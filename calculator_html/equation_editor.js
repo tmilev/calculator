@@ -1051,8 +1051,7 @@ class MathNodeFactory {
     let subscriptNode = new MathNodeOperatorSubscript(equationEditor);
     let subscriptScale = 0.8;
     subscriptNode.type.fontSizeRatio = subscriptScale;
-    let operatorNode =
-      new MathNode(equationEditor, knownTypes.operatorStandalone);
+    let operatorNode = new MathNodeOperatorStandalone(equationEditor);
     let operatorScale = 1;
     operatorNode.type.fontSizeRatio = operatorScale;
     subscriptNode.appendChild(this.horizontalMath(equationEditor, subscript));
@@ -9653,7 +9652,7 @@ class MathNodeOperatorStandalone extends MathNode {
     if (content in latexConstants.utf16ToLatexMap) {
       return new LatexWithAnnotation(latexConstants.utf16ToLatexMap[content]);
     }
-    return new LatexWithAnnotation(`${content}`);
+    return new LatexWithAnnotation(`\\${content}`);
   }
 
   computeDimensions() {
@@ -9741,6 +9740,22 @@ class MathNodeOperatorWithSubscript extends MathNode {
     operator.boundingBox.width = this.boundingBox.width;
     operator.computeBoundingBoxLeftSingleChild();
     subscript.computeBoundingBoxLeftSingleChild();
+  }
+
+  /** 
+   * @override
+   * @returns {LatexWithAnnotation} 
+   */
+  toLatexWithAnnotation(
+    /** @type{ToLatexOptions|null} */
+    options,
+  ) {
+    let result = this.children[0].toLatexWithAnnotation(options).latex;
+    let bottom = this.children[1].toLatexWithAnnotation(options).latex;
+    if (bottom !== '') {
+      result += `_{${bottom}}`;
+    }
+    return new LatexWithAnnotation(result);
   }
 }
 

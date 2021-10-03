@@ -939,6 +939,8 @@ class MathNodeFactory {
     columns,
     /** @type {string} */
     columnStyle,
+    /** @type{string} */
+    parenthesesStyle,
   ) {
     const matrixTable = new MathNode(equationEditor, knownTypes.matrixTable);
     for (let i = 0; i < rows; i++) {
@@ -947,8 +949,13 @@ class MathNodeFactory {
     let leftDelimiter = null;
     let rightDelimiter = null;
     if (columnStyle === '') {
-      leftDelimiter = this.leftParenthesis(equationEditor, false);
-      rightDelimiter = this.rightParenthesis(equationEditor, false);
+      if (parenthesesStyle === '[' || parenthesesStyle === ']' || parenthesesStyle === '[]') {
+        leftDelimiter = this.leftDelimiter(equationEditor, '[', false);
+        rightDelimiter = this.rightDelimiter(equationEditor, ']', false);
+      } else {
+        leftDelimiter = this.leftParenthesis(equationEditor, false);
+        rightDelimiter = this.rightParenthesis(equationEditor, false);
+      }
     } else {
       leftDelimiter = this.atom(equationEditor, '');
       rightDelimiter = this.atom(equationEditor, '');
@@ -1508,7 +1515,7 @@ class LaTeXConstants {
 
     /** @type{Object.<string, string>} */
     this.operatorWithSuperAndSubscript = {
-      'sum': '\u03A3',
+      'sum': '\u2211',
       'int': '\u222B',
     };
     /** @type{Object.<string, string>} */
@@ -1705,11 +1712,13 @@ class LaTeXConstants {
     };
     this.beginEndEnvironments = {
       'pmatrix': 'pmatrix',
+      'bmatrix': 'bmatrix',
       'array': 'array',
     };
     /** @type{Object.<string, boolean>} */
     this.matrixEnder = {
       '\\end{pmatrix}': true,
+      '\\end{bmatrix}': true,
       '\\end{array}': true,
     };
     /** @type{Object.<string, boolean>} */
@@ -1736,6 +1745,7 @@ class LaTeXConstants {
       '\\rangle': true,
       '\\matrix': true,
       '\\pmatrix': true,
+      '\\bmatrix': true,
       '\\cancel': true,
       '\\sqrt': true,
     };
@@ -2393,7 +2403,12 @@ class LaTeXParser {
     }
     if (last.syntacticRole === '\\begin{pmatrix}') {
       this.lastRuleName = 'begin pmatrix to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '');
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '');
+      return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
+    }
+    if (last.syntacticRole === '\\begin{bmatrix}') {
+      this.lastRuleName = 'begin bmatrix to matrix builder';
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '[');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (fourthToLast.syntacticRole === '\\begin{array}' &&
@@ -2409,7 +2424,7 @@ class LaTeXParser {
       last.isExpression()) {
       this.lastRuleName = 'begin array to matrix builder';
       let matrix = mathNodeFactory.matrix(
-        this.equationEditor, 1, 0, last.node.toLatex());
+        this.equationEditor, 1, 0, last.node.toLatex(), '');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -2);
     }
     if (thirdToLast.syntacticRole === 'matrixBuilder' &&
@@ -2447,7 +2462,7 @@ class LaTeXParser {
     if (last.syntacticRole === '\\\\' &&
       secondToLast.syntacticRole === 'matrixBuilder') {
       // Modify secondToLast.node in place for performance reasons:
-      // copying it may cause unwanted quadratic comoplexity.
+      // copying it may cause unwanted quadratic complexity.
       this.lastRuleName = 'matrix builder double backslash';
       let lastRow = secondToLast.node.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(
@@ -2593,14 +2608,14 @@ class LaTeXParser {
     }
     if (thirdToLast.syntacticRole === '\\binom' &&
       secondToLast.isExpression() && last.isExpression()) {
-      let node = mathNodeFactory.matrix(this.equationEditor, 2, 1, '');
+      let node = mathNodeFactory.matrix(this.equationEditor, 2, 1, '', '');
       node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
       node.getMatrixCell(1, 0).children[0].appendChild(last.node);
       return this.replaceParsingStackTop(node, '', -3);
     }
     if (thirdToLast.syntacticRole === '\\stackrel' &&
       secondToLast.isExpression() && last.isExpression()) {
-      let node = mathNodeFactory.matrix(this.equationEditor, 3, 1, '');
+      let node = mathNodeFactory.matrix(this.equationEditor, 3, 1, '', '');
       node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
       node.getMatrixCell(1, 0).children[0].appendChild(last.node);
       node.getMatrixCell(2, 0).children[0].appendChild(
@@ -4366,7 +4381,11 @@ class BoundingBox {
      * indicate the height of the broken line.
      */
     this.lineHeight = -1;
-    /** @type{number}*/
+    /** 
+     * @type{number} 
+     * The distance between the top of the bounding box and the expected
+     * location of a fraction line. 
+     */
     this.fractionLineHeight = 0;
 
     /** @type {boolean} */
@@ -5044,38 +5063,6 @@ class MathNode {
       superscript.boundingBox.height + brace.boundingBox.height;
   }
 
-  computeDimensionsOperatorStandalone() {
-    let child = this.children[0];
-    // see latexConstants.operatorWithSuperAndSubscript
-    let proportionShiftUps = {
-      // sum
-      '\u03A3': 0.22,
-      //'\u03A3': 0,
-      // integral
-      '\u222B': 0.3,
-    };
-    let operatorScales = {
-      // sum
-      '\u03A3': 2,
-      // integral
-      '\u222B': 0.6,
-    };
-    let proportionShiftUp = 0.1;
-    let operatorName = child.initialContent;
-    if (operatorName in proportionShiftUps) {
-      proportionShiftUp = proportionShiftUps[operatorName];
-    }
-    let operatorScale = 1;
-    if (operatorName in operatorScales) {
-      operatorScale = operatorScales[operatorName];
-    }
-    child.boundingBox.top = -child.boundingBox.height * proportionShiftUp;
-    this.boundingBox.height =
-      child.boundingBox.height * (1 - proportionShiftUp * operatorScale);
-    this.boundingBox.width = child.boundingBox.width;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
-  }
-
   containsFractionLineRecursive() {
     if (this.type.type === knownTypes.fraction.type) {
       return true;
@@ -5239,10 +5226,6 @@ class MathNode {
     }
     if (this.type.type === knownTypes.radicalUnderBox.type) {
       this.computeDimensionsRadicalUnderBox();
-      return;
-    }
-    if (this.type.type === knownTypes.operatorStandalone.type) {
-      this.computeDimensionsOperatorStandalone();
       return;
     }
     if (this.type.type === knownTypes.numerator.type) {
@@ -5912,7 +5895,7 @@ class MathNode {
    * horizontal ancestor. Negative direction indicates we are looking for uncles
    * to the left, else we are looking for uncles to the right of the this
    * element.
-   * */
+   */
   firstAtomSiblingOrUncle(
     /** @type{number} */
     direction,
@@ -6608,7 +6591,7 @@ class MathNode {
       return;
     }
     let parent = this.parent;
-    let matrix = mathNodeFactory.matrix(this.equationEditor, rows, columns, '');
+    let matrix = mathNodeFactory.matrix(this.equationEditor, rows, columns, '', '');
     parent.replaceChildAtPositionWithChildren(this.indexInParent, [
       split[0],
       matrix,
@@ -6640,7 +6623,7 @@ class MathNode {
 
   makeSum() {
     this.makeOperatorWithSuperscriptAndSubscript(
-      latexConstants.latexBackslashAtomsEditable['Sigma']);
+      latexConstants.operatorWithSuperAndSubscript['sum']);
   }
 
   makeOperatorWithSuperscriptAndSubscript(
@@ -9623,38 +9606,25 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
    * @override
    */
   computeDimensions() {
+    return this.computeDimensionsOperatorWithSuperAndSubscript();
+  }
+
+  computeDimensionsOperatorWithSuperAndSubscript() {
     let superscript = this.children[0];
     let operator = this.children[1];
     let subscript = this.children[2];
-    let extraSpaceBelowSuperscriptPercent = 0.1;
-    let extraSpaceBelowOperatorPercent = 0.1;
-    let operatorContent = operator.children[0].initialContent;
-    let extraSpaceBelowOperatorCustom = {
-      // integral
-      '\u222B': -0.1,
-    };
-    if (operatorContent in extraSpaceBelowOperatorCustom) {
-      extraSpaceBelowOperatorPercent =
-        extraSpaceBelowOperatorCustom[operatorContent];
-    }
-    let extraSpaceBelowSuperscript =
-      operator.boundingBox.height * extraSpaceBelowSuperscriptPercent;
-    let extraSpaceBelowOperator =
-      operator.boundingBox.height * extraSpaceBelowOperatorPercent;
     superscript.boundingBox.top = 0;
     operator.boundingBox.top =
-      superscript.boundingBox.height + extraSpaceBelowSuperscript;
+      superscript.boundingBox.height;
     subscript.boundingBox.top = superscript.boundingBox.height +
-      extraSpaceBelowSuperscript + operator.boundingBox.height +
-      extraSpaceBelowOperator;
+      operator.boundingBox.height;
     this.boundingBox.height = superscript.boundingBox.height +
-      operator.boundingBox.height + subscript.boundingBox.height +
-      extraSpaceBelowOperator + extraSpaceBelowSuperscript;
+      operator.boundingBox.height + subscript.boundingBox.height;
     this.boundingBox.width = Math.max(
       superscript.boundingBox.width, operator.boundingBox.width,
       subscript.boundingBox.width);
     this.boundingBox.fractionLineHeight = superscript.boundingBox.height +
-      extraSpaceBelowSuperscript + operator.boundingBox.fractionLineHeight;
+      operator.boundingBox.fractionLineHeight;
     this.boundingBox.needsMiddleAlignment = true;
     superscript.boundingBox.width = this.boundingBox.width;
     subscript.boundingBox.width = this.boundingBox.width;
@@ -9684,6 +9654,42 @@ class MathNodeOperatorStandalone extends MathNode {
       return new LatexWithAnnotation(latexConstants.utf16ToLatexMap[content]);
     }
     return new LatexWithAnnotation(`${content}`);
+  }
+
+  computeDimensions() {
+    return this.computeDimensionsOperatorStandalone();
+  }
+
+  computeDimensionsOperatorStandalone() {
+    let child = this.children[0];
+    // see latexConstants.operatorWithSuperAndSubscript
+    // Measured as a proportion of child.boundingBox.height.
+    let distanceTopToCharacterTipMap = {
+      // sum
+      '\u2211': 0.066,
+      // integral
+      '\u222B': 0.066,
+    };
+    let distanceTopToCharacterBottomMap = {
+      // sum
+      '\u2211': 1.033,
+      // integral
+      '\u222B': 1,
+    };
+    let distanceTopToCharacterTip = 0;
+    let operatorName = child.initialContent;
+    if (operatorName in distanceTopToCharacterTipMap) {
+      distanceTopToCharacterTip = distanceTopToCharacterTipMap[operatorName];
+    }
+    let distanceTopToCharacterBottom = 1;
+    if (operatorName in distanceTopToCharacterBottomMap) {
+      distanceTopToCharacterBottom = distanceTopToCharacterBottomMap[operatorName];
+    }
+    let childHeight = child.boundingBox.height;
+    child.boundingBox.top = - childHeight * distanceTopToCharacterTip;
+    this.boundingBox.height = childHeight * (distanceTopToCharacterBottom);
+    this.boundingBox.width = child.boundingBox.width;
+    this.boundingBox.fractionLineHeight = childHeight * (distanceTopToCharacterBottom + distanceTopToCharacterTip) / 2;
   }
 }
 

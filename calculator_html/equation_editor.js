@@ -74,6 +74,8 @@ class MathNodeType {
     // Padding.
     /** @type{string} */
     this.paddingBottom = input['paddingBottom'];
+    /** @type{number} */
+    this.paddingBottomRatioForSVG = input['paddingBottomRatioForSVG'];
     /** @type{string} */
     this.paddingTop = input['paddingTop'];
     /** @type{string} */
@@ -142,6 +144,7 @@ const knownTypeDefaults = {
   'colorImplied': '',
   // Padding
   'paddingBottom': '',
+  'paddingBottomRatioForSVG': 1,
   'paddingTop': '',
   'paddingLeft': '',
   'paddingRight': '',
@@ -551,6 +554,12 @@ class MathNodeFactory {
       let extraPadding = latexConstants.operatorsExtraPadding[operator];
       result.type.paddingLeft = extraPadding;
       result.type.paddingRight = extraPadding;
+    }
+    if (operator in latexConstants.operatorsExtraVerticalPadding) {
+      result.type.paddingBottom = latexConstants.operatorsExtraVerticalPadding[operator];
+    }
+    if (operator in latexConstants.operatorsExtraVerticalPaddingForSVG) {
+      result.type.paddingBottomRatioForSVG = latexConstants.operatorsExtraVerticalPaddingForSVG[operator];
     }
     result.initialContent = operator;
     return result;
@@ -1399,6 +1408,24 @@ class LaTeXConstants {
       '\u2260': '0.3em',
       // ellipsis dots
       '\u2026': '0.3em',
+    };
+    /**
+     * @type {Object.<string, string>}
+     * Used as bottom padding to the operator to aid with
+     * vertical centering.
+     */
+    this.operatorsExtraVerticalPadding = {
+      // Latex to (right arrow).
+      '\u2192': '0.3em',
+    };
+    /**
+     * @type {Object.<string, number>}
+     * A factor to multiply the SVG height with.
+     * to aid with vertical centering.
+     */
+    this.operatorsExtraVerticalPaddingForSVG = {
+      // Latex to (right arrow).
+      '\u2192': 0.85,
     };
     /** @type{Object.<string, string>} */
     this.operatorsNormalized = {
@@ -7665,8 +7692,12 @@ class MathNode {
   ) {
     let text = new ScalableVectorGraphicsTextElement();
     let width = boundingBoxFromParent.left + this.boundingBox.left;
-    let height = boundingBoxFromParent.top + this.boundingBox.top +
-      this.boundingBox.height;
+    let height = boundingBoxFromParent.top + this.boundingBox.top;
+    let heightFromBox = this.boundingBox.height;
+    if (this.type.paddingBottomRatioForSVG !== 1) {
+      heightFromBox *= this.type.paddingBottomRatioForSVG;
+    }
+    height += heightFromBox;
     text.setX(width);
     text.setY(height);
     text.setAlignmentBaseline('text-after-edge');
@@ -7920,13 +7951,13 @@ class ScalableVectorGraphicsElementGeneral extends ScalableVectorGraphicsBase {
     /**@type{number} */
     width,
   ) {
-    this.element.setAttributeNS(null, 'width', `${width}`)
+    this.element.setAttributeNS(null, 'width', `${width}`);
   }
   setHeight(
     /**@type{number} */
     height,
   ) {
-    this.element.setAttributeNS(null, 'height', `${height}`)
+    this.element.setAttributeNS(null, 'height', `${height}`);
   }
 }
 

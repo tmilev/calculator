@@ -9700,6 +9700,10 @@ class MathNodeOperatorWithSubscript extends MathNode {
     super(equationEditor, knownTypes.operatorWithSubscript);
   }
 
+  applyBackspaceToTheRight() {
+    return this.applyBackspaceToTheRightAsLeftArrow();
+  }
+
   /** @returns {boolean} whether reduction occurred. */
   applyBackspaceToTheLeftEndOfOperatorSubscript() {
     let subscript = this.children[1];

@@ -10504,6 +10504,24 @@ let buttonFactories = {
   'matrix2x2': new EquationEditorButtonFactory(
     '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '2x2',
     { 'width': '100%' }, ''),
+  'bmatrix2x2': new EquationEditorButtonFactory(
+    '\\begin{bmatrix}\\caret&\\\\&\\end{bmatrix}', false, '[2x2]',
+    { 'width': '100%' }, ''),
+  'bmatrix3x3': new EquationEditorButtonFactory(
+    '\\begin{bmatrix}\\caret&&\\\\&&\\\\&&\\end{bmatrix}', false, '[3x3]',
+    { 'width': '100%' }, ''),
+  'bmatrix1x3': new EquationEditorButtonFactory(
+    '\\begin{bmatrix}\\caret & & \\\\ \\end{bmatrix}', false, '[1x3]',
+    { 'width': '100%' }, ''),
+  'bmatrix1x2': new EquationEditorButtonFactory(
+    '\\begin{bmatrix}\\caret&\\end{bmatrix}', false, '[1x2]',
+    { 'width': '100%' }, ''),
+  'bmatrix3x1': new EquationEditorButtonFactory(
+    '\\begin{bmatrix}\\caret\\\\\\\\\\end{bmatrix}', false, '[3x1]',
+    { 'width': '100%' }, ''),
+  'bmatrix2x1': new EquationEditorButtonFactory(
+    '\\begin{bmatrix}\\caret&\\\\\\end{bmatrix}', false, '[2x1]',
+    { 'width': '100%' }, ''),
   'pi': new EquationEditorButtonFactory(
     '\\pi', false, '\u03C0', { 'width': '100%' }, ''),
   'degrees': equationEditorButtonFactoryFromKeySequence(
@@ -10512,6 +10530,8 @@ let buttonFactories = {
     '\\alpha', false, '\u03B1', { 'width': '100%' }, ''),
   'beta': new EquationEditorButtonFactory(
     '\\beta', false, '\u03B2', { 'width': '100%' }, ''),
+  'gamma': new EquationEditorButtonFactory(
+    '\\gamma', false, '\u03B3', { 'width': '100%' }, ''),
   'underscore':
     new EquationEditorButtonFactory('_', true, '_', { 'width': '100%' }, ''),
   'limit': new EquationEditorButtonFactory(
@@ -10603,13 +10623,19 @@ class EquationEditorButtonPanel {
         buttonFactories['sqrt'],
         buttonFactories['integral'],
         buttonFactories['sum'],
-        buttonFactories['matrix2x2'],
+        buttonFactories['limit'],
         buttonFactories['pi'],
         buttonFactories['degrees'],
         buttonFactories['alpha'],
         buttonFactories['beta'],
         buttonFactories['underscore'],
-        buttonFactories['limit'],
+        buttonFactories['matrix2x2'],
+        buttonFactories['bmatrix3x3'],
+        buttonFactories['bmatrix2x2'],
+        buttonFactories['bmatrix1x3'],
+        buttonFactories['bmatrix3x1'],
+        buttonFactories['bmatrix1x2'],
+        buttonFactories['bmatrix2x1'],
       ];
     }
   }

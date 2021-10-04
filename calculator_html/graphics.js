@@ -1,4 +1,19 @@
-"use strict";
+// Licensed to you under the Apache 2.0 license.
+//
+// Documentation of the equation editor can be found in:
+//
+// https://calculator-algebra.org:8166/calculator_html/test_graphics.html
+//
+// The source code of the editor can be found in:
+//
+// https://github.com/tmilev/calculator
+//
+// The formatting in this file follows
+// an auto-code formatting associated with the closure compiler.
+//
+// We are not using 'use strict' as that creates
+// a "uselessCode" compiler error with
+// the closure compiler.
 
 var module;
 var require;
@@ -110,79 +125,6 @@ function vectorIsZero(
 function getPosXPosYObject(theObject, cx, cy) {
   let rectangle = theObject.getBoundingClientRect();
   return [cx - rectangle.left, cy - rectangle.top];
-}
-
-function getAngleChangeMathScreen(newX, newY, oldX, oldY) {
-  let result = Math.atan2(newY, newX) - Math.atan2(oldY, oldX);
-  if (result > Math.PI) {
-    result -= Math.PI;
-  } else if (result < - Math.PI) {
-    result += Math.PI;
-  }
-  return result;
-}
-
-function testFunctionPlot(v) {
-  return Math.sin(v);
-}
-
-function testFunctionPlot2(v) {
-  return Math.sin(2 * v) + 2;
-}
-
-function testMoebiusStripEmbedding(u, v) {
-  let z = v * Math.sin(u / 2);
-  let x = (2 + (v) * Math.cos(u / 2)) * Math.cos(u);
-  let y = (2 + (v) * Math.cos(u / 2)) * Math.sin(u);
-  //let z=v/2;//*Math.sin(u);
-  //let x = (u)/10+v/2;// (2+(v)*Math.cos(u))*Math.cos(u);
-  //let y = (u/11);// (2+(v)*Math.cos(u))*Math.sin(u);
-  return [x, y, z];
-}
-
-function testMoebiusStripEmbedding2(u, v) {
-  let first = testMoebiusStripEmbedding(u, v);
-  let x = first[0];
-  let y = first[1];
-  let z = first[2];
-  return [x + 2, z, y];
-}
-
-function testGetMoebiusSurface() {
-  let result = new Surface(
-    testMoebiusStripEmbedding,
-    [[0, Math.PI * 2], [- 0.6, 0.6]],
-    [22, 4],
-    "cyan",
-    "blue",
-    "black",
-    2,
-  );
-  return result;
-}
-
-function testGetMoebiusSurface2() {
-  let result = new Surface(
-    testMoebiusStripEmbedding2,
-    [[0, Math.PI * 2], [- 0.6, 0.6]],
-    [22, 4],
-    "pink",
-    "red",
-    "black",
-    0.5,
-  );
-  return result;
-}
-
-function testVectorField2d(x, y) {
-  return [- y, x];
-}
-
-function testGetTestPlane() {
-  let result = new Surface(function (u, v) {
-    return [u, 0.9 * v, 1 + u + v];
-  }, [[- 1.2, 1], [- 0.7, 1]], [5, 5], "cyan", "blue", "black");
-  return result;
 }
 
 class CurveThreeD {
@@ -2925,76 +2867,6 @@ class Drawing {
     console.log(x);
   }
 
-  testPicture(inputCanvasId) {
-    let theCanvas = new Canvas(
-      document.getElementById(inputCanvasId),
-      document.getElementById(inputCanvasId + "Controls"),
-      document.getElementById(inputCanvasId + "Messages"),
-    );
-    theCanvas.screenBasisUserDefault = [[0.59, 0.78, 0.18], [0.46, - 0.15, - 0.87]];
-    theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();
-    theCanvas.initialize();
-    theCanvas.drawLine([- 1, 0, 0], [1, 0, 0], 'black', 2);
-    theCanvas.drawLine([0, - 1, 0], [0, 1, 0], 'black', 2);
-    theCanvas.drawLine([0, 0, - 1], [0, 0, 1], 'black', 2);
-    theCanvas.drawLine([0, 0, 0], [1, 0.5, 0.5], 'red', 2);
-    theCanvas.scale = 100;
-    theCanvas.drawSurface(testGetMoebiusSurface());
-    theCanvas.drawSurface(testGetMoebiusSurface2());
-    theCanvas.drawPoints([[1, 0, 0]], 'red');
-    theCanvas.drawPoints([[0, 1, 0]], 'green');
-    theCanvas.drawPoints([[0, 0, 1]], 'blue');
-    theCanvas.drawText([1, 0, 0], "x", "green");
-    theCanvas.drawText([0, 1, 0], "y", "green");
-    theCanvas.drawText([0, 0, 1], "z", "green");
-    theCanvas.setBoundingBoxAsDefaultViewWindow();
-    //console.log(theCanvas.theIIIdObjects.thePatches);
-    theCanvas.redraw();
-  }
-
-  testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3) {
-    let theCanvas = new CanvasTwoD(document.getElementById(inputCanvas1));
-    theCanvas.initialize(inputCanvas1);
-    theCanvas.drawLine([- 10, 0], [19, 0], 'green');
-    theCanvas.drawLine([0, - 1], [0, 1], 'purple');
-    theCanvas.drawText([- 1, - 1], '(- 1,- 1)', 'orange');
-    theCanvas.drawFunction(testFunctionPlot, - 10, 10, 100, 'red', 4);
-    theCanvas.setViewWindow([- 10, - 1], [19, 1]);
-    theCanvas.plotFillStart('orange');
-    theCanvas.drawLine([0, - 5], [1, - 4], 'green');
-    theCanvas.drawLine([1, - 4], [2, - 5], 'black');
-    theCanvas.drawLine([2, - 5], [0, - 5], 'black');
-    theCanvas.plotFillFinish();
-    theCanvas.plotFillStart('pink');
-    theCanvas.drawCurve([testFunctionPlot, testFunctionPlot2], - 4, 4, 300, 'blue', 1);
-    theCanvas.plotFillFinish();
-    theCanvas.drawVectorField(testVectorField2d, true, [- 6, - 6], [6, 6], [20, 20], 0.5, "red", 2);
-    theCanvas.redraw();
-    let theCanvas2 = new CanvasTwoD(document.getElementById(inputCanvas2));
-    theCanvas2.initialize(inputCanvas2);
-    theCanvas2.drawLine([- 10, - 1], [10, 1], 'green');
-    theCanvas2.drawLine([0, - 19], [0, 1], 'purple');
-    theCanvas2.drawText([- 1, - 1], '(- 1,- 1)', 'orange');
-    theCanvas2.drawPath([[2, 2], [3, 3], [1, 4]], 'cyan');
-    theCanvas2.drawPathFilled([[- 2, - 2], [- 7, - 3], [- 1, - 4], [- 2, - 2]], 'red', 'green');
-    theCanvas2.plotFillStart('pink');
-    theCanvas2.drawFunction(testFunctionPlot, - 10, 10, 100, 'red', 2);
-    theCanvas2.drawLine([10, 0], [- 10, 0], 'black');
-    theCanvas2.plotFillFinish();
-    theCanvas2.drawFunction(testFunctionPlot, - 10, 10, 100, 'red', 0.5);
-    theCanvas2.setViewWindow([- 1, - 19], [1, 5]);
-    theCanvas2.drawVectorField(testVectorField2d, false, [- 6, - 6], [6, 6], [20, 20], 0.5, "red", 2);
-    theCanvas2.redraw();
-    let theCanvas3 = new CanvasTwoD(document.getElementById(inputCanvas3));
-    theCanvas3.initialize(inputCanvas3);
-    theCanvas3.drawFunction(testFunctionPlot, - 10, 10, 100, 'red', 2);
-    theCanvas3.drawGrid();
-    theCanvas3.drawCoordinateAxes();
-    theCanvas3.setViewWindow([- 1, - 19], [1, 5]);
-    theCanvas3.drawFunction(testFunctionPlot2, "minusInfinity", "infinity", 100, 'red', 4);
-    theCanvas3.redraw();
-  }
-
   /**@returns{{delta:number, x:number, y:number}} */
   mouseWheelCommon(e) {
     e.preventDefault();
@@ -3020,10 +2892,6 @@ class Drawing {
 }
 
 let drawing = new Drawing();
-if (window.calculator === undefined) {
-  window.calculator = {};
-}
-window.calculator.drawing = drawing;
 
 module.exports = {
   drawing,

@@ -65,11 +65,12 @@
   }
 
   function testPictureTwoD() {
-    let inputCanvas1 = 'cOne';
-    let inputCanvas2 = 'cTwo';
-    let inputCanvas3 = 'cThree';
-    let canvas1 = new CanvasTwoD(document.getElementById(inputCanvas1));
-    canvas1.initialize(inputCanvas1);
+    let canvas1 = new CanvasTwoD(
+      document.getElementById('cOne'),
+      document.getElementById('cOneControls'),
+      document.getElementById('cOneMessages'),
+    );
+    canvas1.initialize();
     canvas1.drawLine([- 10, 0], [19, 0], 'green');
     canvas1.drawLine([0, - 1], [0, 1], 'purple');
     canvas1.drawText([- 1, - 1], '(- 1,- 1)', 'orange');
@@ -85,8 +86,12 @@
     canvas1.plotFillFinish();
     canvas1.drawVectorField(testVectorField2d, true, [- 6, - 6], [6, 6], [20, 20], 0.5, "red", 2);
     canvas1.redraw();
-    let canvas2 = new CanvasTwoD(document.getElementById(inputCanvas2));
-    canvas2.initialize(inputCanvas2);
+    let canvas2 = new CanvasTwoD(
+      document.getElementById('cTwo'),
+      document.getElementById('cTwoControls'),
+      document.getElementById('cTwoMessages'),
+    );
+    canvas2.initialize();
     canvas2.drawLine([- 10, - 1], [10, 1], 'green');
     canvas2.drawLine([0, - 19], [0, 1], 'purple');
     canvas2.drawText([- 1, - 1], '(- 1,- 1)', 'orange');
@@ -100,13 +105,17 @@
     canvas2.setViewWindow([- 1, - 19], [1, 5]);
     canvas2.drawVectorField(testVectorField2d, false, [- 6, - 6], [6, 6], [20, 20], 0.5, "red", 2);
     canvas2.redraw();
-    let canvas3 = new CanvasTwoD(document.getElementById(inputCanvas3));
-    canvas3.initialize(inputCanvas3);
+    let canvas3 = new CanvasTwoD(
+      document.getElementById('cThree'),
+      document.getElementById('cThreeControls'),
+      document.getElementById('cThreeMessages'),
+    );
+    canvas3.initialize();
     canvas3.drawFunction(testFunctionPlot, - 10, 10, 100, 'red', 2);
     canvas3.drawGrid();
     canvas3.drawCoordinateAxes();
     canvas3.setViewWindow([- 1, - 19], [1, 5]);
-    canvas3.drawFunction(testFunctionPlot2, "minusInfinity", "infinity", 100, 'red', 4);
+    canvas3.drawFunction(testFunctionPlot2, "minusInfinity", "infinity", 500, 'red', 4);
     canvas3.redraw();
   }
 
@@ -144,22 +153,23 @@
   <canvas width="600" height="400" style="border:solid 1px" id="cOne">Your browser does not support the HTML5 canvas
     tag.</canvas><br>
   <span id="cOneControls"></span>
-  <span id="cOneMessages"></span>
+  <!--span id="cOneMessages"></span-->
   <br>
   <canvas width="600" height="400" style="border:solid 1px" id="cTwo">Your browser does not support the HTML5 canvas
     tag.</canvas><br>
   <span id="cTwoControls"></span>
-  <span id="cTwoMessages"></span>
+  <!--span id="cTwoMessages"></span-->
   <br>
   <canvas width="400" height="400" style="border:solid 1px" id="cThree">Your browser does not support the HTML5 canvas
     tag.</canvas><br>
   <span id="cThreeControls"></span>
-  <span id="cThreeMessages"></span>
+  <!--span id="cThreeMessages"></span-->
 
+  <br>
   <canvas width="600" height="400" style="border:solid 1px" id="canvasThreeD">Your browser does not support the HTML5
     canvas tag.</canvas><br>
   <span id="canvasThreeDControls"></span><br>
-  <span id="canvasThreeDMessages"></span>
+  <!--span id="canvasThreeDMessages"></span-->
 </body>
 
 </html>

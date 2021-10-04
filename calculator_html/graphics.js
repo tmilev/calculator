@@ -15,17 +15,11 @@
 // a "uselessCode" compiler error with
 // the closure compiler.
 
-var module;
-var require;
-if (require === undefined) {
-  require = function () { };
-}
-
-if (module === undefined) {
-  module = {};
-}
-
-
+/**
+ * Converts a vector to string.
+ * @param {Array.<number>} vector to be converted to string
+ * @returns{string}
+ */
 function vectorToString(vector) {
   let result = "[";
   for (let i = 0; i < vector.length; i++) {
@@ -40,8 +34,8 @@ function vectorToString(vector) {
 
 /**
  * Scalar product of two vectors.
- * @param {number[]} s
- * @param {number[]} t
+ * @param {Array.<number>} s the first vector
+ * @param {Array.<number>} t the second vector
  * @returns{number}
  */
 function vectorScalarVector(s, t) {
@@ -111,7 +105,7 @@ function vectorNormalize(vector) {
  * @returns {boolean}
  * */
 function vectorIsZero(
-  /**@type{number[]} */
+  /**@type{Array.<number>} */
   vector,
 ) {
   for (let i = 0; i < vector.length; i++) {
@@ -205,9 +199,11 @@ class Surface {
   constructor(
     /**@type{Function} */
     inputxyzFun,
-    /**@type{number[][]} Variable ranges, in format [[uMin, uMax], [vMin, vMax]]*/
+    /**@type{Array.<Array.<number>>} Variable ranges, in format [[uMin, uMax],
+       [vMin, vMax]]*/
     inputUVBox,
-    /**@type{number[]} Number of patches in the format [uPatchCount, vPathCount]*/
+    /**@type{Array.<number>} Number of patches in the format [uPatchCount,
+       vPathCount]*/
     inputPatchDimensions,
     /**@type{string} */
     colorFront,
@@ -458,7 +454,7 @@ function colorToHex(color) {
 
 class PointsTwoD {
   constructor(
-    /**@type{number[][]} */
+    /**@type{Array.<Array.<number>>} */
     inputPoints,
     inputColor,
   ) {
@@ -883,7 +879,7 @@ class VectorFieldTwoD {
     inputIsDirectionField,
     inputLowLeft,
     inputHighRight,
-    /**@type{number[]} */
+    /**@type{Array.<number>} */
     inputNumSegmentsXY,
     inputDesiredLengthDirectionVectors,
     inputColor,
@@ -1067,7 +1063,7 @@ class CanvasTwoD {
   }
 
   drawPoints(
-    /**@type{number[][]} */
+    /**@type{Array.<Array.<number>>} */
     inputPoints,
     inputColor,
   ) {
@@ -1095,7 +1091,7 @@ class CanvasTwoD {
     inputIsDirectionField,
     inputLowLeft,
     inputHighRight,
-    /**@type{number[]} */
+    /**@type{Array.<number>} */
     inputNumSegmentsXY,
     inputDesiredLengthDirectionVectors,
     inputColor,
@@ -1424,7 +1420,7 @@ class Canvas {
       thePatches: [],
       theContours: [],
       thePoints: [],
-      /**@type{TextInThreeD[]} */
+      /**@type{Array.<TextInThreeD>} */
       theLabels: [],
     };
     this.screenXY = [0, 0];
@@ -2356,7 +2352,7 @@ class Canvas {
    * Returns a projection in 3d of
    * of the input vector
    * to the current screen.`
-   * @returns{number[]}
+   * @returns{Array.<number>}
    */
   coordsProjectToMathScreen3d(vector) {
     let output = this.screenBasisOrthonormal[0].slice();
@@ -2373,10 +2369,10 @@ class Canvas {
    * Returns a projection in 3d
    * of the input vector
    * to the selected screen.`
-   * @returns{number[]}
+   * @returns{Array.<number>}
    */
   coordsProjectToSelectedMathScreen3d(
-    /**@type{number[]} */
+    /**@type{Array.<number>} */
     vector,
   ) {
     let output = this.selectedScreenBasisOrthonormal[0].slice();
@@ -2880,7 +2876,7 @@ class Drawing {
     };
   }
 
-  /**@{HTMLCanvasElement} */
+  /**@returns{HTMLCanvasElement} */
   resetCanvas(/**@type{HTMLCanvasElement} */ element) {
     if (element.parentElement === null || element.parentElement == undefined) {
       return element;
@@ -2893,6 +2889,18 @@ class Drawing {
 
 let drawing = new Drawing();
 
+/**
+ * When using as a commonJS module inside the calculator project, the content of
+ * this file is inserted into a function body, which receives as an argument a
+ * variable called module. Modifications to module.exports are then visible to
+ * the caller of this functions, i.e., to external javascript files.
+ */
+var module;
+if (module === undefined) {
+  module = {
+    exports: null,
+  };
+}
 module.exports = {
   drawing,
   Canvas,

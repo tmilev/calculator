@@ -1,10 +1,10 @@
 // Licensed to you under the Apache 2.0 license.
 //
-// Documentation of the equation editor can be found in:
+// Documentation of the graphics can be found in:
 //
 // https://calculator-algebra.org:8166/calculator_html/test_graphics.html
 //
-// The source code of the editor can be found in:
+// The source code can be found in:
 //
 // https://github.com/tmilev/calculator
 //
@@ -2947,7 +2947,7 @@ class Canvas {
     if (this.numAccountedPatches < thePatches.length) {
       this.textMouseInfo += `<span style ='color:red'><b>Error: only ${this.numAccountedPatches} out of `;
       this.textMouseInfo += `${this.theIIIdObjects.thePatches
-          .length} patches accounted. </b></span><br>`;
+        .length} patches accounted. </b></span><br>`;
     }
     this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `;
     this.textMouseInfo += `(~${(1000 / this.redrawTime).toFixed(1)} f.p.s.)`;

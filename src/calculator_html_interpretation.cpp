@@ -924,12 +924,11 @@ JSData WebAPIResponse::getEditPageJSON(
     !global.userDefaultHasAdminRights()
   ) {
     if (!showSourceRelaxed){
-      output[WebAPI::result::error] = "Only logged-in admins are allowed to edit pages.";
+      output[WebAPI::result::error] = "Only logged-in admins can edit pages.";
       return output;
     } else {
       output[WebAPI::result::comments] =
-      "Only logged-in admins can edit pages. "
-      "The problem source code is also on github.";
+      "Only logged-in admins can edit pages.";
     }
   }
   CalculatorHTML editedFile;

@@ -163,7 +163,7 @@ class CurveThreeD {
     let argumentT = this.leftPt;
     let x = this.coordinateFunctions[0](argumentT);
     let y = this.coordinateFunctions[1](argumentT);
-    let theCoords = theCanvas.coordsMathToScreen([x, y]);
+    let theCoords = theCanvas.coordinatesMathToScreen([x, y]);
     if (startByMoving) {
       theSurface.moveTo(theCoords[0], theCoords[1]);
     } else {
@@ -196,7 +196,7 @@ class CurveThreeD {
         skippedValues = true;
         continue;
       }
-      theCoords = theCanvas.coordsMathToScreen([x, y]);
+      theCoords = theCanvas.coordinatesMathToScreen([x, y]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
   }
@@ -512,7 +512,7 @@ class PointsTwoD {
       theSurface.beginPath();
       theSurface.strokeStyle = colorRGBToString(this.color);
       theSurface.fillStyle = colorRGBToString(this.color);
-      let theCoords = theCanvas.coordsMathToScreen(this.location[i]);
+      let theCoords = theCanvas.coordinatesMathToScreen(this.location[i]);
       theSurface.arc(theCoords[0], theCoords[1], 3, 0, Math.PI * 2);
       theSurface.fill();
     }
@@ -578,7 +578,7 @@ class CurveTwoD {
     let argumentT = this.leftPt;
     let x = this.coordinateFunctions[0](argumentT);
     let y = this.coordinateFunctions[1](argumentT);
-    let theCoords = theCanvas.coordsMathToScreen([x, y]);
+    let theCoords = theCanvas.coordinatesMathToScreen([x, y]);
     let alreadyMoved = false;
     if (startByMoving) {
       alreadyMoved = true;
@@ -609,7 +609,7 @@ class CurveTwoD {
         skippedValues = true;
         continue;
       }
-      theCoords = theCanvas.coordsMathToScreen([x, y]);
+      theCoords = theCanvas.coordinatesMathToScreen([x, y]);
       if (!alreadyMoved) {
         alreadyMoved = true;
         theSurface.moveTo(theCoords[0], theCoords[1]);
@@ -643,7 +643,7 @@ class PathTwoD {
       return;
     }
     let theSurface = theCanvas.surface;
-    let theCoords = theCanvas.coordsMathToScreen(this.path[0]);
+    let theCoords = theCanvas.coordinatesMathToScreen(this.path[0]);
     if (startByMoving) {
       theSurface.moveTo(theCoords[0], theCoords[1]);
     } else {
@@ -651,7 +651,7 @@ class PathTwoD {
     }
     theSurface.lineWidth = this.lineWidth;
     for (let i = 1; i < this.path.length; i++) {
-      theCoords = theCanvas.coordsMathToScreen(this.path[i]);
+      theCoords = theCanvas.coordinatesMathToScreen(this.path[i]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
     theSurface.strokeStyle = colorRGBToString(this.color);
@@ -673,7 +673,12 @@ class PathTwoD {
 }
 
 class DrawCoordinateAxesTwoD {
-  constructor() { }
+  constructor(
+      /** @type{string} */ inputXAxisLabel,
+      /** @type{string} */ inputYAxisLabel) {
+    this.xAxisLabel = inputXAxisLabel;
+    this.yAxisLabel = inputYAxisLabel;
+  }
 
   draw(theCanvas) {
     this.drawNoFinish(theCanvas, true);
@@ -687,32 +692,35 @@ class DrawCoordinateAxesTwoD {
   drawNoFinish(theCanvas, startByMoving) {
     let lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
     let topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
-    let theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
-    theSurface.fillStyle = colorRGBToString([0, 0, 0]);
-    theSurface.lineWidth = 1;
+    let surface = theCanvas.surface;
+    surface.strokeStyle = colorRGBToString([0, 0, 0]);
+    surface.fillStyle = colorRGBToString([0, 0, 0]);
+    surface.lineWidth = 1;
     let left = lowLeft[0];
     let right = topRight[0];
     let bottom = lowLeft[1];
     let top = topRight[1];
-    theSurface.beginPath();
-    let theCoords = theCanvas.coordsMathScreenToScreen([0, bottom]);
-    theSurface.moveTo(theCoords[0], theCoords[1]);
-    theCoords = theCanvas.coordsMathScreenToScreen([0, top]);
-    theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.stroke();
-    theCoords = theCanvas.coordsMathScreenToScreen([left, 0]);
-    theSurface.moveTo(theCoords[0], theCoords[1]);
-    theCoords = theCanvas.coordsMathScreenToScreen([right, 0]);
-    theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.stroke();
-    theCoords = theCanvas.coordsMathScreenToScreen([1, -0.1]);
-    theSurface.moveTo(theCoords[0], theCoords[1]);
-    theCoords = theCanvas.coordsMathScreenToScreen([1, 0.1]);
-    theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.stroke();
-    theCoords = theCanvas.coordsMathScreenToScreen([1, 0]);
-    theSurface.fillText('1', theCoords[0], theCoords[1] + 10);
+    surface.beginPath();
+    let coordinates = theCanvas.coordsMathScreenToScreen([0, bottom]);
+    surface.moveTo(coordinates[0], coordinates[1]);
+    coordinates = theCanvas.coordsMathScreenToScreen([0, top]);
+    surface.lineTo(coordinates[0], coordinates[1]);
+    surface.stroke();
+    surface.fillText(this.yAxisLabel, coordinates[0] - 10, coordinates[1] + 10);
+
+    coordinates = theCanvas.coordsMathScreenToScreen([left, 0]);
+    surface.moveTo(coordinates[0], coordinates[1]);
+    coordinates = theCanvas.coordsMathScreenToScreen([right, 0]);
+    surface.lineTo(coordinates[0], coordinates[1]);
+    surface.stroke();
+    surface.fillText(this.xAxisLabel, coordinates[0] - 10, coordinates[1] + 10);
+    coordinates = theCanvas.coordsMathScreenToScreen([1, -0.1]);
+    surface.moveTo(coordinates[0], coordinates[1]);
+    coordinates = theCanvas.coordsMathScreenToScreen([1, 0.1]);
+    surface.lineTo(coordinates[0], coordinates[1]);
+    surface.stroke();
+    coordinates = theCanvas.coordsMathScreenToScreen([1, 0]);
+    surface.fillText('1', coordinates[0], coordinates[1] + 10);
   }
 }
 
@@ -726,10 +734,10 @@ class AxesGrid {
   drawNoFinish(theCanvas, startByMoving) {
     let lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
     let topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
-    let theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString([160, 160, 160]);
-    theSurface.fillStyle = colorRGBToString([160, 160, 160]);
-    theSurface.lineWidth = 0.1;
+    let surface = theCanvas.surface;
+    surface.strokeStyle = colorRGBToString([160, 160, 160]);
+    surface.fillStyle = colorRGBToString([160, 160, 160]);
+    surface.lineWidth = 0.1;
     let left = lowLeft[0];
     let right = topRight[0];
     let bottom = lowLeft[1];
@@ -750,29 +758,29 @@ class AxesGrid {
         (ceilTop - floorBottom) /
         (theCanvas.height / distanceBetweenMarks)));
     let Delta = Math.max(DeltaHorizontal, DeltaVertical);
-    theSurface.beginPath();
+    surface.beginPath();
     for (let i = floorLeft; i <= ceilRight; i += Delta) {
       let theCoords = theCanvas.coordsMathScreenToScreen([i, bottom]);
-      theSurface.moveTo(theCoords[0], theCoords[1]);
+      surface.moveTo(theCoords[0], theCoords[1]);
       theCoords = theCanvas.coordsMathScreenToScreen([i, top]);
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-      theSurface.stroke();
+      surface.lineTo(theCoords[0], theCoords[1]);
+      surface.stroke();
     }
     for (let i = floorBottom; i <= ceilTop; i += Delta) {
       let theCoords = theCanvas.coordsMathScreenToScreen([left, i]);
-      theSurface.moveTo(theCoords[0], theCoords[1]);
+      surface.moveTo(theCoords[0], theCoords[1]);
       theCoords = theCanvas.coordsMathScreenToScreen([right, i]);
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-      theSurface.stroke();
+      surface.lineTo(theCoords[0], theCoords[1]);
+      surface.stroke();
     }
-    theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
-    theSurface.fillStyle = colorRGBToString([0, 0, 0]);
+    surface.strokeStyle = colorRGBToString([0, 0, 0]);
+    surface.fillStyle = colorRGBToString([0, 0, 0]);
     let counter = 0;
     for (let i = floorLeft; i <= ceilRight; i += Delta) {
       counter++;
       // if (counter%2=== 0 && i !==1){
       let theCoords = theCanvas.coordsMathScreenToScreen([i, 0]);
-      theSurface.fillText(i, theCoords[0], theCoords[1] + 10);
+      surface.fillText(i, theCoords[0], theCoords[1] + 10);
       //}
     }
     counter = 0;
@@ -780,7 +788,7 @@ class AxesGrid {
       counter++;
       // if (counter%2=== 0 && i !==1){
       let theCoords = theCanvas.coordsMathScreenToScreen([0, i]);
-      theSurface.fillText(i, theCoords[0] - 10, theCoords[1]);
+      surface.fillText(i, theCoords[0] - 10, theCoords[1]);
       //}
     }
   }
@@ -884,7 +892,7 @@ class PlotTwoD {
     }
     let x = realLeft;
     let y = this.functionPlotted(x);
-    let theCoords = theCanvas.coordsMathToScreen([x, y]);
+    let theCoords = theCanvas.coordinatesMathToScreen([x, y]);
     let alreadyMoved = false;
     if (startByMoving) {
       alreadyMoved = true;
@@ -915,7 +923,7 @@ class PlotTwoD {
         skippedValues = true;
         continue;
       }
-      theCoords = theCanvas.coordsMathToScreen([x, y]);
+      theCoords = theCanvas.coordinatesMathToScreen([x, y]);
       if (!alreadyMoved) {
         alreadyMoved = true;
         theSurface.moveTo(theCoords[0], theCoords[1]);
@@ -952,7 +960,7 @@ class TextPlotTwoD {
     let theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle = colorRGBToString(this.color);
-    let theCoords = theCanvas.coordsMathToScreen(this.location);
+    let theCoords = theCanvas.coordinatesMathToScreen(this.location);
     theSurface.fillText(this.text, theCoords[0], theCoords[1]);
   }
 
@@ -1020,9 +1028,9 @@ class VectorFieldTwoD {
         }
         let headMath = [x + theV[0] / 2, y + theV[1] / 2];
         let tailMath = [x - theV[0] / 2, y - theV[1] / 2];
-        let headScreen = theCanvas.coordsMathToScreen(headMath);
-        let tailScreen = theCanvas.coordsMathToScreen(tailMath);
-        let baseScreen = theCanvas.coordsMathToScreen([x, y]);
+        let headScreen = theCanvas.coordinatesMathToScreen(headMath);
+        let tailScreen = theCanvas.coordinatesMathToScreen(tailMath);
+        let baseScreen = theCanvas.coordinatesMathToScreen([x, y]);
         theSurface.moveTo(tailScreen[0], tailScreen[1]);
         theSurface.lineTo(headScreen[0], headScreen[1]);
         theSurface.stroke();
@@ -1053,14 +1061,14 @@ class SegmentTwoD {
 
   drawNoFinish(theCanvas, startByMoving) {
     let theSurface = theCanvas.surface;
-    let theCoords = theCanvas.coordsMathToScreen(this.leftPt);
+    let theCoords = theCanvas.coordinatesMathToScreen(this.leftPt);
     theSurface.lineWidth = this.lineWidth;
     if (startByMoving) {
       theSurface.moveTo(theCoords[0], theCoords[1]);
     } else {
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
-    theCoords = theCanvas.coordsMathToScreen(this.rightPt);
+    theCoords = theCanvas.coordinatesMathToScreen(this.rightPt);
     theSurface.lineTo(theCoords[0], theCoords[1]);
   }
 
@@ -1122,7 +1130,7 @@ class CanvasTwoD {
   ) {
     this.theObjects = [];
     this.surface = null;
-    this.canvasContainer = drawing.resetCanvas(inputCanvas);
+    this.canvasContainer = inputCanvas;
 
     this.canvasId = null;
     this.screenBasisOrthonormal = [];
@@ -1187,8 +1195,16 @@ class CanvasTwoD {
     this.theObjects.push(new AxesGrid());
   }
 
-  drawCoordinateAxes() {
-    this.theObjects.push(new DrawCoordinateAxesTwoD());
+  drawCoordinateAxes(
+      /** @type{string|undefined} */ xAxisLabel,
+      /** @type{string|undefined} */ yAxisLabel) {
+    if (xAxisLabel === undefined) {
+      xAxisLabel = '';
+    }
+    if (yAxisLabel === undefined) {
+      yAxisLabel = '';
+    }
+    this.theObjects.push(new DrawCoordinateAxesTwoD(xAxisLabel, yAxisLabel));
   }
 
   drawVectorField(
@@ -1231,7 +1247,7 @@ class CanvasTwoD {
   /**
    * Plots a function.
    *
-   * @param{Function} inputFun the function to plot
+   * @param{function(number):number} toBePlotted the function to plot
    * @param{number|string} leftPoint the x-coordinate of the left-most point of
    * the plot or the string 'minusInfinity'
    * @param{number|string} rightPoint the x-coordinate of the right-most point
@@ -1243,10 +1259,10 @@ class CanvasTwoD {
    *
    */
   drawFunction(
-    inputFun, leftPoint, rightPoint, inputNumSegments, inputColor,
+    toBePlotted, leftPoint, rightPoint, inputNumSegments, inputColor,
     inputLineWidth) {
     let newPlot = new PlotTwoD(
-      inputFun, leftPoint, rightPoint, inputNumSegments, inputColor,
+      toBePlotted, leftPoint, rightPoint, inputNumSegments, inputColor,
       inputLineWidth);
     this.theObjects.push(newPlot);
   }
@@ -1288,8 +1304,8 @@ class CanvasTwoD {
 
   setViewWindow(leftLowPt, rightUpPt) {
     this.viewWindowDefault = [leftLowPt, rightUpPt];
-    let leftLowScreen = this.coordsMathToScreen(leftLowPt);
-    let rightUpScreen = this.coordsMathToScreen(rightUpPt);
+    let leftLowScreen = this.coordinatesMathToScreen(leftLowPt);
+    let rightUpScreen = this.coordinatesMathToScreen(rightUpPt);
     let desiredHeight = Math.abs(rightUpScreen[1] - leftLowScreen[1]);
     let desiredWidth = Math.abs(rightUpScreen[0] - leftLowScreen[0]);
     let candidateScaleHeight = this.scale * this.height / desiredHeight;
@@ -1298,7 +1314,8 @@ class CanvasTwoD {
     // console.log("new scale: "+ this.scale);
     let centerViewWindowMath = vectorPlusVector(leftLowPt, rightUpPt);
     vectorTimesScalar(centerViewWindowMath, 0.5);
-    let centerViewWindowScreen = this.coordsMathToScreen(centerViewWindowMath);
+    let centerViewWindowScreen =
+      this.coordinatesMathToScreen(centerViewWindowMath);
     this.centerX += this.centerCanvasX - centerViewWindowScreen[0];
     this.centerY += this.centerCanvasY - centerViewWindowScreen[1];
   }
@@ -1369,6 +1386,10 @@ class CanvasTwoD {
   }
 
   resetView() {
+    if (this.surface === null) {
+      // Graphics not intialized.
+      return;
+    }
     this.setViewWindow(this.viewWindowDefault[0], this.viewWindowDefault[1]);
     this.redraw();
   }
@@ -1382,10 +1403,11 @@ class CanvasTwoD {
     button.addEventListener('click', () => {
       this.resetView();
     });
+    this.spanControls.textContent = '';
     this.spanControls.appendChild(button);
   }
 
-  coordsMathScreenToMath(theCoords) {
+  coordinatesMathScreenToMath(theCoords) {
     let output = this.screenBasisOrthonormal[0].slice();
     vectorTimesScalar(output, theCoords[0]);
     vectorAddVectorTimesScalar(
@@ -1393,14 +1415,14 @@ class CanvasTwoD {
     return output;
   }
 
-  coordsMathToMathScreen(vector) {
+  coordinatesMathToMathScreen(vector) {
     return [
       vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
       vectorScalarVector(vector, this.screenBasisOrthonormal[1])
     ];
   }
 
-  coordsMathToScreen(vector) {
+  coordinatesMathToScreen(vector) {
     return [
       this.scale * vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +
       this.centerX,
@@ -1550,7 +1572,7 @@ class Canvas {
     /**@type{HTMLElement} */
     messages,
   ) {
-    this.canvasContainer = drawing.resetCanvas(inputCanvas);
+    this.canvasContainer = inputCanvas;
     this.spanControls = controls;
     this.spanMessages = messages;
     this.theIIIdObjects = {
@@ -1873,9 +1895,9 @@ class Canvas {
     this.surface.setLineDash([]);
     this.surface.lineWidth = 2;
     this.surface.strokeStyle = 'green';
-    currentPt = this.coordsMathToScreen(this.selectedVector);
+    currentPt = this.coordinatesMathToScreen(this.selectedVector);
     this.surface.moveTo(currentPt[0], currentPt[1]);
-    currentPt = this.coordsMathToScreen([0, 0, 0]);
+    currentPt = this.coordinatesMathToScreen([0, 0, 0]);
     this.surface.lineTo(currentPt[0], currentPt[1]);
     this.surface.stroke();
   }
@@ -1887,7 +1909,7 @@ class Canvas {
     let theSurface = this.surface;
     let thePts = theContour.thePoints;
     // console.log("line start\n");
-    let currentPt = this.coordsMathToScreen(thePts[0]);
+    let currentPt = this.coordinatesMathToScreen(thePts[0]);
     if (this.flagRoundContours) {
       vectorRound(currentPt);
     }
@@ -1930,7 +1952,7 @@ class Canvas {
         theSurface.moveTo(currentPt[0], currentPt[1]);
         dashIsOn = false;
       }
-      currentPt = this.coordsMathToScreen(thePts[i]);
+      currentPt = this.coordinatesMathToScreen(thePts[i]);
       if (this.flagRoundContours) {
         vectorRound(currentPt);
       }
@@ -1940,7 +1962,7 @@ class Canvas {
     theSurface.stroke();
     /////////////////
     if (this.flagDebugLabelPatches) {
-      currentPt = this.coordsMathToScreen(thePts[4]);
+      currentPt = this.coordinatesMathToScreen(thePts[4]);
       if (this.flagRoundContours) {
         vectorRound(currentPt);
       }
@@ -1980,7 +2002,7 @@ class Canvas {
           j :
           currentContour.thePoints.length - j - 1;
         let theCoords =
-          this.coordsMathToScreen(currentContour.thePoints[theIndex]);
+          this.coordinatesMathToScreen(currentContour.thePoints[theIndex]);
         if (this.flagRoundPatches) {
           vectorRound(theCoords);
         }
@@ -2002,7 +2024,7 @@ class Canvas {
     let isInForeGround = this.pointIsInForeGround(theText.location, []);
     theSurface.beginPath();
     theSurface.strokeStyle = theText.color;
-    let theCoords = this.coordsMathToScreen(theText.location);
+    let theCoords = this.coordinatesMathToScreen(theText.location);
     theSurface.font = '15pt sans-serif';
     theSurface.lineWidth = 1;
     if (isInForeGround) {
@@ -2020,7 +2042,7 @@ class Canvas {
     theSurface.beginPath();
     theSurface.strokeStyle = colorRGBToString(thePoint.color);
     theSurface.fillStyle = colorRGBToString(thePoint.color);
-    let theCoords = this.coordsMathToScreen(thePoint.location);
+    let theCoords = this.coordinatesMathToScreen(thePoint.location);
     theSurface.arc(theCoords[0], theCoords[1], 3, 0, Math.PI * 2);
     if (isInForeGround) {
       theSurface.fill();
@@ -2603,7 +2625,7 @@ class Canvas {
     return output;
   }
 
-  coordsMathToScreen(vector) {
+  coordinatesMathToScreen(vector) {
     return [
       this.scale * vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +
       this.centerX,
@@ -3166,16 +3188,6 @@ class Drawing {
       y: e.clientY,
     };
   }
-
-  /** @returns{HTMLCanvasElement} */
-  resetCanvas(/**@type{HTMLCanvasElement} */ element) {
-    if (element.parentElement === null || element.parentElement == undefined) {
-      return element;
-    }
-    let result = element.cloneNode(false);
-    element.replaceWith(result);
-    return result;
-  }
 }
 
 let drawing = new Drawing();
@@ -3192,6 +3204,7 @@ if (module === undefined) {
     exports: null,
   };
 }
+
 module.exports = {
   drawing,
   Canvas,

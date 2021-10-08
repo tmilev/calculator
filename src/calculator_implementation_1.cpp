@@ -45,6 +45,7 @@ std::string PlotObject::PlotTypes::points           = "points";
 std::string PlotObject::PlotTypes::segment          = "segment";
 std::string PlotObject::PlotTypes::plotFillStart    = "plotFillStart";
 std::string PlotObject::PlotTypes::plotFillFinish   = "plotFillFinish";
+std::string PlotObject::PlotTypes::pathFilled       = "pathFilled";
 
 std::string Plot::Labels::canvasName                = "canvasName";
 std::string Plot::Labels::controlsName              = "controlsName";
@@ -800,7 +801,7 @@ JSData PlotObject::toJSONDrawText() {
 
 JSData PlotObject::toJSONDrawPath() {
   JSData result;
-  result[PlotObject::PlotTypes::segment] = this->pointsDouble;
+  result[PlotObject::PlotTypes::points] = this->pointsDouble;
   this->writeColorLineWidth(result);
   return result;
 }
@@ -862,7 +863,7 @@ JSData PlotObject::toJSON() {
     // The plot type carries all information.
   } else if (correctedPlotType == "axesGrid") {
     // The plot type carries all information.
-  } else if (correctedPlotType == "pathFilled") {
+  } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled ) {
     result = this->toJSONDrawPathFilled();
   } else {
     result = this->toJSONDrawPath();

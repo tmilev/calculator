@@ -1174,28 +1174,28 @@ bool CalculatorFunctionsPlot::plotRectangle(
   ) {
     return false;
   }
-  PlotObject thePlot;
-  thePlot.dimension = 2;
-  thePlot.plotType = "pathFilled";
+  PlotObject plot;
+  plot.dimension = 2;
+  plot.plotType = PlotObject::PlotTypes::pathFilled;
   Vector<double> currentCorner = theRectangle[0];
   Vector<double>& dimensions = theRectangle[1];
 
-  thePlot.pointsDouble.addOnTop(currentCorner);
+  plot.pointsDouble.addOnTop(currentCorner);
   currentCorner[0] += dimensions[0];
-  thePlot.pointsDouble.addOnTop(currentCorner);
+  plot.pointsDouble.addOnTop(currentCorner);
   currentCorner[1] += dimensions[1];
-  thePlot.pointsDouble.addOnTop(currentCorner);
+  plot.pointsDouble.addOnTop(currentCorner);
   currentCorner[0] -= dimensions[0];
-  thePlot.pointsDouble.addOnTop(currentCorner);
+  plot.pointsDouble.addOnTop(currentCorner);
   currentCorner[1] -= dimensions[1];
-  thePlot.pointsDouble.addOnTop(currentCorner);
-  thePlot.colorFillJS = "cyan";
-  thePlot.colorJS = "blue";
-  thePlot.pointsDouble.addOnTop(currentCorner);
-  thePlot.rectangles.addOnTop(theRectangle);
-  thePlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
-  thePlot.colorFillRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
-  return output.assignValue(calculator, thePlot);
+  plot.pointsDouble.addOnTop(currentCorner);
+  plot.colorFillJS = "cyan";
+  plot.colorJS = "blue";
+  plot.pointsDouble.addOnTop(currentCorner);
+  plot.rectangles.addOnTop(theRectangle);
+  plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
+  plot.colorFillRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
+  return output.assignValue(calculator, plot);
 }
 
 bool CalculatorFunctions::operatorBounds(

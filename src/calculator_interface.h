@@ -960,6 +960,7 @@ public:
     static std::string points;
     static std::string plotFillStart;
     static std::string plotFillFinish;
+    static std::string pathFilled;
   };
 
   std::string plotString;

@@ -2947,7 +2947,7 @@ class Canvas {
     if (this.numAccountedPatches < thePatches.length) {
       this.textMouseInfo += `<span style ='color:red'><b>Error: only ${this.numAccountedPatches} out of `;
       this.textMouseInfo += `${this.theIIIdObjects.thePatches
-        .length} patches accounted. </b></span><br>`;
+          .length} patches accounted. </b></span><br>`;
     }
     this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `;
     this.textMouseInfo += `(~${(1000 / this.redrawTime).toFixed(1)} f.p.s.)`;

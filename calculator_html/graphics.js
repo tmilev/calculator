@@ -109,7 +109,7 @@ function vectorMinusVector(left, right) {
  * Formula: output = output + scalar*otherVector.
  *
  * @param {!Array.<number>} output the vector to which we add.
- * @param {number} otherVector the vector we use to modify the output
+ * @param {!Array.<number>} otherVector the vector we use to modify the output
  * @param {number} scalar the scalar we multiply otherVector by
  */
 function vectorAddVectorTimesScalar(output, otherVector, scalar) {
@@ -257,7 +257,7 @@ function colorScale(inputRGB, scale) {
 /**
  * Extracts an RGB number triple from a color.
  *
- * @param {string|?Array.<number>} input color, named, rgb hex value or RGB
+ * @param {string|!Array.<number>} input color, named, rgb hex value or RGB
  *     number triple.
  *
  * @returns {!Array.<number>}
@@ -268,8 +268,9 @@ function colorToRGB(input) {
   }
   let hex = colorToHex(input);
   return [
-    parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16),
-    parseInt(hex.slice(5, 7), 16)
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
   ];
 }
 
@@ -478,8 +479,8 @@ function infinityType(input) {
 /** A set of points in two dimensions. */
 class PointsTwoD {
   /**
-   * @param {!Array.<!Array.<number>>} inputPoints the points
-   * @param {string} inputColor desired point color
+   * @param {!Array.<!Array.<number>>} inputPoints the points.
+   * @param {string} inputColor desired point color.
    */
   constructor(
       inputPoints,
@@ -517,6 +518,16 @@ class PointsTwoD {
       surface.arc(theCoords[0], theCoords[1], 3, 0, Math.PI * 2);
       surface.fill();
     }
+  }
+
+  /**
+   * Same as draw, required by interface.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} unused unused.
+   */
+  drawNoFinish(canvas, unused) {
+    this.draw(canvas);
   }
 }
 
@@ -556,6 +567,8 @@ class CurveTwoD {
     this.numSegments = inputNumSegments;
     /** @type{number} */
     this.lineWidth = inputLineWidth;
+    /** @type{string} */
+    this.type = 'curve';
   }
 
   /**
@@ -741,6 +754,8 @@ class CoordinateAxesTwoD {
     this.xAxisLabel = inputXAxisLabel;
     /** @type{string} */
     this.yAxisLabel = inputYAxisLabel;
+    /** @type{string} */
+    this.type = 'axis';
   }
 
   /**
@@ -806,7 +821,16 @@ class CoordinateAxesTwoD {
 
 /** Grid lines of the coordinate system. Excludes the coordinate axes. */
 class AxesGrid {
-  constructor() {}
+  constructor() {
+    this.type = 'grid';
+  }
+
+  /**
+   * Used to satisfy interface requirements
+   *
+   * @param {!Array.<!Array.<number>>} unused output bounding box.
+   */
+  accountBoundingBox(unused) {}
 
   /**
    * Draws the object onto the given canvas.
@@ -821,10 +845,9 @@ class AxesGrid {
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
    * @param {!CanvasTwoD} canvas the canvas.
-   * @param {boolean} startByMoving whether to move to the initial point without
-   * drawing a line
+   * @param {boolean} unused unused.
    */
-  drawNoFinish(canvas, startByMoving) {
+  drawNoFinish(canvas, unused) {
     let lowLeft = canvas.coordsScreenToMathScreen([0, canvas.height]);
     let topRight = canvas.coordsScreenToMathScreen([canvas.width, 0]);
     let surface = canvas.surface;
@@ -870,13 +893,13 @@ class AxesGrid {
     for (let i = floorLeft; i <= ceilRight; i += Delta) {
       counter++;
       let theCoords = canvas.coordsMathScreenToScreen([i, 0]);
-      surface.fillText(i, theCoords[0], theCoords[1] + 10);
+      surface.fillText(`${i}`, theCoords[0], theCoords[1] + 10);
     }
     counter = 0;
     for (let i = floorBottom; i <= ceilTop; i += Delta) {
       counter++;
       let theCoords = canvas.coordsMathScreenToScreen([0, i]);
-      surface.fillText(i, theCoords[0] - 10, theCoords[1]);
+      surface.fillText(`${i}`, theCoords[0] - 10, theCoords[1]);
     }
   }
 }
@@ -1063,7 +1086,7 @@ class TextPlotTwoD {
   draw(canvas) {
     let surface = canvas.surface;
     surface.beginPath();
-    this.drawNoFinish(canvas);
+    this.drawNoFinish(canvas, true);
     surface.stroke();
   }
 }
@@ -1110,9 +1133,9 @@ class VectorFieldTwoD {
     this.theField = inputField;
     /** @type{boolean} */
     this.isDirectionField = inputIsDirectionField;
-    /** @type{number} */
+    /** @type{!Array.<number>} */
     this.lowLeft = inputLowLeft;
-    /** @type{number} */
+    /** @type{!Array.<number>} */
     this.highRight = inputHighRight;
     this.numSegmentsXY = inputNumSegmentsXY;
     /** @type{number} */
@@ -1120,6 +1143,7 @@ class VectorFieldTwoD {
     /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.lineWidth = inputLineWidth;
+    this.type = 'vectorField';
   }
 
   /**
@@ -1130,6 +1154,16 @@ class VectorFieldTwoD {
   accountBoundingBox(inputOutputBox) {
     accountBoundingBox(this.lowLeft, inputOutputBox);
     accountBoundingBox(this.highRight, inputOutputBox);
+  }
+
+  /**
+   * Same as draw but required to satisfy interface.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} unused unused.
+   */
+  drawNoFinish(canvas, unused) {
+    this.draw(canvas);
   }
 
   /**
@@ -1180,9 +1214,9 @@ class SegmentTwoD {
    * @param {number} inputLineWidth line width.
    */
   constructor(inputLeftPt, inputRightPt, inputColor, inputLineWidth) {
-    /** @type{number} */
+    /** @type{!Array.<number>} */
     this.leftPt = inputLeftPt;
-    /** @type{number} */
+    /** @type{!Array.<number>} */
     this.rightPt = inputRightPt;
     /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
@@ -1249,14 +1283,25 @@ class PlotFillTwoD {
     this.indexFillStart = inputCanvas.drawObjects.length;
     /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
+    this.type = 'plotFillStart';
   }
 
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {!Array.<!Array.<number>>} unused output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {}
+  accountBoundingBox(unused) {}
+
+  /**
+   * Same as draw but used to satisfy an interface.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} unused unused.
+   */
+  drawNoFinish(canvas, unused) {
+    this.draw(canvas);
+  }
 
   /**
    * Draws the object onto the given canvas.
@@ -1290,6 +1335,42 @@ class PlotFillTwoD {
   }
 }
 
+/** An object that indicates the end of a plot fill. */
+class PlotFillFinishTwoD {
+  constructor() {
+    this.type = 'plotFillFinish';
+  }
+
+  /**
+   * Unused.
+   * @param {!Array.<!Array.<number>>} unused used.
+   */
+  accountBoundingBox(unused) {}
+
+  /**
+   * Unused.
+   * @param {!CanvasTwoD} canvas unused.
+   * @param {boolean} unused unused.
+   */
+  drawNoFinish(canvas, unused) {}
+
+  /**
+   * Unused.
+   * @param {!CanvasTwoD} canvas unused.
+   */
+  draw(canvas) {}
+}
+
+/**
+ * @typedef {{ strokeStyle: string, fillStyle:string, moveTo:
+ * function(number, number), lineTo: function(number, number), fillText:
+ * function(string, number, number), beginPath: !Function, arc:
+ * function(number, number, number, number, number), fill: !Function, stroke:
+ * !Function, lineWidth: number, clearRect: function(number, number,
+ * number, number)}}
+ */
+let Canvas2DContext;
+
 /**
  * A two dimensional plot.
  *
@@ -1302,7 +1383,16 @@ class CanvasTwoD {
    * @param {?HTMLElement|null} messages generae debug messages here.
    */
   constructor(inputCanvas, controls, messages) {
+    /**
+     * @type {!Array.<{
+     *   draw: function(!CanvasTwoD),
+     *   drawNoFinish: function(!CanvasTwoD, boolean),
+     *   accountBoundingBox:function(!Array.<!Array.<number>>),
+     *   type: string}>}
+     */
     this.drawObjects = [];
+
+    /** @type {?Canvas2DContext} */
     this.surface = null;
     this.canvasContainer = inputCanvas;
 
@@ -1318,9 +1408,12 @@ class CanvasTwoD {
     if (this.spanControls === undefined) {
       this.spanControls = null;
     }
+    /** @type{number} */
     this.numDrawnObjects = 0;
     this.boundingBoxMath = [[-0.1, -0.1], [0.1, 0.1]];
+    /** @type{number} */
     this.width = inputCanvas.width;
+    /** @type{number} */
     this.height = inputCanvas.height;
     this.centerCanvasX = inputCanvas.width / 2;
     this.centerCanvasY = inputCanvas.height / 2;
@@ -1528,7 +1621,7 @@ class CanvasTwoD {
 
   /** Ends a plot fill sequence. Newly drawn objecs will no longer be filled. */
   plotFillFinish() {
-    this.drawObjects.push({type: 'plotFillFinish'});
+    this.drawObjects.push(new PlotFillFinishTwoD());
   }
 
   /** Computes a view window using the bounding boxes of the various objects. */
@@ -1597,7 +1690,13 @@ class CanvasTwoD {
             this.screenBasisOrthonormal[1]}`;
   }
 
-  /** Rescales the canvas on a mouse wheel event. */
+  /**
+   * Rescales the canvas on a mouse wheel event.
+   *
+   * @param {{preventDefault: !Function, stopPropagation: !Function, detail:
+   *     (number|null|undefined), wheelDelta: number, clientX: number, clientY:
+   *     number}} e the event.
+   */
   mouseWheelHandler(e) {
     let inputs = drawing.mouseWheelCommon(e);
     this.mouseWheel(inputs.delta, inputs.x, inputs.y);
@@ -1611,7 +1710,7 @@ class CanvasTwoD {
 
   /** Starts a canvas pan. */
   clickHandler(e) {
-    this.canvasClick(e.clientX, e.clientY, e);
+    this.canvasClick(e.clientX, e.clientY);
   }
 
   /**
@@ -1621,7 +1720,8 @@ class CanvasTwoD {
    * Creates the canvas 2d context.
    */
   initialize() {
-    this.surface = this.canvasContainer.getContext('2d');
+    this.surface =
+        /** @type {!Canvas2DContext} */ (this.canvasContainer.getContext('2d'));
     this.canvasContainer.addEventListener('DOMMouseScroll', (e) => {
       this.mouseWheelHandler(e);
     }, {passive: false});
@@ -1867,8 +1967,8 @@ class CanvasTwoD {
    * Determines whether a clicked point is within click tolerance distance to
    * another point.
    *
-   * @param {!Array.<number>} screenX absolute screen X coordinate.
-   * @param {!Array.<number>} screenY absolute screen Y coordinate.
+   * @param {number} screenX absolute screen X coordinate.
+   * @param {number} screenY absolute screen Y coordinate.
    * @private
    */
   canvasClick(screenX, screenY) {
@@ -1932,9 +2032,9 @@ class CanvasTwoD {
 /** Parametric curve in three dimensions. */
 class CurveThreeD {
   /**
-   * @param {!Array.<!Function>} inputCoordinateFunctions the coordinate
-   *     functions: an array of three functions that map a real number to a
-   *     triple of numbers
+   * @param {function(number):!Array.<number>} inputCoordinateFunctions the
+   *     coordinate functions: a function that map a real number to a triple of
+   *     numbers
    * @param {number} inputLeftPoint left (lower) bound for the parameter
    * @param {number} inputRightPoint right (high) bound for the parameter
    * @param {number} inputNumberOfSegments number of segments used to
@@ -1945,7 +2045,7 @@ class CurveThreeD {
   constructor(
       inputCoordinateFunctions, inputLeftPoint, inputRightPoint,
       inputNumberOfSegments, inputColor, inputLineWidth) {
-    /** @type{!Array.<!Function>}*/
+    /** @type{function(number):!Array.<number>} */
     this.coordinateFunctions = inputCoordinateFunctions;
     /** @type{number} */
     this.leftPt = inputLeftPoint;
@@ -2056,8 +2156,9 @@ class CurveThreeD {
  */
 class Surface {
   /**
-   * @param {!Function} inputXYZFunction a two-variable function that returns a
-   *     the [x,y,z]-coordinates [f(u,v), h(u,v), g(u,v)].
+   * @param {function(number,number):!Array.<number>} inputXYZFunction a
+   *     two-variable function that returns a the [x,y,z]-coordinates [f(u,v),
+   *     h(u,v), g(u,v)].
    * @param{!Array.<!Array.<number>>} inputUVBox u,v-variable ranges, format:
    * [[uMin, uMax], [vMin, vMax]].
    * @param {!Array.<number>} inputPatchDimensions the pair of numbers.
@@ -2113,6 +2214,8 @@ class Point {
 /**
  * Patch, a 2d-parallelogram embedded in 3d.
  *
+ * This is one of the basic building blocks for drawing surfaces.
+ *
  * Given by a base point p and two edge vectors v_1, v_2. The points that belong
  * to the patch are the points in the set
  *
@@ -2140,6 +2243,12 @@ class Patch {
     this.v2 = vectorPlusVector(this.base, this.edge2);
     this.vEnd = vectorPlusVector(this.v1, this.edge2);
     this.internalPoint = this.base.slice();
+    /** @type{!Array.<number>}*/
+    this.normalScreen1 = [];
+    /** @type{!Array.<number>}*/
+    this.normalScreen2 = [];
+    /** @type{!Array.<number>}*/
+    this.normal = [];
     vectorAddVectorTimesScalar(this.internalPoint, this.edge1, 0.5);
     vectorAddVectorTimesScalar(this.internalPoint, this.edge2, 0.5);
     this.normalVector = vectorCrossVector(inputEdge1, inputEdge2);
@@ -2159,23 +2268,26 @@ class Patch {
 class Contour {
   /**
    * @param{!Array.<!Array<number>>} inputPoints the points on the contour.
-   * @param{string} inputColor color of the contour.
+   * @param{string|!Array.<number>} inputColor color of the contour.
    * @param{number} inputLineWidth line width of the contour.
    *
    */
   constructor(inputPoints, inputColor, inputLineWidth) {
     /** @type{!Array.<!Array<number>>} */
-    this.thePoints = inputPoints.slice();
+    this.points = inputPoints.slice();
     this.thePointsMathScreen = [];
     /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
-    this.adjacentPatches = [];
+    /** @type {!Object.<number,boolean>} */
+    this.adjacentPatches = {};
     this.index = -1;
     this.lineWidth = inputLineWidth;
   }
 }
 
-/** A text label in 3d. */
+/**
+ * A text label in 3d.
+ */
 class TextInThreeD {
   /**
    * @param{!Array.<number>} location [x,y,z]-location of the label.
@@ -2192,18 +2304,48 @@ class TextInThreeD {
 /**
  * Canvas used for software-generated mathematical 3d plots.
  *
+ * The canvas uses a 2d context; all computations required to project the 3d
+ * plot are computed here, in software (javascript). This comes with heavy
+ * restrictions on performance, please use with appropriate caution.
+ *
  * Graphics prorperties.
  * - Uses orthographic projections to project the 3d scene, as is the custom in
  * mathematical plots.
  * - Countours and curves that are not visible in the scene
  * are drawn by dashed lines, as usual in mathematical plots.
- * - Patches that are farther away (view depth from the screen) will be drawn
- * slightly darker.
+ * - Patches that are farther away (in terms of view depth from the screen) will
+ * be drawn slightly darker.
+ * - Surfaces are broken down into curvilinear patches.
+ * -- Occlusions are computed by approximating each patch with a parallelogram.
+ * -- Patches are drawn using higher curvilinear precision.
+ * -- See comments below for the limitations and advangates of this approach.
  *
+ * Any two straight-edge patches can be correctly superimposed on the scene by
+ * drawing one of the patches first, and drawing the second patch after
+ * (possibly partially occluding part of the original patch).
  *
- * The canvas uses a 2d context; all computations required to project the 3d
- * plot are computed here, in software (javascript). This comes with heavy
- * restrictions on performance, please use with appropriate caution.
+ * The superimposition considerations above break for 3 or more patches with
+ * circular overlaps 1>2>3>1. This results in visual glitches. The visual
+ * glitches get smaller if the patches are reduced in size. Also, circularly
+ * overlapping patches are rare in mathemaical problems, so this should not a
+ * present a problem most educational applications.
+ *
+ * The superimposition considerations above also break for two curvilinear
+ * patches that are highly curved. This issue can be alleviated by increasing
+ * the patch precision, but at an increased computational cost.
+ *
+ * The strategy above is how we choose to paint our scene.
+ *
+ * Advantages.
+ * - Since such graphics are not pixel based, they are easy and
+ * inexpensive to draw to SVG/canvas/postscript[pdf, paper print context].
+ * - Such graphics are extremely portable and do not require WebGL.
+ *
+ * Disadvantages.
+ * - This scheme for generating plots has strict performance limitations.
+ * Drawing more than 1000 patches on the screen is not recommended.
+ * - The visual glitches described above can be a problem for complicated
+ * geometry applications.
  */
 class Canvas {
   /**
@@ -2222,21 +2364,23 @@ class Canvas {
     this.spanControls = controls;
     this.spanMessages = messages;
     this.all3dObjects = {
+      /** @type {!Array.<!Patch>} */
       allPatches: [],
       allContours: [],
-      thePoints: [],
-      /**@type{!Array.<!TextInThreeD>} */
+      points: [],
+      /** @type {!Array.<!TextInThreeD>} */
       theLabels: [],
     };
     this.screenXY = [0, 0];
     this.flagShowPerformance = true;
     this.rotationModesAvailable = {
-      'rotateAfterCursorDefaultGreatNormalCircle':
-          this.rotateAfterCursorDefaultGreatNormalCircle,
+      'rotateAfterCursorDefaultGreatNormalCircle': () => {
+        this.rotateAfterCursorDefaultGreatNormalCircle();
+      },
     };
     this.rotationMode = 'rotateAfterCursorDefaultGreatNormalCircle';
 
-    this.thePatchOrder = [];
+    this.patchOrder = [];
     this.numAccountedPatches = 0;
     this.numCyclicallyOverlappingPatchTieBreaks = 0;
     this.numContourPoints = 0;
@@ -2253,6 +2397,8 @@ class Canvas {
     this.zBufferRowCount = 20;
     this.zBuffer = [];
     this.zBufferIndexStrip = [];
+    /** @type{boolean} */
+    this.flagPaintZBuffer = false;
     this.bufferDeltaX = 0;
     this.bufferDeltaY = 0;
     this.colorDepthFactor = 0.4;
@@ -2308,7 +2454,8 @@ class Canvas {
    * Zooms the 3d scene following the mouse wheel.
    *
    * @param {{preventDefault: !Function, stopPropagation: !Function, detail:
-   *     ?number, wheelDelta: number}} e the mouse wheel event.
+   *     (number|null|undefined), wheelDelta: number, clientX: number, clientY:
+   *     number}} e the mouse wheel event.
    */
   mouseWheelHandler(e) {
     let inputs = drawing.mouseWheelCommon(e);
@@ -2324,7 +2471,8 @@ class Canvas {
   /**
    * Handles a mouse click event.
    *
-   * @param {{clientX: number, clientY: number}} e the click event.
+   * @param {{clientX: number, clientY: number, shiftKey: boolean}} e the click
+   *     event.
    */
   clickHandler(e) {
     this.canvasClick(e.clientX, e.clientY, e);
@@ -2337,7 +2485,8 @@ class Canvas {
    * and attaches all mouse events.
    */
   initialize() {
-    this.surface = /** @type{CanvasRenderingContext2D} */ (
+    /** @type{!CanvasRenderingContext2D} */
+    this.surface = /** @type{!CanvasRenderingContext2D} */ (
         this.canvasContainer.getContext('2d'));
     this.canvasContainer.addEventListener('DOMMouseScroll', (e) => {
       this.mouseWheelHandler(e);
@@ -2358,7 +2507,7 @@ class Canvas {
     }, true);
     this.all3dObjects.allPatches = [];
     this.all3dObjects.allContours = [];
-    this.all3dObjects.thePoints = [];
+    this.all3dObjects.points = [];
     this.all3dObjects.theLabels = [];
     this.constructControls();
     this.computeBasis();
@@ -2395,41 +2544,62 @@ class Canvas {
         new Contour(contourPoints, curve.color, curve.lineWidth));
   }
 
+  /**
+   * Draws a 2d parallelogram in 3d.
+   *
+   * @param{!Array.<number>} base the base point of the patch.
+   * @param{!Array.<number>} edge1 the first edge vector.
+   * @param{!Array.<number>} edge2 the second edge vector.
+   * @param{string} color color of the "forward" side of the patch.
+   */
   drawPatchStraight(base, edge1, edge2, color) {
     this.all3dObjects.allPatches.push(
         new Patch(base, edge1, edge2, color, color));
     let patchIndex = this.all3dObjects.allPatches.length - 1;
-    let thePatch = this.all3dObjects.allPatches[patchIndex];
-    thePatch.index = patchIndex;
+    let patch = this.all3dObjects.allPatches[patchIndex];
+    patch.index = patchIndex;
     let allContours = this.all3dObjects.allContours;
-    thePatch.adjacentContours.push(
-        this.drawLine(thePatch.base, thePatch.v1, color, 1));
-    thePatch.traversalOrder.push(1);
+    patch.adjacentContours.push(this.drawLine(patch.base, patch.v1, color, 1));
+    patch.traversalOrder.push(1);
 
-    allContours[allContours.length - 1].adjacentPatches.push(patchIndex);
-    thePatch.adjacentContours.push(
-        this.drawLine(thePatch.v1, thePatch.vEnd, color, 1));
-    thePatch.traversalOrder.push(1);
+    allContours[allContours.length - 1].adjacentPatches[patchIndex] = true;
+    patch.adjacentContours.push(this.drawLine(patch.v1, patch.vEnd, color, 1));
+    patch.traversalOrder.push(1);
 
-    allContours[allContours.length - 1].adjacentPatches.push(patchIndex);
-    thePatch.adjacentContours.push(
-        this.drawLine(thePatch.vEnd, thePatch.v2, color, 1));
-    thePatch.traversalOrder.push(1);
+    allContours[allContours.length - 1].adjacentPatches[patchIndex] = true;
+    patch.adjacentContours.push(this.drawLine(patch.vEnd, patch.v2, color, 1));
+    patch.traversalOrder.push(1);
 
-    allContours[allContours.length - 1].adjacentPatches.push(patchIndex);
-    thePatch.adjacentContours.push(
-        this.drawLine(thePatch.v2, thePatch.base, color, 1));
-    thePatch.traversalOrder.push(1);
+    allContours[allContours.length - 1].adjacentPatches[patchIndex] = true;
+    patch.adjacentContours.push(this.drawLine(patch.v2, patch.base, color, 1));
+    patch.traversalOrder.push(1);
 
-    allContours[allContours.length - 1].adjacentPatches.push(patchIndex);
+    allContours[allContours.length - 1].adjacentPatches[patchIndex] = true;
   }
 
+  /**
+   * Draws points on the scene. Points are always painted, even when occluded.
+   *
+   * @param{!Array.<!Array<number>>} inputPoints list of [x,y,z]-coordinates.
+   * @param{string} inputColor color of the points.
+   */
   drawPoints(inputPoints, inputColor) {
     for (let i = 0; i < inputPoints.length; i++) {
-      this.all3dObjects.thePoints.push(new Point(inputPoints[i], inputColor));
+      this.all3dObjects.points.push(new Point(inputPoints[i], inputColor));
     }
   }
 
+  /**
+   * Draws a straight segment. Parts of the segment in the background with be
+   * drawn with dashed lines. Returns the index of the newly added contour.
+   *
+   * @param{!Array.<number>} leftPt [x,y,z]-coordinates of the first point.
+   * @param{!Array.<number>} rightPt [x,y,z]-coordinates of the first point.
+   * @param{string} inputColor color of the points.
+   * @param{number} inputLineWidth line width.
+   *
+   * @returns {number}
+   */
   drawLine(leftPt, rightPt, inputColor, inputLineWidth) {
     let newContour = new Contour([], inputColor, inputLineWidth);
     let numSegments = this.defaultNumSegmentsPerContour;
@@ -2438,84 +2608,99 @@ class Canvas {
     if (vectorLength(incrementVector) * 10 > numSegments) {
       numSegments = Math.ceil(vectorLength(incrementVector) * 10);
     }
-    newContour.thePoints = new Array(numSegments);
+    newContour.points = new Array(numSegments);
     let incrementScalar = 1 / numSegments;
     vectorTimesScalar(incrementVector, incrementScalar);
     let currentPoint = leftPt.slice();
     for (let i = 0; i < numSegments + 1; i++) {
-      newContour.thePoints[i] = currentPoint;
+      newContour.points[i] = currentPoint;
       currentPoint = vectorPlusVector(currentPoint, incrementVector);
     }
     this.all3dObjects.allContours.push(newContour);
     return this.all3dObjects.allContours.length - 1;
   }
 
-  computePatch(thePatch) {
-    thePatch.normalScreen1 =
-        vectorCrossVector(this.screenNormal, thePatch.edge1);
-    thePatch.normalScreen2 =
-        vectorCrossVector(this.screenNormal, thePatch.edge2);
-    thePatch.normal = vectorCrossVector(thePatch.edge1, thePatch.edge2);
-    thePatch.internalPoint = thePatch.base.slice();
-    vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge1, 0.5);
-    vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
+  /**
+   * Computes internal information about a patch in place.
+   *
+   * @param{!Patch} patch the patch to be updated.
+   * @private
+   */
+  computePatch(patch) {
+    patch.normalScreen1 = vectorCrossVector(this.screenNormal, patch.edge1);
+    patch.normalScreen2 = vectorCrossVector(this.screenNormal, patch.edge2);
+    patch.normal = vectorCrossVector(patch.edge1, patch.edge2);
+    patch.internalPoint = patch.base.slice();
+    vectorAddVectorTimesScalar(patch.internalPoint, patch.edge1, 0.5);
+    vectorAddVectorTimesScalar(patch.internalPoint, patch.edge2, 0.5);
   }
 
-  computeContour(theContour) {
-    if (theContour.thePointsMathScreen.length !== theContour.thePoints.length) {
-      theContour.thePointsMathScreen = new Array(theContour.thePoints.length);
+  /**
+   * Computes internal information about a contour in place.
+   *
+   * @param{Contour} contour the contour to be updated.
+   * @private
+   */
+  computeContour(contour) {
+    if (contour.thePointsMathScreen.length !== contour.points.length) {
+      contour.thePointsMathScreen = new Array(contour.points.length);
     }
-    for (let i = 0; i < theContour.thePoints.length; i++) {
-      theContour.thePointsMathScreen[i] =
-          this.coordsProjectMathToMathScreen2d(theContour.thePoints[i]);
+    for (let i = 0; i < contour.points.length; i++) {
+      contour.thePointsMathScreen[i] =
+          this.coordsProjectMathToMathScreen2d(contour.points[i]);
     }
   }
 
-  pointRelativeToPatch(thePoint, thePatch) {
-    if (vectorLength(thePatch.normalScreen1) < 0.00001 ||
-        vectorLength(thePatch.normalScreen2) < 0.00001 ||
-        vectorLength(thePatch.normal) < 0.00001) {
+  /**
+   * Computes the position of a point relative to a patch.
+   * Returns 1 if the point is in front of the patch. Returns -1 if the patch
+   * occludes the point. Returns 0 if the point and the patch do not overlap.
+   *
+   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param{!Patch} patch the patch.
+   *
+   * @returns{number}
+   * @private
+   */
+  pointRelativeToPatch(point, patch) {
+    if (vectorLength(patch.normalScreen1) < 0.00001 ||
+        vectorLength(patch.normalScreen2) < 0.00001 ||
+        vectorLength(patch.normal) < 0.00001) {
       return 0;
     }
     if (vectorScalarVector(
-            vectorMinusVector(thePoint, thePatch.base),
-            thePatch.normalScreen1) *
+            vectorMinusVector(point, patch.base), patch.normalScreen1) *
             vectorScalarVector(
-                vectorMinusVector(thePatch.internalPoint, thePatch.base),
-                thePatch.normalScreen1) >
+                vectorMinusVector(patch.internalPoint, patch.base),
+                patch.normalScreen1) >
         0) {
       if (vectorScalarVector(
-              vectorMinusVector(thePoint, thePatch.vEnd),
-              thePatch.normalScreen1) *
+              vectorMinusVector(point, patch.vEnd), patch.normalScreen1) *
               vectorScalarVector(
-                  vectorMinusVector(thePatch.internalPoint, thePatch.vEnd),
-                  thePatch.normalScreen1) >
+                  vectorMinusVector(patch.internalPoint, patch.vEnd),
+                  patch.normalScreen1) >
           0) {
         if (vectorScalarVector(
-                vectorMinusVector(thePoint, thePatch.base),
-                thePatch.normalScreen2) *
+                vectorMinusVector(point, patch.base), patch.normalScreen2) *
                 vectorScalarVector(
-                    vectorMinusVector(thePatch.internalPoint, thePatch.base),
-                    thePatch.normalScreen2) >
+                    vectorMinusVector(patch.internalPoint, patch.base),
+                    patch.normalScreen2) >
             0) {
           if (vectorScalarVector(
-                  vectorMinusVector(thePoint, thePatch.vEnd),
-                  thePatch.normalScreen2) *
+                  vectorMinusVector(point, patch.vEnd), patch.normalScreen2) *
                   vectorScalarVector(
-                      vectorMinusVector(thePatch.internalPoint, thePatch.vEnd),
-                      thePatch.normalScreen2) >
+                      vectorMinusVector(patch.internalPoint, patch.vEnd),
+                      patch.normalScreen2) >
               0) {
             if (vectorScalarVector(
-                    vectorMinusVector(thePoint, thePatch.base),
-                    thePatch.normal) *
-                    vectorScalarVector(this.screenNormal, thePatch.normal) <=
+                    vectorMinusVector(point, patch.base), patch.normal) *
+                    vectorScalarVector(this.screenNormal, patch.normal) <=
                 0) {
               return -1;
             }
             if (vectorScalarVector(
-                    vectorMinusVector(thePoint, thePatch.base),
-                    thePatch.normal) *
-                    vectorScalarVector(this.screenNormal, thePatch.normal) >=
+                    vectorMinusVector(point, patch.base), patch.normal) *
+                    vectorScalarVector(this.screenNormal, patch.normal) >=
                 0) {
               return 1;
             }
@@ -2526,27 +2711,65 @@ class Canvas {
     return 0;
   }
 
-  pointIsBehindPatch(thePoint, thePatch) {
-    return this.pointRelativeToPatch(thePoint, thePatch) === -1;
+  /**
+   * Computes whether a point is occluded by a patch.
+   *
+   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param{!Patch} patch the patch.
+   *
+   * @returns{boolean}
+   * @private
+   */
+  pointIsBehindPatch(point, patch) {
+    return this.pointRelativeToPatch(point, patch) === -1;
   }
 
-  pointIsInFrontOfPatch(thePoint, thePatch) {
-    return this.pointRelativeToPatch(thePoint, thePatch) === 1;
+  /**
+   * Computes whether a point is in front of a patch.
+   *
+   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param{!Patch} patch the patch.
+   *
+   * @returns{boolean}
+   */
+  pointIsInFrontOfPatch(point, patch) {
+    return this.pointRelativeToPatch(point, patch) === 1;
   }
 
-  pointIsInForeGround(thePoint, containerPatches) {
+  /**
+   * Computes whether a point is in the foreground (not occluded by any patch).
+   *
+   * The point is compared only to the given patches. Patches can be optimized
+   * out of this comparison using the z-buffer.
+   *
+   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param{!Object.<number,boolean>} containerPatches the patches that can
+   * occlude the point.
+   *
+   * @returns{boolean}
+   * @private
+   */
+  pointIsInForeGround(point, containerPatches) {
     let allPatches = this.all3dObjects.allPatches;
     for (let i = 0; i < allPatches.length; i++) {
-      if (containerPatches.indexOf(i) !== -1) {
+      if (i in containerPatches) {
         continue;
       }
-      if (this.pointIsBehindPatch(thePoint, allPatches[i])) {
+      if (this.pointIsBehindPatch(point, allPatches[i])) {
         return false;
       }
     }
     return true;
   }
 
+  /**
+   * Paints a visual indicator to aid with mouse rotation.
+   *
+   * The aid is a straight line connecting the selected point to the center of
+   * the coordinate system.
+   *
+   * @private
+   */
   paintMouseInfo() {
     if (this.selectedElement !== 'default' ||
         this.selectedElement === undefined || this.selectedVector === [] ||
@@ -2578,34 +2801,41 @@ class Canvas {
     this.surface.stroke();
   }
 
-  paintOneContour(theContour) {
-    if (theContour.thePoints.length < 2) {
+  /**
+   * Paints one contour on the canvas.
+   *
+   * @param {!Contour} contour the contour.
+   *
+   * @private
+   */
+  paintOneContour(contour) {
+    if (contour.points.length < 2) {
       return;
     }
     let surface = this.surface;
-    let thePts = theContour.thePoints;
+    let thePts = contour.points;
     let currentPt = this.coordinatesMathToScreen(thePts[0]);
     if (this.flagRoundContours) {
       vectorRound(currentPt);
     }
-    let oldIsInForeGround = this.pointIsInForeGround(
-        theContour.thePoints[0], theContour.adjacentPatches);
+    let oldIsInForeGround =
+        this.pointIsInForeGround(contour.points[0], contour.adjacentPatches);
     let newIsInForeground = true;
     let dashIsOn = false;
     surface.beginPath();
     surface.setLineDash([]);
     this.numContourPaths++;
-    surface.strokeStyle = colorRGBToString(theContour.color);
-    if (theContour.lineWidth !== undefined) {
-      surface.lineWidth = theContour.lineWidth;
+    surface.strokeStyle = colorRGBToString(contour.color);
+    if (contour.lineWidth !== undefined) {
+      surface.lineWidth = contour.lineWidth;
     } else {
       surface.lineWidth = 1;
     }
     surface.moveTo(currentPt[0], currentPt[1]);
     this.numContourPoints += thePts.length;
     for (let i = 1; i < thePts.length; i++) {
-      newIsInForeground = this.pointIsInForeGround(
-          theContour.thePoints[i], theContour.adjacentPatches);
+      newIsInForeground =
+          this.pointIsInForeGround(contour.points[i], contour.adjacentPatches);
       if (!newIsInForeground && !oldIsInForeGround && !dashIsOn) {
         if (i > 1) {
           surface.stroke();
@@ -2640,16 +2870,23 @@ class Canvas {
       }
       surface.font = '9pt sans-serif';
       surface.fillStyle = 'black';
-      surface.fillText(theContour.index, currentPt[0], currentPt[1]);
+      surface.fillText(`${contour.index}`, currentPt[0], currentPt[1]);
     }
   }
 
-  paintOnePatch(thePatch) {
+  /**
+   * Paints one patch on the canvas.
+   *
+   * @param {!Patch} patch the patch.
+   *
+   * @private
+   */
+  paintOnePatch(patch) {
     let surface = this.surface;
     let visibilityScalarProd =
-        vectorScalarVector(this.screenNormal, thePatch.normal);
+        vectorScalarVector(this.screenNormal, patch.normal);
     let depthScalarProd =
-        vectorScalarVector(this.screenNormal, thePatch.internalPoint);
+        vectorScalarVector(this.screenNormal, patch.internalPoint);
     let depthRatio = (depthScalarProd - this.boundingSegmentZ[0]) /
             (this.boundingSegmentZ[1] - this.boundingSegmentZ[0]) -
         0.5;
@@ -2658,22 +2895,22 @@ class Canvas {
     let colorFactor = 1 + depthRatio * this.colorDepthFactor;
     if (visibilityScalarProd >= 0) {
       surface.fillStyle =
-          colorRGBToString(colorScale(thePatch.colorUV, colorFactor));
+          colorRGBToString(colorScale(patch.colorUV, colorFactor));
     } else {
       surface.fillStyle =
-          colorRGBToString(colorScale(thePatch.colorVU, colorFactor));
+          colorRGBToString(colorScale(patch.colorVU, colorFactor));
     }
     surface.beginPath();
     let first = true;
-    for (let i = 0; i < thePatch.adjacentContours.length; i++) {
+    for (let i = 0; i < patch.adjacentContours.length; i++) {
       let currentContour =
-          this.all3dObjects.allContours[thePatch.adjacentContours[i]];
-      for (let j = 0; j < currentContour.thePoints.length; j++) {
-        let theIndex = (thePatch.traversalOrder[i] === -1) ?
+          this.all3dObjects.allContours[patch.adjacentContours[i]];
+      for (let j = 0; j < currentContour.points.length; j++) {
+        let theIndex = (patch.traversalOrder[i] === -1) ?
             j :
-            currentContour.thePoints.length - j - 1;
+            currentContour.points.length - j - 1;
         let theCoords =
-            this.coordinatesMathToScreen(currentContour.thePoints[theIndex]);
+            this.coordinatesMathToScreen(currentContour.points[theIndex]);
         if (this.flagRoundPatches) {
           vectorRound(theCoords);
         }
@@ -2689,6 +2926,13 @@ class Canvas {
     surface.fill();
   }
 
+  /**
+   * Paints text on the canvas.
+   *
+   * @param {!TextInThreeD} theText the text.
+   *
+   * @private
+   */
   paintText(theText) {
     let surface = this.surface;
     let isInForeGround = this.pointIsInForeGround(theText.location, []);
@@ -2706,13 +2950,20 @@ class Canvas {
     }
   }
 
-  paintOnePoint(thePoint) {
+  /**
+   * Paints one point on the canvas.
+   *
+   * @param {!Point} point the point.
+   *
+   * @private
+   */
+  paintOnePoint(point) {
     let surface = this.surface;
-    let isInForeGround = this.pointIsInForeGround(thePoint.location, []);
+    let isInForeGround = this.pointIsInForeGround(point.location, []);
     surface.beginPath();
-    surface.strokeStyle = colorRGBToString(thePoint.color);
-    surface.fillStyle = colorRGBToString(thePoint.color);
-    let theCoords = this.coordinatesMathToScreen(thePoint.location);
+    surface.strokeStyle = colorRGBToString(point.color);
+    surface.fillStyle = colorRGBToString(point.color);
+    let theCoords = this.coordinatesMathToScreen(point.location);
     surface.arc(theCoords[0], theCoords[1], 3, 0, Math.PI * 2);
     if (isInForeGround) {
       surface.fill();
@@ -2721,9 +2972,22 @@ class Canvas {
     }
   }
 
+  /**
+   * Get the largest/smallest coordinate of a given index.
+   *
+   * @param {number} indexToCompareBy the index of the relevant coordinate.
+   * @param {boolean} getLarger whether we seek the largest coordinate.
+   * @param {!Array.<number>} pt1 the first point.
+   * @param {!Array.<number>} pt2 the second point.
+   * @param {!Array.<number>} pt3 the third point.
+   * @param {!Array.<number>} pt4 the fourth point.
+   *
+   * @returns{number}
+   * @private
+   */
   getExtremePoint(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4) {
     let result = pt1[indexToCompareBy];
-    if (getLarger === 1) {
+    if (getLarger) {
       if (result < pt2[indexToCompareBy]) {
         result = pt2[indexToCompareBy];
       }
@@ -2747,11 +3011,28 @@ class Canvas {
     return result;
   }
 
+  /**
+   * Fetches the row index of the z-buffer patch for a given y coordinate.
+   *
+   * @param {number} input the y coordinate of the point.
+   *
+   * @returns{number}
+   * @private
+   */
   coordsMathScreenToBufferIndicesROWSFloat(input) {
     return this.zBufferRowCount * (input - this.boundingBoxMathScreen[0][1]) /
         (this.boundingBoxMathScreen[1][1] - this.boundingBoxMathScreen[0][1]);
   }
 
+  /**
+   * A less precise but faster version of
+   * coordsMathScreenToBufferIndicesROWSFloat.
+   *
+   * @param {number} input the y coordinate of the point.
+   *
+   * @returns{number}
+   * @private
+   */
   coordsMathScreenToBufferIndicesROWS(input) {
     let result =
         Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
@@ -2761,11 +3042,28 @@ class Canvas {
     return result;
   }
 
+  /**
+   * Fetches the column index of the z-buffer patch for a given x coordinate.
+   *
+   * @param {number} input the x coordinate of the point.
+   *
+   * @returns{number}
+   * @private
+   */
   coordsMathScreenToBufferIndicesCOLSFloat(input) {
     return (this.zBufferColCount) * (input - this.boundingBoxMathScreen[0][0]) /
         (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]);
   }
 
+  /**
+   * A less precise but faster version of
+   * coordsMathScreenToBufferIndicesCOLSFloat.
+   *
+   * @param {number} input the x coordinate of the point.
+   *
+   * @returns{number}
+   * @private
+   */
   coordsMathScreenToBufferIndicesCOLS(input) {
     let result =
         Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
@@ -2775,6 +3073,16 @@ class Canvas {
     return result;
   }
 
+  /**
+   * Computes the row, column of the z-buffer patch that contains the given
+   * point.
+   *
+   * @param {!Array.<number>} input the [x,y]-coordinates of an orthographic
+   *     projection of a point in our 3d scene.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
   coordsMathScreenToBufferIndices(input) {
     let row = this.coordsMathScreenToBufferIndicesROWS(input[1]);
     let col = this.coordsMathScreenToBufferIndicesCOLS(input[0]);
@@ -2787,12 +3095,19 @@ class Canvas {
     return [row, col];
   }
 
-  accountOnePointMathCoordsInBufferStrip(row, thePoint, patchIndex) {
+  /**
+   * @param {number} row the row of the z-buffer.
+   * @param {!Array.<number>} point [x,y]-coordinates of the orthographic
+   *     projection of a point in the scene.
+   *
+   * @private
+   */
+  accountOnePointMathCoordsInBufferStrip(row, point) {
     if (row < 0 || row >= this.zBufferIndexStrip.length) {
       return;
     }
     let bufferCoords = this.coordsMathScreenToBufferIndices(
-        this.coordsProjectMathToMathScreen2d(thePoint));
+        this.coordsProjectMathToMathScreen2d(point));
     // If there were no rounding errors, row would be equal
     // to bufferCoords[0]. However since there will be rounding errors,
     // the row is passed instead as an argument.
@@ -2809,7 +3124,13 @@ class Canvas {
     }
   }
 
-  accountEdgeInBufferStrip(base, edgeVector, patchIndex) {
+  /**
+   * @param {!Array.<number>} base the starting point of the edge.
+   * @param {!Array.<number>} edgeVector the edge vector.
+   *
+   * @private
+   */
+  accountEdgeInBufferStrip(base, edgeVector) {
     let end = vectorPlusVector(base, edgeVector);
     let lowFloat = this.coordsMathScreenToBufferIndicesROWSFloat(
         this.coordsProjectMathToMathScreen2d(base)[1]);
@@ -2818,13 +3139,11 @@ class Canvas {
     if (lowFloat > highFloat) {
       let minusEdge = edgeVector.slice();
       vectorTimesScalar(minusEdge, -1);
-      this.accountEdgeInBufferStrip(end, minusEdge, patchIndex);
+      this.accountEdgeInBufferStrip(end, minusEdge);
       return;
     }
-    this.accountOnePointMathCoordsInBufferStrip(
-        Math.floor(lowFloat), base, patchIndex);
-    this.accountOnePointMathCoordsInBufferStrip(
-        Math.floor(highFloat), end, patchIndex);
+    this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), base);
+    this.accountOnePointMathCoordsInBufferStrip(Math.floor(highFloat), end);
     if (lowFloat === highFloat) {
       return;
     }
@@ -2833,30 +3152,36 @@ class Canvas {
       currentPoint = base.slice();
       vectorAddVectorTimesScalar(
           currentPoint, edgeVector, (i - lowFloat) / (highFloat - lowFloat));
-      this.accountOnePointMathCoordsInBufferStrip(i, currentPoint, patchIndex);
-      this.accountOnePointMathCoordsInBufferStrip(
-          i - 1, currentPoint, patchIndex);
+      this.accountOnePointMathCoordsInBufferStrip(i, currentPoint);
+      this.accountOnePointMathCoordsInBufferStrip(i - 1, currentPoint);
     }
   }
 
+  /**
+   * Accounts all z-buffer patches intersected by a given patch.
+   *
+   * @param {number} patchIndex the inded of the patch.
+   *
+   * @private
+   */
   accountOnePatch(patchIndex) {
-    let thePatch = this.all3dObjects.allPatches[patchIndex];
-    let pt1 = this.coordsProjectMathToMathScreen2d(thePatch.base);
-    let pt2 = this.coordsProjectMathToMathScreen2d(thePatch.v1);
-    let pt3 = this.coordsProjectMathToMathScreen2d(thePatch.v2);
-    let pt4 = this.coordsProjectMathToMathScreen2d(thePatch.vEnd);
-    let lowFloat = this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
-    let highFloat = this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
+    let patch = this.all3dObjects.allPatches[patchIndex];
+    let pt1 = this.coordsProjectMathToMathScreen2d(patch.base);
+    let pt2 = this.coordsProjectMathToMathScreen2d(patch.v1);
+    let pt3 = this.coordsProjectMathToMathScreen2d(patch.v2);
+    let pt4 = this.coordsProjectMathToMathScreen2d(patch.vEnd);
+    let lowFloat = this.getExtremePoint(1, false, pt1, pt2, pt3, pt4);
+    let highFloat = this.getExtremePoint(1, true, pt1, pt2, pt3, pt4);
     let low = this.coordsMathScreenToBufferIndicesROWS(lowFloat);
     let high = this.coordsMathScreenToBufferIndicesROWS(highFloat);
     for (let i = low; i <= high; i++) {
       this.zBufferIndexStrip[i][0] = -1;
       this.zBufferIndexStrip[i][1] = -1;
     }
-    this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge1, patchIndex);
-    this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge2, patchIndex);
-    this.accountEdgeInBufferStrip(thePatch.v1, thePatch.edge2, patchIndex);
-    this.accountEdgeInBufferStrip(thePatch.v2, thePatch.edge1, patchIndex);
+    this.accountEdgeInBufferStrip(patch.base, patch.edge1);
+    this.accountEdgeInBufferStrip(patch.base, patch.edge2);
+    this.accountEdgeInBufferStrip(patch.v1, patch.edge2);
+    this.accountEdgeInBufferStrip(patch.v2, patch.edge1);
     for (let i = low; i <= high; i++) {
       for (let j = this.zBufferIndexStrip[i][0];
            j <= this.zBufferIndexStrip[i][1]; j++) {
@@ -2868,6 +3193,13 @@ class Canvas {
     }
   }
 
+  /**
+   * Accounts one point of the scene into the scene's 2d-bounding box.
+   *
+   * @param {!Array.<number>} input [x,y,z] coordinates of the point.
+   *
+   * @private
+   */
   computeBoundingBoxAccountPoint(input) {
     let theV = this.coordsProjectMathToMathScreen2d(input);
     for (let i = 0; i < 2; i++) {
@@ -2899,10 +3231,15 @@ class Canvas {
     }
   }
 
+  /**
+   * Computes the 2d-bounding box of the scene.
+   *
+   * @private
+   */
   computeBoundingBox() {
     let allPatches = this.all3dObjects.allPatches;
     let allContours = this.all3dObjects.allContours;
-    let thePoints = this.all3dObjects.thePoints;
+    let points = this.all3dObjects.points;
     for (let i = 0; i < allPatches.length; i++) {
       this.computeBoundingBoxAccountPoint(allPatches[i].base);
       this.computeBoundingBoxAccountPoint(allPatches[i].v1);
@@ -2910,15 +3247,20 @@ class Canvas {
       this.computeBoundingBoxAccountPoint(allPatches[i].vEnd);
     }
     for (let i = 0; i < allContours.length; i++) {
-      for (let j = 0; j < allContours[i].thePoints.length; j++) {
-        this.computeBoundingBoxAccountPoint(allContours[i].thePoints[j]);
+      for (let j = 0; j < allContours[i].points.length; j++) {
+        this.computeBoundingBoxAccountPoint(allContours[i].points[j]);
       }
     }
-    for (let i = 0; i < thePoints.length; i++) {
-      this.computeBoundingBoxAccountPoint(thePoints[i].location);
+    for (let i = 0; i < points.length; i++) {
+      this.computeBoundingBoxAccountPoint(points[i].location);
     }
   }
 
+  /**
+   * Computes all z-buffer patches.
+   *
+   * @private
+   */
   computeBuffers() {
     let allPatches = this.all3dObjects.allPatches;
     for (let i = 0; i < this.zBuffer.length; i++) {
@@ -2939,44 +3281,69 @@ class Canvas {
     this.computePatchOrder();
   }
 
-  computePatchOrderOneContourPoint(thePatch, theContour, ptIndex) {
-    let thePointMathScreen = theContour.thePointsMathScreen[ptIndex];
-    let thePoint = theContour.thePoints[ptIndex];
+  /**
+   * Computes the relative position of a contour point to a patch. Takes into
+   * account known incidence data: if the contour point belongs to a patch,
+   * occlusion computations can be optimized out.
+   *
+   * @param {!Patch} patch the patch.
+   * @param {!Contour} contour  the contour.
+   * @param {number} ptIndex the index of the point in the contour.
+   *
+   * @private
+   */
+  computePatchOrderOneContourPoint(patch, contour, ptIndex) {
+    let thePointMathScreen = contour.thePointsMathScreen[ptIndex];
+    let point = contour.points[ptIndex];
     let theIndices = this.coordsMathScreenToBufferIndices(thePointMathScreen);
     let currentBuffer = this.zBuffer[theIndices[0]][theIndices[1]];
     let allPatches = this.all3dObjects.allPatches;
     for (let i = 0; i < currentBuffer.length; i++) {
-      if (thePatch.index === currentBuffer[i]) {
+      if (patch.index === currentBuffer[i]) {
         continue;
       }
-      if (thePatch.patchesAboveMe.indexOf(currentBuffer[i]) >= 0 ||
-          thePatch.patchesBelowMe.indexOf(currentBuffer[i]) >= 0) {
+      if (patch.patchesAboveMe.indexOf(currentBuffer[i]) >= 0 ||
+          patch.patchesBelowMe.indexOf(currentBuffer[i]) >= 0) {
         continue;
       }
       let otherPatch = allPatches[currentBuffer[i]];
-      let relativePosition = this.pointRelativeToPatch(thePoint, otherPatch);
+      let relativePosition = this.pointRelativeToPatch(point, otherPatch);
       if (relativePosition === -1) {
-        otherPatch.patchesBelowMe.push(thePatch.index);
-        thePatch.patchesAboveMe.push(currentBuffer[i]);
+        otherPatch.patchesBelowMe.push(patch.index);
+        patch.patchesAboveMe.push(currentBuffer[i]);
       } else if (relativePosition === 1) {
-        otherPatch.patchesAboveMe.push(thePatch.index);
-        thePatch.patchesBelowMe.push(currentBuffer[i]);
+        otherPatch.patchesAboveMe.push(patch.index);
+        patch.patchesBelowMe.push(currentBuffer[i]);
       }
     }
   }
 
-  computePatchPartialOrderOnePatch(thePatch) {
+  /**
+   * Computes partial patch order of one patch relative to the other patches.
+   *
+   * @param {!Patch} patch the patch.
+   *
+   * @private
+   */
+  computePatchPartialOrderOnePatch(patch) {
     let allContours = this.all3dObjects.allContours;
-    for (let i = 0; i < thePatch.adjacentContours.length; i++) {
-      for (let j = 0;
-           j < allContours[thePatch.adjacentContours[i]].thePoints.length;
+    for (let i = 0; i < patch.adjacentContours.length; i++) {
+      for (let j = 0; j < allContours[patch.adjacentContours[i]].points.length;
            j++) {
         this.computePatchOrderOneContourPoint(
-            thePatch, allContours[thePatch.adjacentContours[i]], j);
+            patch, allContours[patch.adjacentContours[i]], j);
       }
     }
   }
 
+  /**
+   * Computes the partial patch order.
+   *
+   * The order is not transitive, i.e., it is possible that
+   * patch1>patch2>patch3>patch1 (cyclically overlapping patches).
+   *
+   * @private
+   */
   computePatchPartialOrder() {
     let allPatches = this.all3dObjects.allPatches;
     for (let i = 0; i < allPatches.length; i++) {
@@ -2988,21 +3355,28 @@ class Canvas {
     }
   }
 
+  /**
+   * Computes the paint order of the patches
+   *
+   * Breaks cyclically overlapping patches into a strict paint order.
+   *
+   * @private
+   */
   computePatchOrder() {
     this.computePatchPartialOrder();
     let allPatches = this.all3dObjects.allPatches;
-    if (this.thePatchOrder.length !== allPatches.length) {
-      this.thePatchOrder = new Array(allPatches.length);
+    if (this.patchOrder.length !== allPatches.length) {
+      this.patchOrder = new Array(allPatches.length);
       this.patchIsAccounted = new Array(allPatches.length);
     }
     for (let i = 0; i < allPatches.length; i++) {
-      this.thePatchOrder[i] = -1;
+      this.patchOrder[i] = -1;
       this.patchIsAccounted[i] = 0;
     }
     this.numAccountedPatches = 0;
     for (let i = 0; i < allPatches.length; i++) {
       if (allPatches[i].patchesBelowMe.length === 0) {
-        this.thePatchOrder[this.numAccountedPatches] = i;
+        this.patchOrder[this.numAccountedPatches] = i;
         this.numAccountedPatches++;
         this.patchIsAccounted[i] = 1;
       }
@@ -3011,7 +3385,7 @@ class Canvas {
     while (this.numAccountedPatches < allPatches.length) {
       let currentIndex = 0;
       while (currentIndex < this.numAccountedPatches) {
-        let currentPatch = allPatches[this.thePatchOrder[currentIndex]];
+        let currentPatch = allPatches[this.patchOrder[currentIndex]];
         for (let i = 0; i < currentPatch.patchesAboveMe.length; i++) {
           let nextIndex = currentPatch.patchesAboveMe[i];
           if (this.patchIsAccounted[nextIndex] === 1) {
@@ -3026,7 +3400,7 @@ class Canvas {
             }
           }
           if (isGood === 1) {
-            this.thePatchOrder[this.numAccountedPatches] = nextIndex;
+            this.patchOrder[this.numAccountedPatches] = nextIndex;
             this.numAccountedPatches++;
             this.patchIsAccounted[nextIndex] = 1;
           }
@@ -3039,6 +3413,12 @@ class Canvas {
     }
   }
 
+  /**
+   * Breaks one collection of cyclically overlapping patches into a strict paint
+   * order.
+   *
+   * @private
+   */
   patchOverlapTieBreak() {
     // If we have cyclically overlapping patches we break ties
     // by selecting/painting first the patches whose internal point
@@ -3063,11 +3443,16 @@ class Canvas {
       }
     }
     this.numCyclicallyOverlappingPatchTieBreaks++;
-    this.thePatchOrder[this.numAccountedPatches] = deepestNonAccountedIndex;
+    this.patchOrder[this.numAccountedPatches] = deepestNonAccountedIndex;
     this.numAccountedPatches++;
     this.patchIsAccounted[deepestNonAccountedIndex] = 1;
   }
 
+  /**
+   * Allocates the initial z-buffer.
+   *
+   * @private
+   */
   allocateZbuffer() {
     if (this.zBufferRowCount < 1) {
       this.zBufferRowCount = 1;
@@ -3088,6 +3473,15 @@ class Canvas {
     }
   }
 
+  /**
+   * Returns the low left, top right corner of a z-buffer patch.
+   *
+   * @param {number} row index of the row.
+   * @param {number} col index of the column.
+   *
+   * @returns {!Array.<!Array<number>>}
+   * @private
+   */
   getBufferBox(row, col) {
     return [
       [
@@ -3101,6 +3495,11 @@ class Canvas {
     ];
   }
 
+  /**
+   * Paints the z-buffer on the canvas.
+   *
+   * Use for visual debugging of the graphics.
+   */
   paintZbuffer() {
     let surface = this.surface;
     surface.strokeStyle = 'gray';
@@ -3125,6 +3524,11 @@ class Canvas {
     }
   }
 
+  /**
+   * Computes the basis for the screen onto which we project orthographically.
+   *
+   * @param {!Array.<number>} inputNormal the normal to the screen.
+   */
   computeBasisFromNormal(inputNormal) {
     if (inputNormal[0] !== 0) {
       this.screenBasisUser[0] = [-inputNormal[1], inputNormal[0], 0];
@@ -3138,6 +3542,11 @@ class Canvas {
     }
   }
 
+  /**
+   * Computes debug information the projection.
+   *
+   * @private
+   */
   infoProjectionCompute() {
     if (!this.flagShowPerformance) {
       return;
@@ -3152,9 +3561,12 @@ class Canvas {
         `<br>selected e2: ${this.selectedScreenBasisOrthonormal[1]}`;
   }
 
+  /**
+   * Computes an orthonormal basis for the screen projection.
+   *
+   * @private
+   */
   computeBasis() {
-    // if (this.screenBasisOrthonormal.length<2)
-    //   this.screenBasisOrthonormal.length =2;
     this.screenBasisOrthonormal[0] = this.screenBasisUser[0].slice();
     this.screenBasisOrthonormal[1] = this.screenBasisUser[1].slice();
     let e1 = this.screenBasisOrthonormal[0];
@@ -3165,6 +3577,10 @@ class Canvas {
     this.screenNormal = vectorCrossVector(e1, e2);
   }
 
+  /**
+   * Sets the bounding box as the default view window. This rescales the
+   * graphics so as to "fit" the entire picture on the canvas.
+   */
   setBoundingBoxAsDefaultViewWindow() {
     this.resetViewNoRedraw();
     this.computeBoundingBox();
@@ -3176,13 +3592,7 @@ class Canvas {
     let desiredWidth = Math.abs(rightUpScreen[0] - leftLowScreen[0]) * 1.05;
     let candidateScaleHeight = this.scale * this.height / desiredHeight;
     let candidateScaleWidth = this.scale * this.width / desiredWidth;
-    // console.log("leftLowScreen: "+ leftLowScreen +" rightUpScreen:
-    // "+rightUpScreen); console.log(centerScreen); console.log("desiredHeight:
-    // "+desiredHeight); console.log("candidateScaleHeight:
-    // "+candidateScaleHeight); console.log("candidateScaleWidth:
-    // "+candidateScaleWidth); console.log("old scale: "+ this.scale);
     this.scale = Math.min(candidateScaleHeight, candidateScaleWidth);
-    // console.log("new scale: "+ this.scale);
     let newViewWindowCenterMath = vectorPlusVector(
         this.boundingBoxMathScreen[0], this.boundingBoxMathScreen[1]);
     vectorTimesScalar(newViewWindowCenterMath, 0.5);
@@ -3200,11 +3610,17 @@ class Canvas {
     this.lastCenterScreen = newViewWindowCenterMath.slice();
   }
 
+  /** Resets the graphics to its original view window. */
   resetView() {
     this.resetViewNoRedraw();
     this.redraw();
   }
 
+  /**
+   * Same as resetView() but doesn't repaint the canvas.
+   *
+   * @private
+   */
   resetViewNoRedraw() {
     this.boundingBoxMathScreen = [[-0.01, -0.01], [0.01, 0.01]];
     this.boundingBoxMath = [[-0.01, -0.01, -0.01], [0.01, 0.01, 0.01]];
@@ -3216,6 +3632,14 @@ class Canvas {
     this.computeBasis();
   }
 
+  /**
+   * Constructs controls for the graphics.
+   *
+   * As of writing, these consist of a single reset view button and
+   * internationalization-friendly instructions how to rotate the scene.
+   *
+   * @private
+   */
   constructControls() {
     if (this.spanControls === null) {
       return;
@@ -3225,22 +3649,45 @@ class Canvas {
     buttonElement.style.border = 'none';
     buttonElement.style.background = 'none';
     buttonElement.style.cursor = 'pointer';
+    // Cirle arrow: "refresh button".
     buttonElement.textContent = '\u21BB';
     buttonElement.addEventListener('click', this.resetView.bind(this));
     let hintElement = document.createElement('SMALL');
+    // "Shift+cursor=rotation [circle arrow]", written with utf-8 symbols.
     hintElement.textContent = ` \u21E7+\u279A=\u21BB`;
     this.spanControls.appendChild(buttonElement);
     this.spanControls.appendChild(hintElement);
   }
 
-  coordsInjectMathScreen2dToMath3d(theCoords) {
+  /**
+   * Injects a point given in screen 2d-coordinates as if the point was a
+   * physical part of the 3d coordinate system.
+   *
+   * @param {!Array.<number>} coordinates the [x,y] coordinates in the 2d
+   *     screen.
+   *
+   * @returns {!Array.<number>}
+   * @private
+   */
+  coordsInjectMathScreen2dToMath3d(coordinates) {
     let output = this.screenBasisOrthonormal[0].slice();
-    vectorTimesScalar(output, theCoords[0]);
+    vectorTimesScalar(output, coordinates[0]);
     vectorAddVectorTimesScalar(
-        output, this.screenBasisOrthonormal[1], theCoords[1]);
+        output, this.screenBasisOrthonormal[1], coordinates[1]);
     return output;
   }
 
+  /**
+   * Projects a point in 3d onto the selected 2d math screen.
+   *
+   * A screen is "selected" when we got it while rotating the scene when
+   * shift+clicking.
+   *
+   * @param {!Array.<number>} vector the [x,y,z] coordinates of the point
+   *     in 3d.
+   *
+   * @returns {!Array.<number>}
+   */
   coordsProjectMathToMathSelectedScreen2d(vector) {
     return [
       vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]),
@@ -3248,6 +3695,16 @@ class Canvas {
     ];
   }
 
+  /**
+   * Projects a point in 3d onto the original (before we started rotating) 2d
+   * math screen.
+   *
+   * @param {!Array.<number>} vector the [x,y,z] coordinates of the point
+   *     in 3d.
+   *
+   * @returns {!Array.<number>}
+   * @private
+   */
   coordsProjectMathToMathScreen2d(vector) {
     return [
       vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
@@ -3256,10 +3713,12 @@ class Canvas {
   }
 
   /**
-   * Returns a projection in 3d of
-   * of the input vector
-   * to the current screen.`
-   * @returns{Array.<number>}
+   * Projects a vector in 3d to the mathematical screen, injected as a
+   * two-dimensional plane in 3d.
+   *
+   * @param {!Array.<number>} vector the vector to be projected.
+   *
+   * @returns{!Array.<number>}
    */
   coordsProjectToMathScreen3d(vector) {
     let output = this.screenBasisOrthonormal[0].slice();
@@ -3274,15 +3733,13 @@ class Canvas {
   }
 
   /**
-   * Returns a projection in 3d
-   * of the input vector
-   * to the selected screen.`
-   * @returns{Array.<number>}
+   * Same as coordsProjectToMathScreen3d but uses the selected screen.
+   *
+   * @param {!Array.<number>} vector the vector to be projected.
+   *
+   * @returns{!Array.<number>}
    */
-  coordsProjectToSelectedMathScreen3d(
-      /**@type{Array.<number>} */
-      vector,
-  ) {
+  coordsProjectToSelectedMathScreen3d(vector) {
     let output = this.selectedScreenBasisOrthonormal[0].slice();
     vectorTimesScalar(
         output,
@@ -3295,6 +3752,14 @@ class Canvas {
     return output;
   }
 
+  /**
+   * Converts 3d coordinates to screen coordinates (pixels).
+   *
+   * @param {!Array.<number>} vector the [x,y,z] coordinates of the vector.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
   coordinatesMathToScreen(vector) {
     return [
       this.scale * vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +
@@ -3305,6 +3770,14 @@ class Canvas {
     ];
   }
 
+  /**
+   * Sames coordinatesMathToScreen but uses the selected math screen.
+   *
+   * @param {!Array.<number>} vector the [x,y,z] coordinates of the vector.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
   coordsMathToSelectedScreen(vector) {
     return [
       this.scale *
@@ -3318,6 +3791,14 @@ class Canvas {
     ];
   }
 
+  /**
+   * Converts 2d screen coordinates to 2d mathematical screen coordinates.
+   *
+   * @param {!Array.<number>} screenPos the [x,y] coordinates on the screen.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
   coordsScreenToMathScreen(screenPos) {
     return [
       (screenPos[0] - this.centerX) / this.scale,
@@ -3325,23 +3806,66 @@ class Canvas {
     ];
   }
 
+  /**
+   * Converts 2d screen coordinates to 2d mathematical screen coordinates.
+   *
+   * @param {number} cx x coordinate of the center of the coordinae system.
+   * @param {number} cy y coordinate of the center of the coordinae system.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
   coordsScreenAbsoluteToScreen(cx, cy) {
     return getXYPositionOfObject(this.canvasContainer, cx, cy);
   }
 
+  /**
+   * Converts 2d absolute screen coordinates to 2d mathematical screen
+   * coordinates.
+   *
+   * @param {number} screenX x coordinate of the center of the coordinae system.
+   * @param {number} screenY y coordinate of the center of the coordinae system.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
   coordsScreenAbsoluteToMathScreen(screenX, screenY) {
     return this.coordsScreenToMathScreen(
         this.coordsScreenAbsoluteToScreen(screenX, screenY));
   }
 
-  coordsMathScreenToScreen(theCoords) {
+  /**
+   * Converts math screen coordinates to screen coordinates.
+   *
+   * @param {!Array.<number>} coordinates mathematical [x,y]-coordinates.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
+  coordsMathScreenToScreen(coordinates) {
     return [
-      this.scale * theCoords[0] + this.centerX,
-      this.centerY - this.scale * theCoords[1]
+      this.scale * coordinates[0] + this.centerX,
+      this.centerY - this.scale * coordinates[1]
     ];
   }
 
-  rotateOutOfPlane(input, orthoBasis1, orthoBasis2, theAngle) {
+  /**
+   * Partially rotates the input vector.
+   *
+   * The rotation is the component of larger rotation that is orthogonal to the
+   * 3d injection of the mathematical screen.
+   *
+   * @param {!Array.<number>} input the point we are rotating.
+   * @param {!Array.<number>} orthoBasis1 the first basis vector of the
+   *     injection of the math screen.
+   * @param {!Array.<number>} orthoBasis2 the second basis vector of the
+   *     injection of the math screen.
+   * @param {number} angle the angle of rotation.
+   *
+   * @returns{!Array.<number>}
+   * @private
+   */
+  rotateOutOfPlane(input, orthoBasis1, orthoBasis2, angle) {
     let vComponent = input.slice();
     let scal1 = vectorScalarVector(orthoBasis1, input);
     let scal2 = vectorScalarVector(orthoBasis2, input);
@@ -3351,13 +3875,19 @@ class Canvas {
     vectorAddVectorTimesScalar(vComponent, projection, -1);
     projection = orthoBasis1.slice();
     vectorTimesScalar(
-        projection, Math.cos(theAngle) * scal1 - Math.sin(theAngle) * scal2);
+        projection, Math.cos(angle) * scal1 - Math.sin(angle) * scal2);
     vectorAddVectorTimesScalar(
         projection, orthoBasis2,
-        Math.sin(theAngle) * scal1 + Math.sin(theAngle) * scal2);
+        Math.sin(angle) * scal1 + Math.sin(angle) * scal2);
     return vectorPlusVector(vComponent, projection);
   }
 
+  /**
+   * Computes the difference between the clicked position and the mouse position
+   * in mathemaical screen coordinates.
+   *
+   * @private
+   */
   computePositionDelta() {
     let oldX = this.clickedPosition[0];
     let oldY = this.clickedPosition[1];
@@ -3366,6 +3896,26 @@ class Canvas {
     this.positionDelta = [newX - oldX, newY - oldY];
   }
 
+  /**
+   * Rotates the scene so the selected point follows the mouse cursor.
+   *
+   * The rotation has two components.
+   *
+   * First, a radial rotation in the
+   * mathematical screen plane. This is governed by the polar angle of the mouse
+   * cursor position relative to the center of the mathematical screen
+   * coordinate system.
+   *
+   * Second, a rotational component orthogonal to the injection of the
+   * mathematical screen in 3d. This is governed by the shortening/enlarging the
+   * polar radius of cursor position relative to the center of the mathematical
+   * screen coordinate system.
+   *
+   * The angles and deltas are adjusted so that the point "selected" by the
+   * mouse remains under the cursor as we move it around.
+   *
+   * @private
+   */
   rotateAfterCursorDefaultGreatNormalCircle() {
     if (this.mousePosition.length == 0) {
       return;
@@ -3401,26 +3951,29 @@ class Canvas {
     this.redraw();
   }
 
-  makeValidCosine(
-      /** @type{number}*/
-      input,
-  ) {
-    if (input > 1) {
-      return 1;
-    }
-    if (input < -1) {
-      return -1;
-    }
-    return input;
-  }
-
+  /**
+   * A mechanism for boostrapping additional methods for rotation with the
+   * mouse.
+   *
+   * TODO(tmilev): I haven't found a scheme for graphics rotation that matches
+   * my intuition other than the "default" one.
+   *
+   * @private
+   */
   rotateAfterCursorDefault() {
     if (this.mousePosition.length === 0) {
       return;
     }
-    this.rotationModesAvailable[this.rotationMode].bind(this)();
+    this.rotationModesAvailable[this.rotationMode]();
   }
 
+  /**
+   * Zooms the graphics in/out using the mouse wheel.
+   *
+   * @param {number} wheelDelta the mouse wheel change.
+   * @param {number} screenX the screen x-coordinate of the mouse.
+   * @param {number} screenY the screen y-coordinate of the mouse.
+   */
   mouseWheel(wheelDelta, screenX, screenY) {
     let screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
     let mathScreenPos = this.coordsScreenToMathScreen(screenPos);
@@ -3436,6 +3989,12 @@ class Canvas {
     this.redraw();
   }
 
+  /**
+   * If rotation or panning is selected, rotates or pans the graphics.
+   *
+   * @param {number} screenX the screen x-coordinate of the mouse.
+   * @param {number} screenY the screen y-coordinate of the mouse.
+   */
   mouseMove(screenX, screenY) {
     this.screenXY[0] = screenX;
     this.screenXY[1] = screenY;
@@ -3458,6 +4017,11 @@ class Canvas {
     this.redrawTime = this.redrawFinish - this.redrawStart;
   }
 
+  /**
+   * Pans after the mouse cursor.
+   *
+   * @private
+   */
   panAfterCursor() {
     let difference =
         vectorMinusVector(this.mousePosition, this.clickedPosition);
@@ -3466,6 +4030,15 @@ class Canvas {
     this.redraw();
   }
 
+  /**
+   * Checks wheher two points are within mouse click tolerance.
+   *
+   * @param {!Array.<number>} leftXY screen coordinates of the first point.
+   * @param {!Array.<number>} rightXY screen coordinates of the second point.
+   *
+   * @returns {boolean}
+   * @private
+   */
   pointsWithinClickTolerance(leftXY, rightXY) {
     let squaredDistance =
         ((leftXY[0] - rightXY[0]) * (leftXY[0] - rightXY[0]) +
@@ -3474,6 +4047,16 @@ class Canvas {
     return squaredDistance < 7;
   }
 
+  /**
+   * Clicks the canvas: selects whether we rotate the coordinate system or
+   * whether we are panning.
+   *
+   * @param {number} screenX screen x coordinate of the cursor.
+   * @param {number} screenY screen y coordinate of the cursor.
+   * @param {?{shiftKey: boolean}} event the mouse event.
+   *
+   * @private
+   */
   canvasClick(screenX, screenY, event) {
     this.clickedPosition =
         this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
@@ -3500,6 +4083,7 @@ class Canvas {
     this.showMessages();
   }
 
+  /** Deselects everything: stops panning and rotation. */
   selectEmpty() {
     this.selectedElement = '';
     this.selectedScreenBasisOrthonormal = [];
@@ -3508,6 +4092,11 @@ class Canvas {
     this.angleNormal = 0;
   }
 
+  /**
+   * Computes which math screen vector was clicked by the mouse.
+   *
+   * @private
+   */
   computeSelectedVector() {
     this.selectedScreenProjectionNormalized =
         this.coordsInjectMathScreen2dToMath3d(this.clickedPosition);
@@ -3528,6 +4117,11 @@ class Canvas {
     ];
   }
 
+  /**
+   * Writes debug messages onto a DOM component, if available.
+   *
+   * @private
+   */
   showMessages() {
     if (!this.flagShowPerformance) {
       return;
@@ -3553,6 +4147,13 @@ class Canvas {
     }
   }
 
+  /**
+   * Computes debug information about the patches.
+   *
+   * TODO(tmilev): this info used to be in html format, but was changed to
+   * textual due to security concerns. Please cleanup the text from html tags
+   * and adjust it for readability in plain text format.
+   */
   infoPatchesCompute() {
     this.textPatchInfo = '';
     this.textPatchInfo += 'Z-depth: ' + this.boundingSegmentZ + '<br>';
@@ -3608,6 +4209,12 @@ class Canvas {
     this.textPatchInfo += '</table>';
   }
 
+  /**
+   * Computes debug information about the cursor.
+   *
+   * TODO(tmilev): This is no longer in html format, ensure it's readable as
+   * plain text.
+   */
   infoMouseCompute() {
     if (!this.flagShowPerformance) {
       return;
@@ -3644,11 +4251,12 @@ class Canvas {
         `(${(this.newAngleNormal * 180 / Math.PI).toFixed(1)} deg)`;
   }
 
+  /** Redraws the 3d scene. */
   redraw() {
     this.redrawStart = new Date().getTime();
     let allContours = this.all3dObjects.allContours;
     let allPatches = this.all3dObjects.allPatches;
-    let thePoints = this.all3dObjects.thePoints;
+    let points = this.all3dObjects.points;
     let theLabels = this.all3dObjects.theLabels;
     let surface = this.surface;
     surface.clearRect(0, 0, this.width, this.height);
@@ -3662,12 +4270,14 @@ class Canvas {
     let computeContoursTime = new Date().getTime();
     this.computeBuffers();
     let computeBuffersTime = new Date().getTime();
-    // this.paintZbuffer();
+    if (this.flagPaintZBuffer) {
+      this.paintZbuffer();
+    }
     let paintBuffersTime = new Date().getTime();
     let numPainted = 0;
-    for (let i = 0; i < this.thePatchOrder.length; i++) {
-      if (this.thePatchOrder[i] !== -1) {
-        this.paintOnePatch(allPatches[this.thePatchOrder[i]]);
+    for (let i = 0; i < this.patchOrder.length; i++) {
+      if (this.patchOrder[i] !== -1) {
+        this.paintOnePatch(allPatches[this.patchOrder[i]]);
         numPainted++;
       }
     }
@@ -3684,8 +4294,8 @@ class Canvas {
       this.paintOneContour(allContours[i]);
     }
     let paintContourTime = new Date().getTime();
-    for (let i = 0; i < thePoints.length; i++) {
-      this.paintOnePoint(thePoints[i]);
+    for (let i = 0; i < points.length; i++) {
+      this.paintOnePoint(points[i]);
     }
     for (let i = 0; i < theLabels.length; i++) {
       this.paintText(theLabels[i]);
@@ -3717,8 +4327,24 @@ class Canvas {
     this.showMessages();
   }
 
+  /**
+   * Draws a surface.
+   *
+   * @param {function(number,number):!Array.<number>} inputXYZFunction a
+   *     two-variable function that returns a the [x,y,z]-coordinates [f(u,v),
+   *     h(u,v), g(u,v)].
+   * @param{!Array.<!Array.<number>>} inputUVBox u,v-variable ranges, format:
+   * [[uMin, uMax], [vMin, vMax]].
+   * @param {!Array.<number>} inputPatchDimensions the pair of numbers.
+   * [uPatchCount, vPathCount], where we subdivide the UV-rectangle in
+   * uPatchCount times uPatchCount rectangles.
+   * @param{string} colorFront color of the front of the patch.
+   * @param{string} colorBack color of the back of the patch.
+   * @param{string} colorContour color of the patch contour.
+   * @param{number} inputContourWidth the line width of the contour.
+   */
   drawSurfaceCreate(
-      inputxyzFun,
+      inputXYZFunction,
       inputUVBox,
       inputPatchDimensions,
       colorFront,
@@ -3727,7 +4353,7 @@ class Canvas {
       inputContourWidth,
   ) {
     this.drawSurface(new Surface(
-        inputxyzFun,
+        inputXYZFunction,
         inputUVBox,
         inputPatchDimensions,
         colorFront,
@@ -3737,22 +4363,22 @@ class Canvas {
         ));
   }
 
-  drawSurface(
-      /**@type{Surface} */
-      surface,
-  ) {
+  /**
+   * Same as drawSurfaceCreate but assumes the user of the function allocated
+   * the Surface object themselves.
+   *
+   * @param {!Surface} surface the surface.
+   */
+  drawSurface(surface) {
     let numUsegments = surface.patchDimensions[0];
     let numVsegments = surface.patchDimensions[1];
     let allPatches = this.all3dObjects.allPatches;
     let allContours = this.all3dObjects.allContours;
-    // let incomingPatches = new Array(numUsegments);
     let deltaU = surface.deltaU;
     let deltaV = surface.deltaV;
     let firstPatchIndex = allPatches.length;
     for (let i = 0; i < numUsegments; i++) {
-      // incomingPatches[i] = new Array(numVsegments);
       for (let j = 0; j < numVsegments; j++) {
-        // let incomingPatch = incomingPatches[i][j];
         let currentU = surface.uvBox[0][0] + i * deltaU;
         let currentV = surface.uvBox[1][0] + j * deltaV;
         let base = surface.xyzFun(currentU, currentV);
@@ -3784,16 +4410,17 @@ class Canvas {
             contourPoints, surface.colors.colorContour, surface.contourWidth);
         incomingContour.index = allContours.length;
         if (i > 0) {
-          incomingContour.adjacentPatches.push(
-              firstPatchIndex + numVsegments * (i - 1) + j);
+          incomingContour
+              .adjacentPatches[firstPatchIndex + numVsegments * (i - 1) + j] =
+              true;
           allPatches[firstPatchIndex + numVsegments * (i - 1) + j]
               .adjacentContours[2] = allContours.length;
           allPatches[firstPatchIndex + numVsegments * (i - 1) + j]
               .traversalOrder[2] = -1;
         }
         if (i < numUsegments) {
-          incomingContour.adjacentPatches.push(
-              firstPatchIndex + numVsegments * i + j);
+          incomingContour
+              .adjacentPatches[firstPatchIndex + numVsegments * i + j] = true;
           allPatches[firstPatchIndex + numVsegments * i + j]
               .adjacentContours[0] = allContours.length;
         }
@@ -3812,14 +4439,15 @@ class Canvas {
             contourPoints, surface.colors.colorContour, surface.contourWidth);
         incomingContour.index = allContours.length;
         if (j > 0) {
-          incomingContour.adjacentPatches.push(
-              firstPatchIndex + numVsegments * i + j - 1);
+          incomingContour
+              .adjacentPatches[firstPatchIndex + numVsegments * i + j - 1] =
+              true;
           allPatches[firstPatchIndex + numVsegments * i + j - 1]
               .adjacentContours[1] = allContours.length;
         }
         if (j < numVsegments) {
-          incomingContour.adjacentPatches.push(
-              firstPatchIndex + numVsegments * i + j);
+          incomingContour
+              .adjacentPatches[firstPatchIndex + numVsegments * i + j] = true;
           allPatches[firstPatchIndex + numVsegments * i + j]
               .adjacentContours[3] = allContours.length;
           allPatches[firstPatchIndex + numVsegments * i + j].traversalOrder[3] =
@@ -3831,6 +4459,7 @@ class Canvas {
   }
 }
 
+/** Convenience wrapper for a few functions and classes. */
 class Drawing {
   constructor() {
     this.firstCriticalRunTimeError = '';
@@ -3841,11 +4470,12 @@ class Drawing {
     this.CurveThreeD = CurveThreeD;
   }
 
-  calculatorError(
-      /**@type{string} */
-      x,
-  ) {
-    console.log(x);
+  /**
+   * Processes an error message.
+   * @param{string} input
+   */
+  calculatorError(input) {
+    console.log(input);
   }
 
   /**
@@ -3853,7 +4483,8 @@ class Drawing {
    * x and y (cursor position during the wheel event).
    *
    * @param {{preventDefault: !Function, stopPropagation: !Function, detail:
-   *     ?number, wheelDelta: number}} e the mouse wheel event.
+   *     (number|null|undefined), wheelDelta: number, clientX: number, clientY:
+   *     number}} e the mouse wheel event.
    * @returns{{delta:number, x:number, y:number}}
    */
   mouseWheelCommon(e) {

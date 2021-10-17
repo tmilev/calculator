@@ -203,218 +203,47 @@ function getXYPositionOfObject(object, cx, cy) {
   return [cx - rectangle.left, cy - rectangle.top];
 }
 
-/** Parametric curve in three dimensions. */
-class CurveThreeD {
-  /**
-   * @param {!Array.<!Function>} inputCoordinateFunctions the coordinate
-   *     functions: an array of three functions that map a real number to a
-   *     triple of numbers
-   * @param {number} inputLeftPoint left (lower) bound for the parameter
-   * @param {number} inputRightPoint right (high) bound for the parameter
-   * @param {number} inputNumberOfSegments number of segments used to
-   *     approximate the curve
-   * @param {string} inputColor curve color
-   * @param {number} inputLineWidth the line width of the curve.
-   */
-  constructor(
-      inputCoordinateFunctions, inputLeftPoint, inputRightPoint,
-      inputNumberOfSegments, inputColor, inputLineWidth) {
-    /** @type{!Array.<!Function>}*/
-    this.coordinateFunctions = inputCoordinateFunctions;
-    /** @type{number} */
-    this.leftPt = inputLeftPoint;
-    /** @type{number} */
-    this.rightPt = inputRightPoint;
-    /** @type{!Array.<number>} */
-    this.color = colorToRGB(inputColor);
-    /** @type{number} */
-    this.numSegments = inputNumberOfSegments;
-    this.lineWidth = inputLineWidth;
-  }
-
-  /**
-   * Enlarges a bounding box in-place to ensure it encloses the object.
-   *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
-   */
-  accountBoundingBox(inputOutputBox) {
-    let argumentT = this.leftPt;
-    let x = this.coordinateFunctions[0](argumentT);
-    let y = this.coordinateFunctions[1](argumentT);
-    accountBoundingBox([x, y], inputOutputBox);
-    for (let i = 0; i < this.numSegments; i++) {
-      let ratio = i / (this.numSegments - 1);
-      argumentT = this.leftPt * (1 - ratio) + this.rightPt * ratio;
-      x = this.coordinateFunctions[0](argumentT);
-      y = this.coordinateFunctions[1](argumentT);
-      accountBoundingBox([x, y], inputOutputBox);
-    }
-  }
-
-  /**
-   * Same as draw but does not complete the stroke command; use for plot fills.
-   *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
-   * drawing a line
-   */
-  drawNoFinish(canvas, startByMoving) {
-    let surface = canvas.surface;
-    surface.strokeStyle = colorRGBToString(this.color);
-    surface.fillStyle = colorRGBToString(this.color);
-    let argumentT = this.leftPt;
-    let x = this.coordinateFunctions[0](argumentT);
-    let y = this.coordinateFunctions[1](argumentT);
-    let theCoords = canvas.coordinatesMathToScreen([x, y]);
-    if (startByMoving) {
-      surface.moveTo(theCoords[0], theCoords[1]);
-    } else {
-      surface.lineTo(theCoords[0], theCoords[1]);
-    }
-    let skippedValues = false;
-    for (let i = 0; i < this.numSegments; i++) {
-      let ratio = i / (this.numSegments - 1);
-      argumentT =
-          this.leftPt * (1 - ratio) + this.rightPt * ratio;  //<- this way of
-      // computing x introduces smaller numerical errors.
-      // For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
-      // If not careful with rounding errors,
-      // you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
-      // resulting in serious visual glitches.
-      // Note: the remarks above were discovered the painful way (trial and
-      // error).
-      x = this.coordinateFunctions[0](argumentT);
-      y = this.coordinateFunctions[1](argumentT);
-      if (!isFinite(y) || !isFinite(x)) {
-        console.log(
-            `Failed to evaluate: ${this.coordinateFunctions} at x = ${x}`);
-      }
-      if (Math.abs(y) > 100000 || Math.abs(x) > 100000) {
-        if (!skippedValues) {
-          console.log('Curve point: ' + [
-            x, y
-          ] + ' is too large, skipping. Further errors suppressed.');
-        }
-        skippedValues = true;
-        continue;
-      }
-      theCoords = canvas.coordinatesMathToScreen([x, y]);
-      surface.lineTo(theCoords[0], theCoords[1]);
-    }
-  }
-
-  /**
-   * Draws the object onto the given canvas.
-   *
-   * @param{!CanvasTwoD} canvas the canvas
-   */
-  draw(canvas) {
-    let surface = canvas.surface;
-    surface.beginPath();
-    this.drawNoFinish(canvas, true);
-    surface.stroke();
-  }
-}
-
-class Surface {
-  constructor(
-      /**@type{Function} */
-      inputxyzFun,
-      /**@type{Array.<Array.<number>>} Variable ranges, in format [[uMin, uMax],
-         [vMin, vMax]]*/
-      inputUVBox,
-      /**@type{Array.<number>} Number of patches in the format [uPatchCount,
-         vPathCount]*/
-      inputPatchDimensions,
-      /**@type{string} */
-      colorFront,
-      /**@type{string} */
-      colorBack,
-      /**@type{string} */
-      colorContour,
-      /**@type{number} */
-      inputContourWidth,
-  ) {
-    this.xyzFun = inputxyzFun;
-    this.uvBox = inputUVBox;
-    this.patchDimensions = inputPatchDimensions;
-    this.colors = {
-      colorContour: colorContour,
-      colorUV: colorToHex(colorBack),
-      colorVU: colorToHex(colorFront),
-    };
-    this.contourWidth = inputContourWidth;
-    this.deltaU =
-        (this.uvBox[0][1] - this.uvBox[0][0]) / this.patchDimensions[0];
-    this.deltaV =
-        (this.uvBox[1][1] - this.uvBox[1][0]) / this.patchDimensions[1];
-    this.numSamplesUSegment = 10;
-    this.numSamplesVSegment = 10;
-  }
-}
-
-class Point {
-  constructor(inputLocation, inputColor) {
-    this.location = inputLocation;
-    /** @type{Array.<number>} */
-    this.color = colorToRGB(inputColor);
-  }
-}
-
-class Patch {
-  constructor(
-      /** @type{Array.<number>}*/ inputBase,
-      /** @type{Array.<number>}*/ inputEdge1,
-      /** @type{Array.<number>}*/ inputEdge2, inputColorUV, inputColorVU) {
-    /** @type{Array.<number>}*/
-    this.base = inputBase.slice();
-    /** @type{Array.<number>}*/
-    this.edge1 = inputEdge1.slice();
-    /** @type{Array.<number>}*/
-    this.edge2 = inputEdge2.slice();
-    this.colorUV = colorToRGB(inputColorUV);
-    this.colorVU = colorToRGB(inputColorVU);
-    /** @type{Array.<number>}*/
-    this.v1 = vectorPlusVector(this.base, this.edge1);
-    this.v2 = vectorPlusVector(this.base, this.edge2);
-    this.vEnd = vectorPlusVector(this.v1, this.edge2);
-    this.internalPoint = this.base.slice();
-    vectorAddVectorTimesScalar(this.internalPoint, this.edge1, 0.5);
-    vectorAddVectorTimesScalar(this.internalPoint, this.edge2, 0.5);
-    this.normalVector = vectorCrossVector(inputEdge1, inputEdge2);
-    this.adjacentContours = [];
-    this.traversalOrder = [];
-    this.patchesBelowMe = [];
-    this.patchesAboveMe = [];
-    this.index = -1;
-  }
-}
-
-class Contour {
-  constructor(inputPoints, /**@type{string}*/ inputColor, inputLineWidth) {
-    this.thePoints = inputPoints.slice();
-    this.thePointsMathScreen = [];
-    /** @type{Array.<number>} */
-    this.color = colorToRGB(inputColor);
-    this.adjacentPatches = [];
-    this.index = -1;
-    this.lineWidth = inputLineWidth;
-  }
-}
-
+/**
+ * Converts an RGB number triple to a hex string starting with #.
+ * @param {number} r red value.
+ * @param {number} g green value.
+ * @param {number} b blue value.
+ *
+ * @returns{string}
+ */
 function colorRGBToHex(r, g, b) {
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
-function colorRGBToString(input) {
-  return `rgb(${input[0].toString()},${input[1].toString()},${
-      input[2].toString()})`;
+/**
+ * Converts an RGB number triple to a string of the form rgb(r,g,b).
+ *
+ * For example, [100,50,50] will be converted to the string "rgb(100,50,50)".
+ *
+ * @param {!Array<number>} inputRGB an RGB-triple of numbers.
+ *
+ * @returns {string}
+ */
+function colorRGBToString(inputRGB) {
+  return `rgb(${inputRGB[0].toString()},${inputRGB[1].toString()},${
+      inputRGB[2].toString()})`;
 }
 
-function colorScale(inputRGB, theScale) {
+/**
+ * Rescales a color by multiplying its red,green,blue-coordinates by
+ * the given scale.
+ *
+ * Values are rounded down to integers and truncated to the range [0,255].
+ *
+ * @param {!Array<number>} inputRGB an RGB-triple of numbers.
+ * @param {number} scale the scale.
+ *
+ * @returns {!Array<number>}
+ */
+function colorScale(inputRGB, scale) {
   let result = [0, 0, 0];
   for (let i = 0; i < inputRGB.length; i++) {
-    result[i] = Math.round(inputRGB[i] * theScale);
+    result[i] = Math.round(inputRGB[i] * scale);
     if (result[i] < 0) {
       result[i] = 0;
     }
@@ -431,7 +260,7 @@ function colorScale(inputRGB, theScale) {
  * @param {string|?Array.<number>} input color, named, rgb hex value or RGB
  *     number triple.
  *
- * @returns{!Array.<number>}
+ * @returns {!Array.<number>}
  */
 function colorToRGB(input) {
   if (typeof input !== 'string') {
@@ -449,14 +278,11 @@ function colorToRGB(input) {
  *
  * If the color name is not recognized, returns the input, unmodified.
  *
- * @param{sring} color input named color
+ * @param {string} color input named color.
  *
- * @returns{string}
+ * @returns {string}
  */
-function colorToHex(
-    /** @type{string} */
-    color,
-) {
+function colorToHex(color) {
   const colors = {
     'aliceblue': '#f0f8ff',
     'antiquewhite': '#faebd7',
@@ -608,6 +434,294 @@ function colorToHex(
   return color;
 }
 
+
+/**
+ * Converts a number or string to a number.
+ *
+ * @param {number|string} input the number or string to be normalized
+ * @returns {number}
+ */
+function numberFromNumberOfInfinity(input) {
+  if (typeof input === 'string') {
+    let inputString = /**@type{string}*/ (input);
+    if (inputString.toLowerCase() === 'infinity' ||
+        inputString.toLowerCase() === 'minusInfinity') {
+      return 0;
+    }
+    return parseInt(input, 10);
+  }
+  return /** @type{number} */ (input);
+}
+
+/**
+ * If the input is a string that indicates +/- infinity, returns a normalized
+ * string representation. Otherwise returns the empty string.
+ *
+ * @param {number|string} input the input number or string.
+ *
+ * @returns {string}
+ */
+function infinityType(input) {
+  if (typeof input !== 'string') {
+    return '';
+  }
+  let inputString = /** @type{string} */ (input);
+  if (inputString.toLowerCase() === 'infinity') {
+    return 'infinity';
+  }
+  if (inputString.toLowerCase() === 'minusinfinity') {
+    return 'minusInfinity';
+  }
+  return '';
+}
+
+/** Parametric curve in three dimensions. */
+class CurveThreeD {
+  /**
+   * @param {!Array.<!Function>} inputCoordinateFunctions the coordinate
+   *     functions: an array of three functions that map a real number to a
+   *     triple of numbers
+   * @param {number} inputLeftPoint left (lower) bound for the parameter
+   * @param {number} inputRightPoint right (high) bound for the parameter
+   * @param {number} inputNumberOfSegments number of segments used to
+   *     approximate the curve
+   * @param {string} inputColor curve color
+   * @param {number} inputLineWidth the line width of the curve.
+   */
+  constructor(
+      inputCoordinateFunctions, inputLeftPoint, inputRightPoint,
+      inputNumberOfSegments, inputColor, inputLineWidth) {
+    /** @type{!Array.<!Function>}*/
+    this.coordinateFunctions = inputCoordinateFunctions;
+    /** @type{number} */
+    this.leftPt = inputLeftPoint;
+    /** @type{number} */
+    this.rightPt = inputRightPoint;
+    /** @type{!Array.<number>} */
+    this.color = colorToRGB(inputColor);
+    /** @type{number} */
+    this.numSegments = inputNumberOfSegments;
+    this.lineWidth = inputLineWidth;
+  }
+
+  /**
+   * Enlarges a bounding box in-place to ensure it encloses the object.
+   *
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   */
+  accountBoundingBox(inputOutputBox) {
+    let argumentT = this.leftPt;
+    let x = this.coordinateFunctions[0](argumentT);
+    let y = this.coordinateFunctions[1](argumentT);
+    accountBoundingBox([x, y], inputOutputBox);
+    for (let i = 0; i < this.numSegments; i++) {
+      let ratio = i / (this.numSegments - 1);
+      argumentT = this.leftPt * (1 - ratio) + this.rightPt * ratio;
+      x = this.coordinateFunctions[0](argumentT);
+      y = this.coordinateFunctions[1](argumentT);
+      accountBoundingBox([x, y], inputOutputBox);
+    }
+  }
+
+  /**
+   * Same as draw but does not complete the stroke command; use for plot fills.
+   *
+   * @param {!CanvasTwoD} canvas the canvas
+   * @param {boolean} startByMoving whether to move to the initial point without
+   * drawing a line
+   */
+  drawNoFinish(canvas, startByMoving) {
+    let surface = canvas.surface;
+    surface.strokeStyle = colorRGBToString(this.color);
+    surface.fillStyle = colorRGBToString(this.color);
+    let argumentT = this.leftPt;
+    let x = this.coordinateFunctions[0](argumentT);
+    let y = this.coordinateFunctions[1](argumentT);
+    let theCoords = canvas.coordinatesMathToScreen([x, y]);
+    if (startByMoving) {
+      surface.moveTo(theCoords[0], theCoords[1]);
+    } else {
+      surface.lineTo(theCoords[0], theCoords[1]);
+    }
+    let skippedValues = false;
+    for (let i = 0; i < this.numSegments; i++) {
+      let ratio = i / (this.numSegments - 1);
+      argumentT =
+          this.leftPt * (1 - ratio) + this.rightPt * ratio;  //<- this way of
+      // computing x introduces smaller numerical errors.
+      // For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
+      // If not careful with rounding errors,
+      // you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
+      // resulting in serious visual glitches.
+      // Note: the remarks above were discovered the painful way (trial and
+      // error).
+      x = this.coordinateFunctions[0](argumentT);
+      y = this.coordinateFunctions[1](argumentT);
+      if (!isFinite(y) || !isFinite(x)) {
+        console.log(
+            `Failed to evaluate: ${this.coordinateFunctions} at x = ${x}`);
+      }
+      if (Math.abs(y) > 100000 || Math.abs(x) > 100000) {
+        if (!skippedValues) {
+          console.log('Curve point: ' + [
+            x, y
+          ] + ' is too large, skipping. Further errors suppressed.');
+        }
+        skippedValues = true;
+        continue;
+      }
+      theCoords = canvas.coordinatesMathToScreen([x, y]);
+      surface.lineTo(theCoords[0], theCoords[1]);
+    }
+  }
+
+  /**
+   * Draws the object onto the given canvas.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   */
+  draw(canvas) {
+    let surface = canvas.surface;
+    surface.beginPath();
+    this.drawNoFinish(canvas, true);
+    surface.stroke();
+  }
+}
+
+/**
+ * Parametric surface in 3d.
+ *
+ * A parametric surface in 3d is an expression of the form:
+ *
+ * x=f(u,v)
+ * y=g(u,v)
+ * z=h(u,v)
+ *
+ * (u,v)\in X for some functions f,g,h and for the u,v-parameters in some
+ * 2d-set. We presently support only rectangles for the (u,v)-parameter space.
+ */
+class Surface {
+  /**
+   * @param {!Function} inputXYZFunction a two-variable function that returns a
+   *     the [x,y,z]-coordinates [f(u,v), h(u,v), g(u,v)].
+   * @param{!Array.<!Array.<number>>} inputUVBox u,v-variable ranges, format:
+   * [[uMin, uMax], [vMin, vMax]].
+   * @param {!Array.<number>} inputPatchDimensions the pair of numbers.
+   * [uPatchCount, vPathCount], where we subdivide the UV-rectangle in
+   * uPatchCount times uPatchCount rectangles.
+   * @param{string} colorFront color of the front of the patch.
+   * @param{string} colorBack color of the back of the patch.
+   * @param{string} colorContour color of the patch contour.
+   * @param{number} inputContourWidth the line width of the contour.
+   */
+  constructor(
+      inputXYZFunction,
+      inputUVBox,
+      inputPatchDimensions,
+      colorFront,
+      colorBack,
+      colorContour,
+      inputContourWidth,
+  ) {
+    this.xyzFun = inputXYZFunction;
+    this.uvBox = inputUVBox;
+    this.patchDimensions = inputPatchDimensions;
+    this.colors = {
+      colorContour: colorContour,
+      colorUV: colorToHex(colorBack),
+      colorVU: colorToHex(colorFront),
+    };
+    this.contourWidth = inputContourWidth;
+    this.deltaU =
+        (this.uvBox[0][1] - this.uvBox[0][0]) / this.patchDimensions[0];
+    this.deltaV =
+        (this.uvBox[1][1] - this.uvBox[1][0]) / this.patchDimensions[1];
+    this.numSamplesUSegment = 10;
+    this.numSamplesVSegment = 10;
+  }
+}
+
+/**
+ * A class that represents a point in IIId.
+ */
+class Point {
+  /**
+   * @param {!Array.<number>} inputLocation [x,y,z]-coordinates of the input.
+   * @param {string} inputColor input color.
+   */
+  constructor(inputLocation, inputColor) {
+    this.location = inputLocation;
+    /** @type{!Array.<number>} */
+    this.color = colorToRGB(inputColor);
+  }
+}
+
+/**
+ * Patch, a 2d-parallelogram embedded in 3d.
+ *
+ * Given by a base point p and two edge vectors v_1, v_2. The points that belong
+ * to the patch are the points in the set
+ *
+ * \{p+s*v_1+t*v_2 | s\in [0,1], t\in[0,1]\}
+ */
+class Patch {
+  /**
+   * @param{!Array.<number>} inputBase the base point of the patch.
+   * @param{!Array.<number>} inputEdge1 the first edge vector.
+   * @param{!Array.<number>} inputEdge2 the second edge vector.
+   * @param{string} inputColorUV color of the "forward" side of the patch.
+   * @param{string} inputColorVU color of the "back" side of the patch.
+   */
+  constructor(inputBase, inputEdge1, inputEdge2, inputColorUV, inputColorVU) {
+    /** @type{!Array.<number>}*/
+    this.base = inputBase.slice();
+    /** @type{!Array.<number>}*/
+    this.edge1 = inputEdge1.slice();
+    /** @type{!Array.<number>}*/
+    this.edge2 = inputEdge2.slice();
+    this.colorUV = colorToRGB(inputColorUV);
+    this.colorVU = colorToRGB(inputColorVU);
+    /** @type{!Array.<number>}*/
+    this.v1 = vectorPlusVector(this.base, this.edge1);
+    this.v2 = vectorPlusVector(this.base, this.edge2);
+    this.vEnd = vectorPlusVector(this.v1, this.edge2);
+    this.internalPoint = this.base.slice();
+    vectorAddVectorTimesScalar(this.internalPoint, this.edge1, 0.5);
+    vectorAddVectorTimesScalar(this.internalPoint, this.edge2, 0.5);
+    this.normalVector = vectorCrossVector(inputEdge1, inputEdge2);
+    this.adjacentContours = [];
+    this.traversalOrder = [];
+    this.patchesBelowMe = [];
+    this.patchesAboveMe = [];
+    this.index = -1;
+  }
+}
+
+/**
+ * A parametric curve in 3d that is a boundary of a surface patch.
+ *
+ * Sections of the curve that are not visible are plotted with dashes.
+ */
+class Contour {
+  /**
+   * @param{!Array.<!Array<number>>} inputPoints the points on the contour.
+   * @param{string} inputColor color of the contour.
+   * @param{number} inputLineWidth line width of the contour.
+   *
+   */
+  constructor(inputPoints, inputColor, inputLineWidth) {
+    /** @type{!Array.<!Array<number>>} */
+    this.thePoints = inputPoints.slice();
+    this.thePointsMathScreen = [];
+    /** @type{!Array.<number>} */
+    this.color = colorToRGB(inputColor);
+    this.adjacentPatches = [];
+    this.index = -1;
+    this.lineWidth = inputLineWidth;
+  }
+}
+
+/** A set of points in two dimensions. */
 class PointsTwoD {
   /**
    * @param {!Array.<!Array.<number>>} inputPoints the points
@@ -626,7 +740,7 @@ class PointsTwoD {
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     for (let i = 0; i < this.location.length; i++) {
@@ -637,7 +751,7 @@ class PointsTwoD {
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     let surface = canvas.surface;
@@ -652,28 +766,48 @@ class PointsTwoD {
   }
 }
 
+/**
+ * Parametric curve in two dimensions.
+ *
+ * A parametric curve is a curve in 2d given by:
+ *
+ * x=f(t)
+ * y=g(t)
+ *
+ * for some functions f and g and some parameter range t\in [a,b].
+ */
 class CurveTwoD {
+  /**
+   * @param{!Array.<!Function>} inputCoordinateFunctions a pair of coordinate
+   * functions.
+   * @param{number} inputLeftPt lower bound for the parameter.
+   * @param{number} inputRightPt higher bound for the parameter.
+   * @param{number} inputNumSegments number of segments used to approximate the
+   * curve.
+   * @param{string} inputColor the color of the curve.
+   * @param{number} inputLineWidth the width of the line.
+   */
   constructor(
-      /** @type{Array.<Function>}*/
       inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
       inputColor, inputLineWidth) {
-    /** @type{Array.<Function>}*/
+    /** @type{!Array.<!Function>}*/
     this.coordinateFunctions = inputCoordinateFunctions;
     /** @type{number} */
     this.leftPt = inputLeftPt;
     /** @type{number} */
     this.rightPt = inputRightPt;
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
     /** @type{number} */
     this.numSegments = inputNumSegments;
+    /** @type{number} */
     this.lineWidth = inputLineWidth;
   }
 
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     let argumentT = this.leftPt;
@@ -692,7 +826,7 @@ class CurveTwoD {
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     let surface = canvas.surface;
@@ -704,8 +838,8 @@ class CurveTwoD {
   /**
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
@@ -758,22 +892,37 @@ class CurveTwoD {
   }
 }
 
+/**
+ * A path in two dimenions.
+ *
+ * Here, "path" means a sequence of points connected by straight segments.
+ */
 class PathTwoD {
+  /**
+   * @param{!Array.<!Array.<number>>} inputPath a list of points in 2d.
+   * @param{string} inputColor the color of the path.
+   * @param{string} inputFillColor fill color of the path, used when isFilled is
+   * set.
+   * @param{number} inputLineWidth line width.
+   */
   constructor(inputPath, inputColor, inputFillColor, inputLineWidth) {
-    /** @type{Array.<Array.<number>>} */
+    /** @type{!Array.<!Array.<number>>} */
     this.path = inputPath;
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
+    /** @type{!Array.<number>} */
     this.colorFill = colorToRGB(inputFillColor);
     this.isFilled = false;
+    /** @type{string} */
     this.type = 'path';
+    /** @type{number} */
     this.lineWidth = inputLineWidth;
   }
 
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     for (let i = 0; i < this.path.length; i++) {
@@ -784,8 +933,8 @@ class PathTwoD {
   /**
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
@@ -814,7 +963,7 @@ class PathTwoD {
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     if (this.path.length < 1) {
@@ -827,18 +976,23 @@ class PathTwoD {
   }
 }
 
-class DrawCoordinateAxesTwoD {
-  constructor(
-      /** @type{string} */ inputXAxisLabel,
-      /** @type{string} */ inputYAxisLabel) {
+
+class CoordinateAxesTwoD {
+  /**
+   * @param {string} inputXAxisLabel string label of the x axis.
+   * @param {string} inputYAxisLabel string label of the y axis.
+   */
+  constructor(inputXAxisLabel, inputYAxisLabel) {
+    /** @type{string} */
     this.xAxisLabel = inputXAxisLabel;
+    /** @type{string} */
     this.yAxisLabel = inputYAxisLabel;
   }
 
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     this.drawNoFinish(canvas, true);
@@ -847,7 +1001,7 @@ class DrawCoordinateAxesTwoD {
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     accountBoundingBox([0, 1], inputOutputBox);
@@ -857,8 +1011,8 @@ class DrawCoordinateAxesTwoD {
   /**
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
@@ -896,13 +1050,14 @@ class DrawCoordinateAxesTwoD {
   }
 }
 
+/** Grid lines of the coordinate system. Excludes the coordinate axes. */
 class AxesGrid {
   constructor() {}
 
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     this.drawNoFinish(canvas, true);
@@ -911,8 +1066,8 @@ class AxesGrid {
   /**
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
@@ -960,69 +1115,34 @@ class AxesGrid {
     let counter = 0;
     for (let i = floorLeft; i <= ceilRight; i += Delta) {
       counter++;
-      // if (counter%2=== 0 && i !==1){
       let theCoords = canvas.coordsMathScreenToScreen([i, 0]);
       surface.fillText(i, theCoords[0], theCoords[1] + 10);
-      //}
     }
     counter = 0;
     for (let i = floorBottom; i <= ceilTop; i += Delta) {
       counter++;
-      // if (counter%2=== 0 && i !==1){
       let theCoords = canvas.coordsMathScreenToScreen([0, i]);
       surface.fillText(i, theCoords[0] - 10, theCoords[1]);
-      //}
     }
   }
 }
 
-/** @returns{number} */
-function numberFromNumberOfInfinity(/**@type{number|string} */ input) {
-  if (typeof input === 'string') {
-    let inputString = /**@type{string}*/ (input);
-    if (inputString.toLowerCase() === 'infinity' ||
-        inputString.toLowerCase() === 'minusInfinity') {
-      return 0;
-    }
-    return parseInt(input, 10);
-  }
-  return /** @type{number} */ (input);
-}
-
-/**
- * @returns{string} If the input is a string that indicates infinity, returns
- * a normalized string representation. Otherwise returns the empty string.
- */
-function infinityType(/** @type{number|string} */ input) {
-  if (typeof input !== 'string') {
-    return '';
-  }
-  /**@type{string} */
-  let inputString = /**@type{string} */ (input);
-  if (inputString.toLowerCase() === 'infinity') {
-    return 'infinity';
-  }
-  if (inputString.toLowerCase() === 'minusinfinity') {
-    return 'minusInfinity';
-  }
-  return '';
-}
-
+/** Plot of a function in one variable. */
 class PlotTwoD {
+  /**
+   * @param {function(number):number} inputFunction function to be plotted.
+   * @param {number|string} leftPoint low x-coordinate or the string
+   *     'minusInfinity'.
+   * @param {number|string} rightPoint high x-coordinate or the string
+   *     'infinity'.
+   * @param {number} numberOfSegments number of segments to approximate the
+   *     graph.
+   * @param {string} inputColor color of the graph.
+   * @param {number} inputLineWidth line width of the graph.
+   */
   constructor(
-      /**@type{Function} */
-      inputFunction,
-      /**@type{number|string} */
-      leftPoint,
-      /**@type{number|string} */
-      rightPoint,
-      /**@type{number} */
-      numberOfSegments,
-      /**@type{string} */
-      inputColor,
-      /**@type{number} */
-      inputLineWidth,
-  ) {
+      inputFunction, leftPoint, rightPoint, numberOfSegments, inputColor,
+      inputLineWidth) {
     this.functionPlotted = inputFunction;
     /** @type{number} */
     this.leftPoint = numberFromNumberOfInfinity(leftPoint);
@@ -1032,7 +1152,7 @@ class PlotTwoD {
     this.rightPoint = numberFromNumberOfInfinity(rightPoint);
     /** @type{string} */
     this.rightInfinityType = infinityType(rightPoint);
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
     if (inputLineWidth === undefined) {
       this.lineWidth = 1;
@@ -1046,7 +1166,7 @@ class PlotTwoD {
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     for (let i = 0; i < this.numberOfSegments; i++) {
@@ -1066,8 +1186,8 @@ class PlotTwoD {
   /**
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
@@ -1130,7 +1250,7 @@ class PlotTwoD {
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     let surface = canvas.surface;
@@ -1140,13 +1260,19 @@ class PlotTwoD {
   }
 }
 
+/** A text label in two dimensions. */
 class TextPlotTwoD {
+  /**
+   * @param {!Array.<number>} inputLocation location of the text.
+   * @param {string} inputText text to draw.
+   * @param {string} inputColor text color.
+   */
   constructor(inputLocation, inputText, inputColor) {
-    /**@type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.location = inputLocation;
-    /**@type{string} */
+    /** @type{string} */
     this.text = inputText;
-    /**@type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'plotText';
   }
@@ -1154,7 +1280,7 @@ class TextPlotTwoD {
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     accountBoundingBox(this.location, inputOutputBox);
@@ -1163,11 +1289,11 @@ class TextPlotTwoD {
   /**
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
-   * drawing a line
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
+   * drawing a line. Ignored.
    */
-  drawNoFinish(canvas) {
+  drawNoFinish(canvas, startByMoving) {
     let surface = canvas.surface;
     surface.strokeStyle = colorRGBToString(this.color);
     surface.fillStyle = colorRGBToString(this.color);
@@ -1178,7 +1304,7 @@ class TextPlotTwoD {
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     let surface = canvas.surface;
@@ -1188,19 +1314,45 @@ class TextPlotTwoD {
   }
 }
 
+/**
+ * A plot of a vector field.
+ *
+ * A vector field is a map assigns a vectors to points in the plane. A vector
+ * field is given by a pair of functions:
+ *
+ * [f(x,y), g(x,y)].
+ *
+ * This is visualized by selecting a "grid" of base points and drawing the
+ * vector attached to each base point.
+ */
 class VectorFieldTwoD {
+  /**
+   * @param {!Function} inputField the vector field.
+   * @param {boolean} inputIsDirectionField when set indicates that each vector
+   *     must be drawn with equal length.
+   * @param {!Array.<number>} inputLowLeft [x,y]-coordinate of the low left
+   *     coordinate of the rectangle over which we draw the vector field.
+   * @param {!Array.<number>} inputHighRight [x,y]-coordinate of the high right
+   *     coordinate of the rectangle over which we draw the vector field.
+   * @param {!Array.<number>} inputNumSegmentsXY a pair of numbers. The first
+   *     number gives the number of x-coordinates of the sample points less one
+   * the second number gives the number of y coordinates less one.
+   * @param {number} inputDesiredLengthDirectionVectors lengths of the direction
+   *     vectors; used when inputIsDirectionField is set.
+   * @param {string} inputColor color of the vectors.
+   * @param {number} inputLineWidth line width.
+   */
   constructor(
       inputField,
       inputIsDirectionField,
       inputLowLeft,
       inputHighRight,
-      /**@type{Array.<number>} */
       inputNumSegmentsXY,
       inputDesiredLengthDirectionVectors,
       inputColor,
       inputLineWidth,
   ) {
-    /** @type{Function} */
+    /** @type{!Function} */
     this.theField = inputField;
     /** @type{boolean} */
     this.isDirectionField = inputIsDirectionField;
@@ -1211,7 +1363,7 @@ class VectorFieldTwoD {
     this.numSegmentsXY = inputNumSegmentsXY;
     /** @type{number} */
     this.desiredLengthDirectionVectors = inputDesiredLengthDirectionVectors;
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.lineWidth = inputLineWidth;
   }
@@ -1219,7 +1371,7 @@ class VectorFieldTwoD {
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     accountBoundingBox(this.lowLeft, inputOutputBox);
@@ -1229,7 +1381,7 @@ class VectorFieldTwoD {
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     let surface = canvas.surface;
@@ -1256,25 +1408,29 @@ class VectorFieldTwoD {
         let tailMath = [x - theV[0] / 2, y - theV[1] / 2];
         let headScreen = canvas.coordinatesMathToScreen(headMath);
         let tailScreen = canvas.coordinatesMathToScreen(tailMath);
-        let baseScreen = canvas.coordinatesMathToScreen([x, y]);
         surface.moveTo(tailScreen[0], tailScreen[1]);
         surface.lineTo(headScreen[0], headScreen[1]);
         surface.stroke();
-        // surface.moveTo(baseScreen[0], baseScreen[1]);
-        // surface.arc(baseScreen[0], baseScreen[1],0.5, 0, Math.PI*2);
-        // surface.fill();
       }
     }
   }
 }
 
+/** A segment in two dimensions. */
 class SegmentTwoD {
+  /**
+   * @param {!Array.<number>} inputLeftPt [x,y]-coordinates of the first point.
+   * @param {!Array.<number>} inputRightPt [x,y]-coordinates of the second
+   *     point.
+   * @param {string} inputColor color of the segment.
+   * @param {number} inputLineWidth line width.
+   */
   constructor(inputLeftPt, inputRightPt, inputColor, inputLineWidth) {
     /** @type{number} */
     this.leftPt = inputLeftPt;
     /** @type{number} */
     this.rightPt = inputRightPt;
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'segment';
     this.lineWidth = inputLineWidth;
@@ -1283,7 +1439,7 @@ class SegmentTwoD {
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
     accountBoundingBox(this.leftPt, inputOutputBox);
@@ -1293,8 +1449,8 @@ class SegmentTwoD {
   /**
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
-   * @param{!CanvasTwoD} canvas the canvas
-   * @param{boolean} startByMoving whether to move to the initial point without
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
@@ -1313,7 +1469,7 @@ class SegmentTwoD {
   /**
    * Draws the object onto the given canvas.
    *
-   * @param{!CanvasTwoD} canvas the canvas
+   * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
     let surface = canvas.surface;
@@ -1325,24 +1481,38 @@ class SegmentTwoD {
   }
 }
 
+/**
+ * An object that indicates the start of a plot fill. All objects between this
+ * one and the first occurence of the next 'plotFillFinish' object will be
+ * plotted and filled.
+ */
 class PlotFillTwoD {
+  /**
+   * @param{!CanvasTwoD} inputCanvas the owner canvas.
+   * @param{string} inputColor color of the plot fill.
+   */
   constructor(inputCanvas, inputColor) {
     this.indexFillStart = inputCanvas.drawObjects.length;
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
   }
 
   /**
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
-   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {}
 
-  draw(inputCanvas) {
-    let surface = inputCanvas.surface;
-    let theObs = inputCanvas.drawObjects;
-    let tempCounter = inputCanvas.numDrawnObjects;
+  /**
+   * Draws the object onto the given canvas.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   */
+  draw(canvas) {
+    let surface = canvas.surface;
+    let theObs = canvas.drawObjects;
+    let tempCounter = canvas.numDrawnObjects;
     surface.beginPath();
     let firstRun = true;
     for (tempCounter++; tempCounter < theObs.length; tempCounter++) {
@@ -1350,44 +1520,46 @@ class PlotFillTwoD {
       if (currentO.type === 'plotFillFinish') {
         break;
       }
-      currentO.drawNoFinish(inputCanvas, firstRun);
+      currentO.drawNoFinish(canvas, firstRun);
       firstRun = false;
     }
     surface.fillStyle = colorRGBToString(this.color);
     surface.fill();
-    for (inputCanvas.numDrawnObjects++;
-         inputCanvas.numDrawnObjects < theObs.length;
-         inputCanvas.numDrawnObjects++) {
-      let currentO = theObs[inputCanvas.numDrawnObjects];
+    for (canvas.numDrawnObjects++; canvas.numDrawnObjects < theObs.length;
+         canvas.numDrawnObjects++) {
+      let currentO = theObs[canvas.numDrawnObjects];
       if (currentO.type === 'plotFillFinish') {
         break;
       }
-      currentO.draw(inputCanvas);
+      currentO.draw(canvas);
     }
   }
 }
 
+/**
+ * A two dimensional plot.
+ *
+ * A collection of 2d objects plotted on a 2d canvas in the web browser.
+ */
 class CanvasTwoD {
-  constructor(
-      /**@type{HTMLCanvasElement} */
-      inputCanvas,
-      /**@type{HTMLElement} */
-      controls,
-      /**@type{HTMLElement} */
-      messages,
-  ) {
+  /**
+   * @param {!HTMLCanvasElement} inputCanvas the canvas on which to plot.
+   * @param {?HTMLElement} controls generate input controls here.
+   * @param {?HTMLElement|null} messages generae debug messages here.
+   */
+  constructor(inputCanvas, controls, messages) {
     this.drawObjects = [];
     this.surface = null;
     this.canvasContainer = inputCanvas;
 
     this.canvasId = null;
     this.screenBasisOrthonormal = [];
-    /**@type{HTMLElement|null} */
+    /** @type{?HTMLElement} */
     this.spanMessages = messages;
     if (this.spanMessages === undefined) {
       this.spanMessages = null;
     }
-    /**@type{HTMLElement|null} */
+    /** @type{?HTMLElement} */
     this.spanControls = controls;
     if (this.spanControls === undefined) {
       this.spanControls = null;
@@ -1403,9 +1575,9 @@ class CanvasTwoD {
     this.viewWindowDefault = [[-5, -5], [5, 5]];
     /** @type{number} */
     this.scale = 50;
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.mousePosition = [];
-    /** @type{Array.<number>} */
+    /** @type{!Array.<number>} */
     this.clickedPosition = [];
     this.positionDelta = [];
     this.textMouseInfo = '';
@@ -1423,45 +1595,75 @@ class CanvasTwoD {
     this.flagShowGrid = false;
   }
 
-  drawPoints(
-      /**@type{Array.<Array.<number>>} */
-      inputPoints,
-      inputColor,
-  ) {
+  /**
+   * Draws points on the canvas.
+   *
+   * @param {!Array.<!Array.<number>>} inputPoints the points to plot.
+   * @param {string} inputColor input color.
+   */
+  drawPoints(inputPoints, inputColor) {
     this.drawObjects.push(new PointsTwoD(inputPoints, inputColor));
   }
 
+  /**
+   * Draws a segment on the canvas.
+   *
+   * @param {!Array.<number>} inputLeftPt first endpoint.
+   * @param {!Array.<number>} inputRightPt second endpoint.
+   * @param {string} inputColor input color.
+   * @param {number} inputLineWidth line width.
+   */
   drawLine(inputLeftPt, inputRightPt, inputColor, inputLineWidth) {
     let newLine =
         new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
     this.drawObjects.push(newLine);
   }
 
+  /** Adds a grid to the plot. */
   drawGrid() {
     this.flagShowAxesTicks = true;
     this.flagShowGrid = true;
     this.drawObjects.push(new AxesGrid());
   }
 
-  drawCoordinateAxes(
-      /** @type{string|undefined} */ xAxisLabel,
-      /** @type{string|undefined} */ yAxisLabel) {
+  /**
+   * Adds a coordinate axes to the plot.
+   * @param {string|undefined} xAxisLabel label of the x axis.
+   * @param {string|undefined} yAxisLabel label of the y axis.
+   */
+  drawCoordinateAxes(xAxisLabel, yAxisLabel) {
     if (xAxisLabel === undefined) {
       xAxisLabel = '';
     }
     if (yAxisLabel === undefined) {
       yAxisLabel = '';
     }
-    this.drawObjects.push(new DrawCoordinateAxesTwoD(xAxisLabel, yAxisLabel));
+    this.drawObjects.push(new CoordinateAxesTwoD(xAxisLabel, yAxisLabel));
   }
 
+  /**
+   * Draws a vector field on the canvas. See VectorFieldTwoD.
+   *
+   * @param {!Function} inputField the vector field.
+   * @param {boolean} inputIsDirectionField when set indicates that each vector
+   *     must be drawn with equal length.
+   * @param {!Array.<number>} inputLowLeft [x,y]-coordinate of the low left
+   *     coordinate of the rectangle over which we draw the vector field.
+   * @param {!Array.<number>} inputHighRight [x,y]-coordinate of the high right
+   *     coordinate of the rectangle over which we draw the vector field.
+   * @param {!Array.<number>} inputNumSegmentsXY a pair of numbers. The first
+   *     number gives the number of x-coordinates of the sample points less one
+   * the second number gives the number of y coordinates less one.
+   * @param {number} inputDesiredLengthDirectionVectors lengths of the direction
+   *     vectors; used when inputIsDirectionField is set.
+   * @param {string} inputColor color of the vectors.
+   * @param {number} inputLineWidth line width.
+   */
   drawVectorField(
       inputField,
-      /**@type{boolean} */
       inputIsDirectionField,
       inputLowLeft,
       inputHighRight,
-      /**@type{Array.<number>} */
       inputNumSegmentsXY,
       inputDesiredLengthDirectionVectors,
       inputColor,
@@ -1480,12 +1682,26 @@ class CanvasTwoD {
     this.drawObjects.push(newLine);
   }
 
+  /**
+   * Draws a path.
+   *
+   * @param{!Array.<!Array.<number>>} inputPath a list of points in 2d.
+   * @param{string} inputColor the color of the path.
+   * @param{number} inputLineWidth line width.
+   */
   drawPath(inputPath, inputColor, inputLineWidth) {
     let newPath =
         new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
     this.drawObjects.push(newPath);
   }
 
+  /**
+   * Draws a filled path.
+   *
+   * @param{!Array.<!Array.<number>>} inputPath a list of points in 2d.
+   * @param{string} inputContourColor the color of the path.
+   * @param{string} inputFillColor the fill color.
+   */
   drawPathFilled(inputPath, inputContourColor, inputFillColor) {
     let newPath = new PathTwoD(inputPath, inputContourColor, inputFillColor, 1);
     newPath.isFilled = true;
@@ -1504,7 +1720,6 @@ class CanvasTwoD {
    * our plot
    * @param{string} inputColor the color of the plot
    * @param{number} inputLineWidth the width of the line to plot in pixels.
-   *
    */
   drawFunction(
       toBePlotted, leftPoint, rightPoint, inputNumSegments, inputColor,

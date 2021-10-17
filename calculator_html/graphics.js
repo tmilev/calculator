@@ -1781,8 +1781,6 @@ class CanvasTwoD {
    * @param {!Array.<number>} input mathematical screen coordinates.
    *
    * @returns {!Array.<number>}
-   *
-   * @private
    */
   coordinatesMathScreenToMath(input) {
     let output = this.screenBasisOrthonormal[0].slice();
@@ -1798,8 +1796,6 @@ class CanvasTwoD {
    * @param {!Array.<number>} vector mathematical coordinates.
    *
    * @returns {!Array.<number>}
-   *
-   * @private
    */
   coordinatesMathToMathScreen(vector) {
     return [
@@ -3982,8 +3978,6 @@ class Canvas {
       this.scale = 1;
     }
     let intermediateScreenPos = this.coordsMathScreenToScreen(mathScreenPos);
-    // console.log("start screen: "+[screenX, screenY]);
-    // console.log("intermed. screen: "+ intermediateScreenPos);
     this.centerX = this.centerX + screenPos[0] - intermediateScreenPos[0];
     this.centerY = this.centerY + screenPos[1] - intermediateScreenPos[1];
     this.redraw();

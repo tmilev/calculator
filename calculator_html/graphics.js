@@ -2634,7 +2634,7 @@ class Canvas {
   /**
    * Computes internal information about a contour in place.
    *
-   * @param{Contour} contour the contour to be updated.
+   * @param{!Contour} contour the contour to be updated.
    * @private
    */
   computeContour(contour) {
@@ -4501,7 +4501,11 @@ let drawing = new Drawing();
  * this file is inserted into a function body, which receives as an argument a
  * variable called module. Modifications to module.exports are then visible to
  * the caller of this functions, i.e., to external javascript files.
+ *
+ * Let and const would not be allowed here as they would shadow the externally
+ * attached module variable. Var however does not shadow the external variable.
  */
+/** @suppress {lintChecks} */
 var module;
 if (module === undefined) {
   module = {

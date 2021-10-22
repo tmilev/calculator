@@ -4535,6 +4535,21 @@ AdjointMatrix(g_2)
 ```
 Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].First element g = element of a semisimple Lie algebra. Extended to a map on the universal enveloping algebra via: ad(g_1, g_2) = ad(g_1)ad(g_2)
 
+*CartanInvolution* [CartanInvolution] {CalculatorLieTheory::cartanInvolution}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%203%2c%200%29%3b%5cnCartanInvolution%28AII%2c%203%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+CartanInvolution(AI, 3, 0);
+CartanInvolution(AII, 3);
+CartanInvolution(AIII, 4, 2);
+CartanInvolution(AIII, 5, 3);
+```
+Computes the Cartan involution from a Satake/Vogan diagram. A Satake diagram is given by a string and and two integers. The string is one of the following. AI, AII, AIII, AIV,
+BI, BII,
+CI, CII, DI,  DII, DIII,
+EI, EII, EIII, EIV, EV, EVI, EVII, EVIII, EIX,
+FI, FII,
+G.The first integer is the rank of ambient Lie algebra. The second integer is a parameter of the diagram. May be omitted if the diagram does not admit a parameter. As of writing, the output is a string that summarizes the Cartan involution. This is work in progress.
+
 *AdCommonEigenspace* [AdCommonEigenspace] {CalculatorLieTheory::adCommonEigenSpaces}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AdCommonEigenspace%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
@@ -4556,7 +4571,7 @@ PrintMacdonaldPolys{}(B_3)
 ```
 Prints macdonald polynomials from a semisimple type. 
 
-*CharPoly* [CharPoly] {CalculatorFunctions::innerCharPolyMatrix}. 
+*CharPoly* [CharPoly] {CalculatorFunctions::characteristicPolynomialMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%5c%5cbegin%7bpmatrix%7d2%20%26%203%26%205%5c%5c%5c%5c%207%26%2011%26%2013%5c%5c%5c%5c%2017%2619%20%2623%5c%5cend%7bpmatrix%7d%3b%20p%20%3dMinPolyMatrix%7b%7dA%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A =\begin{pmatrix}2 & 3& 5\\ 7& 11& 13\\ 17&19 &23\end{pmatrix}; p =MinPolyMatrix{}A

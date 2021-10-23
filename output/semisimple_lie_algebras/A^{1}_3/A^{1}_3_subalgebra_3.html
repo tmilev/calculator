@@ -1,109 +1,346 @@
 <html>
-<link rel='stylesheet' href='../../../calculator-html/calculator.css'>
-<link rel='stylesheet' href='../../../calculator-html/style_lie_algebras.css'>
-<script src='../../../calculator-html/javascript_all_in_one.js'></script>
-<body onload='window.calculator.equationEditor.typeset(document.body, null); window.calculator.dynamicJavascript.dynamicJavascript.bootstrapAllScripts(document.body);window.calculator.lieAlgebras.bootstrap();'>Subalgebra \(A^{4}_1\) &#8618; <a href="./semisimple_subalgebras_A^{1}_3.html">\(A^{1}_3\)</a><br>3 out of 9
-<div class='divSubalgebraInformation'>Computations done by the <a href='https://github.com/tmilev/calculator'>calculator project</a>.</div><br>Subalgebra type: <a href='A^{1}_3_subalgebra_3.html' id='semisimple_subalgebra_3' style='text-decoration: none'>\(A^{4}_1\)</a>  (click on type for detailed printout).
-<hr style='max-width:300px;margin:0px;'>This is an <b>sl(2) subalgebra</b>; details follow [info from sl(2) tables].<br><a name ='sl2index1'>h-characteristic: (2, 0, 2)</a><br>Length of the weight dual to h: 8<br>
-Simple basis ambient algebra w.r.t defining h: 3 vectors: 
-(1, 0, 0), (0, 1, 0), (0, 0, 1)<br>
-Containing regular semisimple subalgebra number 1: <a href='../rootSubalgebra_2.html'>\(A^{1}_2\)</a><br>
-sl(2)-module decomposition of the ambient Lie algebra: \(V_{4\psi}+3V_{2\psi}+V_{0}\)
-<br>
+<link rel='stylesheet' href='../../../calculator_html/calculator.css'>
+<link rel='stylesheet' href='../../../calculator_html/style_lie_algebras.css'>
+<script src='../../../calculator_html/javascript_all_in_one.js'></script>
 
-Below is one possible realization of the sl(2) subalgebra.
-<br>
-\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
-e&=&2g_{4}+g_{3}\\
-f&=&2g_{-3}+g_{-4}\end{array}\)<br>Matrix realizations in a standard representation: <div class='lieAlgebraPanel'><div>\(\begin{array}{rcl}h&=&\begin{pmatrix}2 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & -2\\
-\end{pmatrix}\\
-e&=&\begin{pmatrix}0 & 0 & 2 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & 1\\
-0 & 0 & 0 & 0\\
-\end{pmatrix}\\
-f&=&\begin{pmatrix}0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-1 & 0 & 0 & 0\\
-0 & 0 & 2 & 0\\
-\end{pmatrix}\end{array}\)<br>Calculator link: <a href = '/app#%7b%22calculatorInput%22%3a%22h%3d%5c%5cbegin%7bpmatrix%7d2%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%20-2%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cne%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%202%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%201%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cnf%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn1%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%202%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d' target='_blank'>h=\begin{pmatrix}2 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; -2\\
-\end{pmatrix};
-e=\begin{pmatrix}0 &amp; 0 &amp; 2 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 1\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-\end{pmatrix};
-f=\begin{pmatrix}0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-1 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 2 &amp; 0\\
-\end{pmatrix};
-</a></div></div><br>Matrix realizations in a standard representation: <div class='lieAlgebraPanel'><div>\(\begin{array}{rcl}h&=&\begin{pmatrix}2 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & -2\\
-\end{pmatrix}\\
-e&=&\begin{pmatrix}0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-\end{pmatrix}\\
-f&=&\begin{pmatrix}0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0\\
-\end{pmatrix}\end{array}\)<br>Calculator link: <a href = '/app#%7b%22calculatorInput%22%3a%22h%3d%5c%5cbegin%7bpmatrix%7d2%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%20-2%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cne%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cnf%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d' target='_blank'>h=\begin{pmatrix}2 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; -2\\
-\end{pmatrix};
-e=\begin{pmatrix}0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-\end{pmatrix};
-f=\begin{pmatrix}0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0\\
-\end{pmatrix};
-</a></div></div><br>Lie brackets of the above elements.<br>
-<br>
-\(\begin{array}{rcl}[e, f]&=&2h_{3}+2h_{2}+2h_{1}\\
-[h, e]&=&4g_{4}+2g_{3}\\
-[h, f]&=&-4g_{-3}-2g_{-4}\end{array}\)<br>Unfold the hidden panel for more information.<br><div class='lieAlgebraPanel'><div><hr>Unknown elements.<br>\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
-e&=&x_{1} g_{4}+x_{2} g_{3}\\
-f&=&x_{4} g_{-3}+x_{3} g_{-4}\end{array}\)<br>Lie brackets of the unknowns.<br>\([e,f] - h = \left(x_{2} x_{4} -2\right)h_{3}+\left(x_{1} x_{3} -2\right)h_{2}+\left(x_{1} x_{3} -2\right)h_{1}\)<br>The polynomial system that corresponds to finding the h, e, f triple:<br>
-\(\begin{array}{rcl}x_{1} x_{3} -2&=&0\\x_{1} x_{3} -2&=&0\\x_{2} x_{4} -2&=&0\\\end{array}\)
-<br>
-Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen to be the increasing odd numbers 1, 3, 5, ....<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\e&=&x_{1} g_{4}+x_{2} g_{3}\\f&=&2g_{-3}+g_{-4}\end{array}\)<br>Matrix form of the system we are trying to solve:
-\(\begin{pmatrix}1 & 0\\
-1 & 0\\
-0 & 2\\
-\end{pmatrix}[col. vect.]=\begin{pmatrix}2\\
-2\\
-2\\
-\end{pmatrix}\)<br>The unknown Kostant-Sekiguchi elements.<br>\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
-e&=&x_{1} g_{4}+x_{2} g_{3}\\
-f&=&x_{4} g_{-3}+x_{3} g_{-4}\end{array}\)<br>\(e-f=0\)<br>\(\theta(e-f)=0\)<br>The polynomial system we need to solve.<br>\(\begin{array}{rcl}x_{1} x_{3} -2&=&0\\x_{1} x_{3} -2&=&0\\x_{2} x_{4} -2&=&0\\\end{array}\)</div></div><hr style='max-width:300px;margin:0px;'><br>Centralizer: \(T_{1}\) (toral part, subscript = dimension). <br>The semisimple part of the centralizer of the semisimple part of my centralizer: <a href='A^{1}_3_subalgebra_9.html' id='semisimple_subalgebra_9' style='text-decoration: none'>\(A^{1}_3\)</a> <br>Basis of Cartan of centralizer: 1 vectors: 
-(1, 2, -1)<br><br>Elements Cartan subalgebra scaled to act by two by components: \(A^{4}_1\): (2, 2, 2): 8<br>Dimension of subalgebra generated by predefined or computed generators: 3.<br>Negative simple generators: \(g_{-1}+g_{-5}\)<br>Positive simple generators: \(2g_{5}+2g_{1}\)<br>Cartan symmetric matrix: \(\begin{pmatrix}\frac{1}{2}\\
-\end{pmatrix}\)<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (co-symmetric Cartan matrix): \(\begin{pmatrix}8\\
-\end{pmatrix}\)<br>Decomposition of ambient Lie algebra: \(V_{4\omega_{1}}\oplus 3V_{2\omega_{1}}\oplus V_{0}\)<br>Primal decomposition of the ambient Lie algebra. This refines the above decomposition (please note the order is not the same as above). \(V_{2\omega_{1}+8\psi}\oplus V_{4\omega_{1}}\oplus V_{2\omega_{1}}\oplus V_{0}\oplus V_{2\omega_{1}-8\psi}\)<br>In the table below we indicate the highest weight vectors of the decomposition of the ambient Lie algebra as a module over the semisimple part. The second row indicates weights of the highest weight vectors relative to the Cartan of the semisimple subalgebra. As the centralizer is well-chosen and the centralizer of our subalgebra is non-trivial, we may in addition split highest weight vectors with the same weight over the semisimple part over the centralizer (recall that the centralizer preserves the weights over the subalgebra and in particular acts on the highest weight vectors). Therefore we have chosen our highest weight vectors to be, in addition, weight vectors over the Cartan of the centralizer of the starting subalgebra. Their weight over the sum of the Cartans of the semisimple subalgebra and its centralizer is indicated in the third row. The weights corresponding to the Cartan of the centralizer are again indicated with the letter \omega. As there is no preferred way of chosing a basis of the Cartan of the centralizer (unlike the starting semisimple Lie algebra: there we have a preferred basis induced by the fundamental weights), our centralizer weights are simply given by the constant by which the k^th basis element of the Cartan of the centralizer acts on the highest weight vector. Here, we use the choice for basis of the Cartan of the centralizer given at the start of the page.<br><br><table class='tableStandard'><tr><td>Highest vectors of representations (total 5); the vectors are over the primal subalgebra.</td><td>\(-h_{3}+2h_{2}+h_{1}\)</td><td>\(g_{3}\)</td><td>\(g_{5}+g_{1}\)</td><td>\(g_{4}\)</td><td>\(g_{6}\)</td></tr><tr><td>weight</td><td>\(0\)</td><td>\(2\omega_{1}\)</td><td>\(2\omega_{1}\)</td><td>\(2\omega_{1}\)</td><td>\(4\omega_{1}\)</td></tr><tr><td>weights rel. to Cartan of (centralizer+semisimple s.a.). </td><td>\(0\)</td><td>\(2\omega_{1}-8\psi\)</td><td>\(2\omega_{1}\)</td><td>\(2\omega_{1}+8\psi\)</td><td>\(4\omega_{1}\)</td></tr></table>Isotypic module decomposition over primal subalgebra (total 5 isotypic components). <table class='tableStandard'><tr><td>Isotypic components + highest weight</td><td>\(V_{0} \) &rarr; (0, 0)</td><td>\(V_{2\omega_{1}-8\psi} \) &rarr; (2, -8)</td><td>\(V_{2\omega_{1}} \) &rarr; (2, 0)</td><td>\(V_{2\omega_{1}+8\psi} \) &rarr; (2, 8)</td><td>\(V_{4\omega_{1}} \) &rarr; (4, 0)</td></tr><tr><td>Module label </td><td>\(W_{1}\)</td><td>\(W_{2}\)</td><td>\(W_{3}\)</td><td>\(W_{4}\)</td><td>\(W_{5}\)</td></tr><tr><td>Module elements (weight vectors). <span class='fElement'>In blue - corresp. F element</span>. <span class='hElement'>In red -corresp. H element</span>. </td><td>Cartan of centralizer component. <table class='tableNone'><tr><td><table class='tableModuleDecomposition'><tr><td>\(-h_{3}+2h_{2}+h_{1}\)</td></tr></table></td></tr></table></td><td><table class='tableNone'><tr><td><table class='tableModuleDecomposition'><tr><td>\(g_{3}\)</td></tr><tr><td>\(-g_{-2}\)</td></tr><tr><td>\(g_{-4}\)</td></tr></table></td></tr></table></td><td>Semisimple subalgebra component. <table class='tableNone'><tr><td><table class='tableModuleDecomposition'><tr><td>\(-g_{5}-g_{1}\)</td></tr><tr><td>\(h_{3}+h_{2}+h_{1}\)</td></tr><tr><td>\(g_{-1}+g_{-5}\)</td></tr></table></td></tr></table></td><td><table class='tableNone'><tr><td><table class='tableModuleDecomposition'><tr><td>\(g_{4}\)</td></tr><tr><td>\(g_{2}\)</td></tr><tr><td>\(g_{-3}\)</td></tr></table></td></tr></table></td><td><table class='tableNone'><tr><td><table class='tableModuleDecomposition'><tr><td>\(g_{6}\)</td></tr><tr><td>\(g_{5}-g_{1}\)</td></tr><tr><td>\(-h_{3}-h_{2}+h_{1}\)</td></tr><tr><td>\(3g_{-1}-3g_{-5}\)</td></tr><tr><td>\(6g_{-6}\)</td></tr></table></td></tr></table></td></tr><tr><td>Weights of elements in fundamental coords w.r.t. Cartan of subalgebra in same order as above</td><td>\(0\)</td><td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td><td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td><td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td><td>\(4\omega_{1}\)<br>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)<br>\(-4\omega_{1}\)</td></tr><tr><td>Weights of elements in (fundamental coords w.r.t. Cartan of subalgebra) + Cartan centralizer</td><td>\(0\)</td><td>\(2\omega_{1}-8\psi\)<br>\(-8\psi\)<br>\(-2\omega_{1}-8\psi\)</td><td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td><td>\(2\omega_{1}+8\psi\)<br>\(8\psi\)<br>\(-2\omega_{1}+8\psi\)</td><td>\(4\omega_{1}\)<br>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)<br>\(-4\omega_{1}\)</td></tr><tr><td>Single module character over Cartan of s.a.+ Cartan of centralizer of s.a.</td><td>\(M_{0}\)</td><td>\(M_{2\omega_{1}-8\psi}\oplus M_{-8\psi}\oplus M_{-2\omega_{1}-8\psi}\)</td><td>\(M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\)</td><td>\(M_{2\omega_{1}+8\psi}\oplus M_{8\psi}\oplus M_{-2\omega_{1}+8\psi}\)</td><td>\(M_{4\omega_{1}}\oplus M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\oplus M_{-4\omega_{1}}\)</td></tr><tr><td>Isotypic character</td><td>\(M_{0}\)</td><td>\(M_{2\omega_{1}-8\psi}\oplus M_{-8\psi}\oplus M_{-2\omega_{1}-8\psi}\)</td><td>\(M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\)</td><td>\(M_{2\omega_{1}+8\psi}\oplus M_{8\psi}\oplus M_{-2\omega_{1}+8\psi}\)</td><td>\(M_{4\omega_{1}}\oplus M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\oplus M_{-4\omega_{1}}\)</td></tr></table><br>Semisimple subalgebra: W_{3}<br>Centralizer extension: W_{1}<br><br>Weight diagram. The coordinates corresponding to the simple roots of the subalgerba are fundamental.  <br>The bilinear form is therefore given relative to the fundamental coordinates.<br> 
-<canvas width = '400' height = '600' id = 'idCanvasNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc'>Canvas not supported</canvas>
-<br>
-<div id = 'idHighlightInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc'></div>
-<br>
-<span id = 'idCanvasInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc'></span>
-<br>
-<span name='script' style='display:none' scriptType='graphicsNDimensional'>
-{"widthHTML":400,"heightHTML":600,"screenBasis":[[1,0],[0,1]],"draggablePoints":[[1,0],[0,1]],"bilinearForm":[[2,0],[0,0.0208333]],"graphicsUnit":100,"frameLength":500,"drawObjects":[{"operation":"segment","points":[[0,0],[0,0]],"color":"green"},{"operation":"circleAtVector","location":[0,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[2,-8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[0,-8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-2,-8],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-2,-8],[2,-8]],"color":"#f0f000"},{"operation":"segment","points":[[0,0],[2,0]],"color":"green"},{"operation":"circleAtVector","location":[2,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[0,0],[0,0]],"color":"green"},{"operation":"circleAtVector","location":[0,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[0,0],[-2,0]],"color":"green"},{"operation":"circleAtVector","location":[-2,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-2,0],[2,0]],"color":"blue"},{"operation":"circleAtVector","location":[2,8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[0,8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-2,8],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-2,8],[2,8]],"color":"#f0f000"},{"operation":"circleAtVector","location":[4,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[2,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[0,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-2,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-4,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-4,0],[4,0]],"color":"#f0f000"},{"operation":"highlightGroup","points":[[0,0]],"labels":["(0, 0)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[2,-8],[0,-8],[-2,-8]],"labels":["(2, -8)","(0, -8)","(-2, -8)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[2,0],[0,0],[-2,0]],"labels":["(2, 0)","(0, 0)","(-2, 0)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[2,8],[0,8],[-2,8]],"labels":["(2, 8)","(0, 8)","(-2, 8)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[4,0],[2,0],[0,0],[-2,0],[-4,0]],"labels":["(4, 0)","(2, 0)","(0, 0)","(-2, 0)","(-4, 0)"],"color":"black","radius":5},{"operation":"circleAtVector","location":[1,0],"radius":4,"color":"red"},{"operation":"circleAtVector","location":[0,1],"radius":4,"color":"red"}],"dimension":2,"idCanvas":"idCanvasNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc","idSpanInformation":"idCanvasInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc","idHighlightInformation":"idHighlightInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc"}</span>
-<br><br>Made total 522179 arithmetic operations while solving the Serre relations polynomial system. 
-</body></html>
- 
+<body
+  onload='window.calculator.equationEditor.typeset(document.body, null); window.calculator.dynamicJavascript.dynamicJavascript.bootstrapAllScripts(document.body);window.calculator.lieAlgebras.bootstrap();'>
+  Subalgebra \(A^{4}_1\) &#8618; <a href="./semisimple_subalgebras_A^{1}_3.html">\(A^{1}_3\)</a><br>3 out of 9
+  <div class='divSubalgebraInformation'>Computations done by the <a
+      href='https://github.com/tmilev/calculator'>calculator project</a>.</div><br>Subalgebra type: <a
+    href='A^{1}_3_subalgebra_3.html' id='semisimple_subalgebra_3' style='text-decoration: none'>\(A^{4}_1\)</a> (click
+  on type for detailed printout).
+  <hr style='max-width:300px;margin:0px;'>This is an <b>sl(2) subalgebra</b>; details follow [info from sl(2)
+  tables].<br><a name='sl2index1'>h-characteristic: (2, 0, 2)</a><br>Length of the weight dual to h: 8<br>
+  Simple basis ambient algebra w.r.t defining h: 3 vectors:
+  (1, 0, 0), (0, 1, 0), (0, 0, 1)<br>
+  Containing regular semisimple subalgebra number 1: <a href='../rootSubalgebra_2.html'>\(A^{1}_2\)</a><br>
+  sl(2)-module decomposition of the ambient Lie algebra: \(V_{4\psi}+3V_{2\psi}+V_{0}\)
+  <br>
+
+  Below is one possible realization of the sl(2) subalgebra.
+  <br>
+  \(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
+  e&=&2g_{4}+g_{3}\\
+  f&=&2g_{-3}+g_{-4}\end{array}\)<br>Matrix realizations in a standard representation: <div class='lieAlgebraPanel'>
+    <div>\(\begin{array}{rcl}h&=&\begin{pmatrix}2 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & -2\\
+      \end{pmatrix}\\
+      e&=&\begin{pmatrix}0 & 0 & 2 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 1\\
+      0 & 0 & 0 & 0\\
+      \end{pmatrix}\\
+      f&=&\begin{pmatrix}0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      1 & 0 & 0 & 0\\
+      0 & 0 & 2 & 0\\
+      \end{pmatrix}\end{array}\)<br>Calculator link: <a
+        href='/app#%7b%22calculatorInput%22%3a%22h%3d%5c%5cbegin%7bpmatrix%7d2%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%20-2%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cne%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%202%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%201%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cnf%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn1%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%202%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d'
+        target='_blank'>h=\begin{pmatrix}2 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; -2\\
+        \end{pmatrix};
+        e=\begin{pmatrix}0 &amp; 0 &amp; 2 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 1\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        \end{pmatrix};
+        f=\begin{pmatrix}0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        1 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 2 &amp; 0\\
+        \end{pmatrix};
+      </a></div>
+  </div><br>Matrix realizations in a standard representation: <div class='lieAlgebraPanel'>
+    <div>\(\begin{array}{rcl}h&=&\begin{pmatrix}2 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & -2\\
+      \end{pmatrix}\\
+      e&=&\begin{pmatrix}0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      \end{pmatrix}\\
+      f&=&\begin{pmatrix}0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0\\
+      \end{pmatrix}\end{array}\)<br>Calculator link: <a
+        href='/app#%7b%22calculatorInput%22%3a%22h%3d%5c%5cbegin%7bpmatrix%7d2%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%20-2%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cne%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cnf%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn%5c%5cend%7bpmatrix%7d%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d'
+        target='_blank'>h=\begin{pmatrix}2 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; -2\\
+        \end{pmatrix};
+        e=\begin{pmatrix}0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        \end{pmatrix};
+        f=\begin{pmatrix}0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        0 &amp; 0 &amp; 0 &amp; 0\\
+        \end{pmatrix};
+      </a></div>
+  </div><br>Lie brackets of the above elements.<br>
+  <br>
+  \(\begin{array}{rcl}[e, f]&=&2h_{3}+2h_{2}+2h_{1}\\
+  [h, e]&=&4g_{4}+2g_{3}\\
+  [h, f]&=&-4g_{-3}-2g_{-4}\end{array}\)<br>Unfold the hidden panel for more information.<br>
+  <div class='lieAlgebraPanel'>
+    <div>
+      <hr>Unknown elements.<br>\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
+      e&=&x_{1} g_{4}+x_{2} g_{3}\\
+      f&=&x_{4} g_{-3}+x_{3} g_{-4}\end{array}\)<br>Lie brackets of the unknowns.<br>\([e,f] - h = \left(x_{2} x_{4}
+      -2\right)h_{3}+\left(x_{1} x_{3} -2\right)h_{2}+\left(x_{1} x_{3} -2\right)h_{1}\)<br>The polynomial system that
+      corresponds to finding the h, e, f triple:<br>
+      \(\begin{array}{rcl}x_{1} x_{3} -2&=&0\\x_{1} x_{3} -2&=&0\\x_{2} x_{4} -2&=&0\\\end{array}\)
+      <br>
+      Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen.
+      <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots
+      appear, and the coefficients are chosen to be the increasing odd numbers 1, 3, 5, ....<br>This arbitrary (but
+      well-defined) choice of f guarantees that the computation is linear and fast. <br>
+      \(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\e&=&x_{1} g_{4}+x_{2}
+      g_{3}\\f&=&2g_{-3}+g_{-4}\end{array}\)<br>Matrix form of the system we are trying to solve:
+      \(\begin{pmatrix}1 & 0\\
+      1 & 0\\
+      0 & 2\\
+      \end{pmatrix}[col. vect.]=\begin{pmatrix}2\\
+      2\\
+      2\\
+      \end{pmatrix}\)<br>The unknown Kostant-Sekiguchi elements.<br>\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
+      e&=&x_{1} g_{4}+x_{2} g_{3}\\
+      f&=&x_{4} g_{-3}+x_{3} g_{-4}\end{array}\)<br>\(e-f=0\)<br>\(\theta(e-f)=0\)<br>The polynomial system we need to
+      solve.<br>\(\begin{array}{rcl}x_{1} x_{3} -2&=&0\\x_{1} x_{3} -2&=&0\\x_{2} x_{4} -2&=&0\\\end{array}\)
+    </div>
+  </div>
+  <hr style='max-width:300px;margin:0px;'><br>Centralizer: \(T_{1}\) (toral part, subscript = dimension). <br>The
+  semisimple part of the centralizer of the semisimple part of my centralizer: <a href='A^{1}_3_subalgebra_9.html'
+    id='semisimple_subalgebra_9' style='text-decoration: none'>\(A^{1}_3\)</a> <br>Basis of Cartan of centralizer: 1
+  vectors:
+  (1, 2, -1)<br><br>Elements Cartan subalgebra scaled to act by two by components: \(A^{4}_1\): (2, 2, 2):
+  8<br>Dimension of subalgebra generated by predefined or computed generators: 3.<br>Negative simple generators:
+  \(g_{-1}+g_{-5}\)<br>Positive simple generators: \(2g_{5}+2g_{1}\)<br>Cartan symmetric matrix:
+  \(\begin{pmatrix}\frac{1}{2}\\
+  \end{pmatrix}\)<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (co-symmetric Cartan matrix):
+  \(\begin{pmatrix}8\\
+  \end{pmatrix}\)<br>Decomposition of ambient Lie algebra: \(V_{4\omega_{1}}\oplus 3V_{2\omega_{1}}\oplus
+  V_{0}\)<br>Primal decomposition of the ambient Lie algebra. This refines the above decomposition (please note the
+  order is not the same as above). \(V_{2\omega_{1}+8\psi}\oplus V_{4\omega_{1}}\oplus V_{2\omega_{1}}\oplus V_{0}\oplus
+  V_{2\omega_{1}-8\psi}\)<br>In the table below we indicate the highest weight vectors of the decomposition of the
+  ambient Lie algebra as a module over the semisimple part. The second row indicates weights of the highest weight
+  vectors relative to the Cartan of the semisimple subalgebra. As the centralizer is well-chosen and the centralizer of
+  our subalgebra is non-trivial, we may in addition split highest weight vectors with the same weight over the
+  semisimple part over the centralizer (recall that the centralizer preserves the weights over the subalgebra and in
+  particular acts on the highest weight vectors). Therefore we have chosen our highest weight vectors to be, in
+  addition, weight vectors over the Cartan of the centralizer of the starting subalgebra. Their weight over the sum of
+  the Cartans of the semisimple subalgebra and its centralizer is indicated in the third row. The weights corresponding
+  to the Cartan of the centralizer are again indicated with the letter \omega. As there is no preferred way of chosing a
+  basis of the Cartan of the centralizer (unlike the starting semisimple Lie algebra: there we have a preferred basis
+  induced by the fundamental weights), our centralizer weights are simply given by the constant by which the k^th basis
+  element of the Cartan of the centralizer acts on the highest weight vector. Here, we use the choice for basis of the
+  Cartan of the centralizer given at the start of the page.<br><br>
+  <table class='tableStandard'>
+    <tr>
+      <td>Highest vectors of representations (total 5); the vectors are over the primal subalgebra.</td>
+      <td>\(-h_{3}+2h_{2}+h_{1}\)</td>
+      <td>\(g_{3}\)</td>
+      <td>\(g_{5}+g_{1}\)</td>
+      <td>\(g_{4}\)</td>
+      <td>\(g_{6}\)</td>
+    </tr>
+    <tr>
+      <td>weight</td>
+      <td>\(0\)</td>
+      <td>\(2\omega_{1}\)</td>
+      <td>\(2\omega_{1}\)</td>
+      <td>\(2\omega_{1}\)</td>
+      <td>\(4\omega_{1}\)</td>
+    </tr>
+    <tr>
+      <td>weights rel. to Cartan of (centralizer+semisimple s.a.). </td>
+      <td>\(0\)</td>
+      <td>\(2\omega_{1}-8\psi\)</td>
+      <td>\(2\omega_{1}\)</td>
+      <td>\(2\omega_{1}+8\psi\)</td>
+      <td>\(4\omega_{1}\)</td>
+    </tr>
+  </table>Isotypic module decomposition over primal subalgebra (total 5 isotypic components). <table
+    class='tableStandard'>
+    <tr>
+      <td>Isotypic components + highest weight</td>
+      <td>\(V_{0} \) &rarr; (0, 0)</td>
+      <td>\(V_{2\omega_{1}-8\psi} \) &rarr; (2, -8)</td>
+      <td>\(V_{2\omega_{1}} \) &rarr; (2, 0)</td>
+      <td>\(V_{2\omega_{1}+8\psi} \) &rarr; (2, 8)</td>
+      <td>\(V_{4\omega_{1}} \) &rarr; (4, 0)</td>
+    </tr>
+    <tr>
+      <td>Module label </td>
+      <td>\(W_{1}\)</td>
+      <td>\(W_{2}\)</td>
+      <td>\(W_{3}\)</td>
+      <td>\(W_{4}\)</td>
+      <td>\(W_{5}\)</td>
+    </tr>
+    <tr>
+      <td>Module elements (weight vectors). <span class='fElement'>In blue - corresp. F element</span>. <span
+          class='hElement'>In red -corresp. H element</span>. </td>
+      <td>Cartan of centralizer component. <table class='tableNone'>
+          <tr>
+            <td>
+              <table class='tableModuleDecomposition'>
+                <tr>
+                  <td>\(-h_{3}+2h_{2}+h_{1}\)</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td>
+        <table class='tableNone'>
+          <tr>
+            <td>
+              <table class='tableModuleDecomposition'>
+                <tr>
+                  <td>\(g_{3}\)</td>
+                </tr>
+                <tr>
+                  <td>\(-g_{-2}\)</td>
+                </tr>
+                <tr>
+                  <td>\(g_{-4}\)</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td>Semisimple subalgebra component. <table class='tableNone'>
+          <tr>
+            <td>
+              <table class='tableModuleDecomposition'>
+                <tr>
+                  <td>\(-g_{5}-g_{1}\)</td>
+                </tr>
+                <tr>
+                  <td>\(h_{3}+h_{2}+h_{1}\)</td>
+                </tr>
+                <tr>
+                  <td>\(g_{-1}+g_{-5}\)</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td>
+        <table class='tableNone'>
+          <tr>
+            <td>
+              <table class='tableModuleDecomposition'>
+                <tr>
+                  <td>\(g_{4}\)</td>
+                </tr>
+                <tr>
+                  <td>\(g_{2}\)</td>
+                </tr>
+                <tr>
+                  <td>\(g_{-3}\)</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td>
+        <table class='tableNone'>
+          <tr>
+            <td>
+              <table class='tableModuleDecomposition'>
+                <tr>
+                  <td>\(g_{6}\)</td>
+                </tr>
+                <tr>
+                  <td>\(g_{5}-g_{1}\)</td>
+                </tr>
+                <tr>
+                  <td>\(-h_{3}-h_{2}+h_{1}\)</td>
+                </tr>
+                <tr>
+                  <td>\(3g_{-1}-3g_{-5}\)</td>
+                </tr>
+                <tr>
+                  <td>\(6g_{-6}\)</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td>Weights of elements in fundamental coords w.r.t. Cartan of subalgebra in same order as above</td>
+      <td>\(0\)</td>
+      <td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td>
+      <td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td>
+      <td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td>
+      <td>\(4\omega_{1}\)<br>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)<br>\(-4\omega_{1}\)</td>
+    </tr>
+    <tr>
+      <td>Weights of elements in (fundamental coords w.r.t. Cartan of subalgebra) + Cartan centralizer</td>
+      <td>\(0\)</td>
+      <td>\(2\omega_{1}-8\psi\)<br>\(-8\psi\)<br>\(-2\omega_{1}-8\psi\)</td>
+      <td>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)</td>
+      <td>\(2\omega_{1}+8\psi\)<br>\(8\psi\)<br>\(-2\omega_{1}+8\psi\)</td>
+      <td>\(4\omega_{1}\)<br>\(2\omega_{1}\)<br>\(0\)<br>\(-2\omega_{1}\)<br>\(-4\omega_{1}\)</td>
+    </tr>
+    <tr>
+      <td>Single module character over Cartan of s.a.+ Cartan of centralizer of s.a.</td>
+      <td>\(M_{0}\)</td>
+      <td>\(M_{2\omega_{1}-8\psi}\oplus M_{-8\psi}\oplus M_{-2\omega_{1}-8\psi}\)</td>
+      <td>\(M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\)</td>
+      <td>\(M_{2\omega_{1}+8\psi}\oplus M_{8\psi}\oplus M_{-2\omega_{1}+8\psi}\)</td>
+      <td>\(M_{4\omega_{1}}\oplus M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\oplus M_{-4\omega_{1}}\)</td>
+    </tr>
+    <tr>
+      <td>Isotypic character</td>
+      <td>\(M_{0}\)</td>
+      <td>\(M_{2\omega_{1}-8\psi}\oplus M_{-8\psi}\oplus M_{-2\omega_{1}-8\psi}\)</td>
+      <td>\(M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\)</td>
+      <td>\(M_{2\omega_{1}+8\psi}\oplus M_{8\psi}\oplus M_{-2\omega_{1}+8\psi}\)</td>
+      <td>\(M_{4\omega_{1}}\oplus M_{2\omega_{1}}\oplus M_{0}\oplus M_{-2\omega_{1}}\oplus M_{-4\omega_{1}}\)</td>
+    </tr>
+  </table><br>Semisimple subalgebra: W_{3}<br>Centralizer extension: W_{1}<br><br>Weight diagram. The coordinates
+  corresponding to the simple roots of the subalgerba are fundamental. <br>The bilinear form is therefore given relative
+  to the fundamental coordinates.<br>
+  <canvas width='400' height='600'
+    id='idCanvasNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc'>Canvas not
+    supported</canvas>
+  <br>
+  <div id='idHighlightInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc'></div>
+  <br>
+  <span id='idCanvasInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc'></span>
+  <br>
+  <span name='script' style='display:none' scriptType='graphicsNDimensional'>
+    {"widthHTML":400,"heightHTML":600,"screenBasis":[[1,0],[0,1]],"draggablePoints":[[1,0],[0,1]],"bilinearForm":[[2,0],[0,0.0208333]],"graphicsUnit":100,"frameLength":500,"drawObjects":[{"operation":"segment","points":[[0,0],[0,0]],"color":"green"},{"operation":"circleAtVector","location":[0,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[2,-8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[0,-8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-2,-8],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-2,-8],[2,-8]],"color":"#f0f000"},{"operation":"segment","points":[[0,0],[2,0]],"color":"green"},{"operation":"circleAtVector","location":[2,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[0,0],[0,0]],"color":"green"},{"operation":"circleAtVector","location":[0,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[0,0],[-2,0]],"color":"green"},{"operation":"circleAtVector","location":[-2,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-2,0],[2,0]],"color":"blue"},{"operation":"circleAtVector","location":[2,8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[0,8],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-2,8],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-2,8],[2,8]],"color":"#f0f000"},{"operation":"circleAtVector","location":[4,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[2,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[0,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-2,0],"radius":2,"color":"#959500"},{"operation":"circleAtVector","location":[-4,0],"radius":2,"color":"#959500"},{"operation":"segment","points":[[-4,0],[4,0]],"color":"#f0f000"},{"operation":"highlightGroup","points":[[0,0]],"labels":["(0,
+    0)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[2,-8],[0,-8],[-2,-8]],"labels":["(2,
+    -8)","(0, -8)","(-2,
+    -8)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[2,0],[0,0],[-2,0]],"labels":["(2,
+    0)","(0, 0)","(-2,
+    0)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[2,8],[0,8],[-2,8]],"labels":["(2, 8)","(0,
+    8)","(-2,
+    8)"],"color":"black","radius":5},{"operation":"highlightGroup","points":[[4,0],[2,0],[0,0],[-2,0],[-4,0]],"labels":["(4,
+    0)","(2, 0)","(0, 0)","(-2, 0)","(-4,
+    0)"],"color":"black","radius":5},{"operation":"circleAtVector","location":[1,0],"radius":4,"color":"red"},{"operation":"circleAtVector","location":[0,1],"radius":4,"color":"red"}],"dimension":2,"idCanvas":"idCanvasNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc","idSpanInformation":"idCanvasInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc","idHighlightInformation":"idHighlightInfoNDimensionalGraphicsee6712f5ccf050d497dff569a2f726503a7eb478acb0d314992f5aeca47bb1bc"}</span>
+  <br><br>Made total 522179 arithmetic operations while solving the Serre relations polynomial system.
+</body>
+
+</html>

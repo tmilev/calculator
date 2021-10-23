@@ -192,8 +192,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "The string is one of the following. "
     "AI, AII, AIII, AIV,\n"
     "BI, BII,\n"
-    "CI, CII, DI,  DII, DIII,\n"
-    "EI, EII, EIII, EIV, EV, EVI, EVII, EVIII, EIX,\n"
+    "CI, CII, "
+    "DI, DII, DIII,\n"
+    "EI, EII, EIII, EIV, "
+    "EV, EVI, EVII, EVIII, EIX,\n"
     "FI, FII,\n"
     "G."
     "The first integer is the rank of ambient Lie algebra. "
@@ -204,7 +206,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CartanInvolution(AI, 3, 0);\n"
     "CartanInvolution(AII, 3);\n"
     "CartanInvolution(AIII, 4, 2);\n"
-    "CartanInvolution(AIII, 5, 3);",
+    "CartanInvolution(AIII, 5, 3);\n"
+    "CartanInvolution(E_6, EI);\n"
+    "CartanInvolution(E_6, EII);\n"
+    "CartanInvolution(E_6, EIII);\n"
+    "CartanInvolution(E_6, EIV);\n",
     "CalculatorLieTheory::cartanInvolution",
     "CartanInvolution",
     standardOptions
@@ -1159,7 +1165,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "MakeElementHyperOctahedral",
-    CalculatorConversions::innerMakeElementHyperOctahedral,
+    CalculatorConversions::makeElementHyperOctahedral,
     "",
     "Needs a group name and a list of generators",
     "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0);\n"

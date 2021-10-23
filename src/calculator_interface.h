@@ -1870,7 +1870,7 @@ public:
   Expression expressionMinusInfinity();
   void logFunctionWithTime(Function& input, int64_t startTime);
   void logTime(int64_t startTime);
-  void logPublicError(const std::string& theError);
+  void logPublicError(const std::string& error);
   std::string writeDefaultLatexFileReturnHtmlLink(
     const std::string& fileContent,
     std::string* outputFileNameNoExtension,
@@ -2611,10 +2611,12 @@ public:
     bool setOutput(
       const Expression& input, Function* handler, const std::string& info
     );
-    void accountHistory(Function *handler, const std::string &info);
+    void accountHistory(Function* handler, const std::string& info);
     bool checkInitialization();
     void accountHistoryChildTransformation(
-      const Expression& transformedChild, const Expression& childHistory, int childIndex
+      const Expression& transformedChild,
+      const Expression& childHistory,
+      int childIndex
     );
   };
   void reduce(Calculator::EvaluateLoop& state);
@@ -2625,7 +2627,9 @@ public:
       Expression content;
       List<std::string> annotations;
       std::string stepType;
-      void assignContentAndAnnotation(const Expression& input, const std::string& oneAnnotation);
+      void assignContentAndAnnotation(
+        const Expression& input, const std::string& oneAnnotation
+      );
       void mergeAnnotations(const List<std::string>& incoming);
       JSData toJSON();
     };
@@ -2765,7 +2769,7 @@ public:
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, SlTwoSubalgebra& output);
   static bool innerLoadFromObject(Calculator& calculator, const Expression& input, RationalFraction<Rational>& output);
   static bool innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPolynomialModuloInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialModuloInteger(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
   static bool getPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   // Conversions from expression tree to expression containing type.
@@ -2800,7 +2804,7 @@ public:
   static bool functionMatrixRationalTensorForm(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLoadFileIntoString(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMakeElementHyperOctahedral(Calculator& calculator, const Expression& input, Expression& output);
+  static bool makeElementHyperOctahedral(Calculator& calculator, const Expression& input, Expression& output);
   ////////////////////Conversion to expression tree/////////////////////////////////////
   //converstion from type to expression tree.
   template <class Coefficient>

@@ -225,7 +225,7 @@ public:
     return CalculatorLieTheory::printSemisimpleLieAlgebra(calculator, input, output, true);
   }
   static bool writeSemisimpleLieAlgebraToHardDisk(Calculator& calculator, const Expression& input, Expression& output);
-  static bool printSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool Verbose);
+  static bool printSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool verbose);
   static bool writeToHardDiskOrPrintSemisimpleLieAlgebra(
     Calculator& calculator, const Expression& input, Expression& output, bool verbose, bool writeToHD
   );

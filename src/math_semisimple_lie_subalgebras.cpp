@@ -1151,7 +1151,8 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   bool computeModuleDecomposition,
   bool attemptToSolveSystems,
   bool computePairingTable,
-  bool adjustCentralizers
+  bool adjustCentralizers,
+  const std::string& extraDynkinDiagramPlot
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeStructureWriteFiles");
   this->toStringExpressionString = toStringExpression;
@@ -1174,7 +1175,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     }
     this->writeReportToFiles();
     this->slTwoSubalgebras.writeHTML();
-    this->owner->writeHTML(true, false);
+    this->owner->writeHTML(true, false, extraDynkinDiagramPlot);
   } else {
     if (outputStream != nullptr) {
       *outputStream << "Files precomputed, serving from HD. ";

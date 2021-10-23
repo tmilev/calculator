@@ -8,7 +8,7 @@
 #include "math_extra_weyl_algebras_implementation.h"
 #include "math_rational_function_implementation.h"
 
-MapList<std::string, SatakeDiagram::DiagramType, MathRoutines::hashString> SatakeDiagram::mapStringToType;
+MapList<std::string, SatakeVoganDiagram::DiagramType, MathRoutines::hashString> SatakeVoganDiagram::mapStringToType;
 
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   Calculator& calculator,
@@ -2031,23 +2031,35 @@ bool CalculatorLieTheory::adjointMatrix(
   return output.assignMatrixExpressions(resultExpressions, calculator, false, false);
 }
 
-std::string SatakeDiagram::toString() {
+std::string SatakeVoganDiagram::toString() {
   std::stringstream out;
   switch (this->diagram) {
-  case SatakeDiagram::G:
+  case SatakeVoganDiagram::G:
     out << "G";
     break;
-  case SatakeDiagram::AI:
+  case SatakeVoganDiagram::AI:
     out << "AI";
     break;
-  case SatakeDiagram::AII:
+  case SatakeVoganDiagram::AII:
     out << "AII";
     break;
-  case SatakeDiagram::AIII:
+  case SatakeVoganDiagram::AIII:
     out << "AIII";
     break;
-  case SatakeDiagram::AIV:
+  case SatakeVoganDiagram::AIV:
     out << "AIV";
+    break;
+  case SatakeVoganDiagram::EI:
+    out << "EI";
+    break;
+  case SatakeVoganDiagram::EII:
+    out << "EII";
+    break;
+  case SatakeVoganDiagram::EIII:
+    out << "EIII";
+    break;
+  case SatakeVoganDiagram::EIV:
+    out << "EIV";
     break;
   default:
     out << "[unknown]";
@@ -2056,14 +2068,20 @@ std::string SatakeDiagram::toString() {
   return out.str();
 }
 
-DynkinType SatakeDiagram::dynkinTypeAmbient() {
+DynkinType SatakeVoganDiagram::dynkinTypeAmbient() {
   DynkinType result;
   switch (this->diagram) {
-  case SatakeDiagram::AI:
-  case SatakeDiagram::AII:
-  case SatakeDiagram::AIII:
-  case SatakeDiagram::AIV:
+  case SatakeVoganDiagram::AI:
+  case SatakeVoganDiagram::AII:
+  case SatakeVoganDiagram::AIII:
+  case SatakeVoganDiagram::AIV:
     result.makeSimpleType('A', this->rank, nullptr);
+    return result;
+  case SatakeVoganDiagram::EI:
+  case SatakeVoganDiagram::EII:
+  case SatakeVoganDiagram::EIII:
+  case SatakeVoganDiagram::EIV:
+    result.makeSimpleType('E', 6, nullptr);
     return result;
   default:
     return result;
@@ -2071,35 +2089,35 @@ DynkinType SatakeDiagram::dynkinTypeAmbient() {
   return result;
 }
 
-void SatakeDiagram::computeMapStringToType() {
+void SatakeVoganDiagram::computeMapStringToType() {
   if (this->mapStringToType.size() != 0) {
     return;
   }
-  this->mapStringToType.setKeyValue("AI", SatakeDiagram::AI);
-  this->mapStringToType.setKeyValue("AII", SatakeDiagram::AII);
-  this->mapStringToType.setKeyValue("AIII", SatakeDiagram::AIII);
-  this->mapStringToType.setKeyValue("AIV", SatakeDiagram::AIV);
-  this->mapStringToType.setKeyValue("BI", SatakeDiagram::BI);
-  this->mapStringToType.setKeyValue("CI", SatakeDiagram::CI);
-  this->mapStringToType.setKeyValue("CII", SatakeDiagram::CII);
-  this->mapStringToType.setKeyValue("DI", SatakeDiagram::DI);
-  this->mapStringToType.setKeyValue("DII", SatakeDiagram::DII);
-  this->mapStringToType.setKeyValue("DIII", SatakeDiagram::DIII);
-  this->mapStringToType.setKeyValue("EI", SatakeDiagram::EI);
-  this->mapStringToType.setKeyValue("EII", SatakeDiagram::EII);
-  this->mapStringToType.setKeyValue("EIII", SatakeDiagram::EII);
-  this->mapStringToType.setKeyValue("EIV", SatakeDiagram::EIV);
-  this->mapStringToType.setKeyValue("EV", SatakeDiagram::EV);
-  this->mapStringToType.setKeyValue("EVI", SatakeDiagram::EVI);
-  this->mapStringToType.setKeyValue("EVII", SatakeDiagram::EVII);
-  this->mapStringToType.setKeyValue("EVIII", SatakeDiagram::EVIII);
-  this->mapStringToType.setKeyValue("EIX", SatakeDiagram::EIX);
-  this->mapStringToType.setKeyValue("FI", SatakeDiagram::FI);
-  this->mapStringToType.setKeyValue("FII", SatakeDiagram::FII);
-  this->mapStringToType.setKeyValue("G", SatakeDiagram::G);
+  this->mapStringToType.setKeyValue("AI", SatakeVoganDiagram::AI);
+  this->mapStringToType.setKeyValue("AII", SatakeVoganDiagram::AII);
+  this->mapStringToType.setKeyValue("AIII", SatakeVoganDiagram::AIII);
+  this->mapStringToType.setKeyValue("AIV", SatakeVoganDiagram::AIV);
+  this->mapStringToType.setKeyValue("BI", SatakeVoganDiagram::BI);
+  this->mapStringToType.setKeyValue("CI", SatakeVoganDiagram::CI);
+  this->mapStringToType.setKeyValue("CII", SatakeVoganDiagram::CII);
+  this->mapStringToType.setKeyValue("DI", SatakeVoganDiagram::DI);
+  this->mapStringToType.setKeyValue("DII", SatakeVoganDiagram::DII);
+  this->mapStringToType.setKeyValue("DIII", SatakeVoganDiagram::DIII);
+  this->mapStringToType.setKeyValue("EI", SatakeVoganDiagram::EI);
+  this->mapStringToType.setKeyValue("EII", SatakeVoganDiagram::EII);
+  this->mapStringToType.setKeyValue("EIII", SatakeVoganDiagram::EII);
+  this->mapStringToType.setKeyValue("EIV", SatakeVoganDiagram::EIV);
+  this->mapStringToType.setKeyValue("EV", SatakeVoganDiagram::EV);
+  this->mapStringToType.setKeyValue("EVI", SatakeVoganDiagram::EVI);
+  this->mapStringToType.setKeyValue("EVII", SatakeVoganDiagram::EVII);
+  this->mapStringToType.setKeyValue("EVIII", SatakeVoganDiagram::EVIII);
+  this->mapStringToType.setKeyValue("EIX", SatakeVoganDiagram::EIX);
+  this->mapStringToType.setKeyValue("FI", SatakeVoganDiagram::FI);
+  this->mapStringToType.setKeyValue("FII", SatakeVoganDiagram::FII);
+  this->mapStringToType.setKeyValue("G", SatakeVoganDiagram::G);
 }
 
-bool SatakeDiagram::assignParameter(
+bool SatakeVoganDiagram::assignParameter(
   const std::string& input,
   int inputRank,
   int inputParameter,
@@ -2125,7 +2143,7 @@ bool SatakeDiagram::assignParameter(
   return true;
 }
 
-SatakeDiagram::SatakeDiagram() {
+SatakeVoganDiagram::SatakeVoganDiagram() {
   this->rank = 0;
   this->parameter = - 1;
 }
@@ -2145,6 +2163,30 @@ CartanInvolution::CartanInvolution() {
   this->owner = nullptr;
 }
 
+void CartanInvolution::setSimpleRootSwap(int indexLeft, int indexRight) {
+  int rank = this->dynkinTypeAmbient().getRank();
+  Vector<Rational> simpleLeft, simpleRight;
+  simpleLeft.makeEi(rank, indexLeft);
+  simpleRight.makeEi(rank, indexRight);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[indexLeft].makeGGenerator(simpleRight, *this->owner);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[indexLeft].makeGGenerator(- simpleRight, *this->owner);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[indexRight].makeGGenerator(simpleLeft, *this->owner);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[indexRight].makeGGenerator(- simpleLeft, *this->owner);
+}
+
+void CartanInvolution::setFilledSimpleRoot(int index) {
+  this->setHollowSimpleRoot(index);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
+}
+
+void CartanInvolution::setHollowSimpleRoot(int index) {
+  Vector<Rational> simpleRoot;
+  simpleRoot.makeEi(this->owner->getRank(), index);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[index].makeGGenerator(simpleRoot, *this->owner);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[index].makeGGenerator(- simpleRoot, *this->owner);
+}
+
 bool CartanInvolution::computeSimpleRootImagesTypeAI(
   std::stringstream* commentsOnFailure
 ) {
@@ -2155,15 +2197,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAI(
     }
     return false;
   }
-  int rank = this->owner->getRank();
-  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
-  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
-  Vector<Rational> simpleRoot;
-  for (int i = 0; i < rank; i ++) {
-    simpleRoot.makeEi(rank, i);
-    this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRoot, *this->owner);
-    this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRoot, *this->owner);
-  }
+  this->automorphism.makeGInGWithIdentity(*this->owner);
   return true;
 }
 
@@ -2186,14 +2220,11 @@ bool CartanInvolution::computeSimpleRootImagesTypeAII(
   }
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
-  Vector<Rational> simpleRoot;
   for (int i = 0; i < rank; i ++) {
-    simpleRoot.makeEi(rank, i);
-    this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRoot, *this->owner);
-    this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRoot, *this->owner);
     if (i % 2 == 0) {
-      this->automorphism.imagesPositiveSimpleChevalleyGenerators[i] *= - 1;
-      this->automorphism.imagesNegativeSimpleChevalleyGenerators[i] *= - 1;
+      this->setFilledSimpleRoot(i);
+    } else {
+      this->setHollowSimpleRoot(i);
     }
   }
   return true;
@@ -2229,6 +2260,94 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   Vector<Rational> simpleRootLeft, simpleRootRight;
   for (int i = 0; i < numberOfPairs; i ++) {
+    this->setSimpleRootSwap(i, rank - i - 1);
+  }
+  for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
+    int index = numberOfPairs + i;
+    this->setFilledSimpleRoot(index);
+  }
+  return true;
+}
+
+bool CartanInvolution::computeSimpleRootImagesTypeEI(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEI");
+  // Satake diagram of type EI is for Lie algebra E_6.
+  if (
+    !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
+    this->owner->getRank() != 6
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Type is not E_6. ";
+    }
+    return false;
+  }
+  this->automorphism.makeGInGWithIdentity(*this->owner);
+  return true;
+}
+
+bool CartanInvolution::computeSimpleRootImagesTypeEII(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEII");
+  // Satake diagram of type EII is for Lie algebra E_6.
+  if (
+    !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
+    this->owner->getRank() != 6
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Type is not E_6. ";
+    }
+    return false;
+  }
+  int rank = 6;
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  // The sticky part of Dynkin diagram.
+  this->setHollowSimpleRoot(1);
+  // The middle of the 5-node string of the Dynkin diagram
+  this->setHollowSimpleRoot(3);
+  this->setSimpleRootSwap(0, 5);
+  this->setSimpleRootSwap(2, 4);
+  return true;
+}
+
+bool CartanInvolution::computeSimpleRootImagesTypeEIII(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIII");
+  // Satake diagram of type EI is for Lie algebra E_6.
+  if (
+    !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
+    this->owner->getRank() != 6
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Type is not E_6. ";
+    }
+    return false;
+  }
+  int rank = this->owner->getRank();
+  if (this->satakeDiagram.parameter < 0 || this->satakeDiagram.parameter > rank) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Parameter must be between 0 and the rank " << rank << " instead it is: " << this->satakeDiagram.rank;
+    }
+    return false;
+  }
+  global.fatal << "Not implemented yet" << global.fatal;
+  int paired = rank - this->satakeDiagram.parameter;
+  if (paired % 2 != 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
+      << " does not have the same parity as the rank: " << rank << ".";
+    }
+    return false;
+  }
+  int numberOfPairs = paired / 2;
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  Vector<Rational> simpleRootLeft, simpleRootRight;
+  for (int i = 0; i < numberOfPairs; i ++) {
     simpleRootLeft.makeEi(rank, i);
     simpleRootRight.makeEi(rank, rank - i - 1);
     this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRootRight, *this->owner);
@@ -2247,6 +2366,59 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   return true;
 }
 
+bool CartanInvolution::computeSimpleRootImagesTypeEIV(
+std::stringstream* commentsOnFailure
+) {
+MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIII");
+// Satake diagram of type EI is for Lie algebra E_6.
+if (
+  !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
+  this->owner->getRank() != 6
+) {
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Type is not E_6. ";
+  }
+  return false;
+}
+int rank = this->owner->getRank();
+if (this->satakeDiagram.parameter < 0 || this->satakeDiagram.parameter > rank) {
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Parameter must be between 0 and the rank " << rank << " instead it is: " << this->satakeDiagram.rank;
+  }
+  return false;
+}
+global.fatal << "Not implemented yet" << global.fatal;
+int paired = rank - this->satakeDiagram.parameter;
+if (paired % 2 != 0) {
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
+    << " does not have the same parity as the rank: " << rank << ".";
+  }
+  return false;
+}
+int numberOfPairs = paired / 2;
+this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+Vector<Rational> simpleRootLeft, simpleRootRight;
+for (int i = 0; i < numberOfPairs; i ++) {
+  simpleRootLeft.makeEi(rank, i);
+  simpleRootRight.makeEi(rank, rank - i - 1);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRootRight, *this->owner);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRootRight, *this->owner);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(simpleRootLeft, *this->owner);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(- simpleRootLeft, *this->owner);
+}
+for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
+  int index = numberOfPairs + i;
+  simpleRootLeft.makeEi(rank, index);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[index].makeGGenerator(simpleRootLeft, *this->owner);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[index].makeGGenerator(- simpleRootLeft, *this->owner);
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
+}
+return true;
+}
+
 bool CartanInvolution::computeSimpleRootImages(
   std::stringstream* commentsOnFailure
 ) {
@@ -2254,14 +2426,23 @@ bool CartanInvolution::computeSimpleRootImages(
   this->automorphism.domain = this->owner;
   this->automorphism.coDomain = this->owner;
   this->owner->weylGroup.computeRho(false);
-  if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AI) {
+  if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::AI) {
     return this->computeSimpleRootImagesTypeAI(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AII) {
+  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::AII) {
     return this->computeSimpleRootImagesTypeAII(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeDiagram::DiagramType::AIII) {
+  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::AIII) {
     return this->computeSimpleRootImagesTypeAIII(commentsOnFailure);
+  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EI) {
+    return this->computeSimpleRootImagesTypeEI(commentsOnFailure);
+  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EII) {
+    return this->computeSimpleRootImagesTypeEII(commentsOnFailure);
+  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EIII) {
+    return this->computeSimpleRootImagesTypeEIII(commentsOnFailure);
+  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EIV) {
+    return this->computeSimpleRootImagesTypeEIV(commentsOnFailure);
   }
-    if (commentsOnFailure != nullptr) {
+
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure
     << "Not implemented: Satake diagram: "
     << this->satakeDiagram.toString() << ". ";
@@ -2270,7 +2451,7 @@ bool CartanInvolution::computeSimpleRootImages(
 }
 
 bool CartanInvolution::computeFromDiagram(
-  const SatakeDiagram& inputDiagram,
+  const SatakeVoganDiagram& inputDiagram,
   SemisimpleLieAlgebra& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
@@ -2291,29 +2472,38 @@ bool CartanInvolution::computeFromDiagram(
   return true;
 }
 
-void SatakeDiagram::plot(Plot& output) {
+void DynkinType::plot(Plot& output) {
+}
+
+void SatakeVoganDiagram::plot(Plot& output) {
   this->plotInitialize(output);
   switch (this->diagram) {
-  case SatakeDiagram::AI:
+  case SatakeVoganDiagram::AI:
     this->plotAI(output);
     return;
-  case SatakeDiagram::AII:
+  case SatakeVoganDiagram::AII:
     this->plotAII(output);
     return;
-  case SatakeDiagram::AIII:
+  case SatakeVoganDiagram::AIII:
     this->plotAIII(output);
+    return;
+  case SatakeVoganDiagram::EI:
+    this->plotEI(output);
+    return;
+  case SatakeVoganDiagram::EII:
+    this->plotEII(output);
     return;
   default:
     return;
   }
 }
 
-void SatakeDiagram::plotInitialize(Plot& output) {
+void SatakeVoganDiagram::plotInitialize(Plot& output) {
   output.dimension = 2;
   output.flagIncludeCoordinateSystem = false;
 }
 
-void SatakeDiagram::plotHorizontalChainOfRoots(Plot& output, int count, Selection& blackedNodes) {
+void SatakeVoganDiagram::plotHorizontalChainOfRoots(Plot& output, int count, Selection& blackedNodes) {
   Vector<Rational> center;
   center.makeZero(2);
   for (int i = 0; i < count; i ++) {
@@ -2330,13 +2520,13 @@ void SatakeDiagram::plotHorizontalChainOfRoots(Plot& output, int count, Selectio
   }
 }
 
-void SatakeDiagram::plotAI(Plot& output) {
+void SatakeVoganDiagram::plotAI(Plot& output) {
   Selection blackedNodes;
   blackedNodes.initialize(this->rank);
   this->plotHorizontalChainOfRoots(output, this->rank, blackedNodes);
 }
 
-void SatakeDiagram::plotAII(Plot& output) {
+void SatakeVoganDiagram::plotAII(Plot& output) {
   Selection blackedNodes;
   blackedNodes.initialize(this->rank);
   for (int i = 0; i < this->rank; i += 2) {
@@ -2345,11 +2535,41 @@ void SatakeDiagram::plotAII(Plot& output) {
   this->plotHorizontalChainOfRoots(output, this->rank, blackedNodes);
 }
 
-void SatakeDiagram::plotAIII(Plot& output) {
+void SatakeVoganDiagram::plotAIII(Plot& output) {
   Selection nonBlackedNodes;
   int topRow = (this->rank - this->parameter) / 2;
   nonBlackedNodes.initialize(topRow);
   this->plotHorizontalChainOfRoots(output, topRow, nonBlackedNodes);
+}
+
+void SatakeVoganDiagram::plotEI(Plot& output) {
+  Selection nonBlackedNodes;
+  nonBlackedNodes.initialize(5);
+  this->plotHorizontalChainOfRoots(output, 5, nonBlackedNodes);
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[0] = distanceBetweenRootCenters * 2;
+  left[1] = radiusOfRootCircle;
+  right = left;
+  right[1] = distanceBetweenRootCenters - radiusOfRootCircle;
+  output.drawSegment(left, right);
+  right[1] = distanceBetweenRootCenters;
+  output.drawCircle(right, radiusOfRootCircle, "black", false);
+}
+
+void SatakeVoganDiagram::plotEII(Plot& output) {
+  Selection nonBlackedNodes;
+  nonBlackedNodes.initialize(5);
+  this->plotHorizontalChainOfRoots(output, 5, nonBlackedNodes);
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[0] = distanceBetweenRootCenters * 2;
+  left[1] = radiusOfRootCircle;
+  right = left;
+  right[1] = distanceBetweenRootCenters - radiusOfRootCircle;
+  output.drawSegment(left, right);
+  right[1] = distanceBetweenRootCenters;
+  output.drawCircle(right, radiusOfRootCircle, "black", false);
 }
 
 void CartanInvolution::plot(Plot& output) {
@@ -2360,24 +2580,35 @@ bool CalculatorLieTheory::cartanInvolution(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolution");
-  if (input.size() != 4 && input.size() != 3) {
+  if (input.size() != 4 && input.size() != 3 && input.size() != 2) {
     return calculator << "CartanInvolution takes as input three or two arguments.";
-  }
-  int diagramParameter = 0;
-  if (input.size() == 4) {
-    if (!input[3].isSmallInteger(&diagramParameter)) {
-      return calculator
-      << "Failed to extract small integer from the 3rd argument: "
-      << input[3].toString();
-    }
-  }
-  int rank = 0;
-  if (!input[2].isSmallInteger(&rank)) {
-    return calculator << "Failed to extract small integer from the 2nd argument.";
   }
   std::string typeString;
   if (!input[1].isOfType(&typeString)) {
     typeString = input[1].toString();
+  }
+  int diagramParameter = 0;
+  int rank = 0;
+  if (
+    typeString == "EI"   ||
+    typeString == "EII"  ||
+    typeString == "EIII" ||
+    typeString == "EIV"
+  ) {
+    rank = 6;
+  } else {
+    diagramParameter = 0;
+    if (input.size() == 4) {
+      if (!input[3].isSmallInteger(&diagramParameter)) {
+        return calculator
+        << "Failed to extract small integer from the 3rd argument: "
+        << input[3].toString();
+      }
+    }
+    rank = 0;
+    if (!input[2].isSmallInteger(&rank)) {
+      return calculator << "Failed to extract small integer from the 2nd argument.";
+    }
   }
   CartanInvolution involution;
   if (!involution.satakeDiagram.assignParameter(
@@ -2395,7 +2626,10 @@ bool CalculatorLieTheory::cartanInvolution(
   }
   Plot plot;
   involution.plot(plot);
-  return output.assignValue(calculator, plot.getPlotHtml(calculator) + involution.toString());
+  return output.assignValue(
+    calculator,
+    plot.getPlotHtml(calculator) + "<br>" + involution.toString()
+  );
 }
 
 bool CalculatorLieTheory::isReductiveLieSubalgebra(
@@ -2527,7 +2761,9 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
       &calculator.objectContainer.algebraicClosure
     );
     slTwoSubalgebras.writeHTML(&format);
-    semisimpleLieAlgebra.content->writeHTML(true, false);
+    Plot plot;
+    semisimpleLieAlgebra.content->weylGroup.dynkinType.plot(plot);
+    semisimpleLieAlgebra.content->writeHTML(true, false, plot.getPlotHtml2d(calculator));
   } else {
     out << "The table is precomputed and served from the hard disk. <br>";
   }
@@ -3684,6 +3920,8 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& subalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.weylGroup.dynkinType);
+  Plot plot;
+  subalgebras.owner->weylGroup.dynkinType.plot(plot);
   subalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
     calculator.objectContainer.algebraicClosure,
@@ -3697,7 +3935,8 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     docomputeModuleDecompositionsition,
     doAttemptToSolveSystems,
     docomputePairingTable,
-    doAdjustCentralizers
+    doAdjustCentralizers,
+    plot.getPlotHtml(calculator)
   );
   return output.assignValueOLD(out.str(), calculator);
 }
@@ -3909,9 +4148,9 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
 }
 
 bool CalculatorLieTheory::printSemisimpleLieAlgebra(
-  Calculator& calculator, const Expression& input, Expression& output, bool Verbose
+  Calculator& calculator, const Expression& input, Expression& output, bool verbose
 ) {
-  return CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(calculator, input, output, Verbose, false);
+  return CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(calculator, input, output, verbose, false);
 }
 
 bool CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk(
@@ -3969,12 +4208,15 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   algebraPointer.context.checkInitialization();
   SemisimpleLieAlgebra& semisimpleAlgebra = *algebraPointer.content;
   std::stringstream out;
+  Plot plot;
+  semisimpleAlgebra.weylGroup.dynkinType.plot(plot);
+  std::string plotHTML = plot.getPlotHtml2d(calculator);
   if (writeToHD) {
-    semisimpleAlgebra.writeHTML(verbose, calculator.flagWriteLatexPlots);
+    semisimpleAlgebra.writeHTML(verbose, calculator.flagWriteLatexPlots, plotHTML);
     out << "<a href='"
     << semisimpleAlgebra.fileNames.virtualFileNameWithPathStructureConstants()
     << "' target='_blank'>hard drive output</a><br>";
   }
-  out << semisimpleAlgebra.toHTML(verbose, calculator.flagWriteLatexPlots);
+  out << semisimpleAlgebra.toHTML(verbose, calculator.flagWriteLatexPlots, plotHTML);
   return output.assignValueOLD(out.str(), calculator);
 }

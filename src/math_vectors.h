@@ -1344,5 +1344,4 @@ public:
   void superimposeAffineCones(AffineCones& theOtherComplex);
 };
 
-
 #endif

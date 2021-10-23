@@ -196,7 +196,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   }
   Expression converted;
   if (input.size() == 3) {
-    if (!CalculatorConversions::innerPolynomialModuloInteger(
+    if (!CalculatorConversions::polynomialModuloInteger(
       calculator, input, converted
     )) {
       return calculator

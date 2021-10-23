@@ -2750,12 +2750,14 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     SemisimpleLieAlgebra algebra;
     algebra.weylGroup.makeFromDynkinType(allTypes[i]);
     algebra.computeChevalleyConstants();
-    algebra.writeHTML(true, false);
     SlTwoSubalgebras slTwoSubalgebras(algebra);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo = true;
     algebra.findSl2Subalgebras(algebra, slTwoSubalgebras, true, &calculator.objectContainer.algebraicClosure);
     slTwoSubalgebras.writeHTML();
-    algebra.writeHTML(true, false);
+    Plot plot;
+    algebra.weylGroup.dynkinType.plot(plot);
+    std::string plotDynkinType = plot.getPlotHtml2d(calculator);
+    algebra.writeHTML(true, false, plotDynkinType);
     if (allTypes[i].hasPrecomputedSubalgebras()) {
       SemisimpleSubalgebras subalgebras;
       MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
@@ -2773,7 +2775,8 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
         true,
         true,
         false,
-        true
+        true,
+        plotDynkinType
       )) {
         out << "Failed to compute " << allTypes[i].toString();
       }

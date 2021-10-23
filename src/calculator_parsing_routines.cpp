@@ -671,9 +671,9 @@ bool CalculatorParser::replaceOXEXEXXByEXX() {
   return this->decreaseStackExceptLastTwo(4);
 }
 
-void Calculator::logPublicError(const std::string& theError) {
+void Calculator::logPublicError(const std::string& error) {
   if (this->errorsPublic.str() != "") {
-    this->errorsPublic << theError;
+    this->errorsPublic << error;
   }
 }
 

@@ -641,7 +641,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "PolynomialModP",
-    CalculatorConversions::innerPolynomialModuloInteger,
+    CalculatorConversions::polynomialModuloInteger,
     "",
     "Creates a polynomial, with modular "
     "arithmetic coefficients, i.e., coefficients in Z / p Z. "

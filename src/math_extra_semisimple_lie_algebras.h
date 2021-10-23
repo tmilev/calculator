@@ -8,12 +8,18 @@
 class Plot;
 class CartanInvolution;
 
-// Represents a Satake diagram as defined in
+// Represents a Satake-Vogan diagram as defined in
 // Shôrô Araki,
 // "On root systems and an infinitesimal
 // classification of irreducible symmetric spaces", 1962.
-//
-class SatakeDiagram {
+// We use the Satake-Vogan diagram to define a Cartan involution.
+// More precisely, we use use the images of the simple Cartan generators
+// given in page 404,
+// Knapp, Lie groups beyond an introduction, 2ed, 2002.
+// We then extend the map to a Lie algebra homomorphism using
+// the straightforward algorithms from class
+// HomomorphismSemisimpleLieAlgebra.
+class SatakeVoganDiagram {
 private:
   void plotInitialize(Plot& output);
   void plotHorizontalChainOfRoots(Plot& output, int count, Selection& blackedNodes);
@@ -53,9 +59,9 @@ public:
   // Rank of the simple root system.
   int rank;
   static MapList<
-    std::string, SatakeDiagram::DiagramType, MathRoutines::hashString
+    std::string, SatakeVoganDiagram::DiagramType, MathRoutines::hashString
   > mapStringToType;
-  SatakeDiagram();
+  SatakeVoganDiagram();
   void computeMapStringToType();
   bool assignParameter(
     const std::string& input,
@@ -70,6 +76,8 @@ public:
   void plotAII(Plot& output);
   void plotAIII(Plot& output);
   void plotAIV(Plot& output);
+  void plotEI(Plot& output);
+  void plotEII(Plot& output);
 };
 
 class SemisimpleLieAlgebra {
@@ -214,8 +222,16 @@ public:
     bool includeSl2Subalgebras,
     bool includeSemisimpleSubalgebras
   ) const;
-  void writeHTML(bool verbose, bool flagWriteLatexPlots);
-  std::string toHTML(bool verbose, bool flagWriteLatexPlots);
+  void writeHTML(
+    bool verbose,
+    bool flagWriteLatexPlots,
+    const std::string& extraDynkinDiagramPlot
+  );
+  std::string toHTML(
+    bool verbose,
+    bool flagWriteLatexPlots,
+    const std::string& extraDynkinDiagramPlot
+  );
   static std::string toHTMLCalculatorHeadElements(
     const std::string& relativeTo = "../../.."
   );
@@ -376,7 +392,7 @@ public:
   );
   // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
   bool hasImplementedCartanInvolution(
-    const SatakeDiagram& satakeDiagram,
+    const SatakeVoganDiagram& satakeDiagram,
     CartanInvolution* whichInvolution,
     std::stringstream* commentsOnFailure
   );
@@ -563,9 +579,7 @@ public:
     this->toString(output, false);
   }
   void toString(std::string& output, bool useHtml);
-  void makeGinGWithIdentity(
-    char weylLetter, int rank, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
-  );
+  void makeGInGWithIdentity(SemisimpleLieAlgebra& owner);
   void projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
   void projectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
   void getMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
@@ -588,9 +602,16 @@ public:
 };
 
 class CartanInvolution {
+private:
+  // The cartan involution swaps the two simple generators.
+  void setSimpleRootSwap(int indexLeft, int indexRight);
+  // The cartan involution acts by - 1 on the given simple generator.
+  void setFilledSimpleRoot(int index);
+  // The cartan involution as the identity on the given simple generator.
+  void setHollowSimpleRoot(int index);
 public:
   SemisimpleLieAlgebra* owner;
-  SatakeDiagram satakeDiagram;
+  SatakeVoganDiagram satakeDiagram;
   LinearMapSemisimpleLieAlgebra<Rational> linearMap;
   HomomorphismSemisimpleLieAlgebra automorphism;
   DynkinType dynkinTypeAmbient();
@@ -608,11 +629,23 @@ public:
   bool computeSimpleRootImagesTypeAIV(
     std::stringstream* commentsOnFailure
   );
+  bool computeSimpleRootImagesTypeEI(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImagesTypeEII(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImagesTypeEIII(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImagesTypeEIV(
+    std::stringstream* commentsOnFailure
+  );
   bool computeSimpleRootImages(
     std::stringstream* commentsOnFailure
   );
   bool computeFromDiagram(
-    const SatakeDiagram& inputDiagram,
+    const SatakeVoganDiagram& inputDiagram,
     SemisimpleLieAlgebra& inputOwner,
     std::stringstream* commentsOnFailure
   );

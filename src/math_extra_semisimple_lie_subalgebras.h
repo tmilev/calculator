@@ -623,8 +623,7 @@ public:
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     const DynkinType* targetType
   );
-  bool computeStructureWriteFiles(
-    SemisimpleLieAlgebra& newOwner,
+  bool computeStructureWriteFiles(SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
@@ -636,7 +635,8 @@ public:
     bool computeModuleDecomposition,
     bool attemptToSolveSystems,
     bool computePairingTable,
-    bool adjustCentralizers
+    bool adjustCentralizers,
+    const std::string& extraDynkinDiagramPlot
   );
   bool computeStructureRealFormsWriteFiles(
     SemisimpleLieAlgebra& newOwner,

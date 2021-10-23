@@ -1227,10 +1227,10 @@ bool CalculatorConversions::innerLoadFileIntoString(
   return output.assignValue(calculator, outputString);
 }
 
-bool CalculatorConversions::innerMakeElementHyperOctahedral(
+bool CalculatorConversions::makeElementHyperOctahedral(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerMakeElementHyperOctahedral");
+  MacroRegisterFunctionWithName("CalculatorConversions::makeElementHyperOctahedral");
   std::string inputStringFormat;
   ElementHyperoctahedralGroupR2 element;
   if (input.isOfType<std::string>(&inputStringFormat)) {
@@ -1269,10 +1269,10 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   return output.assignValue(calculator, element);
 }
 
-bool CalculatorConversions::innerPolynomialModuloInteger(
+bool CalculatorConversions::polynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPolynomialModuloInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctions::polynomialModuloInteger");
   if (input.size() != 3) {
     return calculator
     << "Expected two arguments, polynomial and positive integer.";

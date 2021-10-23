@@ -5842,10 +5842,12 @@ class DynkinSimpleType {
   bool operator<(int otherRank) const;
 };
 
-//this class may need a modification: perhaps it should not inherit monomial collection,
-//but rather have a monomial collection as a private member.
-//Many important operations with Dynkin types require fixed order of monomials,
-//which may impose this reorganization.
+class Plot;
+
+// This class may need a modification: perhaps it should not inherit monomial collection,
+// but rather have a monomial collection as a private member.
+// Many important operations with Dynkin types require fixed order of monomials,
+// which may impose this reorganization.
 class DynkinType: public LinearCombination<DynkinSimpleType, Rational> {
 public:
   void getLettersTypesMultiplicities(
@@ -5924,6 +5926,7 @@ public:
     }
     return intResult;
   }
+  void plot(Plot& output);
   bool isTypeAOne() const;
   static int getIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool canBeExtendedParabolicallyTo(const DynkinType& other) const;

@@ -961,6 +961,7 @@ public:
     static std::string plotFillStart;
     static std::string plotFillFinish;
     static std::string pathFilled;
+    static std::string label;
   };
 
   std::string plotString;
@@ -1057,6 +1058,8 @@ public:
   void makeSegment(
     const Vector<Rational>& left, const Vector<Rational>& right
   );
+  void makeLabel(const Vector<Rational>& position, const std::string& label);
+  void makeLabel(const Vector<double>& position, const std::string& label);
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
@@ -1113,6 +1116,7 @@ public:
   void addPlotOnTop(PlotObject& input);
   void addPlotsOnTop(Plot& input);
   void drawSegment(const Vector<Rational>& left, const Vector<Rational>& right);
+  void drawLabel(const Vector<Rational>& position, const std::string& label);
   void drawCircle(
     const Vector<Rational>& center,
     const Rational& radius,

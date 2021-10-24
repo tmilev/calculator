@@ -1151,11 +1151,7 @@ bool CalculatorFunctionsPlot::plotLabel(
     label = input[2].toString();
   }
   PlotObject plot;
-  plot.dimension = labelPosition.size;
-  plot.plotString = label;
-  plot.pointsDouble.addOnTop(labelPosition);
-  plot.plotType = "label";
-  plot.colorJS = "black";
+  plot.makeLabel(labelPosition, label);
   return output.assignValue(calculator, plot);
 }
 

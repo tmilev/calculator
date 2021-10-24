@@ -11,6 +11,8 @@
 #include "general_file_operations_encodings.h"
 #include "web_api.h"
 
+// An externally defined class used to plot Dynkin diagrams.
+class Plot;
 class ElementZmodP;
 class WeylGroupData;
 class AlgebraicClosureRationals;
@@ -5761,6 +5763,10 @@ class DynkinSimpleType {
   char letter;
   int rank;
   Rational cartanSymmetricInverseScale;
+  // Constants used to plot Dynkin diagrams.
+  static const int radiusOfRootCircle = 1;
+  static const int distanceBetweenRootCenters = 20;
+  static const int labelDistance = 5;
   DynkinSimpleType(): letter('X'), rank(- 1), cartanSymmetricInverseScale(0) {
   }
   DynkinSimpleType(const DynkinSimpleType& other) {
@@ -5768,7 +5774,6 @@ class DynkinSimpleType {
   }
   DynkinSimpleType(char inputChar, int inputRank, const Rational& inputScale = 1) :
     letter(inputChar), rank(inputRank), cartanSymmetricInverseScale(inputScale) {
-
   }
   int getRootSystemSize() const;
   int getLieAlgebraDimension() const {
@@ -5840,15 +5845,29 @@ class DynkinSimpleType {
     return other > *this;
   }
   bool operator<(int otherRank) const;
+  void plot(
+    Plot& output,
+    int verticalOffset
+  ) const;
+  static void plotHorizontalChainOfRoots(
+    Plot& output, int count, Selection* blackedNodes
+  );
+  static void plotHorizontalChainOfRoots(
+    Plot& output,
+    int verticalOffset,
+    int count,
+    Selection* blackedNodes,
+    List<std::string> *labels
+  );
+  static void plotE6(Plot& output, int verticalOffset);
 };
-
-class Plot;
 
 // This class may need a modification: perhaps it should not inherit monomial collection,
 // but rather have a monomial collection as a private member.
 // Many important operations with Dynkin types require fixed order of monomials,
 // which may impose this reorganization.
 class DynkinType: public LinearCombination<DynkinSimpleType, Rational> {
+private:
 public:
   void getLettersTypesMultiplicities(
     List<char>* outputLetters = nullptr,
@@ -5926,7 +5945,6 @@ public:
     }
     return intResult;
   }
-  void plot(Plot& output);
   bool isTypeAOne() const;
   static int getIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool canBeExtendedParabolicallyTo(const DynkinType& other) const;
@@ -5961,6 +5979,9 @@ public:
     result -= other;
     return result;
   }
+  // These functions are used to plot dynkin diagrams and Satake-Vogan diagrams.
+  void plot(Plot& output);
+  static void plotInitialize(Plot& output);
 };
 
 class DynkinDiagramRootSubalgebra {

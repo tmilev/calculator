@@ -2473,10 +2473,92 @@ bool CartanInvolution::computeFromDiagram(
 }
 
 void DynkinType::plot(Plot& output) {
+  DynkinType::plotInitialize(output);
+  int verticalOffset = 0;
+  for (int i = 0; i < this->monomials.size; i ++) {
+    for (int j = 0; j < this->coefficients[i]; j ++) {
+      this->monomials[i].plot(output, verticalOffset);
+      verticalOffset += - 2 * DynkinSimpleType::distanceBetweenRootCenters;
+    }
+  }
+}
+
+void DynkinType::plotInitialize(Plot& output) {
+  output.dimension = 2;
+  output.flagIncludeCoordinateSystem = false;
+  output.desiredHtmlWidthInPixels = 200;
+  output.desiredHtmlHeightInPixels = 75;
+}
+
+void DynkinSimpleType::plotHorizontalChainOfRoots(
+  Plot& output, int count, Selection* blackedNodes
+) {
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, count,  0, blackedNodes, nullptr);
+}
+
+void DynkinSimpleType::plotHorizontalChainOfRoots(
+  Plot& output,
+  int count,
+  int verticalOffset,
+  Selection *blackedNodes,
+  List<std::string>* labels
+) {
+  Vector<Rational> center;
+  center.makeZero(2);
+  center[1] = verticalOffset;
+  for (int i = 0; i < count; i ++) {
+    center[0] = i * DynkinSimpleType::distanceBetweenRootCenters;
+    bool selected = false;
+    if (blackedNodes != nullptr) {
+      selected = blackedNodes->selected[i];
+    }
+    output.drawCircle(center, DynkinSimpleType::radiusOfRootCircle, "black", selected);
+  }
+  if (labels != nullptr) {
+    center[1] += DynkinSimpleType::labelDistance;
+    for (int i = 0; i < labels->size; i ++) {
+      center[0] = i * DynkinSimpleType::distanceBetweenRootCenters;
+      output.drawLabel(center, (*labels)[i]);
+    }
+  }
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[1] = verticalOffset;
+  right = left;
+  for (int i = 0; i < count - 1; i ++) {
+    left[0] = i * DynkinSimpleType::distanceBetweenRootCenters + DynkinSimpleType::radiusOfRootCircle;
+    right[0] = (i + 1) * DynkinSimpleType::distanceBetweenRootCenters - DynkinSimpleType::radiusOfRootCircle;
+    output.drawSegment(left, right);
+  }
+}
+
+void DynkinSimpleType::plot(Plot& output, int verticalOffset) const {
+  List<std::string> labels;
+  switch (this->letter) {
+  case 'A':
+    for (int i = 0; i < this->rank; i ++) {
+      std::stringstream rootLabel;
+      rootLabel << "i+1";
+      labels.addOnTop(rootLabel.str());
+    }
+    DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, verticalOffset, nullptr, &labels);
+    break;
+  case 'E':
+    switch (this->rank) {
+    case 6:
+      DynkinSimpleType::plotE6(output, verticalOffset);
+      break;
+    default:
+      global.fatal << "Plotting of type: " << this->toString() << " not implemented. " << global.fatal;
+    }
+    break;
+  default:
+    global.fatal << "Plotting of type: " << this->toString() << " not implemented. " << global.fatal;
+  }
 }
 
 void SatakeVoganDiagram::plot(Plot& output) {
-  this->plotInitialize(output);
+  DynkinType::plotInitialize(output);
   switch (this->diagram) {
   case SatakeVoganDiagram::AI:
     this->plotAI(output);
@@ -2498,32 +2580,8 @@ void SatakeVoganDiagram::plot(Plot& output) {
   }
 }
 
-void SatakeVoganDiagram::plotInitialize(Plot& output) {
-  output.dimension = 2;
-  output.flagIncludeCoordinateSystem = false;
-}
-
-void SatakeVoganDiagram::plotHorizontalChainOfRoots(Plot& output, int count, Selection& blackedNodes) {
-  Vector<Rational> center;
-  center.makeZero(2);
-  for (int i = 0; i < count; i ++) {
-    center[0] = i * distanceBetweenRootCenters;
-    output.drawCircle(center, radiusOfRootCircle, "black", blackedNodes.selected[i]);
-  }
-  Vector<Rational> left, right;
-  left.makeZero(2);
-  right.makeZero(2);
-  for (int i = 0; i < count - 1; i ++) {
-    left[0] = i * distanceBetweenRootCenters + radiusOfRootCircle;
-    right[0] = (i + 1) * distanceBetweenRootCenters - radiusOfRootCircle;
-    output.drawSegment(left, right);
-  }
-}
-
 void SatakeVoganDiagram::plotAI(Plot& output) {
-  Selection blackedNodes;
-  blackedNodes.initialize(this->rank);
-  this->plotHorizontalChainOfRoots(output, this->rank, blackedNodes);
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, nullptr);
 }
 
 void SatakeVoganDiagram::plotAII(Plot& output) {
@@ -2532,35 +2590,36 @@ void SatakeVoganDiagram::plotAII(Plot& output) {
   for (int i = 0; i < this->rank; i += 2) {
     blackedNodes.addSelectionAppendNewIndex(i);
   }
-  this->plotHorizontalChainOfRoots(output, this->rank, blackedNodes);
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &blackedNodes);
 }
 
 void SatakeVoganDiagram::plotAIII(Plot& output) {
-  Selection nonBlackedNodes;
   int topRow = (this->rank - this->parameter) / 2;
-  nonBlackedNodes.initialize(topRow);
-  this->plotHorizontalChainOfRoots(output, topRow, nonBlackedNodes);
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, topRow, nullptr);
 }
 
 void SatakeVoganDiagram::plotEI(Plot& output) {
-  Selection nonBlackedNodes;
-  nonBlackedNodes.initialize(5);
-  this->plotHorizontalChainOfRoots(output, 5, nonBlackedNodes);
+  DynkinSimpleType::plotE6(output, 0);
+}
+
+void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
+  List<std::string> labels = List<std::string>({"1","3","4","5","6"});
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, 5, verticalOffset, nullptr, &labels);
   Vector<Rational> left, right;
   left.makeZero(2);
-  left[0] = distanceBetweenRootCenters * 2;
-  left[1] = radiusOfRootCircle;
+  left[0] = DynkinSimpleType::distanceBetweenRootCenters * 2;
+  left[1] = DynkinSimpleType::radiusOfRootCircle + verticalOffset;
   right = left;
-  right[1] = distanceBetweenRootCenters - radiusOfRootCircle;
+  right[1] = DynkinSimpleType::distanceBetweenRootCenters - DynkinSimpleType::radiusOfRootCircle + verticalOffset;
   output.drawSegment(left, right);
-  right[1] = distanceBetweenRootCenters;
-  output.drawCircle(right, radiusOfRootCircle, "black", false);
+  right[1] = DynkinSimpleType::distanceBetweenRootCenters + verticalOffset;
+  output.drawCircle(right, DynkinSimpleType::radiusOfRootCircle, "black", false);
+  right[1] += DynkinSimpleType::labelDistance;
+  output.drawLabel(right, "2");
 }
 
 void SatakeVoganDiagram::plotEII(Plot& output) {
-  Selection nonBlackedNodes;
-  nonBlackedNodes.initialize(5);
-  this->plotHorizontalChainOfRoots(output, 5, nonBlackedNodes);
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, 5, nullptr);
   Vector<Rational> left, right;
   left.makeZero(2);
   left[0] = distanceBetweenRootCenters * 2;

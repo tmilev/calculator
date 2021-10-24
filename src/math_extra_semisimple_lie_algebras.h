@@ -21,8 +21,6 @@ class CartanInvolution;
 // HomomorphismSemisimpleLieAlgebra.
 class SatakeVoganDiagram {
 private:
-  void plotInitialize(Plot& output);
-  void plotHorizontalChainOfRoots(Plot& output, int count, Selection& blackedNodes);
 public:
   // This is the column 1 entry of Table 5.11 in the paper mentioned above.
   enum DiagramType {

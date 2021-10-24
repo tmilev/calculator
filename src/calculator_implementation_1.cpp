@@ -46,6 +46,7 @@ std::string PlotObject::PlotTypes::segment          = "segment";
 std::string PlotObject::PlotTypes::plotFillStart    = "plotFillStart";
 std::string PlotObject::PlotTypes::plotFillFinish   = "plotFillFinish";
 std::string PlotObject::PlotTypes::pathFilled       = "pathFilled";
+std::string PlotObject::PlotTypes::label            = "label";
 
 std::string Plot::Labels::canvasName                = "canvasName";
 std::string Plot::Labels::controlsName              = "controlsName";
@@ -457,6 +458,24 @@ void PlotObject::makeSegment(
   this->plotType = PlotObject::PlotTypes::segment;
 }
 
+void PlotObject::makeLabel(
+  const Vector<Rational>& position,
+  const std::string& label
+) {
+  this->makeLabel(position.getVectorDouble(), label);
+}
+
+void PlotObject::makeLabel(
+  const Vector<double>& position,
+    const std::string& label
+) {
+  this->dimension = position.size;
+  this->plotString = label;
+  this->pointsDouble.addOnTop(position);
+  this->colorJS = "black";
+  this->plotType = PlotObject::PlotTypes::label;
+}
+
 void PlotObject::makePlotFillStart() {
   this->plotType = PlotObject::PlotTypes::plotFillStart;
 }
@@ -519,6 +538,14 @@ void Plot::drawSegment(
   PlotObject segment;
   segment.makeSegment(left, right);
   this->addPlotOnTop(segment);
+}
+
+void Plot::drawLabel(
+  const Vector<Rational>& position, const std::string& label
+) {
+  PlotObject labelPlot;
+  labelPlot.makeLabel(position, label);
+  this->addPlotOnTop(labelPlot);
 }
 
 void Plot::addPlotsOnTop(Plot& input) {

@@ -2243,12 +2243,13 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   int rank = this->owner->getRank();
   if (this->satakeDiagram.parameter < 0 || this->satakeDiagram.parameter > rank) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter must be between 0 and the rank " << rank << " instead it is: " << this->satakeDiagram.rank;
+      *commentsOnFailure << "Parameter must be between 0 and the rank "
+      << rank << " instead it is: " << this->satakeDiagram.rank;
     }
     return false;
   }
   int paired = rank - this->satakeDiagram.parameter;
-  if (paired % 2 != 0) {
+  if (paired % 2 != 0 && this->satakeDiagram.parameter != 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
       << " does not have the same parity as the rank: " << rank << ".";
@@ -2265,6 +2266,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
     int index = numberOfPairs + i;
     this->setFilledSimpleRoot(index);
+  }
+  if (rank % 2 == 1 && this->satakeDiagram.parameter == 0) {
+    this->setHollowSimpleRoot(rank / 2);
   }
   return true;
 }
@@ -2317,7 +2321,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIII(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIII");
-  // Satake diagram of type EI is for Lie algebra E_6.
+  // Satake diagram of type EIII is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
     this->owner->getRank() != 6
@@ -2327,50 +2331,22 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIII(
     }
     return false;
   }
-  int rank = this->owner->getRank();
-  if (this->satakeDiagram.parameter < 0 || this->satakeDiagram.parameter > rank) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter must be between 0 and the rank " << rank << " instead it is: " << this->satakeDiagram.rank;
-    }
-    return false;
-  }
-  global.fatal << "Not implemented yet" << global.fatal;
-  int paired = rank - this->satakeDiagram.parameter;
-  if (paired % 2 != 0) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
-      << " does not have the same parity as the rank: " << rank << ".";
-    }
-    return false;
-  }
-  int numberOfPairs = paired / 2;
+  int rank = 6;
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
-  Vector<Rational> simpleRootLeft, simpleRootRight;
-  for (int i = 0; i < numberOfPairs; i ++) {
-    simpleRootLeft.makeEi(rank, i);
-    simpleRootRight.makeEi(rank, rank - i - 1);
-    this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRootRight, *this->owner);
-    this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRootRight, *this->owner);
-    this->automorphism.imagesPositiveSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(simpleRootLeft, *this->owner);
-    this->automorphism.imagesNegativeSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(- simpleRootLeft, *this->owner);
-  }
-  for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
-    int index = numberOfPairs + i;
-    simpleRootLeft.makeEi(rank, index);
-    this->automorphism.imagesPositiveSimpleChevalleyGenerators[index].makeGGenerator(simpleRootLeft, *this->owner);
-    this->automorphism.imagesNegativeSimpleChevalleyGenerators[index].makeGGenerator(- simpleRootLeft, *this->owner);
-    this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
-    this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
-  }
+  this->setSimpleRootSwap(0, 5);
+  this->setHollowSimpleRoot(1);
+  this->setFilledSimpleRoot(2);
+  this->setFilledSimpleRoot(3);
+  this->setFilledSimpleRoot(4);
   return true;
 }
 
 bool CartanInvolution::computeSimpleRootImagesTypeEIV(
-std::stringstream* commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
-MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIII");
-// Satake diagram of type EI is for Lie algebra E_6.
+MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIV");
+// Satake diagram of type EIV is for Lie algebra E_6.
 if (
   !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
   this->owner->getRank() != 6
@@ -2380,43 +2356,16 @@ if (
   }
   return false;
 }
-int rank = this->owner->getRank();
-if (this->satakeDiagram.parameter < 0 || this->satakeDiagram.parameter > rank) {
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Parameter must be between 0 and the rank " << rank << " instead it is: " << this->satakeDiagram.rank;
-  }
-  return false;
-}
-global.fatal << "Not implemented yet" << global.fatal;
-int paired = rank - this->satakeDiagram.parameter;
-if (paired % 2 != 0) {
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
-    << " does not have the same parity as the rank: " << rank << ".";
-  }
-  return false;
-}
-int numberOfPairs = paired / 2;
-this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
-this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
-Vector<Rational> simpleRootLeft, simpleRootRight;
-for (int i = 0; i < numberOfPairs; i ++) {
-  simpleRootLeft.makeEi(rank, i);
-  simpleRootRight.makeEi(rank, rank - i - 1);
-  this->automorphism.imagesPositiveSimpleChevalleyGenerators[i].makeGGenerator(simpleRootRight, *this->owner);
-  this->automorphism.imagesNegativeSimpleChevalleyGenerators[i].makeGGenerator(- simpleRootRight, *this->owner);
-  this->automorphism.imagesPositiveSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(simpleRootLeft, *this->owner);
-  this->automorphism.imagesNegativeSimpleChevalleyGenerators[rank - i - 1].makeGGenerator(- simpleRootLeft, *this->owner);
-}
-for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
-  int index = numberOfPairs + i;
-  simpleRootLeft.makeEi(rank, index);
-  this->automorphism.imagesPositiveSimpleChevalleyGenerators[index].makeGGenerator(simpleRootLeft, *this->owner);
-  this->automorphism.imagesNegativeSimpleChevalleyGenerators[index].makeGGenerator(- simpleRootLeft, *this->owner);
-  this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
-  this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
-}
-return true;
+  int rank = 6;
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  this->setHollowSimpleRoot(0);
+  this->setHollowSimpleRoot(5);
+  this->setFilledSimpleRoot(1);
+  this->setFilledSimpleRoot(2);
+  this->setFilledSimpleRoot(3);
+  this->setFilledSimpleRoot(4);
+  return true;
 }
 
 bool CartanInvolution::computeSimpleRootImages(
@@ -2533,15 +2482,18 @@ void DynkinSimpleType::plotHorizontalChainOfRoots(
 }
 
 void DynkinSimpleType::plot(Plot& output, int verticalOffset) const {
-  List<std::string> labels;
   switch (this->letter) {
   case 'A':
-    for (int i = 0; i < this->rank; i ++) {
-      std::stringstream rootLabel;
-      rootLabel << "i+1";
-      labels.addOnTop(rootLabel.str());
-    }
-    DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, verticalOffset, nullptr, &labels);
+    DynkinSimpleType::plotAn(output, this->rank, verticalOffset);
+    break;
+  case 'B':
+    DynkinSimpleType::plotBn(output, this->rank, verticalOffset);
+    break;
+  case 'C':
+    DynkinSimpleType::plotCn(output, this->rank, verticalOffset);
+    break;
+  case 'D':
+    DynkinSimpleType::plotDn(output, this->rank, verticalOffset);
     break;
   case 'E':
     switch (this->rank) {
@@ -2549,12 +2501,72 @@ void DynkinSimpleType::plot(Plot& output, int verticalOffset) const {
       DynkinSimpleType::plotE6(output, verticalOffset);
       break;
     default:
-      global.fatal << "Plotting of type: " << this->toString() << " not implemented. " << global.fatal;
+      global.comments << "Plotting of type: " << this->toString() << " not implemented. ";
     }
     break;
   default:
-    global.fatal << "Plotting of type: " << this->toString() << " not implemented. " << global.fatal;
+    global.comments << "Plotting of type: " << this->toString() << " not implemented. ";
+    break;
   }
+}
+
+void DynkinSimpleType::plotAn(Plot& output, int rank, int verticalOffset) {
+  List<std::string> labels;
+  for (int i = 0; i < rank; i ++) {
+    std::stringstream rootLabel;
+    rootLabel << i + 1;
+    labels.addOnTop(rootLabel.str());
+  }
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, rank, verticalOffset, nullptr, &labels);
+}
+
+void DynkinSimpleType::plotBC(Plot& output, int rank, int verticalOffset) {
+  if (rank <= 1) {
+    return;
+  }
+  DynkinSimpleType::plotAn(output, rank - 1, verticalOffset);
+  Vector<Rational> lastCenter, secondToLastCenter;
+  secondToLastCenter.makeZero(2);
+  secondToLastCenter[1] = verticalOffset;
+  secondToLastCenter[0] = DynkinSimpleType::distanceBetweenRootCenters * (rank - 1);
+  secondToLastCenter[1] -= DynkinSimpleType::radiusOfRootCircle ;
+  lastCenter = secondToLastCenter;
+  lastCenter[0] += DynkinSimpleType::distanceBetweenRootCenters;
+  output.drawSegment(lastCenter, secondToLastCenter);
+  secondToLastCenter[1] += DynkinSimpleType::radiusOfRootCircle * 2;
+  lastCenter[1] += DynkinSimpleType::radiusOfRootCircle * 2;
+  output.drawSegment(lastCenter, secondToLastCenter);
+  lastCenter[1] += DynkinSimpleType::labelDistance;
+  std::stringstream label;
+  label << rank;
+  output.drawLabel(lastCenter, label.str());
+}
+
+void DynkinSimpleType::plotCn(Plot& output, int rank, int verticalOffset) {
+  DynkinSimpleType::plotBC(output, rank, verticalOffset);
+}
+
+void DynkinSimpleType::plotBn(Plot& output, int rank, int verticalOffset) {
+  DynkinSimpleType::plotBC(output, rank, verticalOffset);
+}
+
+void DynkinSimpleType::plotDn(Plot& output, int rank, int verticalOffset) {
+}
+
+void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
+  List<std::string> labels = List<std::string>({"1","3","4","5","6"});
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, 5, verticalOffset, nullptr, &labels);
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[0] = DynkinSimpleType::distanceBetweenRootCenters * 2;
+  left[1] = DynkinSimpleType::radiusOfRootCircle + verticalOffset;
+  right = left;
+  right[1] = DynkinSimpleType::distanceBetweenRootCenters - DynkinSimpleType::radiusOfRootCircle + verticalOffset;
+  output.drawSegment(left, right);
+  right[1] = DynkinSimpleType::distanceBetweenRootCenters + verticalOffset;
+  output.drawCircle(right, DynkinSimpleType::radiusOfRootCircle, "black", false);
+  right[1] += DynkinSimpleType::labelDistance;
+  output.drawLabel(right, "2");
 }
 
 void SatakeVoganDiagram::plot(Plot& output) {
@@ -2600,22 +2612,6 @@ void SatakeVoganDiagram::plotAIII(Plot& output) {
 
 void SatakeVoganDiagram::plotEI(Plot& output) {
   DynkinSimpleType::plotE6(output, 0);
-}
-
-void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
-  List<std::string> labels = List<std::string>({"1","3","4","5","6"});
-  DynkinSimpleType::plotHorizontalChainOfRoots(output, 5, verticalOffset, nullptr, &labels);
-  Vector<Rational> left, right;
-  left.makeZero(2);
-  left[0] = DynkinSimpleType::distanceBetweenRootCenters * 2;
-  left[1] = DynkinSimpleType::radiusOfRootCircle + verticalOffset;
-  right = left;
-  right[1] = DynkinSimpleType::distanceBetweenRootCenters - DynkinSimpleType::radiusOfRootCircle + verticalOffset;
-  output.drawSegment(left, right);
-  right[1] = DynkinSimpleType::distanceBetweenRootCenters + verticalOffset;
-  output.drawCircle(right, DynkinSimpleType::radiusOfRootCircle, "black", false);
-  right[1] += DynkinSimpleType::labelDistance;
-  output.drawLabel(right, "2");
 }
 
 void SatakeVoganDiagram::plotEII(Plot& output) {

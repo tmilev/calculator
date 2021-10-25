@@ -5860,6 +5860,11 @@ class DynkinSimpleType {
     List<std::string> *labels
   );
   static void plotE6(Plot& output, int verticalOffset);
+  static void plotAn(Plot& output, int rank, int verticalOffset);
+  static void plotBn(Plot& output, int rank, int verticalOffset);
+  static void plotBC(Plot& output, int rank, int verticalOffset);
+  static void plotCn(Plot& output, int rank, int verticalOffset);
+  static void plotDn(Plot& output, int rank, int verticalOffset);
 };
 
 // This class may need a modification: perhaps it should not inherit monomial collection,

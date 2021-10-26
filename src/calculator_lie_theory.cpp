@@ -2528,14 +2528,16 @@ void DynkinSimpleType::plotBC(Plot& output, int rank, int verticalOffset) {
   Vector<Rational> lastCenter, secondToLastCenter;
   secondToLastCenter.makeZero(2);
   secondToLastCenter[1] = verticalOffset;
-  secondToLastCenter[0] = DynkinSimpleType::distanceBetweenRootCenters * (rank - 1);
-  secondToLastCenter[1] -= DynkinSimpleType::radiusOfRootCircle ;
+  secondToLastCenter[0] = DynkinSimpleType::distanceBetweenRootCenters * (rank - 2);
+  secondToLastCenter[1] -= DynkinSimpleType::radiusOfRootCircle;
   lastCenter = secondToLastCenter;
   lastCenter[0] += DynkinSimpleType::distanceBetweenRootCenters;
   output.drawSegment(lastCenter, secondToLastCenter);
   secondToLastCenter[1] += DynkinSimpleType::radiusOfRootCircle * 2;
   lastCenter[1] += DynkinSimpleType::radiusOfRootCircle * 2;
   output.drawSegment(lastCenter, secondToLastCenter);
+  lastCenter[1] = verticalOffset;
+  output.drawCircle(lastCenter, DynkinSimpleType::radiusOfRootCircle, "black", false);
   lastCenter[1] += DynkinSimpleType::labelDistance;
   std::stringstream label;
   label << rank;
@@ -2551,6 +2553,43 @@ void DynkinSimpleType::plotBn(Plot& output, int rank, int verticalOffset) {
 }
 
 void DynkinSimpleType::plotDn(Plot& output, int rank, int verticalOffset) {
+  if (rank <= 2) {
+    return;
+  }
+  DynkinSimpleType::plotAn(output, rank - 2, verticalOffset);
+  Vector<Rational> bottomCenter, topCenter, lastAnCenter;
+  lastAnCenter.makeZero(2);
+  lastAnCenter[1] = verticalOffset;
+  lastAnCenter[0] = DynkinSimpleType::distanceBetweenRootCenters * (rank - 3);
+  // Approximate sqrt(2) by 1414/1000:
+  Rational sqrt2DividedBy2 = Rational(1414, 1000) / 2;
+  Rational distanceTimesSqrt2DividedByTwo = sqrt2DividedBy2 * DynkinSimpleType::distanceBetweenRootCenters;
+  bottomCenter = lastAnCenter;
+  bottomCenter[0] += distanceTimesSqrt2DividedByTwo;
+  bottomCenter[1] -= distanceTimesSqrt2DividedByTwo;
+  topCenter = bottomCenter;
+  topCenter[1] += distanceTimesSqrt2DividedByTwo * 2;
+  output.drawCircle(bottomCenter, DynkinSimpleType::radiusOfRootCircle, "black", false);
+  output.drawCircle(topCenter, DynkinSimpleType::radiusOfRootCircle, "black", false);
+  bottomCenter[0] -= sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+  bottomCenter[1] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+  topCenter[0] -= sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+  topCenter[1] -= sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+
+  lastAnCenter[0] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+  lastAnCenter[1] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+  output.drawSegment(lastAnCenter, topCenter);
+  output.drawSegment(lastAnCenter, bottomCenter);
+  std::stringstream secondToLastRoot;
+  secondToLastRoot << rank - 1;
+  bottomCenter[0] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle + DynkinSimpleType::labelDistance;
+  bottomCenter[1] -= sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+  output.drawLabel(bottomCenter, secondToLastRoot.str());
+  std::stringstream lastRoot;
+  lastRoot << rank;
+  topCenter[0] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle + DynkinSimpleType::labelDistance;
+  topCenter[1] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
+  output.drawLabel(topCenter, lastRoot.str());
 }
 
 void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {

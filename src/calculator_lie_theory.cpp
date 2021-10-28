@@ -2500,14 +2500,36 @@ void DynkinSimpleType::plot(Plot& output, int verticalOffset) const {
     case 6:
       DynkinSimpleType::plotE6(output, verticalOffset);
       break;
+    case 7:
+      DynkinSimpleType::plotE7(output, verticalOffset);
+      break;
+    case 8:
+      DynkinSimpleType::plotE8(output, verticalOffset);
+      break;
     default:
       global.comments << "Plotting of type: " << this->toString() << " not implemented. ";
     }
+    break;
+  case 'F':
+    DynkinSimpleType::plotF4(output, verticalOffset);
+    break;
+  case 'G':
+    DynkinSimpleType::plotG2(output, verticalOffset);
     break;
   default:
     global.comments << "Plotting of type: " << this->toString() << " not implemented. ";
     break;
   }
+}
+
+void DynkinSimpleType::plotF4(Plot& output, int verticalOffset) {
+  DynkinSimpleType::plotBn(output, 3, verticalOffset);
+  DynkinSimpleType::appendOneSingleConnectedRootToTheRight(output, 2, verticalOffset, "4", false);
+}
+
+void DynkinSimpleType::plotG2(Plot& output, int verticalOffset) {
+  DynkinSimpleType::plotBn(output, 2, verticalOffset);
+  DynkinSimpleType::appendOneSingleConnectedRootToTheRight(output, 0, verticalOffset, "2", false);
 }
 
 void DynkinSimpleType::plotAn(Plot& output, int rank, int verticalOffset) {
@@ -2546,10 +2568,36 @@ void DynkinSimpleType::plotBC(Plot& output, int rank, int verticalOffset) {
 
 void DynkinSimpleType::plotCn(Plot& output, int rank, int verticalOffset) {
   DynkinSimpleType::plotBC(output, rank, verticalOffset);
+  if (rank < 2) {
+    return;
+  }
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[0] = DynkinSimpleType::distanceBetweenRootCenters * (rank - 2) + DynkinSimpleType::radiusOfRootCircle;
+  left[1] = verticalOffset;
+  right = left;
+  right[0] += DynkinSimpleType::distanceBetweenRootCenters / 4;
+  right[1] += DynkinSimpleType::distanceBetweenRootCenters / 4;
+  output.drawSegment(left, right);
+  right[1] -= DynkinSimpleType::distanceBetweenRootCenters / 2;
+  output.drawSegment(left, right);
 }
 
 void DynkinSimpleType::plotBn(Plot& output, int rank, int verticalOffset) {
   DynkinSimpleType::plotBC(output, rank, verticalOffset);
+  if (rank < 2) {
+    return;
+  }
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[0] = DynkinSimpleType::distanceBetweenRootCenters * (rank - 2) + DynkinSimpleType::radiusOfRootCircle;
+  left[1] = verticalOffset;
+  right = left;
+  left[0] += DynkinSimpleType::distanceBetweenRootCenters / 4;
+  right[1] += DynkinSimpleType::distanceBetweenRootCenters / 4;
+  output.drawSegment(left, right);
+  right[1] -= DynkinSimpleType::distanceBetweenRootCenters / 2;
+  output.drawSegment(left, right);
 }
 
 void DynkinSimpleType::plotDn(Plot& output, int rank, int verticalOffset) {
@@ -2606,6 +2654,38 @@ void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
   output.drawCircle(right, DynkinSimpleType::radiusOfRootCircle, "black", false);
   right[1] += DynkinSimpleType::labelDistance;
   output.drawLabel(right, "2");
+}
+
+void DynkinSimpleType::appendOneSingleConnectedRootToTheRight(
+  Plot &output,
+  int segmentsSoFar,
+  int verticalOffset,
+  const std::string& label,
+  bool filled
+) {
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[0] = DynkinSimpleType::distanceBetweenRootCenters * segmentsSoFar;
+  left[1] = verticalOffset;
+  right = left;
+  right[0] += DynkinSimpleType::distanceBetweenRootCenters;
+  output.drawCircle(right, DynkinSimpleType::radiusOfRootCircle, "black", filled);
+  right[1] += DynkinSimpleType::labelDistance;
+  output.drawLabel(right, label);
+  right[1] -= DynkinSimpleType::labelDistance;
+  left[0] += DynkinSimpleType::radiusOfRootCircle;
+  right[0] -= DynkinSimpleType::radiusOfRootCircle;
+  output.drawSegment(left, right);
+}
+
+void DynkinSimpleType::plotE7(Plot& output, int verticalOffset) {
+  DynkinSimpleType::plotE6(output, verticalOffset);
+  DynkinSimpleType::appendOneSingleConnectedRootToTheRight(output, 4, verticalOffset, "7", false);
+}
+
+void DynkinSimpleType::plotE8(Plot& output, int verticalOffset) {
+  DynkinSimpleType::plotE7(output, verticalOffset);
+  DynkinSimpleType::appendOneSingleConnectedRootToTheRight(output, 5, verticalOffset, "8", false);
 }
 
 void SatakeVoganDiagram::plot(Plot& output) {

@@ -5860,6 +5860,17 @@ class DynkinSimpleType {
     List<std::string> *labels
   );
   static void plotE6(Plot& output, int verticalOffset);
+  static void plotE7(Plot& output, int verticalOffset);
+  static void plotE8(Plot& output, int verticalOffset);
+  static void plotF4(Plot& output, int verticalOffset);
+  static void plotG2(Plot& output, int verticalOffset);
+  static void appendOneSingleConnectedRootToTheRight(
+    Plot& output,
+    int segmentsSoFar,
+    int verticalOffset,
+    const std::string& label,
+    bool filled
+  );
   static void plotAn(Plot& output, int rank, int verticalOffset);
   static void plotBn(Plot& output, int rank, int verticalOffset);
   static void plotBC(Plot& output, int rank, int verticalOffset);

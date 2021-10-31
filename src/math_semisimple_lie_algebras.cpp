@@ -1030,7 +1030,7 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   (void) commentsOnFailure;
   this->domainAlgebra().computeChevalleyConstants();
   this->coDomainAlgebra().computeChevalleyConstants();
-  int domainRank = this->domainAlgebra().weylGroup.cartanSymmetric.numberOfRows;
+  int domainRank = this->domainAlgebra().getRank();
   Selection nonComputed;
   int numberofGenerators = this->domainAlgebra().getNumberOfGenerators();
   nonComputed.initialize(numberofGenerators);
@@ -1261,8 +1261,16 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
   if (useHtml) {
     out << "<br>";
   }
+  FormatExpressions* format = &global.defaultFormat.getElement();
   for (int i = 0; i < this->imagesNegativeSimpleChevalleyGenerators.size; i ++) {
-    out << this->imagesNegativeSimpleChevalleyGenerators[i].toString(&global.defaultFormat.getElement()) << "\n\n";
+    ChevalleyGenerator preimage;
+    Vector<Rational> simpleRoot;
+    simpleRoot.makeEi(this->domain->getRank(), i);
+    preimage.makeGeneratorRootSpace(this->domainAlgebra(), simpleRoot);
+    const ElementSemisimpleLieAlgebra<Rational>& image = this->imagesNegativeSimpleChevalleyGenerators[i];
+    out << "\\("
+    << preimage.toString(format) << "\\mapsto "
+    << image.toString(format) << "\\)" << "\n\n";
     if (useHtml) {
       out << "<br>";
     }
@@ -1272,16 +1280,30 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
     out << "<br>";
   }
   for (int i = 0; i < this->imagesPositiveSimpleChevalleyGenerators.size; i ++) {
-    out << this->imagesPositiveSimpleChevalleyGenerators[i].toString(&global.defaultFormat.getElement()) << "\n\n";
+    ChevalleyGenerator preimage;
+    Vector<Rational> simpleRoot;
+    simpleRoot.makeEi(this->domain->getRank(), i);
+    simpleRoot *= - 1;
+    preimage.makeGeneratorRootSpace(this->domainAlgebra(), simpleRoot);
+    const ElementSemisimpleLieAlgebra<Rational>& image = this->imagesPositiveSimpleChevalleyGenerators[i];
+    out << "\\("
+    << preimage.toString(format) << "\\mapsto "
+    << image.toString(format)
+    << "\\)"
+    << "\n\n";
     if (useHtml) {
       out << "<br>";
     }
   }
-  out << "Maps of Chevalley generators:\n\n";
+  out << "Maps of Chevalley generators:<br>\n";
+  out << "\\(\\begin{array}{rcl}\n";
   for (int i = 0; i < this->domainAllChevalleyGenerators.size; i ++) {
-    out << "<br>" << this->domainAllChevalleyGenerators[i].toString(&global.defaultFormat.getElement())
-    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].toString(&global.defaultFormat.getElement());
+    const ElementSemisimpleLieAlgebra<Rational>& preimage = this->domainAllChevalleyGenerators[i];
+    const ElementSemisimpleLieAlgebra<Rational>& image = this->imagesAllChevalleyGenerators[i];
+    out << preimage.toString(format)
+    << " &\\mapsto& " << image.toString(format) << "\\\\\n";
   }
+  out << "\\end{array}\\)";
   return out.str();
 }
 

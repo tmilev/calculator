@@ -1509,6 +1509,7 @@ class LaTeXConstants {
       'gt': '>',
       'sqcup': '\u2294',
       'to': '\u2192',
+      'mapsto': '\u21A6',
       'nwarrow': '\u2196',
       'nearrow': '\u2197',
       'searrow': '\u2198',

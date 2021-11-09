@@ -911,14 +911,22 @@ public:
     }
     return false;
   }
-  void makeLinearOperatorFromDomainAndRange(Vectors<Coefficient>& domain, Vectors<Coefficient>& range) {
+  bool makeInvertibleHomomorphismFromDomainAndRange(
+    Vectors<Coefficient>& domain, Vectors<Coefficient>& range
+  ) {
     Matrix<Coefficient> domainMatrix;
-    Matrix<Coefficient> codomainMatrix;
+    Matrix<Coefficient> rangeMatrix;
+    global.comments << "Assigning!" << domain.toStringCommaDelimited();
     domainMatrix.assignVectorsToRows(domain);
-    codomainMatrix.assignVectorsToRows(range);
-    domainMatrix.invert();
-    (*this) = domainMatrix * codomainMatrix;
+    global.comments << "Assigning!" << range.toStringCommaDelimited();
+    rangeMatrix.assignVectorsToRows(range);
+    global.comments << "Before inversion!";
+    if (!domainMatrix.invert()) {
+      return false;
+    }
+    (*this) = domainMatrix * rangeMatrix;
     this->transpose();
+    return true;
   }
   void rowTimesScalar(int rowIndex, const Coefficient& scalar);
   void rowTimesScalarWithCarbonCopy(int rowIndex, const Coefficient& scalar, Matrix<Coefficient>* carbonCopy) {
@@ -1388,7 +1396,7 @@ void Matrix<Element>::resize(int r, int c, bool preserveValues, const Element* c
   int newActualNumCols = MathRoutines::maximum(this->actualNumberOfColumns, c);
   int newActualNumRows = MathRoutines::maximum(this->actualNumberOfRows, r);
   if (r > this->actualNumberOfRows || c > this->actualNumberOfColumns) {
-    newElements  = new Element* [newActualNumRows];
+    newElements = new Element* [newActualNumRows];
 #ifdef AllocationLimitsSafeguard
   GlobalStatistics::globalPointerCounter += newActualNumRows;
   GlobalStatistics::checkPointerCounters();
@@ -4050,6 +4058,7 @@ public:
   void makeCartanGenerator(const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwners);
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
+  void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output, SemisimpleLieAlgebra& owner) const;
   void assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
     const Vector<Coefficient>& input,
     SemisimpleLieAlgebra& owner
@@ -5850,14 +5859,13 @@ class DynkinSimpleType {
     int verticalOffset
   ) const;
   static void plotHorizontalChainOfRoots(
-    Plot& output, int count, Selection* blackedNodes
+    Plot& output, int count, Selection* filledNodes
   );
-  static void plotHorizontalChainOfRoots(
-    Plot& output,
+  static void plotHorizontalChainOfRoots(Plot& output,
     int verticalOffset,
     int count,
-    Selection* blackedNodes,
-    List<std::string> *labels
+    Selection* filledNodes,
+    List<std::string>* labels
   );
   static void plotE6(Plot& output, int verticalOffset);
   static void plotE7(Plot& output, int verticalOffset);

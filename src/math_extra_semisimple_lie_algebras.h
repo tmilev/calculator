@@ -76,6 +76,7 @@ public:
   void plotAIV(Plot& output);
   void plotEI(Plot& output);
   void plotEII(Plot& output);
+  void plotTwoElementOrbit(Plot& output, int leftIndex, int rightIndex, int verticalOffset);
 };
 
 class SemisimpleLieAlgebra {
@@ -541,7 +542,9 @@ class HomomorphismSemisimpleLieAlgebra {
 public:
   SemisimpleLieAlgebra* domain;
   SemisimpleLieAlgebra* coDomain;
+  // Images of g_1, g_2, ..., g_{rank}, in this order.
   List<ElementSemisimpleLieAlgebra<Rational> > imagesPositiveSimpleChevalleyGenerators;
+  // Images of g_-1, g_-2, ..., g_{-rank}, in this order.
   List<ElementSemisimpleLieAlgebra<Rational> > imagesNegativeSimpleChevalleyGenerators;
   // imagesAllChevalleyGenerators are given in the same order as
   // the one used in MonomialUniversalEnveloping.

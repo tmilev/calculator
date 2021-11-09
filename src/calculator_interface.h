@@ -2880,7 +2880,7 @@ public:
     Expression& output,
     SemisimpleLieAlgebra*& outputSSalgebra
   );
-  static bool innerSemisimpleLieAlgebra(
+  static bool semisimpleLieAlgebra(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool candidateSubalgebraPrecomputed(

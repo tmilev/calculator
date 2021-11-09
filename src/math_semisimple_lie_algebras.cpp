@@ -918,7 +918,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
       Domain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   }
-  outputAutomorphism.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
+  outputAutomorphism.makeInvertibleHomomorphismFromDomainAndRange(vectorsLeft, vectorsRight);
 }
 
 bool SemisimpleLieAlgebra::hasImplementedCartanInvolution(
@@ -1006,7 +1006,9 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   }*/
 }
 
-int SemisimpleLieAlgebra::getLengthStringAlongAlphaThroughBeta(Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport) {
+int SemisimpleLieAlgebra::getLengthStringAlongAlphaThroughBeta(
+  Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport
+) {
   Vector<Rational> tempRoot = beta;
   for (int i = 0; ; i ++) {
     tempRoot += alpha;
@@ -1025,7 +1027,9 @@ int SemisimpleLieAlgebra::getLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 //  return - 1;
 }
 
-bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleChevalleyGenerators(std::stringstream* commentsOnFailure) {
+bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleChevalleyGenerators(
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleChevalleyGenerators");
   (void) commentsOnFailure;
   this->domainAlgebra().computeChevalleyConstants();
@@ -1079,6 +1083,11 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
         ElementSemisimpleLieAlgebra<Rational>& leftRangeElement = tempRange[leftIndex];
         ElementSemisimpleLieAlgebra<Rational>& rightRangeElement = tempRange[rightIndex];
         this->coDomainAlgebra().lieBracket(leftRangeElement, rightRangeElement, tempRange[index]);
+        global.comments << "<br> Element " << tempDomain[index] << " computed as [ " << leftDomainElement.toString()
+        << ", " << rightDomainElement.toString() << "]";
+        global.comments << "<br> Element " << tempRange[index] << " computed as [ " << leftRangeElement.toString()
+        << ", " << rightRangeElement.toString() << "]";
+        global.comments << "<br> Element " << tempDomain[index] << " maps to " << tempRange[index];
         nonComputed.removeSelection(index);
         break;
       }
@@ -1097,10 +1106,12 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   vectorsRight.setSize(tempDomain.size);
   for (int i = 0; i < tempRange.size; i ++) {
     tempDomain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
-    tempRange[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
+    tempRange[i].toVectorNegativeRootSpacesFirst(vectorsRight[i], this->coDomainAlgebra());
   }
   Matrix<Rational> linearSpaceMap;
-  linearSpaceMap.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
+  linearSpaceMap.makeInvertibleHomomorphismFromDomainAndRange(
+    vectorsLeft, vectorsRight
+  );
   Vector<Rational> imageRoot;
   this->domainAllChevalleyGenerators.setSize(tempDomain.size);
   this->imagesAllChevalleyGenerators.setSize(tempDomain.size);
@@ -1266,7 +1277,7 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
     ChevalleyGenerator preimage;
     Vector<Rational> simpleRoot;
     simpleRoot.makeEi(this->domain->getRank(), i);
-    preimage.makeGeneratorRootSpace(this->domainAlgebra(), simpleRoot);
+    preimage.makeGeneratorRootSpace(this->domainAlgebra(), - simpleRoot);
     const ElementSemisimpleLieAlgebra<Rational>& image = this->imagesNegativeSimpleChevalleyGenerators[i];
     out << "\\("
     << preimage.toString(format) << "\\mapsto "
@@ -1283,7 +1294,6 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
     ChevalleyGenerator preimage;
     Vector<Rational> simpleRoot;
     simpleRoot.makeEi(this->domain->getRank(), i);
-    simpleRoot *= - 1;
     preimage.makeGeneratorRootSpace(this->domainAlgebra(), simpleRoot);
     const ElementSemisimpleLieAlgebra<Rational>& image = this->imagesPositiveSimpleChevalleyGenerators[i];
     out << "\\("
@@ -1365,11 +1375,17 @@ bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
   Vector<Rational> tempRoot;
   tempRoots.setSize(this->imagesAllChevalleyGenerators.size);
   for (int i = 0; i < tempRoots.size; i ++) {
-    this->imagesAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(tempRoots[i]);
+    this->imagesAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(
+      tempRoots[i], this->coDomainAlgebra()
+    );
   }
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
-      this->coDomainAlgebra().lieBracket(this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], element);
+      this->coDomainAlgebra().lieBracket(
+        this->imagesAllChevalleyGenerators[i],
+        this->imagesAllChevalleyGenerators[j],
+        element
+      );
       if (element.isEqualToZero()) {
         continue;
       }

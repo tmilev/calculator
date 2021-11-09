@@ -23,7 +23,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
 
   this->addOperationHandler(
     "SemisimpleLieAlgebra",
-    CalculatorConversions::innerSemisimpleLieAlgebra,
+    CalculatorConversions::semisimpleLieAlgebra,
     "",
     "Creates a semisimple Lie algebra. The semisimple Lie algebra "
     "is given via its Dynkin type. A simple Dynkin type is given by "
@@ -205,7 +205,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Cartan involution. This is work in progress.",
     "CartanInvolution(AI, 3, 0);\n"
     "CartanInvolution(AII, 3);\n"
-    "CartanInvolution(AIII, 4, 2);\n"
+    "CartanInvolution(AIII, 4, 1);\n"
     "CartanInvolution(AIII, 5, 3);\n"
     "CartanInvolution(E_6, EI);\n"
     "CartanInvolution(E_6, EII);\n"

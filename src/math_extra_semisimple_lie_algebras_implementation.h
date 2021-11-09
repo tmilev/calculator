@@ -354,7 +354,20 @@ Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart() co
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const {
+void ElementSemisimpleLieAlgebra<Coefficient>::toVectorNegativeRootSpacesFirst(
+  Vector<Coefficient>& output, SemisimpleLieAlgebra& owner
+) const {
+  if (this->isEqualToZero()) {
+    output.makeZero(owner.getNumberOfGenerators());
+    return;
+  }
+  return this->toVectorNegativeRootSpacesFirst(output);
+}
+
+template <class Coefficient>
+void ElementSemisimpleLieAlgebra<Coefficient>::toVectorNegativeRootSpacesFirst(
+  Vector<Coefficient>& output
+) const {
   if (this->isEqualToZero()) {
     output.makeZero(0);
     return;

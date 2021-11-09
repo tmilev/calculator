@@ -2248,23 +2248,21 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
     }
     return false;
   }
-  int paired = rank - this->satakeDiagram.parameter;
-  if (paired % 2 != 0 && this->satakeDiagram.parameter != 0) {
+  if (this->satakeDiagram.parameter * 2 >= rank) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
-      << " does not have the same parity as the rank: " << rank << ".";
+      << " times 2 must be strictly less than the rank: " << rank << ".";
     }
     return false;
   }
-  int numberOfPairs = paired / 2;
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   Vector<Rational> simpleRootLeft, simpleRootRight;
-  for (int i = 0; i < numberOfPairs; i ++) {
+  for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
     this->setSimpleRootSwap(i, rank - i - 1);
   }
   for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
-    int index = numberOfPairs + i;
+    int index = this->satakeDiagram.parameter + i;
     this->setFilledSimpleRoot(index);
   }
   if (rank % 2 == 1 && this->satakeDiagram.parameter == 0) {
@@ -2440,16 +2438,16 @@ void DynkinType::plotInitialize(Plot& output) {
 }
 
 void DynkinSimpleType::plotHorizontalChainOfRoots(
-  Plot& output, int count, Selection* blackedNodes
+  Plot& output, int count, Selection* filledNodes
 ) {
-  DynkinSimpleType::plotHorizontalChainOfRoots(output, count,  0, blackedNodes, nullptr);
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, count,  0, filledNodes, nullptr);
 }
 
 void DynkinSimpleType::plotHorizontalChainOfRoots(
   Plot& output,
   int count,
   int verticalOffset,
-  Selection *blackedNodes,
+  Selection* filledNodes,
   List<std::string>* labels
 ) {
   Vector<Rational> center;
@@ -2458,8 +2456,8 @@ void DynkinSimpleType::plotHorizontalChainOfRoots(
   for (int i = 0; i < count; i ++) {
     center[0] = i * DynkinSimpleType::distanceBetweenRootCenters;
     bool selected = false;
-    if (blackedNodes != nullptr) {
-      selected = blackedNodes->selected[i];
+    if (filledNodes != nullptr) {
+      selected = filledNodes->selected[i];
     }
     output.drawCircle(center, DynkinSimpleType::radiusOfRootCircle, "black", selected);
   }
@@ -2725,8 +2723,45 @@ void SatakeVoganDiagram::plotAII(Plot& output) {
 }
 
 void SatakeVoganDiagram::plotAIII(Plot& output) {
-  int topRow = (this->rank - this->parameter) / 2;
-  DynkinSimpleType::plotHorizontalChainOfRoots(output, topRow, nullptr);
+  Selection filledRoots;
+  filledRoots.initialize(this->rank);
+  for (int i = this->parameter; i < this->rank - this->parameter; i ++) {
+    filledRoots.addSelectionAppendNewIndex(i);
+  }
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &filledRoots);
+  for (int i = 0; i < this->parameter; i ++) {
+    SatakeVoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, 0);
+  }
+}
+
+void SatakeVoganDiagram::plotTwoElementOrbit(
+  Plot& output, int leftIndex, int rightIndex, int verticalOffset
+) {
+  Vector<Rational> left, right;
+  left.makeZero(2);
+  left[1] = verticalOffset;
+  right = left;
+  left[0] = DynkinSimpleType::distanceBetweenRootCenters * leftIndex;
+  right[0] = DynkinSimpleType::distanceBetweenRootCenters * rightIndex;
+  Vector<Rational> center = (left + right) / 2;
+  PlotObject plotObject;
+  plotObject.variableRangesJS.setSize(1);
+  plotObject.variableRangesJS[0].setSize(2);
+  plotObject.variableRangesJS[0][0] = "0";
+  plotObject.variableRangesJS[0][1] = "3.14159";
+  plotObject.paramLowJS  = "0";
+  plotObject.paramHighJS = "3.14159";
+  plotObject.numberOfSegmentsJS.setSize(1);
+  plotObject.numberOfSegmentsJS[0] = "30";
+  plotObject.coordinateFunctionsJS.setSize(2);
+  plotObject.variablesInPlayJS.addOnTop("t");
+  std::string height = StringRoutines::toStringElement(DynkinSimpleType::distanceBetweenRootCenters);
+  std::string width = StringRoutines::toStringElement(DynkinSimpleType::distanceBetweenRootCenters * (rightIndex - leftIndex) / 2);
+  plotObject.coordinateFunctionsJS[0] = center[0].toString() + "+" + width + "*Math.cos(t)";
+  plotObject.coordinateFunctionsJS[1] = center[1].toString() + "+" + height + "*Math.sin(t)";
+  plotObject.colorJS = "black";
+  plotObject.plotType = PlotObject::PlotTypes::parametricCurve;
+  output.addPlotOnTop(plotObject);
 }
 
 void SatakeVoganDiagram::plotEI(Plot& output) {

@@ -41,7 +41,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   );
 }
 
-bool CalculatorConversions::innerSemisimpleLieAlgebra(
+bool CalculatorConversions::semisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerSemisimpleLieAlgebra");

@@ -8,7 +8,7 @@
 #include "math_extra_weyl_algebras_implementation.h"
 #include "math_rational_function_implementation.h"
 
-MapList<std::string, SatakeVoganDiagram::DiagramType, MathRoutines::hashString> SatakeVoganDiagram::mapStringToType;
+MapList<std::string, VoganDiagram::DiagramType, MathRoutines::hashString> VoganDiagram::mapStringToType;
 
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   Calculator& calculator,
@@ -2031,34 +2031,34 @@ bool CalculatorLieTheory::adjointMatrix(
   return output.assignMatrixExpressions(resultExpressions, calculator, false, false);
 }
 
-std::string SatakeVoganDiagram::toString() {
+std::string VoganDiagram::toString() {
   std::stringstream out;
   switch (this->diagram) {
-  case SatakeVoganDiagram::G:
+  case VoganDiagram::G:
     out << "G";
     break;
-  case SatakeVoganDiagram::AI:
+  case VoganDiagram::AI:
     out << "AI";
     break;
-  case SatakeVoganDiagram::AII:
+  case VoganDiagram::AII:
     out << "AII";
     break;
-  case SatakeVoganDiagram::AIII:
+  case VoganDiagram::AIII:
     out << "AIII";
     break;
-  case SatakeVoganDiagram::AIV:
+  case VoganDiagram::AIV:
     out << "AIV";
     break;
-  case SatakeVoganDiagram::EI:
+  case VoganDiagram::EI:
     out << "EI";
     break;
-  case SatakeVoganDiagram::EII:
+  case VoganDiagram::EII:
     out << "EII";
     break;
-  case SatakeVoganDiagram::EIII:
+  case VoganDiagram::EIII:
     out << "EIII";
     break;
-  case SatakeVoganDiagram::EIV:
+  case VoganDiagram::EIV:
     out << "EIV";
     break;
   default:
@@ -2068,19 +2068,19 @@ std::string SatakeVoganDiagram::toString() {
   return out.str();
 }
 
-DynkinType SatakeVoganDiagram::dynkinTypeAmbient() {
+DynkinType VoganDiagram::dynkinTypeAmbient() {
   DynkinType result;
   switch (this->diagram) {
-  case SatakeVoganDiagram::AI:
-  case SatakeVoganDiagram::AII:
-  case SatakeVoganDiagram::AIII:
-  case SatakeVoganDiagram::AIV:
+  case VoganDiagram::AI:
+  case VoganDiagram::AII:
+  case VoganDiagram::AIII:
+  case VoganDiagram::AIV:
     result.makeSimpleType('A', this->rank, nullptr);
     return result;
-  case SatakeVoganDiagram::EI:
-  case SatakeVoganDiagram::EII:
-  case SatakeVoganDiagram::EIII:
-  case SatakeVoganDiagram::EIV:
+  case VoganDiagram::EI:
+  case VoganDiagram::EII:
+  case VoganDiagram::EIII:
+  case VoganDiagram::EIV:
     result.makeSimpleType('E', 6, nullptr);
     return result;
   default:
@@ -2089,45 +2089,45 @@ DynkinType SatakeVoganDiagram::dynkinTypeAmbient() {
   return result;
 }
 
-void SatakeVoganDiagram::computeMapStringToType() {
+void VoganDiagram::computeMapStringToType() {
   if (this->mapStringToType.size() != 0) {
     return;
   }
-  this->mapStringToType.setKeyValue("AI", SatakeVoganDiagram::AI);
-  this->mapStringToType.setKeyValue("AII", SatakeVoganDiagram::AII);
-  this->mapStringToType.setKeyValue("AIII", SatakeVoganDiagram::AIII);
-  this->mapStringToType.setKeyValue("AIV", SatakeVoganDiagram::AIV);
-  this->mapStringToType.setKeyValue("BI", SatakeVoganDiagram::BI);
-  this->mapStringToType.setKeyValue("CI", SatakeVoganDiagram::CI);
-  this->mapStringToType.setKeyValue("CII", SatakeVoganDiagram::CII);
-  this->mapStringToType.setKeyValue("DI", SatakeVoganDiagram::DI);
-  this->mapStringToType.setKeyValue("DII", SatakeVoganDiagram::DII);
-  this->mapStringToType.setKeyValue("DIII", SatakeVoganDiagram::DIII);
-  this->mapStringToType.setKeyValue("EI", SatakeVoganDiagram::EI);
-  this->mapStringToType.setKeyValue("EII", SatakeVoganDiagram::EII);
-  this->mapStringToType.setKeyValue("EIII", SatakeVoganDiagram::EII);
-  this->mapStringToType.setKeyValue("EIV", SatakeVoganDiagram::EIV);
-  this->mapStringToType.setKeyValue("EV", SatakeVoganDiagram::EV);
-  this->mapStringToType.setKeyValue("EVI", SatakeVoganDiagram::EVI);
-  this->mapStringToType.setKeyValue("EVII", SatakeVoganDiagram::EVII);
-  this->mapStringToType.setKeyValue("EVIII", SatakeVoganDiagram::EVIII);
-  this->mapStringToType.setKeyValue("EIX", SatakeVoganDiagram::EIX);
-  this->mapStringToType.setKeyValue("FI", SatakeVoganDiagram::FI);
-  this->mapStringToType.setKeyValue("FII", SatakeVoganDiagram::FII);
-  this->mapStringToType.setKeyValue("G", SatakeVoganDiagram::G);
+  this->mapStringToType.setKeyValue("AI", VoganDiagram::AI);
+  this->mapStringToType.setKeyValue("AII", VoganDiagram::AII);
+  this->mapStringToType.setKeyValue("AIII", VoganDiagram::AIII);
+  this->mapStringToType.setKeyValue("AIV", VoganDiagram::AIV);
+  this->mapStringToType.setKeyValue("BI", VoganDiagram::BI);
+  this->mapStringToType.setKeyValue("CI", VoganDiagram::CI);
+  this->mapStringToType.setKeyValue("CII", VoganDiagram::CII);
+  this->mapStringToType.setKeyValue("DI", VoganDiagram::DI);
+  this->mapStringToType.setKeyValue("DII", VoganDiagram::DII);
+  this->mapStringToType.setKeyValue("DIII", VoganDiagram::DIII);
+  this->mapStringToType.setKeyValue("EI", VoganDiagram::EI);
+  this->mapStringToType.setKeyValue("EII", VoganDiagram::EII);
+  this->mapStringToType.setKeyValue("EIII", VoganDiagram::EII);
+  this->mapStringToType.setKeyValue("EIV", VoganDiagram::EIV);
+  this->mapStringToType.setKeyValue("EV", VoganDiagram::EV);
+  this->mapStringToType.setKeyValue("EVI", VoganDiagram::EVI);
+  this->mapStringToType.setKeyValue("EVII", VoganDiagram::EVII);
+  this->mapStringToType.setKeyValue("EVIII", VoganDiagram::EVIII);
+  this->mapStringToType.setKeyValue("EIX", VoganDiagram::EIX);
+  this->mapStringToType.setKeyValue("FI", VoganDiagram::FI);
+  this->mapStringToType.setKeyValue("FII", VoganDiagram::FII);
+  this->mapStringToType.setKeyValue("G", VoganDiagram::G);
 }
 
-bool SatakeVoganDiagram::assignParameter(
+bool VoganDiagram::assignParameter(
   const std::string& input,
   int inputRank,
   int inputParameter,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("SatakeDiagram::assignParameter");
+  MacroRegisterFunctionWithName("VoganDiagram::assignParameter");
   this->computeMapStringToType();
   if (!this->mapStringToType.contains(input)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Unknown Satake diagram type: " << input;
+      *commentsOnFailure << "Unknown Vogan diagram type: " << input;
     }
     return false;
   }
@@ -2143,20 +2143,20 @@ bool SatakeVoganDiagram::assignParameter(
   return true;
 }
 
-SatakeVoganDiagram::SatakeVoganDiagram() {
+VoganDiagram::VoganDiagram() {
   this->rank = 0;
   this->parameter = - 1;
 }
 
 std::string CartanInvolution::toString() {
   std::stringstream out;
-  out << this->satakeDiagram.toString() << ". ";
+  out << this->voganDiagram.toString() << ". ";
   out << this->automorphism.toString();
   return out.str();
 }
 
 DynkinType CartanInvolution::dynkinTypeAmbient() {
-  return this->satakeDiagram.dynkinTypeAmbient();
+  return this->voganDiagram.dynkinTypeAmbient();
 }
 
 CartanInvolution::CartanInvolution() {
@@ -2214,7 +2214,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAII(
   int rank = this->owner->getRank();
   if (rank % 2 != 1) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Satake diagram of type AII requires odd rank.";
+      *commentsOnFailure << "Vogan diagram of type AII requires odd rank.";
     }
     return false;
   }
@@ -2241,16 +2241,16 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
     return false;
   }
   int rank = this->owner->getRank();
-  if (this->satakeDiagram.parameter < 0 || this->satakeDiagram.parameter > rank) {
+  if (this->voganDiagram.parameter < 0 || this->voganDiagram.parameter > rank) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Parameter must be between 0 and the rank "
-      << rank << " instead it is: " << this->satakeDiagram.rank;
+      << rank << " instead it is: " << this->voganDiagram.rank;
     }
     return false;
   }
-  if (this->satakeDiagram.parameter * 2 >= rank) {
+  if (this->voganDiagram.parameter * 2 >= rank) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter " << this->satakeDiagram.parameter
+      *commentsOnFailure << "Parameter " << this->voganDiagram.parameter
       << " times 2 must be strictly less than the rank: " << rank << ".";
     }
     return false;
@@ -2258,14 +2258,14 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   Vector<Rational> simpleRootLeft, simpleRootRight;
-  for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
+  for (int i = 0; i < this->voganDiagram.parameter; i ++) {
     this->setSimpleRootSwap(i, rank - i - 1);
   }
-  for (int i = 0; i < this->satakeDiagram.parameter; i ++) {
-    int index = this->satakeDiagram.parameter + i;
+  for (int i = 0; i < this->voganDiagram.parameter; i ++) {
+    int index = this->voganDiagram.parameter + i;
     this->setFilledSimpleRoot(index);
   }
-  if (rank % 2 == 1 && this->satakeDiagram.parameter == 0) {
+  if (rank % 2 == 1 && this->voganDiagram.parameter == 0) {
     this->setHollowSimpleRoot(rank / 2);
   }
   return true;
@@ -2275,7 +2275,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEI(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEI");
-  // Satake diagram of type EI is for Lie algebra E_6.
+  // Vogan diagram of type EI is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
     this->owner->getRank() != 6
@@ -2293,7 +2293,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEII(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEII");
-  // Satake diagram of type EII is for Lie algebra E_6.
+  // Vogan diagram of type EII is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
     this->owner->getRank() != 6
@@ -2319,7 +2319,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIII(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIII");
-  // Satake diagram of type EIII is for Lie algebra E_6.
+  // Vogan diagram of type EIII is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
     this->owner->getRank() != 6
@@ -2343,17 +2343,17 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIII(
 bool CartanInvolution::computeSimpleRootImagesTypeEIV(
   std::stringstream* commentsOnFailure
 ) {
-MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIV");
-// Satake diagram of type EIV is for Lie algebra E_6.
-if (
-  !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
-  this->owner->getRank() != 6
-) {
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Type is not E_6. ";
+  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImagesTypeEIV");
+  // Vogan diagram of type EIV is for Lie algebra E_6.
+  if (
+    !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
+    this->owner->getRank() != 6
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Type is not E_6. ";
+    }
+    return false;
   }
-  return false;
-}
   int rank = 6;
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
@@ -2373,37 +2373,37 @@ bool CartanInvolution::computeSimpleRootImages(
   this->automorphism.domain = this->owner;
   this->automorphism.coDomain = this->owner;
   this->owner->weylGroup.computeRho(false);
-  if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::AI) {
+  if (this->voganDiagram.diagram == VoganDiagram::DiagramType::AI) {
     return this->computeSimpleRootImagesTypeAI(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::AII) {
+  } else if (this->voganDiagram.diagram == VoganDiagram::DiagramType::AII) {
     return this->computeSimpleRootImagesTypeAII(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::AIII) {
+  } else if (this->voganDiagram.diagram == VoganDiagram::DiagramType::AIII) {
     return this->computeSimpleRootImagesTypeAIII(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EI) {
+  } else if (this->voganDiagram.diagram == VoganDiagram::DiagramType::EI) {
     return this->computeSimpleRootImagesTypeEI(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EII) {
+  } else if (this->voganDiagram.diagram == VoganDiagram::DiagramType::EII) {
     return this->computeSimpleRootImagesTypeEII(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EIII) {
+  } else if (this->voganDiagram.diagram == VoganDiagram::DiagramType::EIII) {
     return this->computeSimpleRootImagesTypeEIII(commentsOnFailure);
-  } else if (this->satakeDiagram.diagram == SatakeVoganDiagram::DiagramType::EIV) {
+  } else if (this->voganDiagram.diagram == VoganDiagram::DiagramType::EIV) {
     return this->computeSimpleRootImagesTypeEIV(commentsOnFailure);
   }
 
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
-    << "Not implemented: Satake diagram: "
-    << this->satakeDiagram.toString() << ". ";
+    << "Not implemented: Vogan diagram: "
+    << this->voganDiagram.toString() << ". ";
   }
   return false;
 }
 
 bool CartanInvolution::computeFromDiagram(
-  const SatakeVoganDiagram& inputDiagram,
+  const VoganDiagram &inputDiagram,
   SemisimpleLieAlgebra& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
   this->owner = &inputOwner;
-  this->satakeDiagram = inputDiagram;
+  this->voganDiagram = inputDiagram;
   if (!this->computeSimpleRootImages(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to compute simple root images. ";
@@ -2686,22 +2686,22 @@ void DynkinSimpleType::plotE8(Plot& output, int verticalOffset) {
   DynkinSimpleType::appendOneSingleConnectedRootToTheRight(output, 5, verticalOffset, "8", false);
 }
 
-void SatakeVoganDiagram::plot(Plot& output) {
+void VoganDiagram::plot(Plot& output) {
   DynkinType::plotInitialize(output);
   switch (this->diagram) {
-  case SatakeVoganDiagram::AI:
+  case VoganDiagram::AI:
     this->plotAI(output);
     return;
-  case SatakeVoganDiagram::AII:
+  case VoganDiagram::AII:
     this->plotAII(output);
     return;
-  case SatakeVoganDiagram::AIII:
+  case VoganDiagram::AIII:
     this->plotAIII(output);
     return;
-  case SatakeVoganDiagram::EI:
+  case VoganDiagram::EI:
     this->plotEI(output);
     return;
-  case SatakeVoganDiagram::EII:
+  case VoganDiagram::EII:
     this->plotEII(output);
     return;
   default:
@@ -2709,11 +2709,11 @@ void SatakeVoganDiagram::plot(Plot& output) {
   }
 }
 
-void SatakeVoganDiagram::plotAI(Plot& output) {
+void VoganDiagram::plotAI(Plot& output) {
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, nullptr);
 }
 
-void SatakeVoganDiagram::plotAII(Plot& output) {
+void VoganDiagram::plotAII(Plot& output) {
   Selection blackedNodes;
   blackedNodes.initialize(this->rank);
   for (int i = 0; i < this->rank; i += 2) {
@@ -2722,7 +2722,7 @@ void SatakeVoganDiagram::plotAII(Plot& output) {
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &blackedNodes);
 }
 
-void SatakeVoganDiagram::plotAIII(Plot& output) {
+void VoganDiagram::plotAIII(Plot& output) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
   for (int i = this->parameter; i < this->rank - this->parameter; i ++) {
@@ -2730,11 +2730,11 @@ void SatakeVoganDiagram::plotAIII(Plot& output) {
   }
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &filledRoots);
   for (int i = 0; i < this->parameter; i ++) {
-    SatakeVoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, 0);
+    VoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, 0);
   }
 }
 
-void SatakeVoganDiagram::plotTwoElementOrbit(
+void VoganDiagram::plotTwoElementOrbit(
   Plot& output, int leftIndex, int rightIndex, int verticalOffset
 ) {
   Vector<Rational> left, right;
@@ -2764,11 +2764,11 @@ void SatakeVoganDiagram::plotTwoElementOrbit(
   output.addPlotOnTop(plotObject);
 }
 
-void SatakeVoganDiagram::plotEI(Plot& output) {
+void VoganDiagram::plotEI(Plot& output) {
   DynkinSimpleType::plotE6(output, 0);
 }
 
-void SatakeVoganDiagram::plotEII(Plot& output) {
+void VoganDiagram::plotEII(Plot& output) {
   DynkinSimpleType::plotHorizontalChainOfRoots(output, 5, nullptr);
   Vector<Rational> left, right;
   left.makeZero(2);
@@ -2782,7 +2782,7 @@ void SatakeVoganDiagram::plotEII(Plot& output) {
 }
 
 void CartanInvolution::plot(Plot& output) {
-  return this->satakeDiagram.plot(output);
+  return this->voganDiagram.plot(output);
 }
 
 bool CalculatorLieTheory::cartanInvolution(
@@ -2820,16 +2820,16 @@ bool CalculatorLieTheory::cartanInvolution(
     }
   }
   CartanInvolution involution;
-  if (!involution.satakeDiagram.assignParameter(
+  if (!involution.voganDiagram.assignParameter(
     typeString, rank, diagramParameter, &calculator.comments
   )) {
     return false;
   }
   SemisimpleLieAlgebra& owner = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(
-    involution.satakeDiagram.dynkinTypeAmbient()
+    involution.voganDiagram.dynkinTypeAmbient()
   );
   if (!owner.hasImplementedCartanInvolution(
-    involution.satakeDiagram, &involution, &calculator.comments
+    involution.voganDiagram, &involution, &calculator.comments
   )) {
     return false;
   }

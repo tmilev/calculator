@@ -6003,7 +6003,7 @@ public:
     result -= other;
     return result;
   }
-  // These functions are used to plot dynkin diagrams and Satake-Vogan diagrams.
+  // These functions are used to plot dynkin diagrams and Vogan diagrams.
   void plot(Plot& output);
   static void plotInitialize(Plot& output);
 };

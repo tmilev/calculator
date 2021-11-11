@@ -922,7 +922,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
 }
 
 bool SemisimpleLieAlgebra::hasImplementedCartanInvolution(
-  const SatakeVoganDiagram& satakeDiagram,
+  const VoganDiagram& voganDiagram,
   CartanInvolution* whichInvolution,
   std::stringstream* commentsOnFailure
 ) {
@@ -931,7 +931,7 @@ bool SemisimpleLieAlgebra::hasImplementedCartanInvolution(
   if (whichInvolution == nullptr) {
     whichInvolution = &outputBuffer;
   }
-  return whichInvolution->computeFromDiagram(satakeDiagram, *this, commentsOnFailure);
+  return whichInvolution->computeFromDiagram(voganDiagram, *this, commentsOnFailure);
 }
 
 bool SemisimpleLieAlgebra::isInTheWeightSupport(

@@ -187,22 +187,9 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CartanInvolution",
     CalculatorLieTheory::cartanInvolution,
     "",
-    "Computes the Cartan involution from a Satake/Vogan diagram. "
-    "A Satake diagram is given by a string and and two integers. "
-    "The string is one of the following. "
-    "AI, AII, AIII, AIV,\n"
-    "BI, BII,\n"
-    "CI, CII, "
-    "DI, DII, DIII,\n"
-    "EI, EII, EIII, EIV, "
-    "EV, EVI, EVII, EVIII, EIX,\n"
-    "FI, FII,\n"
-    "G."
-    "The first integer is the rank of ambient Lie algebra. "
-    "The second integer is a parameter of the diagram. "
-    "May be omitted if the diagram does not admit a parameter. "
-    "As of writing, the output is a string that summarizes the "
-    "Cartan involution. This is work in progress.",
+    "Computes the Cartan involution from a Vogan diagram. "
+    "This is work in progress as I was not able to find a good list of Vogan diagrams. "
+    "This is work in progress.",
     "CartanInvolution(AI, 3, 0);\n"
     "CartanInvolution(AII, 3);\n"
     "CartanInvolution(AIII, 4, 1);\n"

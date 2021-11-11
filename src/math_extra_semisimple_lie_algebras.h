@@ -8,18 +8,19 @@
 class Plot;
 class CartanInvolution;
 
-// Represents a Satake-Vogan diagram as defined in
+// Represents a Vogan diagram.
+// Do not confuse with the "Satake" diagrams given in
 // Shôrô Araki,
 // "On root systems and an infinitesimal
 // classification of irreducible symmetric spaces", 1962.
-// We use the Satake-Vogan diagram to define a Cartan involution.
+// We use the Vogan diagram to define a Cartan involution.
 // More precisely, we use use the images of the simple Cartan generators
 // given in page 404,
 // Knapp, Lie groups beyond an introduction, 2ed, 2002.
 // We then extend the map to a Lie algebra homomorphism using
 // the straightforward algorithms from class
 // HomomorphismSemisimpleLieAlgebra.
-class SatakeVoganDiagram {
+class VoganDiagram {
 private:
 public:
   // This is the column 1 entry of Table 5.11 in the paper mentioned above.
@@ -51,15 +52,15 @@ public:
   DiagramType diagram;
   static const int radiusOfRootCircle = 1;
   static const int distanceBetweenRootCenters = 20;
-  // Some of the classical satake types depend on an additional parameter,
+  // Some of the classical Vogan types depend on an additional parameter,
   // smaller than the rank of the ambient complex Lie algebra.
   int parameter;
   // Rank of the simple root system.
   int rank;
   static MapList<
-    std::string, SatakeVoganDiagram::DiagramType, MathRoutines::hashString
+    std::string, VoganDiagram::DiagramType, MathRoutines::hashString
   > mapStringToType;
-  SatakeVoganDiagram();
+  VoganDiagram();
   void computeMapStringToType();
   bool assignParameter(
     const std::string& input,
@@ -391,7 +392,7 @@ public:
   );
   // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
   bool hasImplementedCartanInvolution(
-    const SatakeVoganDiagram& satakeDiagram,
+    const VoganDiagram& voganDiagram,
     CartanInvolution* whichInvolution,
     std::stringstream* commentsOnFailure
   );
@@ -612,7 +613,7 @@ private:
   void setHollowSimpleRoot(int index);
 public:
   SemisimpleLieAlgebra* owner;
-  SatakeVoganDiagram satakeDiagram;
+  VoganDiagram voganDiagram;
   LinearMapSemisimpleLieAlgebra<Rational> linearMap;
   HomomorphismSemisimpleLieAlgebra automorphism;
   DynkinType dynkinTypeAmbient();
@@ -646,7 +647,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool computeFromDiagram(
-    const SatakeVoganDiagram& inputDiagram,
+    const VoganDiagram& inputDiagram,
     SemisimpleLieAlgebra& inputOwner,
     std::stringstream* commentsOnFailure
   );

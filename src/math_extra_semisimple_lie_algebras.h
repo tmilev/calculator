@@ -101,7 +101,7 @@ public:
   // The Chevalley constants are listed in the same order
   // as the root system of the Weyl group.
   // If \alpha is the root at the i^th position in
-  //  this->theWyl.RootSystem and \beta -
+  // this->theWyl.RootSystem and \beta -
   // the root  at the j^th position, then
   // the Chevalley constant N_{\alpha, \beta}
   // given by [g_\alpha, g_\beta] = N_{\alpha, \beta}g_{\alpha +\beta}
@@ -164,7 +164,8 @@ public:
   }
   template <class Coefficient>
   void getGenericElementNegativeBorelNilradical(
-    ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output, int indexFirstVariable = 0
+    ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output,
+    int indexFirstVariable = 0
   ) {
     output.makeZero();
     ChevalleyGenerator generator;
@@ -204,7 +205,9 @@ public:
     List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
   );
   void getChevalleyGeneratorAsLieBracketsSimpleGenerators(
-    int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator
+    int generatorIndex,
+    List<int>& outputIndicesFormatAd0Ad1Ad2etc,
+    Rational& outputMultiplyLieBracketsToGetGenerator
   );
   std::string toString(FormatExpressions* inputFormat = nullptr);
   std::string toStringHTMLMenuStructureSummary(
@@ -251,8 +254,8 @@ public:
     return this->weylGroup.cartanSymmetric.numberOfRows;
   }
   void orderNilradical(const Selection& parabolicSelectionZeroMeansLeviPart, bool useNilWeight, bool ascending);
-  void orderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart);
-  void orderNilradicalFirstTotalWeightDescending(const Selection& parSelZeroMeansLeviPart);
+  void orderNilradicalFirstTotalWeightAscending(const Selection& parabolicSelectionZeroMeansLeviPart);
+  void orderNilradicalFirstTotalWeightDescending(const Selection& parabolicSelectionZeroMeansLeviPart);
   void orderNilradicalNilWeightAscending(const Selection& parSelZeroMeansLeviPart);
   void orderNilradicalNilWeightDescending(const Selection& parSelZeroMeansLeviPart);
   void orderStandardAscending();
@@ -351,7 +354,7 @@ public:
   int getLengthStringAlongAlphaThroughBeta(
     Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport
   );
-  void computeOneAutomorphism(Matrix<Rational>& outputAutomorphism,  bool useNegativeRootsFirst);
+  void computeOneAutomorphism(Matrix<Rational>& outputAutomorphism, bool useNegativeRootsFirst);
   bool operator==(const SemisimpleLieAlgebra& other) const {
     return this->weylGroup == other.weylGroup;
   }
@@ -494,29 +497,34 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     BranchingData& inputData
   );
   bool freudenthalEvalMeDominantWeightsOnly(
-    CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
+    CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
+    int upperBoundNumDominantWeights,
+    std::string* outputDetails
   );
   bool freudenthalEvaluateMeFullCharacter(
-    CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
+    CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
+    int upperBoundNumDominantWeights,
+    std::string* outputDetails
   );
   std::string toStringFullCharacterWeightsTable();
-  bool drawMeNoMultiplicities(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights) {
-    return this->drawMe(outputDetails, theDrawingVars, upperBoundWeights, false);
+  bool drawMeNoMultiplicities(std::string& outputDetails, DrawingVariables& drawingVariables, int upperBoundWeights) {
+    return this->drawMe(outputDetails, drawingVariables, upperBoundWeights, false);
   }
   int getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
-    const Weight<Coefficient>& weightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
+    const Weight<Coefficient>& weightInFundamentalCoordinates,
+    const Vector<Coefficient>& alphaInFundamentalCoordinates
   );
-  bool drawMeWithMultiplicities(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights) {
-    return this->drawMe(outputDetails, theDrawingVars, upperBoundWeights, true);
+  bool drawMeWithMultiplicities(std::string& outputDetails, DrawingVariables& drawingVariables, int upperBoundWeights) {
+    return this->drawMe(outputDetails, drawingVariables, upperBoundWeights, true);
   }
-  void drawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars) const;
+  void drawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& drawingVariables) const;
   SemisimpleLieAlgebra* getOwner() const {
     if (this->size() == 0) {
       global.fatal << "Requesting owner semisimple Lie algebra of zero character. " << global.fatal;
     }
     return (*this)[0].owner;
   }
-  bool drawMe(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
+  bool drawMe(std::string& outputDetails, DrawingVariables& drawingVariables, int upperBoundWeights, bool useMultiplicities);
   bool splitOverLeviMonomialsEncodeHighestWeight(
     std::string* report,
     CharacterSemisimpleLieAlgebraModule& output,
@@ -653,7 +661,5 @@ public:
   );
   void plot(Plot& output);
 };
-
-
 
 #endif

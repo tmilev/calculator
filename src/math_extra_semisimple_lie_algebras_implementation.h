@@ -439,7 +439,10 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGenerator(
 
 template<class Coefficient>
 bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
-  std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults
+  std::string& outputDetails,
+  DrawingVariables& drawingVariables,
+  int upperBoundWeights,
+  bool useMultiplicities
 ) {
   MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::drawMe");
   this->checkNonZeroOwner();
@@ -447,7 +450,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   bool result = this->freudenthalEvalMeDominantWeightsOnly(CharCartan, upperBoundWeights, &outputDetails);
   std::stringstream out;
   WeylGroupData& theWeyl = this->getOwner()->weylGroup;
-  theWeyl.drawRootSystem(theDrawingVars, false, true);
+  theWeyl.drawRootSystem(drawingVariables, false, true);
   int totalNumWeights = 0;
   Vectors<Coefficient> dominantWeightsNonHashed;
   HashedList<Vector<Coefficient> > finalWeights;
@@ -465,9 +468,9 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
     }
     for (int j = 0; j < finalWeights.size; j ++) {
       convertor = finalWeights[j].getVectorRational();
-      theDrawingVars.drawCircleAtVectorBufferRational(convertor, "black", 3);
-      if (useMults) {
-        theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].toString(), "black");
+      drawingVariables.drawCircleAtVectorBufferRational(convertor, "black", 3);
+      if (useMultiplicities) {
+        drawingVariables.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].toString(), "black");
       }
     }
   }
@@ -483,7 +486,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
 
 template <class Coefficient>
 void CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMeAssumeCharIsOverCartan(
-  WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars
+  WeylGroupData& actualAmbientWeyl, DrawingVariables& drawingVariables
 ) const {
   if (actualAmbientWeyl.getDimension() < 2) {
     return;
@@ -491,12 +494,12 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMeAssumeCharIsOverCar
   Vector<Coefficient> actualWeight;
   Vector<Rational> actualWeightRationalPart;
 
-  actualAmbientWeyl.drawRootSystem(theDrawingVars, true, false, nullptr, false);
+  actualAmbientWeyl.drawRootSystem(drawingVariables, true, false, nullptr, false);
   for (int j = 0; j < this->size(); j ++) {
     actualWeight = actualAmbientWeyl.getSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordinates);
     actualWeightRationalPart = actualWeight.getVectorRational(); // <-type conversion here!
-    theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
-    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].toString(), "black");
+    drawingVariables.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
+    drawingVariables.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].toString(), "black");
   }
 }
 

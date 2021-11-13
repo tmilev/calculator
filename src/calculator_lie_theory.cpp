@@ -3891,16 +3891,16 @@ bool CalculatorLieTheory::drawRootSystem(
 
 template <class Coefficient>
 int CharacterSemisimpleLieAlgebraModule<Coefficient>::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
-  const Weight<Coefficient>& weightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
+  const Weight<Coefficient>& weightInFundamentalCoordinates, const Vector<Coefficient>& alphaInFundamentalCoordinates
 ) {
   MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight");
   int result = - 1;
   Weight<Coefficient> currentWeight;
-  currentWeight = weightInFundCoords;
+  currentWeight = weightInFundamentalCoordinates;
   for (
     ;
     this->monomials.contains(currentWeight);
-    result ++, currentWeight.weightFundamentalCoordinates -= theAlphaInFundCoords
+    result ++, currentWeight.weightFundamentalCoordinates -= alphaInFundamentalCoordinates
   ) {
   }
   return result;

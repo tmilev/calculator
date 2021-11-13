@@ -858,23 +858,23 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   Vector<Rational> domainRoot, rangeRoot;
 
   this->computeChevalleyConstants();
-  List<ElementSemisimpleLieAlgebra<Rational> > Domain, Range;
-  Range.setSize(numRoots + dimension);
-  Domain.setSize(numRoots + dimension);
+  List<ElementSemisimpleLieAlgebra<Rational> > domain, range;
+  range.setSize(numRoots + dimension);
+  domain.setSize(numRoots + dimension);
   ElementSemisimpleLieAlgebra<Rational> element;
   for (int i = 0; i < dimension; i ++) {
     domainRoot.makeEi(dimension, i);
     mapOnRootSpaces.actOnVectorColumn(domainRoot, rangeRoot);
     element.makeCartanGenerator(domainRoot, *this);
-    Domain[numRoots + i] = element;
+    domain[numRoots + i] = element;
     element.makeCartanGenerator(rangeRoot, *this);
-    Range[numRoots + i] = element;
+    range[numRoots + i] = element;
     for (int i = 0; i < 2; i ++, domainRoot.negate(), rangeRoot.negate()) {
       int index = this->weylGroup.rootSystem.getIndex(rangeRoot);
       element.makeGGenerator(rangeRoot, *this);
-      Range[index] = element;
+      range[index] = element;
       element.makeGGenerator(domainRoot, *this);
-      Domain[index] = element;
+      domain[index] = element;
       NonExplored.removeSelection(index);
     }
   }
@@ -891,12 +891,12 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
             int leftIndex = this->weylGroup.rootSystem.getIndex(left);
             int rightIndex = this->weylGroup.rootSystem.getIndex(right);
             if (!NonExplored.selected[rightIndex]) {
-              ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = Domain[leftIndex];
-              ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = Domain[rightIndex];
-              this->lieBracket(leftDomainElt, rightDomainElt, Domain[index]);
-              ElementSemisimpleLieAlgebra<Rational>& leftRangeElt = Range[leftIndex];
-              ElementSemisimpleLieAlgebra<Rational>& rightRangeElt = Range[rightIndex];
-              this->lieBracket(leftRangeElt, rightRangeElt, Range[index]);
+              ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = domain[leftIndex];
+              ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = domain[rightIndex];
+              this->lieBracket(leftDomainElt, rightDomainElt, domain[index]);
+              ElementSemisimpleLieAlgebra<Rational>& leftRangeElt = range[leftIndex];
+              ElementSemisimpleLieAlgebra<Rational>& rightRangeElt = range[rightIndex];
+              this->lieBracket(leftRangeElt, rightRangeElt, range[index]);
               NonExplored.removeSelection(index);
             }
           }
@@ -905,17 +905,17 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
     }
   }
   Vectors<Rational> vectorsLeft, vectorsRight;
-  vectorsLeft.setSize(Range.size);
-  vectorsRight.setSize(Range.size);
+  vectorsLeft.setSize(range.size);
+  vectorsRight.setSize(range.size);
   if (!useNegativeRootsFirst) {
-    for (int i = 0; i < Range.size; i ++) {
-      Range[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
-      Domain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+    for (int i = 0; i < range.size; i ++) {
+      range[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
+      domain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   } else {
-    for (int i = 0; i < Range.size; i ++) {
-      Range[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
-      Domain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+    for (int i = 0; i < range.size; i ++) {
+      range[i].toVectorNegativeRootSpacesFirst(vectorsRight[i]);
+      domain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   }
   outputAutomorphism.makeInvertibleHomomorphismFromDomainAndRange(vectorsLeft, vectorsRight);
@@ -939,8 +939,8 @@ bool SemisimpleLieAlgebra::isInTheWeightSupport(
 ) {
   Vector<Rational> correspondingDominant = weight;
   this->weylGroup.raiseToDominantWeight(correspondingDominant);
-  Vector<Rational> theDiff = highestWeight - correspondingDominant;
-  if (!theDiff.isPositiveOrZero())
+  Vector<Rational> difference = highestWeight - correspondingDominant;
+  if (!difference.isPositiveOrZero())
     return false;
   return true;
 }
@@ -1482,21 +1482,21 @@ std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
   return out.str();
 }
 
-void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending(const Selection& parSelZeroMeansLeviPart) {
+void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending(const Selection& parabolicSelectionZeroMeansLeviPart) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending");
-  Vector<Rational> tempVect;
-  tempVect = parSelZeroMeansLeviPart;
+  Vector<Rational> selection;
+  selection = parabolicSelectionZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
+    if (this->getWeightOfGenerator(i).scalarEuclidean(selection) < 0) {
       this->universalEnvelopingGeneratorOrder[i] = - i - this->getNumberOfGenerators() * 5;
     }
   }
 }
 
-void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart) {
+void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(const Selection& parabolicSelectionZeroMeansLeviPart) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending");
   Vector<Rational> tempVect;
-  tempVect = parSelZeroMeansLeviPart;
+  tempVect = parabolicSelectionZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
       this->universalEnvelopingGeneratorOrder[i] = i - this->getNumberOfGenerators() * 5;

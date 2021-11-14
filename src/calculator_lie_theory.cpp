@@ -14,7 +14,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  Vectors<Polynomial<Rational> >& theHws,
+  Vectors<Polynomial<Rational> >& highestWeights,
   ExpressionContext& hwContext,
   Selection& selInducing,
   SemisimpleLieAlgebra* owner,
@@ -28,7 +28,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   MacroRegisterFunctionWithName("CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
-  if (theHws.size == 0) {
+  if (highestWeights.size == 0) {
     return false;
   }
   SemisimpleLieAlgebra& theSSalgebra = *owner;
@@ -80,7 +80,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   << "} Differential operators corresponding to actions"
   << " of simple positive generators for the " << selInducing.toString() << "-parabolic subalgebra.}\\\\<br>";
   List<ModuleSSalgebra<RationalFraction<Rational> > > theMods;
-  theMods.setSize(theHws.size);
+  theMods.setSize(highestWeights.size);
   Vector<RationalFraction<Rational> > tempV;
   int numStartingVars = hwContext.numberOfVariables();
   std::stringstream reportfourierTransformedCalculatorCommands, reportCalculatorCommands;
@@ -89,9 +89,9 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   long long totalMultiplications = 0;
   long long currentMultiplications = 0;
   double totalTime = 0, currentTime = 0;
-  for (int i = 0; i < theHws.size; i ++) {
+  for (int i = 0; i < highestWeights.size; i ++) {
     ModuleSSalgebra<RationalFraction<Rational> >& theMod = theMods[i];
-    tempV = theHws[i];
+    tempV = highestWeights[i];
     if (!theMod.makeFromHW(
       theSSalgebra,
       tempV,
@@ -1776,7 +1776,7 @@ bool CalculatorLieTheory::printB3G2branchingTableInit(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  BranchingData& theG2B3data,
+  BranchingData& g2b3Data,
   int& desiredHeight,
   ExpressionContext& outputContext
 ) {
@@ -1798,7 +1798,7 @@ bool CalculatorLieTheory::printB3G2branchingTableInit(
     desiredHeight = 0;
   }
   const Expression& weightNode = input[2];
-  CalculatorLieTheory::splitFDpartB3overG2Init(calculator, weightNode, output, theG2B3data, outputContext);
+  CalculatorLieTheory::splitFDpartB3overG2Init(calculator, weightNode, output, g2b3Data, outputContext);
   if (output.isError()) {
     return true;
   }
@@ -1840,7 +1840,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  BranchingData& theG2B3Data,
+  BranchingData& g2b3Data,
   ExpressionContext& outputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2Init");
@@ -1853,7 +1853,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
   }
   if (!calculator.getVectorFromFunctionArguments<RationalFraction<Rational> >(
     input,
-    theG2B3Data.weightFundamentalCoordinates,
+    g2b3Data.weightFundamentalCoordinates,
     &outputContext,
     3,
     CalculatorConversions::functionRationalFunction<Rational>
@@ -1863,14 +1863,14 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
       "Failed to extract highest weight in fundamental coordinates. "
     );
   }
-  calculator.makeHmmG2InB3(theG2B3Data.homomorphism);
-  theG2B3Data.inducing.initialize(3);
-  for (int i = 0; i < theG2B3Data.weightFundamentalCoordinates.size; i ++) {
-    if (!theG2B3Data.weightFundamentalCoordinates[i].isSmallInteger()) {
-      theG2B3Data.inducing.addSelectionAppendNewIndex(i);
+  calculator.makeHmmG2InB3(g2b3Data.homomorphism);
+  g2b3Data.inducing.initialize(3);
+  for (int i = 0; i < g2b3Data.weightFundamentalCoordinates.size; i ++) {
+    if (!g2b3Data.weightFundamentalCoordinates[i].isSmallInteger()) {
+      g2b3Data.inducing.addSelectionAppendNewIndex(i);
     }
   }
-  theG2B3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups();
+  g2b3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups();
   return true;
 }
 
@@ -2837,10 +2837,10 @@ void CartanInvolution::plot(Plot& output) {
   return this->voganDiagram.plot(output);
 }
 
-bool CalculatorLieTheory::cartanInvolution(
-  Calculator& calculator, const Expression& input, Expression& output
+bool CalculatorLieTheory::cartanInvolutionInternal(
+  Calculator& calculator, const Expression& input, CartanInvolution& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolution");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolutionInternal");
   if (input.size() != 4 && input.size() != 3 && input.size() != 2) {
     return calculator << "CartanInvolution takes as input three or two arguments.";
   }
@@ -2871,18 +2871,28 @@ bool CalculatorLieTheory::cartanInvolution(
       return calculator << "Failed to extract small integer from the 2nd argument.";
     }
   }
-  CartanInvolution involution;
-  if (!involution.voganDiagram.assignParameter(
+  if (!output.voganDiagram.assignParameter(
     typeString, rank, diagramParameter - 1, &calculator.comments
   )) {
     return false;
   }
   SemisimpleLieAlgebra& owner = calculator.objectContainer.getLieAlgebraCreateIfNotPresent(
-    involution.voganDiagram.dynkinTypeAmbient()
+    output.voganDiagram.dynkinTypeAmbient()
   );
   if (!owner.hasImplementedCartanInvolution(
-    involution.voganDiagram, &involution, &calculator.comments
+    output.voganDiagram, &output, &calculator.comments
   )) {
+    return false;
+  }
+  return true;
+}
+
+bool CalculatorLieTheory::cartanInvolution(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolution");
+  CartanInvolution involution;
+  if (!CalculatorLieTheory::cartanInvolutionInternal(calculator, input, involution)) {
     return false;
   }
   Plot plot;

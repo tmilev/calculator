@@ -290,7 +290,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand,
     "",
     "Computes the Lie algebra structure over Kostant-Sekiguchi sl twos "
-    "w.r.t. maximally compact real form.",
+    "with respect to maximally compact real form.",
     "SlTwoRealFormStructure{}(a_3)",
     "Calculator::slTwoRealFormStructureComputeOnDemand",
     "SlTwoRealFormStructure",
@@ -311,6 +311,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "IsReductiveLieSubalgebra",
     CalculatorLieTheory::isReductiveLieSubalgebra,
     "",
+    "Not implemented yet. "
     "Given a set of elements of a semisimple lie algebra, "
     "tries to determine whether the Lie subalgebra they generate "
     "is reductive and what is its type.",

@@ -26,7 +26,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    Vectors<Polynomial<Rational> >& theHws,
+    Vectors<Polynomial<Rational> >& highestWeights,
     ExpressionContext& hwContext,
     Selection& selInducing,
     SemisimpleLieAlgebra* owner,
@@ -106,14 +106,14 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    BranchingData& theG2B3Data,
+    BranchingData& g2b3Data,
     ExpressionContext& outputContext
   );
   static bool printB3G2branchingTableInit(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    BranchingData& theG2B3data,
+    BranchingData& g2b3Data,
     int& desiredHeight,
     ExpressionContext& outputContext
   );
@@ -177,6 +177,11 @@ public:
     Expression& output,
     SemisimpleLieAlgebra*& outputOwner,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
+  );
+  static bool cartanInvolutionInternal(
+    Calculator& calculator,
+    const Expression& input,
+    CartanInvolution& output
   );
   static bool cartanInvolution(
     Calculator& calculator, const Expression& input, Expression& output

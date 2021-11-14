@@ -2105,7 +2105,7 @@ void VoganDiagram::computeMapStringToType() {
   this->mapStringToType.setKeyValue("DIII", VoganDiagram::DIII);
   this->mapStringToType.setKeyValue("EI", VoganDiagram::EI);
   this->mapStringToType.setKeyValue("EII", VoganDiagram::EII);
-  this->mapStringToType.setKeyValue("EIII", VoganDiagram::EII);
+  this->mapStringToType.setKeyValue("EIII", VoganDiagram::EIII);
   this->mapStringToType.setKeyValue("EIV", VoganDiagram::EIV);
   this->mapStringToType.setKeyValue("EV", VoganDiagram::EV);
   this->mapStringToType.setKeyValue("EVI", VoganDiagram::EVI);
@@ -2164,6 +2164,7 @@ CartanInvolution::CartanInvolution() {
 }
 
 void CartanInvolution::setSimpleRootSwap(int indexLeft, int indexRight) {
+  MacroRegisterFunctionWithName("CartanInvolution::setSimpleRootSwap");
   int rank = this->dynkinTypeAmbient().getRank();
   Vector<Rational> simpleLeft, simpleRight;
   simpleLeft.makeEi(rank, indexLeft);
@@ -2175,6 +2176,7 @@ void CartanInvolution::setSimpleRootSwap(int indexLeft, int indexRight) {
 }
 
 void CartanInvolution::setFilledSimpleRoot(int index) {
+  MacroRegisterFunctionWithName("CartanInvolution::setFilledSimpleRoot");
   this->setHollowSimpleRoot(index);
   this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
   this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
@@ -2197,7 +2199,15 @@ bool CartanInvolution::computeSimpleRootImagesTypeAI(
     }
     return false;
   }
-  this->automorphism.makeGInGWithIdentity(*this->owner);
+  int rank = this->owner->getRank();
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  for (int i = 0; i < rank / 2; i ++) {
+    this->setSimpleRootSwap(i, rank - i - 1);
+  }
+  if (rank % 2 == 1) {
+    this->setFilledSimpleRoot(rank / 2);
+  }
   return true;
 }
 
@@ -2221,12 +2231,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeAII(
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   for (int i = 0; i < rank; i ++) {
-    if (i % 2 == 0) {
-      this->setFilledSimpleRoot(i);
-    } else {
-      this->setHollowSimpleRoot(i);
-    }
+    this->setSimpleRootSwap(i, rank - i - 1);
   }
+  this->setHollowSimpleRoot(rank / 2);
   return true;
 }
 
@@ -2248,26 +2255,23 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
     }
     return false;
   }
-  if (this->voganDiagram.parameter * 2 >= rank) {
+  if (this->voganDiagram.parameter >= rank) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter " << this->voganDiagram.parameter
-      << " times 2 must be strictly less than the rank: " << rank << ".";
+      *commentsOnFailure << "Parameter " << this->voganDiagram.parameter + 1
+      << " must be less than or equal to: " << rank << ". ";
     }
     return false;
   }
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   Vector<Rational> simpleRootLeft, simpleRootRight;
-  for (int i = 0; i < this->voganDiagram.parameter; i ++) {
-    this->setSimpleRootSwap(i, rank - i - 1);
+  for (int i = 0; i < this->voganDiagram.diagram; i ++) {
+    if (i == this->voganDiagram.parameter) {
+      continue;
+    }
+    this->setHollowSimpleRoot(i);
   }
-  for (int i = 0; i < this->voganDiagram.parameter; i ++) {
-    int index = this->voganDiagram.parameter + i;
-    this->setFilledSimpleRoot(index);
-  }
-  if (rank % 2 == 1 && this->voganDiagram.parameter == 0) {
-    this->setHollowSimpleRoot(rank / 2);
-  }
+  this->setFilledSimpleRoot(this->voganDiagram.parameter);
   return true;
 }
 
@@ -2285,7 +2289,15 @@ bool CartanInvolution::computeSimpleRootImagesTypeEI(
     }
     return false;
   }
-  this->automorphism.makeGInGWithIdentity(*this->owner);
+  int rank = 6;
+  this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
+  this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  // The sticky part of Dynkin diagram.
+  this->setFilledSimpleRoot(1);
+  // The middle of the 5-node string of the Dynkin diagram
+  this->setHollowSimpleRoot(3);
+  this->setSimpleRootSwap(0, 5);
+  this->setSimpleRootSwap(2, 4);
   return true;
 }
 
@@ -2306,12 +2318,13 @@ bool CartanInvolution::computeSimpleRootImagesTypeEII(
   int rank = 6;
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
+  this->setHollowSimpleRoot(0);
   // The sticky part of Dynkin diagram.
-  this->setHollowSimpleRoot(1);
-  // The middle of the 5-node string of the Dynkin diagram
+  this->setFilledSimpleRoot(1);
+  this->setHollowSimpleRoot(2);
   this->setHollowSimpleRoot(3);
-  this->setSimpleRootSwap(0, 5);
-  this->setSimpleRootSwap(2, 4);
+  this->setHollowSimpleRoot(4);
+  this->setHollowSimpleRoot(5);
   return true;
 }
 
@@ -2332,11 +2345,13 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIII(
   int rank = 6;
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
-  this->setSimpleRootSwap(0, 5);
+  // The sticky part of Dynkin diagram.
+  this->setFilledSimpleRoot(0);
   this->setHollowSimpleRoot(1);
-  this->setFilledSimpleRoot(2);
-  this->setFilledSimpleRoot(3);
-  this->setFilledSimpleRoot(4);
+  this->setHollowSimpleRoot(2);
+  this->setHollowSimpleRoot(3);
+  this->setHollowSimpleRoot(4);
+  this->setHollowSimpleRoot(5);
   return true;
 }
 
@@ -2357,12 +2372,12 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIV(
   int rank = 6;
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
-  this->setHollowSimpleRoot(0);
-  this->setHollowSimpleRoot(5);
-  this->setFilledSimpleRoot(1);
-  this->setFilledSimpleRoot(2);
-  this->setFilledSimpleRoot(3);
-  this->setFilledSimpleRoot(4);
+  // The sticky part of Dynkin diagram.
+  this->setHollowSimpleRoot(1);
+  // The middle of the 5-node string of the Dynkin diagram
+  this->setHollowSimpleRoot(3);
+  this->setSimpleRootSwap(0, 5);
+  this->setSimpleRootSwap(2, 4);
   return true;
 }
 
@@ -2437,10 +2452,27 @@ void DynkinType::plotInitialize(Plot& output) {
   output.desiredHtmlHeightInPixels = 75;
 }
 
+void DynkinSimpleType::plotOneRoot(
+  Plot& output, int index, bool filled, int verticalOffset
+) {
+  Vector<Rational> center;
+  center.makeZero(2);
+  center[1] = verticalOffset;
+  center[0] = index * DynkinSimpleType::distanceBetweenRootCenters;
+  output.drawCircle(
+    center,
+    DynkinSimpleType::radiusOfRootCircle,
+    "black",
+    filled
+  );
+}
+
 void DynkinSimpleType::plotHorizontalChainOfRoots(
   Plot& output, int count, Selection* filledNodes
 ) {
-  DynkinSimpleType::plotHorizontalChainOfRoots(output, count,  0, filledNodes, nullptr);
+  DynkinSimpleType::plotHorizontalChainOfRoots(
+    output, count,  0, filledNodes, nullptr
+  );
 }
 
 void DynkinSimpleType::plotHorizontalChainOfRoots(
@@ -2450,17 +2482,16 @@ void DynkinSimpleType::plotHorizontalChainOfRoots(
   Selection* filledNodes,
   List<std::string>* labels
 ) {
-  Vector<Rational> center;
-  center.makeZero(2);
-  center[1] = verticalOffset;
   for (int i = 0; i < count; i ++) {
-    center[0] = i * DynkinSimpleType::distanceBetweenRootCenters;
     bool selected = false;
     if (filledNodes != nullptr) {
       selected = filledNodes->selected[i];
     }
-    output.drawCircle(center, DynkinSimpleType::radiusOfRootCircle, "black", selected);
+    DynkinSimpleType::plotOneRoot(output, i, verticalOffset, selected);
   }
+  Vector<Rational> center;
+  center.makeZero(2);
+  center[1] = verticalOffset;
   if (labels != nullptr) {
     center[1] += DynkinSimpleType::labelDistance;
     for (int i = 0; i < labels->size; i ++) {
@@ -2639,7 +2670,9 @@ void DynkinSimpleType::plotDn(Plot& output, int rank, int verticalOffset) {
 }
 
 void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
-  List<std::string> labels = List<std::string>({"1","3","4","5","6"});
+  List<std::string> labels = List<std::string>({
+    "1", "3", "4", "5", "6"
+  });
   DynkinSimpleType::plotHorizontalChainOfRoots(output, 5, verticalOffset, nullptr, &labels);
   Vector<Rational> left, right;
   left.makeZero(2);
@@ -2704,38 +2737,49 @@ void VoganDiagram::plot(Plot& output) {
   case VoganDiagram::EII:
     this->plotEII(output);
     return;
+  case VoganDiagram::EIII:
+    this->plotEIII(output);
+    return;
+  case VoganDiagram::EIV:
+    this->plotEIV(output);
+    return;
   default:
     return;
   }
 }
 
 void VoganDiagram::plotAI(Plot& output) {
-  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, nullptr);
+  Selection filledNodes;
+  filledNodes.initialize(this->rank);
+  if (this->rank % 2 == 1) {
+    filledNodes.addSelectionAppendNewIndex(this->rank / 2);
+  }
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &filledNodes);
+  for (int i = 0; i < this->rank / 2; i ++) {
+    VoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, 0, this->rank);
+  }
 }
 
 void VoganDiagram::plotAII(Plot& output) {
-  Selection blackedNodes;
-  blackedNodes.initialize(this->rank);
-  for (int i = 0; i < this->rank; i += 2) {
-    blackedNodes.addSelectionAppendNewIndex(i);
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, nullptr);
+  for (int i = 0; i < this->rank / 2; i ++) {
+    VoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, 0, this->rank);
   }
-  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &blackedNodes);
 }
 
 void VoganDiagram::plotAIII(Plot& output) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
-  for (int i = this->parameter; i < this->rank - this->parameter; i ++) {
-    filledRoots.addSelectionAppendNewIndex(i);
-  }
+  filledRoots.addSelectionAppendNewIndex(this->parameter);
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &filledRoots);
-  for (int i = 0; i < this->parameter; i ++) {
-    VoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, 0);
-  }
 }
 
 void VoganDiagram::plotTwoElementOrbit(
-  Plot& output, int leftIndex, int rightIndex, int verticalOffset
+  Plot& output,
+  int leftIndex,
+  int rightIndex,
+  int verticalOffset,
+  int rootsOnThisPlotRow
 ) {
   Vector<Rational> left, right;
   left.makeZero(2);
@@ -2755,9 +2799,11 @@ void VoganDiagram::plotTwoElementOrbit(
   plotObject.numberOfSegmentsJS[0] = "30";
   plotObject.coordinateFunctionsJS.setSize(2);
   plotObject.variablesInPlayJS.addOnTop("t");
-  std::string height = StringRoutines::toStringElement(DynkinSimpleType::distanceBetweenRootCenters);
-  std::string width = StringRoutines::toStringElement(DynkinSimpleType::distanceBetweenRootCenters * (rightIndex - leftIndex) / 2);
-  plotObject.coordinateFunctionsJS[0] = center[0].toString() + "+" + width + "*Math.cos(t)";
+  int totalWidth = (rootsOnThisPlotRow - 1) * DynkinSimpleType::distanceBetweenRootCenters;
+  int width = DynkinSimpleType::distanceBetweenRootCenters * (rightIndex - leftIndex) / 2;
+  std::string height = StringRoutines::toStringElement(DynkinSimpleType::distanceBetweenRootCenters * width / totalWidth);
+  std::string widthString = StringRoutines::toStringElement(width);
+  plotObject.coordinateFunctionsJS[0] = center[0].toString() + "+" + widthString + "*Math.cos(t)";
   plotObject.coordinateFunctionsJS[1] = center[1].toString() + "+" + height + "*Math.sin(t)";
   plotObject.colorJS = "black";
   plotObject.plotType = PlotObject::PlotTypes::parametricCurve;
@@ -2766,19 +2812,25 @@ void VoganDiagram::plotTwoElementOrbit(
 
 void VoganDiagram::plotEI(Plot& output) {
   DynkinSimpleType::plotE6(output, 0);
+  VoganDiagram::plotTwoElementOrbit(output, 0, 4, 0, - 4);
+  VoganDiagram::plotTwoElementOrbit(output, 1, 3, 0, - 4);
+  DynkinSimpleType::plotOneRoot(output, 2, true, DynkinSimpleType::distanceBetweenRootCenters);
 }
 
 void VoganDiagram::plotEII(Plot& output) {
-  DynkinSimpleType::plotHorizontalChainOfRoots(output, 5, nullptr);
-  Vector<Rational> left, right;
-  left.makeZero(2);
-  left[0] = distanceBetweenRootCenters * 2;
-  left[1] = radiusOfRootCircle;
-  right = left;
-  right[1] = distanceBetweenRootCenters - radiusOfRootCircle;
-  output.drawSegment(left, right);
-  right[1] = distanceBetweenRootCenters;
-  output.drawCircle(right, radiusOfRootCircle, "black", false);
+  DynkinSimpleType::plotE6(output, 0);
+  DynkinSimpleType::plotOneRoot(output, 2, true, DynkinSimpleType::distanceBetweenRootCenters);
+}
+
+void VoganDiagram::plotEIII(Plot& output) {
+  DynkinSimpleType::plotE6(output, 0);
+  DynkinSimpleType::plotOneRoot(output, 0, true, 0);
+}
+
+void VoganDiagram::plotEIV(Plot& output) {
+  DynkinSimpleType::plotE6(output, 0);
+  VoganDiagram::plotTwoElementOrbit(output, 0, 4, 0, - 4);
+  VoganDiagram::plotTwoElementOrbit(output, 1, 3, 0, - 4);
 }
 
 void CartanInvolution::plot(Plot& output) {
@@ -2796,7 +2848,7 @@ bool CalculatorLieTheory::cartanInvolution(
   if (!input[1].isOfType(&typeString)) {
     typeString = input[1].toString();
   }
-  int diagramParameter = 0;
+  int diagramParameter = 1;
   int rank = 0;
   if (
     typeString == "EI"   ||
@@ -2806,7 +2858,7 @@ bool CalculatorLieTheory::cartanInvolution(
   ) {
     rank = 6;
   } else {
-    diagramParameter = 0;
+    diagramParameter = 1;
     if (input.size() == 4) {
       if (!input[3].isSmallInteger(&diagramParameter)) {
         return calculator
@@ -2821,7 +2873,7 @@ bool CalculatorLieTheory::cartanInvolution(
   }
   CartanInvolution involution;
   if (!involution.voganDiagram.assignParameter(
-    typeString, rank, diagramParameter, &calculator.comments
+    typeString, rank, diagramParameter - 1, &calculator.comments
   )) {
     return false;
   }
@@ -2836,8 +2888,8 @@ bool CalculatorLieTheory::cartanInvolution(
   Plot plot;
   involution.plot(plot);
   return output.assignValue(
-    calculator,
-    plot.getPlotHtml(calculator) + "<br>" + involution.toString()
+    calculator, "Vogan diagram:\n<br>\n" +
+    plot.getPlotHtml(calculator) + "\n<br>\n" + involution.toString()
   );
 }
 

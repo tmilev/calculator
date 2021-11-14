@@ -916,11 +916,8 @@ public:
   ) {
     Matrix<Coefficient> domainMatrix;
     Matrix<Coefficient> rangeMatrix;
-    global.comments << "Assigning!" << domain.toStringCommaDelimited();
     domainMatrix.assignVectorsToRows(domain);
-    global.comments << "Assigning!" << range.toStringCommaDelimited();
     rangeMatrix.assignVectorsToRows(range);
-    global.comments << "Before inversion!";
     if (!domainMatrix.invert()) {
       return false;
     }
@@ -929,13 +926,22 @@ public:
     return true;
   }
   void rowTimesScalar(int rowIndex, const Coefficient& scalar);
-  void rowTimesScalarWithCarbonCopy(int rowIndex, const Coefficient& scalar, Matrix<Coefficient>* carbonCopy) {
+  void rowTimesScalarWithCarbonCopy(
+    int rowIndex,
+    const Coefficient& scalar,
+    Matrix<Coefficient>* carbonCopy
+  ) {
     this->rowTimesScalar(rowIndex, scalar);
     if (carbonCopy != 0) {
       carbonCopy->rowTimesScalar(rowIndex, scalar);
     }
   }
-  void addTwoRows(int fromRowIndex, int toRowIndex, int startColumnIndex, const Coefficient& scalar);
+  void addTwoRows(
+    int fromRowIndex,
+    int toRowIndex,
+    int startColumnIndex,
+    const Coefficient& scalar
+  );
   void addTwoRowsWithCarbonCopy(
     int fromRowIndex,
     int toRowIndex,
@@ -5858,6 +5864,9 @@ class DynkinSimpleType {
     Plot& output,
     int verticalOffset
   ) const;
+  static void plotOneRoot(
+    Plot& output, int index, bool filled, int verticalOffset
+  );
   static void plotHorizontalChainOfRoots(
     Plot& output, int count, Selection* filledNodes
   );

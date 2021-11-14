@@ -1083,11 +1083,6 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
         ElementSemisimpleLieAlgebra<Rational>& leftRangeElement = tempRange[leftIndex];
         ElementSemisimpleLieAlgebra<Rational>& rightRangeElement = tempRange[rightIndex];
         this->coDomainAlgebra().lieBracket(leftRangeElement, rightRangeElement, tempRange[index]);
-        global.comments << "<br> Element " << tempDomain[index] << " computed as [ " << leftDomainElement.toString()
-        << ", " << rightDomainElement.toString() << "]";
-        global.comments << "<br> Element " << tempRange[index] << " computed as [ " << leftRangeElement.toString()
-        << ", " << rightRangeElement.toString() << "]";
-        global.comments << "<br> Element " << tempDomain[index] << " maps to " << tempRange[index];
         nonComputed.removeSelection(index);
         break;
       }
@@ -1193,13 +1188,20 @@ void HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   }
 }
 
-void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(Matrix<Rational>& output) {
+void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(
+  Matrix<Rational>& output
+) {
   output.initialize(this->coDomainAlgebra().getRank(), this->domainAlgebra().getRank());
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i = 0; i < this->domainAlgebra().getRank(); i ++) {
-    domainElt.makeCartanGenerator(Vector<Rational>::getEi(this->domainAlgebra().getRank(), i), this->domainAlgebra());
+    domainElt.makeCartanGenerator(
+      Vector<Rational>::getEi(this->domainAlgebra().getRank(), i),
+      this->domainAlgebra()
+    );
     this->applyHomomorphism(domainElt, imageElt);
-    output.assignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.getCartanPart());
+    output.assignVectorToColumnKeepOtherColsIntactNoInit(
+      i, imageElt.getCartanPart()
+    );
   }
 }
 
@@ -1319,26 +1321,28 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
 
 class SlTwoInSlN;
 
-void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output) {
+void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(
+  Vectors<Rational>& output
+) {
   List<Vector<Rational> >& rootSystem = this->coDomainAlgebra().weylGroup.rootSystem;
-  int rankSA = this->domainAlgebra().weylGroup.getDimension();
+  int rankSubalgebra = this->domainAlgebra().weylGroup.getDimension();
   Matrix<Rational> invertedCartan;
   invertedCartan = this->domainAlgebra().weylGroup.cartanSymmetric;
   invertedCartan.invert();
   int numberOfPositiveRootsDomain = this->domainAlgebra().weylGroup.rootsOfBorel.size;
   output.setSize(rootSystem.size);
   Vector<Rational> scalarProducts;
-  scalarProducts.setSize(rankSA);
+  scalarProducts.setSize(rankSubalgebra);
   for (int i = 0; i < rootSystem.size; i ++) {
-    for (int j = 0; j < rankSA; j ++) {
+    for (int j = 0; j < rankSubalgebra; j ++) {
       ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numberOfPositiveRootsDomain];
       scalarProducts[j] = this->coDomainAlgebra().weylGroup.rootScalarCartanRoot(currentH.getCartanPart(), rootSystem[i]);
     }
     invertedCartan.actOnVectorColumn(scalarProducts, output[i]);
   }
-  this->imagesCartanDomain.setSize(rankSA);
-  for (int i = 0; i < rankSA; i ++) {
-    this->imagesCartanDomain[i] = this->imagesAllChevalleyGenerators[i +numberOfPositiveRootsDomain].getCartanPart();
+  this->imagesCartanDomain.setSize(rankSubalgebra);
+  for (int i = 0; i < rankSubalgebra; i ++) {
+    this->imagesCartanDomain[i] = this->imagesAllChevalleyGenerators[i + numberOfPositiveRootsDomain].getCartanPart();
   }
 }
 
@@ -1354,18 +1358,27 @@ bool HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism() {
   ElementSemisimpleLieAlgebra<Rational> coDomainElement, domainElement, imageOfDomainElement;
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
-      this->coDomainAlgebra().lieBracket(this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], coDomainElement);
-      this->coDomainAlgebra().lieBracket(this->domainAllChevalleyGenerators[i], this->domainAllChevalleyGenerators[j], domainElement);
+      this->coDomainAlgebra().lieBracket(
+        this->imagesAllChevalleyGenerators[i],
+        this->imagesAllChevalleyGenerators[j],
+        coDomainElement
+      );
+      this->coDomainAlgebra().lieBracket(
+        this->domainAllChevalleyGenerators[i],
+        this->domainAllChevalleyGenerators[j],
+        domainElement
+      );
       this->applyHomomorphism(domainElement, imageOfDomainElement);
       if (imageOfDomainElement != coDomainElement) {
         global.fatal
         << "Applying the homomorphism first, then Lie bracket "
-        << "does not match doing Lie bracket first, then homomorphism." << global.fatal;
+        << "does not match doing Lie bracket first, then homomorphism."
+        << global.fatal;
+        return false;
       }
     }
   }
   return true;
-
 }
 
 bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {

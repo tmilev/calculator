@@ -188,10 +188,21 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::cartanInvolution,
     "",
     "Computes the Cartan involution from a Vogan diagram. "
-    "This is work in progress as I was not able to find a good list of Vogan diagrams. "
+    "The Vogan diagrams are listed on "
+    "page 695, Knapp, Lie groups beyond an introduction, 2nd edition."
+    "However, these were given no labels. "
+    "We are matching the Vogan diagrams to their"
+    "Satake diagram labels as presented in the tables in "
+    "Shôrô Araki, On root systems and an infinitesimal classification "
+    "of irreducible symmetric spaces, 1962. "
+    "If you see any discrepancies, please file a bug in our bug tracker. "
+    "The first argument is the type of the matching Satake diagram. "
+    "The second argument is the parameter of the Satake diagram. "
+    "Please note that we will draw the corresponding Vogan diagram, "
+    "and NOT the Satake diagram. "
     "This is work in progress.",
     "CartanInvolution(AI, 3, 0);\n"
-    "CartanInvolution(AII, 3);\n"
+    "CartanInvolution(AII, 4);\n"
     "CartanInvolution(AIII, 4, 1);\n"
     "CartanInvolution(AIII, 5, 3);\n"
     "CartanInvolution(E_6, EI);\n"

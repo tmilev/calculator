@@ -77,7 +77,15 @@ public:
   void plotAIV(Plot& output);
   void plotEI(Plot& output);
   void plotEII(Plot& output);
-  void plotTwoElementOrbit(Plot& output, int leftIndex, int rightIndex, int verticalOffset);
+  void plotEIII(Plot& output);
+  void plotEIV(Plot& output);
+  void plotTwoElementOrbit(
+    Plot& output,
+    int leftIndex,
+    int rightIndex,
+    int verticalOffset,
+    int rootsOnThisPlotRow
+  );
 };
 
 class SemisimpleLieAlgebra {
@@ -599,7 +607,10 @@ public:
   bool checkIsHomomorphism();
   bool checkClosednessLieBracket();
   bool checkInitialization();
-  void applyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
+  void applyHomomorphism(
+    const ElementSemisimpleLieAlgebra<Rational>& input,
+    ElementSemisimpleLieAlgebra<Rational>& output
+  );
   bool applyHomomorphism(
     const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
     ElementUniversalEnveloping<RationalFraction<Rational> >& output

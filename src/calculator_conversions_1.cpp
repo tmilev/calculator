@@ -620,7 +620,8 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   if (!CalculatorConversions::functionDynkinType(
     calculator, input, dynkinType
   )) {
-    return calculator << "Failed to extract Dynkin type from: " << input.toString();
+    return calculator << "Failed to extract Dynkin type from: "
+    << input.toString() << ". ";
   }
   if (dynkinType.getRank() > 20) {
     return calculator
@@ -628,8 +629,10 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
     << "If you would like to relax this limitation edit file " << __FILE__
     << " line " << __LINE__ << ". Note that the Chevalley "
     << "constant computation Reserves a dim(g)*dim(g) "
-    << "table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
-    << "You have been warned. Alternatively, you may want to implement a sparse structure constant table "
+    << "table of RAM memory, which means the RAM memory "
+    << "rises with the 4^th power of rank(g). "
+    << "You have been warned. Alternatively, you may "
+    << "want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
   }
   bool newlyCreated = !calculator.objectContainer.semisimpleLieAlgebras.contains(dynkinType);

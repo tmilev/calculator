@@ -593,7 +593,7 @@ z = Polynomial{}(x^2+y^2);
 ```
 Divides rational by polynomial (to get a rational function).
 
-*/* [DividePolynomialByPolynomial] {CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial}. 
+*/* [DividePolynomialByPolynomial] {CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28-x_%7b1%7d%5e%7b2%7dx_%7b2%7dx_%7b3%7d-x_%7b1%7d%5e%7b2%7dx_%7b3%7d%2bx_%7b2%7d%2b%201%29%2f%5cnPolynomial%7b%7d%28x_%7b1%7d%5e%7b2%7dx_%7b2%7dx_%7b3%7d-x_%7b1%7d%5e%7b2%7dx_%7b3%7d-x_%7b2%7d%2b%201%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/

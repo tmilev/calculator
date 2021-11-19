@@ -3160,16 +3160,19 @@ bool CalculatorLieTheory::parabolicWeylGroups(
   return output.assignValueOLD(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorLieTheory::weylDimFormula(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::weylDimFormula");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (input.size() != 3) {
     return output.assignError(calculator, "This function takes 2 arguments");
   }
-  WithContext<SemisimpleLieAlgebra*> theSSowner;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
     calculator,
     input[1],
-    theSSowner
+    semisimpleLieAlgebra
   )) {
     return output.assignError(
       calculator,
@@ -3180,8 +3183,8 @@ bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expressio
   if (!calculator.getVector<RationalFraction<Rational> >(
     input[2],
     weight,
-    &theSSowner.context,
-    theSSowner.content->getRank()
+    &semisimpleLieAlgebra.context,
+    semisimpleLieAlgebra.content->getRank()
   )) {
     return output.assignError(
       calculator,
@@ -3192,13 +3195,13 @@ bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expressio
   rfOne.makeOne();
   Vector<RationalFraction<Rational> > weightInSimpleCoords;
   FormatExpressions format;
-  theSSowner.context.getFormat(format);
-  weightInSimpleCoords = theSSowner.content->weylGroup.getSimpleCoordinatesFromFundamental(weight);
+  semisimpleLieAlgebra.context.getFormat(format);
+  weightInSimpleCoords = semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(weight);
   calculator << "<br>Weyl dim formula input: simple coords: "
   << weightInSimpleCoords.toString(&format)
   << ", fundamental coords: " << weight.toString(&format);
-  RationalFraction<Rational> tempRF = theSSowner.content->weylGroup.weylDimensionFormulaSimpleCoordinates(weightInSimpleCoords);
-  return output.assignValueWithContextOLD(tempRF, theSSowner.context, calculator);
+  RationalFraction<Rational> tempRF = semisimpleLieAlgebra.content->weylGroup.weylDimensionFormulaSimpleCoordinates(weightInSimpleCoords);
+  return output.assignValueWithContext(calculator, tempRF, semisimpleLieAlgebra.context);
 }
 
 bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator, const Expression& input, Expression& output) {

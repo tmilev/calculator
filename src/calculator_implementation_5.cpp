@@ -327,8 +327,8 @@ bool Calculator::getMatrixDoubles(
     input,
     output,
     nullptr,
-    desiredNumberOfColumns,
-    CalculatorFunctions::functionEvaluateToDouble
+    desiredNumberOfColumns //,
+    // CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
@@ -341,8 +341,8 @@ bool Calculator::getVectorDoubles(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory,
-    CalculatorFunctions::functionEvaluateToDouble
+    desiredDimensionNonMandatory //,
+    // CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
@@ -353,8 +353,8 @@ bool Calculator::getVectorDoublesFromFunctionArguments(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory,
-    CalculatorFunctions::functionEvaluateToDouble
+    desiredDimensionNonMandatory //,
+    //CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
@@ -481,8 +481,8 @@ bool CalculatorConversions::functionMatrixDouble(
     input,
     matrix,
     nullptr,
-    0,
-    CalculatorFunctions::functionEvaluateToDouble
+    0 //,
+    //CalculatorFunctions::functionEvaluateToDouble
   )) {
     return calculator << "<br>Failed to get matrix of doubles. ";
   }

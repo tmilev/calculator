@@ -276,32 +276,13 @@ int Expression::getTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGr
   return this->owner->opWeylGroupVirtualRep();
 }
 
-// Expression::getTypeOperation specializations end.
-// Expression::convertsInternally specializations follow.
 template < >
-bool Expression::convertsInternally(
-  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >* whichElement
-) const {
-  MacroRegisterFunctionWithName("Expression::convertsInternally");
-  if (this->owner == nullptr) {
-    return false;
-  }
-  ElementUniversalEnveloping<RationalFraction<Rational> > element;
-  if (!this->isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(&element)) {
-    return false;
-  }
-  ElementSemisimpleLieAlgebra<Rational> elementSemisimple;
-  if (!element.isLieAlgebraElementRational(elementSemisimple)) {
-    return false;
-  }
-  if (whichElement != nullptr) {
-    this->getContext(whichElement->context);
-    whichElement->content = elementSemisimple;
-  }
-  return true;
+int Expression::getTypeOperation<ElementSemisimpleLieAlgebra<AlgebraicNumber> >() const {
+  this->checkInitialization();
+  return this->owner->opElementSemisimpleLieAlgebraAlgebraicCoefficients();
 }
 
-// Expression::ConvertsToType specializations end.
+// Expression::getTypeOperation specializations end.
 // Expression::addObjectReturnIndex specializations follow
 
 template < >
@@ -968,6 +949,19 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getV
   return this->owner->objectContainer.weylGroupVirtualRepresentations.getElement(this->getLastChild().data);
 }
 
+template < >
+ElementSemisimpleLieAlgebra<AlgebraicNumber>& Expression::getValueNonConst() const {
+  if (!this->isOfType<ElementSemisimpleLieAlgebra<AlgebraicNumber> >()) {
+    global.fatal << "Expression not of required type "
+    << "ElementSemisimpleLieAlgebra. The expression equals "
+    << this->toString() << "." << global.fatal;
+  }
+  return this->owner->objectContainer.elementsOfSemisimpleLieAlgebrasWithAlgebraicCoefficients .getElement(
+    this->getLastChild().data
+  );
+}
+//end Expression::getValueNonConst specializations.
+
 bool Expression::isMatrix(int* outputNumberOfRows, int* outputNumberOfColumns) const {
   MacroRegisterFunctionWithName("Expression::isMatrix");
   if (this->owner == nullptr) {
@@ -992,278 +986,6 @@ bool Expression::isMatrix(int* outputNumberOfRows, int* outputNumberOfColumns) c
   }
   return true;
 }
-
-//end Expression::getValueNonConst specializations.
-//start Expression::convertInternally specializations.
-template< >
-bool Expression::convertInternally<Polynomial<AlgebraicNumber> >(Expression& output) const {
-  MacroRegisterFunctionWithName("convertInternally_Polynomial_AlgebraicNumber");
-  this->checkInitialization();
-  if (this->isOfType<Rational>()) {
-    Polynomial<AlgebraicNumber> resultP;
-    resultP.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
-  }
-  if (this->isOfType<AlgebraicNumber>()) {
-    Polynomial<AlgebraicNumber> resultP;
-    resultP.makeConstant(this->getValue<AlgebraicNumber>());
-    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
-  }
-  if (this->isOfType<Polynomial<Rational> >()) {
-    Polynomial<AlgebraicNumber> resultP;
-    resultP = this->getValue<Polynomial<Rational> >();
-    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
-  }
-  if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
-  this->checkInitialization();
-  if (this->isOfType<Rational>()) {
-    Polynomial<Rational> resultP;
-    resultP.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContextOLD(resultP, this->getContext(), *this->owner);
-  }
-  if (this->isOfType<Polynomial<Rational> >()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<Polynomial<ElementZmodP> >(Expression& output) const {
-  MacroRegisterFunctionWithName("Expression::convertInternally");
-  this->checkInitialization();
-  if (this->isOfType<Polynomial<ElementZmodP> >()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<PolynomialModuloPolynomial<ElementZmodP> >(Expression& output) const {
-  MacroRegisterFunctionWithName("Expression::convertInternally");
-  this->checkInitialization();
-  if (this->isOfType<PolynomialModuloPolynomial<ElementZmodP> >()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<RationalFraction<Rational> >(Expression& output) const {
-  MacroRegisterFunctionWithName("Expression::convertInternally_RationalFunction_Rational");
-  this->checkInitialization();
-  if (this->isOfType<Rational>()) {
-    RationalFraction<Rational> resultRF;
-    resultRF.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContextOLD(
-      resultRF, this->getContext(), *this->owner
-    );
-  }
-  if (this->isOfType<AlgebraicNumber>()) {
-    Rational rationalValue;
-    if (!this->getValue<AlgebraicNumber>().isRational(&rationalValue)) {
-      return false;
-    }
-    RationalFraction<Rational> result;
-    result.makeConstant(rationalValue);
-    return output.assignValueWithContextOLD(result, this->getContext(), *this->owner);
-  }
-  if (this->isOfType<Polynomial<Rational> >()) {
-    RationalFraction<Rational> result;
-    result = this->getValue<Polynomial<Rational> >();
-    return output.assignValueWithContextOLD(
-      result, this->getContext(), *this->owner
-    );
-  }
-  if (this->isOfType<RationalFraction<Rational> >()) {
-    output = *this;
-    return true;
-  }
-  (*this->owner)
-  << "<hr>convertInternally_RationalFunction_Rational: Failed to convert "
-  << this->toString() << " to rational function. ";
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<RationalFraction<AlgebraicNumber> >(Expression& output) const {
-  MacroRegisterFunctionWithName("Expression::converInternally_RationalFunction_AlgebraicNumber");
-  this->checkInitialization();
-  AlgebraicClosureRationals* closure = &this->owner->objectContainer.algebraicClosure;
-  if (this->isOfType<Rational>()) {
-    RationalFraction<AlgebraicNumber> result;
-    AlgebraicNumber value;
-    value.assignRational(this->getValue<Rational>(), closure);
-    result.makeConstant(value);
-    return output.assignValueWithContextOLD(
-      result, this->getContext(), *this->owner
-    );
-  }
-  if (this->isOfType<AlgebraicNumber>()) {
-    RationalFraction<AlgebraicNumber> result;
-    result.makeConstant(this->getValue<AlgebraicNumber>());
-    return output.assignValueWithContextOLD(
-      result, this->getContext(), *this->owner
-    );
-  }
-  // TODO(tmilev): please implement conversion from Polynomial<Rational> to Polynomial<AlgebraicNumber>.
-  if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
-    RationalFraction<AlgebraicNumber> result;
-    result = this->getValue<Polynomial<AlgebraicNumber> >();
-    return output.assignValueWithContextOLD(
-      result, this->getContext(), *this->owner
-    );
-  }
-  if (this->isOfType<RationalFraction<AlgebraicNumber> >()) {
-    output = *this;
-    return true;
-  }
-  (*this->owner)
-  << "<hr>converInternally_RationalFunction_AlgebraicNumber: Failed to convert "
-  << this->toString() << " to rational function with algebraic coefficients. ";
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_ElementWeylAlgebra");
-  this->checkInitialization();
-  if (this->isOfType<Rational>()) {
-    ElementWeylAlgebra<Rational> resultEWA;
-    resultEWA.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContextOLD(resultEWA, this->getContext(), *this->owner);
-  }
-  if (this->isOfType<Polynomial<Rational> >()) {
-    ElementWeylAlgebra<Rational> resultEWA;
-    resultEWA.assignPolynomial(this->getValue<Polynomial<Rational> >());
-    return output.assignValueWithContextOLD(resultEWA, this->getContext(), *this->owner);
-  }
-  if (this->isOfType<ElementWeylAlgebra<Rational> >()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<Weight<Polynomial<Rational> > >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_Weight_Polynomial");
-  this->checkInitialization();
-  if (this->isOfType<Weight<Polynomial<Rational> > >()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
-  this->checkInitialization();
-  if (!this->isBuiltInType())
-    return false;
-  if (this->isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >()) {
-    output = *this;
-    return true;
-  }
-  SemisimpleLieAlgebra* theOwner = this->getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
-  if (theOwner == nullptr) {
-    this->owner->comments << "<hr>Failed to convert " << this->toString() << " (Lispified: " << this->toStringFull()
-    << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
-    return false;
-  }
-  ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
-  if (this->isOfType<Rational>()) {
-    outputUE.makeConstant(this->getValue<Rational>(), *theOwner);
-    return output.assignValueWithContextOLD(outputUE, this->getContext(), *this->owner);
-  } else if (this->isOfType<Polynomial<Rational> >()) {
-    RationalFraction<Rational> tempRF;
-    tempRF = this->getValue<Polynomial<Rational> >();
-    outputUE.makeConstant(tempRF, *theOwner);
-    return output.assignValueWithContextOLD(outputUE, this->getContext(), *this->owner);
-  } else if (this->isOfType<RationalFraction<Rational> >()) {
-    outputUE.makeConstant(this->getValue<RationalFraction<Rational> >(), *theOwner);
-    return output.assignValueWithContextOLD(outputUE, this->getContext(), *this->owner);
-  }
-  return *this->owner << "<hr>Failed to convert " << this->toString()
-  << " to element of universal enveloping -  I don't know how. ";
-}
-
-template< >
-bool Expression::convertInternally<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
-  this->checkInitialization();
-  if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<Rational>(Expression& output) const {
-  MacroRegisterFunctionWithName("convertInternally");
-  this->checkInitialization();
-  if (this->isOfType<Rational>()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<ElementZmodP>(Expression& output) const {
-  MacroRegisterFunctionWithName("convertInternally");
-  this->checkInitialization();
-  if (this->isOfType<ElementZmodP>()) {
-    output = *this;
-    return true;
-  }
-  return false;
-}
-
-template< >
-bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
-  MacroRegisterFunctionWithName("convertInternally");
-  this->checkInitialization();
-  if (this->isOfType<AlgebraicNumber>()) {
-    output = *this;
-    return true;
-  }
-  Rational rational;
-  if (!this->isOfType<Rational>(&rational)) {
-    return false;
-  }
-  AlgebraicNumber outRat = rational;
-  return output.assignValueOLD(outRat, *this->owner);
-}
-
-template< >
-bool Expression::convertInternally<double>(Expression& output) const {
-  MacroRegisterFunctionWithName("convertInternally");
-  this->checkInitialization();
-  if (this->isOfType<double>()) {
-    output = *this;
-    return true;
-  }
-  double outputDouble = 0;
-  if (this->evaluatesToDouble(&outputDouble)) {
-    return output.assignValueOLD(outputDouble, *this->owner);
-  }
-  return false;
-}
-//end Expression::convertToType specializations.
 
 bool Expression::checkConsistencyRecursively() const {
   MacroRegisterFunctionWithName("Expression::checkConsistencyRecursively");

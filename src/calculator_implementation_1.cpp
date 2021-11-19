@@ -68,8 +68,8 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
     input,
     output,
     &contextStart,
-    0,
-    CalculatorConversions::functionPolynomial<AlgebraicNumber>
+    0//,
+    //CalculatorConversions::functionPolynomial<AlgebraicNumber>
   )) {
     return false;
   }

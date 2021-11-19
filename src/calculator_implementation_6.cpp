@@ -1195,7 +1195,9 @@ bool CalculatorFunctions::innerIsSquareFreePolynomial(
     return false;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convertToPolynomial(input, polynomial)) {
+  if (!CalculatorConversions::convertToPolynomial(
+    input, polynomial, - 1, - 1
+  )) {
     return false;
   }
   std::stringstream out;
@@ -2631,17 +2633,14 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     return calculator << "Could not get arithmetic expression from: " << input[1].toString()
     << ". I was expecting a cubic equality.";
   }
-  Expression polynomialE;
-  Polynomial<Rational> polynomial;
+  WithContext<Polynomial<Rational> > polynomialWithContext;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, curveE, polynomialE
+    calculator, curveE, polynomialWithContext, - 1, - 1
   )) {
     return calculator << "Could not get polynomial from " << curveE.toString();
   }
-  if (!polynomialE.isOfType(&polynomial)) {
-    return calculator << "Could not convert to polynomial: " << polynomialE.toString();
-  }
-  ExpressionContext curveContext = polynomialE.getContext();
+  ExpressionContext curveContext = polynomialWithContext.context;
+  Polynomial<Rational> polynomial = polynomialWithContext.content;
   if (curveContext.numberOfVariables() != 2) {
     return calculator << "Expected 2 context variables in "
     << curveE.toString() << ", got context: "
@@ -2665,7 +2664,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << curveContext.getVariable(1).toString()
     << " not equal to " << yE.toString();
   }
-  calculator << "Created elliptic curve " << polynomialE.toString()
+  calculator << "Created elliptic curve " << polynomial.toString()
   << " = 0. The variables are assumed to be: x = " << xE.toString() << ", y = " << yE.toString();
   if (polynomial.size() > 4) {
     return calculator << "Elliptic curve allowed to have max 4 terms, yours has: " << polynomial.size();
@@ -2856,8 +2855,8 @@ bool CalculatorFunctions::determinantPolynomial(
     input[1],
     matrixPolynomial,
     &context,
-    - 1,
-    CalculatorConversions::functionPolynomial<Rational>
+    - 1 //,
+    //CalculatorConversions::functionPolynomial<Rational>
   )) {
     return calculator << "<hr>Failed to convert the input to "
     << "matrix of polynomials. ";
@@ -3232,7 +3231,7 @@ bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Exp
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!calculator.getTypeHighestWeightParabolic<Rational>(
-    calculator, input, output, hwFundamental, tempSel, semisimpleLieAlgebra, nullptr
+    calculator, input, output, hwFundamental, tempSel, semisimpleLieAlgebra
   )) {
     return output.assignError(
       calculator, "Failed to extract highest weight and algebra"
@@ -3264,7 +3263,7 @@ bool CalculatorFunctions::innerFreudenthalFormula(Calculator& calculator, const 
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!calculator.getTypeHighestWeightParabolic<Rational>(
-    calculator, input, output, hwFundamental, tempSel, semisimpleLieAlgebra, nullptr
+    calculator, input, output, hwFundamental, tempSel, semisimpleLieAlgebra
   )) {
     return output.assignError(calculator, "Failed to extract highest weight and algebra");
   }

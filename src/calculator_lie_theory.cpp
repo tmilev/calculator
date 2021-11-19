@@ -320,7 +320,9 @@ bool CalculatorLieTheory::animateLittelmannPaths(
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+    calculator,
+    input[1],
+    algebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -331,8 +333,7 @@ bool CalculatorLieTheory::animateLittelmannPaths(
     input[2],
     weight,
     &tempContext,
-    theSSowner->getRank(),
-    nullptr
+    theSSowner->getRank()
   )) {
     return output.assignError(
       calculator,
@@ -686,7 +687,9 @@ bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointer;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebraPointer
+    calculator,
+    input[1],
+    semisimpleLieAlgebraPointer
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -695,7 +698,10 @@ bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input
   waypoints.setSize(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
     if (!calculator.getVector<Rational>(
-      input[i], waypoints[i - 2], nullptr, semisimpleLieAlgebra.getRank(), nullptr
+      input[i],
+      waypoints[i - 2],
+      nullptr,
+      semisimpleLieAlgebra.getRank()
     )) {
       return output.assignError(calculator, "Failed to extract waypoints");
     }
@@ -706,7 +712,9 @@ bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input
   return output.assignValueOLD(theLSpath, calculator);
 }
 
-bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::kazhdanLuzstigCoeffificents");
   if (input.size() != 2) {
     return calculator
@@ -715,8 +723,8 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(Calculator& calculator, co
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     semisimpleLieAlgebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
@@ -770,9 +778,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
     output,
     theHWs[0],
     theParSel,
-    theSSalgebra,
-    CalculatorConversions::functionPolynomial<Rational>)
-  ) {
+    theSSalgebra
+  )) {
     return output.assignError(
       calculator,
       "Failed to extract type, highest weight, parabolic selection"
@@ -1179,8 +1186,7 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
     output,
     highestWeightFundamentalCoordinates,
     selectionParSel,
-    semisimpleLieAlgebra,
-    CalculatorConversions::functionRationalFunction<Rational>
+    semisimpleLieAlgebra
   )) {
     return output.assignError(
       calculator,
@@ -1230,7 +1236,9 @@ bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToL
   resultSSalgebraE = leftE;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   if (!CalculatorConversions::convert(
-    leftE, CalculatorConversions::functionSemisimpleLieAlgebra, theSSalgebra
+    calculator,
+    leftE,
+    theSSalgebra
   )) {
     return output.assignError(
       calculator,
@@ -1244,8 +1252,7 @@ bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToL
     genVemaWeightNode,
     highestWeightFundCoords,
     &hwContext,
-    theRank,
-    CalculatorConversions::functionPolynomial<Rational>
+    theRank
   )) {
     return calculator
     << "Failed to convert the third argument of "
@@ -1354,8 +1361,7 @@ bool CalculatorLieTheory::highestWeightVector(Calculator& calculator, const Expr
     output,
     highestWeightFundamentalCoordinates,
     parabolicSelection,
-    semisimpleLieAlgebra,
-    CalculatorConversions::functionRationalFunction<Rational>
+    semisimpleLieAlgebra
   )) {
     return output.assignError(
       calculator,
@@ -1392,7 +1398,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   const Expression& fdWeightNode = input[2];
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
-    leftE, CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebra
+    calculator,
+    leftE,
+    semisimpleLieAlgebra
   )) {
     return output.assignError(
       calculator,
@@ -1406,8 +1414,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     genVemaWeightNode,
     highestWeightFundCoords,
     &hwContext,
-    rank,
-    CalculatorConversions::functionRationalFunction<Rational>
+    rank
+    // CalculatorConversions::functionRationalFunction<Rational>
   )) {
     return calculator
     << "Failed to convert the third argument of "
@@ -1417,7 +1425,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     << genVemaWeightNode.toString() << ".";
   }
   Vector<Rational> highestWeightFiniteDimensional;
-  if (!calculator.getVector<Rational>(fdWeightNode, highestWeightFiniteDimensional, nullptr, rank, nullptr)) {
+  if (!calculator.getVector<Rational>(
+    fdWeightNode, highestWeightFiniteDimensional, nullptr, rank
+  )) {
     return calculator
     << "Failed to convert the second argument of "
     << "splitGenericGeneralizedVermaTensorFiniteDimensional to a list of "
@@ -1451,7 +1461,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     if (!isGood) {
       return output.assignError(
         calculator,
-        "Error: the third argument of splitGenericGeneralizedVermaTensorFiniteDimensional "
+        "Error: the third argument of "
+        "splitGenericGeneralizedVermaTensorFiniteDimensional "
         "must be a list of small non-negative integers."
       );
     }
@@ -1855,8 +1866,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
     input,
     g2b3Data.weightFundamentalCoordinates,
     &outputContext,
-    3,
-    CalculatorConversions::functionRationalFunction<Rational>
+    3//,
+    //CalculatorConversions::functionRationalFunction<Rational>
   )) {
     output.assignError(
       calculator,
@@ -1915,7 +1926,9 @@ bool CalculatorLieTheory::elementsInSameLieAlgebra(
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+    calculator,
+    input[1],
+    algebra
   )) {
     output.assignError(
       calculator,
@@ -2930,8 +2943,8 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
   }
   WithContext<SemisimpleLieAlgebra*> ownerLieAlgebra;
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     ownerLieAlgebra
   )) {
     return output.assignError(
@@ -2994,8 +3007,8 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     semisimpleLieAlgebra
   )) {
     return output.assignError(
@@ -3062,8 +3075,8 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   const Expression& splittingParNode = input[4];
   WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
   if (!CalculatorConversions::convert(
+    calculator,
     typeNode,
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     ownerSSPointer
   )) {
     return output.assignError(
@@ -3081,21 +3094,24 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
     weightNode,
     weightFundCoords,
     &finalContext,
-    dimension,
-    CalculatorConversions::functionRationalFunction<Rational>
+    dimension
   )) {
     return output.assignError(
       calculator,
       "Failed to extract highest weight from the second argument."
     );
   }
-  if (!calculator.getVector<Rational>(inducingParNode, inducingParSel, &finalContext, dimension, nullptr)) {
+  if (!calculator.getVector<Rational>(
+    inducingParNode, inducingParSel, &finalContext, dimension
+  )) {
     return output.assignError(
       calculator,
       "Failed to extract parabolic selection from the third argument"
     );
   }
-  if (!calculator.getVector<Rational>(splittingParNode, splittingParSel, &finalContext, dimension, nullptr)) {
+  if (!calculator.getVector<Rational>(
+    splittingParNode, splittingParSel, &finalContext, dimension
+  )) {
     return output.assignError(
       calculator,
       "Failed to extract parabolic selection from the fourth argument"
@@ -3127,8 +3143,8 @@ bool CalculatorLieTheory::parabolicWeylGroups(
   Selection selectionParSel;
   WithContext<SemisimpleLieAlgebra*> theSSPointer;
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSPointer
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
@@ -3151,8 +3167,8 @@ bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expressio
   }
   WithContext<SemisimpleLieAlgebra*> theSSowner;
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSowner
   )) {
     return output.assignError(
@@ -3165,8 +3181,7 @@ bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expressio
     input[2],
     weight,
     &theSSowner.context,
-    theSSowner.content->getRank(),
-    CalculatorConversions::functionRationalFunction<Rational>
+    theSSowner.content->getRank()
   )) {
     return output.assignError(
       calculator,
@@ -3198,8 +3213,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
     output,
     theHWfundcoords,
     parabolicSel,
-    semisimpleLieAlgebraPointer,
-    CalculatorConversions::functionRationalFunction<Rational>
+    semisimpleLieAlgebraPointer
   )) {
     return output.assignError(calculator, "Failed to extract highest weight vector data");
   } else {
@@ -3302,8 +3316,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     output,
     theHWfundcoords,
     parSel,
-    theSSlieAlg,
-    CalculatorConversions::functionRationalFunction<Rational>
+    theSSlieAlg
   )) {
    return false;
   }
@@ -3409,22 +3422,17 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   return output.assignValueOLD<std::string>(out.str(), calculator);
 }
 
-template <>
-bool Expression::convertsInternally<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(
-  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >* whichElement
-) const;
-
 bool CalculatorLieTheory::constructCartanSubalgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::constructCartanSubalgebra");
   SubalgebraSemisimpleLieAlgebra subalgebra;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
-  if (input.convertsInternally(&element)) {
+  if (CalculatorConversions::convertWithoutComputation(calculator, input, element)) {
     subalgebra.generators.addOnTop(element.content);
   } else {
     for (int i = 1; i < input.size(); i ++) {
-      if (input[i].convertsInternally(&element)) {
+      if (input[i].isOfTypeWithContext(&element)) {
         subalgebra.generators.addOnTop(element.content);
       } else {
         return calculator
@@ -3469,7 +3477,9 @@ bool CalculatorLieTheory::growDynkinType(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
-    input[2], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebra
+    calculator,
+    input[2],
+    semisimpleLieAlgebra
   )) {
     return output.assignError(calculator, "Error extracting ambient Lie algebra.");
   }
@@ -3544,7 +3554,9 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   }
   WithContext<SemisimpleLieAlgebra*> lieAlgebraPointer;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, lieAlgebraPointer
+    calculator,
+    input[1],
+    lieAlgebraPointer
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -3761,7 +3773,9 @@ bool CalculatorLieTheory::casimirWithRespectToLevi(
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+    calculator,
+    input[1],
+    algebra
   )) {
     return output.assignError(
       calculator,
@@ -3867,8 +3881,8 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   const Expression& hwNode = input[2];
   WithContext<SemisimpleLieAlgebra*> theSSalgpointer;
   if (!CalculatorConversions::convert(
+    calculator,
     typeNode,
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSalgpointer
   )) {
     return output.assignError(
@@ -3879,7 +3893,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   Vector<Rational> highestWeightFundCoords;
   ExpressionContext context(calculator);
   if (!calculator.getVector<Rational>(
-    hwNode, highestWeightFundCoords, &context, theSSalgpointer.content->getRank(), nullptr
+    hwNode, highestWeightFundCoords, &context, theSSalgpointer.content->getRank()
   )) {
     return output.assignError(
       calculator,
@@ -3909,8 +3923,8 @@ bool CalculatorLieTheory::drawRootSystem(
   bool hasPreferredProjectionPlane = input.isListNElements(4);
   WithContext<SemisimpleLieAlgebra*> theAlgPointer;
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     theAlgPointer
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
@@ -3924,14 +3938,12 @@ bool CalculatorLieTheory::drawRootSystem(
       input[2],
       preferredProjectionPlane[0],
       nullptr,
-      theWeyl.getDimension(),
-      nullptr
+      theWeyl.getDimension()
     ) && calculator.getVector(
       input[3],
       preferredProjectionPlane[1],
       nullptr,
-      theWeyl.getDimension(),
-      nullptr
+      theWeyl.getDimension()
     );
     if (!isGood) {
       return output.assignError(
@@ -4036,8 +4048,8 @@ bool CalculatorLieTheory::drawWeightSupport(
   const Expression& hwNode = input[2];
   WithContext<SemisimpleLieAlgebra*> theAlgPointer;
   if (!CalculatorConversions::convert(
+    calculator,
     typeNode,
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     theAlgPointer
   )) {
     return output.assignError(
@@ -4051,8 +4063,7 @@ bool CalculatorLieTheory::drawWeightSupport(
     hwNode,
     highestWeightFundCoords,
     nullptr,
-    theAlg.getRank(),
-    nullptr
+    theAlg.getRank()
   )) {
     return false;
   }
@@ -4160,8 +4171,8 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   }
   if (!isAlreadySubalgebrasObject) {
     if (!CalculatorConversions::convert(
+      calculator,
       input[1],
-      CalculatorConversions::functionSemisimpleLieAlgebra,
       ownerAlgebra
     )) {
       return output.assignError(
@@ -4219,7 +4230,9 @@ bool CalculatorLieTheory::casimir(Calculator& calculator, const Expression& inpu
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+    calculator,
+    input[1],
+    algebra
   )) {
     return output.assignError(
       calculator,
@@ -4279,7 +4292,12 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(Calcula
   WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
   Expression tempE, tempE2;
   if (!calculator.getTypeHighestWeightParabolic(
-    calculator, input, output, highestWeight, parSel, ownerSSLiealg, nullptr
+    calculator,
+    input,
+    output,
+    highestWeight,
+    parSel,
+    ownerSSLiealg
   )) {
     return false;
   }
@@ -4310,7 +4328,9 @@ bool CalculatorLieTheory::chevalleyGenerator(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebra
+    calculator,
+    input[1],
+    semisimpleLieAlgebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -4348,7 +4368,9 @@ bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expressi
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebra
+    calculator,
+    input[1],
+    semisimpleLieAlgebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -4386,7 +4408,9 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+    calculator,
+    input[1],
+    algebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -4399,7 +4423,7 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
     return calculator << "<hr>Function root subsystem works for simple ambient types only. ";
   }
   for (int i = 2; i < input.size(); i ++) {
-    if (!calculator.getVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
+    if (!calculator.getVector(input[i], currentRoot, nullptr, theRank)) {
       return false;
     }
     if (!theWeyl.rootSystem.contains(currentRoot)) {
@@ -4465,8 +4489,8 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   WithContext<SemisimpleLieAlgebra*> algebraPointer;
   input.checkInitialization();
   if (!CalculatorConversions::convert(
+    calculator,
     input,
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     algebraPointer
   )) {
     calculator << "Failed to extract Lie algebra from: " << input.toString() << "<br>";

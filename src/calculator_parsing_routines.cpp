@@ -483,6 +483,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addOperationBuiltInType("string");
   this->addOperationBuiltInType("JSON");
   this->addOperationBuiltInType("ElementUEoverRF");
+  this->addOperationBuiltInType("ElementSemisimpleLieAlgebraAlgebraicCoefficients");
   this->addOperationBuiltInType("ElementTensorGVM");
   this->addOperationBuiltInType("CharSSAlgMod");
   this->addOperationBuiltInType("SemisimpleLieAlg");

@@ -4113,8 +4113,8 @@ public:
     return tempRoot1.isProportionalTo(tempRoot2, outputTimesMeEqualsInput);
   }
   unsigned int hashFunction() const {
-    return this->indexOfOwnerAlgebra * someRandomPrimes[0] +
-    this->::LinearCombination<ChevalleyGenerator, Rational>::hashFunction() * someRandomPrimes[1];
+    return this->::LinearCombination<ChevalleyGenerator, Coefficient>::
+    hashFunction() * someRandomPrimes[1];
   }
   static unsigned int hashFunction(const ElementSemisimpleLieAlgebra<Coefficient>& input) {
     return input.hashFunction();

@@ -153,7 +153,9 @@ bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& c
   }
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerAlgebra
+    calculator,
+    input[1],
+    ownerAlgebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -440,7 +442,9 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+    calculator,
+    input[1],
+    algebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -552,7 +556,9 @@ bool CalculatorFunctions::operationBinary(
   return false;
 }
 
-bool CalculatorFunctions::innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly) {
+bool CalculatorFunctions::innerEWAorPoly(
+  Calculator& calculator, const Expression& input, Expression& output, bool assignPoly
+) {
   MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
   if (!input.isListNElements(3)) {
     return false;
@@ -563,8 +569,7 @@ bool CalculatorFunctions::innerEWAorPoly(Calculator& calculator, const Expressio
     input,
     inputPolForm,
     &startContext,
-    2,
-    CalculatorConversions::functionPolynomial<Rational>
+    2
   )) {
     return calculator
     << "<hr>Failed to extract polynomials from arguments of "

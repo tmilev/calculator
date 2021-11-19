@@ -429,7 +429,7 @@ public:
 
   static bool innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerTrace(Calculator& calculator, const Expression& input, Expression& output);
+  static bool matrixTrace(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIfStandard(Calculator& calculator, const Expression& input, Expression& output);
@@ -468,7 +468,6 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    Expression::FunctionAddress conversionFunction,
     int maxiumDimension
   );
 

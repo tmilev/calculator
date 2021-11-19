@@ -2602,7 +2602,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Trace",
-    CalculatorFunctions::innerTrace,
+    CalculatorFunctions::matrixTrace,
     "",
     "Gets trace of a square matrix. ",
     "X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); Trace X",

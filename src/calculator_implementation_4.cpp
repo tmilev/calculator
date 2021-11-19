@@ -2142,6 +2142,7 @@ void ObjectContainer::reset() {
   this->ellipticCurveElementsZmodP.clear();
   this->ellipticCurveElementsRational.clear();
   this->canvasPlotCounter = 0;
+  this->elementsOfSemisimpleLieAlgebrasWithAlgebraicCoefficients.clear();
   this->resetPlots();
   this->resetSliders();
 }
@@ -2219,39 +2220,6 @@ bool Expression::mergeContextsMyAruments(
       return false;
     }
     output.addChildOnTop(convertedE);
-  }
-  return true;
-}
-
-bool Calculator::convertExpressionsToCommonContext(
-  List<Expression>& inputOutputEs, ExpressionContext* inputOutputStartingContext
-) {
-  MacroRegisterFunctionWithName("Calculator::convertExpressionsToCommonContext");
-  ExpressionContext commonContext(*this);
-  if (inputOutputStartingContext != nullptr) {
-    commonContext = *inputOutputStartingContext;
-  }
-  for (int i = 0; i < inputOutputEs.size; i ++) {
-    if (!inputOutputEs[i].isBuiltInType()) {
-      return
-      *this << "<hr>Possible programming error: "
-      << "calling convertExpressionsToCommonContext "
-      << "on expressions without context. "
-      << global.fatal.getStackTraceEtcErrorMessageHTML();
-    }
-    if (!commonContext.mergeContexts(inputOutputEs[i].getContext(), commonContext)) {
-      return *this << "<hr>Failed to merge context "
-      << commonContext.toString() << " with "
-      << inputOutputEs[i].getContext().toString();
-    }
-  }
-  for (int i = 0; i < inputOutputEs.size; i ++) {
-    if (!inputOutputEs[i].setContextAtLeastEqualTo(commonContext, nullptr)) {
-      return false;
-    }
-  }
-  if (inputOutputStartingContext != nullptr) {
-    *inputOutputStartingContext = commonContext;
   }
   return true;
 }

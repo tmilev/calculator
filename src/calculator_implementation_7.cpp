@@ -21,13 +21,6 @@
 #include <vector>
 #include "math_rational_function_implementation.h"
 
-template <>
-bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
-template <>
-bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) const;
-template <>
-bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(Expression& output) const;
-
 template<>
 List<Polynomial<Rational> >::Comparator*
 FormatExpressions::getMonomialOrder<Polynomial<Rational> >() {
@@ -1190,8 +1183,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
       input,
       polynomialsRational,
       &context,
-      0,
-      CalculatorConversions::functionPolynomial<Rational>
+      0
     )) {
       return output.assignError(
         calculator,
@@ -1203,8 +1195,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
       input,
       polynomialsRational,
       &context,
-      0,
-      CalculatorConversions::functionPolynomial<Rational>
+      0
     )) {
       return output.assignError(
         calculator,
@@ -1298,7 +1289,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
   MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly");
   WithContext<Polynomial<AlgebraicNumber> > polynomial;
   if (!CalculatorConversions::convertToPolynomial(
-    input, polynomial
+    input, polynomial, - 1, - 1
   )) {
     return calculator << "<hr>Failed to convert "
     << input.toString() << " to polynomial. ";
@@ -2130,45 +2121,46 @@ bool CalculatorFunctions::innerCompositeConstTimesAnyActOn(
 bool CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCompositeEWAactOnPoly");
+  MacroRegisterFunctionWithName("CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial");
   if (input.size() != 2) {
     return false;
   }
-  Expression theEWAE = input[0];
+  Expression elementWeylAlgebra = input[0];
   Expression argument = input[1];
-  if (!theEWAE.isListStartingWithAtom(calculator.opElementWeylAlgebra())) {
+  if (!elementWeylAlgebra.isListStartingWithAtom(calculator.opElementWeylAlgebra())) {
     return false;
   }
   if (!argument.isBuiltInType()) {
     return false;
   }
-  if (!theEWAE.mergeContexts(theEWAE, argument)) {
+  if (!elementWeylAlgebra.mergeContexts(elementWeylAlgebra, argument)) {
     return false;
   }
-  Polynomial<Rational> argumentPolynomial;
-  Expression argumentConverted;
-  if (argument.convertInternally<Polynomial<Rational> >(argumentConverted)) {
-    argumentPolynomial = argumentConverted.getValue<Polynomial<Rational> >();
-  } else if (argument.convertInternally<ElementWeylAlgebra<Rational> >(argumentConverted)) {
-    if (!argumentConverted.getValue<ElementWeylAlgebra<Rational> >().isPolynomial(&argumentPolynomial)) {
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!CalculatorConversions::convert(calculator, argument, polynomial)) {
+    WithContext<ElementWeylAlgebra<Rational> > argumentElementWeylAlgebra;
+    if (!CalculatorConversions::convert(calculator, argument, argumentElementWeylAlgebra)) {
       return false;
     }
-  } else {
-    return false;
+    if (!argumentElementWeylAlgebra.content.isPolynomial(&polynomial.content)) {
+      return false;
+    }
+    polynomial.context = argumentElementWeylAlgebra.context;
   }
-  const ElementWeylAlgebra<Rational>& theEWA = theEWAE.getValue<ElementWeylAlgebra<Rational> >();
+  const ElementWeylAlgebra<Rational>& theEWA = elementWeylAlgebra.getValue<ElementWeylAlgebra<Rational> >();
   if (theEWA.hasNonSmallPositiveIntegerDerivation()) {
     return calculator << "<hr> I cannot apply " << theEWA.toString()
-    << " onto " << argumentPolynomial.toString() << " as "
+    << " onto " << polynomial.content.toString() << " as "
     << "the differential operator contains non-integral differential operator exponents. ";
   }
-  if (!theEWA.actOnPolynomial(argumentPolynomial)) {
+  if (!theEWA.actOnPolynomial(polynomial.content)) {
     std::stringstream out;
-    out << "Failed to act by operator " << theEWA.toString() << " on polynomial " << argumentPolynomial.toString()
+    out << "Failed to act by operator " << theEWA.toString()
+    << " on polynomial " << polynomial.content.toString()
     << " (possibly the weyl algebra element has non-integral exponents)";
     return output.assignError(calculator, out.str());
   }
-  return output.assignValueWithContext(calculator, argumentPolynomial, theEWAE.getContext());
+  return output.assignValueWithContext(calculator, polynomial.content, polynomial.context);
 }
 
 bool CalculatorFunctions::innerFormatCPPSourceCode(
@@ -2814,7 +2806,7 @@ bool CalculatorFunctions::powerAnyToZero(Calculator& calculator, const Expressio
     // TODO(tmilev): 0^0 is 1 by definition, fix this.
     return output.assignError(calculator, "Error: expression of the form 0^0 is illegal.");
   }
-  return output.assignValueOLD<Rational>(1, calculator);
+  return output.assignValue<Rational>(calculator, 1);
 }
 
 bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
@@ -2898,7 +2890,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
   output.reset(calculator);
   Expression changedMultiplicand, leftSummand, rightSummand;
   Expression bInverse, bPrime, eMOne;
-  eMOne.assignValueOLD<Rational>(- 1, calculator);
+  eMOne.assignValue<Rational>(calculator, - 1);
   changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[1]);
   leftSummand.makeXOX(calculator, calculator.opDivide(), changedMultiplicand, argument[2]);
   bPrime.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[2]);
@@ -3109,7 +3101,8 @@ bool CalculatorFunctions::compareFunctionsNumerically(
   double tolerance = 0.0001;
   if (input.size() > 6) {
     if (!input[6].evaluatesToDouble(&tolerance)) {
-      return calculator << "Failed to evaluate the argument " << input[6].toString() << " to a floating point number. ";
+      return calculator << "Failed to evaluate the argument "
+      << input[6].toString() << " to a floating point number. ";
     }
   }
   if (minDiff < - tolerance || maxDiff > tolerance) {
@@ -3121,10 +3114,12 @@ bool CalculatorFunctions::compareFunctionsNumerically(
 bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints");
+  MacroRegisterFunctionWithName("CalculatorFunctions::compareExpressionsNumericallyAtPoints");
   if (input.size() < 5) {
-    return calculator << "Comparing functions at points takes as input at least 5 arguments "
-    << "- two functions to compare, precision, variable belonging to an interval and number of sampling points).";
+    return calculator
+    << "Comparing functions at points takes as input at least 5 arguments "
+    << "- two functions to compare, precision, variable belonging "
+    << "to an interval and number of sampling points).";
   }
   Expression theFunE = input[1];
   theFunE -= input[2];
@@ -3174,8 +3169,7 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
     thePointsE,
     thePoints,
     nullptr,
-    varsGiven.size,
-    CalculatorFunctions::functionEvaluateToDouble
+    varsGiven.size
   )) {
     return calculator
     << "Failed to extract list of points from: "
@@ -3464,7 +3458,8 @@ bool CalculatorFunctions::innerIsDifferentialOneFormOneVariable(
   if (input.size() != 2) {
     return false;
   }
-  return output.assignValue(calculator,
+  return output.assignValue(
+    calculator,
     static_cast<int>(input[1].isDifferentialOneFormOneVariable())
   );
 }
@@ -3719,7 +3714,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     << outputMatrix.toString(&format) << "$";
   }
   out << "Output in LaTeX: <br><br>" << outLaTeX.str();
-  return output.assignValue(calculator, out.str());
+  return output.assignValue<std::string>(calculator, out.str());
 }
 
 bool CalculatorFunctions::innerInvertMatrixVerbose(
@@ -3816,7 +3811,7 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
     << "be read off on the matrix to the left of the id matrix: "
     << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
   }
-  return output.assignValue(calculator, out.str());
+  return output.assignValue<std::string>(calculator, out.str());
 }
 
 bool CalculatorFunctions::functionPolynomialize(
@@ -3827,17 +3822,15 @@ bool CalculatorFunctions::functionPolynomialize(
   if (input.hasBoundVariables()) {
     return false;
   }
-  if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, input, polynomialExpression
+  WithContext<Polynomial<AlgebraicNumber> > outputWithContext;
+  if (!CalculatorConversions::functionPolynomial<AlgebraicNumber>(
+    calculator, input, outputWithContext, - 1, - 1
   )) {
     return false;
   }
-  if (!CalculatorConversions::functionExpressionFromBuiltInType(
-    calculator, polynomialExpression, output
-  )) {
-    return false;
-  }
-  return true;
+  return output.assignValueWithContext(
+    calculator, outputWithContext.content, outputWithContext.context
+  );
 }
 
 bool CalculatorFunctions::outerPolynomialize(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4481,17 +4474,13 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &functionExpression, &integrationSet)) {
     return false;
   }
-  Expression polynomializedFunctionE;
+  WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, functionExpression, polynomializedFunctionE
+    calculator, functionExpression, polynomial, - 1, - 1
   )) {
     return false;
   }
-  if (!polynomializedFunctionE.isOfType<Polynomial<Rational> >()) {
-    return false;
-  }
-  ExpressionContext contextE = polynomializedFunctionE.getContext();
-  int numVars = contextE.numberOfVariables();
+  int numVars = polynomial.context.numberOfVariables();
   if (numVars > 2) {
     return false;
   }
@@ -4503,7 +4492,7 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   cosPowerE.assignValue(calculator, 1);
   bool firstIsSine = false;
   for (int i = 0; i < numVars; i ++) {
-    Expression currentE = contextE.getVariable(i);
+    Expression currentE = polynomial.context.getVariable(i);
     if (
       !currentE.startsWith(calculator.opSin(), 2) &&
       !currentE.startsWith(calculator.opCos(), 2)
@@ -4526,7 +4515,7 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   if (theTrigArgumentNoCoeff != theVariableE) {
     return false;
   }
-  const Polynomial<Rational>& theTrigPoly = polynomializedFunctionE.getValue<Polynomial<Rational> >();
+  const Polynomial<Rational>& theTrigPoly = polynomial.content;
   Expression theCosE, theSinE, theCosDoubleE, theTrigArgumentDouble;
   theTrigArgumentDouble = theTrigArgument;
   theTrigArgumentDouble *= 2;
@@ -4621,16 +4610,13 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &functionExpression, &integrationSet)) {
     return false;
   }
-  Expression polynomializedFunctionE;
+  WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, functionExpression, polynomializedFunctionE
+    calculator, functionExpression, polynomial, - 1, - 1
   )) {
     return false;
   }
-  if (!polynomializedFunctionE.isOfType<Polynomial<Rational> >()) {
-    return false;
-  }
-  ExpressionContext context = polynomializedFunctionE.getContext();
+  ExpressionContext context = polynomial.context;
   int numVars = context.numberOfVariables();
   if (numVars > 2) {
     return false;
@@ -4666,7 +4652,7 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   if (theTrigArgumentNoCoeff != theVariableE) {
     return false;
   }
-  const Polynomial<Rational>& theTrigPoly = polynomializedFunctionE.getValue<Polynomial<Rational> >();
+  const Polynomial<Rational>& theTrigPoly = polynomial.content;
   Expression theTanE, theSecE;
   theTanE.makeOX(calculator, calculator.opTan(), theTrigArgument);
   theSecE.makeOX(calculator, calculator.opSec(), theTrigArgument);
@@ -5390,10 +5376,10 @@ bool CalculatorFunctions::innerReverseBytes(Calculator& calculator, const Expres
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctions::innerTrace(
+bool CalculatorFunctions::matrixTrace(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTrace");
+  MacroRegisterFunctionWithName("CalculatorFunctions::matrixTrace");
   if (input.size() != 2) {
     return false;
   }
@@ -6684,8 +6670,8 @@ bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
   const Expression& eLargeSA = input[2];
   WithContext<SemisimpleLieAlgebra*> smallSubalgebraPointer;
   if (!CalculatorConversions::convert(
+    calculator,
     eSmallSA,
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     smallSubalgebraPointer
   )) {
     return output.assignError(
@@ -6695,8 +6681,8 @@ bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
   }
   WithContext<SemisimpleLieAlgebra*> largeSubalgebraPointer;
   if (!CalculatorConversions::convert(
+    calculator,
     eLargeSA,
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     largeSubalgebraPointer
   )) {
     return output.assignError(
@@ -6807,14 +6793,13 @@ bool CalculatorFunctions::functionDeterminant(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  Expression::FunctionAddress conversionFunction,
   int maxiumDimension
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionDeterminant");
   Matrix<Coefficient> matrix;
   ExpressionContext context;
   if (!calculator.functionGetMatrix<Coefficient>(
-    input, matrix, &context, - 1, conversionFunction, &calculator.comments
+    input, matrix, &context, - 1, &calculator.comments
   )) {
     return false;
   }
@@ -6859,22 +6844,22 @@ bool CalculatorFunctions::determinant(
   }
   const Expression& argument = input[1];
   if (CalculatorFunctions::functionDeterminant<Rational>(
-    calculator, argument, output, nullptr, 100
+    calculator, argument, output, 100
   )) {
     return true;
   }
   if (CalculatorFunctions::functionDeterminant<ElementZmodP>(
-    calculator, argument, output, nullptr, 100
+    calculator, argument, output, 100
   )) {
     return true;
   }
   if (CalculatorFunctions::functionDeterminant<AlgebraicNumber>(
-    calculator, argument, output, nullptr, 20
+    calculator, argument, output, 20
   )) {
     return true;
   }
   if (CalculatorFunctions::functionDeterminant<RationalFraction<Rational> >(
-    calculator, argument, output, CalculatorConversions::functionRationalFunction<Rational>, 10
+    calculator, argument, output, 10
   )) {
     return true;
   }
@@ -6884,7 +6869,7 @@ bool CalculatorFunctions::determinant(
 bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::characteristicPolynomialMatrix");
+  MacroRegisterFunctionWithName("CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm");
   RecursionDepthCounter theRecursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.assignError(
@@ -6906,15 +6891,15 @@ bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
       "I couldn't extract a Lie algebra to compute hwtaabf."
     );
   }
-  SemisimpleLieAlgebra& constantSemisimpleLieAlgebra = calculator.objectContainer.semisimpleLieAlgebras.values[algebraIndex];
+  SemisimpleLieAlgebra& constantSemisimpleLieAlgebra =
+  calculator.objectContainer.semisimpleLieAlgebras.values[algebraIndex];
   const Expression& weightExpression = input[3];
   Vector<RationalFraction<Rational> > weight;
   if (!calculator.getVector<RationalFraction<Rational> >(
     weightExpression,
     weight,
     &finalContext,
-    constantSemisimpleLieAlgebra.getRank(),
-    CalculatorConversions::functionRationalFunction<Rational>
+    constantSemisimpleLieAlgebra.getRank()
   )) {
     return calculator
     << "<hr>Failed to obtain highest weight from the third argument which is "
@@ -6930,22 +6915,29 @@ bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
       "weight and the elements of the Universal enveloping. "
     );
   }
-  Expression leftConverted, rightConverted;
-  if (!leftMerged.convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(leftConverted)) {
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > leftConverted, rightConverted;
+  if (!CalculatorConversions::convertWithoutComputation(
+    calculator, leftMerged, leftConverted
+  )) {
     return false;
   }
-  if (!rightMerged.convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(rightConverted)) {
+  if (!CalculatorConversions::convertWithoutComputation(
+    calculator, rightMerged, rightConverted
+  )) {
     return false;
   }
-  const ElementUniversalEnveloping<RationalFraction<Rational> >& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
-  const ElementUniversalEnveloping<RationalFraction<Rational> >& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
   WeylGroupData& weylGroup = constantSemisimpleLieAlgebra.weylGroup;
   Vector<RationalFraction<Rational> > highestWeightDualCoordinates;
   constantSemisimpleLieAlgebra.orderSSalgebraForHWbfComputation();
   highestWeightDualCoordinates = weylGroup.getDualCoordinatesFromFundamental(weight);
-  RationalFraction<Rational> outputRF;
-  if (!leftUE.highestWeightTransposeAntiAutomorphismBilinearForm(
-    rightUE, outputRF, &highestWeightDualCoordinates, 1, 0, &calculator.comments
+  RationalFraction<Rational> outputRationalFraction;
+  if (!leftConverted.content.highestWeightTransposeAntiAutomorphismBilinearForm(
+    rightConverted.content,
+    outputRationalFraction,
+    &highestWeightDualCoordinates,
+    1,
+    0,
+    &calculator.comments
   )) {
     return output.assignError(
       calculator,
@@ -6953,7 +6945,7 @@ bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
     );
   }
   constantSemisimpleLieAlgebra.orderStandardAscending();
-  return output.assignValueWithContext(calculator, outputRF, finalContext);
+  return output.assignValueWithContext(calculator, outputRationalFraction, finalContext);
 }
 
 bool Expression::evaluatesToDoubleInRange(

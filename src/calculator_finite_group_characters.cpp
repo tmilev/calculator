@@ -14,6 +14,15 @@ FormatExpressions::getMonomialOrder<ClassFunction<WeylGroupData::WeylGroupBase, 
   return nullptr;
 }
 
+/*template <>
+bool CalculatorConversions::functionPolynomial<Rational>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Rational> >& output,
+  int maximumVariables,
+  int maximumPowerToExpand
+);*/
+
 template < >
 WeylGroupData& Expression::getValueNonConst() const;
 
@@ -55,7 +64,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkAllSimp
 
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkRepresentationIsMultiplicativelyClosed() {
-  HashedList<Matrix<Rational> > tempList;
+  List<Matrix<Rational> > tempList;
   tempList.addOnTop(this->elementImages);
   Matrix<Rational> matrix;
   ElementWeylGroup element;
@@ -400,8 +409,8 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   const Expression& semisimpleLieAlgebraNode = input[1];
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
   if (!CalculatorConversions::convert(
+    calculator,
     semisimpleLieAlgebraNode,
-    CalculatorConversions::functionSemisimpleLieAlgebra,
     semisimpleLieAlgebraWithContext
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
@@ -445,9 +454,6 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   return output.assignValue(calculator, out.str());
 }
 
-template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
-
 bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -474,8 +480,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     vectorNode,
     highestWeightFundamentalCoordinates,
     &context,
-    dynkinType.getRank(),
-    CalculatorConversions::functionPolynomial<Rational>
+    dynkinType.getRank()//,
+    //CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.assignError(calculator, "Failed to extract highest weight");
   }
@@ -535,22 +541,21 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupOrbitSize");
   //double startTimeForDebug= global.getElapsedSeconds();
-  WithContext<SemisimpleLieAlgebra*> theAlgebra;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
   Vector<Rational> weightRational;
   if (calculator.getTypeWeight<Rational>(
-    calculator, input, weightRational, theAlgebra, nullptr
+    calculator, input, weightRational, semisimpleLieAlgebraWithContext
   )) {
-    Rational result = theAlgebra.content->weylGroup.getOrbitSize(weightRational);
+    Rational result = semisimpleLieAlgebraWithContext.content->weylGroup.getOrbitSize(weightRational);
     return output.assignValue(calculator, result);
   }
-  SemisimpleLieAlgebra* semisimpleLieAlgebra = theAlgebra.content;
+  SemisimpleLieAlgebra* semisimpleLieAlgebra = semisimpleLieAlgebraWithContext.content;
   Vector<Polynomial<Rational> > weightPolynomial;
   if (calculator.getTypeWeight<Polynomial<Rational> >(
     calculator,
     input,
     weightPolynomial,
-    theAlgebra,
-    CalculatorConversions::functionPolynomial<Rational>
+    semisimpleLieAlgebraWithContext
   )) {
     Rational result = semisimpleLieAlgebra->weylGroup.getOrbitSize(weightPolynomial);
     return output.assignValue(calculator, result);
@@ -575,8 +580,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     calculator,
     input,
     weight,
-    semisimpleLieAlgebra,
-    CalculatorConversions::functionPolynomial<Rational>
+    semisimpleLieAlgebra
   )) {
     return false;
   }
@@ -2084,7 +2088,9 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(Calculator& calculator, const 
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+    calculator,
+    input[1],
+    algebra
   )) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -2397,7 +2403,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointer;
   if (!CalculatorConversions::convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, semisimpleLieAlgebraPointer
+    calculator,
+    input[1],
+    semisimpleLieAlgebraPointer
   )) {
     return output.assignError(
       calculator,

@@ -83,7 +83,9 @@ public:
   static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
@@ -222,144 +224,181 @@ bool CalculatorConversions::getPolynomial(
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorConversions::functionPolynomial<Coefficient>(calculator, input[1], output);
+  WithContext<Polynomial<Coefficient> > outputWithContext;
+  if (!CalculatorConversions::functionPolynomial<Coefficient>(
+    calculator, input[1], outputWithContext, - 1, - 1
+  )) {
+    return false;
+  }
+  return output.assignValueWithContext(
+    calculator,
+    outputWithContext.content,
+    outputWithContext.context
+  );
 }
 
-template <class Coefficient, int MaximumPower, int MaximumVariables>
-bool CalculatorConversions::functionPolynomialWithExponentLimit(
-  Calculator& calculator, const Expression& input, Expression& output
+template <class Coefficient>
+bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Coefficient> >& output,
+  int maximumVariables,
+  int maximumPowerToExpand
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomialWithExponentLimit");
-  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
-  if (calculator.recursionDepth > calculator.maximumRecursionDepth) {
-    return calculator << "Max recursion depth of " << calculator.maximumRecursionDepth
-    << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
-  }
-  if (input.isOfType<Polynomial<Coefficient> >()) {
-    output = input;
-    return true;
-  }
-  if (input.isOfType<Polynomial<Rational> >()) {
-    Polynomial<Rational> polynomial;
-    Polynomial<Coefficient> converted;
-    input.isOfType(&polynomial);
-    converted = polynomial;
-    return output.assignValueWithContextOLD(converted, input.getContext(), calculator);
-  }
-  if (input.isOfType<Coefficient>() || input.isOfType<Rational>()) {
-    if (!input.convertInternally<Polynomial<Coefficient> >(output)) {
-      global.fatal
-      << "Failed to convert coefficient to polynomial. " << global.fatal;
-    }
-    return true;
-  }
-  Expression converted, computer, candidate;
+  MacroRegisterFunctionWithName("CalculatorConversions::extractPolynomialSumDifferenceOrProduct");
   if (
-    input.isListStartingWithAtom(calculator.opTimes()) ||
-    input.isListStartingWithAtom(calculator.opPlus())
+    !input.isListStartingWithAtom(calculator.opTimes()) &&
+    !input.isListStartingWithAtom(calculator.opPlus()) &&
+    !input.isListStartingWithAtom(calculator.opMinus())
   ) {
-    computer.reset(calculator, input.size());
-    computer.addChildOnTop(input[0]);
-    for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, MaximumPower, MaximumVariables>(
-        calculator, input[i], converted
-      )) {
-        return calculator << "<hr>Failed to extract polynomial from "
-        << input[i].toString();
-      }
-      computer.addChildOnTop(converted);
+    global.fatal << "Unexpected input for extractPolynomialSumDifferenceOrProduct. " << global.fatal;
+  }
+  WithContext<Polynomial<Coefficient> > converted;
+  if (input.isListStartingWithAtom(calculator.opTimes())) {
+    output.content.makeOne();
+  } else {
+    output.content.makeZero();
+  }
+  output.content.makeZero();
+  for (int i = 1; i < input.size(); i ++) {
+    if (!CalculatorConversions::functionPolynomial<Coefficient>(
+      calculator,
+      input[i],
+      converted,
+      maximumVariables,
+      maximumPowerToExpand
+    )) {
+      return calculator << "<hr>Failed to extract polynomial from "
+      << input[i].toString();
     }
-    if (input.isListStartingWithAtom(calculator.opTimes())) {
-      if (!CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial(
-        calculator, computer, candidate
-      )) {
-        return false;
-      }
-      if (candidate.getContext().numberOfVariables() > MaximumVariables && MaximumVariables >= 0) {
-        return calculator << "Too many variables";
-      }
-      output = candidate;
-      return true;
+    if (!output.mergeContexts(output, converted, &calculator.comments)) {
+      return calculator << "Failed to merge contexts in polynomial conversion. ";
+    }
+    if (
+      maximumVariables >= 0 &&
+      output.context.numberOfVariables() > maximumVariables
+    ) {
+      return calculator << "Maximum number of variables exceeded: " << maximumVariables << ". ";
     }
     if (input.isListStartingWithAtom(calculator.opPlus())) {
-      if (!CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(
-        calculator, computer, candidate
-      )) {
-        return false;
+      output.content += converted.content;
+    } else if (input.isListStartingWithAtom(calculator.opMinus())){
+      if (i == 1 && input.size() == 2) {
+        output.content -= converted.content;
+      } else if (i == 1 && input.size() > 2) {
+        output.content += converted.content;
+      } else {
+        output.content -= converted.content;
       }
-      if (candidate.getContext().numberOfVariables() > MaximumVariables && MaximumVariables >= 0) {
-        return calculator << "Too many variables";
-      }
-      output = candidate;
-      return true;
+    } else {
+      output.content *= converted.content;
     }
-    global.fatal << "Error, this line of code should never be reached. " << global.fatal;
-  }
-  if (input.startsWith(calculator.opMinus(), 3)) {
-    computer.reset(calculator, input.size());
-    computer.addChildOnTop(input[0]);
-    for (int i = 1; i < 3; i ++) {
-      Expression summand = input[i];
-      if (i == 2) {
-        summand *= - 1;
-      }
-      if (!CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, MaximumPower, MaximumVariables>(
-        calculator, summand, converted
-      )) {
-        return calculator << "<hr>Failed to extract polynomial from " << summand.toString();
-      }
-      computer.addChildOnTop(converted);
-    }
-    if (!CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(calculator, computer, candidate)) {
-      return calculator << "Too many variables";
-    }
-    output = candidate;
     return true;
   }
+  return true;
+}
 
-  int power = - 1;
-  if (input.startsWith(calculator.opPower(), 3)) {
-    if (input[2].isSmallInteger(&power)) {
-      if (!CalculatorConversions::functionPolynomialWithExponentLimit<Coefficient, MaximumPower, MaximumVariables>(calculator, input[1], converted)) {
-        return calculator
-        << "<hr>Failed to extract polynomial from "
-        << input[1].toString() << ".";
-      }
-      if (power > MaximumPower && MaximumPower >= 0) {
-        return calculator
-        << "Polynomial expression "
-        << "has power larger than the maximum allowed: " << MaximumPower << ".";
-      }
-      if (converted.getContext().numberOfVariables() > MaximumVariables && MaximumVariables >= 0) {
-        return calculator << "Too many variables";
-      }
-      Polynomial<Coefficient> resultP = converted.getValue<Polynomial<Coefficient> >();
-      if (power < 0) {
-        Coefficient inverted;
-        if (!resultP.isConstant(&inverted)) {
-          calculator << "<hr>Failed to extract polynomial from "
-          << input.toString() << " because the exponent was negative. "
-          << "Please make sure that this is not a typo. "
-          << "I am treating " << input.toString() << " as a single variable. ";
-          Polynomial<Coefficient> monomial;
-          monomial.makeMonomial(0, 1, 1);
-          ExpressionContext context(calculator);
-          context.makeOneVariable(input);
-          return output.assignValueWithContextOLD(monomial, context, calculator);
-        }
-        inverted.invert();
-        power *= - 1;
-        resultP = inverted;
-      }
-      resultP.raiseToPower(power, 1);
-      return output.assignValueWithContextOLD(resultP, converted.getContext(), calculator);
-    }
+template <class Coefficient>
+bool CalculatorConversions::extractPolynomialFromPower(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Coefficient> >& output,
+  int maximumVariables,
+  int maximumPowerToExpand
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::extractPolynomialFromPower");
+  if (!input.startsWith(calculator.opPower(), 3)) {
+    global.fatal << "Incorrect call of extractPolynomialFromPower with input: "
+    << input.toString() << global.fatal;
   }
+  int power = - 1;
+  if (!input[2].isSmallInteger(&power)) {
+    return calculator << "Expression: " << input.toString() << " has non-integer exponent. ";
+  }
+  if (!CalculatorConversions::functionPolynomial<Coefficient>(
+    calculator, input[1], output, maximumVariables, maximumPowerToExpand
+  )) {
+    return calculator
+    << "<hr>Failed to extract polynomial from "
+    << input[1].toString() << ".";
+  }
+  if (maximumPowerToExpand >= 0 && power > maximumPowerToExpand) {
+    return calculator
+    << "Polynomial expression "
+    << "has power larger than the maximum allowed: " << maximumPowerToExpand << ".";
+  }
+  if (power < 0) {
+    Coefficient inverted;
+    if (!output.content.isConstant(&inverted)) {
+      return calculator << "<hr>Failed to extract polynomial from "
+      << input.toString() << " because the exponent was negative. "
+      << "Please make sure that this is not a typo. ";
+    }
+    inverted.invert();
+    power *= - 1;
+    output.content = inverted;
+  }
+  output.content.raiseToPower(power, 1);
+  return true;
+}
+
+template <class Coefficient>
+bool CalculatorConversions::functionPolynomial(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Coefficient> >& output,
+  int maximumVariables,
+  int maximumPowerToExpand
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
+  if (calculator.recursionDepth > calculator.maximumRecursionDepth) {
+    return calculator << "Max recursion depth of "
+    << calculator.maximumRecursionDepth
+    << " exceeded while trying to evaluate polynomial "
+    << "expression (i.e. your polynomial expression is too large).";
+  }
+  if (input.isOfTypeWithContext<Polynomial<Coefficient> >(&output)) {
+    return true;
+  }
+  WithContext<Polynomial<Rational> > polynomialRational;
+  if (input.isOfTypeWithContext<Polynomial<Rational> >(&polynomialRational)) {
+    output.content = polynomialRational.content;
+    output.context = polynomialRational.context;
+    return true;
+  }
+  WithContext<Coefficient> coefficient;
+  if (input.isOfTypeWithContext(&coefficient)) {
+    output.content = coefficient.content;
+    output.context = coefficient.context;
+    return true;
+  }
+  WithContext<Rational> coefficientRational;
+  if (input.isOfTypeWithContext(&coefficientRational)) {
+    output.content = coefficientRational.content;
+    output.context = coefficientRational.context;
+    return true;
+  }
+  WithContext<Polynomial<Coefficient> > converted, candidate;
+  if (
+    input.isListStartingWithAtom(calculator.opTimes()) ||
+    input.isListStartingWithAtom(calculator.opPlus()) ||
+    input.isListStartingWithAtom(calculator.opMinus())
+  ) {
+    return CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
+      calculator, input, output, maximumVariables, maximumPowerToExpand
+    );
+  }
+  if (input.startsWith(calculator.opPower(), 3)) {
+    return CalculatorConversions::extractPolynomialFromPower(
+      calculator, input, output, maximumVariables, maximumPowerToExpand
+    );
+  }
+  output.context.makeOneVariable(input);
   Polynomial<Coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
-  ExpressionContext context(calculator);
-  context.makeOneVariable(input);
-  return output.assignValueWithContextOLD(monomial, context, calculator);
+  output.content = monomial;
+  return true;
 }
 
 template <class Coefficient>
@@ -434,24 +473,26 @@ bool CalculatorConversions::functionRationalFunction(
     output = input;
     return true;
   }
+  WithContext<RationalFraction<Coefficient> > potentialOutput;
   if (
     input.isOfType<Polynomial<Coefficient> >() ||
     input.isOfType<Coefficient>() ||
     input.isOfType<Rational>()
   ) {
-    return input.convertInternally<RationalFraction<Coefficient> >(output);
+    if (!CalculatorConversions::convertWithoutComputation(calculator, input, potentialOutput)) {
+      return false;
+    }
+    return output.assignWithContext(calculator, potentialOutput);
   }
   if (input.isOfType<AlgebraicNumber>()) {
-    Expression potentialOutput;
-    if (input.convertInternally<RationalFraction<Coefficient> > (potentialOutput)) {
-      output = potentialOutput;
-      return true;
+    if (CalculatorConversions::convertWithoutComputation(calculator, input, potentialOutput)) {
+      return output.assignWithContext(calculator, potentialOutput);
     }
   }
   ExpressionContext context(calculator);
   context.makeOneVariable(input);
   RationalFraction<Coefficient> rationalFunction;
   rationalFunction.makeOneLetterMonomial(0, Coefficient::oneStatic());
-  return output.assignValueWithContextOLD(rationalFunction, context, calculator);
+  return output.assignValueWithContext(calculator, rationalFunction, context);
 }
 #endif

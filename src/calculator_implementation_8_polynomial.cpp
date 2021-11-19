@@ -7,8 +7,15 @@
 
 template <>
 bool CalculatorConversions::getPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
-template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
+
+/*template <>
+bool CalculatorConversions::functionPolynomial<Rational>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Rational> >& output,
+  int maximumVariables,
+  int maximumPowerToExpand
+);*/
 
 bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   Calculator& calculator, const Expression& input, Expression& output
@@ -287,7 +294,9 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convert(
-    input, CalculatorConversions::getPolynomial<Rational>, polynomial
+    calculator,
+    input,
+    polynomial
   )) {
     return false;
   }
@@ -330,7 +339,9 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   MacroRegisterFunctionWithName("Calculator::factorPolynomialKronecker");
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convert(
-    input, CalculatorConversions::getPolynomial<Rational>, polynomial
+    calculator,
+    input,
+    polynomial
   )) {
     return false;
   }
@@ -370,7 +381,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
 ) {
   MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convertToPolynomial(input, polynomial)) {
+  if (!CalculatorConversions::convertToPolynomial(input, polynomial, 50, 1)) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
@@ -490,8 +501,8 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     input,
     inputs,
     nullptr,
-    - 1,
-    CalculatorConversions::functionPolynomial<Rational>
+    - 1 //,
+//    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
       calculator, inputs, nullptr, output
@@ -502,8 +513,8 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     input,
     inputsAlgebraic,
     nullptr,
-    - 1,
-    CalculatorConversions::functionPolynomial<AlgebraicNumber>
+    - 1 //,
+   // CalculatorConversions::functionPolynomial<AlgebraicNumber>
   )) {
     return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
       calculator, inputs, nullptr, output
@@ -1041,13 +1052,19 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   const Expression& numComputationsE = input[1];
   Rational upperBound = 0;
   if (!numComputationsE.isOfType(&upperBound)) {
-    return output.assignError(calculator, "Failed to convert the first argument of the expression to rational number.");
+    return output.assignError(
+      calculator,
+      "Failed to convert the first argument "
+      "of the expression to rational number."
+    );
   }
   if (upperBound > 1000000) {
     return output.assignError(
       calculator,
-      "Error: your upper limit of polynomial operations exceeds 1000000, which is too large."
-      "You may use negative or zero number give no computation bound, but please don't. "
+      "Error: your upper limit of polynomial "
+      "operations exceeds 1000000, which is too large."
+      "You may use negative or zero number give "
+      "no computation bound, but please don't. "
     );
   }
   output.reset(calculator);
@@ -1059,8 +1076,8 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
     output,
     inputVector,
     &context,
-    - 1,
-    CalculatorConversions::functionPolynomial<Rational>
+    - 1//,
+    //CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.assignError(calculator, "Failed to extract polynomial expressions");
   }
@@ -1208,8 +1225,8 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePo
     input,
     polynomials,
     &context,
-    2,
-    CalculatorConversions::functionPolynomial<Rational>
+    2//,
+    //CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.assignError(
       calculator,
@@ -1278,8 +1295,8 @@ bool CalculatorFunctionsPolynomial::groebner(
     output,
     inputVector,
     &context,
-    - 1,
-    CalculatorConversions::functionPolynomial<Rational>
+    - 1//,
+    //CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.assignError(
       calculator,
@@ -1420,10 +1437,8 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   }
   WithContext<Polynomial<AlgebraicNumber> > numerator;
   WithContext<Polynomial<AlgebraicNumber> > denominator;
-  if (!CalculatorConversions::convert(
-    input[2],
-    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6, 1>,
-    denominator
+  if (!CalculatorConversions::convertToPolynomial(
+    input[2], denominator, 6, 1
   )) {
     return false;
   }
@@ -1433,8 +1448,9 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     return false;
   }
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6, 1>,
+    //    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6, 1>,
     numerator
   )) {
     return false;

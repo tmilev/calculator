@@ -11,12 +11,6 @@
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::raiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 #include "math_rational_function_implementation.h"
 
-template <>
-bool Expression::convertInternally<RationalFraction<Rational> >(Expression& output) const;
-
-template <>
-bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
-
 bool CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -505,9 +499,6 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
   return output.assignValueWithContext(calculator, left, input[1].getContext());
 }
 
-template <>
-bool Expression::convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(Expression& output) const;
-
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -525,11 +516,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   }
   SemisimpleLieAlgebra& semisimpleLieAlgebra =
   inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().getOwnerSemisimple();
-  Expression leftE;
   inputConverted[1].checkConsistency();
   input[1].checkConsistency();
   input[2].checkConsistency();
-  if (!inputConverted[1].convertInternally<ElementUniversalEnveloping<RationalFraction<Rational> > >(leftE)) {
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element;
+  if (!inputConverted.isOfTypeWithContext(&element)) {
     return false;
   }
   const ElementTensorsGeneralizedVermas<RationalFraction<Rational> >& rightEltETGVM =
@@ -543,7 +534,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   semisimpleLieAlgebra.flagHasNilradicalOrder = true;
   RationalFraction<Rational> one(Rational::one());
   if (!rightEltETGVM.multiplyOnTheLeft(
-    leftE.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >(),
+    element.content,
     outputElt,
     semisimpleLieAlgebra,
     one
@@ -1537,29 +1528,33 @@ bool CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPo
   if (!input.mergeContextsMyAruments(inputConverted, &calculator.comments)) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFraction<Rational> > theUE;
+  ElementUniversalEnveloping<RationalFraction<Rational> > elementUniversalEnveloping;
   Expression copyExponent = inputConverted[2];
   Expression copyBase = inputConverted[1];
-  if (!copyBase.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(&theUE)) {
+  if (!copyBase.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
+    &elementUniversalEnveloping
+  )) {
     return false;
   }
-  if (!theUE.isPowerOfSingleGenerator()) {
+  if (!elementUniversalEnveloping.isPowerOfSingleGenerator()) {
     int tempPower;
     if (!copyExponent.isSmallInteger(&tempPower)) {
       return false;
     }
-    theUE.raiseToPower(tempPower);
-    return output.assignValueWithContext(calculator, theUE, copyBase.getContext());
+    elementUniversalEnveloping.raiseToPower(tempPower);
+    return output.assignValueWithContext(calculator, elementUniversalEnveloping, copyBase.getContext());
   }
-  Expression exponentConverted;
-  if (!copyExponent.convertInternally<RationalFraction<Rational> >(exponentConverted)) {
+  WithContext<RationalFraction<Rational> > exponentConverted;
+  if (!CalculatorConversions::convertWithoutComputation(
+    calculator, copyExponent, exponentConverted
+  )) {
     return false;
   }
   MonomialUniversalEnveloping<RationalFraction<Rational> > monomial;
-  monomial = theUE[0];
-  monomial.powers[0] *= exponentConverted.getValue<RationalFraction<Rational> >();
+  monomial = elementUniversalEnveloping[0];
+  monomial.powers[0] *= exponentConverted.content;
   ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
-  outputUE.makeZero(*theUE.owner);
+  outputUE.makeZero(*elementUniversalEnveloping.owner);
   outputUE.addMonomial(monomial, 1);
   return output.assignValueWithContext(calculator, outputUE, copyBase.getContext());
 }
@@ -2044,7 +2039,7 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   (left.isMatrixOfType<Rational>()         && right.isMatrixOfType<RationalFraction<Rational> >()) ||
   (left.isMatrixOfType<RationalFraction<Rational> >() && right.isMatrixOfType<RationalFraction<Rational> >() );
   if (invokeRFMultiplication) {
-    return CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
+    return CalculatorFunctionsBinaryOps::multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
       calculator, input, output
     );
   }
@@ -2257,10 +2252,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
   return output.makeMatrix(calculator, leftMatrix);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
+bool CalculatorFunctionsBinaryOps::multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -2286,13 +2281,14 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     return false;
   }
   if (!leftE.isMatrixOfType<RationalFraction<Rational> >()) {
-    Expression leftErfForm;
-    if (!leftE.convertInternally<RationalFraction<Rational> >(leftErfForm)) {
+    WithContext<RationalFraction<Rational> > leftErfForm;
+    if (!CalculatorConversions::convertWithoutComputation(
+      calculator, leftE, leftErfForm
+    )) {
       return calculator << "Failed to convert "
       << leftE.toString() << " to rational function. ";
     }
-    RationalFraction<Rational> theScalar = leftErfForm.getValue<RationalFraction<Rational> >();
-    rightMatrix *= theScalar;
+    rightMatrix *= leftErfForm.content;
     ExpressionContext contextE = leftE.getContext();
     return output.makeMatrix(calculator, rightMatrix, &contextE);
   }
@@ -2521,17 +2517,17 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA(
   ) {
     return output.assignValue(calculator, 0);
   }
-  Expression leftConverted, rightConverted;
+  WithContext<ElementWeylAlgebra<Rational> > leftConverted, rightConverted;
   if (
-    !leftE.convertInternally<ElementWeylAlgebra<Rational> >(leftConverted) ||
-    !rightE.convertInternally<ElementWeylAlgebra<Rational> >(rightConverted)
+    !CalculatorConversions::convertWithoutComputation(calculator, leftE, leftConverted) ||
+    !CalculatorConversions::convertWithoutComputation(calculator, rightE, rightConverted)
   ) {
     calculator << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
   }
-  ElementWeylAlgebra<Rational> resultE = rightConverted.getValue<ElementWeylAlgebra<Rational> >();
-  resultE.lieBracketOnTheLeft(leftConverted.getValue<ElementWeylAlgebra<Rational> >());
-  return output.assignValueWithContext(calculator, resultE, leftConverted.getContext());
+  ElementWeylAlgebra<Rational> resultE = rightConverted.content;
+  resultE.lieBracketOnTheLeft(leftConverted.content);
+  return output.assignValueWithContext(calculator, resultE, leftConverted.context);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix(

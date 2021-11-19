@@ -9,8 +9,403 @@
 #include "math_rational_function_implementation.h"
 #include "calculator_lie_theory.h"
 
-template <>
-bool Expression::convertInternally<RationalFraction<Rational> >(Expression& output) const;
+//start CalculatorConversions::convertWithoutComputation specializations.
+template< >
+bool CalculatorConversions::convertWithoutComputation<Polynomial<AlgebraicNumber> >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<AlgebraicNumber> >& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::convert");
+  input.checkInitialization();
+  if (input.isOfType<Rational>()) {
+    output.context.initialize(calculator);
+    output.content.makeConstant(input.getValue<Rational>());
+    return true;
+  }
+  if (input.isOfType<AlgebraicNumber>()) {
+    output.context.initialize(calculator);
+    output.content.makeConstant(input.getValue<AlgebraicNumber>());
+    return true;
+  }
+  WithContext<Polynomial<Rational> > polynomialRational;
+  if (input.isOfTypeWithContext(&polynomialRational)) {
+    // Converts types.
+    output.content = polynomialRational.content;
+    output.context = polynomialRational.context;
+    return true;
+  }
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<Polynomial<Rational> >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Rational> >& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  input.checkInitialization();
+  if (input.isOfType<Rational>()) {
+    output.content.makeConstant(input.getValue<Rational>());
+    output.context.initialize(calculator);
+    return true;
+  }
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<Polynomial<ElementZmodP> >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<ElementZmodP> >& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<PolynomialModuloPolynomial<ElementZmodP> >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<PolynomialModuloPolynomial<ElementZmodP> >& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<RationalFraction<Rational> >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<RationalFraction<Rational> >& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  input.checkInitialization();
+  if (input.isOfType<Rational>()) {
+    output.content = input.getValue<Rational>();
+    output.context.initialize(calculator);
+    return true;
+  }
+  if (input.isOfType<AlgebraicNumber>()) {
+    Rational rationalValue;
+    if (!input.getValue<AlgebraicNumber>().isRational(&rationalValue)) {
+      return false;
+    }
+    output.content = rationalValue;
+    output.context.initialize(calculator);
+    return true;
+  }
+  WithContext<Polynomial<Rational> > polynomial;
+  if (input.isOfTypeWithContext<Polynomial<Rational> >(&polynomial)) {
+    output.content = polynomial.content;
+    output.context = polynomial.context;
+    return true;
+  }
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<RationalFraction<AlgebraicNumber> >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<RationalFraction<AlgebraicNumber> >& output
+) {
+  MacroRegisterFunctionWithName("Expression::converInternally_RationalFunction_AlgebraicNumber");
+  input.checkInitialization();
+  AlgebraicClosureRationals* closure = &calculator.objectContainer.algebraicClosure;
+  if (input.isOfType<Rational>()) {
+    AlgebraicNumber value;
+    value.assignRational(input.getValue<Rational>(), closure);
+    output.content = value;
+    output.context.initialize(calculator);
+    return true;
+  }
+  if (input.isOfType<AlgebraicNumber>()) {
+    output.content = input.getValue<AlgebraicNumber>();
+    output.context.initialize(calculator);
+    return true;
+  }
+  // TODO(tmilev): please implement conversion from Polynomial<Rational> to Polynomial<AlgebraicNumber>.
+  WithContext<Polynomial<AlgebraicNumber> > polynomial;
+  if (input.isOfTypeWithContext(&polynomial)) {
+    output.content = polynomial.content;
+    output.context = polynomial.context;
+    return true;
+  }
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<ElementWeylAlgebra<Rational> >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementWeylAlgebra<Rational> >& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  input.checkInitialization();
+  if (input.isOfType<Rational>()) {
+    output.content.makeConstant(input.getValue<Rational>());
+    output.context.initialize(calculator);
+    return true;
+  }
+  WithContext<Polynomial<Rational> > polynomial;
+  if (input.isOfTypeWithContext(&polynomial)) {
+    output.context = polynomial.context;
+    output.content.assignPolynomial(polynomial.content);
+    return true;
+  }
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<Weight<Polynomial<Rational> > >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Weight<Polynomial<Rational> > >& output
+) {
+  (void) calculator;
+  input.checkInitialization();
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<ElementUniversalEnveloping<RationalFraction<Rational> > >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  SemisimpleLieAlgebra* owner = input.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
+  if (owner == nullptr) {
+    return false;
+  }
+  WithContext<RationalFraction<Rational> > rationalFraction;
+  if (CalculatorConversions::convertWithoutComputation(
+    calculator, input, rationalFraction
+  )) {
+    output.content.makeConstant(rationalFraction.content, *owner);
+    output.context = rationalFraction.context;
+    return true;
+  }
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<ElementSemisimpleLieAlgebra<AlgebraicNumber > >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element;
+  if (!CalculatorConversions::convertWithoutComputation(
+    calculator, input, element
+  )) {
+    return false;
+  }
+  ElementSemisimpleLieAlgebra<Rational> lieAlgebraElement;
+  // Convert coefficients here.
+  if (!element.content.isLieAlgebraElementRational(lieAlgebraElement)) {
+    return false;
+  }
+  output.context = element.context;
+  output.content = lieAlgebraElement;
+  return true;
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<Rational>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Rational>& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<ElementZmodP>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementZmodP>& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<AlgebraicNumber>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<AlgebraicNumber>& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  if (input.isOfType<Rational>()) {
+    output.context.initialize(calculator);
+    output.content.owner = &calculator.objectContainer.algebraicClosure;
+    output.content = input.getValue<Rational>();
+    return true;
+  }
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<double>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<double>& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template< >
+bool CalculatorConversions::convertWithoutComputation<std::string>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<std::string>& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+//end Expression::convertWithoutComputation specializations.
+
+//start Expression::convert specializations.
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Rational> >& output
+) {
+  return CalculatorConversions::functionPolynomial(calculator, input, output, - 1, - 1);
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Rational>& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<AlgebraicNumber>& output
+) {
+  (void) calculator;
+  return input.isOfTypeWithContext(&output);
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<double>& output
+) {
+  if (CalculatorConversions::convertWithoutComputation(calculator, input, output)) {
+    return true;
+  }
+  double outputDouble = 0;
+  if (!input.evaluatesToDouble(&outputDouble)) {
+    return false;
+  }
+  output.context.initialize(calculator);
+  output.content = outputDouble;
+  return true;
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<RationalFraction<Rational> >& output
+) {
+  if (CalculatorConversions::convertWithoutComputation(calculator, input, output)) {
+    return true;
+  }
+  double outputDouble = 0;
+  if (!input.evaluatesToDouble(&outputDouble)) {
+    return false;
+  }
+  output.context.initialize(calculator);
+  output.content = outputDouble;
+  return true;
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<SemisimpleLieAlgebra*>& output
+) {
+  Expression converted;
+  if (!CalculatorConversions::functionSemisimpleLieAlgebra(calculator, input, converted, output.content)) {
+    return false;
+  }
+  output.context = converted.getContext();
+  return true;
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementWeylAlgebra<Rational> >& output
+) {
+  return CalculatorConversions::convertWithoutComputation(calculator, input, output);
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >& output
+) {
+  return CalculatorConversions::convertWithoutComputation(calculator, input, output);
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<AlgebraicNumber> >& output
+) {
+  return CalculatorConversions::convertWithoutComputation(calculator, input, output);
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<std::string>& output
+) {
+  return CalculatorConversions::convertWithoutComputation(calculator, input, output);
+}
+
+template < >
+bool CalculatorConversions::convert(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementZmodP>& output
+) {
+  return CalculatorConversions::convertWithoutComputation(calculator, input, output);
+}
+//end Expression::convert specializations.
 
 bool CalculatorConversions::expressionFromChevalleyGenerator(
   Calculator& calculator, const ChevalleyGenerator& input, Expression& output
@@ -44,7 +439,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
 bool CalculatorConversions::semisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerSemisimpleLieAlgebra");
+  MacroRegisterFunctionWithName("Calculator::semisimpleLieAlgebra");
   if (input.size() != 2) {
     return calculator << "Semisimple Lie algebra expects a single argument. ";
   }
@@ -77,7 +472,7 @@ bool CalculatorConversions::dynkinSimpleType(
 bool CalculatorConversions::functionDynkinSimpleType(
   Calculator& calculator, const Expression& input, DynkinSimpleType& outputMon
 ) {
-  MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon_DynkinSimpleType");
+  MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::functionDynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
   if (input.startsWith(calculator.opUnderscore(), 3)) {
     rankE = input[2];
@@ -863,8 +1258,11 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
   Expression polyFormE;
-  Polynomial<AlgebraicNumber> polyForm;
-  bool polyFormGood = CalculatorConversions::functionPolynomial<AlgebraicNumber>(calculator, input, polyFormE);
+  WithContext<Polynomial<AlgebraicNumber> > polynomialFormWithContext;
+  bool polyFormGood = CalculatorConversions::functionPolynomial<AlgebraicNumber>(
+    calculator, input, polynomialFormWithContext, 10, 5
+  );
+  Polynomial<AlgebraicNumber> polyForm = polynomialFormWithContext.content;
   if (polyFormGood) {
     polyFormGood = polyFormE.isOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   }
@@ -943,20 +1341,15 @@ bool CalculatorConversions::innerElementUE(
   Polynomial<Rational> currentPMultiplicand;
   RationalFraction<Rational>  currentMultiplicandRFpart;
   outputUE.makeZero(owner);
-  Expression polyE;
-  if (!CalculatorConversions::functionPolynomial<Rational>(calculator, input[1], polyE)) {
+  WithContext< Polynomial<Rational> > theP;
+  if (!CalculatorConversions::functionPolynomial<Rational>(calculator, input[1], theP, - 1, - 1)) {
     return calculator << "<hr>Failed to convert " << input[1].toString() << " to polynomial.<hr>";
   }
-  Polynomial<Rational> theP;
-  if (polyE.isError() || !polyE.isOfType<Polynomial<Rational> >(&theP)) {
-    return calculator << "<hr>Failed to convert " << input[1].toString()
-    << " to polynomial. Instead I got " << polyE.toString() << ". <hr>";
-  }
-  ExpressionContext context = polyE.getContext();
+  ExpressionContext context = theP.context;
   HashedList<Expression> polynomialVariables;
-  for (int j = 0; j < theP.size(); j ++) {
-    const MonomialPolynomial& currentMon = theP[j];
-    currentSummand.makeConstant(theP.coefficients[j], owner);
+  for (int j = 0; j < theP.content.size(); j ++) {
+    const MonomialPolynomial& currentMon = theP.content[j];
+    currentSummand.makeConstant(theP.content.coefficients[j], owner);
     currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
       int power = - 1;
@@ -1194,8 +1587,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
     input,
     outputMat,
     &context,
-    - 1,
-    CalculatorConversions::functionRationalFunction<Rational>
+    - 1
   )) {
     return calculator << "<hr>Failed to get matrix of rational functions. ";
   }
@@ -1279,8 +1671,8 @@ bool CalculatorConversions::polynomialModuloInteger(
   }
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convert(
+    calculator,
     input[1],
-    CalculatorConversions::functionPolynomial<Rational>,
     polynomial
   )) {
     return false;

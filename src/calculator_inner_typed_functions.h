@@ -168,7 +168,9 @@ bool CalculatorFunctionsBinaryOps::multiplyTypeByType(
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(inputContextsMerged, &calculator.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(
+    inputContextsMerged, nullptr
+  )) {
     return false;
   }
   Type result;
@@ -186,7 +188,9 @@ bool CalculatorFunctionsBinaryOps::addTypeToType(
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(inputContextsMerged, &calculator.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(
+    inputContextsMerged, nullptr
+  )) {
     return false;
   }
   Type result;
@@ -204,7 +208,9 @@ bool CalculatorFunctionsBinaryOps::divideTypeByType(
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(inputContextsMerged, &calculator.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<Type>(
+    inputContextsMerged, nullptr
+  )) {
     return false;
   }
   if (inputContextsMerged[2].getValue<Type>().isEqualToZero()) {
@@ -394,6 +400,7 @@ bool CalculatorConversions::functionPolynomial(
       calculator, input, output, maximumVariables, maximumPowerToExpand
     );
   }
+  output.context.initialize(calculator);
   output.context.makeOneVariable(input);
   Polynomial<Coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
@@ -447,9 +454,9 @@ bool CalculatorConversions::functionRationalFunction(
     }
     global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
   }
-  int theSmallPower = - 1;
+  int smallPower = - 1;
   if (input.startsWith(calculator.opPower(), 3) ) {
-    if (input[2].isSmallInteger(&theSmallPower)) {
+    if (input[2].isSmallInteger(&smallPower)) {
       Expression leftE;
       if (!CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], leftE)) {
         return calculator << "<hr>CalculatorConversions::innerRationalFunction: failed to convert "
@@ -460,8 +467,8 @@ bool CalculatorConversions::functionRationalFunction(
       }
       RationalFraction<Coefficient> rationalFunction;
       rationalFunction = leftE.getValue<RationalFraction<Coefficient> >();
-      rationalFunction.raiseToPower(theSmallPower);
-      return output.assignValueWithContextOLD(rationalFunction, leftE.getContext(), calculator);
+      rationalFunction.raiseToPower(smallPower);
+      return output.assignValueWithContext(calculator, rationalFunction, leftE.getContext());
     }
     calculator << "<hr>Warning: failed to raise "
     << input[1].toString() << " to power " << input[2].toString()

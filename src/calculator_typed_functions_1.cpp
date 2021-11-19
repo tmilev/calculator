@@ -597,7 +597,7 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctio
 bool CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial");
   if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFraction<Rational> >(calculator, input, output)) {
     if (!CalculatorFunctionsBinaryOps::divideTypeByType<RationalFraction<AlgebraicNumber> >(calculator, input, output)) {
       return false;
@@ -667,7 +667,7 @@ bool CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny(Cal
 }
 
 bool CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyUEByAny");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping");
   calculator.checkInputNotSameAsOutput(input, output);
   if (input.size() != 3) {
     return false;
@@ -844,7 +844,7 @@ bool CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToInteger(
 bool CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToPolynomialModuloInteger");
   if (input.size() != 3) {
     return false;
   }

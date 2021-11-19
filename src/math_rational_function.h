@@ -56,12 +56,12 @@ public:
   Rational rationalValue() const;
   void raiseToPower(int power);
   void reduceMemory();
-  void operator=(const Polynomial<Coefficient>& other);
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const RationalFraction<Coefficient>& input);
   void operator=(int other);
-  void operator=(const Rational& other);
+  void operator=(const Coefficient& other);
   void operator=(const RationalFraction<Rational>& other);
+  void operator=(const Polynomial<Coefficient>& other);
   bool checkConsistency() const;
   void setNumberOfVariables(int goalNumVars);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);

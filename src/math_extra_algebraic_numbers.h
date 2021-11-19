@@ -88,15 +88,9 @@ class AlgebraicNumber {
   bool isEqualToOne() const {
     return (*this) == 1;
   }
-  void operator=(const AlgebraicNumber& other) {
-    this->basisIndex = other.basisIndex;
-    this->owner = other.owner;
-    this->element = other.element;
-  }
+  void operator=(const AlgebraicNumber& other);
   void operator=(const Rational& other);
-  void operator=(int other) {
-    *this = Rational(other);
-  }
+  void operator=(int other);
   bool constructFromMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& polynomial,
     AlgebraicClosureRationals& inputOwner,
@@ -138,7 +132,7 @@ class AlgebraicNumber {
   bool operator!= (const AlgebraicNumber& other) const;
   bool operator!= (int other) const;
   void negate();
-  void operator= (const Polynomial<AlgebraicNumber>& other);
+  void operator=(const Polynomial<AlgebraicNumber>& other);
   AlgebraicNumber operator+(const AlgebraicNumber& other) const {
     this->checkConsistency();
     AlgebraicNumber result = *this;

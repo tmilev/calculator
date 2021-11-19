@@ -401,7 +401,7 @@ void CompareExpressions::comparePartTwo(Calculator& calculator) {
     return;
   }
   if (!calculator.parser.parseNoEmbeddingInCommand(this->desiredString, this->desired)) {
-    this->syntaxErrorsRightRaw =  "Error parsing desired expression." + calculator.parser.syntaxErrors;
+    this->syntaxErrorsRightRaw = "Error parsing desired expression." + calculator.parser.syntaxErrors;
     this->syntaxErrorsRightFormatted = calculator.parser.toStringSyntacticStackHTMLSimple();
     return;
   }

@@ -4536,19 +4536,19 @@ AdjointMatrix(g_2)
 Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].First element g = element of a semisimple Lie algebra. Extended to a map on the universal enveloping algebra via: ad(g_1, g_2) = ad(g_1)ad(g_2)
 
 *CartanInvolution* [CartanInvolution] {CalculatorLieTheory::cartanInvolution}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%203%2c%200%29%3b%5cnCartanInvolution%28AII%2c%203%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%203%2c%200%29%3b%5cnCartanInvolution%28AII%2c%204%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%201%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%5cnCartanInvolution%28E_6%2c%20EI%29%3b%5cnCartanInvolution%28E_6%2c%20EII%29%3b%5cnCartanInvolution%28E_6%2c%20EIII%29%3b%5cnCartanInvolution%28E_6%2c%20EIV%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CartanInvolution(AI, 3, 0);
-CartanInvolution(AII, 3);
-CartanInvolution(AIII, 4, 2);
+CartanInvolution(AII, 4);
+CartanInvolution(AIII, 4, 1);
 CartanInvolution(AIII, 5, 3);
+CartanInvolution(E_6, EI);
+CartanInvolution(E_6, EII);
+CartanInvolution(E_6, EIII);
+CartanInvolution(E_6, EIV);
+
 ```
-Computes the Cartan involution from a Satake/Vogan diagram. A Satake diagram is given by a string and and two integers. The string is one of the following. AI, AII, AIII, AIV,
-BI, BII,
-CI, CII, DI,  DII, DIII,
-EI, EII, EIII, EIV, EV, EVI, EVII, EVIII, EIX,
-FI, FII,
-G.The first integer is the rank of ambient Lie algebra. The second integer is a parameter of the diagram. May be omitted if the diagram does not admit a parameter. As of writing, the output is a string that summarizes the Cartan involution. This is work in progress.
+Computes the Cartan involution from a Vogan diagram. The Vogan diagrams are listed on page 695, Knapp, Lie groups beyond an introduction, 2nd edition.However, these were given no labels. We are matching the Vogan diagrams to theirSatake diagram labels as presented in the tables in Shôrô Araki, On root systems and an infinitesimal classification of irreducible symmetric spaces, 1962. If you see any discrepancies, please file a bug in our bug tracker. The first argument is the type of the matching Satake diagram. The second argument is the parameter of the Satake diagram. Please note that we will draw the corresponding Vogan diagram, and NOT the Satake diagram. This is work in progress.
 
 *AdCommonEigenspace* [AdCommonEigenspace] {CalculatorLieTheory::adCommonEigenSpaces}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AdCommonEigenspace%7b%7d%28F_4%2c%20-5%20%28g_%7b9%7d%29%20%2b3%20%28g_%7b13%7d%29%20%2b5%20%28g_%7b16%7d%29%20%2b4%20%28g_%7b10%7d%29%2c%20g_%7b14%7d%2bg_%7b22%7d%2bg_%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4599,7 +4599,7 @@ Gets simple Lie algebra links to the calculator.
 ```
 SlTwoRealFormStructure{}(a_3)
 ```
-Computes the Lie algebra structure over Kostant-Sekiguchi sl twos w.r.t. maximally compact real form.
+Computes the Lie algebra structure over Kostant-Sekiguchi sl twos with respect to maximally compact real form.
 
 *SlTwoRealFormStructureRecompute* [SlTwoRealFormStructureRecompute] {Calculator::slTwoRealFormStructureForceRecompute}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SlTwoRealFormStructureForceRecompute%7b%7d%28a_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4620,7 +4620,7 @@ g_{22}, g_{23}  ,
 g_{24}
 )
 ```
-Given a set of elements of a semisimple lie algebra, tries to determine whether the Lie subalgebra they generate is reductive and what is its type.
+Not implemented yet. Given a set of elements of a semisimple lie algebra, tries to determine whether the Lie subalgebra they generate is reductive and what is its type.
 
 *ConesIntersection* [ConesIntersection] {Calculator::innerConesIntersect}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v_1%20%3d%20%281%2c%202%2c%203%29%3b%5cnv_2%20%3d%20%281%2c%203%2c%202%29%3b%5cnv_3%20%3d%20%283%2c%201%2c%201%29%3b%5cnv_4%20%3d%20%28-%202%2c%202%2c%202%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20v_4%20%29%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20-%20v_4%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)

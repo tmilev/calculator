@@ -1179,7 +1179,10 @@ void AlgebraicNumber::makeZero() {
   this->assignRational(0, this->owner);
 }
 
-void AlgebraicNumber::assignRational(const Rational& input, AlgebraicClosureRationals* inputOwner) {
+void AlgebraicNumber::assignRational(
+  const Rational& input,
+  AlgebraicClosureRationals* inputOwner
+) {
   this->basisIndex = 0;
   this->owner = inputOwner;
   this->element.makeEi(0, input);
@@ -1598,6 +1601,16 @@ void AlgebraicNumber::operator=(const Rational& other) {
   this->owner = nullptr;
   this->element.makeEi(0, other);
   this->basisIndex = 0;
+}
+
+void AlgebraicNumber::operator=(const AlgebraicNumber& other) {
+  this->basisIndex = other.basisIndex;
+  this->owner = other.owner;
+  this->element = other.element;
+}
+
+void AlgebraicNumber::operator=(int other) {
+  *this = Rational(other);
 }
 
 bool ElementZmodP::needsParenthesisForMultiplication(

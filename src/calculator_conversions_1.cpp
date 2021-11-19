@@ -111,7 +111,7 @@ bool CalculatorConversions::convertWithoutComputation<RationalFraction<Algebraic
   const Expression& input,
   WithContext<RationalFraction<AlgebraicNumber> >& output
 ) {
-  MacroRegisterFunctionWithName("Expression::converInternally_RationalFunction_AlgebraicNumber");
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation_RationalFraction_AlgebraicNumber");
   input.checkInitialization();
   AlgebraicClosureRationals* closure = &calculator.objectContainer.algebraicClosure;
   if (input.isOfType<Rational>()) {
@@ -1179,28 +1179,34 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   return output.makeSequenceCommands(calculator, keys, values);
 }
 
-bool CalculatorConversions::innerExpressionFromMonomialUE(
+bool CalculatorConversions::expressionFromMonomialUniversalEnveloping(
   Calculator& calculator,
   const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromMonomialUE");
+  MacroRegisterFunctionWithName("CalculatorConversions::expressionFromMonomialUniversalEnveloping");
   if (input.isConstant()) {
     return output.assignValue(calculator, 1);
   }
   ChevalleyGenerator chevalleyGenerator;
   chevalleyGenerator.owner = input.owner;
-  Expression chevGenE, powerE, termE;
-  List<Expression> theTerms;
+  Expression chevalleyExpression, powerE, termE;
+  List<Expression> terms;
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     chevalleyGenerator.generatorIndex = input.generatorsIndices[i];
-    CalculatorConversions::expressionFromChevalleyGenerator(calculator, chevalleyGenerator, chevGenE);
-    CalculatorConversions::expressionFromRationalFraction<Rational>(calculator, input.powers[i], powerE, inputContext);
-    termE.makeXOX(calculator, calculator.opPower(), chevGenE, powerE);
-    theTerms.addOnTop(termE);
+    CalculatorConversions::expressionFromChevalleyGenerator(
+      calculator, chevalleyGenerator, chevalleyExpression
+    );
+    CalculatorConversions::expressionFromRationalFraction<Rational>(
+      calculator, input.powers[i], powerE, inputContext
+    );
+    termE.makeXOX(
+      calculator, calculator.opPower(), chevalleyExpression, powerE
+    );
+    terms.addOnTop(termE);
   }
-  return output.makeProduct(calculator, theTerms);
+  return output.makeProduct(calculator, terms);
 }
 
 bool CalculatorConversions::innerExpressionFromUE(
@@ -1214,7 +1220,7 @@ bool CalculatorConversions::innerExpressionFromUE(
   theUEE.makeZero();
   Expression currentMonE;
   for (int i = 0; i < input.size(); i ++) {
-    if (!CalculatorConversions::innerExpressionFromMonomialUE(
+    if (!CalculatorConversions::expressionFromMonomialUniversalEnveloping(
       calculator, input[i], currentMonE, inputContext
     )) {
       return calculator << "<hr>Failed to store " << input.toString();

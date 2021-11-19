@@ -2910,7 +2910,7 @@ public:
   static bool expressionFromChevalleyGenerator(
     Calculator& calculator, const ChevalleyGenerator& input, Expression& output
   );
-  static bool innerExpressionFromMonomialUE(
+  static bool expressionFromMonomialUniversalEnveloping(
     Calculator& calculator,
     const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
     Expression& output,
@@ -3537,11 +3537,10 @@ bool CalculatorConversions::expressionFromRationalFraction(
   MacroRegisterFunctionWithName("CalculatorConversions::expressionFromRationalFraction");
   Rational aConst;
   if (input.isConstant(&aConst)) {
-    return output.assignValueOLD(aConst, calculator);
+    return output.assignValue(calculator, aConst);
   }
   Polynomial<Coefficient> numerator, denominator;
   input.getNumerator(numerator);
-
   if (input.isConstant() || input.expressionType == RationalFraction<Coefficient>::TypeExpression::typePolynomial) {
     return CalculatorConversions::expressionFromPolynomial<Coefficient>(calculator, numerator, output, inputContext);
   }
@@ -3556,7 +3555,10 @@ bool CalculatorConversions::expressionFromRationalFraction(
   denominatorRescaled *= multipleTopBottom.getDenominator();
   CalculatorConversions::expressionFromPolynomial<Coefficient>(calculator, numeratorRescaled, numeratorExpression, inputContext);
   CalculatorConversions::expressionFromPolynomial<Coefficient>(calculator, denominatorRescaled, denominatorExpression, inputContext);
-  return output.makeXOX(calculator, calculator.opDivide(), numeratorExpression, denominatorExpression);
+  output.makeXOX(calculator, calculator.opDivide(), numeratorExpression, denominatorExpression);
+  output.checkConsistency();
+  output.checkInitialization();
+  return true;
 }
 
 template <class BuiltIn>

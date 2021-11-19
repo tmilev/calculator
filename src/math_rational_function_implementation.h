@@ -950,7 +950,7 @@ void RationalFraction<Coefficient>::operator=(int other) {
 }
 
 template<class Coefficient>
-void RationalFraction<Coefficient>::operator=(const Rational& other) {
+void RationalFraction<Coefficient>::operator=(const Coefficient& other) {
   this->makeConstant(other);
 }
 

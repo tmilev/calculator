@@ -393,14 +393,14 @@ bool CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor(
 bool CalculatorFunctionsBinaryOps::addWeightToWeight(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddWeightToWeight");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addWeightToWeight");
   return CalculatorFunctionsBinaryOps::addTypeToType<Weight<Polynomial<Rational> > >(calculator, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(
+bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialByWeightPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialByWeightPolynomial");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -547,7 +547,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
 bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra");
   if (input.size() != 3) {
     return false;
   }
@@ -557,6 +557,7 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlge
   )) {
     return false;
   }
+  global.comments << "<br>DEBUG: inputContexts merged: " << inputContextsMerged.toString() << "<br>";
   if (
     inputContextsMerged[1].getValue<ElementWeylAlgebra<Rational> >().hasNonSmallPositiveIntegerDerivation() ||
     inputContextsMerged[2].getValue<ElementWeylAlgebra<Rational> >().hasNonSmallPositiveIntegerDerivation()

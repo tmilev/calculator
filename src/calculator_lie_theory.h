@@ -138,7 +138,7 @@ public:
   static bool printSlTwos(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorLieTheory::rootSubalgebrasAndSlTwos(calculator, input, output, true, false, false);
   }
-  static bool weylDimFormula(Calculator& calculator, const Expression& input, Expression& output);
+  static bool weylDimensionFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool decomposeCharGenVerma(Calculator& calculator, const Expression& input, Expression& output);
   static bool decomposeFDPartGeneralizedVermaModuleOverLeviPart(
     Calculator& calculator, const Expression& input, Expression& output

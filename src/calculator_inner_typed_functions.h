@@ -98,7 +98,7 @@ public:
   static bool innerMultiplyAnyByEltTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEllipticCurveElements(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEllipticCurveElementsZmodP(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyRationalOrPolynomialByWeightPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool lieBracketOfMatrices(Calculator& calculator, const Expression& input, Expression& output);

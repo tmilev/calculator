@@ -416,7 +416,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "WeylDimFormula",
-    CalculatorLieTheory::weylDimFormula,
+    CalculatorLieTheory::weylDimensionFormula,
     "",
     "Weyl dimension formula. First argument gives "
     "the type of the Weyl group of the simple "
@@ -1818,7 +1818,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly,
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialByWeightPolynomial,
     this->opPolynomialRational(),
     this->opWeightLieAlgPoly(),
     "Carries out multiplication between a rational or polynomial "
@@ -1831,7 +1831,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly,
+    CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialByWeightPolynomial,
     this->opRational(),
     this->opWeightLieAlgPoly(),
     "Carries out multiplication between a rational or polynomial "

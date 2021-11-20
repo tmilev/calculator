@@ -1557,8 +1557,9 @@ unsigned int PolynomialModuloPolynomial<Coefficient>::hashFunction(
 }
 
 template<class Coefficient>
-std::string PolynomialModuloPolynomial<Coefficient>::toString(FormatExpressions* format
-) {
+std::string PolynomialModuloPolynomial<Coefficient>::toString(
+  FormatExpressions* format
+) const {
   std::stringstream out;
   out << this->value.toString(format) << "(mod (" << this->modulus.toString(format) << "))";
   return out.str();

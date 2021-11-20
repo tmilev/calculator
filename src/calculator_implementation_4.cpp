@@ -2170,6 +2170,7 @@ bool Expression::mergeContextsMyAruments(
   if (this->size() < 2) {
     return false;
   }
+  global.comments << "DEBUG: About to merge: " << this->toString() << "<br>";
   for (int i = 1; i < this->size(); i ++) {
     if (!(*this)[i].isBuiltInType()) {
       if (commentsOnFailure != nullptr) {
@@ -2212,13 +2213,16 @@ bool Expression::mergeContextsMyAruments(
   output.reset(*this->owner, this->size());
   output.addChildOnTop((*this)[0]);
   Expression convertedE;
+  global.comments << "DEBUG: about to set context at least equal to: " << commonContext.toString() << "<br>";
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
+    global.comments << "DEBUG: set context of: " << convertedE.toString() ;
     if (!convertedE.setContextAtLeastEqualTo(commonContext, commentsOnFailure)) {
       *this->owner << "<hr>Failed to convert "
       << convertedE.toString() << " to context " << commonContext.toString();
       return false;
     }
+    global.comments << " to get: " << convertedE.toString() << "<br>";
     output.addChildOnTop(convertedE);
   }
   return true;

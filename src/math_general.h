@@ -3009,7 +3009,7 @@ public:
   void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
-  std::string toString(FormatExpressions* format = nullptr);
+  std::string toString(FormatExpressions* format = nullptr) const;
   PolynomialModuloPolynomial<Coefficient> one();
   static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);
   unsigned int hashFunction() const;

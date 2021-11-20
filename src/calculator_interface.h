@@ -772,6 +772,7 @@ public:
     Expression& output,
     std::stringstream* commentsOnFailure
   );
+  std::string toString() const;
 };
 
 class Function {
@@ -2882,14 +2883,14 @@ public:
   );
   //conversions from expression containing type to expression tree
   static bool innerStoreSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output);
-  static bool functionSemisimpleLieAlgebra(
+  static bool functionSemisimpleLieAlgebraFromDynkinType(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool functionSemisimpleLieAlgebra(
+  static bool functionSemisimpleLieAlgebraFromDynkinType(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    SemisimpleLieAlgebra*& outputSSalgebra
+    WithContext<SemisimpleLieAlgebra *> &outputSSalgebra
   );
   static bool semisimpleLieAlgebra(
     Calculator& calculator, const Expression& input, Expression& output
@@ -3265,6 +3266,8 @@ bool Expression::mergeContextsMyArumentsAndConvertThem(
   if (!this->mergeContextsMyAruments(mergedContexts, commentsOnFailure)) {
     return false;
   }
+  global.comments << "DEBUG: Merged contexts: " << mergedContexts[1].toString()
+  << "," << mergedContexts[2].toString() << "<br>";
   output.reset(*this->owner, this->children.size);
   output.addChildOnTop((*this)[0]);
   WithContext<Type> converted;
@@ -3279,9 +3282,10 @@ bool Expression::mergeContextsMyArumentsAndConvertThem(
       return false;
     }
     Expression convertedExpression;
-    convertedExpression.assignValueWithContext(
-      *this->owner, converted.content, converted.context
+    convertedExpression.assignWithContext(
+      *this->owner, converted
     );
+    global.comments << "DEBUG: so " << mergedContexts[i].toString() << " was convi to : " << converted.toString();
     output.addChildOnTop(convertedExpression);
   }
   return true;
@@ -3559,6 +3563,13 @@ bool CalculatorConversions::expressionFromRationalFraction(
   output.checkConsistency();
   output.checkInitialization();
   return true;
+}
+
+template <class BuiltIn>
+std::string WithContext<BuiltIn>::toString() const {
+  std::stringstream out;
+  out << this->content.toString() << "[ctx: " << this->context.toString() << "]";
+  return out.str();
 }
 
 template <class BuiltIn>

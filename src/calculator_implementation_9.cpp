@@ -556,18 +556,18 @@ bool CalculatorFunctions::operationBinary(
   return false;
 }
 
-bool CalculatorFunctions::innerEWAorPoly(
+bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output, bool assignPoly
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
+  MacroRegisterFunctionWithName("Calculator::elementWeylAlgebraOrPolynomial");
   if (!input.isListNElements(3)) {
     return false;
   }
-  Vector<Polynomial<Rational> > inputPolForm;
+  Vector<Polynomial<Rational> > inputPolynomialForm;
   ExpressionContext startContext(calculator);
   if (!calculator.getVectorFromFunctionArguments(
     input,
-    inputPolForm,
+    inputPolynomialForm,
     &startContext,
     2
   )) {
@@ -575,11 +575,12 @@ bool CalculatorFunctions::innerEWAorPoly(
     << "<hr>Failed to extract polynomials from arguments of "
     << input.toString();
   }
-  int letterDiff = 0, letterPol = 0;
+  int letterDifferential = 0;
+  int letterPolynomial = 0;
   if (
-    !inputPolForm[0].isOneLetterFirstDegree(&letterDiff) ||
-    !inputPolForm[1].isOneLetterFirstDegree(&letterPol) ||
-    letterDiff == letterPol
+    !inputPolynomialForm[0].isOneLetterFirstDegree(&letterDifferential) ||
+    !inputPolynomialForm[1].isOneLetterFirstDegree(&letterPolynomial) ||
+    letterDifferential == letterPolynomial
   ) {
     return calculator
     << "<hr>Failed to get different one-variable polynomials from input. "
@@ -587,23 +588,25 @@ bool CalculatorFunctions::innerEWAorPoly(
   }
   ExpressionContext endContext(calculator);
   endContext.makeOneVariableOneDifferentialOperator(
-    startContext.getVariable(letterPol),
-    startContext.getVariable(letterDiff)
+    startContext.getVariable(letterPolynomial),
+    startContext.getVariable(letterDifferential)
   );
-  ElementWeylAlgebra<Rational> outputEWA;
+  ElementWeylAlgebra<Rational> outputElementWeylAlgebra;
   if (assignPoly) {
-    outputEWA.makexi(0);
+    outputElementWeylAlgebra.makexi(0);
   } else {
-    outputEWA.makedi(0);
+    outputElementWeylAlgebra.makedi(0);
   }
-  return output.assignValueWithContextOLD(outputEWA, endContext, calculator);
+  global.comments << "DEBUG: about to assign with context: "
+  << outputElementWeylAlgebra.toString() << ", context: " << endContext.toString();
+  return output.assignValueWithContext(calculator, outputElementWeylAlgebra, endContext);
 }
 
 bool CalculatorBasics::extractBaseMultiplication(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
-  MacroRegisterFunctionWithName("Calculator::outerExtractBaseMultiplication");
+  RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
+  MacroRegisterFunctionWithName("Calculator::extractBaseMultiplication");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }

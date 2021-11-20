@@ -2124,12 +2124,14 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     return false;
   }
   Expression tempE;
-  SemisimpleLieAlgebra* semisimpleLieAlgebra = nullptr;
-  if (!CalculatorConversions::functionSemisimpleLieAlgebra(
-    calculator, input[1], tempE, semisimpleLieAlgebra
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
+  semisimpleLieAlgebraWithContext.content = nullptr;
+  if (!CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
+    calculator, input[1], tempE, semisimpleLieAlgebraWithContext
   )) {
     return calculator << "<hr>Failed to load semisimple Lie algebra";
   }
+  SemisimpleLieAlgebra* semisimpleLieAlgebra = semisimpleLieAlgebraWithContext.content;
   std::string coordinatesString;
   bool isGood = input[3].isOperation(&coordinatesString);
   if (isGood) {
@@ -2144,7 +2146,7 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     return false;
   }
   if (coordinatesString != "epsilon") {
-    if (weightIndex < 1 || weightIndex> semisimpleLieAlgebra->getRank()) {
+    if (weightIndex < 1 || weightIndex > semisimpleLieAlgebra->getRank()) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function "
       << "needs to be index of a weight between 1 and the Lie algebra rank. "
@@ -2185,17 +2187,22 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
     return calculator << "Lie algebra rho weight expects a single argument. ";
   }
   Weight<Polynomial<Rational> > resultWeight;
-  SemisimpleLieAlgebra* semisimpleLieAlgebra = nullptr;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
+  semisimpleLieAlgebraWithContext.content = nullptr;
   Expression tempE;
-  if (!CalculatorConversions::functionSemisimpleLieAlgebra(
-    calculator, input[1], tempE, semisimpleLieAlgebra
+  if (!CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
+    calculator, input[1], tempE, semisimpleLieAlgebraWithContext
   )) {
     return calculator << "<hr>Failed to load semisimple Lie algebra. ";
   }
-  semisimpleLieAlgebra ->checkConsistency();
+  SemisimpleLieAlgebra* semisimpleLieAlgebra = semisimpleLieAlgebraWithContext.content;
+  semisimpleLieAlgebra->checkConsistency();
   ExpressionContext context(calculator);
   context.setAmbientSemisimpleLieAlgebra(*semisimpleLieAlgebra );
-  resultWeight.weightFundamentalCoordinates = semisimpleLieAlgebra ->weylGroup.getFundamentalCoordinatesFromSimple(semisimpleLieAlgebra ->weylGroup.rho);
+  resultWeight.weightFundamentalCoordinates =
+  semisimpleLieAlgebra->weylGroup.getFundamentalCoordinatesFromSimple(
+    semisimpleLieAlgebra ->weylGroup.rho
+  );
   resultWeight.owner = semisimpleLieAlgebra;
   return output.assignValueWithContext(calculator, resultWeight, context);
 }

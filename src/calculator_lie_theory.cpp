@@ -3160,14 +3160,15 @@ bool CalculatorLieTheory::parabolicWeylGroups(
   return output.assignValueOLD(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::weylDimFormula(
+bool CalculatorLieTheory::weylDimensionFormula(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::weylDimFormula");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::weylDimensionFormula");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (input.size() != 3) {
     return output.assignError(calculator, "This function takes 2 arguments");
   }
+
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (!CalculatorConversions::convert(
     calculator,
@@ -3188,7 +3189,8 @@ bool CalculatorLieTheory::weylDimFormula(
   )) {
     return output.assignError(
       calculator,
-      "Failed to convert the argument of the function to a highest weight vector"
+      "Failed to convert the argument of the "
+      "function to a highest weight vector"
     );
   }
   RationalFraction<Rational> rfOne;
@@ -3200,8 +3202,8 @@ bool CalculatorLieTheory::weylDimFormula(
   calculator << "<br>Weyl dim formula input: simple coords: "
   << weightInSimpleCoords.toString(&format)
   << ", fundamental coords: " << weight.toString(&format);
-  RationalFraction<Rational> tempRF = semisimpleLieAlgebra.content->weylGroup.weylDimensionFormulaSimpleCoordinates(weightInSimpleCoords);
-  return output.assignValueWithContext(calculator, tempRF, semisimpleLieAlgebra.context);
+  RationalFraction<Rational> result = semisimpleLieAlgebra.content->weylGroup.weylDimensionFormulaSimpleCoordinates(weightInSimpleCoords);
+  return output.assignValueWithContext(calculator, result, semisimpleLieAlgebra.context);
 }
 
 bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4496,6 +4498,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
     input,
     algebraPointer
   )) {
+    global.comments << "DEBUG: here I am again!";
     calculator << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
     return output.assignError(
       calculator,
@@ -4516,5 +4519,5 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
     << "' target='_blank'>hard drive output</a><br>";
   }
   out << semisimpleAlgebra.toHTML(verbose, calculator.flagWriteLatexPlots, plotHTML);
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }

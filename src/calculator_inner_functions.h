@@ -553,12 +553,12 @@ public:
 
   static bool innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPolynomialWithEWA(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerEWAorPoly(calculator, input, output, true);
+    return CalculatorFunctions::elementWeylAlgebraOrPolynomial(calculator, input, output, true);
   }
   static bool innerElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerEWAorPoly(calculator, input, output, false);
+    return CalculatorFunctions::elementWeylAlgebraOrPolynomial(calculator, input, output, false);
   }
-  static bool innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly);
+  static bool elementWeylAlgebraOrPolynomial(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly);
   static bool operationBinary(Calculator& calculator, const Expression& input, Expression& output, int operation);
   static bool innerInterpolatePoly(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerTimes(Calculator& calculator, const Expression& input, Expression& output) {

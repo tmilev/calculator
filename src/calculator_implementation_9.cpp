@@ -597,8 +597,6 @@ bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
   } else {
     outputElementWeylAlgebra.makedi(0);
   }
-  global.comments << "DEBUG: about to assign with context: "
-  << outputElementWeylAlgebra.toString() << ", context: " << endContext.toString();
   return output.assignValueWithContext(calculator, outputElementWeylAlgebra, endContext);
 }
 

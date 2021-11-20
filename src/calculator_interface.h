@@ -3266,8 +3266,6 @@ bool Expression::mergeContextsMyArumentsAndConvertThem(
   if (!this->mergeContextsMyAruments(mergedContexts, commentsOnFailure)) {
     return false;
   }
-  global.comments << "DEBUG: Merged contexts: " << mergedContexts[1].toString()
-  << "," << mergedContexts[2].toString() << "<br>";
   output.reset(*this->owner, this->children.size);
   output.addChildOnTop((*this)[0]);
   WithContext<Type> converted;
@@ -3285,7 +3283,6 @@ bool Expression::mergeContextsMyArumentsAndConvertThem(
     convertedExpression.assignWithContext(
       *this->owner, converted
     );
-    global.comments << "DEBUG: so " << mergedContexts[i].toString() << " was convi to : " << converted.toString();
     output.addChildOnTop(convertedExpression);
   }
   return true;

@@ -716,13 +716,9 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
   MacroRegisterFunctionWithName("WithContext_ElementWeylAlgebra_Rational::extendContext");
   PolynomialSubstitution<Rational> substitutionDifferentialOperatorPart;
   PolynomialSubstitution<Rational> substitutionPolynomialPart;
-  global.comments << "<hr>DEBUG: setting context " << newContext.toString()
-  << " to: " << this->toString() << "<br>";
   this->context.polynomialAndWeylAlgebraSubstitutionNoFailure(
     newContext, substitutionPolynomialPart, substitutionDifferentialOperatorPart
   );
-  global.comments << "DEBUG: Resulting subs: "
-  << substitutionDifferentialOperatorPart.toString() << "<br>";
   if (!this->content.substitution(
     substitutionPolynomialPart, substitutionDifferentialOperatorPart
   )) {
@@ -732,10 +728,8 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
       << substitutionDifferentialOperatorPart.toString()
       << ", " << substitutionPolynomialPart.toString();
     }
-    global.comments << "DEBUG: FAILED TO CONVERT " << this->toString() << "<hr>";
     return false;
   }
-  global.comments << "DEBUG: final: " << this->toString() << "<hr>";
   this->context = newContext;
   return true;
 }

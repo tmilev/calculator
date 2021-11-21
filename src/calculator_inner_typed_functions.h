@@ -271,7 +271,6 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
   } else {
     output.content.makeZero();
   }
-  output.content.makeZero();
   for (int i = 1; i < input.size(); i ++) {
     if (!CalculatorConversions::functionPolynomial<Coefficient>(
       calculator,
@@ -302,10 +301,13 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
       } else {
         output.content -= converted.content;
       }
-    } else {
+    } else if (input.isListStartingWithAtom(calculator.opTimes())) {
+      global.comments << "DEBUG: content: " << output.content << " incoming: " << converted.content;
       output.content *= converted.content;
+    } else {
+      global.fatal << "While extracting input polynomial, got unexpected input type: "
+      << input.toString();
     }
-    return true;
   }
   return true;
 }

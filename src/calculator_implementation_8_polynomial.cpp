@@ -292,10 +292,12 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
+  global.comments << "DEBUG: about to factor: " << input[1].toString() << "<br>";
+
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convert(
     calculator,
-    input,
+    input[1],
     polynomial
   )) {
     return false;
@@ -308,16 +310,17 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   }
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
   std::stringstream comments;
+  global.comments << "DEBUG: factor: " << polynomial.toString();
   if (!factorization.factor(
     polynomial.content,
     &comments,
     &comments
   )) {
-    return output.assignValueOLD(comments.str(), calculator);
+    return output.assignValue(calculator, comments.str());
   }
   List<Expression> resultSequence;
   Expression constantFactor;
-  constantFactor.assignValueOLD(factorization.constantFactor, calculator);
+  constantFactor.assignValue(calculator, factorization.constantFactor);
   resultSequence.addOnTop(constantFactor);
   Expression polynomialE;
 

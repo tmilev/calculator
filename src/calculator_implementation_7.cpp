@@ -1283,13 +1283,13 @@ bool CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus(
   );
 }
 
-bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
+bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinimalPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly");
+  MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinimalPolynomial");
   WithContext<Polynomial<AlgebraicNumber> > polynomial;
-  if (!CalculatorConversions::convertToPolynomial(
-    input, polynomial, - 1, - 1
+  if (!CalculatorConversions::functionPolynomial(
+    calculator, input[1], polynomial, - 1, - 1
   )) {
     return calculator << "<hr>Failed to convert "
     << input.toString() << " to polynomial. ";
@@ -1300,6 +1300,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
     << polynomial.toStringContentWithFormat()
     << ", which is not in one variable.";
   }
+  global.comments << "DEBUG: extracted poly: " << polynomial.toString();
   AlgebraicNumber algebraicNumber;
   std::stringstream commentsOnFailure;
   if (!algebraicNumber.constructFromMinimalPolynomial(
@@ -1307,7 +1308,9 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
     calculator.objectContainer.algebraicClosure,
     &commentsOnFailure
   )) {
-    return calculator << "Failed to construct minimal polynomial. " << commentsOnFailure.str();
+    return calculator
+    << "Failed to construct minimal polynomial. "
+    << commentsOnFailure.str();
   }
   return output.assignValue(calculator, algebraicNumber);
 }

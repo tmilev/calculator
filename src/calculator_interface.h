@@ -2923,15 +2923,6 @@ public:
   static bool functionExpressionFromPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionFrom(Calculator& calculator, const MonomialPolynomial& input, Expression& output);
-  template <class Coefficient>
-  static bool convertToPolynomial(
-    const Expression& input,
-    WithContext<Polynomial<Coefficient> >& output,
-    int maximumPower,
-    int maximumVariables
-  ) {
-    return CalculatorConversions::functionPolynomial(*input.owner, input, output, maximumVariables, maximumPower);
-  }
   template <class Type>
   static bool convert(
     Calculator& calculator,

@@ -85,7 +85,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "AlgebraicNumberFromPolynomial",
-    CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly,
+    CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinimalPolynomial,
     "",
     "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
     "AlgebraicNumberFromPolynomial{}(x^2 - 4);\n"

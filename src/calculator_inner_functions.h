@@ -180,7 +180,7 @@ public:
 class CalculatorFunctionsAlgebraic {
 public:
   static bool convertAlgebraicNumberToMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool getAlgebraicNumberFromMinPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getAlgebraicNumberFromMinimalPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool printAlgebraicClosureStatus(Calculator& calculator, const Expression& input, Expression& output);
   static bool isAlgebraicRadical(Calculator& calculator, const Expression& input, Expression& output);
 };

@@ -1530,7 +1530,6 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::factor(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::factor");
-  global.comments << "DEBUG: About to factor: " << input.toString();
   this->original = input;
   if (this->original.isConstant(&this->constantFactor)) {
     return true;

@@ -1195,8 +1195,8 @@ bool CalculatorFunctions::innerIsSquareFreePolynomial(
     return false;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convertToPolynomial(
-    input, polynomial, - 1, - 1
+  if (!CalculatorConversions::functionPolynomial(
+    calculator, input[1], polynomial, - 1, - 1
   )) {
     return false;
   }

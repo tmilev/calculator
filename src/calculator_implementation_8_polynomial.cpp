@@ -381,7 +381,9 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
 ) {
   MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convertToPolynomial(input, polynomial, 50, 1)) {
+  if (!CalculatorConversions::functionPolynomial(
+    calculator, input, polynomial, 50, 1
+  )) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
@@ -1439,8 +1441,8 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   }
   WithContext<Polynomial<AlgebraicNumber> > numerator;
   WithContext<Polynomial<AlgebraicNumber> > denominator;
-  if (!CalculatorConversions::convertToPolynomial(
-    input[2], denominator, 6, 1
+  if (!CalculatorConversions::functionPolynomial(
+    calculator, input[2], denominator, 6, 1
   )) {
     return false;
   }

@@ -280,7 +280,7 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
       maximumPowerToExpand
     )) {
       return calculator << "<hr>Failed to extract polynomial from "
-      << input[i].toString();
+      << input[i].toString() << ". ";
     }
     if (!output.mergeContexts(output, converted, &calculator.comments)) {
       return calculator << "Failed to merge contexts in polynomial conversion. ";
@@ -326,19 +326,21 @@ bool CalculatorConversions::extractPolynomialFromPower(
   }
   int power = - 1;
   if (!input[2].isSmallInteger(&power)) {
-    return calculator << "Expression: " << input.toString() << " has non-integer exponent. ";
+    return calculator << "Expression: " << input.toString()
+    << " has non-integer exponent. ";
   }
   if (!CalculatorConversions::functionPolynomial<Coefficient>(
     calculator, input[1], output, maximumVariables, maximumPowerToExpand
   )) {
     return calculator
     << "<hr>Failed to extract polynomial from "
-    << input[1].toString() << ".";
+    << input[1].toString() << ". ";
   }
   if (maximumPowerToExpand >= 0 && power > maximumPowerToExpand) {
     return calculator
     << "Polynomial expression "
-    << "has power larger than the maximum allowed: " << maximumPowerToExpand << ".";
+    << "has power larger than the maximum allowed: "
+    << maximumPowerToExpand << ". ";
   }
   if (power < 0) {
     Coefficient inverted;

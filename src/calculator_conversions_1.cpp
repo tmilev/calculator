@@ -17,7 +17,7 @@ bool CalculatorConversions::convertWithoutComputation<Polynomial<AlgebraicNumber
   const Expression& input,
   WithContext<Polynomial<AlgebraicNumber> >& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::convert");
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
   (void) calculator;
   input.checkInitialization();
   WithContext<Rational> rational;
@@ -200,7 +200,7 @@ bool CalculatorConversions::convertWithoutComputation<ElementUniversalEnveloping
   const Expression& input,
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation_ElementUniversalEnveloping_RationalFraction_Rational");
   SemisimpleLieAlgebra* owner = input.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
   if (owner == nullptr) {
     return false;
@@ -213,7 +213,8 @@ bool CalculatorConversions::convertWithoutComputation<ElementUniversalEnveloping
     output.context = rationalFraction.context;
     return true;
   }
-  return input.isOfTypeWithContext(&output);
+  bool result = input.isOfTypeWithContext(&output);
+  return result;
 }
 
 template< >
@@ -222,7 +223,7 @@ bool CalculatorConversions::convertWithoutComputation<ElementSemisimpleLieAlgebr
   const Expression& input,
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation_ElementSemisimpleLieAlgebra_AlgebraicNumber");
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element;
   if (!CalculatorConversions::convertWithoutComputation(
     calculator, input, element
@@ -416,7 +417,7 @@ bool CalculatorConversions::convert(
   const Expression& input,
   WithContext<Polynomial<AlgebraicNumber> >& output
 ) {
-  return CalculatorConversions::convertWithoutComputation(calculator, input, output);
+  return CalculatorConversions::functionPolynomial(calculator, input, output, - 1, - 1);
 }
 
 template < >
@@ -1326,25 +1327,25 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   SemisimpleLieAlgebra& owner
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
-  Expression polyFormE;
+  Expression polynomialFormExpression;
   WithContext<Polynomial<AlgebraicNumber> > polynomialFormWithContext;
-  bool polyFormGood = CalculatorConversions::functionPolynomial<AlgebraicNumber>(
+  bool polynomialFormGood = CalculatorConversions::functionPolynomial<AlgebraicNumber>(
     calculator, input, polynomialFormWithContext, 10, 5
   );
-  Polynomial<AlgebraicNumber> polyForm = polynomialFormWithContext.content;
-  if (polyFormGood) {
-    polyFormGood = polyFormE.isOfType<Polynomial<AlgebraicNumber> >(&polyForm);
+  Polynomial<AlgebraicNumber> polynomialForm = polynomialFormWithContext.content;
+  if (polynomialFormGood) {
+    polynomialFormGood = polynomialFormExpression.isOfType<Polynomial<AlgebraicNumber> >(&polynomialForm);
   }
-  if (!polyFormGood) {
+  if (!polynomialFormGood) {
     return calculator << "<hr>Failed to convert " << input.toString() << " to polynomial.<hr>";
   }
   ChevalleyGenerator chevalleyGenerator;
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElement;
   chevalleyGenerator.owner = &owner;
   output.makeZero();
-  ExpressionContext context = polyFormE.getContext();
-  for (int j = 0; j < polyForm.size(); j ++) {
-    const MonomialPolynomial& currentMon = polyForm[j];
+  ExpressionContext context = polynomialFormExpression.getContext();
+  for (int j = 0; j < polynomialForm.size(); j ++) {
+    const MonomialPolynomial& currentMon = polynomialForm[j];
     int chevalleyGeneratorIndex = 0;
     if (!currentMon.isOneLetterFirstDegree(&chevalleyGeneratorIndex)) {
       return calculator << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
@@ -1357,9 +1358,9 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
       << "(summand of: "
       << input.toString() << ") to Chevalley generator.<hr>";
     }
-    std::string theLetter;
+    std::string letter;
     if (
-      !singleChevGenE[1].isOperation(&theLetter) ||
+      !singleChevGenE[1].isOperation(&letter) ||
       !singleChevGenE[2].isSmallInteger(&chevalleyGenerator.generatorIndex)
     ) {
       return calculator << "<hr>Failed to convert summand "
@@ -1367,20 +1368,23 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
       << owner.toStringLieAlgebraName();
     }
     bool isGood = true;
-    if (theLetter == "g") {
+    if (letter == "g") {
       chevalleyGenerator.generatorIndex = owner.getGeneratorFromDisplayIndex(chevalleyGenerator.generatorIndex);
-      if (chevalleyGenerator.generatorIndex < 0 || chevalleyGenerator.generatorIndex >= owner.getNumberOfGenerators()) {
+      if (
+        chevalleyGenerator.generatorIndex < 0 ||
+        chevalleyGenerator.generatorIndex >= owner.getNumberOfGenerators()
+      ) {
         isGood = false;
       }
-      output.addMonomial(chevalleyGenerator, polyForm.coefficients[j]);
-    } else if (theLetter == "h") {
-      int theRootIndex = owner.getRootIndexFromDisplayIndex(chevalleyGenerator.generatorIndex);
-      if (theRootIndex < 0) {
+      output.addMonomial(chevalleyGenerator, polynomialForm.coefficients[j]);
+    } else if (letter == "h") {
+      int rootIndex = owner.getRootIndexFromDisplayIndex(chevalleyGenerator.generatorIndex);
+      if (rootIndex < 0) {
         isGood = false;
       } else {
-        currentElt.makeCartanGenerator(owner.weylGroup.rootSystem[theRootIndex], owner);
-        currentElt *= polyForm.coefficients[j];
-        output += currentElt;
+        currentElement.makeCartanGenerator(owner.weylGroup.rootSystem[rootIndex], owner);
+        currentElement *= polynomialForm.coefficients[j];
+        output += currentElement;
       }
     } else {
       isGood = false;
@@ -1394,10 +1398,13 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   return true;
 }
 
-bool CalculatorConversions::innerElementUE(
-  Calculator& calculator, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner
+bool CalculatorConversions::elementUniversalEnveloping(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  SemisimpleLieAlgebra& owner
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerElementUE");
+  MacroRegisterFunctionWithName("CalculatorConversions::elementUniversalEnveloping");
   if (input.size() != 2) {
     return calculator << "Universal enveloping algebra element expects a single argument. ";
   }
@@ -1410,15 +1417,18 @@ bool CalculatorConversions::innerElementUE(
   Polynomial<Rational> currentPMultiplicand;
   RationalFraction<Rational>  currentMultiplicandRFpart;
   outputUE.makeZero(owner);
-  WithContext< Polynomial<Rational> > theP;
-  if (!CalculatorConversions::functionPolynomial<Rational>(calculator, input[1], theP, - 1, - 1)) {
-    return calculator << "<hr>Failed to convert " << input[1].toString() << " to polynomial.<hr>";
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!CalculatorConversions::functionPolynomial<Rational>(
+    calculator, input[1], polynomial, - 1, - 1
+  )) {
+    return calculator << "<hr>Failed to convert "
+    << input[1].toString() << " to polynomial.<hr>";
   }
-  ExpressionContext context = theP.context;
+  ExpressionContext context = polynomial.context;
   HashedList<Expression> polynomialVariables;
-  for (int j = 0; j < theP.content.size(); j ++) {
-    const MonomialPolynomial& currentMon = theP.content[j];
-    currentSummand.makeConstant(theP.content.coefficients[j], owner);
+  for (int j = 0; j < polynomial.content.size(); j ++) {
+    const MonomialPolynomial& currentMon = polynomial.content[j];
+    currentSummand.makeConstant(polynomial.content.coefficients[j], owner);
     currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
       int power = - 1;

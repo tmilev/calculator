@@ -1300,7 +1300,6 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinimalPolynomial(
     << polynomial.toStringContentWithFormat()
     << ", which is not in one variable.";
   }
-  global.comments << "DEBUG: extracted poly: " << polynomial.toString();
   AlgebraicNumber algebraicNumber;
   std::stringstream commentsOnFailure;
   if (!algebraicNumber.constructFromMinimalPolynomial(

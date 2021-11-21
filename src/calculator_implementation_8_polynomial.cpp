@@ -1442,7 +1442,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   WithContext<Polynomial<AlgebraicNumber> > numerator;
   WithContext<Polynomial<AlgebraicNumber> > denominator;
   if (!CalculatorConversions::functionPolynomial(
-    calculator, input[2], denominator, 6, 1
+    calculator, input[2], denominator, 1, 6
   )) {
     return false;
   }
@@ -1451,11 +1451,12 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     // The denominator is a constant;
     return false;
   }
-  if (!CalculatorConversions::convert(
+  if (!CalculatorConversions::functionPolynomial(
     calculator,
     input[1],
-    //    CalculatorConversions::functionPolynomialWithExponentLimit<AlgebraicNumber, 6, 1>,
-    numerator
+    numerator,
+    1,
+    20
   )) {
     return false;
   }

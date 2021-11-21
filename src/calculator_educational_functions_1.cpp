@@ -212,7 +212,7 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
 
 void ProblemWithSolution::addAnnotationStep(Calculator& calculator, const std::string& input) {
   Calculator::ExpressionHistoryEnumerator::Step step;
-  step.content.assignValueOLD(input, calculator);
+  step.content.assignValue(calculator, input);
   this->steps.addOnTop(step);
 }
 
@@ -281,11 +281,11 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   comparison.desired = input[2];
   if (!comparison.desired.getFreeVariables(comparison.freeVariablesDesired, false)) {
     comparison.errorEvaluation = "Unexpected failure to extract free variables from desired answer.";
-    return output.assignValueOLD(comparison.toJSON(), calculator);
+    return output.assignValue(calculator, comparison.toJSON());
   }
   if (!comparison.given.getFreeVariables(comparison.freeVariablesFound, false)) {
     comparison.errorEvaluation = "Unexpected failure to extract free variables from given answer.";
-    return output.assignValueOLD(comparison.toJSON(), calculator);
+    return output.assignValue(calculator, comparison.toJSON());
   }
   for (int i = 0; i < comparison.freeVariablesFound.size; i ++) {
     const Expression& current = comparison.freeVariablesFound[i];
@@ -298,7 +298,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     errorStream << "Unexpected symbols: <b style='color:red'>"
     << comparison.unexpectedVariables.toStringCommaDelimited() << "</b>";
     comparison.errorInAnswer = errorStream.str();
-    return output.assignValueOLD(comparison.toJSON(), calculator);
+    return output.assignValue(calculator, comparison.toJSON());
   }
   comparison.givenSimplified.makeOX(
     calculator,
@@ -347,7 +347,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     comparison.comparisonNoDistributionEvaluated
   );
   comparison.processComparisonRestricted();
-  return output.assignValueOLD(comparison.toJSON(), calculator);
+  return output.assignValue(calculator, comparison.toJSON());
 }
 
 void CompareExpressions::processComparisonRestricted() {
@@ -508,7 +508,7 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
   }
   Rational result = numerator / denominator;
   if (numerator == result.getNumerator() && denominator == result.getDenominator()) {
-    return output.assignValueOLD(result, calculator);
+    return output.assignValue(calculator, result);
   }
   return false;
 }

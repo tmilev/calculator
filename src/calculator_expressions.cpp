@@ -1077,7 +1077,7 @@ Expression Expression::zero() {
     return Expression::zeroStatic();
   }
   Expression result;
-  return result.assignValueOLD(0, *this->owner);
+  return result.assignValue(*this->owner, 0);
 }
 
 Expression Expression::zeroStatic() {
@@ -1088,7 +1088,7 @@ Expression Expression::zeroStatic() {
 bool Expression::addChildRationalOnTop(const Rational& inputRat) {
   this->checkInitialization();
   Expression ratE;
-  ratE.assignValueOLD(inputRat, *this->owner);
+  ratE.assignValue(*this->owner, inputRat);
   return this->addChildOnTop(ratE);
 }
 
@@ -1827,7 +1827,7 @@ void Expression::getBaseExponentForm(Expression& outputBase, Expression& outputE
     return;
   }
   outputBase = *this;
-  outputExponent.assignValueOLD(1, *this->owner);
+  outputExponent.assignValue(*this->owner, 1);
 }
 
 bool Expression::getContext(ExpressionContext& output) const {
@@ -1915,7 +1915,7 @@ void Expression::getCoefficientMultiplicandForm(Expression& outputCoeff, Express
       return;
     }
   }
-  outputCoeff.assignValueOLD(1, *this->owner);
+  outputCoeff.assignValue(*this->owner, 1);
   outputNoCoeff = *this;
 }
 
@@ -4802,7 +4802,7 @@ bool Expression::makeProduct(Calculator& owner, const Expression& left, const Ex
 
 bool Expression::makeProduct(Calculator& owner, const List<Expression>& multiplicands) {
   if (multiplicands.size == 0) {
-    return this->assignValueOLD(1, owner);
+    return this->assignValue(owner, 1);
   }
   return this->makeXOXOdotsOX(owner, owner.opTimes(), multiplicands);
 }
@@ -4810,7 +4810,7 @@ bool Expression::makeProduct(Calculator& owner, const List<Expression>& multipli
 bool Expression::makeSum(Calculator& owner, const List<Expression>& summands) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   if (summands.size == 0) {
-    return this->assignValueOLD(0, owner);
+    return this->assignValue(owner, 0);
   }
   return this->makeXOXOdotsOX(owner, owner.opPlus(), summands);
 }
@@ -4877,7 +4877,7 @@ bool Expression::makeSqrt(Calculator& owner, const Expression& argument, const R
   MacroRegisterFunctionWithName("Expression::makeSqrt");
   this->reset(owner, 3);
   Expression radicalIndexE;
-  radicalIndexE.assignValueOLD(radicalSuperIndex, owner);
+  radicalIndexE.assignValue(owner, radicalSuperIndex);
   this->addChildAtomOnTop(owner.opSqrt());
   this->addChildOnTop(radicalIndexE);
   return this->addChildOnTop(argument);
@@ -4895,12 +4895,12 @@ bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, c
   }
   if (right.owner == nullptr) {
     Expression rightCopy;
-    rightCopy.assignValueOLD(right.data, *left.owner);
+    rightCopy.assignValue(*left.owner, right.data);
     return this->makeXOX(owner, theOp, left, rightCopy);
   }
  if (left.owner == nullptr) {
     Expression leftCopy;
-    leftCopy.assignValueOLD(left.data, *right.owner);
+    leftCopy.assignValue(*right.owner, left.data);
     return this->makeXOX(owner, theOp, leftCopy, right);
   }
   left.checkInitialization();

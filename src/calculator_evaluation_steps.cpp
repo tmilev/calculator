@@ -368,5 +368,5 @@ bool CalculatorSteps::innerLogEvaluationStepsHumanReadableMerged(
   if (doDebug) {
     out << "<hr>" << history.toStringDebug();
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }

@@ -1214,13 +1214,17 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
 }
 
 SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const {
+  MacroRegisterFunctionWithName("Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithCaution");
   this->checkInitialization();
-  ExpressionContext myContext = this->getContext();
-  int indexSSalg = myContext.indexAmbientSemisimpleLieAlgebra;
-  if (indexSSalg == - 1) {
+  if (!this->isBuiltInType()) {
     return nullptr;
   }
-  return &this->owner->objectContainer.semisimpleLieAlgebras.values[indexSSalg];
+  ExpressionContext myContext = this->getContext();
+  int indexSemisimpleLieAlgebra = myContext.indexAmbientSemisimpleLieAlgebra;
+  if (indexSemisimpleLieAlgebra == - 1) {
+    return nullptr;
+  }
+  return &this->owner->objectContainer.semisimpleLieAlgebras.values[indexSemisimpleLieAlgebra];
 }
 
 Function& Calculator::getFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
@@ -2010,8 +2014,8 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
 
 SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
-  SemisimpleSubalgebras& currentSAs = this->semisimpleSubalgebras.getValueCreateNoInitialization(input);
-  return currentSAs;
+  SemisimpleSubalgebras& result = this->semisimpleSubalgebras.getValueCreateNoInitialization(input);
+  return result;
 }
 
 SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const DynkinType& input) {

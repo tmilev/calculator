@@ -540,24 +540,23 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylGroupOrbitSize");
-  //double startTimeForDebug= global.getElapsedSeconds();
-  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
+  semisimpleLieAlgebra.content = nullptr;
   Vector<Rational> weightRational;
   if (calculator.getTypeWeight<Rational>(
-    calculator, input, weightRational, semisimpleLieAlgebraWithContext
+    calculator, input, weightRational, semisimpleLieAlgebra
   )) {
-    Rational result = semisimpleLieAlgebraWithContext.content->weylGroup.getOrbitSize(weightRational);
+    Rational result = semisimpleLieAlgebra.content->weylGroup.getOrbitSize(weightRational);
     return output.assignValue(calculator, result);
   }
-  SemisimpleLieAlgebra* semisimpleLieAlgebra = semisimpleLieAlgebraWithContext.content;
   Vector<Polynomial<Rational> > weightPolynomial;
   if (calculator.getTypeWeight<Polynomial<Rational> >(
     calculator,
     input,
     weightPolynomial,
-    semisimpleLieAlgebraWithContext
+    semisimpleLieAlgebra
   )) {
-    Rational result = semisimpleLieAlgebra->weylGroup.getOrbitSize(weightPolynomial);
+    Rational result = semisimpleLieAlgebra.content->weylGroup.getOrbitSize(weightPolynomial);
     return output.assignValue(calculator, result);
   }
   return false;

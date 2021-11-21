@@ -435,7 +435,7 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
     Expression differentialOperator(*this->owner);
     differentialOperator.addChildAtomOnTop("\\partial");
     Expression variableIndex;
-    variableIndex.assignValueOLD(i, *this->owner);
+    variableIndex.assignValue(*this->owner, i);
     differentialOperator.addChildOnTop(variableIndex);
     if (outputContext.differentialOperatorVariables.contains(
       differentialOperator

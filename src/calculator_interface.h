@@ -2804,7 +2804,7 @@ public:
     const Expression& input,
     Expression& output
   );
-  static bool innerElementUE(
+  static bool elementUniversalEnveloping(
     Calculator& calculator, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner
   );
   static bool outerMatrixExpressionsToMatrixOfType(
@@ -3294,16 +3294,17 @@ bool Calculator::getTypeWeight(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  WithContext<SemisimpleLieAlgebra*> ambientSemisimpleLieAlgebraContainer;
+  outputAmbientSemisimpleLieAlgebra.content = nullptr;
   if (!CalculatorConversions::convert(
     *this,
     leftE,
-    ambientSemisimpleLieAlgebraContainer
+    outputAmbientSemisimpleLieAlgebra
   )) {
     calculator << "Error extracting Lie algebra from " << leftE.toString();
     return false;
   }
-  SemisimpleLieAlgebra* ambientSemisimpleLieAlgebra = ambientSemisimpleLieAlgebraContainer.content;
+  SemisimpleLieAlgebra* ambientSemisimpleLieAlgebra =
+  outputAmbientSemisimpleLieAlgebra.content;
   if (!calculator.getVector<Coefficient>(
     middleE,
     outputWeightSimpleCoords,

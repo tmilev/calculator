@@ -250,7 +250,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   out << reportfourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();
   out << "<br><br>" << latexReport2.str();
-  return output.assignValueOLD<std::string>(out.str(), calculator);
+  return output.assignValue<std::string>(calculator, out.str());
 }
 
 bool CalculatorLieTheory::highestWeightVectorCommon(
@@ -346,7 +346,7 @@ bool CalculatorLieTheory::animateLittelmannPaths(
   << weightInSimpleCoords.toString();
   LittelmannPath path;
   path.makeFromWeightInSimpleCoords(weightInSimpleCoords, theSSowner->weylGroup);
-  return output.assignValueOLD(path.generateOrbitAndAnimate(), calculator);
+  return output.assignValue(calculator, path.generateOrbitAndAnimate());
 }
 
 bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output) {
@@ -2904,6 +2904,7 @@ bool CalculatorLieTheory::cartanInvolution(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolution");
+  return calculator << "Not implemented yet.";
   CartanInvolution involution;
   if (!CalculatorLieTheory::cartanInvolutionInternal(calculator, input, involution)) {
     return false;
@@ -3463,7 +3464,7 @@ bool CalculatorLieTheory::constructCartanSubalgebra(
   }
   subalgebra.computeBasis();
   subalgebra.computeCartanSubalgebra();
-  return output.assignValueOLD(subalgebra.toString(), calculator);
+  return output.assignValue(calculator, subalgebra.toString());
 }
 
 bool CalculatorLieTheory::growDynkinType(
@@ -4137,7 +4138,9 @@ bool CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers(Calculator& c
   return CalculatorLieTheory::printSemisimpleSubalgebras(calculator, input, output, true, true, false, true, false, false);
 }
 
-bool CalculatorLieTheory::printSemisimpleSubalgebrasRegular(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorLieTheory::printSemisimpleSubalgebrasRegular(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   return CalculatorLieTheory::printSemisimpleSubalgebras(calculator, input, output, false, true, false, true, false, true);
 }
 
@@ -4168,6 +4171,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   }
   std::stringstream out;
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
+  ownerAlgebra.content = nullptr;
   SemisimpleLieAlgebra* ownerAlgebraPointer = nullptr;
   bool isAlreadySubalgebrasObject = input[1].isOfType<SemisimpleSubalgebras>();
   int maximumRank = 8;
@@ -4186,12 +4190,17 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
       );
     }
     ownerAlgebraPointer = ownerAlgebra.content;
+    if (ownerAlgebraPointer == nullptr) {
+      global.fatal
+      << "Zero pointer to semisimple Lie algebra: this shouldn't happen. "
+      << global.fatal;
+    }
     if (ownerAlgebraPointer->getRank() > maximumRank) {
       out << "<b>This code is has been set to run up to rank "
       << maximumRank << ". "
       << "As soon as the algorithms are mature enough, "
       << "higher ranks will be allowed. </b>";
-      return output.assignValueOLD(out.str(), calculator);
+      return output.assignValue(calculator, out.str());
     }
   } else {
     ownerAlgebraPointer = input[1].getValue<SemisimpleSubalgebras>().owner;
@@ -4207,6 +4216,9 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& subalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.weylGroup.dynkinType);
+  if (subalgebras.owner == nullptr) {
+    subalgebras.owner = &ownerLieAlgebra;
+  }
   Plot plot;
   subalgebras.owner->weylGroup.dynkinType.plot(plot);
   subalgebras.computeStructureWriteFiles(
@@ -4225,7 +4237,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     doAdjustCentralizers,
     plot.getPlotHtml(calculator)
   );
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::casimir(Calculator& calculator, const Expression& input, Expression& output) {

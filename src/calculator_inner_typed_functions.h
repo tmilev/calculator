@@ -302,7 +302,6 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
         output.content -= converted.content;
       }
     } else if (input.isListStartingWithAtom(calculator.opTimes())) {
-      global.comments << "DEBUG: content: " << output.content << " incoming: " << converted.content;
       output.content *= converted.content;
     } else {
       global.fatal << "While extracting input polynomial, got unexpected input type: "
@@ -372,25 +371,7 @@ bool CalculatorConversions::functionPolynomial(
     << " exceeded while trying to evaluate polynomial "
     << "expression (i.e. your polynomial expression is too large).";
   }
-  if (input.isOfTypeWithContext<Polynomial<Coefficient> >(&output)) {
-    return true;
-  }
-  WithContext<Polynomial<Rational> > polynomialRational;
-  if (input.isOfTypeWithContext<Polynomial<Rational> >(&polynomialRational)) {
-    output.content = polynomialRational.content;
-    output.context = polynomialRational.context;
-    return true;
-  }
-  WithContext<Coefficient> coefficient;
-  if (input.isOfTypeWithContext(&coefficient)) {
-    output.content = coefficient.content;
-    output.context = coefficient.context;
-    return true;
-  }
-  WithContext<Rational> coefficientRational;
-  if (input.isOfTypeWithContext(&coefficientRational)) {
-    output.content = coefficientRational.content;
-    output.context = coefficientRational.context;
+  if (CalculatorConversions::convertWithoutComputation(calculator, input, output)) {
     return true;
   }
   WithContext<Polynomial<Coefficient> > converted, candidate;

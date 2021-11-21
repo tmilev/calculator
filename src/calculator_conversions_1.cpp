@@ -180,7 +180,6 @@ bool CalculatorConversions::convertWithoutComputation<ElementWeylAlgebra<Rationa
     return true;
   }
   bool result = input.isOfTypeWithContext(&output);
-  global.comments << "DEBUG: got to here about to return: " << output.toString() << "<br>";
   return result;
 }
 

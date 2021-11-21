@@ -2135,23 +2135,15 @@ bool CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial(
   if (!argument.isBuiltInType()) {
     return false;
   }
-  global.comments << "DEBUG: element at start:: "
-  << elementWeylAlgebra.toString() << "<br>";
   if (!elementWeylAlgebra.mergeContexts(elementWeylAlgebra, argument)) {
     return false;
   }
-  global.comments << "DEBUG: AFTER MERGE CONTEXT: element: "
-  << elementWeylAlgebra.toString()
-  << " argument: " << argument.toString() << "<br>";
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convertWithoutComputation(calculator, argument, polynomial)) {
     return false;
   }
   const ElementWeylAlgebra<Rational>& elementWeylAlgebraInternal =
   elementWeylAlgebra.getValue<ElementWeylAlgebra<Rational> >();
-  global.comments << "DEBUG: got to here: element: "
-  << elementWeylAlgebraInternal.toString()
-  << " argument: " << polynomial.toString() << "<br>";
   if (elementWeylAlgebraInternal.hasNonSmallPositiveIntegerDerivation()) {
     return calculator << "<hr> I cannot apply "
     << elementWeylAlgebraInternal.toString()

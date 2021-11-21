@@ -420,7 +420,7 @@ public:
   }
   template <class Coefficient>
   bool substitution(
-    const List<Polynomial<Coefficient> >& theSubstitution,
+    const List<Polynomial<Coefficient> >& substitution,
     Polynomial<Coefficient>& output,
     const Coefficient& one
   ) const;

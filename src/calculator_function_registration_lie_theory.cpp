@@ -1734,7 +1734,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
+    CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor,
     this->opRational(),
     this->opElementTensorGVM(),
     "Handles multiplying rational number by an element of "
@@ -1750,7 +1750,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
+    CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor,
     this->opPolynomialRational(),
     this->opElementTensorGVM(),
     "Handles multiplying polynomial by an element of tensor "
@@ -1769,7 +1769,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
+    CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor,
     this->opRationalFraction(),
     this->opElementTensorGVM(),
     "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. "
@@ -1787,7 +1787,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
+    CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor,
     this->opElementUEOverRF(),
     this->opElementTensorGVM(),
     "Handles acting by element Universal enveloping on an element of "

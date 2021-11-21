@@ -263,18 +263,18 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
   bool Verbose
 ) {
   MacroRegisterFunctionWithName("Calculator::highestWeightVectorCommon");
-  RecursionDepthCounter therecursionIncrementer(&calculator.recursionDepth);
+  RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   RationalFraction<Rational> RFOne, RFZero;
   RFOne.makeOne();
   RFZero.makeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element;
   //= theElementData.theElementTensorGenVermas.getElement();
-  ListReferences<ModuleSSalgebra<RationalFraction<Rational> > >& theMods = calculator.objectContainer.categoryOModules;
+  ListReferences<ModuleSSalgebra<RationalFraction<Rational> > >& allModules = calculator.objectContainer.categoryOModules;
   int indexOfModule = - 1;
 
-  for (int i = 0; i < theMods.size; i ++) {
-    ModuleSSalgebra<RationalFraction<Rational> >& currentMod = theMods[i];
+  for (int i = 0; i < allModules.size; i ++) {
+    ModuleSSalgebra<RationalFraction<Rational> >& currentMod = allModules[i];
     if (
       highestWeightFundCoords == currentMod.highestWeightFundamentalCoordinatesBaseField &&
       selectionParSel == currentMod.parabolicSelectionNonSelectedAreElementsLevi &&
@@ -285,29 +285,29 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
     }
   }
   if (indexOfModule == - 1) {
-    indexOfModule = theMods.size;
-    theMods.setSize(theMods.size + 1);
-    theMods.lastObject().reset();
+    indexOfModule = allModules.size;
+    allModules.setSize(allModules.size + 1);
+    allModules.lastObject().reset();
   }
-  ModuleSSalgebra<RationalFraction<Rational> >& theMod = theMods[indexOfModule];
-  if (!theMod.flagIsInitialized) {
-    bool isGood = theMod.makeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
+  ModuleSSalgebra<RationalFraction<Rational> >& currentModule = allModules[indexOfModule];
+  if (!currentModule.flagIsInitialized) {
+    bool isGood = currentModule.makeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
     if (Verbose) {
-      calculator << theMod.toString();
+      calculator << currentModule.toString();
     }
     if (!isGood) {
       return output.assignError(calculator, "Error while generating highest weight module. See comments for details. ");
     }
   }
-  if (&theMod.getOwner() != owner) {
+  if (&currentModule.getOwner() != owner) {
     global.fatal << "Module has owner that is not what it should be. " << global.fatal;
   }
-  element.makeHWV(theMod, RFOne);
+  element.makeHWV(currentModule, RFOne);
   if (&element.getOwnerSemisimple() != owner) {
     global.fatal << "Just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
   }
-  return output.assignValueWithContextOLD<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >(element, hwContext, calculator);
+  return output.assignValueWithContext(calculator, element, hwContext);
 }
 
 bool CalculatorLieTheory::animateLittelmannPaths(
@@ -4498,7 +4498,6 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
     input,
     algebraPointer
   )) {
-    global.comments << "DEBUG: here I am again!";
     calculator << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
     return output.assignError(
       calculator,

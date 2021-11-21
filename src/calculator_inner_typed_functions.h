@@ -95,7 +95,7 @@ public:
   static bool innerMultiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyAnyByElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyByEltTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyAnyByElementTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEllipticCurveElements(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEllipticCurveElementsZmodP(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyRationalOrPolynomialByWeightPolynomial(Calculator& calculator, const Expression& input, Expression& output);
@@ -176,7 +176,9 @@ bool CalculatorFunctionsBinaryOps::multiplyTypeByType(
   Type result;
   result = inputContextsMerged[1].getValue<Type>();
   result *= inputContextsMerged[2].getValue<Type>();
-  return output.assignValueWithContextOLD(result, inputContextsMerged[1].getContext(), calculator);
+  return output.assignValueWithContext(
+    calculator, result, inputContextsMerged[1].getContext()
+  );
 }
 
 template <class Type>
@@ -196,7 +198,9 @@ bool CalculatorFunctionsBinaryOps::addTypeToType(
   Type result;
   result = inputContextsMerged[1].getValue<Type>();
   result += inputContextsMerged[2].getValue<Type>();
-  return output.assignValueWithContextOLD(result, inputContextsMerged[1].getContext(), calculator);
+  return output.assignValueWithContext(
+    calculator, result, inputContextsMerged[1].getContext()
+  );
 }
 
 template <class Type>
@@ -219,7 +223,9 @@ bool CalculatorFunctionsBinaryOps::divideTypeByType(
   Type result;
   result = inputContextsMerged[1].getValue<Type>();
   result /= inputContextsMerged[2].getValue<Type>();
-  return output.assignValueWithContextOLD(result, inputContextsMerged[1].getContext(), calculator);
+  return output.assignValueWithContext(
+    calculator, result, inputContextsMerged[1].getContext()
+  );
 }
 
 template <class Coefficient>

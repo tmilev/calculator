@@ -499,10 +499,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
   return output.assignValueWithContext(calculator, left, input[1].getContext());
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
+bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -557,7 +557,6 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlge
   )) {
     return false;
   }
-  global.comments << "<br>DEBUG: inputContexts merged: " << inputContextsMerged.toString() << "<br>";
   if (
     inputContextsMerged[1].getValue<ElementWeylAlgebra<Rational> >().hasNonSmallPositiveIntegerDerivation() ||
     inputContextsMerged[2].getValue<ElementWeylAlgebra<Rational> >().hasNonSmallPositiveIntegerDerivation()

@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".#include "calculator_interface.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
+#include "math_extra_weyl_algebras_implementation.h"
 #include "calculator_interface.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
@@ -17,14 +18,17 @@ bool CalculatorConversions::convertWithoutComputation<Polynomial<AlgebraicNumber
   WithContext<Polynomial<AlgebraicNumber> >& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::convert");
+  (void) calculator;
   input.checkInitialization();
-  if (input.isOfType<Rational>()) {
-    output.context.initialize(calculator);
-    output.content.makeConstant(input.getValue<Rational>());
+  WithContext<Rational> rational;
+  if (input.isOfTypeWithContext(&rational)) {
+    output.context = rational.context;
+    output.content.makeConstant(rational.content);
     return true;
   }
-  if (input.isOfType<AlgebraicNumber>()) {
-    output.context.initialize(calculator);
+  WithContext<Rational> algebraicNumber;
+  if (input.isOfTypeWithContext(&algebraicNumber)) {
+    output.context = algebraicNumber.context;
     output.content.makeConstant(input.getValue<AlgebraicNumber>());
     return true;
   }
@@ -45,11 +49,23 @@ bool CalculatorConversions::convertWithoutComputation<Polynomial<Rational> >(
   WithContext<Polynomial<Rational> >& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  (void) calculator;
   input.checkInitialization();
-  if (input.isOfType<Rational>()) {
-    output.content.makeConstant(input.getValue<Rational>());
-    output.context.initialize(calculator);
+  WithContext<Rational> rational;
+  if (input.isOfTypeWithContext(&rational)) {
+    output.content.makeConstant(rational.content);
+    output.context = rational.context;
     return true;
+  }
+  WithContext<ElementWeylAlgebra<Rational> > elementWeylAlgebra;
+  if (input.isOfTypeWithContext(&elementWeylAlgebra)) {
+    if (elementWeylAlgebra.content.isPolynomial(&output.content)) {
+      // An element of a weyl algebra that happens to be a polynomial.
+      output.context = elementWeylAlgebra.context;
+      return true;
+    }
+    // An element of a Weyl algebra that is not a polynomial.
+    return false;
   }
   return input.isOfTypeWithContext(&output);
 }
@@ -81,19 +97,22 @@ bool CalculatorConversions::convertWithoutComputation<RationalFraction<Rational>
   WithContext<RationalFraction<Rational> >& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
+  (void) calculator;
   input.checkInitialization();
-  if (input.isOfType<Rational>()) {
-    output.content = input.getValue<Rational>();
-    output.context.initialize(calculator);
+  WithContext<Rational> rational;
+  if (input.isOfTypeWithContext(&rational)) {
+    output.content = rational.content;
+    output.context = rational.context;
     return true;
   }
-  if (input.isOfType<AlgebraicNumber>()) {
+  WithContext<AlgebraicNumber> algebraicNumber;
+  if (input.isOfTypeWithContext(&algebraicNumber)) {
     Rational rationalValue;
     if (!input.getValue<AlgebraicNumber>().isRational(&rationalValue)) {
       return false;
     }
     output.content = rationalValue;
-    output.context.initialize(calculator);
+    output.context = algebraicNumber.context;
     return true;
   }
   WithContext<Polynomial<Rational> > polynomial;
@@ -114,16 +133,18 @@ bool CalculatorConversions::convertWithoutComputation<RationalFraction<Algebraic
   MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation_RationalFraction_AlgebraicNumber");
   input.checkInitialization();
   AlgebraicClosureRationals* closure = &calculator.objectContainer.algebraicClosure;
-  if (input.isOfType<Rational>()) {
+  WithContext<Rational> rational;
+  if (input.isOfTypeWithContext(&rational)) {
     AlgebraicNumber value;
-    value.assignRational(input.getValue<Rational>(), closure);
+    value.assignRational(rational.content, closure);
     output.content = value;
-    output.context.initialize(calculator);
+    output.context = rational.context;
     return true;
   }
-  if (input.isOfType<AlgebraicNumber>()) {
-    output.content = input.getValue<AlgebraicNumber>();
-    output.context.initialize(calculator);
+  WithContext<AlgebraicNumber> algebraicNumber;
+  if (input.isOfTypeWithContext(&algebraicNumber)) {
+    output.content = algebraicNumber.content;
+    output.context = algebraicNumber.context;
     return true;
   }
   // TODO(tmilev): please implement conversion from Polynomial<Rational> to Polynomial<AlgebraicNumber>.
@@ -159,6 +180,7 @@ bool CalculatorConversions::convertWithoutComputation<ElementWeylAlgebra<Rationa
     return true;
   }
   bool result = input.isOfTypeWithContext(&output);
+  global.comments << "DEBUG: got to here about to return: " << output.toString() << "<br>";
   return result;
 }
 
@@ -255,10 +277,11 @@ bool CalculatorConversions::convertWithoutComputation<AlgebraicNumber>(
   WithContext<AlgebraicNumber>& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::convertWithoutComputation");
-  if (input.isOfType<Rational>()) {
-    output.context.initialize(calculator);
+  WithContext<Rational> rational;
+  if (input.isOfTypeWithContext(&rational)) {
+    output.context = rational.context;
     output.content.owner = &calculator.objectContainer.algebraicClosure;
-    output.content = input.getValue<Rational>();
+    output.content = rational.content;
     return true;
   }
   return input.isOfTypeWithContext(&output);
@@ -362,7 +385,7 @@ bool CalculatorConversions::convert(
   WithContext<SemisimpleLieAlgebra*>& output
 ) {
   Expression converted;
-  if (input.isOfTypeWithContext(&output)){
+  if (input.isOfTypeWithContext(&output)) {
     return true;
   }
   return CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
@@ -427,12 +450,26 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
     input.generatorIndex >= input.owner->getNumberOfPositiveRoots() &&
     input.generatorIndex < input.owner->getNumberOfPositiveRoots() + input.owner->getRank()
   ) {
-    generatorLetterE.makeAtom(calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst("h"));
+    generatorLetterE.makeAtom(
+      calculator,
+      calculator.addOperationNoRepetitionOrReturnIndexFirst("h")
+    );
   } else {
-    generatorLetterE.makeAtom(calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst("g"));
+    generatorLetterE.makeAtom(
+      calculator,
+      calculator.addOperationNoRepetitionOrReturnIndexFirst("g")
+    );
   }
-  generatorIndexE.assignValue(calculator, input.owner->getDisplayIndexFromGenerator(input.generatorIndex));
-  return output.makeXOX(calculator, calculator.opUnderscore(), generatorLetterE, generatorIndexE);
+  generatorIndexE.assignValue(
+    calculator,
+    input.owner->getDisplayIndexFromGenerator(input.generatorIndex)
+  );
+  return output.makeXOX(
+    calculator,
+    calculator.opUnderscore(),
+    generatorLetterE,
+    generatorIndexE
+  );
 }
 
 bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(

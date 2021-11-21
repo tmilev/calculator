@@ -7,7 +7,7 @@
 
 template <class Coefficient>
 bool MonomialPolynomial::substitution(
-  const List<Polynomial<Coefficient> >& theSubstitution,
+  const List<Polynomial<Coefficient> >& substitution,
   Polynomial<Coefficient>& output,
   const Coefficient& one
 ) const {
@@ -21,19 +21,19 @@ bool MonomialPolynomial::substitution(
     if (this->monomialBody[i] == 0) {
       continue;
     }
-    if (i >= theSubstitution.size) {
+    if (i >= substitution.size) {
       global.fatal << "Attempt to carry out a substitution in the monomial "
       << this->toString()
       << " which does have non-zero exponent of variable x_{"
       << i + 1 << "}; however, the input substitution has "
-      << theSubstitution.size
+      << substitution.size
       << " variable images. More precisely, the input substitution is:  "
-      << theSubstitution.toString() << ". " << global.fatal;
+      << substitution.toString() << ". " << global.fatal;
     }
     int theExponent = 0;
     if (!this->monomialBody[i].isSmallInteger(&theExponent) || this->monomialBody[i] < 0) {
-      if (theSubstitution[i].isMonomialCoefficientOne()) {
-        MonomialPolynomial tempMon = theSubstitution[i][0];
+      if (substitution[i].isMonomialCoefficientOne()) {
+        MonomialPolynomial tempMon = substitution[i][0];
         tempMon.raiseToPower(this->monomialBody[i]);
         output *= tempMon;
         continue;
@@ -44,7 +44,7 @@ bool MonomialPolynomial::substitution(
       << " instead. " << GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML();
       return false;
     }
-    tempPoly = theSubstitution[i];
+    tempPoly = substitution[i];
     tempPoly.raiseToPower(theExponent, one);
     output *= tempPoly;
   }

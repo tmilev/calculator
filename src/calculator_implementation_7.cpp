@@ -2127,37 +2127,44 @@ bool CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial(
   }
   Expression elementWeylAlgebra = input[0];
   Expression argument = input[1];
-  if (!elementWeylAlgebra.isListStartingWithAtom(calculator.opElementWeylAlgebra())) {
+  if (!elementWeylAlgebra.isListStartingWithAtom(
+    calculator.opElementWeylAlgebra()
+  )) {
     return false;
   }
   if (!argument.isBuiltInType()) {
     return false;
   }
+  global.comments << "DEBUG: element at start:: "
+  << elementWeylAlgebra.toString() << "<br>";
   if (!elementWeylAlgebra.mergeContexts(elementWeylAlgebra, argument)) {
     return false;
   }
+  global.comments << "DEBUG: AFTER MERGE CONTEXT: element: "
+  << elementWeylAlgebra.toString()
+  << " argument: " << argument.toString() << "<br>";
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convert(calculator, argument, polynomial)) {
-    WithContext<ElementWeylAlgebra<Rational> > argumentElementWeylAlgebra;
-    if (!CalculatorConversions::convert(calculator, argument, argumentElementWeylAlgebra)) {
-      return false;
-    }
-    if (!argumentElementWeylAlgebra.content.isPolynomial(&polynomial.content)) {
-      return false;
-    }
-    polynomial.context = argumentElementWeylAlgebra.context;
+  if (!CalculatorConversions::convertWithoutComputation(calculator, argument, polynomial)) {
+    return false;
   }
-  const ElementWeylAlgebra<Rational>& theEWA = elementWeylAlgebra.getValue<ElementWeylAlgebra<Rational> >();
-  if (theEWA.hasNonSmallPositiveIntegerDerivation()) {
-    return calculator << "<hr> I cannot apply " << theEWA.toString()
+  const ElementWeylAlgebra<Rational>& elementWeylAlgebraInternal =
+  elementWeylAlgebra.getValue<ElementWeylAlgebra<Rational> >();
+  global.comments << "DEBUG: got to here: element: "
+  << elementWeylAlgebraInternal.toString()
+  << " argument: " << polynomial.toString() << "<br>";
+  if (elementWeylAlgebraInternal.hasNonSmallPositiveIntegerDerivation()) {
+    return calculator << "<hr> I cannot apply "
+    << elementWeylAlgebraInternal.toString()
     << " onto " << polynomial.content.toString() << " as "
-    << "the differential operator contains non-integral differential operator exponents. ";
+    << "the differential operator contains "
+    << "non-integral differential operator exponents. ";
   }
-  if (!theEWA.actOnPolynomial(polynomial.content)) {
+  if (!elementWeylAlgebraInternal.actOnPolynomial(polynomial.content)) {
     std::stringstream out;
-    out << "Failed to act by operator " << theEWA.toString()
+    out << "Failed to act by operator " << elementWeylAlgebraInternal.toString()
     << " on polynomial " << polynomial.content.toString()
-    << " (possibly the weyl algebra element has non-integral exponents)";
+    << " (possibly the weyl algebra "
+    << "element has non-integral exponents)";
     return output.assignError(calculator, out.str());
   }
   return output.assignValueWithContext(calculator, polynomial.content, polynomial.context);

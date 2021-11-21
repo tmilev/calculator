@@ -2418,9 +2418,13 @@ bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFractio
   (void) format;
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
-  out << "ETGVM{}(";
+  out << "ElementTensorsGeneralizedVermas{}(";
   out << input.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().toString(&localFormat);
   out << ")";
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  if (showContext) {
+    out << "[" << input.getContext().toString() << "]";
+  }
   return true;
 }
 

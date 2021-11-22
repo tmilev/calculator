@@ -340,7 +340,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::convert(
     calculator,
-    input,
+    input[1],
     polynomial
   )) {
     return false;
@@ -361,17 +361,16 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   }
   List<Expression> resultSequence;
   Expression constantFactor;
-  constantFactor.assignValueOLD(factorization.constantFactor, calculator);
+  constantFactor.assignValue(calculator, factorization.constantFactor);
   resultSequence.addOnTop(constantFactor);
   Expression polynomialE;
   for (int i = 0; i < factorization.reduced.size; i ++) {
-    Expression expressionE(calculator);
-    polynomialE.assignValueWithContextOLD(
-      factorization.reduced[i], polynomial.context, calculator
-    );
-    expressionE.addChildAtomOnTop("MakeExpression");
-    expressionE.addChildOnTop(polynomialE);
-    resultSequence.addOnTop(expressionE);
+    if (! CalculatorConversions::expressionFromPolynomial(
+      calculator, factorization.reduced[i], polynomialE, &polynomial.context
+    )) {
+      return calculator << "Unexpected failure to convert factor to expression. ";
+    }
+    resultSequence.addOnTop(polynomialE);
   }
   return output.makeSequence(calculator, &resultSequence);
 }

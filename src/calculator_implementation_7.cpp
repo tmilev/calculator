@@ -3139,16 +3139,16 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
     return calculator << "The fourth argument " << input[4].toString() << " needs to be "
     << " of the form (x,y,...)\\in (...). ";
   }
-  const Expression& theVarsE = input[4][1];
+  const Expression& variableExpressions = input[4][1];
   HashedList<Expression> varsGiven;
-  if (!theVarsE.isSequenceNElements()) {
-    varsGiven.addOnTop(theVarsE);
+  if (!variableExpressions.isSequenceNElements()) {
+    varsGiven.addOnTop(variableExpressions);
   } else {
-    for (int i = 1; i < theVarsE.size(); i ++) {
-      if (varsGiven.contains(theVarsE[i])) {
-        return calculator << theVarsE[i] << " given more than once. ";
+    for (int i = 1; i < variableExpressions.size(); i ++) {
+      if (varsGiven.contains(variableExpressions[i])) {
+        return calculator << variableExpressions[i] << " given more than once. ";
       }
-      varsGiven.addOnTop(theVarsE[i]);
+      varsGiven.addOnTop(variableExpressions[i]);
     }
   }
   for (int i = 0; i < freeVariables.size; i ++) {
@@ -3163,7 +3163,7 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
   if (!calculator.functionGetMatrix(
     pointsExpressions,
     points,
-    false,
+    true,
     nullptr,
     varsGiven.size
   )) {

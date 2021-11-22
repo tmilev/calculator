@@ -2821,7 +2821,8 @@ public:
   static bool functionRationalFunction(
     Calculator& calculator,
     const Expression& input,
-    WithContext<RationalFraction<Coefficient> >& output
+    WithContext<RationalFraction<Coefficient> >& output,
+    bool allowNonIntegerPowers
   );
   static bool elementUniversalEnveloping(
     Calculator& calculator, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner

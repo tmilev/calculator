@@ -322,7 +322,7 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   const Expression* left = &input[1];
   const Expression* right = &input[2];
   if (*left == *right) {
-    constPower.assignValueOLD(2, calculator);
+    constPower.assignValue(calculator, 2);
     output.makeXOX(calculator, calculator.opPower(), *left, constPower);
     return true;
   }

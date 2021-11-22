@@ -2018,7 +2018,9 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation computation(&calculator);
   computation.inputIntegrand = input;
-  if (!CalculatorConversions::functionRationalFunction<Rational>(calculator, input, computation.rationalFraction)) {
+  if (!CalculatorConversions::functionRationalFunction<Rational>(
+    calculator, input, computation.rationalFraction, false
+  )) {
     return calculator << "CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
@@ -2040,15 +2042,17 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   return output.makeSequence(calculator, &computation.partialFractionSummands);
 }
 
-bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(
+bool CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
+  MacroRegisterFunctionWithName("CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm");
   IntegralRationalFunctionComputation computation(&calculator);
   if (input.size() < 2) {
     return false;
   }
-  if (!CalculatorConversions::functionRationalFunction(calculator, input[1], computation.rationalFraction)) {
+  if (!CalculatorConversions::functionRationalFunction(
+    calculator, input[1], computation.rationalFraction, false
+  )) {
     return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input[1].toString() << " to rational function. ";
@@ -3841,7 +3845,11 @@ bool CalculatorFunctions::outerPolynomialize(Calculator& calculator, const Expre
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionPolynomialize(calculator, input[1], output);
+  if (CalculatorFunctions::functionPolynomialize(calculator, input[1], output)) {
+    return true;
+  }
+  output = input[1];
+  return true;
 }
 
 bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks(
@@ -3855,7 +3863,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBloc
   IntegralRationalFunctionComputation computation(&calculator);
   computation.inputIntegrand = functionExpression;
   if (!CalculatorConversions::functionRationalFunction<Rational>(
-    calculator, functionExpression, computation.rationalFraction
+    calculator, functionExpression, computation.rationalFraction, false
   )) {
     return calculator
     << "<hr>Call of function CalculatorConversions::functionRationalFunction "
@@ -4886,25 +4894,25 @@ bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateEpowerAxDiffX");
-  Expression functionExpression, theVariableE;
-  if (!input.isIndefiniteIntegralFdx(&theVariableE, &functionExpression)) {
+  Expression functionExpression, variableExpression;
+  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression)) {
     return false;
   }
-  Expression theFunCoeff, theFunNoCoeff;
-  functionExpression.getCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
-  if (!theFunNoCoeff.startsWith(calculator.opPower(), 3)) {
+  Expression functionCoefficient, functionWithoutCoefficient;
+  functionExpression.getCoefficientMultiplicandForm(functionCoefficient, functionWithoutCoefficient);
+  if (!functionWithoutCoefficient.startsWith(calculator.opPower(), 3)) {
     return false;
   }
-  if (!theFunNoCoeff[1].isOperationGiven(calculator.opE())) {
+  if (!functionWithoutCoefficient[1].isOperationGiven(calculator.opE())) {
     return false;
   }
   Expression powerCoefficient, powerNoCoefficient;
-  theFunNoCoeff[2].getCoefficientMultiplicandForm(powerCoefficient, powerNoCoefficient);
-  if (powerNoCoefficient != theVariableE) {
+  functionWithoutCoefficient[2].getCoefficientMultiplicandForm(powerCoefficient, powerNoCoefficient);
+  if (powerNoCoefficient != variableExpression) {
     if (powerNoCoefficient.startsWith(calculator.opTimes(), 3)) {
       if (
         powerNoCoefficient[1].isOperationGiven(calculator.opImaginaryUnit()) &&
-        powerNoCoefficient[2] == theVariableE
+        powerNoCoefficient[2] == variableExpression
       ) {
         output = powerNoCoefficient[1] * (- 1) * functionExpression / powerCoefficient;
         output.checkConsistency();

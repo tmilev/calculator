@@ -403,7 +403,8 @@ template <class Coefficient>
 bool CalculatorConversions::functionRationalFunction(
   Calculator& calculator,
   const Expression& input,
-  WithContext<RationalFraction<Coefficient> >& output
+  WithContext<RationalFraction<Coefficient> >& output,
+  bool allowNonIntegerPowers
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionRationalFunction");
   if (CalculatorConversions::convertWithoutComputation(calculator, input, output)) {
@@ -416,14 +417,16 @@ bool CalculatorConversions::functionRationalFunction(
   ) {
     WithContext<RationalFraction<Coefficient> > left, right;
     if (
-      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], left)
-    ) {
+      !CalculatorConversions::functionRationalFunction<Coefficient>(
+        calculator, input[1], left, allowNonIntegerPowers
+    )) {
       return calculator << "<hr>Failed to convert " << input[1].toString()
       << " to rational function. ";
     }
     if (
-      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[2], right)
-    ) {
+      !CalculatorConversions::functionRationalFunction<Coefficient>(
+        calculator, input[2], right, allowNonIntegerPowers
+    )) {
       return calculator << "<hr>Failed to convert " << input[2].toString()
       << " to rational function. ";
     }
@@ -451,19 +454,23 @@ bool CalculatorConversions::functionRationalFunction(
   }
   int smallPower = - 1;
   if (input.startsWith(calculator.opPower(), 3) ) {
-    if (!input[2].isSmallInteger(&smallPower)) {
+    if (input[2].isSmallInteger(&smallPower)) {
+      WithContext<RationalFraction<Coefficient> > base;
+      if (!CalculatorConversions::functionRationalFunction<Coefficient>(
+        calculator, input[1], base, allowNonIntegerPowers
+      )) {
+        return calculator << "<hr>CalculatorConversions::functionRationalFunction: failed to convert "
+        << input[1].toString() << " to rational fraction. ";
+      }
+      output.context = base.context;
+      output.content = base.content;
+      output.content.raiseToPower(smallPower);
+      return true;
+    }
+    if (!allowNonIntegerPowers) {
       return calculator << "<hr>Warning: failed to raise "
       << input[1].toString() << " to power " << input[2].toString();
     }
-    WithContext<RationalFraction<Coefficient> > base;
-    if (!CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], base)) {
-      return calculator << "<hr>CalculatorConversions::functionRationalFunction: failed to convert "
-      << input[1].toString() << " to rational fraction. ";
-    }
-    output.context = base.context;
-    output.content = base.content;
-    output.content.raiseToPower(smallPower);
-    return true;
   }
   output.context.initialize(calculator);
   output.context.makeOneVariable(input);

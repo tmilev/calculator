@@ -751,7 +751,8 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsIntegration::integrateEpowerAxDiffX,
     "",
     "If a is a number, integrates e^{a x} dx. ",
-    "\\int x dx ",
+    "\\int e^{5x} dx;\n"
+    "\\int e^{-x} dx",
     "CalculatorFunctionsIntegration::integrateEpowerAxDiffX",
     "IntegrateEpowerX",
     innerStandard
@@ -1704,7 +1705,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "UnivariatePartialFractionAlgrithm",
-    CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm,
+    CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm,
     "",
     "Attempts to splits a univariate rational function into partial fractions "
     "over the real algebraic numbers. At the moment, "

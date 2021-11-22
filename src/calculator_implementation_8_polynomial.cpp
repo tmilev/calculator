@@ -1420,7 +1420,7 @@ bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibra
   }
   WithContext<RationalFraction<AlgebraicNumber> > rationalFunction;
   if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(
-    calculator, input, rationalFunction
+    calculator, input, rationalFunction, true
   )) {
     return false;
   }

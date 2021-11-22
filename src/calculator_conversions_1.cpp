@@ -364,7 +364,9 @@ bool CalculatorConversions::convert(
   const Expression& input,
   WithContext<RationalFraction<Rational> >& output
 ) {
-  return CalculatorConversions::functionRationalFunction(calculator, input, output);
+  return CalculatorConversions::functionRationalFunction(
+    calculator, input, output, false
+  );
 }
 
 template < >
@@ -1532,7 +1534,7 @@ bool CalculatorConversions::rationalFunction(
   }
   WithContext<RationalFraction<Rational> > outputCandidate;
   if (!CalculatorConversions::functionRationalFunction(
-    calculator, input[1], outputCandidate
+    calculator, input[1], outputCandidate, true
   )) {
     return false;
   }

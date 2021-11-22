@@ -911,6 +911,11 @@ class SyntacticElement {
 };
 
 class PlotObject {
+  friend std::ostream& operator<<(std::ostream& output, const PlotObject& unused) {
+    (void) unused;
+    output << "A Plot object.";
+    return output;
+  }
 private:
   JSData coordinateFunction(int index);
   JSData manifoldImmersionFunctionsJS();
@@ -1062,6 +1067,11 @@ public:
 
 // The following class is meant to use to draw plots for calculus students.
 class Plot {
+  friend std::ostream& operator<<(std::ostream& output, const Plot& unused) {
+    (void) unused;
+    output << "A Plot.";
+    return output;
+  }
 private:
   std::string canvasNamE;
   static JSData getCoordinateSystem();
@@ -3204,7 +3214,9 @@ bool Expression::assignValueWithContext(
   this->reset(owner, 3);
   this->addChildAtomOnTop(this->getTypeOperation<Type>());
   this->addChildOnTop(context.toExpression());
-  return this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
+  this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
+  this->checkConsistency();
+  return true;
 }
 
 template <class Type>
@@ -3589,7 +3601,8 @@ bool WithContext<BuiltIn>::setContextAndSerialize(
   if (!this->setContextAtLeast(inputOutputContext, commentsOnFailure)) {
     return false;
   }
-  return output.assignWithContext(*this->context.owner, *this);
+  bool result = output.assignWithContext(*this->context.owner, *this);
+  return result;
 }
 
 template <class BuiltIn>

@@ -571,6 +571,10 @@ class WeylGroupData {
   bool loadCharacterTable();
   WeylGroupData(const WeylGroupData& other);
   void operator=(const WeylGroupData& other);
+  friend std::ostream& operator<<(std::ostream& output, const WeylGroupData& data) {
+    output << "Weyl group data of Dynkin type: " << data.dynkinType.toString();
+    return output;
+  }
   //<- once created, WeylGroupData can't be moved: a pointer to it is stored in FiniteGroup
 public:
   bool flagIrrepsAreComputed;
@@ -1172,6 +1176,11 @@ public:
 template <typename someGroup, typename Coefficient>
 class GroupRepresentation {
 public:
+  friend std::ostream& operator<<(std::ostream& output, const GroupRepresentation& unused) {
+    (void) unused;
+    output << "A group representation";
+    return output;
+  }
   someGroup* ownerGroup;
   List<Matrix<Coefficient> > generators;
   mutable ClassFunction<someGroup, Coefficient> character;

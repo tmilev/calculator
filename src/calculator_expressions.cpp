@@ -2080,16 +2080,18 @@ bool Expression::toStringBuiltIn<Rational>(
   FormatExpressions* format
 ) {
   (void) format;
-  if (input.hasNonEmptyContext()) {
-    out << "Rational{}(" << input[1].toString() << ", ";
-  }
+  std::string rationalString;
   if (!input.owner->flagUseFracInRationalLaTeX) {
-    out << input.getValue<Rational>().toString();
+    rationalString = input.getValue<Rational>().toString();
   } else {
-    out << input.getValue<Rational>().toStringFrac();
+    rationalString = input.getValue<Rational>().toStringFrac();
   }
+
   if (input.hasNonEmptyContext()) {
-    out << ")";
+    ExpressionContext context = input.getContext();
+    out << "Rational{}(" << rationalString << ", " << input.getContext().toString() << ")";
+  } else {
+    out << rationalString;
   }
   return true;
 }
@@ -2582,7 +2584,9 @@ bool Expression::toStringBuiltIn<AlgebraicNumber>(
   if (input.owner->flagUseFracInRationalLaTeX) {
     formatLocal.flagUseFrac = true;
   }
-  std::string currentString = input.getValue<AlgebraicNumber>().toString(&formatLocal);
+  std::string currentString = input.getValue<AlgebraicNumber>().toString(
+    &formatLocal
+  );
   if (currentString.size() > 0) {
     if (currentString[0] == '-') {
       currentString = currentString.substr(1);
@@ -2595,6 +2599,10 @@ bool Expression::toStringBuiltIn<AlgebraicNumber>(
   out << currentString;
   if (input.owner->flagUseNumberColors) {
     out << "}";
+  }
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  if (showContext) {
+    out << "[" << input.getContext().toString() << "]";
   }
   return true;
 }

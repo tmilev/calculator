@@ -294,8 +294,10 @@ bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
   return result;
 }
 
-bool CalculatorBasics::tensorProductStandard(Calculator& calculator, const Expression& input, Expression& output) {
-  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
+bool CalculatorBasics::tensorProductStandard(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::outerTensorProductStandard");
   if (CalculatorBasics::distribute(calculator, input, output, calculator.opPlus(), calculator.opTensor())) {
     return true;
@@ -2208,7 +2210,8 @@ bool Expression::mergeContextsMyAruments(
     }
     ExpressionContext currentContext = (*this)[i].getContext();
     if (!commonContext.mergeContexts(currentContext, commonContext)) {
-      *this->owner << "<hr>Failed to merge context " << commonContext.toString()
+      *this->owner << "<hr>Failed to merge context "
+      << commonContext.toString()
       << " with " << (*this)[i].getContext().toString();
       return false;
     }
@@ -2218,9 +2221,12 @@ bool Expression::mergeContextsMyAruments(
   Expression convertedE;
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
-    if (!convertedE.setContextAtLeastEqualTo(commonContext, commentsOnFailure)) {
+    if (!convertedE.setContextAtLeastEqualTo(
+      commonContext, commentsOnFailure
+    )) {
       *this->owner << "<hr>Failed to convert "
-      << convertedE.toString() << " to context " << commonContext.toString();
+      << convertedE.toString() << " to context "
+      << commonContext.toString();
       return false;
     }
     output.addChildOnTop(convertedE);

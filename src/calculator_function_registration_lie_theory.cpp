@@ -1608,7 +1608,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Adds two elements of tensor products of generalized Verma modules. ",
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
     "(3/4 v)\\otimes v-3/4 (v\\otimes v)",
-    "CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor",
+    "CalculatorFunctionsBinaryOps::addElementTensorToElementTensor",
     "AddElementTensorGeneralizedVermaModuleToElementTensorGeneralizedVermaModule",
     standardOptions
   );

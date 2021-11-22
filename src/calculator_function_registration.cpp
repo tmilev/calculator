@@ -635,7 +635,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Creates a polynomial expression with algebraic number coefficients. ",
     "PolynomialAlgebraicNumbers{}((x + \\sqrt{2})^2 (\\sqrt{3}x - \\sqrt{5}));",
-    "CalculatorConversions::innerPolynomial",
+    "CalculatorConversions::getPolynomial",
     "PolynomialAlgebraicNumbers",
     innerStandard
   );

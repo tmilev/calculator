@@ -26,10 +26,10 @@ bool CalculatorConversions::convertWithoutComputation<Polynomial<AlgebraicNumber
     output.content.makeConstant(rational.content);
     return true;
   }
-  WithContext<Rational> algebraicNumber;
+  WithContext<AlgebraicNumber> algebraicNumber;
   if (input.isOfTypeWithContext(&algebraicNumber)) {
     output.context = algebraicNumber.context;
-    output.content.makeConstant(input.getValue<AlgebraicNumber>());
+    output.content.makeConstant(algebraicNumber.content);
     return true;
   }
   WithContext<Polynomial<Rational> > polynomialRational;

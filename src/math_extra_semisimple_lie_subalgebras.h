@@ -415,6 +415,10 @@ public:
 
 class SemisimpleSubalgebras {
 public:
+  friend std::ostream& operator<<(std::ostream& output, const SemisimpleSubalgebras& subalgebras) {
+    output << subalgebras.toStringShort();
+    return output;
+  }
   FormatExpressions currentFormat;
   SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* ownerField;
@@ -586,6 +590,7 @@ public:
   bool checkInitialization() const;
   bool checkIsEmpty() const;
   bool checkAll() const;
+  std::string toStringShort() const;
   std::string toStringState(FormatExpressions* format = nullptr);
   std::string toStringCurrentChain(FormatExpressions* format = nullptr);
   std::string toStringProgressReport(FormatExpressions* format = nullptr);

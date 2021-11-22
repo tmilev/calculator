@@ -3002,6 +3002,11 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output);
 
 template <class Coefficient>
 class PolynomialModuloPolynomial {
+  friend std::ostream& operator<<(std::ostream& output, const PolynomialModuloPolynomial& unused) {
+    (void) unused;
+    output << "A polynomial modulo polynomial.";
+    return output;
+  }
 public:
   Polynomial<Coefficient> modulus;
   Polynomial<Coefficient> value;
@@ -6165,6 +6170,12 @@ public:
 
 class LittelmannPath {
 public:
+  friend std::ostream& operator<<(std::ostream& output, const LittelmannPath& unused) {
+    (void) unused;
+    output << "A Littelmann Path.";
+    return output;
+  }
+
   WeylGroupData* owner;
   Vectors<Rational> waypoints;
   void makeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner);

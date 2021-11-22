@@ -802,7 +802,8 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
 }
 
 bool Expression::setContextAtLeastEqualTo(
-  ExpressionContext& inputOutputMinContext, std::stringstream* commentsOnFailure
+  ExpressionContext& inputOutputMinContext,
+  std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Expression::setContextAtLeastEqualTo");
   this->checkInitialization();
@@ -840,7 +841,9 @@ bool Expression::setContextAtLeastEqualTo(
   }
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > elementUniversalEnveloping;
   if (this->isOfTypeWithContext(&elementUniversalEnveloping)) {
-    return elementUniversalEnveloping.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return elementUniversalEnveloping.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<Polynomial<Rational> > polynomial;
   if (this->isOfTypeWithContext(&polynomial)) {

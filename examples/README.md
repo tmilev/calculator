@@ -404,7 +404,7 @@ x_i\partial_i-\partial_i x_i-[x_i, \partial_i]
 ```
 Adds a rational or polynomial to element Weyl algebra. 
 
-*\+* [AddElementTensorGeneralizedVermaModuleToElementTensorGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor}. 
+*\+* [AddElementTensorGeneralizedVermaModuleToElementTensorGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::addElementTensorToElementTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v%3dHeighestWeightVector%7b%7d%28G_2%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v-3%2f4%20%28v%5c%5cotimes%20v%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 v=HeighestWeightVector{}(G_2, (1,0),(0,0));
@@ -2530,7 +2530,7 @@ Polynomial{}(y^2)-(Polynomial{}y)^2
 ```
 Creates a polynomial expression with rational coefficients. 
 
-*PolynomialAlgebraicNumbers* [PolynomialAlgebraicNumbers] {CalculatorConversions::innerPolynomial}. 
+*PolynomialAlgebraicNumbers* [PolynomialAlgebraicNumbers] {CalculatorConversions::getPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%7b%7d%28%28x%20%2b%20%5c%5csqrt%7b2%7d%29%5e2%20%28%5c%5csqrt%7b3%7dx%20-%20%5c%5csqrt%7b5%7d%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers{}((x + \sqrt{2})^2 (\sqrt{3}x - \sqrt{5}));

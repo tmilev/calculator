@@ -520,7 +520,9 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
   input[1].checkConsistency();
   input[2].checkConsistency();
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element;
-  if (!inputConverted.isOfTypeWithContext(&element)) {
+  if (!CalculatorConversions::convertWithoutComputation(
+    calculator, inputConverted[1], element
+  )) {
     return false;
   }
   const ElementTensorsGeneralizedVermas<RationalFraction<Rational> >& rightEltETGVM =
@@ -716,7 +718,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& calculator,
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
+bool CalculatorFunctionsBinaryOps::multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath");
@@ -733,23 +735,23 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
     return false;
   }
   LittelmannPath result = rightCopy.getValue<LittelmannPath>();
-  WeylGroupData& theWeyl = *result.owner;
-  MonomialTensor<int, HashFunctions::hashFunction> theLRO;
-  theLRO = output.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
-  for (int i = theLRO.generatorsIndices.size - 1; i >= 0; i --) {
+  WeylGroupData& weylGroup = *result.owner;
+  MonomialTensor<int, HashFunctions::hashFunction> littlemannRootOperator;
+  littlemannRootOperator = output.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
+  for (int i = littlemannRootOperator.generatorsIndices.size - 1; i >= 0; i --) {
     if (
-      theLRO.generatorsIndices[i] == 0 ||
-      theLRO.generatorsIndices[i] < - theWeyl.getDimension() ||
-      theLRO.generatorsIndices[i] > theWeyl.getDimension()
+      littlemannRootOperator.generatorsIndices[i] == 0 ||
+      littlemannRootOperator.generatorsIndices[i] < - weylGroup.getDimension() ||
+      littlemannRootOperator.generatorsIndices[i] > weylGroup.getDimension()
     ) {
       std::stringstream out;
       out << " The Littelmann root operator must have an index whose absolute value "
       << "is between 1 and the rank of the ambient Lie algebra, instead I get index  "
-      << theLRO.generatorsIndices[i];
+      << littlemannRootOperator.generatorsIndices[i];
       return output.assignError(calculator, out.str());
     } else {
-      for (int j = 0; j < theLRO.powers[i]; j ++) {
-        result.actByEFDisplayIndex(theLRO.generatorsIndices[i]);
+      for (int j = 0; j < littlemannRootOperator.powers[i]; j ++) {
+        result.actByEFDisplayIndex(littlemannRootOperator.generatorsIndices[i]);
       }
     }
   }

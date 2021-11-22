@@ -18,7 +18,10 @@ bool CalculatorHtmlFunctions::userInputBox(
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
   if (calculator.objectContainer.userInputTextBoxesWithValues.contains(boxName)) {
-    return output.assignValueOLD(calculator.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(boxName), calculator);
+    return output.assignValue(
+      calculator,
+      calculator.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(boxName)
+    );
   }
   InputBox newBox;
   newBox.name = boxName;
@@ -36,7 +39,7 @@ bool CalculatorHtmlFunctions::userInputBox(
       newBox.step = theArguments.values[i];
     }
   }
-  return output.assignValueOLD(newBox, calculator);
+  return output.assignValue(calculator, newBox);
 }
 
 bool CalculatorHtmlFunctions::evaluateSymbols(
@@ -80,7 +83,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   if (previousWasInteger) {
     out << "}";
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorHtmlFunctions::setInputBox(
@@ -109,7 +112,7 @@ bool CalculatorHtmlFunctions::setInputBox(
   box.value = arguments.getValueCreateEmpty("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBox) {

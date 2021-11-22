@@ -20,6 +20,11 @@ public:
 
 template <typename Coefficient>
 class ElementEllipticCurve {
+  friend std::ostream& operator<<(std::ostream& output, const ElementEllipticCurve& unused) {
+    (void) unused;
+    output << "An element of an elliptic curve.";
+    return output;
+  }
 public:
   EllipticCurveWeierstrassNormalForm owner;
   Coefficient xCoordinate;

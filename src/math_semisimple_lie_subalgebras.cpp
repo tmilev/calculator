@@ -600,6 +600,16 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
   return out.str();
 }
 
+std::string SemisimpleSubalgebras::toStringShort() const {
+  if (this->owner == nullptr) {
+    return "(Uninitialized subalgebras)";
+  }
+  std::stringstream out;
+  out << "Semisimple subalgebras of Lie algebra of type: "
+  << this->owner->toStringLieAlgebraName();
+  return out.str();
+}
+
 std::string SemisimpleSubalgebras::toString(FormatExpressions* format, bool writeToHardDisk) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::toString");
   HtmlRoutines::globalMathSpanID = 0;

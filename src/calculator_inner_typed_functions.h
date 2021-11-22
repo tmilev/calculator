@@ -63,7 +63,7 @@ public:
   static bool multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerMultiplyLRObyLRO(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyLRObyLSPath(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyAnyScalarByMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyAnyScalarBySequence(Calculator& calculator, const Expression& input, Expression& output);

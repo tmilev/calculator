@@ -381,7 +381,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
   MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial(
-    calculator, input, polynomial, 50, 1
+    calculator, input[1], polynomial, 1, 50
   )) {
     return false;
   }
@@ -433,13 +433,13 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   resultSequence.addOnTop(constantFactorExpression);
   Expression polynomialE;
   for (int i = 0; i < factors.size; i ++) {
-    Expression expressionE(calculator);
-    polynomialE.assignValueWithContextOLD(
-      factors[i], originalPolynomial.context, calculator
-    );
-    expressionE.addChildAtomOnTop("MakeExpression");
-    expressionE.addChildOnTop(polynomialE);
-    resultSequence.addOnTop(expressionE);
+    if (!CalculatorConversions::expressionFromPolynomial(
+      calculator, factors[i], polynomialE, &originalPolynomial.context
+    )) {
+      return calculator << "Unexpected failure to convert "
+      << factors[i].toString() << " to expression. ";
+    }
+    resultSequence.addOnTop(polynomialE);
   }
   return output.makeSequence(calculator, &resultSequence);
 }

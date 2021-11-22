@@ -4512,7 +4512,7 @@ CartanGenerator{}(G_2, 1)
 ```
 First argument must be a semisimple Lie algebra, second argument must be a number between 1 and K, where K is the rank of the Lie algebra. In this case the function returns the element of the Cartan subalgebra that is dual to the simple root with the same index. Note that this element of the Cartan subalgebra is proportional to a Chevalley-Weyl generator with a coefficient of proportionality equal to 2/(simple root length squared) ).
 
-*StandardRepresentationMatrix* [StandardRepresentationMatrix] {CalculatorLieTheory::adCommonEigenSpaces}. 
+*StandardRepresentationMatrix* [StandardRepresentationMatrix] {CalculatorLieTheory::standardRepresentationMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Type%20%3d%20A_4%3b%5cnStandardRepresentationMatrix%7b%7d%28Type%2c%20g_1%29%3b%5cng_%7b%7bj%7d%7d%3dChevalleyGenerator%28Type%2c%20j%29%3b%5cnh_%7b%7bj%7d%7d%3dCartanGenerator%28Type%2c%20j%29%3b%5cnStandardRepresentationMatrix%28g_1%29%3b%5cnStandardRepresentationMatrix%28g_1-g_-1%29%3b%5cnStandardRepresentationMatrix%28%20%28g_1%2bg_2%20-%20g_-1-g_-2%29%5e2%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Type = A_4;

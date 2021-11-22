@@ -162,7 +162,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "StandardRepresentationMatrix(g_1);\n"
     "StandardRepresentationMatrix(g_1-g_-1);\n"
     "StandardRepresentationMatrix( (g_1+g_2 - g_-1-g_-2)^2);",
-    "CalculatorLieTheory::adCommonEigenSpaces",
+    "CalculatorLieTheory::standardRepresentationMatrix",
     "StandardRepresentationMatrix",
     standardOptions
   );

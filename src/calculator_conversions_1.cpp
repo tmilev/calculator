@@ -1315,24 +1315,19 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,
   SemisimpleLieAlgebra& owner
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
-  Expression polynomialFormExpression;
+  MacroRegisterFunctionWithName("CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers");
   WithContext<Polynomial<AlgebraicNumber> > polynomialFormWithContext;
-  bool polynomialFormGood = CalculatorConversions::functionPolynomial<AlgebraicNumber>(
-    calculator, input, polynomialFormWithContext, 10, 5
-  );
-  Polynomial<AlgebraicNumber> polynomialForm = polynomialFormWithContext.content;
-  if (polynomialFormGood) {
-    polynomialFormGood = polynomialFormExpression.isOfType<Polynomial<AlgebraicNumber> >(&polynomialForm);
-  }
-  if (!polynomialFormGood) {
+  if (!CalculatorConversions::functionPolynomial<AlgebraicNumber>(
+    calculator, input, polynomialFormWithContext, 300, 2
+  )) {
     return calculator << "<hr>Failed to convert " << input.toString() << " to polynomial.<hr>";
   }
+  Polynomial<AlgebraicNumber> polynomialForm = polynomialFormWithContext.content;
   ChevalleyGenerator chevalleyGenerator;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElement;
   chevalleyGenerator.owner = &owner;
   output.makeZero();
-  ExpressionContext context = polynomialFormExpression.getContext();
+  ExpressionContext context = polynomialFormWithContext.context;
   for (int j = 0; j < polynomialForm.size(); j ++) {
     const MonomialPolynomial& currentMon = polynomialForm[j];
     int chevalleyGeneratorIndex = 0;
@@ -1340,20 +1335,20 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
       return calculator << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
       << input.toString() << ".<hr>";
     }
-    Expression singleChevGenE = context.getVariable(chevalleyGeneratorIndex);
-    if (!singleChevGenE.startsWith(calculator.opUnderscore(), 3)) {
+    Expression chevalleyGeneratorExpression = context.getVariable(chevalleyGeneratorIndex);
+    if (!chevalleyGeneratorExpression.startsWith(calculator.opUnderscore(), 3)) {
       return calculator << "<hr>Failed to convert: "
-      << singleChevGenE.toString()
+      << chevalleyGeneratorExpression.toString()
       << "(summand of: "
       << input.toString() << ") to Chevalley generator.<hr>";
     }
     std::string letter;
     if (
-      !singleChevGenE[1].isOperation(&letter) ||
-      !singleChevGenE[2].isSmallInteger(&chevalleyGenerator.generatorIndex)
+      !chevalleyGeneratorExpression[1].isOperation(&letter) ||
+      !chevalleyGeneratorExpression[2].isSmallInteger(&chevalleyGenerator.generatorIndex)
     ) {
       return calculator << "<hr>Failed to convert summand "
-      << singleChevGenE.toString() << " to Chevalley generator of "
+      << chevalleyGeneratorExpression.toString() << " to Chevalley generator of "
       << owner.toStringLieAlgebraName();
     }
     bool isGood = true;
@@ -1380,7 +1375,7 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
     }
     if (!isGood) {
       return calculator << "<hr>Failed to convert summand "
-      << singleChevGenE.toString() << " to Chevalley generator of "
+      << chevalleyGeneratorExpression.toString() << " to Chevalley generator of "
       << owner.toStringLieAlgebraName();
     }
   }

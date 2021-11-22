@@ -305,7 +305,7 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
       output.content *= converted.content;
     } else {
       global.fatal << "While extracting input polynomial, got unexpected input type: "
-      << input.toString();
+      << input.toString() << global.fatal;
     }
   }
   return true;

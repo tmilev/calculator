@@ -1943,9 +1943,13 @@ bool CalculatorLieTheory::elementsInSameLieAlgebra(
     if (!CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
       calculator, input[i], element, *outputOwner
     )) {
+      std::stringstream out;
+      out
+      << "Failed to extract element of semisimple Lie algebra from: "
+      << input[i] << ". ";
       output.assignError(
         calculator,
-        "Failed to extract element of semisimple Lie algebra. "
+        out.str()
       );
       return false;
     }
@@ -1977,7 +1981,7 @@ bool CalculatorLieTheory::adjointCommonEigenSpaces(
     }
   }
   out << ")";
-  output.assignValueOLD(out.str(), calculator);
+  output.assignValue(calculator, out.str());
   return true;
 }
 
@@ -3434,18 +3438,15 @@ bool CalculatorLieTheory::constructCartanSubalgebra(
   MacroRegisterFunctionWithName("CalculatorFunctions::constructCartanSubalgebra");
   SubalgebraSemisimpleLieAlgebra subalgebra;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
-  if (CalculatorConversions::convertWithoutComputation(calculator, input, element)) {
-    subalgebra.generators.addOnTop(element.content);
-  } else {
-    for (int i = 1; i < input.size(); i ++) {
-      if (input[i].isOfTypeWithContext(&element)) {
-        subalgebra.generators.addOnTop(element.content);
-      } else {
-        return calculator
-        << "Failed to extract element of a semisimple Lie algebra from "
-        << input[i].toString();
-      }
+  for (int i = 1; i < input.size(); i ++) {
+    if (!CalculatorConversions::convertWithoutComputation(
+      calculator, input[i], element
+    )) {
+      return calculator
+      << "Failed to extract element of a semisimple Lie algebra from "
+      << input[i].toString();
     }
+    subalgebra.generators.addOnTop(element.content);
   }
   for (int i = 0; i < subalgebra.generators.size; i ++) {
     if (!subalgebra.generators[i].isEqualToZero()) {

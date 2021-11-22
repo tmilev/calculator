@@ -1415,7 +1415,7 @@ void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients(
 
 class IntegralRationalFunctionComputation {
 public:
-  RationalFraction<Rational> rationalFraction;
+  WithContext<RationalFraction<Rational> > rationalFraction;
   Polynomial<Rational> denominator, numerator;
   Polynomial<Rational> quotient, remainder;
   List<Polynomial<Rational> > allFactors;
@@ -1425,7 +1425,7 @@ public:
   FormatExpressions currentFormat;
   Expression integrationSetE;
   ExpressionContext context;
-  Expression inputExpression;
+  Expression inputIntegrand;
   Expression outputIntegralE;
   AlgebraicNumber additionalMultiple;
   Calculator* owner;
@@ -1754,7 +1754,7 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
     }
   }
   this->stringRationalFunctionPartialFractionLatex = rationalFractionStream.str();
-  answerFinalStream << this->rationalFraction.toString(&this->currentFormat) << "=";
+  answerFinalStream << this->rationalFraction.content.toString(&this->currentFormat) << "=";
   if (!this->quotient.isEqualToZero()) {
     answerFinalStream << this->quotient.toString(&this->currentFormat) << "+ ";
     answerFinalStream << this->transformedRationalFraction.toString(&this->currentFormat) << "=";
@@ -1803,19 +1803,19 @@ void IntegralRationalFunctionComputation::prepareDenominatorFactors() {
 bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() {
   MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::computePartialFractionDecomposition");
   this->checkConsistency();
-  this->context = this->inputExpression.getContext();
+  this->context = this->rationalFraction.context;
   this->context.getFormat(this->currentFormat);
   if (
-    this->rationalFraction.minimalNumberOfVariables() < 1 ||
-    this->rationalFraction.expressionType == RationalFraction<Rational>::TypeExpression::typeConstant ||
-    this->rationalFraction.expressionType == RationalFraction<Rational>::TypeExpression::typePolynomial
+    this->rationalFraction.content.minimalNumberOfVariables() < 1 ||
+    this->rationalFraction.content.expressionType == RationalFraction<Rational>::TypeExpression::typeConstant ||
+    this->rationalFraction.content.expressionType == RationalFraction<Rational>::TypeExpression::typePolynomial
   ) {
-    this->printoutPartialFractionsHtml << this->rationalFraction.toString(&this->currentFormat)
+    this->printoutPartialFractionsHtml << this->rationalFraction.content.toString(&this->currentFormat)
     << " is already split into partial fractions. ";
     return true;
   }
-  this->rationalFraction.getDenominator(this->denominator);
-  this->rationalFraction.getNumerator(this->numerator);
+  this->rationalFraction.content.getDenominator(this->denominator);
+  this->rationalFraction.content.getNumerator(this->numerator);
   this->numerator *= this->denominator.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
@@ -2017,19 +2017,15 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation computation(&calculator);
-  bool isGood = CalculatorConversions::functionRationalFunction<Rational>(calculator, input, computation.inputExpression);
-  if (isGood) {
-    isGood = computation.inputExpression.isOfType<RationalFraction<Rational> >();
-  }
-  if (!isGood) {
-    return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
+  computation.inputIntegrand = input;
+  if (!CalculatorConversions::functionRationalFunction<Rational>(calculator, input, computation.rationalFraction)) {
+    return calculator << "CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  computation.rationalFraction = computation.inputExpression.getValue<RationalFraction<Rational> >();
-  if (computation.rationalFraction.minimalNumberOfVariables() > 1) {
+  if (computation.rationalFraction.content.minimalNumberOfVariables() > 1) {
     return calculator << "The input rational function is of "
-    << computation.rationalFraction.minimalNumberOfVariables() << " variables and "
+    << computation.rationalFraction.content.minimalNumberOfVariables() << " variables and "
     << " I can handle only 1.";
   }
   if (!computation.computePartialFractionDecomposition()) {
@@ -2049,19 +2045,17 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRationalFunctionComputation computation(&calculator);
-  bool isGood = CalculatorConversions::rationalFunction(calculator, input, computation.inputExpression);
-  if (isGood) {
-    isGood = computation.inputExpression.isOfType<RationalFraction<Rational> >();
+  if (input.size() < 2) {
+    return false;
   }
-  if (!isGood) {
+  if (!CalculatorConversions::functionRationalFunction(calculator, input[1], computation.rationalFraction)) {
     return calculator << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
-    << input.toString() << " to rational function. ";
+    << input[1].toString() << " to rational function. ";
   }
-  computation.rationalFraction = computation.inputExpression.getValue<RationalFraction<Rational> >();
-  if (computation.rationalFraction.minimalNumberOfVariables() > 1) {
+  if (computation.rationalFraction.content.minimalNumberOfVariables() > 1) {
     return calculator << "The input rational function is of "
-    << computation.rationalFraction.minimalNumberOfVariables() << " variables and "
+    << computation.rationalFraction.content.minimalNumberOfVariables() << " variables and "
     << " I can handle only 1. ";
   }
   computation.computePartialFractionDecomposition();
@@ -2081,7 +2075,7 @@ bool CalculatorFunctions::gaussianEliminationMatrix(
     << input.toString() << ". ";
   }
   Matrix<AlgebraicNumber> matrix;
-  if (!calculator.functionGetMatrix(converted, matrix)) {
+  if (!calculator.functionGetMatrixNoComputation(converted, matrix)) {
     return calculator
     << "<hr>Failed to extract algebraic number matrix, "
     << "got intermediate conversion to: "
@@ -3122,16 +3116,16 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
     << "- two functions to compare, precision, variable belonging "
     << "to an interval and number of sampling points).";
   }
-  Expression theFunE = input[1];
-  theFunE -= input[2];
-  HashedList<Expression> theFreeVars;
-  if (!theFunE.getFreeVariables(theFreeVars, true)) {
+  Expression functionExpression = input[1];
+  functionExpression -= input[2];
+  HashedList<Expression> freeVariables;
+  if (!functionExpression.getFreeVariables(freeVariables, true)) {
     return calculator << "Was not able to extract the function argument of your function. " ;
   }
-  if (theFreeVars.size <= 0) {
+  if (freeVariables.size <= 0) {
     Expression zeroE;
     zeroE.assignValue(calculator, 0);
-    return output.makeXOX(calculator, calculator.opEqualEqual(), theFunE, zeroE);
+    return output.makeXOX(calculator, calculator.opEqualEqual(), functionExpression, zeroE);
   }
   double tolerance = 0.0001;
   if (!input[3].evaluatesToDouble(&tolerance)) {
@@ -3157,47 +3151,51 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
       varsGiven.addOnTop(theVarsE[i]);
     }
   }
-  for (int i = 0; i < theFreeVars.size; i ++) {
-    if (!varsGiven.contains(theFreeVars[i])) {
+  for (int i = 0; i < freeVariables.size; i ++) {
+    if (!varsGiven.contains(freeVariables[i])) {
       return calculator << "The expression depends on "
-      << theFreeVars[i].toString()
+      << freeVariables[i].toString()
       << " but I no value given for that expression. ";
     }
   }
-  const Expression& thePointsE = input[4][2];
-  Matrix<double> thePoints;
+  const Expression& pointsExpressions = input[4][2];
+  Matrix<double> points;
   if (!calculator.functionGetMatrix(
-    thePointsE,
-    thePoints,
+    pointsExpressions,
+    points,
+    false,
     nullptr,
     varsGiven.size
   )) {
     return calculator
     << "Failed to extract list of points from: "
-    << thePointsE.toString();
+    << pointsExpressions.toString();
   }
   HashedList<Expression> knownEs = calculator.knownDoubleConstants;
   List<double> knownValues = calculator.knownDoubleConstantValues;
   for (int i = 0; i < varsGiven.size; i ++) {
     if (knownEs.contains(varsGiven[i])) {
       return calculator << varsGiven[i]
-      << " is an already known constant and cannot be used as a variable in this context. ";
+      << " is an already known constant and "
+      << "cannot be used as a variable in this context. ";
     } else {
       knownEs.addOnTop(varsGiven[i]);
     }
   }
   knownValues.setSize(knownEs.size);
   int numFailedSamples = 0;
-  int totalSamples = thePoints.numberOfRows;
-  for (int i = 0; i < thePoints.numberOfRows; i ++) {
-    for (int j = 0; j < thePoints.numberOfColumns; j ++) {
-      knownValues[j + calculator.knownDoubleConstants.size] = thePoints(i, j);
+  int totalSamples = points.numberOfRows;
+  for (int i = 0; i < points.numberOfRows; i ++) {
+    for (int j = 0; j < points.numberOfColumns; j ++) {
+      knownValues[j + calculator.knownDoubleConstants.size] = points(i, j);
     }
     double floatingResult = 0;
-    if (!theFunE.evaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &floatingResult)) {
+    if (!functionExpression.evaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &floatingResult)) {
       numFailedSamples ++;
       if ((numFailedSamples * 100) / totalSamples > 20) {
-        calculator << "Failed to evaluate at least one of the functions in more than 20% of the sampling points. ";
+        calculator << "Failed to evaluate at least one "
+        << "of the functions in more "
+        << "than 20% of the sampling points. ";
         return output.assignValue(calculator, 0);
       }
     }
@@ -3499,7 +3497,8 @@ bool CalculatorFunctionsDifferentiation::interpretAsDifferential(
     calculator, differentialFormCandidate,  differentialForm
   )) {
     output = input;
-    return output.setChild(2, differentialForm);
+    output.setChild(2, differentialForm);
+    return true;
   }
   if (!differentialFormCandidate.startsWithGivenOperation("*", 3)) {
     return false;
@@ -3514,7 +3513,8 @@ bool CalculatorFunctionsDifferentiation::interpretAsDifferential(
     calculator.expressionOne()
   );
   output = input;
-  return output.setChild(2, differentialForm);
+  output.setChild(2, differentialForm);
+  return true;
 }
 
 bool CalculatorFunctionsIntegration::integralOperator(
@@ -3535,7 +3535,8 @@ bool CalculatorFunctionsIntegration::integralOperator(
     integralOperatorE.addChildAtomOnTop(calculator.opIntegral());
     integralOperatorE.addChildAtomOnTop(calculator.opIndefiniteIndicator());
     output = input;
-    return output.setChild(1, integralOperatorE);
+    output.setChild(1, integralOperatorE);
+    return true;
   }
   if (!integralE.startsWith(calculator.opIntegral())) {
     return false;
@@ -3562,11 +3563,13 @@ bool CalculatorFunctionsIntegration::integralOperator(
     newFun.makeXOX(calculator, operatorIndex, startingIntegrand, incomingIntegrand[2]);
     newIntegrand.makeXOX(calculator, calculator.opDifferential(), incomingIntegrand[1], newFun);
     output = integralE;
-    return output.setChild(2, newIntegrand);
+    output.setChild(2, newIntegrand);
+    return true;
   }
   newIntegrand.makeXOX(calculator, operatorIndex, startingIntegrand, incomingIntegrand);
   output = integralE;
-  return output.setChild(2, newIntegrand);
+  output.setChild(2, newIntegrand);
+  return true;
 }
 
 bool CalculatorFunctions::rationalFunctionSubstitution(
@@ -3595,12 +3598,12 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Matrix<RationalFraction<Rational> > matrix, outputMatrix, extendedMatrix;
   Expression converted;
-  if (!CalculatorConversions::innerMatrixRationalFunction(
+  if (!CalculatorConversions::matrixRationalFunction(
     calculator, input, converted
   )) {
     return output.assignError(calculator, "Failed to extract matrix. ");
   }
-  if (calculator.functionGetMatrix(converted, matrix)) {
+  if (calculator.functionGetMatrixNoComputation(converted, matrix)) {
     return calculator << "Failed to get matrix of rational functions. ";
   }
   ExpressionContext context = converted.getContext();
@@ -3728,7 +3731,7 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
   }
 
   Matrix<Rational> matrix, outputMatrix, augmentedMatrix;
-  if (!calculator.functionGetMatrix(
+  if (!calculator.functionGetMatrixNoComputation(
     converted, matrix
   )) {
     return CalculatorFunctions::innerInvertMatrixRFsVerbose(calculator, input, output);
@@ -3829,8 +3832,8 @@ bool CalculatorFunctions::functionPolynomialize(
   )) {
     return false;
   }
-  return output.assignValueWithContext(
-    calculator, outputWithContext.content, outputWithContext.context
+  return CalculatorConversions::expressionFromPolynomial(
+    calculator, outputWithContext.content, output, &outputWithContext.context
   );
 }
 
@@ -3844,47 +3847,40 @@ bool CalculatorFunctions::outerPolynomialize(Calculator& calculator, const Expre
 bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::functionIntegrateRationalFunctionSplitToBuidingBlocks");
-  Expression functionExpression, theVariableE, integrationSetE;
-  if (!input.isIndefiniteIntegralFdx(&theVariableE, &functionExpression, &integrationSetE)) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks");
+  Expression functionExpression, variableExpression, integrationSetE;
+  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression, &integrationSetE)) {
     return false;
   }
   IntegralRationalFunctionComputation computation(&calculator);
+  computation.inputIntegrand = functionExpression;
   if (!CalculatorConversions::functionRationalFunction<Rational>(
-    calculator, functionExpression, computation.inputExpression
+    calculator, functionExpression, computation.rationalFraction
   )) {
     return calculator
-    << "<hr>Call of function CalculatorConversions::innerRationalFunction<Rational> "
+    << "<hr>Call of function CalculatorConversions::functionRationalFunction "
     << "failed, input was: "
     << functionExpression.toString();
   }
-  if (!computation.inputExpression.isOfType<RationalFraction<Rational> >()) {
-    return calculator
-    << "<hr>CalculatorFunctions::integrateRationalFunctionSplitToBuidingBlocks: "
-    << "failed to convert "
-    << functionExpression.toString() << " to rational function. "
-    << "Attempt to converted expression yielded: " << computation.inputExpression.toString();
-  }
-  ExpressionContext context = computation.inputExpression.getContext();
+  ExpressionContext context = computation.rationalFraction.context;
   if (context.numberOfVariables() > 1) {
     return calculator << "<hr>I converted " << functionExpression.toString()
     << " to rational function, but it is of "
     << context.numberOfVariables()
     << " variables. I have been taught to work with 1 variable only. "
     << "<br>The context of the rational function is: "
-    << computation.inputExpression.getContext().toString();
+    << context.toString();
   }
   if (context.numberOfVariables() == 1) {
-    if (context.getVariable(0) != theVariableE) {
-      return calculator << "<hr>The univariate rational function was in variable "
-      << computation.inputExpression.getContext().toString()
-      << " but the variable of integration is " << theVariableE.toString();
+    if (context.getVariable(0) != variableExpression) {
+      return calculator << "<hr>The univariate rational function uses context "
+      << context.toString()
+      << " but the variable of integration is " << variableExpression.toString();
     }
   }
   computation.integrationSetE = integrationSetE;
-  computation.rationalFraction = computation.inputExpression.getValue<RationalFraction<Rational> >();
-  computation.rationalFraction.getDenominator(computation.denominator);
-  computation.rationalFraction.getNumerator(computation.numerator);
+  computation.rationalFraction.content.getDenominator(computation.denominator);
+  computation.rationalFraction.content.getNumerator(computation.numerator);
   if (computation.denominator.totalDegree() < 1) {
     return false;
   }
@@ -5317,7 +5313,7 @@ bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
     return false;
   }
   Matrix<Rational> matrix;
-  if (!calculator.functionGetMatrix(argument, matrix)) {
+  if (!calculator.functionGetMatrixNoComputation(argument, matrix)) {
     return calculator
     << "<hr>Minimal poly computation: could not convert "
     << argument.toString() << " to rational matrix.";
@@ -5342,7 +5338,7 @@ bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
   }
   const Expression& argument = input[1];
   Matrix<Rational> matrix;
-  if (!calculator.functionGetMatrix(argument, matrix)) {
+  if (!calculator.functionGetMatrixNoComputation(argument, matrix)) {
     return calculator
     << "<hr>Characteristic poly computation: could not convert "
     << input.toString() << " to rational matrix.";
@@ -5385,7 +5381,7 @@ bool CalculatorFunctions::matrixTrace(
     return false;
   }
   Matrix<Rational> matrix;
-  if (calculator.functionGetMatrix(input[1], matrix)) {
+  if (calculator.functionGetMatrixNoComputation(input[1], matrix)) {
     if (!matrix.isSquare()) {
       return output.assignError(
         calculator,
@@ -5395,7 +5391,7 @@ bool CalculatorFunctions::matrixTrace(
     return output.assignValue(calculator, matrix.getTrace());
   }
   Matrix<RationalFraction<Rational> > matrixRationalFunction;
-  if (calculator.functionGetMatrix(input[1], matrixRationalFunction)) {
+  if (calculator.functionGetMatrixNoComputation(input[1], matrixRationalFunction)) {
     if (!matrixRationalFunction.isSquare()) {
       return output.assignError(
         calculator,
@@ -5578,7 +5574,7 @@ bool CalculatorFunctions::innerIsNilpotent(
   bool found = false;
   Matrix<Rational> matrix;
   MatrixTensor<Rational> matrixTensor;
-  if (calculator.functionGetMatrix(converted, matrix)) {
+  if (calculator.functionGetMatrixNoComputation(converted, matrix)) {
     found = true;
     matrixTensor = matrix;
   } else if (input.isOfType<MatrixTensor<Rational> >(&matrixTensor)) {
@@ -5604,7 +5600,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& calculator, const Expres
   )) {
     return calculator << "Failed to extract matrix from input. ";
   }
-  if (calculator.functionGetMatrix(converted, matrix)) {
+  if (calculator.functionGetMatrixNoComputation(converted, matrix)) {
     if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1) {
       return output.assignError(
         calculator,
@@ -5620,7 +5616,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& calculator, const Expres
     return output.makeMatrix(calculator, matrix);
   }
   Matrix<AlgebraicNumber> matrixAlgebraic;
-  if (calculator.functionGetMatrix(input, matrixAlgebraic)) {
+  if (calculator.functionGetMatrixNoComputation(input, matrixAlgebraic)) {
     return calculator << "<hr>Failed to extract algebraic number matrix from: "
     << input.toString();
   }
@@ -6755,6 +6751,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& calculator, const
   if (!calculator.functionGetMatrix(
     thePartitioningVectorsE,
     vectorsMatForm,
+    false,
     nullptr,
     thePartition.goalVector.size
   )) {
@@ -6800,7 +6797,7 @@ bool CalculatorFunctions::functionDeterminant(
   Matrix<Coefficient> matrix;
   ExpressionContext context;
   if (!calculator.functionGetMatrix<Coefficient>(
-    input, matrix, &context, - 1, &calculator.comments
+    input, matrix, false, &context, - 1, &calculator.comments
   )) {
     return false;
   }
@@ -7032,7 +7029,9 @@ bool Expression::evaluatesToDoubleInRange(
 
 bool Expression::evaluatesToDouble(double* whichDouble) const {
   return this->evaluatesToDoubleUnderSubstitutions(
-    this->owner->knownDoubleConstants, this->owner->knownDoubleConstantValues, whichDouble
+    this->owner->knownDoubleConstants,
+    this->owner->knownDoubleConstantValues,
+    whichDouble
   );
 }
 

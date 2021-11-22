@@ -24,6 +24,7 @@ std::string Calculator::Atoms::transpose = "Transpose";
 std::string Calculator::Atoms::approximations = "Approximations";
 std::string Calculator::Atoms::turnOnRules = "TurnOnRules";
 std::string Calculator::Atoms::turnOffRules = "TurnOffRules";
+std::string Calculator::Atoms::elementTensorsGeneralizedVermas = "ETGVM";
 
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
@@ -1172,7 +1173,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "MakeMatrixRFs",
-    CalculatorConversions::innerMatrixRationalFunction,
+    CalculatorConversions::matrixRationalFunction,
     "",
     "Creates an internal C++ matrix structure "
     "from double list of polynomial functions. ",
@@ -1504,7 +1505,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Interpolate",
-    CalculatorFunctions::innerInterpolatePoly,
+    CalculatorFunctions::interpolatePolynomial,
     "",
     "Constructs the one-variable polynomial of minimal degree that passes through "
     "the points. Points are given in the form "
@@ -4521,11 +4522,11 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger,
+    CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger,
     "",
     "Attempts to exponentiate a matrix of expressions, if the exponent is small. ",
     "X =\\begin{pmatrix} a & b \\\\ t +q &r\\end{pmatrix}; X^{2}  ",
-    "CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger",
     "PowerMatrixNumbersBySmallIntegerIfPossible",
     innerStandard
   );

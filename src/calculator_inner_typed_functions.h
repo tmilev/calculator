@@ -124,7 +124,7 @@ public:
   static bool divideEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool powerMatrixBuiltInBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerMatrixExpressionsBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerMatrixNumbersByLargeIntegerIfPossible(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
@@ -403,94 +403,71 @@ template <class Coefficient>
 bool CalculatorConversions::functionRationalFunction(
   Calculator& calculator,
   const Expression& input,
-  Expression& output
+  WithContext<RationalFraction<Coefficient> >& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionRationalFunction");
-  Expression intermediate(calculator);
+  if (CalculatorConversions::convertWithoutComputation(calculator, input, output)) {
+    return true;
+  }
   if (
     input.startsWith(calculator.opPlus(), 3) ||
     input.startsWith(calculator.opTimes(), 3) ||
     input.startsWith(calculator.opDivide(), 3)
   ) {
-    Expression leftE, rightE;
+    WithContext<RationalFraction<Coefficient> > left, right;
     if (
-      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], leftE) ||
-      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[2], rightE)
+      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], left)
     ) {
       return calculator << "<hr>Failed to convert " << input[1].toString()
-      << " and " << input[2].toString() << " to rational function. ";
+      << " to rational function. ";
     }
-    if (leftE.isError() || rightE.isError()) {
-      return calculator << "<hr>Conversion of " << input[1].toString()
-      << " and " << input[2].toString() << " returned error(s): "
-      << leftE.toString() << " and " << rightE.toString();
+    if (
+      !CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[2], right)
+    ) {
+      return calculator << "<hr>Failed to convert " << input[2].toString()
+      << " to rational function. ";
     }
-    intermediate.addChildOnTop(input[0]);
-    intermediate.addChildOnTop(leftE);
-    intermediate.addChildOnTop(rightE);
+    if (!left.mergeContexts(left, right, &calculator.comments)) {
+      return false;
+    }
+    output.content = left.content;
+    output.context = left.context;
     if (input.startsWith(calculator.opPlus())) {
-      return CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction(
-        calculator, intermediate, output
-      );
+      output.content += right.content;
+      return true;
     }
     if (input.startsWith(calculator.opTimes())) {
-      return CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
-        calculator, intermediate, output
-      );
+      output.content *= right.content;
+      return true;
     }
     if (input.startsWith(calculator.opDivide())) {
-      return CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
-        calculator, intermediate, output
-      );
+      if (right.content.isEqualToZero()) {
+        return calculator << "Division by zero in rational fraction conversion";
+      }
+      output.content /= right.content;
+      return true;
     }
     global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
   }
   int smallPower = - 1;
   if (input.startsWith(calculator.opPower(), 3) ) {
-    if (input[2].isSmallInteger(&smallPower)) {
-      Expression leftE;
-      if (!CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], leftE)) {
-        return calculator << "<hr>CalculatorConversions::innerRationalFunction: failed to convert "
-        << input[1].toString() << " to rational function. ";
-      }
-      if (leftE.isError()) {
-        return calculator << "<hr>Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
-      }
-      RationalFraction<Coefficient> rationalFunction;
-      rationalFunction = leftE.getValue<RationalFraction<Coefficient> >();
-      rationalFunction.raiseToPower(smallPower);
-      return output.assignValueWithContext(calculator, rationalFunction, leftE.getContext());
+    if (!input[2].isSmallInteger(&smallPower)) {
+      return calculator << "<hr>Warning: failed to raise "
+      << input[1].toString() << " to power " << input[2].toString();
     }
-    calculator << "<hr>Warning: failed to raise "
-    << input[1].toString() << " to power " << input[2].toString()
-    << ": failed to convert the power to small integer. "
-    << "I am treating " << input.toString()
-    << " as a single variable: please make sure that is what you want. ";
-  }
-  if (input.isOfType<RationalFraction<Coefficient> >()) {
-    output = input;
+    WithContext<RationalFraction<Coefficient> > base;
+    if (!CalculatorConversions::functionRationalFunction<Coefficient>(calculator, input[1], base)) {
+      return calculator << "<hr>CalculatorConversions::functionRationalFunction: failed to convert "
+      << input[1].toString() << " to rational fraction. ";
+    }
+    output.context = base.context;
+    output.content = base.content;
+    output.content.raiseToPower(smallPower);
     return true;
   }
-  WithContext<RationalFraction<Coefficient> > potentialOutput;
-  if (
-    input.isOfType<Polynomial<Coefficient> >() ||
-    input.isOfType<Coefficient>() ||
-    input.isOfType<Rational>()
-  ) {
-    if (!CalculatorConversions::convertWithoutComputation(calculator, input, potentialOutput)) {
-      return false;
-    }
-    return output.assignWithContext(calculator, potentialOutput);
-  }
-  if (input.isOfType<AlgebraicNumber>()) {
-    if (CalculatorConversions::convertWithoutComputation(calculator, input, potentialOutput)) {
-      return output.assignWithContext(calculator, potentialOutput);
-    }
-  }
-  ExpressionContext context(calculator);
-  context.makeOneVariable(input);
-  RationalFraction<Coefficient> rationalFunction;
-  rationalFunction.makeOneLetterMonomial(0, Coefficient::oneStatic());
-  return output.assignValueWithContext(calculator, rationalFunction, context);
+  output.context.initialize(calculator);
+  output.context.makeOneVariable(input);
+  output.content.makeOneLetterMonomial(0, Coefficient::oneStatic());
+  return true;
 }
 #endif

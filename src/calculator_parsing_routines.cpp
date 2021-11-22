@@ -484,7 +484,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addOperationBuiltInType("JSON");
   this->addOperationBuiltInType("ElementUEoverRF");
   this->addOperationBuiltInType("ElementSemisimpleLieAlgebraAlgebraicCoefficients");
-  this->addOperationBuiltInType("ElementTensorGVM");
+  this->addOperationBuiltInType(Calculator::Atoms::elementTensorsGeneralizedVermas);
   this->addOperationBuiltInType("CharSSAlgMod");
   this->addOperationBuiltInType("SemisimpleLieAlg");
   this->addOperationBuiltInType("LittelmannPath");

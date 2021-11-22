@@ -2854,9 +2854,9 @@ bool CalculatorFunctions::determinantPolynomial(
   if (!calculator.functionGetMatrix(
     input[1],
     matrixPolynomial,
+    true,
     &context,
-    - 1 //,
-    //CalculatorConversions::functionPolynomial<Rational>
+    - 1
   )) {
     return calculator << "<hr>Failed to convert the input to "
     << "matrix of polynomials. ";
@@ -3015,7 +3015,7 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
     return false;
   }
   Matrix<Rational> matrix;
-  if (!calculator.functionGetMatrix(input[1], matrix)) {
+  if (!calculator.functionGetMatrix(input[1], matrix, false)) {
     return false;
   }
   if (!matrix.isSquare()) {

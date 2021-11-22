@@ -326,9 +326,9 @@ bool Calculator::getMatrixDoubles(
   return this->functionGetMatrix<double>(
     input,
     output,
+    true,
     nullptr,
-    desiredNumberOfColumns //,
-    // CalculatorFunctions::functionEvaluateToDouble
+    desiredNumberOfColumns
   );
 }
 
@@ -480,9 +480,9 @@ bool CalculatorConversions::functionMatrixDouble(
   if (!calculator.functionGetMatrix(
     input,
     matrix,
+    true,
     nullptr,
-    0 //,
-    //CalculatorFunctions::functionEvaluateToDouble
+    0
   )) {
     return calculator << "<br>Failed to get matrix of doubles. ";
   }

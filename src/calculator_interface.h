@@ -218,7 +218,7 @@ private:
   ) const;
   bool isDifferentialOneFormOneVariable(
     Expression* outputDifferentialOfWhat = nullptr,
-    Expression* outputCoeffInFrontOfDifferential = nullptr
+    Expression* outputCoefficientInFrontOfDifferential = nullptr
   ) const;
   bool isKnownFunctionWithComplexRange(std::string* outputWhichOperation = nullptr) const;
   bool isArithmeticOperation(std::string* outputWhichOperation = nullptr) const;
@@ -1607,6 +1607,7 @@ public:
     static std::string approximations;
     static std::string turnOnRules;
     static std::string turnOffRules;
+    static std::string elementTensorsGeneralizedVermas;
   };
 
   // Initialization mode for the calculator.
@@ -2107,7 +2108,7 @@ public:
     return this->operations.getIndexNoFail("WeylGroupVirtualRep");
   }
   int opElementTensorGVM() {
-    return this->operations.getIndexNoFail("ElementTensorGVM");
+    return this->operations.getIndexNoFail(Calculator::Atoms::elementTensorsGeneralizedVermas);
   }
   int opElementSemisimpleLieAlgebraAlgebraicCoefficients() {
     return this->operations.getIndexNoFail("ElementSemisimpleLieAlgebraAlgebraicCoefficients");
@@ -2440,9 +2441,17 @@ public:
     LinearCombination<Expression, Rational>& outputSum
   );
   template<class Type>
+  bool functionGetMatrixNoComputation(
+    const Expression& input,
+    Matrix<Type>& outputMatrix
+  ) {
+    return this->functionGetMatrix(input, outputMatrix, false);
+  }
+  template<class Type>
   bool functionGetMatrix(
     const Expression& input,
     Matrix<Type>& outputMatrix,
+    bool convertWithComputation,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetNumberOfColumnsNonMandatory = - 1,
     std::stringstream* commentsOnError = nullptr
@@ -2812,7 +2821,7 @@ public:
   static bool functionRationalFunction(
     Calculator& calculator,
     const Expression& input,
-    Expression& output
+    WithContext<RationalFraction<Coefficient> >& output
   );
   static bool elementUniversalEnveloping(
     Calculator& calculator, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner
@@ -2824,7 +2833,7 @@ public:
   static bool functionMatrixDouble(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMatrixRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool matrixRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMatrixRationalTensorForM(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixRationalTensorForm(Calculator& calculator, const Expression& input, Expression& output);
@@ -2945,23 +2954,6 @@ public:
     const Expression& input,
     WithContext<Type>& output
   );
-  template <class Type>
-  static bool conversionFunctionInContext(
-    Calculator& calculator,
-    const Expression& input,
-    WithContext<Type>& output,
-    ExpressionContext* inputOutputContexts
-  ) {
-    if (!CalculatorConversions::convert(calculator, input, output)) {
-      return false;
-    }
-    if (inputOutputContexts != nullptr) {
-      if (!output.setContextAtLeast(*inputOutputContexts, &calculator.comments)) {
-        return false;
-      }
-    }
-    return true;
-  }
 };
 
 template <class Type>
@@ -3095,6 +3087,7 @@ template <class Type>
 bool Calculator::functionGetMatrix(
   const Expression& input,
   Matrix<Type>& outputMatrix,
+  bool convertWithComputation,
   ExpressionContext* inputOutputStartingContext,
   int targetNumberOfColumnsNonMandatory,
   std::stringstream* commentsOnError
@@ -3102,8 +3095,14 @@ bool Calculator::functionGetMatrix(
   MacroRegisterFunctionWithName("Calculator::functionGetMatrix");
   Matrix<Expression> matrixExpressions;
   Matrix<WithContext<Type> > outputCandidate;
+  Expression transformer = input;
+  if (transformer.size() > 0) {
+    Expression matrixStart(*this);
+    matrixStart.addChildAtomOnTop(this->opMatrix());
+    transformer.setChild(0, matrixStart);
+  }
   if (!this->getMatrixExpressions(
-    input, matrixExpressions, - 1, targetNumberOfColumnsNonMandatory
+    transformer, matrixExpressions, - 1, targetNumberOfColumnsNonMandatory
   )) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to extract matrix of expressions from "
@@ -3121,18 +3120,33 @@ bool Calculator::functionGetMatrix(
   }
   for (int i = 0; i < outputCandidate.numberOfRows; i ++) {
     for (int j = 0; j < outputCandidate.numberOfColumns; j ++) {
-      if (!CalculatorConversions::conversionFunctionInContext<Type>(
-        *this,
-        matrixExpressions(i, j),
-        outputCandidate(i, j),
-        &context
-      )) {
+      WithContext<Type>& current = outputCandidate(i, j);
+      bool success = false;
+      if (convertWithComputation) {
+        success = CalculatorConversions::convert(
+          *this, matrixExpressions(i, j), current
+        );
+      } else {
+        success = CalculatorConversions::convertWithoutComputation(
+          *this, matrixExpressions(i, j), current
+        );
+      }
+      if (!success) {
         if (commentsOnError != nullptr) {
           *commentsOnError << "Failed to convert matrix element: "
           << "row: " << i << ", column: "
           << j << ", expression: "
           << matrixExpressions(i, j).toString() << ". ";
         }
+        return false;
+      }
+      context.mergeContexts(current.context, context);
+    }
+  }
+  for (int i = 0; i < outputCandidate.numberOfRows; i ++) {
+    for (int j = 0; j < outputCandidate.numberOfColumns; j ++) {
+      WithContext<Type>& current = outputCandidate(i, j);
+      if (!current.setContextAtLeast(context, commentsOnError)){
         return false;
       }
     }

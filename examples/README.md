@@ -1585,7 +1585,7 @@ X =\begin{pmatrix} 1 & -1 \\ 4 & -3\end{pmatrix}; X^{-55!- 1}
 ```
 Attempts to exponentiate matrix by a large power. 
 
-*^* [PowerMatrixNumbersBySmallIntegerIfPossible] {CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger}. 
+*^* [PowerMatrixNumbersBySmallIntegerIfPossible] {CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%5c%5cbegin%7bpmatrix%7d%20a%20%26%20b%20%5c%5c%5c%5c%20t%20%2bq%20%26r%5c%5cend%7bpmatrix%7d%3b%20X%5e%7b2%7d%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =\begin{pmatrix} a & b \\ t +q &r\end{pmatrix}; X^{2}  

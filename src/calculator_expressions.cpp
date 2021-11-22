@@ -1424,7 +1424,8 @@ bool Expression::isDefiniteIntegralOverIntervalFdx(
 }
 
 bool Expression::isDifferentialOneFormOneVariable(
-  Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential
+  Expression* outputDifferentialOfWhat,
+  Expression* outputCoefficientInFrontOfDifferential
 ) const {
   MacroRegisterFunctionWithName("Expression::isDifferentialOneFormOneVariable");
   if (this->owner == nullptr) {
@@ -1436,8 +1437,8 @@ bool Expression::isDifferentialOneFormOneVariable(
   if (outputDifferentialOfWhat != nullptr) {
     *outputDifferentialOfWhat = (*this)[1];
   }
-  if (outputCoeffInFrontOfDifferential != nullptr) {
-    *outputCoeffInFrontOfDifferential = (*this)[2];
+  if (outputCoefficientInFrontOfDifferential != nullptr) {
+    *outputCoefficientInFrontOfDifferential = (*this)[2];
   }
   return true;
 }
@@ -2420,7 +2421,7 @@ bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFractio
   (void) format;
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
-  out << "ElementTensorsGeneralizedVermas{}(";
+  out << Calculator::Atoms::elementTensorsGeneralizedVermas << "{}(";
   out << input.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().toString(&localFormat);
   out << ")";
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
@@ -2665,7 +2666,7 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
     format.flagUseHTML = false;
     format.flagUseLatex = true;
     Matrix<RationalFraction<Rational> > matrix;
-    this->owner->functionGetMatrix(*this, matrix);
+    this->owner->functionGetMatrix(*this, matrix, false);
     out << matrix.toString(&format);
     return true;
   }

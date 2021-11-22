@@ -218,7 +218,6 @@ void Calculator::ExpressionHistoryEnumerator::toStepsWithMerge(
 List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
   "IntegralOperatorFromProduct",
   "InterpretAsDifferential",
-  "IntegralOperatorFromProduct",
   "CommuteConstants",
   "MultiplyByOne"
 });

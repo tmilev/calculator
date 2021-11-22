@@ -1419,12 +1419,10 @@ bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibra
   ) {
     return false;
   }
-  Expression converted(calculator);
-  if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(calculator, input, converted)) {
-    return false;
-  }
   WithContext<RationalFraction<AlgebraicNumber> > rationalFunction;
-  if (!converted.isOfTypeWithContext(&rationalFunction)) {
+  if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(
+    calculator, input, rationalFunction
+  )) {
     return false;
   }
   return CalculatorConversions::expressionFromRationalFraction(

@@ -221,10 +221,10 @@ bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expr
   Matrix<Rational> coneStrictMatForm;
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
-  if (!calculator.functionGetMatrix(input[1], coneStrictMatForm)) {
+  if (!calculator.functionGetMatrixNoComputation(input[1], coneStrictMatForm)) {
     return calculator << "Failed to extract matrix from the first argument, " << input[1].toString();
   }
-  if (!calculator.functionGetMatrix(input[2], coneNonStrictMatForm)) {
+  if (!calculator.functionGetMatrixNoComputation(input[2], coneNonStrictMatForm)) {
     return calculator << "Failed to extract matrix from the second argument, " << input[2].toString();
   }
   std::stringstream out;
@@ -408,13 +408,13 @@ bool CalculatorFunctions::innerPerturbSplittingNormal(Calculator& calculator, co
   Matrix<Rational> matrix;
   Vectors<Rational> nonStrictCone, vectorsToPerturbRelativeTo;
   if (!calculator.functionGetMatrix(
-    input[2], matrix, nullptr, splittingNormal.size, nullptr
+    input[2], matrix, false, nullptr, splittingNormal.size, nullptr
   )) {
     return output.assignError(calculator, "Failed to extract matrix from second argument. ");
   }
   nonStrictCone.assignMatrixRows(matrix);
   if (!calculator.functionGetMatrix(
-    input[3], matrix, nullptr, splittingNormal.size, nullptr
+    input[3], matrix, false, nullptr, splittingNormal.size, nullptr
   )) {
     return output.assignError(calculator, "Failed to extract matrix from third argument. ");
   }
@@ -506,10 +506,10 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
   return output.assignValueOLD(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerInterpolatePoly(
+bool CalculatorFunctions::interpolatePolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
+  MacroRegisterFunctionWithName("Calculator::interpolatePolynomial");
   if (input.size() < 2) {
     return false;
   }
@@ -519,7 +519,7 @@ bool CalculatorFunctions::innerInterpolatePoly(
   }
   Matrix<Rational> pointsOfInterpoly;
   if (!calculator.functionGetMatrix(
-    convertedE, pointsOfInterpoly, nullptr, 2
+    convertedE, pointsOfInterpoly, false, nullptr, 2
   )) {
     return calculator
     << "<hr>Failed to extract points of interpolation from "

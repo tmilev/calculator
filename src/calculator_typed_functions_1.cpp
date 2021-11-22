@@ -661,14 +661,18 @@ bool CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomia
   return CalculatorFunctionsBinaryOps::multiplyTypeByType<Polynomial<Rational> >(calculator, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny");
   return CalculatorFunctionsBinaryOps::addTypeToType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
     calculator, input, output
   );
 }
 
-bool CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping");
   calculator.checkInputNotSameAsOutput(input, output);
   if (input.size() != 3) {
@@ -680,7 +684,8 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping(Calcu
   )) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFraction<Rational> > result = inputContextsMerged[1].getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
+  ElementUniversalEnveloping<RationalFraction<Rational> > result =
+  inputContextsMerged[1].getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
   result *= inputContextsMerged[2].getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
   result.simplify(RationalFraction<Rational>::oneRational());
   return output.assignValueWithContext(calculator, result, inputContextsMerged[1].getContext());
@@ -1029,7 +1034,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible(
   }
   const Expression& matrixE = input[1];
   Matrix<Rational> baseRat;
-  if (calculator.functionGetMatrix(matrixE, baseRat)) {
+  if (calculator.functionGetMatrixNoComputation(matrixE, baseRat)) {
     if (!baseRat.isSquare() || baseRat.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
@@ -1055,7 +1060,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible(
     return output.makeMatrix(calculator, baseRat);
   }
   Matrix<AlgebraicNumber> baseAlg;
-  if (calculator.functionGetMatrix(matrixE, baseAlg)) {
+  if (calculator.functionGetMatrixNoComputation(matrixE, baseAlg)) {
     if (!baseAlg.isSquare() || baseAlg.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
@@ -1103,59 +1108,59 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
   if (!powerIsSmall) {
     return false;
   }
-  Matrix<Rational> baseRat;
-  if (calculator.functionGetMatrix(matrixE, baseRat)) {
-    if (!baseRat.isSquare() || baseRat.numberOfColumns == 0) {
+  Matrix<Rational> baseRational;
+  if (calculator.functionGetMatrixNoComputation(matrixE, baseRational)) {
+    if (!baseRational.isSquare() || baseRational.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
-      << "Your matrix, " << baseRat.toString() << " is not square. ";
+      << "Your matrix, " << baseRational.toString() << " is not square. ";
       return output.assignError(calculator, errorStream.str());
     }
     if (power <= 0) {
-      if (baseRat.getDeterminant() == 0) {
+      if (baseRational.getDeterminant() == 0) {
         return output.assignError(calculator, "Division by zero: trying to raise 0 to negative power. ");
       }
     }
     if (power < 0) {
-      baseRat.invert();
+      baseRational.invert();
       power *= - 1;
     }
     Matrix<Rational> idMat;
-    idMat.makeIdentityMatrix(baseRat.numberOfRows, Rational::one(), Rational::zero());
-    MathRoutines::raiseToPower(baseRat, power, idMat);
-    return output.makeMatrix(calculator, baseRat);
+    idMat.makeIdentityMatrix(baseRational.numberOfRows, Rational::one(), Rational::zero());
+    MathRoutines::raiseToPower(baseRational, power, idMat);
+    return output.makeMatrix(calculator, baseRational);
   }
-  Matrix<AlgebraicNumber> baseAlg;
+  Matrix<AlgebraicNumber> baseAlgebraic;
   AlgebraicNumber one = calculator.objectContainer.algebraicClosure.one();
   AlgebraicNumber zero = calculator.objectContainer.algebraicClosure.zero();
-  if (calculator.functionGetMatrix(matrixE, baseAlg)) {
-    if (!baseAlg.isSquare() || baseAlg.numberOfColumns == 0) {
+  if (calculator.functionGetMatrixNoComputation(matrixE, baseAlgebraic)) {
+    if (!baseAlgebraic.isSquare() || baseAlgebraic.numberOfColumns == 0) {
       return output.assignError(
         calculator,
         "Exponentiating non-square matrices or matrices with zero rows is not allowed."
       );
     }
     if (power <= 0) {
-      if (baseAlg.getDeterminant() == 0) {
+      if (baseAlgebraic.getDeterminant() == 0) {
         return output.assignError(
           calculator, "Division by zero: trying to raise 0 to negative power. "
         );
       }
     }
     if (power < 0) {
-      baseAlg.invert();
+      baseAlgebraic.invert();
       power *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
     idMat.makeIdentityMatrix(
-      baseAlg.numberOfRows, one, zero
+      baseAlgebraic.numberOfRows, one, zero
     );
-    MathRoutines::raiseToPower(baseAlg, power, idMat);
-    return output.makeMatrix(calculator, baseAlg);
+    MathRoutines::raiseToPower(baseAlgebraic, power, idMat);
+    return output.makeMatrix(calculator, baseAlgebraic);
   }
   Matrix<RationalFraction<Rational> > baseRationalFunctionCoefficients;
   ExpressionContext context(calculator);
-  if (calculator.functionGetMatrix(matrixE, baseRationalFunctionCoefficients, &context)) {
+  if (calculator.functionGetMatrix(matrixE, baseRationalFunctionCoefficients, false, &context)) {
     if (!baseRationalFunctionCoefficients.isSquare() || baseRationalFunctionCoefficients.numberOfColumns == 0) {
       return output.assignError(
         calculator,
@@ -1561,10 +1566,10 @@ bool CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPo
   return output.assignValueWithContext(calculator, outputUE, copyBase.getContext());
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
+bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
@@ -2101,8 +2106,8 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrix(
   }
   Matrix<Rational> leftMatRat, rightMatRat;
   if (
-    calculator.functionGetMatrix(leftE, leftMatRat) &&
-    calculator.functionGetMatrix(rightE, rightMatRat)
+    calculator.functionGetMatrixNoComputation(leftE, leftMatRat) &&
+    calculator.functionGetMatrixNoComputation(rightE, rightMatRat)
   ) {
     Matrix<Rational> resultMatRat;
     resultMatRat.assignTensorProduct(leftMatRat, rightMatRat);
@@ -2160,24 +2165,24 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(
     return false;
   }
   Matrix<AlgebraicNumber> matrixAlg;
-  AlgebraicNumber theScalar;
-  Matrix<Rational> matrixRat;
-  Rational theScalarRat;
-  if (calculator.functionGetMatrix(*matE, matrixRat)) {
-    matrixAlg = matrixRat;
+  AlgebraicNumber scalar;
+  Matrix<Rational> matrixRational;
+  Rational scalarRational;
+  if (calculator.functionGetMatrixNoComputation(*matE, matrixRational)) {
+    matrixAlg = matrixRational;
   } else {
-    if (!calculator.functionGetMatrix(*matE, matrixAlg)) {
+    if (!calculator.functionGetMatrixNoComputation(*matE, matrixAlg)) {
       return false;
     }
   }
-  if (scalarE->isOfType(&theScalarRat)) {
-    theScalar = theScalarRat;
+  if (scalarE->isOfType(&scalarRational)) {
+    scalar = scalarRational;
   } else {
-    if (!scalarE->isOfType(&theScalar)) {
+    if (!scalarE->isOfType(&scalar)) {
       return false;
     }
   }
-  matrixAlg *= theScalar;
+  matrixAlg *= scalar;
   return output.makeMatrix(calculator, matrixAlg);
 }
 
@@ -2195,17 +2200,17 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(
   if (leftE.isMatrixOfType<Rational>() && rightE.isMatrixOfType<Rational>()) {
     return false;
   }
-  if (calculator.functionGetMatrix(leftE, matRatLeft)) {
+  if (calculator.functionGetMatrixNoComputation(leftE, matRatLeft)) {
     matAlgLeft = matRatLeft;
   } else {
-    if (!calculator.functionGetMatrix(leftE, matAlgLeft)) {
+    if (!calculator.functionGetMatrixNoComputation(leftE, matAlgLeft)) {
       return false;
     }
   }
-  if (calculator.functionGetMatrix(rightE, matRatRight)) {
+  if (calculator.functionGetMatrixNoComputation(rightE, matRatRight)) {
     matAlgRight = matRatRight;
   } else {
-    if (!calculator.functionGetMatrix(rightE, matAlgRight)) {
+    if (!calculator.functionGetMatrixNoComputation(rightE, matAlgRight)) {
       return false;
     }
   }
@@ -2233,7 +2238,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
     return false;
   }
   Matrix<Rational> leftMatrix, rightMatrix;
-  if (!calculator.functionGetMatrix(rightE, rightMatrix)) {
+  if (!calculator.functionGetMatrixNoComputation(rightE, rightMatrix)) {
     return false;
   }
   Rational theScalar;
@@ -2244,7 +2249,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
   if (!leftE.isMatrixOfType<Rational>()) {
     return false;
   }
-  if (!calculator.functionGetMatrix(leftE, rightMatrix)) {
+  if (!calculator.functionGetMatrixNoComputation(leftE, rightMatrix)) {
     return false;
   }
   if (leftMatrix.numberOfColumns != rightMatrix.numberOfRows) {
@@ -2279,7 +2284,7 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixRationalFractionOrRationalFract
     << " to common context. ";
   }
   Matrix<RationalFraction<Rational> > leftMatrix, rightMatrix;
-  if (!calculator.functionGetMatrix(rightE, rightMatrix)) {
+  if (!calculator.functionGetMatrixNoComputation(rightE, rightMatrix)) {
     return false;
   }
   if (!leftE.isMatrixOfType<RationalFraction<Rational> >()) {
@@ -2294,7 +2299,7 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixRationalFractionOrRationalFract
     ExpressionContext contextE = leftE.getContext();
     return output.makeMatrix(calculator, rightMatrix, &contextE);
   }
-  if (!calculator.functionGetMatrix(leftE, leftMatrix)) {
+  if (!calculator.functionGetMatrixNoComputation(leftE, leftMatrix)) {
     return false;
   }
   if (leftMatrix.numberOfColumns != rightMatrix.numberOfRows) {
@@ -2651,7 +2656,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
   Expression leftE = input[1];
   Expression rightE = input[2];
   Matrix<Rational> leftMatRat, rightMatRat;
-  Matrix<AlgebraicNumber> leftMatAlg, rightMatAlg;
+  Matrix<AlgebraicNumber> leftMatrixAlgebraic, rightMatrixAlgebraic;
   if (
     !rightE.isMatrixOfType<Rational>() ||
     !leftE.isMatrixOfType<Rational>()
@@ -2663,40 +2668,40 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
       return false;
     }
     if (rightE.isMatrixOfType<Rational>()) {
-      if (!calculator.functionGetMatrix(leftE, leftMatAlg)) {
+      if (!calculator.functionGetMatrixNoComputation(leftE, leftMatrixAlgebraic)) {
         return false;
       }
-      if (!calculator.functionGetMatrix(rightE, rightMatAlg)) {
+      if (!calculator.functionGetMatrixNoComputation(rightE, rightMatrixAlgebraic)) {
         return false;
       }
       if (
-        rightMatAlg.numberOfRows != leftMatAlg.numberOfRows ||
-        rightMatAlg.numberOfColumns != leftMatAlg.numberOfColumns
+        rightMatrixAlgebraic.numberOfRows != leftMatrixAlgebraic.numberOfRows ||
+        rightMatrixAlgebraic.numberOfColumns != leftMatrixAlgebraic.numberOfColumns
       ) {
         return false;
       }
-      leftMatAlg += rightMatAlg;
-      return output.makeMatrix(calculator, leftMatAlg);
+      leftMatrixAlgebraic += rightMatrixAlgebraic;
+      return output.makeMatrix(calculator, leftMatrixAlgebraic);
     }
-    if (!calculator.functionGetMatrix(rightE, rightMatAlg)) {
+    if (!calculator.functionGetMatrixNoComputation(rightE, rightMatrixAlgebraic)) {
       return false;
     }
-    if (!calculator.functionGetMatrix(leftE, leftMatAlg)) {
+    if (!calculator.functionGetMatrixNoComputation(leftE, leftMatrixAlgebraic)) {
       return false;
     }
     if (
-      rightMatAlg.numberOfRows != leftMatAlg.numberOfRows ||
-      rightMatAlg.numberOfColumns != leftMatAlg.numberOfColumns
+      rightMatrixAlgebraic.numberOfRows != leftMatrixAlgebraic.numberOfRows ||
+      rightMatrixAlgebraic.numberOfColumns != leftMatrixAlgebraic.numberOfColumns
     ) {
       return false;
     }
-    leftMatAlg += rightMatAlg;
-    return output.makeMatrix(calculator, leftMatAlg);
+    leftMatrixAlgebraic += rightMatrixAlgebraic;
+    return output.makeMatrix(calculator, leftMatrixAlgebraic);
   }
-  if (!calculator.functionGetMatrix(leftE, leftMatRat)) {
+  if (!calculator.functionGetMatrixNoComputation(leftE, leftMatRat)) {
     return false;
   }
-  if (!calculator.functionGetMatrix(rightE, rightMatRat)) {
+  if (!calculator.functionGetMatrixNoComputation(rightE, rightMatRat)) {
     return false;
   }
   if (
@@ -2763,10 +2768,10 @@ bool CalculatorFunctionsBinaryOps::addMatrixRationalFractionsToMatrixRationalFra
     return false;
   }
   Matrix<RationalFraction<Rational> > leftMatrix, rightMatrix;
-  if (!calculator.functionGetMatrix(leftE, leftMatrix)) {
+  if (!calculator.functionGetMatrixNoComputation(leftE, leftMatrix)) {
     return false;
   }
-  if (!calculator.functionGetMatrix(rightE, rightMatrix)) {
+  if (!calculator.functionGetMatrixNoComputation(rightE, rightMatrix)) {
     return false;
   }
   if (

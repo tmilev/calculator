@@ -888,7 +888,7 @@ bool Expression::setContextAtLeastEqualTo(
     }
     inputOutputMinContext = newContext;
     Matrix<RationalFraction<Rational> > newMatrix;
-    this->owner->functionGetMatrix(*this, newMatrix, &newContext);
+    this->owner->functionGetMatrix(*this, newMatrix, false, &newContext);
     PolynomialSubstitution<Rational> substitution;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, substitution, Rational::one());
     for (int i = 0; i < newMatrix.numberOfRows; i ++) {

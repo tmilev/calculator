@@ -8,15 +8,6 @@
 template <>
 bool CalculatorConversions::getPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
 
-/*template <>
-bool CalculatorConversions::functionPolynomial<Rational>(
-  Calculator& calculator,
-  const Expression& input,
-  WithContext<Polynomial<Rational> >& output,
-  int maximumVariables,
-  int maximumPowerToExpand
-);*/
-
 bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -381,7 +372,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
   MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial(
-    calculator, input[1], polynomial, 1, 50
+    calculator, input[1], polynomial, 1, 50, false
   )) {
     return false;
   }
@@ -1439,7 +1430,7 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   WithContext<Polynomial<AlgebraicNumber> > numerator;
   WithContext<Polynomial<AlgebraicNumber> > denominator;
   if (!CalculatorConversions::functionPolynomial(
-    calculator, input[2], denominator, 1, 6
+    calculator, input[2], denominator, 1, 6, true
   )) {
     return false;
   }
@@ -1453,7 +1444,8 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     input[1],
     numerator,
     1,
-    20
+    20,
+    true
   )) {
     return false;
   }

@@ -199,7 +199,9 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
     return true;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::functionPolynomial(calculator, leftMinusRight, polynomial, 50, 10)) {
+  if (!CalculatorConversions::functionPolynomial(
+    calculator, leftMinusRight, polynomial, 50, 10, false
+  )) {
     this->addAnnotationStep(calculator, "Sorry, I've only been taught to solve polynomial equations.");
     return true;
   }

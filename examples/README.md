@@ -895,7 +895,7 @@ M * M * M * M;
 ```
 Multiplies rational by matrix tensor form. 
 
-*\** [CombineExponents] {Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY}. 
+*\** [CombineExponents] {Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%2a%28x%2ay%29%2ax%2a%28x%2ax%5e3%2ax%29%3b%5cnx%5e%7b2%2f3%7dx%5e%7b1%2f2%7d%3b%5cn%28x%3e0%29%3d1%3b%5cnx%5e%7b2%2f3%7dx%5e%7b1%2f2%7d%3b%5cn%28x%5e%7b1%2f2%7d%29%5e2%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x*(x*y)*x*(x*x^3*x);
@@ -2042,9 +2042,10 @@ Attempts to rearrange into standard polynomial form and then integrate.
 Integrates x^n dx. 
 
 *\int* [IntegrateEpowerX] {CalculatorFunctionsIntegration::integrateEpowerAxDiffX}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20e%5e%7b5x%7d%20dx%3b%5cn%5c%5cint%20e%5e%7b-x%7d%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\int x dx 
+\int e^{5x} dx;
+\int e^{-x} dx
 ```
 If a is a number, integrates e^{a x} dx. 
 

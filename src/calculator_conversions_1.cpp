@@ -315,7 +315,7 @@ bool CalculatorConversions::convert(
   const Expression& input,
   WithContext<Polynomial<Rational> >& output
 ) {
-  return CalculatorConversions::functionPolynomial(calculator, input, output, - 1, - 1);
+  return CalculatorConversions::functionPolynomial(calculator, input, output, - 1, - 1, false);
 }
 
 template < >
@@ -408,7 +408,7 @@ bool CalculatorConversions::convert(
   const Expression& input,
   WithContext<Polynomial<AlgebraicNumber> >& output
 ) {
-  return CalculatorConversions::functionPolynomial(calculator, input, output, - 1, - 1);
+  return CalculatorConversions::functionPolynomial(calculator, input, output, - 1, - 1, false);
 }
 
 template < >
@@ -1320,7 +1320,7 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   MacroRegisterFunctionWithName("CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers");
   WithContext<Polynomial<AlgebraicNumber> > polynomialFormWithContext;
   if (!CalculatorConversions::functionPolynomial<AlgebraicNumber>(
-    calculator, input, polynomialFormWithContext, 300, 2
+    calculator, input, polynomialFormWithContext, 300, 2, false
   )) {
     return calculator << "<hr>Failed to convert " << input.toString() << " to polynomial.<hr>";
   }
@@ -1405,7 +1405,7 @@ bool CalculatorConversions::elementUniversalEnveloping(
   outputUE.makeZero(owner);
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, input[1], polynomial, - 1, - 1
+    calculator, input[1], polynomial, - 1, - 1, false
   )) {
     return calculator << "<hr>Failed to convert "
     << input[1].toString() << " to polynomial.<hr>";

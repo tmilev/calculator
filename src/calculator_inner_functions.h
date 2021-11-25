@@ -427,7 +427,7 @@ public:
     Expression& outputConstTerm
   );
 
-  static bool innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool matrixTrace(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output);
@@ -482,7 +482,7 @@ public:
 
   static bool innerIsSquare(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsSquareFree(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsSquareFreePolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isSquareFreePolynomial(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsPower(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsEven(Calculator& calculator, const Expression& input, Expression& output);

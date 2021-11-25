@@ -314,7 +314,7 @@ bool CalculatorBasics::tensorProductStandard(
 bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
+  MacroRegisterFunctionWithName("Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }

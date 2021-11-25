@@ -810,7 +810,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::innerPowerImaginaryUnit,
+    CalculatorFunctions::powerImaginaryUnit,
     "",
     "Raises imaginary unit to an integer power. ",
     "TurnOnRules(\"PowerImaginaryUnit\");\n"
@@ -3786,7 +3786,7 @@ void Calculator::initializeFunctionsStandard() {
     "(x>0)=1;\n"
     "x^{2/3}x^{1/2};\n"
     "(x^{1/2})^2;",
-    "Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY",
+    "Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY",
     "CombineExponents",
     innerStandard
   );

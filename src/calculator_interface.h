@@ -151,7 +151,7 @@ private:
   void getBaseExponentForm(Expression& outputBase, Expression& outputExponent) const;
   void getMultiplicandsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
   void getMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
-  void getCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const;
+  void getCoefficientMultiplicandForm(Expression& outputCoefficient, Expression& outputNoCoefficient) const;
   void getCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
   bool setChildAtomValue(int childIndex, const std::string& atom);
   bool setChildAtomValue(int childIndex, int atomValue);
@@ -2772,7 +2772,8 @@ private:
     const Expression& input,
     WithContext<Polynomial<Coefficient> >& output,
     int maximumVariables,
-    int maximumPowerToExpand
+    int maximumPowerToExpand,
+    bool acceptNonPositiveOrNonIntegerPowers
   );
   template <class Coefficient>
   static bool extractPolynomialFromPower(
@@ -2780,8 +2781,16 @@ private:
     const Expression& input,
     WithContext<Polynomial<Coefficient> >& output,
     int maximumVariables,
-    int maximumPowerToExpand
+    int maximumPowerToExpand,
+    bool acceptNonPositiveOrNonIntegerPowers
   );
+  template <class Coefficient>
+  static bool extractPolynomialMakeAtom(
+    Calculator& calculator,
+    const Expression& input,
+    WithContext<Polynomial<Coefficient> >& output
+  );
+
 public:
   ////////////////////Conversion from expression tree/////////////////////////////////
   // conversions from expression tree to type
@@ -2814,7 +2823,8 @@ public:
     const Expression& input,
     WithContext<Polynomial<Coefficient> >& output,
     int maximumVariables,
-    int maximumPowerToExpand
+    int maximumPowerToExpand,
+    bool acceptNonPositiveOrNonIntegerPowers
   );
   static bool rationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>

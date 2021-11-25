@@ -1906,18 +1906,20 @@ void Expression::getMultiplicandsDivisorsRecursive(List<Expression>& outputAppen
   }
 }
 
-void Expression::getCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const {
+void Expression::getCoefficientMultiplicandForm(
+  Expression& outputCoefficient, Expression& outputNoCoefficient
+) const {
   MacroRegisterFunctionWithName("Expression::getCoefficientMultiplicandForm");
   this->checkInitialization();
   if (this->startsWith(this->owner->opTimes(), 3)) {
     if ((*this)[1].isConstantNumber()) {
-      outputNoCoeff = (*this)[2];
-      outputCoeff = (*this)[1];
+      outputNoCoefficient = (*this)[2];
+      outputCoefficient = (*this)[1];
       return;
     }
   }
-  outputCoeff.assignValue(*this->owner, 1);
-  outputNoCoeff = *this;
+  outputCoefficient.assignValue(*this->owner, 1);
+  outputNoCoefficient = *this;
 }
 
 void Expression::getCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const {

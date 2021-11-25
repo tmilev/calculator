@@ -186,7 +186,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "IsSquareFreePolynomial",
-    CalculatorFunctions::innerIsSquareFreePolynomial,
+    CalculatorFunctions::isSquareFreePolynomial,
     "",
     "Computes whether a polynomial is square-free by "
     "computing the greatest common divisors of "
@@ -194,7 +194,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "If the greatest common divisor is constant, then the polynomial is square-free. ",
     "IsSquareFreePolynomial((x^2-3y^2 x )(x+y));\n"
     "IsSquareFreePolynomial( (x-3x y +5 x y^2)^2 (3+x +y^2) )",
-    "CalculatorFunctions::innerIsSquareFree",
+    "CalculatorFunctions::isSquareFreePolynomial",
     "IsSquareFreePolynomial",
     innerStandard
   );

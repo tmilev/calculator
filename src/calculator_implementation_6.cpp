@@ -1187,16 +1187,16 @@ bool CalculatorFunctions::innerIsSquareFree(
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctions::innerIsSquareFreePolynomial(
+bool CalculatorFunctions::isSquareFreePolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsSquareFreePolynomial");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isSquareFreePolynomial");
   if (input.size() != 2) {
     return false;
   }
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial(
-    calculator, input[1], polynomial, - 1, - 1
+    calculator, input[1], polynomial, - 1, - 1, false
   )) {
     return false;
   }
@@ -2635,7 +2635,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   WithContext<Polynomial<Rational> > polynomialWithContext;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, curveE, polynomialWithContext, - 1, - 1
+    calculator, curveE, polynomialWithContext, - 1, - 1, false
   )) {
     return calculator << "Could not get polynomial from " << curveE.toString();
   }

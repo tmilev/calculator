@@ -1289,7 +1289,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinimalPolynomial(
   MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinimalPolynomial");
   WithContext<Polynomial<AlgebraicNumber> > polynomial;
   if (!CalculatorConversions::functionPolynomial(
-    calculator, input[1], polynomial, - 1, - 1
+    calculator, input[1], polynomial, - 1, - 1, false
   )) {
     return calculator << "<hr>Failed to convert "
     << input.toString() << " to polynomial. ";
@@ -3832,7 +3832,7 @@ bool CalculatorFunctions::functionPolynomialize(
   }
   WithContext<Polynomial<AlgebraicNumber> > outputWithContext;
   if (!CalculatorConversions::functionPolynomial<AlgebraicNumber>(
-    calculator, input, outputWithContext, - 1, - 1
+    calculator, input, outputWithContext, - 1, - 1, true
   )) {
     return false;
   }
@@ -4368,30 +4368,30 @@ bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integratePullImaginaryUnit");
-  Expression functionExpression, theVariableE, integrationSetE;
-  if (!input.isIndefiniteIntegralFdx(&theVariableE, &functionExpression, &integrationSetE)) {
+  Expression functionExpression, variableExpression, integrationSetE;
+  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression, &integrationSetE)) {
     return false;
   }
   Expression iE;
   iE.makeAtom(calculator, calculator.opImaginaryUnit());
-  if (theVariableE == iE) {
+  if (variableExpression == iE) {
     return false;
   }
-  Expression coefficientExpression, theNoCFintegrand, theNoImIntegrand, outputIntegralNoCF;
-  functionExpression.getCoefficientMultiplicandForm(coefficientExpression, theNoCFintegrand);
+  Expression coefficientExpression, noCoefficientIntegrand, theNoImIntegrand, outputIntegralNoCF;
+  functionExpression.getCoefficientMultiplicandForm(coefficientExpression, noCoefficientIntegrand);
 
-  if (theNoCFintegrand == iE) {
+  if (noCoefficientIntegrand == iE) {
     theNoImIntegrand.assignValue(calculator, 1);
-  } else if (theNoCFintegrand.startsWith(calculator.opTimes(), 3)) {
-    if (theNoCFintegrand[1] != iE) {
+  } else if (noCoefficientIntegrand.startsWith(calculator.opTimes(), 3)) {
+    if (noCoefficientIntegrand[1] != iE) {
       return false;
     }
-    theNoImIntegrand = theNoCFintegrand[2];
+    theNoImIntegrand = noCoefficientIntegrand[2];
   } else {
     return false;
   }
   coefficientExpression *= iE;
-  outputIntegralNoCF.makeIntegral(calculator, integrationSetE,theNoImIntegrand,theVariableE);
+  outputIntegralNoCF.makeIntegral(calculator, integrationSetE, theNoImIntegrand, variableExpression);
   output = coefficientExpression * outputIntegralNoCF;
   return true;
 }
@@ -4481,7 +4481,7 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   }
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, functionExpression, polynomial, - 1, - 1
+    calculator, functionExpression, polynomial, - 1, - 1, true
   )) {
     return false;
   }
@@ -4617,7 +4617,7 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   }
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial<Rational>(
-    calculator, functionExpression, polynomial, - 1, - 1
+    calculator, functionExpression, polynomial, - 1, - 1, true
   )) {
     return false;
   }
@@ -4829,8 +4829,8 @@ bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
   return true;
 }
 
-bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerImaginaryUnit");
+bool CalculatorFunctions::powerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::powerImaginaryUnit");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }

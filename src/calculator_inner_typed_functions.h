@@ -238,7 +238,7 @@ bool CalculatorConversions::getPolynomial(
   }
   WithContext<Polynomial<Coefficient> > outputWithContext;
   if (!CalculatorConversions::functionPolynomial<Coefficient>(
-    calculator, input[1], outputWithContext, - 1, - 1
+    calculator, input[1], outputWithContext, - 1, - 1, false
   )) {
     return false;
   }
@@ -255,7 +255,8 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
   const Expression& input,
   WithContext<Polynomial<Coefficient> >& output,
   int maximumVariables,
-  int maximumPowerToExpand
+  int maximumPowerToExpand,
+  bool acceptNonPositiveOrNonIntegerPowers
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::extractPolynomialSumDifferenceOrProduct");
   if (
@@ -277,7 +278,8 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
       input[i],
       converted,
       maximumVariables,
-      maximumPowerToExpand
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
     )) {
       return calculator << "<hr>Failed to extract polynomial from "
       << input[i].toString() << ". ";
@@ -317,7 +319,8 @@ bool CalculatorConversions::extractPolynomialFromPower(
   const Expression& input,
   WithContext<Polynomial<Coefficient> >& output,
   int maximumVariables,
-  int maximumPowerToExpand
+  int maximumPowerToExpand,
+  bool acceptNonPositiveOrNonIntegerPowers
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::extractPolynomialFromPower");
   if (!input.startsWith(calculator.opPower(), 3)) {
@@ -326,11 +329,15 @@ bool CalculatorConversions::extractPolynomialFromPower(
   }
   int power = - 1;
   if (!input[2].isSmallInteger(&power)) {
-    return calculator << "Expression: " << input.toString()
-    << " has non-integer exponent. ";
+    if (acceptNonPositiveOrNonIntegerPowers) {
+      return CalculatorConversions::extractPolynomialMakeAtom(calculator, input, output);
+    } else {
+      return calculator << "Expression: " << input.toString()
+      << " has non-integer exponent. ";
+    }
   }
   if (!CalculatorConversions::functionPolynomial<Coefficient>(
-    calculator, input[1], output, maximumVariables, maximumPowerToExpand
+    calculator, input[1], output, maximumVariables, maximumPowerToExpand, acceptNonPositiveOrNonIntegerPowers
   )) {
     return calculator
     << "<hr>Failed to extract polynomial from "
@@ -363,7 +370,8 @@ bool CalculatorConversions::functionPolynomial(
   const Expression& input,
   WithContext<Polynomial<Coefficient> >& output,
   int maximumVariables,
-  int maximumPowerToExpand
+  int maximumPowerToExpand,
+  bool acceptNonPositiveOrNonIntegerPowers
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
@@ -383,14 +391,30 @@ bool CalculatorConversions::functionPolynomial(
     input.isListStartingWithAtom(calculator.opMinus())
   ) {
     return CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
-      calculator, input, output, maximumVariables, maximumPowerToExpand
+      calculator, input, output, maximumVariables, maximumPowerToExpand, acceptNonPositiveOrNonIntegerPowers
     );
   }
   if (input.startsWith(calculator.opPower(), 3)) {
     return CalculatorConversions::extractPolynomialFromPower(
-      calculator, input, output, maximumVariables, maximumPowerToExpand
+      calculator,
+      input,
+      output,
+      maximumVariables,
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
     );
   }
+  return CalculatorConversions::extractPolynomialMakeAtom(
+    calculator, input, output
+  );
+}
+
+template <class Coefficient>
+bool CalculatorConversions::extractPolynomialMakeAtom(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Coefficient> >& output
+) {
   output.context.initialize(calculator);
   output.context.makeOneVariable(input);
   Polynomial<Coefficient> monomial;

@@ -4320,7 +4320,7 @@ IsPossiblyPrime(4256233 * 49979687)
 ```
 Checks whether the number is prime by trial division first and by the Miller-Rabin test next.
 
-*IsSquareFreePolynomial* [IsSquareFreePolynomial] {CalculatorFunctions::innerIsSquareFree}. 
+*IsSquareFreePolynomial* [IsSquareFreePolynomial] {CalculatorFunctions::isSquareFreePolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsSquareFreePolynomial%28%28x%5e2-3y%5e2%20x%20%29%28x%2by%29%29%3b%5cnIsSquareFreePolynomial%28%20%28x-3x%20y%20%2b5%20x%20y%5e2%29%5e2%20%283%2bx%20%2by%5e2%29%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 IsSquareFreePolynomial((x^2-3y^2 x )(x+y));

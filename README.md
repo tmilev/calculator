@@ -97,6 +97,22 @@ Run
 will start the calculator in daemon mode. 
 The server will restart when you rebuild the executable successfully.
 
+
+### Run the calculator tests.
+
+Run
+```
+./calculator test calculator
+```
+
+to test all calculator functions (some experimental ones are excluded).
+
+Run 
+```
+./calculator test
+```
+to run the full test suite that is ran before deploying calculator-algebra.org. This will test database setup, presence of .pdf files that are part of the frontend homework files, etc. This will also check that your executable compiles cleanly without ssl and database support.
+
 ### Prerequisites
 1. **OS**. For now, we support **Linux only**. Windows and Mac OS support could be added in the future (depending on resources). 
 - Ubuntu (all systems using the apt package manager should work too, but that hasn't been tested). The site

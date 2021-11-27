@@ -2813,7 +2813,7 @@ void Calculator::initializeFunctionsStandard() {
     "IsLinearOrConstantIn(x, x y + 1);\n"
     "IsLinearOrConstantIn(x, x + 1);\n"
     "IsLinearOrConstantIn(x, x \\pi + 1);",
-    "CalculatorFunctions::innerIsLinearOrConstantIn",
+    "CalculatorFunctions::isLinearOrConstantIn",
     "IsLinearOrConstantIn",
     innerStandard
   );
@@ -2848,7 +2848,7 @@ void Calculator::initializeFunctionsStandard() {
     "IsProductTermsUpToPower(x, (x- 1)(x + 1));\n"
     "IsProductTermsUpToPower(x, (2x + 1)(x \\pi + 1));\n"
     "IsProductTermsUpToPower(x, (2x +y)(x \\pi + 1));\n",
-    "CalculatorFunctions::innerIsProductTermsUpToPower",
+    "CalculatorFunctions::isProductTermsUpToPower",
     "IsProductTermsUpToPower",
     innerStandard
   );
@@ -2890,18 +2890,18 @@ void Calculator::initializeFunctionsStandard() {
     "the left hand side of the below expression is substituted with a*(b*c), and thus the rule becomes "
     "a*(b*c)=a*(b*c), which clearly is infinite substitution.",
     "%LogEvaluation\n({{a}}*{{b}})*{{c}}=a*(b*c);  ",
-    "Calculator::outerCheckRule",
+    "Calculator::checkRule",
     "CheckAutoEquality",
     outerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddStringToString,
+    CalculatorFunctionsBinaryOps::addStringToString,
     this->opString(),
     this->opString(),
     "Concatenates strings. ",
     "\"hello \"+ \"world\"",
-    "CalculatorFunctionsBinaryOps::innerAddStringToString",
+    "CalculatorFunctionsBinaryOps::addStringToString",
     "AddStrings",
     innerStandard
   );
@@ -2912,40 +2912,40 @@ void Calculator::initializeFunctionsStandard() {
     this->opRational(),
     "Adds two rational numbers. ",
     "2 + 3",
-    "CalculatorFunctionsBinaryOps::innerAddRatToRat",
+    "CalculatorFunctionsBinaryOps::addRationalToRational",
     "AddRationals",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational,
+    CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational,
     this->opRational(),
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    "CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational",
+    "CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational",
     "AddRationalToElementZmodP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational,
+    CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational,
     this->opEltZmodP(),
     this->opRational(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    "CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational",
+    "CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational",
     "AddElementZmodPToRational",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational,
+    CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational,
     this->opEltZmodP(),
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    "CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational",
+    "CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational",
     "AddElementZmodPToElementZmodP",
     innerStandard
   );
@@ -2958,7 +2958,7 @@ void Calculator::initializeFunctionsStandard() {
     "a = PolynomialModP(x^2 + x + 7, 5);\n"
     "b = PolynomialModP(x^2 + 1, 5);\n"
     "a + b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger",
+    "CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational",
     "AddPolynomialZmodPToPolynomialZmodP",
     innerStandard
   );
@@ -2971,7 +2971,7 @@ void Calculator::initializeFunctionsStandard() {
     "a = PolynomialModP(x^2 + x + 7, 5);\n"
     "b = 3;\n"
     "a + b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger",
+    "CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToInteger",
     "AddPolynomialZmodPToInteger",
     innerStandard
   );
@@ -2987,7 +2987,7 @@ void Calculator::initializeFunctionsStandard() {
     "a mod p;\n"
     "b mod p;\n"
     "a+b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger",
+    "CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger",
     "AddPolynomialModPolynomialModPToPolynomialModPolynomialModP",
     innerStandard
   );
@@ -2998,7 +2998,7 @@ void Calculator::initializeFunctionsStandard() {
     this->opAlgebraicNumber(),
     "Adds two algebraic numbers. ",
     "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}",
-    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber",
+    "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
     "AddAlgebraicNumberToAlgebraicNumber",
     innerStandard
   );
@@ -3009,7 +3009,7 @@ void Calculator::initializeFunctionsStandard() {
     this->opRational(),
     "Adds algebraic number to rational. ",
     "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})",
-    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber",
+    "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
     "AddAlgebraicNumberToRational",
     innerStandard
   );
@@ -3020,31 +3020,31 @@ void Calculator::initializeFunctionsStandard() {
     this->opAlgebraicNumber(),
     "Adds rational to algebraic number. ",
     "1/(1+\\sqrt {2}+\\sqrt{}6)",
-    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber",
+    "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
     "AddRationalToAlgebraicNumber",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational,
+    CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational,
     this->opDouble(),
     this->opRational(),
     "Adds double or rational to a double or rational approximately "
     "using the built-in cpp addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
-    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational",
+    "CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational",
     "AddDoubleToRational",
     innerStandard
   );
   // must come before outer plus:
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPlotToPlot,
+    CalculatorFunctionsBinaryOps::addPlotToPlot,
     this->opCalculusPlot(),
     this->opCalculusPlot(),
     "Superimposes two plots. ",
     "Plot2D{}(sin{}(x), -5, 5) + Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
-    "CalculatorFunctionsBinaryOps::innerAddPlotToPlot",
+    "CalculatorFunctionsBinaryOps::addPlotToPlot",
     "AddPlots",
     innerStandard
   );
@@ -3054,7 +3054,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Rescales an expression over the rationals so that the leading term has coefficient 1. ",
     "ScaleToLeadingUnit(1/2 x + 1/3 y+ 1/7 a b)",
-    "Calculator::innerScaleToLeadingUnit",
+    "CalculatorFunctions::innerScaleToLeadingUnit",
     "ScaleToLeadingUnit",
     innerStandard
   );
@@ -3066,7 +3066,7 @@ void Calculator::initializeFunctionsStandard() {
     "Sorts terms (over the rationals). "
     "Similar to AddTerms but doesn't combine monomial coefficients or drop zeroes. ",
     "2+3+a+2a+b+1+a",
-    "Calculator::sortTerms",
+    "CalculatorFunctions::sortTerms",
     "SortTerms",
     Function::Options::outerOffByDefault(),
     &additiveOperations
@@ -3274,7 +3274,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational,
+    CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational,
     this->opRational(),
     this->opDouble(),
     "Adds double or rational to a double or rational approximately using the "
@@ -3286,7 +3286,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational,
+    CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational,
     this->opDouble(),
     this->opDouble(),
     "Adds double or rational to a double or rational approximately using the built-in cpp "

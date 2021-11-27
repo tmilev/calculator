@@ -47,7 +47,7 @@ Some functions are marked as "admin only". These are only available to administr
 
 
 
-*=* [CheckAutoEquality] {Calculator::outerCheckRule}. 
+*=* [CheckAutoEquality] {Calculator::checkRule}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25LogEvaluation%5cn%28%7b%7ba%7d%7d%2a%7b%7bb%7d%7d%29%2a%7b%7bc%7d%7d%3da%2a%28b%2ac%29%3b%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %LogEvaluation
@@ -89,42 +89,42 @@ cos(a) - cos(b);
 ```
 Implementation of sum-to-product trig rules. 
 
-*\+* [AddStrings] {CalculatorFunctionsBinaryOps::innerAddStringToString}. 
+*\+* [AddStrings] {CalculatorFunctionsBinaryOps::addStringToString}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%22hello%20%5c%22%2b%20%5c%22world%5c%22%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 "hello "+ "world"
 ```
 Concatenates strings. 
 
-*\+* [AddRationals] {CalculatorFunctionsBinaryOps::innerAddRatToRat}. 
+*\+* [AddRationals] {CalculatorFunctionsBinaryOps::addRationalToRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%20%2b%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2 + 3
 ```
 Adds two rational numbers. 
 
-*\+* [AddRationalToElementZmodP] {CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational}. 
+*\+* [AddRationalToElementZmodP] {CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%207%29%20%2b%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod 7) + 3
 ```
 Adds elements of Z_p. 
 
-*\+* [AddElementZmodPToRational] {CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational}. 
+*\+* [AddElementZmodPToRational] {CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%207%29%20%2b%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod 7) + 3
 ```
 Adds elements of Z_p. 
 
-*\+* [AddElementZmodPToElementZmodP] {CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational}. 
+*\+* [AddElementZmodPToElementZmodP] {CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%207%29%20%2b%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod 7) + 3
 ```
 Adds elements of Z_p. 
 
-*\+* [AddPolynomialZmodPToPolynomialZmodP] {CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger}. 
+*\+* [AddPolynomialZmodPToPolynomialZmodP] {CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%20PolynomialModP%28x%5e2%20%2b%20x%20%2b%207%2c%205%29%3b%5cnb%20%3d%20PolynomialModP%28x%5e2%20%2b%201%2c%205%29%3b%5cna%20%2b%20b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a = PolynomialModP(x^2 + x + 7, 5);
@@ -133,7 +133,7 @@ a + b
 ```
 Adds polynomials modulo integers. 
 
-*\+* [AddPolynomialZmodPToInteger] {CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger}. 
+*\+* [AddPolynomialZmodPToInteger] {CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%20PolynomialModP%28x%5e2%20%2b%20x%20%2b%207%2c%205%29%3b%5cnb%20%3d%203%3b%5cna%20%2b%20b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a = PolynomialModP(x^2 + x + 7, 5);
@@ -142,7 +142,7 @@ a + b
 ```
 Adds polynomials modulo integers. 
 
-*\+* [AddPolynomialModPolynomialModPToPolynomialModPolynomialModP] {CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger}. 
+*\+* [AddPolynomialModPolynomialModPToPolynomialModPolynomialModP] {CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22p%20%3d%20PolynomialModP%28x%5e2%20%2b%20x%20%2b%207%2c%205%29%3b%5cna%20%3d%20PolynomialModP%28x%5e2%20%2b%201%2c%205%29%3b%5cnb%20%3d%20PolynomialModP%28x%5e2%2c%205%29%3b%5cna%20mod%20p%3b%5cnb%20mod%20p%3b%5cna%2bb%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 p = PolynomialModP(x^2 + x + 7, 5);
@@ -154,42 +154,42 @@ a+b
 ```
 Adds polynomials modulo integers. 
 
-*\+* [AddAlgebraicNumberToAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber}. 
+*\+* [AddAlgebraicNumberToAlgebraicNumber] {CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%20%7b2%7d%2b%20%5c%5csqrt%20%7b3%7d%20%2b%20%5c%5csqrt%7b6%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt {2}+ \sqrt {3} + \sqrt{6}
 ```
 Adds two algebraic numbers. 
 
-*\+* [AddAlgebraicNumberToRational] {CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber}. 
+*\+* [AddAlgebraicNumberToRational] {CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2f%28%5c%5csqrt%20%7b2%7d%2b%201%2b%5c%5csqrt%7b3%7d%2b%5c%5csqrt%7b6%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 1/(\sqrt {2}+ 1+\sqrt{3}+\sqrt{6})
 ```
 Adds algebraic number to rational. 
 
-*\+* [AddRationalToAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber}. 
+*\+* [AddRationalToAlgebraicNumber] {CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2f%281%2b%5c%5csqrt%20%7b2%7d%2b%5c%5csqrt%7b%7d6%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 1/(1+\sqrt {2}+\sqrt{}6)
 ```
 Adds rational to algebraic number. 
 
-*\+* [AddDoubleToRational] {CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational}. 
+*\+* [AddDoubleToRational] {CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283.14159265358979323846%29%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(3.14159265358979323846) + 1
 ```
 Adds double or rational to a double or rational approximately using the built-in cpp addition, returning double. 
 
-*\+* [AddPlots] {CalculatorFunctionsBinaryOps::innerAddPlotToPlot}. 
+*\+* [AddPlots] {CalculatorFunctionsBinaryOps::addPlotToPlot}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Plot2D%7b%7d%28sin%7b%7d%28x%29%2c%20-5%2c%205%29%20%2b%20Plot2D%7b%7d%281%2fsin%7b%7d%28x%20%29%2c%200.1%2c%203.041592654%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Plot2D{}(sin{}(x), -5, 5) + Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)
 ```
 Superimposes two plots. 
 
-*\+* [SortTerms] {Calculator::sortTerms}. 
+*\+* [SortTerms] {CalculatorFunctions::sortTerms}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%2b3%2ba%2b2a%2bb%2b1%2ba%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2+3+a+2a+b+1+a
@@ -3633,7 +3633,7 @@ CoefficientOf(y, x * x * y + x * z * y * z + x * y * x)
 ```
 Gets the coefficient of the first argument in the second. 
 
-*IsLinearOrConstantIn* [IsLinearOrConstantIn] {CalculatorFunctions::innerIsLinearOrConstantIn}. 
+*IsLinearOrConstantIn* [IsLinearOrConstantIn] {CalculatorFunctions::isLinearOrConstantIn}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsLinearOrConstantIn%28x%2c%20x%5e2%20%2b%201%29%3b%5cnIsLinearOrConstantIn%28x%2c%20x%20y%20%2b%201%29%3b%5cnIsLinearOrConstantIn%28x%2c%20x%20%2b%201%29%3b%5cnIsLinearOrConstantIn%28x%2c%20x%20%5c%5cpi%20%2b%201%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 IsLinearOrConstantIn(x, x^2 + 1);
@@ -3656,7 +3656,7 @@ IsProductLinearOrConstantTermsIn(x, (2x +y)(x \pi + 1));
 ```
 Returns true if the expression is a product of linear or constant terms. Although this is subject to change, at the moment powers of linear terms are not considered linear. 
 
-*IsProductTermsUpToPower* [IsProductTermsUpToPower] {CalculatorFunctions::innerIsProductTermsUpToPower}. 
+*IsProductTermsUpToPower* [IsProductTermsUpToPower] {CalculatorFunctions::isProductTermsUpToPower}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffRules%28%5c%22DistributeMultiplication%5c%22%29%3b%5cnIsProductTermsUpToPower%28x%5e2%2c%20x%5e2%2b%201%29%3b%5cnIsProductTermsUpToPower%28x%5e3%2cx%28%20x%5e2-%201%29%29%3b%5cnIsProductTermsUpToPower%28x%5e2%2cx%28%20x%5e2-%201%29%29%3b%5cnIsProductTermsUpToPower%28x%2c%20%28x-%201%29%28x%20%2b%201%29%29%3b%5cnIsProductTermsUpToPower%28x%2c%20%282x%20%2b%201%29%28x%20%5c%5cpi%20%2b%201%29%29%3b%5cnIsProductTermsUpToPower%28x%2c%20%282x%20%2by%29%28x%20%5c%5cpi%20%2b%201%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOffRules("DistributeMultiplication");
@@ -3670,7 +3670,7 @@ IsProductTermsUpToPower(x, (2x +y)(x \pi + 1));
 ```
 Returns true if the expression is a product of terms of power up to the given power. Although this is subject to change, at the moment powers of linear terms are not considered linear. 
 
-*ScaleToLeadingUnit* [ScaleToLeadingUnit] {Calculator::innerScaleToLeadingUnit}. 
+*ScaleToLeadingUnit* [ScaleToLeadingUnit] {CalculatorFunctions::innerScaleToLeadingUnit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ScaleToLeadingUnit%281%2f2%20x%20%2b%201%2f3%20y%2b%201%2f7%20a%20b%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ScaleToLeadingUnit(1/2 x + 1/3 y+ 1/7 a b)

@@ -11,7 +11,7 @@
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::raiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 #include "math_rational_function_implementation.h"
 
-bool CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational(
+bool CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational");
@@ -144,7 +144,7 @@ bool CalculatorFunctionsBinaryOps::addRationalToRational(
   return output.assignValue(calculator, leftR + rightR);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddStringToString(
+bool CalculatorFunctionsBinaryOps::addStringToString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddStringToString");
@@ -957,7 +957,7 @@ bool CalculatorFunctionsBinaryOps::multiplyPolynomialModPolynomialModPToPolynomi
   return output.assignValueWithContext(calculator, left, inputContextsMerged[1].getContext());
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::addPlotToPlot(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
@@ -1837,7 +1837,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRation
   return output.assignValue(calculator, leftD * rightD);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational(
+bool CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational");

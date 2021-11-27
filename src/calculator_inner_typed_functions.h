@@ -14,7 +14,7 @@ public:
   template <class Type>
   static bool divideTypeByType(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -22,7 +22,7 @@ public:
   static bool addUniversalEnvelopingAlgebraElementToAny(Calculator& calculator, const Expression& input, Expression& output);
   static bool addElementTensorToElementTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool addNumberOrPolynomialToNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddPlotToPlot(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addPlotToPlot(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAddMatrixToMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDirectSumMatrixWithMatrix(Calculator& calculator, const Expression& input, Expression& output);
@@ -35,8 +35,8 @@ public:
   static bool addMatrixRationalFractionsToMatrixRationalFractions(Calculator& calculator, const Expression& input, Expression& output);
   static bool addMatrixTensorToMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool addRationalToRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddStringToString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addStringToString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addElementZModPOrRationalToElementZModPOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool addPolynomialModuloIntegerToPolynomialModuloInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );

@@ -358,7 +358,7 @@ bool Calculator::getVectorDoublesFromFunctionArguments(
   );
 }
 
-bool CalculatorFunctions::innerGetPointsImplicitly(
+bool CalculatorFunctions::getPointsImplicitly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetPointsImplicitly");
@@ -970,7 +970,7 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerRemoveDuplicates(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::removeDuplicates(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerRemoveDuplicates");
   int operationRemoveDuplicated = calculator.operations.getIndexNoFail("RemoveDuplicates");
   if (
@@ -986,7 +986,7 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& calculator, const Ex
   return output.makeSequence(calculator, &result);
 }
 
-bool CalculatorFunctions::innerSort(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::sort(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSort");
   List<Expression> sortedExpressions;
   const Expression* toBeSorted = &input;
@@ -1003,7 +1003,7 @@ bool CalculatorFunctions::innerSort(Calculator& calculator, const Expression& in
   return output.makeSequence(calculator, &sortedExpressions);
 }
 
-bool CalculatorFunctions::innerSortDescending(
+bool CalculatorFunctions::sortDescending(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSortDescending");
@@ -1043,7 +1043,7 @@ bool CalculatorFunctionsListsAndSets::length(Calculator& calculator, const Expre
   return output.assignValue(calculator, input.size() - 1);
 }
 
-bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
+bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
   Calculator& calculator, const Expression& input, Expression& output, bool excludeNamedConstants
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables");
@@ -1243,7 +1243,7 @@ bool CalculatorFunctions::operatorBounds(
   return output.setChild(1, theLimitsE);
 }
 
-bool CalculatorFunctions::innerPowerExponentToLog(
+bool CalculatorFunctions::powerExponentToLog(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerExponentToLog");
@@ -1301,7 +1301,7 @@ bool CalculatorFunctions::distributeExponent(
   return output.makeXOX(calculator, calculator.opTimes(), leftE, rightE);
 }
 
-bool CalculatorFunctions::innerSqrt(
+bool CalculatorFunctions::sqrt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerSqrt");

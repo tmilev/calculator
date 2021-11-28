@@ -565,10 +565,10 @@ bool CalculatorFunctions::testProblemInterpretation(
   return output.assignValue(calculator, comments.str());
 }
 
-bool CalculatorFunctions::innerIntervalClosedFromSequence(
+bool CalculatorFunctions::intervalClosedFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalClosedFromSequence");
+  MacroRegisterFunctionWithName("CalculatorFunctions::intervalClosedFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -579,10 +579,10 @@ bool CalculatorFunctions::innerIntervalClosedFromSequence(
   return output.setChildAtomValue(0, calculator.opIntervalClosed());
 }
 
-bool CalculatorFunctions::innerIntervalOpenFromSequence(
+bool CalculatorFunctions::intervalOpenFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalOpenFromSequence");
+  MacroRegisterFunctionWithName("CalculatorFunctions::intervalOpenFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -593,10 +593,10 @@ bool CalculatorFunctions::innerIntervalOpenFromSequence(
   return output.setChildAtomValue(0, calculator.opIntervalOpen());
 }
 
-bool CalculatorFunctions::innerIntervalRightClosedFromSequence(
+bool CalculatorFunctions::intervalRightClosedFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalRightClosedFromSequence");
+  MacroRegisterFunctionWithName("CalculatorFunctions::intervalRightClosedFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -607,10 +607,10 @@ bool CalculatorFunctions::innerIntervalRightClosedFromSequence(
   return output.setChildAtomValue(0, calculator.opIntervalRightClosed());
 }
 
-bool CalculatorFunctions::innerIntervalLeftClosedFromSequence(
+bool CalculatorFunctions::intervalLeftClosedFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalLeftClosedFromSequence");
+  MacroRegisterFunctionWithName("CalculatorFunctions::intervalLeftClosedFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -621,7 +621,7 @@ bool CalculatorFunctions::innerIntervalLeftClosedFromSequence(
   return output.setChildAtomValue(0, calculator.opIntervalLeftClosed());
 }
 
-bool CalculatorFunctions::innerGetFirstSummandContaining(
+bool CalculatorFunctions::getFirstSummandContaining(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetFirstSummandContaining");
@@ -639,7 +639,7 @@ bool CalculatorFunctions::innerGetFirstSummandContaining(
   return false;
 }
 
-bool CalculatorFunctions::innerGetSummand(
+bool CalculatorFunctions::getSummand(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetSummand");
@@ -1128,8 +1128,8 @@ bool CalculatorFunctions::innerSendEmailWithMailGun(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerIsSquare(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsSquare");
+bool CalculatorFunctions::isSquare(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::isSquare");
   if (input.size() != 2) {
     return false;
   }
@@ -1158,10 +1158,10 @@ bool CalculatorFunctions::innerIsSquare(Calculator& calculator, const Expression
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctions::innerIsSquareFree(
+bool CalculatorFunctions::isSquareFree(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsSquareFree");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isSquareFree");
   if (input.size() != 2) {
     return false;
   }
@@ -1205,10 +1205,10 @@ bool CalculatorFunctions::isSquareFreePolynomial(
   return output.assignValue(calculator, Rational(int(squareFree)));
 }
 
-bool CalculatorFunctions::innerIsPower(
+bool CalculatorFunctions::isPower(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPower");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isPower");
   if (input.size() != 2) {
     return false;
   }
@@ -1571,7 +1571,7 @@ bool CalculatorFunctions::matchesPattern(
   return output.addChildOnTop(commandList);
 }
 
-bool CalculatorFunctions::innerDegreesToRadians(
+bool CalculatorFunctions::degreesToRadians(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDegreesToRadians");
@@ -1588,7 +1588,7 @@ bool CalculatorFunctions::innerDegreesToRadians(
   return true;
 }
 
-bool CalculatorFunctions::innerLessThanOrEqualTo(
+bool CalculatorFunctions::lessThanOrEqualTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLessThanOrEqualTo");
@@ -1603,7 +1603,7 @@ bool CalculatorFunctions::innerLessThanOrEqualTo(
   return true;
 }
 
-bool CalculatorFunctions::innerGreaterThanOrEqualTo(
+bool CalculatorFunctions::greaterThanOrEqualTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGreaterThanOrEqualTo");
@@ -1653,7 +1653,7 @@ bool CalculatorFunctions::greaterThan(Calculator& calculator, const Expression& 
   return false;
 }
 
-bool CalculatorFunctions::innerLessThan(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::lessThan(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLessThan");
   if (!input.isListNElements(3)) {
     return false;
@@ -1665,7 +1665,7 @@ bool CalculatorFunctions::innerLessThan(Calculator& calculator, const Expression
   return CalculatorFunctions::greaterThan(calculator, swappedE, output);
 }
 
-bool CalculatorFunctions::innerCollectOpands(
+bool CalculatorFunctions::collectOpands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCollectOpands");
@@ -1680,7 +1680,7 @@ bool CalculatorFunctions::innerCollectOpands(
   return output.makeSequence(calculator, &theList);
 }
 
-bool CalculatorFunctions::innerCollectMultiplicands(
+bool CalculatorFunctions::collectMultiplicands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::outerCollectSummands");
@@ -1692,7 +1692,7 @@ bool CalculatorFunctions::innerCollectMultiplicands(
   return output.makeSequence(calculator, &theList);
 }
 
-bool CalculatorFunctions::innerCollectSummands(
+bool CalculatorFunctions::collectSummands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCollectSummands");
@@ -2061,7 +2061,7 @@ bool CalculatorFunctionsListsAndSets::intersectUnion(
   return CalculatorBasics::distribute(calculator, input, output, calculator.opUnion(), calculator.opIntersection(), false);
 }
 
-bool CalculatorFunctions::innerCompareIntervalsNumerically(
+bool CalculatorFunctions::compareIntervalsNumerically(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompareIntervalsNumerically");
@@ -2123,10 +2123,10 @@ bool CalculatorFunctions::innerCompareIntervalsNumerically(
 
 }
 
-bool CalculatorFunctions::innerIntersectEmptySet(
+bool CalculatorFunctions::intersectEmptySet(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntersectEmptySet");
+  MacroRegisterFunctionWithName("CalculatorFunctions::intersectEmptySet");
   if (!input.startsWith(calculator.opIntersection(), 3)) {
     return false;
   }
@@ -2144,7 +2144,7 @@ bool CalculatorFunctions::innerIntersectEmptySet(
 bool CalculatorFunctions::isLinearOrConstantIn(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsLinearOrConstantIn");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isLinearOrConstantIn");
   if (input.size() < 3) {
     return false;
   }
@@ -2204,7 +2204,7 @@ bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
   return output.assignValue(calculator, 1);
 }
 
-bool CalculatorFunctions::innerOrIdentical(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::orIdentical(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerOrIdentical");
   (void) calculator;
   if (!input.startsWithGivenOperation("or", 3)) {
@@ -2371,8 +2371,8 @@ bool CalculatorFunctionsAlgebraic::isAlgebraicRadical(
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctions::innerIsReal(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsReal");
+bool CalculatorFunctions::isReal(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::isReal");
   if (input.size() != 2) {
     return false;
   }
@@ -2397,7 +2397,7 @@ bool CalculatorFunctions::expressiontoUTF8String(
 bool CalculatorFunctions::isProductTermsUpToPower(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsProductTermsUpToPower");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isProductTermsUpToPower");
   if (input.size() < 3) {
     return false;
   }
@@ -2455,7 +2455,7 @@ bool CalculatorFunctions::isProductTermsUpToPower(
   return output.assignValue(calculator, 1);
 }
 
-bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::scaleToLeadingUnit(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerScaleToLeadingUnit");
   if (input.size() != 2) {
     return false;
@@ -2486,7 +2486,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
   }
   Expression radical, reduced;
   radical.makeXOX(calculator, calculator.opSqrt(), calculator.expressionTwo(), input[1]);
-  if (!CalculatorFunctions::innerSqrt(calculator, radical, reduced)) {
+  if (!CalculatorFunctions::sqrt(calculator, radical, reduced)) {
     return false;
   }
   if (!reduced.isOfType<AlgebraicNumber>()) {
@@ -2497,7 +2497,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
   return output.makeXOX(calculator, calculator.opPower(), reduced, integerPower);
 }
 
-bool CalculatorFunctions::innerNewtonsMethod(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::newtonsMethod(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerNewtonsMethod");
   if (input.size() != 4) {
     return false;
@@ -2826,7 +2826,7 @@ bool CalculatorFunctionsCrypto::testASN1Decode(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerIsInteger(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::isInteger(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }
@@ -3210,7 +3210,7 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerIsRational(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::isRational(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }

@@ -1077,7 +1077,7 @@ bool CalculatorFunctions::coefficientOf(Calculator& calculator, const Expression
   return output.makeSum(calculator, survivingSummands);
 }
 
-bool CalculatorFunctions::innerChildExpression(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::childExpression(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerChildExpression");
   (void) calculator;
   if (input.size() != 3) {
@@ -1140,7 +1140,7 @@ bool CalculatorFunctions::dereferenceSequenceOrMatrix(
   return false;
 }
 
-bool CalculatorFunctions::innerDereferenceSequenceStatements(
+bool CalculatorFunctions::dereferenceSequenceStatements(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDereferenceSequenceStatements");
@@ -1314,7 +1314,7 @@ bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinimalPolynomial(
   return output.assignValue(calculator, algebraicNumber);
 }
 
-bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
+bool CalculatorFunctions::compositeAPowerBEvaluatedAtC(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompositeApowerBevaluatedAtC");
@@ -1338,7 +1338,7 @@ bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
   return output.makeXOX(calculator, calculator.opPower(), finalBase, input[0][2]);
 }
 
-bool CalculatorFunctions::innerConstantFunction(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::constantFunction(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConstantFunction");
   (void) calculator;//portable way of avoiding unused parameter warning
   if (!input.isListNElements()) {
@@ -2097,7 +2097,7 @@ bool CalculatorFunctions::gaussianEliminationMatrix(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerCompositeConstTimesAnyActOn(
+bool CalculatorFunctions::compositeConstTimesAnyActOn(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompositeConstTimesAnyActOn");
@@ -2499,7 +2499,7 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
   return false;
 }
 
-bool CalculatorFunctions::innerCompositeDifferentiateLog(
+bool CalculatorFunctions::compositeDifferentiateLog(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCompositeDifferentiateLog");
@@ -2557,7 +2557,7 @@ bool CalculatorFunctions::divideByNumber(
   return true;
 }
 
-bool CalculatorFunctions::innerMax(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::maximum(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerMin");
   (void) calculator;
   if (input.size() < 3) {
@@ -2580,7 +2580,7 @@ bool CalculatorFunctions::innerMax(Calculator& calculator, const Expression& inp
   return true;
 }
 
-bool CalculatorFunctions::innerMin(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::minimum(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerMin");
   (void) calculator;
   if (input.size() < 3) {
@@ -2603,7 +2603,7 @@ bool CalculatorFunctions::innerMin(Calculator& calculator, const Expression& inp
   return true;
 }
 
-bool CalculatorFunctions::innerEqualEqualEqual(
+bool CalculatorFunctions::equalEqualEqual(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerEqualEqualEqual");
@@ -3358,8 +3358,8 @@ bool CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument(
   return output.makeXOX(calculator, input[0][0].data, leftE, rightE);
 }
 
-bool CalculatorFunctions::innerIsEven(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsEven");
+bool CalculatorFunctions::isEven(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::isEven");
   if (input.size() != 2) {
     return false;
   }
@@ -3377,10 +3377,10 @@ bool CalculatorFunctions::innerIsEven(Calculator& calculator, const Expression& 
   return output.assignValue(calculator, 0);
 }
 
-bool CalculatorFunctions::innerIsConstant(
+bool CalculatorFunctions::isConstant(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsConstant");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isConstant");
   if (input.size() != 2) {
     return false;
   }
@@ -3388,10 +3388,10 @@ bool CalculatorFunctions::innerIsConstant(
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctions::innerIsNonEmptySequence(
+bool CalculatorFunctions::isNonEmptySequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsNonEmptySequence");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isNonEmptySequence");
   if (input.hasBoundVariables()) {
     return false;
   }
@@ -3422,7 +3422,7 @@ bool CalculatorFunctions::differentialStandardHandler(
   return output.addChildRationalOnTop(1);
 }
 
-bool CalculatorFunctions::innerDifferentialOfPolynomial(
+bool CalculatorFunctions::differentialOfPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentialOfPolynomial");
@@ -3454,10 +3454,10 @@ bool CalculatorFunctions::innerDifferentialOfPolynomial(
   return output.makeSum(calculator, outputSummands);
 }
 
-bool CalculatorFunctions::innerIsDifferentialOneFormOneVariable(
+bool CalculatorFunctions::isDifferentialOneFormOneVariable(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsDifferentialOneFormOneVariable");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isDifferentialOneFormOneVariable");
   if (input.size() != 2) {
     return false;
   }
@@ -3596,10 +3596,10 @@ bool CalculatorFunctions::rationalFunctionSubstitution(
   return CalculatorConversions::expressionFromRationalFraction<Rational>(calculator, resultRationalForm, output);
 }
 
-bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
+bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
+  MacroRegisterFunctionWithName("Calculator::invertMatrixVerbose");
   Matrix<RationalFraction<Rational> > matrix, outputMatrix, extendedMatrix;
   Expression converted;
   if (!CalculatorConversions::matrixRationalFunction(
@@ -3725,10 +3725,10 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   return output.assignValue<std::string>(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerInvertMatrixVerbose(
+bool CalculatorFunctions::invertMatrixVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerInvertMatrixVerbose");
+  MacroRegisterFunctionWithName("CalculatorFunctions::invertMatrixVerbose");
   Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(calculator, input, converted)) {
     return calculator << "Failed to get matrix from: " << input.toString();
@@ -3738,7 +3738,7 @@ bool CalculatorFunctions::innerInvertMatrixVerbose(
   if (!calculator.functionGetMatrixNoComputation(
     converted, matrix
   )) {
-    return CalculatorFunctions::innerInvertMatrixRFsVerbose(calculator, input, output);
+    return CalculatorFunctions::invertMatrixRationalFractionsVerbose(calculator, input, output);
   }
   if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1) {
     return output.assignError(calculator, "The matrix is not square");
@@ -5279,7 +5279,7 @@ bool Expression::makeSequenceStatements(Calculator& owner, List<Expression>* inp
   return true;
 }
 
-bool CalculatorFunctions::innerGetUserDefinedSubExpressions(
+bool CalculatorFunctions::getUserDefinedSubExpressions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetUserDefinedSubExpressions");
@@ -5291,7 +5291,7 @@ bool CalculatorFunctions::innerGetUserDefinedSubExpressions(
   return output.makeSequence(calculator, &theList);
 }
 
-bool CalculatorFunctions::innerLispify(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::lispify(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLispify");
   if (input.size() != 2) {
     return false;
@@ -5299,7 +5299,7 @@ bool CalculatorFunctions::innerLispify(Calculator& calculator, const Expression&
   return output.assignValue(calculator, input[1].toStringSemiFull());
 }
 
-bool CalculatorFunctions::innerLispifyFull(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::lispifyFull(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLispifyFull");
   if (input.size() != 2) {
     return false;
@@ -5364,7 +5364,7 @@ bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
   return output.assignValue(calculator, theCharPoly.toString(&format));
 }
 
-bool CalculatorFunctions::innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::reverseBytes(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerReverseBytes");
   if (input.size() != 2) {
     return false;
@@ -5427,7 +5427,7 @@ bool CalculatorFunctions::matrixTrace(
   return true;
 }
 
-bool CalculatorFunctions::innerContains(
+bool CalculatorFunctions::contains(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerContains");
@@ -5537,8 +5537,8 @@ void ElementZmodP::operator*=(const ElementZmodP& other) {
   this->value %= this->modulus;
 }
 
-bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPossiblyPrime");
+bool CalculatorFunctions::isPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::isPossiblyPrime");
   if (input.size() != 2) {
     return false;
   }
@@ -5555,7 +5555,7 @@ bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& calculator, const Exp
 }
 
 bool CalculatorFunctions::isPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPrimeMillerRabin");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isPrimeMillerRabin");
   if (input.size() != 2) {
     return false;
   }
@@ -5571,10 +5571,10 @@ bool CalculatorFunctions::isPrimeMillerRabin(Calculator& calculator, const Expre
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctions::innerIsNilpotent(
+bool CalculatorFunctions::isNilpotent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsNilpotent");
+  MacroRegisterFunctionWithName("CalculatorFunctions::isNilpotent");
   Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(calculator, input, converted)) {
     return false;
@@ -5599,8 +5599,8 @@ bool CalculatorFunctions::innerIsNilpotent(
   return output.assignValue(calculator, 0);
 }
 
-bool CalculatorFunctions::innerInvertMatrix(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerInvertMatrix");
+bool CalculatorFunctions::invertMatrix(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::invertMatrix");
   Matrix<Rational> matrix;
   Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(
@@ -5644,7 +5644,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& calculator, const Expres
   return output.makeMatrix(calculator, matrixAlgebraic);
 }
 
-bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::differentialEquationsEulersMethod(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDFQsEulersMethod");
   if (input.size() != 7) {
     return calculator << "Euler method function takes 6 arguments";
@@ -6637,7 +6637,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   return output.assignValue(calculator, outputPlot);
 }
 
-bool CalculatorFunctions::innerEvaluateToDoublE(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::evaluateToDouble(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Expression::innerEvaluateToDoublE");
   if (input.size() != 2) {
     // one argument expected.
@@ -6718,7 +6718,7 @@ bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
   return output.assignValue(calculator, semisimpleSubalgebras);
 }
 
-bool CalculatorFunctions::innerAllPartitions(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::allPartitions(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerAllPartitions");
   if (input.size() != 2) {
     return false;
@@ -6744,7 +6744,7 @@ bool CalculatorFunctions::innerAllPartitions(Calculator& calculator, const Expre
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::allVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerAllVectorPartitions");
   if (input.size() != 3) {
     return calculator << "<hr>AllVectorPartitions function takes 3 arguments.";
@@ -8138,7 +8138,7 @@ bool CalculatorFunctions::setRandomSeed(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerAnd(
+bool CalculatorFunctions::andFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerAnd");
@@ -8157,7 +8157,7 @@ bool CalculatorFunctions::innerAnd(
   return false;
 }
 
-bool CalculatorFunctions::innerOr(
+bool CalculatorFunctions::orFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerOr");
@@ -8176,10 +8176,10 @@ bool CalculatorFunctions::innerOr(
   return false;
 }
 
-bool CalculatorFunctions::innerIfStandard(
+bool CalculatorFunctions::ifStandard(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIfStandard");
+  MacroRegisterFunctionWithName("CalculatorFunctions::ifStandard");
   (void) calculator;
   if (input.size() != 4) {
     return false;
@@ -8195,10 +8195,10 @@ bool CalculatorFunctions::innerIfStandard(
   return false;
 }
 
-bool CalculatorFunctions::innerIfFrozen(
+bool CalculatorFunctions::ifFrozen(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIfFrozen");
+  MacroRegisterFunctionWithName("CalculatorFunctions::ifFrozen");
   (void) calculator;
   if (input.size() != 4) {
     return false;

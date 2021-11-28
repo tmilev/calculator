@@ -170,7 +170,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "IsPossiblyPrime",
-    CalculatorFunctions::innerIsPossiblyPrime,
+    CalculatorFunctions::isPossiblyPrime,
     "",
     "Checks whether the number is "
     "prime by trial division first "
@@ -200,7 +200,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "AllPartitions",
-    CalculatorFunctions::innerAllPartitions,
+    CalculatorFunctions::allPartitions,
     "",
     "Prints all partitions of a positive number into a sum of positive integers. ",
     "AllPartitions(10) ",
@@ -210,7 +210,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "AllVectorPartitions",
-    CalculatorFunctions::innerAllVectorPartitions,
+    CalculatorFunctions::allVectorPartitions,
     "",
     "Prints all partitions of the vector "
     "(first argument) using a given list of "
@@ -268,7 +268,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "IsNilpotent",
-    CalculatorFunctions::innerIsNilpotent,
+    CalculatorFunctions::isNilpotent,
     "",
     "Computes whether a matrix is nilpotent. "
     "Recall an object X is nilpotent if there's a positive N with X^N=0. "

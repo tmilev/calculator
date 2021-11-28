@@ -287,7 +287,7 @@ public:
   static bool distributeSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool fourierTransformElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSqrt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sqrt(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool factorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionFactorInteger(Calculator& calculator, const Expression& input, Expression& output);
@@ -311,18 +311,18 @@ public:
   static bool compareExpressionsNumerically(Calculator& calculator, const Expression& input, Expression& output);
   static bool compareExpressionsNumericallyAtPoints(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(
+  static bool ensureExpressionDependsOnlyOnMandatoryVariables(
     Calculator& calculator, const Expression& input, Expression& output, bool excludeNamedConstants
   );
-  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants(
+  static bool ensureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(calculator, input, output, true);
+    return CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(calculator, input, output, true);
   }
-  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants(
+  static bool ensureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(calculator, input, output, false);
+    return CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(calculator, input, output, false);
   }
   static bool ensureExpressionDependsOnlyOnStandard(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -344,29 +344,29 @@ public:
 
   static bool dereferenceInterval(Calculator& calculator, const Expression& input, Expression& output);
   static bool dereferenceSequenceOrMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDereferenceSequenceStatements(Calculator& calculator, const Expression& input, Expression& output);
+  static bool dereferenceSequenceStatements(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool compositeElementWeylAlgebraActOnPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCompositeConstTimesAnyActOn(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCompositeApowerBevaluatedAtC(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConstantFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compositeConstTimesAnyActOn(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compositeAPowerBEvaluatedAtC(Calculator& calculator, const Expression& input, Expression& output);
+  static bool constantFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool rationalFunctionSubstitution(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerGetPointsImplicitly(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCompositeDifferentiateLog(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getPointsImplicitly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compositeDifferentiateLog(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool operatorBounds(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerAnyToZero(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerExponentToLog(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerNewtonsMethod(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerExponentToLog(Calculator& calculator, const Expression& input, Expression& output);
+  static bool newtonsMethod(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerCompareIntervalsNumerically(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntersectEmptySet(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetFirstSummandContaining(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetSummand(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCollectMultiplicands(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCollectOpands(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCollectSummands(Calculator& calculator, const Expression& input, Expression& output);
+  static bool compareIntervalsNumerically(Calculator& calculator, const Expression& input, Expression& output);
+  static bool intersectEmptySet(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getFirstSummandContaining(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getSummand(Calculator& calculator, const Expression& input, Expression& output);
+  static bool collectMultiplicands(Calculator& calculator, const Expression& input, Expression& output);
+  static bool collectOpands(Calculator& calculator, const Expression& input, Expression& output);
+  static bool collectSummands(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerMergeConstantRadicals(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerCommuteConstants(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& calculator, const Expression& input, Expression& output);
@@ -377,42 +377,42 @@ public:
   static bool addTerms(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool isPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output);
   static bool leastCommonMultipleInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool greatestCommonDivisorInteger(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsNilpotent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isNilpotent(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerInvertMatrixRFsVerbose(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerInvertMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDFQsEulersMethod(Calculator& calculator, const Expression& input, Expression& output);
+  static bool invertMatrixRationalFractionsVerbose(Calculator& calculator, const Expression& input, Expression& output);
+  static bool invertMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentialEquationsEulersMethod(Calculator& calculator, const Expression& input, Expression& output);
 
 
-  static bool innerScaleToLeadingUnit(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRemoveDuplicates(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSort(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSortDescending(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetUserDefinedSubExpressions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool scaleToLeadingUnit(Calculator& calculator, const Expression& input, Expression& output);
+  static bool removeDuplicates(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sort(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sortDescending(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getUserDefinedSubExpressions(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool divideByNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool divisionCancellations(Calculator& calculator, const Expression& input, Expression& output);
   static bool associateDivisionDivision(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerEqualEqual(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerEqualEqualEqual(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMax(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMin(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLessThanOrEqualTo(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGreaterThanOrEqualTo(Calculator& calculator, const Expression& input, Expression& output);
+  static bool equalEqualEqual(Calculator& calculator, const Expression& input, Expression& output);
+  static bool maximum(Calculator& calculator, const Expression& input, Expression& output);
+  static bool minimum(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lessThanOrEqualTo(Calculator& calculator, const Expression& input, Expression& output);
+  static bool greaterThanOrEqualTo(Calculator& calculator, const Expression& input, Expression& output);
   static bool greaterThan(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLessThan(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lessThan(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool outerCommuteAtimesBifUnivariate(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& calculator, const Expression& input, Expression& output);
   static bool differentialStandardHandler(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentialOfPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentialOfPolynomial(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsDifferentialOneFormOneVariable(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isDifferentialOneFormOneVariable(Calculator& calculator, const Expression& input, Expression& output);
   static bool extractQuadraticCoefficientsWithRespectToVariable(
     const Expression& quadratic,
     const Expression& variable,
@@ -430,13 +430,13 @@ public:
   static bool powerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool matrixTrace(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output);
+  static bool reverseBytes(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIfStandard(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIfFrozen(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerOr(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerOrIdentical(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAnd(Calculator& calculator, const Expression& input, Expression& output);
+  static bool ifStandard(Calculator& calculator, const Expression& input, Expression& output);
+  static bool ifFrozen(Calculator& calculator, const Expression& input, Expression& output);
+  static bool orFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool orIdentical(Calculator& calculator, const Expression& input, Expression& output);
+  static bool andFunction(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool solveUnivariatePolynomialWithRadicalsWithRespectTo(
     Calculator& calculator, const Expression& input, Expression& output
@@ -448,20 +448,20 @@ public:
     const Expression& input,
     Expression& output
   );
-  static bool innerContains(Calculator& calculator, const Expression& input, Expression& output);
+  static bool contains(Calculator& calculator, const Expression& input, Expression& output);
   static bool expressionLeafs(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerLispify(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLispifyFull(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerChildExpression(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lispify(Calculator& calculator, const Expression& input, Expression& output);
+  static bool lispifyFull(Calculator& calculator, const Expression& input, Expression& output);
+  static bool childExpression(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerDegreesToRadians(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerEvaluateToDoublE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool degreesToRadians(Calculator& calculator, const Expression& input, Expression& output);
+  static bool evaluateToDouble(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionEvaluateToDouble(Calculator& calculator, const Expression& input, Expression& output);
   static bool embedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerAllPartitions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool allPartitions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool allVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
 
   template<class Coefficient>
   static bool functionDeterminant(
@@ -474,21 +474,21 @@ public:
   static bool determinant(Calculator& calculator, const Expression& input, Expression& output);
   static bool highestWeightTransposeAntiAutomorphismBilinearForm(Calculator& calculator, const Expression& input, Expression& output);
   static bool coefficientsPowersOf(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntervalOpenFromSequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntervalClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntervalLeftClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntervalRightClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsNonEmptySequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool intervalOpenFromSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool intervalClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool intervalLeftClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool intervalRightClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isNonEmptySequence(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsSquare(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsSquareFree(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isSquare(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isSquareFree(Calculator& calculator, const Expression& input, Expression& output);
   static bool isSquareFreePolynomial(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsPower(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsEven(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isPower(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isEven(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsReal(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsConstant(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isReal(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isConstant(Calculator& calculator, const Expression& input, Expression& output);
   static bool gaussianEliminationMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool splitToPartialFractionsOverAlgebraicRealsAlgorithm(
     Calculator& calculator, const Expression& input, Expression& output
@@ -572,10 +572,10 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool determinantPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerInvertMatrixVerbose(Calculator& calculator, const Expression& input, Expression& output);
+  static bool invertMatrixVerbose(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);

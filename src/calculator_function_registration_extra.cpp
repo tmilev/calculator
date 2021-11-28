@@ -168,7 +168,7 @@ void Calculator::initializeFunctionsExtra() {
   );
   this->addOperationHandler(
     "Lispify",
-    CalculatorFunctions::innerLispify,
+    CalculatorFunctions::lispify,
     "",
     "Shows the internal tree structure of an expression, "
     "without completely unfolding the tree structure of "
@@ -180,7 +180,7 @@ void Calculator::initializeFunctionsExtra() {
   );
   this->addOperationHandler(
     "LispifyFull",
-    CalculatorFunctions::innerLispifyFull,
+    CalculatorFunctions::lispifyFull,
     "",
     "Shows the complete internal tree structure of an expression "
     "(replacing the expression with a string).",

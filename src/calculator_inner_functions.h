@@ -326,19 +326,19 @@ public:
   }
   static bool ensureExpressionDependsOnlyOnStandard(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplySequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSumSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplySequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sumSequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool sumTimesExpressionToSumOf(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSumAsOperatorToSumInternalNotation(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHandleUnderscorePowerLimits(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerPolynomialize(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sumAsOperatorToSumInternalNotation(Calculator& calculator, const Expression& input, Expression& output);
+  static bool handleUnderscorePowerLimits(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialize(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionPolynomialize(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(
+  static bool applyToSubexpressionsRecurseThroughCalculusFunctions(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerSubList(Calculator& calculator, const Expression& input, Expression& output);
+  static bool subList(Calculator& calculator, const Expression& input, Expression& output);
   static bool applyToList(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerNumerator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool numerator(Calculator& calculator, const Expression& input, Expression& output);
   static bool denominator(Calculator& calculator, const Expression& input, Expression& output);
 
 

@@ -1337,7 +1337,7 @@ bool CalculatorFunctions::factorOutNumberContent(
   return true;
 }
 
-bool CalculatorFunctions::innerSubList(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::subList(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSubList");
   if (input.size() != 3) {
     return false;

@@ -517,7 +517,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Numerator",
-    CalculatorFunctions::innerNumerator,
+    CalculatorFunctions::numerator,
     "",
     "If the expression is a fraction, returns the numerator, "
     "else returns the entire expression. ",
@@ -528,7 +528,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions",
-    CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFunctions,
+    CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions,
     "",
     "Applies a transformation, recursively to all subexpressions of "
     "a list of known functions. ",
@@ -539,7 +539,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "SubList",
-    CalculatorFunctions::innerSubList,
+    CalculatorFunctions::subList,
     "",
     "Extracts a sub-list that contains all elements that satisfy a "
     "condition given by the second argument. Use the bound "
@@ -574,7 +574,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Product",
-    CalculatorFunctions::innerMultiplySequence,
+    CalculatorFunctions::multiplySequence,
     "",
     "Returns the product of the elements in a sequence. "
     "When used with zero arguments, returns 1.",
@@ -588,7 +588,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\sum",
-    CalculatorFunctions::innerSumSequence,
+    CalculatorFunctions::sumSequence,
     "",
     "Returns the sum of the elements in a sequence. "
     "When used with one element, will return that element. ",
@@ -615,7 +615,7 @@ void Calculator::initializeFunctionsStandard() {
     ");\n"
     "MakeExpression {}D - C;\n"
     "D - B;",
-    "CalculatorConversions::innerExpressionFromBuiltInTypE",
+    "CalculatorConversions::expressionFromBuiltInType",
     "MakeExpression",
     innerStandard
   );
@@ -626,7 +626,7 @@ void Calculator::initializeFunctionsStandard() {
     "Creates a polynomial expression with rational coefficients. ",
     "Polynomial{}((x-2y+z- 1)^2(x +y-z));"
     "\nPolynomial{}(y^2)-(Polynomial{}y)^2",
-    "CalculatorConversions::innerPolynomial",
+    "CalculatorConversions::getPolynomial",
     "Polynomial",
     innerStandard
   );
@@ -649,7 +649,7 @@ void Calculator::initializeFunctionsStandard() {
     "First argument = expression to convert to polynomial. "
     "Second argument = the number mod which we are computing. ",
     "PolynomialModP{}(x^2+x+1, 2);",
-    "CalculatorConversions::innerPolynomialModuloInteger",
+    "CalculatorConversions::polynomialModuloInteger",
     "PolynomialModP",
     innerStandard
   );
@@ -670,7 +670,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Polynomialize",
-    CalculatorFunctions::outerPolynomialize,
+    CalculatorFunctions::polynomialize,
     "",
     "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
     "C = (c a + a b + b c + 1)^3;\n"
@@ -3474,7 +3474,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::innerHandleUnderscorePowerLimits,
+    CalculatorFunctions::handleUnderscorePowerLimits,
     "",
     "Handles expressions of the form \\limits_a^b",
     "\\limits_a^b; \\limits^b_a",
@@ -3484,7 +3484,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "_",
-    CalculatorFunctions::innerHandleUnderscorePowerLimits,
+    CalculatorFunctions::handleUnderscorePowerLimits,
     "",
     "Handles expressions of the form \\limits_a^b",
     "\\limits_a^b; \\limits^b_a",
@@ -5087,7 +5087,7 @@ void Calculator::initializeFunctionsStandard() {
 
   this->addOperationHandler(
     "\\sum",
-    CalculatorFunctions::innerSumAsOperatorToSumInternalNotation,
+    CalculatorFunctions::sumAsOperatorToSumInternalNotation,
     "",
     "Transforms (\\sum_a^b ){} n to \\sum_a^b n (internal notation). ",
     "PlotExpressionTree(Freeze(\\sum_a^b ){} n);\n"

@@ -727,7 +727,7 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   return true;
 }
 
-bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFunctions(
+bool CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("innerApplyToSubexpressionsRecurseThroughCalculusFunctions");
@@ -768,7 +768,7 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
   return true;
 }
 
-bool CalculatorFunctions::innerNumerator(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::numerator(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerNumerator");
   if (input.size() != 2) {
     return false;
@@ -808,7 +808,7 @@ bool CalculatorFunctions::denominator(Calculator& calculator, const Expression& 
   return output.assignValue(calculator, 1);
 }
 
-bool CalculatorFunctions::innerHandleUnderscorePowerLimits(
+bool CalculatorFunctions::handleUnderscorePowerLimits(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerHandleUnderscorePowerLimits");
@@ -832,7 +832,7 @@ bool CalculatorFunctions::innerHandleUnderscorePowerLimits(
   }
 }
 
-bool CalculatorFunctions::innerSumAsOperatorToSumInternalNotation(
+bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSumAsOperatorToSumInternalNotation");
@@ -889,7 +889,7 @@ bool CalculatorFunctions::sumTimesExpressionToSumOf(
   return false;
 }
 
-bool CalculatorFunctions::innerSumSequence(
+bool CalculatorFunctions::sumSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSumSequence");
@@ -913,7 +913,7 @@ bool CalculatorFunctions::innerSumSequence(
   return output.makeSum(calculator, theTerms);
 }
 
-bool CalculatorFunctions::innerMultiplySequence(
+bool CalculatorFunctions::multiplySequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerMultiplySequence");
@@ -921,7 +921,7 @@ bool CalculatorFunctions::innerMultiplySequence(
     return false;
   }
   if (input.size() == 2 && input[1].isSequenceNElements()) {
-    return CalculatorFunctions::innerMultiplySequence(calculator, input[1], output);
+    return CalculatorFunctions::multiplySequence(calculator, input[1], output);
   }
   List<Expression> terms;
   for (int i = 1; i < input.size(); i ++) {

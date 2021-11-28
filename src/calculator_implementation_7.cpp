@@ -3841,7 +3841,7 @@ bool CalculatorFunctions::functionPolynomialize(
   );
 }
 
-bool CalculatorFunctions::outerPolynomialize(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::polynomialize(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }

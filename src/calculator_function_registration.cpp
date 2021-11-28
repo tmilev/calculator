@@ -39,7 +39,7 @@ void Calculator::initializeAdminFunctions() {
   }
   this->addOperationHandler(
     "MongoFind",
-    CalculatorDatabaseFunctions::innerExecuteMongoQuery,
+    CalculatorDatabaseFunctions::executeMongoQuery,
     "",
     "Executes a mongoDB query. Requires administator rights. "
     "The database name is calculator (can't be modified). "
@@ -368,13 +368,13 @@ void Calculator::initializeFunctionsStandard() {
     "freeze command and returns the argument, "
     "else returns the argument unchanged.",
     "a =Freeze{}(1 + 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c",
-    "CalculatorFunctions::innerThaw",
+    "CalculatorFunctions::thaw",
     "Thaw",
     innerStandard
   );
   this->addOperationHandler(
     "LogEvaluationStepsDebug",
-    CalculatorSteps::innerLogEvaluationStepsDebug,
+    CalculatorSteps::logEvaluationStepsDebug,
     "",
     "Creates an expression evaluation tree. "
     "Intended for debugging the system. ",
@@ -385,7 +385,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "LogEvaluationSteps",
-    CalculatorSteps::innerLogEvaluationSteps,
+    CalculatorSteps::logEvaluationSteps,
     "",
     "Show a step-by step evaluation of the calculator. "
     "Some steps my be combined or omitted for improved human readability. ",
@@ -815,7 +815,7 @@ void Calculator::initializeFunctionsStandard() {
     "Raises imaginary unit to an integer power. ",
     "TurnOnRules(\"PowerImaginaryUnit\");\n"
     "i^{-50!+ 1}; ",
-    "CalculatorFunctions::innerPowerImaginaryUnit",
+    "CalculatorFunctions::powerImaginaryUnit",
     "PowerImaginaryUnit",
     innerStandardOffByDefault
   );
@@ -1145,7 +1145,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "MakeMatrix",
-    CalculatorConversions::innerMakeMatrix,
+    CalculatorConversions::makeMatrix,
     "",
     "Creates an internal c++ matrix structure from double list of rationals. ",
     "s_1 = MakeMatrix{}((- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));\n"
@@ -1158,7 +1158,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "MakeMatrixTensorForm",
-    CalculatorConversions::innerMatrixRationalTensorForM,
+    CalculatorConversions::matrixRationalTensorForm,
     "",
     "Same as MakeMatrix but uses different c++ implementation "
     "(class MatrixTensor instead of class Matrix). ",
@@ -1425,7 +1425,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "ModP",
-    CalculatorFunctions::innerZmodP,
+    CalculatorFunctions::zModP,
     "",
     "Number modulo P. First argument = number, second argument = modulo.",
     "ModP{}(7, 3)",
@@ -1525,7 +1525,7 @@ void Calculator::initializeFunctionsStandard() {
     "polynomial divided by a set of polynomials "
     "using the default monomial order (lexicographic).",
     "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y);",
-    "CalculatorFunctions::innerPolynomialDivisionRemainder",
+    "CalculatorFunctions::polynomialDivisionRemainder",
     "PolyDivRemainder",
     innerStandard
   );
@@ -1547,7 +1547,7 @@ void Calculator::initializeFunctionsStandard() {
     "Creates a slide with the polynomial disivion algorithm. "
     "First element = starting slide number.",
     "PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2) ; PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
-    "Calculator::innerPolynomialDivisionSlidesGrLex",
+    "Calculator::polynomialDivisionSlidesGrLex",
     "PolyDivSlidesGrLex",
     innerStandard
   );
@@ -1558,7 +1558,7 @@ void Calculator::initializeFunctionsStandard() {
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
     "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
-    "CalculatorFunctions::innerPolynomialDivisionVerboseGrLex",
+    "CalculatorFunctions::polynomialDivisionVerboseGrLex",
     "PolyDivStringGrLex",
     innerStandard
   );
@@ -1573,7 +1573,7 @@ void Calculator::initializeFunctionsStandard() {
     "First **smaller** power on the right is declared the winner ('larger')."
     "For example,  x^2 y^3 > x y^4, x^11 > y^10. ",
     "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
-    "CalculatorFunctions::innerPolynomialDivisionVerboseGradedReverseLexicographic",
+    "CalculatorFunctions::polynomialDivisionVerboseGradedReverseLexicographic",
     "PolyDivStringGrLexRev",
     innerStandard
   );
@@ -1590,7 +1590,7 @@ void Calculator::initializeFunctionsStandard() {
     "words 'expansions' (x^2y^3->xxyyy) of the monomials. ",
     "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);\n"
     "PolyDivStringLex{}(x^7 + \\sqrt{2} x + 1, \\sqrt{3}x^2 + 2x + 1)",
-    "CalculatorFunctions::innerPolynomialDivisionVerboseLex",
+    "CalculatorFunctions::polynomialDivisionVerboseLex",
     "PolyDivStringLex",
     innerStandard
   );
@@ -1608,7 +1608,7 @@ void Calculator::initializeFunctionsStandard() {
     "words 'expansions' (x^2y^3->xxyyy) of the monomials. "
     ,
     "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1) ;",
-    "CalculatorFunctions::innerPolynomialDivisionVerboseLexRev",
+    "CalculatorFunctions::polynomialDivisionVerboseLexRev",
     "PolyDivStringLexRev",
     innerStandard
   );
@@ -1719,7 +1719,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "UnivariatePartialFractions",
-    CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealS,
+    CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealS,
     "",
     "Attempts to splits a univariate rational function into partial "
     "fractions over the real algebraic numbers. "
@@ -2070,7 +2070,7 @@ void Calculator::initializeFunctionsStandard() {
     "To modify the dimensions (in pixels) of another plot, "
     "add to it the PlotWindow ``plot''. ",
     "Plot2D{}(1/x, -30, 30, \"red\") + PlotWindow(400,400) + PlotViewRectangle((-5,-5), (5,5))",
-    "CalculatorFunctionsPlot::innerPlotWindow",
+    "CalculatorFunctionsPlot::plotWindow",
     "PlotWindow",
     innerStandard
   );
@@ -2277,7 +2277,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "not",
-    CalculatorFunctions::innerNot,
+    CalculatorFunctions::notFunction,
     "",
     "If the argument is a small integer, "
     "returns 1 if the argument is 0 and 1 the argument is non-zero. "
@@ -2323,7 +2323,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2); (1,2)^t",
-    "Calculator::innerTranspose",
+    "Calculator::transpose",
     Calculator::Atoms::transpose,
     innerStandard
   );
@@ -2608,7 +2608,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Gets trace of a square matrix. ",
     "X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); Trace X",
-    "CalculatorFunctions::innerTrace",
+    "CalculatorFunctions::trace",
     "Trace",
     innerStandard
   );
@@ -2624,7 +2624,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Reverse",
-    CalculatorFunctions::innerReverseOrder,
+    CalculatorFunctions::reverseOrder,
     "",
     "Reverses order of elements. This operation will reverse products, lists, etc. "
     "More precisely, the command leaves the fist child in "
@@ -2637,7 +2637,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "ReverseRecursively",
-    CalculatorFunctions::innerReverseOrderRecursively,
+    CalculatorFunctions::reverseOrderRecursively,
     "",
     "Same as Reverse but will apply recursively to the children expressions as well.",
     "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
@@ -4046,7 +4046,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "Value",
-    CalculatorFunctions::innerValueOfModularExpression,
+    CalculatorFunctions::valueOfModularExpression,
     "",
     "Given an expression of the form a mod b, returns the element a. "
     "When the input is a modular polynomial, converts the polynomial to a rational. ",
@@ -4060,7 +4060,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "mod",
-    CalculatorFunctions::innerZmodP,
+    CalculatorFunctions::zModP,
     "",
     "Same as ModP but uses the mod notation.",
     "7 mod 3",
@@ -4441,26 +4441,26 @@ void Calculator::initializeFunctionsStandard() {
     "5^{- 1/3};\n"
     "5^{- 1/3}-\\sqrt[3]{5^- 1};\n"
     "\\sqrt[20]{200!}",
-    "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors",
+    "CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors",
     "PowerRationalByRational",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic,
+    CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic,
     this->opRational(),
     this->opRational(),
     "If the rational power is small enough, converts to an algebraic number. "
     "At the moment works with rational powers whose denominator is 2, "
     "may be extended to larger powers in the future. ",
     "54^{1/2}",
-    "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic",
+    "CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic",
     "PowerRationalByRationalOutputAlgebraic",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational,
+    CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational,
     this->opRational(),
     this->opDouble(),
     "Calls the built-in cpp functions to approximately raise a double to a power, "
@@ -4469,18 +4469,18 @@ void Calculator::initializeFunctionsStandard() {
     "f{}{{x}}=x^3+p x +q;\n"
     "Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\n"
     "q = DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
-    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational",
+    "CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational",
     "PowerDoubleToDouble",
     innerStandard
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT,
+    CalculatorFunctionsBinaryOps::powerSequenceOrMatrixByT,
     "",
     "Provided the exponent is t or T, calls the Transpose "
     "function on the base.",
     "X = (1,2)^t; X-Transpose{}(1,2); \\begin{pmatrix}1&2\\\\ 3& 5\\end{pmatrix}^t  ",
-    "CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT",
+    "CalculatorFunctionsBinaryOps::powerSequenceOrMatrixByT",
     "TransposePowerNotation",
     innerStandard
   );
@@ -4507,7 +4507,7 @@ void Calculator::initializeFunctionsStandard() {
     "a=FunctionToMatrix(f,2,2);\n"
     "b=a^{-1};\n"
     "a*b",
-    "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerMatBySmallInteger",
     "PowerMatrixBuiltInByInteger",
     innerStandard
   );
@@ -4517,7 +4517,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Attempts to exponentiate matrix by a large power. ",
     "X =\\begin{pmatrix} 1 & -1 \\\\ 4 & -3\\end{pmatrix}; X^{-55!- 1}  ",
-    "CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossible",
+    "CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible",
     "PowerMatrixNumbersByLargeIntegerIfPossible",
     innerStandard
   );
@@ -4533,11 +4533,11 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger,
+    CalculatorFunctionsBinaryOps::powerElementZmodPByInteger,
     "",
     "Raises an element of Z mod p to an integer power. ",
     "a = 3 mod 7; a^2",
-    "CalculatorFunctions::innerPowerElementZmodPByInteger",
+    "CalculatorFunctions::powerElementZmodPByInteger",
     "PowerElementZmodPToInteger",
     innerStandard
   );
@@ -4547,7 +4547,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Replaces e^{\\ln x} by x.",
     "e^{\\ln x}; ",
-    "CalculatorFunctions::innerPowerExponentToLog",
+    "CalculatorFunctions::powerExponentToLog",
     "PowerToLog",
     innerStandard
   );
@@ -4565,7 +4565,7 @@ void Calculator::initializeFunctionsStandard() {
     "A;\n"
     "B=x^0;\n"
     "0^0; ",
-    "CalculatorFunctions::innerPowerAnyToZero",
+    "CalculatorFunctions::powerAnyToZero",
     "PowerAnyToZero",
     innerStandard
   );
@@ -4576,7 +4576,7 @@ void Calculator::initializeFunctionsStandard() {
     this->opRational(),
     "Raises polynomial to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
-    "CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger",
     "PowerPolynomialBySmallInteger",
     innerStandard
   );
@@ -4589,7 +4589,7 @@ void Calculator::initializeFunctionsStandard() {
     "x = Polynomial{}x;\n"
     "y = Polynomial{}y;\n"
     "(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
-    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger",
     "PowerPolynomialAlgebraicNumbersBySmallInteger",
     innerStandard
   );
@@ -4616,7 +4616,7 @@ void Calculator::initializeFunctionsStandard() {
     "Raises polynomial modulo an integer to a small integer power. ",
     "a = PolynomialModP{}(x^2 + x + 1, 7);\n"
     "a^20",
-    "CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerPolynomialModuloIntegerBySmallInteger",
     "PowerPolynomialModuloIntegerBySmallInteger",
     innerStandard
   );
@@ -4643,13 +4643,13 @@ void Calculator::initializeFunctionsStandard() {
     "GCDPoly(s, modulo);\n"
     "GCDPoly(t, modulo);\n"
     "GCDPoly(u, modulo);",
-    "CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPBySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerPolynomialModPModuloPolynomialModPBySmallInteger",
     "PowerPolynomialModPModuloPolynomialModPBySmallInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger,
+    CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger,
     this->opAlgebraicNumber(),
     this->opRational(),
     "Raises algebraic number to small integer or half-integer power. ",
@@ -4658,7 +4658,7 @@ void Calculator::initializeFunctionsStandard() {
     "c = 33/4;\n"
     "x = (-b+\\sqrt{}(b^2-4a c))/(2a);\n"
     "B= c+a x^{2}+b x;",
-    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger",
     "PowerAlgebraicNumberBySmallInteger",
     innerStandard
   );
@@ -4677,7 +4677,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational,
+    CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational,
     this->opDouble(),
     this->opRational(),
     "Calls the built-in cpp functions to approximately raise a double to a power, "
@@ -4687,7 +4687,7 @@ void Calculator::initializeFunctionsStandard() {
     "f{}{{x}}=x^3+p x +q;\n"
     "Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\n"
     "q= DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
-    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational",
+    "CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational",
     "PowerFloatingToPower",
     innerStandard
   );

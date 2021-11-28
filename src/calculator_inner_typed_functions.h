@@ -91,7 +91,7 @@ public:
   static bool innerMultiplyRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyDoubleOrRationalByDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerWeylGroupElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerWeylGroupElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyAnyByElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output);
@@ -127,7 +127,7 @@ public:
   static bool powerMatrixExpressionsBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerMatrixNumbersByLargeIntegerIfPossible(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerRationalByRationalOutputAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerRationalByRationalReducePrimeFactors(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerRationalByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
@@ -136,16 +136,16 @@ public:
   static bool powerPolynomialModuloIntegerBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerAlgebraicNumberBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerElementWeylAlgebraBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerSequenceOrMatrixByT(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerSequenceOrMatrixByT(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerElementZmodPByInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerEllipticCurveRationalElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerEllipticCurveZmodPElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerElementZmodPByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerEllipticCurveRationalElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool powerEllipticCurveZmodPElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool binomialCoefficient(Calculator& calculator, const Expression& input, Expression& output);
   static bool setMinus(Calculator& calculator, const Expression& input, Expression& output);

@@ -7,6 +7,6 @@
 
 class CalculatorDatabaseFunctions {
 public:
-  static bool innerExecuteMongoQuery(Calculator& calculator, const Expression& input, Expression& output);
+  static bool executeMongoQuery(Calculator& calculator, const Expression& input, Expression& output);
 };
 #endif

@@ -60,7 +60,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGradedReverseLexico
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic");
+  MacroRegisterFunctionWithName("CalculatorFunctions::polynomialDivisionVerboseLexicographic");
   List<MonomialPolynomial>::Comparator order(
     MonomialPolynomial::greaterThan_leftLargerWins
   );
@@ -89,7 +89,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   Expression& output,
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
+  MacroRegisterFunctionWithName("Calculator::polynomialDivisionVerbose");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!calculator.getListPolynomialVariableLabelsLexicographic(
@@ -133,7 +133,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
 bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionSlidesGrLex");
+  MacroRegisterFunctionWithName("Calculator::polynomialDivisionSlidesGrLex");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!calculator.getListPolynomialVariableLabelsLexicographic(
@@ -246,7 +246,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
 bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionQuotient");
+  MacroRegisterFunctionWithName("Calculator::polynomialDivisionQuotient");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!calculator.getListPolynomialVariableLabelsLexicographic(input, polynomialsRational, context)) {

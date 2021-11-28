@@ -323,19 +323,19 @@ std::string Calculator::ExpressionHistoryEnumerator::toStringExpressionHistoryMe
   return out.str();
 }
 
-bool CalculatorSteps::innerLogEvaluationStepsDebug(
+bool CalculatorSteps::logEvaluationStepsDebug(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorSteps::innerLogEvaluationStepsHumanReadableMerged(calculator, input, output, true);
+  return CalculatorSteps::logEvaluationStepsHumanReadableMerged(calculator, input, output, true);
 }
 
-bool CalculatorSteps::innerLogEvaluationSteps(
+bool CalculatorSteps::logEvaluationSteps(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorSteps::innerLogEvaluationStepsHumanReadableMerged(calculator, input, output, false);
+  return CalculatorSteps::logEvaluationStepsHumanReadableMerged(calculator, input, output, false);
 }
 
-bool CalculatorSteps::innerLogEvaluationStepsHumanReadableMerged(
+bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
   Calculator& calculator,
   const Expression& input,
   Expression& output,

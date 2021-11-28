@@ -98,7 +98,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "ElementWeylAlgebraDO",
-    CalculatorFunctions::innerElementWeylAlgebra,
+    CalculatorFunctions::elementWeylAlgebra,
     "",
     "Creates element of a Weyl algebra = polynomial coefficient differential operator. "
     "First argument denotes differential operator letter, "
@@ -114,14 +114,14 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "ElementWeylAlgebraPoly",
-    CalculatorFunctions::innerPolynomialWithEWA,
+    CalculatorFunctions::polynomialWithEWA,
     "",
     "Creates a monomial from the second argument whose differential "
     "operator letter is the first argument. ",
     "x_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n"
     "\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "\\partial_1 x_1",
-    "Calculator::innerPolynomialWithEWA",
+    "Calculator::polynomialWithEWA",
     "ElementWeylAlgebraPoly",
     innerFreezesArguments
   );
@@ -255,14 +255,14 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "PrintNonNegativeVectorsLevel",
-    CalculatorFunctions::innerPrintZnEnumeration,
+    CalculatorFunctions::printZnEnumeration,
     "",
     "Prints all vectors of grade level d with n "
     "coordinates lying in Z_{>= 0}. "
     "Function meant for debugging purposes. "
     "First argument = dimension, second argument =grading level. ",
     "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ",
-    "Calculator::innerPrintZnEnumeration",
+    "Calculator::printZnEnumeration",
     "PrintNonNegativeVectorsLevel",
     innerStandard
   );
@@ -281,7 +281,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystem",
-    CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit,
+    CalculatorFunctions::solveSerreLikeSystemNoUpperLimit,
     "",
     "Attempts to heuristically solve a system "
     "of polynomial of equations over the rationals. "
@@ -643,7 +643,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "ElementEllipticCurveNormalForm",
-    CalculatorFunctions::innerElementEllipticCurveNormalForm,
+    CalculatorFunctions::elementEllipticCurveNormalForm,
     "",
     "Makes an elliptic curve from a cubic in normal form, generator letter and base point.",
     "ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);"
@@ -654,25 +654,25 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger,
+    CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger,
     this->opEllipticCurveElementsRational(),
     this->opRational(),
     "Exponentiates an elliptic curve element by an integer. ",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
     "g^2",
-    "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
+    "CalculatorFunctionsBinaryOps::powerEllipticCuveElementByInteger",
     "PowerEllipticCurveElementRationalByInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger,
+    CalculatorFunctionsBinaryOps::powerEllipticCurveZmodPElementByInteger,
     this->opEllipticCurveElementsZmodP(),
     this->opRational(),
     "Exponentiates an elliptic curve element by an integer. ",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
     "g^2",
-    "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
+    "CalculatorFunctionsBinaryOps::powerEllipticCuveElementByInteger",
     "PowerEllipticCurveElementZmodPByInteger",
     innerStandard
   );
@@ -688,7 +688,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "a^10;\n"
     "\\partial x^{3/2};\n"
     "\\partial^{3/2} x",
-    "CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger",
+    "CalculatorFunctionsBinaryOps::powerEWABySmallInteger",
     "PowerElementWeylAlgebraBySmallInteger",
     innerStandard
   );

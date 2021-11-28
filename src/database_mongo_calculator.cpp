@@ -1,7 +1,7 @@
 #include "calculator_database_mongo.h"
 #include "database.h"
 
-bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
+bool CalculatorDatabaseFunctions::executeMongoQuery(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorDatabaseFunctions::innerExecuteMongoQuery");

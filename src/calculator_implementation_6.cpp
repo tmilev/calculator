@@ -624,7 +624,7 @@ bool CalculatorFunctions::intervalLeftClosedFromSequence(
 bool CalculatorFunctions::getFirstSummandContaining(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGetFirstSummandContaining");
+  MacroRegisterFunctionWithName("CalculatorFunctions::getFirstSummandContaining");
   if (!input.startsWithGivenOperation("GetFirstSummandContaining", 3)) {
     return false;
   }
@@ -642,7 +642,7 @@ bool CalculatorFunctions::getFirstSummandContaining(
 bool CalculatorFunctions::getSummand(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGetSummand");
+  MacroRegisterFunctionWithName("CalculatorFunctions::getSummand");
   if (!input.startsWithGivenOperation("GetSummand", 3)) {
     return false;
   }
@@ -878,7 +878,7 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
 bool CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerJWTverifyAgainstKnownKeys");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "This function is only available to logged-in admins. ";
   }
@@ -1099,10 +1099,10 @@ bool CalculatorFunctionsCrypto::RSAEncrypt(
   return output.assignValue(calculator, Rational(result));
 }
 
-bool CalculatorFunctions::innerSendEmailWithMailGun(
+bool CalculatorFunctions::sendEmailWithMailGun(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSendEmailWithMailGun");
+  MacroRegisterFunctionWithName("CalculatorFunctions::sendEmailWithMailGun");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Sending mail available to logged-in admins only. ";
   }
@@ -1310,7 +1310,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& calculator, const Ex
 bool CalculatorFunctions::factorOutNumberContent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorOutNumberContent");
+  MacroRegisterFunctionWithName("CalculatorFunctions::factorOutNumberContent");
   if (input.size() != 2) {
     return calculator << "FactorOutNumberContent expects single argument. ";
   }
@@ -1338,7 +1338,7 @@ bool CalculatorFunctions::factorOutNumberContent(
 }
 
 bool CalculatorFunctions::subList(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSubList");
+  MacroRegisterFunctionWithName("CalculatorFunctions::subList");
   if (input.size() != 3) {
     return false;
   }
@@ -1375,7 +1375,7 @@ bool CalculatorFunctions::subList(Calculator& calculator, const Expression& inpu
 }
 
 bool CalculatorFunctions::applyToList(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerApplyToList");
+  MacroRegisterFunctionWithName("CalculatorFunctions::applyToList");
   if (input.size() != 3) {
     return false;
   }
@@ -1574,7 +1574,7 @@ bool CalculatorFunctions::matchesPattern(
 bool CalculatorFunctions::degreesToRadians(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDegreesToRadians");
+  MacroRegisterFunctionWithName("CalculatorFunctions::degreesToRadians");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -1591,7 +1591,7 @@ bool CalculatorFunctions::degreesToRadians(
 bool CalculatorFunctions::lessThanOrEqualTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLessThanOrEqualTo");
+  MacroRegisterFunctionWithName("CalculatorFunctions::lessThanOrEqualTo");
   if (input.size() != 3) {
     return false;
   }
@@ -1606,7 +1606,7 @@ bool CalculatorFunctions::lessThanOrEqualTo(
 bool CalculatorFunctions::greaterThanOrEqualTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGreaterThanOrEqualTo");
+  MacroRegisterFunctionWithName("CalculatorFunctions::greaterThanOrEqualTo");
   if (input.size() != 3) {
     return false;
   }
@@ -1654,7 +1654,7 @@ bool CalculatorFunctions::greaterThan(Calculator& calculator, const Expression& 
 }
 
 bool CalculatorFunctions::lessThan(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLessThan");
+  MacroRegisterFunctionWithName("CalculatorFunctions::lessThan");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1668,7 +1668,7 @@ bool CalculatorFunctions::lessThan(Calculator& calculator, const Expression& inp
 bool CalculatorFunctions::collectOpands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCollectOpands");
+  MacroRegisterFunctionWithName("CalculatorFunctions::collectOpands");
   if (input.size() != 3) {
     return false;
   }
@@ -1695,7 +1695,7 @@ bool CalculatorFunctions::collectMultiplicands(
 bool CalculatorFunctions::collectSummands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCollectSummands");
+  MacroRegisterFunctionWithName("CalculatorFunctions::collectSummands");
   if (input.size() != 2) {
     return false;
   }
@@ -2064,7 +2064,7 @@ bool CalculatorFunctionsListsAndSets::intersectUnion(
 bool CalculatorFunctions::compareIntervalsNumerically(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCompareIntervalsNumerically");
+  MacroRegisterFunctionWithName("CalculatorFunctions::compareIntervalsNumerically");
   if (input.size() != 4) {
     return calculator << "Comparing intervals numerically takes 3 arguments: two unions and precision. ";
   }
@@ -2205,7 +2205,7 @@ bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
 }
 
 bool CalculatorFunctions::orIdentical(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerOrIdentical");
+  MacroRegisterFunctionWithName("CalculatorFunctions::orIdentical");
   (void) calculator;
   if (!input.startsWithGivenOperation("or", 3)) {
     return false;
@@ -2326,7 +2326,7 @@ bool CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry(
 }
 
 bool CalculatorFunctions::distributeSqrt(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerDistributeSqrt");
+  MacroRegisterFunctionWithName("Calculator::distributeSqrt");
   if (!input.startsWith(calculator.opSqrt(), 3)) {
     return false;
   }
@@ -2456,7 +2456,7 @@ bool CalculatorFunctions::isProductTermsUpToPower(
 }
 
 bool CalculatorFunctions::scaleToLeadingUnit(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerScaleToLeadingUnit");
+  MacroRegisterFunctionWithName("CalculatorFunctions::scaleToLeadingUnit");
   if (input.size() != 2) {
     return false;
   }
@@ -2467,10 +2467,10 @@ bool CalculatorFunctions::scaleToLeadingUnit(Calculator& calculator, const Expre
   return output.makeSum(calculator, collection);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
+bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerRatByRatReducePrimeFactors");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -2498,7 +2498,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
 }
 
 bool CalculatorFunctions::newtonsMethod(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerNewtonsMethod");
+  MacroRegisterFunctionWithName("CalculatorFunctions::newtonsMethod");
   if (input.size() != 4) {
     return false;
   }
@@ -2550,10 +2550,10 @@ bool CalculatorFunctions::newtonsMethod(Calculator& calculator, const Expression
   );
 }
 
-bool CalculatorFunctions::innerValueOfModularExpression(
+bool CalculatorFunctions::valueOfModularExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerValueOfModularExpression");
+  MacroRegisterFunctionWithName("CalculatorFunctions::valueOfModularExpression");
   if (input.size() != 2) {
     return false;
   }
@@ -2577,10 +2577,10 @@ bool CalculatorFunctions::innerValueOfModularExpression(
   return false;
 }
 
-bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
+bool CalculatorFunctions::elementEllipticCurveNormalForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerElementEllipticCurveNormalForm");
+  MacroRegisterFunctionWithName("CalculatorFunctions::elementEllipticCurveNormalForm");
   if (input.size() != 4) {
     return calculator << "Elliptic curve expects 3 arguments (curve, generator letter, baseX and baseY) ";
   }
@@ -2882,10 +2882,10 @@ bool CalculatorFunctions::determinantPolynomial(
   return output.assignValueWithContextOLD(outputPoly, context, calculator);
 }
 
-bool CalculatorFunctions::innerGenerateMultiplicativelyClosedSet(
+bool CalculatorFunctions::generateMultiplicativelyClosedSet(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGenerateMultiplicativelyClosedSet");
+  MacroRegisterFunctionWithName("CalculatorFunctions::generateMultiplicativelyClosedSet");
   if (input.size() <= 2) {
     return output.assignError(
       calculator, "I need at least two arguments - upper bound and at least one element to multiply. "
@@ -3085,8 +3085,8 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
   return output.assignMatrixExpressions(resultMat, calculator, true, true);
 }
 
-bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
+bool CalculatorFunctions::suffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::suffixNotationForPostScript");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (*counter.counter == calculator.maximumRecursionDepth - 2) {
     return output.assignValue(calculator, std::string("..."));
@@ -3181,7 +3181,7 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
     !input[0].isOperationGiven(calculator.opPower());
   if (useUsualOrder) {
     for (int i = input.size() - 1; i >= 1; i --) {
-      if (!CalculatorFunctions::innerSuffixNotationForPostScript(calculator, input[i], currentE)) {
+      if (!CalculatorFunctions::suffixNotationForPostScript(calculator, input[i], currentE)) {
         return output.assignError(calculator, "Failed to convert " + input[i].toString());
       }
       if (!currentE.isOfType(&currentString)) {
@@ -3191,7 +3191,7 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
     }
   } else {
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorFunctions::innerSuffixNotationForPostScript(calculator, input[i], currentE)) {
+      if (!CalculatorFunctions::suffixNotationForPostScript(calculator, input[i], currentE)) {
         return output.assignError(calculator, "Failed to convert " + input[i].toString());
       }
       if (!currentE.isOfType(&currentString)) {
@@ -3200,7 +3200,7 @@ bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculato
       out << currentString << " ";
     }
   }
-  if (!CalculatorFunctions::innerSuffixNotationForPostScript(calculator, input[0], currentE)) {
+  if (!CalculatorFunctions::suffixNotationForPostScript(calculator, input[0], currentE)) {
     return output.assignError(calculator, "Failed to convert " + input[0].toString());
   }
   if (!currentE.isOfType(&currentString)) {
@@ -3226,7 +3226,7 @@ bool CalculatorFunctions::isRational(Calculator& calculator, const Expression& i
   return true;
 }
 
-bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::freudenthalFull(Calculator& calculator, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
@@ -3258,7 +3258,7 @@ bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Exp
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::freudenthalFormula(Calculator& calculator, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
@@ -3319,8 +3319,8 @@ std::string StringRoutines::convertStringToHexIfNonReadable(
   return Crypto::convertStringToHex(input, lineWidthZeroForNone, useHTML);
 }
 
-bool CalculatorFunctions::innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerJacobiSymbol");
+bool CalculatorFunctions::jacobiSymbol(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::jacobiSymbol");
   global.fatal << "Function not implemented yet." << global.fatal;
   (void) calculator;
   (void) output;

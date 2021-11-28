@@ -2001,7 +2001,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   return true;
 }
 
-bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealS(
+bool CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealS(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {
@@ -2071,7 +2071,7 @@ bool CalculatorFunctions::gaussianEliminationMatrix(
 ) {
   MacroRegisterFunctionWithName("gaussianEliminationMatrix");
   Expression converted;
-  if (!CalculatorConversions::innerMakeMatrix(
+  if (!CalculatorConversions::makeMatrix(
     calculator, input, converted
   )) {
     return calculator
@@ -2162,7 +2162,7 @@ bool CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial(
   return output.assignValueWithContext(calculator, polynomial.content, polynomial.context);
 }
 
-bool CalculatorFunctions::innerFormatCPPSourceCode(
+bool CalculatorFunctions::formatCPPSourceCode(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!global.userDefaultHasAdminRights()) {
@@ -2178,7 +2178,7 @@ bool CalculatorFunctions::innerFormatCPPSourceCode(
   return output.assignValue(calculator, report.str());
 }
 
-bool CalculatorFunctions::innerformatCPPDirectory(
+bool CalculatorFunctions::formatCPPDirectory(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!global.userDefaultHasAdminRights()) {
@@ -3730,7 +3730,7 @@ bool CalculatorFunctions::invertMatrixVerbose(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::invertMatrixVerbose");
   Expression converted;
-  if (!CalculatorConversions::innerMakeMatrix(calculator, input, converted)) {
+  if (!CalculatorConversions::makeMatrix(calculator, input, converted)) {
     return calculator << "Failed to get matrix from: " << input.toString();
   }
 
@@ -5576,7 +5576,7 @@ bool CalculatorFunctions::isNilpotent(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::isNilpotent");
   Expression converted;
-  if (!CalculatorConversions::innerMakeMatrix(calculator, input, converted)) {
+  if (!CalculatorConversions::makeMatrix(calculator, input, converted)) {
     return false;
   }
   bool found = false;
@@ -5603,7 +5603,7 @@ bool CalculatorFunctions::invertMatrix(Calculator& calculator, const Expression&
   MacroRegisterFunctionWithName("CalculatorFunctions::invertMatrix");
   Matrix<Rational> matrix;
   Expression converted;
-  if (!CalculatorConversions::innerMakeMatrix(
+  if (!CalculatorConversions::makeMatrix(
     calculator, input, converted
   )) {
     return calculator << "Failed to extract matrix from input. ";
@@ -5821,7 +5821,7 @@ bool CalculatorFunctionsPlot::plotViewWindow(
     widthHeight[0] = 100;
     widthHeight[1] = 100;
     MapList<std::string, Expression, MathRoutines::hashString> map;
-    if (!CalculatorConversions::innerLoadKeysFromStatementList(
+    if (!CalculatorConversions::loadKeysFromStatementList(
       calculator, input, map, nullptr, false
     )) {
       isGood = false;
@@ -6119,7 +6119,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   }
   Expression functionSuffixNotationE;
   if (!calculator.callCalculatorFunction(
-    CalculatorFunctions::innerSuffixNotationForPostScript, input[1], functionSuffixNotationE
+    CalculatorFunctions::suffixNotationForPostScript, input[1], functionSuffixNotationE
   )) {
     calculator << "No LaTeX version: failed to convert: "
     << input[1].toString() << " to postfix notation. ";
@@ -6534,7 +6534,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   bool isGoodLatexWise = true;
   for (int i = 0; i < plot.dimension; i ++) {
     if (!calculator.callCalculatorFunction(
-      CalculatorFunctions::innerSuffixNotationForPostScript,
+      CalculatorFunctions::suffixNotationForPostScript,
       plot.coordinateFunctionsE[i],
       convertedExpressions[i]
     )) {
@@ -7315,10 +7315,10 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
   return false;
 }
 
-bool CalculatorFunctions::innerTestTopCommand(
+bool CalculatorFunctions::testTopCommand(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTopCommand");
+  MacroRegisterFunctionWithName("CalculatorFunctions::testTopCommand");
   (void) input;
   (void) calculator;//portable way of avoiding unused parameter warning
   if (!global.userDefaultHasAdminRights()) {
@@ -7327,10 +7327,10 @@ bool CalculatorFunctions::innerTestTopCommand(
   return output.assignValue(calculator, global.toHTMLTopCommandLinuxSystem());
 }
 
-bool CalculatorFunctions::innerTestIndicator(
+bool CalculatorFunctions::testIndicator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestIndicator");
+  MacroRegisterFunctionWithName("CalculatorFunctions::testIndicator");
   if (global.response.flagBanProcessMonitoring) {
     std::stringstream out;
     out << "The server's admins have explicitly banned monitoring. ";
@@ -7348,12 +7348,12 @@ bool CalculatorFunctions::innerTestIndicator(
   }
   int numRuns = - 1;
   if (!input[1].isIntegerFittingInInt(&numRuns)) {
-    return calculator << "Argument of CalculatorFunctions::innerTestIndicator "
+    return calculator << "Argument of CalculatorFunctions::testIndicator "
     << "is not a small integer, instead it equals: " << input[1] << ".";
   }
   if (numRuns > 200000) {
     calculator << "The argument " << numRuns
-    << " of CalculatorFunctions::innerTestIndicator larger than 200000, trimming down to 200000.";
+    << " of CalculatorFunctions::testIndicator larger than 200000, trimming down to 200000.";
     numRuns = 200000;
   }
   if (numRuns < 0) {
@@ -7482,7 +7482,7 @@ bool CalculatorFunctionsFreecalc::buildFreecalc(
   return output.assignValue(calculator, crawler.displayResult.str());
 }
 
-bool CalculatorFunctions::innerFindProductDistanceModN(
+bool CalculatorFunctions::findProductDistanceModN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFindProductDistanceModN");
@@ -7591,12 +7591,12 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
+bool CalculatorFunctions::solveProductSumEquationOverSetModN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSolveProductSumEquationOverSetModN");
   Expression modulusExpression, integersExpression, productExpression, sumExpression;
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "theMod", modulusExpression)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "theMod", modulusExpression)) {
     return calculator << "<hr>Value theMod not found.";
   }
   int modulusSmall;
@@ -7612,7 +7612,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   if (modulusSmall > 10000000) {
     return calculator << "<hr>I've been instructed to compute with moduli no larger than 10000000.";
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "theSet", integersExpression)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "theSet", integersExpression)) {
     return calculator << "<hr>Value theSet not found.";
   }
   List<int> integerList;
@@ -7624,7 +7624,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
       return calculator << "<hr>The integer list " << integerList << " contains non-positive numbers.";
     }
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "theProduct", productExpression)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "theProduct", productExpression)) {
     return calculator << "<hr>Value theProduct not found. ";
   }
   LargeInteger goalProduct;
@@ -7634,7 +7634,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   if (goalProduct.isNegative()) {
     return calculator << "<hr>I am expecting a positive product as input. ";
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "theSum", sumExpression)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "theSum", sumExpression)) {
     return calculator << "<hr>Value theSum not found. ";
   }
   int integerSum = - 1;
@@ -7818,7 +7818,7 @@ bool CalculatorFunctions::crashByVectorOutOfBounds(
 }
 
 bool CalculatorFunctions::transpose(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerTranspose");
+  MacroRegisterFunctionWithName("Calculator::transpose");
   if (
     !input.isSequenceNElements() &&
     !input.isMatrix() &&
@@ -7842,10 +7842,10 @@ bool CalculatorFunctions::transpose(Calculator& calculator, const Expression& in
   return output.assignMatrixExpressions(matrix, calculator, true, true);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(
+bool CalculatorFunctionsBinaryOps::powerSequenceOrMatrixByT(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerSequenceOrMatrixByT");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;

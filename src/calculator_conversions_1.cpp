@@ -689,7 +689,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
   return true;
 }
 
-bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
+bool CalculatorConversions::expressionFromDynkinSimpleType(
   Calculator& calculator, const DynkinSimpleType& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromDynkinSimpleType");
@@ -703,7 +703,7 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   return output.makeXOX(calculator, calculator.opUnderscore(), letterAndIndexE, rankE);
 }
 
-bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(
+bool CalculatorConversions::storeSemisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!input[1].isOfType<SemisimpleLieAlgebra*>()) {
@@ -713,7 +713,7 @@ bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(
   return CalculatorConversions::expressionFromDynkinType(calculator, owner->weylGroup.dynkinType, output);
 }
 
-bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRationals(
+bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraRationals(
   Calculator& calculator, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerStoreElementSemisimpleLieAlgebraRational");
@@ -735,7 +735,7 @@ bool CalculatorConversions::expressionFromDynkinType(
   monomials.makeZero();
   Expression currentMonomial;
   for (int i = 0; i < input.size(); i ++) {
-    CalculatorConversions::innerExpressionFromDynkinSimpleType(calculator, input[i], currentMonomial);
+    CalculatorConversions::expressionFromDynkinSimpleType(calculator, input[i], currentMonomial);
     monomials.addMonomial(currentMonomial, input.coefficients[i]);
   }
   return output.makeSum(calculator, monomials);
@@ -756,7 +756,7 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraAlgebraicNu
   return output.makeSum(calculator, monomials);
 }
 
-bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
+bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, SlTwoSubalgebra& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerSlTwoSubalgebraPrecomputed");
@@ -813,18 +813,18 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   return true;
 }
 
-bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
+bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerSlTwoSubalgebraPrecomputed");
   SlTwoSubalgebra tempSL2;
-  if (!CalculatorConversions::innerSlTwoSubalgebraPrecomputed(calculator, input, tempSL2)) {
+  if (!CalculatorConversions::slTwoSubalgebraPrecomputed(calculator, input, tempSL2)) {
     return calculator << "<hr>Failed to load sl(2) subalgebra. ";
   }
   return output.assignValue(calculator, tempSL2.toString());
 }
 
-bool CalculatorConversions::innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorConversions::algebraicNumber(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerAlgebraicNumber");
   if (input.isOfType<AlgebraicNumber>()) {
     output = input;
@@ -838,7 +838,7 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& calculator, const E
   return false;
 }
 
-bool CalculatorConversions::innerLoadKeysFromStatementList(
+bool CalculatorConversions::loadKeysFromStatementList(
   Calculator& calculator,
   const Expression& input,
   MapList<std::string, Expression, MathRoutines::hashString>& output,
@@ -847,7 +847,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
   MapList<Expression, Expression> outputExpressionFormat;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(
+  if (!CalculatorConversions::loadKeysFromStatementList(
     calculator, input, outputExpressionFormat, commentsOnFailure, allowFailure
   )) {
     return false;
@@ -863,7 +863,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
   return true;
 }
 
-bool CalculatorConversions::innerLoadKeysFromStatementList(
+bool CalculatorConversions::loadKeysFromStatementList(
   Calculator& calculator,
   const Expression& input,
   MapList<Expression, Expression>& output,
@@ -887,7 +887,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
   return true;
 }
 
-bool CalculatorConversions::innerLoadKey(
+bool CalculatorConversions::loadKey(
   Calculator& calculator,
   const Expression& inputStatementList,
   const std::string& inputKey,
@@ -961,8 +961,8 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   report.report(reportStream.str());
   Expression dynkinTypeE, ElementsCartanE, generatorsE;
   if (
-    !CalculatorConversions::innerLoadKey(calculator, input, "DynkinType", dynkinTypeE) ||
-    !CalculatorConversions::innerLoadKey(calculator, input, "ElementsCartan", ElementsCartanE)
+    !CalculatorConversions::loadKey(calculator, input, "DynkinType", dynkinTypeE) ||
+    !CalculatorConversions::loadKey(calculator, input, "ElementsCartan", ElementsCartanE)
   ) {
     return false;
   }
@@ -1017,7 +1017,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   report.report(reportStream.str());
   outputSubalgebra.positiveGenerators.setSize(0);
   outputSubalgebra.negativeGenerators.setSize(0);
-  if (CalculatorConversions::innerLoadKey(calculator, input, "generators", generatorsE)) {
+  if (CalculatorConversions::loadKey(calculator, input, "generators", generatorsE)) {
     generatorsE.sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> currentGeneratorAlgebraic;
     for (int i = 1; i < generatorsE.size(); i ++) {
@@ -1054,25 +1054,25 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   );
 }
 
-bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
+bool CalculatorConversions::loadSemisimpleSubalgebras(
   Calculator& calculator, const Expression& inpuT, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadSemisimpleSubalgebras");
   Expression input = inpuT;
   Expression ambientTypeE, numExploredHsE, numExploredTypesE, subalgebrasE, currentChainE;
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "AmbientDynkinType", ambientTypeE)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "AmbientDynkinType", ambientTypeE)) {
     return calculator << "<hr>Failed to load Dynkin type from: " << input.toString();
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "NumExploredHs", numExploredHsE)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "NumExploredHs", numExploredHsE)) {
     return calculator << "<hr>Failed to load numExploredHs list from: " << input.toString();
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "NumExploredTypes", numExploredTypesE)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "NumExploredTypes", numExploredTypesE)) {
     return calculator << "<hr>Failed to load NumExploredTypes list from: " << input.toString();
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "Subalgebras", subalgebrasE)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "Subalgebras", subalgebrasE)) {
     return calculator << "<hr>Failed to load Subalgebras list from: " << input.toString();
   }
-  if (!CalculatorConversions::innerLoadKey(calculator, input, "CurrentChain", currentChainE)) {
+  if (!CalculatorConversions::loadKey(calculator, input, "CurrentChain", currentChainE)) {
     return calculator << "<hr>Failed to load CurrentChain from: " << input.toString();
   }
   List<int> currentChainInt, numExploredTypes, numExploredHs;
@@ -1264,7 +1264,7 @@ bool CalculatorConversions::expressionFromMonomialUniversalEnveloping(
   return output.makeProduct(calculator, terms);
 }
 
-bool CalculatorConversions::innerExpressionFromUE(
+bool CalculatorConversions::expressionFromElementUniversalEnveloping(
   Calculator& calculator,
   const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
   Expression& output,
@@ -1515,14 +1515,14 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
   return false;
 }
 
-bool CalculatorConversions::innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorConversions::expressionFromElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
   ElementUniversalEnveloping<RationalFraction<Rational> > elementUniversalEnveloping;
   if (!input.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(&elementUniversalEnveloping)) {
     return calculator << "<hr>Expression " << input.toString()
     << " is not an element of universal enveloping, can't convert to expression";
   }
-  return CalculatorConversions::innerExpressionFromUE(calculator, elementUniversalEnveloping, output);
+  return CalculatorConversions::expressionFromElementUniversalEnveloping(calculator, elementUniversalEnveloping, output);
 }
 
 bool CalculatorConversions::rationalFunction(
@@ -1552,11 +1552,11 @@ bool CalculatorConversions::functionMatrixRational(
   return output.makeMatrix(calculator, outputMatrix);
 }
 
-bool CalculatorConversions::innerMatrixRationalTensorForM(
+bool CalculatorConversions::matrixRationalTensorForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerMatrixRationalTensorForM");
-  if (!CalculatorConversions::innerMakeMatrix(calculator, input, output)) {
+  if (!CalculatorConversions::makeMatrix(calculator, input, output)) {
     return calculator << "Failed to extract matrix of rationals. ";
   }
   Matrix<Rational> matrixRational;
@@ -1618,7 +1618,7 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
   return false;
 }
 
-bool CalculatorConversions::innerMakeMatrix(
+bool CalculatorConversions::makeMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerMakeMatrix");
@@ -1670,7 +1670,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   return true;
 }
 
-bool CalculatorConversions::innerLoadFileIntoString(
+bool CalculatorConversions::loadFileIntoString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFileIntoString");

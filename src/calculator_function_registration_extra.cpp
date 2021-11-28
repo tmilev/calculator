@@ -18,7 +18,7 @@ void Calculator::initializeFunctionsExtra() {
 
   this->addOperationHandler(
     "LoadFileIntoString",
-    CalculatorConversions::innerLoadFileIntoString,
+    CalculatorConversions::loadFileIntoString,
     "",
     "Loads a file into a string. "
     "The file must be given its relative file name displayed when browsing "
@@ -87,7 +87,7 @@ void Calculator::initializeFunctionsExtra() {
   );
   this->addOperationHandler(
     "TestCalculatorIndicator",
-    CalculatorFunctions::innerTestIndicator,
+    CalculatorFunctions::testIndicator,
     "",
     "(This is not a mathematical function). "
     "Tests the calculator indicator mechanism."
@@ -96,17 +96,17 @@ void Calculator::initializeFunctionsExtra() {
     "Use a large dummy comment to test that large outputs are piped correctly to the "
     "monitoring process. ",
     "TestCalculatorIndicator(1000, 200000)",
-    "CalculatorFunctions::innerTestIndicator",
+    "CalculatorFunctions::testIndicator",
     "TestCalculatorIndicator",
     innerNoTest
   );
   this->addOperationHandler(
     "TestTopCommand",
-    CalculatorFunctions::innerTestTopCommand,
+    CalculatorFunctions::testTopCommand,
     "",
     "(This is not a mathematical function). Tests the top linux command. ",
     "TestTopCommand(1000)",
-    "CalculatorFunctions::innerTestTopCommand",
+    "CalculatorFunctions::testTopCommand",
     "TestTopCommand",
     innerAdminNoTest
   );
@@ -231,7 +231,7 @@ void Calculator::initializeFunctionsExtra() {
 
   this->addOperationHandler(
     "FormatCPPCode",
-    CalculatorFunctions::innerFormatCPPSourceCode,
+    CalculatorFunctions::formatCPPSourceCode,
     "",
     "Format cpp code. ",
     "FormatCPPCode{}(\"src/database.cpp\")",
@@ -241,7 +241,7 @@ void Calculator::initializeFunctionsExtra() {
   );
   this->addOperationHandler(
     "formatCPPDirectory",
-    CalculatorFunctions::innerformatCPPDirectory,
+    CalculatorFunctions::formatCPPDirectory,
     "",
     "Format cpp directory. ",
     "formatCPPDirectory{}(\"src/\")",
@@ -366,7 +366,7 @@ void Calculator::initializeFunctionsExtra() {
   );
   this->addOperationHandler(
     "SuffixNotationForPostScript",
-    CalculatorFunctions::innerSuffixNotationForPostScript,
+    CalculatorFunctions::suffixNotationForPostScript,
     "",
     "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.",
     "suffixNotationForPostScript{}((1/3 + a + b) * c)",
@@ -894,7 +894,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
   );
   this->addOperationHandler(
     "FetchKnownPublicKeys",
-    CalculatorFunctions::innerFetchKnownPublicKeys,
+    CalculatorFunctions::fetchKnownPublicKeys,
     "",
     "Updates known public keys. Requires administrator privileges. "
     "At the moment, works for google public keys only. ",

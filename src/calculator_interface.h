@@ -1670,6 +1670,12 @@ public:
   // Note that the output of a function may be of type Error. Error results come, like any other
   // result, with a true return from the function.
   //-----------------------------------------------
+  //
+  // The concept of an inner and outer function is **deprecated**.
+  //
+  // The following comments document what used to be the behavior.
+  // The new behavior is to have no distinction between "inner" and "outer" functions.
+  //
   // In addition, built-in functions are split into two flavors:
   // inner functions (or just "functions")
   // and outer functions (or "laws").
@@ -2750,13 +2756,13 @@ public:
 
 class CalculatorSteps {
 public:
-  static bool innerLogEvaluationStepsDebug(
+  static bool logEvaluationStepsDebug(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerLogEvaluationSteps(
+  static bool logEvaluationSteps(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerLogEvaluationStepsHumanReadableMerged(
+  static bool logEvaluationStepsHumanReadableMerged(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
@@ -2810,9 +2816,8 @@ public:
   static bool functionDynkinType(Calculator& calculator, const Expression& input, DynkinType& output);
   static bool dynkinSimpleType(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
-  static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, SlTwoSubalgebra& output);
-  static bool innerLoadFromObject(Calculator& calculator, const Expression& input, RationalFraction<Rational>& output);
-  static bool innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
+  static bool slTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, SlTwoSubalgebra& output);
+  static bool algebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool polynomialModuloInteger(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
   static bool getPolynomial(Calculator& calculator, const Expression& input, Expression& output);
@@ -2840,15 +2845,15 @@ public:
   static bool outerMatrixExpressionsToMatrixOfType(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerMakeMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool makeMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixDouble(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool matrixRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMatrixRationalTensorForM(Calculator& calculator, const Expression& input, Expression& output);
+  static bool matrixRationalTensorForm(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMatrixRationalTensorForm(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLoadFileIntoString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool loadFileIntoString(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool makeElementHyperOctahedral(Calculator& calculator, const Expression& input, Expression& output);
   ////////////////////Conversion to expression tree/////////////////////////////////////
@@ -2871,20 +2876,20 @@ public:
   static bool expressionFromRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerLoadKey(
+  static bool loadKey(
     Calculator& calculator,
     const Expression& inputStatementList,
     const std::string& inputKey,
     Expression& output
   );
-  static bool innerLoadKeysFromStatementList(
+  static bool loadKeysFromStatementList(
     Calculator& calculator,
     const Expression& input,
     MapList<std::string, Expression, MathRoutines::hashString>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
-  static bool innerLoadKeysFromStatementList(
+  static bool loadKeysFromStatementList(
     Calculator& calculator,
     const Expression& input,
     MapList<Expression, Expression>& output,
@@ -2899,7 +2904,7 @@ public:
   static bool expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
     Calculator& calculator, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output
   );
-  static bool innerExpressionFromUE(
+  static bool expressionFromElementUniversalEnveloping(
     Calculator& calculator,
     const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
     Expression& output,
@@ -2907,12 +2912,12 @@ public:
   );
   static bool storeCandidateSubalgebra(Calculator& calculator, const CandidateSemisimpleSubalgebra& input, Expression& output);
   static bool expressionFromDynkinType(Calculator& calculator, const DynkinType& input, Expression& output);
-  static bool innerExpressionFromDynkinSimpleType(Calculator& calculator, const DynkinSimpleType& input, Expression& output);
-  static bool innerExpressionFromElementSemisimpleLieAlgebraRationals(
+  static bool expressionFromDynkinSimpleType(Calculator& calculator, const DynkinSimpleType& input, Expression& output);
+  static bool expressionFromElementSemisimpleLieAlgebraRationals(
     Calculator& calculator, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
   );
   //conversions from expression containing type to expression tree
-  static bool innerStoreSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output);
+  static bool storeSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionSemisimpleLieAlgebraFromDynkinType(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -2936,8 +2941,8 @@ public:
   static bool storeSemisimpleSubalgebras(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLoadSemisimpleSubalgebras(Calculator& calculator, const Expression& inpuT, Expression& output);
+  static bool slTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, Expression& output);
+  static bool loadSemisimpleSubalgebras(Calculator& calculator, const Expression& inpuT, Expression& output);
   static bool expressionFromChevalleyGenerator(
     Calculator& calculator, const ChevalleyGenerator& input, Expression& output
   );
@@ -2951,8 +2956,7 @@ public:
   static bool expressionFromBuiltInType(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
   static bool functionExpressionFromPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionFrom(Calculator& calculator, const MonomialPolynomial& input, Expression& output);
+  static bool expressionFromElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output);
   template <class Type>
   static bool convert(
     Calculator& calculator,

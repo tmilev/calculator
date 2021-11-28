@@ -146,7 +146,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   return true;
 }
 
-bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAttemptExtendingEtoHEFwithHinCartan");
   if (input.size() != 3) {
     return output.assignError(calculator, "Function takes 2 arguments - type and an element of the Lie algebra.");
@@ -181,7 +181,7 @@ bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& c
   return output.assignValueOLD(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::zModP(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerZmodP");
   if (!input.isListNElements(3)) {
     return false;
@@ -211,7 +211,7 @@ bool CalculatorFunctions::innerZmodP(Calculator& calculator, const Expression& i
   return output.assignValueWithContextOLD(outputElement, context, calculator);
 }
 
-bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::conesIntersect(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
   if (!input.isListNElements(3)) {
     return calculator << "Function ConesIntersection expects 2 arguments, got "
@@ -281,7 +281,7 @@ bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expr
   return output.assignValueOLD(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::reverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");
   if (input.size() < 2) {
     return false;
@@ -316,7 +316,7 @@ bool Calculator::functionReverseOrderRecursively(
   return true;
 }
 
-bool CalculatorFunctions::innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::reverseOrder(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerReverseOrder");
   if (!input.isSuitableForRecursion()) {
     output = input;
@@ -340,7 +340,7 @@ bool CalculatorFunctions::innerReverseOrder(Calculator& calculator, const Expres
   return true;
 }
 
-bool CalculatorFunctions::innerNot(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::notFunction(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }
@@ -355,10 +355,10 @@ bool CalculatorFunctions::innerNot(Calculator& calculator, const Expression& inp
   return output.assignValueOLD(0, calculator);
 }
 
-bool CalculatorFunctions::innerPrintZnEnumeration(
+bool CalculatorFunctions::printZnEnumeration(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintZnEnumeration");
+  MacroRegisterFunctionWithName("Calculator::printZnEnumeration");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -392,8 +392,8 @@ void Vector<Rational>::perturbNormalRelativeToVectorsInGeneralPosition(
   const List<Vector<Rational> >& vectorsToBeInGeneralPosition
 );
 
-bool CalculatorFunctions::innerPerturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerPerturbSplittingNormal");
+bool CalculatorFunctions::perturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::perturbSplittingNormal");
   std::stringstream out;
   if (input.size() != 4) {
     out << "Perturbing splitting normal takes 3 arguments: normal, "
@@ -434,11 +434,11 @@ bool CalculatorFunctions::innerPerturbSplittingNormal(Calculator& calculator, co
   return output.assignValueOLD(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintAllVectorPartitions");
+bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::printAllVectorPartitions");
   RecursionDepthCounter theRecursion(&calculator.recursionDepth);
   if (input.size() != 3) {
-    return output.assignError(calculator, "Function innerPrintAllPartitions expects 2 arguments.");
+    return output.assignError(calculator, "Function printAllPartitions expects 2 arguments.");
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!CalculatorConversions::convert(
@@ -514,7 +514,7 @@ bool CalculatorFunctions::interpolatePolynomial(
     return false;
   }
   Expression convertedE;
-  if (!CalculatorConversions::innerMakeMatrix(calculator, input, convertedE)) {
+  if (!CalculatorConversions::makeMatrix(calculator, input, convertedE)) {
     return false;
   }
   Matrix<Rational> pointsOfInterpoly;
@@ -634,7 +634,7 @@ bool CalculatorBasics::extractBaseMultiplication(
     // on condition that a*b has an inner handler
     Expression tempExp, newExpr;
     tempExp.makeXOX(calculator, calculator.opTimes(), output[1], output[2][1]);
-    if (CalculatorFunctions::innerTimes(calculator, tempExp, newExpr)) {
+    if (CalculatorFunctions::times(calculator, tempExp, newExpr)) {
       output.makeProduct(calculator, newExpr, output[2][2]);
       result = true;
     }

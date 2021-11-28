@@ -493,17 +493,17 @@ public:
   static bool splitToPartialFractionsOverAlgebraicRealsAlgorithm(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerSplitToPartialFractionsOverAlgebraicRealS(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitToPartialFractionsOverAlgebraicRealS(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionSplitToPartialFractionsOverAlgebraicReals(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestTopCommand(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestIndicator(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFindProductDistanceModN(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSolveProductSumEquationOverSetModN(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testTopCommand(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testIndicator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool findProductDistanceModN(Calculator& calculator, const Expression& input, Expression& output);
+  static bool solveProductSumEquationOverSetModN(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool solveSerreLikeSystem(
     Calculator& calculator, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure
   );
-  static bool innerSolveSerreLikeSystemNoUpperLimit(
+  static bool solveSerreLikeSystemNoUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, false, false);
@@ -524,61 +524,61 @@ public:
     return CalculatorFunctions::solveSerreLikeSystem(calculator, input, output, true, true);
   }
   static bool fetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFetchKnownPublicKeys(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSendEmailWithMailGun(Calculator& calculator, const Expression& input, Expression& output);
+  static bool fetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output);
+  static bool fetchKnownPublicKeys(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sendEmailWithMailGun(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerElementEllipticCurveNormalForm(
+  static bool elementEllipticCurveNormalForm(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerValueOfModularExpression(
+  static bool valueOfModularExpression(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerFormatCPPSourceCode(
+  static bool formatCPPSourceCode(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerformatCPPDirectory(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-
-  static bool innerPrintZnEnumeration(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerNot(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerZmodP(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAttemptExtendingEtoHEFwithHinCartan(
+  static bool formatCPPDirectory(
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPerturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printZnEnumeration(Calculator& calculator, const Expression& input, Expression& output);
+  static bool notFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool zModP(Calculator& calculator, const Expression& input, Expression& output);
+  static bool attemptExtendingEtoHEFwithHinCartan(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
 
-  static bool innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPolynomialWithEWA(Calculator& calculator, const Expression& input, Expression& output) {
+  static bool conesIntersect(Calculator& calculator, const Expression& input, Expression& output);
+  static bool perturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool printAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialWithEWA(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorFunctions::elementWeylAlgebraOrPolynomial(calculator, input, output, true);
   }
-  static bool innerElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
+  static bool elementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorFunctions::elementWeylAlgebraOrPolynomial(calculator, input, output, false);
   }
   static bool elementWeylAlgebraOrPolynomial(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly);
   static bool operationBinary(Calculator& calculator, const Expression& input, Expression& output, int operation);
   static bool interpolatePolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTimes(Calculator& calculator, const Expression& input, Expression& output) {
+  static bool times(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorFunctions::operationBinary(calculator, input, output, calculator.opTimes());
   }
-  static bool innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
+  static bool reverseOrder(Calculator& calculator, const Expression& input, Expression& output);
+  static bool reverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
   static bool transpose(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerGenerateMultiplicativelyClosedSet(
+  static bool generateMultiplicativelyClosedSet(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool determinantPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool invertMatrixVerbose(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output);
+  static bool suffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output);
   static bool isInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool isRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);
+  static bool freudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
+  static bool freudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
+  static bool jacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);
   class Test{
   public:
     static bool checkSorting(const List<Expression>& mustBeSorted);

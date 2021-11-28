@@ -226,7 +226,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "AttemptExtendingEtoHEFwithHinCartan",
-    CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan,
+    CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan,
     "",
     "Attempts to embed an element E into an sl(2)-triple over "
     "the rationals, such that the element H is in the "
@@ -329,7 +329,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "ConesIntersection",
-    CalculatorFunctions::innerConesIntersect,
+    CalculatorFunctions::conesIntersect,
     "",
     "Takes as input two sequences of vectors, generates two cones, "
     "and intersects them using the simplex algorithm. "
@@ -901,7 +901,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PrintProductDistancesModN",
-    CalculatorFunctions::innerFindProductDistanceModN,
+    CalculatorFunctions::findProductDistanceModN,
     "",
     "First argument = number N. Second argument = list of positive numbers. "
     "This function finds, modulo N, the product "
@@ -920,7 +920,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "SolveProductSumEquationOverSetModN",
-    CalculatorFunctions::innerSolveProductSumEquationOverSetModN,
+    CalculatorFunctions::solveProductSumEquationOverSetModN,
     "",
     "Tries to find one solution of the system a_1*a_2* ...= X mod N a_1+a_2+...=Y "
     "where the a_i's belong to a "
@@ -1042,7 +1042,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "LoadSemisimpleSubalgebras",
-    CalculatorConversions::innerLoadSemisimpleSubalgebras,
+    CalculatorConversions::loadSemisimpleSubalgebras,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b>"
     "Loads a semisimpleSubalgebra from expression. ",
@@ -1053,7 +1053,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "SltwoSubalgebra",
-    CalculatorConversions::innerSlTwoSubalgebraPrecomputed,
+    CalculatorConversions::slTwoSubalgebraPrecomputed,
     "",
     "<b>This function is being developed and is not implemented fully yet. </b>"
     "Loads an sl(2) subalgebra from expression. ",
@@ -1071,7 +1071,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
 
   this->addOperationHandler(
     "Freudenthal",
-    CalculatorFunctions::innerFreudenthalFormula,
+    CalculatorFunctions::freudenthalFormula,
     "",
     "Computes the dominant weights with multiplicities of a "
     "finite dimensional module of a highest weight "
@@ -1097,7 +1097,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "FreudenthalFull",
-    CalculatorFunctions::innerFreudenthalFull,
+    CalculatorFunctions::freudenthalFull,
     "",
     "Computes the full character and prints it to screen. "
     "Argument format same as the Freudenthal function. ",
@@ -1108,7 +1108,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PerturbSplittingNormal",
-    CalculatorFunctions::innerPerturbSplittingNormal,
+    CalculatorFunctions::perturbSplittingNormal,
     "",
     "Takes 3 arguments: normal, cone and general vectors. "
     "Attempts to perturb the normal so that the cone stays on "
@@ -1137,7 +1137,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(1, 2, 2, 1),"
     "(1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), "
     "(1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
-    "Calculator::innerPerturbSplittingNormal",
+    "Calculator::perturbSplittingNormal",
     "PerturbSplittingNormal",
     standardOptions
   );
@@ -1411,7 +1411,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "GenerateFiniteMultiplicativelyClosedSet",
-    CalculatorFunctions::innerGenerateMultiplicativelyClosedSet,
+    CalculatorFunctions::generateMultiplicativelyClosedSet,
     "",
     "The first argument gives upper_bound to the number of elements of the set. "
     "Generates a finite multiplicatively closed set of at most upper_bound elements, "
@@ -1679,7 +1679,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger,
+    CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger,
     this->opWeylGroupElement(),
     this->opRational(),
     "Exponentiates element of a Weyl group to an integer power. ",
@@ -1689,7 +1689,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "d = MakeElementWeylGroup{}(f_4, 4);\n"
     "x = a b c d  b a;\n"
     "x^1000001",
-    "CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger",
+    "CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger",
     "PowerWeylGroupElementByInteger",
     standardOptions
   );

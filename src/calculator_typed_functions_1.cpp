@@ -299,10 +299,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(
   return output.assignValue(calculator, leftR);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger(
+bool CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerWeylGroupElementByInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger");
   if (input.size() != 3) {
     return false;
   }
@@ -1374,10 +1374,10 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
   return output.assignValue(calculator, baseCopy);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
+bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1431,7 +1431,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerEWABySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1772,10 +1772,10 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors(
   return output.makeProduct(calculator, theRadicalCFE, theRadicalE);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational(
+bool CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -2877,10 +2877,10 @@ bool CalculatorFunctionsBinaryOps::binomialCoefficient(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
+bool CalculatorFunctionsBinaryOps::powerElementZmodPByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerElementZmodPByInteger");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -2908,10 +2908,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   return output.assignValueWithContext(calculator, element, context);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger(
+bool CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -2935,10 +2935,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
   return output.assignValueWithContext(calculator, element, input[1].getContext());
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
+bool CalculatorFunctionsBinaryOps::powerEllipticCurveZmodPElementByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::powerEllipticCurveZmodPElementByInteger");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }

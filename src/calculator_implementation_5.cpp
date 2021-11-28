@@ -1246,7 +1246,7 @@ bool CalculatorFunctions::operatorBounds(
 bool CalculatorFunctions::powerExponentToLog(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPowerExponentToLog");
+  MacroRegisterFunctionWithName("CalculatorFunctions::powerExponentToLog");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -1597,7 +1597,7 @@ bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expressi
 }
 
 bool CalculatorFunctions::thaw(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerThaw");
+  MacroRegisterFunctionWithName("CalculatorFunctions::thaw");
   if (input.size() < 2) {
     return false;
   }
@@ -2120,7 +2120,7 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
     }
   }
   MapList<std::string, Expression, MathRoutines::hashString> keys;
-  if (CalculatorConversions::innerLoadKeysFromStatementList(
+  if (CalculatorConversions::loadKeysFromStatementList(
     calculator, input, keys, &calculator.comments, true
   )) {
     if (keys.contains("color1")) {

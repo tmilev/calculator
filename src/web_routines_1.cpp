@@ -602,7 +602,7 @@ void WebCrawler::fetchWebPagePart2(
 #endif
 }
 
-bool CalculatorFunctions::innerFetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::fetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPageGET");
   if (!global.userDefaultHasAdminRights()) {
     return output.assignValueOLD(std::string("Fetching web pages available only for logged-in admins. "), calculator);
@@ -665,7 +665,7 @@ bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Express
   return output.assignValueOLD(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerFetchKnownPublicKeys(
+bool CalculatorFunctions::fetchKnownPublicKeys(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchKnownPublicKeys");

@@ -2839,16 +2839,16 @@ void Selection::initSelectionFixedCardinality(int card) {
 void Selection::incrementSelectionFixedCardinality(int cardinality) {
   // Example of the order of generation of all combinations
   // when cardinality = 2 and maximumSize = 5. The second column indicates the
-  // state of the array at the point in code marked with *** below
-  // 11000 (->10000) indexLastZeroWithOneBefore: 2 numberOfOnesAfterLastZeroWithOneBefore: 0
-  // 10100 (->10000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 0
-  // 10010 (->10000) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
-  // 10001 (->00000) indexLastZeroWithOneBefore: 1 numberOfOnesAfterLastZeroWithOneBefore: 1
-  // 01100 (->01000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 0
-  // 01010 (->01000) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
-  // 01001 (->00000) indexLastZeroWithOneBefore: 2 numberOfOnesAfterLastZeroWithOneBefore: 1
-  // 00110 (->00100) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
-  // 00101 (->00000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 1
+  // state of the array at the point in code marked with *** below.
+  // 11000 (10000) indexLastZeroWithOneBefore: 2 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 10100 (10000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 10010 (10000) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 10001 (00000) indexLastZeroWithOneBefore: 1 numberOfOnesAfterLastZeroWithOneBefore: 1
+  // 01100 (01000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 01010 (01000) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 01001 (00000) indexLastZeroWithOneBefore: 2 numberOfOnesAfterLastZeroWithOneBefore: 1
+  // 00110 (00100) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 00101 (00000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 1
   // 00011
   if (cardinality > this->numberOfElements) {
     return;
@@ -2880,7 +2880,7 @@ void Selection::incrementSelectionFixedCardinality(int cardinality) {
   for (int i = 0; i < numberOfOnesAfterLastZeroWithOneBefore + 1; i ++) {
     this->selected[this->elements[this->cardinalitySelection - i - 1]] = false;
   }
-  //***At this point in time the second column is recorded
+  // ***At this point in time the second column is recorded.
   for (int i = 0; i < numberOfOnesAfterLastZeroWithOneBefore + 1; i ++) {
     this->selected[i + indexLastZeroWithOneBefore] = true;
     this->elements[this->cardinalitySelection + i - numberOfOnesAfterLastZeroWithOneBefore - 1] = i + indexLastZeroWithOneBefore;

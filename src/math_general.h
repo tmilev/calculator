@@ -2934,10 +2934,10 @@ class SylvesterMatrix {
 public:
   // For polynomials A = a_0 x^n + ..., B = b_0 x^m + ...,
   // we define the Sylvester matrix as the matrix:
-  // ( a_0  0  0 ...  0  b_1  0  0 ... 0   )
-  // ( a_1 a_0 0 ...  0  b_2 b_1 0 ... 0   )
+  // ( a_0  0  0 ...  0  b_0  0  0 ... 0   )
+  // ( a_1 a_0 0 ...  0  b_1 b_0 0 ... 0   )
   // (               ...               ... )
-  // ( a_n           a_0               b_1 )
+  // ( a_n           a_0               b_0 )
   // ( 0             ... b_m               )
   // ( ...           ... ...               )
   // ( 0    0  0 ... a_n  0   0  0 ... b_m ).
@@ -2955,7 +2955,7 @@ public:
   // Then we define the Sylvester product matrix to be
   // the sylvester multi-matrix of the t_j's.
   // In the case of k = 2 this coincides with the usual
-  // Sylvester matrix (depending on the, defintion
+  // Sylvester matrix (depending on the defintion, that may be
   // with reversed order of the polynomials).
   // The Sylvester product matrix is used when computing
   // Henself lifts of multiple polynomial products.
@@ -3039,7 +3039,7 @@ public:
   // the OneFactorFinder here remain unspecified.
   int64_t computations;
   // Upper limit for the number of computations to carry out before giving up.
-  // Set to non-posiive for no computation limits.
+  // Set to non-positive for no computation limits.
   int64_t maximumComputations;
   FormatExpressions format;
   bool basicChecks(
@@ -3089,9 +3089,9 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   // The substitution format is:
   // the i^th element denotes the image of x_i,
   // For example, if polynomials is the array
-  // x_1+x_2 (poly in 3 variables)
-  // x_1x_3+2 (poly in 3 variables)
-  // this mens that it can be applied to polynomials in two variables
+  // x_1+x_2 (polynomial in 3 variables)
+  // x_1x_3+2 (polynomial in 3 variables)
+  // this means that it can be applied to polynomials in two variables
   // like this: x_1-> x_1+x_2
   // x_2-> (x_1x_3+2)
   // to produce a polynomial in three variables.
@@ -3103,7 +3103,7 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   );
   // In the following function we have that:
   // the format of the linear substitution is:
-  // theSub is a matrix whose number of rows minus 1 must equal the # number of
+  // substitution is a matrix whose number of rows minus 1 must equal the # number of
   // target variables and whose number of columns must equal the number of variables in
   // the current polynomial (this->NumVariables).
   // The first row denotes the constant term in the substitution of the respective variable.

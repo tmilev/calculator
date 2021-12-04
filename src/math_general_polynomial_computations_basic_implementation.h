@@ -266,7 +266,7 @@ Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input, 
 
 template <class Coefficient>
 void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables) {
-  MacroRegisterFunctionWithName("Polynomial_CoefficientType::setNumberOfVariablesSubstituteDeletedByOne");
+  MacroRegisterFunctionWithName("Polynomial::setNumberOfVariablesSubstituteDeletedByOne");
   if (newNumberOfVariables >= this->minimalNumberOfVariables()) {
     return;
   }
@@ -503,7 +503,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrixMultiple(
   int dimension,
   Matrix<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixMulti");
+  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixMultiple");
   output.initialize(dimension, dimension);
   output.makeZero(polynomials[0].coefficients[0].zero());
   int columnOffset = 0;

@@ -2837,19 +2837,19 @@ void Selection::initSelectionFixedCardinality(int card) {
 }
 
 void Selection::incrementSelectionFixedCardinality(int cardinality) {
-  //example of the order of generation of all combinations
+  // Example of the order of generation of all combinations
   // when cardinality = 2 and maximumSize = 5. The second column indicates the
-  //state of the array at the point in code marked with *** below
-  //11000 (->10000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 0
-  //10100 (->10000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
-  //10010 (->10000) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
-  //10001 (->00000) indexLastZeroWithOneBefore: 1 NumOnesAfterLastZeroWithOneBefore: 1
-  //01100 (->01000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
-  //01010 (->01000) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
-  //01001 (->00000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 1
-  //00110 (->00100) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
-  //00101 (->00000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 1
-  //00011
+  // state of the array at the point in code marked with *** below
+  // 11000 (->10000) indexLastZeroWithOneBefore: 2 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 10100 (->10000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 10010 (->10000) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 10001 (->00000) indexLastZeroWithOneBefore: 1 numberOfOnesAfterLastZeroWithOneBefore: 1
+  // 01100 (->01000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 01010 (->01000) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 01001 (->00000) indexLastZeroWithOneBefore: 2 numberOfOnesAfterLastZeroWithOneBefore: 1
+  // 00110 (->00100) indexLastZeroWithOneBefore: 4 numberOfOnesAfterLastZeroWithOneBefore: 0
+  // 00101 (->00000) indexLastZeroWithOneBefore: 3 numberOfOnesAfterLastZeroWithOneBefore: 1
+  // 00011
   if (cardinality > this->numberOfElements) {
     return;
   }
@@ -2912,11 +2912,14 @@ void Selection::operator=(const Selection& right) {
 }
 
 unsigned int Selection::hashFunction() const {
-  int tempMin = MathRoutines::minimum(someRandomPrimesSize, this->numberOfElements);
   unsigned int result = 0;
-  for (int i = 0; i < tempMin; i ++) {
+  int j = 0;
+  for (int i = 0; i < this->selected.size; i ++, j++) {
+    if (j >= someRandomPrimesSize) {
+      j = 0;
+    }
     if (this->selected[i]) {
-      result += static_cast<unsigned>(i) * someRandomPrimes[i];
+      result += static_cast<unsigned>(i) * someRandomPrimes[j];
     }
   }
   return result;

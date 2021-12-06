@@ -155,39 +155,42 @@ Calculator::NamedRuleLocation::NamedRuleLocation() {
   this->isComposite = false;
 }
 
-Expression Calculator::expressionZero() {
+
+Expression Calculator::expressionRational(const Rational& input) {
   Expression result;
-  result.assignValueOLD(0, *this);
+  result.assignValue(*this, input);
   return result;
+}
+
+Expression Calculator::expressionInteger(int input) {
+  Expression result;
+  result.assignValue(*this, input);
+  return result;
+}
+
+Expression Calculator::expressionZero() {
+  return this->expressionInteger(0);
 }
 
 Expression Calculator::expressionOne() {
-  Expression result;
-  result.assignValueOLD(1, *this);
-  return result;
+  return this->expressionInteger(1);
 }
 
 Expression Calculator::expressionMinusOne() {
-  Expression result;
-  result.assignValueOLD(- 1, *this);
-  return result;
+  return this->expressionInteger(- 1);
 }
 
 Expression Calculator::expressionFour() {
-  Expression result;
-  result.assignValueOLD(4, *this);
-  return result;
+  return this->expressionInteger(4);
 }
 
 Expression Calculator::expressionTwo() {
-  Expression result;
-  result.assignValueOLD(2, *this);
-  return result;
+  return this->expressionInteger(2);
 }
 
 Expression Calculator::expressionMinusHalf() {
   Expression result;
-  result.assignValueOLD(Rational(- 1, 2), *this);
+  result.assignValue(*this, Rational(- 1, 2));
   return result;
 }
 

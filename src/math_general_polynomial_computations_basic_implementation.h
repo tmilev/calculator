@@ -1589,4 +1589,34 @@ void PolynomialModuloPolynomial<Coefficient>::reduce() {
   );
 }
 
+template<class Coefficient>
+void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
+  Selection& nonCoefficientVariables,
+  Polynomial<Polynomial<Coefficient> >& output
+) const {
+  MacroRegisterFunctionWithName("Polynomial::getPolynomialWithPolynomialCoefficient");
+  if (nonCoefficientVariables.numberOfElements < this->minimalNumberOfVariables()) {
+    global.fatal << "getPolynomialWithPolynomialCoefficient "
+    << "called with selection "
+    << "with wrong number of variables. " << global.fatal;
+  }
+  output.makeZero();
+  MonomialPolynomial coefficientPart, polynomialPart;
+  Polynomial<Coefficient> currentCoefficient;
+  for (int i = 0; i < this->size(); i ++) {
+    coefficientPart.makeOne();
+    polynomialPart.makeOne();
+    for (int j = 0; j < (*this)[i].minimalNumberOfVariables(); j ++) {
+      if (nonCoefficientVariables.selected[j]) {
+        polynomialPart.setVariable(j, (*this)[i](j));
+      } else {
+        coefficientPart.setVariable(j, (*this)[i](j));
+      }
+    }
+    currentCoefficient.makeZero();
+    currentCoefficient.addMonomial(coefficientPart, this->coefficients[i]);
+    output.addMonomial(polynomialPart, currentCoefficient);
+  }
+}
+
 #endif

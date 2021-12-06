@@ -372,7 +372,7 @@ bool AlgebraicClosureRationals::reduceMe(
   Polynomial<Rational> minimalPolynomial, smallestFactor;
   minimalPolynomial.assignMinimalPolynomial(this->generatingElementMatrixForm);
   int dimension = this->latestBasis.size;
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
   bool mustBeTrue = factorization.factor(
     minimalPolynomial,
     nullptr,

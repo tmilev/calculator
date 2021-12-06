@@ -441,6 +441,9 @@ public:
   static bool solveUnivariatePolynomialWithRadicalsWithRespectTo(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool cardanoFormula(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
 
   static bool makeJavascriptExpression(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMakeJavascriptExpression(

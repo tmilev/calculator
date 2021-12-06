@@ -2667,6 +2667,18 @@ void Calculator::initializeFunctionsStandard() {
     "SolveFor",
     innerStandard
   );
+  this->addOperationHandler(
+    "CardanoFormula",
+    CalculatorFunctions::cardanoFormula,
+    "",
+    "Applies the cardano formula to a cubic.",
+    "CardanoFormula(x^3 + p x + q=0);\n"
+    "CardanoFormula(x^3 + 2 x + 3);\n"
+    "CardanoFormula(a x^3 + b x^2 + c x + d);\n",
+    "CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT",
+    "SolveFor",
+    innerStandard
+  );
 
   this->addOperationHandler(
     "\\sqrt",

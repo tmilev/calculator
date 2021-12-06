@@ -589,10 +589,16 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
   }
   this->degree = 0;
   if (!this->current.totalDegree().isSmallInteger(&this->degree)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Total degree is not small integer.";
+    }
     return false;
   }
   Vector<Polynomial<Rational> > derivative;
   if (!this->current.differential(derivative, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to compute the differential.";
+    }
     return false;
   }
   Polynomial<Rational> greatestCommonDivisor;
@@ -631,7 +637,7 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
     this->modularization.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
     return this->oneFactorFromModularization(comments, commentsOnFailure);
   }
-  return false;
+  return this->output->accountReducedFactor(this->current, false);
 }
 
 bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
@@ -639,6 +645,9 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
 ) {
   PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus> factorizationModular;
   if (!factorizationModular.factor(this->modularization, comments, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to factor modular polynomial: " << this->modularization.toString();
+    }
     return false;
   }
   this->factorsOverPrime = factorizationModular.reduced;
@@ -824,9 +833,12 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLift(
   std::stringstream *comments, std::stringstream *commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factorizationFromHenselLift");
-  this->maximumFactorsLiftedTries = 100;
+  this->maximumFactorsLiftedTries = 1000;
   while (this->factorsLifted.size > 0) {
     if (!this->factorizationFromHenselLiftOnce(comments, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to carry out hensel lift. ";
+      }
       return false;
     }
   }
@@ -840,7 +852,10 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
   (void) comments;
   SelectionFixedRank selection;
   // global.comments << "And the factors are: " << this->factorsLifted.toStringCommaDelimited();
-  for (int i = 1; i <= this->factorsLifted.size; i ++) {
+  int maximumSubsetsToTry = this->factorsLifted.size / 2;
+  LargeInteger twoPowerN = 2;
+  twoPowerN.raiseToPower(maximumSubsetsToTry);
+  for (int i = 1; i <= maximumSubsetsToTry; i ++) {
     selection.setNumberOfItemsAndDesiredSubsetSize(i, this->factorsLifted.size);
     do {
       this->factorsLiftedTries ++;
@@ -848,7 +863,7 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "The maximum allowed Hensel lift combinations is: "
-          << this->maximumFactorsLiftedTries << ". ";
+          << this->maximumFactorsLiftedTries << ". Total possibilities: " << twoPowerN;
         }
         return false;
       }
@@ -857,12 +872,12 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
       }
     } while (selection.incrementReturnFalseIfPastLast());
   }
-  // Since the product of all lifts should be equal to the
-  // original polynomial, in the worst case scenario,
-  // the loop above should return on
-  // its final iteration.
-  // Therefore if we reach this piece of code we've made
-  // an algorithmic or programming error.
-  global.fatal << "This code section should not be reachable. " << global.fatal;
+  selection.setNumberOfItemsAndDesiredSubsetSize(this->factorsLifted.size, this->factorsLifted.size);
+  if (!this->tryFactor(selection)) {
+    // The product of all lifts should be equal to the
+    // original polynomial, which is not the case.
+    // We've made an algorithmic or programming error.
+    global.fatal << "This code section should not be reachable. " << global.fatal;
+  }
   return true;
 }

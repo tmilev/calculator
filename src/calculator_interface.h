@@ -1877,6 +1877,8 @@ public:
   }
   const List<Function>* getOperationHandlers(int operation);
   const List<Function>* getOperationCompositeHandlers(int operation);
+  Expression expressionInteger(int input);
+  Expression expressionRational(const Rational& input);
   Expression expressionZero();
   Expression expressionOne();
   Expression expressionTwo();

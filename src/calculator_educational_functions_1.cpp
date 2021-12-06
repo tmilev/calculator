@@ -514,3 +514,108 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
   }
   return false;
 }
+
+bool CalculatorFunctions::cardanoFormula(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::cardanoFormula");
+  if (input.size() != 2) {
+    return false;
+  }
+  Expression polynomialExpression = input[1];
+  if (polynomialExpression.startsWith(calculator.opDefine(), 3)) {
+    // The argument is an equality.
+    // Replace it with the left hand side minus the right hand side.
+    polynomialExpression = polynomialExpression[1] +
+    calculator.expressionMinusOne() * polynomialExpression[2];
+  }
+  WithContext<Polynomial<Rational> > withContext;
+  if (!CalculatorConversions::functionPolynomial(
+    calculator, polynomialExpression, withContext, 5, 4, false
+  )) {
+    return calculator << "Failed to extract polynomial. ";
+  }
+  Polynomial<Rational>& polynomialInternal = withContext.content;
+  int indexVariableMaximumDegree = - 1;
+  int maximumPower = 0;
+  for (int i = 0; i < withContext.context.numberOfVariables(); i ++) {
+    int currentPower = polynomialInternal.getMaximumPowerOfVariableIndex(i);
+    if (currentPower > maximumPower) {
+      maximumPower = currentPower;
+      indexVariableMaximumDegree = i;
+    }
+  }
+  if (maximumPower != 3) {
+    return calculator << "Could not find a third power variable in your input. ";
+  }
+  Selection nonCoefficientVariables;
+  nonCoefficientVariables.initialize(withContext.context.numberOfVariables());
+  nonCoefficientVariables.addSelectionAppendNewIndex(indexVariableMaximumDegree);
+  Expression aCoefficient;
+  Expression bCoefficient;
+  Expression cCoefficient;
+  Expression dCoefficient;
+  Polynomial<Polynomial<Rational> > coefficients;
+  polynomialInternal.getPolynomialWithPolynomialCoefficient(
+    nonCoefficientVariables, coefficients
+  );
+  ExpressionContext contextCopy = withContext.context;
+  CalculatorConversions::expressionFromPolynomial(
+    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 3), aCoefficient, &contextCopy);
+  CalculatorConversions::expressionFromPolynomial(
+    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 2), bCoefficient, &contextCopy);
+  CalculatorConversions::expressionFromPolynomial(
+    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 1), cCoefficient, &contextCopy);
+  CalculatorConversions::expressionFromPolynomial(
+    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 0), dCoefficient, &contextCopy);
+  Expression bMonic;
+  Expression cMonic;
+  Expression dMonic;
+  if (aCoefficient.isEqualToOne()) {
+    bMonic = bCoefficient;
+    cMonic = cCoefficient;
+    dMonic = dCoefficient;
+  } else {
+    bMonic = bCoefficient / aCoefficient;
+    cMonic = cCoefficient / aCoefficient;
+    dMonic = dCoefficient / aCoefficient;
+  }
+  // Substitute x=y-b/3 in x^3+bx^2+cx+d.
+  // Workbook:
+  // x=(y-b/3);
+  // CoefficientsPowersOf(y, Polynomialize( x^3 + b x^2 + c x + d) );
+  // Resulting coefficients:
+  // y^3 + (-b^2/3+c)y + (2/27 b^3-b/3 c+d)
+  // Let y^3+p y + q be the depressed cubic above (suppressed = no quadratic term).
+  // Therefore:
+  // p = -b^2/3+c
+  // q = 2/27b^3-b/3c+d
+  Expression p = cCoefficient + calculator.expressionMinusOne() * bCoefficient * bCoefficient;
+  Expression q =
+  calculator.expressionRational(Rational(2, 27))
+  * bCoefficient * bCoefficient * bCoefficient
+  +
+  calculator.expressionRational(Rational(-1, 3))
+  * bCoefficient *cCoefficient
+  +
+  dCoefficient;
+  // The discriminant of the depressed cubic equals:
+  // -(4p^3+27q^2)
+  Expression discriminant =
+  calculator.expressionInteger(- 4) * p * p *p
+  +
+  calculator.expressionInteger(- 27) * q * q;
+  Expression discriminantOverNegative108 = discriminant / - 108;
+  Expression squareRootD;
+  squareRootD.makeSqrt(calculator, discriminantOverNegative108);
+  Expression negativeQOverTwo = calculator.expressionMinusHalf() * q;
+  Expression underFirstCubic = negativeQOverTwo + squareRootD;
+  Expression underSecondCubic = negativeQOverTwo - squareRootD;
+  Expression left, right;
+  left.makeSqrt(calculator, underFirstCubic, 3);
+  right.makeSqrt(calculator, underSecondCubic, 3);
+  output = left + right;
+  return true;
+}

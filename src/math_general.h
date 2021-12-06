@@ -2784,7 +2784,7 @@ public:
   }
   void makeOne();
   void getPolynomialWithPolynomialCoefficient(
-    Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
+    Selection& nonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
   ) const;
   void getPolynomialUnivariateWithPolynomialCoefficients(
     int variableIndex,
@@ -2863,6 +2863,12 @@ public:
   void operator=(int other);
   template <class otherType>
   void assignOtherType(const Polynomial<otherType>& other);
+  // Returns the coefficient a of a monomial of the form ax^k.
+  Coefficient getCoefficientOfXPowerK(int variableIndex, int variablePower) {
+    MonomialPolynomial monomial;
+    monomial.setVariable(variableIndex, variablePower);
+    return this->getCoefficientOf(monomial);
+  }
   static bool greatestCommonDivisorOneVariable(
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,
@@ -2890,6 +2896,10 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
+  static Polynomial<Coefficient> zeroStatic() {
+    Polynomial<Coefficient> zero;
+    return zero;
+  }
   class Test {
   public:
     FormatExpressions format;

@@ -290,6 +290,7 @@ public:
   static bool sqrt(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool factorInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool numberOfIntegerDivisors(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionFactorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool factorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
 

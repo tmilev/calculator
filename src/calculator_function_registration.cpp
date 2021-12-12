@@ -2786,6 +2786,23 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
+    "NumberOfIntegerDivisors",
+    CalculatorFunctions::numberOfIntegerDivisors,
+    "",
+    "Computes the number of integer divisors "
+    "(positive and negative) of a given number. "
+    "For example, 6 has 8 divisors: 1,2,3,6 "
+    "and their negatives.",
+    "NumberOfIntegerDivisors(6);\n"
+    "f{}1=Sequence{}(2);\n"
+    "f{}{{x}}=f{}(x-1) \\cup Sequence{}( NumberOfIntegerDivisors(x));\n"
+    "a=f{}100;\n"
+    "Max a",
+    "Calculator::numberOfIntegerDivisors",
+    "NumberOfIntegerDivisors",
+    innerStandard
+  );
+  this->addOperationHandler(
     "CoefficientsPowersOf",
     CalculatorFunctions::coefficientsPowersOf,
     "",

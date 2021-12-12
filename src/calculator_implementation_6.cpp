@@ -1240,6 +1240,29 @@ bool CalculatorFunctions::isPower(
   return output.assignValue(calculator, result);
 }
 
+bool CalculatorFunctions::numberOfIntegerDivisors(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::numberOfIntegerDivisors");
+  if (input.size() != 2) {
+    return false;
+  }
+  LargeInteger argument;
+  if (!input[1].isInteger(&argument)) {
+    return false;
+  }
+  if (argument.isEqualToZero()) {
+    return calculator << "Factorizaion of 0 is not defined in the calculator.";
+  }
+  List<LargeInteger> allPrimeFactors;
+  List<int> allMultiplicities;
+  argument.value.factor(allPrimeFactors, allMultiplicities, 10000, 2, nullptr);
+  LargeInteger result = 1;
+  for (int i = 0; i < allMultiplicities.size; i ++) {
+    result *= allMultiplicities[i] + 1;
+  }
+  result *= 2;
+  return output.assignValue(calculator, Rational(result));
+}
+
 bool CalculatorFunctions::factorInteger(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::factorInteger");
   if (input.size() != 2) {

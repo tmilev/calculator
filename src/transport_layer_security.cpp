@@ -555,17 +555,17 @@ bool CipherSuiteSpecification::computeName() {
   return true;
 }
 
-void SSLRecord::writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations) const {
+void SSLRecord::writeBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
   MacroRegisterFunctionWithName("SSLRecord::writeBytes");
-  serialization::WriterOneByteInteger recordTypeWriter(
+  Serialization::WriterOneByteInteger recordTypeWriter(
     SSLRecord::tokens::handshake, output, annotations, "SSL handshake tag"
   );
-  serialization::WriterTwoByteInteger writerVersion(this->version, output, annotations, "SSL record version");
-  serialization::LengthWriterTwoBytes writerLength(output, annotations, "SSL handshake body");
+  Serialization::WriterTwoByteInteger writerVersion(this->version, output, annotations, "SSL record version");
+  Serialization::LengthWriterTwoBytes writerLength(output, annotations, "SSL handshake body");
   this->content.writeBytes(output, annotations);
 }
 
-void SSLContent::writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations) const {
+void SSLContent::writeBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
   switch (this->contentType) {
     case SSLContent::tokens::clientHello:
       return SSLContent::writeBytesHandshakeClientHello(output, annotations);
@@ -579,18 +579,18 @@ void SSLContent::writeBytes(List<unsigned char>& output, List<serialization::Mar
 }
 
 void SSLContent::writeBytesHandshakeServerHello(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeServerHello");
   if (this->contentType != SSLContent::tokens::serverHello) {
     global.fatal << "Not allowed to serialize non server-hello content as server hello. " << global.fatal;
   }
   this->WriteType(output, annotations);
-  serialization::LengthWriterThreeBytes writeLength(output, annotations, "SSL content body");
+  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "SSL content body");
   this->WriteVersion(output, annotations);
   this->writeBytesMyRandomAndSessionId(output, annotations);
   // 256 = 0x0100 = no compression:
-  serialization::WriterTwoByteInteger compressionWriter(256, output, annotations, "compression: none");
+  Serialization::WriterTwoByteInteger compressionWriter(256, output, annotations, "compression: none");
   this->writeBytesExtensionsOnly(output, annotations);
 }
 
@@ -606,13 +606,13 @@ std::string SSLContent::getType(unsigned char theToken) {
 }
 
 void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLContent::writeNamedCurveAndPublicKey");
-  serialization::WriterOneByteInteger curveName(
+  Serialization::WriterOneByteInteger curveName(
     SSLContent::namedCurve, output, annotations, "named curve"
   );
-  serialization::writeTwoByteUnsignedAnnotated(
+  Serialization::writeTwoByteUnsignedAnnotated(
     static_cast<unsigned int>(this->chosenEllipticCurve),
     output,
     annotations,
@@ -624,19 +624,19 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
   this->ephemerealPublicKey.xCoordinate.value.writeBigEndianFixedNumberOfBytes(
     publicKeyBytes, 32, &shouldNotBeNeeded
   );
-  serialization::writeOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");
+  Serialization::writeOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");
   if (!mustBeTrue) {
     global.fatal << "Internally generated public key does not serialize properly. "
     << shouldNotBeNeeded.str()
     << global.fatal;
   }
-  serialization::WriterOneByteInteger(
+  Serialization::WriterOneByteInteger(
     SignatureAlgorithmSpecification::HashAlgorithm::sha256,
     output,
     annotations,
     "hash label"
   );
-  serialization::WriterOneByteInteger(
+  Serialization::WriterOneByteInteger(
     SignatureAlgorithmSpecification::SignatureAlgorithm::RSA,
     output,
     annotations,
@@ -646,35 +646,35 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
 }
 
 void SSLContent::WriteType(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   if (annotations != nullptr) {
-    annotations->addOnTop(serialization::Marker(output.size, 1, this->getType(this->contentType)));
+    annotations->addOnTop(Serialization::Marker(output.size, 1, this->getType(this->contentType)));
   }
   output.addOnTop(this->contentType);
 }
 
 void SSLContent::WriteVersion(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
-  serialization::WriterTwoByteInteger(this->version, output, annotations, "SSL content version");
+  Serialization::WriterTwoByteInteger(this->version, output, annotations, "SSL content version");
 }
 
 void SSLContent::writeBytesHandshakeCertificate(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeCertificate");
   if (this->contentType != SSLContent::tokens::certificate) {
     global.fatal << "Not allowed to serialize non-certificate content as certificate. " << global.fatal;
   }
   this->WriteType(output, annotations);
-  serialization::LengthWriterThreeBytes writeLength(output, annotations, "certificateCollection");
-  serialization::LengthWriterThreeBytes writeLengthFirstCertificate(output, annotations, "certificateBody");
+  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "certificateCollection");
+  Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(output, annotations, "certificateBody");
   this->GetServer().certificate.writeBytesASN1(output, annotations);
 }
 
 void SSLContent::writeBytesHandshakeSecretExchange(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLContent::writeBytesHandshakeSecretExchange");
   this->checkInitialization();
@@ -682,24 +682,24 @@ void SSLContent::writeBytesHandshakeSecretExchange(
     global.fatal << "Not allowed to serialize non-server key exchange as such. " << global.fatal;
   }
   this->WriteType(output, annotations);
-  serialization::LengthWriterThreeBytes writeLength(output, annotations, "server key exchange");
+  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "server key exchange");
   this->owner->owner->session.writeNamedCurveAndPublicKey(output, annotations);
 }
 
 void SSLContent::writeBytesHandshakeClientHello(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeClientHello");
   if (this->contentType != SSLContent::tokens::clientHello) {
     global.fatal << "Not allowed to serialize non client-hello content as client hello. " << global.fatal;
   }
   this->WriteType(output, annotations);
-  serialization::LengthWriterThreeBytes writeLength(output, annotations, "Handshake clientHello body");
+  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "Handshake clientHello body");
   this->WriteVersion(output, annotations);
   this->writeBytesIncomingRandomAndSessionId(output, annotations);
   this->writeBytesSupportedCiphers(output, annotations);
   // 256 = 0x0100 = no compression:
-  serialization::WriterTwoByteInteger noCompression(256, output, annotations, "compression: none");
+  Serialization::WriterTwoByteInteger noCompression(256, output, annotations, "compression: none");
   this->writeBytesExtensionsOnly(output, annotations);
 }
 
@@ -714,36 +714,36 @@ List<unsigned char>& SSLContent::getMyRandomBytes() const {
 }
 
 void SSLContent::writeBytesIncomingRandomAndSessionId(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesIncomingRandomAndSessionId");
-  serialization::writeBytesAnnotated(
+  Serialization::writeBytesAnnotated(
     this->owner->owner->session.incomingRandomBytes, output, annotations, "client random"
   );
-  serialization::writeOneByteLengthFollowedByBytes(this->sessionId, output, annotations, "session id");
+  Serialization::writeOneByteLengthFollowedByBytes(this->sessionId, output, annotations, "session id");
 }
 
 void SSLContent::writeBytesMyRandomAndSessionId(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesMyRandomAndSessionId");
-  serialization::writeBytesAnnotated(this->getMyRandomBytes(), output, annotations, "server random");
-  serialization::writeOneByteLengthFollowedByBytes(this->sessionId, output, annotations, "session id");
+  Serialization::writeBytesAnnotated(this->getMyRandomBytes(), output, annotations, "server random");
+  Serialization::writeOneByteLengthFollowedByBytes(this->sessionId, output, annotations, "session id");
 }
 
 void SSLContent::writeBytesSupportedCiphers(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesSupportedCiphers");
   List<CipherSuiteSpecification>& ciphers = this->owner->owner->session.incomingCiphers;
-  serialization::WriterTwoByteInteger cipherNumberWriter(
+  Serialization::WriterTwoByteInteger cipherNumberWriter(
     ciphers.size * 2,
     output,
     annotations,
     "number of ciphers"
   );
   for (int i = 0; i < ciphers.size; i ++) {
-    serialization::WriterTwoByteInteger currentCipher(
+    Serialization::WriterTwoByteInteger currentCipher(
       ciphers[i].id, output, annotations, "cipher id"
     );
   }
@@ -751,7 +751,7 @@ void SSLContent::writeBytesSupportedCiphers(
 
 bool SSLContent::decodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::decodeSupportedCiphers");
-  if (!serialization::readTwoByteInt(
+  if (!Serialization::readTwoByteInt(
     this->owner->incomingBytes,
     this->owner->offsetDecoded,
     this->cipherSpecLength,
@@ -780,7 +780,7 @@ bool SSLContent::decodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   ciphers.setSize(halfCipherLength);
   for (int i = 0; i < halfCipherLength; i ++) {
     ciphers[i].owner = this->owner->owner;
-    if (!serialization::readTwoByteInt(
+    if (!Serialization::readTwoByteInt(
       this->owner->incomingBytes,
       this->owner->offsetDecoded,
       ciphers[i].id,
@@ -801,10 +801,10 @@ bool SSLContent::decodeSupportedCiphers(std::stringstream* commentsOnFailure) {
 }
 
 void SSLContent::writeBytesExtensionsOnly(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesExtensionsOnly");
-  serialization::LengthWriterTwoBytes extensionsLength(output, annotations, "extensions");
+  Serialization::LengthWriterTwoBytes extensionsLength(output, annotations, "extensions");
   for (int i = 0; i < this->extensions.size; i ++) {
     this->extensions[i].writeBytes(output, annotations);
   }
@@ -829,7 +829,7 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (!serialization::readThreeByteInt(
+  if (!Serialization::readThreeByteInt(
     this->owner->incomingBytes,
     this->owner->offsetDecoded,
     this->length,
@@ -846,7 +846,7 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (!serialization::readTwoByteInt(
+  if (!Serialization::readTwoByteInt(
     this->owner->incomingBytes,
     this->owner->offsetDecoded,
     this->version,
@@ -855,7 +855,7 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
     return false;
   }
   List<unsigned char> incomingRandomBytes;
-  if (!serialization::readBytesFixedLength(
+  if (!Serialization::readBytesFixedLength(
     this->owner->incomingBytes,
     this->LengthRandomBytesInSSLHello,
     this->owner->offsetDecoded,
@@ -874,7 +874,7 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
   }
   this->flagIncomingRandomIncluded = true;
 
-  if (!serialization::readOneByteLengthFollowedByBytes(
+  if (!Serialization::readOneByteLengthFollowedByBytes(
     this->owner->incomingBytes,
     this->owner->offsetDecoded,
     nullptr,
@@ -889,7 +889,7 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
   if (!this->decodeSupportedCiphers(commentsOnFailure)){
     return false;
   }
-  if (!serialization::readTwoByteInt(
+  if (!Serialization::readTwoByteInt(
     this->owner->incomingBytes, this->owner->offsetDecoded, this->compressionMethod, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -907,7 +907,7 @@ bool SSLContent::decodeExtensions(std::stringstream *commentsOnFailure) {
     // No extensions
     return true;
   }
-  if (!serialization::readTwoByteInt(
+  if (!Serialization::readTwoByteInt(
     this->owner->incomingBytes,
     this->owner->offsetDecoded,
     this->extensionsLength,
@@ -927,7 +927,7 @@ bool SSLContent::decodeExtensions(std::stringstream *commentsOnFailure) {
   while (this->owner->offsetDecoded < extensionsLimit) {
     SSLHelloExtension incoming;
     incoming.owner = this;
-    if (!serialization::readTwoByteInt(
+    if (!Serialization::readTwoByteInt(
       this->owner->incomingBytes,
       this->owner->offsetDecoded,
       incoming.extensionType,
@@ -935,7 +935,7 @@ bool SSLContent::decodeExtensions(std::stringstream *commentsOnFailure) {
     )) {
       return false;
     }
-    if (!serialization::readTwoByteLengthFollowedByBytes(
+    if (!Serialization::readTwoByteLengthFollowedByBytes(
       this->owner->incomingBytes,
       this->owner->offsetDecoded,
       nullptr,
@@ -956,10 +956,10 @@ SSLHelloExtension::SSLHelloExtension() {
 
 void SSLHelloExtension::writeBytes(
   List<unsigned char>& output,
-  List<serialization::Marker>* annotations
+  List<Serialization::Marker>* annotations
 ) {
-  serialization::WriterTwoByteInteger writer(this->extensionType, output, annotations, "ssl hello extension type");
-  serialization::writeTwoByteLengthFollowedByBytes(this->content, output, annotations, "ssl hello extension content");
+  Serialization::WriterTwoByteInteger writer(this->extensionType, output, annotations, "ssl hello extension type");
+  Serialization::writeTwoByteLengthFollowedByBytes(this->content, output, annotations, "ssl hello extension content");
 }
 
 void SSLHelloExtension::makeGrease(SSLContent* inputOwner) {
@@ -1033,7 +1033,7 @@ bool SSLHelloExtension::processServerName(std::stringstream *commentsOnError) {
     }
     return false;
   }
-  if (!serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
+  if (!Serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
     this->content, 0, nullptr, &session.serverName, commentsOnError
   )) {
     if (commentsOnError != nullptr) {
@@ -1076,7 +1076,7 @@ bool SSLHelloExtension::processSignatureAlgorithms(std::stringstream* commentsOn
   TransportLayerSecurityServer::Session& session = this->owner->owner->owner->session;
   int offset = 0;
   List<unsigned char> specifications;
-  if (!serialization::readTwoByteLengthFollowedByBytes(
+  if (!Serialization::readTwoByteLengthFollowedByBytes(
     this->content, offset, nullptr, &specifications, commentsOnError
   )) {
     return false;
@@ -1126,25 +1126,25 @@ bool SSLContent::processExtensions(std::stringstream* commentsOnFailure) {
   return true;
 }
 
-bool serialization::readTwoByteInt(
+bool Serialization::readTwoByteInt(
   const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
 ) {
-  return serialization::readNByteInt(2, input, inputOutputOffset, result, commentsOnFailure);
+  return Serialization::readNByteInt(2, input, inputOutputOffset, result, commentsOnFailure);
 }
 
-bool serialization::readThreeByteInt(
+bool Serialization::readThreeByteInt(
   const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
 ) {
-  return serialization::readNByteInt(3, input, inputOutputOffset, result, commentsOnFailure);
+  return Serialization::readNByteInt(3, input, inputOutputOffset, result, commentsOnFailure);
 }
 
-bool serialization::readFourByteInt(
+bool Serialization::readFourByteInt(
   const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
 ) {
-  return serialization::readNByteInt(4, input, inputOutputOffset, result, commentsOnFailure);
+  return Serialization::readNByteInt(4, input, inputOutputOffset, result, commentsOnFailure);
 }
 
-bool serialization::readNByteInt(
+bool Serialization::readNByteInt(
   int numBytes,
   const List<unsigned char>& input,
   int& inputOutputOffset,
@@ -1171,7 +1171,7 @@ bool serialization::readNByteInt(
   return true;
 }
 
-bool serialization::readBytesFixedLength(
+bool Serialization::readBytesFixedLength(
   const List<unsigned char>& input,
   int desiredNumberOfBytes,
   int& inputOutputOffset,
@@ -1200,31 +1200,31 @@ bool serialization::readBytesFixedLength(
   return true;
 }
 
-bool serialization::readOneByteLengthFollowedByBytes(
+bool Serialization::readOneByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   int& outputOffset,
   int* resultLength,
   List<unsigned char>* output,
   std::stringstream* commentsOnError
 ) {
-  return serialization::readNByteLengthFollowedByBytes(
+  return Serialization::readNByteLengthFollowedByBytes(
     1, input, outputOffset, resultLength, output, commentsOnError
   );
 }
 
-bool serialization::readTwoByteLengthFollowedByBytes(
+bool Serialization::readTwoByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   int& outputOffset,
   int* resultLength,
   List<unsigned char>* output,
   std::stringstream* commentsOnError
 ) {
-  return serialization::readNByteLengthFollowedByBytes(
+  return Serialization::readNByteLengthFollowedByBytes(
     2, input, outputOffset, resultLength, output, commentsOnError
   );
 }
 
-bool serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
+bool Serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
   const List<unsigned char>& input,
   int offset,
   int* resultLength,
@@ -1232,12 +1232,12 @@ bool serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
   std::stringstream* commentsOnError
 ) {
   int outputOffset = offset;
-  return serialization::readNByteLengthFollowedByBytes(
+  return Serialization::readNByteLengthFollowedByBytes(
     2, input, outputOffset, resultLength, output, commentsOnError
   );
 }
 
-bool serialization::readNByteLengthFollowedByBytes(
+bool Serialization::readNByteLengthFollowedByBytes(
   int numBytesLength,
   const List<unsigned char>& input,
   int& outputOffset,
@@ -1249,7 +1249,7 @@ bool serialization::readNByteLengthFollowedByBytes(
   if (resultLength == nullptr) {
     resultLength = &temp;
   }
-  if (!serialization::readNByteInt(
+  if (!Serialization::readNByteInt(
     numBytesLength, input, outputOffset, *resultLength, commentsOnError
   )) {
     return false;
@@ -1270,59 +1270,59 @@ bool serialization::readNByteLengthFollowedByBytes(
   return true;
 }
 
-void serialization::writeTwoByteInt(
+void Serialization::writeTwoByteInt(
   int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return serialization::writeNByteUnsigned(2, static_cast<unsigned>(input), output, inputOutputOffset);
+  return Serialization::writeNByteUnsigned(2, static_cast<unsigned>(input), output, inputOutputOffset);
 }
 
-void serialization::writeThreeByteInt(
+void Serialization::writeThreeByteInt(
   int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return serialization::writeNByteUnsigned(3, static_cast<unsigned>(input), output, inputOutputOffset);
+  return Serialization::writeNByteUnsigned(3, static_cast<unsigned>(input), output, inputOutputOffset);
 }
 
-void serialization::writeTwoByteUnsignedAnnotated(
+void Serialization::writeTwoByteUnsignedAnnotated(
   unsigned int input,
   List<unsigned char>& output,
-  List<serialization::Marker>* annotations,
+  List<Serialization::Marker>* annotations,
   const std::string& label
 ) {
   if (annotations != nullptr) {
-    annotations->addOnTop(serialization::Marker(output.size, 2, label));
+    annotations->addOnTop(Serialization::Marker(output.size, 2, label));
   }
-  serialization::writeTwoByteUnsigned(input, output);
+  Serialization::writeTwoByteUnsigned(input, output);
 }
 
-void serialization::writeTwoByteUnsigned(
+void Serialization::writeTwoByteUnsigned(
   unsigned int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return serialization::writeNByteUnsigned(2, input, output, inputOutputOffset);
+  return Serialization::writeNByteUnsigned(2, input, output, inputOutputOffset);
 }
 
-void serialization::writeThreeByteUnsigned(
+void Serialization::writeThreeByteUnsigned(
   unsigned int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return serialization::writeNByteUnsigned(3, input, output, inputOutputOffset);
+  return Serialization::writeNByteUnsigned(3, input, output, inputOutputOffset);
 }
 
-void serialization::writeFourByteUnsigned(
+void Serialization::writeFourByteUnsigned(
   unsigned int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return serialization::writeNByteUnsigned(4, input, output, inputOutputOffset);
+  return Serialization::writeNByteUnsigned(4, input, output, inputOutputOffset);
 }
 
-void serialization::writeNByteUnsigned(
+void Serialization::writeNByteUnsigned(
   int byteCountOfLength,
   unsigned int input,
   List<unsigned char>& output,
@@ -1344,33 +1344,33 @@ void serialization::writeNByteUnsigned(
   inputOutputOffset += byteCountOfLength;
 }
 
-void serialization::writeOneByteLengthFollowedByBytes(
+void Serialization::writeOneByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   List<unsigned char>& output,
-  List<serialization::Marker>* annotations,
+  List<Serialization::Marker>* annotations,
   const std::string& label
 ) {
-  serialization::writeNByteLengthFollowedByBytes(
+  Serialization::writeNByteLengthFollowedByBytes(
     1, input, output, annotations, label
   );
 }
 
-void serialization::writeTwoByteLengthFollowedByBytes(
+void Serialization::writeTwoByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   List<unsigned char>& output,
-  List<serialization::Marker>* annotations,
+  List<Serialization::Marker>* annotations,
   const std::string& label
 ) {
-  serialization::writeNByteLengthFollowedByBytes(
+  Serialization::writeNByteLengthFollowedByBytes(
     2, input, output, annotations, label
   );
 }
 
-std::string serialization::convertListUnsignedCharsToHex(const List<unsigned char>& input) {
+std::string Serialization::convertListUnsignedCharsToHex(const List<unsigned char>& input) {
   return Crypto::convertListUnsignedCharsToHexFormat(input, 0, false);
 }
 
-std::string serialization::convertListUnsignedCharsToString(const List<unsigned char>& input) {
+std::string Serialization::convertListUnsignedCharsToString(const List<unsigned char>& input) {
   std::string result;
   result.resize(static_cast<unsigned>(input.size));
   for (unsigned i = 0; i < result.size(); i ++) {
@@ -1379,26 +1379,26 @@ std::string serialization::convertListUnsignedCharsToString(const List<unsigned 
   return result;
 }
 
-void serialization::writeBytesAnnotated(
+void Serialization::writeBytesAnnotated(
   const List<unsigned char>& input,
   List<unsigned char>& output,
-  List<serialization::Marker>* annotations,
+  List<Serialization::Marker>* annotations,
   const std::string& label
 ) {
   if (annotations != nullptr) {
-    annotations->addOnTop(serialization::Marker(output.size, input.size, label));
+    annotations->addOnTop(Serialization::Marker(output.size, input.size, label));
   }
   output.addListOnTop(input);
 }
 
-void serialization::writeNByteLengthFollowedByBytes(
+void Serialization::writeNByteLengthFollowedByBytes(
   int byteCountOfLength,
   const List<unsigned char>& input,
   List<unsigned char>& output,
-  List<serialization::Marker>* annotations,
+  List<Serialization::Marker>* annotations,
   const std::string& label
 ) {
-  serialization::WriterIntegerWithMarker writer(
+  Serialization::WriterIntegerWithMarker writer(
     byteCountOfLength, static_cast<unsigned>(input.size), output, annotations, label
   );
   output.addListOnTop(input);
@@ -1420,25 +1420,25 @@ SSLRecord::SSLRecord() {
   this->owner = nullptr;
 }
 
-std::string serialization::JSLabels::markers = "markers";
-std::string serialization::JSLabels::body = "body";
-std::string serialization::JSLabels::length = "length";
-std::string serialization::JSLabels::offset = "offset";
-std::string serialization::JSLabels::label = "label";
-std::string serialization::JSLabels::serialization = "serialization";
+std::string Serialization::JSLabels::markers = "markers";
+std::string Serialization::JSLabels::body = "body";
+std::string Serialization::JSLabels::length = "length";
+std::string Serialization::JSLabels::offset = "offset";
+std::string Serialization::JSLabels::label = "label";
+std::string Serialization::JSLabels::serialization = "serialization";
 
-std::string serialization::Marker::toString() const {
+std::string Serialization::Marker::toString() const {
   std::stringstream out;
   out << "[" << this->offset << ", " << this->length << ", '" << this->label << "']";
   return out.str();
 }
 
-JSData serialization::Marker::toJSON() {
+JSData Serialization::Marker::toJSON() {
   JSData result;
   result.elementType = JSData::token::tokenObject;
-  result[serialization::JSLabels::offset] = LargeInteger(this->offset);
-  result[serialization::JSLabels::length] = LargeInteger(this->length);
-  result[serialization::JSLabels::label] = this->label;
+  result[Serialization::JSLabels::offset] = LargeInteger(this->offset);
+  result[Serialization::JSLabels::length] = LargeInteger(this->length);
+  result[Serialization::JSLabels::label] = this->label;
   return result;
 }
 
@@ -1460,7 +1460,7 @@ std::string SSLRecord::JSLabels::session = "session";
 JSData SSLRecord::toJSON() {
   MacroRegisterFunctionWithName("SSLRecord::toJSON");
   JSData result;
-  result[serialization::JSLabels::serialization] = this->toJSONSerialization();
+  result[Serialization::JSLabels::serialization] = this->toJSONSerialization();
   result[SSLRecord::JSLabels::type] = this->toStringType();
   result[SSLRecord::JSLabels::content] = this->content.toJSON();
   result[SSLRecord::JSLabels::session] = this->owner->session.toJSON();
@@ -1581,15 +1581,15 @@ JSData SSLRecord::toJSONSerialization() {
   MacroRegisterFunctionWithName("SSLRecord::toJSONSerialization");
   JSData result;
   List<unsigned char> serialization;
-  List<serialization::Marker> markers;
+  List<Serialization::Marker> markers;
   this->writeBytes(serialization, &markers);
   JSData jsMarkers;
   jsMarkers.elementType = JSData::token::tokenArray;
   for (int i = 0; i < markers.size; i ++) {
     jsMarkers.listObjects.addOnTop(markers[i].toJSON());
   }
-  result[serialization::JSLabels::markers] = jsMarkers;
-  result[serialization::JSLabels::body] = Crypto::convertListUnsignedCharsToHex(serialization);
+  result[Serialization::JSLabels::markers] = jsMarkers;
+  result[Serialization::JSLabels::body] = Crypto::convertListUnsignedCharsToHex(serialization);
   return result;
 }
 
@@ -1655,12 +1655,12 @@ bool SSLRecord::decode(std::stringstream *commentsOnFailure) {
     }
     return false;
   }
-  if (!serialization::readTwoByteInt(
+  if (!Serialization::readTwoByteInt(
     this->incomingBytes, this->offsetDecoded, this->version, commentsOnFailure
   )) {
     return false;
   }
-  if (!serialization::readTwoByteInt(
+  if (!Serialization::readTwoByteInt(
     this->incomingBytes, this->offsetDecoded, this->length, commentsOnFailure
   )) {
     return false;

@@ -163,7 +163,7 @@ public:
   std::string toStringTestEncode();
   void computeASN(ASNElement& output);
   void computeASNSignatureAlgorithm(ASNElement& output);
-  void writeBytesASN1(List<unsigned char>& output, List<serialization::Marker>* annotations);
+  void writeBytesASN1(List<unsigned char>& output, List<Serialization::Marker>* annotations);
 };
 
 class Crypto {

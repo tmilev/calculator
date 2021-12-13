@@ -228,7 +228,7 @@ public:
   bool processRequestOnlineCertificateStatus(std::stringstream* commentsOnError);
   bool processRequestSignedCertificateTimestamp(std::stringstream* commentsOnError);
   bool processSignatureAlgorithms(std::stringstream* commentsOnError);
-  void writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations);
+  void writeBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations);
   void makeEllipticCurvePointFormat(SSLContent* inputOwner);
   void makeExtendedMasterSecret(SSLContent* inputOwner);
   void makeGrease(SSLContent* inputOwner);
@@ -331,33 +331,33 @@ public:
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
-  void writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
-  void WriteType(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
-  void WriteVersion(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
+  void writeBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteType(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteVersion(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   void writeBytesHandshakeClientHello(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeServerHello(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeCertificate(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeSecretExchange(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   List<unsigned char>& getMyRandomBytes() const;
   void writeBytesIncomingRandomAndSessionId(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesMyRandomAndSessionId(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesSupportedCiphers(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesExtensionsOnly(
-    List<unsigned char>& output, List<serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
 };
 
@@ -409,7 +409,7 @@ public:
   void prepareServerHello1Start(SSLRecord& clientHello);
   void prepareServerHello2Certificate();
   bool prepareServerHello3SecretExchange(std::stringstream* commentsOnFailure);
-  void writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
+  void writeBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
 };
 
 class TransportLayerSecurityServer {
@@ -485,7 +485,7 @@ public:
       List<unsigned char>& input, std::stringstream* commentsOnFailure
     );
     void writeNamedCurveAndPublicKey(
-      List<unsigned char>& output, List<serialization::Marker>* annotations
+      List<unsigned char>& output, List<Serialization::Marker>* annotations
     ) const;
   };
   TransportLayerSecurityServer::Session session;

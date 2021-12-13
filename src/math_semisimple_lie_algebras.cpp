@@ -1321,7 +1321,7 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
 
 class SlTwoInSlN;
 
-void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(
+void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmallerCartanSubalgebra(
   Vectors<Rational>& output
 ) {
   List<Vector<Rational> >& rootSystem = this->coDomainAlgebra().weylGroup.rootSystem;

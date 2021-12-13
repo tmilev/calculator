@@ -488,7 +488,7 @@ std::string ASNElement::toString() const {
   return this->toJSON().toString();
 }
 
-void ASNElement::writeAnnotations(List<serialization::Marker>& output) {
+void ASNElement::writeAnnotations(List<Serialization::Marker>& output) {
   std::stringstream bodyStream, tagStream, lengthStream;
   tagStream << "Type: " << AbstractSyntaxNotationOneSubsetDecoder::getType(this->tag);
   lengthStream << "Content length: " << this->lengthPromised;
@@ -497,16 +497,16 @@ void ASNElement::writeAnnotations(List<serialization::Marker>& output) {
     bodyStream << "<br>" << comment;
   }
   int lengthOfLengthEncoding = this->getLengthLengthEncoding();
-  output.addOnTop(serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite, this->lengthPromised + lengthOfLengthEncoding + 1, bodyStream.str()
   ));
-  output.addOnTop(serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite, 1, tagStream.str()
   ));
-  output.addOnTop(serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite + 1, lengthOfLengthEncoding, lengthStream.str()
   ));
-  output.addOnTop(serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite + 1 + lengthOfLengthEncoding, this->lengthPromised, bodyStream.str()
   ));
   for (int i = 0; i < this->elements.size; i ++) {
@@ -882,7 +882,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLengt
   unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numBytes);
   output[offset] = lengthPlus128;
   offset ++;
-  serialization::writeNByteUnsigned(
+  Serialization::writeNByteUnsigned(
     numBytes,
     static_cast<unsigned int>(input),
     output,
@@ -1496,7 +1496,7 @@ void X509Certificate::computeASNSignatureAlgorithm(ASNElement& output) {
 }
 
 void X509Certificate::writeBytesASN1(
-  List<unsigned char>& output, List<serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) {
   MacroRegisterFunctionWithName("X509Certificate::writeBytesASN1");
   this->computeASN(this->recodedASN);

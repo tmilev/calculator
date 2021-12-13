@@ -316,7 +316,7 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   output.imagesNegativeSimpleChevalleyGenerators[0] = g_m1plusg_m3;
   output.imagesNegativeSimpleChevalleyGenerators[1] = g_m2;
   output.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
-  output.getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(output.restrictedRootSystem);
+  output.getRestrictionAmbientRootSystemToTheSmallerCartanSubalgebra(output.restrictedRootSystem);
 }
 
 void BranchingData::resetOutputData() {

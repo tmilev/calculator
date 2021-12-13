@@ -2063,9 +2063,6 @@ std::string VoganDiagram::toString() {
   case VoganDiagram::AIII:
     out << "AIII";
     break;
-  case VoganDiagram::AIV:
-    out << "AIV";
-    break;
   case VoganDiagram::EI:
     out << "EI";
     break;
@@ -2091,7 +2088,6 @@ DynkinType VoganDiagram::dynkinTypeAmbient() {
   case VoganDiagram::AI:
   case VoganDiagram::AII:
   case VoganDiagram::AIII:
-  case VoganDiagram::AIV:
     result.makeSimpleType('A', this->rank, nullptr);
     return result;
   case VoganDiagram::EI:
@@ -2113,7 +2109,6 @@ void VoganDiagram::computeMapStringToType() {
   this->mapStringToType.setKeyValue("AI", VoganDiagram::AI);
   this->mapStringToType.setKeyValue("AII", VoganDiagram::AII);
   this->mapStringToType.setKeyValue("AIII", VoganDiagram::AIII);
-  this->mapStringToType.setKeyValue("AIV", VoganDiagram::AIV);
   this->mapStringToType.setKeyValue("BI", VoganDiagram::BI);
   this->mapStringToType.setKeyValue("CI", VoganDiagram::CI);
   this->mapStringToType.setKeyValue("CII", VoganDiagram::CII);
@@ -2157,6 +2152,18 @@ bool VoganDiagram::assignParameter(
   if (this->rank < 0) {
     this->rank = 0;
   }
+  if (
+    this->diagram == VoganDiagram::DiagramType::AIII &&
+    this->parameter > this->rank / 2
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Parameter must be at least 1 and at most rank/2="
+      << this->rank / 2
+      << ", it is instead: " << this->parameter;
+    }
+    return false;
+  }
   return true;
 }
 
@@ -2166,6 +2173,7 @@ VoganDiagram::VoganDiagram() {
 }
 
 std::string CartanInvolution::toString() {
+  MacroRegisterFunctionWithName("CartanInvolution::toString");
   std::stringstream out;
   out << this->voganDiagram.toString() << ". ";
   out << this->automorphism.toString();
@@ -2282,7 +2290,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   Vector<Rational> simpleRootLeft, simpleRootRight;
-  for (int i = 0; i < this->voganDiagram.diagram; i ++) {
+  for (int i = 0; i < this->voganDiagram.rank; i ++) {
     if (i == this->voganDiagram.parameter) {
       continue;
     }
@@ -2504,7 +2512,7 @@ void DynkinSimpleType::plotHorizontalChainOfRoots(
     if (filledNodes != nullptr) {
       selected = filledNodes->selected[i];
     }
-    DynkinSimpleType::plotOneRoot(output, i, verticalOffset, selected);
+    DynkinSimpleType::plotOneRoot(output, i, selected, verticalOffset);
   }
   Vector<Rational> center;
   center.makeZero(2);
@@ -2736,6 +2744,72 @@ void DynkinSimpleType::plotE8(Plot& output, int verticalOffset) {
   DynkinSimpleType::appendOneSingleConnectedRootToTheRight(output, 5, verticalOffset, "8", false);
 }
 
+void SatakeDiagram::plot(Plot& output, int verticalOffset) {
+  DynkinType::plotInitialize(output);
+  switch (this->diagram) {
+  case SatakeDiagram::AI:
+    this->plotAI(output, verticalOffset);
+    return;
+  case SatakeDiagram::AII:
+    this->plotAII(output, verticalOffset);
+    return;
+  case SatakeDiagram::AIII:
+    this->plotAIII(output, verticalOffset);
+    return;
+  default:
+    break;
+  }
+}
+
+void SatakeDiagram::plotAI(Plot& output, int verticalOffset) {
+  DynkinSimpleType::plotAn(output, this->rank, verticalOffset);
+}
+
+void SatakeDiagram::plotAII(Plot& output, int verticalOffset) {
+  Selection filledRoots;
+  filledRoots.initialize(this->rank);
+  for (int i = 0; i < this->rank; i += 2) {
+    filledRoots.addSelectionAppendNewIndex(i);
+  }
+  DynkinSimpleType::plotHorizontalChainOfRoots(
+    output, this->rank, verticalOffset, &filledRoots, nullptr
+  );
+}
+
+void SatakeDiagram::plotAIII(Plot& output, int verticalOffset) {
+  Selection filledRoots;
+  filledRoots.initialize(this->rank);
+  int remainingRank = this->rank - (this->parameter + 1) * 2;
+  for (int i = this->parameter + 1; i < this->parameter + remainingRank + 1; i ++) {
+    filledRoots.addSelectionAppendNewIndex(i);
+  }
+  for (int i = 0 ; i < this->parameter + 1; i ++) {
+    VoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, verticalOffset, this->rank);
+  }
+  DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &filledRoots);
+}
+
+SatakeDiagram VoganDiagram::computeSatakeDiagram() {
+  SatakeDiagram result;
+  switch (this->diagram) {
+  case VoganDiagram::DiagramType::AI:
+    result.diagram = SatakeDiagram::DiagramType::AI;
+    break;
+  case VoganDiagram::DiagramType::AII:
+    result.diagram = SatakeDiagram::DiagramType::AII;
+    break;
+  case VoganDiagram::DiagramType::AIII:
+    result.diagram = SatakeDiagram::DiagramType::AIII;
+    break;
+  default:
+    global.fatal << "ComputeSatakeDiagram Not implemented yet." << global.fatal;
+  }
+
+  result.rank = this->rank;
+  result.parameter = this->parameter;
+  return result;
+}
+
 void VoganDiagram::plot(Plot& output) {
   DynkinType::plotInitialize(output);
   switch (this->diagram) {
@@ -2850,8 +2924,12 @@ void VoganDiagram::plotEIV(Plot& output) {
   VoganDiagram::plotTwoElementOrbit(output, 1, 3, 0, - 4);
 }
 
-void CartanInvolution::plot(Plot& output) {
+void CartanInvolution::plotVoganDiagram(Plot& output) {
   return this->voganDiagram.plot(output);
+}
+
+void CartanInvolution::plotSatakeDiagram(Plot& output, int verticalOffset) {
+  return this->voganDiagram.computeSatakeDiagram().plot(output, verticalOffset);
 }
 
 bool CalculatorLieTheory::cartanInvolutionInternal(
@@ -2908,16 +2986,19 @@ bool CalculatorLieTheory::cartanInvolution(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolution");
-  return calculator << "Not implemented yet.";
   CartanInvolution involution;
   if (!CalculatorLieTheory::cartanInvolutionInternal(calculator, input, involution)) {
     return false;
   }
-  Plot plot;
-  involution.plot(plot);
+  Plot plotVogan, plotSatake;
+  involution.plotVoganDiagram(plotVogan);
+  involution.plotSatakeDiagram(plotSatake, 0);
   return output.assignValue(
     calculator, "Vogan diagram:\n<br>\n" +
-    plot.getPlotHtml(calculator) + "\n<br>\n" + involution.toString()
+    plotVogan.getPlotHtml(calculator) +
+    "\n<br>\nSatake diagram:\n<br>\n" +
+    plotSatake.getPlotHtml(calculator) +
+    "\n<br>\n" + involution.toString()
   );
 }
 

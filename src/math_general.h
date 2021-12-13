@@ -3071,7 +3071,7 @@ public:
 
 class PolynomialFactorizationKronecker {
   public:
-  static const int maximumDegreeDefault = 16;
+  static const int maximumDegreeDefault = 20;
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker>* output;
   Polynomial<Rational> current;
   bool oneFactor(

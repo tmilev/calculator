@@ -366,7 +366,7 @@ void Pipe::readLoop(List<char>& output) {
   int offset = 0;
   List<unsigned char> metaDataBuffer;
   metaDataBuffer = this->metaData.lastRead;
-  serialization::readFourByteInt(
+  Serialization::readFourByteInt(
     metaDataBuffer, offset, expectedBytes, nullptr
   );
   output.setSize(0);

@@ -75,7 +75,7 @@ public:
   std::string interpretAsObjectIdentifierGetNameAndId() const;
   void toJSON(JSData& output) const;
   JSData toJSON() const;
-  void writeAnnotations(List<serialization::Marker>& output);
+  void writeAnnotations(List<Serialization::Marker>& output);
   std::string toString() const;
   bool isComposite() const;
   bool isPureComposite() const;

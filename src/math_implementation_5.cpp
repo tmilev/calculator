@@ -660,16 +660,17 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::isCoefficientOneChevalleyGenerato
   return false;
 }
 
-void HomomorphismSemisimpleLieAlgebra::getWeightsWrtKInSimpleCoordinatesK(
-  Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts
+void HomomorphismSemisimpleLieAlgebra::getWeightsRelativeToKInSimpleKCoordinates(
+  Vectors<Rational>& outputWeights,
+  List<ElementSemisimpleLieAlgebra<Rational> >& inputElements
 ) {
-  outputWeights.setSize(inputElts.size);
+  outputWeights.setSize(inputElements.size);
   Rational tempRat;
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
-  for (int i = 0; i < inputElts.size; i ++) {
+  for (int i = 0; i < inputElements.size; i ++) {
     Vector<Rational>& currentWeight = outputWeights[i];
     currentWeight.makeZero(this->domainAlgebra().getRank());
-    ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElts[i];
+    ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElements[i];
     for (int j = 0; j < this->domainAlgebra().getRank(); j ++) {
       this->coDomainAlgebra().lieBracket(
         this->imagesAllChevalleyGenerators[j + this->domainAlgebra().getNumberOfPositiveRoots()],

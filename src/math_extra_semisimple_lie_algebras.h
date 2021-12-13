@@ -8,11 +8,33 @@
 class Plot;
 class CartanInvolution;
 
-// Represents a Vogan diagram.
-// Do not confuse with the "Satake" diagrams given in
+// From
 // Shôrô Araki,
 // "On root systems and an infinitesimal
 // classification of irreducible symmetric spaces", 1962.
+class SatakeDiagram {
+private:
+public:
+  enum DiagramType {
+    AI,
+    AII,
+    AIII,
+  };
+  DiagramType diagram;
+  // Some of the classical Satake types
+  // depend on an additional parameter,
+  // smaller than the rank of the ambient complex Lie algebra.
+  int parameter;
+  // Rank of the simple root system.
+  int rank;
+
+  void plot(Plot& output, int verticalOffset);
+  void plotAI(Plot& output, int verticalOffset);
+  void plotAII(Plot& output, int verticalOffset);
+  void plotAIII(Plot& output, int verticalOffset);
+};
+
+// Represents a Vogan diagram.
 // We use the Vogan diagram to define a Cartan involution.
 // More precisely, we use use the images of the simple Cartan generators
 // given in page 404,
@@ -28,7 +50,6 @@ public:
     AI,
     AII,
     AIII,
-    AIV,
     BI,
     BII,
     CI,
@@ -70,6 +91,7 @@ public:
   );
   DynkinType dynkinTypeAmbient();
   std::string toString();
+
   void plot(Plot& output);
   void plotAI(Plot& output);
   void plotAII(Plot& output);
@@ -79,13 +101,15 @@ public:
   void plotEII(Plot& output);
   void plotEIII(Plot& output);
   void plotEIV(Plot& output);
-  void plotTwoElementOrbit(
+  static void plotTwoElementOrbit(
     Plot& output,
     int leftIndex,
     int rightIndex,
     int verticalOffset,
     int rootsOnThisPlotRow
   );
+
+  SatakeDiagram computeSatakeDiagram();
 };
 
 class SemisimpleLieAlgebra {
@@ -252,13 +276,13 @@ public:
   std::string toStringLieAlgebraNameFullHTML() const;
   std::string toStringLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;
-  inline int getNumberOfGenerators() const {
+  int getNumberOfGenerators() const {
     return this->weylGroup.cartanSymmetric.numberOfRows + this->weylGroup.rootSystem.size;
   }
-  inline int getNumberOfPositiveRoots() const {
+  int getNumberOfPositiveRoots() const {
     return this->weylGroup.rootsOfBorel.size;
   }
-  inline int getRank() const {
+  int getRank() const {
     return this->weylGroup.cartanSymmetric.numberOfRows;
   }
   void orderNilradical(const Selection& parabolicSelectionZeroMeansLeviPart, bool useNilWeight, bool ascending);
@@ -360,7 +384,10 @@ public:
   bool isInTheWeightSupport(Vector<Rational>& weight, Vector<Rational>& highestWeight);
   void createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& highestWeight);
   int getLengthStringAlongAlphaThroughBeta(
-    Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport
+    Vector<Rational>& alpha,
+    Vector<Rational>& beta,
+    int& distanceToHighestWeight,
+    Vectors<Rational>& weightSupport
   );
   void computeOneAutomorphism(Matrix<Rational>& outputAutomorphism, bool useNegativeRootsFirst);
   bool operator==(const SemisimpleLieAlgebra& other) const {
@@ -532,7 +559,12 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     }
     return (*this)[0].owner;
   }
-  bool drawMe(std::string& outputDetails, DrawingVariables& drawingVariables, int upperBoundWeights, bool useMultiplicities);
+  bool drawMe(
+    std::string& outputDetails,
+    DrawingVariables& drawingVariables,
+    int upperBoundWeights,
+    bool useMultiplicities
+  );
   bool splitOverLeviMonomialsEncodeHighestWeight(
     std::string* report,
     CharacterSemisimpleLieAlgebraModule& output,
@@ -545,7 +577,9 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
   std::string multiplyBy(const CharacterSemisimpleLieAlgebraModule& other);
   std::string operator*=(const CharacterSemisimpleLieAlgebraModule& other);
   std::string operator*=(const Weight<Rational>& other);
-  CharacterSemisimpleLieAlgebraModule<Coefficient> operator-(const CharacterSemisimpleLieAlgebraModule<Coefficient>& right) const {
+  CharacterSemisimpleLieAlgebraModule<Coefficient> operator-(
+    const CharacterSemisimpleLieAlgebraModule<Coefficient>& right
+  ) const {
     CharacterSemisimpleLieAlgebraModule<Coefficient> output = *this;
     output -= right;
     return output;
@@ -585,13 +619,10 @@ public:
   HomomorphismSemisimpleLieAlgebra(): domain(nullptr), coDomain(nullptr) {
   }
   void getWeightsGmodKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
-    this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->gModK);
+    this->getWeightsRelativeToKInSimpleKCoordinates(outputWeights, this->gModK);
   }
-  void getWeightsKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
-    this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->imagesAllChevalleyGenerators);
-  }
-  void getWeightsWrtKInSimpleCoordinatesK(
-    Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts
+  void getWeightsRelativeToKInSimpleKCoordinates(
+    Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElements
   );
   void toString(std::string& output) {
     this->toString(output, false);
@@ -602,7 +633,7 @@ public:
   void projectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
   void getMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
   std::string toString(bool useHtml = true);
-  void getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output);
+  void getRestrictionAmbientRootSystemToTheSmallerCartanSubalgebra(Vectors<Rational>& output);
   bool computeHomomorphismFromImagesSimpleChevalleyGenerators(std::stringstream* commentsOnFailure);
   bool checkIsHomomorphism();
   bool checkClosednessLieBracket();
@@ -670,7 +701,8 @@ public:
     SemisimpleLieAlgebra& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  void plot(Plot& output);
+  void plotVoganDiagram(Plot& output);
+  void plotSatakeDiagram(Plot& output, int verticalOffset);
 };
 
 #endif

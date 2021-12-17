@@ -39,11 +39,27 @@
 // computing the hash functions is only O(N) operations.
 
 // Used for hashing.
-const int someRandomPrimesSize = 25;
-const unsigned int someRandomPrimes[someRandomPrimesSize] = {
-  607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
-  7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
-  9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
+class HashConstants {
+private:
+  // Selected for no particular reason:
+  // 25 is a frequently used "large" number.
+  static const int size = 25;
+  // Selected by tmilev.
+  // Procedure: I inspected the list of primes up to 15000.
+  // Then I copied and pasted a few numbers at random,
+  // trying not to pick consecutive primes.
+  // I also went for 3+ decimal digits.
+  static const unsigned int primeConstants[size];
+public:
+  static inline unsigned int getConstantIncrementCounter(int& counter) {
+    if (counter > size) {
+      counter = 0;
+    }
+    return primeConstants[counter];
+  }
+  static const unsigned constant0 = 607;
+  static const unsigned constant1 = 1013;
+  static const unsigned constant2 = 2207;
 };
 
 // The following class is for buffers, i/o function pointers, multitasking, general purpose.
@@ -153,11 +169,6 @@ public:
   RegisterFunctionCall(const char* fileName, int line, const std::string& functionName = "");
   ~RegisterFunctionCall();
 };
-
-typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
-typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
-typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
-typedef void (*drawClearScreenFunction)();
 
 class MathRoutines {
 public:
@@ -439,11 +450,9 @@ public:
   static unsigned int hashFunction(const std::string& input) {
     size_t numCycles = input.size();
     unsigned int result = 0;
-    for (unsigned i = 0, counter = 0; i < numCycles; i ++, counter ++) {
-      if (counter >= someRandomPrimesSize) {
-        counter = 0;
-      }
-      result += static_cast<unsigned>(input[i]) * someRandomPrimes[counter];
+    int hashCounter = 0;
+    for (unsigned i = 0; i < numCycles; i ++) {
+      result += static_cast<unsigned>(input[i]) * HashConstants::getConstantIncrementCounter(hashCounter);
     }
     return result;
   }
@@ -974,13 +983,11 @@ public:
     unsigned int result = 0;
     int j = - 1;
     int k = 0;
+    int hashCounter = 0;
     for (int i = 0; i < this->size; i ++) {
       j ++;
       k ++;
-      if (j >= someRandomPrimesSize) {
-        j = 0;
-      }
-      result += k * someRandomPrimes[i] * HashFunctions::hashFunction(objects[i]);
+      result += k * HashConstants::getConstantIncrementCounter(hashCounter) * HashFunctions::hashFunction(objects[i]);
     }
     return result;
   }
@@ -1117,8 +1124,8 @@ public:
     const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input
   ) {
     return
-      someRandomPrimes[0] * hashFunction1(input.object1) +
-      someRandomPrimes[1] * hashFunction2(input.object2);
+      HashConstants::constant0 * hashFunction1(input.object1) +
+      HashConstants::constant1 * hashFunction2(input.object2);
   }
   unsigned int hashFunction() const {
     return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::hashFunction(*this);

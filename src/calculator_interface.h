@@ -1197,14 +1197,14 @@ public:
   HashedListReferences<Weight<Rational> > weights;
   HashedListReferences<Weight<Polynomial<Rational> > > weightsPolynomial;
   HashedListReferences<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elementsOfSemisimpleLieAlgebrasWithAlgebraicCoefficients;
-  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> > hyperoctahedralRepresentations;
+  ListReferences<GroupRepresentation<FiniteGroup<HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2>, Rational> > hyperoctahedralRepresentations;
   ListReferences<Plot> allPlots;
   List<bool> userInputBoxSliderDisplayed;
   MapReferences<std::string, InputBox, MathRoutines::hashString> userInputTextBoxesWithValues;
   MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
   AlgebraicClosureRationals algebraicClosure;
   HashedList<AlgebraicNumber> allAlgebraicNumbers;
-  HashedListReferences<ElementHyperoctahedralGroupR2> elementsHyperOctGroup;
+  HashedListReferences<HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2> elementsHyperOctGroup;
   ListReferences<HyperoctahedralGroupData> hyperOctahedralGroups;
   HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> > littelmannOperators;
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);

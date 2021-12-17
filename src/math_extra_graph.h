@@ -40,7 +40,7 @@ public:
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * someRandomPrimes[0];
+    return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * HashConstants::constant0;
   }
   bool operator==(const GraphEdge& other) const {
     return

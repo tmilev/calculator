@@ -419,7 +419,11 @@ bool TopicElementParser::Test::defaultTopicListsOKCrashOnFailure() {
 bool TopicElementParser::Test::defaultPdfsOKCrashOnFailure() {
   TopicElementParser::Test tester;
   if (!tester.defaultPdfsOK()) {
-    global.fatal << "Default pdfs are broken. " << tester.comments.str() << global.fatal;
+    global.fatal << "Default pdfs are broken. " << tester.comments.str()
+    << "\nYou may want to regenerate them using command: "
+    << "https://localhost:8166/"
+    << HtmlRoutines::getCalculatorComputationURL("1+1")
+    << global.fatal;
   }
   return false;
 }

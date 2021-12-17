@@ -1205,10 +1205,10 @@ int AffineCone::getDimension() {
 }
 
 unsigned int AffineCone::hashFunction() const {
-  int tempMin = MathRoutines::minimum(this->walls.size, ::someRandomPrimesSize);
   unsigned int result = 0;
-  for (int i = 0; i < tempMin; i ++) {
-    result += this->walls[i].hashFunction() * ::someRandomPrimes[i];
+  int j = 0;
+  for (int i = 0; i < this->walls.size; i ++) {
+    result += this->walls[i].hashFunction() * HashConstants::getConstantIncrementCounter(j);
   }
   return result;
 }

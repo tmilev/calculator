@@ -53,13 +53,11 @@ public:
   }
   unsigned int hashFunction() const {
     unsigned int result = 0;
-    int j = - 1;
+    int j = 0;
     for (int i = 0; i < this->size; i ++) {
-      j ++;
-      if (j > someRandomPrimesSize) {
-        j = 0;
-      }
-      result += someRandomPrimes[i] * HashFunctions::hashFunction((*this)[i]);
+      result +=
+      HashConstants::getConstantIncrementCounter(j) *
+      HashFunctions::hashFunction((*this)[i]);
     }
     return result;
   }

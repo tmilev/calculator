@@ -150,11 +150,11 @@ public:
   void multiplyByGeneratorPowerOnTheRight(int generatorIndex, const Coefficient& power);
   void multiplyByGeneratorPowerOnTheLeft(int generatorIndexStandsToTheLeft, const Coefficient& power);
   unsigned int hashFunction() const {
-    int top = MathRoutines::minimum(someRandomPrimesSize, this->generatorsIndices.size);
     unsigned int result = 0;
-    for (int i = 0; i < top; i ++) {
-      result += someRandomPrimes[i] * this->generatorsIndices[i] +
-      someRandomPrimes[top - 1 - i] * inputHashFunction(this->powers[i]);
+    int j = 0;
+    for (int i = 0; i < this->generatorsIndices.size; i ++) {
+      result += HashConstants::getConstantIncrementCounter(j) * this->generatorsIndices[i] +
+      HashConstants::getConstantIncrementCounter(j) * inputHashFunction(this->powers[i]);
     }
     return result;
   }
@@ -342,9 +342,10 @@ public:
   // Two such different representation may differ by extra entries filled in with zeroes.
   static unsigned int hashFunction(const MonomialPolynomial& input) {
     unsigned int result = 0;
-    int numberOfCycles = MathRoutines::minimum(input.monomialBody.size, someRandomPrimesSize);
-    for (int i = 0; i < numberOfCycles; i ++) {
-      result += input.monomialBody[i].hashFunction();
+    int j = 0;
+    for (int i = 0; i < input.monomialBody.size; i ++) {
+      result += input.monomialBody[i].hashFunction() *
+      HashConstants::getConstantIncrementCounter(j);
     }
     return result;
   }
@@ -732,14 +733,12 @@ public:
   }
   static unsigned int hashFunction(const Matrix<Coefficient>& input) {
     unsigned int result = 0;
-    int counter = 0;
-    for (int i = 0; i < input.numberOfRows; i ++, counter ++) {
-      for (int j = 0; j < input.numberOfColumns; j ++, counter ++) {
-        if (counter < someRandomPrimesSize) {
-          result += input.elements[i][j].hashFunction() * someRandomPrimes[counter];
-        } else {
-          result += input.elements[i][j].hashFunction() * (i + 1) + j;
-        }
+    int hashCounter = 0;
+
+    for (int i = 0; i < input.numberOfRows; i ++) {
+      for (int j = 0; j < input.numberOfColumns; j ++) {
+        result += input.elements[i][j].hashFunction() *
+        HashConstants::getConstantIncrementCounter(hashCounter);
       }
     }
     return result;
@@ -1961,7 +1960,8 @@ class MonomialWeylAlgebra {
   static unsigned int hashFunction(const MonomialWeylAlgebra& input) {
     return
     input.polynomialPart.hashFunction() +
-    input.differentialPart.hashFunction() * someRandomPrimes[0];
+    input.differentialPart.hashFunction() *
+    HashConstants::constant0;
   }
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
@@ -4129,7 +4129,7 @@ public:
   }
   unsigned int hashFunction() const {
     return this->::LinearCombination<ChevalleyGenerator, Coefficient>::
-    hashFunction() * someRandomPrimes[1];
+    hashFunction() * HashConstants::constant1;
   }
   static unsigned int hashFunction(const ElementSemisimpleLieAlgebra<Coefficient>& input) {
     return input.hashFunction();
@@ -5837,7 +5837,8 @@ class DynkinSimpleType {
   }
   static unsigned int hashFunction(const DynkinSimpleType& input) {
     return static_cast<unsigned int>(input.letter) * 2 +
-    static_cast<unsigned int>(input.rank) + someRandomPrimes[0] * input.cartanSymmetricInverseScale.hashFunction();
+    static_cast<unsigned int>(input.rank) +
+    HashConstants::constant0 * input.cartanSymmetricInverseScale.hashFunction();
   }
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
@@ -6359,8 +6360,8 @@ class MonomialMatrix {
     return this->vIndex == other.vIndex && this->dualIndex == other.dualIndex && this->isIdentity == other.isIdentity;
   }
   static unsigned int hashFunction(const MonomialMatrix& input) {
-    return static_cast<unsigned int>(input.vIndex) * someRandomPrimes[0] +
-    static_cast<unsigned int>(input.dualIndex) * someRandomPrimes[1] + input.isIdentity;
+    return static_cast<unsigned int>(input.vIndex) * HashConstants::constant0 +
+    static_cast<unsigned int>(input.dualIndex) * HashConstants::constant1 + input.isIdentity;
   }
   unsigned int hashFunction() const {
     return hashFunction(*this);

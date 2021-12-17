@@ -5820,10 +5820,11 @@ void SlTwoSubalgebra::makeReportPrecomputations(
 }
 
 unsigned int SlTwoSubalgebra::hashFunction() const {
-  int tempI = MathRoutines::minimum(someRandomPrimesSize, this->hCharacteristic.size);
   unsigned int result = 0;
-  for (int i = 0; i < tempI; i ++) {
-    result += static_cast<unsigned>(this->hCharacteristic[i].numeratorShort) * someRandomPrimes[i];
+  int j = 0;
+  for (int i = 0; i < this->hCharacteristic.size; i ++, j ++) {
+    result += this->hCharacteristic.hashFunction() *
+    HashConstants::getConstantIncrementCounter(j);
   }
   return result;
 }

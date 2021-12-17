@@ -691,14 +691,10 @@ bool PermutationR2::isIdentity() const {
 
 unsigned int PermutationR2::hashFunction() const {
   unsigned int acc = 0;
-  unsigned int n = 0;
+  int n = 0;
   for (int i = 0; i < this->cycles.size; i ++) {
     for (int j = 0; j < this->cycles[i].size; j ++) {
-      acc += someRandomPrimes[n] * static_cast<unsigned>(this->cycles[i][j]);
-      n ++;
-      if (n >= static_cast<unsigned>(someRandomPrimesSize)) {
-        n = 0;
-      }
+      acc += HashConstants::getConstantIncrementCounter(n) * static_cast<unsigned>(this->cycles[i][j]);
     }
   }
   return acc;
@@ -1443,8 +1439,8 @@ bool HyperoctahedralGroup::getWordByFormulaImplementation(void* GG, const Elemen
 }*/
 
 bool HyperoctahedralGroupData::getWordByFormulaImplementation(
-  FiniteGroup<ElementHyperoctahedralGroupR2>& G,
-  const ElementHyperoctahedralGroupR2& g,
+  FiniteGroup<HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2>& G,
+  const HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2& g,
   List<int>& word
 ) {
   HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);

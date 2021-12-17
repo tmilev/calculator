@@ -12,16 +12,12 @@ public:
   HashedList<key, keyHashFunction> keys;
   listType values;
   unsigned int hashFunction() const {
-    int j = - 1;
     unsigned int result = 0;
+    int j = 0;
     for (int i = 0; i < this->keys.size; i ++) {
-      j ++;
-      if (j >= someRandomPrimesSize) {
-        j = 0;
-      }
       result += keyHashFunction(this->keys[i]) *
       HashFunctions::hashFunction(this->values[i]) *
-      someRandomPrimes[j];
+      HashConstants::getConstantIncrementCounter(j);
     }
     return result;
   }

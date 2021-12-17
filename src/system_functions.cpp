@@ -8,16 +8,23 @@
 #include "system_functions_global_objects.h"
 #include "general_logging_global_variables.h"
 
-static timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
+class SytemFunctionsGlobal {
+public:
+  static timeval computationStartGlobal;
+  static timeval lastTimeMeasure;
+};
+
+timeval SytemFunctionsGlobal::computationStartGlobal;
+timeval SytemFunctionsGlobal::lastTimeMeasure;
 
 int64_t GlobalVariables::getElapsedMilliseconds() {
-  gettimeofday(&LastMeasureOfCurrentTime, nullptr);
-  return (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec) * 1000 +
-  (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - global.millisecondOffset;
+  gettimeofday(&SytemFunctionsGlobal::lastTimeMeasure, nullptr);
+  return (SytemFunctionsGlobal::lastTimeMeasure.tv_sec - SytemFunctionsGlobal::computationStartGlobal.tv_sec) * 1000 +
+  (SytemFunctionsGlobal::lastTimeMeasure.tv_usec - SytemFunctionsGlobal::computationStartGlobal.tv_usec) / 1000 - global.millisecondOffset;
 }
 
 void initializeTimer() {
-  gettimeofday(&ComputationStartGlobal, nullptr);
+  gettimeofday(&SytemFunctionsGlobal::computationStartGlobal, nullptr);
 }
 
 int GlobalVariables::getGlobalTimeInSeconds() {

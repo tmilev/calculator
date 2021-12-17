@@ -1665,11 +1665,13 @@ public:
   );
   void (*cosetRepresentativeEnumerator)(void* H) = nullptr;
   bool (*sameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = nullptr;
-  //GroupRepresentation<Subgroup<somegroup,elementSomeGroup>, Rational> GetEmptyRationalRepresentationSubgroup();
+  static bool translatableWordsSubgroupElementGetWord(
+    FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out
+  );
 };
 
-template <typename elementSomeGroup>
-bool translatableWordsSubgroupElementGetWord(
+template <class someGroup, class elementSomeGroup>
+bool SubgroupData<someGroup, elementSomeGroup>::translatableWordsSubgroupElementGetWord(
   FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out
 ) {
   List<int> superword;

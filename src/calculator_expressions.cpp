@@ -1051,7 +1051,7 @@ unsigned int Expression::hashFunction(const Expression& input) {
 }
 
 unsigned int Expression::hashFunction() const {
-  unsigned int result = static_cast<unsigned>(this->data) * someRandomPrimes[1];
+  unsigned int result = static_cast<unsigned>(this->data) * HashConstants::constant1;
   if (this->owner == nullptr) {
     if (this->children.size == 0) {
       return result;

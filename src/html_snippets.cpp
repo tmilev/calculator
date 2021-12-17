@@ -116,10 +116,10 @@ const std::string& HtmlRoutines::getCSSAddStyleTags(const std::string& fileNameV
 
 std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNoEncoding) {
   std::stringstream out;
-  JSData theRequest;
-  theRequest[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
-  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::frontend::calculatorPage;
-  out << "#" << HtmlRoutines::convertStringToURLString(theRequest.toString(nullptr), false);
+  JSData request;
+  request[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
+  request[DatabaseStrings::labelCurrentPage] = WebAPI::frontend::calculatorPage;
+  out << "#" << HtmlRoutines::convertStringToURLString(request.toString(nullptr), false);
   return out.str();
 }
 

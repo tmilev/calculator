@@ -90,6 +90,16 @@ public:
   inline static uint32_t F5(uint32_t x, uint32_t y, uint32_t z) {
     return ((x) ^ ((y) | ~(z)));
   }
+  static void ripemd160Initialize(Ripemd160State *self);
+  static void ripemd160Done(Ripemd160State* self, unsigned char *out);
+  static void ripemd160Process(
+    Ripemd160State* self,
+    const unsigned char* p,
+    unsigned long length
+  );
+  static void ripemd160Compress(Ripemd160State* self);
+  static inline void byteswapDigest(uint32_t* p);
+  static inline void byteswap32(uint32_t *v);
 };
 
 
@@ -169,14 +179,14 @@ const uint32_t RIPEMD160Internal::KR[5] = {
   0x00000000u     /* Round 5: 0 */
 };
 
-void ripemd160_init(Ripemd160State *self) {
+void RIPEMD160Internal::ripemd160Initialize(Ripemd160State *self) {
   memcpy(self->h, RIPEMD160Internal::initial_h, Crypto::RIPEMD160LengthInBytes);
   memset(&self->buf, 0, sizeof(self->buf));
   self->length = 0;
   self->bufpos = 0;
 }
 
-static inline void byteswap32(uint32_t *v) {
+inline void RIPEMD160Internal::byteswap32(uint32_t *v) {
   union { uint32_t w; uint8_t b[4]; } x, y;
 
   x.w = *v;
@@ -190,7 +200,7 @@ static inline void byteswap32(uint32_t *v) {
   x.w = y.w = 0;
 }
 
-static inline void byteswap_digest(uint32_t* p) {
+void RIPEMD160Internal::byteswapDigest(uint32_t* p) {
   unsigned int i;
   for (i = 0; i < 4; i ++) {
     byteswap32(p ++);
@@ -201,7 +211,7 @@ static inline void byteswap_digest(uint32_t* p) {
 }
 
 /* The RIPEMD160 compression function.  Operates on self->buf */
-static void ripemd160_compress(Ripemd160State* self) {
+void RIPEMD160Internal::ripemd160Compress(Ripemd160State* self) {
   uint8_t w, round;
   uint32_t T;
   uint32_t AL, BL, CL, DL, EL;    /* left line */
@@ -213,7 +223,7 @@ static void ripemd160_compress(Ripemd160State* self) {
   }
   /* Byte-swap the buffer if we're on a big-endian machine */
   if (Crypto::flagRIPEMDBigEndian) {
-    byteswap_digest(self->buf.w);
+    RIPEMD160Internal::byteswapDigest(self->buf.w);
   }
   /* load the left and right lines with the initial state */
   AL = AR = self->h[0];
@@ -358,7 +368,7 @@ static void ripemd160_compress(Ripemd160State* self) {
   self->bufpos = 0;
 }
 
-void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned long length) {
+void RIPEMD160Internal::ripemd160Process(Ripemd160State* self, const unsigned char* p, unsigned long length) {
   unsigned long bytes_needed;
   /* We never leave a full buffer */
   if (self->bufpos >= 64) {
@@ -374,7 +384,7 @@ void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned lo
       self->bufpos += bytes_needed;
       self->length += bytes_needed << 3;    /* length is in bits */
       p += bytes_needed;
-      ripemd160_compress(self);
+      RIPEMD160Internal::ripemd160Compress(self);
       length -= bytes_needed;
       continue;
     }
@@ -388,12 +398,12 @@ void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned lo
   }
 }
 
-void ripemd160_done(Ripemd160State* self, unsigned char *out) {
+void RIPEMD160Internal::ripemd160Done(Ripemd160State* self, unsigned char *out) {
   /* Append the padding */
   self->buf.b[self->bufpos ++] = 0x80;
   if (self->bufpos > 56) {
     self->bufpos = 64;
-    ripemd160_compress(self);
+    RIPEMD160Internal::ripemd160Compress(self);
   }
   /* Append the length */
   self->buf.w[14] = static_cast<uint32_t>(self->length & 0xFFFFffffu);
@@ -403,11 +413,11 @@ void ripemd160_done(Ripemd160State* self, unsigned char *out) {
     byteswap32(&self->buf.w[15]);
   }
   self->bufpos = 64;
-  ripemd160_compress(self);
+  RIPEMD160Internal::ripemd160Compress(self);
 
   /* Copy the final state into the output buffer */
   if (Crypto::flagRIPEMDBigEndian) {
-    byteswap_digest(self->h);
+    RIPEMD160Internal::byteswapDigest(self->h);
   }
   memcpy(out, &self->h, Crypto::RIPEMD160LengthInBytes);
 }
@@ -415,8 +425,8 @@ void ripemd160_done(Ripemd160State* self, unsigned char *out) {
 void CryptoPublicDomain::computeRIPEMD160(const std::string& input, List<unsigned char>& output) {
   MacroRegisterFunctionWithName("Crypto::computeRIPEMD160");
   Ripemd160State md;
-  ripemd160_init(&md);
+  RIPEMD160Internal::ripemd160Initialize(&md);
   output.setSize(20);
-  ripemd160_process(&md, reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
-  ripemd160_done(&md, output.objects);
+  RIPEMD160Internal::ripemd160Process(&md, reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
+  RIPEMD160Internal::ripemd160Done(&md, output.objects);
 }

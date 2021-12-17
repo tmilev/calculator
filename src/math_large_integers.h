@@ -553,11 +553,11 @@ public:
       if (this->numeratorShort == 0) {
         return 0;
       }
-      return static_cast<unsigned int>(this->numeratorShort) * someRandomPrimes[0] +
-      static_cast<unsigned int>(this->denominatorShort) * ::someRandomPrimes[1];
+      return static_cast<unsigned int>(this->numeratorShort) * HashConstants::constant0 +
+      static_cast<unsigned int>(this->denominatorShort) * HashConstants::constant1;
     }
-    return this->extended->numerator.hashFunction() * someRandomPrimes[0] +
-    this->extended->denominator.hashFunction() * someRandomPrimes[1];
+    return this->extended->numerator.hashFunction() * HashConstants::constant0 +
+    this->extended->denominator.hashFunction() * HashConstants::constant1;
   }
   static inline unsigned int hashFunction(const Rational& input) {
     return input.hashFunction();

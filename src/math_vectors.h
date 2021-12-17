@@ -250,15 +250,10 @@ public:
     (*this)[nonZeroIndex] = 1;
   }
   inline static unsigned int hashFunction(const Vector<Coefficient>& input) {
-    return input.hashFunction();
+    return input.::List<Coefficient>::hashFunction();
   }
   unsigned int hashFunction() const {
-    unsigned int result = 0;
-    int theSize = MathRoutines::minimum(this->size, someRandomPrimesSize);
-    for (int i = 0; i < theSize; i ++) {
-      result += this->objects[i].hashFunction() * ::someRandomPrimes[i];
-    }
-    return result;
+    return this->::List<Coefficient>::hashFunction();
   }
   void scaleToFirstNonZeroCoordinatePositive();
   // Returns the number by which the vector was multiplied.
@@ -327,7 +322,7 @@ public:
       this->objects[j] = normal[j];
     }
   }
-  bool projectToAffineSpace(Vector<Coefficient> &output) {
+  bool projectToAffineSpace(Vector<Coefficient>& output) {
     if (this->objects[this->size - 1].isEqualToZero()) {
       return false;
     }
@@ -355,16 +350,16 @@ public:
     }
     return - 1;
   }
-  Vector<Coefficient> getshiftToTheLeft(int numPositions) {
+  Vector<Coefficient> getshiftToTheLeft(int numberOfPositions) {
     Vector<Coefficient> result;
-    if (numPositions > this->size) {
+    if (numberOfPositions > this->size) {
       global.fatal << "You requested a shift of "
-      << numPositions << " positions in a vector with "
+      << numberOfPositions << " positions in a vector with "
       << this->size << "elements" << global.fatal;
     }
-    result.setSize(this->size - numPositions);
+    result.setSize(this->size - numberOfPositions);
     for (int i = 0; i < result.size; i ++) {
-      result[i] = this->objects[i + numPositions];
+      result[i] = this->objects[i + numberOfPositions];
     }
     return result;
   }
@@ -392,10 +387,10 @@ public:
       this->objects[i] = ringZero;
     }
   }
-  void setDimensionInsertZeroes(int newDim) {
-    int oldDim = this->size;
-    this->setSize(newDim);
-    for (int i = oldDim; i < newDim; i ++) {
+  void setDimensionInsertZeroes(int newDimension) {
+    int oldDimension = this->size;
+    this->setSize(newDimension);
+    for (int i = oldDimension; i < newDimension; i ++) {
       (*this)[i] = 0;
     }
   }

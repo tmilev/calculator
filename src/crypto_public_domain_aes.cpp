@@ -39,6 +39,7 @@ public:
 
   static const uint8_t sbox[256];
   static const uint8_t rsbox[256];
+  static const uint8_t rCon[11];
 
   // CBC enables AES encryption in CBC-mode of operation.
   // CTR enables encryption in counter-mode.
@@ -111,6 +112,9 @@ public:
   void cipher(state_t* state, uint8_t* RoundKey);
   void invCipher(state_t* state,uint8_t* RoundKey);
   void keyExpansion(uint8_t* RoundKey, const uint8_t* Key);
+  static uint8_t getSBoxValue(uint8_t num);
+  static uint8_t getSBoxInvert(uint8_t num);
+  static void xOrWithIv(uint8_t* buf, uint8_t* Iv);
 };
 
 void AESContext::setNumberOfBits(int inputNumBits) {
@@ -188,9 +192,9 @@ const uint8_t AESContext::rsbox[256] = {
   0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
   0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d };
 
-// The round constant word array, Rcon[i], contains the values given by
+// The round constant word array, rCon[i], contains the values given by
 // x to the power (i - 1) being powers of x (x is denoted as {02}) in the field GF(2^8)
-static const uint8_t Rcon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
+const uint8_t AESContext::rCon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
 /*
  * Jordan Goulder points out in PR #12 (https://github.com/kokke/tiny-AES-C/pull/12),
@@ -202,11 +206,11 @@ static const uint8_t Rcon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40
  *  up to rcon[8] for AES-192, up to rcon[7] for AES-256. rcon[0] is not used in AES algorithm."
  */
 
-static uint8_t getSBoxValue(uint8_t num) {
+uint8_t AESContext::getSBoxValue(uint8_t num) {
   return AESContext::sbox[num];
 }
 
-static uint8_t getSBoxInvert(uint8_t num) {
+uint8_t AESContext::getSBoxInvert(uint8_t num) {
   return AESContext::rsbox[num];
 }
 
@@ -246,7 +250,7 @@ void AESContext::keyExpansion(uint8_t* RoundKey, const uint8_t* Key) {
       tempa[1] = getSBoxValue(tempa[1]);
       tempa[2] = getSBoxValue(tempa[2]);
       tempa[3] = getSBoxValue(tempa[3]);
-      tempa[0] = tempa[0] ^ Rcon[i / Nk];
+      tempa[0] = tempa[0] ^ rCon[i / Nk];
     }
     if (this->numBits == 256) {
       if (i % Nk == 4) {
@@ -444,7 +448,7 @@ void AESContext::AES_ECB_decrypt(uint8_t* buf) {
   invCipher(reinterpret_cast<state_t*>(buf), this->RoundKey);
 }
 
-static void XorWithIv(uint8_t* buf, uint8_t* Iv) {
+void AESContext::xOrWithIv(uint8_t* buf, uint8_t* Iv) {
   uint8_t i;
   for (i = 0; i < AESContext::blockLength; ++ i) {
     // The block in AES is always 128-bit no matter the key size
@@ -456,7 +460,7 @@ void AESContext::AES_CBC_encrypt_buffer(uint8_t* buf, uint32_t length) {
   uintptr_t i;
   uint8_t* Iv = this->initializationVector;
   for (i = 0; i < length; i += AESContext::blockLength) {
-    XorWithIv(buf, Iv);
+    xOrWithIv(buf, Iv);
     cipher(reinterpret_cast<state_t*>(buf), this->RoundKey);
     Iv = buf;
     buf += AESContext::blockLength;
@@ -472,13 +476,14 @@ void AESContext::AES_CBC_decrypt_buffer(uint8_t* buf, uint32_t length) {
   for (i = 0; i < length; i += this->blockLength) {
     memcpy(storeNextIv, buf, this->blockLength);
     invCipher(reinterpret_cast<state_t*>(buf), this->RoundKey);
-    XorWithIv(buf, this->initializationVector);
+    xOrWithIv(buf, this->initializationVector);
     memcpy(this->initializationVector, storeNextIv, this->blockLength);
     buf += this->blockLength;
   }
 }
 
-/* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
+// Symmetrical operation: same function for encrypting as for decrypting.
+// Note any IV / nonce should never be reused with the same key.
 void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length) {
   uint8_t buffer[AESContext::blockLength];
   unsigned i;

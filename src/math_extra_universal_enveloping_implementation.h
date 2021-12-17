@@ -1790,10 +1790,11 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::makeZero(
 
 template <class Coefficient>
 unsigned int MonomialUniversalEnvelopingOrdered<Coefficient>::hashFunction() const {
-  int top = MathRoutines::minimum(someRandomPrimesSize, this->generatorsIndices.size);
   unsigned int result = 0;
-  for (int i = 0; i < top; i ++) {
-    result += someRandomPrimes[i] * this->generatorsIndices.objects[i];
+  int j = 0;
+  for (int i = 0; i < this->powers.size; i ++) {
+    result += HashConstants::getConstantIncrementCounter(j) *
+    this->generatorsIndices.objects[i];
   }
   return result;
 }

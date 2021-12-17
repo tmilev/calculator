@@ -16,7 +16,7 @@
 #include "general_logging_global_variables.h"
 class TransportLayerSecurity;
 
-//Forward-declare openssl dependencies
+// Forward-declare openssl dependencies
 typedef struct ssl_st SSL;
 typedef struct x509_st X509;
 typedef struct ssl_ctx_st SSL_CTX;

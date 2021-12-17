@@ -13,7 +13,8 @@ class QuasiDifferentialMononomial {
   MonomialWeylAlgebra weylMonomial;
   MonomialMatrix matrixMonomial;
   static unsigned int hashFunction(const QuasiDifferentialMononomial& input) {
-    return input.weylMonomial.hashFunction() * someRandomPrimes[0] + input.matrixMonomial.hashFunction() * someRandomPrimes[1];
+    return input.weylMonomial.hashFunction() * HashConstants::constant0 +
+    input.matrixMonomial.hashFunction() * HashConstants::constant1;
   }
   unsigned int hashFunction() const {
     return hashFunction(*this);

@@ -45,7 +45,9 @@ class MonomialGeneralizedVerma {
     const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
   );
   unsigned int hashFunction() const {
-    return this->indexFDVector * someRandomPrimes[0] + (static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->owner))) * someRandomPrimes[1];
+    return this->indexFDVector * HashConstants::constant0 +
+    (static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->owner))) *
+    HashConstants::constant1;
   }
   static unsigned int hashFunction(const MonomialGeneralizedVerma<Coefficient>& input) {
     return input.hashFunction();
@@ -130,10 +132,12 @@ public:
     this->monomials.addOnTop(other);
   }
   unsigned int hashFunction() const {
-    int numCycles = MathRoutines::minimum(someRandomPrimesSize, this->monomials.size);
     unsigned int result = 0;
-    for (int i = 0; i < numCycles; i ++) {
-      result += someRandomPrimes[i] * this->monomials[i].hashFunction();
+    int j = 0;
+    for (int i = 0; i < this->monomials.size; i ++) {
+      result +=
+      HashConstants::getConstantIncrementCounter(j) *
+      this->monomials[i].hashFunction();
     }
     return result;
   }

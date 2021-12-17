@@ -175,6 +175,17 @@ public:
   static Matrix<Rational> matrixInBasis(
     const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X, const List<Vector<Rational> >& B
   );
+  template <typename Coefficient>
+  static Vector<Coefficient> putInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B);
+  template <typename Coefficient>
+  List<Vector<Coefficient> > orthogonalComplement(
+    const List<Vector<Coefficient> >& V, const List<Vector<Coefficient> >& WW
+  );
+  template <typename Coefficient>
+  bool spaceContains(
+    const List<Vector<Coefficient> >& space,
+    const Vector<Coefficient>& vector
+  );
 };
 
 
@@ -435,21 +446,24 @@ void PolynomialUnivariateDense<Coefficient>::squareFree() {
 }
 
 template <typename Coefficient>
-bool space_contains(const List<Vector<Coefficient> >& V, Vector<Coefficient> v) {
-  if (v.isEqualToZero()) {
-    if (V.size == 0) {
+bool CharacterFunctions::spaceContains(
+  const List<Vector<Coefficient> >& space,
+  const Vector<Coefficient>& vector
+) {
+  if (vector.isEqualToZero()) {
+    if (space.size == 0) {
       return false;
     }
     return true;
   }
   int i = 0;
   while (true) {
-    int vi = v.getIndexFirstNonZeroCoordinate();
+    int vi = vector.getIndexFirstNonZeroCoordinate();
     while (true) {
-      if (i == V.size) {
+      if (i == space.size) {
         return false;
       }
-      int vii = V[i].getIndexFirstNonZeroCoordinate();
+      int vii = space[i].getIndexFirstNonZeroCoordinate();
       if (vii > vi) {
         return false;
       }
@@ -458,8 +472,8 @@ bool space_contains(const List<Vector<Coefficient> >& V, Vector<Coefficient> v) 
       }
       i ++;
     }
-    v -= V[i] * v[vi] / V[i][vi];
-    if (v.isEqualToZero()) {
+    vector -= space[i] * vector[vi] / space[i][vi];
+    if (vector.isEqualToZero()) {
       return true;
     }
   }
@@ -558,7 +572,7 @@ void SpaceTree<Coefficient>::intersection(
 }
 
 template <typename Coefficient>
-List<Vector<Coefficient> > orthogonal_complement(
+List<Vector<Coefficient> > CharacterFunctions::orthogonalComplement(
   const List<Vector<Coefficient> >& V, const List<Vector<Coefficient> >& WW
 ) {
   List<Vector<Coefficient> > W = intersection(V, WW);
@@ -637,9 +651,8 @@ List<List<Vector<Rational> > > CharacterFunctions::eigenspaces(
   return spaces;
 }
 
-
 template <typename Coefficient>
-Vector<Coefficient> putInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B) {
+Vector<Coefficient> CharacterFunctions::putInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B) {
   Vector<Coefficient> w;
   w.makeZero(B.size);
   Matrix<Coefficient> M;

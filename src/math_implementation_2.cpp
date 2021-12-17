@@ -5,6 +5,12 @@
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
 
+const unsigned int HashConstants::primeConstants[HashConstants::size] = {
+  607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
+  7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
+  9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
+};
+
 void LargeIntegerUnsigned::assignString(const std::string& input) {
   if (input.size() < 10) {
     unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));
@@ -1205,10 +1211,11 @@ void LargeIntegerUnsigned::operator=(unsigned int x) {
 }
 
 unsigned int LargeIntegerUnsigned::hashFunction() const {
-  int numCycles = MathRoutines::minimum(this->digits.size, someRandomPrimesSize);
+  int j = 0;
   unsigned int result = 0;
-  for (int i = 0; i < numCycles; i ++) {
-    result += static_cast<unsigned>(this->digits[i]) * someRandomPrimes[i];
+  for (int i = 0; i < this->digits.size; i ++) {
+    result += static_cast<unsigned>(this->digits[i]) *
+    HashConstants::getConstantIncrementCounter(j);
   }
   return result;
 }

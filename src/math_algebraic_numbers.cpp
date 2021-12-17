@@ -1678,8 +1678,8 @@ unsigned int ElementZmodP::hashFunction() const {
   if (this->value.isEqualToZero()) {
     return 0;
   }
-  return this->value.hashFunction() * someRandomPrimes[0] +
-  this->modulus.hashFunction() * someRandomPrimes[1];
+  return this->value.hashFunction() * HashConstants::constant0 +
+  this->modulus.hashFunction() * HashConstants::constant1;
 }
 
 void ElementZmodP::checkIamInitialized() const {

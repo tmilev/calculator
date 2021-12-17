@@ -246,7 +246,7 @@ void SubgroupData<someGroup, elementSomeGroup>::makeTranslatableWordsSubgroup(
       this->superGeneratorSubWordExists[i] = true;
     }
   }
-  this->subgroupContent->getWordByFormula = translatableWordsSubgroupElementGetWord<elementSomeGroup>;
+  this->subgroupContent->getWordByFormula = SubgroupData<someGroup, elementSomeGroup>::translatableWordsSubgroupElementGetWord;
   this->subgroupContent->parentRelationship = this;
 }
 
@@ -1912,11 +1912,13 @@ unsigned int ClassFunction<someFiniteGroup, Coefficient>::hashFunction() const {
 }
 
 template<class someFiniteGroup, typename Coefficient>
-unsigned int ClassFunction<someFiniteGroup, Coefficient>::hashFunction(const ClassFunction<someFiniteGroup, Coefficient>& input) {
+unsigned int ClassFunction<someFiniteGroup, Coefficient>::hashFunction(
+  const ClassFunction<someFiniteGroup, Coefficient>& input
+) {
   unsigned int acc = 0;
-  int n = (input.data.size < someRandomPrimesSize) ? input.data.size : someRandomPrimesSize;
-  for (int i = 0; i < n; i ++) {
-    acc += input.data[i].hashFunction() * someRandomPrimes[i];
+  int j = 0;
+  for (int i = 0; i < input.data.size; i ++) {
+    acc += input.data[i].hashFunction() * HashConstants::getConstantIncrementCounter(j);
   }
   return acc;
 }

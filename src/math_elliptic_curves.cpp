@@ -3,8 +3,8 @@
 
 unsigned int EllipticCurveWeierstrassNormalForm::hashFunction(const EllipticCurveWeierstrassNormalForm& input) {
   return
-  input.linearCoefficient.hashFunction() * someRandomPrimes[0] +
-  input.constantTerm.hashFunction() * someRandomPrimes[1] ;
+  input.linearCoefficient.hashFunction() * HashConstants::constant0 +
+  input.constantTerm.hashFunction() * HashConstants::constant1;
 }
 
 bool EllipticCurveWeierstrassNormalForm::getOrderNISTCurve(

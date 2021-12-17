@@ -1538,8 +1538,8 @@ void PolynomialModuloPolynomial<Coefficient>::operator-=(
 template<class Coefficient>
 unsigned int PolynomialModuloPolynomial<Coefficient>::hashFunction() const {
   return
-  this->value.hashFunction() * someRandomPrimes[0] +
-  this->modulus.hashFunction() * someRandomPrimes[1];
+  this->value.hashFunction() * HashConstants::constant0 +
+  this->modulus.hashFunction() * HashConstants::constant1;
 }
 
 template<class Coefficient>

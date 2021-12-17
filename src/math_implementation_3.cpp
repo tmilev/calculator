@@ -2027,36 +2027,39 @@ char MathRoutines::convertHumanReadableHexToCharValue(char input) {
 
 unsigned int MathRoutines::hashListUnsignedChars(const List<unsigned char> &input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
-  for (int i = 0; i < numCycles; i ++) {
-    result += someRandomPrimes[i] * static_cast<unsigned>(input[i]);
+  int j = 0;
+  for (int i = 0; i < input.size; i ++) {
+    result += HashConstants::getConstantIncrementCounter(j) *
+    static_cast<unsigned>(input[i]);
   }
   return result;
 }
 
 unsigned int MathRoutines::hashListStrings(const List<std::string>& input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
-  for (int i = 0; i < numCycles; i ++) {
-    result += someRandomPrimes[i] * MathRoutines::hashString(input[i]);
+  int j = 0;
+  for (int i = 0; i < input.size; i ++) {
+    result += HashConstants::getConstantIncrementCounter(j) *
+    MathRoutines::hashString(input[i]);
   }
   return result;
 }
 
 unsigned int MathRoutines::hashListDoubles(const List<double>& input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
-  for (int i = 0; i < numCycles; i ++) {
-    result += someRandomPrimes[i] * MathRoutines::hashDouble(input[i]);
+  int j = 0;
+  for (int i = 0; i < input.size; i ++) {
+    result += HashConstants::getConstantIncrementCounter(j) * MathRoutines::hashDouble(input[i]);
   }
   return result;
 }
 
 unsigned int MathRoutines::hashListInts(const List<int>& input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
-  for (int i = 0; i < numCycles; i ++) {
-    result += someRandomPrimes[i] * HashFunctions::hashFunction(input[i]);
+  int j = 0;
+  for (int i = 0; i < input.size; i ++) {
+    result += HashConstants::getConstantIncrementCounter(j) *
+    HashFunctions::hashFunction(input[i]);
   }
   return result;
 }
@@ -2915,11 +2918,9 @@ unsigned int Selection::hashFunction() const {
   unsigned int result = 0;
   int j = 0;
   for (int i = 0; i < this->selected.size; i ++, j++) {
-    if (j >= someRandomPrimesSize) {
-      j = 0;
-    }
     if (this->selected[i]) {
-      result += static_cast<unsigned>(i) * someRandomPrimes[j];
+      result += static_cast<unsigned>(i) *
+      HashConstants::getConstantIncrementCounter(j);
     }
   }
   return result;
@@ -3764,8 +3765,10 @@ OnePartialFraction::~OnePartialFraction() {
 
 unsigned int OnePartialFraction::hashFunction() const {
   unsigned int result = 0;
+  int j = 0;
   for (int i = 0; i < this->denominator.size; i ++) {
-    result += someRandomPrimes[i] * this->denominator[i].hashFunction();
+    result += HashConstants::getConstantIncrementCounter(j) *
+    this->denominator[i].hashFunction();
   }
   return result;
 }
@@ -6747,10 +6750,11 @@ std::string ElementWeylGroup::toString(FormatExpressions* format) const {
 }
 
 unsigned int ElementWeylGroup::hashFunction() const {
-  int top = MathRoutines::minimum(this->generatorsLastAppliedFirst.size, ::someRandomPrimesSize);
   unsigned int result = 0;
-  for (int i = 0; i < top; i ++) {
-    result += this->generatorsLastAppliedFirst[i].hashFunction() * ::someRandomPrimes[i];
+  int j = 0;
+  for (int i = 0; i < this->generatorsLastAppliedFirst.size; i ++) {
+    result += this->generatorsLastAppliedFirst[i].hashFunction() *
+    HashConstants::getConstantIncrementCounter(j);
   }
   return result;
 }

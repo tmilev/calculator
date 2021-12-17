@@ -43,9 +43,10 @@ public:
   static SignalsInfrastructure& signals();
 };
 
-class NetworkingFunctions {
+class SystemFunctions {
 public:
   static void* getIncomingAddress(sockaddr* sa);
+  static void segfaultSigaction[[noreturn]](int signal, siginfo_t* si, void* arg);
 };
 
 SignalsInfrastructure& SignalsInfrastructure::signals() {
@@ -339,8 +340,18 @@ void WebWorker::sendAllBytesNoHeaders() {
 
 const int WebServer::maxNumPendingConnections = 1000000;
 
+void SystemFunctions::segfaultSigaction[[noreturn]](int signal, siginfo_t* si, void* arg) {
+  // <- This signal should never happen in
+  // <- server, so even if racy, we take the risk of a hang.
+  // <- Racy-ness in child process does not bother us: hanged children are still fine.
+  (void) signal;
+  (void) arg;
+  global.fatal << "Caught segfault at address: " << si->si_addr << global.fatal;
+  exit(0);
+}
+
 // IPv4 or IPv6:
-void* NetworkingFunctions::getIncomingAddress(struct sockaddr* sa) {
+void* SystemFunctions::getIncomingAddress(struct sockaddr* sa) {
   if (sa->sa_family == AF_INET) {
     return &((reinterpret_cast<struct sockaddr_in*>(sa))->sin_addr);
   }
@@ -2775,16 +2786,6 @@ bool WebServer::requiresLogin(const std::string& inputRequest, const std::string
   return true;
 }
 
-void segfault_sigaction[[noreturn]](int signal, siginfo_t* si, void* arg) {
-  // <- This signal should never happen in
-  // <- server, so even if racy, we take the risk of a hang.
-  // <- Racy-ness in child process does not bother us: hanged children are still fine.
-  (void) signal;
-  (void) arg;
-  global.fatal << "Caught segfault at address: " << si->si_addr << global.fatal;
-  exit(0);
-}
-
 void WebServer::fperror_sigaction[[noreturn]](int signal) {
   (void) signal;
   global.fatal << "Fatal arithmetic error. " << global.fatal;
@@ -3119,7 +3120,7 @@ void SignalsInfrastructure::initializeSignals() {
   if (sigemptyset(&this->SignalSEGV.sa_mask) == - 1) {
     global.fatal << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << global.fatal;
   }
-  this->SignalSEGV.sa_sigaction = &segfault_sigaction;
+  this->SignalSEGV.sa_sigaction = &SystemFunctions::segfaultSigaction;
   this->SignalSEGV.sa_flags = SA_SIGINFO;
   if (sigaction(SIGSEGV, &SignalSEGV, nullptr) == - 1) {
     global.fatal << "Failed to register SIGSEGV handler "
@@ -3271,7 +3272,7 @@ int Listener::acceptWrapper() {
 void Listener::computeUserAddress() {
   inet_ntop(
     this->theirAddress.ss_family,
-    NetworkingFunctions::getIncomingAddress(reinterpret_cast<struct sockaddr *>(&this->theirAddress)),
+    SystemFunctions::getIncomingAddress(reinterpret_cast<struct sockaddr *>(&this->theirAddress)),
     this->userAddressBuffer,
     sizeof this->userAddressBuffer
   );

@@ -932,8 +932,8 @@ unsigned int RationalFraction<Coefficient>::hashFunction() const {
     case RationalFraction::typePolynomial:
       return this->numerator.getElementConst().hashFunction();
     case RationalFraction::typeRationalFunction:
-      return this->numerator.getElementConst().hashFunction() * someRandomPrimes[0] +
-      this->denominator.getElementConst().hashFunction() * someRandomPrimes[1];
+      return this->numerator.getElementConst().hashFunction() * HashConstants::constant0 +
+      this->denominator.getElementConst().hashFunction() * HashConstants::constant1;
     default:
       return static_cast<unsigned int>(- 1);
   }

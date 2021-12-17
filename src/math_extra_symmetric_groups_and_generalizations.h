@@ -615,6 +615,8 @@ public:
 
 class HyperoctahedralBitsAutomorphism {
 public:
+  typedef SemidirectProductElement<PermutationR2, ElementZ2N, HyperoctahedralBitsAutomorphism> ElementHyperoctahedralGroupR2;
+
   static ElementZ2N oa(const PermutationR2& h, const ElementZ2N& k) {
     ElementZ2N out = k;
     int bon = h.largestOccurringNumber();

@@ -255,6 +255,7 @@ public:
     std::string& readAhead, std::stringstream& out, bool replacePlusBySpace
   );
   static void replaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
+  // Returns an url with a calculator computation
   static std::string getCalculatorComputationURL(
     const std::string& inputNoEncoding
   );

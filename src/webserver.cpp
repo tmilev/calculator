@@ -43,6 +43,11 @@ public:
   static SignalsInfrastructure& signals();
 };
 
+class NetworkingFunctions {
+public:
+  static void* getIncomingAddress(sockaddr* sa);
+};
+
 SignalsInfrastructure& SignalsInfrastructure::signals() {
   static SignalsInfrastructure result;
   return result;
@@ -335,7 +340,7 @@ void WebWorker::sendAllBytesNoHeaders() {
 const int WebServer::maxNumPendingConnections = 1000000;
 
 // IPv4 or IPv6:
-void *get_in_addr(struct sockaddr* sa) {
+void* NetworkingFunctions::getIncomingAddress(struct sockaddr* sa) {
   if (sa->sa_family == AF_INET) {
     return &((reinterpret_cast<struct sockaddr_in*>(sa))->sin_addr);
   }
@@ -3167,7 +3172,7 @@ void SignalsInfrastructure::initializeSignals() {
   this->flagInitialized = true;
 }
 
-extern void monitorWebServer(int pidServer,const std::string& pingAuthentication);
+extern void monitorWebServer(int pidServer, const std::string& pingAuthentication);
 
 void WebServer::writeVersionJSFile() {
   MacroRegisterFunctionWithName("WebServer::writeVersionJSFile");
@@ -3266,7 +3271,7 @@ int Listener::acceptWrapper() {
 void Listener::computeUserAddress() {
   inet_ntop(
     this->theirAddress.ss_family,
-    get_in_addr(reinterpret_cast<struct sockaddr *>(&this->theirAddress)),
+    NetworkingFunctions::getIncomingAddress(reinterpret_cast<struct sockaddr *>(&this->theirAddress)),
     this->userAddressBuffer,
     sizeof this->userAddressBuffer
   );

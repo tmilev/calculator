@@ -45,6 +45,7 @@ public:
    static unsigned int hashFunction(const VectorSpace<Coefficient>& input) {
      return input.fastbasis.hashFunction();
    }
+
    bool operator==(const VectorSpace<Coefficient> &other) const;
 };
 

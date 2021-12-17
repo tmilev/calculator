@@ -4515,15 +4515,6 @@ void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Ratio
     }*/
 }
 
-void FileSetPutPointerToEnd(std::fstream& theFile, bool StoreToFile) {
-  if (!theFile.is_open() && StoreToFile) {
-    global.fatal << "Put pointer seek on closed file not allowed. " << global.fatal;
-  }
-  std::filebuf* pbuf = theFile.rdbuf();
-  long tempSize = pbuf->pubseekoff(0, std::fstream::end);
-  theFile.seekp(tempSize);
-}
-
 bool PartialFractions::verifyFileComputedContributions() {
   int tempI = this->readFromFileComputedContributions(PartialFractions::ComputedContributionsList);
   std::filebuf* pbuf = OnePartialFraction::TheBigDump.rdbuf();

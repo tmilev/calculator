@@ -1906,8 +1906,8 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
 // was created to facilitate computations of tau signatures
 class SubgroupDataWeylGroup {
 public:
-  WeylGroupData* theWeylData;
-  SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> theSubgroupData;
+  WeylGroupData* weylData;
+  SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> subgroupData;
   List<Rational> tauSignature;
   bool checkInitialization();
   void ComputeTauSignature();
@@ -2233,38 +2233,38 @@ ClassFunction<someFiniteGroup, Coefficient> ClassFunction<someFiniteGroup, Coeff
 
 // Univariate dense polynomials.
 template <typename Coefficient>
-class UDPolynomial {
+class PolynomialUnivariateDense {
 public:
    // "So the last shall be first, and the first last" -- Matthew 20:12
   List<Coefficient> data;
-  UDPolynomial() {
+  PolynomialUnivariateDense() {
   }
-  UDPolynomial(const UDPolynomial<Coefficient>& other) {
+  PolynomialUnivariateDense(const PolynomialUnivariateDense<Coefficient>& other) {
     this->data = other.data;
   }
-  UDPolynomial& operator=(const UDPolynomial<Coefficient>& other) {
+  PolynomialUnivariateDense& operator=(const PolynomialUnivariateDense<Coefficient>& other) {
     this->data = other.data;
     return *this;
   }
   // UDPolynomial<Coefficient> operator+(const UDPolynomial<Coefficient>& right) const;
-  void operator+=(const UDPolynomial<Coefficient>& right);
+  void operator+=(const PolynomialUnivariateDense<Coefficient>& right);
   // UDPolynomial<Coefficient> operator-(const UDPolynomial<Coefficient>& right) const;
-  void operator-=(const UDPolynomial<Coefficient>& right);
-  UDPolynomial<Coefficient> operator*(const UDPolynomial<Coefficient>& right) const;
+  void operator-=(const PolynomialUnivariateDense<Coefficient>& right);
+  PolynomialUnivariateDense<Coefficient> operator*(const PolynomialUnivariateDense<Coefficient>& right) const;
   //  UDPolynomial<Coefficient> operator*(const Coefficient& right) const;
   void operator*=(const Coefficient& right);
-  void operator*=(const UDPolynomial<Coefficient>& other) {
+  void operator*=(const PolynomialUnivariateDense<Coefficient>& other) {
     *this = (*this) * other;
   }
 
-  UDPolynomial<Coefficient> timesXn(int n) const;
+  PolynomialUnivariateDense<Coefficient> timesXn(int n) const;
   // Quick divisibility test
   // bool DivisibleBy(const UDPolynomial<Coefficient>& divisor) const;
-  DivisionResult<UDPolynomial<Coefficient> > divideBy(const UDPolynomial<Coefficient>& right) const;
-  UDPolynomial<Coefficient> operator/(const UDPolynomial<Coefficient>& divisor) const;
-  UDPolynomial<Coefficient> operator%(const UDPolynomial<Coefficient>& divisor) const;
+  DivisionResult<PolynomialUnivariateDense<Coefficient> > divideBy(const PolynomialUnivariateDense<Coefficient>& right) const;
+  PolynomialUnivariateDense<Coefficient> operator/(const PolynomialUnivariateDense<Coefficient>& divisor) const;
+  PolynomialUnivariateDense<Coefficient> operator%(const PolynomialUnivariateDense<Coefficient>& divisor) const;
   void operator/=(const Coefficient& right);
-  void operator/=(const UDPolynomial<Coefficient>& right) {
+  void operator/=(const PolynomialUnivariateDense<Coefficient>& right) {
     *this = *this / right;
   }
   Coefficient operator()(const Coefficient& x) const;
@@ -2272,7 +2272,7 @@ public:
   void formalDerivative();
   void squareFree();
   Coefficient& operator[](int i) const;
-  bool operator<(const UDPolynomial<Coefficient>& right) const;
+  bool operator<(const PolynomialUnivariateDense<Coefficient>& right) const;
   bool operator==(int other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   void assignMinimalPolynomial(const Matrix<Coefficient>& input);
@@ -2280,7 +2280,7 @@ public:
 };
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>& input) {
+void PolynomialUnivariateDense<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>& input) {
   int n = input.numberOfColumns;
   this->data.setSize(1);
   this->data[0] = 1;
@@ -2297,7 +2297,7 @@ void UDPolynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient
       v = w;
     }
     Vector<Coefficient> p = vs.basis.putInBasis(w);
-    UDPolynomial<Coefficient> out;
+    PolynomialUnivariateDense<Coefficient> out;
     out.data.setSize(p.size + 1);
     for (int i = 0; i <p.size; i ++) {
       out.data[i] = - p[i];
@@ -2308,7 +2308,7 @@ void UDPolynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::assignCharacteristicPolynomial(const Matrix<Coefficient>& input) {
+void PolynomialUnivariateDense<Coefficient>::assignCharacteristicPolynomial(const Matrix<Coefficient>& input) {
   int n = input.numberOfColumns;
   this->data.setSize(n + 1);
   this->data[0] = 1;
@@ -2325,12 +2325,12 @@ void UDPolynomial<Coefficient>::assignCharacteristicPolynomial(const Matrix<Coef
 }
 
 template <typename Coefficient>
-Coefficient& UDPolynomial<Coefficient>::operator[](int i) const {
+Coefficient& PolynomialUnivariateDense<Coefficient>::operator[](int i) const {
   return data[i];
 }
 
 template <typename Coefficient>
-Coefficient UDPolynomial<Coefficient>::operator()(const Coefficient& x) const {
+Coefficient PolynomialUnivariateDense<Coefficient>::operator()(const Coefficient& x) const {
   Coefficient acc = 0;
   Coefficient y = 1;
   for (int i = 0; i < data.size; i ++) {
@@ -2341,7 +2341,7 @@ Coefficient UDPolynomial<Coefficient>::operator()(const Coefficient& x) const {
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::operator+=(const UDPolynomial<Coefficient>& right) {
+void PolynomialUnivariateDense<Coefficient>::operator+=(const PolynomialUnivariateDense<Coefficient>& right) {
   int t = min(right.data.size, data.size);
   for (int i = 0; i < t; i ++) {
     data[i] += right.data[i];
@@ -2360,7 +2360,7 @@ void UDPolynomial<Coefficient>::operator+=(const UDPolynomial<Coefficient>& righ
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::operator-=(const UDPolynomial<Coefficient>& right) {
+void PolynomialUnivariateDense<Coefficient>::operator-=(const PolynomialUnivariateDense<Coefficient>& right) {
   int t = right.data.size;
   if (data.size < t) {
     t = data.size;
@@ -2383,8 +2383,8 @@ void UDPolynomial<Coefficient>::operator-=(const UDPolynomial<Coefficient>& righ
 }
 
 template <typename Coefficient>
-UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator*(const UDPolynomial<Coefficient>& right) const {
-  UDPolynomial<Coefficient> out;
+PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::operator*(const PolynomialUnivariateDense<Coefficient>& right) const {
+  PolynomialUnivariateDense<Coefficient> out;
   out.data.setSize(data.size + right.data.size - 1);
   for (int i = 0; i <out.data.size; i ++) {
     out.data[i] = 0;
@@ -2398,8 +2398,8 @@ UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator*(const UDPolynomia
 }
 
 template <typename Coefficient>
-UDPolynomial<Coefficient> UDPolynomial<Coefficient>::timesXn(int n) const {
-  UDPolynomial<Coefficient> out;
+PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::timesXn(int n) const {
+  PolynomialUnivariateDense<Coefficient> out;
   out.data.setSize(data.size + n);
   for (int i = 0; i < n; i ++) {
     out.data[i] = 0;
@@ -2412,14 +2412,14 @@ UDPolynomial<Coefficient> UDPolynomial<Coefficient>::timesXn(int n) const {
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::operator*=(const Coefficient& right) {
+void PolynomialUnivariateDense<Coefficient>::operator*=(const Coefficient& right) {
   for (int i = 0; i < data.size; i ++) {
     data[i] *= right;
   }
 }
 
 template <class Coefficient>
-std::string UDPolynomial<Coefficient>::toString(FormatExpressions* format) const {
+std::string PolynomialUnivariateDense<Coefficient>::toString(FormatExpressions* format) const {
   Polynomial<Coefficient> tempP;
   tempP.makeZero();
   MonomialPolynomial tempM;
@@ -2431,7 +2431,7 @@ std::string UDPolynomial<Coefficient>::toString(FormatExpressions* format) const
 }
 
 template <typename Coefficient>
-std::ostream& operator<<(std::ostream& out, const UDPolynomial<Coefficient>& p) {
+std::ostream& operator<<(std::ostream& out, const PolynomialUnivariateDense<Coefficient>& p) {
   FormatExpressions tempFormat;
   tempFormat.polynomialAlphabet.setSize(1);
   tempFormat.polynomialAlphabet[0] = "q";

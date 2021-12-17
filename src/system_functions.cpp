@@ -163,7 +163,7 @@ void TimeoutThread::run() {
   global.checkConsistency();
 }
 
-void RunTimerThread(int threadIndex) {
+void ThreadData::runTimerThread(int threadIndex) {
   global.threadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
   TimeoutThread theThread;
@@ -171,7 +171,7 @@ void RunTimerThread(int threadIndex) {
 }
 
 void createTimerThread() {
-  ThreadData::createThread(RunTimerThread, "timer");
+  ThreadData::createThread(ThreadData::runTimerThread, "timer");
 }
 
 int externalCommandNoOutput(const std::string& theCommand) {

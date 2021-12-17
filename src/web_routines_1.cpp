@@ -69,6 +69,8 @@ public:
   WebServerMonitor();
 };
 
+// A function to monitor the web server and restart if goes non-responsive.
+// This function is extern'ed, so not wrapping up in a class.
 void monitorWebServer(int pidServer, const std::string& pingAuthentication) {
   WebServerMonitor monitor;
   monitor.monitor(pidServer, pingAuthentication);

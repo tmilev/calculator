@@ -24,6 +24,7 @@ public:
   static void createThread(void (*InputFunction)(int), const std::string& inputName);
   static std::string toStringAllThreadsHtml();
   static std::string toStringAllThreadsConsole();
+  static void runTimerThread(int threadIndex);
   ThreadData();
   ~ThreadData();
 };

@@ -79,10 +79,6 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   return out.str();
 }
 
-int IntIdentity(const int& x) {
-  return x;
-}
-
 bool Calculator::getVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
   MacroRegisterFunctionWithName("Calculator::getVectorExpressions");
   input.checkInitialization();

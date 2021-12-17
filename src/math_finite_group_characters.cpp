@@ -85,78 +85,31 @@ void WeylGroupData::computeInitialIrreducibleRepresentations() {
   this->group.addIrreducibleRepresentation(standardRep);
 }
 
-// This is dumb, but i couldnt figure out what else to do
-template<> // haha wat
-unsigned int VectorSpace<Rational>::hashFunction(const VectorSpace<Rational>& in) {
-  return in.fastbasis.hashFunction();
-}
-// whenever i figure out cxx i can get rid of this.  but im probably jst
-// going to define this for every other field
-
-
-template <typename Coefficient>
-void matrixInBasis(
-  Matrix<Coefficient>& out,
-  const Matrix<Coefficient>& in,
-  const List<Vector<Coefficient> >& basis,
-  const Matrix<Coefficient>& gramMatrix
-) {
-  int d = basis.size;
-  out.initialize(d, d);
-  for (int i = 0; i < d; i ++) {
-    for (int j = 0; j < d; j ++) {
-      out.elements[i][j] = basis[i].scalarEuclidean(in * basis[j]);
-    }
-  }
-  out.multiplyOnTheLeft(gramMatrix);
-}
-
-template <typename Coefficient>
-void MatrixInBasisFast(Matrix<Coefficient>& out, const Matrix<Coefficient>& in, const Matrix<Coefficient>& BM) {
-  int d = BM.numberOfRows;
-  Matrix<Coefficient> M = BM;
-  Matrix<Coefficient> inT = in;
-  inT.transpose();
-  M.multiplyOnTheRight(inT);
-  out.makeZeroMatrix(d);
-  for (int i = 0; i < d; i ++) {
-    int jj = 0;
-    for (int j = 0; j < d; j ++) {
-      while ((jj < M.numberOfColumns) and (M.elements[i][jj] == 0)) {
-        jj ++;
-      }
-      if (jj == M.numberOfColumns) {
-        out.elements[i][j] = 0;
-        continue;
-      }
-      if (BM.elements[j][jj] == 0) {
-        out.elements[i][j] = 0;
-        continue;
-      }
-      out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
-      for (int k = jj; k < M.numberOfColumns; k ++) {
-        M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
-      }
-    }
-  }
-}
-
 template <typename Coefficient>
 class SpaceTree {
 public:
-   List<Vector<Coefficient> > space;
-   List<SpaceTree<Coefficient> > subspaces;
-
-   void placeInTree(const List<Vector<Coefficient> >& V);
-   void getLeaves(List<List<Vector<Coefficient> > >& leaves) const;
-   void displayTree() const;
+  List<Vector<Coefficient> > space;
+  List<SpaceTree<Coefficient> > subspaces;
+  void placeInTree(const List<Vector<Coefficient> >& vector);
+  void getLeaves(List<List<Vector<Coefficient> > >& leaves) const;
+  void displayTree() const;
+  void getunion(
+    const List<Vector<Coefficient> >& left,
+    const List<Vector<Coefficient> >& right,
+    List<Vector<Coefficient> >& output
+  );
+  void intersection(
+    const List<Vector<Coefficient> > &left,
+    const List<Vector<Coefficient> > &right,
+    List<Vector<Coefficient> >& output
+  );
 };
 
 template <typename Coefficient>
-void SpaceTree<Coefficient>::placeInTree(const List<Vector<Coefficient> > &V) {
+void SpaceTree<Coefficient>::placeInTree(const List<Vector<Coefficient> >& vector) {
   List<Vector<Coefficient> > U;
   for (int i = 0; i < subspaces.size; i ++) {
-    intersection(V, subspaces[i].space, U);
+    intersection(vector, subspaces[i].space, U);
     if (U.size == 0) {
       continue;
     }
@@ -170,10 +123,10 @@ void SpaceTree<Coefficient>::placeInTree(const List<Vector<Coefficient> > &V) {
     getunion(W, subspaces[i].space, tempVspace);
     W = tempVspace;
   }
-  intersection(W, V, tempVspace);
-  if (tempVspace.size != V.size) {
+  intersection(W, vector, tempVspace);
+  if (tempVspace.size != vector.size) {
     SpaceTree<Coefficient> vst;
-    vst.space = V;
+    vst.space = vector;
     subspaces.addOnTop(vst);
   }
 }
@@ -195,15 +148,41 @@ void SpaceTree<Coefficient>::displayTree() const {
   for (int i = 0; i < subspaces.size; i ++) {
     subspaces[i].displayTree();
   }
-//  global.Comments << ']';
 }
+
+class CharacterFunctions {
+public:
+  template <typename elementSomeGroup>
+  static void exportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data);
+  static void exportTauSignatures(
+    WeylGroupData& groupData, const List<List<bool> >& ts, JSData& output
+  );
+  template <typename Somegroup>
+  static List<ClassFunction<Somegroup, Rational> > computeCharacterTable(Somegroup& group);
+  static void computeTauSignatures(WeylGroupData* group, List<List<bool> >& tauSignatures, bool pseudo = false);
+  static List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0);
+  template <typename Somegroup>
+  static Matrix<Rational> getClassMatrix(
+    const Somegroup &group, int cci, List<int>* classmap = nullptr
+  );
+  template <typename Coefficient>
+  static List<VectorSpace<Coefficient> > getEigenspaces(const Matrix<Coefficient>& matrix);
+  template <typename Coefficient>
+  static Matrix<Coefficient> getMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& classFunction);
+  static void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>& gens, List<bool>& out);
+  template <typename Coefficient>
+  static bool isIsotypicComponent(WeylGroupData& group, const List<Vector<Coefficient> >& vector);
+  static Matrix<Rational> matrixInBasis(
+    const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X, const List<Vector<Rational> >& B
+  );
+};
+
 
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
   const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other,
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) const {
-  //lazy programmers handling://////
   if (&output == this || &output == &other) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> thisCopy, otherCopy;
     thisCopy = *this;
@@ -236,14 +215,6 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
   for (int i = 0; i < this->generators.size; i ++) {
     output.generators[i].assignTensorProduct(this->generators[i],other.generators[i]);
   }
-  /* would that it be this simple
-  if ((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0)) {
-    U.classFunctionMatrices.setSize(G->ccCount);
-    for (int i = 0; i <classFunctionMatrices.size; i ++) {
-      if ((classFunctionMatrices[i].numberOfColumns > 0) && (other.classFunctionMatrices[i].numberOfColumns > 0))
-      U.classFunctionMatrices[i].assignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
-    }
-  }*/
   output.ownerGroup = this->ownerGroup;
 }
 
@@ -267,19 +238,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
   }
   out.ownerGroup = ownerGroup;
   out.basis.makeEiBasis(d);
-
-/*
-   if (classFunctionMatrices.size > 0) {
-     out.classFunctionMatrices.setSize(G->ccCount);
-     for (int i = 0; i <classFunctionMatrices.size; i ++) {
-        if (classFunctionMatrices[i].numberOfRows > 0) {
-          //MatrixInBasisFast(out.classFunctionMatrices[i],classFunctionMatrices[i],BM);
-          matrixInBasis(out.classFunctionMatrices[i],classFunctionMatrices[i],basis,GM);
-        }
-      }
-   }
-*/
-   return out;
+  return out;
 }
 
 template <typename somegroup, typename Coefficient>
@@ -349,34 +308,6 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   if (Vb.size == 0) {
     return out;
   }
-/*  SpaceTree<Rational> st;
-  st.space = basis;
-  for (int cfi = 0; cfi <G->ccCount; cfi ++) {
-     ClassFunction<Coefficient> cf;
-      cf.G = G;
-      cf.makeZero();
-      cf[cfi] = 1;
-      global.Comments << "getting matrix " << cf << "\n";
-      Matrix<Coefficient> A;
-      classFunctionMatrix(cf, A);
-      List<List<Vector<Coefficient> > > es = eigenspaces(A);
-      global.Comments << "eigenspaces were ";
-      for (int i = 0; i <es.size; i ++)
-         global.Comments << es[i].size << " ";
-      global.Comments << "\n";
-      for (int i = 0; i <es.size; i ++)
-         st.PlaceInTree(es[i]);
-      global.Comments << "tree is ";
-      st.DisplayTree();
-      global.Comments << "\n";
-  }
-  List<List<Vector<Coefficient> > > leaves;
-  st.GetLeaves(leaves);
-  global.Comments << "leaves are ";
-  for (int i = 0; i <leaves.size; i ++)
-    global.Comments << leaves[i].size << " ";
-  global.Comments << "\n";
-*/
   List<List<Vector<Coefficient> > > es;
   for (int cfi = this->ownerGroup->conjugacyClassCount() - 1; cfi >= 0; cfi --) {
     ClassFunction<somegroup, Coefficient> cf;
@@ -406,19 +337,9 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   return out;
 }
 
-int ithfactor(int i, List<int> f) {
-  int acc = 1;
-  for (int j = 0; j < f.size; j ++) {
-    if (i & i << j) {
-      acc = acc * f[j];
-    }
-  }
-  return acc;
-}
-
 template <typename Coefficient>
-DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::divideBy(const UDPolynomial<Coefficient>& divisor) const {
-  DivisionResult<UDPolynomial<Coefficient> > out;
+DivisionResult<PolynomialUnivariateDense<Coefficient> > PolynomialUnivariateDense<Coefficient>::divideBy(const PolynomialUnivariateDense<Coefficient>& divisor) const {
+  DivisionResult<PolynomialUnivariateDense<Coefficient> > out;
   out.remainder = *this;
   if (data.size < divisor.data.size) {
     return out;
@@ -430,7 +351,7 @@ DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::divideBy(c
       out.quotient[i] = 0;
       continue;
     }
-    UDPolynomial<Coefficient> p = divisor.timesXn(i);
+    PolynomialUnivariateDense<Coefficient> p = divisor.timesXn(i);
     out.quotient[i] = out.remainder.data[out.remainder.data.size - 1] / divisor.data[divisor.data.size - 1];
     p *= out.quotient[i];
     out.remainder -= p;
@@ -439,19 +360,19 @@ DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::divideBy(c
 }
 
 template <typename Coefficient>
-UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator/(const UDPolynomial<Coefficient>& divisor) const {
-  DivisionResult<UDPolynomial<Coefficient> > tmp = this->divideBy(divisor);
+PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::operator/(const PolynomialUnivariateDense<Coefficient>& divisor) const {
+  DivisionResult<PolynomialUnivariateDense<Coefficient> > tmp = this->divideBy(divisor);
   return tmp.quotient;
 }
 
 template <typename Coefficient>
-UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator%(const UDPolynomial<Coefficient>& divisor) const {
-  DivisionResult<UDPolynomial<Coefficient> > tmp = this->divideBy(divisor);
+PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::operator%(const PolynomialUnivariateDense<Coefficient>& divisor) const {
+  DivisionResult<PolynomialUnivariateDense<Coefficient> > tmp = this->divideBy(divisor);
   return tmp.remainder;
 }
 
 template <typename Coefficient>
-bool UDPolynomial<Coefficient>::operator==(const int other) const {
+bool PolynomialUnivariateDense<Coefficient>::operator==(const int other) const {
   if (other == 0) {
     if (data.size == 0) {
       return true;
@@ -469,7 +390,7 @@ bool UDPolynomial<Coefficient>::operator==(const int other) const {
 
 template <typename Coefficient>
 //template <typename integral>
-void UDPolynomial<Coefficient>::clearDenominators() {
+void PolynomialUnivariateDense<Coefficient>::clearDenominators() {
   int acc = 1;
   for (int i = 0; i < data.size; i ++) {
     acc = lcm(acc, data[i].getDenominator());
@@ -478,7 +399,7 @@ void UDPolynomial<Coefficient>::clearDenominators() {
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::formalDerivative() {
+void PolynomialUnivariateDense<Coefficient>::formalDerivative() {
   if (data.size < 2) {
     data.size = 0;
   }
@@ -489,7 +410,7 @@ void UDPolynomial<Coefficient>::formalDerivative() {
 }
 
 template <typename Coefficient>
-bool UDPolynomial<Coefficient>::operator<(const UDPolynomial<Coefficient>& right) const {
+bool PolynomialUnivariateDense<Coefficient>::operator<(const PolynomialUnivariateDense<Coefficient>& right) const {
   if (data.size < right.data.size) {
     return true;
   }
@@ -503,11 +424,11 @@ bool UDPolynomial<Coefficient>::operator<(const UDPolynomial<Coefficient>& right
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::squareFree() {
+void PolynomialUnivariateDense<Coefficient>::squareFree() {
   global.comments << *this << "\n";
-  UDPolynomial<Coefficient> p = formalDerivative();
+  PolynomialUnivariateDense<Coefficient> p = formalDerivative();
   global.comments << p << "\n";
-  UDPolynomial<Coefficient> q = gcd(*this, p);
+  PolynomialUnivariateDense<Coefficient> q = gcd(*this, p);
   if (q.data.size > 1) {
     data = (*this / q).data;
   }
@@ -545,37 +466,41 @@ bool space_contains(const List<Vector<Coefficient> >& V, Vector<Coefficient> v) 
 }
 
 template<typename Coefficient>
-void getunion(const List<Vector<Coefficient> >& V, const List<Vector<Coefficient> >& W, List<Vector<Coefficient> >& output) {
-  if (&output == &V || &output == &W) {
+void SpaceTree<Coefficient>::getunion(
+  const List<Vector<Coefficient> >& left,
+  const List<Vector<Coefficient> >& right,
+  List<Vector<Coefficient> >& output
+) {
+  if (&output == &left || &output == &right) {
     List<Vector<Coefficient> > newOutput;
-    getunion(V, W, newOutput);
+    getunion(left, right, newOutput);
     output = newOutput;
     return;
   }
-  if (V.size == 0) {
-    output = W;
+  if (left.size == 0) {
+    output = right;
     return;
   }
-  int d = V[0].size;
-  Matrix<Coefficient> M;
-  M.initialize(V.size + W.size,d);
-  for (int i = 0; i < V.size; i ++) {
+  int d = left[0].size;
+  Matrix<Coefficient> matrix;
+  matrix.initialize(left.size + right.size,d);
+  for (int i = 0; i < left.size; i ++) {
     for (int j = 0; j < d; j ++) {
-      M.elements[i][j] = V[i][j];
+      matrix.elements[i][j] = left[i][j];
     }
   }
-  for (int i = 0; i < W.size; i ++) {
+  for (int i = 0; i < right.size; i ++) {
     for (int j = 0; j < d; j ++) {
-      M.elements[V.size + i][j] = W[i][j];
+      matrix.elements[left.size + i][j] = right[i][j];
     }
   }
-  M.gaussianEliminationByRows(M);
+  matrix.gaussianEliminationByRows(matrix);
   output.setSize(0);
   Vector<Coefficient> v;
-  for (int i = 0; i < M.numberOfRows; i ++) {
+  for (int i = 0; i < matrix.numberOfRows; i ++) {
     v.setSize(d);
     for (int j = 0; j < d; j ++) {
-      v[j] = M.elements[i][j];
+      v[j] = matrix.elements[i][j];
     }
     if (v.isEqualToZero()) {
       break;
@@ -585,32 +510,32 @@ void getunion(const List<Vector<Coefficient> >& V, const List<Vector<Coefficient
 }
 
 template<typename Coefficient>
-void intersection(
-  const List<Vector<Coefficient> > &V,
-  const List<Vector<Coefficient> > &W,
+void SpaceTree<Coefficient>::intersection(
+  const List<Vector<Coefficient> >& left,
+  const List<Vector<Coefficient> >& right,
   List<Vector<Coefficient> >& output
 ) {
-  if ((V.size == 0) or (W.size == 0)) {
+  if ((left.size == 0) or (right.size == 0)) {
     output.setSize(0);
     return;
   }
-  int d = V[0].size;
+  int d = left[0].size;
 
   Matrix<Coefficient> MV;
-  MV.initialize(V.size, d);
-  for (int i = 0; i < V.size; i ++) {
+  MV.initialize(left.size, d);
+  for (int i = 0; i < left.size; i ++) {
     for (int j = 0; j < d; j ++) {
-      MV.elements[i][j] = V[i][j];
+      MV.elements[i][j] = left[i][j];
     }
   }
   List<Vector<Coefficient> > Vperp;
   MV.getZeroEigenSpaceModifyMe(Vperp);
 
   Matrix<Coefficient> MW;
-  MW.initialize(W.size, d);
-  for (int i = 0; i < W.size; i ++) {
+  MW.initialize(right.size, d);
+  for (int i = 0; i < right.size; i ++) {
     for (int j = 0; j < d; j ++) {
-      MW.elements[i][j] = W[i][j];
+      MW.elements[i][j] = right[i][j];
     }
   }
   List<Vector<Coefficient> > Wperp;
@@ -686,80 +611,17 @@ List<Vector<Coefficient> > orthogonal_complement(
   return out;
 }
 
-// we're going to guess at integers
-template <typename Coefficient>
-bool pdiv(List<Coefficient> &p, int a) {
-  List<Coefficient> q;
-  Coefficient lastround = p[0];
-  for (int i = 1; i < p.size; i ++) {
-    q.addOnTop(lastround);
-    lastround = p[i] - lastround * a;
-  }
-  if (lastround == 0) {
-    p = q;
-    return true;
-  }
-  return false;
-}
-
-template <typename Coefficient>
-List<int> factorpoly(List<Coefficient> p, int maxfac) {
-  List<int> factors;
-  for (int i1 = 0; i1 < maxfac; i1 ++) {
-    for (int i2 = 1; i2 >= - 1; i2 -= 2) {
-      int i = i1 * i2;
-      while (pdiv(p, i)) {
-        if (!factors.contains(i)) {
-          factors.addOnTop(i);
-        }
-        if (p.size == 1) {
-          return factors;
-        }
-      }
-    }
-  }
-  return factors;
-}
-
-template <typename Coefficient>
-List<Vector<Coefficient> > DestructiveColumnSpace(Matrix<Coefficient>& M) {
-  M.transpose();
-  Matrix<Coefficient> dummy1;
-  Selection dummy2;
-  M.gaussianEliminationByRows(M, dummy1, dummy2);
-  List<Vector<Coefficient> > out;
-  bool zerov;
-  for (int i = 0; i < M.numberOfRows; i ++) {
-    Vector<Coefficient> v;
-    v.makeZero(M.numberOfColumns); // initializing is not necessary
-    zerov = true;
-    for (int j = 0; j < M.numberOfColumns; j ++) {
-      v[j] = M.elements[i][j];
-      if (zerov && M.elements[i][j] != 0) {
-        zerov = false;
-      }
-    }
-    if (zerov) {
-      return out;
-    }
-    out.addOnTop(v);
-  }
-}
-
-// guess at integers
-List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0) {
+List<List<Vector<Rational> > > CharacterFunctions::eigenspaces(
+  const Matrix<Rational>& M, int checkDivisorsOf
+) {
   (void) checkDivisorsOf;
   int n = M.numberOfColumns;
   List<List<Vector<Rational> > > spaces;
   int found = 0;
-// for (int i = 0; found < n; i ++){
-//   if ((i != 0) && (checkDivisorsOf%i != 0))
-//     continue;
-  UDPolynomial<Rational> p;
+  PolynomialUnivariateDense<Rational> p;
   p.assignMinimalPolynomial(M);
   for (int ii = 0; ii < 2 * n + 2; ii ++) {
-    // lol, this did end up working though
-    int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,- 1,2,-2,3,-3,...
+    int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,-1,2,-2,3,-3,...
     Rational r = i;
     if (p(r) == 0) {
       Matrix<Rational> M2 = M;
@@ -774,6 +636,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
   }
   return spaces;
 }
+
 
 template <typename Coefficient>
 Vector<Coefficient> putInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B) {
@@ -806,44 +669,33 @@ Vector<Coefficient> putInBasis(const Vector<Coefficient>& v, const List<Vector<C
 }
 
 template <typename Coefficient>
-ElementWeylGroupRing<Coefficient> ActOnGroupRing(
-  ElementWeylGroup& theElement, const ElementWeylGroupRing<Coefficient>& v
+bool CharacterFunctions::isIsotypicComponent(
+  WeylGroupData& group, const List<Vector<Coefficient> >& vector
 ) {
-  ElementWeylGroupRing<Coefficient> out;
-  out.makeZero();
-  for (int i = 0; i < v.size(); i ++) {
-    out.addMonomial(v.coefficients[i], theElement * v[i]);
-  }
-  return out;
-}
-
-// this function name is a lie
-template <typename Coefficient>
-bool is_isotypic_component(WeylGroupData& G, const List<Vector<Coefficient> >& V) {
   // pre-initial test: V isn't empty
-  if (V.size == 0) {
+  if (vector.size == 0) {
     return false;
   }
   // initial test: dimension of V is a square
-  int n = sqrt(V.size);
-  if (n * n != V.size) {
+  int n = sqrt(vector.size);
+  if (n * n != vector.size) {
     return false;
   }
   // more expensive test: character of V has unit norm
   ClassFunction<FiniteGroup<ElementWeylGroup>, Coefficient> X;
-  X.G = &G.group;
-  X.data.setSize(G.group.conjugacyClassCount());
-  for (int i = 0; i < G.group.conjugacyClassCount(); i ++) {
-    ElementWeylGroup& g = G.group.conjugacyClasses[i].representative;
+  X.G = &group.group;
+  X.data.setSize(group.group.conjugacyClassCount());
+  for (int i = 0; i < group.group.conjugacyClassCount(); i ++) {
+    ElementWeylGroup& g = group.group.conjugacyClasses[i].representative;
     Coefficient tr = 0;
-    for (int j = 0; j < V.size; j ++) {
-      Vector<Coefficient> v = ActOnGroupRing(g, V[j]);
-      v = putInBasis(v, V);
+    for (int j = 0; j < vector.size; j ++) {
+      Vector<Coefficient> v = ActOnGroupRing(g, vector[j]);
+      v = putInBasis(v, vector);
       tr += v[j];
     }
     X.data[i] = tr;
   }
-  // (4, - 1, - 1/2, 1/2, - 1, 1/4, 1/4, 1, 1/2, -7/2)[1] haha yeah right
+  // (4, - 1, - 1/2, 1/2, - 1, 1/4, 1/4, 1, 1/2, -7/2)[1]
   if (X.norm() != n) {
     return false;
   }
@@ -853,16 +705,16 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<Coefficient> >& V
   if (spaces.size != 2) {
     return false;
   }
-  if (spaces[1].size != V.size) {
+  if (spaces[1].size != vector.size) {
     return false;
   }
-  if (intersection(spaces[1], V).size != V.size) {
+  if (intersection(spaces[1], vector).size != vector.size) {
     return false;
   }
   return true;
 }
 
-Matrix<Rational> matrixInBasis(
+Matrix<Rational> CharacterFunctions::matrixInBasis(
   const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X, const List<Vector<Rational> >& B
 ) {
   List<Vector<Rational> > rows;
@@ -894,27 +746,17 @@ Matrix<Rational> matrixInBasis(
   return M;
 }
 
-ElementMonomialAlgebra<ElementWeylGroup, Rational> FromClassFunction(
-  const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X
-) {
-  ElementMonomialAlgebra<ElementWeylGroup, Rational> out;
-  for (int i = 0; i < X.G->conjugacyClassCount(); i ++) {
-    for (int j = 0; j < X.G->conjugacyClasses[i].size; j ++) {
-      out.addMonomial(X.G->conjugacyClasses[i].elements[j], X.data[i]);
-    }
-  }
-  return out;
-}
-
 template <typename Coefficient>
-Matrix<Coefficient> getMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& X) {
+Matrix<Coefficient> CharacterFunctions::getMatrix(
+  const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& classFunction
+) {
   Matrix<Coefficient> M;
-  M.makeZeroMatrix(X.G->N);
-  for (int i1 = 0; i1 < X.G->ccCount; i1 ++) {
-    for (int i2 = 0; i2 < X.G->ccSizes[i1]; i2 ++) {
-      int i = X.G->conjugacyClasses[i1][i2];
-      for (int j = 0; j < X.G->N; j ++) {
-        M(X.G->multiplyElements(i, j), j) = X.data[i1];
+  M.makeZeroMatrix(classFunction.G->N);
+  for (int i1 = 0; i1 < classFunction.G->ccCount; i1 ++) {
+    for (int i2 = 0; i2 < classFunction.G->ccSizes[i1]; i2 ++) {
+      int i = classFunction.G->conjugacyClasses[i1][i2];
+      for (int j = 0; j < classFunction.G->N; j ++) {
+        M(classFunction.G->multiplyElements(i, j), j) = classFunction.data[i1];
       }
     }
   }
@@ -929,7 +771,7 @@ void SubgroupDataRootReflections::computeDynkinType() {
 }
 
 SubgroupDataWeylGroup::SubgroupDataWeylGroup() {
-  this->theWeylData = nullptr;
+  this->weylData = nullptr;
 }
 
 SubgroupDataRootReflections::SubgroupDataRootReflections() {
@@ -938,7 +780,7 @@ SubgroupDataRootReflections::SubgroupDataRootReflections() {
 }
 
 bool SubgroupDataWeylGroup::checkInitialization() {
-  if (this->theWeylData == nullptr) {
+  if (this->weylData == nullptr) {
     global.fatal << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << global.fatal;
   }
   return true;
@@ -972,21 +814,21 @@ std::string SubgroupDataRootReflections::toString(FormatExpressions* format) {
 std::string SubgroupDataWeylGroup::toString(FormatExpressions* format) {
   MacroRegisterFunctionWithName("SubgroupDataWeylGroup::toString");
   std::stringstream out;
-  out << this->theSubgroupData.toString(format);
+  out << this->subgroupData.toString(format);
   return out.str();
 }
 
 void SubgroupDataWeylGroup::ComputeTauSignature() {
   MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   this->checkInitialization();
-  if (!this->theSubgroupData.groupContent->flagCCRepresentativesComputed) {
-    this->theSubgroupData.groupContent->computeConjugacyClassSizesAndRepresentatives();
+  if (!this->subgroupData.groupContent->flagCCRepresentativesComputed) {
+    this->subgroupData.groupContent->computeConjugacyClassSizesAndRepresentatives();
   }
-  this->theSubgroupData.groupContent->checkConjugacyClassRepresentationsMatchCCSizes();
-  this->theSubgroupData.groupContent->checkOrthogonalityCharacterTable();
+  this->subgroupData.groupContent->checkConjugacyClassRepresentationsMatchCCSizes();
+  this->subgroupData.groupContent->checkOrthogonalityCharacterTable();
   Vector<Rational> Xs;
-  this->theSubgroupData.subgroupContent->getSignCharacter(Xs);
-  this->theSubgroupData.computeCCRepresentativesPreimages();
+  this->subgroupData.subgroupContent->getSignCharacter(Xs);
+  this->subgroupData.computeCCRepresentativesPreimages();
   //if (global.printOutThisKindaThing)
   //{
   //global.Comments << "here is the character table of the group, the representatives and sizes for "
@@ -999,18 +841,18 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   //global.Comments << this->theSubgroupData.ccRepresentativesPreimages.toStringCommaDelimited() << '\n';
  //}
 
-  this->tauSignature.setSize(this->theSubgroupData.groupContent->conjugacyClassCount());
+  this->tauSignature.setSize(this->subgroupData.groupContent->conjugacyClassCount());
 
   Vector<Rational> XiS;
-  XiS.makeZero(this->theSubgroupData.subgroupContent->conjugacyClasses.size);
-  for (int i = 0; i < this->theSubgroupData.groupContent->conjugacyClasses.size; i ++) {
+  XiS.makeZero(this->subgroupData.subgroupContent->conjugacyClasses.size);
+  for (int i = 0; i < this->subgroupData.groupContent->conjugacyClasses.size; i ++) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
-    this->theWeylData->group.characterTable[i];
+    this->weylData->group.characterTable[i];
     //global.Comments << "Restricting character: " << Xip.toString() << "<br>";
-    for (int j = 0; j < this->theSubgroupData.subgroupContent->conjugacyClasses.size; j ++) {
-      XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
+    for (int j = 0; j < this->subgroupData.subgroupContent->conjugacyClasses.size; j ++) {
+      XiS[j] = XiG[this->subgroupData.ccRepresentativesPreimages[j]];
     }
-    this->tauSignature[i] = this->theSubgroupData.subgroupContent->getHermitianProduct(Xs, XiS);
+    this->tauSignature[i] = this->subgroupData.subgroupContent->getHermitianProduct(Xs, XiS);
     //global.Comments << "<br>Hermitian product of " << Xs.toString() << " and "
     //<< XiS.toString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].isSmallInteger()) {
@@ -1021,53 +863,53 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 
 void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::computeCCSizesRepresentativesPreimages");
-  if (this->dynkinType == this->theWeylData->dynkinType && this->theWeylData->group.flagCCRepresentativesComputed) {
-    this->theSubgroupData.subgroupContent->conjugacyClasses.setSize(this->theSubgroupData.groupContent->conjugacyClasses.size);
-    for (int i = 0; i < this->theSubgroupData.subgroupContent->conjugacyClasses.size; i ++) {
-      this->theSubgroupData.subgroupContent->conjugacyClasses[i].flagRepresentativeComputed = true;
-      this->theSubgroupData.subgroupContent->conjugacyClasses[i].representative = this->theSubgroupData.groupContent->conjugacyClasses[i].representative;
-      this->theSubgroupData.subgroupContent->conjugacyClasses[i].size = this->theSubgroupData.groupContent->conjugacyClasses[i].size;
-      this->theSubgroupData.subgroupContent->conjugacyClasses[i].flagElementsComputed = false;
+  if (this->dynkinType == this->weylData->dynkinType && this->weylData->group.flagCCRepresentativesComputed) {
+    this->subgroupData.subgroupContent->conjugacyClasses.setSize(this->subgroupData.groupContent->conjugacyClasses.size);
+    for (int i = 0; i < this->subgroupData.subgroupContent->conjugacyClasses.size; i ++) {
+      this->subgroupData.subgroupContent->conjugacyClasses[i].flagRepresentativeComputed = true;
+      this->subgroupData.subgroupContent->conjugacyClasses[i].representative = this->subgroupData.groupContent->conjugacyClasses[i].representative;
+      this->subgroupData.subgroupContent->conjugacyClasses[i].size = this->subgroupData.groupContent->conjugacyClasses[i].size;
+      this->subgroupData.subgroupContent->conjugacyClasses[i].flagElementsComputed = false;
     }
-    this->theSubgroupData.ccRepresentativesPreimages.setSize(this->theSubgroupData.groupContent->conjugacyClasses.size);
-    for (int i = 0; i < this->theSubgroupData.ccRepresentativesPreimages.size; i ++) {
-      this->theSubgroupData.ccRepresentativesPreimages[i] = i;
+    this->subgroupData.ccRepresentativesPreimages.setSize(this->subgroupData.groupContent->conjugacyClasses.size);
+    for (int i = 0; i < this->subgroupData.ccRepresentativesPreimages.size; i ++) {
+      this->subgroupData.ccRepresentativesPreimages[i] = i;
     }
-    this->theSubgroupData.subgroupContent->flagCCRepresentativesComputed = true;
+    this->subgroupData.subgroupContent->flagCCRepresentativesComputed = true;
   } else {
     if (this->dynkinType.getRank() <= 6) {
-      this->theSubgroupData.subgroupContent->computeConjugacyClassesFromAllElements();
+      this->subgroupData.subgroupContent->computeConjugacyClassesFromAllElements();
     } else {
-      this->theSubgroupData.subgroupContent->computeConjugacyClassSizesAndRepresentatives();
+      this->subgroupData.subgroupContent->computeConjugacyClassSizesAndRepresentatives();
     }
 
-    this->theSubgroupData.computeCCRepresentativesPreimages();
+    this->subgroupData.computeCCRepresentativesPreimages();
   }
 }
 
 void SubgroupDataRootReflections::initializeGenerators() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::initializeGenerators");
   if (this->dynkinType.getRank() == 0) {
-    this->theSubgroupData.subgroupContent->generators.setSize(1);
-    this->theSubgroupData.subgroupContent->generators[0].makeIdentity(*this->theSubgroupData.groupContent);
+    this->subgroupData.subgroupContent->generators.setSize(1);
+    this->subgroupData.subgroupContent->generators[0].makeIdentity(*this->subgroupData.groupContent);
     return;
   }
   int d = this->SubCartanSymmetric.numberOfRows;
-  this->theSubgroupData.generatorPreimages.setSize(d);
-  this->theSubgroupData.subgroupContent->generators.setSize(d);
+  this->subgroupData.generatorPreimages.setSize(d);
+  this->subgroupData.subgroupContent->generators.setSize(d);
   ElementWeylGroup currentReflection;
   for (int i = 0; i < d; i ++) {
-    currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
-    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.groupContent->elements.getIndex(currentReflection);
-    this->theSubgroupData.subgroupContent->generators[i] = currentReflection;
+    currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->weylData);
+    this->subgroupData.generatorPreimages[i] = this->subgroupData.groupContent->elements.getIndex(currentReflection);
+    this->subgroupData.subgroupContent->generators[i] = currentReflection;
   }
 }
 
 void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots) {
   MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeParabolicSubgroup");
   G.checkConsistency();
-  this->theWeylData = &G;
-  this->theSubgroupData.makeSubgroupOf(G.group);
+  this->weylData = &G;
+  this->subgroupData.makeSubgroupOf(G.group);
   this->checkInitialization();
   this->flagIsParabolic = true;
   this->simpleRootsInLeviParabolic = inputGeneratingSimpleRoots;
@@ -1089,8 +931,8 @@ void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const 
 
 void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections) {
   MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeFromRoots");
-  this->theSubgroupData.makeSubgroupOf(G.group);
-  this->theWeylData = &G;
+  this->subgroupData.makeSubgroupOf(G.group);
+  this->weylData = &G;
   this->generatingSimpleRoots = inputRootReflections;
   DynkinDiagramRootSubalgebra diagram;
   diagram.computeDiagramTypeModifyInput(this->generatingSimpleRoots, G);
@@ -1234,4 +1076,320 @@ void WeylGroupData::getSignSignatureRootSubgroups(
   for (int j = 0; j < outputSubgroups.size; j ++) {
     outputSubgroups[j].ComputeTauSignature();
   }
+}
+
+void CharacterFunctions::computeTauSignatures(
+  WeylGroupData* group, List<List<bool> >& tauSignatures, bool pseudo
+) {
+  Selection sel;
+  sel.initialize(group->cartanSymmetric.numberOfColumns);
+  int numCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
+  List<List<bool> > tss;
+  tss.setSize(numCycles);
+  List<ElementWeylGroup> generators;
+  for (int i = 0; i < numCycles - 2; i ++) {
+    sel.incrementSelection();
+    generators.setSize(sel.cardinalitySelection);
+    for (int j = 0; j < sel.cardinalitySelection; j ++) {
+      generators[j].makeSimpleReflection(sel.elements[j], *group);
+    }
+    getTauSignaturesFromSubgroup(*group, generators, tss[i]);
+  }
+  Vector<Rational> Xs;
+  group->getSignCharacter(Xs);
+  List<bool> tsg;
+  tsg.setSize(group->group.characterTable.size);
+  for (int i = 0; i < group->group.characterTable.size; i ++) {
+    tsg[i] = group->group.characterTable[i].data == Xs;
+  }
+  tss.addOnTop(tsg);
+
+  if (pseudo) {
+    global.comments << "pseudo-parabolics" << "\n";
+    ElementWeylGroup hr = group->getRootReflection(group->rootSystem.size- 1);
+    sel.initialize(group->cartanSymmetric.numberOfColumns);
+    for (int i = 0; i < numCycles - 1; i ++) {
+      generators.setSize(sel.cardinalitySelection);
+      for (int j = 0; j < sel.cardinalitySelection; j ++) {
+        generators[j].makeSimpleReflection(sel.elements[j], *group);
+      }
+      generators.addOnTop(hr);
+      List<bool> ts;
+      getTauSignaturesFromSubgroup(*group, generators, ts);
+      tss.addOnTop(ts);
+      sel.incrementSelection();
+    }
+  }
+
+  // we will need the sign character for the group
+
+
+  tauSignatures.setSize(group->group.characterTable.size);
+  for (int i = 0; i < group->group.characterTable.size; i ++) {
+    tauSignatures[i].setSize(tss.size + 1);
+    tauSignatures[i][0] = 1;
+    for (int j = 1; j < tss.size + 1; j ++) {
+      tauSignatures[i][j] = tss[j - 1][i];
+    }
+  }
+  for (int i = 0; i < group->group.characterTable.size; i ++) {
+    global.comments << group->group.characterTable[i] << "\n";
+    for (int j = 0; j < tauSignatures[i].size; j ++) {
+      global.comments << tauSignatures[i][j] << ' ';
+    }
+    global.comments << "\n";
+  }
+}
+
+template <typename elementSomeGroup>
+void CharacterFunctions::exportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data) {
+  data.elementType = JSData::token::tokenObject;
+  JSData emptyArray;
+  emptyArray.makeEmptyArray();
+  JSData& representatives = data.objects.getValueCreate("representatives", emptyArray);
+  JSData& sizes = data.objects.getValueCreate("sizes", emptyArray);
+  JSData& characters = data.objects.getValueCreate("characters", emptyArray);
+  representatives.elementType = JSData::token::tokenArray;
+  representatives.listObjects.setSize(G.conjugacyClassCount());
+
+  for (int i = 0; i < G.conjugacyClassCount(); i ++) {
+    List<int> reprefs;
+    G.getWord(G.conjugacyClasses[i].representative, reprefs);
+    representatives.listObjects[i].elementType = JSData::token::tokenArray;
+    representatives.listObjects[i].listObjects.setSize(reprefs.size);
+    for (int j = 0; j < reprefs.size; j ++) {
+      representatives.listObjects[i].listObjects[j].elementType = JSData::token::tokenLargeInteger;
+      representatives.listObjects[i].listObjects[j].integerValue.getElement() = reprefs[j];
+    }
+  }
+  sizes.elementType = JSData::token::tokenArray;
+  sizes.listObjects.setSize(G.conjugacyClassCount());
+  for (int i = 0; i < G.conjugacyClassCount(); i ++) {
+    sizes.listObjects[i].elementType = JSData::token::tokenLargeInteger;
+    sizes.listObjects[i].integerValue.getElement() = G.conjugacyClasses[i].size;
+  }
+  characters.elementType = JSData::token::tokenArray;
+  characters.listObjects.setSize(G.characterTable.size);
+  for (int i = 0; i < G.characterTable.size; i ++) {
+    for (int j = 0; j < G.characterTable[i].data.size; j ++) {
+      characters[i][j] = G.characterTable[i][j].getNumerator();
+    }
+  }
+}
+
+void CharacterFunctions::exportTauSignatures(
+  WeylGroupData& groupData, const List<List<bool> >& ts, JSData& output
+) {
+  CharacterFunctions::exportCharTable(groupData.group, output["chartable"]);
+  for (int i = 0; i < ts.size; i ++) {
+    for (int j = 0; j < ts[i].size; j ++) {
+      output["tausigs"][i][j] = ts[i][j];
+    }
+  }
+}
+
+template <typename Coefficient>
+List<VectorSpace<Coefficient> > CharacterFunctions::getEigenspaces(
+  const Matrix<Coefficient>& matrix
+) {
+  List<List<Vector<Coefficient> > > es = eigenspaces(matrix);
+  List<VectorSpace<Coefficient> > vs;
+  for (int spi = 0; spi < es.size; spi ++) {
+    VectorSpace<Coefficient> V;
+    for (int j = 0; j < es[spi].size; j ++) {
+      V.addVector(es[spi][j]);
+    }
+    vs.addOnTop(V);
+  }
+  return vs;
+}
+
+void CharacterFunctions::getTauSignaturesFromSubgroup(
+  WeylGroupData& G, const List<ElementWeylGroup>& gens, List<bool>& out
+) {
+  SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> HD;
+  HD.initFromGroupAndGenerators(G.group, gens);
+  FiniteGroup<ElementWeylGroup>& H = *HD.subgroupContent;
+  H.computeAllElements(true, - 1);
+  Vector<Rational> HXs;
+  H.getSignCharacter(HXs);
+
+  List<int> ccPreimages;
+  ccPreimages.setSize(H.conjugacyClassCount());
+  for (int i = 0; i < H.conjugacyClassCount(); i ++) {
+    bool notFound = true;
+    for (int ci = 0; notFound && ci < G.group.conjugacyClassCount(); ci ++) {
+      for (int cj = 0; notFound && cj < G.group.conjugacyClasses[ci].size; cj ++) {
+        if (G.group.conjugacyClasses[ci].elements[cj] == H.conjugacyClasses[i].representative) {
+          ccPreimages[i] = ci;
+          notFound = false;
+        }
+      }
+    }
+    if (notFound) {
+      global.fatal << "Something went very wrong: couldn't find preimage of conjugacy class of subgroup. " << global.fatal;
+    }
+  }
+  out.setSize(G.group.characterTable.size);
+  Vector<Rational> HXi;
+  HXi.setSize(H.conjugacyClassCount());
+  for (int i = 0; i < G.group.characterTable.size; i ++) {
+    Vector<Rational> GXi = G.group.characterTable[i].data;
+    for (int j = 0; j < HXi.size; j ++) {
+      HXi[j] = GXi[ccPreimages[j]];
+    }
+    if (H.getHermitianProduct(HXs, HXi) == 0) {
+      out[i] = false;
+    } else {
+      out[i] = true;
+    }
+  }
+}
+
+// Reference: Schneider, 1990.
+// TODO(tmilev): apply improvements described in the reference
+template <typename Somegroup>
+List<ClassFunction<Somegroup, Rational> > CharacterFunctions::computeCharacterTable(Somegroup &group) {
+  if (group.conjugacyClassCount() == 0) {
+    group.computeConjugacyClassesFromAllElements();
+  }
+  List<int> classmap;
+  int sizeOfG = - 1;
+  group.getSize().isIntegerFittingInInt(&sizeOfG);
+  classmap.setSize(sizeOfG);
+//  classmap.setSize(G.theElements.size);
+  for (int i = 0; i < group.conjugacyClassCount(); i ++) {
+    for (int j = 0; j < group.conjugacyClasses[i].size; j ++) {
+      classmap[group.theElements.getIndex(group.conjugacyClasses[i].theElements[j])] = i;
+    }
+  }
+  Matrix<Rational> form; // so inefficient
+  form.makeZeroMatrix(group.conjugacyClassCount());
+  for (int i = 0; i < group.conjugacyClassCount(); i ++) {
+    form.elements[i][i] = group.conjugacyClasses[i].size;
+  }
+  List<VectorSpace<Rational> > spaces;
+  if (group.characterTable.size > 0) {
+    VectorSpace<Rational> allchars;
+    for (int i = 0; i < group.characterTable.size; i ++) {
+      VectorSpace<Rational> xspi;
+      xspi.addVector(group.characterTable[i].data);
+      spaces.addOnTop(xspi);
+      allchars.addVector(group.characterTable[i].data);
+    }
+    spaces.addOnTop(allchars.orthogonalComplement(nullptr, &form));
+  } else {
+    Vector<Rational> X1;
+    X1.setSize(group.conjugacyClassCount());
+    for (int i = 0; i < group.conjugacyClassCount(); i ++) {
+      X1[i] = 1;
+    }
+    VectorSpace<Rational> sp1;
+    sp1.addVector(X1);
+    spaces.addOnTop(sp1);
+    spaces.addOnTop(sp1.orthogonalComplement(nullptr, &form));
+  }
+  bool foundEmAll = false;
+  for (int i = 0; !foundEmAll && i < group.conjugacyClassCount(); i ++) {
+    Matrix<Rational> M;
+    global.comments << "Getting class matrix " << i << "\n";
+    M = getClassMatrix(group,i,&classmap);
+    List<VectorSpace<Rational> > es = getEigenspaces(M);
+    for (int esi = 0; !foundEmAll && esi < es.size; esi ++) {
+      int spsize = spaces.size;
+      for (int spi = 0; !foundEmAll &&spi < spsize; spi ++) {
+        if (spaces[spi].rank == 1) {
+          continue;
+        }
+        VectorSpace<Rational> V = spaces[spi].intersection(es[esi]);
+        if ((V.rank > 0) and (V.rank < spaces[spi].rank)) {
+          VectorSpace<Rational> W = es[esi].orthogonalComplement(&spaces[spi],&form);
+          spaces[spi] = V;
+          spaces.addOnTop(W);
+          if (spaces.size == group.conjugacyClassCount()) {
+            foundEmAll = true;
+            break;
+          }
+        }
+      }
+    }
+    int nchars = 0;
+    for (int i = 0; i < spaces.size; i ++) {
+      if (spaces[i].rank == 1) {
+        nchars += 1;
+      }
+    }
+    global.comments << "Have " << nchars << " chars" << "\n";
+  }
+  List<ClassFunction<Somegroup, Rational> > chars;
+  chars.setSize(spaces.size);
+  for (int i = 0; i < spaces.size; i ++) {
+    chars[i].data = spaces[i].getCanonicalBasisVector(0);
+    chars[i].G = &group;
+  }
+  for (int i = 0; i < spaces.size; i ++) {
+    Rational x = chars[i].innerProduct(chars[i]);
+    int x2 = x.getDenominator().getUnsignedIntValueTruncated();
+    x2 = static_cast<int>(FloatingPoint::sqrtFloating(x2));
+    chars[i] *= x2;
+    if (chars[i][0] < 0) {
+      chars[i] *= - 1;
+    }
+    global.comments << x2 << "\n";
+  }
+
+  chars.quickSortAscending(/*&CharacterComparator*/);
+  for (int i = 0; i < chars.size; i ++) {
+    for (int j = i; j < chars.size; j ++) {
+      if (chars[i] > chars[j]) {
+        global.comments << "error: " << i << j << "\n";
+      }
+    }
+  }
+  for (int i = 0; i < chars.size; i ++) {
+    global.comments << chars[i] << "\n";
+  }
+  group.characterTable = chars;
+  for (int i = 0; i < group.characterTable.size; i ++) {
+    global.comments << group.characterTable[i] << "\n";
+  }
+  return chars;
+}
+
+template <typename Somegroup>
+Matrix<Rational> CharacterFunctions::getClassMatrix(
+  const Somegroup &group, int cci, List<int>* classmap
+) {
+  List<int> invl;
+  int classSize = - 1;
+  group.conjugacyClasses[cci].size.isIntegerFittingInInt(&classSize);
+  invl.setSize(classSize);
+  for (int i = 0; i < group.conjugacyClasses[cci].size; i ++) {
+    invl[i] = group.invert(group.theElements.getIndex(group.conjugacyClasses[cci].theElements[i]));
+  }
+  Matrix<int> M;
+  M.makeZeroMatrix(group.conjugacyClassCount());
+  for (int t = 0; t < group.conjugacyClassCount(); t ++)
+    for (int xi = 0; xi < invl.size; xi ++) {
+      int yi = group.multiplyElements(invl[xi], group.theElements.getIndex(group.conjugacyClasses[t].representative));
+      int ci;
+      if (classmap) {
+        M.elements[t][(*classmap)[yi]] += 1;
+      } else {
+        for (ci = 0; ci < group.conjugacyClassCount(); ci ++) {
+          if (group.conjugacyClasses[ci].indicesEltsInOwner.BSContains(yi)) {
+            M.elements[t][ci] += 1;
+            break;
+          }
+        }
+      }
+    }
+  Matrix<Rational> out;
+  out.initialize(M.numberOfRows, M.numberOfColumns);
+  for (int i = 0; i < M.numberOfRows; i ++) {
+    for (int j = 0; j < M.numberOfColumns; j ++) {
+      out.elements[i][j] = M.elements[i][j];
+    }
+  }
+  return out;
 }

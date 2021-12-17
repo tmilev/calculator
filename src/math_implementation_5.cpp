@@ -560,12 +560,6 @@ std::string VectorPartition::toStringAllPartitions(bool useHtml) {
   return out.str();
 }
 
-void RootIndexToPoly(int index, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
-  int theRank = theAlgebra.weylGroup.cartanSymmetric.numberOfRows;
-  int numPosRoots = theAlgebra.weylGroup.rootsOfBorel.size;
-  output.makeDegreeOne(theRank + numPosRoots, index + theRank, Rational(1));
-}
-
 template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::assignFromCoordinateFormWithRespectToBasis(
   List<ElementUniversalEnveloping<Coefficient> >& basis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner

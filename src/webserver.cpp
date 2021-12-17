@@ -3297,6 +3297,7 @@ int WebServer::daemon() {
   if (prependServer) {
     restartCommand << MainFlags::server << " ";
   }
+  restartCommand << Configuration::serverAutoMonitor << " false ";
   for (int i = 2; i < global.programArguments.size; i ++) {
     restartCommand << global.programArguments[i] << " ";
   }
@@ -3989,7 +3990,8 @@ void WebServer::analyzeMainArguments(int argC, char **argv) {
   arguments.currentIndex = 1;
   arguments.commandLineConfigurations.addListOnTop(List<std::string> ({
     Configuration::portHTTP,
-    Configuration::portHTTPSOpenSSL
+    Configuration::portHTTPSOpenSSL,
+    Configuration::serverAutoMonitor,
   }));
   for (; arguments.processOneArgument(); arguments.currentIndex ++) {
   }
@@ -4263,7 +4265,19 @@ void GlobalVariables::configurationProcess() {
     << "Everyone gets logged-in as administrator. " << Logger::endL
     << Logger::purple << "************************" << Logger::endL;
   }
-  if (global.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
+  if (
+    global.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON() &&
+    global.flagDaemonMonitor
+  ) {
+    global << Logger::green << "Daemon self-monitoring turned on. "
+    << Logger::red
+    << "This turns OFF server self-monitoring throug http pings. "
+    << Logger::endL;
+  }
+  if (
+    global.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON() &&
+    !global.flagDaemonMonitor
+  ) {
     global.flagLocalhostConnectionMonitor = true;
   } else {
     global.flagLocalhostConnectionMonitor = false;

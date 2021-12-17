@@ -612,7 +612,9 @@ class Page {
     if (monitoring !== "false") {
       monitoring = "true";
     }
-    let monitorResult = document.getElementById(ids.domElements.pages.calculator.monitoring.spanStatus);
+    let monitorResult = document.getElementById(
+      ids.domElements.pages.calculator.monitoring.spanStatus
+    );
     if (monitorResult === null) {
       return;
     }

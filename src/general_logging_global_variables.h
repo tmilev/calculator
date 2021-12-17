@@ -243,7 +243,15 @@ public:
   // read/store operation.
   bool flagDatabaseCompiled;
   bool flagDisableDatabaseLogEveryoneAsAdmin;
+  // When this is set, the calculator will spin a separate
+  // process that will periodically ping the main calculator
+  // server.
   bool flagLocalhostConnectionMonitor;
+  // If this flag is set, the calculator should run as a
+  // daemon that spawns worker calculator processes
+  // and monitors their deaths.
+  // Setting this flag will turn off web server
+  // self-pinging.
   bool flagDaemonMonitor;
 
   std::string buildVersionSimple;

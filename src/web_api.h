@@ -367,7 +367,7 @@ public:
     bool nestTables
   );
   static std::string toHtmlTableRowsFromStringContainingJSON(
-    const std::string& theJSON
+    const std::string& inputJSON
   );
   static std::string toHtmlTableRowsFromJSON(const JSData& input);
 };

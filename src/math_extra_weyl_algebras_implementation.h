@@ -169,21 +169,23 @@ void ElementWeylAlgebra<Coefficient>::raiseToPower(int power) {
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makeGEpsPlusEpsInTypeD(int i, int j, int NumVars) {
+void ElementWeylAlgebra<Coefficient>::makeGEpsPlusEpsInTypeD(
+  int i, int j, int numberOfVariables
+) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();
   tempMon.polynomialPart.setVariable(i, 1);
-  tempMon.differentialPart.setVariable(j + NumVars, 1);
+  tempMon.differentialPart.setVariable(j + numberOfVariables, 1);
   this->addMonomial(tempMon, 1);
   tempMon.makeOne();
   tempMon.polynomialPart.setVariable(j, 1);
-  tempMon.differentialPart.setVariable(i + NumVars, 1);
+  tempMon.differentialPart.setVariable(i + numberOfVariables, 1);
   this->addMonomial(tempMon, 1);
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makeGEpsMinusEpsInTypeD(int i, int j, int NumVars) {
+void ElementWeylAlgebra<Coefficient>::makeGEpsMinusEpsInTypeD(int i, int j, int numberOfVariables) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();
@@ -191,21 +193,23 @@ void ElementWeylAlgebra<Coefficient>::makeGEpsMinusEpsInTypeD(int i, int j, int 
   tempMon.differentialPart.setVariable(j, 1);
   this->addMonomial(tempMon, 1);
   tempMon.makeOne();
-  tempMon.polynomialPart.setVariable(j + NumVars, 1);
-  tempMon.differentialPart.setVariable(i + NumVars, 1);
+  tempMon.polynomialPart.setVariable(j + numberOfVariables, 1);
+  tempMon.differentialPart.setVariable(i + numberOfVariables, 1);
   this->addMonomial(tempMon, 1);
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::makeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars) {
+void ElementWeylAlgebra<Coefficient>::makeGMinusEpsMinusEpsInTypeD(
+  int i, int j, int numberOfVariables
+) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.makeOne();
-  tempMon.polynomialPart.setVariable(i + NumVars, 1);
+  tempMon.polynomialPart.setVariable(i + numberOfVariables, 1);
   tempMon.differentialPart.setVariable(j, 1);
   this->addMonomial(tempMon, 1);
   tempMon.makeOne();
-  tempMon.polynomialPart.setVariable(j + NumVars, 1);
+  tempMon.polynomialPart.setVariable(j + numberOfVariables, 1);
   tempMon.differentialPart.setVariable(i, 1);
   this->addMonomial(tempMon, 1);
 }

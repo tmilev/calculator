@@ -3923,10 +3923,10 @@ bool PartialFractions::splitClassicalRootSystem(bool shouldElongate, Vector<Rati
   return this->checkForMinimalityDecompositionWithRespectToRoot(indicator);
 }
 
-bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot) {
+bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* root) {
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].indicesNonZeroMultiplicities.size > this->ambientDimension) {
-      if ((*this)[i].rootIsInFractionCone(*this, theRoot)) {
+      if ((*this)[i].rootIsInFractionCone(*this, root)) {
         return false;
       }
     }
@@ -9080,10 +9080,10 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
 }
 
 void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(
-  Vectors<Rational>& generators, const Vector<Rational>& theH
+  Vectors<Rational>& generators, const Vector<Rational>& hVector
 ) {
   for (int i = 0; i < generators.size; i ++) {
-    if (!this->isPositiveOrPerpWithRespectToH(generators[i], theH)) {
+    if (!this->isPositiveOrPerpWithRespectToH(generators[i], hVector)) {
       generators[i].negate();
     }
   }
@@ -9100,7 +9100,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(
           reductionOccured = true;
         }
         if (this->rootSystem.getIndex(tempRoot) != - 1) {
-          if (!this->isPositiveOrPerpWithRespectToH(tempRoot, theH)) {
+          if (!this->isPositiveOrPerpWithRespectToH(tempRoot, hVector)) {
             tempRoot.negate();
             generators[j] = tempRoot;
           } else {
@@ -9911,7 +9911,9 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& n
   znLattice.makeZn(scalarProducts.size);
   znLattice.intersectWithBothOfMaximalRank(eigenLattice);
   resultBasis.reserve(scalarProducts.size - 1);
-  Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
+  Vector<Rational> tempRoot;
+  Vector<Rational> resultRoot;
+  Rational orthogonalComponent;
   for (int i = 0; i < znLattice.basisRationalForm.numberOfRows; i ++) {
     znLattice.basisRationalForm.getVectorFromRow(i, tempRoot);
     orthogonalComponent = tempRoot.scalarEuclidean(scalarProducts) / scalarProducts.scalarEuclidean(scalarProducts);
@@ -9980,7 +9982,7 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& substitution) {
     return false;
   }
   int numNonZeroRows = nonPivotPoints.numberOfElements;
-  int numZeroRows = matrix.numberOfRows-numNonZeroRows;
+  int numZeroRows = matrix.numberOfRows - numNonZeroRows;
   matRelationBetweenStartingVariables.initialize(numZeroRows, startingDim);
   for (int i = 0; i < numZeroRows; i ++) {
     for (int j = 0; j < startingDim; j ++) {
@@ -10080,11 +10082,13 @@ bool Cone::solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, Lis
   return result;
 }
 
-std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(const std::string& theJSON) {
-  MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
+std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(
+  const std::string& inputJSON
+) {
+  MacroRegisterFunctionWithName("HtmlRoutines::toHtmlTableRowsFromStringContainingJSON");
   JSData parser;
-  if (!parser.parse(theJSON)) {
-    return StringRoutines::stringTrimToLengthForDisplay(theJSON, 1000);
+  if (!parser.parse(inputJSON)) {
+    return StringRoutines::stringTrimToLengthForDisplay(inputJSON, 1000);
   }
   return HtmlRoutines::toHtmlTableRowsFromJSON(parser);
 }
@@ -10635,10 +10639,10 @@ bool Cone::regularizeToBasis(
 
 
 bool Cone::drawMeLastCoordinateAffine(
-  bool InitDrawVars,
-  DrawingVariables& theDrawingVariables,
+  bool initializeDrawingVariables,
+  DrawingVariables& drawingVariables,
   FormatExpressions& format,
-  const std::string& ChamberWallColor
+  const std::string& chamberWallColor
 ) const {
   (void) format;
   Vector<Rational> zeroRoot;
@@ -10663,8 +10667,8 @@ bool Cone::drawMeLastCoordinateAffine(
       foundBadVertex = true;
     }
   }
-  if (InitDrawVars) {
-    theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension() - 1);
+  if (initializeDrawingVariables) {
+    drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension() - 1);
   }
   for (int k = 0; k < this->normals.size; k ++) {
     for (int i = 0; i < VerticesScaled.size; i ++) {
@@ -10672,8 +10676,8 @@ bool Cone::drawMeLastCoordinateAffine(
         for (int j = i + 1; j < VerticesScaled.size; j ++) {
           if (DrawVertex[j] && this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()) {
             if (this->isHonest1DEdgeAffine(i, j)) {
-              theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
-                VerticesScaled[i], VerticesScaled[j], ChamberWallColor, 1
+              drawingVariables.drawLineBetweenTwoVectorsBufferRational(
+                VerticesScaled[i], VerticesScaled[j], chamberWallColor, 1
               );
             }
           }
@@ -10684,7 +10688,9 @@ bool Cone::drawMeLastCoordinateAffine(
   return foundBadVertex;
 }
 
-std::string Cone::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& format) {
+std::string Cone::drawMeToHtmlLastCoordAffine(
+  DrawingVariables& drawingVariables, FormatExpressions& format
+) {
   if (this->flagIsTheZeroCone) {
     return "The cone is empty. ";
   }
@@ -10695,13 +10701,13 @@ std::string Cone::drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariab
     return "The cone is empty";
   }
   std::stringstream out;
-  theDrawingVariables.operations.makeMeAStandardBasis(this->getDimension() - 1);
-  bool foundBadVertex = this->drawMeLastCoordinateAffine(false, theDrawingVariables, format);
-  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension() - 1);
+  drawingVariables.operations.makeMeAStandardBasis(this->getDimension() - 1);
+  bool foundBadVertex = this->drawMeLastCoordinateAffine(false, drawingVariables, format);
+  drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension() - 1);
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
-    out << theDrawingVariables.getHTMLDiv(this->getDimension() - 1, false);
+    out << drawingVariables.getHTMLDiv(this->getDimension() - 1, false);
   }
   out << "<br>" << this->toString(&format);
   return out.str();
@@ -10765,7 +10771,7 @@ bool Cone::drawMeProjective(
   return true;
 }
 
-std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& format) {
+std::string Cone::drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format) {
   if (this->flagIsTheZeroCone) {
     return "The cone is the zero cone (i.e. contains only the origin).";
   }
@@ -10778,10 +10784,10 @@ std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
     << this->toString(&format);
     return out.str();
   }
-  theDrawingVariables.operations.makeMeAStandardBasis(this->getDimension());
-  this->drawMeProjective(nullptr, true, theDrawingVariables, format);
-  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->getDimension());
-  out << theDrawingVariables.getHTMLDiv(this->getDimension(), false);
+  drawingVariables.operations.makeMeAStandardBasis(this->getDimension());
+  this->drawMeProjective(nullptr, true, drawingVariables, format);
+  drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension());
+  out << drawingVariables.getHTMLDiv(this->getDimension(), false);
   out << "<br>" << this->toString(&format);
   return out.str();
 }
@@ -11314,19 +11320,19 @@ void PiecewiseQuasipolynomial::operator*=(const Rational& other) {
     this->makeZero(this->NumVariables);
     return;
   }
-  for (int i = 0; i < this->theQPs.size; i ++) {
-    this->theQPs[i] *= other;
+  for (int i = 0; i < this->quasiPolynomials.size; i ++) {
+    this->quasiPolynomials[i] *= other;
   }
 }
 
 void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other) {
   this->makeCommonRefinement(other);
-  for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
-    int index = other.theProjectivizedComplex.getLowestIndexChamberContaining(
-      this->theProjectivizedComplex[i].getInternalPoint()
+  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
+    int index = other.projectivizedComplex.getLowestIndexChamberContaining(
+      this->projectivizedComplex[i].getInternalPoint()
     );
     if (index != - 1) {
-      this->theQPs[i] += other.theQPs[index];
+      this->quasiPolynomials[i] += other.quasiPolynomials[index];
     }
   }
 }
@@ -11352,11 +11358,11 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   //  theFracs.theChambersOld.theDirections = theRoots;
   //  theFracs.theChambersOld.SliceTheEuclideanSpace(false);
   //  theFracs.theChambers.AssignCombinatorialChamberComplex(theFracs.theChambersOld);
-  this->theQPs.setSize(theFracs.theChambers.size);
+  this->quasiPolynomials.setSize(theFracs.theChambers.size);
   Vector<Rational> indicator;
   for (int i = 0; i < theFracs.theChambers.size; i ++) {
     indicator = theFracs.theChambers[i].getInternalPoint();
-    theFracs.getVectorPartitionFunction(this->theQPs[i], indicator);
+    theFracs.getVectorPartitionFunction(this->quasiPolynomials[i], indicator);
     //QuasiPolynomial& currentQP = this->theQPs[i];
   }
   Lattice baseLattice;
@@ -11366,7 +11372,7 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   Vector<Rational> shiftRoot;
   baseLattice.getInternalPointInConeForSomeFundamentalDomain(shiftRoot, baseCone);
   shiftRoot.negate();
-  theFracs.theChambers.makeAffineAndTransformToProjectiveDimPlusOne(shiftRoot, this->theProjectivizedComplex);
+  theFracs.theChambers.makeAffineAndTransformToProjectiveDimPlusOne(shiftRoot, this->projectivizedComplex);
   outputstring = out.str();
   return true;
 }
@@ -11394,18 +11400,20 @@ bool Lattice::getInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& o
   return true;
 }
 
-void Cone::translateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector) {
-  if (theTranslationVector.size != this->getDimension() - 1) {
+void Cone::translateMeMyLastCoordinateAffinization(
+  Vector<Rational>& translationVector
+) {
+  if (translationVector.size != this->getDimension() - 1) {
     global.fatal << "Translation vector size does not equal dimension minus one. " << global.fatal;
   }
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->normals.size; i ++) {
     tempRoot = this->normals[i];
     tempRoot.size --;
-    (*this->normals[i].lastObject()) -= tempRoot.scalarEuclidean(theTranslationVector);
+    (*this->normals[i].lastObject()) -= tempRoot.scalarEuclidean(translationVector);
   }
-  tempRoot = theTranslationVector;
-  tempRoot.setSize(theTranslationVector.size + 1);
+  tempRoot = translationVector;
+  tempRoot.setSize(translationVector.size + 1);
   *tempRoot.lastObject() = 0;
   for (int i = 0; i < this->vertices.size; i ++) {
     if (!this->vertices[i].lastObject()->isEqualToZero()) {
@@ -11468,20 +11476,20 @@ void ConeComplex::translateMeMyLastCoordinateAffinization(Vector<Rational>& tran
 
 void PiecewiseQuasipolynomial::translateArgument(Vector<Rational>& translateToBeAddedToArgument) {
   Vector<Rational> chamberShift = - translateToBeAddedToArgument;
-  this->theProjectivizedComplex.translateMeMyLastCoordinateAffinization(chamberShift);
+  this->projectivizedComplex.translateMeMyLastCoordinateAffinization(chamberShift);
   QuasiPolynomial tempQP;
-  for (int i = 0; i < this->theQPs.size; i ++) {
-    this->theQPs[i].substitution(- translateToBeAddedToArgument, tempQP);
-    this->theQPs[i] = tempQP;
+  for (int i = 0; i < this->quasiPolynomials.size; i ++) {
+    this->quasiPolynomials[i].substitution(- translateToBeAddedToArgument, tempQP);
+    this->quasiPolynomials[i] = tempQP;
   }
 }
 
 std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
   std::stringstream out;
   FormatExpressions format;
-  for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
-    const Cone& currentCone = this->theProjectivizedComplex[i];
-    QuasiPolynomial& currentQP = this->theQPs[i];
+  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
+    const Cone& currentCone = this->projectivizedComplex[i];
+    QuasiPolynomial& currentQP = this->quasiPolynomials[i];
     out << "Chamber number " << i + 1;
     if (useHtml) {
       out << "<br>";
@@ -11500,60 +11508,60 @@ std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
 }
 
 void PiecewiseQuasipolynomial::drawMe(
-  DrawingVariables& theDrawingVars,
-  int numLatticePointsPerDim,
-  Cone* RestrictingChamber,
+  DrawingVariables& drawingVariables,
+  int numberOfLatticePointsPerDimension,
+  Cone* restrictingChamber,
   Vector<Rational>* distinguishedPoint
 ) {
   FormatExpressions format;
   Vectors<Rational> latticePoints;
-  HashedList<Vector<Rational> > theLatticePointsFinal;
-  List<std::string> theLatticePointColors;
+  HashedList<Vector<Rational> > latticePointsFinal;
+  List<std::string> latticePointColors;
   List<std::string> tempList;
-  if (numLatticePointsPerDim < 0) {
-    numLatticePointsPerDim = 0;
+  if (numberOfLatticePointsPerDimension < 0) {
+    numberOfLatticePointsPerDimension = 0;
   }
-  const std::string ZeroColor = "gray";
-  for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
+  const std::string zeroColor = "gray";
+  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
     std::string chamberWallColor = "black";
-    bool isZeroChamber = this->theQPs[i].isEqualToZero();
+    bool isZeroChamber = this->quasiPolynomials[i].isEqualToZero();
     if (isZeroChamber) {
-      chamberWallColor = ZeroColor;
+      chamberWallColor = zeroColor;
     }
-    this->theProjectivizedComplex[i].drawMeLastCoordinateAffine(false, theDrawingVars, format, chamberWallColor);
+    this->projectivizedComplex[i].drawMeLastCoordinateAffine(false, drawingVariables, format, chamberWallColor);
     std::stringstream tempStream;
     tempStream << i + 1;
-    Vector<Rational> tempRoot = this->theProjectivizedComplex[i].getInternalPoint();
+    Vector<Rational> tempRoot = this->projectivizedComplex[i].getInternalPoint();
     tempRoot.makeAffineUsingLastCoordinate();
-    for (int j = 0; j < this->theQPs[i].latticeShifts.size; j ++) {
-      this->theProjectivizedComplex[i].getLatticePointsInCone(
-        this->theQPs[i].ambientLatticeReduced,
-        this->theQPs[i].latticeShifts[j],
-        numLatticePointsPerDim,
+    for (int j = 0; j < this->quasiPolynomials[i].latticeShifts.size; j ++) {
+      this->projectivizedComplex[i].getLatticePointsInCone(
+        this->quasiPolynomials[i].ambientLatticeReduced,
+        this->quasiPolynomials[i].latticeShifts[j],
+        numberOfLatticePointsPerDimension,
         true,
         latticePoints,
         distinguishedPoint
       );
       tempList.initializeFillInObject(latticePoints.size, chamberWallColor);
-      if (RestrictingChamber != nullptr) {
+      if (restrictingChamber != nullptr) {
         for (int k = 0; k < latticePoints.size; k ++) {
           tempRoot = latticePoints[k];
           tempRoot.makeAffineUsingLastCoordinate();
-          if (!RestrictingChamber->isInCone(tempRoot)) {
-            tempList[k] = ZeroColor;
+          if (!restrictingChamber->isInCone(tempRoot)) {
+            tempList[k] = zeroColor;
           }
         }
       }
-      theLatticePointsFinal.addListOnTop(latticePoints);
-      theLatticePointColors.addListOnTop(tempList);
+      latticePointsFinal.addListOnTop(latticePoints);
+      latticePointColors.addListOnTop(tempList);
     }
   }
-  for (int i = 0; i < theLatticePointsFinal.size; i ++) {
-    theDrawingVars.drawCircleAtVectorBufferRational(theLatticePointsFinal[i], theLatticePointColors[i], 2);
-    theDrawingVars.drawTextAtVectorBufferRational(
-      theLatticePointsFinal[i],
-      this->evaluateInputProjectivized(theLatticePointsFinal[i]).toString(),
-      theLatticePointColors[i]
+  for (int i = 0; i < latticePointsFinal.size; i ++) {
+    drawingVariables.drawCircleAtVectorBufferRational(latticePointsFinal[i], latticePointColors[i], 2);
+    drawingVariables.drawTextAtVectorBufferRational(
+      latticePointsFinal[i],
+      this->evaluateInputProjectivized(latticePointsFinal[i]).toString(),
+      latticePointColors[i]
     );
   }
 }
@@ -11570,7 +11578,7 @@ Rational QuasiPolynomial::evaluate(const Vector<Rational>& input) {
 }
 
 Rational PiecewiseQuasipolynomial::evaluate(const Vector<Rational>& input) {
-  if (input.size != this->theProjectivizedComplex.getDimension() - 1) {
+  if (input.size != this->projectivizedComplex.getDimension() - 1) {
     global.fatal << "Input size does not equal the projectivized complex dimension minus one. " << global.fatal;
   }
   Vector<Rational> ProjectivizedInput = input;
@@ -11581,23 +11589,23 @@ Rational PiecewiseQuasipolynomial::evaluate(const Vector<Rational>& input) {
 
 Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Rational>& input) {
   Rational result;
-  if (input.size != this->theProjectivizedComplex.getDimension()) {
+  if (input.size != this->projectivizedComplex.getDimension()) {
     global.fatal << "Input size not equal to projectivized complex dimension. " << global.fatal;
   }
   Vector<Rational> AffineInput = input;
   AffineInput.setSize(input.size - 1);
-  int index = this->theProjectivizedComplex.getLowestIndexChamberContaining(input);
+  int index = this->projectivizedComplex.getLowestIndexChamberContaining(input);
   if (index == - 1) {
     return 0;
   }
-  result = this->theQPs[index].evaluate(AffineInput);
+  result = this->quasiPolynomials[index].evaluate(AffineInput);
   // The following for loop is for self-check purposes only.
   // Comment it out as soon as
   // the code has been tested sufficiently.
   bool firstFail = true;
-  for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
-    if (this->theProjectivizedComplex[i].isInCone(input)) {
-      Rational altResult = this->theQPs[i].evaluate(AffineInput);
+  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
+    if (this->projectivizedComplex[i].isInCone(input)) {
+      Rational altResult = this->quasiPolynomials[i].evaluate(AffineInput);
       if (result != altResult) {
         if ((false)) {
           if (!firstFail) {
@@ -11606,21 +11614,21 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
           FormatExpressions tempFormat;
           global.comments << "<hr>Error!!! Failed on chamber " << index + 1 << " and " << i + 1;
           global.comments << "<br>Evaluating at point " << AffineInput.toString() << "<br>";
-          global.comments << "<br>Chamber " << index + 1 << ": " << this->theProjectivizedComplex[index].toString(&tempFormat);
-          global.comments << "<br>QP: " << this->theQPs[index].toString(true, false);
+          global.comments << "<br>Chamber " << index + 1 << ": " << this->projectivizedComplex[index].toString(&tempFormat);
+          global.comments << "<br>QP: " << this->quasiPolynomials[index].toString(true, false);
           global.comments << "<br>value: " << result.toString();
-          global.comments << "<br><br>Chamber " << i + 1 << ": " << this->theProjectivizedComplex[i].toString(&tempFormat);
-          global.comments << "<br>QP: " << this->theQPs[i].toString(true, false);
+          global.comments << "<br><br>Chamber " << i + 1 << ": " << this->projectivizedComplex[i].toString(&tempFormat);
+          global.comments << "<br>QP: " << this->quasiPolynomials[i].toString(true, false);
           global.comments << "<br>value: " << altResult.toString();
           if (firstFail) {
             DrawingVariables tempDV;
             global.comments << "<br><b>Point of failure: " << AffineInput.toString() << "</b>";
             //this->drawMe(tempDV);
-            this->theProjectivizedComplex.drawMeLastCoordinateAffine(true, tempDV, tempFormat);
+            this->projectivizedComplex.drawMeLastCoordinateAffine(true, tempDV, tempFormat);
             tempDV.operations.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
             tempDV.operations.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
             tempDV.operations.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
-            global.comments << tempDV.getHTMLDiv(this->theProjectivizedComplex.getDimension() - 1, false);
+            global.comments << tempDV.getHTMLDiv(this->projectivizedComplex.getDimension() - 1, false);
           }
           firstFail = false;
         }
@@ -11631,17 +11639,17 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
 }
 
 void PiecewiseQuasipolynomial::makeCommonRefinement(const ConeComplex& other) {
-  List<QuasiPolynomial> oldQPList = this->theQPs;
-  ConeComplex oldComplex = this->theProjectivizedComplex;
-  this->theProjectivizedComplex.refineMakeCommonRefinement(other);
-  this->theQPs.setSize(this->theProjectivizedComplex.size);
-  for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
-    int theOldIndex = oldComplex.getLowestIndexChamberContaining(this->theProjectivizedComplex[i].getInternalPoint());
-    if (theOldIndex != - 1) {
-      this->theQPs[i] = oldQPList[theOldIndex];
+  List<QuasiPolynomial> oldQuasiPolynomials = this->quasiPolynomials;
+  ConeComplex oldComplex = this->projectivizedComplex;
+  this->projectivizedComplex.refineMakeCommonRefinement(other);
+  this->quasiPolynomials.setSize(this->projectivizedComplex.size);
+  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
+    int oldIndex = oldComplex.getLowestIndexChamberContaining(this->projectivizedComplex[i].getInternalPoint());
+    if (oldIndex != - 1) {
+      this->quasiPolynomials[i] = oldQuasiPolynomials[oldIndex];
     } else {
       //the below needs to be fixed!!!!!
-      this->theQPs[i].makeZeroLatticeZn(this->minimalNumberOfVariables());
+      this->quasiPolynomials[i].makeZeroLatticeZn(this->minimalNumberOfVariables());
     }
   }
 }
@@ -11674,8 +11682,8 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
   return false;
 }
 
-void Cone::changeBasis(Matrix<Rational>& theLinearMap) {
-  theLinearMap.actOnVectorsColumn(this->normals);
+void Cone::changeBasis(Matrix<Rational>& linearMap) {
+  linearMap.actOnVectorsColumn(this->normals);
   this->createFromNormals(this->normals);
 }
 
@@ -11763,11 +11771,11 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   this->numProcessedNonParam = 0;
   this->LPtoMaximizeLargerDim.size = 0;
   this->LPtoMaximizeSmallerDim.size = 0;
-  this->theStartingRepresentative = startingShift;
-  this->theFinalRepresentatives.size = 0;
+  this->startingRepresentative = startingShift;
+  this->finalRepresentatives.size = 0;
   this->complexStartingPerRepresentative.size = 0;
   this->complexRefinedPerRepresentative.size = 0;
-  this->theConesLargerDim.addOnTop(theCLS);
+  this->conesLargerDimension.addOnTop(theCLS);
   this->LPtoMaximizeLargerDim.addOnTop(theNEq);
   this->isInfinity.initializeFillInObject(1, false);
 }
@@ -11797,64 +11805,64 @@ std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* forma
       out << "the function we need to max: " << this->LPtoMaximizeSmallerDim[i].toString();
     }
   }*/
-  out << "<hr><hr>Cones not processed(number of cones " << this->theConesLargerDim.size << "):\n<hr>\n";
-  DrawingVariables theDrawingVariables;
+  out << "<hr><hr>Cones not processed(number of cones " << this->conesLargerDimension.size << "):\n<hr>\n";
+  DrawingVariables drawingVariables;
   Polynomial<Rational>  tempP;
-  for (int i = 0; i < this->theConesLargerDim.size; i ++) {
+  for (int i = 0; i < this->conesLargerDimension.size; i ++) {
     out << "";// << this->theConesLargerDim[i].toString(format);
     //out << "<br>" << this->LPtoMaximizeLargerDim[i].toString();
-    theDrawingVariables.operations.initialize();
-    out << "<br>" << this->theConesLargerDim[i].projectivizedCone.drawMeToHtmlLastCoordAffine(theDrawingVariables, *format);
-    out << "<br>over " << this->theConesLargerDim[i].shift.toString() << " + " << this->theConesLargerDim[i].lattice.toString();
+    drawingVariables.operations.initialize();
+    out << "<br>" << this->conesLargerDimension[i].projectivizedCone.drawMeToHtmlLastCoordAffine(drawingVariables, *format);
+    out << "<br>over " << this->conesLargerDimension[i].shift.toString() << " + " << this->conesLargerDimension[i].lattice.toString();
     tempP.makeLinearWithConstantTerm(this->LPtoMaximizeLargerDim[i]);
     out << "<br>the function we have maxed, as a function of the remaining variables, is: " << tempP.toString(format) << "<hr><hr>";
   }
-  if (this->theConesSmallerDim.size > 0) {
+  if (this->conesSmallerDimension.size > 0) {
     out << "<br>Cones processed: <br>";
-    for (int i = 0; i < this->theConesSmallerDim.size; i ++) {
-      out << this->theConesSmallerDim[i].toString(*format);
+    for (int i = 0; i < this->conesSmallerDimension.size; i ++) {
+      out << this->conesSmallerDimension[i].toString(*format);
       //out << "<br>" << this->LPtoMaximizeSmallerDim[i].toString();
-      theDrawingVariables.operations.initialize();
-      out << this->theConesSmallerDim[i].projectivizedCone.drawMeToHtmlLastCoordAffine(theDrawingVariables, *format);
+      drawingVariables.operations.initialize();
+      out << this->conesSmallerDimension[i].projectivizedCone.drawMeToHtmlLastCoordAffine(drawingVariables, *format);
     }
   }
   return out.str();
 }
 
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
-  this->theFinalRougherLattice = this->theConesLargerDim[0].lattice;
+  this->theFinalRougherLattice = this->conesLargerDimension[0].lattice;
   ProgressReport report;
   ProgressReport report2;
-  for (int i = 1; i < this->theConesLargerDim.size; i ++) {
-    this->theFinalRougherLattice.intersectWith(this->theConesLargerDim[i].lattice);
+  for (int i = 1; i < this->conesLargerDimension.size; i ++) {
+    this->theFinalRougherLattice.intersectWith(this->conesLargerDimension[i].lattice);
     std::stringstream tempStream;
-    tempStream << "intersecing lattice " << i + 1 << " out of " << this->theConesLargerDim.size;
+    tempStream << "intersecing lattice " << i + 1 << " out of " << this->conesLargerDimension.size;
     report.report(tempStream.str());
   }
-  this->theFinalRepresentatives.size = 0;
+  this->finalRepresentatives.size = 0;
   Vectors<Rational> tempRoots, tempRoots2;
   tempRoots2.setSize(1);
-  for (int i = 0; i < this->theConesLargerDim.size; i ++) {
-    tempRoots2[0] = this->theConesLargerDim[i].shift;
-    this->theConesLargerDim[i].lattice.getAllRepresentativesProjectingDownTo(
+  for (int i = 0; i < this->conesLargerDimension.size; i ++) {
+    tempRoots2[0] = this->conesLargerDimension[i].shift;
+    this->conesLargerDimension[i].lattice.getAllRepresentativesProjectingDownTo(
       this->theFinalRougherLattice, tempRoots2, tempRoots
     );
-    this->theFinalRepresentatives.addOnTopNoRepetition(tempRoots);
+    this->finalRepresentatives.addOnTopNoRepetition(tempRoots);
     std::stringstream tempStream;
-    tempStream << "Computing representative " << i + 1 << " out of " << this->theConesLargerDim.size;
-    tempStream << "\nSo far " << this->theFinalRepresentatives.size << " found.";
+    tempStream << "Computing representative " << i + 1 << " out of " << this->conesLargerDimension.size;
+    tempStream << "\nSo far " << this->finalRepresentatives.size << " found.";
     report2.report(tempStream.str());
   }
-  this->complexStartingPerRepresentative.setSize(this->theFinalRepresentatives.size);
-  this->startingLPtoMaximize.setSize(this->theFinalRepresentatives.size);
-  this->finalMaxima.setSize(this->theFinalRepresentatives.size);
+  this->complexStartingPerRepresentative.setSize(this->finalRepresentatives.size);
+  this->startingLPtoMaximize.setSize(this->finalRepresentatives.size);
+  this->finalMaxima.setSize(this->finalRepresentatives.size);
   Vector<Rational> tempRoot;
-  for (int i = 0; i < this->theFinalRepresentatives.size; i ++) {
-    for (int j = 0; j < this->theConesLargerDim.size; j ++) {
-      tempRoot = this->theFinalRepresentatives[i];
-      this->theConesLargerDim[j].lattice.reduceVector(tempRoot);
-      if (tempRoot == this->theConesLargerDim[j].shift) {
-        this->complexStartingPerRepresentative[i].addOnTop(this->theConesLargerDim[j].projectivizedCone);
+  for (int i = 0; i < this->finalRepresentatives.size; i ++) {
+    for (int j = 0; j < this->conesLargerDimension.size; j ++) {
+      tempRoot = this->finalRepresentatives[i];
+      this->conesLargerDimension[j].lattice.reduceVector(tempRoot);
+      if (tempRoot == this->conesLargerDimension[j].shift) {
+        this->complexStartingPerRepresentative[i].addOnTop(this->conesLargerDimension[j].projectivizedCone);
         this->startingLPtoMaximize[i].addOnTop(this->LPtoMaximizeLargerDim[j]);
       }
     }
@@ -11893,14 +11901,14 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
 */
 
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
-  this->complexRefinedPerRepresentative.setSize(this->theFinalRepresentatives.size);
-  this->theMaximaCandidates.setSize(this->theFinalRepresentatives.size);
+  this->complexRefinedPerRepresentative.setSize(this->finalRepresentatives.size);
+  this->theMaximaCandidates.setSize(this->finalRepresentatives.size);
   ProgressReport report;
-  for (int i = 0; i < this->theFinalRepresentatives.size; i ++) {
+  for (int i = 0; i < this->finalRepresentatives.size; i ++) {
     ConeComplex& currentComplex = this->complexRefinedPerRepresentative[i];
     currentComplex.initFromCones(this->complexStartingPerRepresentative[i], true);
     std::stringstream tempStream;
-    tempStream << "Processing representative " << i + 1 << " out of " << this->theFinalRepresentatives.size;
+    tempStream << "Processing representative " << i + 1 << " out of " << this->finalRepresentatives.size;
     report.report(tempStream.str());
     currentComplex.refine();
     this->theMaximaCandidates[i].setSize(currentComplex.size);
@@ -11915,11 +11923,11 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
 }
 
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep5() {
-  this->finalMaximaChambers.setSize(this->theFinalRepresentatives.size);
-  this->finalMaximaChambersIndicesMaxFunctions.setSize(this->theFinalRepresentatives.size);
+  this->finalMaximaChambers.setSize(this->finalRepresentatives.size);
+  this->finalMaximaChambersIndicesMaxFunctions.setSize(this->finalRepresentatives.size);
   for (int i = 0; i < 1; i ++ ) {
     this->finalMaximaChambers[i].setSize(this->complexRefinedPerRepresentative[i].size);
-    this->theFinalRepresentatives[i].setSize(this->complexRefinedPerRepresentative[i].size);
+    this->finalRepresentatives[i].setSize(this->complexRefinedPerRepresentative[i].size);
     for (int j = 0; j < 1; j ++) {
       const Cone& currentCone = this->complexRefinedPerRepresentative[i][j];
       this->finalMaximaChambers[i][j].initialize();
@@ -11940,31 +11948,31 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1(
   ProgressReport report2;
   ProgressReport report3;
   for (; this->numProcessedNonParam< this->numNonParaM; this->numProcessedNonParam ++) {
-    while (this->theConesLargerDim.size > 0) {
-      ConeLatticeAndShift& currentCLS = *this->theConesLargerDim.lastObject();
+    while (this->conesLargerDimension.size > 0) {
+      ConeLatticeAndShift& currentCLS = *this->conesLargerDimension.lastObject();
       if (this->LPtoMaximizeLargerDim.lastObject()->size != currentCLS.getDimensionAffine() + 1) {
         global.fatal << "In ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1: "
         << "dimensions don't match. " << global.fatal;
       }
       if (!this->LPtoMaximizeLargerDim.lastObject()->isEqualToZero()) {
         currentCLS.findExtremaInDirectionOverLatticeOneNonParametric(
-          *this->LPtoMaximizeLargerDim.lastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim
+          *this->LPtoMaximizeLargerDim.lastObject(), this->LPtoMaximizeSmallerDim, this->conesSmallerDimension
         );
       }
-      this->theConesLargerDim.size --;
+      this->conesLargerDimension.size --;
       this->LPtoMaximizeLargerDim.size --;
       thePauseController.safePointDontCallMeFromDestructors();
       std::stringstream tempStream1, tempStream2, tempStream3;
       tempStream1 << "Processing " << this->numProcessedNonParam + 1 << " out of " << this->numNonParaM;
-      tempStream2 << "Remaining cones: " << this->theConesLargerDim.size;
-      tempStream3 << "Cones smaller dim total: " << this->theConesSmallerDim.size;
+      tempStream2 << "Remaining cones: " << this->conesLargerDimension.size;
+      tempStream3 << "Cones smaller dim total: " << this->conesSmallerDimension.size;
       report1.report(tempStream1.str());
       report2.report(tempStream2.str());
       report3.report(tempStream3.str());
     }
     this->LPtoMaximizeLargerDim = this->LPtoMaximizeSmallerDim;
-    this->theConesLargerDim = this->theConesSmallerDim;
-    this->theConesSmallerDim.size = 0;
+    this->conesLargerDimension = this->conesSmallerDimension;
+    this->conesSmallerDimension.size = 0;
     this->LPtoMaximizeSmallerDim.size = 0;
   }
 }
@@ -11973,7 +11981,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerate
   Vector<Rational>& theLPToMaximizeAffine,
   Vectors<Rational>& outputAppendLPToMaximizeAffine,
   List<ConeLatticeAndShift>& outputAppend,
-  Matrix<Rational>& theProjectionLatticeLevel
+  Matrix<Rational>& projectionLatticeLevel
 ) {
   Matrix<Rational> matVertices;
   matVertices.assignVectorsToRows(this->projectivizedCone.vertices);
@@ -12000,7 +12008,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerate
   tempCLS.projectivizedCone.createFromNormals(newNormals);
   tempCLS.shift = this->shift;
   tempCLS.shift.shiftToTheLeftOnePosition();
-  this->lattice.applyLinearMap(theProjectionLatticeLevel, tempCLS.lattice);
+  this->lattice.applyLinearMap(projectionLatticeLevel, tempCLS.lattice);
   Vector<Rational> tempRoot;
   tempRoot = theLPToMaximizeAffine.getshiftToTheLeftOnePositionition();
   tempRoot += preferredNormal * theLPToMaximizeAffine[0];
@@ -12794,16 +12802,18 @@ std::string ConeComplex::toString(bool useHtml) {
 }
 
 bool ConeComplex::findMaxLFOverConeProjective(
-  const Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber
+  const Cone& input,
+  List<Polynomial<Rational> >& inputLinearPolynomials,
+  List<int>& outputMaximumOverEeachSubChamber
 ) {
   Vectors<Rational> HyperPlanesCorrespondingToLF;
-  if (input.normals.size < 1 || inputLinPolys.size < 1) {
+  if (input.normals.size < 1 || inputLinearPolynomials.size < 1) {
     return false;
   }
   int dimension = input.normals[0].size;
-  HyperPlanesCorrespondingToLF.setSize(inputLinPolys.size);
-  for (int i = 0; i < inputLinPolys.size; i ++) {
-    Polynomial<Rational>& currentPoly = inputLinPolys[i];
+  HyperPlanesCorrespondingToLF.setSize(inputLinearPolynomials.size);
+  for (int i = 0; i < inputLinearPolynomials.size; i ++) {
+    Polynomial<Rational>& currentPoly = inputLinearPolynomials[i];
     if (currentPoly.totalDegree() != 1 ) {
       global.comments << "The total degree must be one, instead it is "
       << currentPoly.totalDegree() << ". The dimension of the cone is " << dimension;

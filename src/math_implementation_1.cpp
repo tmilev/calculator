@@ -304,10 +304,12 @@ bool LittelmannPath::minimaAreIntegral() {
   return true;
 }
 
-void LittelmannPath::makeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner) {
-  this->owner = &theOwner;
+void LittelmannPath::makeFromWeightInSimpleCoords(
+  const Vector<Rational>& weightInSimpleCoords, WeylGroupData& inputOwner
+) {
+  this->owner = &inputOwner;
   this->waypoints.setSize(2);
-  this->waypoints[0].makeZero(theOwner.getDimension());
+  this->waypoints[0].makeZero(inputOwner.getDimension());
   this->waypoints[1] = weightInSimpleCoords;
   this->simplify();
 }
@@ -879,18 +881,18 @@ LittelmannPath::LittelmannPath(const LittelmannPath& other) {
   *this = other;
 }
 
-bool LittelmannPath::isAdaptedString(MonomialTensor<int, HashFunctions::hashFunction>& theString) {
+bool LittelmannPath::isAdaptedString(MonomialTensor<int, HashFunctions::hashFunction>& inputString) {
   LittelmannPath tempPath = *this;
   LittelmannPath tempPath2;
-  for (int i = 0; i < theString.generatorsIndices.size; i ++) {
-    for (int k = 0; k < theString.powers[i]; k ++) {
-      tempPath.actByEAlpha(- theString.generatorsIndices[i] - 1);
+  for (int i = 0; i < inputString.generatorsIndices.size; i ++) {
+    for (int k = 0; k < inputString.powers[i]; k ++) {
+      tempPath.actByEAlpha(- inputString.generatorsIndices[i] - 1);
     }
     if (tempPath.isEqualToZero()) {
       return false;
     }
     tempPath2 = tempPath;
-    tempPath2.actByEAlpha(- theString.generatorsIndices[i] - 1);
+    tempPath2.actByEAlpha(- inputString.generatorsIndices[i] - 1);
     if (!tempPath2.isEqualToZero()) {
       return false;
     }

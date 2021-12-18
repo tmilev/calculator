@@ -438,7 +438,7 @@ public:
     this->generatorsLastAppliedFirst = other.generatorsLastAppliedFirst;
   }
   template<class Coefficient>
-  static void actOn(const ElementWeylGroup& inputElt, const Vector<Coefficient>& inputV, Vector<Coefficient>& output);
+  static void actOn(const ElementWeylGroup& inputElement, const Vector<Coefficient>& inputVector, Vector<Coefficient>& output);
   template<class Coefficient>
   void actOn(Vector<Coefficient>& inputOutput) const;
   bool checkConsistency() const;
@@ -500,7 +500,9 @@ public:
   bool checkInitialization() const;
   template<class Coefficient>
   static void actOn(
-    const ElementWeylGroupAutomorphisms& inputElt, const Vector<Coefficient>& inputV, Vector<Coefficient>& output
+    const ElementWeylGroupAutomorphisms& inputElement,
+    const Vector<Coefficient>& inputVector,
+    Vector<Coefficient>& output
   );
   template<class Coefficient>
   void actOn(Vector<Coefficient>& inputOutput) const;
@@ -770,11 +772,8 @@ public:
     List<Rational>& outputCoeffs,
     bool IntegralCoefficientsOnly
   );
-  // void makeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
-  // void makeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->makeFromDynkinType(theLetters, theRanks, 0); }
-  // void GetLongRootLength(Rational& output);
   static bool isAddmisibleDynkinType(char candidateLetter, int n);
-  // the below will not do anything if the inputLetter is not a valid Dynkin letter
+  // The below will not do anything if the inputLetter is not a valid Dynkin letter.
   static void transformToAdmissibleDynkinType(char inputLetter, int& outputRank);
   void computeEpsilonMatrix();
   template <class Coefficient>
@@ -975,8 +974,8 @@ public:
   }
   void simpleReflectionDualSpace(int index, Vector<Rational>& dualSpaceElement);
   void simpleReflectionRootPolynomial(int index, PolynomialSubstitution<Rational>& root, bool rhoAction);
-  bool isPositiveOrPerpWithRespectToH(const Vector<Rational>& input, const Vector<Rational>& theH) {
-    return this->rootScalarCartanRoot(input, theH).isPositiveOrZero();
+  bool isPositiveOrPerpWithRespectToH(const Vector<Rational>& input, const Vector<Rational>& hVector) {
+    return this->rootScalarCartanRoot(input, hVector).isPositiveOrZero();
   }
   template<class Coefficient>
   void reflectBetaWithRespectToAlpha(
@@ -1021,7 +1020,7 @@ public:
   static void transformToSimpleBasisGeneratorsArbitraryCoordinates(
     Vectors<Rational>& generators, const HashedList<Vector<Rational> >& inputRootSystem
   );
-  void transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Rational>& generators, const Vector<Rational>& theH);
+  void transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Rational>& generators, const Vector<Rational>& hVector);
   int operator()(int i, int j) const;
   bool operator==(const WeylGroupData& other) const;
   void operator+=(const WeylGroupData& other);
@@ -1050,9 +1049,13 @@ void WeylGroupData::rootScalarCartanRoot(const Vector<leftType>& r1, const Vecto
 }
 
 template<class Coefficient>
-void ElementWeylGroup::actOn(const ElementWeylGroup& inputElt, const Vector<Coefficient>& inputV, Vector<Coefficient>& output) {
-  inputElt.checkInitialization();
-  inputElt.owner->actOn(inputElt, inputV, output);
+void ElementWeylGroup::actOn(
+  const ElementWeylGroup& inputElement,
+  const Vector<Coefficient>& inputVector,
+  Vector<Coefficient>& output
+) {
+  inputElement.checkInitialization();
+  inputElement.owner->actOn(inputElement, inputVector, output);
 }
 
 template<class Coefficient>
@@ -1087,7 +1090,7 @@ public:
 
   template <class Coefficient>
   void actOn(
-    const ElementWeylGroupAutomorphisms& theGroupElement,
+    const ElementWeylGroupAutomorphisms& groupElement,
     const Vector<Coefficient>& inputVector,
     Vector<Coefficient>& outputVector
   ) const;
@@ -1097,12 +1100,12 @@ public:
 
 template<class Coefficient>
 void ElementWeylGroupAutomorphisms::actOn(
-  const ElementWeylGroupAutomorphisms& inputElt,
+  const ElementWeylGroupAutomorphisms& inputElement,
   const Vector<Coefficient>& inputV,
   Vector<Coefficient>& output
 ) {
-  inputElt.checkInitialization();
-  inputElt.owner->actOn(inputElt, inputV, output);
+  inputElement.checkInitialization();
+  inputElement.owner->actOn(inputElement, inputV, output);
 }
 
 template<class Coefficient>
@@ -1113,14 +1116,14 @@ void ElementWeylGroupAutomorphisms::actOn(Vector<Coefficient>& inputOutput) cons
 
 template <class Coefficient>
 void WeylGroupAutomorphisms::actOn(
-  const ElementWeylGroupAutomorphisms& theGroupElement,
+  const ElementWeylGroupAutomorphisms& groupElement,
   const Vector<Coefficient>& inputVector,
   Vector<Coefficient>& outputVector
 ) const {
   this->checkInitialization();
   outputVector = inputVector;
-  for (int i = theGroupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    SimpleReflectionOrOuterAutomorphism& currentGenerator = theGroupElement.generatorsLastAppliedFirst[i];
+  for (int i = groupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
+    SimpleReflectionOrOuterAutomorphism& currentGenerator = groupElement.generatorsLastAppliedFirst[i];
     if (!currentGenerator.flagIsOuter) {
       this->weylGroup->reflectSimple(currentGenerator.index, outputVector);
     } else {

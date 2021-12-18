@@ -5120,7 +5120,7 @@ public:
   void reduce();
   void intersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& subspaceBasis);
   void intersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& subspaceNormals);
-  void intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
+  void intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& normal);
   static bool getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
     const PolynomialSubstitution<Rational>& substitution, Matrix<Rational>& output
   );
@@ -5391,8 +5391,8 @@ public:
 class Cone {
   void computeVerticesFromNormalsNoFakeVertices();
   bool eliminateFakeNormalsUsingVertices(int numAddedFakeWalls);
-  friend std::ostream& operator << (std::ostream& output, const Cone& theCone) {
-    output << theCone.toString();
+  friend std::ostream& operator << (std::ostream& output, const Cone& cone) {
+    output << cone.toString();
     return output;
   }
 public:
@@ -5403,10 +5403,10 @@ public:
   int LowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* format = nullptr) const;
   void transformToWeylProjective(ConeComplex& owner);
-  std::string drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& format);
-  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& format);
+  std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
+  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
   void getLinesContainedInCone(Vectors<Rational>& output);
-  void translateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
+  void translateMeMyLastCoordinateAffinization(Vector<Rational>& translationVector);
   bool isHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2) const {
     int numCommonWalls = 0;
     for (int i = 0; i < this->normals.size; i ++) {
@@ -5441,10 +5441,10 @@ public:
     Vector<Rational>& output
   );
   bool drawMeLastCoordinateAffine(
-    bool InitDrawVars,
-    DrawingVariables& theDrawingVariables,
+    bool initializeDrawingVariables,
+    DrawingVariables& drawingVariables,
     FormatExpressions& format,
-    const std::string& ChamberWallColor = nullptr
+    const std::string& chamberWallColor = nullptr
   ) const;
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
@@ -5470,7 +5470,7 @@ public:
     Vector<Rational>* shiftAllPointsBy
   ) const;
   bool makeConvexHullOfMeAnd(const Cone& other);
-  void changeBasis(Matrix<Rational>& theLinearMap);
+  void changeBasis(Matrix<Rational>& linearMap);
   std::string DebugString;
   int getDimension() const {
     if (this->normals.size == 0) {
@@ -5563,7 +5563,7 @@ class ConeLatticeAndShift {
     Vector<Rational>& theLPToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend,
-    Matrix<Rational>& theProjectionLatticeLevel
+    Matrix<Rational>& projectionLatticeLevel
   );
   bool readFromFile(std::fstream& input);
   std::string toString(FormatExpressions& format);
@@ -5589,7 +5589,6 @@ public:
   void refineMakeCommonRefinement(const ConeComplex& other);
   void sort();
   void refineAndSort();
-  void findMaxmumOverNonDisjointChambers(Vectors<Rational>& theMaximaOverEachChamber, Vectors<Rational>& outputMaxima);
   void makeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output);
   void transformToWeylProjective();
   int getDimension() {
@@ -5623,23 +5622,32 @@ public:
     return - 1;
   }
   bool findMaxLFOverConeProjective(
-    const Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber
+    const Cone& input,
+    List<Polynomial<Rational> >& inputLinearPolynomials,
+    List<int>& outputMaximumOverEeachSubChamber
   );
   bool findMaxLFOverConeProjective(
-    const Cone& input, Vectors<Rational>& inputLFsLastCoordConst, List<int>& outputMaximumOverEeachSubChamber
+    const Cone& input,
+    Vectors<Rational>& inputLFsLastCoordConst,
+    List<int>& outputMaximumOverEeachSubChamber
   );
   void initFromCones(
     List<Vectors<Rational> >& normalsOfCones,
     bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   void initFromCones(
-    List<Cone>& normalsOfCones, bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    List<Cone>& normalsOfCones,
+    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   bool splitChamber(
-    int indexChamberBeingRefined, bool weAreChopping, const Vector<Rational>& killerNormal
+    int indexChamberBeingRefined,
+    bool weAreChopping,
+    const Vector<Rational>& killerNormal
   );
   void getNewVerticesAppend(
-    Cone& myDyingCone, const Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices
+    Cone& myDyingCone,
+    const Vector<Rational>& killerNormal,
+    HashedList<Vector<Rational> >& outputVertices
   );
   void initialize() {
     this->splittingNormals.clear();
@@ -5775,7 +5783,7 @@ public:
   }
   PartialFractions();
   int sizeWithoutDebugString();
-  bool checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot);
+  bool checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* root);
   void makeProgressReportSplittingMainPart();
   void makeProgressVPFcomputation();
 };
@@ -6120,9 +6128,9 @@ public:
   static unsigned int hashFunction(const ElementWeylAlgebra& input) {
     return input.hashFunction();
   }
-  void makeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
-  void makeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
-  void makeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
+  void makeGEpsPlusEpsInTypeD(int i, int j, int numberOfVariables);
+  void makeGEpsMinusEpsInTypeD(int i, int j, int numberOfVariables);
+  void makeGMinusEpsMinusEpsInTypeD(int i, int j, int numberOfVariables);
   void makexixj(int i, int j);
   void makexi(int i);
   void makedi(int i);
@@ -6185,9 +6193,11 @@ public:
 
   WeylGroupData* owner;
   Vectors<Rational> waypoints;
-  void makeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner);
-  void makeFromWaypoints(Vectors<Rational>& weightsInSimpleCoords, WeylGroupData& theOwner) {
-    this->owner = &theOwner;
+  void makeFromWeightInSimpleCoords(
+    const Vector<Rational>& weightInSimpleCoords, WeylGroupData& inputOwner
+  );
+  void makeFromWaypoints(Vectors<Rational>& weightsInSimpleCoords, WeylGroupData& inputOwner) {
+    this->owner = &inputOwner;
     this->waypoints = weightsInSimpleCoords;
     this->simplify();
   }
@@ -6201,7 +6211,7 @@ public:
       this->waypoints.addOnTop(other.waypoints[i] + endPoint);
     }
   }
-  bool isAdaptedString(MonomialTensor<int, HashFunctions::hashFunction>& theString);
+  bool isAdaptedString(MonomialTensor<int, HashFunctions::hashFunction>& inputString);
   std::string toStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
   std::string toStringOperatorSequenceStartingOnMe(List<int>& input);
   bool generateOrbit(
@@ -6244,12 +6254,11 @@ public:
   List<List<Vectors<Rational> > > theMaximaCandidates;
   List<Vectors<Rational> > startingLPtoMaximize;
   List<Vectors<Rational> > finalMaxima;
-  Lattice theStartingLattice;
   Lattice theFinalRougherLattice;
-  Vector<Rational> theStartingRepresentative;
-  Vectors<Rational> theFinalRepresentatives;
-  List<ConeLatticeAndShift> theConesLargerDim;
-  List<ConeLatticeAndShift> theConesSmallerDim;
+  Vector<Rational> startingRepresentative;
+  Vectors<Rational> finalRepresentatives;
+  List<ConeLatticeAndShift> conesLargerDimension;
+  List<ConeLatticeAndShift> conesSmallerDimension;
   List<List<ConeComplex> > finalMaximaChambers;
   List<List<List<int> > > finalMaximaChambersIndicesMaxFunctions;
   List<bool> isInfinity;
@@ -6271,21 +6280,21 @@ class PiecewiseQuasipolynomial {
   // Then the theProjectivizedComplex is an n + 1-dimensional complex,
   // which is the projectivization of the n-dim affine complex representing the
   // domain of the piecewise quasipoly.
-  ConeComplex theProjectivizedComplex;
-  List<QuasiPolynomial> theQPs;
+  ConeComplex projectivizedComplex;
+  List<QuasiPolynomial> quasiPolynomials;
   int NumVariables;
   std::string toString(bool useLatex, bool useHtml);
   void drawMe(
-    DrawingVariables& theDrawingVars,
-    int numLatticePointsPerDim,
-    Cone* RestrictingChamber = nullptr,
+    DrawingVariables& drawingVariables,
+    int numberOfLatticePointsPerDimension,
+    Cone* restrictingChamber = nullptr,
     Vector<Rational>* distinguishedPoint = nullptr
   );
   int minimalNumberOfVariables() {
     return this->NumVariables;
   }
   void makeCommonRefinement(const PiecewiseQuasipolynomial& other) {
-    this->makeCommonRefinement(other.theProjectivizedComplex);
+    this->makeCommonRefinement(other.projectivizedComplex);
   }
   bool checkConsistency() const {
     return true;
@@ -6297,8 +6306,8 @@ class PiecewiseQuasipolynomial {
   Rational evaluateInputProjectivized(const Vector<Rational>& thePoint);
   void makeZero(int numVars) {
     this->NumVariables = numVars;
-    this->theProjectivizedComplex.initialize();
-    this->theQPs.size = 0;
+    this->projectivizedComplex.initialize();
+    this->quasiPolynomials.size = 0;
   }
   void operator+=(const PiecewiseQuasipolynomial& other);
   void operator*=(const Rational& other);

@@ -1989,9 +1989,9 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
 void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initTheMaxComputation");
   this->theMaxComputation.numNonParaM = 2;
-  this->theMaxComputation.theConesLargerDim.reserve(this->projectivizedChambeR.size);
+  this->theMaxComputation.conesLargerDimension.reserve(this->projectivizedChambeR.size);
   this->theMaxComputation.LPtoMaximizeLargerDim.reserve(this->theMultiplicities.size);
-  this->theMaxComputation.theConesLargerDim.setSize(0);
+  this->theMaxComputation.conesLargerDimension.setSize(0);
   this->theMaxComputation.LPtoMaximizeLargerDim.setSize(0);
   Lattice ZnLattice;
   int theAffineDim = 5;
@@ -2010,11 +2010,11 @@ void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
       if (!tempBool) {
         global.fatal << "This should not happen. " << global.fatal;
       }
-      this->theMaxComputation.theConesLargerDim.addOnTop(currentCLS);
+      this->theMaxComputation.conesLargerDimension.addOnTop(currentCLS);
       this->theMaxComputation.LPtoMaximizeLargerDim.addOnTop(theLPtoMax);
       this->numNonZeroMults ++;
       std::stringstream out;
-      out << "Initialized " << i + 1 << " out of " << this->theMaxComputation.theConesLargerDim.size
+      out << "Initialized " << i + 1 << " out of " << this->theMaxComputation.conesLargerDimension.size
       << "; so far " << this->numNonZeroMults << " non-zero multiplicities";
       report.report(out.str());
     }

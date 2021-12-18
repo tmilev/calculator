@@ -19,7 +19,7 @@ class Vector: public List<Coefficient> {
     }
     return result;
   }
-  friend std::ostream& operator<< <Coefficient>(std::ostream& output, const Vector<Coefficient>& theVector);
+  friend std::ostream& operator<< <Coefficient>(std::ostream& output, const Vector<Coefficient>& toBeWritten);
 public:
   Vector(){}
   Vector(const Vector<Coefficient>& other): List<Coefficient>(other) {

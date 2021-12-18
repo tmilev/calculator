@@ -32,8 +32,6 @@ unsigned int GlobalStatistics::numberOfListsCreated = 0;
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
 
-Rational PartialFractions::CheckSum;
-
 int HtmlRoutines::globalMathSpanID = 0;
 int HtmlRoutines::globalGeneralPurposeID = 0;
 
@@ -43,19 +41,10 @@ template < > double Complex<double>::equalityPrecision = 0.00000001;
 template <class ElementLeft, class ElementRight, class Coefficient>
 class TensorProductMonomial;
 
-std::fstream PartialFractions::ComputedContributionsList;
-
 //template < > int ListPointers<PartFraction>::MemoryAllocationIncrement =100;
 //ListPointers<PartFraction> PartFraction::GlobalCollectorPartFraction;
-bool PartialFractions::flagSplitTestModeNoNumerators = false;
-bool PartialFractions::flagAnErrorHasOccurredTimeToPanic = false;
-bool PartialFractions::flagUsingCheckSum = true;
-int PartialFractions::NumMonomialsInNumeratorsRelevantFractions = 0;
-int PartialFractions::NumProcessedForVPFMonomialsTotal = 0;
-int PartialFractions::flagMaxNumStringOutputLines = 500;
 //int PartFraction::lastApplicationOfSVformulaNumNewGenerators = 0;
 //int PartFraction::lastApplicationOfSVformulaNumNewMonomials = 0;
-bool PartialFractions::flagMakingProgressReport = true;
 //FacetPointers TheBigFacetOutput;
 //DrawingVariables TDV(200, 400);
 
@@ -427,17 +416,17 @@ void HtmlRoutines::elementToStringTooltip(
 ) {
   std::stringstream out;
   if (useHtml) {
-    out << "<span title =\"" << inputTooltip << "\">" << input << "</span>";
+    out << "<span title ='" << inputTooltip << "'>" << input << "</span>";
   }
   output = out.str();
 }
 
 std::string HtmlRoutines::getStyleButtonLikeHtml() {
-  return " style =\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
+  return " style='background:none; border:0; text-decoration:underline; color:blue; cursor:pointer' ";
 }
 
 std::string HtmlRoutines::convertStringEscapeQuotesAndBackslashes(const std::string& input) {
-  MacroRegisterFunctionWithName("HtmlRoutines::ConvertStringToBackslashEscapedString");
+  MacroRegisterFunctionWithName("HtmlRoutines::convertStringEscapeQuotesAndBackslashes");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -3831,16 +3820,16 @@ void PartialFractions::compareCheckSums() {
 
 void PartialFractions::prepareIndicatorVariables() {
   this->NumberIrrelevantFractions = 0;
-  this->NumberRelevantReducedFractions = 0;
+  this->numberOfRelevantReducedFractions = 0;
   this->NumGeneratorsInTheNumerators = 0;
   this->NumGeneratorsIrrelevantFractions = 0;
   this->NumGeneratorsRelevenatFractions = 0;
   this->NumMonomialsInNumeratorsIrrelevantFractions = 0;
-  this->NumMonomialsInNumeratorsRelevantFractions = 0;
+  this->numberOfMonomialsInNumeratorsRelevantFractions = 0;
   this->numberOfMonomialsInTheNumerators = 1;
   this->NumTotalReduced = 0;
   this->NumRelevantNonReducedFractions = 0;
-  this->NumProcessedForVPFMonomialsTotal = 0;
+  this->numberOfProcessedForVPFMonomialsTotal = 0;
   this->NumProcessedForVPFfractions = 0;
   this->NumRunsReduceMonomialByMonomial = 0;
 }
@@ -3857,7 +3846,7 @@ bool PartialFractions::splitPartial() {
   Polynomial<LargeInteger> currentCoeff;
   reducedForGood.makeZero();
   if (this->flagUsingCheckSum) {
-    this->computeOneCheckSum(this->CheckSum);
+    this->computeOneCheckSum(this->checkSum);
   }
   while (this->size() > 0) {
     this->popMonomial(0, currentFrac, currentCoeff);
@@ -3878,7 +3867,7 @@ bool PartialFractions::splitPartial() {
   if (this->flagUsingCheckSum) {
     Rational tempRat;
     reducedForGood.computeOneCheckSum(tempRat);
-    if (tempRat != this->CheckSum) {
+    if (tempRat != this->checkSum) {
       global.fatal
       << "The checksums of the partial fraction decomposition do not match. " << global.fatal;
     }
@@ -4010,8 +3999,11 @@ PartialFractions::PartialFractions() {
   this->flagUsingCheckSum = true;
   this->flagUsingOrlikSolomonBasis = false;
   this->flagInitialized = false;
+  this->flagMakingProgressReport = true;
   this->SplitStepsCounter = 0;
   this->LimitSplittingSteps = 0;
+  this->numberOfMonomialsInNumeratorsRelevantFractions = 0;
+  this->numberOfProcessedForVPFMonomialsTotal = 0;
 }
 
 void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* Indicator) {
@@ -4232,37 +4224,39 @@ int PartialFractions::toString(std::string& output, bool LatexFormat, FormatExpr
   return this->toStringBasisChange(output, LatexFormat, format);
 }
 
-int PartialFractions::toFileOutput(std::fstream& output, bool LatexFormat) {
-  return this->toFileOutputBasisChange(output, LatexFormat);
+int PartialFractions::toFileOutput(std::fstream& output, bool latexFormat) {
+  return this->toFileOutputBasisChange(output, latexFormat);
 }
 
 int PartialFractions::toStringBasisChange(
-  std::string& output, bool LatexFormat, FormatExpressions& PolyFormatLocal
+  std::string& output,
+  bool latexFormat,
+  FormatExpressions& polynomialFormatLocal
 ) {
   std::stringstream out;
   std::string tempS;
   int TotalLines = 0;
-  PolyFormatLocal.extraLinesCounterLatex = 0;
-  if (LatexFormat) {
+  polynomialFormatLocal.extraLinesCounterLatex = 0;
+  if (latexFormat) {
     out << "\\begin{eqnarray*}\n";
   }
   int LastCutOff = 0;
   for (int i = 0; i < this->size(); i ++) {
     if (this->coefficients[i].size() > 0 ) {
-      if (LatexFormat) {
+      if (latexFormat) {
         out << "&&";
       }
       if (tempS[0] != '-') {
         out << "+";
       }
       out << tempS;
-      if (LatexFormat) {
+      if (latexFormat) {
         out << "\\\\ \n";
         TotalLines ++;
       } else {
         out << "\n";
       }
-      if (LatexFormat && (TotalLines - LastCutOff) > 40) {
+      if (latexFormat && (TotalLines - LastCutOff) > 40) {
         out << "\\end{eqnarray*}\\begin{eqnarray*}\n";
         LastCutOff = TotalLines;
       }
@@ -4273,7 +4267,7 @@ int PartialFractions::toStringBasisChange(
       break;
     }
   }
-  if (!LatexFormat) {
+  if (!latexFormat) {
     output = out.str();
     if (output.size() > 0) {
       if (output[0] == '+') {
@@ -4287,48 +4281,48 @@ int PartialFractions::toStringBasisChange(
   return TotalLines;
 }
 
-int PartialFractions::toFileOutputBasisChange(std::fstream& output, bool LatexFormat) {
+int PartialFractions::toFileOutputBasisChange(std::fstream& output, bool latexFormat) {
   std::string tempS;
-  int TotalLines = 0;
-  FormatExpressions PolyFormatLocal;
-  PolyFormatLocal.extraLinesCounterLatex = 0;
-  if (LatexFormat) {
+  int totalLines = 0;
+  FormatExpressions polynomialFormatLocal;
+  polynomialFormatLocal.extraLinesCounterLatex = 0;
+  if (latexFormat) {
     output << "\\begin{eqnarray*}\n";
   }
-  int LastCutOff = 0;
+  int lastCutOff = 0;
   for (int i = 0; i < this->size(); i ++) {
     if (this->coefficients[i].size() > 0 ) {
-      if (LatexFormat) {
+      if (latexFormat) {
         output << "&&";
       }
       if (tempS[0] != '-') {
         output << "+";
       }
       output << tempS;
-      if (LatexFormat) {
+      if (latexFormat) {
         output << "\\\\ \n";
-        TotalLines ++;
+        totalLines ++;
       } else {
         output << "\n";
       }
-      if (LatexFormat && (TotalLines - LastCutOff) > 20) {
+      if (latexFormat && (totalLines - lastCutOff) > 20) {
         output << "\\end{eqnarray*}\\begin{eqnarray*}\n";
-        LastCutOff = TotalLines;
+        lastCutOff = totalLines;
       }
     }
   }
-  if (LatexFormat) {
+  if (latexFormat) {
     output << "\\end{eqnarray*}";
   }
-  return TotalLines;
+  return totalLines;
 }
 
-int OnePartialFraction::controlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal) {
-  int numCutOffs = static_cast<signed>(output.size()) % PolyFormatLocal.maximumLineLength;
+int OnePartialFraction::controlLineSizeFracs(std::string& output, FormatExpressions& polynomialFormatLocal) {
+  int numCutOffs = static_cast<signed>(output.size()) % polynomialFormatLocal.maximumLineLength;
   int LastCutOffIndex = 0;
   int NumLinesAdded = 0;
   for (int i = 0; i < numCutOffs; i ++) {
-    for (int j = LastCutOffIndex + PolyFormatLocal.maximumLineLength; j < static_cast<signed>(output.size()) - 1; j ++) {
+    for (int j = LastCutOffIndex + polynomialFormatLocal.maximumLineLength; j < static_cast<signed>(output.size()) - 1; j ++) {
       unsigned k = static_cast<unsigned>(j);
       if (output[k] == '\\' && output[k + 1] == 'f') {
         output.insert(k, "\\\\\n&&");
@@ -4341,22 +4335,24 @@ int OnePartialFraction::controlLineSizeFracs(std::string& output, FormatExpressi
   return NumLinesAdded;
 }
 
-int OnePartialFraction::controlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal) {
-  int numCutOffs = static_cast<int>(static_cast<int>(output.size()) % PolyFormatLocal.maximumLineLength);
-  int LastCutOffIndex = 0;
-  int NumLinesAdded = 0;
-  for (int i = 0; i < numCutOffs; i ++) {
-    for (int j = LastCutOffIndex + PolyFormatLocal.maximumLineLength; j < static_cast<int>(output.size()) - 1; j ++) {
+int OnePartialFraction::controlLineSizeStringPolys(
+  std::string& output, FormatExpressions& polynomialFormatLocal
+) {
+  int numberOfCutOffs = static_cast<int>(static_cast<int>(output.size()) % polynomialFormatLocal.maximumLineLength);
+  int lastCutOffIndex = 0;
+  int numberOfLinesAdded = 0;
+  for (int i = 0; i < numberOfCutOffs; i ++) {
+    for (int j = lastCutOffIndex + polynomialFormatLocal.maximumLineLength; j < static_cast<int>(output.size()) - 1; j ++) {
       unsigned k = static_cast<unsigned>(j);
       if ((output[k] == '+' || output[k] == '-') && output[k - 1] != '{') {
         output.insert(k, "\\\\\n&&");
-        NumLinesAdded ++;
-        LastCutOffIndex = j + 5;
+        numberOfLinesAdded ++;
+        lastCutOffIndex = j + 5;
         break;
       }
     }
   }
-  return NumLinesAdded;
+  return numberOfLinesAdded;
 }
 
 void PartialFractions::makeProgressReportSplittingMainPart() {
@@ -4364,7 +4360,7 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
     return;
   }
   std::stringstream out1, out2, out3;
-  out1 << this->NumberRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions
+  out1 << this->numberOfRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions
   << " disjoint = " << this->NumTotalReduced;
   if (this->NumRelevantNonReducedFractions != 0) {
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
@@ -4374,9 +4370,9 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
   ProgressReport report2;
   ProgressReport report3;
   report1.report(out1.str());
-  out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
+  out2 << this->numberOfMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
   << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
-  << this->NumMonomialsInNumeratorsRelevantFractions + this->NumMonomialsInNumeratorsIrrelevantFractions << " out of "
+  << this->numberOfMonomialsInNumeratorsRelevantFractions + this->NumMonomialsInNumeratorsIrrelevantFractions << " out of "
   << this->numberOfMonomialsInTheNumerators << " total monomials in the numerators";
   report2.report(out2.str());
   if (this->NumGeneratorsInTheNumerators != 0) {
@@ -4398,7 +4394,7 @@ void PartialFractions::makeProgressVPFcomputation() {
   std::stringstream out2;
   ProgressReport report;
   out2 << "Processed " << this->NumProcessedForVPFfractions << " out of "
-  << this->NumberRelevantReducedFractions << " relevant fractions";
+  << this->numberOfRelevantReducedFractions << " relevant fractions";
   report.report(out2.str());
 }
 
@@ -6604,9 +6600,9 @@ void ElementWeylGroup::makeCanonical() {
   if (this->owner->rho.size == 0) {
     this->owner->computeRho(false);
   }
-  Vector<Rational> theVector;
-  this->owner->actOn(*this, this->owner->rho, theVector);
-  this->makeFromRhoImage(theVector, *this->owner);
+  Vector<Rational> workingVector;
+  this->owner->actOn(*this, this->owner->rho, workingVector);
+  this->makeFromRhoImage(workingVector, *this->owner);
 }
 
 bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
@@ -11261,8 +11257,8 @@ void Lattice::getRootOnLatticeSmallestPositiveProportionalTo(
 }
 
 bool Cone::getLatticePointsInCone(
-  Lattice& theLattice,
-  Vector<Rational>& theShift,
+  Lattice& lattice,
+  Vector<Rational>& shift,
   int upperBoundPointsInEachDim,
   bool lastCoordinateIsOne,
   Vectors<Rational>& outputPoints,
@@ -11271,8 +11267,8 @@ bool Cone::getLatticePointsInCone(
   if (upperBoundPointsInEachDim <= 0) {
     upperBoundPointsInEachDim = 5;
   }
-  Vector<Rational> theActualShift = theShift;
-  theLattice.reduceVector(theActualShift);
+  Vector<Rational> actualShift = shift;
+  lattice.reduceVector(actualShift);
   int dimensionAffine = this->getDimension();
   if (lastCoordinateIsOne) {
     dimensionAffine --;
@@ -11293,9 +11289,9 @@ bool Cone::getLatticePointsInCone(
   outputPoints.size = 0;
   Vector<Rational> candidatePoint;
   Vectors<Rational> LatticeBasis;
-  LatticeBasis.assignMatrixRows(theLattice.basisRationalForm);
+  LatticeBasis.assignMatrixRows(lattice.basisRationalForm);
   for (int i = 0; i < numCycles; i ++, boundingBox.incrementSubset()) {
-    candidatePoint = theActualShift;
+    candidatePoint = actualShift;
     if (shiftAllPointsBy != nullptr) {
       candidatePoint += *shiftAllPointsBy;
     }

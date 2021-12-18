@@ -5334,8 +5334,8 @@ public:
   void assignDenominatorOnly(const OnePartialFraction& p);
   void assignNoIndicesNonZeroMults(OnePartialFraction& p);
   int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFractions& owner, int minIndex);
-  int controlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
-  int controlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
+  int controlLineSizeFracs(std::string& output, FormatExpressions& polynomialFormatLocal);
+  int controlLineSizeStringPolys(std::string& output, FormatExpressions& polynomialFormatLocal);
   //void swap(int indexA, int indexB);
   OnePartialFraction();
   ~OnePartialFraction();
@@ -5457,8 +5457,8 @@ public:
     return true;
   }
   bool getLatticePointsInCone(
-    Lattice& theLattice,
-    Vector<Rational>& theShift,
+    Lattice& lattice,
+    Vector<Rational>& shift,
     int upperBoundPointsInEachDim,
     bool lastCoordinateIsOne,
     Vectors<Rational>& outputPoints,
@@ -5671,36 +5671,32 @@ public:
   int IndexCurrentlyProcessed;
   int HighestIndex;
   int NumberIrrelevantFractions;
-  int NumberRelevantReducedFractions;
+  int numberOfRelevantReducedFractions;
   int numberOfMonomialsInTheNumerators;
   int NumGeneratorsInTheNumerators;
   int NumRelevantNonReducedFractions;
-  //int NumRelevantMonomialsInNonReducedFractions;
-  //int NumRelevantGeneratorsInNonReducedFractions;
-  static int NumMonomialsInNumeratorsRelevantFractions;
+  int numberOfMonomialsInNumeratorsRelevantFractions;
   int NumGeneratorsRelevenatFractions;
   int NumMonomialsInNumeratorsIrrelevantFractions;
   int NumGeneratorsIrrelevantFractions;
   int NumTotalReduced;
   int NumProcessedForVPFfractions;
   int NumRunsReduceMonomialByMonomial;
-  static int NumProcessedForVPFMonomialsTotal;
-  static std::fstream ComputedContributionsList;
-  static const int MaxReadFileBufferSize = 33554432; //= 32 MB of read buffer size
+  int numberOfProcessedForVPFMonomialsTotal;
   Rational StartCheckSum;
   Rational EndCheckSum;
-  static Rational CheckSum;
+  Rational checkSum;
   bool flagDiscardingFractions;
   bool flagUsingOrlikSolomonBasis;
   bool flagInitialized;
   int LimitSplittingSteps;
   int SplitStepsCounter;
   ConeComplex theChambers;
-  static bool flagSplitTestModeNoNumerators;
-  static bool flagAnErrorHasOccurredTimeToPanic;
-  static bool flagMakingProgressReport;
-  static bool flagUsingCheckSum;
-  static int flagMaxNumStringOutputLines;
+  bool flagSplitTestModeNoNumerators;
+  bool flagAnErrorHasOccurredTimeToPanic;
+  bool flagMakingProgressReport;
+  bool flagUsingCheckSum;
+  int flagMaxNumStringOutputLines;
 
   HashedList<Vector<Rational> > startingVectors;
   Matrix<int> TableAllowedAminusB;
@@ -5743,11 +5739,12 @@ public:
     Vector<Rational>* chamberIndicator
   );
   bool isHigherThanWithRespectToWeight(
-    const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& weights
+    const Vector<Rational>& left,
+    const Vector<Rational>& r,
+    const Vector<Rational>& weights
   );
   void computeSupport(List<Vectors<Rational> >& output);
   void computeOneCheckSum(Rational& output);
-  void popIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, Vector<Rational>* Indicator);
   void prepareIndicatorVariables();
   void initFromOtherPartialFractions(PartialFractions& input);
   std::string toString(FormatExpressions& format) {
@@ -5758,10 +5755,10 @@ public:
   void toString(std::string& output, FormatExpressions& format);
   int toString(std::string& output, bool LatexFormat, FormatExpressions& format);
   int toStringBasisChange(
-    std::string& output, bool LatexFormat, FormatExpressions& PolyFormatLocal
+    std::string& output, bool latexFormat, FormatExpressions& polynomialFormatLocal
   );
-  int toFileOutput(std::fstream& output, bool LatexFormat);
-  int toFileOutputBasisChange(std::fstream& output, bool LatexFormat);
+  int toFileOutput(std::fstream& output, bool latexFormat);
+  int toFileOutputBasisChange(std::fstream& output, bool latexFormat);
   bool getVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator);
   // bool verifyFileComputedContributions();
   void writeToFileComputedContributions(std::fstream& output);

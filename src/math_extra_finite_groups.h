@@ -1191,7 +1191,7 @@ public:
   std::string identifyingString; // in Python, this would be an anonymous object
 
   GroupRepresentation() {
-    this->ownerGroup = NULL;
+    this->ownerGroup = nullptr;
     this->flagCharacterIsComputed = false;
   }
 
@@ -1438,13 +1438,22 @@ public:
     const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other,
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
   ) const;
-  void getLargestDenominatorSimpleGenerators(LargeIntegerUnsigned& outputLCM, LargeIntegerUnsigned& outputDen) const;
+  void getLargestDenominatorSimpleGenerators(
+    LargeIntegerUnsigned& outputLeastCommonMultiple,
+    LargeIntegerUnsigned& outputDenominator
+  ) const;
 
   void reset();
   void initialize(somegroup& inputOwner);
   void checkRepresentationIsMultiplicativelyClosed();
-  void getClassFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputChar, Matrix<Coefficient>& outputMat);
-  void classFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat);
+  void getClassFunctionMatrix(
+    ClassFunction<somegroup, Coefficient>& inputCharacter,
+    Matrix<Coefficient>& outputMatrix
+  );
+  void classFunctionMatrix(
+    ClassFunction<somegroup, Coefficient>& inputClassFunction,
+    Matrix<Coefficient>& outputMatrix
+  );
   int getDimension() const;
   void restrictRepresentation(
     const Vectors<Coefficient>& vectorSpaceBasisSubrep,

@@ -2154,7 +2154,7 @@ bool VoganDiagram::assignParameter(
   }
   if (
     this->diagram == VoganDiagram::DiagramType::AIII &&
-    this->parameter > this->rank / 2
+    this->parameter > (this->rank - 1) / 2
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure

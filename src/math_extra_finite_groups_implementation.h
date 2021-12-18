@@ -1418,15 +1418,15 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator>(
 
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunctionMatrix(
-  ClassFunction<somegroup, Coefficient>& inputChar, Matrix<Coefficient>& outputMat
+  ClassFunction<somegroup, Coefficient>& inputCharacter, Matrix<Coefficient>& outputMatrix
 ) {
   this->checkInitialization();
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
-  outputMat.makeZeroMatrix(this->getDimension());
+  outputMatrix.makeZeroMatrix(this->getDimension());
   int numClasses = this->ownerGroup->conjugacyClassCount();
   ProgressReport report;
   for (int cci = 0; cci < numClasses; cci ++) {
-    if (inputChar[cci] == 0) {
+    if (inputCharacter[cci] == 0) {
       continue;
     }
     if (!this->classFunctionMatricesComputed[cci]) {
@@ -1468,9 +1468,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunc
         report.report(reportstream.str());
       }
     }
-    for (int j = 0; j < outputMat.numberOfRows; j ++) {
-      for (int k = 0; k < outputMat.numberOfColumns; k ++) {
-        outputMat(j, k) += this->classFunctionMatrices[cci](j, k) * MathRoutines::complexConjugate(inputChar[cci]);
+    for (int j = 0; j < outputMatrix.numberOfRows; j ++) {
+      for (int k = 0; k < outputMatrix.numberOfColumns; k ++) {
+        outputMatrix(j, k) += this->classFunctionMatrices[cci](j, k) * MathRoutines::complexConjugate(inputCharacter[cci]);
       }
     }
   }
@@ -1478,15 +1478,16 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunc
 
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::classFunctionMatrix(
-  ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat
+  ClassFunction<somegroup, Coefficient>& inputClassFunction,
+  Matrix<Coefficient>& outputMatrix
 ) {
   int dimension = this->generators[0].numberOfRows;
-  outputMat.makeZeroMatrix(dimension);
+  outputMatrix.makeZeroMatrix(dimension);
   if (classFunctionMatrices.size == 0) {
     classFunctionMatrices.setSize(this->ownerGroup->conjugacyClassCount());
   }
   for (int cci = 0; cci < this->ownerGroup->conjugacyClassCount(); cci ++) {
-    if (inputCF[cci] == 0) {
+    if (inputClassFunction[cci] == 0) {
       continue;
     }
     if (classFunctionMatrices[cci].numberOfColumns == 0) {
@@ -1495,9 +1496,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::classFunctio
         this->classFunctionMatrices[cci] += this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].elements[icci]);
       }
     }
-    for (int i = 0; i < outputMat.numberOfRows; i ++) {
-      for (int j = 0; j < outputMat.numberOfColumns; j ++) {
-        outputMat.elements[i][j] += classFunctionMatrices[cci].elements[i][j] * inputCF[cci];
+    for (int i = 0; i < outputMatrix.numberOfRows; i ++) {
+      for (int j = 0; j < outputMatrix.numberOfColumns; j ++) {
+        outputMatrix.elements[i][j] += classFunctionMatrices[cci].elements[i][j] * inputClassFunction[cci];
       }
     }
   }
@@ -1767,7 +1768,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
   std::string& outputDetails,
   int UpperBoundFreudenthal
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::freudenthalFormulaIrrepIsWRTLeviPart");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::freudenthalFormulaIrrepIsWRTLeviPart");
   //double startTimer = global.getElapsedSeconds();
   this->computeRootSubsystem();
   Vector<Rational> eiVect;
@@ -2142,15 +2143,16 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsTodorsVersi
 
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::spreadVector(
-  const Vector<Coefficient>& input, Vectors<Coefficient>& outputBasisGeneratedSpace
+  const Vector<Coefficient>& input,
+  Vectors<Coefficient>& outputBasisGeneratedSpace
 ) {
   this->checkInitialization();
   outputBasisGeneratedSpace.setSize(1);
   outputBasisGeneratedSpace[0] = input;
   Vector<Coefficient> tempV;
-  int theRank = this->ownerGroup->getDimension();
+  int rank = this->ownerGroup->getDimension();
   for (int i = 0; i < outputBasisGeneratedSpace.size; i ++) {
-    for (int j = 0; j < theRank; j ++) {
+    for (int j = 0; j < rank; j ++) {
       tempV = outputBasisGeneratedSpace[i];
       this->elementImages[j + 1].actOnVectorColumn(tempV);
       if (!outputBasisGeneratedSpace.linearSpanContainsVector(tempV)) {
@@ -2161,24 +2163,28 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::spreadVector
 }
 
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getLargestDenominatorSimpleGenerators(
-  LargeIntegerUnsigned& outputLCM, LargeIntegerUnsigned& outputDen
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
+getLargestDenominatorSimpleGenerators(
+  LargeIntegerUnsigned& outputLeastCommonMultiple,
+  LargeIntegerUnsigned& outputDenominator
 ) const {
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::getLargestDenominatorSimpleGenerators");
-  outputLCM = 1;
-  outputDen = 1;
+  outputLeastCommonMultiple = 1;
+  outputDenominator = 1;
   for (int gi = 0; gi < this->generators.size; gi ++) {
     for (int mi = 0; mi < this->generators[gi].numberOfRows; mi ++) {
       for (int mj = 0; mj < this->generators[gi].numberOfColumns; mj ++) {
-        if (this->generators[gi](mi, mj).getDenominator() > outputDen) {
-          outputDen = this->generators[gi](mi, mj).getDenominator();
+        if (this->generators[gi](mi, mj).getDenominator() > outputDenominator) {
+          outputDenominator = this->generators[gi](mi, mj).getDenominator();
         }
-        outputLCM = LargeIntegerUnsigned::leastCommonMultiple(outputLCM, this->generators[gi](mi, mj).getDenominator());
+        outputLeastCommonMultiple = LargeIntegerUnsigned::leastCommonMultiple(
+          outputLeastCommonMultiple,
+          this->generators[gi](mi, mj).getDenominator()
+        );
       }
     }
   }
 }
-
 
 template <typename somegroup, typename Coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTodorsVersionRecursive(
@@ -2344,7 +2350,7 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersion(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>* startingIrrep
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::computeIrreducibleRepresentationsThomasVersion");
+  MacroRegisterFunctionWithName("FiniteGroup::computeIrreducibleRepresentationsThomasVersion");
   if (!startingIrrep) {
     if (this->irreps_grcam.size != 0) {
       startingIrrep = &(this->irreps_grcam[0]);
@@ -2354,7 +2360,8 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
       }
     }
     if (!startingIrrep || (startingIrrep->generators.size > 0 && startingIrrep->generators[0].numberOfRows == 1)) {
-      global.fatal << "Can't find a good starting irrep.  If you think you provided one, change the present assertion. "
+      global.fatal << "Can't find a good starting irrep. "
+      << "If you think you provided one, change the present assertion. "
       << global.fatal;
     }
   }

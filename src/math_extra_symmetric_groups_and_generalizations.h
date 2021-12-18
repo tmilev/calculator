@@ -640,12 +640,6 @@ typedef SemidirectProductElement<PermutationR2, ElementZ2N, HyperoctahedralBitsA
 template <>
 void ElementHyperoctahedralGroupR2::makeFromString(const std::string& in);
 
-//class HyperoctahedralElementR2: public SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>
-//{
-//  unsigned int hashFunction() const {return SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>::hashFunction();}
-//  static unsigned int hashFunction(const HyperoctahedralElementR2& in) {return in.hashFunction();}
-//};
-
 class HyperoctahedralGroupData {
 public:
   int dimension;
@@ -691,7 +685,6 @@ public:
   somestream& intoStream(somestream& outstream) const;
 };
 std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data);
-
 
 // Superseded by SemidirectProductGroup<PermutationR2, ElementZ2N, HyperoctahedralBitsAutomorphism>
 // A hyperoctahedral group is a semidirect product of a symmetric group and
@@ -814,13 +807,13 @@ public:
       }
     }
   }
-  void initialize(int theN) {
-    List<int> ll;
-    ll.setSize(theN);
-    for (int i = 0; i < theN; i ++) {
-      ll[i] = i;
+  void initialize(int numberOfElements) {
+    List<int> initialPermutation;
+    initialPermutation.setSize(numberOfElements);
+    for (int i = 0; i < numberOfElements; i ++) {
+      initialPermutation[i] = i;
     }
-    this->initialize(ll);
+    this->initialize(initialPermutation);
   }
   List<int>& operator*() {
     return l;
@@ -855,10 +848,10 @@ public:
   List<int> replacements;
   GeneratorPermutationsOfList<int> pads;
 
-  void initialize(const List<int>& l) {
-    replacements = l;
+  void initialize(const List<int>& input) {
+    replacements = input;
     replacements.quickSortAscending();
-    pads.initialize(l.size);
+    pads.initialize(input.size);
   }
 
   GeneratorPermutationR2sOnIndices& operator++() {
@@ -891,7 +884,7 @@ public:
     return pads.doneIterating();
   }
 
-  void ResetIteration() {
+  void resetIteration() {
     this->initialize(replacements);
   }
 };
@@ -926,8 +919,8 @@ public:
       }
       switch (stack[frame_pointer].program_counter) {
       case pcpositions::beginning:
-        this->generators[frame_pointer].ResetIteration();
-          break;
+        this->generators[frame_pointer].resetIteration();
+        break;
       case pcpositions::loop:
         if (this->generators[frame_pointer].doneIterating()) {
           stack[frame_pointer].program_counter = pcpositions::end;

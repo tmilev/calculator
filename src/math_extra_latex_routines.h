@@ -66,9 +66,9 @@ class LaTeXCrawler {
   List<std::string> theLectureNumbers;
   List<std::string> theLectureDesiredNames;
   List<std::string> slideTexInputCommands;
-  List<LaTeXCrawler::FileWithOption> slideFileNamesVirtualWithPatH;
+  List<LaTeXCrawler::FileWithOption> slideFileNamesVirtualWithPath;
   List<std::string> slideFileNamesWithLatexPathNoExtension;
-  List<std::string> slideFileNamesVirtualNoPathNoExtensioN;
+  List<std::string> slideFileNamesVirtualNoPathNoExtension;
   List<std::string> latexSnippets;
   void* ownerCalculator;
   bool flagAddSlideToSVN;
@@ -90,7 +90,11 @@ class LaTeXCrawler {
   void crawl();
   bool extractFileNamesPdfExists(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool buildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool buildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool buildTopicList(
+    int topicNumber,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
   void buildFreecalc();
   void crawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName);
   bool initializeFromGlobalVariables(std::stringstream* commentsOnFailure);

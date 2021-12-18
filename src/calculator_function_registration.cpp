@@ -2676,7 +2676,7 @@ void Calculator::initializeFunctionsStandard() {
     "CardanoFormula(x^3 + 2 x + 3);\n"
     "CardanoFormula(a x^3 + b x^2 + c x + d);\n",
     "CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT",
-    "SolveFor",
+    "CardanoFormula",
     innerStandard
   );
 
@@ -4693,7 +4693,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault,
+    CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault,
     this->opAlgebraicNumber(),
     this->opRational(),
     "Takes the radical of an algebraic number, if the algebraic number is a positive number"

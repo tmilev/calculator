@@ -681,7 +681,7 @@ void Course::reset() {
 }
 
 std::string CourseList::toHtml() {
-  return this->theCourses.toString();
+  return this->allCourses.toString();
 }
 
 bool CourseList::loadFromString(const std::string& input) {
@@ -692,50 +692,50 @@ bool CourseList::loadFromString(const std::string& input) {
   while (std::getline(tableReader, currentLine, '\n')) {
     if (StringRoutines::stringBeginsWith(currentLine, "Html:", &currentArgument)) {
       if (current.courseTemplate != "") {
-        this->theCourses.addOnTop(current);
+        this->allCourses.addOnTop(current);
         current.reset();
       }
       current.courseTemplate = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::stringBeginsWith(currentLine, "Topics:", &currentArgument)) {
       if (current.courseTopicsNoFolder != "") {
-        this->theCourses.addOnTop(current);
+        this->allCourses.addOnTop(current);
         current.reset();
       }
       current.courseTopicsNoFolder = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::stringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (current.title != "") {
-        this->theCourses.addOnTop(current);
+        this->allCourses.addOnTop(current);
         current.reset();
       }
       current.title = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::stringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
       if (current.flagRoughDraft != "") {
-        this->theCourses.addOnTop(current);
+        this->allCourses.addOnTop(current);
         current.reset();
       }
       current.flagRoughDraft = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
   }
   if (!current.isEmpty()) {
-    this->theCourses.addOnTop(current);
+    this->allCourses.addOnTop(current);
   }
   return true;
 }
 
 bool CourseList::load() {
-  std::string theTopicFile;
+  std::string topicFile;
   std::stringstream commentsOnFailure;
   if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
-    "/coursesavailable/default.txt", theTopicFile, &commentsOnFailure
+    "/coursesavailable/default.txt", topicFile, &commentsOnFailure
   )) {
     commentsOnFailure << "Failed to fetch available courses from /coursesavailable/default.txt. ";
     this->errorMessage = commentsOnFailure.str();
     return false;
   }
-  return this->loadFromString(theTopicFile);
+  return this->loadFromString(topicFile);
 }
 
 JSData CourseList::toJSON() {
@@ -744,8 +744,8 @@ JSData CourseList::toJSON() {
     output[WebAPI::result::error] = this->errorMessage;
   }
   output["courses"].elementType = JSData::token::tokenArray;
-  for (int i = 0; i < this->theCourses.size; i ++) {
-    Course& currentCourse = this->theCourses[i];
+  for (int i = 0; i < this->allCourses.size; i ++) {
+    Course& currentCourse = this->allCourses[i];
     output["courses"].listObjects.addOnTop(currentCourse.toJSON());
   }
   return output;
@@ -2405,7 +2405,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   }
   theProblem.currentUser.computePointsEarned(
     theProblem.currentUser.problemData.keys,
-    &theProblem.topics.theTopics,
+    &theProblem.topics.topics,
     comments
   );
   List<std::string> userLabels;
@@ -2428,9 +2428,9 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->userNames.setSize(0);
   this->userInfos.setSize(0);
   this->scoresBreakdown.setSize(0);
-  this->numStudentsSolvedEntireTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
-  this->numStudentsSolvedPartOfTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
-  this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
+  this->numStudentsSolvedEntireTopic.initializeFillInObject(this->theProblem.topics.topics.size(), 0);
+  this->numStudentsSolvedPartOfTopic.initializeFillInObject(this->theProblem.topics.topics.size(), 0);
+  this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->theProblem.topics.topics.size(), 0);
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = global.userDefault.sectionComputed;
   this->currentCourse = global.getWebInput(WebAPI::problem::courseHome);
@@ -2477,16 +2477,16 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     );
     currentUserRecord.currentUser.computePointsEarned(
       theProblem.problemNamesNoTopics,
-      &theProblem.topics.theTopics,
+      &theProblem.topics.topics,
       comments
     );
     this->scoresBreakdown.lastObject()->clear();
-    for (int j = 0; j < theProblem.topics.theTopics.size(); j ++) {
-      TopicElement& currentTopic = theProblem.topics.theTopics.values[j];
+    for (int j = 0; j < theProblem.topics.topics.size(); j ++) {
+      TopicElement& currentTopic = theProblem.topics.topics.values[j];
       Rational currentPts = currentTopic.totalPointsEarned;
       Rational maxPts = currentTopic.maxPointsInAllChildren;
       this->scoresBreakdown.lastObject()->setKeyValue(
-        theProblem.topics.theTopics.keys[j], currentPts
+        theProblem.topics.topics.keys[j], currentPts
       );
       if (maxPts == currentPts) {
         this->numStudentsSolvedEntireTopic[j] ++;
@@ -2515,9 +2515,9 @@ std::string WebAPIResponse::getScoresInCoursePage() {
   out << "Section: " << theScores.currentSection << ". ";
   out << "<script type =\"text/javascript\">\n";
   out << "studentScoresInHomePage = new Array("
-  << theScores.theProblem.topics.theTopics.size() << ");\n";
-  for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
+  << theScores.theProblem.topics.topics.size() << ");\n";
+  for (int i = 0; i < theScores.theProblem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.topics.topics.values[i];
     out << "studentScoresInHomePage[" << i << "] = new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight) {
       out << "studentScoresInHomePage[" << i << "].weightsOK = false;\n";
@@ -2561,8 +2561,8 @@ std::string WebAPIResponse::toStringUserScores() {
   << theScores.currentCourse << "\n<br>\n";
   out << "<table class =\"scoreTable\"><tr><th rowspan =\"3\">User</th>"
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
-  for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
+  for (int i = 0; i < theScores.theProblem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.topics.topics.values[i];
     if (
       currentElt.problemFileName != "" ||
       currentElt.type != TopicElement::types::chapter
@@ -2581,8 +2581,8 @@ std::string WebAPIResponse::toStringUserScores() {
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
+  for (int i = 0; i < theScores.theProblem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.topics.topics.values[i];
     if (currentElt.problemFileName != "" || currentElt.type != TopicElement::types::section) {
       continue;
     }
@@ -2595,8 +2595,8 @@ std::string WebAPIResponse::toStringUserScores() {
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[i];
+  for (int i = 0; i < theScores.theProblem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.topics.topics.values[i];
     if (
       currentElt.problemFileName == "" &&
       currentElt.type != TopicElement::types::problem &&
@@ -2627,8 +2627,8 @@ std::string WebAPIResponse::toStringUserScores() {
   out
   << "<td>" << theScores.theProblem.currentUser.pointsMax.getDoubleValue()
   << "</td>";
-  for (int j = 0; j < theScores.theProblem.topics.theTopics.size(); j ++) {
-    TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[j];
+  for (int j = 0; j < theScores.theProblem.topics.topics.size(); j ++) {
+    TopicElement& currentElt = theScores.theProblem.topics.topics.values[j];
     if (currentElt.problemFileName != "") {
       continue;
     }
@@ -2645,8 +2645,8 @@ std::string WebAPIResponse::toStringUserScores() {
     out << "<tr><td>" << theScores.userNames[i] << "</td>"
     << "<td>" << theScores.userInfos[i] << "</td>"
     << "<td>" << theScores.userScores[i].getDoubleValue() << "</td>";
-    for (int j = 0; j < theScores.theProblem.topics.theTopics.size(); j ++) {
-      TopicElement& currentElt = theScores.theProblem.topics.theTopics.values[j];
+    for (int j = 0; j < theScores.theProblem.topics.topics.size(); j ++) {
+      TopicElement& currentElt = theScores.theProblem.topics.topics.values[j];
       if (currentElt.problemFileName != "") {
         continue;
       }
@@ -2657,7 +2657,7 @@ std::string WebAPIResponse::toStringUserScores() {
         continue;
       }
       if (theScores.scoresBreakdown[i].contains(
-        theScores.theProblem.topics.theTopics.keys[j]
+        theScores.theProblem.topics.topics.keys[j]
       )) {
         out << "<td>"
         << theScores.scoresBreakdown[i].values[j].getDoubleValue()

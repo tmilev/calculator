@@ -233,11 +233,11 @@ bool CalculatorHTML::mergeOneProblemAdminData(
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::mergeOneProblemAdminData");
-  if (!this->topics.theTopics.contains(inputProblemName)) {
+  if (!this->topics.topics.contains(inputProblemName)) {
     commentsOnFailure << "Did not find " << inputProblemName
     << " among the list of topics/problems. ";
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
-      commentsOnFailure << "The topics are: " << this->topics.theTopics.toStringHtml();
+      commentsOnFailure << "The topics are: " << this->topics.topics.toStringHtml();
     }
     return false;
   }
@@ -430,9 +430,9 @@ bool CalculatorHTML::loadMe(
     if (!this->loadDatabaseInfo(errorStream)) {
       global.comments << "Error loading your problem from the database. " << errorStream.str();
     }
-    for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    for (int i = 0; i < this->topics.topics.size(); i ++) {
       this->computeDeadlinesAllSectionsNoInheritance(
-        this->topics.theTopics.values[i]
+        this->topics.topics.values[i]
       );
     }
   }
@@ -470,8 +470,10 @@ std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
     } else {
       out << "<b>Your random seed must have been reset. </b>";
     }
-    out << "<br><b style ='color:red'>If the problem persists after a couple of page refreshes, "
-    << "it's a bug. Please take a screenshot and email the site administrator/your instructor. </b>";
+    out << "<br><b style ='color:red'>If the problem persists "
+    << "after a couple of page refreshes, "
+    << "it's a bug. Please take a screenshot and email "
+    << "the site administrator/your instructor. </b>";
     out
     << "Generated in "
     << MathRoutines::reducePrecision(global.getElapsedSeconds() - startTime)
@@ -1609,13 +1611,13 @@ std::string CalculatorHTML::getDeadline(
   if (!global.flagDatabaseCompiled) {
     return "While getting deadline: database not compiled";
   }
-  int topicIndex = this->topics.theTopics.getIndex(problemName);
+  int topicIndex = this->topics.topics.getIndex(problemName);
   if (topicIndex == - 1) {
     return problemName + " not found in topic list. ";
   }
-  TopicElement& currentTopic = this->topics.theTopics.getValueCreateEmpty(problemName);
+  TopicElement& currentTopic = this->topics.topics.getValueCreateEmpty(problemName);
   for (int i = currentTopic.parentTopics.size - 1; i >= 0; i --) {
-    const std::string& containerName = this->topics.theTopics.keys[currentTopic.parentTopics[i]];
+    const std::string& containerName = this->topics.topics.keys[currentTopic.parentTopics[i]];
     if (this->currentUser.problemData.contains(containerName)) {
       ProblemDataAdministrative& currentProblem =
       this->currentUser.problemData.getValueCreateNoInitialization(containerName).adminData;
@@ -3083,10 +3085,10 @@ void CalculatorHTML::computeProblemLabel() {
   ) {
     return;
   }
-  if (!this->topics.theTopics.contains(this->fileName)) {
+  if (!this->topics.topics.contains(this->fileName)) {
     return;
   }
-  TopicElement& current = this->topics.theTopics.getValueCreateEmpty(this->fileName);
+  TopicElement& current = this->topics.topics.getValueCreateEmpty(this->fileName);
   current.computeLinks(*this, true);
   this->outputProblemLabel = current.problemNumberString;
   this->outputProblemTitle = current.title;
@@ -3161,8 +3163,8 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& interpreter, std::strin
     global.requestType != "template" &&
     global.requestType != "templateNoLogin"
   ) {
-    if (this->topics.theTopics.contains(this->fileName)) {
-      TopicElement& current = this->topics.theTopics.getValueCreateEmpty(this->fileName);
+    if (this->topics.topics.contains(this->fileName)) {
+      TopicElement& current = this->topics.topics.getValueCreateEmpty(this->fileName);
       current.computeLinks(*this, true);
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
     }
@@ -3449,13 +3451,13 @@ TopicElementParser::TopicElementParser() {
 
 void TopicElementParser::addTopic(TopicElement& inputElt, int index) {
   MacroRegisterFunctionWithName("TopicElement::addTopic");
-  if (this->theTopics.contains(inputElt.id)) {
+  if (this->topics.contains(inputElt.id)) {
     std::stringstream out;
     out << index << ". [Error] Element id: " << inputElt.id << " already present. ";
     inputElt.id = out.str();
     inputElt.title = out.str();
   }
-  this->theTopics.setKeyValue(inputElt.id, inputElt);
+  this->topics.setKeyValue(inputElt.id, inputElt);
 }
 
 void TopicElement::makeError(const std::string& message) {
@@ -3501,11 +3503,11 @@ void TopicElement::reset() {
 
 bool TopicElementParser::checkConsistencyParsed() {
   MacroRegisterFunctionWithName("TopicElementParser::checkConsistencyParsed");
-  for (int i = 0; i < this->theTopics.size(); i ++) {
-    if (this->theTopics.values[i].type == TopicElement::types::problem) {
-      if (this->theTopics.values[i].immediateChildren.size > 0) {
+  for (int i = 0; i < this->topics.size(); i ++) {
+    if (this->topics.values[i].type == TopicElement::types::problem) {
+      if (this->topics.values[i].immediateChildren.size > 0) {
         global.fatal << "Topic element: "
-        << this->theTopics.values[i].toString()
+        << this->topics.values[i].toString()
         << " has non-zero immediate children. " << global.fatal;
         return false;
       }
@@ -3516,8 +3518,8 @@ bool TopicElementParser::checkConsistencyParsed() {
 
 bool TopicElementParser::checkNoErrors(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TopicElementParser::checkNoErrors");
-  for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.values[i];
+  for (int i = 0; i < this->topics.size(); i ++) {
+    TopicElement& current = this->topics.values[i];
     if (current.isError()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Element index "
@@ -3629,8 +3631,8 @@ bool TopicElementParser::checkProblemsOpen(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("TopicElementParser::checkProblemsOpen");
-  for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.values[i];
+  for (int i = 0; i < this->topics.size(); i ++) {
+    TopicElement& current = this->topics.values[i];
     if (!current.problemOpensIfAvailable(commentsOnFailure)) {
       return false;
     }
@@ -3643,8 +3645,8 @@ bool TopicElementParser::checkTopicPdfs(
 ) {
   MacroRegisterFunctionWithName("TopicElementParser::checkTopicPdfs");
   this->checkInitialization();
-  for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.values[i];
+  for (int i = 0; i < this->topics.size(); i ++) {
+    TopicElement& current = this->topics.values[i];
     if (!current.pdfsOpenIfAvailable(*this->owner, commentsOnFailure)) {
       return false;
     }
@@ -3961,8 +3963,8 @@ void TopicElementParser::parseTopicList(
 
 void TopicElementParser::computeTopicNumbers() {
   List<int> currentProblemNumber;
-  for (int i = 0; i < this->theTopics.size(); i ++) {
-    TopicElement& current = this->theTopics.values[i];
+  for (int i = 0; i < this->topics.size(); i ++) {
+    TopicElement& current = this->topics.values[i];
     int labelsNeeded = current.type - TopicElement::types::chapter + 1;
     if (labelsNeeded > 4 || labelsNeeded < 0) {
       labelsNeeded = 4;
@@ -3985,8 +3987,8 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
   MacroRegisterFunctionWithName("computeTopicHierarchyPartOne");
   List<int> parentChain;
   List<int> parentTypes;
-  for (int i = 0; i < this->theTopics.size(); i ++) {
-    int currentAdjustedtype = this->theTopics.values[i].type;
+  for (int i = 0; i < this->topics.size(); i ++) {
+    int currentAdjustedtype = this->topics.values[i].type;
     if (
       currentAdjustedtype != TopicElement::types::chapter &&
       currentAdjustedtype != TopicElement::types::section &&
@@ -4001,12 +4003,12 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
       }
     }
     if (parentChain.size > 0) {
-      TopicElement& parent = this->theTopics.values[*parentChain.lastObject()];
+      TopicElement& parent = this->topics.values[*parentChain.lastObject()];
       parent.immediateChildren.addOnTop(i);
     }
-    this->theTopics.values[i].parentTopics.setSize(0);
+    this->topics.values[i].parentTopics.setSize(0);
     for (int j = 0; j < parentChain.size; j ++) {
-      this->theTopics.values[i].parentTopics.addOnTop(parentChain[j]);
+      this->topics.values[i].parentTopics.addOnTop(parentChain[j]);
     }
     parentChain.addOnTop(i);
     parentTypes.addOnTop(currentAdjustedtype);
@@ -4015,8 +4017,8 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
 
 void TopicElementParser::computeTopicHierarchyPartTwo() {
   MacroRegisterFunctionWithName("TopicElementParser::computeTopicHierarchyPartTwo");
-  for (int i = this->theTopics.size() - 1; i >= 0; i --) {
-    TopicElement& currentElt = this->theTopics.values[i];
+  for (int i = this->topics.size() - 1; i >= 0; i --) {
+    TopicElement& currentElt = this->topics.values[i];
     if (currentElt.problemFileName != "") {
       continue;
     }
@@ -4029,7 +4031,7 @@ void TopicElementParser::computeTopicHierarchyPartTwo() {
     currentElt.flagContainsProblemsNotInSubsection = false;
     currentElt.totalSubSectionsUnderME = 0;
     for (int j = 0; j < currentElt.immediateChildren.size; j ++) {
-      TopicElement& currentChild = this->theTopics.values[currentElt.immediateChildren[j]];
+      TopicElement& currentChild = this->topics.values[currentElt.immediateChildren[j]];
       if (currentChild.type == TopicElement::types::topic) {
         currentElt.totalSubSectionsUnderME ++;
         currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
@@ -4068,29 +4070,55 @@ void CalculatorHTML::interpretAccountInformationLinks(SyntacticElementHTML& inpu
   return;
 }
 
+bool CalculatorHTML::loadAndParseTopicIndex(int index, std::stringstream& comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::loadAndParseTopicIndex");
+  if (index == 0) {
+    return CalculatorHTML::loadAndParseTopicList(comments);
+  }
+  index --;
+  CourseList courseList;
+  if (!courseList.load()) {
+    comments << "Failed to log course list. ";
+    return false;
+  }
+  if (index < 0 || index >= courseList.allCourses.size) {
+    comments << "Index out of range. ";
+    return false;
+  }
+  Course course = courseList.allCourses[index];
+  this->topicListFileName = course.courseTopicsWithFolder();
+  this->courseHome = course.title;
+  return CalculatorHTML::loadAndParseTopicList(comments);
+}
+
 bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::loadAndParseTopicList");
-  if (this->topics.theTopics.size() != 0) {
+  if (this->topics.topics.size() != 0) {
     return true;
   }
   if (this->topicListContent == "") {
     if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
       this->topicListFileName, this->topicListContent, &comments
     )) {
-      comments << "Failed to load the topic list associated with this course. "
-      << "Go to ``select course'' from the menu to see a list of available courses. ";
+      comments
+      << "Failed to load the topic list associated with this course. "
+      << "Go to ``select course'' from the menu "
+      << "to see a list of available courses. ";
       return false;
     }
   }
   if (this->topicListContent == "") {
-    comments  << "Topic list empty. Topic list file name: " << this->topicListFileName << ". ";
+    comments  << "Topic list empty. Topic list file name: "
+    << this->topicListFileName << ". ";
     return false;
   }
   this->topics.parseTopicList(this->topicListContent);
   this->problemNamesNoTopics.clear();
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    if (this->topics.theTopics.values[i].problemFileName != "") {
-      this->problemNamesNoTopics.addOnTop(this->topics.theTopics.values[i].problemFileName);
+  for (int i = 0; i < this->topics.topics.size(); i ++) {
+    if (this->topics.topics.values[i].problemFileName != "") {
+      this->problemNamesNoTopics.addOnTop(
+        this->topics.topics.values[i].problemFileName
+      );
     }
   }
   return true;
@@ -4110,8 +4138,8 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   }
   output["topicBundleFile"] = topicBundleFiles;
   output["children"].elementType = JSData::token::tokenArray;
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = this->topics.theTopics.values[i];
+  for (int i = 0; i < this->topics.topics.size(); i ++) {
+    TopicElement& currentElt = this->topics.topics.values[i];
     if (currentElt.type == TopicElement::types::chapter) {
       output["children"].listObjects.addOnTop(currentElt.toJSON(*this));
     }
@@ -4149,17 +4177,17 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(std::stringstream& comments
     !global.userStudentVieWOn() &&
     global.requestType != "templateNoLogin";
     HashedList<std::string, MathRoutines::hashString> gradableProblems;
-    for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-      if (this->topics.theTopics.values[i].type == TopicElement::types::problem) {
-        gradableProblems.addOnTopNoRepetition(this->topics.theTopics.values[i].id);
-        if (this->topics.theTopics.values[i].immediateChildren.size > 0) {
-          global.fatal << "Error: problem " << this->topics.theTopics.values[i].toString()
+    for (int i = 0; i < this->topics.topics.size(); i ++) {
+      if (this->topics.topics.values[i].type == TopicElement::types::problem) {
+        gradableProblems.addOnTopNoRepetition(this->topics.topics.values[i].id);
+        if (this->topics.topics.values[i].immediateChildren.size > 0) {
+          global.fatal << "Error: problem " << this->topics.topics.values[i].toString()
           << " has children topics which is not allowed. "
           << global.fatal;
         }
       }
     }
-    this->currentUser.computePointsEarned(gradableProblems, &this->topics.theTopics, commentsOnFailure);
+    this->currentUser.computePointsEarned(gradableProblems, &this->topics.topics, commentsOnFailure);
   }
   this->topics.initializeElementTypes();
   return true;
@@ -4427,7 +4455,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
     << this->immediateChildren.toStringCommaDelimited() << global.fatal;
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
-    TopicElement& currentChild = owner.topics.theTopics.values[this->immediateChildren[i]];
+    TopicElement& currentChild = owner.topics.topics.values[this->immediateChildren[i]];
     output["children"].listObjects.addOnTop(currentChild.toJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;

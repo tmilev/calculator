@@ -358,9 +358,12 @@ void Calculator::initializeFunctionsExtra() {
     "BuildSlidesInTopicList",
     CalculatorFunctionsFreecalc::buildFreecalcSlidesOnTopic,
     "",
-    "Builds all slides in the current topic list. Available to logged-in admins only. ",
+    "Builds all slides in the topic list. "
+    "Available to logged-in admins only. "
+    "Use the topic number as input, or "
+    "0 for the current topic. ",
     "BuildSlidesInTopicList (0);",
-    "CalculatorFunctions::innerBuildFreecalcSlidesOnTopic",
+    "CalculatorFunctions::buildFreecalcSlidesOnTopic",
     "BuildSlidesInTopicList",
     innerAdminNoTest
   );

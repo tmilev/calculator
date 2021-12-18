@@ -3559,7 +3559,7 @@ SolveFor(x, x^3 - 3x^2 - x/2 + 5);
 ```
 Tries to solve a polynomial equation with respect to a variable. The first argument gives the variable expression (arbitrary expressions allowed) and the second argument gives the polynomial. At the moment the calculator only knows the quadratic formula but Cardano's formula and the fourth degree formula will be implemented when need arises. The solutions of the equation are returned in a list (empty list for no solution). Solutions with multiplicity higher than one are repeated. 
 
-*CardanoFormula* [SolveFor] {CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT}. 
+*CardanoFormula* [CardanoFormula] {CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CardanoFormula%28x%5e3%20%2b%20p%20x%20%2b%20q%3d0%29%3b%5cnCardanoFormula%28x%5e3%20%2b%202%20x%20%2b%203%29%3b%5cnCardanoFormula%28a%20x%5e3%20%2b%20b%20x%5e2%20%2b%20c%20x%20%2b%20d%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CardanoFormula(x^3 + p x + q=0);
@@ -5502,12 +5502,12 @@ BuildFreecalcWithSlides("freecalc/homework/referenceallproblemsbycourse/calculus
 ```
 Same as BuildFreeCalc but attempts to also build individual slides. 
 
-*BuildSlidesInTopicList* [BuildSlidesInTopicList] {CalculatorFunctions::innerBuildFreecalcSlidesOnTopic}. (admin only) 
+*BuildSlidesInTopicList* [BuildSlidesInTopicList] {CalculatorFunctions::buildFreecalcSlidesOnTopic}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BuildSlidesInTopicList%20%280%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 BuildSlidesInTopicList (0);
 ```
-Builds all slides in the current topic list. Available to logged-in admins only. 
+Builds all slides in the topic list. Available to logged-in admins only. Use the topic number as input, or 0 for the current topic. 
 
 *SuffixNotationForPostScript* [SuffixNotationForPostScript] {CalculatorFunctions::innerSuffixNotationForPostScript}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22suffixNotationForPostScript%7b%7d%28%281%2f3%20%2b%20a%20%2b%20b%29%20%2a%20c%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

@@ -418,17 +418,20 @@ bool TopicElementParser::Test::defaultTopicListsOKCrashOnFailure() {
 
 bool TopicElementParser::Test::defaultPdfsOKCrashOnFailure() {
   TopicElementParser::Test tester;
-  if (!tester.defaultPdfsOK()) {
+  int whichTopic = 0;
+  if (!tester.defaultPdfsOK(whichTopic)) {
+    std::stringstream topicBuildCommand;
+    topicBuildCommand << "BuildSlidesInTopicList(" << whichTopic << ")";
     global.fatal << "Default pdfs are broken. " << tester.comments.str()
     << "\nYou may want to regenerate them using command: "
     << "https://localhost:8166/"
-    << HtmlRoutines::getCalculatorComputationURL("1+1")
+    << HtmlRoutines::getCalculatorComputationURL(topicBuildCommand.str())
     << global.fatal;
   }
   return false;
 }
 
-bool TopicElementParser::Test::defaultPdfsOK() {
+bool TopicElementParser::Test::defaultPdfsOK(int& whichTopic) {
  MacroRegisterFunctionWithName("TopicElementParser::Test::defaultPdfsOK");
   CourseList courses;
   if (!courses.load()) {
@@ -436,9 +439,9 @@ bool TopicElementParser::Test::defaultPdfsOK() {
     << courses.errorMessage;
     return false;
   }
-  for (int i = 0; i < courses.theCourses.size; i ++) {
+  for (whichTopic = 0; whichTopic < courses.allCourses.size; whichTopic ++) {
     CalculatorHTML owner;
-    owner.topicListFileName = courses.theCourses[i].courseTopicsWithFolder();
+    owner.topicListFileName = courses.allCourses[whichTopic].courseTopicsWithFolder();
     if (!owner.loadAndParseTopicList(this->comments)) {
       this->comments << "Failed to load course "
       << owner.topicListFileName << ". ";
@@ -460,9 +463,9 @@ bool TopicElementParser::Test::defaultTopicListsOK() {
     << courses.errorMessage;
     return false;
   }
-  for (int i = 0; i < courses.theCourses.size; i ++) {
+  for (int i = 0; i < courses.allCourses.size; i ++) {
     CalculatorHTML owner;
-    owner.topicListFileName = courses.theCourses[i].courseTopicsWithFolder();
+    owner.topicListFileName = courses.allCourses[i].courseTopicsWithFolder();
     if (!owner.loadAndParseTopicList(this->comments)) {
       this->comments << "Failed to load course "
       << owner.topicListFileName << ". ";
@@ -480,7 +483,7 @@ bool TopicElementParser::Test::defaultTopicListsOK() {
     }
     this->comments << "Topic list: "
     << owner.topicListFileName << " with "
-    << owner.topics.theTopics.size()
+    << owner.topics.topics.size()
     << " topics <b style = 'color:green'>looks ok</b>.<br>";
   }
   return true;

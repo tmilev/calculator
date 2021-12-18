@@ -4271,7 +4271,7 @@ void GlobalVariables::configurationProcess() {
   ) {
     global << Logger::green << "Daemon self-monitoring turned on. "
     << Logger::red
-    << "This turns OFF server self-monitoring throug http pings. "
+    << "This turns OFF server self-monitoring through http pings. "
     << Logger::endL;
   }
   if (
@@ -4283,7 +4283,7 @@ void GlobalVariables::configurationProcess() {
     global.flagLocalhostConnectionMonitor = false;
     if (!global.flagRunningConsoleRegular && !global.flagRunningConsoleTest) {
       global
-      << Logger::red << "WARNING: server auto-monitoring is off. " << Logger::endL;
+      << Logger::red << "WARNING: server http self-pings are off. " << Logger::endL;
     }
   }
   if (global.flagServerDetailedLog) {
@@ -4343,7 +4343,7 @@ void GlobalVariables::configurationProcess() {
       Configuration::processMonitoringBanned
     ].isTrueRepresentationInJSON()
   ) {
-    global << Logger::blue << "Process monitoring banned from configuration.json. " << Logger::endL;
+    global << Logger::blue << "Worker process monitoring banned from configuration.json. " << Logger::endL;
     WebServer::turnProcessMonitoringOff();
   } else {
     WebServer::turnProcessMonitoringOn();

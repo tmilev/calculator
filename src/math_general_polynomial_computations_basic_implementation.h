@@ -677,23 +677,7 @@ bool Polynomial<Coefficient>::operator>(const Polynomial<Coefficient>& other) co
   if (this->totalDegree() < other.totalDegree()) {
     return false;
   }
-  MonomialPolynomial thisMaximalMonomial, otherMaximalMonomial;
-  List<MonomialPolynomial>::Comparator& monomialOrder = MonomialPolynomial::orderDefault();
-  int thisMaxMonIndex = this->getIndexLeadingMonomial(&thisMaximalMonomial, nullptr, &monomialOrder);
-  int otherMaxMonIndex = other.getIndexLeadingMonomial(&otherMaximalMonomial, nullptr, &monomialOrder);
-  if (thisMaximalMonomial > otherMaximalMonomial) {
-    return true;
-  }
-  if (otherMaximalMonomial > thisMaximalMonomial) {
-    return false;
-  }
-  if (this->coefficients[thisMaxMonIndex] > other.coefficients[otherMaxMonIndex]) {
-    return true;
-  }
-  if (other.coefficients[otherMaxMonIndex] > this->coefficients[thisMaxMonIndex]) {
-    return false;
-  }
-  return false;
+  return this->::LinearCombination<MonomialPolynomial, Coefficient>::operator>(other);
 }
 
 template <class Coefficient>

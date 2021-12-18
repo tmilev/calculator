@@ -1310,10 +1310,10 @@ bool CalculatorFunctionsBinaryOps::powerPolynomialModPModuloPolynomialModPBySmal
   return output.assignValueWithContext(calculator, base, input[1].getContext());
 }
 
-bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
+bool CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;

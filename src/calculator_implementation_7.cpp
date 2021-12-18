@@ -7395,13 +7395,19 @@ bool CalculatorFunctionsFreecalc::buildFreecalcSlidesOnTopic(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(calculator, out.str());
   }
-  (void) input;
+  if (input.size() < 2) {
+    return false;
+  }
+  int topicNumber = 0;
+  if (!input[1].isSmallInteger(&topicNumber)) {
+    return calculator << "Expected a topic number, got: " << input[1].toString();
+  }
+
   LaTeXCrawler crawler;
   crawler.flagBuildSingleSlides = true;
   crawler.ownerCalculator = &calculator;
-  //theCrawler.topicListToBuild = input.getValue<std::string>();
   std::stringstream out;
-  crawler.buildTopicList(&out, &out);
+  crawler.buildTopicList(topicNumber, &out, &out);
   return output.assignValue(calculator, out.str());
 }
 

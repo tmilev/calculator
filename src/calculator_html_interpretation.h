@@ -28,7 +28,7 @@ public:
     bool accountIfStateChanger(CalculatorHTML& owner) const;
   };
   CalculatorHTML* owner;
-  MapList<std::string, TopicElement, MathRoutines::hashString> theTopics;
+  MapList<std::string, TopicElement, MathRoutines::hashString> topics;
   MapList<std::string, List<TopicElementParser::TopicLine>, MathRoutines::hashString> knownTopicBundles;
   HashedList<std::string, MathRoutines::hashString> loadedTopicBundleFiles;
 
@@ -67,7 +67,7 @@ public:
     static bool all();
     static bool defaultTopicListsOKCrashOnFailure();
     static bool defaultPdfsOKCrashOnFailure();
-    bool defaultPdfsOK();
+    bool defaultPdfsOK(int& whichTopic);
     bool defaultTopicListsOK();
   };
 };
@@ -347,6 +347,7 @@ public:
     const std::string& inputRandomSeed,
     std::stringstream* commentsOnFailure
   );
+  bool loadAndParseTopicIndex(int index, std::stringstream& comments);
   bool loadAndParseTopicList(std::stringstream& comments);
   bool loadDatabaseInfo(std::stringstream& comments);
   std::string cleanUpFileName(const std::string& inputLink);
@@ -577,7 +578,7 @@ public:
 
 class CourseList {
 public:
-  List<Course> theCourses;
+  List<Course> allCourses;
   std::string errorMessage;
   bool loadFromString(const std::string& input);
   std::string toHtml();

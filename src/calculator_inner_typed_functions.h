@@ -137,7 +137,7 @@ public:
   static bool powerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool powerAlgebraicNumberBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& calculator, const Expression& input, Expression& output);
+  static bool radicalAlgebraicNumberPositiveDefault(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerElementWeylAlgebraBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);

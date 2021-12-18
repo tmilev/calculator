@@ -858,9 +858,9 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   minusMinimalPolynomialMinusMaximalMonomial *= - 1;
   MatrixTensor<Rational> currentCoefficientMatrixForm;
   for (int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++) {
-    AlgebraicNumber& currentCoeff = minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
+    AlgebraicNumber& currentCoefficient = minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
     const MonomialPolynomial& currentMonomial = minusMinimalPolynomialMinusMaximalMonomial[i];
-    this->getMultiplicationBy(currentCoeff, currentCoefficientMatrixForm);
+    this->getMultiplicationBy(currentCoefficient, currentCoefficientMatrixForm);
     for (int j = 0; j < currentCoefficientMatrixForm.size(); j ++) {
       int relationRowIndex = currentCoefficientMatrixForm[j].vIndex;
       int relationColumnIndex = currentCoefficientMatrixForm[j].dualIndex;
@@ -914,8 +914,6 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   // the solution of our polynomial and so we want to know the image of
   // x as that will give us the solution in question.
   this->contractBasesIfRedundant(backUpCopy, &outputRoot);
-
-
   // Sanity check code here:
   PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.setSize(1);

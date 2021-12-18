@@ -194,34 +194,34 @@ CalculatorHTML::Test::OneProblemTest::OneAnswer::OneAnswer() {
 }
 
 bool CalculatorHTML::Test::OneProblemTest::run() {
-  CalculatorHTML theProblem;
+  CalculatorHTML problem;
   std::stringstream commentsOnFailure;
   std::stringstream randomSeedStringStarting;
   randomSeedStringStarting << this->randomSeed;
-  theProblem.fileName = this->fileName;
+  problem.fileName = this->fileName;
   this->flagSuccess = false;
   StateMaintainer<MapList<std::string, std::string, MathRoutines::hashString> >
   maintainArguments(global.webArguments);
-  if (!theProblem.loadMe(false, randomSeedStringStarting.str(), &commentsOnFailure)) {
+  if (!problem.loadMe(false, randomSeedStringStarting.str(), &commentsOnFailure)) {
     this->errorLoad = commentsOnFailure.str();
     return this->flagSuccess;
   }
-  this->flagInterpretationSuccess = theProblem.interpretHtml(&commentsOnFailure);
+  this->flagInterpretationSuccess = problem.interpretHtml(&commentsOnFailure);
 
   if (!this->flagInterpretationSuccess) {
     this->errorInterpretation = commentsOnFailure.str();
     return this->flagSuccess;
   }
   std::stringstream randomSeedStream;
-  randomSeedStream << theProblem.problemData.randomSeeD;
-  this->answers.setSize(theProblem.problemData.answers.size());
+  randomSeedStream << problem.problemData.randomSeed;
+  this->answers.setSize(problem.problemData.answers.size());
   this->flagAllBuiltInAnswersOK = true;
-  global.setWebInput(WebAPI::problem::fileName, theProblem.fileName);
+  global.setWebInput(WebAPI::problem::fileName, problem.fileName);
   global.setWebInput(WebAPI::problem::randomSeed, randomSeedStream.str());
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
-    current.answerId = theProblem.problemData.answers.values[j].answerId;
+    current.answerId = problem.problemData.answers.values[j].answerId;
     current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
     global.setWebInput(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall = WebAPIResponse::getAnswerOnGiveUp(

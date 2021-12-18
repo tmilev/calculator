@@ -148,7 +148,7 @@ public:
   std::string mathQuillPanelOptions;
   //////////////////////////////////////
   std::string idSpanSolution;
-  std::string idMQField;
+  std::string idMathEquationField;
   std::string idMQFieldLocation;
   std::string idMQButtonPanelLocation;
   std::string currentAnswerURLed;
@@ -191,7 +191,7 @@ public:
     return output;
   }
   bool flagRandomSeedGiven;
-  uint32_t randomSeeD;
+  uint32_t randomSeed;
   bool flagProblemWeightIsOK;
   Rational points;
   ProblemDataAdministrative adminData;

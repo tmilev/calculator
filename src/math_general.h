@@ -677,7 +677,10 @@ public:
     this->actMultiplyVectorRowOnTheRight(standsOnTheLeft, output);
     standsOnTheLeft = output;
   }
-  void actMultiplyVectorRowOnTheRight(const Vector<Coefficient>& standsOnTheLeft, Vector<Coefficient>& output) const {
+  void actMultiplyVectorRowOnTheRight(
+    const Vector<Coefficient>& standsOnTheLeft,
+    Vector<Coefficient>& output
+  ) const {
     if (&standsOnTheLeft == &output) {
       global.fatal << "In actMultiplyVectorRowOnTheRight: output not allowed to equal input. " << global.fatal;
     }
@@ -695,7 +698,7 @@ public:
     }
   }
   void getNSquaredVectorForm(Vector<Coefficient>& output) {
-    output.setSize(this->numberOfRows*this->numberOfColumns);
+    output.setSize(this->numberOfRows * this->numberOfColumns);
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
         output.objects[i * this->numberOfRows + j] = this->elements[i][j];
@@ -734,7 +737,6 @@ public:
   static unsigned int hashFunction(const Matrix<Coefficient>& input) {
     unsigned int result = 0;
     int hashCounter = 0;
-
     for (int i = 0; i < input.numberOfRows; i ++) {
       for (int j = 0; j < input.numberOfColumns; j ++) {
         result += input.elements[i][j].hashFunction() *
@@ -817,7 +819,10 @@ public:
       }
     }
   }
-  void actOnMonomialAsDifferentialOperator(const MonomialPolynomial& input, Polynomial<Rational>& output);
+  void actOnMonomialAsDifferentialOperator(
+    const MonomialPolynomial& input,
+    Polynomial<Rational>& output
+  );
   void switchRows(int row1, int row2);
   void switchRowsWithCarbonCopy(int row1, int row2, Matrix<Coefficient>* carbonCopy) {
     this->switchRows(row1, row2);

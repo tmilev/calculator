@@ -257,26 +257,26 @@ bool CalculatorFunctionsCrypto::functionHashString(
   if (!input.isOfType(&inputString)) {
     return false;
   }
-  List<unsigned char> theBitStream;
-  theBitStream = inputString;
+  List<unsigned char> bitStream;
+  bitStream = inputString;
   std::stringstream out;
   if (verbose) {
     out << "<br>Input: " << inputString;
-    out << "<br>Base64 conversion: " << Crypto::convertListUnsignedCharsToBase64(theBitStream, false);
-    out << "<br>Base64url conversion: " << Crypto::convertListUnsignedCharsToBase64(theBitStream, true);
+    out << "<br>Base64 conversion: " << Crypto::convertListUnsignedCharsToBase64(bitStream, false);
+    out << "<br>Base64url conversion: " << Crypto::convertListUnsignedCharsToBase64(bitStream, true);
   }
   List<unsigned char> hashUChar;
-  List<uint32_t> theSha1Uint;
+  List<uint32_t> sha1Uint;
   Crypto::External& externalCrypto = Crypto::externalCrypto();
   if (hashId == "SHA1" || hashId == "SHA256" || hashId == "SHA224") {
     if (hashId == "SHA1") {
-      Crypto::computeSha1(inputString, theSha1Uint);
+      Crypto::computeSha1(inputString, sha1Uint);
     } else if (hashId == "SHA256") {
-      Crypto::computeSha256(inputString, theSha1Uint);
+      Crypto::computeSha256(inputString, sha1Uint);
     } else if (hashId == "SHA224") {
-      Crypto::computeSha224(inputString, theSha1Uint);
+      Crypto::computeSha224(inputString, sha1Uint);
     }
-    Crypto::convertListUint32ToListUcharBigendian(theSha1Uint, hashUChar);
+    Crypto::convertListUint32ToListUcharBigendian(sha1Uint, hashUChar);
   } else if (hashId == "SHA3_256") {
     Crypto::computeSha3_256(inputString, hashUChar);
   } else if (hashId == "KECCAK256") {
@@ -293,14 +293,15 @@ bool CalculatorFunctionsCrypto::functionHashString(
     externalCrypto.computeRIPEMD160(inputString, hashUChar);
   }
   if (verbose) {
-    std::string theSha1base64string, theSha1base64URLstring;
-    theSha1base64string = Crypto::convertListUnsignedCharsToBase64(hashUChar, true);
-    theSha1base64URLstring = Crypto::convertListUnsignedCharsToBase64(hashUChar, false);
-    out << "<br>" << hashId << " in base64: " << theSha1base64string;
-    out << "<br>" << hashId << " in base64url: " << theSha1base64URLstring;
+    std::string sha1base64string;
+    std::string sha1base64URLstring;
+    sha1base64string = Crypto::convertListUnsignedCharsToBase64(hashUChar, true);
+    sha1base64URLstring = Crypto::convertListUnsignedCharsToBase64(hashUChar, false);
+    out << "<br>" << hashId << " in base64: " << sha1base64string;
+    out << "<br>" << hashId << " in base64url: " << sha1base64URLstring;
     out << "<br>" << hashId << " hex: ";
-    for (int i = 0; i < theSha1Uint.size; i ++) {
-      out << std::hex << theSha1Uint[i];
+    for (int i = 0; i < sha1Uint.size; i ++) {
+      out << std::hex << sha1Uint[i];
     }
     out << "<br>bitstream: ";
   }

@@ -97,15 +97,15 @@ public:
     if (this->owner->size == 0) {
       return - 1;
     }
-    int theAnswer = this->owner->objects[0].minimalNumberOfVariables();
+    int answer = this->owner->objects[0].minimalNumberOfVariables();
     for (int i = 1; i < this->owner->size; i ++) {
-      if (theAnswer != this->owner->objects[i].minimalNumberOfVariables()) {
+      if (answer != this->owner->objects[i].minimalNumberOfVariables()) {
         return - 1;
       }
     }
-    return theAnswer;
+    return answer;
   }
-  bool extractElementUniversalEnveloping(ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& theOwner);
+  bool extractElementUniversalEnveloping(ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& owner);
   void operator=(const ElementSumGeneralizedVermas<Coefficient>& other) {
     this->::LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient>::operator=(other);
   }

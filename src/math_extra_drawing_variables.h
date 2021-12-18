@@ -28,7 +28,7 @@ public:
   bool flagIsPausedWhileAnimating;
   std::string DebugString;
   int indexStartingModifiableTextCommands;
-  void (*specialOperationsOnBasisChange)(DrawOperations& theOps);
+  void (*specialOperationsOnBasisChange)(DrawOperations& drawOperations);
   static void projectionMultiplicityMergeOnBasisChange(DrawOperations& operations);
   void makeMeAStandardBasis(int dimension);
   void operator+=(const DrawOperations& other);
@@ -135,7 +135,7 @@ public:
     const Vectors<Rational>& vectors, const std::string& color, double lineWidth, const std::string& frameId, int frameIndex
   );
   void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize);
-  void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
+  void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int fontSize, int textStyle);
   void drawCircleAtVectorBufferRational(
     const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1
   );

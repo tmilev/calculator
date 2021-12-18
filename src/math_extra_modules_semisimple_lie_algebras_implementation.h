@@ -1910,9 +1910,9 @@ void ElementSumGeneralizedVermas<Coefficient>::makeHWV(
 
 template<class Coefficient>
 bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping(
-  ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& theOwner
+  ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& owner
 ) {
-  output.makeZero(theOwner);
+  output.makeZero(owner);
   ModuleSSalgebra<Coefficient>* theModPtr = nullptr;
   MonomialUniversalEnveloping<Coefficient> tempMon;
   for (int i = 0; i < this->size(); i ++) {

@@ -276,15 +276,15 @@ bool CalculatorHTML::mergeProblemWeightAndStore(
   std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
-  JSData theProblemJSON;
-  if (!theProblemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
+  JSData problemJSON;
+  if (!problemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your input. ";
     }
     return false;
   }
   MapList<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
-  if (!this->mergeProblemWeight(theProblemJSON, incomingProblems, true, commentsOnFailure)) {
+  if (!this->mergeProblemWeight(problemJSON, incomingProblems, true, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your request";
     }
@@ -297,15 +297,15 @@ bool CalculatorHTML::mergeProblemDeadlineAndStore(
   std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::mergeProblemDeadlineAndStore");
-  JSData theProblemJSON;
-  if (!theProblemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
+  JSData problemJSON;
+  if (!problemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your input. ";
     }
     return false;
   }
   MapList<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
-  if (!this->mergeProblemDeadline(theProblemJSON, incomingProblems, commentsOnFailure)) {
+  if (!this->mergeProblemDeadline(problemJSON, incomingProblems, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your request";
     }
@@ -439,7 +439,7 @@ bool CalculatorHTML::loadMe(
   this->problemData.checkConsistency();
   if (!this->flagIsForReal && inputRandomSeed != "") {
     std::stringstream randSeedStream(inputRandomSeed);
-    randSeedStream >> this->problemData.randomSeeD;
+    randSeedStream >> this->problemData.randomSeed;
     this->problemData.flagRandomSeedGiven = true;
   }
   return true;
@@ -578,7 +578,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   out << "fileName=" << urledProblem << "&"
   << global.toStringCalculatorArgumentsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed) {
-    out << "randomSeed=" << this->problemData.randomSeeD << "&";
+    out << "randomSeed=" << this->problemData.randomSeed << "&";
   }
   if (setDebugFlag) {
     out << "debugFlag=true&";
@@ -701,7 +701,7 @@ bool CalculatorHtmlFunctions::interpretProblem(
     return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
   problem.problemData.flagRandomSeedGiven = true;
-  problem.problemData.randomSeeD = calculator.objectContainer.pseudoRandom.getRandomSeed();
+  problem.problemData.randomSeed = calculator.objectContainer.pseudoRandom.getRandomSeed();
   problem.interpretHtml(&calculator.comments);
   std::stringstream out;
   out << problem.outputHtmlBodyNoTag;
@@ -1065,7 +1065,7 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
   std::stringstream out;
   out << Calculator::Atoms::commandEnclosure << "{}(";
   out << Calculator::Atoms::setRandomSeed
-  << "{}(" << this->problemData.randomSeeD << "); ";
+  << "{}(" << this->problemData.randomSeed << "); ";
   out << this->prepareUserInputBoxes();
   out << "); ";
   return out.str();
@@ -1074,7 +1074,7 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
 std::string CalculatorHTML::getProblemHeaderWithoutEnclosure() {
   std::stringstream out;
   out << Calculator::Atoms::setRandomSeed
-  << " {}(" << this->problemData.randomSeeD << "); ";
+  << " {}(" << this->problemData.randomSeed << "); ";
   out << this->prepareUserInputBoxes();
   return out.str();
 }
@@ -1469,7 +1469,7 @@ bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   this->numberOfAnswerIdsMathquilled ++;
   currentA.idVerificationSpan = "verification" + answerId;
   currentA.idSpanSolution = "solution" + answerId;
-  currentA.idMQField = answerId + "MQSpanId";
+  currentA.idMathEquationField = answerId + "MQSpanId";
   currentA.idMQFieldLocation = answerId + "MQSpanIdLocation";
 
   if (currentA.idMQButtonPanelLocation == "") {
@@ -1935,7 +1935,7 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   if (!this->problemData.flagRandomSeedGiven) {
     generator.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   } else {
-    generator.setRandomSeedSmall(this->problemData.randomSeeD);
+    generator.setRandomSeedSmall(this->problemData.randomSeed);
   }
   this->randomSeedPerAttempt[0] = generator.getRandomSeed();
   for (int i = 1; i < this->randomSeedPerAttempt.size; i ++) {
@@ -1947,7 +1947,7 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
 
   this->numberOfInterpretationAttempts = 0;
   for (int i = 0; i < this->maxInterpretationAttempts; i ++) {
-    this->problemData.randomSeeD = this->randomSeedPerAttempt[i];
+    this->problemData.randomSeed = this->randomSeedPerAttempt[i];
     this->numberOfInterpretationAttempts = i + 1;
     startTime = global.getElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(this->timeIntermediatePerAttempt.size + 1);
@@ -2881,7 +2881,7 @@ bool CalculatorHTML::extractAnswerIdsOnce(
 
 bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIds");
-  // we shouldn't clear this->theProblemData.theAnswers: it may contain
+  // we shouldn't clear this->problemData.theAnswers: it may contain
   // outdated information loaded from the database. We don't want to loose that info
   // (say we renamed an answerId but students have already stored answers using the old answerId...).
   for (int i = 0; i < this->content.size; i ++) {
@@ -3038,7 +3038,7 @@ JSData CalculatorHTML::getEditorBoxesHTML() {
     }
     currentAnswerJS[answerLabels::idPanel] = currentAnswer.idAnswerPanel;
     currentAnswerJS[answerLabels::answerHighlight] = currentAnswer.htmlAnswerHighlight;
-    currentAnswerJS[answerLabels::idEquationEditorElement] = currentAnswer.idMQField;
+    currentAnswerJS[answerLabels::idEquationEditorElement] = currentAnswer.idMathEquationField;
     currentAnswerJS[answerLabels::idButtonContainer] = currentAnswer.idMQButtonPanelLocation;
     currentAnswerJS[answerLabels::mathQuillPanelOptions] = currentAnswer.mathQuillPanelOptions;
     currentAnswerJS[answerLabels::idPureLatex] = currentAnswer.answerId;
@@ -3129,7 +3129,7 @@ void CalculatorHTML::computeBodyDebugString() {
     out << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
   }
   out << "<br>Random seed: "
-  << this->problemData.randomSeeD
+  << this->problemData.randomSeed
   << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
   << this->problemData.flagRandomSeedGiven
   << "<br>flagRandomSeedGiven: "
@@ -3309,7 +3309,7 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
     out << "studentSection=" << HtmlRoutines::convertStringToURLString(studentSection, false) << "&";
   }
   if (includeRandomSeedIfAppropriate) {
-    out << "randomSeed=" << this->problemData.randomSeeD << "&";
+    out << "randomSeed=" << this->problemData.randomSeed << "&";
   }
   return out.str();
 }

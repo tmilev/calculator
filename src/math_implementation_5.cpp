@@ -265,11 +265,15 @@ void DrawOperations::drawTextAtVectorBufferRational(
 }
 
 void DrawOperations::drawTextAtVectorBufferDouble(
-  const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle
+  const Vector<double>& input,
+  const std::string& inputText,
+  int ColorIndex,
+  int fontSize,
+  int textStyle
 ) {
   (void) ColorIndex;
-  (void) theFontSize;
-  (void) theTextStyle;
+  (void) fontSize;
+  (void) textStyle;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
   theOperation[DrawOperations::fieldLocation] = input;

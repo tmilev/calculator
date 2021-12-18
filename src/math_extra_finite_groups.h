@@ -651,7 +651,7 @@ public:
   bool loadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const;
   Rational getKillingDividedByTraceRatio();
   bool containsRootNonStronglyPerpendicularTo(Vectors<Rational>& vectors, Vector<Rational>& input);
-  int numberOfRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
+  int numberOfRootsConnectedTo(Vectors<Rational>& vectors, Vector<Rational>& input);
   void getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
     List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
   );
@@ -1728,8 +1728,8 @@ bool SubgroupData<someGroup, elementSomeGroup>::sameCosetAs(elementSomeGroup& g1
     return sameCosetAsByFormula(this, g1, g2);
   }
   this->computeCosets();
-  int g1i = this->groupContent->theElements.getIndex(g1);
-  int g2i = this->groupContent->theElements.getIndex(g2);
+  int g1i = this->groupContent->elements.getIndex(g1);
+  int g2i = this->groupContent->elements.getIndex(g2);
   for (int i = 0; i < this->cosets.size; i ++) {
     if (this->cosets[i].BSContains(g1i)) {
       if (this->cosets[i].BSContains(g2i)) {

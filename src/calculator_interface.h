@@ -313,13 +313,6 @@ private:
     const ExpressionContext& context
   );
   // Same as assignValueWithContext but with shuffled arguments. Deprecated.
-  template <class Type>
-  bool assignValueWithContextOLD(
-    const Type& inputValue,
-    const ExpressionContext& context,
-    Calculator& owner
-  );
-  // Same as assignValueWithContext but with shuffled arguments. Deprecated.
   template <class BuiltIn>
   bool assignWithContext(
     Calculator& owner,
@@ -3248,15 +3241,6 @@ bool Expression::assignValueWithContext(
 }
 
 template <class Type>
-bool Expression::assignValueWithContextOLD(
-  const Type& inputValue,
-  const ExpressionContext& context,
-  Calculator& owner
-) {
-  return this->assignValueWithContext(owner, inputValue, context);
-}
-
-template <class Type>
 bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
   Expression typeComputer;
   typeComputer.owner = &owner;
@@ -3476,7 +3460,7 @@ bool Expression::makeMatrix(
       if (inputContext == nullptr) {
         currentElt.assignValue(owner, input(i, j));
       } else {
-        currentElt.assignValueWithContextOLD(input(i, j), *inputContext, owner);
+        currentElt.assignValueWithContext(owner, input(i, j), *inputContext);
       }
       matrixExpressions(i, j) = currentElt;
     }

@@ -132,7 +132,7 @@ public:
     const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color, double lineWidth = 1
   );
   void drawPath(
-    const Vectors<Rational>& theVectors, const std::string& color, double lineWidth, const std::string& frameId, int frameIndex
+    const Vectors<Rational>& vectors, const std::string& color, double lineWidth, const std::string& frameId, int frameIndex
   );
   void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize);
   void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
@@ -291,13 +291,13 @@ public:
     this->operations.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
   }
   void drawPath(
-    const Vectors<Rational>& theVectors,
+    const Vectors<Rational>& vectors,
     const std::string& color,
     double lineWidth,
     const std::string& frameId = "",
     int frameIndex = - 1
   ) {
-    this->operations.drawPath(theVectors, color, lineWidth, frameId, frameIndex);
+    this->operations.drawPath(vectors, color, lineWidth, frameId, frameIndex);
   }
   void drawLineBetweenTwoVectorsBufferDouble(
     const Vector<double>& r1, const Vector<double>& r2, const std::string& color, double lineWidth = 1

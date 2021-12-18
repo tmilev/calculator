@@ -1519,13 +1519,13 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   if (numSegments < 1 || numSegments > 100) {
     return calculator << "Bad number of segments: " << numSegments;
   }
-  Expression theVector = (rightE - leftE);
+  Expression vectorExpression = (rightE - leftE);
   Expression midPt = (rightE + leftE) / 2;
-  Expression theVectorX, theVectorY;
-  theVectorX.makeXOX(calculator, calculator.opUnderscore(), theVector, calculator.expressionOne());
-  theVectorY.makeXOX(calculator, calculator.opUnderscore(), theVector, calculator.expressionTwo());
+  Expression vectorX, vectorY;
+  vectorX.makeXOX(calculator, calculator.opUnderscore(), vectorExpression, calculator.expressionOne());
+  vectorY.makeXOX(calculator, calculator.opUnderscore(), vectorExpression, calculator.expressionTwo());
   Expression theOrthoV;
-  theOrthoV.makeXOX(calculator, calculator.opSequence(), theVectorY * (- 1), theVectorX);
+  theOrthoV.makeXOX(calculator, calculator.opSequence(), vectorY * (- 1), vectorX);
   Expression leftPt = midPt - theOrthoV / 25;
   Expression rightPt = midPt + theOrthoV / 25;
   output.reset(calculator);

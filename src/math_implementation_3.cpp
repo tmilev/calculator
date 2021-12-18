@@ -32,11 +32,7 @@ unsigned int GlobalStatistics::numberOfListsCreated = 0;
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
 
-Vector<Rational> OnePartialFraction::theVectorToBePartitioned;
-bool OnePartialFraction::MakingConsistencyCheck = false;
 Rational PartialFractions::CheckSum;
-Rational OnePartialFraction::CheckSum;
-Rational OnePartialFraction::CheckSum2;
 
 int HtmlRoutines::globalMathSpanID = 0;
 int HtmlRoutines::globalGeneralPurposeID = 0;
@@ -47,13 +43,10 @@ template < > double Complex<double>::equalityPrecision = 0.00000001;
 template <class ElementLeft, class ElementRight, class Coefficient>
 class TensorProductMonomial;
 
-std::fstream OnePartialFraction::TheBigDump;
 std::fstream PartialFractions::ComputedContributionsList;
 
 //template < > int ListPointers<PartFraction>::MemoryAllocationIncrement =100;
 //ListPointers<PartFraction> PartFraction::GlobalCollectorPartFraction;
-bool OnePartialFraction::UseGlobalCollector = true;
-bool OnePartialFraction::flagAnErrorHasOccurredTimeToPanic = false;
 bool PartialFractions::flagSplitTestModeNoNumerators = false;
 bool PartialFractions::flagAnErrorHasOccurredTimeToPanic = false;
 bool PartialFractions::flagUsingCheckSum = true;
@@ -3157,11 +3150,7 @@ bool OnePartialFraction::reduceOnceGeneralMethod(
       }
     }
     if (ShouldDecompose) {
-      if (this->flagAnErrorHasOccurredTimeToPanic) {
-      }
       this->decomposeFromLinearRelation(linearDependenceExtractor, output, owner.flagUsingOrlikSolomonBasis, owner.startingVectors);
-      if (this->flagAnErrorHasOccurredTimeToPanic) {
-      }
       return true;
     }
   }
@@ -3223,8 +3212,6 @@ void OnePartialFraction::readFromFile(PartialFractions& owner, std::fstream& inp
 }
 
 void OnePartialFraction::computeOneCheckSum(PartialFractions& owner, Rational& output, int dimension) const {
-  if (this->flagAnErrorHasOccurredTimeToPanic) {
-  }
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(owner.ambientDimension);
   Rational tempRat;
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
@@ -3268,8 +3255,6 @@ bool OnePartialFraction::rootIsInFractionCone(
   }
   if (this->RelevanceIsComputed) {
     return !this->IsIrrelevant;
-  }
-  if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
   }
   Cone tempCone;
   Vectors<Rational> tempRoots;
@@ -3406,8 +3391,6 @@ bool OnePartialFraction::decomposeFromLinearRelation(
   }
   if (!flagUsingOSbasis) {
     this->lastDistinguishedIndex = GainingMultiplicityIndex;
-  }
-  if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
   }
   this->applyGeneralizedSzenesVergneFormula(
     ParticipatingIndices,
@@ -4479,9 +4462,6 @@ void PartialFractions::run(Vectors<Rational>& input) {
 void PartialFractions::removeRedundantShortRoots(Vector<Rational>* indicator) {
   Rational startCheckSum;
   ProgressReport report;
-  if (OnePartialFraction::MakingConsistencyCheck) {
-    this->computeOneCheckSum(startCheckSum);
-  }
   for (int i = 0; i < this->size(); i ++) {
     if (this->removeRedundantShortRootsIndex(i, indicator)) {
       i --;
@@ -4516,14 +4496,6 @@ void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Ratio
       this->popIndexHashChooseSwapByLowestNonProcessedAndAccount(i, Indicator);
       i --;
     }*/
-}
-
-bool PartialFractions::verifyFileComputedContributions() {
-  int tempI = this->readFromFileComputedContributions(PartialFractions::ComputedContributionsList);
-  std::filebuf* pbuf = OnePartialFraction::TheBigDump.rdbuf();
-  long tempSize = pbuf->pubseekoff(0, std::fstream::end);
-  OnePartialFraction::TheBigDump.seekp(tempSize);
-  return(tempSize >= tempI);
 }
 
 void PartialFractions::toString(std::string& output, FormatExpressions& format) {
@@ -4725,35 +4697,17 @@ void OnePartialFractionDenominator::computeOneCheckSum(
     tempRat = 1;
     tempRat2 = 1;
     for (int j = 0; j < dimension; j ++) {
-      if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
-        tempS = exponent.toString();
-      }
       tempRat3 = CheckSumRoot[j];
       if (!tempRat3.isEqualToZero()) {
         tempRat3.raiseToPower((exponent[j] * this->elongations[i]).numeratorShort);
       }
       tempRat2 *= tempRat3;
-      if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
-        tempS = tempRat2.toString();
-      }
-    }
-    if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
-      tempS = tempRat.toString();
     }
     tempRat -= tempRat2;
     tempRat.raiseToPower(this->multiplicities[i]);
-    if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
-      tempS = tempRat.toString();
-    }
     output.multiplyBy(tempRat);
-    if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
-      tempS = output.toString();
-    }
   }
   output.invert();
-  if (OnePartialFraction::flagAnErrorHasOccurredTimeToPanic) {
-    tempS = output.toString();
-  }
 }
 
 int OnePartialFractionDenominator::getMultiplicityLargestElongation() {
@@ -7997,10 +7951,10 @@ void WeylGroupData::getMatrixStandardRepresentation(const ElementWeylGroup& inpu
   }
 }
 
-int WeylGroupData::numberOfRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
+int WeylGroupData::numberOfRootsConnectedTo(Vectors<Rational>& vectors, Vector<Rational>& input) {
   int result = 0;
   for (int i = 0; i < this->group.elements.size; i ++) {
-    if (!Vector<Rational>::scalarProduct(theVectors[i], input, this->cartanSymmetric).isEqualToZero()) {
+    if (!Vector<Rational>::scalarProduct(vectors[i], input, this->cartanSymmetric).isEqualToZero()) {
       result ++;
     }
   }
@@ -9639,9 +9593,6 @@ void OnePartialFraction::getVectorPartitionFunction(
 ) const {
   QuasiPolynomial shiftedPoly;
   Vectors<Rational> normals, latticeGenerators;
-  if (OnePartialFraction::MakingConsistencyCheck) {
-    OnePartialFraction::CheckSum.makeZero();
-  }
   this->getRootsFromDenominator(owner, latticeGenerators);
   Lattice lattice;
   lattice.makeFromRoots(latticeGenerators);
@@ -9667,14 +9618,7 @@ bool PartialFractions::getVectorPartitionFunction(QuasiPolynomial& output, Vecto
     return false;
   }
   this->NumProcessedForVPFfractions = 0;
-  if (OnePartialFraction::MakingConsistencyCheck) {
-    PartialFractions::CheckSum.makeZero();
-  }
   output.makeZeroLatticeZn(this->ambientDimension);
-  ///////////////////////////////////////////////
-  //this->flagAnErrorHasOccurredTimeToPanic = true;
-  //PartFraction::flagAnErrorHasOccurredTimeToPanic = true;
-  //this->ComputeDebugString();
   ///////////////////////////////////////////////
   QuasiPolynomial tempQP;
   for (int i = 0; i < this->size(); i ++) {

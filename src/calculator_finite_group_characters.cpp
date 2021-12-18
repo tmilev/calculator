@@ -72,10 +72,10 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkReprese
     for (int j = 0; j < tempList.size; j ++) {
       matrix = tempList[i];
       matrix.multiplyOnTheLeft(tempList[j]);
-      element = this->ownerGroup->theElements[j];
-      element *= this->ownerGroup->theElements[i];
+      element = this->ownerGroup->elements[j];
+      element *= this->ownerGroup->elements[i];
       element.makeCanonical();
-      int targetIndex = this->ownerGroup->theElements.getIndex(element);
+      int targetIndex = this->ownerGroup->elements.getIndex(element);
       if (!(matrix == this->elementImages[targetIndex])) {
         global.fatal << "this is a programming error: element " << i + 1 << " times element "
         << j + 1 << " is outside of the set, i.e.,  "
@@ -92,7 +92,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllGe
   this->checkInitialization();
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
   HashedList<ElementWeylGroup> elementsExplored;
-  elementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
+  elementsExplored.setExpectedSize(this->ownerGroup->elements.size);
   this->elementImages[0].makeIdentityMatrix(this->getDimension());
   ElementWeylGroup currentElt;
   int rank = this->ownerGroup->getDimension();
@@ -104,23 +104,17 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllGe
     generators[i].makeSimpleReflection(i, *this->ownerGroup);
   }
   for (int i = 0; i < elementsExplored.size; i ++) {
-    int indexParentElement = this->ownerGroup->theElements.getIndex(elementsExplored[i]);
+    int indexParentElement = this->ownerGroup->elements.getIndex(elementsExplored[i]);
     for (int j = 0; j < rank; j ++) {
       currentElt = generators[j] * elementsExplored[i];
       if (!elementsExplored.contains(currentElt)) {
-        int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
-        this->theElementIsComputed[indexCurrentElt] = true;
+        int indexCurrentElt = this->ownerGroup->elements.getIndex(currentElt);
+        this->elementIsComputed[indexCurrentElt] = true;
         this->elementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->elementImages[indexCurrentElt]);
         elementsExplored.addOnTop(currentElt);
       }
     }
   }
-//  this->checkRepresentationIsMultiplicativelyClosed();
-  //FormatExpressions tempFormat;
-  //tempFormat.flagUseLatex = true;
-  //for (int i = 0; i < this->theElementImages.size; i ++)
-  //{
-  //}
 }
 
 // This method uses auto everywhere, and a lot of copying data in order to use auto

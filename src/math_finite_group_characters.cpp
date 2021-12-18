@@ -1270,10 +1270,9 @@ List<ClassFunction<Somegroup, Rational> > CharacterFunctions::computeCharacterTa
   int sizeOfG = - 1;
   group.getSize().isIntegerFittingInInt(&sizeOfG);
   classmap.setSize(sizeOfG);
-//  classmap.setSize(G.theElements.size);
   for (int i = 0; i < group.conjugacyClassCount(); i ++) {
     for (int j = 0; j < group.conjugacyClasses[i].size; j ++) {
-      classmap[group.theElements.getIndex(group.conjugacyClasses[i].theElements[j])] = i;
+      classmap[group.elements.getIndex(group.conjugacyClasses[i].elements[j])] = i;
     }
   }
   Matrix<Rational> form; // so inefficient
@@ -1378,13 +1377,13 @@ Matrix<Rational> CharacterFunctions::getClassMatrix(
   group.conjugacyClasses[cci].size.isIntegerFittingInInt(&classSize);
   invl.setSize(classSize);
   for (int i = 0; i < group.conjugacyClasses[cci].size; i ++) {
-    invl[i] = group.invert(group.theElements.getIndex(group.conjugacyClasses[cci].theElements[i]));
+    invl[i] = group.invert(group.elements.getIndex(group.conjugacyClasses[cci].elements[i]));
   }
   Matrix<int> M;
   M.makeZeroMatrix(group.conjugacyClassCount());
   for (int t = 0; t < group.conjugacyClassCount(); t ++)
     for (int xi = 0; xi < invl.size; xi ++) {
-      int yi = group.multiplyElements(invl[xi], group.theElements.getIndex(group.conjugacyClasses[t].representative));
+      int yi = group.multiplyElements(invl[xi], group.elements.getIndex(group.conjugacyClasses[t].representative));
       int ci;
       if (classmap) {
         M.elements[t][(*classmap)[yi]] += 1;

@@ -5228,12 +5228,6 @@ public:
   );
   bool removeRedundantShortRoots(PartialFractions& owner, Vector<Rational>* Indicator, int dimension);
   bool AlreadyAccountedForInGUIDisplay;
-  static bool flagAnErrorHasOccurredTimeToPanic;
-  static std::fstream TheBigDump;
-  static bool UseGlobalCollector;
-  static bool MakingConsistencyCheck;
-  static Rational CheckSum, CheckSum2;
-  static Vector<Rational> theVectorToBePartitioned;
   void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQP,
     const MonomialPolynomial& monomial,
@@ -5769,7 +5763,7 @@ public:
   int toFileOutput(std::fstream& output, bool LatexFormat);
   int toFileOutputBasisChange(std::fstream& output, bool LatexFormat);
   bool getVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator);
-  bool verifyFileComputedContributions();
+  // bool verifyFileComputedContributions();
   void writeToFileComputedContributions(std::fstream& output);
   int readFromFileComputedContributions(std::fstream& input);
   void writeToFile(std::fstream& output);
@@ -6809,7 +6803,7 @@ public:
   Matrix<Rational> hElement;
   Matrix<Rational> eElement;
   Matrix<Rational> fElement;
-  List<int> thePartition;
+  List<int> partition;
   List<Matrix<Rational> > projectors;
   List<Matrix<Rational> > highestWeightVectors;
   List<List<Matrix<Rational> > > gModKModules;
@@ -6900,7 +6894,6 @@ public:
   void generatePartialBruhatOrder();
   void initFromWeyl(WeylGroupData* weylGroup);
 };
-
 
 template<class Coefficient>
 void Matrix<Coefficient>::substitution(const PolynomialSubstitution<Rational>& substitution) {

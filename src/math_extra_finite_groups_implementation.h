@@ -1358,7 +1358,7 @@ Matrix<Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficien
   if (this->elementIsComputed[groupElementIndex]) {
     return matrix;
   }
-  const ElementWeylGroup& element = this->ownerGroup->theElements[groupElementIndex];
+  const ElementWeylGroup& element = this->ownerGroup->elements[groupElementIndex];
   this->elementIsComputed[groupElementIndex] = true;
   this->getMatrixElement(element, matrix);
   return matrix;
@@ -1492,7 +1492,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::classFunctio
     if (classFunctionMatrices[cci].numberOfColumns == 0) {
       classFunctionMatrices[cci].makeZeroMatrix(this->generators[0].numberOfColumns);
       for (int icci = 0; icci < this->ownerGroup->conjugacyClasses[cci].size; icci ++) {
-        this->classFunctionMatrices[cci] += this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].theElements[icci]);
+        this->classFunctionMatrices[cci] += this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].elements[icci]);
       }
     }
     for (int i = 0; i < outputMat.numberOfRows; i ++) {

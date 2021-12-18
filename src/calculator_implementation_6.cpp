@@ -2597,12 +2597,12 @@ bool CalculatorFunctions::valueOfModularExpression(
     for (int i = 0; i < candidatePolynomial.size(); i ++) {
       rationalConversion.addMonomial(candidatePolynomial.monomials[i], candidatePolynomial.coefficients[i].value);
     }
-    return output.assignValueWithContextOLD(rationalConversion, input[1].getContext(), calculator);
+    return output.assignValueWithContext(calculator, rationalConversion, input[1].getContext());
   }
 
   PolynomialModuloPolynomial<ElementZmodP> quotientElement;
   if (input[1].isOfType(&quotientElement)) {
-    return output.assignValueWithContextOLD(quotientElement.value, input[1].getContext(), calculator);
+    return output.assignValueWithContext(calculator, quotientElement.value, input[1].getContext());
   }
   return false;
 }
@@ -2736,10 +2736,10 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   context.addVariable(xE);
   context.addVariable(yE);
   if (isRational) {
-    return output.assignValueWithContextOLD(eltRational, context, calculator);
+    return output.assignValueWithContext(calculator, eltRational, context);
   }
   if (isElementZmodP) {
-    return output.assignValueWithContextOLD(eltZmodP, context, calculator);
+    return output.assignValueWithContext(calculator, eltZmodP, context);
   }
   return false;
 }
@@ -2909,7 +2909,7 @@ bool CalculatorFunctions::determinantPolynomial(
   }
   Polynomial<Rational> outputPoly;
   outputPoly.makeDeterminantFromSquareMatrix(matrixPolynomial);
-  return output.assignValueWithContextOLD(outputPoly, context, calculator);
+  return output.assignValueWithContext(calculator, outputPoly, context);
 }
 
 bool CalculatorFunctions::generateMultiplicativelyClosedSet(

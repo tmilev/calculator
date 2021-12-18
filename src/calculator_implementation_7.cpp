@@ -38,16 +38,16 @@ bool CalculatorFunctionsCrypto::testLoadPEMCertificates(
   if (!input[1].isOfType(&binaryString)) {
     return false;
   }
-  X509Certificate theCertificate;
+  X509Certificate certificate;
   std::stringstream errorStream, resultStream;
   // May not be initialized if unit testing. Safe after the first run.
   ASNObject::namesToObjectIdsNonThreadSafe();
-  bool success = theCertificate.loadFromASNEncoded(binaryString, &errorStream);
+  bool success = certificate.loadFromASNEncoded(binaryString, &errorStream);
   if (!success) {
     resultStream << "Failed to load asn encoded certificate.<br>";
     resultStream << errorStream.str();
   } else {
-    resultStream << "<br>Loaded certificate successfully.<br>" << theCertificate.toString();
+    resultStream << "<br>Loaded certificate successfully.<br>" << certificate.toString();
   }
   return output.assignValue(calculator, resultStream.str());
 }
@@ -6722,10 +6722,10 @@ bool CalculatorFunctions::allVectorPartitions(Calculator& calculator, const Expr
     return calculator << "<hr>AllVectorPartitions function takes 3 arguments.";
   }
   VectorPartition thePartition;
-  const Expression& theVectorE = input[1];
+  const Expression& vectorExpression = input[1];
   const Expression& thePartitioningVectorsE = input[2];
-  if (!calculator.getVector(theVectorE, thePartition.goalVector)) {
-    return calculator << "<hr>Failed to extract vector from " << theVectorE.toString();
+  if (!calculator.getVector(vectorExpression, thePartition.goalVector)) {
+    return calculator << "<hr>Failed to extract vector from " << vectorExpression.toString();
   }
   Matrix<Rational> vectorsMatForm;
   if (!calculator.functionGetMatrix(

@@ -384,11 +384,6 @@ public:
     const CoefficientTypeQuotientField& fieldUnit,
     const CoefficientTypeQuotientField& fieldZero
   );
-  static void getBasisFromSpanOfElements(
-    List<ElementUniversalEnvelopingOrdered>& theElements,
-    Vectors<Polynomial<Coefficient> >& outputCoordinates,
-    List<ElementUniversalEnvelopingOrdered>& outputTheBasis
-  );
   bool getCoordinatesInBasis(
     List<ElementUniversalEnvelopingOrdered<Coefficient> >& theBasis,
     Vector<Coefficient>& output,
@@ -396,14 +391,9 @@ public:
     const Coefficient& ringZero
   ) const;
   static void getCoordinateFormOfSpanOfElements(
-    List<ElementUniversalEnvelopingOrdered>& theElements,
+    List<ElementUniversalEnvelopingOrdered>& elements,
     Vectors<Polynomial<Coefficient> >& outputCoordinates,
     ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials
-  );
-  void assignFromCoordinateFormWithRespectToBasis(
-    List<ElementUniversalEnveloping<Coefficient> >& theBasis,
-    Vector<Polynomial<Coefficient> >& input,
-    SemisimpleLieAlgebraOrdered& owner
   );
   void raiseToPower(int power, const Coefficient& ringUnit);
   bool isPowerOfSingleGenerator() {

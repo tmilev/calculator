@@ -195,7 +195,7 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferRational(
 }
 
 void DrawOperations::drawPath(
-  const Vectors<Rational>& theVectors,
+  const Vectors<Rational>& vectors,
   const std::string& color,
   double lineWidth,
   const std::string& frameId,
@@ -204,7 +204,7 @@ void DrawOperations::drawPath(
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typePath;
   Vectors<double> vectorsDouble;
-  theVectors.getVectorsDouble(vectorsDouble);
+  vectors.getVectorsDouble(vectorsDouble);
   theOperation[DrawOperations::fieldPoints] = vectorsDouble;
   theOperation[DrawOperations::fieldFrameId] = frameId;
   theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
@@ -687,26 +687,20 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   List<ElementSemisimpleLieAlgebra>& elements,
   List<ElementSemisimpleLieAlgebra>& outputBasis
 ) {
-  Vectors<Rational> theRootForm;
-  theRootForm.setSize(elements.size);
+  Vectors<Rational> rootForm;
+  rootForm.setSize(elements.size);
   for (int i = 0; i < elements.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = elements[i];
-    currentElt.toVectorNegativeRootSpacesFirst(theRootForm[i]);
+    currentElt.toVectorNegativeRootSpacesFirst(rootForm[i]);
   }
-//  int theRank = 0; int numRoots = 0;
-//  if (theElements.size > 0)
-//  { theRank = theElements.objects[0].Hcomponent.size;
-//    numRoots = theElements.objects[0].coeffsRootSpaces.size;
-//  }
-  theRootForm.chooseABasis();
-  outputBasis.setSize(theRootForm.size);
-  for (int i = 0; i < theRootForm.size; i ++) {
+  rootForm.chooseABasis();
+  outputBasis.setSize(rootForm.size);
+  for (int i = 0; i < rootForm.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = outputBasis[i];
     currentElt.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
-      theRootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]
+      rootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]
     );
   }
-
 }
 
 template <class Coefficient>
@@ -727,14 +721,14 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
   if (!tempBool) {
     global.comments << "<br>Climbing down does not work as expected!";
   }
-  Rational RaiseCoeff;
-  RaiseCoeff.makeZero();
+  Rational raiseCoeff;
+  raiseCoeff.makeZero();
   outputCoeff.makeOne();
   output = input;
   for (int i = 0; i < generatorPower; i ++) {
-    RaiseCoeff += currentWeight;
+    raiseCoeff += currentWeight;
     currentWeight -= 2;
-    outputCoeff *= RaiseCoeff;
+    outputCoeff *= raiseCoeff;
     Matrix<Rational>::lieBracket(this->fElement, output, output);
   }
 }
@@ -792,7 +786,7 @@ void SlTwoInSlN::getIsPlusKIndexingFrom(int input, int& s, int& k) {
   if (input >= this->dimension || input < 0) {
     return;
   }
-  for (int offset = 0; offset <= input; offset += this->thePartition[s - 1]) {
+  for (int offset = 0; offset <= input; offset += this->partition[s - 1]) {
     k = input - offset;
     s ++;
   }
@@ -917,10 +911,10 @@ std::string SlTwoInSlN::GetNotationString(bool useHtml) {
   out << newLine << "Let the starting index of the j-th block be " << beginMath << "i_j" << endMath;
   out << "." << newLine << "In particular let: ";
   int offset = 1;
-  for (int i = 0; i < this->thePartition.size; i ++) {
+  for (int i = 0; i < this->partition.size; i ++) {
     out << beginMath << "i_" << i + 1 << "=" << offset << endMath << " ";
-    out << " (size of block = " << this->thePartition[i] << "), ";
-    offset += this->thePartition[i];
+    out << " (size of block = " << this->partition[i] << "), ";
+    offset += this->partition[i];
   }
   out << newLine << "Let " << beginMath << "\\eta" << endMath << " be the weight corresponding to h.";
   out << newLine << "Let " << beginMath << "\\zeta_{j}" << endMath << " be the weight corresponding to the j-th block";
@@ -929,11 +923,11 @@ std::string SlTwoInSlN::GetNotationString(bool useHtml) {
 
 std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml, bool computePairingTable) {
   std::stringstream out;
-  this->thePartition = decompositionDimensions;
-  this->thePartition.quickSortDescending();
+  this->partition = decompositionDimensions;
+  this->partition.quickSortDescending();
   this->dimension = 0;
-  for (int i = 0; i < this->thePartition.size; i ++) {
-    this->dimension += this->thePartition[i];
+  for (int i = 0; i < this->partition.size; i ++) {
+    this->dimension += this->partition[i];
   }
   hElement.initialize(this->dimension, this->dimension);
   hElement.makeZero();
@@ -941,7 +935,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   eElement.makeZero();
   fElement.initialize(this->dimension, this->dimension);
   fElement.makeZero();
-  this->projectors.setSize(this->thePartition.size);
+  this->projectors.setSize(this->partition.size);
   int currentOffset = 0;
   std::string beginMath, endMath, newLine;
   if (useHtml) {
@@ -953,25 +947,25 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     endMath = "$";
     newLine = "\n\n\n";
   }
-  for (int i = 0; i < this->thePartition.size; i ++) {
+  for (int i = 0; i < this->partition.size; i ++) {
     this->projectors[i].initialize(this->dimension, this->dimension);
     this->projectors[i].makeZero();
-    for (int j = 0; j < this->thePartition[i]; j ++) {
-      hElement.elements[currentOffset + j][currentOffset + j] = this->thePartition[i] - 1 - 2 * j;
+    for (int j = 0; j < this->partition[i]; j ++) {
+      hElement.elements[currentOffset + j][currentOffset + j] = this->partition[i] - 1 - 2 * j;
       this->projectors[i].elements[currentOffset + j][currentOffset + j] = 1;
-      if (j != this->thePartition[i] - 1) {
+      if (j != this->partition[i] - 1) {
         fElement.elements[currentOffset + j + 1][currentOffset + j] = 1;
-        eElement.elements[currentOffset + j][currentOffset + j + 1] = (j + 1) * (this->thePartition[i] - j - 1);
+        eElement.elements[currentOffset + j][currentOffset + j + 1] = (j + 1) * (this->partition[i] - j - 1);
       }
     }
-    currentOffset += this->thePartition[i];
+    currentOffset += this->partition[i];
   }
   out << newLine << beginMath << "h =" << this->elementMatrixToTensorString(this->hElement, useHtml) << "="
-  << this->hElement.toStringWithBlocks(this->thePartition) << endMath;
+  << this->hElement.toStringWithBlocks(this->partition) << endMath;
   out << newLine << beginMath << "e =" << this->elementMatrixToTensorString(this->eElement, useHtml) << "="
-  << this->eElement.toStringWithBlocks(this->thePartition) << endMath;
+  << this->eElement.toStringWithBlocks(this->partition) << endMath;
   out << newLine << beginMath << "f =" << this->elementMatrixToTensorString(this->fElement, useHtml) << "="
-  << this->fElement.toStringWithBlocks(this->thePartition) << endMath;
+  << this->fElement.toStringWithBlocks(this->partition) << endMath;
   Matrix<Rational> matrix;
   matrix.initialize(this->dimension, this->dimension);
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;

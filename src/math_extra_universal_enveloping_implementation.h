@@ -1041,26 +1041,26 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::getCoordinatesInBasis(
 
 template <class Coefficient>
 void ElementUniversalEnvelopingOrdered<Coefficient>::getCoordinateFormOfSpanOfElements(
-  List<ElementUniversalEnvelopingOrdered>& theElements,
+  List<ElementUniversalEnvelopingOrdered>& elements,
   Vectors<Polynomial<Coefficient> >& outputCoordinates,
   ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials
 ) {
-  if (theElements.size == 0) {
+  if (elements.size == 0) {
     return;
   }
-  outputCorrespondingMonomials.makeZero(*theElements[0].owner);
-  for (int i = 0; i < theElements.size; i ++) {
-    for (int j = 0; j < theElements[i].size; j ++) {
-      outputCorrespondingMonomials.addOnTopNoRepetition(theElements[i][j]);
+  outputCorrespondingMonomials.makeZero(*elements[0].owner);
+  for (int i = 0; i < elements.size; i ++) {
+    for (int j = 0; j < elements[i].size; j ++) {
+      outputCorrespondingMonomials.addOnTopNoRepetition(elements[i][j]);
     }
   }
-  outputCoordinates.setSize(theElements.size);
+  outputCoordinates.setSize(elements.size);
   Polynomial<Rational> ZeroPoly;
   ZeroPoly.makeZero();
-  for (int i = 0; i < theElements.size; i ++) {
+  for (int i = 0; i < elements.size; i ++) {
     Vector<Polynomial<Coefficient> >& current = outputCoordinates[i];
     current.initializeFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
-    ElementUniversalEnvelopingOrdered& currentElt = theElements[i];
+    ElementUniversalEnvelopingOrdered& currentElt = elements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnvelopingOrdered<Coefficient>& currentMon = currentElt[j];
       current.objects[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.coefficient;

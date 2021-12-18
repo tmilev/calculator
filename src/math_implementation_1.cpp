@@ -430,12 +430,12 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     theSub[i] = theHWdualCoords[i];
   }
   this->modOutVermaRelations(&theSub, ringUnit, ringZero);
-  int numPosRoots = this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
+  int numberOfPositiveRoots = this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
   for (int k = this->generatorsIndices.size - 1; k >= 0; k --) {
     int indexCurrentGenerator = this->generatorsIndices[k];
-    if (indexCurrentGenerator >= numPosRoots) {
+    if (indexCurrentGenerator >= numberOfPositiveRoots) {
       return false;
     }
     ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->elementOrder[indexCurrentGenerator];
@@ -463,7 +463,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
 
 template <class Coefficient>
 bool ElementUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimental(
-  const Vector<Rational>& theHWsimpleCoords,
+  const Vector<Rational>& highestWeightSimpleCoordinates,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
@@ -473,7 +473,7 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperiment
   bool result = true;
   for (int i = 0; i < this->size; i ++) {
     tempMon = this->objects[i];
-    if (!tempMon.modOutFDRelationsExperimental(theHWsimpleCoords, ringUnit, ringZero)) {
+    if (!tempMon.modOutFDRelationsExperimental(highestWeightSimpleCoordinates, ringUnit, ringZero)) {
       result = false;
     }
     output.addMonomial(tempMon);

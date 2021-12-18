@@ -79,7 +79,7 @@ public:
   }
   SemisimpleLieAlgebraOrdered();
   bool checkInitialization() const;
-  int getDisplayIndexFromGeneratorIndex(int GeneratorIndex);
+  int getDisplayIndexFromGeneratorIndex(int generatorIndex);
   void getLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& coefficients);
   void initialize(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
   void initDefaultOrder(SemisimpleLieAlgebra& owner);
@@ -107,10 +107,9 @@ public:
   // the first k variables correspond to the Cartan of the smaller Lie algebra
   // the next l variables correspond to the Cartan of the larger Lie algebra
   // the last variable is the projectivization
-  List<Matrix<Rational> > theLinearOperatorsExtended;
+  List<Matrix<Rational> > linearOperatorsExtended;
   Vector<Rational> NonIntegralOriginModificationBasisChanged;
-  std::fstream theMultiplicitiesMaxOutput;
-  std::fstream theMultiplicitiesMaxOutputReport2;
+  std::fstream multiplicitiesMaxOutputReport2;
   Vectors<Rational> GmodKnegativeWeightS;
   Vectors<Rational> GmodKNegWeightsBasisChanged;
   Matrix<Rational> preferredBasisChangE;
@@ -243,11 +242,11 @@ public:
     MonomialUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringZero = 0
   );
-  void makeConstant(const Coefficient& theConst, SemisimpleLieAlgebraOrdered& theOwner) {
+  void makeConstant(const Coefficient& inputConstant, SemisimpleLieAlgebraOrdered& inputOwner) {
     this->generatorsIndices.size = 0;
     this->powers.size = 0;
-    this->Coefficient = theConst;
-    this->owner = &theOwner;
+    this->coefficient = inputConstant;
+    this->owner = &inputOwner;
   }
   void simplify(
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
@@ -279,7 +278,7 @@ public:
   void operator*=(const MonomialUniversalEnvelopingOrdered& other);
   template<class OtherCoefficientType>
   void assignChangeCoefficientType(const MonomialUniversalEnvelopingOrdered<OtherCoefficientType>& other) {
-    this->Coefficient = other.Coefficient;
+    this->coefficient = other.coefficient;
     this->generatorsIndices = other.generatorsIndices.size;
     this->powers.setSize(other.powers.size);
     for (int i = 0; i < this->powers.size; i ++) {
@@ -289,7 +288,7 @@ public:
   inline void operator=(const MonomialUniversalEnvelopingOrdered& other) {
     this->generatorsIndices = other.generatorsIndices;
     this->powers = other.powers;
-    this->Coefficient = other.Coefficient;
+    this->coefficient = other.coefficient;
     this->owner = other.owner;
   }
 };
@@ -337,7 +336,7 @@ public:
     const Coefficient& ringZero
   );
   bool modOutFDRelationsExperimental(
-    const Vector<Rational> & theHWsimpleCoords,
+    const Vector<Rational>& highestWeightSimpleCoordinates,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
@@ -349,10 +348,10 @@ public:
   );
   bool getLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void substitutionCoefficients(PolynomialSubstitution<Rational>& substitution);
-  void makeConstant(const Coefficient& coeff, SemisimpleLieAlgebraOrdered& theOwner) {
-    this->makeZero(theOwner);
+  void makeConstant(const Coefficient& coeff, SemisimpleLieAlgebraOrdered& inputOwner) {
+    this->makeZero(inputOwner);
     MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
-    tempMon.makeConstant(coeff, theOwner);
+    tempMon.makeConstant(coeff, inputOwner);
     this->addMonomial(tempMon);
   }
   void simplify(const Coefficient& ringUnit = 1,  const Coefficient& ringZero = 0);
@@ -360,7 +359,7 @@ public:
     if (this->size == 0) {
       return 0;
     } else {
-      return this->objects[0].Coefficient.NumVars;
+      return this->objects[0].coefficient.NumVars;
     }
   }
   inline void multiplyBy(const ElementUniversalEnvelopingOrdered& other) {

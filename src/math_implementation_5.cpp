@@ -257,11 +257,11 @@ void DrawOperations::drawTextAtVectorBufferRational(
 ) {
   (void) color;
   (void) fontSize;
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
-  theOperation[DrawOperations::fieldLocation] = input.getVectorDouble();
-  theOperation[DrawOperations::fieldText] = inputText;
-  this->theOperations.addOnTop(theOperation);
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
+  operation[DrawOperations::fieldLocation] = input.getVectorDouble();
+  operation[DrawOperations::fieldText] = inputText;
+  this->theOperations.addOnTop(operation);
 }
 
 void DrawOperations::drawTextAtVectorBufferDouble(
@@ -274,11 +274,11 @@ void DrawOperations::drawTextAtVectorBufferDouble(
   (void) ColorIndex;
   (void) fontSize;
   (void) textStyle;
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
-  theOperation[DrawOperations::fieldLocation] = input;
-  theOperation[DrawOperations::fieldText] = inputText;
-  this->theOperations.addOnTop(theOperation);
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
+  operation[DrawOperations::fieldLocation] = input;
+  operation[DrawOperations::fieldText] = inputText;
+  this->theOperations.addOnTop(operation);
 }
 
 void DrawingVariables::drawLineDirectly(
@@ -296,13 +296,13 @@ void DrawingVariables::drawLineDirectly(
 void DrawOperations::drawHighlightGroup(
   Vectors<double>& highlightGroup, List<std::string>& labels, const std::string& color, int radius
 ) {
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeHighlightGroup;
-  theOperation[DrawOperations::fieldPoints] = highlightGroup;
-  theOperation[DrawOperations::fieldLabels] = labels;
-  theOperation[DrawOperations::fieldColor] = color;
-  theOperation[DrawOperations::fieldRadius] = radius;
-  this->theOperations.addOnTop(theOperation);
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeHighlightGroup;
+  operation[DrawOperations::fieldPoints] = highlightGroup;
+  operation[DrawOperations::fieldLabels] = labels;
+  operation[DrawOperations::fieldColor] = color;
+  operation[DrawOperations::fieldRadius] = radius;
+  this->theOperations.addOnTop(operation);
 }
 
 void DrawOperations::drawLineBuffer(
@@ -317,14 +317,14 @@ void DrawOperations::drawLineBuffer(
   (void) thePenStyle;
   (void) colorIndex;
   (void) lineWidth;
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  theOperation[DrawOperations::fieldPoints].elementType = JSData::token::tokenArray;
-  theOperation[DrawOperations::fieldPoints][0][0] = x1;
-  theOperation[DrawOperations::fieldPoints][0][1] = y1;
-  theOperation[DrawOperations::fieldPoints][1][0] = x2;
-  theOperation[DrawOperations::fieldPoints][1][1] = y2;
-  this->theOperations.addOnTop(theOperation);
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
+  operation[DrawOperations::fieldPoints].elementType = JSData::token::tokenArray;
+  operation[DrawOperations::fieldPoints][0][0] = x1;
+  operation[DrawOperations::fieldPoints][0][1] = y1;
+  operation[DrawOperations::fieldPoints][1][0] = x2;
+  operation[DrawOperations::fieldPoints][1][1] = y2;
+  this->theOperations.addOnTop(operation);
 }
 
 void DrawOperations::drawTextBuffer(
@@ -333,13 +333,13 @@ void DrawOperations::drawTextBuffer(
   (void) theFontSize;
   (void) ColorIndex;
   (void) theTextStyle;
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  theOperation[DrawOperations::fieldLocation].elementType = JSData::token::tokenArray;
-  theOperation[DrawOperations::fieldLocation][0] = x1;
-  theOperation[DrawOperations::fieldLocation][1] = y1;
-  theOperation[DrawOperations::fieldText] = inputText;
-  this->theOperations.addOnTop(theOperation);
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
+  operation[DrawOperations::fieldLocation].elementType = JSData::token::tokenArray;
+  operation[DrawOperations::fieldLocation][0] = x1;
+  operation[DrawOperations::fieldLocation][1] = y1;
+  operation[DrawOperations::fieldText] = inputText;
+  this->theOperations.addOnTop(operation);
 }
 
 int DrawingVariables::getActualPenStyleFromFlagsAnd(int inputPenStyle) {
@@ -481,7 +481,7 @@ Vector<Rational> VectorPartition::getPartitionSum() {
 
 void VectorPartition::beefUpPartition() {
   MacroRegisterFunctionWithName("VectorPartition::beefUpPartition");
-  Vector<Rational> remainder = this->goalVector-this->currentPartitionSum;
+  Vector<Rational> remainder = this->goalVector - this->currentPartitionSum;
   while ((remainder - *this->partitioningRoots.lastObject()).isPositiveOrZero()) {
     (*this->currentPartition.lastObject()) ++;
     this->currentPartitionSum += *(this->partitioningRoots.lastObject());
@@ -606,16 +606,16 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(coefficients);
 }
 
-int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int GeneratorIndex) {
+int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int generatorIndex) {
   int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   int posRootsPlusRank = numPosRoots + this->ownerSemisimpleLieAlgebra->getRank();
-  if (GeneratorIndex >= posRootsPlusRank) {
-    return GeneratorIndex - posRootsPlusRank + 1;
+  if (generatorIndex >= posRootsPlusRank) {
+    return generatorIndex - posRootsPlusRank + 1;
   }
-  if (GeneratorIndex >= numPosRoots) {
-    return GeneratorIndex + 1;
+  if (generatorIndex >= numPosRoots) {
+    return generatorIndex + 1;
   }
-  return - numPosRoots + GeneratorIndex;
+  return - numPosRoots + generatorIndex;
 }
 
 void SemisimpleLieAlgebraOrdered::initialize(

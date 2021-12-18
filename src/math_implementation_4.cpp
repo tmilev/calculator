@@ -1359,7 +1359,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   FormatExpressions format;
   Vector<Rational> tempRoot;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    this->theMultiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false
+    this->multiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false
   );
   this->partialFractions.initFromRoots(this->GmodKNegWeightsBasisChanged);
   out << this->partialFractions.toString(format);
@@ -1431,7 +1431,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
 //  this->projectivizedChamber.ComputeDebugString();
 //  out << "\n\n" << this->projectivizedChamber.DebugString;
   report.report(out.str());
-  this->theMultiplicitiesMaxOutputReport2 << out.str();
+  this->multiplicitiesMaxOutputReport2 << out.str();
 }
 
 std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebraHighestWeight(
@@ -1717,7 +1717,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   theSubgroup.makeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
 
   this->linearOperators.setSize(theSubgroup.allElements.size);
-  this->theLinearOperatorsExtended.setSize(theSubgroup.allElements.size);
+  this->linearOperatorsExtended.setSize(theSubgroup.allElements.size);
   this->translations.setSize(theSubgroup.allElements.size);
   this->translationsProjectedBasisChanged.setSize(theSubgroup.allElements.size);
   this->coefficients.setSize(theSubgroup.allElements.size);
@@ -1743,11 +1743,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
   << theProjectionBasisChanged.toString(&global.defaultFormat.getElement());
   this->log << "\n\n\nMatrix form of the operators $u_w$, "
-  << "the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
+  << "the translations $\tau_w$ and their projections (" << this->linearOperatorsExtended.size << "):";
   //List<Matrix<Rational> > tempList;
   for (int k = 0; k < this->linearOperators.size; k ++) {
     Matrix<Rational>& currentLO = this->linearOperators[k];
-    Matrix<Rational>& currentLOExtended = this->theLinearOperatorsExtended[k];
+    Matrix<Rational>& currentLOExtended = this->linearOperatorsExtended[k];
     currentLO.multiplyOnTheLeft(theProjectionBasisChanged);
     currentLO *= - 1;
     //tempList.addOnTopNoRepetition(this->theLinearOperators.objects[i]);
@@ -1793,8 +1793,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
   << "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
   << tempVect.toString(&format) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
-  for (int i = 0; i < this->theLinearOperatorsExtended.size; i ++) {
-    Matrix<Rational>& currentLoExt = this->theLinearOperatorsExtended[i];
+  for (int i = 0; i < this->linearOperatorsExtended.size; i ++) {
+    Matrix<Rational>& currentLoExt = this->linearOperatorsExtended[i];
     for (int j = 0; j < currentLoExt.numberOfRows; j ++) {
       for (int k = 0; k < currentLoExt.numberOfColumns; k ++) {
         matrixPoly.elements[j][k].makeConstant(currentLoExt.elements[j][k]);
@@ -1864,9 +1864,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.toString(&format) << "\n";
   this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n"
-  << this->theLinearOperatorsExtended[0].toString(&global.defaultFormat.getElement()) << "\n";
+  << this->linearOperatorsExtended[0].toString(&global.defaultFormat.getElement()) << "\n";
   this->log << "\nThe second operator extended:\n"
-  << this->theLinearOperatorsExtended[1].toString(&global.defaultFormat.getElement()) << "\n";
+  << this->linearOperatorsExtended[1].toString(&global.defaultFormat.getElement()) << "\n";
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.normals.size; i ++) {
     tempRoot.makeZero(input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1);
     for (int j = 0; j < input.domainAlgebra().getRank(); j ++) {
@@ -2088,7 +2088,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
 void GeneralizedVermaModuleCharacters::getProjection(
   int indexOperator, const Vector<Rational>& input, Vector<Rational>& output
 ) {
-  Matrix<Rational>& currentExtendedOperator = this->theLinearOperatorsExtended[indexOperator];
+  Matrix<Rational>& currentExtendedOperator = this->linearOperatorsExtended[indexOperator];
   Vector<Rational>& currentTranslation = this->translationsProjectedBasisChanged[indexOperator];
   if (input.lastObject()->isEqualToZero()) {
     global.fatal << "Last coordinate is not supposed to be be zero. " << global.fatal;
@@ -2127,7 +2127,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
 void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal
 ) {
-  Matrix<Rational> theOperatorExtended = this->theLinearOperatorsExtended[indexOperator];
+  Matrix<Rational> theOperatorExtended = this->linearOperatorsExtended[indexOperator];
   Vector<Rational>& theTranslation = this->translationsProjectedBasisChanged[indexOperator];
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
   Rational theConst;

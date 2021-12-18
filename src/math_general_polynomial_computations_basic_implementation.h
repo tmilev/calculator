@@ -661,22 +661,6 @@ bool Polynomial<Coefficient>::operator<(const Coefficient& other) const {
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::operator>(const Polynomial<Coefficient>& other) const {
-  if (other.size() == 0) {
-    if (this->size() == 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-  if (this->size() == 0) {
-    return false;
-  }
-  if (this->totalDegree() > other.totalDegree()) {
-    return true;
-  }
-  if (this->totalDegree() < other.totalDegree()) {
-    return false;
-  }
   return this->::LinearCombination<MonomialPolynomial, Coefficient>::operator>(other);
 }
 

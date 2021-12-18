@@ -533,15 +533,15 @@ bool CalculatorConversions::functionDynkinSimpleType(
     return calculator << "<hr>Failed to extract rank, type, "
     << "first co-root length from: " << input.toString() << ". ";
   }
-  Rational theScale;
-  if (!scaleE.isOfType<Rational>(&theScale)) {
+  Rational scale;
+  if (!scaleE.isOfType<Rational>(&scale)) {
     return calculator << "<hr>Failed to extract first co-root length: "
     << "expression " << scaleE.toString()
     << " is not a rational number.";
   }
-  if (theScale <= 0) {
+  if (scale <= 0) {
     return calculator << "<hr>Couldn't extract first co-root length: "
-    << theScale.toString() << " is non-positive.";
+    << scale.toString() << " is non-positive.";
   }
   std::string typeName;
   if (!typeLetterE.isOperation(&typeName)) {
@@ -601,7 +601,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
     return calculator << "<hr>Type D is expected to have rank 4 or more, "
     << "your input was of rank " << rank << ". ";
   }
-  outputMon.makeArbitrary(theWeylLetter, rank, theScale);
+  outputMon.makeArbitrary(theWeylLetter, rank, scale);
   return true;
 }
 

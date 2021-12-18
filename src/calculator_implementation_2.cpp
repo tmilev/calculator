@@ -709,7 +709,7 @@ void Calculator::EvaluateLoop::accountHistoryChildTransformation(
     return;
   }
   Expression incomingHistory, indexE;
-  indexE.assignValueOLD(childIndex, *this->owner);
+  indexE.assignValue(*this->owner, childIndex);
   incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySetChild(),
@@ -748,7 +748,7 @@ void Calculator::EvaluateLoop::accountHistory(Function* handler, const std::stri
     description << info;
   }
   Expression extraInformation;
-  extraInformation.assignValueOLD(description.str(), *this->owner);
+  extraInformation.assignValue(*this->owner, description.str());
   incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySet(),

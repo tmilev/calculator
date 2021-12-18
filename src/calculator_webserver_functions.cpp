@@ -12,7 +12,7 @@ bool CalculatorFunctionsCrypto::x509CertificateServer(
   MacroRegisterFunctionWithName("CalculatorFunctions::x509CertificateServer");
   (void) input;
   std::string result = Crypto::convertListUnsignedCharsToBase64(global.server().transportLayerSecurity.theServer.certificate.sourceBinary, false);
-  return output.assignValueOLD(result, calculator);
+  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsCrypto::x509CertificateDecode(
@@ -27,10 +27,10 @@ bool CalculatorFunctionsCrypto::x509CertificateDecode(
   certificate.sourceBinary = binary;
   std::stringstream commentsOnError;
   if (!certificate.loadFromASNEncoded(certificate.sourceBinary, &commentsOnError)) {
-    return output.assignValueOLD(commentsOnError.str(), calculator);
+    return output.assignValue(calculator, commentsOnError.str());
   }
   std::stringstream out;
   out << certificate.toStringTestEncode() << "<br>";
   out << certificate.toString();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }

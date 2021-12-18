@@ -1059,7 +1059,7 @@ bool Expression::assignStringParsed(
   if (!owner.parser.parseAndExtractExpressions(
     input, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors
   )) {
-    this->assignValueOLD(outputSyntacticErrors, owner);
+    this->assignValue(owner, outputSyntacticErrors);
     return false;
   }
   if (commands.startsWith(owner.opCommandSequence(), 2)) {

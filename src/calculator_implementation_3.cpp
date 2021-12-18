@@ -691,7 +691,7 @@ bool Calculator::automatedTest(
     << "number of tests to run after that. ";
   }
   test.calculatorTestRun();
-  return output.assignValueOLD(test.reportHtml, calculator);
+  return output.assignValue(calculator, test.reportHtml);
 }
 
 bool Calculator::Test::processResults() {

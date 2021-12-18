@@ -1168,8 +1168,8 @@ void Expression::setSize(int desiredSize) {
 
 bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
   this->checkInitialization();
-  int indexOfTheExpression = this->owner->addChildExpression(inputChild);
-  this->children.setObjectAtIndex(childIndexInMe, indexOfTheExpression);
+  int expressionIndex = this->owner->addChildExpression(inputChild);
+  this->children.setObjectAtIndex(childIndexInMe, expressionIndex);
   return true;
 }
 
@@ -1233,8 +1233,8 @@ bool Expression::startsWithGivenOperation(const std::string& operation, int desi
   if (this->size() == 0) {
     return false;
   }
-  int theOpIndex = this->owner->operations.getIndex(operation);
-  if (theOpIndex == - 1) {
+  int operatorIndex = this->owner->operations.getIndex(operation);
+  if (operatorIndex == - 1) {
     return false;
   }
   if (desiredChildren >= 0) {
@@ -1242,7 +1242,7 @@ bool Expression::startsWithGivenOperation(const std::string& operation, int desi
       return false;
     }
   }
-  return (*this)[0].isOperationGiven(theOpIndex);
+  return (*this)[0].isOperationGiven(operatorIndex);
 }
 
 bool Expression::startsWith(int operation, int numberOfChildren) const {
@@ -1447,7 +1447,7 @@ bool Expression::containsAsSubExpressionNoBuiltInTypes(const Expression& input) 
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
+  RecursionDepthCounter counter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::ContainsAsSubExpression: ")) {
     return false;
   }
@@ -1540,17 +1540,17 @@ bool Expression::isIntervalRealLine() const {
 }
 
 bool Expression::isEqualToOne() const {
-  int theInt;
-  if (this->isSmallInteger(&theInt)) {
-    return theInt == 1;
+  int value = 0;
+  if (this->isSmallInteger(&value)) {
+    return value == 1;
   }
   return false;
 }
 
 bool Expression::isEqualToTwo() const {
-  int theInt;
-  if (this->isSmallInteger(&theInt)) {
-    return theInt == 2;
+  int value = 0;
+  if (this->isSmallInteger(&value)) {
+    return value == 2;
   }
   return false;
 }
@@ -1566,9 +1566,9 @@ bool Expression::isEqualToHalf() const {
 
 bool Expression::isKnownToBeNonNegative() const {
   MacroRegisterFunctionWithName("Expression::isKnownToBeNonNegative");
-  double theDouble = 0;
-  if (this->evaluatesToDouble(&theDouble)) {
-    return theDouble >= 0;
+  double number = 0;
+  if (this->evaluatesToDouble(&number)) {
+    return number >= 0;
   }
   if (this->owner == nullptr) {
     return false;
@@ -1652,9 +1652,9 @@ bool Expression::isSmallInteger(int* whichInteger) const {
   if (this->isOfType<Rational>(&rational)) {
     return rational.isSmallInteger(whichInteger);
   }
-  AlgebraicNumber theAlgNum;
-  if (this->isOfType<AlgebraicNumber>(&theAlgNum)) {
-    return theAlgNum.isSmallInteger(whichInteger);
+  AlgebraicNumber algebraicNumber;
+  if (this->isOfType<AlgebraicNumber>(&algebraicNumber)) {
+    return algebraicNumber.isSmallInteger(whichInteger);
   }
   return false;
 }
@@ -1674,7 +1674,7 @@ bool Expression::divisionByMeShouldBeWrittenInExponentForm() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
+  RecursionDepthCounter counter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly()) {
     return false;
   }
@@ -1700,14 +1700,14 @@ bool Expression::isPositiveNumber() const {
   if (this->isOfType<Rational>(&rational)) {
     return rational.isPositive();
   }
-  double theDouble = - 1;
-  if (!this->evaluatesToDouble(&theDouble)) {
+  double number = - 1;
+  if (!this->evaluatesToDouble(&number)) {
     return false;
   }
-  if (FloatingPoint::isNaN(theDouble)) {
+  if (FloatingPoint::isNaN(number)) {
     return false;
   }
-  return theDouble > 0;
+  return number > 0;
 }
 
 bool Expression::isConstantNumber() const {
@@ -1715,7 +1715,7 @@ bool Expression::isConstantNumber() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter thecounter(&this->owner->recursionDepth);
+  RecursionDepthCounter counter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::isConstantNumber: ")) {
     return false;
   }
@@ -1867,13 +1867,13 @@ int Expression::getNumberOfColumns() const {
   if (!this->isSequenceNElements()) {
     return - 1;
   }
-  int theMax = 1;
+  int maximum = 1;
   for (int i = 1; i < this->size(); i ++) {
     if ((*this)[i].isSequenceNElements()) {
-      theMax = MathRoutines::maximum((*this)[i].size() - 1, theMax);
+      maximum = MathRoutines::maximum((*this)[i].size() - 1, maximum);
     }
   }
-  return theMax;
+  return maximum;
 }
 
 void Expression::getMultiplicandsRecursive(List<Expression>& outputAppendList, int depth) const {
@@ -1940,7 +1940,7 @@ int Expression::getExpressionTreeSize() const {
     return 1;
   }
   this->checkInitialization();
-  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
+  RecursionDepthCounter counter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("While computing Expression::getExpressionTreeSize: ")) {
     return 1;
   }
@@ -1956,7 +1956,8 @@ int Expression::getExpressionTreeSize() const {
 
 bool Expression::operator>(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::operatorGreaterThan");
-  double left = 0, right = 0;
+  double left = 0;
+  double right = 0;
   bool leftEvalsToDouble = this->evaluatesToDouble(&left);
   bool rightEvalsToDouble = other.evaluatesToDouble(&right);
   if (leftEvalsToDouble && rightEvalsToDouble) {
@@ -2441,14 +2442,14 @@ bool Expression::toStringBuiltIn<Plot>(
 ) {
   bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
   if (isFinal) {
-    Plot& thePlot = input.getValueNonConst<Plot>();
-    thePlot.flagIncludeExtraHtmlDescriptions = (format == nullptr) ? true : format->flagIncludeExtraHtmlDescriptionsInPlots;
-    thePlot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
-    out << thePlot.getPlotHtml(*input.owner);
+    Plot& plot = input.getValueNonConst<Plot>();
+    plot.flagIncludeExtraHtmlDescriptions = (format == nullptr) ? true : format->flagIncludeExtraHtmlDescriptionsInPlots;
+    plot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
+    out << plot.getPlotHtml(*input.owner);
     if (input.owner->flagWriteLatexPlots) {
-      out << input.owner->writeDefaultLatexFileReturnHtmlLink(thePlot.getPlotStringAddLatexCommands(false), nullptr, true);
+      out << input.owner->writeDefaultLatexFileReturnHtmlLink(plot.getPlotStringAddLatexCommands(false), nullptr, true);
       out << "<br><b>LaTeX code used to generate the output. </b><br>"
-      << thePlot.getPlotStringAddLatexCommands(true);
+      << plot.getPlotStringAddLatexCommands(true);
     }
   } else {
     out << "(plot not shown)";
@@ -2464,11 +2465,11 @@ bool Expression::toStringBuiltIn<WeylGroupData>(
 ) {
   (void) format;
   FormatExpressions formatLocal;
-  WeylGroupData& theGroup = input.getValueNonConst<WeylGroupData>();
+  WeylGroupData& group = input.getValueNonConst<WeylGroupData>();
   formatLocal.flagUseLatex = true;
   formatLocal.flagUseHTML = false;
   formatLocal.flagUseReflectionNotation = true;
-  out << theGroup.toString(&formatLocal);
+  out << group.toString(&formatLocal);
   return true;
 }
 
@@ -2978,24 +2979,24 @@ std::string Expression::toStringAllSlidersInExpression() const {
     }
     this->owner->objectContainer.userInputBoxSliderDisplayed[index] = true;
     InputBox& box = sliders.values[index];
-    std::string theSliderName = box.getSliderName();
+    std::string sliderName = box.getSliderName();
     out << "<input name='"
-    << theSliderName
+    << sliderName
     << "' type='range'";
-    double theReader = 0;
+    double reader = 0;
     out << std::fixed;
     out.precision(4);
-    if (box.min.evaluatesToDouble(&theReader)) {
-      out << "min='" << theReader << "' ";
+    if (box.min.evaluatesToDouble(&reader)) {
+      out << "min='" << reader << "' ";
     }
-    if (box.max.evaluatesToDouble(&theReader)) {
-      out << "max='" << theReader << "' ";
+    if (box.max.evaluatesToDouble(&reader)) {
+      out << "max='" << reader << "' ";
     }
-    if (box.step.evaluatesToDouble(&theReader)) {
-      out << "step ='" << theReader << "' ";
+    if (box.step.evaluatesToDouble(&reader)) {
+      out << "step ='" << reader << "' ";
     }
-    if (box.value.evaluatesToDouble(&theReader)) {
-      out << "value='" << theReader << "' ";
+    if (box.value.evaluatesToDouble(&reader)) {
+      out << "value='" << reader << "' ";
     } else {
       out << "value='1' ";
     }
@@ -3621,11 +3622,11 @@ bool Expression::toStringLnAbsoluteInsteadOfLogarithm(
   ) {
     return false;
   }
-  std::string theArg = input[1].toString(format);
-  if (!StringRoutines::stringBeginsWith(theArg, "\\left|")) {
-    out << "\\ln \\left|" << theArg << "\\right|";
+  std::string argument = input[1].toString(format);
+  if (!StringRoutines::stringBeginsWith(argument, "\\left|")) {
+    out << "\\ln \\left|" << argument << "\\right|";
   } else {
-    out << "\\ln " << theArg;
+    out << "\\ln " << argument;
   }
   return true;
 }
@@ -4509,8 +4510,8 @@ bool Expression::isList() const {
   return true;
 }
 
-bool Expression::isListOfTwoAtomsStartingWith(int theOp) const {
-  if (!this->isListStartingWithAtom(theOp)) {
+bool Expression::isListOfTwoAtomsStartingWith(int operation) const {
+  if (!this->isListStartingWithAtom(operation)) {
     return false;
   }
   if (this->children.size != 2) {
@@ -4751,11 +4752,11 @@ bool Expression::isCacheableExpression() const {
   if (this->children.size > 0) {
     return true;
   }
-  Calculator& theBoss = *this->owner;
-  if (this->data < 0 || this->data >= theBoss.operations.size()) {
+  Calculator& owner = *this->owner;
+  if (this->data < 0 || this->data >= owner.operations.size()) {
     global.fatal << "Corrupted atom in Expression::isCacheableExpression. " << global.fatal;
   }
-  return theBoss.atomsThatMustNotBeCached.contains(theBoss.operations.keys[this->data]);
+  return owner.atomsThatMustNotBeCached.contains(owner.operations.keys[this->data]);
 }
 
 bool Expression::isBuiltInScalar() const {

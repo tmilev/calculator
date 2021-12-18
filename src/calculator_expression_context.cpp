@@ -544,11 +544,11 @@ bool ExpressionContext::polynomialSubstitution(
 ) const {
   output.setSize(this->variables.size);
   for (int i = 0; i < this->variables.size; i ++) {
-    int theNewIndex = largerContext.variables.getIndex(this->variables[i]);
-    if (theNewIndex == - 1) {
+    int newIndex = largerContext.variables.getIndex(this->variables[i]);
+    if (newIndex == - 1) {
       return false;
     }
-    output[i].makeMonomial(theNewIndex, 1, one);
+    output[i].makeMonomial(newIndex, 1, one);
   }
   return true;
 }

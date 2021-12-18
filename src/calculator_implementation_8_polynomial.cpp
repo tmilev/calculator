@@ -31,7 +31,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   Polynomial<AlgebraicNumber> outputRemainder;
   computation.remainderDivisionByBasis(polynomials[0], outputRemainder, - 1);
   Expression polynomialExpression;
-  polynomialExpression.assignValueWithContextOLD(outputRemainder, context, calculator);
+  polynomialExpression.assignValueWithContext(calculator, outputRemainder, context);
   output.reset(calculator);
   output.addChildAtomOnTop("MakeExpression");
   output.addChildOnTop(polynomialExpression);
@@ -127,7 +127,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   std::stringstream out;
   out << computation.divisionReport.getElement().getDivisionStringHtml();
   out << latexOutput.str();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
@@ -179,8 +179,8 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   << computation.divisionReport.getElement().getDivisionLaTeXSlide()
   << "\\end{frame}"
   << "\\end{document}\r\n";
-  return output.assignValueOLD(
-    HtmlRoutines::convertStringToHtmlString(latexOutput.str(), true), calculator
+  return output.assignValue(calculator,
+    HtmlRoutines::convertStringToHtmlString(latexOutput.str(), true)
   );
 }
 
@@ -228,16 +228,16 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   if (!result.factor(polynomial.content, &comments, &comments)) {
     out << "Failed to factor. " << comments.str()
     << "Factorization so far: " << result.toStringResult(&result.format);
-    return output.assignValueOLD(out.str(), calculator);
+    return output.assignValue(calculator, out.str());
   }
   calculator << "Factorization success: " << result.toStringResult(&result.format);
   List<Expression> factorsList;
   Expression constant;
-  constant.assignValueWithContextOLD(result.constantFactor, polynomial.context, calculator);
+  constant.assignValueWithContext(calculator, result.constantFactor, polynomial.context);
   factorsList.addOnTop(constant);
   for (int i = 0; i < result.reduced.size; i ++) {
     Expression next;
-    next.assignValueWithContextOLD(result.reduced[i], polynomial.context, calculator);
+    next.assignValueWithContext(calculator, result.reduced[i], polynomial.context);
     factorsList.addOnTop(next);
   }
   return output.makeSequence(calculator, &factorsList);
@@ -268,7 +268,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   for (int i = 0; i < computation.quotients.size; i ++) {
     currentE.reset(calculator);
     currentE.addChildAtomOnTop("MakeExpression");
-    polynomialExpression.assignValueWithContextOLD(computation.quotients[i], context, calculator);
+    polynomialExpression.assignValueWithContext(calculator, computation.quotients[i], context);
     currentE.addChildOnTop(polynomialExpression);
     quotients.addOnTop(currentE);
   }
@@ -420,7 +420,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialProcess");
   List<Expression> resultSequence;
   Expression constantFactorExpression;
-  constantFactorExpression.assignValueOLD(constantFactor, calculator);
+  constantFactorExpression.assignValue(calculator, constantFactor);
   resultSequence.addOnTop(constantFactorExpression);
   Expression polynomialE;
   for (int i = 0; i < factors.size; i ++) {
@@ -1097,7 +1097,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
     relations[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
     out << "<br>" << relations[i].toString(&format);
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 template <class Coefficient>
@@ -1124,7 +1124,7 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePo
       left, right, outputPolynomial, one, &calculator.comments
     );
   }
-  return output.assignValueWithContextOLD(outputPolynomial, context, calculator);
+  return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 
 bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
@@ -1391,7 +1391,7 @@ bool CalculatorFunctionsPolynomial::groebner(
     }
     out << ");";
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibrary(

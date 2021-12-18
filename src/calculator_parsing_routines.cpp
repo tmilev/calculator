@@ -94,7 +94,7 @@ bool CalculatorParser::replaceIntegerDotIntegerByE() {
   result += afterDecimalPoint;
   result /= denominator;
   left.controlIndex = this->conExpression();
-  left.data.assignValueOLD(result, *this->owner);
+  left.data.assignValue(*this->owner, result);
   this->decreaseStackSetCharacterRanges(2);
   return true;
 }
@@ -905,7 +905,7 @@ bool CalculatorParser::replaceOEXByE() {
 bool CalculatorParser::replaceXXByEmptyString() {
   SyntacticElement& left = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
   Expression newExpr;
-  left.data.assignValueOLD(std::string(""), *this->owner);
+  left.data.assignValue(*this->owner, std::string(""));
   left.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(1);
 }
@@ -1164,7 +1164,7 @@ void CalculatorParser::parseFillDictionary(
       currentElement.data.reset(*this->owner);
       output.addOnTop(currentElement);
     } else if (MathRoutines::hasDecimalDigitsOnly(current) && !mustInterpretAsVariable) {
-      currentElement.data.assignValueOLD(current, *this->owner);
+      currentElement.data.assignValue(*this->owner, current);
       currentElement.controlIndex = this->conInteger();
       output.addOnTop(currentElement);
     } else {
@@ -1416,7 +1416,7 @@ bool CalculatorParser::replaceMatrixXByE() {
     for (int i = 0; i < numberOfRows; i ++) {
       for (int j = 0; j < numberOfColumns; j ++) {
         if (j + 1 >= matrixElement.dataList[i].size()) {
-          matrix.elements[i][j].assignValueOLD(0, *this->owner);
+          matrix.elements[i][j].assignValue(*this->owner, 0);
           continue;
         }
         matrix.elements[i][j] = matrixElement.dataList[i][j + 1];
@@ -1483,7 +1483,7 @@ bool CalculatorParser::replaceIntegerXbyEX() {
   element.controlIndex = this->conExpression();
   Rational value;
   value.assignString(element.data.getValue<std::string>());
-  element.data.assignValueOLD(value, *this->owner);
+  element.data.assignValue(*this->owner, value);
   return true;
 }
 

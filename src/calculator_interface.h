@@ -182,7 +182,7 @@ private:
 
   bool startsWithGivenOperation(const std::string& operation, int desiredChildren = - 1) const;
   bool isListStartingWithAtom(int operation = - 1) const;
-  bool isListOfTwoAtomsStartingWith(int theOp) const;
+  bool isListOfTwoAtomsStartingWith(int operation) const;
   bool isFrozen() const;
   bool isAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr) const;
   bool isAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
@@ -305,9 +305,6 @@ private:
   // note: the following always returns true:
   template <class Type>
   bool assignValue(Calculator& owner, const Type& inputValue);
-  // Same as assignValue but with shuffled arguments. Deprecated.
-  template <class Type>
-  bool assignValueOLD(const Type& inputValue, Calculator& owner);
   // note: the following always returns true:
   template <class Type>
   bool assignValueWithContext(
@@ -334,7 +331,7 @@ private:
   bool addChildValueOnTop(const Type& inputValue) {
     this->checkInitialization();
     Expression child;
-    child.assignValueOLD(inputValue, *this->owner);
+    child.assignValue(*this->owner, inputValue);
     child.checkConsistency();
     return this->addChildOnTop(child);
   }
@@ -393,7 +390,7 @@ private:
   bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
   bool makeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
 
-  bool makeXOXOdotsOX(Calculator& owner, int operation, const List<Expression>& theOpands);
+  bool makeXOXOdotsOX(Calculator& owner, int operation, const List<Expression>& opands);
   bool makeOXdotsX(Calculator& owner, int operation, const List<Expression>& input);
   bool makeOX(Calculator& owner, int operation, const Expression& opArgument);
   bool sequencefy();
@@ -598,12 +595,12 @@ private:
   void operator=(const Rational& other) {
     MacroRegisterFunctionWithName("Expression::operator=(Rational)");
     this->checkInitialization();
-    this->assignValueOLD(other, *this->owner);
+    this->assignValue(*this->owner, other);
   }
   void operator=(int other) {
     MacroRegisterFunctionWithName("Expression::operator=(int)");
     this->checkInitialization();
-    this->assignValueOLD(Rational(other), *this->owner);
+    this->assignValue(*this->owner, Rational(other));
   }
   void operator/=(const Expression& other);
   void operator+=(const Expression& other);
@@ -3190,16 +3187,16 @@ bool Expression::makeSum(
 ) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
-  oneE.assignValueOLD<Rational>(1, calculator);
+  oneE.assignValue<Rational>(calculator, 1);
   if (summands.isEqualToZero()) {
-    return this->assignValueOLD<Rational>(0, calculator);
+    return this->assignValue<Rational>(calculator, 0);
   }
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.setSize(summands.size());
   for (int i = 0; i < summands.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
     if (summands[i] == oneE) {
-      current.assignValueOLD(summands.coefficients[i], calculator);
+      current.assignValue(calculator, summands.coefficients[i]);
     } else if (!(summands.coefficients[i] == 1)) {
       current.reset(calculator, 3);
       current.addChildAtomOnTop(calculator.opTimes());
@@ -3283,11 +3280,6 @@ bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
   }
   ExpressionContext emptyContext(owner);
   return this->assignValueWithContext(owner, inputValue, emptyContext);
-}
-
-template <class Type>
-bool Expression::assignValueOLD(const Type& inputValue, Calculator& owner) {
-  return this->assignValue(owner, inputValue);
 }
 
 template <class Type>
@@ -3482,7 +3474,7 @@ bool Expression::makeMatrix(
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
       if (inputContext == nullptr) {
-        currentElt.assignValueOLD(input(i, j), owner);
+        currentElt.assignValue(owner, input(i, j));
       } else {
         currentElt.assignValueWithContextOLD(input(i, j), *inputContext, owner);
       }
@@ -3513,7 +3505,7 @@ bool CalculatorConversions::expressionFromPolynomial(
   }
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].isConstant()) {
-      currentTerm.assignValueOLD(1, calculator);
+      currentTerm.assignValue(calculator, 1);
       terms.addMonomial(currentTerm, input.coefficients[i]);
       continue;
     }
@@ -3530,7 +3522,7 @@ bool CalculatorConversions::expressionFromPolynomial(
         if (input[i](j) == 1) {
           currentMultTermE = currentBase;
         } else {
-          currentPower.assignValueOLD(input[i](j), calculator);
+          currentPower.assignValue(calculator, input[i](j));
           currentMultTermE.makeXOX(
             calculator, calculator.opPower(), currentBase, currentPower
           );

@@ -607,7 +607,7 @@ void WebCrawler::fetchWebPagePart2(
 bool CalculatorFunctions::fetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPageGET");
   if (!global.userDefaultHasAdminRights()) {
-    return output.assignValueOLD(std::string("Fetching web pages available only for logged-in admins. "), calculator);
+    return output.assignValue(calculator, std::string("Fetching web pages available only for logged-in admins. "));
   }
   WebCrawler theCrawler;
   if (input.size() != 4) {
@@ -631,13 +631,13 @@ bool CalculatorFunctions::fetchWebPageGET(Calculator& calculator, const Expressi
   << "<br>";
   theCrawler.fetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPagePOST");
   if (!global.userDefaultHasAdminRights()) {
-    return output.assignValueOLD(std::string("Fetching web pages available only for logged-in admins. "), calculator);
+    return output.assignValue(calculator, std::string("Fetching web pages available only for logged-in admins. "));
   }
   WebCrawler crawler;
   if (input.size() != 5) {
@@ -664,7 +664,7 @@ bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Express
   crawler.flagDoUseGET = false;
   crawler.fetchWebPage(&out, &out);
   out << "<br>" << crawler.lastTransactionErrors << "<hr>" << crawler.lastTransaction;
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctions::fetchKnownPublicKeys(
@@ -675,14 +675,14 @@ bool CalculatorFunctions::fetchKnownPublicKeys(
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
     out << "You need to be a logged-in administrator to call this function. ";
-    return output.assignValueOLD(out.str(), calculator);
+    return output.assignValue(calculator, out.str());
   }
   WebCrawler crawler;
   crawler.theTSL.openSSLData.name = "crawler";
   crawler.updatePublicKeys(&out, &out);
   crawler.closeEverything();
   global << "Closed web connection." << Logger::endL;
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 void WebCrawler::updatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {

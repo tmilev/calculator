@@ -486,7 +486,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
       currentUEelt, theG2B3Data.shapovalovProducts[k], &theMod.highestWeightDualCoordinatesBaseField, one, zero, nullptr
     );
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output) {
@@ -655,7 +655,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
   }
   latexReport << "\\end{document}";
   out << "<br><br>\n\n\n\n\n" << latexReport.str();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::littelmannOperator(Calculator& calculator, const Expression& input, Expression& output) {
@@ -676,7 +676,7 @@ bool CalculatorLieTheory::littelmannOperator(Calculator& calculator, const Expre
   if (index == 0) {
     return output.assignError(calculator, "The index of the Littelmann root operator is expected to be non-zero.");
   }
-  return output.assignValueOLD(index, calculator);
+  return output.assignValue(calculator, index);
 }
 
 bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input, Expression& output) {
@@ -709,7 +709,7 @@ bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input
   waypoints = semisimpleLieAlgebra.weylGroup.getSimpleCoordinatesFromFundamental(waypoints, Rational::zero());
   LittelmannPath theLSpath;
   theLSpath.makeFromWaypoints(waypoints, semisimpleLieAlgebra.weylGroup);
-  return output.assignValueOLD(theLSpath, calculator);
+  return output.assignValue(calculator, theLSpath);
 }
 
 bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
@@ -736,7 +736,7 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
     << " have at most 192 elements (i.e. no larger than D_4). "
     << semisimpleLieAlgebra.content->toStringLieAlgebraName()
     << " has " << theWeyl.group.getSize().toString() << ".";
-    return output.assignValueOLD(out.str(), calculator);
+    return output.assignValue(calculator, out.str());
   }
   FormatExpressions format;
   format.polynomialAlphabet.setSize(1);
@@ -748,7 +748,7 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   theKLpolys.computeKLPolys(&theWeyl);
   format.flagUseHTML = true;
   out << theKLpolys.toString(&format);
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
@@ -1007,7 +1007,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   out << "<br><br><br>";
   out << latexTable.str();
   out << "<br>";
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::printB3G2branchingTable(
@@ -1170,7 +1170,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculato
   << "<br>\\documentclass{article}<br>\\usepackage{longtable, amssymb}"
   << "<br>\\begin{document}<br>%text body<br>" << latexTable.str()
   << "<br>%end of text body <br>\\end{document}";
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::printGeneralizedVermaModule(
@@ -1214,7 +1214,7 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element;
   element = output.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >();
   ModuleSSalgebra<RationalFraction<Rational> >& module = *element[0].monomials[0].owner;
-  return output.assignValueOLD(module.toString(), calculator);
+  return output.assignValue(calculator, module.toString());
 }
 
 bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
@@ -1245,18 +1245,18 @@ bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToL
       "Error extracting Lie algebra."
     );
   }
-  int theRank = theSSalgebra.content->getRank();
+  int rank = theSSalgebra.content->getRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   ExpressionContext hwContext(calculator);
   if (!calculator.getVector(
     genVemaWeightNode,
     highestWeightFundCoords,
     &hwContext,
-    theRank
+    rank
   )) {
     return calculator
     << "Failed to convert the third argument of "
-    << "splitGenericGeneralizedVermaTensorFiniteDimensional to a list of " << theRank
+    << "splitGenericGeneralizedVermaTensorFiniteDimensional to a list of " << rank
     << " polynomials. The second argument you gave is "
     << genVemaWeightNode.toString() << ".";
   }
@@ -1271,9 +1271,9 @@ bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToL
   RFOne.makeOne();
   RFZero.makeZero();
   Selection selInducing;
-  selInducing.makeFullSelection(theRank);
+  selInducing.makeFullSelection(rank);
   int coefficient;
-  for (int i = 0; i < theRank; i ++) {
+  for (int i = 0; i < rank; i ++) {
     if (highestWeightFundCoords[i].isSmallInteger(&coefficient)) {
       if (coefficient == 0) {
         selInducing.removeSelection(i);
@@ -1287,7 +1287,7 @@ bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToL
   SelectionWithMaxMultiplicity theHWenumerator;
   Vector<Polynomial<Rational> > theHWrf;
   for (int j = 0; j <= desiredHeight; j ++) {
-    theHWenumerator.initMaxMultiplicity(theRank - selInducing.cardinalitySelection, j);
+    theHWenumerator.initMaxMultiplicity(rank - selInducing.cardinalitySelection, j);
     theHWenumerator.incrementSubsetFixedCardinality(j);
     LargeInteger numCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
     for (int i = 0; i < numCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
@@ -1339,7 +1339,7 @@ bool CalculatorLieTheory::killingForm(Calculator& calculator, const Expression& 
     return false;
   }
   if (left.isEqualToZero() || right.isEqualToZero()) {
-    return output.assignValueOLD(0, calculator);
+    return output.assignValue(calculator, 0);
   }
   if (&left.getOwner() != &right.getOwner()) {
     return false;
@@ -1664,7 +1664,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   out << "</table>";
   latexReport2 << "\\end{longtable}";
   out << "<br>Ready LaTeX (table 1 and 2): <br><br><br>" << latexReport1.str() << "<br><br><br>" << latexReport2.str() << "<br>";
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::splitFDpartB3overG2(
@@ -1780,7 +1780,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
   }
   out << "</table>";
   out << "<br>Time final: " << global.getElapsedSeconds();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::printB3G2branchingTableInit(
@@ -1844,7 +1844,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   startingChar.makeFromWeight(simpleWeight, &theG2B3Data.homomorphism.coDomainAlgebra());
   startingChar.splitCharacterOverReductiveSubalgebra(&report, tempChar, theG2B3Data);
   out << report;
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::splitFDpartB3overG2Init(
@@ -3059,7 +3059,7 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
   << ownerLieAlgebra.content->toStringLieAlgebraName() << "</a>";
   if (FileOperations::fileExistsVirtual(outKostantSekiguchi.str()) && !forceRecompute) {
     out << "<br>The table is precomputed and served from the hard disk. <br>";
-    return output.assignValueOLD(out.str(), calculator);
+    return output.assignValue(calculator, out.str());
   }
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "The real form structure is not precomputed. "
@@ -3076,7 +3076,7 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
     calculator.objectContainer.slTwoSubalgebras,
     &out
   );
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
@@ -3141,7 +3141,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   << (showSLTwos ? outSltwoMainFile.str() : outRootHtmlDisplayName.str())
   << "' target='_blank'>"
   << semisimpleLieAlgebra.content->toStringLieAlgebraName() << " </a>";
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
@@ -3216,7 +3216,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   theMod.makeFromHW(ownerSS, weightFundCoords, selInducing, 1, 0, nullptr, false);
   std::string report;
   theMod.splitOverLevi(&report, selSplittingParSel);
-  return output.assignValueOLD(report, calculator);
+  return output.assignValue(calculator, report);
 }
 
 bool CalculatorLieTheory::parabolicWeylGroups(
@@ -3243,7 +3243,7 @@ bool CalculatorLieTheory::parabolicWeylGroups(
     subgroup.makeParabolicFromSelectionSimpleRoots(theSSalgebra.weylGroup, selectionParSel, 2000);
     out << "<hr>" << HtmlRoutines::getMathNoDisplay(subgroup.toString());
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::weylDimensionFormula(
@@ -3389,7 +3389,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
     out << "</table><hr>";
     out << subgroup.toString();
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::decomposeCharGenVerma(
@@ -3510,7 +3510,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   }
   out << "</table>";
   out << "Final char: " << HtmlRoutines::getMathNoDisplay(theChar.toString(&formatChars));
-  return output.assignValueOLD<std::string>(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::constructCartanSubalgebra(
@@ -3630,7 +3630,7 @@ bool CalculatorLieTheory::growDynkinType(
     }
     out << "</table>";
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::computeSemisimpleSubalgebras(
@@ -3653,7 +3653,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   if (lieAlgebra.getRank() > 6) {
     out << "<b>This code is completely experimental and has been set to run up to rank 6. "
     << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    return output.assignValueOLD(out.str(), calculator);
+    return output.assignValue(calculator, out.str());
   }
   SemisimpleSubalgebras& semisimpleSubalgebras =
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(lieAlgebra.weylGroup.dynkinType);
@@ -3666,7 +3666,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
     calculator.objectContainer.slTwoSubalgebras,
     nullptr
   );
-  return output.assignValueOLD(semisimpleSubalgebras, calculator);
+  return output.assignValue(calculator, semisimpleSubalgebras);
 }
 
 template < >
@@ -3699,7 +3699,7 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   file << subalgebras.toString(&tempFormat, false);
   std::stringstream out;
   out << "<a href='" << global.displayPathOutputFolder << "FKFTcomputation.html'>FKFTcomputation.html</a>";
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
@@ -3729,7 +3729,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
     }
     out << ")  )";
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::getPrincipalSl2Index(Calculator& calculator, const Expression& input, Expression& output) {
@@ -3739,7 +3739,7 @@ bool CalculatorLieTheory::getPrincipalSl2Index(Calculator& calculator, const Exp
     return calculator << "Failed to convert "
     << input.toString() << " to DynkinType.";
   }
-  return output.assignValueOLD(dynkinType.getPrincipalSlTwoCartanSymmetricInverseScale(), calculator);
+  return output.assignValue(calculator, dynkinType.getPrincipalSlTwoCartanSymmetricInverseScale());
 }
 
 bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
@@ -3766,7 +3766,7 @@ bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
   std::stringstream out;
   out << "There are " << indices.size << " absolute Dynkin indices. The indices are: "
   << indices.toStringCommaDelimited();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
@@ -3820,7 +3820,7 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
         }
       }
     }
-    return output.assignValueOLD(out.str(), calculator);
+    return output.assignValue(calculator, out.str());
   }
   FormatExpressions format;
   context.getFormat(format);
@@ -3848,7 +3848,7 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
       }
     }
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::casimirWithRespectToLevi(
@@ -3882,7 +3882,7 @@ bool CalculatorLieTheory::casimirWithRespectToLevi(
   theCasimir.makeCasimirWRTLeviParabolic(*theSSalg, parabolicSelection);
   ExpressionContext contextE(calculator);
   contextE.setAmbientSemisimpleLieAlgebra(*theSSalg);
-  return output.assignValueWithContextOLD(theCasimir, contextE, calculator);
+  return output.assignValueWithContext(calculator, theCasimir, contextE);
 }
 
 template <class Type>
@@ -3938,7 +3938,7 @@ bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
   ) {
     return calculator << "Failed to convert arguments of " << input.toString() << " to two DynkinType's.";
   }
-  return output.assignValueOLD(static_cast<int>(smallType.canBeExtendedParabolicallyTo(targetType)), calculator);
+  return output.assignValue(calculator, static_cast<int>(smallType.canBeExtendedParabolicallyTo(targetType)));
 }
 
 bool CalculatorLieTheory::getSymmetricCartan(Calculator& calculator, const Expression& input, Expression& output) {
@@ -3953,7 +3953,7 @@ bool CalculatorLieTheory::getSymmetricCartan(Calculator& calculator, const Expre
   dynkinType.getCoCartanSymmetric(outputCoMat);
   out << "Symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputMat.toStringLatex(), 10000)
   << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputCoMat.toStringLatex(), 10000);
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::drawWeightSupportWithMults(
@@ -3998,7 +3998,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   std::string report;
   theChar.drawMeWithMultiplicities(report, drawingVariables, 10000);
   out << report << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::drawRootSystem(
@@ -4048,7 +4048,7 @@ bool CalculatorLieTheory::drawRootSystem(
     drawingVariables.FillUserDefinedProjection = preferredProjectionPlane;
   }
   out << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 template <class Coefficient>
@@ -4168,7 +4168,7 @@ bool CalculatorLieTheory::drawWeightSupport(
   out << report << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.toStringFullCharacterWeightsTable();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::getLinksToSimpleLieAlgebras(
@@ -4201,7 +4201,7 @@ bool CalculatorLieTheory::getLinksToSimpleLieAlgebras(
   out << "<br>Recompute links.";
   out << outRecomputeLinks.str();
   out << outFromHD.str();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4346,7 +4346,7 @@ bool CalculatorLieTheory::casimir(Calculator& calculator, const Expression& inpu
   <<  ". The Casimir element of the ambient Lie algebra. ";
   ExpressionContext context(calculator);
   context.setAmbientSemisimpleLieAlgebra(algebraReference);
-  return output.assignValueWithContextOLD(theCasimir, context, calculator);
+  return output.assignValueWithContext(calculator, theCasimir, context);
 }
 
 bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4381,7 +4381,7 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
   outputUE.simplify(RationalFraction<Rational>::oneRational());
   ExpressionContext context(calculator);
   context.setAmbientSemisimpleLieAlgebra(theHmm.coDomainAlgebra());
-  return output.assignValueWithContextOLD(outputUE, context, calculator);
+  return output.assignValueWithContext(calculator, outputUE, context);
 }
 
 bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4415,7 +4415,7 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(Calcula
     ownerSSLiealg.content->weylGroup.getSimpleCoordinatesFromFundamental(highestWeight),
     ownerSSLiealg.content
   );
-  return output.assignValueOLD(element, calculator);
+  return output.assignValue(calculator, element);
 }
 
 bool CalculatorLieTheory::chevalleyGenerator(
@@ -4457,7 +4457,7 @@ bool CalculatorLieTheory::chevalleyGenerator(
     semisimpleLieAlgebra.content->weylGroup.dynkinType
   );
   context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
-  return output.assignValueWithContextOLD(elementOverRationalFunctions, context, calculator);
+  return output.assignValueWithContext(calculator, elementOverRationalFunctions, context);
 }
 
 bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4497,7 +4497,7 @@ bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expressi
   ExpressionContext context(calculator);
   int theAlgIndex = calculator.objectContainer.semisimpleLieAlgebras.getIndex(semisimpleLieAlgebra.content->weylGroup.dynkinType);
   context.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
-  return output.assignValueWithContextOLD(theUE, context, calculator);
+  return output.assignValueWithContext(calculator, theUE, context);
 }
 
 bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression& input, Expression& output) {
@@ -4514,7 +4514,7 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra* theSSlieAlg = algebra.content;
-  int theRank = theSSlieAlg->getRank();
+  int rank = theSSlieAlg->getRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
   WeylGroupData& theWeyl = theSSlieAlg->weylGroup;
@@ -4522,7 +4522,7 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
     return calculator << "<hr>Function root subsystem works for simple ambient types only. ";
   }
   for (int i = 2; i < input.size(); i ++) {
-    if (!calculator.getVector(input[i], currentRoot, nullptr, theRank)) {
+    if (!calculator.getVector(input[i], currentRoot, nullptr, rank)) {
       return false;
     }
     if (!theWeyl.rootSystem.contains(currentRoot)) {
@@ -4538,7 +4538,7 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
   diagram.computeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << diagram.toString()
   << ". Simple basis: " << diagram.simpleBasesConnectedComponents.toString();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorLieTheory::printSemisimpleLieAlgebra(

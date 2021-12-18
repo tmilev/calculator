@@ -178,7 +178,7 @@ bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(Calculator& calcul
   } else {
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctions::zModP(Calculator& calculator, const Expression& input, Expression& output) {
@@ -208,7 +208,7 @@ bool CalculatorFunctions::zModP(Calculator& calculator, const Expression& input,
   ExpressionContext context;
   context.initialize(calculator);
   context.setDefaultModulus(outputElement.modulus);
-  return output.assignValueWithContextOLD(outputElement, context, calculator);
+  return output.assignValueWithContext(calculator, outputElement, context);
 }
 
 bool CalculatorFunctions::conesIntersect(Calculator& calculator, const Expression& input, Expression& output) {
@@ -278,7 +278,7 @@ bool CalculatorFunctions::conesIntersect(Calculator& calculator, const Expressio
       << outputSeparatingNormal.scalarEuclidean(coneNonStrictGens[i]).toString();
     }
   }
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctions::reverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output) {
@@ -350,9 +350,9 @@ bool CalculatorFunctions::notFunction(Calculator& calculator, const Expression& 
     return false;
   }
   if (theInt == 0) {
-    return output.assignValueOLD(1, calculator);
+    return output.assignValue(calculator, 1);
   }
-  return output.assignValueOLD(0, calculator);
+  return output.assignValue(calculator, 0);
 }
 
 bool CalculatorFunctions::printZnEnumeration(
@@ -383,7 +383,7 @@ bool CalculatorFunctions::printZnEnumeration(
     counter ++;
   }
   out << "Total " << counter << " vectors:<br>" << out2.str();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 template <>
@@ -431,7 +431,7 @@ bool CalculatorFunctions::perturbSplittingNormal(Calculator& calculator, const E
   << nonStrictCone.toString() << " and vectors " << vectorsToPerturbRelativeTo.toString();
   splittingNormal.perturbNormalRelativeToVectorsInGeneralPosition(nonStrictCone, vectorsToPerturbRelativeTo);
   out << "<br>End result: " << splittingNormal.toString();
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
@@ -503,7 +503,7 @@ bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const
   }
   out << "<br>Done in " << totalCycles << " cycles.";
   out << "<br>" << counter << " total partitions ";
-  return output.assignValueOLD(out.str(), calculator);
+  return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctions::interpolatePolynomial(
@@ -532,7 +532,7 @@ bool CalculatorFunctions::interpolatePolynomial(
   interPoly.interpolate(arguments, values);
   ExpressionContext context(calculator);
   context.makeOneVariableFromString("x");
-  return output.assignValueWithContextOLD(interPoly, context, calculator);
+  return output.assignValueWithContext(calculator, interPoly, context);
 }
 
 bool CalculatorFunctions::operationBinary(
@@ -641,7 +641,7 @@ bool CalculatorBasics::extractBaseMultiplication(
   }
   // handle 0 * anything = 0
   if (output[1].isEqualToZero()) {
-    return output.assignValueOLD(0, calculator);
+    return output.assignValue(calculator, 0);
   }
   return result;
 }

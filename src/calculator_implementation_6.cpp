@@ -3124,55 +3124,55 @@ bool CalculatorFunctions::suffixNotationForPostScript(Calculator& calculator, co
   std::string currentString;
   if (input.isOperation(&currentString)) {
     if (input.toString() == "e") {
-      return output.assignValueOLD<std::string>(" 2.718281828 ", calculator);
+      return output.assignValue(calculator, std::string(" 2.718281828 "));
     }
     if (input.toString() == "\\pi") {
-      return output.assignValueOLD<std::string>(" 3.141592654 ", calculator);
+      return output.assignValue(calculator, std::string(" 3.141592654 "));
     }
     if (input.data >= calculator.numberOfPredefinedAtoms) {
       return output.assignValue(calculator, currentString);
     }
     if (currentString == "|") {
-      return output.assignValueOLD<std::string>("abs ", calculator);
+      return output.assignValue(calculator, std::string("abs "));
     }
     if (currentString == "+") {
-      return output.assignValueOLD<std::string>("add ", calculator);
+      return output.assignValue(calculator, std::string("add "));
     }
     if (currentString == "*") {
-      return output.assignValueOLD<std::string>("mul ", calculator);
+      return output.assignValue(calculator, std::string("mul "));
     }
     if (currentString == "-") {
-      return output.assignValueOLD<std::string>("sub ", calculator);
+      return output.assignValue(calculator, std::string("sub "));
     }
     if (currentString == "/") {
-      return output.assignValueOLD<std::string>("div ", calculator);
+      return output.assignValue(calculator, std::string("div "));
     }
     if (currentString == "^") {
-      return output.assignValueOLD<std::string>("exp ", calculator);
+      return output.assignValue(calculator, std::string("exp "));
     }
     if (currentString == "\\log") {
-      return output.assignValueOLD<std::string>("ln ", calculator);
+      return output.assignValue(calculator, std::string("ln "));
     }
     if (currentString == "\\sin") {
-      return output.assignValueOLD<std::string>(" 57.29578 mul sin ", calculator);
+      return output.assignValue(calculator, std::string(" 57.29578 mul sin "));
     }
     if (currentString == "\\cos") {
-      return output.assignValueOLD<std::string>(" 57.29578 mul cos ", calculator);
+      return output.assignValue(calculator, std::string(" 57.29578 mul cos "));
     }
     if (currentString == "\\tan") {
-      return output.assignValueOLD<std::string>(" 57.29578 mul tan ", calculator);
+      return output.assignValue(calculator, std::string(" 57.29578 mul tan "));
     }
     if (currentString == "\\arctan") {
-      return output.assignValueOLD<std::string>("ATAN ", calculator);
+      return output.assignValue(calculator, std::string("ATAN "));
     }
     if (currentString == "\\arcsin") {
-      return output.assignValueOLD<std::string>("ASIN ", calculator);
+      return output.assignValue(calculator, std::string("ASIN "));
     }
     if (currentString == "\\arccos") {
-      return output.assignValueOLD<std::string>("ACOS ", calculator);
+      return output.assignValue(calculator, std::string("ACOS "));
     }
     if (currentString == "\\sqrt") {
-      return output.assignValueOLD<std::string>("sqrt ", calculator);
+      return output.assignValue(calculator, std::string("sqrt "));
     }
     return output.assignError(
       calculator, "Cannot convert " + currentString + " to suffix notation."

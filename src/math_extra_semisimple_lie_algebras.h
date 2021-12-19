@@ -19,6 +19,8 @@ public:
     AI,
     AII,
     AIII,
+    BI,
+    CI,
   };
   DiagramType diagram;
   // Some of the classical Satake types
@@ -32,6 +34,8 @@ public:
   void plotAI(Plot& output, int verticalOffset);
   void plotAII(Plot& output, int verticalOffset);
   void plotAIII(Plot& output, int verticalOffset);
+  void plotBI(Plot& output, int verticalOffset);
+  void plotCI(Plot& output, int verticalOffset);
 };
 
 // Represents a Vogan diagram.
@@ -51,9 +55,7 @@ public:
     AII,
     AIII,
     BI,
-    BII,
     CI,
-    CII,
     DI,
     DII,
     DIII,
@@ -96,7 +98,8 @@ public:
   void plotAI(Plot& output);
   void plotAII(Plot& output);
   void plotAIII(Plot& output);
-  void plotAIV(Plot& output);
+  void plotBI(Plot& output);
+  void plotCI(Plot& output);
   void plotEI(Plot& output);
   void plotEII(Plot& output);
   void plotEIII(Plot& output);
@@ -678,7 +681,10 @@ public:
   bool computeSimpleRootImagesTypeAIII(
     std::stringstream* commentsOnFailure
   );
-  bool computeSimpleRootImagesTypeAIV(
+  bool computeSimpleRootImagesTypeBI(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImagesTypeCI(
     std::stringstream* commentsOnFailure
   );
   bool computeSimpleRootImagesTypeEI(

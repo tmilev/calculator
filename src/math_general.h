@@ -5908,10 +5908,30 @@ class DynkinSimpleType {
     const std::string& label,
     bool filled
   );
-  static void plotAn(Plot& output, int rank, int verticalOffset);
-  static void plotBn(Plot& output, int rank, int verticalOffset);
-  static void plotBC(Plot& output, int rank, int verticalOffset);
-  static void plotCn(Plot& output, int rank, int verticalOffset);
+  static void plotAn(
+    Plot& output,
+    int rank,
+    Selection* filledRoots,
+    int verticalOffset
+  );
+  static void plotBn(
+    Plot& output,
+    int rank,
+    Selection* filledRoots,
+    int verticalOffset
+  );
+  static void plotBC(
+    Plot& output,
+    int rank,
+    Selection* filledRoots,
+    int verticalOffset
+  );
+  static void plotCn(
+    Plot& output,
+    int rank,
+    Selection* filledRoots,
+    int verticalOffset
+  );
   static void plotDn(Plot& output, int rank, int verticalOffset);
 };
 

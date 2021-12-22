@@ -21,6 +21,7 @@ public:
     AIII,
     BI,
     CI,
+    DI,
   };
   DiagramType diagram;
   // Some of the classical Satake types
@@ -91,7 +92,11 @@ public:
     int inputParameter,
     std::stringstream* commentsOnFailure
   );
-  DynkinType dynkinTypeAmbient();
+  bool dynkinTypeAmbient(
+    DynkinType& output,
+    std::stringstream* commentsOnFailure
+  );
+  DynkinType dynkinTypeAmbientNoFailure();
   std::string toString();
 
   void plot(Plot& output);
@@ -100,6 +105,7 @@ public:
   void plotAIII(Plot& output);
   void plotBI(Plot& output);
   void plotCI(Plot& output);
+  void plotDI(Plot& output);
   void plotEI(Plot& output);
   void plotEII(Plot& output);
   void plotEIII(Plot& output);
@@ -669,7 +675,10 @@ public:
   VoganDiagram voganDiagram;
   LinearMapSemisimpleLieAlgebra<Rational> linearMap;
   HomomorphismSemisimpleLieAlgebra automorphism;
-  DynkinType dynkinTypeAmbient();
+  bool dynkinTypeAmbient(
+    DynkinType& output, std::stringstream* commentsOnFailure
+  );
+  DynkinType dynkinTypeAmbientNoFailure();
   std::string toString();
   CartanInvolution();
   bool computeSimpleRootImagesTypeAI(
@@ -685,6 +694,16 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool computeSimpleRootImagesTypeCI(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImagesTypeD(
+    std::stringstream* commentsOnFailure,
+    bool useAutomorphism
+  );
+  bool computeSimpleRootImagesTypeDI(
+    std::stringstream* commentsOnFailure
+  );
+  bool computeSimpleRootImagesTypeDII(
     std::stringstream* commentsOnFailure
   );
   bool computeSimpleRootImagesTypeEI(

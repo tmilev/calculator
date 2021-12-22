@@ -5932,7 +5932,7 @@ class DynkinSimpleType {
     Selection* filledRoots,
     int verticalOffset
   );
-  static void plotDn(Plot& output, int rank, int verticalOffset);
+  static void plotDn(Plot& output, int rank, Selection* filledRoots, int verticalOffset);
 };
 
 // This class may need a modification: perhaps it should not inherit monomial collection,

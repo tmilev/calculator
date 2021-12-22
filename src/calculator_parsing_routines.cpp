@@ -2347,6 +2347,11 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
+  if (secondToLastS == "%" && lastS == "SequenceStatements") {
+    this->lastRuleName = "comment out command";
+    this->popTopSyntacticStack();
+    return this->popTopSyntacticStack();
+  }
   if (secondToLastS == "%" && lastS == "LogCache") {
     this->owner->flagLogCache = true;
     this->popTopSyntacticStack();
@@ -2513,8 +2518,9 @@ bool CalculatorParser::applyOneRule() {
   if (lastS == "\\varnothing") {
     return this->replaceXByO(this->owner->opEmptySet());
   }
-  if (lastS == "\\circ" && secondToLastS != "{" && secondToLastS != "(" && secondToLastS != "^")
+  if (lastS == "\\circ" && secondToLastS != "{" && secondToLastS != "(" && secondToLastS != "^") {
     return this->replaceXByCon(this->conApplyFunction());
+  }
   if (fifthToLastS == "{" && fourthToLastS == "{" && thirdToLastS == "Variable" && secondToLastS == "}" && lastS == "}") {
     return this->replaceXXVXdotsXbyE_BOUND_XdotsX(2);
   }

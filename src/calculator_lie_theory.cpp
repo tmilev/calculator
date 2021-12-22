@@ -2069,6 +2069,12 @@ std::string VoganDiagram::toString() {
   case VoganDiagram::CI:
     out << "CI";
     break;
+  case VoganDiagram::DI:
+    out << "DI";
+    break;
+  case VoganDiagram::DII:
+    out << "DII";
+    break;
   case VoganDiagram::EI:
     out << "EI";
     break;
@@ -2082,7 +2088,7 @@ std::string VoganDiagram::toString() {
     out << "EIV";
     break;
   default:
-    out << "[unknown]";
+    out << "[unknown vogan diagram]";
   }
   out << ", " << this->rank << ", " << this->parameter;
   return out.str();
@@ -2923,6 +2929,7 @@ void DynkinSimpleType::plotDn(
   lastAnCenter[0] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
   lastAnCenter[1] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
   output.drawSegment(lastAnCenter, topCenter);
+  lastAnCenter[1] -= sqrt2DividedBy2 * 2 * DynkinSimpleType::radiusOfRootCircle;
   output.drawSegment(lastAnCenter, bottomCenter);
   std::stringstream secondToLastRoot;
   secondToLastRoot << rank - 1;
@@ -3096,6 +3103,12 @@ void VoganDiagram::plot(Plot& output) {
   case VoganDiagram::CI:
     this->plotCI(output);
     return;
+  case VoganDiagram::DI:
+    this->plotDI(output);
+    return;
+  case VoganDiagram::DII:
+    this->plotDII(output);
+    return;
   case VoganDiagram::EI:
     this->plotEI(output);
     return;
@@ -3154,6 +3167,21 @@ void VoganDiagram::plotCI(Plot& output) {
 }
 
 void VoganDiagram::plotDI(Plot& output) {
+  this->plotDII(output);
+  Rational squareRootOfTwo = Rational(1414, 1000);
+  Rational distanceBetweenCentersDividedBySquareRootOfTwo = DynkinSimpleType::distanceBetweenRootCenters;
+  distanceBetweenCentersDividedBySquareRootOfTwo /= squareRootOfTwo;
+  Vector<Rational> bottomEndAutomorphism;
+  bottomEndAutomorphism.makeZero(2);
+  bottomEndAutomorphism[0] = DynkinSimpleType::distanceBetweenRootCenters * (this->rank - 3);
+  bottomEndAutomorphism[0] += distanceBetweenCentersDividedBySquareRootOfTwo;
+  bottomEndAutomorphism[1] = - distanceBetweenCentersDividedBySquareRootOfTwo + 3;
+  Vector<Rational> topEndAutomorphism = bottomEndAutomorphism;
+  topEndAutomorphism[1] += distanceBetweenCentersDividedBySquareRootOfTwo * 2 - 6;
+  output.drawSegment(bottomEndAutomorphism, topEndAutomorphism);
+}
+
+void VoganDiagram::plotDII(Plot& output) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
   filledRoots.addSelectionAppendNewIndex(this->parameter);

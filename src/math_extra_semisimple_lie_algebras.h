@@ -106,6 +106,7 @@ public:
   void plotBI(Plot& output);
   void plotCI(Plot& output);
   void plotDI(Plot& output);
+  void plotDII(Plot& output);
   void plotEI(Plot& output);
   void plotEII(Plot& output);
   void plotEIII(Plot& output);

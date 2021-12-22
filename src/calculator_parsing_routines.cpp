@@ -2352,6 +2352,11 @@ bool CalculatorParser::applyOneRule() {
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }
+  if (thirdToLastS == "%" && secondToLastS == "SequenceStatements") {
+    this->lastRuleName = "comment out command below top";
+    this->popBelowStackTop();
+    return this->popBelowStackTop();
+  }
   if (secondToLastS == "%" && lastS == "LogCache") {
     this->owner->flagLogCache = true;
     this->popTopSyntacticStack();

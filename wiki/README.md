@@ -52,14 +52,17 @@ For single-line formulas, we guarantee the calculator's interpretation of your i
 - well-formed LaTeX that displays nicely;
 - can be parsed back by the calculator;
 - forms a valid normalized input equivalent to the entered one.
+
+
 ```
 log 10;
 \log 10;
 sin x;
 \sin^2 x;
-(\sin{}(x))^2
-``` 
+(\sin{}(x))^2 
+```
 [log 10; \log 10; sin x; \sin^2 x; (\sin{}(x))^2](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22log%2010%3B%5Cn%5C%5Clog%2010%3B%5Cnsin%20x%3B%5Cn%5C%5Csin%5E2%20x%3B%5Cn(%5C%5Csin%7B%7D(x))%5E2%22%2C%22monitoring%22%3A%22true%22%7D)
+
 
 ### Algebra
 Basic symbolic computation.
@@ -264,6 +267,18 @@ FactorPolynomialOverRationals(169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7
 [FactorPolynomialOverRationals(169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22FactorPolynomialOverRationals(169%20x%5E%7B11%7D-312%20x%5E%7B10%7D%2B430%20x%5E%7B9%7D-524%20x%5E%7B8%7D%2B595%20x%5E%7B7%7D-644%20x%5E%7B6%7D%2B581%20x%5E%7B5%7D-440%20x%5E%7B4%7D%2B318%20x%5E%7B3%7D-214%20x%5E%7B2%7D%2B127%20x-56)%22%2C%22monitoring%22%3A%22true%22%7D)
 
 ... to be continued.
+
+
+## Code comments. 
+
+A command that starts with the percent sign % is "commented out":
+
+```
+1+1;
+%1+2;
+```
+[1+1;%1+2;](https://localhost:8166/appNoCache#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2B1%3B%5Cn%25%201%2B2%3B%22%2C%22monitoring%22%3A%22true%22%2C%22useWebAssembly%22%3A%22false%22%2C%22inputFocus%22%3Atrue%7D)
+
 
 ## How does it work?
 All computations handled by the calculator are held in a universal and arbitrarily nested data structure:

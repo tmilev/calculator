@@ -1281,6 +1281,10 @@ private:
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 1);
     return true;
   }
+  bool popBelowStackTop() {
+    (*this->currentSyntacticStack).removeIndexShiftDown((*this->currentSyntacticStack).size - 2);
+    return true;
+  }
   bool canBeRegardedAsDifferentialForm(const SyntacticElement& input);
   bool canBeRegardedAsDifferentialForm(const std::string& input);
   bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs);

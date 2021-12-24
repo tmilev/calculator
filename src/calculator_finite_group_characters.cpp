@@ -258,22 +258,22 @@ bool Matrix<Element>::getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   int upperLimitComputations = 100000;
   output.setSize(0);
   int found = 0;
-  Polynomial<Element> theMinPoly;
-  theMinPoly.assignMinimalPolynomial(*this);
-  Vector<Element> theEigenValueCandidate;
-  theEigenValueCandidate.setSize(1);
+  Polynomial<Element> minimalPolynomil;
+  minimalPolynomil.assignMinimalPolynomial(*this);
+  Vector<Element> eigenValueCandidate;
+  eigenValueCandidate.setSize(1);
   Matrix<Rational> eigenSpaceMatrix;
   for (int ii = 0; ii < upperLimitComputations; ii ++) {
     int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0, 1, - 1, 2, - 2, 3, - 3,...
-    theEigenValueCandidate[0] = i;
-    if (theMinPoly.evaluate(theEigenValueCandidate) == 0) {
+    eigenValueCandidate[0] = i;
+    if (minimalPolynomil.evaluate(eigenValueCandidate) == 0) {
       eigenSpaceMatrix = *this;
       output.setSize(output.size + 1);
-      eigenSpaceMatrix.getEigenspaceModifyMe(theEigenValueCandidate[0], *output.lastObject());
+      eigenSpaceMatrix.getEigenspaceModifyMe(eigenValueCandidate[0], *output.lastObject());
       if (output.lastObject()->size == 0) {
-        global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].toString()
+        global.fatal << "This is a programmig error: " << eigenValueCandidate[0].toString()
         << " is a zero of the minimal polynomial "
-        << theMinPoly.toString() << " of the operator " << this->toString()
+        << minimalPolynomil.toString() << " of the operator " << this->toString()
         << " but the corresponding eigenspace is empty. " << global.fatal;
       }
       found += output.lastObject()->size;
@@ -296,21 +296,21 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
   // currently we have the difficulty with GroupRepresentation<WeylGroup, Coefficient> vs
   // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >, Coefficient>
   if ((letters.size == 1) && (letters[0] == 'A')) {
-    int theRank = ranks[0];
-    List<Partition> thePartitions;
-    Partition::GetPartitions(thePartitions,theRank + 1);
-    for (int i = 0; i < thePartitions.size; i ++) {
+    int rank = ranks[0];
+    List<Partition> partitions;
+    Partition::GetPartitions(partitions, rank + 1);
+    for (int i = 0; i < partitions.size; i ++) {
       GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> irrep;
-      thePartitions[i].spechtModuleMatricesOfTranspositionsjjplusone(irrep.generators);
+      partitions[i].spechtModuleMatricesOfTranspositionsjjplusone(irrep.generators);
       irrep.ownerGroup = &g;
-      irrep.identifyingString = thePartitions[i].toString();
+      irrep.identifyingString = partitions[i].toString();
       irrep.computeCharacter();
       g.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'B')) {
-    int theRank = ranks[0];
+    int rank = ranks[0];
     HyperoctahedralGroupData HOG;
-    HOG.makeHyperoctahedralGroup(theRank);
+    HOG.makeHyperoctahedralGroup(rank);
     HOG.allSpechtModules();
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> phi;
     phi.preimageGroup = &g;
@@ -335,9 +335,9 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
       g.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
-    int theRank = ranks[0];
+    int rank = ranks[0];
     HyperoctahedralGroupData HOG;
-    HOG.makeHyperoctahedralGroup(theRank + 1);
+    HOG.makeHyperoctahedralGroup(rank + 1);
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> inclusionMap;
     inclusionMap.preimageGroup = &g;
     inclusionMap.generatorImages.setSize(g.generators.size);

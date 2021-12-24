@@ -4947,11 +4947,11 @@ bool Expression::operator==(int other) const {
   if (this->owner == nullptr) {
     return false;
   }
-  int theInt;
-  if (!this->isSmallInteger(&theInt)) {
+  int inputInteger = 0;
+  if (!this->isSmallInteger(&inputInteger)) {
     return false;
   }
-  return theInt == other;
+  return inputInteger == other;
 }
 
 bool Expression::operator==(const std::string& other) const {

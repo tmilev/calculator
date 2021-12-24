@@ -5807,16 +5807,9 @@ void SlTwoSubalgebra::makeReportPrecomputations(
       this->hElement.getCartanPart(), this->preferredAmbientSimpleBasis[i]
     );
   }
-  //this->hCharacteristic.ComputeDebugString();
-  //  if (this->theE.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
-  //      && this->theF.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size
-  //      && this->theH.NonZeroElements.maximumSize == this->owner->theWeyl.RootSystem.size)
   this->getOwnerSemisimpleAlgebra().lieBracket(this->eElement, this->fElement, this->eBracketF);
   this->getOwnerSemisimpleAlgebra().lieBracket(this->hElement, this->eElement, this->hBracketE);
   this->getOwnerSemisimpleAlgebra().lieBracket(this->hElement, this->fElement, this->hBracketF);
-
-  //theSl2.hCharacteristic.ComputeDebugString();
-  //  this->computePrimalModuleDecomposition();
 }
 
 unsigned int SlTwoSubalgebra::hashFunction() const {
@@ -5829,7 +5822,7 @@ unsigned int SlTwoSubalgebra::hashFunction() const {
   return result;
 }
 
-//The below code is related to sl(2) subalgebras of simple Lie algebras
+//The below code is related to sl(2) subalgebras of simple Lie algebras.
 void SlTwoSubalgebra::computeModuleDecompositionsition(
   const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
   int dimensionContainingRegularSubalgebra,
@@ -8095,8 +8088,6 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   ////////////////
   this->bilinearFormSimplePrimal = this->weylNonEmbedded->cartanSymmetric;
   Matrix<Rational> centralizerPart, matrixFundamentalCoordinatesSimple, diagonalMatrix, diagMatrix2, bilinearFormInverted;
-  // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.toString() << "<br>Cartan symmetric: "
-  // << this->owner->owner->theWeyl.cartanSymmetric.toString();
   this->cartanOfCentralizer.getGramMatrix(centralizerPart, &this->owner->owner->weylGroup.cartanSymmetric);
   this->bilinearFormSimplePrimal.directSumWith(centralizerPart);
   bilinearFormInverted = this->bilinearFormSimplePrimal;

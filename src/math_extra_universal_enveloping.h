@@ -56,8 +56,8 @@ public:
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
-  void setNumberOfVariables(int newNumVars);
-  void substitution(const PolynomialSubstitution<Rational>& theSub);
+  void setNumberOfVariables(int newNumberOfVariables);
+  void substitution(const PolynomialSubstitution<Rational>& substitution);
   unsigned int hashFunction() const {
     return this->::MonomialTensor<Coefficient>::hashFunction();
   }
@@ -261,7 +261,7 @@ public:
   void substitution(
     const PolynomialSubstitution<Rational>& polynomialSubstitution
   );
-  void makeCasimir(SemisimpleLieAlgebra& theOwner);
+  void makeCasimir(SemisimpleLieAlgebra& inputOwner);
   void makeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& owner, const Selection& leviRoots);
   static void lieBracket(
     const ElementUniversalEnveloping<Coefficient>& left,

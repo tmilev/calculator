@@ -426,12 +426,12 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
   Vector<Rational> theHWdualCoords = weyl.getDualCoordinatesFromFundamental(
     weyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
   );
-  List<Coefficient> theSub;
-  theSub.setSize(theHWdualCoords.size);
+  List<Coefficient> substitution;
+  substitution.setSize(theHWdualCoords.size);
   for (int i = 0; i < theHWdualCoords.size; i ++) {
-    theSub[i] = theHWdualCoords[i];
+    substitution[i] = theHWdualCoords[i];
   }
-  this->modOutVermaRelations(&theSub, ringUnit, ringZero);
+  this->modOutVermaRelations(&substitution, ringUnit, ringZero);
   int numberOfPositiveRoots = this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
@@ -581,7 +581,7 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
   int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
-  int theRank = this->getOwner().getRank();
+  int rank = this->getOwner().getRank();
   Coefficient coefficient;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->objects[i];
@@ -596,9 +596,9 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
       }
       int theGenerator = currentMon.generatorsIndices[j];
       if (theGenerator < numPosRoots) {
-        theGenerator = 2 * numPosRoots + theRank - 1 - theGenerator;
-      } else if (theGenerator >= numPosRoots + theRank) {
-        theGenerator = - theGenerator + 2 * numPosRoots + theRank - 1;
+        theGenerator = 2 * numPosRoots + rank - 1 - theGenerator;
+      } else if (theGenerator >= numPosRoots + rank) {
+        theGenerator = - theGenerator + 2 * numPosRoots + rank - 1;
       }
       tempMon.multiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.powers[j]);
       if (power % 2 == 1) {

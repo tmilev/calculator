@@ -36,13 +36,13 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   ElementSemisimpleLieAlgebra<Rational> theGenerator;
   ElementUniversalEnveloping<Polynomial<Rational> > genericElt, actionOnGenericElt;
   List<QuasiDifferentialOperator<Rational> > theQDOs;
-  FormatExpressions theWeylFormat, theUEformat;
+  FormatExpressions weylFormat, theUEformat;
   std::stringstream out, latexReport, latexReport2;
   Polynomial<Rational> zero;
   Polynomial<Rational> one;
   one.makeConstant(Rational::one());
-  theWeylFormat.maximumLineLength = 40;
-  theWeylFormat.flagUseLatex = true;
+  weylFormat.maximumLineLength = 40;
+  weylFormat.flagUseLatex = true;
   theUEformat.maximumLineLength = 20;
   theUEformat.flagUseLatex = true;
   theUEformat.chevalleyGgeneratorLetter = "g";
@@ -51,8 +51,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   theUEformat.polyDefaultLetter = exponentVariableLetter == nullptr  ? "a" : *exponentVariableLetter;
   theUEformat.maximumLineLength = 178;
   theUEformat.numberOfAmpersandsPerNewLineForLaTeX = 2;
-  theWeylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
-  hwContext.getFormat(theWeylFormat);
+  weylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
+  hwContext.getFormat(weylFormat);
   List<ElementSemisimpleLieAlgebra<Rational> > theGeneratorsItry;
   if (!AllGenerators) {
     for (int j = 0; j < theSSalgebra.getRank(); j ++) {
@@ -109,11 +109,11 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       Pone.makeOne();
       Pzero.makeZero();
       theMod.getGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
-      theWeylFormat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
-      theWeylFormat.weylAlgebraLetters.setSize(numStartingVars + elementsNegativeNilrad.size);
+      weylFormat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
+      weylFormat.weylAlgebraLetters.setSize(numStartingVars + elementsNegativeNilrad.size);
       theUEformat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
       for (int k = 0; k < numStartingVars; k ++) {
-        theWeylFormat.weylAlgebraLetters[k] = "error";
+        weylFormat.weylAlgebraLetters[k] = "error";
       }
       std::string theFinalXletter = (xLetter == nullptr) ? "x": *xLetter;
       std::string theFinalPartialLetter = (partialLetter == nullptr) ? "\\partial" : *partialLetter;
@@ -125,8 +125,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         tempstream3 << theFinalXletter << "_" << k-numStartingVars + 1;
         tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars + 1 << "}";
         if (
-          theWeylFormat.polynomialAlphabet.contains(tempstream2.str()) ||
-          theWeylFormat.polynomialAlphabet.contains(tempstream3.str())
+          weylFormat.polynomialAlphabet.contains(tempstream2.str()) ||
+          weylFormat.polynomialAlphabet.contains(tempstream3.str())
         ) {
           return output.assignError(
             calculator,
@@ -135,8 +135,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
             " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. "
           );
         }
-        theWeylFormat.polynomialAlphabet[k] = tempstream2.str();
-        theWeylFormat.weylAlgebraLetters[k] = tempStream4.str();
+        weylFormat.polynomialAlphabet[k] = tempstream2.str();
+        weylFormat.weylAlgebraLetters[k] = tempStream4.str();
       }
       out << "<tr><td>General monomial in U(n_-):</td><td>"
       << HtmlRoutines::getMathNoDisplay(genericElt.toString(&theUEformat)) << "</td> </tr>";
@@ -184,20 +184,20 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       totalAdditions += Rational::totalAdditions() - currentAdditions;
       totalMultiplications += Rational::totalMultiplications() - currentMultiplications;
       totalTime += global.getElapsedSeconds() - currentTime;
-      theWeylFormat.customCoefficientMonomialSeparator = "\\otimes ";
-      theWeylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
+      weylFormat.customCoefficientMonomialSeparator = "\\otimes ";
+      weylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
       out << "<td>" << HtmlRoutines::getMathNoDisplay(
-        "\\begin{array}{|r|c|l|}&&" + theQDOs[j].toString(&theWeylFormat) + "\\end{array}"
+        "\\begin{array}{|r|c|l|}&&" + theQDOs[j].toString(&weylFormat) + "\\end{array}"
       ) << "</td>";
-      theWeylFormat.numberOfAmpersandsPerNewLineForLaTeX = 0;
-      theWeylFormat.maximumLineLength = 300;
-      latexReport << " & $\\begin{array}{l}" << theQDOs[j].toString(&theWeylFormat) << "\\end{array}$";
+      weylFormat.numberOfAmpersandsPerNewLineForLaTeX = 0;
+      weylFormat.maximumLineLength = 300;
+      latexReport << " & $\\begin{array}{l}" << theQDOs[j].toString(&weylFormat) << "\\end{array}$";
       if (j != 0) {
         latexReport2 << "&&";
       }
-      latexReport2 << " $\\begin{array}{l}" << theQDOs[j].toString(&theWeylFormat) << "\\end{array}$\\\\ "
+      latexReport2 << " $\\begin{array}{l}" << theQDOs[j].toString(&weylFormat) << "\\end{array}$\\\\ "
       << (j != theGeneratorsItry.size - 1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
-      theWeylFormat.customCoefficientMonomialSeparator = "";
+      weylFormat.customCoefficientMonomialSeparator = "";
     }
     latexReport2 << "\\end{longtable}";
     latexReport << "\\\\\\hline<br>";
@@ -302,7 +302,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
   if (&currentModule.getOwner() != owner) {
     global.fatal << "Module has owner that is not what it should be. " << global.fatal;
   }
-  element.makeHWV(currentModule, RFOne);
+  element.makeHighestWeightVector(currentModule, RFOne);
   if (&element.getOwnerSemisimple() != owner) {
     global.fatal << "Just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
@@ -442,7 +442,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, Branc
   theG2B3Data.shapovalovProducts.setSize(theG2B3Data.g2Weights.size);
   theG2B3Data.elementsUniversalEnveloping.setSize(theG2B3Data.g2Weights.size);
   ElementSumGeneralizedVermas<RationalFraction<Rational> >& theHWV = *theG2B3Data.eigenVectorsLevi.lastObject();
-  theHWV.makeHWV(theMod, one);
+  theHWV.makeHighestWeightVector(theMod, one);
   theHWV *= - 1;
   *theG2B3Data.eigenVectors.lastObject() = theHWV;
   Vector<RationalFraction<Rational> > weightDifference;
@@ -730,12 +730,12 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   std::stringstream out;
-  WeylGroupData& theWeyl = semisimpleLieAlgebra.content->weylGroup;
-  if (theWeyl.group.getSize() > 192) {
+  WeylGroupData& weylGroup = semisimpleLieAlgebra.content->weylGroup;
+  if (weylGroup.group.getSize() > 192) {
     out << "I have been instructed to run only for Weyl groups that"
     << " have at most 192 elements (i.e. no larger than D_4). "
     << semisimpleLieAlgebra.content->toStringLieAlgebraName()
-    << " has " << theWeyl.group.getSize().toString() << ".";
+    << " has " << weylGroup.group.getSize().toString() << ".";
     return output.assignValue(calculator, out.str());
   }
   FormatExpressions format;
@@ -745,7 +745,7 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << semisimpleLieAlgebra.content->toStringLieAlgebraName();
   KazhdanLusztigPolynomials theKLpolys;
-  theKLpolys.computeKLPolys(&theWeyl);
+  theKLpolys.computeKLPolys(&weylGroup);
   format.flagUseHTML = true;
   out << theKLpolys.toString(&format);
   return output.assignValue(calculator, out.str());
@@ -917,10 +917,10 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
             g2inB3Data.ambientCharacter[0].weightFundamentalCoordinates,
             RationalFraction<Rational>::oneRational()
           );
-          RationalFraction<Rational> theWeylSize;
-          theWeylSize = g2inB3Data.weylGroupFiniteDimensional.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates);
+          RationalFraction<Rational> weylSize;
+          weylSize = g2inB3Data.weylGroupFiniteDimensional.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates);
           latexTable << "& \\multirow{" << g2inB3Data.eigenVectors.size  << "}{*}{$"
-          << theWeylSize.toString(&g2inB3Data.format)
+          << weylSize.toString(&g2inB3Data.format)
           << "$}";
         } else {
           latexTable << "&";
@@ -1600,9 +1600,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
       theEigenVectorWeightsFund[i], RationalFraction<Rational>::zeroRational()
     );
-    element.makeHWV(theFDMod, RFOne);
+    element.makeHighestWeightVector(theFDMod, RFOne);
     element.multiplyOnTheLeft(theLeviEigenVectors[i], element, *semisimpleLieAlgebra.content, RFOne);
-    element.makeHWV(theGenMod, RFOne);
+    element.makeHighestWeightVector(theGenMod, RFOne);
     element.tensorOnTheRight(element);
     element *= - 1;
     std::string startingEltString = element.toString(&tempFormat);
@@ -3503,7 +3503,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   Vector<RationalFraction<Rational> > weightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
-  WeylGroupData& theWeyl = ownerSS.weylGroup;
+  WeylGroupData& weylGroup = ownerSS.weylGroup;
   int dimension = ownerSS.getRank();
   ExpressionContext finalContext(calculator);
   if (!calculator.getVector<RationalFraction<Rational> >(
@@ -3535,7 +3535,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   }
   calculator << "Your input weight in fundamental coordinates: " << weightFundCoords.toString();
   calculator << "<br>Your input weight in simple coordinates: "
-  << theWeyl.getSimpleCoordinatesFromFundamental(
+  << weylGroup.getSimpleCoordinatesFromFundamental(
     weightFundCoords, RationalFraction<Rational>::zeroRational()
   ).toString()
   << "<br>Your inducing parabolic subalgebra: " << inducingParSel.toString() << "."
@@ -3754,39 +3754,39 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     theHWFundCoordsFDPart[parSel.elements[i]] = 0;
   }
   KazhdanLusztigPolynomials theKLpolys;
-  WeylGroupData& theWeyl = theSSlieAlg.content->weylGroup;
-  if (!theKLpolys.computeKLPolys(&theWeyl)) {
+  WeylGroupData& weylGroup = theSSlieAlg.content->weylGroup;
+  if (!theKLpolys.computeKLPolys(&weylGroup)) {
     return output.assignError(
       calculator,
       "failed to generate Kazhdan-Lusztig polynomials (output too large?)"
     );
   }
-  theHWSimpCoordsFDPart = theWeyl.getSimpleCoordinatesFromFundamental(
+  theHWSimpCoordsFDPart = weylGroup.getSimpleCoordinatesFromFundamental(
     theHWFundCoordsFDPart, RationalFraction<Rational>::zeroRational()
   );
-  theHWSimpCoordsFDPart += theWeyl.rho;
+  theHWSimpCoordsFDPart += weylGroup.rho;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subgroup;
-  if (!subgroup.makeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000)) {
+  if (!subgroup.makeParabolicFromSelectionSimpleRoots(weylGroup, parSel, 1000)) {
     return output.assignError(
       calculator,
       "Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000)."
     );
   }
-  theHWsimpCoords = theWeyl.getSimpleCoordinatesFromFundamental(
+  theHWsimpCoords = weylGroup.getSimpleCoordinatesFromFundamental(
     theHWfundcoords, RationalFraction<Rational>::zeroRational()
   );
-  List<ElementWeylGroup> theWeylElements;
-  subgroup.getGroupElementsIndexedAsAmbientGroup(theWeylElements);
+  List<ElementWeylGroup> weylGroupElements;
+  subgroup.getGroupElementsIndexedAsAmbientGroup(weylGroupElements);
   Vector<RationalFraction<Rational> > currentHW;
   out << "<br>Orbit modified with small rho: "
   << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
-  for (int i = 0; i < theWeyl.group.elements.size; i ++) {
+  for (int i = 0; i < weylGroup.group.elements.size; i ++) {
     currentHW = theHWsimpCoords;
     currentHW += subgroup.getRho();
-    theWeyl.actOn(i, currentHW);
+    weylGroup.actOn(i, currentHW);
     currentHW -= subgroup.getRho();
     out << "<tr><td>" << currentHW.toString() << "</td><td>"
-    << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
+    << weylGroup.getFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
   }
   out << "</table>";
   out << "<br>The rho of the Levi part is: "
@@ -3804,8 +3804,8 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   formatChars.fundamentalWeightLetter = "\\omega";
   formatChars.flagUseLatex = true;
   subgroup.ambientWeyl = theKLpolys.weylGroup;
-  for (int i = 0; i < theWeylElements.size; i ++) {
-    ElementWeylGroup& currentElement = theWeylElements[i];
+  for (int i = 0; i < weylGroupElements.size; i ++) {
+    ElementWeylGroup& currentElement = weylGroupElements[i];
     out << "<tr><td>" << currentElement.toString() << "</td>";
 
     int indexInWeyl = theKLpolys.weylGroup->group.elements.getIndex(currentElement);
@@ -3820,17 +3820,17 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     for (int j = 0; j < theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl].size; j ++) {
       if (!theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j].isEqualToZero()) {
         currentHW = theHWsimpCoords;
-        theWeyl.actOnRhoModified(j, currentHW);
-        monomial.weightFundamentalCoordinates = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
-        int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.group.elements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
+        weylGroup.actOnRhoModified(j, currentHW);
+        monomial.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(currentHW);
+        int sign = (currentElement.generatorsLastAppliedFirst.size - weylGroup.group.elements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
         currentChar.addMonomial(monomial, theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j] * sign);
       }
     }
     currentHW = theHWsimpCoords;
     currentHW += subgroup.getRho();
-    theWeyl.actOn(indexInWeyl, currentHW);
+    weylGroup.actOn(indexInWeyl, currentHW);
     currentHW -= subgroup.getRho();
-    out << "<td>" << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toStringLetterFormat("\\omega") << "</td>";
+    out << "<td>" << weylGroup.getFundamentalCoordinatesFromSimple(currentHW).toStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << HtmlRoutines::getMathNoDisplay(currentChar.toString(&formatChars)) << "</td>";
     if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
       currentChar *= - 1;
@@ -4319,15 +4319,15 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
     );
   }
   Vector<Rational> highestWeightSimpleCoords;
-  WeylGroupData& theWeyl = theSSalgpointer.content->weylGroup;
-  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  WeylGroupData& weylGroup = theSSalgpointer.content->weylGroup;
+  highestWeightSimpleCoords = weylGroup.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
   theChar.makeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
   DrawingVariables drawingVariables;
   std::string report;
   theChar.drawMeWithMultiplicities(report, drawingVariables, 10000);
-  out << report << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
+  out << report << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   return output.assignValue(calculator, out.str());
 }
 
@@ -4348,7 +4348,7 @@ bool CalculatorLieTheory::drawRootSystem(
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra& theAlg = *theAlgPointer.content;
-  WeylGroupData& theWeyl = theAlg.weylGroup;
+  WeylGroupData& weylGroup = theAlg.weylGroup;
   Vectors<Rational> preferredProjectionPlane;
   if (hasPreferredProjectionPlane) {
     preferredProjectionPlane.setSize(2);
@@ -4356,12 +4356,12 @@ bool CalculatorLieTheory::drawRootSystem(
       input[2],
       preferredProjectionPlane[0],
       nullptr,
-      theWeyl.getDimension()
+      weylGroup.getDimension()
     ) && calculator.getVector(
       input[3],
       preferredProjectionPlane[1],
       nullptr,
-      theWeyl.getDimension()
+      weylGroup.getDimension()
     );
     if (!isGood) {
       return output.assignError(
@@ -4372,12 +4372,12 @@ bool CalculatorLieTheory::drawRootSystem(
   }
   std::stringstream out;
   DrawingVariables drawingVariables;
-  theWeyl.drawRootSystem(drawingVariables, true, false, nullptr, true, nullptr);
+  weylGroup.drawRootSystem(drawingVariables, true, false, nullptr, true, nullptr);
   if (hasPreferredProjectionPlane) {
     drawingVariables.flagFillUserDefinedProjection = true;
     drawingVariables.FillUserDefinedProjection = preferredProjectionPlane;
   }
-  out << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
+  out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   return output.assignValue(calculator, out.str());
 }
 
@@ -4486,8 +4486,8 @@ bool CalculatorLieTheory::drawWeightSupport(
     return false;
   }
   Vector<Rational> highestWeightSimpleCoords;
-  WeylGroupData& theWeyl = theAlg.weylGroup;
-  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords, Rational::zero());
+  WeylGroupData& weylGroup = theAlg.weylGroup;
+  highestWeightSimpleCoords = weylGroup.getSimpleCoordinatesFromFundamental(highestWeightFundCoords, Rational::zero());
   // Vectors<Rational> weightsToBeDrawn;
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
@@ -4495,7 +4495,7 @@ bool CalculatorLieTheory::drawWeightSupport(
   DrawingVariables drawingVariables;
   std::string report;
   theChar.drawMeNoMultiplicities(report, drawingVariables, 10000);
-  out << report << drawingVariables.getHTMLDiv(theWeyl.getDimension(), true);
+  out << report << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.toStringFullCharacterWeightsTable();
   return output.assignValue(calculator, out.str());
@@ -4697,12 +4697,12 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
       "Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments."
     );
   }
-  HomomorphismSemisimpleLieAlgebra theHmm;
-  calculator.makeHmmG2InB3(theHmm);
+  HomomorphismSemisimpleLieAlgebra homomorphism;
+  calculator.makeHmmG2InB3(homomorphism);
 
   ElementUniversalEnveloping<RationalFraction<Rational> > argument = output.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >();
   ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
-  if (!theHmm.applyHomomorphism(argument, outputUE)) {
+  if (!homomorphism.applyHomomorphism(argument, outputUE)) {
     return output.assignError(
       calculator,
       "Failed to apply homomorphism for unspecified reason"
@@ -4710,7 +4710,7 @@ bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& 
   }
   outputUE.simplify(RationalFraction<Rational>::oneRational());
   ExpressionContext context(calculator);
-  context.setAmbientSemisimpleLieAlgebra(theHmm.coDomainAlgebra());
+  context.setAmbientSemisimpleLieAlgebra(homomorphism.coDomainAlgebra());
   return output.assignValueWithContext(calculator, outputUE, context);
 }
 
@@ -4847,24 +4847,24 @@ bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression
   int rank = theSSlieAlg->getRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
-  WeylGroupData& theWeyl = theSSlieAlg->weylGroup;
-  if (!theWeyl.dynkinType.isSimple()) {
+  WeylGroupData& weylGroup = theSSlieAlg->weylGroup;
+  if (!weylGroup.dynkinType.isSimple()) {
     return calculator << "<hr>Function root subsystem works for simple ambient types only. ";
   }
   for (int i = 2; i < input.size(); i ++) {
     if (!calculator.getVector(input[i], currentRoot, nullptr, rank)) {
       return false;
     }
-    if (!theWeyl.rootSystem.contains(currentRoot)) {
+    if (!weylGroup.rootSystem.contains(currentRoot)) {
       return output.assignError(calculator, "Input vector " + currentRoot.toString() + " is not a root. ");
     }
     outputRoots.addOnTop(currentRoot);
   }
   std::stringstream out;
   DynkinDiagramRootSubalgebra diagram;
-  theWeyl.transformToSimpleBasisGenerators(outputRoots, theWeyl.rootSystem);
-  diagram.ambientBilinearForm = theWeyl.cartanSymmetric;
-  diagram.ambientRootSystem = theWeyl.rootSystem;
+  weylGroup.transformToSimpleBasisGenerators(outputRoots, weylGroup.rootSystem);
+  diagram.ambientBilinearForm = weylGroup.cartanSymmetric;
+  diagram.ambientRootSystem = weylGroup.rootSystem;
   diagram.computeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << diagram.toString()
   << ". Simple basis: " << diagram.simpleBasesConnectedComponents.toString();

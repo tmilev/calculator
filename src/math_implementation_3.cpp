@@ -5722,7 +5722,6 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
     } else {
       out << "_" << this->rank;
     }
-    //out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
   }
   return out.str();
 }
@@ -6578,12 +6577,12 @@ void ElementWeylGroup::makeSimpleReflection(int simpleRootIndex, WeylGroupData& 
 
 void ElementWeylGroup::makeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl) {
   this->owner = &inputWeyl;
-  int theRank = this->owner->getDimension();
+  int rank = this->owner->getDimension();
   this->generatorsLastAppliedFirst.setSize(0);
   Vector<Rational> rhoImage = inputRhoImage;
   SimpleReflection generator;
   while (rhoImage != this->owner->rho) {
-    for (int i = 0; i < theRank; i ++) {
+    for (int i = 0; i < rank; i ++) {
       if (this->owner->getScalarProductSimpleRoot(rhoImage, i) < 0) {
         this->owner->reflectSimple(i, rhoImage);
         generator.makeSimpleReflection(i);
@@ -6861,12 +6860,12 @@ void WeylGroupData::getSignCharacter(Vector<Rational>& out) {
 // this is only used in one place.
 void SubgroupDataWeylGroup::getSignCharacter(Vector<Rational>& out) {
   MacroRegisterFunctionWithName("SubgroupRootReflections::getSignCharacter");
-  this->theSubgroupData->theSubgroup->getSignCharacter(out);
-//  if (!this->theSubgroup->flagCCRepresentativesComputed)
-//    this->theSubgroup->computeConjugacyClassSizesAndRepresentatives(0);
-//  out.setSize(this->theSubgroup->conjugacyClassCount());
-//  for (int i = 0; i < this->theSubgroup->conjugacyClassCount(); i ++)
-//    out[i] = this->theSubgroup->conjugacyClasses[i].representative.Sign();
+  this->subgroupData->subgroup->getSignCharacter(out);
+//  if (!this->subgroup->flagCCRepresentativesComputed)
+//    this->subgroup->computeConjugacyClassSizesAndRepresentatives(0);
+//  out.setSize(this->subgroup->conjugacyClassCount());
+//  for (int i = 0; i < this->subgroup->conjugacyClassCount(); i ++)
+//    out[i] = this->subgroup->conjugacyClasses[i].representative.Sign();
 }
 */
 
@@ -7784,10 +7783,10 @@ void WeylGroupData::drawRootSystem(
     output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 3);
   }
   if (drawWeylChamber) {
-    Cone theWeylChamber;
-    this->getWeylChamber(theWeylChamber);
+    Cone weylChamber;
+    this->getWeylChamber(weylChamber);
     FormatExpressions tempFormat;
-    theWeylChamber.drawMeProjective(nullptr, false, outputDV, tempFormat);
+    weylChamber.drawMeProjective(nullptr, false, outputDV, tempFormat);
   }
   output.centerX = 300;
   output.centerY = 300;
@@ -8235,10 +8234,10 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   return this->toStringFromLayersAndArrows(arrows, layers, GraphWidth, true);
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives(int UpperLimit) {
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives(int upperLimit) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives");
   this->checkInitialization();
-  this->ambientWeyl->group.computeAllElements(UpperLimit);
+  this->ambientWeyl->group.computeAllElements(upperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size = 0;
   this->RepresentativesQuotientAmbientOrder.reserve(this->ambientWeyl->group.elements.size);
@@ -8262,21 +8261,21 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::d
   const Vector<Rational>& highestWeightSimpleCoord,
   DrawingVariables& drawingVariables,
   const std::string& color,
-  int UpperBoundVertices
+  int upperBoundVertices
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::drawContour");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::drawContour");
   HashedList<Vector<Rational> > orbit;
   orbit.addOnTop(highestWeightSimpleCoord);
-  WeylGroupData& theWeyl = *this->ambientWeyl;
+  WeylGroupData& ambientWeylGroup = *this->ambientWeyl;
   Vector<Rational> tempRoot;
   for (int i = 0; i < orbit.size; i ++) {
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
       tempRoot = orbit[i];
-      theWeyl.reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], tempRoot, false, tempRoot);
+      ambientWeylGroup.reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], tempRoot, false, tempRoot);
       if (orbit.addOnTopNoRepetition(tempRoot)) {
         drawingVariables.drawLineBetweenTwoVectorsBufferRational(orbit[i], tempRoot, color, 1);
       }
-      if (orbit.size > UpperBoundVertices) {
+      if (orbit.size > upperBoundVertices) {
         return false;
       }
     }
@@ -9815,14 +9814,14 @@ bool QuasiPolynomial::substitutionFewerVariables(
   if (!this->ambientLatticeReduced.getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(substitution, latticeSubstitution)) {
     return false;
   }
-  Matrix<Rational> theSubLatticeShift;
+  Matrix<Rational> subLatticeShift;
   output.ambientLatticeReduced = this->ambientLatticeReduced;
   if (!output.ambientLatticeReduced.substitutionHomogeneous(latticeSubstitution)) {
     return false;
   }
-  theSubLatticeShift.initialize(latticeSubstitution.numberOfRows, 1);
-  for (int i = 0; i < theSubLatticeShift.numberOfRows; i ++) {
-    substitution[i].getConstantTerm(theSubLatticeShift.elements[i][0], Rational(0));
+  subLatticeShift.initialize(latticeSubstitution.numberOfRows, 1);
+  for (int i = 0; i < subLatticeShift.numberOfRows; i ++) {
+    substitution[i].getConstantTerm(subLatticeShift.elements[i][0], Rational(0));
   }
   Matrix<Rational> shiftImage, shiftMatForm;
   output.latticeShifts.size = 0;
@@ -9833,7 +9832,7 @@ bool QuasiPolynomial::substitutionFewerVariables(
   Polynomial<Rational> tempP;
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     shiftMatForm.assignVectorColumn(this->latticeShifts[i]);
-    shiftMatForm -= theSubLatticeShift;
+    shiftMatForm -= subLatticeShift;
     if (latticeSubstitution.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(latticeSubstitution, shiftMatForm, shiftImage)) {
       tempRoot.assignMatrixDetectRowOrColumn(shiftImage);
       tempP = this->valueOnEachLatticeShift[i];
@@ -9954,13 +9953,13 @@ bool Lattice::substitutionHomogeneous(
   global.fatal << "Not implemented yet. " << global.fatal;
  /*Vectors<Rational> preimageBasis;
   preimageBasis.assignMatrixRows(this->basisRationalForm);
-  Matrix<Rational>  theSubModifiable, currentBasisVector, oneSolution;
+  Matrix<Rational>  subModifiable, currentBasisVector, oneSolution;
   for (int i = 0; i <preimageBasis.size; i ++) {
-    theSubModifiable = theSub;
+    subModifiable = sub;
     currentBasisVector.assignVectorColumn(preimageBasis[i]);
-    if (theSubModifiable.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSubModifiable, currentBasisVector, oneSolution)) {
-      theSubModifiable = theSub;
-      theSubModifiable.fin
+    if (subModifiable.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(subModifiable, currentBasisVector, oneSolution)) {
+      subModifiable = sub;
+      subModifiable.fin
     }
   }*/
 return false;
@@ -10222,10 +10221,10 @@ std::string HtmlRoutines::convertStringToURLString(const std::string& input, boo
   return out.str();
 }
 
-Vector<Rational> OnePartialFractionDenominator::GetCheckSumRoot(int NumVars) {
+Vector<Rational> OnePartialFractionDenominator::GetCheckSumRoot(int numberOfVariables) {
   Vector<Rational> output;
-  output.setSize(NumVars);
-  for (int i = 0; i < NumVars; i ++) {
+  output.setSize(numberOfVariables);
+  for (int i = 0; i < numberOfVariables; i ++) {
     output[i] = i + 2;
   }
   return output;
@@ -10944,8 +10943,6 @@ void DrawOperations::rotateOutOfPlane(
 }
 
 void DrawOperations::modifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2) {
-  //if  (this->getScalarProduct(root2, root2) == 0)
-  //  root2.makeEi(this->theWeyl.cartanSymmetric.numberOfRows,1);
   double theScalar = this->bilinearForm.scalarProduct(root1, root2) / this->bilinearForm.scalarProduct(root2, root2);
   root1 -= root2 * theScalar;
   this->scaleToUnitLength(root1);
@@ -12497,11 +12494,11 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       for (int j = 0; j < this->vertices.size; j ++) {
         if (currentNormal.scalarEuclidean(this->vertices[j]).isEqualToZero()) {
           verticesOnWall.addOnTop(this->vertices[j]);
-          int theRank = verticesOnWall.getRankElementSpan(&matrixX, &tempSelX);
-          if (theRank < verticesOnWall.size) {
+          int rank = verticesOnWall.getRankElementSpan(&matrixX, &tempSelX);
+          if (rank < verticesOnWall.size) {
             verticesOnWall.removeLastObject();
           } else {
-            if (theRank == DesiredRank - 1) {
+            if (rank == DesiredRank - 1) {
               wallIsGood = true;
               break;
             }

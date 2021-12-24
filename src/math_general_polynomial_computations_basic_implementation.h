@@ -317,14 +317,14 @@ void Polynomial<Coefficient>::shiftVariableIndicesToTheRight(int variableIndexSh
   if (variableIndexShift == 0) {
     return;
   }
-  int oldNumVars = this->minimalNumberOfVariables();
+  int oldNumberOfVariables = this->minimalNumberOfVariables();
   Polynomial<Coefficient> accumulator;
   accumulator.makeZero();
   accumulator.setExpectedSize(this->size());
   MonomialPolynomial monomial;
   for (int i = 0; i < this->size(); i ++) {
     monomial.makeOne();
-    for (int j = 0; j < oldNumVars; j ++) {
+    for (int j = 0; j < oldNumberOfVariables; j ++) {
       monomial.setVariable(j + variableIndexShift, (*this)[i](j));
     }
     accumulator.addMonomial(monomial, this->coefficients[i]);
@@ -617,9 +617,9 @@ int Polynomial<Coefficient>::getHighestIndexSuchThatHigherIndexVariablesDontPart
 
 template <class Coefficient>
 void Polynomial<Coefficient>::scaleToPositiveMonomialExponents(MonomialPolynomial& outputScale) {
-  int numVars = this->minimalNumberOfVariables();
+  int numberOfVariables = this->minimalNumberOfVariables();
   outputScale.makeOne();
-  for (int i = 0; i < numVars; i ++) {
+  for (int i = 0; i < numberOfVariables; i ++) {
     for (int j = 0; j < this->size(); j ++) {
       const MonomialPolynomial& currentMonomial = (*this)[j];
       Rational currentScale = MathRoutines::minimum(outputScale(i), currentMonomial(i));
@@ -799,7 +799,6 @@ void Polynomial<Coefficient>::operator=(int other) {
 template <class Coefficient>
 template <class otherType>
 void Polynomial<Coefficient>::assignOtherType(const Polynomial<otherType>& other) {
-  this->NumVars = other.NumVars;
   this->::LinearCombination<MonomialPolynomial, Coefficient>::assignOtherType(other);
 }
 

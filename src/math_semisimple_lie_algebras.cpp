@@ -603,17 +603,9 @@ void SemisimpleLieAlgebra::exploitSymmetryAndCyclicityChevalleyConstants(int ind
   if ((rootI + rootJ).isEqualToZero()) {
     global.fatal << "Sum or roots not allowed to be zero here. " << global.fatal;
   }
-  //int indexMinusI = this->theWeyl.RootSystem.getIndex(-rootI);
-  //int indexMinusJ = this->theWeyl.RootSystem.getIndex(-rootJ);
-  //this->ComputeDebugString();
   this->exploitSymmetryChevalleyConstants(indexI, indexJ);
-  //this->ComputeDebugString();
-  //int indexRootIPlusRootJ = this->theWeyl.RootSystem.getIndex(rootI + rootJ);
   int indexMinusIMinusJ = this->weylGroup.rootSystem.getIndex(- rootI - rootJ);
   this->exploitTheCyclicTrick(indexI, indexJ, indexMinusIMinusJ);
-  //this->ComputeDebugString();
-  //this->exploitTheCyclicTrick(indexMinusI, indexMinusJ, indexRootIPlusRootJ);
-  //this->ComputeDebugString();
 }
 
 void SemisimpleLieAlgebra::exploitSymmetryChevalleyConstants(int indexI, int indexJ) {
@@ -742,7 +734,6 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
 }
 
 bool SemisimpleLieAlgebra::testForConsistency() {
-  //HashedList<Vector<Rational> >& theRoots = this->theWeyl.RootSystem;
   FormatExpressions& format = global.defaultFormat.getElement();
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, global);
@@ -842,19 +833,12 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   theRootSA.generateAutomorphismsPreservingBorel(theAutos);
   Matrix<Rational> mapOnRootSpaces;
   int theAutoIndex = theAutos.externalAutomorphisms.size > 1 ? 1 : 0;
-  /*if (this->theWeyl.WeylLetter == 'D' && dimension ==4)
-    theAutoIndex =2;
-*/
   mapOnRootSpaces.assignVectorsToRows(theAutos.externalAutomorphisms[theAutoIndex]);
   mapOnRootSpaces.transpose();
-//  mapOnRootSpaces.ComputeDebugString();
-//  Matrix<Rational>  theDet =mapOnRootSpaces;
-//  Rational tempRat;
-//  theDet.computeDeterminantOverwriteMatrix(tempRat);
-  Selection NonExplored;
+  Selection nonExplored;
   int numRoots = this->weylGroup.rootSystem.size;
-  NonExplored.initialize(numRoots);
-  NonExplored.makeFullSelection();
+  nonExplored.initialize(numRoots);
+  nonExplored.makeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
 
   this->computeChevalleyConstants();
@@ -875,13 +859,13 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
       range[index] = element;
       element.makeGGenerator(domainRoot, *this);
       domain[index] = element;
-      NonExplored.removeSelection(index);
+      nonExplored.removeSelection(index);
     }
   }
   Vector<Rational> left, right;
-  while (NonExplored.cardinalitySelection > 0) {
-    for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
-      int index = NonExplored.elements[i];
+  while (nonExplored.cardinalitySelection > 0) {
+    for (int i = 0; i < nonExplored.cardinalitySelection; i ++) {
+      int index = nonExplored.elements[i];
       const Vector<Rational>& current = this->weylGroup.rootSystem[index];
       for (int j = 0; j < dimension; j ++) {
         left.makeEi(dimension, j);
@@ -890,14 +874,14 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
           if (this->weylGroup.isARoot(right)) {
             int leftIndex = this->weylGroup.rootSystem.getIndex(left);
             int rightIndex = this->weylGroup.rootSystem.getIndex(right);
-            if (!NonExplored.selected[rightIndex]) {
+            if (!nonExplored.selected[rightIndex]) {
               ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = domain[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = domain[rightIndex];
               this->lieBracket(leftDomainElt, rightDomainElt, domain[index]);
               ElementSemisimpleLieAlgebra<Rational>& leftRangeElt = range[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightRangeElt = range[rightIndex];
               this->lieBracket(leftRangeElt, rightRangeElt, range[index]);
-              NonExplored.removeSelection(index);
+              nonExplored.removeSelection(index);
             }
           }
         }

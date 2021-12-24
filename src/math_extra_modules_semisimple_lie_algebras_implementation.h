@@ -448,7 +448,6 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   Vectors<Coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<Coefficient> > tempEigenVects;
   Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.getElement() : *outputEigenSpace;
-  //WeylGroup& weylGroup = this->theAlgebra.weylGroup;
   theFinalEigenSpace.makeEiBasis(this->getDimension());
   for (int i = 0; i < splittingParSelectedInLevi.cardinalitySelection; i ++) {
     int theGenIndex = splittingParSelectedInLevi.elements[i] +
@@ -577,18 +576,18 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::makeFromHW");
   ProgressReport report;
   this->owner = &inputAlgebra;
-  SemisimpleLieAlgebra& theAlgebrA = inputAlgebra;
+  SemisimpleLieAlgebra& algebra = inputAlgebra;
 
-  int theRank = theAlgebrA.getRank();
-  if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.numberOfElements != theRank) {
+  int rank = algebra.getRank();
+  if (HWFundCoords.size != rank || selNonSelectedAreElementsLevi.numberOfElements != rank) {
     global.fatal << "I am asked to create a "
     << "generalized Verma module with a semisimple Lie algebra of rank "
-    << theRank << " but the input highest weight, "
+    << rank << " but the input highest weight, "
     << HWFundCoords.toString() << ", has " << HWFundCoords.size << " coordinates and "
     << " the parabolic section indicates rank of "
     << selNonSelectedAreElementsLevi.numberOfElements << ". " << global.fatal;
   }
-  WeylGroupData& weylGroup = theAlgebrA.weylGroup;
+  WeylGroupData& weylGroup = algebra.weylGroup;
   this->cachedPairs.clear();
   this->cachedTraces.setSize(0);
 
@@ -597,10 +596,10 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->parabolicSelectionSelectedAreElementsLevi.invertSelection();
 
   this->highestWeightFundamentalCoordinatesBaseField = HWFundCoords;
-  this->highestWeightDualCoordinatesBaseField.setSize(theRank);
-  this->highestWeightFiniteDimensionalPartFundamentalCoordinates.setSize(theRank);
+  this->highestWeightDualCoordinatesBaseField.setSize(rank);
+  this->highestWeightFiniteDimensionalPartFundamentalCoordinates.setSize(rank);
 
-  for (int i = 0; i < theRank; i ++) {
+  for (int i = 0; i < rank; i ++) {
     this->highestWeightFiniteDimensionalPartFundamentalCoordinates[i] = 0;
     if (this->parabolicSelectionSelectedAreElementsLevi.selected[i]) {
       int theCoord;
@@ -1064,8 +1063,8 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
 
 template <class Coefficient>
 void ElementTensorsGeneralizedVermas<Coefficient>::substitution(
-  const PolynomialSubstitution<Rational>& theSub,
-  ListReferences<ModuleSSalgebra<Coefficient> >& theMods
+  const PolynomialSubstitution<Rational>& substitution,
+  ListReferences<ModuleSSalgebra<Coefficient> >& modules
 ) {
   ElementTensorsGeneralizedVermas<Coefficient> output;
   MonomialTensorGeneralizedVermas<Coefficient> currentMon;
@@ -1073,9 +1072,9 @@ void ElementTensorsGeneralizedVermas<Coefficient>::substitution(
   Coefficient tempCF;
   for (int i = 0; i < this->size(); i ++) {
     currentMon = (*this)[i];
-    currentMon.substitution(theSub, theMods);
+    currentMon.substitution(substitution, modules);
     tempCF = this->coefficients[i];
-    tempCF.substitution(theSub, 1, nullptr);
+    tempCF.substitution(substitution, 1, nullptr);
     output.addMonomial(currentMon, tempCF);
   }
   *this = output;
@@ -1129,16 +1128,16 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
 }
 
 template <class Coefficient>
-void ElementTensorsGeneralizedVermas<Coefficient>::makeHWV(
-  ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit
+void ElementTensorsGeneralizedVermas<Coefficient>::makeHighestWeightVector(
+  ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit
 ) {
   MonomialTensorGeneralizedVermas<Coefficient> tensorMon;
   Coefficient currentCoeff;
   currentCoeff = ringUnit;
   tensorMon.monomials.setSize(1);
   MonomialGeneralizedVerma<Coefficient>& monomial = tensorMon.monomials[0];
-  monomial.indexFDVector = theOwner.generatingWordsNonReduced.size - 1;
-  monomial.makeConstant(theOwner);
+  monomial.indexFDVector = inputOwner.generatingWordsNonReduced.size - 1;
+  monomial.makeConstant(inputOwner);
   this->makeZero();
   this->addMonomial(tensorMon, ringUnit);
 }
@@ -1238,11 +1237,11 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
   if (this->owner == nullptr) {
     return "(Error: module not initialized)";
   }
-  SemisimpleLieAlgebra& theAlgebrA = *this->owner;
-  WeylGroupData& weylGroup = theAlgebrA.weylGroup;
+  SemisimpleLieAlgebra& algebra = *this->owner;
+  WeylGroupData& weylGroup = algebra.weylGroup;
   std::stringstream out;
   out << "<br>Semisimple Lie algebra acting on generalized Verma module: "
-  << theAlgebrA.toStringLieAlgebraName() << ".";
+  << algebra.toStringLieAlgebraName() << ".";
   out << "<br>Parabolic selection: "
   << this->parabolicSelectionNonSelectedAreElementsLevi.toString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
@@ -1293,13 +1292,13 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
   << "Note that generator actions are computed on demand, only the simple "
   << "Chevalley generators are computed by default. ";
   out << "<table><tr><td>Generator</td><td>Action</td></tr>";
-  ElementSemisimpleLieAlgebra<Rational> tempSSElt;
+  ElementSemisimpleLieAlgebra<Rational> semisimpleLieAlgebraElement;
   for (int i = 0; i < this->actionsGeneratorsMatrix.size; i ++) {
     if (this->ComputedGeneratorActions.selected[i]) {
-      tempSSElt.makeGenerator(i, theAlgebrA);
+      semisimpleLieAlgebraElement.makeGenerator(i, algebra);
       out << "<tr>";
       out << "<td>"
-      << HtmlRoutines::getMathNoDisplay(tempSSElt.toString(format))
+      << HtmlRoutines::getMathNoDisplay(semisimpleLieAlgebraElement.toString(format))
       << "</td>";
       out << "<td>";
       if (this->getDimension() < 28) {
@@ -1389,7 +1388,7 @@ bool ModuleSSalgebra<Coefficient>::isNotInLevi(int generatorIndex) {
 
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
-  bool shiftPowersByNumVarsBaseField,
+  bool shiftPowersByNumberOfVariablesBaseField,
   ElementUniversalEnveloping<RationalFraction<Rational> >& output,
   bool useNilWeight,
   bool ascending
@@ -1402,7 +1401,7 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   MonomialUniversalEnveloping<RationalFraction<Rational> > monomial;
   monomial.makeConstant();
   int variableShift = 0;
-  if (shiftPowersByNumVarsBaseField) {
+  if (shiftPowersByNumberOfVariablesBaseField) {
     variableShift = this->minimalNumberOfVariables();
   }
   for (int i = 0; i < elementsNilradical.size; i ++) {
@@ -1417,7 +1416,7 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
 
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
-  bool shiftPowersByNumVarsBaseField,
+  bool shiftPowersByNumberOfVariablesBaseField,
   ElementUniversalEnveloping<Polynomial<Rational> >& output,
   bool useNilWeight,
   bool ascending
@@ -1430,7 +1429,7 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   MonomialUniversalEnveloping<Polynomial<Rational> > monomial;
   monomial.makeOne(*this->owner);
   int variableShift = 0;
-  if (shiftPowersByNumVarsBaseField) {
+  if (shiftPowersByNumberOfVariablesBaseField) {
     variableShift = this->minimalNumberOfVariables();
   }
   for (int i = 0; i < elementsNilradical.size; i ++) {
@@ -1449,9 +1448,9 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
   bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::getActionGeneralizedVermaModuleAsDifferentialOperator");
-  List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
+  List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
   List<int> indicesNilrad;
-  this->getElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
+  this->getElementsNilradical(elementsNilradical, true, &indicesNilrad, useNilWeight, ascending);
   ElementUniversalEnveloping<Polynomial<Rational> > genericElement, result;
   this->getGenericUnMinusElt(true, genericElement, useNilWeight, ascending);
   result.assignElementLieAlgebra(inputElt, *this->owner, 1);
@@ -1536,7 +1535,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
 
 template<class Coefficient>
 void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
-  HomomorphismSemisimpleLieAlgebra& theHmm,
+  HomomorphismSemisimpleLieAlgebra& homomorphism,
   Selection& LeviInSmall,
   List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors,
   Vectors<Coefficient>* outputWeightsFundCoords,
@@ -1561,7 +1560,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   }
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream tempStream1;
-  tempStream1 << "Started splitting the f.d. part of the " << theHmm.coDomainAlgebra().toStringLieAlgebraName() << "-module with highest weight in fund coords "
+  tempStream1 << "Started splitting the f.d. part of the " << homomorphism.coDomainAlgebra().toStringLieAlgebraName() << "-module with highest weight in fund coords "
   << this->character[0].weightFundamentalCoordinates.toString();
   ProgressReport report;
   report.report(tempStream1.str());
@@ -1579,7 +1578,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   }
   for (int i = 0; i < invertedLeviInSmall.cardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
-    theHmm.imagesPositiveSimpleChevalleyGenerators[invertedLeviInSmall.elements[i]];
+    homomorphism.imagesPositiveSimpleChevalleyGenerators[invertedLeviInSmall.elements[i]];
     MatrixTensor<Coefficient> currentOp, matrix;
     currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
@@ -1638,7 +1637,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
         lastNonZeroIndex = i;
       }
     }
-    currentWeight = theHmm.coDomainAlgebra().weylGroup.getFundamentalCoordinatesFromSimple(
+    currentWeight = homomorphism.coDomainAlgebra().weylGroup.getFundamentalCoordinatesFromSimple(
       this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
     );//<-implicit type conversion here
     currentWeight += hwFundCoordsNilPart;
@@ -1754,14 +1753,15 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* f
 
 template <class Coefficient>
 void MonomialGeneralizedVerma<Coefficient>::substitution(
-  const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
+  const PolynomialSubstitution<Rational>& substitution,
+  ListReferences<ModuleSSalgebra<Coefficient> >& modules
 ) {
-  this->monomialCoefficientOne.substitution(theSub);
+  this->monomialCoefficientOne.substitution(substitution);
   ModuleSSalgebra<Coefficient> newOwner;
   newOwner = *this->owner;
-  newOwner.substitution(theSub);
-  int newModIndex = theMods.addNoRepetitionOrReturnIndexFirst(newOwner);
-  this->owner = &theMods[newModIndex];
+  newOwner.substitution(substitution);
+  int newModIndex = modules.addNoRepetitionOrReturnIndexFirst(newOwner);
+  this->owner = &modules[newModIndex];
 }
 
 template <class Coefficient>
@@ -1897,14 +1897,14 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
 }
 
 template <class Coefficient>
-void ElementSumGeneralizedVermas<Coefficient>::makeHWV(
-  ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit
+void ElementSumGeneralizedVermas<Coefficient>::makeHighestWeightVector(
+  ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit
 ) {
   this->makeZero();
   MonomialGeneralizedVerma<Coefficient> monomial;
-  monomial.indexFDVector = theOwner.generatingWordsNonReduced.size - 1;
-  monomial.monomialCoefficientOne.makeOne(theOwner.getOwner());
-  monomial.owner = &theOwner;
+  monomial.indexFDVector = inputOwner.generatingWordsNonReduced.size - 1;
+  monomial.monomialCoefficientOne.makeOne(inputOwner.getOwner());
+  monomial.owner = &inputOwner;
   this->addMonomial(monomial, ringUnit);
 }
 

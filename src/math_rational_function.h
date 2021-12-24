@@ -63,9 +63,9 @@ public:
   void operator=(const RationalFraction<Rational>& other);
   void operator=(const Polynomial<Coefficient>& other);
   bool checkConsistency() const;
-  void setNumberOfVariables(int goalNumVars);
-  void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
-  void makeOneLetterMonomial(int index, const Coefficient& coefficient, int ExpectedNumVars = 0);
+  void setNumberOfVariables(int goalNumberOfVariables);
+  void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
+  void makeOneLetterMonomial(int index, const Coefficient& coefficient, int expectedNumberOfVariables = 0);
   void getNumerator(Polynomial<Coefficient>& output) const;
   void getDenominator(Polynomial<Coefficient>& output) const;
   bool isNegative();

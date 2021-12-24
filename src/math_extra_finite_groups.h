@@ -2026,7 +2026,7 @@ public:
     const Vector<Rational>& highestWeightSimpleCoord,
     DrawingVariables& drawingVariables,
     const std::string& color,
-    int UpperBoundVertices
+    int upperBoundVertices
   );
   // The body of this function must
   // appear after the definitions of isDominantWithRespectToGenerator.
@@ -2039,7 +2039,7 @@ public:
     const Vector<Coefficient>& weightInnerSimpleCoords,
     const Coefficient& ringUnit = Coefficient::one()
   );
-  void findQuotientRepresentatives(int UpperLimit);
+  void findQuotientRepresentatives(int upperLimit);
   void getMatrixOfElement(
     const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input,
     Matrix<Rational>& outputMatrix

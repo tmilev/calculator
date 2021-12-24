@@ -973,11 +973,11 @@ void DynkinDiagramRootSubalgebra::getMapFromPermutation(
   }
 }
 
-void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl) {
+void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& weylGroup) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput");
-  this->ambientRootSystem = theWeyl.rootSystem;
-  this->ambientBilinearForm = theWeyl.cartanSymmetric;
-  theWeyl.transformToSimpleBasisGenerators(inputRoots, theWeyl.rootSystem);
+  this->ambientRootSystem = weylGroup.rootSystem;
+  this->ambientBilinearForm = weylGroup.cartanSymmetric;
+  weylGroup.transformToSimpleBasisGenerators(inputRoots, weylGroup.rootSystem);
   this->computeDiagramInputIsSimple(inputRoots);
 }
 
@@ -1393,17 +1393,17 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       }
     }
     */
-//  this->theParser.theHmm.theRange.theWeyl.getIntegralLatticeInSimpleCoordinates(integralLattice);
+//  this->theParser.theHmm.theRange.weylGroup.getIntegralLatticeInSimpleCoordinates(integralLattice);
   //out << "\nThe integral lattice:\n" << integralLattice.toString(false, false);
   //this->theMultiplicitiesMaxOutputReport2.flush();
   QuasiPolynomial tempQP;
-  this->theMultiplicities.setSize(this->projectivizedChambeR.size);
-  this->numNonZeroMults = 0;
+  this->multiplicities.setSize(this->projectivizedChambeR.size);
+  this->numberNonZeroMultiplicities = 0;
   ProgressReport report;
   ProgressReport report2;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {
-    QuasiPolynomial& currentSum = this->theMultiplicities.objects[i];
-    currentSum.makeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
+    QuasiPolynomial& currentSum = this->multiplicities.objects[i];
+    currentSum.makeZeroOverLattice(this->extendedIntegralLatticeMatrixForm);
     for (int k = 0; k < this->linearOperators.size; k ++) {
       this->getProjection(k, this->projectivizedChambeR.objects[i].getInternalPoint(), tempRoot);
       tempRoot -= this->NonIntegralOriginModificationBasisChanged;
@@ -1419,10 +1419,10 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       report.report(tempStream.str());
     }
     if (!currentSum.isEqualToZero()) {
-      this->numNonZeroMults ++;
+      this->numberNonZeroMultiplicities ++;
     }
     std::stringstream tempStream;
-    tempStream << " So far " << i + 1 << " out of " << this->projectivizedChambeR.size << " processed " << this->numNonZeroMults
+    tempStream << " So far " << i + 1 << " out of " << this->projectivizedChambeR.size << " processed " << this->numberNonZeroMultiplicities
     << " non-zero total.";
     report2.report(tempStream.str());
     out << "\nChamber " << i + 1 << ": the quasipolynomial is: " << currentSum.toString(false, false);
@@ -1438,22 +1438,22 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel
 ) {
   std::stringstream out;
-  WeylGroupData& LargerWeyl = this->theHmm.coDomainAlgebra().weylGroup;
-  WeylGroupData& SmallerWeyl = this->theHmm.domainAlgebra().weylGroup;
-  if (!LargerWeyl.isOfSimpleType('B', 3)) {
+  WeylGroupData& largeWeylGroup = this->homomorphism.coDomainAlgebra().weylGroup;
+  WeylGroupData& smallWeylGroup = this->homomorphism.domainAlgebra().weylGroup;
+  if (!largeWeylGroup.isOfSimpleType('B', 3)) {
     return "Error: algebra is not so(7).";
   }
-  this->initFromHomomorphism(parabolicSel, this->theHmm);
+  this->initFromHomomorphism(parabolicSel, this->homomorphism);
   this->transformToWeylProjectiveStep1();
   this->transformToWeylProjectiveStep2();
   Vector<Rational> highestWeightLargerAlgSimpleCoords;
-  highestWeightLargerAlgSimpleCoords = LargerWeyl.getSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
+  highestWeightLargerAlgSimpleCoords = largeWeylGroup.getSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
   Vector<Rational> tempRoot;
   DrawingVariables drawOps;
-  int theSmallDim = SmallerWeyl.cartanSymmetric.numberOfRows;
+  int smallDimension = smallWeylGroup.cartanSymmetric.numberOfRows;
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
   Vectors<double> theDraggableBasis;
-  theDraggableBasis.makeEiBasis(theSmallDim);
+  theDraggableBasis.makeEiBasis(smallDimension);
   WeylGroupData tmpWeyl;
   tmpWeyl.makeArbitrarySimple('A', 2);
   drawOps.operations.initDimensions(tmpWeyl.cartanSymmetric, theDraggableBasis, theDraggableBasis);
@@ -1465,9 +1465,9 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   drawOps.operations.modifyToOrthonormalNoShiftSecond
   (drawOps.operations.basisProjectionPlane[1], drawOps.operations.basisProjectionPlane[0]);
   drawOps.operations.graphicsUnit = 50;
-  PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
+  PiecewiseQuasipolynomial startingPolynomial, substitutedPolynomial, accumulator;
   std::string tempS;
-  theStartingPoly.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
+  startingPolynomial.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.setSize(this->linearOperators.size);
   this->linearOperators[0].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
@@ -1476,11 +1476,11 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   out << "<br>the argument translations: " << this->translationsProjectedBasisChanged.toString();
   out << "<br>Element u_w: projection, multiplication by - 1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
-  theStartingPoly.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
+  startingPolynomial.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   drawOps.drawCoordSystemBuffer(drawOps, 2);
   Cone smallWeylChamber;
   Matrix<Rational> invertedCartan;
-  invertedCartan = SmallerWeyl.cartanSymmetric;
+  invertedCartan = smallWeylGroup.cartanSymmetric;
   invertedCartan.invert();
   Vectors<Rational> tempVertices;
   Vector<Rational> tMpRt;
@@ -1509,16 +1509,16 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
     drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], "red", 3);
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.toString();
-  Accum.makeZero(theStartingPoly.NumVariables);
+  accumulator.makeZero(startingPolynomial.NumVariables);
   for (int i = 0; i < this->linearOperators.size; i ++) {
-    theSubbedPoly = theStartingPoly;
-    theSubbedPoly *= this->coefficients[i];
-    theSubbedPoly.translateArgument(translationsProjectedFinal[i]);
-    Accum += theSubbedPoly;
+    substitutedPolynomial = startingPolynomial;
+    substitutedPolynomial *= this->coefficients[i];
+    substitutedPolynomial.translateArgument(translationsProjectedFinal[i]);
+    accumulator += substitutedPolynomial;
   }
-  Accum.drawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
+  accumulator.drawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
   out << drawOps.getHTMLDiv(2, false);
-  out << Accum.toString(false, true);
+  out << accumulator.toString(false, true);
   return out.str();
 }
 
@@ -1527,11 +1527,11 @@ void GeneralizedVermaModuleCharacters::sortMultiplicities() {
   tempList = this->projectivizedChambeR;
   tempList.quickSortAscending();
   List<QuasiPolynomial> tempQPlist;
-  tempQPlist.setSize(this->theMultiplicities.size);
-  for (int i = 0; i < this->theMultiplicities.size; i ++) {
-    tempQPlist[i] = this->theMultiplicities[this->projectivizedChambeR.getIndex(tempList[i])];
+  tempQPlist.setSize(this->multiplicities.size);
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    tempQPlist[i] = this->multiplicities[this->projectivizedChambeR.getIndex(tempList[i])];
   }
-  this->theMultiplicities = tempQPlist;
+  this->multiplicities = tempQPlist;
   this->projectivizedChambeR.clear();
   for (int i = 0; i < tempList.size; i ++) {
     this->projectivizedChambeR.addOnTop(tempList[i]);
@@ -1570,7 +1570,7 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
   switch (this->computationPhase) {
     case 0:
 //      this->theParser.theHmm.MakeG2InB3(this->theParser);
-      this->initFromHomomorphism(parabolicSel, this->theHmm);
+      this->initFromHomomorphism(parabolicSel, this->homomorphism);
       this->transformToWeylProjectiveStep1();
 //      out << global.theIndicatorVariables.StatusString1;
       this->transformToWeylProjectiveStep2();
@@ -1594,19 +1594,19 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 5:
-      this->theMaxComputation.findExtremaParametricStep1(this->pauseController);
+      this->maximumComputation.findExtremaParametricStep1(this->pauseController);
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 6:
-      this->theMaxComputation.findExtremaParametricStep3();
+      this->maximumComputation.findExtremaParametricStep3();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 7:
-      this->theMaxComputation.findExtremaParametricStep4();
+      this->maximumComputation.findExtremaParametricStep4();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 8:
-      this->theMaxComputation.findExtremaParametricStep5();
+      this->maximumComputation.findExtremaParametricStep5();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     default:
@@ -1621,7 +1621,7 @@ GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
   this->computationPhase = 0;
   this->NumProcessedConesParam = 0;
   this->NumProcessedExtremaEqualOne = 0;
-  this->numNonZeroMults = 0;
+  this->numberNonZeroMultiplicities = 0;
   this->weylLarger = nullptr;
   this->weylSmaller = nullptr;
 }
@@ -1643,10 +1643,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vectors<Rational> tempRoots;
   this->weylLarger = &input.coDomainAlgebra().weylGroup;
   this->weylSmaller = &input.domainAlgebra().weylGroup;
-  WeylGroupData& theWeYl = input.coDomainAlgebra().weylGroup;
-//  input.projectOntoSmallCartan(theWeyl.rootsOfBorel, tempRoots);
+  WeylGroupData& weylGroupCoDomain = input.coDomainAlgebra().weylGroup;
+//  input.projectOntoSmallCartan(weylSmaller.rootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
-  theWeYl.group.computeAllElements(false);
+  weylGroupCoDomain.group.computeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
   Matrix<Rational> theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
@@ -1714,7 +1714,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.toString();
   tempRoot = this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.toString();
-  theSubgroup.makeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
+  theSubgroup.makeParabolicFromSelectionSimpleRoots(weylGroupCoDomain, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
 
   this->linearOperators.setSize(theSubgroup.allElements.size);
   this->linearOperatorsExtended.setSize(theSubgroup.allElements.size);
@@ -1810,12 +1810,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\\end{longtable}\n\n";
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   Lattice tempLattice;
-  theWeYl.getIntegralLatticeInSimpleCoordinates(tempLattice);
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.makeIdentityMatrix(input.domainAlgebra().getRank());
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.directSumWith(tempLattice.basisRationalForm, Rational(0));
-  this->theExtendedIntegralLatticeMatForM.makeFromMatrix(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
+  weylGroupCoDomain.getIntegralLatticeInSimpleCoordinates(tempLattice);
+  this->extendedIntegralLatticeMatrixForm.basisRationalForm.makeIdentityMatrix(input.domainAlgebra().getRank());
+  this->extendedIntegralLatticeMatrixForm.basisRationalForm.directSumWith(tempLattice.basisRationalForm, Rational(0));
+  this->extendedIntegralLatticeMatrixForm.makeFromMatrix(this->extendedIntegralLatticeMatrixForm.basisRationalForm);
   Matrix<Rational> invertedCartan;
-  invertedCartan = theWeYl.cartanSymmetric;
+  invertedCartan = weylGroupCoDomain.cartanSymmetric;
   invertedCartan.invert();
   Vectors<Rational> WallsWeylChamberLargerAlgebra;
   for (int i = 0; i < invertedCartan.numberOfRows; i ++) {
@@ -1833,7 +1833,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   int totalDim = input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank();
   rootsGeneratingExtendedLattice.setSize(totalDim);
   this->log << "\n" << invertedCartan.toString(&global.defaultFormat.getElement()) << "\n";
-  this->log << this->theExtendedIntegralLatticeMatForM.toString();
+  this->log << this->extendedIntegralLatticeMatrixForm.toString();
   this->WeylChamberSmallerAlgebra.createFromNormals(WallsWeylChamberLargerAlgebra);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.toString(&format) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.normals = this->WeylChamberSmallerAlgebra.normals;
@@ -1928,7 +1928,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   int numFoundChambers = 0;
   List<int> DisplayIndicesprojectivizedChambers;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {
-    QuasiPolynomial& theMult = this->theMultiplicities[i];
+    QuasiPolynomial& theMult = this->multiplicities[i];
     if (!theMult.isEqualToZero()) {
       numFoundChambers ++;
       out << "\\hline\\multicolumn{2}{c}{Chamber " << numFoundChambers << "}\\\\\n";
@@ -1988,34 +1988,34 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
 
 void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initTheMaxComputation");
-  this->theMaxComputation.numNonParaM = 2;
-  this->theMaxComputation.conesLargerDimension.reserve(this->projectivizedChambeR.size);
-  this->theMaxComputation.LPtoMaximizeLargerDim.reserve(this->theMultiplicities.size);
-  this->theMaxComputation.conesLargerDimension.setSize(0);
-  this->theMaxComputation.LPtoMaximizeLargerDim.setSize(0);
+  this->maximumComputation.numNonParaM = 2;
+  this->maximumComputation.conesLargerDimension.reserve(this->projectivizedChambeR.size);
+  this->maximumComputation.LPtoMaximizeLargerDim.reserve(this->multiplicities.size);
+  this->maximumComputation.conesLargerDimension.setSize(0);
+  this->maximumComputation.LPtoMaximizeLargerDim.setSize(0);
   Lattice ZnLattice;
   int theAffineDim = 5;
 //  int theProjectivizedDim= theAffineDim + 1;
   ZnLattice.makeZn(theAffineDim);
-  this->numNonZeroMults = 0;
+  this->numberNonZeroMultiplicities = 0;
   ProgressReport report;
   ConeLatticeAndShift currentCLS;
   Vector<Rational> theLPtoMax;
-  for (int i = 0; i < this->theMultiplicities.size; i ++) {
-    if (! this->theMultiplicities[i].isEqualToZero()) {
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    if (! this->multiplicities[i].isEqualToZero()) {
       currentCLS.projectivizedCone = this->projectivizedChambeR[i];
       currentCLS.shift.makeZero(theAffineDim);
       currentCLS.lattice = ZnLattice;
-      bool tempBool = this->theMultiplicities[i].valueOnEachLatticeShift[0].getRootFromLinearPolynomialConstantTermLastVariable(theLPtoMax);
+      bool tempBool = this->multiplicities[i].valueOnEachLatticeShift[0].getRootFromLinearPolynomialConstantTermLastVariable(theLPtoMax);
       if (!tempBool) {
         global.fatal << "This should not happen. " << global.fatal;
       }
-      this->theMaxComputation.conesLargerDimension.addOnTop(currentCLS);
-      this->theMaxComputation.LPtoMaximizeLargerDim.addOnTop(theLPtoMax);
-      this->numNonZeroMults ++;
+      this->maximumComputation.conesLargerDimension.addOnTop(currentCLS);
+      this->maximumComputation.LPtoMaximizeLargerDim.addOnTop(theLPtoMax);
+      this->numberNonZeroMultiplicities ++;
       std::stringstream out;
-      out << "Initialized " << i + 1 << " out of " << this->theMaxComputation.conesLargerDimension.size
-      << "; so far " << this->numNonZeroMults << " non-zero multiplicities";
+      out << "Initialized " << i + 1 << " out of " << this->maximumComputation.conesLargerDimension.size
+      << "; so far " << this->numberNonZeroMultiplicities << " non-zero multiplicities";
       report.report(out.str());
     }
   }
@@ -2043,7 +2043,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpress
 }
 
 std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesReport() {
-  if (this->theMultiplicities.size != this->projectivizedChambeR.size) {
+  if (this->multiplicities.size != this->projectivizedChambeR.size) {
     global.fatal << "Bad number of multiplicities. " << global.fatal;
   }
   std::stringstream out;
@@ -2054,7 +2054,7 @@ std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesRepor
   format.polynomialAlphabet[2] = "y_1";
   format.polynomialAlphabet[3] = "y_2";
   format.polynomialAlphabet[4] = "y_3";
-  out << "Number chambers: " << projectivizedChambeR.size << " of them " << this->numNonZeroMults << " non-zero.";
+  out << "Number chambers: " << projectivizedChambeR.size << " of them " << this->numberNonZeroMultiplicities << " non-zero.";
   int numInequalities = 0;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {
     numInequalities += this->projectivizedChambeR[i].normals.size;

@@ -1515,13 +1515,13 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
   } else {
     out << "Character needs to be computed.";
   }
-  int theRank = this->ownerGroup->generators.size;
+  int rank = this->ownerGroup->generators.size;
   LargeIntegerUnsigned theLCM, theDen;
   this->getLargestDenominatorSimpleGenerators(theLCM, theDen);
   out << "\n<br>\n LCM denominators simple generators: " << theLCM.toString() << ", largest denominator: " << theDen.toString();
-  out << "\n<br>\nThe simple generators (" << theRank << " total):<br> ";
+  out << "\n<br>\nThe simple generators (" << rank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
-  for (int i = 0; i < theRank; i ++) {
+  for (int i = 0; i < rank; i ++) {
     if (i < this->generators.size) {
       std::stringstream tempStream;
       tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generators[i].toString(format) << "; \\\\\n";

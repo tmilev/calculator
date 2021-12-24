@@ -4458,18 +4458,18 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   )) {
     return false;
   }
-  int numVars = polynomial.context.numberOfVariables();
-  if (numVars > 2) {
+  int numberOfVariables = polynomial.context.numberOfVariables();
+  if (numberOfVariables > 2) {
     return false;
   }
-  if (numVars == 0) {
+  if (numberOfVariables == 0) {
     return false;
   }
-  Expression sinPowerE, theTrigArgument, cosPowerE;
+  Expression sinPowerE, trigonometricArgument, cosPowerE;
   sinPowerE.assignValue(calculator, 1);
   cosPowerE.assignValue(calculator, 1);
   bool firstIsSine = false;
-  for (int i = 0; i < numVars; i ++) {
+  for (int i = 0; i < numberOfVariables; i ++) {
     Expression currentE = polynomial.context.getVariable(i);
     if (
       !currentE.startsWith(calculator.opSin(), 2) &&
@@ -4481,25 +4481,25 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
       firstIsSine = true;
     }
     if (i == 0) {
-      theTrigArgument = currentE[1];
+      trigonometricArgument = currentE[1];
     } else {
-      if (theTrigArgument != currentE[1]) {
+      if (trigonometricArgument != currentE[1]) {
         return false;
       }
     }
   }
-  Expression theTrigArgumentNoCoeff, theTrigArgCoeff;
-  theTrigArgument.getCoefficientMultiplicandForm(theTrigArgCoeff, theTrigArgumentNoCoeff);
-  if (theTrigArgumentNoCoeff != theVariableE) {
+  Expression trigonometricArgumentNoCoefficient, theTrigArgCoeff;
+  trigonometricArgument.getCoefficientMultiplicandForm(theTrigArgCoeff, trigonometricArgumentNoCoefficient);
+  if (trigonometricArgumentNoCoefficient != theVariableE) {
     return false;
   }
   const Polynomial<Rational>& theTrigPoly = polynomial.content;
-  Expression theCosE, theSinE, theCosDoubleE, theTrigArgumentDouble;
-  theTrigArgumentDouble = theTrigArgument;
-  theTrigArgumentDouble *= 2;
-  theCosE.makeOX(calculator, calculator.opCos(), theTrigArgument);
-  theSinE.makeOX(calculator, calculator.opSin(), theTrigArgument);
-  theCosDoubleE.makeOX(calculator, calculator.opCos(), theTrigArgumentDouble);
+  Expression theCosE, theSinE, theCosDoubleE, trigonometricArgumentDouble;
+  trigonometricArgumentDouble = trigonometricArgument;
+  trigonometricArgumentDouble *= 2;
+  theCosE.makeOX(calculator, calculator.opCos(), trigonometricArgument);
+  theSinE.makeOX(calculator, calculator.opSin(), trigonometricArgument);
+  theCosDoubleE.makeOX(calculator, calculator.opCos(), trigonometricArgumentDouble);
   Expression outputCandidate, currentSummandE, currentCommandListE,
   currentSubE, currentIntegrandE, currentIntegrandNonPolynomializedE,
   currentIntegral, currentIntegralComputation,
@@ -4595,18 +4595,18 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
     return false;
   }
   ExpressionContext context = polynomial.context;
-  int numVars = context.numberOfVariables();
-  if (numVars > 2) {
+  int numberOfVariables = context.numberOfVariables();
+  if (numberOfVariables > 2) {
     return false;
   }
-  if (numVars == 0) {
+  if (numberOfVariables == 0) {
     return false;
   }
   Expression sinPowerE, theTrigArgument, cosPowerE;
   sinPowerE.assignValue(calculator, 1);
   cosPowerE.assignValue(calculator, 1);
   bool firstIsTan = false;
-  for (int i = 0; i < numVars; i ++) {
+  for (int i = 0; i < numberOfVariables; i ++) {
     Expression currentE = context.getVariable(i);
     if (
       !currentE.startsWith(calculator.opTan(), 2) &&

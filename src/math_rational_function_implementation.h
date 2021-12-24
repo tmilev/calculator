@@ -324,7 +324,7 @@ void RationalFraction<Coefficient>::greatestCommonDivisor(
 
 template<class Coefficient>
 void RationalFraction<Coefficient>::makeOneLetterMonomial(
-  int index, const Coefficient& coefficient, int ExpectedNumVars
+  int index, const Coefficient& coefficient, int expectedNumberOfVariables
 ) {
   if (index < 0) {
     global.fatal << "I am asked to create "
@@ -332,14 +332,17 @@ void RationalFraction<Coefficient>::makeOneLetterMonomial(
     << index << ". " << global.fatal;
   }
   this->expressionType = TypeExpression::typePolynomial;
-  ExpectedNumVars = MathRoutines::maximum(index + 1, ExpectedNumVars);
-  this->numerator.getElement().makeDegreeOne(ExpectedNumVars, index, coefficient);
+  expectedNumberOfVariables = MathRoutines::maximum(index + 1, expectedNumberOfVariables);
+  this->numerator.getElement().makeDegreeOne(expectedNumberOfVariables, index, coefficient);
 }
 
 template<class Coefficient>
-void RationalFraction<Coefficient>::makeMonomial(int letterIndex, const Rational& power, const Rational& coefficient) {
+void RationalFraction<Coefficient>::makeMonomial(
+  int letterIndex, const Rational& power, const Rational& coefficient
+) {
   if (letterIndex < 0) {
-    global.fatal << "I am asked to create Monomial which has a variable of negative index "
+    global.fatal
+    << "I am asked to create Monomial which has a variable of negative index "
     << letterIndex << ". " << global.fatal;
   }
   this->expressionType = TypeExpression::typePolynomial;
@@ -347,11 +350,11 @@ void RationalFraction<Coefficient>::makeMonomial(int letterIndex, const Rational
 }
 
 template<class Coefficient>
-void RationalFraction<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int newNumVars) {
-  int oldNumVars = this->minimalNumberOfVariables();
-  this->numerator.getElement().setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
-  this->denominator.getElement().setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
-  if (newNumVars < oldNumVars) {
+void RationalFraction<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables) {
+  int oldNumberOfVariables = this->minimalNumberOfVariables();
+  this->numerator.getElement().setNumberOfVariablesSubstituteDeletedByOne(newNumberOfVariables);
+  this->denominator.getElement().setNumberOfVariablesSubstituteDeletedByOne(newNumberOfVariables);
+  if (newNumberOfVariables < oldNumberOfVariables) {
     this->simplify();
   }
 }
@@ -790,7 +793,6 @@ void RationalFraction<Coefficient>::raiseToPower(int power) {
 
 template<class Coefficient>
 void RationalFraction<Coefficient>::clearDenominators(RationalFraction<Coefficient>& outputWasMultipliedBy) {
-  //outputWasMultipliedBy.makeConstant(this->NumVars, (Rational) 1, this->context);
   Rational tempRat;
   switch(this->expressionType) {
     case RationalFraction::typeConstant:
@@ -955,8 +957,8 @@ void RationalFraction<Coefficient>::operator=(const Coefficient& other) {
 }
 
 template<class Coefficient>
-void RationalFraction<Coefficient>::setNumberOfVariables(int goalNumVars) {
-  this->setNumberOfVariablesSubstituteDeletedByOne(goalNumVars);
+void RationalFraction<Coefficient>::setNumberOfVariables(int goalNumberOfVariables) {
+  this->setNumberOfVariablesSubstituteDeletedByOne(goalNumberOfVariables);
 }
 
 template<class Coefficient>

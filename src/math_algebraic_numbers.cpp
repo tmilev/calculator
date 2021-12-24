@@ -116,12 +116,12 @@ void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
   selection.initialize(this->quadraticRadicals.size);
   do {
     std::stringstream out;
-    LargeInteger theRad = 1;
+    LargeInteger radical = 1;
     for (int i = 0; i < selection.cardinalitySelection; i ++) {
-      theRad *= this->quadraticRadicals[selection.elements[i]];
+      radical *= this->quadraticRadicals[selection.elements[i]];
     }
-    if (theRad != 1) {
-      out << "\\sqrt{" << theRad.toString() << "}";
+    if (radical != 1) {
+      out << "\\sqrt{" << radical.toString() << "}";
     }
     this->displayNamesBasisElements[this->getIndexFromRadicalSelection(selection)] = out.str();
   } while (selection.incrementReturnFalseIfPastLast());
@@ -1002,12 +1002,12 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
     global.fatal << "Algebraic numbers "
     << "with zero owners but different basis indices. " << global.fatal;
   }
-  VectorSparse<Rational> AdditiveFormOther;
+  VectorSparse<Rational> additiveFormOther;
   correctedOwner->getAdditionTo(*this, this->element);
-  correctedOwner->getAdditionTo(other, AdditiveFormOther);
+  correctedOwner->getAdditionTo(other, additiveFormOther);
   this->owner = correctedOwner;
   this->basisIndex = correctedOwner->basisInjections.size - 1;
-  this->element -= AdditiveFormOther;
+  this->element -= additiveFormOther;
 }
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {

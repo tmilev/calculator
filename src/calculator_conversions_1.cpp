@@ -552,36 +552,36 @@ bool CalculatorConversions::functionDynkinSimpleType(
     << "the type of a simple Lie algebra must be the letter A, B, C, D, E, F or G. "
     << "Instead, it is " << typeName + ". Error encountered while processing " << input.toString();
   }
-  char theWeylLetter = typeName[0];
-  if (theWeylLetter == 'a') {
-    theWeylLetter ='A';
+  char weylLetter = typeName[0];
+  if (weylLetter == 'a') {
+    weylLetter ='A';
   }
-  if (theWeylLetter == 'b') {
-    theWeylLetter ='B';
+  if (weylLetter == 'b') {
+    weylLetter ='B';
   }
-  if (theWeylLetter == 'c') {
-    theWeylLetter ='C';
+  if (weylLetter == 'c') {
+    weylLetter ='C';
   }
-  if (theWeylLetter == 'd') {
-    theWeylLetter ='D';
+  if (weylLetter == 'd') {
+    weylLetter ='D';
   }
-  if (theWeylLetter == 'e') {
-    theWeylLetter ='E';
+  if (weylLetter == 'e') {
+    weylLetter ='E';
   }
-  if (theWeylLetter == 'f') {
-    theWeylLetter ='F';
+  if (weylLetter == 'f') {
+    weylLetter ='F';
   }
-  if (theWeylLetter == 'g') {
-    theWeylLetter ='G';
+  if (weylLetter == 'g') {
+    weylLetter ='G';
   }
   if (!(
-    theWeylLetter == 'A' ||
-    theWeylLetter == 'B' ||
-    theWeylLetter == 'C' ||
-    theWeylLetter == 'D' ||
-    theWeylLetter == 'E' ||
-    theWeylLetter == 'F' ||
-    theWeylLetter == 'G'
+    weylLetter == 'A' ||
+    weylLetter == 'B' ||
+    weylLetter == 'C' ||
+    weylLetter == 'D' ||
+    weylLetter == 'E' ||
+    weylLetter == 'F' ||
+    weylLetter == 'G'
   )) {
     return calculator << "The type of a simple Lie algebra must be "
     << "the letter A, B, C, D, E, F or G; error while processing " << input.toString();
@@ -594,14 +594,14 @@ bool CalculatorConversions::functionDynkinSimpleType(
     return calculator << "<hr>The rank of a simple Lie algebra "
     << "must be between 1 and 20; error while processing " << input.toString();
   }
-  if (theWeylLetter == 'E' && (rank > 8 || rank < 3)) {
+  if (weylLetter == 'E' && (rank > 8 || rank < 3)) {
     return calculator << "<hr>Type E must have rank 6, 7 or 8 ";
   }
-  if (theWeylLetter == 'D' && (rank < 3)) {
+  if (weylLetter == 'D' && (rank < 3)) {
     return calculator << "<hr>Type D is expected to have rank 4 or more, "
     << "your input was of rank " << rank << ". ";
   }
-  outputMon.makeArbitrary(theWeylLetter, rank, scale);
+  outputMon.makeArbitrary(weylLetter, rank, scale);
   return true;
 }
 

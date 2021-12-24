@@ -244,10 +244,10 @@ template <class Coefficient>
 std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(bool addDollars) const {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::toStringLetterOrder");
   std::stringstream out;
-  int numVars = this->minimalNumberOfVariables();
+  int numberOfVariables = this->minimalNumberOfVariables();
   List<MonomialPolynomial> variables;
   out << "Variable name(s), ascending order: ";
-  variables.setSize(numVars);
+  variables.setSize(numberOfVariables);
   for (int i = 0; i < variables.size; i ++) {
     variables[i].makeEi(i, 1);
   }
@@ -256,23 +256,23 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(bool addD
   if (addDollars) {
     out << "$";
   }
-  for (int i = 0; i < numVars; i ++) {
+  for (int i = 0; i < numberOfVariables; i ++) {
     out << variables[i].toString(&tempFormat);
-    if (i != numVars - 1) {
+    if (i != numberOfVariables - 1) {
       out << ", ";
     }
   }
   if (addDollars) {
     out << "$";
   }
-  if (numVars > 1) {
+  if (numberOfVariables > 1) {
     out << ". The implied lexicographic order runs in the opposite direction: ";
     if (addDollars) {
       out << "$";
     }
-    for (int i = 0; i < numVars; i ++) {
+    for (int i = 0; i < numberOfVariables; i ++) {
       out << variables[i].toString(&tempFormat);
-      if (i != numVars - 1) {
+      if (i != numberOfVariables - 1) {
         out << " > ";
       }
     }
@@ -615,14 +615,14 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
   List<Polynomial<Coefficient> >& inputSystem,
   PolynomialSubstitution<Coefficient>& outputSub
 ) {
-  int numVars = this->systemSolution.size;
+  int numberOfVariables = this->systemSolution.size;
   MonomialPolynomial tempM;
   Polynomial<Coefficient> tempP;
   Coefficient coefficient;
   for (int i = 0; i < inputSystem.size; i ++) {
     tempP = inputSystem[i];
-    for (int j = 0; j < numVars; j ++) {
-      tempM.makeEi(j, 1, numVars);
+    for (int j = 0; j < numberOfVariables; j ++) {
+      tempM.makeEi(j, 1, numberOfVariables);
       int indexTempM = tempP.monomials.getIndex(tempM);
       if (indexTempM == - 1) {
         continue;
@@ -640,7 +640,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
       if (!isGood) {
         continue;
       }
-      outputSub.makeIdentitySubstitution(numVars);
+      outputSub.makeIdentitySubstitution(numberOfVariables);
       outputSub[j] = tempP;
       coefficient *= - 1;
       outputSub[j] /= coefficient;
@@ -650,7 +650,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
     if (tempP.isOneVariableNonConstantPolynomial(&oneVarIndex)) {
       if (this->flagUsingAlgebraicClosure && this->algebraicClosure != 0) {
         if (this->getOneVariablePolynomialSolution(tempP, coefficient)) {
-          outputSub.makeIdentitySubstitution(numVars);
+          outputSub.makeIdentitySubstitution(numberOfVariables);
           outputSub[oneVarIndex].makeConstant(coefficient);
           //check our work:
           tempP.substitution(outputSub, 1);
@@ -991,9 +991,9 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
     << "Input system in calculator-input format: <br>"
     << this->toStringCalculatorInputFromSystem(inputSystem) << "<br>" << global.fatal;
   }
-  PolynomialSubstitution<Coefficient> theSub;
-  theSub.makeIdentitySubstitution(this->systemSolution.size);
-  theSub[variableIndex] = aValueToTryOnPreferredVariable;
+  PolynomialSubstitution<Coefficient> substitution;
+  substitution.makeIdentitySubstitution(this->systemSolution.size);
+  substitution[variableIndex] = aValueToTryOnPreferredVariable;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream out;
     MonomialPolynomial monomial(variableIndex);
@@ -1003,7 +1003,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   }
   heuristicAttempt.setSerreLikeSolutionIndex(variableIndex, aValueToTryOnPreferredVariable);
   for (int i = 0; i < inputSystem.size; i ++) {
-    inputSystem[i].substitution(theSub, 1);
+    inputSystem[i].substitution(substitution, 1);
   }
   heuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
   this->numberOfSerreSystemComputations += heuristicAttempt.numberOfSerreSystemComputations;
@@ -1053,15 +1053,15 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
       << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
       report1.report(out.str());
     }
-    PolynomialSubstitution<Coefficient> theSub;
-    theSub.makeIdentitySubstitution(this->systemSolution.size);
-    theSub[i] = 0;
+    PolynomialSubstitution<Coefficient> substitution;
+    substitution.makeIdentitySubstitution(this->systemSolution.size);
+    substitution[i] = 0;
     PolynomialSystem<Coefficient>& oneCase = this->computationUsedInRecursiveCalls.getElement();
     this->setUpRecursiveComputation(oneCase);
     oneCase.setSerreLikeSolutionIndex(i, 0);
     inputSystem = inputSystemCopy;
     for (int i = 0; i < inputSystem.size; i ++) {
-      inputSystem[i].substitution(theSub, 1);
+      inputSystem[i].substitution(substitution, 1);
     }
     oneCase.solveSerreLikeSystemRecursively(inputSystem);
     this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);

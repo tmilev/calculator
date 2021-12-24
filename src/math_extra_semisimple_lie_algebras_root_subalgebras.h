@@ -365,7 +365,7 @@ public:
   int numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration;
   List<int> CountersNilradicalsGeneration;
   List<int> numberOfConeConditionHoldsBySemisimplePart;
-  List<RootSubalgebra> theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither;
+  List<RootSubalgebra> subalgebrasOrderParabolicPseudoParabolicNeither;
   int RecursionDepthNilradicalsGeneration;
   int numberOfSubalgebrasProcessed;
   int numberOfConeConditionFailures;

@@ -794,7 +794,7 @@ SubgroupDataRootReflections::SubgroupDataRootReflections() {
 
 bool SubgroupDataWeylGroup::checkInitialization() {
   if (this->weylData == nullptr) {
-    global.fatal << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << global.fatal;
+    global.fatal << "SubgroupDataWeylGroup: non-initialized weylData pointer. " << global.fatal;
   }
   return true;
 }
@@ -847,11 +847,11 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   //global.Comments << "here is the character table of the group, the representatives and sizes for "
   //         << "conjugacy classes of the group and the subgroup, and for your convenience, "
   //         << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
-  //global.Comments << this->theSubgroupData.theGroup->prettyPrintCharacterTable();
+  //global.Comments << this->subgroupData.theGroup->prettyPrintCharacterTable();
   //global.Comments << Xs << " <- subgroup sign character\n";
-  //global.Comments << this->theSubgroupData.theGroup->prettyPrintCCRepsSizes();
-  //global.Comments << this->theSubgroupData.theSubgroup->prettyPrintCCRepsSizes();
-  //global.Comments << this->theSubgroupData.ccRepresentativesPreimages.toStringCommaDelimited() << '\n';
+  //global.Comments << this->subgroupData.group->prettyPrintCCRepsSizes();
+  //global.Comments << this->subgroupData.subgroup->prettyPrintCCRepsSizes();
+  //global.Comments << this->subgroupData.ccRepresentativesPreimages.toStringCommaDelimited() << '\n';
  //}
 
   this->tauSignature.setSize(this->subgroupData.groupContent->conjugacyClassCount());

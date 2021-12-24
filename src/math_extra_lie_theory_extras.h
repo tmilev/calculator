@@ -118,14 +118,14 @@ public:
   Cone PreimageWeylChamberLargerAlgebra;
   Cone WeylChamberSmallerAlgebra;
   Cone PreimageWeylChamberSmallerAlgebra;
-  Lattice theExtendedIntegralLatticeMatForM;
+  Lattice extendedIntegralLatticeMatrixForm;
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
-  List<QuasiPolynomial> theMultiplicities;
-  HomomorphismSemisimpleLieAlgebra theHmm;
+  List<QuasiPolynomial> multiplicities;
+  HomomorphismSemisimpleLieAlgebra homomorphism;
   // List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
-  int numNonZeroMults;
+  int numberNonZeroMultiplicities;
   Selection ParabolicLeviPartRootSpacesZeroStandsForSelected;
   Selection ParabolicSelectionSmallerAlgebra;
   List<Rational> coefficients;
@@ -134,7 +134,7 @@ public:
   PartialFractions partialFractions;
   // List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   ConeComplex projectivizedParamComplex;
-  ConeLatticeAndShiftMaxComputation theMaxComputation;
+  ConeLatticeAndShiftMaxComputation maximumComputation;
   ConeComplex smallerAlgebraChamber;
   ConeComplex projectivizedChambeR;
   std::stringstream log;
@@ -201,8 +201,8 @@ public:
   void multiplyByGeneratorPowerOnTheRight(int generatorIndex, const Coefficient& power);
   void multiplyByGeneratorPowerOnTheRight(int generatorIndex, int power);
   void multiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
-  void makeZero(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
-  void makeZero(const Coefficient& ringZero, SemisimpleLieAlgebraOrdered& theOwner);
+  void makeZero(int numberOfVariables, SemisimpleLieAlgebraOrdered& inputOwner);
+  void makeZero(const Coefficient& ringZero, SemisimpleLieAlgebraOrdered& inputOwner);
   bool modOutFDRelationsExperimental(
     const Vector<Rational>& theHWsimpleCoords,
     const Coefficient& ringUnit = 1,
@@ -213,16 +213,10 @@ public:
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
-  void setNumberOfVariables(int newNumVars);
+  void setNumberOfVariables(int newNumberOfVariables);
   unsigned int hashFunction() const;
   static inline unsigned int hashFunction(const MonomialUniversalEnvelopingOrdered<Coefficient>& input) {
     return input.hashFunction();
-  }
-  void getDegree(Polynomial<Rational>& output) {
-    output.makeZero(this->Coefficient.NumVars);
-    for (int i = 0; i < this->generatorsIndices.size; i ++) {
-      output += this->powers[i];
-    }
   }
   bool getElementUniversalEnveloping(ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebraOrdered& owner);
   bool isEqualToZero() const {
@@ -314,14 +308,13 @@ public:
   }
   SemisimpleLieAlgebraOrdered* owner;
   void addMonomial(const MonomialUniversalEnvelopingOrdered<Coefficient>& input);
-  void makeCartanGenerator(const Vector<Rational> & input, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
   void assignElementLieAlgebra(
     const ElementSemisimpleLieAlgebra<Rational>& input,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
-    SemisimpleLieAlgebraOrdered& theOwner
+    SemisimpleLieAlgebraOrdered& inputOwner
   );
-  void makeZero(SemisimpleLieAlgebraOrdered& theOwner);
+  void makeZero(SemisimpleLieAlgebraOrdered& inputOwner);
   bool assignElementUniversalEnveloping(
     ElementUniversalEnveloping<Coefficient>& input,
     SemisimpleLieAlgebraOrdered& owner,
@@ -355,13 +348,6 @@ public:
     this->addMonomial(tempMon);
   }
   void simplify(const Coefficient& ringUnit = 1,  const Coefficient& ringZero = 0);
-  int minimalNumberOfVariables() const {
-    if (this->size == 0) {
-      return 0;
-    } else {
-      return this->objects[0].coefficient.NumVars;
-    }
-  }
   inline void multiplyBy(const ElementUniversalEnvelopingOrdered& other) {
     this->operator*=(other);
   }
@@ -408,7 +394,6 @@ public:
     }
     return true;
   }
-  void makeCasimir(SemisimpleLieAlgebraOrdered& theOwner, int numVars);
   void actOnMe(const ElementSemisimpleLieAlgebra<Rational>& element, ElementUniversalEnvelopingOrdered& output);
   void lieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
   void lieBracketOnTheRight(
@@ -470,7 +455,7 @@ template <class Coefficient>
 class ElementVermaModuleOrdered {
 public:
   ElementUniversalEnvelopingOrdered<Coefficient> elementInternal;
-  PolynomialSubstitution<Coefficient> theSubNthElementIsImageNthCoordSimpleBasis;
+  PolynomialSubstitution<Coefficient> substitutionNthElementIsImageNthCoordinateSimpleBasis;
   std::string toString(const FormatExpressions& format) const;
   bool isEqualToZero() const {
     return this->elementInternal.isEqualToZero();
@@ -509,7 +494,7 @@ public:
   }
   void makeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub) {
     this->elementInternal.makeZero(owner);
-    this->theSubNthElementIsImageNthCoordSimpleBasis = incomingSub;
+    this->substitutionNthElementIsImageNthCoordinateSimpleBasis = incomingSub;
   }
   template <class CoefficientTypeOther>
   void operator*=(const CoefficientTypeOther& theConst) {
@@ -535,7 +520,7 @@ public:
   }
   void operator=(const ElementVermaModuleOrdered& other) {
     this->elementInternal = other.elementInternal;
-    this->theSubNthElementIsImageNthCoordSimpleBasis = other.theSubNthElementIsImageNthCoordSimpleBasis;
+    this->substitutionNthElementIsImageNthCoordinateSimpleBasis = other.substitutionNthElementIsImageNthCoordinateSimpleBasis;
   }
 };
 #endif

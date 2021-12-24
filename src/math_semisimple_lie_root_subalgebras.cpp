@@ -2580,7 +2580,6 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   this->hAlgebraic.makeCartanGenerator(h, this->getOwnerSemisimpleAlgebra());
   this->participatingPositiveRoots.size = 0;
   int relativeDimension = simpleBasisSubalgebras.size;
-  // int dimension = this->theWeyl.cartanSymmetric.numberOfRows;
   if (relativeDimension != zeroCharacteristics.numberOfElements) {
     global.fatal << "Relative dimension is incorrect. " << global.fatal;
   }
@@ -2998,7 +2997,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
   Vectors<Rational> basis, currentBasis;
   List<bool> Explored;
   Explored.initializeFillInObject(this->subalgebras.size, false);
-  this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.setSize(0);
+  this->subalgebrasOrderParabolicPseudoParabolicNeither.setSize(0);
   this->NumNonPseudoParabolic = 0;
   this->NumParabolic = 0;
   this->NumPseudoParabolicNonParabolic = 0;
@@ -3050,7 +3049,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
       }
     } while (parSel.incrementReturnFalseIfPastLast());
     currentList.quickSortAscending();
-    this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.addListOnTop(currentList);
+    this->subalgebrasOrderParabolicPseudoParabolicNeither.addListOnTop(currentList);
     basis.addOnTop(this->owner->weylGroup.rootSystem[0]);
     parSel.initialize(this->owner->getRank() + 1);
   }
@@ -3062,7 +3061,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
     }
   }
   currentList.quickSortAscending();
-  this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.addListOnTop(currentList);
+  this->subalgebrasOrderParabolicPseudoParabolicNeither.addListOnTop(currentList);
 }
 
 void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
@@ -3444,15 +3443,15 @@ std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* format) 
     }
   }
   out << "</table>\n\n";
-  if (this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size > 0) {
+  if (this->subalgebrasOrderParabolicPseudoParabolicNeither.size > 0) {
     out << "<hr>There are " << this->NumParabolic << " parabolic, "
     << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
     << this->NumNonPseudoParabolic << " non pseudo-parabolic root subsystems.";
     HashedList<Vector<Rational> > GAPPosRootSystem;
     if (this->flagPrintGAPinput && this->owner->weylGroup.loadGAPRootSystem(GAPPosRootSystem)) {
       out << " The roots needed to generate the root subsystems are listed below using the root indices in GAP. ";
-      for (int i = 0; i < this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i ++) {
-        RootSubalgebra& currentSA = this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
+      for (int i = 0; i < this->subalgebrasOrderParabolicPseudoParabolicNeither.size; i ++) {
+        RootSubalgebra& currentSA = this->subalgebrasOrderParabolicPseudoParabolicNeither[i];
         out << "<br>";
         out << "[";
         if (i < this->NumParabolic) {
@@ -3475,14 +3474,14 @@ std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* format) 
           }
         }
         out << "]]";
-        if (i != this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size - 1) {
+        if (i != this->subalgebrasOrderParabolicPseudoParabolicNeither.size - 1) {
           out << ",";
         }
       }
     }
     out << "<hr>The roots needed to generate the root subsystems are listed below. ";
-    for (int i = 0; i < this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i ++) {
-      RootSubalgebra& currentSA = this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
+    for (int i = 0; i < this->subalgebrasOrderParabolicPseudoParabolicNeither.size; i ++) {
+      RootSubalgebra& currentSA = this->subalgebrasOrderParabolicPseudoParabolicNeither[i];
       out << "<br>";
       out << "[";
       if (i < this->NumParabolic) {
@@ -3508,7 +3507,7 @@ std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* format) 
         }
       }
       out << "]]";
-      if (i != this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size - 1) {
+      if (i != this->subalgebrasOrderParabolicPseudoParabolicNeither.size - 1) {
         out << ",";
       }
     }

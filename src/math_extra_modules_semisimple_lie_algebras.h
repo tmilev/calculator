@@ -34,15 +34,16 @@ class MonomialGeneralizedVerma {
     }
     return false;
   }
-  void setNumberOfVariables(int goalNumVars) {
+  void setNumberOfVariables(int goalNumberOfVariables) {
     if (this->owner->size <= this->indexInOwner) {
       global.fatal << "Crash in setNumberOfVariables: bad number of variables. " << global.fatal;
     }
-    this->monomialCoefficientOne.setNumberOfVariables(goalNumVars);
-    this->owner->objects[this->indexInOwner].setNumberOfVariables(goalNumVars);
+    this->monomialCoefficientOne.setNumberOfVariables(goalNumberOfVariables);
+    this->owner->objects[this->indexInOwner].setNumberOfVariables(goalNumberOfVariables);
   }
   void substitution(
-    const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
+    const PolynomialSubstitution<Rational>& substitution,
+    ListReferences<ModuleSSalgebra<Coefficient> >& modules
   );
   unsigned int hashFunction() const {
     return this->indexFDVector * HashConstants::constant0 +
@@ -87,9 +88,8 @@ public:
   static unsigned int hashFunction(const ElementSumGeneralizedVermas<Coefficient>& input) {
     return input.hashFunction();
   }
-  ElementSumGeneralizedVermas() {
-  }
-  void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit);
+  ElementSumGeneralizedVermas() {}
+  void makeHighestWeightVector(ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit);
   int minimalNumberOfVariables() {
     if (this->owner == nullptr) {
       return - 1;
@@ -144,17 +144,17 @@ public:
   static unsigned int hashFunction(const MonomialTensorGeneralizedVermas<Coefficient>& input) {
     return input.hashFunction();
   }
-  void setNumberOfVariables(int goalNumVars) {
+  void setNumberOfVariables(int goalNumberOfVariables) {
     for (int i = 0; i < this->monomials.size; i ++) {
-      this->monomials[i].setNumberOfVariables(goalNumVars);
+      this->monomials[i].setNumberOfVariables(goalNumberOfVariables);
     }
   }
   void substitution(
-    const PolynomialSubstitution<Rational>& theSub,
-    ListReferences<ModuleSSalgebra<Coefficient> >& theMods
+    const PolynomialSubstitution<Rational>& substitution,
+    ListReferences<ModuleSSalgebra<Coefficient> >& modules
   ) {
     for (int i = 0; i < this->monomials.size; i ++) {
-      this->monomials[i].substitution(theSub, theMods);
+      this->monomials[i].substitution(substitution, modules);
     }
   }
   std::string toString(FormatExpressions* format = nullptr, bool includeV = true) const;
@@ -292,10 +292,6 @@ public:
   void applyTransposeAntiAutomorphism(MonomialTensor<int, HashFunctions::hashFunction>& monomial);
   void getFDchar(CharacterSemisimpleLieAlgebraModule<Coefficient>& output);
   void substitution(const PolynomialSubstitution<Rational>& variableImages);
-  //  List<ElementUniversalEnveloping<Coefficient> > theGeneratingWordsLittelmannForm;
-  //  HashedList<MonomialUniversalEnveloping<Coefficient> > theGeneratingMonsPBWform;
-  //  List
-  //  List<Matrix<Coefficient> > ActionsChevalleyGenerators;
   MatrixTensor<Coefficient>& getActionGeneratorIndex(int generatorIndex);
   MatrixTensor<Coefficient>& getActionSimpleGeneratorIndex(int generatorIndex);
   int minimalNumberOfVariables() {
@@ -371,8 +367,6 @@ public:
     out << "v_{" << this->highestWeightFundamentalCoordinatesBaseField.toString(format)
     << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.toString() << "}";
     return out.str();
-    //    return "hwv{}("+ this->getOwner().toStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(format) + ","
-    //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).toString(format) + ")";
   }
   void splitOverLevi(
     std::string* report,
@@ -401,13 +395,13 @@ public:
   bool isNotInLevi(int generatorIndex);
   bool isNotInParabolic(int generatorIndex);
   void getGenericUnMinusElt(
-    bool shiftPowersByNumVarsBaseField,
+    bool shiftPowersByNumberOfVariablesBaseField,
     ElementUniversalEnveloping<Polynomial<Rational> >& output,
     bool useNilWeight,
     bool ascending
   );
   void getGenericUnMinusElt(
-    bool shiftPowersByNumVarsBaseField,
+    bool shiftPowersByNumberOfVariablesBaseField,
     ElementUniversalEnveloping<RationalFraction<Rational> >& output,
     bool useNilWeight,
     bool ascending
@@ -466,11 +460,14 @@ public:
     }
     return (*this)[0].isHighestWeightVector();
   }
-  void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit);
-  void substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods);
-  void setNumberOfVariables(int goalNumVars) {
+  void makeHighestWeightVector(ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit);
+  void substitution(
+    const PolynomialSubstitution<Rational>& substitution,
+    ListReferences<ModuleSSalgebra<Coefficient> >& modules
+  );
+  void setNumberOfVariables(int goalNumberOfVariables) {
     for (int i = 0; i < this->size; i ++) {
-      this->objects[i].setNumberOfVariables(goalNumVars);
+      this->objects[i].setNumberOfVariables(goalNumberOfVariables);
     }
   }
   SemisimpleLieAlgebra& getOwnerSemisimple() const {

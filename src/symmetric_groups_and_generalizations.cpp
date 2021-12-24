@@ -895,35 +895,35 @@ void ElementHyperoctahedralGroup::toggleBit(int i) {
 }
 
 bool NeedRankAdjustment(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right) {
-  int theRank= left.s.size;
-  if (theRank == 0)
-    theRank = right.s.size;
-  if (theRank == 0)
+  int rank= left.s.size;
+  if (rank == 0)
+    rank = right.s.size;
+  if (rank == 0)
     return false;
   if (left.s.size == 0)
     return true;
   else
-    if (left.s.size != theRank)
+    if (left.s.size != rank)
       global.fatal << "Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << global.fatal;
   if (right.s.size == 0)
     return true;
   else
-    if (right.s.size != theRank)
+    if (right.s.size != rank)
       global.fatal << "Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << global.fatal;
   return false;
 }
 
 
 void EnsureSameRank(ElementHyperoctahedralGroup& left, ElementHyperoctahedralGroup& right) {
-  int theRank= left.s.size;
-  if (theRank == 0)
-    theRank = right.s.size;
-  if (theRank == 0)
+  int rank= left.s.size;
+  if (rank == 0)
+    rank = right.s.size;
+  if (rank == 0)
     return;
   if (left.s.size == 0)
-    left.s.initializeFillInObject(theRank, false);
+    left.s.initializeFillInObject(rank, false);
   if (right.s.size == 0)
-    right.s.initializeFillInObject(theRank, false);
+    right.s.initializeFillInObject(rank, false);
 }
 
 void ElementHyperoctahedralGroup::makeFromMultiplicities(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right) {

@@ -3859,7 +3859,7 @@ public:
   int getTotalMultiplicity() const;
   void invert();
   void initialize();
-  static Vector<Rational> GetCheckSumRoot(int NumVars);
+  static Vector<Rational> GetCheckSumRoot(int numberOfVariables);
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const OnePartialFractionDenominator& input) {
     return input.hashFunction();
@@ -5098,14 +5098,15 @@ public:
   }
   // returns false if the vector is not in the vector space spanned by the lattice
   bool reduceVector(Vector<Rational>& vector) const;
-  // In the following two functions, the format of the matrix theSub of the substitution is as follows.
+  // In the following two functions, the format of the matrix of the substitution is as follows.
   // Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
   // Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
-  // Then theSub is an n by m matrix, where the i^th row of the matrix gives the expression of x_i via the y_j's.
+  // Then the substitution matrix is an n by m matrix,
+  // where the i^th row of the matrix gives the expression of x_i via the y_j's.
   // In addition, we require that n>=m (otherwise, in general, we do not expect to get a lattice).
   // For example, if we want to carry out the substitution
   // x_1=y_1+y_2, x_2=y_1-y_2, x_3=y_1, then
-  // theSub should be initialized as:
+  // the substitution matrix should be initialized as:
   // 1  1
   // 1 - 1
   // 1  0
@@ -6087,7 +6088,7 @@ public:
   // transformation to simple basis on the simpleBasisInput,
   // so your input will get changed if it wasn't
   // simple as required.
-  void computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl);
+  void computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& weylGroup);
   //the below function is just as the above but doesn't modify simpleBasisInput
   void computeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput);
   void computeDiagramTypeModifyInputRelative(
@@ -6164,7 +6165,6 @@ public:
   );
   void fourierTransform(ElementWeylAlgebra<Coefficient>& output) const;
   bool actOnPolynomial(Polynomial<Rational>& poly) const;
-  void setNumberOfVariables(int newNumVars);
   void multiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
   static void lieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output);
   void lieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
@@ -6324,8 +6324,8 @@ class PiecewiseQuasipolynomial {
   bool makeVPF(Vectors<Rational>& theRoots, std::string& outputstring);
   Rational evaluate(const Vector<Rational>& thePoint);
   Rational evaluateInputProjectivized(const Vector<Rational>& thePoint);
-  void makeZero(int numVars) {
-    this->NumVariables = numVars;
+  void makeZero(int numberOfVariables) {
+    this->NumVariables = numberOfVariables;
     this->projectivizedComplex.initialize();
     this->quasiPolynomials.size = 0;
   }
@@ -6447,10 +6447,10 @@ public:
     monomial.makeIdentitySpecial();
     this->addMonomial(monomial, 1);
   }
-  void makeIdentity(int numVars) {
+  void makeIdentity(int numberOfVariables) {
     this->makeZero();
     MonomialMatrix monomial;
-    for (int i = 0; i < numVars; i ++) {
+    for (int i = 0; i < numberOfVariables; i ++) {
       monomial.dualIndex = i;
       monomial.vIndex = i;
       this->addMonomial(monomial, 1);
@@ -6552,13 +6552,13 @@ public:
       }
     }
   }
-  void substitution(const PolynomialSubstitution<Rational>& theSub) {
+  void substitution(const PolynomialSubstitution<Rational>& substitution) {
     MatrixTensor<Coefficient> thisCopy = *this;
     this->makeZero();
     Coefficient coefficient;
     for (int i = 0; i < thisCopy.size(); i ++) {
       coefficient = thisCopy.coefficients[i];
-      coefficient.substitution(theSub, Rational::one());
+      coefficient.substitution(substitution, Rational::one());
       this->addMonomial(thisCopy[i], coefficient);
     }
   }
@@ -6573,13 +6573,13 @@ public:
     }
     *this = output;
   }
-  void setNumberOfVariables(int newNumVars) {
+  void setNumberOfVariables(int newNumberOfVariables) {
     MatrixTensor<Coefficient> thisCopy = *this;
     this->makeZero();
     Coefficient tempCF;
     for (int i = 0; i < thisCopy.size; i ++) {
       tempCF = thisCopy.coefficients[i];
-      tempCF.setNumberOfVariables(newNumVars);
+      tempCF.setNumberOfVariables(newNumberOfVariables);
       this->addMonomial(thisCopy[i], tempCF);
     }
   }

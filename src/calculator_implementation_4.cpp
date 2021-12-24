@@ -1170,15 +1170,15 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
     return true;
   }
   Rational rational, rationalTwo;
-  AlgebraicNumber theAlgebraic;
+  AlgebraicNumber algebraicNumber;
   if (this->isOfType(&rational) && other.isOfType(&rationalTwo)) {
     return rational == rationalTwo;
   }
-  if (this->isOfType(&rational) && other.isOfType(&theAlgebraic)) {
-    return theAlgebraic == rational;
+  if (this->isOfType(&rational) && other.isOfType(&algebraicNumber)) {
+    return algebraicNumber == rational;
   }
-  if (other.isOfType(&rational) && this->isOfType(&theAlgebraic)) {
-    return theAlgebraic == rational;
+  if (other.isOfType(&rational) && this->isOfType(&algebraicNumber)) {
+    return algebraicNumber == rational;
   }
   double leftD = - 1, rightD = - 1;
   if (this->evaluatesToDouble(&leftD) && other.evaluatesToDouble(&rightD)) {

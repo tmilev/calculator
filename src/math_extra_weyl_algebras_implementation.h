@@ -40,7 +40,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   int dimension = MathRoutines::maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
   tempSel.multiplicities.initializeFillInObject(dimension, 0);
   tempSel.capacities.setSize(dimension);
-  int theExpectedSize = 1;
+  int expectedSize = 1;
   for (int i = 0; i < dimension; i ++) {
     int powerDiffOp = 0;
     if (!left.differentialPart(i).isSmallInteger(&powerDiffOp)) {
@@ -51,7 +51,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
       << "it should have been caught at an earlier level. " << global.fatal;
     }
     tempSel.capacities[i] = powerDiffOp;
-    theExpectedSize *= powerDiffOp;
+    expectedSize *= powerDiffOp;
   }
   tempSel.elements.initializeFillInObject(dimension, 0);
   MonomialWeylAlgebra buffer;
@@ -59,7 +59,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   output.makeZero();
   int numCycles = tempSel.totalNumberSubsetsSmallInt();
   Rational coeffBuff;
-  output.setExpectedSize(theExpectedSize);
+  output.setExpectedSize(expectedSize);
   for (int i = 0; i < numCycles; i ++) {
     coeffBuff = 1;
     for (int k = 0; k < dimension; k ++) {
@@ -302,7 +302,7 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
   MonomialWeylAlgebra monomial;
   ElementWeylAlgebra output;
   output.makeZero();
-  Coefficient theNewCoeff;
+  Coefficient newCoefficient;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
     if (!currentMon.polynomialPart.substitution(
@@ -319,10 +319,10 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
       for (int k = 0; k < differentialOperatorPart.size(); k ++) {
         monomial.polynomialPart = polyPart[j];
         monomial.differentialPart = differentialOperatorPart[k];
-        theNewCoeff = this->coefficients[i];
-        theNewCoeff *= polyPart.coefficients[j];
-        theNewCoeff *= differentialOperatorPart.coefficients[k];
-        output.addMonomial(monomial, theNewCoeff);
+        newCoefficient = this->coefficients[i];
+        newCoefficient *= polyPart.coefficients[j];
+        newCoefficient *= differentialOperatorPart.coefficients[k];
+        output.addMonomial(monomial, newCoefficient);
       }
     }
   }

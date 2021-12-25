@@ -1895,8 +1895,8 @@ void Matrix<Element>::initialize(
 class FormatExpressions {
 public:
   //alphabetBases must contain at least two elements
-  std::string chevalleyGgeneratorLetter;
-  std::string chevalleyHgeneratorLetter;
+  std::string chevalleyGGeneratorLetter;
+  std::string chevalleyHGeneratorLetter;
   std::string fundamentalWeightLetter;
   std::string polyDefaultLetter;
   std::string weylAlgebraDefaultLetter;
@@ -1916,7 +1916,7 @@ public:
   int matrixColumnVerticalLineIndex;
   static const int ExpressionLineBreak = 50;
   bool flagDontCollalpseProductsByUnits;
-  bool flagPassCustomCoeffMonSeparatorToCoeffs;
+  bool flagPassCustomCoefficientMonomialSeparatorToCoefficients;
   bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
   bool flagUsePmatrix;
@@ -2438,9 +2438,9 @@ public:
   }
   bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isInteger(LargeInteger* whichInteger = nullptr) const;
-  void setExpectedSize(int theSize) {
-    this->monomials.setExpectedSize(theSize);
-    this->coefficients.setExpectedSize(theSize);
+  void setExpectedSize(int expectedSize) {
+    this->monomials.setExpectedSize(expectedSize);
+    this->coefficients.setExpectedSize(expectedSize);
   }
   bool hasGreaterThanOrEqualToMonomial(TemplateMonomial& m, int& whichIndex);
   void writeToFile(std::fstream& output);
@@ -4634,7 +4634,7 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpre
   if (this->generatorsIndices.size == 0) {
     return "1";
   }
-  std::string letter = format == nullptr ?  "g" : format->chevalleyGgeneratorLetter;
+  std::string letter = format == nullptr ?  "g" : format->chevalleyGGeneratorLetter;
   std::string letters = "abcdefghijklmnopqrstuvwxyz";
   std::stringstream out;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
@@ -4993,7 +4993,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   std::string customTimes = "";
   if (format != nullptr) {
     useCustomPlus = (format->customPlusSign != "");
-    if (format->flagPassCustomCoeffMonSeparatorToCoeffs == false) {
+    if (format->flagPassCustomCoefficientMonomialSeparatorToCoefficients == false) {
       customTimes = format->customCoefficientMonomialSeparator;
       format->customCoefficientMonomialSeparator = "";
     }
@@ -5347,7 +5347,7 @@ public:
   ~OnePartialFraction();
   void getPolyReduceMonomialByMonomial(
     PartialFractions& owner,
-    Vector<Rational>& theExponent,
+    Vector<Rational>& exponent,
     int StartMonomialPower,
     int DenPowerReduction,
     int startDenominatorPower,
@@ -5423,7 +5423,7 @@ public:
     }
     return false;
   }
-  bool isTheEntireSpace() {
+  bool isEntireSpace() {
     return this->normals.size == 0 && this->flagIsTheZeroCone;
   }
   bool isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
@@ -5725,7 +5725,7 @@ public:
   int getIndexDoubleOfARoot(const Vector<Rational>& root);
   void computeTable(int dimension);
   void prepareCheckSums();
-  std::string doTheFullComputationReturnLatexFileString(
+  std::string doFullComputationReturnLatexFileString(
     Vectors<Rational>& toBePartitioned, FormatExpressions& format, std::string* outputHtml
   );
   bool argumentsAllowed(Vectors<Rational>& arguments, std::string& outputWhatWentWrong);
@@ -6274,7 +6274,7 @@ public:
   List<List<Vectors<Rational> > > maximaCandidates;
   List<Vectors<Rational> > startingLPtoMaximize;
   List<Vectors<Rational> > finalMaxima;
-  Lattice theFinalRougherLattice;
+  Lattice finalRougherLattice;
   Vector<Rational> startingRepresentative;
   Vectors<Rational> finalRepresentatives;
   List<ConeLatticeAndShift> conesLargerDimension;
@@ -6286,7 +6286,7 @@ public:
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
   std::string toString(FormatExpressions* format = nullptr);
-  void initialize(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift);
+  void initialize(Vector<Rational>& inequalities, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift);
   void findExtremaParametricStep1(PauseThread& thePauseController);
   void findExtremaParametricStep2TrimChamberForMultOne(PauseThread& thePauseController);
   void findExtremaParametricStep3();
@@ -6302,7 +6302,7 @@ class PiecewiseQuasipolynomial {
   // domain of the piecewise quasipoly.
   ConeComplex projectivizedComplex;
   List<QuasiPolynomial> quasiPolynomials;
-  int NumVariables;
+  int numberOfVariables;
   std::string toString(bool useLatex, bool useHtml);
   void drawMe(
     DrawingVariables& drawingVariables,
@@ -6311,7 +6311,7 @@ class PiecewiseQuasipolynomial {
     Vector<Rational>* distinguishedPoint = nullptr
   );
   int minimalNumberOfVariables() {
-    return this->NumVariables;
+    return this->numberOfVariables;
   }
   void makeCommonRefinement(const PiecewiseQuasipolynomial& other) {
     this->makeCommonRefinement(other.projectivizedComplex);
@@ -6325,7 +6325,7 @@ class PiecewiseQuasipolynomial {
   Rational evaluate(const Vector<Rational>& thePoint);
   Rational evaluateInputProjectivized(const Vector<Rational>& thePoint);
   void makeZero(int numberOfVariables) {
-    this->NumVariables = numberOfVariables;
+    this->numberOfVariables = numberOfVariables;
     this->projectivizedComplex.initialize();
     this->quasiPolynomials.size = 0;
   }

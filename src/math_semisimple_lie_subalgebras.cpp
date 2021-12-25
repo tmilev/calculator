@@ -3997,18 +3997,6 @@ bool NilradicalCandidate::isCommutingSelectionNilradicalElements(
           this->nilradicalWeights[inputNilradicalSelection.elements[i]], this->nilradicalWeights[inputNilradicalSelection.elements[j]]
         ) < 0
       ) {
-        /*global.fatal << "<br>This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
-        << "strongly orthogonal, but their k-weights aren't. Crashing to tactfully let you know. "
-        << "The bad elements are: "
-        << this->theNilradical[inputNilradSel.elements[i]].toString() << " of weight "
-        << this->theNilradicalWeights[inputNilradSel.elements[i]].toString()
-        << " and "
-        << this->theNilradical[inputNilradSel.elements[j]].toString() << " of weight "
-        << this->theNilradicalWeights[inputNilradSel.elements[j]].toString() << ". "
-        //<< "The bilinear form is: " << this->owner->bilinearFormFundPrimal.toString() << ". "
-        //<< " and the subalgebra in play is: " << this->owner->toString() << ". "
-        //<< global.fatal;
-        */
         return false;
       }
     }
@@ -4110,10 +4098,6 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
 
 bool NilradicalCandidate::tryFindingLInfiniteRelations() {
   MacroRegisterFunctionWithName("NilradicalCandidate::tryFindingLInfiniteRelations");
-  //Vector<Rational> theNilradLinCombi = this->getNilradicalLinearCombination();
-  //if (theNilradLinCombi.getNumberOfNonZeroCoordinates() == 1)
-  //  return true;
-//  Vectors<Rational> curentNilradicalCone;
   Vector<Rational> betterIntersection;
   this->nilradicalSubselection.initialize(this->nilradicalWeights.size);
   this->flagComputedRelativelyStrongIntersections = false;
@@ -4230,7 +4214,7 @@ void NilradicalCandidate::reset() {
   this->nilradical.setSize(0);
   this->nilradicalElementOpposites.setSize(0);
   this->ownerModulesNilradicalElements.setSize(0);
-  this->ownerModulestheNonFKhwVectors.setSize(0);
+  this->ownerModulesNonFernandoKacHighestWeightVectors.setSize(0);
   this->nilradicalSubselection.initialize(0);
   this->nilradicalSubset.setSize(0);
   this->nonFernandoKacHighestWeightVectorsStrongRelativeToSubset.setSize(0);
@@ -4262,7 +4246,7 @@ void NilradicalCandidate::computeTheTwoCones() {
         for (int k = 0; k < this->owner->modules[i].size; k ++) {
           this->nonFernandoKacHighestWeights.addOnTop(this->owner->highestWeightsPrimal[i]);
           this->nonFernandoKacHighestWeightVectors.addOnTop(this->owner->highestVectors[i][k]);
-          this->ownerModulestheNonFKhwVectors.addOnTop(i);
+          this->ownerModulesNonFernandoKacHighestWeightVectors.addOnTop(i);
           if (this->isStronglySingular(i)) {
             this->nonFernandoKacHighestWeightsStronglyTwoSided.addOnTop(this->owner->highestWeightsPrimal[i]);
             this->nonFernandoKacHighestVectorsStronglyTwoSided.addOnTop(this->owner->highestVectors[i][k]);
@@ -4282,7 +4266,7 @@ void NilradicalCandidate::computeTheTwoCones() {
   }
   if (
     this->ownerModulesNilradicalElements.size != this->nilradical.size ||
-    this->nonFernandoKacHighestWeights.size != this->ownerModulestheNonFKhwVectors.size
+    this->nonFernandoKacHighestWeights.size != this->ownerModulesNonFernandoKacHighestWeightVectors.size
   ) {
     global.fatal << "Sizes of indexing arrasy in "
     << "Fernando Kac nilradical candidate don't match. " << global.fatal;

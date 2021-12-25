@@ -34,8 +34,8 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     }
     return;
   }
-  Matrix<Rational> matCoxeterElt;
-  this->getCoxeterElement(matCoxeterElt);
+  Matrix<Rational> matrixCoxeterElement;
+  this->getCoxeterElement(matrixCoxeterElement);
   this->computeDynkinDiagramKAndCentralizer();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempGroup;
   int coxeterNumber = 1;
@@ -48,23 +48,23 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     lastRoot.getCoordinatesInBasis(tempGroup.simpleRootsInner, lastRootInSimpleCoords);
     coxeterNumber = MathRoutines::maximum(lastRootInSimpleCoords.sumCoordinates().numeratorShort, coxeterNumber);
   }
-  Complex<double> theEigenValue;
-  theEigenValue.realPart = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
-  theEigenValue.imaginaryPart = FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
-  Matrix<Complex<double> > eigenMat;
-  eigenMat.initialize(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
-  for (int i = 0; i < eigenMat.numberOfRows; i ++) {
-    for (int j = 0; j < eigenMat.numberOfColumns; j ++) {
-      eigenMat.elements[i][j] = matCoxeterElt.elements[i][j].getDoubleValue();
+  Complex<double> eigenValue;
+  eigenValue.realPart = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
+  eigenValue.imaginaryPart = FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
+  Matrix<Complex<double> > eigenMatrix;
+  eigenMatrix.initialize(matrixCoxeterElement.numberOfRows, matrixCoxeterElement.numberOfColumns);
+  for (int i = 0; i < eigenMatrix.numberOfRows; i ++) {
+    for (int j = 0; j < eigenMatrix.numberOfColumns; j ++) {
+      eigenMatrix.elements[i][j] = matrixCoxeterElement.elements[i][j].getDoubleValue();
       if (i == j) {
-        eigenMat.elements[i][i] -= theEigenValue;
+        eigenMatrix.elements[i][i] -= eigenValue;
       }
     }
   }
-  List<Vector<Complex<double> > > theEigenSpaceList;
-  eigenMat.getZeroEigenSpace(theEigenSpaceList);
-  Vectors<Complex<double> > theEigenSpace;
-  theEigenSpace.operator=(theEigenSpaceList);
+  List<Vector<Complex<double> > > eigenSpaceList;
+  eigenMatrix.getZeroEigenSpace(eigenSpaceList);
+  Vectors<Complex<double> > eigenSpace;
+  eigenSpace.operator=(eigenSpaceList);
   DrawOperations tempDO;
   tempDO.initDimensions(dimension);
   for (int i = 0; i < dimension; i ++) {
@@ -75,17 +75,17 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   }
   outputBasis1.setSize(dimension);
   outputBasis2.setSize(dimension);
-  if (theEigenSpace.size > 0) {
+  if (eigenSpace.size > 0) {
     if (coxeterNumber > 2) {
       for (int j = 0; j < dimension; j ++) {
-        outputBasis1[j] = theEigenSpace[0][j].realPart;
-        outputBasis2[j] = theEigenSpace[0][j].imaginaryPart;
+        outputBasis1[j] = eigenSpace[0][j].realPart;
+        outputBasis2[j] = eigenSpace[0][j].imaginaryPart;
       }
       tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
-    } else if (coxeterNumber <= 2 && theEigenSpace.size > 1) {
+    } else if (coxeterNumber <= 2 && eigenSpace.size > 1) {
       for (int j = 0; j < dimension; j ++) {
-        outputBasis1[j] = theEigenSpace[0][j].realPart;
-        outputBasis2[j] = theEigenSpace[1][j].realPart;
+        outputBasis1[j] = eigenSpace[0][j].realPart;
+        outputBasis2[j] = eigenSpace[1][j].realPart;
       }
       tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     }
@@ -237,13 +237,14 @@ void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
   std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites
 ) {
   std::string tempS;
-  int tempI, theSize;
-  input >> tempS >> theSize;
-  outMultTable.setSize(theSize);
-  outOpposites.setSize(theSize);
-  for (int i = 0; i < theSize; i ++) {
-    outMultTable[i].setSize(theSize);
-    for (int j = 0; j < theSize; j ++) {
+  int tempI = 0;
+  int size = 0;
+  input >> tempS >> size;
+  outMultTable.setSize(size);
+  outOpposites.setSize(size);
+  for (int i = 0; i < size; i ++) {
+    outMultTable[i].setSize(size);
+    for (int j = 0; j < size; j ++) {
       input >> tempI;
       outMultTable[i][j].setSize(tempI);
       for (int k = 0; k < outMultTable[i][j].size; k ++) {

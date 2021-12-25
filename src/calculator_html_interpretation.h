@@ -448,18 +448,18 @@ public:
   void computeDeadlinesAllSections(TopicElement& inputOutput);
   void computeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
   JSData toStringTopicListJSON(std::stringstream* comments);
-  std::string toStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
+  std::string toStringProblemInfo(const std::string& fileName, const std::string& stringToDisplay = "");
   static std::string toStringLinkFromProblem(
-    const std::string& theFileName,
+    const std::string& fileName,
     bool practiceMode = true,
     int randomSeed = - 1
   );
-  std::string toStringLinkFromFileName(const std::string& theFileName);
+  std::string toStringLinkFromFileName(const std::string& fileName);
   std::string toStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
-  std::string toStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
+  std::string toStringCalculatorProblemSourceFromFileName(const std::string& fileName);
   void interpretGenerateLink(SyntacticElementHTML& inputOutput);
-  std::string toStringProblemScoreFull(const std::string& theFileName);
-  std::string toStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);
+  std::string toStringProblemScoreFull(const std::string& fileName);
+  std::string toStringProblemScoreShort(const std::string& fileName, bool& outputAlreadySolved);
   bool computeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void interpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool prepareSectionList(std::stringstream& commentsOnFailure);

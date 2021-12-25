@@ -38,12 +38,12 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   std::string* outputFileNameNoExtension,
   bool useLatexDviPSpsToPNG
 ) {
-  std::fstream theFile;
+  std::fstream fileStream;
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
   if (!FileOperations::openFileCreateIfNotPresentVirtual(
-    theFile, global.displayPathOutputFolder + fileName.str() + ".tex", false, true, false
+    fileStream, global.displayPathOutputFolder + fileName.str() + ".tex", false, true, false
   )) {
     return "failed to create file: " + fileName.str() + ".tex";
   }
@@ -53,9 +53,9 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   FileOperations::getPhysicalFileNameFromVirtual(
     "output/" + fileName.str(), fileNameWithPathPhysical, false, false, nullptr
   );
-  theFile << fileContent;
-  theFile.flush();
-  theFile.close();
+  fileStream << fileContent;
+  fileStream.flush();
+  fileStream.close();
   systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
   global.externalCommandNoOutput(systemCommand1.str(), true);
   if (useLatexDviPSpsToPNG) {
@@ -476,10 +476,10 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
     return false;
   }
   const Expression& withNotation = input[2];
-  const Expression& theNotation = input[1];
+  const Expression& notation = input[1];
   calculator << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
-  << theNotation.toString();
-  calculator.objectContainer.expressionNotation.addOnTop(theNotation.toString());
+  << notation.toString();
+  calculator.objectContainer.expressionNotation.addOnTop(notation.toString());
   calculator.objectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
   output.setChildAtomValue(0, calculator.opDefine());
@@ -488,7 +488,7 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
     if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().isHighestWeightVector()) {
       MonomialGeneralizedVerma<RationalFraction<Rational> >& element =
       withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()[0].monomials[0];
-      element.getOwner().highestWeightVectorNotation = theNotation.toString();
+      element.getOwner().highestWeightVectorNotation = notation.toString();
     }
   }
   return true;
@@ -1796,12 +1796,12 @@ void Calculator::writeAutoCompleteKeyWordsToFile() {
   }
   out << "];\n";
   out << "module.exports = {theAutocompleteDictionary};";
-  std::fstream theFileStream;
+  std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    theFileStream, "/calculator_html/autocomplete_keywords.js",
+    fileStream, "/calculator_html/autocomplete_keywords.js",
     false, true, false, false
   );
-  theFileStream << out.str();
+  fileStream << out.str();
 }
 
 void Calculator::computeAutoCompleteKeyWords() {

@@ -20,8 +20,8 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   std::string hLetter = "h";
   std::string gLetter = "g";
   if (format != nullptr) {
-    hLetter = format->chevalleyHgeneratorLetter;
-    gLetter = format->chevalleyGgeneratorLetter;
+    hLetter = format->chevalleyHGeneratorLetter;
+    gLetter = format->chevalleyGGeneratorLetter;
   }
   out << "Type " << this->weylGroup.dynkinType.toString() << ".";
   out << "The letter " << HtmlRoutines::getMathNoDisplay(hLetter)
@@ -381,11 +381,11 @@ std::string SemisimpleLieAlgebra::FileNames::fileNameNoPathSemisimpleSubalgebras
 }
 
 std::string SemisimpleLieAlgebra::FileNames::fileNameNoPathRootSubalgebras() const {
-  std::stringstream theFileName;
-  theFileName << "rootSubalgebras_"
+  std::stringstream fileName;
+  fileName << "rootSubalgebras_"
   << FileOperations::cleanUpForFileNameUse(this->owner->weylGroup.dynkinType.toString())
   << ".html";
-  return theFileName.str();
+  return fileName.str();
 }
 
 std::string SemisimpleLieAlgebra::FileNames::virtualFolderName() const {
@@ -1466,9 +1466,9 @@ std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
     polynomialFormat = &tempFormat.getElement();
   }
   if (this->isGeneratorFromCartan(index)) {
-    out << polynomialFormat->chevalleyHgeneratorLetter << "_{" << index - this->getNumberOfPositiveRoots() + 1 << "}";
+    out << polynomialFormat->chevalleyHGeneratorLetter << "_{" << index - this->getNumberOfPositiveRoots() + 1 << "}";
   } else {
-    out << polynomialFormat->chevalleyGgeneratorLetter << "_{";
+    out << polynomialFormat->chevalleyGGeneratorLetter << "_{";
     if (index >= this->getNumberOfPositiveRoots()) {
       out << index - this->getNumberOfPositiveRoots() - this->getRank() + 1;
     } else {

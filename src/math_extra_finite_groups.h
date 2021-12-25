@@ -2070,7 +2070,7 @@ public:
   ) const;
   template <class Coefficient>
   void actByElement(
-    const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theElement,
+    const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& element,
     const Vectors<Coefficient>& input,
     Vectors<Coefficient>& output
   ) const;

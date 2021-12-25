@@ -63,8 +63,8 @@ class LaTeXCrawler {
 
   std::string desiredPresentationTitle;
 
-  List<std::string> theLectureNumbers;
-  List<std::string> theLectureDesiredNames;
+  List<std::string> lectureNumbers;
+  List<std::string> lectureDesiredNames;
   List<std::string> slideTexInputCommands;
   List<LaTeXCrawler::FileWithOption> slideFileNamesVirtualWithPath;
   List<std::string> slideFileNamesWithLatexPathNoExtension;

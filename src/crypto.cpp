@@ -1484,7 +1484,7 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
   this->algorithm = "";
   this->keyid = "";
   this->modulusString = "";
-  this->theExponentString = "";
+  this->exponentString = "";
   if (input.hasKey("alg")) {
     this->algorithm = input.getValue("alg").stringValue;
   }
@@ -1495,7 +1495,7 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
     this->modulusString = input.getValue("n").stringValue;
   }
   if (input.hasKey("e")) {
-    this->theExponentString = input.getValue("e").stringValue;
+    this->exponentString = input.getValue("e").stringValue;
   }
   return this->loadFromModulusAndExponentStrings(commentsOnFailure);
 }
@@ -1505,7 +1505,7 @@ bool PublicKeyRSA::loadFromModulusAndExponentStrings(std::stringstream *comments
   if (!Crypto::convertBase64ToLargeUnsigned(this->modulusString, this->modulus, commentsOnFailure)) {
     return false;
   }
-  if (!Crypto::convertBase64ToLargeUnsigned(this->theExponentString, this->exponent, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToLargeUnsigned(this->exponentString, this->exponent, commentsOnFailure)) {
     return false;
   }
   return true;
@@ -1558,7 +1558,7 @@ std::string PublicKeyRSA::toString() {
   out << "Modulus [string, math]: [" << this->modulusString
   << ", " << this->modulus.toString() << "]" << "\n<br>\n";
   out << "Exponent [string, math]: " << "["
-  << this->theExponentString << ", "
+  << this->exponentString << ", "
   << this->exponent.toString()
   << "]\n\n";
   return out.str();
@@ -1567,8 +1567,8 @@ std::string PublicKeyRSA::toString() {
 bool Crypto::loadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("Crypto::loadKnownCertificates");
   Crypto::knownCertificates.setSize(0);
-  List<std::string> theFileNames;
-  if (! FileOperations::getFolderFileNamesVirtual("certificates-public/", theFileNames, nullptr)) {
+  List<std::string> fileNames;
+  if (! FileOperations::getFolderFileNamesVirtual("certificates-public/", fileNames, nullptr)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not open folder certificates-public/, no certificates loaded.";
     }
@@ -1577,22 +1577,22 @@ bool Crypto::loadKnownCertificates(std::stringstream* commentsOnFailure, std::st
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Certificates: ";
   }
-  for (int i = 0; i < theFileNames.size; i ++) {
-    if (theFileNames[i] == "." || theFileNames[i] == "..") {
+  for (int i = 0; i < fileNames.size; i ++) {
+    if (fileNames[i] == "." || fileNames[i] == "..") {
       continue;
     }
-    if (StringRoutines::stringBeginsWith(theFileNames[i], "debug")) {
+    if (StringRoutines::stringBeginsWith(fileNames[i], "debug")) {
       continue;
     }
-    if (StringRoutines::stringEndsWith(theFileNames[i], "readme.md")) {
+    if (StringRoutines::stringEndsWith(fileNames[i], "readme.md")) {
       continue;
     }
-    if (StringRoutines::stringEndsWith(theFileNames[i], "README.md")) {
+    if (StringRoutines::stringEndsWith(fileNames[i], "README.md")) {
       continue;
     }
     std::string currentCert;
     if (!FileOperations::loadFileToStringVirtual(
-      "certificates-public/" + theFileNames[i], currentCert, false, commentsOnFailure
+      "certificates-public/" + fileNames[i], currentCert, false, commentsOnFailure
     )) {
       continue;
     }
@@ -1609,19 +1609,21 @@ bool Crypto::loadKnownCertificates(std::stringstream* commentsOnFailure, std::st
 }
 
 LargeIntegerUnsigned Crypto::rsaEncrypt(
-  const LargeIntegerUnsigned& theModulus, const LargeInteger& theExponent, const LargeInteger& theMessage
+  const LargeIntegerUnsigned& modulus,
+  const LargeInteger& exponent,
+  const LargeInteger& message
 ) {
   MacroRegisterFunctionWithName("Crypto::rsaEncrypt");
-  if (theModulus == 0 || theExponent == 0) {
+  if (modulus == 0 || exponent == 0) {
     global.fatal << "The modulus and the exponent are not allowed to be zero while running RSA. "
-    << "The modulus: " << theModulus.toString() << "; the exponent: " << theExponent.toString() << global.fatal;
+    << "The modulus: " << modulus.toString() << "; the exponent: " << exponent.toString() << global.fatal;
   }
-  ElementZmodP element, theOne;
-  element.modulus = theModulus;
-  theOne.value = 1;
-  theOne.modulus = theModulus;
-  element.assignRational(theMessage);
-  MathRoutines::raiseToPower(element, theExponent, theOne);
+  ElementZmodP element, one;
+  element.modulus = modulus;
+  one.value = 1;
+  one.modulus = modulus;
+  element.assignRational(message);
+  MathRoutines::raiseToPower(element, exponent, one);
   return element.value;
 }
 

@@ -119,13 +119,13 @@ void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthenticat
     << " is set to a large value. "
     << "Set the ping interval to less than 30 seconds to remove this message. " << Logger::endL;
   }
-  std::fstream theFile;
+  std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    theFile, "/LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
+    fileStream, "/LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
   );
-  theFile << "<a href=\"/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/\">"
+  fileStream << "<a href=\"/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/\">"
   << GlobalVariables::getDateForLogFiles() << "</a>" << "<br>\n";
-  theFile.close();
+  fileStream.close();
   WebClient webCrawler;
   webCrawler.initialize();
   global << Logger::blue << "Pinging " << webCrawler.addressToConnectTo << " at port/service "
@@ -167,13 +167,18 @@ void WebServerMonitor::stop() {
   now.assignLocalTime();
   global << Logger::red << "Server stopped responding. "
   << "Logging this event and stopping the monitor." << Logger::endL;
-  std::fstream theFile;
+  std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
+    fileStream,
+    "LogFiles/server_starts_and_unexpected_restarts.html",
+    true,
+    false,
+    false,
+    true
   );
-  theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
+  fileStream << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
   << now.toStringLocal() << ", GM: " << now.toStringGM() << "</b><br>\n";
-  theFile.flush();
+  fileStream.flush();
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
   global << "Terminating server children with command: " << killServerChildrenCommand.str() << Logger::endL;

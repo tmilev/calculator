@@ -96,16 +96,16 @@ const std::string& HtmlRoutines::getJavascriptAddScriptTags(const std::string& f
 std::string HtmlRoutines::getJavascriptLink(const std::string& fileNameVirtual) {
   MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptLink");
   std::stringstream out;
-  std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
-  out << "<script src =\"" << theFileName << "\"></script>\n";
+  std::string fileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
+  out << "<script src =\"" << fileName << "\"></script>\n";
   return out.str();
 }
 
 std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
   MacroRegisterFunctionWithName("HtmlRoutines::getCSSLink");
   std::stringstream out;
-  std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
-  out << "<link rel = \"stylesheet\" href= \"" << theFileName << "\">\n";
+  std::string fileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
+  out << "<link rel = \"stylesheet\" href= \"" << fileName << "\">\n";
   return out.str();
 }
 

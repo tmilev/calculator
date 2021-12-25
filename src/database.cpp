@@ -952,15 +952,15 @@ bool Database::User::sendActivationEmail(
   std::stringstream* commentsGeneralSensitive
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::sendActivationEmail");
-  List<std::string> theEmails;
-  StringRoutines::stringSplitDefaultDelimiters(emailList, theEmails);
+  List<std::string> emails;
+  StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   return Database::User::sendActivationEmail(
-    theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
+    emails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
   );
 }
 
 bool Database::User::sendActivationEmail(
-  const List<std::string>& theEmails,
+  const List<std::string>& emails,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
@@ -968,11 +968,11 @@ bool Database::User::sendActivationEmail(
   MacroRegisterFunctionWithName("DatabaseRoutines::sendActivationEmail");
   UserCalculator currentUser;
   bool result = true;
-  for (int i = 0; i < theEmails.size; i ++) {
+  for (int i = 0; i < emails.size; i ++) {
     global << "Sending activation email, user "
-    << i + 1 << " out of " << theEmails.size << " ... ";
-    currentUser.username = theEmails[i];
-    currentUser.email = theEmails[i];
+    << i + 1 << " out of " << emails.size << " ... ";
+    currentUser.username = emails[i];
+    currentUser.email = emails[i];
     global.server().getActiveWorker().doSetEmail(
       currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
     );
@@ -1318,14 +1318,14 @@ bool Database::User::addUsersFromEmails(
   MacroRegisterFunctionWithName("DatabaseRoutines::addUsersFromEmails");
   global.millisecondsMaxComputation = 100000; //100 seconds
   global.millisecondsReplyAfterComputation = 200000; // 200 seconds
-  List<std::string> theEmails, thePasswords;
-  StringRoutines::stringSplitDefaultDelimiters(emailList, theEmails);
-  StringRoutines::stringSplitDefaultDelimiters(userPasswords, thePasswords);
-  if (thePasswords.size > 0) {
-    if (thePasswords.size != theEmails.size) {
+  List<std::string> emails, passwords;
+  StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
+  StringRoutines::stringSplitDefaultDelimiters(userPasswords, passwords);
+  if (passwords.size > 0) {
+    if (passwords.size != emails.size) {
       comments << "Different number of usernames/emails and passwords: "
-      << theEmails.size << " emails and "
-      << thePasswords.size << " passwords. "
+      << emails.size << " emails and "
+      << passwords.size << " passwords. "
       << "If you want to enter usernames without password, you need to leave the password input box empty. ";
       return false;
     }
@@ -1335,21 +1335,21 @@ bool Database::User::addUsersFromEmails(
   bool doSendEmails = false;
   outputNumNewUsers = 0;
   outputNumUpdatedUsers = 0;
-  for (int i = 0; i < theEmails.size; i ++) {
+  for (int i = 0; i < emails.size; i ++) {
     currentUser.reset();
-    currentUser.username = theEmails[i];
+    currentUser.username = emails[i];
     currentUser.courseInDB = global.getWebInput(WebAPI::problem::courseHome);
     currentUser.sectionInDB = userGroup;
     currentUser.instructorInDB = global.userDefault.username;
-    currentUser.email = theEmails[i];
+    currentUser.email = emails[i];
     currentUser.userRole = userRole;
 
     bool isEmail = true;
-    if (theEmails[i].find('@') == std::string::npos) {
+    if (emails[i].find('@') == std::string::npos) {
       isEmail = false;
       currentUser.email = "";
     } else {
-      currentUser.email = theEmails[i];
+      currentUser.email = emails[i];
     }
     QuerySet currentUserData;
     List<QueryExact> findUser;
@@ -1381,14 +1381,14 @@ bool Database::User::addUsersFromEmails(
         result = false;
       }
     }
-    if (thePasswords.size == 0 || thePasswords.size != theEmails.size) {
+    if (passwords.size == 0 || passwords.size != emails.size) {
       if (currentUser.actualHashedSaltedPassword == "" && currentUser.actualAuthenticationToken == "") {
         if (!currentUser.computeAndStoreActivationToken(&comments)) {
           result = false;
         }
       }
     } else {
-      currentUser.enteredPassword = HtmlRoutines::convertStringToURLString(thePasswords[i], false);
+      currentUser.enteredPassword = HtmlRoutines::convertStringToURLString(passwords[i], false);
       //<-Passwords are ONE-LAYER url-encoded
       //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
       //<-Incoming pluses must be re-coded as spaces (%20).
@@ -1411,7 +1411,7 @@ bool Database::User::addUsersFromEmails(
     if (global.userDefaultHasAdminRights()) {
       commentsGeneralSensitive = &comments;
     }
-    if (!Database::User::sendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
+    if (!Database::User::sendActivationEmail(emails, &comments, &comments, commentsGeneralSensitive)) {
       result = false;
     }
   }

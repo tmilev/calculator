@@ -578,9 +578,9 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
   bool splitOverLeviMonomialsEncodeHighestWeight(
     std::string* report,
     CharacterSemisimpleLieAlgebraModule& output,
-    const Selection& splittingParSel,
-    const Selection& ParSelFDInducingPart,
-    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSub
+    const Selection& splittingParabolicSelection,
+    const Selection& parabolicSelectionFiniteDimensionalInducingPart,
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSubgroup
   );
   int getIndexExtremeWeightRelativeToWeyl(WeylGroupData& weyl) const;
   void makeTrivial(SemisimpleLieAlgebra& inputOwner);

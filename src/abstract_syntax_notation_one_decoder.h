@@ -22,7 +22,7 @@
 // in elements array.
 //
 // Finally, non-composite elements have their
-// theElemetns array of length zero and have their
+// elements array of length zero and have their
 // ASNAtom filled-in.
 //
 class ASNElement {

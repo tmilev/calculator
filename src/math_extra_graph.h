@@ -24,8 +24,8 @@ private:
 
 class GraphEdge {
 public:
-  friend std::ostream& operator<<(std::ostream& output, const GraphEdge& theEdge) {
-    output << theEdge.toString();
+  friend std::ostream& operator<<(std::ostream& output, const GraphEdge& edge) {
+    output << edge.toString();
     return output;
   }
   int vStart;
@@ -58,7 +58,7 @@ public:
   int numNodes;
   int groupMaxSize;
   List<std::string> nodeLabels;
-  LinearCombination<GraphEdge, Rational> theEdges;
+  LinearCombination<GraphEdge, Rational> edges;
   List<List<int> > edgesPerNodeNoMultiplicities;
   List<List<int> > nodeGroupsForDisplay;
   List<List<List<int> > > connectedComponents;

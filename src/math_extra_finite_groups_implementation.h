@@ -629,9 +629,9 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassSizesAndRepresentatives
   MacroRegisterFunctionWithName("FiniteGroup::computeConjugacyClassSizesAndRepresentatives");
   this->checkConsistency();
   if (this->getSizeByFormula != 0) {
-    LargeInteger theSize = this->getSizeByFormula(*this);
+    LargeInteger expectedSize = this->getSizeByFormula(*this);
     //extended digit separators only appear in cxx14
-    if (theSize > 100000000) {
+    if (expectedSize > 100000000) {
       if (this->flagCanComputeCCsWithOrbitIterator) {
         this->computeConjugacyClassSizesAndRepresentativesWithOrbitIterator();
         return;
@@ -1551,13 +1551,13 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::a
 
 template <class Coefficient>
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::actByElement(
-  const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theElement,
+  const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& element,
   const Vectors<Coefficient>& input,
   Vectors<Coefficient>& output
 ) const {
   output.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
-    this->actByElement(theElement, input[i], output[i]);
+    this->actByElement(element, input[i], output[i]);
   }
 }
 

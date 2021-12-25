@@ -167,10 +167,10 @@ bool TransportLayerSecurity::sslWriteLoop(
   return true;
 }
 
-void TransportLayerSecurityOpenSSL::setSocketAddToStack(int theSocket) {
+void TransportLayerSecurityOpenSSL::setSocketAddToStack(int socketFileDescriptor) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::setSocketAddToStack");
-  this->socketStack.addOnTop(theSocket);
-  this->doSetSocket(theSocket);
+  this->socketStack.addOnTop(socketFileDescriptor);
+  this->doSetSocket(socketFileDescriptor);
 }
 
 void TransportLayerSecurity::free() {

@@ -136,8 +136,8 @@ public:
       this->outputMarkers = markers;
       this->markerOffset = - 1;
       this->offset = output.size;
-      int theSize = output.size;
-      Serialization::writeNByteUnsigned(numberOfBytes, 0, output, theSize);
+      int expectedSize = output.size;
+      Serialization::writeNByteUnsigned(numberOfBytes, 0, output, expectedSize);
       if (this->outputMarkers != nullptr) {
         this->markerOffset = this->outputMarkers->size;
         this->outputMarkers->addOnTop(Serialization::Marker(this->offset, - 1, Serialization::JSLabels::length));

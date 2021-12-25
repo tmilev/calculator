@@ -51,17 +51,17 @@ bool CalculatorHTML::Test::computeTotalFiles() {
 }
 
 std::string CalculatorHTML::toStringLinkFromProblem(
-  const std::string& theFileName,
+  const std::string& fileName,
   bool practiceMode,
   int randomSeed
 ) {
   JSData request;
-  request[WebAPI::problem::fileName] = theFileName;
-  request[WebAPI::frontend::problemFileName] = theFileName;
+  request[WebAPI::problem::fileName] = fileName;
+  request[WebAPI::frontend::problemFileName] = fileName;
   std::stringstream randomSeedStream;
   randomSeedStream << randomSeed;
   request[WebAPI::problem::randomSeed] = randomSeedStream.str();
-  request[WebAPI::problem::fileName] = theFileName;
+  request[WebAPI::problem::fileName] = fileName;
   request[WebAPI::frontend::currentPage] = WebAPI::frontend::problemPage;
   if (practiceMode) {
     request[WebAPI::frontend::exerciseType] = WebAPI::frontend::exercise  ;
@@ -73,7 +73,7 @@ std::string CalculatorHTML::toStringLinkFromProblem(
   << "#"
   << request.toString()
   << "'>"
-  << theFileName
+  << fileName
   << "</a>";
   return  out.str();
 }
@@ -653,8 +653,8 @@ bool CalculatorFunctions::getSummand(
   if (!input.startsWithGivenOperation("GetSummand", 3)) {
     return false;
   }
-  const Expression& theExpression = input[1];
-  if (theExpression.startsWith(calculator.opPlus(), 3)) {
+  const Expression& expression = input[1];
+  if (expression.startsWith(calculator.opPlus(), 3)) {
     int summandIndex = - 1;
     if (!input[2].isSmallInteger(&summandIndex)) {
       return false;
@@ -663,34 +663,34 @@ bool CalculatorFunctions::getSummand(
       return false;
     }
     List<Expression> summands;
-    List<Expression> theSums;
-    calculator.collectOpands(theExpression, calculator.opPlus(), summands);
+    List<Expression> sums;
+    calculator.collectOpands(expression, calculator.opPlus(), summands);
     for (int i = 0; i < summands.size; i ++) {
       if (summands[i].containsAsSubExpressionNoBuiltInTypes(calculator.opSum())) {
-        theSums.addOnTop(summands[i]);
+        sums.addOnTop(summands[i]);
         summands.removeIndexShiftDown(i);
         i --;
       }
     }
-    if (theSums.size > 1) {
+    if (sums.size > 1) {
       return false;
     }
     if (summandIndex < summands.size) {
       output = summands[summandIndex];
       return true;
     }
-    if (theSums.size == 0) {
+    if (sums.size == 0) {
       return false;
     }
     output.reset(calculator);
     output.addChildAtomOnTop("GetSummand");
-    output.addChildOnTop(theSums[0]);
+    output.addChildOnTop(sums[0]);
     Expression shiftE;
     shiftE.assignValue(calculator, summands.size);
     return output.addChildOnTop(input[2] - shiftE);
   }
   List<Expression> multiplicands;
-  theExpression.getMultiplicandsRecursive(multiplicands);
+  expression.getMultiplicandsRecursive(multiplicands);
   Expression theSum = *multiplicands.lastObject();
   multiplicands.removeLastObject();
   Expression coeffExpression;
@@ -706,20 +706,20 @@ bool CalculatorFunctions::getSummand(
   if (!limitExpressions.startsWith(calculator.opLimitBoundary(), 3)) {
     return false;
   }
-  const Expression& theBottomBoundary = limitExpressions[1];
-  if (!theBottomBoundary.startsWith(calculator.opDefine(), 3)) {
+  const Expression& bottomBoundary = limitExpressions[1];
+  if (!bottomBoundary.startsWith(calculator.opDefine(), 3)) {
     return false;
   }
-  Expression substitution = theBottomBoundary;
+  Expression substitution = bottomBoundary;
   Expression //oneE,
   valueToSubWith;
-  valueToSubWith = theBottomBoundary[2] + input[2];
+  valueToSubWith = bottomBoundary[2] + input[2];
   substitution.setChild(2, valueToSubWith);
-  Expression theCommandSequence(calculator);
-  theCommandSequence.addChildAtomOnTop(calculator.opCommandSequence());
-  theCommandSequence.addChildOnTop(substitution);
-  theCommandSequence.addChildOnTop(coeffExpression * theSum[2]);
-  return output.makeXOX(calculator, calculator.opUnderscore(), theCommandSequence, calculator.expressionTwo());
+  Expression commandSequence(calculator);
+  commandSequence.addChildAtomOnTop(calculator.opCommandSequence());
+  commandSequence.addChildOnTop(substitution);
+  commandSequence.addChildOnTop(coeffExpression * theSum[2]);
+  return output.makeXOX(calculator, calculator.opUnderscore(), commandSequence, calculator.expressionTwo());
 }
 
 bool CalculatorFunctionsPlot::plotVectorField(Calculator& calculator, const Expression& input, Expression& output) {
@@ -851,34 +851,34 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
     << "string with the token in the usual format (\"a.b.c\"), "
     << "the modulus of the key and the exponent of the key. ";
   }
-  std::string theTokenString;
-  if (!input[1].isOfType(&theTokenString)) {
+  std::string tokenString;
+  if (!input[1].isOfType(&tokenString)) {
     return calculator << "The first argument of " << input.toString() << " is not a string. ";
   }
   std::stringstream out;
-  std::string theModBase64, theExpBase64;
-  if (!input[2].isOfType(&theModBase64) || !input[3].isOfType(&theExpBase64)) {
+  std::string modulusBase64, exponentBase64;
+  if (!input[2].isOfType(&modulusBase64) || !input[3].isOfType(&exponentBase64)) {
     return calculator << "Failed to convert the arguments "
     << input[2].toString()
     << " and " << input[3].toString()
     << " to base64 strings";
   }
-  JSONWebToken theToken;
-  LargeIntegerUnsigned theMod, theExp;
-  if (!theToken.assignString(theTokenString, &out)) {
+  JSONWebToken webToken;
+  LargeIntegerUnsigned modulus, exponent;
+  if (!webToken.assignString(tokenString, &out)) {
     return output.assignValue(calculator, out.str());
   }
   out << "Sucesfully extracted JWT token. <br>"
-  << theToken.toString()
+  << webToken.toString()
   << "<br>";
   if (
-    !Crypto::convertBase64ToLargeUnsigned(theModBase64, theMod, &out) ||
-    !Crypto::convertBase64ToLargeUnsigned(theExpBase64, theExp, &out)
+    !Crypto::convertBase64ToLargeUnsigned(modulusBase64, modulus, &out) ||
+    !Crypto::convertBase64ToLargeUnsigned(exponentBase64, exponent, &out)
   ) {
     return output.assignValue(calculator, out.str());
   }
   out << "<br>Successfully extracted modulus and exponent";
-  theToken.verifyRSA256(theMod, theExp, &out, &out);
+  webToken.verifyRSA256(modulus, exponent, &out, &out);
   return output.assignValue(calculator, out.str());
 }
 
@@ -1084,11 +1084,14 @@ bool CalculatorFunctionsCrypto::RSAEncrypt(
   if (input.size() != 4) {
     return false;
   }
-  LargeInteger theExponent, modulus, theMessage, result;
+  LargeInteger exponent;
+  LargeInteger modulus;
+  LargeInteger message;
+  LargeInteger result;
   if (
     !input[1].isInteger(&modulus) ||
-    !input[2].isInteger(&theExponent) ||
-    !input[3].isInteger(&theMessage)
+    !input[2].isInteger(&exponent) ||
+    !input[3].isInteger(&message)
   ) {
     return calculator << "Failed to extract three (large) integers from the arguments of "
     << input.toString();
@@ -1096,13 +1099,13 @@ bool CalculatorFunctionsCrypto::RSAEncrypt(
   if (modulus < 0) {
     modulus *= - 1;
   }
-  if (modulus == 0 || theExponent == 0) {
+  if (modulus == 0 || exponent == 0) {
     return calculator << "The modulus and exponent must be non-zero.";
   }
   if (modulus == 1) {
     return calculator << "Modulus 1 not allowed";
   }
-  result = Crypto::rsaEncrypt(modulus.value, theExponent, theMessage);
+  result = Crypto::rsaEncrypt(modulus.value, exponent, message);
   return output.assignValue(calculator, Rational(result));
 }
 
@@ -1118,16 +1121,16 @@ bool CalculatorFunctions::sendEmailWithMailGun(
     if (input.size() != 4) {
       return calculator << "Send email requires three arguments. ";
     }
-    EmailRoutines theEmail;
+    EmailRoutines email;
     if (
-      !input[1].isOfType(&theEmail.toEmail) ||
-      !input[2].isOfType(&theEmail.emailContent) ||
-      !input[3].isOfType(&theEmail.subject)
+      !input[1].isOfType(&email.toEmail) ||
+      !input[2].isOfType(&email.emailContent) ||
+      !input[3].isOfType(&email.subject)
     ) {
       return calculator << "Arguments of " << input.toString()
       << "expected to be strings (enclose in \"\" please). ";
     }
-    theEmail.sendEmailWithMailGun(&out, &out, &out);
+    email.sendEmailWithMailGun(&out, &out, &out);
   } else {
     (void) input;
     out << "Error: database not running. ";
@@ -1151,8 +1154,8 @@ bool CalculatorFunctions::isSquare(Calculator& calculator, const Expression& inp
     return output.assignValue(calculator, 1);
   }
   List<int> multiplicities;
-  List<LargeInteger> theFactors;
-  if (!value.value.factor(theFactors, multiplicities, 0, 4, nullptr)) {
+  List<LargeInteger> factors;
+  if (!value.value.factor(factors, multiplicities, 0, 4, nullptr)) {
     return calculator << "Failed to factor: " << value.toString() << " (may be too large?).";
   }
   int result = 1;
@@ -1177,9 +1180,9 @@ bool CalculatorFunctions::isSquareFree(
     return false;
   }
   List<int> multiplicities;
-  List<LargeInteger> theFactors;
+  List<LargeInteger> factors;
   if (!theInteger.value.factor(
-    theFactors, multiplicities, 0, 3, &calculator.comments
+    factors, multiplicities, 0, 3, &calculator.comments
   )) {
     return calculator << "Failed to factor: "
     << theInteger.toString() << " (may be too large?).";
@@ -1227,9 +1230,9 @@ bool CalculatorFunctions::isPower(
     return false;
   }
   List<int> multiplicities;
-  List<LargeInteger> theFactors;
+  List<LargeInteger> factors;
   if (!toBeFactored.value.factor(
-    theFactors, multiplicities, 0, 3, &calculator.comments
+    factors, multiplicities, 0, 3, &calculator.comments
   )) {
     return calculator << "Failed to factor: "
     << toBeFactored.toString() << " (may be too large?).";
@@ -1409,7 +1412,7 @@ bool CalculatorFunctions::applyToList(Calculator& calculator, const Expression& 
   if (input.size() != 3) {
     return false;
   }
-  const Expression& theFun = input[1];
+  const Expression& functionExpression = input[1];
   if (!input[2].isSequenceNElements()) {
     return false;
   }
@@ -1417,7 +1420,7 @@ bool CalculatorFunctions::applyToList(Calculator& calculator, const Expression& 
   result.setSize(input[2].size() - 1);
   for (int i = 1; i < input[2].size(); i ++) {
     result[i - 1].reset(calculator);
-    result[i - 1].addChildOnTop(theFun);
+    result[i - 1].addChildOnTop(functionExpression);
     result[i - 1].addChildOnTop(input[2][i]);
   }
   return output.makeSequence(calculator, &result);
@@ -2532,16 +2535,16 @@ bool CalculatorFunctions::newtonsMethod(Calculator& calculator, const Expression
   if (input.size() != 4) {
     return false;
   }
-  Expression theFun;
-  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, input[1], theFun)) {
-    theFun = input[1];
+  Expression functionExpression;
+  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, input[1], functionExpression)) {
+    functionExpression = input[1];
   }
   HashedList<Expression> theVars;
-  if (!theFun.getFreeVariables(theVars, true)) {
-    return calculator << "Failed to get free variables from: " << theFun.toString();
+  if (!functionExpression.getFreeVariables(theVars, true)) {
+    return calculator << "Failed to get free variables from: " << functionExpression.toString();
   }
   if (theVars.size != 1) {
-    return calculator << "While trying to extract a function from: " << theFun.toString()
+    return calculator << "While trying to extract a function from: " << functionExpression.toString()
     << ", got " << theVars.size << " variables. Newton's method requires an expression that depends "
     << "on exactly one variable. The variables I got were: "
     << theVars.toStringCommaDelimited();
@@ -2563,7 +2566,7 @@ bool CalculatorFunctions::newtonsMethod(Calculator& calculator, const Expression
   }
   MapList<std::string, Expression, MathRoutines::hashString> substitution;
   substitution.setKeyValue("x", theVars[0]);
-  substitution.setKeyValue("f", theFun);
+  substitution.setKeyValue("f", functionExpression);
   substitution.setKeyValue("a", calculator.getNewAtom());
   substitution.setKeyValue("iteratedMap", calculator.getNewAtom());
   substitution.setKeyValue("NewtonMap", calculator.getNewAtom());

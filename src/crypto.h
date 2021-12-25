@@ -14,7 +14,7 @@ public:
   std::string algorithm;
   std::string keyid;
   std::string modulusString;
-  std::string theExponentString;
+  std::string exponentString;
   LargeIntegerUnsigned modulus;
   LargeIntegerUnsigned exponent;
   bool loadFromJSON(
@@ -318,7 +318,9 @@ public:
   static void computeSha3_256(const std::string& input, List<unsigned char>& output);
   static void convertListUint32ToLargeIntegerUnsignedLittleEndian(List<uint32_t>& input, LargeIntegerUnsigned& output);
   static LargeIntegerUnsigned rsaEncrypt(
-    const LargeIntegerUnsigned& theModulus, const LargeInteger& theExponent, const LargeInteger& theMessage
+    const LargeIntegerUnsigned& modulus,
+    const LargeInteger& exponent,
+    const LargeInteger& message
   );
   static void convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     const List<unsigned char>& input,

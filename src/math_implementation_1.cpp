@@ -57,7 +57,7 @@ bool PartialFractions::argumentsAllowed(
   }
   Cone tempCone;
   bool result = tempCone.createFromVertices(arguments);
-  if (tempCone.isTheEntireSpace()) {
+  if (tempCone.isEntireSpace()) {
     outputWhatWentWrong = "Error: the vectors you gave as input span the entire space.";
     return false;
   }

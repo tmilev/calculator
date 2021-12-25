@@ -70,25 +70,25 @@ std::string GraphEdge::toString(FormatExpressions* format) const {
 }
 
 void GraphWeightedLabeledEdges::addEdge(int i, int j) {
-  GraphEdge theEdge(i, j);
-  this->theEdges.addMonomial(theEdge, 1);
+  GraphEdge graphEdge(i, j);
+  this->edges.addMonomial(graphEdge, 1);
 }
 
 void GraphWeightedLabeledEdges::addEdge(int i, int j, const std::string& inputLabel) {
-  GraphEdge theEdge(i, j, inputLabel);
-  this->theEdges.addMonomial(theEdge, 1);
+  GraphEdge graphEdge(i, j, inputLabel);
+  this->edges.addMonomial(graphEdge, 1);
 }
 
 bool GraphWeightedLabeledEdges:: checkConsistency() const {
-  for (int i = 0; i < this->theEdges.size(); i ++) {
+  for (int i = 0; i < this->edges.size(); i ++) {
     if (
-      this->theEdges[i].vStart < 0 ||
-      this->theEdges[i].vStart >= this->numNodes ||
-      this->theEdges[i].vEnd  < 0 ||
-      this->theEdges[i].vEnd >= this->numNodes
+      this->edges[i].vStart < 0 ||
+      this->edges[i].vStart >= this->numNodes ||
+      this->edges[i].vEnd  < 0 ||
+      this->edges[i].vEnd >= this->numNodes
     ) {
       global.fatal << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
-      << this->theEdges[i].toString() << " is a bad." << global.fatal;
+      << this->edges[i].toString() << " is a bad." << global.fatal;
     }
   }
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
@@ -113,8 +113,8 @@ void GraphWeightedLabeledEdges::computeEdgesPerNodesNoMultiplicities() {
   List<int> emptyList;
   this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numNodes, emptyList);
   this->checkConsistency();
-  for (int i = 0; i < this->theEdges.size(); i ++) {
-    this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].addOnTop(this->theEdges[i].vEnd);
+  for (int i = 0; i < this->edges.size(); i ++) {
+    this->edgesPerNodeNoMultiplicities[this->edges[i].vStart].addOnTop(this->edges[i].vEnd);
   }
 }
 
@@ -152,7 +152,7 @@ void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances()
   this->distanceToBaseNode.initializeFillInObject(this->numNodes, - 1);
   this->baseNode.initializeFillInObject(this->numNodes, - 1);
   List<int> theOrbit;
-  theOrbit.setExpectedSize(this->theEdges.size());
+  theOrbit.setExpectedSize(this->edges.size());
   for (int indexBaseNode = 0; indexBaseNode < this->numNodes; indexBaseNode ++) {
     if (this->baseNode[indexBaseNode] == - 1) {
       this->distanceToBaseNode[indexBaseNode] = 0;
@@ -245,10 +245,10 @@ std::string GraphWeightedLabeledEdges::toStringNodesAndEdges(FormatExpressions* 
   MacroRegisterFunctionWithName("Graph::toStringNodesAndEdges");
   (void) format;
   std::stringstream out;
-  out << "The graph has " << this->theEdges.size() << " edges: <br>\n";
-  for (int i = 0; i < this->theEdges.size(); i ++) {
-    out << this->theEdges[i].toString();
-    if (i != this->theEdges.size() - 1) {
+  out << "The graph has " << this->edges.size() << " edges: <br>\n";
+  for (int i = 0; i < this->edges.size(); i ++) {
+    out << this->edges[i].toString();
+    if (i != this->edges.size() - 1) {
       out << ", ";
     }
   }

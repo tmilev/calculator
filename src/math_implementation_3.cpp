@@ -809,10 +809,10 @@ uint32_t HtmlRoutines::redGreenBlue(unsigned int r, unsigned int g, unsigned int
   return r * 65536 + g * 256 + b;
 }
 
-bool FileOperations::isFolderUnsecure(const std::string& theFolderName) {
+bool FileOperations::isFolderUnsecure(const std::string& folderName) {
   MacroRegisterFunctionWithName("FileOperations::isFolderUnsecure");
   DIR *pDir;
-  pDir = opendir(theFolderName.c_str());
+  pDir = opendir(folderName.c_str());
   if (pDir != nullptr) {
     closedir(pDir);
     return true;
@@ -877,46 +877,46 @@ std::string FileOperations::convertStringToEscapedStringFileNameSafe(const std::
 }
 
 bool FileOperations::isOKFileNameVirtual(
-  const std::string& theFileName,
+  const std::string& fileName,
   bool accessSensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("FileOperations::isOKFileNameVirtual");
   (void) accessSensitiveFolders;
-  std::string theFileNameNoPath = FileOperations::getFileNameFromFileNameWithPath(theFileName);
-  std::string theFilePath = FileOperations::getPathFromFileNameWithPath(theFileName);
-  if (theFilePath.size() > 10000000) {
+  std::string fileNameNoPath = FileOperations::getFileNameFromFileNameWithPath(fileName);
+  std::string filePath = FileOperations::getPathFromFileNameWithPath(fileName);
+  if (filePath.size() > 10000000) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid file name: too long. ";
     }
     return false;
   }
-  if (theFilePath.size() > 0) {
-    if (theFilePath[0] == '.') {
+  if (filePath.size() > 0) {
+    if (filePath[0] == '.') {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Invalid file name: "
-        << theFileName << ": starts with dot but not with ./. ";
+        << fileName << ": starts with dot but not with ./. ";
       }
       return false;
     }
   }
-  for (unsigned i = 0; i < theFilePath.size(); i ++) {
-    if (theFilePath[i] == '.') {
-      if (i + 1 < theFilePath.size()) {
-        if (theFilePath[i + 1] == '.') {
+  for (unsigned i = 0; i < filePath.size(); i ++) {
+    if (filePath[i] == '.') {
+      if (i + 1 < filePath.size()) {
+        if (filePath[i + 1] == '.') {
           if (commentsOnFailure != nullptr) {
             *commentsOnFailure << "Invalid file name: "
-            << theFileName << ": has two consecutive dots. ";
+            << fileName << ": has two consecutive dots. ";
           }
           return false;
         }
       }
     }
   }
-  if (theFileNameNoPath.size() > 0) {
-    if (theFileNameNoPath[0] == '.') {
+  if (fileNameNoPath.size() > 0) {
+    if (fileNameNoPath[0] == '.') {
       if (commentsOnFailure != nullptr) {
-       *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot. ";
+       *commentsOnFailure << "Invalid file name: " << fileName << ": starts with dot. ";
       }
       return false;
     }
@@ -924,10 +924,10 @@ bool FileOperations::isOKFileNameVirtual(
   return true;
 }
 
-bool FileOperations::isFileNameWithoutDotsAndSlashes(const std::string& theFileName) {
+bool FileOperations::isFileNameWithoutDotsAndSlashes(const std::string& fileName) {
   MacroRegisterFunctionWithName("FileOperations::isFileNameWithoutDotsAndSlashes");
-  for (unsigned i = 0; i < theFileName.size(); i ++) {
-    if (theFileName[i] == '/' || theFileName[i] == '\\' || theFileName[i] == '.') {
+  for (unsigned i = 0; i < fileName.size(); i ++) {
+    if (fileName[i] == '/' || fileName[i] == '\\' || fileName[i] == '.') {
       return false;
     }
   }
@@ -966,21 +966,21 @@ std::string FileOperations::cleanUpForFileNameUse(const std::string& inputString
 }
 
 bool FileOperations::isFileNameSafeForSystemCommands(
-  const std::string& theFileName, std::stringstream* commentsOnFailure
+  const std::string& fileName, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("FileOperations::isFileNameSafeForSystemCommands");
   const unsigned maxAllowedFileNameSize = 1000;
-  if (theFileName.size() > maxAllowedFileNameSize) {
+  if (fileName.size() > maxAllowedFileNameSize) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "File name has length: " << theFileName.size()
+      *commentsOnFailure << "File name has length: " << fileName.size()
       << "; max allowed file name size is: " << maxAllowedFileNameSize;
     }
     return false;
   }
-  for (unsigned i = 0; i < theFileName.size(); i ++) {
-    if (!FileOperations::getSafeFileChars()[theFileName[i]]) {
+  for (unsigned i = 0; i < fileName.size(); i ++) {
+    if (!FileOperations::getSafeFileChars()[fileName[i]]) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Character: " << theFileName[i] << " not allowed in file name. ";
+        *commentsOnFailure << "Character: " << fileName[i] << " not allowed in file name. ";
       }
       return false;
     }
@@ -1168,18 +1168,18 @@ std::string FileOperations::writeFileReturnHTMLLink(
 }
 
 bool FileOperations::loadFileToStringVirtual(
-  const std::string& theFileName,
+  const std::string& fileName,
   std::string& output,
   bool accessSensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
   return FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
-    theFileName, output, accessSensitiveFolders, false, commentsOnFailure
+    fileName, output, accessSensitiveFolders, false, commentsOnFailure
   );
 }
 
 bool FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
-  const std::string& theFileName,
+  const std::string& fileName,
   std::string& output,
   bool accessSensitiveFolders,
   bool accessULTRASensitiveFolders,
@@ -1187,7 +1187,7 @@ bool FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded
 ) {
   std::string computedFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtual(
-    theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure
+    fileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure
   )) {
     return false;
   }
@@ -1205,8 +1205,8 @@ bool FileOperations::loadFileToStringUnsecure(
     }
     return false;
   }
-  std::ifstream theFile;
-  if (!FileOperations::openFileUnsecureReadOnly(theFile, fileNameUnsecure, false)) {
+  std::ifstream fileStream;
+  if (!FileOperations::openFileUnsecureReadOnly(fileStream, fileNameUnsecure, false)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The requested file "
       << HtmlRoutines::convertStringToHtmlString(fileNameUnsecure, false)
@@ -1215,7 +1215,7 @@ bool FileOperations::loadFileToStringUnsecure(
     return false;
   }
   std::stringstream contentStream;
-  contentStream << theFile.rdbuf();
+  contentStream << fileStream.rdbuf();
   output = contentStream.str();
   return true;
 }
@@ -1603,11 +1603,11 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
     std::string fileContent;
     std::string inputDefault = inputStart + "default/" + fileEnd;
     if (FileOperations::loadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
-      std::fstream theFile;
+      std::fstream fileStream;
       if (FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
-        theFile, inputCopy, false, true, false, false
+        fileStream, inputCopy, false, true, false, false
       )) {
-        theFile << fileContent;
+        fileStream << fileContent;
         result = true;
       }
     }
@@ -1963,8 +1963,8 @@ bool WeylGroupData::hasStronglyPerpendicularDecompositionWRT(
     output.reserve(set.size);
     outputCoeffs.reserve(set.size);
   }
-  Vectors<Rational> theNewSet;
-  theNewSet.reserve(set.size);
+  Vectors<Rational> newSet;
+  newSet.reserve(set.size);
   Vector<Rational> tempRoot;
   Rational tempRat;
   for (int indexFirstNonZeroRoot = 0; indexFirstNonZeroRoot < set.size; indexFirstNonZeroRoot ++) {
@@ -1972,17 +1972,17 @@ bool WeylGroupData::hasStronglyPerpendicularDecompositionWRT(
     tempRat = this->rootScalarCartanRoot(input, currentRoot)/this->rootScalarCartanRoot(currentRoot, currentRoot);
     if (tempRat.isPositive()) {
       if (!IntegralCoefficientsOnly || tempRat.denominatorShort == 1) {
-         theNewSet.size = 0;
+         newSet.size = 0;
          for (int i = indexFirstNonZeroRoot; i < set.size; i ++) {
            if (this->isStronglyPerpendicularTo(currentRoot, set[i])) {
-             theNewSet.addOnTop(set[i]);
+             newSet.addOnTop(set[i]);
            }
          }
          outputCoeffs.addOnTop(tempRat);
          output.addOnTop(currentRoot);
          tempRoot = input - currentRoot * tempRat;
          if (this->hasStronglyPerpendicularDecompositionWRT(
-          tempRoot, upperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly
+          tempRoot, upperBoundNumBetas, newSet, output, outputCoeffs, IntegralCoefficientsOnly
          )) {
            return true;
          }
@@ -2989,14 +2989,14 @@ FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<Polynomial<Ratio
 FormatExpressions::FormatExpressions() {
   this->ambientWeylLetter = 'X';
   this->extraLinesCounterLatex = 0;
-  this->chevalleyGgeneratorLetter = "g";
-  this->chevalleyHgeneratorLetter = "h";
+  this->chevalleyGGeneratorLetter = "g";
+  this->chevalleyHGeneratorLetter = "h";
   this->polyDefaultLetter = "x";
   this->weylAlgebraDefaultLetter = "\\partial";
   this->finiteDimensionalRepresentationLetter = "V";
   this->simpleRootLetter = "\\eta";
   this->maximumLineLength = 100;
-  this->flagPassCustomCoeffMonSeparatorToCoeffs = false;
+  this->flagPassCustomCoefficientMonomialSeparatorToCoefficients = false;
   this->flagUseCalculatorFormatForUEOrdered = true;
   this->flagUseHTML = false;
   this->flagUseLatex = false;
@@ -4170,7 +4170,7 @@ void OnePartialFraction::reduceMonomialByMonomialModifyOneMonomial(
 
 void OnePartialFraction::getPolyReduceMonomialByMonomial(
   PartialFractions& owner,
-  Vector<Rational>& theExponent,
+  Vector<Rational>& exponent,
   int StartMonomialPower,
   int DenPowerReduction,
   int startDenominatorPower,
@@ -4196,7 +4196,7 @@ void OnePartialFraction::getPolyReduceMonomialByMonomial(
         << startDenominatorPower << ". " << global.fatal;
       }
       for (int k = 0; k <= StartMonomialPower - startDenominatorPower; k++) {
-        tempMon = theExponent;
+        tempMon = exponent;
         tempMon.raiseToPower(k);
         coefficient = MathRoutines::parity(startDenominatorPower) * MathRoutines::nChooseK(
           StartMonomialPower - 1 - k, startDenominatorPower - 1
@@ -4211,7 +4211,7 @@ void OnePartialFraction::getPolyReduceMonomialByMonomial(
       output.addMonomial(tempMon, coefficient);
     } else {
       for (int k = 1; k <= - StartMonomialPower; k ++) {
-        tempMon = theExponent;
+        tempMon = exponent;
         tempMon.raiseToPower(- k);
         coefficient = MathRoutines::nChooseK(startDenominatorPower - StartMonomialPower - 1 - k, startDenominatorPower - 1);
         output.addMonomial(tempMon, coefficient);
@@ -7610,13 +7610,13 @@ LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& weight) {
 bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& matrix) {
   MacroRegisterFunctionWithName("WeylGroup::IsElementGroupOrOuterAuto");
   this->computeOuterAutomorphisms();
-  Vector<Rational> theRhoImage;
-  matrix.actOnVectorColumn(this->weylGroup->rho, theRhoImage);
-  ElementWeylGroup theElementCandidate;
-  this->weylGroup->raiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
+  Vector<Rational> rhoImage;
+  matrix.actOnVectorColumn(this->weylGroup->rho, rhoImage);
+  ElementWeylGroup elementCandidate;
+  this->weylGroup->raiseToDominantWeight(rhoImage, nullptr, nullptr, &elementCandidate);
   Matrix<Rational> theCandidateMat;
   MatrixTensor<Rational> candidateMatrixTensorForm, candidateMatrixWithOuterAutomorphisms;
-  this->weylGroup->getMatrixStandardRepresentation(theElementCandidate, theCandidateMat);
+  this->weylGroup->getMatrixStandardRepresentation(elementCandidate, theCandidateMat);
   candidateMatrixTensorForm = theCandidateMat;
   for (int i = 0; i < this->outerAutomorphisms.elements.size; i ++) {
     candidateMatrixWithOuterAutomorphisms = this->outerAutomorphisms.elements[i];
@@ -7655,16 +7655,16 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   for (int i = 0; i < coxeterNumber - 1; i ++) {
     matrix.multiplyOnTheLeft(matCoxeterElt);
   }
-  Complex<double> theEigenValue;
-  theEigenValue.realPart = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
-  theEigenValue.imaginaryPart = FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
+  Complex<double> eigenValue;
+  eigenValue.realPart = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
+  eigenValue.imaginaryPart = FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMat;
   eigenMat.initialize(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
     for (int j = 0; j < eigenMat.numberOfColumns; j ++) {
       eigenMat.elements[i][j] = matCoxeterElt.elements[i][j].getDoubleValue();
       if (i == j) {
-        eigenMat.elements[i][i] -= theEigenValue;
+        eigenMat.elements[i][i] -= eigenValue;
       }
     }
   }
@@ -7914,13 +7914,13 @@ Rational WeylGroupData::getLongestRootLengthSquared() const {
 
 bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& matrix) {
   MacroRegisterFunctionWithName("WeylGroup::isElementWeylGroup");
-  Vector<Rational> theRhoImage;
-  matrix.actOnVectorColumn(this->rho, theRhoImage);
-  ElementWeylGroup theElementCandidate;
-  this->raiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
+  Vector<Rational> rhoImage;
+  matrix.actOnVectorColumn(this->rho, rhoImage);
+  ElementWeylGroup elementCandidate;
+  this->raiseToDominantWeight(rhoImage, nullptr, nullptr, &elementCandidate);
   Matrix<Rational> candidateMatrix, inputMatrix;
   matrix.getMatrix(inputMatrix, this->getDimension());
-  this->getMatrixStandardRepresentation(theElementCandidate, candidateMatrix);
+  this->getMatrixStandardRepresentation(elementCandidate, candidateMatrix);
   return candidateMatrix == inputMatrix;
 }
 
@@ -9627,7 +9627,7 @@ bool PartialFractions::getVectorPartitionFunction(QuasiPolynomial& output, Vecto
   return true;
 }
 
-std::string PartialFractions::doTheFullComputationReturnLatexFileString(
+std::string PartialFractions::doFullComputationReturnLatexFileString(
   Vectors<Rational>& toBePartitioned, FormatExpressions& format, std::string* outputHtml
 ) {
   std::string whatWentWrong;
@@ -9640,7 +9640,7 @@ std::string PartialFractions::doTheFullComputationReturnLatexFileString(
   std::stringstream out;
   std::stringstream outHtml;
   global.fatal << global.fatal ;
-  //  this->theChambersOld.SliceTheEuclideanSpace(false);
+  //  this->theChambersOld.SliceEuclideanSpace(false);
   //  this->theChambersOld.quickSortAscending();
   //  this->theChambersOld.LabelChamberIndicesProperly();
   //  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld);
@@ -11314,7 +11314,7 @@ bool Cone::getLatticePointsInCone(
 
 void PiecewiseQuasipolynomial::operator*=(const Rational& other) {
   if (other.isEqualToZero()) {
-    this->makeZero(this->NumVariables);
+    this->makeZero(this->numberOfVariables);
     return;
   }
   for (int i = 0; i < this->quasiPolynomials.size; i ++) {
@@ -11339,27 +11339,27 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
     outputstring = "Error.";
     return false;
   }
-  this->NumVariables = theRoots.getDimension();
-  PartialFractions theFracs;
+  this->numberOfVariables = theRoots.getDimension();
+  PartialFractions partialFractions;
   FormatExpressions format;
   std::stringstream out;
   std::string whatWentWrong;
 
-  theFracs.initFromRoots(theRoots);
-  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(format));
-  theFracs.split(nullptr);
-  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(format));
-  // theFracs.theChambers.initializeFromDirectionsAndRefine(theRoots);
+  partialFractions.initFromRoots(theRoots);
+  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(format));
+  partialFractions.split(nullptr);
+  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(format));
+  // partialFractions.theChambers.initializeFromDirectionsAndRefine(theRoots);
   global.fatal << "Not implemented. " << global.fatal ;
-  //  theFracs.theChambersOld.AmbientDimension = theRoots[0].size;
-  //  theFracs.theChambersOld.theDirections = theRoots;
-  //  theFracs.theChambersOld.SliceTheEuclideanSpace(false);
-  //  theFracs.theChambers.AssignCombinatorialChamberComplex(theFracs.theChambersOld);
-  this->quasiPolynomials.setSize(theFracs.theChambers.size);
+  //  partialFractions.theChambersOld.AmbientDimension = theRoots[0].size;
+  //  partialFractions.theChambersOld.theDirections = theRoots;
+  //  partialFractions.theChambersOld.SliceEuclideanSpace(false);
+  //  partialFractions.theChambers.AssignCombinatorialChamberComplex(partialFractions.theChambersOld);
+  this->quasiPolynomials.setSize(partialFractions.theChambers.size);
   Vector<Rational> indicator;
-  for (int i = 0; i < theFracs.theChambers.size; i ++) {
-    indicator = theFracs.theChambers[i].getInternalPoint();
-    theFracs.getVectorPartitionFunction(this->quasiPolynomials[i], indicator);
+  for (int i = 0; i < partialFractions.theChambers.size; i ++) {
+    indicator = partialFractions.theChambers[i].getInternalPoint();
+    partialFractions.getVectorPartitionFunction(this->quasiPolynomials[i], indicator);
     //QuasiPolynomial& currentQP = this->theQPs[i];
   }
   Lattice baseLattice;
@@ -11369,7 +11369,7 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   Vector<Rational> shiftRoot;
   baseLattice.getInternalPointInConeForSomeFundamentalDomain(shiftRoot, baseCone);
   shiftRoot.negate();
-  theFracs.theChambers.makeAffineAndTransformToProjectiveDimPlusOne(shiftRoot, this->projectivizedComplex);
+  partialFractions.theChambers.makeAffineAndTransformToProjectiveDimPlusOne(shiftRoot, this->projectivizedComplex);
   outputstring = out.str();
   return true;
 }
@@ -11758,12 +11758,15 @@ void ConeComplex::transformToWeylProjective() {
 }
 
 void ConeLatticeAndShiftMaxComputation::initialize(
-  Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift
+  Vector<Rational>& inequalities,
+  Cone& startingCone,
+  Lattice& startingLattice,
+  Vector<Rational>& startingShift
 ) {
-  ConeLatticeAndShift theCLS;
-  theCLS.projectivizedCone = startingCone;
-  theCLS.lattice = startingLattice;
-  theCLS.shift = startingShift;
+  ConeLatticeAndShift allCones;
+  allCones.projectivizedCone = startingCone;
+  allCones.lattice = startingLattice;
+  allCones.shift = startingShift;
   this->numNonParaM = 0;
   this->numProcessedNonParam = 0;
   this->LPtoMaximizeLargerDim.size = 0;
@@ -11772,8 +11775,8 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   this->finalRepresentatives.size = 0;
   this->complexStartingPerRepresentative.size = 0;
   this->complexRefinedPerRepresentative.size = 0;
-  this->conesLargerDimension.addOnTop(theCLS);
-  this->LPtoMaximizeLargerDim.addOnTop(theNEq);
+  this->conesLargerDimension.addOnTop(allCones);
+  this->LPtoMaximizeLargerDim.addOnTop(inequalities);
   this->isInfinity.initializeFillInObject(1, false);
 }
 
@@ -11793,11 +11796,11 @@ void Lattice::applyLinearMap(Matrix<Rational>& linearMap, Lattice& output) {
 
 std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* format) {
   std::stringstream out;
-  out << "<hr>Resulting lattice: " << this->theFinalRougherLattice.toString() << "<hr><hr>";
+  out << "<hr>Resulting lattice: " << this->finalRougherLattice.toString() << "<hr><hr>";
 /*  if (this->complexStartingPerRepresentative.size >0) {
     out << "<hr> Non-refined complex per representative:<br>\n ";
     for (int i = 0; i < this->complexStartingPerRepresentative.size; i ++) {
-      out << "Lattice +shift ="  << this->theFinalRepresentatives[i].toString() << " + " << this->theFinalRougherLattice.toString();
+      out << "Lattice +shift ="  << this->finalRepresentatives[i].toString() << " + " << this->finalRougherLattice.toString();
       out << "<br>\n" << this->complexStartingPerRepresentative[i].toString(false, true);
       out << "the function we need to max: " << this->LPtoMaximizeSmallerDim[i].toString();
     }
@@ -11827,11 +11830,11 @@ std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* forma
 }
 
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
-  this->theFinalRougherLattice = this->conesLargerDimension[0].lattice;
+  this->finalRougherLattice = this->conesLargerDimension[0].lattice;
   ProgressReport report;
   ProgressReport report2;
   for (int i = 1; i < this->conesLargerDimension.size; i ++) {
-    this->theFinalRougherLattice.intersectWith(this->conesLargerDimension[i].lattice);
+    this->finalRougherLattice.intersectWith(this->conesLargerDimension[i].lattice);
     std::stringstream tempStream;
     tempStream << "intersecing lattice " << i + 1 << " out of " << this->conesLargerDimension.size;
     report.report(tempStream.str());
@@ -11842,7 +11845,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
   for (int i = 0; i < this->conesLargerDimension.size; i ++) {
     tempRoots2[0] = this->conesLargerDimension[i].shift;
     this->conesLargerDimension[i].lattice.getAllRepresentativesProjectingDownTo(
-      this->theFinalRougherLattice, tempRoots2, tempRoots
+      this->finalRougherLattice, tempRoots2, tempRoots
     );
     this->finalRepresentatives.addOnTopNoRepetition(tempRoots);
     std::stringstream tempStream;
@@ -12060,18 +12063,18 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   Lattice exitRougherLattice;
   ConeLatticeAndShift tempCLS;
   directionSmallerDim.makeEi(dimensionProjectivized - 1, 0);
-  Vectors<Rational> theNewNormals;
+  Vectors<Rational> newNormals;
   for (int i = 0; i < complexBeforeProjection.size; i ++) {
     const Cone& currentCone = complexBeforeProjection[i];
     int numNonPerpWalls = 0;
-    theNewNormals.size = 0;
+    newNormals.size = 0;
     bool foundEnteringNormal = false;
     bool foundExitNormal = false;
     for (int j = 0; j < currentCone.normals.size; j ++) {
       Vector<Rational>& currentNormal = currentCone.normals[j];
       if (currentNormal[0].isEqualToZero()) {
         tempRoot = currentNormal.getshiftToTheLeftOnePositionition();
-        theNewNormals.addOnTop(tempRoot);
+        newNormals.addOnTop(tempRoot);
       } else {
         numNonPerpWalls ++;
         if (numNonPerpWalls >= 3) {
@@ -12109,11 +12112,11 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     global.comments << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.toString() : "not found");
     global.comments << "<br>The shifted lattice representatives: " << exitRepresentatives.toString()
     << "<br>exitNormalsShiftedAffineProjected";
-    if (theNewNormals.size <= 0) {
+    if (newNormals.size <= 0) {
       global.fatal << "New normals missing. " << global.fatal;
     }
     for (int j = 0; j < exitRepresentatives.size; j ++) {
-      tempCLS.projectivizedCone.normals = theNewNormals;
+      tempCLS.projectivizedCone.normals = newNormals;
       exitNormalShiftedAffineProjected = exitNormalAffine.getshiftToTheLeftOnePositionition();
       *exitNormalShiftedAffineProjected.lastObject() = - exitNormalLatticeLevel.scalarEuclidean(exitRepresentatives[j]);
       global.comments << exitNormalShiftedAffineProjected.toString() << ", ";

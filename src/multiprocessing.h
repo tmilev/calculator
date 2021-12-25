@@ -149,26 +149,22 @@ public:
   MutexProcess theMutexPipe;
   bool flagDeallocated;
   std::string name;
-  //  static int ConnectWithTimeoutViaSelect(int theFD, const std::string& input);
   std::string getLastRead() {
     return this->thePipe.getLastRead();
   }
-  static void writeNoFailure(
-    int theFD, const List<char>& input, bool dontCrashOnFail
-  );
   void readOnce(bool dontCrashOnFail);
   void readOnceWithoutEmptying(bool dontCrashOnFail);
   void readLoop(List<char>& output);
-  static int writeNoInterrupts(int theFD, const std::string& input);
+  static int writeNoInterrupts(int fileDescriptor, const std::string& input);
   static int writeWithTimeoutViaSelect(
-    int theFD,
+    int fileDescriptor,
     const std::string& input,
     int timeOutInSeconds,
     int maxNumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
   static int readWithTimeOutViaSelect(
-    int theFD,
+    int fileDescriptor,
     List<char>& output,
     int timeOutInSeconds,
     int maxNumTries = 10,

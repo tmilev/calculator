@@ -423,21 +423,21 @@ JSData WebAPIResponse::clonePageResult() {
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  std::fstream theFile;
+  std::fstream fileStream;
   if (FileOperations::fileExistsVirtualCustomizedReadOnly(fileNameTarget, nullptr)) {
     out << "Output file: " << fileNameTarget << " already exists. ";
     result[WebAPI::result::error] = out.str();
     return result;
   }
   if (!FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
-    theFile, fileNameTarget, false, false, false, &out
+    fileStream, fileNameTarget, false, false, false, &out
   )) {
     out << "Failed to open output file: " << fileNameTarget << ".";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  theFile << startingFileString;
-  theFile.close();
+  fileStream << startingFileString;
+  fileStream.close();
   std::string fileNameNonVirtual;
   std::stringstream comments;
   if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
@@ -896,14 +896,14 @@ JSData WebAPIResponse::getExamPageJSON() {
   output[WebAPI::problem::idProblem] = problem.fileName;
   if (problem.flagLoadedSuccessfully) {
     output["answers"] = problem.getEditorBoxesHTML();
-    JSData theScripts;
-    theScripts = JSData::token::tokenArray;
-    theScripts.listObjects.setSize(problem.scripts.size());
+    JSData scripts;
+    scripts = JSData::token::tokenArray;
+    scripts.listObjects.setSize(problem.scripts.size());
     for (int i = 0; i < problem.scripts.size(); i ++) {
-      theScripts[problem.scripts.keys[i]] =
+      scripts[problem.scripts.keys[i]] =
       HtmlRoutines::convertStringToURLString(problem.scripts.values[i], false);
     }
-    output["scripts"] = theScripts;
+    output["scripts"] = scripts;
     output[WebAPI::problem::forReal] = problem.flagIsForReal;
     if (!problem.flagIsForReal) {
       std::stringstream randomSeedStream;

@@ -546,12 +546,12 @@ std::string Answer::toStringSolutionElements() {
   return out.str();
 }
 
-std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(const std::string& theFileName) {
+std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(const std::string& fileName) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringCalculatorProblemSourceFromFileName");
   std::stringstream out;
   out //<< "<span class =\"calculatorExamProblem\">\n"
-  << "Title: " << theFileName << "\n"
-  << "Problem: " << theFileName << "\n"
+  << "Title: " << fileName << "\n"
+  << "Problem: " << fileName << "\n"
   //<< "\n</span>"
   ;
   return out.str();
@@ -601,10 +601,10 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   return out.str();
 }
 
-std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileName) {
+std::string CalculatorHTML::toStringLinkFromFileName(const std::string& fileName) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
-  std::string urledProblem = HtmlRoutines::convertStringToURLString(theFileName, false);
+  std::string urledProblem = HtmlRoutines::convertStringToURLString(fileName, false);
   refStreamNoRequest << global.toStringCalculatorArgumentsNoNavigation(nullptr)
   << "fileName=" << urledProblem << "&";
   if (global.userStudentVieWOn()) {
@@ -621,9 +621,9 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
     refStreamNoRequest << "courseHome=" << this->courseHome << "&";
   }
   if (
-    theFileName == this->topicListFileName ||
-    theFileName == this->courseHome ||
-    StringRoutines::stringEndsWith(theFileName, ".txt")
+    fileName == this->topicListFileName ||
+    fileName == this->courseHome ||
+    StringRoutines::stringEndsWith(fileName, ".txt")
   ) {
     out << "<a href=\"" << global.displayNameExecutable
     << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
@@ -646,24 +646,24 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
   return out.str();
 }
 
-std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay) {
+std::string CalculatorHTML::toStringProblemInfo(const std::string& fileName, const std::string& stringToDisplay) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringLinksFromFileName");
   std::stringstream out;
-  out << this->toStringLinkFromFileName(theFileName);
-  out << this->toStringProblemScoreFull(theFileName);
+  out << this->toStringLinkFromFileName(fileName);
+  out << this->toStringProblemScoreFull(fileName);
   if (global.flagDatabaseCompiled) {
     bool problemAlreadySolved = false;
-    if (this->currentUser.problemData.contains(theFileName)) {
-      ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(theFileName);
+    if (this->currentUser.problemData.contains(fileName)) {
+      ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(fileName);
       if (theProbData.numCorrectlyAnswered >= theProbData.answers.size()) {
         problemAlreadySolved = true;
       }
     }
-    out << this->toStringDeadline(theFileName, problemAlreadySolved, false, false);
+    out << this->toStringDeadline(fileName, problemAlreadySolved, false, false);
   }
   std::string finalStringToDisplay = stringToDisplay;
   if (finalStringToDisplay == "") {
-    finalStringToDisplay = FileOperations::getFileNameFromFileNameWithPath(theFileName);
+    finalStringToDisplay = FileOperations::getFileNameFromFileNameWithPath(fileName);
   }
   out << finalStringToDisplay;
   return out.str();
@@ -3314,9 +3314,9 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
   return out.str();
 }
 
-std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileName) {
+std::string CalculatorHTML::toStringProblemScoreFull(const std::string& fileName) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringProblemScoreFull");
-  (void) theFileName;
+  (void) fileName;
   std::stringstream out;
   if (global.userGuestMode()) {
     out << "scores require login";
@@ -3327,8 +3327,8 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
     return out.str();
   }
   Rational currentWeight;
-  if (this->currentUser.problemData.contains(theFileName)) {
-    ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(theFileName);
+  if (this->currentUser.problemData.contains(fileName)) {
+    ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(fileName);
     if (!theProbData.flagProblemWeightIsOK) {
       out << "<span style =\"color:orange\">No point weight assigned yet. </span>";
       if (!theProbData.adminData.getWeightFromCourse(this->currentUser.courseComputed, currentWeight)) {
@@ -3361,9 +3361,9 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
   return out.str();
 }
 
-std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved) {
+std::string CalculatorHTML::toStringProblemScoreShort(const std::string& fileName, bool& outputAlreadySolved) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringProblemScoreShort");
-  (void) theFileName;
+  (void) fileName;
   (void) outputAlreadySolved;
   if (!global.flagDatabaseCompiled) {
     return "Error: database not running. ";
@@ -3379,8 +3379,8 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   outputAlreadySolved = false;
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
-  if (this->currentUser.problemData.contains(theFileName)) {
-    theProbData = this->currentUser.problemData.getValueCreateEmpty(theFileName);
+  if (this->currentUser.problemData.contains(fileName)) {
+    theProbData = this->currentUser.problemData.getValueCreateEmpty(fileName);
     Rational percentSolved = 0, totalPoints = 0;
     percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.answers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
@@ -4227,12 +4227,12 @@ void LaTeXCrawler::Slides::addSlidesOnTop(const List<std::string>& input) {
 JSData LaTeXCrawler::Slides::toJSON() {
   JSData result;
   result[WebAPI::request::slides::title] = this->title;
-  JSData theFiles;
-  theFiles.elementType = JSData::token::tokenArray;
+  JSData fileNames;
+  fileNames.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->filesToCrawl.size; i ++) {
-    theFiles.listObjects.addOnTop(this->filesToCrawl[i].toJSON());
+    fileNames.listObjects.addOnTop(this->filesToCrawl[i].toJSON());
   }
-  result[WebAPI::request::slides::files] = theFiles;
+  result[WebAPI::request::slides::files] = fileNames;
   return result;
 }
 
@@ -4287,26 +4287,26 @@ bool LaTeXCrawler::Slides::fromString(
 }
 
 JSData TopicElement::computeSlidesJSON(CalculatorHTML& owner) {
-  LaTeXCrawler::Slides theSlides;
-  theSlides.addSlidesOnTop(owner.slidesSourcesHeaders);
-  theSlides.addSlidesOnTop(this->sourceSlides);
-  theSlides.title = this->title;
-  return theSlides.toJSON();
+  LaTeXCrawler::Slides slides;
+  slides.addSlidesOnTop(owner.slidesSourcesHeaders);
+  slides.addSlidesOnTop(this->sourceSlides);
+  slides.title = this->title;
+  return slides.toJSON();
 }
 
 JSData TopicElement::computeHomeworkJSON(CalculatorHTML& owner) {
-  LaTeXCrawler::Slides theSlides;
-  theSlides.addSlidesOnTop(owner.sourcesHomeworkHeaders);
+  LaTeXCrawler::Slides slides;
+  slides.addSlidesOnTop(owner.sourcesHomeworkHeaders);
   for (int i = 0; i < this->sourceHomework.size; i ++) {
     LaTeXCrawler::FileWithOption file;
     file.fileName = this->sourceHomework[i];
     if (i < this->sourceHomeworkIsSolution.size) {
       file.isSolution = this->sourceHomeworkIsSolution[i];
     }
-    theSlides.filesToCrawl.addOnTop(file);
+    slides.filesToCrawl.addOnTop(file);
   }
-  theSlides.title = this->title;
-  return theSlides.toJSON();
+  slides.title = this->title;
+  return slides.toJSON();
 }
 
 

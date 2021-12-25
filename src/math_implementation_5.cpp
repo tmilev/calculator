@@ -235,16 +235,20 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
 }
 
 void DrawOperations::drawFilledShape(
-  const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex, double lineWidth
+  const List<Vector<double> >& corners,
+  uint32_t penStyle,
+  int colorIndex,
+  int fillColorIndex,
+  double lineWidth
 ) {
-  (void) thePenStyle;
-  (void) ColorIndex;
+  (void) penStyle;
+  (void) colorIndex;
   (void) fillColorIndex;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeFilledShape;
   theOperation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
-  for (int i = 0; i < theCorners.size; i ++) {
-    theOperation[DrawOperations::fieldPoints][i] = theCorners[i];
+  for (int i = 0; i < corners.size; i ++) {
+    theOperation[DrawOperations::fieldPoints][i] = corners[i];
   }
   if (lineWidth != 1.0) {
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
@@ -328,11 +332,16 @@ void DrawOperations::drawLineBuffer(
 }
 
 void DrawOperations::drawTextBuffer(
-  double x1, double y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle
+  double x1,
+  double y1,
+  const std::string& inputText,
+  int ColorIndex,
+  int fontSize,
+  int textStyle
 ) {
-  (void) theFontSize;
+  (void) fontSize;
   (void) ColorIndex;
-  (void) theTextStyle;
+  (void) textStyle;
   JSData operation;
   operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
   operation[DrawOperations::fieldLocation].elementType = JSData::token::tokenArray;

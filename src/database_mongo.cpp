@@ -122,7 +122,7 @@ public:
   bson_t* options;
   bson_t* updateResult;
   bson_t* command;
-  bson_error_t theError;
+  bson_error_t errorDatabase;
   int maxOutputItems;
   long long totalItems;
   std::string findQuery;
@@ -210,23 +210,23 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
     static_cast<unsigned>(this->findQuery.size()),
-    &this->theError
+    &this->errorDatabase
   );
   bool result = mongoc_collection_remove(
     collection.collection,
     MONGOC_REMOVE_SINGLE_REMOVE,
     this->query,
     nullptr,
-    &this->theError
+    &this->errorDatabase
   );
   if (!result) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << this->theError.message;
+      *commentsOnFailure << this->errorDatabase.message;
     }
     global << Logger::red << "While removing: "
     << this->findQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << Logger::endL;
+    << this->errorDatabase.message << Logger::endL;
     return false;
   }
   //char* bufferOutpurStringFormat = 0;
@@ -257,7 +257,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   this->update = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(incomingJSONString.c_str()),
     static_cast<signed>(incomingJSONString.size()),
-    &this->theError
+    &this->errorDatabase
   );
   if (this->update == nullptr) {
     if (commentsOnFailure != nullptr) {
@@ -267,16 +267,16 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   }
   this->updateResult = bson_new();
   bool result = mongoc_collection_insert_one(
-    collection.collection, this->update, nullptr, this->updateResult, &this->theError
+    collection.collection, this->update, nullptr, this->updateResult, &this->errorDatabase
   );
   if (!result) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << this->theError.message;
+      *commentsOnFailure << this->errorDatabase.message;
     }
     global << Logger::red << "While updating: "
     << this->findQuery << " to: " << this->updateQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << Logger::endL;
+    << this->errorDatabase.message << Logger::endL;
     return false;
   }
   // char* bufferOutpurStringFormat = 0;
@@ -299,19 +299,19 @@ bool MongoQuery::updateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
     static_cast<signed>(this->findQuery.size()),
-    &this->theError
+    &this->errorDatabase
   );
   this->update = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->updateQuery.c_str()),
     static_cast<signed>(this->updateQuery.size()),
-    &this->theError
+    &this->errorDatabase
   );
   if (doUpsert) {
     this->optionsQuery = "{\"upsert\": true}";
     this->options = bson_new_from_json(
       reinterpret_cast<const uint8_t*>(this->optionsQuery.c_str()),
       static_cast<signed>(this->optionsQuery.size()),
-      &this->theError
+      &this->errorDatabase
     );
   }
   this->updateResult = bson_new();
@@ -323,21 +323,21 @@ bool MongoQuery::updateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
       this->update,
       this->options,
       this->updateResult,
-      &this->theError
+      &this->errorDatabase
     );
   } else {
     result = mongoc_collection_update_one(
-      collection.collection, this->query, this->update, nullptr, this->updateResult, &this->theError
+      collection.collection, this->query, this->update, nullptr, this->updateResult, &this->errorDatabase
     );
   }
   if (!result) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << this->theError.message;
+      *commentsOnFailure << this->errorDatabase.message;
     }
     global << Logger::red << "While updating: "
     << this->findQuery << " to: " << this->updateQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << Logger::endL;
+    << this->errorDatabase.message << Logger::endL;
     return false;
   }
   // char* bufferOutpurStringFormat = 0;
@@ -399,16 +399,16 @@ bool MongoQuery::FindMultiple(
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
     static_cast<signed>(this->findQuery.size()),
-    &this->theError
+    &this->errorDatabase
   );
   if (this->query == nullptr) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << this->theError.message;
+      *commentsOnFailure << this->errorDatabase.message;
     }
     global << Logger::red << "While finding: "
     << this->findQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << Logger::endL;
+    << this->errorDatabase.message << Logger::endL;
     return false;
   }
   if (this->options != nullptr) {
@@ -420,13 +420,13 @@ bool MongoQuery::FindMultiple(
     this->options = bson_new_from_json(
       reinterpret_cast<const uint8_t*>(optionsString.c_str()),
       static_cast<signed>(optionsString.size()),
-      &this->theError
+      &this->errorDatabase
     );
     if (this->options == nullptr) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << this->theError.message;
+        *commentsOnFailure << this->errorDatabase.message;
       }
-      global << Logger::red << "Mongo error: " << this->theError.message << Logger::endL;
+      global << Logger::red << "Mongo error: " << this->errorDatabase.message << Logger::endL;
       return false;
     }
   }
@@ -525,14 +525,14 @@ void Database::Mongo::createHashIndex(const std::string& collectionName, const s
   query.command = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(command.str().c_str()),
     static_cast<signed>(command.str().size()),
-    &query.theError
+    &query.errorDatabase
   );
   mongoc_database_write_command_with_opts(
     static_cast<mongoc_database_t*>(this->database),
     query.command,
     nullptr,
     query.updateResult,
-    &query.theError
+    &query.errorDatabase
   );
   #endif
 }

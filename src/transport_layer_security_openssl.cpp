@@ -225,7 +225,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     }
   } else {
     global << Logger::green << "Found officially signed certificate... " << Logger::endL;
-    //if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <= 0)
+    //if (SSL_CTX_use_certificate_chain_file(sslData.ctx, signedFileCertificate2.c_str()) <= 0)
     //{ ERR_print_errors_fp(stderr);
     //  exit(3);
     //}
@@ -275,14 +275,14 @@ void TransportLayerSecurityOpenSSL::clearErrorQueue(int numberOfTransferredBytes
 #endif // MACRO_use_open_ssl
 }
 
-void TransportLayerSecurityOpenSSL::doSetSocket(int theSocket) {
+void TransportLayerSecurityOpenSSL::doSetSocket(int socketFileDescriptor) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::doSetSocket");
-  (void) theSocket;
+  (void) socketFileDescriptor;
 #ifdef MACRO_use_open_ssl
   int result = 0;
   for (int i = 0; i < 10; i ++) {
 
-    result = SSL_set_fd(this->sslData, theSocket);
+    result = SSL_set_fd(this->sslData, socketFileDescriptor);
     if (result != 0) {
       break;
     }
@@ -376,9 +376,6 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "A failure in the SSL library occurred. <br>";
         }
-        //theError = ERR_get_error(3ssl);
-        //if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
-        //  maxNumHandshakeTries =1;
         break;
       default:
         if (commentsOnFailure != nullptr) {
@@ -607,9 +604,6 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
           if (commentsOnFailure != nullptr) {
             *commentsOnFailure << "A failure in the SSL library occurred. ";
           }
-        // theError = ERR_get_error(3ssl);
-        // if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
-        //   maxNumHandshakeTries =1;
           break;
         default:
           if (commentsOnFailure != nullptr) {

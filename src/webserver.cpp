@@ -1239,8 +1239,8 @@ int WebWorker::processFolder() {
     outPage << sanitization.str();
     outError << sanitization.str();
   }
-  List<std::string> theFileNames, theFileTypes;
-  if (!FileOperations::getFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, theFileNames, &theFileTypes)) {
+  List<std::string> fileNames, fileTypes;
+  if (!FileOperations::getFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, fileNames, &fileTypes)) {
     outError << "<b>Failed to open directory with physical address "
     << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, false)
     << " </b>";
@@ -1253,14 +1253,14 @@ int WebWorker::processFolder() {
   << HtmlRoutines::convertStringToHtmlString(this->addressGetOrPost, false) << "<br>Virtual name: "
   << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false) << "<hr>";
   List<std::string> folderLinksSanitized, fileLinksSanitized;
-  for (int i = 0; i < theFileNames.size; i ++) {
+  for (int i = 0; i < fileNames.size; i ++) {
     std::stringstream currentStream;
-    bool isDir = (theFileTypes[i] == ".d");
-    currentStream << "<a href=\"" << HtmlRoutines::convertStringToURLString(theFileNames[i], false);
+    bool isDir = (fileTypes[i] == ".d");
+    currentStream << "<a href=\"" << HtmlRoutines::convertStringToURLString(fileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
-    currentStream << "\">" << HtmlRoutines::convertStringToHtmlString(theFileNames[i], false);
+    currentStream << "\">" << HtmlRoutines::convertStringToHtmlString(fileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
@@ -1364,12 +1364,12 @@ int WebWorker::processFile() {
   }
   std::string fileExtension = FileOperations::getFileExtensionWithDot(this->RelativePhysicalFileNamE);
   bool isBinary = this->isFileExtensionOfBinaryFile(fileExtension);
-  std::fstream theFile;
-  if (!FileOperations::openFileUnsecure(theFile, this->RelativePhysicalFileNamE, false, false, !isBinary)) {
+  std::fstream fileStream;
+  if (!FileOperations::openFileUnsecure(fileStream, this->RelativePhysicalFileNamE, false, false, !isBinary)) {
     return this->processFileCantOpen();
   }
-  theFile.seekp(0, std::ifstream::end);
-  long fileSize = theFile.tellp();
+  fileStream.seekp(0, std::ifstream::end);
+  long fileSize = fileStream.tellp();
   if (fileSize > 100000000) {
     return this->processFileTooLarge(fileSize);
   }
@@ -1395,15 +1395,15 @@ int WebWorker::processFile() {
   }
   const int bufferSize = 64 * 1024;
   this->bufferFileIO.setSize(bufferSize);
-  theFile.seekg(0);
-  theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
-  long numBytesRead = theFile.gcount();
+  fileStream.seekg(0);
+  fileStream.read(&this->bufferFileIO[0], this->bufferFileIO.size);
+  long numBytesRead = fileStream.gcount();
   while (numBytesRead != 0) {
     this->bufferFileIO.setSize(static_cast<int>(numBytesRead));
     this->queueBytesForSendingNoHeader(this->bufferFileIO);
     this->bufferFileIO.setSize(bufferSize);
-    theFile.read(this->bufferFileIO.objects, this->bufferFileIO.size);
-    numBytesRead = theFile.gcount();
+    fileStream.read(this->bufferFileIO.objects, this->bufferFileIO.size);
+    numBytesRead = fileStream.gcount();
   }
   this->sendAllBytesNoHeaders();
   return 0;
@@ -1650,9 +1650,9 @@ bool WebWorker::doSetEmail(
     }
     return false;
   }
-  EmailRoutines theEmail;
-  theEmail.toEmail = inputOutputUser.email;
-  if (!theEmail.isOKEmail(theEmail.toEmail, commentsOnFailure)) {
+  EmailRoutines email;
+  email.toEmail = inputOutputUser.email;
+  if (!email.isOKEmail(email.toEmail, commentsOnFailure)) {
     return false;
   }
   UserCalculator userCopy;
@@ -1661,16 +1661,16 @@ bool WebWorker::doSetEmail(
   if (!userCopy.computeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive)) {
     return false;
   }
-  theEmail.emailContent = userCopy.activationEmail;
-  theEmail.subject = userCopy.activationEmailSubject;
+  email.emailContent = userCopy.activationEmail;
+  email.subject = userCopy.activationEmailSubject;
   if (commentsGeneralNonSensitive != nullptr) {
     *commentsGeneralNonSensitive << "<br><b>Sending email... </b>";
   }
-  theEmail.sendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
+  email.sendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
   if (commentsGeneralSensitive != nullptr) {
     if (global.userDefaultHasAdminRights()) {
       *commentsGeneralSensitive << "<hr>Content of sent email (administrator view only):<br>"
-      << HtmlRoutines::convertStringToHtmlString(theEmail.emailContent, true);
+      << HtmlRoutines::convertStringToHtmlString(email.emailContent, true);
     }
   } else {
     if (commentsGeneralNonSensitive != nullptr) {
@@ -2654,8 +2654,8 @@ std::string WebServer::toStringStatusAll() {
 
 bool WebServer::restartNeeded() {
   MacroRegisterFunctionWithName("WebServer::restartIsNeeded");
-  struct stat theFileStat;
-  if (stat(global.physicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
+  struct stat fileStatistic;
+  if (stat(global.physicalNameExecutableWithPath.c_str(), &fileStatistic) != 0) {
     global << Logger::red << "Failed to extract executable statistics from: "
     << global.physicalNameExecutableWithPath << "." << Logger::endL;
     return false;
@@ -2663,11 +2663,11 @@ bool WebServer::restartNeeded() {
   bool result = false;
   if (
     this->timeLastExecutableModification != - 1 &&
-    this->timeLastExecutableModification != theFileStat.st_ctime
+    this->timeLastExecutableModification != fileStatistic.st_ctime
   ) {
     result = true;
   }
-  this->timeLastExecutableModification = theFileStat.st_ctime;
+  this->timeLastExecutableModification = fileStatistic.st_ctime;
   return result;
 }
 
@@ -3183,11 +3183,11 @@ void WebServer::writeVersionJSFile() {
   out << "  version:\"" << global.buildVersionSimple << "\",\n";
   out << "};\n";
   out << "module.exports = {\nserverInformation,\n};\n";
-  std::fstream theFileStream;
+  std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    theFileStream, "/calculator_html/server_information.js", false, true, false, false
+    fileStream, "/calculator_html/server_information.js", false, true, false, false
   );
-  theFileStream << out.str();
+  fileStream << out.str();
 }
 
 // Class not included in header for portability reasons

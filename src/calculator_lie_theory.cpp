@@ -45,35 +45,35 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   weylFormat.flagUseLatex = true;
   theUEformat.maximumLineLength = 20;
   theUEformat.flagUseLatex = true;
-  theUEformat.chevalleyGgeneratorLetter = "g";
-  theUEformat.chevalleyHgeneratorLetter = "h";
+  theUEformat.chevalleyGGeneratorLetter = "g";
+  theUEformat.chevalleyHGeneratorLetter = "h";
   hwContext.getFormat(theUEformat);
   theUEformat.polyDefaultLetter = exponentVariableLetter == nullptr  ? "a" : *exponentVariableLetter;
   theUEformat.maximumLineLength = 178;
   theUEformat.numberOfAmpersandsPerNewLineForLaTeX = 2;
   weylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
   hwContext.getFormat(weylFormat);
-  List<ElementSemisimpleLieAlgebra<Rational> > theGeneratorsItry;
+  List<ElementSemisimpleLieAlgebra<Rational> > generatorsItry;
   if (!AllGenerators) {
     for (int j = 0; j < theSSalgebra.getRank(); j ++) {
       Vector<Rational> ei;
       ei.makeEi(theSSalgebra.getRank(), j);
       theGenerator.makeGGenerator(ei, theSSalgebra);
-      theGeneratorsItry.addOnTop(theGenerator);
+      generatorsItry.addOnTop(theGenerator);
       ei.negate();
       theGenerator.makeGGenerator(ei, theSSalgebra);
-      theGeneratorsItry.addOnTop(theGenerator);
+      generatorsItry.addOnTop(theGenerator);
     }
   } else {
     for (int j = 0; j < theSSalgebra.getNumberOfGenerators(); j ++) {
       theGenerator.makeGenerator(j, theSSalgebra);
-      theGeneratorsItry.addOnTop(theGenerator);
+      generatorsItry.addOnTop(theGenerator);
     }
   }
-  theQDOs.setSize(theGeneratorsItry.size);
+  theQDOs.setSize(generatorsItry.size);
   out << "<table border =\"1\">";
   latexReport << "\\begin{longtable}{rll";
-  for (int i = 0; i < theGeneratorsItry.size; i ++) {
+  for (int i = 0; i < generatorsItry.size; i ++) {
     latexReport << "l";
   }
   latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.toString()
@@ -115,15 +115,15 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       for (int k = 0; k < numStartingVars; k ++) {
         weylFormat.weylAlgebraLetters[k] = "error";
       }
-      std::string theFinalXletter = (xLetter == nullptr) ? "x": *xLetter;
-      std::string theFinalPartialLetter = (partialLetter == nullptr) ? "\\partial" : *partialLetter;
+      std::string finalXletter = (xLetter == nullptr) ? "x": *xLetter;
+      std::string finalPartialLetter = (partialLetter == nullptr) ? "\\partial" : *partialLetter;
       for (int k = numStartingVars; k < theUEformat.polynomialAlphabet.size; k ++) {
         std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
         tmpStream << theUEformat.polyDefaultLetter << "_{" << k - hwContext.numberOfVariables() + 1 << "}";
         theUEformat.polynomialAlphabet[k] = tmpStream.str();
-        tempstream2 << theFinalXletter << "_{" << k-numStartingVars + 1 << "}";
-        tempstream3 << theFinalXletter << "_" << k-numStartingVars + 1;
-        tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars + 1 << "}";
+        tempstream2 << finalXletter << "_{" << k-numStartingVars + 1 << "}";
+        tempstream3 << finalXletter << "_" << k-numStartingVars + 1;
+        tempStream4 << finalPartialLetter << "_{" << k-numStartingVars + 1 << "}";
         if (
           weylFormat.polynomialAlphabet.contains(tempstream2.str()) ||
           weylFormat.polynomialAlphabet.contains(tempstream3.str())
@@ -140,20 +140,20 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       }
       out << "<tr><td>General monomial in U(n_-):</td><td>"
       << HtmlRoutines::getMathNoDisplay(genericElt.toString(&theUEformat)) << "</td> </tr>";
-      latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
+      latexReport << "& \\multicolumn{" << generatorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
-      out << "<tr><td></td><td colspan =\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
+      out << "<tr><td></td><td colspan =\"" << generatorsItry.size << "\"> Element acting</td></td></tr>";
       out << "<tr><td>Action on</td>";
-      for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        out << "<td>" << theGeneratorsItry[j].toString(&theUEformat) << "</td>";
-        latexReport << "& $" << theGeneratorsItry[j].toString(&theUEformat)  << "$";
+      for (int j = 0; j < generatorsItry.size; j ++) {
+        out << "<td>" << generatorsItry[j].toString(&theUEformat) << "</td>";
+        latexReport << "& $" << generatorsItry[j].toString(&theUEformat)  << "$";
       }
       latexReport << "\\endhead \\hline<br>";
       out << "</tr>";
       out << "<tr><td>" << HtmlRoutines::getMathNoDisplay(genericElt.toString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.toString(&theUEformat) << "$";
-      for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        actionOnGenericElt.assignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
+      for (int j = 0; j < generatorsItry.size; j ++) {
+        actionOnGenericElt.assignElementLieAlgebra(generatorsItry[j], theSSalgebra, Pone);
         actionOnGenericElt *= genericElt;
         theSSalgebra.orderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.simplify(one);
@@ -167,14 +167,14 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
     }
     out << "<tr><td>" << HtmlRoutines::getMathNoDisplay(theMod.character.toString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
-    latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
-    << "}{*}{$" << theSSalgebra.toStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
+    latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << generatorsItry.size
+    << "}{*}{$" << theSSalgebra.toStringLieAlgebraName() << "$}" << " &  \\multirow{"  << generatorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
     latexReport << "$\\begin{array}{r}" << theMod.character.toString()
     << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.getDimension() << " \\end{array}$";
-    for (int j = 0; j < theGeneratorsItry.size; j ++) {
-      theGenerator = theGeneratorsItry[j];
+    for (int j = 0; j < generatorsItry.size; j ++) {
+      theGenerator = generatorsItry[j];
       currentTime = global.getElapsedSeconds();
       currentAdditions = Rational::totalAdditions();
       currentMultiplications = Rational::totalMultiplications();
@@ -196,7 +196,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         latexReport2 << "&&";
       }
       latexReport2 << " $\\begin{array}{l}" << theQDOs[j].toString(&weylFormat) << "\\end{array}$\\\\ "
-      << (j != theGeneratorsItry.size - 1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
+      << (j != generatorsItry.size - 1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       weylFormat.customCoefficientMonomialSeparator = "";
     }
     latexReport2 << "\\end{longtable}";
@@ -213,19 +213,19 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       reportCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
 
-      for (int j = 0; j < theGeneratorsItry.size; j ++) {
+      for (int j = 0; j < generatorsItry.size; j ++) {
         theQDOs[j].getElementWeylAlgebraSetMatrixPartsToId(diffOpPart);
         diffOpPart.fourierTransform(transformedDO);
         reportfourierTransformedCalculatorCommands << "<br>"
-        << theGeneratorsItry[j].toString() << "=" << transformedDO.toString() << ";";
-        reportCalculatorCommands << "<br>" << theGeneratorsItry[j].toString() << "=" << diffOpPart.toString() << ";";
+        << generatorsItry[j].toString() << "=" << transformedDO.toString() << ";";
+        reportCalculatorCommands << "<br>" << generatorsItry[j].toString() << "=" << diffOpPart.toString() << ";";
       }
       reportfourierTransformedCalculatorCommands << "<br>generateVectorSpaceClosedWithRespectToLieBracket{}(248," ;
       reportCalculatorCommands << "<br>generateVectorSpaceClosedWithRespectToLieBracket{}(248," ;
-      for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        reportfourierTransformedCalculatorCommands << theGeneratorsItry[j].toString();
-        reportCalculatorCommands << theGeneratorsItry[j].toString();
-        if (j != theGeneratorsItry.size - 1) {
+      for (int j = 0; j < generatorsItry.size; j ++) {
+        reportfourierTransformedCalculatorCommands << generatorsItry[j].toString();
+        reportCalculatorCommands << generatorsItry[j].toString();
+        if (j != generatorsItry.size - 1) {
           reportfourierTransformedCalculatorCommands << ", ";
           reportCalculatorCommands << ", ";
         }
@@ -269,7 +269,6 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
   RFZero.makeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element;
-  //= theElementData.theElementTensorGenVermas.getElement();
   ListReferences<ModuleSSalgebra<RationalFraction<Rational> > >& allModules = calculator.objectContainer.categoryOModules;
   int indexOfModule = - 1;
 
@@ -1411,7 +1410,6 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   RFOne.makeOne();
   RFZero.makeZero();
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element;
-  //= theElementData.theElementTensorGenVermas.getElement();
   Selection parabolicSelection1, finiteDimensionalSelection;
   Expression highestWeightVectorFiniteDimensionalExpression, highestWeightVectorGeneralizedVerma;
   parabolicSelection1.makeFullSelection(rank);
@@ -1471,43 +1469,47 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   const ElementTensorsGeneralizedVermas<RationalFraction<Rational> >& theHWfd =
   highestWeightVectorFiniteDimensionalExpression.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >();
 
-  ModuleSSalgebra<RationalFraction<Rational> >& theGenMod = theHWgenVerma[0].monomials[0].getOwner();
-  ModuleSSalgebra<RationalFraction<Rational> >& theFDMod = theHWfd[0].monomials[0].getOwner();
+  ModuleSSalgebra<RationalFraction<Rational> >& generalizedModule = theHWgenVerma[0].monomials[0].getOwner();
+  ModuleSSalgebra<RationalFraction<Rational> >& finiteDimensionalModule = theHWfd[0].monomials[0].getOwner();
   if (
-    theGenMod.owner != theFDMod.owner ||
-    theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements ||
-    theFDMod.getOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
+    generalizedModule.owner != finiteDimensionalModule.owner ||
+    generalizedModule.getOwner().getRank() != generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements ||
+    finiteDimensionalModule.getOwner().getRank() != finiteDimensionalModule.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
   ) {
     global.fatal << "The two modules have owners, "
-    << theFDMod.getOwner().weylGroup.dynkinType.toString()
-    << " and " << theGenMod.getOwner().weylGroup.dynkinType.toString() << ", and parabolic selections of max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
-    << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements << global.fatal;
+    << finiteDimensionalModule.getOwner().weylGroup.dynkinType.toString()
+    << " and " << generalizedModule.getOwner().weylGroup.dynkinType.toString() << ", and parabolic selections of max size "
+    << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
+    << " and " << finiteDimensionalModule.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements << global.fatal;
   }
-  ElementUniversalEnveloping<RationalFraction<Rational> > theCasimir, theCasimirMinusChar;
-  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
-  theHWchar.makeFromWeight(theFDMod.highestWeightSimpleCoordinatesBaseField, semisimpleLieAlgebra.content);
+  ElementUniversalEnveloping<RationalFraction<Rational> > casimir;
+  ElementUniversalEnveloping<RationalFraction<Rational> > casimirMinusChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > highestWeightCharacter;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > finiteDimensionalLeviSplit;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > finiteDimensionalCharacter;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > finiteDimensionalLeviSplitShifted;
+  highestWeightCharacter.makeFromWeight(finiteDimensionalModule.highestWeightSimpleCoordinatesBaseField, semisimpleLieAlgebra.content);
   List<ElementUniversalEnveloping<RationalFraction<Rational> > > theLeviEigenVectors;
-  Vectors<RationalFraction<Rational> > theEigenVectorWeightsFund;
-  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements != theGenMod.getOwner().getRank()) {
+  Vectors<RationalFraction<Rational> > eigenVectorWeightsFund;
+  if (generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements != generalizedModule.getOwner().getRank()) {
     global.fatal << "Module has parabolic selection with max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
+    << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
     << " but the ambient semisimple Lie algebra is of rank "
-    << theGenMod.getOwner().getRank() << ". " << global.fatal;
+    << generalizedModule.getOwner().getRank() << ". " << global.fatal;
   }
   std::string report;
-  theFDMod.splitOverLevi(
+  finiteDimensionalModule.splitOverLevi(
     &report,
-    theGenMod.parabolicSelectionNonSelectedAreElementsLevi,
+    generalizedModule.parabolicSelectionNonSelectedAreElementsLevi,
     &theLeviEigenVectors,
-    &theEigenVectorWeightsFund,
+    &eigenVectorWeightsFund,
     nullptr,
-    &theFDLeviSplit
+    &finiteDimensionalLeviSplit
   );
-  theFDMod.getFDchar(theFDChaR);
+  finiteDimensionalModule.getFDchar(finiteDimensionalCharacter);
   List<ElementUniversalEnveloping<RationalFraction<Rational> > > theCentralCharacters;
   RationalFraction<Rational> zero(Rational::zero());
-  theCasimir.makeCasimir(*semisimpleLieAlgebra.content);
+  casimir.makeCasimir(*semisimpleLieAlgebra.content);
   Vector<RationalFraction<Rational> > currentHWsimplecoords, currentHWdualcoords;
   FormatExpressions tempFormat;
   tempFormat.maximumLineLength = 60;
@@ -1515,41 +1517,43 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   tempFormat.fundamentalWeightLetter = "\\psi";
   tempFormat.customPlusSign = "\\oplus ";
   hwContext.getFormat(tempFormat);
-  out << "<br>Character of finite dimensional module:" << HtmlRoutines::getMathNoDisplay(theFDChaR.toString());
-  if (theGenMod.parabolicSelectionSelectedAreElementsLevi.cardinalitySelection > 0) {
-    out << "<br>theFDChar split over levi:" << HtmlRoutines::getMathNoDisplay(theFDLeviSplit.toString(&tempFormat));
+  out << "<br>Character of finite dimensional module:" << HtmlRoutines::getMathNoDisplay(finiteDimensionalCharacter.toString());
+  if (generalizedModule.parabolicSelectionSelectedAreElementsLevi.cardinalitySelection > 0) {
+    out << "<br>The finite dimensional character "
+    << "split over the levi component:"
+    << HtmlRoutines::getMathNoDisplay(finiteDimensionalLeviSplit.toString(&tempFormat));
   }
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
   latexReport1 << " \\begin{longtable}{rl}\\caption{\\label{table"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
-  << "GenVermatimes7DimCentralCharacters} $" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
+  << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
+  << "GenVermatimes7DimCentralCharacters} $" << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
   tempFormat.customPlusSign = "";
-  tempFormat.chevalleyGgeneratorLetter = "\\bar{g}";
-  tempFormat.chevalleyHgeneratorLetter = "\\bar{h}";
-  theFDLeviSplitShifteD.makeZero();
+  tempFormat.chevalleyGGeneratorLetter = "\\bar{g}";
+  tempFormat.chevalleyHGeneratorLetter = "\\bar{h}";
+  finiteDimensionalLeviSplitShifted.makeZero();
   Weight<RationalFraction<Rational> > tempMon;
   tempMon.owner = semisimpleLieAlgebra.content;
   ElementUniversalEnveloping<RationalFraction<Rational> > currentChar;
   for (int i = 0; i < theLeviEigenVectors.size; i ++) {
-    tempMon.weightFundamentalCoordinates = theEigenVectorWeightsFund[i];
-    tempMon.weightFundamentalCoordinates += theGenMod.highestWeightFundamentalCoordinatesBaseField;
-    theFDLeviSplitShifteD.addMonomial(tempMon, RFOne);
+    tempMon.weightFundamentalCoordinates = eigenVectorWeightsFund[i];
+    tempMon.weightFundamentalCoordinates += generalizedModule.highestWeightFundamentalCoordinatesBaseField;
+    finiteDimensionalLeviSplitShifted.addMonomial(tempMon, RFOne);
     currentHWdualcoords = semisimpleLieAlgebra.content->weylGroup.getDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordinates);
-    currentChar = theCasimir;
+    currentChar = casimir;
     currentChar.modOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.addOnTop(currentChar);
-    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordinates.toStringLetterFormat("\\psi") << "</td><td>"
+    out << "<tr><td>" << finiteDimensionalLeviSplitShifted[i].weightFundamentalCoordinates.toStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.toString(&tempFormat) << "</td></tr>";
-    latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordinates.toStringLetterFormat("\\psi", &tempFormat) << "$"
+    latexReport1 << " $" << finiteDimensionalLeviSplitShifted[i].weightFundamentalCoordinates.toStringLetterFormat("\\psi", &tempFormat) << "$"
     << "&$p_{" << i + 1 << "}=$ $" << currentChar.toString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > elementGeneralizedVerma, element2;
-  theFDMod.highestWeightVectorNotation = "v";
-  theGenMod.highestWeightVectorNotation = "w";
+  finiteDimensionalModule.highestWeightVectorNotation = "v";
+  generalizedModule.highestWeightVectorNotation = "w";
   out << "Let w be the highest weight vector of the generalized Verma component, and let v be the highest weight vector of the finite dimensional component";
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Algebraic expression</td><td>Additional multiplier</td>";
   if (numberOfVariables == 1) {
@@ -1562,18 +1566,18 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   out << "</tr>";
   std::stringstream latexReport2;
   latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{\\label{tableDecompo"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString() << "times7dim}Decomposition for the $"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
+  << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString() << "times7dim}Decomposition for the $"
+  << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Projector applied to &"
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   for (int i = 0; i < theCentralCharacters.size; i ++) {
     Vector<RationalFraction<Rational> > currentWeightSimpleCoords =
     semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
-      theEigenVectorWeightsFund[i], RationalFraction<Rational>::zeroRational()
+      eigenVectorWeightsFund[i], RationalFraction<Rational>::zeroRational()
     );
-    element.makeHighestWeightVector(theFDMod, RFOne);
+    element.makeHighestWeightVector(finiteDimensionalModule, RFOne);
     element.multiplyOnTheLeft(theLeviEigenVectors[i], element, *semisimpleLieAlgebra.content, RFOne);
-    element.makeHighestWeightVector(theGenMod, RFOne);
+    element.makeHighestWeightVector(generalizedModule, RFOne);
     element.tensorOnTheRight(element);
     element *= - 1;
     std::string startingEltString = element.toString(&tempFormat);
@@ -1583,12 +1587,12 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     for (int j = 0; j < theCentralCharacters.size; j ++) {
       Vector<RationalFraction<Rational> > otherWeightSimpleCoords =
       semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
-        theEigenVectorWeightsFund[j], RationalFraction<Rational>::zeroRational()
+        eigenVectorWeightsFund[j], RationalFraction<Rational>::zeroRational()
       );
       if ((otherWeightSimpleCoords - currentWeightSimpleCoords).isPositive()) {
-        theCasimirMinusChar = theCasimir;
-        theCasimirMinusChar -= theCentralCharacters[j];
-        element.multiplyOnTheLeft(theCasimirMinusChar, element2, *semisimpleLieAlgebra.content, RFOne);
+        casimirMinusChar = casimir;
+        casimirMinusChar -= theCentralCharacters[j];
+        element.multiplyOnTheLeft(casimirMinusChar, element2, *semisimpleLieAlgebra.content, RFOne);
         element = element2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].toString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j + 1 << ") $ ";
@@ -1607,8 +1611,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     if (!scale.isConstant(&tempRat)) {
       global.fatal << "Unexpected: scale not rational" << global.fatal;
     }
-    currentHWsimplecoords = theGenMod.highestWeightSimpleCoordinatesBaseField;
-    currentHWsimplecoords += theFDMod.moduleWeightsSimpleCoordinates[i];
+    currentHWsimplecoords = generalizedModule.highestWeightSimpleCoordinatesBaseField;
+    currentHWsimplecoords += finiteDimensionalModule.moduleWeightsSimpleCoordinates[i];
     out << "<tr><td>"
     << semisimpleLieAlgebra.content->weylGroup.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).toStringLetterFormat("\\psi")
     << "</td><td>" << HtmlRoutines::getMathNoDisplay(tempStream.str()) << "</td><td>" << tempRat.toString() << "</td>";
@@ -3682,8 +3686,8 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
       : theHWsimplecoords.toString(&format))
       << "</td>";
       tempRoot = semisimpleLieAlgebra.weylGroup.getFundamentalCoordinatesFromSimple(theHWsimplecoords);
-      std::string theFundString = tempRoot.toStringLetterFormat(format.fundamentalWeightLetter, &format);
-      out << "<td>" << (useJavascript ? HtmlRoutines::getMathNoDisplay(theFundString): theFundString)
+      std::string fundamentalString = tempRoot.toStringLetterFormat(format.fundamentalWeightLetter, &format);
+      out << "<td>" << (useJavascript ? HtmlRoutines::getMathNoDisplay(fundamentalString): fundamentalString)
       << "</td>";
       out << "</tr>";
     }

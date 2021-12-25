@@ -30,8 +30,8 @@ bool MonomialPolynomial::substitution(
       << " variable images. More precisely, the input substitution is:  "
       << substitution.toString() << ". " << global.fatal;
     }
-    int theExponent = 0;
-    if (!this->monomialBody[i].isSmallInteger(&theExponent) || this->monomialBody[i] < 0) {
+    int exponent = 0;
+    if (!this->monomialBody[i].isSmallInteger(&exponent) || this->monomialBody[i] < 0) {
       if (substitution[i].isMonomialCoefficientOne()) {
         MonomialPolynomial tempMon = substitution[i][0];
         tempMon.raiseToPower(this->monomialBody[i]);
@@ -45,7 +45,7 @@ bool MonomialPolynomial::substitution(
       return false;
     }
     tempPoly = substitution[i];
-    tempPoly.raiseToPower(theExponent, one);
+    tempPoly.raiseToPower(exponent, one);
     output *= tempPoly;
   }
   return true;

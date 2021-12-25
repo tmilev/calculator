@@ -73,8 +73,8 @@ public:
   bool checkCanInitializeToClient();
   bool checkCanInitialize(bool toServer);
   bool checkCanInitializeToServer();
-  void doSetSocket(int theSocket);
-  void setSocketAddToStack(int theSocket);
+  void doSetSocket(int socketFileDescriptor);
+  void setSocketAddToStack(int socketFileDescriptor);
   void removeLastSocket();
   bool handShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
   bool inspectCertificates(

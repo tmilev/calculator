@@ -171,7 +171,7 @@ void LaTeXCrawler::buildFreecalc() {
       }
     }
     if (lectureNumber.size() > 0) {
-      this->theLectureNumbers.addOnTop(lectureNumber.substr(1, lectureNumber.size() - 1));
+      this->lectureNumbers.addOnTop(lectureNumber.substr(1, lectureNumber.size() - 1));
     } else {
       this->displayResult << "Failed to extract lecture/homework number from line: " << buffer;
       return;
@@ -195,9 +195,9 @@ void LaTeXCrawler::buildFreecalc() {
       << "(<-has space bar in the end). The name itself should not contain the characters . / or \\. "
       << "I am assigning an automatic file name. <br>";
     }
-    theLectureDesiredNames.addOnTop(desiredName);
+    lectureDesiredNames.addOnTop(desiredName);
   }
-  reportStream << " done. Extracted: " << theLectureNumbers.size
+  reportStream << " done. Extracted: " << lectureNumbers.size
   << " homework/lecture numbers. Preparing Homework/Lecture content ... ";
   report.report(reportStream.str());
   if (isLecture && isHomework) {
@@ -300,15 +300,15 @@ void LaTeXCrawler::buildFreecalc() {
     }
   }
   this->fileNameWorkingCopy = "working_file_" + this->fileNameToCrawlPhysicalNoPathName;
-  std::string theFileNameWorkingCopyPDF = "working_file_" +
+  std::string fileNameWorkingCopyPDF = "working_file_" +
   this->fileNameToCrawlPhysicalNoPathName.substr(0, this->fileNameToCrawlPhysicalNoPathName.size() - 3) + "pdf";
-  int numLecturesToProcess = theLectureNumbers.size;
+  int numLecturesToProcess = this->lectureNumbers.size;
   std::fstream workingFile;
   for (int i = 0; i < numLecturesToProcess; i ++) {
-    reportStream << "<br>Processing lecture " << i + 1 << " out of " << theLectureNumbers.size << ". ";
+    reportStream << "<br>Processing lecture " << i + 1 << " out of " << this->lectureNumbers.size << ". ";
     resultTable << "<tr>";
-    resultTable << "<td>" << theLectureNumbers[i] << "</td>";
-    resultTable << "<td>" << theLectureDesiredNames[i] << "</td>";
+    resultTable << "<td>" << this->lectureNumbers[i] << "</td>";
+    resultTable << "<td>" << this->lectureDesiredNames[i] << "</td>";
     if (!FileOperations::openFileCreateIfNotPresentUnsecure(workingFile, this->fileNameWorkingCopy, false, true, false)) {
       resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
       << this->fileNameWorkingCopy << ", aborting. </td> </tr>";
@@ -316,10 +316,10 @@ void LaTeXCrawler::buildFreecalc() {
     }
     if (isLecture) {
       workingFile << "\\documentclass[handout]{beamer}\n\\newcommand{\\currentLecture}{"
-      << theLectureNumbers[i] << "}\n"
+      << this->lectureNumbers[i] << "}\n"
       << LectureContentNoDocumentClassNoCurrentLecture.str();
     } else {
-      workingFile << "\\newcommand{\\currentHW}{" << theLectureNumbers[i] << "}\n"
+      workingFile << "\\newcommand{\\currentHW}{" << this->lectureNumbers[i] << "}\n"
       << LectureContentNoDocumentClassNoCurrentLecture.str();
     }
     workingFile.close();
@@ -331,22 +331,23 @@ void LaTeXCrawler::buildFreecalc() {
     reportStream << "<b>[x2]</b>";
     report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
-    std::stringstream thePdfFileNameHandout;
+    std::stringstream pdfFileNameHandout;
     if (isLecture) {
-      thePdfFileNameHandout << "./" << printableFolder << "Lecture" << theLectureNumbers[i] << "Handout_"
-      << theLectureDesiredNames[i];
+      pdfFileNameHandout << "./" << printableFolder
+      << "Lecture" << this->lectureNumbers[i] << "Handout_"
+      << this->lectureDesiredNames[i];
       if (lectureFileNameEnd != "") {
-        thePdfFileNameHandout << "_" << lectureFileNameEnd;
+        pdfFileNameHandout << "_" << lectureFileNameEnd;
       }
-      thePdfFileNameHandout << ".pdf";
+      pdfFileNameHandout << ".pdf";
     } else {
-      thePdfFileNameHandout << "./" << printableFolder << "Homework" << theLectureNumbers[i] << "_" << theLectureDesiredNames[i];
+      pdfFileNameHandout << "./" << printableFolder << "Homework" << lectureNumbers[i] << "_" << lectureDesiredNames[i];
       if (lectureFileNameEnd != "") {
-        thePdfFileNameHandout << "_" << lectureFileNameEnd;
+        pdfFileNameHandout << "_" << lectureFileNameEnd;
       }
-      thePdfFileNameHandout << ".pdf";
+      pdfFileNameHandout << ".pdf";
     }
-    currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameHandout.str();
+    currentSysCommand = "mv " + fileNameWorkingCopyPDF + " " + pdfFileNameHandout.str();
 
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i + 1 << " handout compiled, renaming file ... ";
@@ -356,7 +357,7 @@ void LaTeXCrawler::buildFreecalc() {
     report.report(reportStream.str());
     if (!isLecture) {
       report.report(reportStream.str());
-      resultTable << "<td>" << thePdfFileNameHandout.str() << "</td>";
+      resultTable << "<td>" << pdfFileNameHandout.str() << "</td>";
       resultTable << "</tr>";
       continue;
     }
@@ -367,7 +368,7 @@ void LaTeXCrawler::buildFreecalc() {
     }
     workingFile << "\\documentclass";
     workingFile << "{beamer}\n\\newcommand{\\currentLecture}{"
-    << theLectureNumbers[i] << "}\n";
+    << lectureNumbers[i] << "}\n";
     workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
     workingFile.close();
     currentSysCommand = "pdflatex --shell-escape " + this->fileNameWorkingCopy;
@@ -377,16 +378,16 @@ void LaTeXCrawler::buildFreecalc() {
     global.externalCommandNoOutput(currentSysCommand, true);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
-    << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
+    << lectureNumbers[i] << "_" << lectureDesiredNames[i] << "_"
     << lectureFileNameEnd << ".pdf";
-    currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
+    currentSysCommand = "mv " + fileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i + 1 << " regular slides compiled, renaming file ... ";
     report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << " done.";
     report.report(reportStream.str());
-    resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
+    resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << pdfFileNameHandout.str() << "</td>";
     resultTable << "</tr>";
   }
   int numSlidesToBuild = this->slideTexInputCommands.size;
@@ -399,7 +400,7 @@ void LaTeXCrawler::buildFreecalc() {
     std::string currentName = this->slideTexInputCommands[i].substr(0, this->slideTexInputCommands[i].size() - 1);
     this->slideFileNamesVirtualNoPathNoExtension[i] = FileOperations::getFileNameFromFileNameWithPath(currentName);
   }
-  //executedCommands << "<br>Slides extracted: " << this->theSlides.toStringCommaDelimited();
+  //executedCommands << "<br>Slides extracted: " << this->slides.toStringCommaDelimited();
   //executedCommands << "<br>Slides names: " << this->theSlideNames.toStringCommaDelimited();
   for (int i = 0; i < numSlidesToBuild; i ++) {
     for (int k = 0; k < 2; k ++) {
@@ -433,7 +434,7 @@ void LaTeXCrawler::buildFreecalc() {
       }
       thePdfFileNameNormal << "Slide_"
       << this->slideFileNamesVirtualNoPathNoExtension[i] << ".pdf";
-      currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
+      currentSysCommand = "mv " + fileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
       executedCommands << "<br>" << currentSysCommand;
       reportStream << "<br>Slide " << i + 1 << ", run " << k << " compiled, renaming file ... ";
       report.report(reportStream.str());
@@ -527,16 +528,16 @@ void LaTeXCrawler::crawlRecursive(std::stringstream& crawlingResult, const std::
     << this->baseFoldersCrawlableFilesPhysical.toStringCommaDelimited() << "\n";
     return;
   }
-  std::fstream theFile;
-  if (!FileOperations::openFileUnsecure(theFile, trimmedFileName, false, false, false)) {
+  std::fstream fileStream;
+  if (!FileOperations::openFileUnsecure(fileStream, trimmedFileName, false, false, false)) {
     this->errorStream << "Failed to open file " << trimmedFileName << "; current folder: "
     << FileOperations::getCurrentFolder() << ". Aborting.<br>";
     crawlingResult << "%Failed to open file: " << trimmedFileName << "\n";
     return;
   }
   std::string buffer;
-  while (!theFile.eof()) {
-    std::getline(theFile, buffer);
+  while (!fileStream.eof()) {
+    std::getline(fileStream, buffer);
     std::string newFileName;
     bool isGood = true;
     if (buffer.find("IfFileExists") != std::string::npos) {
@@ -780,14 +781,14 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
     commentsOnFailure = &tempStream;
   }
   std::stringstream crawlingResult;
-  std::fstream theFile;
+  std::fstream fileStream;
   if (!this->flagCrawlTexSourcesRecursively) {
-    if (!FileOperations::openFileVirtual(theFile, this->headerFileNameWithPathVirtual, false, false, false)) {
+    if (!FileOperations::openFileVirtual(fileStream, this->headerFileNameWithPathVirtual, false, false, false)) {
       return false;
     }
     std::string buffer;
     do {
-      std::getline(theFile, buffer);
+      std::getline(fileStream, buffer);
       if (!StringRoutines::stringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "[handout]")) {
         crawlingResult << buffer << "\n";
       }
@@ -796,8 +797,8 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
           crawlingResult << "[handout]" << "\n";
         }
       }
-    } while (!theFile.eof());
-    theFile.close();
+    } while (!fileStream.eof());
+    fileStream.close();
   }
   bool addExtraTex = (this->slideFileNamesVirtualWithPath.size > 1);
   if (this->flagDoChangeDirs) {
@@ -862,15 +863,15 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
     this->targetLaTeX = crawlingResult.str();
     return true;
   }
-  if (FileOperations::openFileCreateIfNotPresentUnsecure(theFile, this->workingFileNameNoPathTex, false, true, false)) {
-    theFile << crawlingResult.str();
+  if (FileOperations::openFileCreateIfNotPresentUnsecure(fileStream, this->workingFileNameNoPathTex, false, true, false)) {
+    fileStream << crawlingResult.str();
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
     }
   } else if (commentsGeneral != nullptr) {
     *commentsGeneral << "FAILED to store file: " << this->workingFileNameNoPathTex << "<br>";
   }
-  theFile.close();
+  fileStream.close();
   std::string currentSysCommand = "pdflatex --shell-escape " + this->workingFileNameNoPathTex;
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";

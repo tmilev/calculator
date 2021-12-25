@@ -160,20 +160,22 @@ bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(Calculator& calcul
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra* ownerSemisimple = ownerAlgebra.content;
-  ElementSemisimpleLieAlgebra<Rational> theErational;
+  ElementSemisimpleLieAlgebra<Rational> rationalExpression;
   if (!CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients(
-    calculator, input[2], theErational, *ownerSemisimple
+    calculator, input[2], rationalExpression, *ownerSemisimple
   )) {
     return output.assignError(calculator, "Failed to extract element of semisimple Lie algebra. ");
   }
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
-  theE = theErational;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> fElement;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> hElement;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> eElement;
+  eElement = rationalExpression;
   std::stringstream out, logStream;
-  bool success = ownerSemisimple->attemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
+  bool success = ownerSemisimple->attemptExtendingEtoHEFwithHinCartan(eElement, hElement, fElement, &logStream);
   if (success) {
-    out << HtmlRoutines::getMathNoDisplay("F=" + theF.toString() + ";")
-    << "<br>" << HtmlRoutines::getMathNoDisplay("H=" + theH.toString() + ";") << "<br>"
-    << HtmlRoutines::getMathNoDisplay("E=" + theE.toString() + ";")
+    out << HtmlRoutines::getMathNoDisplay("F=" + fElement.toString() + ";")
+    << "<br>" << HtmlRoutines::getMathNoDisplay("H=" + hElement.toString() + ";") << "<br>"
+    << HtmlRoutines::getMathNoDisplay("E=" + eElement.toString() + ";")
     << "<br><br>The log stream of the computation follows. " << logStream.str();
   } else {
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();

@@ -256,35 +256,36 @@ template <class Coefficient>
 bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEncodeHighestWeight(
   std::string* report,
   CharacterSemisimpleLieAlgebraModule& output,
-  const Selection& splittingParSel,
-  const Selection& ParSelFDInducingPart,
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSub
+  const Selection& splittingParabolicSelection,
+  const Selection& parabolicSelectionFiniteDimensionalInducingPart,
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSubgroup
 ) {
-  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEncodeHighestWeight");
+  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::splitOverLeviMonomialsEncodeHighestWeight");
   this->checkNonZeroOwner();
   std::stringstream out;
   std::string tempS;
-  if (this->getOwner()->getRank() != splittingParSel.numberOfElements) {
+  if (this->getOwner()->getRank() != splittingParabolicSelection.numberOfElements) {
     global.fatal << "Parabolic selection selects out of "
-    << splittingParSel.numberOfElements
+    << splittingParabolicSelection.numberOfElements
     << " elements while the weyl group is of rank "
     << this->getOwner()->getRank() << ". " << global.fatal;
   }
-  outputWeylSub.makeParabolicFromSelectionSimpleRoots(this->getOwner()->weylGroup, splittingParSel, 1);
-  outputWeylSub.computeRootSubsystem();
+  outputWeylSubgroup.makeParabolicFromSelectionSimpleRoots(this->getOwner()->weylGroup, splittingParabolicSelection, 1);
+  outputWeylSubgroup.computeRootSubsystem();
 
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms complementGroup, theFDWeyl;
-  complementGroup.ambientWeyl = outputWeylSub.ambientWeyl;
-  theFDWeyl.ambientWeyl = outputWeylSub.ambientWeyl;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms complementGroup;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms finiteDimensionalWeyl;
+  complementGroup.ambientWeyl = outputWeylSubgroup.ambientWeyl;
+  finiteDimensionalWeyl.ambientWeyl = outputWeylSubgroup.ambientWeyl;
 
-  Selection invertedSel;
-  invertedSel = splittingParSel;
-  invertedSel.invertSelection();
-  complementGroup.makeParabolicFromSelectionSimpleRoots(this->getOwner()->weylGroup, invertedSel, 1);
+  Selection invertedSelection;
+  invertedSelection = splittingParabolicSelection;
+  invertedSelection.invertSelection();
+  complementGroup.makeParabolicFromSelectionSimpleRoots(this->getOwner()->weylGroup, invertedSelection, 1);
   complementGroup.computeRootSubsystem();
-  out << outputWeylSub.toString(false);
+  out << outputWeylSubgroup.toString(false);
   CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl, remainingCharDominantLevi;
-  theFDWeyl.makeParabolicFromSelectionSimpleRoots(this->getOwner()->weylGroup, ParSelFDInducingPart, 1);
+  finiteDimensionalWeyl.makeParabolicFromSelectionSimpleRoots(this->getOwner()->weylGroup, parabolicSelectionFiniteDimensionalInducingPart, 1);
   Weight<Coefficient> tempMon, localHighest;
   List<Coefficient> tempMults;
   HashedList<Vector<Coefficient> > tempHashedRoots;
@@ -295,7 +296,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   tempMon.owner = this->getOwner();
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& currentMon = (*this)[i];
-    if (!theFDWeyl.freudenthalFormulaIrrepIsWRTLeviPart(
+    if (!finiteDimensionalWeyl.freudenthalFormulaIrrepIsWRTLeviPart(
       currentMon.weightFundamentalCoordinates, tempHashedRoots, tempMults, tempS, 10000
     )) {
       if (report != nullptr) {
@@ -316,7 +317,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   tempMon.owner = this->getOwner();
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
-    if (!theFDWeyl.generateOrbitReturnFalseIfTruncated(
+    if (!finiteDimensionalWeyl.generateOrbitReturnFalseIfTruncated(
       weylGroup.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordinates), orbitDom, false, 10000
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
@@ -327,7 +328,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
       return false;
     }
     for (int k = 0; k < orbitDom.size; k ++) {
-      if (outputWeylSub.isDominantWeight(orbitDom[k])) {
+      if (outputWeylSubgroup.isDominantWeight(orbitDom[k])) {
         tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi.addMonomial(tempMon, charAmbientFDWeyl.coefficients[i]);
       }
@@ -341,9 +342,9 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     localHighest = *remainingCharDominantLevi.monomials.lastObject();
     for (bool found = true; found; ) {
       found = false;
-      for (int i = 0; i < outputWeylSub.simpleRootsInner.size; i ++) {
+      for (int i = 0; i < outputWeylSubgroup.simpleRootsInner.size; i ++) {
         tempMon = localHighest;
-        simpleGeneratorBaseField = outputWeylSub.simpleRootsInner[i]; // <- implicit type conversion here!
+        simpleGeneratorBaseField = outputWeylSubgroup.simpleRootsInner[i]; // <- implicit type conversion here!
         tempMon.weightFundamentalCoordinates += this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
         if (remainingCharDominantLevi.monomials.contains(tempMon)) {
           localHighest = tempMon;
@@ -353,7 +354,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
     highestCoeff = remainingCharDominantLevi.coefficients[remainingCharDominantLevi.monomials.getIndex(localHighest)];
     output.addMonomial(localHighest, highestCoeff);
-    if (!outputWeylSub.freudenthalFormulaIrrepIsWRTLeviPart(
+    if (!outputWeylSubgroup.freudenthalFormulaIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordinates, tempHashedRoots, tempMults, tempS, 10000
     )) {
       if (report != nullptr) {
@@ -381,7 +382,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = weylGroup.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordinates).getVectorRational();
-      outputWeylSub.drawContour(tempRoot, drawingVariables, "#a0a000", 1000);
+      outputWeylSubgroup.drawContour(tempRoot, drawingVariables, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       drawingVariables.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
@@ -447,8 +448,8 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   eigenSpacesPerSimpleGenerator.setSize(splittingParSelectedInLevi.cardinalitySelection);
   Vectors<Coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<Coefficient> > tempEigenVects;
-  Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.getElement() : *outputEigenSpace;
-  theFinalEigenSpace.makeEiBasis(this->getDimension());
+  Vectors<Coefficient>& finalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.getElement() : *outputEigenSpace;
+  finalEigenSpace.makeEiBasis(this->getDimension());
   for (int i = 0; i < splittingParSelectedInLevi.cardinalitySelection; i ++) {
     int theGenIndex = splittingParSelectedInLevi.elements[i] +
     this->getOwner().getRank() + this->getOwner().getNumberOfPositiveRoots();
@@ -456,9 +457,9 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     Matrix<Coefficient> currentOpMat;
     currentOp.getMatrix(currentOpMat, this->getDimension());
     currentOpMat.getZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
-    tempSpace1 = theFinalEigenSpace;
+    tempSpace1 = finalEigenSpace;
     tempSpace2 = eigenSpacesPerSimpleGenerator[i];
-    theFinalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
+    finalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, finalEigenSpace);
   }
   out << "<br>Eigenvectors:<table> ";
   std::stringstream readyForLatexComsumption;
@@ -471,10 +472,10 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   hwFundCoordsNilPart = this->highestWeightFundamentalCoordinatesBaseField;
   hwFundCoordsNilPart -= this->highestWeightFiniteDimensionalPartFundamentalCoordinates;
   ElementUniversalEnveloping<Coefficient> currentElt, element;
-  for (int j = 0; j < theFinalEigenSpace.size; j ++) {
+  for (int j = 0; j < finalEigenSpace.size; j ++) {
     out << "<tr><td>";
     currentElt.makeZero(this->getOwner());
-    Vector<Coefficient>& currentVect = theFinalEigenSpace[j];
+    Vector<Coefficient>& currentVect = finalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {
@@ -1571,10 +1572,10 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   eigenSpacesPerSimpleGenerator.setSize(invertedLeviInSmall.cardinalitySelection);
   Vectors<Coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<Coefficient> > tempEigenVects;
-  Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
-  theFinalEigenSpace.setSize(0);
+  Vectors<Coefficient>& finalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
+  finalEigenSpace.setSize(0);
   if (invertedLeviInSmall.cardinalitySelection == 0) {
-    theFinalEigenSpace.makeEiBasis(this->getDimension());
+    finalEigenSpace.makeEiBasis(this->getDimension());
   }
   for (int i = 0; i < invertedLeviInSmall.cardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
@@ -1596,15 +1597,15 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     tempStream3 << " done in " << global.getElapsedSeconds() - timeAtStart1 << " seconds. ";
     report.report(tempStream3.str());
     if (i == 0) {
-      theFinalEigenSpace = eigenSpacesPerSimpleGenerator[i];
+      finalEigenSpace = eigenSpacesPerSimpleGenerator[i];
     } else {
       std::stringstream tempStream4;
       double timeAtStart2 = global.getElapsedSeconds();
       tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.toString() << "...";
-      tempSpace1 = theFinalEigenSpace;
+      tempSpace1 = finalEigenSpace;
       report.report(tempStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
-      theFinalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
+      finalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, finalEigenSpace);
       tempStream4 << " done in " << global.getElapsedSeconds() - timeAtStart2 << " seconds. ";
       report.report(tempStream4.str());
     }
@@ -1623,10 +1624,10 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   if (outputEigenVectors != nullptr) {
     outputEigenVectors->setSize(0);
   }
-  for (int j = 0; j < theFinalEigenSpace.size; j ++) {
+  for (int j = 0; j < finalEigenSpace.size; j ++) {
     out << "<tr><td>";
     currentElt.makeZero(this->getOwner());
-    Vector<Coefficient>& currentVect = theFinalEigenSpace[j];
+    Vector<Coefficient>& currentVect = finalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {

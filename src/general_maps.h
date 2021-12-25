@@ -89,9 +89,9 @@ public:
     this->values.addOnTop(inputValue);
     this->keys.addOnTop(inputKey);
   }
-  void setExpectedSize(int theSize) {
-    this->keys.setExpectedSize(theSize);
-    this->values.setExpectedSize(theSize);
+  void setExpectedSize(int expectedSize) {
+    this->keys.setExpectedSize(expectedSize);
+    this->values.setExpectedSize(expectedSize);
   }
   void clear() {
     this->keys.clear();

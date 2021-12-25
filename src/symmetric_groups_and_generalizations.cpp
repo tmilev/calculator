@@ -150,12 +150,12 @@ void Partition::fillTableau(Tableau& out, List<int>& stuffing) const {
     << *this << " but you provided only " << stuffing.size << '\n' << global.fatal;
   }
   out.t.setSize(this->p.size);
-  int cur = 0;
+  int current = 0;
   for (int i = 0; i < this->p.size; i ++) {
     out.t[i].setSize(this->p[i]);
     for (int j = 0; j < this->p[i]; j ++) {
-      out.t[i][j] = stuffing[cur];
-      cur ++;
+      out.t[i][j] = stuffing[current];
+      current ++;
     }
   }
 }

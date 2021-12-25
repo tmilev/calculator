@@ -1237,11 +1237,11 @@ bool CalculatorParser::replaceXXbyEX() {
 
 bool CalculatorParser::replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
   SyntacticElement& theSequenceElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  SyntacticElement& theFunctionElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 5];
+  SyntacticElement& functionExpressionlt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 5];
   Expression newExpr;
   newExpr.reset(*this->owner);
   newExpr.setExpectedSize(theSequenceElt.data.size());
-  newExpr.addChildOnTop(theFunctionElt.data);
+  newExpr.addChildOnTop(functionExpressionlt.data);
   if (theSequenceElt.data.isAtom()) {
     newExpr.addChildOnTop(theSequenceElt.data);
   } else {
@@ -1249,7 +1249,7 @@ bool CalculatorParser::replaceEXXSequenceXBy_Expression_with_E_instead_of_sequen
       newExpr.addChildOnTop(theSequenceElt.data[i]);
     }
   }
-  theFunctionElt.data = newExpr;
+  functionExpressionlt.data = newExpr;
   return this->decreaseStackSetCharacterRanges(4);
 }
 
@@ -1634,10 +1634,10 @@ bool CalculatorParser::replaceEOXbyEX() {
 
 bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
   MacroRegisterFunctionWithName("Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits");
-  SyntacticElement& theE = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
-  const std::string& currentVar = this->owner->operations.keys[theE.data.data];
+  SyntacticElement& currentElement = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
+  const std::string& currentVar = this->owner->operations.keys[currentElement.data.data];
   if (!this->predefinedWordSplits.contains(currentVar)) {
-    global.fatal << "Predefined word splits array does not contain the variable: " << theE.data.toString()
+    global.fatal << "Predefined word splits array does not contain the variable: " << currentElement.data.toString()
     << ". This should not happen in the body of this function. " << global.fatal;
   }
   List<std::string>& split = this->predefinedWordSplits.getValueCreateEmpty(currentVar);

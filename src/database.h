@@ -94,7 +94,7 @@ public:
     );
     //TODO(tmilev): refactor down to database-only operations.
     static bool sendActivationEmail(
-      const List<std::string>& theEmails,
+      const List<std::string>& emails,
       std::stringstream* commentsOnFailure,
       std::stringstream* commentsGeneral,
       std::stringstream* commentsGeneralSensitive

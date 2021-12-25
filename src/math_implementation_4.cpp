@@ -1370,7 +1370,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;
 //  this->thePfs.theChambersOld.initialize();
 //  this->thePfs.theChambersOld.theDirections = this->GmodKNegWeightsBasisChanged;
-//  this->thePfs.theChambersOld.SliceTheEuclideanSpace(false);
+//  this->thePfs.theChambersOld.SliceEuclideanSpace(false);
 //  this->theQPsNonSubstituted.setSize(this->thePfs.theChambersOld.size);
 //  this->theQPsSubstituted.setSize(this->thePfs.theChambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
@@ -1388,7 +1388,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
         global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
         global.makeReport();
-        currentQPNoSub.substitution(this->theLinearOperatorsExtended.objects[k], this->translationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
+        currentQPNoSub.substitution(this->theLinearOperatorsExtended.objects[k], this->translationsProjectedBasisChanged[k], this->ExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.toString(false, false);
       }
     }
@@ -1508,7 +1508,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
     drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], "red", 3);
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.toString();
-  accumulator.makeZero(startingPolynomial.NumVariables);
+  accumulator.makeZero(startingPolynomial.numberOfVariables);
   for (int i = 0; i < this->linearOperators.size; i ++) {
     substitutedPolynomial = startingPolynomial;
     substitutedPolynomial *= this->coefficients[i];

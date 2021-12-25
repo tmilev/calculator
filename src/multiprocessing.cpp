@@ -171,17 +171,16 @@ std::string MutexProcess::toString() const {
   return out.str();
 }
 
-int Pipe::writeWithTimeoutViaSelect(
-  int theFD,
+int Pipe::writeWithTimeoutViaSelect(int fileDescriptor,
   const std::string& input,
   int timeOutInSeconds,
   int maxNumTries,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Pipe::writeWithTimeoutViaSelect");
-  fd_set theFDcontainer;
-  FD_ZERO(&theFDcontainer);
-  FD_SET(theFD, &theFDcontainer);
+  fd_set fileDescriptorContainer;
+  FD_ZERO(&fileDescriptorContainer);
+  FD_SET(fileDescriptor, &fileDescriptorContainer);
   timeval timeOut;
   timeOut.tv_sec = timeOutInSeconds;
   timeOut.tv_usec = 0;
@@ -191,12 +190,12 @@ int Pipe::writeWithTimeoutViaSelect(
   do {
     if (numFails > maxNumTries) {
       failStream << maxNumTries
-      << " failed or timed-out select attempts on file descriptor: " << theFD;
+      << " failed or timed-out select attempts on file descriptor: " << fileDescriptor;
       break;
     }
-    numSelected = select(theFD + 1, nullptr, &theFDcontainer, nullptr, &timeOut);
+    numSelected = select(fileDescriptor + 1, nullptr, &fileDescriptorContainer, nullptr, &timeOut);
     failStream << "While select-writing on file descriptor: "
-    << theFD << ", select failed. Error message: "
+    << fileDescriptor << ", select failed. Error message: "
     << strerror(errno) << ". \n";
     numFails ++;
   } while (numSelected < 0);
@@ -206,26 +205,26 @@ int Pipe::writeWithTimeoutViaSelect(
     }
     return - 1;
   }
-  return Pipe::writeNoInterrupts(theFD, input);
+  return Pipe::writeNoInterrupts(fileDescriptor, input);
 }
 
 int Pipe::readWithTimeOutViaSelect(
-  int theFD,
+  int fileDescriptor,
   List<char>& output,
   int timeOutInSeconds,
   int maxNumTries,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Pipe::readWithTimeOutViaSelect");
-  if (theFD < 0) {
+  if (fileDescriptor < 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Attempting to read from a negative file descriptor: " << theFD;
+      *commentsOnFailure << "Attempting to read from a negative file descriptor: " << fileDescriptor;
     }
     return - 1;
   }
-  fd_set theFDcontainer;
-  FD_ZERO(&theFDcontainer);
-  FD_SET(theFD, &theFDcontainer);
+  fd_set fileDescriptorContainer;
+  FD_ZERO(&fileDescriptorContainer);
+  FD_SET(fileDescriptor, &fileDescriptorContainer);
   timeval timeOut;
   timeOut.tv_sec = timeOutInSeconds;
   timeOut.tv_usec = 0;
@@ -234,12 +233,12 @@ int Pipe::readWithTimeOutViaSelect(
   std::stringstream failStream;
   do {
     if (numFails > maxNumTries) {
-      failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
+      failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << fileDescriptor;
       break;
     }
-    numSelected = select(theFD + 1, &theFDcontainer, nullptr, nullptr, &timeOut);
+    numSelected = select(fileDescriptor + 1, &fileDescriptorContainer, nullptr, nullptr, &timeOut);
     failStream << "While select-reading from file descriptor: "
-    << theFD << ", select failed. Error message: "
+    << fileDescriptor << ", select failed. Error message: "
     << strerror(errno) << ". \n";
     numFails ++;
   } while (numSelected < 0);
@@ -253,7 +252,7 @@ int Pipe::readWithTimeOutViaSelect(
   int bytesRead = - 1;
   do {
     bytesRead = static_cast<int>(read(
-      theFD,
+      fileDescriptor,
       output.objects,
       static_cast<unsigned>(output.size - 1)
     ));
@@ -264,7 +263,7 @@ int Pipe::readWithTimeOutViaSelect(
 
     if (numFails > maxNumTries) {
       failStream << "Too many failed attempts: " << maxNumTries
-      << " at reading from file descriptor: " << theFD << ". Error message: "
+      << " at reading from file descriptor: " << fileDescriptor << ". Error message: "
       << strerror(errno) << ".\n";
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << failStream.str();
@@ -279,14 +278,14 @@ bool PipePrimitive::setPipeFlagsNoFailure(int inputFlags, int whichEnd, bool don
   MacroRegisterFunctionWithName("Pipe::SetPipeBlockingModeCrashIfFail");
   int counter = 0;
   while (fcntl(this->pipeEnds[whichEnd], F_SETFL, inputFlags) < 0) {
-    std::string theError = strerror(errno);
+    std::string errorString = strerror(errno);
     global << Logger::purple << "Failed to fcntl pipe end with file descriptor: "
     << this->pipeEnds[whichEnd] << ": "
-    << theError << ". " << Logger::endL;
+    << errorString << ". " << Logger::endL;
     if (++ counter > 100) {
       if (!dontCrashOnFail) {
         global.fatal << "fcntl failed more than 100 times on "
-        << "file desciptor: " << this->pipeEnds[whichEnd] << ": " << theError << ". " << global.fatal;
+        << "file desciptor: " << this->pipeEnds[whichEnd] << ": " << errorString << ". " << global.fatal;
       }
       return false;
     }
@@ -330,10 +329,10 @@ bool PipePrimitive::setWriteBlocking(bool dontCrashOnFail) {
   return result;
 }
 
-int Pipe::writeNoInterrupts(int theFD, const std::string& input) {
+int Pipe::writeNoInterrupts(int fileDescriptor, const std::string& input) {
   int numAttempts = 0;
   for (;;) {
-    int result = static_cast<int>(write(theFD, input.c_str(), input.size()));
+    int result = static_cast<int>(write(fileDescriptor, input.c_str(), input.size()));
     if (result >= 0) {
       return result;
     }

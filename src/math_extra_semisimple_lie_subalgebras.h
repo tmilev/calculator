@@ -34,7 +34,7 @@ class NilradicalCandidate {
   Vectors<Rational> nonFernandoKacHighestWeightsStronglyTwoSided;
 
   List<int> ownerModulesNilradicalElements;
-  List<int> ownerModulestheNonFKhwVectors;
+  List<int> ownerModulesNonFernandoKacHighestWeightVectors;
 
   Vectors<Rational> leviRootsAmbienT;
   Vectors<Rational> leviRootsSmallPrimalFundamentalCoordinates;

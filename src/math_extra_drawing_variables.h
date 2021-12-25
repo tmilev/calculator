@@ -121,12 +121,16 @@ public:
   void drawLineBuffer(
     double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, double lineWidth
   );
-  void drawTextBuffer(double x1, double y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
+  void drawTextBuffer(double x1, double y1, const std::string& inputText, int ColorIndex, int fontSize, int textStyle);
   void drawLineBetweenTwoVectorsBufferRational(
     const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth = 1
   );
   void drawFilledShape(
-    const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex, double lineWidth
+    const List<Vector<double> >& corners,
+    uint32_t penStyle,
+    int colorIndex,
+    int fillColorIndex,
+    double lineWidth
   );
   void drawLineBetweenTwoVectorsBufferDouble(
     const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color, double lineWidth = 1

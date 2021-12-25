@@ -99,7 +99,6 @@ bool CalculatorFunctionsCrypto::testTLSMessageSequence(
   if (!spoofServer.initializeAll(
     inputMessages[0],
     inputMessages[1],
-    // TransportLayerSecurity::DefaultTLS_READ_ONLY().theServer.certificate.sourceBinary,
     &commentsOnFailure
   )) {
     commentsOnFailure << "Unexpected failure while initializing TLS server. ";
@@ -2251,17 +2250,17 @@ bool CalculatorFunctionsListsAndSets::unionNoRepetition(
       numElts += input[i].size() - 1;
     }
   }
-  HashedList<Expression> theList;
+  HashedList<Expression> unionHashedList;
   List<int> indices;
-  theList.setExpectedSize(numElts);
+  unionHashedList.setExpectedSize(numElts);
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
-      theList.addOnTopNoRepetition(input[i][j]);
+      unionHashedList.addOnTopNoRepetition(input[i][j]);
     }
   }
-  indices.setSize(theList.size);
-  for (int i = 0; i < theList.size; i ++) {
-    indices[i] = calculator.addChildExpression(theList[i]);
+  indices.setSize(unionHashedList.size);
+  for (int i = 0; i < unionHashedList.size; i ++) {
+    indices[i] = calculator.addChildExpression(unionHashedList[i]);
   }
   output.setExpectedSize(numElts);
   output.reset(calculator, indices.size + 1);
@@ -2883,9 +2882,9 @@ bool CalculatorFunctions::outerCommuteAtimesBifUnivariate(
   if (input[1].isConstantNumber()) {
     return false;
   }
-  HashedListSpecialized<Expression> theList;
-  input.getBlocksOfCommutativity(theList);
-  if (theList.size != 1) {
+  HashedListSpecialized<Expression> commutativityBlocks;
+  input.getBlocksOfCommutativity(commutativityBlocks);
+  if (commutativityBlocks.size != 1) {
     return false;
   }
   if (input[2] > input[1] || input[2] == input[1]) {
@@ -2911,11 +2910,11 @@ bool CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate(
     return false;
   }
   const Expression& middleExpression = input[2][1];
-  HashedListSpecialized<Expression> theList;
+  HashedListSpecialized<Expression> commutativityBlocks;
 
-  leftExpression.getBlocksOfCommutativity(theList);
-  middleExpression.getBlocksOfCommutativity(theList);
-  if (theList.size != 1) {
+  leftExpression.getBlocksOfCommutativity(commutativityBlocks);
+  middleExpression.getBlocksOfCommutativity(commutativityBlocks);
+  if (commutativityBlocks.size != 1) {
     return false;
   }
   if (middleExpression > leftExpression || middleExpression == leftExpression) {
@@ -5259,9 +5258,9 @@ bool CalculatorFunctions::getUserDefinedSubExpressions(
   if (input.size() != 2) {
     return false;
   }
-  HashedListSpecialized<Expression> theList;
-  input[1].getBlocksOfCommutativity(theList);
-  return output.makeSequence(calculator, &theList);
+  HashedListSpecialized<Expression> commutativityBlocks;
+  input[1].getBlocksOfCommutativity(commutativityBlocks);
+  return output.makeSequence(calculator, &commutativityBlocks);
 }
 
 bool CalculatorFunctions::lispify(Calculator& calculator, const Expression& input, Expression& output) {

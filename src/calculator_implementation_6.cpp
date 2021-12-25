@@ -702,11 +702,11 @@ bool CalculatorFunctions::getSummand(
   if (!theSum.startsWith(calculator.opSum(), 3)) {
     return false;
   }
-  const Expression& theLimits = theSum[1];
-  if (!theLimits.startsWith(calculator.opLimitBoundary(), 3)) {
+  const Expression& limitExpressions = theSum[1];
+  if (!limitExpressions.startsWith(calculator.opLimitBoundary(), 3)) {
     return false;
   }
-  const Expression& theBottomBoundary = theLimits[1];
+  const Expression& theBottomBoundary = limitExpressions[1];
   if (!theBottomBoundary.startsWith(calculator.opDefine(), 3)) {
     return false;
   }
@@ -927,16 +927,16 @@ bool CalculatorFunctionsEncoding::convertIntegerToHex(
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theLI;
-  if (!input[1].isInteger(&theLI)) {
+  LargeInteger largeInteger;
+  if (!input[1].isInteger(&largeInteger)) {
     return false;
   }
-  if (theLI < 0) {
+  if (largeInteger < 0) {
     return calculator << "I only convert positive integers to hex strings. ";
   }
   std::string result;
-  if (!Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theLI.value, 0, result)) {
-    return calculator << "Failed to convert " << theLI
+  if (!Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(largeInteger.value, 0, result)) {
+    return calculator << "Failed to convert " << largeInteger
     << " to a hex string. ";
   }
   return output.assignValue(calculator, result);
@@ -1390,7 +1390,7 @@ bool CalculatorFunctions::subList(Calculator& calculator, const Expression& inpu
   toBeSubbed.reset(calculator);
   toBeSubbed.addChildAtomOnTop(calculator.opBind());
   toBeSubbed.addChildOnTop(boundVars[0]);
-  List<Expression> theList;
+  List<Expression> currentList;
   for (int i = 1; i < input[1].size(); i ++) {
     substituted = input[2];
     substituted.substituteRecursively(toBeSubbed, input[1][i]);
@@ -1398,10 +1398,10 @@ bool CalculatorFunctions::subList(Calculator& calculator, const Expression& inpu
       return calculator << "Failed to evaluate " << substituted.toString();
     }
     if (subbedSimplified.isEqualToOne()) {
-      theList.addOnTop(input[1][i]);
+      currentList.addOnTop(input[1][i]);
     }
   }
-  return output.makeSequence(calculator, &theList);
+  return output.makeSequence(calculator, &currentList);
 }
 
 bool CalculatorFunctions::applyToList(Calculator& calculator, const Expression& input, Expression& output) {
@@ -1705,9 +1705,9 @@ bool CalculatorFunctions::collectOpands(
   if (!input[1].isAtom()) {
     return false;
   }
-  List<Expression> theList;
-  calculator.appendOpandsReturnTrueIfOrderNonCanonical(input[2], theList, input[1].data);
-  return output.makeSequence(calculator, &theList);
+  List<Expression> opandList;
+  calculator.appendOpandsReturnTrueIfOrderNonCanonical(input[2], opandList, input[1].data);
+  return output.makeSequence(calculator, &opandList);
 }
 
 bool CalculatorFunctions::collectMultiplicands(
@@ -1717,9 +1717,9 @@ bool CalculatorFunctions::collectMultiplicands(
   if (input.size() != 2) {
     return false;
   }
-  List<Expression> theList;
-  calculator.appendOpandsReturnTrueIfOrderNonCanonical(input[1], theList, calculator.opTimes());
-  return output.makeSequence(calculator, &theList);
+  List<Expression> multiplicands;
+  calculator.appendOpandsReturnTrueIfOrderNonCanonical(input[1], multiplicands, calculator.opTimes());
+  return output.makeSequence(calculator, &multiplicands);
 }
 
 bool CalculatorFunctions::collectSummands(
@@ -1729,9 +1729,9 @@ bool CalculatorFunctions::collectSummands(
   if (input.size() != 2) {
     return false;
   }
-  List<Expression> theList;
-  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input[1], theList);
-  return output.makeSequence(calculator, &theList);
+  List<Expression> summands;
+  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input[1], summands);
+  return output.makeSequence(calculator, &summands);
 }
 
 bool CalculatorFunctions::leftIntervalGreaterThanRight(const Expression& left, const Expression& right) {

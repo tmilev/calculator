@@ -636,29 +636,29 @@ bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::processSlidesOrHomeworkFromSource");
   this->owner->setHeaderOKNoContentLength("");
 
-  LaTeXCrawler theCrawler;
+  LaTeXCrawler latexCrawler;
   JSData resultOnError;
   std::stringstream commentsOnFailure;
-  if (!theCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
+  if (!latexCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
     commentsOnFailure << "Failed to process slides or homework from source. ";
     resultOnError[WebAPI::result::error] = commentsOnFailure.str();
     return global.response.writeResponse(resultOnError);
   }
   std::stringstream comments;
   if (global.getWebInput("layout") == "printable") {
-    theCrawler.flagProjectorMode = false;
+    latexCrawler.flagProjectorMode = false;
   }
   if (global.getWebInput("answerKey") == "true") {
-    theCrawler.flagAnswerKey = true;
+    latexCrawler.flagAnswerKey = true;
   }
   if (
     global.requestType == "homeworkFromSource" ||
     global.requestType == "homeworkSource"
   ) {
-    theCrawler.flagHomeworkRatherThanSlides = true;
+    latexCrawler.flagHomeworkRatherThanSlides = true;
   }
-  if (!theCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
-    resultOnError["targetPdfFileName"] = theCrawler.targetPDFFileNameWithPathVirtual;
+  if (!latexCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
+    resultOnError["targetPdfFileName"] = latexCrawler.targetPDFFileNameWithPathVirtual;
     resultOnError[WebAPI::result::error] = comments.str();
     this->owner->flagDoAddContentLength = true;
     global.response.writeResponse(resultOnError);
@@ -666,7 +666,7 @@ bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
   }
   this->owner->setHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;
-  this->owner->writeToBody(theCrawler.targetPDFbinaryContent);
+  this->owner->writeToBody(latexCrawler.targetPDFbinaryContent);
   this->owner->sendPending();
   return true;
 }
@@ -688,30 +688,30 @@ bool LaTeXCrawler::initializeFromGlobalVariables(std::stringstream* commentsOnFa
 bool WebAPIResponse::processSlidesSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::processSlidesSource");
   this->owner->setHeaderOKNoContentLength("");
-  LaTeXCrawler theCrawler;
+  LaTeXCrawler latexCrawler;
   JSData result;
   std::stringstream commentsOnFailure;
-  if (!theCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
+  if (!latexCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
     result[WebAPI::result::error] = commentsOnFailure.str();
     return global.response.writeResponse(result);
   }
   if (global.requestType == "homeworkSource") {
-    theCrawler.flagHomeworkRatherThanSlides = true;
+    latexCrawler.flagHomeworkRatherThanSlides = true;
   } else {
-    theCrawler.flagHomeworkRatherThanSlides = false;
+    latexCrawler.flagHomeworkRatherThanSlides = false;
   }
   std::stringstream comments;
   if (global.getWebInput("layout") == "printable") {
-    theCrawler.flagProjectorMode = false;
+    latexCrawler.flagProjectorMode = false;
   }
   if (global.getWebInput("answerKey") == "false") {
-    theCrawler.flagAnswerKey = false;
+    latexCrawler.flagAnswerKey = false;
   } else {
-    theCrawler.flagAnswerKey = true;
+    latexCrawler.flagAnswerKey = true;
   }
-  theCrawler.flagSourceOnly = true;
-  theCrawler.flagCrawlTexSourcesRecursively = true;
-  if (!theCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
+  latexCrawler.flagSourceOnly = true;
+  latexCrawler.flagCrawlTexSourcesRecursively = true;
+  if (!latexCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
     this->owner->flagDoAddContentLength = true;
     comments << "Failed to build your slides. ";
     result[WebAPI::result::error] = comments.str();
@@ -719,7 +719,7 @@ bool WebAPIResponse::processSlidesSource() {
   }
   this->owner->setHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;
-  return this->owner->writeToBody(theCrawler.targetLaTeX);
+  return this->owner->writeToBody(latexCrawler.targetLaTeX);
 }
 
 bool WebAPIResponse::processClonePage() {

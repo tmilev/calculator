@@ -916,8 +916,8 @@ class Vectors: public List<Vector<Coefficient> > {
     Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int dimension
   ) const;
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
-  bool getLinearDependence(Matrix<Coefficient>& outputTheLinearCombination);
-  void getLinearDependenceRunTheLinearAlgebra(Matrix<Coefficient>& outputTheSystem, Selection& outputNonPivotPoints);
+  bool getLinearDependence(Matrix<Coefficient>& outputLinearCombination);
+  void getLinearDependenceCompute(Matrix<Coefficient>& outputSystem, Selection& outputNonPivotPoints);
   bool containsVectorNonPerpendicularTo(const Vector<Coefficient>& input, const Matrix<Coefficient>& bilinearForm);
   bool containsOppositeRoots() {
     if (this->size < 10) {
@@ -1045,21 +1045,21 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
 }
 
 template <class Coefficient>
-void Vectors<Coefficient>::getLinearDependenceRunTheLinearAlgebra(
-  Matrix<Coefficient>& outputTheSystem, Selection& outputNonPivotPoints
+void Vectors<Coefficient>::getLinearDependenceCompute(
+  Matrix<Coefficient>& outputSystem, Selection& outputNonPivotPoints
 ) {
-  MacroRegisterFunctionWithName("Vectors::getLinearDependenceRunTheLinearAlgebra");
+  MacroRegisterFunctionWithName("Vectors::getLinearDependenceCompute");
   if (this->size == 0) {
     return;
   }
   int dimension = (*this)[0].size;
-  outputTheSystem.initialize(dimension, this->size);
+  outputSystem.initialize(dimension, this->size);
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      outputTheSystem(j, i) = (*this)[i][j];
+      outputSystem(j, i) = (*this)[i][j];
     }
   }
-  outputTheSystem.gaussianEliminationByRows(0, &outputNonPivotPoints);
+  outputSystem.gaussianEliminationByRows(0, &outputNonPivotPoints);
 }
 
 template <class Coefficient>

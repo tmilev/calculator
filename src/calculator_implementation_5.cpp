@@ -1205,18 +1205,18 @@ bool CalculatorFunctions::operatorBounds(
     return false;
   }
   const Expression& baseE = input[1];
-  Expression theLimitsE;
+  Expression limitsExpression;
   int theIntegralOp = baseE.data;
   if (
     theIntegralOp == calculator.opIntegral() || theIntegralOp == calculator.opSum()
   ) {
     output.reset(calculator);
     output.addChildAtomOnTop(theIntegralOp);
-    theLimitsE.reset(calculator);
-    theLimitsE.addChildAtomOnTop(calculator.opLimitBoundary());
-    theLimitsE.addChildOnTop(input[2]);
-    theLimitsE.addChildAtomOnTop(calculator.opIndefiniteIndicator());
-    output.addChildOnTop(theLimitsE);
+    limitsExpression.reset(calculator);
+    limitsExpression.addChildAtomOnTop(calculator.opLimitBoundary());
+    limitsExpression.addChildOnTop(input[2]);
+    limitsExpression.addChildAtomOnTop(calculator.opIndefiniteIndicator());
+    output.addChildOnTop(limitsExpression);
     return true;
   }
   if (
@@ -1225,22 +1225,22 @@ bool CalculatorFunctions::operatorBounds(
   ) {
     return false;
   }
-  theLimitsE.reset(calculator);
-  theLimitsE.addChildAtomOnTop(calculator.opLimitBoundary());
+  limitsExpression.reset(calculator);
+  limitsExpression.addChildAtomOnTop(calculator.opLimitBoundary());
   for (int i = 1; i < 3; i ++) {
     if (i < baseE[1].size()) {
-      theLimitsE.addChildOnTop(baseE[1][i]);
+      limitsExpression.addChildOnTop(baseE[1][i]);
     } else {
-      theLimitsE.addChildAtomOnTop(calculator.opIndefiniteIndicator());
+      limitsExpression.addChildAtomOnTop(calculator.opIndefiniteIndicator());
     }
   }
   if (input[1].isOperationGiven(calculator.opUnderscore())) {
-    theLimitsE.setChild(1, input[2]);
+    limitsExpression.setChild(1, input[2]);
   } else {
-    theLimitsE.setChild(2, input[2]);
+    limitsExpression.setChild(2, input[2]);
   }
   output = input[1];
-  return output.setChild(1, theLimitsE);
+  return output.setChild(1, limitsExpression);
 }
 
 bool CalculatorFunctions::powerExponentToLog(

@@ -1811,13 +1811,13 @@ std::string UserCalculator::getActivationAddressFromActivationToken(
   } else {
     out << global.hopefullyPermanentWebAdress;
   }
-  JSData theJS;
-  theJS[DatabaseStrings::labelActivationToken] = activationToken;
-  theJS[DatabaseStrings::labelUsername] = inputUserNameUnsafe;
-  theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::request::activateAccountJSON;
-  theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
-  theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
+  JSData jsonData;
+  jsonData[DatabaseStrings::labelActivationToken] = activationToken;
+  jsonData[DatabaseStrings::labelUsername] = inputUserNameUnsafe;
+  jsonData[DatabaseStrings::labelCalculatorRequest] = WebAPI::request::activateAccountJSON;
+  jsonData[DatabaseStrings::labelEmail] = inputEmailUnsafe;
+  jsonData[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << global.displayApplication
-  << "#" << HtmlRoutines::convertStringToURLString(theJS.toString(nullptr), false);
+  << "#" << HtmlRoutines::convertStringToURLString(jsonData.toString(nullptr), false);
   return out.str();
 }

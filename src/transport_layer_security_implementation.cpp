@@ -19,7 +19,7 @@ bool TransportLayerSecurity::loadPEMCertificate(std::stringstream* commentsOnFai
     }
     return false;
   }
-  return this->theServer.certificate.loadFromPEM(certificateContent, commentsOnFailure);
+  return this->server.certificate.loadFromPEM(certificateContent, commentsOnFailure);
 }
 
 bool TransportLayerSecurity::loadPEMPrivateKey(
@@ -43,7 +43,7 @@ bool TransportLayerSecurity::loadPEMPrivateKey(
     return false;
   }
   accessULTRASensitiveFoldersAllowed = false;
-  return this->theServer.privateKey.loadFromPEM(certificateContent, commentsOnFailure);
+  return this->server.privateKey.loadFromPEM(certificateContent, commentsOnFailure);
 }
 
 bool TransportLayerSecurity::initSSLKeyFilesInternal(std::stringstream* commentsOnFailure) {

@@ -1451,7 +1451,6 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vector<Rational> tempRoot;
   DrawingVariables drawOps;
   int smallDimension = smallWeylGroup.cartanSymmetric.numberOfRows;
-//  drawOps.theBuffer.initDimensions(theSmallDim, 1);
   Vectors<double> theDraggableBasis;
   theDraggableBasis.makeEiBasis(smallDimension);
   WeylGroupData tmpWeyl;

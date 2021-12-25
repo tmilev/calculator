@@ -297,9 +297,9 @@ bool ElementZmodP::Test::scale() {
   x = 2;
   y = 0;
   z = 3;
-  List<ElementZmodP> theList = {x, y, z};
-  ElementZmodP scale = ElementZmodP::scaleNormalizeIndex(theList, 0);
-  std::string scaled = theList.toStringCommaDelimited();
+  List<ElementZmodP> elementList = {x, y, z};
+  ElementZmodP scale = ElementZmodP::scaleNormalizeIndex(elementList, 0);
+  std::string scaled = elementList.toStringCommaDelimited();
   std::string expected = "(1 mod (7)), (0 mod (7)), (5 mod (7))";
   if (scaled != expected) {
     global.fatal << "Bad scaling, got: " << scaled << ", expected: " << expected << ". " << global.fatal;

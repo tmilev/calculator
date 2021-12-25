@@ -534,7 +534,7 @@ public:
   bool flagInitialized;
   bool flagUseBuiltInTlS;
   TransportLayerSecurityOpenSSL openSSLData;
-  TransportLayerSecurityServer theServer;
+  TransportLayerSecurityServer server;
   List<char> readBuffer;
   List<char> writeBuffer;
   int readBufferStandardSize;

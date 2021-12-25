@@ -377,7 +377,7 @@ public:
   bool interpretHtmlOneAttempt(Calculator& interpreter, std::stringstream& comments);
   void computeProblemLabel();
   void computeBodyDebugString();
-  std::string toStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& elements);
+  std::string toStringInterprettedCommands(Calculator& calculator, List<SyntacticElementHTML>& elements);
   void logProblemGenerationObsolete(Calculator& interpreter);
   bool processExecutedCommands(
     Calculator& interpreter, List<SyntacticElementHTML>& elements, std::stringstream& comments

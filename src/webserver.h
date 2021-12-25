@@ -54,16 +54,15 @@ public:
   bool flagDoAddContentLength;
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
-  List<std::string> theMessageHeaderStrings;
+  List<std::string> messageHeaderStrings;
   MapList<std::string, std::string, MathRoutines::hashString> requestHeaders;
   int contentLength;
-  int requestTypE;
+  int requestType;
   int connectedSocketID;
   int connectedSocketIDLastValueBeforeRelease;
   int connectionID;
   int indentationLevelHTML;
   int numberOfConsecutiveNoReportsBeforeDisconnect;
-  const int maxNumberOfConsecutiveNoReports = 2;
   List<char> remainingBytesToSend;
   List<char> remainingHeaderToSend;
   List<char> remainingBodyToSend;
@@ -245,8 +244,7 @@ public:
   std::string portHTTPSOpenSSL;
   std::string portHTTPSBuiltIn;
   std::string portHTTPSDefault;
-  List<int> theListeningSockets;
-  //List<int> theListeningSocketsReadyToAccept;
+  List<int> listeningSockets;
   ListReferences<WebWorker> allWorkers;
   MapList<std::string, int, MathRoutines::hashString> workerIds;
 
@@ -258,7 +256,7 @@ public:
   MapList<std::string, std::string, MathRoutines::hashString> MIMETypes;
   int activeWorker;
   int64_t timeLastExecutableModification;
-  ListReferences<std::string> theProgressReports;
+  ListReferences<std::string> progressReports;
   WebServer();
   ~WebServer();
   static void figureOutOperatingSystem();

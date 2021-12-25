@@ -602,35 +602,6 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
       } else {
         out << "<td>has non-adapted string</td>";
       }
-/*      if (theMod.makeFromHW
-          (calculator.theObjectContainer.theLieAlgebras, i,
-           currentHW, tempSel, 1, 0, 0, true)) {
-        out << "<td>is good</td>";
-        if (!theMod.flagConjectureBholds) {
-          out << "<td><b>conjecture B fails!</b></td>";
-          ConjectureBholds = false;
-        }
-        if (!theMod.flagConjectureCholds) {
-          out << "<td><b>conjecture C holds</b></td>";
-          ConjectureCholds = false;
-        }
-        if (theMod.NumCachedPairsBeforeSimpleGen>= theMod.MaxNumCachedPairs)
-          latexReport << "$ \\geq$ " << theMod.MaxNumCachedPairs;
-        else
-          latexReport << theMod.NumCachedPairsBeforeSimpleGen;
-        latexReport
-        << "&" << theMod.cachedPairs.size << " & "
-        << Rational::totalLargeAdditions+Rational::totalSmallAdditions
-        +Rational::totalLargeMultiplications+Rational::totalSmallMultiplications -
-        startRatOps;
-      }
-      else {
-        latexReport << " & \\textbf{BAD}";
-        out << "<td><b>Is bad!!!!</b></td>";
-        report.report("BAD BAD BAD!!!");
-        foundBad = true;
-        break;
-      }*/
       out << "</tr>";
       if (foundBad) {
         break;

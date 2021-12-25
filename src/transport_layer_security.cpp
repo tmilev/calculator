@@ -52,7 +52,7 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer) {
     this->openSSLData.initSSLServer();
     bool flagBuiltInTLSAvailable = false;
     if (flagBuiltInTLSAvailable) {
-      this->theServer.initialize();
+      this->server.initialize();
     }
   } else {
     this->openSSLData.initSSLClient();
@@ -1966,7 +1966,7 @@ bool TransportLayerSecurity::handShakeIamServer(int inputSocketID, std::stringst
   if (!this->flagUseBuiltInTlS) {
     return this->openSSLData.handShakeIamServer(inputSocketID, commentsOnFailure);
   }
-  return this->theServer.handShakeIamServer(inputSocketID, commentsOnFailure);
+  return this->server.handShakeIamServer(inputSocketID, commentsOnFailure);
 }
 
 bool TransportLayerSecurity::handShakeIAmClientNoSocketCleanup(

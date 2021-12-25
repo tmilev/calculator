@@ -514,14 +514,14 @@ int Vectors<Coefficient>::getRankElementSpan(Matrix<Coefficient>* buffer, Select
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::getLinearDependence(Matrix<Coefficient>& outputTheLinearCombination) {
+bool Vectors<Coefficient>::getLinearDependence(Matrix<Coefficient>& outputLinearCombination) {
   Matrix<Coefficient> eliminated;
   Selection nonPivotPoints;
-  this->getLinearDependenceRunTheLinearAlgebra(eliminated, nonPivotPoints);
+  this->getLinearDependenceCompute(eliminated, nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection == 0) {
     return false;
   }
-  eliminated.nonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
+  eliminated.nonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputLinearCombination);
   return true;
 }
 

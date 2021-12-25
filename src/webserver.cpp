@@ -21,8 +21,8 @@ const std::string WebServer::Statististics::pingRequestsString = "pingsRequests"
 const std::string WebServer::Statististics::allRequestsString = "allRequests";
 
 WebServer& GlobalVariables::server() {
-  static WebServer theServer;
-  return theServer;
+  static WebServer result;
+  return result;
 }
 
 class SignalsInfrastructure {
@@ -160,7 +160,7 @@ bool WebWorker::receiveAll() {
   MacroRegisterFunctionWithName("WebWorker::receiveAll");
   this->messageBody = "";
   this->messageHead = "";
-  this->requestTypE = this->requestUnknown;
+  this->requestType = this->requestUnknown;
   if (this->connectedSocketID == - 1) {
     global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
   }
@@ -209,7 +209,7 @@ bool WebWorker::receiveAll() {
   this->messageHead.assign(readBuffer.objects, static_cast<unsigned>(numBytesInBuffer));
   this->parseMessageHead();
 
-  if (this->requestTypE == WebWorker::requestTypes::requestPost) {
+  if (this->requestType == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
   } else {
     this->displayUserInput = "GET " + this->addressGetOrPost;
@@ -361,10 +361,10 @@ void* SystemFunctions::getIncomingAddress(struct sockaddr* sa) {
 std::string WebWorker::toStringMessageFull() const {
   std::stringstream out;
   out << this->toStringMessageShort();
-  if (this->theMessageHeaderStrings.size > 0) {
+  if (this->messageHeaderStrings.size > 0) {
     out << "<hr>\nStrings extracted from message: ";
-    for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
-      out << "<br>" << HtmlRoutines::convertStringToHtmlString(this->theMessageHeaderStrings[i], false);
+    for (int i = 0; i < this->messageHeaderStrings.size; i ++) {
+      out << "<br>" << HtmlRoutines::convertStringToHtmlString(this->messageHeaderStrings[i], false);
     }
   }
   return out.str();
@@ -372,11 +372,11 @@ std::string WebWorker::toStringMessageFull() const {
 
 std::string WebWorker::toStringMessageShort() const {
   std::stringstream out;
-  if (this->requestTypE == this->requestGet) {
+  if (this->requestType == this->requestGet) {
     out << "GET ";
-  } else if (this->requestTypE == this->requestPost) {
+  } else if (this->requestType == this->requestPost) {
     out << "POST ";
-  } else if (this->requestTypE == this->requestChunked) {
+  } else if (this->requestType == this->requestChunked) {
     out << "GET or POST **chunked** " ;
   } else {
     out << "Request type undefined.";
@@ -444,9 +444,9 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->RelativePhysicalFileNamE = "";
   this->VirtualFileName = "";
   this->displayUserInput = "";
-  this->theMessageHeaderStrings.setSize(0);
+  this->messageHeaderStrings.setSize(0);
   this->requestHeaders.clear();
-  this->requestTypE = this->requestUnknown;
+  this->requestType = this->requestUnknown;
   this->contentLength = - 1;
 }
 
@@ -747,9 +747,9 @@ void WebWorker::parseMessageHead() {
   this->resetMessageComponentsExceptRawMessage();
   std::string buffer;
   buffer.reserve(this->messageHead.size());
-  this->theMessageHeaderStrings.setExpectedSize(50);
+  this->messageHeaderStrings.setExpectedSize(50);
   this->cookies.setExpectedSize(30);
-  this->theMessageHeaderStrings.size = 0;
+  this->messageHeaderStrings.size = 0;
   this->cookies.size = 0;
   this->connectionFlags.size = 0;
   this->messageBody = "";
@@ -761,109 +761,109 @@ void WebWorker::parseMessageHead() {
     if (this->messageHead[i] != ' ' && this->messageHead[i] != '\n' && this->messageHead[i] != '\r') {
       buffer.push_back(this->messageHead[i]);
       if (i == this->messageHead.size() - 1) {
-        this->theMessageHeaderStrings.addOnTop(buffer);
+        this->messageHeaderStrings.addOnTop(buffer);
       }
     } else {
       if (buffer != "") {
-        this->theMessageHeaderStrings.addOnTop(buffer);
+        this->messageHeaderStrings.addOnTop(buffer);
         buffer = "";
       }
       if (i > 0) {
         if (this->messageHead[i - 1] == '\r' && this->messageHead[i] == '\n') {
-          this->theMessageHeaderStrings.addOnTop("\n");
+          this->messageHeaderStrings.addOnTop("\n");
         }
       }
     }
   }
-  for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
-    if (this->theMessageHeaderStrings[i] == "GET") {
-      this->requestTypE = this->requestGet;
+  for (int i = 0; i < this->messageHeaderStrings.size; i ++) {
+    if (this->messageHeaderStrings[i] == "GET") {
+      this->requestType = this->requestGet;
       i ++;
-      if (i < this->theMessageHeaderStrings.size) {
-        this->addressGetOrPost = this->theMessageHeaderStrings[i];
+      if (i < this->messageHeaderStrings.size) {
+        this->addressGetOrPost = this->messageHeaderStrings[i];
       }
-    } else if (this->theMessageHeaderStrings[i] == "POST") {
-      this->requestTypE = this->requestPost;
+    } else if (this->messageHeaderStrings[i] == "POST") {
+      this->requestType = this->requestPost;
       i ++;
       // Short post messages may be attached to the message head
       // if that is the case the message does not end in \n.
-      if (i < this->theMessageHeaderStrings.size) {
-        this->addressGetOrPost = this->theMessageHeaderStrings[i];
-        if (*this->theMessageHeaderStrings.lastObject() != "\n") {
-          this->messageBody = *this->theMessageHeaderStrings.lastObject();
+      if (i < this->messageHeaderStrings.size) {
+        this->addressGetOrPost = this->messageHeaderStrings[i];
+        if (*this->messageHeaderStrings.lastObject() != "\n") {
+          this->messageBody = *this->messageHeaderStrings.lastObject();
         } else {
           this->messageBody = "";
         }
       }
-    } else if (this->theMessageHeaderStrings[i] == "HEAD") {
-      this->requestTypE = this->requestHead;
+    } else if (this->messageHeaderStrings[i] == "HEAD") {
+      this->requestType = this->requestHead;
       i ++;
-      if (i < this->theMessageHeaderStrings.size) {
-        this->addressGetOrPost = this->theMessageHeaderStrings[i];
+      if (i < this->messageHeaderStrings.size) {
+        this->addressGetOrPost = this->messageHeaderStrings[i];
       }
     } else if (
-      this->theMessageHeaderStrings[i] == "transfer-coding:" ||
-      this->theMessageHeaderStrings[i] == "Transfer-coding:" ||
-      this->theMessageHeaderStrings[i] == "Transfer-Coding:"
+      this->messageHeaderStrings[i] == "transfer-coding:" ||
+      this->messageHeaderStrings[i] == "Transfer-coding:" ||
+      this->messageHeaderStrings[i] == "Transfer-Coding:"
     ) {
       i ++;
-      if (i < this->theMessageHeaderStrings.size) {
+      if (i < this->messageHeaderStrings.size) {
         if (
-          this->theMessageHeaderStrings[i] == "chunked" ||
-          this->theMessageHeaderStrings[i] == "chunked;" ||
-          this->theMessageHeaderStrings[i] == "Chunked" ||
-          this->theMessageHeaderStrings[i] == "Chunked;"
+          this->messageHeaderStrings[i] == "chunked" ||
+          this->messageHeaderStrings[i] == "chunked;" ||
+          this->messageHeaderStrings[i] == "Chunked" ||
+          this->messageHeaderStrings[i] == "Chunked;"
         ) {
-          this->requestTypE = this->requestChunked;
+          this->requestType = this->requestChunked;
         }
       }
     } else if ((
-        this->theMessageHeaderStrings[i] == "Content-Length:" ||
-        this->theMessageHeaderStrings[i] == "Content-length:" ||
-        this->theMessageHeaderStrings[i] == "content-length:"
+        this->messageHeaderStrings[i] == "Content-Length:" ||
+        this->messageHeaderStrings[i] == "Content-length:" ||
+        this->messageHeaderStrings[i] == "content-length:"
       ) &&
-      i + 1 < this->theMessageHeaderStrings.size
+      i + 1 < this->messageHeaderStrings.size
     ) {
-      if (this->theMessageHeaderStrings[i + 1].size() < 10000) {
-        LargeIntegerUnsigned theLI;
-        if (theLI.assignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
-          if (!theLI.isIntegerFittingInInt(&this->contentLength)) {
+      if (this->messageHeaderStrings[i + 1].size() < 10000) {
+        LargeIntegerUnsigned largeInteger;
+        if (largeInteger.assignStringFailureAllowed(this->messageHeaderStrings[i + 1], true)) {
+          if (!largeInteger.isIntegerFittingInInt(&this->contentLength)) {
             this->contentLength = - 1;
           }
         }
       }
     } else if (
-      this->theMessageHeaderStrings[i] == "Host:" ||
-      this->theMessageHeaderStrings[i] == "host:"
+      this->messageHeaderStrings[i] == "Host:" ||
+      this->messageHeaderStrings[i] == "host:"
     ) {
       i ++;
-      if (i < this->theMessageHeaderStrings.size) {
-        this->hostWithPort = this->theMessageHeaderStrings[i];
+      if (i < this->messageHeaderStrings.size) {
+        this->hostWithPort = this->messageHeaderStrings[i];
       }
     } else if (
-      this->theMessageHeaderStrings[i] == "Cookie:" ||
-      this->theMessageHeaderStrings[i] == "cookie:"
+      this->messageHeaderStrings[i] == "Cookie:" ||
+      this->messageHeaderStrings[i] == "cookie:"
     ) {
       i ++;
-      for (; i < this->theMessageHeaderStrings.size; i ++) {
-        if (this->theMessageHeaderStrings[i] == "\n")
+      for (; i < this->messageHeaderStrings.size; i ++) {
+        if (this->messageHeaderStrings[i] == "\n")
           break;
-        this->cookies.addOnTop(this->theMessageHeaderStrings[i]);
+        this->cookies.addOnTop(this->messageHeaderStrings[i]);
       }
     } else if (
-      this->theMessageHeaderStrings[i] == "Connection:" ||
-      this->theMessageHeaderStrings[i] == "connection:"
+      this->messageHeaderStrings[i] == "Connection:" ||
+      this->messageHeaderStrings[i] == "connection:"
     ) {
       i ++;
-      for (; i < this->theMessageHeaderStrings.size; i ++) {
-        if (this->theMessageHeaderStrings[i] == "\n") {
+      for (; i < this->messageHeaderStrings.size; i ++) {
+        if (this->messageHeaderStrings[i] == "\n") {
           break;
         }
-        this->connectionFlags.addOnTop(this->theMessageHeaderStrings[i]);
+        this->connectionFlags.addOnTop(this->messageHeaderStrings[i]);
         if (
-          this->theMessageHeaderStrings[i] == "keep-alive" ||
-          this->theMessageHeaderStrings[i] == "Keep-Alive" ||
-          this->theMessageHeaderStrings[i] == "Keep-alive"
+          this->messageHeaderStrings[i] == "keep-alive" ||
+          this->messageHeaderStrings[i] == "Keep-Alive" ||
+          this->messageHeaderStrings[i] == "Keep-alive"
         ) {
           this->flagKeepAlive = true;
         }
@@ -878,7 +878,7 @@ void WebWorker::parseMessageHead() {
 
 void WebWorker::attemptUnknownRequestErrorCorrection() {
   MacroRegisterFunctionWithName("WebWorker::attemptUnknownRequestErrorCorrection");
-  if (this->requestTypE != this->requestUnknown) {
+  if (this->requestType != this->requestUnknown) {
     return;
   }
   global << Logger::red << "Unknown request. " << Logger::endL;
@@ -889,18 +889,18 @@ void WebWorker::attemptUnknownRequestErrorCorrection() {
   global << HtmlRoutines::convertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << Logger::endL;
   global << Logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size() == 0) {
-    if (*this->theMessageHeaderStrings.lastObject() != "\n") {
+    if (*this->messageHeaderStrings.lastObject() != "\n") {
       global << Logger::green
       << "Message body set to last message chunk.\n";
-      this->messageBody = *this->theMessageHeaderStrings.lastObject();
+      this->messageBody = *this->messageHeaderStrings.lastObject();
     }
   }
   if (this->messageBody.size() != 0) {
     global << "Request set to: POST\n";
-    this->requestTypE = this->requestPost;
+    this->requestType = this->requestPost;
   } else {
     global << "Request set to: GET\n";
-    this->requestTypE = this->requestGet;
+    this->requestType = this->requestGet;
   }
   if (this->addressGetOrPost == "") {
     global << "Address set to: " << global.displayNameExecutable << "\n";
@@ -1389,7 +1389,7 @@ int WebWorker::processFile() {
   }
   theHeader << "\r\n";
   this->queueStringForSendingNoHeader(theHeader.str());
-  if (this->requestTypE == this->requestHead) {
+  if (this->requestType == this->requestHead) {
     this->sendAllBytesNoHeaders();
     return 0;
   }
@@ -1419,7 +1419,7 @@ void WebWorker::reset() {
   this->parent = nullptr;
   this->indentationLevelHTML = 0;
   this->displayUserInput = "";
-  this->requestTypE = this->requestUnknown;
+  this->requestType = this->requestUnknown;
   this->flagDoAddContentLength = false;
   this->flagFileNameSanitized = false;
   this->millisecondsLastPingServerSideOnly = - 1;
@@ -1989,13 +1989,13 @@ int WebWorker::serveClient() {
   UserCalculatorData& user = global.userDefault;
   this->response.reset(*this);
   if (
-    this->requestTypE != this->requestGet &&
-    this->requestTypE != this->requestPost &&
-    this->requestTypE != this->requestHead
+    this->requestType != this->requestGet &&
+    this->requestType != this->requestPost &&
+    this->requestType != this->requestHead
   ) {
     if (
-      this->requestTypE != this->requestUnknown &&
-      this->requestTypE != this->requestChunked
+      this->requestType != this->requestUnknown &&
+      this->requestType != this->requestChunked
     ) {
       global.fatal << "Something is wrong: request type does "
       << "not have any of the expected values. " << global.fatal;
@@ -2326,8 +2326,8 @@ void WebServer::releaseEverything() {
     global << Logger::red << "Detail: "
     << "About to close socket: " << this->listeningSocketHTTP << ". " << Logger::endL;
   }
-  for (int i = 0; i < this->theListeningSockets.size; i ++) {
-    int socket = this->theListeningSockets[i];
+  for (int i = 0; i < this->listeningSockets.size; i ++) {
+    int socket = this->listeningSockets[i];
     close(socket);
     if (global.flagServerDetailedLog) {
       global << Logger::red << "Detail: "
@@ -2736,24 +2736,24 @@ void WebServer::initListeningSockets() {
   MacroRegisterFunctionWithName("WebServer::initListeningSockets");
   this->highestSocketNumber = - 1;
   if (this->listeningSocketHTTP != - 1) {
-    this->theListeningSockets.addOnTop(this->listeningSocketHTTP);
+    this->listeningSockets.addOnTop(this->listeningSocketHTTP);
   }
   if (this->listeningSocketHTTPSBuiltIn != - 1) {
-    this->theListeningSockets.addOnTop(this->listeningSocketHTTPSBuiltIn);
+    this->listeningSockets.addOnTop(this->listeningSocketHTTPSBuiltIn);
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSBuiltIn;
   }
   if (this->listeningSocketHTTPSOpenSSL != - 1) {
-    this->theListeningSockets.addOnTop(this->listeningSocketHTTPSOpenSSL);
+    this->listeningSockets.addOnTop(this->listeningSocketHTTPSOpenSSL);
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSOpenSSL;
   }
   this->highestSocketNumber = - 1;
-  for (int i = 0; i < this->theListeningSockets.size; i ++) {
+  for (int i = 0; i < this->listeningSockets.size; i ++) {
     this->highestSocketNumber = MathRoutines::maximum(
-      this->theListeningSockets[i], this->highestSocketNumber
+      this->listeningSockets[i], this->highestSocketNumber
     );
-    if (listen(this->theListeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
+    if (listen(this->listeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
       global.fatal << "Listen function failed on socket: "
-      << this->theListeningSockets[i] << global.fatal;
+      << this->listeningSockets[i] << global.fatal;
     }
   }
 }
@@ -3211,8 +3211,8 @@ public:
 
 void Listener::zeroSocketSet() {
   FD_ZERO(&this->FDSetListenSockets);
-  for (int i = 0; i < this->owner->theListeningSockets.size; i ++) {
-    FD_SET(this->owner->theListeningSockets[i], &this->FDSetListenSockets);
+  for (int i = 0; i < this->owner->listeningSockets.size; i ++) {
+    FD_SET(this->owner->listeningSockets[i], &this->FDSetListenSockets);
   }
   if (global.flagServerDetailedLog) {
     global << Logger::red << "Detail: About to enter select loop. " << Logger::endL;
@@ -3247,8 +3247,8 @@ void Listener::selectWrapper() {
 int Listener::acceptWrapper() {
   MacroRegisterFunctionWithName("Listener::acceptWrapper");
   socklen_t sin_size = sizeof (this->theirAddress);
-  for (int i = this->owner->theListeningSockets.size - 1; i >= 0; i --) {
-    int currentListeningSocket = this->owner->theListeningSockets[i];
+  for (int i = this->owner->listeningSockets.size - 1; i >= 0; i --) {
+    int currentListeningSocket = this->owner->listeningSockets[i];
     if (!FD_ISSET(currentListeningSocket, &this->FDSetListenSockets)) {
       continue;
     }
@@ -3410,12 +3410,12 @@ int WebServer::run() {
   this->statistics.successfulSelectsSoFar = 0;
   this->statistics.failedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
-  Listener theListener(this);
+  Listener listener(this);
   while (true) {
     // Main accept() loop.
-    theListener.zeroSocketSet();
+    listener.zeroSocketSet();
     SignalsInfrastructure::signals().unblockSignals();
-    theListener.selectWrapper();
+    listener.selectWrapper();
     SignalsInfrastructure::signals().blockSignals();
     if (global.flagServerDetailedLog) {
       global << Logger::green << "Detail: select success. " << Logger::endL;
@@ -3442,7 +3442,7 @@ int WebServer::run() {
       this->previousServerStatDetailedReport = reportCount;
       global << this->toStringStatusForLogFile() << Logger::endL;
     }
-    int newConnectedSocket = theListener.acceptWrapper();
+    int newConnectedSocket = listener.acceptWrapper();
     if (newConnectedSocket < 0) {
       global << Logger::red
       << "This is not supposed to to happen: select succeeded "
@@ -3455,8 +3455,8 @@ int WebServer::run() {
       }
       continue;
     }
-    theListener.computeUserAddress();
-    this->handleTooManyConnections(theListener.userAddress);
+    listener.computeUserAddress();
+    this->handleTooManyConnections(listener.userAddress);
     this->recycleChildrenIfPossible();
     if (!this->createNewActiveWorker()) {
       global << Logger::purple
@@ -3476,7 +3476,7 @@ int WebServer::run() {
     // <-cannot set earlier as the active worker may change after recycling.
     this->statistics.allConnections ++;
     this->getActiveWorker().connectionID = this->statistics.allConnections;
-    this->getActiveWorker().userAddress.content = theListener.userAddress;
+    this->getActiveWorker().userAddress.content = listener.userAddress;
     this->currentlyConnectedAddresses.addMonomial(this->getActiveWorker().userAddress, 1);
     /////////////
     if (global.flagServerDetailedLog) {
@@ -4486,21 +4486,21 @@ int WebServer::mainConsoleHelp() {
 
 int WebServer::mainCommandLine() {
   MacroRegisterFunctionWithName("WebServer::mainCommandLine");
-  Calculator& theCalculator = global.calculator().getElement();
-  theCalculator.initialize(Calculator::Mode::full);
+  Calculator& calculator = global.calculator().getElement();
+  calculator.initialize(Calculator::Mode::full);
   if (global.programArguments.size > 1) {
     for (int i = 1; i < global.programArguments.size; i ++) {
-      theCalculator.inputString += global.programArguments[i];
+      calculator.inputString += global.programArguments[i];
       if (i != global.programArguments.size - 1) {
-        theCalculator.inputString += " ";
+        calculator.inputString += " ";
       }
     }
   } else {
     global << "Input: " << Logger::yellow;
-    std::cin >> theCalculator.inputString;
+    std::cin >> calculator.inputString;
   }
-  theCalculator.flagUseHtml = false;
-  theCalculator.evaluate(theCalculator.inputString);
+  calculator.flagUseHtml = false;
+  calculator.evaluate(calculator.inputString);
   std::fstream outputFile;
   std::string outputFileName;
   if (!FileOperations::getPhysicalFileNameFromVirtual(
@@ -4511,8 +4511,8 @@ int WebServer::mainCommandLine() {
   FileOperations::openFileCreateIfNotPresentVirtual(
     outputFile, "output/outputFileCommandLine.html", false, true, false
   );
-  global << theCalculator.outputString;
-  outputFile << theCalculator.outputString;
+  global << calculator.outputString;
+  outputFile << calculator.outputString;
   global << "\nTotal running time: " << Logger::blue << global.getElapsedMilliseconds() << " ms. "
   << Logger::endL
   << "Output written in: " << Logger::green << outputFileName << Logger::endL << "\n";
@@ -4524,7 +4524,7 @@ void WebWorker::prepareFullMessageHeaderAndFooter() {
   this->remainingBytesToSend.setSize(0);
   this->remainingBytesToSend.setExpectedSize(this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30);
   if (this->remainingHeaderToSend.size == 0) {
-    if (this->requestTypE != this->requestHead) {
+    if (this->requestType != this->requestHead) {
       this->remainingBytesToSend = this->remainingBodyToSend;
     }
     this->remainingBodyToSend.setSize(0);
@@ -4541,7 +4541,7 @@ void WebWorker::prepareFullMessageHeaderAndFooter() {
   for (unsigned i = 0; i < contentLengthString.size(); i ++) {
     this->remainingBytesToSend.addOnTop(contentLengthString[i]);
   }
-  if (this->requestTypE != this->requestHead) {
+  if (this->requestType != this->requestHead) {
     this->remainingBytesToSend.addListOnTop(this->remainingBodyToSend);
   }
   this->remainingBodyToSend.setSize(0);

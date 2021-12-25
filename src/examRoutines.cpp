@@ -1785,24 +1785,24 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
   }
 }
 
-std::string CalculatorHTML::toStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML>& elements) {
+std::string CalculatorHTML::toStringInterprettedCommands(Calculator &calculator, List<SyntacticElementHTML>& elements) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringInterprettedCommands");
   std::stringstream out;
   out << "<table>";
-  int commandCounter = theInterpreter.programExpression.size() - 1;
+  int commandCounter = calculator.programExpression.size() - 1;
   for (int eltCounter = elements.size - 1; eltCounter > 0; eltCounter --) {
     SyntacticElementHTML& currentElt = elements[eltCounter];
     std::string currentEltString = currentElt.getTagClass() + "[" + currentElt.content.substr(0, 10) + "...]";
     if (!currentElt.isInterpretedByCalculatorOnGeneration()) {
       out << "<tr><td>" << currentEltString << "</td>"
       << "<td>"
-      << theInterpreter.programExpression[commandCounter].toString()
+      << calculator.programExpression[commandCounter].toString()
       << "</td></tr>";
       commandCounter --;
       continue;
     }
     for (; commandCounter > 1; commandCounter --) {
-      std::string currentString= theInterpreter.programExpression[commandCounter].toString();
+      std::string currentString= calculator.programExpression[commandCounter].toString();
       out << "<tr><td>" << currentEltString << "</td><td>"
       << currentString << "</td></tr>";
       if (currentString == "SeparatorBetweenSpans") {
@@ -3550,26 +3550,26 @@ bool TopicElement::pdfSlidesOpenIfAvailable(
   if (this->sourceSlides.size == 0) {
     return true;
   }
-  LaTeXCrawler theCrawler;
-  theCrawler.desiredPresentationTitle = this->title;
+  LaTeXCrawler latexCrawler;
+  latexCrawler.desiredPresentationTitle = this->title;
 
-  theCrawler.addSlidesOnTop(owner.slidesSourcesHeaders);
-  theCrawler.addSlidesOnTop(this->sourceSlides);
-  theCrawler.flagProjectorMode = true;
-  theCrawler.flagHomeworkRatherThanSlides = false;
-  if (!theCrawler.extractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
+  latexCrawler.addSlidesOnTop(owner.slidesSourcesHeaders);
+  latexCrawler.addSlidesOnTop(this->sourceSlides);
+  latexCrawler.flagProjectorMode = true;
+  latexCrawler.flagHomeworkRatherThanSlides = false;
+  if (!latexCrawler.extractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
     return false;
   }
   std::string actualOutput;
   FileOperations::getPhysicalFileNameFromVirtual(
-    theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
+    latexCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
   );
   global << "Physical filename: " << actualOutput << Logger::endL;
-  if (!theCrawler.flagPDFExists && commentsOnFailure != nullptr) {
+  if (!latexCrawler.flagPDFExists && commentsOnFailure != nullptr) {
     *commentsOnFailure << "Could not find file: "
-    << theCrawler.targetPDFFileNameWithPathVirtual << ". ";
+    << latexCrawler.targetPDFFileNameWithPathVirtual << ". ";
   }
-  return theCrawler.flagPDFExists;
+  return latexCrawler.flagPDFExists;
 }
 
 bool TopicElement::pdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
@@ -3585,25 +3585,25 @@ bool TopicElement::pdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::strin
   if (this->sourceHomework.size == 0) {
     return true;
   }
-  LaTeXCrawler theCrawler;
-  theCrawler.desiredPresentationTitle = this->title;
+  LaTeXCrawler latexCrawler;
+  latexCrawler.desiredPresentationTitle = this->title;
 
-  theCrawler.addSlidesOnTop(owner.sourcesHomeworkHeaders);
-  theCrawler.addSlidesOnTop(this->sourceHomework);
-  theCrawler.flagHomeworkRatherThanSlides = true;
-  if (!theCrawler.extractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
+  latexCrawler.addSlidesOnTop(owner.sourcesHomeworkHeaders);
+  latexCrawler.addSlidesOnTop(this->sourceHomework);
+  latexCrawler.flagHomeworkRatherThanSlides = true;
+  if (!latexCrawler.extractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
     return false;
   }
   std::string actualOutput;
   FileOperations::getPhysicalFileNameFromVirtual(
-    theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
+    latexCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
   );
   global << "Physical filename: " << actualOutput << Logger::endL;
-  if (!theCrawler.flagPDFExists && commentsOnFailure != nullptr) {
+  if (!latexCrawler.flagPDFExists && commentsOnFailure != nullptr) {
     *commentsOnFailure << "Could not find file: "
-    << theCrawler.targetPDFFileNameWithPathVirtual << ". ";
+    << latexCrawler.targetPDFFileNameWithPathVirtual << ". ";
   }
-  return theCrawler.flagPDFExists;
+  return latexCrawler.flagPDFExists;
 }
 
 bool TopicElement::pdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {

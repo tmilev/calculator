@@ -5253,7 +5253,7 @@ public:
     PartialFractions& owner, Vectors<Rational>& output, int dimension, Matrix<Rational>& buffer
   );
   int computeGainingMultiplicityIndexInLinearRelation(
-    bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation
+    bool flagUsingOrlikSolomon, Matrix<Rational>& linearRelation
   );
   void getRootsFromDenominator(
     PartialFractions& owner, Vectors<Rational>& output
@@ -5270,7 +5270,7 @@ public:
     PartialFractions& owner
   );
   bool decomposeFromLinearRelation(
-    Matrix<Rational>& theLinearRelation,
+    Matrix<Rational>& linearRelation,
     LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output,
     bool flagUsingOSbasis,
     List<Vector<Rational> >& startingVectors

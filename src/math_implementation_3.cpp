@@ -12176,26 +12176,26 @@ void ConeComplex::getNewVerticesAppend(
   int dimensionMinusTwo = killerNormal.size - 2;
   int dimension = killerNormal.size;
   LargeInteger numberOfCycles = MathRoutines::nChooseK(myDyingCone.normals.size, dimensionMinusTwo);
-  Selection theSel;
+  Selection selection;
   Selection nonPivotPoints;
-  theSel.initialize(myDyingCone.normals.size);
-  Matrix<Rational> theLinearAlgebra;
-  theLinearAlgebra.initialize(dimensionMinusTwo + 1, dimension);
+  selection.initialize(myDyingCone.normals.size);
+  Matrix<Rational> toBeEliminated;
+  toBeEliminated.initialize(dimensionMinusTwo + 1, dimension);
   Vector<Rational> tempRoot;
   for (int i = 0; i < numberOfCycles; i ++) {
-    theSel.incrementSelectionFixedCardinality(dimensionMinusTwo);//, indexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
+    selection.incrementSelectionFixedCardinality(dimensionMinusTwo);//, indexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
     for (int j = 0; j < dimensionMinusTwo; j ++) {
-      Vector<Rational>& currentNormal = myDyingCone.normals[theSel.elements[j]];
+      Vector<Rational>& currentNormal = myDyingCone.normals[selection.elements[j]];
       for (int k = 0; k < dimension; k ++) {
-        theLinearAlgebra.elements[j][k] = currentNormal[k];
+        toBeEliminated.elements[j][k] = currentNormal[k];
       }
     }
     for (int k = 0; k < dimension; k ++) {
-      theLinearAlgebra.elements[dimensionMinusTwo][k] = killerNormal[k];
+      toBeEliminated.elements[dimensionMinusTwo][k] = killerNormal[k];
     }
-    theLinearAlgebra.gaussianEliminationByRows(nullptr, &nonPivotPoints);
+    toBeEliminated.gaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.cardinalitySelection == 1) {
-      theLinearAlgebra.nonPivotPointsToEigenVector(nonPivotPoints, tempRoot, Rational(1), Rational(0));
+      toBeEliminated.nonPivotPointsToEigenVector(nonPivotPoints, tempRoot, Rational(1), Rational(0));
       Cone::scaleNormalizeByPositive(tempRoot);
       if (myDyingCone.isInCone(tempRoot)) {
         outputVertices.addOnTopNoRepetition(tempRoot);

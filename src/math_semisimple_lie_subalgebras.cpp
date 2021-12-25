@@ -770,8 +770,8 @@ std::string SemisimpleSubalgebras::toStringTableSubalgebraLinksTable(FormatExpre
   bool rowStarted = false;
   int displayedInCurrentRow = 0;
   for (int i = 0; i < this->subalgebras.size(); i ++) {
-    CandidateSemisimpleSubalgebra& theSA = this->subalgebras.values[i];
-    if (theSA.flagSystemProvedToHaveNoSolution) {
+    CandidateSemisimpleSubalgebra& subalgebra = this->subalgebras.values[i];
+    if (subalgebra.flagSystemProvedToHaveNoSolution) {
       continue;
     }
     displayedInCurrentRow ++;
@@ -781,7 +781,7 @@ std::string SemisimpleSubalgebras::toStringTableSubalgebraLinksTable(FormatExpre
     }
     int displayIndex = this->getDisplayIndexFromActual(i);
     out << "<td>" << displayIndex << ". " << "<a href='#semisimple_subalgebra_" << displayIndex
-    << "'>\\(" << theSA.weylNonEmbedded->dynkinType.toString() << "\\)</a></td>";
+    << "'>\\(" << subalgebra.weylNonEmbedded->dynkinType.toString() << "\\)</a></td>";
     if (displayedInCurrentRow >= numberOfColumns) {
       out << "</tr>";
       rowStarted = false;
@@ -1797,16 +1797,16 @@ void SemisimpleSubalgebras::getHCandidates(
   ProgressReport report2;
   ProgressReport report3;
   int baseRank = currentType.getRank() - 1;
-  DynkinSimpleType theSmallType = currentType.getSmallestSimpleType();
+  DynkinSimpleType smallType = currentType.getSmallestSimpleType();
   if (report1.tickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "the latest root of the candidate simple component " << theSmallType.toString();
+    reportStream << "the latest root of the candidate simple component " << smallType.toString();
     report1.report(reportStream.str());
   }
   int indexNewRooT = *currentRootInjection.lastObject();
-  int indexNewRootInSmallType = indexNewRooT - currentType.getRank() + theSmallType.rank;
-  Rational desiredHScaledToActByTwoLengthSquared = theSmallType.cartanSymmetricInverseScale * 4 /
-  theSmallType.getDefaultRootLengthSquared(indexNewRootInSmallType);
+  int indexNewRootInSmallType = indexNewRooT - currentType.getRank() + smallType.rank;
+  Rational desiredHScaledToActByTwoLengthSquared = smallType.cartanSymmetricInverseScale * 4 /
+  smallType.getDefaultRootLengthSquared(indexNewRootInSmallType);
   outputHCandidatesScaledToActByTwo.setSize(0);
   for (int j = 0; j < this->slTwoSubalgebras.size; j ++) {
     if (report2.tickAndWantReport()) {
@@ -2458,15 +2458,6 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
   }
   return true;
 }
-
-/*
-void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSemisimpleSubalgebra& input) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::RegisterPossibleCandidate");
-  this->checkConsistency();
-  if (input.theSubalgebraNonEmbeddedDefaultScale == 0)
-    global.fatal << "Non-initialized non-default scale subalgebra in candidate subalgebra. " << global.fatal;
-  this->checkInitialization();
-}*/
 
 bool DynkinType::isTypeAOne() const {
   if (this->size() != 1) {
@@ -7061,13 +7052,13 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(FormatExpression
 
   out << "</table>";
   out << "<br>modules corresponding to the semisimple subalgebra: ";
-  Vector<Rational> theSAvector, tempV;
-  theSAvector.makeZero(this->nilradicalPairingTable.size);
+  Vector<Rational> subalgebraVector, tempV;
+  subalgebraVector.makeZero(this->nilradicalPairingTable.size);
   for (int i = 0; i < this->subalgebraModules.size; i ++) {
     tempV.makeEi(this->nilradicalPairingTable.size, this->subalgebraModules[i]);
-    theSAvector += tempV;
+    subalgebraVector += tempV;
   }
-  out << theSAvector.toStringLetterFormat("V");
+  out << subalgebraVector.toStringLetterFormat("V");
   out << "<br><table><tr><td>modules</td>";
   FormatExpressions characterFormat;
   if (!this->characterFormat.isZeroPointer()) {

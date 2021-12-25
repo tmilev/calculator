@@ -1159,13 +1159,13 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   if (!this->problem.loadAndParseTopicList(out)) {
     hasDeadline = false;
   }
-  std::string theSQLstring;
-  theSQLstring = user.sectionComputed;
+  std::string sqlString;
+  sqlString = user.sectionComputed;
   if (hasDeadline) {
     bool unused = false;
     std::string deadlineString = this->problem.getDeadline(
       this->problem.fileName,
-      HtmlRoutines::convertStringToURLString(theSQLstring, false),
+      HtmlRoutines::convertStringToURLString(sqlString, false),
       unused
     );
 
@@ -2001,8 +2001,8 @@ std::string WebAPIResponse::getScoresPage() {
   std::stringstream out;
   CalculatorHTML thePage;
   thePage.loadDatabaseInfo(out);
-  std::string theScoresHtml = WebAPIResponse::toStringUserScores();
-  out << theScoresHtml;
+  std::string scoresHtml = WebAPIResponse::toStringUserScores();
+  out << scoresHtml;
   return out.str();
 }
 
@@ -2029,7 +2029,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     << "<br>";
   }
   UserCalculator currentUser;
-  HashedList<std::string, MathRoutines::hashString> theSections;
+  HashedList<std::string, MathRoutines::hashString> sections;
   List<std::string> sectionDescriptions;
   List<List<std::string> > activatedAccountBucketsBySection;
   List<List<std::string> > preFilledLinkBucketsBySection;
@@ -2042,19 +2042,19 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     )) {
       continue;
     }
-    if (!theSections.contains(currentUser.sectionInDB)) {
+    if (!sections.contains(currentUser.sectionInDB)) {
       std::stringstream currentSectionInfo;
       currentSectionInfo << "<b>Section: </b>" << currentUser.sectionInDB
       << ", <b>Course: </b>" << currentUser.courseInDB
       << ", <b>Instructor: </b>" << currentUser.instructorInDB;
-      theSections.addOnTop(currentUser.sectionInDB);
+      sections.addOnTop(currentUser.sectionInDB);
       sectionDescriptions.addOnTop(currentSectionInfo.str());
     }
   }
-  theSections.quickSortAscending(nullptr, &sectionDescriptions);
-  activatedAccountBucketsBySection.setSize(theSections.size);
-  nonActivatedAccountBucketsBySection.setSize(theSections.size);
-  preFilledLinkBucketsBySection.setSize(theSections.size);
+  sections.quickSortAscending(nullptr, &sectionDescriptions);
+  activatedAccountBucketsBySection.setSize(sections.size);
+  nonActivatedAccountBucketsBySection.setSize(sections.size);
+  preFilledLinkBucketsBySection.setSize(sections.size);
   int numActivatedUsers = 0;
   for (int i = 0; i < users.size; i ++) {
     currentUser.loadFromJSON(users[i]);
@@ -2121,7 +2121,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     << currentUser.username << "\">" << currentUser.username << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     oneTableLineStream << "</tr>";
-    int indexCurrentBucket = theSections.getIndex(currentUser.sectionInDB);
+    int indexCurrentBucket = sections.getIndex(currentUser.sectionInDB);
     if (indexCurrentBucket != - 1) {
       if (isActivated) {
         activatedAccountBucketsBySection[indexCurrentBucket].addOnTop(oneTableLineStream.str());
@@ -2148,7 +2148,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     if (!adminsOnly) {
       if (nonActivatedAccountBucketsBySection[i].size > 0) {
         tableStream << "<tr><td colspan =\"6\" style =\"text-align:center\">"
-        << theSections[i] << "</td></tr>";
+        << sections[i] << "</td></tr>";
       }
     }
     for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++) {
@@ -2159,7 +2159,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     if (!adminsOnly) {
       if (activatedAccountBucketsBySection[i].size > 0) {
         tableStream << "<tr><td colspan =\"7\" style =\"text-align:center\">"
-        << theSections[i] << "</td></tr>";
+        << sections[i] << "</td></tr>";
       }
     }
     for (int j = 0; j < activatedAccountBucketsBySection[i].size; j ++) {
@@ -2171,7 +2171,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   if (!adminsOnly) {
     for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++) {
       if (preFilledLinkBucketsBySection[i].size > 0) {
-        preFilledLoginLinks << theSections[i] << "<br>";
+        preFilledLoginLinks << sections[i] << "<br>";
       }
       for (int j = 0; j < preFilledLinkBucketsBySection[i].size; j ++) {
         preFilledLoginLinks << preFilledLinkBucketsBySection[i][j]
@@ -2255,9 +2255,9 @@ int ProblemData::getExpectedNumberOfAnswers(
         if (expectedNumberOfAnswersString == "") {
           continue;
         }
-        std::stringstream theStream(expectedNumberOfAnswersString);
+        std::stringstream stringStream(expectedNumberOfAnswersString);
         int numAnswers = - 1;
-        theStream >> numAnswers;
+        stringStream >> numAnswers;
         if (numAnswers == - 1) {
           continue;
         }
@@ -2508,16 +2508,16 @@ std::string WebAPIResponse::getScoresInCoursePage() {
   }
   std::stringstream out;
   out.precision(4);
-  UserScores theScores;
-  if (!theScores.ComputeScoresAndStats(out)) {
+  UserScores scores;
+  if (!scores.ComputeScoresAndStats(out)) {
     return out.str();
   }
-  out << "Section: " << theScores.currentSection << ". ";
+  out << "Section: " << scores.currentSection << ". ";
   out << "<script type =\"text/javascript\">\n";
   out << "studentScoresInHomePage = new Array("
-  << theScores.problem.topics.topics.size() << ");\n";
-  for (int i = 0; i < theScores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = theScores.problem.topics.topics.values[i];
+  << scores.problem.topics.topics.size() << ");\n";
+  for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = scores.problem.topics.topics.values[i];
     out << "studentScoresInHomePage[" << i << "] = new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight) {
       out << "studentScoresInHomePage[" << i << "].weightsOK = false;\n";
@@ -2528,13 +2528,13 @@ std::string WebAPIResponse::getScoresInCoursePage() {
     << "'"
     << "';\n";
     out << "studentScoresInHomePage[" << i << "].numSolvedAll ="
-    << theScores.numStudentsSolvedEntireTopic[i]
+    << scores.numStudentsSolvedEntireTopic[i]
     << ";\n";
     out << "studentScoresInHomePage[" << i << "].numSolvedPart ="
-    << theScores.numStudentsSolvedPartOfTopic[i]
+    << scores.numStudentsSolvedPartOfTopic[i]
     << ";\n";
     out << "studentScoresInHomePage[" << i << "].numSolvedNone ="
-    << theScores.numStudentsSolvedNothingInTopic[i]
+    << scores.numStudentsSolvedNothingInTopic[i]
     << ";\n";
   }
   out << "</script>";
@@ -2552,17 +2552,17 @@ std::string WebAPIResponse::toStringUserScores() {
 
   std::stringstream out;
   out.precision(4);
-  UserScores theScores;
-  if (!theScores.ComputeScoresAndStats(out)) {
+  UserScores scores;
+  if (!scores.ComputeScoresAndStats(out)) {
     return out.str();
   }
-  out << "<b>Section: </b>" << theScores.currentSection
+  out << "<b>Section: </b>" << scores.currentSection
   << "<br><b>Course: </b>"
-  << theScores.currentCourse << "\n<br>\n";
+  << scores.currentCourse << "\n<br>\n";
   out << "<table class =\"scoreTable\"><tr><th rowspan =\"3\">User</th>"
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
-  for (int i = 0; i < theScores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = theScores.problem.topics.topics.values[i];
+  for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = scores.problem.topics.topics.values[i];
     if (
       currentElt.problemFileName != "" ||
       currentElt.type != TopicElement::types::chapter
@@ -2581,8 +2581,8 @@ std::string WebAPIResponse::toStringUserScores() {
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i = 0; i < theScores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = theScores.problem.topics.topics.values[i];
+  for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = scores.problem.topics.topics.values[i];
     if (currentElt.problemFileName != "" || currentElt.type != TopicElement::types::section) {
       continue;
     }
@@ -2595,8 +2595,8 @@ std::string WebAPIResponse::toStringUserScores() {
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i = 0; i < theScores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = theScores.problem.topics.topics.values[i];
+  for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
+    TopicElement& currentElt = scores.problem.topics.topics.values[i];
     if (
       currentElt.problemFileName == "" &&
       currentElt.type != TopicElement::types::problem &&
@@ -2625,10 +2625,10 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "<tr><td><b>maximum score</b></td>"
   << "<td>-</td>";
   out
-  << "<td>" << theScores.problem.currentUser.pointsMax.getDoubleValue()
+  << "<td>" << scores.problem.currentUser.pointsMax.getDoubleValue()
   << "</td>";
-  for (int j = 0; j < theScores.problem.topics.topics.size(); j ++) {
-    TopicElement& currentElt = theScores.problem.topics.topics.values[j];
+  for (int j = 0; j < scores.problem.topics.topics.size(); j ++) {
+    TopicElement& currentElt = scores.problem.topics.topics.values[j];
     if (currentElt.problemFileName != "") {
       continue;
     }
@@ -2641,12 +2641,12 @@ std::string WebAPIResponse::toStringUserScores() {
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
-  for (int i = 0; i < theScores.userInfos.size; i ++) {
-    out << "<tr><td>" << theScores.userNames[i] << "</td>"
-    << "<td>" << theScores.userInfos[i] << "</td>"
-    << "<td>" << theScores.userScores[i].getDoubleValue() << "</td>";
-    for (int j = 0; j < theScores.problem.topics.topics.size(); j ++) {
-      TopicElement& currentElt = theScores.problem.topics.topics.values[j];
+  for (int i = 0; i < scores.userInfos.size; i ++) {
+    out << "<tr><td>" << scores.userNames[i] << "</td>"
+    << "<td>" << scores.userInfos[i] << "</td>"
+    << "<td>" << scores.userScores[i].getDoubleValue() << "</td>";
+    for (int j = 0; j < scores.problem.topics.topics.size(); j ++) {
+      TopicElement& currentElt = scores.problem.topics.topics.values[j];
       if (currentElt.problemFileName != "") {
         continue;
       }
@@ -2656,11 +2656,11 @@ std::string WebAPIResponse::toStringUserScores() {
       ) {
         continue;
       }
-      if (theScores.scoresBreakdown[i].contains(
-        theScores.problem.topics.topics.keys[j]
+      if (scores.scoresBreakdown[i].contains(
+        scores.problem.topics.topics.keys[j]
       )) {
         out << "<td>"
-        << theScores.scoresBreakdown[i].values[j].getDoubleValue()
+        << scores.scoresBreakdown[i].values[j].getDoubleValue()
         << "</td>";
       } else {
         out << "<td></td>";

@@ -474,9 +474,9 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
     for (int j = i; j < this->characterTable.size; j ++) {
       ClassFunction<FiniteGroup, Rational>& leftChar = this->characterTable[i];
       ClassFunction<FiniteGroup, Rational>& rightChar = this->characterTable[j];
-      Rational theScalarProd = this->getHermitianProduct(leftChar.data, rightChar.data);
+      Rational scalarProduct = this->getHermitianProduct(leftChar.data, rightChar.data);
       if (j != i) {
-        if (theScalarProd != 0) {
+        if (scalarProduct != 0) {
           global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.toString() << " is not orthogonal to char number "
           << j + 1 << " = " << rightChar.toString() << ". <br>The entire char table is: "
@@ -484,7 +484,7 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
         }
       }
       if (j == i) {
-        if (theScalarProd != 1) {
+        if (scalarProduct != 1) {
           global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.toString() << " is not of norm 1. "
           << "<br>The entire char table is: " << this->prettyPrintCharacterTable() << global.fatal;
@@ -693,10 +693,10 @@ template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
   MacroRegisterFunctionWithName("FiniteGroup::computeConjugacyClassesFromAllElements");
   this->computeAllElements(false, - 1);
-  List<bool> Accounted;
-  Accounted.initializeFillInObject(this->elements.size, false);
-  HashedList<int, HashFunctions::hashFunction> theStack;
-  theStack.setExpectedSize(this->elements.size);
+  List<bool> accounted;
+  accounted.initializeFillInObject(this->elements.size, false);
+  HashedList<int, HashFunctions::hashFunction> stack;
+  stack.setExpectedSize(this->elements.size);
   List<elementSomeGroup> inversesOfGenerators;
   inversesOfGenerators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
@@ -706,18 +706,18 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
   List<List<int> > ccIndices;
   ccIndices.reserve(120);
   for (int i = 0; i < this->elements.size; i ++) {
-    if (!Accounted[i]) {
-      theStack.clear();
-      theStack.addOnTop(i);
-      for (int j = 0; j < theStack.size; j ++) {
+    if (!accounted[i]) {
+      stack.clear();
+      stack.addOnTop(i);
+      for (int j = 0; j < stack.size; j ++) {
         for (int k = 0; k < this->generators.size; k ++) {
-          currentElement = inversesOfGenerators[k] * this->elements[theStack[j]] * this->generators[k];
+          currentElement = inversesOfGenerators[k] * this->elements[stack[j]] * this->generators[k];
           int accountedIndex = this->elements.getIndexNoFail(currentElement);
-          theStack.addOnTopNoRepetition(accountedIndex);
-          Accounted[accountedIndex] = true;
+          stack.addOnTopNoRepetition(accountedIndex);
+          accounted[accountedIndex] = true;
         }
       }
-      ccIndices.addOnTop(theStack);
+      ccIndices.addOnTop(stack);
       ccIndices.lastObject()->quickSortAscending();
     }
   }
@@ -738,19 +738,19 @@ LargeInteger WeylGroupData::getOrbitSize(Vector<Coefficient>& weight) {
   // and finally compute the size of the orbit. I will check numerically if everything is ok
   // all the way up to E6.
   Vector<Coefficient> currentWeight;
-  Vectors<Rational> theStabilizingRoots;
+  Vectors<Rational> stabilizingRoots;
   for (int i = 0; i < this->rootsOfBorel.size; i ++) {
     this->reflectBetaWithRespectToAlpha(this->rootsOfBorel[i], weight, false, currentWeight);
     if (currentWeight == weight) {
-      theStabilizingRoots.addOnTop(this->rootsOfBorel[i]);
+      stabilizingRoots.addOnTop(this->rootsOfBorel[i]);
     }
   }
-  DynkinDiagramRootSubalgebra theStabilizerSubsystem;
-  theStabilizerSubsystem.computeDiagramTypeModifyInput(theStabilizingRoots, *this);
-  DynkinType theStabilizerDynkinType;
-  theStabilizerSubsystem.getDynkinType(theStabilizerDynkinType);
+  DynkinDiagramRootSubalgebra stabilizerSubsystem;
+  stabilizerSubsystem.computeDiagramTypeModifyInput(stabilizingRoots, *this);
+  DynkinType stabilizerDynkinType;
+  stabilizerSubsystem.getDynkinType(stabilizerDynkinType);
   Rational resultRat = this->group.getSize();
-  resultRat /= theStabilizerDynkinType.getWeylGroupSizeByFormula();
+  resultRat /= stabilizerDynkinType.getWeylGroupSizeByFormula();
   LargeInteger result;
   if (!resultRat.isInteger(&result)) {
     global.fatal << "Something has gone very wrong: orbit size reported to be " << resultRat.toString()
@@ -850,7 +850,7 @@ void WeylGroupData::raiseToDominantWeight(
   if (stabilizerFound != nullptr) {
     *stabilizerFound = false;
   }
-  Coefficient theScalarProd;
+  Coefficient scalarProduct;
   int dimension = this->getDimension();
   SimpleReflection theGen;
   if (raisingElt != nullptr) {
@@ -859,12 +859,12 @@ void WeylGroupData::raiseToDominantWeight(
   for (bool found = true; found; ) {
     found = false;
     for (int i = 0; i < dimension; i ++) {
-      theScalarProd = this->getScalarProductSimpleRoot(weight, i);
-      if (theScalarProd.isNegative()) {
+      scalarProduct = this->getScalarProductSimpleRoot(weight, i);
+      if (scalarProduct.isNegative()) {
         found = true;
-        theScalarProd *= 2;
-        theScalarProd /= this->cartanSymmetric.elements[i][i];
-        weight[i] -= theScalarProd;
+        scalarProduct *= 2;
+        scalarProduct /= this->cartanSymmetric.elements[i][i];
+        weight[i] -= scalarProduct;
         if (sign != nullptr) {
           *sign *= - 1;
         }
@@ -874,7 +874,7 @@ void WeylGroupData::raiseToDominantWeight(
         }
       }
       if (stabilizerFound != nullptr) {
-        if (theScalarProd.isEqualToZero()) {
+        if (scalarProduct.isEqualToZero()) {
           *stabilizerFound = true;
         }
       }
@@ -1704,8 +1704,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::r
   if (stabilizerFound != nullptr) {
     *stabilizerFound = false;
   }
-  Rational theScalarProd;
-//  int dimension= this->ambientWeyl->getDimension();
+  Rational scalarProduct;
   for (bool found = true; found; ) {
     found = false;
     for (int i = 0; i < this->simpleRootsInner.size; i ++) {
@@ -1717,7 +1716,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::r
         }
       }
       if (stabilizerFound != nullptr) {
-        if (theScalarProd.isEqualToZero()) {
+        if (scalarProduct.isEqualToZero()) {
           *stabilizerFound = true;
         }
       }

@@ -3583,11 +3583,13 @@ void RootSubalgebras::initOwnerMustBeNonZero() {
   this->owner->weylGroup.computeRho(false);
 }
 
-int RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions(const RootSubalgebra& theSA) {
+int RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions(
+  const RootSubalgebra& subalgebra
+) {
   MacroRegisterFunctionWithName("RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions");
   int result = - 1;
   for (int i = 0; i < this->subalgebras.size; i ++) {
-    if (this->subalgebras[i].isEquivalentToByDiagramsAndDimensions(theSA)) {
+    if (this->subalgebras[i].isEquivalentToByDiagramsAndDimensions(subalgebra)) {
       if (result != - 1) {
         global.fatal << "Experimental code internal check failed. " << global.fatal;
       }
@@ -3673,21 +3675,21 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
   Selection& SelectedBasisRoots, RootSubalgebra& rootSubalgebra
 ) {
   this->computeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, rootSubalgebra);
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup = this->centralizerIsomorphisms.lastObject();
-  this->actionsNormalizerCentralizerNilradical.setSize(theSubgroup.allElements.size - 1);
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& subgroup = this->centralizerIsomorphisms.lastObject();
+  this->actionsNormalizerCentralizerNilradical.setSize(subgroup.allElements.size - 1);
   Vector<Rational> tempRoot;
   ProgressReport report;
-  for (int i = 0; i < theSubgroup.allElements.size - 1; i ++) {
+  for (int i = 0; i < subgroup.allElements.size - 1; i ++) {
     this->actionsNormalizerCentralizerNilradical[i].setSize(rootSubalgebra.modules.size);
     for (int j = 0; j < rootSubalgebra.modules.size; j ++) {
       tempRoot = rootSubalgebra.highestWeightsPrimalSimple[j];
-      theSubgroup.actByNonSimpleElement(i + 1, tempRoot);
+      subgroup.actByNonSimpleElement(i + 1, tempRoot);
       int tempI = rootSubalgebra.getIndexKModuleContainingRoot(tempRoot);
       this->actionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
     if (global.response.monitoringAllowed()) {
       std::stringstream out;
-      out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
+      out << "Computing action of element " << i + 1 << " out of " << subgroup.allElements.size;
       report.report(out.str());
     }
   }

@@ -416,7 +416,7 @@ public:
   void computeParabolicPseudoParabolicNeitherOrder();
   bool isNewSubalgebra(RootSubalgebra& input);
   int getindexSubalgebraIsomorphicTo(RootSubalgebra& input);
-  int getIndexUpToEquivalenceByDiagramsAndDimensions(const RootSubalgebra& theSA);
+  int getIndexUpToEquivalenceByDiagramsAndDimensions(const RootSubalgebra& subalgebra);
   int indexSubalgebra(RootSubalgebra& input);
   void computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
     List<RootSubalgebra>& bufferSubalgebras, int recursionDepth

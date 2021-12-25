@@ -560,7 +560,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   inputData.initAssumingParSelAndHmmInitted();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmallAsSubgroupInLarge = inputData.weylGroupFiniteDimensionalSmallAsSubgroupInLarge;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmall = inputData.weylGroupFiniteDimensionalSmall;
-  SemisimpleLieAlgebra& theSmallAlgebra = inputData.homomorphism.domainAlgebra();
+  SemisimpleLieAlgebra& smallAlgebra = inputData.homomorphism.domainAlgebra();
   Vectors<Rational>& embeddingsSimpleEiGoesTo = inputData.homomorphism.imagesCartanDomain;
 
   CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;
@@ -632,7 +632,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       fundCoordsSmaller[j] = weylGroup.rootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
       fundCoordsSmaller[j] /= weylGroupFiniteDimensionalSmall.ambientWeyl->cartanSymmetric(j, j) / 2;
     }
-    tempMon.owner = &theSmallAlgebra;
+    tempMon.owner = &smallAlgebra;
     tempMon.weightFundamentalCoordinates = fundCoordsSmaller;
     remainingCharProjected.addMonomial(tempMon, remainingCharDominantLevI.coefficients[i]);
   }
@@ -665,7 +665,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       return false;
     }
     for (int i = 0; i < tempHashedRoots.size; i ++) {
-      tempMon.owner = &theSmallAlgebra;
+      tempMon.owner = &smallAlgebra;
       tempMon.weightFundamentalCoordinates =
       weylGroupFiniteDimensionalSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff = tempMults[i];

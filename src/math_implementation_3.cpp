@@ -249,13 +249,13 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
   if (this->threadIndex == - 1) {
     return;
   }
-  ListReferences<StackInfo>& theStack = global.customStackTrace[this->threadIndex];
-  theStack.setSize(theStack.size + 1);
-  StackInfo& stackTop = theStack.lastObject();
+  ListReferences<StackInfo>& stack = global.customStackTrace[this->threadIndex];
+  stack.setSize(stack.size + 1);
+  StackInfo& stackTop = stack.lastObject();
   stackTop.fileName = fileName;
   stackTop.line = line;
   stackTop.functionName = functionName;
-  if (theStack.size > 200000) {
+  if (stack.size > 200000) {
     global.fatal << "Stack too deep: 200000 layers. " << global.fatal;
   }
 }
@@ -7555,21 +7555,21 @@ void WeylGroupData::getExtremeElementInOrbit(
   if (stabilizerFound != nullptr) {
     *stabilizerFound = false;
   }
-  Rational theScalarProd;
+  Rational scalarProduct;
   ElementWeylGroup eltSimplReflection;
   //  static int numTimesReflectionWasApplied = 0;
   for (bool found = true; found;) {
     found = false;
     for (int i = 0; i < this->getDimension(); i ++) {
       bool shouldApplyReflection = false;
-      theScalarProd = this->rootScalarCartanRoot(inputOutput, bufferEiBAsis[i]);
+      scalarProduct = this->rootScalarCartanRoot(inputOutput, bufferEiBAsis[i]);
       if (findLowest) {
-        shouldApplyReflection = theScalarProd.isPositive();
+        shouldApplyReflection = scalarProduct.isPositive();
       } else {
-        shouldApplyReflection = theScalarProd.isNegative();
+        shouldApplyReflection = scalarProduct.isNegative();
       }
       if (stabilizerFound != nullptr) {
-        if (theScalarProd.isEqualToZero()) {
+        if (scalarProduct.isEqualToZero()) {
           *stabilizerFound = true;
         }
       }
@@ -9007,24 +9007,24 @@ void WeylGroupData::transformToSimpleBasisGenerators(
 template <class Coefficient>
 void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(const List<Vector<Coefficient> >& inputVectors) {
   MacroRegisterFunctionWithName("Vector::perturbNoZeroScalarProductWithMe");
-  Coefficient theScalarProdInverted;
+  Coefficient scalarProductInverted;
   for (int i = 0; i < inputVectors.size; i ++) {
     if (this->scalarEuclidean(inputVectors[i]) == 0) {
-      Coefficient theScale = 1;
+      Coefficient scale = 1;
       for (int j = 0; j < i; j ++) {
         if (inputVectors[i].scalarEuclidean(inputVectors[j]) != 0) {
-          theScalarProdInverted = (this->scalarEuclidean(inputVectors[j]) / inputVectors[i].scalarEuclidean(inputVectors[j])) / 2;
-          if (theScalarProdInverted < 0) {
-            theScalarProdInverted *= - 1;
+          scalarProductInverted = (this->scalarEuclidean(inputVectors[j]) / inputVectors[i].scalarEuclidean(inputVectors[j])) / 2;
+          if (scalarProductInverted < 0) {
+            scalarProductInverted *= - 1;
           }
-          if (theScale == 0) {
-            theScale = theScalarProdInverted;
-          } else if (theScalarProdInverted != 0) {
-            theScale = MathRoutines::minimum(theScale, theScalarProdInverted);
+          if (scale == 0) {
+            scale = scalarProductInverted;
+          } else if (scalarProductInverted != 0) {
+            scale = MathRoutines::minimum(scale, scalarProductInverted);
           }
         }
       }
-      *this += inputVectors[i] * theScale;
+      *this += inputVectors[i] * scale;
     }
   }
   for (int i = 0; i < inputVectors.size; i ++) {
@@ -9193,36 +9193,36 @@ bool Lattice::getAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
 
 bool Lattice::getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection(
   Vector<Rational>& startingPoint,
-  Vector<Rational>& theAffineHyperplane,
-  Vector<Rational>& theDirection,
+  Vector<Rational>& affineHyperplane,
+  Vector<Rational>& direction,
   Vector<Rational>& outputPoint
 ) {
-  Vector<Rational> normal = theAffineHyperplane;
-  normal.setSize(theAffineHyperplane.size - 1);
-  Rational theShift = - (*theAffineHyperplane.lastObject());
-  if (normal.scalarEuclidean(startingPoint) == theShift) {
+  Vector<Rational> normal = affineHyperplane;
+  normal.setSize(affineHyperplane.size - 1);
+  Rational shift = - (*affineHyperplane.lastObject());
+  if (normal.scalarEuclidean(startingPoint) == shift) {
     outputPoint = startingPoint;
     return true;
   }
-  if (theDirection.scalarEuclidean(normal).isEqualToZero()) {
+  if (direction.scalarEuclidean(normal).isEqualToZero()) {
     return false;
   }
-  Rational theMovement = (theShift - startingPoint.scalarEuclidean(normal)) / theDirection.scalarEuclidean(normal);
-  global.comments << "<br>the movement: " << theMovement.toString() << ", (" << theShift.toString()
+  Rational movement = (shift - startingPoint.scalarEuclidean(normal)) / direction.scalarEuclidean(normal);
+  global.comments << "<br>the movement: " << movement.toString() << ", (" << shift.toString()
   << " - " << startingPoint.scalarEuclidean(normal).toString() << ")/ "
-  << theDirection.scalarEuclidean(normal).toString() << ", ";
-  if (!theMovement.isInteger()) {
+  << direction.scalarEuclidean(normal).toString() << ", ";
+  if (!movement.isInteger()) {
     global.comments << "the movement is not integral; ";
-    theMovement.assignFloor();
-    if (theDirection.scalarEuclidean(normal).isPositive()) {
-      theMovement += 1;
+    movement.assignFloor();
+    if (direction.scalarEuclidean(normal).isPositive()) {
+      movement += 1;
     }
   }
   global.comments << "the normal: " << normal.toString() << ", the direction: "
-  << theDirection.toString() << ", the shift: " << theShift.toString()
-  << ", the movement: " << theMovement.toString() << ", startingPoint: " << startingPoint.toString();
+  << direction.toString() << ", the shift: " << shift.toString()
+  << ", the movement: " << movement.toString() << ", startingPoint: " << startingPoint.toString();
   outputPoint = startingPoint;
-  outputPoint += theDirection * theMovement;
+  outputPoint += direction * movement;
   global.comments << ", finalPoint: " << outputPoint.toString();
   return true;
 }
@@ -10600,17 +10600,17 @@ bool Cone::isRegularToBasis(
   Vector<Rational>& outputFailingNormal,
   int dimension
 ) {
-  Selection WallSelection;
-  WallSelection.initialize(basis.size);
+  Selection wallSelection;
+  wallSelection.initialize(basis.size);
   LargeInteger x = MathRoutines::nChooseK(basis.size, dimension - 1);
   Matrix<Rational> bufferMat;
   Vector<Rational> candidate;
-  Rational theScalarProduct;
+  Rational scalarProduct;
   for (int i = 0; i < x; i ++) {
-    WallSelection.incrementSelectionFixedCardinality(dimension - 1);
-    if (basis.computeNormalFromSelection(candidate, WallSelection, bufferMat, dimension)) {
-      candidate.scalarEuclidean(input, theScalarProduct);
-      if (theScalarProduct.isEqualToZero()) {
+    wallSelection.incrementSelectionFixedCardinality(dimension - 1);
+    if (basis.computeNormalFromSelection(candidate, wallSelection, bufferMat, dimension)) {
+      candidate.scalarEuclidean(input, scalarProduct);
+      if (scalarProduct.isEqualToZero()) {
         outputFailingNormal = candidate;
         return false;
       }
@@ -10943,8 +10943,8 @@ void DrawOperations::rotateOutOfPlane(
 }
 
 void DrawOperations::modifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2) {
-  double theScalar = this->bilinearForm.scalarProduct(root1, root2) / this->bilinearForm.scalarProduct(root2, root2);
-  root1 -= root2 * theScalar;
+  double scalar = this->bilinearForm.scalarProduct(root1, root2) / this->bilinearForm.scalarProduct(root2, root2);
+  root1 -= root2 * scalar;
   this->scaleToUnitLength(root1);
   this->scaleToUnitLength(root2);
 }
@@ -12057,8 +12057,8 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   Vector<Rational> tempRoot, extraEquation, exitNormalAffine, enteringNormalAffine;
   Vector<Rational> exitNormalLatticeLevel, exitNormalShiftedAffineProjected;
   Vector<Rational> directionSmallerDim, directionSmallerDimOnLattice;
-  Vector<Rational> theShiftReduced = this->shift;
-  this->lattice.reduceVector(theShiftReduced);
+  Vector<Rational> shiftReduced = this->shift;
+  this->lattice.reduceVector(shiftReduced);
   Vectors<Rational> exitRepresentatives, exitWallsShifted;
   Lattice exitRougherLattice;
   ConeLatticeAndShift tempCLS;
@@ -12102,7 +12102,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     }
     exitRougherLattice.applyLinearMap(theProjectionLatticeLevel, tempCLS.lattice);
     for (int j = 0; j < exitRepresentatives.size; j ++) {
-      exitRepresentatives[j] += theShiftReduced;
+      exitRepresentatives[j] += shiftReduced;
       Lattice::getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection(
         exitRepresentatives[j], exitNormalAffine, directionSmallerDimOnLattice, exitRepresentatives[j]
       );

@@ -118,13 +118,13 @@ double MeshTriangles::getTriangleMaxSideLength(int triangleIndex) {
   Vector<double>& firstV = this->triangles[triangleIndex][0];
   Vector<double>& secondV = this->triangles[triangleIndex][1];
   Vector<double>& thirdV = this->triangles[triangleIndex][2];
-  List<Vector<double> > theSides;
-  theSides.addOnTop(firstV - secondV);
-  theSides.addOnTop(secondV - thirdV);
-  theSides.addOnTop(thirdV - firstV);
+  List<Vector<double> > sides;
+  sides.addOnTop(firstV - secondV);
+  sides.addOnTop(secondV - thirdV);
+  sides.addOnTop(thirdV - firstV);
   double result = 0;
-  for (int i = 0; i < theSides.size; i ++) {
-    double normSquared = theSides[i][0] * theSides[i][0] + theSides[i][1] * theSides[i][1];
+  for (int i = 0; i < sides.size; i ++) {
+    double normSquared = sides[i][0] * sides[i][0] + sides[i][1] * sides[i][1];
     result = MathRoutines::maximum(result, FloatingPoint::sqrtFloating(normSquared));
   }
   return result;
@@ -231,7 +231,7 @@ void MeshTriangles::computeImplicitPlotPart2() {
   double minSide = MathRoutines::minimum(this->height, this->width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
   currentPlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
-  Vectors<double>& theSegment = currentPlot.pointsDouble;
+  Vectors<double>& segment = currentPlot.pointsDouble;
   List<Vector<double> > currentTriangle;
   for (int i = 0; i < this->triangles.size; i ++) {
     currentTriangle = this->triangles[i]; //making a copy in case this->theTriangles changes underneath.
@@ -264,17 +264,17 @@ void MeshTriangles::computeImplicitPlotPart2() {
       this->subdivide(i);
       continue;
     }
-    theSegment.setSize(0);
+    segment.setSize(0);
     if (prod01 <= 0) {
-      this->addPointFromVerticesValues(theSegment, currentTriangle[0], currentTriangle[1], val0, val1);
+      this->addPointFromVerticesValues(segment, currentTriangle[0], currentTriangle[1], val0, val1);
     }
     if (prod12 <= 0) {
-      this->addPointFromVerticesValues(theSegment, currentTriangle[1], currentTriangle[2], val1, val2);
+      this->addPointFromVerticesValues(segment, currentTriangle[1], currentTriangle[2], val1, val2);
     }
-    if (prod20 <= 0 && theSegment.size < 2) {
-      this->addPointFromVerticesValues(theSegment, currentTriangle[2], currentTriangle[0], val2, val0);
+    if (prod20 <= 0 && segment.size < 2) {
+      this->addPointFromVerticesValues(segment, currentTriangle[2], currentTriangle[0], val2, val0);
     }
-    if (theSegment.size != 2) {
+    if (segment.size != 2) {
       continue;
     }
     this->curve.addPlotOnTop(currentPlot);
@@ -883,12 +883,12 @@ bool CalculatorFunctions::sumTimesExpressionToSumOf(
     if (!input[1][1].startsWith(calculator.opLimitBoundary())) {
       return false;
     }
-    Expression theSummed(calculator);
-    theSummed.addChildOnTop(input[0]);
-    theSummed.addChildOnTop(input[1][2]);
-    theSummed.addChildOnTop(input[2]);
+    Expression accumulated(calculator);
+    accumulated.addChildOnTop(input[0]);
+    accumulated.addChildOnTop(input[1][2]);
+    accumulated.addChildOnTop(input[2]);
     output = input[1];
-    return output.setChild(2,theSummed);
+    return output.setChild(2,accumulated);
   }
   return false;
 }

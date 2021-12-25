@@ -632,8 +632,8 @@ std::string Plot::toStringDebug() {
   out <<  "Objects: " << this->plotObjects.size << "<br>";
   for (int i = 0; i < this->plotObjects.size; i ++) {
     if (this->plotObjects[i].plotType == "surface") {
-      PlotObject& theSurface = this->plotObjects[i];
-      out << theSurface.toStringDebug();
+      PlotObject& surface = this->plotObjects[i];
+      out << surface.toStringDebug();
     }
   }
   return out.str();

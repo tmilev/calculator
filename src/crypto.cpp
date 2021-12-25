@@ -370,7 +370,8 @@ bool Crypto::convertBase64ToBitStream(
   MacroRegisterFunctionWithName("Crypto::Base64ToBitStream");
   output.reserve(static_cast<signed>((3 * input.size()) / 4 + 1));
   output.setSize(0);
-  uint32_t theStack = 0, sixBitDigit = 0;
+  uint32_t stack = 0;
+  uint32_t sixBitDigit = 0;
   int numBitsInStack = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     bool isGood = Crypto::get6BitFromChar(static_cast<unsigned char>(input[i]), sixBitDigit);
@@ -378,7 +379,7 @@ bool Crypto::convertBase64ToBitStream(
       continue;
     }
     if (!isGood && input[i] == '=' ) {
-      theStack = 0;
+      stack = 0;
       numBitsInStack += 6;
       numBitsInStack %= 8;
       continue;
@@ -390,23 +391,23 @@ bool Crypto::convertBase64ToBitStream(
       }
       return false;
     }
-    theStack *= 64;
-    theStack += sixBitDigit;
+    stack *= 64;
+    stack += sixBitDigit;
     numBitsInStack += 6;
     if (numBitsInStack == 12) {
-      output.addOnTop(static_cast<unsigned char>(theStack / 16));
+      output.addOnTop(static_cast<unsigned char>(stack / 16));
       numBitsInStack = 4;
-      theStack = theStack % 16;
+      stack = stack % 16;
     }
     if (numBitsInStack == 8) {
-      output.addOnTop(static_cast<unsigned char>(theStack));
+      output.addOnTop(static_cast<unsigned char>(stack));
       numBitsInStack = 0;
-      theStack = 0;
+      stack = 0;
     }
     if (numBitsInStack == 10) {
-      output.addOnTop(static_cast<unsigned char>(theStack / 4));
+      output.addOnTop(static_cast<unsigned char>(stack / 4));
       numBitsInStack = 2;
-      theStack = theStack % 4;
+      stack = stack % 4;
     }
   }
   if (commentsGeneral != nullptr && numBitsInStack != 0) {
@@ -452,38 +453,38 @@ std::string Crypto::convertListUnsignedCharsToBase64(
   const List<unsigned char>& input, bool useBase64URL
 ) {
   MacroRegisterFunctionWithName("Crypto::convertListUnsignedCharsToBase64");
-  uint32_t theStack = 0;
-  int numBitsInTheStack = 0;
+  uint32_t stack = 0;
+  int numberOfBitsInStack = 0;
   std::string result;
   result.reserve(static_cast<unsigned>((input.size * 4) / 3 + 1));
   for (int i = 0; i < input.size; i ++) {
-    theStack *= 256;
-    theStack += input[i];
-    numBitsInTheStack += 8;
-    if (numBitsInTheStack == 8) {
-      result.push_back(Crypto::getCharFrom6Bit(theStack / 4, useBase64URL));
-      numBitsInTheStack = 2;
-      theStack %= 4;
+    stack *= 256;
+    stack += input[i];
+    numberOfBitsInStack += 8;
+    if (numberOfBitsInStack == 8) {
+      result.push_back(Crypto::getCharFrom6Bit(stack / 4, useBase64URL));
+      numberOfBitsInStack = 2;
+      stack %= 4;
     }
-    if (numBitsInTheStack == 10) {
-      result.push_back(Crypto::getCharFrom6Bit(theStack / 16, useBase64URL));
-      numBitsInTheStack = 4;
-      theStack %= 16;
+    if (numberOfBitsInStack == 10) {
+      result.push_back(Crypto::getCharFrom6Bit(stack / 16, useBase64URL));
+      numberOfBitsInStack = 4;
+      stack %= 16;
     }
-    if (numBitsInTheStack == 12) {
-      result.push_back(Crypto::getCharFrom6Bit(theStack / 64, useBase64URL));
-      result.push_back(Crypto::getCharFrom6Bit(theStack % 64, useBase64URL));
-      numBitsInTheStack = 0;
-      theStack = 0;
+    if (numberOfBitsInStack == 12) {
+      result.push_back(Crypto::getCharFrom6Bit(stack / 64, useBase64URL));
+      result.push_back(Crypto::getCharFrom6Bit(stack % 64, useBase64URL));
+      numberOfBitsInStack = 0;
+      stack = 0;
     }
   }
-  if (numBitsInTheStack == 2) {
-    result.push_back(Crypto::getCharFrom6Bit(theStack * 16, useBase64URL));
+  if (numberOfBitsInStack == 2) {
+    result.push_back(Crypto::getCharFrom6Bit(stack * 16, useBase64URL));
     result.push_back('=');
     result.push_back('=');
   }
-  if (numBitsInTheStack == 4) {
-    result.push_back(Crypto::getCharFrom6Bit(theStack * 4, useBase64URL));
+  if (numberOfBitsInStack == 4) {
+    result.push_back(Crypto::getCharFrom6Bit(stack * 4, useBase64URL));
     result.push_back('=');
   }
   return result;
@@ -698,9 +699,9 @@ std::string Crypto::convertStringToHex(const std::string& input, int byteWidthLi
 }
 
 void Crypto::appendDoubleSha256Check(const std::string& input, std::string& output) {
-  std::string theSha256, doubleSha256;
-  Crypto::computeSha256(input, theSha256);
-  Crypto::computeSha256(theSha256, doubleSha256);
+  std::string sha256, doubleSha256;
+  Crypto::computeSha256(input, sha256);
+  Crypto::computeSha256(sha256, doubleSha256);
   output.reserve(input.size() + 4);
   output = input;
   for (unsigned i = 0; i < 4; i ++) {
@@ -1205,9 +1206,9 @@ void Crypto::computeSha256(const std::string& input, std::string& output) {
 }
 
 void Crypto::computeSha256(const List<unsigned char>& input, List<unsigned char>& output) {
-  List<uint32_t> theSha256Uint;
-  Crypto::computeSha256(input, theSha256Uint);
-  Crypto::convertListUint32ToListUcharBigendian(theSha256Uint, output);
+  List<uint32_t> sha256Uint;
+  Crypto::computeSha256(input, sha256Uint);
+  Crypto::convertListUint32ToListUcharBigendian(sha256Uint, output);
 }
 
 void Crypto::computeSha256(const List<unsigned char>& input, List<uint32_t>& output) {
@@ -1646,15 +1647,16 @@ bool JSONWebToken::verifyRSA256(
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Payload: " << payload;
   }
-  List<uint32_t> outputSha, RSAresultInts;
+  List<uint32_t> outputSha;
+  List<uint32_t> rsaResultIntegers;
   Crypto::computeSha256(payload, outputSha);
   if (commentsGeneral != nullptr) {
     LargeIntegerUnsigned shaSum;
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, shaSum);
     *commentsGeneral << "<br>Sha256 of payload: " << shaSum.toString();
   }
-  LargeIntegerUnsigned theSignatureInt;
-  if (!Crypto::convertBase64ToLargeUnsigned(this->signatureBase64, theSignatureInt, commentsOnFailure)) {
+  LargeIntegerUnsigned signatureInteger;
+  if (!Crypto::convertBase64ToLargeUnsigned(this->signatureBase64, signatureInteger, commentsOnFailure)) {
     return false;
   }
   // In order to have reproducible comments, we don't want to log time.
@@ -1669,34 +1671,34 @@ bool JSONWebToken::verifyRSA256(
     }
     return false;
   }
-  LargeIntegerUnsigned RSAresult = Crypto::rsaEncrypt(modulus, exponent, theSignatureInt);
+  LargeIntegerUnsigned rsaResult = Crypto::rsaEncrypt(modulus, exponent, signatureInteger);
   // In order to have reproducible comments, we don't want to log time.
   // if (commentsGeneral != nullptr) {
   //
   //   *commentsGeneral << "<br>RSA encryption took: "
   //   << global.getElapsedSeconds() - timeStart << " second(s).<br>";
   // }
-  std::string RSAresultBitstream, RSAresultLast32bytes;
-  Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(RSAresult, 0, RSAresultBitstream);
-  if (RSAresultBitstream.size() > 32) {
-    RSAresultLast32bytes = RSAresultBitstream.substr(RSAresultBitstream.size() - 32, 32);
+  std::string rsaResultBitstream, rsaResultLast32bytes;
+  Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(rsaResult, 0, rsaResultBitstream);
+  if (rsaResultBitstream.size() > 32) {
+    rsaResultLast32bytes = rsaResultBitstream.substr(rsaResultBitstream.size() - 32, 32);
   }
-  Crypto::convertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
-  bool result = (RSAresultInts == outputSha);
+  Crypto::convertStringToListUInt32BigendianZeroPad(rsaResultLast32bytes, rsaResultIntegers);
+  bool result = (rsaResultIntegers == outputSha);
   if (!result) {
-    RSAresultInts.reverseElements();
-    result = (RSAresultInts == outputSha);
+    rsaResultIntegers.reverseElements();
+    result = (rsaResultIntegers == outputSha);
   }
   if ((!result && commentsOnFailure != nullptr) || commentsGeneral != nullptr) {
     std::string RSAresultTrimmedHex, shaHex, RSAresultHex, RSAresultBase64;
-    LargeIntegerUnsigned theShaUI;
+    LargeIntegerUnsigned shaUnsignedInteger;
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(
-      outputSha, theShaUI
+      outputSha, shaUnsignedInteger
     );
-    RSAresultBase64 = Crypto::convertStringToBase64Standard(RSAresultBitstream);
-    Crypto::convertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
-    Crypto::convertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);
-    Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theShaUI, 0, shaHex);
+    RSAresultBase64 = Crypto::convertStringToBase64Standard(rsaResultBitstream);
+    Crypto::convertStringToHex(rsaResultBitstream, RSAresultHex, 0, false);
+    Crypto::convertStringToHex(rsaResultLast32bytes, RSAresultTrimmedHex, 0, false);
+    Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(shaUnsignedInteger, 0, shaHex);
     if (!result && commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br><b style =\"color:red\">Token invalid: the "
       << "SHA does not match the RSA result. </b>";
@@ -1705,8 +1707,8 @@ bool JSONWebToken::verifyRSA256(
     }
     if (commentsGeneral != nullptr) {
       *commentsGeneral
-      << "<br>Sha integer: " << theShaUI.toString()
-      << "<br>Encrypted signature: " << RSAresult.toString()
+      << "<br>Sha integer: " << shaUnsignedInteger.toString()
+      << "<br>Encrypted signature: " << rsaResult.toString()
       << "<br>sha hex: " << shaHex
       << "<br>RSAresult hex: " << RSAresultHex
       << "<br>trimmed: " << RSAresultTrimmedHex

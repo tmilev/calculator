@@ -1563,20 +1563,20 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   for (int i = 0; i < partitionsParabolics.size; i ++) {
     int typeBsize = rank - partitionsParabolics[i].n;
     DynkinType dynkinType;
-    DynkinSimpleType theSimpleType;
+    DynkinSimpleType simpleType;
     for (int j = 0; j < partitionsParabolics[i].p.size; j ++) {
       if (partitionsParabolics[i].p[j] <= 1) {
         continue;
       }
-      theSimpleType.makeArbitrary('A', partitionsParabolics[i].p[j] - 1, 1);
-      dynkinType.addMonomial(theSimpleType, 1);
+      simpleType.makeArbitrary('A', partitionsParabolics[i].p[j] - 1, 1);
+      dynkinType.addMonomial(simpleType, 1);
     }
     if (typeBsize == 1) {
-      theSimpleType.makeArbitrary('A', 1, 2);
-      dynkinType.addMonomial(theSimpleType,1);
+      simpleType.makeArbitrary('A', 1, 2);
+      dynkinType.addMonomial(simpleType,1);
     } else if (typeBsize > 1) {
-      theSimpleType.makeArbitrary('B', typeBsize, 1);
-      dynkinType.addMonomial(theSimpleType, 1);
+      simpleType.makeArbitrary('B', typeBsize, 1);
+      dynkinType.addMonomial(simpleType, 1);
     }
     outLaTeX << "&$" << dynkinType.toString(&format) << "$";
   }

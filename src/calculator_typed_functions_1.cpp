@@ -1895,8 +1895,8 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix(
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  const Expression& theScalarE = input[1];
-  if (!theScalarE.isBuiltInScalar()) {
+  const Expression& scalarExpression = input[1];
+  if (!scalarExpression.isBuiltInScalar()) {
     return false;
   }
   const Expression& matrixE = input[2];
@@ -1909,7 +1909,7 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix(
   }
   for (int i = 0; i < matrix.numberOfRows; i ++) {
     for (int j = 0; j < matrix.numberOfColumns; j ++) {
-      matrix(i, j) = theScalarE * matrix(i, j);
+      matrix(i, j) = scalarExpression * matrix(i, j);
     }
   }
   return output.assignMatrixExpressions(matrix, calculator, false, true);
@@ -2241,9 +2241,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
   if (!calculator.functionGetMatrixNoComputation(rightE, rightMatrix)) {
     return false;
   }
-  Rational theScalar;
-  if (leftE.isOfType<Rational>(&theScalar)) {
-    leftMatrix *= theScalar;
+  Rational scalar;
+  if (leftE.isOfType<Rational>(&scalar)) {
+    leftMatrix *= scalar;
     return output.makeMatrix(calculator, leftMatrix);
   }
   if (!leftE.isMatrixOfType<Rational>()) {
@@ -2322,10 +2322,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTe
   if (!rightE.isOfType<MatrixTensor<Rational> >()) {
     return false;
   }
-  Rational theScalar;
-  if (leftE.isOfType<Rational>(&theScalar)) {
+  Rational scalar;
+  if (leftE.isOfType<Rational>(&scalar)) {
     MatrixTensor<Rational> result = rightE.getValue<MatrixTensor<Rational> >();
-    result *= theScalar;
+    result *= scalar;
     return output.assignValue(calculator, result);
   }
   if (!leftE.isOfType<MatrixTensor<Rational> >()) {

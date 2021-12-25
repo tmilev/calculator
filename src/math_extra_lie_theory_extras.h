@@ -110,11 +110,11 @@ public:
   List<Matrix<Rational> > linearOperatorsExtended;
   Vector<Rational> NonIntegralOriginModificationBasisChanged;
   std::fstream multiplicitiesMaxOutputReport2;
-  Vectors<Rational> GmodKnegativeWeightS;
-  Vectors<Rational> GmodKNegWeightsBasisChanged;
+  Vectors<Rational> gModKNegativeWeights;
+  Vectors<Rational> gModKNegativeWeightsBasisChanged;
   Matrix<Rational> preferredBasisChangE;
   Matrix<Rational> preferredBasisChangeInversE;
-  Vectors<Rational> preferredBasiS;
+  Vectors<Rational> preferredBasis;
   Cone PreimageWeylChamberLargerAlgebra;
   Cone WeylChamberSmallerAlgebra;
   Cone PreimageWeylChamberSmallerAlgebra;

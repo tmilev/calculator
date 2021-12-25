@@ -691,7 +691,7 @@ bool CalculatorFunctions::getSummand(
   }
   List<Expression> multiplicands;
   expression.getMultiplicandsRecursive(multiplicands);
-  Expression theSum = *multiplicands.lastObject();
+  Expression sumExpression = *multiplicands.lastObject();
   multiplicands.removeLastObject();
   Expression coeffExpression;
   if (multiplicands.size > 0) {
@@ -699,10 +699,10 @@ bool CalculatorFunctions::getSummand(
   } else {
     coeffExpression.assignValue(calculator, 1);
   }
-  if (!theSum.startsWith(calculator.opSum(), 3)) {
+  if (!sumExpression.startsWith(calculator.opSum(), 3)) {
     return false;
   }
-  const Expression& limitExpressions = theSum[1];
+  const Expression& limitExpressions = sumExpression[1];
   if (!limitExpressions.startsWith(calculator.opLimitBoundary(), 3)) {
     return false;
   }
@@ -718,7 +718,7 @@ bool CalculatorFunctions::getSummand(
   Expression commandSequence(calculator);
   commandSequence.addChildAtomOnTop(calculator.opCommandSequence());
   commandSequence.addChildOnTop(substitution);
-  commandSequence.addChildOnTop(coeffExpression * theSum[2]);
+  commandSequence.addChildOnTop(coeffExpression * sumExpression[2]);
   return output.makeXOX(calculator, calculator.opUnderscore(), commandSequence, calculator.expressionTwo());
 }
 
@@ -2951,9 +2951,6 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
       reportStream << "<br>Evaluating: " << product.toString();
       report.report(reportStream.str());
       calculator.evaluateExpression(calculator, product, evaluatedProduct);
-      //if (evaluatedProduct == theSet[0])
-      //{
-      //}
       set.addOnTopNoRepetition(evaluatedProduct);
       if (set.size > upperLimit) {
         std::stringstream out;

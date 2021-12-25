@@ -1196,9 +1196,9 @@ bool HardCodedWeylGroupData::loadOutputSubgroupsFromJSData(
       currentSGdata.listObjects[0].listObjects[2].listObjects[j].integerValue.getElement().isIntegerFittingInInt(&theInt);
       readerSubgroup.generatingSimpleRoots.addOnTop(gapRootSystem[- 1 + theInt]);
     }
-    DynkinDiagramRootSubalgebra theSAdiagram;
-    theSAdiagram.computeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
-    theSAdiagram.getDynkinType(readerSubgroup.dynkinType);
+    DynkinDiagramRootSubalgebra subalgebraDiagram;
+    subalgebraDiagram.computeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
+    subalgebraDiagram.getDynkinType(readerSubgroup.dynkinType);
     if (readerSubgroup.dynkinType.toString() != sgString) {
       global.fatal << "Corrupt JSon data: hard-coded Dynkin type is: "
       << sgString << " but dynkin type is computed to be: "

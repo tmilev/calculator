@@ -1150,10 +1150,10 @@ bool LargeIntegerUnsigned::factor(
   outputFactors.setSize(0);
   outputMultiplicites.setSize(0);
   maximumDivisorToTry = this->maximumDivisorToTryWhenFactoring(maximumDivisorToTry);
-  List<bool> theSieve;
-  theSieve.initializeFillInObject(maximumDivisorToTry + 1, true);
+  List<bool> sieve;
+  sieve.initializeFillInObject(maximumDivisorToTry + 1, true);
   for (int i = 2; i <= maximumDivisorToTry; i ++) {
-    if (!theSieve[i]) {
+    if (!sieve[i]) {
       continue;
     }
     //LargeIntUnsigned current = toBeFactored % i;
@@ -1163,7 +1163,7 @@ bool LargeIntegerUnsigned::factor(
       toBeFactored /= candidate;
     }
     for (int j = i; j <= maximumDivisorToTry; j += i) {
-      theSieve[j] = false;
+      sieve[j] = false;
     }
   }
   if (toBeFactored > 1) {
@@ -1570,9 +1570,9 @@ void Rational::raiseToPower(int x) {
   MathRoutines::raiseToPower(tempNum.value, x, oneLI);
   LargeIntegerUnsigned tempDen = this->getDenominator();
   MathRoutines::raiseToPower(tempDen, x, oneLI);
-  char theSign = (this->isPositive() || x % 2 == 0) ? 1 : - 1;
+  char sign = (this->isPositive() || x % 2 == 0) ? 1 : - 1;
   this->allocateExtended();
-  this->extended->numerator.sign = theSign;
+  this->extended->numerator.sign = sign;
   this->extended->denominator = tempDen;
   this->extended->numerator.value = tempNum.value;
   this->shrinkExtendedPartIfPossible();

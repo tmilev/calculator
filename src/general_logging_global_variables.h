@@ -195,15 +195,15 @@ public:
   }
   // When non-null, usually points to:
   // int externalCommandNoOutput(const std::string& theCommand)
-  int (*pointerExternalCommandNoOutput)(const std::string& theSystemCommand);
+  int (*pointerExternalCommandNoOutput)(const std::string& systemCommand);
   // When non-null, usually points to:
   // std::string externalCommandReturnStandardOut(const std::string& inputCommand)
-  std::string (*pointerExternalCommandReturnOutput)(const std::string& theSystemCommand);
+  std::string (*pointerExternalCommandReturnOutput)(const std::string& systemCommand);
   // When non-null, usually points to:
   // int externalCommandStream(const std::string& inputCommand)
-  int (*pointerExternalCommandStream)(const std::string& theSystemCommand);
+  int (*pointerExternalCommandStream)(const std::string& systemCommand);
   // When non-null, this usually points to: callChDirWrapper.
-  void (*pointerCallChDir)(const std::string& theDirectoryName);
+  void (*pointerCallChDir)(const std::string& directoryName);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   MemorySaving<Calculator>& calculator();
 

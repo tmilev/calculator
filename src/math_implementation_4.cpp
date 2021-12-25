@@ -740,7 +740,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size == 1) {
       //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
-      Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
+      Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
       tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[0]);//<-first long component
       if (!tripleNode.scalarProduct(currentComponent[0], this->ambientBilinearForm).isEqualToZero()) {
@@ -749,10 +749,10 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       currentComponent.addOnTop(tripleNode);//<-then triple node
       currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1]);//<-last two vectors
       currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[2]);//<-last two vectors
-      outputType.makeArbitrary('D', currentComponent.size, theScale);
+      outputType.makeArbitrary('D', currentComponent.size, scale);
     } else {
       //the second largest component has more than one element, hence we are in type E_n.
-      Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
+      Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2) {
         global.fatal << "The Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
@@ -775,7 +775,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       currentComponent.addOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1][1]); //<-next the second root from 2-element component
       currentComponent.addOnTop(tripleNode); //<- next the triple node
       currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[0]); //<-finally the longest component. Conventions, conventions...
-      outputType.makeArbitrary('E', currentComponent.size, theScale);
+      outputType.makeArbitrary('E', currentComponent.size, scale);
     }
    return;
   }
@@ -1361,7 +1361,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   FileOperations::openFileCreateIfNotPresentVirtual(
     this->multiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false
   );
-  this->partialFractions.initFromRoots(this->GmodKNegWeightsBasisChanged);
+  this->partialFractions.initFromRoots(this->gModKNegativeWeightsBasisChanged);
   out << this->partialFractions.toString(format);
   this->partialFractions.split(nullptr);
   out << "=" << this->partialFractions.toString(format);
@@ -1466,7 +1466,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   drawOps.operations.graphicsUnit = 50;
   PiecewiseQuasipolynomial startingPolynomial, substitutedPolynomial, accumulator;
   std::string tempS;
-  startingPolynomial.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
+  startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.setSize(this->linearOperators.size);
   this->linearOperators[0].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
@@ -1475,7 +1475,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   out << "<br>the argument translations: " << this->translationsProjectedBasisChanged.toString();
   out << "<br>Element u_w: projection, multiplication by - 1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
-  startingPolynomial.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
+  startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
   drawOps.drawCoordSystemBuffer(drawOps, 2);
   Cone smallWeylChamber;
   Matrix<Rational> invertedCartan;
@@ -1636,7 +1636,7 @@ bool GeneralizedVermaModuleCharacters::checkInitialization() const {
 }
 
 void GeneralizedVermaModuleCharacters::initFromHomomorphism(
-  Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input
+  Vector<Rational>& parabolicSelection, HomomorphismSemisimpleLieAlgebra& input
 ) {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
   Vectors<Rational> tempRoots;
@@ -1647,7 +1647,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "projections: " << tempRoots.toString();
   weylGroupCoDomain.group.computeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
-  Matrix<Rational> theProjectionBasisChanged;
+  Matrix<Rational> projectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions format;
   global.fatal << "Not implemented. " << global.fatal;
@@ -1655,48 +1655,48 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   input.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
   global.fatal << "Not implemented. " << global.fatal;
 //  tempM.InduceFromEmbedding(tempStream, input);
-  input.getWeightsGmodKInSimpleCoordinatesK(this->GmodKnegativeWeightS);
+  input.getWeightsGmodKInSimpleCoordinatesK(this->gModKNegativeWeights);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.toString();
 //  matrix.actOnVectorsColumn(this->GmodKnegativeWeightS);
-  this->log << this->GmodKnegativeWeightS.toString();
-  this->preferredBasiS.setSize(2);
-  this->preferredBasiS[0] = - this->GmodKnegativeWeightS[1];
-  this->preferredBasiS[1] = - this->GmodKnegativeWeightS[2];
+  this->log << this->gModKNegativeWeights.toString();
+  this->preferredBasis.setSize(2);
+  this->preferredBasis[0] = - this->gModKNegativeWeights[1];
+  this->preferredBasis[1] = - this->gModKNegativeWeights[2];
   /////////////////////////////////////////
   //this->preferredBasiS[0] ="(1,0)";
   //this->preferredBasiS[1] ="(0,1)";
   ////////////////////////////////////////
-  this->preferredBasisChangE.assignVectorsToRows(this->preferredBasiS);
+  this->preferredBasisChangE.assignVectorsToRows(this->preferredBasis);
   this->preferredBasisChangE.transpose();
   this->preferredBasisChangeInversE = this->preferredBasisChangE;
   this->preferredBasisChangeInversE.invert();
   this->preferredBasisChangeInversE.actOnVectorsColumn
-  (this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
-  this->log << "\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.toString();
-  for (int i = 0; i < this->GmodKnegativeWeightS.size; i ++) {
-    if (this->GmodKnegativeWeightS[i].isPositiveOrZero()) {
-      this->GmodKnegativeWeightS.removeIndexSwapWithLast(i);
+  (this->gModKNegativeWeights, this->gModKNegativeWeightsBasisChanged);
+  this->log << "\nWeights after basis change: " << this->gModKNegativeWeightsBasisChanged.toString();
+  for (int i = 0; i < this->gModKNegativeWeights.size; i ++) {
+    if (this->gModKNegativeWeights[i].isPositiveOrZero()) {
+      this->gModKNegativeWeights.removeIndexSwapWithLast(i);
       i --;
     }
   }
-  for (int i = 0; i < this->GmodKNegWeightsBasisChanged.size; i ++) {
-    if (this->GmodKNegWeightsBasisChanged[i].isPositiveOrZero()) {
-      this->GmodKNegWeightsBasisChanged.removeIndexSwapWithLast(i);
+  for (int i = 0; i < this->gModKNegativeWeightsBasisChanged.size; i ++) {
+    if (this->gModKNegativeWeightsBasisChanged[i].isPositiveOrZero()) {
+      this->gModKNegativeWeightsBasisChanged.removeIndexSwapWithLast(i);
       i --;
     }
   }
-  this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.toString();
-  theProjectionBasisChanged.initialize(input.domainAlgebra().getRank(), input.coDomainAlgebra().getRank());
+  this->log << "\nNegative weights after basis change: " << this->gModKNegativeWeightsBasisChanged.toString();
+  projectionBasisChanged.initialize(input.domainAlgebra().getRank(), input.coDomainAlgebra().getRank());
   for (int i = 0; i < input.coDomainAlgebra().getRank(); i ++) {
     startingWeight.makeEi(input.coDomainAlgebra().getRank(), i);
     input.projectOntoSmallCartan(startingWeight, projectedWeight);
     this->preferredBasisChangeInversE.actOnVectorColumn(projectedWeight);
     for (int j = 0; j < projectedWeight.size; j ++) {
-      theProjectionBasisChanged.elements[j][i] = projectedWeight[j];
+      projectionBasisChanged.elements[j][i] = projectedWeight[j];
     }
   }
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected = theParabolicSel;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subgroup;
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSelection;
   Matrix<Rational> DualCartanEmbedding;
   input.getMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   Vector<Rational> ParabolicEvaluationRootImage, tempRoot;
@@ -1713,41 +1713,41 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.toString();
   tempRoot = this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.toString();
-  theSubgroup.makeParabolicFromSelectionSimpleRoots(weylGroupCoDomain, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
+  subgroup.makeParabolicFromSelectionSimpleRoots(weylGroupCoDomain, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
 
-  this->linearOperators.setSize(theSubgroup.allElements.size);
-  this->linearOperatorsExtended.setSize(theSubgroup.allElements.size);
-  this->translations.setSize(theSubgroup.allElements.size);
-  this->translationsProjectedBasisChanged.setSize(theSubgroup.allElements.size);
-  this->coefficients.setSize(theSubgroup.allElements.size);
-  this->log << " \n******************\nthe subgroup: \n" << theSubgroup.toString() << "\n\n\n\n\n\n";
-  this->log << theSubgroup.toStringBruhatGraph();
+  this->linearOperators.setSize(subgroup.allElements.size);
+  this->linearOperatorsExtended.setSize(subgroup.allElements.size);
+  this->translations.setSize(subgroup.allElements.size);
+  this->translationsProjectedBasisChanged.setSize(subgroup.allElements.size);
+  this->coefficients.setSize(subgroup.allElements.size);
+  this->log << " \n******************\nthe subgroup: \n" << subgroup.toString() << "\n\n\n\n\n\n";
+  this->log << subgroup.toStringBruhatGraph();
   this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
-  << theSubgroup.allElements.size << " elements):\n";
-  for (int i = 0; i < theSubgroup.allElements.size; i ++) {
+  << subgroup.allElements.size << " elements):\n";
+  for (int i = 0; i < subgroup.allElements.size; i ++) {
     Matrix<Rational>& currentLinearOperator = this->linearOperators[i];
-    theSubgroup.getMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
+    subgroup.getMatrixOfElement(subgroup.allElements[i], currentLinearOperator);
 //    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.toString(&global.defaultFormat.getElement());
-    currentLinearOperator.actOnVectorColumn(theSubgroup.getRho(), this->translations[i]);
-    this->translations[i] -= theSubgroup.getRho();
+    currentLinearOperator.actOnVectorColumn(subgroup.getRho(), this->translations[i]);
+    this->translations[i] -= subgroup.getRho();
     this->translations[i].negate();
-    theProjectionBasisChanged.actOnVectorColumn(this->translations[i], this->translationsProjectedBasisChanged[i]);
-    if (theSubgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
+    projectionBasisChanged.actOnVectorColumn(this->translations[i], this->translationsProjectedBasisChanged[i]);
+    if (subgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
       this->coefficients[i] = 1;
     } else {
       this->coefficients[i] = - 1;
     }
   }
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
-  << theProjectionBasisChanged.toString(&global.defaultFormat.getElement());
+  << projectionBasisChanged.toString(&global.defaultFormat.getElement());
   this->log << "\n\n\nMatrix form of the operators $u_w$, "
   << "the translations $\tau_w$ and their projections (" << this->linearOperatorsExtended.size << "):";
   //List<Matrix<Rational> > tempList;
   for (int k = 0; k < this->linearOperators.size; k ++) {
     Matrix<Rational>& currentLO = this->linearOperators[k];
     Matrix<Rational>& currentLOExtended = this->linearOperatorsExtended[k];
-    currentLO.multiplyOnTheLeft(theProjectionBasisChanged);
+    currentLO.multiplyOnTheLeft(projectionBasisChanged);
     currentLO *= - 1;
     //tempList.addOnTopNoRepetition(this->theLinearOperators.objects[i]);
     currentLOExtended.makeIdentityMatrix(currentLO.numberOfRows);
@@ -1782,12 +1782,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   format.polynomialAlphabet[2] = "y_1";
   format.polynomialAlphabet[3] = "y_2";
   format.polynomialAlphabet[4] = "y_3";
-  tempRoot = theSubgroup.getRho();
+  tempRoot = subgroup.getRho();
   this->linearOperators[0].actOnVectorColumn(tempRoot);
   this->preferredBasisChangE.actOnVectorColumn(tempRoot);
   tempRoot.negate();
   this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
-  << theSubgroup.getRho().toStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
+  << subgroup.getRho().toStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
   << tempRoot.toStringLetterFormat("\\alpha") << "$.";
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
   << "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
@@ -1803,7 +1803,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     for (int j = 0; j < tempVect2.size; j ++) {
       tempVect2[j] += this->translationsProjectedBasisChanged[i][j];
     }
-    this->log << "\n$" << theSubgroup.allElements[i].toString() << "$&$"
+    this->log << "\n$" << subgroup.allElements[i].toString() << "$&$"
     << tempVect2.toString(&format) << "$\\\\";
   }
   this->log << "\\end{longtable}\n\n";
@@ -2139,11 +2139,11 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
 }
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep1() {
-  this->smallerAlgebraChamber.initializeFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged);
+  this->smallerAlgebraChamber.initializeFromDirectionsAndRefine(this->gModKNegativeWeightsBasisChanged);
   ProgressReport report1;
   ProgressReport report2;
   report1.report(this->smallerAlgebraChamber.toString(false));
-  this->log << "Directions for making the chamber basis changed: " << this->GmodKNegWeightsBasisChanged.toString()
+  this->log << "Directions for making the chamber basis changed: " << this->gModKNegativeWeightsBasisChanged.toString()
   << "\n Resulting chamber before projectivization:\n "
   << this->smallerAlgebraChamber.toString(false);
   report2.report(this->log.str());

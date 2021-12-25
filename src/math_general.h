@@ -5066,8 +5066,8 @@ public:
   void intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator);
   static bool getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection(
     Vector<Rational>& startingPoint,
-    Vector<Rational>& theAffineHyperplane,
-    Vector<Rational>& theDirection,
+    Vector<Rational>& affineHyperplane,
+    Vector<Rational>& direction,
     Vector<Rational>& outputPoint
   );
   void getDefaultFundamentalDomainInternalPoint(Vector<Rational>& output);

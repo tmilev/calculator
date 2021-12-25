@@ -35,7 +35,7 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
     newLeft.powers.size --;
   }
   int indexMinus = 2 * this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() - index - 1;
-  int theSimpleIndex = index - this->getOwner().getNumberOfPositiveRoots() - this->getOwner().getRank();
+  int simpleIndex = index - this->getOwner().getNumberOfPositiveRoots() - this->getOwner().getRank();
   MonomialTensor<int, HashFunctions::hashFunction> Accum;
   Accum.powers.reserve(oldRight.powers.size);
   Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
@@ -54,9 +54,9 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
         remainingWeight += weylGroup.rootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
       }
       remainingWeight += this->highestWeightFiniteDimensionalPartSimpleCoordinates;
-      summand += weylGroup.getScalarProductSimpleRoot(remainingWeight, theSimpleIndex);
+      summand += weylGroup.getScalarProductSimpleRoot(remainingWeight, simpleIndex);
       summand *= 2;
-      summand /= weylGroup.cartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
+      summand /= weylGroup.cartanSymmetric.elements[simpleIndex][simpleIndex];
       summand += 1;
       summand -= oldRight.powers[i];
       if (!summand.isEqualToZero()) {
@@ -524,7 +524,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
   Vector<Rational> targetWeight;
   Pair<MonomialTensor<int, HashFunctions::hashFunction>, MonomialTensor<int, HashFunctions::hashFunction> > currentPair;
   MatrixTensor<Coefficient>& outputMat = this->actionsGeneratorsMatrix[generatorIndex];
-  Vector<Coefficient> theScalarProds;
+  Vector<Coefficient> scalarProducts;
   outputMat.makeZero();
   for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
     List<MonomialTensor<int, HashFunctions::hashFunction> >& currentWordList =
@@ -538,7 +538,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
       List<MonomialTensor<int, HashFunctions::hashFunction> >&
       otherWordList = this->theGeneratingWordsIntGrouppedByWeight[weightLevelIndex];
       for (int j = 0; j < currentWordList.size; j ++) {
-        theScalarProds.setSize(otherWordList.size);
+        scalarProducts.setSize(otherWordList.size);
         for (int k = 0; k < otherWordList.size; k ++) {
           if (generatorIndex > this->getOwner().getNumberOfPositiveRoots()) {
             currentPair.object1 = currentWordList[j];
@@ -552,11 +552,11 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
             currentPair.object2 = otherWordList[k];
           }
           ProgressReport report;
-          theScalarProds[k] = this->highestWeightTrace(currentPair, &report);
+          scalarProducts[k] = this->highestWeightTrace(currentPair, &report);
         }
-        this->bilinearFormsInverted[weightLevelIndex].actOnVectorColumn(theScalarProds);
-        for (int k = 0; k < theScalarProds.size; k ++) {
-          outputMat.addMonomial(MonomialMatrix(rowOffset + k, columnOffset + j), theScalarProds[k]);
+        this->bilinearFormsInverted[weightLevelIndex].actOnVectorColumn(scalarProducts);
+        for (int k = 0; k < scalarProducts.size; k ++) {
+          outputMat.addMonomial(MonomialMatrix(rowOffset + k, columnOffset + j), scalarProducts[k]);
         }
       }
     }
@@ -753,7 +753,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           }
       /*    for (int j = 0; j < this->actionsSimpleGens[i].size; j ++)
             for (int k = 0; k< this->actionsSimpleGens[i][j].size; k++) {
-              out << "<br>" << theSimpleGenerator.toString(global, tempFormat) << "\\cdot "
+              out << "<br>" << simpleGenerator.toString(global, tempFormat) << "\\cdot "
               << this->theGeneratingWordsGrouppedByWeight[j][k].toString(false, false, tempFormat)
               << "\\cdot v=" << this->actionsSimpleGens[i][j][k].toString(global, tempFormat)
               << "\\cdot v"
@@ -944,29 +944,29 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  Vector <Coefficient> theScalarProducts;
+  Vector<Coefficient> scalarProducts;
   List<MonomialUniversalEnveloping<Coefficient> >& inputBasis =
   this->generatingWordsGrouppedByWeight[indexInputBasis];
-  theScalarProducts.setSize(inputBasis.size);
+  scalarProducts.setSize(inputBasis.size);
 
   for (int i = 0; i < inputBasis.size; i ++) {
     std::stringstream tempStream;
     inputHomogeneous.highestWeightTransposeAntiAutomorphismBilinearForm(
       inputBasis[i],
-      theScalarProducts[i],
+      scalarProducts[i],
       &substitutionHiGoesToIthElement,
       ringUnit,
       ringZero,
       &tempStream
     );
   }
-  this->bilinearFormsInverted[indexInputBasis].actOnVectorColumn(theScalarProducts, ringZero);
+  this->bilinearFormsInverted[indexInputBasis].actOnVectorColumn(scalarProducts, ringZero);
   outputHomogeneous.makeZero(*this->owner);
   ElementUniversalEnveloping<Coefficient> element;
-  for (int i = 0; i < theScalarProducts.size; i ++) {
+  for (int i = 0; i < scalarProducts.size; i ++) {
     element.makeZero(*this->owner);
     element.addMonomial(this->generatingWordsGrouppedByWeight[indexInputBasis][i], ringUnit);
-    element *= theScalarProducts[i];
+    element *= scalarProducts[i];
     outputHomogeneous += element;
   }
 }
@@ -987,9 +987,6 @@ void ModuleSSalgebra<Coefficient>::reset() {
   this->thePaths.setSize(0);
   this->generatingWordsGrouppedByWeight.setSize(0);
   this->theGeneratingWordsIntGrouppedByWeight.setSize(0);
-  //List<ElementUniversalEnveloping<Coefficient> > theSimpleGens;
-  //List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsSimpleGens;
-  //List<Matrix<Coefficient> > actionsSimpleGensMatrixForM;
   this->bilinearFormsAtEachWeightLevel.setSize(0);
   this->bilinearFormsInverted.setSize(0);
   //Vectors<Rational> weightsSimpleGens;

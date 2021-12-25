@@ -223,7 +223,6 @@ public:
   List<LittelmannPath> thePaths;
   List<List<MonomialUniversalEnveloping<Coefficient> > > generatingWordsGrouppedByWeight;
   List<List<MonomialTensor<int, HashFunctions::hashFunction> > > theGeneratingWordsIntGrouppedByWeight;
-  // List<ElementUniversalEnveloping<Coefficient> > theSimpleGens;
   // List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsSimpleGens;
   // List<Matrix<Coefficient> > actionsSimpleGensMatrixForM;
   List<Matrix<Coefficient> > bilinearFormsAtEachWeightLevel;

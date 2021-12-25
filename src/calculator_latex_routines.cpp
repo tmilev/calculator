@@ -401,7 +401,7 @@ void LaTeXCrawler::buildFreecalc() {
     this->slideFileNamesVirtualNoPathNoExtension[i] = FileOperations::getFileNameFromFileNameWithPath(currentName);
   }
   //executedCommands << "<br>Slides extracted: " << this->slides.toStringCommaDelimited();
-  //executedCommands << "<br>Slides names: " << this->theSlideNames.toStringCommaDelimited();
+  //executedCommands << "<br>Slides names: " << this->slideNames.toStringCommaDelimited();
   for (int i = 0; i < numSlidesToBuild; i ++) {
     for (int k = 0; k < 2; k ++) {
       if (!FileOperations::openFileUnsecure(workingFile, this->fileNameWorkingCopy, false, true, false)) {

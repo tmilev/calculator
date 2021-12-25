@@ -1236,17 +1236,17 @@ bool CalculatorParser::replaceXXbyEX() {
 }
 
 bool CalculatorParser::replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
-  SyntacticElement& theSequenceElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  SyntacticElement& sequenceElement = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
   SyntacticElement& functionExpressionlt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 5];
   Expression newExpr;
   newExpr.reset(*this->owner);
-  newExpr.setExpectedSize(theSequenceElt.data.size());
+  newExpr.setExpectedSize(sequenceElement.data.size());
   newExpr.addChildOnTop(functionExpressionlt.data);
-  if (theSequenceElt.data.isAtom()) {
-    newExpr.addChildOnTop(theSequenceElt.data);
+  if (sequenceElement.data.isAtom()) {
+    newExpr.addChildOnTop(sequenceElement.data);
   } else {
-    for (int i = 1; i < theSequenceElt.data.size(); i ++) {
-      newExpr.addChildOnTop(theSequenceElt.data[i]);
+    for (int i = 1; i < sequenceElement.data.size(); i ++) {
+      newExpr.addChildOnTop(sequenceElement.data[i]);
     }
   }
   functionExpressionlt.data = newExpr;

@@ -717,7 +717,6 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
     *this += element1;
   }
   //Rational tempRat;
-  //Vector<Rational> theSum;
   for (int i = 0; i < weylGroup.rootSystem.size; i ++) {
     //Implementation without the ninja formula:
 //    tempRat = 0;

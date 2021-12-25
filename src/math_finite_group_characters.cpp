@@ -992,16 +992,15 @@ bool FiniteGroup<elementSomeGroup>::areConjugate_OLD_Deprecated_Version_By_Todor
 
 void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups) {
   MacroRegisterFunctionWithName("WeylGroup::getSignSignatureAllRootSubsystems");
-  RootSubalgebras theRootSAs;
-  SemisimpleLieAlgebra theSSlieAlg;
-  theSSlieAlg.weylGroup.makeFromDynkinType(this->dynkinType);
-//  theSSlieAlg.computeChevalleyConstants(global);
-  theRootSAs.owner = &theSSlieAlg;
-  theRootSAs.computeAllReductiveRootSubalgebrasUpToIsomorphism();
+  RootSubalgebras rootSubalgebras;
+  SemisimpleLieAlgebra semisimpleLieAlgebra;
+  semisimpleLieAlgebra.weylGroup.makeFromDynkinType(this->dynkinType);
+  rootSubalgebras.owner = &semisimpleLieAlgebra;
+  rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   List<Vectors<Rational> > theRootSAsBases;
-  theRootSAsBases.setExpectedSize(theRootSAs.subalgebras.size);
-  for (int i = theRootSAs.subalgebras.size - 1; i >= 0; i --) {
-    theRootSAsBases.addOnTop(theRootSAs.subalgebras[i].simpleRootsReductiveSubalgebra);
+  theRootSAsBases.setExpectedSize(rootSubalgebras.subalgebras.size);
+  for (int i = rootSubalgebras.subalgebras.size - 1; i >= 0; i --) {
+    theRootSAsBases.addOnTop(rootSubalgebras.subalgebras[i].simpleRootsReductiveSubalgebra);
   }
   this->getSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }
@@ -1049,14 +1048,14 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   extendedBasis.addOnTop(this->rootSystem[0]);
   outputSubgroups.setExpectedSize(MathRoutines::twoToTheNth(this->getDimension()));
   outputSubgroups.setSize(0);
-  SubgroupDataRootReflections theSG;
+  SubgroupDataRootReflections subgroup;
   do {
     extendedBasis.subSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
     if (currentBasisExtendedParabolic.getRankElementSpan() == currentBasisExtendedParabolic.size) {
-      theSG.makeFromRoots(*this, currentBasisExtendedParabolic);
-      theSG.flagIsExtendedParabolic = true;
-      theSG.simpleRootsInLeviParabolic = parSelrootsAreInLevi;
-      outputSubgroups.addOnTop(theSG);
+      subgroup.makeFromRoots(*this, currentBasisExtendedParabolic);
+      subgroup.flagIsExtendedParabolic = true;
+      subgroup.simpleRootsInLeviParabolic = parSelrootsAreInLevi;
+      outputSubgroups.addOnTop(subgroup);
     }
   } while (parSelrootsAreInLevi.incrementReturnFalseIfPastLast());
   for (int i = 0; i < outputSubgroups.size; i ++) {

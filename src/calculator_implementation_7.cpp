@@ -3264,11 +3264,11 @@ bool CalculatorFunctions::compareExpressionsNumerically(
     }
   }
   knownValues.setSize(knownEs.size);
-  SelectionWithDifferentMaxMultiplicities theSamplingSelector;
-  theSamplingSelector.initializeFromIntegers(numSamples);
-  if (theSamplingSelector.totalNumberOfSubsets() > 1000000) {
+  SelectionWithDifferentMaxMultiplicities samplingSelector;
+  samplingSelector.initializeFromIntegers(numSamples);
+  if (samplingSelector.totalNumberOfSubsets() > 1000000) {
     return calculator << "The total number of sampling points, "
-    << theSamplingSelector.totalNumberOfSubsets().toString() << " exceeds "
+    << samplingSelector.totalNumberOfSubsets().toString() << " exceeds "
     << "the hard-coded limit of 1000000. ";
   }
   double tolerance = 0.0001;
@@ -3279,19 +3279,19 @@ bool CalculatorFunctions::compareExpressionsNumerically(
   if (tolerance < 0) {
     tolerance *= - 1;
   }
-  Rational totalSamples = theSamplingSelector.totalNumberSubsetsSmallInt();
+  Rational totalSamples = samplingSelector.totalNumberSubsetsSmallInt();
   Rational numFailedSamples = 0;
   do {
-    for (int i = 0; i < theSamplingSelector.multiplicities.size; i ++) {
+    for (int i = 0; i < samplingSelector.multiplicities.size; i ++) {
       double& currentValue = knownValues[i + calculator.knownDoubleConstants.size];
       double& lBound = leftBoundaries[i];
       double& rBound = rightBoundaries[i];
-      if (theSamplingSelector.capacities[i] == 1) {
+      if (samplingSelector.capacities[i] == 1) {
         currentValue = (lBound + rBound) / 2;
         continue;
       }
-      double paramBnZeroAndOne = theSamplingSelector.multiplicities[i];
-      paramBnZeroAndOne /= theSamplingSelector.capacities[i] - 1;
+      double paramBnZeroAndOne = samplingSelector.multiplicities[i];
+      paramBnZeroAndOne /= samplingSelector.capacities[i] - 1;
       currentValue = lBound *(1 - paramBnZeroAndOne) + rBound * paramBnZeroAndOne;
     }
     double floatingResult = 0;
@@ -3305,7 +3305,7 @@ bool CalculatorFunctions::compareExpressionsNumerically(
     if (floatingResult > tolerance || floatingResult < - tolerance) {
       return output.assignValue(calculator, 0);
     }
-  } while (theSamplingSelector.incrementReturnFalseIfPastLast());
+  } while (samplingSelector.incrementReturnFalseIfPastLast());
   return output.assignValue(calculator, 1);
 }
 
@@ -4488,18 +4488,21 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
       }
     }
   }
-  Expression trigonometricArgumentNoCoefficient, theTrigArgCoeff;
-  trigonometricArgument.getCoefficientMultiplicandForm(theTrigArgCoeff, trigonometricArgumentNoCoefficient);
+  Expression trigonometricArgumentNoCoefficient, trigonometricArgumentCoefficient;
+  trigonometricArgument.getCoefficientMultiplicandForm(trigonometricArgumentCoefficient, trigonometricArgumentNoCoefficient);
   if (trigonometricArgumentNoCoefficient != variableExpression) {
     return false;
   }
-  const Polynomial<Rational>& theTrigPoly = polynomial.content;
-  Expression theCosE, theSinE, theCosDoubleE, trigonometricArgumentDouble;
+  const Polynomial<Rational>& trigonometricPolynomial = polynomial.content;
+  Expression cosineExpression;
+  Expression sineExpression;
+  Expression cosineDoubleExpression;
+  Expression trigonometricArgumentDouble;
   trigonometricArgumentDouble = trigonometricArgument;
   trigonometricArgumentDouble *= 2;
-  theCosE.makeOX(calculator, calculator.opCos(), trigonometricArgument);
-  theSinE.makeOX(calculator, calculator.opSin(), trigonometricArgument);
-  theCosDoubleE.makeOX(calculator, calculator.opCos(), trigonometricArgumentDouble);
+  cosineExpression.makeOX(calculator, calculator.opCos(), trigonometricArgument);
+  sineExpression.makeOX(calculator, calculator.opSin(), trigonometricArgument);
+  cosineDoubleExpression.makeOX(calculator, calculator.opCos(), trigonometricArgumentDouble);
   Expression outputCandidate, currentSummandE, currentCommandListE,
   currentSubE, currentIntegrandE, currentIntegrandNonPolynomializedE,
   currentIntegral, currentIntegralComputation,
@@ -4511,8 +4514,8 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   outputCandidate.assignValue(calculator, 0);
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
-  for (int i = 0; i < theTrigPoly.size(); i ++) {
-    const MonomialPolynomial& currentMon = theTrigPoly[i];
+  for (int i = 0; i < trigonometricPolynomial.size(); i ++) {
+    const MonomialPolynomial& currentMon = trigonometricPolynomial[i];
     int powerSine = - 1, powerCosine = - 1;
     if (!currentMon(0).isSmallInteger(&powerSine) || !currentMon(1).isSmallInteger(&powerCosine)) {
       return false;
@@ -4529,26 +4532,26 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
       currentIntegrandSinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(calculator, powerCosine);
       currentIntegrandCosinePart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
-      currentCF.assignValue(calculator, - theTrigPoly.coefficients[i]);
-      currentCF /= theTrigArgCoeff;
-      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theCosE);
+      currentCF.assignValue(calculator, - trigonometricPolynomial.coefficients[i]);
+      currentCF /= trigonometricArgumentCoefficient;
+      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, cosineExpression);
     } else if (powerCosine % 2 == 1) {
       currentE = oneE - newVarE * newVarE;
       powerE.assignValue(calculator, (powerCosine - 1) / 2);
       currentIntegrandCosinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(calculator, powerSine);
       currentIntegrandSinePart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
-      currentCF.assignValue(calculator, theTrigPoly.coefficients[i]);
-      currentCF /= theTrigArgCoeff;
-      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theSinE);
+      currentCF.assignValue(calculator, trigonometricPolynomial.coefficients[i]);
+      currentCF /= trigonometricArgumentCoefficient;
+      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, sineExpression);
     } else {
-      currentE = (oneE - theCosDoubleE) / twoE;
+      currentE = (oneE - cosineDoubleExpression) / twoE;
       powerE.assignValue(calculator, powerSine / 2);
       currentIntegrandSinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
-      currentE = (oneE + theCosDoubleE) / twoE;
+      currentE = (oneE + cosineDoubleExpression) / twoE;
       powerE.assignValue(calculator, powerCosine / 2);
       currentIntegrandCosinePart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
-      currentCF.assignValue(calculator, theTrigPoly.coefficients[i]);
+      currentCF.assignValue(calculator, trigonometricPolynomial.coefficients[i]);
       currentIntegrandNonPolynomializedE = currentCF * currentIntegrandSinePart * currentIntegrandCosinePart;
       currentIntegrandE.reset(calculator);
       currentIntegrandE.addChildAtomOnTop("Polynomialize");
@@ -4602,7 +4605,7 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   if (numberOfVariables == 0) {
     return false;
   }
-  Expression sinPowerE, theTrigArgument, cosPowerE;
+  Expression sinPowerE, trigonometricArgument, cosPowerE;
   sinPowerE.assignValue(calculator, 1);
   cosPowerE.assignValue(calculator, 1);
   bool firstIsTan = false;
@@ -4618,22 +4621,22 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
       firstIsTan = true;
     }
     if (i == 0) {
-      theTrigArgument = currentE[1];
+      trigonometricArgument = currentE[1];
     } else {
-      if (theTrigArgument != currentE[1]) {
+      if (trigonometricArgument != currentE[1]) {
         return false;
       }
     }
   }
-  Expression theTrigArgumentNoCoeff, theTrigArgCoeff;
-  theTrigArgument.getCoefficientMultiplicandForm(theTrigArgCoeff, theTrigArgumentNoCoeff);
-  if (theTrigArgumentNoCoeff != variableExpression) {
+  Expression trigonometricArgumentNoCoefficient, trigonometricArgumentCoefficient;
+  trigonometricArgument.getCoefficientMultiplicandForm(trigonometricArgumentCoefficient, trigonometricArgumentNoCoefficient);
+  if (trigonometricArgumentNoCoefficient != variableExpression) {
     return false;
   }
-  const Polynomial<Rational>& theTrigPoly = polynomial.content;
-  Expression theTanE, theSecE;
-  theTanE.makeOX(calculator, calculator.opTan(), theTrigArgument);
-  theSecE.makeOX(calculator, calculator.opSec(), theTrigArgument);
+  const Polynomial<Rational>& trigonometrixPolynomial = polynomial.content;
+  Expression tangentExpression, secantExpression;
+  tangentExpression.makeOX(calculator, calculator.opTan(), trigonometricArgument);
+  secantExpression.makeOX(calculator, calculator.opSec(), trigonometricArgument);
   Expression outputCandidate, currentSummandE, currentCommandListE,
   currentSubE, currentIntegrandE, currentIntegrandNonPolynomializedE,
   currentIntegral, currentIntegralComputation,
@@ -4645,8 +4648,8 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   outputCandidate.assignValue(calculator, 0);
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
-  for (int i = 0; i < theTrigPoly.size(); i ++) {
-    const MonomialPolynomial& currentMon = theTrigPoly[i];
+  for (int i = 0; i < trigonometrixPolynomial.size(); i ++) {
+    const MonomialPolynomial& currentMon = trigonometrixPolynomial[i];
     int powerTan = - 1, powerSec = - 1;
     if (!currentMon(0).isSmallInteger(&powerTan) || !currentMon(1).isSmallInteger(&powerSec)) {
       return false;
@@ -4663,18 +4666,18 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
       currentIntegrandTanPart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(calculator, powerSec - 1);
       currentIntegrandSecPart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
-      currentCF.assignValue(calculator, theTrigPoly.coefficients[i]);
-      currentCF /= theTrigArgCoeff;
-      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theSecE);
+      currentCF.assignValue(calculator, trigonometrixPolynomial.coefficients[i]);
+      currentCF /= trigonometricArgumentCoefficient;
+      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, secantExpression);
     } else if (powerSec % 2 == 0) {
       currentE = oneE + newVarE * newVarE;
       powerE.assignValue(calculator, (powerSec - 2) / 2);
       currentIntegrandSecPart.makeXOX(calculator, calculator.opPower(), currentE, powerE);
       powerE.assignValue(calculator, powerTan);
       currentIntegrandTanPart.makeXOX(calculator, calculator.opPower(), newVarE, powerE);
-      currentCF.assignValue(calculator, theTrigPoly.coefficients[i]);
-      currentCF /= theTrigArgCoeff;
-      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, theTanE);
+      currentCF.assignValue(calculator, trigonometrixPolynomial.coefficients[i]);
+      currentCF /= trigonometricArgumentCoefficient;
+      currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, tangentExpression);
     } else {
       return false;
       /*currentE= (oneE-theCosDoubleE)/twoE;
@@ -5225,7 +5228,7 @@ bool Expression::makeSequence(Calculator& owner, List<Expression>* inputSequence
 
 bool Expression::makeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues) {
   MacroRegisterFunctionWithName("Expression::makeSequenceCommands");
-  List<Expression> theStatements;
+  List<Expression> statements;
   Expression currentStatement, currentKey;
   if (inputValues.size != inputKeys.size) {
     global.fatal << "I am asked to create a "
@@ -5235,9 +5238,9 @@ bool Expression::makeSequenceCommands(Calculator& owner, List<std::string>& inpu
   for (int i = 0; i < inputValues.size; i ++) {
     currentKey.makeAtom(owner, inputKeys[i]);
     currentStatement.makeXOX(owner, owner.opDefine(), currentKey, inputValues[i]);
-    theStatements.addOnTop(currentStatement);
+    statements.addOnTop(currentStatement);
   }
-  return this->makeSequenceStatements(owner, &theStatements);
+  return this->makeSequenceStatements(owner, &statements);
 }
 
 bool Expression::makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements) {

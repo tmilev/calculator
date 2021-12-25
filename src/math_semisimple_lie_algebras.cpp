@@ -35,51 +35,51 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   << ", <br> where g is a Chevalley generator, " << HtmlRoutines::getMathNoDisplay("\\gamma")
   << " is its weight, and <br>"
   << HtmlRoutines::getMathNoDisplay("\\alpha_i") << " is the i^th simple root. ";
-  std::stringstream theTableLateXStream, theHtmlStream;
-  theHtmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
+  std::stringstream tableLateXStream, htmlStream;
+  htmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
   << "<td>[,]</td>";
-  theTableLateXStream << "\\begin{array}{cc|";
+  tableLateXStream << "\\begin{array}{cc|";
   for (int i = 0; i < this->getNumberOfGenerators() + 1; i ++) {
-    theTableLateXStream << "c";
+    tableLateXStream << "c";
   }
-  theTableLateXStream << "}\n";
-  theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
+  tableLateXStream << "}\n";
+  tableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i = 0; i < numRoots + dimension; i ++) {
     element1.makeGenerator(i, *this);
     tempS = element1.toString(format);
-    theHtmlStream << "<td>" << tempS << "</td>";
-    theTableLateXStream << " & ";
-    theTableLateXStream << tempS;
+    htmlStream << "<td>" << tempS << "</td>";
+    tableLateXStream << " & ";
+    tableLateXStream << tempS;
   }
-  theTableLateXStream << "\\\\\n";
-  theHtmlStream << "</tr>";
+  tableLateXStream << "\\\\\n";
+  htmlStream << "</tr>";
   //int lineCounter = 0;
   for (int i = 0; i < dimension + numRoots; i ++) {
     tempRoot = this->getWeightOfGenerator(i);
-    theTableLateXStream << tempRoot.toString() << "&";
-    theHtmlStream << "<tr><td>" << tempRoot.toString() << "</td>";
+    tableLateXStream << tempRoot.toString() << "&";
+    htmlStream << "<tr><td>" << tempRoot.toString() << "</td>";
     this->weylGroup.getEpsilonCoordinates(tempRoot, tempRoot2);
-    theTableLateXStream << tempRoot2.toStringLetterFormat("\\varepsilon") << "&";
-    theHtmlStream << "<td>" << tempRoot2.toStringLetterFormat("e") << "</td>";
+    tableLateXStream << tempRoot2.toStringLetterFormat("\\varepsilon") << "&";
+    htmlStream << "<td>" << tempRoot2.toStringLetterFormat("e") << "</td>";
     element1.makeGenerator(i, *this);
     tempS = element1.toString(format);
-    theTableLateXStream << tempS;
-    theHtmlStream << "<td>" << tempS << "</td>";
+    tableLateXStream << tempS;
+    htmlStream << "<td>" << tempS << "</td>";
     for (int j = 0; j < numRoots + dimension; j ++) {
       element2.makeGenerator(j, *this);
       this->lieBracket(element1, element2, element3);
       tempS = element3.toString(format);
-      theTableLateXStream << "& ";
-      theTableLateXStream << tempS;
-      theHtmlStream << "<td>" << tempS << "</td>";
+      tableLateXStream << "& ";
+      tableLateXStream << tempS;
+      htmlStream << "<td>" << tempS << "</td>";
     }
-    theHtmlStream << "</tr>";
-    theTableLateXStream << "\\\\\n";
+    htmlStream << "</tr>";
+    tableLateXStream << "\\\\\n";
   }
-  theHtmlStream << "</table>";
-  theTableLateXStream << "\\end{array}";
+  htmlStream << "</table>";
+  tableLateXStream << "\\end{array}";
   if (this->getNumberOfGenerators() < 22) {
-    out << "<div class='mathcalculator'>" << theTableLateXStream.str() << "</div>";
+    out << "<div class='mathcalculator'>" << tableLateXStream.str() << "</div>";
     return out.str();
   }
   out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in "
@@ -91,11 +91,11 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
       << "wish to do so on your own. ";
     }
   }
-  out << theHtmlStream.str();
+  out << htmlStream.str();
   if (format != nullptr) {
     if (format->flagLatexDetailsInHtml) {
       out << "The above table in LaTex format follows. <hr>"
-      << theTableLateXStream.str() << "<hr>";
+      << tableLateXStream.str() << "<hr>";
     }
   }
   return out.str();

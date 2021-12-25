@@ -551,7 +551,7 @@ void Vector<Coefficient>::operator=(const SelectionWithMultiplicities& other) {
 
 template <class Coefficient>
 bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
-  Selection& theSelection,
+  Selection& selection,
   Vector<Coefficient>& output,
   Matrix<Coefficient>& buffer,
   Selection& nonPivotPointsBuffer
@@ -561,13 +561,13 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   }
   int dimension = this->objects[0].size;
   output.setSize(dimension);
-  if (dimension - 1 != theSelection.cardinalitySelection) {
+  if (dimension - 1 != selection.cardinalitySelection) {
     global.fatal << "Dimensions don't match. " << global.fatal;
   }
   buffer.initialize(dimension - 1, dimension);
   for (int i = 0; i < dimension - 1; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      buffer.elements[i][j] = (this->externalWalls[theSelection.elements[i]].normal[j]);
+      buffer.elements[i][j] = (this->externalWalls[selection.elements[i]].normal[j]);
     }
   }
   buffer.gaussianEliminationByRows(0, nonPivotPointsBuffer);

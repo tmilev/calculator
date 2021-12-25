@@ -658,11 +658,11 @@ bool CalculatorFunctions::urlStringToNormalString(
     return false;
   }
   const Expression& argument = input[1];
-  std::string theString;
-  if (!argument.isOfType<std::string>(&theString)) {
+  std::string argumentString;
+  if (!argument.isOfType<std::string>(&argumentString)) {
     return false;
   }
-  return output.assignValue(calculator, HtmlRoutines::convertURLStringToNormal(theString, false));
+  return output.assignValue(calculator, HtmlRoutines::convertURLStringToNormal(argumentString, false));
 }
 
 bool CalculatorFunctions::stringToURL(Calculator& calculator, const Expression& input, Expression& output) {
@@ -671,11 +671,11 @@ bool CalculatorFunctions::stringToURL(Calculator& calculator, const Expression& 
     return false;
   }
   const Expression& argument = input[1];
-  std::string theString;
-  if (!argument.isOfType<std::string>(&theString)) {
+  std::string argumentString;
+  if (!argument.isOfType<std::string>(&argumentString)) {
     return false;
   }
-  return output.assignValue(calculator, HtmlRoutines::convertStringToURLString(theString, false));
+  return output.assignValue(calculator, HtmlRoutines::convertStringToURLString(argumentString, false));
 }
 
 bool CalculatorFunctions::stringToAtom(Calculator& calculator, const Expression& input, Expression& output) {
@@ -684,11 +684,11 @@ bool CalculatorFunctions::stringToAtom(Calculator& calculator, const Expression&
     return false;
   }
   const Expression& argument = input[1];
-  std::string theString;
-  if (!argument.isOfType(&theString)) {
+  std::string argumentString;
+  if (!argument.isOfType(&argumentString)) {
     return false;
   }
-  return output.makeAtom(calculator, theString);
+  return output.makeAtom(calculator, argumentString);
 }
 
 bool CalculatorFunctions::expressionToString(
@@ -880,9 +880,9 @@ bool CalculatorFunctionsBasic::absoluteValue(Calculator& calculator, const Expre
     }
     return output.assignValue(calculator, rational);
   }
-  double theDouble = 0;
-  if (argument.evaluatesToDouble(&theDouble)) {
-    if (theDouble < 0) {
+  double value = 0;
+  if (argument.evaluatesToDouble(&value)) {
+    if (value < 0) {
       Expression moneE;
       moneE.assignValue(calculator, - 1);
       output = argument;
@@ -1850,8 +1850,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     computation.addBasisElementNoReduction(this->denominator);
     computation.format = this->currentFormat;
     computation.polynomialOrder.monomialOrder = monomialOrder;
-    Polynomial<Rational> theNumCopy = this->numerator;
-    computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
+    Polynomial<Rational> numeratorCopy = this->numerator;
+    computation.remainderDivisionByBasis(numeratorCopy, computation.remainderDivision, - 1);
     this->printoutPartialFractionsLatex << "Here is a detailed long polynomial division. ";
     this->printoutPartialFractionsLatex << computation.divisionReport.getElement().getDivisionStringLaTeX();
     this->printoutPartialFractionsHtml << "<br>Here is a detailed long polynomial division:<br> ";
@@ -2503,29 +2503,29 @@ bool CalculatorFunctions::divideByNumber(
     return output.assignError(calculator, "Division by zero. ");
   }
   Rational rationalValue;
-  AlgebraicNumber theAlgValue;
-  double theDoubleValue;
-  Expression theInvertedE;
+  AlgebraicNumber algebraicValue;
+  double doubleValue;
+  Expression invertedExpression;
   bool result = false;
   if (input[2].isOfType<Rational>(&rationalValue)) {
     rationalValue.invert();
-    theInvertedE.assignValue(calculator, rationalValue);
+    invertedExpression.assignValue(calculator, rationalValue);
     result = true;
   }
-  if (input[2].isOfType<AlgebraicNumber>(&theAlgValue)) {
-    theAlgValue.invert();
-    theInvertedE.assignValue(calculator, theAlgValue);
+  if (input[2].isOfType<AlgebraicNumber>(&algebraicValue)) {
+    algebraicValue.invert();
+    invertedExpression.assignValue(calculator, algebraicValue);
     result = true;
   }
-  if (input[2].isOfType<double>(&theDoubleValue)) {
-    theDoubleValue = 1 / theDoubleValue;
-    theInvertedE.assignValue(calculator, theDoubleValue);
+  if (input[2].isOfType<double>(&doubleValue)) {
+    doubleValue = 1 / doubleValue;
+    invertedExpression.assignValue(calculator, doubleValue);
     result = true;
   }
   if (!result) {
     return false;
   }
-  output = theInvertedE * input[1];
+  output = invertedExpression * input[1];
   return true;
 }
 
@@ -2535,16 +2535,17 @@ bool CalculatorFunctions::maximum(Calculator& calculator, const Expression& inpu
   if (input.size() < 3) {
     return false;
   }
-  double theMax = 0, current = 0;
+  double maximumValue = 0;
+  double current = 0;
   int bestIndex = 1;
   for (int i = 1; i < input.size(); i ++) {
     if (!input[i].evaluatesToDouble(&current)) {
       return false;
     }
     if (i == 1) {
-      theMax = current;
-    } else if (theMax < current) {
-      theMax = current;
+      maximumValue = current;
+    } else if (maximumValue < current) {
+      maximumValue = current;
       bestIndex = i;
     }
   }

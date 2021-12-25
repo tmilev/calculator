@@ -5286,23 +5286,23 @@ public:
   void reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* Indicator);
   void applySzenesVergneFormula(
     List<Vector<Rational> >& startingVectors,
-    List<int>& theSelectedIndices,
-    List<int>& theElongations,
+    List<int>& selectedIndices,
+    List<int>& elongations,
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
     LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output
   );
   void applyGeneralizedSzenesVergneFormula(
-    List<int>& theSelectedIndices,
-    List<int>& theGreatestElongations,
-    List<int>& theCoefficients,
+    List<int>& selectedIndices,
+    List<int>& greatestElongations,
+    List<int>& coefficients,
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
     LinearCombination<OnePartialFraction,
     Polynomial<LargeInteger> >& output,
     List<Vector<Rational> >& startingVectors
   );
-  bool checkForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
+  bool checkForOrlikSolomonAdmissibility(List<int>& selectedIndices);
   bool reduceOnceTotalOrderMethod(
     LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output, PartialFractions& owner
   );
@@ -5363,9 +5363,9 @@ public:
   void getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
   void getNElongationPolynomialWithMonomialContribution(
     List<Vector<Rational> >& startingVectors,
-    List<int>& theSelectedIndices,
-    List<int>& theCoefficients,
-    List<int>& theGreatestElongations,
+    List<int>& selectedIndices,
+    List<int>& coefficients,
+    List<int>& greatestElongations,
     int index,
     Polynomial<LargeInteger>& output,
     int dimension
@@ -6271,7 +6271,7 @@ public:
   int numProcessedNonParam;
   List<ConeComplex> complexStartingPerRepresentative;
   List<ConeComplex> complexRefinedPerRepresentative;
-  List<List<Vectors<Rational> > > theMaximaCandidates;
+  List<List<Vectors<Rational> > > maximaCandidates;
   List<Vectors<Rational> > startingLPtoMaximize;
   List<Vectors<Rational> > finalMaxima;
   Lattice theFinalRougherLattice;
@@ -6495,8 +6495,8 @@ public:
   );
   bool isIdentity() const {
     int dimension = this->getMinimumNumberOfColumnsNumberOfRows();
-    Selection theSel;
-    theSel.initialize(dimension);
+    Selection selection;
+    selection.initialize(dimension);
     for (int i = 0; i < this->size(); i ++) {
       if ((*this)[i].vIndex != (*this)[i].dualIndex) {
         return false;
@@ -6504,9 +6504,9 @@ public:
       if (this->coefficients[i] != 1) {
         return false;
       }
-      theSel.addSelectionAppendNewIndex((*this)[i].vIndex);
+      selection.addSelectionAppendNewIndex((*this)[i].vIndex);
     }
-    return theSel.cardinalitySelection == dimension;
+    return selection.cardinalitySelection == dimension;
   }
   bool isPositiveDefinite() {
     Matrix<Coefficient> other;

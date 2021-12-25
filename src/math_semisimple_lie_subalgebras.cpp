@@ -4297,21 +4297,21 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
   reportStream << "Enumerating recursively nilradicals of type " << this->toStringTypeAndHs() << "...";
   report.report(reportStream.str());
   this->fernandoKacNilradicalCandidates.setSize(0);
-  List<int> theSel;
+  List<int> selection;
   this->recursionDepthCounterForNilradicalGeneration = 0;
   //0 stands for not selected, 1 for selected from nilradical, 3 for selected from semisimple part, 2 stands for unknown.
-  theSel.initializeFillInObject(this->nilradicalPairingTable.size, 2);
+  selection.initializeFillInObject(this->nilradicalPairingTable.size, 2);
   for (int i = 0; i < this->primalSubalgebraModules.size; i ++) {
-    theSel[this->primalSubalgebraModules[i]] = 1;
+    selection[this->primalSubalgebraModules[i]] = 1;
   }
   std::stringstream out;
-  if (theSel.size != this->nilradicalPairingTable.size || theSel.size != this->modulesIsotypicallyMerged.size) {
+  if (selection.size != this->nilradicalPairingTable.size || selection.size != this->modulesIsotypicallyMerged.size) {
     global.fatal << "Selection has "
-    << theSel.size << ", nilraidcal pairing table has " << this->nilradicalPairingTable.size
+    << selection.size << ", nilraidcal pairing table has " << this->nilradicalPairingTable.size
     << " elements and modules isotypically merged has " << this->modulesIsotypicallyMerged.size
     << " elements." << global.fatal;
   }
-  this->enumerateNilradicalsRecursively(theSel, &out);
+  this->enumerateNilradicalsRecursively(selection, &out);
   if (this->fernandoKacNilradicalCandidates.size < 1) {
     global.fatal << "While enumerating nilradicals of "
     << this->weylNonEmbedded->dynkinType.toString()
@@ -4370,21 +4370,21 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
     }
   }
   Vector<Rational> oldThis =*this;
-  Cone theCone;
-  theCone.createFromVertices(nonStrictConeNonPositiveScalar);
+  Cone cone;
+  cone.createFromVertices(nonStrictConeNonPositiveScalar);
   Coefficient scalarThis;
   Coefficient scalarOther;
   Coefficient scale;
   Vector<Rational> currentModifier;
-  Vectors<Rational> allVectors = theCone.vertices;
+  Vectors<Rational> allVectors = cone.vertices;
   allVectors.addListOnTop(vectorsToBeInGeneralPosition);
   for (int i = 0; i < vectorsToBeInGeneralPosition.size; i ++) {
     if (this->scalarEuclidean(vectorsToBeInGeneralPosition[i]) == 0) {
       bool foundModifier = false;
-      for (int j = 0; j < theCone.normals.size; j ++) {
-        if (theCone.normals[j].scalarEuclidean(vectorsToBeInGeneralPosition[i]) != 0) {
+      for (int j = 0; j < cone.normals.size; j ++) {
+        if (cone.normals[j].scalarEuclidean(vectorsToBeInGeneralPosition[i]) != 0) {
           foundModifier = true;
-          currentModifier = theCone.normals[j];
+          currentModifier = cone.normals[j];
           break;
         }
       }

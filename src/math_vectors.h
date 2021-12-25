@@ -706,7 +706,7 @@ class Vectors: public List<Vector<Coefficient> > {
   ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   bool linearAlgebraForVertexComputation(
-    Selection& theSelection,
+    Selection& selection,
     Vector<Coefficient>& output,
     Matrix<Coefficient>& buffer,
     Selection& nonPivotPointsBuffer

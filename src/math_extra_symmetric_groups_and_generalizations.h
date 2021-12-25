@@ -665,9 +665,11 @@ public:
   }
 
   static bool getWordByFormulaImplementation(
-    FiniteGroup<ElementHyperoctahedralGroupR2>& G, const ElementHyperoctahedralGroupR2& g, List<int>& out
+    FiniteGroup<ElementHyperoctahedralGroupR2>& group,
+    const ElementHyperoctahedralGroupR2& element,
+    List<int>& out
   );
-  static LargeInteger getSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G);
+  static LargeInteger getSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& group);
   void allSpechtModules();
   void spechtModuleOfPartititons(
     const Partition& positive,

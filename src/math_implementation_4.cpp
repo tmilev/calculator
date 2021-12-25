@@ -1589,7 +1589,7 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
 //      out << this->checkMultiplicitiesVsOrbits();
       break;
     case 4:
-      this->initTheMaxComputation();
+      this->inititializeMaximumComputation();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 5:
@@ -1985,8 +1985,8 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
-  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initTheMaxComputation");
+void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
+  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::inititializeMaximumComputation");
   this->maximumComputation.numNonParaM = 2;
   this->maximumComputation.conesLargerDimension.reserve(this->projectivizedChambeR.size);
   this->maximumComputation.LPtoMaximizeLargerDim.reserve(this->multiplicities.size);
@@ -2020,15 +2020,15 @@ void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
   }
 }
 
-std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpressions& format, const Cone& theCone) {
+std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpressions& format, const Cone& cone) {
   std::stringstream out1;
   Vector<Rational> normalNoConstant;
   int dimSmallerAlgebra = this->linearOperators[0].numberOfRows;
   int dimLargerAlgebra = this->linearOperators[0].numberOfColumns;
   Rational theConst;
   out1 << "\\begin{tabular}{rcl}";
-  for (int i = 0; i < theCone.normals.size; i ++) {
-    Vector<Rational>& currentNormal = theCone.normals[i];
+  for (int i = 0; i < cone.normals.size; i ++) {
+    Vector<Rational>& currentNormal = cone.normals[i];
     normalNoConstant = currentNormal;
     normalNoConstant.setSize(dimSmallerAlgebra + dimLargerAlgebra);
     theConst = - (*currentNormal.lastObject());

@@ -172,9 +172,9 @@ std::string WebAPIResponse::getSanitizedComment(
   MacroRegisterFunctionWithName("WebAPIReponse::getSanitizedComment");
   format.flagUseQuotes = false;
   resultIsPlot = false;
-  std::string theString;
-  if (input.isOfType<std::string>(&theString)) {
-    if (StringRoutines::stringBeginsWith(theString, "Approximations have been")) {
+  std::string currentString;
+  if (input.isOfType<std::string>(&currentString)) {
+    if (StringRoutines::stringBeginsWith(currentString, "Approximations have been")) {
       return "";
     }
     return input.toString(&format);

@@ -320,7 +320,7 @@ public:
   static std::string clearSlashes(const std::string& inputString);
   static std::string cleanUpForLaTeXLabelUse(const std::string& inputString);
   static bool isRepresentedByItselfInURLs(char input);
-  static void clearDollarSigns(std::string& theString, std::string& output);
+  static void clearDollarSigns(std::string& input, std::string& output);
   static void subEqualitiesWithSimeq(
     std::string& input, std::string& output
   );

@@ -340,11 +340,11 @@ std::string HtmlRoutines::cleanUpForLaTeXLabelUse(const std::string& inputString
   return out.str();
 }
 
-void HtmlRoutines::clearDollarSigns(std::string& theString, std::string& output) {
+void HtmlRoutines::clearDollarSigns(std::string& input, std::string& output) {
   std::stringstream out;
-  for (unsigned int i = 0; i < theString.size(); i ++) {
-    if (theString[i] != '$') {
-      out << theString[i];
+  for (unsigned int i = 0; i < input.size(); i ++) {
+    if (input[i] != '$') {
+      out << input[i];
     }
   }
   output = out.str();
@@ -2586,15 +2586,15 @@ bool StringRoutines::stringEndsWith(
     }
     return true;
   }
-  int indexInTheString = static_cast<signed>(input.size()) - 1;
+  int indexInString = static_cast<signed>(input.size()) - 1;
   for (int i = static_cast<signed>(desiredEnd.size()) - 1; i >= 0; i --) {
-    if (indexInTheString < 0) {
+    if (indexInString < 0) {
       return false;
     }
-    if (desiredEnd[static_cast<unsigned>(i)] != input[static_cast<unsigned>(indexInTheString)]) {
+    if (desiredEnd[static_cast<unsigned>(i)] != input[static_cast<unsigned>(indexInString)]) {
       return false;
     }
-    indexInTheString --;
+    indexInString --;
   }
   if (outputStringBeginning != nullptr) {
     *outputStringBeginning = input.substr(0, input.size() - desiredEnd.size());
@@ -3308,9 +3308,9 @@ int OnePartialFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFract
   return result;
 }
 
-bool OnePartialFraction::checkForOrlikSolomonAdmissibility(List<int>& theSelectedIndices) {
+bool OnePartialFraction::checkForOrlikSolomonAdmissibility(List<int>& selectedIndices) {
   global.fatal << "Orlik solomon admissability not implemented yet " << global.fatal;
-  (void) theSelectedIndices;
+  (void) selectedIndices;
   return true;
 }
 
@@ -3437,9 +3437,9 @@ bool OnePartialFraction::reduceMeOnce(
 
 void OnePartialFraction::getNElongationPolynomialWithMonomialContribution(
   List<Vector<Rational> >& startingVectors,
-  List<int>& theSelectedIndices,
-  List<int>& theCoefficients,
-  List<int>& theGreatestElongations,
+  List<int>& selectedIndices,
+  List<int>& coefficients,
+  List<int>& greatestElongations,
   int index,
   Polynomial<LargeInteger>& output,
   int dimension
@@ -3447,16 +3447,16 @@ void OnePartialFraction::getNElongationPolynomialWithMonomialContribution(
   MonomialPolynomial tempM;
   tempM.makeOne();
   for (int i = 0; i < index; i ++) {
-    int tempI = theSelectedIndices[i];
+    int tempI = selectedIndices[i];
     for (int j = 0; j < dimension; j ++) {
-      tempM.multiplyByVariable(j, startingVectors[tempI][j] * theCoefficients[i] * theGreatestElongations[i]);
+      tempM.multiplyByVariable(j, startingVectors[tempI][j] * coefficients[i] * greatestElongations[i]);
     }
   }
   this->getNElongationPolynomial(
     startingVectors,
-    theSelectedIndices[index],
-    theGreatestElongations[index],
-    theCoefficients[index],
+    selectedIndices[index],
+    greatestElongations[index],
+    coefficients[index],
     output,
     dimension
   );
@@ -3464,9 +3464,9 @@ void OnePartialFraction::getNElongationPolynomialWithMonomialContribution(
 }
 
 void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
-  List<int>& theSelectedIndices,
-  List<int>& theGreatestElongations,
-  List<int>& theCoefficients,
+  List<int>& selectedIndices,
+  List<int>& greatestElongations,
+  List<int>& coefficients,
   int GainingMultiplicityIndex,
   int ElongationGainingMultiplicityIndex,
   LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output,
@@ -3479,12 +3479,12 @@ void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
   output.makeZero();
   int dimension = startingVectors[0].size;
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
-  TheBigBadIndexingSet.initPart1(theSelectedIndices.size);
-  for (int i = 0; i < theSelectedIndices.size; i ++) {
-    int tempI = this->denominator[theSelectedIndices[i]].getMultiplicityLargestElongation() - 1;
+  TheBigBadIndexingSet.initPart1(selectedIndices.size);
+  for (int i = 0; i < selectedIndices.size; i ++) {
+    int tempI = this->denominator[selectedIndices[i]].getMultiplicityLargestElongation() - 1;
     TheBigBadIndexingSet.capacities[i] = tempI;
   }
-  for (int i = 0; i < theSelectedIndices.size; i ++) {
+  for (int i = 0; i < selectedIndices.size; i ++) {
     TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
     int oldMaxMultiplicity = TheBigBadIndexingSet.capacities[i];
     TheBigBadIndexingSet.capacities[i] = 0;
@@ -3493,16 +3493,16 @@ void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
       tempFrac.assign(*this);
       tempFrac.RelevanceIsComputed = false;
       int tempN = TheBigBadIndexingSet.totalMultiplicity() + oldMaxMultiplicity;
-      for (int k = 0; k < theSelectedIndices.size; k ++) {
+      for (int k = 0; k < selectedIndices.size; k ++) {
         int multiplicityChange;
         if (k != i) {
           multiplicityChange = TheBigBadIndexingSet.multiplicities[k];
         } else {
           multiplicityChange = oldMaxMultiplicity + 1;
         }
-        tempFrac.denominator[theSelectedIndices[k]].addMultiplicity(- multiplicityChange, theGreatestElongations[k]);
+        tempFrac.denominator[selectedIndices[k]].addMultiplicity(- multiplicityChange, greatestElongations[k]);
         this->getNElongationPolynomialWithMonomialContribution(
-          startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, dimension
+          startingVectors, selectedIndices, coefficients, greatestElongations, k, tempP, dimension
         );
         tempP.raiseToPower(multiplicityChange, 1);
         ComputationalBufferCoefficient *= (tempP);
@@ -3531,8 +3531,8 @@ void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
 
 void OnePartialFraction::applySzenesVergneFormula(
   List<Vector<Rational> >& startingVectors,
-  List<int>& theSelectedIndices,
-  List<int>& theElongations,
+  List<int>& selectedIndices,
+  List<int>& elongations,
   int GainingMultiplicityIndex,
   int ElongationGainingMultiplicityIndex,
   LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output
@@ -3544,23 +3544,23 @@ void OnePartialFraction::applySzenesVergneFormula(
   output.makeZero();
   int dimension = startingVectors[0].size;
   CoefficientBuffer.makeOne();
-  for (int i = 0; i < theSelectedIndices.size; i ++) {
+  for (int i = 0; i < selectedIndices.size; i ++) {
     tempFrac.assign(*this);
     tempFrac.RelevanceIsComputed = false;
     tempFrac.denominator[GainingMultiplicityIndex].addMultiplicity(1, ElongationGainingMultiplicityIndex);
-    OnePartialFractionDenominator& currentFrac = tempFrac.denominator[theSelectedIndices[i]];
+    OnePartialFractionDenominator& currentFrac = tempFrac.denominator[selectedIndices[i]];
     int LargestElongation = currentFrac.getLargestElongation();
     currentFrac.addMultiplicity(- 1, LargestElongation);
     tempM.makeOne();
     for (int j = 0; j < i; j ++) {
-      int tempElongation = this->denominator[theSelectedIndices[j]].getLargestElongation();
+      int tempElongation = this->denominator[selectedIndices[j]].getLargestElongation();
       for (int k = 0; k < dimension; k ++) {
-        Rational incomingPower = startingVectors[theSelectedIndices[j]][k] * theElongations[j] * tempElongation;
+        Rational incomingPower = startingVectors[selectedIndices[j]][k] * elongations[j] * tempElongation;
         tempM.multiplyByVariable(k, incomingPower);
       }
     }
     CoefficientBuffer.multiplyBy(tempM);
-    this->getNElongationPolynomial(startingVectors, theSelectedIndices[i], LargestElongation, theElongations[i], tempP, dimension);
+    this->getNElongationPolynomial(startingVectors, selectedIndices[i], LargestElongation, elongations[i], tempP, dimension);
     CoefficientBuffer *= tempP;
     tempFrac.computeIndicesNonZeroMultiplicities();
     output.addMonomial(tempFrac, CoefficientBuffer);
@@ -7142,9 +7142,9 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
     out << "(";
     //Print vector ensuring every number is at least 3 characters wide. (3 should suffice for E8... or does it?)
     for (int j = 0; j < this->group.characterTable[i].data.size; j ++) {
-      std::string theNumber = this->group.characterTable[i].data[j].toString();
-      out << theNumber;
-      for (size_t k = theNumber.size(); k < 3; k ++) {
+      std::string numberString = this->group.characterTable[i].data[j].toString();
+      out << numberString;
+      for (size_t k = numberString.size(); k < 3; k ++) {
         out << "&nbsp;";
       }
       if (j != this->group.characterTable[i].data.size - 1) {
@@ -11899,7 +11899,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
 
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
   this->complexRefinedPerRepresentative.setSize(this->finalRepresentatives.size);
-  this->theMaximaCandidates.setSize(this->finalRepresentatives.size);
+  this->maximaCandidates.setSize(this->finalRepresentatives.size);
   ProgressReport report;
   for (int i = 0; i < this->finalRepresentatives.size; i ++) {
     ConeComplex& currentComplex = this->complexRefinedPerRepresentative[i];
@@ -11908,11 +11908,11 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
     tempStream << "Processing representative " << i + 1 << " out of " << this->finalRepresentatives.size;
     report.report(tempStream.str());
     currentComplex.refine();
-    this->theMaximaCandidates[i].setSize(currentComplex.size);
+    this->maximaCandidates[i].setSize(currentComplex.size);
     for (int j = 0; j < currentComplex.size; j ++) {
       for (int k = 0; k < this->complexStartingPerRepresentative[k].size; k ++) {
         if (this->complexStartingPerRepresentative[i][k].isInCone(currentComplex[j].getInternalPoint())) {
-          this->theMaximaCandidates[i][j].addOnTopNoRepetition(this->startingLPtoMaximize[i][k]);
+          this->maximaCandidates[i][j].addOnTopNoRepetition(this->startingLPtoMaximize[i][k]);
         }
       }
     }
@@ -11930,7 +11930,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep5() {
       this->finalMaximaChambers[i][j].initialize();
       this->finalMaximaChambers[i][j].findMaxLFOverConeProjective(
         currentCone,
-        this->theMaximaCandidates[i][j],
+        this->maximaCandidates[i][j],
         this->finalMaximaChambersIndicesMaxFunctions[i][j]
       );
     }
@@ -12294,11 +12294,11 @@ bool Cone::makeConvexHullOfMeAnd(const Cone& other) {
 }
 
 bool ConeComplex::addNonRefinedChamberOnTopNoRepetition(const Cone& newCone) {
-  Cone theConeSorted;
-  theConeSorted = newCone;
-  theConeSorted.normals.quickSortAscending();
-  this->ConvexHull.makeConvexHullOfMeAnd(theConeSorted);
-  return this->addOnTopNoRepetition(theConeSorted);
+  Cone coneSorted;
+  coneSorted = newCone;
+  coneSorted.normals.quickSortAscending();
+  this->ConvexHull.makeConvexHullOfMeAnd(coneSorted);
+  return this->addOnTopNoRepetition(coneSorted);
 }
 
 void ConeComplex::refineOneStep() {
@@ -12385,13 +12385,13 @@ void ConeComplex::refine() {
 
 void Cone::computeVerticesFromNormalsNoFakeVertices() {
   this->vertices.size = 0;
-  Selection theSel, nonPivotPoints;
+  Selection selection, nonPivotPoints;
   for (int i = 0; i < this->normals.size; i ++) {
     Cone::scaleNormalizeByPositive(this->normals[i]);
   }
   int dimension = this->normals[0].size;
-  theSel.initialize(this->normals.size);
-  LargeInteger numCycles = theSel.getNumberOfCombinationsFixedCardinality(dimension - 1);
+  selection.initialize(this->normals.size);
+  LargeInteger numCycles = selection.getNumberOfCombinationsFixedCardinality(dimension - 1);
   if (dimension == 1) {
     numCycles = 0;
     bool foundNegative = false;
@@ -12418,10 +12418,10 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
   Vector<Rational> tempRoot;
   matrix.initialize(dimension - 1, dimension);
   for (int i = 0; i < numCycles; i ++) {
-    theSel.incrementSelectionFixedCardinality(dimension - 1);
-    for (int j = 0; j < theSel.cardinalitySelection; j ++) {
+    selection.incrementSelectionFixedCardinality(dimension - 1);
+    for (int j = 0; j < selection.cardinalitySelection; j ++) {
       for (int k = 0; k < dimension; k ++) {
-        matrix.elements[j][k] = this->normals[theSel.elements[j]][k];
+        matrix.elements[j][k] = this->normals[selection.elements[j]][k];
       }
     }
     matrix.gaussianEliminationByRows(nullptr, &nonPivotPoints);
@@ -12591,13 +12591,13 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
     }
   }
   LargeInteger numberOfCandidates = MathRoutines::nChooseK(inputVertices.size, rankVerticesSpan - 1);
-  Selection theSelection;
-  theSelection.initialize(inputVertices.size);
+  Selection selection;
+  selection.initialize(inputVertices.size);
   Vector<Rational> normalCandidate;
   for (int i = 0; i < numberOfCandidates; i ++) {
-    theSelection.incrementSelectionFixedCardinality(rankVerticesSpan - 1);
-    for (int j = 0; j < theSelection.cardinalitySelection; j ++) {
-      extraVertices.addOnTop(inputVertices[theSelection.elements[j]]);
+    selection.incrementSelectionFixedCardinality(rankVerticesSpan - 1);
+    for (int j = 0; j < selection.cardinalitySelection; j ++) {
+      extraVertices.addOnTop(inputVertices[selection.elements[j]]);
     }
     if (extraVertices.computeNormal(normalCandidate, dimension)) {
       bool hasPositive = false;
@@ -12852,13 +12852,13 @@ bool ConeComplex::findMaxLFOverConeProjective(
   global.comments << this->toString(true);
   this->refine();
   outputMaximumOverEeachSubChamber.setSize(this->size);
-  Rational theMax = 0;
+  Rational maximumScalarProduct = 0;
   for (int i = 0; i < this->size; i ++) {
     this->objects[i].getInternalPoint(tempRoot);
     bool isInitialized = false;
     for (int j = 0; j < inputLFsLastCoordConst.size; j ++) {
-      if (!isInitialized || tempRoot.scalarEuclidean(inputLFsLastCoordConst[j]) > theMax) {
-        theMax = tempRoot.scalarEuclidean(inputLFsLastCoordConst[j]);
+      if (!isInitialized || tempRoot.scalarEuclidean(inputLFsLastCoordConst[j]) > maximumScalarProduct) {
+        maximumScalarProduct = tempRoot.scalarEuclidean(inputLFsLastCoordConst[j]);
         outputMaximumOverEeachSubChamber[i] = j;
         isInitialized = true;
       }

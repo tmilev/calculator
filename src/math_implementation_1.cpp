@@ -766,12 +766,12 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->indicesNilradicalLarge.setSize(0);
   this->indicesNilradicalSmall.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> element;
-  WeylGroupData& theLargeWeyl = this->homomorphism.coDomainAlgebra().weylGroup;
-  WeylGroupData& theSmallWeyl = this->homomorphism.domainAlgebra().weylGroup;
+  WeylGroupData& largeWeylGroup = this->homomorphism.coDomainAlgebra().weylGroup;
+  WeylGroupData& smallWeylGroup = this->homomorphism.domainAlgebra().weylGroup;
   int numB3NegGenerators = this->homomorphism.coDomainAlgebra().getNumberOfPositiveRoots();
   int numG2NegGenerators = this->homomorphism.domainAlgebra().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
-    const Vector<Rational>& currentWeight = theLargeWeyl.rootSystem[i];
+    const Vector<Rational>& currentWeight = largeWeylGroup.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->inducing.cardinalitySelection; k ++) {
       if (!currentWeight[this->inducing.elements[k]].isEqualToZero()) {
@@ -787,7 +787,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
   }
   for (int i = 0; i < numG2NegGenerators; i ++) {
-    const Vector<Rational>& currentWeight = theSmallWeyl.rootSystem[i];
+    const Vector<Rational>& currentWeight = smallWeylGroup.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->smallParabolicSelection.cardinalitySelection; k ++) {
       if (!currentWeight[this->smallParabolicSelection.elements[k]].isEqualToZero()) {

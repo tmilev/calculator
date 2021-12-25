@@ -331,9 +331,18 @@ public:
   void initForNilradicalGeneration();
   void initNoOwnerReset();
   void getLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
-  bool linearCombinationToString(const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
+  bool linearCombinationToString(
+    const Vector<Rational>& alphaRoot,
+    int coefficient,
+    Vector<Rational>& linearCombination,
+    std::string& output
+  );
   bool linearCombinationToStringDistinguishedIndex(
-    int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output
+    int distinguished,
+    Vector<Rational>& alphaRoot,
+    int coefficient,
+    Vector<Rational>& linearCombination,
+    std::string& output
   );
   void writeLieBracketTableAndOppositeKModulesToFile(
     std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites
@@ -369,12 +378,12 @@ public:
   int RecursionDepthNilradicalsGeneration;
   int numberOfSubalgebrasProcessed;
   int numberOfConeConditionFailures;
-  int NumSubalgebrasCounted;
-  int NumLinesPerTableLatex;
-  int NumColsPerTableLatex;
-  int NumPseudoParabolicNonParabolic;
-  int NumParabolic;
-  int NumNonPseudoParabolic;
+  int subalgebrasCounted;
+  int linesPerTableLatex;
+  int columnsPerTableLatex;
+  int totalPseudoParabolicNonParabolic;
+  int totalParabolics;
+  int totalNonPseudoParabolic;
   int UpperLimitNumElementsWeyl;
   std::string ReportStringNonNilradicalParabolic;
   bool flagComputingLprohibitingWeights;
@@ -415,7 +424,7 @@ public:
   void sortDescendingOrderBySSRank();
   void toStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input);
   void toStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm);
-  void toStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess);
+  void toStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int amountToProcess);
   void toHTML(FormatExpressions* format);
   std::string toString(FormatExpressions* format);
   std::string toStringAlgebraLink(int index);

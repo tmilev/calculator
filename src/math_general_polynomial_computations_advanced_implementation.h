@@ -779,9 +779,9 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoPolynomialSystem(
 
 template <class Coefficient>
 int PolynomialSystem<Coefficient>::getNumberOfVariablesToSolveFor(const List<Polynomial<Coefficient> >& input) {
-  Selection theSel;
-  PolynomialSystem<Coefficient>::getVariablesToSolveFor(input, theSel);
-  return theSel.cardinalitySelection;
+  Selection selection;
+  PolynomialSystem<Coefficient>::getVariablesToSolveFor(input, selection);
+  return selection.cardinalitySelection;
 }
 
 template <class Coefficient>

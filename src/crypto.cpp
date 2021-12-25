@@ -633,19 +633,19 @@ bool Crypto::convertHexToString(const std::string& input, std::string& output, s
         break;
       }
       char currentChar = input[i + j];
-      char theDigit = - 1;
+      char digit = - 1;
       if (currentChar >= 'A' && currentChar <= 'F') {
-        theDigit = 10 + currentChar - 'A';
+        digit = 10 + currentChar - 'A';
       }
       if (currentChar >= 'a' && currentChar <= 'f') {
-        theDigit = 10 + currentChar - 'a';
+        digit = 10 + currentChar - 'a';
       }
       if (currentChar >= '0' && currentChar <= '9') {
-        theDigit = currentChar - '0';
+        digit = currentChar - '0';
       }
-      if (theDigit != - 1) {
+      if (digit != - 1) {
         nextByte *= 16;
-        nextByte += theDigit;
+        nextByte += digit;
       } else {
         if (commentsOnFailure != nullptr && result) {
           *commentsOnFailure << "Found unexpected character: " << currentChar;
@@ -663,22 +663,22 @@ bool Crypto::convertHexToInteger(const std::string& input, LargeIntegerUnsigned&
   bool foundNonZero = false;
   outputNumLeadingZeroPairs = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
-    int theDigit = - 1;
+    int digit = - 1;
     if (input[i] >= 'A' && input[i] <= 'F') {
-      theDigit = 10 + input[i] - 'A';
+      digit = 10 + input[i] - 'A';
     }
     if (input[i] >= 'a' && input[i] <= 'f') {
-      theDigit = 10 + input[i] - 'a';
+      digit = 10 + input[i] - 'a';
     }
     if (input[i] >= '0' && input[i] <= '9') {
-      theDigit = input[i] - '0';
+      digit = input[i] - '0';
     }
-    if (theDigit > 0) {
+    if (digit > 0) {
       foundNonZero = true;
     }
-    if (theDigit != - 1) {
+    if (digit != - 1) {
       output *= 16;
-      output += static_cast<unsigned int>(theDigit);
+      output += static_cast<unsigned int>(digit);
     }
     if (!foundNonZero) {
       outputNumLeadingZeroPairs ++;
@@ -1057,9 +1057,9 @@ bool Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(
 bool Crypto::convertLargeUnsignedToBase64SignificantDigitsFirst(
   const LargeIntegerUnsigned& input, std::string& outputBase64
 ) {
-  std::string theString;
-  Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(input, 0, theString);
-  outputBase64 = Crypto::convertListUnsignedCharsToBase64(theString, false);
+  std::string converter;
+  Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(input, 0, converter);
+  outputBase64 = Crypto::convertListUnsignedCharsToBase64(converter, false);
   return true;
 }
 
@@ -1716,18 +1716,18 @@ bool JSONWebToken::verifyRSA256(
 
 bool JSONWebToken::assignString(const std::string& other, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("JSONWebToken::assignString");
-  List<std::string> theStrings;
-  StringRoutines::stringSplitExcludeDelimiter(other, '.', theStrings);
-  if (theStrings.size != 3) {
+  List<std::string> stringSplitter;
+  StringRoutines::stringSplitExcludeDelimiter(other, '.', stringSplitter);
+  if (stringSplitter.size != 3) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Expected 3 strings separated by two dots, got: "
-      << theStrings.size << " strings, obtained from: " << other;
+      << stringSplitter.size << " strings, obtained from: " << other;
     }
     return false;
   }
-  this->headerBase64    = theStrings[0];
-  this->claimsBase64    = theStrings[1];
-  this->signatureBase64 = theStrings[2];
+  this->headerBase64    = stringSplitter[0];
+  this->claimsBase64    = stringSplitter[1];
+  this->signatureBase64 = stringSplitter[2];
   if (!Crypto::convertBase64ToString(this->headerBase64, this->headerJSON, commentsOnFailure)) {
     return false;
   }

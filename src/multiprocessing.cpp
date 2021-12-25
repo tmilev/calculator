@@ -903,12 +903,12 @@ bool MathRoutines::parseListIntegers(
   delimiters.addOnTopNoRepetition(']');
   delimiters.addOnTopNoRepetition('(');
   delimiters.addOnTopNoRepetition(')');
-  List<std::string> theNumbers;
-  StringRoutines::stringSplitExcludeDelimiters(input, delimiters, theNumbers);
-  result.setSize(theNumbers.size);
-  for (int i = 0; i < theNumbers.size; i ++) {
+  List<std::string> numberStrings;
+  StringRoutines::stringSplitExcludeDelimiters(input, delimiters, numberStrings);
+  result.setSize(numberStrings.size);
+  for (int i = 0; i < numberStrings.size; i ++) {
     LargeInteger theInt;
-    bool success = theInt.assignStringFailureAllowed(theNumbers[i], commentsOnFailure);
+    bool success = theInt.assignStringFailureAllowed(numberStrings[i], commentsOnFailure);
     if (!success) {
       return false;
     }

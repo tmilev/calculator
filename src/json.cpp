@@ -163,8 +163,8 @@ bool JSData::hasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
   }
   for (int i = 0; i < keys.size; i ++) {
     // will not work for integer indices larger than 9
-    int theDigit = - 1;
-    if (MathRoutines::isADigit(keys[i], &theDigit)) {
+    int digit = - 1;
+    if (MathRoutines::isADigit(keys[i], &digit)) {
       if (currentData->elementType != JSData::token::tokenArray) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
@@ -175,14 +175,14 @@ bool JSData::hasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
         }
         return false;
       }
-      if (currentData->listObjects.size <= theDigit) {
+      if (currentData->listObjects.size <= digit) {
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Key index: " << theDigit
+          *commentsOnFailure << "Key index: " << digit
           << " is too large for current value: " << currentData->toString(&JSData::PrintOptions::HTML());
         }
         return false;
       }
-      currentData = &currentData->listObjects[theDigit];
+      currentData = &currentData->listObjects[digit];
       continue;
     }
     if (currentData->elementType != JSData::token::tokenObject) {

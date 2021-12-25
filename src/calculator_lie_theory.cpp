@@ -548,7 +548,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
   bool ConjectureCholds = true;
   LittelmannPath hwPath;
   List<LittelmannPath> tempList;
-  List<List<int> > theStrings;
+  List<List<int> > integerStrings;
   MonomialTensor<int, HashFunctions::hashFunction> tempMon;
   DynkinType currentType;
   for (int i = 0; i < ranks.size; i ++) {
@@ -580,16 +580,16 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, con
       );
       hwPath.generateOrbit(
         tempList,
-        theStrings,
+        integerStrings,
         MathRoutines::minimum(1000, currentAlg.weylGroup.weylDimFormulaFundamentalCoords(currentHW).numeratorShort),
         nullptr
       );
-      reportStream << "\nPath orbit size = " << theStrings.size
+      reportStream << "\nPath orbit size = " << integerStrings.size
       << " generated in " << global.getElapsedSeconds() << " seconds. ";
       report.report(reportStream.str());
-      for (int k = 0; k < theStrings.size; k ++) {
+      for (int k = 0; k < integerStrings.size; k ++) {
         LittelmannPath& currentPath = tempList[k];
-        tempMon = theStrings[k];
+        tempMon = integerStrings[k];
         tempMon.generatorsIndices.reverseElements();
         tempMon.powers.reverseElements();
         if (!currentPath.isAdaptedString(tempMon)) {

@@ -50,12 +50,12 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
     return false;
   }
   const Expression& argument = input[1];
-  std::string theString;
-  if (!argument.isOfType(&theString)) {
+  std::string argumentString;
+  if (!argument.isOfType(&argumentString)) {
     return false;
   }
   List<SyntacticElement> elements;
-  calculator.parser.parseFillDictionary(theString, elements);
+  calculator.parser.parseFillDictionary(argumentString, elements);
   Expression evaluatedE;
   std::stringstream out;
   bool previousWasInteger = false;

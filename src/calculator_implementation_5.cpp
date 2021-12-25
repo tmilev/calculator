@@ -1362,15 +1362,15 @@ bool CalculatorFunctions::sqrt(
   if (power != 2) {
     return false;
   }
-  AlgebraicNumber theNumber;
-  if (!theNumber.assignRationalQuadraticRadical(
+  AlgebraicNumber algebraicNumber;
+  if (!algebraicNumber.assignRationalQuadraticRadical(
     rationalValue,
     calculator.objectContainer.algebraicClosure,
     &calculator.comments
   )) {
     return false;
   }
-  return output.assignValue(calculator, theNumber);
+  return output.assignValue(calculator, algebraicNumber);
 }
 
 bool CalculatorFunctionsBasic::floor(
@@ -1385,9 +1385,9 @@ bool CalculatorFunctionsBasic::floor(
     rational.assignFloor();
     return output.assignValue(calculator, rational);
   }
-  double theDouble = 0;
-  if (input[1].evaluatesToDouble(&theDouble)) {
-    return output.assignValue(calculator, static_cast<int>(std::floor(theDouble)));
+  double floatingPointNumber = 0;
+  if (input[1].evaluatesToDouble(&floatingPointNumber)) {
+    return output.assignValue(calculator, static_cast<int>(std::floor(floatingPointNumber)));
   }
   return false;
 }
@@ -1432,10 +1432,10 @@ bool CalculatorFunctionsBasic::round(
     }
     return output.assignValue(calculator, result);
   }
-  double theDouble = 0;
-  if (input[1].evaluatesToDouble(&theDouble)) {
+  double doubleNumber = 0;
+  if (input[1].evaluatesToDouble(&doubleNumber)) {
     return output.assignValue(calculator,
-      static_cast<int>(std::round(theDouble))
+      static_cast<int>(std::round(doubleNumber))
     );
   }
   return false;
@@ -1851,25 +1851,25 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   }
   out.precision(7);
   bool hasDoubleValue = false;
-  double theDoubleValue = - 1;
+  double doubleValue = - 1;
   if (input.isOfType<Rational>()) {
     hasDoubleValue = true;
-    theDoubleValue = input.getValue<Rational>().getDoubleValue();
+    doubleValue = input.getValue<Rational>().getDoubleValue();
   }
   if (input.isOfType<AlgebraicNumber>()) {
-    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&theDoubleValue);
+    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&doubleValue);
   }
   if (input.isOfType<double>()) {
     hasDoubleValue = true;
-    theDoubleValue = input.getValue<double>();
+    doubleValue = input.getValue<double>();
   }
   if (hasDoubleValue) {
-    std::string theDoubleString = FloatingPoint::doubleToString(theDoubleValue);
-    if (theDoubleString.size() > 0) {
-      if (theDoubleString[0] == '-') {
-        out << "(" << theDoubleString << ")";
+    std::string doubleString = FloatingPoint::doubleToString(doubleValue);
+    if (doubleString.size() > 0) {
+      if (doubleString[0] == '-') {
+        out << "(" << doubleString << ")";
       } else {
-        out << " " << theDoubleString;
+        out << " " << doubleString;
       }
     }
     return output.assignValue(calculator, out.str());

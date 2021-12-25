@@ -152,10 +152,10 @@ public:
   std::string prepareReport();
   GeneralizedVermaModuleCharacters();
   bool checkInitialization() const;
-  std::string prepareReportOneCone(FormatExpressions& format, const Cone& theCone);
+  std::string prepareReportOneCone(FormatExpressions& format, const Cone& cone);
   void getProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational>& output);
   void splitByMultiplicityFreeWall(Cone& cone, ConeComplex& output);
-  void initTheMaxComputation();
+  void inititializeMaximumComputation();
   void computeQPsFromChamberComplex();
   void getSubstitutionFromIndex(
     PolynomialSubstitution<Rational>& outputSub,

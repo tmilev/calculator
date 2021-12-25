@@ -675,7 +675,7 @@ public:
     }
     return result;
   }
-  // The function below is required to reserve the order of elements given by theSelection.elements.
+  // The function below is required to reserve the order of elements given by selection.elements.
   void subSelection(const Selection& selection, List<Object>& output);
   // If comparison function is not specified, quickSortAscending uses operator >, else it uses the given
   // comparison function
@@ -1325,7 +1325,7 @@ public:
     }
     this->removeLastObject();
   }
-  void setObjectAtIndex(int index, const Object& theObject) {
+  void setObjectAtIndex(int index, const Object& input) {
     if (index < 0 || index >= this->size) {
       std::stringstream commentsOnCrash;
       commentsOnCrash << "Attempt to pop out index "
@@ -1335,9 +1335,9 @@ public:
     }
     int hashIndexPop = this->getHash(this->objects[index]);
     this->hashBuckets[hashIndexPop].removeFirstOccurenceSwapWithLast(index);
-    int hashIndexIncoming = this->getHash(theObject);
+    int hashIndexIncoming = this->getHash(input);
     this->hashBuckets[hashIndexIncoming].addOnTop(index);
-    this->objects[index] = theObject;
+    this->objects[index] = input;
   }
   void removeIndexSwapWithLast(int index) {
     if (index < 0 || index >= this->size) {
@@ -1525,8 +1525,8 @@ public:
   const Object& operator[](int i) const {
     return TemplateList::operator[](i);
   }
-  Object& getElement(int theObjectIndex) const {
-    return TemplateList::operator[](theObjectIndex);
+  Object& getElement(int objectIndex) const {
+    return TemplateList::operator[](objectIndex);
   }
   void operator=(const TemplateList& other) {
     if (this == &other) {

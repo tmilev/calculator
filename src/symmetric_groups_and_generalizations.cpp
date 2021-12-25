@@ -175,10 +175,10 @@ void Partition::fillTableauOrdered(Tableau& in) const {
 void Partition::getAllStandardTableaux(List<Tableau>& out) const {
   GeneratorPermutationsOfList<int> perms;
   for (perms.initialize(this->n); !perms.doneIterating(); ++ perms) {
-    Tableau theTableau;
-    this->fillTableau(theTableau, *perms);
-    if (theTableau.isStandard()) {
-      out.addOnTop(theTableau);
+    Tableau tableau;
+    this->fillTableau(tableau, *perms);
+    if (tableau.isStandard()) {
+      out.addOnTop(tableau);
     }
   }
 }
@@ -1407,17 +1407,19 @@ int HyperoctahedralGroup::GetN() {
 }
 */
 
-LargeInteger HyperoctahedralGroupData::getSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G) {
-  HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
+LargeInteger HyperoctahedralGroupData::getSizeByFormulaImplementation(
+  FiniteGroup<ElementHyperoctahedralGroupR2>& group
+) {
+  HyperoctahedralGroupData* hyperOctahedralData = static_cast<HyperoctahedralGroupData*>(group.specificDataPointer);
   //global.Comments << "HyperoctahedralGroup::getSize() called.  N =" << HD->N << '\n';
-  if (!HD) {
+  if (!hyperOctahedralData) {
     global.fatal << "Consistency error. " << global.fatal;
   }
-  if (HD->flagIsEntireHyperoctahedralGroup) {
-    return MathRoutines::factorial(HD->dimension) * (1 << HD->dimension);
+  if (hyperOctahedralData->flagIsEntireHyperoctahedralGroup) {
+    return MathRoutines::factorial(hyperOctahedralData->dimension) * (1 << hyperOctahedralData->dimension);
   }
-  if (HD->flagIsEntireDn) {
-    return MathRoutines::factorial(HD->dimension) * (1 << HD->dimension) / 2;
+  if (hyperOctahedralData->flagIsEntireDn) {
+    return MathRoutines::factorial(hyperOctahedralData->dimension) * (1 << hyperOctahedralData->dimension) / 2;
   }
   global.fatal << "This method should not have been called. " << global.fatal;
   // control reaches end of non-void function
@@ -1439,15 +1441,15 @@ bool HyperoctahedralGroup::getWordByFormulaImplementation(void* GG, const Elemen
 }*/
 
 bool HyperoctahedralGroupData::getWordByFormulaImplementation(
-  FiniteGroup<HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2>& G,
-  const HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2& g,
+  FiniteGroup<HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2>& group,
+  const HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2& element,
   List<int>& word
 ) {
-  HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
+  HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(group.specificDataPointer);
   if (HD->flagIsEntireHyperoctahedralGroup) {
-    g.h.getWordjjPlus1(word);
-    for (int i = 0; i < g.k.bits.size; i ++) {
-      if (g.k.bits[i]) {
+    element.h.getWordjjPlus1(word);
+    for (int i = 0; i < element.k.bits.size; i ++) {
+      if (element.k.bits[i]) {
         word.addOnTop(HD->dimension - 1+ i);
       }
     }

@@ -1646,7 +1646,7 @@ Rational KostkaNumber::computeTypeBParabolicSignMultiplicity(
     << "} )=";
   }
   Rational result = 0;
-  SelectionWithDifferentMaxMultiplicities theSelection;
+  SelectionWithDifferentMaxMultiplicities selection;
   List<int> complementSelection;
   HashedList<KostkaNumber> KNcache;
   KostkaNumber leftKostkaNumber, rightKostkaNumber;
@@ -1657,19 +1657,19 @@ Rational KostkaNumber::computeTypeBParabolicSignMultiplicity(
   tempP = rightPartition;
   tempP.transpose();
   rightKostkaNumber.partition = tempP.p;
-  theSelection.initializeFromIntegers(parabolicPartition.p);
+  selection.initializeFromIntegers(parabolicPartition.p);
   do {
     complementSelection.setSize(parabolicPartition.p.size);
-    for (int k = 0; k < theSelection.capacities.size; k ++) {
-      complementSelection[k] = parabolicPartition.p[k] - theSelection.multiplicities[k];
+    for (int k = 0; k < selection.capacities.size; k ++) {
+      complementSelection[k] = parabolicPartition.p[k] - selection.multiplicities[k];
     }
-    leftKostkaNumber.tuple = theSelection.multiplicities;
+    leftKostkaNumber.tuple = selection.multiplicities;
     leftKostkaNumber.compute(&KNcache, nullptr);
     rightKostkaNumber.tuple = complementSelection;
     rightKostkaNumber.tuple.addOnTop(BcomponentSize);
     rightKostkaNumber.compute(&KNcache, nullptr);
     result += leftKostkaNumber.value * rightKostkaNumber.value;
-  } while (theSelection.incrementReturnFalseIfPastLast());
+  } while (selection.incrementReturnFalseIfPastLast());
   if (comments != nullptr) {
     *comments << result.toString();
   }

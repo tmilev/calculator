@@ -369,17 +369,17 @@ bool CalculatorFunctions::printZnEnumeration(
   if (grade > 10 || dimension > 5 || grade < 0 || dimension < 0) {
     return false;
   }
-  SelectionPositiveIntegers theSel;
-  theSel.initialize(dimension);
+  SelectionPositiveIntegers selection;
+  selection.initialize(dimension);
   std::stringstream out2, out;
   LargeIntegerUnsigned gradeLarge = static_cast<unsigned>(grade);
   int counter = 0;
   for (
-    theSel.setFirstInGradeLevel(gradeLarge);
-    theSel.getGrading() == gradeLarge;
-    theSel.incrementReturnFalseIfPastLast()
+    selection.setFirstInGradeLevel(gradeLarge);
+    selection.getGrading() == gradeLarge;
+    selection.incrementReturnFalseIfPastLast()
   ) {
-    out2 << theSel.toString() << "<br>";
+    out2 << selection.toString() << "<br>";
     counter ++;
   }
   out << "Total " << counter << " vectors:<br>" << out2.str();

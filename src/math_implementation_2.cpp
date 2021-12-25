@@ -728,15 +728,15 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
     int startIndex = highestBufferIndex;
     do {
       currentPower = bufferPowersOfBase.objects[highestBufferIndex];
-      unsigned int theDigit = 0;
+      unsigned int digit = 0;
       while (remainder.isGreaterThanOrEqualTo(currentPower)) {
-        theDigit ++;
+        digit ++;
         currentPower += bufferPowersOfBase[highestBufferIndex];
       }
-      out << theDigit;
+      out << digit;
       numRemainingDigits --;
-      if (theDigit != 1) {
-        bufferPowersOfBase[highestBufferIndex] *= theDigit;
+      if (digit != 1) {
+        bufferPowersOfBase[highestBufferIndex] *= digit;
       }
       remainder.subtractSmallerPositive(bufferPowersOfBase[highestBufferIndex]);
       highestBufferIndex --;

@@ -646,10 +646,10 @@ public:
   bool flagIsEntireHyperoctahedralGroup;
   bool flagIsEntireDn;
   FiniteGroup<ElementHyperoctahedralGroupR2>* group;
-  FiniteGroup<ElementHyperoctahedralGroupR2> theGroupMayBeHereNameIsLongToDiscourageUse;
+  FiniteGroup<ElementHyperoctahedralGroupR2> groupMayBeHereNameIsLongToDiscourageUse;
 
   void makeHyperoctahedralGroup(int n) {
-    this->group = &theGroupMayBeHereNameIsLongToDiscourageUse;
+    this->group = &groupMayBeHereNameIsLongToDiscourageUse;
     this->group->specificDataPointer = this;
     this->dimension = n;
     this->group->generators.setSize(n - 1 + n);

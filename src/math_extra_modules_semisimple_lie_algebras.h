@@ -13,8 +13,8 @@ class MonomialGeneralizedVerma {
   int indexFDVector;
   MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {
   }
-  friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<Coefficient>& theGen) {
-    output << theGen.toString();
+  friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<Coefficient>& generator) {
+    output << generator.toString();
     return output;
   }
   void multiplyMeByUEEltOnTheLeft(
@@ -218,11 +218,11 @@ public:
   // specialization below.
   // [Update:] made a bug report on this in the gcc bug tracker.
   // This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
-  HashedListSpecialized<MonomialTensor<int, HashFunctions::hashFunction> > theGeneratingWordsNonReducedInt;
-  Vectors<Rational> theGeneratingWordsWeightsPlusWeightFDpart;
-  List<LittelmannPath> thePaths;
+  HashedListSpecialized<MonomialTensor<int, HashFunctions::hashFunction> > generatingWordsNonReducedInt;
+  Vectors<Rational> generatingWordsWeightsPlusWeightFiniteDimensionalPart;
+  List<LittelmannPath> allPaths;
   List<List<MonomialUniversalEnveloping<Coefficient> > > generatingWordsGrouppedByWeight;
-  List<List<MonomialTensor<int, HashFunctions::hashFunction> > > theGeneratingWordsIntGrouppedByWeight;
+  List<List<MonomialTensor<int, HashFunctions::hashFunction> > > generatingWordsIntegersGrouppedByWeight;
   // List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsSimpleGens;
   // List<Matrix<Coefficient> > actionsSimpleGensMatrixForM;
   List<Matrix<Coefficient> > bilinearFormsAtEachWeightLevel;

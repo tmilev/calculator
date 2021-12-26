@@ -110,8 +110,8 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   if (this->waypoints.size == 0) {
     return;
   }
-  Rational theMin = 0;
-  int minIndex = - 1;
+  Rational minimalScalarProduct = 0;
+  int indexMinimalScalarProduct = - 1;
   if (this->owner == nullptr) {
     global.fatal << "zero owner not allowed here. " << global.fatal;
   }
@@ -121,23 +121,23 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   Rational lengthAlpha = weylGroup.rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / lengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
-    Rational tempRat = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
-    if (tempRat <= theMin) {
-      theMin = tempRat;
-      minIndex = i;
+    Rational scalarProduct = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
+    if (scalarProduct <= minimalScalarProduct) {
+      minimalScalarProduct = scalarProduct;
+      indexMinimalScalarProduct = i;
     }
   }
-  if (minIndex <= 0 || theMin > - 1) {
+  if (indexMinimalScalarProduct <= 0 || minimalScalarProduct > - 1) {
     this->waypoints.size = 0;
     return;
   }
   int precedingIndex = 0;
-  for (int i = 0; i <= minIndex; i ++) {
+  for (int i = 0; i <= indexMinimalScalarProduct; i ++) {
     Rational tempScalar = weylGroup.rootScalarCartanRoot(this->waypoints[i], alphaScaled);
-    if (tempScalar >= theMin + 1) {
+    if (tempScalar >= minimalScalarProduct + 1) {
       precedingIndex = i;
     }
-    if (tempScalar < theMin + 1) {
+    if (tempScalar < minimalScalarProduct + 1) {
       break;
     }
   }
@@ -145,21 +145,21 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   if (!this->minimaAreIntegral()) {
     global.comments << "<br>Something is wrong: starting path is BAD!";
   }
-  if (s2 > theMin + 1) {
+  if (s2 > minimalScalarProduct + 1) {
     this->waypoints.setSize(this->waypoints.size + 1);
     for (int i = this->waypoints.size - 1; i >= precedingIndex + 2; i --) {
       this->waypoints[i] = this->waypoints[i - 1];
     }
     precedingIndex ++;
-    minIndex ++;
+    indexMinimalScalarProduct ++;
     Vector<Rational>& r1 = this->waypoints[precedingIndex];
     Vector<Rational>& r2 = this->waypoints[precedingIndex - 1];
     Rational s1 = weylGroup.rootScalarCartanRoot(r1, alphaScaled);
-    Rational x = (theMin + 1 - s2) / (s1 - s2);
+    Rational x = (minimalScalarProduct + 1 - s2) / (s1 - s2);
     this->waypoints[precedingIndex] = (r1 - r2) * x + r2;
   }
   Vectors<Rational> differences;
-  differences.setSize(minIndex-precedingIndex);
+  differences.setSize(indexMinimalScalarProduct-precedingIndex);
   Rational currentDist = 0;
   Rational minDist = 0;
   for (int i = 0; i < differences.size; i ++) {
@@ -173,7 +173,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   for (int i = 0; i < differences.size; i ++) {
     this->waypoints[i + precedingIndex + 1] = this->waypoints[i + precedingIndex] + differences[i];
   }
-  for (int i = minIndex + 1; i < this->waypoints.size; i ++) {
+  for (int i = indexMinimalScalarProduct + 1; i < this->waypoints.size; i ++) {
     this->waypoints[i] += alpha;
   }
   this->simplify();
@@ -189,36 +189,36 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   if (indexAlpha < 0 || indexAlpha >= this->owner->getDimension()) {
     global.fatal << "Index of Littelmann root operator out of range. " << global.fatal;
   }
-  Rational theMin = 0;
-  int minIndex = - 1;
+  Rational minimalScalarProduct = 0;
+  int indexMinimalScalarProduct = - 1;
   WeylGroupData& weylGroup = *this->owner;
   Vector<Rational>& alpha = weylGroup.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
-    Rational tempRat = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
-    if (tempRat <= theMin) {
-      theMin = tempRat;
-      minIndex = i;
+    Rational scalarProduct = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
+    if (scalarProduct <= minimalScalarProduct) {
+      minimalScalarProduct = scalarProduct;
+      indexMinimalScalarProduct = i;
     }
   }
   Rational lastScalar = this->owner->rootScalarCartanRoot(*this->waypoints.lastObject(), alphaScaled);
-  if (minIndex < 0 || lastScalar - theMin < 1) {
+  if (indexMinimalScalarProduct < 0 || lastScalar - minimalScalarProduct < 1) {
     this->waypoints.size = 0;
     return;
   }
   int succeedingIndex = 0;
-  for (int i = this->waypoints.size - 1; i >= minIndex; i --) {
+  for (int i = this->waypoints.size - 1; i >= indexMinimalScalarProduct; i --) {
     Rational tempScalar = weylGroup.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
-    if (tempScalar >= theMin + 1) {
+    if (tempScalar >= minimalScalarProduct + 1) {
       succeedingIndex = i;
     }
-    if (tempScalar < theMin + 1) {
+    if (tempScalar < minimalScalarProduct + 1) {
       break;
     }
   }
   Rational s1 = this->owner->rootScalarCartanRoot(this->waypoints[succeedingIndex], alphaScaled);
-  if (s1 > theMin + 1) {
+  if (s1 > minimalScalarProduct + 1) {
     this->waypoints.setSize(this->waypoints.size + 1);
     for (int i = this->waypoints.size - 1; i >= succeedingIndex + 1; i --) {
       this->waypoints[i] = this->waypoints[i - 1];
@@ -227,21 +227,21 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
     Vector<Rational>& r1 = this->waypoints[succeedingIndex];
     Vector<Rational>& r2 = this->waypoints[succeedingIndex - 1];
     Rational s2 = weylGroup.rootScalarCartanRoot(r2, alphaScaled);
-    Rational x = (theMin + 1 - s2) / (s1 - s2);
+    Rational x = (minimalScalarProduct + 1 - s2) / (s1 - s2);
     this->waypoints[succeedingIndex] = (r1 - r2) * x + r2;
   }
   Vector<Rational> diff, oldWayPoint;
-  oldWayPoint = this->waypoints[minIndex];
+  oldWayPoint = this->waypoints[indexMinimalScalarProduct];
   Rational currentDist = 0;
-  for (int i = 0; i < succeedingIndex - minIndex; i ++) {
-    diff = this->waypoints[i + minIndex + 1] - oldWayPoint;
+  for (int i = 0; i < succeedingIndex - indexMinimalScalarProduct; i ++) {
+    diff = this->waypoints[i + indexMinimalScalarProduct + 1] - oldWayPoint;
     currentDist += weylGroup.rootScalarCartanRoot(diff, alphaScaled);
     if (currentDist > 0) {
       weylGroup.reflectSimple(indexAlpha, diff);
       currentDist = 0;
     }
-    oldWayPoint = this->waypoints[i + minIndex + 1];
-    this->waypoints[i + minIndex + 1] = this->waypoints[i + minIndex] + diff;
+    oldWayPoint = this->waypoints[i + indexMinimalScalarProduct + 1];
+    this->waypoints[i + indexMinimalScalarProduct + 1] = this->waypoints[i + indexMinimalScalarProduct] + diff;
   }
   for (int i = succeedingIndex + 1; i < this->waypoints.size; i ++) {
     this->waypoints[i] -= alpha;
@@ -594,13 +594,13 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
       if (!currentMon.powers[j].isSmallInteger(&power)) {
         return false;
       }
-      int theGenerator = currentMon.generatorsIndices[j];
-      if (theGenerator < numPosRoots) {
-        theGenerator = 2 * numPosRoots + rank - 1 - theGenerator;
-      } else if (theGenerator >= numPosRoots + rank) {
-        theGenerator = - theGenerator + 2 * numPosRoots + rank - 1;
+      int generator = currentMon.generatorsIndices[j];
+      if (generator < numPosRoots) {
+        generator = 2 * numPosRoots + rank - 1 - generator;
+      } else if (generator >= numPosRoots + rank) {
+        generator = - generator + 2 * numPosRoots + rank - 1;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.powers[j]);
+      tempMon.multiplyByGeneratorPowerOnTheRight(generator, currentMon.powers[j]);
       if (power % 2 == 1) {
         coefficient *= - 1;
       }
@@ -729,18 +729,18 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
       return false;
     }
     for (int j = 0; j < currentMon.powers.size; j ++) {
-      Rational tempRat;
-      if (!currentMon.powers[j].isConstant(tempRat)) {
+      Rational constantPower;
+      if (!currentMon.powers[j].isConstant(constantPower)) {
         return false;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);
+      tempMon.multiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], constantPower);
     }
     output.addMonomial(tempMon, Coefficient(1));
   }
   return true;
 }
 
-void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
+void BranchingData::initializePart1NoSubgroups() {
   MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
   this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl = &this->homomorphism.coDomainAlgebra().weylGroup;
   this->weylGroupFiniteDimensionalSmall.ambientWeyl = &this->homomorphism.domainAlgebra().weylGroup;
@@ -838,7 +838,7 @@ BranchingData::BranchingData() {
   this->flagAscendingGeneratorOrder = false;
 }
 
-void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
+void BranchingData::initializePart2NoSubgroups() {
   List<Vectors<Rational> > emptyList;
   this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
   this->weylGroupFiniteDimensionalSmall.makeParabolicFromSelectionSimpleRoots(

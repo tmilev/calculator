@@ -109,7 +109,7 @@ void OrbitIterator<elementGroup, elementRepresentation>::initialize(
   const GroupActionWithName &inputGroupAction
 ) {
   this->resetNoActionChange();
-  this->theGroupGeneratingElements = inputGenerators;
+  this->groupGeneratingElements = inputGenerators;
   this->groupAction.name = inputGroupAction.name;
   this->groupAction.actOn = inputGroupAction.actOn;
   this->currentLayer->clear();
@@ -138,12 +138,12 @@ std::string OrbitIterator<elementGroup, elementRepresentation>::toStringLayerSiz
 template <class elementGroup, class elementRepresentation>
 bool OrbitIterator<elementGroup, elementRepresentation>::incrementReturnFalseIfPastLast() {
   MacroRegisterFunctionWithName("OrbitIterator::incrementReturnFalseIfPastLast");
-  if (this->theGroupGeneratingElements.size == 0) {
+  if (this->groupGeneratingElements.size == 0) {
     return false;
   }
-  for (int i = 0; i < this->theGroupGeneratingElements.size; i ++) {
+  for (int i = 0; i < this->groupGeneratingElements.size; i ++) {
     this->groupAction.actOn(
-      this->theGroupGeneratingElements[i],
+      this->groupGeneratingElements[i],
       (*this->currentLayer)[this->indexCurrentElement],
       this->bufferRepresentationElement
     );
@@ -168,13 +168,13 @@ bool OrbitIterator<elementGroup, elementRepresentation>::checkInitialization() c
 template <class elementGroup, class elementRepresentation>
 bool OrbitIterator<elementGroup, elementRepresentation>::incrementReturnFalseIfPastLastFALSE() {
   MacroRegisterFunctionWithName("OrbitIterator::incrementReturnFalseIfPastLastFALSE");
-  if (this->theGroupGeneratingElements.size == 0) {
+  if (this->groupGeneratingElements.size == 0) {
     return false;
   }
   this->checkInitialization();
-  for (int i = 0; i < this->theGroupGeneratingElements.size; i ++) {
+  for (int i = 0; i < this->groupGeneratingElements.size; i ++) {
     this->groupAction.actOn(
-      this->theGroupGeneratingElements[i],
+      this->groupGeneratingElements[i],
       (*this->currentLayer)[this->indexCurrentElement],
       this->bufferRepresentationElement
     );
@@ -794,7 +794,7 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
   int numElementsToReserve = MathRoutines::minimum(upperLimitNumberOfElements, 1000000);
   output.setExpectedSize(numElementsToReserve);
   ProgressReport report(3000, GlobalVariables::Response::ReportType::general);
-  SimpleReflectionOrOuterAutomorphism theGen;
+  SimpleReflectionOrOuterAutomorphism generatorsOuterGroup;
   if (outputSubset != nullptr) {
     currentElt.makeIdentity(*this);
     outputSubset->setExpectedSize(numElementsToReserve);
@@ -813,8 +813,8 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
       if (output.addOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
           currentElt.makeIdentity(*this);
-          theGen.makeSimpleReflection(j);
-          currentElt.generatorsLastAppliedFirst.addOnTop(theGen);
+          generatorsOuterGroup.makeSimpleReflection(j);
+          currentElt.generatorsLastAppliedFirst.addOnTop(generatorsOuterGroup);
           currentElt.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
           outputSubset->addOnTop(currentElt);
         }
@@ -852,7 +852,7 @@ void WeylGroupData::raiseToDominantWeight(
   }
   Coefficient scalarProduct;
   int dimension = this->getDimension();
-  SimpleReflection theGen;
+  SimpleReflection generator;
   if (raisingElt != nullptr) {
     raisingElt->makeIdentity(*this);
   }
@@ -868,9 +868,9 @@ void WeylGroupData::raiseToDominantWeight(
         if (sign != nullptr) {
           *sign *= - 1;
         }
-        theGen.makeSimpleReflection(i);
+        generator.makeSimpleReflection(i);
         if (raisingElt != nullptr) {
-          raisingElt->generatorsLastAppliedFirst.addOnTop(theGen);//warning order of raising element is reversed, must reverse back
+          raisingElt->generatorsLastAppliedFirst.addOnTop(generator);//warning order of raising element is reversed, must reverse back
         }
       }
       if (stabilizerFound != nullptr) {
@@ -888,12 +888,13 @@ void WeylGroupData::raiseToDominantWeight(
 
 template <class Coefficient>
 void WeylGroupData::reflectRhoSimple(int index, Vector<Coefficient>& vector) const {
-  Coefficient alphaShift, tempRat;
+  Coefficient alphaShift;
+  Coefficient scalar;
   alphaShift = 0;
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat = vector[i];
-    tempRat *= this->cartanSymmetric.elements[index][i] * (- 2);
-    alphaShift += tempRat;
+    scalar = vector[i];
+    scalar *= this->cartanSymmetric.elements[index][i] * (- 2);
+    alphaShift += scalar;
   }
   alphaShift /= this->cartanSymmetric.elements[index][index];
   alphaShift -= 1;
@@ -939,7 +940,7 @@ bool WeylGroupData::generateOrbit(
     outputSubset->addOnTop(currentElt);
   }
   ProgressReport report(1000, GlobalVariables::Response::ReportType::general);
-  SimpleReflection theGen;
+  SimpleReflection simpleReflection;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfRows; j ++) {
       currentRoot = output[i];
@@ -959,8 +960,8 @@ bool WeylGroupData::generateOrbit(
       if (output.addOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
           currentElt.generatorsLastAppliedFirst.setSize(1);
-          theGen.makeSimpleReflection(j);
-          currentElt.generatorsLastAppliedFirst[0] = theGen;
+          simpleReflection.makeSimpleReflection(j);
+          currentElt.generatorsLastAppliedFirst[0] = simpleReflection;
           currentElt.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
           currentElt.makeCanonical();
           outputSubset->addOnTop(currentElt);
@@ -978,12 +979,13 @@ bool WeylGroupData::generateOrbit(
 
 template <class Coefficient>
 void WeylGroupData::reflectMinusRhoSimple(int index, Vector<Coefficient>& vector) const {
-  Coefficient alphaShift, tempRat;
+  Coefficient alphaShift;
+  Coefficient scalar;
   alphaShift = 0;
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat = vector[i];
-    tempRat *= this->cartanSymmetric.elements[index][i];
-    alphaShift += tempRat;
+    scalar = vector[i];
+    scalar *= this->cartanSymmetric.elements[index][i];
+    alphaShift += scalar;
   }
   alphaShift *= - 2;
   alphaShift /= this->cartanSymmetric.elements[index][index];
@@ -1000,12 +1002,13 @@ void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& vector) const 
     << index + 1 << " in a Weyl group of rank "
     << this->getDimension() << global.fatal;
   }
-  Coefficient alphaShift, tempRat;
+  Coefficient alphaShift;
+  Coefficient scalar;
   alphaShift = 0;
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat = vector[i];
-    tempRat *= this->cartanSymmetric.elements[index][i];
-    alphaShift += tempRat;
+    scalar = vector[i];
+    scalar *= this->cartanSymmetric.elements[index][i];
+    alphaShift += scalar;
   }
   alphaShift *= - 2;
   alphaShift /= this->cartanSymmetric.elements[index][index];

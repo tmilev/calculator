@@ -1695,10 +1695,10 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
     return;
   }
   this->iterator.initialize(
-    this->iterator.theGroupGeneratingElements, this->orbitDefiningElement, this->iterator.groupAction
+    this->iterator.groupGeneratingElements, this->orbitDefiningElement, this->iterator.groupAction
   );
-  if (this->iterator.theGroupGeneratingElements.size > 0) {
-    WeylGroupAutomorphisms& ownerGroup = *this->iterator.theGroupGeneratingElements[0].owner;
+  if (this->iterator.groupGeneratingElements.size > 0) {
+    WeylGroupAutomorphisms& ownerGroup = *this->iterator.groupGeneratingElements[0].owner;
     this->computedSize = ownerGroup.getOrbitSize(this->orbitDefiningElement);
     if (this->computedSize > this->maxOrbitBufferSize) {
       this->maxOrbitBufferSize = 0;
@@ -2562,14 +2562,14 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
      output.addMonomial(MonomialMatrix(2, 4), 1);
      output.addMonomial(MonomialMatrix(4, 2), 1);
   }
-  Rational tempRat = output.getDeterminant();
-  if (tempRat != 1 && tempRat != - 1) {
+  Rational determinant = output.getDeterminant();
+  if (determinant != 1 && determinant != - 1) {
     FormatExpressions format;
     format.flagUseHTML = false;
     format.flagUseLatex = true;
     global.fatal << "The determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
-    << tempRat.toString() << ". The auto matrix is: "
+    << determinant.toString() << ". The auto matrix is: "
     << HtmlRoutines::getMathNoDisplay(output.toStringMatrixForm(&format))
     << " and the dynkin type is: "
     << this->toString() << "." << global.fatal;
@@ -5814,17 +5814,17 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   outputModuleDimensions.initializeFillInObject(4 * positiveRootsContainingRegularSubalgebra.size + 1, 0);
   outputModuleDimensions[indexZeroWeight] = dimensionContainingRegularSubalgebra;
   List<int> bufferHighestWeights;
-  Rational tempRat;
+  Rational scalarProduct;
   Vectors<Rational> coordsInPreferredSimpleBasis;
   positiveRootsContainingRegularSubalgebra.getCoordinatesInBasis(
     this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis
   );
   for (int k = 0; k < positiveRootsContainingRegularSubalgebra.size; k ++) {
-    tempRat = this->hCharacteristic.scalarEuclidean(coordsInPreferredSimpleBasis[k]);
-    if (tempRat.denominatorShort != 1) {
+    scalarProduct = this->hCharacteristic.scalarEuclidean(coordsInPreferredSimpleBasis[k]);
+    if (scalarProduct.denominatorShort != 1) {
       global.fatal << "Characteristic must be integer. " << global.fatal;
     }
-    if (tempRat > positiveRootsContainingRegularSubalgebra.size * 2) {
+    if (scalarProduct > positiveRootsContainingRegularSubalgebra.size * 2) {
       global.fatal << "The scalar product of the h-Characteristic "
       << this->hCharacteristic.toString()
       << " with the simple root " << coordsInPreferredSimpleBasis[k].toString()
@@ -5832,8 +5832,8 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
       << ". The affected sl(2) subalgebra is " << this->toString() << ". " << global.fatal;
       break;
     }
-    outputModuleDimensions[indexZeroWeight + tempRat.numeratorShort] ++;
-    outputModuleDimensions[indexZeroWeight - tempRat.numeratorShort] ++;
+    outputModuleDimensions[indexZeroWeight + scalarProduct.numeratorShort] ++;
+    outputModuleDimensions[indexZeroWeight - scalarProduct.numeratorShort] ++;
   }
   bufferHighestWeights = (outputModuleDimensions);
   outputHighestWeights.setExpectedSize(positiveRootsContainingRegularSubalgebra.size * 2);
@@ -6294,15 +6294,15 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
     for (int j = 0; j < cornerWeights.size; j ++) {
       Rational minimalDistance = 0;
       for (int k = 0; k < cornerWeights.size; k ++) {
-        Rational tempRat = Vector<Rational>::scalarProduct(
+        Rational scalarProduct = Vector<Rational>::scalarProduct(
           cornerWeights[k] - cornerWeights[j],
           cornerWeights[k] - cornerWeights[j],
           this->bilinearFormFundamentalPrimal
         );
         if (minimalDistance == 0) {
-          minimalDistance = tempRat;
-        } else if (tempRat != 0) {
-          minimalDistance = MathRoutines::minimum(tempRat, minimalDistance);
+          minimalDistance = scalarProduct;
+        } else if (scalarProduct != 0) {
+          minimalDistance = MathRoutines::minimum(scalarProduct, minimalDistance);
         }
       }
       for (int k = j + 1; k < cornerWeights.size; k ++) {

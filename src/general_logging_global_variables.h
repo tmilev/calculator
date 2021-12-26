@@ -394,7 +394,6 @@ public:
   bool flagUseMathTags;
 
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
-  MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
   class Crasher {
     public:
     std::stringstream crashReport;

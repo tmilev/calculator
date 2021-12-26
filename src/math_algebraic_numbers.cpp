@@ -676,9 +676,9 @@ bool AlgebraicNumber::needsParenthesisForMultiplication(
 
 bool AlgebraicNumber::needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
   if (this->owner == nullptr) {
-    Rational tempRat;
-    if (this->isRational(&tempRat)) {
-      return tempRat.needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+    Rational rationalValue;
+    if (this->isRational(&rationalValue)) {
+      return rationalValue.needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     }
     return false;
   }

@@ -902,8 +902,8 @@ public:
   }
   Vector<Rational> applyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational>& vv) const;
   template <class Coefficient>
-  void actOn(const ElementWeylGroup& theGroupElement, Vector<Coefficient>& inputOutput) const {
-    this->actOn(theGroupElement, inputOutput, inputOutput);
+  void actOn(const ElementWeylGroup& groupElement, Vector<Coefficient>& inputOutput) const {
+    this->actOn(groupElement, inputOutput, inputOutput);
   }
   template <class Coefficient>
   void actOn(int indexOfWeylElement, Vector<Coefficient>& vector) const {
@@ -921,10 +921,10 @@ public:
     }
   }
   template <class Coefficient>
-  void actOnRhoModified(const ElementWeylGroup& theGroupElement, Vector<Coefficient>& vector) const {
+  void actOnRhoModified(const ElementWeylGroup& groupElement, Vector<Coefficient>& vector) const {
     Vector<Coefficient> tempV;
     vector += this->rho;
-    this->actOn(theGroupElement, vector, tempV);
+    this->actOn(groupElement, vector, tempV);
     vector = tempV;
     vector -= this->rho;
   }
@@ -948,7 +948,7 @@ public:
   // where rho is the half-sum of the positive roots.
   //
   // If minusRho and rhoAction are both set, then instead we do v -> s(v + rho) - rho.
-  void reflectSimple(int index, Vector<Rational>& theRoot, bool rhoAction, bool useMinusRho);
+  void reflectSimple(int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho);
   // Simple reflection with respect to the simple root with given index.
   // Acts on the second argument in place.
   template <class Coefficient>
@@ -1000,11 +1000,11 @@ public:
     }
     return result;
   }
-  template <class leftType, class rightType>
-  leftType rootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2) const {
-    leftType tempRat;
-    this->rootScalarCartanRoot(r1, r2, tempRat);
-    return tempRat;
+  template <class LeftType, class RightType>
+  LeftType rootScalarCartanRoot(const Vector<LeftType>& r1, const Vector<RightType>& r2) const {
+    LeftType result;
+    this->rootScalarCartanRoot(r1, r2, result);
+    return result;
   }
   // the below functions perturbs input so that inputH has
   // non-zero scalar product with Vectors<Rational> of the Vector<Rational>  system,
@@ -1548,7 +1548,7 @@ public:
   HashedList<elementRepresentation>* currentLayer;
   HashedList<elementRepresentation>* nextLayer;
   OrbitIterator::GroupActionWithName groupAction;
-  List<elementGroup> theGroupGeneratingElements;
+  List<elementGroup> groupGeneratingElements;
   int indexCurrentElement;
   OrbitIterator() {
     this->groupAction.actOn = 0;

@@ -716,30 +716,30 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
     element1 *= element2;
     *this += element1;
   }
-  //Rational tempRat;
+  //Rational rational;
   for (int i = 0; i < weylGroup.rootSystem.size; i ++) {
     //Implementation without the ninja formula:
-//    tempRat = 0;
+//    rational = 0;
 //    Vector<Rational> & theRoot = weylGroup.RootSystem.objects[i];
 //    int indexOfOpposite = weylGroup.RootSystem.getIndex(-theRoot);
 //    Vector<Rational> & theOpposite = weylGroup.RootSystem.objects[indexOfOpposite];
 //    for (int j = 0; j < weylGroup.RootSystem.size; j ++)
 //    { Vector<Rational> & current = weylGroup.RootSystem.objects[j];
 //      if (current == theOpposite)
-//        tempRat +=2;
+//        rational +=2;
 //       else
 //       { int indexOfSum= weylGroup.RootSystem.getIndex(current +theRoot);
 //         if (indexOfSum!= - 1)
-//           tempRat +=(owner.ChevalleyConstants.elements[i][j]*owner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
+//           rational +=(owner.ChevalleyConstants.elements[i][j]*owner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
 //       }
 //     }
-//     tempRat +=2;
-//     tempRat = 1/tempRat;
+//     rational +=2;
+//     rational = 1/rational;
 //     element2.makeOneGeneratorCoefficientOne(theOpposite, numVars, owner);
 //     element1.makeOneGeneratorCoefficientOne(theRoot, numVars, owner);
 //     element2*= element1;
 //
-//     element2*= tempRat;
+//     element2*= rational;
 //     *this+= element2;
     //The ninja formula alternative implementation:
     const Vector<Rational>& theRoot = weylGroup.rootSystem[i];

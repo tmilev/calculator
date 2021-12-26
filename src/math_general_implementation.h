@@ -12,27 +12,27 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   bool doReport = this->numberOfColumns > 10 && this->numberOfRows > 10 && this->numberOfColumns * this->numberOfRows >= 400;
   ProgressReport report(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport report2(400, GlobalVariables::Response::ReportType::gaussianElimination);
-  int tempI;
+  int pivotIndex = 0;
   output = ringOne;
-  Coefficient tempRat;
+  Coefficient scalar;
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal << "Error: determinant computation: number of columns different from number of rows. " << global.fatal;
   }
   int dim = this->numberOfColumns;
   for (int i = 0; i < dim; i ++) {
-    tempI = this->findPivot(i, i);
-    if (tempI == - 1) {
+    pivotIndex = this->findPivot(i, i);
+    if (pivotIndex == - 1) {
       output = ringZero;
       return;
     }
-    this->switchRows(i, tempI);
-    if (tempI != i) {
+    this->switchRows(i, pivotIndex);
+    if (pivotIndex != i) {
       output *= - 1;
     }
-    tempRat = this->elements[i][i];
-    output *= tempRat;
-    tempRat.invert();
-    this->rowTimesScalar(i, tempRat);
+    scalar = this->elements[i][i];
+    output *= scalar;
+    scalar.invert();
+    this->rowTimesScalar(i, scalar);
     if (doReport) {
       if (report.tickAndWantReport()) {
         std::stringstream reportStream;
@@ -48,9 +48,9 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
     }
     for (int j = i + 1; j < dim; j ++) {
       if (!this->elements[j][i].isEqualToZero()) {
-        tempRat = this->elements[j][i];
-        tempRat.negate();
-        this->addTwoRows (i, j, i, tempRat);
+        scalar = this->elements[j][i];
+        scalar.negate();
+        this->addTwoRows(i, j, i, scalar);
         if (doReport) {
           if (report2.tickAndWantReport()) {
             std::stringstream reportStream;

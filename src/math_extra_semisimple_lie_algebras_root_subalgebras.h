@@ -326,7 +326,7 @@ public:
   void computeHighestWeightInTheSameKModule(const Vector<Rational>& input, Vector<Rational>& outputHW);
   void computeExtremeWeightInTheSameKModule(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
   void computeLowestWeightInTheSameKModule(const Vector<Rational>& input, Vector<Rational>& outputLW);
-  void getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration);
+  void getLinearCombinationFromMaxRankRootsAndExtraRoot(bool doEnumeration);
 //  void commonCodeForgetLinearCombinationFromMaxRankRootsAndExtraRoot();
   void initForNilradicalGeneration();
   void initNoOwnerReset();

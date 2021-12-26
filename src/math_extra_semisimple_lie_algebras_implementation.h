@@ -254,15 +254,15 @@ void SemisimpleLieAlgebra::getAdjoint(MatrixTensor<Coefficient>& output, Element
 
 template <class Coefficient>
 void SemisimpleLieAlgebra::getAdjoint(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e) {
-  int NumGenerators = this->getNumberOfGenerators();
-  output.initialize(NumGenerators, NumGenerators);
+  int numberOfGenerators = this->getNumberOfGenerators();
+  output.initialize(numberOfGenerators, numberOfGenerators);
   output.makeZero();
-  ElementSemisimpleLieAlgebra<Coefficient> theGen, theResult;
-  for (int i = 0; i < NumGenerators; i ++) {
-    theGen.makeGenerator(i, *this);
-    this->lieBracket(e, theGen, theResult);
-    for (int j = 0; j < theResult.size(); j ++) {
-      output(theResult[j].generatorIndex, i) = theResult.coefficients[j];
+  ElementSemisimpleLieAlgebra<Coefficient> generator, result;
+  for (int i = 0; i < numberOfGenerators; i ++) {
+    generator.makeGenerator(i, *this);
+    this->lieBracket(e, generator, result);
+    for (int j = 0; j < result.size(); j ++) {
+      output(result[j].generatorIndex, i) = result.coefficients[j];
     }
   }
 }
@@ -557,7 +557,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   WeylGroupData& weylGroup = this->getOwner()->weylGroup;
   std::stringstream out;
   std::string tempS;
-  inputData.initAssumingParSelAndHmmInitted();
+  inputData.initializeAfterParabolicSelectionAndHomomorphism();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmallAsSubgroupInLarge = inputData.weylGroupFiniteDimensionalSmallAsSubgroupInLarge;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmall = inputData.weylGroupFiniteDimensionalSmall;
   SemisimpleLieAlgebra& smallAlgebra = inputData.homomorphism.domainAlgebra();

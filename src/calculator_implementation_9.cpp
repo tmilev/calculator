@@ -78,19 +78,20 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       Matrix<Rational>::getMaxMovementAndLeavingVariableRow(
         MaxMovement, LeavingVariableRow, EnteringVariable, workingMatrix, matX, BaseVariables
       );
-      Rational tempRat, tempTotalChange;
+      Rational scalar;
+      Rational tempTotalChange;
       if (workingMatrix.elements[LeavingVariableRow][EnteringVariable].isEqualToZero()) {
         global.fatal << "The leaving-entering coefficient is not allowed to be zero. " << global.fatal;
       }
-      tempRat.assign(workingMatrix.elements[LeavingVariableRow][EnteringVariable]);
-      tempRat.invert();
+      scalar.assign(workingMatrix.elements[LeavingVariableRow][EnteringVariable]);
+      scalar.invert();
       for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
         if (!workingMatrix.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
           global.fatal << "The base variable coefficient is required to be 1 at this point of code. "
           << global.fatal;
         }
       }
-      workingMatrix.rowTimesScalar(LeavingVariableRow, tempRat);
+      workingMatrix.rowTimesScalar(LeavingVariableRow, scalar);
       tempTotalChange.assign(MaxMovement);
       tempTotalChange.multiplyBy(ChangeGradient);
       matX[EnteringVariable] += MaxMovement;
@@ -107,12 +108,12 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       }
       for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
         if (!workingMatrix.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
-          tempRat.assign(workingMatrix.elements[i][EnteringVariable]);
-          tempRat.multiplyBy(MaxMovement);
-          matX[BaseVariables.elements[i]] -= tempRat;
-          tempRat.assign(workingMatrix.elements[i][EnteringVariable]);
-          tempRat.negate();
-          workingMatrix.addTwoRows(LeavingVariableRow, i, 0, tempRat);
+          scalar.assign(workingMatrix.elements[i][EnteringVariable]);
+          scalar.multiplyBy(MaxMovement);
+          matX[BaseVariables.elements[i]] -= scalar;
+          scalar.assign(workingMatrix.elements[i][EnteringVariable]);
+          scalar.negate();
+          workingMatrix.addTwoRows(LeavingVariableRow, i, 0, scalar);
         }
         if (i == LeavingVariableRow) {
           matX[BaseVariables.elements[i]] = 0;

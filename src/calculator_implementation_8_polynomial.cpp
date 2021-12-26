@@ -1073,24 +1073,25 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   )) {
     return output.assignError(calculator, "Failed to extract polynomial expressions");
   }
-  Vector<Polynomial<Rational> > relations, theGens;
+  Vector<Polynomial<Rational> > relations;
+  Vector<Polynomial<Rational> > generators;
   FormatExpressions format;
   context.getFormat(format);
   for (char i = 0; i < 26; i ++) {
     char currentLetter = 'a' + i;
-    std::string currentStr;
-    currentStr = currentLetter;
-    if (!format.polynomialAlphabet.contains(currentStr)) {
-      format.polynomialAlphabet.addOnTop(currentStr);
+    std::string currentString;
+    currentString = currentLetter;
+    if (!format.polynomialAlphabet.contains(currentString)) {
+      format.polynomialAlphabet.addOnTop(currentString);
     }
   }
-  if (!RationalFraction<Rational>::getRelations(inputVector, theGens, relations, calculator.comments)) {
+  if (!RationalFraction<Rational>::getRelations(inputVector, generators, relations, calculator.comments)) {
     return calculator << "Failed to extract relations. ";
   }
   std::stringstream out;
   out << "Polynomials:";
-  for (int i = 0; i < theGens.size; i ++) {
-    out << "<br>" << theGens[i].toString(&format) << "=" << inputVector[i].toString(&format);
+  for (int i = 0; i < generators.size; i ++) {
+    out << "<br>" << generators[i].toString(&format) << "=" << inputVector[i].toString(&format);
   }
   out << "<br>Relations: ";
   for (int i = 0; i < relations.size; i ++) {

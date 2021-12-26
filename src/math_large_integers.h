@@ -837,8 +837,8 @@ public:
     this->addInteger(right);
   }
   void operator-=(int right) {
-    Rational tempRat = right;
-    this->subtract(tempRat);
+    Rational converted = right;
+    this->subtract(converted);
   }
   void operator=(int right) {
     this->assignInteger(right);

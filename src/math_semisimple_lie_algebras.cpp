@@ -435,8 +435,8 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
   this->computedChevalleyConstants.makeZero(false);
   Selection nonExploredRoots;
   this->flagAnErrorHasOccurredTimeToPanic = false;
-  Vectors<Rational>& posRoots = this->weylGroup.rootsOfBorel;
-  nonExploredRoots.makeFullSelection(posRoots.size);
+  Vectors<Rational>& positiveRoots = this->weylGroup.rootsOfBorel;
+  nonExploredRoots.makeFullSelection(positiveRoots.size);
   Vector<Rational> tempRoot;
   std::stringstream out;
   ProgressReport report;
@@ -466,19 +466,19 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     report.report(out.str());
     startStructureConstantComputation = global.getElapsedSeconds();
   }
-  Rational tempRat;
+  Rational coordinateSum;
   while (nonExploredRoots.cardinalitySelection > 0) {
-    int theBorelIndex = nonExploredRoots.elements[0];
-    Rational height = posRoots[theBorelIndex].sumCoordinates();
+    int borelIndex = nonExploredRoots.elements[0];
+    Rational height = positiveRoots[borelIndex].sumCoordinates();
     for (int i = 1; i < nonExploredRoots.cardinalitySelection; i ++) {
-      tempRat = posRoots[nonExploredRoots.elements[i]].sumCoordinates();
-      if (height.isGreaterThan(tempRat)) {
-        height = tempRat;
-        theBorelIndex = nonExploredRoots.elements[i];
+      coordinateSum = positiveRoots[nonExploredRoots.elements[i]].sumCoordinates();
+      if (height.isGreaterThan(coordinateSum)) {
+        height = coordinateSum;
+        borelIndex = nonExploredRoots.elements[i];
       }
     }
-    Vector<Rational>& theRoot = posRoots[theBorelIndex];
-    int index = this->weylGroup.rootSystem.getIndex(theRoot);
+    Vector<Rational>& root = positiveRoots[borelIndex];
+    int index = this->weylGroup.rootSystem.getIndex(root);
     Vector<Rational> smallRoot2;
     int firstIndexFirstPositiveChoice = - 1;
     int secondIndexFirstPositiveChoice = - 1;
@@ -489,7 +489,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
       int firstPositiveIndex = this->weylGroup.rootSystem.getIndex(smallRoot1);
       int firstNegativeIndex = this->weylGroup.rootSystem.getIndex(- smallRoot1);
       if (height.isGreaterThan(currentHeight)) {
-        smallRoot2 = theRoot - smallRoot1;
+        smallRoot2 = root - smallRoot1;
         int SecondPosIndex = this->weylGroup.rootSystem.getIndex(smallRoot2);
         if (firstPositiveIndex<SecondPosIndex) {
           int secondNegativeIndex = this->weylGroup.rootSystem.getIndex(- smallRoot2);
@@ -502,14 +502,18 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
             this->computedChevalleyConstants.elements[firstNegativeIndex][secondNegativeIndex] = true;
           } else {
             this->computeOneChevalleyConstant(
-              firstIndexFirstPositiveChoice, secondIndexFirstPositiveChoice, firstNegativeIndex, secondNegativeIndex, index
+              firstIndexFirstPositiveChoice,
+              secondIndexFirstPositiveChoice,
+              firstNegativeIndex,
+              secondNegativeIndex,
+              index
             );
           }
           this->exploitSymmetryAndCyclicityChevalleyConstants(firstNegativeIndex, secondNegativeIndex);
         }
       }
     }
-    nonExploredRoots.selected[theBorelIndex] = false;
+    nonExploredRoots.selected[borelIndex] = false;
     nonExploredRoots.computeIndicesFromSelection();
   }
   double startMultTable = - 1;
@@ -645,11 +649,11 @@ void SemisimpleLieAlgebra::exploitTheCyclicTrick(int i, int j, int k) {
     global.fatal << "Bad structure constant computation order." << global.fatal;
   }
   /////////////////////////////////////////////////////////////////
-  Rational& tempRat = this->chevalleyConstants.elements[i][j];
-  Rational tempRat2 = this->weylGroup.rootScalarCartanRoot(rootK, rootK);
-  this->chevalleyConstants.elements[j][k] = (tempRat * this->weylGroup.rootScalarCartanRoot(rootI, rootI)) / tempRat2;
+  Rational& chevalleyConstant = this->chevalleyConstants.elements[i][j];
+  Rational scalarProduct = this->weylGroup.rootScalarCartanRoot(rootK, rootK);
+  this->chevalleyConstants.elements[j][k] = (chevalleyConstant * this->weylGroup.rootScalarCartanRoot(rootI, rootI)) / scalarProduct;
   this->computedChevalleyConstants.elements[j][k] = true;
-  this->chevalleyConstants.elements[k][i] = (tempRat * this->weylGroup.rootScalarCartanRoot(rootJ, rootJ)) / tempRat2;
+  this->chevalleyConstants.elements[k][i] = (chevalleyConstant * this->weylGroup.rootScalarCartanRoot(rootJ, rootJ)) / scalarProduct;
   this->computedChevalleyConstants.elements[k][i] = true;
   this->exploitSymmetryChevalleyConstants(j, k);
   this->exploitSymmetryChevalleyConstants(k, i);

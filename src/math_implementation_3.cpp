@@ -1904,8 +1904,8 @@ void DrawingVariables::drawTextDirectly(
 
 void DrawingVariables::projectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output) {
   output = input;
-  Vector<Rational> normal; Vector<Rational> basepoint;
-  Rational tempRat2, tempRat, tempRat3;
+  Vector<Rational> normal;
+  Vector<Rational> basepoint;
   normal.makeZero(input.size);
   for (int i = 0; i < input.size; i ++) {
     if (input[i].isPositiveOrZero()) {
@@ -1920,12 +1920,15 @@ void DrawingVariables::projectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
     basepoint.negate();
   }
   //////////////////////////////////////////////////
-  output.scalarEuclidean(normal, tempRat2);
-  basepoint.scalarEuclidean(normal, tempRat);
-  if (!tempRat2.isEqualToZero()) {
-    tempRat3 = tempRat;
-    tempRat3.divideBy(tempRat2);
-    output *= tempRat3;
+  Rational scalarProduct;
+  output.scalarEuclidean(normal, scalarProduct);
+  Rational scalarProductBasePoint;
+  basepoint.scalarEuclidean(normal, scalarProductBasePoint);
+  Rational scalar;
+  if (!scalarProduct.isEqualToZero()) {
+    scalar = scalarProductBasePoint;
+    scalar.divideBy(scalarProduct);
+    output *= scalar;
   } else {
     output.makeZero(input.size);
   }
@@ -1966,21 +1969,21 @@ bool WeylGroupData::hasStronglyPerpendicularDecompositionWRT(
   Vectors<Rational> newSet;
   newSet.reserve(set.size);
   Vector<Rational> tempRoot;
-  Rational tempRat;
+  Rational scalarProduct;
   for (int indexFirstNonZeroRoot = 0; indexFirstNonZeroRoot < set.size; indexFirstNonZeroRoot ++) {
     Vector<Rational>& currentRoot = set[indexFirstNonZeroRoot];
-    tempRat = this->rootScalarCartanRoot(input, currentRoot)/this->rootScalarCartanRoot(currentRoot, currentRoot);
-    if (tempRat.isPositive()) {
-      if (!IntegralCoefficientsOnly || tempRat.denominatorShort == 1) {
+    scalarProduct = this->rootScalarCartanRoot(input, currentRoot)/this->rootScalarCartanRoot(currentRoot, currentRoot);
+    if (scalarProduct.isPositive()) {
+      if (!IntegralCoefficientsOnly || scalarProduct.denominatorShort == 1) {
          newSet.size = 0;
          for (int i = indexFirstNonZeroRoot; i < set.size; i ++) {
            if (this->isStronglyPerpendicularTo(currentRoot, set[i])) {
              newSet.addOnTop(set[i]);
            }
          }
-         outputCoeffs.addOnTop(tempRat);
+         outputCoeffs.addOnTop(scalarProduct);
          output.addOnTop(currentRoot);
-         tempRoot = input - currentRoot * tempRat;
+         tempRoot = input - currentRoot * scalarProduct;
          if (this->hasStronglyPerpendicularDecompositionWRT(
           tempRoot, upperBoundNumBetas, newSet, output, outputCoeffs, IntegralCoefficientsOnly
          )) {
@@ -3201,13 +3204,13 @@ void OnePartialFraction::readFromFile(PartialFractions& owner, std::fstream& inp
 }
 
 void OnePartialFraction::computeOneCheckSum(PartialFractions& owner, Rational& output, int dimension) const {
-  Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(owner.ambientDimension);
-  Rational tempRat;
+  Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::getCheckSumRoot(owner.ambientDimension);
+  Rational multiplicand;
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     this->denominator[this->indicesNonZeroMultiplicities[i]].computeOneCheckSum(
-      tempRat, owner.startingVectors[this->indicesNonZeroMultiplicities[i]], dimension
+      multiplicand, owner.startingVectors[this->indicesNonZeroMultiplicities[i]], dimension
     );
-    output.multiplyBy(tempRat);
+    output.multiplyBy(multiplicand);
   }
 }
 
@@ -3348,63 +3351,48 @@ bool OnePartialFraction::decomposeFromLinearRelation(
 ) {
  //  linearRelation.ComputeDebugString();
   //linearRelation.ComputeDebugString();
-  int GainingMultiplicityIndexInLinRelation = - 1;
-  int GainingMultiplicityIndex = - 1;
-  int ElongationGainingMultiplicityIndex = - 1;
-  List<int> ParticipatingIndices;
-  List<int> theGreatestElongations;
-  List<int> theCoefficients;
-  ParticipatingIndices.size = 0;
-  theCoefficients.size = 0;
-  theGreatestElongations.size = 0;
-  GainingMultiplicityIndexInLinRelation = this->computeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, linearRelation);
-  GainingMultiplicityIndex = this->indicesNonZeroMultiplicities[GainingMultiplicityIndexInLinRelation];
-  int tempI = this->denominator[GainingMultiplicityIndex].getLargestElongation();
-  linearRelation.elements[GainingMultiplicityIndexInLinRelation][0].multiplyByInt(tempI);
+  int gainingMultiplicityIndexInLinRelation = - 1;
+  int gainingMultiplicityIndex = - 1;
+  int elongationGainingMultiplicityIndex = - 1;
+  List<int> participatingIndices;
+  List<int> greatestElongations;
+  List<int> coefficients;
+  participatingIndices.size = 0;
+  coefficients.size = 0;
+  greatestElongations.size = 0;
+  gainingMultiplicityIndexInLinRelation = this->computeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, linearRelation);
+  gainingMultiplicityIndex = this->indicesNonZeroMultiplicities[gainingMultiplicityIndexInLinRelation];
+  int tempI = this->denominator[gainingMultiplicityIndex].getLargestElongation();
+  linearRelation.elements[gainingMultiplicityIndexInLinRelation][0].multiplyByInt(tempI);
   //linearRelation.ComputeDebugString();
   linearRelation.scaleToIntegralForMinimalRationalHeightNoSignChange();
-  ElongationGainingMultiplicityIndex = linearRelation.elements[GainingMultiplicityIndexInLinRelation][0].numeratorShort;
-  if (ElongationGainingMultiplicityIndex < 0) {
-    ElongationGainingMultiplicityIndex = - ElongationGainingMultiplicityIndex;
+  elongationGainingMultiplicityIndex = linearRelation.elements[gainingMultiplicityIndexInLinRelation][0].numeratorShort;
+  if (elongationGainingMultiplicityIndex < 0) {
+    elongationGainingMultiplicityIndex = - elongationGainingMultiplicityIndex;
   } else {
     linearRelation *= - 1;
   }
   //linearRelation.ComputeDebugString();
   for (int i = 0; i < linearRelation.numberOfRows; i ++) {
-    if (i != GainingMultiplicityIndexInLinRelation && !linearRelation.elements[i][0].isEqualToZero()) {
+    if (i != gainingMultiplicityIndexInLinRelation && !linearRelation.elements[i][0].isEqualToZero()) {
       int tempI = this->indicesNonZeroMultiplicities[i];
-      ParticipatingIndices.addOnTop(tempI);
-      theGreatestElongations.addOnTop(this->denominator[tempI].getLargestElongation());
-      theCoefficients.addOnTop(linearRelation.elements[i][0].numeratorShort);
+      participatingIndices.addOnTop(tempI);
+      greatestElongations.addOnTop(this->denominator[tempI].getLargestElongation());
+      coefficients.addOnTop(linearRelation.elements[i][0].numeratorShort);
     }
   }
   if (!flagUsingOSbasis) {
-    this->lastDistinguishedIndex = GainingMultiplicityIndex;
+    this->lastDistinguishedIndex = gainingMultiplicityIndex;
   }
   this->applyGeneralizedSzenesVergneFormula(
-    ParticipatingIndices,
-    theGreatestElongations,
-    theCoefficients,
-    GainingMultiplicityIndex,
-    ElongationGainingMultiplicityIndex,
+    participatingIndices,
+    greatestElongations,
+    coefficients,
+    gainingMultiplicityIndex,
+    elongationGainingMultiplicityIndex,
     output,
     startingVectors
   );
-
-  //if (this->MakingConsistencyCheck)
-  //{ if (!this->CheckSum2.isEqualTo(this->CheckSum))global.fatal << global.fatal;
-  //}
-  /*if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
-    Rational tempRat2, tempRat;
-    std::string tempS1, tempS2;
-    Accum.computeOneCheckSum(tempRat2);
-    this->computeOneCheckSum(tempRat);
-    tempRat.toString(tempS1);
-    this->CheckSum2.toString(tempS2);
-    tempRat2.subtract(tempRat);
-    if (!oldCheckSum.isEqualTo(tempRat2))global.fatal << global.fatal;
-  }*/
-  //Accum.ComputeDebugString();
   return true;
 }
 
@@ -3665,51 +3653,60 @@ void OnePartialFraction::getNElongationPolynomial(
 }
 
 void OnePartialFraction::makePolynomialFromOneNormal(
-  Vector<Rational>& normal, const MonomialPolynomial& shiftRational, int theMult, Polynomial<Rational>& output
+  Vector<Rational>& normal,
+  const MonomialPolynomial& shiftRational,
+  int multiplicities,
+  Polynomial<Rational>& output
 ) {
   output.makeOne();
-  if (theMult == 1) {
+  if (multiplicities == 1) {
     return;
   }
-  Rational tempRat, tempRat2;
-  Polynomial<Rational> tempP;
   Vector<Rational> shiftRationalVector;
   shiftRationalVector.makeZero(normal.size);
   for (int i = 0; i < normal.size; i ++) {
     shiftRationalVector[i] = shiftRational(i);
   }
-  tempRat = normal.scalarEuclidean(shiftRationalVector);
-  for (int j = 0; j < theMult - 1; j ++) {
-    tempP.makeLinearNoConstant(normal);
-    tempRat2.assignNumeratorAndDenominator(- 1, j + 1);
-    tempRat2.multiplyBy(tempRat);
-    tempRat2 += 1;
-    Rational tempRat3;
-    tempRat3.assignNumeratorAndDenominator(1, j + 1);
-    tempP *= (tempRat3);
-    tempP.addConstant(tempRat2);
-    output *= tempP;
+  Rational scalarProduct;
+  scalarProduct = normal.scalarEuclidean(shiftRationalVector);
+  Rational constantTerm;
+  Polynomial<Rational> nextSummand;
+  for (int j = 0; j < multiplicities - 1; j ++) {
+    nextSummand.makeLinearNoConstant(normal);
+    constantTerm.assignNumeratorAndDenominator(- 1, j + 1);
+    constantTerm.multiplyBy(scalarProduct);
+    constantTerm += 1;
+    Rational scalar;
+    scalar.assignNumeratorAndDenominator(1, j + 1);
+    nextSummand *= scalar;
+    nextSummand.addConstant(constantTerm);
+    output *= nextSummand;
   }
 }
 
-void OnePartialFraction::computeNormals(PartialFractions& owner, Vectors<Rational>& output, int dimension, Matrix<Rational>& buffer) {
-  Vectors<Rational> dens;
+void OnePartialFraction::computeNormals(
+  PartialFractions& owner,
+  Vectors<Rational>& output,
+  int dimension,
+  Matrix<Rational>& buffer
+) {
+  Vectors<Rational> denominators;
   Vector<Rational> tempRoot;
   tempRoot.setSize(dimension);
-  dens.size = 0;
+  denominators.size = 0;
   output.size = 0;
   for (int i = 0; i < dimension; i ++) {
     tempRoot = owner.startingVectors[this->indicesNonZeroMultiplicities[i]];
-    dens.addOnTop(tempRoot);
+    denominators.addOnTop(tempRoot);
   }
-  Rational tempRat;
+  Rational scalarProduct;
   for (int i = 0; i < dimension; i ++) {
-    dens.computeNormalExcludingIndex(tempRoot, i, buffer);
-    tempRat = tempRoot.scalarEuclidean(dens[i]);
-    if (tempRat.isEqualToZero()) {
+    denominators.computeNormalExcludingIndex(tempRoot, i, buffer);
+    scalarProduct = tempRoot.scalarEuclidean(denominators[i]);
+    if (scalarProduct.isEqualToZero()) {
       global.fatal << "Scalar product is equal to zero. " << global.fatal;
     }
-    tempRoot /= tempRat;
+    tempRoot /= scalarProduct;
     output.addOnTop(tempRoot);
   }
 }
@@ -3722,10 +3719,10 @@ OnePartialFraction::OnePartialFraction() {
   this->RelevanceIsComputed = false;
 }
 
-void OnePartialFraction::initialize(int numRoots) {
-  this->indicesNonZeroMultiplicities.reserve(numRoots);
+void OnePartialFraction::initialize(int numberOfRoots) {
+  this->indicesNonZeroMultiplicities.reserve(numberOfRoots);
   this->indicesNonZeroMultiplicities.size = 0;
-  this->denominator.setSize(numRoots);
+  this->denominator.setSize(numberOfRoots);
   for (int i = 0; i < this->denominator.size; i ++) {
     this->denominator[i].elongations.setSize(0);
     this->denominator[i].multiplicities.setSize(0);
@@ -3865,9 +3862,9 @@ bool PartialFractions::splitPartial() {
     this->makeProgressReportSplittingMainPart();
   }
   if (this->flagUsingCheckSum) {
-    Rational tempRat;
-    reducedForGood.computeOneCheckSum(tempRat);
-    if (tempRat != this->checkSum) {
+    Rational resultCheckSum;
+    reducedForGood.computeOneCheckSum(resultCheckSum);
+    if (resultCheckSum != this->checkSum) {
       global.fatal
       << "The checksums of the partial fraction decomposition do not match. " << global.fatal;
     }
@@ -4118,10 +4115,10 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
       owner.AddAlreadyReduced(tempFrac, Indicator);
   }
   if (this->flagAnErrorHasOccurredTimeToPanic) {
-    Rational tempRat;
-    owner.computeOneCheckSum(tempRat);
-    tempRat.subtract(theDiff);
-    if (!tempRat.isEqualTo(StartCheckSum))
+    Rational checksum;
+    owner.computeOneCheckSum(checksum);
+    checksum.subtract(theDiff);
+    if (!checksum.isEqualTo(StartCheckSum))
       global.fatal << global.fatal;
   }*/
 }
@@ -4400,15 +4397,16 @@ void PartialFractions::makeProgressVPFcomputation() {
 
 void PartialFractions::computeOneCheckSum(Rational& output) {
   output.makeZero();
-  Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(this->ambientDimension);
+  Vector<Rational> checkSumRoot = OnePartialFractionDenominator::getCheckSumRoot(this->ambientDimension);
   ProgressReport report;
   ProgressReport report2;
   for (int i = 0; i < this->size(); i ++) {
-    Rational currentCheckSum, tempRat;
+    Rational currentCheckSum;
+    Rational rationalValue;
     (*this)[i].computeOneCheckSum(*this, currentCheckSum, this->ambientDimension);
-    (*this)[i].evaluateIntegerPolynomial(this->coefficients[i], CheckSumRoot, tempRat);
-    currentCheckSum *= tempRat;
-    output += (tempRat);
+    (*this)[i].evaluateIntegerPolynomial(this->coefficients[i], checkSumRoot, rationalValue);
+    currentCheckSum *= rationalValue;
+    output += rationalValue;
     if (this->flagMakingProgressReport) {
       std::stringstream out;
       out << "Checksum " << i + 1 << " out of " << this->size();
@@ -4552,23 +4550,26 @@ bool PartialFractions::isHigherThanWithRespectToWeight(
 
 //NOTE NOTE NOTE: To be fixed: you gotta use the preceding function to sort the theVPbasis!
 void PartialFractions::computeKostantFunctionFromWeylGroup(
-  char weylGroupLetter, int weylGroupNumber, QuasiPolynomial& output, Vector<Rational>* chamberIndicator
+  char weylGroupLetter,
+  int weylGroupNumber,
+  QuasiPolynomial& output,
+  Vector<Rational>* chamberIndicator
 ) {
   this->initCommon();
-  Vectors<Rational> theVPbasis;
+  Vectors<Rational> vectorPartitionBasis;
   Vector<Rational> tempWeight; tempWeight.setSize(weylGroupNumber);
   WeylGroupData tempW;
   tempW.makeArbitrarySimple(weylGroupLetter, weylGroupNumber);
   tempW.computeRho(true);
-  theVPbasis = tempW.rootsOfBorel;
+  vectorPartitionBasis = tempW.rootsOfBorel;
   if (weylGroupLetter == 'B') {
-    for (int i = 0; i < theVPbasis.size; i ++) {
-      Rational tempRat;
+    for (int i = 0; i < vectorPartitionBasis.size; i ++) {
+      Rational scalarProduct;
       Vector<Rational> tempRoot;
-      tempRoot = theVPbasis[i];
-      tempW.rootScalarCartanRoot(tempRoot, tempRoot, tempRat);
-      if (tempRat.isEqualToOne()) {
-        theVPbasis.addOnTop(tempW.rootsOfBorel[i] * 2);
+      tempRoot = vectorPartitionBasis[i];
+      tempW.rootScalarCartanRoot(tempRoot, tempRoot, scalarProduct);
+      if (scalarProduct.isEqualToOne()) {
+        vectorPartitionBasis.addOnTop(tempW.rootsOfBorel[i] * 2);
       }
     }
   }
@@ -4577,10 +4578,10 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
     tempRoot.makeZero(this->ambientDimension);
     tempRoot[this->ambientDimension - 1] = 1;
     tempRoot[this->ambientDimension - 2] = - 1;
-    theVPbasis.addOnTop(tempRoot);
+    vectorPartitionBasis.addOnTop(tempRoot);
     tempRoot[this->ambientDimension - 1] = 1;
     tempRoot[this->ambientDimension - 2] = 1;
-    theVPbasis.addOnTop(tempRoot);
+    vectorPartitionBasis.addOnTop(tempRoot);
     for (int i = this->ambientDimension - 3; i >= 0; i --) {
       tempRoot[i] = 2;
       global.fatal << "This line of code "
@@ -4590,7 +4591,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
     tempWeight[this->ambientDimension - 2] = 7;
     tempWeight[this->ambientDimension - 1] = 8;
   }
-  theVPbasis.quickSortAscending();
+  vectorPartitionBasis.quickSortAscending();
   //fix this!
   global.fatal << " Not implemented yet. " << global.fatal;
   //  this->initFromRoots(theVPbasis, 0);
@@ -4687,21 +4688,21 @@ void OnePartialFractionDenominator::computeOneCheckSum(
 ) {
   output = 1;
   std::string tempS;
-  Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(dimension);
+  Vector<Rational> checkSumRoot = OnePartialFractionDenominator::getCheckSumRoot(dimension);
   for (int i = 0; i < this->elongations.size; i ++) {
-    Rational tempRat, tempRat2, tempRat3;
-    tempRat = 1;
-    tempRat2 = 1;
+    Rational scalar = 1;
+    Rational minuend = 1;
+    Rational exponentiated;
     for (int j = 0; j < dimension; j ++) {
-      tempRat3 = CheckSumRoot[j];
-      if (!tempRat3.isEqualToZero()) {
-        tempRat3.raiseToPower((exponent[j] * this->elongations[i]).numeratorShort);
+      exponentiated = checkSumRoot[j];
+      if (!exponentiated.isEqualToZero()) {
+        exponentiated.raiseToPower((exponent[j] * this->elongations[i]).numeratorShort);
       }
-      tempRat2 *= tempRat3;
+      minuend *= exponentiated;
     }
-    tempRat -= tempRat2;
-    tempRat.raiseToPower(this->multiplicities[i]);
-    output.multiplyBy(tempRat);
+    scalar -= minuend;
+    scalar.raiseToPower(this->multiplicities[i]);
+    output.multiplyBy(scalar);
   }
   output.invert();
 }
@@ -5490,12 +5491,12 @@ Rational DynkinType::getRankRational() const {
 }
 
 int DynkinType::getRank() const {
-  Rational tempRat = this->getRankRational();
+  Rational rationalRank = this->getRankRational();
   int result = 0;
-  if (!tempRat.isSmallInteger(&result)) {
+  if (!rationalRank.isSmallInteger(&result)) {
     global.fatal << "Attempt to get a small integer "
     << "rank from a Dynkin type whose rank is not a small integer, but is instead "
-    << tempRat.toString() << ". " << global.fatal;
+    << rationalRank.toString() << ". " << global.fatal;
   }
   return result;
 }
@@ -6716,19 +6717,20 @@ bool ElementWeylGroup::operator>(const ElementWeylGroup& other) const {
 }
 
 void ElementWeylGroup::multiplyOnTheRightBySimpleReflection(int reflectionIndex) {
-  SimpleReflection theGen;
-  theGen.makeSimpleReflection(reflectionIndex);
-  this->generatorsLastAppliedFirst.addOnTop(theGen);
+  SimpleReflection simpleReflection;
+  simpleReflection.makeSimpleReflection(reflectionIndex);
+  this->generatorsLastAppliedFirst.addOnTop(simpleReflection);
 }
 
 void WeylGroupData::simpleReflectionDualSpace(int index, Vector<Rational>& dualSpaceElement) {
-  Rational coefficient, tempRat;
+  Rational coefficient;
+  Rational scalarProduct;
   coefficient.assign(dualSpaceElement[index]);
   coefficient.divideBy(this->cartanSymmetric.elements[index][index]);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat.assign(coefficient);
-    tempRat.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
-    dualSpaceElement[i] += (tempRat);
+    scalarProduct.assign(coefficient);
+    scalarProduct.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
+    dualSpaceElement[i] += scalarProduct;
   }
 }
 
@@ -6744,14 +6746,15 @@ ElementWeylGroup WeylGroupData::getRootReflection(int rootIndex) {
 }
 
 void WeylGroupData::reflectSimple(
-  int index, Vector<Rational>& theRoot, bool rhoAction, bool useMinusRho
+  int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho
 ) {
-  Rational alphaShift, tempRat;
+  Rational alphaShift;
+  Rational scalar;
   alphaShift.makeZero();
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat = theRoot[i];
-    tempRat.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
-    alphaShift += tempRat;
+    scalar = root[i];
+    scalar.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
+    alphaShift += scalar;
   }
   alphaShift.divideBy(this->cartanSymmetric.elements[index][index]);
   if (rhoAction) {
@@ -6761,7 +6764,7 @@ void WeylGroupData::reflectSimple(
       alphaShift.addInteger(- 1);
     }
   }
-  theRoot[index] += alphaShift;
+  root[index] += alphaShift;
 }
 
 void WeylGroupData::simpleReflectionRootPolynomial(
@@ -6938,28 +6941,30 @@ void WeylGroupData::generateAdditivelyClosedSubset(Vectors<Rational>& input, Vec
 }
 
 void WeylGroupData::perturbWeightToRegularWithRespectToRootSystem(const Vector<Rational>& inputH, Vector<Rational>& output) {
-  output = (inputH);
+  output = inputH;
   int indexFirstNonRegular;
   while (!this->isRegular(output, &indexFirstNonRegular)) {
-    const Vector<Rational>& theBadRoot = this->rootSystem[indexFirstNonRegular];
+    const Vector<Rational>& badRoot = this->rootSystem[indexFirstNonRegular];
     Rational maxMovement = 0;
-    Rational tempRat1, tempRat2, tempMaxMovement;
+    Rational scalarProduct1;
+    Rational scalarProduct2;
+    Rational tempMaxMovement;
     for (int i = 0; i < this->rootsOfBorel.size; i ++) {
-      this->rootScalarCartanRoot(theBadRoot, this->rootsOfBorel[i], tempRat1);
-      this->rootScalarCartanRoot(output, this->rootsOfBorel[i], tempRat2);
-      if ((!tempRat1.isEqualToZero()) && (!tempRat2.isEqualToZero())) {
-        tempMaxMovement = tempRat2 / tempRat1;
+      this->rootScalarCartanRoot(badRoot, this->rootsOfBorel[i], scalarProduct1);
+      this->rootScalarCartanRoot(output, this->rootsOfBorel[i], scalarProduct2);
+      if ((!scalarProduct1.isEqualToZero()) && (!scalarProduct2.isEqualToZero())) {
+        tempMaxMovement = scalarProduct2 / scalarProduct1;
         tempMaxMovement.AssignAbsoluteValue();
         if ((tempMaxMovement < maxMovement) || maxMovement.isEqualToZero()) {
           maxMovement = tempMaxMovement;
         }
       }
     }
-    int tempInt = 2;
-    if (this->rootScalarCartanRoot(theBadRoot, inputH).isNegative()) {
-      tempInt = - 2;
+    int adjustment = 2;
+    if (this->rootScalarCartanRoot(badRoot, inputH).isNegative()) {
+      adjustment = - 2;
     }
-    output += theBadRoot*maxMovement / tempInt;
+    output += badRoot * maxMovement / adjustment;
   }
 }
 
@@ -7414,13 +7419,13 @@ void WeylGroupAutomorphisms::computeOuterAutoGenerators() {
     return;
   }
   this->checkInitialization();
-  List<MatrixTensor<Rational> >& theGens = this->outerAutomorphisms.generators;
-  this->weylGroup->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(theGens);
-  for (int i = 0; i < theGens.size; i ++) {
+  List<MatrixTensor<Rational> >& generators = this->outerAutomorphisms.generators;
+  this->weylGroup->dynkinType.getOuterAutosGeneratorsActOnVectorColumn(generators);
+  for (int i = 0; i < generators.size; i ++) {
     if (
-      theGens[i].getMinimumNumberOfColumnsNumberOfRows() != this->weylGroup->getDimension() ||
-      theGens[i].getMinimalNumberOfColumns() != this->weylGroup->getDimension() ||
-      theGens[i].getMinimalNumberOfRows() != this->weylGroup->getDimension()
+      generators[i].getMinimumNumberOfColumnsNumberOfRows() != this->weylGroup->getDimension() ||
+      generators[i].getMinimalNumberOfColumns() != this->weylGroup->getDimension() ||
+      generators[i].getMinimalNumberOfRows() != this->weylGroup->getDimension()
     ) {
       global.fatal << "Bad outer automorphisms, type " << this->weylGroup->dynkinType.toString() << "." << global.fatal;
     }
@@ -7494,10 +7499,10 @@ void WeylGroupData::getWeylChamber(Cone& output) {
 void WeylGroupData::getFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output) {
   Matrix<Rational> result;
   result = this->cartanSymmetric;
-  Rational tempRat;
+  Rational scalar;
   for (int i = 0; i < this->getDimension(); i ++) {
-    tempRat = 2 / this->cartanSymmetric.elements[i][i];
-    result.rowTimesScalar(i, tempRat);
+    scalar = 2 / this->cartanSymmetric.elements[i][i];
+    result.rowTimesScalar(i, scalar);
   }
   result.transpose();
   result.invert();
@@ -7519,10 +7524,10 @@ void WeylGroupData::getIntegralLatticeInSimpleCoordinates(Lattice& output) {
 
 Rational WeylGroupData::getKillingDividedByTraceRatio() {
   Rational result = 0;
-  Rational tempRat;
+  Rational scalar;
   for (int i = 0; i < this->rootSystem.size; i ++) {
-    tempRat = this->rootScalarCartanRoot(this->rootSystem[i], this->rootSystem[0]);
-    result += tempRat * tempRat;
+    scalar = this->rootScalarCartanRoot(this->rootSystem[i], this->rootSystem[0]);
+    result += scalar * scalar;
   }
   result /= this->rootScalarCartanRoot(this->rootSystem[0], this->rootSystem[0]);
   return result;
@@ -7736,20 +7741,20 @@ void WeylGroupData::drawRootSystem(
     }
   }
   Vector<double> tempRoot;
-  Vectors<double>& theTwoPlane = output.basisProjectionPlane;
+  Vectors<double>& twoPlane = output.basisProjectionPlane;
   if (predefinedProjectionPlane == nullptr) {
-    this->getCoxeterPlane(theTwoPlane[0], theTwoPlane[1]);
+    this->getCoxeterPlane(twoPlane[0], twoPlane[1]);
   } else {
-    predefinedProjectionPlane->getVectorsDouble(theTwoPlane);
+    predefinedProjectionPlane->getVectorsDouble(twoPlane);
   }
-  if (theTwoPlane.size != 2) {
+  if (twoPlane.size != 2) {
     global.fatal << "Object theTwoPlane is supposed to be two-dimensional but it is instead of dimension: "
-    << theTwoPlane.size << ". " << global.fatal;
+    << twoPlane.size << ". " << global.fatal;
   }
-  Vectors<Rational> RootSystemSorted;
-  RootSystemSorted = this->rootSystem;
+  Vectors<Rational> rootSystemSorted;
+  rootSystemSorted = this->rootSystem;
   List<double> lengths;
-  lengths.setSize(RootSystemSorted.size);
+  lengths.setSize(rootSystemSorted.size);
   for (int i = 0; i < this->rootSystem.size; i ++) {
     tempRoot.setSize(dimension);
     for (int j = 0; j < dimension; j ++) {
@@ -7759,24 +7764,23 @@ void WeylGroupData::drawRootSystem(
     double Length2 = this->rootScalarCartanRoot(tempRoot, output.basisProjectionPlane[1]);
     lengths[i] = FloatingPoint::sqrtFloating(Length1 * Length1 + Length2 * Length2);
   }
-  for (int i = 0; i < RootSystemSorted.size; i ++) {
-    for (int j = i; j < RootSystemSorted.size; j ++) {
+  for (int i = 0; i < rootSystemSorted.size; i ++) {
+    for (int j = i; j < rootSystemSorted.size; j ++) {
       if (lengths[i] < lengths[j]) {
         MathRoutines::swap(lengths[i], lengths[j]);
-        MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
+        MathRoutines::swap(rootSystemSorted[i], rootSystemSorted[j]);
       }
     }
   }
   Vector<Rational> differenceRoot;
-  differenceRoot = RootSystemSorted[0] - RootSystemSorted[1];
+  differenceRoot = rootSystemSorted[0] - rootSystemSorted[1];
   Rational minLength = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
-  for (int i = 2; i < RootSystemSorted.size; i ++) {
-    differenceRoot = RootSystemSorted[0] - RootSystemSorted[i];
+  for (int i = 2; i < rootSystemSorted.size; i ++) {
+    differenceRoot = rootSystemSorted[0] - rootSystemSorted[i];
     if (minLength > this->rootScalarCartanRoot(differenceRoot, differenceRoot)) {
       minLength = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
     }
   }
-  Rational tempRat;
   if (bluePoint != nullptr) {
     output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 5);
     output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 4);
@@ -7790,14 +7794,15 @@ void WeylGroupData::drawRootSystem(
   }
   output.centerX = 300;
   output.centerY = 300;
-  for (int i = 0; i < RootSystemSorted.size; i ++) {
-    output.drawLineBetweenTwoVectorsBufferRational(zeroRoot, RootSystemSorted[i], "green", 1);
-    output.drawCircleAtVectorBufferRational(RootSystemSorted[i], "#ff00ff", 2);
-    for (int j = i + 1; j < RootSystemSorted.size; j ++) {
-      differenceRoot = RootSystemSorted[i] - RootSystemSorted[j];
-      tempRat = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
-      if (minLength == tempRat) {
-        output.drawLineBetweenTwoVectorsBufferRational(RootSystemSorted[i], RootSystemSorted[j], "blue", 1);
+  Rational scalarProduct;
+  for (int i = 0; i < rootSystemSorted.size; i ++) {
+    output.drawLineBetweenTwoVectorsBufferRational(zeroRoot, rootSystemSorted[i], "green", 1);
+    output.drawCircleAtVectorBufferRational(rootSystemSorted[i], "#ff00ff", 2);
+    for (int j = i + 1; j < rootSystemSorted.size; j ++) {
+      differenceRoot = rootSystemSorted[i] - rootSystemSorted[j];
+      scalarProduct = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
+      if (minLength == scalarProduct) {
+        output.drawLineBetweenTwoVectorsBufferRational(rootSystemSorted[i], rootSystemSorted[j], "blue", 1);
       }
     }
   }
@@ -7829,11 +7834,11 @@ void WeylGroupData::drawRootSystem(
   std::stringstream tempStream;
   tempStream << this->dynkinType.getWeylGroupName();
   if (this->getDimension() == 2 && predefinedProjectionPlane != nullptr) {
-    theTwoPlane[1][0] = 1;
-    theTwoPlane[1][1] = 0;
-    theTwoPlane[0][0] = 0;
-    theTwoPlane[0][1] = 1;
-    outputDV.operations.modifyToOrthonormalNoShiftSecond(theTwoPlane[0], theTwoPlane[1]);
+    twoPlane[1][0] = 1;
+    twoPlane[1][1] = 0;
+    twoPlane[0][0] = 0;
+    twoPlane[0][1] = 1;
+    outputDV.operations.modifyToOrthonormalNoShiftSecond(twoPlane[0], twoPlane[1]);
   }
   output.drawTextBuffer(
     0,
@@ -8572,20 +8577,22 @@ int KazhdanLusztigPolynomials::chamberIndicatorToIndex(Vector<Rational>& Chamber
   ChamberIndicatorPlusRho = (ChamberIndicator);
   ChamberIndicatorPlusRho += this->weylGroup->rho;
   for (int i = 0; i < this->size; i ++) {
-    Rational tempRat1, tempRat2;
-    bool tempBool1, tempBool2;
+    Rational scalarProduct1;
+    Rational scalarProduct2;
+    bool firstIsPositive = false;
+    bool secondIsPositive = false;
     bool haveSameSigns = true;
     for (int j = 0; j < this->weylGroup->rootSystem.size; j ++) {
-      this->weylGroup->rootScalarCartanRoot(ChamberIndicatorPlusRho, this->weylGroup->rootSystem[j], tempRat1);
+      this->weylGroup->rootScalarCartanRoot(ChamberIndicatorPlusRho, this->weylGroup->rootSystem[j], scalarProduct1);
       tempRoot = (*this)[i];
       tempRoot += (this->weylGroup->rho);
-      this->weylGroup->rootScalarCartanRoot(tempRoot, this->weylGroup->rootSystem[j], tempRat2);
-      tempBool1 = tempRat1.isPositive();
-      tempBool2 = tempRat2.isPositive();
-      if (tempRat1.isEqualToZero() || tempRat2.isEqualToZero()) {
+      this->weylGroup->rootScalarCartanRoot(tempRoot, this->weylGroup->rootSystem[j], scalarProduct2);
+      firstIsPositive = scalarProduct1.isPositive();
+      secondIsPositive = scalarProduct2.isPositive();
+      if (scalarProduct1.isEqualToZero() || scalarProduct2.isEqualToZero()) {
         global.fatal << "Coefficients are zero at a bad place. " << global.fatal;
       }
-      if (tempBool1 != tempBool2) {
+      if (firstIsPositive != secondIsPositive) {
         haveSameSigns = false;
         break;
       }
@@ -10221,7 +10228,7 @@ std::string HtmlRoutines::convertStringToURLString(const std::string& input, boo
   return out.str();
 }
 
-Vector<Rational> OnePartialFractionDenominator::GetCheckSumRoot(int numberOfVariables) {
+Vector<Rational> OnePartialFractionDenominator::getCheckSumRoot(int numberOfVariables) {
   Vector<Rational> output;
   output.setSize(numberOfVariables);
   for (int i = 0; i < numberOfVariables; i ++) {
@@ -10293,7 +10300,7 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   if (direction.scalarEuclidean(normal).isEqualToZero()) {
     return;
   }
-  Rational theConstOnTheOtherSide = - *affineHyperplane.lastObject();
+  Rational constOnRightHandSide = - *affineHyperplane.lastObject();
   Vectors<Rational> basis;
   basis.assignMatrixRows(this->basisRationalForm);
   Lattice hyperplaneLatticeNoShift, directionLattice;//, normalProjectionLattice, theTrueProjectionLattice;
@@ -10312,16 +10319,18 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
     outputRepresentatives[i] += shift;
     outputRougherLattice.reduceVector(outputRepresentatives[i]);
   }
-  Rational shiftedConst, unitMovement, tempRat;
+  Rational shiftedConstant;
+  Rational unitMovement;
+  Rational scalarProduct;
   unitMovement = normal.scalarEuclidean(outputDirectionMultipleOnLattice);
   movementInDirectionPerRepresentative.setSize(outputRepresentatives.size);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
-    tempRat = (normal.scalarEuclidean(outputRepresentatives[i]) - theConstOnTheOtherSide) / unitMovement;
-    tempRat.assignFractionalValue();
-    shiftedConst = theConstOnTheOtherSide + tempRat;
-    Vector<Rational>& currentMovement =movementInDirectionPerRepresentative[i];
+    scalarProduct = (normal.scalarEuclidean(outputRepresentatives[i]) - constOnRightHandSide) / unitMovement;
+    scalarProduct.assignFractionalValue();
+    shiftedConstant = constOnRightHandSide + scalarProduct;
+    Vector<Rational>& currentMovement = movementInDirectionPerRepresentative[i];
     currentMovement = affineHyperplane;
-    *currentMovement.lastObject() = shiftedConst;
+    *currentMovement.lastObject() = shiftedConstant;
   }
 }
 
@@ -10646,23 +10655,23 @@ bool Cone::drawMeLastCoordinateAffine(
   (void) format;
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->getDimension() - 1);
-  Vectors<Rational> VerticesScaled;
-  VerticesScaled = this->vertices;
-  Rational tempRat;
-  List<bool> DrawVertex;
-  DrawVertex.initializeFillInObject(this->vertices.size, true);
+  Vectors<Rational> verticesScaled;
+  verticesScaled = this->vertices;
+  Rational scalar;
+  List<bool> drawVertex;
+  drawVertex.initializeFillInObject(this->vertices.size, true);
   bool foundBadVertex = false;
   for (int i = 0; i < this->vertices.size; i ++) {
-    tempRat = *VerticesScaled[i].lastObject();
-    VerticesScaled[i].setSize(this->getDimension() - 1);
-    if (tempRat.isPositive()) {
-      VerticesScaled[i] /= tempRat;
+    scalar = *verticesScaled[i].lastObject();
+    verticesScaled[i].setSize(this->getDimension() - 1);
+    if (scalar.isPositive()) {
+      verticesScaled[i] /= scalar;
     }
-    if (tempRat.isEqualToZero()) {
-      VerticesScaled[i] *= 10000;
+    if (scalar.isEqualToZero()) {
+      verticesScaled[i] *= 10000;
     }
-    if (tempRat.isNegative()) {
-      DrawVertex[i] = false;
+    if (scalar.isNegative()) {
+      drawVertex[i] = false;
       foundBadVertex = true;
     }
   }
@@ -10670,13 +10679,13 @@ bool Cone::drawMeLastCoordinateAffine(
     drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension() - 1);
   }
   for (int k = 0; k < this->normals.size; k ++) {
-    for (int i = 0; i < VerticesScaled.size; i ++) {
-      if (DrawVertex[i] && this->normals[k].scalarEuclidean(this->vertices[i]).isEqualToZero()) {
-        for (int j = i + 1; j < VerticesScaled.size; j ++) {
-          if (DrawVertex[j] && this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()) {
+    for (int i = 0; i < verticesScaled.size; i ++) {
+      if (drawVertex[i] && this->normals[k].scalarEuclidean(this->vertices[i]).isEqualToZero()) {
+        for (int j = i + 1; j < verticesScaled.size; j ++) {
+          if (drawVertex[j] && this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()) {
             if (this->isHonest1DEdgeAffine(i, j)) {
               drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-                VerticesScaled[i], VerticesScaled[j], chamberWallColor, 1
+                verticesScaled[i], verticesScaled[j], chamberWallColor, 1
               );
             }
           }
@@ -11374,26 +11383,28 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   return true;
 }
 
-bool Lattice::getInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& output, Cone& coneContainingOutputPoint) {
-  Vector<Rational> coordsInBasis;
+bool Lattice::getInternalPointInConeForSomeFundamentalDomain(
+  Vector<Rational>& output, Cone& coneContainingOutputPoint
+) {
+  Vector<Rational> coordinatesInBasis;
   coneContainingOutputPoint.getInternalPoint(output);
   Vectors<Rational> basisRoots;
   basisRoots.assignMatrixRows(this->basisRationalForm);
-  if (!output.getCoordinatesInBasis(basisRoots, coordsInBasis)) {
+  if (!output.getCoordinatesInBasis(basisRoots, coordinatesInBasis)) {
     return false;
   }
-  Rational maxCoord = coordsInBasis[0];
-  if (maxCoord < 0) {
-    maxCoord = - maxCoord;
+  Rational maximalCoordinate = coordinatesInBasis[0];
+  if (maximalCoordinate < 0) {
+    maximalCoordinate = - maximalCoordinate;
   }
-  for (int i = 0; i < coordsInBasis.size; i ++) {
-    Rational tempRat = (coordsInBasis[i] < 0) ? - coordsInBasis[i] : coordsInBasis[i];
-    if (tempRat > maxCoord) {
-      maxCoord = tempRat;
+  for (int i = 0; i < coordinatesInBasis.size; i ++) {
+    Rational candidate = (coordinatesInBasis[i] < 0) ? - coordinatesInBasis[i] : coordinatesInBasis[i];
+    if (candidate > maximalCoordinate) {
+      maximalCoordinate = candidate;
     }
   }
-  maxCoord += 1;
-  output /= maxCoord;
+  maximalCoordinate += 1;
+  output /= maximalCoordinate;
   return true;
 }
 
@@ -11401,7 +11412,9 @@ void Cone::translateMeMyLastCoordinateAffinization(
   Vector<Rational>& translationVector
 ) {
   if (translationVector.size != this->getDimension() - 1) {
-    global.fatal << "Translation vector size does not equal dimension minus one. " << global.fatal;
+    global.fatal
+    << "Translation vector size does not equal dimension minus one. "
+    << global.fatal;
   }
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->normals.size; i ++) {
@@ -11414,8 +11427,7 @@ void Cone::translateMeMyLastCoordinateAffinization(
   *tempRoot.lastObject() = 0;
   for (int i = 0; i < this->vertices.size; i ++) {
     if (!this->vertices[i].lastObject()->isEqualToZero()) {
-      Rational tempRat = *this->vertices[i].lastObject();
-      this->vertices[i] /= tempRat;
+      this->vertices[i] /= *this->vertices[i].lastObject();
       this->vertices[i] += tempRoot;
       Cone::scaleNormalizeByPositive(this->vertices[i]);
     }
@@ -12215,55 +12227,55 @@ void ConeComplex::getNewVerticesAppend(
 bool ConeComplex::splitChamber(
   int indexChamberBeingRefined, bool weAreChopping, const Vector<Rational>& killerNormal
 ) {
-  Cone& myDyingCone = this->objects[indexChamberBeingRefined];
+  Cone& toBeSliced = this->objects[indexChamberBeingRefined];
   Cone newPlusCone, newMinusCone;
   Matrix<Rational> bufferMat;
   Selection bufferSel;
-  bool needToRecomputeVertices = (myDyingCone.normals.getRankElementSpan(&bufferMat, &bufferSel) < this->getDimension());
-//  newPlusCone.flagHasSufficientlyManyVertices = true;
-//  newMinusCone.flagHasSufficientlyManyVertices = true;
-  newPlusCone.LowestIndexNotCheckedForSlicingInDirection = myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
-  newMinusCone.LowestIndexNotCheckedForSlicingInDirection = myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
-  newPlusCone.LowestIndexNotCheckedForChopping = myDyingCone.LowestIndexNotCheckedForChopping;
-  newMinusCone.LowestIndexNotCheckedForChopping = myDyingCone.LowestIndexNotCheckedForChopping;
+  bool needToRecomputeVertices = (toBeSliced.normals.getRankElementSpan(&bufferMat, &bufferSel) < this->getDimension());
+  newPlusCone.LowestIndexNotCheckedForSlicingInDirection = toBeSliced.LowestIndexNotCheckedForSlicingInDirection;
+  newMinusCone.LowestIndexNotCheckedForSlicingInDirection = toBeSliced.LowestIndexNotCheckedForSlicingInDirection;
+  newPlusCone.LowestIndexNotCheckedForChopping = toBeSliced.LowestIndexNotCheckedForChopping;
+  newMinusCone.LowestIndexNotCheckedForChopping = toBeSliced.LowestIndexNotCheckedForChopping;
   newPlusCone.flagIsTheZeroCone = false;
   newMinusCone.flagIsTheZeroCone = false;
   if (weAreChopping) {
     newPlusCone.LowestIndexNotCheckedForChopping ++;
     newMinusCone.LowestIndexNotCheckedForChopping ++;
   }
-  newPlusCone.vertices.size = 0; newPlusCone.normals.size = 0;
-  newMinusCone.vertices.size = 0; newMinusCone.normals.size = 0;
-  HashedList<Vector<Rational> > ZeroVertices;
-  Rational tempRat;
-  for (int i = 0; i < myDyingCone.vertices.size; i ++) {
-    killerNormal.scalarEuclidean(myDyingCone.vertices[i], tempRat);
-    if (tempRat.isPositive()) {
-      newPlusCone.vertices.addOnTop(myDyingCone.vertices[i]);
+  newPlusCone.vertices.size = 0;
+  newPlusCone.normals.size = 0;
+  newMinusCone.vertices.size = 0;
+  newMinusCone.normals.size = 0;
+  HashedList<Vector<Rational> > zeroVertices;
+  Rational scalarProduct;
+  for (int i = 0; i < toBeSliced.vertices.size; i ++) {
+    killerNormal.scalarEuclidean(toBeSliced.vertices[i], scalarProduct);
+    if (scalarProduct.isPositive()) {
+      newPlusCone.vertices.addOnTop(toBeSliced.vertices[i]);
     }
-    if (tempRat.isEqualToZero()) {
-      ZeroVertices.addOnTopNoRepetition(myDyingCone.vertices[i]);
+    if (scalarProduct.isEqualToZero()) {
+      zeroVertices.addOnTopNoRepetition(toBeSliced.vertices[i]);
     }
-    if (tempRat.isNegative()) {
-      newMinusCone.vertices.addOnTop(myDyingCone.vertices[i]);
+    if (scalarProduct.isNegative()) {
+      newMinusCone.vertices.addOnTop(toBeSliced.vertices[i]);
     }
   }
   if (newPlusCone.vertices.size == 0 || newMinusCone.vertices.size == 0) {
     return false;
   }
-  this->getNewVerticesAppend(myDyingCone, killerNormal, ZeroVertices);
-  for (int i = 0; i < myDyingCone.normals.size; i ++) {
-    if (newPlusCone.vertices.hasAnElementPerpendicularTo(myDyingCone.normals[i])) {
-      newPlusCone.normals.addOnTop(myDyingCone.normals[i]);
+  this->getNewVerticesAppend(toBeSliced, killerNormal, zeroVertices);
+  for (int i = 0; i < toBeSliced.normals.size; i ++) {
+    if (newPlusCone.vertices.hasAnElementPerpendicularTo(toBeSliced.normals[i])) {
+      newPlusCone.normals.addOnTop(toBeSliced.normals[i]);
     }
-    if (newMinusCone.vertices.hasAnElementPerpendicularTo(myDyingCone.normals[i])) {
-      newMinusCone.normals.addOnTop(myDyingCone.normals[i]);
+    if (newMinusCone.vertices.hasAnElementPerpendicularTo(toBeSliced.normals[i])) {
+      newMinusCone.normals.addOnTop(toBeSliced.normals[i]);
     }
   }
   newPlusCone.normals.addOnTop(killerNormal);
   newMinusCone.normals.addOnTop(- killerNormal);
-  newPlusCone.vertices.addListOnTop(ZeroVertices);
-  newMinusCone.vertices.addListOnTop(ZeroVertices);
+  newPlusCone.vertices.addListOnTop(zeroVertices);
+  newMinusCone.vertices.addListOnTop(zeroVertices);
   this->popChamberSwapWithLast(indexChamberBeingRefined);
   if (needToRecomputeVertices) {
     newPlusCone.createFromNormals(newPlusCone.normals);
@@ -12606,11 +12618,11 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
       bool hasPositive = false;
       bool hasNegative = false;
       for (int j = 0; j < inputVertices.size; j ++) {
-        Rational tempRat = normalCandidate.scalarEuclidean(inputVertices[j]);
-        if (tempRat.isNegative()) {
+        Rational scalarProduct = normalCandidate.scalarEuclidean(inputVertices[j]);
+        if (scalarProduct.isNegative()) {
           hasNegative = true;
         }
-        if (tempRat.isPositive()) {
+        if (scalarProduct.isPositive()) {
           hasPositive = true;
         }
         if (hasNegative && hasPositive) {

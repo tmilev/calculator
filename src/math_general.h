@@ -2270,10 +2270,10 @@ public:
   bool hasRationalCoefficients(
     LinearCombination<TemplateMonomial, Rational>* outputConversionToRationals = nullptr
   ) {
-    Rational tempRat;
+    Rational unused;
     Rational* coefficient = nullptr;
     if (outputConversionToRationals != nullptr) {
-      coefficient = &tempRat;
+      coefficient = &unused;
       outputConversionToRationals->makeZero();
     }
     for (int i = 0; i < this->size(); i ++) {
@@ -2446,12 +2446,12 @@ public:
   void writeToFile(std::fstream& output);
   void clearDenominators(Rational& output) {
     output.makeOne();
-    Rational tempRat;
+    Rational scale;
     for (int i = 0; i < this->size(); i ++) {
       if (!this->coefficients[i].isInteger()) {
-        tempRat = this->coefficients[i].getDenominator();
-        *this *= tempRat;
-        output *= tempRat;
+        scale = this->coefficients[i].getDenominator();
+        *this *= scale;
+        output *= scale;
       }
     }
   }
@@ -3859,7 +3859,7 @@ public:
   int getTotalMultiplicity() const;
   void invert();
   void initialize();
-  static Vector<Rational> GetCheckSumRoot(int numberOfVariables);
+  static Vector<Rational> getCheckSumRoot(int numberOfVariables);
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const OnePartialFractionDenominator& input) {
     return input.hashFunction();
@@ -4358,16 +4358,16 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     outputNormal[i] = matrixX[i] - matrixX[i + dimension];
   }
   if (result) {
-    Rational tempRat;
+    Rational scalarProduct;
     for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
-      coneStrictlyPositiveCoeffs[i].scalarEuclidean(outputNormal, tempRat);
-      if (!tempRat.isPositive()) {
+      coneStrictlyPositiveCoeffs[i].scalarEuclidean(outputNormal, scalarProduct);
+      if (!scalarProduct.isPositive()) {
         global.fatal << "Unexpected non-positive value. " << global.fatal;
       }
     }
     for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
-      coneNonNegativeCoeffs[i].scalarEuclidean(outputNormal, tempRat);
-      if (!tempRat.isNonPositive()) {
+      coneNonNegativeCoeffs[i].scalarEuclidean(outputNormal, scalarProduct);
+      if (!scalarProduct.isNonPositive()) {
         global.fatal << "Unexpected positive value. " << global.fatal;
       }
     }
@@ -5246,7 +5246,7 @@ public:
   static void makePolynomialFromOneNormal(
     Vector<Rational>& normal,
     const MonomialPolynomial& shiftRational,
-    int theMult,
+    int multiplicities,
     Polynomial<Rational>& output
   );
   void computeNormals(
@@ -5324,7 +5324,7 @@ public:
   static unsigned int hashFunction(const OnePartialFraction& input) {
     return input.hashFunction();
   }
-  void initialize(int numRoots);
+  void initialize(int numberOfRoots);
   void computeIndicesNonZeroMultiplicities();
   bool decreasePowerOneFraction(int index, int increment);
   void prepareFraction(

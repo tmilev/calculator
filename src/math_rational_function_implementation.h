@@ -206,16 +206,16 @@ RationalFraction<Coefficient> RationalFraction<Coefficient>::zero() {
 
 template<class Coefficient>
 RationalFraction<Coefficient> RationalFraction<Coefficient>::zeroStatic() {
-  RationalFraction tempRat;
-  tempRat.makeZero();
-  return tempRat;
+  RationalFraction result;
+  result.makeZero();
+  return result;
 }
 
 template<class Coefficient>
 RationalFraction<Coefficient> RationalFraction<Coefficient>::one() {
-  RationalFraction tempRat;
-  tempRat.makeConstant(1);
-  return tempRat;
+  RationalFraction result;
+  result.makeConstant(1);
+  return result;
 }
 
 template<class Coefficient>
@@ -526,32 +526,35 @@ void RationalFraction<Coefficient>::operator*=(const RationalFraction<Coefficien
     this->operator*=(tempP);
     return;
   }
-  Polynomial<Coefficient> theGCD1, theGCD2, tempP1, tempP2;
+  Polynomial<Coefficient> greatestCommonDivisor1;
+  Polynomial<Coefficient> greatestCommonDivisor2;
+  Polynomial<Coefficient> tempP1;
+  Polynomial<Coefficient> tempP2;
   ProgressReport report;
   if (report.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString() << " by " << other.toString();
     report.report(out.str());
   }
-  RationalFraction<Coefficient>::greatestCommonDivisor(other.denominator.getElementConst(), this->numerator.getElement(), theGCD1);
-  RationalFraction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other.numerator.getElementConst(), theGCD2);
+  RationalFraction<Coefficient>::greatestCommonDivisor(other.denominator.getElementConst(), this->numerator.getElement(), greatestCommonDivisor1);
+  RationalFraction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other.numerator.getElementConst(), greatestCommonDivisor2);
   List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderForGreatestCommonDivisor();
-  this->numerator.getElement().divideBy(theGCD1, tempP1, tempP2, monomialOrder);
+  this->numerator.getElement().divideBy(greatestCommonDivisor1, tempP1, tempP2, monomialOrder);
   this->numerator.getElement() = tempP1;
   if (!tempP2.isEqualToZero()) {
     global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
   }
-  other.denominator.getElementConst().divideBy(theGCD1, tempP1, tempP2, monomialOrder);
+  other.denominator.getElementConst().divideBy(greatestCommonDivisor1, tempP1, tempP2, monomialOrder);
   if (!tempP2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->denominator.getElement() *= tempP1;
-  this->denominator.getElement().divideBy(theGCD2, tempP1, tempP2, monomialOrder);
+  this->denominator.getElement().divideBy(greatestCommonDivisor2, tempP1, tempP2, monomialOrder);
   if (!tempP2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->denominator.getElement() = tempP1;
-  other.numerator.getElementConst().divideBy(theGCD2, tempP1, tempP2, monomialOrder);
+  other.numerator.getElementConst().divideBy(greatestCommonDivisor2, tempP1, tempP2, monomialOrder);
   if (!tempP2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
@@ -793,16 +796,16 @@ void RationalFraction<Coefficient>::raiseToPower(int power) {
 
 template<class Coefficient>
 void RationalFraction<Coefficient>::clearDenominators(RationalFraction<Coefficient>& outputWasMultipliedBy) {
-  Rational tempRat;
+  Rational scalar;
   switch(this->expressionType) {
     case RationalFraction::typeConstant:
-      tempRat = this->constantValue.getDenominator();
-      outputWasMultipliedBy.makeConstant(tempRat);
-      this->constantValue *= tempRat;
+      scalar = this->constantValue.getDenominator();
+      outputWasMultipliedBy.makeConstant(scalar);
+      this->constantValue *= scalar;
     break;
     case RationalFraction::typePolynomial:
-      this->numerator.getElement().clearDenominators(tempRat);
-      outputWasMultipliedBy.makeConstant(tempRat);
+      this->numerator.getElement().clearDenominators(scalar);
+      outputWasMultipliedBy.makeConstant(scalar);
     break;
     case RationalFraction::typeRationalFunction:
       RationalFraction tempRF;

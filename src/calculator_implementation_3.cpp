@@ -200,19 +200,19 @@ std::string HtmlRoutines::getSliderSpanStartsHidden(
 
 std::string LittelmannPath::generateOrbitAndAnimate() {
   std::stringstream out;
-  List<LittelmannPath> theOrbit;
-  List<List<int> > theGens;
-  if (!this->generateOrbit(theOrbit, theGens, 1000, nullptr)) {
-    out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
+  List<LittelmannPath> orbit;
+  List<List<int> > generators;
+  if (!this->generateOrbit(orbit, generators, 1000, nullptr)) {
+    out  << "<b>Not all paths were genenerated, only the first " << orbit.size << "</b>";
   }
-  Vectors<double> coxPlane;
-  coxPlane.setSize(2);
-  this->owner->getCoxeterPlane(coxPlane[0], coxPlane[1]);
+  Vectors<double> coxeterPlane;
+  coxeterPlane.setSize(2);
+  this->owner->getCoxeterPlane(coxeterPlane[0], coxeterPlane[1]);
   DrawingVariables animated, collapsed;
   this->owner->drawRootSystem(animated, true, true);
   this->owner->drawRootSystem(collapsed, true, true);
-  for (int i = 0; i < theOrbit.size; i ++) {
-    LittelmannPath& currentPath = theOrbit[i];
+  for (int i = 0; i < orbit.size; i ++) {
+    LittelmannPath& currentPath = orbit[i];
     animated.drawPath(currentPath.waypoints, "black", 1, this->owner->dynkinType.toString(), i);
     collapsed.drawPath(currentPath.waypoints, "black", 1);
     for (int j = 0; j < currentPath.waypoints.size; j ++) {
@@ -225,20 +225,20 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
   out << collapsed.getHTMLDiv(this->owner->getDimension(), false);
   out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
-  << theOrbit.size << " total):<br>";
+  << orbit.size << " total):<br>";
   out << "<table>";
-  for (int i = 0; i < theOrbit.size; i ++) {
-    LittelmannPath& currentPath = theOrbit[i];
+  for (int i = 0; i < orbit.size; i ++) {
+    LittelmannPath& currentPath = orbit[i];
     out << "<tr><td>" << currentPath.toString() << "</td>"
     << "<td>"
-    << this->toStringOperatorSequenceStartingOnMe(theGens[i])
+    << this->toStringOperatorSequenceStartingOnMe(generators[i])
     << "</td></tr>";
   }
   out << "</table>";
-  LittelmannPath lastPath = theOrbit[0];
+  LittelmannPath lastPath = orbit[0];
   LittelmannPath tempPath;
   MonomialTensor<int, HashFunctions::hashFunction> tempMon;
-  tempMon = *theGens.lastObject();
+  tempMon = *generators.lastObject();
   tempMon.generatorsIndices.reverseElements();
   tempMon.powers.reverseElements();
   out << "<table>";
@@ -263,9 +263,9 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   out << "</table>";
   out << "<table><td>corresponding element of U(g)</td><td>is adapted</td>"
   << "<td>path</td><td>e operators with non-zero action.</td>";
-  for (int i = 0; i < theGens.size; i ++) {
-    tempPath = theOrbit[i];
-    tempMon = theGens[i];
+  for (int i = 0; i < generators.size; i ++) {
+    tempPath = orbit[i];
+    tempMon = generators[i];
     tempMon.generatorsIndices.reverseElements();
     tempMon.powers.reverseElements();
     bool isadapted = tempPath.isAdaptedString(tempMon);
@@ -273,12 +273,12 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     << (isadapted ? "is adapted to" : "is not adapted to" ) << "</td><td>"
     << tempPath.toString() << "</td><td>";
     for (int j = 0; j < this->owner->getDimension(); j ++) {
-      tempPath = theOrbit[i];
+      tempPath = orbit[i];
       tempPath.actByEFDisplayIndex(j + 1);
       if (!tempPath.isEqualToZero()) {
         out << "e_{" << j + 1 << "}, ";
       }
-      tempPath = theOrbit[i];
+      tempPath = orbit[i];
       tempPath.actByEFDisplayIndex(- j - 1);
       if (!tempPath.isEqualToZero()) {
         out << "e_{" << - j - 1 << "}, ";

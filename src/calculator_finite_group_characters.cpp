@@ -292,7 +292,7 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
   WD.dynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   // When WeylGroupRepresentation is merged with GroupRepresentation,
   // and WeylGroupData split from FiniteGroup<ElementWeylGroup<WeylGroup> >
-  // theRepresentations will be this->theGroup->irreps
+  // theRepresentations will be this->group->irreps
   // currently we have the difficulty with GroupRepresentation<WeylGroup, Coefficient> vs
   // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >, Coefficient>
   if ((letters.size == 1) && (letters[0] == 'A')) {
@@ -721,16 +721,16 @@ bool CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable(
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
-  WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
-  if (theGroup.getDimension() > 8) {
+  WeylGroupData& weylGroup = output.getValueNonConst<WeylGroupData>();
+  if (weylGroup.getDimension() > 8) {
     calculator << "Computing character table disabled for rank >= 8, modify file " << __FILE__
     << " line "  << __LINE__ << " to change that. ";
     return false;
   }
   std::stringstream reportStream;
-  theGroup.computeOrLoadCharacterTable(&reportStream);
+  weylGroup.computeOrLoadCharacterTable(&reportStream);
   calculator << reportStream.str();
-  return output.assignValue(calculator, theGroup);
+  return output.assignValue(calculator, weylGroup);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
@@ -740,8 +740,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
-  WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
-  if (theGroup.getDimension() > 8) {
+  WeylGroupData& weylGroup = output.getValueNonConst<WeylGroupData>();
+  if (weylGroup.getDimension() > 8) {
     calculator << "Conjugacy classes computation disabled for rank greater than 8. "
     << "Modify source code "
     << "file " << __FILE__ << " line " << __LINE__
@@ -749,9 +749,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
     return false;
   }
   std::stringstream out;
-  theGroup.computeOrLoadConjugacyClasses(&out);
+  weylGroup.computeOrLoadConjugacyClasses(&out);
   calculator << out.str();
-  return output.assignValue(calculator, theGroup);
+  return output.assignValue(calculator, weylGroup);
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements(

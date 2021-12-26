@@ -30,12 +30,12 @@ bool CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRati
           return false;
         }
       } else {
-        Rational tempRat;
-        if (!rightE->isOfType<Rational>(&tempRat)) {
+        Rational rationalValue;
+        if (!rightE->isOfType<Rational>(&rationalValue)) {
           return false;
         }
         element2.modulus = element1.modulus;
-        if (!element2.assignRational(tempRat)) {
+        if (!element2.assignRational(rationalValue)) {
           return false;
         }
       }
@@ -67,12 +67,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
           return false;
         }
       } else {
-        Rational tempRat;
-        if (!rightE->isOfType<Rational>(&tempRat)) {
+        Rational rationalValue;
+        if (!rightE->isOfType<Rational>(&rationalValue)) {
           return false;
         }
         element2.modulus = element1.modulus;
-        if (!element2.assignRational(tempRat)) {
+        if (!element2.assignRational(rationalValue)) {
           return false;
         }
       }
@@ -104,12 +104,12 @@ bool CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat(
           return false;
         }
       } else {
-        Rational tempRat;
-        if (!rightE->isOfType<Rational>(&tempRat)) {
+        Rational rationalValue;
+        if (!rightE->isOfType<Rational>(&rationalValue)) {
           return false;
         }
         element2.modulus = element1.modulus;
-        if (!element2.assignRational(tempRat)) {
+        if (!element2.assignRational(rationalValue)) {
           return false;
         }
       }
@@ -166,20 +166,20 @@ bool CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNum
     return false;
   }
   AlgebraicNumber leftAN, rightAN;
-  Rational tempRat;
+  Rational rationalValue;
   if (!input[1].isOfType(&leftAN)) {
     if (!input[2].isOfType(&rightAN)) {
       return false;
     }
-    if (!input[1].isOfType<Rational>(&tempRat)) {
+    if (!input[1].isOfType<Rational>(&rationalValue)) {
       return false;
     }
-    leftAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
+    leftAN.assignRational(rationalValue, &calculator.objectContainer.algebraicClosure);
   } else if (!input[2].isOfType(&rightAN)) {
-    if (!input[2].isOfType(&tempRat)) {
+    if (!input[2].isOfType(&rationalValue)) {
       return false;
     }
-    rightAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
+    rightAN.assignRational(rationalValue, &calculator.objectContainer.algebraicClosure);
   }
   if (rightAN.isEqualToZero()) {
     return output.assignError(calculator, "Division by zero. ");
@@ -243,21 +243,21 @@ bool CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber(
     return false;
   }
   AlgebraicNumber leftAN, rightAN;
-  Rational tempRat;
+  Rational rationalValue;
   if (!input[1].isOfType(&leftAN)) {
     if (!input[2].isOfType(&rightAN)) {
       return false;
     }
-    if (!input[1].isOfType<Rational>(&tempRat)) {
+    if (!input[1].isOfType<Rational>(&rationalValue)) {
       return false;
     }
-    leftAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
+    leftAN.assignRational(rationalValue, &calculator.objectContainer.algebraicClosure);
     leftAN.checkConsistency();
   } else if (!input[2].isOfType(&rightAN)) {
-    if (!input[2].isOfType(&tempRat)) {
+    if (!input[2].isOfType(&rationalValue)) {
       return false;
     }
-    rightAN.assignRational(tempRat, &calculator.objectContainer.algebraicClosure);
+    rightAN.assignRational(rationalValue, &calculator.objectContainer.algebraicClosure);
     rightAN.checkConsistency();
   }
   leftAN.checkConsistency();
@@ -2345,21 +2345,21 @@ bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
     return false;
   }
   Rational coefficient = 1;
-  Rational tempRat;
+  Rational rationalValue;
   Expression leftE = input[1];
   Expression rightE = input[2];
   bool found = false;
   if (input[1].startsWith(calculator.opTimes(), 3)) {
-    if (input[1][1].isOfType(&tempRat)) {
+    if (input[1][1].isOfType(&rationalValue)) {
       found = true;
-      coefficient *= tempRat;
+      coefficient *= rationalValue;
       leftE = input[1][2];
     }
   }
   if (input[2].startsWith(calculator.opTimes(), 3)) {
-    if (input[2][1].isOfType(&tempRat)) {
+    if (input[2][1].isOfType(&rationalValue)) {
       found = true;
-      coefficient *= tempRat;
+      coefficient *= rationalValue;
       rightE = input[2][2];
     }
   }

@@ -435,15 +435,15 @@ bool MeshTriangles::computePoints(
   if (!calculator.getVectorDoubles(input[3], this->upperRightCorner)) {
     return calculator << "Failed to extract upper right corner from: " << input[3].toString();
   }
-  List<int> theGridCount;
-  if (!calculator.getVectorInt(input[4], theGridCount)) {
+  List<int> gridCount;
+  if (!calculator.getVectorInt(input[4], gridCount)) {
     return calculator << "Failed to extract pair of small integers from: " << input[4].toString();
   }
-  if (theGridCount.size != 2) {
+  if (gridCount.size != 2) {
     return calculator << "Failed to extract pair of small integers from: " << input[4].toString();
   }
-  this->xStartingGridCount = theGridCount[0];
-  this->yStartingGridCount = theGridCount[1];
+  this->xStartingGridCount = gridCount[0];
+  this->yStartingGridCount = gridCount[1];
   if (input.size() >= 6) {
     if (!input[5].isSmallInteger(&this->maxNumTriangles)) {
       return calculator << "Failed to extract small integer from: " << input[5].toString();

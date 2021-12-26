@@ -1145,15 +1145,15 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
       }
     }
     if (counter > 3) {
-      Matrix<Rational> theGram;
-      currentComponent.getGramMatrix(theGram, &this->ambientBilinearForm);
+      Matrix<Rational> gramMatrix;
+      currentComponent.getGramMatrix(gramMatrix, &this->ambientBilinearForm);
       global.fatal << "Corrupt simple basis corresponding to "
       << "Dynkin diagram: the Dynkin diagram should have nodes with "
       << "valency at most 3, but this diagram has node with valency "
       << counter << ". The current component is: "
       << currentComponent.toString()
       << ". The corresponding Symmetric Cartan is: "
-      << theGram.toString() << ". " << global.fatal;
+      << gramMatrix.toString() << ". " << global.fatal;
     }
     if (counter == 3) {
       result ++;
@@ -1960,12 +1960,12 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
       for (int j = 0; j < this->projectivezedChambersSplitByMultFreeWalls.size; j ++) {
         tempRoot = this->projectivezedChambersSplitByMultFreeWalls.objects[j].getInternalPoint();
         if (this->projectivizedChamber.objects[i].isInCone(tempRoot)) {
-          Rational tempRat;
-          tempRat =*tempRoot.lastObject();
-          if (tempRat != 0)
-            tempRoot/= tempRat;
-          theMult.valueOnEachLatticeShift.objects[0].evaluate(tempRoot, tempRat);
-          if (tempRat<1) {
+          Rational scalar;
+          scalar =*tempRoot.lastObject();
+          if (scalar != 0)
+            tempRoot/= scalar;
+          theMult.valueOnEachLatticeShift.objects[0].evaluate(tempRoot, scalar);
+          if (scalar<1) {
             indexMultFreeChamber = j;
             break;
           }
@@ -2093,8 +2093,7 @@ void GeneralizedVermaModuleCharacters::getProjection(
     global.fatal << "Last coordinate is not supposed to be be zero. " << global.fatal;
   }
   output = input;
-  Rational tempRat = *output.lastObject();
-  output /= tempRat;
+  output /= *output.lastObject();
   output.size --;
   currentExtendedOperator.actOnVectorColumn(output);
   output += currentTranslation;

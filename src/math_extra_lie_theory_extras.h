@@ -50,12 +50,12 @@ struct BranchingData {
   template <class Coefficient>
   Vector<Coefficient> projectWeight(Vector<Coefficient>& input);
   void resetOutputData();
-  void initAssumingParSelAndHmmInittedPart1NoSubgroups();
-  void initAssumingParSelAndHmmInittedPart2Subgroups();
-  void initAssumingParSelAndHmmInitted() {
-    MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInitted");
-    this->initAssumingParSelAndHmmInittedPart1NoSubgroups();
-    this->initAssumingParSelAndHmmInittedPart2Subgroups();
+  void initializePart1NoSubgroups();
+  void initializePart2NoSubgroups();
+  void initializeAfterParabolicSelectionAndHomomorphism() {
+    MacroRegisterFunctionWithName("BranchingData::initializeAfterParabolicSelectionAndHomomorphism");
+    this->initializePart1NoSubgroups();
+    this->initializePart2NoSubgroups();
   }
   BranchingData();
 };

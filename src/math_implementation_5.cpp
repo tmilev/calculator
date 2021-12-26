@@ -672,7 +672,7 @@ void HomomorphismSemisimpleLieAlgebra::getWeightsRelativeToKInSimpleKCoordinates
   List<ElementSemisimpleLieAlgebra<Rational> >& inputElements
 ) {
   outputWeights.setSize(inputElements.size);
-  Rational tempRat;
+  Rational scalar;
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
   for (int i = 0; i < inputElements.size; i ++) {
     Vector<Rational>& currentWeight = outputWeights[i];
@@ -684,10 +684,11 @@ void HomomorphismSemisimpleLieAlgebra::getWeightsRelativeToKInSimpleKCoordinates
         currentLieElt,
         tempLieElement
       );
-      if (!currentLieElt.isProportionalTo(tempLieElement, tempRat)) {
-        global.fatal << "Lie algebra elements not proportional as expected. " << global.fatal;
+      if (!currentLieElt.isProportionalTo(tempLieElement, scalar)) {
+        global.fatal << "Lie algebra elements not "
+        << "proportional as expected. " << global.fatal;
       }
-      currentWeight[j] = tempRat;
+      currentWeight[j] = scalar;
     }
   }
   Matrix<Rational> invertedCartan = this->domainAlgebra().weylGroup.cartanSymmetric;
@@ -865,19 +866,24 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
   outputTheHWVectors.size = 0;
   Matrix<Rational> remainder;
   remainder = input;
-  Matrix<Rational> component, highestWeightVector, matrix;
-  Rational coefficient, tempRat;
+  Matrix<Rational> component;
+  Matrix<Rational> highestWeightVector;
+  Matrix<Rational> matrix;
+  Rational coefficient;
+  Rational scalar;
   int largestPowerNotKillingInput;
   while (!remainder.isEqualToZero() ) {
     this->climbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
-    this->climbDownFromHighestWeightAlongSl2String(highestWeightVector, component, coefficient, largestPowerNotKillingInput);
+    this->climbDownFromHighestWeightAlongSl2String(
+      highestWeightVector, component, coefficient, largestPowerNotKillingInput
+    );
     for (int i = 0; i < this->projectors.size; i ++) {
       Matrix<Rational>& currentProjector = this->projectors[i];
       matrix = highestWeightVector;
       matrix.multiplyOnTheLeft(currentProjector);
       if (!matrix.isEqualToZero()) {
-        matrix.findFirstNonZeroElementSearchEntireRow(tempRat);
-        matrix /= tempRat;
+        matrix.findFirstNonZeroElementSearchEntireRow(scalar);
+        matrix /= scalar;
         outputTheHWVectors.addOnTop(matrix);
       }
     }
@@ -886,13 +892,13 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
     outputDecompositionOfInput.addOnTop(component);
     remainder -= component;
   }
-  //remainder.makeZero();
-//  for (int i = 0; i <outputVectors.size; i ++)
-//    remainder.Add(outputVectors.objects[i]);
-
 }
 
-void SlTwoInSlN::climbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& outputLastNonZero, int& largestPowerNotKillingInput) {
+void SlTwoInSlN::climbUpFromVector(
+  Matrix<Rational>& input,
+  Matrix<Rational>& outputLastNonZero,
+  int& largestPowerNotKillingInput
+) {
   Matrix<Rational> matrix;
   if (&input == &outputLastNonZero) {
     global.fatal << "Input not allowed to coincide with the output. " << global.fatal;
@@ -1370,10 +1376,10 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
   if (this->flagIsTheZeroCone) {
     return point.isEqualToZero();
   }
-  Rational tempRat;
+  Rational scalarProduct;
   for (int i = 0; i < this->normals.size; i ++) {
-    tempRat = point.scalarEuclidean(this->normals[i]);
-    if (tempRat.isNegative()) {
+    scalarProduct = point.scalarEuclidean(this->normals[i]);
+    if (scalarProduct.isNegative()) {
       return false;
     }
   }

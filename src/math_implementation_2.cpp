@@ -1558,8 +1558,6 @@ void Rational::writeToFile(std::fstream& output) {
 }
 
 void Rational::raiseToPower(int x) {
-  Rational tempRat;
-  tempRat.makeOne();
   if (x < 0) {
     x = - x;
     this->invert();
@@ -1603,9 +1601,9 @@ void Rational::readFromFile(std::istream& input) {
 }
 
 void Rational::multiplyByInt(int x) {
-  Rational tempRat;
-  tempRat.assignInteger(x);
-  this->multiplyBy(tempRat);
+  Rational coefficient;
+  coefficient.assignInteger(x);
+  this->multiplyBy(coefficient);
 }
 
 void Rational::multiplyBy(const Rational& r) {
@@ -1626,16 +1624,16 @@ void Rational::multiplyBy(const Rational& r) {
 }
 
 Rational operator/(int left, const Rational& right) {
-  Rational tempRat = left;
-  tempRat /= right;
-  return tempRat;
+  Rational result = left;
+  result /= right;
+  return result;
 }
 
 Rational operator-(const Rational& argument) {
-  Rational tempRat;
-  tempRat.assign(argument);
-  tempRat.negate();
-  return tempRat;
+  Rational result;
+  result.assign(argument);
+  result.negate();
+  return result;
 }
 
 void Rational::multiplyByLargeInteger(LargeInteger& x) {
@@ -1655,37 +1653,37 @@ void Rational::divideBy(const Rational& r) {
     this->makeOne();
     return;
   }
-  Rational tempRat = r;
-  tempRat.invert();
-  this->operator*=(tempRat);
+  Rational inverted = r;
+  inverted.invert();
+  this->operator*=(inverted);
 }
 
 Rational Rational::operator/(const Rational& right) const {
-  Rational tempRat;
-  tempRat.assign(*this);
-  tempRat.divideBy(right);
-  return tempRat;
+  Rational result;
+  result.assign(*this);
+  result.divideBy(right);
+  return result;
 }
 
 Rational Rational::operator*(const Rational& right) const {
-  Rational tempRat;
-  tempRat.assign(*this);
-  tempRat.multiplyBy(right);
-  return tempRat;
+  Rational result;
+  result.assign(*this);
+  result.multiplyBy(right);
+  return result;
 }
 
 Rational Rational::operator+(const Rational& right) const {
-  Rational tempRat;
-  tempRat.assign(*this);
-  tempRat += right;
-  return tempRat;
+  Rational result;
+  result.assign(*this);
+  result += right;
+  return result;
 }
 
 Rational Rational::operator-(const Rational& right) const {
-  Rational tempRat;
-  tempRat.assign(*this);
-  tempRat -= right;
-  return tempRat;
+  Rational result;
+  result.assign(*this);
+  result -= right;
+  return result;
 }
 
 void Rational::assign(const Rational& r) {
@@ -1758,16 +1756,16 @@ GlobalStatistics::checkPointerCounters();
 }
 
 void Rational::addInteger(int x) {
-  Rational tempRat;
-  tempRat.assignNumeratorAndDenominator(x, 1);
-  this->operator+=(tempRat);
+  Rational toAdd;
+  toAdd.assignNumeratorAndDenominator(x, 1);
+  this->operator+=(toAdd);
 }
 
 bool Rational::isGreaterThan(const Rational& r) const {
-  Rational tempRat;
-  tempRat.assign(*this);
-  tempRat.subtract(r);
-  return tempRat.isPositive();
+  Rational other;
+  other.assign(*this);
+  other.subtract(r);
+  return other.isPositive();
 }
 
 void Rational::subtract(const Rational& r) {
@@ -1781,41 +1779,44 @@ bool Rational::getSquareRootIfRational(Rational& output) const {
   if (*this < 0) {
     return false;
   }
-  LargeInteger numerator = this->getNumerator();
-  LargeIntegerUnsigned theDen = this->getDenominator();
-  List<LargeInteger> primeFactorsNum, primeFactorsDen;
-  List<int> multsNum, multsDen;
-  if (!numerator.value.factor(primeFactorsNum, multsNum, 0, 3, nullptr)) {
+  LargeInteger numeratorLarge = this->getNumerator();
+  LargeIntegerUnsigned denominatorLarge = this->getDenominator();
+  List<LargeInteger> primeFactorsNumerator;
+  List<LargeInteger> primeFactorsDenominator;
+  List<int> multiplicitiesNumerator;
+  List<int> multiplicitiesDenominator;
+  if (!numeratorLarge.value.factor(primeFactorsNumerator, multiplicitiesNumerator, 0, 3, nullptr)) {
     return false;
   }
-  if (!theDen.factor(primeFactorsDen, multsDen, 0, 3, nullptr)) {
+  if (!denominatorLarge.factor(primeFactorsDenominator, multiplicitiesDenominator, 0, 3, nullptr)) {
     return false;
   }
   output = 1;
-  Rational tempRat;
-  for (int i = 0; i < primeFactorsNum.size; i ++) {
-    if (multsNum[i] % 2 != 0) {
+  Rational currentFactor;
+  for (int i = 0; i < primeFactorsNumerator.size; i ++) {
+    if (multiplicitiesNumerator[i] % 2 != 0) {
       return false;
     }
-    tempRat = primeFactorsNum[i];
-    int currentMult = multsNum[i];
-    tempRat.raiseToPower(currentMult / 2);
-    output *= tempRat;
+    currentFactor = primeFactorsNumerator[i];
+    int currentMultiplicity = multiplicitiesNumerator[i];
+    currentFactor.raiseToPower(currentMultiplicity / 2);
+    output *= currentFactor;
   }
-  for (int i = 0; i < primeFactorsDen.size; i ++) {
-    if (multsDen[i] % 2 != 0) {
+  for (int i = 0; i < primeFactorsDenominator.size; i ++) {
+    if (multiplicitiesDenominator[i] % 2 != 0) {
       return false;
     }
-    tempRat = primeFactorsDen[i];
-    int currentMult = multsDen[i];
-    tempRat.raiseToPower(currentMult / 2);
-    output /= tempRat;
+    currentFactor = primeFactorsDenominator[i];
+    int currentMultiplicity = multiplicitiesDenominator[i];
+    currentFactor.raiseToPower(currentMultiplicity / 2);
+    output /= currentFactor;
   }
   return true;
 }
 
 bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
-  int otherNumeratorAbsoluteValue, thisNumAbs;
+  int otherNumeratorAbsoluteValue = 0;
+  int thisNumeratorAbsoluteValue = 0;
   if (this->denominatorShort <= 0 || otherDenominator <= 0) {
     global.fatal << "Try to add corrupt rational number(s) with denominators "
     << this->denominatorShort << " and " << otherDenominator
@@ -1827,13 +1828,13 @@ bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
     otherNumeratorAbsoluteValue = otherNumerator;
   }
   if (this->numeratorShort < 0) {
-    thisNumAbs = - this->numeratorShort;
+    thisNumeratorAbsoluteValue = - this->numeratorShort;
   } else {
-    thisNumAbs = this->numeratorShort;
+    thisNumeratorAbsoluteValue = this->numeratorShort;
   }
   if (
     this->extended != nullptr ||
-    thisNumAbs >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    thisNumeratorAbsoluteValue >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
     this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
     otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
     otherDenominator >= LargeIntegerUnsigned::squareRootOfCarryOverBound
@@ -2143,20 +2144,20 @@ bool Rational::isEqualTo(const Rational& b) const {
   if (this->extended == nullptr && b.extended == nullptr) {
     return (this->numeratorShort * b.denominatorShort == b.numeratorShort * this->denominatorShort);
   }
-  Rational tempRat;
-  tempRat.assign(*this);
-  tempRat.subtract(b);
-  return tempRat.isEqualToZero();
+  Rational crossProduct;
+  crossProduct.assign(*this);
+  crossProduct.subtract(b);
+  return crossProduct.isEqualToZero();
 }
 
 bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
   if (this->extended == nullptr && right.extended == nullptr) {
     return (this->numeratorShort * right.denominatorShort >= right.numeratorShort * this->denominatorShort);
   }
-  Rational tempRat;
-  tempRat.assign(*this);
-  tempRat.subtract(right);
-  return tempRat.isPositiveOrZero();
+  Rational crossProduct;
+  crossProduct.assign(*this);
+  crossProduct.subtract(right);
+  return crossProduct.isPositiveOrZero();
 }
 
 std::string Rational::toString(FormatExpressions* format) const {

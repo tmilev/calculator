@@ -101,17 +101,18 @@ public:
       << "of vectors of dimension " << r1.size << " and " << r2.size << ". "
       << global.fatal;
     }
-    Coefficient tempRat, accumRow;
+    Coefficient summand;
+    Coefficient rowAccumulator;
     result = 0;
     for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
-      accumRow = 0;
+      rowAccumulator = 0;
       for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
-        tempRat = r2[j];
-        tempRat *= bilinearForm.elements[i][j];
-        accumRow += tempRat;
+        summand = r2[j];
+        summand *= bilinearForm.elements[i][j];
+        rowAccumulator += summand;
       }
-      accumRow *= r1[i];
-      result += accumRow;
+      rowAccumulator *= r1[i];
+      result += rowAccumulator;
     }
   }
   template <class otherType>
@@ -216,10 +217,10 @@ public:
     Vector<Coefficient>& output
   ) {
     Coefficient t;
-    Coefficient tempRat;
+    Coefficient scalar;
     input.scalarEuclidean(normal, t);
-    projectionDirection.scalarEuclidean(normal, tempRat);
-    t /= tempRat;
+    projectionDirection.scalarEuclidean(normal, scalar);
+    t /= scalar;
     t.negate();
     Vector<Coefficient>::vectorPlusVectorTimesScalar(input, projectionDirection, t, output);
   }
@@ -229,15 +230,15 @@ public:
     const Coefficient& coefficient,
     Vector<Coefficient>& output
   ) {
-    Coefficient tempRat;
+    Coefficient scalar;
     if (r1.size != r2.size) {
       global.fatal << "Adding vectors of different dimensions. " << global.fatal;
     }
     output = r1;
     for (int i = 0; i < r1.size; i ++) {
-      tempRat = r2[i];
-      tempRat *= coefficient;
-      output.objects[i] += (tempRat);
+      scalar = r2[i];
+      scalar *= coefficient;
+      output.objects[i] += scalar;
     }
   }
   void negate() {
@@ -1217,18 +1218,20 @@ public:
 
 template <class Coefficient>
 bool AffineHyperplane<Coefficient>::operator==(const AffineHyperplane& right) {
-  Vector<Rational> tempRoot1, tempRoot2;
-  tempRoot1 = this->normal;
-  tempRoot2 = right.normal;
-  tempRoot1.scaleNormalizeFirstNonZero();
-  tempRoot2.scaleNormalizeFirstNonZero();
-  if (!(tempRoot1 == tempRoot2)) {
+  Vector<Rational> leftNormal;
+  Vector<Rational> rightNormal;
+  leftNormal = this->normal;
+  rightNormal = right.normal;
+  leftNormal.scaleNormalizeFirstNonZero();
+  rightNormal.scaleNormalizeFirstNonZero();
+  if (!(leftNormal == rightNormal)) {
     return false;
   }
-  Rational tempRat1, tempRat2;
-  tempRoot1.scalarEuclidean(this->affinePoint, tempRat1);
-  tempRoot1.scalarEuclidean(right.affinePoint, tempRat2);
-  return tempRat1.isEqualTo(tempRat2);
+  Rational scalarProductLeft;
+  Rational scalarProductRight;
+  leftNormal.scalarEuclidean(this->affinePoint, scalarProductLeft);
+  leftNormal.scalarEuclidean(right.affinePoint, scalarProductRight);
+  return scalarProductLeft.isEqualTo(scalarProductRight);
 }
 
 template <class Coefficient>

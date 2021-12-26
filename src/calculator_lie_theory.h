@@ -9,7 +9,7 @@ public:
   static bool killingForm(Calculator& calculator, const Expression& input, Expression& output);
   static bool kazhdanLuzstigCoeffificents(Calculator& calculator, const Expression& input, Expression& output);
   static bool splitFDpartB3overG2old(Calculator& calculator, const Expression& input, Expression& output);
-  static bool splitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output);
+  static bool splitFDpartB3overG2inner(Calculator& calculator, BranchingData& g2B3Data, Expression& output);
   static bool littelmannOperator(Calculator& calculator, const Expression& input, Expression& output);
   static bool animateLittelmannPaths(Calculator& calculator, const Expression& input, Expression& output);
   static bool LSPath(Calculator& calculator, const Expression& input, Expression& output);
@@ -118,7 +118,10 @@ public:
     ExpressionContext& outputContext
   );
   static bool splitFDpartB3overG2CharsOutput(
-    Calculator& calculator, const Expression& input, Expression& output, BranchingData& theG2B3Data
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    BranchingData& g2B3Data
   );
   static bool splitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
   static bool rootSubalgebrasAndSlTwos(

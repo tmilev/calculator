@@ -1108,31 +1108,32 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   }
   Vectors<Rational> domainRec = domain;
   Vectors<Rational> rangeRec = range;
-  RootSubalgebra leftSA;
-  RootSubalgebra rightSA;
-  Rational tempRatD, tempRatR;
-  Vector<Rational>& LastRootD = *domainRec.lastObject();
-  Vector<Rational>& LastRootR = *rangeRec.lastObject();
+  RootSubalgebra leftSubalgebra;
+  RootSubalgebra rightSubalgebra;
+  Rational domainScalarProduct;
+  Rational rangeScalarProduct;
+  Vector<Rational>& lastRootDomain = *domainRec.lastObject();
+  Vector<Rational>& lastRootRange = *rangeRec.lastObject();
   if (recursionDepth != 0) {
     for (int i = 0; i <domainRec.size; i ++) {
-      this->getAmbientWeyl().rootScalarCartanRoot(domainRec[i], LastRootD, tempRatD);
-      this->getAmbientWeyl().rootScalarCartanRoot(rangeRec[i], LastRootR, tempRatR);
-      if (!tempRatR.isEqualTo(tempRatD)) {
+      this->getAmbientWeyl().rootScalarCartanRoot(domainRec[i], lastRootDomain, domainScalarProduct);
+      this->getAmbientWeyl().rootScalarCartanRoot(rangeRec[i], lastRootRange, rangeScalarProduct);
+      if (!rangeScalarProduct.isEqualTo(domainScalarProduct)) {
         return false;
       }
     }
   }
-  leftSA.owner = this->owner;
-  rightSA.owner = this->owner;
-  leftSA.genK = domainRec;
-  rightSA.genK=rangeRec;
-  leftSA.computeEssentials();
-  rightSA.computeEssentials();
+  leftSubalgebra.owner = this->owner;
+  rightSubalgebra.owner = this->owner;
+  leftSubalgebra.genK = domainRec;
+  rightSubalgebra.genK=rangeRec;
+  leftSubalgebra.computeEssentials();
+  rightSubalgebra.computeEssentials();
   if (recursionDepth!= 0) {
     if (
-      leftSA.dynkinDiagram.toString() != rightSA.dynkinDiagram.toString() ||
-      leftSA.centralizerDiagram.toString() != rightSA.centralizerDiagram.toString() ||
-      rightSA.modules.size != leftSA.modules.size
+      leftSubalgebra.dynkinDiagram.toString() != rightSubalgebra.dynkinDiagram.toString() ||
+      leftSubalgebra.centralizerDiagram.toString() != rightSubalgebra.centralizerDiagram.toString() ||
+      rightSubalgebra.modules.size != leftSubalgebra.modules.size
     ) {
       if (abortKmodule != nullptr) {
         *abortKmodule = true;
@@ -1141,21 +1142,21 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
     }
   }
   int counter = 0;
-  domainRec.addOnTop(leftSA.highestWeightsPrimalSimple[counter]);
+  domainRec.addOnTop(leftSubalgebra.highestWeightsPrimalSimple[counter]);
   while (domainRec.getRankElementSpan() == currentRank) {
     counter ++;
-    if (leftSA.modules.size <= counter) {
+    if (leftSubalgebra.modules.size <= counter) {
       global.fatal << "Left subalgebra modules not allowed to be empty. " << global.fatal;
     }
     domainRec.removeIndexSwapWithLast(domainRec.size - 1);
-    domainRec.addOnTop(leftSA.highestWeightsPrimalSimple[counter]);
+    domainRec.addOnTop(leftSubalgebra.highestWeightsPrimalSimple[counter]);
   }
   //find a minimal possible new kmodule to throw in
-  for (int i = 0; i < leftSA.modules.size; i ++) {
-    if (leftSA.modules[i].size > leftSA.modules[counter].size) {
-      domainRec.lastObject()->operator=(leftSA.highestWeightsPrimalSimple[i]);
+  for (int i = 0; i < leftSubalgebra.modules.size; i ++) {
+    if (leftSubalgebra.modules[i].size > leftSubalgebra.modules[counter].size) {
+      domainRec.lastObject()->operator=(leftSubalgebra.highestWeightsPrimalSimple[i]);
       if (domainRec.getRankElementSpan() == currentRank) {
-        domainRec.lastObject()->operator=(leftSA.highestWeightsPrimalSimple[counter]);
+        domainRec.lastObject()->operator=(leftSubalgebra.highestWeightsPrimalSimple[counter]);
       } else {
         counter = i;
       }
@@ -1164,13 +1165,13 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   if (!(domainRec.getRankElementSpan() == currentRank + 1)) {
     global.fatal << "Ranks do not match. " << global.fatal;
   }
-  Vectors<Rational>& firstKmodLeft = leftSA.weightsModulesPrimalSimple[counter];
+  Vectors<Rational>& firstKmodLeft = leftSubalgebra.weightsModulesPrimalSimple[counter];
   bool result = false;
   bool tempBool;
-  for (int i = 0; i < rightSA.modules.size; i ++) {
-    if (firstKmodLeft.size == rightSA.modules[i].size) {
+  for (int i = 0; i < rightSubalgebra.modules.size; i ++) {
+    if (firstKmodLeft.size == rightSubalgebra.modules[i].size) {
       for (int j = 0; j < firstKmodLeft.size; j ++) {
-        rangeRec.addOnTop(rightSA.weightsModulesPrimalSimple[i][j]);
+        rangeRec.addOnTop(rightSubalgebra.weightsModulesPrimalSimple[i][j]);
         if (rangeRec.getRankElementSpan() != (currentRank + 1)) {
           continue;
         }
@@ -1220,13 +1221,13 @@ bool RootSubalgebra::isAnIsomorphism(
     tempRoots[i].makeZero(dimension);
   }
   matrixB.invert();
-  Rational tempRat2;
+  Rational adjustment;
   for (int k = 0; k < dimension; k ++) {
     for (int i = 0; i < dimension; i ++) {
       for (int j = 0; j < dimension; j ++) {
-        tempRat2 = range[j][k];
-        tempRat2.multiplyBy(matrixB.elements[i][j]);
-        tempRoots[i][k] += tempRat2;
+        adjustment = range[j][k];
+        adjustment.multiplyBy(matrixB.elements[i][j]);
+        tempRoots[i][k] += adjustment;
       }
     }
   }
@@ -1420,7 +1421,7 @@ void RootSubalgebra::makeGeneratingSingularVectors(ConeRelation& relation, Vecto
   }
 }
 
-void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration) {
+void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool doEnumeration) {
   int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   std::stringstream out2;
   std::stringstream out;
@@ -1429,26 +1430,26 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   this->simpleRootsReductiveSubalgebra.getMatrixRootsToRows(inverted);
   inverted.invert();
   int counter = 0;
-  HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().rootSystem;
-  for (int i = 0; i <AllRoots.size; i ++) {
+  HashedList<Vector<Rational> >& allRoots = this->getAmbientWeyl().rootSystem;
+  for (int i = 0; i < allRoots.size; i ++) {
     Vector<Rational> linComb;
-    if (this->allRootsSubalgebra.getIndex(AllRoots[i]) == - 1) {
+    if (this->allRootsSubalgebra.getIndex(allRoots[i]) == - 1) {
       for (int j = 0; j < dimension; j ++) {
         linComb[j].makeZero();
         for (int k = 0; k < dimension; k++) {
-          Rational tempRat;
-          tempRat.assign(inverted.elements[k][j]);
-          tempRat.multiplyBy(AllRoots[i][k]);
-          linComb[j] += tempRat;
+          Rational scalarProduct;
+          scalarProduct.assign(inverted.elements[k][j]);
+          scalarProduct.multiplyBy(allRoots[i][k]);
+          linComb[j] += scalarProduct;
         }
       }
       int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
       linComb *= - x;
       std::string tempS;
-      if (this->linearCombinationToString(AllRoots[i], x, linComb, tempS)) {
+      if (this->linearCombinationToString(allRoots[i], x, linComb, tempS)) {
         out << tempS << "\n";
         counter ++;
-        if (this->lowestWeightsPrimalSimple.getIndex(AllRoots[i]) != - 1) {
+        if (this->lowestWeightsPrimalSimple.getIndex(allRoots[i]) != - 1) {
           out2 << tempS << "\n";
         }
       }
@@ -1457,7 +1458,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   out << "\\multicolumn{2}{|c|}{Number of relations: " << counter << " }\\\\\\hline";
   std::string tempS = out.str();
   out2 << "\n\n" << tempS;
-  if (DoEnumeration) {
+  if (doEnumeration) {
     this->testedRootsAlpha = this->lowestWeightsPrimalSimple;
     this->doKRootsEnumeration();
   }
@@ -1471,11 +1472,11 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
   Vector<Rational> tempRoot;
   tempRoot = this->simpleRootsReductiveSubalgebra[0];
   this->computeHighestWeightInTheSameKModule(tempRoot, tempRoot);
-  HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().rootSystem;
+  HashedList<Vector<Rational> >& allRoots = this->getAmbientWeyl().rootSystem;
   for (int l = 0; l < this->simpleRootsReductiveSubalgebra.size; l ++) {
-    Rational tempRat;
-    this->getAmbientWeyl().rootScalarCartanRoot(tempRoot, this->simpleRootsReductiveSubalgebra[l], tempRat);
-    if (!tempRat.isEqualToZero()) {
+    Rational scalarProduct;
+    this->getAmbientWeyl().rootScalarCartanRoot(tempRoot, this->simpleRootsReductiveSubalgebra[l], scalarProduct);
+    if (!scalarProduct.isEqualToZero()) {
       int counter = 0;
       Vectors<Rational> tempRoots;
       tempRoots =(this->simpleRootsReductiveSubalgebra);
@@ -1483,23 +1484,24 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
       Matrix<Rational> inverted;
       tempRoots.getMatrixRootsToRows(inverted);
       inverted.invert();
-      for (int i = 0; i <AllRoots.size; i ++) {
+      for (int i = 0; i <allRoots.size; i ++) {
         Vector<Rational> linearCombination;
-        if (this->allRootsSubalgebra.getIndex(AllRoots.objects[i]) == - 1) {
+        if (this->allRootsSubalgebra.getIndex(allRoots.objects[i]) == - 1) {
           for (int j = 0; j < dimension; j ++) {
             linearCombination[j].makeZero();
             for (int k = 0; k < dimension; k++) {
-              Rational tempRat;
-              tempRat.assign(inverted.elements[k][j]);
-              tempRat.multiplyBy(AllRoots[i][k]);
-              linearCombination[j] += tempRat;
+              scalarProduct.assign(inverted.elements[k][j]);
+              scalarProduct.multiplyBy(allRoots[i][k]);
+              linearCombination[j] += scalarProduct;
             }
           }
           int x = linearCombination.findLeastCommonMultipleDenominatorsTruncateToInt();
           linearCombination *= - x;
-          std::string tempS;
-          if (this->linearCombinationToStringDistinguishedIndex(l, AllRoots.objects[i], x, linearCombination, tempS)) {
-            out << tempS << "\n";
+          std::string linearCombinationString;
+          if (this->linearCombinationToStringDistinguishedIndex(
+            l, allRoots.objects[i], x, linearCombination, linearCombinationString
+          )) {
+            out << linearCombinationString << "\n";
             counter ++;
           }
         }
@@ -2057,19 +2059,17 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
     );
     counter += this->kComponentRanks[i];
   }
-  //matrix.ComputeDebugString();
   if (matrix.invert()) {
-    //matrix.ComputeDebugString();
     for (int l = 0; l < this->testedRootsAlpha.size; l ++) {
       Vector<Rational> linComb;
-      Vector<Rational>& TestedRootAlpha = this->testedRootsAlpha[l];
+      Vector<Rational>& testedRootAlpha = this->testedRootsAlpha[l];
       for (int j = 0; j < dimension; j ++) {
         linComb[j].makeZero();
         for (int k = 0; k < dimension; k ++) {
-          Rational tempRat;
-          tempRat.assign(matrix.elements[k][j]);
-          tempRat.multiplyBy(TestedRootAlpha[k]);
-          linComb[j] += tempRat;
+          Rational scalarProduct;
+          scalarProduct.assign(matrix.elements[k][j]);
+          scalarProduct.multiplyBy(testedRootAlpha[k]);
+          linComb[j] += scalarProduct;
         }
       }
       int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
@@ -2083,7 +2083,7 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
       }
       if (foundBadCombination) {
         std::string tempS;
-        this->linearCombinationToString(TestedRootAlpha, x, linComb, tempS);
+        this->linearCombinationToString(testedRootAlpha, x, linComb, tempS);
       }
     }
   }
@@ -4353,13 +4353,13 @@ int ConeRelation::rootsToScalarProductString(
   std::string coefficientString;
   std::stringstream out;
   int numLinesLatex = 0;
-  Rational tempRat;
+  Rational scalarProduct;
   for (int i = 0; i < inputLeft.size; i ++) {
     for (int j = 0; j < inputRight.size; j ++) {
       if (i < j || letterTypeLeft != letterTypeRight) {
-        owner.getAmbientWeyl().rootScalarCartanRoot(inputLeft[i], inputRight[j], tempRat);
-        if (!tempRat.isEqualToZero()) {
-          coefficientString = tempRat.toString();
+        owner.getAmbientWeyl().rootScalarCartanRoot(inputLeft[i], inputRight[j], scalarProduct);
+        if (!scalarProduct.isEqualToZero()) {
+          coefficientString = scalarProduct.toString();
           out << "$\\langle" << letterTypeLeft << "_" << i + 1
           << ", " << letterTypeRight << "_" << j + 1 << "\\rangle =" << coefficientString << "$, ";
           numLinesLatex ++;

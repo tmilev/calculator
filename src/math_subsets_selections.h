@@ -377,9 +377,9 @@ void Vectors<Coefficient>::selectionToMatrixAppend(
   int startRowIndex
 ) {
   for (int i = 0; i < selection.cardinalitySelection; i ++) {
-    Vector<Coefficient>& tempRoot = this->objects[selection.elements[i]];
+    Vector<Coefficient>& root = this->objects[selection.elements[i]];
     for (int j = 0; j < outputDimension; j ++) {
-      output.elements[startRowIndex + i][j] = tempRoot[j];
+      output.elements[startRowIndex + i][j] = root[j];
     }
   }
 }
@@ -392,9 +392,9 @@ void Vectors<Coefficient>::selectionToMatrix(
   int startRowIndex
 ) {
   for (int i = 0; i < selection.cardinalitySelection; i ++) {
-    Vector<Rational>& tempRoot = this->objects[selection.elements[i]];
+    Vector<Rational>& root = this->objects[selection.elements[i]];
     for (int j = 0; j < outputDimension; j ++) {
-      output.elements[startRowIndex + i][j] = tempRoot[j];
+      output.elements[startRowIndex + i][j] = root[j];
     }
   }
 }

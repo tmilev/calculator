@@ -308,7 +308,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr);
   void toHTML(int index, FormatExpressions* format);
   std::string toStringLieBracketTable(bool useLaTeX, bool useHtml, RootSubalgebra& owner);
-  bool rootsDefineSubalgebra(Vectors<Rational>& theRoots);
+  bool rootsDefineSubalgebra(Vectors<Rational>& roots);
   void generateKModuleLieBracketTable(List<List<List<int> > >& output, List<int>& oppositeKmods);
   void kModuleLieBracketKModule(int index1, int index2, List<int>& oppositeKModules, List<int>& output);
   void computeDynkinDiagramKAndCentralizer();

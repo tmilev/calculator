@@ -1012,7 +1012,8 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
-  const List<Polynomial<Coefficient> >& inputSystem, MonomialPolynomial& outputMon
+  const List<Polynomial<Coefficient> >& inputSystem,
+  MonomialPolynomial& outputMonomial
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::hasSingleMonomialEquation");
   bool result = false;
@@ -1020,14 +1021,14 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
   for (int i = 0; i < inputSystem.size; i ++) {
     if (inputSystem[i].size() == 1) {
       result = true;
-      int currentNumNonZeroMonEntries = 0;
+      int currentNumberNonZeroMonomialEntries = 0;
       for (int j = 0; j < inputSystem[i][0].minimalNumberOfVariables(); j ++) {
         if (!(inputSystem[i][0](j) == 0)) {
-          currentNumNonZeroMonEntries ++;
+          currentNumberNonZeroMonomialEntries ++;
         }
       }
-      if (currentNumNonZeroMonEntries < minimalNumberOfNonZeroMonomialEntries) {
-        outputMon = inputSystem[i][0];
+      if (currentNumberNonZeroMonomialEntries < minimalNumberOfNonZeroMonomialEntries) {
+        outputMonomial = inputSystem[i][0];
       }
     }
   }
@@ -1184,7 +1185,10 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   int numberOfVariables = 0;
   List<Polynomial<Coefficient> > workingSystem = inputSystem;
   for (int i = 0; i < workingSystem.size; i ++) {
-    numberOfVariables = MathRoutines::maximum(numberOfVariables, workingSystem[i].minimalNumberOfVariables());
+    numberOfVariables = MathRoutines::maximum(
+      numberOfVariables,
+      workingSystem[i].minimalNumberOfVariables()
+    );
   }
   this->systemSolution.initializeFillInObject(numberOfVariables, 0);
   this->solutionsFound.initialize(numberOfVariables);
@@ -1280,7 +1284,9 @@ bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(
 ) {
   MacroRegisterFunctionWithName("Polynomial::leastCommonMultipleOneVariable");
   Polynomial<Coefficient> divisor;
-  if (!Polynomial<Coefficient>::greatestCommonDivisorOneVariable(left, right, divisor, commentsOnFailure)) {
+  if (!Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
+    left, right, divisor, commentsOnFailure
+  )) {
     return false;
   }
   Polynomial<Coefficient> product = left;
@@ -1317,7 +1323,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   leftTemp = left;
   rightTemp = right;
   Polynomial<Coefficient> oneMinusT;
-  List<Polynomial<Coefficient> > theBasis;
+  List<Polynomial<Coefficient> > basis;
   leftTemp.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   rightTemp.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   oneMinusT.makeMonomial(numberOfVariables, 1, one);
@@ -1325,9 +1331,9 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   oneMinusT *= - 1;
   oneMinusT += one;
   rightTemp *= oneMinusT;
-  theBasis.setSize(0);
-  theBasis.addOnTop(leftTemp);
-  theBasis.addOnTop(rightTemp);
+  basis.setSize(0);
+  basis.addOnTop(leftTemp);
+  basis.addOnTop(rightTemp);
   GroebnerBasisComputation<Coefficient> computation;
   computation.format.flagSuppressModP = true;
   computation.format.polynomialAlphabet.addOnTop("x");
@@ -1336,7 +1342,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   computation.format.polynomialAlphabet.addOnTop("w");
   computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderForGreatestCommonDivisor();
   computation.maximumMonomialOperations = - 1;
-  if (!computation.transformToReducedGroebnerBasis(theBasis)) {
+  if (!computation.transformToReducedGroebnerBasis(basis)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unexpected: failed to transform to reduced "
       << "Groebner basis. ";
@@ -1346,8 +1352,8 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   int maximalMonomialNoTIndex = - 1;
   Rational maximaltotalDegree;
   MonomialPolynomial currentLeading;
-  for (int i = theBasis.size - 1; i >= 0; i --) {
-    theBasis[i].getIndexLeadingMonomial(
+  for (int i = basis.size - 1; i >= 0; i --) {
+    basis[i].getIndexLeadingMonomial(
       &currentLeading, nullptr, &computation.polynomialOrder.monomialOrder
     );
     if (currentLeading(numberOfVariables) == 0) {
@@ -1367,12 +1373,12 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
     << left.toString(&computation.format)
     << " and " << right.toString(&computation.format) << ". "
     << "The list of polynomials is: ";
-    for (int i = 0; i < theBasis.size; i ++) {
-      global.fatal << theBasis[i].toString(&computation.format) << ", ";
+    for (int i = 0; i < basis.size; i ++) {
+      global.fatal << basis[i].toString(&computation.format) << ", ";
     }
     global.fatal << global.fatal;
   }
-  output = theBasis[maximalMonomialNoTIndex];
+  output = basis[maximalMonomialNoTIndex];
   output.setNumberOfVariablesSubstituteDeletedByOne(numberOfVariables);
   output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return true;

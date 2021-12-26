@@ -619,11 +619,11 @@ bool Vector<Coefficient>::isProportionalTo(
     }
     return false;
   }
-  Vector<Rational> tempRoot = *this;
+  Vector<Rational> root = *this;
   outputTimesMeEqualsInput = input[indexFirstNonZero];
   outputTimesMeEqualsInput /= (*this)[indexFirstNonZero];
-  tempRoot *= outputTimesMeEqualsInput;
-  return tempRoot == input;
+  root *= outputTimesMeEqualsInput;
+  return root == input;
 }
 
 template <class Coefficient>
@@ -923,12 +923,12 @@ class Vectors: public List<Vector<Coefficient> > {
   bool containsVectorNonPerpendicularTo(const Vector<Coefficient>& input, const Matrix<Coefficient>& bilinearForm);
   bool containsOppositeRoots() {
     if (this->size < 10) {
-      Vector<Rational> tempRoot;
+      Vector<Rational> root;
       for (int i = 0; i < this->size; i ++) {
-        tempRoot = this->objects[i];
-        tempRoot.negate();
+        root = this->objects[i];
+        root.negate();
         for (int j = i + 1; j < this->size; j ++) {
-          if (this->objects[j].isEqualTo(tempRoot)) {
+          if (this->objects[j].isEqualTo(root)) {
             return true;
           }
         }
@@ -946,14 +946,14 @@ class Vectors: public List<Vector<Coefficient> > {
     return false;
   }
   void assignMatrixColumns(Matrix<Coefficient>& matrix) {
-    Vector<Coefficient> tempRoot;
+    Vector<Coefficient> root;
     this->setSize(matrix.numberOfColumns);
-    tempRoot.setSize(matrix.numberOfRows);
+    root.setSize(matrix.numberOfRows);
     for (int i = 0; i < matrix.numberOfColumns; i ++) {
       for (int j = 0; j < matrix.numberOfRows; j ++) {
-        tempRoot[j] = matrix.elements[j][i];
+        root[j] = matrix.elements[j][i];
       }
-      this->objects[i] = tempRoot;
+      this->objects[i] = root;
     }
   }
   void assignMatrixRows(const Matrix<Coefficient>& input) {
@@ -1111,7 +1111,7 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   bufferMatGaussianElimination.gaussianEliminationEuclideanDomain(
     &bufferMatGaussianEliminationCC, negativeOne, ringUnit
   );
-  Vector<Coefficient> tempRoot, combination;
+  Vector<Coefficient> root, combination;
   if (this == &output) {
     global.fatal << "Output not allowed to coincide with this object." << global.fatal;
   }
@@ -1127,11 +1127,11 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
     if (column >= dimension) {
       break;
     }
-    bufferMatGaussianElimination.getVectorFromRow(i, tempRoot);
+    bufferMatGaussianElimination.getVectorFromRow(i, root);
     output[i] = this->objects[column];
     output[i] /= bufferMatGaussianElimination.elements[i][column];
-    tempRoot *= output[i];
-    combination -= tempRoot;
+    root *= output[i];
+    combination -= root;
   }
   if (!combination.isEqualToZero()) {
     return false;
@@ -1177,13 +1177,13 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(
     return 0;
   }
   int dimension = this->getDimensionOfElements();
-  Vectors<Rational> tempRoots;
+  Vectors<Rational> roots;
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
-    tempRoots.addOnTop(this->objects[i]);
-    int newRank = tempRoots.getRankElementSpan(bufferMatrix, bufferSelection);
+    roots.addOnTop(this->objects[i]);
+    int newRank = roots.getRankElementSpan(bufferMatrix, bufferSelection);
     if (newRank == oldRank) {
-      tempRoots.removeIndexSwapWithLast(tempRoots.size - 1);
+      roots.removeIndexSwapWithLast(roots.size - 1);
     } else {
       this->swapTwoIndices(oldRank, i);
       if (oldRank + 1 != newRank) {

@@ -76,9 +76,9 @@ bool PartialFractions::argumentsAllowed(
 }
 
 void Lattice::intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator) {
-  Vectors<Rational> tempRoots;
-  tempRoots.addOnTop(inputLine);
-  this->intersectWithLinearSubspaceSpannedBy(tempRoots);
+  Vectors<Rational> roots;
+  roots.addOnTop(inputLine);
+  this->intersectWithLinearSubspaceSpannedBy(roots);
   if (this->basisRationalForm.numberOfRows > 1) {
     global.fatal << "This should not be possible. " << global.fatal;
   }
@@ -498,10 +498,10 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   if (!this->getBasisFromSpanOfElements(tempBasis, tempCoords, elements, ringUnit, ringZero)) {
     return false;
   }
-  Vector<Coefficient> tempRoot;
-  tempRoot = *tempCoords.lastObject();
+  Vector<Coefficient> root;
+  root = *tempCoords.lastObject();
   tempCoords.setSize(theBasis.size);
-  return tempRoot.getCoordinatesInBasis(tempCoords, output);
+  return root.getCoordinatesInBasis(tempCoords, output);
 }
 
 template<class Coefficient>

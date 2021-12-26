@@ -115,11 +115,11 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   HashedList<Vector<Coefficient> > currentOrbit;
   const int OrbitSizeHardLimit = 10000000;
   Vector<Rational> rightHWSimpleCoords = weylGrouop.getSimpleCoordinatesFromFundamental(rightHWFundCoords, zero);
-  Vectors<Rational> tempRoots;
-  tempRoots.setSize(1);
+  Vectors<Rational> roots;
+  roots.setSize(1);
   for (int i = 0; i < weightsLeftSimpleCoords.size; i ++) {
-    tempRoots[0] = weightsLeftSimpleCoords[i];
-    weylGrouop.generateOrbit(tempRoots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit);
+    roots[0] = weightsLeftSimpleCoords[i];
+    weylGrouop.generateOrbit(roots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit);
     if (currentOrbit.size >= OrbitSizeHardLimit) {
       errorLog << "Error: orbit layer size exceeded hard-coded limit of " << OrbitSizeHardLimit << ".";
       return errorLog.str();
@@ -680,20 +680,21 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     DrawingVariables drawingVariables1;
     std::string tempS;
     output.drawMeNoMultiplicities(tempS, drawingVariables1, 10000);
-    Vector<Rational> tempRoot, tempRoot2;
+    Vector<Rational> leftRoot;
+    Vector<Rational> rightRoot;
     weylGroupFiniteDimensionalSmall.ambientWeyl->group.computeAllElements(false, 20);
     out << "<hr>";
     for (int i = 0; i < output.size(); i ++) {
-      tempRoot = weylGroupFiniteDimensionalSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
+      leftRoot = weylGroupFiniteDimensionalSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
         output[i].weightFundamentalCoordinates
       ).getVectorRational();
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
-      drawingVariables1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
+      drawingVariables1.drawTextAtVectorBufferRational(leftRoot, tempStream.str(), "black");
       for (int j = 1; j < weylGroupFiniteDimensionalSmall.ambientWeyl->group.elements.size; j ++) {
-        tempRoot2 = tempRoot;
-        weylGroupFiniteDimensionalSmall.ambientWeyl->actOnRhoModified(j, tempRoot2);
-        drawingVariables1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
+        rightRoot = leftRoot;
+        weylGroupFiniteDimensionalSmall.ambientWeyl->actOnRhoModified(j, rightRoot);
+        drawingVariables1.drawCircleAtVectorBufferRational(rightRoot, "#a00000", 5);
       }
     }
     out << "<hr>" << drawingVariables1.getHTMLDiv(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(), false);

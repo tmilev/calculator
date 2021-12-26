@@ -1539,10 +1539,12 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
 }
 
 template <class Coefficient>
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::actByNonSimpleElement(int index, Vector<Coefficient>& inputOutput) const {
-  Vector<Coefficient> tempRoot;
-  this->actByNonSimpleElement(index, inputOutput, tempRoot);
-  inputOutput = tempRoot;
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::actByNonSimpleElement(
+  int index, Vector<Coefficient>& inputOutput
+) const {
+  Vector<Coefficient> root;
+  this->actByNonSimpleElement(index, inputOutput, root);
+  inputOutput = root;
 }
 
 template <class Coefficient>
@@ -1573,7 +1575,8 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::a
   if (&input == &output) {
     global.fatal << "Input not allowed to coincide with output. " << global.fatal;
   }
-  Vector<Coefficient> tempRoot, tempRoot2;
+  Vector<Coefficient> leftRoot;
+  Vector<Coefficient> rightRoot;
   output = input;
   for (int i = element.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     int index = element.generatorsLastAppliedFirst[i].index;
@@ -1581,11 +1584,11 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::a
       this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[index], output, false, output);
     } else {
       index -= this->simpleRootsInner.size;
-      tempRoot.makeZero(input.size);
+      leftRoot.makeZero(input.size);
       for (int j = 0; j < output.size; j ++) {
-        tempRoot2 = this->externalAutomorphisms[index][j];
-        tempRoot2 *= output[j];
-        tempRoot += tempRoot2;
+        rightRoot = this->externalAutomorphisms[index][j];
+        rightRoot *= output[j];
+        leftRoot += rightRoot;
       }
     }
   }
@@ -1735,7 +1738,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   HashedList<Vector<Coefficient> > orbit;
   bool result = true;
   orbit.clear();
-  Vector<Coefficient> tempRoot;
+  Vector<Coefficient> root;
   orbit.addOnTop(input);
   Vectors<Coefficient> externalAutosOverAmbientField;
   for (int i = 0; i < orbit.size; i ++) {
@@ -1746,16 +1749,16 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
       }
     }
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
-      this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], orbit[i], false, tempRoot);
-      orbit.addOnTopNoRepetition(tempRoot);
+      this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], orbit[i], false, root);
+      orbit.addOnTopNoRepetition(root);
     }
     if (restrictToInner) {
       continue;
     }
     for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
       externalAutosOverAmbientField = this->externalAutomorphisms[j];
-      orbit[i].getCoordinatesInBasis(externalAutosOverAmbientField, tempRoot);
-      orbit.addOnTopNoRepetition(tempRoot);
+      orbit[i].getCoordinatesInBasis(externalAutosOverAmbientField, root);
+      orbit.addOnTopNoRepetition(root);
     }
   }
   outputOrbit = orbit;

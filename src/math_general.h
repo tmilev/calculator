@@ -3342,7 +3342,7 @@ public:
     List<Polynomial<Coefficient> >& inputSystem,
     PolynomialSubstitution<Coefficient>& outputSub
   );
-  bool hasSingleMonomialEquation(const List<Polynomial<Coefficient> >& inputSystem, MonomialPolynomial& outputMon);
+  bool hasSingleMonomialEquation(const List<Polynomial<Coefficient> >& inputSystem, MonomialPolynomial& outputMonomial);
   void setUpRecursiveComputation(PolynomialSystem<Coefficient>& toBeModified);
   void processSolvedSubcaseIfSolvedOrProvenToHaveSolution(PolynomialSystem<Coefficient>& potentiallySolvedCase);
   void solveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputSystem, const MonomialPolynomial& monomial);
@@ -4127,10 +4127,11 @@ public:
     const ElementSemisimpleLieAlgebra<Coefficient>& other,
     Rational& outputTimesMeEqualsInput
   ) const {
-    Vector<Rational> tempRoot1, tempRoot2;
-    this->toVectorNegativeRootSpacesFirst(tempRoot1);
-    other.toVectorNegativeRootSpacesFirst(tempRoot2);
-    return tempRoot1.isProportionalTo(tempRoot2, outputTimesMeEqualsInput);
+    Vector<Rational> root1;
+    Vector<Rational> root2;
+    this->toVectorNegativeRootSpacesFirst(root1);
+    other.toVectorNegativeRootSpacesFirst(root2);
+    return root1.isProportionalTo(root2, outputTimesMeEqualsInput);
   }
   unsigned int hashFunction() const {
     return this->::LinearCombination<ChevalleyGenerator, Coefficient>::

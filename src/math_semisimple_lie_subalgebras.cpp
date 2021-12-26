@@ -5761,21 +5761,21 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   MacroRegisterFunctionWithName("SlTwoSubalgebra::makeReportPrecomputations");
   int dimension = this->getOwnerSemisimpleAlgebra().getRank();
   this->indicesContainingRootSubalgebras.size = 0;
-  Vectors<Rational> tempRoots;
-  tempRoots = minimalContainingRegularSubalgebra.simpleRootsReductiveSubalgebra;
-  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->hElement.getCartanPart());
+  Vectors<Rational> roots;
+  roots = minimalContainingRegularSubalgebra.simpleRootsReductiveSubalgebra;
+  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(roots, this->hElement.getCartanPart());
   DynkinDiagramRootSubalgebra diagram;
   diagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   diagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
-  diagram.computeDiagramInputIsSimple(tempRoots);
+  diagram.computeDiagramInputIsSimple(roots);
   this->indicesContainingRootSubalgebras.addOnTop(indexMinimalContainingRegularSA);
-  tempRoots.makeEiBasis(dimension);
-  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->hElement.getCartanPart());
+  roots.makeEiBasis(dimension);
+  this->getOwnerSemisimpleAlgebra().weylGroup.transformToSimpleBasisGeneratorsWithRespectToH(roots, this->hElement.getCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   tempDiagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
-  tempDiagram.computeDiagramInputIsSimple(tempRoots);
-  this->preferredAmbientSimpleBasis = tempRoots;
+  tempDiagram.computeDiagramInputIsSimple(roots);
+  this->preferredAmbientSimpleBasis = roots;
   this->hCharacteristic.setSize(dimension);
   for (int i = 0; i < dimension; i ++) {
     this->hCharacteristic[i] = this->getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(

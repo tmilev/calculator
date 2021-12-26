@@ -375,17 +375,17 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     DrawingVariables drawingVariables;
     std::string tempS;
     this->drawMeNoMultiplicities(tempS, drawingVariables, 10000);
-    Vector<Rational> tempRoot;
+    Vector<Rational> root;
     out << "<hr>In the following weight visualization, "
     << "a yellow line is drawn if the corresponding weights are "
     << "simple reflections of one another, "
     << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
-      tempRoot = weylGroup.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordinates).getVectorRational();
-      outputWeylSubgroup.drawContour(tempRoot, drawingVariables, "#a0a000", 1000);
+      root = weylGroup.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordinates).getVectorRational();
+      outputWeylSubgroup.drawContour(root, drawingVariables, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
-      drawingVariables.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
+      drawingVariables.drawTextAtVectorBufferRational(root, tempStream.str(), "black");
     }
     out << "<hr>" << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false);
     *report = out.str();

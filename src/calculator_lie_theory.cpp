@@ -3603,13 +3603,14 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
   MacroRegisterFunctionWithName("CalculatorLieTheory::parabolicWeylGroupsBruhatGraph");
   RecursionDepthCounter theRecursion(&calculator.recursionDepth);
   Selection parabolicSel;
-  Vector<RationalFraction<Rational> > theHWfundcoords, tempRoot, theHWsimplecoords;
+  Vector<RationalFraction<Rational> > highestWeightFundamentalCoordinates;
+  Vector<RationalFraction<Rational> > highestWeightSimpleCoordinates;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointer;
   if (!calculator.getTypeHighestWeightParabolic(
     calculator,
     input,
     output,
-    theHWfundcoords,
+    highestWeightFundamentalCoordinates,
     parabolicSel,
     semisimpleLieAlgebraPointer
   )) {
@@ -3681,14 +3682,15 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator,
       out << "<tr><td>"
       << (useJavascript ? HtmlRoutines::getMathNoDisplay(current.toString()) : current.toString())
       << "</td>";
-      theHWsimplecoords = semisimpleLieAlgebra.weylGroup.getSimpleCoordinatesFromFundamental(theHWfundcoords, RationalFraction<Rational>::zeroRational());
-      semisimpleLieAlgebra.weylGroup.actOnRhoModified(subgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
+      highestWeightSimpleCoordinates = semisimpleLieAlgebra.weylGroup.getSimpleCoordinatesFromFundamental(highestWeightFundamentalCoordinates, RationalFraction<Rational>::zeroRational());
+      semisimpleLieAlgebra.weylGroup.actOnRhoModified(subgroup.RepresentativesQuotientAmbientOrder[i], highestWeightSimpleCoordinates);
       out << "<td>"
-      << (useJavascript ? HtmlRoutines::getMathNoDisplay(theHWsimplecoords.toString(&format))
-      : theHWsimplecoords.toString(&format))
+      << (useJavascript ? HtmlRoutines::getMathNoDisplay(highestWeightSimpleCoordinates.toString(&format))
+      : highestWeightSimpleCoordinates.toString(&format))
       << "</td>";
-      tempRoot = semisimpleLieAlgebra.weylGroup.getFundamentalCoordinatesFromSimple(theHWsimplecoords);
-      std::string fundamentalString = tempRoot.toStringLetterFormat(format.fundamentalWeightLetter, &format);
+      Vector<RationalFraction<Rational> > root;
+      root = semisimpleLieAlgebra.weylGroup.getFundamentalCoordinatesFromSimple(highestWeightSimpleCoordinates);
+      std::string fundamentalString = root.toStringLetterFormat(format.fundamentalWeightLetter, &format);
       out << "<td>" << (useJavascript ? HtmlRoutines::getMathNoDisplay(fundamentalString): fundamentalString)
       << "</td>";
       out << "</tr>";
@@ -3758,16 +3760,16 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   );
   List<ElementWeylGroup> weylGroupElements;
   subgroup.getGroupElementsIndexedAsAmbientGroup(weylGroupElements);
-  Vector<RationalFraction<Rational> > currentHW;
+  Vector<RationalFraction<Rational> > currentHighestWeight;
   out << "<br>Orbit modified with small rho: "
   << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
   for (int i = 0; i < weylGroup.group.elements.size; i ++) {
-    currentHW = highestWeightSimpleCoordinates;
-    currentHW += subgroup.getRho();
-    weylGroup.actOn(i, currentHW);
-    currentHW -= subgroup.getRho();
-    out << "<tr><td>" << currentHW.toString() << "</td><td>"
-    << weylGroup.getFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
+    currentHighestWeight = highestWeightSimpleCoordinates;
+    currentHighestWeight += subgroup.getRho();
+    weylGroup.actOn(i, currentHighestWeight);
+    currentHighestWeight -= subgroup.getRho();
+    out << "<tr><td>" << currentHighestWeight.toString() << "</td><td>"
+    << weylGroup.getFundamentalCoordinatesFromSimple(currentHighestWeight).toString() << "</td></tr>";
   }
   out << "</table>";
   out << "<br>The rho of the Levi part is: "
@@ -3800,18 +3802,18 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     monomial.owner = semisimpleLieAlgebra.content;
     for (int j = 0; j < theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl].size; j ++) {
       if (!theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j].isEqualToZero()) {
-        currentHW = highestWeightSimpleCoordinates;
-        weylGroup.actOnRhoModified(j, currentHW);
-        monomial.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(currentHW);
+        currentHighestWeight = highestWeightSimpleCoordinates;
+        weylGroup.actOnRhoModified(j, currentHighestWeight);
+        monomial.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(currentHighestWeight);
         int sign = (currentElement.generatorsLastAppliedFirst.size - weylGroup.group.elements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
         currentChar.addMonomial(monomial, theKLpolys.kazhdanLuzstigCoefficients[indexInWeyl][j] * sign);
       }
     }
-    currentHW = highestWeightSimpleCoordinates;
-    currentHW += subgroup.getRho();
-    weylGroup.actOn(indexInWeyl, currentHW);
-    currentHW -= subgroup.getRho();
-    out << "<td>" << weylGroup.getFundamentalCoordinatesFromSimple(currentHW).toStringLetterFormat("\\omega") << "</td>";
+    currentHighestWeight = highestWeightSimpleCoordinates;
+    currentHighestWeight += subgroup.getRho();
+    weylGroup.actOn(indexInWeyl, currentHighestWeight);
+    currentHighestWeight -= subgroup.getRho();
+    out << "<td>" << weylGroup.getFundamentalCoordinatesFromSimple(currentHighestWeight).toStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << HtmlRoutines::getMathNoDisplay(currentChar.toString(&formatChars)) << "</td>";
     if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
       currentChar *= - 1;

@@ -676,16 +676,17 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
   this->makeZero(inputOwner);
   WeylGroupData& weylGroup = this->getOwner().weylGroup;
   int dimension = weylGroup.cartanSymmetric.numberOfRows;
-  Vector<Rational> tempRoot1, tempRoot2;
+  Vector<Rational> root1;
+  Vector<Rational> root2;
 //  Matrix<Rational> killingForm;
 //  killingForm.initialize(dimension, dimension);
 //  for (int i = 0; i < dimension; i ++)
-//  { tempRoot1.makeEi(dimension, i);
+//  { root1.makeEi(dimension, i);
 //    for (int j = 0; j < dimension; j ++)
 //    { killingForm.elements[i][j] = 0;
-//      tempRoot2.makeEi(dimension, j);
+//      root2.makeEi(dimension, j);
 //      for (int k = 0; k < weylGroup.RootSystem.size; k++)
-//        killingForm.elements[i][j] += weylGroup.rootScalarCartanRoot(tempRoot1, weylGroup.RootSystem.objects[k])* weylGroup.rootScalarCartanRoot(tempRoot2, weylGroup.RootSystem.objects[k]);
+//        killingForm.elements[i][j] += weylGroup.rootScalarCartanRoot(root1, weylGroup.RootSystem.objects[k])* weylGroup.rootScalarCartanRoot(root2, weylGroup.RootSystem.objects[k]);
 //    }
 //  }
 //  killingForm.invert(global);
@@ -702,17 +703,17 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
   invertedSymCartan.invert();
 ////////////////////////////////////////////////////////////////////////
   for (int i = 0; i < dimension; i ++) {
-    tempRoot1.makeEi(dimension, i);
+    root1.makeEi(dimension, i);
   //implementation without the ninja formula:
-//    killingForm.actOnVectorColumn(tempRoot1, tempRoot2);
-//    element1.makeCartanGenerator(tempRoot1, numVars, owner);
-//    element2.makeCartanGenerator(tempRoot2, numVars, owner);
+//    killingForm.actOnVectorColumn(root1, root2);
+//    element1.makeCartanGenerator(root1, numVars, owner);
+//    element2.makeCartanGenerator(root2, numVars, owner);
 //    element1*= element2;
 //    *this+= element1;
 // Alternative implementation using a ninja formula I cooked up after looking at the printouts:
-    invertedSymCartan.actOnVectorColumn(tempRoot1, tempRoot2);
-    element1.makeCartanGenerator(tempRoot1, inputOwner);
-    element2.makeCartanGenerator(tempRoot2, inputOwner);
+    invertedSymCartan.actOnVectorColumn(root1, root2);
+    element1.makeCartanGenerator(root1, inputOwner);
+    element2.makeCartanGenerator(root2, inputOwner);
     element1 *= element2;
     *this += element1;
   }
@@ -754,15 +755,15 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
 //  FormatExpressions tempPolyFormat;
 //  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   //this->DebugString= out.str();
-//  Vector<Rational> tempRoot;
+//  Vector<Rational> root;
 //  for (int i = 0; i < dimension; i ++)
-//  { tempRoot.makeEi(dimension, i);
+//  { root.makeEi(dimension, i);
 //    if (!length1Explored)
-//    { length1= weylGroup.rootScalarCartanRoot(tempRoot, tempRoot);
+//    { length1= weylGroup.rootScalarCartanRoot(root, root);
 //      length1Explored = true;
 //      coefficient1= 0;
 //      for (int j = 0; j < weylGroup.rootsOfBorel.size; j ++)
-//      { coefficient1+= weylGroup.rootScalarCartanRoot(tempRoot, weylGroup.rootsOfBorel.objects[j])*weylGroup.rootScalarCartanRoot(tempRoot, weylGroup.rootsOfBorel.objects[j]);
+//      { coefficient1+= weylGroup.rootScalarCartanRoot(root, weylGroup.rootsOfBorel.objects[j])*weylGroup.rootScalarCartanRoot(root, weylGroup.rootsOfBorel.objects[j]);
 //        coef
 //      }
 //    }
@@ -1027,11 +1028,11 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::getCoordinatesInBasis(
   tempBasis = theBasis;
   tempBasis.addOnTop(*this);
   Vectors<Coefficient> tempCoords;
-  this->getBasisFromSpanOfElements(tempBasis, tempCoords, elements, ringUnit, ringZero, global);
-  Vector<Coefficient> tempRoot;
-  tempRoot = *tempCoords.lastObject();
+  this->getBasisFromSpanOfElements(tempBasis, tempCoords, elements, ringUnit, ringZero);
+  Vector<Coefficient> lastRoot;
+  lastRoot = *tempCoords.lastObject();
   tempCoords.setSize(theBasis.size);
-  return tempRoot.getCoordinatesInBasis(tempCoords, output, ringUnit, ringZero);
+  return lastRoot.getCoordinatesInBasis(tempCoords, output, ringUnit, ringZero);
 }
 
 template <class Coefficient>

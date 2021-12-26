@@ -628,13 +628,14 @@ bool Vector<Coefficient>::isProportionalTo(
 
 template <class Coefficient>
 void Vector<Coefficient>::findLeastCommonMultipleDenominators(LargeIntegerUnsigned& output) {
-  LargeIntegerUnsigned tempI, tempI2;
+  LargeIntegerUnsigned quotient;
+  LargeIntegerUnsigned remainder;
   output.makeOne();
   for (int i = 0; i < this->size; i ++) {
-    this->objects[i].getDenominator(tempI2);
-    LargeIntegerUnsigned::greatestCommonDivisor(output, tempI2, tempI);
-    output.multiplyBy(tempI2);
-    output.dividePositive(tempI, output, tempI2);
+    this->objects[i].getDenominator(remainder);
+    LargeIntegerUnsigned::greatestCommonDivisor(output, remainder, quotient);
+    output.multiplyBy(remainder);
+    output.dividePositive(quotient, output, remainder);
   }
 }
 
@@ -1246,18 +1247,18 @@ Vector<Coefficient> AffineHyperplane<Coefficient>::projectOnMe(Vector<Coefficien
 
 template <class Coefficient>
 bool AffineHyperplane<Coefficient>::projectFromFacetNormal(Vector<Coefficient>& input) {
-  int tempI = input.getIndexFirstNonZeroCoordinate();
-  if (tempI == - 1) {
+  int index = input.getIndexFirstNonZeroCoordinate();
+  if (index == - 1) {
     global.fatal << "No non-zero coordinate found. " << global.fatal;
   }
-  if (tempI == input.size - 1) {
+  if (index == input.size - 1) {
     return false;
   }
   this->affinePoint.makeZero(input.size);
   this->affinePoint.setSize(input.size - 1);
-  this->affinePoint[tempI] = input[input.size - 1];
-  this->affinePoint[tempI].negate();
-  this->affinePoint[tempI].divideBy(input[tempI]);
+  this->affinePoint[index] = input[input.size - 1];
+  this->affinePoint[index].negate();
+  this->affinePoint[index].divideBy(input[index]);
   this->normal = input;
   this->normal.setSize(input.size - 1);
   return true;

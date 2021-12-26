@@ -265,7 +265,7 @@ public:
   void makeProgressReportGeneratorAutomorphisms(int progress, int outOf, int found);
   bool indexIsCompatibleWithPrevious(
     int startIndex,
-    int RecursionDepth,
+    int recursionDepth,
     List<List<List<int> > >& multTable,
     List<Selection>& impliedSelections,
     List<int>& oppositeKmods,

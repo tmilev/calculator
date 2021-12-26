@@ -3850,7 +3850,7 @@ class OnePartialFractionDenominator {
 public:
   List<int> multiplicities;
   List<int> elongations;
-  void addMultiplicity(int MultiplicityIncrement, int Elongation);
+  void addMultiplicity(int multiplicityIncrement, int elongation);
   int indexLargestElongation();
   int getLargestElongation();
   void getPolynomialDenominator(Polynomial<LargeInteger>& output, int multiplicityIndex, Vector<Rational>& exponent);
@@ -5219,9 +5219,9 @@ public:
   std::string DebugString;
   int lastDistinguishedIndex;
   int FileStoragePosition;
-  bool PowerSeriesCoefficientIsComputed;
-  bool IsIrrelevant;
-  bool RelevanceIsComputed;
+  bool powerSeriesCoefficientIsComputed;
+  bool isIrrelevant;
+  bool relevanceIsComputed;
   List<int> indicesNonZeroMultiplicities;
   List<OnePartialFractionDenominator> denominator;
   friend std::ostream& operator << (std::ostream& output, const OnePartialFraction& input) {
@@ -5296,8 +5296,8 @@ public:
     List<int>& selectedIndices,
     List<int>& greatestElongations,
     List<int>& coefficients,
-    int GainingMultiplicityIndex,
-    int ElongationGainingMultiplicityIndex,
+    int gainingMultiplicityIndex,
+    int elongationGainingMultiplicityIndex,
     LinearCombination<OnePartialFraction,
     Polynomial<LargeInteger> >& output,
     List<Vector<Rational> >& startingVectors
@@ -5693,7 +5693,7 @@ public:
   int NumGeneratorsRelevenatFractions;
   int NumMonomialsInNumeratorsIrrelevantFractions;
   int NumGeneratorsIrrelevantFractions;
-  int NumTotalReduced;
+  int totalReduced;
   int NumProcessedForVPFfractions;
   int NumRunsReduceMonomialByMonomial;
   int numberOfProcessedForVPFMonomialsTotal;
@@ -5713,10 +5713,10 @@ public:
   int flagMaxNumStringOutputLines;
 
   HashedList<Vector<Rational> > startingVectors;
-  Matrix<int> TableAllowedAminusB;
-  Matrix<int> TableAllowedAminus2B;
-  Selection IndicesRedundantShortRoots;
-  List<int> IndicesDoublesOfRedundantShortRoots;
+  Matrix<int> tableAllowedAminusB;
+  Matrix<int> tableAllowedAminus2B;
+  Selection indicesRedundantShortRoots;
+  List<int> indicesDoublesOfRedundantShortRoots;
   int numberOfNonRedundantShortRoots;
   Vector<Rational> weights;
   void initFromRoots(Vectors<Rational>& algorithmBasis, Vector<Rational>* weights);
@@ -5731,12 +5731,6 @@ public:
   bool argumentsAllowed(Vectors<Rational>& arguments, std::string& outputWhatWentWrong);
   bool assureIndicatorRegularity(Vector<Rational>& indicator);
   void compareCheckSums();
-  void computePolynomialCorrespondingToOneMonomial(
-    QuasiPolynomial& outputQP,
-    int monomialIndex,
-    Vectors<Rational>& normals,
-    Lattice& theLattice
-  );
   bool initFromRoots(Vectors<Rational>& input);
   void initAndSplit(Vectors<Rational>& input);
   void run(Vectors<Rational>& input);

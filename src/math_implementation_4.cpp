@@ -1892,18 +1892,18 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 std::string GeneralizedVermaModuleCharacters::prepareReport() {
   std::stringstream out;
   FormatExpressions format;
-  int tempI = 0;
+  int variableIndex = 0;
   format.polynomialAlphabet.setSize(5);
-  format.polynomialAlphabet[tempI] = "x_1";
-  tempI ++;
-  format.polynomialAlphabet[tempI] = "x_2";
-  tempI ++;
-  format.polynomialAlphabet[tempI] = "y_1";
-  tempI ++;
-  format.polynomialAlphabet[tempI] = "y_2";
-  tempI ++;
-  format.polynomialAlphabet[tempI] = "y_3";
-  tempI ++;
+  format.polynomialAlphabet[variableIndex] = "x_1";
+  variableIndex ++;
+  format.polynomialAlphabet[variableIndex] = "x_2";
+  variableIndex ++;
+  format.polynomialAlphabet[variableIndex] = "y_1";
+  variableIndex ++;
+  format.polynomialAlphabet[variableIndex] = "y_2";
+  variableIndex ++;
+  format.polynomialAlphabet[variableIndex] = "y_3";
+  variableIndex ++;
   out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
   << "\n\\begin{document}\\tiny\n";
   out << "\n The chamber complex + multiplicities follow.\n\n\n"

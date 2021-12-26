@@ -1576,14 +1576,14 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::a
   Vector<Coefficient> tempRoot, tempRoot2;
   output = input;
   for (int i = element.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    int tempI = element.generatorsLastAppliedFirst[i].index;
-    if (tempI < this->simpleRootsInner.size) {
-      this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[tempI], output, false, output);
+    int index = element.generatorsLastAppliedFirst[i].index;
+    if (index < this->simpleRootsInner.size) {
+      this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[index], output, false, output);
     } else {
-      tempI -= this->simpleRootsInner.size;
+      index -= this->simpleRootsInner.size;
       tempRoot.makeZero(input.size);
       for (int j = 0; j < output.size; j ++) {
-        tempRoot2 = this->externalAutomorphisms[tempI][j];
+        tempRoot2 = this->externalAutomorphisms[index][j];
         tempRoot2 *= output[j];
         tempRoot += tempRoot2;
       }

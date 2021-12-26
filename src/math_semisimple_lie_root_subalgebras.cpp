@@ -237,7 +237,7 @@ void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
   std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites
 ) {
   std::string tempS;
-  int tempI = 0;
+  int reader = 0;
   int size = 0;
   input >> tempS >> size;
   outMultTable.setSize(size);
@@ -245,8 +245,8 @@ void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
   for (int i = 0; i < size; i ++) {
     outMultTable[i].setSize(size);
     for (int j = 0; j < size; j ++) {
-      input >> tempI;
-      outMultTable[i][j].setSize(tempI);
+      input >> reader;
+      outMultTable[i][j].setSize(reader);
       for (int k = 0; k < outMultTable[i][j].size; k ++) {
         input >> outMultTable[i][j][k];
       }
@@ -329,33 +329,33 @@ bool RootSubalgebra::listHasNonSelectedIndexLowerThanGiven(int index, List<int>&
 
 bool RootSubalgebra::indexIsCompatibleWithPrevious(
   int startIndex,
-  int RecursionDepth,
+  int recursionDepth,
   List<List<List<int> > >& multTable,
   List<Selection>& impliedSelections,
   List<int>& oppositeKmods,
   RootSubalgebras& owner
 ) {
-  Selection& targetSel = impliedSelections[RecursionDepth + 1];
-  Selection& originalSel = impliedSelections[RecursionDepth];
-  targetSel = originalSel;
-  targetSel.addSelectionAppendNewIndex(startIndex);
-  for (int k = targetSel.cardinalitySelection - 1; k < targetSel.cardinalitySelection; k ++) {
-    int tempI = targetSel.elements[k];
-    for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
-      if (targetSel.selected[oppositeKmods[targetSel.elements[i]]]) {
+  Selection& targetSelection = impliedSelections[recursionDepth + 1];
+  Selection& originalSelection = impliedSelections[recursionDepth];
+  targetSelection = originalSelection;
+  targetSelection.addSelectionAppendNewIndex(startIndex);
+  for (int k = targetSelection.cardinalitySelection - 1; k < targetSelection.cardinalitySelection; k ++) {
+    int index = targetSelection.elements[k];
+    for (int i = 0; i < targetSelection.cardinalitySelection; i ++) {
+      if (targetSelection.selected[oppositeKmods[targetSelection.elements[i]]]) {
         return false;
       }
-      List<int>& tempList = multTable[tempI][targetSel.elements[i]];
+      List<int>& tempList = multTable[index][targetSelection.elements[i]];
       for (int j = 0; j < tempList.size; j ++) {
-        if (tempList[j] < startIndex && !originalSel.selected[tempList[j]]) {
+        if (tempList[j] < startIndex && !originalSelection.selected[tempList[j]]) {
           return false;
         } else {
-          targetSel.addSelectionAppendNewIndex(tempList[j]);
+          targetSelection.addSelectionAppendNewIndex(tempList[j]);
         }
       }
     }
   }
-  if (!owner.approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(targetSel)) {
+  if (!owner.approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(targetSelection)) {
     return false;
   }
   return true;
@@ -774,8 +774,8 @@ bool RootSubalgebra::checkRankInequality() const {
 bool RootSubalgebra::checkForSmallRelations(ConeRelation& relation, Vectors<Rational>& nilradicalRoots) {
   MacroRegisterFunctionWithName("RootSubalgebra::checkForSmallRelations");
   Vector<Rational> weightSum;
-  bool tempBool;
-  int tempI;
+  bool foundSmallRelation = false;
+  int index = 0;
   for (int i = 0; i < this->modules.size; i ++) {
     if (!this->nilradicalKModules.selected[i]) {
       for (int j = i + 1; j < this->modules.size; j ++) {
@@ -785,20 +785,20 @@ bool RootSubalgebra::checkForSmallRelations(ConeRelation& relation, Vectors<Rati
           if (!weightSum.isEqualToZero()) {
             relation.betaCoefficients.setSize(0);
             relation.betas.setSize(0);
-            tempI = nilradicalRoots.getIndex(weightSum);
-            if (tempI != - 1) {
-              tempBool = true;
+            index = nilradicalRoots.getIndex(weightSum);
+            if (index != - 1) {
+              foundSmallRelation = true;
               relation.betaCoefficients.setSize(1);
               relation.betas.setSize(1);
               relation.betaCoefficients[0].makeOne();
-              relation.betas[0] =(nilradicalRoots[tempI]);
+              relation.betas[0] =(nilradicalRoots[index]);
             } else {
-              tempBool =
+              foundSmallRelation =
               this->getAmbientWeyl().hasStronglyPerpendicularDecompositionWRT(
                 weightSum, - 1, nilradicalRoots, relation.betas, relation.betaCoefficients, true
               );
             }
-            if (tempBool) {
+            if (foundSmallRelation) {
               relation.alphas.size = 0;
               relation.alphaCoefficients.size = 0;
               relation.alphas.addOnTop(this->highestWeightsPrimalSimple[i]);
@@ -1388,23 +1388,23 @@ bool RootSubalgebra::isGeneratingSingularVectors(int indexKmod, Vectors<Rational
 
 void RootSubalgebra::makeGeneratingSingularVectors(ConeRelation& relation, Vectors<Rational>& nilradicalRoots) {
   bool isMaximal = false;
-  Vector<Rational> tempRoot;
+  Vector<Rational> root;
   while (!isMaximal) {
     isMaximal = true;
     for (int i = 0; i < relation.alphaCoefficients.size; i ++) {
       for (int j = 0; j < nilradicalRoots.size; j ++) {
-        tempRoot = relation.alphas[i];
-        tempRoot += nilradicalRoots[j];
-        if ((this->isARoot(tempRoot) || tempRoot.isEqualToZero()) &&(!nilradicalRoots.contains(tempRoot))) {
-          this->computeHighestWeightInTheSameKModule(tempRoot, tempRoot);
-          tempRoot -= relation.alphas[i];
-          relation.alphas[i] += tempRoot;
-          int tempI = relation.betas.getIndex(tempRoot);
-          if (tempI == - 1) {
-            relation.betas.addOnTop(tempRoot);
+        root = relation.alphas[i];
+        root += nilradicalRoots[j];
+        if ((this->isARoot(root) || root.isEqualToZero()) &&(!nilradicalRoots.contains(root))) {
+          this->computeHighestWeightInTheSameKModule(root, root);
+          root -= relation.alphas[i];
+          relation.alphas[i] += root;
+          int index = relation.betas.getIndex(root);
+          if (index == - 1) {
+            relation.betas.addOnTop(root);
             relation.betaCoefficients.addOnTop(relation.alphaCoefficients[i]);
           } else {
-            relation.betaCoefficients[tempI] += relation.alphaCoefficients[i];
+            relation.betaCoefficients[index] += relation.alphaCoefficients[i];
           }
           isMaximal = false;
           break;
@@ -3684,8 +3684,8 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
     for (int j = 0; j < rootSubalgebra.modules.size; j ++) {
       tempRoot = rootSubalgebra.highestWeightsPrimalSimple[j];
       subgroup.actByNonSimpleElement(i + 1, tempRoot);
-      int tempI = rootSubalgebra.getIndexKModuleContainingRoot(tempRoot);
-      this->actionsNormalizerCentralizerNilradical[i][j] = tempI;
+      int index = rootSubalgebra.getIndexKModuleContainingRoot(tempRoot);
+      this->actionsNormalizerCentralizerNilradical[i][j] = index;
     }
     if (global.response.monitoringAllowed()) {
       std::stringstream out;
@@ -4488,8 +4488,8 @@ void ConeRelation::FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& Ni
 
 bool ConeRelation::checkForBugs(RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots) {
   for (int i = 0; i < this->alphas.size; i ++) {
-    int tempI = owner.highestWeightsPrimalSimple.getIndex(this->alphas[i]);
-    if (tempI == - 1) {
+    int index = owner.highestWeightsPrimalSimple.getIndex(this->alphas[i]);
+    if (index == - 1) {
       return false;
     }
     if (nilradicalRoots.contains(this->alphas[i])) {

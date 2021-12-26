@@ -425,12 +425,12 @@ std::ostream& operator<<(std::ostream& output, const List<Object>& input) {
 template <class Object>
 std::iostream& operator>>(std::iostream& input, List<Object>& outputList) {
   std::string tempS;
-  int tempI;
-  input >> tempS >> tempI;
+  int reader = 0;
+  input >> tempS >> reader;
   if (tempS != "size:") {
     fatalCrash("Failed reading list from stream. ");
   }
-  outputList.setSize(tempI);
+  outputList.setSize(reader);
   for (int i = 0; i < outputList.size; i ++) {
     input >> outputList[i];
   }
@@ -1354,10 +1354,10 @@ public:
       this->size --;
       return;
     }
-    int tempI = this->size - 1;
-    Object* oTop = &this->objects[tempI];
+    int lastIndex = this->size - 1;
+    Object* oTop = &this->objects[lastIndex];
     int hashIndexTop = this->getHash(*oTop);
-    this->hashBuckets[hashIndexTop].removeFirstOccurenceSwapWithLast(tempI);
+    this->hashBuckets[hashIndexTop].removeFirstOccurenceSwapWithLast(lastIndex);
     this->hashBuckets[hashIndexTop].addOnTop(index);
     this->TemplateList::removeIndexSwapWithLast(index);
   }

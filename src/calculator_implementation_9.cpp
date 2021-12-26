@@ -20,29 +20,29 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   // and x is a column vector with m entries
   Matrix<Rational> workingMatrix;
   Vector<Rational> matX;
-  Selection BaseVariables;
-  Rational GlobalGoal;
-  GlobalGoal.makeZero();
+  Selection baseVariables;
+  Rational globalGoal;
+  globalGoal.makeZero();
   if (matA.numberOfRows != matb.numberOfRows) {
     global.fatal << "The number of inequalities: "
     << matA.numberOfRows << " does not match the number of "
     << "constaints: " << matb.numberOfRows << ". " << global.fatal;
   }
   for (int j = 0; j < matb.numberOfRows; j ++) {
-    GlobalGoal += matb.elements[j][0];
+    globalGoal += matb.elements[j][0];
     if (matb.elements[j][0].isNegative()) {
       global.fatal << "Constraint index " << j << " is negative: "
       << matb.elements[j][0] << " which is not allowed. " << global.fatal;
     }
   }
-  if (GlobalGoal.isEqualToZero()) {
+  if (globalGoal.isEqualToZero()) {
     return false;
   }
   int numberOfTrueVariables = matA.numberOfColumns;
   workingMatrix.initialize(matA.numberOfRows, numberOfTrueVariables + matA.numberOfRows);
-  HashedList<Selection> VisitedVertices;
-  VisitedVertices.clear();
-  BaseVariables.initialize(workingMatrix.numberOfColumns);
+  HashedList<Selection> visitedVertices;
+  visitedVertices.clear();
+  baseVariables.initialize(workingMatrix.numberOfColumns);
   workingMatrix.makeZero();
   matX.makeZero(workingMatrix.numberOfColumns);
   for (int j = 0; j < matA.numberOfColumns; j ++) {
@@ -53,81 +53,82 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   for (int j = 0; j < matA.numberOfRows; j ++) {
     workingMatrix.elements[j][j + numberOfTrueVariables].makeOne();
     matX[j + numberOfTrueVariables] = (matb.elements[j][0]);
-    BaseVariables.addSelectionAppendNewIndex(j + numberOfTrueVariables);
+    baseVariables.addSelectionAppendNewIndex(j + numberOfTrueVariables);
   }
-  Rational ChangeGradient; //Change, PotentialChange;
-  int EnteringVariable = 0;
+  Rational changeGradient; //Change, PotentialChange;
+  int enteringVariable = 0;
   bool WeHaveNotEnteredACycle = true;
-  while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.isPositive()) {
-    EnteringVariable = - 1; ChangeGradient.makeZero();
+  while (enteringVariable != - 1 && WeHaveNotEnteredACycle && globalGoal.isPositive()) {
+    enteringVariable = - 1;
+    changeGradient.makeZero();
     for (int i = 0; i < workingMatrix.numberOfColumns; i ++) {
-      if (!BaseVariables.selected[i]) {
+      if (!baseVariables.selected[i]) {
         Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
         Matrix<Rational>::computePotentialChangeGradient(
-          workingMatrix, BaseVariables, numberOfTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
+          workingMatrix, baseVariables, numberOfTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
         );
-        if (PotentialChangeGradient.isGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable) {
-          EnteringVariable = i;
-          ChangeGradient.assign(PotentialChangeGradient);
+        if (PotentialChangeGradient.isGreaterThanOrEqualTo(changeGradient) && hasAPotentialLeavingVariable) {
+          enteringVariable = i;
+          changeGradient.assign(PotentialChangeGradient);
         }
       }
     }
-    if (EnteringVariable != - 1) {
-      int LeavingVariableRow;
-      Rational MaxMovement;
+    if (enteringVariable != - 1) {
+      int leavingVariableRow = 0;
+      Rational maximumMovement;
       Matrix<Rational>::getMaxMovementAndLeavingVariableRow(
-        MaxMovement, LeavingVariableRow, EnteringVariable, workingMatrix, matX, BaseVariables
+        maximumMovement, leavingVariableRow, enteringVariable, workingMatrix, matX, baseVariables
       );
       Rational scalar;
       Rational tempTotalChange;
-      if (workingMatrix.elements[LeavingVariableRow][EnteringVariable].isEqualToZero()) {
+      if (workingMatrix.elements[leavingVariableRow][enteringVariable].isEqualToZero()) {
         global.fatal << "The leaving-entering coefficient is not allowed to be zero. " << global.fatal;
       }
-      scalar.assign(workingMatrix.elements[LeavingVariableRow][EnteringVariable]);
+      scalar.assign(workingMatrix.elements[leavingVariableRow][enteringVariable]);
       scalar.invert();
       for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
-        if (!workingMatrix.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
+        if (!workingMatrix.elements[i][baseVariables.elements[i]].isEqualTo(1)) {
           global.fatal << "The base variable coefficient is required to be 1 at this point of code. "
           << global.fatal;
         }
       }
-      workingMatrix.rowTimesScalar(LeavingVariableRow, scalar);
-      tempTotalChange.assign(MaxMovement);
-      tempTotalChange.multiplyBy(ChangeGradient);
-      matX[EnteringVariable] += MaxMovement;
+      workingMatrix.rowTimesScalar(leavingVariableRow, scalar);
+      tempTotalChange.assign(maximumMovement);
+      tempTotalChange.multiplyBy(changeGradient);
+      matX[enteringVariable] += maximumMovement;
       if (!tempTotalChange.isEqualToZero()) {
-        VisitedVertices.clear();
-        GlobalGoal.subtract(tempTotalChange);
+        visitedVertices.clear();
+        globalGoal.subtract(tempTotalChange);
       } else {
-        int tempI = VisitedVertices.getIndex(BaseVariables);
-        if (tempI == - 1) {
-          VisitedVertices.addOnTop(BaseVariables);
+        int index = visitedVertices.getIndex(baseVariables);
+        if (index == - 1) {
+          visitedVertices.addOnTop(baseVariables);
         } else {
           WeHaveNotEnteredACycle = false;
         }
       }
       for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
-        if (!workingMatrix.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
-          scalar.assign(workingMatrix.elements[i][EnteringVariable]);
-          scalar.multiplyBy(MaxMovement);
-          matX[BaseVariables.elements[i]] -= scalar;
-          scalar.assign(workingMatrix.elements[i][EnteringVariable]);
+        if (!workingMatrix.elements[i][enteringVariable].isEqualToZero()&& i != leavingVariableRow) {
+          scalar.assign(workingMatrix.elements[i][enteringVariable]);
+          scalar.multiplyBy(maximumMovement);
+          matX[baseVariables.elements[i]] -= scalar;
+          scalar.assign(workingMatrix.elements[i][enteringVariable]);
           scalar.negate();
-          workingMatrix.addTwoRows(LeavingVariableRow, i, 0, scalar);
+          workingMatrix.addTwoRows(leavingVariableRow, i, 0, scalar);
         }
-        if (i == LeavingVariableRow) {
-          matX[BaseVariables.elements[i]] = 0;
+        if (i == leavingVariableRow) {
+          matX[baseVariables.elements[i]] = 0;
         }
       }
-      if (!matX[BaseVariables.elements[LeavingVariableRow]].isEqualToZero()) {
+      if (!matX[baseVariables.elements[leavingVariableRow]].isEqualToZero()) {
         global.fatal << "Leaving variable coefficient not allowed to be zero. " << global.fatal;
       }
-      BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]] = false;
-      BaseVariables.elements[LeavingVariableRow] = EnteringVariable;
-      BaseVariables.selected[EnteringVariable] = true;
+      baseVariables.selected[baseVariables.elements[leavingVariableRow]] = false;
+      baseVariables.elements[leavingVariableRow] = enteringVariable;
+      baseVariables.selected[enteringVariable] = true;
       //BaseVariables.ComputeDebugString();
       for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
-        if (!workingMatrix.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
+        if (!workingMatrix.elements[i][baseVariables.elements[i]].isEqualTo(1)) {
           global.fatal << "New base variable expected to be equal to 1. " << global.fatal;
         }
       }

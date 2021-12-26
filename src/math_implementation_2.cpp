@@ -189,9 +189,9 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x) {
 }
 
 void LargeIntegerUnsigned::addUInt(unsigned int x) {
-  LargeIntegerUnsigned tempI;
-  tempI.assignShiftedUInt(x, 0);
-  (*this) += tempI;
+  LargeIntegerUnsigned converter;
+  converter.assignShiftedUInt(x, 0);
+  (*this) += converter;
 }
 
 void LargeIntegerUnsigned::operator*=(const LargeIntegerUnsigned& right) {
@@ -1327,9 +1327,9 @@ bool LargeInteger::isIntegerFittingInInt(int* whichInt) {
 }
 
 void LargeInteger::multiplyByInt(int x) {
-  LargeInteger tempI;
-  tempI.assignInteger(x);
-  *this *= tempI;
+  LargeInteger converter;
+  converter.assignInteger(x);
+  *this *= converter;
 }
 
 LargeInteger LargeInteger::zero() {
@@ -1447,9 +1447,9 @@ void LargeInteger::addLargeIntUnsigned(const LargeIntegerUnsigned& x) {
   if (this->value.isGreaterThanOrEqualTo(x)) {
     this->value.subtractSmallerPositive(x);
   } else {
-    LargeIntegerUnsigned tempI = x;
-    tempI.subtractSmallerPositive(this->value);
-    this->value = tempI;
+    LargeIntegerUnsigned converted = x;
+    converted.subtractSmallerPositive(this->value);
+    this->value = converted;
     this->sign = 1;
   }
 }
@@ -1461,9 +1461,9 @@ void LargeInteger::operator+=(const LargeInteger& x) {
     if (this->value.isGreaterThanOrEqualTo(x.value)) {
       this->value.subtractSmallerPositive(x.value);
     } else {
-      LargeIntegerUnsigned tempI = this->value;
+      LargeIntegerUnsigned converted = this->value;
       this->value = x.value;
-      this->value.subtractSmallerPositive(tempI);
+      this->value.subtractSmallerPositive(converted);
       this->sign = x.sign;
     }
   }
@@ -1578,16 +1578,16 @@ void Rational::raiseToPower(int x) {
 
 void Rational::invert() {
   if (this->extended == nullptr) {
-    int tempI = this->denominatorShort;
-    if (tempI <= 0) {
+    int denominatorInteger = this->denominatorShort;
+    if (denominatorInteger <= 0) {
       global.fatal << "Denominator not allowed to be negative. " << global.fatal;
     }
     if (this->numeratorShort < 0) {
       this->denominatorShort = - this->numeratorShort;
-      this->numeratorShort = - tempI;
+      this->numeratorShort = - denominatorInteger;
     } else {
       this->denominatorShort = this->numeratorShort;
-      this->numeratorShort = tempI;
+      this->numeratorShort = denominatorInteger;
     }
     return;
   }
@@ -1944,10 +1944,10 @@ Rational Rational::scaleNormalizeIndex(
 LargeIntegerUnsigned Rational::getDenominator() const {
   LargeIntegerUnsigned result;
   if (this->extended == nullptr) {
-    unsigned int tempI = static_cast<unsigned int>(this->denominatorShort);
-    result.assignShiftedUInt(tempI, 0);
+    unsigned int shifted = static_cast<unsigned int>(this->denominatorShort);
+    result.assignShiftedUInt(shifted, 0);
   } else {
-    result = (this->extended->denominator);
+    result = this->extended->denominator;
   }
   return result;
 }
@@ -2115,16 +2115,23 @@ void Rational::simplify() {
     return;
   }
   if (!this->extended->denominator.isEqualToOne()) {
-    LargeIntegerUnsigned tempI;
-    LargeIntegerUnsigned::greatestCommonDivisor(this->extended->denominator, this->extended->numerator.value, tempI);
-    /*if (Rational::flagAnErrorHasOccurredTimeToPanic) {
-      std::string tempS1, tempS2, tempS3;
-      tempI.toString(tempS1);
-      this->toString(tempS2);
-    }*/
-    LargeIntegerUnsigned tempI2;
-    this->extended->denominator.dividePositive(tempI, this->extended->denominator, tempI2);
-    this->extended->numerator.value.dividePositive(tempI, this->extended->numerator.value, tempI2);
+    LargeIntegerUnsigned denominatorGreatestCommonDivisor;
+    LargeIntegerUnsigned::greatestCommonDivisor(
+      this->extended->denominator,
+      this->extended->numerator.value,
+      denominatorGreatestCommonDivisor
+    );
+    LargeIntegerUnsigned numeratorGreatestCommonDivisor;
+    this->extended->denominator.dividePositive(
+      denominatorGreatestCommonDivisor,
+      this->extended->denominator,
+      numeratorGreatestCommonDivisor
+    );
+    this->extended->numerator.value.dividePositive(
+      denominatorGreatestCommonDivisor,
+      this->extended->numerator.value,
+      numeratorGreatestCommonDivisor
+    );
   }
   this->shrinkExtendedPartIfPossible();
 }

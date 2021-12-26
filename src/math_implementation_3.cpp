@@ -268,14 +268,14 @@ RegisterFunctionCall::~RegisterFunctionCall() {
 }
 
 int DrawingVariables::getColorFromChamberIndex(int index) {
-  static const int NumColorsBase = 3;
-  int tempI = index % (NumColorsBase * NumColorsBase * NumColorsBase);
-  if (tempI < 0) {
-    tempI += (NumColorsBase * NumColorsBase * NumColorsBase);
+  static const int numberColorsBase = 3;
+  int colorIndex = index % (numberColorsBase * numberColorsBase * numberColorsBase);
+  if (colorIndex < 0) {
+    colorIndex += (numberColorsBase * numberColorsBase * numberColorsBase);
   }
-  int r = (255 * (tempI % NumColorsBase)) / NumColorsBase;
-  int g = (255 * (tempI % (NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase);
-  int b = (255 * (tempI % (NumColorsBase * NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase * NumColorsBase);
+  int r = (255 * (colorIndex % numberColorsBase)) / numberColorsBase;
+  int g = (255 * (colorIndex % (numberColorsBase * numberColorsBase))) / (numberColorsBase * numberColorsBase);
+  int b = (255 * (colorIndex % (numberColorsBase * numberColorsBase * numberColorsBase))) / (numberColorsBase * numberColorsBase * numberColorsBase);
   return static_cast<int>(HtmlRoutines::redGreenBlue(
     static_cast<unsigned int>(r),
     static_cast<unsigned int>(g),
@@ -1791,12 +1791,12 @@ bool FileOperations::openFileCreateIfNotPresentVirtual(
 bool FileOperations::openFileCreateIfNotPresentUnsecure(
   std::fstream& file,
   const std::string& fileName,
-  bool OpenInAppendMode,
+  bool openInAppendMode,
   bool truncate,
   bool openAsBinary
 ) {
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (OpenInAppendMode) {
+  if (openInAppendMode) {
     if (openAsBinary) {
       file.open(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::app | std::fstream::binary);
     } else {
@@ -1816,9 +1816,9 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
   if (file.is_open()) {
     file.clear();
     file.seekp(0, std::ios_base::end);
-    long tempI = file.tellp();
-    if (tempI > 0) {
-      if (!OpenInAppendMode) {
+    long filePosition = file.tellp();
+    if (filePosition > 0) {
+      if (!openInAppendMode) {
         file.seekp(0);
         file.seekg(0);
       }
@@ -3047,8 +3047,8 @@ bool OnePartialFraction::reduceOnceTotalOrderMethod(
 ) {
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     for (int j = 0; j < this->indicesNonZeroMultiplicities.size; j ++) {
-      int AminusBindex = owner.TableAllowedAminusB.elements[this->indicesNonZeroMultiplicities[i]][this->indicesNonZeroMultiplicities[j]];
-      int Aminus2Bindex = owner.TableAllowedAminus2B.elements[this->indicesNonZeroMultiplicities[i]][this->indicesNonZeroMultiplicities[j]];
+      int AminusBindex = owner.tableAllowedAminusB.elements[this->indicesNonZeroMultiplicities[i]][this->indicesNonZeroMultiplicities[j]];
+      int Aminus2Bindex = owner.tableAllowedAminus2B.elements[this->indicesNonZeroMultiplicities[i]][this->indicesNonZeroMultiplicities[j]];
       if (AminusBindex != - 1 &&  AminusBindex > this->indicesNonZeroMultiplicities[j]) {
         this->decomposeAMinusNB(
           this->indicesNonZeroMultiplicities[i], this->indicesNonZeroMultiplicities[j], 1, AminusBindex, output, owner
@@ -3165,8 +3165,8 @@ void OnePartialFraction::assignDenominatorOnly(const OnePartialFraction& p) {
 void OnePartialFraction::assign(const OnePartialFraction& p) {
   this->denominator = p.denominator;
   this->indicesNonZeroMultiplicities = (p.indicesNonZeroMultiplicities);
-  this->IsIrrelevant = p.IsIrrelevant;
-  this->RelevanceIsComputed = p.RelevanceIsComputed;
+  this->isIrrelevant = p.isIrrelevant;
+  this->relevanceIsComputed = p.relevanceIsComputed;
   this->lastDistinguishedIndex = p.lastDistinguishedIndex;
 }
 
@@ -3186,16 +3186,16 @@ void OnePartialFraction::writeToFile(std::fstream& output) const {
 
 void OnePartialFraction::readFromFile(PartialFractions& owner, std::fstream& input) {
   std::string tempS;
-  int tempI;
-  input >> tempS >> tempI;
-  if (tempI != owner.startingVectors.size) {
+  int reader = 0;
+  input >> tempS >> reader;
+  if (reader != owner.startingVectors.size) {
     global.fatal << "Failed to read partial fraction from file. " << global.fatal;
   }
-  this->initialize(tempI);
+  this->initialize(reader);
   for (int j = 0; j < this->denominator.size; j ++) {
-    input >> tempI;
-    this->denominator[j].multiplicities.setSize(tempI);
-    this->denominator[j].elongations.setSize(tempI);
+    input >> reader;
+    this->denominator[j].multiplicities.setSize(reader);
+    this->denominator[j].elongations.setSize(reader);
     for (int i = 0; i < this->denominator[j].multiplicities.size; i ++) {
       input >> this->denominator[j].multiplicities[i] >> this->denominator[j].elongations[i];
     }
@@ -3240,22 +3240,23 @@ std::string OnePartialFraction::toString(
 }
 
 bool OnePartialFraction::rootIsInFractionCone(
-  PartialFractions& owner, Vector<Rational>* root
+  PartialFractions& owner,
+  Vector<Rational>* root
 ) const {
   if (root == nullptr) {
     return true;
   }
-  if (this->RelevanceIsComputed) {
-    return !this->IsIrrelevant;
+  if (this->relevanceIsComputed) {
+    return !this->isIrrelevant;
   }
-  Cone tempCone;
-  Vectors<Rational> tempRoots;
+  Cone cone;
+  Vectors<Rational> roots;
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
-    int tempI = this->indicesNonZeroMultiplicities[i];
-    tempRoots.addOnTop(owner.startingVectors[tempI]);
+    int index = this->indicesNonZeroMultiplicities[i];
+    roots.addOnTop(owner.startingVectors[index]);
   }
-  tempCone.createFromVertices(tempRoots);
-  return !this->IsIrrelevant;
+  cone.createFromVertices(roots);
+  return !this->isIrrelevant;
 }
 
 void OnePartialFraction::prepareFraction(
@@ -3286,11 +3287,11 @@ void OnePartialFraction::prepareFraction(
 
 int OnePartialFraction::getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner) {
   int result = 0;
-  for (int i = 0; i < owner.IndicesRedundantShortRoots.cardinalitySelection; i ++) {
-    int tempI = owner.IndicesRedundantShortRoots.elements[i];
-    int tempI2 = owner.getIndexDoubleOfARoot(owner.startingVectors[tempI]);
-    if (tempI2 != - 1) {
-      if (this->denominator[tempI2].multiplicities.size > 0) {
+  for (int i = 0; i < owner.indicesRedundantShortRoots.cardinalitySelection; i ++) {
+    int index = owner.indicesRedundantShortRoots.elements[i];
+    int rootIndex = owner.getIndexDoubleOfARoot(owner.startingVectors[index]);
+    if (rootIndex != - 1) {
+      if (this->denominator[rootIndex].multiplicities.size > 0) {
         result ++;
       }
     }
@@ -3301,10 +3302,10 @@ int OnePartialFraction::getNumberProportionalVectorsClassicalRootSystems(Partial
 int OnePartialFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFractions& owner, int minIndex) {
   int result = owner.startingVectors.size;
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
-    int tempI = this->indicesNonZeroMultiplicities[i];
-    if (this->denominator[tempI].multiplicities.size > 0) {
-      if (tempI >= minIndex && tempI < result) {
-        result = tempI;
+    int index = this->indicesNonZeroMultiplicities[i];
+    if (this->denominator[index].multiplicities.size > 0) {
+      if (index >= minIndex && index < result) {
+        result = index;
       }
     }
   }
@@ -3362,9 +3363,8 @@ bool OnePartialFraction::decomposeFromLinearRelation(
   greatestElongations.size = 0;
   gainingMultiplicityIndexInLinRelation = this->computeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, linearRelation);
   gainingMultiplicityIndex = this->indicesNonZeroMultiplicities[gainingMultiplicityIndexInLinRelation];
-  int tempI = this->denominator[gainingMultiplicityIndex].getLargestElongation();
-  linearRelation.elements[gainingMultiplicityIndexInLinRelation][0].multiplyByInt(tempI);
-  //linearRelation.ComputeDebugString();
+  int indexScale = this->denominator[gainingMultiplicityIndex].getLargestElongation();
+  linearRelation.elements[gainingMultiplicityIndexInLinRelation][0].multiplyByInt(indexScale);
   linearRelation.scaleToIntegralForMinimalRationalHeightNoSignChange();
   elongationGainingMultiplicityIndex = linearRelation.elements[gainingMultiplicityIndexInLinRelation][0].numeratorShort;
   if (elongationGainingMultiplicityIndex < 0) {
@@ -3372,12 +3372,11 @@ bool OnePartialFraction::decomposeFromLinearRelation(
   } else {
     linearRelation *= - 1;
   }
-  //linearRelation.ComputeDebugString();
   for (int i = 0; i < linearRelation.numberOfRows; i ++) {
     if (i != gainingMultiplicityIndexInLinRelation && !linearRelation.elements[i][0].isEqualToZero()) {
-      int tempI = this->indicesNonZeroMultiplicities[i];
-      participatingIndices.addOnTop(tempI);
-      greatestElongations.addOnTop(this->denominator[tempI].getLargestElongation());
+      int index = this->indicesNonZeroMultiplicities[i];
+      participatingIndices.addOnTop(index);
+      greatestElongations.addOnTop(this->denominator[index].getLargestElongation());
       coefficients.addOnTop(linearRelation.elements[i][0].numeratorShort);
     }
   }
@@ -3432,12 +3431,12 @@ void OnePartialFraction::getNElongationPolynomialWithMonomialContribution(
   Polynomial<LargeInteger>& output,
   int dimension
 ) {
-  MonomialPolynomial tempM;
-  tempM.makeOne();
+  MonomialPolynomial monomial;
+  monomial.makeOne();
   for (int i = 0; i < index; i ++) {
-    int tempI = selectedIndices[i];
+    int index = selectedIndices[i];
     for (int j = 0; j < dimension; j ++) {
-      tempM.multiplyByVariable(j, startingVectors[tempI][j] * coefficients[i] * greatestElongations[i]);
+      monomial.multiplyByVariable(j, startingVectors[index][j] * coefficients[i] * greatestElongations[i]);
     }
   }
   this->getNElongationPolynomial(
@@ -3448,43 +3447,43 @@ void OnePartialFraction::getNElongationPolynomialWithMonomialContribution(
     output,
     dimension
   );
-  output.multiplyBy(tempM);
+  output.multiplyBy(monomial);
 }
 
 void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
   List<int>& selectedIndices,
   List<int>& greatestElongations,
   List<int>& coefficients,
-  int GainingMultiplicityIndex,
-  int ElongationGainingMultiplicityIndex,
+  int gainingMultiplicityIndex,
+  int elongationGainingMultiplicityIndex,
   LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output,
   List<Vector<Rational> >& startingVectors
 ) {
   OnePartialFraction tempFrac;
-  tempFrac.RelevanceIsComputed = false;
+  tempFrac.relevanceIsComputed = false;
   Polynomial<LargeInteger> tempP;
-  Polynomial<LargeInteger> ComputationalBufferCoefficient;
+  Polynomial<LargeInteger> computationalBufferCoefficient;
   output.makeZero();
   int dimension = startingVectors[0].size;
-  SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
-  TheBigBadIndexingSet.initPart1(selectedIndices.size);
+  SelectionWithDifferentMaxMultiplicities indexingSet;
+  indexingSet.initPart1(selectedIndices.size);
   for (int i = 0; i < selectedIndices.size; i ++) {
-    int tempI = this->denominator[selectedIndices[i]].getMultiplicityLargestElongation() - 1;
-    TheBigBadIndexingSet.capacities[i] = tempI;
+    int index = this->denominator[selectedIndices[i]].getMultiplicityLargestElongation() - 1;
+    indexingSet.capacities[i] = index;
   }
   for (int i = 0; i < selectedIndices.size; i ++) {
-    TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
-    int oldMaxMultiplicity = TheBigBadIndexingSet.capacities[i];
-    TheBigBadIndexingSet.capacities[i] = 0;
-    int NumSubsets = TheBigBadIndexingSet.totalNumberSubsetsSmallInt();
+    indexingSet.clearNoMaxMultiplicitiesChange();
+    int oldMaxMultiplicity = indexingSet.capacities[i];
+    indexingSet.capacities[i] = 0;
+    int NumSubsets = indexingSet.totalNumberSubsetsSmallInt();
     for (int j = 0; j < NumSubsets; j ++) {
       tempFrac.assign(*this);
-      tempFrac.RelevanceIsComputed = false;
-      int tempN = TheBigBadIndexingSet.totalMultiplicity() + oldMaxMultiplicity;
+      tempFrac.relevanceIsComputed = false;
+      int tempN = indexingSet.totalMultiplicity() + oldMaxMultiplicity;
       for (int k = 0; k < selectedIndices.size; k ++) {
         int multiplicityChange;
         if (k != i) {
-          multiplicityChange = TheBigBadIndexingSet.multiplicities[k];
+          multiplicityChange = indexingSet.multiplicities[k];
         } else {
           multiplicityChange = oldMaxMultiplicity + 1;
         }
@@ -3493,27 +3492,27 @@ void OnePartialFraction::applyGeneralizedSzenesVergneFormula(
           startingVectors, selectedIndices, coefficients, greatestElongations, k, tempP, dimension
         );
         tempP.raiseToPower(multiplicityChange, 1);
-        ComputationalBufferCoefficient *= (tempP);
+        computationalBufferCoefficient *= (tempP);
         LargeInteger tempInt;
-        int tempI;
+        int multiplicity = 0;
         if (k == i) {
-          tempI = oldMaxMultiplicity;
+          multiplicity = oldMaxMultiplicity;
         } else {
-          tempI = multiplicityChange;
+          multiplicity = multiplicityChange;
         }
-        MathRoutines::nChooseK(tempN, tempI, tempInt);
-        ComputationalBufferCoefficient *= tempInt;
-        tempN -= tempI;
+        MathRoutines::nChooseK(tempN, multiplicity, tempInt);
+        computationalBufferCoefficient *= tempInt;
+        tempN -= multiplicity;
       }
-      tempFrac.denominator[GainingMultiplicityIndex].addMultiplicity(
-        TheBigBadIndexingSet.totalMultiplicity() + oldMaxMultiplicity + 1,
-        ElongationGainingMultiplicityIndex
+      tempFrac.denominator[gainingMultiplicityIndex].addMultiplicity(
+        indexingSet.totalMultiplicity() + oldMaxMultiplicity + 1,
+        elongationGainingMultiplicityIndex
       );
       tempFrac.computeIndicesNonZeroMultiplicities();
-      output.addMonomial(tempFrac, ComputationalBufferCoefficient);
-      TheBigBadIndexingSet.incrementReturnFalseIfPastLast();
+      output.addMonomial(tempFrac, computationalBufferCoefficient);
+      indexingSet.incrementReturnFalseIfPastLast();
     }
-    TheBigBadIndexingSet.capacities[i] = oldMaxMultiplicity;
+    indexingSet.capacities[i] = oldMaxMultiplicity;
   }
 }
 
@@ -3526,7 +3525,7 @@ void OnePartialFraction::applySzenesVergneFormula(
   LinearCombination<OnePartialFraction, Polynomial<LargeInteger> >& output
 ) {
   OnePartialFraction tempFrac;
-  tempFrac.RelevanceIsComputed = false;
+  tempFrac.relevanceIsComputed = false;
   Polynomial<LargeInteger> tempP, CoefficientBuffer;
   MonomialPolynomial tempM;
   output.makeZero();
@@ -3534,7 +3533,7 @@ void OnePartialFraction::applySzenesVergneFormula(
   CoefficientBuffer.makeOne();
   for (int i = 0; i < selectedIndices.size; i ++) {
     tempFrac.assign(*this);
-    tempFrac.RelevanceIsComputed = false;
+    tempFrac.relevanceIsComputed = false;
     tempFrac.denominator[GainingMultiplicityIndex].addMultiplicity(1, ElongationGainingMultiplicityIndex);
     OnePartialFractionDenominator& currentFrac = tempFrac.denominator[selectedIndices[i]];
     int LargestElongation = currentFrac.getLargestElongation();
@@ -3564,7 +3563,7 @@ void OnePartialFraction::decomposeAMinusNB(
   PartialFractions& owner
 ) {
   OnePartialFraction tempFrac;
-  tempFrac.RelevanceIsComputed = false;
+  tempFrac.relevanceIsComputed = false;
   Polynomial<LargeInteger> AminusNbetaPoly, commonPoly;
   this->getAlphaMinusNBetaPoly(owner, indexA, indexB, n, AminusNbetaPoly);
   int powerA = this->denominator[indexA].multiplicities[0];
@@ -3712,11 +3711,11 @@ void OnePartialFraction::computeNormals(
 }
 
 OnePartialFraction::OnePartialFraction() {
-  this->PowerSeriesCoefficientIsComputed = false;
+  this->powerSeriesCoefficientIsComputed = false;
   this->AlreadyAccountedForInGUIDisplay = false;
   this->FileStoragePosition = - 1;
   this->lastDistinguishedIndex = - 1;
-  this->RelevanceIsComputed = false;
+  this->relevanceIsComputed = false;
 }
 
 void OnePartialFraction::initialize(int numberOfRoots) {
@@ -3824,7 +3823,7 @@ void PartialFractions::prepareIndicatorVariables() {
   this->NumMonomialsInNumeratorsIrrelevantFractions = 0;
   this->numberOfMonomialsInNumeratorsRelevantFractions = 0;
   this->numberOfMonomialsInTheNumerators = 1;
-  this->NumTotalReduced = 0;
+  this->totalReduced = 0;
   this->NumRelevantNonReducedFractions = 0;
   this->numberOfProcessedForVPFMonomialsTotal = 0;
   this->NumProcessedForVPFfractions = 0;
@@ -4059,12 +4058,12 @@ void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int m
       for (int i = 0; i <matLinComb.numberOfRows; i ++) {
         powers.capacities[i] = 0;
         if (matLinComb.elements[i][0].isGreaterThanOrEqualTo(1) || matLinComb.elements[i][0].isNegative()) {
-          int tempI = matLinComb.elements[i][0].floorIfSmall();
-          powersSigned[i] = tempI;
-          if (tempI<0)
+          int index = matLinComb.elements[i][0].floorIfSmall();
+          powersSigned[i] = index;
+          if (index<0)
             powers.capacities[i] = this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation();
           else
-            powers.capacities[i] =MathRoutines::minimum(tempI, this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
+            powers.capacities[i] =MathRoutines::minimum(index, this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
           tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
           tempRoot*=(powersSigned[i]*this->objects[this->IndicesNonZeroMults[i]].getLargestElongation());
           tempMon-= tempRoot;
@@ -4358,7 +4357,7 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
   }
   std::stringstream out1, out2, out3;
   out1 << this->numberOfRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions
-  << " disjoint = " << this->NumTotalReduced;
+  << " disjoint = " << this->totalReduced;
   if (this->NumRelevantNonReducedFractions != 0) {
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
   }
@@ -4719,24 +4718,24 @@ int OnePartialFractionDenominator::getMultiplicityLargestElongation() {
   return result;
 }
 
-void OnePartialFractionDenominator::addMultiplicity(int MultiplicityIncrement, int Elongation) {
-  if (MultiplicityIncrement == 0) {
+void OnePartialFractionDenominator::addMultiplicity(int multiplicityIncrement, int elongation) {
+  if (multiplicityIncrement == 0) {
     return;
   }
-  int ElongationIndex = this->elongations.getIndex(Elongation);
-  if (ElongationIndex == - 1) {
-    this->elongations.addOnTop(Elongation);
-    int tempI = 0;
-    this->multiplicities.addOnTop(tempI);
-    ElongationIndex = this->multiplicities.size - 1;
+  int elongationIndex = this->elongations.getIndex(elongation);
+  if (elongationIndex == - 1) {
+    this->elongations.addOnTop(elongation);
+    int index = 0;
+    this->multiplicities.addOnTop(index);
+    elongationIndex = this->multiplicities.size - 1;
   }
-  this->multiplicities[ElongationIndex] += MultiplicityIncrement;
-  if (!(this->multiplicities[ElongationIndex] >= 0)) {
+  this->multiplicities[elongationIndex] += multiplicityIncrement;
+  if (!(this->multiplicities[elongationIndex] >= 0)) {
     global.fatal << "Multiplicity is supposed to be positive. " << global.fatal;
   }
-  if (this->multiplicities[ElongationIndex] == 0) {
-    this->multiplicities.popIndexSwapWithLast(ElongationIndex);
-    this->elongations.popIndexSwapWithLast(ElongationIndex);
+  if (this->multiplicities[elongationIndex] == 0) {
+    this->multiplicities.popIndexSwapWithLast(elongationIndex);
+    this->elongations.popIndexSwapWithLast(elongationIndex);
   }
 }
 
@@ -4856,24 +4855,24 @@ void PartialFractions::computeTable(int dimension) {
   tempR.setSize(dimension);
   tempR2.setSize(dimension);
   tempR3.setSize(dimension);
-  this->IndicesRedundantShortRoots.initialize(this->size());
-  this->IndicesDoublesOfRedundantShortRoots.setSize(this->size());
-  this->TableAllowedAminus2B.initialize(this->size(), this->size());
-  this->TableAllowedAminusB.initialize(this->size(), this->size());
+  this->indicesRedundantShortRoots.initialize(this->size());
+  this->indicesDoublesOfRedundantShortRoots.setSize(this->size());
+  this->tableAllowedAminus2B.initialize(this->size(), this->size());
+  this->tableAllowedAminusB.initialize(this->size(), this->size());
   for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
       for (int k = 0; k < dimension; k ++) {
         tempR[k] = this->startingVectors[i][k] - this->startingVectors[j][k];
         tempR2[k] = this->startingVectors[i][k] - this->startingVectors[j][k] * 2;
       }
-      this->TableAllowedAminusB.elements[i][j] = this->getIndex(tempR);
-      this->TableAllowedAminus2B.elements[i][j] = this->getIndex(tempR2);
+      this->tableAllowedAminusB.elements[i][j] = this->getIndex(tempR);
+      this->tableAllowedAminus2B.elements[i][j] = this->getIndex(tempR2);
     }
     tempR3 = this->startingVectors[i];
     tempR3 *= 2;
-    this->IndicesDoublesOfRedundantShortRoots[i] = this->getIndex(tempR3);
-    if (IndicesDoublesOfRedundantShortRoots[i] != - 1) {
-      this->IndicesRedundantShortRoots.addSelectionAppendNewIndex(i);
+    this->indicesDoublesOfRedundantShortRoots[i] = this->getIndex(tempR3);
+    if (indicesDoublesOfRedundantShortRoots[i] != - 1) {
+      this->indicesRedundantShortRoots.addSelectionAppendNewIndex(i);
     }
   }
 }
@@ -8739,21 +8738,21 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
         tempM.invert();
         tempP1.addMonomial(tempM, this->rPolynomials[x][i].coefficients[j]);
       }
-      int tempI;
+      int sign = 0;
       if ((
           this->weylGroup->group.elements[x].generatorsLastAppliedFirst.size +
           this->weylGroup->group.elements[i].generatorsLastAppliedFirst.size
         ) % 2 == 0
       ) {
-        tempI = 1;
+        sign = 1;
       } else {
-        tempI = - 1;
+        sign = - 1;
       }
       Rational powerQ = - this->weylGroup->group.elements[x].generatorsLastAppliedFirst.size +
       2 * this->weylGroup->group.elements[i].generatorsLastAppliedFirst.size -
       this->weylGroup->group.elements[y].generatorsLastAppliedFirst.size;
       powerQ /= 2;
-      tempP2.makeMonomial(0, powerQ, tempI);
+      tempP2.makeMonomial(0, powerQ, sign);
       tempP1 *= tempP2;
       tempP1 *= this->kazhdanLuzstigPolynomials[i][y];
       if (!this->explored[i]) {
@@ -12930,9 +12929,9 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   scaleThis = this->denominator / oldDen;
   scaleOther = this->denominator / other.denominator;
   int oldNumRows = this->basis.numberOfRows;
-  LargeInteger tempI;
-  tempI = scaleThis;
-  this->basis *= tempI;
+  LargeInteger scale;
+  scale = scaleThis;
+  this->basis *= scale;
   this->basis.resize(this->basis.numberOfRows+other.basis.numberOfRows, dimension, true);
   for (int i = oldNumRows; i < this->basis.numberOfRows; i ++) {
     for (int j = 0; j < this->basis.numberOfColumns; j ++) {

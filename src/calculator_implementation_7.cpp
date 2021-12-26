@@ -3593,7 +3593,6 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   }
   outputMatrix.makeIdentityMatrix(
   matrix.numberOfRows,RationalFraction<Rational>::oneRational(), RationalFraction<Rational>::zeroRational());
-  int tempI;
   int numberOfFoundPivots = 0;
   std::stringstream out, outLaTeX;
 
@@ -3612,14 +3611,15 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   outLaTeX << "\\begin{tabular}{ll}";
   outLaTeX << "$" << extendedMatrix.toString(& format) << "$";
 
+  int pivotIndex = 0;
   for (int i = 0; i < matrix.numberOfColumns; i ++) {
-    tempI = matrix.findPivot(i, numberOfFoundPivots);
-    if (tempI != - 1) {
-      if (tempI != numberOfFoundPivots) {
-        matrix.switchRows(numberOfFoundPivots, tempI);
-        outputMatrix.switchRows (numberOfFoundPivots, tempI);
-        out << "<br>Swap row " << numberOfFoundPivots + 1 << " and row " << tempI + 1 << ": ";
-        outLaTeX << "& Swap row " << numberOfFoundPivots + 1 << " and row " << tempI + 1 << ". ";
+    pivotIndex = matrix.findPivot(i, numberOfFoundPivots);
+    if (pivotIndex != - 1) {
+      if (pivotIndex != numberOfFoundPivots) {
+        matrix.switchRows(numberOfFoundPivots, pivotIndex);
+        outputMatrix.switchRows (numberOfFoundPivots, pivotIndex);
+        out << "<br>Swap row " << numberOfFoundPivots + 1 << " and row " << pivotIndex + 1 << ": ";
+        outLaTeX << "& Swap row " << numberOfFoundPivots + 1 << " and row " << pivotIndex + 1 << ". ";
         extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMatrix);
         out << "<br>" << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
@@ -3717,7 +3717,6 @@ bool CalculatorFunctions::invertMatrixVerbose(
     return output.assignError(calculator, "The matrix is not square");
   }
   outputMatrix.makeIdentityMatrix(matrix.numberOfRows);
-  int tempI;
   int numberOfFoundPivots = 0;
   std::stringstream out;
   Rational tempElement;
@@ -3729,14 +3728,15 @@ bool CalculatorFunctions::invertMatrixVerbose(
   augmentedMatrix = matrix;
   augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
   out << "<br>" << HtmlRoutines::getMathNoDisplay(augmentedMatrix.toString(&format));
+  int pivotIndex = 0;
   for (int i = 0; i < matrix.numberOfColumns; i ++) {
-    tempI = matrix.findPivot(i, numberOfFoundPivots);
-    if (tempI != - 1) {
-      if (tempI != numberOfFoundPivots) {
-        matrix.switchRows(numberOfFoundPivots, tempI);
-        outputMatrix.switchRows (numberOfFoundPivots, tempI);
+    pivotIndex = matrix.findPivot(i, numberOfFoundPivots);
+    if (pivotIndex != - 1) {
+      if (pivotIndex != numberOfFoundPivots) {
+        matrix.switchRows(numberOfFoundPivots, pivotIndex);
+        outputMatrix.switchRows (numberOfFoundPivots, pivotIndex);
         out << "<br>switch row " << numberOfFoundPivots + 1
-        << " and row " << tempI + 1 << ": ";
+        << " and row " << pivotIndex + 1 << ": ";
         augmentedMatrix = matrix;
         augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
         out << "<br>"

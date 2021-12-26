@@ -2744,11 +2744,11 @@ bool Expression::needsParenthesisForBaseOfExponent() const {
     return this->getValue<double>() < 0;
   }
   if (this->isOfType<AlgebraicNumber>()) {
-    LargeInteger tempI;
-    if (!this->getValue<AlgebraicNumber>().isInteger(&tempI)) {
+    LargeInteger largeInteger;
+    if (!this->getValue<AlgebraicNumber>().isInteger(&largeInteger)) {
       return true;
     }
-    return tempI > 0;
+    return largeInteger > 0;
   }
   if (this->isAtom() || this->children.size == 0) {
     return false;

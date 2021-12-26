@@ -520,7 +520,6 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     }
   }
   ///////////////////
-  int tempI;
   int numberOfPivots = 0;
   int maximumMatrixRank = MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
   Coefficient tempElement;
@@ -551,8 +550,8 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       }
       break;
     }
-    tempI = this->findPivot(i, numberOfPivots);
-    if (tempI == - 1) {
+    int pivotIndex = this->findPivot(i, numberOfPivots);
+    if (pivotIndex == - 1) {
       if (outputNonPivotColumns != nullptr) {
         outputNonPivotColumns->addSelectionAppendNewIndex(i);
       }
@@ -568,7 +567,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
         }
         *humanReadableReport << "</td><td style='border-bottom:1pt solid black;'><div style='display:inline-block;min-width:100px'>Selected pivot column "
         << i + 1 << ". ";
-        if (numberOfPivots != tempI) {
+        if (numberOfPivots != pivotIndex) {
           *humanReadableReport << "Swapping rows so the pivot row is number " << numberOfPivots << ". ";
         }
       } else {
@@ -578,7 +577,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
           *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)";
         }
         *humanReadableReport << "& Selected pivot column " << i + 1 << ". ";
-        if (numberOfPivots != tempI) {
+        if (numberOfPivots != pivotIndex) {
           *humanReadableReport << "Swapping rows so the pivot row is number "
           << numberOfPivots << ". ";
         }
@@ -587,9 +586,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     if (outputPivotColumns != nullptr) {
       outputPivotColumns->addSelectionAppendNewIndex(i);
     }
-    this->switchRows(numberOfPivots, tempI);
+    this->switchRows(numberOfPivots, pivotIndex);
     if (carbonCopyMatrix != 0) {
-      carbonCopyMatrix->switchRows(numberOfPivots, tempI);
+      carbonCopyMatrix->switchRows(numberOfPivots, pivotIndex);
     }
     tempElement = this->elements[numberOfPivots][i];
     tempElement.invert();

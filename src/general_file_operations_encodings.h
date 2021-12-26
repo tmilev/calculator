@@ -153,7 +153,7 @@ public:
   static bool openFileCreateIfNotPresentUnsecure(
     std::fstream& file,
     const std::string& fileName,
-    bool OpenInAppendMode,
+    bool openInAppendMode,
     bool truncate,
     bool openAsBinary
   );

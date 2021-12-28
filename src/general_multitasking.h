@@ -76,34 +76,6 @@ public:
   }
 };
 
-class PauseThread {
-  private:
-  MutexRecursiveWrapper mutexlockMeToPauseCallersOfSafePoint;
-  MutexRecursiveWrapper mutexSignalMeWhenReachingSafePoint;
-  bool flagIsRunning;
-  bool flagIsPausedWhileRunning;
-  bool isPausedWhileRunning() const;
-  void operator=(const PauseThread& other);
-  PauseThread(const PauseThread& other);
-public:
-  MutexRecursiveWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
-  void safePointDontCallMeFromDestructors();
-  void signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
-  void unlockSafePoint();
-  void initComputation();
-  void exitComputation();
-  bool& getFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe();
-  bool& getFlagIsRunningUnsafeUseWithMutexHoldMe();
-  PauseThread();
-};
-
-class ControllerStartsRunning: public PauseThread {
-public:
-  ControllerStartsRunning() {
-    this->initComputation();
-  }
-};
-
 class GlobalStatistics {
 public:
   static long long globalPointerCounter;

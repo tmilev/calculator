@@ -280,7 +280,6 @@ public:
   );
   bool listHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel);
   void generatePossibleNilradicalsRecursive(
-    PauseThread& PauseMutex,
     List<List<List<int> > >& multTable,
     List<Selection>& impliedSelections,
     List<int>& oppositeKmods,
@@ -288,7 +287,6 @@ public:
     int indexInOwner
   );
   void generatePossibleNilradicals(
-    PauseThread& PauseMutex,
     List<Selection>& impliedSelections,
     int& parabolicsCounter,
     bool useParabolicsInNilradical,

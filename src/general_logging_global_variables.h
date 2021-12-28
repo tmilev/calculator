@@ -357,7 +357,6 @@ public:
   JSData configurationCommandLine;
   JSData timeStats;
   List<List<std::string> > databaseModifiableFields;
-  PauseThread theLocalPauseController;
 
   static std::string hopefullyPermanentWebAdress;
   static std::string hopefullyPermanentWebAdressOfServerExecutable;

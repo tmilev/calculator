@@ -1564,7 +1564,6 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
 
 void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& parabolicSel) {
   std::stringstream out;
-  this->pauseController.initComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
   switch (this->computationPhase) {
     case 0:
@@ -1593,7 +1592,7 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 5:
-      this->maximumComputation.findExtremaParametricStep1(this->pauseController);
+      this->maximumComputation.findExtremaParametricStep1();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 6:
@@ -1612,7 +1611,6 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
       break;
   }
   this->computationPhase ++;
-  this->pauseController.exitComputation();
 }
 
 GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {

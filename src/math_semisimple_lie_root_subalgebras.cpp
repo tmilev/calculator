@@ -286,7 +286,6 @@ bool RootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
 }
 
 void RootSubalgebra::generatePossibleNilradicalsRecursive(
-  PauseThread& PauseMutex,
   List<List<List<int> > >& multTable,
   List<Selection>& impliedSelections,
   List<int>& oppositeKmods,
@@ -312,7 +311,6 @@ void RootSubalgebra::generatePossibleNilradicalsRecursive(
     if (RecursionDepth > - 1) {
       counters[RecursionDepth] ++;
     }
-    PauseMutex.safePointDontCallMeFromDestructors();
   }
 }
 
@@ -1771,7 +1769,6 @@ void RootSubalgebra::generatePossibleNilradicalsInit(List<Selection>& impliedSel
 }
 
 void RootSubalgebra::generatePossibleNilradicals(
-  PauseThread& PauseMutex,
   List<Selection>& impliedSelections,
   int& parabolicsCounter,
   bool useParabolicsInNilradical,
@@ -1818,7 +1815,7 @@ void RootSubalgebra::generatePossibleNilradicals(
         owner.CountersNilradicalsGeneration[0] = this->centralizerRoots.size;
       }
       this->generatePossibleNilradicalsRecursive(
-        PauseMutex, this->pairingTable, impliedSelections, this->oppositeKModules, owner, indexInOwner
+        this->pairingTable, impliedSelections, this->oppositeKModules, owner, indexInOwner
       );
     }
   } else {
@@ -1827,7 +1824,7 @@ void RootSubalgebra::generatePossibleNilradicals(
     owner.RecursionDepthNilradicalsGeneration = 0;
     owner.CountersNilradicalsGeneration[0] = 0;
     this->generatePossibleNilradicalsRecursive(
-      PauseMutex, this->pairingTable, impliedSelections, this->oppositeKModules, owner, indexInOwner
+      this->pairingTable, impliedSelections, this->oppositeKModules, owner, indexInOwner
     );
   }
 }
@@ -3169,14 +3166,12 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
 }
 
 void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int startingIndex, int numberToBeProcessed) {
-  static PauseThread localController;
   this->numberOfSubalgebrasProcessed = 0;
   this->numberOfConeConditionFailures = 0;
   this->subalgebrasCounted = 0;
   for (int i = startingIndex; i < numberToBeProcessed + startingIndex; i ++) {
     this->subalgebras[i].flagComputeConeCondition = this->flagComputeConeCondition;
     this->subalgebras[i].generatePossibleNilradicals(
-      localController,
       this->impiedSelectionsNilradical,
       this->parabolicsCounterNilradicalGeneration,
       false,
@@ -3201,7 +3196,6 @@ SemisimpleLieAlgebra& RootSubalgebras::getOwnerSemisimpleLieAlgebra() const {
 }
 
 void RootSubalgebras::computeLProhibitingRelations() {
-  static PauseThread localController;
   if (this->flagStoringNilradicals) {
     this->storedNilradicals.setSize(this->subalgebras.size);
   }
@@ -3211,7 +3205,6 @@ void RootSubalgebras::computeLProhibitingRelations() {
   ) {
     this->subalgebras[this->indexCurrentSubalgebraNilradicalsGeneration].flagComputeConeCondition = this->flagComputeConeCondition;
     this->subalgebras[this->indexCurrentSubalgebraNilradicalsGeneration].generatePossibleNilradicals(
-      localController,
       this->impiedSelectionsNilradical,
       this->parabolicsCounterNilradicalGeneration,
       this->flagUsingParabolicsInCentralizers,

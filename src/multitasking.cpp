@@ -108,58 +108,6 @@ void MutexRecursiveWrapper::unlockMe() {
   static_cast<std::mutex*>(this->theMutexImplementation)->unlock();
 }
 
-void PauseThread::safePointDontCallMeFromDestructors() {
-  this->mutexSignalMeWhenReachingSafePoint.unlockMe();
-  this->mutexlockMeToPauseCallersOfSafePoint.lockMe();
-  this->mutexSignalMeWhenReachingSafePoint.lockMe();
-  this->mutexlockMeToPauseCallersOfSafePoint.unlockMe();
-}
-
-void PauseThread::signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint() {
-  this->mutexHoldMeWhenReadingOrWritingInternalFlags.lockMe();
-  if (this->flagIsPausedWhileRunning) {
-    this->mutexHoldMeWhenReadingOrWritingInternalFlags.unlockMe();
-    return;
-  }
-  this->mutexHoldMeWhenReadingOrWritingInternalFlags.unlockMe();
-  this->mutexlockMeToPauseCallersOfSafePoint.lockMe();
-  this->mutexSignalMeWhenReachingSafePoint.lockMe();
-  this->flagIsPausedWhileRunning = true;
-  this->mutexSignalMeWhenReachingSafePoint.unlockMe();
-}
-
-void PauseThread::unlockSafePoint() {
-  this->flagIsPausedWhileRunning = false;
-  this->mutexlockMeToPauseCallersOfSafePoint.unlockMe();
-}
-
-void PauseThread::initComputation() {
-  this->mutexSignalMeWhenReachingSafePoint.lockMe();
-  this->flagIsRunning = true;
-}
-
-void PauseThread::exitComputation() {
-  this->flagIsRunning = false;
-  this->mutexSignalMeWhenReachingSafePoint.unlockMe();
-}
-
-bool& PauseThread::getFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe() {
-  return this->flagIsPausedWhileRunning;
-}
-
-bool& PauseThread::getFlagIsRunningUnsafeUseWithMutexHoldMe() {
-  return this->flagIsRunning;
-}
-
-PauseThread::PauseThread() {
-  this->flagIsRunning = false;
-  this->flagIsPausedWhileRunning = false;
-}
-
-bool PauseThread::isPausedWhileRunning() const {
-  return this->flagIsPausedWhileRunning;
-}
-
 ThreadData::ThreadData() {
   this->index = 0;
 //  this->theId = 0;

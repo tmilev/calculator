@@ -11957,9 +11957,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep5() {
   }
 }
 
-void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1(
-  PauseThread& thePauseController
-) {
+void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
   FormatExpressions tempFormat;
   ProgressReport report1;
   ProgressReport report2;
@@ -11978,7 +11976,6 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1(
       }
       this->conesLargerDimension.size --;
       this->LPtoMaximizeLargerDim.size --;
-      thePauseController.safePointDontCallMeFromDestructors();
       std::stringstream tempStream1, tempStream2, tempStream3;
       tempStream1 << "Processing " << this->numProcessedNonParam + 1 << " out of " << this->numNonParaM;
       tempStream2 << "Remaining cones: " << this->conesLargerDimension.size;

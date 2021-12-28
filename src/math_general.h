@@ -6282,8 +6282,8 @@ public:
 
   std::string toString(FormatExpressions* format = nullptr);
   void initialize(Vector<Rational>& inequalities, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift);
-  void findExtremaParametricStep1(PauseThread& thePauseController);
-  void findExtremaParametricStep2TrimChamberForMultOne(PauseThread& thePauseController);
+  void findExtremaParametricStep1();
+  void findExtremaParametricStep2TrimChamberForMultOne();
   void findExtremaParametricStep3();
   void findExtremaParametricStep4();
   void findExtremaParametricStep5();

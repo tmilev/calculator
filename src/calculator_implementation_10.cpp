@@ -8,6 +8,13 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula(
   const Expression& input,
   Expression& output
 ) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula");
+  Vectors<Rational> vectors;
+  Matrix<Rational> matrix;
+  if (CalculatorConversions::functionGetMatrix(calculator, input, matrix, false)) {
+
+  }
+  global.comments << "DEBUG: got matrix so far: " << matrix.toString() << ". ";
   global.fatal << "Not implemented yet. " << global.fatal;
   return false;
 }

@@ -4485,6 +4485,20 @@ ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101)
 ```
 Makes an elliptic curve from a cubic in normal form, generator letter and base point.
 
+*VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+VectorPartitionFunction(
+(1,0,0),
+(0,1,0),
+(0,0,1),
+(1,1,0),
+(0,1,1),
+(1,1,1)
+);
+```
+Work in progress. Vector partition function formula. 
+
 *SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::innerSemisimpleLieAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
@@ -4557,17 +4571,20 @@ AdjointMatrix(g_2)
 Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].First element g = element of a semisimple Lie algebra. Extended to a map on the universal enveloping algebra via: ad(g_1, g_2) = ad(g_1)ad(g_2)
 
 *CartanInvolution* [CartanInvolution] {CalculatorLieTheory::cartanInvolution}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%204%29%3b%5cnCartanInvolution%28AI%2c%205%29%3b%5cnCartanInvolution%28AII%2c%204%29%3b%5cnCartanInvolution%28AII%2c%205%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%201%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%204%29%3b%5cnCartanInvolution%28BI%2c%204%2c%201%29%3b%5cnCartanInvolution%28BI%2c%204%2c%202%29%3b%5cnCartanInvolution%28BI%2c%204%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%201%29%3b%5cnCartanInvolution%28BI%2c%205%2c%202%29%3b%5cnCartanInvolution%28BI%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%204%29%3b%5cnCartanInvolution%28CI%2c%205%29%3b%5cnCartanInvolution%28CI%2c%205%2c1%29%3b%5cnCartanInvolution%28CI%2c%205%2c2%29%3b%5cnCartanInvolution%28CI%2c%205%2c%203%29%3b%5cnCartanInvolution%28CI%2c%205%2c%204%29%3b%5cnCartanInvolution%28DI%2c%205%29%3b%5cnCartanInvolution%28DI%2c%205%2c1%29%3b%5cnCartanInvolution%28DI%2c%205%2c2%29%3b%5cnCartanInvolution%28DI%2c%205%2c3%29%3b%5cnCartanInvolution%28DI%2c%205%2c4%29%3b%5cnCartanInvolution%28DI%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%205%29%3b%5cnCartanInvolution%28DII%2c%205%2c1%29%3b%5cnCartanInvolution%28DII%2c%205%2c2%29%3b%5cnCartanInvolution%28DII%2c%205%2c3%29%3b%5cnCartanInvolution%28DII%2c%205%2c4%29%3b%5cnCartanInvolution%28DII%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%203%2c1%29%3b%5cnCartanInvolution%28E_6%2c%20EI%29%3b%5cnCartanInvolution%28E_6%2c%20EII%29%3b%5cnCartanInvolution%28E_6%2c%20EIII%29%3b%5cnCartanInvolution%28E_6%2c%20EIV%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%204%29%3b%5cnCartanInvolution%28AI%2c%205%29%3b%5cnCartanInvolution%28AII%2c%204%29%3b%5cnCartanInvolution%28AII%2c%205%29%3b%5cnCartanInvolution%28AIII%2c%204%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%200%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%201%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%204%29%3b%5cnCartanInvolution%28BI%2c%204%2c%200%29%3b%5cnCartanInvolution%28BI%2c%204%2c%201%29%3b%5cnCartanInvolution%28BI%2c%204%2c%202%29%3b%5cnCartanInvolution%28BI%2c%204%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%201%29%3b%5cnCartanInvolution%28BI%2c%205%2c%202%29%3b%5cnCartanInvolution%28BI%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%204%29%3b%5cnCartanInvolution%28CI%2c%205%29%3b%5cnCartanInvolution%28CI%2c%205%2c1%29%3b%5cnCartanInvolution%28CI%2c%205%2c2%29%3b%5cnCartanInvolution%28CI%2c%205%2c%203%29%3b%5cnCartanInvolution%28CI%2c%205%2c%204%29%3b%5cnCartanInvolution%28DI%2c%205%29%3b%5cnCartanInvolution%28DI%2c%205%2c1%29%3b%5cnCartanInvolution%28DI%2c%205%2c2%29%3b%5cnCartanInvolution%28DI%2c%205%2c3%29%3b%5cnCartanInvolution%28DI%2c%205%2c4%29%3b%5cnCartanInvolution%28DI%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%205%29%3b%5cnCartanInvolution%28DII%2c%205%2c1%29%3b%5cnCartanInvolution%28DII%2c%205%2c2%29%3b%5cnCartanInvolution%28DII%2c%205%2c3%29%3b%5cnCartanInvolution%28DII%2c%205%2c4%29%3b%5cnCartanInvolution%28DII%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%203%2c1%29%3b%5cnCartanInvolution%28E_6%2c%20EI%29%3b%5cnCartanInvolution%28E_6%2c%20EII%29%3b%5cnCartanInvolution%28E_6%2c%20EIII%29%3b%5cnCartanInvolution%28E_6%2c%20EIV%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CartanInvolution(AI, 4);
 CartanInvolution(AI, 5);
 CartanInvolution(AII, 4);
 CartanInvolution(AII, 5);
+CartanInvolution(AIII, 4);
+CartanInvolution(AIII, 4, 0);
 CartanInvolution(AIII, 4, 1);
 CartanInvolution(AIII, 4, 2);
 CartanInvolution(AIII, 5, 2);
 CartanInvolution(AIII, 5, 3);
 CartanInvolution(BI, 4);
+CartanInvolution(BI, 4, 0);
 CartanInvolution(BI, 4, 1);
 CartanInvolution(BI, 4, 2);
 CartanInvolution(BI, 4, 3);

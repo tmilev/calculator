@@ -225,10 +225,10 @@ bool CalculatorFunctions::conesIntersect(Calculator& calculator, const Expressio
   Matrix<Rational> coneStrictMatForm;
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
-  if (!calculator.functionGetMatrixNoComputation(input[1], coneStrictMatForm)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, input[1], coneStrictMatForm)) {
     return calculator << "Failed to extract matrix from the first argument, " << input[1].toString();
   }
-  if (!calculator.functionGetMatrixNoComputation(input[2], coneNonStrictMatForm)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, input[2], coneNonStrictMatForm)) {
     return calculator << "Failed to extract matrix from the second argument, " << input[2].toString();
   }
   std::stringstream out;
@@ -411,14 +411,14 @@ bool CalculatorFunctions::perturbSplittingNormal(Calculator& calculator, const E
   }
   Matrix<Rational> matrix;
   Vectors<Rational> nonStrictCone, vectorsToPerturbRelativeTo;
-  if (!calculator.functionGetMatrix(
-    input[2], matrix, false, nullptr, splittingNormal.size, nullptr
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator, input[2], matrix, false, nullptr, splittingNormal.size, nullptr
   )) {
     return output.assignError(calculator, "Failed to extract matrix from second argument. ");
   }
   nonStrictCone.assignMatrixRows(matrix);
-  if (!calculator.functionGetMatrix(
-    input[3], matrix, false, nullptr, splittingNormal.size, nullptr
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator, input[3], matrix, false, nullptr, splittingNormal.size, nullptr
   )) {
     return output.assignError(calculator, "Failed to extract matrix from third argument. ");
   }
@@ -522,8 +522,8 @@ bool CalculatorFunctions::interpolatePolynomial(
     return false;
   }
   Matrix<Rational> pointsOfInterpoly;
-  if (!calculator.functionGetMatrix(
-    convertedE, pointsOfInterpoly, false, nullptr, 2
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator, convertedE, pointsOfInterpoly, false, nullptr, 2
   )) {
     return calculator
     << "<hr>Failed to extract points of interpolation from "

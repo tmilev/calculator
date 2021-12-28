@@ -2884,7 +2884,8 @@ bool CalculatorFunctions::determinantPolynomial(
   }
   Matrix<Polynomial<Rational> > matrixPolynomial;
   ExpressionContext context(calculator);
-  if (!calculator.functionGetMatrix(
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator,
     input[1],
     matrixPolynomial,
     true,
@@ -3045,7 +3046,7 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
     return false;
   }
   Matrix<Rational> matrix;
-  if (!calculator.functionGetMatrix(input[1], matrix, false)) {
+  if (!CalculatorConversions::functionGetMatrix(calculator, input[1], matrix, false)) {
     return false;
   }
   if (!matrix.isSquare()) {

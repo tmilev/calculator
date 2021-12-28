@@ -2051,7 +2051,7 @@ bool CalculatorFunctions::gaussianEliminationMatrix(
     << input.toString() << ". ";
   }
   Matrix<AlgebraicNumber> matrix;
-  if (!calculator.functionGetMatrixNoComputation(converted, matrix)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, converted, matrix)) {
     return calculator
     << "<hr>Failed to extract algebraic number matrix, "
     << "got intermediate conversion to: "
@@ -3138,7 +3138,8 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
   }
   const Expression& pointsExpressions = input[4][2];
   Matrix<double> points;
-  if (!calculator.functionGetMatrix(
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator,
     pointsExpressions,
     points,
     true,
@@ -3581,7 +3582,7 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   )) {
     return output.assignError(calculator, "Failed to extract matrix. ");
   }
-  if (calculator.functionGetMatrixNoComputation(converted, matrix)) {
+  if (CalculatorConversions::functionGetMatrixNoComputation(calculator, converted, matrix)) {
     return calculator << "Failed to get matrix of rational functions. ";
   }
   ExpressionContext context = converted.getContext();
@@ -3709,8 +3710,8 @@ bool CalculatorFunctions::invertMatrixVerbose(
   }
 
   Matrix<Rational> matrix, outputMatrix, augmentedMatrix;
-  if (!calculator.functionGetMatrixNoComputation(
-    converted, matrix
+  if (!CalculatorConversions::functionGetMatrixNoComputation(
+    calculator, converted, matrix
   )) {
     return CalculatorFunctions::invertMatrixRationalFractionsVerbose(calculator, input, output);
   }
@@ -5299,7 +5300,7 @@ bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
     return false;
   }
   Matrix<Rational> matrix;
-  if (!calculator.functionGetMatrixNoComputation(argument, matrix)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, argument, matrix)) {
     return calculator
     << "<hr>Minimal poly computation: could not convert "
     << argument.toString() << " to rational matrix.";
@@ -5324,7 +5325,7 @@ bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
   }
   const Expression& argument = input[1];
   Matrix<Rational> matrix;
-  if (!calculator.functionGetMatrixNoComputation(argument, matrix)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, argument, matrix)) {
     return calculator
     << "<hr>Characteristic poly computation: could not convert "
     << input.toString() << " to rational matrix.";
@@ -5367,7 +5368,7 @@ bool CalculatorFunctions::matrixTrace(
     return false;
   }
   Matrix<Rational> matrix;
-  if (calculator.functionGetMatrixNoComputation(input[1], matrix)) {
+  if (CalculatorConversions::functionGetMatrixNoComputation(calculator, input[1], matrix)) {
     if (!matrix.isSquare()) {
       return output.assignError(
         calculator,
@@ -5377,7 +5378,7 @@ bool CalculatorFunctions::matrixTrace(
     return output.assignValue(calculator, matrix.getTrace());
   }
   Matrix<RationalFraction<Rational> > matrixRationalFunction;
-  if (calculator.functionGetMatrixNoComputation(input[1], matrixRationalFunction)) {
+  if (CalculatorConversions::functionGetMatrixNoComputation(calculator, input[1], matrixRationalFunction)) {
     if (!matrixRationalFunction.isSquare()) {
       return output.assignError(
         calculator,
@@ -5560,7 +5561,7 @@ bool CalculatorFunctions::isNilpotent(
   bool found = false;
   Matrix<Rational> matrix;
   MatrixTensor<Rational> matrixTensor;
-  if (calculator.functionGetMatrixNoComputation(converted, matrix)) {
+  if (CalculatorConversions::functionGetMatrixNoComputation(calculator, converted, matrix)) {
     found = true;
     matrixTensor = matrix;
   } else if (input.isOfType<MatrixTensor<Rational> >(&matrixTensor)) {
@@ -5586,7 +5587,7 @@ bool CalculatorFunctions::invertMatrix(Calculator& calculator, const Expression&
   )) {
     return calculator << "Failed to extract matrix from input. ";
   }
-  if (calculator.functionGetMatrixNoComputation(converted, matrix)) {
+  if (CalculatorConversions::functionGetMatrixNoComputation(calculator, converted, matrix)) {
     if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1) {
       return output.assignError(
         calculator,
@@ -5602,7 +5603,7 @@ bool CalculatorFunctions::invertMatrix(Calculator& calculator, const Expression&
     return output.makeMatrix(calculator, matrix);
   }
   Matrix<AlgebraicNumber> matrixAlgebraic;
-  if (calculator.functionGetMatrixNoComputation(input, matrixAlgebraic)) {
+  if (CalculatorConversions::functionGetMatrixNoComputation(calculator, input, matrixAlgebraic)) {
     return calculator << "<hr>Failed to extract algebraic number matrix from: "
     << input.toString();
   }
@@ -6734,7 +6735,8 @@ bool CalculatorFunctions::allVectorPartitions(Calculator& calculator, const Expr
     return calculator << "<hr>Failed to extract vector from " << vectorExpression.toString();
   }
   Matrix<Rational> vectorsMatForm;
-  if (!calculator.functionGetMatrix(
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator,
     partitioningVectorsExpression,
     vectorsMatForm,
     false,
@@ -6782,8 +6784,8 @@ bool CalculatorFunctions::functionDeterminant(
   MacroRegisterFunctionWithName("CalculatorFunctions::functionDeterminant");
   Matrix<Coefficient> matrix;
   ExpressionContext context;
-  if (!calculator.functionGetMatrix<Coefficient>(
-    input, matrix, false, &context, - 1, &calculator.comments
+  if (!CalculatorConversions::functionGetMatrix<Coefficient>(
+    calculator, input, matrix, false, &context, - 1, &calculator.comments
   )) {
     return false;
   }

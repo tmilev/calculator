@@ -2669,7 +2669,7 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format)
     format.flagUseHTML = false;
     format.flagUseLatex = true;
     Matrix<RationalFraction<Rational> > matrix;
-    this->owner->functionGetMatrix(*this, matrix, false);
+    CalculatorConversions::functionGetMatrix(*this->owner, *this, matrix, false);
     out << matrix.toString(&format);
     return true;
   }

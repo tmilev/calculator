@@ -2442,22 +2442,6 @@ public:
     const Expression& input,
     LinearCombination<Expression, Rational>& outputSum
   );
-  template<class Type>
-  bool functionGetMatrixNoComputation(
-    const Expression& input,
-    Matrix<Type>& outputMatrix
-  ) {
-    return this->functionGetMatrix(input, outputMatrix, false);
-  }
-  template<class Type>
-  bool functionGetMatrix(
-    const Expression& input,
-    Matrix<Type>& outputMatrix,
-    bool convertWithComputation,
-    ExpressionContext* inputOutputStartingContext = nullptr,
-    int targetNumberOfColumnsNonMandatory = - 1,
-    std::stringstream* commentsOnError = nullptr
-  );
   template <class Type>
   bool getVectorFromFunctionArguments(
     const Expression& input,
@@ -2966,6 +2950,25 @@ public:
     const Expression& input,
     WithContext<Type>& output
   );
+
+  template<class Type>
+  static bool functionGetMatrixNoComputation(
+    Calculator& calculator,
+    const Expression& input,
+    Matrix<Type>& outputMatrix
+  ) {
+    return CalculatorConversions::functionGetMatrix(calculator, input, outputMatrix, false);
+  }
+  template<class Type>
+  static bool functionGetMatrix(
+    Calculator& calculator,
+    const Expression& input,
+    Matrix<Type>& outputMatrix,
+    bool convertWithComputation,
+    ExpressionContext* inputOutputStartingContext = nullptr,
+    int targetNumberOfColumnsNonMandatory = - 1,
+    std::stringstream* commentsOnError = nullptr
+  );
 };
 
 template <class Type>
@@ -3096,7 +3099,8 @@ bool Expression::isOfTypeWithContext(WithContext<Type>* whichElement) const {
 }
 
 template <class Type>
-bool Calculator::functionGetMatrix(
+bool CalculatorConversions::functionGetMatrix(
+  Calculator& calculator,
   const Expression& input,
   Matrix<Type>& outputMatrix,
   bool convertWithComputation,
@@ -3104,16 +3108,16 @@ bool Calculator::functionGetMatrix(
   int targetNumberOfColumnsNonMandatory,
   std::stringstream* commentsOnError
 ) {
-  MacroRegisterFunctionWithName("Calculator::functionGetMatrix");
+  MacroRegisterFunctionWithName("CalculatorConversions::functionGetMatrix");
   Matrix<Expression> matrixExpressions;
   Matrix<WithContext<Type> > outputCandidate;
   Expression transformer = input;
   if (transformer.size() > 0) {
-    Expression matrixStart(*this);
-    matrixStart.addChildAtomOnTop(this->opMatrix());
+    Expression matrixStart(calculator);
+    matrixStart.addChildAtomOnTop(calculator.opMatrix());
     transformer.setChild(0, matrixStart);
   }
-  if (!this->getMatrixExpressions(
+  if (!calculator.getMatrixExpressions(
     transformer, matrixExpressions, - 1, targetNumberOfColumnsNonMandatory
   )) {
     if (commentsOnError != nullptr) {
@@ -3126,7 +3130,7 @@ bool Calculator::functionGetMatrix(
     matrixExpressions.numberOfRows,
     matrixExpressions.numberOfColumns
   );
-  ExpressionContext context(*this);
+  ExpressionContext context(calculator);
   if (inputOutputStartingContext != nullptr) {
     context = *inputOutputStartingContext;
   }
@@ -3136,11 +3140,11 @@ bool Calculator::functionGetMatrix(
       bool success = false;
       if (convertWithComputation) {
         success = CalculatorConversions::convert(
-          *this, matrixExpressions(i, j), current
+          calculator, matrixExpressions(i, j), current
         );
       } else {
         success = CalculatorConversions::convertWithoutComputation(
-          *this, matrixExpressions(i, j), current
+          calculator, matrixExpressions(i, j), current
         );
       }
       if (!success) {

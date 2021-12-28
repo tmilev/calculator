@@ -423,8 +423,8 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   }
   if (!isGood && input.size() == 3) {
     Matrix<Rational> highestWeightsMatForm;
-    if (calculator.functionGetMatrix(
-      input[2], highestWeightsMatForm, false, nullptr, semisimpleLieAlgebra->getRank()
+    if (CalculatorConversions::functionGetMatrix(
+      calculator, input[2], highestWeightsMatForm, false, nullptr, semisimpleLieAlgebra->getRank()
     )) {
       highestWeightsMatForm.getVectorsFromRows(highestWeights);
       isGood = true;
@@ -1925,7 +1925,7 @@ bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(
     return calculator << "<hr>Failed to get Dynkin type from argument. " << input[1].toString();
   }
   Matrix<Rational> matrix;
-  if (!calculator.functionGetMatrixNoComputation(input[2], matrix)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, input[2], matrix)) {
     return calculator << "<hr>Failed to get matrix from argument. " << input[2].toString();
   }
   if (matrix.numberOfColumns != matrix.numberOfRows || matrix.numberOfColumns != dynkinType.getRank()) {

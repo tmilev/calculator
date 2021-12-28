@@ -323,7 +323,8 @@ void MeshTriangles::computeImplicitPlot() {
 bool Calculator::getMatrixDoubles(
   const Expression& input, Matrix<double>& output, int desiredNumberOfColumns
 ) {
-  return this->functionGetMatrix<double>(
+  return CalculatorConversions::functionGetMatrix<double>(
+    *this,
     input,
     output,
     true,
@@ -477,7 +478,8 @@ bool CalculatorConversions::functionMatrixDouble(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixDouble");
   Matrix<double> matrix;
-  if (!calculator.functionGetMatrix(
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator,
     input,
     matrix,
     true,

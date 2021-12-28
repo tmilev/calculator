@@ -986,7 +986,9 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   reportStream << "Extracting matrix of Cartan elements. ";
   report.report(reportStream.str());
   Matrix<Rational> hElements;
-  if (!calculator.functionGetMatrix(ElementsCartanE, hElements, false, nullptr, rank, nullptr)) {
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator, ElementsCartanE, hElements, false, nullptr, rank, nullptr
+  )) {
     return calculator << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
     << outputSubalgebra.weylNonEmbedded->dynkinType << "<hr>";
   }
@@ -1546,7 +1548,7 @@ bool CalculatorConversions::functionMatrixRational(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixRational");
   Matrix<Rational> outputMatrix;
-  if (!calculator.functionGetMatrix(input, outputMatrix, false, nullptr, - 1, nullptr)) {
+  if (!CalculatorConversions::functionGetMatrix(calculator, input, outputMatrix, false, nullptr, - 1, nullptr)) {
     return calculator << "<br>Failed to get matrix of rationals. ";
   }
   return output.makeMatrix(calculator, outputMatrix);
@@ -1560,7 +1562,7 @@ bool CalculatorConversions::matrixRationalTensorForm(
     return calculator << "Failed to extract matrix of rationals. ";
   }
   Matrix<Rational> matrixRational;
-  if (!calculator.functionGetMatrixNoComputation(output, matrixRational)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, output, matrixRational)) {
     return false;
   }
   MatrixTensor<Rational> outputMatrixTensor;
@@ -1573,7 +1575,7 @@ bool CalculatorConversions::functionMatrixRationalTensorForm(
 ) {
   MacroRegisterFunctionWithName("Calculator::functionMatrixRationalTensorForm");
   Matrix<Rational> matrixRational;
-  if (!calculator.functionGetMatrixNoComputation(input, matrixRational)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, input, matrixRational)) {
     return false;
   }
   MatrixTensor<Rational> outputMatrixTensor;
@@ -1634,7 +1636,7 @@ bool CalculatorConversions::functionMatrixAlgebraic(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixAlgebraic");
   Matrix<AlgebraicNumber> outputMatrix;
-  if (!calculator.functionGetMatrixNoComputation(input, outputMatrix)) {
+  if (!CalculatorConversions::functionGetMatrixNoComputation(calculator, input, outputMatrix)) {
     return false;
   }
   return output.makeMatrix(calculator, outputMatrix);
@@ -1655,7 +1657,8 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixRationalFunction");
   Matrix<RationalFraction<Rational> > outputMatrix;
   ExpressionContext context(calculator);
-  if (!calculator.functionGetMatrix(
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator,
     input,
     outputMatrix,
     true,

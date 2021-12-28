@@ -3,7 +3,7 @@
 #include "calculator_inner_functions_vector_partition_function_1.h"
 
 void Calculator::initializeFunctionsVectorPartitionFunctions() {
-  MacroRegisterFunctionWithName("Calculator::initializeFunctionsScientificBasic");
+  MacroRegisterFunctionWithName("Calculator::initializeFunctionsVectorPartitionFunctions");
   Function::Options innerStandard = Function::Options::standard();
 
   this->addOperationHandler(

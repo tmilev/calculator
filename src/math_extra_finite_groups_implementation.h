@@ -518,23 +518,23 @@ void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   ConjugacyClass& inputOutputClass, bool storeCC
 ) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
-  OrbitIterator<elementSomeGroup, elementSomeGroup> theOrbitIterator;
-  theOrbitIterator.groupAction.actOn = elementSomeGroup::conjugationAction;
-  theOrbitIterator.groupAction.name = "conjugation action";
-  theOrbitIterator.initialize(this->generators, inputOutputClass.representative, theOrbitIterator.groupAction);
+  OrbitIterator<elementSomeGroup, elementSomeGroup> orbitIterator;
+  orbitIterator.groupAction.actOn = elementSomeGroup::conjugationAction;
+  orbitIterator.groupAction.name = "conjugation action";
+  orbitIterator.initialize(this->generators, inputOutputClass.representative, orbitIterator.groupAction);
   inputOutputClass.size = 1;
   if (storeCC) {
     inputOutputClass.elements.setSize(0);
     inputOutputClass.elements.addOnTop(inputOutputClass.representative);
   }
-  while (theOrbitIterator.incrementReturnFalseIfPastLast()) {
+  while (orbitIterator.incrementReturnFalseIfPastLast()) {
     inputOutputClass.size ++;
     if (storeCC) {
-      if (inputOutputClass.elements.contains(theOrbitIterator.getCurrentElement())) {
-        global.fatal << " !element " << theOrbitIterator.getCurrentElement().toString()
+      if (inputOutputClass.elements.contains(orbitIterator.getCurrentElement())) {
+        global.fatal << " !element " << orbitIterator.getCurrentElement().toString()
         << " already contained !" << global.fatal;
       }
-      inputOutputClass.elements.addOnTop(theOrbitIterator.getCurrentElement());
+      inputOutputClass.elements.addOnTop(orbitIterator.getCurrentElement());
     }
   }
 }
@@ -784,7 +784,7 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
   MacroRegisterFunctionWithName("WeylGroup::generateOuterOrbit");
   this->checkInitialization();
   this->computeOuterAutoGenerators();
-  List<MatrixTensor<Rational> > theOuterGens = this->outerAutomorphisms.generators;
+  List<MatrixTensor<Rational> > outerGenerators = this->outerAutomorphisms.generators;
   output.clear();
   for (int i = 0; i < weights.size; i ++) {
     output.addOnTop(weights[i]);
@@ -801,14 +801,14 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
     outputSubset->clear();
     outputSubset->addOnTop(currentElt);
   }
-  int numGens = this->weylGroup->getDimension() + theOuterGens.size;
+  int numGens = this->weylGroup->getDimension() + outerGenerators.size;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < numGens; j ++) {
       if (j < this->weylGroup->getDimension()) {
         currentRoot = output[i];
         this->weylGroup->reflectSimple(j, currentRoot);
       } else {
-        theOuterGens[j - this->weylGroup->getDimension()].actOnVectorColumn(output[i], currentRoot);
+        outerGenerators[j - this->weylGroup->getDimension()].actOnVectorColumn(output[i], currentRoot);
       }
       if (output.addOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
@@ -1213,9 +1213,9 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
     }
     return false;
   }
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
-  if (theTopHeightSimpleCoords < 0) {
-    theTopHeightSimpleCoords = 0;
+  int topHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
+  if (topHeightSimpleCoords < 0) {
+    topHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
   int topHeightRootSystem = this->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
@@ -1233,7 +1233,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   Vector<Coefficient> currentWeight;
   for (
     int lowestUnexploredHeightDiff = 0;
-    lowestUnexploredHeightDiff <= theTopHeightSimpleCoords;
+    lowestUnexploredHeightDiff <= topHeightSimpleCoords;
     lowestUnexploredHeightDiff ++
   ) {
     if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights) {
@@ -1644,9 +1644,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   basisEi.makeEiBasis(dimension);
   this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Coefficient> highestWeightFundCoords = this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
-  if (theTopHeightSimpleCoords < 0) {
-    theTopHeightSimpleCoords = 0;
+  int topHeightSimpleCoordinates = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
+  if (topHeightSimpleCoordinates < 0) {
+    topHeightSimpleCoordinates = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
   int topHeightRootSystem = this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
@@ -1662,7 +1662,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   Vector<Coefficient> currentWeight;
   for (
     int lowestUnexploredHeightDiff = 0;
-    lowestUnexploredHeightDiff <= theTopHeightSimpleCoords;
+    lowestUnexploredHeightDiff <= topHeightSimpleCoordinates;
     lowestUnexploredHeightDiff ++
   ) {
     if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights) {

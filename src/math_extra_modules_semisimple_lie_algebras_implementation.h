@@ -1762,7 +1762,7 @@ void MonomialTensorGeneralizedVermas<Coefficient>::operator=(const MonomialGener
 
 template <class Coefficient>
 void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
-  const ElementUniversalEnveloping<Coefficient>& theUE,
+  const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping,
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
   MacroRegisterFunctionWithName("MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft");
@@ -1774,33 +1774,33 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
     global.fatal << "Calling generalized verma module simplification requires nilradical order on the generators. "
     << global.fatal;
   }
-  for (int j = 0; j < theUE.size(); j ++) {
-    currentMon.monomialCoefficientOne = theUE[j];
+  for (int j = 0; j < elementUniversalEnveloping.size(); j ++) {
+    currentMon.monomialCoefficientOne = elementUniversalEnveloping[j];
     currentMon.monomialCoefficientOne *= this->monomialCoefficientOne;
     currentMon.owner = this->owner;
     currentMon.indexFDVector = this->indexFDVector;
     currentMon.owner = this->owner;
     std::stringstream reportStream;
     reportStream << "reducing mon: " << currentMon.toString()
-    << ", index" << j + 1 << " out of " << theUE.size() << "...";
+    << ", index" << j + 1 << " out of " << elementUniversalEnveloping.size() << "...";
     report.report(reportStream.str());
     currentMon.reduceMe(buffer);
     reportStream << " done.";
     report.report(reportStream.str());
-    buffer *= theUE.coefficients[j];
+    buffer *= elementUniversalEnveloping.coefficients[j];
     output += buffer;
   }
 }
 
 template <class Coefficient>
 void ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft(
-  const ElementUniversalEnveloping<Coefficient>& theUE
+  const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping
 ) {
   MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft");
   ElementSumGeneralizedVermas<Coefficient> buffer, Accum;
   Accum.makeZero();
   for (int i = 0; i < this->size(); i ++) {
-    (*this)[i].multiplyMeByUEEltOnTheLeft(theUE, buffer);
+    (*this)[i].multiplyMeByUEEltOnTheLeft(elementUniversalEnveloping, buffer);
     buffer *= this->coefficients[i];
     Accum += buffer;
   }
@@ -1828,24 +1828,24 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
     output.addMonomial(basisMon, 1);
     return;
   }
-  ElementUniversalEnveloping<Coefficient> theUEelt;
-  theUEelt.makeZero(*this->getOwner().owner);
-  theUEelt.addMonomial(this->monomialCoefficientOne, 1);
-  theUEelt.simplify();
+  ElementUniversalEnveloping<Coefficient> elementUniversalEnveloping;
+  elementUniversalEnveloping.makeZero(*this->getOwner().owner);
+  elementUniversalEnveloping.addMonomial(this->monomialCoefficientOne, 1);
+  elementUniversalEnveloping.simplify();
 
   MonomialUniversalEnveloping<Coefficient> currentMon;
   MonomialGeneralizedVerma<Coefficient> newMon;
   MatrixTensor<Coefficient> matrix1, matrix2;
   ProgressReport report;
   Coefficient coefficient;
-  for (int l = 0; l < theUEelt.size(); l ++) {
-    currentMon = theUEelt[l];
+  for (int l = 0; l < elementUniversalEnveloping.size(); l ++) {
+    currentMon = elementUniversalEnveloping[l];
     matrix1.makeIdentitySpecial();
     for (int k = currentMon.powers.size - 1; k >= 0; k --) {
       std::stringstream reportStream;
       reportStream << "accounting monomial " << currentMon.toString() << " of index "
       << l + 1 << " out of "
-      << theUEelt.size() << " and letter index " << currentMon.powers.size - k
+      << elementUniversalEnveloping.size() << " and letter index " << currentMon.powers.size - k
       << " out of " << currentMon.powers.size << "...";
       report.report(reportStream.str());
       int power = - 1;
@@ -1877,7 +1877,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       if (otherIndex != - 1) {
         newMon.monomialCoefficientOne = currentMon;
         newMon.indexFDVector = otherIndex;
-        coefficient = theUEelt.coefficients[l];
+        coefficient = elementUniversalEnveloping.coefficients[l];
         coefficient *= matrix1.coefficients[i];
         output.addMonomial(newMon, coefficient);
       }

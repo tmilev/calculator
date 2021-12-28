@@ -110,7 +110,6 @@ void MutexRecursiveWrapper::unlockMe() {
 
 ThreadData::ThreadData() {
   this->index = 0;
-//  this->theId = 0;
 }
 
 ThreadData::~ThreadData() {
@@ -133,17 +132,17 @@ void ThreadData::registerFirstThread(const std::string& inputName) {
 }
 
 ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
-  ListReferences<ThreadData>& theThreadData =
+  ListReferences<ThreadData>& threadData =
   global.threadData;
   ThreadData newThreadData;
   newThreadData.name = inputName;
-  newThreadData.index = theThreadData.size;
-  theThreadData.addOnTop(newThreadData);
-  global.allThreads.setSize(theThreadData.size);
+  newThreadData.index = threadData.size;
+  threadData.addOnTop(newThreadData);
+  global.allThreads.setSize(threadData.size);
   global.customStackTrace.reserve(2);
   global.progressReportStrings.reserve(2);
-  global.customStackTrace.setSize(theThreadData.size);
-  global.progressReportStrings.setSize(theThreadData.size);
+  global.customStackTrace.setSize(threadData.size);
+  global.progressReportStrings.setSize(threadData.size);
   global.customStackTrace.lastObject().reserve(30);
   global.progressReportStrings.lastObject().reserve(30);
   return global.threadData.lastObject();
@@ -158,9 +157,9 @@ void ThreadData::createThread(void (*InputFunction)(int), const std::string& inp
 
 int ThreadData::getCurrentThreadId() {
   std::thread::id currentId = std::this_thread::get_id();
-  ListReferences<ThreadData>& theThreadData = global.threadData;
-  for (int i = 0; i < theThreadData.size; i ++) {
-    if (currentId == theThreadData[i].id) {
+  ListReferences<ThreadData>& threadData = global.threadData;
+  for (int i = 0; i < threadData.size; i ++) {
+    if (currentId == threadData[i].id) {
       return i;
     }
   }

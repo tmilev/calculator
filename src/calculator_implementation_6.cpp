@@ -1061,12 +1061,12 @@ bool CalculatorFunctionsCrypto::testRSASign(
   out << "Message:<br>" << Crypto::convertListUnsignedCharsToHex(message);
   out << "<br>Padded message digest:<br>" << Crypto::convertListUnsignedCharsToHex(paddedMessage);
   out << "<br>Signature:<br>" << Crypto::convertListUnsignedCharsToHex(signature);
-  ElementZmodP element, theOne;
+  ElementZmodP element, one;
   element.modulus = key.publicKey.modulus;
-  theOne.makeOne(element.modulus);
+  one.makeOne(element.modulus);
   Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, element.value);
   out << "<br>Signature integer:<br>" << element.value.toString();
-  MathRoutines::raiseToPower(element, key.publicKey.exponent, theOne);
+  MathRoutines::raiseToPower(element, key.publicKey.exponent, one);
   out << "<br>Signature power e mod n [e = "
   << key.publicKey.exponent << ", n = "
   << key.publicKey.modulus << "]"

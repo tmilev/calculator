@@ -543,9 +543,9 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
   int numRoots = numberOfPositiveRoots * 2;
   int numberOfGenerators = numRoots + rank;
   this->lieBrackets.initialize(numberOfGenerators, numberOfGenerators);
-  //  this->theLiebracketPairingIndices.initialize(numberOfGenerators, numberOfGenerators);
+  //  this->liebracketPairingIndices.initialize(numberOfGenerators, numberOfGenerators);
   this->universalEnvelopingGeneratorOrder.initializeFillInObject(numberOfGenerators, - 1);
-  //  this->theLiebracketPairingIndices.makeZero(- 1);
+  //  this->liebracketPairingIndices.makeZero(- 1);
   //  this->OppositeRootSpaces.initializeFillInObject(numRoots+dimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
   for (int i = 0; i < numberOfGenerators; i ++) {
@@ -939,13 +939,13 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   /*Vectors<Rational> weightSupport;
   this->GenerateWeightSupport(highestWeight, weightSupport);
   int highestWeight, distanceToHW;
-  this->EmbeddingsRootSpaces.setSize(this->theWeyl.RootSystem.size);
-  int dimension = this->theWeyl.cartanSymmetric.numberOfRows;
+  this->EmbeddingsRootSpaces.setSize(this->weylGroup.RootSystem.size);
+  int dimension = this->weylGroup.cartanSymmetric.numberOfRows;
   List<bool> Explored;
-  Explored.initializeFillInObject(this->theWeyl.RootSystem.size, false);
+  Explored.initializeFillInObject(this->weylGroup.RootSystem.size, false);
   int numExplored = 0;
-  for (int i = 0; i < this->theWeyl.RootSystem.size; i ++) {
-    Vector<Rational>& current = this->theWeyl.RootSystem.objects[i];
+  for (int i = 0; i < this->weylGroup.RootSystem.size; i ++) {
+    Vector<Rational>& current = this->weylGroup.RootSystem.objects[i];
     if (current.SumCoordinates() ==1 || current.SumCoordinates() == - 1) {
       numExplored++;
       Explored.objects[i] = true;
@@ -966,14 +966,14 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   }
   Vectors<Rational> simpleBasis;
   simpleBasis.makeEiBasis(dimension);
-  while (numExplored< this->theWeyl.RootSystem.size) {
-    for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
+  while (numExplored< this->weylGroup.RootSystem.size) {
+    for (int i = 0; i < this->weylGroup.RootSystem.size; i ++)
       if (Explored.objects[i])
-        for (int j = 0; j < this->theWeyl.RootSystem.size; j ++)
+        for (int j = 0; j < this->weylGroup.RootSystem.size; j ++)
           if (Explored.objects[j]) {
-            Vector<Rational> root = this->theWeyl.RootSystem.objects[i] + this->theWeyl.RootSystem.objects[j];
-            if (this->theWeyl.isARoot(root)) {
-              int index = this->theWeyl.RootSystem.getIndex(root);
+            Vector<Rational> root = this->weylGroup.RootSystem.objects[i] + this->weylGroup.RootSystem.objects[j];
+            if (this->weylGroup.isARoot(root)) {
+              int index = this->weylGroup.RootSystem.getIndex(root);
               if (!Explored.objects[index]) {
                 Explored.objects[index] = true;
                 numExplored++;
@@ -991,7 +991,7 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
     Vector<Rational> root;
     root.makeEi(dimension, i);
     for (int j = 0; j<weightSupport.size; j ++)
-      current.elements[j][j] = this->theWeyl.rootScalarCartanRoot(root, weightSupport.objects[j]);
+      current.elements[j][j] = this->weylGroup.rootScalarCartanRoot(root, weightSupport.objects[j]);
   }*/
 }
 

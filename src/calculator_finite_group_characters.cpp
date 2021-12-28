@@ -292,7 +292,7 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
   WD.dynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   // When WeylGroupRepresentation is merged with GroupRepresentation,
   // and WeylGroupData split from FiniteGroup<ElementWeylGroup<WeylGroup> >
-  // theRepresentations will be this->group->irreps
+  // representations will be this->group->irreps
   // currently we have the difficulty with GroupRepresentation<WeylGroup, Coefficient> vs
   // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >, Coefficient>
   if ((letters.size == 1) && (letters[0] == 'A')) {
@@ -361,7 +361,7 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
   // work then using brute force
   //  else
   //    global.fatal << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
-  // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << global.fatal;
+  // << this->dynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << global.fatal;
   global << g.prettyPrintCharacterTable() << '\n';
 }
 

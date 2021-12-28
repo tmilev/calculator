@@ -376,8 +376,8 @@ bool WebAPIResponse::processCompute() {
     calculator.inputString
   );
   ////////////////////////////////////////////////
-  // the initialization below moved to the start of the web server!
-  // theParser.initialize();
+  // The parser used to be initialized here.
+  // It has since been moved to the start of the web server.
   ////////////////////////////////////////////////
   global.response.allowReport();
   calculator.evaluate(calculator.inputString);

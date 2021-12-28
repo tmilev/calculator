@@ -6,10 +6,10 @@
 #include "general_lists.h"
 #include "general_list_references.h"
 
-template <class listType, class key, class value, unsigned int keyHashFunction(const key&) = key::hashFunction>
+template <class listType, class Key, class Value, unsigned int keyHashFunction(const Key&) = Key::hashFunction>
 class MapTemplate {
 public:
-  HashedList<key, keyHashFunction> keys;
+  HashedList<Key, keyHashFunction> keys;
   listType values;
   unsigned int hashFunction() const {
     unsigned int result = 0;
@@ -21,41 +21,41 @@ public:
     }
     return result;
   }
-  int getIndex(const key& input) const {
+  int getIndex(const Key& input) const {
     return this->keys.getIndex(input);
   }
-  int getIndexNoFail(const key& input) const {
+  int getIndexNoFail(const Key& input) const {
     return this->keys.getIndexNoFail(input);
   }
-  bool contains(const key& inputKey) const {
+  bool contains(const Key& inputKey) const {
     return this->getIndex(inputKey) != - 1;
   }
-  void removeKey(const key& theKey) {
-    int index = this->keys.getIndex(theKey);
+  void removeKey(const Key& inputKey) {
+    int index = this->keys.getIndex(inputKey);
     if (index == - 1) {
       return;
     }
     this->keys.removeIndexSwapWithLast(index);
     this->values.removeIndexSwapWithLast(index);
   }
-  const value& getValueNoFail(const key& input) const {
+  const Value& getValueNoFail(const Key& input) const {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
       fatalCrash("Map does not contain key at a place where that is not allowed. ");
     }
     return this->values[index];
   }
-  value getValue(const key& input, const value& resultIfMissing) const {
+  Value getValue(const Key& input, const Value& resultIfMissing) const {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
       return resultIfMissing;
     }
     return this->values[index];
   }
-  value& getValueCreateEmpty(const key& input) {
+  Value& getValueCreateEmpty(const Key& input) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
-      value empty;
+      Value empty;
       index = this->keys.size;
       this->keys.addOnTop(input);
       this->values.addOnTop(empty);
@@ -63,7 +63,7 @@ public:
     return this->values[index];
   }
 
-  value& getValueCreate(const key& input, const value& initialValue) {
+  Value& getValueCreate(const Key& input, const Value& initialValue) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
       index = this->keys.size;
@@ -72,7 +72,7 @@ public:
     }
     return this->values[index];
   }
-  value& getValueCreateNoInitialization(const key& input) {
+  Value& getValueCreateNoInitialization(const Key& input) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
       index = this->keys.size;
@@ -81,7 +81,7 @@ public:
     }
     return this->values[index];
   }
-  void setKeyValue(const key& inputKey, const value& inputValue) {
+  void setKeyValue(const Key& inputKey, const Value& inputValue) {
     if (this->contains(inputKey)) {
       this->values[this->keys.getIndex(inputKey)] = inputValue;
       return;
@@ -112,7 +112,7 @@ public:
     out << "}";
     return out.str();
   }
-  inline value& operator[](const key& index) {
+  inline Value& operator[](const Key& index) {
     return this->getValueCreate(index);
   }
 };

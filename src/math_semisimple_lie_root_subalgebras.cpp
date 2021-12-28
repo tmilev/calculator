@@ -2127,13 +2127,13 @@ bool RootSubalgebras::growDynkinType(
 ) const {
   MacroRegisterFunctionWithName("RootSubalgebras::growDynkinType");
   input.grow(this->validScales, this->getOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
-  char theLetter;
-  if (!this->owner->weylGroup.dynkinType.isSimple(&theLetter)) {
+  char letter;
+  if (!this->owner->weylGroup.dynkinType.isSimple(&letter)) {
     return true;
   }
   for (int i = output.size - 1; i >= 0; i --) {
     bool isGood = true;
-    if (theLetter == 'A') {
+    if (letter == 'A') {
       if (
         output[i].containsType('B') || output[i].containsType('C') || output[i].containsType('D') ||
         output[i].containsType('E') || output[i].containsType('F') || output[i].containsType('G')
@@ -2141,7 +2141,7 @@ bool RootSubalgebras::growDynkinType(
         isGood = false;
       }
     }
-    if (theLetter == 'B') {
+    if (letter == 'B') {
       if (
         output[i].containsType('C') || output[i].containsType('E') ||
         output[i].containsType('F') || output[i].containsType('G')
@@ -2149,7 +2149,7 @@ bool RootSubalgebras::growDynkinType(
         isGood = false;
       }
     }
-    if (theLetter == 'C') {
+    if (letter == 'C') {
       if (
         output[i].containsType('D') || output[i].containsType('E') ||
         output[i].containsType('F') || output[i].containsType('G')
@@ -2157,7 +2157,7 @@ bool RootSubalgebras::growDynkinType(
         isGood = false;
       }
     }
-    if (theLetter == 'D') {
+    if (letter == 'D') {
       if (
         output[i].containsType('B') || output[i].containsType('C') ||
         output[i].containsType('E') || output[i].containsType('F') || output[i].containsType('G')
@@ -2165,7 +2165,7 @@ bool RootSubalgebras::growDynkinType(
         isGood = false;
       }
     }
-    if (theLetter == 'E') {
+    if (letter == 'E') {
       if (
         output[i].containsType('B') || output[i].containsType('C') ||
         output[i].containsType('F') || output[i].containsType('G')
@@ -2173,12 +2173,12 @@ bool RootSubalgebras::growDynkinType(
         isGood = false;
       }
     }
-    if (theLetter == 'F') {
+    if (letter == 'F') {
       if (output[i].containsType('G')) {
         isGood = false;
       }
     }
-    if (theLetter == 'G') {
+    if (letter == 'G') {
       if (output[i].containsType('B')) {
         isGood = false;
       }

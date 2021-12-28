@@ -1,13 +1,13 @@
 "use strict";
 const ids = require("./ids_dom_elements");
-var theAutocompleteDictionary = require("./autocomplete_keywords").theAutocompleteDictionary;
+var autoCompleteDictionary = require("./autocomplete_keywords").autoCompleteDictionary;
 
 var minLengthAutocompleteTrigger = 2;
 var DebugCounter = 0;
 var AutocompleteIsInitialized = false;
 
-var theAutocompleteDictionaryLowerCase;
-var theAutocompleteDictionaryByKey;
+var autoCompleteDictionaryLowerCase;
+var autoCompleteDictionaryByKey;
 var theText;
 var theSuggestions;
 var theSuggestionsHighlighted;
@@ -24,12 +24,12 @@ function initializeAutocomplete() {
   if (AutocompleteIsInitialized) {
     return true;
   }
-  if (theAutocompleteDictionary === undefined) {
+  if (autoCompleteDictionary === undefined) {
     return false;
   }
   AutocompleteIsInitialized = true;
-  theAutocompleteDictionaryLowerCase = new Array;
-  theAutocompleteDictionaryByKey = new Array;
+  autoCompleteDictionaryLowerCase = new Array;
+  autoCompleteDictionaryByKey = new Array;
   theText = document.getElementById(ids.domElements.pages.calculator.inputMain);
   theSuggestions = new Array;
   theSuggestionsHighlighted = new Array;
@@ -41,11 +41,11 @@ function initializeAutocomplete() {
   ignoreOninput = false;
   DebugCounter = 0;
   //theAutoCompleteHints.style.visibility ="hidden";
-  for (var i = 0; i < theAutocompleteDictionary.length; i++) {
-    theAutocompleteDictionaryLowerCase.push(theAutocompleteDictionary[i].toLowerCase());
+  for (var i = 0; i < autoCompleteDictionary.length; i++) {
+    autoCompleteDictionaryLowerCase.push(autoCompleteDictionary[i].toLowerCase());
   }
-  for (i = 0; i < theAutocompleteDictionary.length; i++) {
-    theAutocompleteDictionaryByKey[theAutocompleteDictionary[i]] = 1;
+  for (i = 0; i < autoCompleteDictionary.length; i++) {
+    autoCompleteDictionaryByKey[autoCompleteDictionary[i]] = 1;
   }
   return true;
 }
@@ -55,11 +55,11 @@ function displayDictionary() {
   var result;
   result = "";
   counter = 0;
-  for (var i in theAutocompleteDictionaryByKey) {
-    result += i + " " + theAutocompleteDictionaryByKey[i] + " <br />";
+  for (var i in autoCompleteDictionaryByKey) {
+    result += i + " " + autoCompleteDictionaryByKey[i] + " <br />";
     counter++;
     if (counter >= 15) {
-      result += "... displaying first 15 out of a total of " + Object.keys(theAutocompleteDictionaryByKey).length + " words in the dictionary.";
+      result += "... displaying first 15 out of a total of " + Object.keys(autoCompleteDictionaryByKey).length + " words in the dictionary.";
       break;
     }
   }
@@ -137,19 +137,19 @@ function suggestWord() {
     clearAutocompleteTab();
     return;
   }
-  for (var i = 0; i < theAutocompleteDictionary.length; i++) {
-    if (theLastWord == theAutocompleteDictionary[i]) {
+  for (var i = 0; i < autoCompleteDictionary.length; i++) {
+    if (theLastWord == autoCompleteDictionary[i]) {
       clearAutocompleteTab();
       return;
     }
     var lastWordLowerCase = theLastWord.toLowerCase();
-    var startpos = theAutocompleteDictionaryLowerCase[i].indexOf(lastWordLowerCase);
+    var startpos = autoCompleteDictionaryLowerCase[i].indexOf(lastWordLowerCase);
     if (startpos === - 1) {
       continue;
     }
-    var currentString = theAutocompleteDictionary[i].substr(0, startpos);
-    currentString += "<b>" + theLastWord + "</b>" + theAutocompleteDictionary[i].substr(startpos + theLastWord.length);
-    theSuggestions.push(theAutocompleteDictionary[i]);
+    var currentString = autoCompleteDictionary[i].substr(0, startpos);
+    currentString += "<b>" + theLastWord + "</b>" + autoCompleteDictionary[i].substr(startpos + theLastWord.length);
+    theSuggestions.push(autoCompleteDictionary[i]);
     theSuggestionsHighlighted.push(currentString);
   }
   if (theSuggestions.length > 0)
@@ -216,10 +216,10 @@ function accountWordAtCursor(amount) {
     return;
   }
   theAutoComplete.textContent = theLastWord;
-  if (typeof (theAutocompleteDictionary[theLastWord]) !== "number") {
-    theAutocompleteDictionary[theLastWord] = amount;
+  if (typeof (autoCompleteDictionary[theLastWord]) !== "number") {
+    autoCompleteDictionary[theLastWord] = amount;
   } else {
-    theAutocompleteDictionary[theLastWord] += amount;
+    autoCompleteDictionary[theLastWord] += amount;
   }
   displayDictionary();
 }

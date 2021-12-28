@@ -143,7 +143,7 @@ public:
   // The Chevalley constants are listed in the same order
   // as the root system of the Weyl group.
   // If \alpha is the root at the i^th position in
-  // this->theWyl.RootSystem and \beta -
+  // this->weylGroup.RootSystem and \beta -
   // the root  at the j^th position, then
   // the Chevalley constant N_{\alpha, \beta}
   // given by [g_\alpha, g_\beta] = N_{\alpha, \beta}g_{\alpha +\beta}

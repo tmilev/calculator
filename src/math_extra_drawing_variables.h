@@ -9,7 +9,7 @@ class DrawOperations {
 private:
   void changeBasisPReserveAngles(double newX, double newY);
 public:
-  List<JSData> theOperations;
+  List<JSData> operations;
   List<List<double> > projectionsEiVectors;
   Vectors<double> basisProjectionPlane;
   static const int graphicsUnitDefault = 100;
@@ -119,9 +119,9 @@ public:
   void click(double x, double y);
   void drawHighlightGroup(Vectors<double>& highlightGroup, List<std::string>& labels, const std::string& color, int radius);
   void drawLineBuffer(
-    double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, double lineWidth
+    double x1, double y1, double x2, double y2, uint32_t penStyle, int colorIndex, double lineWidth
   );
-  void drawTextBuffer(double x1, double y1, const std::string& inputText, int ColorIndex, int fontSize, int textStyle);
+  void drawTextBuffer(double x1, double y1, const std::string& inputText, int colorIndex, int fontSize, int textStyle);
   void drawLineBetweenTwoVectorsBufferRational(
     const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth = 1
   );
@@ -195,9 +195,9 @@ public:
 
 class DrawingVariables {
 public:
-  typedef void (*DrawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long penStyle, int ColorIndex);
-  typedef void (*DrawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
-  typedef void (*DrawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
+  typedef void (*DrawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long penStyle, int colorIndex);
+  typedef void (*DrawTextFunction)(double X1, double Y1, const char* text, int length, int colorIndex, int fontSize);
+  typedef void (*DrawCircleFunction)(double X1, double Y1, double radius, unsigned long penStyle, int colorIndex);
   typedef void (*DrawClearScreenFunction)();
 
 private:
@@ -218,7 +218,11 @@ public:
     PenStyleLinkToOriginPermanentlyZeroChamber
   };
   enum TextStyles {
-    TextStyleNormal, TextStyleInvisible, TextStyleChamber, TextStyleZeroChamber, TextStylePermanentlyZeroChamber
+    TextStyleNormal,
+    TextStyleInvisible,
+    TextStyleChamber,
+    TextStyleZeroChamber,
+    TextStylePermanentlyZeroChamber
   };
   int ColorDashes;
   bool flagLaTeXDraw;
@@ -265,21 +269,27 @@ public:
   void drawString(DrawElementInputOutput& drawData, const std::string& input, int fontSize, int textStyle);
   void drawCoordSystemBuffer(DrawingVariables& variables, int dimension);
   void drawLineDirectly(
-    double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, double lineWidth
+    double x1,
+    double y1,
+    double x2,
+    double y2,
+    uint32_t penStyle,
+    int colorIndex,
+    double lineWidth
   );
   void drawLineBuffer(
     double x1,
     double y1,
     double x2,
     double y2,
-    uint32_t thePenStyle,
+    uint32_t penStyle,
     int colorIndex,
     double lineWidth
   );
   void drawTextDirectly(double x1, double y1, const std::string& inputText, int color, std::fstream* latexOutFile);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color);
   //if the LatexOutFile is zero then the procedure defaults to the screen
-  void drawLineBufferOld(double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, std::fstream* latexOutFile);
+  void drawLineBufferOld(double x1, double y1, double x2, double y2, uint32_t penStyle, int colorIndex, std::fstream* latexOutFile);
   void drawLineBetweenTwoVectorsBufferRational(
     const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1
   ) {

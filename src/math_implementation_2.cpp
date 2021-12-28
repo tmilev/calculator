@@ -278,23 +278,24 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
     }
     if (i == exponentOfThePowerTwoFactorOfNminusOne - 1) {
       if (comments != nullptr) {
-        std::stringstream theTwoPowerContraStream, theTwoPowerStream;
+        std::stringstream twoPowerContradictionStream;
+        std::stringstream twoPowerStream;
         if (i > 0) {
-          theTwoPowerContraStream << "2";
+          twoPowerContradictionStream << "2";
           if (i > 1) {
-            theTwoPowerContraStream << "^{ " << i << "} \\cdot ";
+            twoPowerContradictionStream << "^{ " << i << "} \\cdot ";
           }
         }
-        theTwoPowerStream << "2";
+        twoPowerStream << "2";
         if (exponentOfThePowerTwoFactorOfNminusOne > 1) {
-          theTwoPowerStream << "^{" << exponentOfThePowerTwoFactorOfNminusOne << "}";
+          twoPowerStream << "^{" << exponentOfThePowerTwoFactorOfNminusOne << "}";
         }
         *comments << this->toString() << " is not prime because \\(" << base << "^{"
-        << theTwoPowerContraStream.str()
+        << twoPowerContradictionStream.str()
         << oddFactorOfNminusOne.toString() << "} = " << power.value.toString() << " ~ mod ~"
         << this->toString() << " \\)"
         << "<br>If " << this->toString() << " were prime, we'd have to have that \\("
-        << base << "^{" << theTwoPowerStream.str() << "\\cdot" << oddFactorOfNminusOne
+        << base << "^{" << twoPowerStream.str() << "\\cdot" << oddFactorOfNminusOne
         << "} = " << base << "^{" << this->toString() << " - 1} = 1 ~mod ~" << this->toString() << "\\)"
         << "<br> which can be reasoned to contradict the first equality.";
       }
@@ -1239,14 +1240,14 @@ void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
   LargeIntegerUnsigned tempInt, tempOne;
   tempOne.makeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
-    unsigned int thePrime = primesBelowX.objects[i];
+    unsigned int prime = primesBelowX.objects[i];
     unsigned int powerOfThePrime = 0;
-    unsigned int currentPower = thePrime;
+    unsigned int currentPower = prime;
     do {
       powerOfThePrime += x / currentPower;
-      currentPower *= thePrime;
+      currentPower *= prime;
     } while (currentPower <= x);
-    tempInt.assignShiftedUInt(thePrime, 0);
+    tempInt.assignShiftedUInt(prime, 0);
     MathRoutines::raiseToPower(tempInt, powerOfThePrime, tempOne);
     *this *= tempInt;
   }

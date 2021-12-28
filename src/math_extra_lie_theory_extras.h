@@ -103,11 +103,11 @@ Vector<Coefficient> BranchingData::projectWeight(Vector<Coefficient>& input) {
 class GeneralizedVermaModuleCharacters {
 public:
   List<Matrix<Rational> > linearOperators;
-  // the first k variables correspond to the Cartan of the smaller Lie algebra
-  // the next l variables correspond to the Cartan of the larger Lie algebra
-  // the last variable is the projectivization
+  // The first k variables correspond to the Cartan of the smaller Lie algebra.
+  // The next l variables correspond to the Cartan of the larger Lie algebra.
+  // The last variable is the projectivization.
   List<Matrix<Rational> > linearOperatorsExtended;
-  Vector<Rational> NonIntegralOriginModificationBasisChanged;
+  Vector<Rational> nonIntegralOriginModificationBasisChanged;
   std::fstream multiplicitiesMaxOutputReport2;
   Vectors<Rational> gModKNegativeWeights;
   Vectors<Rational> gModKNegativeWeightsBasisChanged;
@@ -118,8 +118,8 @@ public:
   Cone WeylChamberSmallerAlgebra;
   Cone PreimageWeylChamberSmallerAlgebra;
   Lattice extendedIntegralLatticeMatrixForm;
-  List<QuasiPolynomial> theQPsNonSubstituted;
-  List<List<QuasiPolynomial> > theQPsSubstituted;
+  List<QuasiPolynomial> quasiPolynomialsNonSubstituted;
+  List<List<QuasiPolynomial> > quasiPolynomialsSubstituted;
   List<QuasiPolynomial> multiplicities;
   HomomorphismSemisimpleLieAlgebra homomorphism;
   // List<QuasiPolynomial> multiplicitiesExtremaCandidates;
@@ -164,9 +164,12 @@ public:
   );
   void sortMultiplicities();
   void getSubstitutionFromNonParametricArray(
-    Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams
+    Matrix<Rational>& output,
+    Vector<Rational>& outputTranslation,
+    Vectors<Rational>& nonParameters,
+    int numberOfParameters
   );
-  void initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input);
+  void initFromHomomorphism(Vector<Rational>& parabolicSelection, HomomorphismSemisimpleLieAlgebra& input);
   void transformToWeylProjectiveStep1();
   void transformToWeylProjectiveStep2();
   void transformToWeylProjective(int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal);

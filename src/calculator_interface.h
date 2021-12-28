@@ -32,25 +32,25 @@ private:
   // Definitions.
   // 1. Fundamentals.
   // 1.1. An atom is an expression with zero children.
-  // 1.2. At atom whose theData entry is a valid index of
+  // 1.2. At atom whose data entry is a valid index of
   //      Calculator::operations will also be called an operation.
   //      Let the string corresponding to this index be X.
   //      Then, we say that "at atom equals the operation X".
   //      Note that this is ambiguous:
-  //      theData entry of an atom can be interpreted either
+  //      data entry of an atom can be interpreted either
   //      as an operation or as an an actual piece of data,
   //      not necessarily an index of Calculator::operations.
   //      Whenever this ambiguity becomes an issue
-  //      explicit reference to the Expression::theData
+  //      explicit reference to the Expression::data
   //      and Expression::children members should be made.
-  // 1.3. A list is an expression with 1 or more children whose theData entry equals
+  // 1.3. A list is an expression with 1 or more children whose data entry equals
   //      0. The atom 0 *MUST* be equal to Calculator::opList().
   // 1.4. An expression with 1 or more children is
-  //      not allowed to have theData entry different
+  //      not allowed to have data entry different
   //      from 0 = Calculator::opList(). The system is instructed to
   //      crash and burn shall such a configuration be detected.
   //      Rationale: keep the system simple,
-  //      at the cost of leaving theData entry non-used for non-atomic expressions.
+  //      at the cost of leaving data entry non-used for non-atomic expressions.
   // 2. Basic building blocks
   // 2.1. A frozen expression is a list whose first entry is an atom equal to Freeze.
   // 2.2. A sequence is a list whose first entry is an atom equal to Sequence.

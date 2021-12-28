@@ -164,7 +164,7 @@ int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
   // we have generated at least maxNumTriangles since the last cleanup
   // (which leaves no more than maxNumTriangles alive).
   if (this->triangles.size != this->trianglesUsed.size) {
-    global.fatal << "this->theTriangles.size is not equal to this->trianglesUsed.size: the values are: "
+    global.fatal << "this->triangles.size is not equal to this->trianglesUsed.size: the values are: "
     << this->triangles.size << " and " << this->trianglesUsed.size << ". " << global.fatal;
   }
   int lowestFree = 0;
@@ -234,7 +234,7 @@ void MeshTriangles::computeImplicitPlotPart2() {
   Vectors<double>& segment = currentPlot.pointsDouble;
   List<Vector<double> > currentTriangle;
   for (int i = 0; i < this->triangles.size; i ++) {
-    currentTriangle = this->triangles[i]; //making a copy in case this->theTriangles changes underneath.
+    currentTriangle = this->triangles[i]; //making a copy in case this->triangles changes underneath.
     if (currentTriangle.size != 3) {
       global.fatal << "Error: triangle needs three vertices, instead it has vertices: " << currentTriangle << global.fatal;
     }
@@ -909,11 +909,11 @@ bool CalculatorFunctions::sumSequence(
   if (input[1].isSequenceNElements()) {
     sequenceToSum = &input[1];
   }
-  List<Expression> theTerms;
+  List<Expression> terms;
   for (int i = 1; i < sequenceToSum->size(); i ++) {
-    theTerms.addOnTop((*sequenceToSum)[i]);
+    terms.addOnTop((*sequenceToSum)[i]);
   }
-  return output.makeSum(calculator, theTerms);
+  return output.makeSum(calculator, terms);
 }
 
 bool CalculatorFunctions::multiplySequence(
@@ -1121,10 +1121,10 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
 bool CalculatorFunctionsPlot::plotGrid(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::plotGrid");
   (void) input;
-  PlotObject thePlot;
-  thePlot.plotType = "axesGrid";
-  thePlot.dimension = 2;
-  return output.assignValue(calculator, thePlot);
+  PlotObject plot;
+  plot.plotType = "axesGrid";
+  plot.dimension = 2;
+  return output.assignValue(calculator, plot);
 }
 
 bool CalculatorFunctionsPlot::plotRemoveCoordinateAxes(
@@ -1132,10 +1132,10 @@ bool CalculatorFunctionsPlot::plotRemoveCoordinateAxes(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::plotRemoveCoordinateAxes");
   (void) input;
-  Plot thePlotFinal;
-  thePlotFinal.dimension = 2;
-  thePlotFinal.flagIncludeCoordinateSystem = false;
-  return output.assignValue(calculator, thePlotFinal);
+  Plot plotFinal;
+  plotFinal.dimension = 2;
+  plotFinal.flagIncludeCoordinateSystem = false;
+  return output.assignValue(calculator, plotFinal);
 }
 
 bool CalculatorFunctionsPlot::plotLabel(
@@ -1489,9 +1489,9 @@ bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression&
       segment.lineWidth = 1;
     }
   }
-  Plot thePlot;
-  thePlot += segment;
-  return output.assignValue(calculator, thePlot);
+  Plot plot;
+  plot += segment;
+  return output.assignValue(calculator, plot);
 }
 
 bool CalculatorFunctionsPlot::plotMarkSegment(
@@ -1527,10 +1527,10 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   Expression vectorX, vectorY;
   vectorX.makeXOX(calculator, calculator.opUnderscore(), vectorExpression, calculator.expressionOne());
   vectorY.makeXOX(calculator, calculator.opUnderscore(), vectorExpression, calculator.expressionTwo());
-  Expression theOrthoV;
-  theOrthoV.makeXOX(calculator, calculator.opSequence(), vectorY * (- 1), vectorX);
-  Expression leftPt = midPt - theOrthoV / 25;
-  Expression rightPt = midPt + theOrthoV / 25;
+  Expression orthogonalVector;
+  orthogonalVector.makeXOX(calculator, calculator.opSequence(), vectorY * (- 1), vectorX);
+  Expression leftPt = midPt - orthogonalVector / 25;
+  Expression rightPt = midPt + orthogonalVector / 25;
   output.reset(calculator);
   output.addChildAtomOnTop("PlotSegment");
   output.addChildOnTop(leftPt);
@@ -1985,11 +1985,11 @@ bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(
   }
   Plot resultPlot;
   resultPlot.dimension = 3;
-  PlotObject thePlot;
-  thePlot.plotType = "setProjectionScreen";
-  thePlot.pointsDouble.addOnTop(v1);
-  thePlot.pointsDouble.addOnTop(v2);
-  resultPlot += thePlot;
+  PlotObject plot;
+  plot.plotType = "setProjectionScreen";
+  plot.pointsDouble.addOnTop(v1);
+  plot.pointsDouble.addOnTop(v2);
+  resultPlot += plot;
   return output.assignValue(calculator, resultPlot);
 }
 
@@ -2009,16 +2009,16 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const
   }
   Plot resultPlot;
   resultPlot.dimension = 3;
-  PlotObject thePlot;
-  thePlot.colorJS = "black";
-  thePlot.plotType = "segment";
-  thePlot.pointsDouble.setSize(2);
+  PlotObject plot;
+  plot.colorJS = "black";
+  plot.plotType = "segment";
+  plot.pointsDouble.setSize(2);
   for (int i = 0; i < 3; i ++) {
-    thePlot.pointsDouble[0].makeZero(3);
-    thePlot.pointsDouble[1].makeZero(3);
-    thePlot.pointsDouble[0][i] = corner1[i];
-    thePlot.pointsDouble[1][i] = corner2[i];
-    resultPlot += thePlot;
+    plot.pointsDouble[0].makeZero(3);
+    plot.pointsDouble[1].makeZero(3);
+    plot.pointsDouble[0][i] = corner1[i];
+    plot.pointsDouble[1][i] = corner2[i];
+    resultPlot += plot;
   }
   PlotObject plotLabels;
   plotLabels.plotType = "label";

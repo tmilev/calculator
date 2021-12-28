@@ -138,16 +138,16 @@ bool CalculatorFunctionsCrypto::testLoadPEMPrivateKey(
   List<unsigned char> privateKeyBytes;
   privateKeyBytes = privateKeyString;
   std::stringstream errorStream, resultStream;
-  PrivateKeyRSA thePrivateKey;
-  bool success = thePrivateKey.loadFromASNEncoded(privateKeyBytes, &errorStream);
-  if (!thePrivateKey.basicChecks(&resultStream)) {
+  PrivateKeyRSA privateKey;
+  bool success = privateKey.loadFromASNEncoded(privateKeyBytes, &errorStream);
+  if (!privateKey.basicChecks(&resultStream)) {
     resultStream << "<b style = 'color:red'>Private key failed basic checks. </b>";
   }
   if (!success) {
     resultStream << "<br>Failed to load asn encoded certificate.<br>";
     resultStream << errorStream.str();
   } else {
-    resultStream << "<br>Loaded private key.<br>" << thePrivateKey.toString();
+    resultStream << "<br>Loaded private key.<br>" << privateKey.toString();
   }
   return output.assignValue(calculator, resultStream.str());
 }
@@ -4129,11 +4129,11 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
   Expression arctangentExpressino(calculator);
   arctangentExpressino.addChildAtomOnTop(calculator.opArcTan());
   arctangentExpressino.addChildOnTop(arcTanArgument);
-  Expression theLog(calculator);
-  theLog.addChildAtomOnTop(calculator.opLog());
-  theLog.addChildOnTop(quadraticDividedByA);
+  Expression logarithmExpression(calculator);
+  logarithmExpression.addChildAtomOnTop(calculator.opLog());
+  logarithmExpression.addChildOnTop(quadraticDividedByA);
   Expression C = B - (A * b) / (twoE * a);
-  output = (oneE / a) * ((A / twoE) * theLog + (C / sqrtF) * arctangentExpressino);
+  output = (oneE / a) * ((A / twoE) * logarithmExpression + (C / sqrtF) * arctangentExpressino);
   output.checkConsistencyRecursively();
   output.checkInitializationRecursively();
   return true;
@@ -4195,13 +4195,13 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
 
   Expression monicQuadratic = xSquared + b * x + c;
   Expression D = c - bSquared / fourE;
-  Expression remainingIntegral, functionRemainingToIntegrate, theQuadraticPowerOneMinusN, theQuadraticPowerNMinusOne;
-  theQuadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), monicQuadratic, oneE - numPowerE);
-  theQuadraticPowerNMinusOne.makeXOX(calculator, calculator.opPower(), monicQuadratic, numPowerE - oneE);
-  functionRemainingToIntegrate = oneE / theQuadraticPowerNMinusOne;
+  Expression remainingIntegral, functionRemainingToIntegrate, quadraticPowerOneMinusN, quadraticPowerNMinusOne;
+  quadraticPowerOneMinusN.makeXOX(calculator, calculator.opPower(), monicQuadratic, oneE - numPowerE);
+  quadraticPowerNMinusOne.makeXOX(calculator, calculator.opPower(), monicQuadratic, numPowerE - oneE);
+  functionRemainingToIntegrate = oneE / quadraticPowerNMinusOne;
   remainingIntegral.makeIntegral(calculator, integrationSetE, functionRemainingToIntegrate, x);
   output = oneE / D *
-  ((x + b / twoE) / (twoE * numPowerE - twoE) * theQuadraticPowerOneMinusN +
+  ((x + b / twoE) / (twoE * numPowerE - twoE) * quadraticPowerOneMinusN +
   (twoE * numPowerE - threeE) / (twoE * numPowerE - twoE) * remainingIntegral);
   output.checkConsistencyRecursively();
   output.checkInitializationRecursively();
@@ -4689,7 +4689,7 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
       powerE.assignValue(powerCosine/2, calculator);
       currentIntegrandCosinePart.makeXOX
       (calculator, calculator.opThePower(),currentE, powerE);
-      currentCF.assignValue(theTrigPoly.coeffs[i], calculator);
+      currentCF.assignValue(trigPoly.coeffs[i], calculator);
       currentIntegrandNonPolynomializedE=
       currentCF*currentIntegrandSinePart*currentIntegrandCosinePart;
       currentIntegrandE.reset(calculator);
@@ -5053,9 +5053,9 @@ bool CalculatorFunctions::outerMergeConstantRadicals(
   ) {
     return false;
   }
-  Expression theProduct;
-  theProduct.makeProduct(calculator, input[1][1], input[2][1]);
-  return output.makeXOX(calculator, calculator.opPower(), theProduct, input[1][2]);
+  Expression product;
+  product.makeProduct(calculator, input[1][1], input[2][1]);
+  return output.makeXOX(calculator, calculator.opPower(), product, input[1][2]);
 }
 
 bool CalculatorFunctions::outerCommuteConstants(Calculator& calculator, const Expression& input, Expression& output) {
@@ -5423,17 +5423,17 @@ bool CalculatorFunctions::expressionLeafs(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressionLeafs");
-  HashedList<Expression> theLeafs;
+  HashedList<Expression> leafs;
   if (input.startsWithGivenOperation("ExpressionLeafs")) {
     for (int i = 1; i < input.size(); i ++) {
-      if (!input[i].getExpressionLeafs(theLeafs)) {
+      if (!input[i].getExpressionLeafs(leafs)) {
         return calculator << "Failed to extract expression leafs from " << input.toString() << ".";
       }
     }
-  } else if (!input.getExpressionLeafs(theLeafs)) {
+  } else if (!input.getExpressionLeafs(leafs)) {
     return calculator << "Failed to extract expression leafs from " << input.toString() << ".";
   }
-  return output.makeSequence(calculator, &theLeafs);
+  return output.makeSequence(calculator, &leafs);
 }
 
 bool CalculatorFunctionsListsAndSets::lastElement(
@@ -6070,7 +6070,7 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
-  Vectors<double>& thePointsDouble = plotObject.pointsDouble;
+  Vectors<double>& pointsDouble = plotObject.pointsDouble;
   if (plotObject.parametersInPlay.size == 0) {
     if (!input[1].evaluatesToDoubleInRange(
       variableString,
@@ -6079,11 +6079,11 @@ bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& i
       numIntervals,
       &plotObject.yLow,
       &plotObject.yHigh,
-      &thePointsDouble
+      &pointsDouble
     )) {
       bool hasOneGoodPoint = false;
-      for (int i = 0; i < thePointsDouble.size; i ++) {
-        if (!FloatingPoint::isNaN(thePointsDouble[i][1])) {
+      for (int i = 0; i < pointsDouble.size; i ++) {
+        if (!FloatingPoint::isNaN(pointsDouble[i][1])) {
           hasOneGoodPoint = true;
           break;
         }
@@ -6335,17 +6335,17 @@ bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expre
     outTex << tempStream.str();
   }
   outHtml << "<br>";
-  PlotObject thePlot;
-  thePlot.plotString = outTex.str();
-  thePlot.plotStringWithHtml = outHtml.str();
-  thePlot.xLow = lowerBound;
-  thePlot.xHigh = upperBound;
-  thePlot.yLow = yMin;
-  thePlot.yHigh = yMax;
+  PlotObject plot;
+  plot.plotString = outTex.str();
+  plot.plotStringWithHtml = outHtml.str();
+  plot.xLow = lowerBound;
+  plot.xHigh = upperBound;
+  plot.yLow = yMin;
+  plot.yHigh = yMax;
 
-  thePlot.coordinateFunctionsE.addOnTop(input[1]);
+  plot.coordinateFunctionsE.addOnTop(input[1]);
   Plot plotFinal;
-  plotFinal += thePlot;
+  plotFinal += plot;
   plotFinal += outputPlot;
   return output.assignValue(calculator, plotFinal);
 }
@@ -6727,45 +6727,45 @@ bool CalculatorFunctions::allVectorPartitions(Calculator& calculator, const Expr
   if (input.size() != 3) {
     return calculator << "<hr>AllVectorPartitions function takes 3 arguments.";
   }
-  VectorPartition thePartition;
+  VectorPartition partition;
   const Expression& vectorExpression = input[1];
-  const Expression& thePartitioningVectorsE = input[2];
-  if (!calculator.getVector(vectorExpression, thePartition.goalVector)) {
+  const Expression& partitioningVectorsExpression = input[2];
+  if (!calculator.getVector(vectorExpression, partition.goalVector)) {
     return calculator << "<hr>Failed to extract vector from " << vectorExpression.toString();
   }
   Matrix<Rational> vectorsMatForm;
   if (!calculator.functionGetMatrix(
-    thePartitioningVectorsE,
+    partitioningVectorsExpression,
     vectorsMatForm,
     false,
     nullptr,
-    thePartition.goalVector.size
+    partition.goalVector.size
   )) {
     return calculator << "<hr>Failed to extract list of vectors from "
-    << thePartitioningVectorsE.toString();
+    << partitioningVectorsExpression.toString();
   }
-  Vectors<Rational> theInputVectors;
-  theInputVectors.assignMatrixRows(vectorsMatForm);
-  for (int i = 0; i < theInputVectors.size; i ++) {
-    if (!theInputVectors[i].isPositive()) {
+  Vectors<Rational> inputVectors;
+  inputVectors.assignMatrixRows(vectorsMatForm);
+  for (int i = 0; i < inputVectors.size; i ++) {
+    if (!inputVectors[i].isPositive()) {
       return calculator << "<hr>Input vector "
-      << theInputVectors[i].toString() << " is non-positive";
+      << inputVectors[i].toString() << " is non-positive";
     }
   }
-  if (!thePartition.initialize(theInputVectors, thePartition.goalVector)) {
+  if (!partition.initialize(inputVectors, partition.goalVector)) {
     return calculator << "<hr>Failed to initialize vector partition object";
   }
   std::stringstream out;
   int numFound = 0;
   ProgressReport report;
-  out << thePartition.toStringPartitioningVectors();
-  while (thePartition.incrementReturnFalseIfPastLast()) {
-    out << "<br>" << thePartition.toStringOnePartition(thePartition.currentPartition);
+  out << partition.toStringPartitioningVectors();
+  while (partition.incrementReturnFalseIfPastLast()) {
+    out << "<br>" << partition.toStringOnePartition(partition.currentPartition);
     numFound ++;
     if (numFound % 1000 == 0) {
       std::stringstream reportStream;
-      reportStream << "Found " << numFound << " partitions of " << thePartition.goalVector.toString()
-      << "<br>Current partition: " << thePartition.currentPartition;
+      reportStream << "Found " << numFound << " partitions of " << partition.goalVector.toString()
+      << "<br>Current partition: " << partition.currentPartition;
       report.report(reportStream.str());
     }
   }
@@ -8083,11 +8083,11 @@ public:
         plotText.plotString = HtmlRoutines::clearNewLines(backslashQuotes);
         plot += plotText;
       } else {
-        PlotObject thePoint;
-        thePoint.plotType = "point";
-        thePoint.colorJS = "blue";
-        thePoint.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
-        this->plot += thePoint;
+        PlotObject point;
+        point.plotType = "point";
+        point.colorJS = "blue";
+        point.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
+        this->plot += point;
       }
     }
   }
@@ -8125,7 +8125,7 @@ bool CalculatorFunctions::setRandomSeed(
 bool CalculatorFunctions::andFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerAnd");
+  MacroRegisterFunctionWithName("CalculatorFunctions::andFunction");
   if (input.size() != 3) {
     return false;
   }

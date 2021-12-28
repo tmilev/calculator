@@ -1857,11 +1857,17 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& variables, int di
 }
 
 void DrawingVariables::drawLineBufferOld(
-  double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, std::fstream* latexOutFile
+  double x1,
+  double y1,
+  double x2,
+  double y2,
+  uint32_t penStyle,
+  int colorIndex,
+  std::fstream* latexOutFile
 ) {
-  this->operations.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, 1);
+  this->operations.drawLineBuffer(x1, y1, x2, y2, penStyle, colorIndex, 1);
   if (latexOutFile != nullptr) {
-    LaTeXProcedures::drawline(x1, y1, x2, y2, thePenStyle, colorIndex, *latexOutFile, *this);
+    LaTeXProcedures::drawline(x1, y1, x2, y2, penStyle, colorIndex, *latexOutFile, *this);
   }
 }
 
@@ -3817,12 +3823,12 @@ void PartialFractions::compareCheckSums() {
 void PartialFractions::prepareIndicatorVariables() {
   this->NumberIrrelevantFractions = 0;
   this->numberOfRelevantReducedFractions = 0;
-  this->NumGeneratorsInTheNumerators = 0;
+  this->numberOfGeneratorsInNumerators = 0;
   this->NumGeneratorsIrrelevantFractions = 0;
   this->NumGeneratorsRelevenatFractions = 0;
   this->NumMonomialsInNumeratorsIrrelevantFractions = 0;
   this->numberOfMonomialsInNumeratorsRelevantFractions = 0;
-  this->numberOfMonomialsInTheNumerators = 1;
+  this->numberOfMonomialsInNumerators = 1;
   this->totalReduced = 0;
   this->NumRelevantNonReducedFractions = 0;
   this->numberOfProcessedForVPFMonomialsTotal = 0;
@@ -4130,14 +4136,14 @@ void OnePartialFraction::reduceMonomialByMonomialModifyOneMonomial(
   LargeInteger& inputCoeff
 ) {
   (void) Accum; (void) powers; (void) powersSigned; (void) input; (void) inputCoeff;
-  /*Polynomial<LargeInt>& theNumerator = global.PolyLargeIntPartFracBuffer5.getElement();
+  /*Polynomial<LargeInt>& numerator = global.PolyLargeIntPartFracBuffer5.getElement();
   Polynomial<LargeInt>& tempP = global.PolyLargeIntPartFracBuffer6.getElement();
-  theNumerator.makeZero(Accum.AmbientDimension);
-  theNumerator.addMonomial(input, inputCoeff);
+  numerator.makeZero(Accum.AmbientDimension);
+  numerator.addMonomial(input, inputCoeff);
   if (powersSigned.size != powers.multiplicities.size)
     global.fatal << global.fatal;
   if (this->flagAnErrorHasOccurredTimeToPanic) {
-   // theNumerator.ComputeDebugString();
+   // numerator.ComputeDebugString();
   }
   for (int j = 0; j < powers.multiplicities.size; j ++) {
     int currentIndexInFraction = this->IndicesNonZeroMults[j];
@@ -4152,13 +4158,13 @@ void OnePartialFraction::reduceMonomialByMonomialModifyOneMonomial(
     if (this->flagAnErrorHasOccurredTimeToPanic) {
      // tempP.ComputeDebugString();
     }
-    theNumerator*= tempP;
+    numerator*= tempP;
     if (this->flagAnErrorHasOccurredTimeToPanic) {
-     // theNumerator.ComputeDebugString();
+     // numerator.ComputeDebugString();
     }
     this->objects[currentIndexInFraction].addMultiplicity(-MultChange, currentElongation);
   }
-  this->Coefficient = theNumerator;
+  this->Coefficient = numerator;
   this->computeIndicesNonZeroMultiplicities();
   if (this->flagAnErrorHasOccurredTimeToPanic)
     this->ComputeDebugString(Accum);*/
@@ -4369,13 +4375,13 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
   out2 << this->numberOfMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
   << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
   << this->numberOfMonomialsInNumeratorsRelevantFractions + this->NumMonomialsInNumeratorsIrrelevantFractions << " out of "
-  << this->numberOfMonomialsInTheNumerators << " total monomials in the numerators";
+  << this->numberOfMonomialsInNumerators << " total monomials in the numerators";
   report2.report(out2.str());
-  if (this->NumGeneratorsInTheNumerators != 0) {
+  if (this->numberOfGeneratorsInNumerators != 0) {
     out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + "
     << this->NumGeneratorsIrrelevantFractions << " disjoint = "
     << this->NumGeneratorsIrrelevantFractions + this->NumGeneratorsRelevenatFractions
-    << " out of " << this->NumGeneratorsInTheNumerators << " total generators in the numerators";
+    << " out of " << this->numberOfGeneratorsInNumerators << " total generators in the numerators";
     report3.report(out3.str());
   } else {
     report3.report("");
@@ -4480,8 +4486,8 @@ void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Ratio
     if (this->flagMakingProgressReport) {
       std::stringstream out;
       out << "Elongating denominator " << i + 1 << " out of " << this->size;
-      global.theIndicatorVariables.ProgressReportStrings[3] = out.str();
-      global.FeedIndicatorWindow(global.theIndicatorVariables);
+      global.indicatorVariables.ProgressReportStrings[3] = out.str();
+      global.FeedIndicatorWindow(global.indicatorVariables);
     }
   }
   for (int i = 0; i < this->size; i ++)
@@ -4548,7 +4554,7 @@ bool PartialFractions::isHigherThanWithRespectToWeight(
   return (accum > 0);
 }
 
-//NOTE NOTE NOTE: To be fixed: you gotta use the preceding function to sort the theVPbasis!
+//NOTE NOTE NOTE: To be fixed: you gotta use the preceding function to sort the vpBasis!
 void PartialFractions::computeKostantFunctionFromWeylGroup(
   char weylGroupLetter,
   int weylGroupNumber,
@@ -4594,7 +4600,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   vectorPartitionBasis.quickSortAscending();
   //fix this!
   global.fatal << " Not implemented yet. " << global.fatal;
-  //  this->initFromRoots(theVPbasis, 0);
+  //  this->initFromRoots(vpBasis, 0);
   //this->flagSplitTestModeNoNumerators = true;
   //  this->split(ChamberIndicator);
   if (!this->checkForMinimalityDecompositionWithRespectToRoot(chamberIndicator)) {
@@ -6165,11 +6171,6 @@ bool DynkinSimpleType::operator>(const DynkinSimpleType& other) const {
     return false;
   }
   return this->letter > other.letter;
-  //  if (this->theLetter>other.theLetter)
-  //    return true;
-  //  if (this->theLetter<other.theLetter)
-  //    return false;
-  //  return this->CartanSymmetricScale>other.CartanSymmetricScale;
 }
 
 void DynkinSimpleType::getCn(int n, Matrix<Rational>& output) const {
@@ -6997,37 +6998,37 @@ LargeInteger WeylGroupData::sizeByFormulaOrNegative1(char weylLetter, int dimens
   ) {
     global.fatal << "WeylGroupData::sizeByFormulaOrNegative1 called with impossible Weyl type: " << weylLetter << global.fatal;
   }
-  LargeInteger theOutput = 1;
+  LargeInteger output = 1;
   if (weylLetter == 'A') {
-    theOutput = Rational::factorial(dimension + 1);
+    output = Rational::factorial(dimension + 1);
   }
   if (weylLetter == 'B' || weylLetter == 'C') {
-    theOutput = Rational::factorial(dimension)*Rational::twoToTheNth(dimension);
+    output = Rational::factorial(dimension)*Rational::twoToTheNth(dimension);
   }
   if (weylLetter == 'D') {
-    theOutput = Rational::factorial(dimension)*Rational::twoToTheNth(dimension - 1);
+    output = Rational::factorial(dimension)*Rational::twoToTheNth(dimension - 1);
   }
   if (weylLetter == 'E') {
     if (dimension == 6) {
-      theOutput = 51840;
+      output = 51840;
     }
     if (dimension == 7) {
-      theOutput = 1024;
-      theOutput *= 81 * 35;
+      output = 1024;
+      output *= 81 * 35;
     }
     if (dimension == 8) {
-      theOutput = 1024 * 16;
-      theOutput *= 81 * 3;
-      theOutput *= 25 * 7;
+      output = 1024 * 16;
+      output *= 81 * 3;
+      output *= 25 * 7;
     }
   }
   if (weylLetter == 'F') {
-    theOutput = 128 * 9;
+    output = 128 * 9;
   }
   if (weylLetter == 'G') {
-    theOutput = 12;
+    output = 12;
   }
-  return theOutput;
+  return output;
 }
 
 void WeylGroupData::getWord(int g, List<int>& out) const {
@@ -7750,7 +7751,7 @@ void WeylGroupData::drawRootSystem(
     predefinedProjectionPlane->getVectorsDouble(twoPlane);
   }
   if (twoPlane.size != 2) {
-    global.fatal << "Object theTwoPlane is supposed to be two-dimensional but it is instead of dimension: "
+    global.fatal << "Object twoPlane is supposed to be two-dimensional but it is instead of dimension: "
     << twoPlane.size << ". " << global.fatal;
   }
   Vectors<Rational> rootSystemSorted;
@@ -8938,8 +8939,14 @@ void LaTeXProcedures::getStringFromColorIndex(int colorIndex, std::string &outpu
   }
 }
 
-void LaTeXProcedures::drawTextDirectly(double X1, double Y1, const std::string& text, int ColorIndex, std::fstream& output) {
-  (void) ColorIndex;
+void LaTeXProcedures::drawTextDirectly(
+  double X1,
+  double Y1,
+  const std::string& text,
+  int colorIndex,
+  std::fstream& output
+) {
+  (void) colorIndex;
   output.precision(4);
   X1 -= text.length() * LaTeXProcedures::TextPrintCenteringAdjustmentX;
   Y1 += LaTeXProcedures::TextPrintCenteringAdjustmentY;
@@ -8954,12 +8961,12 @@ void LaTeXProcedures::drawline(
   double Y1,
   double X2,
   double Y2,
-  uint32_t thePenStyle,
+  uint32_t penStyle,
   int colorIndex,
   std::fstream& output,
   DrawingVariables& drawInput
 ) {
-  if (static_cast<int>(thePenStyle) == DrawingVariables::PenStyleInvisible) {
+  if (static_cast<int>(penStyle) == DrawingVariables::PenStyleInvisible) {
     return;
   }
   output.precision(4);
@@ -8968,7 +8975,7 @@ void LaTeXProcedures::drawline(
   Y1 /= LaTeXProcedures::ScaleFactor;
   Y2 /= LaTeXProcedures::ScaleFactor;
   std::string tempS;
-  if (thePenStyle == static_cast<unsigned>(DrawingVariables::PenStyleDashed)) {
+  if (penStyle == static_cast<unsigned>(DrawingVariables::PenStyleDashed)) {
     tempS = "lightgray";
   } else {
     LaTeXProcedures::getStringFromColorIndex(colorIndex, tempS, drawInput);
@@ -9647,7 +9654,6 @@ std::string PartialFractions::doFullComputationReturnLatexFileString(
   //  this->chambersOld.directions = toBePartitioned;
   this->ambientDimension = toBePartitioned.getDimension();
   //  this->chambersOld.AmbientDimension = toBePartitioned.getDimension();
-  //  this->chambersOld.thePauseController.initComputation();
   //this->chambers.ReadFromDefaultFile();
   std::stringstream out;
   std::stringstream outHtml;
@@ -9657,7 +9663,6 @@ std::string PartialFractions::doFullComputationReturnLatexFileString(
   //  this->chambersOld.LabelChamberIndicesProperly();
   //  this->chambers.AssignCombinatorialChamberComplex(this->chambersOld);
   //  this->chambersOld.drawOutput(global.drawingVariables, root, 0);
-  //  this->chambersOld.thePauseController.exitComputation();
   DrawingVariables drawingVariables;
   this->chambers.drawMeProjective(nullptr, true, drawingVariables, format);
   outHtml << drawingVariables.getHTMLDiv(this->ambientDimension, false);
@@ -10309,7 +10314,7 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   Rational constOnRightHandSide = - *affineHyperplane.lastObject();
   Vectors<Rational> basis;
   basis.assignMatrixRows(this->basisRationalForm);
-  Lattice hyperplaneLatticeNoShift, directionLattice;//, normalProjectionLattice, theTrueProjectionLattice;
+  Lattice hyperplaneLatticeNoShift, directionLattice;//, normalProjectionLattice, trueProjectionLattice;
   Vectors<Rational> roots; //Vector<Rational> root;
   roots.addOnTop(direction);
   directionLattice = *this;
@@ -10832,10 +10837,10 @@ void DrawOperations::initDimensions(int dimension) {
 }
 
 int DrawOperations::getDimensionFirstDimensionDependentOperation() {
-  for (int i = 0; i < this->theOperations.size; i ++) {
-    if (this->theOperations[i][fieldOperation].stringValue == DrawOperations::typeSegment) {
-      if (this->theOperations[i][DrawOperations::fieldPoints].listObjects.size > 0) {
-        return this->theOperations[i][DrawOperations::fieldPoints][0].listObjects.size;
+  for (int i = 0; i < this->operations.size; i ++) {
+    if (this->operations[i][fieldOperation].stringValue == DrawOperations::typeSegment) {
+      if (this->operations[i][DrawOperations::fieldPoints].listObjects.size > 0) {
+        return this->operations[i][DrawOperations::fieldPoints][0].listObjects.size;
       }
     }
   }
@@ -10884,7 +10889,7 @@ std::iostream& operator<< (std::iostream& output, const Complex<Base>& input) {
 }
 
 void DrawOperations::initialize() {
-  this->theOperations.reserve(1000);
+  this->operations.reserve(1000);
   this->centerX = 300;
   this->centerY = 300;
   this->graphicsUnit = DrawOperations::graphicsUnitDefault;
@@ -11137,7 +11142,7 @@ class ImpreciseDouble {
     result = *this;
     if (other.isEqualToZero()) {
       // The following is written like this to
-      // avoid this->theValue / 0;
+      // avoid this->value / 0;
       // If the user attempts to divide by zero,
       // I want a regular division by zero exception to be generated.
       result.value = this->value / (other.value - other.value);
@@ -11193,7 +11198,7 @@ void DrawOperations::operator+=(const DrawOperations& other) {
   if (this->bilinearForm.numberOfRows != other.bilinearForm.numberOfRows) {
     return;
   }
-  this->theOperations.addListOnTop(other.theOperations);
+  this->operations.addListOnTop(other.operations);
   //this->BasisProjectionPlane.addListOnTop(other.BasisProjectionPlane);
   //this->centerX.addListOnTop(other.centerX);
   //this->centerY.addListOnTop(other.centerY);
@@ -11375,7 +11380,7 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& roots, std::string& ou
   for (int i = 0; i < partialFractions.chambers.size; i ++) {
     indicator = partialFractions.chambers[i].getInternalPoint();
     partialFractions.getVectorPartitionFunction(this->quasiPolynomials[i], indicator);
-    //QuasiPolynomial& currentQP = this->theQPs[i];
+    //QuasiPolynomial& currentQP = this->qps[i];
   }
   Lattice baseLattice;
   baseLattice.makeFromRoots(roots);
@@ -11751,7 +11756,7 @@ void ConeComplex::transformToWeylProjective() {
   for (int i = 0; i < this->size; i ++)
     if (this->objects[i] != 0) {
       this->objects[i]->transformToWeylProjective(*this);
-//      theVertices.AddRootSnoRepetition(this->objects[i]->AllVertices);
+//      vertices.AddRootSnoRepetition(this->objects[i]->AllVertices);
     }
   //this->startingCones.initFromDirections()
   Vector<Rational> root;
@@ -11770,8 +11775,8 @@ void ConeComplex::transformToWeylProjective() {
   this->log << "the global cone normals: " << this->TheGlobalConeNormals.toString();
   this->toString(tempS);
   this->log << tempS;
-  global.theIndicatorVariables.StatusString1NeedsRefresh = true;
-  global.theIndicatorVariables.StatusString1= this->log.str();
+  global.indicatorVariables.StatusString1NeedsRefresh = true;
+  global.indicatorVariables.StatusString1= this->log.str();
   global.makeReport();*/
 }
 
@@ -11889,21 +11894,21 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
 }
 
 /*void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep2TrimChamberForMultOne
-    (Controller& thePauseController) {
+    () {
   Cone trimmedCone;
   Vectors<Rational> roots;
   Vector<Rational> multFreeWall;
   int startingNumCones = this->conesLargerDim.size;
   int numKilledCones = 0;
   for (int i = 0; i < this->conesLargerDim.size; i ++) {
-    trimmedCone.normals = this->conesLargerDim[i].theProjectivizedCone.normals;
+    trimmedCone.normals = this->conesLargerDim[i].projectivizedCone.normals;
     multFreeWall = this->LPtoMaximizeLargerDim[i];
     multFreeWall.negate();
     *multFreeWall.lastObject() +=1;
     trimmedCone.normals.addOnTop(multFreeWall);
     trimmedCone.createFromNormals(trimmedCone.normals);
     if (!trimmedCone.flagIsTheZeroCone)
-      this->conesLargerDim[i].theProjectivizedCone = trimmedCone;
+      this->conesLargerDim[i].projectivizedCone = trimmedCone;
     else {
       this->conesLargerDim.removeIndexSwapWithLast(i);
       this->LPtoMaximizeLargerDim.removeIndexSwapWithLast(i);
@@ -11913,7 +11918,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
     std::stringstream tempStream;
     tempStream << "Processed " << i +numKilledCones << " out of " << startingNumCones;
     tempStream << "\nKilled " << numKilledCones << " cones so far";
-    global.theIndicatorVariables.ProgressReportStrings[2] = tempStream.str();
+    global.indicatorVariables.ProgressReportStrings[2] = tempStream.str();
     global.makeReport();
   }
 }
@@ -11994,7 +11999,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
 }
 
 void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
-  Vector<Rational>& theLPToMaximizeAffine,
+  Vector<Rational>& lpToMaximizeAffine,
   Vectors<Rational>& outputAppendLPToMaximizeAffine,
   List<ConeLatticeAndShift>& outputAppend,
   Matrix<Rational>& projectionLatticeLevel
@@ -12026,8 +12031,8 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerate
   tempCLS.shift.shiftToTheLeftOnePosition();
   this->lattice.applyLinearMap(projectionLatticeLevel, tempCLS.lattice);
   Vector<Rational> root;
-  root = theLPToMaximizeAffine.getshiftToTheLeftOnePositionition();
-  root += preferredNormal * theLPToMaximizeAffine[0];
+  root = lpToMaximizeAffine.getshiftToTheLeftOnePositionition();
+  root += preferredNormal * lpToMaximizeAffine[0];
   if (!tempCLS.projectivizedCone.flagIsTheZeroCone) {
     outputAppend.addOnTop(tempCLS);
     outputAppendLPToMaximizeAffine.addOnTop(root);
@@ -12035,7 +12040,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerate
 }
 
 void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
-  Vector<Rational>& theLPToMaximizeAffine,
+  Vector<Rational>& lpToMaximizeAffine,
   Vectors<Rational>& outputAppendLPToMaximizeAffine,
   List<ConeLatticeAndShift>& outputAppend
 ) {
@@ -12051,7 +12056,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   direction.makeEi(dimensionProjectivized, 0);
   if (!this->projectivizedCone.vertices.linearSpanContainsVector(direction)) {
     this->findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
-      theLPToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, projectionLatticeLevel
+      lpToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, projectionLatticeLevel
     );
     return;
   }
@@ -12064,7 +12069,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   ConeComplex complexBeforeProjection;
   complexBeforeProjection.initialize();
   complexBeforeProjection.addNonRefinedChamberOnTopNoRepetition(this->projectivizedCone);
-  if (direction.scalarEuclidean(theLPToMaximizeAffine).isNegative()) {
+  if (direction.scalarEuclidean(lpToMaximizeAffine).isNegative()) {
     direction.negate();
   }
   complexBeforeProjection.slicingDirections.addOnTop(direction);
@@ -12142,37 +12147,14 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
         global.comments << "extra equation: " << extraEquation.toString() << ", ";
         tempCLS.projectivizedCone.normals.addOnTop(extraEquation);
       }
-      root = theLPToMaximizeAffine.getshiftToTheLeftOnePositionition();
-      root -= exitNormalShiftedAffineProjected * theLPToMaximizeAffine[0] / exitNormalAffine[0];
+      root = lpToMaximizeAffine.getshiftToTheLeftOnePositionition();
+      root -= exitNormalShiftedAffineProjected * lpToMaximizeAffine[0] / exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.addOnTop(root);
       if (tempCLS.projectivizedCone.normals.size <= 0) {
         global.fatal << "Projectivized cone has no normals. " << global.fatal;
       }
       Vectors<Rational> roots = tempCLS.projectivizedCone.normals;
       tempCLS.projectivizedCone.createFromNormals(roots);
-      /*if (!tempBool) {
-        std::stringstream tempStream;
-        tempStream << "The bad starting cone (cone number " << i + 1 << "):" << this->toString(format) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.toString(format);
-        tempStream << "<br>\n\n" << this->theProjectivizedCone.normals.toString(false, false, false);
-        tempStream << "\n\n<br>\n\n" << complexBeforeProjection.toString(false, true);
-        if (!foundEnteringNormal)
-          tempStream << "<hr>not found entering normal!!!!!!<hr>";
-        if (!foundExitNormal)
-          tempStream << "<hr>not found exit normal!!!!!!<hr>";
-        Cone tempCone;
-        tempCone.createFromNormals(roots);
-        tempStream << "\n\n\n\n<br><br><hr>The bad normals: " << tempTempRoots.toString();
-        tempStream << "\n\n\n\n<br><br><hr>The bad normals after creation: " << tempCLS.theProjectivizedCone.normals.toString();
-        global.theIndicatorVariables.StatusString1= tempStream.str();
-        global.theIndicatorVariables.StatusString1NeedsRefresh = true;
-        global.makeReport();
-        for (int i = 0; i <10000000; i ++)
-          if (i%3== 0)
-            i = i +2;
-        while (true){}
-      }*/
-      //if (!tempBool)global.fatal << global.fatal;
-      //global.Comments << tempCLS.theProjectivizedCone.toString(false, true, true, true, format);
       if (!tempCLS.projectivizedCone.flagIsTheZeroCone) {
         projectionLatticeLevel.actOnVectorColumn(exitRepresentatives[j], tempCLS.shift);
         outputAppend.addOnTop(tempCLS);

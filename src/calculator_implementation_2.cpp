@@ -919,10 +919,10 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
       beforepatternMatch = *this->output;
     }
     MapList<Expression, Expression> bufferPairs;
-    std::stringstream* theLog = this->owner->flagLogpatternMatching ? &this->owner->comments : nullptr;
+    std::stringstream* logStream = this->owner->flagLogpatternMatching ? &this->owner->comments : nullptr;
     afterpatternMatch = *(this->output);
     if (this->owner->processOneExpressionOnePatternOneSubstitution(
-      currentPattern, afterpatternMatch, bufferPairs, theLog
+      currentPattern, afterpatternMatch, bufferPairs, logStream
     )) {
       std::stringstream substitutionComment;
       if (this->history == nullptr) {

@@ -18,7 +18,7 @@ class MonomialGeneralizedVerma {
     return output;
   }
   void multiplyMeByUEEltOnTheLeft(
-    const ElementUniversalEnveloping<Coefficient>& theUE,
+    const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping,
     ElementSumGeneralizedVermas<Coefficient>& output
   ) const;
   void operator=(const MonomialGeneralizedVerma<Coefficient>& other) {
@@ -81,7 +81,7 @@ class MonomialGeneralizedVerma {
 template<class Coefficient>
 class ElementSumGeneralizedVermas : public LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient> {
 public:
-  void multiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<Coefficient>& theUE);
+  void multiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping);
   unsigned int hashFunction() const {
     return this->LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient>::hashFunction();
   }

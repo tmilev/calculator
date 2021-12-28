@@ -63,7 +63,7 @@ void TimeWrapper::computeTimeStringNonReadable() {
   << this->timeGM.tm_min
   << "-"
   << this->timeGM.tm_sec;
-  this->theTimeStringNonReadable = out.str();
+  this->timeStringNonReadable = out.str();
 }
 
 void TimeWrapper::assignLocalTime() {

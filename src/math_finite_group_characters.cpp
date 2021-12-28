@@ -847,7 +847,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   //global.Comments << "here is the character table of the group, the representatives and sizes for "
   //         << "conjugacy classes of the group and the subgroup, and for your convenience, "
   //         << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
-  //global.Comments << this->subgroupData.theGroup->prettyPrintCharacterTable();
+  //global.Comments << this->subgroupData.group->prettyPrintCharacterTable();
   //global.Comments << Xs << " <- subgroup sign character\n";
   //global.Comments << this->subgroupData.group->prettyPrintCCRepsSizes();
   //global.Comments << this->subgroupData.subgroup->prettyPrintCCRepsSizes();
@@ -975,18 +975,18 @@ bool FiniteGroup<elementSomeGroup>::areConjugate_OLD_Deprecated_Version_By_Todor
   if (left.hasDifferentConjugacyInvariantsFrom(right)) {
     return false;
   }
-  OrbitIteratorWeylGroup theIterator;
-  theIterator.initialize(this->generators, left, ElementWeylGroup::conjugationAction);
+  OrbitIteratorWeylGroup iterator;
+  iterator.initialize(this->generators, left, ElementWeylGroup::conjugationAction);
   if (this->generators.size == 0) {
     global.fatal << "Generators not allowed to be 0. " << global.fatal;
   }
   do {
     //if (left.toString() == "s_{4}")
-    //  global.Comments << "<br>" << theIterator.getCurrentElement().toString() << "=?=" << right.toString();
-    if (theIterator.getCurrentElement() == right) {
+    //  global.Comments << "<br>" << iterator.getCurrentElement().toString() << "=?=" << right.toString();
+    if (iterator.getCurrentElement() == right) {
       return true;
     }
-  } while (theIterator.incrementReturnFalseIfPastLast());
+  } while (iterator.incrementReturnFalseIfPastLast());
   return false;
 }
 

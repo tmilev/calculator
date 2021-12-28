@@ -723,10 +723,10 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
 //    rational = 0;
 //    Vector<Rational> & root = weylGroup.RootSystem.objects[i];
 //    int indexOfOpposite = weylGroup.RootSystem.getIndex(-root);
-//    Vector<Rational> & theOpposite = weylGroup.RootSystem.objects[indexOfOpposite];
+//    Vector<Rational> & opposite = weylGroup.RootSystem.objects[indexOfOpposite];
 //    for (int j = 0; j < weylGroup.RootSystem.size; j ++)
 //    { Vector<Rational> & current = weylGroup.RootSystem.objects[j];
-//      if (current == theOpposite)
+//      if (current == opposite)
 //        rational +=2;
 //       else
 //       { int indexOfSum= weylGroup.RootSystem.getIndex(current +root);
@@ -736,7 +736,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
 //     }
 //     rational +=2;
 //     rational = 1/rational;
-//     element2.makeOneGeneratorCoefficientOne(theOpposite, numVars, owner);
+//     element2.makeOneGeneratorCoefficientOne(opposite, numVars, owner);
 //     element1.makeOneGeneratorCoefficientOne(root, numVars, owner);
 //     element2*= element1;
 //
@@ -1626,9 +1626,9 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::commuteConsecutiveIndicesR
   }
   MonomialUniversalEnvelopingOrdered startMon;
   startMon = tempMon;
-  ElementSemisimpleLieAlgebra<Rational> adResulT, element, theLeftElt;
+  ElementSemisimpleLieAlgebra<Rational> adResulT, element, leftElement;
   this->owner->assignGeneratorCoefficientOne(rightGeneratorIndeX, adResulT);
-  this->owner->assignGeneratorCoefficientOne(leftGeneratorIndeX, theLeftElt);
+  this->owner->assignGeneratorCoefficientOne(leftGeneratorIndeX, leftElement);
   //tempLefttElt.ComputeDebugString(*this->owner, false, false);
   Vector<Rational> coefficients;
   do {
@@ -1666,7 +1666,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::commuteConsecutiveIndicesR
     }
     acquiredCoefficienT *= leftPower;
     leftPower -= 1;
-    this->owner->ownerSemisimpleLieAlgebra->lieBracket(theLeftElt, adResulT, element);
+    this->owner->ownerSemisimpleLieAlgebra->lieBracket(leftElement, adResulT, element);
     adResulT = element;
     powerDroP ++;
     acquiredCoefficienT /= powerDroP;

@@ -248,10 +248,10 @@ public:
     std::stringstream& commentsOnFailure
   );
   void setProblemData(const std::string& problemName, const ProblemData& inputData);
-  bool interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure);
+  bool interpretDatabaseProblemData(const std::string& information, std::stringstream& commentsOnFailure);
   bool interpretDatabaseProblemDataJSON(const JSData& data, std::stringstream& commentsOnFailure);
   bool storeProblemData(const std::string& fileName, std::stringstream* commentsOnFailure);
-  std::string GetSelectedRowEntry(const std::string& theKey);
+  std::string GetSelectedRowEntry(const std::string& key);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
   bool loadFromDatabase(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral = nullptr);
   bool fetchOneColumn(

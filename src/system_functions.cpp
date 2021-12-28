@@ -42,7 +42,6 @@ public:
   int64_t elapsedComputationTimeInMilliseconds;
   int counter ;
   int intervalBetweenChecksInMilliseconds;
-//  ThreadWrapper theThread;
   TimeoutThread();
   void reset();
   void run();

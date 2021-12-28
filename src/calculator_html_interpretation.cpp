@@ -881,7 +881,7 @@ JSData WebAPIResponse::getExamPageJSON() {
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorAndDebugStream
   );
-  //<-must come after theFile.outputHtmlHeadNoTag
+  //<-must come after file.outputHtmlHeadNoTag
   errorAndDebugStream << problem.outputDebugInformationBody;
   out << problemBody;
   std::string commentsProblem = errorAndDebugStream.str();
@@ -1186,8 +1186,6 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
         return false;
       }
       now.assignLocalTime();
-      // out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
-      // << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
       secondsTillDeadline = deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
       deadLinePassed = (secondsTillDeadline < - 18000);
     }
@@ -2319,8 +2317,6 @@ void UserCalculator::computePointsEarned(
       (*topics).values[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
       (*topics).values[i].maxPointsInAllChildren = 0;
       (*topics).values[i].flagSubproblemHasNoWeight = false;
-      //(*theTopics).theValues[i].maxCorrectAnswersInAllChildren = 0;
-      //(*theTopics).theValues[i].numAnsweredInAllChildren = 0;
     }
   }
   for (int i = 0; i < this->problemData.size(); i ++) {

@@ -740,12 +740,12 @@ public:
 
   enum pcpositions { beginning, loop, firstout, afterloop, end};
 
-  void initialize(List<object>& theL) {
-    if (theL.size == 0) {
+  void initialize(List<object>& input) {
+    if (input.size == 0) {
       done_iterating = true;
       return;
     }
-    this->l = theL;
+    this->l = input;
     this->done_iterating = false;
     this->go_once = false;
     this->frame_pointer = 0;

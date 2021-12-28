@@ -163,29 +163,29 @@ std::string DrawOperations::fieldFrameIndex = "frameIndex";
 void DrawOperations::drawCircleAtVectorBufferRational(
   const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId, int frameIndex
 ) {
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
-  theOperation[DrawOperations::fieldLocation] = input.getVectorDouble();
-  theOperation[DrawOperations::fieldRadius] = radius;
-  theOperation[DrawOperations::fieldColor] = color;
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
+  operation[DrawOperations::fieldLocation] = input.getVectorDouble();
+  operation[DrawOperations::fieldRadius] = radius;
+  operation[DrawOperations::fieldColor] = color;
   if (frameId != "") {
-    theOperation[DrawOperations::fieldFrameId] = frameId;
-    theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
+    operation[DrawOperations::fieldFrameId] = frameId;
+    operation[DrawOperations::fieldFrameIndex] = frameIndex;
   }
-  //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
-  this->theOperations.addOnTop(theOperation);
+  //operation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawCircleAtVectorBufferDouble(
   const Vector<double>& input, const std::string& color, double radius
 ) {
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
-  theOperation[DrawOperations::fieldLocation] = input;
-  theOperation[DrawOperations::fieldRadius] = radius;
-  theOperation[DrawOperations::fieldColor] = color;
-  //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
-  this->theOperations.addOnTop(theOperation);
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
+  operation[DrawOperations::fieldLocation] = input;
+  operation[DrawOperations::fieldRadius] = radius;
+  operation[DrawOperations::fieldColor] = color;
+  //operation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferRational(
@@ -201,37 +201,37 @@ void DrawOperations::drawPath(
   const std::string& frameId,
   int frameIndex
 ) {
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typePath;
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typePath;
   Vectors<double> vectorsDouble;
   vectors.getVectorsDouble(vectorsDouble);
-  theOperation[DrawOperations::fieldPoints] = vectorsDouble;
-  theOperation[DrawOperations::fieldFrameId] = frameId;
-  theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
+  operation[DrawOperations::fieldPoints] = vectorsDouble;
+  operation[DrawOperations::fieldFrameId] = frameId;
+  operation[DrawOperations::fieldFrameIndex] = frameIndex;
   if (color != "") {
-    theOperation[DrawOperations::fieldColor] = color;
+    operation[DrawOperations::fieldColor] = color;
   }
   if (lineWidth != 1.0) {
-    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
+    operation[DrawOperations::fieldLineWidth] = lineWidth;
   }
-  this->theOperations.addOnTop(theOperation);
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
   const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color, double lineWidth
 ) {
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
-  theOperation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
-  theOperation[DrawOperations::fieldPoints][0] = vector1;
-  theOperation[DrawOperations::fieldPoints][1] = vector2;
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
+  operation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
+  operation[DrawOperations::fieldPoints][0] = vector1;
+  operation[DrawOperations::fieldPoints][1] = vector2;
   if (color != "") {
-    theOperation[DrawOperations::fieldColor] = color;
+    operation[DrawOperations::fieldColor] = color;
   }
   if (lineWidth != 1.0) {
-    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
+    operation[DrawOperations::fieldLineWidth] = lineWidth;
   }
-  this->theOperations.addOnTop(theOperation);
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawFilledShape(
@@ -244,16 +244,16 @@ void DrawOperations::drawFilledShape(
   (void) penStyle;
   (void) colorIndex;
   (void) fillColorIndex;
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeFilledShape;
-  theOperation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
+  JSData operation;
+  operation[DrawOperations::fieldOperation] = DrawOperations::typeFilledShape;
+  operation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
   for (int i = 0; i < corners.size; i ++) {
-    theOperation[DrawOperations::fieldPoints][i] = corners[i];
+    operation[DrawOperations::fieldPoints][i] = corners[i];
   }
   if (lineWidth != 1.0) {
-    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
+    operation[DrawOperations::fieldLineWidth] = lineWidth;
   }
-  this->theOperations.addOnTop(theOperation);
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawTextAtVectorBufferRational(
@@ -265,7 +265,7 @@ void DrawOperations::drawTextAtVectorBufferRational(
   operation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
   operation[DrawOperations::fieldLocation] = input.getVectorDouble();
   operation[DrawOperations::fieldText] = inputText;
-  this->theOperations.addOnTop(operation);
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawTextAtVectorBufferDouble(
@@ -282,7 +282,7 @@ void DrawOperations::drawTextAtVectorBufferDouble(
   operation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
   operation[DrawOperations::fieldLocation] = input;
   operation[DrawOperations::fieldText] = inputText;
-  this->theOperations.addOnTop(operation);
+  this->operations.addOnTop(operation);
 }
 
 void DrawingVariables::drawLineDirectly(
@@ -290,11 +290,11 @@ void DrawingVariables::drawLineDirectly(
   double y1,
   double x2,
   double y2,
-  uint32_t thePenStyle,
+  uint32_t penStyle,
   int colorIndex,
   double lineWidth
 ) {
-  this->operations.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
+  this->operations.drawLineBuffer(x1, y1, x2, y2, penStyle, colorIndex, lineWidth);
 }
 
 void DrawOperations::drawHighlightGroup(
@@ -306,7 +306,7 @@ void DrawOperations::drawHighlightGroup(
   operation[DrawOperations::fieldLabels] = labels;
   operation[DrawOperations::fieldColor] = color;
   operation[DrawOperations::fieldRadius] = radius;
-  this->theOperations.addOnTop(operation);
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawLineBuffer(
@@ -314,11 +314,11 @@ void DrawOperations::drawLineBuffer(
   double y1,
   double x2,
   double y2,
-  uint32_t thePenStyle,
+  uint32_t penStyle,
   int colorIndex,
   double lineWidth
 ) {
-  (void) thePenStyle;
+  (void) penStyle;
   (void) colorIndex;
   (void) lineWidth;
   JSData operation;
@@ -328,19 +328,19 @@ void DrawOperations::drawLineBuffer(
   operation[DrawOperations::fieldPoints][0][1] = y1;
   operation[DrawOperations::fieldPoints][1][0] = x2;
   operation[DrawOperations::fieldPoints][1][1] = y2;
-  this->theOperations.addOnTop(operation);
+  this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawTextBuffer(
   double x1,
   double y1,
   const std::string& inputText,
-  int ColorIndex,
+  int colorIndex,
   int fontSize,
   int textStyle
 ) {
   (void) fontSize;
-  (void) ColorIndex;
+  (void) colorIndex;
   (void) textStyle;
   JSData operation;
   operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
@@ -348,7 +348,7 @@ void DrawOperations::drawTextBuffer(
   operation[DrawOperations::fieldLocation][0] = x1;
   operation[DrawOperations::fieldLocation][1] = y1;
   operation[DrawOperations::fieldText] = inputText;
-  this->theOperations.addOnTop(operation);
+  this->operations.addOnTop(operation);
 }
 
 int DrawingVariables::getActualPenStyleFromFlagsAnd(int inputPenStyle) {
@@ -418,11 +418,11 @@ void DrawingVariables::drawLineBuffer(
   double y1,
   double x2,
   double y2,
-  uint32_t thePenStyle,
+  uint32_t penStyle,
   int colorIndex,
   double lineWidth
 ) {
-  this->operations.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
+  this->operations.drawLineBuffer(x1, y1, x2, y2, penStyle, colorIndex, lineWidth);
 }
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color) {
@@ -562,9 +562,9 @@ std::string VectorPartition::toStringAllPartitions(bool useHtml) {
   if (useHtml) {
     out << "<br>";
   }
-  for (int i = 0; i < this->thePartitions.size; i ++) {
+  for (int i = 0; i < this->partitions.size; i ++) {
     out << "=";
-    out << this->toStringOnePartition(this->thePartitions[i]);
+    out << this->toStringOnePartition(this->partitions[i]);
     out << "\n\n";
     if (useHtml) {
       out << "<br>\n";

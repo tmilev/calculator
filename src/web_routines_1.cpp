@@ -766,13 +766,13 @@ bool Crypto::verifyJWTagainstKnownKeys(
   // the host system (pgp keys, etc.).
   // This is system dependent and a lot of work-> not doing now, but will do
   // in the future as the need arises.
-  JSONWebToken theToken;
-  if (!theToken.assignString(inputToken, commentsOnFailure)) {
+  JSONWebToken webToken;
+  if (!webToken.assignString(inputToken, commentsOnFailure)) {
     return false;
   }
   std::string keyIDstring = "";
   JSData header;
-  if (!header.parse(theToken.headerJSON)) {
+  if (!header.parse(webToken.headerJSON)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Couldn't load JSON from the user token.";
     }
@@ -827,7 +827,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
     << keyIDstring << ".</b>";
   }
   PublicKeyRSA& currentCert = Crypto::knownCertificates[index];
-  return theToken.verifyRSA256(
+  return webToken.verifyRSA256(
     currentCert.modulus, currentCert.exponent, commentsOnFailure, commentsGeneral
   );
 }

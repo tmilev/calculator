@@ -9,8 +9,7 @@ class TimeWrapper {
 public:
   tm timeGM;
   tm timeLocal;
-  std::string theTimeStringNonReadable;
-//  std::string GetRFC1123time();
+  std::string timeStringNonReadable;
   void assignLocalTime();
   void computeTimeStringNonReadable();
   std::string toString() const;

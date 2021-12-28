@@ -654,8 +654,8 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& fileName, con
   if (global.flagDatabaseCompiled) {
     bool problemAlreadySolved = false;
     if (this->currentUser.problemData.contains(fileName)) {
-      ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(fileName);
-      if (theProbData.numCorrectlyAnswered >= theProbData.answers.size()) {
+      ProblemData& problemData = this->currentUser.problemData.getValueCreateEmpty(fileName);
+      if (problemData.numCorrectlyAnswered >= problemData.answers.size()) {
         problemAlreadySolved = true;
       }
     }
@@ -1660,10 +1660,10 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   if (!deadline.assignMonthDayYear(currentDeadline, badDateStream)) {
     out << "<span style =\"color:red\">" << badDateStream.str() << "</span>";
   }
-  //  out << "deadline.date: " << deadline.theTime.tm_mday;
+  //  out << "deadline.date: " << deadline.time.tm_mday;
   now.assignLocalTime();
-  //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
-  //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+  //  out << "Now: " << asctime (&now.time) << " mktime: " << mktime(&now.time)
+  //  << " deadline: " << asctime(&deadline.time) << " mktime: " << mktime(&deadline.time);
   double secondsTillDeadline = deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
 
   std::stringstream hoursTillDeadlineStream;
@@ -3176,8 +3176,8 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& interpreter, std::strin
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
       if (this->currentUser.problemData.contains(this->fileName)) {
-        ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(this->fileName);
-        if (theProbData.numCorrectlyAnswered >= theProbData.answers.size()) {
+        ProblemData& problemData = this->currentUser.problemData.getValueCreateEmpty(this->fileName);
+        if (problemData.numCorrectlyAnswered >= problemData.answers.size()) {
           problemAlreadySolved = true;
         }
       }
@@ -3328,30 +3328,30 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& fileName
   }
   Rational currentWeight;
   if (this->currentUser.problemData.contains(fileName)) {
-    ProblemData& theProbData = this->currentUser.problemData.getValueCreateEmpty(fileName);
-    if (!theProbData.flagProblemWeightIsOK) {
+    ProblemData& problemData = this->currentUser.problemData.getValueCreateEmpty(fileName);
+    if (!problemData.flagProblemWeightIsOK) {
       out << "<span style =\"color:orange\">No point weight assigned yet. </span>";
-      if (!theProbData.adminData.getWeightFromCourse(this->currentUser.courseComputed, currentWeight)) {
+      if (!problemData.adminData.getWeightFromCourse(this->currentUser.courseComputed, currentWeight)) {
         currentWeight = 0;
       }
-      if (theProbData.answers.size() == 1) {
-        if (theProbData.numCorrectlyAnswered == 1) {
-          out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
+      if (problemData.answers.size() == 1) {
+        if (problemData.numCorrectlyAnswered == 1) {
+          out << problemData.totalNumSubmissions << " submission(s), problem correctly answered. ";
         } else {
-          out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
+          out << problemData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
         }
-      } else if (theProbData.answers.size() > 1) {
-        out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
-        << " out of " << theProbData.answers.size() << " subproblems correctly answered. ";
+      } else if (problemData.answers.size() > 1) {
+        out << problemData.totalNumSubmissions << " submission(s), " << problemData.numCorrectlyAnswered
+        << " out of " << problemData.answers.size() << " subproblems correctly answered. ";
       }
-    } else if (theProbData.totalNumSubmissions != 0) {
-      if (theProbData.numCorrectlyAnswered < theProbData.answers.size()) {
+    } else if (problemData.totalNumSubmissions != 0) {
+      if (problemData.numCorrectlyAnswered < problemData.answers.size()) {
         out << "<b style =\"color:red\">"
-        << theProbData.points << " out of "
+        << problemData.points << " out of "
         << currentWeight << " point(s). </b>";
-      } else if (theProbData.numCorrectlyAnswered == theProbData.answers.size()) {
+      } else if (problemData.numCorrectlyAnswered == problemData.answers.size()) {
         out << "<b style =\"color:green\">"
-        << theProbData.points << " out of "
+        << problemData.points << " out of "
         << currentWeight << " point(s). </b> ";
       }
     }
@@ -3374,19 +3374,19 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& fileNam
     return out.str();
   }
   std::stringstream problemWeight;
-  ProblemData theProbData;
+  ProblemData problemData;
   bool showModifyButton = global.userDefaultHasAdminRights() && !global.userStudentVieWOn();
   outputAlreadySolved = false;
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
   if (this->currentUser.problemData.contains(fileName)) {
-    theProbData = this->currentUser.problemData.getValueCreateEmpty(fileName);
+    problemData = this->currentUser.problemData.getValueCreateEmpty(fileName);
     Rational percentSolved = 0, totalPoints = 0;
-    percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.answers.size());
-    theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
+    percentSolved.assignNumeratorAndDenominator(problemData.numCorrectlyAnswered, problemData.answers.size());
+    problemData.flagProblemWeightIsOK = problemData.adminData.getWeightFromCourse(
       this->currentUser.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
     );
-    if (!theProbData.flagProblemWeightIsOK) {
+    if (!problemData.flagProblemWeightIsOK) {
       problemWeight << "?";
       if (currentWeightAsGivenByInstructor != "") {
         problemWeight << "<span style =\"color:red\">"
@@ -3398,7 +3398,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& fileNam
     }
     outputAlreadySolved = (percentSolved == 1);
     if (!outputAlreadySolved) {
-      if (!theProbData.flagProblemWeightIsOK) {
+      if (!problemData.flagProblemWeightIsOK) {
         out << "<b style =\"color:brown\">" << percentSolved
         << " out of " << problemWeight.str() << "</b>";
       } else {
@@ -3406,7 +3406,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& fileNam
         << " out of " << problemWeight.str() << "</b>";
       }
     } else {
-      if (!theProbData.flagProblemWeightIsOK) {
+      if (!problemData.flagProblemWeightIsOK) {
         out << "<b style =\"color:green\">solved</b>";
       } else {
         out << "<b style =\"color:green\">" << totalPoints << " out of " << problemWeight.str() << "</b>";

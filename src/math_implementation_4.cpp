@@ -955,17 +955,17 @@ Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
 void DynkinDiagramRootSubalgebra::getMapFromPermutation(
   Vectors<Rational>& domain,
   Vectors<Rational>& range,
-  List<int>& thePerm, List<List<List<int > > >& automorphisms,
+  List<int>& permutation, List<List<List<int > > >& automorphisms,
   SelectionWithDifferentMaxMultiplicities& autosPermutations,
   DynkinDiagramRootSubalgebra& right
 ) {
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     for (int j = 0; j < this->simpleBasesConnectedComponents[i].size; j ++) {
-      if (this->simpleBasesConnectedComponents[i].size != right.simpleBasesConnectedComponents[thePerm[i]].size) {
+      if (this->simpleBasesConnectedComponents[i].size != right.simpleBasesConnectedComponents[permutation[i]].size) {
         global.fatal << "Connected components simple bases sizes do not match. " << global.fatal;
       }
       domain.addOnTop( this->simpleBasesConnectedComponents[i][j]);
-      int indexTargetComponent = thePerm[i];
+      int indexTargetComponent = permutation[i];
       int indexAutomorphismInComponent = autosPermutations.multiplicities[i];
       int indexRoot = automorphisms[i][indexAutomorphismInComponent][j];
       range.addOnTop(right.simpleBasesConnectedComponents[indexTargetComponent][indexRoot]);
@@ -1029,52 +1029,52 @@ void DynkinDiagramRootSubalgebra::getDynkinType(DynkinType& output) const {
 void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int index) {
   Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[index];
   DynkinSimpleType& currentStrinG = this->simpleComponentTypes[index];
-  List<int> thePermutation;
-  thePermutation.setSize(currentComponent.size);
+  List<int> permutation;
+  permutation.setSize(currentComponent.size);
   output.size = 0;
   for (int i = 0; i < currentComponent.size; i ++) {
-    thePermutation[i] = i;
+    permutation[i] = i;
   }
-  output.addOnTop(thePermutation);
+  output.addOnTop(permutation);
   if (currentStrinG.letter == 'A' && currentComponent.size != 1) {
-    thePermutation.reverseElements();
-    output.addOnTop(thePermutation);
+    permutation.reverseElements();
+    output.addOnTop(permutation);
   }
   if (currentStrinG.letter == 'D') {
     if (currentComponent.size == 4) {
      //the automorphism group of the Dynkin Diagram is S3
-      thePermutation[1] = 2;
-      thePermutation[2] = 3;
-      thePermutation[3] = 1;
-      output.addOnTop(thePermutation);
-      thePermutation[1] = 1;
-      thePermutation[2] = 3;
-      thePermutation[3] = 2;
-      output.addOnTop(thePermutation);
-      thePermutation[1] = 2;
-      thePermutation[2] = 1;
-      thePermutation[3] = 3;
-      output.addOnTop(thePermutation);
-      thePermutation[1] = 3;
-      thePermutation[2] = 1;
-      thePermutation[3] = 2;
-      output.addOnTop(thePermutation);
-      thePermutation[1] = 3;
-      thePermutation[2] = 2;
-      thePermutation[3] = 1;
-      output.addOnTop(thePermutation);
+      permutation[1] = 2;
+      permutation[2] = 3;
+      permutation[3] = 1;
+      output.addOnTop(permutation);
+      permutation[1] = 1;
+      permutation[2] = 3;
+      permutation[3] = 2;
+      output.addOnTop(permutation);
+      permutation[1] = 2;
+      permutation[2] = 1;
+      permutation[3] = 3;
+      output.addOnTop(permutation);
+      permutation[1] = 3;
+      permutation[2] = 1;
+      permutation[3] = 2;
+      output.addOnTop(permutation);
+      permutation[1] = 3;
+      permutation[2] = 2;
+      permutation[3] = 1;
+      output.addOnTop(permutation);
     } else {
-      thePermutation[currentComponent.size - 2] = currentComponent.size - 1;
-      thePermutation[currentComponent.size - 1] = currentComponent.size - 2;
-      output.addOnTop(thePermutation);
+      permutation[currentComponent.size - 2] = currentComponent.size - 1;
+      permutation[currentComponent.size - 1] = currentComponent.size - 2;
+      output.addOnTop(permutation);
     }
   }
   if (currentStrinG.letter == 'E' && currentStrinG.rank == 6) {
-    thePermutation[1] = 3;
-    thePermutation[2] = 4;
-    thePermutation[3] = 1;
-    thePermutation[4] = 2;
-    output.addOnTop(thePermutation);
+    permutation[1] = 3;
+    permutation[2] = 4;
+    permutation[3] = 1;
+    permutation[4] = 2;
+    output.addOnTop(permutation);
   }
 }
 
@@ -1365,30 +1365,30 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   out << this->partialFractions.toString(format);
   this->partialFractions.split(nullptr);
   out << "=" << this->partialFractions.toString(format);
-//  int totalDim= this->theTranslationS[0].size +this->theTranslationsProjecteD[0].size;
-  this->theQPsSubstituted.setSize(this->projectivizedChambeR.size);
+  //  int totalDim = this->translationS[0].size +this->translationsProjecteD[0].size;
+  this->quasiPolynomialsSubstituted.setSize(this->projectivizedChambeR.size);
   global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;
-//  this->thePfs.chambersOld.initialize();
-//  this->thePfs.chambersOld.directions = this->GmodKNegWeightsBasisChanged;
-//  this->thePfs.chambersOld.SliceEuclideanSpace(false);
-//  this->theQPsNonSubstituted.setSize(this->thePfs.chambersOld.size);
-//  this->theQPsSubstituted.setSize(this->thePfs.chambersOld.size);
+//  this->pfs.chambersOld.initialize();
+//  this->pfs.chambersOld.directions = this->GmodKNegWeightsBasisChanged;
+//  this->pfs.chambersOld.SliceEuclideanSpace(false);
+//  this->qPsNonSubstituted.setSize(this->pfs.chambersOld.size);
+//  this->qPsSubstituted.setSize(this->pfs.chambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
   global.fatal << "Not implemented yet. " << global.fatal;
 /*
-  for (int i = 0; i < this->thePfs.chambersOld.size; i ++)
-    if (this->thePfs.chambersOld.objects[i] != 0) {
-      QuasiPolynomial& currentQPNoSub = this->theQPsNonSubstituted.objects[i];
-      this->theQPsSubstituted.objects[i].setSize(this->theLinearOperators.size);
-      this->thePfs.getVectorPartitionFunction(currentQPNoSub, this->thePfs.chambersOld.objects[i]->InternalPoint);
-      out << "\nChamber " << i + 1 << " with internal point " << this->thePfs.chambersOld.objects[i]->InternalPoint.toString() << " the quasipoly is: " << currentQPNoSub.toString(false, false);
-      for (int k = 0; k< this->theLinearOperators.size; k++) {
-        QuasiPolynomial& currentQPSub = this->theQPsSubstituted.objects[i].objects[k];
+  for (int i = 0; i < this->pfs.chambersOld.size; i ++)
+    if (this->pfs.chambersOld.objects[i] != 0) {
+      QuasiPolynomial& currentQPNoSub = this->qPsNonSubstituted.objects[i];
+      this->qPsSubstituted.objects[i].setSize(this->linearOperators.size);
+      this->pfs.getVectorPartitionFunction(currentQPNoSub, this->pfs.chambersOld.objects[i]->InternalPoint);
+      out << "\nChamber " << i + 1 << " with internal point " << this->pfs.chambersOld.objects[i]->InternalPoint.toString() << " the quasipoly is: " << currentQPNoSub.toString(false, false);
+      for (int k = 0; k< this->linearOperators.size; k++) {
+        QuasiPolynomial& currentQPSub = this->qPsSubstituted.objects[i].objects[k];
         std::stringstream tempStream;
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
-        global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
+        global.indicatorVariables.ProgressReportStrings[0] = tempStream.str();
         global.makeReport();
-        currentQPNoSub.substitution(this->theLinearOperatorsExtended.objects[k], this->translationsProjectedBasisChanged[k], this->ExtendedIntegralLatticeMatForM, currentQPSub);
+        currentQPNoSub.substitution(this->linearOperatorsExtended.objects[k], this->translationsProjectedBasisChanged[k], this->ExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.toString(false, false);
       }
     }
@@ -1405,11 +1405,11 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     currentSum.makeZeroOverLattice(this->extendedIntegralLatticeMatrixForm);
     for (int k = 0; k < this->linearOperators.size; k ++) {
       this->getProjection(k, this->projectivizedChambeR.objects[i].getInternalPoint(), root);
-      root -= this->NonIntegralOriginModificationBasisChanged;
+      root -= this->nonIntegralOriginModificationBasisChanged;
       global.fatal << global.fatal ;
-      int index = - 1;//= this->thePfs.chambersOld.GetFirstChamberIndexContainingPoint(root);
+      int index = - 1; //= this->pfs.chambersOld.GetFirstChamberIndexContainingPoint(root);
       if (index != - 1) {
-        tempQP = this->theQPsSubstituted[index][k];
+        tempQP = this->quasiPolynomialsSubstituted[index][k];
         tempQP *= this->coefficients[k];
         currentSum += tempQP;
       }
@@ -1566,18 +1566,18 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
   switch (this->computationPhase) {
     case 0:
-//      this->parser.hmm.MakeG2InB3(this->theParser);
+//      this->parser.hmm.MakeG2InB3(this->parser);
       this->initFromHomomorphism(parabolicSel, this->homomorphism);
       this->transformToWeylProjectiveStep1();
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       this->transformToWeylProjectiveStep2();
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       break;
     case 1:
       this->projectivizedChambeR.refine();
       this->sortMultiplicities();
       out << this->projectivizedChambeR.toString(false);
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       break;
     case 2:
       this->computeQPsFromChamberComplex();
@@ -1588,23 +1588,23 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
       break;
     case 4:
       this->inititializeMaximumComputation();
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       break;
     case 5:
       this->maximumComputation.findExtremaParametricStep1();
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       break;
     case 6:
       this->maximumComputation.findExtremaParametricStep3();
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       break;
     case 7:
       this->maximumComputation.findExtremaParametricStep4();
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       break;
     case 8:
       this->maximumComputation.findExtremaParametricStep5();
-//      out << global.theIndicatorVariables.StatusString1;
+//      out << global.indicatorVariables.StatusString1;
       break;
     default:
       break;
@@ -1643,7 +1643,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 //  input.projectOntoSmallCartan(weylSmaller.rootsOfBorel, roots);
   this->log << "projections: " << roots.toString();
   weylGroupCoDomain.group.computeAllElements(false);
-  this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
+  this->nonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
   Matrix<Rational> projectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions format;
@@ -1746,7 +1746,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     Matrix<Rational>& currentLOExtended = this->linearOperatorsExtended[k];
     currentLO.multiplyOnTheLeft(projectionBasisChanged);
     currentLO *= - 1;
-    //tempList.addOnTopNoRepetition(this->theLinearOperators.objects[i]);
+    //tempList.addOnTopNoRepetition(this->linearOperators.objects[i]);
     currentLOExtended.makeIdentityMatrix(currentLO.numberOfRows);
     currentLOExtended.resize(currentLO.numberOfRows, currentLO.numberOfRows + currentLO.numberOfColumns, true);
     for (int i = 0; i < currentLO.numberOfRows; i ++) {
@@ -1881,8 +1881,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.toString(&format) << "\n";
   this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.toString(&format) << "\n";
 
-  //global.theIndicatorVariables.StatusString1NeedsRefresh = true;
-  //global.theIndicatorVariables.StatusString1= this->log.str();
+  //global.indicatorVariables.StatusString1NeedsRefresh = true;
+  //global.indicatorVariables.StatusString1= this->log.str();
   //global.makeReport();
 }
 
@@ -2062,20 +2062,23 @@ std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesRepor
 }
 
 void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
-  Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams
+  Matrix<Rational>& output,
+  Vector<Rational>& outputTranslation,
+  Vectors<Rational>& nonParameters,
+  int numberOfParameters
 ) {
-  //reminder: the very last variable comes from the projectivization and contributes to the translation only!
-  int numNonParams = NonParams.size;
-  output.initialize(numParams + numNonParams - 1, numParams - 1);
-  outputTranslation.makeZero(numParams + numNonParams - 1);
+  //Reminder: the very last variable comes from the projectivization and contributes to the translation only!
+  int numNonParams = nonParameters.size;
+  output.initialize(numberOfParameters + numNonParams - 1, numberOfParameters - 1);
+  outputTranslation.makeZero(numberOfParameters + numNonParams - 1);
   output.makeZero();
   for (int l = 0; l < numNonParams; l ++) {
-    for (int k = 0; k < numParams - 1; k ++) {
-      output.elements[l][k] = NonParams[l][k];
+    for (int k = 0; k < numberOfParameters - 1; k ++) {
+      output.elements[l][k] = nonParameters[l][k];
     }
-    outputTranslation[l] = *NonParams[l].lastObject();
+    outputTranslation[l] = *nonParameters[l].lastObject();
   }
-  for (int l = 0; l < numParams - 1; l ++) {
+  for (int l = 0; l < numberOfParameters - 1; l ++) {
     output.elements[l + numNonParams][l] = 1;
   }
 }
@@ -2100,19 +2103,19 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
   Matrix<LargeInteger>& outputMat,
   LargeIntegerUnsigned& outputDen, int index
 ) {
-  Matrix<Rational>& theOperator = this->linearOperators[index];
-  int dimLargerAlgebra = theOperator.numberOfColumns;
-  int dimSmallerAlgebra = theOperator.numberOfRows;
-  Vector<Rational>& theTranslation = this->translations[index];
+  Matrix<Rational>& matrixOperator = this->linearOperators[index];
+  int dimLargerAlgebra = matrixOperator.numberOfColumns;
+  int dimSmallerAlgebra = matrixOperator.numberOfRows;
+  Vector<Rational>& translation = this->translations[index];
   Matrix<Rational> matrix;
   matrix.initialize(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra);
   matrix.makeZero();
   for (int j = 0; j < dimSmallerAlgebra; j ++) {
     matrix.elements[j][j] = 1;
     for (int i = 0; i < dimLargerAlgebra; i ++) {
-      matrix.elements[i][j] -= theOperator.elements[j][i];
+      matrix.elements[i][j] -= matrixOperator.elements[j][i];
     }
-    matrix.elements[dimLargerAlgebra + dimSmallerAlgebra][j] = - theTranslation[j];
+    matrix.elements[dimLargerAlgebra + dimSmallerAlgebra][j] = - translation[j];
   }
   matrix.getMatrixIntegerWithDenominator(outputMat, outputDen);
   outputSub.makeSubstitutionFromMatrixIntegerAndDenominator(outputMat, outputDen);
@@ -2121,14 +2124,14 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
 void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal
 ) {
-  Matrix<Rational> theOperatorExtended = this->linearOperatorsExtended[indexOperator];
-  Vector<Rational>& theTranslation = this->translationsProjectedBasisChanged[indexOperator];
-  //the goddamned sign in front of theTranslation is now checked: it should be + and not -
+  Matrix<Rational> operatorExtended = this->linearOperatorsExtended[indexOperator];
+  Vector<Rational>& translation = this->translationsProjectedBasisChanged[indexOperator];
+  //the goddamned sign in front of translation is now checked: it should be + and not -
   Rational rationalConstant;
-  startingNormal.scalarEuclidean(this->NonIntegralOriginModificationBasisChanged + theTranslation, rationalConstant);
-  theOperatorExtended.transpose();
+  startingNormal.scalarEuclidean(this->nonIntegralOriginModificationBasisChanged + translation, rationalConstant);
+  operatorExtended.transpose();
   outputNormal = startingNormal;
-  theOperatorExtended.actOnVectorColumn(outputNormal);
+  operatorExtended.actOnVectorColumn(outputNormal);
   outputNormal.setSize(outputNormal.size + 1);
   *outputNormal.lastObject() = - rationalConstant;
 }

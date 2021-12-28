@@ -309,7 +309,7 @@ public:
   };
   static const unsigned char namedCurve = 3;
   SSLContent();
-  static std::string getType(unsigned char theToken);
+  static std::string getType(unsigned char token);
   void resetExceptOwner();
   TransportLayerSecurityServer& GetServer() const;
   bool checkInitialization() const;

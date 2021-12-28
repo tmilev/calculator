@@ -594,8 +594,8 @@ void SSLContent::writeBytesHandshakeServerHello(
   this->writeBytesExtensionsOnly(output, annotations);
 }
 
-std::string SSLContent::getType(unsigned char theToken) {
-  switch (theToken) {
+std::string SSLContent::getType(unsigned char token) {
+  switch (token) {
   case SSLContent::tokens::certificate:
     return "certificate";
   case SSLContent::tokens::serverKeyExchange:

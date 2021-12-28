@@ -1641,16 +1641,16 @@ void PrivateKeyRSA::signBytesPadPKCS1(
   MacroRegisterFunctionWithName("PrivateKeyRSA::signBytesPadPKCS1");
   List<unsigned char> inputHashedPadded;
   this->hashAndPadPKCS1(input, hash, inputHashedPadded);
-  ElementZmodP element, theOne;
+  ElementZmodP element, one;
   if (this->publicKey.modulus.isEqualToZero()) {
     global.fatal << "Public key modulus is zero. " << global.fatal;
   }
   element.modulus = this->publicKey.modulus;
-  theOne.makeOne(this->publicKey.modulus);
+  one.makeOne(this->publicKey.modulus);
   Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     inputHashedPadded, element.value
   );
-  MathRoutines::raiseToPower(element, this->privateExponent, theOne);
+  MathRoutines::raiseToPower(element, this->privateExponent, one);
   output.setSize(0);
   element.value.writeBigEndianBytes(output, false);
 }

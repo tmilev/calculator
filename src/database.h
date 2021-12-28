@@ -59,7 +59,7 @@ public:
   bool initializeServer();
   bool initializeWorker();
   bool checkInitialization();
-  void createHashIndex(const std::string& collectionName, const std::string& theKey);
+  void createHashIndex(const std::string& collectionName, const std::string& key);
 
   class User {
   public:
@@ -163,7 +163,7 @@ public:
     bool fetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
     );
-    void createHashIndex(const std::string& collectionName, const std::string& theKey);
+    void createHashIndex(const std::string& collectionName, const std::string& key);
     bool hasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
     bool storeDatabase(std::stringstream* commentsOnFailure);
     bool readDatabase(std::stringstream* commentsOnFailure);

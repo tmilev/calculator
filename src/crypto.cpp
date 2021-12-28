@@ -1529,11 +1529,11 @@ bool Crypto::loadOneKnownCertificate(
   bool isGood = false;
   if (certificateJSON.elementType == JSData::token::tokenObject) {
     if (certificateJSON.hasKey("keys")) {
-      JSData theKeys = certificateJSON.getValue("keys");
-      if (theKeys.elementType == JSData::token::tokenArray) {
+      JSData keys = certificateJSON.getValue("keys");
+      if (keys.elementType == JSData::token::tokenArray) {
         isGood = true;
-        for (int i = 0; i < theKeys.listObjects.size; i ++) {
-          if (!currentCert.loadFromJSON(theKeys.listObjects[i], commentsOnFailure, commentsGeneral)) {
+        for (int i = 0; i < keys.listObjects.size; i ++) {
+          if (!currentCert.loadFromJSON(keys.listObjects[i], commentsOnFailure, commentsGeneral)) {
             return false;
           }
           Crypto::knownCertificates.addOnTop(currentCert);

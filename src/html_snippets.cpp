@@ -68,10 +68,10 @@ const std::string& HtmlRoutines::getFile(
   const std::string& additionalEndTag
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::getFile");
-  std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
+  std::string fileId = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (global.flagCachingInternalFilesOn) {
-    if (HtmlRoutines::preLoadedFiles().getValueCreateEmpty(theID) != "") {
-      return HtmlRoutines::preLoadedFiles().getValueCreateEmpty(theID);
+    if (HtmlRoutines::preLoadedFiles().getValueCreateEmpty(fileId) != "") {
+      return HtmlRoutines::preLoadedFiles().getValueCreateEmpty(fileId);
     }
   }
   std::stringstream out, commentsOnFailure;
@@ -84,8 +84,8 @@ const std::string& HtmlRoutines::getFile(
     out << "<b style='color:red'>Failed to load file: [" << fileNameVirtual
     << "]. Comments: " << commentsOnFailure.str() << "</b>";
   }
-  HtmlRoutines::preLoadedFiles().setKeyValue(theID, out.str());
-  return HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization(theID);
+  HtmlRoutines::preLoadedFiles().setKeyValue(fileId, out.str());
+  return HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization(fileId);
 }
 
 const std::string& HtmlRoutines::getJavascriptAddScriptTags(const std::string& fileNameVirtual) {

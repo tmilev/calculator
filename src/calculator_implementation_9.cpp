@@ -473,10 +473,10 @@ bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const
   }
   std::stringstream out;
   out << "<br>the weight you want partitioned: " << highestWeightInteger;
-  Vector<int> thePartition;
-  thePartition.setSize(semisimpleLieAlgebra.getNumberOfPositiveRoots());
-  for (int i = 0; i < thePartition.size; i ++) {
-    thePartition[i] = 0;
+  Vector<int> partition;
+  partition.setSize(semisimpleLieAlgebra.getNumberOfPositiveRoots());
+  for (int i = 0; i < partition.size; i ++) {
+    partition[i] = 0;
   }
   Vector<Rational> weight, tmpWt;
   Vectors<Rational>& rootsBorel = semisimpleLieAlgebra.weylGroup.rootsOfBorel;
@@ -487,19 +487,19 @@ bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const
   while (i > 0 && counter < 10000) {
     totalCycles ++;
     if (weight == highestWeight) {
-      tmpWt = thePartition;
+      tmpWt = partition;
       out << "<br>" << tmpWt.toStringLetterFormat("\\alpha");
       counter ++;
     }
     if (!(highestWeight - weight).isPositive() || i > rootsBorel.size) {
       if (i <= rootsBorel.size) {
-        weight -= rootsBorel[i - 1] * thePartition[i - 1];
-        thePartition[i - 1] = 0;
+        weight -= rootsBorel[i - 1] * partition[i - 1];
+        partition[i - 1] = 0;
       }
       i --;
       if (i > 0) {
         weight += rootsBorel[i - 1];
-        thePartition[i - 1] ++;
+        partition[i - 1] ++;
       }
     } else {
       i ++;
@@ -545,11 +545,11 @@ bool CalculatorFunctions::operationBinary(
   Expression& output,
   int operation
 ) {
-  MemorySaving<Calculator::OperationHandlers>& theOperation = calculator.operations.values[operation];
-  if (theOperation.isZeroPointer()) {
+  MemorySaving<Calculator::OperationHandlers>& operationMap = calculator.operations.values[operation];
+  if (operationMap.isZeroPointer()) {
     return false;
   }
-  List<Function>& handlers = theOperation.getElement().handlers;
+  List<Function>& handlers = operationMap.getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     if (handlers[i].inputFitsMyInnerType(input)) {
       if (handlers[i].functionAddress(calculator, input, output)) {

@@ -1621,11 +1621,11 @@ bool CalculatorParser::replaceEEBy_CofEE(int controlIndex) {
 
 bool CalculatorParser::replaceEOXbyEX() {
   SyntacticElement& left =  (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
-  SyntacticElement& opElt = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
-  int theOp = this->getOperationIndexFromControlIndex(opElt.controlIndex);
+  SyntacticElement& operationElement = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+  int operation = this->getOperationIndexFromControlIndex(operationElement.controlIndex);
   Expression newExpr;
   newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(theOp);
+  newExpr.addChildAtomOnTop(operation);
   newExpr.addChildOnTop(left.data);
   left.data = newExpr;
   this->decreaseStackExceptLast(1);

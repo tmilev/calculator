@@ -1784,9 +1784,9 @@ bool Matrix<Element>::solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
   if (A.numberOfRows != b.numberOfRows) {
     global.fatal << "Number of matrix rows does not match number of vector entries. " << global.fatal;
   }
-  Selection thePivotPoints;
-  A.gaussianEliminationByRows(&b, 0, &thePivotPoints);
-  return A.rowEchelonFormToLinearSystemSolution(thePivotPoints, b, output);
+  Selection pivotPoints;
+  A.gaussianEliminationByRows(&b, 0, &pivotPoints);
+  return A.rowEchelonFormToLinearSystemSolution(pivotPoints, b, output);
 }
 
 template <typename Element>
@@ -3893,12 +3893,12 @@ public:
     double Y1,
     double X2,
     double Y2,
-    uint32_t thePenStyle,
+    uint32_t penStyle,
     int colorIndex,
     std::fstream& output,
     DrawingVariables& drawInput
   );
-  static void drawTextDirectly(double X1, double Y1, const std::string& text, int ColorIndex, std::fstream& output);
+  static void drawTextDirectly(double X1, double Y1, const std::string& text, int colorIndex, std::fstream& output);
   static void beginDocument(std::fstream& output);
   static void endLatexDocument(std::fstream& output);
   static void beginPSTricks(std::fstream& output);
@@ -3976,10 +3976,10 @@ class Complex {
     return output;
   }
   void operator*=(const Complex<Coefficient>& other) {
-    Complex Accum;
-    Accum.realPart = this->realPart * other.realPart - this->imaginaryPart * other.imaginaryPart;
-    Accum.imaginaryPart = this->realPart * other.imaginaryPart + this->imaginaryPart * other.realPart;
-    this->operator=(Accum);
+    Complex accumulator;
+    accumulator.realPart = this->realPart * other.realPart - this->imaginaryPart * other.imaginaryPart;
+    accumulator.imaginaryPart = this->realPart * other.imaginaryPart + this->imaginaryPart * other.realPart;
+    this->operator=(accumulator);
   }
   void operator=(const Complex<Coefficient>& other) {
     this->realPart = other.realPart;
@@ -5549,7 +5549,7 @@ class ConeLatticeAndShift {
   Lattice lattice;
   Vector<Rational> shift;
   void findExtremaInDirectionOverLatticeOneNonParametric(
-    Vector<Rational>& theLPToMaximizeAffine,
+    Vector<Rational>& lpToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend
   );
@@ -5560,7 +5560,7 @@ class ConeLatticeAndShift {
   }
   void writeToFile(std::fstream& output);
   void findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
-    Vector<Rational>& theLPToMaximizeAffine,
+    Vector<Rational>& lpToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend,
     Matrix<Rational>& projectionLatticeLevel
@@ -5685,8 +5685,8 @@ public:
   int HighestIndex;
   int NumberIrrelevantFractions;
   int numberOfRelevantReducedFractions;
-  int numberOfMonomialsInTheNumerators;
-  int NumGeneratorsInTheNumerators;
+  int numberOfMonomialsInNumerators;
+  int numberOfGeneratorsInNumerators;
   int NumRelevantNonReducedFractions;
   int numberOfMonomialsInNumeratorsRelevantFractions;
   int NumGeneratorsRelevenatFractions;
@@ -5846,8 +5846,8 @@ class DynkinSimpleType {
   Rational getDefaultRootLengthSquared(int rootIndex) const;
   Rational getDefaultLongRootLengthSquared() const;
   Rational getEpsilonRealizationLongRootLengthSquared() const;
-  static Rational getDefaultLongRootLengthSquared(char theInputType) {
-    DynkinSimpleType dynkinType(theInputType, 2);
+  static Rational getDefaultLongRootLengthSquared(char inputType) {
+    DynkinSimpleType dynkinType(inputType, 2);
     return dynkinType.getDefaultLongRootLengthSquared();
   }
   Rational getLongRootLengthSquared() const;
@@ -6100,7 +6100,7 @@ public:
   void getMapFromPermutation(
     Vectors<Rational>& domain,
     Vectors<Rational>& range,
-    List<int>& thePerm,
+    List<int>& permutation,
     List<List<List<int> > >& automorphisms,
     SelectionWithDifferentMaxMultiplicities& autosPermutations,
     DynkinDiagramRootSubalgebra& right
@@ -6113,12 +6113,12 @@ public:
   Vector<Rational> goalVector;
   List<int> currentPartition;
   Vector<Rational> currentPartitionSum;
-  // Format: each element of thePartitions gives an array whose entries give
-  // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements, then thePartitions[0]
+  // Format: each element of partitions gives an array whose entries give
+  // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements, then partitions[0]
   // would have 2 elements: the first giving the multiplicity of PartitioningRoots[0]
   // and the second - the multiplicity of
   // PartitioningRoots[1]
-  List<List<int> > thePartitions;
+  List<List<int> > partitions;
   bool flagStoreAllPartitions;
   VectorPartition() {
     this->flagStoreAllPartitions = false;
@@ -6290,7 +6290,7 @@ public:
 class PiecewiseQuasipolynomial {
   public:
   // Let the piecewise quasipolynomial be in n variables.
-  // Then the theProjectivizedComplex is an n + 1-dimensional complex,
+  // Then the projectivizedComplex is an n + 1-dimensional complex,
   // which is the projectivization of the n-dim affine complex representing the
   // domain of the piecewise quasipoly.
   ConeComplex projectivizedComplex;
@@ -6315,8 +6315,8 @@ class PiecewiseQuasipolynomial {
   void makeCommonRefinement(const ConeComplex& other);
   void translateArgument(Vector<Rational>& translateToBeAddedToArgument);
   bool makeVPF(Vectors<Rational>& roots, std::string& outputstring);
-  Rational evaluate(const Vector<Rational>& thePoint);
-  Rational evaluateInputProjectivized(const Vector<Rational>& thePoint);
+  Rational evaluate(const Vector<Rational>& point);
+  Rational evaluateInputProjectivized(const Vector<Rational>& point);
   void makeZero(int numberOfVariables) {
     this->numberOfVariables = numberOfVariables;
     this->projectivizedComplex.initialize();
@@ -6771,8 +6771,8 @@ void MatrixTensor<Coefficient>::gaussianEliminationByRowsMatrix(MatrixTensor<Coe
     carbonCopyMatrix->getVectorsSparseFromRowsIncludeZeroRows(carbonCopyRows, numberOfRows);
   }
   this->getVectorsSparseFromRowsIncludeZeroRows(rows, numberOfRows);
-  List<VectorSparse<Coefficient> >* theCarbonCopyPointer = carbonCopyMatrix == 0 ? 0 : &carbonCopyRows;
-  VectorSparse<Coefficient>::gaussianEliminationByRows(rows, 0, 0, 0, theCarbonCopyPointer);
+  List<VectorSparse<Coefficient> >* carbonCopyPointer = carbonCopyMatrix == 0 ? 0 : &carbonCopyRows;
+  VectorSparse<Coefficient>::gaussianEliminationByRows(rows, 0, 0, 0, carbonCopyPointer);
   this->assignVectorsToRows(rows);
   if (carbonCopyMatrix != 0) {
     carbonCopyMatrix->assignVectorsToRows(carbonCopyRows);
@@ -6798,14 +6798,14 @@ void MatrixTensor<Coefficient>::directSumWith(const MatrixTensor<Coefficient>& o
 
 template <class Coefficient>
 void MatrixTensor<Coefficient>::invert() {
-  MatrixTensor<Coefficient> theId;
-  theId.makeIdentity(this->getMinimumNumberOfColumnsNumberOfRows());
-  MatrixTensor<Coefficient> result = theId;
+  MatrixTensor<Coefficient> identity;
+  identity.makeIdentity(this->getMinimumNumberOfColumnsNumberOfRows());
+  MatrixTensor<Coefficient> result = identity;
   this->gaussianEliminationByRowsMatrix(&result);
-  if (*this != theId) {
+  if (*this != identity) {
     global.fatal << "Attempting to invert a "
     << "non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
-    << this->toStringMatrixForm() << " but should instead be equal to " << theId.toStringMatrixForm() << global.fatal;
+    << this->toStringMatrixForm() << " but should instead be equal to " << identity.toStringMatrixForm() << global.fatal;
   }
   *this = result;
 }

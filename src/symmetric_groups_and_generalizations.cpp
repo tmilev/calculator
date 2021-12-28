@@ -1390,7 +1390,7 @@ void HyperoctahedralGroupData::allSpechtModules() {
     }
   }
   global.comments << this->group->prettyPrintCharacterTable() << '\n';
-  //this->theGroup->representationDataIntoJS().writefile("representations_hyperoctahedral_group");
+  //this->group->representationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }
 
 /*

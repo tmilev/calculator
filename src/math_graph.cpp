@@ -151,21 +151,21 @@ void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances()
   MacroRegisterFunctionWithName("Graph::computeConnectedComponentsAndBaseNodeDistances");
   this->distanceToBaseNode.initializeFillInObject(this->numNodes, - 1);
   this->baseNode.initializeFillInObject(this->numNodes, - 1);
-  List<int> theOrbit;
-  theOrbit.setExpectedSize(this->edges.size());
+  List<int> orbit;
+  orbit.setExpectedSize(this->edges.size());
   for (int indexBaseNode = 0; indexBaseNode < this->numNodes; indexBaseNode ++) {
     if (this->baseNode[indexBaseNode] == - 1) {
       this->distanceToBaseNode[indexBaseNode] = 0;
       this->baseNode[indexBaseNode] = indexBaseNode;
-      theOrbit.setSize(0);
-      theOrbit.addOnTop(indexBaseNode);
-      for (int i = 0; i < theOrbit.size; i ++) {
-        List<int>& currentHeirs = this->edgesPerNodeNoMultiplicities[theOrbit[i]];
+      orbit.setSize(0);
+      orbit.addOnTop(indexBaseNode);
+      for (int i = 0; i < orbit.size; i ++) {
+        List<int>& currentHeirs = this->edgesPerNodeNoMultiplicities[orbit[i]];
         for (int j = 0; j<currentHeirs.size; j ++) {
           if (this->distanceToBaseNode[currentHeirs[j]] == - 1) {
-            this->distanceToBaseNode[currentHeirs[j]] = this->distanceToBaseNode[theOrbit[i]] + 1;
+            this->distanceToBaseNode[currentHeirs[j]] = this->distanceToBaseNode[orbit[i]] + 1;
             this->baseNode[currentHeirs[j]] = indexBaseNode;
-            theOrbit.addOnTop(currentHeirs[j]);
+            orbit.addOnTop(currentHeirs[j]);
           }
         }
       }

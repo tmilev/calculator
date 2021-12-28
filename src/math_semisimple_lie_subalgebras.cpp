@@ -7066,7 +7066,7 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(FormatExpression
   }
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
     out << "<td><b>" << "W_{" << i + 1 << "}"
-    //    << "=" << this->thePrimalChar[i].toString(&characterFormat)
+    //    << "=" << this->primalChar[i].toString(&characterFormat)
     << "</b></td>";
   }
   out << "</tr>";

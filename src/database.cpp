@@ -231,15 +231,15 @@ bool Database::convertJSONToJSONEncodeKeys(
       )) {
         return false;
       }
-      std::string theKey;
+      std::string key;
       if (encodeOverDecode) {
-        theKey = Database::convertStringToMongoKeyString(
+        key = Database::convertStringToMongoKeyString(
           input.objects.keys[i]
         );
       } else {
-        theKey = HtmlRoutines::convertURLStringToNormal(input.objects.keys[i], false);
+        key = HtmlRoutines::convertURLStringToNormal(input.objects.keys[i], false);
       }
-      output[theKey] = nextItem;
+      output[key] = nextItem;
     }
     return true;
   }
@@ -351,13 +351,13 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
 }
 
 void Database::createHashIndex(
-  const std::string& collectionName, const std::string& theKey
+  const std::string& collectionName, const std::string& key
 ) {
   MacroRegisterFunctionWithName("Database::createHashIndex");
   if (global.flagDatabaseCompiled) {
-    this->mongoDB.createHashIndex(collectionName, theKey);
+    this->mongoDB.createHashIndex(collectionName, key);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    this->fallBack.createHashIndex(collectionName, theKey);
+    this->fallBack.createHashIndex(collectionName, key);
   }
 }
 
@@ -875,7 +875,7 @@ bool UserCalculator::resetAuthenticationToken(std::stringstream* commentsOnFailu
   );
   QuerySet setUser;
   setUser.value[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
-  setUser.value[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
+  setUser.value[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.timeStringNonReadable;
   Database::get().updateOne(findUser, setUser, commentsOnFailure);
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
@@ -936,9 +936,9 @@ bool UserCalculator::isAcceptableDatabaseInput(const std::string& input, std::st
   return true;
 }
 
-std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey) {
+std::string UserCalculator::GetSelectedRowEntry(const std::string& key) {
   MacroRegisterFunctionWithName("UserCalculator::GetSelectedRowEntry");
-  int index = this->selectedRowFieldNamesUnsafe.getIndex(theKey);
+  int index = this->selectedRowFieldNamesUnsafe.getIndex(key);
   if (index == - 1) {
     return "";
   }
@@ -1090,10 +1090,10 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   return result;
 }
 
-bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure) {
+bool UserCalculator::interpretDatabaseProblemData(const std::string& information, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemData");
   MapList<std::string, std::string, MathRoutines::hashString> mapStrings;
-  if (!HtmlRoutines::chopPercentEncodedString(theInfo, mapStrings, commentsOnFailure)) {
+  if (!HtmlRoutines::chopPercentEncodedString(information, mapStrings, commentsOnFailure)) {
     return false;
   }
   this->problemData.clear();
@@ -1609,12 +1609,12 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
     return false;
   }
   tokenIsGood = true;
-  JSONWebToken theToken;
-  if (!theToken.assignString(userWrapper.enteredGoogleToken, commentsOnFailure)) {
+  JSONWebToken webToken;
+  if (!webToken.assignString(userWrapper.enteredGoogleToken, commentsOnFailure)) {
     return false;
   }
   JSData data;
-  if (!data.parse(theToken.claimsJSON, commentsOnFailure)) {
+  if (!data.parse(webToken.claimsJSON, commentsOnFailure)) {
     return false;
   }
   if (data.getValue("email").elementType != JSData::token::tokenString) {

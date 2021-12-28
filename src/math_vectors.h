@@ -1340,7 +1340,7 @@ public:
 
 class AffineCones: public HashedList<AffineCone> {
 public:
-  void superimposeAffineCones(AffineCones& theOtherComplex);
+  void superimposeAffineCones(AffineCones& otherComplex);
 };
 
 #endif

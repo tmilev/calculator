@@ -376,18 +376,18 @@ void LaTeXCrawler::buildFreecalc() {
     reportStream << currentSysCommand;
     report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
-    std::stringstream thePdfFileNameNormal;
-    thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
+    std::stringstream pdfFileNameNormal;
+    pdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
     << lectureNumbers[i] << "_" << lectureDesiredNames[i] << "_"
     << lectureFileNameEnd << ".pdf";
-    currentSysCommand = "mv " + fileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
+    currentSysCommand = "mv " + fileNameWorkingCopyPDF + " " + pdfFileNameNormal.str();
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i + 1 << " regular slides compiled, renaming file ... ";
     report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << " done.";
     report.report(reportStream.str());
-    resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << pdfFileNameHandout.str() << "</td>";
+    resultTable << "<td>" << pdfFileNameNormal.str() << "</td>" << "<td>" << pdfFileNameHandout.str() << "</td>";
     resultTable << "</tr>";
   }
   int numSlidesToBuild = this->slideTexInputCommands.size;
@@ -425,23 +425,23 @@ void LaTeXCrawler::buildFreecalc() {
       reportStream << currentSysCommand;
       report.report(reportStream.str());
       global.externalCommandNoOutput(currentSysCommand, true);
-      std::stringstream thePdfFileNameNormal;
-      thePdfFileNameNormal << "./";
+      std::stringstream pdfFileNameNormal;
+      pdfFileNameNormal << "./";
       if (k == 0) {
-        thePdfFileNameNormal << slideProjectorFolder;
+        pdfFileNameNormal << slideProjectorFolder;
       } else {
-        thePdfFileNameNormal << slideHandoutFolder;
+        pdfFileNameNormal << slideHandoutFolder;
       }
-      thePdfFileNameNormal << "Slide_"
+      pdfFileNameNormal << "Slide_"
       << this->slideFileNamesVirtualNoPathNoExtension[i] << ".pdf";
-      currentSysCommand = "mv " + fileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
+      currentSysCommand = "mv " + fileNameWorkingCopyPDF + " " + pdfFileNameNormal.str();
       executedCommands << "<br>" << currentSysCommand;
       reportStream << "<br>Slide " << i + 1 << ", run " << k << " compiled, renaming file ... ";
       report.report(reportStream.str());
       global.externalCommandReturnOutput(currentSysCommand);
       reportStream << " done.";
       report.report(reportStream.str());
-      resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>";
+      resultTable << "<td>" << pdfFileNameNormal.str() << "</td>";
       resultTable << "</tr>";
     }
   }
@@ -498,7 +498,7 @@ void LaTeXCrawler::crawlRecursive(std::stringstream& crawlingResult, const std::
   MacroRegisterFunctionWithName("LaTeXcrawler::crawlRecursive");
   RecursionDepthCounter counter(&this->recursionDepth);
   if (this->recursionDepth > 1000) {
-    this->errorStream << "While crawling theFileToCrawl, reached max recursion depth of 1000";
+    this->errorStream << "While crawling fileToCrawl, reached max recursion depth of 1000";
     return;
   }
   if (this->errorStream.str() != "") {

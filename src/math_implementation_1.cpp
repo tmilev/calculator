@@ -693,25 +693,25 @@ std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
 ) {
   std::stringstream out;
-  List<ElementUniversalEnveloping<Coefficient> > theOrbit;
-  theOrbit.reserve(1000);
+  List<ElementUniversalEnveloping<Coefficient> > orbit;
+  orbit.reserve(1000);
   ElementUniversalEnveloping<Coefficient> element;
   int dimension = this->getOwner().getRank();
   int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
-  theOrbit.addOnTop(*this);
-  for (int i = 0; i < theOrbit.size; i ++) {
+  orbit.addOnTop(*this);
+  for (int i = 0; i < orbit.size; i ++) {
     for (int j = 0; j < dimension; j ++) {
       element.makeOneGenerator(j + numPosRoots + dimension, *this->owner, ringUnit);
-      element *= theOrbit[i];
+      element *= orbit[i];
       element.simplify(ringUnit);
       element.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
       if (!element.isEqualToZero()) {
-        theOrbit.addOnTop(element);
+        orbit.addOnTop(element);
       }
     }
   }
-  for (int i = 0; i < theOrbit.size; i ++) {
-    ElementUniversalEnveloping<Coefficient>& current = theOrbit[i];
+  for (int i = 0; i < orbit.size; i ++) {
+    ElementUniversalEnveloping<Coefficient>& current = orbit[i];
     out << "<br>" << current.toString(&global.defaultFormat.getElement());
   }
   return out.str();

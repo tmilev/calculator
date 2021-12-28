@@ -18,7 +18,7 @@ std::string DrawingVariables::getHTMLDiv(
   data["frameLength"] = this->operations.frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
   data[drawObjects].elementType = JSData::token::tokenArray;
-  data[drawObjects].listObjects = this->operations.theOperations;
+  data[drawObjects].listObjects = this->operations.operations;
   data["dimension"] = dimension;
 
   std::string graphicsId = Crypto::convertStringToHex(Crypto::computeSha256(data.toString()), 0, false);

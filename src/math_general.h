@@ -794,7 +794,7 @@ public:
   ) const;
   std::string toStringPlainText(bool jsonFormat = false) const;
   std::string toStringOneLine(bool jsonFormat = false) const;
-  std::string toStringWithBlocks(List<int>& theBlocks);
+  std::string toStringWithBlocks(List<int>& blocks);
   void makeIdentityMatrix(
     int dimension,
     const Coefficient& ringUnit = Coefficient::oneStatic(),
@@ -1624,7 +1624,7 @@ void Matrix<Coefficient>::multiplyOnTheLeft(
 }
 
 template <typename Element>
-std::string Matrix<Element>::toStringWithBlocks(List<int>& theBlocks) {
+std::string Matrix<Element>::toStringWithBlocks(List<int>& blocks) {
   std::stringstream out;
   std::string tempS;
   out << "\\left(\\begin{array}{";
@@ -1633,7 +1633,7 @@ std::string Matrix<Element>::toStringWithBlocks(List<int>& theBlocks) {
   for (int j = 0; j < this->numberOfColumns; j ++) {
     out << "c";
     offset ++;
-    if (offset == theBlocks.objects[blockIndex]) {
+    if (offset == blocks.objects[blockIndex]) {
       offset = 0;
       blockIndex ++;
       if (j != this->numberOfColumns - 1) {
@@ -1654,7 +1654,7 @@ std::string Matrix<Element>::toStringWithBlocks(List<int>& theBlocks) {
     }
     out << "\\\\\n";
     offset ++;
-    if (offset == theBlocks.objects[blockIndex]) {
+    if (offset == blocks.objects[blockIndex]) {
       offset = 0;
       blockIndex ++;
       if (i != this->numberOfColumns - 1) {
@@ -2833,8 +2833,6 @@ public:
   bool isProportionalTo(
     const Polynomial<Coefficient>& other, Coefficient& outputTimesMeEqualsOther, const Coefficient& ringUnit
   ) const;
-  void drawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
-
   // void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<Coefficient> >& output, int UpToPower);
   int getMaximumPowerOfVariableIndex(int variableIndex);
   bool operator<=(const Coefficient& other) const;
@@ -3354,7 +3352,7 @@ public:
     Polynomial<Coefficient>& substitution, int index, PolynomialSubstitution<Coefficient>& finalSubstitution
   );
   bool getOneVariablePolynomialSolution(const Polynomial<Coefficient>& polynomial, Coefficient& outputSolution);
-  void setSerreLikeSolutionIndex(int index, const Coefficient& theConst);
+  void setSerreLikeSolutionIndex(int index, const Coefficient& inputConstant);
   void getSubstitutionFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
   std::string toStringSerreLikeSolution();
   static int getNumberOfVariablesToSolveFor(const List<Polynomial<Coefficient> >& input);
@@ -5451,7 +5449,7 @@ public:
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool initTheDrawVars,
-    DrawingVariables& theDrawingVariables,
+    DrawingVariables& drawingVariables,
     FormatExpressions& format
   ) const;
   bool isInCone(const Vector<Rational>& point) const;
@@ -5706,7 +5704,7 @@ public:
   bool flagInitialized;
   int LimitSplittingSteps;
   int SplitStepsCounter;
-  ConeComplex theChambers;
+  ConeComplex chambers;
   bool flagSplitTestModeNoNumerators;
   bool flagAnErrorHasOccurredTimeToPanic;
   bool flagMakingProgressReport;
@@ -6089,7 +6087,7 @@ public:
   void computeDiagramTypeModifyInputRelative(
     Vectors<Rational>& inputOutputSimpleWeightSystem,
     const HashedList<Vector<Rational> >& weightSystem,
-    const Matrix<Rational>& theBilinearForm
+    const Matrix<Rational>& bilinearForm
   );
   void computeDynkinStrings();
   void computeDynkinString(int indexComponent);
@@ -6103,8 +6101,8 @@ public:
     Vectors<Rational>& domain,
     Vectors<Rational>& range,
     List<int>& thePerm,
-    List<List<List<int> > >& theAutos,
-    SelectionWithDifferentMaxMultiplicities& theAutosPerm,
+    List<List<List<int> > >& automorphisms,
+    SelectionWithDifferentMaxMultiplicities& autosPermutations,
     DynkinDiagramRootSubalgebra& right
   );
 };
@@ -6316,7 +6314,7 @@ class PiecewiseQuasipolynomial {
   }
   void makeCommonRefinement(const ConeComplex& other);
   void translateArgument(Vector<Rational>& translateToBeAddedToArgument);
-  bool makeVPF(Vectors<Rational>& theRoots, std::string& outputstring);
+  bool makeVPF(Vectors<Rational>& roots, std::string& outputstring);
   Rational evaluate(const Vector<Rational>& thePoint);
   Rational evaluateInputProjectivized(const Vector<Rational>& thePoint);
   void makeZero(int numberOfVariables) {
@@ -6766,18 +6764,18 @@ void MatrixTensor<Coefficient>::getVectorsSparseFromRowsIncludeZeroRows(
 
 template <class Coefficient>
 void MatrixTensor<Coefficient>::gaussianEliminationByRowsMatrix(MatrixTensor<Coefficient>* carbonCopyMatrix) {
-  List<VectorSparse<Coefficient> > theRows, theCarbonCopyRows;
+  List<VectorSparse<Coefficient> > rows, carbonCopyRows;
   int numberOfRows = this->getMinimalNumberOfRows();
   if (carbonCopyMatrix != 0) {
     numberOfRows = MathRoutines::maximum(numberOfRows, carbonCopyMatrix->getMinimalNumberOfRows());
-    carbonCopyMatrix->getVectorsSparseFromRowsIncludeZeroRows(theCarbonCopyRows, numberOfRows);
+    carbonCopyMatrix->getVectorsSparseFromRowsIncludeZeroRows(carbonCopyRows, numberOfRows);
   }
-  this->getVectorsSparseFromRowsIncludeZeroRows(theRows, numberOfRows);
-  List<VectorSparse<Coefficient> >* theCarbonCopyPointer = carbonCopyMatrix == 0 ? 0 : &theCarbonCopyRows;
-  VectorSparse<Coefficient>::gaussianEliminationByRows(theRows, 0, 0, 0, theCarbonCopyPointer);
-  this->assignVectorsToRows(theRows);
+  this->getVectorsSparseFromRowsIncludeZeroRows(rows, numberOfRows);
+  List<VectorSparse<Coefficient> >* theCarbonCopyPointer = carbonCopyMatrix == 0 ? 0 : &carbonCopyRows;
+  VectorSparse<Coefficient>::gaussianEliminationByRows(rows, 0, 0, 0, theCarbonCopyPointer);
+  this->assignVectorsToRows(rows);
   if (carbonCopyMatrix != 0) {
-    carbonCopyMatrix->assignVectorsToRows(theCarbonCopyRows);
+    carbonCopyMatrix->assignVectorsToRows(carbonCopyRows);
   }
 }
 

@@ -42,7 +42,7 @@ private:
 public:
   bool initializeIfNeeded();
   std::string mutexName;
-  void* theMutexImplementation;
+  void* mutexImplementation;
   // note: the mutex implementation is not a named type for system portability.
   bool islockedUnsafeUseForWINguiOnly();
   // locks the mutex if the mutex is free. If not it suspends calling thread until
@@ -65,14 +65,14 @@ public:
 //this class uses RAII to lock MutexRecursiveWrapper's -> equivalent to std::lock_guard
 class MutexlockGuard {
 public:
-  MutexRecursiveWrapper* theMutex;
+  MutexRecursiveWrapper* mutexWrapper;
   MutexlockGuard(MutexRecursiveWrapper& inputMutex) {
-    this->theMutex = &inputMutex;
-    this->theMutex->lockMe();
+    this->mutexWrapper = &inputMutex;
+    this->mutexWrapper->lockMe();
   }
   ~MutexlockGuard() {
-    this->theMutex->unlockMe();
-    this->theMutex = nullptr;
+    this->mutexWrapper->unlockMe();
+    this->mutexWrapper = nullptr;
   }
 };
 

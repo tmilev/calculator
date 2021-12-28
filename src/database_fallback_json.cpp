@@ -304,9 +304,9 @@ bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
 }
 
 bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
-  std::string theDatabase;
+  std::string database;
   if (!FileOperations::loadFileToStringVirtual(
-    Database::FallBack::databaseFilename, theDatabase, true, commentsOnFailure
+    Database::FallBack::databaseFilename, database, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Database load failed. ";
@@ -323,6 +323,6 @@ bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  global << "Database size: " << Logger::blue << theDatabase.size() << Logger::endL;
-  return this->reader.parse(theDatabase, commentsOnFailure);
+  global << "Database size: " << Logger::blue << database.size() << Logger::endL;
+  return this->reader.parse(database, commentsOnFailure);
 }

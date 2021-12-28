@@ -9,11 +9,11 @@ bool CalculatorHtmlFunctions::userInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::userInputBox");
-  MapList<std::string, Expression, MathRoutines::hashString> theArguments;
-  if (!CalculatorConversions::loadKeysFromStatementList(calculator, input, theArguments, &calculator.comments)) {
+  MapList<std::string, Expression, MathRoutines::hashString> arguments;
+  if (!CalculatorConversions::loadKeysFromStatementList(calculator, input, arguments, &calculator.comments)) {
     return false;
   }
-  if (!theArguments.contains("name")) {
+  if (!arguments.contains("name")) {
     return calculator << "User input name not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
@@ -25,18 +25,18 @@ bool CalculatorHtmlFunctions::userInputBox(
   }
   InputBox newBox;
   newBox.name = boxName;
-  for (int i = 0; i < theArguments.keys.size; i ++) {
-    if (theArguments.keys[i] == "value") {
-      newBox.value = theArguments.values[i];
+  for (int i = 0; i < arguments.keys.size; i ++) {
+    if (arguments.keys[i] == "value") {
+      newBox.value = arguments.values[i];
     }
-    if (theArguments.keys[i] == "min") {
-      newBox.min = theArguments.values[i];
+    if (arguments.keys[i] == "min") {
+      newBox.min = arguments.values[i];
     }
-    if (theArguments.keys[i] == "max") {
-      newBox.max = theArguments.values[i];
+    if (arguments.keys[i] == "max") {
+      newBox.max = arguments.values[i];
     }
-    if (theArguments.keys[i] == "step") {
-      newBox.step = theArguments.values[i];
+    if (arguments.keys[i] == "step") {
+      newBox.step = arguments.values[i];
     }
   }
   return output.assignValue(calculator, newBox);
@@ -115,14 +115,14 @@ bool CalculatorHtmlFunctions::setInputBox(
   return output.assignValue(calculator, out.str());
 }
 
-std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBox) {
+std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& box) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::getUserInputBoxName");
-  if (theBox.owner == nullptr) {
+  if (box.owner == nullptr) {
     return "non-initialized-expression";
   }
-  Calculator& calculator = *theBox.owner;
+  Calculator& calculator = *box.owner;
   MapList<std::string, Expression, MathRoutines::hashString> arguments;
-  if (!CalculatorConversions::loadKeysFromStatementList(calculator, theBox, arguments)) {
+  if (!CalculatorConversions::loadKeysFromStatementList(calculator, box, arguments)) {
     return "corrupt-box";
   }
   if (!arguments.contains("name")) {

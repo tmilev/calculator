@@ -87,7 +87,7 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   }
   global << Logger::red << "SSL is available but CERTIFICATE files are missing." << Logger::endL;
   global << Logger::green << "Let me try to create those files for you." << Logger::endL;
-  std::stringstream theCommand;
+  std::stringstream command;
   std::string certificatePhysicalName, keyPhysicalName;
   FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::fileCertificate, certificatePhysicalName, true, true, nullptr
@@ -95,19 +95,19 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::fileKey, keyPhysicalName, true, true, nullptr
   );
-  theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
+  command <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
   << " -out " << certificatePhysicalName
   << " -days 3001 ";
   if (
     global.configuration["openSSLSubject"].elementType != JSData::token::tokenUndefined &&
     global.configuration["openSSLSubject"].elementType == JSData::token::tokenString
   ) {
-    theCommand << "-subj " << global.configuration["openSSLSubject"].stringValue;
+    command << "-subj " << global.configuration["openSSLSubject"].stringValue;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
   }
   global << "About to generate key files with the following command. " << Logger::endL;
-  global << Logger::green << theCommand.str() << Logger::endL;
-  global.externalCommandNoOutput(theCommand.str(), true);
+  global << Logger::green << command.str() << Logger::endL;
+  global.externalCommandNoOutput(command.str(), true);
   return true;
 }
 

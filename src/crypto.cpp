@@ -822,8 +822,8 @@ void Crypto::convertStringToListUInt32BigendianZeroPad(const std::string& input,
 
 void Crypto::convertStringToListUInt32BigendianZeroPad(const List<unsigned char>& input, List<uint32_t>& output) {
   MacroRegisterFunctionWithName("Crypto::convertStringToListUInt32BigendianZeroPad");
-  List<unsigned char> theConvertor;
-  theConvertor.setSize(4);
+  List<unsigned char> converter;
+  converter.setSize(4);
   int finalSize = input.size / 4;
   if (input.size % 4 != 0) {
     finalSize ++;
@@ -831,9 +831,9 @@ void Crypto::convertStringToListUInt32BigendianZeroPad(const List<unsigned char>
   output.setSize(finalSize);
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < 4; j ++) {
-      theConvertor[j] = (i * 4 + j < input.size) ? input[i * 4 + j] : 0;
+      converter[j] = (i * 4 + j < input.size) ? input[i * 4 + j] : 0;
     }
-    output[i] = Crypto::getUInt32FromCharBigendian(theConvertor);
+    output[i] = Crypto::getUInt32FromCharBigendian(converter);
   }
 }
 

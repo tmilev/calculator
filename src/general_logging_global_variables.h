@@ -13,7 +13,7 @@ class WebServer;
 
 class ThreadData {
 public:
-  std::thread::id theId;
+  std::thread::id id;
   int index;
   std::string name;
   std::string toStringHtml() const;
@@ -194,7 +194,7 @@ public:
     }
   }
   // When non-null, usually points to:
-  // int externalCommandNoOutput(const std::string& theCommand)
+  // int externalCommandNoOutput(const std::string& command)
   int (*pointerExternalCommandNoOutput)(const std::string& systemCommand);
   // When non-null, usually points to:
   // std::string externalCommandReturnStandardOut(const std::string& inputCommand)

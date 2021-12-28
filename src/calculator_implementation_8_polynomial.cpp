@@ -520,14 +520,14 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::getDivisionLaTeXSlide");
   this->checkInitialization();
   std::stringstream out;
-  List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
+  List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& subtrahends = this->intermediateSubtractands;
   this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   bool oneDivisor = (this->owner->basis.size == 1);
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
-  for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theRemainders[i].monomials);
+  for (int i = 0; i < remainders.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(remainders[i].monomials);
   }
   for (int i = 0; i < subtrahends.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(subtrahends[i].monomials);
@@ -552,15 +552,15 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   dummyListList.setSize(this->allMonomials.size);
   dummyList.initializeFillInObject(this->allMonomials.size, - 1);
   this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(subtrahends.size, 0);
-  this->highlightMonsRemainders.initializeFillInObject(theRemainders.size,   dummyListList);
+  this->highlightMonsRemainders.initializeFillInObject(remainders.size,   dummyListList);
   this->highlightMonsSubtrahends.initializeFillInObject(subtrahends.size, dummyListList);
   this->highlightMonsQuotients.initializeFillInObject(basis.size, dummyListList);
   this->highlightMonsDivisors.initializeFillInObject (basis.size, dummyListList);
-  this->fcAnswerMonsRemainders.initializeFillInObject(theRemainders.size, dummyList);
+  this->fcAnswerMonsRemainders.initializeFillInObject(remainders.size, dummyList);
   this->fcAnswerMonsSubtrahends.initializeFillInObject(subtrahends.size, dummyList);
   this->fcAnswerMonsQuotients.initializeFillInObject(basis.size, dummyList);
   this->fcAnswerMonsDivisors.initializeFillInObject(basis.size, dummyList);
-  this->uncoverAllMonsRemainders.initializeFillInObject(theRemainders.size, 1);
+  this->uncoverAllMonsRemainders.initializeFillInObject(remainders.size, 1);
   this->uncoverAllMonsSubtrahends.initializeFillInObject(subtrahends.size, 1);
   this->uncoverAllMonsQuotients.initializeFillInObject(basis.size, 1);
   this->uncoverAllMonsDivisors.initializeFillInObject(basis.size, 1);
@@ -569,7 +569,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   this->additionalHighlightRemainders.initializeFillInObject(this->allMonomials.size, dummyList);
   this->highlightAllMonsFinalRemainder = - 1;
   int currentSlideNumer = this->firstIndexLatexSlide + 1;
-  for (int i = 0; i < theRemainders.size; i ++) {
+  for (int i = 0; i < remainders.size; i ++) {
     this->computeHighLightsFromRemainder(i, currentSlideNumer);
   }
   for (int i = 0; i < subtrahends.size; i ++) {
@@ -645,7 +645,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   }
   out << " \\cline{2-" << this->allMonomials.size * 2 + 1 << "}"
   << " \\cline{2-" << this->allMonomials.size * 2 + 1 << "}";
-  for (int i = 0; i < theRemainders.size; i ++) {
+  for (int i = 0; i < remainders.size; i ++) {
     if (i == 0) {
       if (oneDivisor) {
         out << "\\multicolumn{1}{c|}{"
@@ -663,14 +663,14 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     } else {
       out << "\\uncover<" << this->uncoverAllMonsRemainders[i] << "->{";
     }
-    if (i == theRemainders.size - 1 && i != 0 && oneDivisor) {
+    if (i == remainders.size - 1 && i != 0 && oneDivisor) {
       out << "\\uncover<" << this->highlightAllMonsFinalRemainder << "->{"
       << "\\textbf{\\color{orange}Remainder: }"
       << "}";
     }
     out << "&";
     out << this->getSpacedMonomialsWithHighlightLaTeX(
-      theRemainders[i],
+      remainders[i],
       &this->highlightMonsRemainders[i],
       &this->fcAnswerMonsRemainders[i],
       nullptr,

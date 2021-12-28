@@ -171,18 +171,18 @@ void TimeoutThread::run() {
 }
 
 void ThreadData::runTimerThread(int threadIndex) {
-  global.threadData[threadIndex].theId = std::this_thread::get_id();
+  global.threadData[threadIndex].id = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
-  TimeoutThread theThread;
-  theThread.run();
+  TimeoutThread timeoutThread;
+  timeoutThread.run();
 }
 
 void createTimerThread() {
   ThreadData::createThread(ThreadData::runTimerThread, "timer");
 }
 
-int externalCommandNoOutput(const std::string& theCommand) {
-  return system(theCommand.c_str());
+int externalCommandNoOutput(const std::string& command) {
+  return system(command.c_str());
 }
 
 #ifndef MACRO_use_wasm
@@ -227,23 +227,23 @@ int externalCommandStreamOutput(const std::string& inputCommand) {
 }
 
 #else
-std::string externalCommandReturnStandardOut(const std::string& inputCommand) {
+std::string externalCommandReturnStandardOut(const std::string& command) {
   global.fatal
   << "In externalCommandReturnStandardOut(...): external commands such as: "
-  << inputCommand << " are not allowed. " << global.fatal;
+  << command << " are not allowed. " << global.fatal;
   return "";
 }
 
-int externalCommandStreamOutput(const std::string& inputCommand) {
-  global.fatal << "In externalCommandStreamOutput(...): external commands such as: " << inputCommand << " are not allowed. " << global.fatal;
+int externalCommandStreamOutput(const std::string& command) {
+  global.fatal << "In externalCommandStreamOutput(...): external commands such as: " << command << " are not allowed. " << global.fatal;
   return - 1;
 }
 #endif
 
-void callChDirWrapper(const std::string& theDir) {
-  int systemOutput = chdir(theDir.c_str());
+void callChDirWrapper(const std::string& command) {
+  int systemOutput = chdir(command.c_str());
   if (systemOutput != 0) {
-    global << Logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
+    global << Logger::red << "Chdir command to directory: " << command << " exited with " << systemOutput
     << ". " << Logger::endL;
   }
 }

@@ -159,9 +159,9 @@ void RationalFraction<Coefficient>::makeZero() {
 }
 
 template<class Coefficient>
-void RationalFraction<Coefficient>::operator+=(int theConstant) {
+void RationalFraction<Coefficient>::operator+=(int coefficient) {
   RationalFraction tempRF;
-  tempRF.makeConstant(Rational(theConstant));
+  tempRF.makeConstant(Rational(coefficient));
   (*this) += tempRF;
 }
 
@@ -426,7 +426,7 @@ void RationalFraction<Coefficient>::operator*=(const Polynomial<Coefficient>& ot
     this->reduceMemory();
     return;
   }
-  Polynomial<Coefficient> commonDivisor, theResult, tempP;
+  Polynomial<Coefficient> commonDivisor, result, tempP;
   ProgressReport report;
   if (report.tickAndWantReport()) {
     std::stringstream out;
@@ -437,16 +437,16 @@ void RationalFraction<Coefficient>::operator*=(const Polynomial<Coefficient>& ot
   RationalFraction<Coefficient>::greatestCommonDivisor(this->denominator.getElement(), other, commonDivisor);
   this->numerator.getElement() *= other;
   List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderForGreatestCommonDivisor();
-  this->numerator.getElement().divideBy(commonDivisor, theResult, tempP, monomialOrder);
+  this->numerator.getElement().divideBy(commonDivisor, result, tempP, monomialOrder);
   if (!tempP.isEqualToZero()) {
     global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
   }
-  this->numerator.getElement() = theResult;
-  this->denominator.getElement().divideBy(commonDivisor, theResult, tempP, monomialOrder);
+  this->numerator.getElement() = result;
+  this->denominator.getElement().divideBy(commonDivisor, result, tempP, monomialOrder);
   if (!tempP.isEqualToZero()) {
     global.fatal << "Polynomial not equal to zero. " << global.fatal;
   }
-  this->denominator.getElement() = theResult;
+  this->denominator.getElement() = result;
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
   if (report.tickAndWantReport()) {
@@ -903,8 +903,8 @@ bool RationalFraction<Coefficient>::isEqualTo(const RationalFraction<Coefficient
 }
 
 template<class Coefficient>
-void RationalFraction<Coefficient>::multiplyByConstant(const Rational& theConst) {
-  this->operator*=(theConst);
+void RationalFraction<Coefficient>::multiplyByConstant(const Rational& inputConstant) {
+  this->operator*=(inputConstant);
 }
 
 template<class Coefficient>
@@ -1173,8 +1173,8 @@ bool RationalFraction<Coefficient>::getRelations(
   if (inputElements.size == 0) {
     return true;
   }
-  List<Polynomial<Rational> > theGroebnerBasis;
-  theGroebnerBasis = inputElements;
+  List<Polynomial<Rational> > groebnerBasis;
+  groebnerBasis = inputElements;
   int numStartingGenerators = inputElements.size;
   int numStartingVariables = 0;
   for (int i = 0; i < inputElements.size; i ++) {
@@ -1182,24 +1182,24 @@ bool RationalFraction<Coefficient>::getRelations(
   }
   Polynomial<Rational> currentGenerator;
   for (int i = 0; i < numStartingGenerators; i ++) {
-    Polynomial<Rational>& currentPoly = theGroebnerBasis[i];
+    Polynomial<Rational>& currentPoly = groebnerBasis[i];
     currentPoly.setNumberOfVariablesSubstituteDeletedByOne(numStartingVariables + numStartingGenerators);
     currentGenerator.makeDegreeOne(numStartingVariables + numStartingGenerators, i + numStartingVariables, 1);
     outputGeneratorLabels[i] = currentGenerator;
     currentPoly -= currentGenerator;
   }
-  GroebnerBasisComputation<Rational> theComputation;
-  theComputation.polynomialOrder.monomialOrder.setComparison(
+  GroebnerBasisComputation<Rational> computation;
+  computation.polynomialOrder.monomialOrder.setComparison(
     MonomialPolynomial::greaterThan_leftLargerWins
   );
-  if (!theComputation.transformToReducedGroebnerBasis(theGroebnerBasis)) {
+  if (!computation.transformToReducedGroebnerBasis(groebnerBasis)) {
     comments << "Failed to find Groebner basis";
     return false;
   }
-  outputRelations.reserve(theGroebnerBasis.size);
+  outputRelations.reserve(groebnerBasis.size);
   outputRelations.setSize(0);
-  for (int i = 0; i < theGroebnerBasis.size; i ++) {
-    Polynomial<Rational>& currentPoly = theGroebnerBasis[i];
+  for (int i = 0; i < groebnerBasis.size; i ++) {
+    Polynomial<Rational>& currentPoly = groebnerBasis[i];
     bool bad = false;
     for (int j = 0; j < numStartingVariables; j ++) {
       if (currentPoly.getMaximumPowerOfVariableIndex(j) > 0) {

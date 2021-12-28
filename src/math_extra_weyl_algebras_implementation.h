@@ -58,19 +58,19 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   buffer.makeOne();
   output.makeZero();
   int numCycles = tempSel.totalNumberSubsetsSmallInt();
-  Rational coeffBuff;
+  Rational coefficientBuffer;
   output.setExpectedSize(expectedSize);
   for (int i = 0; i < numCycles; i ++) {
-    coeffBuff = 1;
+    coefficientBuffer = 1;
     for (int k = 0; k < dimension; k ++) {
-      int multDrop = tempSel.multiplicities[k];
-      Rational theDOPower = left.differentialPart(k);
-      Rational thePolPower = right.polynomialPart(k);
-      coeffBuff *= Rational::nChooseK(theDOPower, multDrop) * Rational::nChooseK(thePolPower, multDrop) * Rational::factorial(multDrop);
-      buffer.polynomialPart.setVariable(k, left.polynomialPart(k) + right.polynomialPart(k) - multDrop);
-      buffer.differentialPart.setVariable(k, left.differentialPart(k) + right.differentialPart(k) - multDrop);
+      int multiplicityDrop = tempSel.multiplicities[k];
+      Rational differentialOperatorPower = left.differentialPart(k);
+      Rational polynomialPower = right.polynomialPart(k);
+      coefficientBuffer *= Rational::nChooseK(differentialOperatorPower, multiplicityDrop) * Rational::nChooseK(polynomialPower, multiplicityDrop) * Rational::factorial(multiplicityDrop);
+      buffer.polynomialPart.setVariable(k, left.polynomialPart(k) + right.polynomialPart(k) - multiplicityDrop);
+      buffer.differentialPart.setVariable(k, left.differentialPart(k) + right.differentialPart(k) - multiplicityDrop);
     }
-    output.addMonomial(buffer, coeffBuff);
+    output.addMonomial(buffer, coefficientBuffer);
     tempSel.incrementReturnFalseIfPastLast();
   }
 }

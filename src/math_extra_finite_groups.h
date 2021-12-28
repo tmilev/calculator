@@ -934,8 +934,8 @@ public:
   }
   template <class Coefficient>
   void actOnDual(int index,Vector<Coefficient>& vector, bool RhoAction, const Coefficient& ringZero);
-  //theRoot is a list of the simple coordinates of the Vector<Rational>
-  //theRoot serves as both input and output
+  // root is a list of the simple coordinates of the Vector<Rational>
+  // root serves as both input and output
   void actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& root, bool rhoAction);
   void actOnRootByGroupElement(int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho);
   // Simple reflection with respect to vector alpha.

@@ -55,7 +55,7 @@ bool Database::Mongo::initialize() {
   this->client = mongoc_client_new("mongodb://localhost:27017");
   this->database = mongoc_client_get_database(
     static_cast<mongoc_client_t*>(this->client),
-    DatabaseStrings::theDatabaseName.c_str()
+    DatabaseStrings::databaseName.c_str()
   );
 #endif
   return true;
@@ -104,7 +104,7 @@ MongoCollection::MongoCollection(const std::string& collectionName) {
   this->name = collectionName;
   this->collection = mongoc_client_get_collection(
     static_cast<mongoc_client_t*>(Database::get().mongoDB.client),
-    DatabaseStrings::theDatabaseName.c_str(),
+    DatabaseStrings::databaseName.c_str(),
     this->name.c_str()
   );
 }
@@ -486,7 +486,7 @@ std::string Database::Mongo::convertErrorToString(void* bson_error_t_pointer) {
 
 bool Database::Mongo::deleteDatabase(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Database::Mongo::deleteDatabase");
-  if (DatabaseStrings::theDatabaseName != "calculatortest") {
+  if (DatabaseStrings::databaseName != "calculatortest") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The only database allowed to be deleted is calculatortest. ";
     }
@@ -547,13 +547,13 @@ bool Database::findFromString(
 ) {
   MacroRegisterFunctionWithName("Database::findFromString");
 #ifdef MACRO_use_MongoDB
-  JSData theData;
+  JSData data;
   //global << Logger::blue << "Query input: " << findQuery << Logger::endL;
-  if (!theData.parse(findQuery, commentsOnFailure)) {
+  if (!data.parse(findQuery, commentsOnFailure)) {
     return false;
   }
   return Database::get().findFromJSON(
-    collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure
+    collectionName, data, output, maxOutputItems, totalItems, commentsOnFailure
   );
 #else
   if (commentsOnFailure != nullptr) {

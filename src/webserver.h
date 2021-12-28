@@ -301,7 +301,7 @@ public:
   void writeVersionJSFile();
   WebWorker& getActiveWorker();
   static void workerTimerPing(int64_t pingTime);
-  static void release(int& theDescriptor);
+  static void release(int& descriptor);
   static void wrapUp();
   static void fperror_sigaction[[noreturn]](int signal);
   void reapChildren();

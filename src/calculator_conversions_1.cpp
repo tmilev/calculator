@@ -894,11 +894,11 @@ bool CalculatorConversions::loadKey(
   Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");
-  Expression theKeyE;
-  theKeyE.makeAtom(calculator, inputKey);
+  Expression keyExpression;
+  keyExpression.makeAtom(calculator, inputKey);
   for (int i = 0; i < inputStatementList.size(); i ++) {
     if (inputStatementList[i].startsWith(calculator.opDefine(), 3)) {
-      if (inputStatementList[i][1] == theKeyE) {
+      if (inputStatementList[i][1] == keyExpression) {
         output = inputStatementList[i][2];
         return true;
       }
@@ -1271,8 +1271,8 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
   ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
-  LinearCombination<Expression, RationalFraction<Rational> > theUEE;
-  theUEE.makeZero();
+  LinearCombination<Expression, RationalFraction<Rational> > elementUniversalEnveloping;
+  elementUniversalEnveloping.makeZero();
   Expression currentMonE;
   for (int i = 0; i < input.size(); i ++) {
     if (!CalculatorConversions::expressionFromMonomialUniversalEnveloping(
@@ -1280,9 +1280,9 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
     )) {
       return calculator << "<hr>Failed to store " << input.toString();
     }
-    theUEE.addMonomial(currentMonE, input.coefficients[i]);
+    elementUniversalEnveloping.addMonomial(currentMonE, input.coefficients[i]);
   }
-  return output.makeSum(calculator, theUEE);
+  return output.makeSum(calculator, elementUniversalEnveloping);
 }
 
 bool CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients(
@@ -1432,9 +1432,9 @@ bool CalculatorConversions::elementUniversalEnveloping(
         return calculator << "<hr>Failed to convert "
         << input[1].toString() << " to polynomial.<hr>";
       }
-      std::string theLetter;
+      std::string letter;
       if (
-        !singleChevGenE[0].isOperation(&theLetter) ||
+        !singleChevGenE[0].isOperation(&letter) ||
         !singleChevGenE[1].isSmallInteger(&chevalleyGenerator.generatorIndex)
       ) {
         return calculator << "<hr>Failed to convert summand "
@@ -1443,12 +1443,12 @@ bool CalculatorConversions::elementUniversalEnveloping(
       }
       bool isGood = true;
       bool isHonestElementUE = true;
-      if (theLetter == "g") {
+      if (letter == "g") {
         chevalleyGenerator.generatorIndex = owner.getGeneratorFromDisplayIndex(chevalleyGenerator.generatorIndex);
         if (chevalleyGenerator.generatorIndex < 0 || chevalleyGenerator.generatorIndex >= owner.getNumberOfGenerators()) {
           isGood = false;
         }
-      } else if (theLetter == "h") {
+      } else if (letter == "h") {
         if (chevalleyGenerator.generatorIndex < 1 || chevalleyGenerator.generatorIndex>owner.getRank()) {
           isGood = false;
         } else {
@@ -1678,15 +1678,15 @@ bool CalculatorConversions::loadFileIntoString(
     return false;
   }
   const Expression& argument = input[1];
-  std::string theRelativeFileName;
-  if (!argument.isOfType<std::string>(&theRelativeFileName)) {
+  std::string relativeFileName;
+  if (!argument.isOfType<std::string>(&relativeFileName)) {
     calculator << "Input of load file string command is supposed to be a string. "
     << "Converting your expression to a string and using that instead. ";
-    theRelativeFileName = argument.toString();
+    relativeFileName = argument.toString();
   }
   std::string outputString;
   if (!FileOperations::loadFileToStringVirtual(
-    theRelativeFileName, outputString, false, &calculator.comments
+    relativeFileName, outputString, false, &calculator.comments
   )) {
     return false;
   }

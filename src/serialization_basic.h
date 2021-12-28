@@ -16,8 +16,8 @@ public:
   };
   class Marker {
   public:
-    friend std::ostream& operator<<(std::ostream& output, const Serialization::Marker& theMarker) {
-      output << theMarker.toString();
+    friend std::ostream& operator<<(std::ostream& output, const Serialization::Marker& marker) {
+      output << marker.toString();
       return output;
     }
     int offset;

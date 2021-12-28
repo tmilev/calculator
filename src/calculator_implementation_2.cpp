@@ -412,7 +412,7 @@ bool Calculator::outerStandardFunction(
   Function** outputHandler
 ) {
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
-  RecursionDepthCounter theCounter(&calculator.recursionDepth);
+  RecursionDepthCounter counter(&calculator.recursionDepth);
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isList()) {
     return false;
@@ -633,7 +633,7 @@ bool Calculator::accountRule(
   const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
 ) {
   MacroRegisterFunctionWithName("Calculator::accountRule");
-  RecursionDepthCounter theRecursionCounter(&this->recursionDepth);
+  RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (this->recursionDepth > this->maximumRecursionDepth) {
     return false;
   }

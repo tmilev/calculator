@@ -12,10 +12,10 @@
 class Calculator;
 
 extern int getElapsedMilliseconds();
-extern int externalCommandNoOutput(const std::string& theCommand);
-extern std::string externalCommandReturnStandardOut(const std::string& theCommand);
-extern int externalCommandStreamOutput(const std::string& theCommand);
-extern void callChDirWrapper(const std::string& theCommand);
+extern int externalCommandNoOutput(const std::string& command);
+extern std::string externalCommandReturnStandardOut(const std::string& command);
+extern int externalCommandStreamOutput(const std::string& command);
+extern void callChDirWrapper(const std::string& command);
 extern void ignoreUserAbortSignal();
 
 extern void initializeGlobalObjects();

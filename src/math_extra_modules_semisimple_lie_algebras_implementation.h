@@ -603,14 +603,14 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   for (int i = 0; i < rank; i ++) {
     this->highestWeightFiniteDimensionalPartFundamentalCoordinates[i] = 0;
     if (this->parabolicSelectionSelectedAreElementsLevi.selected[i]) {
-      int theCoord;
-      if (!this->highestWeightFundamentalCoordinatesBaseField[i].isSmallInteger(&theCoord)) {
+      int inputCoordinate;
+      if (!this->highestWeightFundamentalCoordinatesBaseField[i].isSmallInteger(&inputCoordinate)) {
         if (outputReport != nullptr) {
           *outputReport = "The given module over the Levi part is not finite dimensional";
         }
         return false;
       }
-      this->highestWeightFiniteDimensionalPartFundamentalCoordinates[i] = theCoord;
+      this->highestWeightFiniteDimensionalPartFundamentalCoordinates[i] = inputCoordinate;
     }
     this->highestWeightDualCoordinatesBaseField[i] = this->highestWeightFundamentalCoordinatesBaseField[i];
     this->highestWeightDualCoordinatesBaseField[i] *= weylGroup.cartanSymmetric.elements[i][i] / 2;
@@ -709,12 +709,12 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   Rational::totalLargeMultiplications + Rational::totalSmallMultiplications - startingNumRationalOperations;
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
-    Matrix<Coefficient>& theBF = this->bilinearFormsAtEachWeightLevel[k];
-    Matrix<Coefficient>& theBFinverted = this->bilinearFormsInverted[k];
-    if (!theBF.isNonNegativeAllEntries()) {
+    Matrix<Coefficient>& bilinearForm = this->bilinearFormsAtEachWeightLevel[k];
+    Matrix<Coefficient>& bilinearFormInverted = this->bilinearFormsInverted[k];
+    if (!bilinearForm.isNonNegativeAllEntries()) {
       this->flagConjectureBholds = false;
     }
-    if (theBFinverted.numberOfRows <= 0) {
+    if (bilinearFormInverted.numberOfRows <= 0) {
       isBad = true;
     }
   }
@@ -725,7 +725,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     }
     return false;
   }
-  ElementSemisimpleLieAlgebra<Rational> tempSSElt;
+  ElementSemisimpleLieAlgebra<Rational> currentElement;
   if (computeSimpleGens) {
     for (int k = 0; k < 2; k ++) {
       for (int j = 0; j < this->getOwner().getRank(); j ++) {
@@ -734,9 +734,9 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           if (k == 1) {
             index = this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() + j;
           }
-          tempSSElt.makeGenerator(index, this->getOwner());
+          currentElement.makeGenerator(index, this->getOwner());
           if (outputReport != nullptr) {
-            out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.defaultFormat.getElement());
+            out2 << "<hr>Simple generator: " << currentElement.toString(&global.defaultFormat.getElement());
           }
           MatrixTensor<Coefficient>& matrix = this->getActionGeneratorIndex(index);
           std::stringstream tempStream;
@@ -751,14 +751,6 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << matrix.toString();
             }
           }
-      /*    for (int j = 0; j < this->actionsSimpleGens[i].size; j ++)
-            for (int k = 0; k< this->actionsSimpleGens[i][j].size; k++) {
-              out << "<br>" << simpleGenerator.toString(global, tempFormat) << "\\cdot "
-              << this->theGeneratingWordsGrouppedByWeight[j][k].toString(false, false, tempFormat)
-              << "\\cdot v=" << this->actionsSimpleGens[i][j][k].toString(global, tempFormat)
-              << "\\cdot v"
-              ;
-            }*/
           if (k == 1) {
             this->getActionGeneratorIndex(this->getOwner().getNumberOfPositiveRoots() + j);
           }
@@ -839,14 +831,14 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
   output.setSize(0);
   output.reserve(ownerSS.getNumberOfPositiveRoots());
 
-  int theBeginning = useNegativeNilradical ? 0: ownerSS.getNumberOfPositiveRoots() +ownerSS.getRank();
+  int beginning = useNegativeNilradical ? 0: ownerSS.getNumberOfPositiveRoots() + ownerSS.getRank();
   MemorySaving<List<int> > tempList;
   if (outputListOfGenerators == nullptr) {
     outputListOfGenerators = &tempList.getElement();
   }
   outputListOfGenerators->setSize(0);
   outputListOfGenerators->reserve(ownerSS.getNumberOfPositiveRoots());
-  for (int i = theBeginning; i < theBeginning+ownerSS.getNumberOfPositiveRoots(); i ++) {
+  for (int i = beginning; i < beginning+ownerSS.getNumberOfPositiveRoots(); i ++) {
     if (this->isNotInLevi(i)) {
       outputListOfGenerators->addOnTop(i);
     }
@@ -1320,8 +1312,8 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
 
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
-    Matrix<Coefficient>& theBF = this->bilinearFormsAtEachWeightLevel[k];
-    Matrix<Coefficient>& theBFinverted = this->bilinearFormsInverted[k];
+    Matrix<Coefficient>& bilinearForm = this->bilinearFormsAtEachWeightLevel[k];
+    Matrix<Coefficient>& bilinearFormInverted = this->bilinearFormsInverted[k];
     out << "<hr>weight in simple coords: " << this->moduleWeightsSimpleCoordinates[k].toString();
     List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->generatingWordsGrouppedByWeight[k];
     for (int i = 0; i < currentList.size; i ++) {
@@ -1330,21 +1322,21 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
       << currentElt.toString(&global.defaultFormat.getElement());
     }
     out << "; Matrix of Shapovalov form associated to current weight level: <br> "
-    << theBF.toString(&global.defaultFormat.getElement());
-/*    if (!theBF.isPositiveDefinite()) {
+    << bilinearForm.toString(&global.defaultFormat.getElement());
+/*    if (!bilinearForm.isPositiveDefinite()) {
       monomialDetailStream << "<b>Is not positive definite!</b>";
       this->flagConjectureCholds = false;
     }
     else
       monomialDetailStream << " (positive definite)";*/
-    if (!theBF.isNonNegativeAllEntries()) {
+    if (!bilinearForm.isNonNegativeAllEntries()) {
       out << "<b>Has negative entries</b>";
     } else {
       out << " (positive entries only )";
     }
     out << " corresonding inverted matrix:<br>";
-    if (theBFinverted.numberOfRows > 0) {
-      out << theBFinverted.toString(&global.defaultFormat.getElement());
+    if (bilinearFormInverted.numberOfRows > 0) {
+      out << bilinearFormInverted.toString(&global.defaultFormat.getElement());
     } else {
       out << "<b>The matrix of the bilinear form is not invertible!</b>";
       isBad = true;
@@ -1911,14 +1903,14 @@ bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping
   ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& owner
 ) {
   output.makeZero(owner);
-  ModuleSSalgebra<Coefficient>* theModPtr = nullptr;
+  ModuleSSalgebra<Coefficient>* modulePointer = nullptr;
   MonomialUniversalEnveloping<Coefficient> tempMon;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialGeneralizedVerma<Coefficient>& currentMon = (*this)[i];
     if (i == 0) {
-      theModPtr = currentMon.owner;
+      modulePointer = currentMon.owner;
     }
-    if (currentMon.owner != theModPtr) {
+    if (currentMon.owner != modulePointer) {
       return false;
     }
     tempMon = currentMon.monomialCoefficientOne;

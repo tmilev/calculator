@@ -912,11 +912,11 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   out << ", ";
   List<unsigned char> idNonHexed;
   Crypto::computeSha256(*this->rawData, idNonHexed);
-  std::string theID = Crypto::convertListUnsignedCharsToHex(idNonHexed);
-  out << "\"" << theID << "\"";
+  std::string id = Crypto::convertListUnsignedCharsToHex(idNonHexed);
+  out << "\"" << id << "\"";
   out << "]";
   out << "</script>";
-  out << "<span id='" << theID << "'></span>";
+  out << "<span id='" << id << "'></span>";
   return out.str();
 }
 
@@ -1569,8 +1569,8 @@ bool PrivateKeyRSA::basicChecks(std::stringstream* comments) {
   *comments << "Must be zero: " << mustBeZero.toString();
   LargeInteger EulerPhi = (primeOneLI - 1) * (primeTwoLI - 1);
   ElementZmodP mustBeZeroModP;
-  // exponent.theModulo = EulerPhi.value;
-  // exponent.theValue = this->exponent;
+  // exponent.modulo = EulerPhi.value;
+  // exponent.value = this->exponent;
   mustBeZeroModP.modulus = EulerPhi.value;
   mustBeZeroModP.value = 1;
   mustBeZeroModP /= this->publicKey.exponent;

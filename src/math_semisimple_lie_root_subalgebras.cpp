@@ -640,11 +640,11 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
       }
     }
   }
-  List<ElementSemisimpleLieAlgebra<Rational> >& theMod = this->modules[moduleIndex];
-  theMod.setSize(wPrimalSimple.size);
+  List<ElementSemisimpleLieAlgebra<Rational> >& module = this->modules[moduleIndex];
+  module.setSize(wPrimalSimple.size);
   int indexInZeroSpace = 0;
   for (int i = 0; i < wPrimalSimple.size; i ++) {
-    ElementSemisimpleLieAlgebra<Rational>& currentElt = theMod[i];
+    ElementSemisimpleLieAlgebra<Rational>& currentElt = module[i];
     if (!wPrimalSimple[i].isEqualToZero()) {
       currentElt.makeGGenerator(wPrimalSimple[i], this->getOwnerLieAlgebra());
       continue;
@@ -875,7 +875,6 @@ void RootSubalgebra::extractRelations(
     relation.makeLookCivilized(*this);
     owner.goodRelations.addRelationNoRepetition(relation, owner);
   } else {
-    //if (!this->checkForSmallRelations(theRel, NilradicalRoots))
     this->matrixToRelation(relation, matrixA, matrixX, dimension, nilradicalRoots);
     this->makeGeneratingSingularVectors(relation, nilradicalRoots);
     relation.FixRightHandSide(*this, nilradicalRoots);
@@ -1842,17 +1841,17 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   if (domainAndRangeGenerateNonIsoSAs != nullptr) {
     *domainAndRangeGenerateNonIsoSAs = false;
   }
-  RootSubalgebra theDomainRootSA;
-  RootSubalgebra theRangeRootSA;
-  theDomainRootSA.owner = &inputOwner;
-  theRangeRootSA.owner = &inputOwner;
-  theDomainRootSA.genK = domain;
-  theRangeRootSA.genK = range;
-  theDomainRootSA.computeEssentials();
-  theRangeRootSA.computeEssentials();
+  RootSubalgebra domainRootSubalgebra;
+  RootSubalgebra rangeRootSubalgebra;
+  domainRootSubalgebra.owner = &inputOwner;
+  rangeRootSubalgebra.owner = &inputOwner;
+  domainRootSubalgebra.genK = domain;
+  rangeRootSubalgebra.genK = range;
+  domainRootSubalgebra.computeEssentials();
+  rangeRootSubalgebra.computeEssentials();
   if (
-    theDomainRootSA.dynkinDiagram.toString() != theRangeRootSA.dynkinDiagram.toString() ||
-    theDomainRootSA.centralizerDiagram.toString() != theRangeRootSA.centralizerDiagram.toString()
+    domainRootSubalgebra.dynkinDiagram.toString() != rangeRootSubalgebra.dynkinDiagram.toString() ||
+    domainRootSubalgebra.centralizerDiagram.toString() != rangeRootSubalgebra.centralizerDiagram.toString()
   ) {
     if (domainAndRangeGenerateNonIsoSAs != nullptr) {
       *domainAndRangeGenerateNonIsoSAs = true;
@@ -1864,16 +1863,16 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   List<int> tempList, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   List<List<List<int> > > CentralizerDiagramAutomorphisms;
-  theDomainRootSA.centralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
-  theDomainRootSA.centralizerDiagram.toString();
+  domainRootSubalgebra.centralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
+  domainRootSubalgebra.centralizerDiagram.toString();
   tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
   for (int i = 0; i <CentralizerDiagramAutomorphisms.size; i ++) {
     tempAutosCentralizer.capacities[i] = CentralizerDiagramAutomorphisms[i].size - 1;
   }
-  tempList.setSize(theDomainRootSA.centralizerDiagram.sameTypeComponents.size);
+  tempList.setSize(domainRootSubalgebra.centralizerDiagram.sameTypeComponents.size);
   int tempSize = 0;
-  for (int i = 0; i < theDomainRootSA.centralizerDiagram.sameTypeComponents.size; i ++) {
-    tempList[i] = theDomainRootSA.centralizerDiagram.sameTypeComponents[i].size;
+  for (int i = 0; i < domainRootSubalgebra.centralizerDiagram.sameTypeComponents.size; i ++) {
+    tempList[i] = domainRootSubalgebra.centralizerDiagram.sameTypeComponents[i].size;
     tempSize += tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
@@ -1898,15 +1897,15 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
     for (int l = 0; l < NumAutosCentralizer; l ++) {
       isoDomain.size = givenSize;
       isoRange.size = givenSize;
-      theDomainRootSA.centralizerDiagram.getMapFromPermutation(
+      domainRootSubalgebra.centralizerDiagram.getMapFromPermutation(
         isoDomain,
         isoRange,
         tempPermutation2,
         CentralizerDiagramAutomorphisms,
         tempAutosCentralizer,
-        theRangeRootSA.centralizerDiagram
+        rangeRootSubalgebra.centralizerDiagram
       );
-      if (theDomainRootSA.attemptExtensionToIsomorphismNoCentralizer(
+      if (domainRootSubalgebra.attemptExtensionToIsomorphismNoCentralizer(
         isoDomain, isoRange, 0, outputAutomorphisms, false, nullptr, &domain, &range
       )) {
         if (outputAutomorphisms == nullptr) {
@@ -1914,7 +1913,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
         }
       }
       if (outputAutomorphisms != nullptr) {
-        theDomainRootSA.makeProgressReportGeneratorAutomorphisms(
+        domainRootSubalgebra.makeProgressReportGeneratorAutomorphisms(
           l + NumAutosCentralizer * j, tempI2 * NumAutosCentralizer, outputAutomorphisms->externalAutomorphisms.size
         );
       }

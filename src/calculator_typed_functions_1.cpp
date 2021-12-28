@@ -411,17 +411,17 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialByWeightPolynomia
   }
   Weight<Polynomial<Rational> > weight;
   Rational cfRat;
-  Polynomial<Rational> theCoefficient;
-  if (!inputConverted[1].isOfType<Polynomial<Rational> >(&theCoefficient)) {
+  Polynomial<Rational> coefficient;
+  if (!inputConverted[1].isOfType<Polynomial<Rational> >(&coefficient)) {
     if (!inputConverted[1].isOfType<Rational>(&cfRat)) {
       return false;
     }
-    theCoefficient = cfRat;
+    coefficient = cfRat;
   }
   if (!inputConverted[2].isOfType<Weight<Polynomial<Rational> > >(&weight)) {
     return false;
   }
-  weight *= theCoefficient;
+  weight *= coefficient;
   return output.assignValueWithContext(calculator, weight, inputConverted[2].getContext());
 }
 
@@ -1761,15 +1761,15 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors(
   ) {
     return false;
   }
-  Expression insideRadicalE, theRadicalE, theRadicalCFE, exponentE;
+  Expression insideRadicalE, radicalExpression, radicalCoefficientExpression, exponentE;
   if (exponentWorking < 0) {
     outsideOfRadical.invert();
   }
-  theRadicalCFE.assignValue(calculator, outsideOfRadical);
+  radicalCoefficientExpression.assignValue(calculator, outsideOfRadical);
   insideRadicalE.assignValue(calculator, insideRadical);
   exponentE.assignValue(calculator, exponentWorking);
-  theRadicalE.makeXOX(calculator, calculator.opPower(), insideRadicalE, exponentE);
-  return output.makeProduct(calculator, theRadicalCFE, theRadicalE);
+  radicalExpression.makeXOX(calculator, calculator.opPower(), insideRadicalE, exponentE);
+  return output.makeProduct(calculator, radicalCoefficientExpression, radicalExpression);
 }
 
 bool CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational(
@@ -2366,10 +2366,10 @@ bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
   if (!found) {
     return false;
   }
-  Expression theBracket;
-  theBracket.makeXOX(calculator, calculator.opLieBracket(), leftE, rightE);
+  Expression bracket;
+  bracket.makeXOX(calculator, calculator.opLieBracket(), leftE, rightE);
   output.assignValue(calculator, coefficient);
-  output *= theBracket;
+  output *= bracket;
   return true;
 }
 
@@ -2454,9 +2454,9 @@ bool CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded(
   if (input[1] == input[2]) {
     return output.assignValue(calculator, 0);
   }
-  Expression theBracket;
-  theBracket.makeXOX(calculator, calculator.opLieBracket(), input[2], input[1]);
-  output = calculator.expressionMinusOne() * theBracket;
+  Expression bracket;
+  bracket.makeXOX(calculator, calculator.opLieBracket(), input[2], input[1]);
+  output = calculator.expressionMinusOne() * bracket;
   return true;
 }
 

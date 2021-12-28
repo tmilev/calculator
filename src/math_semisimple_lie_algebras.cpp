@@ -830,15 +830,15 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   Matrix<Rational>& outputAutomorphism, bool useNegativeRootsFirst
 ) {
   global.fatal << "Not implemented yet!!!!!" << global.fatal;
-  RootSubalgebra theRootSA;
-//  theRootSA.initialize(*this);
+  RootSubalgebra rootSubalgebra;
+  //  rootSubalgebra.initialize(*this);
   int dimension = this->weylGroup.cartanSymmetric.numberOfRows;
-  theRootSA.genK.makeEiBasis(dimension);
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theAutos;
-  theRootSA.generateAutomorphismsPreservingBorel(theAutos);
+  rootSubalgebra.genK.makeEiBasis(dimension);
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms automorphisms;
+  rootSubalgebra.generateAutomorphismsPreservingBorel(automorphisms);
   Matrix<Rational> mapOnRootSpaces;
-  int theAutoIndex = theAutos.externalAutomorphisms.size > 1 ? 1 : 0;
-  mapOnRootSpaces.assignVectorsToRows(theAutos.externalAutomorphisms[theAutoIndex]);
+  int automorphismIndex = automorphisms.externalAutomorphisms.size > 1 ? 1 : 0;
+  mapOnRootSpaces.assignVectorsToRows(automorphisms.externalAutomorphisms[automorphismIndex]);
   mapOnRootSpaces.transpose();
   Selection nonExplored;
   int numRoots = this->weylGroup.rootSystem.size;
@@ -937,7 +937,7 @@ bool SemisimpleLieAlgebra::isInTheWeightSupport(
 void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& highestWeight) {
   (void) highestWeight;
   /*Vectors<Rational> weightSupport;
-  this->GenerateWeightSupport(theHighestWeight, weightSupport);
+  this->GenerateWeightSupport(highestWeight, weightSupport);
   int highestWeight, distanceToHW;
   this->EmbeddingsRootSpaces.setSize(this->theWeyl.RootSystem.size);
   int dimension = this->theWeyl.cartanSymmetric.numberOfRows;

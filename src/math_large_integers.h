@@ -712,7 +712,6 @@ public:
   }
   void writeToFile(std::fstream& output);
   void readFromFile(std::istream& input);
-  void drawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
     if (this->isNegative()) {
       this->negate();

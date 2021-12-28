@@ -19,8 +19,8 @@ private:
     Polynomial<Coefficient>& output
   );
 public:
-  friend std::ostream& operator<<(std::ostream& output, const RationalFraction<Coefficient>& theRF) {
-    output << theRF.toString();
+  friend std::ostream& operator<<(std::ostream& output, const RationalFraction<Coefficient>& rationalFraction) {
+    output << rationalFraction.toString();
     return output;
   }
   MemorySaving<Polynomial<Coefficient> > numerator;
@@ -96,7 +96,7 @@ public:
   bool operator<(const RationalFraction<Rational>& other) const;
   bool operator<=(const RationalFraction<Rational>& other) const;
   bool operator>(const RationalFraction<Rational>& other) const;
-  void multiplyByConstant(const Rational& theConst);
+  void multiplyByConstant(const Rational& inputConstant);
   void invert();
   void makeOne();
   void makeZero();

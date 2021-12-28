@@ -119,9 +119,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
     return false;
   }
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.sumCoordinates().getDoubleValue()) + 1;
-  if (theTopHeightSimpleCoords < 0) {
-    theTopHeightSimpleCoords = 0;
+  int topHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.sumCoordinates().getDoubleValue()) + 1;
+  if (topHeightSimpleCoords < 0) {
+    topHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
   int topHeightRootSystem = this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
@@ -138,7 +138,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
   for (
     int lowestUnexploredHeightDiff = 0;
-    lowestUnexploredHeightDiff <= theTopHeightSimpleCoords;
+    lowestUnexploredHeightDiff <= topHeightSimpleCoords;
     lowestUnexploredHeightDiff ++
   ) {
     //double startCycleTime = global.getElapsedSeconds();
@@ -745,12 +745,12 @@ bool Calculator::Test::processResults() {
       isUknown = true;
       this->unknown ++;
     } else {
-      StringRoutines::Differ theDiffer;
-      theDiffer.left = HtmlRoutines::convertStringToHtmlString(currentTest.actualResult, false);
-      theDiffer.right = HtmlRoutines::convertStringToHtmlString(currentTest.expectedResult, false);
+      StringRoutines::Differ differ;
+      differ.left = HtmlRoutines::convertStringToHtmlString(currentTest.actualResult, false);
+      differ.right = HtmlRoutines::convertStringToHtmlString(currentTest.expectedResult, false);
       currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
       << "<td class = 'cellCalculatorResult'>";
-      currentLine << theDiffer.differenceHTML("actual", "expected");
+      currentLine << differ.differenceHTML("actual", "expected");
       currentLine << "</td>";
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
       currentLineConsole << "Expected:\n" << currentTest.expectedResult << "\n";

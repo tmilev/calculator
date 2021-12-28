@@ -174,7 +174,7 @@ public:
   MapList<std::string, std::string, MathRoutines::hashString> problemWeightsPerCourse;
   MapList<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
   bool getWeightFromCourse(
-    const std::string& theCourseNonURLed,
+    const std::string& courseNonURLed,
     Rational& output,
     std::string* outputAsGivenByInstructor = nullptr
   );
@@ -186,8 +186,8 @@ private:
   int expectedNumberOfAnswersFromDB;
   int knownNumberOfAnswersFromHD;
 public:
-  friend std::ostream& operator << (std::ostream& output, const ProblemData& theData) {
-    output << theData.toString();
+  friend std::ostream& operator << (std::ostream& output, const ProblemData& data) {
+    output << data.toString();
     return output;
   }
   bool flagRandomSeedGiven;
@@ -244,7 +244,7 @@ public:
   void computeExpectedNumberOfAnswersPerProblem();
   void computePointsEarned(
     const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-    MapList<std::string, TopicElement, MathRoutines::hashString>* theTopics,
+    MapList<std::string, TopicElement, MathRoutines::hashString>* topics,
     std::stringstream& commentsOnFailure
   );
   void setProblemData(const std::string& problemName, const ProblemData& inputData);
@@ -267,7 +267,7 @@ public:
   bool exists(std::stringstream* comments);
   bool storeToDatabase(bool doSetPassword, std::stringstream* commentsOnFailure);
   static bool isAcceptableDatabaseInput(const std::string& input, std::stringstream* comments);
-  static bool isAcceptableCharDatabaseInput(char theChar);
+  static bool isAcceptableCharDatabaseInput(char character);
   bool computeAndStoreActivationToken(std::stringstream* commentsOnFailure);
   void computeHashedSaltedPassword();
   bool getActivationAbsoluteAddress(std::string& output, std::stringstream& comments);

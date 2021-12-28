@@ -353,10 +353,10 @@ bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
       this->elementType = JSData::token::tokenUndefined;
       Rational parser;
       if (parser.assignStringFailureAllowed(this->stringValue)) {
-        LargeInteger theInt;
-        if (parser.isInteger(&theInt)) {
+        LargeInteger integerValue;
+        if (parser.isInteger(&integerValue)) {
           this->elementType = JSData::token::tokenLargeInteger;
-          this->integerValue.getElement() = theInt;
+          this->integerValue.getElement() = integerValue;
           this->stringValue = "";
           return true;
         }

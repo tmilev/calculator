@@ -13,9 +13,9 @@ bool PrivateKeyRSA::Test::all() {
 
 bool PrivateKeyRSA::Test::loadFromPEMFile() {
   std::string fileName = "test/private_key.pem";
-  PrivateKeyRSA theKey;
+  PrivateKeyRSA key;
   std::stringstream commentsOnFailure;
-  if (!theKey.loadFromPEMFile(fileName, &commentsOnFailure)) {
+  if (!key.loadFromPEMFile(fileName, &commentsOnFailure)) {
     global.fatal << "Failed to load pem file. " << commentsOnFailure.str() << global.fatal;
   }
   return true;
@@ -51,12 +51,12 @@ bool PrivateKeyRSA::Test::loadFromPEM() {
   "exoRjqJPEb58+k18LOMio0bqgUi21ZPEGs+r/zq0Mis2XFTTjJm2COyCnD0c+mna\n"
   "gujWsxdtYAoSSPb1ZsJ423Y=\n"
   "-----END PRIVATE KEY-----";
-  PrivateKeyRSA theKey;
+  PrivateKeyRSA key;
   std::stringstream commentsOnFailure;
-  if (!theKey.loadFromPEM(pemContent, &commentsOnFailure)) {
+  if (!key.loadFromPEM(pemContent, &commentsOnFailure)) {
     global.fatal << "Failed to load pem content. " << global.fatal;
   }
-  if (!theKey.basicChecks(&commentsOnFailure)) {
+  if (!key.basicChecks(&commentsOnFailure)) {
     global.fatal << "Hard coded private key did not pass basic checks. " << global.fatal;
   }
   return true;
@@ -95,8 +95,8 @@ bool X509Certificate::Test::loadFromPEM() {
   "-----END CERTIFICATE-----"
   ;
   std::stringstream commentsOnFailure;
-  X509Certificate theCertificate;
-  if (!theCertificate.loadFromPEM(pemContent, &commentsOnFailure)) {
+  X509Certificate certificate;
+  if (!certificate.loadFromPEM(pemContent, &commentsOnFailure)) {
     global.fatal << "Failed to load built-in test certificate content. " << global.fatal;
   }
   return true;
@@ -105,8 +105,8 @@ bool X509Certificate::Test::loadFromPEM() {
 bool X509Certificate::Test::loadFromPEMFile() {
   std::string fileName = "test/certificate_self_signed.pem";
   std::stringstream commentsOnFailure;
-  X509Certificate theCertificate;
-  if (!theCertificate.loadFromPEMFile(fileName, &commentsOnFailure)) {
+  X509Certificate certificate;
+  if (!certificate.loadFromPEMFile(fileName, &commentsOnFailure)) {
     global.fatal << "Failed to load built-in test certificate file. "
     << commentsOnFailure.str() << global.fatal;
   }

@@ -376,7 +376,7 @@ public:
     CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar = nullptr
   );
   void splitFDpartOverFKLeviRedSubalg(
-    HomomorphismSemisimpleLieAlgebra& theHmm,
+    HomomorphismSemisimpleLieAlgebra& homomorphism,
     Selection& LeviInSmall,
     List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors = nullptr,
     Vectors<Coefficient>* outputWeightsFundCoords = nullptr,

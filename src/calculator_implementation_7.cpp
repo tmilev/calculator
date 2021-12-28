@@ -446,15 +446,15 @@ bool CalculatorFunctionsEncoding::convertIntegerUnsignedToBase58(
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theInt;
-  if (!input[1].isInteger(&theInt)) {
+  LargeInteger integerValue;
+  if (!input[1].isInteger(&integerValue)) {
     return false;
   }
-  if (theInt < 0) {
+  if (integerValue < 0) {
     return calculator << "Conversion from negative integer to base58 not allowed. ";
   }
   std::string result;
-  Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(theInt.value, result, 0);
+  Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(integerValue.value, result, 0);
   return output.assignValue(calculator, result);
 }
 
@@ -606,15 +606,15 @@ bool CalculatorFunctionsEncoding::base64ToCharToBase64Test(
   if (!input[1].isOfType(&inputString)) {
     return false;
   }
-  List<unsigned char> theBitStream;
-  if (!Crypto::convertBase64ToBitStream(inputString, theBitStream, &calculator.comments)) {
+  List<unsigned char> bitStream;
+  if (!Crypto::convertBase64ToBitStream(inputString, bitStream, &calculator.comments)) {
     return false;
   }
   std::stringstream out;
-  std::string theConvertedBack = Crypto::convertListUnsignedCharsToBase64(theBitStream, false);
+  std::string convertedBack = Crypto::convertListUnsignedCharsToBase64(bitStream, false);
   out << "Original string: " << inputString
-  << "<br>Converted to bitstream and back: " << theConvertedBack;
-  if (theConvertedBack != inputString) {
+  << "<br>Converted to bitstream and back: " << convertedBack;
+  if (convertedBack != inputString) {
     out << "<br><b>The input is not the same as the output!</b>";
   }
   return output.assignValue(calculator, out.str());
@@ -2302,7 +2302,7 @@ bool CalculatorFunctionsDifferentiation::differentiateConstPower(Calculator& cal
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1];
+  const Expression& differentialOperatorVariable = input[1];
   const Expression& argument = input[2];
   //////////////////////
   if (!argument.startsWith(calculator.opPower(), 3)) {
@@ -2315,7 +2315,7 @@ bool CalculatorFunctionsDifferentiation::differentiateConstPower(Calculator& cal
   minusOne.assignValue<Rational>(calculator, - 1);
   exponent.makeXOX(calculator, calculator.opPlus(), argument[2], minusOne);
   monomial.makeXOX(calculator, calculator.opPower(), argument[1], exponent);
-  basePrime.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[1]);
+  basePrime.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[1]);
   term.makeXOX(calculator, calculator.opTimes(), argument[2], monomial);
   return output.makeXOX(calculator, calculator.opTimes(), term, basePrime);
 }
@@ -2330,7 +2330,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAPowerB(Calculator& calcul
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1];
+  const Expression& differentialOperatorVariable = input[1];
   const Expression& argument = input[2];
   //////////////////////
   // d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\log a)
@@ -2342,7 +2342,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAPowerB(Calculator& calcul
   logarithmBase.addChildAtomOnTop(calculator.opLog());
   logarithmBase.addChildOnTop(argument[1]);
   exponentTimesLogBase.makeXOX(calculator, calculator.opTimes(), argument[2], logarithmBase);
-  derivativeExponentTimesLogBase.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, exponentTimesLogBase);
+  derivativeExponentTimesLogBase.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, exponentTimesLogBase);
   return output.makeXOX(calculator, calculator.opTimes(), argument, derivativeExponentTimesLogBase);
 }
 
@@ -2374,10 +2374,10 @@ bool CalculatorFunctionsDifferentiation::differentiateX(Calculator& calculator, 
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1];
+  const Expression& differentialOperatorVariable = input[1];
   const Expression& argument = input[2];
   //////////////////////
-  if (argument != theDOvar)
+  if (argument != differentialOperatorVariable)
     return false;
   return output.assignValue<Rational>(calculator, 1);
 }
@@ -2559,16 +2559,17 @@ bool CalculatorFunctions::minimum(Calculator& calculator, const Expression& inpu
   if (input.size() < 3) {
     return false;
   }
-  double theMin = 0, current = 0;
+  double minimalValue = 0;
+  double current = 0;
   int bestIndex = 1;
   for (int i = 1; i < input.size(); i ++) {
     if (!input[i].evaluatesToDouble(& current)) {
       return false;
     }
     if (i == 1) {
-      theMin = current;
-    } else if (theMin > current) {
-      theMin = current;
+      minimalValue = current;
+    } else if (minimalValue > current) {
+      minimalValue = current;
       bestIndex = i;
     }
   }
@@ -2690,7 +2691,7 @@ bool CalculatorFunctionsDifferentiation::differentiateChainRule(
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1], argument = input[2];
+  const Expression& differentialOperatorVariable = input[1], argument = input[2];
   //////////////////////
   if (!argument.startsWith(- 1, 2)) {
     return false;
@@ -2701,11 +2702,11 @@ bool CalculatorFunctionsDifferentiation::differentiateChainRule(
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
   Expression multiplicandleft, multiplicandleftFunction, multiplicandright;
-  multiplicandleftFunction.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[0]);
+  multiplicandleftFunction.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[0]);
   multiplicandleft.reset(calculator);
   multiplicandleft.addChildOnTop(multiplicandleftFunction);
   multiplicandleft.addChildOnTop(argument[1]);
-  multiplicandright.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[1]);
+  multiplicandright.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[1]);
   return output.makeXOX(calculator, calculator.opTimes(), multiplicandleft, multiplicandright);
 }
 
@@ -2721,7 +2722,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAplusB(
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression "
     << input[1].toString() << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1], argument = input[2];
+  const Expression& differentialOperatorVariable = input[1], argument = input[2];
   //////////////////////
   if (!argument.startsWith(calculator.opPlus(), 3)) {
     return false;
@@ -2729,8 +2730,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAplusB(
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
   Expression leftSummand, rightSummand;
-  leftSummand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[1]);
-  rightSummand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[2]);
+  leftSummand.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[1]);
+  rightSummand.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[2]);
   return output.makeXOX(calculator, calculator.opPlus(), leftSummand, rightSummand);
 }
 
@@ -2746,7 +2747,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1], argument = input[2];
+  const Expression& differentialOperatorVariable = input[1], argument = input[2];
   //////////////////////
   if (!argument.startsWith(calculator.opTimes(), 3)) {
     return false;
@@ -2754,9 +2755,9 @@ bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
   Expression changedMultiplicand, leftSummand, rightSummand;
-  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[1]);
+  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[1]);
   leftSummand.makeXOX(calculator, calculator.opTimes(), changedMultiplicand, argument[2]);
-  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[2]);
+  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[2]);
   rightSummand.makeXOX(calculator, calculator.opTimes(), argument[1], changedMultiplicand );
   return output.makeXOX(calculator, calculator.opPlus(), leftSummand, rightSummand);
 }
@@ -2793,7 +2794,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1], argument = input[2];
+  const Expression& differentialOperatorVariable = input[1], argument = input[2];
   //////////////////////
   //Quotient rule (commutative): (a/b^n)'= (a'b-n a b')/b^{n + 1}
   if (!argument.startsWith(calculator.opDivide(), 3)) {
@@ -2804,7 +2805,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
   if (numeratorE.startsWith(calculator.opPlus())) {
     Expression leftE(calculator), rightE(calculator);
     leftE.addChildAtomOnTop(calculator.opDifferentiate());
-    leftE.addChildOnTop(theDOvar);
+    leftE.addChildOnTop(differentialOperatorVariable);
     rightE = leftE;
     leftE.addChildOnTop(numeratorE[1] / denominatorE);
     rightE.addChildOnTop(numeratorE[2] / denominatorE);
@@ -2813,31 +2814,31 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
-  Expression theDenominatorBase, eOne, theDenominatorExponentPlusOne, theDenominatorExponent, changedMultiplicand,
-  leftSummand, rightSummand, theDenominatorFinal, numerator;
+  Expression denominatorBase, eOne, denominatorExponentPlusOne, denominatorExponent, changedMultiplicand,
+  leftSummand, rightSummand, denominatorFinal, numerator;
   eOne.assignValue(calculator, 1);
   bool denBaseFound = false;
   if (argument[2].startsWith(calculator.opPower(), 3)) {
     if (argument[2][2].isConstantNumber()) {
       denBaseFound = true;
-      theDenominatorBase = argument[2][1];
-      theDenominatorExponent = argument[2][2];
-      theDenominatorExponentPlusOne.makeXOX(calculator, calculator.opPlus(), theDenominatorExponent, eOne);
+      denominatorBase = argument[2][1];
+      denominatorExponent = argument[2][2];
+      denominatorExponentPlusOne.makeXOX(calculator, calculator.opPlus(), denominatorExponent, eOne);
     }
   }
   if (!denBaseFound) {
-    theDenominatorBase = argument[2];
-    theDenominatorExponentPlusOne.assignValue(calculator, 2);
-    theDenominatorExponent.assignValue(calculator, 1);
+    denominatorBase = argument[2];
+    denominatorExponentPlusOne.assignValue(calculator, 2);
+    denominatorExponent.assignValue(calculator, 1);
   }
-  theDenominatorFinal.makeXOX(calculator, calculator.opPower(), theDenominatorBase, theDenominatorExponentPlusOne);
-  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[1]);
-  leftSummand.makeXOX(calculator, calculator.opTimes(), changedMultiplicand, theDenominatorBase);
-  rightSummand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, theDenominatorBase);
+  denominatorFinal.makeXOX(calculator, calculator.opPower(), denominatorBase, denominatorExponentPlusOne);
+  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[1]);
+  leftSummand.makeXOX(calculator, calculator.opTimes(), changedMultiplicand, denominatorBase);
+  rightSummand.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, denominatorBase);
   changedMultiplicand.makeXOX(calculator, calculator.opTimes(), argument[1], rightSummand);
-  rightSummand.makeXOX(calculator, calculator.opTimes(), theDenominatorExponent, changedMultiplicand);
+  rightSummand.makeXOX(calculator, calculator.opTimes(), denominatorExponent, changedMultiplicand);
   numerator.makeXOX(calculator, calculator.opMinus(), leftSummand, rightSummand);
-  return output.makeXOX(calculator, calculator.opDivide(), numerator, theDenominatorFinal);
+  return output.makeXOX(calculator, calculator.opDivide(), numerator, denominatorFinal);
 }
 
 bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
@@ -2852,7 +2853,7 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
     calculator << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& theDOvar = input[1], argument = input[2];
+  const Expression& differentialOperatorVariable = input[1], argument = input[2];
   //////////////////////
   //Quotient rule (non-commutative): (a/b)'= (ab^{- 1})'=a' b - a b^{- 1} b' b^{- 1}
   if (!argument.startsWith(calculator.opDivide(), 3)) {
@@ -2863,9 +2864,9 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
   Expression changedMultiplicand, leftSummand, rightSummand;
   Expression bInverse, bPrime, eMOne;
   eMOne.assignValue<Rational>(calculator, - 1);
-  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[1]);
+  changedMultiplicand.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[1]);
   leftSummand.makeXOX(calculator, calculator.opDivide(), changedMultiplicand, argument[2]);
-  bPrime.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, argument[2]);
+  bPrime.makeXOX(calculator, calculator.opDifferentiate(), differentialOperatorVariable, argument[2]);
   bInverse.makeXOX(calculator, calculator.opPower(), argument[2], eMOne);
   rightSummand.makeXOX(calculator, calculator.opTimes(), bPrime, bInverse); //rightSummand = b' b^{- 1}
   changedMultiplicand.makeXOX(calculator, calculator.opTimes(), bInverse, rightSummand); //changedMultiplicand = b^- 1 b' b^- 1
@@ -3036,18 +3037,18 @@ bool CalculatorFunctions::compareFunctionsNumerically(
   }
   Expression functionExpression = input[1];
   functionExpression -= input[2];
-  HashedList<Expression> theVars;
-  if (!functionExpression.getFreeVariables(theVars, true)) {
+  HashedList<Expression> variables;
+  if (!functionExpression.getFreeVariables(variables, true)) {
     return calculator << "Was not able to extract the function argument of your function. " ;
   }
-  if (theVars.size <= 0) {
+  if (variables.size <= 0) {
     Expression zeroE;
     zeroE.assignValue(calculator, 0);
     return output.makeXOX(calculator, calculator.opEqualEqual(), functionExpression, zeroE);
   }
-  if (theVars.size > 1) {
+  if (variables.size > 1) {
     return calculator << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
-    << theVars.toStringCommaDelimited();
+    << variables.toStringCommaDelimited();
   }
   double leftBoundary = 0;
   double rightBoundary = 0;
@@ -3065,7 +3066,7 @@ bool CalculatorFunctions::compareFunctionsNumerically(
   }
   double minDiff = 0, maxDiff = 0;
   if (!functionExpression.evaluatesToDoubleInRange(
-    theVars[0].toString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, nullptr
+    variables[0].toString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, nullptr
   )) {
     return calculator << "Failed to evaluate your function to a number. "
     << "The sampling interval may be outside of the domain of the function. ";
@@ -3340,11 +3341,11 @@ bool CalculatorFunctions::isEven(Calculator& calculator, const Expression& input
   if (argument.hasBoundVariables()) {
     return false;
   }
-  LargeInteger theInt;
-  if (!argument.isInteger(&theInt)) {
+  LargeInteger integerValue;
+  if (!argument.isInteger(&integerValue)) {
     return output.assignValue(calculator, 0);
   }
-  if (theInt.isEven()) {
+  if (integerValue.isEven()) {
     return output.assignValue(calculator, 1);
   }
   return output.assignValue(calculator, 0);
@@ -4125,14 +4126,14 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaand
   Expression sqrtF;
   sqrtF.makeSqrt(calculator, F, 2);
   Expression arcTanArgument = xplusbdiv2a / sqrtF;
-  Expression theArcTan(calculator);
-  theArcTan.addChildAtomOnTop(calculator.opArcTan());
-  theArcTan.addChildOnTop(arcTanArgument);
+  Expression arctangentExpressino(calculator);
+  arctangentExpressino.addChildAtomOnTop(calculator.opArcTan());
+  arctangentExpressino.addChildOnTop(arcTanArgument);
   Expression theLog(calculator);
   theLog.addChildAtomOnTop(calculator.opLog());
   theLog.addChildOnTop(quadraticDividedByA);
   Expression C = B - (A * b) / (twoE * a);
-  output = (oneE / a) * ((A / twoE) * theLog + (C / sqrtF) * theArcTan);
+  output = (oneE / a) * ((A / twoE) * theLog + (C / sqrtF) * arctangentExpressino);
   output.checkConsistencyRecursively();
   output.checkInitializationRecursively();
   return true;
@@ -4329,12 +4330,12 @@ bool Expression::makeIntegral(Calculator& calculator,
     Expression integrationSetCopy = integrationSet;
     return this->makeIntegral(calculator, integrationSetCopy, functionCopy, variableCopy);
   }
-  Expression theDiffForm;
-  theDiffForm.makeXOX(calculator, calculator.opDifferential(), variable, function);
+  Expression differentialForm;
+  differentialForm.makeXOX(calculator, calculator.opDifferential(), variable, function);
   this->reset(calculator);
   this->addChildAtomOnTop(calculator.opIntegral());
   this->addChildOnTop(integrationSet);
-  return this->addChildOnTop(theDiffForm);
+  return this->addChildOnTop(differentialForm);
 }
 
 bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
@@ -4680,15 +4681,15 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
       currentSubE.makeXOX(calculator, calculator.opDefine(), newVarE, tangentExpression);
     } else {
       return false;
-      /*currentE= (oneE-theCosDoubleE)/twoE;
+      /*currentE= (oneE-cosDoubleE)/twoE;
       powerE.assignValue(powerSine/2, calculator);
       currentIntegrandSinePart.makeXOX
       (calculator, calculator.opThePower(),currentE, powerE);
-      currentE= (oneE+theCosDoubleE)/twoE;
+      currentE= (oneE+cosDoubleE)/twoE;
       powerE.assignValue(powerCosine/2, calculator);
       currentIntegrandCosinePart.makeXOX
       (calculator, calculator.opThePower(),currentE, powerE);
-      currentCF.assignValue(theTrigPoly.theCoeffs[i], calculator);
+      currentCF.assignValue(theTrigPoly.coeffs[i], calculator);
       currentIntegrandNonPolynomializedE=
       currentCF*currentIntegrandSinePart*currentIntegrandCosinePart;
       currentIntegrandE.reset(calculator);
@@ -5107,18 +5108,19 @@ bool Expression::splitProduct(
     return false;
   }
   this->checkInitialization();
-  List<Expression> theMultiplicandsLeft, theMultiplicandsRight;
-  this->owner->appendOpandsReturnTrueIfOrderNonCanonical(*this, theMultiplicandsLeft, this->owner->opTimes());
-  if (theMultiplicandsLeft.size <= numDesiredMultiplicandsLeft) {
+  List<Expression> multiplicandsLeft;
+  List<Expression> multiplicandsRight;
+  this->owner->appendOpandsReturnTrueIfOrderNonCanonical(*this, multiplicandsLeft, this->owner->opTimes());
+  if (multiplicandsLeft.size <= numDesiredMultiplicandsLeft) {
     return false;
   }
-  theMultiplicandsRight.setExpectedSize(theMultiplicandsLeft.size-numDesiredMultiplicandsLeft);
-  for (int i = numDesiredMultiplicandsLeft; i < theMultiplicandsLeft.size; i ++) {
-    theMultiplicandsRight.addOnTop(theMultiplicandsLeft[i]);
+  multiplicandsRight.setExpectedSize(multiplicandsLeft.size-numDesiredMultiplicandsLeft);
+  for (int i = numDesiredMultiplicandsLeft; i < multiplicandsLeft.size; i ++) {
+    multiplicandsRight.addOnTop(multiplicandsLeft[i]);
   }
-  theMultiplicandsLeft.setSize(numDesiredMultiplicandsLeft);
-  outputLeftMultiplicand.makeOXdotsX(*this->owner, this->owner->opTimes(), theMultiplicandsLeft);
-  return outputRightMultiplicand.makeOXdotsX(*this->owner, this->owner->opTimes(), theMultiplicandsRight);
+  multiplicandsLeft.setSize(numDesiredMultiplicandsLeft);
+  outputLeftMultiplicand.makeOXdotsX(*this->owner, this->owner->opTimes(), multiplicandsLeft);
+  return outputRightMultiplicand.makeOXdotsX(*this->owner, this->owner->opTimes(), multiplicandsRight);
 }
 
 bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
@@ -5308,9 +5310,9 @@ bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
   FormatExpressions tempF;
   tempF.polynomialAlphabet.setSize(1);
   tempF.polynomialAlphabet[0] = "q";
-  Polynomial<Rational> theMinPoly;
-  theMinPoly.assignMinimalPolynomial(matrix);
-  return output.assignValue(calculator, theMinPoly.toString(&tempF));
+  Polynomial<Rational> minimalPolynomial;
+  minimalPolynomial.assignMinimalPolynomial(matrix);
+  return output.assignValue(calculator, minimalPolynomial.toString(&tempF));
 }
 
 bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
@@ -5335,9 +5337,9 @@ bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
   FormatExpressions format;
   format.polynomialAlphabet.setSize(1);
   format.polynomialAlphabet[0] = "q";
-  Polynomial<Rational> theCharPoly;
-  theCharPoly.assignCharacteristicPolynomial(matrix);
-  return output.assignValue(calculator, theCharPoly.toString(&format));
+  Polynomial<Rational> characterPolynomial;
+  characterPolynomial.assignCharacteristicPolynomial(matrix);
+  return output.assignValue(calculator, characterPolynomial.toString(&format));
 }
 
 bool CalculatorFunctions::reverseBytes(Calculator& calculator, const Expression& input, Expression& output) {
@@ -5518,11 +5520,11 @@ bool CalculatorFunctions::isPossiblyPrime(Calculator& calculator, const Expressi
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theInt;
-  if (!input[1].isInteger(&theInt)) {
+  LargeInteger integerValue;
+  if (!input[1].isInteger(&integerValue)) {
     return false;
   }
-  bool resultBool = theInt.value.isPossiblyPrime(10, true, &calculator.comments);
+  bool resultBool = integerValue.value.isPossiblyPrime(10, true, &calculator.comments);
   Rational result = 1;
   if (!resultBool) {
     result = 0;
@@ -5535,11 +5537,11 @@ bool CalculatorFunctions::isPrimeMillerRabin(Calculator& calculator, const Expre
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theInt;
-  if (!input[1].isInteger(&theInt)) {
+  LargeInteger integerValue;
+  if (!input[1].isInteger(&integerValue)) {
     return false;
   }
-  bool resultBool = theInt.value.isPossiblyPrimeMillerRabin(10, &calculator.comments);
+  bool resultBool = integerValue.value.isPossiblyPrimeMillerRabin(10, &calculator.comments);
   Rational result = 1;
   if (!resultBool) {
     result = 0;
@@ -6619,22 +6621,22 @@ bool CalculatorFunctions::evaluateToDouble(Calculator& calculator, const Express
     // one argument expected.
     return false;
   }
-  double theValue = 0;
-  if (!input[1].evaluatesToDouble(&theValue)) {
+  double value = 0;
+  if (!input[1].evaluatesToDouble(&value)) {
     return false;
   }
-  return output.assignValue(calculator, theValue);
+  return output.assignValue(calculator, value);
 }
 
 bool CalculatorFunctions::functionEvaluateToDouble(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Expression::functionEvaluateToDouble");
-  double theValue = 0;
-  if (!input.evaluatesToDouble(&theValue)) {
+  double value = 0;
+  if (!input.evaluatesToDouble(&value)) {
     return false;
   }
-  return output.assignValue(calculator, theValue);
+  return output.assignValue(calculator, value);
 }
 
 bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
@@ -6852,7 +6854,7 @@ bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm");
-  RecursionDepthCounter theRecursionCounter(&calculator.recursionDepth);
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.assignError(
       calculator,

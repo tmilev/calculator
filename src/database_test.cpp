@@ -13,13 +13,13 @@ Database::Test::~Test() {
 
 void Database::Test::setUp() {
   global.flagServerforkedIntoWorker = true;
-  DatabaseStrings::theDatabaseName = "calculatortest";
+  DatabaseStrings::databaseName = "calculatortest";
   Database::FallBack::databaseFilename = "test/test_database.json";
 }
 
 void Database::Test::tearDown() {
   global.flagServerforkedIntoWorker = false;
-  DatabaseStrings::theDatabaseName = "calculator";
+  DatabaseStrings::databaseName = "calculator";
 }
 
 bool Database::Test::all() {

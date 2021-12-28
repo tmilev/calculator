@@ -349,11 +349,11 @@ bool CalculatorFunctions::notFunction(Calculator& calculator, const Expression& 
     return false;
   }
   const Expression& argument = input[1];
-  int theInt;
-  if (!argument.isSmallInteger(&theInt)) {
+  int integerValue = 0;
+  if (!argument.isSmallInteger(&integerValue)) {
     return false;
   }
-  if (theInt == 0) {
+  if (integerValue == 0) {
     return output.assignValue(calculator, 1);
   }
   return output.assignValue(calculator, 0);
@@ -440,7 +440,7 @@ bool CalculatorFunctions::perturbSplittingNormal(Calculator& calculator, const E
 
 bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::printAllVectorPartitions");
-  RecursionDepthCounter theRecursion(&calculator.recursionDepth);
+  RecursionDepthCounter recursion(&calculator.recursionDepth);
   if (input.size() != 3) {
     return output.assignError(calculator, "Function printAllPartitions expects 2 arguments.");
   }
@@ -456,14 +456,14 @@ bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const
 
   SemisimpleLieAlgebra& semisimpleLieAlgebra = *semisimpleLieAlgebraPointer;
   ExpressionContext context(calculator);
-  Vector<Rational> theHW;
-  if (!calculator.getVector<Rational>(input[2], theHW, &context, semisimpleLieAlgebra.getRank())) {
+  Vector<Rational> highestWeight;
+  if (!calculator.getVector<Rational>(input[2], highestWeight, &context, semisimpleLieAlgebra.getRank())) {
     return output.assignError(calculator, "Failed to extract weight you want partitioned from " + input[2].toString());
   }
-  Vector<int> theHWint;
-  theHWint.setSize(theHW.size);
-  for (int i = 0; i < theHW.size; i ++) {
-    if (!theHW[i].isSmallInteger(&theHWint[i]) || theHW[i] < 0) {
+  Vector<int> highestWeightInteger;
+  highestWeightInteger.setSize(highestWeight.size);
+  for (int i = 0; i < highestWeight.size; i ++) {
+    if (!highestWeight[i].isSmallInteger(&highestWeightInteger[i]) || highestWeight[i] < 0) {
       return output.assignError(
         calculator,
         "The input weight you gave is bad: "
@@ -472,7 +472,7 @@ bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const
     }
   }
   std::stringstream out;
-  out << "<br>the weight you want partitioned: " << theHWint;
+  out << "<br>the weight you want partitioned: " << highestWeightInteger;
   Vector<int> thePartition;
   thePartition.setSize(semisimpleLieAlgebra.getNumberOfPositiveRoots());
   for (int i = 0; i < thePartition.size; i ++) {
@@ -486,12 +486,12 @@ bool CalculatorFunctions::printAllVectorPartitions(Calculator& calculator, const
   int i = rootsBorel.size;
   while (i > 0 && counter < 10000) {
     totalCycles ++;
-    if (weight == theHW) {
+    if (weight == highestWeight) {
       tmpWt = thePartition;
       out << "<br>" << tmpWt.toStringLetterFormat("\\alpha");
       counter ++;
     }
-    if (!(theHW - weight).isPositive() || i > rootsBorel.size) {
+    if (!(highestWeight - weight).isPositive() || i > rootsBorel.size) {
       if (i <= rootsBorel.size) {
         weight -= rootsBorel[i - 1] * thePartition[i - 1];
         thePartition[i - 1] = 0;

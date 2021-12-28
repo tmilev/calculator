@@ -440,9 +440,9 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   if (!useOuter) {
     semisimpleLieAlgebra->weylGroup.raiseToMaximallyDominant(highestWeights);
   } else {
-    WeylGroupAutomorphisms theOuterAutos;
-    theOuterAutos.weylGroup = &semisimpleLieAlgebra->weylGroup;
-    theOuterAutos.raiseToMaximallyDominant(highestWeights);
+    WeylGroupAutomorphisms outerAutomorphisms;
+    outerAutomorphisms.weylGroup = &semisimpleLieAlgebra->weylGroup;
+    outerAutomorphisms.raiseToMaximallyDominant(highestWeights);
   }
   out << "<br>Maximally dominant output: " << highestWeights.toString();
   return output.assignValue(calculator, out.str());
@@ -1002,7 +1002,7 @@ bool CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps");
-  Expression theTensor;
+  Expression tensorExpression;
   if (input.size() != 3) {
     return false;
   }
@@ -1832,13 +1832,13 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers(
   if (type == 'A') {
     if ((false)) {
       int permutationSize = rank + 1;
-      List<Partition> thePartitions, partitionsTransposed;
-      Partition::GetPartitions(thePartitions, permutationSize);
-      partitionsTransposed.setSize(thePartitions.size);
-      for (int i = 0; i < thePartitions.size; i ++) {
-        partitionsTransposed[i] = thePartitions[i];
+      List<Partition> partitions, partitionsTransposed;
+      Partition::GetPartitions(partitions, permutationSize);
+      partitionsTransposed.setSize(partitions.size);
+      for (int i = 0; i < partitions.size; i ++) {
+        partitionsTransposed[i] = partitions[i];
         partitionsTransposed[i].transpose();
-        out << "<br>Partition: " << thePartitions[i].toString()
+        out << "<br>Partition: " << partitions[i].toString()
         << ", transposed: " << partitionsTransposed[i].toString();
       }
     }

@@ -307,19 +307,19 @@ std::string Crypto::computeSha3_256OutputBase64URL(const std::string& input) {
 }
 
 void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& output) {
-  Sha3 theHasher;
-  theHasher.flagUseKeccak = true;
-  theHasher.initialize();
-  theHasher.update(input);
-  theHasher.finalize();
-  theHasher.getResultVector(output);
+  Sha3 hasher;
+  hasher.flagUseKeccak = true;
+  hasher.initialize();
+  hasher.update(input);
+  hasher.finalize();
+  hasher.getResultVector(output);
 }
 
 void Crypto::computeSha3_256(const std::string& input, List<unsigned char>& output) {
-  Sha3 theHasher;
-  theHasher.flagUseKeccak = false;
-  theHasher.initialize();
-  theHasher.update(input);
-  theHasher.finalize();
-  theHasher.getResultVector(output);
+  Sha3 hasher;
+  hasher.flagUseKeccak = false;
+  hasher.initialize();
+  hasher.update(input);
+  hasher.finalize();
+  hasher.getResultVector(output);
 }

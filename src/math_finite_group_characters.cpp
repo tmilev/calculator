@@ -997,12 +997,12 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   semisimpleLieAlgebra.weylGroup.makeFromDynkinType(this->dynkinType);
   rootSubalgebras.owner = &semisimpleLieAlgebra;
   rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
-  List<Vectors<Rational> > theRootSAsBases;
-  theRootSAsBases.setExpectedSize(rootSubalgebras.subalgebras.size);
+  List<Vectors<Rational> > rootSubalgebrasBases;
+  rootSubalgebrasBases.setExpectedSize(rootSubalgebras.subalgebras.size);
   for (int i = rootSubalgebras.subalgebras.size - 1; i >= 0; i --) {
-    theRootSAsBases.addOnTop(rootSubalgebras.subalgebras[i].simpleRootsReductiveSubalgebra);
+    rootSubalgebrasBases.addOnTop(rootSubalgebras.subalgebras[i].simpleRootsReductiveSubalgebra);
   }
-  this->getSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
+  this->getSignSignatureRootSubgroups(outputSubgroups, rootSubalgebrasBases);
 }
 
 void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups) {

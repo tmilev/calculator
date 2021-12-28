@@ -1046,14 +1046,14 @@ std::string CalculatorHTML::prepareUserInputBoxes() {
     return "";
   }
   std::stringstream out;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments = global.webArguments;
   std::string inputNonAnswerReader;
-  for (int i = 0; i < theArgs.size(); i ++) {
-    if (StringRoutines::stringBeginsWith(theArgs.keys[i], "userInputBox", &inputNonAnswerReader)) {
-      if (inputNonAnswerReader != "" && theArgs.values[i] != "") {
+  for (int i = 0; i < arguments.size(); i ++) {
+    if (StringRoutines::stringBeginsWith(arguments.keys[i], "userInputBox", &inputNonAnswerReader)) {
+      if (inputNonAnswerReader != "" && arguments.values[i] != "") {
         out << Calculator::Atoms::setInputBox << "(name = "
         << inputNonAnswerReader
-        << ", value = " << HtmlRoutines::convertURLStringToNormal(theArgs.values[i], false)
+        << ", value = " << HtmlRoutines::convertURLStringToNormal(arguments.values[i], false)
         << "); ";
       }
     }
@@ -2006,13 +2006,13 @@ std::string CalculatorHTML::Parser::toStringParsingStack(
   out << "#Non-dummy elts: " << stack.size - SyntacticElementHTML::parsingDummyElements << ". ";
   for (int i = SyntacticElementHTML::parsingDummyElements; i < stack.size; i ++) {
     out << "<span style ='color:" << ((i % 2 == 0) ? "orange" : "blue") << "'>";
-    std::string theContent = stack[i].toStringDebug();
-    if (theContent.size() == 0) {
-      theContent = "<b>empty</b>";
-    } else if (theContent == " ") {
-      theContent = "_";
+    std::string content = stack[i].toStringDebug();
+    if (content.size() == 0) {
+      content = "<b>empty</b>";
+    } else if (content == " ") {
+      content = "_";
     }
-    out << theContent << "</span>";
+    out << content << "</span>";
   }
   return out.str();
 }
@@ -2881,7 +2881,7 @@ bool CalculatorHTML::extractAnswerIdsOnce(
 
 bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIds");
-  // we shouldn't clear this->problemData.theAnswers: it may contain
+  // we shouldn't clear this->problemData.answers: it may contain
   // outdated information loaded from the database. We don't want to loose that info
   // (say we renamed an answerId but students have already stored answers using the old answerId...).
   for (int i = 0; i < this->content.size; i ++) {
@@ -4409,10 +4409,10 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
     problemSolved = false;
     returnEmptyStringIfNoDeadline = true;
   } else {
-    //std::string theRawSQLink = global.displayNameExecutable +
+    //std::string rawSQLink = global.displayNameExecutable +
     //"?request=scoredQuiz&fileName=" + this->problem;
-    std::string theRawExerciseLink;
-    theRawExerciseLink = global.displayNameExecutable + "?request=exercise&fileName=" + this->problemFileName;
+    std::string rawExerciseLink;
+    rawExerciseLink = global.displayNameExecutable + "?request=exercise&fileName=" + this->problemFileName;
     this->displayProblemLink = owner.toStringLinkFromFileName(this->problemFileName);
     this->displayScore = owner.toStringProblemScoreShort(this->problemFileName, problemSolved);
   }
@@ -4469,8 +4469,8 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   }
   output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
   if (!global.userDefaultHasProblemComposingRights()) {
-    std::string theDeadline = owner.getDeadlineNoInheritance(this->id);
-    output[WebAPI::problem::deadlineSingle] = theDeadline;
+    std::string deadline = owner.getDeadlineNoInheritance(this->id);
+    output[WebAPI::problem::deadlineSingle] = deadline;
   }
   output["handwrittenSolution"] = this->handwrittenSolution;
 

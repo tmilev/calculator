@@ -43,9 +43,9 @@ Expression operator-(const Expression& left, const Expression& right) {
   return result;
 }
 
-//If you get a specialization after instantiation error:
-//the following template specialization funcitons must appear
-//here and nowhere else (discovered through extremely painful experimentation).
+// If you get a specialization after instantiation error:
+// the following template specialization funcitons must appear
+// here and nowhere else (discovered through extremely painful experimentation).
 
 template < >
 List<Expression>::Comparator*
@@ -1744,7 +1744,7 @@ bool Expression::isAlgebraicRadical() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter thecounter(&this->owner->recursionDepth);
+  RecursionDepthCounter counter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::isAlgebraicRadical: ")) {
     return false;
   }
@@ -4827,18 +4827,18 @@ bool Expression::makeSum(Calculator& owner, const List<Expression>& summands) {
   return this->makeXOXOdotsOX(owner, owner.opPlus(), summands);
 }
 
-bool Expression::makeOXdotsX(Calculator& owner, int operation, const List<Expression>& theOpands) {
+bool Expression::makeOXdotsX(Calculator& owner, int operation, const List<Expression>& opands) {
   MacroRegisterFunctionWithName("Expression::makeOXdotsX");
-  if (theOpands.size == 0) {
+  if (opands.size == 0) {
     global.fatal << "zero opands not allowed at this point. " << global.fatal;
   }
-  if (theOpands.size == 1) {
-    *this = theOpands[0];
+  if (opands.size == 1) {
+    *this = opands[0];
     return true;
   }
-  *this = *theOpands.lastObject();
-  for (int i = theOpands.size - 2; i >= 0; i --) {
-    this->makeXOX(owner, operation, theOpands[i], *this);
+  *this = *opands.lastObject();
+  for (int i = opands.size - 2; i >= 0; i --) {
+    this->makeXOX(owner, operation, opands[i], *this);
   }
   this->checkConsistencyRecursively();
   return true;
@@ -4895,12 +4895,12 @@ bool Expression::makeSqrt(Calculator& owner, const Expression& argument, const R
   return this->addChildOnTop(argument);
 }
 
-bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right) {
+bool Expression::makeXOX(Calculator& owner, int operation, const Expression& left, const Expression& right) {
   MacroRegisterFunctionWithName("Expression::makeXOX");
   if (&left == this || &right == this) {
     Expression leftCopy = left;
     Expression rightCopy = right;
-    return this->makeXOX(owner, theOp, leftCopy, rightCopy);
+    return this->makeXOX(owner, operation, leftCopy, rightCopy);
   }
   if (right.owner == nullptr && left.owner == nullptr) {
     global.fatal << "Cannot build an expression from two non-initialized expressions. " << global.fatal;
@@ -4908,18 +4908,18 @@ bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, c
   if (right.owner == nullptr) {
     Expression rightCopy;
     rightCopy.assignValue(*left.owner, right.data);
-    return this->makeXOX(owner, theOp, left, rightCopy);
+    return this->makeXOX(owner, operation, left, rightCopy);
   }
  if (left.owner == nullptr) {
     Expression leftCopy;
     leftCopy.assignValue(*right.owner, left.data);
-    return this->makeXOX(owner, theOp, leftCopy, right);
+    return this->makeXOX(owner, operation, leftCopy, right);
   }
   left.checkInitialization();
   right.checkInitialization();
   this->reset(owner, 3);
   this->data = owner.opList();
-  this->addChildAtomOnTop(theOp);
+  this->addChildAtomOnTop(operation);
   this->addChildOnTop(left);
   return this->addChildOnTop(right);
 }

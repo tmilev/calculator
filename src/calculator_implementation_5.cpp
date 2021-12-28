@@ -38,9 +38,9 @@ public:
   int cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex);
   void computeImplicitPlot();
   void computeImplicitPlotPart2();
-  void plotGrid(int theColor);
+  void plotGrid(int color);
   bool evaluatesToDouble(double& whichDouble);
-  double getValueAtPoint(const Vector<double>& thePoint);
+  double getValueAtPoint(const Vector<double>& point);
   void evaluateFunAtTriangleVertices(int triangleIndex);
   double getTriangleMaxSideLength(int triangleIndex);
   void subdivide(int triangleIndex);
@@ -67,14 +67,14 @@ MeshTriangles::MeshTriangles() {
   this->flagFunctionEvaluationFailed = false;
 }
 
-void MeshTriangles::plotGrid(int theColor) {
+void MeshTriangles::plotGrid(int color) {
   MacroRegisterFunctionWithName("MeshTriangles::plotGrid");
   this->grid.clearPlotObjects();
   this->grid.setExpectedPlotObjects(this->triangles.size * 3);
   PlotObject currentLinePlot;
   List<Vector<double> >& pointsVector = currentLinePlot.pointsDouble;
   currentLinePlot.pointsDouble.setSize(4);
-  currentLinePlot.colorRGB = theColor;
+  currentLinePlot.colorRGB = color;
   for (int i = 0; i < this->triangles.size; i ++) {
     pointsVector[0] = this->triangles[i][0];
     pointsVector[1] = this->triangles[i][1];
@@ -84,13 +84,13 @@ void MeshTriangles::plotGrid(int theColor) {
   }
 }
 
-double MeshTriangles::getValueAtPoint(const Vector<double>& thePoint) {
-  int index = this->evaluatedPoints.getIndex(thePoint);
+double MeshTriangles::getValueAtPoint(const Vector<double>& point) {
+  int index = this->evaluatedPoints.getIndex(point);
   if (index != - 1) {
     return this->evaluatedPoints.values[index];
   }
-  this->knownValues[this->knownValues.size - 2] = thePoint[0];
-  this->knownValues[this->knownValues.size - 1] = thePoint[1];
+  this->knownValues[this->knownValues.size - 2] = point[0];
+  this->knownValues[this->knownValues.size - 1] = point[1];
   double functionValue = 0;
   if (this->functionExpression.evaluatesToDoubleUnderSubstitutions(this->knownEs, this->knownValues, &functionValue)) {
     this->numGoodEvaluations ++;
@@ -98,7 +98,7 @@ double MeshTriangles::getValueAtPoint(const Vector<double>& thePoint) {
     this->numBadEvaluations ++;
     functionValue = std::nan("");
   }
-  this->evaluatedPoints.setKeyValue(thePoint, functionValue);
+  this->evaluatedPoints.setKeyValue(point, functionValue);
   return functionValue;
 }
 
@@ -317,7 +317,6 @@ void MeshTriangles::computeImplicitPlot() {
     this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(100, 100, 100)));
     this->plot.addPlotsOnTop(this->grid);
   }
-  // this->theCurve.colorRGB=HtmlRoutines::redGreenBlue(255,0,0);
   this->plot.addPlotsOnTop(this->curve);
 }
 
@@ -594,11 +593,11 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
       if (polyPartE[1] != variableExpression) {
         continue;
       }
-      int theInt = - 1;
-      if (!polyPartE[2].isSmallInteger(&theInt)) {
+      int integerValue = - 1;
+      if (!polyPartE[2].isSmallInteger(&integerValue)) {
         continue;
       }
-      if (theInt <= 0) {
+      if (integerValue <= 0) {
         continue;
       }
       powerOfXE = polyPartE[2];
@@ -681,11 +680,11 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   ) {
     return false;
   }
-  Expression theIndefiniteIntegral, indefiniteExpression;
+  Expression indefiniteIntegral, indefiniteExpression;
   indefiniteExpression.makeAtom(calculator, calculator.opIndefiniteIndicator());
-  theIndefiniteIntegral.makeIntegral(calculator, indefiniteExpression, functionExpression, variableExpression);
+  indefiniteIntegral.makeIntegral(calculator, indefiniteExpression, functionExpression, variableExpression);
   Expression solvedIntegral;
-  if (!calculator.evaluateExpression(calculator, theIndefiniteIntegral, solvedIntegral)) {
+  if (!calculator.evaluateExpression(calculator, indefiniteIntegral, solvedIntegral)) {
     return false;
   }
   if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(calculator.opIntegral())) {
@@ -697,14 +696,14 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(calculator.opLog())) {
     return false;
   }
-  HashedList<Expression> theVar;
-  List<double> theValue;
-  theVar.addOnTop(variableExpression);
-  theValue.addOnTop(0);
+  HashedList<Expression> variables;
+  List<double> variableValues;
+  variables.addOnTop(variableExpression);
+  variableValues.addOnTop(0);
   for (int i = 1; i <= 2; i ++) {
-    if (setExpression[i].evaluatesToDouble(&theValue[0])) {
-      double theResult = 0;
-      if (!solvedIntegral.evaluatesToDoubleUnderSubstitutions(theVar, theValue, &theResult)) {
+    if (setExpression[i].evaluatesToDouble(&variableValues[0])) {
+      double result = 0;
+      if (!solvedIntegral.evaluatesToDoubleUnderSubstitutions(variables, variableValues, &result)) {
         return false;
       }
     }
@@ -715,19 +714,19 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   substitutionBottom = substitutionTop;
   substitutionBottom.addChildOnTop(setExpression[1]);
   substitutionTop.addChildOnTop(setExpression[2]);
-  Expression theTopCommands(calculator), theBottomCommands(calculator);
-  theTopCommands.addChildAtomOnTop(calculator.opCommandSequence());
-  theBottomCommands.addChildAtomOnTop(calculator.opCommandSequence());
+  Expression topCommands(calculator), bottomCommands(calculator);
+  topCommands.addChildAtomOnTop(calculator.opCommandSequence());
+  bottomCommands.addChildAtomOnTop(calculator.opCommandSequence());
 
-  theTopCommands.addChildOnTop(substitutionTop);
-  theBottomCommands.addChildOnTop(substitutionBottom);
+  topCommands.addChildOnTop(substitutionTop);
+  bottomCommands.addChildOnTop(substitutionBottom);
 
-  theTopCommands.addChildOnTop(solvedIntegral);
-  theBottomCommands.addChildOnTop(solvedIntegral);
-  Expression theTop, theBottom;
-  theTop.makeXOX(calculator, calculator.opUnderscore(), theTopCommands, calculator.expressionTwo());
-  theBottom.makeXOX(calculator, calculator.opUnderscore(), theBottomCommands, calculator.expressionTwo());
-  output = theTop - theBottom;
+  topCommands.addChildOnTop(solvedIntegral);
+  bottomCommands.addChildOnTop(solvedIntegral);
+  Expression topExpression, bottomExpression;
+  topExpression.makeXOX(calculator, calculator.opUnderscore(), topCommands, calculator.expressionTwo());
+  bottomExpression.makeXOX(calculator, calculator.opUnderscore(), bottomCommands, calculator.expressionTwo());
+  output = topExpression - bottomExpression;
   return true;
 }
 
@@ -741,34 +740,34 @@ bool CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions(
   if (!input.startsWithGivenOperation("ApplyToSubexpressionsRecurseThroughCalculusFunctions")) {
     return false;
   }
-  const Expression& theArg = input[2];
+  const Expression& argumentExpression = input[2];
   if (
-    theArg.startsWith(calculator.opPlus()) ||
-    theArg.startsWith(calculator.opMinus()) ||
-    theArg.startsWith(calculator.opTimes()) ||
-    theArg.startsWith(calculator.opPower()) ||
-    theArg.startsWith(calculator.opDivide()) ||
-    theArg.startsWith(calculator.opSequence()) ||
-    theArg.startsWith(calculator.opSqrt()) ||
-    theArg.startsWith(calculator.opCos()) ||
-    theArg.startsWith(calculator.opSin())
+    argumentExpression.startsWith(calculator.opPlus()) ||
+    argumentExpression.startsWith(calculator.opMinus()) ||
+    argumentExpression.startsWith(calculator.opTimes()) ||
+    argumentExpression.startsWith(calculator.opPower()) ||
+    argumentExpression.startsWith(calculator.opDivide()) ||
+    argumentExpression.startsWith(calculator.opSequence()) ||
+    argumentExpression.startsWith(calculator.opSqrt()) ||
+    argumentExpression.startsWith(calculator.opCos()) ||
+    argumentExpression.startsWith(calculator.opSin())
   ) {
     output.reset(calculator);
     output.addChildOnTop(input[1]);
     Expression recursivelyModifiedExpression(calculator);
-    recursivelyModifiedExpression.addChildOnTop(theArg[0]);
-    for (int i = 1; i < theArg.size(); i ++) {
+    recursivelyModifiedExpression.addChildOnTop(argumentExpression[0]);
+    for (int i = 1; i < argumentExpression.size(); i ++) {
       Expression nextE(calculator);
       nextE.addChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
       nextE.addChildOnTop(input[1]);
-      nextE.addChildOnTop(theArg[i]);
+      nextE.addChildOnTop(argumentExpression[i]);
       recursivelyModifiedExpression.addChildOnTop(nextE);
     }
     return output.addChildOnTop(recursivelyModifiedExpression);
   }
   output.reset(calculator);
   output.addChildOnTop(input[1]);
-  output.addChildOnTop(theArg);
+  output.addChildOnTop(argumentExpression);
   return true;
 }
 
@@ -798,10 +797,10 @@ bool CalculatorFunctions::denominator(Calculator& calculator, const Expression& 
     return false;
   }
   const Expression& argument = input[1];
-  Rational rational, theDen;
+  Rational rational, denominator;
   if (argument.isRational(&rational)) {
-    theDen = rational.getDenominator();
-    return output.assignValue(calculator, theDen);
+    denominator = rational.getDenominator();
+    return output.assignValue(calculator, denominator);
   }
   if (argument.startsWith(calculator.opDivide())) {
     if (argument.size() > 2) {
@@ -850,12 +849,12 @@ bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(
   if (input.size() == 2) {
     return output.addChildOnTop(input[1]);
   }
-  List<Expression> theRemaining;
+  List<Expression> remaining;
   for (int i = 1; i < input.size(); i ++) {
-    theRemaining.addOnTop(input[i]);
+    remaining.addOnTop(input[i]);
   }
   Expression argumentE;
-  argumentE.makeSequence(calculator, &theRemaining);
+  argumentE.makeSequence(calculator, &remaining);
   return output.addChildOnTop(argumentE);
 }
 
@@ -1166,19 +1165,19 @@ bool CalculatorFunctionsPlot::plotRectangle(
   if (input.size() != 3) {
     return false;
   }
-  Vectors<double> theRectangle;
-  theRectangle.setSize(2);
+  Vectors<double> rectangle;
+  rectangle.setSize(2);
   if (
-    !calculator.getVectorDoubles(input[1], theRectangle[0], 2) ||
-    !calculator.getVectorDoubles(input[2], theRectangle[1], 2)
+    !calculator.getVectorDoubles(input[1], rectangle[0], 2) ||
+    !calculator.getVectorDoubles(input[2], rectangle[1], 2)
   ) {
     return false;
   }
   PlotObject plot;
   plot.dimension = 2;
   plot.plotType = PlotObject::PlotTypes::pathFilled;
-  Vector<double> currentCorner = theRectangle[0];
-  Vector<double>& dimensions = theRectangle[1];
+  Vector<double> currentCorner = rectangle[0];
+  Vector<double>& dimensions = rectangle[1];
 
   plot.pointsDouble.addOnTop(currentCorner);
   currentCorner[0] += dimensions[0];
@@ -1192,7 +1191,7 @@ bool CalculatorFunctionsPlot::plotRectangle(
   plot.colorFillJS = "cyan";
   plot.colorJS = "blue";
   plot.pointsDouble.addOnTop(currentCorner);
-  plot.rectangles.addOnTop(theRectangle);
+  plot.rectangles.addOnTop(rectangle);
   plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
   plot.colorFillRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
   return output.assignValue(calculator, plot);
@@ -1210,12 +1209,12 @@ bool CalculatorFunctions::operatorBounds(
   }
   const Expression& baseE = input[1];
   Expression limitsExpression;
-  int theIntegralOp = baseE.data;
+  int integralOperator = baseE.data;
   if (
-    theIntegralOp == calculator.opIntegral() || theIntegralOp == calculator.opSum()
+    integralOperator == calculator.opIntegral() || integralOperator == calculator.opSum()
   ) {
     output.reset(calculator);
-    output.addChildAtomOnTop(theIntegralOp);
+    output.addChildAtomOnTop(integralOperator);
     limitsExpression.reset(calculator);
     limitsExpression.addChildAtomOnTop(calculator.opLimitBoundary());
     limitsExpression.addChildOnTop(input[2]);
@@ -1628,25 +1627,25 @@ bool CalculatorFunctions::leastCommonMultipleInteger(
   if (input.size() < 3) {
     return false;
   }
-  Vector<LargeInteger> theInts;
-  if (!calculator.getVectorLargeIntegerFromFunctionArguments(input, theInts)) {
+  Vector<LargeInteger> integers;
+  if (!calculator.getVectorLargeIntegerFromFunctionArguments(input, integers)) {
     return false;
   }
-  if (theInts.size < 1) {
+  if (integers.size < 1) {
     //<-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments works as intended.
     return false;
   }
-  LargeIntegerUnsigned theResult = theInts[0].value;
-  if (theResult == 0) {
+  LargeIntegerUnsigned result = integers[0].value;
+  if (result == 0) {
     return false;
   }
-  for (int i = 1; i < theInts.size; i ++) {
-    if (theInts[i].value == 0) {
+  for (int i = 1; i < integers.size; i ++) {
+    if (integers[i].value == 0) {
       return false;
     }
-    theResult = LargeIntegerUnsigned::leastCommonMultiple(theResult, theInts[i].value);
+    result = LargeIntegerUnsigned::leastCommonMultiple(result, integers[i].value);
   }
-  return output.assignValue(calculator, theResult);
+  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctions::greatestCommonDivisorInteger(
@@ -1656,25 +1655,25 @@ bool CalculatorFunctions::greatestCommonDivisorInteger(
   if (input.size() < 3) {
     return false;
   }
-  Vector<LargeInteger> theInts;
-  if (!calculator.getVectorLargeIntegerFromFunctionArguments(input, theInts)) {
+  Vector<LargeInteger> integers;
+  if (!calculator.getVectorLargeIntegerFromFunctionArguments(input, integers)) {
     return false;
   }
-  if (theInts.size < 1) {
+  if (integers.size < 1) {
     //<-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments works as intended.
     return false;
   }
-  LargeIntegerUnsigned theResult = theInts[0].value;
-  if (theResult == 0) {
+  LargeIntegerUnsigned result = integers[0].value;
+  if (result == 0) {
     return false;
   }
-  for (int i = 1; i < theInts.size; i ++) {
-    if (theInts[i].value == 0) {
+  for (int i = 1; i < integers.size; i ++) {
+    if (integers[i].value == 0) {
       return false;
     }
-    theResult = LargeIntegerUnsigned::greatestCommonDivisor(theResult, theInts[i].value);
+    result = LargeIntegerUnsigned::greatestCommonDivisor(result, integers[i].value);
   }
-  return output.assignValue(calculator, theResult);
+  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsBasic::logarithmBaseNaturalToLn(Calculator& calculator, const Expression& input, Expression& output) {
@@ -1694,47 +1693,47 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }
-  Rational theBase, theArg;
+  Rational base, argument;
   if (
-    !input[1].isOfType<Rational>(&theBase) ||
-    !input[2].isOfType<Rational>(&theArg)
+    !input[1].isOfType<Rational>(&base) ||
+    !input[2].isOfType<Rational>(&argument)
   ) {
     return false;
   }
-  if (theBase < 0 || theArg < 0) {
+  if (base < 0 || argument < 0) {
     return false;
   }
-  if (theBase == 1) {
+  if (base == 1) {
     return false;
   }
-  if (theBase == 0 || theArg == 0) {
+  if (base == 0 || argument == 0) {
     std::stringstream errorStream;
-    errorStream << "Attempt to take logarithm base " << theBase
-    << " of " << theArg << " is not allowed. ";
+    errorStream << "Attempt to take logarithm base " << base
+    << " of " << argument << " is not allowed. ";
     return output.assignError(calculator, errorStream.str());
   }
-  if (theArg == 1) {
+  if (argument == 1) {
     return output.assignValue(calculator, 0);
   }
   Expression newBaseE, newArgE;
-  newBaseE.assignValue(calculator, theBase);
-  newArgE.assignValue(calculator, theArg);
-  if (theBase < 1) {
-    theBase.invert();
-    newBaseE.assignValue(calculator, theBase);
+  newBaseE.assignValue(calculator, base);
+  newArgE.assignValue(calculator, argument);
+  if (base < 1) {
+    base.invert();
+    newBaseE.assignValue(calculator, base);
     output.makeXOX(calculator, calculator.opLogBase(), newBaseE, newArgE);
     output *= - 1;
     return true;
   }
-  if (theArg < 1) {
-    theArg.invert();
-    newArgE.assignValue(calculator, theArg);
+  if (argument < 1) {
+    argument.invert();
+    newArgE.assignValue(calculator, argument);
     output.makeXOX(calculator, calculator.opLogBase(), newBaseE, newArgE);
     output *= - 1;
     return true;
   }
   LargeInteger baseInt, argNum;
-  if (!theBase.isInteger(&baseInt)) {
+  if (!base.isInteger(&baseInt)) {
     return false;
   }
   LargeInteger simplerBase;
@@ -1748,8 +1747,8 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
       return true;
     }
   }
-  argNum = theArg.getNumerator();
-  LargeInteger argDen = theArg.getDenominator();
+  argNum = argument.getNumerator();
+  LargeInteger argDen = argument.getDenominator();
   double doubleBase = baseInt.getDoubleValue();
   double doubleArgNum = argNum.getDoubleValue();
   if (FloatingPoint::logFloating(doubleArgNum) / FloatingPoint::logFloating(doubleBase) > 1000) {
@@ -1770,10 +1769,10 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   if (!changed) {
     return false;
   }
-  theArg = argNum;
-  theArg /= argDen;
-  newBaseE.assignValue(calculator, theBase);
-  newArgE.assignValue(calculator, theArg);
+  argument = argNum;
+  argument /= argDen;
+  newBaseE.assignValue(calculator, base);
+  newArgE.assignValue(calculator, argument);
   output.makeXOX(calculator, calculator.opLogBase(), newBaseE, newArgE);
   if (intPart == 0) {
     return true;
@@ -1820,7 +1819,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   const Expression& input,
   Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionMakeJavascriptExpression");
-  RecursionDepthCounter theCounter(&calculator.recursionDepth);
+  RecursionDepthCounter counter(&calculator.recursionDepth);
   if (calculator.recursionDepthExceededHandleRoughly()) {
     return false;
   }

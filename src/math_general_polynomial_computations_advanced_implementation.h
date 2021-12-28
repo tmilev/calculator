@@ -1265,9 +1265,9 @@ std::string PolynomialSystem<Coefficient>::toStringSerreLikeSolution() {
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::setSerreLikeSolutionIndex(
-  int index, const Coefficient& theConst
+  int index, const Coefficient& inputConstant
 ) {
-  this->systemSolution[index] = theConst;
+  this->systemSolution[index] = inputConstant;
   if (this->solutionsFound.selected[index]) {
     global.fatal << "This a programming error: attempting to set "
     << "value to a variable whose value has already been computed. " << global.fatal;

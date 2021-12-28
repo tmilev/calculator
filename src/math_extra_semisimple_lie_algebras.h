@@ -471,7 +471,7 @@ public:
   void accountSingleWeight(
     const Vector<Rational>& currentWeightSimpleCoords,
     const Vector<Rational>& otherHighestWeightSimpleCoords,
-    Rational& theMult,
+    Rational& multiplicity,
     CharacterSemisimpleLieAlgebraModule<Coefficient>& outputAccum
   ) const;
   std::string tensorAndDecompose(

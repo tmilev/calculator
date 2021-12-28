@@ -553,9 +553,9 @@ bool WebWorker::extractArgumentsFromMessage(
     argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs =
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
   global.webArguments;
-  if (!HtmlRoutines::chopPercentEncodedStringAppend(input, theArgs, argumentProcessingFailureComments)) {
+  if (!HtmlRoutines::chopPercentEncodedStringAppend(input, arguments, argumentProcessingFailureComments)) {
     return false;
   }
   return true;
@@ -573,7 +573,7 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
     return true;
   }
 
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments = global.webArguments;
   UserCalculatorData& user = global.userDefault;
   user.username = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("username"), true
@@ -720,7 +720,7 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
   if (shouldDisplayMessage) {
     argumentProcessingFailureComments << "Invalid user and/or authentication. ";
   }
-  theArgs.setKeyValue("password", "********************************************");
+  arguments.setKeyValue("password", "********************************************");
   return true;
 }
 
@@ -1373,22 +1373,22 @@ int WebWorker::processFile() {
   if (fileSize > 100000000) {
     return this->processFileTooLarge(fileSize);
   }
-  std::stringstream theHeader;
-  theHeader << "HTTP/1.0 200 OK\r\n"
+  std::stringstream header;
+  header << "HTTP/1.0 200 OK\r\n"
   << this->headerFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++) {
     if (StringRoutines::stringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
-      theHeader << WebAPI::headerCacheControl << "\r\n";
+      header << WebAPI::headerCacheControl << "\r\n";
       break;
     }
   }
-  theHeader << "Content-length: " << fileSize << "\r\n";
+  header << "Content-length: " << fileSize << "\r\n";
   if (!this->flagKeepAlive) {
-    theHeader << this->getHeaderConnectionClose() << "\r\n";
+    header << this->getHeaderConnectionClose() << "\r\n";
   }
-  theHeader << "\r\n";
-  this->queueStringForSendingNoHeader(theHeader.str());
+  header << "\r\n";
+  this->queueStringForSendingNoHeader(header.str());
   if (this->requestType == this->requestHead) {
     this->sendAllBytesNoHeaders();
     return 0;
@@ -3659,8 +3659,8 @@ int WebWorker::run() {
   return this->lastResult;
 }
 
-void WebServer::release(int& theDescriptor) {
-  MutexProcess::release(theDescriptor);
+void WebServer::release(int& descriptor) {
+  MutexProcess::release(descriptor);
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

@@ -416,24 +416,24 @@ std::string LittelmannPath:: toStringOperatorSequenceStartingOnMe(List<int>& inp
 
 template <class Coefficient>
 bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimental(
-  const Vector<Rational>& theHWsimpleCoords,
+  const Vector<Rational>& highestWeightSimpleCoordinates,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
   WeylGroupData& weyl = this->owner->ownerSemisimpleLieAlgebra->weylGroup;
-  Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
-  weyl.raiseToDominantWeight(theHWsimpleCoordsTrue);
-  Vector<Rational> theHWdualCoords = weyl.getDualCoordinatesFromFundamental(
-    weyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
+  Vector<Rational> highestWeightSimpleCoordinatesTrue = highestWeightSimpleCoordinates;
+  weyl.raiseToDominantWeight(highestWeightSimpleCoordinatesTrue);
+  Vector<Rational> highestWeightDualCoordinates = weyl.getDualCoordinatesFromFundamental(
+    weyl.getFundamentalCoordinatesFromSimple(highestWeightSimpleCoordinatesTrue)
   );
   List<Coefficient> substitution;
-  substitution.setSize(theHWdualCoords.size);
-  for (int i = 0; i < theHWdualCoords.size; i ++) {
-    substitution[i] = theHWdualCoords[i];
+  substitution.setSize(highestWeightDualCoordinates.size);
+  for (int i = 0; i < highestWeightDualCoordinates.size; i ++) {
+    substitution[i] = highestWeightDualCoordinates[i];
   }
   this->modOutVermaRelations(&substitution, ringUnit, ringZero);
   int numberOfPositiveRoots = this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
-  Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
+  Vector<Rational> currentWeight = highestWeightSimpleCoordinatesTrue;
   Vector<Rational> testWeight;
   for (int k = this->generatorsIndices.size - 1; k >= 0; k --) {
     int indexCurrentGenerator = this->generatorsIndices[k];
@@ -454,7 +454,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
       currentWeight += currentRoot;
       testWeight = currentWeight;
       weyl.raiseToDominantWeight(testWeight);
-      if (!(theHWsimpleCoordsTrue - testWeight).isPositiveOrZero()) {
+      if (!(highestWeightSimpleCoordinatesTrue - testWeight).isPositiveOrZero()) {
         this->makeZero(ringZero, *this->owner);
         return true;
       }
@@ -486,13 +486,13 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperiment
 
 template <class Coefficient>
 bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
-  List<ElementUniversalEnveloping<Coefficient> >& theBasis,
+  List<ElementUniversalEnveloping<Coefficient> >& basis,
   Vector<Coefficient>& output,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) const {
   List<ElementUniversalEnveloping<Coefficient> > tempBasis, elements;
-  tempBasis = theBasis;
+  tempBasis = basis;
   tempBasis.addOnTop(*this);
   Vectors<Coefficient> tempCoords;
   if (!this->getBasisFromSpanOfElements(tempBasis, tempCoords, elements, ringUnit, ringZero)) {
@@ -500,7 +500,7 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   }
   Vector<Coefficient> root;
   root = *tempCoords.lastObject();
-  tempCoords.setSize(theBasis.size);
+  tempCoords.setSize(basis.size);
   return root.getCoordinatesInBasis(tempCoords, output);
 }
 
@@ -531,7 +531,7 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
     ElementUniversalEnveloping<Coefficient>& currentElt = elements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnveloping<Coefficient>& currentMon = currentElt[j];
-      currentList[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.theCoefficient;
+      currentList[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.coefficient;
     }
   }
   outputBasis.size = 0;

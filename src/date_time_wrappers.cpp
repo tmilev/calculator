@@ -32,12 +32,12 @@ TimeWrapper::TimeWrapper() {
 
 bool TimeWrapper::assignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure) {
   this->assignLocalTime(); //<-hopefully this initialized time properly ...
-  List<char> theDelimiters;
-  theDelimiters.addOnTop('/');
-  theDelimiters.addOnTop('-');
-  theDelimiters.addOnTop('.');
+  List<char> delimiters;
+  delimiters.addOnTop('/');
+  delimiters.addOnTop('-');
+  delimiters.addOnTop('.');
   List<std::string> output;
-  StringRoutines::stringSplitExcludeDelimiters(input, theDelimiters, output);
+  StringRoutines::stringSplitExcludeDelimiters(input, delimiters, output);
   if (output.size < 3) {
     commentsOnFailure << "Failed to extract a M/D/Y date from: " << input;
     return false;

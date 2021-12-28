@@ -2003,7 +2003,7 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
   }
   simpleSummandSelection.initializeFromIntegers(multiplicities);
   DynkinType currentComplementSummand, centralizerOfComplementOfCurrentSummand, currentSummand;
-  HashedList<Rational> theDynkinIndicesCurrentSummand, theDynkinIndicesCentralizerComplementCurrentSummand;
+  HashedList<Rational> dynkinIndicesCurrentSummand, dynkinIndicesCentralizerComplementCurrentSummand;
   while (simpleSummandSelection.incrementReturnFalseIfPastLast()) {
     currentComplementSummand.makeZero();
     for (int i = 0; i < simpleSummandSelection.multiplicities.size; i ++) {
@@ -2014,16 +2014,16 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
       currentSummand.getDynkinIndicesSl2Subalgebras(
         this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
         this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-        theDynkinIndicesCurrentSummand,
+        dynkinIndicesCurrentSummand,
         this->ownerField
       );
       centralizerOfComplementOfCurrentSummand.getDynkinIndicesSl2Subalgebras(
         this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
         this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-        theDynkinIndicesCentralizerComplementCurrentSummand,
+        dynkinIndicesCentralizerComplementCurrentSummand,
         this->ownerField
       );
-      if (!theDynkinIndicesCentralizerComplementCurrentSummand.contains(theDynkinIndicesCurrentSummand)) {
+      if (!dynkinIndicesCentralizerComplementCurrentSummand.contains(dynkinIndicesCurrentSummand)) {
         std::stringstream reportStream;
         reportStream << "<hr>"
         << "I have rejected type "
@@ -2034,7 +2034,7 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
         << centralizerOfComplementOfCurrentSummand.toString() << ". "
         << "Then I computed the absolute Dynkin indices of "
         << "the centralizer's sl(2)-subalgebras, namely:<br> "
-        << theDynkinIndicesCentralizerComplementCurrentSummand.toStringCommaDelimited()
+        << dynkinIndicesCentralizerComplementCurrentSummand.toStringCommaDelimited()
         << ". If the type was realizable, those would have to contain "
         << "the absolute Dynkin indices of sl(2) subalgebras of the original summand. "
         << "However, that is not the case. "
@@ -2042,7 +2042,7 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits(
         << " is not realizable. "
         << "The absolute Dynkin indices of the sl(2) subalgebras of "
         << "the original summand I computed to be:<br> "
-        << theDynkinIndicesCurrentSummand.toStringCommaDelimited() << ". ";
+        << dynkinIndicesCurrentSummand.toStringCommaDelimited() << ". ";
         this->comments += reportStream.str();
         std::fstream logFile;
         if (!FileOperations::openFileCreateIfNotPresentVirtual(
@@ -2097,20 +2097,20 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   if (newSummandType.size() != 1) {
     return false;
   }
-  HashedList<Rational> theDynkinIndicesNewSummand, DynkinIndicesTheyGotToFitIn;
+  HashedList<Rational> dynkinIndicesNewSummand, dynkinIndicesTheyGotToFitIn;
   centralizerComplementNewSummandType.getDynkinIndicesSl2Subalgebras(
     this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
     this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-    DynkinIndicesTheyGotToFitIn,
+    dynkinIndicesTheyGotToFitIn,
     this->ownerField
   );
   newSummandType.getDynkinIndicesSl2Subalgebras(
     this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
     this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-    theDynkinIndicesNewSummand,
+    dynkinIndicesNewSummand,
     this->ownerField
   );
-  if (DynkinIndicesTheyGotToFitIn.contains(theDynkinIndicesNewSummand)) {
+  if (dynkinIndicesTheyGotToFitIn.contains(dynkinIndicesNewSummand)) {
     return false;
   }
   std::fstream logFile;
@@ -2128,13 +2128,13 @@ bool SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   << "I computed the latter complement summand has centralizer "
   << centralizerComplementNewSummandType.toString() << ". "
   << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
-  << DynkinIndicesTheyGotToFitIn.toStringCommaDelimited()
+  << dynkinIndicesTheyGotToFitIn.toStringCommaDelimited()
   << ". If the type was realizable, those would have to contain "
   << "the absolute Dynkin indices of sl(2) subalgebras "
   << "of the original summand. However, that is not the case. "
   << "I can therefore conclude that the Dynkin type " << currentType.toString() << " is not realizable. "
   << "The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
-  << theDynkinIndicesNewSummand.toStringCommaDelimited() << ". ";
+  << dynkinIndicesNewSummand.toStringCommaDelimited() << ". ";
   logFile << reportStream.str();
   global.comments << reportStream.str();
   return true;
@@ -2307,7 +2307,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   ///////////
   this->currentNumberOfLargerTypesExplored.addOnTop(inputNumberOfLargerTypesExplored);
   // global.Comments << "<hr>" << this->currentPossibleLargerDynkinTypes.lastObject()->size
-  // << " possible extensions of " << input.weylNonEmbedded->theDynkinType.toString() << ": ";
+  // << " possible extensions of " << input.weylNonEmbedded->dynkinType.toString() << ": ";
   // for (int i = 0; i < this->currentPossibleLargerDynkinTypes.lastObject()->size; i ++)
   //   global.Comments << (*this->currentPossibleLargerDynkinTypes.lastObject())[i].toString() << ", ";
   ///////////
@@ -4527,7 +4527,7 @@ void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(
   List<int>& selection, std::stringstream* logStream
 ) {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively");
-  RecursionDepthCounter theCounter(&this->recursionDepthCounterForNilradicalGeneration);
+  RecursionDepthCounter counter(&this->recursionDepthCounterForNilradicalGeneration);
   if (this->recursionDepthCounterForNilradicalGeneration>this->nilradicalPairingTable.size + 1) {
     global.fatal << "<br>oh no... something went very wrong! The nilradical generation recursion "
     << "depth cannot exceed the number of nilradicals! "
@@ -4838,7 +4838,7 @@ bool SemisimpleSubalgebras::checkConsistencyHs() const {
   this->checkInitialization();
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (this->subalgebras.keys[i] != this->subalgebras.values[i].cartanElementsSubalgebra) {
-      global.fatal << "List this->theHsOfSubalgebras does not match this->theSubalgebras. " << global.fatal;
+      global.fatal << "List this->hElementsOfSubalgebras does not match this->theSubalgebras. " << global.fatal;
     }
   }
   return true;
@@ -7772,15 +7772,15 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
   Incrementable<SelectionFixedRank> selectedTypes;
   List<DynkinSimpleType> isoTypes;
   SelectionFixedRank currentTypeSelection;
-  List<List<Vectors<Rational> > > theHsScaledToActByTwoByType;
-  other.getHsScaledToActByTwoByType(theHsScaledToActByTwoByType, isoTypes);
+  List<List<Vectors<Rational> > > hElementsScaledToActByTwoByType;
+  other.getHsScaledToActByTwoByType(hElementsScaledToActByTwoByType, isoTypes);
   for (int i = 0; i < isoTypes.size; i ++) {
     Rational ratMult = this->weylNonEmbedded->dynkinType.getCoefficientOf(isoTypes[i]);
     int intMult = 0;
     if (!ratMult.isSmallInteger(&intMult)) {
       return false;
     }
-    currentTypeSelection.setNumberOfItemsAndDesiredSubsetSize(intMult, theHsScaledToActByTwoByType[i].size);
+    currentTypeSelection.setNumberOfItemsAndDesiredSubsetSize(intMult, hElementsScaledToActByTwoByType[i].size);
     selectedTypes.elements.addOnTop(currentTypeSelection);
   }
   FinitelyGeneratedMatrixMonoid<Rational> outerAutomorphisms;
@@ -7827,7 +7827,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
       for (int i = 0; i < selectedTypes.elements.size; i ++) {
         Selection& currentSel = selectedTypes.elements[i].selection;
         for (int j = 0; j < currentSel.cardinalitySelection; j ++) {
-          currentComponent = theHsScaledToActByTwoByType[i][currentSel.elements[j]];
+          currentComponent = hElementsScaledToActByTwoByType[i][currentSel.elements[j]];
           conjugationCandidates.addListOnTop(currentComponent);
         }
       }
@@ -8094,7 +8094,7 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
 /*  this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++)
     this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
-    (i, this->theHs[i]);
+    (i, this->hs[i]);
   for (int i = this->getRank(); i < this->getPrimalRank(); i ++)
     this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->CartanOfCentralizer[i-this->getRank()]);

@@ -255,7 +255,7 @@ public:
   static bool generateVectorSpaceClosedWithRespectToOperation(
     List<Type>& inputOutputElts,
     int upperDimensionBound,
-    void (*theBinaryOperation)(const Type& left, const Type& right, Type& output)
+    void (*binaryOperation)(const Type& left, const Type& right, Type& output)
   );
 
   static char convertHumanReadableHexToCharValue(char input);

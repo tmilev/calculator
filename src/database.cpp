@@ -462,17 +462,17 @@ std::string ProblemData::toStringAvailableAnswerIds() {
 }
 
 bool ProblemDataAdministrative::getWeightFromCourse(
-  const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor
+  const std::string& courseNonURLed, Rational& output, std::string* outputAsGivenByInstructor
 ) {
-  MacroRegisterFunctionWithName("ProblemDataAdministrative::GetWeightFromSection");
-  if (!this->problemWeightsPerCourse.contains(theCourseNonURLed)) {
+  MacroRegisterFunctionWithName("ProblemDataAdministrative::getWeightFromCourse");
+  if (!this->problemWeightsPerCourse.contains(courseNonURLed)) {
     return false;
   }
   std::string tempString;
   if (outputAsGivenByInstructor == nullptr) {
     outputAsGivenByInstructor = &tempString;
   }
-  *outputAsGivenByInstructor = this->problemWeightsPerCourse.getValueCreateEmpty(theCourseNonURLed);
+  *outputAsGivenByInstructor = this->problemWeightsPerCourse.getValueCreateEmpty(courseNonURLed);
   return output.assignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
@@ -902,14 +902,14 @@ bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
   );
 }
 
-bool UserCalculator::isAcceptableCharDatabaseInput(char theChar) {
-  if (MathRoutines::isADigit(theChar)) {
+bool UserCalculator::isAcceptableCharDatabaseInput(char character) {
+  if (MathRoutines::isADigit(character)) {
     return true;
   }
-  if (MathRoutines::isALatinLetter(theChar)) {
+  if (MathRoutines::isALatinLetter(character)) {
     return true;
   }
-  switch (theChar) {
+  switch (character) {
     case '.':
     case '@':
     case '+':
@@ -991,8 +991,8 @@ bool Database::User::sendActivationEmail(
 
 bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("ProblemData::loadFromOldFormat");
-  MapList<std::string, std::string, MathRoutines::hashString> theMap;
-  if (!HtmlRoutines::chopPercentEncodedString(inputData, theMap, commentsOnFailure)) {
+  MapList<std::string, std::string, MathRoutines::hashString> mapStrings;
+  if (!HtmlRoutines::chopPercentEncodedString(inputData, mapStrings, commentsOnFailure)) {
     return false;
   }
   this->points = 0;
@@ -1000,24 +1000,24 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
-    if (theMap.contains(WebAPI::problem::randomSeed)) {
+    if (mapStrings.contains(WebAPI::problem::randomSeed)) {
       global.comments << "Loading random seed from old format.";
-      this->randomSeed = static_cast<uint32_t>(atoi(theMap.getValueCreateEmpty(WebAPI::problem::randomSeed).c_str()));
+      this->randomSeed = static_cast<uint32_t>(atoi(mapStrings.getValueCreateEmpty(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
   this->answers.clear();
   bool result = true;
   MapList<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
-  for (int i = 0; i < theMap.size(); i ++) {
-    if (theMap.keys[i] == WebAPI::problem::randomSeed) {
+  for (int i = 0; i < mapStrings.size(); i ++) {
+    if (mapStrings.keys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
     Answer answer;
-    answer.answerId = theMap.keys[i];
+    answer.answerId = mapStrings.keys[i];
     this->answers.setKeyValue(answer.answerId, answer);
     Answer& currentA = *this->answers.values.lastObject();
-    std::string currentQuestion = HtmlRoutines::convertURLStringToNormal(theMap.values[i], false);
+    std::string currentQuestion = HtmlRoutines::convertURLStringToNormal(mapStrings.values[i], false);
     result = HtmlRoutines::chopPercentEncodedString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result) {
       commentsOnFailure << "Failed to interpret as key-value pair: "
@@ -1092,21 +1092,21 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
 
 bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemData");
-  MapList<std::string, std::string, MathRoutines::hashString> theMap;
-  if (!HtmlRoutines::chopPercentEncodedString(theInfo, theMap, commentsOnFailure)) {
+  MapList<std::string, std::string, MathRoutines::hashString> mapStrings;
+  if (!HtmlRoutines::chopPercentEncodedString(theInfo, mapStrings, commentsOnFailure)) {
     return false;
   }
   this->problemData.clear();
-  this->problemData.setExpectedSize(theMap.size());
+  this->problemData.setExpectedSize(mapStrings.size());
   bool result = true;
   ProblemData reader;
   std::string probNameNoWhiteSpace;
-  for (int i = 0; i < theMap.size(); i ++) {
-    if (!reader.loadFromOldFormat(HtmlRoutines::convertURLStringToNormal(theMap.values[i], false), commentsOnFailure)) {
+  for (int i = 0; i < mapStrings.size(); i ++) {
+    if (!reader.loadFromOldFormat(HtmlRoutines::convertURLStringToNormal(mapStrings.values[i], false), commentsOnFailure)) {
       result = false;
       continue;
     }
-    probNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(theMap.keys[i], false));
+    probNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(mapStrings.keys[i], false));
     if (probNameNoWhiteSpace == "") {
       continue;
     }
@@ -1544,12 +1544,12 @@ List<bool> EmailRoutines::recognizedEmailCharacters;
 List<bool>& EmailRoutines::getRecognizedEmailChars() {
   if (recognizedEmailCharacters.size == 0) {
     recognizedEmailCharacters.initializeFillInObject(256, false);
-    std::string theChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    theChars += "0123456789";
-    theChars += "@";
-    theChars += "!#$%&'*+-/=?.";
-    for (unsigned i = 0; i < theChars.size(); i ++) {
-      recognizedEmailCharacters[static_cast<unsigned char>(theChars[i])] = true;
+    std::string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    characters += "0123456789";
+    characters += "@";
+    characters += "!#$%&'*+-/=?.";
+    for (unsigned i = 0; i < characters.size(); i ++) {
+      recognizedEmailCharacters[static_cast<unsigned char>(characters[i])] = true;
     }
   }
   return EmailRoutines::recognizedEmailCharacters;
@@ -1613,18 +1613,18 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   if (!theToken.assignString(userWrapper.enteredGoogleToken, commentsOnFailure)) {
     return false;
   }
-  JSData theData;
-  if (!theData.parse(theToken.claimsJSON, commentsOnFailure)) {
+  JSData data;
+  if (!data.parse(theToken.claimsJSON, commentsOnFailure)) {
     return false;
   }
-  if (theData.getValue("email").elementType != JSData::token::tokenString) {
+  if (data.getValue("email").elementType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find email entry in the json data "
-      << theData.toString(nullptr);
+      << data.toString(nullptr);
     }
     return false;
   }
-  userWrapper.email = theData.getValue("email").stringValue;
+  userWrapper.email = data.getValue("email").stringValue;
   userWrapper.username = "";
   if (!userWrapper.exists(commentsOnFailure)) {
     if (commentsGeneral != nullptr) {

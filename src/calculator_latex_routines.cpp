@@ -496,7 +496,7 @@ LaTeXCrawler::LaTeXCrawler() {
 
 void LaTeXCrawler::crawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileNamE) {
   MacroRegisterFunctionWithName("LaTeXcrawler::crawlRecursive");
-  RecursionDepthCounter theCounter(&this->recursionDepth);
+  RecursionDepthCounter counter(&this->recursionDepth);
   if (this->recursionDepth > 1000) {
     this->errorStream << "While crawling theFileToCrawl, reached max recursion depth of 1000";
     return;

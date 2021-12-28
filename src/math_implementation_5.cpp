@@ -550,9 +550,9 @@ std::string VectorPartition::toStringPartitioningVectors() {
 }
 
 std::string VectorPartition::toStringOnePartition(const List<int>& currentPartition) {
-  Vector<Rational> theV;
-  theV = currentPartition;
-  return theV.toStringLetterFormat("e");
+  Vector<Rational> vector;
+  vector = currentPartition;
+  return vector.toStringLetterFormat("e");
 }
 
 std::string VectorPartition::toStringAllPartitions(bool useHtml) {
@@ -987,27 +987,27 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   << this->fElement.toStringWithBlocks(this->partition) << endMath;
   Matrix<Rational> matrix;
   matrix.initialize(this->dimension, this->dimension);
-  List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
+  List<Matrix<Rational> > Decomposition, highestWeightCandidatesBeforeProjection, highestWeightCandidatesProjected;
   this->highestWeightVectors.size = 0;
   this->gModKModules.size = 0;
   for (int i = 0; i < this->dimension; i ++) {
     for (int j = 0; j < this->dimension; j ++) {
       matrix.makeZero();
       matrix.elements[i][j] = 1;
-      this->extractHighestWeightVectorsFromVector(matrix, Decomposition, theHwCandidatesBeforeProjection);
-      theHwCandidatesProjected.size = 0;
-      for (int k = 0; k < theHwCandidatesBeforeProjection.size; k ++) {
+      this->extractHighestWeightVectorsFromVector(matrix, Decomposition, highestWeightCandidatesBeforeProjection);
+      highestWeightCandidatesProjected.size = 0;
+      for (int k = 0; k < highestWeightCandidatesBeforeProjection.size; k ++) {
         for (int l = 0; l < this->projectors.size; l ++) {
-          matrix = theHwCandidatesBeforeProjection[k];
+          matrix = highestWeightCandidatesBeforeProjection[k];
           matrix.multiplyOnTheLeft(this->projectors[l]);
           if (!matrix.isEqualToZero()) {
-            theHwCandidatesProjected.addOnTop(matrix);
+            highestWeightCandidatesProjected.addOnTop(matrix);
           }
         }
       }
-      for (int k = 0; k < theHwCandidatesProjected.size; k ++) {
-        if (this->getModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k]) == - 1) {
-          Matrix<Rational>& currentHighest = theHwCandidatesProjected[k];
+      for (int k = 0; k < highestWeightCandidatesProjected.size; k ++) {
+        if (this->getModuleIndexFromHighestWeightVector(highestWeightCandidatesProjected[k]) == - 1) {
+          Matrix<Rational>& currentHighest = highestWeightCandidatesProjected[k];
           this->highestWeightVectors.addOnTop(currentHighest);
           this->gModKModules.expandOnTop(1);
           List<Matrix<Rational> >& currentMod = *this->gModKModules.lastObject();

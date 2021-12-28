@@ -42,7 +42,7 @@ void MutexRecursiveWrapper::initConstructorCallOnly() {
   this->flagDeallocated = false;
   this->flagInitialized = false;
   this->flagUnsafeFlagForDebuggingIslocked = false;
-  this->theMutexImplementation = nullptr;
+  this->mutexImplementation = nullptr;
   this->lastlockerThread = - 1;
 #ifdef AllocationLimitsSafeguard
 GlobalStatistics::globalPointerCounter ++;
@@ -56,14 +56,14 @@ bool MutexRecursiveWrapper::initializeIfNeeded() {
   if (!global.flagServerforkedIntoWorker) {
     return false;
   }
-  this->theMutexImplementation = new std::mutex;
+  this->mutexImplementation = new std::mutex;
   this->flagInitialized = true;
   return true;
 }
 
 MutexRecursiveWrapper::~MutexRecursiveWrapper() {
-  delete static_cast<std::mutex*>(this->theMutexImplementation);
-  this->theMutexImplementation = nullptr;
+  delete static_cast<std::mutex*>(this->mutexImplementation);
+  this->mutexImplementation = nullptr;
   this->flagDeallocated = true;
   this->flagInitialized = false;
 }
@@ -90,7 +90,7 @@ void MutexRecursiveWrapper::lockMe() {
         << global.toStringProgressReportConsole() << Logger::endL;
       }
     }
-    static_cast<std::mutex*>(this->theMutexImplementation)->lock();
+    static_cast<std::mutex*>(this->mutexImplementation)->lock();
   } catch (...) {
     global.fatal << "Fatal error: mutex lock failed. " << global.fatal;
   }
@@ -105,7 +105,7 @@ void MutexRecursiveWrapper::unlockMe() {
   }
   this->flagUnsafeFlagForDebuggingIslocked = false;
   this->lastlockerThread = - 1;
-  static_cast<std::mutex*>(this->theMutexImplementation)->unlock();
+  static_cast<std::mutex*>(this->mutexImplementation)->unlock();
 }
 
 ThreadData::ThreadData() {
@@ -129,7 +129,7 @@ GlobalVariables::~GlobalVariables() {
 }
 
 void ThreadData::registerFirstThread(const std::string& inputName) {
-  ThreadData::registerNewThread(inputName).theId = std::this_thread::get_id();
+  ThreadData::registerNewThread(inputName).id = std::this_thread::get_id();
 }
 
 ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
@@ -151,8 +151,8 @@ ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
 
 void ThreadData::createThread(void (*InputFunction)(int), const std::string& inputName) {
   MutexlockGuard(global.mutexRegisterNewThread);
-  ThreadData& theData = ThreadData::registerNewThread(inputName);
-  std::thread newThread(InputFunction, theData.index);
+  ThreadData& threadData = ThreadData::registerNewThread(inputName);
+  std::thread newThread(InputFunction, threadData.index);
   global.allThreads.lastObject().swap(newThread);
 }
 
@@ -160,7 +160,7 @@ int ThreadData::getCurrentThreadId() {
   std::thread::id currentId = std::this_thread::get_id();
   ListReferences<ThreadData>& theThreadData = global.threadData;
   for (int i = 0; i < theThreadData.size; i ++) {
-    if (currentId == theThreadData[i].theId) {
+    if (currentId == theThreadData[i].id) {
       return i;
     }
   }
@@ -182,7 +182,7 @@ std::string ThreadData::toStringHtml() const {
     out << this->name;
   }
   out << "</span>.";
-  out << " Index: " << this->index << ", id: " << this->theId << ".";
+  out << " Index: " << this->index << ", id: " << this->id << ".";
   return out.str();
 }
 
@@ -194,7 +194,7 @@ std::string ThreadData::toStringConsole() const {
   } else {
     out << this->name;
   }
-  out << ". Index: " << this->index << ", id: " << this->theId << ".";
+  out << ". Index: " << this->index << ", id: " << this->id << ".";
   return out.str();
 }
 

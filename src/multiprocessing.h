@@ -139,7 +139,7 @@ public:
 // This is an unnamed pipe with which may be shared by two or more processes
 // and by more than one thread in each process.
 // Multiple processes may try to send bytes through the pipe.
-// A writer to the pipe may lock access to the pipe via theMutexPipe lock.
+// A writer to the pipe may lock access to the pipe via mutexPipe lock.
 // TheMutexPipe lock has a (pipe-based) mechanism for locking out other processes and
 // a mutex-based mechanism for locking out other threads within the same process.
 class Pipe {

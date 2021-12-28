@@ -906,12 +906,12 @@ bool MathRoutines::parseListIntegers(
   StringRoutines::stringSplitExcludeDelimiters(input, delimiters, numberStrings);
   result.setSize(numberStrings.size);
   for (int i = 0; i < numberStrings.size; i ++) {
-    LargeInteger theInt;
-    bool success = theInt.assignStringFailureAllowed(numberStrings[i], commentsOnFailure);
+    LargeInteger integerValue;
+    bool success = integerValue.assignStringFailureAllowed(numberStrings[i], commentsOnFailure);
     if (!success) {
       return false;
     }
-    if (!theInt.isIntegerFittingInInt(&result[i])) {
+    if (!integerValue.isIntegerFittingInInt(&result[i])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Integer at position " << i << " is too large. ";
       }

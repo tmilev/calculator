@@ -256,23 +256,23 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   char ipString[INET6_ADDRSTRLEN];
   int numBytesWritten = - 1;
   for (p = this->serverInfo; p != nullptr; p = p->ai_next, close(this->socketInteger)) {
-    void* theAddress = nullptr;
+    void* adress = nullptr;
     this->socketInteger = - 1;
     // get the pointer to the address itself,
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
       struct sockaddr_in *ipv4 = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
-      theAddress = &(ipv4->sin_addr);
+      adress = &(ipv4->sin_addr);
       reportStream << "IPv4: ";
     } else {
       // IPv6
       struct sockaddr_in6 *ipv6 = reinterpret_cast<struct sockaddr_in6 *>(p->ai_addr);
-      theAddress = &(ipv6->sin6_addr);
+      adress = &(ipv6->sin6_addr);
       reportStream << "IPv6: ";
     }
     // convert the IP to a string and print it:
-    inet_ntop(p->ai_family, theAddress, ipString, sizeof ipString);
+    inet_ntop(p->ai_family, adress, ipString, sizeof ipString);
     reportStream << this->addressToConnectTo << ": " << ipString << "<br>";
     this->socketInteger = socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
     int connectionResult = - 1;
@@ -374,27 +374,27 @@ void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringst
   char ipString[INET6_ADDRSTRLEN];
   timeval timeOut;
   for (p = this->serverInfo; p != nullptr; p = p->ai_next, close(this->socketInteger)) {
-    void *theAddress = nullptr;
+    void *address = nullptr;
     this->socketInteger = - 1;
     // get the pointer to the address itself,
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
       struct sockaddr_in *ipv4 = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
-      theAddress = &(ipv4->sin_addr);
+      address = &(ipv4->sin_addr);
       if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv4: ";
       }
     } else {
       // IPv6
       struct sockaddr_in6 *ipv6 = reinterpret_cast<struct sockaddr_in6 *> (p->ai_addr);
-      theAddress = &(ipv6->sin6_addr);
+      address = &(ipv6->sin6_addr);
       if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv6: ";
       }
     }
     // convert the IP to a string and print it:
-    inet_ntop(p->ai_family, theAddress, ipString, sizeof ipString);
+    inet_ntop(p->ai_family, address, ipString, sizeof ipString);
 //    std::string ipString()
     if (commentsGeneral != nullptr) {
       *commentsGeneral << this->addressToConnectTo << ": " << ipString << "<br>";
@@ -469,16 +469,16 @@ void WebClient::fetchWebPagePart2(
   (void) commentsOnFailure;
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
-  std::stringstream theMessageHeader, theContinueHeader;
+  std::stringstream messageHeader, continueHeader;
   if (this->flagDoUseGET) {
-    theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.0"
+    messageHeader << "GET " << this->addressToConnectTo << " HTTP/1.0"
     << "\r\n" << "Host: " << this->serverToConnectTo << "\r\n\r\n";
   } else {
-    theMessageHeader << "POST " << this->addressToConnectTo << " HTTP/1.0"
+    messageHeader << "POST " << this->addressToConnectTo << " HTTP/1.0"
     << "\r\n" << "Host: " << this->serverToConnectTo;
-    theMessageHeader << "\r\nContent-length: " << this->postMessageToSend.size();
-    theMessageHeader << "\r\n\r\n";
-    theMessageHeader << this->postMessageToSend;
+    messageHeader << "\r\nContent-length: " << this->postMessageToSend.size();
+    messageHeader << "\r\n\r\n";
+    messageHeader << this->postMessageToSend;
   }
   this->transportLayerSecurity.openSSLData.checkCanInitializeToClient();
   if (!this->transportLayerSecurity.handShakeIAmClientNoSocketCleanup(
@@ -497,7 +497,7 @@ void WebClient::fetchWebPagePart2(
   }
   std::string errorSSL;
   if (!this->transportLayerSecurity.sslWriteLoop(
-    10, theMessageHeader.str(), &errorSSL, commentsGeneral, true
+    10, messageHeader.str(), &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
@@ -529,17 +529,17 @@ void WebClient::fetchWebPagePart2(
     this->bodyReceivedWithHeader = this->headerReceived.substr(bodyStart);
     this->headerReceived = this->headerReceived.substr(0, bodyStart);
   }
-  List<std::string> theHeaderPieces;
-  StringRoutines::stringSplitDefaultDelimiters(this->headerReceived, theHeaderPieces);
+  List<std::string> headerPieces;
+  StringRoutines::stringSplitDefaultDelimiters(this->headerReceived, headerPieces);
   std::string expectedLengthString;
-  for (int i = 0; i < theHeaderPieces.size; i ++) {
+  for (int i = 0; i < headerPieces.size; i ++) {
     if (
-      theHeaderPieces[i] == "Content-length:" ||
-      theHeaderPieces[i] == "Content-Length:" ||
-      theHeaderPieces[i] == "content-length:"
+      headerPieces[i] == "Content-length:" ||
+      headerPieces[i] == "Content-Length:" ||
+      headerPieces[i] == "content-length:"
     ) {
-      if (i + 1 < theHeaderPieces.size) {
-        expectedLengthString=theHeaderPieces[i + 1];
+      if (i + 1 < headerPieces.size) {
+        expectedLengthString=headerPieces[i + 1];
         break;
       }
     }
@@ -565,9 +565,9 @@ void WebClient::fetchWebPagePart2(
     return;
   }
   this->flagContinueWasNeeded = true;
-  theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
+  continueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
   if (!this->transportLayerSecurity.sslWriteLoop(
-    10, theContinueHeader.str(), &errorSSL, commentsGeneral, true
+    10, continueHeader.str(), &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;

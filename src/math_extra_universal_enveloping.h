@@ -223,7 +223,7 @@ public:
     ElementUniversalEnveloping<Coefficient>& outputCorrespondingMonomials
   );
   bool getCoordinatesInBasis(
-    List<ElementUniversalEnveloping<Coefficient> >& theBasis,
+    List<ElementUniversalEnveloping<Coefficient> >& basis,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit,
     const Coefficient& ringZero

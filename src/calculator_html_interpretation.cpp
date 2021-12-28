@@ -239,14 +239,14 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs =
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
   global.webArguments;
   JSData result;
-  for (int i = 0; i < theArgs.size(); i ++) {
+  for (int i = 0; i < arguments.size(); i ++) {
     if (StringRoutines::stringBeginsWith(
-      theArgs.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID)
+      arguments.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID)
     ) {
-      lastAnswer = "(" + HtmlRoutines::convertURLStringToNormal(theArgs.values[i], false) + "); ";
+      lastAnswer = "(" + HtmlRoutines::convertURLStringToNormal(arguments.values[i], false) + "); ";
     }
   }
   studentAnswerSream << lastAnswer;
@@ -753,9 +753,9 @@ JSData CourseList::toJSON() {
 
 JSData WebAPIResponse::getSelectCourseJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::getSelectCourseJSON");
-  CourseList theCourses;
-  theCourses.load();
-  return theCourses.toJSON();
+  CourseList courses;
+  courses.load();
+  return courses.toJSON();
 }
 
 std::string WebAPIResponse::getHtmlTagWithManifest() {
@@ -769,24 +769,24 @@ std::string WebAPIResponse::getHtmlTagWithManifest() {
 JSData WebAPIResponse::getTopicTableJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::getTopicTableJSON");
   std::stringstream out;
-  CalculatorHTML thePage;
+  CalculatorHTML page;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
-  thePage.topicListFileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::topicList), false);
+  page.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
+  page.topicListFileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::topicList), false);
   JSData result;
-  if (!thePage.loadAndParseTopicList(out)) {
+  if (!page.loadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (!thePage.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
+  if (!page.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
     comments << "While loading topic table, failed to load file: ["
     << global.getWebInput(WebAPI::problem::courseHome) << "].";
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
-  thePage.computeTopicListAndPointsEarned(comments);
-  return thePage.toStringTopicListJSON(&comments);
+  page.computeTopicListAndPointsEarned(comments);
+  return page.toStringTopicListJSON(&comments);
 }
 
 void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
@@ -949,30 +949,30 @@ JSData WebAPIResponse::getEditPageJSON(
     output[WebAPI::result::error] = errorStream.str();
     //return output.toString(false);
   }
-  HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
+  HashedList<std::string, MathRoutines::hashString> autocompleteKeyWords;
   editedFile.initBuiltInSpanClasses();
   std::stringstream comments;
   if (editedFile.courseHome == editedFile.fileName || editedFile.topicListFileName == editedFile.fileName) {
     editedFile.loadAndParseTopicList(comments);
-    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
-    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClassesAnswerFields);
-    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.calculatorTopicElementNames);
-    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.topics.knownTopicBundles.keys);
+    autocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
+    autocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClassesAnswerFields);
+    autocompleteKeyWords.addOnTopNoRepetition(editedFile.calculatorTopicElementNames);
+    autocompleteKeyWords.addOnTopNoRepetition(editedFile.topics.knownTopicBundles.keys);
   } else {
     Calculator tempCalculator;
     tempCalculator.initialize(Calculator::Mode::educational);
     tempCalculator.computeAutoCompleteKeyWords();
-    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
-    theAutocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
+    autocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
+    autocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
     editedFile.initAutocompleteExtras();
-    theAutocompleteKeyWords.addOnTopNoRepetition(editedFile.autoCompleteExtras);
+    autocompleteKeyWords.addOnTopNoRepetition(editedFile.autoCompleteExtras);
   }
-  JSData theAutoCompleteWordsJS;
-  theAutoCompleteWordsJS.elementType = JSData::token::tokenArray;
-  for (int i = 0; i < theAutocompleteKeyWords.size; i ++) {
-    theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
+  JSData autoCompleteWordsJS;
+  autoCompleteWordsJS.elementType = JSData::token::tokenArray;
+  for (int i = 0; i < autocompleteKeyWords.size; i ++) {
+    autoCompleteWordsJS[i] = autocompleteKeyWords[i];
   }
-  output["autoComplete"] = theAutoCompleteWordsJS;
+  output["autoComplete"] = autoCompleteWordsJS;
   output["content"] = HtmlRoutines::convertStringToURLString(editedFile.parser.inputHtml, false);
   return output;
 }
@@ -1568,7 +1568,7 @@ std::string WebAPIResponse::addTeachersSections() {
   HtmlRoutines::convertURLStringToNormal(inputParsed["students"].stringValue, false);
   List<std::string> desiredSectionsList;
 
-  List<std::string> theTeachers;
+  List<std::string> teachers;
   List<char> delimiters;
   delimiters.addOnTop(' ');
   delimiters.addOnTop('\r');
@@ -1579,17 +1579,17 @@ std::string WebAPIResponse::addTeachersSections() {
   delimiters.addOnTop(static_cast<char>(160)); //<-&nbsp
   StringRoutines::stringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
 
-  StringRoutines::stringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
-  if (theTeachers.size == 0) {
+  StringRoutines::stringSplitExcludeDelimiters(desiredUsers, delimiters, teachers);
+  if (teachers.size == 0) {
     out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();
   }
   UserCalculator currentTeacher;
-  for (int i = 0; i < theTeachers.size; i ++) {
+  for (int i = 0; i < teachers.size; i ++) {
     currentTeacher.reset();
-    currentTeacher.username = theTeachers[i];
+    currentTeacher.username = teachers[i];
     if (!currentTeacher.loadFromDatabase(&out, &out)) {
-      out << "<span style='color:red'>Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
+      out << "<span style='color:red'>Failed to fetch teacher: " << teachers[i] << "</span><br>";
       continue;
     }
     currentTeacher.sectionsTaught = desiredSectionsList;
@@ -1601,9 +1601,9 @@ std::string WebAPIResponse::addTeachersSections() {
     QuerySet setQuery;
     setQuery.value[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
     if (!Database::get().updateOne(findQuery, setQuery, &out)) {
-      out << "<span style='color:red'>Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
+      out << "<span style='color:red'>Failed to store course info of instructor: " << teachers[i] << ". </span><br>";
     } else {
-      out << "<span style='color:green'>Assigned " << theTeachers[i] << " to section(s): "
+      out << "<span style='color:green'>Assigned " << teachers[i] << " to section(s): "
       << desiredSectionsList << "</span><br>";
     }
   }
@@ -1999,8 +1999,8 @@ std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddres
 std::string WebAPIResponse::getScoresPage() {
   MacroRegisterFunctionWithName("WebWorker::getScoresPage");
   std::stringstream out;
-  CalculatorHTML thePage;
-  thePage.loadDatabaseInfo(out);
+  CalculatorHTML page;
+  page.loadDatabaseInfo(out);
   std::string scoresHtml = WebAPIResponse::toStringUserScores();
   out << scoresHtml;
   return out.str();
@@ -2307,18 +2307,18 @@ int ProblemData::getExpectedNumberOfAnswers(
 
 void UserCalculator::computePointsEarned(
   const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-  MapList<std::string, TopicElement, MathRoutines::hashString>* theTopics,
+  MapList<std::string, TopicElement, MathRoutines::hashString>* topics,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::computePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
-  if (theTopics != nullptr) {
-    for (int i = 0; i < theTopics->size(); i ++) {
-      (*theTopics).values[i].totalPointsEarned = 0;
-      (*theTopics).values[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
-      (*theTopics).values[i].maxPointsInAllChildren = 0;
-      (*theTopics).values[i].flagSubproblemHasNoWeight = false;
+  if (topics != nullptr) {
+    for (int i = 0; i < topics->size(); i ++) {
+      (*topics).values[i].totalPointsEarned = 0;
+      (*topics).values[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
+      (*topics).values[i].maxPointsInAllChildren = 0;
+      (*topics).values[i].flagSubproblemHasNoWeight = false;
       //(*theTopics).theValues[i].maxCorrectAnswersInAllChildren = 0;
       //(*theTopics).theValues[i].numAnsweredInAllChildren = 0;
     }
@@ -2351,19 +2351,19 @@ void UserCalculator::computePointsEarned(
         this->pointsEarned += currentP.points;
       }
     }
-    if (theTopics != nullptr) {
-      if (theTopics->contains(problemName)) {
-        TopicElement& currentElt = theTopics->getValueCreateEmpty(problemName);
+    if (topics != nullptr) {
+      if (topics->contains(problemName)) {
+        TopicElement& currentElt = topics->getValueCreateEmpty(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElt.parentTopics.size; j ++) {
-          (*theTopics).values[currentElt.parentTopics[j]].totalPointsEarned += currentP.points;
-          (*theTopics).values[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
+          (*topics).values[currentElt.parentTopics[j]].totalPointsEarned += currentP.points;
+          (*topics).values[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
           if (currentWeight == 0) {
-            (*theTopics).values[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
+            (*topics).values[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
           }
         }
         if (currentElt.parentTopics.size > 1) {
-          (*theTopics).values[currentElt.parentTopics[currentElt.parentTopics.size - 2]].
+          (*topics).values[currentElt.parentTopics[currentElt.parentTopics.size - 2]].
             pointsEarnedInProblemsThatAreImmediateChildren += currentP.points;
         }
       }

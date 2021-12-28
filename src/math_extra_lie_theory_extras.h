@@ -122,7 +122,7 @@ public:
   List<List<QuasiPolynomial> > theQPsSubstituted;
   List<QuasiPolynomial> multiplicities;
   HomomorphismSemisimpleLieAlgebra homomorphism;
-  // List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
+  // List<QuasiPolynomial> multiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
   int numberNonZeroMultiplicities;
   Selection ParabolicLeviPartRootSpacesZeroStandsForSelected;
@@ -203,7 +203,7 @@ public:
   void makeZero(int numberOfVariables, SemisimpleLieAlgebraOrdered& inputOwner);
   void makeZero(const Coefficient& ringZero, SemisimpleLieAlgebraOrdered& inputOwner);
   bool modOutFDRelationsExperimental(
-    const Vector<Rational>& theHWsimpleCoords,
+    const Vector<Rational>& highestWeightSimpleCoordinates,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
@@ -369,7 +369,7 @@ public:
     const CoefficientTypeQuotientField& fieldZero
   );
   bool getCoordinatesInBasis(
-    List<ElementUniversalEnvelopingOrdered<Coefficient> >& theBasis,
+    List<ElementUniversalEnvelopingOrdered<Coefficient> >& basis,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit,
     const Coefficient& ringZero
@@ -479,7 +479,7 @@ public:
     const RationalFraction<Rational>& rationalFractionZero
   );
   bool getCoordinatesInBasis(
-    const List<ElementVermaModuleOrdered<Coefficient> >& theBasis,
+    const List<ElementVermaModuleOrdered<Coefficient> >& basis,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit,
     const Coefficient& ringZero
@@ -491,13 +491,13 @@ public:
   ) const {
     return this->elementInternal.isProportionalTo(other.elementInternal, outputTimesMeEqualsOther, ringZero);
   }
-  void makeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub) {
+  void makeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSubstitution) {
     this->elementInternal.makeZero(owner);
-    this->substitutionNthElementIsImageNthCoordinateSimpleBasis = incomingSub;
+    this->substitutionNthElementIsImageNthCoordinateSimpleBasis = incomingSubstitution;
   }
   template <class CoefficientTypeOther>
-  void operator*=(const CoefficientTypeOther& theConst) {
-    this->elementInternal.operator*=(theConst);
+  void operator*=(const CoefficientTypeOther& inputConstant) {
+    this->elementInternal.operator*=(inputConstant);
   }
   void multiplyOnTheLeft(
     const ElementSemisimpleLieAlgebra<Rational>& other,
@@ -508,8 +508,8 @@ public:
   void clearDenominators(Coefficient& outputWasMultipliedBy, const Coefficient& ringUnit) {
     this->elementInternal.clearDenominators(outputWasMultipliedBy, ringUnit);
   }
-  void operator/=(const Coefficient& theConst) {
-    this->elementInternal.operator/=(theConst);
+  void operator/=(const Coefficient& inputConstant) {
+    this->elementInternal.operator/=(inputConstant);
   }
   void operator-=(const ElementVermaModuleOrdered& other) {
     this->elementInternal -= other.elementInternal;

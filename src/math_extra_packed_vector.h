@@ -307,7 +307,7 @@ void AnotherWeylGroup<scalar, templateVector>::computeConjugacyClasses() {
   HashedList<int, HashFunctions::hashFunction> stack;
   stack.setExpectedSize(this->size());
   int rank = this->getRank();
-  templateVector theRhoImage;
+  templateVector rhoImage;
   global.comments << "number of conjugacy classes... ";
   for (int i = 0; i < this->size(); i ++) {
     if (!Accounted[i]) {
@@ -315,11 +315,11 @@ void AnotherWeylGroup<scalar, templateVector>::computeConjugacyClasses() {
       stack.addOnTop(i);
       for (int j = 0; j < stack.size; j ++)
         for (int k = 0; k < rank; k ++) {
-          theRhoImage = this->twiceRho;
-          this->simpleReflection(k, theRhoImage);
-          this->actOn(stack[j], theRhoImage);
-          this->simpleReflection(k, theRhoImage);
-          int accountedIndex = this->rhoOrbit.getIndex(theRhoImage);
+          rhoImage = this->twiceRho;
+          this->simpleReflection(k, rhoImage);
+          this->actOn(stack[j], rhoImage);
+          this->simpleReflection(k, rhoImage);
+          int accountedIndex = this->rhoOrbit.getIndex(rhoImage);
           stack.addOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex] = true;
         }

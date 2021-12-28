@@ -1175,17 +1175,17 @@ bool CalculatorFunctions::isSquareFree(
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theInteger;
-  if (!input[1].isInteger(&theInteger)) {
+  LargeInteger integerValue;
+  if (!input[1].isInteger(&integerValue)) {
     return false;
   }
   List<int> multiplicities;
   List<LargeInteger> factors;
-  if (!theInteger.value.factor(
+  if (!integerValue.value.factor(
     factors, multiplicities, 0, 3, &calculator.comments
   )) {
     return calculator << "Failed to factor: "
-    << theInteger.toString() << " (may be too large?).";
+    << integerValue.toString() << " (may be too large?).";
   }
   int result = 1;
   for (int i = 0; i < multiplicities.size; i ++) {
@@ -1347,14 +1347,14 @@ bool CalculatorFunctions::factorOutNumberContent(
   if (input.size() != 2) {
     return calculator << "FactorOutNumberContent expects single argument. ";
   }
-  LinearCombination<Expression, Rational> theV;
-  if (!calculator.functionCollectSummandsCombine(calculator, input[1], theV)) {
+  LinearCombination<Expression, Rational> linearCombination;
+  if (!calculator.functionCollectSummandsCombine(calculator, input[1], linearCombination)) {
     return calculator << "Failed to extract summands from: " << input[1].toString();
   }
-  if (theV.isEqualToZero()) {
+  if (linearCombination.isEqualToZero()) {
     return output.assignValue(calculator, 0);
   }
-  Rational scale = theV.scaleNormalizeLeadingMonomial(nullptr);
+  Rational scale = linearCombination.scaleNormalizeLeadingMonomial(nullptr);
   if (scale == 0) {
     return false;
   }
@@ -1365,7 +1365,7 @@ bool CalculatorFunctions::factorOutNumberContent(
   }
   Expression left, right;
   left.assignValue(calculator, scale);
-  right.makeSum(calculator, theV);
+  right.makeSum(calculator, linearCombination);
   output = left * right;
   return true;
 }
@@ -1929,9 +1929,9 @@ bool CalculatorFunctionsIntervals::unionUnionIntervals(
     return false;
   }
   const Expression& rightE = input[2][1];
-  Expression theMiddleUnion, middleUnionReduced;
-  theMiddleUnion.makeXOX(calculator, calculator.opUnion(), leftE, rightE);
-  if (!CalculatorFunctionsIntervals::unionIntervals(calculator, theMiddleUnion, middleUnionReduced)) {
+  Expression middleUnion, middleUnionReduced;
+  middleUnion.makeXOX(calculator, calculator.opUnion(), leftE, rightE);
+  if (!CalculatorFunctionsIntervals::unionIntervals(calculator, middleUnion, middleUnionReduced)) {
     return false;
   }
   return output.makeXOX(calculator, calculator.opUnion(), middleUnionReduced, rightComposite[2]);
@@ -2434,13 +2434,13 @@ bool CalculatorFunctions::isProductTermsUpToPower(
   if (input.size() < 3) {
     return false;
   }
-  Expression theBase;
-  theBase = input[1];
+  Expression baseExpression;
+  baseExpression = input[1];
   LargeInteger desiredMaxPower = 1;
-  if (theBase.startsWith(calculator.opPower(), 3)) {
-    if (theBase[2].isInteger(&desiredMaxPower)) {
+  if (baseExpression.startsWith(calculator.opPower(), 3)) {
+    if (baseExpression[2].isInteger(&desiredMaxPower)) {
       if (desiredMaxPower > 0) {
-        theBase = input[1][1];
+        baseExpression = input[1][1];
       } else {
         desiredMaxPower = 1;
       }
@@ -2463,12 +2463,12 @@ bool CalculatorFunctions::isProductTermsUpToPower(
     for (int i = 0; i < summands.size; i ++) {
       LargeInteger foundPower = 0;
       for (int j = 0; j < summands[i].size; j ++) {
-        if (summands[i][j] == theBase) {
+        if (summands[i][j] == baseExpression) {
           foundPower ++;
           continue;
         }
         if (summands[i][j].startsWith(calculator.opPower(), 3)) {
-          if (summands[i][j][1] == theBase) {
+          if (summands[i][j][1] == baseExpression) {
             LargeInteger localPower;
             if (summands[i][j][2].isInteger(&localPower)) {
               foundPower += localPower;
@@ -2539,15 +2539,15 @@ bool CalculatorFunctions::newtonsMethod(Calculator& calculator, const Expression
   if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, input[1], functionExpression)) {
     functionExpression = input[1];
   }
-  HashedList<Expression> theVars;
-  if (!functionExpression.getFreeVariables(theVars, true)) {
+  HashedList<Expression> variables;
+  if (!functionExpression.getFreeVariables(variables, true)) {
     return calculator << "Failed to get free variables from: " << functionExpression.toString();
   }
-  if (theVars.size != 1) {
+  if (variables.size != 1) {
     return calculator << "While trying to extract a function from: " << functionExpression.toString()
-    << ", got " << theVars.size << " variables. Newton's method requires an expression that depends "
+    << ", got " << variables.size << " variables. Newton's method requires an expression that depends "
     << "on exactly one variable. The variables I got were: "
-    << theVars.toStringCommaDelimited();
+    << variables.toStringCommaDelimited();
   }
   int numIterations = - 1;
   if (!input[3].isSmallInteger(&numIterations)) {
@@ -2565,7 +2565,7 @@ bool CalculatorFunctions::newtonsMethod(Calculator& calculator, const Expression
     return output.assignError(calculator, errorStream.str());
   }
   MapList<std::string, Expression, MathRoutines::hashString> substitution;
-  substitution.setKeyValue("x", theVars[0]);
+  substitution.setKeyValue("x", variables[0]);
   substitution.setKeyValue("f", functionExpression);
   substitution.setKeyValue("a", calculator.getNewAtom());
   substitution.setKeyValue("iteratedMap", calculator.getNewAtom());

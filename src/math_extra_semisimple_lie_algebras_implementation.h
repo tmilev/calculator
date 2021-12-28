@@ -47,7 +47,7 @@ template <class Coefficient>
 void Weight<Coefficient>::accountSingleWeight(
   const Vector<Rational>& currentWeightSimpleCoords,
   const Vector<Rational>& otherHighestWeightSimpleCoords,
-  Rational& theMult,
+  Rational& multiplicity,
   CharacterSemisimpleLieAlgebraModule<Coefficient>& outputAccum
 ) const {
   //This is the Brauer-Klimyk formula. Reference:
@@ -75,7 +75,7 @@ void Weight<Coefficient>::accountSingleWeight(
   tempMon.owner = this->owner;
   tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(dominant);
   Coefficient coeffChange;
-  coeffChange = theMult;
+  coeffChange = multiplicity;
   coeffChange *= sign;
   outputAccum.addMonomial(tempMon, coeffChange);
 }
@@ -142,22 +142,22 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvaluateMeFull
     return false;
   }
   outputCharOwnerSetToZero.makeZero();
-  Vectors<Rational> theVect;
-  HashedList<Vector<Coefficient> > theOrbit;
-  theVect.setSize(1);
+  Vectors<Rational> vector;
+  HashedList<Vector<Coefficient> > orbit;
+  vector.setSize(1);
   Weight<Coefficient> tempMon;
   tempMon.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
-    theVect[0] = this->getOwner()->weylGroup.getSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordinates, Rational::zero());
-    if (!(this->getOwner()->weylGroup.generateOrbit(theVect, false, theOrbit, false, - 1, 0, upperBoundNumDominantWeights))) {
+    vector[0] = this->getOwner()->weylGroup.getSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordinates, Rational::zero());
+    if (!(this->getOwner()->weylGroup.generateOrbit(vector, false, orbit, false, - 1, 0, upperBoundNumDominantWeights))) {
       if (outputDetails != nullptr) {
         *outputDetails = "failed to generate orbit (possibly too large?)";
       }
       return false;
     }
-    int orbitSize = theOrbit.size;
+    int orbitSize = orbit.size;
     for (int j = 0; j < orbitSize; j ++) {
-      tempMon.weightFundamentalCoordinates = this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(theOrbit[j]);
+      tempMon.weightFundamentalCoordinates = this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(orbit[j]);
       outputCharOwnerSetToZero.addMonomial(tempMon, domChar.coefficients[i]);
     }
   }

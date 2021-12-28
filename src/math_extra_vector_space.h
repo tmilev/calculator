@@ -87,10 +87,10 @@ void Basis<Coefficient>::computeGramMatrix() {
 template <typename Coefficient>
 Vector<Coefficient> Basis<Coefficient>::putInBasis(const Vector<Coefficient>& input) {
   if (false) {
-    Vectors<Coefficient> theBasisVectorForm;
-    this->basis.getVectorsFromRows(theBasisVectorForm);
+    Vectors<Coefficient> basisVectorForm;
+    this->basis.getVectorsFromRows(basisVectorForm);
     Vector<Coefficient> output;
-    input.getCoordinatesInBasis(theBasisVectorForm, output);
+    input.getCoordinatesInBasis(basisVectorForm, output);
     return output;
   } else {
     if (!haveGramMatrix) {

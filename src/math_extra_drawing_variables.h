@@ -145,10 +145,10 @@ public:
   );
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
-  void scaleToUnitLength(Vector<double>& theRoot) {
-    double theLength = this->bilinearForm.scalarProduct(theRoot, theRoot);
-    theLength = FloatingPoint::sqrtFloating(theLength);
-    theRoot /= theLength;
+  void scaleToUnitLength(Vector<double>& root) {
+    double length = this->bilinearForm.scalarProduct(root, root);
+    length = FloatingPoint::sqrtFloating(length);
+    root /= length;
   }
   void rotateOutOfPlane(
     std::stringstream& Logger,
@@ -195,16 +195,16 @@ public:
 
 class DrawingVariables {
 public:
-  typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
-  typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
-  typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
-  typedef void (*drawClearScreenFunction)();
+  typedef void (*DrawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long penStyle, int ColorIndex);
+  typedef void (*DrawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
+  typedef void (*DrawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
+  typedef void (*DrawClearScreenFunction)();
 
 private:
-  drawLineFunction theDrawLineFunction;
-  drawTextFunction theDrawTextFunction;
-  drawCircleFunction theDrawCircleFunction;
-  drawClearScreenFunction theDrawClearScreenFunction;
+  DrawLineFunction drawLineFunction;
+  DrawTextFunction drawTextFunction;
+  DrawCircleFunction drawCircleFunction;
+  DrawClearScreenFunction drawClearScreenFunction;
 public:
   enum PenStyles {
     PenStyleInvisible,
@@ -315,8 +315,8 @@ public:
   );
   void drawCircleAtVectorBufferDouble(const Vector<double>& point, const std::string& color, double radius);
   void operator=(const DrawingVariables& other) {
-    this->theDrawLineFunction = other.theDrawLineFunction;
-    this->theDrawTextFunction = other.theDrawTextFunction;
+    this->drawLineFunction = other.drawLineFunction;
+    this->drawTextFunction = other.drawTextFunction;
   }
 };
 #endif

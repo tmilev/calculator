@@ -471,7 +471,7 @@ bool CalculatorBasics::associate(Calculator& calculator, const Expression& input
 
 bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::standardIsDenotedBy");
-  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
+  RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opIsDenotedBy(), 3)) {
     return false;
   }
@@ -683,7 +683,9 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
 }
 
 bool Calculator::collectCoefficientsPowersVariables(
-  const Expression& input, const Expression& theVariable, VectorSparse<Expression>& outputPositionIiscoeffXtoIth
+  const Expression& input,
+  const Expression& variable,
+  VectorSparse<Expression>& outputPositionIiscoeffXtoIth
 ) {
   MacroRegisterFunctionWithName("Calculator::collectCoefficientsPowersVariables");
   List<Expression> summands, currentMultiplicands, remainingMultiplicands;
@@ -703,14 +705,14 @@ bool Calculator::collectCoefficientsPowersVariables(
       } else {
         currentCoeff.makeProduct(calculator, remainingMultiplicands);
       }
-      if (currentE == theVariable) {
+      if (currentE == variable) {
         outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(1), currentCoeff);
         found = true;
         break;
       }
       if (currentE.startsWith(calculator.opPower(), 3)) {
         int power;
-        if (currentE[1] == theVariable) {
+        if (currentE[1] == variable) {
           if (currentE[2].isSmallInteger(&power)) {
             outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(power), currentCoeff);
             found = true;
@@ -2236,7 +2238,7 @@ bool Expression::mergeContextsMyAruments(
 
 bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
-  RecursionDepthCounter theCounter(&calculator.recursionDepth);
+  RecursionDepthCounter counter(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opCommandSequence())) {
     return false;
   }

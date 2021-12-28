@@ -28,23 +28,23 @@ std::string SSLRecord::Test::sampleClientHelloHex =
 bool SSLRecord::Test::serializationClientHello(TransportLayerSecurityServer& testServer) {
   MacroRegisterFunctionWithName("SSLRecord::Test::serializationClientHello");
   std::string inputHex = SSLRecord::Test::sampleClientHelloHex;
-  SSLRecord theRecord;
-  theRecord.owner = &testServer;
+  SSLRecord record;
+  record.owner = &testServer;
   std::stringstream comments;
   if (!Crypto::convertHexToListUnsignedChar(
-    inputHex, theRecord.incomingBytes, &comments
+    inputHex, record.incomingBytes, &comments
   )) {
     global.fatal << "Bad hard-coded test hex string!" << global.fatal;
   }
-  if (!theRecord.decode(&comments)) {
+  if (!record.decode(&comments)) {
     global.fatal << "Failed to decode built-in message. " << comments.str() << global.fatal;
   }
   List<unsigned char> encoded;
-  theRecord.writeBytes(encoded, nullptr);
-  if (encoded != theRecord.incomingBytes) {
-    global << "Decoded:\n" << theRecord.content.getStringHighlighter()
-    << Crypto::convertListUnsignedCharsToHex(theRecord.incomingBytes) << Logger::endL;
-    global << "Encoded:\n" << theRecord.content.getStringHighlighter()
+  record.writeBytes(encoded, nullptr);
+  if (encoded != record.incomingBytes) {
+    global << "Decoded:\n" << record.content.getStringHighlighter()
+    << Crypto::convertListUnsignedCharsToHex(record.incomingBytes) << Logger::endL;
+    global << "Encoded:\n" << record.content.getStringHighlighter()
     << Crypto::convertListUnsignedCharsToHex(encoded) << Logger::endL;
     global.fatal << "decode->Encode did not reproduce the original input. " << global.fatal;
   }

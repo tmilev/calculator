@@ -64,9 +64,9 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFraction<Rational> >& outputHWs,
+    Vectors<RationalFraction<Rational> >& outputHighestWeights,
     BranchingData& g2InB3Data,
-    ExpressionContext &theContext
+    ExpressionContext &context
   );
   static bool writeGenVermaModAsDiffOperators(
     Calculator& calculator,

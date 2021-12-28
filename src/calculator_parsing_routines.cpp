@@ -2572,7 +2572,7 @@ bool CalculatorParser::applyOneRule() {
   // it appears to be the more natural choice.
   // if (fourthToLastS == "Expression" && thirdToLastS == "{}" && secondToLastS == "Expression"
   //     && this->allowsApplyFunctionInPreceding(lastS) )
-  //   return this->replaceEOEXByEX(secondToLastE.theData.format);
+  //   return this->replaceEOEXByEX(secondToLastE.data.format);
   if (
     fourthToLastS == "Expression" &&
     thirdToLastS == "{}" &&

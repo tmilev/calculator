@@ -379,12 +379,12 @@ private:
   );
   bool makeMatrix(Matrix<Expression>* inputMatrix, Calculator& owner);
   bool makeSequence(Calculator& owner, List<Expression>* inputSequence = nullptr);
-  bool makeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
+  bool makeXOX(Calculator& owner, int operation, const Expression& left, const Expression& right);
   bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
   bool makeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
 
   bool makeXOXOdotsOX(Calculator& owner, int operation, const List<Expression>& opands);
-  bool makeOXdotsX(Calculator& owner, int operation, const List<Expression>& input);
+  bool makeOXdotsX(Calculator& owner, int operation, const List<Expression>& opands);
   bool makeOX(Calculator& owner, int operation, const Expression& opArgument);
   bool sequencefy();
   bool isSuitableForSubstitution() const;
@@ -2419,7 +2419,7 @@ public:
   static bool outerPowerRaiseToFirst(Calculator& calculator, const Expression& input, Expression& output);
   static bool collectCoefficientsPowersVariables(
     const Expression& input,
-    const Expression& theVariable,
+    const Expression& variable,
     VectorSparse<Expression>& outputPositionIiscoeffXtoIth
   );
   bool collectOpands(const Expression& input, int operation, List<Expression>& outputOpands);

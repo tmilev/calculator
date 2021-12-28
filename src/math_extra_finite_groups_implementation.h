@@ -1519,9 +1519,9 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
     out << "Character needs to be computed.";
   }
   int rank = this->ownerGroup->generators.size;
-  LargeIntegerUnsigned theLCM, theDen;
-  this->getLargestDenominatorSimpleGenerators(theLCM, theDen);
-  out << "\n<br>\n LCM denominators simple generators: " << theLCM.toString() << ", largest denominator: " << theDen.toString();
+  LargeIntegerUnsigned leastCommonMultiple, denominator;
+  this->getLargestDenominatorSimpleGenerators(leastCommonMultiple, denominator);
+  out << "\n<br>\n LCM denominators simple generators: " << leastCommonMultiple.toString() << ", largest denominator: " << denominator.toString();
   out << "\n<br>\nThe simple generators (" << rank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
   for (int i = 0; i < rank; i ++) {
@@ -2054,8 +2054,8 @@ void FiniteGroup<elementSomeGroup>::addCharacter(const ClassFunction<FiniteGroup
   //                             (2) to remind the user not to use a list of pointers
   /*  ClassFunction<FiniteGroup<elementSomeGroup>, Rational>* place = 0;
   for (int i = 0; i < this->irreps.size; i ++)
-    if (this->irreps[i].theCharacter == X)
-      place = &(this->irreps[i].theCharacter);
+    if (this->irreps[i].character == X)
+      place = &(this->irreps[i].character);
   if (place == 0)
     for (int i = 0; i < this->orphanCharacters.size; i ++)
       if (this->orphanCharacters[i] == X)
@@ -2371,10 +2371,10 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
     }
   }
   GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& sr = *startingIrrep;
-  if (this->theGroup.squaresCCReps.size == 0) {
-    this->theGroup.computeSquaresCCReps(global);
+  if (this->group.squaresCCReps.size == 0) {
+    this->group.computeSquaresCCReps(global);
   }
-  this->theGroup.characterTable.setSize(0);
+  this->group.characterTable.setSize(0);
   this->irreps_grcam.setSize(0);
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > newspaces;
   newspaces.addOnTop(sr);
@@ -2392,8 +2392,8 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
     List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > spaces = tspace.decomposeThomasVersion();
     for (int spi = 0; spi < spaces.size; spi ++) {
       if (spaces[spi].getNumberOfComponents() == 1) {
-        if (!this->theGroup.characterTable.contains(spaces[spi].getCharacter())) {
-          this->theGroup.characterTable.addOnTop(spaces[spi].getCharacter());
+        if (!this->group.characterTable.contains(spaces[spi].getCharacter())) {
+          this->group.characterTable.addOnTop(spaces[spi].getCharacter());
           this->irreps_grcam.addOnTop(spaces[spi]);
           newspaces.addOnTop(spaces[spi]);
         }
@@ -2401,17 +2401,17 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
         incompletely_digested.addOnTop(spaces[spi]);
       }
     }
-    if (irreps_grcam.size == this->theGroup.conjugacyClassCount()) {
+    if (irreps_grcam.size == this->group.conjugacyClassCount()) {
       break;
     }
     for (int spi = 0; spi < incompletely_digested.size; spi ++) {
-      for (int ci = 0; ci < this->theGroup.characterTable.size; ci ++) {
-        if (incompletely_digested[spi].getCharacter().innerProduct(this->theGroup.characterTable[ci]) != 0) {
+      for (int ci = 0; ci < this->group.characterTable.size; ci ++) {
+        if (incompletely_digested[spi].getCharacter().innerProduct(this->group.characterTable[ci]) != 0) {
           List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > shards = incompletely_digested[spi].decomposeThomasVersion();
           incompletely_digested.removeIndexShiftDown(spi);
           for (int shi = 0; shi < shards.size; shi ++) {
             if (shards[shi].getNumberOfComponents() == 1) {
-              if (!this->theGroup.characterTable.contains(shards[shi].getCharacter())) {
+              if (!this->group.characterTable.contains(shards[shi].getCharacter())) {
                 this->irreps_grcam.addOnTop(spaces[spi]);
                 this->characterTable.addOnTop(this->irreps_grcam.lastObject()->character);
                 newspaces.addOnTop(spaces[spi]);
@@ -2432,8 +2432,8 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
     this->irreducibleRepresentations.addOnTop(this->irreps_grcam[i].makeOtherGroupRepresentationClass());
     this->characterTable.addOnTop(&(this->irreducibleRepresentations[i].character));
   }
-  this->theGroup.flagCharTableIsComputed = true;
-  this->theGroup.flagIrrepsAreComputed = true;
+  this->group.flagCharTableIsComputed = true;
+  this->group.flagIrrepsAreComputed = true;
 }
 
 template <typename elementSomeGroup>

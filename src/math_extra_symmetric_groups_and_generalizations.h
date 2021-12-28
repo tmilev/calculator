@@ -411,11 +411,11 @@ public:
     return false;
   }
   template <typename Coefficient>
-  void getCharacteristicPolynomialStandardRepresentation(Polynomial<Coefficient>& theCharPoly) {
+  void getCharacteristicPolynomialStandardRepresentation(Polynomial<Coefficient>& characterPolynomial) {
     Polynomial<Rational> p;
-    this->h.getCharacteristicPolynomialStandardRepresentation(theCharPoly);
+    this->h.getCharacteristicPolynomialStandardRepresentation(characterPolynomial);
     this->k.getCharacteristicPolynomialStandardRepresentation(p);
-    theCharPoly *= p;
+    characterPolynomial *= p;
   }
 };
 
@@ -1797,7 +1797,7 @@ std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum() {
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     this->ownerGroup->irreps[i].computeCharacter();
     Coefficient x;
-    x = this->character.innerProduct(this->ownerGroup->irreps[i].theCharacter);
+    x = this->character.innerProduct(this->ownerGroup->irreps[i].character);
     if (x != 0) {
       if (firstone) {
         firstone = false;

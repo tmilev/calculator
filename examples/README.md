@@ -2,7 +2,7 @@
 
 The calculator is a substitution engine and does not distinguish between "operators" and "regular functions" except for the different syntax with which these are entered. For example, the expressions "a+b" and "add(a,b)" are equivalent. 
 
-Every operator/function in the calculator corresponds to one or more internal function, which we call handlers. For example, the function/operator "a+b" can be handled by more than 40 different handlers. Each handler either substitutes the expression "a+b" with a new one, or leaves it intact. If multiple handlers are applicable, the first applicable one is used. The order of the handlers is the same as the order in the documentation below.
+Every operator/function in the calculator corresponds to one or more internal function, which we call handlers. For example, the function/operator "a+b" can be handled by more than 40 different handlers. Each handler either substitutes the expression "a+b" with a new one, or leaves it intact. If multiple handlers are available, the first applicable one is used. The order of the handlers is the same as the order in the documentation below.
 
 The users can dynamically add their own substitution rules to the built-in handlers. Users can also turn on and off any of the built-in handlers.
 
@@ -32,7 +32,6 @@ By "syntax", we mean the translation of a sequence of characters to an internal 
 - Likewise, the string "Polynomialize((x+1)^2)" corresponds to the command "Polynomialize" with input "(x+1)^2". The actual C++ handler takes as input both the expression "Polynomialize" and the expression "(x+1)^2".
 
 Note that these two examples have different syntax, but very similar internal representations. This is so by design. Our syntax is designed to follow a small subset of LaTeX, which in turn follows mathematical conventions rather than computer science ones. In practice our syntax is very stable for commonly used expressions (fractions, integrals, exponents, etc.). 
-
 
 ## List of handlers
 Below, we list all built-in calculator handlers ("commands", "operators"). For each handler, the first entry is the name of the command.
@@ -4558,7 +4557,7 @@ AdjointMatrix(g_2)
 Computes the adjoint matrix of element g. The adjoint matrix is the matrix of the linear map ad(g):x -> [g,x].First element g = element of a semisimple Lie algebra. Extended to a map on the universal enveloping algebra via: ad(g_1, g_2) = ad(g_1)ad(g_2)
 
 *CartanInvolution* [CartanInvolution] {CalculatorLieTheory::cartanInvolution}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%204%29%3b%5cnCartanInvolution%28AI%2c%205%29%3b%5cnCartanInvolution%28AII%2c%204%29%3b%5cnCartanInvolution%28AII%2c%205%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%201%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%5cnCartanInvolution%28E_6%2c%20EI%29%3b%5cnCartanInvolution%28E_6%2c%20EII%29%3b%5cnCartanInvolution%28E_6%2c%20EIII%29%3b%5cnCartanInvolution%28E_6%2c%20EIV%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CartanInvolution%28AI%2c%204%29%3b%5cnCartanInvolution%28AI%2c%205%29%3b%5cnCartanInvolution%28AII%2c%204%29%3b%5cnCartanInvolution%28AII%2c%205%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%201%29%3b%5cnCartanInvolution%28AIII%2c%204%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%202%29%3b%5cnCartanInvolution%28AIII%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%204%29%3b%5cnCartanInvolution%28BI%2c%204%2c%201%29%3b%5cnCartanInvolution%28BI%2c%204%2c%202%29%3b%5cnCartanInvolution%28BI%2c%204%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%201%29%3b%5cnCartanInvolution%28BI%2c%205%2c%202%29%3b%5cnCartanInvolution%28BI%2c%205%2c%203%29%3b%5cnCartanInvolution%28BI%2c%205%2c%204%29%3b%5cnCartanInvolution%28CI%2c%205%29%3b%5cnCartanInvolution%28CI%2c%205%2c1%29%3b%5cnCartanInvolution%28CI%2c%205%2c2%29%3b%5cnCartanInvolution%28CI%2c%205%2c%203%29%3b%5cnCartanInvolution%28CI%2c%205%2c%204%29%3b%5cnCartanInvolution%28DI%2c%205%29%3b%5cnCartanInvolution%28DI%2c%205%2c1%29%3b%5cnCartanInvolution%28DI%2c%205%2c2%29%3b%5cnCartanInvolution%28DI%2c%205%2c3%29%3b%5cnCartanInvolution%28DI%2c%205%2c4%29%3b%5cnCartanInvolution%28DI%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%205%29%3b%5cnCartanInvolution%28DII%2c%205%2c1%29%3b%5cnCartanInvolution%28DII%2c%205%2c2%29%3b%5cnCartanInvolution%28DII%2c%205%2c3%29%3b%5cnCartanInvolution%28DII%2c%205%2c4%29%3b%5cnCartanInvolution%28DII%2c%205%2c5%29%3b%5cnCartanInvolution%28DII%2c%203%2c1%29%3b%5cnCartanInvolution%28E_6%2c%20EI%29%3b%5cnCartanInvolution%28E_6%2c%20EII%29%3b%5cnCartanInvolution%28E_6%2c%20EIII%29%3b%5cnCartanInvolution%28E_6%2c%20EIV%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CartanInvolution(AI, 4);
 CartanInvolution(AI, 5);
@@ -4568,6 +4567,32 @@ CartanInvolution(AIII, 4, 1);
 CartanInvolution(AIII, 4, 2);
 CartanInvolution(AIII, 5, 2);
 CartanInvolution(AIII, 5, 3);
+CartanInvolution(BI, 4);
+CartanInvolution(BI, 4, 1);
+CartanInvolution(BI, 4, 2);
+CartanInvolution(BI, 4, 3);
+CartanInvolution(BI, 5, 1);
+CartanInvolution(BI, 5, 2);
+CartanInvolution(BI, 5, 3);
+CartanInvolution(BI, 5, 4);
+CartanInvolution(CI, 5);
+CartanInvolution(CI, 5,1);
+CartanInvolution(CI, 5,2);
+CartanInvolution(CI, 5, 3);
+CartanInvolution(CI, 5, 4);
+CartanInvolution(DI, 5);
+CartanInvolution(DI, 5,1);
+CartanInvolution(DI, 5,2);
+CartanInvolution(DI, 5,3);
+CartanInvolution(DI, 5,4);
+CartanInvolution(DI, 5,5);
+CartanInvolution(DII, 5);
+CartanInvolution(DII, 5,1);
+CartanInvolution(DII, 5,2);
+CartanInvolution(DII, 5,3);
+CartanInvolution(DII, 5,4);
+CartanInvolution(DII, 5,5);
+CartanInvolution(DII, 3,1);
 CartanInvolution(E_6, EI);
 CartanInvolution(E_6, EII);
 CartanInvolution(E_6, EIII);

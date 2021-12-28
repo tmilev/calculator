@@ -174,37 +174,49 @@ class MathRoutines {
 public:
   template <class Coefficient>
   static bool invertXModN(const Coefficient& x, const Coefficient& n, Coefficient& output) {
-    Coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
-    Coefficient vD[2], vP[2], temp;
-    vP[0] = 1;
-    vP[1] = 0; // at any given moment, p = vP[0] * N + vP[1] * X
-    vD[0] = 0;
-    vD[1] = 1; // at any given moment, d = vD[0] * N + vD[1] * X
-    p = n;
-    d = x;
-    d %= n;
-    if (d < 0) {
-      d += n;
+    Coefficient quotient;
+    Coefficient remainder;
+    Coefficient dividend;
+    Coefficient divisor;
+    Coefficient dividendN;
+    Coefficient dividendX;
+    Coefficient divisorN;
+    Coefficient divisorX;
+    Coefficient swapX;
+    Coefficient swapN;
+    if (x < 0 || n < 0) {
+      fatalCrash("Negative inputs to invertXModN");
     }
-    while (d > 0) {
-      q = p / d;
-      r = p % d;
-      p = d;
-      d = r;
-      for (int i = 0; i < 2; i ++) {
-        temp = vP[i];
-        vP[i] = vD[i];
-        vD[i] = temp - q * vD[i];
-      }
+    // At any given moment, dividend = dividendN * N + dividendX * X.
+    dividend = n;
+    dividendN = 1;
+    dividendX = 0;
+    // At any given moment, divisor = divisorN * N + divisorX * X.
+    divisor = x;
+    divisorN = 0;
+    divisorX = 1;
+    while (divisor > 0) {
+      quotient = dividend / divisor;
+      remainder = dividend % divisor;
+      dividend = divisor;
+      divisor = remainder;
+
+      swapX = dividendX;
+      swapN = dividendN;
+
+      dividendX = divisorX;
+      dividendN = divisorN;
+
+      divisorX = swapX - quotient * divisorX;
+      divisorN = swapN - quotient * divisorN;
     }
-    if (!(p == 1)) {
-      return false;//d and p were not relatively prime.
+    if (dividend != 1) {
+      return false; //d and p were not relatively prime.
     }
-    p = vP[1] % n;
-    if (p < 0) {
-      p += n;
+    output = dividendX % n;
+    if (output < 0) {
+      output += n;
     }
-    output = p;
     return true;
   }
   static int leastCommonMultiple(int a, int b);
@@ -233,9 +245,9 @@ public:
   static bool isHexDigit(char digitCandidate);
   static bool isADigit(char input, int* whichDigit = nullptr);
   template <class Type>
-  static bool generateVectorSpaceClosedWithRespectToLieBracket(List<Type>& inputOutputElts, int upperDimensionBound) {
+  static bool generateVectorSpaceClosedWithRespectToLieBracket(List<Type>& inputOutputElements, int upperDimensionBound) {
     return MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
-      inputOutputElts, upperDimensionBound, Type::lieBracket
+      inputOutputElements, upperDimensionBound, Type::lieBracket
     );
   }
   static Vector<double> getVectorDouble(Vector<Rational>& input);

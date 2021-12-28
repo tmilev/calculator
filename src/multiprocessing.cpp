@@ -370,8 +370,8 @@ void Pipe::readLoop(List<char>& output) {
   );
   output.setSize(0);
   while (output.size < expectedBytes) {
-    this->thePipe.readOnceNoFailure(true);
-    output.addListOnTop(this->thePipe.lastRead);
+    this->pipe.readOnceNoFailure(true);
+    output.addListOnTop(this->pipe.lastRead);
   }
   safetyFirst.unlockMe(); // Prevent threads from locking one another.
 }
@@ -381,11 +381,11 @@ void Pipe::writeOnceAfterEmptying(
 ) {
   MacroRegisterFunctionWithName("Pipe::writeOnceAfterEmptying");
   MutexlockGuard safety(global.mutexWebWorkerPipeWritelock);
-  this->theMutexPipe.lock();
-  this->thePipe.readOnceNoFailure(dontCrashOnFail);
-  this->thePipe.lastRead.setSize(0);
-  this->thePipe.writeOnceNoFailure(toBeSent, 0, dontCrashOnFail);
-  this->theMutexPipe.unlock();
+  this->mutexPipe.lock();
+  this->pipe.readOnceNoFailure(dontCrashOnFail);
+  this->pipe.lastRead.setSize(0);
+  this->pipe.writeOnceNoFailure(toBeSent, 0, dontCrashOnFail);
+  this->mutexPipe.unlock();
 }
 
 bool PipePrimitive::readOnceWithoutEmptying(bool dontCrashOnFail) {
@@ -482,27 +482,27 @@ std::string Pipe::toString() const {
   if (this->name != "") {
     out << this->name << ": information pipe: ";
   }
-  out << this->thePipe.toString();
-  out << " mutex data: " << this->theMutexPipe.toString();
+  out << this->pipe.toString();
+  out << " mutex data: " << this->mutexPipe.toString();
   return out.str();
 }
 
 bool Pipe::resetNoAllocation() {
-  bool oldReadEndBlocks = this->thePipe.flagReadEndBlocks;
+  bool oldReadEndBlocks = this->pipe.flagReadEndBlocks;
   if (oldReadEndBlocks) {
-    if (!this->thePipe.setReadNonBlocking(true)) {
+    if (!this->pipe.setReadNonBlocking(true)) {
       return false;
     }
   }
-  this->thePipe.readOnceNoFailure(true);
+  this->pipe.readOnceNoFailure(true);
   if (oldReadEndBlocks) {
-    if (!this->thePipe.setReadBlocking(true)) {
+    if (!this->pipe.setReadBlocking(true)) {
       return false;
     }
   }
   if (
     this->metaData.readOnceNoFailure(true) &&
-    this->theMutexPipe.resetNoAllocation()
+    this->mutexPipe.resetNoAllocation()
   ) {
     return true;
   }
@@ -514,11 +514,11 @@ bool Pipe::createMe(const std::string& inputPipeName) {
   this->checkConsistency();
   this->release();
   this->name = inputPipeName;
-  if (!this->thePipe.createMe("pipe[" + inputPipeName + "]", false, false, true)) {
+  if (!this->pipe.createMe("pipe[" + inputPipeName + "]", false, false, true)) {
     this->release();
     return false;
   }
-  if (!this->theMutexPipe.createMe("mutex[" + inputPipeName + "]", true)) {
+  if (!this->mutexPipe.createMe("mutex[" + inputPipeName + "]", true)) {
     this->release();
     return false;
   }
@@ -549,8 +549,8 @@ Pipe::Pipe() {
 
 void Pipe::release() {
   this->checkConsistency();
-  this->theMutexPipe.release();
-  this->thePipe.release();
+  this->mutexPipe.release();
+  this->pipe.release();
   this->metaData.release();
 }
 
@@ -601,14 +601,14 @@ void Pipe::readOnceWithoutEmptying(bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::readOnceWithoutEmptying");
   MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
   MutexlockGuard guard (safetyFirst); // guard from other threads.
-  this->theMutexPipe.lock();
-  this->thePipe.readOnceNoFailure(dontCrashOnFail);
-  if (this->thePipe.lastRead.size > 0) {
+  this->mutexPipe.lock();
+  this->pipe.readOnceNoFailure(dontCrashOnFail);
+  if (this->pipe.lastRead.size > 0) {
     std::string tempS;
     tempS = this->getLastRead();
-    this->thePipe.writeOnceNoFailure(tempS, 0, dontCrashOnFail);
+    this->pipe.writeOnceNoFailure(tempS, 0, dontCrashOnFail);
   }
-  this->theMutexPipe.unlock();
+  this->mutexPipe.unlock();
 }
 
 void Pipe::readOnce(bool dontCrashOnFail) {
@@ -616,10 +616,10 @@ void Pipe::readOnce(bool dontCrashOnFail) {
   this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
   MutexlockGuard guard(safetyFirst); // guard from other threads.
-  MutexProcesslockGuard lock(this->theMutexPipe);
-  this->theMutexPipe.lock();
-  this->thePipe.readOnceNoFailure(dontCrashOnFail);
-  this->theMutexPipe.unlock();
+  MutexProcesslockGuard lock(this->mutexPipe);
+  this->mutexPipe.lock();
+  this->pipe.readOnceNoFailure(dontCrashOnFail);
+  this->mutexPipe.unlock();
 }
 
 Logger::Logger() {

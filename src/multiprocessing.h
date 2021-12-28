@@ -144,13 +144,13 @@ public:
 // a mutex-based mechanism for locking out other threads within the same process.
 class Pipe {
 public:
-  PipePrimitive thePipe;
+  PipePrimitive pipe;
   PipePrimitive metaData;
-  MutexProcess theMutexPipe;
+  MutexProcess mutexPipe;
   bool flagDeallocated;
   std::string name;
   std::string getLastRead() {
-    return this->thePipe.getLastRead();
+    return this->pipe.getLastRead();
   }
   void readOnce(bool dontCrashOnFail);
   void readOnceWithoutEmptying(bool dontCrashOnFail);

@@ -15,7 +15,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   std::string tempS;
   Vector<Rational> root;
   Vector<Rational> root2;
-  int numRoots = this->weylGroup.rootSystem.size;
+  int numberOfRoots = this->weylGroup.rootSystem.size;
   int dimension = this->weylGroup.cartanSymmetric.numberOfRows;
   ElementSemisimpleLieAlgebra<Rational> element1, element2, element3;
   std::string hLetter = "h";
@@ -45,7 +45,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   }
   tableLateXStream << "}\n";
   tableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
-  for (int i = 0; i < numRoots + dimension; i ++) {
+  for (int i = 0; i < numberOfRoots + dimension; i ++) {
     element1.makeGenerator(i, *this);
     tempS = element1.toString(format);
     htmlStream << "<td>" << tempS << "</td>";
@@ -55,7 +55,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   tableLateXStream << "\\\\\n";
   htmlStream << "</tr>";
   //int lineCounter = 0;
-  for (int i = 0; i < dimension + numRoots; i ++) {
+  for (int i = 0; i < dimension + numberOfRoots; i ++) {
     root = this->getWeightOfGenerator(i);
     tableLateXStream << root.toString() << "&";
     htmlStream << "<tr><td>" << root.toString() << "</td>";
@@ -66,7 +66,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
     tempS = element1.toString(format);
     tableLateXStream << tempS;
     htmlStream << "<td>" << tempS << "</td>";
-    for (int j = 0; j < numRoots + dimension; j ++) {
+    for (int j = 0; j < numberOfRoots + dimension; j ++) {
       element2.makeGenerator(j, *this);
       this->lieBracket(element1, element2, element3);
       tempS = element3.toString(format);
@@ -540,13 +540,10 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
 void SemisimpleLieAlgebra::computeLieBracketTable() {
   int numberOfPositiveRoots = this->weylGroup.rootsOfBorel.size;
   int rank = this->weylGroup.cartanSymmetric.numberOfRows;
-  int numRoots = numberOfPositiveRoots * 2;
-  int numberOfGenerators = numRoots + rank;
+  int numberOfRoots = numberOfPositiveRoots * 2;
+  int numberOfGenerators = numberOfRoots + rank;
   this->lieBrackets.initialize(numberOfGenerators, numberOfGenerators);
-  //  this->liebracketPairingIndices.initialize(numberOfGenerators, numberOfGenerators);
   this->universalEnvelopingGeneratorOrder.initializeFillInObject(numberOfGenerators, - 1);
-  //  this->liebracketPairingIndices.makeZero(- 1);
-  //  this->OppositeRootSpaces.initializeFillInObject(numRoots+dimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
   for (int i = 0; i < numberOfGenerators; i ++) {
     leftWeight = this->getWeightOfGenerator(i);
@@ -841,23 +838,23 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   mapOnRootSpaces.assignVectorsToRows(automorphisms.externalAutomorphisms[automorphismIndex]);
   mapOnRootSpaces.transpose();
   Selection nonExplored;
-  int numRoots = this->weylGroup.rootSystem.size;
-  nonExplored.initialize(numRoots);
+  int numberOfRoots = this->weylGroup.rootSystem.size;
+  nonExplored.initialize(numberOfRoots);
   nonExplored.makeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
 
   this->computeChevalleyConstants();
   List<ElementSemisimpleLieAlgebra<Rational> > domain, range;
-  range.setSize(numRoots + dimension);
-  domain.setSize(numRoots + dimension);
+  range.setSize(numberOfRoots + dimension);
+  domain.setSize(numberOfRoots + dimension);
   ElementSemisimpleLieAlgebra<Rational> element;
   for (int i = 0; i < dimension; i ++) {
     domainRoot.makeEi(dimension, i);
     mapOnRootSpaces.actOnVectorColumn(domainRoot, rangeRoot);
     element.makeCartanGenerator(domainRoot, *this);
-    domain[numRoots + i] = element;
+    domain[numberOfRoots + i] = element;
     element.makeCartanGenerator(rangeRoot, *this);
-    range[numRoots + i] = element;
+    range[numberOfRoots + i] = element;
     for (int i = 0; i < 2; i ++, domainRoot.negate(), rangeRoot.negate()) {
       int index = this->weylGroup.rootSystem.getIndex(rangeRoot);
       element.makeGGenerator(rangeRoot, *this);

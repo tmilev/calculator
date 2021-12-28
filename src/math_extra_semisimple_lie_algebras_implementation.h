@@ -451,7 +451,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   std::stringstream out;
   WeylGroupData& weylGroup = this->getOwner()->weylGroup;
   weylGroup.drawRootSystem(drawingVariables, false, true);
-  int totalNumWeights = 0;
+  int totalWeights = 0;
   Vectors<Coefficient> dominantWeightsNonHashed;
   HashedList<Vector<Coefficient> > finalWeights;
   Vector<Rational> convertor;
@@ -460,8 +460,8 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
     dominantWeightsNonHashed.size = 0;
     dominantWeightsNonHashed.addOnTop(weylGroup.getSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoordinates));
     bool isTrimmed = !weylGroup.generateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0,  0, upperBoundWeights);
-    totalNumWeights += finalWeights.size;
-    if (isTrimmed || totalNumWeights>upperBoundWeights) {
+    totalWeights += finalWeights.size;
+    if (isTrimmed || totalWeights>upperBoundWeights) {
       out << "Did not generate all weights of the module due to RAM limits. ";
       result = false;
       break;
@@ -474,8 +474,8 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
       }
     }
   }
-  out << "<br>Number of computed weights: " << totalNumWeights << ". ";
-  if (result && totalNumWeights<upperBoundWeights) {
+  out << "<br>Number of computed weights: " << totalWeights << ". ";
+  if (result && totalWeights<upperBoundWeights) {
     out << "<br>All weights were computed and are drawn. <br>";
   } else {
     out << "<br><b> Not all weights were computed. </b>";

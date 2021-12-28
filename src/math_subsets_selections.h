@@ -156,7 +156,7 @@ public:
   List<int> elements;
   List<int> multiplicities;
   List<int> capacities;
-  void initPart1(int numElements);
+  void initPart1(int numberOfElements);
   void clearNoMaxMultiplicitiesChange();
   bool incrementReturnFalseIfPastLast();
   LargeInteger totalNumberOfSubsets();

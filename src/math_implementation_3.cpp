@@ -4911,10 +4911,10 @@ int PartialFractions::getIndexDoubleOfARoot(const Vector<Rational>& root) {
   return this->getIndex(root * 2);
 }
 
-void SelectionWithDifferentMaxMultiplicities::initPart1(int numElements) {
-  this->multiplicities.initializeFillInObject(numElements, 0);
-  this->capacities.initializeFillInObject(numElements,0);
-  this->elements.reserve(numElements);
+void SelectionWithDifferentMaxMultiplicities::initPart1(int numberOfElements) {
+  this->multiplicities.initializeFillInObject(numberOfElements, 0);
+  this->capacities.initializeFillInObject(numberOfElements,0);
+  this->elements.reserve(numberOfElements);
   this->elements.size = 0;
 }
 
@@ -7073,8 +7073,8 @@ void WeylGroupData::generateRootSystem() {
   Vectors<Rational> startRoots;
   HashedList<Vector<Rational> > rootsFinder;
   startRoots.makeEiBasis(this->getDimension());
-  int estimatedNumRoots = this->dynkinType.getRootSystemSize();
-  this->generateOrbit(startRoots, false, rootsFinder, false, estimatedNumRoots);
+  int estimatedNumberOfRoots = this->dynkinType.getRootSystemSize();
+  this->generateOrbit(startRoots, false, rootsFinder, false, estimatedNumberOfRoots);
   this->rootSystem.clear();
   this->rootSystem.setExpectedSize(rootsFinder.size);
   this->rootsOfBorel.setSize(0);
@@ -7882,10 +7882,10 @@ std::string WeylGroupData::generateWeightSupportMethod1(
     out << "Number of (non-strictly) dominant weights: " << dominantWeights.size << "<br>";
   }
   HashedList<Vector<Rational> > finalWeights;
-  int estimatedNumWeights = static_cast<int>((Rational(this->group.getSize())).getDoubleValue() * dominantWeights.size);
-  estimatedNumWeights = MathRoutines::minimum(10000, estimatedNumWeights);
-  finalWeights.reserve(estimatedNumWeights);
-  finalWeights.setHashSize(estimatedNumWeights);
+  int estimatedNumberOfWeights = static_cast<int>((Rational(this->group.getSize())).getDoubleValue() * dominantWeights.size);
+  estimatedNumberOfWeights = MathRoutines::minimum(10000, estimatedNumberOfWeights);
+  finalWeights.reserve(estimatedNumberOfWeights);
+  finalWeights.setHashSize(estimatedNumberOfWeights);
   Vectors<Rational> dominantWeightsNonHashed;
   dominantWeightsNonHashed = (dominantWeights);
   this->generateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, nullptr, 10000);

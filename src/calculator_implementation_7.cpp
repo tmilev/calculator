@@ -7505,10 +7505,10 @@ bool CalculatorFunctions::findProductDistanceModN(
   indexStack.reserve(inputSize);
   LargeIntegerUnsigned modulus;
   modulus = static_cast<unsigned>(inputSize);
-  int numElementsCovered = 0;
+  int numberOfElementsCovered = 0;
   for (int i = 0; i < integerList.size; i ++) {
     if (inputList[integersReduced[i]] == 0) {
-      numElementsCovered ++;
+      numberOfElementsCovered ++;
     }
     inputList[integersReduced[i]] = static_cast<unsigned>(integerList[i]);
     indexStack.addOnTop(integersReduced[i]);
@@ -7519,7 +7519,7 @@ bool CalculatorFunctions::findProductDistanceModN(
   std::stringstream reportstream;
   reportstream << "Finding product distance mod " << modulus.toString() << " w.r.t. elements "
   << integerList;
-  int numElementsNotAddedToStack = 0;
+  int numberOfElementsNotAddedToStack = 0;
   maxDistanceGenerated = 0;
   for (int i = 0; i < indexStack.size; i ++) {
     for (int j = 0; j < integersReduced.size; j ++) {
@@ -7534,13 +7534,13 @@ bool CalculatorFunctions::findProductDistanceModN(
       currentDistance += static_cast<unsigned>(integersReduced[j]);
       if (inputList[currentIndex] > 0) {
         if (inputList[currentIndex] < currentDistance) {
-          numElementsNotAddedToStack ++;
-          if (numElementsNotAddedToStack % 50000 == 0) {
+          numberOfElementsNotAddedToStack ++;
+          if (numberOfElementsNotAddedToStack % 50000 == 0) {
             std::stringstream out;
             out << "While computing product distance, explored " << i + 1 << " out of "
-            << indexStack.size << " indices. " << numElementsNotAddedToStack
+            << indexStack.size << " indices. " << numberOfElementsNotAddedToStack
             << " candidates were not added to the stack. "
-            << "Number of elements reached: " << numElementsCovered << ". "
+            << "Number of elements reached: " << numberOfElementsCovered << ". "
             << "Max distance generated while searching: " << maxDistanceGenerated.toString();
             report.report(out.str());
           }
@@ -7548,7 +7548,7 @@ bool CalculatorFunctions::findProductDistanceModN(
         }
       }
       if (inputList[currentIndex] == 0) {
-        numElementsCovered ++;
+        numberOfElementsCovered ++;
       }
       inputList[currentIndex] = currentDistance;
       if (currentDistance > maxDistanceGenerated) {
@@ -7558,8 +7558,8 @@ bool CalculatorFunctions::findProductDistanceModN(
       if (indexStack.size % 10000 == 0) {
         std::stringstream out;
         out << "While computing product distance, explored " << i + 1 << " out of "
-        << indexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
-        << "Number of elements reached: " << numElementsCovered << ". "
+        << indexStack.size << " indices. " << numberOfElementsNotAddedToStack << " candidates were not added to the stack. "
+        << "Number of elements reached: " << numberOfElementsCovered << ". "
         << "Max distance generated while searching: " << maxDistanceGenerated.toString();
         report.report(out.str());
       }

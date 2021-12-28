@@ -382,7 +382,7 @@ public:
   int totalPseudoParabolicNonParabolic;
   int totalParabolics;
   int totalNonPseudoParabolic;
-  int UpperLimitNumElementsWeyl;
+  int upperLimitElementsWeylGroup;
   std::string ReportStringNonNilradicalParabolic;
   bool flagComputingLprohibitingWeights;
   bool flagUsingParabolicsInCentralizers;

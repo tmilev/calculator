@@ -791,13 +791,13 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
   }
   Vector<Coefficient> currentRoot;
   ElementWeylGroupAutomorphisms currentElt;
-  int numElementsToReserve = MathRoutines::minimum(upperLimitNumberOfElements, 1000000);
-  output.setExpectedSize(numElementsToReserve);
+  int numberOfElementsToReserve = MathRoutines::minimum(upperLimitNumberOfElements, 1000000);
+  output.setExpectedSize(numberOfElementsToReserve);
   ProgressReport report(3000, GlobalVariables::Response::ReportType::general);
   SimpleReflectionOrOuterAutomorphism generatorsOuterGroup;
   if (outputSubset != nullptr) {
     currentElt.makeIdentity(*this);
-    outputSubset->setExpectedSize(numElementsToReserve);
+    outputSubset->setExpectedSize(numberOfElementsToReserve);
     outputSubset->clear();
     outputSubset->addOnTop(currentElt);
   }

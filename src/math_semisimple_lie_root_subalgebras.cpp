@@ -3707,7 +3707,7 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
   this->makeProgressReportAutomorphisms(outputSubgroup, rootSubalgebra);
   rootSubalgebra.generateIsomorphismsPreservingBorel(rootSubalgebra, &outputSubgroup);
   outputSubgroup.computeSubGroupFromGeneratingReflections(
-    &selectedRootsBasisCentralizer, &outputSubgroup.externalAutomorphisms, this->UpperLimitNumElementsWeyl, false
+    &selectedRootsBasisCentralizer, &outputSubgroup.externalAutomorphisms, this->upperLimitElementsWeylGroup, false
   );
   outputSubgroup.simpleRootsInner = selectedRootsBasisCentralizer;
   this->centralizerOuterIsomorphisms.lastObject().externalAutomorphisms = outputSubgroup.externalAutomorphisms;
@@ -3726,7 +3726,7 @@ RootSubalgebras::RootSubalgebras() {
   this->flagLookingForMinimalRels = false;
   this->linesPerTableLatex = 20;
   this->columnsPerTableLatex = 4;
-  this->UpperLimitNumElementsWeyl = 0;
+  this->upperLimitElementsWeylGroup = 0;
   this->owner = nullptr;
   this->flagPrintGAPinput = false;
   this->flagPrintParabolicPseudoParabolicInfo = false;

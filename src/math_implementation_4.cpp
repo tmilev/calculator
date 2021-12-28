@@ -1253,12 +1253,12 @@ void Permutation::incrementAndGetPermutation(List<int>& output) {
 }
 
 void Permutation::getPermutationLthElementIsTheImageofLthIndex(List<int>& output) {
-  int numElements = this->multiplicities.size;
-  output.setSize(numElements);
-  for (int i = 0; i < numElements; i ++) {
+  int numberOfElements = this->multiplicities.size;
+  output.setSize(numberOfElements);
+  for (int i = 0; i < numberOfElements; i ++) {
     output[i] = i;
   }
-  for (int i = 0; i < numElements; i ++) {
+  for (int i = 0; i < numberOfElements; i ++) {
     MathRoutines::swap(output[i], output[i + this->multiplicities[i]]);
   }
 }

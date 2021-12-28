@@ -853,7 +853,6 @@ public:
       weights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, upperLimitNumberOfElements
     );
   }
-//  int GetNumRootsFromFormula();
   void generateRootSystem();
   void actOnAffineHyperplaneByGroupElement(int index, AffineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho);
   void getLowestElementInOrbit(

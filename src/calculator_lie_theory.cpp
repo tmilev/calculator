@@ -2130,7 +2130,6 @@ void VoganDiagram::computeMapStringToType() {
   this->mapStringToType.setKeyValue("CI", VoganDiagram::CI);
   this->mapStringToType.setKeyValue("DI", VoganDiagram::DI);
   this->mapStringToType.setKeyValue("DII", VoganDiagram::DII);
-  this->mapStringToType.setKeyValue("DIII", VoganDiagram::DIII);
   this->mapStringToType.setKeyValue("EI", VoganDiagram::EI);
   this->mapStringToType.setKeyValue("EII", VoganDiagram::EII);
   this->mapStringToType.setKeyValue("EIII", VoganDiagram::EIII);
@@ -2162,12 +2161,58 @@ bool VoganDiagram::assignParameter(
   this->diagram = this->mapStringToType.getValueNoFail(input);
   this->parameter = inputParameter;
   this->rank = inputRank;
-  if (this->parameter < 0) {
-    this->parameter = 0;
+  this->adjustRank();
+  this->adjustParameter();
+  if (!this->parameterChecks(commentsOnFailure)) {
+    return false;
+  }
+  // Check that we have not forgotten to implement
+  // the ambient Lie algebra computation.
+  DynkinType unused;
+  if (!this->dynkinTypeAmbient(unused, commentsOnFailure)) {
+    return false;
+  }
+  return true;
+}
+
+bool VoganDiagram::adjustRank() {
+  switch (this->diagram) {
+  case VoganDiagram::EI:
+  case VoganDiagram::EII:
+  case VoganDiagram::EIII:
+  case VoganDiagram::EIV:
+    this->rank = 6;
+    break;
+  case VoganDiagram::EV:
+    this->rank = 7;
+    break;
+  case VoganDiagram::EVII:
+    this->rank = 8;
+    break;
+  default:
+    break;
   }
   if (this->rank < 0) {
     this->rank = 0;
   }
+  return true;
+}
+
+bool VoganDiagram::adjustParameter() {
+  switch (this->diagram) {
+  case VoganDiagram::DI:
+    this->parameter ++;
+    break;
+  default:
+    break;
+  }
+  if (this->parameter < 0) {
+    this->parameter = 0;
+  }
+  return true;
+}
+
+bool VoganDiagram::parameterChecks(std::stringstream* commentsOnFailure) const {
   if (
     this->diagram == VoganDiagram::DiagramType::AIII &&
     this->parameter > (this->rank - 1) / 2
@@ -2180,12 +2225,15 @@ bool VoganDiagram::assignParameter(
     }
     return false;
   }
-  // Check that we have not forgotten to implement
-  // the ambient Lie algebra computation.
-  DynkinType unused;
-  if (!this->dynkinTypeAmbient(unused, commentsOnFailure)) {
+  if (this->diagram == VoganDiagram::DI && this->parameter >= this->rank - 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Type DI requires a parameter between 0 and rank - 2, which equlas: "
+      << this->rank - 2 <<  ".";
+    }
     return false;
   }
+
   return true;
 }
 
@@ -2473,8 +2521,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
   Vector<Rational> simpleRootLeft;
   Vector<Rational> simpleRootRight;
 
+  int filledRootIndex = this->voganDiagram.parameter - 1;
   for (int i = 0; i < this->voganDiagram.rank - 2; i ++) {
-    if (i == this->voganDiagram.parameter) {
+    if (filledRootIndex == this->voganDiagram.parameter) {
       continue;
     }
     this->setHollowSimpleRoot(i);
@@ -2485,8 +2534,8 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
       this->voganDiagram.rank - 1
     );
   }
-  if (this->voganDiagram.parameter >= 0) {
-    this->setFilledSimpleRoot(this->voganDiagram.parameter);
+  if (filledRootIndex >= 0) {
+    this->setFilledSimpleRoot(filledRootIndex);
   }
   return true;
 }
@@ -3144,7 +3193,12 @@ void VoganDiagram::plotCI(Plot& output) {
 }
 
 void VoganDiagram::plotDI(Plot& output) {
-  this->plotDII(output);
+  Selection filledRoots;
+  filledRoots.initialize(this->rank);
+  if (this->parameter > 0) {
+    filledRoots.addSelectionAppendNewIndex(this->parameter - 1);
+  }
+  DynkinSimpleType::plotDn(output, this->rank, &filledRoots, 0);
   Rational squareRootOfTwo = Rational(1414, 1000);
   Rational distanceBetweenCentersDividedBySquareRootOfTwo = DynkinSimpleType::distanceBetweenRootCenters;
   distanceBetweenCentersDividedBySquareRootOfTwo /= squareRootOfTwo;
@@ -3245,23 +3299,14 @@ bool CalculatorLieTheory::cartanInvolutionInternal(
   }
   int diagramParameter = 1;
   int rank = 0;
-  if (
-    typeString == "EI"   ||
-    typeString == "EII"  ||
-    typeString == "EIII" ||
-    typeString == "EIV"
-  ) {
-    rank = 6;
-  } else {
-    diagramParameter = 1;
-    if (input.size() == 4) {
-      if (!input[3].isSmallInteger(&diagramParameter)) {
-        return calculator
-        << "Failed to extract small integer from the 3rd argument: "
-        << input[3].toString();
-      }
+  if (input.size() == 4) {
+    if (!input[3].isSmallInteger(&diagramParameter)) {
+      return calculator
+      << "Failed to extract small integer from the 3rd argument: "
+      << input[3].toString();
     }
-    rank = 0;
+  }
+  if (input.size() >= 2) {
     if (!input[2].isSmallInteger(&rank)) {
       return calculator << "Failed to extract small integer from the 2nd argument.";
     }

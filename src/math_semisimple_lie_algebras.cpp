@@ -867,7 +867,8 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
       nonExplored.removeSelection(index);
     }
   }
-  Vector<Rational> left, right;
+  Vector<Rational> left;
+  Vector<Rational> right;
   while (nonExplored.cardinalitySelection > 0) {
     for (int i = 0; i < nonExplored.cardinalitySelection; i ++) {
       int index = nonExplored.elements[i];
@@ -929,8 +930,9 @@ bool SemisimpleLieAlgebra::isInTheWeightSupport(
   Vector<Rational> correspondingDominant = weight;
   this->weylGroup.raiseToDominantWeight(correspondingDominant);
   Vector<Rational> difference = highestWeight - correspondingDominant;
-  if (!difference.isPositiveOrZero())
+  if (!difference.isPositiveOrZero()) {
     return false;
+  }
   return true;
 }
 
@@ -1126,7 +1128,10 @@ void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(Vector<Rational>& 
   output.makeZero(smallDimension);
   for (int i = 0; i < smallDimension; i ++) {
     output[i] = this->coDomainAlgebra().weylGroup.rootScalarCartanRoot(
-      this->imagesAllChevalleyGenerators[this->domainAlgebra().weylGroup.rootsOfBorel.size + i].getCartanPart(), input
+      this->imagesAllChevalleyGenerators[
+        this->domainAlgebra().weylGroup.rootsOfBorel.size + i
+      ].getCartanPart(),
+      input
     );
   }
   invertedSmallCartan.actOnVectorColumn(output, output);
@@ -1344,7 +1349,9 @@ bool HomomorphismSemisimpleLieAlgebra::checkInitialization() {
 
 bool HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism() {
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism");
-  ElementSemisimpleLieAlgebra<Rational> coDomainElement, domainElement, imageOfDomainElement;
+  ElementSemisimpleLieAlgebra<Rational> coDomainElement;
+  ElementSemisimpleLieAlgebra<Rational> domainElement;
+  ElementSemisimpleLieAlgebra<Rational> imageOfDomainElement;
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
       this->coDomainAlgebra().lieBracket(

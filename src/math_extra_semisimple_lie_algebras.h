@@ -59,7 +59,6 @@ public:
     CI,
     DI,
     DII,
-    DIII,
     EI,
     EII,
     EIII,
@@ -92,6 +91,9 @@ public:
     int inputParameter,
     std::stringstream* commentsOnFailure
   );
+  bool adjustRank();
+  bool adjustParameter();
+  bool parameterChecks(std::stringstream* commentsOnFailure) const;
   bool dynkinTypeAmbient(
     DynkinType& output,
     std::stringstream* commentsOnFailure

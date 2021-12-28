@@ -4008,10 +4008,14 @@ PartialFractions::PartialFractions() {
   this->numberOfProcessedForVPFMonomialsTotal = 0;
 }
 
-void OnePartialFraction::reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* Indicator) {
+void OnePartialFraction::reduceMonomialByMonomial(
+  PartialFractions& owner,
+  int myIndex,
+  Vector<Rational>* indicator
+) {
   (void) owner;
   (void) myIndex;
-  (void) Indicator;
+  (void) indicator;
   /*PartFraction tempFrac;
   //tempFrac.assign(*this);
   Rational StartCheckSum, difference;

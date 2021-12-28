@@ -5282,7 +5282,7 @@ public:
     Polynomial<LargeInteger>& outputCoeff,
     Vectors<Rational>& startingVectors
   );
-  void reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* Indicator);
+  void reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* indicator);
   void applySzenesVergneFormula(
     List<Vector<Rational> >& startingVectors,
     List<int>& selectedIndices,

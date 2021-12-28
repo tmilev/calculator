@@ -2580,6 +2580,7 @@ public:
   void initializeAtomsNotGoodForChainRule();
   void initializeFunctionsStandard();
   void initializeFunctionsScientificBasic();
+  void initializeFunctionsVectorPartitionFunctions();
   void initializeFunctionsExtra();
   void initializeFunctionsCryptoAndEncoding();
   void initializeFunctionsSemisimpleLieAlgebras();

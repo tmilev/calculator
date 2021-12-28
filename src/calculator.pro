@@ -32,6 +32,7 @@ HEADERS += \
     calculator_html_functions.h \
     calculator_html_interpretation.h \
     calculator_inner_functions.h \
+    calculator_inner_functions_vector_partition_function_1.h \
     calculator_inner_typed_functions.h \
     calculator_interface.h \
     calculator_weyl_group_characters.h \
@@ -111,9 +112,11 @@ SOURCES += \
     calculator_function_registration_extra.cpp \
     calculator_function_registration_lie_theory.cpp \
     calculator_function_registration_scientific.cpp \
+    calculator_function_registration_vector_partition_function.cpp \
     calculator_html_interpretation.cpp \
     calculator_html_routines.cpp \
     calculator_implementation_1.cpp \
+    calculator_implementation_10.cpp \
     calculator_implementation_2.cpp \
     calculator_implementation_3.cpp \
     calculator_implementation_4.cpp \

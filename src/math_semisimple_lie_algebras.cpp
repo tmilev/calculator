@@ -995,7 +995,10 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
 }
 
 int SemisimpleLieAlgebra::getLengthStringAlongAlphaThroughBeta(
-  Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport
+  Vector<Rational>& alpha,
+  Vector<Rational>& beta,
+  int& distanceToHighestWeight,
+  Vectors<Rational>& weightSupport
 ) {
   Vector<Rational> root = beta;
   for (int i = 0; ; i ++) {

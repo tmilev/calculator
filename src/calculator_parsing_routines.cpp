@@ -522,6 +522,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   if (this->mode == Calculator::Mode::full) {
     this->initializeFunctionsCryptoAndEncoding();
     this->initializeFunctionsScientificBasic();
+    this->initializeFunctionsVectorPartitionFunctions();
     this->initializeFunctionsSemisimpleLieAlgebras();
     this->initializeAdminFunctions();
     this->initializeFunctionsExtra();

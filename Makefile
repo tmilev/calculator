@@ -146,6 +146,7 @@ SOURCES_RELATIVE_PATH=\
     calculator_function_registration_scientific.cpp \
     calculator_function_registration_lie_theory.cpp \
     calculator_html_interpretation.cpp \
+    calculator_function_registration_vector_partition_function.cpp \
     calculator_html_routines.cpp \
     calculator_implementation_1.cpp \
     calculator_implementation_2.cpp \
@@ -156,6 +157,7 @@ SOURCES_RELATIVE_PATH=\
     calculator_implementation_7.cpp \
     calculator_implementation_8_polynomial.cpp \
     calculator_implementation_9.cpp \
+    calculator_implementation_10.cpp \
     calculator_javascript_graphics.cpp \
     calculator_latex_routines.cpp \
     calculator_parsing_routines.cpp \

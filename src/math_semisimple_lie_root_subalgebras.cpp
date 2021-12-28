@@ -1429,21 +1429,21 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool doEnu
   int counter = 0;
   HashedList<Vector<Rational> >& allRoots = this->getAmbientWeyl().rootSystem;
   for (int i = 0; i < allRoots.size; i ++) {
-    Vector<Rational> linComb;
+    Vector<Rational> linearCombination;
     if (this->allRootsSubalgebra.getIndex(allRoots[i]) == - 1) {
       for (int j = 0; j < dimension; j ++) {
-        linComb[j].makeZero();
-        for (int k = 0; k < dimension; k++) {
+        linearCombination[j].makeZero();
+        for (int k = 0; k < dimension; k ++) {
           Rational scalarProduct;
           scalarProduct.assign(inverted.elements[k][j]);
           scalarProduct.multiplyBy(allRoots[i][k]);
-          linComb[j] += scalarProduct;
+          linearCombination[j] += scalarProduct;
         }
       }
-      int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
-      linComb *= - x;
+      int x = linearCombination.findLeastCommonMultipleDenominatorsTruncateToInt();
+      linearCombination *= - x;
       std::string tempS;
-      if (this->linearCombinationToString(allRoots[i], x, linComb, tempS)) {
+      if (this->linearCombinationToString(allRoots[i], x, linearCombination, tempS)) {
         out << tempS << "\n";
         counter ++;
         if (this->lowestWeightsPrimalSimple.getIndex(allRoots[i]) != - 1) {

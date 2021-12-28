@@ -2200,8 +2200,9 @@ bool VoganDiagram::adjustRank() {
 
 bool VoganDiagram::adjustParameter() {
   switch (this->diagram) {
-  case VoganDiagram::DI:
-    this->parameter ++;
+  case VoganDiagram::DiagramType::AI:
+  case VoganDiagram::DiagramType::AII:
+    this->parameter --;
     break;
   default:
     break;
@@ -2215,25 +2216,28 @@ bool VoganDiagram::adjustParameter() {
 bool VoganDiagram::parameterChecks(std::stringstream* commentsOnFailure) const {
   if (
     this->diagram == VoganDiagram::DiagramType::AIII &&
-    this->parameter > (this->rank - 1) / 2
+    this->parameter > this->rank / 2
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "Parameter must be at least 1 and at most rank/2="
+      << "Parameter must be at most rank/2="
       << this->rank / 2
-      << ", it is instead: " << this->parameter;
+      << ", it is instead: " << this->parameter << ". ";
     }
     return false;
   }
-  if (this->diagram == VoganDiagram::DI && this->parameter >= this->rank - 1) {
+  if (
+    this->diagram == VoganDiagram::DiagramType::DI &&
+    this->parameter >= this->rank - 1
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "Type DI requires a parameter between 0 and rank - 2, which equlas: "
+      << "Type DI requires a parameter "
+      << "between 0 and rank - 2, which equals: "
       << this->rank - 2 <<  ".";
     }
     return false;
   }
-
   return true;
 }
 
@@ -2336,7 +2340,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAII(
   int rank = this->owner->getRank();
   if (rank % 2 != 1) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Vogan diagram of type AII requires odd rank.";
+      *commentsOnFailure << "Vogan diagram of type AII requires odd rank. ";
     }
     return false;
   }
@@ -2376,14 +2380,18 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   }
   this->automorphism.imagesPositiveSimpleChevalleyGenerators.setSize(rank);
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
-  Vector<Rational> simpleRootLeft, simpleRootRight;
+  Vector<Rational> simpleRootLeft;
+  Vector<Rational> simpleRootRight;
+  int parameterIndex = this->voganDiagram.parameter - 1;
   for (int i = 0; i < this->voganDiagram.rank; i ++) {
-    if (i == this->voganDiagram.parameter) {
+    if (i == parameterIndex) {
       continue;
     }
     this->setHollowSimpleRoot(i);
   }
-  this->setFilledSimpleRoot(this->voganDiagram.parameter);
+  if (parameterIndex >= 0) {
+    this->setFilledSimpleRoot(parameterIndex);
+  }
   return true;
 }
 
@@ -2400,11 +2408,11 @@ bool CartanInvolution::computeSimpleRootImagesTypeBI(
   int rank = this->owner->getRank();
   if (
     this->voganDiagram.parameter < 0 ||
-    this->voganDiagram.parameter >= rank - 1
+    this->voganDiagram.parameter >= rank
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Parameter must be between 0 and the rank less one. The rank is: "
-      << rank << " the parameter is: " << this->voganDiagram.parameter + 1;
+      << rank << " the parameter is: " << this->voganDiagram.parameter << ". ";
     }
     return false;
   }
@@ -2419,13 +2427,16 @@ bool CartanInvolution::computeSimpleRootImagesTypeBI(
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   Vector<Rational> simpleRootLeft;
   Vector<Rational> simpleRootRight;
+  int filledRootIndex = this->voganDiagram.parameter - 1;
   for (int i = 0; i < this->voganDiagram.rank; i ++) {
-    if (i == this->voganDiagram.parameter) {
+    if (i == filledRootIndex) {
       continue;
     }
     this->setHollowSimpleRoot(i);
   }
-  this->setFilledSimpleRoot(this->voganDiagram.parameter);
+  if (filledRootIndex >= 0) {
+    this->setFilledSimpleRoot(filledRootIndex);
+  }
   return true;
 }
 
@@ -2448,7 +2459,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeCI(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and the rank less one. The rank is: "
-      << rank << " the parameter is: " << this->voganDiagram.parameter + 1;
+      << rank << " the parameter is: " << this->voganDiagram.parameter << ". ";
     }
     return false;
   }
@@ -2463,13 +2474,16 @@ bool CartanInvolution::computeSimpleRootImagesTypeCI(
   this->automorphism.imagesNegativeSimpleChevalleyGenerators.setSize(rank);
   Vector<Rational> simpleRootLeft;
   Vector<Rational> simpleRootRight;
+  int filledRootIndex = this->voganDiagram.parameter - 1;
   for (int i = 0; i < this->voganDiagram.rank; i ++) {
-    if (i == this->voganDiagram.parameter) {
+    if (i == filledRootIndex) {
       continue;
     }
     this->setHollowSimpleRoot(i);
   }
-  this->setFilledSimpleRoot(this->voganDiagram.parameter);
+  if (filledRootIndex >= 0) {
+    this->setFilledSimpleRoot(filledRootIndex);
+  }
   return true;
 }
 
@@ -2505,7 +2519,8 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and the rank less one. The rank is: "
-      << rank << " the parameter is: " << this->voganDiagram.parameter + 1;
+      << rank << " the parameter is: "
+      << this->voganDiagram.parameter << ". ";
     }
     return false;
   }
@@ -2533,6 +2548,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
       this->voganDiagram.rank - 2,
       this->voganDiagram.rank - 1
     );
+  } else {
+    this->setHollowSimpleRoot(this->voganDiagram.rank - 2);
+    this->setHollowSimpleRoot(this->voganDiagram.rank - 1);
   }
   if (filledRootIndex >= 0) {
     this->setFilledSimpleRoot(filledRootIndex);
@@ -2666,6 +2684,8 @@ bool CartanInvolution::computeSimpleRootImages(
     return this->computeSimpleRootImagesTypeCI(commentsOnFailure);
   case VoganDiagram::DiagramType::DI:
     return this->computeSimpleRootImagesTypeDI(commentsOnFailure);
+  case VoganDiagram::DiagramType::DII:
+    return this->computeSimpleRootImagesTypeDII(commentsOnFailure);
   case VoganDiagram::DiagramType::EI:
     return this->computeSimpleRootImagesTypeEI(commentsOnFailure);
   case VoganDiagram::DiagramType::EII:
@@ -3057,11 +3077,11 @@ void SatakeDiagram::plotAII(Plot& output, int verticalOffset) {
 void SatakeDiagram::plotAIII(Plot& output, int verticalOffset) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
-  int remainingRank = this->rank - (this->parameter + 1) * 2;
-  for (int i = this->parameter + 1; i < this->parameter + remainingRank + 1; i ++) {
+  int remainingRank = this->rank - this->parameter * 2;
+  for (int i = this->parameter; i < this->parameter + remainingRank; i ++) {
     filledRoots.addSelectionAppendNewIndex(i);
   }
-  for (int i = 0 ; i < this->parameter + 1; i ++) {
+  for (int i = 0 ; i < this->parameter; i ++) {
     VoganDiagram::plotTwoElementOrbit(output, i, this->rank - i - 1, verticalOffset, this->rank);
   }
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &filledRoots);
@@ -3070,7 +3090,7 @@ void SatakeDiagram::plotAIII(Plot& output, int verticalOffset) {
 void SatakeDiagram::plotBI(Plot& output, int verticalOffset) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
-  for (int i = this->parameter + 1; i < this->rank; i ++) {
+  for (int i = this->parameter; i < this->rank; i ++) {
     filledRoots.addSelectionAppendNewIndex(i);
   }
   DynkinSimpleType::plotBn(output, this->rank, &filledRoots, verticalOffset);
@@ -3101,6 +3121,9 @@ SatakeDiagram VoganDiagram::computeSatakeDiagram() {
     break;
   case VoganDiagram::DiagramType::DI:
     result.diagram = SatakeDiagram::DiagramType::DI;
+    break;
+  case VoganDiagram::DiagramType::DII:
+    result.diagram = SatakeDiagram::DiagramType::DII;
     break;
   default:
     global.fatal << "ComputeSatakeDiagram: not implemented yet." << global.fatal;
@@ -3174,21 +3197,27 @@ void VoganDiagram::plotAII(Plot& output) {
 void VoganDiagram::plotAIII(Plot& output) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
-  filledRoots.addSelectionAppendNewIndex(this->parameter);
+  if (this->parameter > 0) {
+    filledRoots.addSelectionAppendNewIndex(this->parameter - 1);
+  }
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, &filledRoots);
 }
 
 void VoganDiagram::plotBI(Plot& output) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
-  filledRoots.addSelectionAppendNewIndex(this->parameter);
+  if (this->parameter > 0) {
+    filledRoots.addSelectionAppendNewIndex(this->parameter - 1);
+  }
   DynkinSimpleType::plotBn(output, this->rank, &filledRoots, 0);
 }
 
 void VoganDiagram::plotCI(Plot& output) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
-  filledRoots.addSelectionAppendNewIndex(this->parameter);
+  if (this->parameter > 0) {
+    filledRoots.addSelectionAppendNewIndex(this->parameter - 1);
+  }
   DynkinSimpleType::plotCn(output, this->rank, &filledRoots, 0);
 }
 
@@ -3215,7 +3244,9 @@ void VoganDiagram::plotDI(Plot& output) {
 void VoganDiagram::plotDII(Plot& output) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
-  filledRoots.addSelectionAppendNewIndex(this->parameter);
+  if (this->parameter > 0) {
+    filledRoots.addSelectionAppendNewIndex(this->parameter - 1);
+  }
   DynkinSimpleType::plotDn(output, this->rank, &filledRoots, 0);
 }
 
@@ -3297,7 +3328,7 @@ bool CalculatorLieTheory::cartanInvolutionInternal(
   if (!input[1].isOfType(&typeString)) {
     typeString = input[1].toString();
   }
-  int diagramParameter = 1;
+  int diagramParameter = 0;
   int rank = 0;
   if (input.size() == 4) {
     if (!input[3].isSmallInteger(&diagramParameter)) {
@@ -3312,7 +3343,7 @@ bool CalculatorLieTheory::cartanInvolutionInternal(
     }
   }
   if (!output.voganDiagram.assignParameter(
-    typeString, rank, diagramParameter - 1, &calculator.comments
+    typeString, rank, diagramParameter, &calculator.comments
   )) {
     return false;
   }

@@ -22,6 +22,7 @@ public:
     BI,
     CI,
     DI,
+    DII,
   };
   DiagramType diagram;
   // Some of the classical Satake types

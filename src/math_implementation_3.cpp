@@ -7751,7 +7751,9 @@ void WeylGroupData::drawRootSystem(
     predefinedProjectionPlane->getVectorsDouble(twoPlane);
   }
   if (twoPlane.size != 2) {
-    global.fatal << "Object twoPlane is supposed to be two-dimensional but it is instead of dimension: "
+    global.fatal
+    << "Object twoPlane is supposed to "
+    << "be two-dimensional but it is instead of dimension: "
     << twoPlane.size << ". " << global.fatal;
   }
   Vectors<Rational> rootSystemSorted;

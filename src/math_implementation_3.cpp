@@ -55,6 +55,11 @@ unsigned long long int Rational::totalSmallAdditions = 0;
 unsigned long long int Rational::totalSmallGreatestCommonDivisors = 0;
 unsigned long long int Rational::totalSmallMultiplications = 0;
 
+template <>
+List<OnePartialFraction>::Comparator* FormatExpressions::getMonomialOrder<OnePartialFraction>() {
+  return nullptr;
+}
+
 int GlobalVariables::externalCommandNoOutput(
   const std::string& systemCommand, bool logErrors
 ) {
@@ -3155,10 +3160,20 @@ bool OnePartialFraction::reduceOnceGeneralMethod(
   return false;
 }
 
+bool OnePartialFraction::operator>(const OnePartialFraction& other) const {
+  if (this->indicesNonZeroMultiplicities > other.indicesNonZeroMultiplicities) {
+    return true;
+  }
+  if (other.indicesNonZeroMultiplicities > this->indicesNonZeroMultiplicities) {
+    return true;
+  }
+  return this->denominator > other.denominator;
+}
+
 int OnePartialFraction::sizeWithoutDebugString() const {
   int Accum = 0;
   Accum += static_cast<int>(sizeof(this->denominator));
-  Accum += this->denominator.size * static_cast<int>(sizeof(OnePartialFractionDenominator));
+  Accum += this->denominator.size * static_cast<int>(sizeof(OnePartialFractionDenominatorComponent));
   Accum += static_cast<int>(sizeof(this->indicesNonZeroMultiplicities));
   return Accum;
 }
@@ -3197,50 +3212,44 @@ void OnePartialFraction::readFromFile(PartialFractions& owner, std::fstream& inp
   if (reader != owner.startingVectors.size) {
     global.fatal << "Failed to read partial fraction from file. " << global.fatal;
   }
-  this->initialize(reader);
+  this->initialize(owner);
   for (int j = 0; j < this->denominator.size; j ++) {
     input >> reader;
     this->denominator[j].multiplicities.setSize(reader);
     this->denominator[j].elongations.setSize(reader);
     for (int i = 0; i < this->denominator[j].multiplicities.size; i ++) {
-      input >> this->denominator[j].multiplicities[i] >> this->denominator[j].elongations[i];
+      input
+      >> this->denominator[j].multiplicities[i]
+      >> this->denominator[j].elongations[i];
     }
   }
   this->computeIndicesNonZeroMultiplicities();
 }
 
-void OnePartialFraction::computeOneCheckSum(PartialFractions& owner, Rational& output, int dimension) const {
-  Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::getCheckSumRoot(owner.ambientDimension);
+void OnePartialFraction::computeOneCheckSum(
+  PartialFractions& owner, Rational& output, int dimension
+) const {
+  MacroRegisterFunctionWithName("OnePartialFraction::computeOneCheckSum");
+  Vector<Rational> checkSumRoot = OnePartialFractionDenominatorComponent::getCheckSumRoot(owner.ambientDimension);
   Rational multiplicand;
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     this->denominator[this->indicesNonZeroMultiplicities[i]].computeOneCheckSum(
-      multiplicand, owner.startingVectors[this->indicesNonZeroMultiplicities[i]], dimension
+      multiplicand,
+      owner.startingVectors[this->indicesNonZeroMultiplicities[i]],
+      dimension
     );
     output.multiplyBy(multiplicand);
   }
 }
 
-std::string OnePartialFraction::toString(
-  bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed
-) {
+std::string OnePartialFraction::toString(FormatExpressions* format) const {
   std::stringstream out;
-  std::string tempS, stringPoly;
-  NumLinesUsed = 0;
-  for (int i = 0; i < this->denominator.size; i ++) {
-    this->denominator[i].toString();
-    out << tempS;
+  std::string stringPoly;
+  if (this->denominator.size == 0) {
+    return "1";
   }
-  tempS = out.str();
-  if (LatexFormat) {
-    out << stringPoly;
-    if (stringPoly.size() > static_cast<unsigned>(PolyFormatLocal.maximumLineLength)) {
-      out << ("\\\\\n&&");
-      NumLinesUsed++;
-    }
-    out << tempS;
-  } else {
-    out << stringPoly;
-    out << tempS;
+  for (int i = 0; i < this->denominator.size; i ++) {
+    out << this->denominator[i].toString(format);
   }
   return out.str();
 }
@@ -3541,7 +3550,7 @@ void OnePartialFraction::applySzenesVergneFormula(
     tempFrac.assign(*this);
     tempFrac.relevanceIsComputed = false;
     tempFrac.denominator[GainingMultiplicityIndex].addMultiplicity(1, ElongationGainingMultiplicityIndex);
-    OnePartialFractionDenominator& currentFrac = tempFrac.denominator[selectedIndices[i]];
+    OnePartialFractionDenominatorComponent& currentFrac = tempFrac.denominator[selectedIndices[i]];
     int LargestElongation = currentFrac.getLargestElongation();
     currentFrac.addMultiplicity(- 1, LargestElongation);
     tempM.makeOne();
@@ -3609,13 +3618,20 @@ bool OnePartialFraction::decreasePowerOneFraction(int index, int increment) {
 void OnePartialFraction::computeIndicesNonZeroMultiplicities() {
   this->indicesNonZeroMultiplicities.size = 0;
   for (int i = 0; i < this->denominator.size; i ++) {
-    if (this->denominator[i].multiplicities.size > 0) {
-      this->indicesNonZeroMultiplicities.addOnTop(i);
+    if (this->denominator[i].multiplicities.size == 0) {
+      continue;
     }
+    this->indicesNonZeroMultiplicities.addOnTop(i);
   }
 }
 
-void OnePartialFraction::getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output) {
+void OnePartialFraction::getAlphaMinusNBetaPoly(
+  PartialFractions& owner,
+  int indexA,
+  int indexB,
+  int n,
+  Polynomial<LargeInteger>& output
+) {
   output.makeZero();
   MonomialPolynomial tempM;
   tempM.makeOne();
@@ -3718,19 +3734,20 @@ void OnePartialFraction::computeNormals(
 
 OnePartialFraction::OnePartialFraction() {
   this->powerSeriesCoefficientIsComputed = false;
-  this->AlreadyAccountedForInGUIDisplay = false;
   this->FileStoragePosition = - 1;
   this->lastDistinguishedIndex = - 1;
   this->relevanceIsComputed = false;
+  this->owner = nullptr;
 }
 
-void OnePartialFraction::initialize(int numberOfRoots) {
+void OnePartialFraction::initialize(PartialFractions& inputOwner) {
+  int numberOfRoots = inputOwner.startingVectors.size;
+  this->owner = &inputOwner;
   this->indicesNonZeroMultiplicities.reserve(numberOfRoots);
   this->indicesNonZeroMultiplicities.size = 0;
   this->denominator.setSize(numberOfRoots);
   for (int i = 0; i < this->denominator.size; i ++) {
-    this->denominator[i].elongations.setSize(0);
-    this->denominator[i].multiplicities.setSize(0);
+    this->denominator[i].initialize(inputOwner, i);
   }
 }
 
@@ -3763,14 +3780,10 @@ void OnePartialFraction::operator=(const OnePartialFraction& right) {
   this->assign(right);
 }
 
-int PartialFractions::sizeWithoutDebugString() {
-  int Accum = 0;
-  Accum += sizeof(this->monomials);
-  for (int i = 0; i < this->size(); i ++) {
-    Accum += (*this)[i].sizeWithoutDebugString();
-  }
-  Accum += sizeof(this->HighestIndex) + sizeof(this->IndexLowestNonProcessed);
-  return Accum;
+std::string PartialFractions::toString(FormatExpressions* format) const {
+  std::stringstream out;
+  out << this->allFractions.toString(format);
+  return out.str();
 }
 
 bool PartialFractions::assureIndicatorRegularity(Vector<Rational>& indicator) {
@@ -3784,36 +3797,38 @@ bool PartialFractions::assureIndicatorRegularity(Vector<Rational>& indicator) {
 }
 
 void PartialFractions::prepareCheckSums() {
+  MacroRegisterFunctionWithName("PartialFractions::prepareCheckSums");
   if (!this->flagUsingCheckSum) {
     return;
   }
-  this->computeOneCheckSum(this->StartCheckSum);
+  this->computeOneCheckSum(this->startCheckSum);
 }
 
 void PartialFractions::initFromOtherPartialFractions(PartialFractions& input) {
-  this->makeZero();
+  this->allFractions.makeZero();
   this->startingVectors = input.startingVectors;
-  this->IndexLowestNonProcessed = 0;
-  this->IndexCurrentlyProcessed = 0;
+  this->indexLowestNonProcessed = 0;
+  this->indexCurrentlyProcessed = 0;
   this->ambientDimension = input.ambientDimension;
 }
 
 void PartialFractions::compareCheckSums() {
+  MacroRegisterFunctionWithName("PartialFractions::compareCheckSums");
   if (!this->flagUsingCheckSum) {
     return;
   }
   ProgressReport report1;
   ProgressReport report2;
   if (!this->flagDiscardingFractions) {
-    this->computeOneCheckSum(this->EndCheckSum);
-    if (!this->StartCheckSum.isEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic) {
+    this->computeOneCheckSum(this->endCheckSum);
+    if (!this->startCheckSum.isEqualTo(this->endCheckSum) || this->flagAnErrorHasOccurredTimeToPanic) {
       std::stringstream out1, out2;
-      out1 << "Starting checksum: " << this->StartCheckSum.toString();
-      out2 << "  Ending checksum: " << this->EndCheckSum.toString();
+      out1 << "Starting checksum: " << this->startCheckSum.toString();
+      out2 << "  Ending checksum: " << this->endCheckSum.toString();
       report1.report(out1.str());
       report2.report(out2.str());
     }
-    if (!this->StartCheckSum.isEqualTo(this->EndCheckSum)) {
+    if (!this->startCheckSum.isEqualTo(this->endCheckSum)) {
       global.fatal << "The checksum of the partial fractions failed. " << global.fatal;
     } else {
     }
@@ -3821,7 +3836,7 @@ void PartialFractions::compareCheckSums() {
 }
 
 void PartialFractions::prepareIndicatorVariables() {
-  this->NumberIrrelevantFractions = 0;
+  this->numberOfIrrelevantFractions = 0;
   this->numberOfRelevantReducedFractions = 0;
   this->numberOfGeneratorsInNumerators = 0;
   this->NumGeneratorsIrrelevantFractions = 0;
@@ -3846,12 +3861,12 @@ bool PartialFractions::splitPartial() {
   LinearCombination<OnePartialFraction, Polynomial<LargeInteger> > buffer;
   PartialFractions reducedForGood;
   Polynomial<LargeInteger> currentCoeff;
-  reducedForGood.makeZero();
+  reducedForGood.allFractions.makeZero();
   if (this->flagUsingCheckSum) {
     this->computeOneCheckSum(this->checkSum);
   }
   while (this->size() > 0) {
-    this->popMonomial(0, currentFrac, currentCoeff);
+    this->allFractions.popMonomial(0, currentFrac, currentCoeff);
     bool tempBool;
     if (this->flagUsingOrlikSolomonBasis) {
       tempBool = currentFrac.reduceOnceGeneralMethod(*this, buffer, bufferRoots, bufferMat);
@@ -3860,9 +3875,9 @@ bool PartialFractions::splitPartial() {
     }
     if (tempBool) {
       buffer *= currentCoeff;
-      *this += buffer;
+      this->allFractions += buffer;
     } else {
-      reducedForGood.addMonomial(currentFrac, currentCoeff);
+      reducedForGood.allFractions.addMonomial(currentFrac, currentCoeff);
     }
     this->makeProgressReportSplittingMainPart();
   }
@@ -3927,41 +3942,31 @@ bool PartialFractions::splitClassicalRootSystem(bool shouldElongate, Vector<Rati
 
 bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* root) {
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].indicesNonZeroMultiplicities.size > this->ambientDimension) {
-      if ((*this)[i].rootIsInFractionCone(*this, root)) {
-        return false;
-      }
+    if (this->allFractions[i].indicesNonZeroMultiplicities.size <= this->ambientDimension) {
+      continue;
+    }
+    if (this->allFractions[i].rootIsInFractionCone(*this, root)) {
+      return false;
     }
   }
   return true;
 }
 
-bool OnePartialFraction::initFromRoots(PartialFractions& owner, Vectors<Rational>& input) {
-  if (input.size == 0) {
-    return false;
-  }
-  for (int i = 0; i < input.size; i ++) {
-    if (input[i].isEqualToZero()) {
-      return false;
-    }
-  }
-  owner.startingVectors = input;
-  this->initialize(owner.startingVectors.size);
-  for (int i = 0; i < owner.startingVectors.size; i ++) {
-    this->denominator[i].initialize();
-  }
+bool OnePartialFraction::initializeFromVectors(
+  PartialFractions& owner,
+  Vectors<Rational>& input,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("OnePartialFraction::initializeFromVectors");
+  (void) commentsOnFailure;
+  this->initialize(owner);
   for (int i = 0; i < input.size; i ++) {
     int index = owner.getIndex(input[i]);
     this->denominator[index].addMultiplicity(1, 1);
   }
   this->computeIndicesNonZeroMultiplicities();
-  for (int i = 0; i < input.size; i ++) {
-    for (int j = 0; j < input[i].size; j ++) {
-      if (!input[i][j].isSmallInteger()) {
-        return false;
-      }
-    }
-  }
+  global.comments << "DEBUG: initialized: " << this->toString()
+  << " start vec: " << input.toString();
   return true;
 }
 
@@ -3989,13 +3994,13 @@ void PartialFractions::writeToFileComputedContributions(std::fstream& output) {
   output.seekp(0);
   output << "Partial_fraction_index/file_storage_position\n";
   for (int i = 0; i < this->size(); i ++) {
-    output << i << " " << (*this)[i].FileStoragePosition << "\n";
+    output << i << " " << this->allFractions[i].FileStoragePosition << "\n";
   }
 }
 
 PartialFractions::PartialFractions() {
-  this->HighestIndex = - 1;
-  this->IndexLowestNonProcessed = - 2;
+  this->highestIndex = - 1;
+  this->indexLowestNonProcessed = - 2;
   this->flagSplitTestModeNoNumerators = false;
   this->flagDiscardingFractions = false;
   this->flagUsingCheckSum = true;
@@ -4133,13 +4138,13 @@ void OnePartialFraction::reduceMonomialByMonomial(
 }
 
 void OnePartialFraction::reduceMonomialByMonomialModifyOneMonomial(
-  PartialFractions& Accum,
+  PartialFractions& accumulator,
   SelectionWithDifferentMaxMultiplicities& powers,
   List<int>& powersSigned,
   MonomialPolynomial& input,
   LargeInteger& inputCoeff
 ) {
-  (void) Accum; (void) powers; (void) powersSigned; (void) input; (void) inputCoeff;
+  (void) accumulator; (void) powers; (void) powersSigned; (void) input; (void) inputCoeff;
   /*Polynomial<LargeInt>& numerator = global.PolyLargeIntPartFracBuffer5.getElement();
   Polynomial<LargeInt>& tempP = global.PolyLargeIntPartFracBuffer6.getElement();
   numerator.makeZero(Accum.AmbientDimension);
@@ -4226,65 +4231,8 @@ void OnePartialFraction::getPolyReduceMonomialByMonomial(
   }
 }
 
-int PartialFractions::toString(std::string& output, bool LatexFormat, FormatExpressions& format) {
-  return this->toStringBasisChange(output, LatexFormat, format);
-}
-
 int PartialFractions::toFileOutput(std::fstream& output, bool latexFormat) {
   return this->toFileOutputBasisChange(output, latexFormat);
-}
-
-int PartialFractions::toStringBasisChange(
-  std::string& output,
-  bool latexFormat,
-  FormatExpressions& polynomialFormatLocal
-) {
-  std::stringstream out;
-  std::string tempS;
-  int TotalLines = 0;
-  polynomialFormatLocal.extraLinesCounterLatex = 0;
-  if (latexFormat) {
-    out << "\\begin{eqnarray*}\n";
-  }
-  int LastCutOff = 0;
-  for (int i = 0; i < this->size(); i ++) {
-    if (this->coefficients[i].size() > 0 ) {
-      if (latexFormat) {
-        out << "&&";
-      }
-      if (tempS[0] != '-') {
-        out << "+";
-      }
-      out << tempS;
-      if (latexFormat) {
-        out << "\\\\ \n";
-        TotalLines ++;
-      } else {
-        out << "\n";
-      }
-      if (latexFormat && (TotalLines - LastCutOff) > 40) {
-        out << "\\end{eqnarray*}\\begin{eqnarray*}\n";
-        LastCutOff = TotalLines;
-      }
-    }
-    if (TotalLines>this->flagMaxNumStringOutputLines) {
-      out << "\n Number of lines exceeded " << this->flagMaxNumStringOutputLines
-      << "; The rest of the output was suppressed.";
-      break;
-    }
-  }
-  if (!latexFormat) {
-    output = out.str();
-    if (output.size() > 0) {
-      if (output[0] == '+') {
-        output.erase(0, 1);
-      }
-    }
-  } else {
-    out << "\\end{eqnarray*}";
-    output = out.str();
-  }
-  return TotalLines;
 }
 
 int PartialFractions::toFileOutputBasisChange(std::fstream& output, bool latexFormat) {
@@ -4297,7 +4245,7 @@ int PartialFractions::toFileOutputBasisChange(std::fstream& output, bool latexFo
   }
   int lastCutOff = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (this->coefficients[i].size() > 0 ) {
+    if (this->allFractions.coefficients[i].size() > 0 ) {
       if (latexFormat) {
         output << "&&";
       }
@@ -4366,7 +4314,7 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
     return;
   }
   std::stringstream out1, out2, out3;
-  out1 << this->numberOfRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions
+  out1 << this->numberOfRelevantReducedFractions << " relevant reduced + " << this->numberOfIrrelevantFractions
   << " disjoint = " << this->totalReduced;
   if (this->NumRelevantNonReducedFractions != 0) {
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
@@ -4405,15 +4353,16 @@ void PartialFractions::makeProgressVPFcomputation() {
 }
 
 void PartialFractions::computeOneCheckSum(Rational& output) {
+  MacroRegisterFunctionWithName("PartialFractions::computeOneCheckSum");
   output.makeZero();
-  Vector<Rational> checkSumRoot = OnePartialFractionDenominator::getCheckSumRoot(this->ambientDimension);
+  Vector<Rational> checkSumRoot = OnePartialFractionDenominatorComponent::getCheckSumRoot(this->ambientDimension);
   ProgressReport report;
   ProgressReport report2;
   for (int i = 0; i < this->size(); i ++) {
     Rational currentCheckSum;
     Rational rationalValue;
-    (*this)[i].computeOneCheckSum(*this, currentCheckSum, this->ambientDimension);
-    (*this)[i].evaluateIntegerPolynomial(this->coefficients[i], checkSumRoot, rationalValue);
+    this->allFractions[i].computeOneCheckSum(*this, currentCheckSum, this->ambientDimension);
+    this->allFractions[i].evaluateIntegerPolynomial(this->allFractions.coefficients[i], checkSumRoot, rationalValue);
     currentCheckSum *= rationalValue;
     output += rationalValue;
     if (this->flagMakingProgressReport) {
@@ -4429,40 +4378,81 @@ void PartialFractions::computeOneCheckSum(Rational& output) {
   }
 }
 
-void PartialFractions::initCommon() {
-  this->makeZero();
+void PartialFractions::initializeCommon() {
+  this->allFractions.makeZero();
   this->startingVectors.clear();
   this->flagInitialized = false;
   this->SplitStepsCounter = 1;
 }
 
-bool PartialFractions::initFromRoots(Vectors<Rational>& input) {
-  this->initCommon();
-  if (input.size < 1) {
+bool PartialFractions::inputIsValid(std::stringstream* commentsOnFailure) const {
+  if (this->startingVectors.size < 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Zero vectors not allowed.";
+    }
+    return false;
+  }
+  for (int i = 0; i < this->startingVectors.size; i ++) {
+    if (!this->startingVectors[i].isEqualToZero()) {
+      continue;
+    }
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Zero vector not allowed. ";
+    }
+    return false;
+  }
+  for (int i = 0; i < this->startingVectors.size; i ++) {
+    for (int j = 0; j < this->startingVectors[i].size; j ++) {
+      if (this->startingVectors[i][j].isSmallInteger()) {
+        continue;
+      }
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Input has non-integer coefficient. ";
+      }
+      return false;
+    }
+  }
+  return true;
+
+}
+
+bool PartialFractions::initializeFromVectors(
+  Vectors<Rational>& input,
+  std::stringstream* commentsOnFailure
+) {
+  this->initializeCommon();
+  this->startingVectors = input;
+  if (!this->inputIsValid(commentsOnFailure)) {
     return false;
   }
   OnePartialFraction f;
   this->ambientDimension = input[0].size;
-  bool tempBool = f.initFromRoots(*this, input);
+  bool tempBool = f.initializeFromVectors(*this, input, commentsOnFailure);
   Polynomial<LargeInteger> tempOne;
   tempOne.makeOne();
-  this->addMonomial(f, tempOne);
+  this->allFractions.addMonomial(f, tempOne);
   return tempBool;
 }
 
-void PartialFractions::initAndSplit(Vectors<Rational>& input) {
-  this->initFromRoots(input);
-  this->split(nullptr);
+void PartialFractions::initializeAndSplit(
+  Vectors<Rational>& input,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PartialFractions::initializeAndSplit");
+  this->initializeFromVectors(input, commentsOnFailure);
+  global.comments << "DEbug: initial part frac: " << this->allFractions.toString() << "\n<br>\n";
+  this->split(nullptr, commentsOnFailure);
 }
 
 void PartialFractions::run(Vectors<Rational>& input) {
   if (!this->flagInitialized) {
-    this->initFromRoots(input);
+    this->initializeFromVectors(input, nullptr);
   }
-  this->split(nullptr);
+  this->split(nullptr, nullptr);
 }
 
 void PartialFractions::removeRedundantShortRoots(Vector<Rational>* indicator) {
+  MacroRegisterFunctionWithName("PartialFractions::removeRedundantShortRoots");
   Rational startCheckSum;
   ProgressReport report;
   for (int i = 0; i < this->size(); i ++) {
@@ -4501,10 +4491,6 @@ void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Ratio
     }*/
 }
 
-void PartialFractions::toString(std::string& output, FormatExpressions& format) {
-  this->toString(output, format.flagUseLatex, format);
-}
-
 void PartialFractions::writeToFile(std::fstream& output) {
   output << "Dimension: ";
   output << this->ambientDimension << "\n";
@@ -4519,7 +4505,7 @@ void PartialFractions::writeToFile(std::fstream& output) {
   }
   output << "\n" << "Number_of_fractions: " << this->size() << "\n";
   for (int i = 0; i < this->size(); i ++) {
-    (*this)[i].writeToFile(output);
+    this->allFractions[i].writeToFile(output);
   }
 }
 
@@ -4528,10 +4514,10 @@ void PartialFractions::computeSupport(List<Vectors<Rational> >& output) {
   output.setExpectedSize(this->size());
   for (int i = 0; i < this->size(); i ++) {
     Vectors<Rational> allVectors;
-    for (int j = 0; j < (*this)[i].indicesNonZeroMultiplicities.size; j ++) {
+    for (int j = 0; j < this->allFractions[i].indicesNonZeroMultiplicities.size; j ++) {
       Vector<Rational> leftVector;
       Vector<Rational> rightVector;
-      leftVector = (this->startingVectors[(*this)[i].indicesNonZeroMultiplicities[j]]);
+      leftVector = (this->startingVectors[this->allFractions[i].indicesNonZeroMultiplicities[j]]);
       Vector<Rational> linearCombination;
       leftVector /= 2;
       linearCombination = leftVector;
@@ -4565,7 +4551,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   QuasiPolynomial& output,
   Vector<Rational>* chamberIndicator
 ) {
-  this->initCommon();
+  this->initializeCommon();
   Vectors<Rational> vectorPartitionBasis;
   Vector<Rational> tempWeight; tempWeight.setSize(weylGroupNumber);
   WeylGroupData tempW;
@@ -4622,16 +4608,16 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   }
 }
 
-void OnePartialFractionDenominator::operator=(OnePartialFractionDenominator& right) {
+void OnePartialFractionDenominatorComponent::operator=(OnePartialFractionDenominatorComponent& right) {
   this->multiplicities = right.multiplicities;
   this->elongations = right.elongations;
 }
 
-unsigned int OnePartialFractionDenominator::hashFunction() const {
+unsigned int OnePartialFractionDenominatorComponent::hashFunction() const {
   return static_cast<unsigned>(this->getTotalMultiplicity());
 }
 
-void OnePartialFractionDenominator::getPolynomialDenominator(
+void OnePartialFractionDenominatorComponent::getPolynomialDenominator(
   Polynomial<LargeInteger>& output, int multiplicityIndex, Vector<Rational>& exponent
 ) {
   if (multiplicityIndex >= this->multiplicities.size) {
@@ -4646,7 +4632,7 @@ void OnePartialFractionDenominator::getPolynomialDenominator(
   output.addMonomial(tempM, - 1);
 }
 
-int OnePartialFractionDenominator::getLargestElongation() {
+int OnePartialFractionDenominatorComponent::getLargestElongation() {
   int result = this->elongations[0];
   for (int i = 1; i < this->elongations.size; i ++) {
     if (this->elongations[i] == result) {
@@ -4659,7 +4645,7 @@ int OnePartialFractionDenominator::getLargestElongation() {
   return result;
 }
 
-int OnePartialFractionDenominator::getLeastCommonMultipleElongations() {
+int OnePartialFractionDenominatorComponent::getLeastCommonMultipleElongations() {
   int result = 1;
   for (int i = 0; i < this->elongations.size; i ++) {
     if (this->elongations[i] == 0) {
@@ -4670,7 +4656,7 @@ int OnePartialFractionDenominator::getLeastCommonMultipleElongations() {
   return result;
 }
 
-int OnePartialFractionDenominator::getTotalMultiplicity() const {
+int OnePartialFractionDenominatorComponent::getTotalMultiplicity() const {
   int result = 0;
   for (int i = 0; i < this->elongations.size; i ++) {
     result += this->multiplicities[i];
@@ -4678,7 +4664,7 @@ int OnePartialFractionDenominator::getTotalMultiplicity() const {
   return result;
 }
 
-int OnePartialFractionDenominator::indexLargestElongation() {
+int OnePartialFractionDenominatorComponent::indexLargestElongation() {
   int result = 0;
   for (int i = 1; i < this->elongations.size; i ++) {
     if (this->elongations[i] > this->elongations[result]) {
@@ -4688,17 +4674,22 @@ int OnePartialFractionDenominator::indexLargestElongation() {
   return result;
 }
 
-void OnePartialFractionDenominator::initialize() {
+void OnePartialFractionDenominatorComponent::initialize(
+  PartialFractions& inputOwner, int inputStartingVectorIndex
+) {
   this->elongations.setSize(0);
   this->multiplicities.setSize(0);
+  this->owner = &inputOwner;
+  this->startingVectorIndex = inputStartingVectorIndex;
 }
 
-void OnePartialFractionDenominator::computeOneCheckSum(
+void OnePartialFractionDenominatorComponent::computeOneCheckSum(
   Rational& output, const Vector<Rational>& exponent, int dimension
 ) {
+  MacroRegisterFunctionWithName("OnePartialFractionDenominator::computeOneCheckSum");
   output = 1;
   std::string tempS;
-  Vector<Rational> checkSumRoot = OnePartialFractionDenominator::getCheckSumRoot(dimension);
+  Vector<Rational> checkSumRoot = OnePartialFractionDenominatorComponent::getCheckSumRoot(dimension);
   for (int i = 0; i < this->elongations.size; i ++) {
     Rational scalar = 1;
     Rational minuend = 1;
@@ -4714,22 +4705,25 @@ void OnePartialFractionDenominator::computeOneCheckSum(
     scalar.raiseToPower(this->multiplicities[i]);
     output.multiplyBy(scalar);
   }
+  global.comments << "DEBUG: got to here! Partial fraction: " << this->toString(nullptr);
   output.invert();
 }
 
-int OnePartialFractionDenominator::getMultiplicityLargestElongation() {
+int OnePartialFractionDenominatorComponent::getMultiplicityLargestElongation() {
   int result = 0;
-  int LargestElongationFound = 0;
+  int largestElongationFound = 0;
   for (int i = 0; i < this->elongations.size; i ++) {
-    if (LargestElongationFound< this->elongations[i]) {
-      LargestElongationFound = this->elongations[i];
+    if (largestElongationFound < this->elongations[i]) {
+      largestElongationFound = this->elongations[i];
       result = this->multiplicities[i];
     }
   }
   return result;
 }
 
-void OnePartialFractionDenominator::addMultiplicity(int multiplicityIncrement, int elongation) {
+void OnePartialFractionDenominatorComponent::addMultiplicity(
+  int multiplicityIncrement, int elongation
+) {
   if (multiplicityIncrement == 0) {
     return;
   }
@@ -4750,75 +4744,82 @@ void OnePartialFractionDenominator::addMultiplicity(int multiplicityIncrement, i
   }
 }
 
-void OnePartialFractionDenominator::oneFractionToStringBasisChange(
-  PartialFractions& owner,
-  int indexElongation,
-  Matrix<LargeInteger>& variableChange,
-  bool usingVariableChange,
-  std::string& output,
-  bool latexFormat,
-  int indexInFraction,
-  int dimension,
-  FormatExpressions& polynomialFormatLocal
-) {
-  std::stringstream out;
-  Vector<Rational> leftRoot;
-  Vector<Rational> rightRoot;
-  rightRoot.setSize(dimension);
-  leftRoot.setSize(dimension);
-  int numberOfCoordinates;
-  if (usingVariableChange) {
-    numberOfCoordinates = variableChange.numberOfRows;
-    leftRoot = owner.startingVectors[indexInFraction];
-    for (int i = 0; i < numberOfCoordinates; i ++) {
-      rightRoot[i] = 0;
-      for (int j = 0; j < dimension; j ++) {
-        rightRoot[i] += leftRoot[j] * variableChange.elements[i][j];
-      }
-    }
-  } else {
-    numberOfCoordinates = dimension;
-    rightRoot = owner.startingVectors[indexInFraction];
-  }
-  rightRoot *= this->elongations[indexElongation];
-  if (!latexFormat) {
-    out << "1/(1-";
-  } else {
-    out << "\\frac{1}{(1-";
-  }
-  for (int i = 0; i < numberOfCoordinates; i ++) {
-    if (rightRoot[i] != 0) {
-      out << polynomialFormatLocal.getPolynomialLetter(i);
-      if (rightRoot[i] != 1) {
-        out << "^{" << rightRoot[i].toString() << "}";
-      }
-    }
-  }
-  out << ")";
-  if (this->multiplicities[indexElongation] > 1) {
-    out << "^" << this->multiplicities[indexElongation];
-  }
-  if (latexFormat) {
-    out << "}";
-  }
-  output = out.str();
+OnePartialFractionDenominatorComponent::OnePartialFractionDenominatorComponent() {
+  this->owner = nullptr;
+  this->startingVectorIndex = - 1;
 }
 
-std::string OnePartialFractionDenominator::toString() {
-  if (this->multiplicities.size == 0) {
-    return "";
+bool OnePartialFractionDenominatorComponent::operator>(
+  const OnePartialFractionDenominatorComponent& other
+) const {
+  if (this->multiplicities > other.multiplicities) {
+    return true;
+  }
+  if (other.multiplicities > this->multiplicities) {
+    return false;
+  }
+  if (this->elongations > other.elongations) {
+    return true;
+  }
+  if (other.elongations > this->elongations) {
+    return false;
+  }
+  return false;
+}
+
+std::string OnePartialFractionDenominatorComponent::toStringOneDenominator(
+  int elongation,
+  int multiplicity,
+  FormatExpressions* format
+) const {
+  if (this->owner == nullptr) {
+    return "(uninitialized OnePartialFractionDenominator)";
   }
   std::stringstream out;
-  std::string tempS;
+  Vector<Rational> exponent;
+  exponent = this->owner->startingVectors[this->startingVectorIndex];
+  exponent *= elongation;
+  MemorySaving<FormatExpressions> formatContainer;
+  if (format == nullptr) {
+    format = &formatContainer.getElement();
+  }
+  out << "(1-";
+  MonomialPolynomial monomial;
+  monomial.makeFromPowers(exponent);
+  out << monomial.toString(format);
+  out << ")";
+  if (multiplicity > 1) {
+    out << "^{" << multiplicity << "}";
+  }
+  if (format->flagUseLatex) {
+    out << "}";
+  }
+  return out.str();
+}
+
+std::string OnePartialFractionDenominatorComponent::toString(FormatExpressions* format) const {
+  if (this->owner == nullptr) {
+    return "(uninitialized)";
+  }
+  if (this->multiplicities.size == 0) {
+    return "1";
+  }
+  MemorySaving<FormatExpressions> formatContainer;
+  if (format == nullptr) {
+    format = &formatContainer.getElement();
+  }
+  std::stringstream out;
   for (int k = 0; k < this->multiplicities.size; k ++) {
-    //this->oneFractionToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, dimension, PolyFormatLocal);
-    out << tempS;
+    out
+    << this->toStringOneDenominator(
+      this->elongations[k], this->multiplicities[k], format
+    );
   }
   out << " ";
   return out.str();
 }
 
-bool OnePartialFractionDenominator::operator==(OnePartialFractionDenominator& right) {
+bool OnePartialFractionDenominatorComponent::operator==(OnePartialFractionDenominatorComponent& right) {
   if (this->elongations.size != right.elongations.size) {
     return false;
   }
@@ -4841,8 +4842,10 @@ bool OnePartialFractionDenominator::operator==(OnePartialFractionDenominator& ri
   return true;
 }
 
-void PartialFractions::initFromRoots(
-  Vectors<Rational>& algorithmBasis, Vector<Rational>* weights
+void PartialFractions::initializeFromVectorsAndWeights(
+  Vectors<Rational>& algorithmBasis,
+  Vector<Rational>* weights,
+  std::stringstream* commentsOnFailure
 ) {
   if (algorithmBasis.size == 0) {
     return;
@@ -4860,6 +4863,10 @@ void PartialFractions::initFromRoots(
   }
   this->numberOfNonRedundantShortRoots = this->size();
   this->computeTable(dimension);
+}
+
+int PartialFractions::size() {
+  return this->allFractions.size();
 }
 
 void PartialFractions::computeTable(int dimension) {
@@ -9582,7 +9589,7 @@ void OnePartialFraction::getRootsFromDenominator(PartialFractions& owner, Vector
   output.setSize(this->indicesNonZeroMultiplicities.size);
   for (int i = 0; i < this->indicesNonZeroMultiplicities.size; i ++) {
     output[i] = owner.startingVectors[this->indicesNonZeroMultiplicities[i]];
-    OnePartialFractionDenominator& current = this->denominator[this->indicesNonZeroMultiplicities[i]];
+    OnePartialFractionDenominatorComponent& current = this->denominator[this->indicesNonZeroMultiplicities[i]];
     if (current.elongations.size != 1) {
       global.fatal << "Elongations expected to have a single element. " << global.fatal;
     }
@@ -9642,9 +9649,9 @@ bool PartialFractions::getVectorPartitionFunction(QuasiPolynomial& output, Vecto
   ///////////////////////////////////////////////
   QuasiPolynomial tempQP;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].rootIsInFractionCone(*this, &newIndicator)) {
-      const OnePartialFraction& currentPF = (*this)[i];
-      currentPF.getVectorPartitionFunction(*this, this->coefficients[i], tempQP);
+    if (this->allFractions[i].rootIsInFractionCone(*this, &newIndicator)) {
+      const OnePartialFraction& currentFraction = this->allFractions[i];
+      currentFraction.getVectorPartitionFunction(*this, this->allFractions.coefficients[i], tempQP);
       output += tempQP;
       this->makeProgressVPFcomputation();
     }
@@ -9680,16 +9687,16 @@ std::string PartialFractions::doFullComputationReturnLatexFileString(
   out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
   << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: ";
   global.fatal << global.fatal;
-//  out << this->chambersOld.directions.ElementToStringGeneric();
-  out << "\n\n The corresponding generating function is: " << this->toString(format) << "= (after splitting acording to algorithm)";
-  this->split(nullptr);
-  out << this->toString(format);
+  //  out << this->chambersOld.directions.ElementToStringGeneric();
+  out << "\n\n The corresponding generating function is: " << this->toString(&format) << "= (after splitting acording to algorithm)";
+  this->split(nullptr, nullptr);
+  out << this->toString(&format);
   global.fatal << global.fatal;
-//  out << "Therefore the vector partition function is given by " << this->chambersOld.GetNumNonZeroPointers()
-//        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
-//  outHtml << "There are " << this->chambersOld.size << " systems of linear inequalities "
-//  << " such that on each such system of inequalities the vector partition function is quasi-polynomial. "
-//  << " A full list of the systems of inequalities (\"chambers\") and the corresponding quasi-polynomials follows.<hr> ";
+  //  out << "Therefore the vector partition function is given by " << this->chambersOld.GetNumNonZeroPointers()
+  //        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
+  //  outHtml << "There are " << this->chambersOld.size << " systems of linear inequalities "
+  //  << " such that on each such system of inequalities the vector partition function is quasi-polynomial. "
+  //  << " A full list of the systems of inequalities (\"chambers\") and the corresponding quasi-polynomials follows.<hr> ";
   QuasiPolynomial tempQP;
   std::string tempS;
   Vector<Rational> tempIndicator;
@@ -10245,7 +10252,7 @@ std::string HtmlRoutines::convertStringToURLString(const std::string& input, boo
   return out.str();
 }
 
-Vector<Rational> OnePartialFractionDenominator::getCheckSumRoot(int numberOfVariables) {
+Vector<Rational> OnePartialFractionDenominatorComponent::getCheckSumRoot(int numberOfVariables) {
   Vector<Rational> output;
   output.setSize(numberOfVariables);
   for (int i = 0; i < numberOfVariables; i ++) {
@@ -10255,14 +10262,19 @@ Vector<Rational> OnePartialFractionDenominator::getCheckSumRoot(int numberOfVari
 }
 
 bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational>* indicator) {
-  if (!(*this)[index].rootIsInFractionCone(*this, indicator)) {
+  if (!this->allFractions[index].rootIsInFractionCone(*this, indicator)) {
     return false;
   }
   bool found = false;
-  for (int k = 0; k < (*this)[index].indicesNonZeroMultiplicities.size; k ++) {
-    int currentIndex = (*this)[index].indicesNonZeroMultiplicities[k];
-    const OnePartialFractionDenominator& currentFrac = (*this)[index].denominator[currentIndex];
-    if (currentFrac.elongations.size > 1) {
+  for (
+    int k = 0;
+    k < this->allFractions[index].indicesNonZeroMultiplicities.size;
+    k ++
+  ) {
+    int currentIndex = this->allFractions[index].indicesNonZeroMultiplicities[k];
+    const OnePartialFractionDenominatorComponent& currentFraction =
+    this->allFractions[index].denominator[currentIndex];
+    if (currentFraction.elongations.size > 1) {
       found = true;
       break;
     }
@@ -10273,25 +10285,30 @@ bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational
   OnePartialFraction onePartialFraction;
   Rational localStartCheckSum, localEndCheckSum;
   std::string tempS;
-  Polynomial<LargeInteger> tempIP, currentCoeff;
-  this->popMonomial(index, onePartialFraction, currentCoeff);
+  Polynomial<LargeInteger> tempIP, currentCoefficient;
+  this->allFractions.popMonomial(index, onePartialFraction, currentCoefficient);
   for (int k = 0; k < onePartialFraction.indicesNonZeroMultiplicities.size; k ++) {
     int currentIndex = onePartialFraction.indicesNonZeroMultiplicities[k];
-    OnePartialFractionDenominator& currentFrac = onePartialFraction.denominator[currentIndex];
-    int LCMElongations = currentFrac.getLeastCommonMultipleElongations();
+    OnePartialFractionDenominatorComponent& currentFraction = onePartialFraction.denominator[currentIndex];
+    int LCMElongations = currentFraction.getLeastCommonMultipleElongations();
     tempS = this->startingVectors[currentIndex].toString();
-    while (currentFrac.elongations.size > 1) {
-      for (int i = 0; i < currentFrac.elongations.size; i ++) {
-        int elongationValue = currentFrac.elongations[i];
+    while (currentFraction.elongations.size > 1) {
+      for (int i = 0; i < currentFraction.elongations.size; i ++) {
+        int elongationValue = currentFraction.elongations[i];
         if (elongationValue != LCMElongations) {
           int numSummands = LCMElongations / elongationValue;
           onePartialFraction.getNElongationPolynomial(
-            this->startingVectors, currentIndex, elongationValue, numSummands, tempIP, this->ambientDimension
+            this->startingVectors,
+            currentIndex,
+            elongationValue,
+            numSummands,
+            tempIP,
+            this->ambientDimension
           );
-          tempIP.raiseToPower(currentFrac.multiplicities[i], 1);
-          currentCoeff *= tempIP;
-          currentFrac.addMultiplicity(currentFrac.multiplicities[i], LCMElongations);
-          currentFrac.addMultiplicity(- currentFrac.multiplicities[i], elongationValue);
+          tempIP.raiseToPower(currentFraction.multiplicities[i], 1);
+          currentCoefficient *= tempIP;
+          currentFraction.addMultiplicity(currentFraction.multiplicities[i], LCMElongations);
+          currentFraction.addMultiplicity(- currentFraction.multiplicities[i], elongationValue);
           if (!localEndCheckSum.isEqualTo(localStartCheckSum)) {
             global.fatal << "Local end checksum must be zero. " << global.fatal;
           }
@@ -10299,7 +10316,7 @@ bool PartialFractions::removeRedundantShortRootsIndex(int index, Vector<Rational
       }
     }
   }
-  this->addMonomial(onePartialFraction, currentCoeff);
+  this->allFractions.addMonomial(onePartialFraction, currentCoefficient);
   return true;
 }
 
@@ -11371,10 +11388,10 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& roots, std::string& ou
   std::stringstream out;
   std::string whatWentWrong;
 
-  partialFractions.initFromRoots(roots);
-  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(format));
-  partialFractions.split(nullptr);
-  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(format));
+  partialFractions.initializeFromVectors(roots, nullptr);
+  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(&format));
+  partialFractions.split(nullptr, nullptr);
+  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(&format));
   // partialFractions.chambers.initializeFromDirectionsAndRefine(roots);
   global.fatal << "Not implemented. " << global.fatal ;
   //  partialFractions.chambersOld.AmbientDimension = roots[0].size;
@@ -11690,11 +11707,13 @@ void Lattice::getDefaultFundamentalDomainInternalPoint(Vector<Rational>& output)
   output /= 2;
 }
 
-bool PartialFractions::split(Vector<Rational>* indicator) {
-  //PartFraction::flagAnErrorHasOccurredTimeToPanic = true;
-  //this->flagAnErrorHasOccurredTimeToPanic = true;
+bool PartialFractions::split(
+  Vector<Rational>* indicator,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PartialFractions::split");
   if (!this->flagInitialized) {
-    this->IndexLowestNonProcessed = 0;
+    this->indexLowestNonProcessed = 0;
     this->prepareIndicatorVariables();
     this->prepareCheckSums();
     this->flagInitialized = true;
@@ -11702,7 +11721,7 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
   if (this->splitPartial()) {
     this->removeRedundantShortRoots(indicator);
     this->compareCheckSums();
-    this->IndexLowestNonProcessed = this->size();
+    this->indexLowestNonProcessed = this->size();
     this->makeProgressReportSplittingMainPart();
   }
   return false;

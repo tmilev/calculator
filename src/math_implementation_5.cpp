@@ -1123,6 +1123,10 @@ void MonomialPolynomial::setVariable(int variableIndex, const Rational& power) {
   this->trimTrailingZeroes();
 }
 
+void MonomialPolynomial::makeFromPowers(const Vector<Rational>& inputMonomialBody) {
+  this->monomialBody = inputMonomialBody;
+}
+
 void MonomialPolynomial::multiplyByVariable(int variableIndex, const Rational& variablePower) {
   if (variablePower.isEqualToZero()) {
     return;
@@ -1396,13 +1400,14 @@ std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat) co
     return "1";
   }
   for (int i = 0; i < this->monomialBody.size; i ++) {
-    if (!(this->monomialBody[i].isEqualToZero())) {
-      out << polynomialFormat->getPolynomialLetter(i);
-      if (!(this->monomialBody[i] == 1)) {
-        out << "^{" << this->monomialBody[i] << "}";
-      } else {
-        out << " ";
-      }
+    if ((this->monomialBody[i].isEqualToZero())) {
+      continue;
+    }
+    out << polynomialFormat->getPolynomialLetter(i);
+    if (this->monomialBody[i] == 1) {
+      out << " ";
+    } else {
+      out << "^{" << this->monomialBody[i] << "}";
     }
   }
   return out.str();

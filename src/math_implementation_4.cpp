@@ -1361,10 +1361,12 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   FileOperations::openFileCreateIfNotPresentVirtual(
     this->multiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false
   );
-  this->partialFractions.initFromRoots(this->gModKNegativeWeightsBasisChanged);
-  out << this->partialFractions.toString(format);
-  this->partialFractions.split(nullptr);
-  out << "=" << this->partialFractions.toString(format);
+  this->partialFractions.initializeFromVectors(
+    this->gModKNegativeWeightsBasisChanged, nullptr
+  );
+  out << this->partialFractions.toString(&format);
+  this->partialFractions.split(nullptr, nullptr);
+  out << "=" << this->partialFractions.toString(&format);
   //  int totalDim = this->translationS[0].size +this->translationsProjecteD[0].size;
   this->quasiPolynomialsSubstituted.setSize(this->projectivizedChambeR.size);
   global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;

@@ -11,10 +11,14 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula(
   MacroRegisterFunctionWithName("CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula");
   Vectors<Rational> vectors;
   Matrix<Rational> matrix;
-  if (CalculatorConversions::functionGetMatrix(calculator, input, matrix, false)) {
-
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator, input, matrix, false
+  )) {
+    return calculator << "Failed to extract matrix of rationals. ";
   }
-  global.comments << "DEBUG: got matrix so far: " << matrix.toString() << ". ";
-  global.fatal << "Not implemented yet. " << global.fatal;
-  return false;
+  matrix.getVectorsFromRows(vectors);
+  PartialFractions partialFractions;
+  partialFractions.initializeAndSplit(vectors, &calculator.comments);
+  output.assignValue(calculator, partialFractions.toString(nullptr));
+  return true;
 }

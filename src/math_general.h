@@ -350,6 +350,7 @@ public:
     return result;
   }
   std::string toString(FormatExpressions* polynomialFormat = nullptr) const;
+  void makeFromPowers(const Vector<Rational>& inputMonomialBody);
   void makeOne() {
     this->monomialBody.setSize(0);
   }
@@ -3844,39 +3845,52 @@ void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeI
 
 class PartialFractions;
 
-class OnePartialFractionDenominator {
+// Suppose the initial vectors are v_1, ..., v_n.
+// For every vector v=(a_1, ..., a_k), define
+// x^{v} as the monomial x_1^{a_1} ... x_n^{a_k}.
+//
+// Then the denominator recorded here has the form:
+// (1-x^{e_1 * v_1})^m_1 ... (1-x^{e_n * v_n})^m_n,
+// where we call
+// e_1, ..., e_n
+// the vector "elongations" and we call
+// m_1, ..., m_n the vector "multiplicities".
+class OnePartialFractionDenominatorComponent {
 public:
   List<int> multiplicities;
   List<int> elongations;
+  int startingVectorIndex;
+  PartialFractions* owner;
   void addMultiplicity(int multiplicityIncrement, int elongation);
   int indexLargestElongation();
   int getLargestElongation();
-  void getPolynomialDenominator(Polynomial<LargeInteger>& output, int multiplicityIndex, Vector<Rational>& exponent);
+  void getPolynomialDenominator(
+    Polynomial<LargeInteger>& output,
+    int multiplicityIndex,
+    Vector<Rational>& exponent
+  );
   int getMultiplicityLargestElongation();
   int getLeastCommonMultipleElongations();
   int getTotalMultiplicity() const;
   void invert();
-  void initialize();
+  void initialize(PartialFractions& inputOwner, int inputStartingVectorIndex);
   static Vector<Rational> getCheckSumRoot(int numberOfVariables);
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(const OnePartialFractionDenominator& input) {
+  static unsigned int hashFunction(const OnePartialFractionDenominatorComponent& input) {
     return input.hashFunction();
   }
+  OnePartialFractionDenominatorComponent();
   void computeOneCheckSum(Rational& output, const Vector<Rational>& exponent, int dimension);
-  void operator=(OnePartialFractionDenominator& right);
-  bool operator==(OnePartialFractionDenominator& right);
-  std::string toString();
-  void oneFractionToStringBasisChange(
-    PartialFractions& owner,
-    int indexElongation,
-    Matrix<LargeInteger>& variableChange,
-    bool usingVariableChange,
-    std::string& output,
-    bool latexFormat,
-    int indexInFraction,
-    int dimension,
-    FormatExpressions& polynomialFormatLocal
-  );
+  void operator=(OnePartialFractionDenominatorComponent& right);
+  bool operator==(OnePartialFractionDenominatorComponent& right);
+
+  bool operator>(const OnePartialFractionDenominatorComponent& other) const;
+  std::string toString(FormatExpressions* format) const;
+  std::string toStringOneDenominator(
+    int elongation,
+    int multiplicity,
+    FormatExpressions* format
+  ) const;
 };
 
 class LaTeXProcedures {
@@ -5211,28 +5225,29 @@ class OnePartialFraction {
 private:
   void findPivot();
   void findInitialPivot();
-  bool rootIsInFractionCone (PartialFractions& owner, Vector<Rational>* root) const;
+  bool rootIsInFractionCone(PartialFractions& owner, Vector<Rational>* root) const;
   friend class PartialFractions;
   friend class partFractionPolynomialSubstitution;
 public:
-  std::string DebugString;
   int lastDistinguishedIndex;
   int FileStoragePosition;
   bool powerSeriesCoefficientIsComputed;
   bool isIrrelevant;
   bool relevanceIsComputed;
   List<int> indicesNonZeroMultiplicities;
-  List<OnePartialFractionDenominator> denominator;
-  friend std::ostream& operator << (std::ostream& output, const OnePartialFraction& input) {
+  List<OnePartialFractionDenominatorComponent> denominator;
+  PartialFractions* owner;
+  friend std::ostream& operator<<(std::ostream& output, const OnePartialFraction& input) {
     (void) input;
     global.fatal << " Not implemented, please fix. " << global.fatal;
     return output;
   }
   bool removeRedundantShortRootsClassicalRootSystem(
-    PartialFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int dimension
+    PartialFractions& owner,
+    Vector<Rational>* indicator,
+    Polynomial<LargeInteger>& buffer1,
+    int dimension
   );
-  bool removeRedundantShortRoots(PartialFractions& owner, Vector<Rational>* Indicator, int dimension);
-  bool AlreadyAccountedForInGUIDisplay;
   void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQP,
     const MonomialPolynomial& monomial,
@@ -5249,7 +5264,10 @@ public:
     Polynomial<Rational>& output
   );
   void computeNormals(
-    PartialFractions& owner, Vectors<Rational>& output, int dimension, Matrix<Rational>& buffer
+    PartialFractions& owner,
+    Vectors<Rational>& output,
+    int dimension,
+    Matrix<Rational>& buffer
   );
   int computeGainingMultiplicityIndexInLinearRelation(
     bool flagUsingOrlikSolomon, Matrix<Rational>& linearRelation
@@ -5258,7 +5276,9 @@ public:
     PartialFractions& owner, Vectors<Rational>& output
   ) const;
   void getVectorPartitionFunction(
-    PartialFractions& owner, Polynomial<LargeInteger>& coefficient, QuasiPolynomial& output
+    PartialFractions& owner,
+    Polynomial<LargeInteger>& coefficient,
+    QuasiPolynomial& output
   ) const;
   void decomposeAMinusNB(
     int indexA,
@@ -5275,7 +5295,9 @@ public:
     List<Vector<Rational> >& startingVectors
   );
   void computeOneCheckSum(
-    PartialFractions& owner, Rational& output, int dimension
+    PartialFractions& owner,
+    Rational& output,
+    int dimension
   ) const;
   bool reduceMeOnce(
     const Polynomial<LargeInteger>& myCoeff,
@@ -5323,7 +5345,7 @@ public:
   static unsigned int hashFunction(const OnePartialFraction& input) {
     return input.hashFunction();
   }
-  void initialize(int numberOfRoots);
+  void initialize(PartialFractions& inputOwner);
   void computeIndicesNonZeroMultiplicities();
   bool decreasePowerOneFraction(int index, int increment);
   void prepareFraction(
@@ -5353,13 +5375,19 @@ public:
     Polynomial<LargeInteger>& output
   );
   void reduceMonomialByMonomialModifyOneMonomial(
-    PartialFractions& Accum,
+    PartialFractions& accumulator,
     SelectionWithDifferentMaxMultiplicities& powers,
     List<int>& powersSigned,
     MonomialPolynomial& input,
     LargeInteger& inputCoeff
   );
-  void getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
+  void getAlphaMinusNBetaPoly(
+    PartialFractions& owner,
+    int indexA,
+    int indexB,
+    int n,
+    Polynomial<LargeInteger>& output
+  );
   void getNElongationPolynomialWithMonomialContribution(
     List<Vector<Rational> >& startingVectors,
     List<int>& selectedIndices,
@@ -5377,15 +5405,25 @@ public:
     Polynomial<LargeInteger>& output,
     int dimension
   );
-  static void getNElongationPolynomial(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int dimension);
+  static void getNElongationPolynomial(
+    Vector<Rational>& exponent,
+    int n,
+    Polynomial<LargeInteger>& output,
+    int dimension
+  );
   int getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner);
   bool operator==(const OnePartialFraction& right) const;
   void operator=(const OnePartialFraction& right);
-  bool initFromRoots(PartialFractions& owner, Vectors<Rational>& input);
-  std::string toString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
+  bool initializeFromVectors(
+    PartialFractions& owner,
+    Vectors<Rational>& input,
+    std::stringstream* commentsOnFailure
+  );
+  std::string toString(FormatExpressions* format = nullptr) const;
   void readFromFile(PartialFractions& owner, std::fstream& input);
   void writeToFile(std::fstream& output) const;
   int sizeWithoutDebugString() const;
+  bool operator>(const OnePartialFraction& other) const;
 };
 
 class Cone {
@@ -5675,15 +5713,16 @@ public:
   }
 };
 
-class PartialFractions: public LinearCombination<OnePartialFraction, Polynomial<LargeInteger> > {
+class PartialFractions {
   bool splitPartial();
-  void initCommon();
+  void initializeCommon();
 public:
+  LinearCombination<OnePartialFraction, Polynomial<LargeInteger> > allFractions;
   int ambientDimension;
-  int IndexLowestNonProcessed;
-  int IndexCurrentlyProcessed;
-  int HighestIndex;
-  int NumberIrrelevantFractions;
+  int indexLowestNonProcessed;
+  int indexCurrentlyProcessed;
+  int highestIndex;
+  int numberOfIrrelevantFractions;
   int numberOfRelevantReducedFractions;
   int numberOfMonomialsInNumerators;
   int numberOfGeneratorsInNumerators;
@@ -5696,8 +5735,8 @@ public:
   int NumProcessedForVPFfractions;
   int NumRunsReduceMonomialByMonomial;
   int numberOfProcessedForVPFMonomialsTotal;
-  Rational StartCheckSum;
-  Rational EndCheckSum;
+  Rational startCheckSum;
+  Rational endCheckSum;
   Rational checkSum;
   bool flagDiscardingFractions;
   bool flagUsingOrlikSolomonBasis;
@@ -5718,11 +5757,11 @@ public:
   List<int> indicesDoublesOfRedundantShortRoots;
   int numberOfNonRedundantShortRoots;
   Vector<Rational> weights;
-  void initFromRoots(Vectors<Rational>& algorithmBasis, Vector<Rational>* weights);
   int addRootAndSort(Vector<Rational>& root);
   int getIndex(const Vector<Rational>& root);
   int getIndexDoubleOfARoot(const Vector<Rational>& root);
   void computeTable(int dimension);
+  int size();
   void prepareCheckSums();
   std::string doFullComputationReturnLatexFileString(
     Vectors<Rational>& toBePartitioned, FormatExpressions& format, std::string* outputHtml
@@ -5730,15 +5769,24 @@ public:
   bool argumentsAllowed(Vectors<Rational>& arguments, std::string& outputWhatWentWrong);
   bool assureIndicatorRegularity(Vector<Rational>& indicator);
   void compareCheckSums();
-  bool initFromRoots(Vectors<Rational>& input);
-  void initAndSplit(Vectors<Rational>& input);
+  void initializeFromVectorsAndWeights(
+    Vectors<Rational>& algorithmBasis,
+    Vector<Rational>* weights,
+    std::stringstream* commentsOnFailure
+  );
+  bool initializeFromVectors(
+    Vectors<Rational>& input, std::stringstream* commentsOnFailure
+  );
+  // Returns whether the input vectors are valid for vector partition function computations.
+  bool inputIsValid(std::stringstream* commentsOnFailure) const;
+  void initializeAndSplit(Vectors<Rational>& input, std::stringstream* commentsOnFailure);
   void run(Vectors<Rational>& input);
   //row index is the index of the Vector<Rational> ; column(second) index is the coordinate index
   void removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* indicator);
   void removeRedundantShortRoots(Vector<Rational>* indicator);
   bool removeRedundantShortRootsIndex(int index, Vector<Rational>* indicator);
   bool splitClassicalRootSystem(bool shouldElongate, Vector<Rational>* indicator);
-  bool split(Vector<Rational>* indicator);
+  bool split(Vector<Rational>* indicator, std::stringstream* commentsOnFailure);
   void computeKostantFunctionFromWeylGroup(
     char weylGroupLetter,
     int weylGroupNumber,
@@ -5754,16 +5802,6 @@ public:
   void computeOneCheckSum(Rational& output);
   void prepareIndicatorVariables();
   void initFromOtherPartialFractions(PartialFractions& input);
-  std::string toString(FormatExpressions& format) {
-    std::string tempS;
-    this->toString(tempS, format);
-    return tempS;
-  }
-  void toString(std::string& output, FormatExpressions& format);
-  int toString(std::string& output, bool LatexFormat, FormatExpressions& format);
-  int toStringBasisChange(
-    std::string& output, bool latexFormat, FormatExpressions& polynomialFormatLocal
-  );
   int toFileOutput(std::fstream& output, bool latexFormat);
   int toFileOutputBasisChange(std::fstream& output, bool latexFormat);
   bool getVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator);
@@ -5776,10 +5814,10 @@ public:
     global.fatal << "This is not implemented yet. " << global.fatal;
   }
   PartialFractions();
-  int sizeWithoutDebugString();
   bool checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* root);
   void makeProgressReportSplittingMainPart();
   void makeProgressVPFcomputation();
+  std::string toString(FormatExpressions* format) const;
 };
 
 class DynkinSimpleType {

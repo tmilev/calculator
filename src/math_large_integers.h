@@ -562,8 +562,7 @@ public:
   static inline unsigned int hashFunction(const Rational& input) {
     return input.hashFunction();
   }
-  //void MultiplyByLargeRational(int num, int den);
-  void multiplyByInt(int x);
+  void multiplyByInteger(int x);
   void multiplyByLargeInteger(LargeInteger& x);
   void multiplyByLargeIntUnsigned(LargeIntegerUnsigned& x);
   void assign(const Rational& r);
@@ -807,7 +806,7 @@ public:
       }
     }
     if (this == &r) {
-      this->multiplyByInt(2);
+      this->multiplyByInteger(2);
       return;
     }
     MacroIncrementCounter(Rational::totalLargeAdditions);
@@ -852,7 +851,7 @@ public:
   Rational operator*(int right) const {
     Rational rightCopy;
     rightCopy.assign(*this);
-    rightCopy.multiplyByInt(right);
+    rightCopy.multiplyByInteger(right);
     return rightCopy;
   }
   Rational operator/(int right) const {

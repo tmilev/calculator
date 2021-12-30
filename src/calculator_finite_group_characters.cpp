@@ -577,7 +577,9 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   )) {
     return false;
   }
-  Vector<Polynomial<Rational> > highestWeightFundamentalCoordinates, highestWeightSimpleCoords, currentWeight;
+  Vector<Polynomial<Rational> > highestWeightFundamentalCoordinates;
+  Vector<Polynomial<Rational> > highestWeightSimpleCoords;
+  Vector<Polynomial<Rational> > currentWeight;
   Polynomial<Rational> zero;
   WeylGroupData& weyl = semisimpleLieAlgebra.content->weylGroup;
   if (!useFundCoords) {
@@ -596,7 +598,9 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
   Polynomial<Rational> exponent;
-  if (!semisimpleLieAlgebra.content->weylGroup.generateOrbit(highestWeights, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
+  if (!semisimpleLieAlgebra.content->weylGroup.generateOrbit(
+    highestWeights, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921
+  )) {
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size << " elements only.";
   } else {
     out << "The orbit has " << outputOrbit.size << " elements.";

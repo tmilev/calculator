@@ -2486,10 +2486,12 @@ void DynkinType::getDynkinTypeWithDefaultScales(DynkinType& output) const {
   }
 }
 
-void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex) const {
+void DynkinSimpleType::getAutomorphismActingOnVectorColumn(
+  MatrixTensor<Rational>& output, int autoIndex
+) const {
   MacroRegisterFunctionWithName("DynkinSimpleType::getAutomorphismActingOnVectorColumn");
   if (
-    AutoIndex == 0 ||
+    autoIndex == 0 ||
     this->letter == 'B' ||
     this->letter == 'C' ||
     this->letter == 'G' ||
@@ -2512,27 +2514,27 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
       // The automorphism group of Dynkin Diagram D_4 is S3
       // The triple node is always fixed:
       output.addMonomial(MonomialMatrix(1, 1), 1);
-      if (AutoIndex == 1) {
+      if (autoIndex == 1) {
         // Permutation (12), AutoIndex = 1
         output.addMonomial(MonomialMatrix(0, 2), 1);
         output.addMonomial(MonomialMatrix(2, 0), 1);
         output.addMonomial(MonomialMatrix(3, 3), 1);
-      } else if (AutoIndex == 2) {
+      } else if (autoIndex == 2) {
         //Permutation (23), AutoIndex =2
         output.addMonomial(MonomialMatrix(0, 0), 1);
         output.addMonomial(MonomialMatrix(2, 3), 1);
         output.addMonomial(MonomialMatrix(3, 2), 1);
-      } else if (AutoIndex == 3) {
+      } else if (autoIndex == 3) {
         // Permutation (12)(23)=(123), AutoIndex =3
         output.addMonomial(MonomialMatrix(0, 2), 1);
         output.addMonomial(MonomialMatrix(2, 3), 1);
         output.addMonomial(MonomialMatrix(3, 0), 1);
-      } else if (AutoIndex == 4) {
+      } else if (autoIndex == 4) {
         // Permutation (23)(12)=(132), AutoIndex =4
         output.addMonomial(MonomialMatrix(0, 3), 1);
         output.addMonomial(MonomialMatrix(2, 0), 1);
         output.addMonomial(MonomialMatrix(3, 2), 1);
-      } else if (AutoIndex == 5) {
+      } else if (autoIndex == 5) {
         // Permutation (12)(23)(12)=(13), AutoIndex =5
         output.addMonomial(MonomialMatrix(0, 3), 1);
         output.addMonomial(MonomialMatrix(2, 2), 1);

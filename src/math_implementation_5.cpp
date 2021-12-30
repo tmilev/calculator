@@ -1125,6 +1125,7 @@ void MonomialPolynomial::setVariable(int variableIndex, const Rational& power) {
 
 void MonomialPolynomial::makeFromPowers(const Vector<Rational>& inputMonomialBody) {
   this->monomialBody = inputMonomialBody;
+  this->trimTrailingZeroes();
 }
 
 void MonomialPolynomial::multiplyByVariable(int variableIndex, const Rational& variablePower) {
@@ -1168,12 +1169,6 @@ bool MonomialPolynomial::hasPositiveOrZeroExponents() const {
     }
   }
   return true;
-}
-
-void MonomialPolynomial::exponentMeBy(const Rational& exponent) {
-  for (int i = 0; i < this->monomialBody.size; i ++) {
-    this->monomialBody[i] *= exponent;
-  }
 }
 
 bool MonomialPolynomial::operator>(const MonomialPolynomial& other) const {
@@ -1242,7 +1237,6 @@ bool MonomialPolynomial::greaterThan_totalDegree_leftLargerWins(
   }
   return left.greaterThan_leftLargerWins(right);
 }
-
 
 bool MonomialPolynomial::greaterThan_rightLargerWins(const MonomialPolynomial& other) const {
   for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --) {
@@ -1374,6 +1368,15 @@ void MonomialPolynomial::setSize(int variableCount) {
   for (int i = oldSize; i < this->monomialBody.size; i ++) {
     this->monomialBody[i] = 0;
   }
+}
+
+bool Cone::isInCone(const Vectors<Rational>& vertices) const {
+  for (int i = 0; i < vertices.size; i ++) {
+    if (!this->isInCone(vertices[i])) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Cone::isInCone(const Vector<Rational>& point) const {

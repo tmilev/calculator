@@ -232,33 +232,9 @@ Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input, 
   MacroRegisterFunctionWithName("Polynomial::evaluate");
   Coefficient output = zero;
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialPolynomial& currentMon = (*this)[i];
+    const MonomialPolynomial& currentMonomial = (*this)[i];
     Coefficient accumulator = this->coefficients[i];
-    Coefficient converted;
-    for (int j = 0; j < currentMon.minimalNumberOfVariables(); j ++) {
-      int numCycles = 0;
-      if (!(*this)[i](j).isSmallInteger(&numCycles)) {
-        global.fatal
-        << "Attempting to evaluate a polynomial whose "
-        << i + 1 << "^{th} variable is raised to the power "
-        << (*this)[i](j).toString()
-        << ". Raising variables to power is allowed "
-        << "only if the power is a small integer. "
-        << "If the user has requested such an operation, "
-        << "it *must* be intercepted at an earlier level "
-        << "(and the user must be informed)." << global.fatal;
-      }
-      bool isPositive = numCycles > 0;
-      if (numCycles < 0) {
-        numCycles = - numCycles;
-      }
-      converted = input[j];
-      MathRoutines::raiseToPower(converted, numCycles, zero.one());
-      if (!isPositive) {
-        converted.invert();
-      }
-      accumulator *= converted;
-    }
+    currentMonomial.evaluateAccumulate(input, accumulator);
     output += accumulator;
   }
   return output;

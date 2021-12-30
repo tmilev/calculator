@@ -582,12 +582,12 @@ void GroebnerBasisComputation<Coefficient>::checkConsistency() {
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::getSubstitutionFromPartialSolutionSerreLikeSystem(
-  PolynomialSubstitution<Coefficient>& outputSub
+  PolynomialSubstitution<Coefficient>& outputSubstitution
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::getSubstitutionFromPartialSolutionSerreLikeSystem");
-  outputSub.makeIdentitySubstitution(this->systemSolution.size);
+  outputSubstitution.makeIdentitySubstitution(this->systemSolution.size);
   for (int i = 0; i < this->solutionsFound.cardinalitySelection; i ++) {
-    outputSub[this->solutionsFound.elements[i]] = this->systemSolution[
+    outputSubstitution[this->solutionsFound.elements[i]] = this->systemSolution[
       this->solutionsFound.elements[i]
     ];
   }

@@ -1601,7 +1601,7 @@ void Rational::readFromFile(std::istream& input) {
   this->assignString(tempS);
 }
 
-void Rational::multiplyByInt(int x) {
+void Rational::multiplyByInteger(int x) {
   Rational coefficient;
   coefficient.assignInteger(x);
   this->multiplyBy(coefficient);
@@ -2036,7 +2036,7 @@ Rational Rational::twoToTheNth(int n) {
   Rational result = 1;
   if (n >= 0) {
     for (int i = 0; i < n; i ++) {
-      result.multiplyByInt(2);
+      result.multiplyByInteger(2);
     }
   } else {
     for (int i = 0; i > n; i --) {

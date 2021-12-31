@@ -325,6 +325,7 @@ public:
   }
   MonomialPolynomial() {
   }
+  MonomialPolynomial(const Vector<Rational>& exponents);
   friend std::ostream& operator<<(std::ostream& output, const MonomialPolynomial& monomial) {
     output << monomial.toString();
     return output;
@@ -3184,9 +3185,9 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
       this->objects[i].makeZero(numberOfVariables);
     }
   }
-  std::string toString(int numDisplayedEltsMinus1ForAll = - 1) const {
+  std::string toString(int numberOfDisplayedElementsMinus1ForAll = - 1) const {
     std::string tempS;
-    this->toString(tempS, numDisplayedEltsMinus1ForAll);
+    this->toString(tempS, numberOfDisplayedElementsMinus1ForAll);
     return tempS;
   }
   bool operator==(const PolynomialSubstitution& right);
@@ -3874,7 +3875,9 @@ void PolynomialSubstitution<Coefficient>::makeIdentityLikeInjectionSubstitution(
 }
 
 template <class Coefficient>
-void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeInteger>& substitution) {
+void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(
+  Matrix<LargeInteger>& substitution
+) {
   Polynomial<Coefficient> tempP;
   MonomialPolynomial tempM;
   tempM.makeOne();
@@ -3892,16 +3895,30 @@ void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeI
 
 class PartialFractions;
 
+// This class holds a partial fraction denominator
+// of the form (1-x^{e_1 v})^m_1 ... (1-x^{e_k v})^m_k.
+// Here, v is a vector whose coefficients have no
+// common divisor, e_k ("elongation") is a small integer
+// and m_k ("multiplicity") is another small integer.
+// The normalizedVectorIndex is the index (position)
+// of the vector v in the normalized list of starting vectors.
 class OnePartialFractionDenominatorComponent {
+  friend std::ostream& operator<<(std::ostream& output, const OnePartialFractionDenominatorComponent& input) {
+    output << input.toString(nullptr);
+    return output;
+  }
 public:
   List<int> multiplicities;
   List<int> elongations;
-  int startingVectorIndex;
+  int normalizedVectorIndex;
   PartialFractions* owner;
-  void addMultiplicity(int multiplicityIncrement, int elongation);
-  int indexLargestElongation();
-  int getLargestElongation();
-  void getElongatedVector(int index, Vector<Rational>& output);
+  void addMultiplicitY(int multiplicityIncrement, int elongation);
+  int indexLargestElongation() const;
+  int getLargestElongation() const;
+  void getElongatedVector(int index, Vector<Rational>& output) const;
+  void getLongestVector(Vector<Rational>& output) const;
+  const Vector<Rational>& getNormalizedVector() const;
+
   void getMonomial(int elongationIndex, MonomialPolynomial& output);
   void getPolynomialDenominator(
     Polynomial<LargeInteger>& output,
@@ -3909,10 +3926,11 @@ public:
     Vector<Rational>& exponent
   );
   int getMultiplicityLargestElongation();
-  int getLeastCommonMultipleElongations();
+  int getLeastCommonMultipleElongations() const;
   int getTotalMultiplicity() const;
+  void getDenominatorExponents(List<Vector<Rational> >& output) const;
   void invert();
-  void initialize(PartialFractions& inputOwner, int inputStartingVectorIndex);
+  void initialize(PartialFractions& inputOwner, int inputNormalizedVectorIndex);
   static Vector<Rational> getCheckSumRoot(int numberOfVariables);
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const OnePartialFractionDenominatorComponent& input) {
@@ -3920,8 +3938,8 @@ public:
   }
   OnePartialFractionDenominatorComponent();
   void computeOneCheckSum(Rational& output, const Vector<Rational>& variableValues);
-  void operator=(OnePartialFractionDenominatorComponent& right);
-  bool operator==(OnePartialFractionDenominatorComponent& right);
+  void operator=(const OnePartialFractionDenominatorComponent& right);
+  bool operator==(const OnePartialFractionDenominatorComponent& right) const;
 
   bool operator>(const OnePartialFractionDenominatorComponent& other) const;
   std::string toString(FormatExpressions* format) const;
@@ -5266,7 +5284,7 @@ public:
 // x^{v} as the monomial x_1^{a_1} ... x_n^{a_k}.
 //
 // Then the denominator recorded here has the form:
-// (1-x^{e_1 * v_1})^m_1 ... (1-x^{e_n * v_n})^m_n,
+// (1-x^{v_1})^m_1 ... (1-x^{v_n})^m_n,
 // where we call
 // e_1, ..., e_n
 // the vector "elongations" and we call
@@ -5279,11 +5297,15 @@ private:
   friend class PartialFractions;
   friend class partFractionPolynomialSubstitution;
 public:
-  int lastDistinguishedIndex;
+
   bool isIrrelevant;
   bool relevanceIsComputed;
-  List<int> indicesNonZeroMultiplicities;
-  List<OnePartialFractionDenominatorComponent> denominator;
+
+  // The keys are the exponents vectors, rescaled so that the
+  // coefficients have no greatest common divisor.
+  // Given a key v, the values are all
+  // denominators of the form (1-x^{a_1 v})^{m_1} ... (1-x^{a_k v})^{m_k}
+  MapList<Vector<Rational>, OnePartialFractionDenominatorComponent> denominators;
   PartialFractions* owner;
   friend std::ostream& operator<<(std::ostream& output, const OnePartialFractionDenominator& input) {
     (void) input;
@@ -5297,8 +5319,9 @@ public:
     int dimension
   );
   void computePolynomialCorrespondingToOneMonomial(
-    QuasiPolynomial& outputQP,
+    QuasiPolynomial& outputQuasipolynomial,
     const MonomialPolynomial& monomial,
+    Vectors<Rational>& coneGenerators,
     Vectors<Rational>& normals,
     Lattice& lattice
   ) const;
@@ -5320,10 +5343,18 @@ public:
     Matrix<Rational>& buffer
   );
   int computeGainingMultiplicityIndexInLinearRelation(
-    Matrix<Rational>& linearRelation
+    Vector<Rational>& linearRelation
   );
-  void getRootsFromDenominator(
-    PartialFractions& owner, Vectors<Rational>& output
+  void getNormalizedSortedDenominatorExponents(
+    Vectors<Rational>& output
+  ) const;
+  void getDenominatorsSorted(
+    MapList<Vector<Rational>, OnePartialFractionDenominatorComponent>& output
+  ) const;
+  // Returns the denominator exponents in the order implied by
+  // the order of the normalized vectors.
+  void getDenominatorExponents(
+    Vectors<Rational>& output
   ) const;
   void getVectorPartitionFunction(
     PartialFractions& owner,
@@ -5338,38 +5369,29 @@ public:
     LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output,
     PartialFractions& owner
   );
-  bool decomposeFromLinearRelation(
-    Matrix<Rational>& linearRelation,
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output,
-    List<Vector<Rational> >& startingVectors
+  bool decomposeFromNormalizedLinearRelation(
+    Vector<Rational>& linearRelationBetweenNormalizedVectors,
+    Vectors<Rational>& normalizedVectors,
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output
+  );
+  void getLinearRelationFromNormalized(
+    int gainingMultiplicityIndex,
+    List<Vector<Rational> >& normalizedVectors,
+    Vector<Rational>& linearRelationBetweenNormalizedVectors,
+    Vector<Rational>& output
   );
   void computeOneCheckSum(
     Vector<Rational>& variableValues,
     Rational& output
   ) const;
-  bool reduceMeOnce(
-    const Polynomial<LargeInteger>& myCoeff,
-    Polynomial<LargeInteger>& outputCoeff,
-    Vectors<Rational>& startingVectors
-  );
-  void reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* indicator);
-  void applySzenesVergneFormula(
-    List<Vector<Rational> >& startingVectors,
-    List<int>& selectedIndices,
-    List<int>& elongations,
-    int GainingMultiplicityIndex,
-    int ElongationGainingMultiplicityIndex,
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output
-  );
   void applyGeneralizedSzenesVergneFormula(
-    List<int>& selectedIndices,
-    List<int>& greatestElongations,
-    List<int>& coefficients,
-    int gainingMultiplicityIndex,
+    const List<Vector<Rational> >& normalizedVectors,
+    MapList<Vector<Rational>, OnePartialFractionDenominatorComponent>& toBeReduced,
+    const Vector<Rational>& linearRelation,
+    const Vector<Rational>& gainingNormalizedExponent,
     int elongationGainingMultiplicityIndex,
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output,
-    List<Vector<Rational> >& startingVectors
-  );
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output
+  ) const;
   bool reduceOnceTotalOrderMethod(
     LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output
   );
@@ -5381,20 +5403,16 @@ public:
     return input.hashFunction();
   }
   void initialize(PartialFractions& inputOwner);
-  void computeIndicesNonZeroMultiplicities();
   bool decreasePowerOneFraction(int index, int increment);
   void prepareFraction(
     int indexA,
     int indexB,
-    int AminusNBindex,
-    bool indexAisNullified,
+    int aMinusNBIndex,
+    bool indexAIsNullified,
     OnePartialFractionDenominator& output,
-    Polynomial<LargeInteger>& AminusNbetaPoly,
-    Polynomial<LargeInteger>& outputCommonCoeff
+    Polynomial<LargeInteger>& aMinusNBetaPolynomial,
+    Polynomial<LargeInteger>& outputCommonCoefficient
   );
-  void assignDenominatorOnly(const OnePartialFractionDenominator& p);
-  void assignNoIndicesNonZeroMults(OnePartialFractionDenominator& p);
-  int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFractions& owner, int minIndex);
   int controlLineSizeFracs(std::string& output, FormatExpressions& polynomialFormatLocal);
   int controlLineSizeStringPolys(std::string& output, FormatExpressions& polynomialFormatLocal);
   OnePartialFractionDenominator();
@@ -5403,17 +5421,10 @@ public:
   void getPolyReduceMonomialByMonomial(
     PartialFractions& owner,
     Vector<Rational>& exponent,
-    int StartMonomialPower,
-    int DenPowerReduction,
+    int startMonomialPower,
+    int denominatorPowerReduction,
     int startDenominatorPower,
     Polynomial<LargeInteger>& output
-  );
-  void reduceMonomialByMonomialModifyOneMonomial(
-    PartialFractions& accumulator,
-    SelectionWithDifferentMaxMultiplicities& powers,
-    List<int>& powersSigned,
-    MonomialPolynomial& input,
-    LargeInteger& inputCoeff
   );
   void getAlphaMinusNBetaPoly(
     PartialFractions& owner,
@@ -5422,35 +5433,25 @@ public:
     int n,
     Polynomial<LargeInteger>& output
   );
-  void getNElongationPolynomialWithMonomialContribution(
-    List<Vector<Rational> >& startingVectors,
-    List<int>& selectedIndices,
-    List<int>& coefficients,
-    List<int>& greatestElongations,
-    int index,
-    Polynomial<LargeInteger>& output,
-    int dimension
-  );
-  void getNElongationPolynomial(
-    List<Vector<Rational> >& startingVectors,
-    int index,
-    int baseElongation,
+  static void getNElongationPolynomial(
     int lengthOfGeometricSeries,
-    Polynomial<LargeInteger>& output,
-    int dimension
+    const Vector<Rational>& exponent,
+    Polynomial<LargeInteger>& output
   );
   int getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner);
   bool operator==(const OnePartialFractionDenominator& right) const;
   void operator=(const OnePartialFractionDenominator& right);
-  bool initializeFromVectors(
+  bool initializeFromPartialFractions(
     PartialFractions& owner,
-    Vectors<Rational>& input,
     std::stringstream* commentsOnFailure
   );
+  void addMultiplicity(
+    const Vector<Rational>& normalizedVector,
+    int multiplicity,
+    int elongation
+  );
   std::string toString(FormatExpressions* format = nullptr) const;
-  void readFromFile(PartialFractions& owner, std::fstream& input);
-  void writeToFile(std::fstream& output) const;
-  bool checkConsistency() const;
+  bool checkInitialization() const;
   bool operator>(const OnePartialFractionDenominator& other) const;
 };
 
@@ -5465,8 +5466,8 @@ public:
   bool flagIsTheZeroCone;
   Vectors<Rational> vertices;
   Vectors<Rational> normals;
-  int LowestIndexNotCheckedForChopping;
-  int LowestIndexNotCheckedForSlicingInDirection;
+  int lowestIndexNotCheckedForChopping;
+  int lowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* format = nullptr) const;
   void transformToWeylProjective(ConeComplex& owner);
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
@@ -5516,7 +5517,6 @@ public:
   ) const;
   bool makeConvexHullOfMeAnd(const Cone& other);
   void changeBasis(Matrix<Rational>& linearMap);
-  std::string DebugString;
   int getDimension() const {
     if (this->normals.size == 0) {
       return 0;
@@ -5564,15 +5564,15 @@ public:
     this->flagIsTheZeroCone = other.flagIsTheZeroCone;
     this->vertices = other.vertices;
     this->normals = other.normals;
-    this->LowestIndexNotCheckedForSlicingInDirection = other.LowestIndexNotCheckedForSlicingInDirection;
-    this->LowestIndexNotCheckedForChopping = other.LowestIndexNotCheckedForChopping;
+    this->lowestIndexNotCheckedForSlicingInDirection = other.lowestIndexNotCheckedForSlicingInDirection;
+    this->lowestIndexNotCheckedForChopping = other.lowestIndexNotCheckedForChopping;
   }
   Cone(const Cone& other) {
     this->operator=(other);
   }
   Cone() {
-    this->LowestIndexNotCheckedForSlicingInDirection = 0;
-    this->LowestIndexNotCheckedForChopping = 0;
+    this->lowestIndexNotCheckedForSlicingInDirection = 0;
+    this->lowestIndexNotCheckedForChopping = 0;
     this->flagIsTheZeroCone = true;
     //this->flagHasSufficientlyManyVertices = true;
   }
@@ -5723,6 +5723,7 @@ public:
 class PartialFractions {
   bool splitPartial();
   void initializeCommon();
+  void initializeDimension();
 public:
   LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> > nonReduced;
   LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> > reducedWithElongationRedundancies;
@@ -5744,27 +5745,29 @@ public:
   int numberOfRunsReduceMonomialByMonomial;
   int numberOfProcessedForVPFMonomialsTotal;
   Rational startCheckSum;
-  Rational endCheckSum;
-  Rational checkSum;
   bool flagDiscardingFractions;
   bool flagInitialized;
   int LimitSplittingSteps;
   int SplitStepsCounter;
   ConeComplex chambers;
   bool flagSplitTestModeNoNumerators;
-  bool flagAnErrorHasOccurredTimeToPanic;
   bool flagMakingProgressReport;
   bool flagUsingCheckSum;
   int flagMaxNumStringOutputLines;
 
-  HashedList<Vector<Rational> > startingVectors;
+  // The original vectors whose vector partition function
+  // we are computing.
+  List<Vector<Rational> > originalVectors;
+  // The original vectors, rescaled so their coefficients have
+  // no greatest common divisor and sorted in graded lexicographic order.
+  HashedList<Vector<Rational> > normalizedVectors;
+
   Matrix<int> tableAllowedAminusB;
   Matrix<int> tableAllowedAminus2B;
   Selection indicesRedundantShortRoots;
   List<int> indicesDoublesOfRedundantShortRoots;
   int numberOfNonRedundantShortRoots;
   Vector<Rational> weights;
-  int addRootAndSort(Vector<Rational>& root);
   int getIndex(const Vector<Rational>& root);
   int getIndexDoubleOfARoot(const Vector<Rational>& root);
   void computeTable(int dimension);
@@ -5780,11 +5783,6 @@ public:
   );
   bool assureIndicatorRegularity(Vector<Rational>& indicator);
   void compareCheckSums();
-  void initializeFromVectorsAndWeights(
-    Vectors<Rational>& algorithmBasis,
-    Vector<Rational>* weights,
-    std::stringstream* commentsOnFailure
-  );
   bool initializeFromVectors(
     Vectors<Rational>& input, std::stringstream* commentsOnFailure
   );
@@ -5797,12 +5795,11 @@ public:
   void removeRedundantShortRoots(Vector<Rational>* indicator);
   // Reduces redundant short roots if present.
   // Returns true if redundant short roots were found, false otherwise.
-  bool reducePartiallyRedundantShortRoots(
+  bool reduceOnceRedundantShortRoots(
     const OnePartialFractionDenominator& toBeReduced,
     LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output,
     Vector<Rational>* indicator
   );
-  bool splitClassicalRootSystem(bool shouldElongate, Vector<Rational>* indicator);
   bool split(Vector<Rational>* indicator, std::stringstream* commentsOnFailure);
   void computeKostantFunctionFromWeylGroup(
     char weylGroupLetter,
@@ -5821,8 +5818,9 @@ public:
     Rational& output
   );
   void prepareIndicatorVariables();
-  void initFromOtherPartialFractions(PartialFractions& input);
-  bool getVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator);
+  bool getVectorPartitionFunction(
+    QuasiPolynomial& output, Vector<Rational>& newIndicator
+  );
   void resetRelevanceIsComputed() {
     global.fatal << "This is not implemented yet. " << global.fatal;
   }
@@ -6234,10 +6232,10 @@ public:
   ) const;
   void assignPolynomial(const Polynomial<Rational>& input) {
     this->makeZero();
-    MonomialWeylAlgebra tempM;
+    MonomialWeylAlgebra monomial;
     for (int i = 0; i < input.size(); i ++) {
-      tempM.polynomialPart = input[i];
-      this->addMonomial(tempM, input.coefficients[i]);
+      monomial.polynomialPart = input[i];
+      this->addMonomial(monomial, input.coefficients[i]);
     }
   }
   void operator=(const std::string& input);
@@ -6281,7 +6279,7 @@ public:
   bool generateOrbit(
     List<LittelmannPath>& output,
     List<List<int> >& outputOperators,
-    int UpperBoundNumElts,
+    int upperBoundNumElts,
     Selection* parabolicNonSelectedAreInLeviPart = nullptr
   );
   std::string generateOrbitAndAnimate();
@@ -6330,7 +6328,12 @@ public:
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
   std::string toString(FormatExpressions* format = nullptr);
-  void initialize(Vector<Rational>& inequalities, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift);
+  void initialize(
+    Vector<Rational>& inequalities,
+    Cone& startingCone,
+    Lattice& startingLattice,
+    Vector<Rational>& startingShift
+  );
   void findExtremaParametricStep1();
   void findExtremaParametricStep2TrimChamberForMultOne();
   void findExtremaParametricStep3();

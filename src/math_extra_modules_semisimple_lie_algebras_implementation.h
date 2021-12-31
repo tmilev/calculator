@@ -127,10 +127,10 @@ void ModuleSSalgebra<Coefficient>::substitution(
   for (int i = 0; i < this->actionsGeneratorsMatrix.size; i ++) {
     this->actionsGeneratorsMatrix[i].substitution(variableImages);
   }
-  for (int i = 0; i < this->actionsGeneratorS.size; i ++) {
-    for (int j = 0; j < this->actionsGeneratorS[i].size; j ++) {
-      for (int k = 0; k < this->actionsGeneratorS[i][j].size; k ++) {
-        this->actionsGeneratorS[i][j][k].substitution(variableImages);
+  for (int i = 0; i < this->actionsGenerators.size; i ++) {
+    for (int j = 0; j < this->actionsGenerators[i].size; j ++) {
+      for (int k = 0; k < this->actionsGenerators[i][j].size; k ++) {
+        this->actionsGenerators[i][j][k].substitution(variableImages);
       }
     }
   }
@@ -164,10 +164,10 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
   if (generatorIndex < 0 || generatorIndex >= numGenerators) {
     global.fatal << "Bad generator index: " << generatorIndex << ". " << global.fatal;
   }
-  if (this->ComputedGeneratorActions.selected[generatorIndex]) {
+  if (this->computedGeneratorActions.selected[generatorIndex]) {
     return this->actionsGeneratorsMatrix[generatorIndex];
   }
-  this->ComputedGeneratorActions.addSelectionAppendNewIndex(generatorIndex);
+  this->computedGeneratorActions.addSelectionAppendNewIndex(generatorIndex);
   if (this->hasFreeAction(generatorIndex)) {
     global.fatal << "Due to a change in "
     << "implementation of the generalized Verma module class. " << global.fatal;
@@ -703,8 +703,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     }
   }
   this->intermediateStepForMakeFromHW(ringUnit, ringZero);
-  this->NumCachedPairsBeforeSimpleGen = this->cachedPairs.size;
-  this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen =
+  this->numberOfCachedPairsBeforeSimpleGenerators = this->cachedPairs.size;
+  this->numberRationalMultiplicationsAndAdditionsBeforeSimpleGenerators =
   Rational::totalLargeAdditions + Rational::totalSmallAdditions +
   Rational::totalLargeMultiplications + Rational::totalSmallMultiplications - startingNumRationalOperations;
   bool isBad = false;
@@ -775,8 +775,8 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
   ProgressReport report2;
   this->bilinearFormsAtEachWeightLevel.setSize(this->generatingWordsGrouppedByWeight.size);
   this->bilinearFormsInverted.setSize(this->generatingWordsGrouppedByWeight.size);
-  this->ComputedGeneratorActions.initialize(this->getOwner().getNumberOfGenerators());
-  this->actionsGeneratorS.setSize(this->getOwner().getNumberOfGenerators());
+  this->computedGeneratorActions.initialize(this->getOwner().getNumberOfGenerators());
+  this->actionsGenerators.setSize(this->getOwner().getNumberOfGenerators());
   this->actionsGeneratorsMatrix.setSize(this->getOwner().getNumberOfGenerators());
   int numScalarProducts = 0;
   this->flagConjectureBholds = true;
@@ -966,8 +966,8 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::reset() {
   this->actionsGeneratorsMatrix.setSize(0);
-  this->actionsGeneratorS.setSize(0);
-  this->ComputedGeneratorActions.initialize(0);
+  this->actionsGenerators.setSize(0);
+  this->computedGeneratorActions.initialize(0);
   this->owner = nullptr;
   this->generatingWordsNonReduced.clear();
   // Note: for some reason, the linker fails to resolve without the explicit template
@@ -1003,8 +1003,8 @@ void ModuleSSalgebra<Coefficient>::reset() {
   this->flagIsInitialized = false;
   this->flagConjectureBholds = true;
   this->flagConjectureCholds = true;
-  this->NumCachedPairsBeforeSimpleGen = 0;
-  this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen = 0;
+  this->numberOfCachedPairsBeforeSimpleGenerators = 0;
+  this->numberRationalMultiplicationsAndAdditionsBeforeSimpleGenerators = 0;
   this->maximumNumberOfCachedPairs = 1000000;
 }
 
@@ -1277,14 +1277,14 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format) co
 
   out << "<br>Character: " << this->character.toString();
   out << "<br>Computed generator actions ("
-  << this->ComputedGeneratorActions.cardinalitySelection << " out of "
+  << this->computedGeneratorActions.cardinalitySelection << " out of "
   << this->actionsGeneratorsMatrix.size << " computed actions) follow. "
   << "Note that generator actions are computed on demand, only the simple "
   << "Chevalley generators are computed by default. ";
   out << "<table><tr><td>Generator</td><td>Action</td></tr>";
   ElementSemisimpleLieAlgebra<Rational> semisimpleLieAlgebraElement;
   for (int i = 0; i < this->actionsGeneratorsMatrix.size; i ++) {
-    if (this->ComputedGeneratorActions.selected[i]) {
+    if (this->computedGeneratorActions.selected[i]) {
       semisimpleLieAlgebraElement.makeGenerator(i, algebra);
       out << "<tr>";
       out << "<td>"

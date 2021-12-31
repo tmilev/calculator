@@ -83,11 +83,11 @@ bool GraphWeightedLabeledEdges:: checkConsistency() const {
   for (int i = 0; i < this->edges.size(); i ++) {
     if (
       this->edges[i].vStart < 0 ||
-      this->edges[i].vStart >= this->numNodes ||
+      this->edges[i].vStart >= this->numberOfNodes ||
       this->edges[i].vEnd  < 0 ||
-      this->edges[i].vEnd >= this->numNodes
+      this->edges[i].vEnd >= this->numberOfNodes
     ) {
-      global.fatal << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
+      global.fatal << "Graph error in graph with " << this->numberOfNodes << " nodes: detected a corrupt edge: "
       << this->edges[i].toString() << " is a bad." << global.fatal;
     }
   }
@@ -95,10 +95,10 @@ bool GraphWeightedLabeledEdges:: checkConsistency() const {
     for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++) {
       if (
         this->nodeGroupsForDisplay[i][j] < 0 ||
-        this->nodeGroupsForDisplay[i][j] >= numNodes
+        this->nodeGroupsForDisplay[i][j] >= numberOfNodes
       ) {
         global.fatal << "Graph error in graph with "
-        << this->numNodes << " nodes: display group "
+        << this->numberOfNodes << " nodes: display group "
         << i + 1 << " is corrupt: has "
         << " node of index " << this->nodeGroupsForDisplay[i][j]
         << global.fatal;
@@ -111,7 +111,7 @@ bool GraphWeightedLabeledEdges:: checkConsistency() const {
 void GraphWeightedLabeledEdges::computeEdgesPerNodesNoMultiplicities() {
   MacroRegisterFunctionWithName("Graph::computeEdgesPerNodesNoMultiplicities");
   List<int> emptyList;
-  this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numNodes, emptyList);
+  this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numberOfNodes, emptyList);
   this->checkConsistency();
   for (int i = 0; i < this->edges.size(); i ++) {
     this->edgesPerNodeNoMultiplicities[this->edges[i].vStart].addOnTop(this->edges[i].vEnd);
@@ -149,11 +149,11 @@ void GraphWeightedLabeledEdges::addNodeToComponent(int nodeIndex) {
 
 void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances() {
   MacroRegisterFunctionWithName("Graph::computeConnectedComponentsAndBaseNodeDistances");
-  this->distanceToBaseNode.initializeFillInObject(this->numNodes, - 1);
-  this->baseNode.initializeFillInObject(this->numNodes, - 1);
+  this->distanceToBaseNode.initializeFillInObject(this->numberOfNodes, - 1);
+  this->baseNode.initializeFillInObject(this->numberOfNodes, - 1);
   List<int> orbit;
   orbit.setExpectedSize(this->edges.size());
-  for (int indexBaseNode = 0; indexBaseNode < this->numNodes; indexBaseNode ++) {
+  for (int indexBaseNode = 0; indexBaseNode < this->numberOfNodes; indexBaseNode ++) {
     if (this->baseNode[indexBaseNode] == - 1) {
       this->distanceToBaseNode[indexBaseNode] = 0;
       this->baseNode[indexBaseNode] = indexBaseNode;
@@ -172,7 +172,7 @@ void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances()
     }
   }
   this->connectedComponents.setSize(0);
-  for (int i = 0; i < this->numNodes; i ++) {
+  for (int i = 0; i < this->numberOfNodes; i ++) {
     this->addNodeToComponent(i);
   }
 }
@@ -194,8 +194,8 @@ void GraphWeightedLabeledEdges::computeDisplayGroups() {
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
     this->groupMaxSize =MathRoutines::maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);
   }
-  this->positionInDisplayGroup.initializeFillInObject(this->numNodes, - 1);
-  this->displayGroupIndices.initializeFillInObject(this->numNodes, - 1);
+  this->positionInDisplayGroup.initializeFillInObject(this->numberOfNodes, - 1);
+  this->displayGroupIndices.initializeFillInObject(this->numberOfNodes, - 1);
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
     for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++) {
       this->positionInDisplayGroup[this->nodeGroupsForDisplay[i][j]] = j;

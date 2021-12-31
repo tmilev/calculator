@@ -6,18 +6,16 @@
 #include "general_lists.h"
 #include "general_list_references.h"
 
-template <class listType, class Key, class Value, unsigned int keyHashFunction(const Key&) = Key::hashFunction>
+template <class ListType, class Key, class Value, unsigned int keyHashFunction(const Key&) = Key::hashFunction>
 class MapTemplate {
 public:
   HashedList<Key, keyHashFunction> keys;
-  listType values;
+  ListType values;
   unsigned int hashFunction() const {
     unsigned int result = 0;
-    int j = 0;
     for (int i = 0; i < this->keys.size; i ++) {
       result += keyHashFunction(this->keys[i]) *
-      HashFunctions::hashFunction(this->values[i]) *
-      HashConstants::getConstantIncrementCounter(j);
+      HashFunctions::hashFunction(this->values[i]);
     }
     return result;
   }
@@ -114,6 +112,22 @@ public:
   }
   inline Value& operator[](const Key& index) {
     return this->getValueCreate(index);
+  }
+  bool operator==(const MapTemplate<ListType, Key, Value, keyHashFunction>& other) const {
+    if (this->size() != other.size()) {
+      return false;
+    }
+    for (int i = 0; i < this->size(); i ++) {
+      const Key& key = this->keys[i];
+      int otherIndex = other.getIndex(key);
+      if (otherIndex == - 1) {
+        return false;
+      }
+      if (!(this->values[i] == other.values[otherIndex])) {
+        return false;
+      }
+    }
+    return true;
   }
 };
 

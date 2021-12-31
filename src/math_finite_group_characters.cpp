@@ -778,7 +778,7 @@ Matrix<Coefficient> CharacterFunctions::getMatrix(
 
 void SubgroupDataRootReflections::computeDynkinType() {
   WeylGroupData tempGroup;
-  tempGroup.cartanSymmetric = this->SubCartanSymmetric;
+  tempGroup.cartanSymmetric = this->subCartanSymmetric;
   tempGroup.makeMeFromMyCartanSymmetric();
   this->dynkinType = tempGroup.dynkinType;
 }
@@ -907,7 +907,7 @@ void SubgroupDataRootReflections::initializeGenerators() {
     this->subgroupData.subgroupContent->generators[0].makeIdentity(*this->subgroupData.groupContent);
     return;
   }
-  int d = this->SubCartanSymmetric.numberOfRows;
+  int d = this->subCartanSymmetric.numberOfRows;
   this->subgroupData.generatorPreimages.setSize(d);
   this->subgroupData.subgroupContent->generators.setSize(d);
   ElementWeylGroup currentReflection;
@@ -930,10 +930,10 @@ void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const 
   EiBasis.makeEiBasis(G.getDimension());
   EiBasis.subSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
   int d = inputGeneratingSimpleRoots.cardinalitySelection;
-  this->SubCartanSymmetric.initialize(d, d);
+  this->subCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
     for (int jj = 0; jj < d; jj ++) {
-      this->SubCartanSymmetric(ii, jj) = G.rootScalarCartanRoot(
+      this->subCartanSymmetric(ii, jj) = G.rootScalarCartanRoot(
         this->generatingSimpleRoots[ii], this->generatingSimpleRoots[jj]
       );
     }
@@ -950,10 +950,10 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   DynkinDiagramRootSubalgebra diagram;
   diagram.computeDiagramTypeModifyInput(this->generatingSimpleRoots, G);
   int d = this->generatingSimpleRoots.size;
-  this->SubCartanSymmetric.initialize(d, d);
+  this->subCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
     for (int jj = 0; jj < d; jj ++) {
-      this->SubCartanSymmetric(ii, jj) = G.rootScalarCartanRoot(
+      this->subCartanSymmetric(ii, jj) = G.rootScalarCartanRoot(
         this->generatingSimpleRoots[ii], generatingSimpleRoots[jj]
       );
     }
@@ -1388,7 +1388,7 @@ Matrix<Rational> CharacterFunctions::getClassMatrix(
         M.elements[t][(*classmap)[yi]] += 1;
       } else {
         for (ci = 0; ci < group.conjugacyClassCount(); ci ++) {
-          if (group.conjugacyClasses[ci].indicesEltsInOwner.BSContains(yi)) {
+          if (group.conjugacyClasses[ci].indicesEltsInOwner.sortedContains(yi)) {
             M.elements[t][ci] += 1;
             break;
           }

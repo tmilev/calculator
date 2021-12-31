@@ -78,7 +78,10 @@ public:
   Matrix<Rational>& getClassMatrix(int cc);
   void computeClassMatrices(); // O(W.size)
   void computeTauSignatures();
-  Rational getHermitianProduct(const Vector<Rational>& left, const Vector<Rational>& right) const;
+  Rational getHermitianProduct(
+    const Vector<Rational>& left,
+    const Vector<Rational>& right
+  ) const;
 
   int getRootReflection(int i) const;
   void getSignCharacter(Vector<Rational>& out);
@@ -300,8 +303,8 @@ void AnotherWeylGroup<scalar, templateVector>::computeConjugacyClasses() {
   if (this->rhoOrbit.size == 0) {
     this->computeAllElements();
   }
-  List<bool> Accounted;
-  Accounted.initializeFillInObject(this->size(), false);
+  List<bool> accounted;
+  accounted.initializeFillInObject(this->size(), false);
   this->conjugacyClasses.setSize(0);
   this->conjugacyClasses.reserve(50);
   HashedList<int, HashFunctions::hashFunction> stack;
@@ -310,7 +313,7 @@ void AnotherWeylGroup<scalar, templateVector>::computeConjugacyClasses() {
   templateVector rhoImage;
   global.comments << "number of conjugacy classes... ";
   for (int i = 0; i < this->size(); i ++) {
-    if (!Accounted[i]) {
+    if (!accounted[i]) {
       stack.clear();
       stack.addOnTop(i);
       for (int j = 0; j < stack.size; j ++)
@@ -321,7 +324,7 @@ void AnotherWeylGroup<scalar, templateVector>::computeConjugacyClasses() {
           this->simpleReflection(k, rhoImage);
           int accountedIndex = this->rhoOrbit.getIndex(rhoImage);
           stack.addOnTopNoRepetition(accountedIndex);
-          Accounted[accountedIndex] = true;
+          accounted[accountedIndex] = true;
         }
       this->conjugacyClasses.addOnTop(stack);
       this->conjugacyClasses.lastObject()->quickSortAscending();

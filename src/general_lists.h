@@ -273,7 +273,7 @@ public:
   static int kToTheNth(int k, int n);
   static void kToTheNth(int k, int n, LargeInteger& output);
   inline static int parity(int n);
-  static int binomialCoefficientMultivariate(int N, List<int>& choices);
+  static int binomialCoefficientMultivariate(int n, List<int>& choices);
   static bool isPrimeSimple(int input);
   template <class Coefficient, typename IntegerType>
   static void raiseToPower(
@@ -528,7 +528,10 @@ private:
   void expandArrayOnTop(int increase);
   template <class compareClass, class carbonCopyType>
   bool quickSortAscendingCustomRecursive(
-    int bottomIndex, int topIndex, compareClass& comparator, List<carbonCopyType>* carbonCopy
+    int bottomIndex,
+    int topIndex,
+    compareClass& comparator,
+    List<carbonCopyType>* carbonCopy
   );
   void quickSortDescending(int bottomIndex, int topIndex);
   inline void initConstructorCallOnly() {
@@ -607,9 +610,6 @@ public:
   }
   void initializeFillInObject(int incomingSize, const Object& o);
   void reserve(int desiredSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
-  void sortedInsert(const Object& o) {
-    this->BSInsert(o); //fixed :) now all this function does is throw away the return value
-  }
   void insertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
     this->shiftUpExpandOnTop(desiredIndex);
     (*this)[desiredIndex] = o;
@@ -854,19 +854,20 @@ public:
     return true;
   }
 
-  // The BS family of operations assume that the list is sorted in ascending order
+  // The "sorted" family of operations
+  // assume that the list is sorted in ascending order
   // and that each object has the comparison operator <=.
   // The objective is fast, stable insertion sorting of partially ordered data.
   // The data that has x <= y and y <= x is called a bin. The methods
-  // BSIndexFirstGreaterThan and BSIndexFirstNotLessThan find the edges of the bin.
+  // sortedIndexFirstGreaterThan and sortedIndexFirstNotLessThan find the edges of the bin.
   // The insertion methods return the index at which the object was inserted, or - 1
-  // BSInsert inserts the element at the end of the bin.
-  // BSInsertDontDup searches the bin for the element before inserting.
-  // BSInsertNextTo searches the bin for an equal element and inserts the new element
+  // sortedInsert inserts the element at the end of the bin.
+  // sortedInsertDontDup searches the bin for the element before inserting.
+  // sortedInsertNextTo searches the bin for an equal element and inserts the new element
   //   next to the existing element
-  // BSGetIndex searches the bin for the element and returns its index
-  // BSContains searches the bin for the element and returns whether it was found.
-  int BSIndexFirstNotLessThan(const Object& o) const {
+  // sortedGetIndex searches the bin for the element and returns its index
+  // sortedContains searches the bin for the element and returns whether it was found.
+  int sortedIndexFirstNotLessThan(const Object& o) const {
     if (this->size == 0) {
       return 0;
     }
@@ -890,7 +891,7 @@ public:
     }
   }
 
-  int BSIndexFirstGreaterThan(const Object& o) const {
+  int sortedIndexFirstGreaterThan(const Object& o) const {
     if (this->size == 0) {
       return 0;
     }
@@ -914,9 +915,9 @@ public:
     }
   }
 
-  // BSGetIndex
-  int BSGetIndex(const Object& o) const {
-    int n = this->BSIndexFirstNotLessThan(o);
+  // sortedGetIndex
+  int sortedGetIndex(const Object& o) const {
+    int n = this->sortedIndexFirstNotLessThan(o);
     if (n != this->size) {
       if (this->objects[n] == o) {
         return n;
@@ -932,11 +933,11 @@ public:
     }
     return - 1;
   }
-  bool BSContains(const Object& o) const {
-    return this->BSGetIndex(o) != - 1;
+  bool sortedContains(const Object& o) const {
+    return this->sortedGetIndex(o) != - 1;
   }
-  int BSInsert(const Object& o) {
-    int n = BSIndexFirstGreaterThan(o);
+  int sortedInsert(const Object& o) {
+    int n = sortedIndexFirstGreaterThan(o);
     if (n == this->size) {
       this->addOnTop(o);
     } else {
@@ -945,8 +946,8 @@ public:
     return n;
   }
 
-  int BSInsertDontDup(const Object& o) {
-    int n = BSIndexFirstNotLessThan(o);
+  int sortedInsertDontDup(const Object& o) {
+    int n = sortedIndexFirstNotLessThan(o);
     for (int i = n; i < this->size; i ++) {
       if (this->objects[i] == o) {
         return - 1;
@@ -960,8 +961,8 @@ public:
     return this->size - 1;
   }
 
-  int BSInsertNextToExisting(const Object& o) {
-    int n = BSIndexFirstNotLessThan(o);
+  int sortedInsertNextToExisting(const Object& o) {
+    int n = sortedIndexFirstNotLessThan(o);
     int existing_index = - 1;
     int bin_end_index = - 1;
     for (int i = n; i < this->size; i ++) {
@@ -1062,8 +1063,8 @@ public:
     this->checkConsistency();
     if ((i >= this->size) || i < 0) {
       std::stringstream crashReport;
-      crashReport <<
-      "Attempt to access the entry of index "
+      crashReport
+      << "Attempt to access the entry of index "
       << i << " in an array of " << this->size << " elements. ";
       fatalCrash(crashReport.str());
     }
@@ -1270,7 +1271,8 @@ public:
           << this->getHash((*this)[index]) << ". The hash size is "
           << this->hashBuckets.size << "<br>hashes of objects: ";
           for (int l = 0; l < this->size; l ++) {
-            commentsOnCrash << this->getHash((*this)[l]) << "= " << this->getHash((*this)[l]) % this->hashBuckets.size << ", ";
+            commentsOnCrash << this->getHash((*this)[l]) << "= "
+            << this->getHash((*this)[l]) % this->hashBuckets.size << ", ";
           }
           commentsOnCrash << "<br>hashes recorded: ";
           for (int l = 0; l < this->hashBuckets.size; l ++) {

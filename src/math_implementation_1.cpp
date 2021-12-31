@@ -334,7 +334,7 @@ std::string LittelmannPath::toStringIndicesToCalculatorOutput(LittelmannPath& in
 bool LittelmannPath::generateOrbit(
   List<LittelmannPath>& output,
   List<List<int> >& outputOperators,
-  int UpperBoundNumElts,
+  int upperBoundNumElts,
   Selection* parabolicNonSelectedAreInLeviPart
 ) {
   HashedList<LittelmannPath> hashedOutput;
@@ -343,8 +343,8 @@ bool LittelmannPath::generateOrbit(
   outputOperators.setSize(1);
   outputOperators[0].setSize(0);
   List<int> currentSequence;
-  if (UpperBoundNumElts > 0) {
-    currentSequence.reserve(UpperBoundNumElts);
+  if (upperBoundNumElts > 0) {
+    currentSequence.reserve(upperBoundNumElts);
   }
   LittelmannPath currentPath;
   bool result = true;
@@ -357,7 +357,7 @@ bool LittelmannPath::generateOrbit(
     parabolicSelectionSelectedAreInLeviPart.makeFullSelection();
   }
   for (int lowestNonExplored = 0; lowestNonExplored < hashedOutput.size; lowestNonExplored ++) {
-    if (UpperBoundNumElts > 0 && UpperBoundNumElts < hashedOutput.size) {
+    if (upperBoundNumElts > 0 && upperBoundNumElts < hashedOutput.size) {
       result = false;
       break;
     } else {

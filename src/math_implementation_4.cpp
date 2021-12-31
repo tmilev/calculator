@@ -1224,7 +1224,7 @@ void AffineHyperplanes::toString(std::string& output) {
 }
 
 void Permutation::initPermutation(int n) {
-  this->initPart1(n);
+  this->initializePart1(n);
   for (int i = 0; i < n; i ++) {
     this->capacities[i] = n - i - 1;
     this->multiplicities[i] = 0;
@@ -1232,7 +1232,7 @@ void Permutation::initPermutation(int n) {
 }
 
 void Permutation::initPermutation(List<int>& disjointSubsets, int totalNumberOfElements) {
-  this->initPart1(totalNumberOfElements);
+  this->initializePart1(totalNumberOfElements);
   int counter = 0;
   for (int i = 0; i < disjointSubsets.size; i ++) {
     for (int j = 0; j < disjointSubsets[i]; j ++) {

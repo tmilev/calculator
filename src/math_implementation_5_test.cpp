@@ -340,3 +340,15 @@ bool ChevalleyGenerator::Test::basic() {
   }
   return true;
 }
+
+template<>
+bool Vectors<Rational>::Test::linearCombination() {
+  global.fatal << "Implement test please!" << global.fatal;
+  return true;
+}
+
+template<>
+bool Vectors<Rational>::Test::all() {
+  Vectors<Rational>::Test::linearCombination();
+  return true;
+}

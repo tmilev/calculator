@@ -1865,7 +1865,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   List<List<List<int> > > CentralizerDiagramAutomorphisms;
   domainRootSubalgebra.centralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
   domainRootSubalgebra.centralizerDiagram.toString();
-  tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
+  tempAutosCentralizer.initializePart1(CentralizerDiagramAutomorphisms.size);
   for (int i = 0; i <CentralizerDiagramAutomorphisms.size; i ++) {
     tempAutosCentralizer.capacities[i] = CentralizerDiagramAutomorphisms[i].size - 1;
   }
@@ -1945,8 +1945,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   List<List<List<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms;
   this->dynkinDiagram.getAutomorphisms(DiagramAutomorphisms);
   this->centralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
-  tempAutos.initPart1(DiagramAutomorphisms.size);
-  tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
+  tempAutos.initializePart1(DiagramAutomorphisms.size);
+  tempAutosCentralizer.initializePart1(CentralizerDiagramAutomorphisms.size);
   for (int i = 0; i < DiagramAutomorphisms.size; i ++) {
     tempAutos.capacities[i] = DiagramAutomorphisms[i].size - 1;
   }

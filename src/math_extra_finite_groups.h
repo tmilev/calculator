@@ -83,7 +83,10 @@ public:
     }
     return true;
   }
-  friend std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup, Coefficient>& data) {
+  friend std::ostream& operator<<(
+    std::ostream& out,
+    const ClassFunction<someFiniteGroup, Coefficient>& data
+  ) {
     out << data.toString();
     return out;
   }
@@ -150,7 +153,9 @@ public:
   HashedList<elementSomeGroup> elements;
   HashedList<elementSomeGroup> unionGeneratorsCC;
   struct ConjugacyClass {
-    friend std::ostream& operator << (std::ostream& output, const ConjugacyClass& conjugacyClasses) {
+    friend std::ostream& operator<<(
+      std::ostream& output, const ConjugacyClass& conjugacyClasses
+    ) {
       output << conjugacyClasses.toString();
       return output;
     }
@@ -183,14 +188,18 @@ public:
   characterPolynomialsConjugacyClassesStandardRepresentation;
 
   // All of these lists will be expected to be sorted at all times, so please
-  // insert using .BSInsertDontDup() if you for some reason can't use the friendly
+  // insert using .sortedInsertDontDup() if you for some reason can't use the friendly
   // insertion methods provided.
   List<GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> > irreducibleRepresentations;
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > irreps_grcam;
   List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational> > characterTable;
 
-  void addIrreducibleRepresentation(GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& r);
-  void addIrreducibleRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& r);
+  void addIrreducibleRepresentation(
+    GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& r
+  );
+  void addIrreducibleRepresentation(
+    GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& r
+  );
   void addCharacter(const ClassFunction<FiniteGroup<elementSomeGroup>, Rational>& X);
 
   List<elementSomeGroup> squaresCCReps;
@@ -286,8 +295,10 @@ public:
   bool (*getWordByFormula)(FiniteGroup<elementSomeGroup>& G, const elementSomeGroup& g, List<int>& out);
   void getSignCharacter(Vector<Rational>& outputCharacter);
   template <typename Coefficient>
-  Coefficient getHermitianProduct(const Vector<Coefficient>& leftCharacter, const Vector<Coefficient>& rightCharacter);
-
+  Coefficient getHermitianProduct(
+    const Vector<Coefficient>& leftCharacter,
+    const Vector<Coefficient>& rightCharacter
+  );
   bool possiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
   void makeIdentity(elementSomeGroup& x);
   bool isIdentity(elementSomeGroup& x);
@@ -438,7 +449,11 @@ public:
     this->generatorsLastAppliedFirst = other.generatorsLastAppliedFirst;
   }
   template<class Coefficient>
-  static void actOn(const ElementWeylGroup& inputElement, const Vector<Coefficient>& inputVector, Vector<Coefficient>& output);
+  static void actOn(
+    const ElementWeylGroup& inputElement,
+    const Vector<Coefficient>& inputVector,
+    Vector<Coefficient>& output
+  );
   template<class Coefficient>
   void actOn(Vector<Coefficient>& inputOutput) const;
   bool checkConsistency() const;
@@ -446,7 +461,9 @@ public:
   int sign() const;
   void multiplyOnTheRightBySimpleReflection(int reflectionIndex);
   static void conjugationAction(
-    const ElementWeylGroup& conjugateWith, const ElementWeylGroup& conjugateOn, ElementWeylGroup& output
+    const ElementWeylGroup& conjugateWith,
+    const ElementWeylGroup& conjugateOn,
+    ElementWeylGroup& output
   );
   ElementWeylGroup operator^(const ElementWeylGroup& right) const;
   void makeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl);
@@ -770,7 +787,7 @@ public:
     Vectors<Rational>& set,
     Vectors<Rational>& output,
     List<Rational>& outputCoeffs,
-    bool IntegralCoefficientsOnly
+    bool integralCoefficientsOnly
   );
   static bool isAddmisibleDynkinType(char candidateLetter, int n);
   // The below will not do anything if the inputLetter is not a valid Dynkin letter.
@@ -812,7 +829,9 @@ public:
   );
   void getWeylChamber(Cone& output);
   std::string generateWeightSupportMethod1(
-    Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights
+    Vector<Rational>& highestWeightSimpleCoords,
+    Vectors<Rational>& outputWeightsSimpleCoords,
+    int upperBoundWeights
   );
   void getIntegralLatticeInSimpleCoordinates(Lattice& output);
   void getFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
@@ -840,9 +859,9 @@ public:
   template <class Coefficient>
   bool generateOrbit(
     Vector<Coefficient>& weight,
-    bool RhoAction,
+    bool rhoAction,
     HashedList<Vector<Coefficient> >& output,
-    bool UseMinusRho,
+    bool useMinusRho,
     int expectedOrbitSize = - 1,
     HashedList<ElementWeylGroup>* outputSubset = nullptr,
     int upperLimitNumberOfElements = - 1
@@ -850,53 +869,73 @@ public:
     Vectors<Coefficient> weights;
     weights.addOnTop(weight);
     return this->generateOrbit(
-      weights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, upperLimitNumberOfElements
+      weights,
+      rhoAction,
+      output,
+      useMinusRho,
+      expectedOrbitSize,
+      outputSubset,
+      upperLimitNumberOfElements
     );
   }
   void generateRootSystem();
-  void actOnAffineHyperplaneByGroupElement(int index, AffineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho);
+  void actOnAffineHyperplaneByGroupElement(int index, AffineHyperplane<Rational>& output, bool rhoAction, bool useMinusRho);
   void getLowestElementInOrbit(
     Vector<Rational>& inputOutput,
     ElementWeylGroup* outputWeylElt,
     Vectors<Rational>& bufferEiBAsis,
-    bool RhoAction,
-    bool UseMinusRho,
+    bool rhoAction,
+    bool useMinusRho,
     int* sign = nullptr,
     bool* stabilizerFound = nullptr
   ) {
     this->getExtremeElementInOrbit(
-      inputOutput, outputWeylElt, bufferEiBAsis, true, RhoAction, UseMinusRho, sign, stabilizerFound
+      inputOutput,
+      outputWeylElt,
+      bufferEiBAsis,
+      true,
+      rhoAction,
+      useMinusRho,
+      sign,
+      stabilizerFound
     );
   }
   void getHighestElementInOrbit(
     Vector<Rational>& inputOutput,
-    ElementWeylGroup* outputWeylElt,
+    ElementWeylGroup* outputWeylElement,
     Vectors<Rational>& bufferEiBAsis,
-    bool RhoAction,
-    bool UseMinusRho,
+    bool rhoAction,
+    bool useMinusRho,
     int* sign,
     bool* stabilizerFound
   ) {
     this->getExtremeElementInOrbit(
-      inputOutput, outputWeylElt, bufferEiBAsis, false, RhoAction, UseMinusRho, sign, stabilizerFound
+      inputOutput,
+      outputWeylElement,
+      bufferEiBAsis,
+      false,
+      rhoAction,
+      useMinusRho,
+      sign,
+      stabilizerFound
     );
   }
   void getExtremeElementInOrbit(
     Vector<Rational>& inputOutput,
-    ElementWeylGroup* outputWeylElt,
+    ElementWeylGroup* outputWeylElement,
     Vectors<Rational>& bufferEiBAsis,
     bool findLowest,
-    bool RhoAction,
-    bool UseMinusRho,
+    bool rhoAction,
+    bool useMinusRho,
     int* sign,
     bool* stabilizerFound
   );
-  void getLongestWeylElt(ElementWeylGroup& outputWeylElt);
+  void getLongestWeylElement(ElementWeylGroup& outputWeylElement);
   bool isEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input);
-  void getCoxeterElement(ElementWeylGroup& outputWeylElt) {
-    outputWeylElt.generatorsLastAppliedFirst.setSize(this->getDimension());
-    for (int i = 0; i < outputWeylElt.generatorsLastAppliedFirst.size; i ++) {
-      outputWeylElt.generatorsLastAppliedFirst[i].makeSimpleReflection(i);
+  void getCoxeterElement(ElementWeylGroup& outputWeylElement) {
+    outputWeylElement.generatorsLastAppliedFirst.setSize(this->getDimension());
+    for (int i = 0; i < outputWeylElement.generatorsLastAppliedFirst.size; i ++) {
+      outputWeylElement.generatorsLastAppliedFirst[i].makeSimpleReflection(i);
     }
   }
   Vector<Rational> applyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational>& vv) const;
@@ -978,7 +1017,10 @@ public:
   }
   template<class Coefficient>
   void reflectBetaWithRespectToAlpha(
-    const Vector<Rational>& alpha, const Vector<Coefficient>& beta, bool rhoAction, Vector<Coefficient>& output
+    const Vector<Rational>& alpha,
+    const Vector<Coefficient>& beta,
+    bool rhoAction,
+    Vector<Coefficient>& output
   ) const;
   bool isRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot);
   template <class leftType, class rightType>
@@ -1398,7 +1440,10 @@ JSData GroupRepresentation<someGroup, Coefficient>::toJSON() {
 
 template <typename somegroup, typename Coefficient>
 class GroupRepresentationCarriesAllMatrices {
-  friend std::ostream& operator << (std::ostream& output, const GroupRepresentationCarriesAllMatrices& irreducibleRepresentation) {
+  friend std::ostream& operator<<(
+    std::ostream& output,
+    const GroupRepresentationCarriesAllMatrices& irreducibleRepresentation
+  ) {
     output << irreducibleRepresentation.toString();
     return output;
   }
@@ -1648,8 +1693,14 @@ public:
   LargeInteger sizeByFormulaOrNegative1() const {
     return - 1;
   }
-  void initFromGroupAndGenerators(someGroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
-  void makeTranslatableWordsSubgroup(someGroup& inputGroup, const List<elementSomeGroup>& subGenerators);
+  void initFromGroupAndGenerators(
+    someGroup& inputGroup,
+    const List<elementSomeGroup>& inputGenerators
+  );
+  void makeTranslatableWordsSubgroup(
+    someGroup& inputGroup,
+    const List<elementSomeGroup>& subGenerators
+  );
   void computeCCRepresentativesPreimages();
   void computeCCSizesRepresentativesPreimages() {
     this->computeConjugacyClassSizesAndRepresentatives();
@@ -1742,8 +1793,8 @@ bool SubgroupData<someGroup, elementSomeGroup>::sameCosetAs(elementSomeGroup& g1
   int g1i = this->groupContent->elements.getIndex(g1);
   int g2i = this->groupContent->elements.getIndex(g2);
   for (int i = 0; i < this->cosets.size; i ++) {
-    if (this->cosets[i].BSContains(g1i)) {
-      if (this->cosets[i].BSContains(g2i)) {
+    if (this->cosets[i].sortedContains(g1i)) {
+      if (this->cosets[i].sortedContains(g2i)) {
         return true;
       }
     }
@@ -1770,7 +1821,7 @@ int SubgroupData<someGroup, elementSomeGroup>::getCosetId(elementSomeGroup& g) {
         return i;
       }
     } else {
-      if (this->cosets[i].supergroupIndices.BSContains(gi)) {
+      if (this->cosets[i].supergroupIndices.sortedContains(gi)) {
         return i;
       }
     }
@@ -1831,10 +1882,13 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
       cg.invert();
       g = cg * this->groupContent->generators[i];
     }
-    global.comments << "element " << this->groupContent->generators[i] << " belongs to coset " << csi;
-    global.comments << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
+    global.comments << "element "
+    << this->groupContent->generators[i] << " belongs to coset " << csi;
+    global.comments << " represented by "
+    << cosets[csi].representative << " and corresponds to subgroup element " << g;
     in.getMatrixOfElement(g, sr.generators[i]);
-    global.comments << " which is assigned matrix\n" << sr.generators[i].toStringPlainText() << '\n';
+    global.comments << " which is assigned matrix\n"
+    << sr.generators[i].toStringPlainText() << '\n';
   }
   GroupRepresentation<someGroup, Coefficient> out;
   out.makeTensorRepresentation(qr,sr);
@@ -1932,7 +1986,7 @@ public:
 class SubgroupDataRootReflections : public SubgroupDataWeylGroup {
 public:
   SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> subGroupDataContainer;
-  Matrix<Rational> SubCartanSymmetric;
+  Matrix<Rational> subCartanSymmetric;
   DynkinType dynkinType;
   Vectors<Rational> generatingSimpleRoots;
   bool flagIsParabolic;
@@ -1988,7 +2042,9 @@ public:
   Vector<Rational> getRho();
   template <class Coefficient>
   void raiseToDominantWeightInner(
-    Vector<Coefficient>& weight, int* sign = nullptr, bool* stabilizerFound = nullptr
+    Vector<Coefficient>& weight,
+    int* sign = nullptr,
+    bool* stabilizerFound = nullptr
   );
   template <class Coefficient>
   bool freudenthalFormulaIrrepIsWRTLeviPart(
@@ -1996,7 +2052,7 @@ public:
     HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoords,
     List<Coefficient>& outputMultsSimpleCoordS,
     std::string& outputDetails,
-    int UpperBoundFreudenthal
+    int upperBoundFreudenthal
   );
   bool makeParabolicFromSelectionSimpleRoots(
     WeylGroupData& inputWeyl,

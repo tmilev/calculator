@@ -1771,7 +1771,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
   HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoordS,
   List<Coefficient>& outputMultsSimpleCoords,
   std::string& outputDetails,
-  int UpperBoundFreudenthal
+  int upperBoundFreudenthal
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::freudenthalFormulaIrrepIsWRTLeviPart");
   //double startTimer = global.getElapsedSeconds();
@@ -1798,10 +1798,10 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
   HashedList<Vector<Coefficient> > outputDomWeightsSimpleCoordsLeviPart;
 
   if (!this->getAllDominantWeightsHWFDIM(
-    hwSimpleCoordsLeviPart, outputDomWeightsSimpleCoordsLeviPart, UpperBoundFreudenthal, outputDetails
+    hwSimpleCoordsLeviPart, outputDomWeightsSimpleCoordsLeviPart, upperBoundFreudenthal, outputDetails
   )) {
     std::stringstream errorLog;
-    errorLog << "Error: the number of dominant weights exceeded hard-coded limit of " << UpperBoundFreudenthal
+    errorLog << "Error: the number of dominant weights exceeded hard-coded limit of " << upperBoundFreudenthal
     << ". Please check out whether LiE's implementation of the Freudenthal formula can do your computation.";
     outputDetails = errorLog.str();
     return false;
@@ -2032,7 +2032,7 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::addIrreducibleRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& p
 ) {
-  this->irreps_grcam.BSInsertDontDup(p);
+  this->irreps_grcam.sortedInsertDontDup(p);
   auto p_gr = p.makeOtherGroupRepresentationClass();
   this->addIrreducibleRepresentation(p_gr);
 }
@@ -2042,13 +2042,13 @@ void FiniteGroup<elementSomeGroup>::addIrreducibleRepresentation(
   GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& p
 ) {
   p.computeCharacter();
-  this->irreducibleRepresentations.BSInsertDontDup(p);
-  this->characterTable.BSInsertDontDup(p.character);
+  this->irreducibleRepresentations.sortedInsertDontDup(p);
+  this->characterTable.sortedInsertDontDup(p.character);
 }
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::addCharacter(const ClassFunction<FiniteGroup<elementSomeGroup>, Rational>& X) {
-  this->characterTable.BSInsertDontDup(X);
+  this->characterTable.sortedInsertDontDup(X);
   // the following is the reason the characterTable is not a list of pointers
   // this method is kept because (1) it will be inlined anyway
   //                             (2) to remind the user not to use a list of pointers
@@ -2209,14 +2209,14 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
     << this->toString() << global.fatal;
   }
   if (sumOfNumComponentsSquared == 1) {
-    int i = this->ownerGroup->characterTable.BSGetIndex(this->character);
+    int i = this->ownerGroup->characterTable.sortedGetIndex(this->character);
     if (i == - 1) {
       this->ownerGroup->addIrreducibleRepresentation(*this);
       appendOnlyIrrepsList.addOnTop(this->makeOtherGroupRepresentationClass());
       if (appendOnlyGRCAMSList) {
         appendOnlyGRCAMSList->addOnTop(*this);
       }
-      i = this->ownerGroup->characterTable.BSGetIndex(this->character);
+      i = this->ownerGroup->characterTable.sortedGetIndex(this->character);
     }
     outputIrrepMults.addMonomial(this->ownerGroup->characterTable[i], 1);
     return true;
@@ -2261,7 +2261,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
       // I'm not sure how much of a good idea it is to ensure that outputIrrepMults only takes monomials
       // from ownerGroup->characterTable, it might be better to add the character from irreps pointed to
       // by the appendOnlyIrrepsList[i]
-      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i].character);
+      int ci = this->ownerGroup->characterTable.sortedGetIndex(appendOnlyIrrepsList[i].character);
       outputIrrepMults.addMonomial(this->ownerGroup->characterTable[ci], NumIrrepsOfType);
       remainingCharacter -= appendOnlyIrrepsList[i].character*NumIrrepsOfType;
       {

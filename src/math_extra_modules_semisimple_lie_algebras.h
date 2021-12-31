@@ -198,8 +198,8 @@ public:
 template <class Coefficient>
 class ModuleSSalgebra {
   List<MatrixTensor<Coefficient> > actionsGeneratorsMatrix;
-  List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsGeneratorS;
-  Selection ComputedGeneratorActions;
+  List<List<List<ElementUniversalEnveloping<Coefficient> > > > actionsGenerators;
+  Selection computedGeneratorActions;
   Rational highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
     const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
     const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
@@ -253,8 +253,8 @@ public:
   bool flagConjectureBholds;
   bool flagConjectureCholds;
   bool flagDeallocated;
-  int NumCachedPairsBeforeSimpleGen;
-  int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
+  int numberOfCachedPairsBeforeSimpleGenerators;
+  int numberRationalMultiplicationsAndAdditionsBeforeSimpleGenerators;
   int maximumNumberOfCachedPairs;
   void reset();
   bool operator==(const ModuleSSalgebra<Coefficient>& other) {
@@ -313,7 +313,8 @@ public:
       global.fatal << "Use after free of ModuleSSalgebra. " << global.fatal;
     }
     if (this->owner == nullptr) {
-      global.fatal << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << global.fatal;
+      global.fatal << "ModuleSSalgebra does not have its "
+      << "owner semisimple algebra properly set. " << global.fatal;
     }
     return true;
   }
@@ -336,7 +337,7 @@ public:
   }
   void getAdActionHomogenousElt(
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
-    Vector<Rational> & weightUEEltSimpleCoords,
+    Vector<Rational>& weightUEEltSimpleCoords,
     List<List<ElementUniversalEnveloping<Coefficient> > >& outputSortedByArgumentWeight,
     const Coefficient& ringUnit,
     const Coefficient& ringZero
@@ -459,7 +460,10 @@ public:
     }
     return (*this)[0].isHighestWeightVector();
   }
-  void makeHighestWeightVector(ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit);
+  void makeHighestWeightVector(
+    ModuleSSalgebra<Coefficient>& inputOwner,
+    const Coefficient& ringUnit
+  );
   void substitution(
     const PolynomialSubstitution<Rational>& substitution,
     ListReferences<ModuleSSalgebra<Coefficient> >& modules

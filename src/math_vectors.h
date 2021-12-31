@@ -992,6 +992,11 @@ class Vectors: public List<Vector<Coefficient> > {
       this->objects[i] = other[i];
     }
   }
+  class Test {
+  public:
+    static bool all();
+    static bool linearCombination();
+  };
 };
 
 template <class Coefficient>

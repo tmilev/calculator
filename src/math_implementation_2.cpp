@@ -1911,33 +1911,42 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
   return true;
 }
 
-Rational Rational::scaleNormalizeIndex(
-  List<Rational>& output, int indexNonZeroEntry
-) {
-  if (output.size == 0) {
+Rational Rational::scaleNoSignChange(List<Rational> &inputOutput) {
+  if (inputOutput.size == 0) {
     return 1;
   }
-  LargeIntegerUnsigned denominatorLCM = output[0].getDenominator();
-  LargeIntegerUnsigned numeratorGCD = output[0].getNumerator().value;
-  for (int i = 1; i < output.size; i ++) {
+  LargeIntegerUnsigned denominatorLCM = inputOutput[0].getDenominator();
+  LargeIntegerUnsigned numeratorGCD = inputOutput[0].getNumerator().value;
+  for (int i = 1; i < inputOutput.size; i ++) {
     LargeIntegerUnsigned::leastCommonMultiple(
       denominatorLCM,
-      output[i].getDenominator(),
+      inputOutput[i].getDenominator(),
       denominatorLCM
     );
     LargeIntegerUnsigned::greatestCommonDivisor(
       numeratorGCD,
-      output[i].getNumerator().value,
+      inputOutput[i].getNumerator().value,
       numeratorGCD
     );
   }
   Rational result = denominatorLCM;
   result /= numeratorGCD;
-  if (output[indexNonZeroEntry] < 0) {
-    result *= - 1;
+  for (int i = 0; i < inputOutput.size; i ++) {
+    inputOutput[i] *= result;
   }
-  for (int i = 0; i < output.size; i ++) {
-    output[i] *= result;
+  return result;
+}
+
+Rational Rational::scaleNormalizeIndex(
+  List<Rational>& inputOutput, int indexNonZeroEntry
+) {
+  Rational result = Rational::scaleNoSignChange(inputOutput);
+  if (inputOutput[indexNonZeroEntry] > 0) {
+    return result;
+  }
+  result *= - 1;
+  for (int i = 0; i < inputOutput.size; i ++) {
+    inputOutput[i].negate();
   }
   return result;
 }

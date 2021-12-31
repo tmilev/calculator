@@ -53,7 +53,7 @@ void SparseSubspaceBasis<templateVector, TemplateMonomial, Coefficient>::setBasi
   }
   for (int i = 0; i < basis.size; i ++) {
     for (int j = 0; j < basis[i].monomials.size; j ++) {
-      this->involvedMonomials.BSInsertDontDup(basis[i].monomials[j]);
+      this->involvedMonomials.sortedInsertDontDup(basis[i].monomials[j]);
     }
   }
   Matrix<Coefficient> basisMatrix;
@@ -1248,8 +1248,8 @@ bool FiniteGroup<elementSomeGroup>::areConjugate(const elementSomeGroup& x, cons
   int xi = this->elements.getIndex(x);
   int yi = this->elements.getIndex(y);
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
-    if (this->conjugacyClasses[i].indicesEltsInOwner.BSContains(xi)) {
-      if (this->conjugacyClasses[i].indicesEltsInOwner.BSContains(yi)) {
+    if (this->conjugacyClasses[i].indicesEltsInOwner.sortedContains(xi)) {
+      if (this->conjugacyClasses[i].indicesEltsInOwner.sortedContains(yi)) {
         return true;
       }
     }
@@ -1613,7 +1613,7 @@ void FiniteGroup<elementSomeGroup>::verifyCCSizesAndRepresentativesFormula() {
     } else {
       int cri = GG.elements.getIndex(this->conjugacyClasses[i].representative);
       for (int gci = 0; gci < GG.conjugacyClasses.size; gci ++) {
-        if (GG.conjugacyClasses[gci].indicesEltsInOwner.BSContains(cri)) {
+        if (GG.conjugacyClasses[gci].indicesEltsInOwner.sortedContains(cri)) {
           gcc = gci;
           break;
         }
@@ -1622,7 +1622,7 @@ void FiniteGroup<elementSomeGroup>::verifyCCSizesAndRepresentativesFormula() {
     global.comments << "class " << i << " representative "
     << this->conjugacyClasses[i].representative << " belongs to cc "
     << gcc << " with representative " << GG.conjugacyClasses[gcc].representative << '\n';
-    if (classes_found.BSInsertDontDup(gcc) == - 1) {
+    if (classes_found.sortedInsertDontDup(gcc) == - 1) {
       global.comments << "error\n";
     }
   }

@@ -55,7 +55,7 @@ public:
 // Edges and nodes are stored independently.
 class GraphWeightedLabeledEdges {
 public:
-  int numNodes;
+  int numberOfNodes;
   int groupMaxSize;
   List<std::string> nodeLabels;
   LinearCombination<GraphEdge, Rational> edges;
@@ -67,7 +67,7 @@ public:
   List<int> positionInDisplayGroup;
   List<int> displayGroupIndices;
   List<int> connectedComponentSizes;
-  GraphWeightedLabeledEdges(): numNodes(- 1), groupMaxSize(- 1){}
+  GraphWeightedLabeledEdges(): numberOfNodes(- 1), groupMaxSize(- 1){}
   bool checkConsistency() const;
   void addEdge(int i, int j);
   void computeEdgesPerNodesNoMultiplicities();

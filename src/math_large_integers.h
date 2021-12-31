@@ -515,7 +515,8 @@ public:
   // Scales a vector of rationals so as to make all coordinates
   // relatively prime integers such that the non-zero coefficient is positive.
   // Returns the number by which the vector was multiplied.
-  static Rational scaleNormalizeIndex(List<Rational>& output, int indexNonZeroEntry);
+  static Rational scaleNormalizeIndex(List<Rational>& inputOutput, int indexNonZeroEntry);
+  static Rational scaleNoSignChange(List<Rational>& inputOutput);
   LargeIntegerUnsigned getDenominator() const;
   bool beginsWithMinus();
   LargeInteger getNumerator() const;

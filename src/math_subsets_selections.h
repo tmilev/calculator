@@ -77,11 +77,17 @@ public:
   // warning: to call the comparison operator sucessfully, cardinalitySelection must
   // be properly computed!
   bool operator==(const Selection& right) const {
-    if (this->numberOfElements != right.numberOfElements || this->cardinalitySelection != right.cardinalitySelection) {
+    if (
+      this->numberOfElements != right.numberOfElements ||
+      this->cardinalitySelection != right.cardinalitySelection
+    ) {
       return false;
     }
     for (int i = 0; i < this->cardinalitySelection; i ++) {
-      if (this->selected[this->elements[i]] != right.selected[this->elements[i]]) {
+      if (
+        this->selected[this->elements[i]] !=
+        right.selected[this->elements[i]]
+      ) {
         return false;
       }
     }
@@ -156,14 +162,17 @@ public:
   List<int> elements;
   List<int> multiplicities;
   List<int> capacities;
-  void initPart1(int numberOfElements);
+  void initializePart1(int numberOfElements);
   void clearNoMaxMultiplicitiesChange();
   bool incrementReturnFalseIfPastLast();
   LargeInteger totalNumberOfSubsets();
   int totalNumberSubsetsSmallInt();
   int totalMultiplicity();
   int maximumTotalMultiplicity();
-  void initializeFromIntegers(int* maximalMultiplicities, int numberOfMaximalMultiplicities);
+  void initializeFromIntegers(
+    int* maximalMultiplicities,
+    int numberOfMaximalMultiplicities
+  );
   void initializeFromIntegers(const List<int>& maximalMultiplicities);
   bool hasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
     return this->capacities.isEqualTo(other.capacities);
@@ -496,18 +505,20 @@ void Vectors<Coefficient>::gaussianEliminationForNormalComputation(
 }
 
 template <class Coefficient>
-int Vectors<Coefficient>::getRankElementSpan(Matrix<Coefficient>* buffer, Selection* bufferSelection) const {
+int Vectors<Coefficient>::getRankElementSpan(
+  Matrix<Coefficient>* buffer, Selection* bufferSelection
+) const {
   if (this->size == 0) {
     return 0;
   }
   int dimension = this->objects[0].size;
-  MemorySaving<Matrix<Coefficient> > emergencyMatBuf;
-  MemorySaving<Selection> emergencySelBuf;
+  MemorySaving<Matrix<Coefficient> > emergencyMatrixBuffer;
+  MemorySaving<Selection> emergencySelectionBuffer;
   if (buffer == nullptr) {
-    buffer = &emergencyMatBuf.getElement();
+    buffer = &emergencyMatrixBuffer.getElement();
   }
   if (bufferSelection == nullptr) {
-    bufferSelection = &emergencySelBuf.getElement();
+    bufferSelection = &emergencySelectionBuffer.getElement();
   }
   this->gaussianEliminationForNormalComputation(*buffer, *bufferSelection, dimension);
   return (dimension - bufferSelection->cardinalitySelection);
@@ -567,7 +578,8 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   buffer.initialize(dimension - 1, dimension);
   for (int i = 0; i < dimension - 1; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      buffer.elements[i][j] = (this->externalWalls[selection.elements[i]].normal[j]);
+      buffer.elements[i][j] =
+      this->externalWalls[selection.elements[i]].normal[j];
     }
   }
   buffer.gaussianEliminationByRows(0, nonPivotPointsBuffer);

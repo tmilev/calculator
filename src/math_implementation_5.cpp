@@ -1139,6 +1139,11 @@ void MonomialPolynomial::multiplyByVariable(int variableIndex, const Rational& v
   this->trimTrailingZeroes();
 }
 
+MonomialPolynomial::MonomialPolynomial(const Vector<Rational>& exponents) {
+  this->monomialBody = exponents;
+  this->trimTrailingZeroes();
+}
+
 const Rational& MonomialPolynomial::operator[](int i) const {
   if (i < 0 || i >= this->monomialBody.size) {
     global.fatal << "Requested exponent "

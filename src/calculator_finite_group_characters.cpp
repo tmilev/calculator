@@ -621,7 +621,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   Matrix<Rational> epsilonCoordinatesMatrix;
   weyl.dynkinType.getEpsilonMatrix(epsilonCoordinatesMatrix);
   GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
-  integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
+  integralPositiveRootReflectionGraph.numberOfNodes = outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.setSize(outputOrbit.size);
   format.flagUseFrac = true;
   for (int i = 0; i < outputOrbit.size; i ++) {

@@ -1365,7 +1365,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     this->gModKNegativeWeightsBasisChanged, nullptr
   );
   out << this->partialFractions.toString(&format);
-  this->partialFractions.split(nullptr, nullptr);
+  this->partialFractions.split(nullptr);
   out << "=" << this->partialFractions.toString(&format);
   //  int totalDim = this->translationS[0].size +this->translationsProjecteD[0].size;
   this->quasiPolynomialsSubstituted.setSize(this->projectivizedChambeR.size);

@@ -71,6 +71,7 @@ void Test::run() {
     // Also tested in calculator test suite.
     Calculator::Examples::Test::all();
     ChevalleyGenerator::Test::all();
+    PartialFractions::Test::all();
     global << Logger::green << "Basic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::crypto)) {

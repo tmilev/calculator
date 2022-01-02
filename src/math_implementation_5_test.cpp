@@ -341,14 +341,111 @@ bool ChevalleyGenerator::Test::basic() {
   return true;
 }
 
+template <>
+bool Vectors<Rational>::Test::TestCaseLinearDependence::test() {
+  Vectors<Rational> vectors;
+  vectors.fromStringListNoFail(this->input);
+  Vector<Rational> linearDependence;
+  vectors.getLinearDependenceHomogenous(linearDependence);
+  std::string resultHomogeneous = linearDependence.toString();
+  vectors.getLinearDependenceLexicographic(linearDependence);
+  std::string resultLexicographic = linearDependence.toString();
+  if (resultHomogeneous != this->expectedHomogeneous) {
+    global.fatal << "Linear depence homogeneous of: " << this->input
+    << "\ngot:\n" << resultHomogeneous
+    << "\nexpected:\n" << this->expectedHomogeneous << "\n" << global.fatal;
+  }
+  if (resultLexicographic != this->expectedLexicographic) {
+    global.fatal << "Linear depence lexicographic of: " << this->input
+    << "\ngot:\n" << resultLexicographic
+    << "\nexpected:\n" << this->expectedLexicographic << "\n" << global.fatal;
+  }
+  return true;
+}
+
 template<>
-bool Vectors<Rational>::Test::linearCombination() {
-  global.fatal << "Implement test please!" << global.fatal;
+bool Vectors<Rational>::Test::linearDependence() {
+  Vectors<Rational>::Test::TestCaseLinearDependence testCase;
+  testCase.input = {
+    "(1,3)",
+    "(3,1)",
+    "(1,1)",
+    "(1,2)"
+  };
+  testCase.expectedHomogeneous = "(-7/8, -3/8, 1, 1)";
+  testCase.expectedLexicographic = "(-1/4, -1/4, 1, 0)";
+  testCase.test();
+
+  testCase.input = {
+    "(1,0)",
+    "(0,1)",
+    "(1,1)",
+  };
+  testCase.expectedHomogeneous = "(-1, -1, 1)";
+  testCase.expectedLexicographic = "(-1, -1, 1)";
+  testCase.test();
   return true;
 }
 
 template<>
 bool Vectors<Rational>::Test::all() {
-  Vectors<Rational>::Test::linearCombination();
+  Vectors<Rational>::Test::linearDependence();
+  return true;
+}
+
+bool PartialFractions::Test::all() {
+  PartialFractions::Test::splitTwoDimensional();
+  return true;
+}
+
+bool PartialFractions::Test::splitTwoDimensional() {
+  SplitTestCase testCase;
+  testCase.vectors = {
+    "(1,0)",
+    "(0,1)",
+    "(1,1)",
+  };
+  testCase.expected =
+  "-x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{1} x_{2} ) )"
+  "+x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{2} ) )"
+  ;
+  testCase.test();
+
+  testCase.vectors = {
+    "(1,1)",
+    "(1,0)",
+    "(0,1)",
+  };
+  testCase.expected =
+  "-x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{1} x_{2} ) )"
+  "+x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{2} ) )"
+  ;
+  testCase.test();
+
+  testCase.vectors = {
+    "(1, 0)",
+    "(0, 1)",
+    "(1, 1)",
+    "(1, 2)",
+    "(2, 2)",
+  };
+  testCase.expected = "";
+  testCase.test();
+
+  return true;
+}
+
+bool PartialFractions::Test::SplitTestCase::test() {
+  PartialFractions splitter;
+  Vectors<Rational> input;
+  input.fromStringListNoFail(this->vectors);
+  splitter.run(input);
+  std::string result = splitter.toString(nullptr);
+  if (result != this->expected) {
+    global.fatal << "Partial fraction splitter: got: "
+    << result << ", expected: "
+    << this->expected << "."
+    << global.fatal;
+  }
   return true;
 }

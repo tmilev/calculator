@@ -410,7 +410,9 @@ void Vectors<Coefficient>::selectionToMatrix(
 
 template<class Coefficient>
 bool Vectors<Coefficient>::computeNormalExcludingIndex(
-  Vector<Coefficient>& output, int index, Matrix<Coefficient>& bufferMatrix
+  Vector<Coefficient>& output,
+  int index,
+  Matrix<Coefficient>& bufferMatrix
 ) {
   Selection nonPivotPoints;
   if (this->size == 0) {
@@ -421,18 +423,21 @@ bool Vectors<Coefficient>::computeNormalExcludingIndex(
   bufferMatrix.initialize(this->size - 1, dimension);
   int k = - 1;
   for (int i = 0; i < this->size; i ++) {
-    if (i != index) {
-      k ++;
-      for (int j = 0; j < dimension; j ++) {
-        bufferMatrix.elements[k][j] = (*this)[i][j];
-      }
+    if (i == index) {
+      continue;
+    }
+    k ++;
+    for (int j = 0; j < dimension; j ++) {
+      bufferMatrix.elements[k][j] = (*this)[i][j];
     }
   }
   bufferMatrix.gaussianEliminationByRows(0, &nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
-  bufferMatrix.nonPivotPointsToEigenVector(nonPivotPoints, output);
+  bufferMatrix.nonPivotPointsToEigenVectorHomogeneous(
+    nonPivotPoints, output
+  );
   return true;
 }
 
@@ -455,7 +460,7 @@ bool Vectors<Coefficient>::computeNormalFromSelection(
   if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
-  bufferMatrix.nonPivotPointsToEigenVector(nonPivotPoints, output);
+  bufferMatrix.nonPivotPointsToEigenVectorHomogeneous(nonPivotPoints, output);
   return true;
 }
 
@@ -525,14 +530,33 @@ int Vectors<Coefficient>::getRankElementSpan(
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::getLinearDependence(Matrix<Coefficient>& outputLinearCombination) {
+bool Vectors<Coefficient>::getLinearDependence(
+  Vector<Coefficient>& outputLinearCombination,
+  bool homogeneous,
+  const Coefficient& one,
+  const Coefficient& zero
+) {
   Matrix<Coefficient> eliminated;
   Selection nonPivotPoints;
   this->getLinearDependenceCompute(eliminated, nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection == 0) {
     return false;
   }
-  eliminated.nonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputLinearCombination);
+  if (homogeneous) {
+    eliminated.nonPivotPointsToEigenVectorHomogeneous(
+      nonPivotPoints,
+      outputLinearCombination,
+      one,
+      zero
+    );
+  } else {
+    eliminated.nonPivotPointsToEigenVectorLexicographic(
+      nonPivotPoints,
+      outputLinearCombination,
+      one,
+      zero
+    );
+  }
   return true;
 }
 

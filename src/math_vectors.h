@@ -517,10 +517,10 @@ public:
     result += right;
     return result;
   }
-  bool assignString(const std::string& input);
+  bool fromString(const std::string& input);
 
   void operator=(const std::string& input) {
-    this->assignString(input);
+    this->fromString(input);
   }
   // The following function is required else
   // some compilers generate warning:
@@ -917,8 +917,29 @@ class Vectors: public List<Vector<Coefficient> > {
   void gaussianEliminationForNormalComputation(
     Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int dimension
   ) const;
-  //the below function returns a n row 1 column matrix with the coefficients in the obvious order
-  bool getLinearDependence(Matrix<Coefficient>& outputLinearCombination);
+  // Computes a linear combination with coefficients in the natural order.
+  bool getLinearDependence(
+    Vector<Coefficient>& outputLinearCombination,
+    bool homogenous,
+    const Coefficient& one = 1,
+    const Coefficient& zero = 0
+  );
+  // Computes a linear combination with coefficients in the natural order.
+  bool getLinearDependenceHomogenous(
+    Vector<Coefficient>& outputLinearCombination,
+    const Coefficient& one = 1,
+    const Coefficient& zero = 0
+  ) {
+    return this->getLinearDependence(outputLinearCombination, true, one, zero);
+  }
+  // Computes a linear combination with coefficients in the natural order.
+  bool getLinearDependenceLexicographic(
+    Vector<Coefficient>& outputLinearCombination,
+    const Coefficient& one = 1,
+    const Coefficient& zero = 0
+  ) {
+    return this->getLinearDependence(outputLinearCombination, false, one, zero);
+  }
   void getLinearDependenceCompute(Matrix<Coefficient>& outputSystem, Selection& outputNonPivotPoints);
   bool containsVectorNonPerpendicularTo(const Vector<Coefficient>& input, const Matrix<Coefficient>& bilinearForm);
   bool containsOppositeRoots() {
@@ -992,15 +1013,32 @@ class Vectors: public List<Vector<Coefficient> > {
       this->objects[i] = other[i];
     }
   }
+  // Creates a list of vectors from a list of strings.
+  // Crashes on failure. Intended for unit tests.
+  void fromStringListNoFail(List<std::string>& input) {
+    this->clear();
+    for (int i = 0; i < input.size; i ++) {
+      Vector<Coefficient> incoming;
+      incoming.fromString(input[i]);
+      this->addOnTop(incoming);
+    }
+  }
   class Test {
   public:
     static bool all();
-    static bool linearCombination();
+    static bool linearDependence();
+    class TestCaseLinearDependence {
+    public:
+      List<std::string> input;
+      std::string expectedHomogeneous;
+      std::string expectedLexicographic;
+      bool test();
+    };
   };
 };
 
 template <class Coefficient>
-bool Vector<Coefficient>::assignString(const std::string& input) {
+bool Vector<Coefficient>::fromString(const std::string& input) {
   MacroRegisterFunctionWithName("Vector::assignString");
   this->setSize(0);
   int currentDigit = - 1;
@@ -1023,13 +1061,15 @@ bool Vector<Coefficient>::assignString(const std::string& input) {
 }
 
 template <class Coefficient>
-bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output) const {
+bool Vector<Coefficient>::getCoordinatesInBasis(
+  const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output
+) const {
   if (inputBasis.size == 0) {
     return false;
   }
   MacroRegisterFunctionWithName("Vector::getCoordinatesInBasis");
   Vectors<Coefficient> bufferVectors;
-  Matrix<Coefficient> bufferMatrix;
+  Vector<Coefficient> linearCombination;
   if (this->size != inputBasis[0].size) {
     global.fatal << "Attempt to get coordinates of vector of "
     << this->size << " coordinates using a basis whose first vector has "
@@ -1038,15 +1078,15 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
   bufferVectors.reserve(inputBasis.size + 1);
   bufferVectors.addListOnTop(inputBasis);
   bufferVectors.addOnTop(*this);
-  if (!bufferVectors.getLinearDependence(bufferMatrix)) {
+  if (!bufferVectors.getLinearDependenceHomogenous(linearCombination)) {
     return false;
   }
-  Coefficient temporaryCoefficient = bufferMatrix(bufferMatrix.numberOfRows - 1, 0);
-  bufferMatrix /= temporaryCoefficient;
-  output.setSize(bufferMatrix.numberOfRows - 1);
-  for (int i = 0; i < bufferMatrix.numberOfRows - 1; i ++) {
-    bufferMatrix(i, 0).negate();
-    output[i] = bufferMatrix(i, 0);
+  Coefficient temporaryCoefficient = linearCombination[linearCombination.size - 1];
+  linearCombination /= temporaryCoefficient;
+  output.setSize(linearCombination.size - 1);
+  for (int i = 0; i < linearCombination.size - 1; i ++) {
+    linearCombination[i].negate();
+    output[i] = linearCombination[i];
   }
   return true;
 }

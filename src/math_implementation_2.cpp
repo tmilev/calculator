@@ -1911,7 +1911,7 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
   return true;
 }
 
-Rational Rational::scaleNoSignChange(List<Rational> &inputOutput) {
+Rational Rational::scaleNoSignChange(List<Rational>& inputOutput) {
   if (inputOutput.size == 0) {
     return 1;
   }

@@ -1019,7 +1019,6 @@ public:
     *this = standsOnTheRight;
     this->multiplyOnTheLeft(thisCopy);
   }
-  void nonPivotPointsToEigenVectorMatrixForm(Selection& nonPivotPoints, Matrix<Coefficient>& output);
   void getVectorsFromRows(List<Vector<Coefficient> >& output) {
     output.setSize(this->numberOfRows);
     for (int i = 0; i < this->numberOfRows; i ++) {
@@ -1029,7 +1028,13 @@ public:
       }
     }
   }
-  void nonPivotPointsToEigenVector(
+  void nonPivotPointsToEigenVectorHomogeneous(
+    Selection& nonPivotPoints,
+    Vector<Coefficient>& output,
+    const Coefficient& ringUnit = 1,
+    const Coefficient& ringZero = 0
+  );
+  void nonPivotPointsToEigenVectorLexicographic(
     Selection& nonPivotPoints,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit = 1,
@@ -1525,7 +1530,9 @@ void Vectors<Coefficient>::getOrthogonalComplement(
 }
 
 template <typename Coefficient>
-bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputDimension) {
+bool Vectors<Coefficient>::computeNormal(
+  Vector<Coefficient>& output, int inputDimension
+) {
   if (this->size == 0) {
     if (inputDimension == 1) {
       output.makeEi(1, 0);
@@ -1538,11 +1545,13 @@ bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputD
   Selection nonPivotPoints;
   nonPivotPoints.initialize(dimension);
   output.setSize(dimension);
-  this->gaussianEliminationForNormalComputation(eliminated, nonPivotPoints, dimension);
+  this->gaussianEliminationForNormalComputation(
+    eliminated, nonPivotPoints, dimension
+  );
   if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
-  eliminated.nonPivotPointsToEigenVector(nonPivotPoints, output);
+  eliminated.nonPivotPointsToEigenVectorHomogeneous(nonPivotPoints, output);
   return true;
 }
 
@@ -3912,7 +3921,7 @@ public:
   List<int> elongations;
   int normalizedVectorIndex;
   PartialFractions* owner;
-  void addMultiplicitY(int multiplicityIncrement, int elongation);
+  void addMultiplicity(int multiplicityIncrement, int elongation);
   int indexLargestElongation() const;
   int getLargestElongation() const;
   void getElongatedVector(int index, Vector<Rational>& output) const;
@@ -3990,26 +3999,7 @@ public:
 };
 
 template<typename Coefficient>
-void Matrix<Coefficient>::nonPivotPointsToEigenVectorMatrixForm(
-  Selection& nonPivotPoints, Matrix<Coefficient>& output
-) {
-  int rowCounter = 0;
-  output.initialize(this->numberOfColumns, 1);
-  for (int i = 0; i < this->numberOfColumns; i ++) {
-    if (!nonPivotPoints.selected[i]) {
-      output(i, 0) = 0;
-      for (int j = 0; j < nonPivotPoints.cardinalitySelection; j ++) {
-        output(i, 0) -= this->elements[rowCounter][nonPivotPoints.elements[j]];
-      }
-      rowCounter ++;
-    } else {
-      output(i, 0) = 1;
-    }
-  }
-}
-
-template<typename Coefficient>
-void Matrix<Coefficient>::nonPivotPointsToEigenVector(
+void Matrix<Coefficient>::nonPivotPointsToEigenVectorHomogeneous(
   Selection& nonPivotPoints,
   Vector<Coefficient>& output,
   const Coefficient& ringUnit,
@@ -4018,15 +4008,35 @@ void Matrix<Coefficient>::nonPivotPointsToEigenVector(
   int rowCounter = 0;
   output.setSize(this->numberOfColumns);
   for (int i = 0; i < this->numberOfColumns; i ++) {
-    if (!nonPivotPoints.selected[i]) {
-      output[i] = ringZero;
-      for (int j = 0; j < nonPivotPoints.cardinalitySelection; j ++) {
-        output[i] -= this->elements[rowCounter][nonPivotPoints.elements[j]];
-      }
-      rowCounter ++;
-    } else {
+    if (nonPivotPoints.selected[i]) {
       output[i] = ringUnit;
+      continue;
     }
+    output[i] = ringZero;
+    for (int j = 0; j < nonPivotPoints.cardinalitySelection; j ++) {
+      output[i] -= this->elements[rowCounter][nonPivotPoints.elements[j]];
+    }
+    rowCounter ++;
+  }
+}
+
+template<typename Coefficient>
+void Matrix<Coefficient>::nonPivotPointsToEigenVectorLexicographic(
+  Selection& nonPivotPoints,
+  Vector<Coefficient>& output,
+  const Coefficient& ringUnit,
+  const Coefficient& ringZero
+) {
+  (void) ringZero;
+  output.makeZero(this->numberOfColumns);
+  if (nonPivotPoints.cardinalitySelection == 0) {
+    return;
+  }
+  int firstNonPivotIndex = nonPivotPoints.elements[0];
+  output[firstNonPivotIndex] = ringUnit;
+  for (int i = firstNonPivotIndex - 1; i >= 0; i --) {
+    output[i] = (*this)(i, firstNonPivotIndex);
+    output[i].negate();
   }
 }
 
@@ -5293,7 +5303,7 @@ class OnePartialFractionDenominator {
 private:
   void findPivot();
   void findInitialPivot();
-  bool rootIsInFractionCone(PartialFractions& owner, Vector<Rational>* root) const;
+  bool rootIsInFractionCone(Vector<Rational>* root) const;
   friend class PartialFractions;
   friend class partFractionPolynomialSubstitution;
 public:
@@ -5365,7 +5375,7 @@ public:
     int indexA,
     int indexB,
     int n,
-    int indexAminusNB,
+    int indexAMinusNB,
     LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output,
     PartialFractions& owner
   );
@@ -5385,7 +5395,6 @@ public:
     Rational& output
   ) const;
   void applyGeneralizedSzenesVergneFormula(
-    const List<Vector<Rational> >& normalizedVectors,
     MapList<Vector<Rational>, OnePartialFractionDenominatorComponent>& toBeReduced,
     const Vector<Rational>& linearRelation,
     const Vector<Rational>& gainingNormalizedExponent,
@@ -5402,7 +5411,6 @@ public:
   static unsigned int hashFunction(const OnePartialFractionDenominator& input) {
     return input.hashFunction();
   }
-  void initialize(PartialFractions& inputOwner);
   bool decreasePowerOneFraction(int index, int increment);
   void prepareFraction(
     int indexA,
@@ -5442,8 +5450,7 @@ public:
   bool operator==(const OnePartialFractionDenominator& right) const;
   void operator=(const OnePartialFractionDenominator& right);
   bool initializeFromPartialFractions(
-    PartialFractions& owner,
-    std::stringstream* commentsOnFailure
+    PartialFractions& owner
   );
   void addMultiplicity(
     const Vector<Rational>& normalizedVector,
@@ -5723,6 +5730,7 @@ public:
 class PartialFractions {
   bool splitPartial();
   void initializeCommon();
+  void initializeInput(const List<Vector<Rational> >& input);
   void initializeDimension();
 public:
   LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> > nonReduced;
@@ -5762,6 +5770,8 @@ public:
   // no greatest common divisor and sorted in graded lexicographic order.
   HashedList<Vector<Rational> > normalizedVectors;
 
+  OnePartialFractionDenominator initialPartialFraction;
+
   Matrix<int> tableAllowedAminusB;
   Matrix<int> tableAllowedAminus2B;
   Selection indicesRedundantShortRoots;
@@ -5800,7 +5810,7 @@ public:
     LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output,
     Vector<Rational>* indicator
   );
-  bool split(Vector<Rational>* indicator, std::stringstream* commentsOnFailure);
+  bool split(Vector<Rational>* indicator);
   void computeKostantFunctionFromWeylGroup(
     char weylGroupLetter,
     int weylGroupNumber,
@@ -5829,6 +5839,17 @@ public:
   void makeProgressReportSplittingMainPart();
   void makeProgressVPFcomputation();
   std::string toString(FormatExpressions* format) const;
+  class Test {
+  public:
+    static bool all();
+    static bool splitTwoDimensional();
+    class SplitTestCase {
+    public:
+      std::string expected;
+      List<std::string> vectors;
+      bool test();
+    };
+  };
 };
 
 class DynkinSimpleType {

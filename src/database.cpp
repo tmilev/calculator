@@ -399,9 +399,9 @@ bool Database::initializeServer() {
 }
 
 void GlobalVariables::initialize() {
-  this->logs.worker.fileName = "/LogFiles/" + GlobalVariables::getDateForLogFiles() + "/logCommon.html";
-  this->logs.server.fileName = "/LogFiles/" + GlobalVariables::getDateForLogFiles() + "/global.html";
-  this->logs.serverMonitor.fileName = "/LogFiles/" + GlobalVariables::getDateForLogFiles() + "/global.html";
+  this->logs.worker.fileName = "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/logCommon.html";
+  this->logs.server.fileName = "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/global.html";
+  this->logs.serverMonitor.fileName = "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/global.html";
 }
 
 void GlobalVariables::initModifiableDatabaseFields() {

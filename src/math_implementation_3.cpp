@@ -3156,8 +3156,12 @@ std::string OnePartialFractionDenominator::toString(
     return "1";
   }
   out << "/(";
-  for (int i = 0; i < this->denominators.size(); i ++) {
-    std::string current = this->denominators.values[i].toString(format);
+  MapList<Vector<Rational>, OnePartialFractionDenominatorComponent > summandsSorted;
+  this->getDenominatorsSorted(summandsSorted);
+  for (int i = 0; i < summandsSorted.size(); i ++) {
+    const OnePartialFractionDenominatorComponent& currentDenominator =
+    this->denominators.values[i];
+    std::string current = currentDenominator.toString(format);
     if (current != "1") {
       out << current;
     }
@@ -3250,8 +3254,6 @@ void OnePartialFractionDenominator::getLinearRelationFromNormalized(
 ) {
   MacroRegisterFunctionWithName("OnePartialFractionDenominator::getLinearRelationFromNormalized");
   output = linearRelationBetweenNormalizedVectors;
-  global.comments << "<br>DEBUG: output so far: " << output.toString()
-  << " notmslized vectors: " << normalizedVectors.toString();
   for (int i = 0; i < output.size; i ++) {
     if (output[i].isEqualToZero()) {
       continue;
@@ -3269,7 +3271,6 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
   LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >& output
 ) {
   MacroRegisterFunctionWithName("OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation");
-  global.comments << "DEBUG: lin relation: " << linearRelationBetweenNormalizedVectors.toString();
   MapList<Vector<Rational>, OnePartialFractionDenominatorComponent> reduced;
   this->getDenominatorsSorted(reduced);
   int gainingMultiplicityIndexInLinearRelation =
@@ -3284,7 +3285,6 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
     this->denominators.getValueNoFail(normalizedVectors[i]);
     reduced.setKeyValue(normalizedVectors[i], beingReduced);
   }
-  global.comments << "<br>DEBUG: got to here.";
   Vector<Rational> linearRelation;
   this->getLinearRelationFromNormalized(
     gainingMultiplicityIndexInLinearRelation,
@@ -3292,7 +3292,6 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
     linearRelationBetweenNormalizedVectors,
     linearRelation
   );
-  global.comments << "<br>DEBUG: got to before scaling.";
   Rational::scaleNormalizeIndex(
     linearRelation,
     gainingMultiplicityIndexInLinearRelation
@@ -3303,8 +3302,6 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
   )) {
     global.fatal << "Elongation is too large. " << global.fatal;
   }
-  global.comments << "<br>DEBUG: apply formula: "
-  << reduced.toStringHtml();
   this->applyGeneralizedSzenesVergneFormula(
     reduced,
     linearRelation,
@@ -3312,7 +3309,6 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
     elongationGainingMultiplicity,
     output
   );
-  global.comments << "<br>DEBUG: The applied formula: " << output.toString() << "<br>";
   return true;
 }
 
@@ -3361,14 +3357,11 @@ void OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula(
       << global.fatal;
     }
     currentCoefficient *= - 1;
-    global.comments << "<br>DEBUG: Getting n elongi from: " << nextExponent.toString() << "<br>";
-
     this->getNElongationPolynomial(
       currentCoefficient,
       nextExponent,
       geometricSeriesNumerator
     );
-    global.comments << "DEBUG: gotten: " << geometricSeriesNumerator.toString() << "<br>";
     coefficientBuffer *= geometricSeriesNumerator;
     output.addMonomial(currentFraction, coefficientBuffer);
     cummulativeExponent.multiplyBy(MonomialPolynomial(nextExponent * currentCoefficient));
@@ -3680,13 +3673,11 @@ bool PartialFractions::splitPartial() {
       currentReduction *= currentCoefficient;
       this->nonReduced += currentReduction;
     } else {
-      this->reduced.addMonomial(currentFraction, currentCoefficient);
+      this->reducedWithElongationRedundancies.addMonomial(currentFraction, currentCoefficient);
     }
     this->compareCheckSums();
     this->makeProgressReportSplittingMainPart();
   }
-  global.comments << "<br>DEBUG: Reduced for good: " << this->toString(nullptr);
-  global.comments << "<br>DEBUG: Reduced for good is here!";
   this->compareCheckSums();
   return true;
 }
@@ -3726,9 +3717,7 @@ void OnePartialFractionDenominator::addMultiplicity(
     );
     this->denominators.setKeyValue(normalizedVector, incoming);
   }
-  current = &this->denominators.getValueCreateNoInitialization(
-    normalizedVector
-  );
+  current = &this->denominators.getValueCreateNoInitialization(normalizedVector);
   current->addMultiplicity(multiplicity, elongation);
   if (current->elongations.size == 0) {
     this->denominators.removeKey(normalizedVector);
@@ -3944,13 +3933,16 @@ void PartialFractions::initializeDimension() {
 void PartialFractions::initializeInput(
   const List<Vector<Rational> >& input
 ) {
+  MacroRegisterFunctionWithName("PartialFractions::initializeInput");
   this->originalVectors = input;
   List<int> coefficients;
+  List<Vector<Rational> > normalizedWithMultiplicity;
   for (int i = 0; i < this->originalVectors.size; i ++) {
     Vector<Rational> normalized = this->originalVectors[i];
     Rational scaleInverted = Rational::scaleNoSignChange(normalized);
     scaleInverted.invert();
-    this->normalizedVectors.addOnTop(normalized);
+    this->normalizedVectors.addOnTopNoRepetition(normalized);
+    normalizedWithMultiplicity.addOnTop(normalized);
     int scaleInteger = 0;
     if (!scaleInverted.isSmallInteger(&scaleInteger)) {
       global.fatal << "Normalized vector is too short: scale: "
@@ -3958,16 +3950,17 @@ void PartialFractions::initializeInput(
     }
     coefficients.addOnTop(scaleInteger);
   }
-  this->normalizedVectors.quickSortAscending(nullptr, &coefficients);
+  this->normalizedVectors.quickSortAscending();
   this->initialPartialFraction.owner = this;
-  for (int i = 0; i < this->normalizedVectors.size; i ++) {
+  normalizedWithMultiplicity.quickSortAscending(nullptr, &coefficients);
+  for (int i = 0; i < normalizedWithMultiplicity.size; i ++) {
     OnePartialFractionDenominatorComponent component;
-    component.initialize(*this, i);
+    const Vector<Rational>& exponent = normalizedWithMultiplicity[i];
+    component.initialize(*this, this->normalizedVectors.getIndex(exponent));
     this->initialPartialFraction.addMultiplicity(
-      this->normalizedVectors[i], 1, coefficients[i]
+      exponent, 1, coefficients[i]
     );
   }
-  global.comments << "Initial part frac: " << this->initialPartialFraction.toString();
 }
 
 bool PartialFractions::inputIsValid(std::stringstream* commentsOnFailure) const {
@@ -4013,18 +4006,19 @@ bool PartialFractions::initializeFromVectors(
   Vectors<Rational>& input,
   std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("PartialFractions::initializeFromVectors");
   this->initializeCommon();
   this->initializeInput(input);
   this->initializeDimension();
   if (!this->inputIsValid(commentsOnFailure)) {
     return false;
   }
-  OnePartialFractionDenominator f;
+  OnePartialFractionDenominator initialFraction;
   this->ambientDimension = input[0].size;
-  bool tempBool = f.initializeFromPartialFractions(*this);
+  bool tempBool = initialFraction.initializeFromPartialFractions(*this);
   Polynomial<LargeInteger> one;
   one.makeOne();
-  this->nonReduced.addMonomial(f, one);
+  this->nonReduced.addMonomial(initialFraction, one);
   return tempBool;
 }
 
@@ -4034,8 +4028,6 @@ void PartialFractions::initializeAndSplit(
 ) {
   MacroRegisterFunctionWithName("PartialFractions::initializeAndSplit");
   this->initializeFromVectors(input, commentsOnFailure);
-  global.comments << "<br>DEbug: initial part frac: "
-  << this->toString(nullptr) << "\n<br>\n";
   this->split(nullptr);
 }
 
@@ -4056,16 +4048,20 @@ void PartialFractions::removeRedundantShortRoots(Vector<Rational>* indicator) {
     this->reducedWithElongationRedundancies.popMonomial(
       0, denominator, coefficient
     );
-    bool fullyReduced = this->reduceOnceRedundantShortRoots(
+    bool needsMoreReduction = this->reduceOnceRedundantShortRoots(
       denominator, summand, indicator
     );
-    summand *= coefficient;
-    if (fullyReduced) {
-      this->reduced += summand;
-    } else {
+    global.comments << "DEBUG: summand: " << summand.toString() << "<br>";
+    global.comments << "DEBUG: needsMoreReduction: " << needsMoreReduction << "<br>";
+    if (needsMoreReduction) {
+      summand *= coefficient;
       this->reducedWithElongationRedundancies += summand;
+    } else {
+      this->reduced.addMonomial(denominator, coefficient);
     }
+    this->compareCheckSums();
   }
+  this->compareCheckSums();
 }
 
 void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* indicator) {
@@ -4339,15 +4335,23 @@ void OnePartialFractionDenominatorComponent::addMultiplicity(
   int elongationIndex = this->elongations.getIndex(elongation);
   if (elongationIndex == - 1) {
     this->elongations.addOnTop(elongation);
-    int index = 0;
-    this->multiplicities.addOnTop(index);
-    elongationIndex = this->multiplicities.size - 1;
+    this->multiplicities.addOnTop(0);
     this->elongations.quickSortAscending(nullptr, &this->multiplicities);
+    elongationIndex = this->elongations.getIndex(elongation);
+  }
+  if (this->multiplicities[elongationIndex] + multiplicityIncrement < 0) {
+    global.fatal
+    << "Multiplicity is supposed to be non-negative. Instead it is: "
+    << this->toStringInternal()
+    << ". "
+    << "Multiplicity increment: "
+    << multiplicityIncrement
+    << ", elongation: "
+    << elongation
+    << ". "
+    << global.fatal;
   }
   this->multiplicities[elongationIndex] += multiplicityIncrement;
-  if (this->multiplicities[elongationIndex] < 0) {
-    global.fatal << "Multiplicity is supposed to be non-negative. " << global.fatal;
-  }
   if (this->multiplicities[elongationIndex] == 0) {
     this->multiplicities.popIndexShiftDown(elongationIndex);
     this->elongations.popIndexShiftDown(elongationIndex);
@@ -4412,7 +4416,18 @@ std::string OnePartialFractionDenominatorComponent::toStringOneDenominator(
   return out.str();
 }
 
-std::string OnePartialFractionDenominatorComponent::toString(FormatExpressions* format) const {
+std::string OnePartialFractionDenominatorComponent::toStringInternal() const {
+  std::stringstream out;
+  out << "elongations: "
+  << this->elongations.toStringCommaDelimited() << ", "
+  << "multiplicities: "
+  << this->multiplicities.toStringCommaDelimited();
+  return out.str();
+}
+
+std::string OnePartialFractionDenominatorComponent::toString(
+  FormatExpressions* format
+) const {
   if (this->owner == nullptr) {
     return "(uninitialized)";
   }
@@ -8515,27 +8530,27 @@ void LaTeXProcedures::getStringFromColorIndex(int colorIndex, std::string &outpu
 }
 
 void LaTeXProcedures::drawTextDirectly(
-  double X1,
-  double Y1,
+  double x1,
+  double y1,
   const std::string& text,
   int colorIndex,
   std::fstream& output
 ) {
   (void) colorIndex;
   output.precision(4);
-  X1 -= text.length() * LaTeXProcedures::TextPrintCenteringAdjustmentX;
-  Y1 += LaTeXProcedures::TextPrintCenteringAdjustmentY;
-  X1 /= LaTeXProcedures::ScaleFactor;
-  Y1 /= LaTeXProcedures::ScaleFactor;
-  output << "\\put(" << X1 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
-  << LaTeXProcedures::FigureCenterCoordSystemY - Y1 << "){\\tiny{" << text << "}}";
+  x1 -= text.length() * LaTeXProcedures::TextPrintCenteringAdjustmentX;
+  y1 += LaTeXProcedures::TextPrintCenteringAdjustmentY;
+  x1 /= LaTeXProcedures::ScaleFactor;
+  y1 /= LaTeXProcedures::ScaleFactor;
+  output << "\\put(" << x1 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
+  << LaTeXProcedures::FigureCenterCoordSystemY - y1 << "){\\tiny{" << text << "}}";
 }
 
 void LaTeXProcedures::drawline(
-  double X1,
-  double Y1,
-  double X2,
-  double Y2,
+  double x1,
+  double y1,
+  double x2,
+  double y2,
   uint32_t penStyle,
   int colorIndex,
   std::fstream& output,
@@ -8545,10 +8560,10 @@ void LaTeXProcedures::drawline(
     return;
   }
   output.precision(4);
-  X1 /= LaTeXProcedures::ScaleFactor;
-  X2 /= LaTeXProcedures::ScaleFactor;
-  Y1 /= LaTeXProcedures::ScaleFactor;
-  Y2 /= LaTeXProcedures::ScaleFactor;
+  x1 /= LaTeXProcedures::ScaleFactor;
+  x2 /= LaTeXProcedures::ScaleFactor;
+  y1 /= LaTeXProcedures::ScaleFactor;
+  y2 /= LaTeXProcedures::ScaleFactor;
   std::string tempS;
   if (penStyle == static_cast<unsigned>(DrawingVariables::PenStyleDashed)) {
     tempS = "lightgray";
@@ -8556,10 +8571,10 @@ void LaTeXProcedures::drawline(
     LaTeXProcedures::getStringFromColorIndex(colorIndex, tempS, drawInput);
   }
   output << "\\psline[linewidth = 0.3pt, linecolor =" << tempS << "]("
-  << X1 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
-  << LaTeXProcedures::FigureCenterCoordSystemY - Y1 << ")" << "("
-  << X2 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
-  << LaTeXProcedures::FigureCenterCoordSystemY - Y2 << ")\n";
+  << x1 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
+  << LaTeXProcedures::FigureCenterCoordSystemY - y1 << ")" << "("
+  << x2 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
+  << LaTeXProcedures::FigureCenterCoordSystemY - y2 << ")\n";
 }
 
 void WeylGroupData::transformToSimpleBasisGenerators(
@@ -9899,8 +9914,6 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
   MacroRegisterFunctionWithName("PartialFractions::reducePartiallyRedundantShortRoots");
   output.makeZero();
   if (!toBeReduced.rootIsInFractionCone(indicator)) {
-    Polynomial<LargeInteger> one;
-    output.addMonomial(toBeReduced, one);
     return false;
   }
   bool found = false;
@@ -9931,32 +9944,31 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
   currentCoefficient.makeOne();
   OnePartialFractionDenominator uniformized;
   uniformized = toBeReduced;
-  while (currentFraction.elongations.size > 1) {
-    for (int i = 0; i < currentFraction.elongations.size; i ++) {
-      int elongationValue = currentFraction.elongations[i];
-      if (elongationValue == leastCommonMultipleElongations) {
-        continue;
-      }
-      int numSummands = leastCommonMultipleElongations / elongationValue;
-      Vector<Rational> exponent = normalized * elongationValue;
-      toBeReduced.getNElongationPolynomial(
-        numSummands, exponent, multiplicand
-      );
-      multiplicand.raiseToPower(currentFraction.multiplicities[i], 1);
-      currentCoefficient *= multiplicand;
-      uniformized.addMultiplicity(
-        normalized,
-        currentFraction.multiplicities[i],
-        leastCommonMultipleElongations
-      );
-      uniformized.addMultiplicity(
-        normalized,
-        - currentFraction.multiplicities[i],
-        elongationValue
-      );
+  for (int i = 0; i < currentFraction.elongations.size; i ++) {
+    int elongationValue = currentFraction.elongations[i];
+    if (elongationValue == leastCommonMultipleElongations) {
+      continue;
     }
+    int numSummands = leastCommonMultipleElongations / elongationValue;
+    Vector<Rational> exponent = normalized * elongationValue;
+    toBeReduced.getNElongationPolynomial(
+      numSummands, exponent, multiplicand
+    );
+    int multiplicityChange = currentFraction.multiplicities[i];
+    multiplicand.raiseToPower(multiplicityChange, 1);
+    currentCoefficient *= multiplicand;
+    uniformized.addMultiplicity(
+      normalized,
+      multiplicityChange,
+      leastCommonMultipleElongations
+    );
+    uniformized.addMultiplicity(
+      normalized,
+      - multiplicityChange,
+      elongationValue
+    );
+    output.addMonomial(uniformized, currentCoefficient);
   }
-  output.addMonomial(uniformized, currentCoefficient);
   return true;
 }
 
@@ -11383,14 +11395,17 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
   if (!this->flagInitialized) {
     this->prepareIndicatorVariables();
     this->prepareCheckSums();
-    global.comments << "DEBUG: checksum: " << this->startCheckSum;
     this->flagInitialized = true;
   }
   if (this->splitPartial()) {
+    global.comments << "DEBUG: split partial done!<br>";
     this->removeRedundantShortRoots(indicator);
+    global.comments << "DEBUG: remove redundi done!<br>";
     this->compareCheckSums();
+    global.comments << "DEBUG: checki sumi done!<br>";
     this->makeProgressReportSplittingMainPart();
   }
+  this->compareCheckSums();
   return false;
 }
 

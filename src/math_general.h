@@ -3951,6 +3951,7 @@ public:
   bool operator==(const OnePartialFractionDenominatorComponent& right) const;
 
   bool operator>(const OnePartialFractionDenominatorComponent& other) const;
+  std::string toStringInternal() const;
   std::string toString(FormatExpressions* format) const;
   std::string toStringOneDenominator(
     int elongation,
@@ -3963,28 +3964,38 @@ public:
 class LaTeXProcedures {
 public:
   static const int ScaleFactor = 40;
-  static const int FigureSizeX = 10; //in centimeters
-  static const int FigureSizeY = 10; //in centimeters
-  static const int FigureCenterCoordSystemX = 4; //in centimeters
-  static const int FigureCenterCoordSystemY = 8; //in centimeters
+  static const int FigureSizeX = 10; // In centimeters.
+  static const int FigureSizeY = 10; // In centimeters.
+  static const int FigureCenterCoordSystemX = 4; // In centimeters.
+  static const int FigureCenterCoordSystemY = 8; // In centimeters.
   static const int TextPrintCenteringAdjustmentX = 3;
   static const int TextPrintCenteringAdjustmentY = 3;
   static void drawline(
-    double X1,
-    double Y1,
-    double X2,
-    double Y2,
+    double x1,
+    double y1,
+    double x2,
+    double y2,
     uint32_t penStyle,
     int colorIndex,
     std::fstream& output,
     DrawingVariables& drawInput
   );
-  static void drawTextDirectly(double X1, double Y1, const std::string& text, int colorIndex, std::fstream& output);
+  static void drawTextDirectly(
+    double x1,
+    double y1,
+    const std::string& text,
+    int colorIndex,
+    std::fstream& output
+  );
   static void beginDocument(std::fstream& output);
   static void endLatexDocument(std::fstream& output);
   static void beginPSTricks(std::fstream& output);
   static void endPSTricks(std::fstream& output);
-  static void getStringFromColorIndex(int colorIndex, std::string &output, DrawingVariables& drawInput);
+  static void getStringFromColorIndex(
+    int colorIndex,
+    std::string& output,
+    DrawingVariables& drawInput
+  );
 };
 
 class Permutation: public SelectionWithDifferentMaxMultiplicities {
@@ -4237,7 +4248,10 @@ public:
     ElementSemisimpleLieAlgebra<Coefficient>& output
   );
   void getMatrix(Matrix<Coefficient>& output);
-  void findEigenSpace(const Coefficient& eigenValue, List<ElementSemisimpleLieAlgebra<Coefficient> >& outputBasis);
+  void findEigenSpace(
+    const Coefficient& eigenValue,
+    List<ElementSemisimpleLieAlgebra<Coefficient> >& outputBasis
+  );
   // Returns the owner semisimple Lie algebra.
   // Crashes if the map is zero (uninitialized map is automatically zero).
   SemisimpleLieAlgebra& owner();
@@ -4245,7 +4259,10 @@ public:
 
 template <class Coefficient>
 void Matrix<Coefficient>::operator-=(const Matrix<Coefficient>& right) {
-  if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
+  if (
+    this->numberOfRows != right.numberOfRows ||
+    this->numberOfColumns != right.numberOfColumns
+  ) {
     global.fatal << "Attempt to subtract from matrix with "
     << this->numberOfRows << " rows and " << this->numberOfColumns
     << " columns a matrix with " << right.numberOfRows << " rows and "
@@ -4384,48 +4401,48 @@ void Polynomial<Coefficient>::makePolynomialFromDirectionAndNormal(
 ) {
   Rational scalarProduct = Vector<Coefficient>::scalarEuclidean(direction, normal);
   this->makeZero();
-  MonomialPolynomial tempM;
+  MonomialPolynomial monomial;
   for (int i = 0; i < direction.size; i ++) {
-    tempM.makeEi(i);
-    this->addMonomial(tempM, normal.objects[i] / scalarProduct);
+    monomial.makeEi(i);
+    this->addMonomial(monomial, normal.objects[i] / scalarProduct);
   }
   *this += correction;
 }
 
 template <class Coefficient>
 bool Vectors<Coefficient>::getNormalSeparatingCones(
-  List<Vector<Coefficient> >& coneStrictlyPositiveCoeffs,
-  List<Vector<Coefficient> >& coneNonNegativeCoeffs,
+  List<Vector<Coefficient> >& coneStrictlyPositiveCoefficients,
+  List<Vector<Coefficient> >& coneNonNegativeCoefficients,
   Vector<Coefficient>& outputNormal
 ) {
   Matrix<Rational> matrixA;
   Matrix<Rational> matrixB;
   Vector<Rational> matrixX;
-  int dimension = coneStrictlyPositiveCoeffs[0].size;
-  if (coneStrictlyPositiveCoeffs.size == 0) {
-    if (coneNonNegativeCoeffs.size > 0) {
-      outputNormal.makeZero(coneNonNegativeCoeffs[0].size);
+  int dimension = coneStrictlyPositiveCoefficients[0].size;
+  if (coneStrictlyPositiveCoefficients.size == 0) {
+    if (coneNonNegativeCoefficients.size > 0) {
+      outputNormal.makeZero(coneNonNegativeCoefficients[0].size);
     }
     return true;
   }
-  int numRows = coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
+  int numRows = coneStrictlyPositiveCoefficients.size + coneNonNegativeCoefficients.size;
   matrixA.initialize(numRows, dimension * 2 + numRows);
   matrixA.makeZero();
   matrixB.initialize(numRows, 1);
   matrixB.makeZero();
-  for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
+  for (int i = 0; i < coneStrictlyPositiveCoefficients.size; i ++) {
     for (int k = 0; k < dimension; k ++) {
-      matrixA.elements[i][k].assign(coneStrictlyPositiveCoeffs.objects[i].objects[k]);
+      matrixA.elements[i][k].assign(coneStrictlyPositiveCoefficients.objects[i].objects[k]);
       matrixA.elements[i][k + dimension].assign(matrixA.elements[i][k]);
       matrixA.elements[i][k + dimension].negate();
     }
     matrixB.elements[i][0].makeOne();
     matrixA.elements[i][dimension * 2 + i].makeMinusOne();
   }
-  for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
-    int currentRow = i + coneStrictlyPositiveCoeffs.size;
+  for (int i = 0; i < coneNonNegativeCoefficients.size; i ++) {
+    int currentRow = i + coneStrictlyPositiveCoefficients.size;
     for (int k = 0; k < dimension; k ++) {
-      matrixA.elements[currentRow][k].assign(coneNonNegativeCoeffs.objects[i].objects[k]);
+      matrixA.elements[currentRow][k].assign(coneNonNegativeCoefficients.objects[i].objects[k]);
       matrixA.elements[currentRow][k + dimension].assign(matrixA.elements[currentRow][k]);
       matrixA.elements[currentRow][k + dimension].negate();
     }
@@ -4440,14 +4457,14 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
   }
   if (result) {
     Rational scalarProduct;
-    for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
-      coneStrictlyPositiveCoeffs[i].scalarEuclidean(outputNormal, scalarProduct);
+    for (int i = 0; i < coneStrictlyPositiveCoefficients.size; i ++) {
+      coneStrictlyPositiveCoefficients[i].scalarEuclidean(outputNormal, scalarProduct);
       if (!scalarProduct.isPositive()) {
         global.fatal << "Unexpected non-positive value. " << global.fatal;
       }
     }
-    for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
-      coneNonNegativeCoeffs[i].scalarEuclidean(outputNormal, scalarProduct);
+    for (int i = 0; i < coneNonNegativeCoefficients.size; i ++) {
+      coneNonNegativeCoefficients[i].scalarEuclidean(outputNormal, scalarProduct);
       if (!scalarProduct.isNonPositive()) {
         global.fatal << "Unexpected positive value. " << global.fatal;
       }
@@ -4510,17 +4527,17 @@ void Matrix<Coefficient>::actOnMonomialAsDifferentialOperator(
   if (this->numberOfRows != this->numberOfColumns) {
     global.fatal << "Matrix not square as expected. " << global.fatal;
   }
-  MonomialPolynomial tempMon;
+  MonomialPolynomial monomial;
   output.makeZero();
   Rational coefficient;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      tempMon = input;
-      coefficient = tempMon(j);
+      monomial = input;
+      coefficient = monomial(j);
       coefficient *= this->elements[i][j];
-      tempMon.multiplyByVariable(j, - 1);
-      tempMon.multiplyByVariable(i, 1);
-      output.addMonomial(tempMon, coefficient);
+      monomial.multiplyByVariable(j, - 1);
+      monomial.multiplyByVariable(i, 1);
+      output.addMonomial(monomial, coefficient);
     }
   }
 }
@@ -4610,18 +4627,20 @@ void List<Object>::subSelection(const Selection& selection, List<Object>& output
 }
 
 template <class Object>
-void List<Object>::intersectWith(const List<Object>& other, List<Object>& output) const {
+void List<Object>::intersectWith(
+  const List<Object>& other, List<Object>& output
+) const {
   if (&output == &other || this == &output) {
     List<Object> l1 = *this;
     List<Object> l2 = other;
     l1.intersectWith(l2, output);
     return;
   }
-  HashedList<Object> tempList;
-  tempList = *this;
+  HashedList<Object> intersection;
+  intersection = *this;
   output.setSize(0);
   for (int i = 0; i < other.size; i ++) {
-    if (tempList.contains(other[i])) {
+    if (intersection.contains(other[i])) {
       output.addOnTop(other[i]);
     }
   }
@@ -5838,7 +5857,7 @@ public:
   bool checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* root);
   void makeProgressReportSplittingMainPart();
   void makeProgressVPFcomputation();
-  std::string toString(FormatExpressions* format) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
   class Test {
   public:
     static bool all();

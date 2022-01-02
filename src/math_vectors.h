@@ -808,8 +808,8 @@ class Vectors: public List<Vector<Coefficient> > {
     Vector<Rational>* outputSplittingNormal = nullptr
   );
   static bool getNormalSeparatingCones(
-    List<Vector<Coefficient> >& coneStrictlyPositiveCoeffs,
-    List<Vector<Coefficient> >& coneNonNegativeCoeffs,
+    List<Vector<Coefficient> >& coneStrictlyPositiveCoefficients,
+    List<Vector<Coefficient> >& coneNonNegativeCoefficients,
     Vector<Coefficient>& outputNormal
   );
   void average(Vector<Coefficient>& output, int dimension) {

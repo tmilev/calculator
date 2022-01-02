@@ -399,6 +399,7 @@ bool PartialFractions::Test::all() {
 }
 
 bool PartialFractions::Test::splitTwoDimensional() {
+  MacroRegisterFunctionWithName("PartialFractions::Test::splitTwoDimensional");
   SplitTestCase testCase;
   testCase.vectors = {
     "(1,0)",
@@ -426,8 +427,19 @@ bool PartialFractions::Test::splitTwoDimensional() {
     "(1, 0)",
     "(0, 1)",
     "(1, 1)",
-    "(1, 2)",
     "(2, 2)",
+  };
+  testCase.expected =
+  "-x_{2}^{-3}/((1-x_{1} )^{2}(1-x_{1}^{2}) (1-x_{1} x_{2} ) )"
+  "+\\left(-x_{2}^{-1}-x_{2}^{-2}\\right)/((1-x_{1} )(1-x_{1}^{2}) (1-x_{1} x_{2} )(1-x_{1}^{2}x_{2}^{2}) )"
+  "+x_{2}^{-3}/((1-x_{1} )^{2}(1-x_{1}^{2}) (1-x_{2} ) )";
+  testCase.test();
+
+  testCase.vectors = {
+    "(1, 0)",
+    "(1, 1)",
+    "(1, 1)",
+    "(1, 2)",
   };
   testCase.expected = "";
   testCase.test();
@@ -436,13 +448,18 @@ bool PartialFractions::Test::splitTwoDimensional() {
 }
 
 bool PartialFractions::Test::SplitTestCase::test() {
+  MacroRegisterFunctionWithName("PartialFractions::Test::SplitTestCase::test");
   PartialFractions splitter;
   Vectors<Rational> input;
   input.fromStringListNoFail(this->vectors);
   splitter.run(input);
   std::string result = splitter.toString(nullptr);
   if (result != this->expected) {
-    global.fatal << "Partial fraction splitter: got: "
+    global.fatal << "Partial fraction splitter of:\n"
+    << this->vectors.toStringCommaDelimited()
+    << "\nnormalized vectors:\n"
+    << splitter.normalizedVectors.toString()
+    << "\ngot: "
     << result << ", expected: "
     << this->expected << "."
     << global.fatal;

@@ -3665,7 +3665,6 @@ bool PartialFractions::splitPartial() {
   OnePartialFractionDenominator currentFraction;
   LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> > currentReduction;
   Polynomial<LargeInteger> currentCoefficient;
-  this->compareCheckSums();
   while (this->nonReduced.size() > 0) {
     this->nonReduced.popMonomial(0, currentFraction, currentCoefficient);
     bool needsReduction = currentFraction.reduceOnce(currentReduction);
@@ -3675,7 +3674,6 @@ bool PartialFractions::splitPartial() {
     } else {
       this->reducedWithElongationRedundancies.addMonomial(currentFraction, currentCoefficient);
     }
-    this->compareCheckSums();
     this->makeProgressReportSplittingMainPart();
   }
   this->compareCheckSums();
@@ -3737,8 +3735,8 @@ PartialFractions::PartialFractions() {
   this->flagUsingCheckSum = true;
   this->flagInitialized = false;
   this->flagMakingProgressReport = true;
-  this->SplitStepsCounter = 0;
-  this->LimitSplittingSteps = 0;
+  this->splitStepsCounter = 0;
+  this->limitSplittingSteps = 0;
   this->numberOfMonomialsInNumeratorsRelevantFractions = 0;
   this->numberOfProcessedForVPFMonomialsTotal = 0;
 }
@@ -3919,7 +3917,7 @@ void PartialFractions::initializeCommon() {
   this->originalVectors.clear();
   this->normalizedVectors.clear();
   this->flagInitialized = false;
-  this->SplitStepsCounter = 1;
+  this->splitStepsCounter = 1;
 }
 
 void PartialFractions::initializeDimension() {
@@ -4051,17 +4049,13 @@ void PartialFractions::removeRedundantShortRoots(Vector<Rational>* indicator) {
     bool needsMoreReduction = this->reduceOnceRedundantShortRoots(
       denominator, summand, indicator
     );
-    global.comments << "DEBUG: summand: " << summand.toString() << "<br>";
-    global.comments << "DEBUG: needsMoreReduction: " << needsMoreReduction << "<br>";
     if (needsMoreReduction) {
       summand *= coefficient;
       this->reducedWithElongationRedundancies += summand;
     } else {
       this->reduced.addMonomial(denominator, coefficient);
     }
-    this->compareCheckSums();
   }
-  this->compareCheckSums();
 }
 
 void PartialFractions::removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* indicator) {
@@ -4162,7 +4156,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   } else {
     root.makeZero(this->ambientDimension);
   }
-  if (!this->getVectorPartitionFunction(output, root)) {
+  if (!this->computeOneVectorPartitionFunction(output, root)) {
     global.fatal << "Failed to get vector partition function. " << global.fatal;
   }
 }
@@ -9271,7 +9265,11 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
   }
 }
 
-bool PartialFractions::getVectorPartitionFunction(
+void PartialFractions::computeAllVectorPartitionFunctions() {
+  global.fatal << "Implement this please!" << global.fatal;
+}
+
+bool PartialFractions::computeOneVectorPartitionFunction(
   QuasiPolynomial& output, Vector<Rational>& newIndicator
 ) {
   ProgressReport report;
@@ -10208,7 +10206,7 @@ void DrawOperations::makeMeAStandardBasis(int dimension) {
   }
 }
 
-std::string ConeComplex::drawMeToHtmlLastCoordAffine(
+std::string ConeCollection::drawMeToHtmlLastCoordAffine(
   DrawingVariables& drawingVariables,
   FormatExpressions& format
 ) {
@@ -10223,7 +10221,7 @@ std::string ConeComplex::drawMeToHtmlLastCoordAffine(
   return out.str();
 }
 
-std::string ConeComplex::drawMeToHtmlProjective(
+std::string ConeCollection::drawMeToHtmlProjective(
   DrawingVariables& drawingVariables, FormatExpressions& format
 ) {
   bool isGood = true;
@@ -10237,7 +10235,7 @@ std::string ConeComplex::drawMeToHtmlProjective(
   return out.str();
 }
 
-bool ConeComplex::drawMeLastCoordinateAffine(
+bool ConeCollection::drawMeLastCoordinateAffine(
   bool initDrawingVariables,
   DrawingVariables& drawingVariables,
   FormatExpressions& format
@@ -10248,18 +10246,18 @@ bool ConeComplex::drawMeLastCoordinateAffine(
   }
 
   drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension() - 1);
-  for (int i = 0; i < this->size; i ++) {
-    result = this->objects[i].drawMeLastCoordinateAffine(initDrawingVariables, drawingVariables, format) && result;
+  for (int i = 0; i < this->allCones.size; i ++) {
+    result = this->allCones[i].drawMeLastCoordinateAffine(initDrawingVariables, drawingVariables, format) && result;
     std::stringstream tempStream;
     tempStream << i + 1;
-    Vector<Rational> root = this->objects[i].getInternalPoint();
+    Vector<Rational> root = this->allCones[i].getInternalPoint();
     root.makeAffineUsingLastCoordinate();
     drawingVariables.drawTextAtVectorBufferRational(root, tempStream.str(), "black");
   }
   return result;
 }
 
-bool ConeComplex::drawMeProjective(
+bool ConeCollection::drawMeProjective(
   Vector<Rational>* coordCenterTranslation,
   bool initDrawVars,
   DrawingVariables& drawingVariables,
@@ -10288,8 +10286,12 @@ bool ConeComplex::drawMeProjective(
       }
     }
   }
-  for (int i = 0; i < this->size; i ++) {
-    result = ((*this)[i].drawMeProjective(coordCenterTranslation, false, drawingVariables, format) && result);
+  for (int i = 0; i < this->allCones.size; i ++) {
+    if (!this->allCones[i].drawMeProjective(
+      coordCenterTranslation, false, drawingVariables, format
+    )) {
+      result = false;
+    }
   }
   return result;
 }
@@ -10896,7 +10898,7 @@ void Selection::operator=(const Vector<Rational>& other) {
   this->computeIndicesFromSelection();
 }
 
-void ConeComplex::initializeFromAffineDirectionsAndRefine(
+void ConeCollection::initializeFromAffineDirectionsAndRefine(
   Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints
 ) {
   if (
@@ -10921,8 +10923,25 @@ void ConeComplex::initializeFromAffineDirectionsAndRefine(
   this->initializeFromDirectionsAndRefine(projectivizedDirections);
 }
 
-void ConeComplex::makeAffineAndTransformToProjectiveDimPlusOne(
-  Vector<Rational>& affinePoint, ConeComplex& output
+int ConeCollection::getDimension() {
+  if (this->allCones.size <= 0) {
+    return - 1;
+  }
+  return this->allCones.objects[0].getDimension();
+}
+
+
+int ConeCollection::getLowestIndexChamberContaining(const Vector<Rational>& root) const {
+  for (int i = 0; i < this->allCones.size; i ++) {
+    if (this->allCones[i].isInCone(root)) {
+      return i;
+    }
+  }
+  return - 1;
+}
+
+void ConeCollection::makeAffineAndTransformToProjectiveDimPlusOne(
+  Vector<Rational>& affinePoint, ConeCollection& output
 ) {
   if (&output == this) {
     global.fatal << "Output coincides with input, not allowed. " << global.fatal;
@@ -10931,10 +10950,10 @@ void ConeComplex::makeAffineAndTransformToProjectiveDimPlusOne(
   Cone tempCone;
   Vectors<Rational> newNormals;
   int affineDimension = affinePoint.size;
-  for (int i = 0; i < this->size; i ++) {
-    newNormals.setSize(this->objects[i].normals.size + 1);
-    for (int j = 0; j < this->objects[i].normals.size; j ++) {
-      newNormals[j] = this->objects[i].normals[j].GetProjectivizedNormal(affinePoint);
+  for (int i = 0; i < this->allCones.size; i ++) {
+    newNormals.setSize(this->allCones[i].normals.size + 1);
+    for (int j = 0; j < this->allCones[i].normals.size; j ++) {
+      newNormals[j] = this->allCones[i].normals[j].GetProjectivizedNormal(affinePoint);
     }
     newNormals.lastObject()->makeEi(affineDimension + 1, affineDimension);
     tempCone.createFromNormals(newNormals);
@@ -11032,9 +11051,9 @@ void PiecewiseQuasipolynomial::operator*=(const Rational& other) {
 
 void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other) {
   this->makeCommonRefinement(other);
-  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
+  for (int i = 0; i < this->projectivizedComplex.allCones.size; i ++) {
     int index = other.projectivizedComplex.getLowestIndexChamberContaining(
-      this->projectivizedComplex[i].getInternalPoint()
+      this->projectivizedComplex.allCones[i].getInternalPoint()
     );
     if (index != - 1) {
       this->quasiPolynomials[i] += other.quasiPolynomials[index];
@@ -11063,11 +11082,11 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& roots, std::string& ou
   //  partialFractions.chambersOld.directions = roots;
   //  partialFractions.chambersOld.SliceEuclideanSpace(false);
   //  partialFractions.chambers.AssignCombinatorialChamberComplex(partialFractions.chambersOld);
-  this->quasiPolynomials.setSize(partialFractions.chambers.size);
+  this->quasiPolynomials.setSize(partialFractions.chambers.allCones.size);
   Vector<Rational> indicator;
-  for (int i = 0; i < partialFractions.chambers.size; i ++) {
-    indicator = partialFractions.chambers[i].getInternalPoint();
-    partialFractions.getVectorPartitionFunction(this->quasiPolynomials[i], indicator);
+  for (int i = 0; i < partialFractions.chambers.allCones.size; i ++) {
+    indicator = partialFractions.chambers.allCones[i].getInternalPoint();
+    partialFractions.computeOneVectorPartitionFunction(this->quasiPolynomials[i], indicator);
     //QuasiPolynomial& currentQP = this->qps[i];
   }
   Lattice baseLattice;
@@ -11151,12 +11170,12 @@ void Cone::translateMeMyLastCoordinateAffinization(
   }
 }
 
-void ConeComplex::getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const {
+void ConeCollection::getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const {
   HashedList<Vector<Rational> > outputHashed;
   Vector<Rational> root;
-  for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < this->objects[i].normals.size; j ++) {
-      root = this->objects[i].normals[j];
+  for (int i = 0; i < this->allCones.size; i ++) {
+    for (int j = 0; j < this->allCones[i].normals.size; j ++) {
+      root = this->allCones[i].normals[j];
       root.scaleNormalizeFirstNonZero();
       outputHashed.addOnTopNoRepetition(root);
     }
@@ -11164,7 +11183,7 @@ void ConeComplex::getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Ve
   output = outputHashed;
 }
 
-void ConeComplex::refineMakeCommonRefinement(const ConeComplex& other) {
+void ConeCollection::refineMakeCommonRefinement(const ConeCollection& other) {
   Vectors<Rational> newWalls;
   Cone tempCone = this->convexHull;
   if (tempCone.makeConvexHullOfMeAnd(other.convexHull)) {
@@ -11180,13 +11199,13 @@ void ConeComplex::refineMakeCommonRefinement(const ConeComplex& other) {
   this->refine();
 }
 
-void ConeComplex::translateMeMyLastCoordinateAffinization(Vector<Rational>& translationVector) {
-  ConeComplex myCopy;
+void ConeCollection::translateMeMyLastCoordinateAffinization(Vector<Rational>& translationVector) {
+  ConeCollection myCopy;
   myCopy = *this;
   this->initialize();
   Cone tempCone;
-  for (int i = 0; i < myCopy.size; i ++) {
-    tempCone = myCopy[i];
+  for (int i = 0; i < myCopy.allCones.size; i ++) {
+    tempCone = myCopy.allCones[i];
     tempCone.translateMeMyLastCoordinateAffinization(translationVector);
     this->addNonRefinedChamberOnTopNoRepetition(tempCone);
   }
@@ -11213,9 +11232,9 @@ void PiecewiseQuasipolynomial::translateArgument(Vector<Rational>& translateToBe
 std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
   std::stringstream out;
   FormatExpressions format;
-  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
-    const Cone& currentCone = this->projectivizedComplex[i];
-    QuasiPolynomial& currentQP = this->quasiPolynomials[i];
+  for (int i = 0; i < this->projectivizedComplex.allCones.size; i ++) {
+    const Cone& currentCone = this->projectivizedComplex.allCones[i];
+    QuasiPolynomial& currentQuasiPolynomial = this->quasiPolynomials[i];
     out << "Chamber number " << i + 1;
     if (useHtml) {
       out << "<br>";
@@ -11225,7 +11244,7 @@ std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
       out << "<br>";
     }
     out << "quasipolynomial: ";
-    out << currentQP.toString(useHtml, useLatex);
+    out << currentQuasiPolynomial.toString(useHtml, useLatex);
     if (useHtml) {
       out << "<hr>";
     }
@@ -11248,19 +11267,21 @@ void PiecewiseQuasipolynomial::drawMe(
     numberOfLatticePointsPerDimension = 0;
   }
   const std::string zeroColor = "gray";
-  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
+  for (int i = 0; i < this->projectivizedComplex.allCones.size; i ++) {
     std::string chamberWallColor = "black";
     bool isZeroChamber = this->quasiPolynomials[i].isEqualToZero();
     if (isZeroChamber) {
       chamberWallColor = zeroColor;
     }
-    this->projectivizedComplex[i].drawMeLastCoordinateAffine(false, drawingVariables, format, chamberWallColor);
+    this->projectivizedComplex.allCones[i].drawMeLastCoordinateAffine(
+      false, drawingVariables, format, chamberWallColor
+    );
     std::stringstream tempStream;
     tempStream << i + 1;
-    Vector<Rational> root = this->projectivizedComplex[i].getInternalPoint();
+    Vector<Rational> root = this->projectivizedComplex.allCones[i].getInternalPoint();
     root.makeAffineUsingLastCoordinate();
     for (int j = 0; j < this->quasiPolynomials[i].latticeShifts.size; j ++) {
-      this->projectivizedComplex[i].getLatticePointsInCone(
+      this->projectivizedComplex.allCones[i].getLatticePointsInCone(
         this->quasiPolynomials[i].ambientLatticeReduced,
         this->quasiPolynomials[i].latticeShifts[j],
         numberOfLatticePointsPerDimension,
@@ -11318,20 +11339,20 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
   if (input.size != this->projectivizedComplex.getDimension()) {
     global.fatal << "Input size not equal to projectivized complex dimension. " << global.fatal;
   }
-  Vector<Rational> AffineInput = input;
-  AffineInput.setSize(input.size - 1);
+  Vector<Rational> affineInput = input;
+  affineInput.setSize(input.size - 1);
   int index = this->projectivizedComplex.getLowestIndexChamberContaining(input);
   if (index == - 1) {
     return 0;
   }
-  result = this->quasiPolynomials[index].evaluate(AffineInput);
+  result = this->quasiPolynomials[index].evaluate(affineInput);
   // The following for loop is for self-check purposes only.
   // Comment it out as soon as
   // the code has been tested sufficiently.
   bool firstFail = true;
-  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
-    if (this->projectivizedComplex[i].isInCone(input)) {
-      Rational altResult = this->quasiPolynomials[i].evaluate(AffineInput);
+  for (int i = 0; i < this->projectivizedComplex.allCones.size; i ++) {
+    if (this->projectivizedComplex.allCones[i].isInCone(input)) {
+      Rational altResult = this->quasiPolynomials[i].evaluate(affineInput);
       if (result != altResult) {
         if ((false)) {
           if (!firstFail) {
@@ -11339,21 +11360,23 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
           }
           FormatExpressions tempFormat;
           global.comments << "<hr>Error!!! Failed on chamber " << index + 1 << " and " << i + 1;
-          global.comments << "<br>Evaluating at point " << AffineInput.toString() << "<br>";
-          global.comments << "<br>Chamber " << index + 1 << ": " << this->projectivizedComplex[index].toString(&tempFormat);
+          global.comments << "<br>Evaluating at point " << affineInput.toString() << "<br>";
+          global.comments << "<br>Chamber " << index + 1 << ": "
+          << this->projectivizedComplex.allCones[index].toString(&tempFormat);
           global.comments << "<br>QP: " << this->quasiPolynomials[index].toString(true, false);
           global.comments << "<br>value: " << result.toString();
-          global.comments << "<br><br>Chamber " << i + 1 << ": " << this->projectivizedComplex[i].toString(&tempFormat);
+          global.comments << "<br><br>Chamber " << i + 1 << ": "
+          << this->projectivizedComplex.allCones[i].toString(&tempFormat);
           global.comments << "<br>QP: " << this->quasiPolynomials[i].toString(true, false);
           global.comments << "<br>value: " << altResult.toString();
           if (firstFail) {
             DrawingVariables tempDV;
-            global.comments << "<br><b>Point of failure: " << AffineInput.toString() << "</b>";
+            global.comments << "<br><b>Point of failure: " << affineInput.toString() << "</b>";
             //this->drawMe(tempDV);
             this->projectivizedComplex.drawMeLastCoordinateAffine(true, tempDV, tempFormat);
-            tempDV.operations.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
-            tempDV.operations.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
-            tempDV.operations.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
+            tempDV.operations.drawCircleAtVectorBufferRational(affineInput, "black", 5);
+            tempDV.operations.drawCircleAtVectorBufferRational(affineInput, "black", 10);
+            tempDV.operations.drawCircleAtVectorBufferRational(affineInput, "red", 4);
             global.comments << tempDV.getHTMLDiv(this->projectivizedComplex.getDimension() - 1, false);
           }
           firstFail = false;
@@ -11364,13 +11387,15 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(const Vector<Ratio
   return result;
 }
 
-void PiecewiseQuasipolynomial::makeCommonRefinement(const ConeComplex& other) {
+void PiecewiseQuasipolynomial::makeCommonRefinement(const ConeCollection& other) {
   List<QuasiPolynomial> oldQuasiPolynomials = this->quasiPolynomials;
-  ConeComplex oldComplex = this->projectivizedComplex;
+  ConeCollection oldComplex = this->projectivizedComplex;
   this->projectivizedComplex.refineMakeCommonRefinement(other);
-  this->quasiPolynomials.setSize(this->projectivizedComplex.size);
-  for (int i = 0; i < this->projectivizedComplex.size; i ++) {
-    int oldIndex = oldComplex.getLowestIndexChamberContaining(this->projectivizedComplex[i].getInternalPoint());
+  this->quasiPolynomials.setSize(this->projectivizedComplex.allCones.size);
+  for (int i = 0; i < this->projectivizedComplex.allCones.size; i ++) {
+    int oldIndex = oldComplex.getLowestIndexChamberContaining(
+      this->projectivizedComplex.allCones[i].getInternalPoint()
+    );
     if (oldIndex != - 1) {
       this->quasiPolynomials[i] = oldQuasiPolynomials[oldIndex];
     } else {
@@ -11398,11 +11423,7 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
     this->flagInitialized = true;
   }
   if (this->splitPartial()) {
-    global.comments << "DEBUG: split partial done!<br>";
     this->removeRedundantShortRoots(indicator);
-    global.comments << "DEBUG: remove redundi done!<br>";
-    this->compareCheckSums();
-    global.comments << "DEBUG: checki sumi done!<br>";
     this->makeProgressReportSplittingMainPart();
   }
   this->compareCheckSums();
@@ -11414,7 +11435,7 @@ void Cone::changeBasis(Matrix<Rational>& linearMap) {
   this->createFromNormals(this->normals);
 }
 
-void Cone::transformToWeylProjective(ConeComplex& owner) {
+void Cone::transformToWeylProjective(ConeCollection& owner) {
   (void) owner;
   global.fatal << "Not implemented yet. " << global.fatal;
 /*
@@ -11432,7 +11453,7 @@ void Cone::transformToWeylProjective(ConeComplex& owner) {
   this->ComputeVerticesFromNormals(owner);*/
 }
 
-void ConeComplex::transformToWeylProjective() {
+void ConeCollection::transformToWeylProjective() {
  /* this->ambientWeyl.getElement().computeAllElements();
   this->log << this->ambientWeyl.getElement().toString();
   std::string tempS;
@@ -11510,7 +11531,7 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   this->isInfinity.initializeFillInObject(1, false);
 }
 
-void Cone::sliceInDirection(Vector<Rational>& direction, ConeComplex& output) {
+void Cone::sliceInDirection(Vector<Rational>& direction, ConeCollection& output) {
   output.initialize();
   output.addNonRefinedChamberOnTopNoRepetition(*this);
   output.slicingDirections.addOnTop(direction);
@@ -11593,7 +11614,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
       root = this->finalRepresentatives[i];
       this->conesLargerDimension[j].lattice.reduceVector(root);
       if (root == this->conesLargerDimension[j].shift) {
-        this->complexStartingPerRepresentative[i].addOnTop(this->conesLargerDimension[j].projectivizedCone);
+        this->complexStartingPerRepresentative[i].allCones.addOnTop(this->conesLargerDimension[j].projectivizedCone);
         this->startingLPtoMaximize[i].addOnTop(this->LPtoMaximizeLargerDim[j]);
       }
     }
@@ -11636,16 +11657,18 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
   this->maximaCandidates.setSize(this->finalRepresentatives.size);
   ProgressReport report;
   for (int i = 0; i < this->finalRepresentatives.size; i ++) {
-    ConeComplex& currentComplex = this->complexRefinedPerRepresentative[i];
-    currentComplex.initFromCones(this->complexStartingPerRepresentative[i], true);
+    ConeCollection& currentComplex = this->complexRefinedPerRepresentative[i];
+    currentComplex.initFromConeWalls(this->complexStartingPerRepresentative[i].allCones, true);
     std::stringstream tempStream;
     tempStream << "Processing representative " << i + 1 << " out of " << this->finalRepresentatives.size;
     report.report(tempStream.str());
     currentComplex.refine();
-    this->maximaCandidates[i].setSize(currentComplex.size);
-    for (int j = 0; j < currentComplex.size; j ++) {
-      for (int k = 0; k < this->complexStartingPerRepresentative[k].size; k ++) {
-        if (this->complexStartingPerRepresentative[i][k].isInCone(currentComplex[j].getInternalPoint())) {
+    this->maximaCandidates[i].setSize(currentComplex.allCones.size);
+    for (int j = 0; j < currentComplex.allCones.size; j ++) {
+      for (int k = 0; k < this->complexStartingPerRepresentative[k].allCones.size; k ++) {
+        if (this->complexStartingPerRepresentative[i].allCones[k].isInCone(
+          currentComplex.allCones[j].getInternalPoint()
+        )) {
           this->maximaCandidates[i][j].addOnTopNoRepetition(this->startingLPtoMaximize[i][k]);
         }
       }
@@ -11657,10 +11680,10 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep5() {
   this->finalMaximaChambers.setSize(this->finalRepresentatives.size);
   this->finalMaximaChambersIndicesMaxFunctions.setSize(this->finalRepresentatives.size);
   for (int i = 0; i < 1; i ++ ) {
-    this->finalMaximaChambers[i].setSize(this->complexRefinedPerRepresentative[i].size);
-    this->finalRepresentatives[i].setSize(this->complexRefinedPerRepresentative[i].size);
+    this->finalMaximaChambers[i].setSize(this->complexRefinedPerRepresentative[i].allCones.size);
+    this->finalRepresentatives[i].setSize(this->complexRefinedPerRepresentative[i].allCones.size);
     for (int j = 0; j < 1; j ++) {
-      const Cone& currentCone = this->complexRefinedPerRepresentative[i][j];
+      const Cone& currentCone = this->complexRefinedPerRepresentative[i].allCones[j];
       this->finalMaximaChambers[i][j].initialize();
       this->finalMaximaChambers[i][j].findMaxLFOverConeProjective(
         currentCone,
@@ -11773,7 +11796,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     tempStream << "<hr><hr><hr><hr>The bad cone:" << this->projectivizedCone.toString(&format);
     report.report(tempStream.str());
   }
-  ConeComplex complexBeforeProjection;
+  ConeCollection complexBeforeProjection;
   complexBeforeProjection.initialize();
   complexBeforeProjection.addNonRefinedChamberOnTopNoRepetition(this->projectivizedCone);
   if (direction.scalarEuclidean(lpToMaximizeAffine).isNegative()) {
@@ -11792,8 +11815,8 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   ConeLatticeAndShift tempCLS;
   directionSmallerDim.makeEi(dimensionProjectivized - 1, 0);
   Vectors<Rational> newNormals;
-  for (int i = 0; i < complexBeforeProjection.size; i ++) {
-    const Cone& currentCone = complexBeforeProjection[i];
+  for (int i = 0; i < complexBeforeProjection.allCones.size; i ++) {
+    const Cone& currentCone = complexBeforeProjection.allCones[i];
     int numNonPerpWalls = 0;
     newNormals.size = 0;
     bool foundEnteringNormal = false;
@@ -11878,28 +11901,30 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   }
 }
 
-void ConeComplex::getNewVerticesAppend(
-  Cone& myDyingCone, const Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices
+void ConeCollection::getNewVerticesAppend(
+  const Cone& toBeSplit,
+  const Vector<Rational>& normalSlicingPlane,
+  HashedList<Vector<Rational> >& outputVertices
 ) {
-  int dimensionMinusTwo = killerNormal.size - 2;
-  int dimension = killerNormal.size;
-  LargeInteger numberOfCycles = MathRoutines::nChooseK(myDyingCone.normals.size, dimensionMinusTwo);
+  int dimensionMinusTwo = normalSlicingPlane.size - 2;
+  int dimension = normalSlicingPlane.size;
+  LargeInteger numberOfCycles = MathRoutines::nChooseK(toBeSplit.normals.size, dimensionMinusTwo);
   Selection selection;
   Selection nonPivotPoints;
-  selection.initialize(myDyingCone.normals.size);
+  selection.initialize(toBeSplit.normals.size);
   Matrix<Rational> toBeEliminated;
   toBeEliminated.initialize(dimensionMinusTwo + 1, dimension);
   Vector<Rational> root;
   for (int i = 0; i < numberOfCycles; i ++) {
     selection.incrementSelectionFixedCardinality(dimensionMinusTwo);//, indexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
     for (int j = 0; j < dimensionMinusTwo; j ++) {
-      Vector<Rational>& currentNormal = myDyingCone.normals[selection.elements[j]];
+      Vector<Rational>& currentNormal = toBeSplit.normals[selection.elements[j]];
       for (int k = 0; k < dimension; k ++) {
         toBeEliminated.elements[j][k] = currentNormal[k];
       }
     }
     for (int k = 0; k < dimension; k ++) {
-      toBeEliminated.elements[dimensionMinusTwo][k] = killerNormal[k];
+      toBeEliminated.elements[dimensionMinusTwo][k] = normalSlicingPlane[k];
     }
     toBeEliminated.gaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.cardinalitySelection == 1) {
@@ -11908,11 +11933,11 @@ void ConeComplex::getNewVerticesAppend(
         root
       );
       Cone::scaleNormalizeByPositive(root);
-      if (myDyingCone.isInCone(root)) {
+      if (toBeSplit.isInCone(root)) {
         outputVertices.addOnTopNoRepetition(root);
       } else {
         root.negate();
-        if (myDyingCone.isInCone(root)) {
+        if (toBeSplit.isInCone(root)) {
           outputVertices.addOnTopNoRepetition(root);
         }
       }
@@ -11920,10 +11945,12 @@ void ConeComplex::getNewVerticesAppend(
   }
 }
 
-bool ConeComplex::splitChamber(
-  int indexChamberBeingRefined, bool weAreChopping, const Vector<Rational>& killerNormal
+bool ConeCollection::splitChamber(
+  int indexChamberBeingRefined,
+  bool weAreChopping,
+  const Vector<Rational>& killerNormal
 ) {
-  Cone& toBeSliced = this->objects[indexChamberBeingRefined];
+  const Cone& toBeSliced = this->allCones[indexChamberBeingRefined];
   Cone newPlusCone, newMinusCone;
   Matrix<Rational> bufferMat;
   Selection bufferSel;
@@ -11982,8 +12009,8 @@ bool ConeComplex::splitChamber(
   return true;
 }
 
-void ConeComplex::popChamberSwapWithLast(int index) {
-  this->removeIndexSwapWithLast(index);
+void ConeCollection::popChamberSwapWithLast(int index) {
+  this->allCones.removeIndexSwapWithLast(index);
 }
 
 bool Cone::makeConvexHullOfMeAnd(const Cone& other) {
@@ -12004,25 +12031,27 @@ bool Cone::makeConvexHullOfMeAnd(const Cone& other) {
   return true;
 }
 
-bool ConeComplex::addNonRefinedChamberOnTopNoRepetition(const Cone& newCone) {
+bool ConeCollection::addNonRefinedChamberOnTopNoRepetition(const Cone& newCone) {
   Cone coneSorted;
   coneSorted = newCone;
   coneSorted.normals.quickSortAscending();
   this->convexHull.makeConvexHullOfMeAnd(coneSorted);
-  return this->addOnTopNoRepetition(coneSorted);
+  return this->allCones.addOnTopNoRepetition(coneSorted);
 }
 
-void ConeComplex::refineOneStep() {
-  if (this->indexLowestNonRefinedChamber >= this->size) {
+void ConeCollection::refineOneStep() {
+  if (this->indexLowestNonRefinedChamber >= this->allCones.size) {
     return;
   }
-  Cone& currentCone = this->objects[this->indexLowestNonRefinedChamber];
+  Cone currentCone = this->allCones[this->indexLowestNonRefinedChamber];
   for (;
     currentCone.lowestIndexNotCheckedForChopping < this->splittingNormals.size;
     currentCone.lowestIndexNotCheckedForChopping ++
   ) {
     if (this->splitChamber(
-      this->indexLowestNonRefinedChamber, true, this->splittingNormals[currentCone.lowestIndexNotCheckedForChopping]
+      this->indexLowestNonRefinedChamber,
+      true,
+      this->splittingNormals[currentCone.lowestIndexNotCheckedForChopping]
     )) {
       return;
     }
@@ -12060,7 +12089,7 @@ void ConeComplex::refineOneStep() {
   this->indexLowestNonRefinedChamber ++;
 }
 
-void ConeComplex::initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors) {
+void ConeCollection::initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors) {
   this->initialize();
   Cone startingCone;
   startingCone.createFromVertices(inputVectors);
@@ -12069,27 +12098,22 @@ void ConeComplex::initializeFromDirectionsAndRefine(Vectors<Rational>& inputVect
   this->refine();
 }
 
-void ConeComplex::sort() {
-  List<Cone> tempList;
-  tempList = *this;
-  tempList.quickSortAscending();
-  this->clear();
-  for (int i = 0; i < tempList.size; i ++) {
-    this->addOnTop(tempList[i]);
-  }
+void ConeCollection::sort() {
+  this->allCones.quickSortAscending();
 }
 
-void ConeComplex::refineAndSort() {
+void ConeCollection::refineAndSort() {
   this->refine();
   this->sort();
 }
 
-void ConeComplex::refine() {
+void ConeCollection::refine() {
   ProgressReport report;
-  while (this->indexLowestNonRefinedChamber < this->size) {
+  while (this->indexLowestNonRefinedChamber < this->allCones.size) {
     this->refineOneStep();
     std::stringstream out;
-    out << "Refined " << this->indexLowestNonRefinedChamber << " out of " << this->size;
+    out << "Refined " << this->indexLowestNonRefinedChamber
+    << " out of " << this->allCones.size;
     report.report(out.str());
   }
 }
@@ -12290,8 +12314,8 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   }
   this->normals.size = 0;
   Matrix<Rational> matrix;
-  Selection tempSel;
-  int rankVerticesSpan = inputVertices.getRankElementSpan(&matrix, &tempSel);
+  Selection wallGeneratorSelection;
+  int rankVerticesSpan = inputVertices.getRankElementSpan(&matrix, &wallGeneratorSelection);
   int dimension = inputVertices.getDimension();
   Vectors<Rational> extraVertices;
   extraVertices.setSize(0);
@@ -12386,21 +12410,24 @@ bool Cone::createFromNormals(
   return this->eliminateFakeNormalsUsingVertices(numAddedFakeWalls);
 }
 
-void ConeComplex::initFromCones(List<Cone>& normalsOfCones, bool assumeConesHaveSufficientlyManyProjectiveVertices) {
+void ConeCollection::initFromConeWalls(
+  List<Cone>& normalsOfCones,
+  bool assumeConesHaveSufficientlyManyProjectiveVertices
+) {
   List<Vectors<Rational> > roots;
   roots.setSize(normalsOfCones.size);
   for (int i = 0; i < normalsOfCones.size; i ++) {
     roots[i] = normalsOfCones[i].normals;
   }
-  this->initFromCones(roots, assumeConesHaveSufficientlyManyProjectiveVertices);
+  this->initFromConeWalls(roots, assumeConesHaveSufficientlyManyProjectiveVertices);
 }
 
-void ConeComplex::initFromCones(
+void ConeCollection::initFromConeWalls(
   List<Vectors<Rational> >& normalsOfCones,
   bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
 ) {
   Cone tempCone;
-  this->clear();
+  this->allCones.clear();
   ProgressReport report;
   report.report(normalsOfCones.toString());
   for (int i = 0; i < normalsOfCones.size; i ++) {
@@ -12415,15 +12442,15 @@ void ConeComplex::initFromCones(
   }
   Vector<Rational> root;
   this->splittingNormals.clear();
-  for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < this->objects[i].normals.size; j ++) {
-      root = this->objects[i].normals[j];
+  for (int i = 0; i < this->allCones.size; i ++) {
+    for (int j = 0; j < this->allCones[i].normals.size; j ++) {
+      root = this->allCones[i].normals[j];
       root.scaleNormalizeFirstNonZero();
       this->splittingNormals.addOnTopNoRepetition(root);
       std::stringstream out;
-      out << "Extracting walls from cone " << i + 1 << " out of " << this->size
+      out << "Extracting walls from cone " << i + 1 << " out of " << this->allCones.size
       << " total distinct chambers.";
-      out << "\nProcessed " << j + 1 << " out of " << this->objects[i].normals.size
+      out << "\nProcessed " << j + 1 << " out of " << this->allCones[i].normals.size
       << " walls of the current chamber.";
       out << "\nTotal # of distinct walls found: " << this->splittingNormals.size;
       report.report(out.str());
@@ -12477,10 +12504,10 @@ std::string Cone::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-std::string ConeComplex::toString(bool useHtml) {
+std::string ConeCollection::toString(bool useHtml) {
   std::stringstream out;
   FormatExpressions format;
-  out << "Number of chambers: " << this->size;
+  out << "Number of chambers: " << this->allCones.size;
   if (useHtml) {
     out << "<br>";
   }
@@ -12498,7 +12525,7 @@ std::string ConeComplex::toString(bool useHtml) {
     }
     out << " Directions to slice along: " << this->slicingDirections.toString();
   }
-  for (int i = 0; i < this->size; i ++) {
+  for (int i = 0; i < this->allCones.size; i ++) {
     if (useHtml) {
       out << "<hr>";
     }
@@ -12506,12 +12533,12 @@ std::string ConeComplex::toString(bool useHtml) {
     if (useHtml) {
       out << "<br>";
     }
-    out << this->objects[i].toString(&format) << "\n\n\n";
+    out << this->allCones[i].toString(&format) << "\n\n\n";
   }
   return out.str();
 }
 
-bool ConeComplex::findMaxLFOverConeProjective(
+bool ConeCollection::findMaxLFOverConeProjective(
   const Cone& input,
   List<Polynomial<Rational> >& inputLinearPolynomials,
   List<int>& outputMaximumOverEeachSubChamber
@@ -12545,7 +12572,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
   );
 }
 
-bool ConeComplex::findMaxLFOverConeProjective(
+bool ConeCollection::findMaxLFOverConeProjective(
   const Cone& input,
   Vectors<Rational>& inputLFsLastCoordConst,
   List<int>& outputMaximumOverEeachSubChamber
@@ -12564,10 +12591,10 @@ bool ConeComplex::findMaxLFOverConeProjective(
   }
   global.comments << this->toString(true);
   this->refine();
-  outputMaximumOverEeachSubChamber.setSize(this->size);
+  outputMaximumOverEeachSubChamber.setSize(this->allCones.size);
   Rational maximumScalarProduct = 0;
-  for (int i = 0; i < this->size; i ++) {
-    this->objects[i].getInternalPoint(root);
+  for (int i = 0; i < this->allCones.size; i ++) {
+    this->allCones[i].getInternalPoint(root);
     bool isInitialized = false;
     for (int j = 0; j < inputLFsLastCoordConst.size; j ++) {
       if (!isInitialized || root.scalarEuclidean(inputLFsLastCoordConst[j]) > maximumScalarProduct) {

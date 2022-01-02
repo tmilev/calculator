@@ -132,10 +132,10 @@ public:
   Vectors<Rational> translationsProjectedBasisChanged;
   PartialFractions partialFractions;
   // List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
-  ConeComplex projectivizedParamComplex;
+  ConeCollection projectivizedParamComplex;
   ConeLatticeAndShiftMaxComputation maximumComputation;
-  ConeComplex smallerAlgebraChamber;
-  ConeComplex projectivizedChambeR;
+  ConeCollection smallerAlgebraChamber;
+  ConeCollection projectivizedChambeR;
   std::stringstream log;
   WeylGroupData* weylSmaller;
   WeylGroupData* weylLarger;
@@ -153,7 +153,7 @@ public:
   bool checkInitialization() const;
   std::string prepareReportOneCone(FormatExpressions& format, const Cone& cone);
   void getProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational>& output);
-  void splitByMultiplicityFreeWall(Cone& cone, ConeComplex& output);
+  void splitByMultiplicityFreeWall(Cone& cone, ConeCollection& output);
   void inititializeMaximumComputation();
   void computeQPsFromChamberComplex();
   void getSubstitutionFromIndex(

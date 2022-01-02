@@ -430,9 +430,11 @@ bool PartialFractions::Test::splitTwoDimensional() {
     "(2, 2)",
   };
   testCase.expected =
-  "-x_{2}^{-3}/((1-x_{1} )^{2}(1-x_{1}^{2}) (1-x_{1} x_{2} ) )"
-  "+\\left(-x_{2}^{-1}-x_{2}^{-2}\\right)/((1-x_{1} )(1-x_{1}^{2}) (1-x_{1} x_{2} )(1-x_{1}^{2}x_{2}^{2}) )"
-  "+x_{2}^{-3}/((1-x_{1} )^{2}(1-x_{1}^{2}) (1-x_{2} ) )";
+  "\\left(-x_{1}^{2}x_{2}^{-3}-2x_{1} x_{2}^{-3}-x_{2}^{-3}\\right)"
+  "/((1-x_{1}^{2})^{3} (1-x_{1} x_{2} ) )"
+  "+\\left(-x_{1}^{2}-x_{1}^{2}x_{2}^{-1}-x_{1} -2x_{1} x_{2}^{-1}-x_{1} x_{2}^{-2}-x_{2}^{-1}-x_{2}^{-2}\\right)"
+  "/((1-x_{1}^{2})^{2} (1-x_{1}^{2}x_{2}^{2})^{2} )"
+  "+\\left(x_{1}^{2}x_{2}^{-3}+2x_{1} x_{2}^{-3}+x_{2}^{-3}\\right)/((1-x_{1}^{2})^{3} (1-x_{2} ) )";
   testCase.test();
 
   testCase.vectors = {
@@ -441,7 +443,12 @@ bool PartialFractions::Test::splitTwoDimensional() {
     "(1, 1)",
     "(1, 2)",
   };
-  testCase.expected = "";
+  testCase.expected =
+  "\\left(x_{1}^{2}x_{2}^{2}+2x_{1} x_{2} +1\\right)"
+  "/((1-x_{1} )^{3} (1-x_{1} x_{2}^{2}) )"
+  "+\\left(-x_{1}^{2}x_{2} -x_{1} \\right)"
+  "/((1-x_{1} )^{3} (1-x_{1} x_{2} ) )"
+  "-x_{1} /((1-x_{1} )^{2} (1-x_{1} x_{2} )^{2} )";
   testCase.test();
 
   return true;
@@ -459,9 +466,9 @@ bool PartialFractions::Test::SplitTestCase::test() {
     << this->vectors.toStringCommaDelimited()
     << "\nnormalized vectors:\n"
     << splitter.normalizedVectors.toString()
-    << "\ngot: "
-    << result << ", expected: "
-    << this->expected << "."
+    << "\ngot:\n"
+    << result << "\nexpected:\n"
+    << this->expected
     << global.fatal;
   }
   return true;

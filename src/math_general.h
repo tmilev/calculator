@@ -5495,7 +5495,7 @@ public:
   int lowestIndexNotCheckedForChopping;
   int lowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* format = nullptr) const;
-  void transformToWeylProjective(ConeComplex& owner);
+  void transformToWeylProjective(ConeCollection& owner);
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
   std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
   void getLinesContainedInCone(Vectors<Rational>& output);
@@ -5549,7 +5549,7 @@ public:
     }
     return this->normals[0].size;
   }
-  void sliceInDirection(Vector<Rational>& direction, ConeComplex& output);
+  void sliceInDirection(Vector<Rational>& direction, ConeCollection& output);
   bool createFromNormals(
     Vectors<Rational>& inputNormals,
     bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
@@ -5646,7 +5646,7 @@ class ConeLatticeAndShift {
   }
 };
 
-class ConeComplex : public HashedList<Cone> {
+class ConeCollection  {
 public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
@@ -5655,19 +5655,15 @@ public:
   HashedList<Vector<Rational> > splittingNormals;
   Vectors<Rational> slicingDirections;
   Cone convexHull;
+  HashedList<Cone> allCones;
   void refineOneStep();
   void refine();
-  void refineMakeCommonRefinement(const ConeComplex& other);
+  void refineMakeCommonRefinement(const ConeCollection& other);
   void sort();
   void refineAndSort();
-  void makeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output);
+  void makeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeCollection& output);
   void transformToWeylProjective();
-  int getDimension() {
-    if (this->size <= 0) {
-      return - 1;
-    }
-    return this->objects[0].getDimension();
-  }
+  int getDimension();
   bool addNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
   void popChamberSwapWithLast(int index);
   void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const;
@@ -5684,14 +5680,7 @@ public:
   );
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
   std::string toString(bool useHtml = false);
-  int getLowestIndexChamberContaining(const Vector<Rational>& root) const {
-    for (int i = 0; i < this->size; i ++) {
-      if (this->objects[i].isInCone(root)) {
-        return i;
-      }
-    }
-    return - 1;
-  }
+  int getLowestIndexChamberContaining(const Vector<Rational>& root) const;
   bool findMaxLFOverConeProjective(
     const Cone& input,
     List<Polynomial<Rational> >& inputLinearPolynomials,
@@ -5702,11 +5691,11 @@ public:
     Vectors<Rational>& inputLFsLastCoordConst,
     List<int>& outputMaximumOverEeachSubChamber
   );
-  void initFromCones(
+  void initFromConeWalls(
     List<Vectors<Rational> >& normalsOfCones,
     bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
-  void initFromCones(
+  void initFromConeWalls(
     List<Cone>& normalsOfCones,
     bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
@@ -5716,28 +5705,28 @@ public:
     const Vector<Rational>& killerNormal
   );
   void getNewVerticesAppend(
-    Cone& myDyingCone,
-    const Vector<Rational>& killerNormal,
+    const Cone& toBeSplit,
+    const Vector<Rational>& normalSlicingPlane,
     HashedList<Vector<Rational> >& outputVertices
   );
   void initialize() {
     this->splittingNormals.clear();
     this->slicingDirections.size = 0;
-    this->clear();
+    this->allCones.clear();
     this->indexLowestNonRefinedChamber = 0;
     this->convexHull.normals.size = 0;
     this->convexHull.vertices.size = 0;
     this->convexHull.flagIsTheZeroCone = true;
   }
-  ConeComplex(const ConeComplex& other):HashedList<Cone>() {
+  ConeCollection(const ConeCollection& other) {
     this->operator=(other);
   }
-  ConeComplex() {
+  ConeCollection() {
     this->flagChambersHaveTooFewVertices = false;
     this->flagIsRefined = false;
   }
-  void operator=(const ConeComplex& other) {
-    this->::HashedList<Cone>::operator=(other);
+  void operator=(const ConeCollection& other) {
+    this->allCones = other.allCones;
     this->splittingNormals = other.splittingNormals;
     this->slicingDirections = other.slicingDirections;
     this->indexLowestNonRefinedChamber = other.indexLowestNonRefinedChamber;
@@ -5774,9 +5763,15 @@ public:
   Rational startCheckSum;
   bool flagDiscardingFractions;
   bool flagInitialized;
-  int LimitSplittingSteps;
-  int SplitStepsCounter;
-  ConeComplex chambers;
+  int limitSplittingSteps;
+  int splitStepsCounter;
+  // The list of polyhedral cones over which our
+  // vector partition function is a
+  // quasipolynomial.
+  ConeCollection chambers;
+  // The quasipolynomials over each chamber,
+  // in the same order.
+  List<QuasiPolynomial> allQuasiPolynomials;
   bool flagSplitTestModeNoNumerators;
   bool flagMakingProgressReport;
   bool flagUsingCheckSum;
@@ -5847,9 +5842,10 @@ public:
     Rational& output
   );
   void prepareIndicatorVariables();
-  bool getVectorPartitionFunction(
+  bool computeOneVectorPartitionFunction(
     QuasiPolynomial& output, Vector<Rational>& newIndicator
   );
+  void computeAllVectorPartitionFunctions();
   void resetRelevanceIsComputed() {
     global.fatal << "This is not implemented yet. " << global.fatal;
   }
@@ -6351,8 +6347,8 @@ class ConeLatticeAndShiftMaxComputation {
 public:
   int numNonParaM;
   int numProcessedNonParam;
-  List<ConeComplex> complexStartingPerRepresentative;
-  List<ConeComplex> complexRefinedPerRepresentative;
+  List<ConeCollection> complexStartingPerRepresentative;
+  List<ConeCollection> complexRefinedPerRepresentative;
   List<List<Vectors<Rational> > > maximaCandidates;
   List<Vectors<Rational> > startingLPtoMaximize;
   List<Vectors<Rational> > finalMaxima;
@@ -6361,7 +6357,7 @@ public:
   Vectors<Rational> finalRepresentatives;
   List<ConeLatticeAndShift> conesLargerDimension;
   List<ConeLatticeAndShift> conesSmallerDimension;
-  List<List<ConeComplex> > finalMaximaChambers;
+  List<List<ConeCollection> > finalMaximaChambers;
   List<List<List<int> > > finalMaximaChambersIndicesMaxFunctions;
   List<bool> isInfinity;
   Vectors<Rational> LPtoMaximizeLargerDim;
@@ -6387,7 +6383,7 @@ class PiecewiseQuasipolynomial {
   // Then the projectivizedComplex is an n + 1-dimensional complex,
   // which is the projectivization of the n-dim affine complex representing the
   // domain of the piecewise quasipoly.
-  ConeComplex projectivizedComplex;
+  ConeCollection projectivizedComplex;
   List<QuasiPolynomial> quasiPolynomials;
   int numberOfVariables;
   std::string toString(bool useLatex, bool useHtml);
@@ -6406,7 +6402,7 @@ class PiecewiseQuasipolynomial {
   bool checkConsistency() const {
     return true;
   }
-  void makeCommonRefinement(const ConeComplex& other);
+  void makeCommonRefinement(const ConeCollection& other);
   void translateArgument(Vector<Rational>& translateToBeAddedToArgument);
   bool makeVPF(Vectors<Rational>& roots, std::string& outputstring);
   Rational evaluate(const Vector<Rational>& point);

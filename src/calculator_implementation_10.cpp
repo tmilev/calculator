@@ -19,6 +19,7 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula(
   matrix.getVectorsFromRows(vectors);
   PartialFractions partialFractions;
   partialFractions.initializeAndSplit(vectors, &calculator.comments);
+  partialFractions.computeAllVectorPartitionFunctions();
   output.assignValue(calculator, partialFractions.toString(nullptr));
   return true;
 }

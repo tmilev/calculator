@@ -111,7 +111,7 @@ class QuasiDifferentialOperator;
 
 //classes related to linear integral programming (polyhedra, lattices, quasipolynomials)
 class Cone;
-class ConeComplex;
+class ConeCollection;
 class Lattice;
 template <class Coefficient>
 class AffineHyperplane;

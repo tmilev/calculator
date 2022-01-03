@@ -5579,13 +5579,12 @@ public:
     return input.hashFunction();
   }
   bool produceNormalFromTwoNormalsAndSlicingDirection(
-    Vector<Rational>& SlicingDirection,
+    const Vector<Rational>& slicingDirection,
     Vector<Rational>& normal1,
     Vector<Rational>& normal2,
     Vector<Rational>& output
   );
   void operator=(const Cone& other) {
-    //this->flagHasSufficientlyManyVertices = other.flagHasSufficientlyManyVertices;
     this->flagIsTheZeroCone = other.flagIsTheZeroCone;
     this->vertices = other.vertices;
     this->normals = other.normals;
@@ -5648,44 +5647,72 @@ class ConeLatticeAndShift {
   }
 };
 
+// A collection of cones associated with a given vector partition function.
 class ConeCollection  {
 public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
-//  List<int> NonRefinedChambers;
-  int indexLowestNonRefinedChamber;
   HashedList<Vector<Rational> > splittingNormals;
   Vectors<Rational> slicingDirections;
   Cone convexHull;
-  HashedList<Cone> allCones;
-  void refineOneStep();
+  HashedList<Cone> nonRefinedCones;
+  HashedList<Cone> refinedCones;
+  // Returns false if the cone is refined,
+  // otherwise slices the cone.
+  bool refineOneStep(Cone& toBeRefined, List<Cone>& output);
+  // Returns false if the cone is refined relative to the splitting normals,
+  // otherwise slices the cone.
+  bool refineByNormals(Cone& toBeRefined, List<Cone>& output);
+  // Returns false if the cone is refined relative to the splitting directions,
+  // otherwise slices the cone.
+  bool refineByDirections(Cone& toBeRefined, List<Cone>& output);
   void refine();
   void refineMakeCommonRefinement(const ConeCollection& other);
   void sort();
   void refineAndSort();
-  void makeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeCollection& output);
+  void makeAffineAndTransformToProjectiveDimensionPlusOne(
+    Vector<Rational>& affinePoint, ConeCollection& output
+  );
   void transformToWeylProjective();
   int getDimension();
   bool addNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
-  void popChamberSwapWithLast(int index);
-  void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const;
-  bool drawMeLastCoordinateAffine(bool initDrawingVariables, DrawingVariables& drawingVariables, FormatExpressions& format);
-  void translateMeMyLastCoordinateAffinization(Vector<Rational>& translationVector);
+  void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(
+    Vectors<Rational>& output
+  ) const;
+  bool drawMeLastCoordinateAffine(
+    bool initDrawingVariables,
+    DrawingVariables& drawingVariables,
+    FormatExpressions& format
+  );
+  void translateMeMyLastCoordinateAffinization(
+    Vector<Rational>& translationVector
+  );
   void initializeFromDirectionsAndRefine(
     Vectors<Rational>& inputVectors
   );
-  void initializeFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
-  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
+  void initializeFromAffineDirectionsAndRefine(
+    Vectors<Rational>& inputDirections,
+    Vectors<Rational>& inputAffinePoints
+  );
+  std::string drawMeToHtmlLastCoordAffine(
+    DrawingVariables& drawingVariables,
+    FormatExpressions& format
+  );
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool initDrawVars,
     DrawingVariables& drawingVariables,
     FormatExpressions& format
   );
-  std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
+  std::string drawMeToHtmlProjective(
+    DrawingVariables& drawingVariables,
+    FormatExpressions& format
+  );
   std::string toString();
   std::string toHTML();
-  int getLowestIndexChamberContaining(const Vector<Rational>& root) const;
+  int getLowestIndexRefinedChamberContaining(
+    const Vector<Rational>& root
+  ) const;
   bool findMaxLFOverConeProjective(
     const Cone& input,
     List<Polynomial<Rational> >& inputLinearPolynomials,
@@ -5704,40 +5731,26 @@ public:
     List<Cone>& normalsOfCones,
     bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
+  // Returns true if a chamber is sliced
+  // in two by a given slicing plane.
+  // If that is the case, slices the chamber
+  // and writes the result in the output variable.
   bool splitChamber(
-    int indexChamberBeingRefined,
+    const Cone& toBeSliced,
     bool weAreChopping,
-    const Vector<Rational>& killerNormal
+    const Vector<Rational>& killerNormal,
+    List<Cone>& output
   );
   void getNewVerticesAppend(
     const Cone& toBeSplit,
     const Vector<Rational>& normalSlicingPlane,
     HashedList<Vector<Rational> >& outputVertices
   );
-  void initialize() {
-    this->splittingNormals.clear();
-    this->slicingDirections.size = 0;
-    this->allCones.clear();
-    this->indexLowestNonRefinedChamber = 0;
-    this->convexHull.normals.size = 0;
-    this->convexHull.vertices.size = 0;
-    this->convexHull.flagIsTheZeroCone = true;
-  }
-  ConeCollection(const ConeCollection& other) {
-    this->operator=(other);
-  }
-  ConeCollection() {
-    this->flagChambersHaveTooFewVertices = false;
-    this->flagIsRefined = false;
-  }
-  void operator=(const ConeCollection& other) {
-    this->allCones = other.allCones;
-    this->splittingNormals = other.splittingNormals;
-    this->slicingDirections = other.slicingDirections;
-    this->indexLowestNonRefinedChamber = other.indexLowestNonRefinedChamber;
-    this->flagIsRefined = other.flagIsRefined;
-    this->flagChambersHaveTooFewVertices = other.flagChambersHaveTooFewVertices;
-  }
+  void initialize();
+  ConeCollection(const ConeCollection& other);
+  ConeCollection();
+  void operator=(const ConeCollection& other);
+  bool checkIsRefinedOrCrash() const;
 };
 
 class PartialFractions {

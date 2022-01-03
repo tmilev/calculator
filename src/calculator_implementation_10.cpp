@@ -27,3 +27,22 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula(
 
   return true;
 }
+
+bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsVectorPartitionFunction::coneDecomposition");
+  Vectors<Rational> vectors;
+  Matrix<Rational> matrix;
+  if (!CalculatorConversions::functionGetMatrix(
+    calculator, input, matrix, false
+  )) {
+    return calculator << "Failed to extract matrix of rationals. ";
+  }
+  matrix.getVectorsFromRows(vectors);
+  ConeCollection chambers;
+  chambers.initializeFromDirectionsAndRefine(vectors);
+  std::stringstream out;
+  out << chambers.toHTML();
+  return output.assignValue(calculator, out.str());
+}

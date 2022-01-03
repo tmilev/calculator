@@ -3297,10 +3297,10 @@ int WebServer::daemon() {
   if (prependServer) {
     restartCommand << MainFlags::server << " ";
   }
-  restartCommand << Configuration::serverAutoMonitor << " false ";
   for (int i = 2; i < global.programArguments.size; i ++) {
     restartCommand << global.programArguments[i] << " ";
   }
+  restartCommand << Configuration::serverAutoMonitor << " false ";
   int pidChild = - 1;
   while (true) {
     if (pidChild < 0) {
@@ -4431,8 +4431,6 @@ int WebServer::main(int argc, char **argv) {
     global.configurationProcess();
     // Store back the config file if it changed.
     global.configurationStore();
-    global << "Computation timeout: " << Logger::red
-    << global.millisecondsMaxComputation << " ms." << Logger::endL;
 
     if (!Database::get().initializeServer()) {
       global.fatal << "Failed to initialize database. " << global.fatal;
@@ -4446,6 +4444,8 @@ int WebServer::main(int argc, char **argv) {
     // Uses the configuration file.
     // Calls again global.server().InitializeMainFoldersSensitive();
     global.server().initializeMainAll();
+    global << "Computation timeout: " << Logger::red
+    << global.millisecondsMaxComputation << " ms." << Logger::endL;
     if (global.flagDaemonMonitor) {
       return global.server().daemon();
     } else if (global.flagRunningBuiltInWebServer) {

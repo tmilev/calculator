@@ -14,15 +14,6 @@ FormatExpressions::getMonomialOrder<ClassFunction<WeylGroupData::WeylGroupBase, 
   return nullptr;
 }
 
-/*template <>
-bool CalculatorConversions::functionPolynomial<Rational>(
-  Calculator& calculator,
-  const Expression& input,
-  WithContext<Polynomial<Rational> >& output,
-  int maximumVariables,
-  int maximumPowerToExpand
-);*/
-
 template < >
 WeylGroupData& Expression::getValueNonConst() const;
 

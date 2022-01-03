@@ -115,7 +115,7 @@ public:
   Matrix<Rational> preferredBasisChangeInversE;
   Vectors<Rational> preferredBasis;
   Cone PreimageWeylChamberLargerAlgebra;
-  Cone WeylChamberSmallerAlgebra;
+  Cone weylChamberSmallerAlgebra;
   Cone preimageWeylChamberSmallerAlgebra;
   Lattice extendedIntegralLatticeMatrixForm;
   List<QuasiPolynomial> quasiPolynomialsNonSubstituted;

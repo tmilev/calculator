@@ -5500,14 +5500,8 @@ public:
   void getLinesContainedInCone(Vectors<Rational>& output);
   void translateMeMyLastCoordinateAffinization(Vector<Rational>& translationVector);
   bool isHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2) const;
-  bool isEntireSpace() {
-    return this->normals.size == 0 && this->flagIsTheZeroCone;
-  }
-  bool isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
-    Vector<Rational>& vertex1 = this->vertices[vertexIndex1];
-    Vector<Rational>& vertex2 = this->vertices[vertexIndex2];
-    return this->isHonest1DEdgeAffine(vertex1, vertex2);
-  }
+  bool isEntireSpace();
+  bool isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const;
   static bool isRegularToBasis(
     const Vectors<Rational>& basis,
     Vector<Rational>& r,
@@ -5542,75 +5536,40 @@ public:
   ) const;
   bool makeConvexHullOfMeAnd(const Cone& other);
   void changeBasis(Matrix<Rational>& linearMap);
-  int getDimension() const {
-    if (this->normals.size == 0) {
-      return 0;
-    }
-    return this->normals[0].size;
-  }
-  void sliceInDirection(Vector<Rational>& direction, ConeCollection& output);
+  int getDimension() const;
+  // Creates a cone from a set of walls.
+  // When set, hasEnoughProjectiveVertices
+  // indicates a mathematical promise (not checked for performance reasons)
+  // that the projective cone, when made affine, is finite.
   bool createFromNormals(
     Vectors<Rational>& inputNormals,
-    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    bool hasEnoughProjectiveVertices
   );
   //returns false if the cone is non-proper, i.e. when either
   //1) the cone is empty or is of smaller dimension than it should be
   //2) the resulting cone is the entire space
-  bool createFromNormals(Vectors<Rational>& inputNormals) {
-    return this->createFromNormals(inputNormals, false);
-  }
+  bool createFromNormals(Vectors<Rational>& inputNormals);
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
-  void getInternalPoint(Vector<Rational>& output) const {
-    if (this->vertices.size <= 0) {
-      return;
-    }
-    this->vertices.sum(output, this->vertices[0].size);
-  }
-  Vector<Rational> getInternalPoint() const {
-    Vector<Rational> result;
-    this->getInternalPoint(result);
-    return result;
-  }
-  unsigned int hashFunction() const {
-    return this->vertices.hashFunction();
-  }
-  static unsigned int hashFunction(const Cone& input) {
-    return input.hashFunction();
-  }
+  void getInternalPoint(Vector<Rational>& output) const;
+  Vector<Rational> getInternalPoint() const;
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const Cone& input);
   bool produceNormalFromTwoNormalsAndSlicingDirection(
     const Vector<Rational>& slicingDirection,
     Vector<Rational>& normal1,
     Vector<Rational>& normal2,
     Vector<Rational>& output
   );
-  void operator=(const Cone& other) {
-    this->flagIsTheZeroCone = other.flagIsTheZeroCone;
-    this->vertices = other.vertices;
-    this->normals = other.normals;
-    this->lowestIndexNotCheckedForSlicingInDirection = other.lowestIndexNotCheckedForSlicingInDirection;
-    this->lowestIndexNotCheckedForChopping = other.lowestIndexNotCheckedForChopping;
-  }
-  Cone(const Cone& other) {
-    this->operator=(other);
-  }
-  Cone() {
-    this->lowestIndexNotCheckedForSlicingInDirection = 0;
-    this->lowestIndexNotCheckedForChopping = 0;
-    this->flagIsTheZeroCone = true;
-    //this->flagHasSufficientlyManyVertices = true;
-  }
+  void operator=(const Cone& other);
+  Cone(const Cone& other);
+  Cone();
   void intersectHyperplane(Vector<Rational>& normal, Cone& outputConeLowerDimension);
   bool getRootFromLPolynomialConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output);
   bool solveLPolynomialEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone);
   bool solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift);
-  bool operator>(const Cone& other) const {
-    return this->normals > other.normals;
-  }
-  bool operator==(const Cone& other) const {
-    return this->flagIsTheZeroCone == other.flagIsTheZeroCone &&
-    this->normals == other.normals;
-  }
+  bool operator>(const Cone& other) const;
+  bool operator==(const Cone& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML() const;
 };
@@ -5625,12 +5584,6 @@ class ConeLatticeAndShift {
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend
   );
-  void operator=(const ConeLatticeAndShift& other) {
-    this->projectivizedCone = other.projectivizedCone;
-    this->lattice = other.lattice;
-    this->shift = other.shift;
-  }
-  void writeToFile(std::fstream& output);
   void findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
     Vector<Rational>& lpToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
@@ -5639,12 +5592,9 @@ class ConeLatticeAndShift {
   );
   bool readFromFile(std::fstream& input);
   std::string toString(FormatExpressions& format);
-  int getDimensionProjectivized() {
-    return this->projectivizedCone.getDimension();
-  }
-  int getDimensionAffine() {
-    return this->projectivizedCone.getDimension() - 1;
-  }
+  void operator=(const ConeLatticeAndShift& other);
+  int getDimensionProjectivized();
+  int getDimensionAffine();
 };
 
 // A collection of cones associated with a given vector partition function.
@@ -5675,7 +5625,10 @@ public:
   );
   void transformToWeylProjective();
   int getDimension();
-  bool addNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
+  void addNonRefinedChamberOnTopNoRepetition(
+    const Cone& newCone,
+    List<Cone>& output
+  );
   void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(
     Vectors<Rational>& output
   ) const;
@@ -5723,13 +5676,16 @@ public:
     Vectors<Rational>& inputLFsLastCoordConst,
     List<int>& outputMaximumOverEeachSubChamber
   );
+  // Creates a cone collection from a set of walls.
+  // hasEnoughProjectiveVertices is a mathematical promise that
+  // the input is of finite size when made affine.
   void initFromConeWalls(
     List<Vectors<Rational> >& normalsOfCones,
-    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    bool hasEnoughProjectiveVertices
   );
   void initFromConeWalls(
     List<Cone>& normalsOfCones,
-    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    bool hasEnoughProjectiveVertices
   );
   // Returns true if a chamber is sliced
   // in two by a given slicing plane.

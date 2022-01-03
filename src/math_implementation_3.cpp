@@ -9687,6 +9687,42 @@ void QuasiPolynomial::operator*=(const Rational& scalar) {
   }
 }
 
+Cone::Cone(const Cone& other) {
+  this->operator=(other);
+}
+
+Cone::Cone() {
+  this->lowestIndexNotCheckedForSlicingInDirection = 0;
+  this->lowestIndexNotCheckedForChopping = 0;
+  this->flagIsTheZeroCone = true;
+  //this->flagHasSufficientlyManyVertices = true;
+}
+
+bool Cone::operator>(const Cone& other) const {
+  return this->normals > other.normals;
+}
+
+bool Cone::operator==(const Cone& other) const {
+  return this->flagIsTheZeroCone == other.flagIsTheZeroCone &&
+  this->normals == other.normals;
+}
+
+void Cone::operator=(const Cone& other) {
+  this->flagIsTheZeroCone = other.flagIsTheZeroCone;
+  this->vertices = other.vertices;
+  this->normals = other.normals;
+  this->lowestIndexNotCheckedForSlicingInDirection = other.lowestIndexNotCheckedForSlicingInDirection;
+  this->lowestIndexNotCheckedForChopping = other.lowestIndexNotCheckedForChopping;
+}
+
+unsigned int Cone::hashFunction() const {
+  return this->vertices.hashFunction();
+}
+
+unsigned int Cone::hashFunction(const Cone& input) {
+  return input.hashFunction();
+}
+
 void Cone::intersectHyperplane(Vector<Rational>& normal, Cone& outputConeLowerDimension) {
   if (normal.isEqualToZero()) {
     global.fatal << "zero normal not allowed. " << global.fatal;
@@ -10233,7 +10269,6 @@ std::string ConeCollection::drawMeToHtmlProjective(
   if (!isGood) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
-  out << this->toHTML();
   return out.str();
 }
 
@@ -10302,6 +10337,16 @@ bool ConeCollection::drawMeProjective(
     }
   }
   return result;
+}
+
+bool Cone::isEntireSpace() {
+  return this->normals.size == 0 && this->flagIsTheZeroCone;
+}
+
+bool Cone::isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
+  Vector<Rational>& vertex1 = this->vertices[vertexIndex1];
+  Vector<Rational>& vertex2 = this->vertices[vertexIndex2];
+  return this->isHonest1DEdgeAffine(vertex1, vertex2);
 }
 
 bool Cone::isRegularToBasis(
@@ -10967,19 +11012,22 @@ void ConeCollection::makeAffineAndTransformToProjectiveDimensionPlusOne(
     const Cone& refined = this->refinedCones[i];
     newNormals.setSize(refined.normals.size + 1);
     for (int j = 0; j < refined.normals.size; j ++) {
-      newNormals[j] = refined.normals[j].GetProjectivizedNormal(affinePoint);
+      newNormals[j] = refined.normals[j].getProjectivizedNormal(affinePoint);
     }
     newNormals.lastObject()->makeEi(affineDimension + 1, affineDimension);
     incoming.createFromNormals(newNormals);
-    output.addNonRefinedChamberOnTopNoRepetition(incoming);
+    output.convexHull.makeConvexHullOfMeAnd(incoming);
+    output.refinedCones.addOnTop(incoming);
   }
 }
 
 template<class Coefficient>
-Vector<Coefficient> Vector<Coefficient>::GetProjectivizedNormal(Vector<Coefficient>& affinePoint) {
+Vector<Coefficient> Vector<Coefficient>::getProjectivizedNormal(
+  Vector<Coefficient>& affinePoint
+) {
   Vector<Coefficient> result = *this;
   result.setSize(this->size + 1);
-  *result.lastObject()= - affinePoint.scalarEuclidean(*this);
+  *result.lastObject() = - affinePoint.scalarEuclidean(*this);
   return result;
 }
 
@@ -11206,7 +11254,8 @@ void ConeCollection::refineMakeCommonRefinement(const ConeCollection& other) {
     this->getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(newWalls);
     this->initialize();
     this->convexHull = currentCone;
-    this->addNonRefinedChamberOnTopNoRepetition(currentCone);
+    this->nonRefinedCones.addOnTop(currentCone);
+    this->convexHull.makeConvexHullOfMeAnd(currentCone);
     this->splittingNormals.addOnTopNoRepetition(newWalls);
   }
   other.getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(newWalls);
@@ -11224,7 +11273,8 @@ void ConeCollection::translateMeMyLastCoordinateAffinization(Vector<Rational>& t
   for (int i = 0; i < myCopy.refinedCones.size; i ++) {
     currentCone = myCopy.refinedCones[i];
     currentCone.translateMeMyLastCoordinateAffinization(translationVector);
-    this->addNonRefinedChamberOnTopNoRepetition(currentCone);
+    this->refinedCones.addOnTop(currentCone);
+    this->convexHull.makeConvexHullOfMeAnd(currentCone);
   }
   Vector<Rational> normalNoAffinePart, newNormal;
   for (int j = 0; j < myCopy.splittingNormals.size; j ++) {
@@ -11550,13 +11600,6 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   this->isInfinity.initializeFillInObject(1, false);
 }
 
-void Cone::sliceInDirection(Vector<Rational>& direction, ConeCollection& output) {
-  output.initialize();
-  output.addNonRefinedChamberOnTopNoRepetition(*this);
-  output.slicingDirections.addOnTop(direction);
-  output.refine();
-}
-
 void Lattice::applyLinearMap(Matrix<Rational>& linearMap, Lattice& output) {
   Vectors<Rational> roots;
   roots.assignMatrixRows(this->basisRationalForm);
@@ -11577,15 +11620,15 @@ std::string ConeLatticeAndShiftMaxComputation::toString(FormatExpressions* forma
   }*/
   out << "<hr><hr>Cones not processed(number of cones " << this->conesLargerDimension.size << "):\n<hr>\n";
   DrawingVariables drawingVariables;
-  Polynomial<Rational>  tempP;
+  Polynomial<Rational> polynomialPart;
   for (int i = 0; i < this->conesLargerDimension.size; i ++) {
     out << "";// << this->conesLargerDim[i].toString(format);
     //out << "<br>" << this->LPtoMaximizeLargerDim[i].toString();
     drawingVariables.operations.initialize();
     out << "<br>" << this->conesLargerDimension[i].projectivizedCone.drawMeToHtmlLastCoordAffine(drawingVariables, *format);
     out << "<br>over " << this->conesLargerDimension[i].shift.toString() << " + " << this->conesLargerDimension[i].lattice.toString();
-    tempP.makeLinearWithConstantTerm(this->LPtoMaximizeLargerDim[i]);
-    out << "<br>the function we have maxed, as a function of the remaining variables, is: " << tempP.toString(format) << "<hr><hr>";
+    polynomialPart.makeLinearWithConstantTerm(this->LPtoMaximizeLargerDim[i]);
+    out << "<br>the function we have maxed, as a function of the remaining variables, is: " << polynomialPart.toString(format) << "<hr><hr>";
   }
   if (this->conesSmallerDimension.size > 0) {
     out << "<br>Cones processed: <br>";
@@ -11790,6 +11833,20 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerate
   }
 }
 
+void ConeLatticeAndShift::operator=(const ConeLatticeAndShift& other) {
+  this->projectivizedCone = other.projectivizedCone;
+  this->lattice = other.lattice;
+  this->shift = other.shift;
+}
+
+int ConeLatticeAndShift::getDimensionProjectivized() {
+  return this->projectivizedCone.getDimension();
+}
+
+int ConeLatticeAndShift::getDimensionAffine() {
+  return this->projectivizedCone.getDimension() - 1;
+}
+
 void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   Vector<Rational>& lpToMaximizeAffine,
   Vectors<Rational>& outputAppendLPToMaximizeAffine,
@@ -11819,7 +11876,8 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   }
   ConeCollection complexBeforeProjection;
   complexBeforeProjection.initialize();
-  complexBeforeProjection.addNonRefinedChamberOnTopNoRepetition(this->projectivizedCone);
+  complexBeforeProjection.refinedCones.addOnTop(this->projectivizedCone);
+  complexBeforeProjection.convexHull.makeConvexHullOfMeAnd(this->projectivizedCone);
   if (direction.scalarEuclidean(lpToMaximizeAffine).isNegative()) {
     direction.negate();
   }
@@ -12024,8 +12082,8 @@ bool ConeCollection::splitChamber(
     newPlusCone.createFromNormals(newPlusCone.normals);
     newMinusCone.createFromNormals(newMinusCone.normals);
   }
-  this->addNonRefinedChamberOnTopNoRepetition(newPlusCone);
-  this->addNonRefinedChamberOnTopNoRepetition(newMinusCone);
+  output.addOnTop(newPlusCone);
+  output.addOnTop(newMinusCone);
   return true;
 }
 
@@ -12047,12 +12105,15 @@ bool Cone::makeConvexHullOfMeAnd(const Cone& other) {
   return true;
 }
 
-bool ConeCollection::addNonRefinedChamberOnTopNoRepetition(const Cone& newCone) {
+void ConeCollection::addNonRefinedChamberOnTopNoRepetition(
+  const Cone& newCone,
+  List<Cone>& output
+) {
   Cone coneSorted;
   coneSorted = newCone;
   coneSorted.normals.quickSortAscending();
   this->convexHull.makeConvexHullOfMeAnd(coneSorted);
-  return this->nonRefinedCones.addOnTopNoRepetition(coneSorted);
+  output.addOnTop(newCone);
 }
 
 bool ConeCollection::refineOneStep(
@@ -12139,9 +12200,9 @@ void ConeCollection::initializeFromDirectionsAndRefine(
   this->initialize();
   Cone startingCone;
   startingCone.createFromVertices(inputVectors);
-  this->addNonRefinedChamberOnTopNoRepetition(startingCone);
+  this->nonRefinedCones.addOnTop(startingCone);
+  this->convexHull.makeConvexHullOfMeAnd(startingCone);
   this->slicingDirections.addListOnTop(inputVectors);
-  global.comments << "DEBUG: about to refine.";
   this->refine();
 }
 
@@ -12361,6 +12422,19 @@ void Cone::scaleNormalizeByPositive(Vector<Rational> &toScale) {
   }
 }
 
+Vector<Rational> Cone::getInternalPoint() const {
+  Vector<Rational> result;
+  this->getInternalPoint(result);
+  return result;
+}
+
+void Cone::getInternalPoint(Vector<Rational>& output) const {
+  if (this->vertices.size <= 0) {
+    return;
+  }
+  this->vertices.sum(output, this->vertices[0].size);
+}
+
 bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   this->lowestIndexNotCheckedForChopping = 0;
   this->lowestIndexNotCheckedForSlicingInDirection = 0;
@@ -12423,10 +12497,22 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   return this->createFromNormals(this->normals);
 }
 
+bool Cone::createFromNormals(Vectors<Rational>& inputNormals) {
+  return this->createFromNormals(inputNormals, false);
+}
+
+int Cone::getDimension() const {
+  if (this->normals.size == 0) {
+    return 0;
+  }
+  return this->normals[0].size;
+}
+
 bool Cone::createFromNormals(
   Vectors<Rational>& inputNormals,
-  bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+  bool hasEnoughProjectiveVertices
 ) {
+  MacroRegisterFunctionWithName("Cone::createFromNormals");
   this->flagIsTheZeroCone = false;
   this->lowestIndexNotCheckedForChopping = 0;
   this->lowestIndexNotCheckedForSlicingInDirection = 0;
@@ -12444,7 +12530,7 @@ bool Cone::createFromNormals(
   int numAddedFakeWalls = 0;
   Matrix<Rational> matrix;
   Selection selection;
-  if (!useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices) {
+  if (!hasEnoughProjectiveVertices) {
     for (int i = 0; i < dimension && this->normals.getRankElementSpan(&matrix, &selection) < dimension; i ++) {
       Vector<Rational> root;
       root.makeEi(dimension, i);
@@ -12499,30 +12585,31 @@ void ConeCollection::initialize() {
 
 void ConeCollection::initFromConeWalls(
   List<Cone>& normalsOfCones,
-  bool assumeConesHaveSufficientlyManyProjectiveVertices
+  bool hasEnoughProjectiveVertices
 ) {
   List<Vectors<Rational> > roots;
   roots.setSize(normalsOfCones.size);
   for (int i = 0; i < normalsOfCones.size; i ++) {
     roots[i] = normalsOfCones[i].normals;
   }
-  this->initFromConeWalls(roots, assumeConesHaveSufficientlyManyProjectiveVertices);
+  this->initFromConeWalls(roots, hasEnoughProjectiveVertices);
 }
 
 void ConeCollection::initFromConeWalls(
   List<Vectors<Rational> >& normalsOfCones,
-  bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+  bool hasEnoughProjectiveVertices
 ) {
-  Cone currentCone;
+  MacroRegisterFunctionWithName("ConeCollection::initFromConeWalls");
+  Cone startingCone;
   this->refinedCones.clear();
   this->nonRefinedCones.clear();
   ProgressReport report;
   report.report(normalsOfCones.toString());
   for (int i = 0; i < normalsOfCones.size; i ++) {
-    if (currentCone.createFromNormals(
-      normalsOfCones[i], useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    if (startingCone.createFromNormals(
+      normalsOfCones[i], hasEnoughProjectiveVertices
     )) {
-      this->addNonRefinedChamberOnTopNoRepetition(currentCone);
+      this->nonRefinedCones.addOnTop(startingCone);
     }
     std::stringstream out;
     out << "Initializing cone " << i + 1 << " out of " << normalsOfCones.size;
@@ -12544,6 +12631,7 @@ void ConeCollection::initFromConeWalls(
       report.report(out.str());
     }
   }
+  this->convexHull.makeConvexHullOfMeAnd(startingCone);
 }
 
 bool ConeCollection::checkIsRefinedOrCrash() const {
@@ -12657,7 +12745,10 @@ std::string ConeCollection::toString() {
 
 std::string ConeCollection::toHTML() {
   std::stringstream out;
+  DrawingVariables drawingVariables;
   FormatExpressions format;
+  this->drawMeToHtmlProjective(drawingVariables, format);
+  out << drawingVariables.getHTMLDiv(this->getDimension(), true);
   out << "Refined chamber count: " << this->refinedCones.size;
   Vectors<Rational> roots;
   roots = this->splittingNormals;
@@ -12718,7 +12809,8 @@ bool ConeCollection::findMaxLFOverConeProjective(
   List<int>& outputMaximumOverEeachSubChamber
 ) {
   this->initialize();
-  this->addNonRefinedChamberOnTopNoRepetition(input);
+  this->nonRefinedCones.addOnTop(input);
+  this->convexHull.makeConvexHullOfMeAnd(input);
   Vector<Rational> root;
   for (int i = 0; i < inputLFsLastCoordConst.size; i ++) {
     for (int j = i + 1; j < inputLFsLastCoordConst.size; j ++) {

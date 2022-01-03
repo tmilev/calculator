@@ -2181,7 +2181,8 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
     roots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.normals);
     report.report(roots.toString());
     currentProjectiveCone.createFromNormals(roots);
-    projectivizedChamberFinal.addNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
+    projectivizedChamberFinal.refinedCones.addOnTop(currentProjectiveCone);
+    projectivizedChamberFinal.convexHull.makeConvexHullOfMeAnd(currentProjectiveCone);
   }
   for (int i = 0; i < this->preimageWeylChamberSmallerAlgebra.normals.size; i ++) {
     projectivizedChamberFinal.splittingNormals.addOnTop(this->preimageWeylChamberSmallerAlgebra.normals[i]);

@@ -432,7 +432,7 @@ public:
     return false;
   }
   bool getCoordinatesInBasis(const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output) const;
-  Vector<Coefficient> GetProjectivizedNormal(Vector<Coefficient>& affinePoint);
+  Vector<Coefficient> getProjectivizedNormal(Vector<Coefficient>& affinePoint);
   Vector<Coefficient> operator*(const Coefficient& other) const {
     Vector<Coefficient> result;
     result.setSize(this->size);

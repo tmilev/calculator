@@ -116,7 +116,7 @@ public:
   Vectors<Rational> preferredBasis;
   Cone PreimageWeylChamberLargerAlgebra;
   Cone WeylChamberSmallerAlgebra;
-  Cone PreimageWeylChamberSmallerAlgebra;
+  Cone preimageWeylChamberSmallerAlgebra;
   Lattice extendedIntegralLatticeMatrixForm;
   List<QuasiPolynomial> quasiPolynomialsNonSubstituted;
   List<List<QuasiPolynomial> > quasiPolynomialsSubstituted;
@@ -135,7 +135,7 @@ public:
   ConeCollection projectivizedParamComplex;
   ConeLatticeAndShiftMaxComputation maximumComputation;
   ConeCollection smallerAlgebraChamber;
-  ConeCollection projectivizedChambeR;
+  ConeCollection projectivizedChamber;
   std::stringstream log;
   WeylGroupData* weylSmaller;
   WeylGroupData* weylLarger;

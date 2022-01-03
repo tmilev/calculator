@@ -703,8 +703,9 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return out.str();
   }
-  std::string toInequalitiesString(
-    bool useLatex, bool useHtml, bool lastVariableIsConstant, FormatExpressions& format
+  std::string toLatexInequalities(
+    bool lastVariableIsConstant,
+    FormatExpressions& format
   ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   bool linearAlgebraForVertexComputation(

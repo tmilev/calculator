@@ -5494,7 +5494,6 @@ public:
   Vectors<Rational> normals;
   int lowestIndexNotCheckedForChopping;
   int lowestIndexNotCheckedForSlicingInDirection;
-  std::string toString(FormatExpressions* format = nullptr) const;
   void transformToWeylProjective(ConeCollection& owner);
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
   std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
@@ -5610,8 +5609,11 @@ public:
     return this->normals > other.normals;
   }
   bool operator==(const Cone& other) const {
-    return this->flagIsTheZeroCone == other.flagIsTheZeroCone && this->normals == other.normals;
+    return this->flagIsTheZeroCone == other.flagIsTheZeroCone &&
+    this->normals == other.normals;
   }
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toHTML() const;
 };
 
 class ConeLatticeAndShift {
@@ -5669,7 +5671,9 @@ public:
   void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const;
   bool drawMeLastCoordinateAffine(bool initDrawingVariables, DrawingVariables& drawingVariables, FormatExpressions& format);
   void translateMeMyLastCoordinateAffinization(Vector<Rational>& translationVector);
-  void initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
+  void initializeFromDirectionsAndRefine(
+    Vectors<Rational>& inputVectors
+  );
   void initializeFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
   std::string drawMeToHtmlLastCoordAffine(DrawingVariables& drawingVariables, FormatExpressions& format);
   bool drawMeProjective(
@@ -5679,7 +5683,8 @@ public:
     FormatExpressions& format
   );
   std::string drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format);
-  std::string toString(bool useHtml = false);
+  std::string toString();
+  std::string toHTML();
   int getLowestIndexChamberContaining(const Vector<Rational>& root) const;
   bool findMaxLFOverConeProjective(
     const Cone& input,
@@ -5780,8 +5785,9 @@ public:
   // The original vectors whose vector partition function
   // we are computing.
   List<Vector<Rational> > originalVectors;
-  // The original vectors, rescaled so their coefficients have
-  // no greatest common divisor and sorted in graded lexicographic order.
+  // Rescaled, deduped and sorted version of the original vectors
+  // so their coefficients have no greatest common
+  // divisor and sorted in graded lexicographic order.
   HashedList<Vector<Rational> > normalizedVectors;
 
   OnePartialFractionDenominator initialPartialFraction;
@@ -7194,46 +7200,32 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(
 }
 
 template <class Coefficient>
-std::string Vectors<Coefficient>::toInequalitiesString(
-  bool useLatex, bool useHtml, bool lastVariableIsConstant, FormatExpressions& format
+std::string Vectors<Coefficient>::toLatexInequalities(
+  bool lastVariableIsConstant,
+  FormatExpressions& format
 ) const {
   std::stringstream out;
-  std::string tempS;
-  if (useLatex) {
-    out << "\\begin{array}{l}";
-  }
+  std::string polynomialPart;
+  out << "\\begin{array}{rcl}";
   for (int i = 0; i < this->size; i ++) {
     Vector<Rational>& current = (*this)[i];
-    tempS = current.toStringLetterFormat(format.polyDefaultLetter, &format, lastVariableIsConstant);
-    if (tempS == "") {
+    polynomialPart = current.toStringLetterFormat(
+      format.polyDefaultLetter, &format, lastVariableIsConstant
+    );
+    if (polynomialPart == "") {
       out << "(0";
     }
-    out << tempS;
+    out << polynomialPart;
     if (!lastVariableIsConstant) {
-      if (useLatex) {
-        out << "\\geq 0\\\\";
-      } else {
-        out << "=>0\n";
-      }
+      out << "&\\geq& 0\\\\\n";
     } else {
-      if (useLatex) {
-        out << "\\geq " << (- (*current.lastObject())).toString() << "\\\\";
-      } else {
-        out << "=>" << (- (*current.lastObject())).toString();
-      }
+      out << "\\geq " << (- (*current.lastObject())).toString() << "\\\\";
     }
-    if (tempS == "") {
+    if (polynomialPart == "") {
       out << ")";
     }
-    if (useHtml) {
-      out << "<br>";
-    } else {
-      out << "\n";
-    }
   }
-  if (useLatex) {
-    out << "\\end{array}";
-  }
+  out << "\\end{array}";
   return out.str();
 }
 #endif

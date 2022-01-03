@@ -20,6 +20,10 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula(
   PartialFractions partialFractions;
   partialFractions.initializeAndSplit(vectors, &calculator.comments);
   partialFractions.computeAllVectorPartitionFunctions();
-  output.assignValue(calculator, partialFractions.toString(nullptr));
+  std::stringstream out;
+  out << partialFractions.toString();
+  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML();
+  output.assignValue(calculator, out.str());
+
   return true;
 }

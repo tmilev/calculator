@@ -9266,7 +9266,9 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
 }
 
 void PartialFractions::computeAllVectorPartitionFunctions() {
-  global.fatal << "Implement this please!" << global.fatal;
+  Vectors<Rational> vectors;
+  vectors.addListOnTop(this->normalizedVectors);
+  this->chambers.initializeFromDirectionsAndRefine(vectors);
 }
 
 bool PartialFractions::computeOneVectorPartitionFunction(
@@ -10217,7 +10219,7 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
-  out << this->toString(true);
+  out << this->toHTML();
   return out.str();
 }
 
@@ -10231,7 +10233,7 @@ std::string ConeCollection::drawMeToHtmlProjective(
   if (!isGood) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
-  out << this->toString(true);
+  out << this->toHTML();
   return out.str();
 }
 
@@ -12041,8 +12043,10 @@ bool ConeCollection::addNonRefinedChamberOnTopNoRepetition(const Cone& newCone) 
 
 void ConeCollection::refineOneStep() {
   if (this->indexLowestNonRefinedChamber >= this->allCones.size) {
+    global.comments << "DEBUG: done with collection";
     return;
   }
+  global.comments << "DEBUG: here I am";
   Cone currentCone = this->allCones[this->indexLowestNonRefinedChamber];
   for (;
     currentCone.lowestIndexNotCheckedForChopping < this->splittingNormals.size;
@@ -12089,12 +12093,15 @@ void ConeCollection::refineOneStep() {
   this->indexLowestNonRefinedChamber ++;
 }
 
-void ConeCollection::initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors) {
+void ConeCollection::initializeFromDirectionsAndRefine(
+  Vectors<Rational>& inputVectors
+) {
   this->initialize();
   Cone startingCone;
   startingCone.createFromVertices(inputVectors);
   this->addNonRefinedChamberOnTopNoRepetition(startingCone);
   this->slicingDirections.addListOnTop(inputVectors);
+  global.comments << "DEBUG: about to refine.";
   this->refine();
 }
 
@@ -12120,7 +12127,8 @@ void ConeCollection::refine() {
 
 void Cone::computeVerticesFromNormalsNoFakeVertices() {
   this->vertices.size = 0;
-  Selection selection, nonPivotPoints;
+  Selection selection;
+  Selection nonPivotPoints;
   for (int i = 0; i < this->normals.size; i ++) {
     Cone::scaleNormalizeByPositive(this->normals[i]);
   }
@@ -12458,6 +12466,36 @@ void ConeCollection::initFromConeWalls(
   }
 }
 
+std::string Cone::toHTML() const {
+  std::stringstream out;
+  bool lastVarIsConstant = false;
+  if (this->flagIsTheZeroCone) {
+    out << "The cone is the zero cone.";
+  } else if (this->normals.size == 0) {
+    out << "The cone is the entire space";
+  }
+  out << "<br>Index next wall to refine by: "
+  << this->lowestIndexNotCheckedForChopping;
+  out << "<br>";
+  out << "\nIndex next direction to slice in: "
+  << this->lowestIndexNotCheckedForSlicingInDirection << "\n";
+  out << "<br>";
+  out << "normals:\n";
+  out << "<br>";
+  out << "\\(";
+  FormatExpressions format;
+  out << this->normals.toLatexInequalities(
+    lastVarIsConstant, format
+  );
+  out << "\\)";
+  out << "<br>Projectivized vertices: "
+  << this->vertices.toString();
+  if (this->vertices.size > 0) {
+    out << "<br>Internal point: " << this->getInternalPoint().toString();
+  }
+  return out.str();
+}
+
 std::string Cone::toString(FormatExpressions* format) const {
   std::stringstream out;
   bool PrepareMathReport = format == nullptr ? false: format->flagUseLatex;
@@ -12490,7 +12528,7 @@ std::string Cone::toString(FormatExpressions* format) const {
   if (format == nullptr) {
     format = &tempF;
   }
-  out << this->normals.toInequalitiesString(useLatex, useHtml, lastVarIsConstant, *format);
+  out << this->normals.toLatexInequalities(lastVarIsConstant, *format);
   if (useLatex) {
     out << "\\]";
   }
@@ -12504,36 +12542,40 @@ std::string Cone::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-std::string ConeCollection::toString(bool useHtml) {
+std::string ConeCollection::toString() {
   std::stringstream out;
   FormatExpressions format;
   out << "Number of chambers: " << this->allCones.size;
-  if (useHtml) {
-    out << "<br>";
-  }
   out << " Next non-refined chamber: " << this->indexLowestNonRefinedChamber + 1;
-  if (useHtml) {
-    out << "<br>";
-  }
   out << "normals of walls to refine by: ";
   Vectors<Rational> roots;
   roots = this->splittingNormals;
   out << roots.toString(&format);
   if (this->slicingDirections.size > 0) {
-    if (useHtml) {
-      out << "<br>\n";
-    }
     out << " Directions to slice along: " << this->slicingDirections.toString();
   }
   for (int i = 0; i < this->allCones.size; i ++) {
-    if (useHtml) {
-      out << "<hr>";
-    }
     out << "\n\n\nChamber " << i + 1 << ":\n";
-    if (useHtml) {
-      out << "<br>";
-    }
     out << this->allCones[i].toString(&format) << "\n\n\n";
+  }
+  return out.str();
+}
+
+std::string ConeCollection::toHTML() {
+  std::stringstream out;
+  FormatExpressions format;
+  out << "Number of chambers: " << this->allCones.size;
+  out << "<br>Next non-refined chamber: " << this->indexLowestNonRefinedChamber + 1;
+  out << "<br>Normals of walls to refine by: ";
+  Vectors<Rational> roots;
+  roots = this->splittingNormals;
+  out << roots.toString(&format);
+  if (this->slicingDirections.size > 0) {
+    out << " Directions to slice along: " << this->slicingDirections.toString();
+  }
+  for (int i = 0; i < this->allCones.size; i ++) {
+    out << "<br>Chamber " << i + 1 << ":<br>";
+    out << this->allCones[i].toHTML() << "\n\n\n";
   }
   return out.str();
 }
@@ -12589,7 +12631,7 @@ bool ConeCollection::findMaxLFOverConeProjective(
       }
     }
   }
-  global.comments << this->toString(true);
+  global.comments << this->toHTML();
   this->refine();
   outputMaximumOverEeachSubChamber.setSize(this->allCones.size);
   Rational maximumScalarProduct = 0;

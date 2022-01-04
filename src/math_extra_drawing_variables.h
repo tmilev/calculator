@@ -321,10 +321,23 @@ public:
   ) {
     this->operations.drawLineBetweenTwoVectorsBufferDouble(r1, r2, color, lineWidth);
   }
-  void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, const std::string& color);
-  void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int textStyle);
+  void drawTextAtVectorBufferRational(
+    const Vector<Rational>& point,
+    const std::string& inputText,
+    const std::string& color
+  );
+  void drawTextAtVectorBufferDouble(
+    const Vector<double>& point,
+    const std::string& inputText,
+    int textColor,
+    int textStyle
+  );
   void drawCircleAtVectorBufferRational(
-    const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1
+    const Vector<Rational>& point,
+    const std::string& color,
+    double radius,
+    const std::string& frameId = "",
+    int frameIndex = - 1
   );
   void drawCircleAtVectorBufferDouble(const Vector<double>& point, const std::string& color, double radius);
   void operator=(const DrawingVariables& other) {

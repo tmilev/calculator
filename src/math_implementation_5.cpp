@@ -264,7 +264,10 @@ void DrawOperations::drawFilledShape(
 }
 
 void DrawOperations::drawTextAtVectorBufferRational(
-  const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize
+  const Vector<Rational>& input,
+  const std::string& inputText,
+  const std::string& color,
+  int fontSize
 ) {
   (void) color;
   (void) fontSize;

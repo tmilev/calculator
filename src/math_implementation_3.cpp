@@ -1856,7 +1856,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& variables, int di
     tempS = root.toString();
     variables.drawLineBetweenTwoVectorsBufferRational(zeroRoot, root, "gray", 1);
     variables.drawTextAtVectorBufferRational(root, tempS, "#94c894");
-    variables.drawCircleAtVectorBufferRational(root, colorText, 2);
+    variables.drawCircleAtVectorBufferRational(root, colorText, 4);
   }
   variables.operations.basisToDrawCirclesAt.makeEiBasis(dimension);
 }
@@ -10474,12 +10474,13 @@ bool Cone::drawMeProjective(
   FormatExpressions& format
 ) const {
   (void) format;
-  Vector<Rational> zeroRoot, coordCenter;
+  Vector<Rational> zeroRoot;
+  Vector<Rational> coordinateCenter;
   zeroRoot.makeZero(this->getDimension());
   if (coordCenterTranslation == nullptr) {
-    coordCenter = zeroRoot;
+    coordinateCenter = zeroRoot;
   } else {
-    coordCenter = *coordCenterTranslation;
+    coordinateCenter = *coordCenterTranslation;
   }
   Vectors<Rational> verticesScaled = this->vertices;
   for (int i = 0; i < verticesScaled.size; i ++) {
@@ -10498,13 +10499,13 @@ bool Cone::drawMeProjective(
     for (int i = 0; i < this->getDimension(); i ++) {
       root.makeEi(this->getDimension(), i);
       drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-        zeroRoot + coordCenter, root + coordCenter, "gray", 1
+        zeroRoot + coordinateCenter, root + coordinateCenter, "gray", 1
       );
     }
   }
   for (int i = 0; i < this->vertices.size; i ++) {
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot + coordCenter, verticesScaled[i] * 10000 + coordCenter, "gray", 1
+      zeroRoot + coordinateCenter, verticesScaled[i] * 5 + coordinateCenter, "lightblue", 1
     );
   }
   for (int k = 0; k < this->normals.size; k ++) {
@@ -10514,7 +10515,10 @@ bool Cone::drawMeProjective(
           if (this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()) {
             if (this->isHonest1DEdgeAffine(i, j)) {
               drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-                verticesScaled[i] + coordCenter, verticesScaled[j] + coordCenter, "black", 1
+                verticesScaled[i] + coordinateCenter,
+                verticesScaled[j] + coordinateCenter,
+                "black",
+                1
               );
             }
           }
@@ -11373,7 +11377,9 @@ void PiecewiseQuasipolynomial::drawMe(
     }
   }
   for (int i = 0; i < latticePointsFinal.size; i ++) {
-    drawingVariables.drawCircleAtVectorBufferRational(latticePointsFinal[i], latticePointColors[i], 2);
+    drawingVariables.drawCircleAtVectorBufferRational(
+      latticePointsFinal[i], latticePointColors[i], 2
+    );
     drawingVariables.drawTextAtVectorBufferRational(
       latticePointsFinal[i],
       this->evaluateInputProjectivized(latticePointsFinal[i]).toString(),

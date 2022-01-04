@@ -3148,14 +3148,36 @@ void OnePartialFractionDenominator::computeOneCheckSum(
   output.invert();
 }
 
-std::string OnePartialFractionDenominator::toString(
+std::string OnePartialFractionDenominator::toLatex(
+  const Polynomial<LargeInteger>& numerator,
   FormatExpressions* format
 ) const {
   std::stringstream out;
+  out << "\\frac{"
+  << numerator.toString(format)
+  << "}{"
+  << this->toStringDenominatorOnly(format)
+  << "}";
+  return out.str();
+}
+
+std::string OnePartialFractionDenominator::toString(
+  FormatExpressions* format
+) const {
   if (this->denominators.size() == 0) {
     return "1";
   }
+  std::stringstream out;
   out << "/(";
+  out << this->toStringDenominatorOnly(format);
+  out << ")";
+  return out.str();
+}
+
+std::string OnePartialFractionDenominator::toStringDenominatorOnly(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
   MapList<Vector<Rational>, OnePartialFractionDenominatorComponent > summandsSorted;
   this->getDenominatorsSorted(summandsSorted);
   for (int i = 0; i < summandsSorted.size(); i ++) {
@@ -3166,11 +3188,11 @@ std::string OnePartialFractionDenominator::toString(
       out << current;
     }
   }
-  out << ")";
   return out.str();
 }
 
-bool OnePartialFractionDenominator::rootIsInFractionCone(Vector<Rational>* root
+bool OnePartialFractionDenominator::rootIsInFractionCone(
+  Vector<Rational>* root
 ) const {
   if (root == nullptr) {
     return true;
@@ -3576,6 +3598,36 @@ void OnePartialFractionDenominator::operator=(
   this->denominators = right.denominators;
   this->isIrrelevant = right.isIrrelevant;
   this->relevanceIsComputed = right.relevanceIsComputed;
+}
+
+std::string PartialFractions::toLatex(FormatExpressions* format) const {
+  if (
+    this->nonReduced.size() > 0 ||
+    this->reducedWithElongationRedundancies.size() > 0
+  ) {
+    return this->toString(format);
+  }
+  if (this->reduced.size() == 0) {
+    return "0";
+  }
+  std::stringstream out;
+  out << "\\begin{array}{ll}&";
+  for (int i = 0; i < this->reduced.size(); i ++) {
+    if (i != 0) {
+      out << "\\\\\n+&\n";
+    }
+    out << this->reduced.monomials[i].toLatex(
+      this->reduced.coefficients[i], format
+    );
+  }
+  out << "\\end{array}";
+  return out.str();
+}
+
+std::string PartialFractions::toHTML(FormatExpressions* format) const {
+  std::stringstream out;
+  out << "\\(" << this->toLatex(format) << "\\)";
+  return out.str();
 }
 
 std::string PartialFractions::toString(FormatExpressions* format) const {
@@ -5235,7 +5287,7 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
   return - 1;
 }
 
-std::string DynkinSimpleType::ToStringNonTechnicalName(FormatExpressions* format) const {
+std::string DynkinSimpleType::toStringNonTechnicalName(FormatExpressions* format) const {
   (void) format;
   std::stringstream out;
   switch (this->letter) {

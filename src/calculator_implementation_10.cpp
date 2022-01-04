@@ -21,7 +21,7 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula(
   partialFractions.initializeAndSplit(vectors, &calculator.comments);
   partialFractions.computeAllVectorPartitionFunctions();
   std::stringstream out;
-  out << partialFractions.toString();
+  out << partialFractions.toHTML();
   out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML();
   output.assignValue(calculator, out.str());
 

@@ -73,7 +73,7 @@ std::string SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML() const
     }
     const DynkinSimpleType& currentSimpleType = dynkinType[indexType];
     for (int indexIsotypic = 0; indexIsotypic < dynkinType.coefficients[indexType]; indexIsotypic ++) {
-      out << currentSimpleType.ToStringNonTechnicalName(nullptr);
+      out << currentSimpleType.toStringNonTechnicalName(nullptr);
       if (indexIsotypic + 1 < dynkinType.coefficients[indexType]) {
         out << "\\oplus";
       }

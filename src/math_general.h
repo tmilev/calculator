@@ -5477,6 +5477,11 @@ public:
     int elongation
   );
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringDenominatorOnly(FormatExpressions* format = nullptr) const;
+  std::string toLatex(
+    const Polynomial<LargeInteger>& numerator,
+    FormatExpressions* format = nullptr
+  ) const;
   bool checkInitialization() const;
   bool operator>(const OnePartialFractionDenominator& other) const;
 };
@@ -5829,6 +5834,8 @@ public:
   void makeProgressReportSplittingMainPart();
   void makeProgressVPFcomputation();
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toHTML(FormatExpressions* format = nullptr) const;
+  std::string toLatex(FormatExpressions* format = nullptr) const;
   class Test {
   public:
     static bool all();
@@ -5926,7 +5933,7 @@ class DynkinSimpleType {
     return this->getRatioLongRootToFirst(this->letter, this->rank);
   }
   std::string toString(FormatExpressions* format = nullptr) const;
-  std::string ToStringNonTechnicalName(FormatExpressions* format = nullptr) const;
+  std::string toStringNonTechnicalName(FormatExpressions* format = nullptr) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
   static void getEpsilonMatrix(char weylLetter, int weylRank, Matrix<Rational>& output);

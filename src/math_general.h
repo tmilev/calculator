@@ -5633,7 +5633,7 @@ public:
     Vectors<Rational>& output
   ) const;
   bool drawMeLastCoordinateAffine(
-    bool initDrawingVariables,
+    bool initializeDrawingVariables,
     DrawingVariables& drawingVariables,
     FormatExpressions& format
   );

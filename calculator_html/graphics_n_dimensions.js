@@ -13,9 +13,9 @@ function startProjectionPlaneUser(canvasId) {
 }
 
 function toStringVector(vector) {
-  var result = "";
+  let result = "";
   result += "(";
-  for (var i = 0; i < vector.length; i++) {
+  for (let i = 0; i < vector.length; i++) {
     result += vector[i].toFixed(2);
     if (i !== vector.length - 1) {
       result += ", ";
@@ -30,9 +30,9 @@ function getAngleFromXandY(x, y) {
 }
 
 function getAngleScreenChange(newX, newY, oldX, oldY) {
-  var result = getAngleFromXandY(newX, newY) - getAngleFromXandY(oldX, oldY);
-  var topBound = Math.PI;
-  var bottomBound = - Math.PI;
+  let result = getAngleFromXandY(newX, newY) - getAngleFromXandY(oldX, oldY);
+  let topBound = Math.PI;
+  let bottomBound = - Math.PI;
   while (result > topBound || result <= bottomBound) {
     if (result > topBound) {
       result -= 2 * Math.PI;
@@ -75,7 +75,7 @@ class GraphicsNDimensions {
     this.screenBasisAtSelection = [];
     this.canvasContainer = document.getElementById(this.idCanvas);
     this.dimension = 0;
-    this.theBilinearForm = [];
+    this.bilinearForm = [];
     this.graphicsUnit = 0;
     this.selectedBasisIndex = - 1;
     this.selectedHighlightIndex = - 1;
@@ -112,6 +112,7 @@ class GraphicsNDimensions {
       timeoutHandle: null,
       frameLength: 300
     };
+    /** @type{HTMLCanvasElement|null} */
     this.canvas = null;
     this.widthHTML = this.canvasContainer.width;
     this.heightHTML = this.canvasContainer.height;
@@ -128,14 +129,14 @@ class GraphicsNDimensions {
   initVectors(inputVectors) {
     this.vectors = inputVectors;
     this.vectorProjections = [];
-    for (var counterVector = 0; counterVector < this.vectors.length; counterVector++) {
+    for (let counterVector = 0; counterVector < this.vectors.length; counterVector++) {
       this.vectorProjections.push([0, 0]);
     }
   }
 
   /** @returns {string} */
   getInfoHTML() {
-    var result = "";
+    let result = "";
     result += `<br>Mouse position: ${toStringVector(this.mousePositionScreen)}`;
     result += `<br>Selected index: ${this.selectedBasisIndex}`;
     if (this.selectedBasisIndex >= 0) {
@@ -152,7 +153,7 @@ class GraphicsNDimensions {
     result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors.\n";
     result += `<br>${toStringVector(this.screenBasis[0])}`;
     result += `<br>${toStringVector(this.screenBasis[1])}`;
-    for (var i = 0; i < this.basisCircles.length; i++) {
+    for (let i = 0; i < this.basisCircles.length; i++) {
       result += `<br>${i}: ${toStringVector(this.basisCircles[i])}: ${toStringVector(this.projectionsBasisCircles[i])}`;
     }
     return result;
@@ -168,11 +169,11 @@ class GraphicsNDimensions {
   }
 
   initInfo() {
-    var infoHTML = "";
+    let infoHTML = "";
     infoHTML += "<div style = 'height:300px; overflow-y: scroll;'>";
-    for (var i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i++) {
       this.idsBasis[i] = [];
-      for (var j = 0; j < this.dimension; j++) {
+      for (let j = 0; j < this.dimension; j++) {
         this.idsBasis[i][j] = `${this.idCanvas}textEbasis_${i}_${j}`;
         infoHTML += `<textarea rows = "1" cols = "2" id = "${this.idsBasis[i][j]}"></textarea>`;
       }
@@ -194,13 +195,13 @@ class GraphicsNDimensions {
   }
 
   snapShotLaTeX() {
-    var textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
-    var result = "";
+    let textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
+    let result = "";
     result += `\\documentclass{article} \\usepackage{auto-pst-pdf}<br>`;
     result += `\n%\\usepackage{pst-plot}<br>\n\\begin{document}<br>\n`;
     result += `\\psset{xunit = 0.01cm, yunit = 0.01cm} <br>\n\\begin{pspicture}(0,0)(1,1)\n`;
     ComputeProjections();
-    for (var counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation++) {
+    for (let counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation++) {
       result += this.drawOperations[counterDrawOperation].getLaTeXOperation();
     }
     result += "\\end{pspicture}<br>";
@@ -212,8 +213,8 @@ class GraphicsNDimensions {
   }
 
   drawStandardEiBasis(color) {
-    for (var i = 0; i < this.dimension; i++) {
-      var eiVector = new Array(this.dimension);
+    for (let i = 0; i < this.dimension; i++) {
+      let eiVector = new Array(this.dimension);
       eiVector.fill(0);
       eiVector[i] = 1;
       this.drawCircle(eiVector, color, 3);
@@ -228,7 +229,7 @@ class GraphicsNDimensions {
       color = "black";
     }
     this.drawOperations.push(new DrawCircleAtVector(
-      this.idCanvas, {
+      this, {
       location: position,
       colorFill: color,
       radius: radius,
@@ -242,7 +243,7 @@ class GraphicsNDimensions {
       color = "black";
     }
     this.drawOperations.push(new DrawSegmentBetweenTwoVectors(
-      this.idCanvas, {
+      this, {
       left: left,
       right: right,
       lineWidth: 1,
@@ -256,7 +257,7 @@ class GraphicsNDimensions {
       color = "black";
     }
     this.drawOperations.push(new DrawPath(
-      this.idCanvas, {
+      this, {
       points: points,
       lineWidth: lineWidth,
       colorLine: color,
@@ -274,7 +275,7 @@ class GraphicsNDimensions {
       radius = 3;
     }
     this.drawOperations.push(new DrawHighlights(
-      this.idCanvas, {
+      this, {
       vectors: points,
       indexInOperations: this.drawOperations.length,
       labels: labels,
@@ -289,7 +290,7 @@ class GraphicsNDimensions {
       color = "black";
     }
     this.drawOperations.push(new DrawTextAtVector(
-      this.idCanvas, {
+      this, {
       location: location,
       text: text,
       colorFill: color
@@ -298,17 +299,17 @@ class GraphicsNDimensions {
   }
 
   getBilinearFormInput() {
-    var result = "";
+    let result = "";
     result += "The bilinear form of the vector space follows. The ij^th element ";
     result += "gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite ";
     result += "symmetric bilinear form the javascript might crash. You are expected to enter ";
     result += "a symmetric strictly positive definite matrix. <br> \n";
-    for (var counterRow = 0; counterRow < this.theBilinearForm.length; counterRow++) {
-      for (var counterColumn = 0; counterColumn < this.theBilinearForm[counterRow].NumCols; counterColumn++) {
-        var idBilinearForm = `${this.idCanvas}textBilinearForm_${i}_${j}`;
+    for (let counterRow = 0; counterRow < this.bilinearForm.length; counterRow++) {
+      for (let counterColumn = 0; counterColumn < this.bilinearForm[counterRow].NumCols; counterColumn++) {
+        let idBilinearForm = `${this.idCanvas}textBilinearForm_${i}_${j}`;
         result += `<textarea rows = "1" cols = "2" id = "${idBilinearForm}" `;
         result += `onChange = "setBilinearForm('this.idCanvas', ${counterRow}, ${counterColumn})">`;
-        result += this.theBilinearForm[i][j];
+        result += this.bilinearForm[i][j];
         result += "</textarea>";
       }
       result += "<br>";
@@ -319,13 +320,13 @@ class GraphicsNDimensions {
     result += "<br>1) inside the projection plane ";
     result += "<br>2) in the plane spanned by the selected vector and its orthogonal complement relative to the projection plane. ";
     result += "<br>The angle change matches the motion of your mouse pointer.  ";
-    result += " Special care must be taken if the selected vector lies ";
+    result += "Special care must be taken if the selected vector lies ";
     result += "inside the projection plane or the selected vector is orthogonal to the projection plane. ";
     result += "If one of these cases happens, the picture might jump around a bit.";
     result += "<br>The mouse wheel zooms in/out. ";
     result += "Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu. ";
     result += `<br>${this.drawOperations.length} elements drawn. `;
-    var textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
+    let textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
     textComponent.innerHTML = result;
   }
 
@@ -333,10 +334,10 @@ class GraphicsNDimensions {
     this.animationBasisChange.frameCount = 0;
     this.animationBasisChange.screenStart[0] = this.screenBasis[0].slice();
     this.animationBasisChange.screenStart[1] = this.screenBasis[1].slice();
-    for (var i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i++) {
       this.animationBasisChange.screenGoal[i] = [];
-      for (var counterDimension = 0; counterDimension < this.dimension; counterDimension++) {
-        var coordinate = document.getElementById(this.idsBasis[i][counterDimension]).value;
+      for (let counterDimension = 0; counterDimension < this.dimension; counterDimension++) {
+        let coordinate = document.getElementById(this.idsBasis[i][counterDimension]).value;
         this.animationBasisChange.screenGoal[i][counterDimension] = Number(coordinate);
       }
     }
@@ -354,14 +355,14 @@ class GraphicsNDimensions {
 
   animateChangeProjectionPlaneUser() {
     this.animationBasisChange.frameCount++;
-    var frameCount = this.animationBasisChange.frameCount;
-    var maxFrameCount = this.animationBasisChange.numberOfFrames;
+    let frameCount = this.animationBasisChange.frameCount;
+    let maxFrameCount = this.animationBasisChange.numberOfFrames;
     if (frameCount > maxFrameCount) {
       return;
     }
-    var screenStart = this.animationBasisChange.screenStart;
-    var screenGoal = this.animationBasisChange.screenGoal;
-    for (var i = 0; i < this.dimension; i++) {
+    let screenStart = this.animationBasisChange.screenStart;
+    let screenGoal = this.animationBasisChange.screenGoal;
+    for (let i = 0; i < this.dimension; i++) {
       this.screenBasis[0][i] = screenGoal[0][i] * (frameCount / maxFrameCount) + screenStart[0][i] * (1 - frameCount / maxFrameCount);
       this.screenBasis[1][i] = screenGoal[1][i] * (frameCount / maxFrameCount) + screenStart[1][i] * (1 - frameCount / maxFrameCount);
     }
@@ -369,7 +370,6 @@ class GraphicsNDimensions {
     this.drawAll();
     setTimeout(this.animateChangeProjectionPlaneUser.bind(this), 100);
   }
-
 
   drawAll() {
     if (this.animationBasisChange.frameStarted) {
@@ -384,8 +384,8 @@ class GraphicsNDimensions {
     this.canvas.clearRect(0, 0, this.widthHTML, this.heightHTML);
     this.writeInfo();
     this.highlightInfoContent = [];
-    for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation++) {
-      var currentOperation = this.drawOperations[counterOperation];
+    for (let i = 0; i < this.drawOperations.length; i++) {
+      let currentOperation = this.drawOperations[i];
       if (currentOperation.frameId !== undefined && currentOperation.frameId !== null) {
         if (currentOperation.frameIndex !== this.animation.currentFrameIndex) {
           continue;
@@ -395,7 +395,7 @@ class GraphicsNDimensions {
     }
     if (this.highlightInfoContent.length > 0) {
       if (this.idHighlightInfo !== null) {
-        var highlightComponent = document.getElementById(this.idHighlightInfo);
+        let highlightComponent = document.getElementById(this.idHighlightInfo);
         highlightComponent.innerHTML = this.highlightInfoContent.join("<br>");
       }
     }
@@ -403,17 +403,17 @@ class GraphicsNDimensions {
   }
 
   makeStandardBilinearForm() {
-    this.theBilinearForm = new Array(this.dimension);
-    for (var i = 0; i < this.theBilinearForm.length; i++) {
-      this.theBilinearForm[i] = newArray(this.dimension);
-      this.theBilinearForm[i].fill(0, 0, this.dimension);
-      this.theBilinearForm[i][i] = 1;
+    this.bilinearForm = new Array(this.dimension);
+    for (let i = 0; i < this.bilinearForm.length; i++) {
+      this.bilinearForm[i] = newArray(this.dimension);
+      this.bilinearForm[i].fill(0, 0, this.dimension);
+      this.bilinearForm[i][i] = 1;
     }
   }
 
   makeEiBasis() {
     this.eiBasis = new Array(this.dimension);
-    for (var i = 0; i < this.eiBasis.length; i++) {
+    for (let i = 0; i < this.eiBasis.length; i++) {
       this.eiBasis[i] = new Array(this.dimension);
       this.eiBasis[i].fill(0, 0, this.dimension);
       this.eiBasis[i][i] = 1;
@@ -423,7 +423,7 @@ class GraphicsNDimensions {
   makeBasisCircles() {
     this.basisCircles = new Array(this.dimension);
     this.projectionsBasisCircles = new Array(this.dimension);
-    for (var i = 0; i < this.basisCircles.length; i++) {
+    for (let i = 0; i < this.basisCircles.length; i++) {
       this.basisCircles[i] = new Array(this.dimension);
       this.basisCircles[i].fill(0, 0, this.dimension);
       this.basisCircles[i][i] = 1;
@@ -434,21 +434,21 @@ class GraphicsNDimensions {
 
   init() {
     this.initInfo();
-    if (this.theBilinearForm.length != this.dimension) {
+    if (this.bilinearForm.length != this.dimension) {
       this.makeStandardBilinearForm(this.dimension);
     }
     if (this.basisCircles.length === 0) {
       this.makeBasisCircles();
     } else {
       this.projectionsBasisCircles = new Array(this.basisCircles.length);
-      for (var i = 0; i < this.basisCircles.length; i++) {
+      for (let i = 0; i < this.basisCircles.length; i++) {
         this.projectionsBasisCircles[i] = new Array(2);
         this.projectionsBasisCircles[i].fill(0, 0, 2);
       }
     }
 
     this.makeEiBasis();
-    var theDiv = document.getElementById(this.idCanvas);
+    let theDiv = document.getElementById(this.idCanvas);
     theDiv.width = this.widthHTML;
     theDiv.height = this.heightHTML;
     this.canvas = theDiv.getContext("2d");
@@ -465,15 +465,15 @@ class GraphicsNDimensions {
   }
 
   scaleToUnitLength(output) {
-    var scale = 1 / Math.sqrt(this.scalarProduct(output, output));
+    let scale = 1 / Math.sqrt(this.scalarProduct(output, output));
     multiplyVectorByScalar(output, scale)
   }
 
   scalarProduct(vector1, vector2) {
-    var result = 0;
-    for (var i = 0; i < this.dimension; i++) {
-      for (var j = 0; j < this.dimension; j++) {
-        result += vector1[i] * vector2[j] * this.theBilinearForm[i][j];
+    let result = 0;
+    for (let i = 0; i < this.dimension; i++) {
+      for (let j = 0; j < this.dimension; j++) {
+        result += vector1[i] * vector2[j] * this.bilinearForm[i][j];
       }
     }
     return result;
@@ -497,18 +497,17 @@ class GraphicsNDimensions {
 
   computeProjectionsEiBasis() {
     if (this.projectionsEiVectors.length != this.dimension) {
-      this.projectionsEiVectors[i] = new Array(this.dimension);
-      for (var i = 0; i < this.dimension; i++) {
+      for (let i = 0; i < this.dimension; i++) {
         this.projectionsEiVectors[i] = new Array(this.dimension);
       }
     }
-    for (var i = 0; i < this.eiBasis.length; i++) {
+    for (let i = 0; i < this.eiBasis.length; i++) {
       this.computeScreenCoordinates(this.eiBasis[i], this.projectionsEiVectors[i]);
     }
   }
 
   computeProjectionsSpecialVectors() {
-    for (var i = 0; i < this.basisCircles.length; i++) {
+    for (let i = 0; i < this.basisCircles.length; i++) {
       if (this.projectionsBasisCircles[i] === null || this.projectionsBasisCircles[i] === undefined) {
         this.projectionsBasisCircles[i] = [];
       }
@@ -519,9 +518,9 @@ class GraphicsNDimensions {
   rotateInPlane(
     inputOutput, orthonormalBasis1, orthonormalBasis2, angle
   ) {
-    var result = inputOutput.slice();
-    var scalarProductWithBasis1 = this.scalarProduct(result, orthonormalBasis1);
-    var scalarProductWithBasis2 = this.scalarProduct(result, orthonormalBasis2);
+    let result = inputOutput.slice();
+    let scalarProductWithBasis1 = this.scalarProduct(result, orthonormalBasis1);
+    let scalarProductWithBasis2 = this.scalarProduct(result, orthonormalBasis2);
     addVectorTimesScalar(result, orthonormalBasis1, - scalarProductWithBasis1);
     addVectorTimesScalar(result, orthonormalBasis2, - scalarProductWithBasis2);
     addVectorTimesScalar(
@@ -536,19 +535,19 @@ class GraphicsNDimensions {
       scalarProductWithBasis1 * Math.sin(angle) +
       scalarProductWithBasis2 * Math.cos(angle)
     );
-    for (var i = 0; i < inputOutput.length; i++) {
+    for (let i = 0; i < inputOutput.length; i++) {
       inputOutput[i] = result[i];
     }
   }
 
   changeBasis() {
-    var newX = this.mousePositionScreen[0] - this.shiftScreenCoordinates[0];
-    var newY = this.mousePositionScreen[1] - this.shiftScreenCoordinates[1];
+    let newX = this.mousePositionScreen[0] - this.shiftScreenCoordinates[0];
+    let newY = this.mousePositionScreen[1] - this.shiftScreenCoordinates[1];
     if (newX == 0 && newY == 0) {
       return;
     }
-    var oldX = this.projectionSelectedAtSelection[0] - this.shiftScreenCoordinates[0];
-    var oldY = this.projectionSelectedAtSelection[1] - this.shiftScreenCoordinates[1];
+    let oldX = this.projectionSelectedAtSelection[0] - this.shiftScreenCoordinates[0];
+    let oldY = this.projectionSelectedAtSelection[1] - this.shiftScreenCoordinates[1];
     newX /= this.graphicsUnit;
     newY /= this.graphicsUnit;
     oldX /= this.graphicsUnit;
@@ -575,21 +574,21 @@ class GraphicsNDimensions {
     if (this.dimension <= 2) {
       return;
     }
-    var selectedVector = this.basisCircles[this.selectedBasisIndex];
-    var xCuttingOld = this.scalarProduct(selectedVector, this.vProjectionNormalizedSelected);
-    var yCuttingOld = this.scalarProduct(selectedVector, this.vOrthogonalSelected);
-    var hypothenuseSquared = xCuttingOld * xCuttingOld + yCuttingOld * yCuttingOld;
+    let selectedVector = this.basisCircles[this.selectedBasisIndex];
+    let xCuttingOld = this.scalarProduct(selectedVector, this.vProjectionNormalizedSelected);
+    let yCuttingOld = this.scalarProduct(selectedVector, this.vOrthogonalSelected);
+    let hypothenuseSquared = xCuttingOld * xCuttingOld + yCuttingOld * yCuttingOld;
 
-    var xCuttingNew = Math.sqrt(newX * newX + newY * newY);
+    let xCuttingNew = Math.sqrt(newX * newX + newY * newY);
     if (xCuttingNew * xCuttingNew > hypothenuseSquared) {
       xCuttingNew = Math.sqrt(hypothenuseSquared) - 0.01;
     }
-    var yCuttingNew = Math.sqrt(hypothenuseSquared - xCuttingNew * xCuttingNew);
+    let yCuttingNew = Math.sqrt(hypothenuseSquared - xCuttingNew * xCuttingNew);
     //if (newX * oldX + newY * oldY < 0) {
     //  xCuttingNew *= - 1;
     //}
     this.angleCuttingChange = - Math.atan2(yCuttingNew, xCuttingNew) + Math.atan2(yCuttingOld, xCuttingOld);
-    for (var i = 0; i < 5; i++) {
+    for (let i = 0; i < 5; i++) {
       if (this.angleCuttingChange <= - Math.PI) {
         this.angleCuttingChange += 2 * Math.PI;
       }
@@ -617,21 +616,9 @@ class GraphicsNDimensions {
   computePosXPosY(event) {
     this.mousePositionScreen[0] = event.clientX;
     this.mousePositionScreen[1] = event.clientY;
-    var rect = this.canvasContainer.getBoundingClientRect();
+    let rect = this.canvasContainer.getBoundingClientRect();
     this.mousePositionScreen[0] -= rect.left;
     this.mousePositionScreen[1] -= rect.top;
-    //  while (thePointer) {
-    //    this.mousePositionScreen[0] -= thePointer.offsetLeft;
-    //    if (typeof thePointer.scrollLeft === "number") {
-    //      this.mousePositionScreen[0] += thePointer.scrollLeft;
-    //    }
-    //    this.mousePositionScreen[1] -= thePointer.offsetTop;
-    //    if (typeof thePointer.scrollTop === "number") {
-    //      this.mousePositionScreen[1] += thePointer.scrollTop;
-    //    }
-    //    //thePointer = thePointer.offsetParent;
-    //    thePointer = thePointer.parentElement;
-    //  }
   }
 
   releaseMouse(event) {
@@ -648,21 +635,21 @@ class GraphicsNDimensions {
     this.screenBasisAtSelection[0] = this.screenBasis[0].slice();
     this.screenBasisAtSelection[1] = this.screenBasis[1].slice();
 
-    var epsilon = 0.0000001;
-    for (var round = 0; round < this.dimension + 1; round++) {
-      var selectedVector = this.basisCircles[this.selectedBasisIndex].slice();
+    let epsilon = 0.0000001;
+    for (let round = 0; round < this.dimension + 1; round++) {
+      let selectedVector = this.basisCircles[this.selectedBasisIndex].slice();
       if (round > 0) {
         selectedVector[(round + 1) % this.dimension] += 0.01;
       }
-      var vectorTimesE1 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[0]);
-      var vectorTimesE2 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[1]);
+      let vectorTimesE1 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[0]);
+      let vectorTimesE2 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[1]);
       this.vProjectionNormalizedSelected = this.screenBasisAtSelection[0].slice();
       multiplyVectorByScalar(this.vProjectionNormalizedSelected, vectorTimesE1);
       addVectorTimesScalar(this.vProjectionNormalizedSelected, this.screenBasisAtSelection[1], vectorTimesE2);
       this.vOrthogonalSelected = selectedVector.slice();
       addVectorTimesScalar(this.vOrthogonalSelected, this.vProjectionNormalizedSelected, - 1);
-      var vOrthogonalSquareLength = this.scalarProduct(this.vOrthogonalSelected, this.vOrthogonalSelected);
-      var vProjectionSquareLength = this.scalarProduct(this.vProjectionNormalizedSelected, this.vProjectionNormalizedSelected);
+      let vOrthogonalSquareLength = this.scalarProduct(this.vOrthogonalSelected, this.vOrthogonalSelected);
+      let vProjectionSquareLength = this.scalarProduct(this.vProjectionNormalizedSelected, this.vProjectionNormalizedSelected);
       if (vOrthogonalSquareLength > epsilon && vProjectionSquareLength > epsilon) {
         break;
       }
@@ -692,7 +679,7 @@ class GraphicsNDimensions {
       this.shiftScreenCoordinatesClicked[0] = this.shiftScreenCoordinates[0];
       this.shiftScreenCoordinatesClicked[1] = this.shiftScreenCoordinates[1];
     }
-    for (var i = 0; i < this.basisCircles.length; i++) {
+    for (let i = 0; i < this.basisCircles.length; i++) {
       if (this.pointsAreWithinClickTolerance(
         this.mousePositionScreenClicked[0], this.mousePositionScreenClicked[1],
         this.projectionsBasisCircles[i][0], this.projectionsBasisCircles[i][1]
@@ -703,15 +690,15 @@ class GraphicsNDimensions {
   }
 
   computeHighlightedIndex() {
-    var oldSelected = this.selectedHighlightIndex;
+    let oldSelected = this.selectedHighlightIndex;
     this.selectedHighlightIndex = - 1;
     this.currentHighlightIndices = {};
-    for (var i = 0; i < this.indicesHighlightOperations.length; i++) {
-      var currentIndex = this.indicesHighlightOperations[i];
-      var currentHighlight = this.drawOperations[currentIndex];
+    for (let i = 0; i < this.indicesHighlightOperations.length; i++) {
+      let currentIndex = this.indicesHighlightOperations[i];
+      let currentHighlight = this.drawOperations[currentIndex];
       currentHighlight.computeProjections();
-      var currentVectors = currentHighlight.vectorProjections;
-      for (var j = 0; j < currentVectors.length; j++) {
+      let currentVectors = currentHighlight.vectorProjections;
+      for (let j = 0; j < currentVectors.length; j++) {
         if (this.pointsAreWithinClickTolerance(
           this.mousePositionScreen[0], this.mousePositionScreen[1], currentVectors[j][0], currentVectors[j][1]
         )) {
@@ -730,7 +717,7 @@ class GraphicsNDimensions {
     this.computePosXPosY(event);
     this.writeInfo();
     //this.processMousePosition(posx, - posy);
-    var doRedraw = this.computeHighlightedIndex();
+    let doRedraw = this.computeHighlightedIndex();
     if (this.selectedBasisIndex == - 1 && !doRedraw) {
       return;
     }
@@ -741,13 +728,13 @@ class GraphicsNDimensions {
       ) {
         doRedraw = true;
       }
-      var deltaX = this.mousePositionScreen[0] - this.mousePositionScreenClicked[0];
-      var deltaY = this.mousePositionScreen[1] - this.mousePositionScreenClicked[1];
+      let deltaX = this.mousePositionScreen[0] - this.mousePositionScreenClicked[0];
+      let deltaY = this.mousePositionScreen[1] - this.mousePositionScreenClicked[1];
       this.shiftScreenCoordinates[0] = this.shiftScreenCoordinatesClicked[0] + deltaX;
       this.shiftScreenCoordinates[1] = this.shiftScreenCoordinatesClicked[1] + deltaY;
     } else if (this.selectedBasisIndex >= 0) {
       this.changeBasis();
-      var doRedraw = true;
+      doRedraw = true;
     }
     if (doRedraw) {
       this.drawAll();
@@ -758,19 +745,19 @@ class GraphicsNDimensions {
     event = event ? event : window.event;
     event.preventDefault();
     event.stopPropagation();
-    var theWheelDelta = event.detail ? event.detail * - 1 : event.wheelDelta / 40;
+    let theWheelDelta = event.detail ? event.detail * - 1 : event.wheelDelta / 40;
     this.computePosXPosY(event);
 
-    var oldXDelta = (this.mousePositionScreen[0] - this.shiftScreenCoordinates[0]);
-    var oldYDelta = (this.mousePositionScreen[1] - this.shiftScreenCoordinates[1]);
-    var oldXDeltaScaled = oldXDelta / this.graphicsUnit;
-    var oldYDeltaScaled = oldYDelta / this.graphicsUnit;
+    let oldXDelta = (this.mousePositionScreen[0] - this.shiftScreenCoordinates[0]);
+    let oldYDelta = (this.mousePositionScreen[1] - this.shiftScreenCoordinates[1]);
+    let oldXDeltaScaled = oldXDelta / this.graphicsUnit;
+    let oldYDeltaScaled = oldYDelta / this.graphicsUnit;
     this.graphicsUnit += theWheelDelta;
     if (this.graphicsUnit < 3) {
       this.graphicsUnit = 3;
     }
-    var newXDelta = oldXDeltaScaled * this.graphicsUnit;
-    var newYDelta = oldYDeltaScaled * this.graphicsUnit;
+    let newXDelta = oldXDeltaScaled * this.graphicsUnit;
+    let newYDelta = oldYDeltaScaled * this.graphicsUnit;
     this.shiftScreenCoordinates[0] += oldXDelta - newXDelta;
     this.shiftScreenCoordinates[1] += oldYDelta - newYDelta;
     this.drawAll();
@@ -778,14 +765,14 @@ class GraphicsNDimensions {
 
   initFromObject(input) {
     this.dimension = input.dimension;
-    this.theBilinearForm = input.bilinearForm;
+    this.bilinearForm = input.bilinearForm;
     this.screenBasis = input.screenBasis;
     this.basisCircles = input.draggablePoints;
     if (input.frameLength !== undefined && input.frameLength !== null) {
       this.animation.frameLength = input.frameLength;
     }
-    for (var i = 0; i < input.drawObjects.length; i++) {
-      var currentOperation = input.drawObjects[i];
+    for (let i = 0; i < input.drawObjects.length; i++) {
+      let currentOperation = input.drawObjects[i];
       if (currentOperation.operation === "circleAtVector") {
         this.drawCircle(
           currentOperation.location,
@@ -843,11 +830,14 @@ class GraphicsNDimensions {
 }
 
 class DrawHighlights {
-  constructor(inputOwnerId, inputData) {
-    this.ownerId = inputOwnerId;
+  constructor(
+    /**@type {GraphicsNDimensions} */
+    inputOwner,
+    inputData,
+  ) {
+    this.owner = inputOwner;
     this.indexInOperations = inputData.indexInOperations;
-    var owner = collectionGraphicsNDimensions[this.ownerId];
-    owner.indicesHighlightOperations.push(this.indexInOperations);
+    this.owner.indicesHighlightOperations.push(this.indexInOperations);
     this.vectors = inputData.vectors;
     this.vectorProjections = [];
     this.color = inputData.color;
@@ -856,39 +846,37 @@ class DrawHighlights {
   }
 
   computeProjections() {
-    var owner = collectionGraphicsNDimensions[this.ownerId];
     if (this.vectorProjections.length !== this.vectors.length) {
       this.vectorProjecions = new Array(this.vectors.length);
     }
-    for (var i = 0; i < this.vectors.length; i++) {
+    for (let i = 0; i < this.vectors.length; i++) {
       if (this.vectorProjections[i] === undefined || this.vectorProjections[i] === null) {
         this.vectorProjections[i] = [];
       }
-      owner.computeScreenCoordinates(this.vectors[i], this.vectorProjections[i]);
+      this.owner.computeScreenCoordinates(this.vectors[i], this.vectorProjections[i]);
     }
   }
 
   drawNoFinish() {
     /**@type {GraphicsNDimensions} */
-    var owner = collectionGraphicsNDimensions[this.ownerId];
-    if (!(this.indexInOperations in owner.currentHighlightIndices)) {
+    if (!(this.indexInOperations in this.owner.currentHighlightIndices)) {
       return;
     }
-    var currentIndices = owner.currentHighlightIndices[this.indexInOperations];
-    var nextLine = [];
-    for (var i = 0; i < this.labels.length; i++) {
+    let currentIndices = this.owner.currentHighlightIndices[this.indexInOperations];
+    let nextLine = [];
+    for (let i = 0; i < this.labels.length; i++) {
       if (i in currentIndices) {
         nextLine.push(`<b>${this.labels[i]}</b>`);
       } else {
         nextLine.push(this.labels[i]);
       }
     }
-    owner.highlightInfoContent.push(nextLine.join(", "));
+    this.owner.highlightInfoContent.push(nextLine.join(", "));
 
     this.computeProjections();
-    var canvas = owner.canvas;
+    let canvas = this.owner.canvas;
     canvas.strokeStyle = this.color;
-    for (var i = 0; i < this.vectors.length; i++) {
+    for (let i = 0; i < this.vectors.length; i++) {
       canvas.beginPath();
       canvas.arc(
         this.vectorProjections[i][0],
@@ -902,29 +890,33 @@ class DrawHighlights {
 }
 
 class DrawPath {
-  constructor(inputOwnerId, inputData) {
-    this.ownerId = inputOwnerId;
+  constructor(
+    /** @type{GraphicsNDimensions} */
+    inputOwner, 
+    inputData,
+  ) {
+    /** @type{GraphicsNDimensions} */
+    this.owner = inputOwner;
     this.points = inputData.points;
     this.lineWidth = inputData.lineWidth;
     this.colorLine = inputData.colorLine;
     if (inputData.frameId !== "" && inputData.frameId !== null && inputData.frameId !== undefined) {
       this.frameId = inputData.frameId;
       this.frameIndex = inputData.frameIndex;
-      collectionGraphicsNDimensions[this.ownerId].registerFrameIndex(this.frameIndex);
+      this.owner.registerFrameIndex(this.frameIndex);
     }
   }
 
   drawNoFinish() {
-    var owner = collectionGraphicsNDimensions[this.ownerId];
-    var canvas = owner.canvas;
+    let canvas = this.owner.canvas;
     canvas.beginPath();
     canvas.strokeStyle = this.colorLine;
     canvas.lineWidth = this.lineWidth;
-    var vector = [];
-    owner.computeScreenCoordinates(this.points[0], vector);
+    let vector = [];
+    this.owner.computeScreenCoordinates(this.points[0], vector);
     canvas.moveTo(vector[0], vector[1]);
-    for (var counterPoints = 1; counterPoints < this.points.length; counterPoints++) {
-      owner.computeScreenCoordinates(this.points[counterPoints], vector);
+    for (let i = 1; i < this.points.length; i++) {
+      this.owner.computeScreenCoordinates(this.points[i], vector);
       canvas.lineTo(vector[0], vector[1]);
     }
     canvas.stroke();
@@ -932,8 +924,13 @@ class DrawPath {
 }
 
 class DrawSegmentBetweenTwoVectors {
-  constructor(inputOwnerId, inputData) {
-    this.ownerId = inputOwnerId;
+  constructor(
+    /** @type{GraphicsNDimensions} */
+    inputOwner, 
+    inputData,
+  ) {
+    /** @type{GraphicsNDimensions} */
+    this.owner = inputOwner;
     this.left = inputData.left.slice();
     this.right = inputData.right.slice();
     this.lineWidth = inputData.lineWidth;
@@ -941,15 +938,14 @@ class DrawSegmentBetweenTwoVectors {
   }
 
   drawNoFinish() {
-    var owner = collectionGraphicsNDimensions[this.ownerId];
-    var canvas = owner.canvas;
+    let canvas = this.owner.canvas;
     canvas.beginPath();
     canvas.strokeStyle = this.colorLine;
     canvas.lineWidth = this.lineWidth;
-    var screenCoordinatesLeft = [];
-    var screenCoordinatesRight = [];
-    owner.computeScreenCoordinates(this.left, screenCoordinatesLeft);
-    owner.computeScreenCoordinates(this.right, screenCoordinatesRight);
+    let screenCoordinatesLeft = [];
+    let screenCoordinatesRight = [];
+    this.owner.computeScreenCoordinates(this.left, screenCoordinatesLeft);
+    this.owner.computeScreenCoordinates(this.right, screenCoordinatesRight);
     canvas.moveTo(screenCoordinatesLeft[0], screenCoordinatesLeft[1]);
     canvas.lineTo(screenCoordinatesRight[0], screenCoordinatesRight[1]);
     canvas.stroke();
@@ -957,24 +953,26 @@ class DrawSegmentBetweenTwoVectors {
 }
 
 class DrawFilledShape {
-  constructor(inputOwnerId, inputData) {
+  constructor(
+    /** @type{GraphicsNDimensions} */
+    inputOwner, inputData,
+  ) {
     this.points = inputData.points;
-    this.ownerId = inputOwnerId;
+    this.owner = inputOwner;
     this.colorFill = inputData.colorFill;
     this.lineWidth = inputData.lineWidth;
   }
 
   drawNoFinish() {
-    var owner = collectionGraphicsNDimensions[this.ownerId];
-    var canvas = owner.canvas;
+    let canvas = this.owner.canvas;
     canvas.beginPath();
     canvas.fillStyle = this.colorFill;
     canvas.lineWidth = this.lineWidth;
-    var currentPoint = [];
-    owner.computeScreenCoordinates(this.points[0], currentPoint);
+    let currentPoint = [];
+    this.owner.computeScreenCoordinates(this.points[0], currentPoint);
     canvas.moveTo(currentPoint[0], currentPoint[1]);
-    for (var counterPoint = 1; counterPoint < this.points.length; counterPoint++) {
-      owner.computeAllScreenCoordinates(this.points[counterPoint], currentPoint);
+    for (let counterPoint = 1; counterPoint < this.points.length; counterPoint++) {
+      this.owner.computeAllScreenCoordinates(this.points[counterPoint], currentPoint);
       canvas.lineTo(currentPoint[0], currentPoint[1]);
     }
     canvas.closePath();
@@ -984,8 +982,13 @@ class DrawFilledShape {
 }
 
 class DrawCircleAtVector {
-  constructor(inputOwnerId, inputData) {
-    this.ownerId = inputOwnerId;
+  constructor(
+    /** @type{GraphicsNDimensions} */
+    inputOwner, 
+    inputData,
+  ) {
+    /** @type{GraphicsNDimensions} */
+    this.owner = inputOwner;
     this.location = inputData.location.slice();
     this.locationScreenCoordinates = [];
     this.colorFill = inputData.colorFill;
@@ -993,16 +996,15 @@ class DrawCircleAtVector {
     if (inputData.frameId !== undefined && inputData.frameId !== null) {
       this.frameId = inputData.frameId;
       this.frameIndex = inputData.frameIndex;
-      collectionGraphicsNDimensions[this.ownerId].registerFrameIndex(this.frameIndex);
+      this.owner.registerFrameIndex(this.frameIndex);
     }
   }
 
   drawNoFinish() {
-    var owner = collectionGraphicsNDimensions[this.ownerId];
-    var canvas = owner.canvas;
+    let canvas = this.owner.canvas;
     canvas.strokeStyle = this.colorFill;
     canvas.fillStyle = this.colorFill;
-    owner.computeScreenCoordinates(this.location, this.locationScreenCoordinates);
+    this.owner.computeScreenCoordinates(this.location, this.locationScreenCoordinates);
     canvas.beginPath();
     canvas.arc(
       this.locationScreenCoordinates[0],
@@ -1015,8 +1017,13 @@ class DrawCircleAtVector {
 }
 
 class DrawTextAtVector {
-  constructor(inputOwnerId, inputData) {
-    this.ownerId = inputOwnerId;
+  /** @type{GraphicsNDimensions} */
+  constructor(
+    /** @type{GraphicsNDimensions} */
+    inputOwner, 
+    inputData,
+  ) {
+    this.owner = inputOwner;
     this.text = inputData.text;
     this.location = inputData.location;
     this.locationScreen = [];
@@ -1024,30 +1031,33 @@ class DrawTextAtVector {
   }
 
   drawNoFinish() {
-    var owner = collectionGraphicsNDimensions[this.ownerId];
-    var canvas = owner.canvas;
+    let canvas = this.owner.canvas;
     canvas.strokeStyle = this.colorFill;
-    owner.computeScreenCoordinates(this.location, this.locationScreen);
-    canvas.strokeText(this.text, this.locationScreen[0] + owner.textShift[0], this.locationScreen[1] + owner.textShift[1]);
+    this.owner.computeScreenCoordinates(this.location, this.locationScreen);
+    canvas.strokeText(
+      this.text, 
+      this.locationScreen[0] + this.owner.textShift[0], 
+      this.locationScreen[1] + this.owner.textShift[1],
+    );
   }
 }
 
 function multiplyVectorByScalar(vector, scalar) {
-  for (var counterDimension = 0; counterDimension < vector.length; counterDimension++) {
+  for (let counterDimension = 0; counterDimension < vector.length; counterDimension++) {
     vector[counterDimension] *= scalar;
   }
 }
 
 function addVectorTimesScalar(vector, other, scalar) {
-  for (var counterDimension = 0; counterDimension < vector.length; counterDimension++) {
+  for (let counterDimension = 0; counterDimension < vector.length; counterDimension++) {
     vector[counterDimension] += other[counterDimension] * scalar;
   }
 }
 
 function testA3(idCanvas, idSpanInformation) {
-  var theA3 = new GraphicsNDimensions(idCanvas, idSpanInformation);
+  let theA3 = new GraphicsNDimensions(idCanvas, idSpanInformation);
   theA3.dimension = 3;
-  theA3.theBilinearForm = [
+  theA3.bilinearForm = [
     [2, -1, 0],
     [-1, 2, -1],
     [0, -1, 2]
@@ -1056,7 +1066,7 @@ function testA3(idCanvas, idSpanInformation) {
     [0.707107, 0.707107, 0],
     [0, 0.707107, 0.707107]
   ];
-  var labeledVectors = [
+  let labeledVectors = [
     [-1, -1, -1],
     [0, -1, -1],
     [-1, -1, 0],
@@ -1070,7 +1080,7 @@ function testA3(idCanvas, idSpanInformation) {
     [0, 1, 1],
     [1, 1, 1],
   ];
-  var segments = [
+  let segments = [
     [[0, - 1, - 1], [1, 0, 0]],
     [[0, - 1, - 1], [-1, -1, -1]],
     [[0, - 1, - 1], [0, 0, -1]],
@@ -1098,12 +1108,12 @@ function testA3(idCanvas, idSpanInformation) {
   ];
   theA3.drawStandardEiBasis("red");
   theA3.drawText([1, 0, 0], "(1, 0, 0)");
-  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
+  for (let counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
     theA3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
     //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
     //theA3.drawCircle(labeledVectors[counterLabel], "red");
   }
-  for (var counterSegment = 0; counterSegment < segments.length; counterSegment++) {
+  for (let counterSegment = 0; counterSegment < segments.length; counterSegment++) {
     theA3.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
   }
   theA3.graphicsUnit = 150;
@@ -1117,14 +1127,14 @@ function createGraphicsFromObject(input) {
   if (input.idSpanInformation === undefined || input.idSpanInformation === null) {
     throw ("idSpanInformation missing.");
   }
-  var theObject = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation, input.idHighlightInformation);
+  let theObject = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation, input.idHighlightInformation);
   theObject.initFromObject(input);
 }
 
 function testA4(idCanvas, idSpanInformation) {
-  var theA4 = new GraphicsNDimensions(idCanvas, idSpanInformation);
+  let theA4 = new GraphicsNDimensions(idCanvas, idSpanInformation);
   theA4.dimension = 4;
-  theA4.theBilinearForm = [
+  theA4.bilinearForm = [
     [2, -1, 0, 0],
     [-1, 2, -1, 0],
     [0, -1, 2, -1],
@@ -1134,7 +1144,7 @@ function testA4(idCanvas, idSpanInformation) {
     [-0.195, 0.316, 0.828, 0.632],
     [0.602, 0.973, 0.602, 0]
   ];
-  var labeledVectors = [
+  let labeledVectors = [
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
@@ -1146,23 +1156,23 @@ function testA4(idCanvas, idSpanInformation) {
     [0, 1, 1, 1],
     [1, 1, 1, 1],
   ];
-  var numberOfPositiveVectors = labeledVectors.length;
-  for (var counter = 0; counter < numberOfPositiveVectors; counter++) {
-    var theVector = labeledVectors[counter].slice();
+  let numberOfPositiveVectors = labeledVectors.length;
+  for (let counter = 0; counter < numberOfPositiveVectors; counter++) {
+    let theVector = labeledVectors[counter].slice();
     multiplyVectorByScalar(theVector, - 1);
     labeledVectors.push(theVector);
   }
-  var segments = [];
-  for (var counter = 0; counter < labeledVectors.length; counter++) {
-    var minDistance = 10;
-    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
-      var newDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
+  let segments = [];
+  for (let counter = 0; counter < labeledVectors.length; counter++) {
+    let minDistance = 10;
+    for (let secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
+      let newDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (newDistance < minDistance && newDistance > 0) {
         minDistance = newDistance;
       }
     }
-    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
-      var theDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
+    for (let secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
+      let theDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (theDistance != minDistance) {
         continue;
       }
@@ -1171,12 +1181,12 @@ function testA4(idCanvas, idSpanInformation) {
   }
 
   theA4.drawStandardEiBasis("red");
-  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
+  for (let counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
     theA4.drawLine([0, 0, 0, 0], labeledVectors[counterLabel], "green");
     //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
     //theA3.drawCircle(labeledVectors[counterLabel], "red");
   }
-  for (var counterSegment = 0; counterSegment < segments.length; counterSegment++) {
+  for (let counterSegment = 0; counterSegment < segments.length; counterSegment++) {
     theA4.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
   }
   theA4.graphicsUnit = 150;
@@ -1184,6 +1194,10 @@ function testA4(idCanvas, idSpanInformation) {
 }
 
 var module;
+if (module === undefined) {
+  module = {};
+}
+
 if (window.calculator === undefined) {
   window.calculator = {};
 }
@@ -1196,12 +1210,9 @@ if (window.calculator.graphicsNDimensions === undefined) {
   };
 }
 
-if (module === undefined) {
-  module = {};
-}
-
 module.exports = {
   createGraphicsFromObject,
+  collectionGraphicsNDimensions,
   GraphicsNDimensions,
   startProjectionPlaneUser,
   testA3,

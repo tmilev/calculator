@@ -184,14 +184,21 @@ void DrawOperations::drawCircleAtVectorBufferDouble(
   operation[DrawOperations::fieldLocation] = input;
   operation[DrawOperations::fieldRadius] = radius;
   operation[DrawOperations::fieldColor] = color;
-  //operation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
   this->operations.addOnTop(operation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferRational(
-  const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth
+  const Vector<Rational>& vector1,
+  const Vector<Rational>& vector2,
+  const std::string& color,
+  double lineWidth
 ) {
-  this->drawLineBetweenTwoVectorsBufferDouble(vector1.getVectorDouble(), vector2.getVectorDouble(), color, lineWidth);
+  this->drawLineBetweenTwoVectorsBufferDouble(
+    vector1.getVectorDouble(),
+    vector2.getVectorDouble(),
+    color,
+    lineWidth
+  );
 }
 
 void DrawOperations::drawPath(

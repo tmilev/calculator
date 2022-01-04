@@ -10273,20 +10273,24 @@ std::string ConeCollection::drawMeToHtmlProjective(
 }
 
 bool ConeCollection::drawMeLastCoordinateAffine(
-  bool initDrawingVariables,
+  bool initializeDrawingVariables,
   DrawingVariables& drawingVariables,
   FormatExpressions& format
 ) {
   MacroRegisterFunctionWithName("ConeCollection::drawMeLastCoordinateAffine");
   this->checkIsRefinedOrCrash();
   bool result = true;
-  if (initDrawingVariables) {
+  if (initializeDrawingVariables) {
     drawingVariables.operations.initDimensions(this->getDimension() - 1);
   }
 
   drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension() - 1);
   for (int i = 0; i < this->refinedCones.size; i ++) {
-    result = this->refinedCones[i].drawMeLastCoordinateAffine(initDrawingVariables, drawingVariables, format) && result;
+    if (!this->refinedCones[i].drawMeLastCoordinateAffine(
+      initializeDrawingVariables, drawingVariables, format
+    )) {
+      result = false;
+    }
     std::stringstream tempStream;
     tempStream << i + 1;
     Vector<Rational> root = this->nonRefinedCones[i].getInternalPoint();
@@ -10391,7 +10395,6 @@ bool Cone::regularizeToBasis(
   return result;
 }
 
-
 bool Cone::drawMeLastCoordinateAffine(
   bool initializeDrawingVariables,
   DrawingVariables& drawingVariables,
@@ -10420,9 +10423,6 @@ bool Cone::drawMeLastCoordinateAffine(
       drawVertex[i] = false;
       foundBadVertex = true;
     }
-  }
-  if (initializeDrawingVariables) {
-    drawingVariables.drawCoordSystemBuffer(drawingVariables, this->getDimension() - 1);
   }
   for (int k = 0; k < this->normals.size; k ++) {
     for (int i = 0; i < verticesScaled.size; i ++) {

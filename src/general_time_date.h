@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderDateAndTimeWrappersAlreadyDefined
-#define vpfHeaderDateAndTimeWrappersAlreadyDefined
+#ifndef header_general_time_date_ALREADY_INCLUDED
+#define header_general_time_date_ALREADY_INCLUDED
 #include "macros.h"
 #include <ctime>
 
@@ -24,4 +24,4 @@ public:
   TimeWrapper();
 };
 
-#endif
+#endif // header_general_time_date_ALREADY_INCLUDED

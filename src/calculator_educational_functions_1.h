@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef CALCULATOR_EDUCATIONAL_FUNCTIONS
-#define CALCULATOR_EDUCATIONAL_FUNCTIONS
+#ifndef header_calculator_educational_functions_ALREADY_INCLUDED
+#define header_calculator_educational_functions_ALREADY_INCLUDED
 #include "calculator_interface.h"
 
 class UnivariateEquation {
@@ -101,4 +101,4 @@ public:
   );
 };
 
-#endif //CALCULATOR_EDUCATIONAL_FUNCTIONS
+#endif //header_calculator_educational_functions_ALREADY_INCLUDED

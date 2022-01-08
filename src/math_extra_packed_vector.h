@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfPackedVector_h_already_included
-#define vpfPackedVector_h_already_included
+#ifndef header_math_extra_packed_vector_ALREADY_INCLUDED
+#define header_math_extra_packed_vector_ALREADY_INCLUDED
 #include "json.h"
 #include "math_extra_vector_space.h"
 #include "math_extra_finite_groups_implementation.h"
@@ -411,4 +411,5 @@ Rational AnotherWeylGroup<scalar, templateVector>::getHermitianProduct(const Vec
   }
   return acc / this->size();
 }
-#endif
+
+#endif // header_math_extra_packed_vector_ALREADY_INCLUDED

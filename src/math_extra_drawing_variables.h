@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderDrawingVars_Already_included
-#define vpfHeaderDrawingVars_Already_included
+#ifndef header_math_extra_drawing_variables_ALREADY_INCLUDED
+#define header_math_extra_drawing_variables_ALREADY_INCLUDED
 
 #include "math_general.h"
 
@@ -54,37 +54,44 @@ public:
   void initDimensions(int dimension);
   int getDimensionFirstDimensionDependentOperation();
   int getDimensionFromBilinearForm();
-  void getCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
-    X1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[0]);
-    Y1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[1]);
-    X1 = X1 * this->graphicsUnit + this->centerX;
-    Y1 = Y1 * this->graphicsUnit + this->centerY;
+  void getCoordsDrawingComputeAll(Vector<double>& input, double& x1, double& y1) {
+    x1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[0]);
+    y1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[1]);
+    x1 = x1 * this->graphicsUnit + this->centerX;
+    y1 = y1 * this->graphicsUnit + this->centerY;
   }
-  void getCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1) {
-    X1 = 0;
-    Y1 = 0;
+  void getCoordsForDrawingProjectionsComputed(Vector<double>& input, double& x1, double& y1) {
+    x1 = 0;
+    y1 = 0;
     for (int j = 0; j < input.size; j ++) {
-      X1 += this->projectionsEiVectors[j][0] * input[j];
-      Y1 += this->projectionsEiVectors[j][1] * input[j];
+      x1 += this->projectionsEiVectors[j][0] * input[j];
+      y1 += this->projectionsEiVectors[j][1] * input[j];
     }
-    X1 = X1 * this->graphicsUnit + this->centerX;
-    Y1 = Y1 * this->graphicsUnit + this->centerY;
+    x1 = x1 * this->graphicsUnit + this->centerX;
+    y1 = y1 * this->graphicsUnit + this->centerY;
   }
-  void getCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2) {
-    X1 = 0;
-    X2 = 0;
-    Y1 = 0;
-    Y2 = 0;
+  void getCoordsForDrawingProjectionsComputed(
+    Vector<double>& input1,
+    Vector<double>& input2,
+    double& x1,
+    double& y1,
+    double& x2,
+    double& y2
+  ) {
+    x1 = 0;
+    x2 = 0;
+    y1 = 0;
+    y2 = 0;
     for (int j = 0; j < input1.size; j ++) {
-      X1 += this->projectionsEiVectors[j][0] * input1[j];
-      Y1 += this->projectionsEiVectors[j][1] * input1[j];
-      X2 += this->projectionsEiVectors[j][0] * input2[j];
-      Y2 += this->projectionsEiVectors[j][1] * input2[j];
+      x1 += this->projectionsEiVectors[j][0] * input1[j];
+      y1 += this->projectionsEiVectors[j][1] * input1[j];
+      x2 += this->projectionsEiVectors[j][0] * input2[j];
+      y2 += this->projectionsEiVectors[j][1] * input2[j];
     }
-    X1 = X1 * this->graphicsUnit + this->centerX;
-    X2 = X2 * this->graphicsUnit + this->centerX;
-    Y1 = Y1 * this->graphicsUnit + this->centerY;
-    Y2 = Y2 * this->graphicsUnit + this->centerY;
+    x1 = x1 * this->graphicsUnit + this->centerX;
+    x2 = x2 * this->graphicsUnit + this->centerX;
+    y1 = y1 * this->graphicsUnit + this->centerY;
+    y2 = y2 * this->graphicsUnit + this->centerY;
   }
   void ensureProperInitialization();
   bool areWithinClickTolerance(double x1, double y1, double x2, double y2) {
@@ -117,13 +124,34 @@ public:
   //  this->draw();
   }
   void click(double x, double y);
-  void drawHighlightGroup(Vectors<double>& highlightGroup, List<std::string>& labels, const std::string& color, int radius);
-  void drawLineBuffer(
-    double x1, double y1, double x2, double y2, uint32_t penStyle, int colorIndex, double lineWidth
+  void drawHighlightGroup(
+    Vectors<double>& highlightGroup,
+    List<std::string>& labels,
+    const std::string& color,
+    int radius
   );
-  void drawTextBuffer(double x1, double y1, const std::string& inputText, int colorIndex, int fontSize, int textStyle);
+  void drawLineBuffer(
+    double x1,
+    double y1,
+    double x2,
+    double y2,
+    uint32_t penStyle,
+    int colorIndex,
+    double lineWidth
+  );
+  void drawTextBuffer(
+    double x1,
+    double y1,
+    const std::string& inputText,
+    int colorIndex,
+    int fontSize,
+    int textStyle
+  );
   void drawLineBetweenTwoVectorsBufferRational(
-    const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth = 1
+    const Vector<Rational>& vector1,
+    const Vector<Rational>& vector2,
+    const std::string& color,
+    double lineWidth = 1
   );
   void drawFilledShape(
     const List<Vector<double> >& corners,
@@ -224,7 +252,7 @@ public:
     TextStyleZeroChamber,
     TextStylePermanentlyZeroChamber
   };
-  int ColorDashes;
+  int colorDashes;
   bool flagLaTeXDraw;
   bool flag2DprojectionDraw;
   bool flagDisplayingCreationNumbersInsteadOfDisplayNumbers;
@@ -236,7 +264,7 @@ public:
   bool flagPlotShowJavascriptOnly;
   bool flagAllowMovingCoordinateSystemFromArbitraryClick;
   bool flagUseGraphicsOld;
-  Vectors<Rational> FillUserDefinedProjection;
+  Vectors<Rational> fillUserDefinedProjection;
   int Selected;
   int textX;
   int textY;
@@ -345,4 +373,5 @@ public:
     this->drawTextFunction = other.drawTextFunction;
   }
 };
-#endif
+
+#endif // header_math_extra_drawing_variables_ALREADY_INCLUDED

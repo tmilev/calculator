@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderSemisimpleLieSubalgebrasIncluded
-#define vpfHeaderSemisimpleLieSubalgebrasIncluded
+#ifndef header_math_extra_semisimple_lie_subalgebras_ALREADY_INCLUDED
+#define header_math_extra_semisimple_lie_subalgebras_ALREADY_INCLUDED
 
 #include "math_general.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
@@ -682,4 +682,4 @@ public:
   );
 };
 
-#endif
+#endif // header_math_extra_semisimple_lie_subalgebras_ALREADY_INCLUDED

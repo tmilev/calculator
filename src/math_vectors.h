@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderMathVectors_h_already_included
-#define vpfHeaderMathVectors_h_already_included
+#ifndef header_math_vectors_ALREADY_INCLUDED
+#define header_math_vectors_ALREADY_INCLUDED
 
 #include "general_logging_global_variables.h"
 #include "math_large_integers.h"
@@ -1389,4 +1389,4 @@ public:
   void superimposeAffineCones(AffineCones& otherComplex);
 };
 
-#endif
+#endif // header_math_vectors_ALREADY_INCLUDED

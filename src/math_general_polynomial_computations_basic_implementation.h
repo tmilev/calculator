@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfImplementationHeaderPolynomialComputationsBasic_already_included
-#define vpfImplementationHeaderPolynomialComputationsBasic_already_included
+#ifndef header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED
+#define header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED
 
 #include "math_general.h"
 
@@ -1562,4 +1562,4 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
   }
 }
 
-#endif
+#endif // header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED

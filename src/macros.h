@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef MacroVPFMacros_included
-#define MacroVPFMacros_included
+#ifndef header_macros_ALREADY_INCLUDED
+#define header_macros_ALREADY_INCLUDED
 
 #include <sstream>
 #include <cstdlib>
@@ -36,7 +36,7 @@
 #ifndef MacroIncrementCounter
 #define MacroIncrementCounter(x) x ++
 //#define MacroIncrementCounter(x)
-#endif
+#endif // header_macros_ALREADY_INCLUDED
 
 // The following turns on a custom, one-line-per-function-opt-in 100% portable stack tracer.
 // The tracer does yield a slow-down, use with caution: it pushes two strings and an int in

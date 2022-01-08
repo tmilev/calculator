@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfImplementationHeaderWeylAlgebras_already_included
-#define vpfImplementationHeaderWeylAlgebras_already_included
+#ifndef header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED
+#define header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED
 
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
@@ -106,61 +106,73 @@ void ElementWeylAlgebra<Coefficient>::lieBracket(
 }
 
 template <class Coefficient>
+void ElementWeylAlgebra<Coefficient>::assignPolynomial(const Polynomial<Rational>& input) {
+  this->makeZero();
+  MonomialWeylAlgebra monomial;
+  for (int i = 0; i < input.size(); i ++) {
+    monomial.polynomialPart = input[i];
+    this->addMonomial(monomial, input.coefficients[i]);
+  }
+}
+
+template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::lieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft) {
-  ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1 = *this;
-  tempEl1.multiplyOnTheLeft(standsOnTheLeft);
-  tempEl2 = standsOnTheLeft;
-  tempEl2.multiplyOnTheLeft(*this);
-  *this = tempEl1;
-  *this -= tempEl2;
+  ElementWeylAlgebra rightSummand;
+  ElementWeylAlgebra leftSummand;
+  rightSummand = *this;
+  rightSummand.multiplyOnTheLeft(standsOnTheLeft);
+  leftSummand = standsOnTheLeft;
+  leftSummand.multiplyOnTheLeft(*this);
+  *this = rightSummand;
+  *this -= leftSummand;
 }
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::lieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight) {
-  ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1 = standsOnTheRight;
-  tempEl1.multiplyOnTheLeft(*this);
-  tempEl2 = *this;
-  tempEl2.multiplyOnTheLeft(standsOnTheRight);
-  *this = tempEl1;
-  *this -= tempEl2;
+  ElementWeylAlgebra leftSummand;
+  ElementWeylAlgebra rightSummand;
+  leftSummand = standsOnTheRight;
+  leftSummand.multiplyOnTheLeft(*this);
+  rightSummand = *this;
+  rightSummand.multiplyOnTheLeft(standsOnTheRight);
+  *this = leftSummand;
+  *this -= rightSummand;
 }
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::multiplyOnTheLeft(const  ElementWeylAlgebra& standsOnTheLeft) {
-  ElementWeylAlgebra buffer;
-  ElementWeylAlgebra Accum;
-  Accum.makeZero();
-  Coefficient currentCF;
+  ElementWeylAlgebra summand;
+  ElementWeylAlgebra accumulator;
+  accumulator.makeZero();
+  Coefficient currentCoefficient;
   for (int j = 0; j < standsOnTheLeft.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
-      this->multiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
-      currentCF = standsOnTheLeft.coefficients[j];
-      currentCF *= this->coefficients[i];
-      buffer *= currentCF;
-      Accum += buffer;
+      this->multiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], summand);
+      currentCoefficient = standsOnTheLeft.coefficients[j];
+      currentCoefficient *= this->coefficients[i];
+      summand *= currentCoefficient;
+      accumulator += summand;
     }
   }
-  *this = Accum;
+  *this = accumulator;
 }
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::operator*=(const ElementWeylAlgebra& standsOnTheRight) {
-  ElementWeylAlgebra buffer;
-  ElementWeylAlgebra Accum;
-  Accum.makeZero();
-  Coefficient currentCF;
+  ElementWeylAlgebra summand;
+  ElementWeylAlgebra accumulator;
+  accumulator.makeZero();
+  Coefficient currentCoefficient;
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
-      this->multiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
-      currentCF = this->coefficients[i];
-      currentCF *= standsOnTheRight.coefficients[j];
-      buffer *= currentCF;
-      Accum += buffer;
+      this->multiplyTwoMonomials((*this)[i], standsOnTheRight[j], summand);
+      currentCoefficient = this->coefficients[i];
+      currentCoefficient *= standsOnTheRight.coefficients[j];
+      summand *= currentCoefficient;
+      accumulator += summand;
     }
   }
-  *this = Accum;
+  *this = accumulator;
 }
 
 template <class Coefficient>
@@ -267,27 +279,27 @@ void ElementWeylAlgebra<Coefficient>::makexidj(int i, int j) {
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
   const Rational& inputRationalPower,
-  int indexVar,
-  ElementWeylAlgebra& outputDO,
+  int indexVariable,
+  ElementWeylAlgebra& outputDifferentialOperator,
   Polynomial<Rational>& outputDenominator
 ) {
   outputDenominator.makeOne();
   MonomialWeylAlgebra monomialWeylAlgebra;
-  outputDO.makeZero();
+  outputDifferentialOperator.makeZero();
   int inputPower = 0;
   if (!inputRationalPower.isSmallInteger(&inputPower)) {
     global.fatal
     << "Differential operator requires integer exponent. " << global.fatal;
   }
   if (inputPower >= 0) {
-    monomialWeylAlgebra.polynomialPart.makeEi(indexVar, inputPower);
+    monomialWeylAlgebra.polynomialPart.makeEi(indexVariable, inputPower);
   } else {
-    monomialWeylAlgebra.differentialPart.makeEi(indexVar, - inputPower);
+    monomialWeylAlgebra.differentialPart.makeEi(indexVariable, - inputPower);
   }
-  outputDO.addMonomial(monomialWeylAlgebra, 1);
+  outputDifferentialOperator.addMonomial(monomialWeylAlgebra, 1);
   inputPower *= - 1;
   Polynomial<Rational> newMultiplicity;
-  newMultiplicity.makeDegreeOne(0, indexVar, 1);
+  newMultiplicity.makeDegreeOne(0, indexVariable, 1);
   for (int i = 0; i < inputPower; i ++) {
     outputDenominator *= newMultiplicity;
     newMultiplicity -= 1;
@@ -334,7 +346,7 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::fourierTransform(ElementWeylAlgebra<Coefficient>& output) const {
-  MacroRegisterFunctionWithName("ElementWeylAlgebra::fourierTransformMe");
+  MacroRegisterFunctionWithName("ElementWeylAlgebra::fourierTransform");
   if (&output == this) {
     ElementWeylAlgebra thisCopy = *this;
     thisCopy.fourierTransform(output);
@@ -399,4 +411,4 @@ bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(
   return true;
 }
 
-#endif
+#endif // header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED

@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef calculator_html_functions_H
-#define calculator_html_functions_H
+#ifndef header_calculator_html_functions_ALREADY_INCLUDED
+#define header_calculator_html_functions_ALREADY_INCLUDED
 
 #include "calculator_interface.h"
 
@@ -18,5 +18,5 @@ public:
   static std::string getUserInputBoxName(const Expression& box);
 };
 
-#endif // calculator_html_functions_H
+#endif // header_calculator_html_functions_ALREADY_INCLUDED
 

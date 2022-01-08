@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef header_crypto_was_already_defined
-#define header_crypto_was_already_defined
+#ifndef header_crypto_ALREADY_INCLUDED
+#define header_crypto_ALREADY_INCLUDED
 #include "general_lists.h"
 #include "general_logging_global_variables.h"
 #include "math_large_integers.h"
@@ -423,4 +423,4 @@ public:
     std::stringstream* commentsGeneral
   );
 };
-#endif // header_crypto_was_already_defined
+#endif // header_crypto_ALREADY_INCLUDED

@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderLieTheoryMiscellaneous
-#define vpfHeaderLieTheoryMiscellaneous
+#ifndef header_math_extra_lie_theory_extras_ALREADY_INCLUDED
+#define header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_rational_function.h"
@@ -525,4 +525,4 @@ public:
     this->substitutionNthElementIsImageNthCoordinateSimpleBasis = other.substitutionNthElementIsImageNthCoordinateSimpleBasis;
   }
 };
-#endif
+#endif // header_math_extra_lie_theory_extras_ALREADY_INCLUDED

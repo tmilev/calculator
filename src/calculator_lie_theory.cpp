@@ -4434,7 +4434,7 @@ bool CalculatorLieTheory::drawRootSystem(
   weylGroup.drawRootSystem(drawingVariables, true, false, nullptr, true, nullptr);
   if (hasPreferredProjectionPlane) {
     drawingVariables.flagFillUserDefinedProjection = true;
-    drawingVariables.FillUserDefinedProjection = preferredProjectionPlane;
+    drawingVariables.fillUserDefinedProjection = preferredProjectionPlane;
   }
   out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   return output.assignValue(calculator, out.str());

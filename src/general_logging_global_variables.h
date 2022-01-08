@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderLoggingGlobalVars_already_defined
-#define vpfHeaderLoggingGlobalVars_already_defined
+#ifndef header_general_logging_global_variables_ALREADY_INCLUDED
+#define header_general_logging_global_variables_ALREADY_INCLUDED
 #include "general_lists.h"
 #include "general_list_references.h"
 #include "general_maps.h"
@@ -494,7 +494,6 @@ public:
     static bool all();
     static bool builds();
   };
-  /// @endcond
 };
 
 template <typename Type>
@@ -510,5 +509,4 @@ Logger& Logger::doTheLogging(const Type& toBePrinted) {
   this->checkLogSize();
   return *this;
 }
-#endif
-
+#endif // header_general_logging_global_variables_ALREADY_INCLUDED

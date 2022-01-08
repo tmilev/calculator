@@ -2,6 +2,7 @@
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_general_implementation.h"
+#include "math_extra_polynomial_factorization.h"
 
 // The Cantor-Zassenhaus algorithm:
 // https://en.wikipedia.org/wiki/Cantor%E2%80%93Zassenhaus_algorithm

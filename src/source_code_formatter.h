@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderHtmlSourceCodeFormatter
-#define vpfHeaderHtmlSourceCodeFormatter
+#ifndef header_source_code_formatter_ALREADY_INCLUDED
+#define header_source_code_formatter_ALREADY_INCLUDED
 #include "macros.h"
 #include "general_list_references.h"
 #include "general_maps.h"
@@ -63,4 +63,5 @@ public:
   );
   std::string toStringLinks();
 };
-#endif
+
+#endif // header_source_code_formatter_ALREADY_INCLUDED

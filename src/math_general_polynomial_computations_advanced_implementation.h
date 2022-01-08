@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfImplementationHeaderPolyComputationsAdvanced_already_included
-#define vpfImplementationHeaderPolyComputationsAdvanced_already_included
+#ifndef header_math_general_polynomial_computations_advanced_implementation_ALREADY_INCLUDED
+#define header_math_general_polynomial_computations_advanced_implementation_ALREADY_INCLUDED
 
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_algebraic_numbers.h"
@@ -1666,4 +1666,5 @@ std::string PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::toS
   }
   return out.str();
 }
-#endif
+
+#endif // header_math_general_polynomial_computations_advanced_implementation_ALREADY_INCLUDED

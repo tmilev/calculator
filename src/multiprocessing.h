@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderWebServerInterProcessLogisticsAlreadyDefined
-#define vpfHeaderWebServerInterProcessLogisticsAlreadyDefined
+#ifndef header_multiprocessing_ALREADY_INCLUDED
+#define header_multiprocessing_ALREADY_INCLUDED
 
 #include "math_general.h"
 #include "system_functions_global_objects.h"
@@ -184,5 +184,5 @@ public:
   Pipe();
 };
 
-#endif
+#endif // header_multiprocessing_ALREADY_INCLUDED
 

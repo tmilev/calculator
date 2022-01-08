@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1General6Maps_already_included
-#define vpfHeader1General6Maps_already_included
+#ifndef header_general_maps_ALREADY_INCLUDED
+#define header_general_maps_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "general_list_references.h"
@@ -137,4 +137,5 @@ template <class key, class value, unsigned int hashFunction(const key&) = key::h
 using MapReferences = MapTemplate<ListReferences<value>, key, value, hashFunction>;
 template <class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
 using MapList = MapTemplate<List<value>, key, value, hashFunction>;
-#endif
+
+#endif // header_general_maps_ALREADY_INCLUDED

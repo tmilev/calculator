@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef WEB_ASSEMBLY_INCLUDED
-#define WEB_ASSEMBLY_INCLUDED
+#ifndef header_web_assembly_ALREADY_INCLUDED
+#define header_web_assembly_ALREADY_INCLUDED
 
 class WebAssembly {
 public:
@@ -11,4 +11,4 @@ public:
   static void mainLoop();
 };
 
-#endif
+#endif // header_web_assembly_ALREADY_INCLUDED

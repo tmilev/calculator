@@ -1,5 +1,5 @@
-#ifndef vpfGraphHeaderAlreadyDefined
-#define vpfGraphHeaderAlreadyDefined
+#ifndef header_math_extra_graph_ALREADY_INCLUDED
+#define header_math_extra_graph_ALREADY_INCLUDED
 #include "math_general.h"
 
 class GraphOLD {
@@ -83,4 +83,4 @@ public:
   std::string toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* format = nullptr);
 };
 
-#endif
+#endif // header_math_extra_graph_ALREADY_INCLUDED

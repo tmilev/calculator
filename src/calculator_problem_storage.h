@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef CALCULATOR_PROBLEM_STORAGE_HEADER_ALREADY_INCLUDED
-#define CALCULATOR_PROBLEM_STORAGE_HEADER_ALREADY_INCLUDED
+#ifndef header_calculator_problem_storage_ALREADY_INCLUDED
+#define header_calculator_problem_storage_ALREADY_INCLUDED
 #include "calculator_interface.h"
 #include "general_time_date.h"
 #include "general_database_system_independent.h"
@@ -288,4 +288,4 @@ public:
   ~UserCalculator();
 };
 
-#endif // CALCULATOR_PROBLEM_STORAGE_HEADER_ALREADY_INCLUDED
+#endif // header_calculator_problem_storage_ALREADY_INCLUDED

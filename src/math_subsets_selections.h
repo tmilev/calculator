@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1_2SubsetsSelections_already_included
-#define vpfHeader1_2SubsetsSelections_already_included
+#ifndef header_math_subsets_selections_ALREADY_INCLUDED
+#define header_math_subsets_selections_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "math_vectors.h"
@@ -614,4 +614,4 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   return false;
 }
 
-#endif
+#endif // header_math_subsets_selections_ALREADY_INCLUDED

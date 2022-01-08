@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef CALCULATOR_WEYL_GROUP_CHARACTERS_INCLUDED
-#define CALCULATOR_WEYL_GROUP_CHARACTERS_INCLUDED
+#ifndef header_calculator_weyl_group_character_ALREADY_INCLUDED
+#define header_calculator_weyl_group_character_ALREADY_INCLUDED
 #include "calculator.h"
 
 class CalculatorFunctionsWeylGroup {
@@ -58,4 +58,4 @@ public:
   static bool getElementWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
 };
 
-#endif
+#endif // header_calculator_weyl_group_character_ALREADY_INCLUDED

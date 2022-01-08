@@ -1,5 +1,5 @@
-#ifndef vpfWEBAPI_HEADER_H
-#define vpfWEBAPI_HEADER_H
+#ifndef header_string_constants_ALREADY_INCLUDED
+#define header_string_constants_ALREADY_INCLUDED
 #include "macros.h"
 
 class MainFlags {
@@ -299,4 +299,4 @@ public:
   static std::string errorDatabaseDisableD;
 };
 
-#endif
+#endif // header_string_constants_ALREADY_INCLUDED

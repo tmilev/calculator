@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfImplementationHeaderPackedVectorIncluded
-#define vpfImplementationHeaderPackedVectorIncluded
+#ifndef header_math_extra_packed_vector_implementation_ALREADY_INCLUDED
+#define header_math_extra_packed_vector_implementation_ALREADY_INCLUDED
 
 #include "math_extra_packed_vector.h"
 #include "assert.h"
@@ -136,8 +136,10 @@ unsigned int PackedVector<scalar>::hashFunction(const PackedVector<scalar>& in) 
 template <typename scalar>
 unsigned int PackedVector<scalar>::hashFunction() const {
   unsigned int result = 0;
+  int j = 0;
   for (int i = 0; i < this->size; i ++) {
-    result += this->data[i].hashFunction() * someRandomPrimes[i];
+    result += this->data[i].hashFunction() *
+    HashConstants::getConstantIncrementCounter(j);
   }
   return result;
 }
@@ -154,4 +156,5 @@ std::ostream& operator<<(std::ostream& out, const PackedVector<scalar>& v) {
   out << ')';
   return out;
 }
-#endif
+
+#endif // header_math_extra_packed_vector_implementation_ALREADY_INCLUDED

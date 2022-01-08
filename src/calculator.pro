@@ -48,6 +48,7 @@ HEADERS += \
     general_multitasking.h \
     general_test.h \
     general_time_date.h \
+    math_extra_polynomial_factorization.h \
     web_api.h \
     json.h \
     macros.h \

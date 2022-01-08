@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfCharacterHeader_alreadyIncluded
-#define vpfCharacterHeader_alreadyIncluded
+#ifndef header_math_extra_finite_groups_ALREADY_INCLUDED
+#define header_math_extra_finite_groups_ALREADY_INCLUDED
 #include "general_lists.h"
 #include "math_general.h"
 #include "math_extra_vector_space.h"
@@ -2601,4 +2601,4 @@ bool FiniteGroup<elementSomeGroup>::checkInitializationConjugacyClasses() const 
   return true;
 }
 
-#endif
+#endif // header_math_extra_finite_groups_ALREADY_INCLUDED

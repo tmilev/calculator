@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader11_HeaderEllipticCurves
-#define vpfHeader11_HeaderEllipticCurves
+#ifndef header_math_extra_elliptic_curves_ALREADY_INCLUDED
+#define header_math_extra_elliptic_curves_ALREADY_INCLUDED
 #include "math_general.h"
 
 class EllipticCurveWeierstrassNormalForm {
@@ -42,4 +42,5 @@ public:
     this->flagInfinity = true;
   }
 };
-#endif
+
+#endif // header_math_extra_elliptic_curves_ALREADY_INCLUDED

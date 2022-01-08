@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1_h_already_included
-#define vpfHeader1_h_already_included
+#ifndef header_general_lists_ALREADY_INCLUDED
+#define header_general_lists_ALREADY_INCLUDED
 
 #include "macros.h"
 #include "general_multitasking.h"

@@ -303,7 +303,7 @@ void DrawingVariables::initDrawingVariables() {
   this->flagDrawingInvisibles = false;
   this->flagDrawingLinkToOrigin = true;
   this->flagFillUserDefinedProjection = false;
-  this->ColorDashes = static_cast<int>(HtmlRoutines::redGreenBlue(200, 200, 200));
+  this->colorDashes = static_cast<int>(HtmlRoutines::redGreenBlue(200, 200, 200));
   this->flag2DprojectionDraw = true;
   this->flagIncludeExtraHtmlDescriptions = true;
   this->flagAllowMovingCoordinateSystemFromArbitraryClick = true;
@@ -5033,6 +5033,16 @@ void DynkinType::makeSimpleType(char type, int rank, const Rational* inputFirstC
   this->addMonomial(dynkinType, 1);
 }
 
+void DynkinType::operator=(const LinearCombination<DynkinSimpleType, Rational>& other) {
+  this->::LinearCombination<DynkinSimpleType, Rational>::operator=(other);
+}
+
+DynkinType DynkinType::operator-(const LinearCombination<DynkinSimpleType, Rational>& other) {
+  DynkinType result = *this;
+  result -= other;
+  return result;
+}
+
 bool DynkinType::hasExceptionalComponent() const {
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].letter == 'E' || (*this)[i].letter == 'F' || (*this)[i].letter == 'G') {
@@ -5092,6 +5102,17 @@ bool DynkinType::isSimple(
   return true;
 }
 
+int DynkinType::getMultiplicity(int SimpleTypeIdentifier) const {
+  int result = 0;
+  if (!this->coefficients[SimpleTypeIdentifier].isSmallInteger(&result)) {
+    global.fatal
+    << "Dynkin type has multiplicity that is not a small integer. "
+    << global.fatal;
+  }
+  return result;
+}
+
+
 int DynkinType::getNumberOfSimpleComponentsOfGivenRank(int desiredRank) const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
@@ -5126,6 +5147,30 @@ Rational DynkinType::getRankRational() const {
     result += this->coefficients[i] * (*this)[i].rank;
   }
   return result;
+}
+
+int DynkinType::getLieAlgebraDimension() const {
+  Rational result = 0;
+  for (int i = 0; i < this->size(); i ++) {
+    result += this->coefficients[i] * (*this)[i].getLieAlgebraDimension();
+  }
+  int intResult = 0;
+  if (!result.isSmallInteger(&intResult)) {
+    global.fatal << "Multiplicity of simple type is not a small integer. " << global.fatal;
+  }
+  return intResult;
+}
+
+int DynkinType::getRootSystemSize() const {
+  Rational result = 0;
+  for (int i = 0; i < this->size(); i ++) {
+    result += this->coefficients[i] * (*this)[i].getRootSystemSize();
+  }
+  int intResult = 0;
+  if (!result.isSmallInteger(&intResult)) {
+    global.fatal << "Multiplicity of simple type is not a small integer. " << global.fatal;
+  }
+  return intResult;
 }
 
 int DynkinType::getRank() const {
@@ -10721,7 +10766,8 @@ void DrawOperations::click(double x , double y) {
   }
   int dimension = this->bilinearForm.numberOfRows;
   for (int i = 0; i < dimension; i ++) {
-    double Xbasis, Ybasis;
+    double Xbasis = 0;
+    double Ybasis = 0;
     this->getCoordsDrawingComputeAll(this->basisToDrawCirclesAt[i], Xbasis, Ybasis);
     if (this->areWithinClickTolerance(x, y, Xbasis, Ybasis)) {
       this->selectedCircleMinus2noneMinus1Center = i;

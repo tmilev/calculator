@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef HEADER_GENERAL_STRINGS_ALREADY_INCLUDED
-#define HEADER_GENERAL_STRINGS_ALREADY_INCLUDED
+#ifndef header_general_strings_ALREADY_INCLUDED
+#define header_general_strings_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "general_memory_saving.h"

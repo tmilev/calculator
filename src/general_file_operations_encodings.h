@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1General7FileOperations_Encodings_already_included
-#define vpfHeader1General7FileOperations_Encodings_already_included
+#ifndef header_general_file_operations_encodings_ALREADY_INCLUDED
+#define header_general_file_operations_encodings_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "general_list_references.h"
@@ -241,4 +241,5 @@ public:
   StateMaintainerCurrentFolder();
   ~StateMaintainerCurrentFolder();
 };
-#endif
+
+#endif // header_general_file_operations_encodings_ALREADY_INCLUDED

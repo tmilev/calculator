@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader2Math_01LargeIntegersInstance_already_included
-#define vpfHeader2Math_01LargeIntegersInstance_already_included
+#ifndef header_math_large_integers_ALREADY_INCLUDED
+#define header_math_large_integers_ALREADY_INCLUDED
 
 #include "general_lists.h"
 
@@ -896,4 +896,5 @@ public:
     static bool testScale();
   };
 };
-#endif
+
+#endif // header_math_large_integers_ALREADY_INCLUDED

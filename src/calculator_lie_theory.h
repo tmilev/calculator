@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef CALCULATOR_LIE_THEORY_INCLUDED
-#define CALCULATOR_LIE_THEORY_INCLUDED
+#ifndef header_calculator_lie_theory_ALREADY_INCLUDED
+#define header_calculator_lie_theory_ALREADY_INCLUDED
 #include "calculator.h"
 
 class CalculatorLieTheory {

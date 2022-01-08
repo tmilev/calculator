@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef DATABASE_HEADER_ALREADY_INCLUDED
-#define DATABASE_HEADER_ALREADY_INCLUDED
+#ifndef header_database_ALREADY_INCLUDED
+#define header_database_ALREADY_INCLUDED
 #include "calculator_interface.h"
 #include "general_time_date.h"
 #include "general_database_system_independent.h"
@@ -370,4 +370,4 @@ public:
   ~Database();
 };
 
-#endif // DATABASE_HEADER_ALREADY_INCLUDED
+#endif // header_database_ALREADY_INCLUDED

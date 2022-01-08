@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader_ImplementationHeaderModulesSSLielgebras
-#define vpfHeader_ImplementationHeaderModulesSSLielgebras
+#ifndef header_math_extra_modules_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
+#define header_math_extra_modules_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 #include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_differential_operators.h"
@@ -1919,4 +1919,5 @@ bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping
   }
   return true;
 }
-#endif
+
+#endif // header_math_extra_modules_semisimple_lie_algebras_implementation_ALREADY_INCLUDED

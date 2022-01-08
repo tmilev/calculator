@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
-#define vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
+#ifndef header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
+#define header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_lie_theory_extras.h" // error: invalid use of incomplete type ‘struct BranchingData’
@@ -1008,4 +1008,5 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(Matrix<Coefficient>& 
     }
   }
 }
-#endif
+
+#endif // header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED

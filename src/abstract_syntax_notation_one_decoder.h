@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED
-#define ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED
+#ifndef header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
+#define header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
 #include "json.h"
 #include "serialization_basic.h"
 
@@ -308,4 +308,4 @@ public:
   ~AbstractSyntaxNotationOneSubsetDecoder();
 };
 
-#endif // ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED
+#endif // header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED

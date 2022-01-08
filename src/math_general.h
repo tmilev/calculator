@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1_2_h_already_included
-#define vpfHeader1_2_h_already_included
+#ifndef header_math_general_ALREADY_INCLUDED
+#define header_math_general_ALREADY_INCLUDED
 
 #include "general_logging_global_variables.h"
 #include "general_strings.h"
@@ -5867,8 +5867,8 @@ class DynkinSimpleType {
   DynkinSimpleType(const DynkinSimpleType& other) {
     *this = other;
   }
-  DynkinSimpleType(char inputChar, int inputRank, const Rational& inputScale = 1) :
-    letter(inputChar), rank(inputRank), cartanSymmetricInverseScale(inputScale) {
+  DynkinSimpleType(char inputLetter, int inputRank, const Rational& inputScale = 1) :
+    letter(inputLetter), rank(inputRank), cartanSymmetricInverseScale(inputScale) {
   }
   int getRootSystemSize() const;
   int getLieAlgebraDimension() const {
@@ -6044,41 +6044,13 @@ public:
   LargeInteger getWeylGroupSizeByFormula() const;
   std::string toString(FormatExpressions* format = nullptr) const;
   void scaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
-  int getMultiplicity(int SimpleTypeIdentifier) const {
-    int result = 0;
-    if (!this->coefficients[SimpleTypeIdentifier].isSmallInteger(&result)) {
-      global.fatal
-      << "Dynkin type has multiplicity that is not a small integer. "
-      << global.fatal;
-    }
-    return result;
-  }
+  int getMultiplicity(int SimpleTypeIdentifier) const;
   int getNumberOfSimpleComponentsOfGivenRank(int desiredRank) const;
   int getNumberOfSimpleComponents() const;
   Rational getRankRational() const;
   int getRank() const;
-  int getRootSystemSize() const {
-    Rational result = 0;
-    for (int i = 0; i < this->size(); i ++) {
-      result += this->coefficients[i] * (*this)[i].getRootSystemSize();
-    }
-    int intResult = 0;
-    if (!result.isSmallInteger(&intResult)) {
-      global.fatal << "Multiplicity of simple type is not a small integer. " << global.fatal;
-    }
-    return intResult;
-  }
-  int getLieAlgebraDimension() const {
-    Rational result = 0;
-    for (int i = 0; i < this->size(); i ++) {
-      result += this->coefficients[i] * (*this)[i].getLieAlgebraDimension();
-    }
-    int intResult = 0;
-    if (!result.isSmallInteger(&intResult)) {
-      global.fatal << "Multiplicity of simple type is not a small integer. " << global.fatal;
-    }
-    return intResult;
-  }
+  int getRootSystemSize() const;
+  int getLieAlgebraDimension() const;
   bool isTypeAOne() const;
   static int getIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool canBeExtendedParabolicallyTo(const DynkinType& other) const;
@@ -6105,14 +6077,8 @@ public:
   );
   bool hasExceptionalComponent() const;
   bool operator>(const DynkinType& other) const;
-  void operator=(const LinearCombination<DynkinSimpleType, Rational>& other) {
-    this->::LinearCombination<DynkinSimpleType, Rational>::operator=(other);
-  }
-  DynkinType operator-(const LinearCombination<DynkinSimpleType, Rational>& other) {
-    DynkinType result = *this;
-    result -= other;
-    return result;
-  }
+  void operator=(const LinearCombination<DynkinSimpleType, Rational>& other);
+  DynkinType operator-(const LinearCombination<DynkinSimpleType, Rational>& other);
   // These functions are used to plot dynkin diagrams and Vogan diagrams.
   void plot(Plot& output);
   static void plotInitialize(Plot& output);
@@ -6219,8 +6185,8 @@ public:
   void makexidj(int i, int j);
   static void getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
     const Rational& inputRationalPower,
-    int indexVar,
-    ElementWeylAlgebra& outputDO,
+    int indexVariable,
+    ElementWeylAlgebra& outputDifferentialOperator,
     Polynomial<Rational>& outputDenominator
   );
   void fourierTransform(ElementWeylAlgebra<Coefficient>& output) const;
@@ -6236,11 +6202,11 @@ public:
     const PolynomialSubstitution<Rational>& substitutionDifferentialPart
   );
   void makeOne() {
-    MonomialWeylAlgebra tempMon;
-    tempMon.polynomialPart.makeOne();
-    tempMon.differentialPart.makeOne();
+    MonomialWeylAlgebra monomial;
+    monomial.polynomialPart.makeOne();
+    monomial.differentialPart.makeOne();
     this->makeZero();
-    this->addMonomial(tempMon, 1);
+    this->addMonomial(monomial, 1);
   }
   bool isPolynomial(Polynomial<Coefficient>* whichPolynomial = 0) const;
   bool hasNonSmallPositiveIntegerDerivation() const;
@@ -6248,14 +6214,7 @@ public:
   void multiplyTwoMonomials(
     const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
   ) const;
-  void assignPolynomial(const Polynomial<Rational>& input) {
-    this->makeZero();
-    MonomialWeylAlgebra monomial;
-    for (int i = 0; i < input.size(); i ++) {
-      monomial.polynomialPart = input[i];
-      this->addMonomial(monomial, input.coefficients[i]);
-    }
-  }
+  void assignPolynomial(const Polynomial<Rational>& input);
   void operator=(const std::string& input);
   void operator*=(const Coefficient& other) {
     this->LinearCombination<MonomialWeylAlgebra, Coefficient>::operator*=(other);
@@ -6556,7 +6515,7 @@ public:
     return this->::LinearCombination<MonomialMatrix, Coefficient>::operator*=(other);
   }
   void getVectorsSparseFromRowsIncludeZeroRows(
-    List<VectorSparse<Coefficient> >& output, int MinNumRows = - 1
+    List<VectorSparse<Coefficient> >& output, int minimalNumberOfRows = - 1
   );
   bool isIdentity() const {
     int dimension = this->getMinimumNumberOfColumnsNumberOfRows();
@@ -6820,17 +6779,17 @@ public:
 
 template <class Coefficient>
 void MatrixTensor<Coefficient>::getVectorsSparseFromRowsIncludeZeroRows(
-  List<VectorSparse<Coefficient> >& output, int MinNumRows
+  List<VectorSparse<Coefficient> >& output, int minimalNumberOfRows
 ) {
-  MinNumRows = MathRoutines::maximum(MinNumRows, this->getMinimalNumberOfRows());
-  output.setSize(MinNumRows);
+  minimalNumberOfRows = MathRoutines::maximum(minimalNumberOfRows, this->getMinimalNumberOfRows());
+  output.setSize(minimalNumberOfRows);
   for (int i = 0; i < output.size; i ++) {
     output[i].makeZero();
   }
   for (int i = 0; i < this->size(); i ++) {
     int rowIndex = (*this)[i].vIndex;
-    int colIndex = (*this)[i].dualIndex;
-    output[rowIndex].addMonomial(MonomialVector(colIndex), this->coefficients[i]);
+    int columnIndex = (*this)[i].dualIndex;
+    output[rowIndex].addMonomial(MonomialVector(columnIndex), this->coefficients[i]);
   }
 }
 
@@ -6876,8 +6835,11 @@ void MatrixTensor<Coefficient>::invert() {
   this->gaussianEliminationByRowsMatrix(&result);
   if (*this != identity) {
     global.fatal << "Attempting to invert a "
-    << "non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
-    << this->toStringMatrixForm() << " but should instead be equal to " << identity.toStringMatrixForm() << global.fatal;
+    << "non-invertable matrix tensor. "
+    << "After Gaussian elimination, the matrix equals "
+    << this->toStringMatrixForm()
+    << " but should instead be equal to "
+    << identity.toStringMatrixForm() << global.fatal;
   }
   *this = result;
 }
@@ -7204,4 +7166,5 @@ std::string Vectors<Coefficient>::toLatexInequalities(
   out << "\\end{array}";
   return out.str();
 }
-#endif
+
+#endif // header_math_general_ALREADY_INCLUDED

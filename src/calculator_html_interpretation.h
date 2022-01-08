@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderHtmlInterpretationAlreadyDefined
-#define vpfHeaderHtmlInterpretationAlreadyDefined
+#ifndef header_calculator_html_interpretation_ALREADY_INCLUDED
+#define header_calculator_html_interpretation_ALREADY_INCLUDED
 #include "general_lists.h"
 #include "database.h"
 #include "calculator_problem_storage.h"
@@ -586,4 +586,4 @@ public:
   JSData toJSON();
 };
 
-#endif
+#endif // header_calculator_html_interpretation_ALREADY_INCLUDED

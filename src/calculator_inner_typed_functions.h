@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader6_1InnerTypedFns_h_already_included
-#define vpfHeader6_1InnerTypedFns_h_already_included
+#ifndef header_calculator_inner_typed_functions_ALREADY_INCLUDED
+#define header_calculator_inner_typed_functions_ALREADY_INCLUDED
 
 #include "calculator_interface.h"
 
@@ -501,4 +501,4 @@ bool CalculatorConversions::functionRationalFunction(
   output.content.makeOneLetterMonomial(0, Coefficient::oneStatic());
   return true;
 }
-#endif
+#endif // header_calculator_inner_typed_functions_ALREADY_INCLUDED

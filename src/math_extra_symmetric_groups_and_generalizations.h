@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfSymmetricGroupsAndGeneralizationsHeader_alreadyIncluded
-#define vpfSymmetricGroupsAndGeneralizationsHeader_alreadyIncluded
+#ifndef header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
+#define header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
 #include "general_lists.h"
 #include "math_general.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
@@ -1821,4 +1821,5 @@ somestream& HyperoctahedralGroupData::intoStream(somestream& out) const {
   }
   return out;
 }
-#endif
+
+#endif // header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED

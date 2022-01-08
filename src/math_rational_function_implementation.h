@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderRationalFunctionImplementation_already_included
-#define vpfHeaderRationalFunctionImplementation_already_included
+#ifndef header_math_rational_function_implementation_ALREADY_INCLUDED
+#define header_math_rational_function_implementation_ALREADY_INCLUDED
 
 #include "math_rational_function.h"
 
@@ -1213,4 +1213,5 @@ bool RationalFraction<Coefficient>::getRelations(
   }
   return true;
 }
-#endif
+
+#endif // header_math_rational_function_implementation_ALREADY_INCLUDED

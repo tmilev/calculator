@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef MATH_EXTRA_DIFFERENTIAL_OPERATORS_INCLUDED
-#define MATH_EXTRA_DIFFERENTIAL_OPERATORS_INCLUDED
+#ifndef header_math_extra_differential_operators_ALREADY_INCLUDED
+#define header_math_extra_differential_operators_ALREADY_INCLUDED
 #include "math_general.h"
 
 class QuasiDifferentialMononomial {
@@ -179,12 +179,13 @@ std::string QuasiDifferentialOperator<Coefficient>::toString(FormatExpressions* 
   if (result == "0" && this->size() != 0) {
     global.fatal << "This is likely a programming error (crashing at any rate): "
     << "I have a non-zero quasidifferential operator "
-    << " with non-properly formatted LaTeX string "
+    << "with non-properly formatted LaTeX string "
     << this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::toString(format)
     << ", however its properly formatted string is 0. "
-    << "Probably there is something wrong with the initializations of the monomials of the qdo. " << global.fatal;
+    << "Probably there is something wrong with "
+    << "the initializations of the monomials of the qdo. " << global.fatal;
   }
   return result;
 }
 
-#endif
+#endif // header_math_extra_differential_operators_ALREADY_INCLUDED

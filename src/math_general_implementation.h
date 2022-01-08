@@ -1,5 +1,5 @@
-#ifndef math_general_implementation_H
-#define math_general_implementation_H
+#ifndef header_math_general_implementation_ALREADY_INCLUDED
+#define header_math_general_implementation_ALREADY_INCLUDED
 #include "math_general.h"
 
 template <class Coefficient>
@@ -651,5 +651,5 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   }
 }
 
-#endif // math_general_implementation_H
+#endif // header_math_general_implementation_ALREADY_INCLUDED
 

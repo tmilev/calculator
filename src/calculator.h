@@ -22,8 +22,8 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 
-#ifndef CALCULATOR_HEADER_ALREADY_INCLUDED
-#define CALCULATOR_HEADER_ALREADY_INCLUDED
+#ifndef header_calculator_ALREADY_INCLUDED
+#define header_calculator_ALREADY_INCLUDED
 // This header file includes the various sub-headers.
 // The splitting into sub-headers is needed to speed up compilation times.
 #include "macros.h"

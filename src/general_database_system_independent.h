@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1General8DatabaseSystemIndependent_already_included
-#define vpfHeader1General8DatabaseSystemIndependent_already_included
+#ifndef header_general_database_system_independent_ALREADY_INCLUDED
+#define header_general_database_system_independent_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "json.h"
@@ -87,4 +87,4 @@ class UserCalculatorData {
   List<QueryExact> getFindMeFromUserNameQuery();
 };
 
-#endif
+#endif // header_general_database_system_independent_ALREADY_INCLUDED

@@ -1,5 +1,5 @@
-#ifndef vpfHeaderTransportLayerSecurity_already_included
-#define vpfHeaderTransportLayerSecurity_already_included
+#ifndef header_transport_layer_security_ALREADY_INCLUDED
+#define header_transport_layer_security_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "serialization_basic.h"
@@ -594,4 +594,4 @@ public:
   void freeEverythingShutdown();
 };
 
-#endif
+#endif // header_transport_layer_security_ALREADY_INCLUDED

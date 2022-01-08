@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfJson_h_already_included
-#define vpfJson_h_already_included
+#ifndef header_json_ALREADY_INCLUDED
+#define header_json_ALREADY_INCLUDED
 
 #include "general_memory_saving.h"
 #include "general_list_references.h"
@@ -174,4 +174,4 @@ void JSData::operator=(const Matrix<Coefficient>& other) {
   }
 }
 
-#endif
+#endif // header_json_ALREADY_INCLUDED

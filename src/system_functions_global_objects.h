@@ -1,8 +1,8 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 
-#ifndef vpfHeaderSystemGlobalObjects_already_included
-#define vpfHeaderSystemGlobalObjects_already_included
+#ifndef header_system_functions_global_objects_ALREADY_INCLUDED
+#define header_system_functions_global_objects_ALREADY_INCLUDED
 #include <iostream>
 #include "general_list_references.h"
 #ifndef __DATE__
@@ -24,4 +24,4 @@ extern void initializeTimer();
 
 extern void* runTimerVoidPointer(void* ptr);
 
-#endif // vpfHeaderSystemGlobalObjects_already_included
+#endif // header_system_functions_global_objects_ALREADY_INCLUDED

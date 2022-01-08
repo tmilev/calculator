@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderRationalFunction_already_included
-#define vpfHeaderRationalFunction_already_included
+#ifndef header_math_rational_function_ALREADY_INCLUDED
+#define header_math_rational_function_ALREADY_INCLUDED
 
 #include "math_general.h"
 
@@ -180,4 +180,4 @@ bool RationalFraction<Rational>::Test::fromStringTest();
 template<>
 bool RationalFraction<Rational>::Test::scaleNormalizeIndex();
 
-#endif
+#endif // header_math_rational_function_ALREADY_INCLUDED

@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader11_ImplementationHeaderEllipticCurves
-#define vpfHeader11_ImplementationHeaderEllipticCurves
+#ifndef header_math_extra_elliptic_curves_implementation_ALREADY_INCLUDED
+#define header_math_extra_elliptic_curves_implementation_ALREADY_INCLUDED
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_algebraic_numbers.h"
 
@@ -99,4 +99,5 @@ std::string ElementEllipticCurve<Coefficient>::toString(FormatExpressions* forma
   }
   return out.str();
 }
-#endif
+
+#endif // header_math_extra_elliptic_curves_implementation_ALREADY_INCLUDED

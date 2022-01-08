@@ -1,8 +1,8 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 
-#ifndef header_crypto_public_domain_was_already_defined
-#define header_crypto_public_domain_was_already_defined
+#ifndef header_crypto_public_domain_ALREADY_INCLUDED
+#define header_crypto_public_domain_ALREADY_INCLUDED
 #include "crypto.h"
 
 // Class CryptoPublicDomain serves the same purpose as
@@ -26,4 +26,4 @@ public:
   );
   CryptoPublicDomain();
 };
-#endif // header_crypto_public_domain_was_already_defined
+#endif // header_crypto_public_domain_ALREADY_INCLUDED

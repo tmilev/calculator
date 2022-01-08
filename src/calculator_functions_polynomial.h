@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderCalculatorFunctionsPolynomial
-#define vpfHeaderCalculatorFunctionsPolynomial
+#ifndef header_calculator_functions_polynomial_ALREADY_INCLUDED
+#define header_calculator_functions_polynomial_ALREADY_INCLUDED
 #include "calculator_interface.h"
 class CalculatorFunctionsPolynomial {
 public:
@@ -99,5 +99,5 @@ public:
   static bool combineFractionsCommutativeWithInternalLibrary(Calculator& calculator, const Expression& input, Expression& output);
 };
 
-#endif // vpfHeaderCalculatorFunctionsPolynomial
+#endif // header_calculator_functions_polynomial_ALREADY_INCLUDED
 

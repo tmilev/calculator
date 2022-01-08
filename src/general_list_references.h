@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader3_already_included
-#define vpfHeader3_already_included
+#ifndef header_general_list_references_ALREADY_INCLUDED
+#define header_general_list_references_ALREADY_INCLUDED
 
 #include "general_lists.h"
 
@@ -256,4 +256,5 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addNoRepetitionOrReturnIndexFirst(o);
   }
 };
-#endif
+
+#endif // header_general_list_references_ALREADY_INCLUDED

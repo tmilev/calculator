@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfVectorSpaceHeader_alreadyIncluded
-#define vpfVectorSpaceHeader_alreadyIncluded
+#ifndef header_math_extra_vector_space_ALREADY_INCLUDED
+#define header_math_extra_vector_space_ALREADY_INCLUDED
 #include "math_general.h"
 
 template <typename Coefficient>
@@ -386,4 +386,5 @@ Vector<Coefficient> VectorSpace<Coefficient>::getCanonicalBasisVector(int i) con
   fastbasis.getVectorFromRow(i, out);
   return out;
 }
-#endif
+
+#endif // header_math_extra_vector_space_ALREADY_INCLUDED

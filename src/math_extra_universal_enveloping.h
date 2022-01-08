@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1_HeaderUniversalEnveloping
-#define vpfHeader1_HeaderUniversalEnveloping
+#ifndef header_math_extra_universal_enveloping_ALREADY_INCLUDED
+#define header_math_extra_universal_enveloping_ALREADY_INCLUDED
 #include "math_general.h"
 #include "math_extra_lie_theory_extras.h"
 
@@ -318,4 +318,4 @@ public:
   }
 };
 
-#endif
+#endif // header_math_extra_universal_enveloping_ALREADY_INCLUDED

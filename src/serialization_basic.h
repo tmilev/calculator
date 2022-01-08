@@ -1,5 +1,5 @@
-#ifndef SERIALIZATION_BASIC_ALREADY_DEFINED
-#define SERIALIZATION_BASIC_ALREADY_DEFINED
+#ifndef header_serialization_basic_ALREADY_INCLUDED
+#define header_serialization_basic_ALREADY_INCLUDED
 #include "general_lists.h"
 #include "json.h"
 
@@ -284,4 +284,4 @@ public:
   static std::string convertListUnsignedCharsToString(const List<unsigned char>& input);
 };
 
-#endif // SERIALIZATION_BASIC_ALREADY_DEFINED
+#endif // header_serialization_basic_ALREADY_INCLUDED

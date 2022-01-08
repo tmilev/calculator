@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader9MemorySaving_h_already_included
-#define vpfHeader9MemorySaving_h_already_included
+#ifndef header_memory_saving_ALREADY_INCLUDED
+#define header_memory_saving_ALREADY_INCLUDED
 
 #include "macros.h"
 #include "general_list_references.h"

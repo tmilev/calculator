@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef header_vpfHeader1General2Mutexes_already_Defined
-#define header_vpfHeader1General2Mutexes_already_Defined
+#ifndef header_general_multitasking_ALREADY_INCLUDED
+#define header_general_multitasking_ALREADY_INCLUDED
 #include "macros.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,4 +89,4 @@ public:
   static void checkPointerCounters();
 };
 
-#endif // header_vpfHeader1General2Mutexes_already_Defined
+#endif // header_general_multitasking_ALREADY_INCLUDED

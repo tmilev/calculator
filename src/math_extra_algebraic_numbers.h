@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader1_3_h_already_included
-#define vpfHeader1_3_h_already_included
+#ifndef header_math_extra_algebraic_numbers_ALREADY_INCLUDED
+#define header_math_extra_algebraic_numbers_ALREADY_INCLUDED
 
 #include "math_general.h"
 
@@ -449,4 +449,4 @@ public:
   }
   PolynomialFactorizationFiniteFields();
 };
-#endif
+#endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

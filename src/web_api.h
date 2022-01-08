@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeaderHtmlSnippetsAlreadyDefined
-#define vpfHeaderHtmlSnippetsAlreadyDefined
+#ifndef header_web_api_ALREADY_INCLUDED
+#define header_web_api_ALREADY_INCLUDED
 #include "macros.h"
 #include "general_maps.h"
 #include "general_list_references.h"
@@ -371,4 +371,5 @@ public:
   );
   static std::string toHtmlTableRowsFromJSON(const JSData& input);
 };
-#endif
+
+#endif // header_web_api_ALREADY_INCLUDED

@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader2_h_already_included
-#define vpfHeader2_h_already_included
+#ifndef header_calculator_interface_ALREADY_INCLUDED
+#define header_calculator_interface_ALREADY_INCLUDED
 
 //the following  include contains all the c++ math routines used in the calculator.
 #include "math_general.h"
@@ -3638,4 +3638,4 @@ bool WithContext<BuiltIn>::mergeContexts(
   leftOutput.extendContext(resultContext, commentsOnFailure) &&
   rightOutput.extendContext(resultContext, commentsOnFailure);
 }
-#endif
+#endif // header_calculator_interface_ALREADY_INCLUDED

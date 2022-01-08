@@ -1,5 +1,5 @@
-#ifndef vpfTreeHeaderAlreadyDefined
-#define vpfTreeHeaderAlreadyDefined
+#ifndef header_math_extra_tree_ALREADY_INCLUDED
+#define header_math_extra_tree_ALREADY_INCLUDED
 #include "math_general.h"
 
 template<typename data>
@@ -113,4 +113,5 @@ std::string Tree<Data>::toString() const {
   out << this->nodes[0].toStringHTML(0);
   return out.str();
 }
-#endif
+
+#endif // header_math_extra_tree_ALREADY_INCLUDED

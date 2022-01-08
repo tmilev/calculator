@@ -1,5 +1,5 @@
-#ifndef WEBSERVER_H
-#define WEBSERVER_H
+#ifndef header_webserver_ALREADY_INCLUDED
+#define header_webserver_ALREADY_INCLUDED
 #include "multiprocessing.h"
 #include "system_functions_global_objects.h"
 #include "transport_layer_security.h"
@@ -337,5 +337,5 @@ public:
   static int mainCommandLine();
 };
 
-#endif // WEBSERVER_H
+#endif // header_webserver_ALREADY_INCLUDED
 

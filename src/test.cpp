@@ -88,6 +88,7 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::polynomial)) {
     MonomialPolynomial::Test::all();
     Polynomial<Rational>::Test::all();
+    PolynomialFactorizationFiniteFields::Test::all();
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||

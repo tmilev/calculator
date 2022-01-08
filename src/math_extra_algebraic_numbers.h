@@ -4,6 +4,7 @@
 #define header_math_extra_algebraic_numbers_ALREADY_INCLUDED
 
 #include "math_general.h"
+#include "math_extra_polynomial_factorization.h"
 
 class AlgebraicClosureRationals;
 class AlgebraicNumber {
@@ -401,6 +402,44 @@ public:
   }
 };
 
+class PolynomialFactorizationCantorZassenhausSmall {
+public:
+  static const int maximumDegreeDefault = 512;
+  IntegerModulusSmall modulus;
+
+
+  int degree;
+  int degreeUnknownFactor;
+  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
+  PolynomialModuloPolynomial<ElementZmodP> baseLetter;
+  PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
+
+  Polynomial<ElementZmodP> current;
+  List<Polynomial<ElementZmodP> > factorCandidatesPreviousRuns;
+  bool oneFactor(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  // Input is either irreuducible polynomial of prime degree, or a product
+  // of linear polynomials.
+  bool handlePrimeDegreeSeparatedFactor(Polynomial<ElementZmodP>& input);
+  bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
+  bool hasFactorsOfDifferentDegree(std::stringstream* comments);
+  bool oneFactorProbabilityHalf(
+    unsigned int constant,
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  bool divisorFromCandidate(
+    const Polynomial<ElementZmodP>& candidate,
+    const std::string& candidateDisplayName,
+    std::stringstream* comments
+  );
+  static std::string name() {
+    return "Cantor-Zassenhaus small.";
+  }
+};
+
 class PolynomialFactorizationFiniteFields {
 public:
   static const int maximumDegreeDefault = 100;
@@ -448,5 +487,21 @@ public:
     return "finite field factorization";
   }
   PolynomialFactorizationFiniteFields();
+  class Test {
+  public:
+    class TestCase {
+    public:
+      std::string toBeFactored;
+      std::string desiredFactorization;
+      Polynomial<Rational>::Test parser;
+      bool run();
+    };
+    static bool all();
+    static bool test(
+      const std::string& toFactor,
+      const std::string& desiredResult
+    );
+  };
 };
+
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

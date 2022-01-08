@@ -882,3 +882,11 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
   }
   return true;
 }
+
+PolynomialUnivariateModular::PolynomialUnivariateModular() : modulus(nullptr) {
+}
+
+PolynomialUnivariateModular::PolynomialUnivariateModular(
+  IntegerModulusSmall* inputModulus
+) : modulus(inputModulus) {
+}

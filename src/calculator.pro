@@ -158,6 +158,7 @@ SOURCES += \
     math_implementation_5.cpp \
     math_implementation_5_test.cpp \
     math_implementation_6.cpp \
+    math_implementation_6_test.cpp \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \

@@ -3806,15 +3806,15 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
     output.makeOne();
     return;
   }
-  MonomialPolynomial tempMon;
-  tempMon.makeOne();
+  MonomialPolynomial monomial;
+  monomial.makeOne();
   output.makeZero();
   LargeInteger coefficient = 1;
   if (startMonomialPower > 0) {
     if (denominatorPowerReduction != startDenominatorPower) {
       coefficient = MathRoutines::nChooseK(startMonomialPower, denominatorPowerReduction);
       coefficient *= MathRoutines::parity(denominatorPowerReduction);
-      output.addMonomial(tempMon, coefficient);
+      output.addMonomial(monomial, coefficient);
     } else {
       if (startMonomialPower < startDenominatorPower) {
         global.fatal << "Start monomial power: "
@@ -3822,12 +3822,12 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
         << startDenominatorPower << ". " << global.fatal;
       }
       for (int k = 0; k <= startMonomialPower - startDenominatorPower; k++) {
-        tempMon = exponent;
-        tempMon.raiseToPower(k);
+        monomial = exponent;
+        monomial.raiseToPower(k);
         coefficient = MathRoutines::parity(startDenominatorPower) * MathRoutines::nChooseK(
           startMonomialPower - 1 - k, startDenominatorPower - 1
         );
-        output.addMonomial(tempMon, coefficient);
+        output.addMonomial(monomial, coefficient);
       }
     }
   }
@@ -3837,16 +3837,16 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
         - startMonomialPower - 1 + denominatorPowerReduction,
         denominatorPowerReduction
       );
-      output.addMonomial(tempMon, coefficient);
+      output.addMonomial(monomial, coefficient);
     } else {
       for (int k = 1; k <= - startMonomialPower; k ++) {
-        tempMon = exponent;
-        tempMon.raiseToPower(- k);
+        monomial = exponent;
+        monomial.raiseToPower(- k);
         coefficient = MathRoutines::nChooseK(
           startDenominatorPower - startMonomialPower - 1 - k,
           startDenominatorPower - 1
         );
-        output.addMonomial(tempMon, coefficient);
+        output.addMonomial(monomial, coefficient);
       }
     }
   }
@@ -4149,7 +4149,7 @@ bool PartialFractions::isHigherThanWithRespectToWeight(
   return accum > 0;
 }
 
-//NOTE NOTE NOTE: To be fixed: you gotta use the preceding function to sort the vpBasis!
+// TODO(tmilev): be fixed: you gotta use the preceding function to sort the vpBasis!
 void PartialFractions::computeKostantFunctionFromWeylGroup(
   char weylGroupLetter,
   int weylGroupNumber,
@@ -4159,18 +4159,18 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   this->initializeCommon();
   Vectors<Rational> vectorPartitionBasis;
   Vector<Rational> tempWeight; tempWeight.setSize(weylGroupNumber);
-  WeylGroupData tempW;
-  tempW.makeArbitrarySimple(weylGroupLetter, weylGroupNumber);
-  tempW.computeRho(true);
-  vectorPartitionBasis = tempW.rootsOfBorel;
+  WeylGroupData weylGroup;
+  weylGroup.makeArbitrarySimple(weylGroupLetter, weylGroupNumber);
+  weylGroup.computeRho(true);
+  vectorPartitionBasis = weylGroup.rootsOfBorel;
   if (weylGroupLetter == 'B') {
     for (int i = 0; i < vectorPartitionBasis.size; i ++) {
       Rational scalarProduct;
       Vector<Rational> root;
       root = vectorPartitionBasis[i];
-      tempW.rootScalarCartanRoot(root, root, scalarProduct);
+      weylGroup.rootScalarCartanRoot(root, root, scalarProduct);
       if (scalarProduct.isEqualToOne()) {
-        vectorPartitionBasis.addOnTop(tempW.rootsOfBorel[i] * 2);
+        vectorPartitionBasis.addOnTop(weylGroup.rootsOfBorel[i] * 2);
       }
     }
   }
@@ -5019,7 +5019,8 @@ int DynkinType::getIndexPreimageFromRootInjection(int inputIndex, const List<int
   }
   global.fatal << "Asking to find the preimage of root index "
   << inputIndex << " w.r.t. root injection "
-  << inputRootInjection << " - the root index has no preimage. This function is not allowed to fail. "
+  << inputRootInjection << " - the root index has no preimage. "
+  << "This function is not allowed to fail. "
   << global.fatal;
   return - 1;
 }
@@ -5132,7 +5133,8 @@ int DynkinType::getRank() const {
   int result = 0;
   if (!rationalRank.isSmallInteger(&result)) {
     global.fatal << "Attempt to get a small integer "
-    << "rank from a Dynkin type whose rank is not a small integer, but is instead "
+    << "rank from a Dynkin type whose rank "
+    << "is not a small integer, but is instead "
     << rationalRank.toString() << ". " << global.fatal;
   }
   return result;
@@ -5409,10 +5411,14 @@ int DynkinSimpleType::getRootSystemSize() const {
       return this->rank * (this->rank - 1) * 2;
     case 'E':
       switch(this->rank) {
-        case 6: return 72;
-        case 7: return 126;
-        case 8: return 240;
-        default: return - 1;
+        case 6:
+          return 72;
+        case 7:
+          return 126;
+        case 8:
+          return 240;
+        default:
+          return - 1;
       }
     case 'G':
       return 12;
@@ -5543,8 +5549,8 @@ void DynkinSimpleType::getEpsilonMatrix(
     output(weylRank - 1, weylRank - 1) = 1;
     output(weylRank - 2, weylRank - 1) = 1;
   }
-  Rational RHalf(1, 2);
-  Rational RMHalf(- 1, 2);
+  Rational half(1, 2);
+  Rational negativeHalf(- 1, 2);
   if (weylLetter == 'E') {
     //Epsilon convention taken with slight modification from
     //Humpreys, Introduction to Lie algebras and representation theory, page 65
@@ -5552,14 +5558,14 @@ void DynkinSimpleType::getEpsilonMatrix(
     output.initialize(8, weylRank);
     output.makeZero();
     //first simple root: - 1/2e_1- 1/2e_8+ 1/2e_2+ 1/2e_3+ 1/2e_4+ 1/2e_5+ 1/2e_6+ 1/2e_7
-    output(0, 0) = RMHalf;
-    output(1, 0) = RHalf;
-    output(2, 0) = RHalf;
-    output(3, 0) = RHalf;
-    output(4, 0) = RHalf;
-    output(5, 0) = RHalf;
-    output(6, 0) = RHalf;
-    output(7, 0) = RMHalf;
+    output(0, 0) = negativeHalf;
+    output(1, 0) = half;
+    output(2, 0) = half;
+    output(3, 0) = half;
+    output(4, 0) = half;
+    output(5, 0) = half;
+    output(6, 0) = half;
+    output(7, 0) = negativeHalf;
     //2nd simple root: -e_1-e_2 (that is the sticky piece of the Dynkin diagram)
     output(0, 1) = - 1;
     output(1, 1) = - 1;
@@ -5601,10 +5607,10 @@ void DynkinSimpleType::getEpsilonMatrix(
     //image of third simple root = e_3 (short one):
     output(2, 2) = 1;
     //image of fourth simple root (short one)
-    output(0, 3) = RMHalf;
-    output(1, 3) = RMHalf;
-    output(2, 3) = RMHalf;
-    output(3, 3) = RMHalf;
+    output(0, 3) = negativeHalf;
+    output(1, 3) = negativeHalf;
+    output(2, 3) = negativeHalf;
+    output(3, 3) = negativeHalf;
     //eps_2:
     //eps_4:
   }

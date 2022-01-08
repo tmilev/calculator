@@ -4499,6 +4499,21 @@ VectorPartitionFunction(
 ```
 Work in progress. Vector partition function formula. 
 
+*ConeDecomposition* [ConeDecomposition] {CalculatorFunctionsVectorPartitionFunction::coneDecomposition}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecomposition%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+ConeDecomposition(
+(1,0,0),
+(0,1,0),
+(0,0,1),
+(1,1,0),
+(0,1,1),
+(1,1,1)
+);
+```
+Work in progress. 
+Cone decomposition related to a vector partition function. 
+
 *SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::innerSemisimpleLieAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

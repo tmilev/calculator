@@ -10460,6 +10460,7 @@ bool Cone::drawMeLastCoordinateAffine(
   const std::string& chamberWallColor
 ) const {
   (void) format;
+  (void) initializeDrawingVariables;
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->getDimension() - 1);
   Vectors<Rational> verticesScaled;

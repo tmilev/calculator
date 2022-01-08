@@ -578,8 +578,9 @@ PolynomialFactorizationFiniteFields::PolynomialFactorizationFiniteFields() {
   this->maximumFactorsLiftedTries = 50000;
 }
 
-bool PolynomialFactorizationFiniteFields::oneFactor(
-  std::stringstream* comments, std::stringstream* commentsOnFailure
+bool PolynomialFactorizationFiniteFields::factor(
+  std::stringstream* comments,
+  std::stringstream* commentsOnFailure
 ) {
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {

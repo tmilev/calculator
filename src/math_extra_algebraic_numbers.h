@@ -474,7 +474,36 @@ public:
     const LargeIntegerUnsigned& oldModulus,
     std::stringstream* comments
   );
+  // Same as factor.
+  // The name oneFactor is
+  // required to allow use of this class with
+  // the PolynomialFactorizationUnivariate template,
+  // as shown in the example below.
+  // PolynomialFactorizationUnivariate<
+  //   Rational,
+  //   PolynomialFactorizationFiniteFields
+  // > factorization;
+  // factorization.factor();
+  //
+  // There's no computational penalty for using
+  // factorization.factor() as above vs. using the
+  // naked factor() method below, so please use this
+  // class through the wrapper
+  // PolynomialFactorizationUnivariate.
+  // The wrapper has convenience functions which are
+  // shared with for use with other factorization methods.
+  // The nature of the Cantor-Zassenhaus algorithm is
+  // such that finding one factor is about as complicated
+  // as finding all factors, which is not assumed to
+  // be the case for all methods for factorization.
   bool oneFactor(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  ) {
+    return this->factor(comments, commentsOnFailure);
+  }
+  // Factors the polynomial fully.
+  bool factor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );

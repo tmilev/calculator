@@ -464,6 +464,7 @@ public:
   void setWebInput(const std::string& inputName, const std::string& inputValue);
   std::string getWebInput(const std::string& inputName);
   void initialize();
+  void initializeMathematics();
   void initModifiableDatabaseFields();
   void initDefaultFolderAndFileNames();
   void initFoldersProjectBase(const std::string& inputPhysicalExecutable);

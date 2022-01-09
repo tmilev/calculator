@@ -2551,6 +2551,7 @@ public:
   );
   void reset();
   void initialize(Calculator::Mode desiredMode);
+  void initializeLogDuration(Calculator::Mode desiredMode);
   void initializeToStringHandlers();
   void initializeAtomsThatFreezeArguments();
   void initializeBuiltInsFreezeArguments();

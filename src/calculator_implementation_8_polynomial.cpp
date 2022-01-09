@@ -4,6 +4,8 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_functions_polynomial.h"
 #include "math_rational_function_implementation.h"
+#include "math_extra_polynomial_factorization.h"
+#include "math_extra_algebraic_numbers.h"
 
 template <>
 bool CalculatorConversions::getPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
@@ -219,13 +221,17 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
     return calculator << "The modulus: " << prime
     << " appears not to be prime. " << commentsOnFailure.str();
   }
-  std::stringstream comments, out;
-  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus> result;
+  std::stringstream comments;
+  std::stringstream out;
+  PolynomialFactorizationUnivariate<ElementZmodP> result;
+  PolynomialFactorizationCantorZassenhaus<
+    PolynomialModuloPolynomial<ElementZmodP>
+  > algorithm;
   polynomial.context.getFormat(result.format);
   result.format.flagSuppressModP = true;
   comments << "Converted polynomial: \\("
   << polynomial.content.toString(&result.format) << "\\)<br>";
-  if (!result.factor(polynomial.content, &comments, &comments)) {
+  if (!result.factor(polynomial.content, algorithm, &comments, &comments)) {
     out << "Failed to factor. " << comments.str()
     << "Factorization so far: " << result.toStringResult(&result.format);
     return output.assignValue(calculator, out.str());
@@ -297,10 +303,12 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
       "I have been taught to factor one variable polynomials only. "
     );
   }
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  PolynomialFactorizationFiniteFields algorithm;
   std::stringstream comments;
   if (!factorization.factor(
     polynomial.content,
+    algorithm,
     &comments,
     &comments
   )) {
@@ -342,9 +350,11 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
       "I have been taught to factor one variable polynomials only. "
     );
   }
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  PolynomialFactorizationKronecker algorithm;
   if (!factorization.factor(
     polynomial.content,
+    algorithm,
     &calculator.comments,
     &calculator.comments
   )) {
@@ -382,10 +392,12 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
       "I have been taught to factor one variable polynomials only. "
     );
   }
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorizationKronecker;
+  PolynomialFactorizationUnivariate<Rational> factorizationKronecker;
+  PolynomialFactorizationKronecker algorithmKronecker;
   factorizationKronecker.maximumComputations = 10000;
   if (factorizationKronecker.factor(
     polynomial.content,
+    algorithmKronecker,
     &calculator.comments,
     &calculator.comments
   )) {
@@ -397,8 +409,14 @@ bool CalculatorFunctionsPolynomial::factorPolynomialRational(
       output
     );
   }
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorizationFiniteFields;
-  if (!factorizationFiniteFields.factor(polynomial.content, &calculator.comments, & calculator.comments)) {
+  PolynomialFactorizationUnivariate<Rational> factorizationFiniteFields;
+  PolynomialFactorizationFiniteFields algorithmFiniteFields;
+  if (!factorizationFiniteFields.factor(
+    polynomial.content,
+    algorithmFiniteFields,
+    &calculator.comments,
+    &calculator.comments
+  )) {
     return false;
   }
   return CalculatorFunctionsPolynomial::factorPolynomialProcess(

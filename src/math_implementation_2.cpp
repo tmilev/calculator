@@ -5,6 +5,8 @@
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
 
+List<unsigned int> LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
+
 const unsigned int HashConstants::primeConstants[HashConstants::size] = {
   607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
   7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
@@ -904,6 +906,17 @@ std::string LargeIntegerUnsigned::toStringAbbreviate(FormatExpressions* format) 
     result = out.str();
   }
   return result;
+}
+
+const List<unsigned int>& LargeIntegerUnsigned::allPrimesSmallerThan15Bits() {
+  if (LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits.size > 0) {
+    return LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
+  }
+  LargeIntegerUnsigned::getPrimesEratosthenesSieve(
+    32768,
+    LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits
+  );
+  return LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
 }
 
 void LargeIntegerUnsigned::padWithZeroesToAtLeastNDigits(int desiredMinNumDigits) {

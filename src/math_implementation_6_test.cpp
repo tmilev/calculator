@@ -40,11 +40,12 @@ bool PolynomialFactorizationFiniteFields::Test::test(
 
 bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
   this->parser.initialize();
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  PolynomialFactorizationFiniteFields algorithm;
   std::stringstream comments;
   Polynomial<Rational> input = this->parser.fromString(toBeFactored);
   int64_t start = global.getElapsedMilliseconds();
-  if (!factorization.factor(input, &comments, &comments)) {
+  if (!factorization.factor(input, algorithm, &comments, &comments)) {
     global.fatal << "Factorization failed: "
     << this->toBeFactored << "\nComments:\n"
     << comments.str()

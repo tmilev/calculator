@@ -408,6 +408,14 @@ void Calculator::reset() {
   this->parser.reset();
 }
 
+void Calculator::initializeLogDuration(Calculator::Mode desiredMode) {
+  int start = global.getElapsedMilliseconds();
+  this->initialize(desiredMode);
+  int duration = global.getElapsedMilliseconds() - start;
+  global << "Calculator initialization took "
+  << Logger::blue << duration << " ms." << Logger::endL;
+}
+
 void Calculator::initialize(Calculator::Mode desiredMode) {
   MacroRegisterFunctionWithName("Calculator::initialize");
   this->reset();

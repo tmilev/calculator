@@ -8,6 +8,7 @@
 class LargeIntegerUnsigned {
   void addNoFitSize(const LargeIntegerUnsigned& x);
   void fitSize();
+  static List<unsigned int> precomputedPrimesSmallerThan15Bits;
 public:
   // The zero element is assumed to have length one array with a zero entry.
   //
@@ -38,6 +39,7 @@ public:
     output << largeIntegerUnsigned.toString();
     return output;
   }
+  static const List<unsigned int>& allPrimesSmallerThan15Bits();
   void padWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void addLargeIntegerUnsignedShiftedTimesDigit(
     const LargeIntegerUnsigned& other, int digitShift, int constantTerm

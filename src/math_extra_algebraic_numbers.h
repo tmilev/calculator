@@ -365,13 +365,14 @@ public:
   };
 };
 
+template <class PolynomialQuotient>
 class PolynomialFactorizationCantorZassenhaus {
 public:
   static const int maximumDegreeDefault = 512;
   ElementZmodP one;
   int degree;
   int degreeUnknownFactor;
-  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
+  PolynomialFactorizationUnivariate<ElementZmodP>* output;
   PolynomialModuloPolynomial<ElementZmodP> baseLetter;
   PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
 
@@ -402,48 +403,10 @@ public:
   }
 };
 
-class PolynomialFactorizationCantorZassenhausSmall {
-public:
-  static const int maximumDegreeDefault = 512;
-  IntegerModulusSmall modulus;
-
-
-  int degree;
-  int degreeUnknownFactor;
-  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
-  PolynomialModuloPolynomial<ElementZmodP> baseLetter;
-  PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
-
-  Polynomial<ElementZmodP> current;
-  List<Polynomial<ElementZmodP> > factorCandidatesPreviousRuns;
-  bool oneFactor(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
-  );
-  // Input is either irreuducible polynomial of prime degree, or a product
-  // of linear polynomials.
-  bool handlePrimeDegreeSeparatedFactor(Polynomial<ElementZmodP>& input);
-  bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
-  bool hasFactorsOfDifferentDegree(std::stringstream* comments);
-  bool oneFactorProbabilityHalf(
-    unsigned int constant,
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
-  );
-  bool divisorFromCandidate(
-    const Polynomial<ElementZmodP>& candidate,
-    const std::string& candidateDisplayName,
-    std::stringstream* comments
-  );
-  static std::string name() {
-    return "Cantor-Zassenhaus small.";
-  }
-};
-
 class PolynomialFactorizationFiniteFields {
 public:
   static const int maximumDegreeDefault = 100;
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields>* output;
+  PolynomialFactorizationUnivariate<Rational>* output;
   Polynomial<Rational> current;
   Polynomial<ElementZmodP> modularization;
   ElementZmodP oneModular;

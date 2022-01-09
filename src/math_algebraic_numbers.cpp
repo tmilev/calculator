@@ -29,8 +29,9 @@ bool PolynomialSolverWithQuadraticRadicalsUnivariate::solvePolynomialWithRadical
   const Polynomial<Rational>& input,
   std::stringstream* commentsOnFailure
 ) {
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
-  if (!factorization.factor(input, nullptr, commentsOnFailure)) {
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  PolynomialFactorizationFiniteFields algorithm;
+  if (!factorization.factor(input, algorithm, nullptr, commentsOnFailure)) {
     if (commentsOnFailure!= nullptr) {
       *commentsOnFailure << "Failed to factor the characteristic polynomial.";
     }
@@ -372,9 +373,11 @@ bool AlgebraicClosureRationals::reduceMe(
   Polynomial<Rational> minimalPolynomial, smallestFactor;
   minimalPolynomial.assignMinimalPolynomial(this->generatingElementMatrixForm);
   int dimension = this->latestBasis.size;
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  PolynomialFactorizationFiniteFields algorithm;
   bool mustBeTrue = factorization.factor(
     minimalPolynomial,
+    algorithm,
     nullptr,
     nullptr
   );

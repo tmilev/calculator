@@ -3070,28 +3070,6 @@ template<>
 bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output);
 
 template <class Coefficient>
-class PolynomialModuloPolynomial {
-  friend std::ostream& operator<<(std::ostream& output, const PolynomialModuloPolynomial& unused) {
-    (void) unused;
-    output << "A polynomial modulo polynomial.";
-    return output;
-  }
-public:
-  Polynomial<Coefficient> modulus;
-  Polynomial<Coefficient> value;
-  void reduce();
-  void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
-  void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
-  void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
-  std::string toString(FormatExpressions* format = nullptr) const;
-  PolynomialModuloPolynomial<Coefficient> one();
-  static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);
-  unsigned int hashFunction() const;
-  bool operator==(const PolynomialModuloPolynomial<Coefficient>& other)const;
-  bool isEqualToZero() const;
-};
-
-template <class Coefficient, class OneFactorFinder>
 class PolynomialFactorizationUnivariate {
 public:
   Polynomial<Coefficient> original;
@@ -3099,6 +3077,7 @@ public:
   Coefficient constantFactor;
   List<Polynomial<Coefficient> > reduced;
   List<Polynomial<Coefficient> > nonReduced;
+  std::string algorithm;
   int maximumDegree;
   // An integer that measures the amount of
   // computations carried out by the OneFactorFinder algorithm.
@@ -3114,8 +3093,10 @@ public:
   bool basicChecks(
     std::stringstream* commentsOnFailure
   );
+  template <class OneFactorFinder>
   bool factor(
     const Polynomial<Coefficient>& input,
+    OneFactorFinder& algorithm,
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
@@ -3126,29 +3107,6 @@ public:
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* format) const;
   PolynomialFactorizationUnivariate();
-};
-
-class PolynomialFactorizationKronecker {
-  public:
-  static const int maximumDegreeDefault = 20;
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker>* output;
-  Polynomial<Rational> current;
-  bool oneFactor(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
-  );
-  PolynomialFactorizationKronecker() {
-    this->output = nullptr;
-  }
-  static bool solvePolynomial(
-    const Polynomial<Rational>& input,
-    List<AlgebraicNumber>& output,
-    AlgebraicClosureRationals& closure,
-    std::stringstream* commentsOnFailure
-  );
-  static std::string name() {
-    return "Kronecker";
-  }
 };
 
 template <class Coefficient>

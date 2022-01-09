@@ -3394,7 +3394,8 @@ int WebServer::run() {
   }
   global.logs.logType = GlobalVariables::LogData::type::server;
   this->initializeSignals();
-  global.calculator().getElement().initialize(Calculator::Mode::full);
+  global.initializeMathematics();
+  global.calculator().getElement().initializeLogDuration(Calculator::Mode::full);
   // Cannot call initializeMutex here: not before we execute fork();
   global.calculator().getElement().computeAutoCompleteKeyWords();
   global.calculator().getElement().writeAutoCompleteKeyWordsToFile();

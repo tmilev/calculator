@@ -1789,9 +1789,11 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   this->rationalFraction.content.getDenominator(this->denominator);
   this->rationalFraction.content.getNumerator(this->numerator);
   this->numerator *= this->denominator.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  PolynomialFactorizationKronecker algorithm;
   if (!factorization.factor(
     this->denominator,
+    algorithm,
     &this->printoutPartialFractionsHtml,
     &this->printoutPartialFractionsHtml
   )) {

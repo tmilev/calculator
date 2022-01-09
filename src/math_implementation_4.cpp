@@ -340,6 +340,14 @@ void GlobalVariables::initThreadsExecutableStart() {
   ThreadData::registerFirstThread("main");
 }
 
+void GlobalVariables::initializeMathematics() {
+  int start = global.getElapsedMilliseconds();
+  LargeIntegerUnsigned::allPrimesSmallerThan15Bits();
+  int duration = global.getElapsedMilliseconds() - start;
+  global <<  "Initializing precomputed math took "
+  << Logger::blue << duration << " ms." << Logger::endL;
+}
+
 void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExecutable) {
   StateMaintainerCurrentFolder preserveCurrentFolder;
   this->physicalPathProjectBase = FileOperations::getPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
@@ -362,7 +370,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
 }
 
 void GlobalVariables::setWebInput(const std::string& inputName, const std::string& inputValue) {
-  MacroRegisterFunctionWithName("GlobalVariables::SetWebInput");
+  MacroRegisterFunctionWithName("GlobalVariables::setWebInput");
   this->webArguments.setKeyValue(inputName, inputValue);
 }
 

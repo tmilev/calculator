@@ -66,20 +66,24 @@ template <>
 bool Polynomial<Rational>::Test::oneFactorizationKronecker(
   const std::string& input, const std::string& expectedFactors
 ) {
-  Polynomial<Rational> toBeFactored = Polynomial<Rational>::Test::fromString(input);
-  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
+  Polynomial<Rational> toBeFactored =
+  Polynomial<Rational>::Test::fromString(input);
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  PolynomialFactorizationKronecker algorithm;
   bool success = factorization.factor(
     toBeFactored,
+    algorithm,
     nullptr,
     nullptr
   );
   if (!success) {
-    global.fatal << "Factorization of " << toBeFactored.toString() << " failed. " << global.fatal;
+    global.fatal << "Factorization of "
+    << toBeFactored.toString(&this->format) << " failed. " << global.fatal;
   }
   std::string resultFactors = factorization.toStringResult(&this->format);
   if (resultFactors != expectedFactors) {
     global.fatal << "While factoring: "
-    << input << "=" << toBeFactored.toString()
+    << input << "=" << toBeFactored.toString(&this->format)
     << " got factors: " << resultFactors
     << ", expected: " << expectedFactors << ". " << global.fatal;
   }

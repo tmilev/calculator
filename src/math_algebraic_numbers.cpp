@@ -1852,6 +1852,16 @@ void ElementZmodP::makeMinusOne(const LargeIntegerUnsigned& newModulo) {
   this->value --;
 }
 
+void ElementZmodP::makeFrom(
+  const int inputModulus, const int inputValue
+) {
+  if (inputModulus <= 0) {
+    global.fatal << "Non-positive modulus not allowed. " << global.fatal;
+  }
+  this->modulus = inputModulus;
+  *this = inputValue;
+}
+
 void ElementZmodP::negate() {
   if (this->value.isEqualToZero()) {
     return;

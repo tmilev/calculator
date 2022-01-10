@@ -1678,7 +1678,9 @@ bool CalculatorFunctions::greatestCommonDivisorInteger(
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctionsBasic::logarithmBaseNaturalToLn(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBasic::logarithmBaseNaturalToLn(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }

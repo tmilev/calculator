@@ -215,7 +215,7 @@ class LargeInteger {
     rightCopy = right;
     return left * rightCopy;
   }
-  friend std::ostream& operator << (std::ostream& output, const LargeInteger& largeInteger) {
+  friend std::ostream& operator<<(std::ostream& output, const LargeInteger& largeInteger) {
     output << largeInteger.toString();
     return output;
   }

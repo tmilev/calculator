@@ -2778,6 +2778,12 @@ public:
     const Coefficient& one,
     std::stringstream* comments
   ) const;
+  // Computes the derivative polynomial d/dx p; crashes if the polynomial
+  // is of two or more variables. Will also crash if the polynomial
+  // has monomial powers that are too large.
+  void derivative(
+    Polynomial<Coefficient>& output
+  ) const;
   // Given polynomial p, returns d/dx_1 p dx_1 + ... + d/dx_n p dx_n.
   // The differentials dx_1, ..., dx_n are introduced as additional variables.
   bool differential(
@@ -2885,6 +2891,11 @@ public:
   bool getRootFromLinearPolynomialConstantTermLastVariable(Vector<Coefficient>& outputRoot);
   Matrix<Coefficient> evaluateUnivariatePolynomial(const Matrix<Coefficient>& input); //<-for univariate polynomials only
   Coefficient evaluate(const Vector<Coefficient>& input, const Coefficient& zero = 0);
+  Coefficient evaluate(const Coefficient& input, const Coefficient& zero = 0) {
+    Vector<Coefficient> vectorInput;
+    vectorInput.addOnTop(input);
+    return this->evaluate(vectorInput, zero);
+  }
   bool isProportionalTo(
     const Polynomial<Coefficient>& other,
     Coefficient& outputTimesMeEqualsOther,
@@ -3069,6 +3080,22 @@ bool Polynomial<Rational>::Test::fromStringTest();
 template<>
 bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output);
 
+class PolynomialConversions {
+public:
+  template<class PolynomialTemplate, class Coefficient>
+  static void convertToPolynomial(
+    const PolynomialTemplate& input,
+    Polynomial<Coefficient>& output
+  );
+  template<class Coefficient>
+  static void convertToPolynomial(
+    const Polynomial<Coefficient>& input,
+    Polynomial<Coefficient>& output
+  ) {
+    output = input;
+  }
+};
+
 template <class Coefficient>
 class PolynomialFactorizationUnivariate {
 public:
@@ -3100,9 +3127,24 @@ public:
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
+  template <class PolynomialTemplate>
+  bool accountNonReducedFactorTemplate(const PolynomialTemplate& incoming) {
+    Polynomial<Coefficient> converted;
+    PolynomialConversions::convertToPolynomial(incoming, converted);
+    return this->accountNonReducedFactorTemplate(converted);
+  }
   bool accountNonReducedFactor(Polynomial<Coefficient>& incoming);
+  template <class PolynomialTemplate>
+  bool accountReducedFactorTemplate(
+    const PolynomialTemplate& incoming, bool accountQuotientAsNonReduced
+  ) {
+    Polynomial<Coefficient> converted;
+    PolynomialConversions::convertToPolynomial(incoming, converted);
+    return this->accountReducedFactor(converted, accountQuotientAsNonReduced);
+  }
   bool accountReducedFactor(
-    Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
+    Polynomial<Coefficient>& incoming,
+    bool accountQuotientAsNonReduced
   );
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* format) const;

@@ -6,6 +6,7 @@
 #include "math_rational_function_implementation.h"
 #include "math_extra_polynomial_factorization.h"
 #include "math_extra_algebraic_numbers.h"
+#include "math_general_implementation.h"
 
 template <>
 bool CalculatorConversions::getPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
@@ -225,7 +226,9 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   std::stringstream out;
   PolynomialFactorizationUnivariate<ElementZmodP> result;
   PolynomialFactorizationCantorZassenhaus<
-    PolynomialModuloPolynomial<ElementZmodP>
+    PolynomialModuloPolynomial<ElementZmodP>,
+    Polynomial<ElementZmodP>,
+    Polynomial<ElementZmodP>
   > algorithm;
   polynomial.context.getFormat(result.format);
   result.format.flagSuppressModP = true;

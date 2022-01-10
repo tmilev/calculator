@@ -1678,13 +1678,29 @@ std::string PolynomialFactorizationUnivariate<Coefficient>::toStringResult(
 
 // The Cantor-Zassenhaus algorithm:
 // https://en.wikipedia.org/wiki/Cantor%E2%80%93Zassenhaus_algorithm
-template<class PolynomialQuotient>
-PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::PolynomialFactorizationCantorZassenhaus() {
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::PolynomialFactorizationCantorZassenhaus() {
   this->output = nullptr;
 }
 
-template<class PolynomialQuotient>
-bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::oneFactor(
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::oneFactor(
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
@@ -1692,7 +1708,9 @@ bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::oneFactor(
   this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
 
-  this->one.makeOne(this->current.coefficients[0].modulus);
+  this->one.makeOne(
+    this->output->current.coefficients[0].modulus
+  );
   if (this->one.modulus == 2) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only odd primes allowed. ";
@@ -1704,48 +1722,62 @@ bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::oneFactor(
   out << "Find one factor of " << this->current.toString(&this->output->format);
   out << "Factorization so far: " << this->output->toStringResult(&this->output->format);
   report.report(out.str());
-  Vector<Polynomial<ElementZmodP> > derivative;
-  if (!this->current.differential(derivative, commentsOnFailure)) {
-    return false;
-  }
-  Polynomial<ElementZmodP> greatestCommonDivisor;
-  derivative[0].greatestCommonDivisor(
-    derivative[0],
+  PolynomialImplementation derivative;
+  this->current.derivative(derivative);
+  PolynomialImplementation candidate;
+  if (!derivative.greatestCommonDivisor(
+    derivative,
     this->current,
-    greatestCommonDivisor,
+    candidate,
     this->one,
     commentsOnFailure
-  );
-  if (!greatestCommonDivisor.isConstant()) {
-    this->output->accountNonReducedFactor(greatestCommonDivisor);
+  )) {
+    return false;
+  }
+  if (!candidate.isConstant()) {
+    this->output->accountNonReducedFactorTemplate(candidate);
     return true;
   }
   return this->oneFactorGo(comments, commentsOnFailure);
 }
 
-template<class PolynomialQuotient>
-bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::
-hasFactorsOfDifferentDegree(std::stringstream* comments) {
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::hasFactorsOfDifferentDegree(std::stringstream* comments) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::hasFactorsOfDifferentDegree");
   (void) comments;
   int degree = this->current.totalDegreeInt();
-  PolynomialModuloPolynomial<ElementZmodP> currentPower;
-  PolynomialModuloPolynomial<ElementZmodP> currentPowerMinusBaseLetter;
+  PolynomialModuloPolynomialImplementation currentPower;
+  PolynomialModuloPolynomialImplementation currentPowerMinusBaseLetter;
   currentPower = this->baseLetter;
-  Polynomial<ElementZmodP> candidateDivisor;
+  PolynomialImplementation candidateDivisor;
   for (int i = 0; i < degree; i ++) {
-    MathRoutines::raiseToPower(currentPower, this->one.modulus, this->oneQuotientRing);
+    MathRoutines::raiseToPower(
+      currentPower, this->one.modulus, this->oneQuotientRing
+    );
     currentPowerMinusBaseLetter = currentPower;
     currentPowerMinusBaseLetter -= this->baseLetter;
     if (currentPowerMinusBaseLetter.isEqualToZero()) {
       continue;
     }
     bool expectedToBeTrue =
-    Polynomial<ElementZmodP>::greatestCommonDivisor(
-      this->current, currentPowerMinusBaseLetter.value, candidateDivisor, this->one, nullptr
+    this->current.greatestCommonDivisor(
+      this->current,
+      currentPowerMinusBaseLetter.value,
+      candidateDivisor,
+      this->one,
+      nullptr
     );
     if (!expectedToBeTrue) {
-      global.fatal << "Unexpected failure to compute greatest common divisor of "
+      global.fatal
+      << "Unexpected failure to compute greatest common divisor of "
       << this->current << " and " << currentPowerMinusBaseLetter.value
       << ". " << global.fatal;
     }
@@ -1759,8 +1791,8 @@ hasFactorsOfDifferentDegree(std::stringstream* comments) {
       << "and \\(" << this->current.toString(&this->output->format) << "\\)";
     }
     if (
-      candidateDivisor.totalDegree() > 0 &&
-      candidateDivisor.totalDegree() < this->current.totalDegree()
+      candidateDivisor.totalDegreeInt() > 0 &&
+      candidateDivisor.totalDegreeInt() < this->current.totalDegreeInt()
     ) {
       if (comments != nullptr) {
         std::string xLetter = this->output->format.getPolynomialLetter(0);
@@ -1771,46 +1803,65 @@ hasFactorsOfDifferentDegree(std::stringstream* comments) {
         << xLetter << "\\) "
         << "and \\(" << this->current.toString(&this->output->format) << "\\)";
       }
-      this->output->accountNonReducedFactor(candidateDivisor);
+      this->output->accountNonReducedFactorTemplate(candidateDivisor);
       return true;
     }
   }
   return false;
 }
 
-template<class PolynomialQuotient>
-bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::
-divisorFromCandidate(
-  const Polynomial<ElementZmodP>& candidate,
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::divisorFromCandidate(
+  const PolynomialImplementation& candidate,
   const std::string& candidateDisplayName,
   std::stringstream* comments
 ) {
   if (candidate.isEqualToZero()) {
     return false;
   }
-  Polynomial<ElementZmodP> divisor;
+  PolynomialImplementation divisor;
   bool mustBeTrue = candidate.greatestCommonDivisor(
     candidate, this->current, divisor, this->one, comments
   );
   if (!mustBeTrue) {
     global.fatal << "Failure to find gcd not allowed here. " << global.fatal;
   }
-  if (divisor.totalDegree() <= 0 || divisor.totalDegree() >= this->current.totalDegree()) {
+  if (
+    divisor.totalDegreeInt() <= 0 ||
+    divisor.totalDegreeInt() >= this->current.totalDegreeInt()
+  ) {
     return false;
   }
   if (comments != nullptr) {
+    Polynomial<ElementZmodP> divisorConverted;
+    PolynomialConversions::convertToPolynomial(divisor, divisorConverted);
     *comments << "Found divisor \\("
-    << this->one.toStringPolynomial(divisor, &this->output->format)
+    << this->one.toStringPolynomial(divisorConverted, &this->output->format)
     << "\\) by taking gcd with \\(" << candidateDisplayName << "\\). ";
   }
-  this->output->accountNonReducedFactor(divisor);
+  this->output->accountNonReducedFactorTemplate(divisor);
   return true;
 }
 
-template<class PolynomialQuotient>
-bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::
-handlePrimeDegreeSeparatedFactor(
-  Polynomial<ElementZmodP>& input
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::handlePrimeDegreeSeparatedFactor(
+  PolynomialImplementation &input
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor");
   int linearTermsToTry = 500;
@@ -1818,13 +1869,13 @@ handlePrimeDegreeSeparatedFactor(
     this->one.modulus.isIntegerFittingInInt(&linearTermsToTry);
   }
   List<ElementZmodP> foundRoots;
-  Vector<ElementZmodP> rootCandidate;
-  rootCandidate.addOnTop(this->one);
+  ElementZmodP rootCandidate;
+  rootCandidate = this->one;
   for (int i = 0; i < linearTermsToTry; i ++) {
-    rootCandidate[0].value = static_cast<unsigned>(i);
+    rootCandidate.value = static_cast<unsigned>(i);
     ElementZmodP value = input.evaluate(rootCandidate, this->one.zero());
     if (value.isEqualToZero()) {
-      foundRoots.addOnTop(rootCandidate[0]);
+      foundRoots.addOnTop(rootCandidate);
     }
   }
   if (foundRoots.size == 0) {
@@ -1832,7 +1883,7 @@ handlePrimeDegreeSeparatedFactor(
       // No linear factors; the current factor is irreducible
       // as it is of prime degree and all of its sub-factors
       // are of equal degree.
-      return this->output->accountReducedFactor(input, true);
+      return this->output->accountReducedFactorTemplate(input, true);
     }
     // It is possible that the current factor has
     // linear factors we haven't checked for.
@@ -1844,25 +1895,38 @@ handlePrimeDegreeSeparatedFactor(
     linearFactor -= foundRoots[i];
     this->output->accountReducedFactor(linearFactor, false);
   }
-  if (this->current.totalDegree() > 0) {
-    this->output->accountNonReducedFactor(this->current);
+  if (this->current.totalDegreeInt() > 0) {
+    this->output->accountNonReducedFactorTemplate(this->current);
   }
   return true;
 }
 
-template<class PolynomialQuotient>
-bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::
-oneFactorGo(
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::oneFactorGo(
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
   (void) commentsOnFailure;
-  this->baseLetter.modulus = this->output->current;
-  this->baseLetter.value.makeDegreeOne(1, 0, this->one, this->one.zero());
-  this->oneQuotientRing.modulus = this->current;
-  this->oneQuotientRing.value.makeConstant(this->one);
-
+  Polynomial<ElementZmodP> polynomial;
+  polynomial.makeDegreeOne(1, 0, this->one, this->one.zero());
+  this->modulus = this->current;
+  this->baseLetter.makeFromModulusAndValue(
+    &this->modulus, polynomial
+  );
+  polynomial.makeConstant(this->one);
+  this->oneQuotientRing.makeFromModulusAndValue(
+    &this->modulus,
+    polynomial
+  );
   if (this->hasFactorsOfDifferentDegree(comments)) {
     return true;
   }
@@ -1870,15 +1934,18 @@ oneFactorGo(
     *comments << "<br>All divisors of " << this->current.toString(&this->output->format)
     << " are of equal degree. ";
   }
-  if (this->current.totalDegree().getNumerator().value.isPossiblyPrime(0, true, comments)) {
+  LargeInteger degree = this->current.totalDegreeInt();
+  if (degree.value.isPossiblyPrime(0, true, comments)) {
     if (this->handlePrimeDegreeSeparatedFactor(this->current)) {
       return true;
     }
   }
   if (
-    this->current.totalDegree() == 1
+    this->current.totalDegreeInt() == 1
   ) {
-    return this->output->accountReducedFactor(this->current, true);
+    return this->output->accountReducedFactorTemplate(
+      this->current, true
+    );
   }
   int maximumDivisors = 10;
   if (this->one.modulus < maximumDivisors) {
@@ -1893,12 +1960,19 @@ oneFactorGo(
       return true;
     }
   }
-  return this->output->accountReducedFactor(this->current, true);
+  return this->output->accountReducedFactorTemplate(this->current, true);
 }
 
-template<class PolynomialQuotient>
-bool PolynomialFactorizationCantorZassenhaus<PolynomialQuotient>::
-oneFactorProbabilityHalf(
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::oneFactorProbabilityHalf(
   unsigned int constant,
   std::stringstream *comments,
   std::stringstream *commentsOnFailure
@@ -1906,31 +1980,49 @@ oneFactorProbabilityHalf(
   (void) commentsOnFailure;
   LargeIntegerUnsigned modulus = this->one.modulus;
   int degree = this->current.totalDegreeInt();
-  PolynomialModuloPolynomial<ElementZmodP> startingPolynomial;
+  PolynomialModuloPolynomialImplementation startingPolynomial;
   startingPolynomial = this->baseLetter;
+
   ElementZmodP constantModular;
   constantModular.modulus = modulus;
   constantModular.value = constant;
-  startingPolynomial.value += constantModular;
-  PolynomialModuloPolynomial<ElementZmodP> currentPolynomial;
+
+  startingPolynomial += constantModular;
+
+  PolynomialModuloPolynomialImplementation currentPolynomial;
+  PolynomialModuloPolynomialImplementation currentPolynomialPlusOne;
   for (int i = 0; i < degree; i ++) {
     currentPolynomial = startingPolynomial;
     LargeInteger power = modulus;
     power.raiseToPower(i + 1);
     power -= 1;
     power /= 2;
-    MathRoutines::raiseToPower(currentPolynomial, power, oneQuotientRing);
+    MathRoutines::raiseToPower(currentPolynomial, power, this->oneQuotientRing);
     if (comments != nullptr) {
-      *comments << "<br>\\(A=x^{\\frac{" << modulus << "^{" << i + 1 << "} - 1}{2}} \\)=\\( "
-      << this->one.toStringPolynomial(currentPolynomial.value, &this->output->format) << "\\)";
+      Polynomial<ElementZmodP> converted;
+      PolynomialConversions::convertToPolynomial(
+        currentPolynomial.getValue(), converted
+      );
+      *comments << "<br>\\(A=x^{\\frac{" << modulus
+      << "^{" << i + 1 << "} - 1}{2}} \\)=\\( "
+      << this->one.toStringPolynomial(converted, &this->output->format)
+      << "\\)";
     }
-    if (this->divisorFromCandidate(currentPolynomial.value, "A", comments)) {
+    if (this->divisorFromCandidate(
+      currentPolynomial.getValue(), "A", comments
+    )) {
       return true;
     }
-    if (this->divisorFromCandidate(currentPolynomial.value + oneQuotientRing.value, "A + 1", comments)) {
+    currentPolynomialPlusOne = currentPolynomial;
+    currentPolynomialPlusOne += this->one;
+    if (this->divisorFromCandidate(
+      currentPolynomialPlusOne.getValue(), "A + 1", comments
+    )) {
       return true;
     }
-    if (this->divisorFromCandidate(currentPolynomial.value + oneQuotientRing.value, "A - 1", comments)) {
+    if (this->divisorFromCandidate(
+      currentPolynomialPlusOne.getValue(), "A - 1", comments
+    )) {
       return true;
     }
   }

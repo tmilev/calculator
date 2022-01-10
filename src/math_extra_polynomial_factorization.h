@@ -13,17 +13,104 @@ public:
 // Dense univariate polynomial mod p for a small integer p.
 // Intended for very fast computations.
 class PolynomialUnivariateModular {
+  friend std::ostream& operator<<(
+    std::ostream& output,
+    const PolynomialUnivariateModular& input
+  ) {
+    output << input.toString();
+    return output;
+  }
 public:
   List<int> coefficients;
   IntegerModulusSmall* modulus;
   PolynomialUnivariateModular();
   PolynomialUnivariateModular(IntegerModulusSmall* modulus);
+  void derivative(PolynomialUnivariateModular& output) const;
+  void operator=(const Polynomial<ElementZmodP>& other);
+  void operator=(const ElementZmodP& other);
+  void operator-=(const PolynomialUnivariateModular& other);
+  void operator*=(const PolynomialUnivariateModular& other);
+  std::string toString(FormatExpressions* format = nullptr) const;
+  static bool greatestCommonDivisor(
+    const PolynomialUnivariateModular& left,
+    const PolynomialUnivariateModular& right,
+    PolynomialUnivariateModular& output,
+    const ElementZmodP& unused,
+    std::stringstream* commentsOnFailure
+  );
+  static bool greatestCommonDivisor(
+    const PolynomialUnivariateModular& left,
+    const PolynomialUnivariateModular& right,
+    PolynomialUnivariateModular& output,
+    std::stringstream* commentsOnFailure
+  );
+  void divideBy(
+    const PolynomialUnivariateModular& divisor,
+    PolynomialUnivariateModular& outputQuotient,
+    PolynomialUnivariateModular& outputRemainder
+  ) const;
+  void toPolynomialNonDense(Polynomial<ElementZmodP>& output) const;
+  bool isConstant() const;
+  bool checkInitialization() const;
+  int totalDegreeInt() const;
+  ElementZmodP evaluate(
+    const ElementZmodP& input,
+    const ElementZmodP& unused
+  ) const;
+  bool isEqualToZero() const;
+  class Test {
+  public:
+    static bool all();
+    static bool greatestCommonDivisor();
+    static bool division();
+    static bool testOneGreatestCommonDivisor(
+      int modulus,
+      const std::string& left,
+      const std::string& right,
+      const std::string& expected
+    );
+    static bool testOneDivision(
+      int modulus,
+      const std::string& dividend,
+      const std::string& divisor,
+      const std::string& expectedQuotient,
+      const std::string& expectedRemainder
+    );
+  };
+};
+
+class PolynomialUnivariateModularAsModulus {
+public:
+  void operator=(const PolynomialUnivariateModular& inputModulus);
 };
 
 class PolynomialModuloPolynomialModuloInteger {
+  friend std::ostream& operator<<(
+    std::ostream& output,
+    const PolynomialModuloPolynomialModuloInteger& input
+  ) {
+    output << input.toString();
+    return output;
+  }
 public:
-  PolynomialUnivariateModular modulus;
+  PolynomialUnivariateModularAsModulus* modulus;
+  PolynomialUnivariateModular value;
 
+  void makeFromModulusAndValue(
+    PolynomialUnivariateModularAsModulus* inputModulus,
+    const Polynomial<ElementZmodP>& inputValue
+  );
+
+  void operator-=(const PolynomialModuloPolynomialModuloInteger& other);
+  void operator+=(const ElementZmodP& other);
+  void operator*=(const PolynomialModuloPolynomialModuloInteger& other);
+
+  bool isEqualToZero() const;
+  const PolynomialUnivariateModular& getValue() const {
+    return this->value;
+  }
+  std::string toString(FormatExpressions* format = nullptr) const;
+  void reduce();
 };
 
 template <class Coefficient>
@@ -39,6 +126,7 @@ public:
   void reduce();
   void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
+  void operator+=(const Coefficient& other);
   void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
   std::string toString(FormatExpressions* format = nullptr) const;
   PolynomialModuloPolynomial<Coefficient> one();
@@ -46,6 +134,13 @@ public:
   unsigned int hashFunction() const;
   bool operator==(const PolynomialModuloPolynomial<Coefficient>& other)const;
   bool isEqualToZero() const;
+  void makeFromModulusAndValue(
+    const Polynomial<Coefficient>* inputModulus,
+    const Polynomial<Coefficient>& inputValue
+  );
+  const Polynomial<Coefficient>& getValue() {
+    return this->value;
+  }
 };
 
 class PolynomialFactorizationKronecker {
@@ -94,6 +189,14 @@ void PolynomialModuloPolynomial<Coefficient>::operator+=(
     << this->modulus << ", " << other.modulus << global.fatal;
   }
   this->value += other.value;
+  this->reduce();
+}
+
+template<class Coefficient>
+void PolynomialModuloPolynomial<Coefficient>::operator+=(
+  const Coefficient& other
+) {
+  this->value += other;
   this->reduce();
 }
 
@@ -162,5 +265,17 @@ void PolynomialModuloPolynomial<Coefficient>::reduce() {
     this->value,
     &MonomialPolynomial::orderDefault()
   );
+}
+
+template <class Coefficient>
+void PolynomialModuloPolynomial<Coefficient>::makeFromModulusAndValue(
+  const Polynomial<Coefficient>* inputModulus,
+  const Polynomial<Coefficient>& inputValue
+) {
+  if (inputModulus == nullptr) {
+    global.fatal << "Null modulus not allowed. " << global.fatal;
+  }
+  this->modulus = *inputModulus;
+  this->value = inputValue;
 }
 #endif // header_math_extra_polynomial_factorization_ALREADY_INCLUDED

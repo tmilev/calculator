@@ -4,6 +4,21 @@
 #include "math_general_implementation.h"
 #include "math_extra_polynomial_factorization.h"
 
+template<>
+void PolynomialConversions::convertToPolynomial(
+  const PolynomialUnivariateModular& input,
+  Polynomial<ElementZmodP>& output
+) {
+  output.makeZero();
+  ElementZmodP coefficient;
+  MonomialPolynomial monomial;
+  for (int i = 0; i < input.coefficients.size; i ++) {
+    coefficient.makeFrom(input.modulus->modulus, input.coefficients[i]);
+    monomial.makeEi(0, i);
+    output.addMonomial(monomial, coefficient);
+  }
+}
+
 template<class Coefficient>
 bool Polynomial<Coefficient>::isSquareFreeAndUnivariate(
   const Coefficient& one,
@@ -396,7 +411,11 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
   PolynomialFactorizationUnivariate<ElementZmodP> factorizationModular;
-  PolynomialFactorizationCantorZassenhaus<PolynomialModuloPolynomialModuloInteger> algorithm;
+  PolynomialFactorizationCantorZassenhaus<
+    PolynomialModuloPolynomialModuloInteger,
+    PolynomialUnivariateModular,
+    PolynomialUnivariateModularAsModulus
+  > algorithm;
 
   if (!factorizationModular.factor(
     this->modularization,
@@ -649,4 +668,165 @@ PolynomialUnivariateModular::PolynomialUnivariateModular() : modulus(nullptr) {
 PolynomialUnivariateModular::PolynomialUnivariateModular(
   IntegerModulusSmall* inputModulus
 ) : modulus(inputModulus) {
+}
+
+bool PolynomialUnivariateModular::greatestCommonDivisor(
+  const PolynomialUnivariateModular& left,
+  const PolynomialUnivariateModular& right,
+  PolynomialUnivariateModular& output,
+  const ElementZmodP& unused,
+  std::stringstream* commentsOnFailure
+) {
+  (void) unused;
+  return PolynomialUnivariateModular::greatestCommonDivisor(
+    left, right, output, commentsOnFailure
+  );
+}
+
+bool PolynomialUnivariateModular::greatestCommonDivisor(
+  const PolynomialUnivariateModular& left,
+  const PolynomialUnivariateModular& right,
+  PolynomialUnivariateModular& output,
+  std::stringstream* commentsOnFailure
+) {
+
+
+}
+
+void PolynomialUnivariateModular::divideBy(
+  const PolynomialUnivariateModular& divisor,
+  PolynomialUnivariateModular& outputQuotient,
+  PolynomialUnivariateModular& outputRemainder
+) const {
+
+}
+
+bool PolynomialUnivariateModular::checkInitialization() const {
+  if (this->modulus == nullptr) {
+    global.fatal
+    << "Uninitialized modular polynomial. "
+    << global.fatal;
+  }
+  return true;
+}
+
+void PolynomialUnivariateModular::toPolynomialNonDense(
+  Polynomial<ElementZmodP>& output
+) const {
+  this->checkInitialization();
+  output.makeZero();
+  MonomialPolynomial monomial;
+  ElementZmodP coefficientModP;
+  for (int i = 0; i < this->coefficients.size; i ++) {
+    monomial.setVariable(0, i);
+    coefficientModP.makeFrom(
+      this->modulus->modulus, this->coefficients[i]
+    );
+    output.addMonomial(monomial, coefficientModP);
+  }
+}
+
+std::string PolynomialUnivariateModular::toString(
+  FormatExpressions* format
+) const {
+  if (this->modulus == nullptr) {
+    return "[uninitialized]";
+  }
+  Polynomial<LargeInteger> converter;
+  MonomialPolynomial monomial;
+  for (int i = 0; i < this->coefficients.size; i ++) {
+    LargeInteger coefficient = this->coefficients[i];
+    monomial.makeEi(0, i);
+    converter.addMonomial(monomial, coefficient);
+  }
+  std::stringstream out;
+  out << converter.toString(format) << " (mod "
+  << this->modulus->modulus << ")";
+  return out.str();
+}
+
+void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
+
+}
+
+void PolynomialUnivariateModular::operator=(const Polynomial<ElementZmodP>& other) {
+
+}
+
+void PolynomialUnivariateModular::operator-=(const PolynomialUnivariateModular& other) {
+
+}
+
+void PolynomialUnivariateModular::derivative(
+  PolynomialUnivariateModular& output
+) const {
+
+}
+
+bool PolynomialUnivariateModular::isEqualToZero() const {
+  return this->coefficients.size == 0;
+}
+
+int PolynomialUnivariateModular::totalDegreeInt() const {
+  return this->coefficients.size - 1;
+}
+
+bool PolynomialUnivariateModular::isConstant() const {
+  return this->coefficients.size <= 1;
+}
+
+ElementZmodP PolynomialUnivariateModular::evaluate(
+  const ElementZmodP& input, const ElementZmodP& unused
+) const {
+
+}
+
+void PolynomialUnivariateModularAsModulus::operator=(
+  const PolynomialUnivariateModular& inputModulus
+) {
+
+}
+
+void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& other) {
+
+}
+
+void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
+  PolynomialUnivariateModularAsModulus* inputModulus,
+  const Polynomial<ElementZmodP>& inputValue
+) {
+  this->modulus = inputModulus;
+  this->value = inputValue;
+}
+
+void PolynomialModuloPolynomialModuloInteger::operator+=(const ElementZmodP& other) {
+
+}
+
+void PolynomialModuloPolynomialModuloInteger::operator-=(
+  const PolynomialModuloPolynomialModuloInteger& other
+) {
+  this->value -= other.value;
+  this->reduce();
+}
+
+void PolynomialModuloPolynomialModuloInteger::operator*=(
+  const PolynomialModuloPolynomialModuloInteger& other
+) {
+  this->value *= other.value;
+  this->reduce();
+}
+
+void PolynomialModuloPolynomialModuloInteger::reduce() {
+  global.fatal << "Implement this!" << global.fatal;
+}
+
+bool PolynomialModuloPolynomialModuloInteger::isEqualToZero() const {
+  return this->value.isEqualToZero();
+}
+
+std::string PolynomialModuloPolynomialModuloInteger::toString(FormatExpressions* format) const {
+  std::stringstream out;
+  out << this->value.toString() << " mod Q";
+  return out.str();
 }

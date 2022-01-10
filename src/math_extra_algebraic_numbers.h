@@ -303,6 +303,7 @@ public:
   void makeZero();
   void makeOne(const LargeIntegerUnsigned& newModulo);
   void makeMinusOne(const LargeIntegerUnsigned& newModulo);
+  void makeFrom(const int inputModulus, const int inputValue);
   void checkEqualModuli(const ElementZmodP& other);
   void negate();
   bool operator==(int other) const;
@@ -365,7 +366,11 @@ public:
   };
 };
 
-template <class PolynomialQuotient>
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
 class PolynomialFactorizationCantorZassenhaus {
 public:
   static const int maximumDegreeDefault = 512;
@@ -373,10 +378,20 @@ public:
   int degree;
   int degreeUnknownFactor;
   PolynomialFactorizationUnivariate<ElementZmodP>* output;
-  PolynomialModuloPolynomial<ElementZmodP> baseLetter;
-  PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
+  PolynomialModuloPolynomialImplementation baseLetter;
+  PolynomialModuloPolynomialImplementation oneQuotientRing;
 
-  Polynomial<ElementZmodP> current;
+  // The modular polynomial currently factored.
+  PolynomialImplementation current;
+  // A conversion of the current polynomial to a
+  // data structure that plays the role of Q in the
+  // expression a mod Q. In the case of
+  // PolynomialUnivariateModular implementation of our polynomial,
+  // the modulus will be implemented as
+  // the data structure PolynomialUnivariateModularAsModulus,
+  // which contains precomputed computational shortcuts
+  // to quickly reduce mod Q.
+  PolynomialModulusImplementation modulus;
   List<Polynomial<ElementZmodP> > factorCandidatesPreviousRuns;
   bool oneFactor(
     std::stringstream* comments,
@@ -384,7 +399,7 @@ public:
   );
   // Input is either irreuducible polynomial of prime degree, or a product
   // of linear polynomials.
-  bool handlePrimeDegreeSeparatedFactor(Polynomial<ElementZmodP>& input);
+  bool handlePrimeDegreeSeparatedFactor(PolynomialImplementation& input);
   bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
   bool hasFactorsOfDifferentDegree(std::stringstream* comments);
   bool oneFactorProbabilityHalf(
@@ -393,7 +408,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool divisorFromCandidate(
-    const Polynomial<ElementZmodP>& candidate,
+    const PolynomialImplementation& candidate,
     const std::string& candidateDisplayName,
     std::stringstream* comments
   );

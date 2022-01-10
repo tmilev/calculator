@@ -114,7 +114,8 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matri
 }
 
 template <class Coefficient, typename IntegerType>
-void MathRoutines::raiseToPower(Coefficient& element, const IntegerType& power, const Coefficient& ringUnit
+void MathRoutines::raiseToPower(
+  Coefficient& element, const IntegerType& power, const Coefficient& ringUnit
 ) {
   MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
   IntegerType powerCopy;

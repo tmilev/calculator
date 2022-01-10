@@ -1064,7 +1064,9 @@ LargeIntegerUnsigned LargeIntegerUnsigned::leastCommonMultiple(
   return output;
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::greatestCommonDivisor(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b) {
+LargeIntegerUnsigned LargeIntegerUnsigned::greatestCommonDivisor(
+  const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b
+) {
   LargeIntegerUnsigned output;
   LargeIntegerUnsigned::greatestCommonDivisor(a, b, output);
   return output;

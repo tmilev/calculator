@@ -69,6 +69,33 @@ bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
     color = Logger::red;
   }
   global << color << "Cantor-Zassenhaus: polynomial of degree: "
-  << input.totalDegree() << " factored in " << duration << " ms." << Logger::endL;
+  << input.totalDegree() << " factored in "
+  << duration << " ms." << Logger::endL;
   return true;
+}
+
+bool PolynomialUnivariateModular::Test::all() {
+  PolynomialUnivariateModular::Test::greatestCommonDivisor();
+  PolynomialUnivariateModular::Test::division();
+  return true;
+}
+
+bool PolynomialUnivariateModular::Test::greatestCommonDivisor() {
+  PolynomialUnivariateModular::Test::testOneGreatestCommonDivisor(
+    5, "x^2-1", "x^3-1", ""
+  );
+  return true;
+}
+
+bool PolynomialUnivariateModular::Test::division() {
+  global.fatal << "Implement please!" << global.fatal;
+}
+
+bool PolynomialUnivariateModular::Test::testOneGreatestCommonDivisor(
+  int modulus,
+  const std::string& left,
+  const std::string& right,
+  const std::string& expected
+) {
+  global.fatal << "Implement please!" << global.fatal;
 }

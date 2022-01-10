@@ -1117,6 +1117,40 @@ bool Polynomial<Coefficient>::differential(
 }
 
 template<class Coefficient>
+void Polynomial<Coefficient>::derivative(
+  Polynomial<Coefficient>& output
+) const {
+  MacroRegisterFunctionWithName("Polynomial::derivative");
+  if (this->minimalNumberOfVariables() > 1) {
+    global.fatal
+    << "Derivative function called on a polynomial of "
+    << "more than one variable. "
+    << "In more than one variable, you should use differentials instead. "
+    << global.fatal;
+  }
+  if (this == &output) {
+    Polynomial<Coefficient> thisCopy = *this;
+    thisCopy.derivative(output);
+    return;
+  }
+  output.makeZero();
+  for (int i = 0; i < this->size(); i ++) {
+    MonomialPolynomial monomial = this->monomials[i];
+    Rational currentDegree = monomial.totalDegree();
+    if (!currentDegree.isInteger()) {
+      global.fatal
+      << "Non-integral power not allow in derivatives."
+      << global.fatal;
+    }
+    monomial.setVariable(0, currentDegree - 1);
+    Coefficient incoming;
+    incoming = this->coefficients[i];
+    incoming *= currentDegree;
+    output.addMonomial(monomial, incoming);
+  }
+}
+
+template<class Coefficient>
 bool Polynomial<Coefficient>::differential(
   Polynomial<Coefficient>& output,
   std::stringstream* comments

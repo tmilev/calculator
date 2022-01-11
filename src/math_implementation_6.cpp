@@ -689,8 +689,86 @@ bool PolynomialUnivariateModular::greatestCommonDivisor(
   PolynomialUnivariateModular& output,
   std::stringstream* commentsOnFailure
 ) {
+  if (&output == &left || &output == &right) {
+    PolynomialUnivariateModular leftCopy = left;
+    PolynomialUnivariateModular rightCopy = right;
+    return PolynomialUnivariateModular::greatestCommonDivisor(
+      leftCopy, rightCopy, output, commentsOnFailure
+    );
+  }
+  output = left;
+  PolynomialUnivariateModular divisor = right;
+  output.rescaleSoLeadingCoefficientIsOne();
+  divisor.rescaleSoLeadingCoefficientIsOne();
+  PolynomialUnivariateModular remainder;
+  PolynomialUnivariateModular quotient;
+  while (!divisor.isEqualToZero()) {
+    output.divideBy(divisor, quotient, remainder);
+    output = divisor;
+    divisor = remainder;
+  }
 
+  return true;
+}
 
+void PolynomialUnivariateModular::ensureCoefficientLength(int desiredLength) {
+  int oldLength = this->coefficients.size;
+  if (desiredLength > oldLength) {
+    this->coefficients.setSize(desiredLength);
+  }
+  for (int i = oldLength; i < this->coefficients.size; i ++) {
+    this->coefficients[i] = 0;
+  }
+}
+
+void PolynomialUnivariateModular::trimTrailingZeroes() {
+  for (int i = this->coefficients.size - 1; i >= 0; i --) {
+    if (this->coefficients[i] != 0) {
+      return;
+    }
+    this->coefficients.size --;
+  }
+}
+
+void PolynomialUnivariateModular::addAnotherTimesConstant(
+  const PolynomialUnivariateModular& other, int coefficient
+) {
+  coefficient = this->reduceIntModP(coefficient);
+  this->ensureCoefficientLength(other.coefficients.size);
+  int modulus = this->getModulus();
+  for (int i = 0; i < other.coefficients.size; i ++) {
+    this->coefficients[i] += other.coefficients[i] * coefficient;
+    this->coefficients[i] %= modulus;
+  }
+  this->trimTrailingZeroes();
+}
+
+void PolynomialUnivariateModular::addTerm(int coefficient, int termPower) {
+  this->ensureCoefficientLength(termPower + 1);
+  this->coefficients[termPower] += coefficient;
+  this->coefficients[termPower] %= this->getModulus();
+}
+
+void PolynomialUnivariateModular::addAnotherTimesTerm(
+  const PolynomialUnivariateModular& other,
+  int coefficient,
+  int termPower
+) {
+  coefficient = this->reduceIntModP(coefficient);
+  this->ensureCoefficientLength(other.coefficients.size + termPower);
+  int modulus = this->getModulus();
+  for (int i = 0; i < other.coefficients.size; i ++) {
+    this->coefficients[i + termPower] += other.coefficients[i] * coefficient;
+    this->coefficients[i] %= modulus;
+  }
+  this->trimTrailingZeroes();
+}
+
+int PolynomialUnivariateModular::getLeadingCoefficient() const {
+  if (this->coefficients.size == 0) {
+    return 0;
+  }
+  return *this->coefficients.lastObject();
 }
 
 void PolynomialUnivariateModular::divideBy(
@@ -698,7 +776,57 @@ void PolynomialUnivariateModular::divideBy(
   PolynomialUnivariateModular& outputQuotient,
   PolynomialUnivariateModular& outputRemainder
 ) const {
+  if (
+    this == &outputQuotient ||
+    &divisor == & outputQuotient ||
+    this == & outputRemainder ||
+    &divisor == & outputRemainder
+  ) {
+    PolynomialUnivariateModular thisCopy = *this;
+    PolynomialUnivariateModular divisorCopy = divisor;
+    thisCopy.divideBy(divisorCopy, outputQuotient, outputRemainder);
+    return;
+  }
+  int divisorInvertedLeadingCoefficient = this->modulus->inverses[
+    divisor.getLeadingCoefficient()
+  ];
+  outputRemainder = *this;
+  outputQuotient.makeZero();
+  int modulus = this->getModulus();
+  while (outputRemainder.coefficients.size >= divisor.coefficients.size) {
+    int coefficient = (outputRemainder.getLeadingCoefficient() * divisorInvertedLeadingCoefficient) % modulus;
+    int termPower = outputRemainder.coefficients.size - divisor.coefficients.size;
+    outputQuotient.addTerm(coefficient, termPower);
+    int coefficientNegated = modulus - coefficient;
+    outputRemainder.addAnotherTimesTerm(divisor, coefficientNegated, termPower);
+  }
+}
 
+void PolynomialUnivariateModular::makeZero() {
+  this->coefficients.size = 0;
+}
+
+void PolynomialUnivariateModular::operator*=(int other) {
+  if (other == 0) {
+    this->makeZero();
+    return;
+  }
+  int modulus = this->getModulus();
+  other = this->reduceIntModP(other);
+  for (int i = 0; i < this->coefficients.size; i ++) {
+    this->coefficients[i] *= other;
+    this->coefficients[i] %= modulus;
+  }
+}
+
+void PolynomialUnivariateModular::rescaleSoLeadingCoefficientIsOne() {
+  if (this->coefficients.size == 0) {
+    return;
+  }
+  int invertedLeadingCoefficient = this->modulus->inverses[
+    *this->coefficients.lastObject()
+  ];
+  *this *= invertedLeadingCoefficient;
 }
 
 bool PolynomialUnivariateModular::checkInitialization() const {
@@ -778,7 +906,17 @@ bool PolynomialUnivariateModular::isConstant() const {
 ElementZmodP PolynomialUnivariateModular::evaluate(
   const ElementZmodP& input, const ElementZmodP& unused
 ) const {
-
+  int inputSmall = 0;
+  input.value.isIntegerFittingInInt(&inputSmall);
+  int result = 0;
+  for (int i = this->coefficients.size - 1; i >= 0; i --) {
+    result *= inputSmall;
+    result += this->coefficients[i];
+    result %= this->modulus->modulus;
+  }
+  ElementZmodP resultModP;
+  resultModP.makeFrom(this->modulus->modulus, result);
+  return resultModP;
 }
 
 void PolynomialUnivariateModularAsModulus::operator=(

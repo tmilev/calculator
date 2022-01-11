@@ -20,6 +20,12 @@ class PolynomialUnivariateModular {
     output << input.toString();
     return output;
   }
+private:
+  // Makes sure the coefficients array holds
+  // at least the given number of elements.
+  // Beefs up newly created coefficients with zeroes.
+  void ensureCoefficientLength(int desiredLength);
+  void trimTrailingZeroes();
 public:
   List<int> coefficients;
   IntegerModulusSmall* modulus;
@@ -30,6 +36,7 @@ public:
   void operator=(const ElementZmodP& other);
   void operator-=(const PolynomialUnivariateModular& other);
   void operator*=(const PolynomialUnivariateModular& other);
+  void operator*=(int other);
   std::string toString(FormatExpressions* format = nullptr) const;
   static bool greatestCommonDivisor(
     const PolynomialUnivariateModular& left,
@@ -44,11 +51,24 @@ public:
     PolynomialUnivariateModular& output,
     std::stringstream* commentsOnFailure
   );
+  int getLeadingCoefficient() const;
   void divideBy(
     const PolynomialUnivariateModular& divisor,
     PolynomialUnivariateModular& outputQuotient,
     PolynomialUnivariateModular& outputRemainder
   ) const;
+  void addAnotherTimesConstant(
+    const PolynomialUnivariateModular& other, int coefficient
+  );
+  void addAnotherTimesTerm(
+    const PolynomialUnivariateModular& other,
+    int coefficient,
+    int termPower
+  );
+  void addTerm(
+    int coefficient,
+    int termPower
+  );
   void toPolynomialNonDense(Polynomial<ElementZmodP>& output) const;
   bool isConstant() const;
   bool checkInitialization() const;
@@ -57,7 +77,20 @@ public:
     const ElementZmodP& input,
     const ElementZmodP& unused
   ) const;
+  inline int getModulus() const {
+    return this->modulus->modulus;
+  }
+  inline int reduceIntModP(int input) {
+    input %= this->modulus->modulus;
+    if (input < 0) {
+      input += this->modulus->modulus;
+    }
+    return input;
+  }
+  void makeZero();
   bool isEqualToZero() const;
+  // Multiplies the polynomial by a constant so the leading coefficient is one.
+  void rescaleSoLeadingCoefficientIsOne();
   class Test {
   public:
     static bool all();

@@ -3141,7 +3141,7 @@ class EquationEditor {
   }
 
   /**
-   * Extracts the font family stirng.
+   * Extracts the font family string.
    *
    * @return {string}
    */
@@ -5269,7 +5269,7 @@ class MathNode {
   }
 
   /**
-   * Whether the expression requries a tall exponent.
+   * Whether the expression requires a tall exponent.
    *
    * By tall exponent we mean how high is an exponent relative to the
    * height of base: in x^2, the square should not be too tall, else the formula
@@ -5450,7 +5450,7 @@ class MathNode {
   }
 
   /**
-   * A default non-dummy implemenation of computeDimensions() that makes some
+   * A default non-dummy implementation of computeDimensions() that makes some
    * reasonable assumptions about the math bounding box.
    */
   computeDimensionsStandard() {

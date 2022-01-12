@@ -180,6 +180,10 @@ class ArrowMotionTypes {
     this.firstAtomToTheLeft = 'firstAtomToTheLeft';
     /** @type {string} */
     this.firstAtomToTheRight = 'firstAtomToTheRight';
+    /** @type {string} */
+    this.firstAtomUp = 'firstAtomUp';
+    /** @type {string} */
+    this.firstAtomDown = 'firstAtomDown';
   }
 }
 
@@ -465,6 +469,10 @@ const knownTypes = {
   }),
   matrixRowEntry: new MathNodeType({
     'type': 'matrixRowEntry',
+    'arrows': {
+      'ArrowUp': arrowMotion.firstAtomUp,
+      'ArrowDown': arrowMotion.firstAtomDown,
+    },
   }),
   operatorWithSuperAndSubscript: new MathNodeType({
     'type': 'operatorWithSuperAndSubscript',
@@ -6087,7 +6095,15 @@ class MathNode {
       /** @type {string} */ key,
       /** @type {string} */ arrowType,
   ) {
-    if (arrowType === arrowMotion.parentForward) {
+    return this.getAtomToFocusFromActionDefault(key, arrowType);
+  }
+
+  /** @returns {MathNodeWithCaretPosition!} */
+  getAtomToFocusFromActionDefault(
+    /** @type {string} */ key,
+    /** @type {string} */ arrowType,
+) {
+  if (arrowType === arrowMotion.parentForward) {
       if (this.parent === null) {
         return new MathNodeWithCaretPosition(null, -1);
       }
@@ -9906,6 +9922,17 @@ class MathNodeMatrixRow extends MathNode {
   ) {
     super(equationEditor, knownTypes.matrixRow);
   }
+
+  /**
+   * Applies backspace to the left.
+   * @returns {boolean}
+   */
+  applyBackspaceToTheLeft() {
+    if (this.indexInParent > 0) {
+      return this.parent.children[this.indexInParent - 1].applyBackspaceToTheRightAsLeftArrow();
+    }
+    return this.parent.parent.parent.applyBackspaceToTheLeftAsLeftArrow();
+  }
 }
 
 class MathNodeRowEntry extends MathNode {
@@ -9914,6 +9941,39 @@ class MathNodeRowEntry extends MathNode {
       equationEditor,
   ) {
     super(equationEditor, knownTypes.matrixRowEntry);
+  }
+
+  /**
+   * Applies backspace to the left.
+   * @returns {boolean}
+   */
+  applyBackspaceToTheLeft() {
+    if (this.indexInParent > 0) {
+      return this.parent.children[this.indexInParent - 1].applyBackspaceToTheRightAsLeftArrow();
+    }
+    return this.parent.applyBackspaceToTheLeft();
+  }
+
+  /** @returns {MathNodeWithCaretPosition!} */
+  getAtomToFocusFromAction(
+    /** @type {string} */ key,
+    /** @type {string} */ arrowType,
+  ) {
+    if (arrowType === arrowMotion.firstAtomDown) {
+      let row = this.parent;
+      let matrixTable = row.parent;
+      if (row.indexInParent < matrixTable.children.length) {
+        return new MathNodeWithCaretPosition(matrixTable.children[row.indexInParent+1].children[this.indexInParent], -1);
+      }
+    }
+    if (arrowType === arrowMotion.firstAtomUp) {
+      let row = this.parent;
+      let matrixTable = row.parent;
+      if (row.indexInParent > 0) {
+        return new MathNodeWithCaretPosition(matrixTable.children[row.indexInParent-1].children[this.indexInParent], 1);
+      }
+    }
+    return this.getAtomToFocusFromActionDefault(key, arrowType);
   }
 }
 

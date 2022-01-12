@@ -9833,11 +9833,16 @@ class MathNodeMatrix extends MathNode {
       options,
   ) {
     if (this.element === null) {
-      return new LatexWithAnnotation('[null)]');
+      return new LatexWithAnnotation('[(null)]');
     }
     let matrixContent = this.children[0].children[1];
     let result = [];
-    result.push('\\begin{pmatrix}');
+    let leftDelimiterMark = this.children[0].children[0];
+    let matrixEnvironment = 'pmatrix';
+    if (leftDelimiterMark.extraData === '[') {
+      matrixEnvironment = 'bmatrix';
+    }
+    result.push(`\\begin{${matrixEnvironment}}`);
     let rows = [];
     for (let i = 0; i < matrixContent.children.length; i++) {
       let matrixRow = matrixContent.children[i];
@@ -9849,7 +9854,7 @@ class MathNodeMatrix extends MathNode {
       rows.push(currentRowStrings.join('&'));
     }
     result.push(rows.join('\\\\'));
-    result.push('\\end{pmatrix}');
+    result.push(`\\end{${matrixEnvironment}}`);
     return new LatexWithAnnotation(result.join(''));
   }
 

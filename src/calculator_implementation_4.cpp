@@ -881,7 +881,8 @@ bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const E
     isGood = true;
   }
   if (!isGood) {
-    Rational powerInner, powerOuter;
+    Rational powerInner;
+    Rational powerOuter;
     if (input[2].isRational(&powerOuter) && input[1][2].isRational(&powerInner)) {
       if ((powerInner * powerOuter).isEven()) {
         isGood = true;

@@ -341,7 +341,7 @@ bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
   Expression& output,
   bool doDebug
 ) {
-  MacroRegisterFunctionWithName("CalculatorSteps::innerLogEvaluationStepsHumanReadableMerged");
+  MacroRegisterFunctionWithName("CalculatorSteps::logEvaluationStepsHumanReadableMerged");
   Expression argument;
   if (input.size() == 2) {
     argument = input[1];

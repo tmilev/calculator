@@ -677,7 +677,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Returns the base 64 encoding of the X509 certificate of this server. ",
     "X509CertificateServerBase64 0; ",
-    "CalculatorFunctions::innerX509certificateCrunch",
+    "CalculatorFunctions::X509CertificateServerBase64",
     "X509CertificateServerBase64",
     innerNoTest
   );

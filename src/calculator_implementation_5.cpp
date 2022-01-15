@@ -735,7 +735,7 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
 bool CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("innerApplyToSubexpressionsRecurseThroughCalculusFunctions");
+  MacroRegisterFunctionWithName("CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions");
   if (input.size() != 3) {
     return false;
   }

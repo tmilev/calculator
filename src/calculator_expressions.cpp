@@ -2900,7 +2900,7 @@ bool CalculatorBasics::flattenCommandEnclosuresOneLayeR(
 bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFlattenCommandEnclosuresOneLayer");
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionFlattenCommandEnclosuresOneLayer");
   if (input.startsWith(calculator.opCommandEnclosure())) {
     if (input.size() <= 1) {
       return false;

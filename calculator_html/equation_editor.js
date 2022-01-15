@@ -1002,9 +1002,11 @@ class MathNodeFactory {
           parenthesesStyle === '[]') {
         leftDelimiter = this.leftDelimiter(equationEditor, '[', false);
         rightDelimiter = this.rightDelimiter(equationEditor, ']', false);
-      } else {
+      } else if (parenthesesStyle === '(') {
         leftDelimiter = this.leftParenthesis(equationEditor, false);
         rightDelimiter = this.rightParenthesis(equationEditor, false);
+      } else {
+        leftDelimiter = this.leftDelimiter(equationEditor, '', false);
       }
     } else {
       leftDelimiter = this.atom(equationEditor, '');
@@ -1785,6 +1787,7 @@ class LaTeXConstants {
       'limits': true,
     };
     this.beginEndEnvironments = {
+      'matrix': 'matrix',
       'pmatrix': 'pmatrix',
       'bmatrix': 'bmatrix',
       'array': 'array',
@@ -1792,6 +1795,7 @@ class LaTeXConstants {
     /** @type {Object.<string, boolean>!} */
     this.matrixEnder = {
       '\\end{pmatrix}': true,
+      '\\end{matrix}': true,
       '\\end{bmatrix}': true,
       '\\end{array}': true,
     };
@@ -2490,6 +2494,11 @@ class LaTeXParser {
     }
     if (last.syntacticRole === '\\begin{pmatrix}') {
       this.lastRuleName = 'begin pmatrix to matrix builder';
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '(');
+      return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
+    }
+    if (last.syntacticRole === '\\begin{matrix}') {
+      this.lastRuleName = 'begin matrix to matrix builder';
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
@@ -9854,9 +9863,11 @@ class MathNodeMatrix extends MathNode {
     let matrixContent = this.children[0].children[1];
     let result = [];
     let leftDelimiterMark = this.children[0].children[0];
-    let matrixEnvironment = 'pmatrix';
+    let matrixEnvironment = 'matrix';
     if (leftDelimiterMark.extraData === '[') {
       matrixEnvironment = 'bmatrix';
+    } else if (leftDelimiterMark.extraData === '(') {
+      matrixEnvironment = 'pmatrix';
     }
     result.push(`\\begin{${matrixEnvironment}}`);
     let rows = [];
@@ -10948,8 +10959,11 @@ let buttonFactories = {
       '\\int', false, '\u222B', {'width': '100%'}, ''),
   'sum': new EquationEditorButtonFactory(
       '\\sum', false, '\u03A3', {'width': '100%'}, ''),
-  'matrix2x2': new EquationEditorButtonFactory(
-      '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '2x2',
+      'matrix2x2': new EquationEditorButtonFactory(
+        '\\begin{matrix}\\caret&\\\\&\\end{matrix}', false, '2x2',
+        {'width': '100%'}, ''),
+    'pmatrix2x2': new EquationEditorButtonFactory(
+      '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '(2x2)',
       {'width': '100%'}, ''),
   'bmatrix2x2': new EquationEditorButtonFactory(
       '\\begin{bmatrix}\\caret&\\\\&\\end{bmatrix}', false, '[2x2]',
@@ -10963,9 +10977,7 @@ let buttonFactories = {
   'bmatrix1x2': new EquationEditorButtonFactory(
       '\\begin{bmatrix}\\caret&\\end{bmatrix}', false, '[1x2]',
       {'width': '100%'}, ''),
-  'bmatrix3x1': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\caret\\\\\\\\\\end{bmatrix}', false, '[3x1]',
-      {'width': '100%'}, ''),
+
   'bmatrix2x1': new EquationEditorButtonFactory(
       '\\begin{bmatrix}\\caret&\\\\\\end{bmatrix}', false, '[2x1]',
       {'width': '100%'}, ''),
@@ -11066,10 +11078,10 @@ class EquationEditorButtonPanel {
         buttonFactories['beta'],
         buttonFactories['underscore'],
         buttonFactories['matrix2x2'],
+        buttonFactories['pmatrix2x2'],
         buttonFactories['bmatrix3x3'],
         buttonFactories['bmatrix2x2'],
         buttonFactories['bmatrix1x3'],
-        buttonFactories['bmatrix3x1'],
         buttonFactories['bmatrix1x2'],
         buttonFactories['bmatrix2x1'],
       ];

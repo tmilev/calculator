@@ -28,9 +28,9 @@ private:
   void trimTrailingZeroes();
 public:
   List<int> coefficients;
-  IntegerModulusSmall* modulus;
+  IntegerModulusSmall* modulusData;
   PolynomialUnivariateModular();
-  PolynomialUnivariateModular(IntegerModulusSmall* modulus);
+  PolynomialUnivariateModular(IntegerModulusSmall* modulusData);
   void derivative(PolynomialUnivariateModular& output) const;
   void operator=(const Polynomial<ElementZmodP>& other);
   void operator=(const ElementZmodP& other);
@@ -78,12 +78,12 @@ public:
     const ElementZmodP& unused
   ) const;
   inline int getModulus() const {
-    return this->modulus->modulus;
+    return this->modulusData->modulus;
   }
   inline int reduceIntModP(int input) {
-    input %= this->modulus->modulus;
+    input %= this->modulusData->modulus;
     if (input < 0) {
-      input += this->modulus->modulus;
+      input += this->modulusData->modulus;
     }
     return input;
   }
@@ -97,13 +97,13 @@ public:
     static bool greatestCommonDivisor();
     static bool division();
     static bool testOneGreatestCommonDivisor(
-      int modulus,
+      int modulusData,
       const std::string& left,
       const std::string& right,
       const std::string& expected
     );
     static bool testOneDivision(
-      int modulus,
+      int modulusData,
       const std::string& dividend,
       const std::string& divisor,
       const std::string& expectedQuotient,
@@ -114,7 +114,9 @@ public:
 
 class PolynomialUnivariateModularAsModulus {
 public:
+  PolynomialUnivariateModular modulus;
   void operator=(const PolynomialUnivariateModular& inputModulus);
+  void computeFromModulus();
 };
 
 class PolynomialModuloPolynomialModuloInteger {

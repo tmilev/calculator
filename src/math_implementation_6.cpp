@@ -13,7 +13,7 @@ void PolynomialConversions::convertToPolynomial(
   ElementZmodP coefficient;
   MonomialPolynomial monomial;
   for (int i = 0; i < input.coefficients.size; i ++) {
-    coefficient.makeFrom(input.modulus->modulus, input.coefficients[i]);
+    coefficient.makeFrom(input.modulusData->modulus, input.coefficients[i]);
     monomial.makeEi(0, i);
     output.addMonomial(monomial, coefficient);
   }
@@ -662,12 +662,12 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
   return true;
 }
 
-PolynomialUnivariateModular::PolynomialUnivariateModular() : modulus(nullptr) {
+PolynomialUnivariateModular::PolynomialUnivariateModular() : modulusData(nullptr) {
 }
 
 PolynomialUnivariateModular::PolynomialUnivariateModular(
   IntegerModulusSmall* inputModulus
-) : modulus(inputModulus) {
+) : modulusData(inputModulus) {
 }
 
 bool PolynomialUnivariateModular::greatestCommonDivisor(
@@ -787,7 +787,7 @@ void PolynomialUnivariateModular::divideBy(
     thisCopy.divideBy(divisorCopy, outputQuotient, outputRemainder);
     return;
   }
-  int divisorInvertedLeadingCoefficient = this->modulus->inverses[
+  int divisorInvertedLeadingCoefficient = this->modulusData->inverses[
     divisor.getLeadingCoefficient()
   ];
   outputRemainder = *this;
@@ -803,7 +803,7 @@ void PolynomialUnivariateModular::divideBy(
 }
 
 void PolynomialUnivariateModular::makeZero() {
-  this->coefficients.size = 0;
+  this->coefficients.clear();
 }
 
 void PolynomialUnivariateModular::operator*=(int other) {
@@ -823,14 +823,14 @@ void PolynomialUnivariateModular::rescaleSoLeadingCoefficientIsOne() {
   if (this->coefficients.size == 0) {
     return;
   }
-  int invertedLeadingCoefficient = this->modulus->inverses[
+  int invertedLeadingCoefficient = this->modulusData->inverses[
     *this->coefficients.lastObject()
   ];
   *this *= invertedLeadingCoefficient;
 }
 
 bool PolynomialUnivariateModular::checkInitialization() const {
-  if (this->modulus == nullptr) {
+  if (this->modulusData == nullptr) {
     global.fatal
     << "Uninitialized modular polynomial. "
     << global.fatal;
@@ -848,7 +848,7 @@ void PolynomialUnivariateModular::toPolynomialNonDense(
   for (int i = 0; i < this->coefficients.size; i ++) {
     monomial.setVariable(0, i);
     coefficientModP.makeFrom(
-      this->modulus->modulus, this->coefficients[i]
+      this->modulusData->modulus, this->coefficients[i]
     );
     output.addMonomial(monomial, coefficientModP);
   }
@@ -857,7 +857,7 @@ void PolynomialUnivariateModular::toPolynomialNonDense(
 std::string PolynomialUnivariateModular::toString(
   FormatExpressions* format
 ) const {
-  if (this->modulus == nullptr) {
+  if (this->modulusData == nullptr) {
     return "[uninitialized]";
   }
   Polynomial<LargeInteger> converter;
@@ -869,26 +869,55 @@ std::string PolynomialUnivariateModular::toString(
   }
   std::stringstream out;
   out << converter.toString(format) << " (mod "
-  << this->modulus->modulus << ")";
+  << this->modulusData->modulus << ")";
   return out.str();
 }
 
 void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
-
+  if (other.modulus != this->getModulus()) {
+    global.fatal << "Attempt to assign " << other.toString()
+    << " to polynomial with modulus: " << this->getModulus() << global.fatal;
+  }
+  this->coefficients.clear();
+  LargeInteger otherReduced = other.value;
+  otherReduced %= this->getModulus();
+  int incoming = 0;
+  otherReduced.isIntegerFittingInInt(&incoming);
+  this->coefficients.addOnTop(incoming);
+  this->trimTrailingZeroes();
 }
 
 void PolynomialUnivariateModular::operator=(const Polynomial<ElementZmodP>& other) {
-
+  this->makeZero();
+  if (other.minimalNumberOfVariables() > 1) {
+    global.fatal << "Attempt to assign " << other.toString()
+    << " to polynomial with one variable. " << global.fatal;
+  }
+  for (int i = 0; i < other.size(); i ++) {
+    LargeInteger otherReduced = other.coefficients[i].value;
+    otherReduced %= this->getModulus();
+    int incoming = 0;
+    otherReduced.isIntegerFittingInInt(&incoming);
+    this->addTerm(incoming, other.monomials[i].totalDegreeInt());
+  }
 }
 
 void PolynomialUnivariateModular::operator-=(const PolynomialUnivariateModular& other) {
-
+  this->addAnotherTimesConstant(other, - 1);
 }
 
 void PolynomialUnivariateModular::derivative(
   PolynomialUnivariateModular& output
 ) const {
-
+  if (this == &output) {
+    PolynomialUnivariateModular thisCopy = *this;
+    thisCopy.derivative(output);
+    return;
+  }
+  output.makeZero();
+  for (int i = this->coefficients.size - 1; i > 0; i--) {
+    output.addTerm(this->coefficients[i] * (i + 1), i);
+  }
 }
 
 bool PolynomialUnivariateModular::isEqualToZero() const {
@@ -906,27 +935,44 @@ bool PolynomialUnivariateModular::isConstant() const {
 ElementZmodP PolynomialUnivariateModular::evaluate(
   const ElementZmodP& input, const ElementZmodP& unused
 ) const {
+  (void) unused;
   int inputSmall = 0;
   input.value.isIntegerFittingInInt(&inputSmall);
   int result = 0;
   for (int i = this->coefficients.size - 1; i >= 0; i --) {
     result *= inputSmall;
     result += this->coefficients[i];
-    result %= this->modulus->modulus;
+    result %= this->modulusData->modulus;
   }
   ElementZmodP resultModP;
-  resultModP.makeFrom(this->modulus->modulus, result);
+  resultModP.makeFrom(this->modulusData->modulus, result);
   return resultModP;
 }
 
 void PolynomialUnivariateModularAsModulus::operator=(
   const PolynomialUnivariateModular& inputModulus
 ) {
+  this->modulus = inputModulus;
+  this->computeFromModulus();
+}
+
+void PolynomialUnivariateModularAsModulus::computeFromModulus() {
 
 }
 
 void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& other) {
-
+  PolynomialUnivariateModular output;
+  output.ensureCoefficientLength(other.coefficients.size + this->coefficients.size - 1);
+  int modulus = this->getModulus();
+  for (int i = 0; i < this->coefficients.size; i ++) {
+    int thisCoefficient = this->coefficients[i];
+    for (int j = 0; j < other.coefficients.size; j ++) {
+      output.coefficients[i + j] =
+      (output.coefficients[i + j] + thisCoefficient * other.coefficients[j]) %
+      modulus;
+    }
+  }
+  *this = output;
 }
 
 void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
@@ -964,6 +1010,7 @@ bool PolynomialModuloPolynomialModuloInteger::isEqualToZero() const {
 }
 
 std::string PolynomialModuloPolynomialModuloInteger::toString(FormatExpressions* format) const {
+  (void) format;
   std::stringstream out;
   out << this->value.toString() << " mod Q";
   return out.str();

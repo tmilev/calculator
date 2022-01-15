@@ -606,7 +606,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
 }
 
 bool CalculatorConversions::dynkinType(Calculator& calculator, const Expression& input, DynkinType& output) {
-  MacroRegisterFunctionWithName("Calculator::innerDynkinTypE");
+  MacroRegisterFunctionWithName("Calculator::dynkinType");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (input.size() != 2) {
     return calculator << "Dynkin type takes as input one argument. ";
@@ -716,7 +716,7 @@ bool CalculatorConversions::storeSemisimpleLieAlgebra(
 bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraRationals(
   Calculator& calculator, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerStoreElementSemisimpleLieAlgebraRational");
+  MacroRegisterFunctionWithName("CalculatorConversions::storeElementSemisimpleLieAlgebraRational");
   LinearCombination<Expression, Rational> monomials;
   monomials.makeZero();
   Expression currentMon;
@@ -759,7 +759,7 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraAlgebraicNu
 bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, SlTwoSubalgebra& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerSlTwoSubalgebraPrecomputed");
+  MacroRegisterFunctionWithName("CalculatorConversions::slTwoSubalgebraPrecomputed");
   if (!input.isListNElements(4)) {
     return calculator << "<hr>input of innerLoadFromObject has "
     << input.size() << " children, 4 expected. ";
@@ -816,7 +816,7 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
 bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerSlTwoSubalgebraPrecomputed");
+  MacroRegisterFunctionWithName("CalculatorConversions::slTwoSubalgebraPrecomputed");
   SlTwoSubalgebra tempSL2;
   if (!CalculatorConversions::slTwoSubalgebraPrecomputed(calculator, input, tempSL2)) {
     return calculator << "<hr>Failed to load sl(2) subalgebra. ";

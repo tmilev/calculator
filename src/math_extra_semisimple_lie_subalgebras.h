@@ -503,7 +503,7 @@ public:
 
   // Possible values:
   // 1. nulltpr.
-  // 2. CalculatorConversions::innerStringFromSemisimpleSubalgebras.
+  // 2. CalculatorConversions::stringFromSemisimpleSubalgebras.
   std::string (*toStringExpressionString)(SemisimpleSubalgebras& input);
   bool loadState(
     List<int>& currentChainIntegers,

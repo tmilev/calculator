@@ -4,7 +4,7 @@
 bool CalculatorDatabaseFunctions::executeMongoQuery(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorDatabaseFunctions::innerExecuteMongoQuery");
+  MacroRegisterFunctionWithName("CalculatorDatabaseFunctions::executeMongoQuery");
   if (!global.userDefaultHasAdminRights()) {
     return output.assignValue(calculator, std::string("Administrator rights needed for mongoDB queries. "));
   }

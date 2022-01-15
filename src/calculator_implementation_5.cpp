@@ -362,7 +362,7 @@ bool Calculator::getVectorDoublesFromFunctionArguments(
 bool CalculatorFunctions::getPointsImplicitly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGetPointsImplicitly");
+  MacroRegisterFunctionWithName("CalculatorFunctions::getPointsImplicitly");
   MeshTriangles mesh;
   if (!mesh.computePoints(calculator, input, false)) {
     return false;
@@ -774,7 +774,7 @@ bool CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions(
 }
 
 bool CalculatorFunctions::numerator(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerNumerator");
+  MacroRegisterFunctionWithName("CalculatorFunctions::numerator");
   if (input.size() != 2) {
     return false;
   }
@@ -794,7 +794,7 @@ bool CalculatorFunctions::numerator(Calculator& calculator, const Expression& in
 }
 
 bool CalculatorFunctions::denominator(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDenominator");
+  MacroRegisterFunctionWithName("CalculatorFunctions::denominator");
   if (input.size() != 2) {
     return false;
   }
@@ -816,7 +816,7 @@ bool CalculatorFunctions::denominator(Calculator& calculator, const Expression& 
 bool CalculatorFunctions::handleUnderscorePowerLimits(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerHandleUnderscorePowerLimits");
+  MacroRegisterFunctionWithName("CalculatorFunctions::handleUnderscorePowerLimits");
   if (
     !input.startsWith(calculator.opPower(), 3) &&
     !input.startsWith(calculator.opUnderscore(), 3)
@@ -840,7 +840,7 @@ bool CalculatorFunctions::handleUnderscorePowerLimits(
 bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSumAsOperatorToSumInternalNotation");
+  MacroRegisterFunctionWithName("CalculatorFunctions::sumAsOperatorToSumInternalNotation");
   if (input.size() <= 1) {
     return false;
   }
@@ -863,7 +863,7 @@ bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(
 bool CalculatorFunctions::sumTimesExpressionToSumOf(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSumTimesExpressionToSumOf");
+  MacroRegisterFunctionWithName("CalculatorFunctions::sumTimesExpressionToSumOf");
   if (
     !input.startsWith(calculator.opTimes(), 3) &&
     !input.startsWith(calculator.opDivide(), 3)
@@ -897,7 +897,7 @@ bool CalculatorFunctions::sumTimesExpressionToSumOf(
 bool CalculatorFunctions::sumSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSumSequence");
+  MacroRegisterFunctionWithName("CalculatorFunctions::sumSequence");
   if (input.size() < 1) {
     return false;
   }
@@ -921,7 +921,7 @@ bool CalculatorFunctions::sumSequence(
 bool CalculatorFunctions::multiplySequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerMultiplySequence");
+  MacroRegisterFunctionWithName("CalculatorFunctions::multiplySequence");
   if (input.size() < 1) {
     return false;
   }
@@ -976,7 +976,7 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
 }
 
 bool CalculatorFunctions::removeDuplicates(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRemoveDuplicates");
+  MacroRegisterFunctionWithName("CalculatorFunctions::removeDuplicates");
   int operationRemoveDuplicated = calculator.operations.getIndexNoFail("RemoveDuplicates");
   if (
     !input.isListStartingWithAtom(operationRemoveDuplicated) &&
@@ -992,7 +992,7 @@ bool CalculatorFunctions::removeDuplicates(Calculator& calculator, const Express
 }
 
 bool CalculatorFunctions::sort(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSort");
+  MacroRegisterFunctionWithName("CalculatorFunctions::sort");
   List<Expression> sortedExpressions;
   const Expression* toBeSorted = &input;
   if (input.size() == 2) {
@@ -1011,7 +1011,7 @@ bool CalculatorFunctions::sort(Calculator& calculator, const Expression& input, 
 bool CalculatorFunctions::sortDescending(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSortDescending");
+  MacroRegisterFunctionWithName("CalculatorFunctions::sortDescending");
   if (
     !input.isListStartingWithAtom(calculator.operations.getIndexNoFail("SortDescending")) &&
     !input.isSequenceNElements()
@@ -1051,7 +1051,7 @@ bool CalculatorFunctionsListsAndSets::length(Calculator& calculator, const Expre
 bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
   Calculator& calculator, const Expression& input, Expression& output, bool excludeNamedConstants
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables");
+  MacroRegisterFunctionWithName("CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables");
   if (input.size() < 3) {
     return false;
   }
@@ -1269,7 +1269,7 @@ bool CalculatorFunctions::powerExponentToLog(
 bool CalculatorFunctions::distributeExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerDistributeExponent");
+  MacroRegisterFunctionWithName("Calculator::distributeExponent");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -1309,7 +1309,7 @@ bool CalculatorFunctions::distributeExponent(
 bool CalculatorFunctions::sqrt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerSqrt");
+  MacroRegisterFunctionWithName("Calculator::sqrt");
   if (input.size() != 3) {
     return false;
   }

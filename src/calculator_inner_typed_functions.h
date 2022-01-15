@@ -23,13 +23,13 @@ public:
   static bool addElementTensorToElementTensor(Calculator& calculator, const Expression& input, Expression& output);
   static bool addNumberOrPolynomialToNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool addPlotToPlot(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddSequenceToSequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAddMatrixToMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDirectSumMatrixWithMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAugmentMatrixToTheRight(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addSequenceToSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool addMatrixToMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool directSumMatrixWithMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool augmentMatrixToTheRight(Calculator& calculator, const Expression& input, Expression& output);
   static bool augmentMatrixBelow(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
+  static bool addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool addMatrixRationalFractionsToMatrixRationalFractions(Calculator& calculator, const Expression& input, Expression& output);
@@ -50,7 +50,7 @@ public:
   static bool addAlgebraicNumberToAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool addWeightToWeight(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyEltHypOctByEltHypOct(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyEltHypOctByEltHypOct(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
@@ -62,12 +62,12 @@ public:
   static bool multiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyLRObyLRO(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyLRObyLRO(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyAnyScalarByMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyScalarBySequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplySequenceByAnyScalar(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyAnyScalarBySequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplySequenceByAnyScalar(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplySequenceByMatrix(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool multiplyMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
@@ -78,28 +78,28 @@ public:
     Expression& output
   );
   static bool multiplyMatrixBySequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(
+  static bool multiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyMatrixRationalOrRationalByMatrixRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyDoubleOrRationalByDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyMatrixTensorOrRationalByMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyAlgebraicNumberByAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyDoubleOrRationalByDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyCoxeterEltByCoxeterElt(Calculator& calculator, const Expression& input, Expression& output);
   static bool powerWeylGroupElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyAnyByElementUniversalEnveloping(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyAnyByElementTensor(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyEllipticCurveElements(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyEllipticCurveElementsZmodP(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyEllipticCurveElements(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyEllipticCurveElementsZmodP(Calculator& calculator, const Expression& input, Expression& output);
   static bool multiplyRationalOrPolynomialByWeightPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyWeylGroupEltByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool lieBracketOfMatrices(Calculator& calculator, const Expression& input, Expression& output);
   static bool lieBracketExtractConstant(Calculator& calculator, const Expression& input, Expression& output);

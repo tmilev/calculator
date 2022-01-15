@@ -37,7 +37,7 @@ void Calculator::initializeFunctionsExtra() {
     "the folder is white listed in the C++ code. ",
     "LoadFileIntoString(\"test/certificate_self_signed.base64\");\n"
     "LoadFileIntoString(\"problems/default/Functions-composing-fractional-linear-1.html\")",
-    "CalculatorConversions::innerLoadFileIntoString",
+    "CalculatorConversions::loadFileIntoString",
     "LoadFileIntoString",
     innerStandard
   );
@@ -150,7 +150,7 @@ void Calculator::initializeFunctionsExtra() {
     "Draws the internal tree structure of an expression. "
     "Does not unfold built-in types.",
     "PlotExpressionTree(e^x)",
-    "CalculatorFunctions::innerDrawExpressionGraph",
+    "CalculatorFunctions::drawExpressionGraph",
     "PlotExpressionTree",
     innerStandard
   );
@@ -162,7 +162,7 @@ void Calculator::initializeFunctionsExtra() {
     "PlotExpressionTreeFull(1);\n"
     "PlotExpressionTree(1 + 1);\n"
     "PlotExpressionTree(Freeze{}(1 + 1));",
-    "CalculatorFunctions::innerDrawExpressionGraphFull",
+    "CalculatorFunctions::drawExpressionGraphFull",
     "PlotExpressionTreeFull",
     innerStandard
   );
@@ -174,7 +174,7 @@ void Calculator::initializeFunctionsExtra() {
     "without completely unfolding the tree structure of "
     "expressions that represent a single mathematical entity.",
     "Lispify(e^x)",
-    "CalculatorFunctions::innerLispify",
+    "CalculatorFunctions::lispify",
     "Lispify",
     innerStandard
   );
@@ -185,7 +185,7 @@ void Calculator::initializeFunctionsExtra() {
     "Shows the complete internal tree structure of an expression "
     "(replacing the expression with a string).",
     "LispifyFull(e^x)",
-    "CalculatorFunctions::innerLispifyFull",
+    "CalculatorFunctions::lispifyFull",
     "LispifyFull",
     innerStandard
   );
@@ -211,7 +211,7 @@ void Calculator::initializeFunctionsExtra() {
     "For more information, see "
     "https://en.wikipedia.org/wiki/Longest_common_subsequence_problem.",
     "StringDifference(\"XMJYAUZ\",\"MZJAWXU\")",
-    "CalculatorFunctions::innerStringDiff",
+    "CalculatorFunctions::stringDifference",
     "StringDifference",
     innerStandard
   );
@@ -235,7 +235,7 @@ void Calculator::initializeFunctionsExtra() {
     "",
     "Format cpp code. ",
     "FormatCPPCode{}(\"src/database.cpp\")",
-    "Calculator::innerFormatCPPSourceCode",
+    "Calculator::formatCPPSourceCode",
     "FormatCPPCode",
     innerInvisibleExperimentalNoTest
   );
@@ -245,7 +245,7 @@ void Calculator::initializeFunctionsExtra() {
     "",
     "Format cpp directory. ",
     "formatCPPDirectory{}(\"src/\")",
-    "Calculator::innerformatCPPDirectory",
+    "Calculator::formatCPPDirectory",
     "formatCPPDirectory",
     innerInvisibleNoTest
   );
@@ -317,7 +317,7 @@ void Calculator::initializeFunctionsExtra() {
     "originally designed for the purposes of the freecalc project "
     "as not been tested on any other projects, please use only for freecalc.",
     "Crawl(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\")",
-    "CalculatorFunctions::innerCrawlTexFile",
+    "CalculatorFunctions::crawlTexFile",
     "Crawl",
     Function::Options::administrativeTested()
   );
@@ -340,7 +340,7 @@ void Calculator::initializeFunctionsExtra() {
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusii.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiii.tex\");\n",
-    "CalculatorFunctions::innerBuildFreecalc",
+    "CalculatorFunctions::buildFreecalc",
     "BuildFreecalc",
     innerAdminNoTest
   );
@@ -373,7 +373,7 @@ void Calculator::initializeFunctionsExtra() {
     "",
     "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.",
     "suffixNotationForPostScript{}((1/3 + a + b) * c)",
-    "CalculatorFunctions::innerSuffixNotationForPostScript",
+    "CalculatorFunctions::suffixNotationForPostScript",
     "SuffixNotationForPostScript",
     innerStandard
   );
@@ -902,7 +902,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Updates known public keys. Requires administrator privileges. "
     "At the moment, works for google public keys only. ",
     "FetchKnownPublicKeys(0)",
-    "CalculatorFunctions::innerFetchKnownPublicKeys",
+    "CalculatorFunctions::fetchKnownPublicKeys",
     "FetchKnownPublicKeys",
     innerAdminNoTest
   );

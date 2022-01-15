@@ -108,7 +108,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "[\\partial_1, x_1];\n"
     "\\partial_1 x_1;\n"
     "x_1\\partial_1",
-    "Calculator::innerElementWeylAlgebra",
+    "Calculator::elementWeylAlgebra",
     "ElementWeylAlgebraDO",
     innerFreezesArguments
   );
@@ -140,7 +140,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "b = \\partial x + \\partial^3 + \\partial;\n"
     "[FourierTransformDO{}a, FourierTransformDO{}b]"
     "- FourierTransformDO{}[a, b]",
-    "CalculatorFunctions::innerFourierTransformEWA",
+    "CalculatorFunctions::fourierTransformElementWeylAlgebra",
     "FourierTransformDO",
     innerStandard
   );
@@ -151,7 +151,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Computes the minimal polynomial of a matrix, provided that the matrix is not too large.",
     "A = MakeMatrix{}((0, 1), (- 1, 0));\n"
     "p = MinPolyMatrix{}A",
-    "CalculatorFunctions::innerMinPolyMatrix",
+    "CalculatorFunctions::minimalPolynomialMatrix",
     "MinPolyMatrix",
     innerStandard
   );
@@ -164,7 +164,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "IsPrimeMillerRabin(4256233);\n"
     "IsPrimeMillerRabin(49979687);\n"
     "IsPrimeMillerRabin(4256233 * 49979687)",
-    "CalculatorFunctions::innerIsPrimeMillerRabin",
+    "CalculatorFunctions::isPrimeMillerRabin",
     "IsPrimeMillerRabin",
     innerStandard
   );
@@ -180,7 +180,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "IsPossiblyPrime(4256233);\n"
     "IsPossiblyPrime(49979687);\n"
     "IsPossiblyPrime(4256233 * 49979687)",
-    "CalculatorFunctions::innerIsPossiblyPrime",
+    "CalculatorFunctions::isPossiblyPrime",
     "IsPossiblyPrime",
     innerStandard
   );
@@ -204,7 +204,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "",
     "Prints all partitions of a positive number into a sum of positive integers. ",
     "AllPartitions(10) ",
-    "CalculatorFunctions::innerAllPartitions",
+    "CalculatorFunctions::allPartitions",
     "AllPartitions",
     innerStandard
   );
@@ -217,7 +217,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "vectors (second argument). All partitioning "
     "vectors should have positive coordinates. ",
     "AllVectorPartitions((10, 11), ((1,2 ), (2, 3), (4, 5), (2, 1), (3, 2), (5, 4))) ",
-    "CalculatorFunctions::innerAllVectorPartitions",
+    "CalculatorFunctions::allVectorPartitions",
     "AllVectorPartitions",
     innerStandard
   );
@@ -249,7 +249,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Second argument = tableaux content = "
     "arbitrary tuple of positive integers. ",
     "KostkaNumber((3,2,1), (4,2)) ",
-    "CalculatorFunctions::innerKostkaNumbers",
+    "CalculatorFunctionsWeylGroup::kostkaNumber",
     "KostkaNumber",
     innerStandard
   );
@@ -275,7 +275,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "May/will be extended to work for an arbitrary object "
     "for which the term \"nilpotent\" makes sense. ",
     "isNilpotent{}((0, 1), (0, 0))",
-    "CalculatorFunctions::innerIsNilpotent",
+    "CalculatorFunctions::isNilpotent",
     "IsNilpotent",
     innerStandard
   );
@@ -326,7 +326,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, "
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
-    "CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit",
+    "CalculatorFunctions::solveSerreLikeSystemNoUpperLimit",
     "FindOneSolutionSerreLikePolynomialSystem",
     innerStandard
   );
@@ -522,7 +522,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddRationalToElementWeylAlgebra",
     innerStandard
   );
@@ -534,7 +534,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Adds a rational or polynomial to element Weyl algebra. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddPolynomialToElementWeylAlgebra",
     innerStandard
   );
@@ -546,7 +546,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddElementWeylAlgebraToPolynomial",
     innerStandard
   );
@@ -558,7 +558,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddElementWeylAlgebraToElementWeylAlgebra",
     innerStandard
   );
@@ -571,7 +571,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
     "3\\partial_i",
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::multiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
     "MultiplyRationalByElementWeylAlgebra",
     innerStandard
   );
@@ -584,7 +584,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
     "x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::multiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
     "MultiplyPolynomialByElementWeylAlgebra",
     innerStandard
   );
@@ -598,7 +598,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_{{i}}= Polynomial{}x_i;\n"
     "a = x_1 x_2;\n"
     "b = \\partial_1 \\partial_2; a b - b a -[a,b] ",
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::multiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
     "MultiplyElementWeylAlgebraByElementWeylAlgebra",
     innerStandard
   );
@@ -611,33 +611,33 @@ void Calculator::initializeFunctionsScientificBasic() {
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
     "x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra",
     "MultiplyElementWeylAlgebraByPolynomial",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements,
+    CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements,
     this->opEllipticCurveElementsRational(),
     this->opEllipticCurveElementsRational(),
     "Multiplies two elements of elliptic curves.",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
     "h = g^2;\n"
     "h * g\n",
-    "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
+    "CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements",
     "MultiplyEllipticCurveElementsRational",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP,
+    CalculatorFunctionsBinaryOps::multiplyEllipticCurveElementsZmodP,
     this->opEllipticCurveElementsZmodP(),
     this->opEllipticCurveElementsZmodP(),
     "Multiplies two elements of elliptic curves.",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 +x - 5, x = 3 mod 17, y = 5 mod 17);\n"
     "h = g^2;\n"
     "h * g\n",
-    "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
+    "CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements",
     "MultiplyEllipticCurveElementsOverZmodP",
     innerStandard
   );
@@ -648,7 +648,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Makes an elliptic curve from a cubic in normal form, generator letter and base point.",
     "ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);"
     "ElementEllipticCurveNormalForm(y^2 = x^3 - x + 1, x = 3, y = 5)",
-    "CalculatorFunctions::innerElementEllipticCurveNormalForm",
+    "CalculatorFunctions::elementEllipticCurveNormalForm",
     "ElementEllipticCurveNormalForm",
     innerStandard
   );
@@ -699,7 +699,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Differential operation acting on a polynomial. ",
     "x = ElementWeylAlgebraPoly{}(\\partial, x);\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
     "\\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)",
-    "CalculatorFunctions::innerCompositeEWAactOnPoly",
+    "CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial",
     "EWAactOnPoly",
     compositeStandard
   );

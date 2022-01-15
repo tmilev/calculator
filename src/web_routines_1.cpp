@@ -610,7 +610,7 @@ void WebClient::fetchWebPagePart2(
 }
 
 bool CalculatorFunctions::fetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPageGET");
+  MacroRegisterFunctionWithName("CalculatorFunctions::fetchWebPageGET");
   if (!global.userDefaultHasAdminRights()) {
     return output.assignValue(calculator, std::string("Fetching web pages available only for logged-in admins. "));
   }
@@ -640,7 +640,7 @@ bool CalculatorFunctions::fetchWebPageGET(Calculator& calculator, const Expressi
 }
 
 bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPagePOST");
+  MacroRegisterFunctionWithName("CalculatorFunctions::fetchWebPagePOST");
   if (!global.userDefaultHasAdminRights()) {
     return output.assignValue(calculator, std::string("Fetching web pages available only for logged-in admins. "));
   }
@@ -675,7 +675,7 @@ bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Express
 bool CalculatorFunctions::fetchKnownPublicKeys(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchKnownPublicKeys");
+  MacroRegisterFunctionWithName("CalculatorFunctions::fetchKnownPublicKeys");
   (void) input;
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {

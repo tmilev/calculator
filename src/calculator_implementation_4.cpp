@@ -495,7 +495,7 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
 }
 
 bool CalculatorBasics::multiplyByOne(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerMultiplyByOne");
+  MacroRegisterFunctionWithName("Calculator::multiplyByOne");
   if (!input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3) {
     return false;
   }
@@ -865,7 +865,7 @@ bool Calculator::functionCollectSummandsCombine(
 }
 
 bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerAssociateExponentExponent");
+  MacroRegisterFunctionWithName("Calculator::associateExponentExponent");
   int opPower = calculator.opPower();
   if (!input.startsWith(opPower, 3)) {
     return false;

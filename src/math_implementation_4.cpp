@@ -1272,7 +1272,7 @@ void Permutation::getPermutationLthElementIsTheImageofLthIndex(List<int>& output
 }
 
 bool WeylGroupData::areMaximallyDominantGroupInner(List<Vector<Rational> >& weights) {
-  MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantInner");
+  MacroRegisterFunctionWithName("WeylGroup::areMaximallyDominantGroupInner");
   for (int i = 0; i < weights.size; i ++) {
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[i]) < 0) {

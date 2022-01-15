@@ -149,7 +149,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 }
 
 bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerAttemptExtendingEtoHEFwithHinCartan");
+  MacroRegisterFunctionWithName("Calculator::attemptExtendingEtoHEFwithHinCartan");
   if (input.size() != 3) {
     return output.assignError(calculator, "Function takes 2 arguments - type and an element of the Lie algebra.");
   }
@@ -186,7 +186,7 @@ bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(Calculator& calcul
 }
 
 bool CalculatorFunctions::zModP(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerZmodP");
+  MacroRegisterFunctionWithName("Calculator::zModP");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -216,7 +216,7 @@ bool CalculatorFunctions::zModP(Calculator& calculator, const Expression& input,
 }
 
 bool CalculatorFunctions::conesIntersect(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
+  MacroRegisterFunctionWithName("Calculator::conesIntersect");
   if (!input.isListNElements(3)) {
     return calculator << "Function ConesIntersection expects 2 arguments, got "
     << input.size() - 1 << " instead. ";
@@ -286,7 +286,7 @@ bool CalculatorFunctions::conesIntersect(Calculator& calculator, const Expressio
 }
 
 bool CalculatorFunctions::reverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");
+  MacroRegisterFunctionWithName("Calculator::reverseOrderRecursively");
   if (input.size() < 2) {
     return false;
   }
@@ -321,7 +321,7 @@ bool Calculator::functionReverseOrderRecursively(
 }
 
 bool CalculatorFunctions::reverseOrder(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerReverseOrder");
+  MacroRegisterFunctionWithName("Calculator::reverseOrder");
   if (!input.isSuitableForRecursion()) {
     output = input;
     return true;

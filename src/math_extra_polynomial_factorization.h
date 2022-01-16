@@ -8,6 +8,7 @@ class IntegerModulusSmall {
 public:
   int modulus;
   List<int> inverses;
+  void initializeModulusData(int inputModulus);
 };
 
 // Dense univariate polynomial mod p for a small integer p.
@@ -87,7 +88,8 @@ public:
     }
     return input;
   }
-  void makeZero();
+  int reduceModP(const LargeInteger& input);
+  void makeZero(IntegerModulusSmall* inputModulus);
   bool isEqualToZero() const;
   // Multiplies the polynomial by a constant so the leading coefficient is one.
   void rescaleSoLeadingCoefficientIsOne();
@@ -96,6 +98,7 @@ public:
     static bool all();
     static bool greatestCommonDivisor();
     static bool division();
+    static bool derivative();
     static bool testOneGreatestCommonDivisor(
       int modulusData,
       const std::string& left,
@@ -109,14 +112,25 @@ public:
       const std::string& expectedQuotient,
       const std::string& expectedRemainder
     );
+    static bool testOneDerivative(
+      int modulusData,
+      const std::string& toBeDifferentiated,
+      const std::string& expected
+    );
+    static PolynomialUnivariateModular fromStringAndModulus(
+      const std::string& input, IntegerModulusSmall* modulus
+    );
   };
 };
 
 class PolynomialUnivariateModularAsModulus {
 public:
   PolynomialUnivariateModular modulus;
+  PolynomialUnivariateModular imageXToTheNth;
+  List<List<int> > imagesPowersOfX;
   void operator=(const PolynomialUnivariateModular& inputModulus);
   void computeFromModulus();
+  void computeOneReductionRow(const List<int>& previous, List<int>& output);
 };
 
 class PolynomialModuloPolynomialModuloInteger {

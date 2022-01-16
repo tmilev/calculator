@@ -5,6 +5,7 @@
 #include "webserver.h"
 #include "database.h"
 #include "calculator_html_interpretation.h"
+#include "signals_infrastructure.h"
 
 class Test {
 public:
@@ -30,6 +31,7 @@ public:
 };
 
 int mainTest(List<std::string>& inputArguments) {
+  SignalsInfrastructure::signals().initializeSignals();
   Test tester;
   inputArguments.sliceInPlace(2, inputArguments.size - 2);
   tester.initialize(inputArguments);
@@ -88,8 +90,8 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::polynomial)) {
     MonomialPolynomial::Test::all();
     Polynomial<Rational>::Test::all();
-    PolynomialFactorizationFiniteFields::Test::all();
     PolynomialUnivariateModular::Test::all();
+    PolynomialFactorizationFiniteFields::Test::all();
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||

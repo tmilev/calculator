@@ -1700,17 +1700,37 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialImplementation,
   PolynomialImplementation,
   PolynomialModulusImplementation
+>::checkInitialization() const {
+  if (this->output == nullptr) {
+    global.fatal << "Null output pointer not allowed. " << global.fatal;
+  }
+  return true;
+}
+
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
 >::oneFactor(
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactor");
+  this->checkInitialization();
+  global << "DEBUG: inside one factor " << Logger::endL;
   this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
 
+  global << "DEBUG: about to make one: " << this->current.toString() << Logger::endL;
   this->one.makeOne(
     this->output->current.coefficients[0].modulus
   );
+  global << "DEBUG: made one!" << this->current.toString() << Logger::endL;
   if (this->one.modulus == 2) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only odd primes allowed. ";
@@ -1722,9 +1742,12 @@ bool PolynomialFactorizationCantorZassenhaus<
   out << "Find one factor of " << this->current.toString(&this->output->format);
   out << "Factorization so far: " << this->output->toStringResult(&this->output->format);
   report.report(out.str());
+  global << "DEBUG: about to derivative: " << this->current.toString() << Logger::endL;
   PolynomialImplementation derivative;
   this->current.derivative(derivative);
   PolynomialImplementation candidate;
+  global << "DEBUG: about to gcd " << this->current.toString()
+  << " and: " << derivative.toString() << Logger::endL;
   if (!derivative.greatestCommonDivisor(
     derivative,
     this->current,
@@ -1738,6 +1761,8 @@ bool PolynomialFactorizationCantorZassenhaus<
     this->output->accountNonReducedFactorTemplate(candidate);
     return true;
   }
+  global << "DEBUG: about to one factor go: ... " << Logger::endL;
+
   return this->oneFactorGo(comments, commentsOnFailure);
 }
 

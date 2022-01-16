@@ -413,6 +413,7 @@ public:
     const std::string& candidateDisplayName,
     std::stringstream* comments
   );
+  bool checkInitialization() const;
   PolynomialFactorizationCantorZassenhaus();
   static std::string name() {
     return "Cantor-Zassenhaus";
@@ -425,6 +426,7 @@ public:
   PolynomialFactorizationUnivariate<Rational>* output;
   Polynomial<Rational> current;
   Polynomial<ElementZmodP> modularization;
+  IntegerModulusSmall smallModulus;
   ElementZmodP oneModular;
   LargeIntegerUnsigned modulusHenselLift;
   LargeInteger leadingCoefficient;

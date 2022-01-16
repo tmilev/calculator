@@ -2988,7 +2988,7 @@ public:
     bool factorizationKronecker();
     bool oneDifferential(const std::string& input, const std::string& expected);
     bool differential();
-    Polynomial<Coefficient> fromString(const std::string& input);
+    static Polynomial<Coefficient> fromString(const std::string& input);
     Vector<Polynomial<Coefficient> > fromStringCommonContext(const std::string& first, const std::string& second);
     Vector<Polynomial<Coefficient> > fromStringCommonContext(const List<std::string>& input);
     bool fromStringTest();

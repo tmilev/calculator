@@ -16,6 +16,7 @@
 #include "math_extra_latex_routines.h"
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 #include "assert.h"
+#include "signals_infrastructure.h"
 
 const std::string WebServer::Statististics::pingRequestsString = "pingsRequests";
 const std::string WebServer::Statististics::allRequestsString = "allRequests";
@@ -24,24 +25,6 @@ WebServer& GlobalVariables::server() {
   static WebServer result;
   return result;
 }
-
-class SignalsInfrastructure {
-public:
-  struct sigaction SignalSEGV;
-  struct sigaction SignalFPE;
-  struct sigaction SignalChild;
-  struct sigaction SignalINT;
-  sigset_t allSignals;
-  sigset_t oldSignals;
-  bool flagSignalsAreBlocked;
-  bool flagSignalsAreStored;
-  bool flagInitialized;
-  SignalsInfrastructure();
-  void blockSignals();
-  void unblockSignals();
-  void initializeSignals();
-  static SignalsInfrastructure& signals();
-};
 
 class SystemFunctions {
 public:

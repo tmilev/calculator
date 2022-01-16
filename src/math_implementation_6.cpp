@@ -349,6 +349,7 @@ bool PolynomialFactorizationFiniteFields::factor(
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factor");
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
     return false;
@@ -392,6 +393,7 @@ bool PolynomialFactorizationFiniteFields::factor(
       continue;
     }
     this->oneModular.makeOne(primeFactors[i]);
+    this->smallModulus.initializeModulusData(primeFactors[i]);
     ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
       this->current, this->modularization, primeFactors[i]
     );
@@ -410,13 +412,14 @@ bool PolynomialFactorizationFiniteFields::factor(
 bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::oneFactorFromModularization");
   PolynomialFactorizationUnivariate<ElementZmodP> factorizationModular;
   PolynomialFactorizationCantorZassenhaus<
     PolynomialModuloPolynomialModuloInteger,
     PolynomialUnivariateModular,
     PolynomialUnivariateModularAsModulus
-  > algorithm;
-
+  > algorithm;  
+  algorithm.current.makeZero(&this->smallModulus);
   if (!factorizationModular.factor(
     this->modularization,
     algorithm,
@@ -746,7 +749,12 @@ void PolynomialUnivariateModular::addAnotherTimesConstant(
 void PolynomialUnivariateModular::addTerm(int coefficient, int termPower) {
   this->ensureCoefficientLength(termPower + 1);
   this->coefficients[termPower] += coefficient;
-  this->coefficients[termPower] %= this->getModulus();
+  int modulus = this->getModulus();
+  this->coefficients[termPower] %= modulus;
+  if (this->coefficients[termPower] < 0) {
+    this->coefficients[termPower] += modulus;
+  }
+  this->trimTrailingZeroes();
 }
 
 void PolynomialUnivariateModular::addAnotherTimesTerm(
@@ -758,8 +766,9 @@ void PolynomialUnivariateModular::addAnotherTimesTerm(
   this->ensureCoefficientLength(other.coefficients.size + termPower);
   int modulus = this->getModulus();
   for (int i = 0; i < other.coefficients.size; i ++) {
-    this->coefficients[i + termPower] += other.coefficients[i] * coefficient;
-    this->coefficients[i] %= modulus;
+    this->coefficients[i + termPower] = (
+      this->coefficients[i + termPower] + other.coefficients[i] * coefficient
+    ) % modulus;
   }
   this->trimTrailingZeroes();
 }
@@ -791,24 +800,52 @@ void PolynomialUnivariateModular::divideBy(
     divisor.getLeadingCoefficient()
   ];
   outputRemainder = *this;
-  outputQuotient.makeZero();
+  outputQuotient.makeZero(this->modulusData);
   int modulus = this->getModulus();
+  if (divisor.isEqualToZero()) {
+    global.fatal
+    << "Dividing by zero is not allowed. "
+    << global.fatal;
+  }
   while (outputRemainder.coefficients.size >= divisor.coefficients.size) {
+    global << "DEBUG: remainder so far: " << outputRemainder.toString()
+    << " divisor so far: " << divisor.toString() << " quotient: "
+    << outputQuotient.toString()
+    << "\noutput remainder lead coeff: "
+    << outputRemainder.getLeadingCoefficient()
+    << " divisorInvertedLeadingCoefficient: "
+    << divisorInvertedLeadingCoefficient << Logger::endL;
     int coefficient = (outputRemainder.getLeadingCoefficient() * divisorInvertedLeadingCoefficient) % modulus;
     int termPower = outputRemainder.coefficients.size - divisor.coefficients.size;
+    global << "DEBUG: about to add : " << coefficient
+    << "x^" << termPower << Logger::endL;
     outputQuotient.addTerm(coefficient, termPower);
     int coefficientNegated = modulus - coefficient;
     outputRemainder.addAnotherTimesTerm(divisor, coefficientNegated, termPower);
   }
 }
 
-void PolynomialUnivariateModular::makeZero() {
+int PolynomialUnivariateModular::reduceModP(
+  const LargeInteger& input
+) {
+  LargeInteger reduced;
+  reduced = input;
+  reduced %= this->getModulus();
+  int result = 0;
+  reduced.isIntegerFittingInInt(&result);
+  return result;
+}
+
+void PolynomialUnivariateModular::makeZero(
+  IntegerModulusSmall* inputModulus
+) {
+  this->modulusData = inputModulus;
   this->coefficients.clear();
 }
 
 void PolynomialUnivariateModular::operator*=(int other) {
   if (other == 0) {
-    this->makeZero();
+    this->makeZero(this->modulusData);
     return;
   }
   int modulus = this->getModulus();
@@ -862,6 +899,11 @@ std::string PolynomialUnivariateModular::toString(
   }
   Polynomial<LargeInteger> converter;
   MonomialPolynomial monomial;
+  MemorySaving<FormatExpressions> backupFormat;
+  if (format == nullptr) {
+    format = &backupFormat.getElement();
+    format->polynomialAlphabet.addOnTop("x");
+  }
   for (int i = 0; i < this->coefficients.size; i ++) {
     LargeInteger coefficient = this->coefficients[i];
     monomial.makeEi(0, i);
@@ -888,7 +930,7 @@ void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
 }
 
 void PolynomialUnivariateModular::operator=(const Polynomial<ElementZmodP>& other) {
-  this->makeZero();
+  this->makeZero(this->modulusData);
   if (other.minimalNumberOfVariables() > 1) {
     global.fatal << "Attempt to assign " << other.toString()
     << " to polynomial with one variable. " << global.fatal;
@@ -914,7 +956,7 @@ void PolynomialUnivariateModular::derivative(
     thisCopy.derivative(output);
     return;
   }
-  output.makeZero();
+  output.makeZero(this->modulusData);
   for (int i = this->coefficients.size - 1; i > 0; i--) {
     output.addTerm(this->coefficients[i] * (i + 1), i);
   }
@@ -957,8 +999,36 @@ void PolynomialUnivariateModularAsModulus::operator=(
 }
 
 void PolynomialUnivariateModularAsModulus::computeFromModulus() {
-
+  int totalModulusDegree = this->modulus.totalDegreeInt();
+  this->imagesPowersOfX.setSize(totalModulusDegree);
+  List<int> startingReduction;
+  startingReduction.initializeFillInObject(totalModulusDegree, 0);
+  List<int>* previousReduction = &startingReduction;
+  this->imageXToTheNth = this->modulus;
+  this->imageXToTheNth.rescaleSoLeadingCoefficientIsOne();
+  this->imageXToTheNth.addTerm(- 1, totalModulusDegree);
+  this->imageXToTheNth *= - 1;
+  for (int i = 0; i < totalModulusDegree; i ++) {
+    List<int>& reduction = this->imagesPowersOfX[i];
+    this->computeOneReductionRow(*previousReduction, reduction);
+  }
 }
+
+void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
+  const List<int>& previous,
+  List<int>& output
+) {
+  int totalModulusDegree = this->modulus.totalDegreeInt();
+  output.setSize(totalModulusDegree);
+  output[0] = this->imageXToTheNth.coefficients[0];
+  int lastCoefficient = *previous.lastObject();
+  for (int i = 1; i < output.size; i ++) {
+    output[i] = previous[i - 1] + this->imageXToTheNth.coefficients[i] * lastCoefficient;
+    output[i] %= this->modulus.modulusData->modulus;
+  }
+}
+
+
 
 void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& other) {
   PolynomialUnivariateModular output;
@@ -984,7 +1054,7 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
 }
 
 void PolynomialModuloPolynomialModuloInteger::operator+=(const ElementZmodP& other) {
-
+  this->value.addTerm(this->value.reduceModP(other.value), 0);
 }
 
 void PolynomialModuloPolynomialModuloInteger::operator-=(
@@ -1002,7 +1072,26 @@ void PolynomialModuloPolynomialModuloInteger::operator*=(
 }
 
 void PolynomialModuloPolynomialModuloInteger::reduce() {
-  global.fatal << "Implement this!" << global.fatal;
+  int totalModulusDegree = this->modulus->modulus.totalDegreeInt();
+  if (this->value.totalDegreeInt() >= totalModulusDegree * 2) {
+    global.fatal
+    << "Reduction of polynomial of too-large degree: "
+    << this->value.totalDegreeInt()
+    << " mod degree: " << totalModulusDegree << ". "
+    << global.fatal;
+  }
+  List<List<int> >& reductions = this->modulus->imagesPowersOfX;
+  for (
+    int i = totalModulusDegree;
+    i < this->value.coefficients.size;
+    i ++
+  ) {
+    int coefficient = this->value.coefficients[i];
+    List<int>& currentReduction = reductions[i - totalModulusDegree];
+    for (int j = 0; j < totalModulusDegree; j ++) {
+      this->value.addTerm(coefficient * currentReduction[j], j);
+    }
+  }
 }
 
 bool PolynomialModuloPolynomialModuloInteger::isEqualToZero() const {
@@ -1014,4 +1103,14 @@ std::string PolynomialModuloPolynomialModuloInteger::toString(FormatExpressions*
   std::stringstream out;
   out << this->value.toString() << " mod Q";
   return out.str();
+}
+
+void IntegerModulusSmall::initializeModulusData(int inputModulus) {
+  this->modulus = inputModulus;
+  this->inverses.initializeFillInObject(inputModulus, 0);
+  for (int i = 1; i < inputModulus; i ++) {
+    if (!MathRoutines::invertXModN(i, inputModulus, this->inverses[i])) {
+      global.fatal << "Modulus " << inputModulus << " is not prime. " << global.fatal;
+    }
+  }
 }

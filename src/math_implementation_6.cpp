@@ -958,7 +958,7 @@ void PolynomialUnivariateModular::derivative(
   }
   output.makeZero(this->modulusData);
   for (int i = this->coefficients.size - 1; i > 0; i--) {
-    output.addTerm(this->coefficients[i] * (i + 1), i);
+    output.addTerm(this->coefficients[i] * i, i);
   }
 }
 

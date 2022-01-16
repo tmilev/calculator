@@ -107,7 +107,7 @@ bool PolynomialUnivariateModular::Test::division() {
 bool PolynomialUnivariateModular::Test::derivative() {
   global << "DEBUG: got to here 2! " << Logger::endL;
   PolynomialUnivariateModular::Test::testOneDerivative(
-    3, "x^2-1", "2x"
+    3, "x^2-1", "2x^{2} (mod 3)"
   );
   return true;
 }
@@ -194,6 +194,7 @@ bool PolynomialUnivariateModular::Test::testOneDerivative(
     << expected
     << global.fatal;
   }
+  return true;
 }
 
 PolynomialUnivariateModular PolynomialUnivariateModular::Test::fromStringAndModulus(

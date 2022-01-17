@@ -1069,9 +1069,8 @@ void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& 
       modulus;
     }
   }
-  global << "DEBUG about to assign: " << this->toString() << " and " << other.toString() << Logger::endL;
-
   *this = output;
+  global << "DEBUG after product: " << this->toString() << Logger::endL;
 }
 
 void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
@@ -1105,7 +1104,9 @@ void PolynomialModuloPolynomialModuloInteger::operator*=(
   global << "DEBUG: about to multi " << this->value.toString() << " by "
   << other.value.toString() << Logger::endL;
   this->value *= other.value;
+  global << "DEBUG: multi result: " << this->value.toString() << Logger::endL;
   this->reduce();
+  global << "DEBUG: AFTER reduction: " << this->toString() << Logger::endL;
 }
 
 void PolynomialModuloPolynomialModuloInteger::reduce() {
@@ -1124,11 +1125,13 @@ void PolynomialModuloPolynomialModuloInteger::reduce() {
     i ++
   ) {
     int coefficient = this->value.coefficients[i];
+    this->value.coefficients[i] = 0;
     List<int>& currentReduction = reductions[i - totalModulusDegree];
     for (int j = 0; j < totalModulusDegree; j ++) {
       this->value.addTerm(coefficient * currentReduction[j], j);
     }
   }
+  this->value.trimTrailingZeroes();
 }
 
 bool PolynomialModuloPolynomialModuloInteger::isEqualToZero() const {

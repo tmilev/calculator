@@ -26,6 +26,7 @@ private:
   // at least the given number of elements.
   // Beefs up newly created coefficients with zeroes.
   friend class PolynomialUnivariateModularAsModulus;
+  friend class PolynomialModuloPolynomialModuloInteger;
   void ensureCoefficientLength(int desiredLength);
   void trimTrailingZeroes();
 public:

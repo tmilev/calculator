@@ -5,16 +5,13 @@
 #include "calculator.h"
 
 bool PolynomialFactorizationFiniteFields::Test::all() {
-  global << "DEBUG: poly facto finite fields start." << Logger::endL;
   Test::test("x^2-1", "(x -1)(x +1)");
-  global << "DEBUG:  part 2''." << Logger::endL;
   Test::test(
     "1176 x^14-7224x^13-10506x^12-7434x^11+1247x^10+6085x^9+6195x^8"
     "+2607x^7+11577x^6+32x^5+7265x^4-2841x^3-1794x^2-1320x-2880",
     "(14x^{7}-103x^{6}-76x^{4}+19x^{3}+18x^{2}+9x +24)"
     "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
   );
-  global << "DEBUG:  part 2." << Logger::endL;
   Test::test(
     "4507104x^15+7359384x^14+1298256x^13-5390778x^12-1915130x^11+2884723x^10"
     "+321265x^9-7734159x^8-2806758x^7+1609059x^6-90547x^5-1699161x^4"
@@ -48,14 +45,12 @@ bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
   std::stringstream comments;
   Polynomial<Rational> input = this->parser.fromString(toBeFactored);
   int64_t start = global.getElapsedMilliseconds();
-  global << "DEBUG: About to factor: " << input.toString() << Logger::endL;
   if (!factorization.factor(input, algorithm, &comments, &comments)) {
     global.fatal << "Factorization failed: "
     << this->toBeFactored << "\nComments:\n"
     << comments.str()
     << global.fatal;
   }
-  global << "DEBUG: factor done " << Logger::endL;
   int64_t duration = global.getElapsedMilliseconds() - start;
   std::string result = factorization.toStringResult(&this->parser.format);
   if (result != this->desiredFactorization) {
@@ -80,16 +75,13 @@ bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
 }
 
 bool PolynomialUnivariateModular::Test::all() {
-  global << "DEBUG: before division!" << Logger::endL;
   PolynomialUnivariateModular::Test::division();
-  global << "DEBUG: before common divisor!" << Logger::endL;
   PolynomialUnivariateModular::Test::greatestCommonDivisor();
   PolynomialUnivariateModular::Test::derivative();
   return true;
 }
 
 bool PolynomialUnivariateModular::Test::greatestCommonDivisor() {
-  global << "DEBUG: got to here! " << Logger::endL;
   PolynomialUnivariateModular::Test::testOneGreatestCommonDivisor(
     5, "x^2-1", "x^3-1", "x +4 (mod 5)"
   );
@@ -97,7 +89,6 @@ bool PolynomialUnivariateModular::Test::greatestCommonDivisor() {
 }
 
 bool PolynomialUnivariateModular::Test::division() {
-  global << "DEBUG: got to here 2! " << Logger::endL;
   PolynomialUnivariateModular::Test::testOneDivision(
     5, "x^3-1", "x-1", "x^{2}+x +1 (mod 5)", "0 (mod 5)"
   );
@@ -105,7 +96,6 @@ bool PolynomialUnivariateModular::Test::division() {
 }
 
 bool PolynomialUnivariateModular::Test::derivative() {
-  global << "DEBUG: got to here 2! " << Logger::endL;
   PolynomialUnivariateModular::Test::testOneDerivative(
     3, "x^2-1", "2x^{2} (mod 3)"
   );
@@ -200,10 +190,7 @@ bool PolynomialUnivariateModular::Test::testOneDerivative(
 PolynomialUnivariateModular PolynomialUnivariateModular::Test::fromStringAndModulus(
   const std::string& input, IntegerModulusSmall* modulus
 ) {
-  global << "DEBUG: inside from stirng and modulus" << Logger::endL;
   Polynomial<Rational> polynomialRational = Polynomial<Rational>::Test::fromString(input);
-  global << "DEBUG: after poly string, got: " << polynomialRational.toString() << Logger::endL;
-  global << "DEBUG: modulus: " << modulus->modulus << Logger::endL;
   PolynomialUnivariateModular result;
   result.makeZero(modulus);
   for (int i = 0; i < polynomialRational.size(); i ++) {
@@ -212,10 +199,7 @@ PolynomialUnivariateModular PolynomialUnivariateModular::Test::fromStringAndModu
     element.assignRational(polynomialRational.coefficients[i]);
     int coefficient = 0;
     element.value.isIntegerFittingInInt(&coefficient);
-    global << "DEBUG: about to add term to: " << result.toString() << Logger::endL;
     result.addTerm(coefficient, polynomialRational.monomials[i].totalDegreeInt());
   }
-
-  global << "DEBUG: got result: " << modulus->modulus << Logger::endL;
   return result;
 }

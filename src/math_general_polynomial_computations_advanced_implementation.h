@@ -1722,15 +1722,12 @@ bool PolynomialFactorizationCantorZassenhaus<
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactor");
   this->checkInitialization();
-  global << "DEBUG: inside one factor " << Logger::endL;
   this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
 
-  global << "DEBUG: about to make one: " << this->current.toString() << Logger::endL;
   this->one.makeOne(
     this->output->current.coefficients[0].modulus
   );
-  global << "DEBUG: made one!" << this->current.toString() << Logger::endL;
   if (this->one.modulus == 2) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only odd primes allowed. ";
@@ -1742,12 +1739,9 @@ bool PolynomialFactorizationCantorZassenhaus<
   out << "Find one factor of " << this->current.toString(&this->output->format);
   out << "Factorization so far: " << this->output->toStringResult(&this->output->format);
   report.report(out.str());
-  global << "DEBUG: about to derivative: " << this->current.toString() << Logger::endL;
   PolynomialImplementation derivative;
   this->current.derivative(derivative);
   PolynomialImplementation candidate;
-  global << "DEBUG: about to gcd " << this->current.toString()
-  << " and: " << derivative.toString() << Logger::endL;
   if (!derivative.greatestCommonDivisor(
     derivative,
     this->current,
@@ -1762,7 +1756,6 @@ bool PolynomialFactorizationCantorZassenhaus<
     return true;
   }
   global << "DEBUG: about to one factor go: ... " << Logger::endL;
-
   return this->oneFactorGo(comments, commentsOnFailure);
 }
 
@@ -1783,7 +1776,12 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialImplementation currentPowerMinusBaseLetter;
   currentPower = this->baseLetter;
   PolynomialImplementation candidateDivisor;
+  currentPower.checkInitialization();
   for (int i = 0; i < degree; i ++) {
+    global << "DEBUG: About to raise: "
+    << currentPower << " to power: "
+    << this->one.modulus << " and one qut ring: "
+    << this->oneQuotientRing << Logger::endL;
     MathRoutines::raiseToPower(
       currentPower, this->one.modulus, this->oneQuotientRing
     );
@@ -1940,18 +1938,24 @@ bool PolynomialFactorizationCantorZassenhaus<
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
+  global << "DEBUG: got to here -1" << Logger::endL;
   (void) commentsOnFailure;
   Polynomial<ElementZmodP> polynomial;
   polynomial.makeDegreeOne(1, 0, this->one, this->one.zero());
+  global << "DEBUG: got to here -2" << Logger::endL;
   this->modulus = this->current;
+  global << "DEBUG: got to here 1" << Logger::endL;
   this->baseLetter.makeFromModulusAndValue(
     &this->modulus, polynomial
   );
+  global << "DEBUG: got to here C-z." << Logger::endL;
   polynomial.makeConstant(this->one);
   this->oneQuotientRing.makeFromModulusAndValue(
     &this->modulus,
     polynomial
   );
+  this->oneQuotientRing.checkInitialization();
+  this->baseLetter.checkInitialization();
   if (this->hasFactorsOfDifferentDegree(comments)) {
     return true;
   }

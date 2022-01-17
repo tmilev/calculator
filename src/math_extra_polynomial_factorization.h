@@ -25,6 +25,7 @@ private:
   // Makes sure the coefficients array holds
   // at least the given number of elements.
   // Beefs up newly created coefficients with zeroes.
+  friend class PolynomialUnivariateModularAsModulus;
   void ensureCoefficientLength(int desiredLength);
   void trimTrailingZeroes();
 public:
@@ -32,9 +33,11 @@ public:
   IntegerModulusSmall* modulusData;
   PolynomialUnivariateModular();
   PolynomialUnivariateModular(IntegerModulusSmall* modulusData);
+  PolynomialUnivariateModular(const PolynomialUnivariateModular& other);
   void derivative(PolynomialUnivariateModular& output) const;
   void operator=(const Polynomial<ElementZmodP>& other);
   void operator=(const ElementZmodP& other);
+  void operator=(const PolynomialUnivariateModular& other);
   void operator-=(const PolynomialUnivariateModular& other);
   void operator*=(const PolynomialUnivariateModular& other);
   void operator*=(int other);
@@ -126,11 +129,13 @@ public:
 class PolynomialUnivariateModularAsModulus {
 public:
   PolynomialUnivariateModular modulus;
-  PolynomialUnivariateModular imageXToTheNth;
+  List<int> imageXToTheNth;
   List<List<int> > imagesPowersOfX;
   void operator=(const PolynomialUnivariateModular& inputModulus);
   void computeFromModulus();
   void computeOneReductionRow(const List<int>& previous, List<int>& output);
+  bool checkInitialization() const;
+  std::string toString(FormatExpressions* format = nullptr) const;
 };
 
 class PolynomialModuloPolynomialModuloInteger {
@@ -160,6 +165,7 @@ public:
   }
   std::string toString(FormatExpressions* format = nullptr) const;
   void reduce();
+  bool checkInitialization() const;
 };
 
 template <class Coefficient>
@@ -189,6 +195,9 @@ public:
   );
   const Polynomial<Coefficient>& getValue() {
     return this->value;
+  }
+  bool checkInitialization() const {
+    return true;
   }
 };
 

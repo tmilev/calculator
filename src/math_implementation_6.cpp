@@ -669,6 +669,13 @@ PolynomialUnivariateModular::PolynomialUnivariateModular() : modulusData(nullptr
 }
 
 PolynomialUnivariateModular::PolynomialUnivariateModular(
+  const PolynomialUnivariateModular& other
+) {
+  this->modulusData = nullptr;
+  *this = other;
+}
+
+PolynomialUnivariateModular::PolynomialUnivariateModular(
   IntegerModulusSmall* inputModulus
 ) : modulusData(inputModulus) {
 }
@@ -808,17 +815,8 @@ void PolynomialUnivariateModular::divideBy(
     << global.fatal;
   }
   while (outputRemainder.coefficients.size >= divisor.coefficients.size) {
-    global << "DEBUG: remainder so far: " << outputRemainder.toString()
-    << " divisor so far: " << divisor.toString() << " quotient: "
-    << outputQuotient.toString()
-    << "\noutput remainder lead coeff: "
-    << outputRemainder.getLeadingCoefficient()
-    << " divisorInvertedLeadingCoefficient: "
-    << divisorInvertedLeadingCoefficient << Logger::endL;
     int coefficient = (outputRemainder.getLeadingCoefficient() * divisorInvertedLeadingCoefficient) % modulus;
     int termPower = outputRemainder.coefficients.size - divisor.coefficients.size;
-    global << "DEBUG: about to add : " << coefficient
-    << "x^" << termPower << Logger::endL;
     outputQuotient.addTerm(coefficient, termPower);
     int coefficientNegated = modulus - coefficient;
     outputRemainder.addAnotherTimesTerm(divisor, coefficientNegated, termPower);
@@ -915,6 +913,12 @@ std::string PolynomialUnivariateModular::toString(
   return out.str();
 }
 
+void PolynomialUnivariateModular::operator=(const PolynomialUnivariateModular& other) {
+  other.checkInitialization();
+  this->modulusData = other.modulusData;
+  this->coefficients = other.coefficients;
+}
+
 void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
   if (other.modulus != this->getModulus()) {
     global.fatal << "Attempt to assign " << other.toString()
@@ -930,6 +934,8 @@ void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
 }
 
 void PolynomialUnivariateModular::operator=(const Polynomial<ElementZmodP>& other) {
+  MacroRegisterFunctionWithName("PolynomialUnivariateModular::operator=");
+  this->checkInitialization();
   this->makeZero(this->modulusData);
   if (other.minimalNumberOfVariables() > 1) {
     global.fatal << "Attempt to assign " << other.toString()
@@ -994,44 +1000,65 @@ ElementZmodP PolynomialUnivariateModular::evaluate(
 void PolynomialUnivariateModularAsModulus::operator=(
   const PolynomialUnivariateModular& inputModulus
 ) {
+  MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::operator=");
+  global << "DEBUG: input modulus: " << inputModulus.toString() << Logger::endL;
   this->modulus = inputModulus;
   this->computeFromModulus();
 }
 
 void PolynomialUnivariateModularAsModulus::computeFromModulus() {
+  MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::computeFromModulus");
+  this->modulus.checkInitialization();
   int totalModulusDegree = this->modulus.totalDegreeInt();
   this->imagesPowersOfX.setSize(totalModulusDegree);
+  global << "DEBUG: Total mod degree: " << totalModulusDegree << Logger::endL;
   List<int> startingReduction;
   startingReduction.initializeFillInObject(totalModulusDegree, 0);
   List<int>* previousReduction = &startingReduction;
-  this->imageXToTheNth = this->modulus;
-  this->imageXToTheNth.rescaleSoLeadingCoefficientIsOne();
-  this->imageXToTheNth.addTerm(- 1, totalModulusDegree);
-  this->imageXToTheNth *= - 1;
+  PolynomialUnivariateModular imageLargestXPower;
+  imageLargestXPower = this->modulus;
+  imageLargestXPower.rescaleSoLeadingCoefficientIsOne();
+  imageLargestXPower.addTerm(- 1, totalModulusDegree);
+  imageLargestXPower *= - 1;
+  imageLargestXPower.ensureCoefficientLength(totalModulusDegree);
+  this->imageXToTheNth = imageLargestXPower.coefficients;
   for (int i = 0; i < totalModulusDegree; i ++) {
     List<int>& reduction = this->imagesPowersOfX[i];
     this->computeOneReductionRow(*previousReduction, reduction);
+    previousReduction = &reduction;
   }
+}
+
+std::string PolynomialUnivariateModularAsModulus::toString(FormatExpressions *format) const {
+  return this->modulus.toString(format);
+}
+
+bool PolynomialUnivariateModularAsModulus::checkInitialization() const {
+  this->modulus.checkInitialization();
+  return true;
 }
 
 void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
   const List<int>& previous,
   List<int>& output
 ) {
+  MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::computeOneReductionRow");
   int totalModulusDegree = this->modulus.totalDegreeInt();
   output.setSize(totalModulusDegree);
-  output[0] = this->imageXToTheNth.coefficients[0];
+  global << "DEBUG: imageXToTheNth: " << this->imageXToTheNth << Logger::endL;
+  output[0] = this->imageXToTheNth[0];
   int lastCoefficient = *previous.lastObject();
   for (int i = 1; i < output.size; i ++) {
-    output[i] = previous[i - 1] + this->imageXToTheNth.coefficients[i] * lastCoefficient;
+    output[i] = previous[i - 1] + this->imageXToTheNth[i] * lastCoefficient;
     output[i] %= this->modulus.modulusData->modulus;
   }
 }
 
-
-
 void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& other) {
+  global << "DEBUG about to product: " << this->toString() << " and " << other.toString() << Logger::endL;
+  this->checkInitialization();
   PolynomialUnivariateModular output;
+  output.makeZero(this->modulusData);
   output.ensureCoefficientLength(other.coefficients.size + this->coefficients.size - 1);
   int modulus = this->getModulus();
   for (int i = 0; i < this->coefficients.size; i ++) {
@@ -1042,6 +1069,8 @@ void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& 
       modulus;
     }
   }
+  global << "DEBUG about to assign: " << this->toString() << " and " << other.toString() << Logger::endL;
+
   *this = output;
 }
 
@@ -1049,8 +1078,12 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
   PolynomialUnivariateModularAsModulus* inputModulus,
   const Polynomial<ElementZmodP>& inputValue
 ) {
+  MacroRegisterFunctionWithName("PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue");
+  inputModulus->checkInitialization();
   this->modulus = inputModulus;
+  this->value.modulusData = this->modulus->modulus.modulusData;
   this->value = inputValue;
+  this->checkInitialization();
 }
 
 void PolynomialModuloPolynomialModuloInteger::operator+=(const ElementZmodP& other) {
@@ -1067,6 +1100,10 @@ void PolynomialModuloPolynomialModuloInteger::operator-=(
 void PolynomialModuloPolynomialModuloInteger::operator*=(
   const PolynomialModuloPolynomialModuloInteger& other
 ) {
+  global << "DEBUG: inside operator *=" << Logger::endL;
+  this->checkInitialization();
+  global << "DEBUG: about to multi " << this->value.toString() << " by "
+  << other.value.toString() << Logger::endL;
   this->value *= other.value;
   this->reduce();
 }
@@ -1076,8 +1113,8 @@ void PolynomialModuloPolynomialModuloInteger::reduce() {
   if (this->value.totalDegreeInt() >= totalModulusDegree * 2) {
     global.fatal
     << "Reduction of polynomial of too-large degree: "
-    << this->value.totalDegreeInt()
-    << " mod degree: " << totalModulusDegree << ". "
+    << this->value.toString()
+    << " mod: " << this->modulus->modulus.toString()
     << global.fatal;
   }
   List<List<int> >& reductions = this->modulus->imagesPowersOfX;
@@ -1098,10 +1135,23 @@ bool PolynomialModuloPolynomialModuloInteger::isEqualToZero() const {
   return this->value.isEqualToZero();
 }
 
+bool PolynomialModuloPolynomialModuloInteger::checkInitialization() const {
+  if (this->modulus == nullptr) {
+    global.fatal << "Uninitialized PolynomialModuloPolynomialModuloInteger. " << global.fatal;
+  }
+  global << "DEBUG: before modulus" << Logger::endL;
+  this->modulus->checkInitialization();
+  global << "DEBUG: before value" << Logger::endL;
+  this->value.checkInitialization();
+  global << "DEBUG: after value" << Logger::endL;
+  return true;
+}
+
 std::string PolynomialModuloPolynomialModuloInteger::toString(FormatExpressions* format) const {
   (void) format;
   std::stringstream out;
-  out << this->value.toString() << " mod Q";
+  out << this->value.toString() << " mod (" << this->modulus->toString()
+  << ")";
   return out.str();
 }
 

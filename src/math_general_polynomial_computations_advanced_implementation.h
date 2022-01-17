@@ -1798,6 +1798,8 @@ bool PolynomialFactorizationCantorZassenhaus<
       this->one,
       nullptr
     );
+    global << "DEBUG: GCD compo OK" << Logger::endL;
+
     if (!expectedToBeTrue) {
       global.fatal
       << "Unexpected failure to compute greatest common divisor of "
@@ -1830,6 +1832,7 @@ bool PolynomialFactorizationCantorZassenhaus<
       return true;
     }
   }
+  global << "DEBUG: diff deg factors done!!!!" << Logger::endL;
   return false;
 }
 
@@ -1884,9 +1887,11 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialImplementation,
   PolynomialModulusImplementation
 >::handlePrimeDegreeSeparatedFactor(
-  PolynomialImplementation &input
+  PolynomialImplementation& input
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor");
+  global << "DEBUG: handle prime deg sep fact" << Logger::endL;
+  this->checkInitialization();
   int linearTermsToTry = 500;
   if (this->one.modulus < linearTermsToTry) {
     this->one.modulus.isIntegerFittingInInt(&linearTermsToTry);
@@ -1912,6 +1917,7 @@ bool PolynomialFactorizationCantorZassenhaus<
     // linear factors we haven't checked for.
     return false;
   }
+  global << "DEBUG: here be i" << Logger::endL;
   for (int i = 0; i < foundRoots.size; i ++) {
     Polynomial<ElementZmodP> linearFactor;
     linearFactor.makeMonomial(0, 1, this->one);
@@ -1964,11 +1970,14 @@ bool PolynomialFactorizationCantorZassenhaus<
     << " are of equal degree. ";
   }
   LargeInteger degree = this->current.totalDegreeInt();
+  global << "DEBUG: GOT TO HERE" << Logger::endL;
+
   if (degree.value.isPossiblyPrime(0, true, comments)) {
     if (this->handlePrimeDegreeSeparatedFactor(this->current)) {
       return true;
     }
   }
+  global << "DEBUG: after separated opti" << Logger::endL;
   if (
     this->current.totalDegreeInt() == 1
   ) {

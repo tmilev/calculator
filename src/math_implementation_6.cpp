@@ -1082,6 +1082,7 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
   this->modulus = inputModulus;
   this->value.modulusData = this->modulus->modulus.modulusData;
   this->value = inputValue;
+  this->reduce();
   this->checkInitialization();
 }
 

@@ -3131,7 +3131,7 @@ public:
   bool accountNonReducedFactorTemplate(const PolynomialTemplate& incoming) {
     Polynomial<Coefficient> converted;
     PolynomialConversions::convertToPolynomial(incoming, converted);
-    return this->accountNonReducedFactorTemplate(converted);
+    return this->accountNonReducedFactor(converted);
   }
   bool accountNonReducedFactor(Polynomial<Coefficient>& incoming);
   template <class PolynomialTemplate>

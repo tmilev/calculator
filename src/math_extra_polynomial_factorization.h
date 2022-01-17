@@ -167,6 +167,18 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   void reduce();
   bool checkInitialization() const;
+  class Test {
+  public:
+    static bool all();
+    static bool product();
+    static bool testOneProduct(
+      int modulus,
+      const std::string& left,
+      const std::string& right,
+      const std::string& modulusPolynomial,
+      const std::string& expected
+    );
+  };
 };
 
 template <class Coefficient>

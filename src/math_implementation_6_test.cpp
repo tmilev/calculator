@@ -203,3 +203,56 @@ PolynomialUnivariateModular PolynomialUnivariateModular::Test::fromStringAndModu
   }
   return result;
 }
+
+bool PolynomialModuloPolynomialModuloInteger::Test::all() {
+  PolynomialModuloPolynomialModuloInteger::Test::product();
+  return true;
+}
+
+bool PolynomialModuloPolynomialModuloInteger::Test::product() {
+  PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
+    5,
+    "x^2",
+    "x^3",
+    "x^2+2x+3",
+    "4x +4 (mod 5) mod (x^{2}+2x +3 (mod 5))"
+  );
+  return true;
+}
+
+bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
+  int modulus,
+  const std::string& left,
+  const std::string& right,
+  const std::string& modulusPolynomial,
+  const std::string& expected
+) {
+  IntegerModulusSmall modulusData;
+  modulusData.initializeModulusData(modulus);
+  PolynomialUnivariateModular leftPolynomial =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(left, &modulusData);
+  PolynomialUnivariateModular rightPolynomial =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(right, &modulusData);
+  PolynomialUnivariateModular modulusPolynomialInternal =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(modulusPolynomial, &modulusData);
+  PolynomialUnivariateModularAsModulus modulusInternal;
+  modulusInternal = modulusPolynomialInternal;
+  PolynomialModuloPolynomialModuloInteger leftElement;
+  PolynomialModuloPolynomialModuloInteger rightElement;
+  Polynomial<ElementZmodP> leftNonDense;
+  Polynomial<ElementZmodP> rightNonDense;
+  leftPolynomial.toPolynomialNonDense(leftNonDense);
+  rightPolynomial.toPolynomialNonDense(rightNonDense);
+  leftElement.makeFromModulusAndValue(&modulusInternal, leftNonDense);
+  rightElement.makeFromModulusAndValue(&modulusInternal, rightNonDense);
+  leftElement *= rightElement;
+  if (leftElement.toString() != expected) {
+    global.fatal << "Product of " << leftPolynomial.toString()
+    << " and " << rightPolynomial.toString() << " mod " << modulusPolynomialInternal.toString()
+    << " computed as:\n" << leftElement.toString()
+    << "\nexpected:\n"
+    << expected
+    << global.fatal;
+  }
+  return true;
+}

@@ -6,6 +6,7 @@
 
 bool PolynomialFactorizationFiniteFields::Test::all() {
   Test::test("x^2-1", "(x -1)(x +1)");
+  Test::test("x^2+2x+1", "");
   Test::test(
     "1176 x^14-7224x^13-10506x^12-7434x^11+1247x^10+6085x^9+6195x^8"
     "+2607x^7+11577x^6+32x^5+7265x^4-2841x^3-1794x^2-1320x-2880",
@@ -91,6 +92,9 @@ bool PolynomialUnivariateModular::Test::greatestCommonDivisor() {
 bool PolynomialUnivariateModular::Test::division() {
   PolynomialUnivariateModular::Test::testOneDivision(
     5, "x^3-1", "x-1", "x^{2}+x +1 (mod 5)", "0 (mod 5)"
+  );
+  PolynomialUnivariateModular::Test::testOneDivision(
+    5, "x^3-1", "x", "x^{2} (mod 5)", "4 (mod 5)"
   );
   return true;
 }
@@ -204,6 +208,32 @@ PolynomialUnivariateModular PolynomialUnivariateModular::Test::fromStringAndModu
   return result;
 }
 
+std::string PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(
+  const Polynomial<ElementZmodP>& other
+) {
+  FormatExpressions format;
+  format.polynomialAlphabet.addOnTop("x");
+  format.flagSuppressModP = true;
+  std::stringstream out;
+  out << other.toString(&format);
+  if (other.size() > 0) {
+    out << "(mod " << other.coefficients[0].modulus << ")";
+  }
+  return out.str();
+}
+
+Polynomial<ElementZmodP> PolynomialUnivariateModular::Test::fromStringAndModulus(
+  const std::string& input, int modulus
+) {
+  IntegerModulusSmall modulusData;
+  modulusData.initializeModulusData(modulus);
+  PolynomialUnivariateModular modulusPolynomialInternal =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(input, &modulusData);
+  Polynomial<ElementZmodP> result;
+  modulusPolynomialInternal.toPolynomialNonDense(result);
+  return result;
+}
+
 bool PolynomialModuloPolynomialModuloInteger::Test::all() {
   PolynomialModuloPolynomialModuloInteger::Test::product();
   return true;
@@ -229,22 +259,18 @@ bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
 ) {
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
-  PolynomialUnivariateModular leftPolynomial =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(left, &modulusData);
-  PolynomialUnivariateModular rightPolynomial =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(right, &modulusData);
+  Polynomial<ElementZmodP> leftPolynomial =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(left, modulus);
+  Polynomial<ElementZmodP> rightPolynomial =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(right, modulus);
   PolynomialUnivariateModular modulusPolynomialInternal =
   PolynomialUnivariateModular::Test::fromStringAndModulus(modulusPolynomial, &modulusData);
   PolynomialUnivariateModularAsModulus modulusInternal;
   modulusInternal = modulusPolynomialInternal;
   PolynomialModuloPolynomialModuloInteger leftElement;
   PolynomialModuloPolynomialModuloInteger rightElement;
-  Polynomial<ElementZmodP> leftNonDense;
-  Polynomial<ElementZmodP> rightNonDense;
-  leftPolynomial.toPolynomialNonDense(leftNonDense);
-  rightPolynomial.toPolynomialNonDense(rightNonDense);
-  leftElement.makeFromModulusAndValue(&modulusInternal, leftNonDense);
-  rightElement.makeFromModulusAndValue(&modulusInternal, rightNonDense);
+  leftElement.makeFromModulusAndValue(&modulusInternal, leftPolynomial);
+  rightElement.makeFromModulusAndValue(&modulusInternal, rightPolynomial);
   leftElement *= rightElement;
   if (leftElement.toString() != expected) {
     global.fatal << "Product of " << leftPolynomial.toString()
@@ -253,6 +279,37 @@ bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
     << "\nexpected:\n"
     << expected
     << global.fatal;
+  }
+  return true;
+}
+
+bool PolynomialConversions::Test::all() {
+  PolynomialConversions::Test::univariateModularToDense();
+  return true;
+}
+
+bool PolynomialConversions::Test::univariateModularToDense() {
+  oneUnivariateModularToDense(5, "x^2+3x-1", "x^{2}+3x +4(mod 5)");
+  return true;
+}
+
+bool PolynomialConversions::Test::oneUnivariateModularToDense(
+  int modulus,
+  const std::string& input,
+  const std::string& expected
+) {
+  IntegerModulusSmall modulusData;
+  modulusData.initializeModulusData(modulus);
+  PolynomialUnivariateModular inputPolynomial =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(input, &modulusData);
+  Polynomial<ElementZmodP> resultPolynomial;
+  PolynomialConversions::convertToPolynomial(inputPolynomial, resultPolynomial);
+  std::string result = PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(resultPolynomial);
+  if (result != expected) {
+    global.fatal << "Converted "
+    << inputPolynomial.toString() << " to: "
+    << result
+    << "\nexpected:\n" << expected << global.fatal;
   }
   return true;
 }

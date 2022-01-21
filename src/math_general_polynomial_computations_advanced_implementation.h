@@ -1978,6 +1978,7 @@ bool PolynomialFactorizationCantorZassenhaus<
     }
   }
   global << "DEBUG: after separated opti" << Logger::endL;
+  this->current.checkInitialization();
   if (
     this->current.totalDegreeInt() == 1
   ) {

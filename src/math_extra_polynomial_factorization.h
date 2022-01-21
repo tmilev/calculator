@@ -124,6 +124,10 @@ public:
     static PolynomialUnivariateModular fromStringAndModulus(
       const std::string& input, IntegerModulusSmall* modulus
     );
+    static Polynomial<ElementZmodP> fromStringAndModulus(
+      const std::string& input, int modulus
+    );
+    static std::string toStringPolynomialElementZModP(const Polynomial<ElementZmodP>& other);
   };
 };
 

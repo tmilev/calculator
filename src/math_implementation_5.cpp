@@ -20,9 +20,9 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   std::stringstream out;
   FormatExpressions tempFormat;
   if (format == nullptr) {
-    tempFormat.polyDefaultLetter = "\\partial";
+    tempFormat.polynomialDefaultLetter = "\\partial";
   } else {
-    tempFormat.polyDefaultLetter = format->weylAlgebraDefaultLetter;
+    tempFormat.polynomialDefaultLetter = format->weylAlgebraDefaultLetter;
     tempFormat.polynomialAlphabet = format->weylAlgebraLetters;
   }
   std::string firstS = this->polynomialPart.toString(format);

@@ -404,9 +404,10 @@ bool PolynomialFactorizationFiniteFields::factor(
       continue;
     }
     this->modularization.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+    global << "DEBUG: oneFactorFromModularization: scaleproductLift: " << this->scaleProductLift << Logger::endL;
     return this->oneFactorFromModularization(comments, commentsOnFailure);
   }
-  return this->output->accountReducedFactor(this->current, false);
+  return this->output->accountNonReducedFactorTemplate(this->current);
 }
 
 bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
@@ -419,7 +420,9 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
     PolynomialUnivariateModular,
     PolynomialUnivariateModularAsModulus
   > algorithm;  
-  algorithm.current.makeZero(&this->smallModulus);
+  PolynomialUnivariateModular zero;
+  zero.makeZero(&this->smallModulus);
+  algorithm.initialize(zero);
   if (!factorizationModular.factor(
     this->modularization,
     algorithm,
@@ -433,15 +436,18 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
     }
     return false;
   }
+  global << "DEBUG: modular factorization went through. algo name: " << algorithm.name() << Logger::endL;
+  global << "DEBUG: facto result: " << factorizationModular.toStringResult() << Logger::endL;
+
   this->factorsOverPrime = factorizationModular.reduced;
   this->format.flagSuppressModP = true;
-  this->computeCoefficientBounds();
+  this->computeCoefficientBoundsElementary();
   this->henselLift(comments);
   return this->factorizationFromHenselLift(comments, commentsOnFailure);
 }
 
-void PolynomialFactorizationFiniteFields::computeCoefficientBounds() {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::computeCoefficientBounds");
+void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary() {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary");
   this->largestCoefficient = 0;
   for (int i = 0; i < this->current.size(); i ++) {
     this->largestCoefficient = MathRoutines::maximum(
@@ -484,7 +490,13 @@ void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments
   }
   this->factorsLifted = this->factorsOverPrime;
   this->modulusHenselLift = this->oneModular.modulus;
+  // global << "DEBUG: HENSEL LIFT RAN mod hensel lift: "
+  // << this->modulusHenselLift << " and coeff bound: " << this->coefficientBound << Logger::endL;
+  if (this->coefficientBound <= this->modulusHenselLift) {
+    this->coefficientBound = this->modulusHenselLift + 1;
+  }
   while (this->modulusHenselLift < this->coefficientBound) {
+    global << "DEBUG: HENSEL LIFT ONCE RAN" << Logger::endL;
     LargeIntegerUnsigned oldModulus = this->modulusHenselLift;
     this->modulusHenselLift *= this->oneModular.modulus;
     this->henselLiftOnce(oldModulus, comments);
@@ -506,12 +518,18 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     << "Modulus: " << this->modulusHenselLift << ". "
     << "Lifted factors without correction: "
     << this->factorsLifted.toStringCommaDelimited(&this->format);
-
   }
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
     this->current, this->desiredLift, this->modulusHenselLift
   );
-  this->scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  global << "DEBUG: desired lift before scaling: " << this->desiredLift.toString();
+  this->scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(
+    &MonomialPolynomial::orderDefault()
+  );
+  global << "DEBUG: desired lift after scaling: " << this->desiredLift.toString()
+  << " and scaleproduct lift: "
+  << this->scaleProductLift.toString()
+  << Logger::endL;
   Polynomial<ElementZmodP> newProduct;
   ElementZmodP one;
   one.makeOne(this->modulusHenselLift);
@@ -578,7 +596,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     *comments << "<br>Lifted product, corrected, before rescaling: "
     << productLift.toString(&this->format);
   }
-  productLift /= scaleProductLift;
+  productLift /= this->scaleProductLift;
   if (comments != nullptr) {
     *comments << "<br>Lifted product, corrected: "
     << productLift.toString(&this->format);
@@ -592,14 +610,19 @@ bool PolynomialFactorizationFiniteFields::tryFactor(SelectionFixedRank& selectio
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::tryFactor");
   Polynomial<ElementZmodP> product;
   ElementZmodP start;
+  global << "DEBUG: before makeone! nthis->modulusHenselLift: " << this->modulusHenselLift << Logger::endL;
+  global << "DEBUG: desired lift: " << this->desiredLift << Logger::endL;
+  global << "DEBUG: scaleproductLift: " << this->scaleProductLift << Logger::endL;
   start.makeOne(this->modulusHenselLift);
   start /= this->scaleProductLift;
   product.makeConstant(start);
+  global << "DEBUG: got to before selection!" << Logger::endL;
   for (int i = 0; i < selection.selection.cardinalitySelection; i ++) {
     product *= this->factorsLifted[selection.selection.elements[i]];
   }
   Polynomial<Rational> candidate;
   ElementZmodP::convertPolynomialModularToPolynomialIntegral(product, candidate, true);
+  global << "DEBUG: got to here!" << Logger::endL;
   if (!this->output->accountReducedFactor(candidate, false)) {
     return false;
   }
@@ -1001,7 +1024,6 @@ void PolynomialUnivariateModularAsModulus::operator=(
   const PolynomialUnivariateModular& inputModulus
 ) {
   MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::operator=");
-  global << "DEBUG: input modulus: " << inputModulus.toString() << Logger::endL;
   this->modulus = inputModulus;
   this->computeFromModulus();
 }
@@ -1011,7 +1033,6 @@ void PolynomialUnivariateModularAsModulus::computeFromModulus() {
   this->modulus.checkInitialization();
   int totalModulusDegree = this->modulus.totalDegreeInt();
   this->imagesPowersOfX.setSize(totalModulusDegree);
-  global << "DEBUG: Total mod degree: " << totalModulusDegree << Logger::endL;
   List<int> startingReduction;
   startingReduction.initializeFillInObject(totalModulusDegree, 0);
   List<int>* previousReduction = &startingReduction;
@@ -1045,7 +1066,6 @@ void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
   MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::computeOneReductionRow");
   int totalModulusDegree = this->modulus.totalDegreeInt();
   output.setSize(totalModulusDegree);
-  global << "DEBUG: imageXToTheNth: " << this->imageXToTheNth << Logger::endL;
   output[0] = this->imageXToTheNth[0];
   int lastCoefficient = *previous.lastObject();
   for (int i = 1; i < output.size; i ++) {
@@ -1055,7 +1075,6 @@ void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
 }
 
 void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& other) {
-  global << "DEBUG about to product: " << this->toString() << " and " << other.toString() << Logger::endL;
   this->checkInitialization();
   PolynomialUnivariateModular output;
   output.makeZero(this->modulusData);
@@ -1070,7 +1089,6 @@ void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& 
     }
   }
   *this = output;
-  global << "DEBUG after product: " << this->toString() << Logger::endL;
 }
 
 void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
@@ -1100,14 +1118,9 @@ void PolynomialModuloPolynomialModuloInteger::operator-=(
 void PolynomialModuloPolynomialModuloInteger::operator*=(
   const PolynomialModuloPolynomialModuloInteger& other
 ) {
-  global << "DEBUG: inside operator *=" << Logger::endL;
   this->checkInitialization();
-  global << "DEBUG: about to multi " << this->value.toString() << " by "
-  << other.value.toString() << Logger::endL;
   this->value *= other.value;
-  global << "DEBUG: multi result: " << this->value.toString() << Logger::endL;
   this->reduce();
-  global << "DEBUG: AFTER reduction: " << this->toString() << Logger::endL;
 }
 
 void PolynomialModuloPolynomialModuloInteger::reduce() {
@@ -1143,11 +1156,8 @@ bool PolynomialModuloPolynomialModuloInteger::checkInitialization() const {
   if (this->modulus == nullptr) {
     global.fatal << "Uninitialized PolynomialModuloPolynomialModuloInteger. " << global.fatal;
   }
-  global << "DEBUG: before modulus" << Logger::endL;
   this->modulus->checkInitialization();
-  global << "DEBUG: before value" << Logger::endL;
   this->value.checkInitialization();
-  global << "DEBUG: after value" << Logger::endL;
   return true;
 }
 

@@ -88,6 +88,11 @@ void Test::run() {
     WebAPIResponse::Test::all();
   }
   if (this->shouldTest(Test::Suites::polynomial)) {
+    PolynomialFactorizationCantorZassenhaus<
+      PolynomialModuloPolynomialModuloInteger,
+      PolynomialUnivariateModular,
+      PolynomialUnivariateModularAsModulus
+    >::Test::all();
     PolynomialConversions::Test::all();
     MonomialPolynomial::Test::all();
     Polynomial<Rational>::Test::all();

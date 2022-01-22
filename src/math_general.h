@@ -1944,7 +1944,7 @@ public:
   std::string chevalleyGGeneratorLetter;
   std::string chevalleyHGeneratorLetter;
   std::string fundamentalWeightLetter;
-  std::string polyDefaultLetter;
+  std::string polynomialDefaultLetter;
   std::string weylAlgebraDefaultLetter;
   std::string customPlusSign;
   std::string customCoefficientMonomialSeparator;
@@ -1960,7 +1960,7 @@ public:
   int maximumMatrixLineLength;
   int maximumMatrixDisplayedRows;
   int matrixColumnVerticalLineIndex;
-  static const int ExpressionLineBreak = 50;
+  static const int expressionLineBreak = 50;
   bool flagDontCollalpseProductsByUnits;
   bool flagPassCustomCoefficientMonomialSeparatorToCoefficients;
   bool flagMakingExpressionTableWithLatex;
@@ -3160,7 +3160,7 @@ public:
     bool accountQuotientAsNonReduced
   );
   bool checkFactorization() const;
-  std::string toStringResult(FormatExpressions* format) const;
+  std::string toStringResult(FormatExpressions* format = nullptr) const;
   PolynomialFactorizationUnivariate();
 };
 
@@ -7024,7 +7024,7 @@ std::string Vectors<Coefficient>::toLatexInequalities(
   for (int i = 0; i < this->size; i ++) {
     Vector<Rational>& current = (*this)[i];
     polynomialPart = current.toStringLetterFormat(
-      format.polyDefaultLetter, &format, lastVariableIsConstant
+      format.polynomialDefaultLetter, &format, lastVariableIsConstant
     );
     if (polynomialPart == "") {
       out << "(0";

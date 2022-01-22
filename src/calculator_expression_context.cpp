@@ -520,7 +520,7 @@ FormatExpressions ExpressionContext::getFormat() const {
 
 void ExpressionContext::getFormat(FormatExpressions& output) const {
   output.polynomialAlphabet.setSize(0);
-  output.polyDefaultLetter = "x";
+  output.polynomialDefaultLetter = "x";
   output.weylAlgebraDefaultLetter = "\\partial";
   if (this->owner == nullptr) {
     return;

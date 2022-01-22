@@ -1580,7 +1580,8 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountNonReducedFactor");
   incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
-  Polynomial<Coefficient> quotient, remainder;
+  Polynomial<Coefficient> quotient;
+  Polynomial<Coefficient> remainder;
   this->current.divideBy(incoming, quotient, remainder, &MonomialPolynomial::orderDefault());
   if (!remainder.isEqualToZero()) {
     return false;
@@ -1636,10 +1637,13 @@ bool PolynomialFactorizationUnivariate<Coefficient>::checkFactorization() const 
     checkComputations *= this->reduced[i];
   }
   if (!checkComputations.isEqualTo(this->original)) {
+    FormatExpressions format;
+    format.flagSuppressModP = true;
+    format.polynomialAlphabet.addOnTop("x");
     global.fatal << "Error in polynomial factorization function. "
     << "Product of factorization: " << this->toStringResult(nullptr)
-    << " equals " << checkComputations << "; expected: "
-    << this->original
+    << " equals " << checkComputations.toString(&format) << "; expected: "
+    << this->original.toString(&format)
     << global.fatal;
   }
   return true;
@@ -1647,9 +1651,15 @@ bool PolynomialFactorizationUnivariate<Coefficient>::checkFactorization() const 
 
 template <class Coefficient>
 std::string PolynomialFactorizationUnivariate<Coefficient>::toStringResult(
-  FormatExpressions *format
+  FormatExpressions* format
 ) const {
   std::stringstream out;
+  MemorySaving<FormatExpressions> backup;
+  if (format == nullptr) {
+    format = &backup.getElement();
+    format->flagSuppressModP = true;
+    format->polynomialAlphabet.addOnTop("x");
+  }
   std::string constantFactorString = this->constantFactor.toString(format);
   if (this->nonReduced.size + this->reduced.size == 0) {
     return constantFactorString;
@@ -1712,6 +1722,21 @@ template <
   class PolynomialImplementation,
   class PolynomialModulusImplementation
 >
+void PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::initialize(
+  const PolynomialImplementation& modulusInitializer
+) {
+  this->current = modulusInitializer;
+}
+
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
 bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialImplementation,
   PolynomialImplementation,
@@ -1755,7 +1780,6 @@ bool PolynomialFactorizationCantorZassenhaus<
     this->output->accountNonReducedFactorTemplate(candidate);
     return true;
   }
-  global << "DEBUG: about to one factor go: ... " << Logger::endL;
   return this->oneFactorGo(comments, commentsOnFailure);
 }
 
@@ -1778,10 +1802,6 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialImplementation candidateDivisor;
   currentPower.checkInitialization();
   for (int i = 0; i < degree; i ++) {
-    global << "DEBUG: About to raise: "
-    << currentPower << " to power: "
-    << this->one.modulus << " and one qut ring: "
-    << this->oneQuotientRing << Logger::endL;
     MathRoutines::raiseToPower(
       currentPower, this->one.modulus, this->oneQuotientRing
     );
@@ -1798,8 +1818,6 @@ bool PolynomialFactorizationCantorZassenhaus<
       this->one,
       nullptr
     );
-    global << "DEBUG: GCD compo OK" << Logger::endL;
-
     if (!expectedToBeTrue) {
       global.fatal
       << "Unexpected failure to compute greatest common divisor of "
@@ -1944,17 +1962,13 @@ bool PolynomialFactorizationCantorZassenhaus<
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
-  global << "DEBUG: got to here -1" << Logger::endL;
   (void) commentsOnFailure;
   Polynomial<ElementZmodP> polynomial;
   polynomial.makeDegreeOne(1, 0, this->one, this->one.zero());
-  global << "DEBUG: got to here -2" << Logger::endL;
   this->modulus = this->current;
-  global << "DEBUG: got to here 1" << Logger::endL;
   this->baseLetter.makeFromModulusAndValue(
     &this->modulus, polynomial
   );
-  global << "DEBUG: got to here C-z." << Logger::endL;
   polynomial.makeConstant(this->one);
   this->oneQuotientRing.makeFromModulusAndValue(
     &this->modulus,
@@ -1966,18 +1980,16 @@ bool PolynomialFactorizationCantorZassenhaus<
     return true;
   }
   if (comments != nullptr) {
-    *comments << "<br>All divisors of " << this->current.toString(&this->output->format)
+    *comments << "<br>All divisors of "
+    << this->current.toString(&this->output->format)
     << " are of equal degree. ";
   }
   LargeInteger degree = this->current.totalDegreeInt();
-  global << "DEBUG: GOT TO HERE" << Logger::endL;
-
   if (degree.value.isPossiblyPrime(0, true, comments)) {
     if (this->handlePrimeDegreeSeparatedFactor(this->current)) {
       return true;
     }
   }
-  global << "DEBUG: after separated opti" << Logger::endL;
   this->current.checkInitialization();
   if (
     this->current.totalDegreeInt() == 1

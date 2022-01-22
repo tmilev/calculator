@@ -394,6 +394,7 @@ public:
   // to quickly reduce mod Q.
   PolynomialModulusImplementation modulus;
   List<Polynomial<ElementZmodP> > factorCandidatesPreviousRuns;
+  void initialize(const PolynomialImplementation& modulusInitializer);
   bool oneFactor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
@@ -418,6 +419,13 @@ public:
   static std::string name() {
     return "Cantor-Zassenhaus";
   }
+  class Test {
+  public:
+    static bool all();
+    static bool testOnce(
+      int modulus, const std::string& input, const std::string& expected
+    );
+  };
 };
 
 class PolynomialFactorizationFiniteFields {
@@ -488,7 +496,12 @@ public:
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
-  void computeCoefficientBounds();
+  // An elementary method for computing coefficient bounds of the individual factors.
+  void computeCoefficientBoundsElementary();
+  // A method for computing tighter coefficient bounds.
+  // Drop in replacement for the previous method, but I
+  // am having difficulty establishing at 100% its correctness.
+  void computeCoefficientBoundsGelfond();
   bool oneFactorFromModularization(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure

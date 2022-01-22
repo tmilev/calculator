@@ -3005,7 +3005,7 @@ FormatExpressions::FormatExpressions() {
   this->extraLinesCounterLatex = 0;
   this->chevalleyGGeneratorLetter = "g";
   this->chevalleyHGeneratorLetter = "h";
-  this->polyDefaultLetter = "x";
+  this->polynomialDefaultLetter = "x";
   this->weylAlgebraDefaultLetter = "\\partial";
   this->finiteDimensionalRepresentationLetter = "V";
   this->simpleRootLetter = "\\eta";
@@ -3048,7 +3048,7 @@ std::string FormatExpressions::getPolynomialLetter(int index) const {
     return this->polynomialAlphabet[index];
   }
   std::stringstream out;
-  out << this->polyDefaultLetter << "_{" << index + 1 << "}";
+  out << this->polynomialDefaultLetter << "_{" << index + 1 << "}";
   std::string tempS = out.str();
   return tempS;
 }
@@ -6321,7 +6321,7 @@ std::string ElementWeylGroup::toStringInvariants(FormatExpressions* format) cons
   VectorSparse<Rational> cycleStructure;
   this->getCycleStructure(cycleStructure);
   FormatExpressions cycleLetterFormat;
-  cycleLetterFormat.polyDefaultLetter = "c";
+  cycleLetterFormat.polynomialDefaultLetter = "c";
   std::stringstream out;
   out << "Cycle structure: " << cycleStructure.toString(&cycleLetterFormat) << ". ";
   return out.str();
@@ -8324,7 +8324,7 @@ bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* weylGroup) {
   this->initFromWeyl(weylGroup);
   this->generatePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;
-  PolyFormatLocal.polyDefaultLetter = "q";
+  PolyFormatLocal.polynomialDefaultLetter = "q";
   this->computeRPolys();
   this->kazhdanLuzstigPolynomials.setSize(this->size);
   this->kazhdanLuzstigCoefficients.setSize(this->size);

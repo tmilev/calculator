@@ -48,7 +48,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   universalEnvelopingFormat.chevalleyGGeneratorLetter = "g";
   universalEnvelopingFormat.chevalleyHGeneratorLetter = "h";
   hwContext.getFormat(universalEnvelopingFormat);
-  universalEnvelopingFormat.polyDefaultLetter = exponentVariableLetter == nullptr  ? "a" : *exponentVariableLetter;
+  universalEnvelopingFormat.polynomialDefaultLetter = exponentVariableLetter == nullptr  ? "a" : *exponentVariableLetter;
   universalEnvelopingFormat.maximumLineLength = 178;
   universalEnvelopingFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
   weylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
@@ -119,7 +119,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       std::string finalPartialLetter = (partialLetter == nullptr) ? "\\partial" : *partialLetter;
       for (int k = numStartingVars; k < universalEnvelopingFormat.polynomialAlphabet.size; k ++) {
         std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
-        tmpStream << universalEnvelopingFormat.polyDefaultLetter << "_{" << k - hwContext.numberOfVariables() + 1 << "}";
+        tmpStream << universalEnvelopingFormat.polynomialDefaultLetter << "_{" << k - hwContext.numberOfVariables() + 1 << "}";
         universalEnvelopingFormat.polynomialAlphabet[k] = tmpStream.str();
         tempstream2 << finalXletter << "_{" << k-numStartingVars + 1 << "}";
         tempstream3 << finalXletter << "_" << k-numStartingVars + 1;

@@ -5,15 +5,17 @@
 #include "calculator.h"
 
 bool PolynomialFactorizationFiniteFields::Test::all() {
-  Test::test("x^2-1", "(x -1)(x +1)");
-  Test::test("x^2+2x+1", "");
-  Test::test(
+  PolynomialFactorizationFiniteFields::Test::test(
     "1176 x^14-7224x^13-10506x^12-7434x^11+1247x^10+6085x^9+6195x^8"
     "+2607x^7+11577x^6+32x^5+7265x^4-2841x^3-1794x^2-1320x-2880",
     "(14x^{7}-103x^{6}-76x^{4}+19x^{3}+18x^{2}+9x +24)"
     "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
   );
-  Test::test(
+  PolynomialFactorizationFiniteFields::Test::test("x+1", "(x +1)");
+  PolynomialFactorizationFiniteFields::Test::test("x^2+1", "(x^{2}+1)");
+  PolynomialFactorizationFiniteFields::Test::test("x^2-1", "(x -1)(x +1)");
+  PolynomialFactorizationFiniteFields::Test::test("x^2+2x+1", "(x +1)(x +1)");
+  PolynomialFactorizationFiniteFields::Test::test(
     "4507104x^15+7359384x^14+1298256x^13-5390778x^12-1915130x^11+2884723x^10"
     "+321265x^9-7734159x^8-2806758x^7+1609059x^6-90547x^5-1699161x^4"
     "+23910x^3-1608x^2-302400x+138240",
@@ -21,7 +23,7 @@ bool PolynomialFactorizationFiniteFields::Test::all() {
     "(706x^{4}+119x^{3}-18x^{2}+91x -48)"
     "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
   );
-  Test::test(
+  PolynomialFactorizationFiniteFields::Test::test(
     "109x^13+9x^12+100x^11-98x^10+x^8 84x^7+12x^6-75x^4-23x^3+19x^2-10x-120",
     "(84x^{15}+109x^{13}+9x^{12}+100x^{11}-98x^{10}"
     "+12x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
@@ -44,7 +46,8 @@ bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
   std::stringstream comments;
-  Polynomial<Rational> input = this->parser.fromString(toBeFactored);
+  global << "\n\nDEBUG: one TEST case!: " << this->toBeFactored << Logger::endL;
+  Polynomial<Rational> input = this->parser.fromString(this->toBeFactored);
   int64_t start = global.getElapsedMilliseconds();
   if (!factorization.factor(input, algorithm, &comments, &comments)) {
     global.fatal << "Factorization failed: "
@@ -311,5 +314,72 @@ bool PolynomialConversions::Test::oneUnivariateModularToDense(
     << result
     << "\nexpected:\n" << expected << global.fatal;
   }
+  return true;
+}
+
+template <>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialModuloInteger,
+  PolynomialUnivariateModular,
+  PolynomialUnivariateModularAsModulus
+>
+::Test::testOnce(
+  int modulus,
+  const std::string& input,
+  const std::string& expected
+) {
+  Polynomial<ElementZmodP> polynomial =
+  PolynomialUnivariateModular::Test::fromStringAndModulus(input, modulus);
+  PolynomialFactorizationCantorZassenhaus<
+    PolynomialModuloPolynomialModuloInteger,
+    PolynomialUnivariateModular,
+    PolynomialUnivariateModularAsModulus
+  > algorithm;
+  PolynomialUnivariateModular zero;
+  IntegerModulusSmall modulusData;
+  modulusData.initializeModulusData(modulus);
+  zero.makeZero(&modulusData);
+  algorithm.initialize(zero);
+  PolynomialFactorizationUnivariate<ElementZmodP> factorization;
+  std::stringstream comments;
+  if (!factorization.factor(polynomial, algorithm, &comments, &comments)) {
+    global.fatal << "Unexpected failure to factor: "
+    << PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(polynomial)
+    << global.fatal;
+  }
+  std::string resultString = factorization.toStringResult();
+  if (resultString != expected) {
+    global.fatal
+    << "Factorization of "
+    << PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(polynomial)
+    << " mod "
+    << modulus
+    << ":\n"
+    << resultString
+    << "\nexpected:\n"
+    << expected
+    << global.fatal;
+  }
+  return true;
+}
+
+template <>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialModuloInteger,
+  PolynomialUnivariateModular,
+  PolynomialUnivariateModularAsModulus
+>
+::Test::all() {
+  Test::testOnce(
+    11,
+    "x^3+3x+7",
+    ""
+  );
+  Test::testOnce(
+    11,
+    "10x^{14}+3x^{13}+10x^{12}+2x^{11}+4x^{10}"
+    "+2x^{9}+2x^{8}+5x^{6}+10x^{5}+5x^{4}+8x^{3}+10x^{2}+2",
+    ""
+  );
   return true;
 }

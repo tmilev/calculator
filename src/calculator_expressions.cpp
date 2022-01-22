@@ -3453,7 +3453,7 @@ bool Expression::toStringPlus(const Expression& input, std::stringstream& out, F
     allowNewLine = format->flagExpressionNewLineAllowed;
   }
   bool useFrac = input.owner->flagUseFracInRationalLaTeX;
-  if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
+  if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::expressionLineBreak)) {
     out << "\\\\\n";
   }
   std::string rightString = right.toString(format);
@@ -3491,7 +3491,7 @@ bool Expression::toStringDirectSum(const Expression& input, std::stringstream& o
     allowNewLine = format->flagExpressionNewLineAllowed;
   }
   bool useFrac = input.owner->flagUseFracInRationalLaTeX;
-  if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
+  if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::expressionLineBreak)) {
     out << "\\\\\n";
   }
   std::string rightString = right.needsParenthesisForAddition() ?

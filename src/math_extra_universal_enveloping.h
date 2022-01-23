@@ -75,10 +75,16 @@ public:
     }
   }
   bool commutingABntoBnAPlusLowerOrderAllowed(
-    Coefficient& leftPower, int leftGeneratorIndex, Coefficient& rightPower, int rightGeneratorIndex
+    Coefficient& leftPower,
+    int leftGeneratorIndex,
+    Coefficient& rightPower,
+    int rightGeneratorIndex
   );
   bool commutingAnBtoBAnPlusLowerOrderAllowed(
-    Coefficient& leftPower, int leftGeneratorIndex, Coefficient& rightPower, int rightGeneratorIndex
+    Coefficient& leftPower,
+    int leftGeneratorIndex,
+    Coefficient& rightPower,
+    int rightGeneratorIndex
   );
   bool switchConsecutiveIndicesIfTheyCommute(int leftIndex);
   void makeOne(SemisimpleLieAlgebra& inputOwner) {

@@ -1736,7 +1736,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* f
     out << "\\cdot ";
   }
   if (includeV) {
-    out << module.elementToStringHWV(format);
+    out << module.elementToStringHighestWeightVector(format);
   }
   return out.str();
 }

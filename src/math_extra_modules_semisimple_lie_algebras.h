@@ -359,7 +359,7 @@ public:
     const Coefficient& ringZero
   );
   std::string toString(FormatExpressions* format = nullptr) const;
-  std::string elementToStringHWV(FormatExpressions* format = nullptr) const {
+  std::string elementToStringHighestWeightVector(FormatExpressions* format = nullptr) const {
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
     }
@@ -370,7 +370,7 @@ public:
   }
   void splitOverLevi(
     std::string* report,
-    Selection& splittingParSel,
+    Selection& splittingParablicSelection,
     List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors = nullptr,
     Vectors<Coefficient>* outputWeightsFundCoords = nullptr,
     Vectors<Coefficient>* outputEigenSpace = nullptr,

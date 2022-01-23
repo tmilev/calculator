@@ -617,24 +617,24 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
   PolynomialSubstitution<Coefficient>& outputSub
 ) {
   int numberOfVariables = this->systemSolution.size;
-  MonomialPolynomial tempM;
+  MonomialPolynomial monomial;
   Polynomial<Coefficient> tempP;
   Coefficient coefficient;
   for (int i = 0; i < inputSystem.size; i ++) {
     tempP = inputSystem[i];
     for (int j = 0; j < numberOfVariables; j ++) {
-      tempM.makeEi(j, 1, numberOfVariables);
-      int indexTempM = tempP.monomials.getIndex(tempM);
+      monomial.makeEi(j, 1, numberOfVariables);
+      int indexTempM = tempP.monomials.getIndex(monomial);
       if (indexTempM == - 1) {
         continue;
       }
       coefficient = tempP.coefficients[indexTempM];
-      tempP.subtractMonomial(tempM, coefficient);
+      tempP.subtractMonomial(monomial, coefficient);
       bool isGood = true;
       for (int k = 0; k < tempP.size(); k ++) {
         if (!(tempP[k](j) == 0)) {
           isGood = false;
-          tempP.addMonomial(tempM, coefficient);
+          tempP.addMonomial(monomial, coefficient);
           break;
         }
       }
@@ -787,7 +787,7 @@ int PolynomialSystem<Coefficient>::getNumberOfVariablesToSolveFor(const List<Pol
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::getVariablesToSolveFor(const List<Polynomial<Coefficient> >& input, Selection& output) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::getVariablesToSolveFor");
+  MacroRegisterFunctionWithName("PolynomialSystem::getVariablesToSolveFor");
   int numberOfVariables = 0;
   for (int i = 0; i < input.size; i ++) {
     numberOfVariables = MathRoutines::maximum(numberOfVariables, input[i].minimalNumberOfVariables());
@@ -963,7 +963,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::processSolvedSubcaseIfSolvedOrProvenToHaveSolution(
   PolynomialSystem<Coefficient>& potentiallySolvedCase
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::processSolvedSubcaseIfSolvedOrProvenToHaveSolution");
+  MacroRegisterFunctionWithName("PolynomialSystem::processSolvedSubcaseIfSolvedOrProvenToHaveSolution");
   if (potentiallySolvedCase.flagSystemSolvedOverBaseField) {
     potentiallySolvedCase.numberOfSerreSystemComputations = this->numberOfSerreSystemComputations;
     this->solutionsFound = potentiallySolvedCase.solutionsFound;
@@ -1270,8 +1270,9 @@ void PolynomialSystem<Coefficient>::setSerreLikeSolutionIndex(
 ) {
   this->systemSolution[index] = inputConstant;
   if (this->solutionsFound.selected[index]) {
-    global.fatal << "This a programming error: attempting to set "
-    << "value to a variable whose value has already been computed. " << global.fatal;
+    global.fatal << "Attempting to set "
+    << "value to a variable whose value has already been computed. "
+    << global.fatal;
   }
   this->solutionsFound.addSelectionAppendNewIndex(index);
 }
@@ -1393,6 +1394,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Polynomial::greatestCommonDivisorOneVariable");
+  global << "DEBUG: compute gcd one var! left, right: " << left.toString() << ", right: "
+  << right.toString() << Logger::endL;
   Polynomial<Coefficient> leftCopy = left;
   Polynomial<Coefficient> rightCopy = right;
   Polynomial<Coefficient> quotient, remainder;
@@ -1588,8 +1591,15 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
   }
   this->nonReduced.addOnTop(incoming);
   if (quotient.isConstant()) {
+    FormatExpressions format;
+    format.flagSuppressModP = true;
+    format.polynomialAlphabet.addOnTop("x");
     global.fatal
-    << "Accounting non-reduced factor must result is degree drop. "
+    << "Accounting non-reduced factor:\n"
+    << incoming.toString(&format)
+    << "\nof:\n"
+    << this->current.toString(&format)
+    << "\nmust result in degree drop. "
     << global.fatal;
   }
   this->nonReduced.addOnTop(quotient);
@@ -1605,7 +1615,8 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountReducedFactor(
     global.fatal << "Constant factors are not to be accounted. " << global.fatal;
   }
   incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
-  Polynomial<Coefficient> quotient, remainder;
+  Polynomial<Coefficient> quotient;
+  Polynomial<Coefficient> remainder;
   this->current.divideBy(
     incoming, quotient, remainder, &MonomialPolynomial::orderDefault()
   );
@@ -1627,7 +1638,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountReducedFactor(
 
 template <class Coefficient>
 bool PolynomialFactorizationUnivariate<Coefficient>::checkFactorization() const {
-  MacroRegisterFunctionWithName("Polynomial::checkFactorization");
+  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::checkFactorization");
   Polynomial<Coefficient> checkComputations;
   checkComputations.makeConstant(this->constantFactor);
   for (int i = 0; i < this->nonReduced.size; i ++) {
@@ -1850,7 +1861,6 @@ bool PolynomialFactorizationCantorZassenhaus<
       return true;
     }
   }
-  global << "DEBUG: diff deg factors done!!!!" << Logger::endL;
   return false;
 }
 
@@ -1908,7 +1918,6 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialImplementation& input
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor");
-  global << "DEBUG: handle prime deg sep fact" << Logger::endL;
   this->checkInitialization();
   int linearTermsToTry = 500;
   if (this->one.modulus < linearTermsToTry) {
@@ -1935,17 +1944,49 @@ bool PolynomialFactorizationCantorZassenhaus<
     // linear factors we haven't checked for.
     return false;
   }
-  global << "DEBUG: here be i" << Logger::endL;
   for (int i = 0; i < foundRoots.size; i ++) {
     Polynomial<ElementZmodP> linearFactor;
     linearFactor.makeMonomial(0, 1, this->one);
     linearFactor -= foundRoots[i];
-    this->output->accountReducedFactor(linearFactor, false);
-  }
-  if (this->current.totalDegreeInt() > 0) {
-    this->output->accountNonReducedFactorTemplate(this->current);
+    bool shouldAccountQuotientAsNonReduced = false;
+    if (i == foundRoots.size - 1) {
+      shouldAccountQuotientAsNonReduced = true;
+    }
+    if (!this->output->accountReducedFactor(
+      linearFactor, shouldAccountQuotientAsNonReduced
+    )) {
+      global.fatal << "Failed to account for reduced factor: "
+      << linearFactor.toString()
+      << global.fatal;
+    }
   }
   return true;
+}
+
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+void PolynomialFactorizationCantorZassenhaus<
+PolynomialModuloPolynomialImplementation,
+PolynomialImplementation,
+PolynomialModulusImplementation
+>::initializeOneFactorComputation() {
+  MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::initializeOneFactorComputation");
+  Polynomial<ElementZmodP> polynomial;
+  polynomial.makeDegreeOne(1, 0, this->one, this->one.zero());
+  this->modulus = this->current;
+  this->baseLetter.makeFromModulusAndValue(
+    &this->modulus, polynomial
+  );
+  polynomial.makeConstant(this->one);
+  this->oneQuotientRing.makeFromModulusAndValue(
+    &this->modulus,
+    polynomial
+  );
+  this->oneQuotientRing.checkInitialization();
+  this->baseLetter.checkInitialization();
 }
 
 template <
@@ -1963,19 +2004,7 @@ bool PolynomialFactorizationCantorZassenhaus<
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
   (void) commentsOnFailure;
-  Polynomial<ElementZmodP> polynomial;
-  polynomial.makeDegreeOne(1, 0, this->one, this->one.zero());
-  this->modulus = this->current;
-  this->baseLetter.makeFromModulusAndValue(
-    &this->modulus, polynomial
-  );
-  polynomial.makeConstant(this->one);
-  this->oneQuotientRing.makeFromModulusAndValue(
-    &this->modulus,
-    polynomial
-  );
-  this->oneQuotientRing.checkInitialization();
-  this->baseLetter.checkInitialization();
+  this->initializeOneFactorComputation();
   if (this->hasFactorsOfDifferentDegree(comments)) {
     return true;
   }
@@ -1984,6 +2013,22 @@ bool PolynomialFactorizationCantorZassenhaus<
     << this->current.toString(&this->output->format)
     << " are of equal degree. ";
   }
+  return this->handleFactorsOfSameDegree(comments, commentsOnFailure);
+}
+
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+bool PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::handleFactorsOfSameDegree(
+  std::stringstream* comments,
+  std::stringstream* commentsOnFailure
+) {
   LargeInteger degree = this->current.totalDegreeInt();
   if (degree.value.isPossiblyPrime(0, true, comments)) {
     if (this->handlePrimeDegreeSeparatedFactor(this->current)) {
@@ -2005,13 +2050,49 @@ bool PolynomialFactorizationCantorZassenhaus<
   ProgressReport report;
   for (unsigned i = 0; i < static_cast<unsigned>(maximumDivisors); i ++) {
     std::stringstream reportStream;
-    reportStream << "Looking for factors round " << i + 1 << " out of " << maximumDivisors;
+    reportStream << "Looking for factors round " << i + 1
+    << " out of " << maximumDivisors;
     report.report(reportStream.str());
     if (this->oneFactorProbabilityHalf(i, comments, commentsOnFailure)) {
       return true;
     }
   }
   return this->output->accountReducedFactorTemplate(this->current, true);
+}
+
+template <
+  class PolynomialModuloPolynomialImplementation,
+  class PolynomialImplementation,
+  class PolynomialModulusImplementation
+>
+void PolynomialFactorizationCantorZassenhaus<
+  PolynomialModuloPolynomialImplementation,
+  PolynomialImplementation,
+  PolynomialModulusImplementation
+>::computeStartingPolynomial(
+  unsigned int constant,
+  PolynomialModuloPolynomialImplementation& output
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::computeStartingPolynomial");
+  Polynomial<ElementZmodP> constructed;
+  int power = 0;
+  int constantTerm = 0;
+  if (constant < this->one.modulus) {
+    constantTerm = constant;
+    power = 1;
+  } else {
+    constantTerm = 1 + (constant - 1) % (this->one.modulus.getUnsignedIntValueTruncated() - 1);
+    power = 1 + (constant - 1) / (this->one.modulus.getUnsignedIntValueTruncated() - 1);
+    if (power >= this->current.totalDegreeInt()) {
+      power = 1;
+    }
+  }
+  ElementZmodP constantModular;
+  constantModular.makeFrom(this->one.modulus, constantTerm);
+  constructed.makeMonomial(0, power, this->one);
+  constructed += constantModular;
+  output = this->baseLetter;
+  output.setValue(constructed);
 }
 
 template <
@@ -2032,16 +2113,11 @@ bool PolynomialFactorizationCantorZassenhaus<
   LargeIntegerUnsigned modulus = this->one.modulus;
   int degree = this->current.totalDegreeInt();
   PolynomialModuloPolynomialImplementation startingPolynomial;
-  startingPolynomial = this->baseLetter;
-
-  ElementZmodP constantModular;
-  constantModular.modulus = modulus;
-  constantModular.value = constant;
-
-  startingPolynomial += constantModular;
+  this->computeStartingPolynomial(constant, startingPolynomial);
 
   PolynomialModuloPolynomialImplementation currentPolynomial;
   PolynomialModuloPolynomialImplementation currentPolynomialPlusOne;
+  PolynomialModuloPolynomialImplementation currentPolynomialMinusOne;
   for (int i = 0; i < degree; i ++) {
     currentPolynomial = startingPolynomial;
     LargeInteger power = modulus;
@@ -2071,8 +2147,10 @@ bool PolynomialFactorizationCantorZassenhaus<
     )) {
       return true;
     }
+    currentPolynomialMinusOne = currentPolynomial;
+    currentPolynomialMinusOne -= this->one;
     if (this->divisorFromCandidate(
-      currentPolynomialPlusOne.getValue(), "A - 1", comments
+      currentPolynomialMinusOne.getValue(), "A - 1", comments
     )) {
       return true;
     }

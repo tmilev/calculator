@@ -141,6 +141,16 @@ public:
   void computeOneReductionRow(const List<int>& previous, List<int>& output);
   bool checkInitialization() const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringImagesOfX() const;
+  class Test {
+  public:
+    static bool all();
+    static bool oneTest(
+      int modulus,
+      const std::string& modulusPolynomial,
+      const std::string& expectedImagesOfX
+    );
+  };
 };
 
 class PolynomialModuloPolynomialModuloInteger {
@@ -162,11 +172,15 @@ public:
 
   void operator-=(const PolynomialModuloPolynomialModuloInteger& other);
   void operator+=(const ElementZmodP& other);
+  void operator-=(const ElementZmodP& other);
   void operator*=(const PolynomialModuloPolynomialModuloInteger& other);
 
   bool isEqualToZero() const;
   const PolynomialUnivariateModular& getValue() const {
     return this->value;
+  }
+  void setValue(const Polynomial<ElementZmodP>& inputValue) {
+    this->value = inputValue;
   }
   std::string toString(FormatExpressions* format = nullptr) const;
   void reduce();
@@ -199,6 +213,7 @@ public:
   void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator+=(const Coefficient& other);
+  void operator-=(const Coefficient& other);
   void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
   std::string toString(FormatExpressions* format = nullptr) const;
   PolynomialModuloPolynomial<Coefficient> one();
@@ -210,6 +225,11 @@ public:
     const Polynomial<Coefficient>* inputModulus,
     const Polynomial<Coefficient>& inputValue
   );
+  void setValue(
+    const Polynomial<Coefficient>& inputValue
+  ) {
+    this->value = inputValue;
+  }
   const Polynomial<Coefficient>& getValue() {
     return this->value;
   }
@@ -272,6 +292,14 @@ void PolynomialModuloPolynomial<Coefficient>::operator+=(
   const Coefficient& other
 ) {
   this->value += other;
+  this->reduce();
+}
+
+template<class Coefficient>
+void PolynomialModuloPolynomial<Coefficient>::operator-=(
+  const Coefficient& other
+) {
+  this->value -= other;
   this->reduce();
 }
 

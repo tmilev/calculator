@@ -343,6 +343,29 @@ PolynomialFactorizationFiniteFields::PolynomialFactorizationFiniteFields() {
   this->degree = 0;
   this->factorsLiftedTries = 0;
   this->maximumFactorsLiftedTries = 50000;
+  this->millisecondsCantorZassenhaus = 0;
+  this->millisecondsLift = 0;
+  this->millisecondsFactorizationFromLift = 0;
+  this->millisecondsTotal = 0;
+  this->numberOfRunsOfFactor = 0;
+}
+
+bool PolynomialFactorizationFiniteFields::factorWithTiming(
+  std::stringstream* comments,
+  std::stringstream* commentsOnFailure
+) {
+  int64_t startMilliseconds = global.getElapsedMilliseconds();
+  this->numberOfRunsOfFactor ++;
+  bool result = this->factor(comments, commentsOnFailure);
+  int64_t ellapsedMillseconds = global.getElapsedMilliseconds() - startMilliseconds;
+  if (this->millisecondsTotal == 0) {
+    this->millisecondsTotal = ellapsedMillseconds;
+  } else {
+    global << Logger::red << "Second run of factorWithTiming; input: "
+    << this->output->original.toString() << ". Milliseconds: "
+    << ellapsedMillseconds << " ms. " << Logger::endL;
+  }
+  return result;
 }
 
 bool PolynomialFactorizationFiniteFields::factor(
@@ -350,6 +373,7 @@ bool PolynomialFactorizationFiniteFields::factor(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factor");
+  int64_t ellapsedMillisecondsStart = global.getElapsedMilliseconds();
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
     return false;
@@ -372,6 +396,7 @@ bool PolynomialFactorizationFiniteFields::factor(
     return false;
   }
   Polynomial<Rational> greatestCommonDivisor;
+  int64_t ellapsedMillisecondsGCDStart = global.getElapsedMilliseconds();
   derivative[0].greatestCommonDivisor(
     derivative[0],
     this->current,
@@ -379,6 +404,7 @@ bool PolynomialFactorizationFiniteFields::factor(
     Rational::one(),
     commentsOnFailure
   );
+  global << "DEBUG: gcd ms: " << global.getElapsedMilliseconds() - ellapsedMillisecondsGCDStart << Logger::endL;
   if (!greatestCommonDivisor.isConstant()) {
     this->output->accountNonReducedFactor(greatestCommonDivisor);
     return true;
@@ -404,7 +430,9 @@ bool PolynomialFactorizationFiniteFields::factor(
       continue;
     }
     this->modularization.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
-    global << "DEBUG: oneFactorFromModularization: scaleproductLift: " << this->scaleProductLift << Logger::endL;
+    global << "DEBUG: elepased ms before modularization: "
+    << global.getElapsedMilliseconds() - ellapsedMillisecondsStart << " ms. "
+    << Logger::endL;
     return this->oneFactorFromModularization(comments, commentsOnFailure);
   }
   return this->output->accountNonReducedFactorTemplate(this->current);
@@ -414,6 +442,7 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::oneFactorFromModularization");
+  int64_t startCantorZassenhaus = global.getElapsedMilliseconds();
   PolynomialFactorizationUnivariate<ElementZmodP> factorizationModular;
   PolynomialFactorizationCantorZassenhaus<
     PolynomialModuloPolynomialModuloInteger,
@@ -436,14 +465,28 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
     }
     return false;
   }
-  global << "DEBUG: modular factorization went through. algo name: " << algorithm.name() << Logger::endL;
-  global << "DEBUG: facto result: " << factorizationModular.toStringResult() << Logger::endL;
-
+  if (this->millisecondsCantorZassenhaus == 0) {
+    this->millisecondsCantorZassenhaus = global.getElapsedMilliseconds() - startCantorZassenhaus;
+  } else {
+    global << Logger::red << "Second run of C-Z algorithm. Input: "
+    << this->output->original.toString() << Logger::endL;
+  }
   this->factorsOverPrime = factorizationModular.reduced;
   this->format.flagSuppressModP = true;
-  this->computeCoefficientBoundsElementary();
+
+//  this->computeCoefficientBoundsElementary();
+  this->computeCoefficientBoundsGelfond();
+  int64_t startHenselLift = global.getElapsedMilliseconds();
   this->henselLift(comments);
-  return this->factorizationFromHenselLift(comments, commentsOnFailure);
+  if (this->millisecondsLift == 0) {
+    this->millisecondsLift = global.getElapsedMilliseconds() - startHenselLift;
+  }
+  int64_t startFactorizationFromHenselLift = global.getElapsedMilliseconds();
+  bool result = this->factorizationFromHenselLift(comments, commentsOnFailure);
+  if (this->millisecondsFactorizationFromLift == 0) {
+    this->millisecondsFactorizationFromLift = global.getElapsedMilliseconds() - startFactorizationFromHenselLift;
+  }
+  return result;
 }
 
 void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary() {
@@ -476,6 +519,21 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary() {
   this->coefficientBound *= MathRoutines::nChooseK(this->degree, this->degree / 2);
 }
 
+void PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond() {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond");
+  this->largestCoefficient = 0;
+  for (int i = 0; i < this->current.size(); i ++) {
+    this->largestCoefficient = MathRoutines::maximum(
+      LargeInteger(this->current.coefficients[i].getNumerator().value),
+      this->largestCoefficient
+    );
+  }
+  this->coefficientBound = 2;
+  MathRoutines::raiseToPower(this->coefficientBound, this->degree, LargeInteger(1));
+  this->coefficientBound *= this->largestCoefficient;
+  this->coefficientBound *= this->degree;
+}
+
 void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::henselLift");
   SylvesterMatrix<ElementZmodP>::sylvesterMatrixProduct(this->factorsOverPrime, this->sylvesterMatrix, comments);
@@ -490,13 +548,10 @@ void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments
   }
   this->factorsLifted = this->factorsOverPrime;
   this->modulusHenselLift = this->oneModular.modulus;
-  // global << "DEBUG: HENSEL LIFT RAN mod hensel lift: "
-  // << this->modulusHenselLift << " and coeff bound: " << this->coefficientBound << Logger::endL;
   if (this->coefficientBound <= this->modulusHenselLift) {
     this->coefficientBound = this->modulusHenselLift + 1;
   }
   while (this->modulusHenselLift < this->coefficientBound) {
-    global << "DEBUG: HENSEL LIFT ONCE RAN" << Logger::endL;
     LargeIntegerUnsigned oldModulus = this->modulusHenselLift;
     this->modulusHenselLift *= this->oneModular.modulus;
     this->henselLiftOnce(oldModulus, comments);
@@ -522,14 +577,9 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
     this->current, this->desiredLift, this->modulusHenselLift
   );
-  global << "DEBUG: desired lift before scaling: " << this->desiredLift.toString();
   this->scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(
     &MonomialPolynomial::orderDefault()
   );
-  global << "DEBUG: desired lift after scaling: " << this->desiredLift.toString()
-  << " and scaleproduct lift: "
-  << this->scaleProductLift.toString()
-  << Logger::endL;
   Polynomial<ElementZmodP> newProduct;
   ElementZmodP one;
   one.makeOne(this->modulusHenselLift);
@@ -610,19 +660,14 @@ bool PolynomialFactorizationFiniteFields::tryFactor(SelectionFixedRank& selectio
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::tryFactor");
   Polynomial<ElementZmodP> product;
   ElementZmodP start;
-  global << "DEBUG: before makeone! nthis->modulusHenselLift: " << this->modulusHenselLift << Logger::endL;
-  global << "DEBUG: desired lift: " << this->desiredLift << Logger::endL;
-  global << "DEBUG: scaleproductLift: " << this->scaleProductLift << Logger::endL;
   start.makeOne(this->modulusHenselLift);
   start /= this->scaleProductLift;
   product.makeConstant(start);
-  global << "DEBUG: got to before selection!" << Logger::endL;
   for (int i = 0; i < selection.selection.cardinalitySelection; i ++) {
     product *= this->factorsLifted[selection.selection.elements[i]];
   }
   Polynomial<Rational> candidate;
   ElementZmodP::convertPolynomialModularToPolynomialIntegral(product, candidate, true);
-  global << "DEBUG: got to here!" << Logger::endL;
   if (!this->output->accountReducedFactor(candidate, false)) {
     return false;
   }
@@ -740,7 +785,6 @@ bool PolynomialUnivariateModular::greatestCommonDivisor(
     output = divisor;
     divisor = remainder;
   }
-
   return true;
 }
 
@@ -1032,9 +1076,13 @@ void PolynomialUnivariateModularAsModulus::computeFromModulus() {
   MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::computeFromModulus");
   this->modulus.checkInitialization();
   int totalModulusDegree = this->modulus.totalDegreeInt();
+  if (totalModulusDegree < 0) {
+    global.fatal << "Zero modulus not allowed. " << global.fatal;
+  }
   this->imagesPowersOfX.setSize(totalModulusDegree);
   List<int> startingReduction;
   startingReduction.initializeFillInObject(totalModulusDegree, 0);
+  *startingReduction.lastObject() = 1;
   List<int>* previousReduction = &startingReduction;
   PolynomialUnivariateModular imageLargestXPower;
   imageLargestXPower = this->modulus;
@@ -1051,7 +1099,18 @@ void PolynomialUnivariateModularAsModulus::computeFromModulus() {
 }
 
 std::string PolynomialUnivariateModularAsModulus::toString(FormatExpressions *format) const {
-  return this->modulus.toString(format);
+  return this->modulus.toString(format) + this->toStringImagesOfX();
+}
+
+std::string PolynomialUnivariateModularAsModulus::toStringImagesOfX() const {
+  std::stringstream out;
+  out << this->imageXToTheNth.toStringCommaDelimited();
+  int degree = this->imageXToTheNth.size;
+  for (int i = 0; i < this->imagesPowersOfX.size; i ++) {
+    out << "\nx^" << degree + i << " -> "
+    << this->imagesPowersOfX[i].toStringCommaDelimited();
+  }
+  return out.str();
 }
 
 bool PolynomialUnivariateModularAsModulus::checkInitialization() const {
@@ -1066,11 +1125,13 @@ void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
   MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::computeOneReductionRow");
   int totalModulusDegree = this->modulus.totalDegreeInt();
   output.setSize(totalModulusDegree);
-  output[0] = this->imageXToTheNth[0];
+  int modulusInteger = this->modulus.modulusData->modulus;
   int lastCoefficient = *previous.lastObject();
+  output[0] = this->imageXToTheNth[0] * lastCoefficient;
+  output[0] %= modulusInteger;
   for (int i = 1; i < output.size; i ++) {
     output[i] = previous[i - 1] + this->imageXToTheNth[i] * lastCoefficient;
-    output[i] %= this->modulus.modulusData->modulus;
+    output[i] %= modulusInteger;
   }
 }
 
@@ -1106,6 +1167,12 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
 
 void PolynomialModuloPolynomialModuloInteger::operator+=(const ElementZmodP& other) {
   this->value.addTerm(this->value.reduceModP(other.value), 0);
+}
+
+void PolynomialModuloPolynomialModuloInteger::operator-=(const ElementZmodP& other) {
+  LargeInteger negative = other.value;
+  negative.negate();
+  this->value.addTerm(this->value.reduceModP(negative), 0);
 }
 
 void PolynomialModuloPolynomialModuloInteger::operator-=(

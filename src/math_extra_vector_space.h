@@ -21,32 +21,35 @@ class Basis {
 template <typename Coefficient>
 class VectorSpace {
 public:
-   int degree;
-   int rank;
-   Matrix<Coefficient> fastbasis;
-   Basis<Coefficient> basis;
+  int degree;
+  int rank;
+  Matrix<Coefficient> fastbasis;
+  Basis<Coefficient> basis;
 
-   VectorSpace() {
-     degree = - 1;
-     rank = 0;
-   }
-   void makeFullRank(int dim);
-   // true if it wasn't already there
-   bool addVector(const Vector<Coefficient>& v);
-   bool addVectorDestructively(Vector<Coefficient>& v);
-   bool addVectorToBasis(const Vector<Coefficient>& v);
-   bool getCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const;
-   VectorSpace<Coefficient> intersection(const VectorSpace<Coefficient>& other) const;
-   VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
-   VectorSpace<Coefficient> orthogonalComplement(VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0) const;
-   Vector<Coefficient> getBasisVector(int i) const;
-   Vector<Coefficient> getCanonicalBasisVector(int i) const;
-   //unsigned int hashFunction() const {return this->hashFunction(*this);}
-   static unsigned int hashFunction(const VectorSpace<Coefficient>& input) {
-     return input.fastbasis.hashFunction();
-   }
+  VectorSpace() {
+    degree = - 1;
+    rank = 0;
+  }
+  void makeFullRank(int dim);
+  // true if it wasn't already there
+  bool addVector(const Vector<Coefficient>& v);
+  bool addVectorDestructively(Vector<Coefficient>& v);
+  bool addVectorToBasis(const Vector<Coefficient>& v);
+  bool getCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const;
+  VectorSpace<Coefficient> intersection(const VectorSpace<Coefficient>& other) const;
+  VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
+  VectorSpace<Coefficient> orthogonalComplement(
+    VectorSpace<Coefficient>* ambient = 0,
+    Matrix<Coefficient>* form = 0
+  ) const;
+  Vector<Coefficient> getBasisVector(int i) const;
+  Vector<Coefficient> getCanonicalBasisVector(int i) const;
+  //unsigned int hashFunction() const {return this->hashFunction(*this);}
+  static unsigned int hashFunction(const VectorSpace<Coefficient>& input) {
+    return input.fastbasis.hashFunction();
+  }
 
-   bool operator==(const VectorSpace<Coefficient> &other) const;
+  bool operator==(const VectorSpace<Coefficient> &other) const;
 };
 
 template <typename Coefficient>
@@ -199,7 +202,9 @@ bool VectorSpace<Coefficient>::addVectorToBasis(const Vector<Coefficient>& v) {
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::getCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const {
+bool VectorSpace<Coefficient>::getCoordinatesDestructively(
+  Vector<Coefficient>& v, Vector<Coefficient>& out
+) const {
   out.makeZero(this->rank);
   if (v.isEqualToZero()) {
     if (this->rank == 0) {

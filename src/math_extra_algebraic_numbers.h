@@ -304,7 +304,8 @@ public:
   void makeZero();
   void makeOne(const LargeIntegerUnsigned& newModulo);
   void makeMinusOne(const LargeIntegerUnsigned& newModulo);
-  void makeFrom(const int inputModulus, const int inputValue);
+  void makeFrom(int inputModulus, int inputValue);
+  void makeFrom(const LargeIntegerUnsigned& inputModulus, int inputValue);
   void checkEqualModuli(const ElementZmodP& other);
   void negate();
   bool operator==(int other) const;
@@ -353,7 +354,10 @@ public:
   // Format a polynomial with modular coefficients.
   // The modulo information will not be repeated for all coefficients, but will be put
   // at the end of the expression.
-  std::string toStringPolynomial(const Polynomial<ElementZmodP>& input, FormatExpressions* format) const;
+  std::string toStringPolynomial(
+    const Polynomial<ElementZmodP>& input,
+    FormatExpressions* format
+  ) const;
   ElementZmodP zero() const;
   ElementZmodP one() const;
   static ElementZmodP zeroStatic();
@@ -395,6 +399,7 @@ public:
   PolynomialModulusImplementation modulus;
   List<Polynomial<ElementZmodP> > factorCandidatesPreviousRuns;
   void initialize(const PolynomialImplementation& modulusInitializer);
+  void initializeOneFactorComputation();
   bool oneFactor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
@@ -402,13 +407,25 @@ public:
   // Input is either irreuducible polynomial of prime degree, or a product
   // of linear polynomials.
   bool handlePrimeDegreeSeparatedFactor(PolynomialImplementation& input);
-  bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
+  bool oneFactorGo(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
   bool hasFactorsOfDifferentDegree(std::stringstream* comments);
+  bool handleFactorsOfSameDegree(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
   bool oneFactorProbabilityHalf(
     unsigned int constant,
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
+  void computeStartingPolynomial(
+    unsigned int constant,
+    PolynomialModuloPolynomialImplementation& output
+  );
+
   bool divisorFromCandidate(
     const PolynomialImplementation& candidate,
     const std::string& candidateDisplayName,
@@ -422,6 +439,13 @@ public:
   class Test {
   public:
     static bool all();
+    static bool constructStartingPolynomial();
+    static bool testOneStartingPolynomial(
+      int modulus,
+      int constant,
+      int currentDegree,
+      const std::string& expected
+    );
     static bool testOnce(
       int modulus, const std::string& input, const std::string& expected
     );
@@ -451,6 +475,11 @@ public:
   Polynomial<ElementZmodP> desiredLift;
   Matrix<ElementZmodP> sylvesterMatrix;
   Matrix<ElementZmodP> sylvesterMatrixInverted;
+  int64_t millisecondsCantorZassenhaus;
+  int64_t millisecondsLift;
+  int64_t millisecondsFactorizationFromLift;
+  int64_t millisecondsTotal;
+  int numberOfRunsOfFactor;
   bool factorizationFromHenselLift(
     std::stringstream* comments, std::stringstream* commentsOnFailure
   );
@@ -489,14 +518,20 @@ public:
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   ) {
-    return this->factor(comments, commentsOnFailure);
+    return this->factorWithTiming(comments, commentsOnFailure);
   }
+  // Factors the polynomial fully.
+  bool factorWithTiming(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
   // Factors the polynomial fully.
   bool factor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
-  // An elementary method for computing coefficient bounds of the individual factors.
+  // An elementary method for computing coefficient
+  // bounds of the individual factors.
   void computeCoefficientBoundsElementary();
   // A method for computing tighter coefficient bounds.
   // Drop in replacement for the previous method, but I

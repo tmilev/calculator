@@ -234,21 +234,21 @@ f{}g{}z
 ```
 Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}= (a +c*b)/b; 
 
-*\+* [AddRationalToPolynomial] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddRationalToPolynomial] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2bPolynomial%7b%7d%5c%5clambda%3b%20Polynomial%7b%7d%5c%5clambda%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 1+Polynomial{}\lambda; Polynomial{}\lambda + 1
 ```
 Adds a rational to a polynomial. 
 
-*\+* [AddPolynomialToRational] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialToRational] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2bPolynomial%7b%7d%5c%5clambda%3b%20Polynomial%7b%7d%5c%5clambda%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 1+Polynomial{}\lambda; Polynomial{}\lambda + 1
 ```
 Adds a polynomial to a rational. 
 
-*\+* [AddPolynomialToPolynomial] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialToPolynomial] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%201%20%2b%20Polynomial%7b%7d%20%5c%5clambda%3b%5cnx%20%2b%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = 1 + Polynomial{} \lambda;
@@ -256,91 +256,91 @@ x + x
 ```
 Adds a polynomial to a polynomial. 
 
-*\+* [AddPolynomialOverAlgebraicNumbersToPolynomialOverAlgebraicNumbers] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialOverAlgebraicNumbersToPolynomialOverAlgebraicNumbers] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28%5c%5csqrt%7b12%7dx%29%20%2b%20PolynomialAlgebraicNumbers%28-%5c%5csqrt%7b3%7dx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers(\sqrt{12}x) + PolynomialAlgebraicNumbers(-\sqrt{3}x)
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddAlgebraicNumberToPolynomialOverAlgebraicNumbers] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddAlgebraicNumberToPolynomialOverAlgebraicNumbers] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28%5c%5csqrt%7b12%7d%29%20%2bPolynomialAlgebraicNumbers%28%5c%5csqrt%7b3%7dx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers(\sqrt{12}) +PolynomialAlgebraicNumbers(\sqrt{3}x)
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddPolynomialOverAlgebraicNumbersToAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialOverAlgebraicNumbersToAlgebraicNumber] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28%5c%5csqrt%7b12%7dx%29%20%2bPolynomialAlgebraicNumbers%28-%5c%5csqrt%7b3%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers(\sqrt{12}x) +PolynomialAlgebraicNumbers(-\sqrt{3})
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddRationalToPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddRationalToPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%20%2b%20PolynomialAlgebraicNumbers%28%5c%5csqrt%7b12%7dx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 1 + PolynomialAlgebraicNumbers(\sqrt{12}x)
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddPolynomialAlgebraicNumbersToRational] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialAlgebraicNumbersToRational] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28%5c%5csqrt%7b12%7dx%29%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers(\sqrt{12}x) + 1
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddPolynomialToAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialToAlgebraicNumber] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28x%29%20%2b%5c%5csqrt%7b2%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers(x) +\sqrt{2}
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddPolynomialToPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialToPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7dx%20%2b%20PolynomialAlgebraicNumbers%28%5c%5csqrt%7b2%7dx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Polynomial{}x + PolynomialAlgebraicNumbers(\sqrt{2}x)
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddPolynomialAlgebraicNumbersToPolynomial] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddPolynomialAlgebraicNumbersToPolynomial] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28%5c%5csqrt%7b2%7dx%29%20%2b%20Polynomial%7b%7dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers(\sqrt{2}x) + Polynomial{}x
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddAlgebraicNumberToPolynomial] {CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial}. 
+*\+* [AddAlgebraicNumberToPolynomial] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%7b2%7d%2bPolynomialAlgebraicNumbers%28x%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt{2}+PolynomialAlgebraicNumbers(x)
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
-*\+* [AddRationalFunctionToRationalFunction] {CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF}. 
+*\+* [AddRationalFunctionToRationalFunction] {CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22WeylDimFormula%7b%7d%28a_2%2c%20%280%2c3%29%29%20%2b%20WeylDimFormula%7b%7d%28a_2%2c%20%283%2c0%29%29%20%2b%204%20WeylDimFormula%7b%7d%28a_2%2c%20%281%2c1%29%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) 
 ```
 Adds a rational function to a rational function. 
 
-*\+* [AddRationalToDouble] {CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational}. 
+*\+* [AddRationalToDouble] {CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283.14159265358979323846%29%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(3.14159265358979323846) + 1
 ```
 Adds double or rational to a double or rational approximately using the built-in cpp addition, returning double. 
 
-*\+* [AddDoubleToDouble] {CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational}. 
+*\+* [AddDoubleToDouble] {CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283.14159265358979323846%29%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(3.14159265358979323846) + 1
 ```
 Adds double or rational to a double or rational approximately using the built-in cpp addition, returning double. 
 
-*\+* [AddMatrices] {CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix}. 
+*\+* [AddMatrices] {CalculatorFunctionsBinaryOps::addMatrixToMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%202%20%5c%5c%5c%5c%202%20%26%203%5c%5cend%7bpmatrix%7d%20%2b%20%5cn%5c%5cbegin%7bpmatrix%7d%201%26%203%20%5c%5c%5c%5c%202%20%26%203%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \begin{pmatrix} 1& 2 \\ 2 & 3\end{pmatrix} + 
@@ -348,7 +348,7 @@ Adds double or rational to a double or rational approximately using the built-in
 ```
 Adds two matrices.
 
-*\+* [AddSequences] {CalculatorFunctionsBinaryOps::innerAddSequenceToSequence}. 
+*\+* [AddSequences] {CalculatorFunctionsBinaryOps::addSequenceToSequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v_%7b1%7d%3d%20%281%2c%202%2c%203%29%3b%5cnv_%7b2%7d%3d%20%281%2c%203%2c%202%29%3b%5cnv_%7b3%7d%3d%20%283%2c%201%2c%201%29%3b%5cnv_%7b4%7d%3d%20%28-2%2c%202%2c%202%29%3b%5cn1%2f2v_%7b1%7d%2b%201%2f2v_%7b2%7d%2b7%2f8v_%7b3%7d%2b%2013%2f16v_%7b4%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 v_{1}= (1, 2, 3);
@@ -359,7 +359,7 @@ v_{4}= (-2, 2, 2);
 ```
 Adds two sequences (termwise), provided the sequences have the same number of entries. In case the entries of the sequences are elements of a base field, corresponds to vector addition.
 
-*\+* [AddMatrixTensorToMatrixTensor] {CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor}. 
+*\+* [AddMatrixTensorToMatrixTensor] {CalculatorFunctionsBinaryOps::addMatrixTensorToMatrixTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20MakeMatrixTensorForm%7b%7d%28%285%2c%208%29%2c%20%283%2c%205%29%29%3b%5cn3A%20%2a%20A%20-%20A%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A = MakeMatrixTensorForm{}((5, 8), (3, 5));
@@ -367,7 +367,7 @@ A = MakeMatrixTensorForm{}((5, 8), (3, 5));
 ```
 Adds two matrices.
 
-*\+* [AddRationalToElementWeylAlgebra] {CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA}. 
+*\+* [AddRationalToElementWeylAlgebra] {CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%20%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cnx_i%5c%5cpartial_i-%5c%5cpartial_i%20x_i-%5bx_i%2c%20%5c%5cpartial_i%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
  \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -376,7 +376,7 @@ x_i\partial_i-\partial_i x_i-[x_i, \partial_i]
 ```
 Adds a rational or polynomial to element Weyl algebra. 
 
-*\+* [AddPolynomialToElementWeylAlgebra] {CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA}. 
+*\+* [AddPolynomialToElementWeylAlgebra] {CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cnx_i%20%2b%5c%5cpartial_i%20%2bx_i%5c%5cpartial_i-%5c%5cpartial_i%20x_i-%5bx_i%2c%20%5c%5cpartial_i%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -385,7 +385,7 @@ x_i +\partial_i +x_i\partial_i-\partial_i x_i-[x_i, \partial_i]
 ```
 Adds a rational or polynomial to element Weyl algebra. 
 
-*\+* [AddElementWeylAlgebraToPolynomial] {CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA}. 
+*\+* [AddElementWeylAlgebraToPolynomial] {CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%20%5c%5cpartial_%7b%7bi%7d%7d%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cnx_i%20%2bx_i%5c%5cpartial_i-%5c%5cpartial_i%20x_i-%5bx_i%2c%20%5c%5cpartial_i%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
  \partial_{{i}} = ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -394,7 +394,7 @@ x_i +x_i\partial_i-\partial_i x_i-[x_i, \partial_i]
 ```
 Adds a rational or polynomial to element Weyl algebra. 
 
-*\+* [AddElementWeylAlgebraToElementWeylAlgebra] {CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA}. 
+*\+* [AddElementWeylAlgebraToElementWeylAlgebra] {CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%20%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cnx_i%5c%5cpartial_i-%5c%5cpartial_i%20x_i-%5bx_i%2c%20%5c%5cpartial_i%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
  \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -411,14 +411,14 @@ v=HeighestWeightVector{}(G_2, (1,0),(0,0));
 ```
 Adds two elements of tensor products of generalized Verma modules. 
 
-*\+* [AddWeightLieAlgebraPolynomialToWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::innerAddWeightToWeight}. 
+*\+* [AddWeightLieAlgebraPolynomialToWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::addWeightToWeight}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clambda%20%3d%20Polynomial%7b%7d%5c%5clambda%3b%20%5c%5cvarepsilon_%7b%7ba%7d%7d%20%3d%20MakeWeight%7b%7d%28B_3%2c%20a%2c%20epsilon%29%3b%20%281%20%2f%202%20%2b%20%5c%5clambda%29%20%5c%5cvarepsilon_1%20%2b%201%20%2f%202%20%5c%5cvarepsilon_2%2b%201%20%2f%202%20%5c%5cvarepsilon_3%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \lambda = Polynomial{}\lambda; \varepsilon_{{a}} = MakeWeight{}(B_3, a, epsilon); (1 / 2 + \lambda) \varepsilon_1 + 1 / 2 \varepsilon_2+ 1 / 2 \varepsilon_3  
 ```
 Adds two weights. 
 
-*\+* [AddElementUniversalEnvelopingRationalFunctionCoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients] {CalculatorFunctionsBinaryOps::innerAddUEToAny}. 
+*\+* [AddElementUniversalEnvelopingRationalFunctionCoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients] {CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7b%7bi%7d%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28F_%7b1%7d%2c%20%7b%7bi%7d%7d%29%3b%5cnh_%7b%7b%7bi%7d%7d%7d%20%3d%20CartanGenerator%7b%7d%28F_%7b1%7d%2c%20%7b%7bi%7d%7d%29%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b-%2014%7d%2bg_%7b-20%7d%2bg_%7b-22%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{{i}}} = ChevalleyGenerator{}(F_{1}, {{i}});
@@ -443,7 +443,7 @@ Transforms a - b to a +(- 1) * b and - b to (- 1) * b. Equivalent to a rule -{{b
 
 Operator or function / is overloaded with 26 total handlers.
 
-*/* [SumProductNotationToOperatorRelativeToDivision] {CalculatorFunctions::innerSumTimesExpressionToSumOf}. 
+*/* [SumProductNotationToOperatorRelativeToDivision] {CalculatorFunctions::sumTimesExpressionToSumOf}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotExpressionTree(  \sum\limits_{b}^c);
@@ -458,7 +458,7 @@ Transforms \sum\limits_{b}^c* a to (\sum\limits_b^c){} a.
 ```
 Transforms integral notation into an integral expression. 
 
-*/* [DivideElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat}. 
+*/* [DivideElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%20%207%29%20%2f%20%283%20mod%207%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod  7) / (3 mod 7)
@@ -479,21 +479,21 @@ d/dx x
 ```
 Replaces d/dx by Differential /Differential{}x. Note that the variable of differentiation is expected to be the string following the d letter. 
 
-*/* [DivideAlgebraicByAlgebraic] {CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat}. 
+*/* [DivideAlgebraicByAlgebraic] {CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2f%281%2b%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d5%2b%5c%5csqrt%7b%7d7%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 1/(1+\sqrt{}2+\sqrt{}3+\sqrt{}5+\sqrt{}7)
 ```
 Divides algebraic numbers. 
 
-*/* [DivideRationalByAlgebraic] {CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat}. 
+*/* [DivideRationalByAlgebraic] {CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2f%28%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d5%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 1/(\sqrt{}2+\sqrt{}3+\sqrt{}5)
 ```
 Divides rational by algebraic number. 
 
-*/* [DivideAlgebraicByRational] {CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat}. 
+*/* [DivideAlgebraicByRational] {CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d5%29%2f5%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (\sqrt{}2+\sqrt{}3+\sqrt{}5)/5
@@ -521,7 +521,7 @@ TurnOffRules(DivideByNumber, ConvertShortDenominatorToNegativePower, DivideRatio
 ```
 Intended for educational purposes. Divides rationals only if the operation is trivial, such as in(2) /(3) --> (2/3). The rule is turned off by default.
 
-*/* [DivideZeroDivideByAnything] {Calculator::innerSubZeroDivAnythingWithZero}. 
+*/* [DivideZeroDivideByAnything] {Calculator::subZeroDivAnythingWithZero}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%2fb%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 0/b; 
@@ -558,14 +558,14 @@ Substitutes a/(b/c)^d =a c^d/b^d.Note the order of multiplication in the rules: 
 ```
 Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t =a_0 x^{-t}+ a_1 x^{c_1-t}+...+a_n x^{c_n-t} 
 
-*/* [DivideRationalByRational] {CalculatorFunctionsBinaryOps::innerDivideRatByRat}. 
+*/* [DivideRationalByRational] {CalculatorFunctionsBinaryOps::divideRationalByRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%224%2f6%3b%202%2f0%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 4/6; 2/0;
 ```
 Divides two rational numbers. 
 
-*/* [DivideRationalByDouble] {CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble}. 
+*/* [DivideRationalByDouble] {CalculatorFunctionsBinaryOps::divideDoubleByDouble}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%200.5%3b%20b%3d%200.5%3b%20c%20%3d%20DoubleValue%7b%7d3.3%3b%20a%2fc%3b%20c%2fa%3b%20c%2fc%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c
@@ -638,7 +638,7 @@ PolynomialModP{}(x^3-x+1, 21) / PolynomialModP{}(2x^2+2, 21);
 ```
 Divides polynomial modulo integer by another polynomial modulo integer. 
 
-*/* [DivideExpressionsAsIfPolynomial] {CalculatorFunctionsPolynomial::innerDivideExpressionsAsIfPolynomial}. 
+*/* [DivideExpressionsAsIfPolynomial] {CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282x%5e2%2b3x-5%29%2f%285x%5e4%2bx%5e2%2b2x-8%29%3b%5cnx%5e2%2fx%3b%5cn%28x%2b1%29%5e2%2f%28x%2b1%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2x^2+3x-5)/(5x^4+x^2+2x-8);
@@ -656,21 +656,21 @@ Equivalent to (a/b){}x = (a{}x)/(b{}x)
 
 Operator or function \* is overloaded with 71 total handlers.
 
-*\** [MultiplyMatrixByMatrix] {CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix}. 
+*\** [MultiplyMatrixByMatrix] {CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%20%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5c%5cbegin%7bpmatrix%7d%201%26%20-2%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \begin{pmatrix} 1&  2 \\ 3& 5\end{pmatrix}\begin{pmatrix} 1& -2 \\ 3& 5\end{pmatrix}
 ```
 Multiplies matrices.
 
-*\** [MultiplySequenceByMatrix] {CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix}. 
+*\** [MultiplySequenceByMatrix] {CalculatorFunctionsBinaryOps::multiplySequenceByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%5c%5cbegin%7bpmatrix%7d%201%26%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (1,2)\begin{pmatrix} 1& 2 \\ 3& 5\end{pmatrix}
 ```
 Multiplies matrices.
 
-*\** [MultiplyMatrixBySequence] {CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix}. 
+*\** [MultiplyMatrixBySequence] {CalculatorFunctionsBinaryOps::multiplySequenceByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%5c%5cbegin%7bpmatrix%7d%201%26%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (1,2)\begin{pmatrix} 1& 2 \\ 3& 5\end{pmatrix}
@@ -698,7 +698,7 @@ If contexts implies it, interprets an atom of the form dx as Differential {} x.
 ```
 Transforms integral notation into an integral expression. 
 
-*\** [SumProductNotationToOperator] {CalculatorFunctions::innerSumTimesExpressionToSumOf}. 
+*\** [SumProductNotationToOperator] {CalculatorFunctions::sumTimesExpressionToSumOf}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotExpressionTree(  \sum\limits_{b}^c);
@@ -713,42 +713,42 @@ d/dx (1/x)
 ```
 Replaces Differentiate{}(x)*a by Differentiate{}(x, a).
 
-*\** [MultiplyRationalByElementZmodP] {CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat}. 
+*\** [MultiplyRationalByElementZmodP] {CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%207%29%20%2a%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod 7) * 3
 ```
 Multiplies elements of Z_p. 
 
-*\** [MultiplyElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat}. 
+*\** [MultiplyElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%207%29%20%2a%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod 7) * 3
 ```
 Multiplies elements of Z_p. 
 
-*\** [MultiplyAlgebraicNumberByAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber}. 
+*\** [MultiplyAlgebraicNumberByAlgebraicNumber] {CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%7b%7d2%28%5c%5csqrt%20%7b2%7d%2a%20%5c%5csqrt%20%7b3%7d%20%2b%5c%5csqrt%7b%7d2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt{}2(\sqrt {2}* \sqrt {3} +\sqrt{}2)
 ```
 Multiplies two algebraic numbers. 
 
-*\** [MultiplyRationalByAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber}. 
+*\** [MultiplyRationalByAlgebraicNumber] {CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%28%5c%5csqrt%20%7b2%7d%2b%5c%5csqrt%7b%7d3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2(\sqrt {2}+\sqrt{}3)
 ```
 Multiplies two algebraic number by rational. 
 
-*\** [MultiplyRationals] {CalculatorFunctionsBinaryOps::innerMultiplyRationalByRational}. 
+*\** [MultiplyRationals] {CalculatorFunctionsBinaryOps::multiplyRationalByRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%20%2a%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2 * 3
 ```
 Multiplies two rationals. 
 
-*\** [MultiplyRationalByDouble] {CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRational}. 
+*\** [MultiplyRationalByDouble] {CalculatorFunctionsBinaryOps::multiplyDoubleOrRationalByDoubleOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%281%2f3%29%2a3%3b%5cnz%3d101%5e20%3b%5cnDoubleValue%7b%7d%28z%29%3b%5cnDoubleValue%7b%7d%28z%29%20%2bDoubleValue%7b%7d%281%29-DoubleValue%7b%7d%28z%29%3b%5cn%28z%2b%201%29-z%3b%5cny%20%3d%20101%5e200%3b%5cnDoubleValue%28y%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(1/3)*3;
@@ -761,7 +761,7 @@ DoubleValue(y)
 ```
 Multiplies rational by a double approximately using the built-in cpp multiplication returning double. The cpp multiplication is supposed to call the system's hardware double multiplication routine. 
 
-*\** [MultiplyDoubleByRational] {CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRational}. 
+*\** [MultiplyDoubleByRational] {CalculatorFunctionsBinaryOps::multiplyDoubleOrRationalByDoubleOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%281%2f3%29%2a3%3b%5cnDoubleValue%7b%7d%28%28101%29%5e%7b20%7d%29%3b%5cnDoubleValue%7b%7d%28DoubleValue%7b%7d%28%28101%29%5e%7b20%7d%29%20%2b%20DoubleValue%7b%7d%281%29%29%20-%20DoubleValue%7b%7d%28101%5e%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(1/3)*3;
@@ -770,7 +770,7 @@ DoubleValue{}(DoubleValue{}((101)^{20}) + DoubleValue{}(1)) - DoubleValue{}(101^
 ```
 Multiplies rational by a double approximately using the built-in cpp multiplication returning double. The cpp multiplication is supposed to call the system's hardware double multiplication routine. 
 
-*\** [MultiplyDoubleByDouble] {CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRational}. 
+*\** [MultiplyDoubleByDouble] {CalculatorFunctionsBinaryOps::multiplyDoubleOrRationalByDoubleOrRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%281%2f3%29%2a3%3b%5cnDoubleValue%7b%7d%28%28101%29%5e%7b20%7d%29%3b%5cnDoubleValue%7b%7d%28DoubleValue%7b%7d%28%28101%29%5e%7b20%7d%29%20%2bDoubleValue%7b%7d%281%29%29-DoubleValue%7b%7d%28101%5e%7b20%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(1/3)*3;
@@ -779,7 +779,7 @@ DoubleValue{}(DoubleValue{}((101)^{20}) +DoubleValue{}(1))-DoubleValue{}(101^{20
 ```
 Multiplies rational by a double approximately using the built-in cpp multiplication returning double. The cpp multiplication is supposed to call the system's hardware double multiplication routine. 
 
-*\** [MultiplyPolynomialByRational] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyPolynomialByRational] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%2aPolynomial%7b%7d%28a%20%2bb%29%3b%5cnPolynomial%7b%7d%28a%20%2bb%29%2f2%3b%5cnPolynomial%7b%7d%28%28a%20%2bb%29%5e3%29%2aPolynomial%7b%7d%28%28a%20%2bc%29%5e3%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2*Polynomial{}(a +b);
@@ -788,7 +788,7 @@ Polynomial{}((a +b)^3)*Polynomial{}((a +c)^3);
 ```
 Multiplies polynomial by a rational (polynomial comes first). 
 
-*\** [MultiplyRationalByPolynomial] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyRationalByPolynomial] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%2aPolynomial%7b%7d%28a%20%2b%20b%29%3b%5cnPolynomial%7b%7d%28a%20%2b%20b%29%2f2%3b%5cnPolynomial%7b%7d%28%28a%20%2b%20b%29%5e3%29%20%2a%20Polynomial%7b%7d%28%28a%20%2b%20c%29%5e3%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2*Polynomial{}(a + b);
@@ -797,7 +797,7 @@ Polynomial{}((a + b)^3) * Polynomial{}((a + c)^3);
 ```
 Multiplies rational by a polynomial (rational comes first). 
 
-*\** [MultiplyPolynomialByPolynomial] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyPolynomialByPolynomial] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%2aPolynomial%7b%7d%28a%20%2bb%29%3b%5cnPolynomial%7b%7d%28a%20%2bb%29%2f2%3b%5cnPolynomial%7b%7d%28%28a%20%2bb%29%5e3%29%20%2a%20Polynomial%7b%7d%28%28a%20%2bc%29%5e3%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2*Polynomial{}(a +b);
@@ -806,14 +806,14 @@ Polynomial{}((a +b)^3) * Polynomial{}((a +c)^3);
 ```
 Multiplies two polynomials. 
 
-*\** [MultiplyPolynomialAlgebraicNumbersByPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyPolynomialAlgebraicNumbersByPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%7b%7d%28%5c%5csqrt%7b3%7dx%29%2aPolynomialAlgebraicNumbers%7b%7d%28%5c%5csqrt%7b6%7dy%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers{}(\sqrt{3}x)*PolynomialAlgebraicNumbers{}(\sqrt{6}y);
 ```
 Multiplies two polynomials over the algebraic numbers. 
 
-*\** [MultiplyPolynomialModPByPolynomialModP] {CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPByPolynomialModP}. 
+*\** [MultiplyPolynomialModPByPolynomialModP] {CalculatorFunctionsBinaryOps::multiplyPolynomialModPByPolynomialModP}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%20PolynomialModP%28%20x%5e2%20%2b%20x%20%2b%201%2c%207%20%29%3b%5cnb%20%3d%20PolynomialModP%28%20x%5e3%20%2b%20x%20%2b%201%2c%207%20%29%3b%5cna%20%2a%20b%3b%5cna%20%2a%20PolynomialModP%28%20x%5e3%20%2b%20x%20%2b%201%2c%205%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a = PolynomialModP( x^2 + x + 1, 7 );
@@ -823,7 +823,7 @@ a * PolynomialModP( x^3 + x + 1, 5 );
 ```
 Multiply two polynomials modulo an integer. 
 
-*\** [MultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP] {CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP}. 
+*\** [MultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP] {CalculatorFunctionsBinaryOps::multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22p%20%3d%20PolynomialModP%28%20x%5e4%20%2b%20x%20%2b%201%2c%207%20%29%3b%5cna%20%3d%20PolynomialModP%28%20x%5e3%20%2b%20x%20%2b%201%2c%207%20%29%3b%5cnb%20%3d%20PolynomialModP%28%20x%20%2b%202%2c%207%20%29%3b%5cnf%20%3d%20a%20mod%20p%3b%5cng%20%3d%20b%20mod%20p%3b%5cnf%20%2a%20g%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 p = PolynomialModP( x^4 + x + 1, 7 );
@@ -835,42 +835,42 @@ f * g
 ```
 Multiply two polynomials modulo an integer. 
 
-*\** [MultiplyPolynomialAlgebraicNumbersByAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyPolynomialAlgebraicNumbersByAlgebraicNumber] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%7b%7d%28%5c%5csqrt%7b3%7dx%29%2a%5c%5csqrt%7b6%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers{}(\sqrt{3}x)*\sqrt{6};
 ```
 Multiplies two polynomials over the algebraic numbers. 
 
-*\** [MultiplyAlgebraicNumberByPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyAlgebraicNumberByPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%7b6%7d%2aPolynomialAlgebraicNumbers%7b%7d%28%5c%5csqrt%7b3%7dx%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt{6}*PolynomialAlgebraicNumbers{}(\sqrt{3}x);
 ```
 Multiplies two polynomials over the algebraic numbers. 
 
-*\** [MultiplyRationalByPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyRationalByPolynomialAlgebraicNumbers] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%7b%7d%28%5c%5csqrt%7b3%7dx%29%2a2%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolynomialAlgebraicNumbers{}(\sqrt{3}x)*2;
 ```
 Multiplies two polynomials over the algebraic numbers. 
 
-*\** [MultiplyPolynomialByAlgebraicNumber] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyPolynomialByAlgebraicNumber] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%7b%7d%28x%29%2a%5c%5csqrt%7b2%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Polynomial{}(x)*\sqrt{2};
 ```
 Multiplies two polynomials over the algebraic numbers. 
 
-*\** [MultiplyAlgebraicNumberByPolynomial] {CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial}. 
+*\** [MultiplyAlgebraicNumberByPolynomial] {CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%7b3%7d%20%2a%20PolynomialAlgebraicNumbers%7b%7d%28x%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt{3} * PolynomialAlgebraicNumbers{}(x);
 ```
 Multiplies two polynomials over the algebraic numbers. 
 
-*\** [MultiplyMatrixTensorByMatrixTensor] {CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor}. 
+*\** [MultiplyMatrixTensorByMatrixTensor] {CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22M%20%3d%20MakeMatrixTensorForm%7b%7d%28%281%2c%201%29%2c%20%280%2c%201%29%29%3b%5cnM%3b%5cnM%20%2a%20M%3b%5cnM%20%2a%20M%20%2a%20M%3b%5cnM%20%2a%20M%20%2a%20M%20%2a%20M%3b%5cn2%20%2a%20M%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 M = MakeMatrixTensorForm{}((1, 1), (0, 1));
@@ -882,7 +882,7 @@ M * M * M * M;
 ```
 Multiplies matrix rational by matrix tensor. 
 
-*\** [MultiplyRationalByMatrixTensor] {CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor}. 
+*\** [MultiplyRationalByMatrixTensor] {CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22M%20%3d%20MakeMatrixTensorForm%7b%7d%28%281%2c%203%2c%205%29%2c%20%28-%201%2c%201%2c%200%29%2c%20%282%2c%202%2c%207%29%29%3b%5cnM%3b%5cnM%20%2a%20M%3b%5cnM%20%2a%20M%20%2a%20M%3b%5cnM%20%2a%20M%20%2a%20M%20%2a%20M%3b%5cn2%20%2a%20M%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 M = MakeMatrixTensorForm{}((1, 3, 5), (- 1, 1, 0), (2, 2, 7));
@@ -905,7 +905,7 @@ x^{2/3}x^{1/2};
 ```
 Collects multiplicand exponents. 
 
-*\** [MultiplyByOne] {Calculator::innerMultiplyByOne}. 
+*\** [MultiplyByOne] {Calculator::multiplyByOne}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%2a1%3b%5cnx%2a1-x%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x*1;
@@ -962,7 +962,7 @@ a*(b/c); (a*b)/c-a*(b/c)
 ```
 Associative law w.r.t. division. 
 
-*\** [CancelMultiplicativeInverse] {Calculator::innerCancelMultiplicativeInverse}. 
+*\** [CancelMultiplicativeInverse] {Calculator::cancelMultiplicativeInverse}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%2fb%3b%20%28a%2fb%29%2ab%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a*b)/b; (a/b)*b
@@ -1025,7 +1025,7 @@ MakeRationalFunction{}(\frac{-2x -2}{x^2-x })MakeRationalFunction{}(\frac{-2x -2
 ```
 Multiplies rational function by a rational function.
 
-*\** [ScalarTimesSequence] {CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence}. 
+*\** [ScalarTimesSequence] {CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v_%7b1%7d%3d%20%281%2c%202%2c%203%29%3b%5cnv_%7b2%7d%3d%20%281%2c%203%2c%202%29%3b%5cnv_%7b3%7d%3d%20%283%2c%201%2c%201%29%3b%5cnv_%7b4%7d%3d%20%28-2%2c%202%2c%202%29%3b%5cn1%2f2v_%7b1%7d%2b%201%2f2v_%7b2%7d%2b7%2f8v_%7b3%7d%2b%2013%2f16v_%7b4%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 v_{1}= (1, 2, 3);
@@ -1036,14 +1036,14 @@ v_{4}= (-2, 2, 2);
 ```
 Carries out multiplication between a rational number on left and sequence on the right. Corresponds to multiplying a vector by a scalar (however please note a sequence does not necessarily consist of elements of a field, so the latter interpretation might not be applicable).
 
-*\** [ScalarTimesMatrix] {CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix}. 
+*\** [ScalarTimesMatrix] {CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%5c%5cbegin%7bpmatrix%7d%20%201%26%202%26%203%5c%5c%5c%5c2%26%201%26%200%20%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2\begin{pmatrix}  1& 2& 3\\2& 1& 0 \end{pmatrix}
 ```
 Multiplies a rational number by a matrix
 
-*\** [MultiplyDoubleBySequence] {CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence}. 
+*\** [MultiplyDoubleBySequence] {CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25NumberColors%5cn%281%2c%202%29%20-%20DoubleValue%7b%7d%201%20%282%2c3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %NumberColors
@@ -1051,21 +1051,21 @@ Multiplies a rational number by a matrix
 ```
 Carries out multiplication between a double number on left and sequence on the right. Corresponds to multiplying a vector by a scalar.
 
-*\** [MultiplyAlgebraicNumberBySequence] {CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence}. 
+*\** [MultiplyAlgebraicNumberBySequence] {CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%20%2c2%29-%20DoubleValue%7b%7d%201%20%282%2c3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (1 ,2)- DoubleValue{} 1 (2,3)
 ```
 Multiplies a double number on left and a sequence on the right.scalar.
 
-*\** [MultiplyPolynomialBySequence] {CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence}. 
+*\** [MultiplyPolynomialBySequence] {CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20Polynomial%7b%7dx%3b%20v%3dx%2a%281%2c%202%2c%203%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = Polynomial{}x; v=x*(1, 2, 3);
 ```
 Carries out multiplication between a rational number on left and sequence on the right.
 
-*\** [MultiplyRationalByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
+*\** [MultiplyRationalByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::multiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cn3%5c%5cpartial_i%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -1074,7 +1074,7 @@ x_{{i}}= Polynomial{}x_i;
 ```
 Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. 
 
-*\** [MultiplyPolynomialByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
+*\** [MultiplyPolynomialByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::multiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cnx_i%5c%5cpartial_i-%5c%5cpartial_i%20x_i-%5bx_i%2c%20%5c%5cpartial_i%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -1083,7 +1083,7 @@ x_i\partial_i-\partial_i x_i-[x_i, \partial_i]
 ```
 Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. 
 
-*\** [MultiplyElementWeylAlgebraByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
+*\** [MultiplyElementWeylAlgebraByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::multiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cna%20%3d%20x_1%20x_2%3b%5cnb%20%3d%20%5c%5cpartial_1%20%5c%5cpartial_2%3b%20a%20b%20-%20b%20a%20-%5ba%2cb%5d%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -1093,7 +1093,7 @@ b = \partial_1 \partial_2; a b - b a -[a,b]
 ```
 Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. 
 
-*\** [MultiplyElementWeylAlgebraByPolynomial] {CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
+*\** [MultiplyElementWeylAlgebraByPolynomial] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cnx_i%5c%5cpartial_i-%5c%5cpartial_i%20x_i-%5bx_i%2c%20%5c%5cpartial_i%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -1102,7 +1102,7 @@ x_i\partial_i-\partial_i x_i-[x_i, \partial_i]
 ```
 Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. 
 
-*\** [MultiplyEllipticCurveElementsRational] {CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements}. 
+*\** [MultiplyEllipticCurveElementsRational] {CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g%20%3d%20ElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20-%20x%20%2b1%2c%20x%20%3d%203%2c%20y%20%3d%205%29%3b%5cnh%20%3d%20g%5e2%3b%5cnh%20%2a%20g%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);
@@ -1112,7 +1112,7 @@ h * g
 ```
 Multiplies two elements of elliptic curves.
 
-*\** [MultiplyEllipticCurveElementsOverZmodP] {CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements}. 
+*\** [MultiplyEllipticCurveElementsOverZmodP] {CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g%20%3d%20ElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20%2bx%20-%205%2c%20x%20%3d%203%20mod%2017%2c%20y%20%3d%205%20mod%2017%29%3b%5cnh%20%3d%20g%5e2%3b%5cnh%20%2a%20g%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g = ElementEllipticCurveNormalForm(y^2 = x^3 +x - 5, x = 3 mod 17, y = 5 mod 17);
@@ -1122,14 +1122,14 @@ h * g
 ```
 Multiplies two elements of elliptic curves.
 
-*\** [MultiplyElementHyperOctahedralByElementHyperOctahedral] {CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct}. 
+*\** [MultiplyElementHyperOctahedralByElementHyperOctahedral] {CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s%20%3d%20MakeElementHyperOctahedral%7b%7d%28%281%2c%202%29%2c%201%2c%200%2c%200%29%3b%20t%20%3d%20MakeElementHyperOctahedral%7b%7d%28%281%2c%203%29%2c%200%2c%200%2c%200%29%3b%20s%20%2a%20t%20%2a%20s%20%2a%20t%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0); t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0); s * t * s * t
 ```
 Multiplies two elements of hyperoctahedral groups. 
 
-*\** [MultiplyCharacterSemisimpleLieAlgebraModuleBy] {CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg}. 
+*\** [MultiplyCharacterSemisimpleLieAlgebraModuleBy] {CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20MakeCharacterLieAlg%7b%7d%28G_2%2c%20%281%2c0%29%29%3b%5cny%20%3d%20MakeCharacterLieAlg%7b%7d%28G_2%2c%20%280%2c1%29%29%3b%5cnx%20%2a%20y%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = MakeCharacterLieAlg{}(G_2, (1,0));
@@ -1138,7 +1138,7 @@ x * y
 ```
 Multiplies two semisimple Lie algebra finite dimensional characters and decomposes using the Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, page 142, exercise 9. 
 
-*\** [MultiplyWeylGroupElementByWeylGroupElement] {CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt}. 
+*\** [MultiplyWeylGroupElementByWeylGroupElement] {CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20MakeElementWeylGroup%7b%7d%28A_2%2c%201%29%3b%20x%2ax%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = MakeElementWeylGroup{}(A_2, 1); x*x
@@ -1155,7 +1155,7 @@ V * V
 ```
 Tensor and decompose two virtual Weyl group representations. 
 
-*\** [MultiplyRationalByUE] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE}. 
+*\** [MultiplyRationalByUE] {CalculatorFunctionsBinaryOps::multiplyAnyByUE}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28F_1%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28F_1%2c%20i%29%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b17%7d-6%2f5g_%7b14%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{i}}= ChevalleyGenerator{}(F_1, i); h_{{i}}= CartanGenerator{}(F_1, i);
@@ -1163,7 +1163,7 @@ g_{{i}}= ChevalleyGenerator{}(F_1, i); h_{{i}}= CartanGenerator{}(F_1, i);
 ```
 Multiplies rational number by an element universal enveloping algebra.
 
-*\** [MultiplyUEByUE] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE}. 
+*\** [MultiplyUEByUE] {CalculatorFunctionsBinaryOps::multiplyAnyByUE}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28F_1%2c%20i%29%3bh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28F_1%2c%20i%29%20%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b17%7d-6%2f5g_%7b14%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{i}}= ChevalleyGenerator{}(F_1, i);h_{{i}}= CartanGenerator{}(F_1, i) ;
@@ -1171,7 +1171,7 @@ g_{{i}}= ChevalleyGenerator{}(F_1, i);h_{{i}}= CartanGenerator{}(F_1, i) ;
 ```
 Multiplies elment Universal enveloping by element universal enveloping algebra.
 
-*\** [MultiplyAnyByEltTensor] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
+*\** [MultiplyAnyByEltTensor] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cn2%2f5%20v%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v%3b%5cn3%2f4%20%28v%5c%5cotimes%20v%29%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v-3%2f4%20%28v%5c%5cotimes%20v%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1185,7 +1185,7 @@ v=HeighestWeightVector{}(G_2, (1,0),(0,0));
 ```
 Handles multiplying rational number by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyPolynomialByElementTensorGeneralVermaModule] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
+*\** [MultiplyPolynomialByElementTensorGeneralVermaModule] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn%282%2az%29%20v%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1198,7 +1198,7 @@ v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 ```
 Handles multiplying polynomial by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyAnyByTensor] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
+*\** [MultiplyAnyByTensor] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%20%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn1%2fz%20v%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1210,7 +1210,7 @@ v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 ```
 Handles multiplying rational function number by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor}. 
+*\** [MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%3d%20Polynomial%7b%7dy%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cnh_1%20v%3b%20%5cnh_2%20v%3b%5cn%20g_1%20g_%7b-%201%7d%20v%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1224,7 +1224,7 @@ h_2 v;
 ```
 Handles acting by element Universal enveloping on an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyWeylGroupElementByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly}. 
+*\** [MultiplyWeylGroupElementByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_%7b%7ba%7d%7d%3dMakeElementWeylGroup%28B_3%2c%20a%29%3b%5cn%5c%5cvarepsilon_%7b%7ba%7d%7d%20%3d%20MakeWeight%7b%7d%28B_3%2c%20a%2c%20epsilon%29%3b%5cnx%20%3d%20Polynomial%7b%7dx%3b%5cn%5c%5cmu%20%3d%20x%5c%5cvarepsilon_1%3b%5cns_1s_2s_3s_2s_1%20%5c%5cmu%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_{{a}}=MakeElementWeylGroup(B_3, a);
@@ -1235,14 +1235,14 @@ s_1s_2s_3s_2s_1 \mu
 ```
 Element of Weyl group action on a weight. 
 
-*\** [MultiplyPolynomialByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly}. 
+*\** [MultiplyPolynomialByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::multiplyRatOrPolyByWeightPoly}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cvarepsilon_%7b%7ba%7d%7d%3dMakeWeight%7b%7d%28B_3%2c%20a%2c%20epsilon%29%3b%20x%20%3d%20Polynomial%7b%7dx%3b%20x%5c%5cvarepsilon_1%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon); x = Polynomial{}x; x\varepsilon_1
 ```
 Carries out multiplication between a rational or polynomial on left and a weight on the right.
 
-*\** [MultiplyRaitonalByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly}. 
+*\** [MultiplyRaitonalByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::multiplyRatOrPolyByWeightPoly}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cvarepsilon_%7b%7ba%7d%7d%3dMakeWeight%7b%7d%28B_3%2c%20a%2c%20epsilon%29%3b%20x%20%3d%20Polynomial%7b%7dx%3b%20x%5c%5cvarepsilon_1%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon); x = Polynomial{}x; x\varepsilon_1
@@ -1256,7 +1256,7 @@ Carries out multiplication between a rational or polynomial on left and a weight
 ```
 Equivalent to (a*b){}x = (a{}x)*(b{}x) 
 
-*\** (_composite_) [ConstTimesAnyAction] {CalculatorFunctions::innerCompositeConstTimesAnyActOn}. 
+*\** (_composite_) [ConstTimesAnyAction] {CalculatorFunctions::compositeConstTimesAnyActOn}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%5c%5csin%29%7b%7dx-2%28%5c%5csin%20x%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2\sin){}x-2(\sin x) 
@@ -1272,14 +1272,14 @@ Factorial function.
 
 Operator or function mod is overloaded with 2 total handlers.
 
-*mod* [mod] {Calculator::innerZmodP}. 
+*mod* [mod] {Calculator::zModP}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%227%20mod%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 7 mod 3
 ```
 Same as ModP but uses the mod notation.
 
-*mod* [moduloPolynomial] {Calculator::innerZmodP}. 
+*mod* [moduloPolynomial] {Calculator::polynomialModPModuloPolynomialModP}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22p%20%3d%20PolynomialModP%28x%5e2%2c%207%29%3b%5cnq%20%3d%20PolynomialModP%28x%5e9%2bx%2b1%2c%207%29%3b%5cnr%20%3d%20PolynomialModP%28y%5e2%2c%207%29%3b%5cns%20%3d%20PolynomialModP%28x%5e5%2c%205%29%3b%5cna%20%3d%20p%20mod%20q%3b%5cna%5e10%3b%5cnr%20mod%20q%3b%5cns%20mod%20q%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 p = PolynomialModP(x^2, 7);
@@ -1293,7 +1293,7 @@ s mod q
 ```
 A polynomial modulo another polynomial. Returns the element given by the first argument of a quotient ring formed modulo the ideal generated by the second argument. 
 
-*and* [and] {CalculatorConversions::innerAnd}. 
+*and* [and] {CalculatorConversions::and}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%20and%200%3b%200%20and%201%3b%201%20and%200%3b%201%20and%201%3b%20a%20and%201%3b%20a%20and%200%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;
@@ -1302,14 +1302,14 @@ Logical and.
 
 Operator or function or is overloaded with 2 total handlers.
 
-*or* [or] {CalculatorConversions::innerOr}. 
+*or* [or] {CalculatorConversions::or}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%20or%200%3b%200%20or%201%3b%201%20or%200%3b%201%20or%201%3b%20a%20or%201%3b%20a%20or%200%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;
 ```
 Logical or.
 
-*or* [orIdentical] {CalculatorConversions::innerOrIdentical}. 
+*or* [orIdentical] {CalculatorConversions::orIdentical}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20or%20b%3b%20a%20or%20a%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a or b; a or a
@@ -1385,7 +1385,7 @@ V = WeylGroupNaturalRep{}(B_3); V \otimes V; V * V
 ```
 Tensor product of two Weyl group reps. Does not decompose the tensor product. If you want decomposition, use V*V instead. 
 
-*\oplus* [DirectSumMatrices] {CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix}. 
+*\oplus* [DirectSumMatrices] {CalculatorFunctionsBinaryOps::directSumMatrixWithMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%202%5c%5c%5c%5c%202%26%203%5c%5cend%7bpmatrix%7d%5c%5coplus%5cn%5c%5cbegin%7bpmatrix%7d%20-%201%26%203%5c%5c%5c%5c%20-2%26%20-3%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \begin{pmatrix} 1& 2\\ 2& 3\end{pmatrix}\oplus
@@ -1402,7 +1402,7 @@ Evaluates the binomial coefficient if possible.
 
 Operator or function \sqrt is overloaded with 2 total handlers.
 
-*\sqrt* [sqrt] {Calculator::innerSqrt}. 
+*\sqrt* [sqrt] {Calculator::sqrt}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%202%2b%5c%5csqrt%203%3b%28%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d6%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt 2+\sqrt 3;(\sqrt{}2+\sqrt{}3+\sqrt{}6)^2
@@ -1418,14 +1418,14 @@ If a is a positive constant, substitutes sqrt(a b) by sqrt(a) sqrt(b).
 
 Operator or function [] is overloaded with 7 total handlers.
 
-*[]* [LieBracketDistribute] {CalculatorFunctionsBinaryOps::innerLieBracketDistribute}. 
+*[]* [LieBracketDistribute] {CalculatorFunctionsBinaryOps::lieBracketDistribute}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5ba%2bb%2c%20c%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 [a+b, c]
 ```
 Implementation of the rules [{{a}}+{{b}},{{c}}] = [a, c] +[b, c] and [{{c}},{{a}}+{{b}}] =[c,a] +[c,b]
 
-*[]* [LieBracketOfMatrices] {CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant}. 
+*[]* [LieBracketOfMatrices] {CalculatorFunctionsBinaryOps::lieBracketOfMatrices}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22h%3d%5c%5cbegin%7bpmatrix%7d3%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5cn0%20%26%201%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%20-1%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%200%20%26%20-3%5c%5c%5c%5c%5c%5cend%7bpmatrix%7d%3be%3d%5c%5cbegin%7bpmatrix%7d0%20%26%203%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%202%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%200%20%26%203%2f5%5c%5c%5c%5c0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c%5c%5cend%7bpmatrix%7d%3bf%3d%5c%5cbegin%7bpmatrix%7d0%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c1%20%26%200%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%202%20%26%200%20%26%200%5c%5c%5c%5c0%20%26%200%20%26%205%20%26%200%5c%5c%5c%5c%5c%5cend%7bpmatrix%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 h=\begin{pmatrix}3 & 0 & 0 & 0\\
@@ -1433,14 +1433,14 @@ h=\begin{pmatrix}3 & 0 & 0 & 0\\
 ```
 Matrix lie bracket. 
 
-*[]* [LieBracketConstants] {CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant}. 
+*[]* [LieBracketConstants] {CalculatorFunctionsBinaryOps::lieBracketExtractConstant}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5b2a%2c%203b%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 [2a, 3b]
 ```
 Extracts constants from Lie brackets. 
 
-*[]* [LieBracketWeylAlgebraElements] {CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA}. 
+*[]* [LieBracketWeylAlgebraElements] {CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%20%5cn%5b%5c%5cpartial_1%2c%20x_1%5d%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -1449,7 +1449,7 @@ x_{{i}}= Polynomial{}x_i;
 ```
 Lie bracket of elements of Weyl algebras = differential operators with polynomial coefficients. 
 
-*[]* [LieBracketSemisimpleLieAlgebras] {CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE}. 
+*[]* [LieBracketSemisimpleLieAlgebras] {CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dA_1%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2ci%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =A_1;
@@ -1459,14 +1459,14 @@ h_{{i}}= CartanGenerator{}(X,i);
 ```
 Lie bracket of elements of semisimple Lie algebra. 
 
-*[]* [LieBracketSwapTermsIfNeeded] {CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded}. 
+*[]* [LieBracketSwapTermsIfNeeded] {CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5bb%2c%20a%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 [b, a]
 ```
 Swaps terms in Lie brackets if needed. 
 
-*[]* [LieBracketJacobiIfNeeded] {CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant}. 
+*[]* [LieBracketJacobiIfNeeded] {CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5b2a%2c3b%5d%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 [2a,3b] 
@@ -1502,14 +1502,14 @@ i^{-50!+ 1};
 ```
 Raises imaginary unit to an integer power. 
 
-*^* [DegreesToRadians] {CalculatorFunctions::innerDegreesToRadians}. 
+*^* [DegreesToRadians] {CalculatorFunctions::degreesToRadians}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%2230%5e%5c%5ccirc%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 30^\circ
 ```
 Converts degrees to radians
 
-*^* [LimitBoundaryNotationPower] {CalculatorFunctions::innerHandleUnderscorePowerLimits}. 
+*^* [LimitBoundaryNotationPower] {CalculatorFunctions::handleUnderscorePowerLimits}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5climits_a%5eb%3b%20%5c%5climits%5eb_a%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \limits_a^b; \limits^b_a
@@ -1685,7 +1685,7 @@ B= c+a x^{2}+b x;
 ```
 Raises algebraic number to small integer or half-integer power. 
 
-*^* [RadicalAlgebraicNumberPositiveDefault] {CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault}. 
+*^* [RadicalAlgebraicNumberPositiveDefault] {CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%7b3%2b2%5c%5csqrt%5b2%5d%7b2%7d%7d%3b%5cn%287-5%5c%5csqrt%7b2%7d%29%5e%7b7%2f3%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt{3+2\sqrt[2]{2}};
@@ -1706,7 +1706,7 @@ f{}Xcardano
 ```
 Calls the built-in cpp functions to approximately raise a double to a power, provided either the base or the exponent is a double. If the base is negative and the exponent is rational with odd denominator, the exponent is evaluated to the corresponding real negative root. 
 
-*^* [PowerPowerToPower] {Calculator::innerAssociateExponentExponent}. 
+*^* [PowerPowerToPower] {Calculator::associateExponentExponent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%5em%29%5en%3b%20%28%28ln%283%29%29%5em%29%5en%3b%20%28%28ln%280.5%29%29%5em%29%5en%3b%20%28a%5em%29%5e2%3b%20%28a%5e2%29%5em%3b%20%28a%5e%7b1%2f2%7d%29%5e2%3b%20%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%20%28a%3e0%29%3d1%3b%20%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m; (a^{1/2})^2; (a^{2})^{1/2}; (a>0)=1; (a^{2})^{1/2};
@@ -1717,7 +1717,7 @@ If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{
 3) c is an integer;
 4) a evaluates to real (double), b and c are rational and b*c is an even integer. 
 
-*^* [DistributeExponent] {CalculatorFunctions::innerDistributeExponent}. 
+*^* [DistributeExponent] {CalculatorFunctions::distributeExponent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%5en%3b%20%28%5c%5csqrt%282%29%2ab%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a*b)^n; (\sqrt(2)*b)^2
@@ -1804,14 +1804,14 @@ g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i);
 ```
 Provided that an element of Universal Enveloping algebra is a single generator (raised to arbitrary formal RF power) with coefficient 1, raises (formally) the element of the UE to arbitrary RF power. 
 
-*^* (_composite_) [ApowerBevaluatedAtC] {CalculatorFunctions::innerCompositeApowerBevaluatedAtC}. 
+*^* (_composite_) [ApowerBevaluatedAtC] {CalculatorFunctions::compositeAPowerBEvaluatedAtC}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%5e2%20x%3b%20%28f%5e-2%29%20%7b%7dx%20%3b%20%28f%5e-%201%29%7b%7dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \tan^2 x; (f^-2) {}x ; (f^- 1){}x 
 ```
 Provided that n is not equal to - 1 and f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}= (f{}x)^n.
 
-*\geq* [greaterThanOrEqualTo] {Calculator::innerGreaterThanOrEqualTo}. 
+*\geq* [greaterThanOrEqualTo] {Calculator::greaterThanOrEqualTo}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20%282%3e%3dx%29%3b%5cnx%20%3d1%3b%5cnA%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A = (2>=x);
@@ -1820,14 +1820,14 @@ A
 ```
 Greater than or equal to operation. 
 
-*\leq* [lessThanOrEqualTo] {Calculator::innerLessThanOrEqualTo}. 
+*\leq* [lessThanOrEqualTo] {Calculator::lessThanOrEqualTo}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%5c%5cleq%20b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a \leq b
 ```
 Transforms \(a\leq b\) to \(b\geq a\).
 
-*\>* [GreaterThan] {CalculatorFunctions::innerGreaterThan}. 
+*\>* [GreaterThan] {CalculatorFunctions::greaterThan}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x_%7b%7bi%7d%7d%20%2a%20x_%7b%7bj%7d%7d%20%2a%20%7b%7ba%7d%7d%20%3aif%28i%20%3e%20j%29%20%3d%20x_j%20%2a%20x_i%20%2a%20a%3b%5cnx_%7b%7bi%7d%7d%2ax_%7b%7bj%7d%7d%3a%20if%20%28i%20%3e%20j%29%20%3d%20x_j%20%2a%20x_i%3b%5cn%28x_2%20%2a%20x_1%20-%20x_1%20%2a%20x_3%29%28x_1%20x_5%20%2b%20x_5%20x_4%20x_2%29%3b%5cnx_5x_4x_3x_2x_1%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x_{{i}} * x_{{j}} * {{a}} :if(i > j) = x_j * x_i * a;
@@ -1837,7 +1837,7 @@ x_5x_4x_3x_2x_1
 ```
 Greater than: has similar action to the less than sign. The following example shows an implementation of commutativity. 
 
-*\<* [LessThan] {CalculatorFunctions::innerLessThan}. 
+*\<* [LessThan] {CalculatorFunctions::lessThan}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%223%20%3c%204%3b%205%20%3c%204%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 3 < 4; 5 < 4
@@ -1862,7 +1862,7 @@ IsEqualToX{}1; z= \sqrt{}1; z==1
 ```
 If either the left or the right argument contains a bound variable does nothing. Else evaluates to 1 if the left argument equals mathematically the right argument.
 
-*===* [IsEqualExpressionTree] {CalculatorFunctions::innerEqualEqualEqual}. 
+*===* [IsEqualExpressionTree] {CalculatorFunctions::equalEqualEqual}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%222%2b3%20%3d%3d%205%3b%5cnFreeze%7b%7d%282%20%2b%203%29%20%3d%3d%20Freeze%7b%7d5%3b%5cnFreeze%7b%7d%282%20%2b%203%29%20%3d%3d%3d%20Freeze%7b%7d5%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 2+3 == 5;
@@ -1981,7 +1981,7 @@ Absolute value function
 ```
 Creates a string. Transforms escape sequences to their byte representations. These may be escaped back when returned to the frontend.
 
-*if* [if] {CalculatorConversions::innerIfFrozen}. 
+*if* [if] {CalculatorConversions::ifFrozen}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22if%20%281%2c%20x%2c%20y%29%3b%5cnif%20%281%2c%20x%2c%201%20%2f%200%29%3b%5cnif%20%282%20-%201%2c%20x%2c%201%20%2f%200%29%3b%5cnif%20%281%20%2b%201%2c%201%20%2f%200%2c%201%20%2f%200%29%3b%5cnif%20%280%2c%20x%2c%201%20%2f%200%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 if (1, x, y);
@@ -2147,7 +2147,7 @@ Integrates building blocks IIb.
 ```
 Attempts to split an integral of a rational function into building block integrals. 
 
-*Rational* (_composite_) [ConstantFunction] {CalculatorFunctions::innerConstantFunction}. 
+*Rational* (_composite_) [ConstantFunction] {CalculatorFunctions::constantFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%7b%7d3%3b%5cn2%7b%7dy%3b%5cn%28%5c%5csqrt%7b%7d2%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 0{}3;
@@ -2156,7 +2156,7 @@ Attempts to split an integral of a rational function into building block integra
 ```
 If x is a constant, replaces x{}({{anything}})=x; 
 
-*AlgebraicNumber* (_composite_) [ConstantFunctionAlgebraicNumber] {CalculatorFunctions::innerConstantFunction}. 
+*AlgebraicNumber* (_composite_) [ConstantFunctionAlgebraicNumber] {CalculatorFunctions::constantFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%7b%7d3%3b%5cn2%7b%7dy%3b%5cn%28%5c%5csqrt%7b%7d2%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 0{}3;
@@ -2174,7 +2174,7 @@ If x is a constant, replaces x{}({{anything}})=x;
 ```
 If x is a constant, replaces x{}({{anything}})=x; 
 
-*ElementWeylAlgebra* (_composite_) [EWAactOnPoly] {CalculatorFunctions::innerCompositeEWAactOnPoly}. 
+*ElementWeylAlgebra* (_composite_) [EWAactOnPoly] {CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20ElementWeylAlgebraPoly%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5c%5cpartial%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5cn%5c%5cpartial%7b%7d%28x%29%3b%20%5c%5cpartial%5e%7b2%7d%7b%7d%28x%5e3%2bx%5e2%29%3b%20x%7b%7d%28x%5e2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = ElementWeylAlgebraPoly{}(\partial, x);\partial = ElementWeylAlgebraDO{}(\partial, x);
@@ -2322,7 +2322,7 @@ EvaluateSymbols("x^x +ax +a x +\left(left \right)")
 ```
 Evaluates and replaces individual symbols/variables in LaTeX string. Leaves the rest of the string intact.
 
-*IfStandard* [IfStandard] {CalculatorConversions::innerIfStandard}. 
+*IfStandard* [IfStandard] {CalculatorConversions::ifStandard}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IfStandard%20%281%2c%20x%2c%20y%29%3b%5cnIfStandard%20%280%2c%20x%2c%20y%29%3b%5cnIfStandard%20%282%2c%20x%2c%20y%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 IfStandard (1, x, y);
@@ -2359,28 +2359,28 @@ a =Freeze{}(1 + 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c
 ```
 If the argument is frozen, removes the top freeze command and returns the argument, else returns the argument unchanged.
 
-*LogEvaluationStepsDebug* [LogEvaluationStepsDebug] {CalculatorFunctions::innerLogEvaluationStepsDebug}. 
+*LogEvaluationStepsDebug* [LogEvaluationStepsDebug] {CalculatorFunctions::logEvaluationStepsDebug}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LogEvaluationStepsDebug%28%28x%20%2b2%29%28x%20%2b3%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 LogEvaluationStepsDebug((x +2)(x +3))
 ```
 Creates an expression evaluation tree. Intended for debugging the system. 
 
-*LogEvaluationSteps* [LogEvaluationSteps] {CalculatorFunctions::innerLogEvaluationSteps}. 
+*LogEvaluationSteps* [LogEvaluationSteps] {CalculatorFunctions::logEvaluationSteps}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LogEvaluationSteps%28%28x%20%2b2%29%28x%20%2b3%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 LogEvaluationSteps((x +2)(x +3))
 ```
 Show a step-by step evaluation of the calculator. Some steps my be combined or omitted for improved human readability. 
 
-*FlattenCommandEnclosuresOneLayer* [FlattenCommandEnclosuresOneLayer] {Calculator::innerFlattenCommandEnclosuresOneLayeR}. 
+*FlattenCommandEnclosuresOneLayer* [FlattenCommandEnclosuresOneLayer] {Calculator::flattenCommandEnclosuresOneLayeR}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FlattenCommandEnclosuresOneLayer%28CommandEnclosure%7b%7d%28x%20%3d%205%3b%20x%29%3b%20CommandEnclosure%7b%7d%28y%3b%20x%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x = 5; x); CommandEnclosure{}(y; x))
 ```
 Flattens command enclosures. 
 
-*ChildExpression* [ChildExpression] {CalculatorFunctions::innerChildExpression}. 
+*ChildExpression* [ChildExpression] {CalculatorFunctions::childExpression}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ChildExpression%28e%5ex%2c%201%29%3b%20ChildExpression%28e%5ex%2c%202%29%3b%20ChildExpression%28e%5ex%2c%203%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)
@@ -2441,21 +2441,21 @@ LogarithmBaseNCeiling(2, - 1);
 ```
 Returns ceiling(log_N (input)), i.e., the smallest integer X for which input <= N^X. First argument = N = base, second argument = input.
 
-*Numerator* [Numerator] {CalculatorFunctions::innerNumerator}. 
+*Numerator* [Numerator] {CalculatorFunctions::numerator}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Numerator%28a%2fb%29%3b%20Numerator%281%2b%201%2fx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Numerator(a/b); Numerator(1+ 1/x)
 ```
 If the expression is a fraction, returns the numerator, else returns the entire expression. 
 
-*ApplyToSubexpressionsRecurseThroughCalculusFunctions* [ApplyToSubexpressionsRecurseThroughCalculusFunctions] {CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFunctions}. 
+*ApplyToSubexpressionsRecurseThroughCalculusFunctions* [ApplyToSubexpressionsRecurseThroughCalculusFunctions] {CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ApplyToSubexpressionsRecurseThroughCalculusFunctions%28Polynomialize%2c%20sin%20%28%28x%20%2b%201%29%5e3%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ApplyToSubexpressionsRecurseThroughCalculusFunctions(Polynomialize, sin ((x + 1)^3))
 ```
 Applies a transformation, recursively to all subexpressions of a list of known functions. 
 
-*SubList* [SubList] {CalculatorFunctions::innerSubList}. 
+*SubList* [SubList] {CalculatorFunctions::subList}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SubList%7b%7d%28%281%2c%202%2c%203%2c%204%29%2c%20%7b%7ba%7d%7d%20%3e%202%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SubList{}((1, 2, 3, 4), {{a}} > 2)
@@ -2478,7 +2478,7 @@ Denominator(a/b); Denominator(1+ 1/x)
 ```
 If the expression is a fraction, returns the denominator, else returns 1. 
 
-*Product* [Product] {CalculatorFunctions::innerMultiplySequence}. 
+*Product* [Product] {CalculatorFunctions::multiplySequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Product%28a%2c%20b%29%3b%5cnProduct%7b%7d%28Sequence%7b%7da%29%3b%5cnProduct%28Sequence%7b%7da%29%3b%5cnProduct%28a%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Product(a, b);
@@ -2490,7 +2490,7 @@ Returns the product of the elements in a sequence. When used with zero arguments
 
 Operator or function \sum is overloaded with 2 total handlers.
 
-*\sum* [\sum] {CalculatorFunctions::innerSumSequence}. 
+*\sum* [\sum] {CalculatorFunctions::sumSequence}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csum%28a%2c%20b%29%3b%5cn%5c%5csum%28%29%3b%5cn%5c%5csum%7b%7d%28Sequence%7b%7da%29%3b%5cn%5c%5csum%28Sequence%7b%7da%29%3b%5cn%5c%5csum%28a%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sum(a, b);
@@ -2501,7 +2501,7 @@ Operator or function \sum is overloaded with 2 total handlers.
 ```
 Returns the sum of the elements in a sequence. When used with one element, will return that element. 
 
-*\sum* (_composite_) [SumAsOperator] {CalculatorFunctions::innerSumAsOperatorToSumInternalNotation}. 
+*\sum* (_composite_) [SumAsOperator] {CalculatorFunctions::sumAsOperatorToSumInternalNotation}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28Freeze%28%5c%5csum_a%5eb%20%29%7b%7d%20n%29%3b%5cnPlotExpressionTree%28%28%5c%5csum_a%5eb%20%29%7b%7d%20n%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotExpressionTree(Freeze(\sum_a^b ){} n);
@@ -2544,7 +2544,7 @@ PolynomialModP{}(x^2+x+1, 2);
 ```
 Creates a polynomial, with modular arithmetic coefficients, i.e., coefficients in Z / p Z. First argument = expression to convert to polynomial. Second argument = the number mod which we are computing. 
 
-*IsDifferentialOneFormOneVariable* [IsDifferentialOneFormOneVariable] {CalculatorFunctions::innerIsDifferentialOneFormOneVariable}. 
+*IsDifferentialOneFormOneVariable* [IsDifferentialOneFormOneVariable] {CalculatorFunctions::isDifferentialOneFormOneVariable}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsDifferentialOneFormOneVariable%28Differential%20x%29%3b%5cnIsDifferentialOneFormOneVariable%28%7b%5c%5ctext%7bd%7d%7d%20x%29%3b%5cnIsDifferentialOneFormOneVariable%28x%20%7b%5c%5ctext%7bd%7d%7d%20y%29%3b%5cnIsDifferentialOneFormOneVariable%28%5c%5cfrac%7b%5c%5ctext%7bd%7d%20y%7d%7by%7d%29%3b%5cnIsDifferentialOneFormOneVariable%281%2f%28%5c%5ctext%7bd%7d%20y%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 IsDifferentialOneFormOneVariable(Differential x);
@@ -2595,7 +2595,7 @@ TurnOnRules("SineOfAngleSum"); \sin(a + b)
 ```
 Implementation of sin (a + b) = sin(a) cos(b) + cos(a) sin(b).
 
-*\sin* [ExpressSinViaExponent] {CalculatorFunctions::innerConvertTrigToExponent}. 
+*\sin* [ExpressSinViaExponent] {CalculatorFunctions::convertSineToExponent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22ExpressSinViaExponent%5c%22%2c%20%5c%22ExpressCosViaExponent%5c%22%29%3b%5cn%5c%5csin%20x%3b%5cncos%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOnRules("ExpressSinViaExponent", "ExpressCosViaExponent");
@@ -2629,7 +2629,7 @@ TurnOnRules("CosineOfAngleSum");
 ```
 Implementation of cos (a + b) = cos(a)cos(b) - sin(a)sin(b).
 
-*\cos* [ExpressCosViaExponent] {CalculatorFunctions::innerConvertTrigToExponent}. 
+*\cos* [ExpressCosViaExponent] {CalculatorFunctions::convertCosineToExponent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22ExpressSinViaExponent%5c%22%2c%20%5c%22ExpressCosViaExponent%5c%22%29%3b%5cn%5c%5csin%20x%3b%5cncos%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOnRules("ExpressSinViaExponent", "ExpressCosViaExponent");
@@ -2735,7 +2735,7 @@ d/dc c^{DoubleValue 3.14}
 ```
 Differentiation - d/dx a^b = d/dx(e^{b\log a}) = a^b d/dx(b\log a) .
 
-*Differentiate* (_composite_) [DifferentiateLog] {CalculatorFunctions::innerCompositeDifferentiateLog}. 
+*Differentiate* (_composite_) [DifferentiateLog] {CalculatorFunctions::compositeDifferentiateLog}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22d%2fdx%20%28%5c%5clog%20x%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 d/dx (\log x)
@@ -2749,7 +2749,7 @@ MakeRationalFunction{}(x_1 + MakeRationalFunction{}x_1 + x_2)
 ```
 Creates a built-in rational function.
 
-*MakeMatrix* [MakeMatrix] {CalculatorConversions::innerMatrixRational}. 
+*MakeMatrix* [MakeMatrix] {CalculatorConversions::matrixRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_1%20%3d%20MakeMatrix%7b%7d%28%28-%201%2c-%201%2c%200%2c%200%29%2c%20%280%2c%201%2c%200%2c%200%29%2c%20%280%2c%200%2c%201%2c%200%29%2c%20%280%2c%200%2c%200%2c%201%29%29%3b%5cns_2%20%3d%20MakeMatrix%7b%7d%28%281%2c%200%2c%200%2c%200%29%2c%20%28-%201%2c%20-%201%2c%20-%201%2c%200%29%2c%20%280%2c%200%2c%201%2c%200%29%2c%20%280%2c%200%2c%200%2c%201%29%29%3b%5cns_3%20%3d%20MakeMatrix%7b%7d%28%281%2c%200%2c%200%2c%200%29%2c%20%280%2c%201%2c%200%2c%200%29%2c%20%280%2c%20-%202%2c%20-%201%2c%20-%201%29%2c%20%280%2c%200%2c%200%2c%201%29%29%3b%5cns_4%20%3d%20MakeMatrix%7b%7d%28%281%2c%200%2c%200%2c%200%29%2c%20%280%2c%201%2c%200%2c%200%29%2c%20%280%2c%200%2c%201%2c%200%29%2c%20%280%2c%200%2c%20-%201%2c%20-%201%29%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_1 = MakeMatrix{}((- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
@@ -2759,7 +2759,7 @@ s_4 = MakeMatrix{}((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, - 1, - 1));
 ```
 Creates an internal c++ matrix structure from double list of rationals. 
 
-*MakeMatrixTensorForm* [MakeMatrixTensorForm] {CalculatorConversions::innerMatrixRationalTensorForM}. 
+*MakeMatrixTensorForm* [MakeMatrixTensorForm] {CalculatorConversions::matrixRationalTensorForM}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_1%20%3d%20MakeMatrixTensorForm%7b%7d%28%5cn%28-%201%2c-%201%2c%200%2c%200%29%2c%5cn%280%2c%201%2c%200%2c%200%29%2c%5cn%280%2c%200%2c%201%2c%200%29%2c%5cn%280%2c%200%2c%200%2c%201%29%5cn%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_1 = MakeMatrixTensorForm{}(
@@ -2771,7 +2771,7 @@ s_1 = MakeMatrixTensorForm{}(
 ```
 Same as MakeMatrix but uses different c++ implementation (class MatrixTensor instead of class Matrix). 
 
-*MakeMatrixRFs* [MakeMatrixRFs] {CalculatorConversions::innerMatrixRationalFunction}. 
+*MakeMatrixRFs* [MakeMatrixRFs] {CalculatorConversions::matrixRationalFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_1%20%3d%20MakeMatrixRFs%7b%7d%28%281%20-%20t%2c%202%29%2c%20%283%2c%202%20-%20t%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_1 = MakeMatrixRFs{}((1 - t, 2), (3, 2 - t))
@@ -2786,14 +2786,14 @@ EnsureExpressionDependsOnlyOn(\sin (\ln x) x y, x);
 ```
 Ensures the expression in the first argument depends only on the free variables given in the remaining arguments. Returns a warning string if that is not the case, else returns an empty string. Intended to warn users of potentially mistyped expressions. 
 
-*EnsureExpressionDependsMandatoryVariables* [EnsureExpressionDependsMandatoryVariables] {CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables}. 
+*EnsureExpressionDependsMandatoryVariables* [EnsureExpressionDependsMandatoryVariables] {CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22EnsureExpressionDependsMandatoryVariables%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20x%2c%20y%29%3b%20EnsureExpressionDependsMandatoryVariables%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20%20%28x%2cy%2cz%29%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 EnsureExpressionDependsMandatoryVariables(\sin (\ln x) x y, x, y); EnsureExpressionDependsMandatoryVariables(\sin (\ln x) x y,  (x,y,z) );
 ```
 Similar to EnsureExpressionDependsOnlyOn, but requests that the expression depend on two lists, first with mandatory variables, second with non-mandatory. 
 
-*EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants* [EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants] {CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables}. 
+*EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants* [EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants] {CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants%282%5c%5cpi%2c%20%5c%5cpi%2c%20y%29%3b%5cnEnsureExpressionDependsMandatoryVariables%282%2c%20%5c%5cpi%2c%20none%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants(2\pi, \pi, y);
@@ -2875,14 +2875,14 @@ Round(3/7)
 ```
 Round function.
 
-*DoubleValue* [DoubleValue] {CalculatorFunctions::innerEvaluateToDoublE}. 
+*DoubleValue* [DoubleValue] {CalculatorFunctions::evaluateToDouble}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(3/7)
 ```
 Double value of a rational number.
 
-*ModP* [ModP] {Calculator::innerZmodP}. 
+*ModP* [ModP] {Calculator::zModP}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ModP%7b%7d%287%2c%203%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ModP{}(7, 3)
@@ -2896,7 +2896,7 @@ GCD(100!+ 1, 101 * 103)
 ```
 Greatest common divisor of two integers.
 
-*LCM* [LCM] {CalculatorFunctions::innerLCM}. 
+*LCM* [LCM] {CalculatorFunctions::leastCommonMultipleInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LCM%2891%2c%201001%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 LCM(91, 1001)
@@ -2983,14 +2983,14 @@ PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1) ;
 ```
 Prints a string representing division of a polynomial by a set of polynomials using the lexicographic order on the monimial exponents with reversed order of variables. For example, y^2 > x^1000 y > x y. Please do note that the lexicographic order is not related to the lexicographic order on the words 'expansions' (x^2y^3->xxyyy) of the monomials. 
 
-*DFQEuler* [DFQEuler] {CalculatorFunctions::innerDFQsEulersMethod}. 
+*DFQEuler* [DFQEuler] {CalculatorFunctions::differentialEquationsEulersMethod}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DFQEuler%28x%5e2%20%2b%20y%5e2%20-%201%2c%200%2c%200%2c%201000%2c%20-%202.5%2c%202.5%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, - 2.5, 2.5)
 ```
 <b>Calculus teaching function.</b> Iterates Euler's method to approximate solutions of first order ordinary DFQ's. First argument = expression for y', second and third argument = x and y initial values, fourth argument = number of approximating points, fifth and sixth argument = left and right endpoints.
 
-*NewtonsMethod* [NewtonsMethod] {CalculatorFunctions::innerNewtonsMethod}. 
+*NewtonsMethod* [NewtonsMethod] {CalculatorFunctions::newtonsMethod}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22NewtonsMethod%28e%5ex%20-%20%28%20200%20sin%7b%7d%20x%20%2b%20x%5e7%29%2c%200%2c%2010%29%3b%5cnNewtonsMethod%28e%5ex%20%3d%20%28%20200%20sin%7b%7d%20x%20%2b%20x%5e7%29%2c%200%2c%2010%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 NewtonsMethod(e^x - ( 200 sin{} x + x^7), 0, 10);
@@ -3029,14 +3029,14 @@ GaussianElimination(\begin{array}{cccccc} \sqrt 1 & \sqrt 2 & \sqrt 3 & 1 & 0 & 
 ```
 Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of a matrix.
 
-*UnivariatePartialFractionAlgrithm* [UnivariatePartialFractionAlgrithm] {CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm}. 
+*UnivariatePartialFractionAlgrithm* [UnivariatePartialFractionAlgrithm] {CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22UnivariatePartialFractionAlgrithm%28%5c%5cfrac%7bx%5e11%7d%7bx%5e%7b8%7d-2x%5e%7b6%7d-2x%5e%7b5%7d%2b4x%5e%7b3%7d%2bx%5e%7b2%7d-2%7d%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 UnivariatePartialFractionAlgrithm(\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});
 ```
 Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers. At the moment, the function factors the denominator over the rationals. If this factorization yields quadratic and linear terms at the function succeeds, else fails.
 
-*UnivariatePartialFractions* [UnivariatePartialFractions] {CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealS}. 
+*UnivariatePartialFractions* [UnivariatePartialFractions] {CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealS}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%5c%5cfrac%7bx%5e3%7d%7bx%5e%7b3%7d-x%5e2%2b2x%5e2-2%7d%3b%5cnB%3dUnivariatePartialFractions%28A%29%3b%5cnA-%5c%5csum%28B%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A =\frac{x^3}{x^{3}-x^2+2x^2-2};
@@ -3052,7 +3052,7 @@ EqualityToArithmeticExpression(a = b)
 ```
 Transforms the equality a = b to the arithmetic expression a - b.
 
-*PointsImplicitly* [PointsImplicitly] {CalculatorFunctions::innerGetPointsImplicitly}. 
+*PointsImplicitly* [PointsImplicitly] {CalculatorFunctions::getPointsImplicitly}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PointsImplicitly%28%28x%20-%201%29%20%28y%20-%201%29%20-%20%28%28x%20-%201%29%20%5e%202%20%28y%20-%201%29%20%2b%201%29%20%5e%202%2c%20%28-%202%2c%20-%202%29%2c%20%282%2c%202%29%2c%20%2810%2c%2010%29%2c%202000%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PointsImplicitly((x - 1) (y - 1) - ((x - 1) ^ 2 (y - 1) + 1) ^ 2, (- 2, - 2), (2, 2), (10, 10), 2000)
@@ -3151,14 +3151,14 @@ MatchesPattern{}(a = b * 10, a = {{c}} * b); MatchesPattern{}(a = b * 10, a = b 
 ```
 Checks whether the first argument matches the pattern of the second argument. If no, returns 0. Pattern parametric entries are indicated with the bound variable notation {{a}}. If the expression matches the pattern, the return is a command enclosure in which each of the variables is freed and assigned the matched value. 
 
-*GetVariablesExcludeNamedConstants* [GetVariablesExcludeNamedConstants] {CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants}. 
+*GetVariablesExcludeNamedConstants* [GetVariablesExcludeNamedConstants] {CalculatorFunctions::getFreeVariablesExcludeNamedConstants}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetVariablesExcludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%3b%20GetVariablesIncludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\arctan x + x *y + x^y + x^{y^z}); GetVariablesIncludeNamedConstants{}(e^x + x + 5 +\arctan x + x *y + x^y + x^{y^z})
 ```
 Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as ``free variables'' but the possibility for small distinctions is reserved (to allow dealing with named constants, reserved keywords, etc.). 
 
-*GetVariablesIncludeNamedConstants* [GetVariablesIncludeNamedConstants] {CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants}. 
+*GetVariablesIncludeNamedConstants* [GetVariablesIncludeNamedConstants] {CalculatorFunctions::getFreeVariablesIncludeNamedConstants}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetVariablesExcludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b5%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2bx%5ey%2bx%5e%7by%5ez%7d%29%3b%20GetVariablesIncludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b5%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2bx%5ey%2bx%5e%7by%5ez%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GetVariablesExcludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z}); GetVariablesIncludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z})
@@ -3260,7 +3260,7 @@ Plot2DWithBars{}(A, B, 0, 5, 1)
 ```
 <b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions, used to illustrate approximations to definite integrals.
 
-*CompareFunctionsNumerically* [CompareFunctionsNumerically] {CalculatorFunctions::innerCompareFunctionsNumerically}. 
+*CompareFunctionsNumerically* [CompareFunctionsNumerically] {CalculatorFunctions::compareFunctionsNumerically}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CompareFunctionsNumerically%7b%7d%28arctan%20%28x%29%2c%20arcsin%28x%2f%5c%5csqrt%7bx%5e2%2b%201%7d%29%2c0%2c%205%2c50%2c0.0001%29%3b%5cnCompareFunctionsNumerically%7b%7d%28e%5ex%2c%201%2bx%20%2bx%5e2%2f2%2bx%5e3%2f3%21%2bx%5e4%2f4%21%2bx%5e5%2f5%21%2bx%5e6%2f6%21%2c0%2c%205%2c50%2c0.0001%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CompareFunctionsNumerically{}(arctan (x), arcsin(x/\sqrt{x^2+ 1}),0, 5,50,0.0001);
@@ -3268,7 +3268,7 @@ CompareFunctionsNumerically{}(e^x, 1+x +x^2/2+x^3/3!+x^4/4!+x^5/5!+x^6/6!,0, 5,5
 ```
 <b>Calculus teaching function.</b> Compares two one-variable functions numerically. First two arguments give the two functions. Third and fourth arguments give the interval [a,b] over which to compare. Fifth argument is optional (default: 50) and gives the number of sampling points. Sixth argument is optional (default: 0.0001) and gives the numerical tolerance eps- if two numbers are at a distance less than eps they are considered equal. 
 
-*CompareExpressionsNumerically* [CompareExpressionsNumerically] {CalculatorFunctions::innerCompareExpressionsNumerically}. 
+*CompareExpressionsNumerically* [CompareExpressionsNumerically] {CalculatorFunctions::compareExpressionsNumerically}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CompareExpressionsNumerically%7b%7d%28%5c%5carctan%20x%20%2b%20%5c%5carctan%20y%2c%20%5c%5carctan%28%28x%20%2by%29%2f%281-%20x%20y%29%29%2c%200.0001%2c%20x%5c%5cin%280%2c0.5%29%2c%2020%2c%20y%5c%5cin%280%2c0.5%29%2c%2020%20%29%3b%5cnCompareExpressionsNumerically%7b%7d%28%5c%5carctan%20x%20%2b%20%5c%5carctan%20y%2c%5c%5carctan%28%28x%20%2by%29%2f%281-%20x%20y%29%29%2c%200.0001%2c%20x%5c%5cin%280%2c2%29%2c%2020%2c%20y%5c%5cin%280%2c2%29%2c%2020%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CompareExpressionsNumerically{}(\arctan x + \arctan y, \arctan((x +y)/(1- x y)), 0.0001, x\in(0,0.5), 20, y\in(0,0.5), 20 );
@@ -3276,7 +3276,7 @@ CompareExpressionsNumerically{}(\arctan x + \arctan y,\arctan((x +y)/(1- x y)), 
 ```
 Compares two expressions numerically. First two arguments give the two functions. The third argument gives the precision. All remaining arguments come in pairs, in the form x\in (2,3), 50. 
 
-*CompareExpressionsNumericallyAtPoints* [CompareExpressionsNumericallyAtPoints] {CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints}. 
+*CompareExpressionsNumericallyAtPoints* [CompareExpressionsNumericallyAtPoints] {CalculatorFunctions::compareExpressionsNumericallyAtPoints}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CompareExpressionsNumericallyAtPoints%7b%7d%28%5c%5carctan%20x%20%2b%20%5c%5carctan%20y%2c%20%5c%5carctan%28%28x%20%2by%29%2f%281-%20x%20y%29%29%2c%200.001%2c%20%28x%2cy%29%5c%5cin%20%28%280.5%2c0.5%29%2c%280.3%2c0.3%29%29%29%3b%5cntheFun%20%3d%5c%5csqrt%7bx%20y%7d-%284%20x%5e%7b2%7d%20y-%201%29%3b%5cna%20%3d%5c%5cfrac%7b-64%20x%5e%7b3%7d%20y%5e%7b2%7d%2b%2016%20x%20y%2by%7d%7b32%20x%5e%7b4%7d%20y-8%20x%5e%7b2%7d-%20x%7d%3b%5cntheDiff%3d%20d%2fdx%28theFun%29%3b%5cnnum%3d%20%28d%2fdx%20y%20%3d%200%3b%20theDiff%29_2%3b%5cnden%20%3d%20CoefficientOf%20%28d%2fdx%20y%2c%20theDiff%29%3b%5cnb%3d%20-num%2fden%3b%5cnCompareExpressionsNumerically%28a%2cb%2c%200.001%2c%20x%5c%5cin%280%2c5%29%2c10%2c%20y%5c%5cin%20%280%2c5%29%2c10%29%3b%5cnA%20%3d%20PointsImplicitly%28theFun%2c%20%280%2c0%29%2c%284%2c4%29%2c%20%2810%2c10%29%2c%20%28400%2c400%29%29%3b%5cnCompareExpressionsNumericallyAtPoints%28a%2cb%2c%200.01%2c%20%28x%2cy%29%5c%5cin%20A%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CompareExpressionsNumericallyAtPoints{}(\arctan x + \arctan y, \arctan((x +y)/(1- x y)), 0.001, (x,y)\in ((0.5,0.5),(0.3,0.3)));
@@ -3353,7 +3353,7 @@ IsRational{}b
 ```
 If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. 
 
-*not* [not] {Calculator::innerNot}. 
+*not* [not] {Calculator::notFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22not%7b%7d1%3bnot%7b%7da%3b%20not%7b%7d0%3b%20not%7b%7d%283%3d%3d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 not{}1;not{}a; not{}0; not{}(3==4)
@@ -3368,7 +3368,7 @@ DiagonalizeMatrix a
 ```
 Tries to diagonalize a matrix (Jordan normal form). As of writing, will succeed only when the eigenvalues are rational or use quadratic radicals and the Jordan normal form is diagonal. When successful, returns a list of three matrices, X, A and X^-1, such that XAX^-1 equals the orignal matrix and A is in Jordan normal form.
 
-*FunctionToMatrix* [FunctionToMatrix] {Calculator::innerFunctionToMatrix}. 
+*FunctionToMatrix* [FunctionToMatrix] {Calculator::functionToMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cn%20A%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3da%2fb%3b%5cn%20X%3b%20%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =FunctionToMatrix{}(A,5,5);
@@ -3384,7 +3384,7 @@ Transpose{}(1,2); (1,2)^t
 ```
 Transposes a matrix of expressions. 
 
-*\det* [Determinant] {CalculatorFunctions::innerDeterminant}. 
+*\det* [Determinant] {CalculatorFunctions::determinant}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cn%20A%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3d1%2f%28a%20%2bb%29%3b%5cn%20X%3b%20%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =FunctionToMatrix{}(A,5,5);
@@ -3393,7 +3393,7 @@ X =FunctionToMatrix{}(A,5,5);
 ```
 Tries to convert to a matrix of rationals or matrix of rational functions and computes the determinant if not too large.  
 
-*DeterminantPolynomial* [DeterminantPolynomial] {Calculator::innerDeterminantPolynomial}. 
+*DeterminantPolynomial* [DeterminantPolynomial] {Calculator::determinantPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DeterminantPolynomial%7b%7d%5c%5cleft%28%20%5c%5cbegin%7barray%7d%7bccc%7dx_%7b11%7d%20%26%20x_%7b12%7d%20%26%20x_%7b13%7d%20%5c%5c%5c%5c%20x_%7b21%7d%20%26%20x_%7b22%7d%20%26%20x_%7b23%7d%20%5c%5c%5c%5c%20x_%7b31%7d%20%26%20x_%7b32%7d%20%26%20x_%7b33%7d%20%5c%5cend%7barray%7d%20%5c%5cright%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DeterminantPolynomial{}\left( \begin{array}{ccc}x_{11} & x_{12} & x_{13} \\ x_{21} & x_{22} & x_{23} \\ x_{31} & x_{32} & x_{33} \end{array} \right) 
@@ -3414,7 +3414,7 @@ Length{}(Sequence{}(a,b));
 ```
 Returns the length of a sequence. 
 
-*GetMultiplicandList* [GetMultiplicandList] {CalculatorFunctions::innerCollectMultiplicands}. 
+*GetMultiplicandList* [GetMultiplicandList] {CalculatorFunctions::collectMultiplicands}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetMultiplicandList%28a%2ab%2ac%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GetMultiplicandList(a*b*c) 
@@ -3438,7 +3438,7 @@ BelongsTo(x,(w,y,z));
 ```
 Returns 1 if an element belongs to a list, 0 otherwise. 
 
-*CompareIntervalsNumerically* [CompareIntervalsNumerically] {CalculatorFunctions::innerCompareIntervalsNumerically}. 
+*CompareIntervalsNumerically* [CompareIntervalsNumerically] {CalculatorFunctions::compareIntervalsNumerically}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%20%20CompareIntervalsNumerically%28%5b3%2c7%29%5c%5ccup%20%5b8%2c9%5d%2c%20%5b3%2c7.00000001%29%5c%5ccup%20%5b7.9999999%2c%209%5d%2c%200.0001%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
@@ -3446,7 +3446,7 @@ Returns 1 if an element belongs to a list, 0 otherwise.
 ```
 Compares unions of intervals numerically. First and second arguments: two unions of intervals to compare. Third argument: precisions to compare with. 
 
-*GetOpandList* [GetOpandList] {CalculatorFunctions::innerCollectOpands}. 
+*GetOpandList* [GetOpandList] {CalculatorFunctions::collectOpands}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cnGetOpandList%28StringToAtom%28%5c%22%5c%5cotimes%5c%22%29%2c%20a%5c%5cotimes%20b%20%5c%5cotimes%20c%20%29%3b%20GetOpandList%28StringToAtom%28%5c%22%5c%5ccup%5c%22%29%2c%20%5ba%2cb%5d%5c%5ccup%20%5bc%2cd%5d%20%5c%5ccup%20%5be%2cf%5d%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
@@ -3461,28 +3461,28 @@ GetSummandList(1+a +b)
 ```
 Converts a sum to a sequence containing the summands. 
 
-*GetSummand* [GetSummand] {CalculatorFunctions::innerGetSummand}. 
+*GetSummand* [GetSummand] {CalculatorFunctions::getSummand}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetSummand%28%5c%5csum_%7bn%20%3d1%7d%5e%5c%5cinfty%20%28-%201%29%5e%7b2n%20%2b%201%7d%20x%5e%7b2n%20%2b%201%7d%2f%282n%20%2b%201%29%21%2c%205%20%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GetSummand(\sum_{n =1}^\infty (- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!, 5 ) 
 ```
 Extracts the nth summand from a sum, <b>starts with the ZEROETH summand</b>. 
 
-*GetFirstSummandContaining* [GetFirstSummandContaining] {CalculatorFunctions::innerGetFirstSummandContaining}. 
+*GetFirstSummandContaining* [GetFirstSummandContaining] {CalculatorFunctions::getFirstSummandContaining}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetFirstSummandContaining%28a%20%2bb%2b%5c%5csum_%7bn%20%3d1%7d%5e%5c%5cinfty%28%28-%201%29%5e%7b2n%20%2b%201%7d%20x%5e%7b2n%20%2b%201%7d%2f%282n%20%2b%201%29%21%29%2c%20%5c%5csum%20%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GetFirstSummandContaining(a +b+\sum_{n =1}^\infty((- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!), \sum ) 
 ```
 Extracts the first summand containing a subexpression. 
 
-*RemoveDuplicates* [RemoveDuplicates] {CalculatorFunctions::innerRemoveDuplicates}. 
+*RemoveDuplicates* [RemoveDuplicates] {CalculatorFunctions::removeDuplicates}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22RemoveDuplicates%28a%2ca%2cc%2ca%2cb%2ca%2cb%2cd%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 RemoveDuplicates(a,a,c,a,b,a,b,d) 
 ```
 Removes duplicates. 
 
-*Sort* [Sort] {CalculatorFunctions::innerSort}. 
+*Sort* [Sort] {CalculatorFunctions::sort}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Sort%28x%5e2%2c%20x%5e3%2c%20x%5e1%2c%20x%5e%7b-%201%7d%29%3b%5cnSort%283%2c2%2c1%2c4%2c3%29%3b%5cnSort%28%283%2c2%2c3%2c1%29%29%3b%5cnSort%7b%7d%28%283%2c2%2c3%2c1%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Sort(x^2, x^3, x^1, x^{- 1});
@@ -3493,14 +3493,14 @@ Sort{}((3,2,3,1));
 ```
 Sorts a sequence. 
 
-*SortDescending* [SortDescending] {CalculatorFunctions::innerSortDescending}. 
+*SortDescending* [SortDescending] {CalculatorFunctions::sortDescending}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SortDescending%28x%5e2%2c%20x%5e3%2c%20x%5e1%2c%20x%5e%7b-%201%7d%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SortDescending(x^2, x^3, x^1, x^{- 1}) 
 ```
 Sorts a sequence in descending order.  
 
-*BlocksOfCommutativity* [BlocksOfCommutativity] {CalculatorFunctions::innerGetUserDefinedSubExpressions}. 
+*BlocksOfCommutativity* [BlocksOfCommutativity] {CalculatorFunctions::getUserDefinedSubExpressions}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BlocksOfCommutativity%28%5c%5csin%20x%20%2b%20x%5e2%2b%203x%20y%20%2b%2018x%5e%7b3%2f4%20y%7d%2b%5c%5csqrt%7b2%7d%5e%7b%5c%5csqrt%7b2%7dc%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 BlocksOfCommutativity(\sin x + x^2+ 3x y + 18x^{3/4 y}+\sqrt{2}^{\sqrt{2}c})
@@ -3528,28 +3528,28 @@ X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); Trace X
 ```
 Gets trace of a square matrix. 
 
-*ReverseBytes* [ReverseBytes] {Calculator::innerReverseBytes}. 
+*ReverseBytes* [ReverseBytes] {Calculator::reverseBytes}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ReverseBytes%7b%7d%28%5c%22abc%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ReverseBytes{}("abc")
 ```
 Reverses the bytes of a string. Does not respect utf-8 encoding. 
 
-*Reverse* [Reverse] {Calculator::innerReverseOrder}. 
+*Reverse* [Reverse] {Calculator::reverseOrder}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Reverse%7b%7d%28s_1%20s_2%20s_3%20s_4%20s_2%20s_3%20s_1%20s_2%20s_3%20s_4%20s_1%20s_2%20s_3%20s_2%20s_1%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Reverse{}(s_1 s_2 s_3 s_4 s_2 s_3 s_1 s_2 s_3 s_4 s_1 s_2 s_3 s_2 s_1)
 ```
 Reverses order of elements. This operation will reverse products, lists, etc. More precisely, the command leaves the fist child in the internal representation of the object in place and flips the order of all other children.
 
-*ReverseRecursively* [ReverseRecursively] {Calculator::innerReverseOrderRecursively}. 
+*ReverseRecursively* [ReverseRecursively] {Calculator::reverseOrderRecursively}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ReverseRecursively%7b%7d%28s_1%20s_2%20s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)
 ```
 Same as Reverse but will apply recursively to the children expressions as well.
 
-*SolveFor* [SolveFor] {CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT}. 
+*SolveFor* [SolveFor] {CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SolveFor%28x%2c%20a%20x%5e2%20%2b%20b%20x%20%2b%20c%29%3b%5cnSolveFor%28x%2c%20a%20x%20%2b%20b%29%3b%5cnSolveFor%28x%2c%20x%5e3%20-%203x%5e2%20-%20x%2f2%20%2b%205%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SolveFor(x, a x^2 + b x + c);
@@ -3558,7 +3558,7 @@ SolveFor(x, x^3 - 3x^2 - x/2 + 5);
 ```
 Tries to solve a polynomial equation with respect to a variable. The first argument gives the variable expression (arbitrary expressions allowed) and the second argument gives the polynomial. At the moment the calculator only knows the quadratic formula but Cardano's formula and the fourth degree formula will be implemented when need arises. The solutions of the equation are returned in a list (empty list for no solution). Solutions with multiplicity higher than one are repeated. 
 
-*CardanoFormula* [CardanoFormula] {CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT}. 
+*CardanoFormula* [CardanoFormula] {CalculatorFunctions::cardanoFormula}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CardanoFormula%28x%5e3%20%2b%20p%20x%20%2b%20q%3d0%29%3b%5cnCardanoFormula%28x%5e3%20%2b%202%20x%20%2b%203%29%3b%5cnCardanoFormula%28a%20x%5e3%20%2b%20b%20x%5e2%20%2b%20c%20x%20%2b%20d%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CardanoFormula(x^3 + p x + q=0);
@@ -3568,7 +3568,7 @@ CardanoFormula(a x^3 + b x^2 + c x + d);
 ```
 Applies the cardano formula to a cubic.
 
-*FactorOutNumberContent* [FactorOutNumberContent] {CalculatorFunctions::innerFactorOutNumberContent}. 
+*FactorOutNumberContent* [FactorOutNumberContent] {CalculatorFunctions::factorOutNumberContent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffRules%28%5c%22DistributeMultiplication%5c%22%2c%5c%22DistributeMultiplicationConstants%5c%22%29%3b%20FactorOutNumberContent%7b%7d%283x%20%2b%209t%20%2b%2027%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOffRules("DistributeMultiplication","DistributeMultiplicationConstants"); FactorOutNumberContent{}(3x + 9t + 27);
@@ -3611,7 +3611,7 @@ FactorOneVariablePolynomialModPrime{}(x^5+x^4+2x^3-x^2-x-1, 1009);
 ```
 Factors a one variable polynomial over a given prime field Z/pZ using the Cantor-Zassenhaus algorithm. First argument = polynomial. Second argument = prime number.
 
-*FactorInteger* [FactorInteger] {Calculator::innerFactorInteger}. 
+*FactorInteger* [FactorInteger] {Calculator::factorInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FactorInteger%2810001011%29%3b%5cnFactorInteger%281%29%3b%5cnFactorInteger%28-%2010%29%3b%5cnFactorInteger%280%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FactorInteger(10001011);
@@ -3690,21 +3690,21 @@ IsProductTermsUpToPower(x, (2x +y)(x \pi + 1));
 ```
 Returns true if the expression is a product of terms of power up to the given power. Although this is subject to change, at the moment powers of linear terms are not considered linear. 
 
-*ScaleToLeadingUnit* [ScaleToLeadingUnit] {CalculatorFunctions::innerScaleToLeadingUnit}. 
+*ScaleToLeadingUnit* [ScaleToLeadingUnit] {CalculatorFunctions::scaleToLeadingUnit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ScaleToLeadingUnit%281%2f2%20x%20%2b%201%2f3%20y%2b%201%2f7%20a%20b%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ScaleToLeadingUnit(1/2 x + 1/3 y+ 1/7 a b)
 ```
 Rescales an expression over the rationals so that the leading term has coefficient 1. 
 
-*AugmentMatrixToTheRight* [AugmentMatrixToTheRight] {CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight}. 
+*AugmentMatrixToTheRight* [AugmentMatrixToTheRight] {CalculatorFunctionsBinaryOps::augmentMatrixToTheRight}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AugmentMatrixToTheRight%28%20%28%281%2c1%29%2c%282%2c2%29%29%2c%20%28%280%2c0%29%2c%281%2c1%29%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 AugmentMatrixToTheRight( ((1,1),(2,2)), ((0,0),(1,1)))
 ```
 Augments matrix to the right with another matrix. Pastes the content of the second matrix to the right of the first matrix.The matrices must have the same number of rows. 
 
-*AugmentMatrixBelow* [AugmentMatrixBelow] {CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow}. 
+*AugmentMatrixBelow* [AugmentMatrixBelow] {CalculatorFunctionsBinaryOps::augmentMatrixBelow}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AugmentMatrixBelow%28%20%28%281%2c1%29%2c%282%2c2%29%29%2c%20%28%280%2c0%29%2c%281%2c1%29%29%29%3b%5cna%20%3d%20FunctionToMatrix%283%2c%202%2c2%29%3b%5cnb%20%3d%20FunctionToMatrix%284%2c%202%2c3%29%3b%5cnAugmentMatrixBelow%28b%2ca%29%3b%5cnAugmentMatrixBelow%28a%2ca%29%3b%5cnAugmentMatrixBelow%28b%2cb%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 AugmentMatrixBelow( ((1,1),(2,2)), ((0,0),(1,1)));
@@ -3718,21 +3718,21 @@ Augments matrix below by another matrix. Pastes the content of the second matrix
 
 Operator or function \_ is overloaded with 5 total handlers.
 
-*\_* [LimitBoundaryNotationUnderscore] {CalculatorFunctions::innerHandleUnderscorePowerLimits}. 
+*\_* [LimitBoundaryNotationUnderscore] {CalculatorFunctions::handleUnderscorePowerLimits}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5climits_a%5eb%3b%20%5c%5climits%5eb_a%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \limits_a^b; \limits^b_a
 ```
 Handles expressions of the form \limits_a^b
 
-*\_* [OperatorBoundsUnderscore] {Calculator::innerUnderscoreIntWithAny}. 
+*\_* [OperatorBoundsUnderscore] {Calculator::operatorBounds}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%5ea_b%20f%20dx%3b%20%5c%5cint_a%5eb%20f%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int^a_b f dx; \int_a^b f dx
 ```
 Takes care of the integral superscript notation \int^a 
 
-*\_* [DereferenceSequenceOrMatrix] {CalculatorFunctions::innerDereferenceSequenceOrMatrix}. 
+*\_* [DereferenceSequenceOrMatrix] {CalculatorFunctions::dereferenceSequenceOrMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20%28a%2c%20b%2c%20c%29%3b%5cnX_1%3b%5cnX_2%3b%5cnX_3%3b%5cnX_4%3b%5cnX_j%3b%5cnj%20%3d%203%3b%5cnX_j%3b%5cnDenominations%20%3d%20%281%2c%205%2c%2010%2c%2025%2c50%2c%20100%2c200%2c%20500%2c%201000%2c%202000%2c%205000%29%3b%5cnp%20%280%2c%200%20%29%3d1%3b%5cnp%20%28%7b%7ba%7d%7d%2c%20%7b%7bx%7d%7d%29%3aif%20%28x%20%3c%200%29%20%3d%200%3b%5cnp%20%280%2c%20%7b%7bx%7d%7d%29%3d%200%3b%5cnp%20%28%7b%7ba%7d%7d%2c%20%7b%7bx%7d%7d%20%29%3d%20p%28a-%201%2cx%29%20%2b%20p%28a%2c%20x-Denominations_a%29%3b%5cnp%20%2811%2c%20100%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = (a, b, c);
@@ -3752,7 +3752,7 @@ p (11, 100)
 ```
 Dereferences a sequence or a matrix. The syntax is as illustrated by the example. 
 
-*\_* [DereferenceInterval] {CalculatorFunctions::innerDereferenceInterval}. 
+*\_* [DereferenceInterval] {CalculatorFunctions::dereferenceInterval}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%5ba%2c%20b%29_1%3b%5cn%28a%2c%20b%5d_2%3b%5cn%5ba%2c%20b%5d_1%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
@@ -3762,7 +3762,7 @@ Dereferences a sequence or a matrix. The syntax is as illustrated by the example
 ```
 Dereferences an interval, as illustrated by the example. 
 
-*\_* [DereferenceSequenceStatements] {CalculatorFunctions::innerDereferenceSequenceStatements}. 
+*\_* [DereferenceSequenceStatements] {CalculatorFunctions::dereferenceSequenceStatements}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20d%2fdx%28%20%5c%5csqrt%28x%20%2b%20y%29%20-%204x%5e2y%5e2%29%3b%5cn%28d%2fdx%28y%29%3d%200%3b%20A%29_2%3b%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A = d/dx( \sqrt(x + y) - 4x^2y^2);
@@ -3770,7 +3770,7 @@ A = d/dx( \sqrt(x + y) - 4x^2y^2);
 ```
 Dereferences a sequence of rules. The syntax is as illustrated by the example. 
 
-*Value* [Value] {CalculatorFunctions::innerValueOfModularExpression}. 
+*Value* [Value] {CalculatorFunctions::valueOfModularExpression}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Value%283%20mod%207%29%3b%5cnValue%289%20mod%207%29%3b%5cna%20%3d%20Value%28%28PolynomialModP%28x%5e9%2c%207%29%29%20mod%20%28PolynomialModP%28x%5e5%2bx%2b1%2c%207%29%29%29%3b%5cnValue%20a%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Value(3 mod 7);
@@ -3796,7 +3796,7 @@ Operator or function Differential is overloaded with 2 total handlers.
 ```
 Transforms Differential{}a to the standard internal form Differential {}(a, 1).
 
-*Differential* [DifferentialOfPolynomial] {CalculatorFunctionsBinaryOps::innerDifferentialOfPolynomial}. 
+*Differential* [DifferentialOfPolynomial] {CalculatorFunctionsBinaryOps::differentialOfPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Differential%7b%7d%28Polynomial%7b%7d%28x%2by%29%29%3b%5cnDifferential%7b%7d%28Polynomial%7b%7d%28x%5e3y%20z%2by%20z%20%2b%20x%20y%20%2b%20x%5e5%20y%5e2%20z%20%2b%20x%20y%5e2%20z%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Differential{}(Polynomial{}(x+y));
@@ -3805,35 +3805,35 @@ Differential{}(Polynomial{}(x^3y z+y z + x y + x^5 y^2 z + x y^2 z));
 ```
 Differential of a polynomial.
 
-*Max* [Max] {CalculatorFunctions::innerMax}. 
+*Max* [Max] {CalculatorFunctions::max}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Max%28-%204%2c2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Max(- 4,2)
 ```
 Maximum function.
 
-*Min* [Min] {CalculatorFunctions::innerMin}. 
+*Min* [Min] {CalculatorFunctions::min}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Min%28-%204%2c2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Min(- 4,2)
 ```
 Maximum function.
 
-*Contains* [Contains] {CalculatorFunctions::innerContains}. 
+*Contains* [Contains] {CalculatorFunctions::contains}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Contains%20%28%28%5c%5carcsin%20x%20%2b%5c%5ccos%20x%2c5%29%2c%20%5c%5carcsin%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Contains ((\arcsin x +\cos x,5), \arcsin )
 ```
 Returns 1 if the first argument contains the second as a sub-expression, else returns 0. Function has not been optimized for speed, use with caution. 
 
-*ExpressionLeafs* [ExpressionLeafs] {CalculatorFunctions::innerExpressionLeafs}. 
+*ExpressionLeafs* [ExpressionLeafs] {CalculatorFunctions::expressionLeafs}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExpressionLeafs%20%28%28%5c%5carcsin%20x%20%2b%5c%5ccos%20x%2c5%29%2c%20%5c%5carcsin%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ExpressionLeafs ((\arcsin x +\cos x,5), \arcsin )
 ```
 Returns a sequence without repetition of all leafs making up an expression. Here, a ``leaf'' means either an atomic expression or a built-in type. Built-in types are not broken into atoms. 
 
-*Last* [Last] {CalculatorFunctions::innerLastElement}. 
+*Last* [Last] {CalculatorFunctions::lastElement}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Last%281%2c2%29%3b%5cnLast%28%281%2c%202%29%29%3b%5cnLast%7b%7d%28%29%3b%5cnLast%7b%7d%28%28%29%29%3b%5cna%20%3d%20%281%2c2%29%3b%5cnLast%20a%3b%5cnLast%20Sequence%7b%7d%28a%29%3b%5cnp%7b%7d%28%28%29%2c%200%29%20%3d%201%3b%5cnp%7b%7d%28%7b%7bx%7d%7d%2c%7b%7bn%7d%7d%29%3a%20if%20%28n%20%3c%200%29%20%3d%200%3b%5cnp%7b%7d%28%28%29%2c%20%7b%7bn%7d%7d%29%20%3d%200%3b%5cnp%7b%7d%28%7b%7bx%7d%7d%2c%20%7b%7bn%7d%7d%29%20%3d%20p%7b%7d%28x%2c%20n%20-%20Last%20x%29%20%2bp%7b%7d%28RemoveLast%20x%2c%20n%29%3b%5cnp%7b%7d%28%281%2c%202%2c%205%2c%2010%2c%2025%2c%20100%29%2c%20100%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Last(1,2);
@@ -4048,7 +4048,7 @@ TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("test/private_key.base64
 ```
 Tests decoding of abstract syntax one. 
 
-*X509CertificateServerBase64* [X509CertificateServerBase64] {CalculatorFunctions::innerX509certificateCrunch}. 
+*X509CertificateServerBase64* [X509CertificateServerBase64] {CalculatorFunctions::X509CertificateServerBase64}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X509CertificateServerBase64%200%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X509CertificateServerBase64 0; 
@@ -4205,7 +4205,7 @@ Sha256Verbose("");
 ```
 Same as Sha256 but more verbose. 
 
-*FetchKnownPublicKeys* [FetchKnownPublicKeys] {CalculatorFunctions::innerFetchKnownPublicKeys}. (admin only) 
+*FetchKnownPublicKeys* [FetchKnownPublicKeys] {CalculatorFunctions::fetchKnownPublicKeys}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FetchKnownPublicKeys%280%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FetchKnownPublicKeys(0)
@@ -4280,7 +4280,7 @@ AlgebraicNumberFromPolynomial{}(x^3 + \sqrt{2}x + 1);
 ```
 Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. 
 
-*ElementWeylAlgebraDO* [ElementWeylAlgebraDO] {Calculator::innerElementWeylAlgebra}. 
+*ElementWeylAlgebraDO* [ElementWeylAlgebraDO] {Calculator::elementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%20%3d%20Polynomial%7b%7dx_i%3b%5cn%5b%5c%5cpartial_1%2c%20x_1%5d%3b%5cn%5c%5cpartial_1%20x_1%3b%5cnx_1%5c%5cpartial_1%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}} = ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -4300,7 +4300,7 @@ x_{{i}} = ElementWeylAlgebraPoly{}(\partial_i, x_i);
 ```
 Creates a monomial from the second argument whose differential operator letter is the first argument. 
 
-*FourierTransformDO* [FourierTransformDO] {CalculatorFunctions::innerFourierTransformEWA}. 
+*FourierTransformDO* [FourierTransformDO] {CalculatorFunctions::fourierTransformElementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20ElementWeylAlgebraPoly%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5cn%5c%5cpartial%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5cna%20%3dx%5e3%20%2b%20x%5c%5cpartial%3b%5cnb%20%3d%20%5c%5cpartial%20x%20%2b%20%5c%5cpartial%5e3%20%2b%20%5c%5cpartial%3b%5cn%5bFourierTransformDO%7b%7da%2c%20FourierTransformDO%7b%7db%5d-%20FourierTransformDO%7b%7d%5ba%2c%20b%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = ElementWeylAlgebraPoly{}(\partial, x);
@@ -4311,7 +4311,7 @@ b = \partial x + \partial^3 + \partial;
 ```
 Fourier-transforms an element of a Weyl algebra. Multiplies each monomial term of odd total degree by - 1 (total degree = sum of degrees in the polynomial variables plus the degrees of the differential variables. 
 
-*MinPolyMatrix* [MinPolyMatrix] {CalculatorFunctions::innerMinPolyMatrix}. 
+*MinPolyMatrix* [MinPolyMatrix] {CalculatorFunctions::minimalPolynomialMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20MakeMatrix%7b%7d%28%280%2c%201%29%2c%20%28-%201%2c%200%29%29%3b%5cnp%20%3d%20MinPolyMatrix%7b%7dA%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A = MakeMatrix{}((0, 1), (- 1, 0));
@@ -4319,7 +4319,7 @@ p = MinPolyMatrix{}A
 ```
 Computes the minimal polynomial of a matrix, provided that the matrix is not too large.
 
-*IsPrimeMillerRabin* [IsPrimeMillerRabin] {CalculatorFunctions::innerIsPrimeMillerRabin}. 
+*IsPrimeMillerRabin* [IsPrimeMillerRabin] {CalculatorFunctions::isPrimeMillerRabin}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d100%21%2b%201%3b%20IsPrimeMillerRabin%28A%29%3b%5cnIsPrimeMillerRabin%284256233%29%3b%5cnIsPrimeMillerRabin%2849979687%29%3b%5cnIsPrimeMillerRabin%284256233%20%2a%2049979687%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A =100!+ 1; IsPrimeMillerRabin(A);
@@ -4329,7 +4329,7 @@ IsPrimeMillerRabin(4256233 * 49979687)
 ```
 Checks whether the number is prime by the Miller-Rabin test. 
 
-*IsPossiblyPrime* [IsPossiblyPrime] {CalculatorFunctions::innerIsPossiblyPrime}. 
+*IsPossiblyPrime* [IsPossiblyPrime] {CalculatorFunctions::isPossiblyPrime}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d100%21%2b%201%3b%5cnIsPrimeMillerRabin%28A%29%3b%5cnIsPossiblyPrime%284256233%29%3b%5cnIsPossiblyPrime%2849979687%29%3b%5cnIsPossiblyPrime%284256233%20%2a%2049979687%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A =100!+ 1;
@@ -4348,14 +4348,14 @@ IsSquareFreePolynomial( (x-3x y +5 x y^2)^2 (3+x +y^2) )
 ```
 Computes whether a polynomial is square-free by computing the greatest common divisors of the partial derivatives with the original polynomial.If the greatest common divisor is constant, then the polynomial is square-free. 
 
-*AllPartitions* [AllPartitions] {CalculatorFunctions::innerAllPartitions}. 
+*AllPartitions* [AllPartitions] {CalculatorFunctions::allPartitions}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AllPartitions%2810%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 AllPartitions(10) 
 ```
 Prints all partitions of a positive number into a sum of positive integers. 
 
-*AllVectorPartitions* [AllVectorPartitions] {CalculatorFunctions::innerAllVectorPartitions}. 
+*AllVectorPartitions* [AllVectorPartitions] {CalculatorFunctions::allVectorPartitions}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AllVectorPartitions%28%2810%2c%2011%29%2c%20%28%281%2c2%20%29%2c%20%282%2c%203%29%2c%20%284%2c%205%29%2c%20%282%2c%201%29%2c%20%283%2c%202%29%2c%20%285%2c%204%29%29%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 AllVectorPartitions((10, 11), ((1,2 ), (2, 3), (4, 5), (2, 1), (3, 2), (5, 4))) 
@@ -4375,7 +4375,7 @@ AllSelectionsFixedRank(2, 1);
 ```
 Prints all selections of fixed size (given by first argument) from a collection of objects with multiplicities (given as a non-negative integer vector by the second argument). 
 
-*KostkaNumber* [KostkaNumber] {CalculatorFunctions::innerKostkaNumbers}. 
+*KostkaNumber* [KostkaNumber] {CalculatorFunctionsWeylGroup::kostkaNumber}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22KostkaNumber%28%283%2c2%2c1%29%2c%20%284%2c2%29%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 KostkaNumber((3,2,1), (4,2)) 
@@ -4389,14 +4389,14 @@ PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0);
 ```
 Prints all vectors of grade level d with n coordinates lying in Z_{>= 0}. Function meant for debugging purposes. First argument = dimension, second argument =grading level. 
 
-*IsNilpotent* [IsNilpotent] {CalculatorFunctions::innerIsNilpotent}. 
+*IsNilpotent* [IsNilpotent] {CalculatorFunctions::isNilpotent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22isNilpotent%7b%7d%28%280%2c%201%29%2c%20%280%2c%200%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 isNilpotent{}((0, 1), (0, 0))
 ```
 Computes whether a matrix is nilpotent. Recall an object X is nilpotent if there's a positive N with X^N=0. May/will be extended to work for an arbitrary object for which the term "nilpotent" makes sense. 
 
-*FindOneSolutionSerreLikePolynomialSystem* [FindOneSolutionSerreLikePolynomialSystem] {CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit}. 
+*FindOneSolutionSerreLikePolynomialSystem* [FindOneSolutionSerreLikePolynomialSystem] {CalculatorFunctions::solveSerreLikeSystemNoUpperLimit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FindOneSolutionSerreLikePolynomialSystem%7b%7d%28%5cnx_%7b12%7dx_%7b24%7d-x_%7b10%7dx_%7b22%7d-2x_%7b8%7dx_%7b20%7d-x_%7b7%7dx_%7b19%7d%2b%201%2c%20x_%7b11%7dx_%7b24%7d-x_%7b10%7dx_%7b23%7d-x_%7b8%7dx_%7b21%7d%2c%20x_%7b9%7dx_%7b24%7d-x_%7b8%7dx_%7b23%7d%2bx_%7b7%7dx_%7b21%7d%2c%20x_%7b6%7dx_%7b24%7d%2b2x_%7b5%7dx_%7b23%7d-x_%7b4%7dx_%7b22%7d%2b2x_%7b3%7dx_%7b21%7d-2x_%7b2%7dx_%7b20%7d-x_%7b1%7dx_%7b19%7d%2c%20x_%7b12%7dx_%7b23%7d-x_%7b11%7dx_%7b22%7d-x_%7b9%7dx_%7b20%7d%2c%20x_%7b11%7dx_%7b23%7d%2bx_%7b10%7dx_%7b22%7d%2bx_%7b8%7dx_%7b20%7d-%201%2c%20x_%7b9%7dx_%7b23%7d%2bx_%7b8%7dx_%7b22%7d-x_%7b7%7dx_%7b20%7d%2c%20x_%7b12%7dx_%7b21%7d-x_%7b11%7dx_%7b20%7d%2bx_%7b9%7dx_%7b19%7d%2c%20x_%7b11%7dx_%7b21%7d%2bx_%7b10%7dx_%7b20%7d-x_%7b8%7dx_%7b19%7d%2c%20x_%7b9%7dx_%7b21%7d%2bx_%7b8%7dx_%7b20%7d%2bx_%7b7%7dx_%7b19%7d-%201%2c%20x_%7b12%7dx_%7b18%7d%2b2x_%7b11%7dx_%7b17%7d-x_%7b10%7dx_%7b16%7d%2b2x_%7b9%7dx_%7b15%7d-2x_%7b8%7dx_%7b14%7d-x_%7b7%7dx_%7b13%7d%2c%20x_%7b6%7dx_%7b18%7d-x_%7b4%7dx_%7b16%7d-2x_%7b2%7dx_%7b14%7d%20-%20x_%7b1%7dx_%7b13%7d%20%2b%201%2c%20x_%7b5%7dx_%7b18%7d%2bx_%7b4%7dx_%7b17%7d%2bx_%7b2%7dx_%7b15%7d%2c%20x_%7b3%7dx_%7b18%7d%2bx_%7b2%7dx_%7b17%7d-x_%7b1%7dx_%7b15%7d%2c%20x_%7b6%7dx_%7b17%7d%2bx_%7b5%7dx_%7b16%7d%2bx_%7b3%7dx_%7b14%7d%2c%20x_%7b5%7dx_%7b17%7d%2bx_%7b4%7dx_%7b16%7d%2bx_%7b2%7dx_%7b14%7d%20-%201%2c%20x_%7b3%7dx_%7b17%7d%2bx_%7b2%7dx_%7b16%7d-x_%7b1%7dx_%7b14%7d%2c%20x_%7b6%7dx_%7b15%7d%2bx_%7b5%7dx_%7b14%7d-x_%7b3%7dx_%7b13%7d%2c%20x_%7b5%7dx_%7b15%7d%2bx_%7b4%7dx_%7b14%7d-x_%7b2%7dx_%7b13%7d%2c%20x_%7b3%7dx_%7b15%7d%2bx_%7b2%7dx_%7b14%7d%2bx_%7b1%7dx_%7b13%7d%20-%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FindOneSolutionSerreLikePolynomialSystem{}(
@@ -4478,7 +4478,7 @@ GroebnerGrLexUpperLimit{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );
 ```
 Transforms to a reduced Groebner basis relative to the graded lexicographic order. In the graded lexicographic order, monomials are first compared by total degree, then by lexicographic order. The lexicographic order is inherited from the comparison of the underlying expressions. <b>The first argument gives an upper bound to the number of polynomial operations allowed.</b> A non-positive number signifies no upper limit, however please do not use (this is a public web server and multiple instances of a large computation might hog it up). The resulting printout will let your know whether the upper limit was hit or not. For a description of the algorithm used see the description of function GroebnerLexUpperLimit.
 
-*ElementEllipticCurveNormalForm* [ElementEllipticCurveNormalForm] {CalculatorFunctions::innerElementEllipticCurveNormalForm}. 
+*ElementEllipticCurveNormalForm* [ElementEllipticCurveNormalForm] {CalculatorFunctions::elementEllipticCurveNormalForm}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20%2b%20x%20%2b%207%2c%20x%20%3d%203%20mod%20101%2c%20y%20%3d%2021%20mod%20101%29%3bElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20-%20x%20%2b%201%2c%20x%20%3d%203%2c%20y%20%3d%205%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);ElementEllipticCurveNormalForm(y^2 = x^3 - x + 1, x = 3, y = 5)
@@ -4514,7 +4514,7 @@ ConeDecomposition(
 Work in progress. 
 Cone decomposition related to a vector partition function. 
 
-*SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::innerSemisimpleLieAlgebra}. 
+*SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::semisimpleLieAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{i}}= ChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);
@@ -4642,7 +4642,7 @@ AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}
 ```
 Computes common eigenspace of the adjoint action of semisimple Lie algebra elements inside the semisimple Lie algebra. 
 
-*AttemptExtendingEtoHEFwithHinCartan* [AttemptExtendingEtoHEFwithHinCartan] {Calculator::innerAttemptExtendingEtoHEFwithHinCartan}. 
+*AttemptExtendingEtoHEFwithHinCartan* [AttemptExtendingEtoHEFwithHinCartan] {Calculator::attemptExtendingEtoHEFwithHinCartan}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AttemptExtendingEtoHEFwithHinCartan%7b%7d%28F_4%2c%20g_1%2b2g_2%2b3g_3%2b4g_4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)
@@ -4707,7 +4707,7 @@ g_{24}
 ```
 Not implemented yet. Given a set of elements of a semisimple lie algebra, tries to determine whether the Lie subalgebra they generate is reductive and what is its type.
 
-*ConesIntersection* [ConesIntersection] {Calculator::innerConesIntersect}. 
+*ConesIntersection* [ConesIntersection] {Calculator::conesIntersect}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22v_1%20%3d%20%281%2c%202%2c%203%29%3b%5cnv_2%20%3d%20%281%2c%203%2c%202%29%3b%5cnv_3%20%3d%20%283%2c%201%2c%201%29%3b%5cnv_4%20%3d%20%28-%202%2c%202%2c%202%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20v_4%20%29%29%3b%5cnConesIntersection%7b%7d%28%28v_1%2c%20v_2%29%2c%20%28v_3%2c%20-%20v_4%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 v_1 = (1, 2, 3);
@@ -4737,7 +4737,7 @@ PrintModule{}(G_2, (2, 0), (0, 0))
 ```
 Makes a report on a finite dimensional Lie algebra module, or more generally, on a generalized Verma module (irreducible finite dimensional semisimple Lie algebra modules are a partial case of generalized Verma modules). The first argument gives the semisimple Lie algebra. The second argument gives the highest weight in fundamental coordinates. The third argument parametrizes the parabolic subalgebra, e.g. (1,0) stands for a parabolic subalgebra (lying in algebra of rank 2) with first simple root crossed-out. The second argument is allowed to have entries that are not non-negative integers in the positions in which the third argument has 1's. 
 
-*HighestWeightTAAbf* [HighestWeightTAAbf] {CalculatorFunctions::innerHWTAABF}. 
+*HighestWeightTAAbf* [HighestWeightTAAbf] {CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7ba%7d%7d%3d%20ChevalleyGenerator%7b%7d%20%28G_2%2c%20a%29%3b%5cnHighestWeightTAAbf%7b%7d%28g_%7b-%201%7d%20g_%7b-2%7d%2c%20g_%7b-%201%7dg_%7b-2%7d%2c%20%282%2c2%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{a}}= ChevalleyGenerator{} (G_2, a);
@@ -4938,14 +4938,14 @@ e_{{i}}= LROdefine_i; e_{- 1} e_{- 1} LSpath{}(G_2, (0,0), (2,1))
 ```
 Littelmann root operator e_i, where e_i is the Littelmann root operator with respect to root of index i. If i is negative then the e_i root operator is defined to be the f_\alpha operator.
 
-*PrintProductDistancesModN* [PrintProductDistancesModN] {CalculatorFunctions::innerFindProductDistanceModN}. (admin only) (invisible) 
+*PrintProductDistancesModN* [PrintProductDistancesModN] {CalculatorFunctions::findProductDistanceModN}. (admin only) (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintProductDistancesModN%2865537%2c%20%2897%2c%2098%2c%2099%2c%20100%2c%20101%2c%20102%2c%20103%2c%20104%2c%20105%2c%20106%2c%20107%2c%20108%2c%20109%2c%20110%2c%20111%2c%20112%2c%20113%2c%20114%2c%20115%2c%20116%2c%20117%2c%20118%2c%20119%2c%20120%2c%20121%2c%20122%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintProductDistancesModN(65537, (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122))
 ```
 First argument = number N. Second argument = list of positive numbers. This function finds, modulo N, the product distance between 1 and each number mod N. We define the product distance between 1 and a number X as the minimal sum of elements whose product equals X mod N, where the elements are taken from the predefined list of positive integers given by the second argument.
 
-*SolveProductSumEquationOverSetModN* [SolveProductSumEquationOverSetModN] {CalculatorFunctions::innerFindProductDistanceModN}. (admin only) (invisible) 
+*SolveProductSumEquationOverSetModN* [SolveProductSumEquationOverSetModN] {CalculatorFunctions::solveProductSumEquationOverSetModN}. (admin only) (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SolveProductSumEquationOverSetModN%28theMod%20%3d65537%3b%20theProduct%20%3d16628%3b%20theSum%3d1286%3b%20theSet%20%3d%20%2897%2c%2098%2c%2099%2c%20100%2c%20101%2c%20102%2c%20103%2c%20104%2c%20105%2c%20106%2c%20107%2c%20108%2c%20109%2c%20110%2c%20111%2c%20112%2c%20113%2c%20114%2c%20115%2c%20116%2c%20117%2c%20118%2c%20119%2c%20120%2c%20121%2c%20122%29%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SolveProductSumEquationOverSetModN(theMod =65537; theProduct =16628; theSum=1286; theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) 
@@ -5008,21 +5008,21 @@ CanBeExtendedParabolicallyTo(A^3_1, A_5);CanBeExtendedParabolicallyTo(a_2, b_3);
 ```
 Finds whether a Dynkin type extends via the standard parabolic extension to another. 
 
-*EmbedSemisimpleInSemisimple* [EmbedSemisimpleInSemisimple] {CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra}. 
+*EmbedSemisimpleInSemisimple* [EmbedSemisimpleInSemisimple] {CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22EmbedSemisimpleInSemisimple%7b%7d%28G%5e3_2%2c%20B_3%29%3bEmbedSemisimpleInSemisimple%7b%7d%28G_2%2c%20B_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)
 ```
 Tries to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. 
 
-*LoadSemisimpleSubalgebras* [LoadSemisimpleSubalgebras] {CalculatorConversions::innerLoadSemisimpleSubalgebras}. (admin only) 
+*LoadSemisimpleSubalgebras* [LoadSemisimpleSubalgebras] {CalculatorConversions::loadSemisimpleSubalgebras}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LoadSemisimpleSubalgebras%20%7b%7d%28EmbedSemisimpleInSemisimple%7b%7d%28G_2%2c%20B_3%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))
 ```
 <b>This function is being developed and is not implemented fully yet.</b>Loads a semisimpleSubalgebra from expression. 
 
-*SltwoSubalgebra* [SltwoSubalgebra] {CalculatorConversions::innerSlTwoSubalgebraPrecomputed}. (admin only) 
+*SltwoSubalgebra* [SltwoSubalgebra] {CalculatorConversions::slTwoSubalgebraPrecomputed}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SltwoSubalgebra%28%5cnB_%7b3%7d%2c%5cn3%20ChevalleyGenerator%28%28B%29_%7b3%7d%2c%20-2%29%2c%5cn3%20ChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%203%29%5cn%2b%206%20ChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%201%29%5cn%2b%2010%20%2f%203%20ChevalleyGenerator%28%20%28B%29_%7b3%7d%2c%202%29%5cn%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 SltwoSubalgebra(
@@ -5035,7 +5035,7 @@ B_{3},
 ```
 <b>This function is being developed and is not implemented fully yet. </b>Loads an sl(2) subalgebra from expression. 
 
-*Freudenthal* [Freudenthal] {Calculator::innerFreudenthalFormula}. 
+*Freudenthal* [Freudenthal] {Calculator::freudenthalFormula}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Freudenthal%7b%7d%28B_3%2c%20%282%2c2%2c2%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Freudenthal{}(B_3, (2,2,2))
@@ -5049,7 +5049,7 @@ h_{{i}}= CartanGenerator{}(F_1, i);KF{}({{i}},{{j}})=Killing{}(h_i, h_j);Functio
 ```
 Computes the Killing form product of two elements of semisimple Lie algebra. 
 
-*FreudenthalFull* [FreudenthalFull] {Calculator::innerFreudenthalFull}. 
+*FreudenthalFull* [FreudenthalFull] {Calculator::freudenthalFull}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FreudenthalFull%7b%7d%28G_2%2c%20%282%2c%201%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FreudenthalFull{}(G_2, (2, 1))
@@ -5078,7 +5078,7 @@ s_{{i}} = MakeElementWeylGroup{}(A_2, i);
 ```
 Needs a group name and a list of generators
 
-*MakeElementHyperOctahedral* [MakeElementHyperOctahedral] {CalculatorConversions::innerMakeElementHyperOctahedral}. 
+*MakeElementHyperOctahedral* [MakeElementHyperOctahedral] {CalculatorConversions::makeElementHyperOctahedral}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s%20%3d%20MakeElementHyperOctahedral%7b%7d%28%281%2c%202%29%2c%201%2c%200%2c%200%29%3b%5cnt%20%3d%20MakeElementHyperOctahedral%7b%7d%28%281%2c%203%29%2c%200%2c%200%2c%200%29%3b%5cns%20%2a%20t%20%2a%20s%20%2a%20t%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0);
@@ -5234,7 +5234,7 @@ WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 1, 0), (1, 0, 0, 0));
 ```
 Same as WeylRaiseToMaximallyDominant but uses outer Weyl group automorphisms as well.
 
-*GenerateFiniteMultiplicativelyClosedSet* [GenerateFiniteMultiplicativelyClosedSet] {Calculator::innerGenerateMultiplicativelyClosedSet}. 
+*GenerateFiniteMultiplicativelyClosedSet* [GenerateFiniteMultiplicativelyClosedSet] {Calculator::generateMultiplicativelyClosedSet}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_1%3dMakeMatrix%7b%7d%28%28-%201%2c%201%2c%200%29%2c%20%280%2c%201%2c%200%29%2c%20%280%2c%200%2c%201%29%29%3b%5cns_2%3dMakeMatrix%7b%7d%28%281%2c%200%2c%200%29%2c%20%281%2c%20-%201%2c%201%29%2c%20%280%2c%200%2c%201%29%29%3b%5cns_3%3dMakeMatrix%7b%7d%28%281%2c%200%2c%200%29%2c%20%280%2c%201%2c%200%29%2c%20%280%2c%202%2c%20-%201%29%29%3b%5cnGenerateFiniteMultiplicativelyClosedSet%7b%7d%2848%2c%20s_1%2c%20s_2%2c%20s_3%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_1=MakeMatrix{}((- 1, 1, 0), (0, 1, 0), (0, 0, 1));
@@ -5365,7 +5365,7 @@ GrowDynkinType(g^35_2+B^30_2, e_6);
 ```
 This is a calculator testing function. Grows a Dynkin type inside an ambient Dynkin type. 
 
-*LoadFileIntoString* [LoadFileIntoString] {CalculatorConversions::innerLoadFileIntoString}. 
+*LoadFileIntoString* [LoadFileIntoString] {CalculatorConversions::loadFileIntoString}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LoadFileIntoString%28%5c%22test%2fcertificate_self_signed.base64%5c%22%29%3b%5cnLoadFileIntoString%28%5c%22problems%2fdefault%2fFunctions-composing-fractional-linear-1.html%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 LoadFileIntoString("test/certificate_self_signed.base64");
@@ -5433,14 +5433,14 @@ CrashVectorOutOfBounds(0)
 ```
 Crashes the calculator by attempting to use data out-of-bounds in a std::vector.
 
-*PlotExpressionTree* [PlotExpressionTree] {CalculatorFunctions::innerDrawExpressionGraph}. 
+*PlotExpressionTree* [PlotExpressionTree] {CalculatorFunctions::drawExpressionGraph}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28e%5ex%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotExpressionTree(e^x)
 ```
 Draws the internal tree structure of an expression. Does not unfold built-in types.
 
-*PlotExpressionTreeFull* [PlotExpressionTreeFull] {CalculatorFunctions::innerDrawExpressionGraphFull}. 
+*PlotExpressionTreeFull* [PlotExpressionTreeFull] {CalculatorFunctions::drawExpressionGraphFull}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTreeFull%281%29%3b%5cnPlotExpressionTree%281%20%2b%201%29%3b%5cnPlotExpressionTree%28Freeze%7b%7d%281%20%2b%201%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotExpressionTreeFull(1);
@@ -5449,14 +5449,14 @@ PlotExpressionTree(Freeze{}(1 + 1));
 ```
 Draws the internal tree structure of an expression. Unfolds built-in types. 
 
-*Lispify* [Lispify] {CalculatorFunctions::innerLispify}. 
+*Lispify* [Lispify] {CalculatorFunctions::lispify}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Lispify%28e%5ex%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Lispify(e^x)
 ```
 Shows the internal tree structure of an expression, without completely unfolding the tree structure of expressions that represent a single mathematical entity.
 
-*LispifyFull* [LispifyFull] {CalculatorFunctions::innerLispifyFull}. 
+*LispifyFull* [LispifyFull] {CalculatorFunctions::lispifyFull}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LispifyFull%28e%5ex%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 LispifyFull(e^x)
@@ -5471,7 +5471,7 @@ TestBase64("TheQuickBrownFoxJumpsOverTheLazyDog")
 ```
 Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. 
 
-*StringDifference* [StringDifference] {CalculatorFunctions::innerStringDiff}. 
+*StringDifference* [StringDifference] {CalculatorFunctions::stringDifference}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22StringDifference%28%5c%22XMJYAUZ%5c%22%2c%5c%22MZJAWXU%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 StringDifference("XMJYAUZ","MZJAWXU")
@@ -5486,14 +5486,14 @@ TestJSON("{\"a\":\"\\\"\"}");
 ```
 Tests the JSON parsing mechanism. Input: json string, use backslash escapes for backslashes and quotes.
 
-*FormatCPPCode* [FormatCPPCode] {Calculator::innerFormatCPPSourceCode}. (invisible) 
+*FormatCPPCode* [FormatCPPCode] {Calculator::formatCPPSourceCode}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPCode%7b%7d%28%5c%22src%2fdatabase.cpp%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FormatCPPCode{}("src/database.cpp")
 ```
 Format cpp code. 
 
-*formatCPPDirectory* [formatCPPDirectory] {Calculator::innerformatCPPDirectory}. (invisible) 
+*formatCPPDirectory* [formatCPPDirectory] {Calculator::formatCPPDirectory}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22formatCPPDirectory%7b%7d%28%5c%22src%2f%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 formatCPPDirectory{}("src/")
@@ -5530,14 +5530,14 @@ c = d; PrintRuleStack{}0;
 ```
 Prints the current rule stack
 
-*Crawl* [Crawl] {CalculatorFunctions::innerCrawlTexFile}. (admin only) 
+*Crawl* [Crawl] {CalculatorFunctions::crawlTexFile}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Crawl%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusimasterproblemsheet.tex%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Crawl("freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex")
 ```
 Crawls a latex file collecting all local style files and all \input commands to produce a single latex file. The function was originally designed for the purposes of the freecalc project as not been tested on any other projects, please use only for freecalc.
 
-*BuildFreecalc* [BuildFreecalc] {CalculatorFunctions::innerBuildFreecalc}. (admin only) 
+*BuildFreecalc* [BuildFreecalc] {CalculatorFunctions::buildFreecalc}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fprecalculus.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fcalculusi.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fcalculusii.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fcalculusiiimultivariable.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fprecalculus.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusi.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusii.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusiii.tex%5c%22%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 BuildFreecalc("freecalc/lectures/referencelectures/precalculus.tex");
@@ -5566,7 +5566,7 @@ BuildSlidesInTopicList (0);
 ```
 Builds all slides in the topic list. Available to logged-in admins only. Use the topic number as input, or 0 for the current topic. 
 
-*SuffixNotationForPostScript* [SuffixNotationForPostScript] {CalculatorFunctions::innerSuffixNotationForPostScript}. 
+*SuffixNotationForPostScript* [SuffixNotationForPostScript] {CalculatorFunctions::suffixNotationForPostScript}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22suffixNotationForPostScript%7b%7d%28%281%2f3%20%2b%20a%20%2b%20b%29%20%2a%20c%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 suffixNotationForPostScript{}((1/3 + a + b) * c)

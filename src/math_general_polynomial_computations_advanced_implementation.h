@@ -1394,8 +1394,6 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Polynomial::greatestCommonDivisorOneVariable");
-  global << "DEBUG: compute gcd one var! left, right: " << left.toString() << ", right: "
-  << right.toString() << Logger::endL;
   Polynomial<Coefficient> leftCopy = left;
   Polynomial<Coefficient> rightCopy = right;
   Polynomial<Coefficient> quotient, remainder;
@@ -1408,7 +1406,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   leftCopy.scaleNormalizeLeadingMonomial(nullptr);
   rightCopy.scaleNormalizeLeadingMonomial(nullptr);
   // We are re-implementing MathRoutines::greatestCommonDivisor,
-  // as this may be a performance-sensitve function.
+  // as this may be a performance-sensitive function.
   while (!rightCopy.isEqualToZero()) {
     leftCopy.divideBy(rightCopy, quotient, remainder, &MonomialPolynomial::orderDegreeThenLeftLargerWins());
     if (!remainder.isEqualToZero() && remainder.totalDegree() >= rightCopy.totalDegree()) {
@@ -1595,7 +1593,11 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
     format.flagSuppressModP = true;
     format.polynomialAlphabet.addOnTop("x");
     global.fatal
-    << "Accounting non-reduced factor:\n"
+    << "While factoring: "
+    << this->original.toString(&format)
+    << "\nSub-factor: "
+    << this->current.toString(&format)
+    << "\nAccounting non-reduced factor:\n"
     << incoming.toString(&format)
     << "\nof:\n"
     << this->current.toString(&format)

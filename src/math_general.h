@@ -3041,7 +3041,7 @@ public:
   // Sylvester matrix (depending on the defintion, that may be
   // with reversed order of the polynomials).
   // The Sylvester product matrix is used when computing
-  // Henself lifts of multiple polynomial products.
+  // Hensel lifts of multiple polynomial products.
   static bool sylvesterMatrixProduct(
     const List<Polynomial<Coefficient> >& polynomials,
     Matrix<Coefficient>& output,

@@ -97,6 +97,14 @@ public:
   bool isEqualToZero() const;
   // Multiplies the polynomial by a constant so the leading coefficient is one.
   void rescaleSoLeadingCoefficientIsOne();
+  bool makeFromPolynomialAndModulus(
+    IntegerModulusSmall* modulus,
+    const Polynomial<Rational>& input
+  );
+  void makeFromPolynomialAndModulusNoFailure(
+    IntegerModulusSmall* modulus,
+    const Polynomial<Rational>& input
+  );
   class Test {
   public:
     static bool all();
@@ -127,7 +135,9 @@ public:
     static Polynomial<ElementZmodP> fromStringAndModulus(
       const std::string& input, int modulus
     );
-    static std::string toStringPolynomialElementZModP(const Polynomial<ElementZmodP>& other);
+    static std::string toStringPolynomialElementZModP(
+      const Polynomial<ElementZmodP>& other
+    );
   };
 };
 

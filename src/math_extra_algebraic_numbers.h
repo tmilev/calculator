@@ -476,6 +476,7 @@ public:
   Matrix<ElementZmodP> sylvesterMatrix;
   Matrix<ElementZmodP> sylvesterMatrixInverted;
   int64_t millisecondsCantorZassenhaus;
+  int64_t millisecondsSquareFree;
   int64_t millisecondsLift;
   int64_t millisecondsFactorizationFromLift;
   int64_t millisecondsTotal;
@@ -527,6 +528,10 @@ public:
   );
   // Factors the polynomial fully.
   bool factor(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  bool hasSquareFactor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );

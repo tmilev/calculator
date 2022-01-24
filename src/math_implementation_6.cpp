@@ -347,6 +347,7 @@ PolynomialFactorizationFiniteFields::PolynomialFactorizationFiniteFields() {
   this->millisecondsLift = 0;
   this->millisecondsFactorizationFromLift = 0;
   this->millisecondsTotal = 0;
+  this->millisecondsSquareFree = 0;
   this->numberOfRunsOfFactor = 0;
 }
 
@@ -355,6 +356,11 @@ bool PolynomialFactorizationFiniteFields::factorWithTiming(
   std::stringstream* commentsOnFailure
 ) {
   int64_t startMilliseconds = global.getElapsedMilliseconds();
+  this->millisecondsLift = 0;
+  this->millisecondsTotal = 0;
+  this->millisecondsSquareFree = 0;
+  this->millisecondsCantorZassenhaus = 0;
+  this->millisecondsFactorizationFromLift = 0;
   this->numberOfRunsOfFactor ++;
   bool result = this->factor(comments, commentsOnFailure);
   int64_t ellapsedMillseconds = global.getElapsedMilliseconds() - startMilliseconds;
@@ -368,12 +374,68 @@ bool PolynomialFactorizationFiniteFields::factorWithTiming(
   return result;
 }
 
+bool PolynomialFactorizationFiniteFields::hasSquareFactor(
+  std::stringstream* comments, std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::hasSquareFactor");
+  (void) comments;
+  List<int> quickCheckPrimes = List<int>({101, 103, 107, 109, 113});
+  for (int i = 0; i < quickCheckPrimes.size; i ++) {
+    PolynomialUnivariateModular converted;
+    PolynomialUnivariateModular derivative;
+    PolynomialUnivariateModular greatestCommonDivisorConvertedAndDerivative;
+    IntegerModulusSmall modulus;
+    modulus.initializeModulusData(quickCheckPrimes[i]);
+    // The current polynomial is supposed to have integer coefficients,
+    // hence the modular conversion cannot fail due to division by
+    // zero.
+    converted.makeFromPolynomialAndModulusNoFailure(&modulus, this->current);
+    converted.derivative(derivative);
+    converted.greatestCommonDivisor(
+      converted,
+      derivative,
+      greatestCommonDivisorConvertedAndDerivative,
+      nullptr
+    );
+    if (greatestCommonDivisorConvertedAndDerivative.isConstant()) {
+      // The polynomial and its derivative have no
+      // common factor over a small prime.
+      // Therefore the pollynomial is square-free over that
+      // small prime. Therefore it's square-free over the rationals.
+      return false;
+    }
+  }
+  // The polynomial is not square-free mod the primes above.
+  // It could still be square free over the rationals if we are unlucky.
+  // For example, x^2+101*103*107*109*113 is square free over the rationals,
+  // but equals x^2 mod 101, 103, 107, 109 and 113.
+  Vector<Polynomial<Rational> > derivative;
+  if (!this->current.differential(derivative, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to compute the differential.";
+    }
+    return false;
+  }
+  Polynomial<Rational> greatestCommonDivisor;
+  derivative[0].greatestCommonDivisor(
+    derivative[0],
+    this->current,
+    greatestCommonDivisor,
+    Rational::one(),
+    commentsOnFailure
+  );
+  if (!greatestCommonDivisor.isConstant()) {
+    this->output->accountNonReducedFactor(greatestCommonDivisor);
+    return true;
+  }
+  return false;
+}
+
 bool PolynomialFactorizationFiniteFields::factor(
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factor");
-  int64_t ellapsedMillisecondsStart = global.getElapsedMilliseconds();
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
     return false;
@@ -388,28 +450,14 @@ bool PolynomialFactorizationFiniteFields::factor(
     }
     return false;
   }
-  Vector<Polynomial<Rational> > derivative;
-  if (!this->current.differential(derivative, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to compute the differential.";
-    }
-    return false;
-  }
-  Polynomial<Rational> greatestCommonDivisor;
-  int64_t ellapsedMillisecondsGCDStart = global.getElapsedMilliseconds();
-  derivative[0].greatestCommonDivisor(
-    derivative[0],
-    this->current,
-    greatestCommonDivisor,
-    Rational::one(),
-    commentsOnFailure
-  );
-  global << "DEBUG: gcd ms: " << global.getElapsedMilliseconds() - ellapsedMillisecondsGCDStart << Logger::endL;
-  if (!greatestCommonDivisor.isConstant()) {
-    this->output->accountNonReducedFactor(greatestCommonDivisor);
+  int64_t squareFreeStart = global.getElapsedMilliseconds();
+  if (this->hasSquareFactor(comments, commentsOnFailure)) {
     return true;
   }
-  const List<unsigned int>& primeFactors = LargeIntegerUnsigned::allPrimesSmallerThan15Bits();
+  this->millisecondsSquareFree =
+  global.getElapsedMilliseconds() - squareFreeStart;
+  const List<unsigned int>& primeFactors =
+  LargeIntegerUnsigned::allPrimesSmallerThan15Bits();
   this->leadingCoefficient = this->current.getLeadingCoefficient(
     &MonomialPolynomial::orderDefault()
   ).getNumerator();
@@ -430,9 +478,6 @@ bool PolynomialFactorizationFiniteFields::factor(
       continue;
     }
     this->modularization.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
-    global << "DEBUG: elepased ms before modularization: "
-    << global.getElapsedMilliseconds() - ellapsedMillisecondsStart << " ms. "
-    << Logger::endL;
     return this->oneFactorFromModularization(comments, commentsOnFailure);
   }
   return this->output->accountNonReducedFactorTemplate(this->current);
@@ -465,27 +510,18 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
     }
     return false;
   }
-  if (this->millisecondsCantorZassenhaus == 0) {
-    this->millisecondsCantorZassenhaus = global.getElapsedMilliseconds() - startCantorZassenhaus;
-  } else {
-    global << Logger::red << "Second run of C-Z algorithm. Input: "
-    << this->output->original.toString() << Logger::endL;
-  }
+  this->millisecondsCantorZassenhaus = global.getElapsedMilliseconds() - startCantorZassenhaus;
   this->factorsOverPrime = factorizationModular.reduced;
   this->format.flagSuppressModP = true;
 
-//  this->computeCoefficientBoundsElementary();
+  //  this->computeCoefficientBoundsElementary();
   this->computeCoefficientBoundsGelfond();
   int64_t startHenselLift = global.getElapsedMilliseconds();
   this->henselLift(comments);
-  if (this->millisecondsLift == 0) {
-    this->millisecondsLift = global.getElapsedMilliseconds() - startHenselLift;
-  }
+  this->millisecondsLift = global.getElapsedMilliseconds() - startHenselLift;
   int64_t startFactorizationFromHenselLift = global.getElapsedMilliseconds();
   bool result = this->factorizationFromHenselLift(comments, commentsOnFailure);
-  if (this->millisecondsFactorizationFromLift == 0) {
-    this->millisecondsFactorizationFromLift = global.getElapsedMilliseconds() - startFactorizationFromHenselLift;
-  }
+  this->millisecondsFactorizationFromLift = global.getElapsedMilliseconds() - startFactorizationFromHenselLift;
   return result;
 }
 
@@ -890,6 +926,38 @@ void PolynomialUnivariateModular::divideBy(
   }
 }
 
+bool PolynomialUnivariateModular::makeFromPolynomialAndModulus(
+  IntegerModulusSmall* modulus,
+  const Polynomial<Rational>& input
+) {
+  this->makeZero(modulus);
+  for (int i = 0; i < input.size(); i ++) {
+    ElementZmodP element;
+    element.modulus = modulus->modulus;
+    if (!element.assignRational(input.coefficients[i])) {
+      return false;
+    }
+    int coefficient = 0;
+    element.value.isIntegerFittingInInt(&coefficient);
+    this->addTerm(coefficient, input.monomials[i].totalDegreeInt());
+  }
+  return true;
+}
+
+void PolynomialUnivariateModular::makeFromPolynomialAndModulusNoFailure(
+  IntegerModulusSmall* modulus,
+  const Polynomial<Rational>& input
+) {
+  bool mustBeTrue = this->makeFromPolynomialAndModulus(modulus, input);
+  if (!mustBeTrue) {
+    global.fatal << "Failed to create modular polynomial form "
+    << input.toString()
+    << " and modulus: "
+    << modulus->modulus
+    << global.fatal;
+  }
+}
+
 int PolynomialUnivariateModular::reduceModP(
   const LargeInteger& input
 ) {
@@ -1031,7 +1099,7 @@ void PolynomialUnivariateModular::derivative(
   }
   output.makeZero(this->modulusData);
   for (int i = this->coefficients.size - 1; i > 0; i--) {
-    output.addTerm(this->coefficients[i] * i, i);
+    output.addTerm(this->coefficients[i] * i, i - 1);
   }
 }
 

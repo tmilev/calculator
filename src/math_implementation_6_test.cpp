@@ -24,9 +24,38 @@ bool PolynomialFactorizationFiniteFields::Test::all() {
     "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
   );
   PolynomialFactorizationFiniteFields::Test::test(
-    "109x^13+9x^12+100x^11-98x^10+x^8 84x^7+12x^6-75x^4-23x^3+19x^2-10x-120",
-    "(84x^{15}+109x^{13}+9x^{12}+100x^{11}-98x^{10}"
-    "+12x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+    "109x^13+9x^12+100x^11-98x^10+x^8 -84x^7+12x^6-75x^4-23x^3+19x^2-10x-120",
+    "(109x^{13}+9x^{12}+100x^{11}-98x^{10}+x^{8}"
+    "-84x^{7}+12x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+  );
+  // The input is (2x^2+3x+4)^3
+  PolynomialFactorizationFiniteFields::Test::test(
+    "8 x^{6}+36 x^{5}+102 x^{4}+171 x^{3}+204 x^{2}+144 x+64",
+    "(2x^{2}+3x +4)(2x^{2}+3x +4)(2x^{2}+3x +4)"
+  );
+  PolynomialFactorizationFiniteFields::Test::test(
+    "x^{6}",
+    "(x )(x )(x )(x )(x )(x )"
+  );
+  PolynomialFactorizationFiniteFields::Test::test(
+    "x^{2}",
+    "(x )(x )"
+  );
+  PolynomialFactorizationFiniteFields::Test::test(
+    "x",
+    "(x )"
+  );
+  PolynomialFactorizationFiniteFields::Test::test(
+    "4",
+    "4"
+  );
+  PolynomialFactorizationFiniteFields::Test::test(
+    "4x+1",
+    "(4x +1)"
+  );
+  PolynomialFactorizationFiniteFields::Test::test(
+    "4x+2",
+    "2(2x +1)"
   );
   return true;
 }
@@ -77,9 +106,12 @@ bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
   if (algorithm.numberOfRunsOfFactor > 1) {
     global << "Total runs of factor: " << algorithm.numberOfRunsOfFactor << ". ";
   }
-  global << "Cantor-Zassenhaus algorithm took: "
+  global
+  << "Square-free check took: "
+  << algorithm.millisecondsSquareFree << " ms. "
+  << "Cantor-Zassenhaus algorithm took: "
   << algorithm.millisecondsCantorZassenhaus << " ms. "
-  << "Henself lift took: " << algorithm.millisecondsLift
+  << "Hensel lift took: " << algorithm.millisecondsLift
   << " ms. Factorization from lift took: "
   << algorithm.millisecondsFactorizationFromLift
   << "ms. Factorization total: "
@@ -113,7 +145,7 @@ bool PolynomialUnivariateModular::Test::division() {
 
 bool PolynomialUnivariateModular::Test::derivative() {
   PolynomialUnivariateModular::Test::testOneDerivative(
-    3, "x^2-1", "2x^{2} (mod 3)"
+    3, "x^2-1", "2x  (mod 3)"
   );
   return true;
 }
@@ -208,15 +240,7 @@ PolynomialUnivariateModular PolynomialUnivariateModular::Test::fromStringAndModu
 ) {
   Polynomial<Rational> polynomialRational = Polynomial<Rational>::Test::fromString(input);
   PolynomialUnivariateModular result;
-  result.makeZero(modulus);
-  for (int i = 0; i < polynomialRational.size(); i ++) {
-    ElementZmodP element;
-    element.modulus = modulus->modulus;
-    element.assignRational(polynomialRational.coefficients[i]);
-    int coefficient = 0;
-    element.value.isIntegerFittingInInt(&coefficient);
-    result.addTerm(coefficient, polynomialRational.monomials[i].totalDegreeInt());
-  }
+  result.makeFromPolynomialAndModulusNoFailure(modulus, polynomialRational);
   return result;
 }
 

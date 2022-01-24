@@ -197,7 +197,6 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   return out.str();
 }
 
-
 void Plot::operator+=(const Plot& other) {
   MacroRegisterFunctionWithName("Plot::operator+=");
   if (other.priorityCanvasName > this->priorityCanvasName) {

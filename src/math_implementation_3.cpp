@@ -1270,6 +1270,7 @@ void FileOperations::initializeFoldersULTRASensitive() {
   folderSubstitutionsULTRASensitive.setKeyValue("/results/", "results/");
   folderSubstitutionsULTRASensitive.setKeyValue("results/", "results/");
   folderSubstitutionsULTRASensitive.setKeyValue("crashes/", "results/crashes/");
+  folderSubstitutionsULTRASensitive.setKeyValue("calculator", "calculator");
 }
 
 void FileOperations::initializeFoldersSensitive() {

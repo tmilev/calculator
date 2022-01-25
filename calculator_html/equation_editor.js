@@ -3946,7 +3946,7 @@ class EquationEditor {
         !this.options.editable) {
       this.container.style.verticalAlign = 'middle';
     } else {
-      this.container.style.verticalAlign = 'text-bottom';
+      this.container.style.verticalAlign = 'sub';
     }
   }
 

@@ -3575,11 +3575,11 @@ TurnOffRules("DistributeMultiplication","DistributeMultiplicationConstants"); Fa
 ```
 Factors out the rational number content of an additive expression. The expression part of the result must have integer relatively prime coefficients, with leading coefficient positive. 
 
-*FactorOneVarPolyOverRationals* [FactorOneVarPolyOverRationals] {CalculatorFunctionsPolynomial::factorPolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FactorOneVarPolyOverRationals%7b%7d%28x%5e%7b8%7d-44x%5e%7b6%7d%2b438x%5e%7b4%7d-%201292x%5e%7b2%7d%2b529%29%3b%5cnFactorOneVarPolyOverRationals%7b%7d%28x%5e%7b8%7d%2b2x%5e%7b7%7d-3x%5e%7b6%7d-4x%5e%7b5%7d%2b6x%5e%7b4%7d%2b2x%5e%7b3%7d-%2013x%5e%7b2%7d%2b%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*FactorUnivariatePolynomialOverRationalsKronecker* [FactorUnivariatePolynomialOverRationalsKronecker] {CalculatorFunctionsPolynomial::factorPolynomialKronecker}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FactorUnivariatePolynomialOverRationalsKronecker%7b%7d%28x%5e%7b8%7d-44x%5e%7b6%7d%2b438x%5e%7b4%7d-%201292x%5e%7b2%7d%2b529%29%3b%5cnFactorUnivariatePolynomialOverRationalsKronecker%7b%7d%28x%5e%7b8%7d%2b2x%5e%7b7%7d-3x%5e%7b6%7d-4x%5e%7b5%7d%2b6x%5e%7b4%7d%2b2x%5e%7b3%7d-%2013x%5e%7b2%7d%2b%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);
-FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)
+FactorUnivariatePolynomialOverRationalsKronecker{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);
+FactorUnivariatePolynomialOverRationalsKronecker{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)
 ```
 Factors a one variable polynomial over the rationals using Kroenecker's method. After clearing denominators, assume the poly has integer coefficients. If looking for a divisor of degree k, plug in k+1 different integer values of the poly to find k+1 integer values. Factor them. Each selection of k+1 factors of these integer values determines the potential values of a divisor polynomial; the polynomial of degree k can be reconstructed from k+1 values through Lagrange interpolation. Try all possible divisors found in this way.
 
@@ -3590,18 +3590,18 @@ Factors a one variable polynomial over the rationals using Kroenecker's method. 
 FactorUnivariatePolynomialOverRationals{}(182903 x^{11}+101813 x^{10}-68963 x^{9}+32574 x^{8}+11015 x^{7}+453344 x^{6}+106241 x^{5}+115598 x^{4}+102 x^{3}+145 x^{2}+12276 x+261632);
 
 ```
-Factors a one variable polynomial over the rationals using finite field methods. At the time of writing, the method used is probabilistic but with high chance of success. 
+Factors a one variable polynomial over the rationals using finite field methods. At the time of writing, the method used is probabilistic but with high chance of success, and pretty fast. 
 
-*FactorPolynomialOverRationals* [FactorPolynomialOverRationals] {CalculatorFunctionsPolynomial::factorPolynomialRational}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%5cnFactorPolynomialOverRationals%7b%7d%28%5cn169%20x%5e%7b11%7d-312%20x%5e%7b10%7d%2b430%20x%5e%7b9%7d-524%20x%5e%7b8%7d%2b595%20x%5e%7b7%7d-644%20x%5e%7b6%7d%2b581%20x%5e%7b5%7d-440%20x%5e%7b4%7d%2b318%20x%5e%7b3%7d-214%20x%5e%7b2%7d%2b127%20x-56%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields* [FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields] {CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields}. (invisible) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%5cnFactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields%7b%7d%28%5cn169%20x%5e%7b11%7d-312%20x%5e%7b10%7d%2b430%20x%5e%7b9%7d-524%20x%5e%7b8%7d%2b595%20x%5e%7b7%7d-644%20x%5e%7b6%7d%2b581%20x%5e%7b5%7d-440%20x%5e%7b4%7d%2b318%20x%5e%7b3%7d-214%20x%5e%7b2%7d%2b127%20x-56%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %HideLHS
-FactorPolynomialOverRationals{}(
+FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields{}(
 169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56
 );
 
 ```
-Runs the Kronecker algorithm with a computation throttle; if unsuccessful, runs finite field algorithms. 
+Runs the Kronecker algorithm with a computation throttle; if unsuccessful, runs finite field algorithms. This can be considerably slower than directly running the finite fieldalgorithm.
 
 *FactorOneVariablePolynomialModPrime* [FactorOneVariablePolynomialModPrime] {CalculatorFunctionsPolynomial::factorPolynomialModPrime}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FactorOneVariablePolynomialModPrime%7b%7d%28x%5e5%2bx%5e4%2b2x%5e3-x%5e2-x-1%2c%201009%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)

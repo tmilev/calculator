@@ -1560,16 +1560,12 @@
     "output":"(RulesOff{}\\left(\"DistributeMultiplication\", \"DistributeMultiplicationConstants\"\\right);3 \\left(x+3 t+9\\right))"
   },
   {
-    "input":"FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\nFactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
+    "input":"FactorUnivariatePolynomialOverRationalsKronecker{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\nFactorUnivariatePolynomialOverRationalsKronecker{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
     "output":"(\\left(1, x^{4}-22 x^{2}-48 x-23, x^{4}-22 x^{2}+48 x-23\\right);\\left(1, x^{4}+x^{3}-2 x^{2}-3 x+1, x^{4}+x^{3}-2 x^{2}+3 x+1\\right))"
   },
   {
     "input":"%HideLHS\nFactorUnivariatePolynomialOverRationals{}(182903 x^{11}+101813 x^{10}-68963 x^{9}+32574 x^{8}+11015 x^{7}+453344 x^{6}+106241 x^{5}+115598 x^{4}+102 x^{3}+145 x^{2}+12276 x+261632);\n",
     "output":"\\left(1, 203 x^{5}+113 x^{4}-102 x^{3}-x^{2}+12 x+512, 901 x^{6}+113 x^{4}+102 x^{3}+x^{2}+12 x+511\\right)"
-  },
-  {
-    "input":"%HideLHS\nFactorPolynomialOverRationals{}(\n169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56\n);\n",
-    "output":"\\left(1, 13 x^{5}-12 x^{4}+11 x^{3}-10 x^{2}+9 x-8, 13 x^{6}-12 x^{5}+11 x^{4}-10 x^{3}+9 x^{2}-8 x+7\\right)"
   },
   {
     "input":"FactorOneVariablePolynomialModPrime{}(x^5+x^4+2x^3-x^2-x-1, 1009);\n",

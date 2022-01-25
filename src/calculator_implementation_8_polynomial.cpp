@@ -379,10 +379,10 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   return output.makeSequence(calculator, &resultSequence);
 }
 
-bool CalculatorFunctionsPolynomial::factorPolynomialRational(
+bool CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
+  MacroRegisterFunctionWithName("Calculator::factorPolynomialKroneckerThenFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
   if (!CalculatorConversions::functionPolynomial(
     calculator, input[1], polynomial, 1, 50, false

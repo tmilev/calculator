@@ -2706,7 +2706,7 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    "FactorOneVarPolyOverRationals",
+    "FactorUnivariatePolynomialOverRationalsKronecker",
     CalculatorFunctionsPolynomial::factorPolynomialKronecker,
     "",
     "Factors a one variable polynomial over the rationals "
@@ -2720,10 +2720,10 @@ void Calculator::initializeFunctionsStandard() {
     "the polynomial of degree k can be reconstructed from k+1 values "
     "through Lagrange interpolation. "
     "Try all possible divisors found in this way.",
-    "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
-    "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
-    "CalculatorFunctionsPolynomial::factorPolynomial",
-    "FactorOneVarPolyOverRationals",
+    "FactorUnivariatePolynomialOverRationalsKronecker{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
+    "FactorUnivariatePolynomialOverRationalsKronecker{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
+    "CalculatorFunctionsPolynomial::factorPolynomialKronecker",
+    "FactorUnivariatePolynomialOverRationalsKronecker",
     innerStandard
   );
   this->addOperationHandler(
@@ -2733,7 +2733,7 @@ void Calculator::initializeFunctionsStandard() {
     "Factors a one variable polynomial over the rationals "
     "using finite field methods. "
     "At the time of writing, the method used is probabilistic "
-    "but with high chance of success. ",
+    "but with high chance of success, and pretty fast. ",
     "%HideLHS\n"
     "FactorUnivariatePolynomialOverRationals{}("
     "182903 x^{11}+101813 x^{10}-68963 x^{9}+32574 x^{8}+"
@@ -2745,19 +2745,21 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    "FactorPolynomialOverRationals",
-    CalculatorFunctionsPolynomial::factorPolynomialRational,
+    "FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields",
+    CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields,
     "",
     "Runs the Kronecker algorithm with a computation throttle; "
-    "if unsuccessful, runs finite field algorithms. ",
+    "if unsuccessful, runs finite field algorithms. "
+    "This can be considerably slower than directly running the finite field"
+    "algorithm.",
     "%HideLHS\n"
-    "FactorPolynomialOverRationals{}(\n"
+    "FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields{}(\n"
     "169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}"
     "-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56\n"
     ");\n",
-    "CalculatorFunctionsPolynomial::factorPolynomialRational",
-    "FactorPolynomialOverRationals",
-    innerStandard
+    "CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields",
+    "FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields",
+    innerNoTestInvisibleExperimental
   );
   this->addOperationHandler(
     "FactorOneVariablePolynomialModPrime",

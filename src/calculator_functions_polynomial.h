@@ -19,9 +19,10 @@ public:
   static bool polynomialDivisionVerboseLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output);
   static bool polynomialDivisionVerboseLexicographic(Calculator& calculator, const Expression& input, Expression& output);
   static bool factorPolynomialModPrime(Calculator& calculator, const Expression& input, Expression& output);
+  static bool factorPolynomialFiniteFields(Calculator& calculator, const Expression& input, Expression& output);
   static bool factorPolynomialKronecker(Calculator& calculator, const Expression& input, Expression& output);
   // Chooses between Kronecker / finite field factorization.
-  static bool factorPolynomialRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool factorPolynomialKroneckerThenFiniteFields(Calculator& calculator, const Expression& input, Expression& output);
   static bool factorPolynomialProcess(
     Calculator& calculator,
     WithContext<Polynomial<Rational> >& originalPolynomial,
@@ -29,7 +30,6 @@ public:
     List<Polynomial<Rational> >& factors,
     Expression& output
   );
-  static bool factorPolynomialFiniteFields(Calculator& calculator, const Expression& input, Expression& output);
   static bool sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool polynomialRelations(Calculator& calculator, const Expression& input, Expression& output);
   template<class Coefficient>

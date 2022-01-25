@@ -5,11 +5,11 @@ const pathnames = require("./pathnames");
 const miscellaneous = require("./miscellaneous_frontend");
 
 function getAccountsTable(inputAccounts) {
-  var result = "";
+  let result = "";
   result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th><th>Course</th><th>Section</th><th>Semester</th></tr>";
-  for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts++) {
+  for (let counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts++) {
     result += "<tr>";
-    var currentUser = inputAccounts[counterAccounts];
+    let currentUser = inputAccounts[counterAccounts];
     //console.log("Current user: " + JSON.stringify(currentUser));
     result += `<td>${currentUser.username}</td>`;
     if (currentUser.email !== undefined) {
@@ -44,13 +44,13 @@ function getAccountsTable(inputAccounts) {
 }
 
 function updateAccountsPageCallback(input, notUsed) {
-  var outputComponentAdmin = document.getElementById("idOutputAdmins");
-  var outputComponentStudents = document.getElementById("idOutputStudents");
-  var parsedUserInfo = null;
+  let outputComponentAdmin = document.getElementById("idOutputAdmins");
+  let outputComponentStudents = document.getElementById("idOutputStudents");
+  let parsedUserInfo = null;
   try {
     parsedUserInfo = miscellaneous.jsonUnescapeParse(input);
-    var admins = parsedUserInfo["admins"];
-    var students = parsedUserInfo["students"];
+    let admins = parsedUserInfo["admins"];
+    let students = parsedUserInfo["students"];
     if (parsedUserInfo.error !== undefined && parsedUserInfo.error !== "") {
       outputComponentAdmin.innerHTML = parsedUserInfo.error;
     } else {
@@ -79,10 +79,10 @@ function addEmailsOrUsers(
   idPasswords,
   requestType
 ) {
-  var spanEmailList = document.getElementById(idEmailList);
-  var spanUserGroup = document.getElementById(idUserGroup);
-  var spanPasswords = document.getElementById(idPasswords);
-  var theURL = "";
+  let spanEmailList = document.getElementById(idEmailList);
+  let spanUserGroup = document.getElementById(idUserGroup);
+  let spanPasswords = document.getElementById(idPasswords);
+  let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `${pathnames.urlFields.request}=${requestType}&`;
   theURL += `${pathnames.urlFields.userRole}=${userRole}&`;
@@ -103,10 +103,10 @@ function getTeachersStudentsCallback(input, output) {
 }
 
 function getTeachersStudents() {
-  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
-  var inputSections = document.getElementById('inputSections').value;
-  var inputTeachers = document.getElementById('inputSetTeacher').value;
-  var teachersAndSections = {
+  let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
+  let inputSections = document.getElementById('inputSections').value;
+  let inputTeachers = document.getElementById('inputSetTeacher').value;
+  let teachersAndSections = {
     teachers: encodeURIComponent(inputTeachers),
     students: encodeURIComponent(inputSections)
   }
@@ -121,7 +121,7 @@ function getTeachersStudents() {
 }
 
 function updateAccountsPage() {
-  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.accountsJSON}`;
+  let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.accountsJSON}`;
 
   submitRequests.submitGET({
     url: theURL,

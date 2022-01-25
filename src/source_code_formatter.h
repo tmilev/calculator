@@ -9,8 +9,9 @@
 class CodeElement {
 public:
   std::string content;
-  std::string type;
+  int indentLevel;
   std::string toString();
+  CodeElement();
 };
 
 class CodeFormatter {
@@ -19,13 +20,12 @@ public:
   std::string outputFileName;
   bool flagInQuotes;
   bool flagPreviousIsStandaloneBackSlash;
-  std::string inputCode, outputCode;
+  std::string inputCode;
   char currentChar;
   std::string currentWord;
-  MapList<std::string, std::string, MathRoutines::hashString> builtInTypes;
   List<CodeElement> originalElements;
-  List<CodeElement> transformedElements;
-  std::string whiteSpaceCharactersNoNewLine;
+  List<CodeElement> stack;
+  std::string transformedContent;
   std::string separatorCharacters;
   List<bool> separatorCharactersMap;
   int maximumDesiredLineLength;
@@ -35,10 +35,6 @@ public:
   int currentLineLength;
   CodeFormatter();
   void addCurrentWord();
-  bool addWordToTarget(const std::string& incomingString, List<CodeElement>& output);
-  bool addWordToOriginals(const std::string& incomingString);
-  bool addWordToTransformed(const std::string& incomingString);
-  void setContentComputeType(const std::string& input, CodeElement& output);
   static bool formatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
   bool formatCPPSourceCode(
     const std::string& inputFileName,
@@ -49,9 +45,8 @@ public:
   bool isSeparatorCharacter(char input);
   bool processSeparatorCharacters();
   bool extractCodeElements(std::stringstream* comments);
+  bool format(std::stringstream* comments);
   bool writeFormatedCode(std::stringstream* comments);
-  bool applyFormattingRules(std::stringstream* comments);
-  bool applyOneRule(std::stringstream* comments);
   std::string toStringTransformed6();
   bool computeState(int maximumElementsToProcess);
   bool addAndAccount(const CodeElement& incoming);

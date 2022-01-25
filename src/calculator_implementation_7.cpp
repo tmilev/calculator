@@ -2139,11 +2139,15 @@ bool CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial(
 bool CalculatorFunctions::formatCPPSourceCode(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::formatCPPSourceCode");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Cpp code formatting available only to logged-in admins. ";
   }
+  if (input.size() != 2) {
+    return false;
+  }
   std::string fileName;
-  if (!input.isOfType(&fileName)) {
+  if (!input[1].isOfType(&fileName)) {
     return false;
   }
   std::stringstream report;

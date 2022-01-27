@@ -2694,7 +2694,7 @@ public:
   static bool cancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output);
   static bool associateExponentExponent(Calculator& calculator, const Expression& input, Expression& output);
   static bool associateTimesDivision(Calculator& calculator, const Expression& input, Expression& output);
-  static bool flattenCommandEnclosuresOneLayeR(
+  static bool flattenCommandEnclosuresOneLayer(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool functionFlattenCommandEnclosuresOneLayer(

@@ -2415,7 +2415,7 @@ bool CalculatorFunctions::isReal(Calculator& calculator, const Expression& input
   return output.assignValue(calculator, 1);
 }
 
-bool CalculatorFunctions::expressiontoUTF8String(
+bool CalculatorFunctions::expressionToUTF8String(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::expressiontoUTF8String");

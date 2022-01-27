@@ -1975,7 +1975,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   return true;
 }
 
-bool CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealS(
+bool CalculatorFunctions::splitToPartialFractionsOverAlgebraicReals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {

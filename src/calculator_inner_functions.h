@@ -273,7 +273,7 @@ public:
 
   static bool stringToAtom(Calculator& calculator, const Expression& input, Expression& output);
   static bool expressionToString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool expressiontoUTF8String(Calculator& calculator, const Expression& input, Expression& output);
+  static bool expressionToUTF8String(Calculator& calculator, const Expression& input, Expression& output);
   static bool quoteToString(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool sliceString(Calculator& calculator, const Expression& input, Expression& output);
@@ -497,7 +497,7 @@ public:
   static bool splitToPartialFractionsOverAlgebraicRealsAlgorithm(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool splitToPartialFractionsOverAlgebraicRealS(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitToPartialFractionsOverAlgebraicReals(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionSplitToPartialFractionsOverAlgebraicReals(Calculator& calculator, const Expression& input, Expression& output);
   static bool testTopCommand(Calculator& calculator, const Expression& input, Expression& output);
   static bool testIndicator(Calculator& calculator, const Expression& input, Expression& output);

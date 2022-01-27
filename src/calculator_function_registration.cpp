@@ -397,7 +397,7 @@ void Calculator::initializeFunctionsStandard() {
 
   this->addOperationHandler(
     "FlattenCommandEnclosuresOneLayer",
-    CalculatorBasics::flattenCommandEnclosuresOneLayeR,
+    CalculatorBasics::flattenCommandEnclosuresOneLayer,
     "",
     "Flattens command enclosures. ",
     "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x = 5; x); "
@@ -430,7 +430,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "ToUTF8String",
-    CalculatorFunctions::expressiontoUTF8String,
+    CalculatorFunctions::expressionToUTF8String,
     "",
     "Transforms an arbitrary expression to a utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
@@ -1011,7 +1011,8 @@ void Calculator::initializeFunctionsStandard() {
     "\\int",
     CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks,
     "",
-    "Attempts to split an integral of a rational function into building block integrals. ",
+    "Attempts to split an integral of a "
+    "rational function into building block integrals. ",
     "\\int \\frac{1}{x(x + 1)} dx ",
     "CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks",
     "IntegratePartialFractions",
@@ -1053,7 +1054,8 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative,
     "",
     "Differentiation - division rule, commutative. "
-    "For the time being differentiation is assumed to be over commutative rings. "
+    "For the time being differentiation "
+    "is assumed to be over commutative rings. "
     "This might change in the future. "
     "The commutative division rule is "
     "d/dx (f/g^n) = ((d/dx f) g - n f (d/dx g))/g^{n + 1}. ",
@@ -1188,7 +1190,8 @@ void Calculator::initializeFunctionsStandard() {
     "EnsureExpressionDependsOnlyOn",
     CalculatorFunctions::ensureExpressionDependsOnlyOnStandard,
     "",
-    "Ensures the expression in the first argument depends only on the free variables given in the remaining arguments. "
+    "Ensures the expression in the first argument depends "
+    "only on the free variables given in the remaining arguments. "
     "Returns a warning string if that is not the case, else returns an empty string. "
     "Intended to warn users of potentially mistyped expressions. ",
     "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x, y);\n"
@@ -1327,7 +1330,8 @@ void Calculator::initializeFunctionsStandard() {
     "\\sin",
     CalculatorFunctionsTrigonometry::sin,
     "",
-    "Sine function. Evaluates to a decimal approximation if the input is a double number. ",
+    "Sine function. Evaluates to a decimal "
+    "approximation if the input is a double number. ",
     "\\sin{}(3.1415)",
     "CalculatorFunctions::sin",
     "Sine",
@@ -1337,7 +1341,8 @@ void Calculator::initializeFunctionsStandard() {
     "\\cos",
     CalculatorFunctionsTrigonometry::cos,
     "",
-    "Cosine function. Evaluates to a decimal approximation if the input is a double number. ",
+    "Cosine function. Evaluates to a decimal approximation "
+    "if the input is a double number. ",
     "\\cos{}(3.1415)",
     "CalculatorFunctions::cos",
     "Cosine",
@@ -1459,8 +1464,10 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomial,
     "",
     "Greatest common divisor polynomial of two polynomials. "
-    "The divisor is scaled so that all coefficients are relatively prime integers, "
-    "and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.) "
+    "The divisor is scaled so that all coefficients "
+    "are relatively prime integers, "
+    "and so that the leading monomial under the "
+    "graded lexicographic order (x_2>x_1, etc.) "
     "has positive coefficient.",
     "GCDPoly{}(x^3-1, x^2-1)\n;"
     "GCDPoly{}(2/3x^3-2/3, 10x^2-10)\n;"
@@ -1489,8 +1496,10 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPolynomial::leastCommonMultiplePolynomial,
     "",
     "Least common multiple of two polynomials. "
-    "The output is scaled so that all coefficients are relatively prime integers, "
-    "and so that the leading monomial under the graded lexicographic order "
+    "The output is scaled so that all "
+    "coefficients are relatively prime integers, "
+    "and so that the leading monomial under "
+    "the graded lexicographic order "
     "(x_2>x_1, etc.) has positive coefficient.",
     "LCMPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ "
     "2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ "
@@ -1534,7 +1543,8 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPolynomial::polynomialDivisionQuotient,
     "",
     "Returns the quotients of a "
-    "polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
+    "polynomial divided by a set of polynomials using "
+    "the default monomial order (lexicographic).",
     "PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;",
     "CalculatorFunctionsPolynomial::polynomialDivisionQuotient",
     "PolyDivQuotient",
@@ -1719,7 +1729,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "UnivariatePartialFractions",
-    CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealS,
+    CalculatorFunctions::splitToPartialFractionsOverAlgebraicReals,
     "",
     "Attempts to splits a univariate rational function into partial "
     "fractions over the real algebraic numbers. "
@@ -1728,7 +1738,7 @@ void Calculator::initializeFunctionsStandard() {
     "A =\\frac{x^3}{x^{3}-x^2+2x^2-2};\n"
     "B=UnivariatePartialFractions(A);\n"
     "A-\\sum(B)",
-    "CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealS",
+    "CalculatorFunctions::splitToPartialFractionsOverAlgebraicReals",
     "UnivariatePartialFractions",
     innerStandard
   );
@@ -1876,7 +1886,9 @@ void Calculator::initializeFunctionsStandard() {
     "PlotPath",
     CalculatorFunctionsPlot::plotPath,
     "",
-    "Plots a straight segment path. The path should be enclosed in parentheses, and color must be indicated. ",
+    "Plots a straight segment path. "
+    "The path should be enclosed in parentheses, "
+    "and color must be indicated. ",
     "PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)",
     "CalculatorFunctions::plotPath",
     "PlotPath",
@@ -1887,7 +1899,8 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPlot::plotSetId,
     "",
     "Creates an empty plot with a given canvas id. "
-    "If you add a nameless plot to a named one the the resulting plot acquires the canvas id. ",
+    "If you add a nameless plot to a named one "
+    "the the resulting plot acquires the canvas id. ",
     "PlotSetId(myId) + PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))",
     "CalculatorFunctions::plotSetId",
     "PlotSetId",
@@ -1897,10 +1910,14 @@ void Calculator::initializeFunctionsStandard() {
     "MatchesPattern",
     CalculatorFunctions::matchesPattern,
     "",
-    "Checks whether the first argument matches the pattern of the second argument. If no, returns 0. "
-    "Pattern parametric entries are indicated with the bound variable notation {{a}}. "
-    "If the expression matches the pattern, the return is a command enclosure "
-    "in which each of the variables is freed and assigned the matched value. ",
+    "Checks whether the first argument matches "
+    "the pattern of the second argument. If no, returns 0. "
+    "Pattern parametric entries are indicated "
+    "with the bound variable notation {{a}}. "
+    "If the expression matches "
+    "the pattern, the return is a command enclosure "
+    "in which each of the variables is "
+    "freed and assigned the matched value. ",
     "MatchesPattern{}(a = b * 10, a = {{c}} * b); "
     "MatchesPattern{}(a = b * 10, a = b * {{c}})",
     "CalculatorFunctions::matchesPattern",
@@ -1912,9 +1929,11 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctions::getFreeVariablesExcludeNamedConstants,
     "",
     "Gets the variables on which the expression depends. "
-    "Excludes the named constants. Here, the word ``variables'' is to be thought of as "
+    "Excludes the named constants. "
+    "Here, the word ``variables'' is to be thought of as "
     "``free variables'' but the possibility for small distinctions is "
-    "reserved (to allow dealing with named constants, reserved keywords, etc.). ",
+    "reserved (to allow dealing with named constants, "
+    "reserved keywords, etc.). ",
     "GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z}); "
     "GetVariablesIncludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z})",
     "CalculatorFunctions::getFreeVariablesExcludeNamedConstants",
@@ -1925,7 +1944,8 @@ void Calculator::initializeFunctionsStandard() {
     "GetVariablesIncludeNamedConstants",
     CalculatorFunctions::getFreeVariablesIncludeNamedConstants,
     "",
-    "Gets the variables on which the expression depends. Includes the named constants. "
+    "Gets the variables on which the expression depends. "
+    "Includes the named constants. "
     "Here, the word ``variables'' is to be thought of as "
     "``free variables'' but the possibility for small distinctions is "
     "reserved (to allow dealing with named constants, reserved keywords, etc.). ",
@@ -1969,7 +1989,8 @@ void Calculator::initializeFunctionsStandard() {
     "Plot2D",
     CalculatorFunctionsPlot::plot2D,
     "",
-    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form "
+    "<b>Calculus teaching function.</b> "
+    "Makes a 2d plot of a function given in the form "
     "y = f(x). The the second and third argument give the upper and "
     "lower bounds of x. The remaining arguments are optional. "
     "The next argument specifies color. "

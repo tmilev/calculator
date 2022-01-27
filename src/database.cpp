@@ -4,11 +4,9 @@
 #include "crypto.h"
 #include "webserver.h"
 #include "system_functions_global_objects.h"
-#include "database.h"
 #include "calculator_database_mongo.h"
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
-#include "crypto.h"
 
 bool Database::User::setPassword(
   const std::string& inputUsername,

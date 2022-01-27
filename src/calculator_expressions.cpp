@@ -2886,7 +2886,7 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* format) co
   return false;
 }
 
-bool CalculatorBasics::flattenCommandEnclosuresOneLayeR(
+bool CalculatorBasics::flattenCommandEnclosuresOneLayer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {

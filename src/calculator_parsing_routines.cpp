@@ -8,7 +8,7 @@ std::string SyntacticElement::getIntegerStringCrashIfNot(CalculatorParser& owner
   }
   std::string result = this->data.getValue<std::string>();
   for (unsigned i = 0; i < result.size(); i ++) {
-    if (!MathRoutines::isADigit(result[i])) {
+    if (!MathRoutines::isDigit(result[i])) {
       global.fatal << "Integer string non-digit entries. " << global.fatal;
     }
   }
@@ -1081,8 +1081,8 @@ bool CalculatorParser::shouldSplitOutsideQuotes(const std::string& left, char ri
     return false;
   }
   char leftLastChar = left[left.size() - 1];
-  bool rightIsDigit = MathRoutines::isADigit(right);
-  bool leftIsDigit = MathRoutines::isADigit(leftLastChar);
+  bool rightIsDigit = MathRoutines::isDigit(right);
+  bool leftIsDigit = MathRoutines::isDigit(leftLastChar);
   if (leftIsDigit && rightIsDigit) {
     return false;
   }

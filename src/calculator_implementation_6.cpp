@@ -3350,6 +3350,24 @@ std::string StringRoutines::convertStringToHexIfNonReadable(
   return Crypto::convertStringToHex(input, lineWidthZeroForNone, useHTML);
 }
 
+bool StringRoutines::isLatinLetterSequence(const std::string& input) {
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (!MathRoutines::isLatinLetter(input[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool StringRoutines::isLatinLetterOrDigitSequence(const std::string &input) {
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (!MathRoutines::isLatinLetter(input[i]) && !MathRoutines::isDigit(input[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CalculatorFunctions::jacobiSymbol(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::jacobiSymbol");
   global.fatal << "Function not implemented yet." << global.fatal;

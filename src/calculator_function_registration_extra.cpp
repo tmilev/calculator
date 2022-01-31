@@ -234,7 +234,7 @@ void Calculator::initializeFunctionsExtra() {
     CalculatorFunctions::formatCPPSourceCode,
     "",
     "Format cpp code. ",
-    "FormatCPPCode{}(\"src/database.cpp\")",
+    "FormatCPPCode{}(\"src/source_code_formatter.cpp\")",
     "Calculator::formatCPPSourceCode",
     "FormatCPPCode",
     innerInvisibleExperimentalNoTest

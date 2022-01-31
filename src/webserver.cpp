@@ -3989,7 +3989,7 @@ void WebServer::initializeMainHashes() {
   }
   global.buildVersionSimple = StringRoutines::stringTrimWhiteSpace(global.buildVersionSimple);
   for (unsigned i = 0; i < global.buildVersionSimple.size(); i ++) {
-    if (MathRoutines::isALatinLetter(global.buildVersionSimple[i])) {
+    if (MathRoutines::isLatinLetter(global.buildVersionSimple[i])) {
       global.buildVersionSimple = "?";
       break;
     }

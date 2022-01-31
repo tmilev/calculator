@@ -1818,7 +1818,7 @@ void Calculator::computeAutoCompleteKeyWords() {
   }
   for (int i = 0; i < this->parser.controlSequences.size; i ++) {
     if (this->parser.controlSequences[i].size() > 0) {
-      if (MathRoutines::isALatinLetter(this->parser.controlSequences[i][0])) {
+      if (MathRoutines::isLatinLetter(this->parser.controlSequences[i][0])) {
         autoCompleteKeyWords.addOnTopNoRepetition(this->parser.controlSequences[i]);
       }
     }

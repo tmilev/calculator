@@ -239,11 +239,11 @@ public:
     return result;
   }
   static int twoToTheNth(int n);
-  static bool isALatinLetter(char input);
-  static bool isADigit(const std::string& input, int* whichDigit = nullptr);
+  static bool isLatinLetter(char input);
+  static bool isDigit(const std::string& input, int* whichDigit = nullptr);
+  static bool isDigit(char input, int* whichDigit = nullptr);
   static bool hasDecimalDigitsOnly(const std::string& input);
   static bool isHexDigit(char digitCandidate);
-  static bool isADigit(char input, int* whichDigit = nullptr);
   template <class Type>
   static bool generateVectorSpaceClosedWithRespectToLieBracket(List<Type>& inputOutputElements, int upperDimensionBound) {
     return MathRoutines::generateVectorSpaceClosedWithRespectToOperation(

@@ -2756,7 +2756,7 @@ bool CalculatorHTML::extractOneAnswerId(
   }
   std::string currentId = input.answerIdCorrectIfEmpty();
   for (unsigned i = 0; i < currentId.size(); i ++) {
-    if (!MathRoutines::isALatinLetter(currentId[i])) {
+    if (!MathRoutines::isLatinLetter(currentId[i])) {
       if (comments != nullptr) {
         *comments << "Answer id must contain latin letters only, but was: " << currentId;
       }

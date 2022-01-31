@@ -1046,8 +1046,8 @@ bool Vector<Coefficient>::fromString(const std::string& input) {
   int sign = 1;
   for (unsigned i = 0; i < input.size(); i ++) {
     char previous = (i == 0) ? '(' : input[i - 1];
-    if (MathRoutines::isADigit(input[i], &currentDigit)) {
-      if (!MathRoutines::isADigit(previous)) {
+    if (MathRoutines::isDigit(input[i], &currentDigit)) {
+      if (!MathRoutines::isDigit(previous)) {
         this->addOnTop(Coefficient(0));
       }
       *this->lastObject() *= 10;

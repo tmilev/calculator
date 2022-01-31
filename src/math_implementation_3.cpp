@@ -608,10 +608,10 @@ std::string StringRoutines::convertStringToJavascriptVariable(const std::string&
   MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (i == 0 && MathRoutines::isADigit(input[i])) {
+    if (i == 0 && MathRoutines::isDigit(input[i])) {
       out << "x";
     }
-    if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i])) {
+    if (MathRoutines::isDigit(input[i]) || MathRoutines::isLatinLetter(input[i])) {
       out << input[i];
     } else {
       out << "x" << StringRoutines::convertByteToHex(static_cast<unsigned char>(input[i]));
@@ -851,7 +851,7 @@ std::string FileOperations::convertStringToLatexFileName(const std::string& inpu
   MacroRegisterFunctionWithName("FileOperations::convertStringToLatexFileName");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i])) {
+    if (MathRoutines::isDigit(input[i]) || MathRoutines::isLatinLetter(input[i])) {
       out << input[i];
     } else if (input[i] == ' ' || input[i] == ':') {
       out << "_";
@@ -2630,7 +2630,7 @@ bool StringRoutines::stringBeginsWith(
   return result;
 }
 
-bool MathRoutines::isALatinLetter(char input) {
+bool MathRoutines::isLatinLetter(char input) {
   if (input >= 'a' && input <= 'z') {
     return true;
   }
@@ -2642,14 +2642,14 @@ bool MathRoutines::isALatinLetter(char input) {
 
 bool MathRoutines::hasDecimalDigitsOnly(const std::string& input) {
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (!MathRoutines::isADigit(input[i])) {
+    if (!MathRoutines::isDigit(input[i])) {
       return false;
     }
   }
   return true;
 }
 
-bool MathRoutines::isADigit(char input, int* whichDigit) {
+bool MathRoutines::isDigit(char input, int* whichDigit) {
   int digit = input - '0';
   bool result = (digit < 10 && digit >= 0);
   if (result && whichDigit != nullptr) {
@@ -2659,7 +2659,7 @@ bool MathRoutines::isADigit(char input, int* whichDigit) {
 }
 
 bool MathRoutines::isHexDigit(char digitCandidate) {
-  if (MathRoutines::isADigit(digitCandidate)) {
+  if (MathRoutines::isDigit(digitCandidate)) {
     return true;
   }
   if (digitCandidate >= 'A' && digitCandidate <= 'F') {
@@ -2671,11 +2671,11 @@ bool MathRoutines::isHexDigit(char digitCandidate) {
   return false;
 }
 
-bool MathRoutines::isADigit(const std::string& input, int* whichDigit) {
+bool MathRoutines::isDigit(const std::string& input, int* whichDigit) {
   if (input.size() != 1) {
     return false;
   }
-  return MathRoutines::isADigit(input[0], whichDigit);
+  return MathRoutines::isDigit(input[0], whichDigit);
 }
 
 int MathRoutines::leastCommonMultiple(int a, int b) {
@@ -9990,10 +9990,10 @@ bool HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
 }
 
 bool HtmlRoutines::isRepresentedByItselfInURLs(char input) {
-  if (MathRoutines::isADigit(input)) {
+  if (MathRoutines::isDigit(input)) {
     return true;
   }
-  if (MathRoutines::isALatinLetter(input)) {
+  if (MathRoutines::isLatinLetter(input)) {
     return true;
   }
   return input == '.' || input == '-' || input == '_';

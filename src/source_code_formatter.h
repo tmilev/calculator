@@ -6,30 +6,162 @@
 #include "general_list_references.h"
 #include "general_maps.h"
 
-class CodeElement {
-public:
-  int indentLevel;
-  int currentLineLength = 0;
-  bool isIncludeLine;
-  bool isComment;
-  bool isInQuote;
-  std::string content;
-  List<CodeElement> children;
-  std::string toString();
-  CodeElement();
-};
-
 class CodeFormatter {
 public:
+  class Element {
+  public:
+    enum Type {
+      Dummy,
+      Unknown,
+      IncludeLineStart,
+      IncludeLine,
+      Comment,
+      CommentMultiline,
+      EndLine,
+      Quote,
+      SingleQuote,
+      StringLiteral,
+      Backslash,
+      ConstKeyWord,
+      ControlKeyWord,
+      TypeKeyWord,
+      // Type+identifer as in:
+      // int x
+      // or:
+      // MyString x
+      TypeAndIdentifier,
+      // A comma-separated list of type+identifiers.
+      TypeAndIdentifierList,
+      // An expression that describes a type such as:
+      // const int, int, const int&.
+      TypeExpression,
+      // A computed expression, such as this->x or x+2.
+      Expression,
+      // An identifier such as f::y.
+      Identifier,
+      // A user-defined atom such as foo or bar.
+      Atom,
+      ControlWantsCodeBlock,
+      Colon,
+      SemiColon,
+      DoubleColon,
+      InParentheses,
+      LeftParenthesis,
+      RightParenthesis,
+      LeftBracket,
+      RightBracket,
+      LeftCurlyBrace,
+      RightCurlyBrace,
+      CodeBlock,
+      TopLevel,
+      FileContent,
+      Operator,
+      Command,
+      CommandList,
+      FunctionWithArguments,
+      ConstructorExternal,
+      FunctionDeclaration,
+      Ampersand,
+      Star,
+      CaseKeyWord,
+      DefaultKeyWord,
+      CaseClauseStart,
+      CaseClause,
+    };
+    Element::Type type;
+    std::string content;
+    List<CodeFormatter::Element> children;
+    int indentLevel;
+    int currentLineLength = 0;
+    std::string toString() const;
+    std::string toStringWithoutType() const;
+    static std::string toStringType(CodeFormatter::Element::Type inputType);
+    Element();
+    void clear();
+    void appendType(const CodeFormatter::Element& other, CodeFormatter::Element::Type inputType);
+    void appendExpression(const CodeFormatter::Element& other);
+    void appendIdentifier(const CodeFormatter::Element& other);
+    void appendCommand(const CodeFormatter::Element& other);
+
+    bool isSuitableForCommand() const;
+    bool isSuitableForTopLevel() const;
+    bool isSuitableForTypeExpression() const;
+    bool isSuitableForParenthesesEnclosure() const;
+
+    bool isIdentifierOrAtom() const;
+    bool isExpressionOrAtom() const;
+    bool isExpressionIdentifierOrAtom() const;
+    bool isCommandListOrCommandOrClause() const;
+    bool isCommandOrClause() const;
+    bool isParenthesesBlock() const;
+    bool isCodeBlock() const;
+    bool isTypeWord() const;
+    bool isTypeOrIdentifierOrExpression() const;
+    bool isStarOrAmpersand() const;
+    void makeFrom1(
+      CodeFormatter::Element::Type inputType,
+      const Element& child
+    );
+    void makeFrom2(
+      CodeFormatter::Element::Type inputType,
+      const Element& left,
+      const Element& right
+    );
+    void makeFrom3(
+      CodeFormatter::Element::Type inputType,
+      const Element& left,
+      const Element& middle,
+      const Element& right
+    );
+  };
+
+  class Words {
+  public:
+    bool flagPreviousIsStandaloneBackSlash;
+    CodeFormatter* owner;
+    char currentChar;
+    CodeFormatter::Element currentWord;
+    List<CodeFormatter::Element> elements;
+    void initialize(CodeFormatter& inputOwner);
+    bool processSeparatorCharacters();
+    bool processCharacterInQuotes();
+    bool processCharacterInSingleQuotes();
+    bool processCharacterInComment();
+    bool processCharacterInMultilineComment();
+    void addCurrentWord();
+    bool previousIsForwardSlash();
+    bool extractCodeElements(std::stringstream* comments);
+    Words();
+  };
+
+  class Processor {
+  public:
+    CodeFormatter* owner;
+    CodeFormatter::Element code;
+    List<CodeFormatter::Element> stack;
+    std::string lastRuleName;
+    std::string debugLog;
+    bool flagPrepareReport;
+    bool flagExceededReportSize;
+
+    void consumeElements();
+    void consumeOneElement(CodeFormatter::Element& incoming);
+    bool applyOneRule();
+    bool removeLast();
+    bool removeLast(int count);
+    bool removeBelowLast(int count);
+    Processor();
+    void initialize(CodeFormatter& inputOwner);
+    std::string toStringStack();
+    void appendLog();
+  };
+
   std::string inputFileName;
   std::string outputFileName;
-  bool flagInQuotes;
-  bool flagPreviousIsStandaloneBackSlash;
+  Words words;
+  CodeFormatter::Processor processor;
   std::string inputCode;
-  char currentChar;
-  std::string currentWord;
-  List<std::string> originalElements;
-  List<CodeElement> stack;
+
   std::string transformedContent;
   std::string separatorCharacters;
   std::string doesntNeedSpaceToTheRight;
@@ -41,44 +173,39 @@ public:
   HashedList<List<std::string> > pairsNotSeparatedBySpace;
   HashedList<std::string, HashFunctions::hashFunction> doesntNeedSpaceToTheRightContainer;
   HashedList<std::string, HashFunctions::hashFunction> doesntNeedSpaceToTheLeftContainer;
+  // Keywords such as int, boo, etc.
+  HashedList<std::string, HashFunctions::hashFunction> typeKeyWords;
+  // Keywords such as for, if, etc that take as input an in-parentheses block and an
+  // in-curly-brace block.
+  HashedList<std::string, HashFunctions::hashFunction> controlKeyWords;
+  MapList<std::string, CodeFormatter::Element::Type, HashFunctions::hashFunction> elementTypes;
+  // A list of elements interpreted as operators.
+  HashedList<std::string, HashFunctions::hashFunction> operatorList;
+
   int maximumDesiredLineLength;
   int indexCurrentlyConsumed;
   const int tabLength = 2;
+  const int dummyElements = 4;
+  // A class to represent
   CodeFormatter();
-  void addCurrentWord();
   static bool formatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
   bool formatCPPSourceCode(
     const std::string& inputFileName,
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
   );
-  std::string peekNext() const;
-  bool processCharacterInQuotes();
   bool shouldSeparateWithSpace(const std::string& left, const std::string& right);
   bool isSeparatorCharacter(char input);
   bool isSeparator(const std::string& input);
-  bool processSeparatorCharacters();
-  bool extractCodeElements(std::stringstream* comments);
-  bool format(std::stringstream* comments);
-  void consumeElement(std::stringstream& out, const std::string& input);
-  void writeElement(std::stringstream& out, const std::string& input);
-  void consumeInComment(
-    std::stringstream& out, const std::string& input
-  );
-  void consumeInQuote(
-    std::stringstream& out, const std::string& input
-  );
-  void consumeInMultiLineComment(
-    std::stringstream& out, const std::string& input
-  );
-  void consumeInIncludeLine(
-    std::stringstream& out, const std::string& input
-  );
-  void breakLine(std::stringstream& out);
-  void indent(std::stringstream& out);
+  bool isOperator(const std::string& input);
+  bool isTypeKeyWord(const std::string& input);
+  bool isControlKeyWord(const std::string& input);
+  void format(
+    std::stringstream& out, CodeFormatter::Element& input);
+  void formatTopLevel(
+    std::stringstream& out, CodeFormatter::Element& input);
   bool isWhiteSpace(const std::string& input);
   bool writeFormatedCode(std::stringstream* comments);
-  void popStack();
   std::string toStringTransformed6();
   bool computeState(int maximumElementsToProcess);
   bool addAndAccount(const std::string& incoming);

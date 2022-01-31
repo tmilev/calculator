@@ -2314,15 +2314,15 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
       positionInString ++;
       break;
     }
-    if (MathRoutines::isADigit(input[positionInString])) {
+    if (MathRoutines::isDigit(input[positionInString])) {
       break;
     }
-    if (MathRoutines::isALatinLetter(input[positionInString])) {
+    if (MathRoutines::isLatinLetter(input[positionInString])) {
       return false;
     }
   }
   for (; positionInString < input.size(); positionInString ++) {
-    if (MathRoutines::isADigit(input[positionInString], &ReaderDigit)) {
+    if (MathRoutines::isDigit(input[positionInString], &ReaderDigit)) {
       *this *= 10;
       *this += ReaderDigit;
     }
@@ -2333,7 +2333,7 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
     }
   }
   for (; positionInString < input.size(); positionInString ++) {
-    if (MathRoutines::isADigit(input[positionInString], &ReaderDigit)) {
+    if (MathRoutines::isDigit(input[positionInString], &ReaderDigit)) {
       readerDen *= 10;
       readerDen += ReaderDigit;
     }

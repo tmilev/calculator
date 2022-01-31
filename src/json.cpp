@@ -164,7 +164,7 @@ bool JSData::hasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
   for (int i = 0; i < keys.size; i ++) {
     // will not work for integer indices larger than 9
     int digit = - 1;
-    if (MathRoutines::isADigit(keys[i], &digit)) {
+    if (MathRoutines::isDigit(keys[i], &digit)) {
       if (currentData->elementType != JSData::token::tokenArray) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
@@ -348,7 +348,7 @@ bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
     return true;
   }
   if (this->stringValue.size() > 0) {
-    if (this->stringValue[0] == '-' || MathRoutines::isADigit(this->stringValue[0])) {
+    if (this->stringValue[0] == '-' || MathRoutines::isDigit(this->stringValue[0])) {
       this->integerValue.freeMemory();
       this->elementType = JSData::token::tokenUndefined;
       Rational parser;

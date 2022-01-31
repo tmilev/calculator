@@ -3,6 +3,408 @@
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "source_code_formatter.h" 
+#include "general_strings.h"
+
+CodeFormatter::Element::Element() {
+  this->indentLevel = 0;
+  this->currentLineLength = 0;
+  this->type = CodeFormatter::Element::Unknown;
+}
+
+std::string CodeFormatter::Element::toStringWithoutType() const {
+  std::stringstream out;
+  out << content;
+  for (int i = 0; i < this->children.size; i ++) {
+    out << this->children[i].toStringWithoutType();
+  }
+  return out.str();
+}
+
+std::string CodeFormatter::Element::toString() const {
+  std::stringstream out;
+  out << this->toStringWithoutType();
+  out <<  "[" << this->toStringType(this->type) << "]";
+  return out.str();
+}
+
+std::string CodeFormatter::Element::toStringType(CodeFormatter::Element::Type input) {
+  switch (input) {
+  case CodeFormatter::Element::TopLevel:
+    return "top level";
+  case CodeFormatter::Element::CommandList:
+    return "command list";
+  case CodeFormatter::Element::Command:
+    return "command";
+  case CodeFormatter::Element::Unknown:
+    return "unknown";
+  case CodeFormatter::Element::Atom:
+    return "atom";
+  case CodeFormatter::Element::TypeKeyWord:
+    return "type key word";
+  case CodeFormatter::Element::Expression:
+    return "expression";
+  case CodeFormatter::Element::Identifier:
+    return "identifier";
+  case CodeFormatter::Element::LeftCurlyBrace:
+    return "{";
+  case CodeFormatter::Element::RightCurlyBrace:
+    return "}";
+  case CodeFormatter::Element::LeftParenthesis:
+    return "(";
+  case CodeFormatter::Element::RightParenthesis:
+    return ")";
+  case CodeFormatter::Element::InParentheses:
+    return "()";
+  case CodeFormatter::Element::EndLine:
+    return "newline";
+  case CodeFormatter::Element::SemiColon:
+    return ";";
+  case CodeFormatter::Element::Colon:
+    return ":";
+  case CodeFormatter::Element::DoubleColon:
+    return "::";
+  case CodeFormatter::Element::Operator:
+    return "operator";
+  case CodeFormatter::Element::Quote:
+    return "quote";
+  case CodeFormatter::Element::ConstKeyWord:
+    return "const";
+  case CodeFormatter::Element::IncludeLine:
+    return "includeLine";
+  case CodeFormatter::Element::IncludeLineStart:
+    return "includeLineStart";
+  case CodeFormatter::Element::FunctionDeclaration:
+    return "functionDeclaration";
+  case CodeFormatter::Element::FunctionWithArguments:
+    return "functionWithArguments";
+  case CodeFormatter::Element::TypeAndIdentifier:
+    return "typeAndIdentifier";
+  case CodeFormatter::Element::TypeExpression:
+    return "typeExpression";
+  case CodeFormatter::Element::CaseKeyWord:
+    return "case keyword";
+  case CodeFormatter::Element::CaseClause:
+    return "case clause";
+  case CodeFormatter::Element::CaseClauseStart:
+    return "case clause start";
+  default:
+    return "????";
+  }
+}
+
+void CodeFormatter::Element::appendExpression(const CodeFormatter::Element &other) {
+  this->appendType(other, CodeFormatter::Element::Expression);
+}
+
+void CodeFormatter::Element::appendIdentifier(const CodeFormatter::Element &other) {
+  this->appendType(other, CodeFormatter::Element::Identifier);
+}
+
+void CodeFormatter::Element::appendType(const CodeFormatter::Element &other, CodeFormatter::Element::Type inputType) {
+  if (this->type == inputType && this->children.size > 0) {
+    this->children.addOnTop(other);
+    return;
+  }
+  CodeFormatter::Element thisCopy = *this;
+  this->children.clear();
+  this->children.addOnTop(thisCopy);
+  this->children.addOnTop(other);
+  this->content = "";
+  this->type = inputType;
+}
+
+void CodeFormatter::Element::clear() {
+  this->children.clear();
+  this->type = CodeFormatter::Element::Unknown;
+  this->content = "";
+}
+
+void CodeFormatter::Element::makeFrom2(CodeFormatter::Element::Type inputType, const Element &left, const Element &right) {
+  if (this == & left || this == & right) {
+    CodeFormatter::Element leftCopy = left;
+    CodeFormatter::Element rightCopy = right;
+    this->makeFrom2(inputType, leftCopy, rightCopy);
+    return;
+  }
+  this->clear();
+  this->type = inputType;
+  this->children.addOnTop(left);
+  this->children.addOnTop(right);
+}
+
+void CodeFormatter::Element::makeFrom1(CodeFormatter::Element::Type inputType, const Element &child) {
+  if (this == & child) {
+    CodeFormatter::Element childCopy = child;
+    this->makeFrom1(inputType, childCopy);
+    return;
+  }
+  this->clear();
+  this->type = inputType;
+  this->children.addOnTop(child);
+}
+
+void CodeFormatter::Element::makeFrom3(CodeFormatter::Element::Type inputType, const Element &left, const Element &middle, const Element &right) {
+  if (this == & left || this == & right || this == &middle) {
+    CodeFormatter::Element leftCopy = left;
+    CodeFormatter::Element middleCopy = middle;
+    CodeFormatter::Element rightCopy = right;
+    this->makeFrom3(inputType, leftCopy, middleCopy, rightCopy);
+    return;
+  }
+  this->clear();
+  this->type = inputType;
+  this->children.addOnTop(left);
+  this->children.addOnTop(middle);
+  this->children.addOnTop(right);
+}
+
+void CodeFormatter::Element::appendCommand(const CodeFormatter::Element &other) {
+  this->appendType(other, CodeFormatter::Element::CommandList);
+}
+
+bool CodeFormatter::Element::isSuitableForTypeExpression() const {
+  return
+  this->isIdentifierOrAtom() ||
+  this->type == CodeFormatter::Element::TypeExpression ||
+  this->type == CodeFormatter::Element::TypeKeyWord;
+}
+
+bool CodeFormatter::Element::isSuitableForParenthesesEnclosure() const {
+  return
+  this->isCommandListOrCommandOrClause() ||
+  this->isExpressionIdentifierOrAtom() ||
+  this->type == CodeFormatter::Element::TypeAndIdentifier ||
+  this->type == CodeFormatter::Element::TypeAndIdentifierList
+  ;
+}
+
+bool CodeFormatter::Element::isIdentifierOrAtom() const {
+  return
+  this->type == CodeFormatter::Element::Identifier ||
+  this->type == CodeFormatter::Element::Atom;
+}
+
+bool CodeFormatter::Element::isExpressionOrAtom() const {
+  return
+  this->type == CodeFormatter::Element::Expression ||
+  this->type == CodeFormatter::Element::Atom;
+}
+
+bool CodeFormatter::Element::isExpressionIdentifierOrAtom() const {
+  return
+  this->type == CodeFormatter::Element::Expression ||
+  this->type == CodeFormatter::Element::Identifier ||
+  this->type == CodeFormatter::Element::Atom;
+}
+
+bool CodeFormatter::Element::isCommandOrClause() const {
+  return
+  this->type == CodeFormatter::Element::Command ||
+  this->type == CodeFormatter::Element::CaseClause
+  ;
+}
+
+bool CodeFormatter::Element::isCommandListOrCommandOrClause() const {
+  return
+  this->type == CodeFormatter::Element::Command ||
+  this->type == CodeFormatter::Element::CommandList ||
+  this->type == CodeFormatter::Element::CaseClause
+  ;
+}
+
+bool CodeFormatter::Element::isSuitableForTopLevel() const {
+  return
+  this->type == CodeFormatter::Element::IncludeLine ||
+  this->type == CodeFormatter::Element::Command ||
+  this->type == CodeFormatter::Element::Comment ||
+  this->type == CodeFormatter::Element::CommentMultiline
+  ;
+}
+
+bool CodeFormatter::Element::isSuitableForCommand() const {
+  return
+  this->isExpressionIdentifierOrAtom() ||
+  this->type == CodeFormatter::Element::FunctionWithArguments ||
+  this->type == CodeFormatter::Element::TypeAndIdentifier
+  ;
+}
+
+bool CodeFormatter::Element::isParenthesesBlock() const {
+  return
+  this->type == CodeFormatter::Element::InParentheses;
+}
+
+bool CodeFormatter::Element::isCodeBlock() const {
+  return
+  this->type == CodeFormatter::Element::CodeBlock;
+}
+
+bool CodeFormatter::Element::isTypeWord() const {
+  return
+  this->type == CodeFormatter::Element::TypeKeyWord;
+}
+
+bool CodeFormatter::Element::isStarOrAmpersand() const {
+  return
+  this->type == CodeFormatter::Element::Star ||
+  this->type == CodeFormatter::Element::Ampersand;
+}
+
+bool CodeFormatter::Element::isTypeOrIdentifierOrExpression() const {
+  return
+  this->type == CodeFormatter::Element::TypeKeyWord ||
+  this->type == CodeFormatter::Element::Expression ||
+  this->type == CodeFormatter::Element::Identifier ||
+  this->type == CodeFormatter::Element::Atom
+  ;
+}
+
+bool CodeFormatter::Words::previousIsForwardSlash() {
+  if (this->elements.size == 0) {
+    return false;
+  }
+  return this->elements.lastObject()->content == "/";
+}
+
+bool CodeFormatter::Words::processSeparatorCharacters() {
+  if (!this->owner->isSeparatorCharacter(this->currentChar)) {
+    this->currentWord.content += this->currentChar;
+    return true;
+  }
+  this->addCurrentWord();
+  this->currentWord.content = this->currentChar;
+  if (this->currentChar == '\"') {
+    this->currentWord.type = CodeFormatter::Element::Quote;
+    this->flagPreviousIsStandaloneBackSlash = false;
+    return true;
+  }
+  if (this->currentChar == '\'') {
+    this->currentWord.type = CodeFormatter::Element::SingleQuote;
+    this->flagPreviousIsStandaloneBackSlash = false;
+    return true;
+  }
+  if (this->currentChar == '/' && this->previousIsForwardSlash()) {
+    this->elements.removeLastObject();
+    this->currentWord.content = "//";
+    this->currentWord.type = CodeFormatter::Element::Comment;
+    return true;
+  }
+  if (this->currentChar == '*' && this->previousIsForwardSlash()) {
+    this->elements.removeLastObject();
+    this->currentWord.content = "/*";
+    this->currentWord.type = CodeFormatter::Element::CommentMultiline;
+    return true;
+  }
+  this->addCurrentWord();
+  return true;
+}
+
+bool CodeFormatter::Words::processCharacterInQuotes() {
+  if (this->currentWord.type != CodeFormatter::Element::Quote) {
+    return false;
+  }
+  this->currentWord.content += this->currentChar;
+  if (this->currentChar == '"' && !this->flagPreviousIsStandaloneBackSlash) {
+    this->addCurrentWord();
+    return true;
+  }
+  if (this->currentChar == '\\') {
+    this->flagPreviousIsStandaloneBackSlash = !this->flagPreviousIsStandaloneBackSlash;
+  } else {
+    this->flagPreviousIsStandaloneBackSlash = false;
+  }
+  return true;
+}
+
+bool CodeFormatter::Words::processCharacterInSingleQuotes() {
+  if (this->currentWord.type != CodeFormatter::Element::SingleQuote) {
+    return false;
+  }
+  this->currentWord.content += this->currentChar;
+  if (this->currentChar == '\'' && !this->flagPreviousIsStandaloneBackSlash) {
+    this->addCurrentWord();
+    return true;
+  }
+  if (this->currentChar == '\\') {
+    this->flagPreviousIsStandaloneBackSlash = !this->flagPreviousIsStandaloneBackSlash;
+  } else {
+    this->flagPreviousIsStandaloneBackSlash = false;
+  }
+  return true;
+}
+
+bool CodeFormatter::Words::processCharacterInComment() {
+  if (this->currentWord.type != CodeFormatter::Element::Comment) {
+    return false;
+  }
+  if (this->currentChar == '\n') {
+    this->addCurrentWord();
+    return this->processSeparatorCharacters();
+  }
+  this->currentWord.content += this->currentChar;
+  return true;
+}
+
+bool CodeFormatter::Words::processCharacterInMultilineComment() {
+  if (this->currentWord.type != CodeFormatter::Element::Comment) {
+    return false;
+  }
+  this->currentWord.content += this->currentChar;
+  if (this->currentChar == '/' && this->currentWord.content[this->currentWord.content.size() - 1] == '*') {
+    this->addCurrentWord();
+  }
+  return true;
+}
+
+bool CodeFormatter::Words::extractCodeElements(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CodeFormatter::Words::extractCodeElements");
+  (void) comments;
+  std::string& inputCode = this->owner->inputCode;
+  this->elements.setExpectedSize(static_cast<signed>(inputCode.size()));
+  this->flagPreviousIsStandaloneBackSlash = false;
+  for (unsigned i = 0; i < inputCode.size(); i ++) {
+    this->currentChar = inputCode[i];
+    if (this->processCharacterInQuotes()) {
+      continue;
+    }
+    if (this->processCharacterInSingleQuotes()) {
+      continue;
+    }
+    if (this->processCharacterInComment()) {
+      continue;
+    }
+    if (this->processCharacterInMultilineComment()) {
+      continue;
+    }
+    if (this->processSeparatorCharacters()) {
+      continue;
+    }
+  }
+  this->addCurrentWord();
+  return true;
+}
+
+CodeFormatter::Words::Words() {
+  this->flagPreviousIsStandaloneBackSlash = false;
+  this->currentChar = 0;
+}
+
+void CodeFormatter::Words::addCurrentWord() {
+  this->flagPreviousIsStandaloneBackSlash = false;
+  if (this->currentWord.content == "") {
+    return;
+  }
+  if (this->currentWord.content == "\n") {
+    this->currentWord.type = CodeFormatter::Element::Type::EndLine;
+  }
+  this->elements.addOnTop(this->currentWord);
+  this->currentWord.type = CodeFormatter::Element::Type::Unknown;
+  this->currentWord.content = "";
+}
+
+void CodeFormatter::Words::initialize(CodeFormatter& inputOwner) {
+  this->owner = &inputOwner;
+}
 
 bool CodeFormatter::initializeFileNames(
   const std::string& fileName,
@@ -83,12 +485,15 @@ bool CodeFormatter::formatCPPSourceCode(
   if (!this->initializeFileNames(inputFileName, inputOutputFileNameEmptyForAuto, comments)) {
     return false;
   }
-  if (!this->extractCodeElements(comments)) {
+  this->words.initialize(*this);
+  if (!this->words.extractCodeElements(comments)) {
     return false;
   }
-  if (!this->format(comments)) {
-    return false;
-  }
+  this->processor.initialize(*this);
+  this->processor.consumeElements();
+  std::stringstream out;
+  this->formatTopLevel(out, this->processor.code);
+  this->transformedContent = out.str();
   if (!this->writeFormatedCode(comments)) {
     return false;
   }
@@ -96,14 +501,6 @@ bool CodeFormatter::formatCPPSourceCode(
     (*comments) << this->toStringLinks();
   }
   return true;
-}
-
-void CodeFormatter::addCurrentWord() {
-  if (this->currentWord == "") {
-    return;
-  }
-  this->originalElements.addOnTop(this->currentWord);
-  this->currentWord = "";
 }
 
 bool CodeFormatter::isSeparatorCharacter(char input) {
@@ -118,82 +515,56 @@ bool CodeFormatter::isSeparator(const std::string& input) {
   return this->isSeparatorCharacter(input[0]);
 }
 
-bool CodeFormatter::processSeparatorCharacters() {
-  if (this->isSeparatorCharacter(this->currentChar)) {
-    this->addCurrentWord();
-    this->currentWord = this->currentChar;
-    this->addCurrentWord();
-    return true;
-  }
-  this->currentWord += this->currentChar;
-  return true;
-}
-
-bool CodeFormatter::processCharacterInQuotes() {
-  if (!this->flagInQuotes) {
-    return false;
-  }
-  this->currentWord += this->currentChar;
-  if (this->currentChar == '"') {
-    if (!this->flagPreviousIsStandaloneBackSlash) {
-      this->flagInQuotes = false;
-      this->addCurrentWord();
-      return true;
-    }
-  }
-  if (this->currentChar == '\\') {
-    this->flagPreviousIsStandaloneBackSlash = !this->flagPreviousIsStandaloneBackSlash;
-  } else {
-    this->flagPreviousIsStandaloneBackSlash = false;
-  }
-  return true;
-}
-
-bool CodeFormatter::extractCodeElements(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::extractCodeElements");
-  (void) comments;
-  this->originalElements.setExpectedSize(static_cast<signed>(this->inputCode.size()));
-  this->flagInQuotes = false;
-  this->flagPreviousIsStandaloneBackSlash = false;
-  for (unsigned i = 0; i < this->inputCode.size(); i ++) {
-    this->currentChar = this->inputCode[i];
-    if (this->processCharacterInQuotes()) {
-      continue;
-    }
-    if (this->processSeparatorCharacters()) {
-      continue;
-    }
-  }
-  this->addCurrentWord();
-  return true;
-}
-
-CodeElement::CodeElement() {
-  this->isIncludeLine = false;
-  this->isComment = false;
-  this->isInQuote = false;
-  this->indentLevel = 0;
-  this->currentLineLength = 0;
-}
-
-std::string CodeElement::toString() {
-  std::stringstream out;
-  out << "indent: " << this->indentLevel;
-  return out.str();
+bool CodeFormatter::isOperator(const std::string& input) {
+  return this->operatorList.contains(input);
 }
 
 CodeFormatter::CodeFormatter() {
-  this->separatorCharacters = "(){} \t\n\r,:;.*&+-/[]#";
+  this->separatorCharacters = "(){} \t\n\r,:;.*&+-/[]#\"'=><";
   this->doesntNeedSpaceToTheLeft = "&,:.()";
   this->doesntNeedSpaceToTheRight = "():.";
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"&", "&"}));
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"&", "*"}));
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"*", "&"}));
+  this->elementTypes.setKeyValue(":", CodeFormatter::Element::Colon);
+  this->elementTypes.setKeyValue(";", CodeFormatter::Element::SemiColon);
+  this->elementTypes.setKeyValue("(", CodeFormatter::Element::LeftParenthesis);
+  this->elementTypes.setKeyValue(")", CodeFormatter::Element::RightParenthesis);
+  this->elementTypes.setKeyValue("{", CodeFormatter::Element::LeftCurlyBrace);
+  this->elementTypes.setKeyValue("}", CodeFormatter::Element::RightCurlyBrace);
+  this->elementTypes.setKeyValue("[", CodeFormatter::Element::LeftBracket);
+  this->elementTypes.setKeyValue("]", CodeFormatter::Element::RightBracket);
+  this->elementTypes.setKeyValue("&", CodeFormatter::Element::Ampersand);
+  this->elementTypes.setKeyValue("*", CodeFormatter::Element::Star);
+  this->elementTypes.setKeyValue("const", CodeFormatter::Element::ConstKeyWord);
+  this->elementTypes.setKeyValue("case", CodeFormatter::Element::CaseKeyWord);
+  this->elementTypes.setKeyValue("default", CodeFormatter::Element::DefaultKeyWord);
+  this->typeKeyWords.addListOnTop(List<std::string>({
+    "bool",
+    "void",
+  }));
+  this->controlKeyWords.addListOnTop(List<std::string>({
+    "for",
+    "if",
+    "while",
+  }));
+  this->operatorList.addListOnTop(List<std::string>({
+    "+",
+    "-",
+    ">",
+    "<",
+    "=",
+    "/",
+    "*",
+    "|",
+    ".",
+    "->",
+    "==",
+    ">>",
+    "<<",
+  }));
   this->maximumDesiredLineLength = 80;
 
-  this->flagInQuotes = false;
-  this->flagPreviousIsStandaloneBackSlash = false;
-  this->currentChar = 0;  
   this->indexCurrentlyConsumed = 0;
 
   this->separatorCharactersMap.initializeFillInObject(256, false);
@@ -210,89 +581,377 @@ CodeFormatter::CodeFormatter() {
   }
 }
 
-bool CodeFormatter::format(std::stringstream* comments) {
-  (void) comments;
-  std::stringstream out;
-  CodeElement initial;
-  this->stack.addOnTop(initial);
-  for (
-    this->indexCurrentlyConsumed = 0;
-    this->indexCurrentlyConsumed < this->originalElements.size;
-    this->indexCurrentlyConsumed ++
-  ) {
-    this->consumeElement(out, this->originalElements[this->indexCurrentlyConsumed]);
+void CodeFormatter::formatTopLevel(std::stringstream &out, CodeFormatter::Element &input) {
+  MacroRegisterFunctionWithName("CodeFormatter::formatTopLevel");
+  for (int i = 0; i < input.children.size; i ++) {
+    CodeFormatter::Element& current = input.children[i];
+    if (current.type == CodeFormatter::Element::Dummy) {
+      continue;
+    }
+    if (i > 1) {
+      CodeFormatter::Element& previous = input.children[i - 1];
+      if (previous.type == CodeFormatter::Element::IncludeLine && current.type != CodeFormatter::Element::IncludeLine) {
+        out << "\n";
+      }
+    }
+    this->format(out, current);
+    out << "\n";
   }
-  this->transformedContent = out.str();
+}
+
+void CodeFormatter::format(std::stringstream &out, Element &input) {
+  MacroRegisterFunctionWithName("CodeFormatter::format");
+  if (input.type == CodeFormatter::Element::TopLevel) {
+    this->formatTopLevel(out, input);
+    return;
+  }
+  if (input.content != "") {
+    out << input.content;
+    return;
+  }
+  for (int i = 0; i < input.children.size; i ++) {
+    this->format(out, input.children[i]);
+  }
+}
+
+CodeFormatter::Processor::Processor() {
+  this->owner = nullptr;
+  global.comments << "DEBUG: preparing report!";
+  this->flagPrepareReport = false;
+  this->flagExceededReportSize = false;
+}
+
+void CodeFormatter::Processor::initialize(CodeFormatter& inputOwner) {
+  this->owner = &inputOwner;
+}
+
+void CodeFormatter::Processor::consumeElements() {
+  List<CodeFormatter::Element>& elements = this->owner->words.elements;
+  this->stack.clear();
+  for (int i = 0; i < this->owner->dummyElements; i ++) {
+    CodeFormatter::Element element;
+    element.type = CodeFormatter::Element::Dummy;
+    this->stack.addOnTop(element);
+  }
+  CodeFormatter::Element topLevel;
+  topLevel.type = CodeFormatter::Element::TopLevel;
+  this->stack.addOnTop(topLevel);
+  for (int i = 0; i < elements.size; i ++) {
+    this->consumeOneElement(elements[i]);
+  }
+  global.comments << "DEBUG: " << this->debugLog;
+  this->code.type = CodeFormatter::Element::FileContent;
+  this->code.content = "";
+  this->code.children = this->stack;
+}
+
+void CodeFormatter::Processor::consumeOneElement(CodeFormatter::Element& incoming) {
+  MacroRegisterFunctionWithName("CodeFormatter::Processor::consumeOneElement");
+  this->lastRuleName = "consume";
+  this->stack.addOnTop(incoming);
+  this->appendLog();
+  int stackSizeToImprove = this->stack.size;
+  int rulesSinceImprovement = 0;
+
+  while (this->applyOneRule()) {
+    this->appendLog();
+    this->lastRuleName = "";
+    rulesSinceImprovement ++;
+    if (this->stack.size < stackSizeToImprove) {
+      rulesSinceImprovement = 0;
+      stackSizeToImprove = this->stack.size;
+    }
+    if (rulesSinceImprovement > 10) {
+      global.fatal << "Too many rule applications without reducing the stack. " << global.fatal;
+    }
+  }
+}
+
+bool CodeFormatter::Processor::applyOneRule() {
+  CodeFormatter::Element& last = this->stack[this->stack.size - 1];
+  CodeFormatter::Element& secondToLast = this->stack[this->stack.size - 2];
+  CodeFormatter::Element& thirdToLast = this->stack[this->stack.size - 3];
+  CodeFormatter::Element& fourthToLast = this->stack[this->stack.size - 4];
+  if (secondToLast.content == "#" && last.content == "include") {
+    secondToLast.content = "#include";
+    secondToLast.type = CodeFormatter::Element::IncludeLineStart;
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::IncludeLineStart && last.type == CodeFormatter::Element::EndLine) {
+    secondToLast.type = CodeFormatter::Element::IncludeLine;
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::IncludeLineStart && last.type != CodeFormatter::Element::EndLine) {
+    secondToLast.content.append(last.content);
+    return this->removeLast();
+  }
+  if (this->owner->isWhiteSpace(last.content)) {
+    this->lastRuleName = "trim whitepace";
+    return this->removeLast();
+  }
+  if (last.type == CodeFormatter::Element::Unknown && this->owner->isTypeKeyWord(last.content)) {
+    this->lastRuleName = "type key word";
+    last.type = CodeFormatter::Element::TypeKeyWord;
+    return true;
+  }
+  if (last.type == CodeFormatter::Element::Unknown && this->owner->isControlKeyWord(last.content)) {
+    this->lastRuleName = "control key word";
+    last.type = CodeFormatter::Element::ControlKeyWord;
+    return true;
+  }
+  if (
+    thirdToLast.type == CodeFormatter::Element::CaseClauseStart &&
+    secondToLast.isCommandListOrCommandOrClause() && (
+      last.type == CodeFormatter::Element::CaseClauseStart ||
+      last.type == CodeFormatter::Element::RightCurlyBrace
+  )) {
+    thirdToLast.makeFrom2(CodeFormatter::Element::CaseClause, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (last.type == CodeFormatter::Element::Quote) {
+    this->lastRuleName = "quote to expression";
+    last.type = CodeFormatter::Element::Expression;
+    return true;
+  }
+  if (secondToLast.type == CodeFormatter::Element::TopLevel && last.isSuitableForTopLevel()) {
+    secondToLast.children.addOnTop(last);
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::ControlKeyWord && last.type == CodeFormatter::Element::InParentheses) {
+    this->lastRuleName = "control wants code block";
+    secondToLast.makeFrom2(CodeFormatter::Element::ControlWantsCodeBlock, secondToLast, last);
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::ControlWantsCodeBlock && last.isCodeBlock()) {
+    this->lastRuleName = "control and code block";
+    secondToLast.makeFrom2(CodeFormatter::Element::Command, secondToLast, last);
+    return this->removeLast();
+  }
+  if (last.type == CodeFormatter::Element::Unknown && this->owner->elementTypes.contains(last.content)) {
+    this->lastRuleName = "look up element type";
+    last.type = this->owner->elementTypes.getValueNoFail(last.content);
+    return true;
+  }
+  if (secondToLast.type == CodeFormatter::Element::Colon && last.type == CodeFormatter::Element::Colon) {
+    this->lastRuleName = "double-colon";
+    secondToLast.type = CodeFormatter::Element::DoubleColon;
+    secondToLast.content = "::";
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::FunctionDeclaration && last.type == CodeFormatter::Element::ConstKeyWord) {
+    secondToLast.children.addOnTop(last);
+    return this->removeLast();
+  }
+  if (last.type == CodeFormatter::Element::Unknown && StringRoutines::isLatinLetterOrDigitSequence(last.content)) {
+    this->lastRuleName = "make atom";
+    last.type = CodeFormatter::Element::Type::Atom;
+    return true;
+  }
+  if (
+    thirdToLast.isIdentifierOrAtom() &&
+    secondToLast.type == CodeFormatter::Element::DoubleColon &&
+    last.type == CodeFormatter::Element::Atom
+  ) {
+    this->lastRuleName = "identifier::atom";
+    thirdToLast.appendIdentifier(secondToLast);
+    thirdToLast.appendIdentifier(last);
+    return this->removeLast(2);
+  }
+
+  if (fourthToLast.type == CodeFormatter::Element::CaseKeyWord && secondToLast.type == CodeFormatter::Element::Colon) {
+    this->lastRuleName = "case clause start";
+    fourthToLast.makeFrom3(CodeFormatter::Element::CaseClauseStart, fourthToLast, thirdToLast, secondToLast);
+    return this->removeBelowLast(2);
+  }
+  if (thirdToLast.type == CodeFormatter::Element::DefaultKeyWord && secondToLast.type == CodeFormatter::Element::Colon) {
+    this->lastRuleName = "default clause";
+    thirdToLast.makeFrom2(CodeFormatter::Element::CaseClauseStart, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (secondToLast.type == CodeFormatter::Element::LeftParenthesis && last.type == CodeFormatter::Element::RightParenthesis) {
+    this->lastRuleName = "parentheses match";
+    secondToLast.makeFrom2(CodeFormatter::Element::InParentheses, secondToLast, last);
+    return this->removeLast();
+  }
+  if (thirdToLast.type == CodeFormatter::Element::LeftParenthesis &&
+    secondToLast.isSuitableForParenthesesEnclosure() &&
+    last.type == CodeFormatter::Element::RightParenthesis
+  ) {
+    this->lastRuleName = "(command list)";
+    CodeFormatter::Element incoming;
+    incoming.children.addOnTop(thirdToLast);
+    incoming.children.addOnTop(secondToLast);
+    incoming.children.addOnTop(last);
+    incoming.type = CodeFormatter::Element::InParentheses;
+    thirdToLast = incoming;
+    return this->removeLast(2);
+  }
+  if (thirdToLast.type == CodeFormatter::Element::LeftBracket &&
+    secondToLast.isExpressionIdentifierOrAtom()
+    && last.type == CodeFormatter::Element::RightBracket
+  ) {
+    this->lastRuleName = "[expression]";
+    thirdToLast.makeFrom3(CodeFormatter::Element::Expression, thirdToLast, secondToLast, last);
+    return this->removeLast(2);
+  }
+  if (secondToLast.type == CodeFormatter::Element::LeftCurlyBrace && last.type == CodeFormatter::Element::RightCurlyBrace) {
+    this->lastRuleName = "{}";
+    secondToLast.makeFrom2(CodeFormatter::Element::CodeBlock, secondToLast, last);
+    return this->removeLast();
+  }
+  if (
+    last.type == CodeFormatter::Element::Unknown &&
+    this->owner->isOperator(last.content)
+  ) {
+    this->lastRuleName = "combine";
+    last.type = CodeFormatter::Element::Operator;
+    return true;
+  }
+  if (
+    secondToLast.type == CodeFormatter::Element::Operator && last.type == CodeFormatter::Element::Operator &&
+    this->owner->isOperator(secondToLast.content + last.content)
+  ) {
+    this->lastRuleName = "add operators";
+    secondToLast.content = secondToLast.content + last.content;
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::FunctionWithArguments && last.type == CodeFormatter::Element::Operator) {
+    this->lastRuleName = "function with arguments to expression";
+    secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
+    return true;
+  }
+  if (secondToLast.isExpressionOrAtom() && last.type == CodeFormatter::Element::Operator) {
+    this->lastRuleName = "expression operator";
+    secondToLast.appendExpression(last);
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::ConstKeyWord && last.isIdentifierOrAtom()) {
+    secondToLast.makeFrom2(CodeFormatter::Element::TypeExpression, secondToLast, last);
+    return this->removeLast();
+  }
+  if (
+    secondToLast.type == CodeFormatter::Element::TypeExpression &&
+    last.isStarOrAmpersand()
+  ) {
+    secondToLast.children.addOnTop(last);
+    return this->removeLast();
+  }
+  if (
+    thirdToLast.isSuitableForTypeExpression() &&
+    secondToLast.isIdentifierOrAtom() &&
+    last.type != CodeFormatter::Element::Colon &&
+    last.type != CodeFormatter::Element::DoubleColon
+  ) {
+    this->lastRuleName = "type and identifier";
+    thirdToLast.makeFrom2(CodeFormatter::Element::TypeAndIdentifier, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
+  }
+
+  if (thirdToLast.isExpressionIdentifierOrAtom() && secondToLast.isExpressionIdentifierOrAtom() && last.type != CodeFormatter::Element::Colon && last.type != CodeFormatter::Element::DoubleColon) {
+    this->lastRuleName = "expression and atom";
+    thirdToLast.appendExpression(secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (secondToLast.isSuitableForCommand() && last.type == CodeFormatter::Element::SemiColon) {
+    this->lastRuleName = "expression and semicolon";
+    secondToLast.appendExpression(last);
+    secondToLast.type = CodeFormatter::Element::Command;
+    return this->removeLast();
+  }
+  if (thirdToLast.isCommandListOrCommandOrClause() && secondToLast.isCommandOrClause()) {
+    this->lastRuleName = "commandList command something";
+    thirdToLast.appendCommand(secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (secondToLast.isCommandListOrCommandOrClause() && last.isCommandOrClause()) {
+    this->lastRuleName = "commandList command";
+    secondToLast.appendCommand(last);
+    return this->removeLast();
+  }
+  if (thirdToLast.isCommandListOrCommandOrClause() && secondToLast.isExpressionIdentifierOrAtom() && last.type == CodeFormatter::Element::RightParenthesis) {
+    this->lastRuleName = "commandList expression)";
+    thirdToLast.appendCommand(secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (
+    thirdToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
+    secondToLast.isCommandListOrCommandOrClause() &&
+    last.type == CodeFormatter::Element::RightCurlyBrace
+  ) {
+    CodeFormatter::Element codeBlock;
+    codeBlock.type = CodeFormatter::Element::CodeBlock;
+    codeBlock.children.addOnTop(thirdToLast);
+    codeBlock.children.addOnTop(secondToLast);
+    codeBlock.children.addOnTop(last);
+    thirdToLast = codeBlock;
+    return this->removeLast(2);
+  }
+  if (secondToLast.isTypeOrIdentifierOrExpression() && last.isParenthesesBlock()) {
+    this->lastRuleName = "identifier(...)";
+    secondToLast.makeFrom2(CodeFormatter::Element::FunctionWithArguments, secondToLast, last);
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::TypeAndIdentifier && last.isParenthesesBlock()) {
+    this->lastRuleName = "type_identifier + parentheses block";
+    secondToLast.makeFrom2(CodeFormatter::Element::FunctionDeclaration, secondToLast, last);
+    return this->removeLast();
+  }
+  if ( (secondToLast.type == CodeFormatter::Element::FunctionDeclaration || secondToLast.type == CodeFormatter::Element::FunctionWithArguments) && last.isCodeBlock()) {
+    this->lastRuleName = "function declaration + code block";
+    secondToLast.makeFrom2(CodeFormatter::Element::Command, secondToLast, last);
+    return this->removeLast();
+  }
+  if (thirdToLast.isIdentifierOrAtom() && secondToLast.isParenthesesBlock() && last.isCodeBlock()) {
+    this->lastRuleName = "atom(...){...}";
+    CodeFormatter::Element incoming;
+    incoming.type = CodeFormatter::Element::ConstructorExternal;
+    incoming.children.addOnTop(thirdToLast);
+    incoming.children.addOnTop(secondToLast);
+    incoming.children.addOnTop(last);
+    thirdToLast = incoming;
+    return this->removeLast(2);
+  }
+  return false;
+}
+
+void CodeFormatter::Processor::appendLog() {
+  if (!this->flagPrepareReport) {
+    return;
+  }
+  if (this->debugLog.size() > 1000000) {
+    if (!this->flagExceededReportSize) {
+      this->debugLog += " ... log is too large.";
+      this->flagExceededReportSize = true;
+    }
+    return;
+  }
+  this->debugLog += this->toStringStack() + "[[" + this->lastRuleName + "]]<br>";
+}
+
+std::string CodeFormatter::Processor::toStringStack() {
+  std::stringstream out;
+  for (int i = this->owner->dummyElements; i < this->stack.size; i ++) {
+    out << this->stack[i].toString() << " ";
+  }
+  return out.str();
+}
+
+bool CodeFormatter::Processor::removeLast() {
+  return this->removeLast(1);
+}
+
+bool CodeFormatter::Processor::removeLast(int count) {
+  for (int i = 0; i < count; i ++) {
+    this->stack.removeLastObject();
+  }
   return true;
 }
 
-void CodeFormatter::writeElement(std::stringstream &out, const std::string &input) {
-  out << input;
-  this->stack.lastObject()->currentLineLength += input.size();
-  this->precedingElementThisLine = input;
-}
-
-void CodeFormatter::consumeElement(
-  std::stringstream& out, const std::string& input
-) {
-  CodeElement& information = *this->stack.lastObject();
-  if (information.isInQuote) {
-    this->consumeInQuote(out, input);
-    return;
+bool CodeFormatter::Processor::removeBelowLast(int count) {
+  for (int i = 0; i < count; i ++) {
+    this->stack.removeIndexShiftDown(this->stack.size - 2);
   }
-  if (information.isComment) {
-    this->consumeInComment(out, input);
-    return;
-  }
-  if (information.isIncludeLine) {
-    this->consumeInIncludeLine(out, input);
-    return;
-  }
-  if (input == "#") {
-    std::string next = this->peekNext();
-    if (next == "include") {
-      CodeElement import;
-      import.isIncludeLine = true;
-      import.currentLineLength = information.currentLineLength;
-      this->stack.addOnTop(import);
-      this->writeElement(out, "#include");
-      this->indexCurrentlyConsumed ++;
-      return;
-    }
-  }
-  if (this->isWhiteSpace(input)) {
-    return;
-  }
-  if (input == "/") {
-    std::string next = this->peekNext();
-    if (next == "/") {
-      CodeElement comment;
-      comment.isComment = true;
-      comment.currentLineLength = information.currentLineLength;
-      this->stack.addOnTop(comment);
-      this->writeElement(out, "//");
-      this->indexCurrentlyConsumed ++;
-      return;
-    }
-  }
-  if (input == "}") {
-    this->popStack();
-    out << "}\n";
-    return;
-  }
-  std::string incoming;
-  if (this->shouldSeparateWithSpace(this->precedingElementThisLine, input)) {
-    incoming = " " + input;
-  } else {
-    incoming = input;
-  }
-
-  if (information.currentLineLength + static_cast<signed>(incoming.size()) > this->maximumDesiredLineLength) {
-    this->breakLine(out);
-    this->indent(out);
-    incoming = input;
-  }
-  this->writeElement(out, incoming);
+  return true;
 }
 
 bool CodeFormatter::shouldSeparateWithSpace(
@@ -316,99 +975,16 @@ bool CodeFormatter::shouldSeparateWithSpace(
   return true;
 }
 
-std::string CodeFormatter::peekNext() const {
-  int nextIndex = this->indexCurrentlyConsumed + 1;
-  if (nextIndex >= this->originalElements.size) {
-    return "";
-  }
-  return this->originalElements[nextIndex];
+bool CodeFormatter::isTypeKeyWord(const std::string &input) {
+  return this->typeKeyWords.contains(input);
 }
 
-void CodeFormatter::consumeInIncludeLine(std::stringstream &out, const std::string &input) {
-  if (input == "\n") {
-    this->popStack();
-    this->breakLine(out);
-    std::string next = this->peekNext();
-    if (next != "#") {
-      out << "\n";
-    }
-    return;
-  }
-  this->writeElement(out, input);
-  return;
-}
-
-void CodeFormatter::consumeInQuote(std::stringstream &out, const std::string &input) {
-  CodeElement& last = *this->stack.lastObject();
-  if (input == "\\") {
-    out << input;
-    out << this->peekNext();
-    this->indexCurrentlyConsumed ++;
-    last.currentLineLength += 2;
-    return;
-  }
-  if (input == "\"") {
-    out << input;
-    last.currentLineLength += input.size();
-    this->popStack();
-    return;
-  }
-  out << input;
-  last.currentLineLength += input.size();
-}
-
-void CodeFormatter::consumeInComment(
-  std::stringstream& out, const std::string& input
-) {
-  if (input == "\n") {
-    this->popStack();
-    this->breakLine(out);
-    return;
-  }
-  CodeElement& last = *this->stack.lastObject();
-  if (
-    static_cast<int>(input.size()) + last.currentLineLength >
-    this->maximumDesiredLineLength
-  ) {
-    this->breakLine(out);
-    this->indent(out);
-    out << "//";
-    last.currentLineLength += 2;
-  }
-  out << input;
-  last.currentLineLength += input.size();
-  return;
-}
-
-void CodeFormatter::popStack() {
-  CodeElement removed = this->stack.popLastObject();
-  if (this->stack.size == 0) {
-    CodeElement empty;
-    this->stack.addOnTop(empty);
-  }
-  this->stack.lastObject()->currentLineLength = removed.currentLineLength;
-}
-
-void CodeFormatter::indent(std::stringstream &out) {
-  CodeElement& information = *this->stack.lastObject();
-  if (information.currentLineLength != 0) {
-    return;
-  }
-  int spaceCount = information.indentLevel * tabLength;
-  information.currentLineLength = spaceCount;
-  for (int i = 0; i < spaceCount; i ++) {
-    out << " ";
-  }
-}
-
-void CodeFormatter::breakLine(std::stringstream& out) {
-  out << "\n";
-  this->stack.lastObject()->currentLineLength = 0;
-  this->precedingElementThisLine = "";
+bool CodeFormatter::isControlKeyWord(const std::string &input) {
+  return this->controlKeyWords.contains(input);
 }
 
 bool CodeFormatter::isWhiteSpace(const std::string& input) {
-  return input == "\n" || input == "\t" || input == " ";
+  return input == "\n" || input == "\t" || input == " " || input == "\r";
 }
 
 bool CodeFormatter::writeFormatedCode(std::stringstream* comments) {

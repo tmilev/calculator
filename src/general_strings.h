@@ -44,6 +44,9 @@ public:
   );
   static std::string convertByteToHex(unsigned char byte);
 
+  static bool isLatinLetterSequence(const std::string& input);
+  static bool isLatinLetterOrDigitSequence(const std::string& input);
+
   class Conversions {
   public:
     // Converts an arbitrary string (byte sequence) to a list of unicode code points

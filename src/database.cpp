@@ -901,10 +901,10 @@ bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
 }
 
 bool UserCalculator::isAcceptableCharDatabaseInput(char character) {
-  if (MathRoutines::isADigit(character)) {
+  if (MathRoutines::isDigit(character)) {
     return true;
   }
-  if (MathRoutines::isALatinLetter(character)) {
+  if (MathRoutines::isLatinLetter(character)) {
     return true;
   }
   switch (character) {

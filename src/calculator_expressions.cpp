@@ -3057,10 +3057,10 @@ bool Expression::toStringTimes(
   }
   bool mustHaveSpace = true;
   if (!firstNeedsBrackets && !secondNeedsBrackets && firstE != "" && firstE != "-") {
-    if (MathRoutines::isADigit(secondE[0])) {
+    if (MathRoutines::isDigit(secondE[0])) {
       mustHaveTimes = true;
     }
-    if (MathRoutines::isADigit(firstE[firstE.size() - 1]) ) {
+    if (MathRoutines::isDigit(firstE[firstE.size() - 1]) ) {
       if (StringRoutines::stringBeginsWith(secondE, "\\frac")) {
         mustHaveTimes = true;
       }
@@ -4996,8 +4996,8 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
         out << firstE;
       }
       if (!firstNeedsBrackets && !secondNeedsBrackets && firstE != "" && firstE != "-") {
-        if (MathRoutines::isADigit(firstE[firstE.size() - 1]) ) {
-          if (MathRoutines::isADigit(secondUTF8String[0])) {
+        if (MathRoutines::isDigit(firstE[firstE.size() - 1]) ) {
+          if (MathRoutines::isDigit(secondUTF8String[0])) {
             mustHaveTimes = true;
           }
           if (StringRoutines::stringBeginsWith(secondString, "\\frac")) {

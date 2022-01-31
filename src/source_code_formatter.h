@@ -20,18 +20,15 @@ public:
       EndLine,
       Quote,
       SingleQuote,
-      StringLiteral,
-      Backslash,
       ConstKeyWord,
       ControlKeyWord,
+      ConstructorExternal,
       TypeKeyWord,
       // Type+identifer as in:
       // int x
       // or:
       // MyString x
       TypeAndIdentifier,
-      // A comma-separated list of type+identifiers.
-      TypeAndIdentifierList,
       // An expression that describes a type such as:
       // const int, int, const int&.
       TypeExpression,
@@ -58,8 +55,9 @@ public:
       Operator,
       Command,
       CommandList,
+      Comma,
+      CommaList,
       FunctionWithArguments,
-      ConstructorExternal,
       FunctionDeclaration,
       Ampersand,
       Star,
@@ -82,12 +80,11 @@ public:
     void appendExpression(const CodeFormatter::Element& other);
     void appendIdentifier(const CodeFormatter::Element& other);
     void appendCommand(const CodeFormatter::Element& other);
-
     bool isSuitableForCommand() const;
     bool isSuitableForTopLevel() const;
     bool isSuitableForTypeExpression() const;
     bool isSuitableForParenthesesEnclosure() const;
-
+    bool isSuitableForCommaListElement() const;
     bool isIdentifierOrAtom() const;
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;
@@ -98,6 +95,7 @@ public:
     bool isTypeWord() const;
     bool isTypeOrIdentifierOrExpression() const;
     bool isStarOrAmpersand() const;
+    bool isOperator() const;
     void makeFrom1(
       CodeFormatter::Element::Type inputType,
       const Element& child

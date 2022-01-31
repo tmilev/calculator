@@ -87,9 +87,40 @@ std::string CodeFormatter::Element::toStringType(CodeFormatter::Element::Type in
     return "case clause";
   case CodeFormatter::Element::CaseClauseStart:
     return "case clause start";
-  default:
-    return "????";
+  case CodeFormatter::Element::Dummy:
+    return "dummy";
+  case CodeFormatter::Element::Comment:
+    return "comment";
+  case CodeFormatter::Element::CommentMultiline:
+    return "comment multiline";
+  case CodeFormatter::Element::SingleQuote:
+    return "single quote";
+  case CodeFormatter::Element::ControlKeyWord:
+    return "control key word";
+  case CodeFormatter::Element::ControlWantsCodeBlock:
+    return "control wants code block";
+  case CodeFormatter::Element::LeftBracket:
+    return "[";
+  case CodeFormatter::Element::RightBracket:
+    return "]";
+  case CodeFormatter::Element::CodeBlock:
+    return "code block";
+  case CodeFormatter::Element::FileContent:
+    return "file content";
+  case CodeFormatter::Element::Comma:
+    return ",";
+  case CodeFormatter::Element::CommaList:
+    return "comma list";
+  case CodeFormatter::Element::Ampersand:
+    return "&";
+  case CodeFormatter::Element::Star:
+    return "*";
+  case CodeFormatter::Element::DefaultKeyWord:
+    return "default";
+  case CodeFormatter::Element::ConstructorExternal:
+    return "default";
   }
+  return "????";
 }
 
 void CodeFormatter::Element::appendExpression(const CodeFormatter::Element &other) {
@@ -174,7 +205,16 @@ bool CodeFormatter::Element::isSuitableForParenthesesEnclosure() const {
   this->isCommandListOrCommandOrClause() ||
   this->isExpressionIdentifierOrAtom() ||
   this->type == CodeFormatter::Element::TypeAndIdentifier ||
-  this->type == CodeFormatter::Element::TypeAndIdentifierList
+  this->type == CodeFormatter::Element::TypeKeyWord ||
+  this->type == CodeFormatter::Element::TypeExpression ||
+  this->type == CodeFormatter::Element::CommaList
+  ;
+}
+
+bool CodeFormatter::Element::isSuitableForCommaListElement() const {
+  return
+  this->isExpressionIdentifierOrAtom() ||
+  this->type == CodeFormatter::Element::TypeAndIdentifier
   ;
 }
 
@@ -242,6 +282,10 @@ bool CodeFormatter::Element::isCodeBlock() const {
 bool CodeFormatter::Element::isTypeWord() const {
   return
   this->type == CodeFormatter::Element::TypeKeyWord;
+}
+
+bool CodeFormatter::Element::isOperator() const {
+  return this->isStarOrAmpersand() || this->type == CodeFormatter::Element::Operator;
 }
 
 bool CodeFormatter::Element::isStarOrAmpersand() const {
@@ -536,6 +580,7 @@ CodeFormatter::CodeFormatter() {
   this->elementTypes.setKeyValue("]", CodeFormatter::Element::RightBracket);
   this->elementTypes.setKeyValue("&", CodeFormatter::Element::Ampersand);
   this->elementTypes.setKeyValue("*", CodeFormatter::Element::Star);
+  this->elementTypes.setKeyValue(",", CodeFormatter::Element::Comma);
   this->elementTypes.setKeyValue("const", CodeFormatter::Element::ConstKeyWord);
   this->elementTypes.setKeyValue("case", CodeFormatter::Element::CaseKeyWord);
   this->elementTypes.setKeyValue("default", CodeFormatter::Element::DefaultKeyWord);
@@ -562,6 +607,8 @@ CodeFormatter::CodeFormatter() {
     "==",
     ">>",
     "<<",
+    "&&",
+    "||"
   }));
   this->maximumDesiredLineLength = 80;
 
@@ -617,7 +664,7 @@ void CodeFormatter::format(std::stringstream &out, Element &input) {
 CodeFormatter::Processor::Processor() {
   this->owner = nullptr;
   global.comments << "DEBUG: preparing report!";
-  this->flagPrepareReport = false;
+  this->flagPrepareReport = true;
   this->flagExceededReportSize = false;
 }
 
@@ -820,20 +867,35 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
     return true;
   }
-  if (secondToLast.isExpressionOrAtom() && last.type == CodeFormatter::Element::Operator) {
+  if (secondToLast.isExpressionOrAtom() && last.isOperator()) {
     this->lastRuleName = "expression operator";
     secondToLast.appendExpression(last);
     return this->removeLast();
   }
-  if (secondToLast.type == CodeFormatter::Element::ConstKeyWord && last.isIdentifierOrAtom()) {
-    secondToLast.makeFrom2(CodeFormatter::Element::TypeExpression, secondToLast, last);
-    return this->removeLast();
+  if (
+    thirdToLast.type == CodeFormatter::Element::ConstKeyWord &&
+    secondToLast.isExpressionIdentifierOrAtom() &&
+    last.type != CodeFormatter::Element::Colon &&
+    last.type != CodeFormatter::Element::DoubleColon
+  ) {
+    this->lastRuleName = "const something";
+    thirdToLast.makeFrom2(CodeFormatter::Element::TypeExpression, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
   }
   if (
     secondToLast.type == CodeFormatter::Element::TypeExpression &&
     last.isStarOrAmpersand()
   ) {
     secondToLast.children.addOnTop(last);
+    return this->removeLast();
+  }
+  if (
+    secondToLast.type == CodeFormatter::Element::Ampersand &&
+    last.type == CodeFormatter::Element::Ampersand
+  ) {
+    secondToLast.clear();
+    secondToLast.content = "&&";
+    secondToLast.type = CodeFormatter::Element::Operator;
     return this->removeLast();
   }
   if (
@@ -856,6 +918,30 @@ bool CodeFormatter::Processor::applyOneRule() {
     this->lastRuleName = "expression and semicolon";
     secondToLast.appendExpression(last);
     secondToLast.type = CodeFormatter::Element::Command;
+    return this->removeLast();
+  }
+  if (
+    thirdToLast.type == CodeFormatter::Element::CommaList &&
+    secondToLast.isSuitableForCommaListElement() &&
+    last.type == CodeFormatter::Element::Comma
+  ) {
+    thirdToLast.children.addOnTop(secondToLast);
+    thirdToLast.children.addOnTop(last);
+    return this->removeLast(2);
+  }
+  if (
+    thirdToLast.type == CodeFormatter::Element::CommaList &&
+    secondToLast.isSuitableForCommaListElement() && (
+      last.type == CodeFormatter::Element::RightParenthesis ||
+      last.type == CodeFormatter::Element::RightCurlyBrace ||
+      last.type == CodeFormatter::Element::RightBracket
+  )) {
+    thirdToLast.children.addOnTop(secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (secondToLast.isSuitableForCommaListElement() && last.type == CodeFormatter::Element::Comma) {
+    this->lastRuleName = "expression, ";
+    secondToLast.makeFrom2(CodeFormatter::Element::CommaList, secondToLast, last);
     return this->removeLast();
   }
   if (thirdToLast.isCommandListOrCommandOrClause() && secondToLast.isCommandOrClause()) {
@@ -903,12 +989,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (thirdToLast.isIdentifierOrAtom() && secondToLast.isParenthesesBlock() && last.isCodeBlock()) {
     this->lastRuleName = "atom(...){...}";
-    CodeFormatter::Element incoming;
-    incoming.type = CodeFormatter::Element::ConstructorExternal;
-    incoming.children.addOnTop(thirdToLast);
-    incoming.children.addOnTop(secondToLast);
-    incoming.children.addOnTop(last);
-    thirdToLast = incoming;
+    thirdToLast.makeFrom3(CodeFormatter::Element::ConstructorExternal, thirdToLast, secondToLast, last);
     return this->removeLast(2);
   }
   return false;

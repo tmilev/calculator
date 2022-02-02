@@ -26,8 +26,10 @@ public:
       TypeKeyWord,
       // Type+identifer as in:
       // int x
-      // or:
+      // or
       // MyString x
+      // or
+      // MyString x,y
       TypeAndIdentifier,
       // An expression that describes a type such as:
       // const int, int, const int&.
@@ -49,6 +51,9 @@ public:
       RightBracket,
       LeftCurlyBrace,
       RightCurlyBrace,
+      // A comma-delimited list surrounded by curly braces such as
+      // {1,2,3}.
+      CurlyBraceCommaDelimitedList,
       CodeBlock,
       TopLevel,
       FileContent,
@@ -57,6 +62,8 @@ public:
       CommandList,
       Comma,
       CommaList,
+      GreaterThan,
+      LessThan,
       FunctionWithArguments,
       FunctionDeclaration,
       Ampersand,
@@ -65,6 +72,11 @@ public:
       DefaultKeyWord,
       CaseClauseStart,
       CaseClause,
+      Exclamation,
+      If,
+      IfWantsCodeBlock,
+      IfClause,
+      Else,
     };
     Element::Type type;
     std::string content;
@@ -80,11 +92,13 @@ public:
     void appendExpression(const CodeFormatter::Element& other);
     void appendIdentifier(const CodeFormatter::Element& other);
     void appendCommand(const CodeFormatter::Element& other);
+    void addChild(const CodeFormatter::Element& other);
     bool isSuitableForCommand() const;
     bool isSuitableForTopLevel() const;
     bool isSuitableForTypeExpression() const;
     bool isSuitableForParenthesesEnclosure() const;
     bool isSuitableForCommaListElement() const;
+    bool isRightDelimiter() const;
     bool isIdentifierOrAtom() const;
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;
@@ -92,10 +106,14 @@ public:
     bool isCommandOrClause() const;
     bool isParenthesesBlock() const;
     bool isCodeBlock() const;
+    bool isCodeBlockOrCommand() const;
     bool isTypeWord() const;
+    bool isTypeWordOrTypeExpression() const;
     bool isTypeOrIdentifierOrExpression() const;
     bool isStarOrAmpersand() const;
     bool isOperator() const;
+    bool isColonDoubleColonOrComma() const;
+    bool isColonOrDoubleColon() const;
     void makeFrom1(
       CodeFormatter::Element::Type inputType,
       const Element& child
@@ -110,6 +128,13 @@ public:
       const Element& left,
       const Element& middle,
       const Element& right
+    );
+    void makeFrom4(
+      CodeFormatter::Element::Type inputType,
+      const Element& first,
+      const Element& second,
+      const Element& third,
+      const Element& fourth
     );
   };
 
@@ -214,6 +239,7 @@ public:
     std::stringstream* comments
   );
   std::string toStringLinks();
+  static bool isIdentifierWord(const std::string& input);
 };
 
 #endif // header_source_code_formatter_ALREADY_INCLUDED

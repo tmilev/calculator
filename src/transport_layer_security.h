@@ -49,6 +49,7 @@ public:
   void freeSession();
   void initSSLLibrary();
   void initSSLServer();
+  void initSSLServerSelfSigned();
   void initSSLClient();
   void initSSLCommon(bool isServer);
   void reset();
@@ -540,21 +541,24 @@ public:
   int readBufferStandardSize;
 
   static TransportLayerSecurity& defaultTLS_READ_ONLY();
-  static const std::string fileCertificate;
-  static const std::string fileKey;
-  // A self-signed certificate.
-  static const std::string certificateSelfSigned;
+  static const std::string certificateSelfSignedPem;
+  static const std::string keySelfSigned;
+
   // Certificate signed by an external authority
   // such as GoDaddy or another institution.
   // This will be the .crt file
   // in the certificates/ folder that is not
-  // the self-signed certificate.
+  // the self-signed certificate and is not the official certificate.
   // If there are more than one .crt files in the
   // certificates folder, the server will crash.
   std::string certificateExternalAuthority;
+  // The private key used in the official certificate.
+  static const std::string keyOfficial;
+  // The official certificate.
+  static const std::string certificateOfficial;
+
   // Contains the string "certificates/"
   static const std::string certificateFolder;
-  static const std::string signedFileKey;
   // Once the first function call returns, the function becomes thread-safe.
   static void initializeNonThreadSafePartsCommon();
   // First call of function (with any member function) is not thread safe (must be called in a single thread).
@@ -589,6 +593,7 @@ public:
     std::stringstream* commentsOnError,
     bool includeNoErrorInComments
   );
+  // Certificate file (.crt) of the external authority.
   std::string certificateExternalPhysical();
   std::string certificateSelfSignedPhysical();
   TransportLayerSecurity();

@@ -20,11 +20,12 @@
 // openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout calculator-algebra.key
 // then get the CSR.csr file to a signing authority,
 // from where you get the signedFileCertificate1 and signedFileCertificate3
-const std::string TransportLayerSecurity::fileCertificate = "certificates/cert.pem";
-const std::string TransportLayerSecurity::fileKey = "certificates/key.pem";
-const std::string TransportLayerSecurity::certificateSelfSigned = "calculator-algebra.crt";
+const std::string TransportLayerSecurity::certificateSelfSignedPem = "certificates/cert.pem";
+const std::string TransportLayerSecurity::keySelfSigned = "certificates/key.pem";
+
 const std::string TransportLayerSecurity::certificateFolder = "certificates/";
-const std::string TransportLayerSecurity::signedFileKey = "certificates/calculator-algebra.key";
+const std::string TransportLayerSecurity::certificateOfficial = "calculator-algebra.crt";
+const std::string TransportLayerSecurity::keyOfficial = "calculator-algebra.key";
 
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;

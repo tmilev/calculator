@@ -263,8 +263,9 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   }
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
+  global << Logger::green << "Certificate file: " << certificateExternalPhysical << Logger::endL;
   SSL_CTX_set_ecdh_auto(this->contextGlobal, 1);
-  if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateSelfSignedPhysical.c_str()) <= 0) {
+  if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateExternalPhysical.c_str()) <= 0) {
     global << Logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << Logger::endL;
     if (SSL_CTX_use_certificate_file(this->contextGlobal, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
@@ -281,7 +282,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     //{ ERR_print_errors_fp(stderr);
     //  exit(3);
     //}
-    if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateExternalPhysical.c_str()) <= 0) {
+    if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateSelfSignedPhysical.c_str()) <= 0) {
       ERR_print_errors_fp(stderr);
       global.fatal << "Failed to user certificate file." << global.fatal;
     }

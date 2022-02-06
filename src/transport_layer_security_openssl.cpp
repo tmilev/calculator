@@ -300,11 +300,11 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
       global.fatal << "Failed to use private key." << global.fatal;
     }
     global.flagCertificatesAreOfficiallySigned = true;
-  }
+  }/*
   if (!SSL_CTX_check_private_key(this->contextGlobal)) {
     global << "Private key does not match the certificate public key. ";
-    global.fatal << "Private key does not match the certificate public key. " << global.fatal;
-  }
+    // global.fatal << "Private key does not match the certificate public key. " << global.fatal;
+  }*/
 #else
   global << Logger::red << "Openssl not available." << Logger::endL;
 #endif // MACRO_use_open_ssl

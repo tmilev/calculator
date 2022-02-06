@@ -9,6 +9,16 @@
 class CodeFormatter {
 public:
   class Element {
+  private:
+    void computeIndentation();
+    void computeIndentationCodeBlock();
+    void computeIndentationBasic(int startingIndex);
+    void computeIndentationBasicIgnorePrevious(int startingIndex);
+    void computeIndentationTopLevel();
+    void computeIndentationAtomic();
+    void formatDefault(std::stringstream& out);
+    void formatContent(std::stringstream& out);
+    void setOwnerRecursively(CodeFormatter* inputOwner);
   public:
     enum Type {
       Dummy,
@@ -36,6 +46,11 @@ public:
       TypeExpression,
       // A computed expression, such as this->x or x+2.
       Expression,
+      // An (incomplete) expression ending with an operator such as:
+      // x+
+      // or
+      // x==
+      ExpressionEndingWithOperator,
       // An identifier such as f::y.
       Identifier,
       // A user-defined atom such as foo or bar.
@@ -77,12 +92,23 @@ public:
       IfWantsCodeBlock,
       IfClause,
       Else,
+      Return,
+      ReturnedExpression,
     };
     Element::Type type;
     std::string content;
     List<CodeFormatter::Element> children;
-    int indentLevel;
-    int currentLineLength = 0;
+    CodeFormatter* owner;
+    // The indentation level of the containing code block.
+    int indentCodeBlock;
+    int whiteSpaceBefore;
+    // The number of columns needed to display the previous
+    // code element.
+    int columnPreviousElement;
+    int columnFinal;
+    int newLinesAfter;
+    int newLinesBefore;
+    std::string toStringFormattingData() const;
     std::string toString() const;
     std::string toStringWithoutType() const;
     static std::string toStringType(CodeFormatter::Element::Type inputType);
@@ -136,6 +162,7 @@ public:
       const Element& third,
       const Element& fourth
     );
+    std::string format(CodeFormatter& owner);
   };
 
   class Words {
@@ -223,10 +250,6 @@ public:
   bool isOperator(const std::string& input);
   bool isTypeKeyWord(const std::string& input);
   bool isControlKeyWord(const std::string& input);
-  void format(
-    std::stringstream& out, CodeFormatter::Element& input);
-  void formatTopLevel(
-    std::stringstream& out, CodeFormatter::Element& input);
   bool isWhiteSpace(const std::string& input);
   bool writeFormatedCode(std::stringstream* comments);
   std::string toStringTransformed6();

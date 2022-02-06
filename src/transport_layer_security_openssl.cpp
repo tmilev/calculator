@@ -1,6 +1,7 @@
 #include "transport_layer_security.h"
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
+#include "general_strings.h"
 #include "crypto.h"
 
 #include <unistd.h> //<- close, open defined here
@@ -160,6 +161,67 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   this->flagContextInitialized = true;
 }
 
+std::string TransportLayerSecurity::certificateSelfSignedPhysical() {
+  MacroRegisterFunctionWithName("TransportLayerSecurity::certificateSelfSignedPhysical");
+  std::string result;
+  FileOperations::getPhysicalFileNameFromVirtual(
+    TransportLayerSecurity::certificateFolder + TransportLayerSecurity::certificateSelfSigned,
+    result,
+    true,
+    true,
+    nullptr
+  );
+  return result;
+}
+
+std::string TransportLayerSecurity::certificateExternalPhysical() {
+  MacroRegisterFunctionWithName("TransportLayerSecurity::certificateExternalPhysical");
+  List<std::string> filesInCertificateFolder;
+  List<std::string> extensions;
+  FileOperations::getFolderFileNamesVirtual(
+    this->certificateFolder,
+    filesInCertificateFolder,
+    &extensions,
+    true,
+    true,
+    nullptr
+  );
+  std::string authorityCertificate;
+  for (int i = 0; i < filesInCertificateFolder.size; i ++) {
+    if (extensions[i] != ".crt") {
+      continue;
+    }
+    if (filesInCertificateFolder[i] == this->certificateSelfSigned) {
+      continue;
+    }
+    if (authorityCertificate != "") {
+      global.fatal << "Found more than one external "
+      << "certificate file in certificates/ folder:\n"
+      << authorityCertificate
+      << "\nand\n"
+      << filesInCertificateFolder[i] << "\n"
+      << "The certificate folder must "
+      << "contain one or two certificates (.crt files): "
+      << "that of the server and that of an external signing authority. "
+      << "The self-signed certificate, if present, "
+      << "must be called " << this->certificateSelfSigned
+      << ". The other file with .crt extension will be assumed to be"
+      << " that of the signing authority. "
+      << global.fatal;
+    }
+    authorityCertificate = filesInCertificateFolder[i];
+  }
+  std::string result;
+  FileOperations::getPhysicalFileNameFromVirtual(
+    this->certificateFolder + authorityCertificate,
+    result,
+    true,
+    true,
+    nullptr
+  );
+  return result;
+}
+
 void TransportLayerSecurityOpenSSL::initSSLServer() {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLServer");
   this->initSSLCommon(true);
@@ -168,22 +230,12 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   }
   this->owner->flagInitializedPrivateKey = true;
   std::string fileCertificatePhysical, fileKeyPhysical,
-  singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileCertificate1,
-    singedFileCertificate1Physical,
-    true,
-    true,
-    nullptr
-  );
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileCertificate3,
-    signedFileCertificate3Physical,
-    true,
-    true,
-    nullptr
-  );
+
+  std::string certificateExternalPhysical = this->owner->certificateExternalPhysical();
+  std::string certificateSelfSignedPhysical = this->owner->certificateSelfSignedPhysical();
+
+
   FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::fileCertificate,
     fileCertificatePhysical,
@@ -212,7 +264,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
   SSL_CTX_set_ecdh_auto(this->contextGlobal, 1);
-  if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, signedFileCertificate3Physical.c_str()) <= 0) {
+  if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateSelfSignedPhysical.c_str()) <= 0) {
     global << Logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << Logger::endL;
     if (SSL_CTX_use_certificate_file(this->contextGlobal, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
@@ -229,7 +281,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     //{ ERR_print_errors_fp(stderr);
     //  exit(3);
     //}
-    if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, singedFileCertificate1Physical.c_str()) <= 0) {
+    if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateExternalPhysical.c_str()) <= 0) {
       ERR_print_errors_fp(stderr);
       global.fatal << "Failed to user certificate file." << global.fatal;
     }

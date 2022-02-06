@@ -542,8 +542,18 @@ public:
   static TransportLayerSecurity& defaultTLS_READ_ONLY();
   static const std::string fileCertificate;
   static const std::string fileKey;
-  static const std::string signedFileCertificate1;
-  static const std::string signedFileCertificate3;
+  // A self-signed certificate.
+  static const std::string certificateSelfSigned;
+  // Certificate signed by an external authority
+  // such as GoDaddy or another institution.
+  // This will be the .crt file
+  // in the certificates/ folder that is not
+  // the self-signed certificate.
+  // If there are more than one .crt files in the
+  // certificates folder, the server will crash.
+  std::string certificateExternalAuthority;
+  // Contains the string "certificates/"
+  static const std::string certificateFolder;
   static const std::string signedFileKey;
   // Once the first function call returns, the function becomes thread-safe.
   static void initializeNonThreadSafePartsCommon();
@@ -579,6 +589,8 @@ public:
     std::stringstream* commentsOnError,
     bool includeNoErrorInComments
   );
+  std::string certificateExternalPhysical();
+  std::string certificateSelfSignedPhysical();
   TransportLayerSecurity();
   ~TransportLayerSecurity();
   void removeLastSocket();

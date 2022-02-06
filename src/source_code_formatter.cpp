@@ -6,9 +6,14 @@
 #include "general_strings.h"
 
 CodeFormatter::Element::Element() {
-  this->indentLevel = 0;
-  this->currentLineLength = 0;
+  this->indentCodeBlock = 0;
+  this->columnPreviousElement = 0;
+  this->newLinesAfter= 0;
+  this->newLinesBefore = 0;
+  this->whiteSpaceBefore = 0;
+  this->columnFinal = 0;
   this->type = CodeFormatter::Element::Unknown;
+  this->owner = nullptr;
 }
 
 std::string CodeFormatter::Element::toStringWithoutType() const {
@@ -135,6 +140,12 @@ std::string CodeFormatter::Element::toStringType(CodeFormatter::Element::Type in
     return "lessThan";
   case CodeFormatter::Element::CurlyBraceCommaDelimitedList:
     return "CurlyBraceCommaDelimitedList";
+  case CodeFormatter::Element::ExpressionEndingWithOperator:
+    return "ExpressionEndingWithOperator";
+  case CodeFormatter::Element::Return:
+    return "Return";
+  case CodeFormatter::Element::ReturnedExpression:
+    return "ReturnedExpression";
   }
   return "????";
 }
@@ -315,6 +326,7 @@ bool CodeFormatter::Element::isSuitableForTopLevel() const {
 bool CodeFormatter::Element::isSuitableForCommand() const {
   return
   this->type == CodeFormatter::Element::Expression ||
+  this->type == CodeFormatter::Element::ExpressionEndingWithOperator ||
   this->type == CodeFormatter::Element::FunctionWithArguments ||
   this->type == CodeFormatter::Element::TypeAndIdentifier
   ;
@@ -381,6 +393,131 @@ bool CodeFormatter::Element::isTypeOrIdentifierOrExpression() const {
   this->type == CodeFormatter::Element::Identifier ||
   this->type == CodeFormatter::Element::Atom
   ;
+}
+
+void CodeFormatter::Element::setOwnerRecursively(CodeFormatter* inputOwner) {
+  this->owner = inputOwner;
+  for (int i = 0; i < this->children.size; i ++) {
+    this->children[i].setOwnerRecursively(inputOwner);
+  }
+}
+
+std::string CodeFormatter::Element::format(CodeFormatter& owner) {
+  this->setOwnerRecursively(&owner);
+  this->computeIndentation();
+  std::stringstream out;
+  this->formatDefault(out);
+  return out.str();
+}
+
+void CodeFormatter::Element::formatDefault(std::stringstream &out) {
+  for (int i = 0; i < this->newLinesBefore; i ++) {
+    out << "\n";
+  }
+  for (int i = 0; i < this->whiteSpaceBefore; i ++) {
+    out << " ";
+  }
+  this->formatContent(out);
+  for (int i = 0; i < this->newLinesAfter; i ++) {
+    out << "\n";
+  }
+}
+
+void CodeFormatter::Element::formatContent(std::stringstream& out) {
+  if (this->content != "") {
+    out << this->content;
+    return;
+  }
+  for (int i = 0; i < this->children.size; i ++) {
+    this->children[i].formatDefault(out);
+  }
+}
+
+std::string CodeFormatter::Element::toStringFormattingData() const {
+  std::stringstream out;
+  if (this->content != "") {
+    out << "[" << this->content << "] ";
+  }
+  out << "lines before: " << this->newLinesBefore;
+  out << " lines after: " << this->newLinesAfter;
+  out << " col: " << this->columnFinal;
+  out << " col prev: " << this->columnPreviousElement;
+  return out.str();
+}
+
+void CodeFormatter::Element::computeIndentationAtomic() {
+  this->columnFinal = this->columnPreviousElement + this->content.size();
+  global.comments << "DEBUG: " << this->toStringFormattingData() << "<br>";
+  if (this->columnFinal < this->owner->maximumDesiredLineLength) {
+    return;
+  }
+  this->newLinesBefore = 1;
+  this->whiteSpaceBefore = this->indentCodeBlock;
+  this->columnFinal = this->whiteSpaceBefore + this->content.size();
+}
+
+void CodeFormatter::Element::computeIndentation() {
+  if (this->type == CodeFormatter::Element::TopLevel) {
+    this->computeIndentationTopLevel();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::CodeBlock) {
+    this->computeIndentationCodeBlock();
+    return;
+  }
+  if (this->content != "") {
+    this->computeIndentationAtomic();
+    return;
+  }
+  this->computeIndentationBasic(0);
+}
+
+void CodeFormatter::Element::computeIndentationCodeBlock() {
+  global.comments << "DEBUG: Code block of size: " << this->children.size;
+  if (this->children.size < 2) {
+    this->computeIndentationBasic(0);
+    return;
+  }
+  this->children[0].whiteSpaceBefore = 1;
+  this->children[0].newLinesAfter = 1;
+  this->columnFinal = this->indentCodeBlock;
+  this->children[1].whiteSpaceBefore = this->indentCodeBlock;
+  this->computeIndentationBasicIgnorePrevious(1);
+}
+
+void CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
+  this->columnFinal = this->columnPreviousElement;
+  this->computeIndentationBasicIgnorePrevious(startingIndex);
+}
+
+void CodeFormatter::Element::computeIndentationBasicIgnorePrevious(int startingIndex) {
+  for (int i = startingIndex; i < this->children.size; i ++) {
+    CodeFormatter::Element& current = this->children[i];
+    current.columnPreviousElement = this->columnFinal;
+    current.computeIndentation();
+    this->columnFinal = current.columnFinal;
+  }
+}
+
+void CodeFormatter::Element::computeIndentationTopLevel() {
+  MacroRegisterFunctionWithName("CodeFormatter::Element::computeIndentationTopLevel");
+  for (int i = 0; i < this->children.size; i ++) {
+    CodeFormatter::Element& current = this->children[i];
+    if (current.type == CodeFormatter::Element::Dummy) {
+      continue;
+    }
+    current.indentCodeBlock = 0;
+    current.columnPreviousElement = 0;
+    current.whiteSpaceBefore = 0;
+    current.newLinesAfter = 1;
+    if (i > 1) {
+      CodeFormatter::Element& previous = this->children[i - 1];
+      if (previous.type == CodeFormatter::Element::IncludeLine && current.type != CodeFormatter::Element::IncludeLine) {
+        previous.newLinesAfter ++;
+      }
+    }
+    this->children[i].computeIndentation();
+  }
 }
 
 bool CodeFormatter::Words::previousIsForwardSlash() {
@@ -630,7 +767,7 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.initialize(*this);
   this->processor.consumeElements();
   std::stringstream out;
-  this->formatTopLevel(out, this->processor.code);
+  out << this->processor.code.format(*this);
   this->transformedContent = out.str();
   if (!this->writeFormatedCode(comments)) {
     return false;
@@ -683,6 +820,7 @@ CodeFormatter::CodeFormatter() {
   this->elementTypes.setKeyValue("default", CodeFormatter::Element::DefaultKeyWord);
   this->elementTypes.setKeyValue("if", CodeFormatter::Element::If);
   this->elementTypes.setKeyValue("else", CodeFormatter::Element::Else);
+  this->elementTypes.setKeyValue("return", CodeFormatter::Element::Return);
   this->typeKeyWords.addListOnTop(List<std::string>({
     "bool",
     "void",
@@ -735,43 +873,9 @@ CodeFormatter::CodeFormatter() {
   }
 }
 
-void CodeFormatter::formatTopLevel(std::stringstream &out, CodeFormatter::Element &input) {
-  MacroRegisterFunctionWithName("CodeFormatter::formatTopLevel");
-  for (int i = 0; i < input.children.size; i ++) {
-    CodeFormatter::Element& current = input.children[i];
-    if (current.type == CodeFormatter::Element::Dummy) {
-      continue;
-    }
-    if (i > 1) {
-      CodeFormatter::Element& previous = input.children[i - 1];
-      if (previous.type == CodeFormatter::Element::IncludeLine && current.type != CodeFormatter::Element::IncludeLine) {
-        out << "\n";
-      }
-    }
-    this->format(out, current);
-    out << "\n";
-  }
-}
-
-void CodeFormatter::format(std::stringstream &out, Element &input) {
-  MacroRegisterFunctionWithName("CodeFormatter::format");
-  if (input.type == CodeFormatter::Element::TopLevel) {
-    this->formatTopLevel(out, input);
-    return;
-  }
-  if (input.content != "") {
-    out << input.content;
-    return;
-  }
-  for (int i = 0; i < input.children.size; i ++) {
-    this->format(out, input.children[i]);
-  }
-}
-
 CodeFormatter::Processor::Processor() {
   this->owner = nullptr;
-  global.comments << "DEBUG: preparing report!";
-  this->flagPrepareReport = true;
+  this->flagPrepareReport = false;
   this->flagExceededReportSize = false;
 }
 
@@ -793,7 +897,7 @@ void CodeFormatter::Processor::consumeElements() {
   for (int i = 0; i < elements.size; i ++) {
     this->consumeOneElement(elements[i]);
   }
-  global.comments << "DEBUG: " << this->debugLog;
+  global.comments << "DEBUG: debugLog:" << this->debugLog;
   this->code.type = CodeFormatter::Element::FileContent;
   this->code.content = "";
   this->code.children = this->stack;
@@ -876,6 +980,14 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.children.addOnTop(last);
     return this->removeLast();
   }
+  if (
+    secondToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator &&
+    last.type == CodeFormatter::Element::InParentheses
+  ) {
+    this->lastRuleName = "in parentheses to expression after expressionending with operator";
+    last.makeFrom1(CodeFormatter::Element::Expression, last);
+    return true;
+  }
   if (secondToLast.type == CodeFormatter::Element::ControlKeyWord && last.type == CodeFormatter::Element::InParentheses) {
     this->lastRuleName = "control wants code block";
     secondToLast.makeFrom2(CodeFormatter::Element::ControlWantsCodeBlock, secondToLast, last);
@@ -952,6 +1064,12 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (secondToLast.type == CodeFormatter::Element::FunctionWithArguments && last.isRightDelimiter()) {
+    secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
+    return true;
+  }
+  if (secondToLast.type == CodeFormatter::Element::FunctionWithArguments &&
+  (last.type == CodeFormatter::Element::LessThan ||
+  last.type == CodeFormatter::Element::GreaterThan)) {
     secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
     return true;
   }
@@ -1040,6 +1158,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   ) {
     this->lastRuleName = "expression operator ?";
     thirdToLast.appendExpression(secondToLast);
+    thirdToLast.type = CodeFormatter::Element::ExpressionEndingWithOperator;
     return this->removeBelowLast(1);
   }
   if (
@@ -1102,7 +1221,17 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.makeFrom2(CodeFormatter::Element::TypeAndIdentifier, thirdToLast, secondToLast);
     return this->removeBelowLast(1);
   }
-
+  if (
+    thirdToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator &&
+    secondToLast.isExpressionIdentifierOrAtom() &&
+    !last.isColonOrDoubleColon()  &&
+    last.type != CodeFormatter::Element::LessThan
+  ) {
+    this->lastRuleName = "expression ending with operator and atom";
+    thirdToLast.appendType(secondToLast, CodeFormatter::Element::ExpressionEndingWithOperator);
+    thirdToLast.type = CodeFormatter::Element::Expression;
+    return this->removeBelowLast(1);
+  }
   if (
     secondToLast.isIdentifierOrAtom() && (
       last.type == CodeFormatter::Element::Ampersand ||
@@ -1180,8 +1309,23 @@ bool CodeFormatter::Processor::applyOneRule() {
     fourthToLast.makeFrom3(CodeFormatter::Element::CommaList, fourthToLast, thirdToLast, secondToLast);
     return this->removeBelowLast(2);
   }
+  if (
+    thirdToLast.type == CodeFormatter::Element::Return && (
+      secondToLast.type == CodeFormatter::Element::Expression ||
+      secondToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator ||
+      secondToLast.type == CodeFormatter::Element::FunctionWithArguments ||
+      secondToLast.type == CodeFormatter::Element::TypeAndIdentifier
+    ) && last.type == CodeFormatter::Element::SemiColon
+  ) {
+    this->lastRuleName = "return expression semicolon";
+    thirdToLast.makeFrom2(CodeFormatter::Element::ReturnedExpression, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
+  }
   if ((
-      secondToLast.isIdentifierOrAtom() || secondToLast.type == CodeFormatter::Element::FunctionWithArguments
+      secondToLast.isIdentifierOrAtom() ||
+      secondToLast.type == CodeFormatter::Element::Return ||
+      secondToLast.type == CodeFormatter::Element::FunctionWithArguments ||
+      secondToLast.type == CodeFormatter::Element::ReturnedExpression
     ) && last.type == CodeFormatter::Element::SemiColon
   ) {
     this->lastRuleName = "identifier and semicolon";
@@ -1221,7 +1365,13 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.appendCommand(last);
     return this->removeLast();
   }
-  if (thirdToLast.isCommandListOrCommandOrClause() && secondToLast.isExpressionIdentifierOrAtom() && last.type == CodeFormatter::Element::RightParenthesis) {
+  if (
+    thirdToLast.isCommandListOrCommandOrClause() && (
+      secondToLast.isExpressionIdentifierOrAtom() ||
+      secondToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator
+    ) &&
+    last.type == CodeFormatter::Element::RightParenthesis
+  ) {
     this->lastRuleName = "commandList expression)";
     thirdToLast.appendCommand(secondToLast);
     return this->removeBelowLast(1);

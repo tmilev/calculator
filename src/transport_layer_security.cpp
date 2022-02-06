@@ -22,8 +22,8 @@
 // from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string TransportLayerSecurity::fileCertificate = "certificates/cert.pem";
 const std::string TransportLayerSecurity::fileKey = "certificates/key.pem";
-const std::string TransportLayerSecurity::signedFileCertificate1 = "certificates/calculator-algebra.crt";
-const std::string TransportLayerSecurity::signedFileCertificate3 = "certificates/godaddy-signature.crt";
+const std::string TransportLayerSecurity::certificateSelfSigned = "calculator-algebra.crt";
+const std::string TransportLayerSecurity::certificateFolder = "certificates/";
 const std::string TransportLayerSecurity::signedFileKey = "certificates/calculator-algebra.key";
 
 TransportLayerSecurity::TransportLayerSecurity() {

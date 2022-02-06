@@ -24,7 +24,6 @@ const std::string TransportLayerSecurity::certificateSelfSignedPem = "certificat
 const std::string TransportLayerSecurity::keySelfSigned = "certificates/key.pem";
 
 const std::string TransportLayerSecurity::certificateFolder = "certificates/";
-const std::string TransportLayerSecurity::certificateOfficial = "calculator-algebra.crt";
 const std::string TransportLayerSecurity::keyOfficial = "calculator-algebra.key";
 
 TransportLayerSecurity::TransportLayerSecurity() {

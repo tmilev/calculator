@@ -549,13 +549,11 @@ public:
   // This will be the .crt file
   // in the certificates/ folder that is not
   // the self-signed certificate and is not the official certificate.
-  // If there are more than one .crt files in the
-  // certificates folder, the server will crash.
-  std::string certificateExternalAuthority;
+  // If there are more than one such .crt file,
+  // the server will crash.
+  std::string certificateOfficialBundle;
   // The private key used in the official certificate.
   static const std::string keyOfficial;
-  // The official certificate.
-  static const std::string certificateOfficial;
 
   // Contains the string "certificates/"
   static const std::string certificateFolder;

@@ -191,7 +191,7 @@ std::string TransportLayerSecurity::certificateExternalPhysical() {
     if (extensions[i] != ".crt") {
       continue;
     }
-    if (filesInCertificateFolder[i] == this->certificateSelfSignedPhysical()) {
+    if (filesInCertificateFolder[i] == this->certificateSelfSignedPem) {
       continue;
     }
     if (authorityCertificate != "") {
@@ -265,9 +265,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     return;
   }
   this->owner->flagInitializedPrivateKey = true;
-  std::string certificateSelfSignedPhysical = this->owner->certificateSelfSignedPhysical();
-
-
+  // std::string certificateSelfSignedPhysical = this->owner->certificateSelfSignedPhysical();
   std::string certificateExternalPhysical = this->owner->certificateExternalPhysical();
   std::string keyOfficialPhysical;
 
@@ -290,11 +288,13 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateExternalPhysical.c_str()) <= 0) {
     this->initSSLServerSelfSigned();
   } else {
-    global << Logger::green << "Found officially signed certificate... " << Logger::endL;
-    if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateSelfSignedPhysical.c_str()) <= 0) {
-      ERR_print_errors_fp(stderr);
-      global.fatal << "Failed to user certificate file." << global.fatal;
-    }
+    global << Logger::green
+    << "Found officially signed certificate: "
+    << Logger::endL
+    << Logger::blue
+    << certificateExternalPhysical
+    << Logger::endL
+    ;
     if (SSL_CTX_use_PrivateKey_file(this->contextGlobal, keyOfficialPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
       ERR_print_errors_fp(stderr);
       global.fatal << "Failed to use private key." << global.fatal;

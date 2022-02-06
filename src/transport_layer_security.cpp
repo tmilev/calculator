@@ -20,11 +20,10 @@
 // openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout calculator-algebra.key
 // then get the CSR.csr file to a signing authority,
 // from where you get the signedFileCertificate1 and signedFileCertificate3
-const std::string TransportLayerSecurity::certificateSelfSignedPem = "certificates/cert.pem";
-const std::string TransportLayerSecurity::keySelfSigned = "certificates/key.pem";
+const std::string TransportLayerSecurity::certificateSelfSignedPem = "cert.pem";
+const std::string TransportLayerSecurity::keySelfSigned = "key.pem";
 
 const std::string TransportLayerSecurity::certificateFolder = "certificates/";
-const std::string TransportLayerSecurity::keyOfficial = "calculator-algebra.key";
 
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
@@ -67,7 +66,7 @@ void TransportLayerSecurity::freeEverythingShutdown() {
 
 bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::initSSLKeyFiles");
-  if (!this->openSSLData.initSSLKeyFiles()) {
+  if (!this->openSSLData.initSSLKeyFilesSelfSigned()) {
     return false;
   }
   bool flagBuiltInTLSAvailable = false;

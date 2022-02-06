@@ -81,8 +81,8 @@ public:
   bool inspectCertificates(
     std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
-  static bool initSSLKeyFiles();
-  static bool initSSLKeyFilesCreateOnDemand();
+  static bool initSSLKeyFilesSelfSigned();
+  static bool initSSLKeyFilesSelfSignedCreateOnDemand();
 };
 
 class TransportLayerSecurityServer;
@@ -551,9 +551,12 @@ public:
   // the self-signed certificate and is not the official certificate.
   // If there are more than one such .crt file,
   // the server will crash.
-  std::string certificateOfficialBundle;
+  std::string certificateOfficial;
   // The private key used in the official certificate.
-  static const std::string keyOfficial;
+  // Will use the .key file found in the certificates/ folder
+  // that is not the self-signed key.
+  // If there are more than such .key files, the server will crash.
+  std::string keyOfficial;
 
   // Contains the string "certificates/"
   static const std::string certificateFolder;
@@ -592,7 +595,8 @@ public:
     bool includeNoErrorInComments
   );
   // Certificate file (.crt) of the external authority.
-  std::string certificateExternalPhysical();
+  std::string certificateOfficialPhysical();
+  std::string keyOfficialPhysical();
   std::string certificateSelfSignedPhysical();
   TransportLayerSecurity();
   ~TransportLayerSecurity();

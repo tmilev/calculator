@@ -75,7 +75,7 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   #endif // MACRO_use_open_ssl
 }
 
-bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
+bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand");
   if (!global.flagSSLAvailable) {
     return false;
@@ -112,13 +112,15 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   return true;
 }
 
-bool TransportLayerSecurityOpenSSL::initSSLKeyFiles() {
-  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFiles");
-  if (!TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand()) {
+bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned() {
+  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned");
+  if (!TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand()) {
     return false;
   }
   if (
-    !FileOperations::fileExistsVirtual(TransportLayerSecurity::certificateSelfSignedPem, true, true) ||
+    !FileOperations::fileExistsVirtual(
+      TransportLayerSecurity::certificateFolder +
+      TransportLayerSecurity::certificateFolder + TransportLayerSecurity::certificateSelfSignedPem, true, true) ||
     !FileOperations::fileExistsVirtual(TransportLayerSecurity::keySelfSigned, true, true)
   ) {
     global.flagSSLAvailable = false;
@@ -174,8 +176,8 @@ std::string TransportLayerSecurity::certificateSelfSignedPhysical() {
   return result;
 }
 
-std::string TransportLayerSecurity::certificateExternalPhysical() {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::certificateExternalPhysical");
+std::string TransportLayerSecurity::certificateOfficialPhysical() {
+  MacroRegisterFunctionWithName("TransportLayerSecurity::certificateOfficialPhysical");
   List<std::string> filesInCertificateFolder;
   List<std::string> extensions;
   FileOperations::getFolderFileNamesVirtual(
@@ -222,8 +224,57 @@ std::string TransportLayerSecurity::certificateExternalPhysical() {
   return result;
 }
 
+std::string TransportLayerSecurity::keyOfficialPhysical() {
+  MacroRegisterFunctionWithName("TransportLayerSecurity::keyOfficialPhysical");
+  List<std::string> filesInCertificateFolder;
+  List<std::string> extensions;
+  FileOperations::getFolderFileNamesVirtual(
+    this->certificateFolder,
+    filesInCertificateFolder,
+    &extensions,
+    true,
+    true,
+    nullptr
+  );
+  std::string keyFileName;
+  for (int i = 0; i < filesInCertificateFolder.size; i ++) {
+    if (extensions[i] != ".key") {
+      continue;
+    }
+    if (filesInCertificateFolder[i] == this->keySelfSigned) {
+      continue;
+    }
+    if (keyFileName != "") {
+      global.fatal << "Found more than one private key "
+      << "in certificates/ folder:\n"
+      << keyFileName
+      << "\nand\n"
+      << filesInCertificateFolder[i] << "\n"
+      << "The certificate folder must "
+      << "contain one or two private .key files: "
+      << "the official one and a self-signed one. "
+      << "The self-signed one is for testing "
+      << "and experimentation purposes. "
+      << global.fatal;
+    }
+    keyFileName = filesInCertificateFolder[i];
+  }
+  std::string result;
+  FileOperations::getPhysicalFileNameFromVirtual(
+    this->certificateFolder + keyFileName,
+    result,
+    true,
+    true,
+    nullptr
+  );
+  return result;
+}
+
 void TransportLayerSecurityOpenSSL::initSSLServerSelfSigned() {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLServerSelfSigned");
+  if (!this->initSSLKeyFilesSelfSigned()) {
+    return;
+  }
   std::string certificate;
   std::string key;
 
@@ -265,34 +316,20 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     return;
   }
   this->owner->flagInitializedPrivateKey = true;
-  // std::string certificateSelfSignedPhysical = this->owner->certificateSelfSignedPhysical();
-  std::string certificateExternalPhysical = this->owner->certificateExternalPhysical();
-  std::string keyOfficialPhysical;
-
-
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::keyOfficial,
-    keyOfficialPhysical,
-    true,
-    true,
-    nullptr
-  );
+  std::string certificateOfficialPhysical = this->owner->certificateOfficialPhysical();
+  std::string keyOfficialPhysical = this->owner->keyOfficialPhysical();
   //////////////////////////////////////////////////////////
-  if (!this->initSSLKeyFiles()) {
-    return;
-  }
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
-  global << Logger::green << "Certificate file: " << certificateExternalPhysical << Logger::endL;
   SSL_CTX_set_ecdh_auto(this->contextGlobal, 1);
-  if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateExternalPhysical.c_str()) <= 0) {
+  if (SSL_CTX_use_certificate_chain_file(this->contextGlobal, certificateOfficialPhysical.c_str()) <= 0) {
     this->initSSLServerSelfSigned();
   } else {
     global << Logger::green
     << "Found officially signed certificate: "
     << Logger::endL
-    << Logger::blue
-    << certificateExternalPhysical
+    << Logger::green
+    << certificateOfficialPhysical
     << Logger::endL
     ;
     if (SSL_CTX_use_PrivateKey_file(this->contextGlobal, keyOfficialPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {

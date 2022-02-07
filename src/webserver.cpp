@@ -3347,15 +3347,6 @@ int WebServer::run() {
     << " seconds. " << Logger::endL
     << Logger::purple << "************************" << Logger::endL;
   }
-
-  // <-Worker log resets are needed, else forked processes reset their common log.
-  // <-Resets of the server logs are not needed, but I put them here nonetheless.
-  if (global.flagSSLAvailable) {
-    // Creates key files if absent. Does not call any openssl functions.
-    std::stringstream commentsOnFailure;
-    TransportLayerSecurity::initializeNonThreadSafePartsCommon();
-    this->transportLayerSecurity.initSSLKeyFiles(&commentsOnFailure);
-  }
   global.logs.server.reset();
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();

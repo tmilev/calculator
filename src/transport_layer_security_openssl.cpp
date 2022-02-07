@@ -81,8 +81,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
     return false;
   }
   if (
-    FileOperations::fileExistsVirtual(TransportLayerSecurity::certificateSelfSignedPem, true, true) &&
-    FileOperations::fileExistsVirtual(TransportLayerSecurity::keySelfSigned, true, true)
+    FileOperations::fileExistsVirtual(TransportLayerSecurity::certificateSelfSignedVirtual(), true, true) &&
+    FileOperations::fileExistsVirtual(TransportLayerSecurity::keySelfSignedVirtual(), true, true)
   ) {
     return true;
   }
@@ -91,10 +91,10 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   std::stringstream command;
   std::string certificatePhysicalName, keyPhysicalName;
   FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::certificateSelfSignedPem, certificatePhysicalName, true, true, nullptr
+    TransportLayerSecurity::certificateSelfSignedVirtual() , certificatePhysicalName, true, true, nullptr
   );
   FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::keySelfSigned, keyPhysicalName, true, true, nullptr
+    TransportLayerSecurity::keySelfSignedVirtual(), keyPhysicalName, true, true, nullptr
   );
   command <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
   << " -out " << certificatePhysicalName
@@ -119,9 +119,11 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned() {
   }
   if (
     !FileOperations::fileExistsVirtual(
-      TransportLayerSecurity::certificateFolder +
-      TransportLayerSecurity::certificateFolder + TransportLayerSecurity::certificateSelfSignedPem, true, true) ||
-    !FileOperations::fileExistsVirtual(TransportLayerSecurity::keySelfSigned, true, true)
+      TransportLayerSecurity::certificateSelfSignedVirtual(), true, true
+    ) ||
+    !FileOperations::fileExistsVirtual(
+      TransportLayerSecurity::keySelfSignedVirtual(), true, true
+    )
   ) {
     global.flagSSLAvailable = false;
     return false;
@@ -167,13 +169,21 @@ std::string TransportLayerSecurity::certificateSelfSignedPhysical() {
   MacroRegisterFunctionWithName("TransportLayerSecurity::certificateSelfSignedPhysical");
   std::string result;
   FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::certificateSelfSignedPem,
+    TransportLayerSecurity::certificateSelfSignedVirtual(),
     result,
     true,
     true,
     nullptr
   );
   return result;
+}
+
+std::string TransportLayerSecurity::certificateSelfSignedVirtual() {
+  return TransportLayerSecurity::certificateFolder + TransportLayerSecurity::certificateSelfSigned;
+}
+
+std::string TransportLayerSecurity::keySelfSignedVirtual() {
+  return TransportLayerSecurity::certificateFolder + TransportLayerSecurity::keySelfSigneD;
 }
 
 std::string TransportLayerSecurity::certificateOfficialPhysical() {
@@ -193,7 +203,7 @@ std::string TransportLayerSecurity::certificateOfficialPhysical() {
     if (extensions[i] != ".crt") {
       continue;
     }
-    if (filesInCertificateFolder[i] == this->certificateSelfSignedPem) {
+    if (filesInCertificateFolder[i] == this->certificateSelfSigned) {
       continue;
     }
     if (authorityCertificate != "") {
@@ -206,7 +216,7 @@ std::string TransportLayerSecurity::certificateOfficialPhysical() {
       << "contain one or two certificates (.crt files): "
       << "that of the server and that of an external signing authority. "
       << "The self-signed certificate, if present, "
-      << "must be called " << this->certificateSelfSignedPem
+      << "must be called " << this->certificateSelfSigned
       << ". The other file with .crt extension will be assumed to be"
       << " that of the signing authority. "
       << global.fatal;
@@ -241,7 +251,7 @@ std::string TransportLayerSecurity::keyOfficialPhysical() {
     if (extensions[i] != ".key") {
       continue;
     }
-    if (filesInCertificateFolder[i] == this->keySelfSigned) {
+    if (filesInCertificateFolder[i] == this->keySelfSigneD) {
       continue;
     }
     if (keyFileName != "") {
@@ -279,14 +289,14 @@ void TransportLayerSecurityOpenSSL::initSSLServerSelfSigned() {
   std::string key;
 
   FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::certificateSelfSignedPem,
+    TransportLayerSecurity::certificateSelfSignedVirtual(),
     certificate,
     true,
     true,
     nullptr
   );
   FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::keySelfSigned,
+    TransportLayerSecurity::keySelfSignedVirtual(),
     key,
     true,
     true,

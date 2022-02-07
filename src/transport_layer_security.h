@@ -541,8 +541,8 @@ public:
   int readBufferStandardSize;
 
   static TransportLayerSecurity& defaultTLS_READ_ONLY();
-  static const std::string certificateSelfSignedPem;
-  static const std::string keySelfSigned;
+  static const std::string certificateSelfSigned;
+  static const std::string keySelfSigneD;
 
   // Certificate signed by an external authority
   // such as GoDaddy or another institution.
@@ -597,7 +597,10 @@ public:
   // Certificate file (.crt) of the external authority.
   std::string certificateOfficialPhysical();
   std::string keyOfficialPhysical();
-  std::string certificateSelfSignedPhysical();
+
+  static std::string certificateSelfSignedVirtual();
+  static std::string certificateSelfSignedPhysical();
+  static std::string keySelfSignedVirtual();
   TransportLayerSecurity();
   ~TransportLayerSecurity();
   void removeLastSocket();

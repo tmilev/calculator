@@ -9,18 +9,6 @@
 class CodeFormatter {
 public:
   class Element {
-  private:
-    void computeIndentation();
-    void computeIndentationCodeBlock();
-    void computeIndentationTypeExpression();
-    void computeIndentationOperator();
-    void computeIndentationBasic(int startingIndex);
-    void computeIndentationBasicIgnorePrevious(int startingIndex);
-    void computeIndentationTopLevel();
-    void computeIndentationAtomic();
-    void formatDefault(std::stringstream& out);
-    void formatContent(std::stringstream& out);
-    void setOwnerRecursively(CodeFormatter* inputOwner);
   public:
     enum Type {
       Dummy,
@@ -97,6 +85,20 @@ public:
       Return,
       ReturnedExpression,
     };
+  private:
+    void computeIndentation(CodeFormatter::Element::Type parentType);
+    void computeIndentationCodeBlock();
+    void computeIndentationCommandListInCodeBlock();
+    void computeIndentationTypeExpression();
+    void computeIndentationOperator();
+    void computeIndentationBasic(int startingIndex);
+    void computeIndentationBasicIgnorePrevious(int startingIndex);
+    void computeIndentationTopLevel();
+    void computeIndentationAtomic();
+    void formatDefault(std::stringstream& out);
+    void formatContent(std::stringstream& out);
+    void setOwnerRecursively(CodeFormatter* inputOwner);
+  public:
     Element::Type type;
     std::string content;
     List<CodeFormatter::Element> children;

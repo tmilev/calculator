@@ -14,6 +14,11 @@ CodeFormatter::Element::Element() {
   this->columnFinal = 0;
   this->type = CodeFormatter::Element::Unknown;
   this->owner = nullptr;
+  this->previousRequiresSeparatorAfter = false;
+  this->previousRequiresWhiteSpaceAfter = false;
+  this->requiresSeparatorAfter = false;
+  this->requiresSeparatorBefore = false;
+  this->requiresWhiteSpaceAfter = false;
 }
 
 std::string CodeFormatter::Element::toStringWithoutType() const {
@@ -436,24 +441,57 @@ void CodeFormatter::Element::formatContent(std::stringstream& out) {
 std::string CodeFormatter::Element::toStringFormattingData() const {
   std::stringstream out;
   if (this->content != "") {
-    out << "[" << this->content << "] ";
+    out << "(" << this->content << ") ";
+  } else {
+    out << "[" << this->toStringType(this->type) << "] ";
   }
   out << "lines before: " << this->newLinesBefore;
   out << " lines after: " << this->newLinesAfter;
   out << " col: " << this->columnFinal;
   out << " col prev: " << this->columnPreviousElement;
+  out << " w: " << this->whiteSpaceBefore;
+  out << " i: " << this->indentCodeBlock;
   return out.str();
 }
 
 void CodeFormatter::Element::computeIndentationAtomic() {
+  this->requiresSeparatorAfter = false;
+  this->requiresSeparatorBefore = false;
+  if (this->content.size() > 0) {
+    char last = this->content[this->content.size() - 1];
+    char first = this->content[0];
+    this->requiresSeparatorAfter = this->owner->isIdentifierCharacter(last);
+    this->requiresSeparatorBefore = this->owner->isIdentifierCharacter(first);
+  }
   this->columnFinal = this->columnPreviousElement + this->content.size();
-  global.comments << "DEBUG: " << this->toStringFormattingData() << "<br>";
+  bool needsWhiteSpaceBefore = this->requiresSeparatorBefore && this->previousRequiresSeparatorAfter;
+  needsWhiteSpaceBefore = needsWhiteSpaceBefore || this->previousRequiresWhiteSpaceAfter;
+  if (needsWhiteSpaceBefore) {
+    this->whiteSpaceBefore = 1;
+    this->columnFinal ++;
+  }
   if (this->columnFinal < this->owner->maximumDesiredLineLength) {
     return;
   }
   this->newLinesBefore = 1;
+  this->requiresSeparatorBefore = false;
   this->whiteSpaceBefore = this->indentCodeBlock;
   this->columnFinal = this->whiteSpaceBefore + this->content.size();
+}
+
+void CodeFormatter::Element::computeIndentationOperator() {
+  this->requiresWhiteSpaceAfter = true;
+  if (this->content == "->" || this->content == ".") {
+    this->requiresWhiteSpaceAfter = false;
+  } else if (this->whiteSpaceBefore == 0) {
+    this->whiteSpaceBefore = 1;
+  }
+  this->columnFinal = this->columnPreviousElement + this->whiteSpaceBefore + this->content.size();
+}
+
+void CodeFormatter::Element::computeIndentationTypeExpression() {
+  this->computeIndentationBasic(0);
+  this->requiresWhiteSpaceAfter = true;
 }
 
 void CodeFormatter::Element::computeIndentation() {
@@ -465,24 +503,40 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationCodeBlock();
     return;
   }
+  if (this->type == CodeFormatter::Element::TypeExpression) {
+    this->computeIndentationTypeExpression();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::Operator) {
+    this->computeIndentationOperator();
+    return;
+  }
   if (this->content != "") {
     this->computeIndentationAtomic();
     return;
   }
+  this->requiresSeparatorBefore = false;
   this->computeIndentationBasic(0);
+  global.comments << "DEBUG: " << this->toStringFormattingData() << "<br>";
 }
 
 void CodeFormatter::Element::computeIndentationCodeBlock() {
-  global.comments << "DEBUG: Code block of size: " << this->children.size;
   if (this->children.size < 2) {
     this->computeIndentationBasic(0);
     return;
   }
   this->children[0].whiteSpaceBefore = 1;
-  this->children[0].newLinesAfter = 1;
   this->columnFinal = this->indentCodeBlock;
-  this->children[1].whiteSpaceBefore = this->indentCodeBlock;
+  this->children[1].previousRequiresSeparatorAfter = false;
+  this->indentCodeBlock += this->owner->tabLength;
+  for (int i = 1; i < this->children.size - 1; i ++) {
+    this->children[i].whiteSpaceBefore = this->indentCodeBlock;
+    this->children[i].newLinesBefore = 1;
+  }
   this->computeIndentationBasicIgnorePrevious(1);
+  this->children.lastObject()->indentCodeBlock -= this->owner->tabLength;
+  this->children.lastObject()->newLinesBefore = 1;
+  this->indentCodeBlock -= this->owner->tabLength;
 }
 
 void CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
@@ -490,12 +544,27 @@ void CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
   this->computeIndentationBasicIgnorePrevious(startingIndex);
 }
 
-void CodeFormatter::Element::computeIndentationBasicIgnorePrevious(int startingIndex) {
+void CodeFormatter::Element::computeIndentationBasicIgnorePrevious(
+  int startingIndex
+) {
   for (int i = startingIndex; i < this->children.size; i ++) {
     CodeFormatter::Element& current = this->children[i];
     current.columnPreviousElement = this->columnFinal;
+    current.indentCodeBlock = this->indentCodeBlock;
+    if (i == 0) {
+      current.previousRequiresSeparatorAfter = this->previousRequiresSeparatorAfter;
+      current.previousRequiresWhiteSpaceAfter = this->previousRequiresWhiteSpaceAfter;
+    } else {
+      CodeFormatter::Element& previous = this->children[i - 1];
+      current.previousRequiresSeparatorAfter = previous.requiresSeparatorAfter;
+      current.previousRequiresWhiteSpaceAfter = previous.requiresWhiteSpaceAfter;
+    }
     current.computeIndentation();
     this->columnFinal = current.columnFinal;
+    this->requiresSeparatorAfter = current.requiresSeparatorAfter;
+  }
+  if (this->children.size > 0) {
+    this->requiresSeparatorBefore = this->children[0].requiresSeparatorBefore;
   }
 }
 
@@ -686,6 +755,12 @@ bool CodeFormatter::initializeFileNames(
     this->outputFileName = this->inputFileName + ".new";
   }
   return true;
+}
+
+bool CodeFormatter::isIdentifierCharacter(char input) {
+  return MathRoutines::isDigit(input) ||
+  MathRoutines::isLatinLetter(input) ||
+  input == '_';
 }
 
 bool CodeFormatter::isIdentifierWord(const std::string& input) {

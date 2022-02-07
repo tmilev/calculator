@@ -12,6 +12,8 @@ public:
   private:
     void computeIndentation();
     void computeIndentationCodeBlock();
+    void computeIndentationTypeExpression();
+    void computeIndentationOperator();
     void computeIndentationBasic(int startingIndex);
     void computeIndentationBasicIgnorePrevious(int startingIndex);
     void computeIndentationTopLevel();
@@ -108,6 +110,11 @@ public:
     int columnFinal;
     int newLinesAfter;
     int newLinesBefore;
+    bool previousRequiresSeparatorAfter;
+    bool previousRequiresWhiteSpaceAfter;
+    bool requiresSeparatorAfter;
+    bool requiresWhiteSpaceAfter;
+    bool requiresSeparatorBefore;
     std::string toStringFormattingData() const;
     std::string toString() const;
     std::string toStringWithoutType() const;
@@ -263,6 +270,7 @@ public:
   );
   std::string toStringLinks();
   static bool isIdentifierWord(const std::string& input);
+  static bool isIdentifierCharacter(char input);
 };
 
 #endif // header_source_code_formatter_ALREADY_INCLUDED

@@ -86,9 +86,10 @@ public:
       ReturnedExpression,
     };
   private:
-    void computeIndentation(CodeFormatter::Element::Type parentType);
+    void computeIndentation();
     void computeIndentationCodeBlock();
     void computeIndentationCommandListInCodeBlock();
+    void computeIndentationComment();
     void computeIndentationTypeExpression();
     void computeIndentationOperator();
     void computeIndentationBasic(int startingIndex);
@@ -97,14 +98,16 @@ public:
     void computeIndentationAtomic();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
-    void setOwnerRecursively(CodeFormatter* inputOwner);
+    int getStartingColumn();
   public:
     Element::Type type;
     std::string content;
     List<CodeFormatter::Element> children;
     CodeFormatter* owner;
+    Element* parent;
+    int indexInParent;
     // The indentation level of the containing code block.
-    int indentCodeBlock;
+    int indentationLevel;
     int whiteSpaceBefore;
     // The number of columns needed to display the previous
     // code element.
@@ -112,15 +115,13 @@ public:
     int columnFinal;
     int newLinesAfter;
     int newLinesBefore;
-    bool previousRequiresSeparatorAfter;
-    bool previousRequiresWhiteSpaceAfter;
     bool requiresSeparatorAfter;
     bool requiresWhiteSpaceAfter;
-    bool requiresSeparatorBefore;
     std::string toStringFormattingData() const;
     std::string toString() const;
     std::string toStringWithoutType() const;
     static std::string toStringType(CodeFormatter::Element::Type inputType);
+    void toStringContentOnly(std::stringstream& out) const;
     Element();
     void clear();
     void appendType(const CodeFormatter::Element& other, CodeFormatter::Element::Type inputType);
@@ -149,6 +150,13 @@ public:
     bool isOperator() const;
     bool isColonDoubleColonOrComma() const;
     bool isColonOrDoubleColon() const;
+    void initializePointers(
+      CodeFormatter* inputOwner,
+      CodeFormatter::Element* inputParent,
+      int inputIndexInParent
+    );
+    Element* previousAtom();
+    Element* lastAtomUnderMe();
     void makeFrom1(
       CodeFormatter::Element::Type inputType,
       const Element& child
@@ -171,7 +179,7 @@ public:
       const Element& third,
       const Element& fourth
     );
-    std::string format(CodeFormatter& owner);
+    std::string format();
   };
 
   class Words {
@@ -273,6 +281,11 @@ public:
   std::string toStringLinks();
   static bool isIdentifierWord(const std::string& input);
   static bool isIdentifierCharacter(char input);
+  void wirePointersRecursively(
+    CodeFormatter::Element& current,
+    CodeFormatter::Element* parent,
+    int indexInParent
+  );
 };
 
 #endif // header_source_code_formatter_ALREADY_INCLUDED

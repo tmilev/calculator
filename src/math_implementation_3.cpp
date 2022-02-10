@@ -2353,7 +2353,7 @@ std::string StringRoutines::stringShortenInsertDots(const std::string& inputStri
   return out.str();
 }
 
-void StringRoutines::stringSplitExcludeDelimiter(
+void StringRoutines::splitExcludeDelimiter(
   const std::string& inputString, char delimiter, List<std::string>& output
 ) {
   List<char> tempList;
@@ -2455,7 +2455,7 @@ void StringRoutines::stringSplitDefaultDelimiters(const std::string& inputString
 void StringRoutines::stringSplitExcludeDelimiters(
   const std::string& inputString, const List<char>& delimiters, List<std::string>& output
 ) {
-  MacroRegisterFunctionWithName("MathRoutines::StringSplit");
+  MacroRegisterFunctionWithName("StringRoutines::stringSplitExcludeDelimiters");
   output.setSize(0);
   std::string reader;
   for (unsigned i = 0; i < inputString.size(); i ++) {

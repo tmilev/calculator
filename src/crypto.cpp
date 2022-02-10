@@ -1721,7 +1721,7 @@ bool JSONWebToken::verifyRSA256(
 bool JSONWebToken::assignString(const std::string& other, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("JSONWebToken::assignString");
   List<std::string> stringSplitter;
-  StringRoutines::stringSplitExcludeDelimiter(other, '.', stringSplitter);
+  StringRoutines::splitExcludeDelimiter(other, '.', stringSplitter);
   if (stringSplitter.size != 3) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Expected 3 strings separated by two dots, got: "

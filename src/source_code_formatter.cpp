@@ -6,7 +6,7 @@
 #include "general_strings.h"
 
 CodeFormatter::Element::Element() {
-  this->indentCodeBlock = 0;
+  this->indentationLevel = 0;
   this->columnPreviousElement = 0;
   this->newLinesAfter= 0;
   this->newLinesBefore = 0;
@@ -14,10 +14,9 @@ CodeFormatter::Element::Element() {
   this->columnFinal = 0;
   this->type = CodeFormatter::Element::Unknown;
   this->owner = nullptr;
-  this->previousRequiresSeparatorAfter = false;
-  this->previousRequiresWhiteSpaceAfter = false;
+  this->parent = nullptr;
+  this->indexInParent = - 1;
   this->requiresSeparatorAfter = false;
-  this->requiresSeparatorBefore = false;
   this->requiresWhiteSpaceAfter = false;
 }
 
@@ -400,16 +399,25 @@ bool CodeFormatter::Element::isTypeOrIdentifierOrExpression() const {
   ;
 }
 
-void CodeFormatter::Element::setOwnerRecursively(CodeFormatter* inputOwner) {
+void CodeFormatter::Element::initializePointers(CodeFormatter *inputOwner, CodeFormatter::Element *inputParent, int inputIndexInParent) {
   this->owner = inputOwner;
-  for (int i = 0; i < this->children.size; i ++) {
-    this->children[i].setOwnerRecursively(inputOwner);
+  this->parent = inputParent;
+  this->indexInParent = inputIndexInParent;
+}
+
+void CodeFormatter::wirePointersRecursively(
+  CodeFormatter::Element &current,
+  Element *parent,
+  int indexInParent
+) {
+  current.initializePointers(this, parent, indexInParent);
+  for (int i = 0; i < current.children.size; i ++) {
+    this->wirePointersRecursively(current.children[i], &current, i);
   }
 }
 
-std::string CodeFormatter::Element::format(CodeFormatter& owner) {
-  this->setOwnerRecursively(&owner);
-  this->computeIndentation(this->type);
+std::string CodeFormatter::Element::format() {
+  this->computeIndentation();
   std::stringstream out;
   this->formatDefault(out);
   return out.str();
@@ -438,37 +446,50 @@ void CodeFormatter::Element::formatContent(std::stringstream& out) {
   }
 }
 
+void CodeFormatter::Element::toStringContentOnly(std::stringstream& out) const {
+  if (this->content != "") {
+    out << this->content;
+    out << " ";
+  }
+  for (int i = 0; i < this->children.size; i ++) {
+    this->children[i].toStringContentOnly(out);
+  }
+}
+
 std::string CodeFormatter::Element::toStringFormattingData() const {
   std::stringstream out;
-  if (this->content != "") {
-    out << "(" << this->content << ") ";
-  } else {
-    out << "[" << this->toStringType(this->type) << "] ";
-  }
+  out << "(";
+  this->toStringContentOnly(out);
+  out << ")";
+  out << "[" << this->toStringType(this->type) << "] ";
   out << "lines before: " << this->newLinesBefore;
   out << " lines after: " << this->newLinesAfter;
   out << " col: " << this->columnFinal;
   out << " col prev: " << this->columnPreviousElement;
   out << " w: " << this->whiteSpaceBefore;
-  out << " i: " << this->indentCodeBlock;
+  out << " i: " << this->indentationLevel;
   return out.str();
 }
 
 void CodeFormatter::Element::computeIndentationAtomic() {
   this->requiresSeparatorAfter = false;
-  this->requiresSeparatorBefore = false;
+  bool needsWhiteSpaceBefore = false;
   if (this->content.size() > 0) {
     char last = this->content[this->content.size() - 1];
     char first = this->content[0];
     this->requiresSeparatorAfter = this->owner->isIdentifierCharacter(last);
-    this->requiresSeparatorBefore = this->owner->isIdentifierCharacter(first);
+    needsWhiteSpaceBefore = this->owner->isIdentifierCharacter(first);
   }
   this->columnFinal = this->content.size();
   if (this->newLinesBefore == 0) {
     this->columnFinal += this->columnPreviousElement;
   }
-  bool needsWhiteSpaceBefore = this->requiresSeparatorBefore && this->previousRequiresSeparatorAfter;
-  needsWhiteSpaceBefore = needsWhiteSpaceBefore || this->previousRequiresWhiteSpaceAfter;
+  CodeFormatter::Element* previous = this->previousAtom();
+  if (previous != nullptr) {
+    if (previous->requiresSeparatorAfter || previous->requiresWhiteSpaceAfter) {
+      needsWhiteSpaceBefore = true;
+    }
+  }
   if (needsWhiteSpaceBefore) {
     this->whiteSpaceBefore = 1;
     this->columnFinal ++;
@@ -477,8 +498,7 @@ void CodeFormatter::Element::computeIndentationAtomic() {
     return;
   }
   this->newLinesBefore = 1;
-  this->requiresSeparatorBefore = false;
-  this->whiteSpaceBefore = this->indentCodeBlock;
+  this->whiteSpaceBefore = this->indentationLevel;
   this->columnFinal = this->whiteSpaceBefore + this->content.size();
 }
 
@@ -497,7 +517,14 @@ void CodeFormatter::Element::computeIndentationTypeExpression() {
   this->requiresWhiteSpaceAfter = true;
 }
 
-void CodeFormatter::Element::computeIndentation(CodeFormatter::Element::Type parentType) {
+void CodeFormatter::Element::computeIndentation() {
+  if (this->parent == nullptr) {
+    for (int i = 0; i < this->children.size; i ++) {
+      this->children[i].computeIndentation();
+    }
+    return;
+  }
+  global.comments << "DEBUG: " << this->toStringFormattingData() << "<br>";
   if (this->type == CodeFormatter::Element::TopLevel) {
     this->computeIndentationTopLevel();
     return;
@@ -514,17 +541,73 @@ void CodeFormatter::Element::computeIndentation(CodeFormatter::Element::Type par
     this->computeIndentationOperator();
     return;
   }
-  if (this->type == CodeFormatter::Element::CommandList && parentType == CodeFormatter::Element::CodeBlock) {
+  if (this->type == CodeFormatter::Element::CommandList && this->parent->type == CodeFormatter::Element::CodeBlock) {
     this->computeIndentationCommandListInCodeBlock();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::Comment) {
+    this->computeIndentationComment();
     return;
   }
   if (this->content != "") {
     this->computeIndentationAtomic();
-    global.comments << "DEBUG: " << this->toStringFormattingData() << "<br>";
     return;
   }
-  this->requiresSeparatorBefore = false;
   this->computeIndentationBasic(0);
+}
+
+int CodeFormatter::Element::getStartingColumn() {
+  if (this->previousAtom() == nullptr) {
+    return this->indentationLevel;
+  }
+  if (this->previousAtom()->newLinesAfter > 0) {
+    return this->indentationLevel;
+  }
+  return this->previousAtom()->columnFinal;
+}
+
+void CodeFormatter::Element::computeIndentationComment() {
+  if (this->children.size > 0) {
+    return;
+  }
+  List<std::string> words;
+  std::string contentAfterDoubleSlash;
+  if (!StringRoutines::stringBeginsWith(this->content, "// ") && StringRoutines::stringBeginsWith(this->content, "//", &contentAfterDoubleSlash)) {
+    this->content = "// " + contentAfterDoubleSlash;
+  }
+  StringRoutines::splitExcludeDelimiter(this->content, ' ', words);
+  if (words.size > 0) {
+    global << Logger::red << "Unexpected empty comment. " << Logger::endL;
+    return;
+  }
+  int currentOffset = this->getStartingColumn();
+  List<std::string> lines;
+  std::string currentWord;
+  int maximumWidth = this->owner->maximumDesiredLineLength;
+  currentWord = words[0];
+  for (int i = 1; i < words.size; i ++) {
+    int incomingLength = currentOffset + currentWord.size() + 1 + words[i].size();
+    if (incomingLength > maximumWidth) {
+      lines.addOnTop(currentWord);
+      currentWord = "//";
+      currentOffset = this->indentationLevel;
+    }
+    currentWord += " " + words[i];
+  }
+  lines.addOnTop(currentWord);
+  if (lines.size == 1) {
+    this->columnFinal = this->getStartingColumn() + 1 + this->content.size();
+    this->newLinesAfter = 1;
+    return;
+  }
+  this->content = "";
+  for (int i = 0; i < lines.size; i ++) {
+    CodeFormatter::Element next;
+    next.initializePointers(this->owner, this, i);
+    next.indentationLevel = this->indentationLevel;
+    next.newLinesAfter = 1;
+    this->addChild(next);
+  }
 }
 
 void CodeFormatter::Element::computeIndentationCodeBlock() {
@@ -533,25 +616,23 @@ void CodeFormatter::Element::computeIndentationCodeBlock() {
     return;
   }
   this->children[0].whiteSpaceBefore = 1;
-  this->columnFinal = this->indentCodeBlock;
-  this->children[1].previousRequiresSeparatorAfter = false;
-  this->indentCodeBlock += this->owner->tabLength;
+  this->columnFinal = this->indentationLevel;
+  this->indentationLevel += this->owner->tabLength;
   for (int i = 1; i < this->children.size - 1; i ++) {
-    this->children[i].whiteSpaceBefore = this->indentCodeBlock;
+    this->children[i].whiteSpaceBefore = this->indentationLevel;
     this->children[i].newLinesBefore = 1;
   }
   this->computeIndentationBasicIgnorePrevious(1);
-  this->children.lastObject()->indentCodeBlock -= this->owner->tabLength;
+  this->children.lastObject()->indentationLevel -= this->owner->tabLength;
   this->children.lastObject()->newLinesBefore = 1;
-  this->indentCodeBlock -= this->owner->tabLength;
+  this->indentationLevel -= this->owner->tabLength;
 }
 
 void CodeFormatter::Element::computeIndentationCommandListInCodeBlock() {
-  // The ambient command list already white space and newlines.
-  for (int i = 1; i < this->children.size; i ++) {
+  for (int i = 0; i < this->children.size; i ++) {
     this->children[i].newLinesBefore = 1;
-    this->children[i].whiteSpaceBefore = this->indentCodeBlock;
-    this->children[i].computeIndentation(this->type);
+    this->children[i].whiteSpaceBefore = this->indentationLevel;
+    this->children[i].computeIndentation();
   }
 }
 
@@ -566,21 +647,10 @@ void CodeFormatter::Element::computeIndentationBasicIgnorePrevious(
   for (int i = startingIndex; i < this->children.size; i ++) {
     CodeFormatter::Element& current = this->children[i];
     current.columnPreviousElement = this->columnFinal;
-    current.indentCodeBlock = this->indentCodeBlock;
-    if (i == 0) {
-      current.previousRequiresSeparatorAfter = this->previousRequiresSeparatorAfter;
-      current.previousRequiresWhiteSpaceAfter = this->previousRequiresWhiteSpaceAfter;
-    } else {
-      CodeFormatter::Element& previous = this->children[i - 1];
-      current.previousRequiresSeparatorAfter = previous.requiresSeparatorAfter;
-      current.previousRequiresWhiteSpaceAfter = previous.requiresWhiteSpaceAfter;
-    }
-    current.computeIndentation(this->type);
+    current.indentationLevel = this->indentationLevel;
+    current.computeIndentation();
     this->columnFinal = current.columnFinal;
     this->requiresSeparatorAfter = current.requiresSeparatorAfter;
-  }
-  if (this->children.size > 0) {
-    this->requiresSeparatorBefore = this->children[0].requiresSeparatorBefore;
   }
 }
 
@@ -591,7 +661,7 @@ void CodeFormatter::Element::computeIndentationTopLevel() {
     if (current.type == CodeFormatter::Element::Dummy) {
       continue;
     }
-    current.indentCodeBlock = 0;
+    current.indentationLevel = 0;
     current.columnPreviousElement = 0;
     current.whiteSpaceBefore = 0;
     current.newLinesAfter = 1;
@@ -601,8 +671,25 @@ void CodeFormatter::Element::computeIndentationTopLevel() {
         previous.newLinesAfter ++;
       }
     }
-    this->children[i].computeIndentation(this->type);
+    this->children[i].computeIndentation();
   }
+}
+
+CodeFormatter::Element* CodeFormatter::Element::previousAtom() {
+  if (this->parent == nullptr) {
+    return nullptr;
+  }
+  if (this->indexInParent == 0) {
+    return this->parent->previousAtom();
+  }
+  return this->parent->children[this->indexInParent - 1].lastAtomUnderMe();
+}
+
+CodeFormatter::Element* CodeFormatter::Element::lastAtomUnderMe() {
+  if (this->children.size == 0) {
+    return this;
+  }
+  return this->children.lastObject()->lastAtomUnderMe();
 }
 
 bool CodeFormatter::Words::previousIsForwardSlash() {
@@ -858,7 +945,8 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.initialize(*this);
   this->processor.consumeElements();
   std::stringstream out;
-  out << this->processor.code.format(*this);
+  this->wirePointersRecursively(this->processor.code, nullptr, - 1);
+  out << this->processor.code.format();
   this->transformedContent = out.str();
   if (!this->writeFormatedCode(comments)) {
     return false;

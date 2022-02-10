@@ -25,11 +25,12 @@ public:
     const std::string& inputString,
     List<std::string>& output
   );
-  static void stringSplitExcludeDelimiter(
+  static void splitExcludeDelimiter(
     const std::string& inputString,
     char delimiter,
     List<std::string>& output
   );
+  // Splits a string using a set of character delimiters.
   static void stringSplitExcludeDelimiters(
     const std::string& inputString,
     const List<char>& delimiters,

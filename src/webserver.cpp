@@ -18,7 +18,7 @@
 #include "assert.h"
 #include "signals_infrastructure.h"
 
-const std::string WebServer::Statististics::pingRequestsString = "pingsRequests";
+const std::string WebServer::Statististics::pingRequestsString = "pingRequests";
 const std::string WebServer::Statististics::allRequestsString = "allRequests";
 
 WebServer& GlobalVariables::server() {
@@ -1488,6 +1488,9 @@ void WebServer::initializeMainMIMETypes() {
   this->MIMETypes.setKeyValue(".html", "text/html"                    );
   this->MIMETypes.setKeyValue(".php" , "text/html"                    );
   this->MIMETypes.setKeyValue(".txt" , "text/plain"                   );
+  this->MIMETypes.setKeyValue(".cpp" , "text/plain"                   );
+  this->MIMETypes.setKeyValue(".pro" , "text/plain"                   );
+  this->MIMETypes.setKeyValue(".h" ,   "text/plain"                   );
   this->MIMETypes.setKeyValue(".png" , "image/png"                    );
   this->MIMETypes.setKeyValue(".js"  , "text/javascript"              );
   this->MIMETypes.setKeyValue(".ico" , "image/x-icon"                 );
@@ -2563,7 +2566,7 @@ std::string WebServer::toStringConnectionSummary() {
   << TimeWrapper::toStringSecondsToDaysHoursSecondsString(timeRunning / 1000, false, false)
   << " web server uptime. ";
   out << this->statistics.allConnections - this->statistics.pingConnections
-  << " http connections, " << this->statistics.pingConnections << " pings connections, "
+  << " http connections, " << this->statistics.pingConnections << " pings connection, "
   << " with " << this->statistics.allRequests - this->statistics.pingRequests
   << " http requests, "
   << this->statistics.pingRequests << " ping requests. "

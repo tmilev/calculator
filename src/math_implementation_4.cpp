@@ -208,9 +208,6 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
 
 std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
   MacroRegisterFunctionWithName("GlobalVariables::toHTMLTopCommandLinuxSystem");
-  if (!global.userDefaultHasAdminRights()) {
-    return "Login as admin for RAM memory statistics.";
-  }
   std::string topString = this->externalCommandReturnOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
@@ -218,6 +215,10 @@ std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
   for (int i = 0; i < 4; i ++) {
     std::getline(topStream, lineString);
     out << lineString << "<br>\n ";
+  }
+  if (!global.userDefaultHasAdminRights()) {
+    out << "Login as admin for full top printout.";
+    return out.str();
   }
   out << "<table>";
   for (; std::getline(topStream, lineString);) {

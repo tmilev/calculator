@@ -489,6 +489,9 @@ void CodeFormatter::Element::computeIndentationAtomic() {
     if (previous->requiresSeparatorAfter || previous->requiresWhiteSpaceAfter) {
       needsWhiteSpaceBefore = true;
     }
+    if (previous->newLinesAfter > 0) {
+      needsWhiteSpaceBefore = false;
+    }
   }
   if (needsWhiteSpaceBefore) {
     this->whiteSpaceBefore = 1;

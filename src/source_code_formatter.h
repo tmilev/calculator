@@ -263,6 +263,7 @@ public:
     std::stringstream* comments
   );
   bool shouldSeparateWithSpace(const std::string& left, const std::string& right);
+  bool preemptsWhitespaceBefore(char input);
   bool isSeparatorCharacter(char input);
   bool isSeparator(const std::string& input);
   bool isOperator(const std::string& input);

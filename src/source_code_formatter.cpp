@@ -496,6 +496,9 @@ bool CodeFormatter::Element::needsWhiteSpaceBefore() {
   if (!previousEndsWithSeparator && !startsWithSeparator) {
     return true;
   }
+  if (this->owner->preemptsWhitespaceBefore(first)) {
+    return false;
+  }
   return previous->requiresWhiteSpaceAfter;
 }
 
@@ -710,14 +713,19 @@ void CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
 
 void CodeFormatter::Element::computeIndentationCommandListInCodeBlock() {
   if (this->parent->type != CodeFormatter::Element::CodeBlock) {
-    this->computeIndentationBasic(0);
+    for (int i = 0; i < this->children.size; i ++) {
+      if (i != this->children.size - 1) {
+        this->children[i].rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
+      }
+      this->children[i].indentationLevel = this->indentationLevel;
+      this->children[i].computeIndentation();
+    }
     return;
   }
   for (int i = 0; i < this->children.size; i ++) {
     this->children[i].rightMostAtomUnderMe()->newLinesAfter = 1;
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].computeIndentation();
-    global.comments << "DEBUG: command list child: " << this->children[i].toStringContentAndMetaData() << "<br>";
   }
 }
 
@@ -1043,6 +1051,10 @@ bool CodeFormatter::formatCPPSourceCode(
   return true;
 }
 
+bool CodeFormatter::preemptsWhitespaceBefore(char input) {
+  return input == ')';
+}
+
 bool CodeFormatter::isSeparatorCharacter(char input) {
   unsigned char inputUnsigned = static_cast<unsigned char>(input);
   return this->separatorCharactersMap[inputUnsigned];
@@ -1335,6 +1347,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   if (secondToLast.type == CodeFormatter::Element::FunctionWithArguments &&
   (last.type == CodeFormatter::Element::LessThan ||
   last.type == CodeFormatter::Element::GreaterThan)) {
+    last.type = CodeFormatter::Element::Operator;
     secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
     return true;
   }
@@ -1607,6 +1620,7 @@ bool CodeFormatter::Processor::applyOneRule() {
       last.isRightDelimiter()
   )) {
     this->lastRuleName = "expression lessThan expression";
+    thirdToLast.type = CodeFormatter::Element::Operator;
     fourthToLast.makeFrom3(CodeFormatter::Element::Expression, fourthToLast, thirdToLast, secondToLast);
     return this->removeBelowLast(2);
   }

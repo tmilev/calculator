@@ -94,13 +94,16 @@ public:
     void computeIndentationComment();
     void computeIndentationTypeExpression();
     void computeIndentationOperator();
+    void computeIndentationInParentheses();
     void computeIndentationBasic(int startingIndex);
     void computeIndentationTopLevel();
     void computeIndentationAtomic();
+    void computeIndentationCaseClause();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
     bool needsWhiteSpaceBefore();
     int offsetFromPrevious();
+    int minimalSizeWithSpacebars();
   public:
     Element::Type type;
     std::string content;
@@ -121,6 +124,7 @@ public:
     std::string toString() const;
     std::string toStringWithoutType() const;
     static std::string toStringType(CodeFormatter::Element::Type inputType);
+    std::string toStringHTMLTree(const std::string& indentation);
     void toStringContentOnly(std::stringstream& out) const;
     Element();
     void clear();
@@ -241,6 +245,7 @@ public:
   HashedList<List<std::string> > pairsNotSeparatedBySpace;
   HashedList<std::string, HashFunctions::hashFunction> doesntNeedSpaceToTheRightContainer;
   HashedList<std::string, HashFunctions::hashFunction> doesntNeedSpaceToTheLeftContainer;
+  HashedList<std::string, HashFunctions::hashFunction> needsSpaceToTheRightContainer;
   // Keywords such as int, boo, etc.
   HashedList<std::string, HashFunctions::hashFunction> typeKeyWords;
   // Keywords such as for, if, etc that take as input an in-parentheses block and an
@@ -264,6 +269,7 @@ public:
   );
   bool shouldSeparateWithSpace(const std::string& left, const std::string& right);
   bool preemptsWhitespaceBefore(char input);
+  bool needsSpaceToTheRight(const std::string& word);
   bool isSeparatorCharacter(char input);
   bool isSeparator(const std::string& input);
   bool isOperator(const std::string& input);

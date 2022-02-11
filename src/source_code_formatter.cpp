@@ -524,6 +524,39 @@ void CodeFormatter::Element::computeIndentationAtomic() {
   }
   this->whiteSpaceBefore = this->indentationLevel;
   this->columnFinal = this->whiteSpaceBefore + this->content.size();
+  if (this->owner->needsSpaceToTheRight(this->content)) {
+    this->requiresWhiteSpaceAfter = true;
+  }
+}
+
+int CodeFormatter::Element::minimalSizeWithSpacebars() {
+  if (this->content != "") {
+    return this->content.size() + 1;
+  }
+  int result = 0;
+  for (int i = 0; i < this->children.size; i ++) {
+    result += this->children[i].minimalSizeWithSpacebars();
+  }
+  return result;
+}
+
+void CodeFormatter::Element::computeIndentationInParentheses() {
+  global.comments << "DEBUG: In parens: children size:" << this->children.size << " cont: " << this->toStringContentAndMetaData();
+  if (this->children.size != 3) {
+    this->computeIndentationBasic(0);
+    return;
+  }
+  this->children[0].computeIndentation();
+  int middleSize = this->children[1].minimalSizeWithSpacebars();
+  if (this->children[0].rightMostAtomUnderMe()->columnFinal + middleSize + 1 > this->owner->maximumDesiredLineLength) {
+    this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
+    this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
+    this->children[1].indentationLevel = this->indentationLevel + this->owner->tabLength;
+    this->children[1].computeIndentation();
+  } else {
+    this->children[1].computeIndentation();
+  }
+  this->children[2].computeIndentation();
 }
 
 void CodeFormatter::Element::computeIndentationOperator() {
@@ -573,12 +606,20 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationControlWantsCodeBlock();
     return;
   }
+  if (this->type == CodeFormatter::Element::CaseClause) {
+    this->computeIndentationCaseClause();
+    return;
+  }
   if (this->type == CodeFormatter::Element::TypeExpression) {
     this->computeIndentationTypeExpression();
     return;
   }
   if (this->type == CodeFormatter::Element::Operator) {
     this->computeIndentationOperator();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::InParentheses) {
+    this->computeIndentationInParentheses();
     return;
   }
   if (this->type == CodeFormatter::Element::CommandList) {
@@ -709,6 +750,25 @@ void CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
   this->children[0].requiresWhiteSpaceAfter = true;
   this->children[0].computeIndentation();
   this->children[1].computeIndentation();
+}
+
+void CodeFormatter::Element::computeIndentationCaseClause() {
+  global.comments << "DEBUG: compute indent clause: children: " << this->toStringHTMLTree("");
+  for (int i = 0; i < this->children.size; i ++) {
+    this->children[i].newLinesAfter = 1;
+    this->children[i].indentationLevel = this->indentationLevel;
+    this->children[i].computeIndentation();
+  }
+}
+
+std::string CodeFormatter::Element::toStringHTMLTree(const std::string &indentation) {
+  std::stringstream out;
+  out << indentation << this->content << "[" << this->toStringType(this->type) << "]";
+  std::string indentationChildren;
+  for (int i = 0; i < this->children.size; i ++) {
+    out << "<br>" << this->children[i].toStringHTMLTree(indentation + "&nbsp&nbsp");
+  }
+  return out.str();
 }
 
 void CodeFormatter::Element::computeIndentationCommandListInCodeBlock() {
@@ -1051,6 +1111,10 @@ bool CodeFormatter::formatCPPSourceCode(
   return true;
 }
 
+bool CodeFormatter::needsSpaceToTheRight(const std::string& word) {
+  return this->needsSpaceToTheRightContainer.contains(word);
+}
+
 bool CodeFormatter::preemptsWhitespaceBefore(char input) {
   return input == ')';
 }
@@ -1107,7 +1171,9 @@ CodeFormatter::CodeFormatter() {
   this->controlKeyWords.addListOnTop(List<std::string>({
     "for",
     "while",
+    "switch",
   }));
+  this->needsSpaceToTheRightContainer.addOnTop("return");
   this->operatorList.addListOnTop(List<std::string>({
     "+",
     "++",

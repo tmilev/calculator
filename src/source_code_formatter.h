@@ -87,18 +87,20 @@ public:
     };
   private:
     void computeIndentation();
+    void computeIndentationFunctionDeclaration();
     void computeIndentationCodeBlock();
+    void computeIndentationControlWantsCodeBlock();
     void computeIndentationCommandListInCodeBlock();
     void computeIndentationComment();
     void computeIndentationTypeExpression();
     void computeIndentationOperator();
     void computeIndentationBasic(int startingIndex);
-    void computeIndentationBasicIgnorePrevious(int startingIndex);
     void computeIndentationTopLevel();
     void computeIndentationAtomic();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
-    int getStartingColumn();
+    bool needsWhiteSpaceBefore();
+    int offsetFromPrevious();
   public:
     Element::Type type;
     std::string content;
@@ -111,13 +113,11 @@ public:
     int whiteSpaceBefore;
     // The number of columns needed to display the previous
     // code element.
-    int columnPreviousElement;
     int columnFinal;
     int newLinesAfter;
-    int newLinesBefore;
-    bool requiresSeparatorAfter;
     bool requiresWhiteSpaceAfter;
-    std::string toStringFormattingData() const;
+    std::string toStringContentAndMetaData() const;
+    std::string toStringIndentation() const;
     std::string toString() const;
     std::string toStringWithoutType() const;
     static std::string toStringType(CodeFormatter::Element::Type inputType);
@@ -156,7 +156,8 @@ public:
       int inputIndexInParent
     );
     Element* previousAtom();
-    Element* lastAtomUnderMe();
+    Element* rightMostAtomUnderMe();
+    Element* leftMostAtomUnderMe();
     void makeFrom1(
       CodeFormatter::Element::Type inputType,
       const Element& child
@@ -280,7 +281,7 @@ public:
   );
   std::string toStringLinks();
   static bool isIdentifierWord(const std::string& input);
-  static bool isIdentifierCharacter(char input);
+  bool isLetterLike(char input);
   void wirePointersRecursively(
     CodeFormatter::Element& current,
     CodeFormatter::Element* parent,

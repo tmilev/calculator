@@ -17,6 +17,7 @@ public:
       IncludeLine,
       Comment,
       CommentMultiline,
+      CommentCollection,
       EndLine,
       Quote,
       SingleQuote,

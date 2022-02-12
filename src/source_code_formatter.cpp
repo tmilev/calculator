@@ -151,6 +151,8 @@ std::string CodeFormatter::Element::toStringType(CodeFormatter::Element::Type in
     return "Return";
   case CodeFormatter::Element::ReturnedExpression:
     return "ReturnedExpression";
+  case CodeFormatter::Element::CommentCollection:
+    return "CommentCollection";
   }
   return "????";
 }
@@ -1104,8 +1106,8 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.consumeElements();
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
-  //global.comments << this->processor.debugLog;
-  // global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
+  global.comments << this->processor.debugLog;
+  global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
   if (this->processor.code.children.size <= this->dummyElements + 1) {
     out << this->processor.code.format();
   } else  {
@@ -1345,6 +1347,13 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.children.addOnTop(last);
     return this->removeLast();
   }
+  if ((secondToLast.type == CodeFormatter::Element::Comment || secondToLast.type == CodeFormatter::Element::CommentMultiline ||
+  secondToLast.type == CodeFormatter::Element::CommentCollection)
+  && (last.type == CodeFormatter::Element::Comment || last.type == CodeFormatter::Element::CommentMultiline)
+  ) {
+    secondToLast.appendType(last, CodeFormatter::Element::CommentCollection);
+    return this->removeLast();
+  }
   if (
     secondToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator &&
     last.type == CodeFormatter::Element::InParentheses
@@ -1379,9 +1388,19 @@ bool CodeFormatter::Processor::applyOneRule() {
     last.isCodeBlockOrCommand()
   ) {
     this->lastRuleName = "if else block";
-    thirdToLast.children.addOnTop(secondToLast);
-    thirdToLast.children.addOnTop(last);
+    thirdToLast.addChild(secondToLast);
+    thirdToLast.addChild(last);
     return this->removeLast(2);
+  }
+  if (
+    fourthToLast.type == CodeFormatter::Element::IfClause &&
+    thirdToLast.type == CodeFormatter::Element::Else &&
+    secondToLast.isCodeBlockOrCommand()
+  ) {
+    this->lastRuleName = "if else block";
+    fourthToLast.addChild(thirdToLast);
+    fourthToLast.addChild(secondToLast);
+    return this->removeBelowLast(2);
   }
   if (secondToLast.type == CodeFormatter::Element::IfClause && last.type != CodeFormatter::Element::Else) {
     secondToLast.makeFrom1(CodeFormatter::Element::Command, secondToLast);
@@ -1519,7 +1538,8 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if ((
       thirdToLast.isExpressionIdentifierOrAtom() ||
-      thirdToLast.type == CodeFormatter::Element::TypeAndIdentifier
+      thirdToLast.type == CodeFormatter::Element::TypeAndIdentifier ||
+      thirdToLast.type == CodeFormatter::Element::InParentheses
     ) && secondToLast.isOperator()
   ) {
     this->lastRuleName = "expression operator ?";
@@ -1599,6 +1619,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeBelowLast(1);
   }
   if (
+    !thirdToLast.isOperator() &&
     secondToLast.isIdentifierOrAtom() && (
       last.type == CodeFormatter::Element::Ampersand ||
       last.type == CodeFormatter::Element::Star
@@ -1738,6 +1759,27 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
+    secondToLast.type == CodeFormatter::Element::Command && (
+      last.type == CodeFormatter::Element::Comment ||
+      last.type == CodeFormatter::Element::CommentMultiline ||
+      last.type == CodeFormatter::Element::CommentCollection
+    )
+  ) {
+    this->lastRuleName = "command comment";
+    secondToLast.appendCommand(last);
+    return this->removeLast();
+  }
+  if ((
+      secondToLast.type == CodeFormatter::Element::Comment ||
+      secondToLast.type == CodeFormatter::Element::CommentMultiline ||
+      secondToLast.type == CodeFormatter::Element::CommentCollection
+    ) && last.type == CodeFormatter::Element::Command
+  ) {
+    this->lastRuleName = "command comment";
+    secondToLast.appendCommand(last);
+    return this->removeLast();
+  }
+  if (
     thirdToLast.isCommandListOrCommand() && (
       secondToLast.isExpressionIdentifierOrAtom() ||
       secondToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator
@@ -1807,7 +1849,7 @@ void CodeFormatter::Processor::appendLog() {
 std::string CodeFormatter::Processor::toStringStack() {
   std::stringstream out;
   for (int i = this->owner->dummyElements; i < this->stack.size; i ++) {
-    out << "<b>"
+    out << "<b style='color:brown'>"
     << this->stack[i].toStringWithoutType() << "</b>["
     << this->stack[i].toStringType(this->stack[i].type) << "] ";
   }

@@ -334,7 +334,7 @@ bool CodeFormatter::Element::isCodeBlock() const {
 
 bool CodeFormatter::Element::isCommandListOrCommand() const {
   return
-  this->type == CodeFormatter::Element::CommaList ||
+  this->type == CodeFormatter::Element::CommandList ||
   this->type == CodeFormatter::Element::Command;
 }
 
@@ -604,6 +604,10 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationCaseClause();
     return;
   }
+  if (this->type == CodeFormatter::Element::CaseClauseStart) {
+    this->computeIndentationCaseClauseStart();
+    return;
+  }
   if (this->type == CodeFormatter::Element::TypeExpression) {
     this->computeIndentationTypeExpression();
     return;
@@ -646,8 +650,6 @@ int CodeFormatter::Element::offsetFromPrevious() {
 }
 
 void CodeFormatter::Element::computeIndentationFunctionDeclaration() {
-  global.comments << "DEBUG: children size: " << this->children.size << " " << this->toStringContentAndMetaData()<< "<br>";
-  global.comments << "DEBUG: previous: " << this->previousAtom()->content << "<br>";
   if (this->children.size >= 3) {
     if (this->children[2].type == CodeFormatter::Element::ConstKeyWord) {
       this->children[1].rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
@@ -711,7 +713,6 @@ void CodeFormatter::Element::computeIndentationCodeBlock() {
     this->computeIndentationBasic(0);
     return;
   }
-  global.comments << "DEBUG: code block<br>" << this->toStringHTMLTree();
   this->children[0].whiteSpaceBefore = 1;
   this->children[0].indentationLevel = this->indentationLevel;
   this->children[0].computeIndentation();
@@ -734,8 +735,6 @@ void CodeFormatter::Element::computeIndentationCodeBlock() {
 }
 
 void CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
-  global.comments << "DEBUG: inside: computeIndentationControlWantsCodeBlock: children size: " << this->children.size
-  << " " << this->toString();
   if (this->children.size != 2) {
     this->computeIndentationBasic(0);
     return;
@@ -748,12 +747,22 @@ void CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
 }
 
 void CodeFormatter::Element::computeIndentationCaseClause() {
-  global.comments << "DEBUG: compute indent clause: children: " << this->toStringHTMLTree();
   for (int i = 0; i < this->children.size; i ++) {
-    this->children[i].newLinesAfter = 1;
+    this->children[i].previousAtom()->newLinesAfter = 1;
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].computeIndentation();
   }
+  if (this->children.size > 0) {
+    this->children.lastObject()->rightMostAtomUnderMe()->newLinesAfter = 1;
+  }
+}
+
+void CodeFormatter::Element::computeIndentationCaseClauseStart() {
+  this->indentationLevel -= this->owner->tabLength;
+  if (this->indentationLevel < 0) {
+    this->indentationLevel = 0;
+  }
+  this->computeIndentationBasic(0);
 }
 
 std::string CodeFormatter::Element::toStringHTMLTree() {
@@ -816,7 +825,6 @@ void CodeFormatter::Element::computeIndentationTopLevel() {
     if (addExtraLine) {
       rightMostAtom->newLinesAfter = 2;
     }
-    global.comments << "DEBUG: " << current.toStringContentAndMetaData() << "<br>";
   }
 }
 
@@ -1096,6 +1104,8 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.consumeElements();
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
+  //global.comments << this->processor.debugLog;
+  // global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
   if (this->processor.code.children.size <= this->dummyElements + 1) {
     out << this->processor.code.format();
   } else  {
@@ -1222,7 +1232,8 @@ CodeFormatter::CodeFormatter() {
 
 CodeFormatter::Processor::Processor() {
   this->owner = nullptr;
-  this->flagPrepareReport = false;
+  global.comments << "DEBUG: preparing report!<br>";
+  this->flagPrepareReport = true;
   this->flagExceededReportSize = false;
 }
 
@@ -1687,6 +1698,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
     return true;
   }
+
   if (
     fourthToLast.isExpressionIdentifierOrAtom() && (
       thirdToLast.type == CodeFormatter::Element::LessThan ||
@@ -1716,7 +1728,11 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.appendCommand(secondToLast);
     return this->removeBelowLast(1);
   }
-  if (secondToLast.isCommandListOrCommand() && last.type == CodeFormatter::Element::Command) {
+  if (secondToLast.isCommandListOrCommand() && (
+    last.type == CodeFormatter::Element::Command ||
+    last.type == CodeFormatter::Element::Comment ||
+    last.type == CodeFormatter::Element::CommentMultiline
+  )) {
     this->lastRuleName = "commandList command";
     secondToLast.appendCommand(last);
     return this->removeLast();
@@ -1785,13 +1801,15 @@ void CodeFormatter::Processor::appendLog() {
     }
     return;
   }
-  this->debugLog += this->toStringStack() + "[[" + this->lastRuleName + "]]<br>";
+  this->debugLog += this->toStringStack() + "<b style='color:red'>[[" + this->lastRuleName + "]]</b><br>";
 }
 
 std::string CodeFormatter::Processor::toStringStack() {
   std::stringstream out;
   for (int i = this->owner->dummyElements; i < this->stack.size; i ++) {
-    out << this->stack[i].toString() << " ";
+    out << "<b>"
+    << this->stack[i].toStringWithoutType() << "</b>["
+    << this->stack[i].toStringType(this->stack[i].type) << "] ";
   }
   return out.str();
 }

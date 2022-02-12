@@ -101,6 +101,8 @@ public:
     void computeIndentationTopLevel();
     void computeIndentationAtomic();
     void computeIndentationCaseClause();
+    void computeIndentationCaseClauseStart();
+    void computeIndentationCaseClauseList();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
     bool needsWhiteSpaceBefore();

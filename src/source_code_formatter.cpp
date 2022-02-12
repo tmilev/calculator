@@ -89,10 +89,14 @@ std::string CodeFormatter::Element::toStringType(CodeFormatter::Element::Type in
     return "typeExpression";
   case CodeFormatter::Element::CaseKeyWord:
     return "case keyword";
+  case CodeFormatter::Element::CaseClauseList:
+    return "list case clauses";
   case CodeFormatter::Element::CaseClause:
     return "case clause";
   case CodeFormatter::Element::CaseClauseStart:
     return "case clause start";
+  case CodeFormatter::Element::CaseClauseMultipleStart:
+    return "case clause multiple start";
   case CodeFormatter::Element::Dummy:
     return "dummy";
   case CodeFormatter::Element::Comment:
@@ -257,7 +261,7 @@ bool CodeFormatter::Element::isSuitableForTypeExpression() const {
 
 bool CodeFormatter::Element::isSuitableForParenthesesEnclosure() const {
   return
-  this->isCommandListOrCommandOrClause() ||
+  this->isCommandListOrCommand() ||
   this->isExpressionIdentifierOrAtom() ||
   this->type == CodeFormatter::Element::TypeAndIdentifier ||
   this->type == CodeFormatter::Element::TypeKeyWord ||
@@ -300,21 +304,6 @@ bool CodeFormatter::Element::isExpressionIdentifierOrAtom() const {
   this->type == CodeFormatter::Element::Atom;
 }
 
-bool CodeFormatter::Element::isCommandOrClause() const {
-  return
-  this->type == CodeFormatter::Element::Command ||
-  this->type == CodeFormatter::Element::CaseClause
-  ;
-}
-
-bool CodeFormatter::Element::isCommandListOrCommandOrClause() const {
-  return
-  this->type == CodeFormatter::Element::Command ||
-  this->type == CodeFormatter::Element::CommandList ||
-  this->type == CodeFormatter::Element::CaseClause
-  ;
-}
-
 bool CodeFormatter::Element::isSuitableForTopLevel() const {
   return
   this->type == CodeFormatter::Element::IncludeLine ||
@@ -341,6 +330,12 @@ bool CodeFormatter::Element::isParenthesesBlock() const {
 bool CodeFormatter::Element::isCodeBlock() const {
   return
   this->type == CodeFormatter::Element::CodeBlock;
+}
+
+bool CodeFormatter::Element::isCommandListOrCommand() const {
+  return
+  this->type == CodeFormatter::Element::CommaList ||
+  this->type == CodeFormatter::Element::Command;
 }
 
 bool CodeFormatter::Element::isCodeBlockOrCommand() const {
@@ -541,7 +536,6 @@ int CodeFormatter::Element::minimalSizeWithSpacebars() {
 }
 
 void CodeFormatter::Element::computeIndentationInParentheses() {
-  global.comments << "DEBUG: In parens: children size:" << this->children.size << " cont: " << this->toStringContentAndMetaData();
   if (this->children.size != 3) {
     this->computeIndentationBasic(0);
     return;
@@ -717,6 +711,7 @@ void CodeFormatter::Element::computeIndentationCodeBlock() {
     this->computeIndentationBasic(0);
     return;
   }
+  global.comments << "DEBUG: code block<br>" << this->toStringHTMLTree();
   this->children[0].whiteSpaceBefore = 1;
   this->children[0].indentationLevel = this->indentationLevel;
   this->children[0].computeIndentation();
@@ -753,7 +748,7 @@ void CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
 }
 
 void CodeFormatter::Element::computeIndentationCaseClause() {
-  global.comments << "DEBUG: compute indent clause: children: " << this->toStringHTMLTree("");
+  global.comments << "DEBUG: compute indent clause: children: " << this->toStringHTMLTree();
   for (int i = 0; i < this->children.size; i ++) {
     this->children[i].newLinesAfter = 1;
     this->children[i].indentationLevel = this->indentationLevel;
@@ -761,13 +756,14 @@ void CodeFormatter::Element::computeIndentationCaseClause() {
   }
 }
 
-std::string CodeFormatter::Element::toStringHTMLTree(const std::string &indentation) {
+std::string CodeFormatter::Element::toStringHTMLTree() {
   std::stringstream out;
-  out << indentation << this->content << "[" << this->toStringType(this->type) << "]";
+  out << "<div style='border-left-style: solid; margin-left: 10px;'>" << this->content << "[" << this->toStringType(this->type) << "]";
   std::string indentationChildren;
   for (int i = 0; i < this->children.size; i ++) {
-    out << "<br>" << this->children[i].toStringHTMLTree(indentation + "&nbsp&nbsp");
+    out << this->children[i].toStringHTMLTree();
   }
+  out << "</div>";
   return out.str();
 }
 
@@ -1100,7 +1096,15 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.consumeElements();
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
-  out << this->processor.code.format();
+  if (this->processor.code.children.size <= this->dummyElements + 1) {
+    out << this->processor.code.format();
+  } else  {
+    out << "FAILED_TO_PARSE;\n";
+    for (int i = this->dummyElements; i < this->processor.code.children.size; i ++) {
+      this->processor.code.children[i].toStringContentOnly(out);
+      out << "\n";
+    }
+  }
   this->transformedContent = out.str();
   if (!this->writeFormatedCode(comments)) {
     return false;
@@ -1305,12 +1309,20 @@ bool CodeFormatter::Processor::applyOneRule() {
     return true;
   }
   if (
-    thirdToLast.type == CodeFormatter::Element::CaseClauseStart &&
-    secondToLast.isCommandListOrCommandOrClause() && (
+    (thirdToLast.type == CodeFormatter::Element::CaseClauseStart  ||
+    thirdToLast.type == CodeFormatter::Element::CaseClauseMultipleStart) &&
+    (secondToLast.isCommandListOrCommand()) && (
+      last.type == CodeFormatter::Element::CaseKeyWord ||
       last.type == CodeFormatter::Element::CaseClauseStart ||
+      last.type == CodeFormatter::Element::CaseClauseMultipleStart ||
       last.type == CodeFormatter::Element::RightCurlyBrace
   )) {
     thirdToLast.makeFrom2(CodeFormatter::Element::CaseClause, thirdToLast, secondToLast);
+    thirdToLast.makeFrom1(CodeFormatter::Element::CaseClauseList, thirdToLast);
+    return this->removeBelowLast(1);
+  }
+  if (thirdToLast.type == CodeFormatter::Element::CaseClauseList && secondToLast.type == CodeFormatter::Element::CaseClauseList) {
+    thirdToLast.children.addListOnTop(secondToLast.children);
     return this->removeBelowLast(1);
   }
   if (last.type == CodeFormatter::Element::Quote || last.type == CodeFormatter::Element::SingleQuote) {
@@ -1390,7 +1402,6 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.appendIdentifier(last);
     return this->removeLast(2);
   }
-
   if (fourthToLast.type == CodeFormatter::Element::CaseKeyWord && secondToLast.type == CodeFormatter::Element::Colon) {
     this->lastRuleName = "case clause start";
     fourthToLast.makeFrom3(CodeFormatter::Element::CaseClauseStart, fourthToLast, thirdToLast, secondToLast);
@@ -1700,18 +1711,18 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.makeFrom2(CodeFormatter::Element::CommaList, secondToLast, last);
     return this->removeLast();
   }
-  if (thirdToLast.isCommandListOrCommandOrClause() && secondToLast.isCommandOrClause()) {
+  if (thirdToLast.isCommandListOrCommand() && secondToLast.type == CodeFormatter::Element::Command) {
     this->lastRuleName = "commandList command something";
     thirdToLast.appendCommand(secondToLast);
     return this->removeBelowLast(1);
   }
-  if (secondToLast.isCommandListOrCommandOrClause() && last.isCommandOrClause()) {
+  if (secondToLast.isCommandListOrCommand() && last.type == CodeFormatter::Element::Command) {
     this->lastRuleName = "commandList command";
     secondToLast.appendCommand(last);
     return this->removeLast();
   }
   if (
-    thirdToLast.isCommandListOrCommandOrClause() && (
+    thirdToLast.isCommandListOrCommand() && (
       secondToLast.isExpressionIdentifierOrAtom() ||
       secondToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator
     ) &&
@@ -1723,15 +1734,11 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (
     thirdToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
-    secondToLast.isCommandListOrCommandOrClause() &&
+    (secondToLast.isCommandListOrCommand() ||
+    secondToLast.type == CodeFormatter::Element::CaseClauseList) &&
     last.type == CodeFormatter::Element::RightCurlyBrace
   ) {
-    CodeFormatter::Element codeBlock;
-    codeBlock.type = CodeFormatter::Element::CodeBlock;
-    codeBlock.children.addOnTop(thirdToLast);
-    codeBlock.children.addOnTop(secondToLast);
-    codeBlock.children.addOnTop(last);
-    thirdToLast = codeBlock;
+    thirdToLast.makeFrom3(CodeFormatter::Element::CodeBlock, thirdToLast, secondToLast, last);
     return this->removeLast(2);
   }
   if (secondToLast.isTypeOrIdentifierOrExpression() && last.isParenthesesBlock()) {

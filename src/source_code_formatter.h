@@ -76,7 +76,9 @@ public:
       CaseKeyWord,
       DefaultKeyWord,
       CaseClauseStart,
+      CaseClauseMultipleStart,
       CaseClause,
+      CaseClauseList,
       Exclamation,
       If,
       IfWantsCodeBlock,
@@ -124,7 +126,7 @@ public:
     std::string toString() const;
     std::string toStringWithoutType() const;
     static std::string toStringType(CodeFormatter::Element::Type inputType);
-    std::string toStringHTMLTree(const std::string& indentation);
+    std::string toStringHTMLTree();
     void toStringContentOnly(std::stringstream& out) const;
     Element();
     void clear();
@@ -142,8 +144,7 @@ public:
     bool isIdentifierOrAtom() const;
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;
-    bool isCommandListOrCommandOrClause() const;
-    bool isCommandOrClause() const;
+    bool isCommandListOrCommand() const;
     bool isParenthesesBlock() const;
     bool isCodeBlock() const;
     bool isCodeBlockOrCommand() const;
@@ -277,7 +278,6 @@ public:
   bool isControlKeyWord(const std::string& input);
   bool isWhiteSpace(const std::string& input);
   bool writeFormatedCode(std::stringstream* comments);
-  std::string toStringTransformed6();
   bool computeState(int maximumElementsToProcess);
   bool addAndAccount(const std::string& incoming);
   bool decreaseStack(int numberToPop);

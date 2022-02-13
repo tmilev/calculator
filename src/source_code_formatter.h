@@ -97,6 +97,7 @@ public:
     void computeIndentationCommaList();
     void computeIndentationComment();
     void computeIndentationTypeExpression();
+    void computeIndentationReturnedExpression();
     void computeIndentationOperator();
     void computeIndentationInParentheses();
     void computeIndentationBasic(int startingIndex);
@@ -108,9 +109,11 @@ public:
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
     bool needsWhiteSpaceBefore();
-    bool containsNewLineAfter();
+    bool containsNewLineAfterRecursively();
+    void resetWhitespaceRecursively();
     int offsetFromPrevious();
     int minimalSizeWithSpacebars();
+    bool isExpressionLikeForIndentation();
   public:
     Element::Type type;
     std::string content;

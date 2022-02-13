@@ -583,6 +583,48 @@ void CodeFormatter::Element::computeIndentationTypeExpression() {
   this->rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
 }
 
+bool CodeFormatter::Element::isExpressionLikeForIndentation() {
+  return this->type == CodeFormatter::Element::Expression ||
+  this->type == CodeFormatter::Element::FunctionWithArguments ||
+  this->type == CodeFormatter::Element::Atom ||
+  this->type == CodeFormatter::Element::Identifier;
+}
+
+void CodeFormatter::Element::computeIndentationReturnedExpression() {
+  this->computeIndentationBasic(0);
+  if (!this->containsNewLineAfterRecursively()){
+    return;
+  }
+  if (this->children.size !=2) {
+    return;
+  }
+  CodeFormatter::Element& returned = this->children[0];
+  CodeFormatter::Element& expression = this->children[1];
+  returned.resetWhitespaceRecursively();
+  expression.resetWhitespaceRecursively();
+  returned.computeIndentation();
+  returned.newLinesAfter = 1;
+  bool previousIsExpression = false;
+  for (int i = 0; i < expression.children.size; i ++) {
+    CodeFormatter::Element& current = expression.children[i];
+    current.indentationLevel = this->indentationLevel;
+    current.computeIndentation();
+    bool breakLine = false;
+    if (current.isOperator() && previousIsExpression && i != expression.children.size - 1) {
+      breakLine = true;
+    }
+    if (breakLine) {
+      if (current.content == "." || current.content == "->"  || current.content == "==" ) {
+        breakLine =false;
+      }
+    }
+    if (breakLine) {
+      current.newLinesAfter = 1;
+    }
+    previousIsExpression = current.isExpressionLikeForIndentation();
+  }
+}
+
 void CodeFormatter::Element::computeIndentation() {
   if (this->parent == nullptr) {
     // This must be the top level element.
@@ -614,6 +656,10 @@ void CodeFormatter::Element::computeIndentation() {
   }
   if (this->type == CodeFormatter::Element::CaseClauseStart) {
     this->computeIndentationCaseClauseStart();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::ReturnedExpression) {
+    this->computeIndentationReturnedExpression();
     return;
   }
   if (this->type == CodeFormatter::Element::TypeExpression) {
@@ -806,9 +852,18 @@ void CodeFormatter::Element::computeIndentationCommandList() {
   }
 }
 
-bool CodeFormatter::Element::containsNewLineAfter() {
+void CodeFormatter::Element::resetWhitespaceRecursively() {
+  this->newLinesAfter = 0;
+  this->whiteSpaceBefore = 0;
+  this->requiresWhiteSpaceAfter = false;
+  for (int i = 0; i < this->children.size; i ++) {
+    this->children[i].resetWhitespaceRecursively();
+  }
+}
+
+bool CodeFormatter::Element::containsNewLineAfterRecursively() {
   for ( int i = 0; i < this->children.size; i ++) {
-    if (this->children[i].containsNewLineAfter()) {
+    if (this->children[i].containsNewLineAfterRecursively()) {
       return true;
     }
   }
@@ -1147,7 +1202,7 @@ bool CodeFormatter::formatCPPSourceCode(
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
   // global.comments << "DEBUG: " << this->processor.debugLog;
- // global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
+  global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
   if (this->processor.code.children.size <= this->dummyElements + 1) {
     out << this->processor.code.format();
   } else  {

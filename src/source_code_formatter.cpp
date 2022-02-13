@@ -490,8 +490,13 @@ bool CodeFormatter::Element::needsWhiteSpaceBefore() {
   char lastPrevious = previous->content[previous->content.size() - 1];
   bool startsWithSeparator = this->owner->isSeparatorCharacter(first);
   bool previousEndsWithSeparator = this->owner->isSeparatorCharacter(lastPrevious);
-  if (!previousEndsWithSeparator && !startsWithSeparator) {
-    return true;
+  if (!previousEndsWithSeparator) {
+    if (!startsWithSeparator) {
+      return true;
+    }
+    if (this->type == CodeFormatter::Element::Quote) {
+      return true;
+    }
   }
   if (this->owner->preemptsWhitespaceBefore(first)) {
     return false;
@@ -500,6 +505,9 @@ bool CodeFormatter::Element::needsWhiteSpaceBefore() {
 }
 
 void CodeFormatter::Element::computeIndentationAtomic() {
+  if (this->owner->needsSpaceToTheRight(this->content)) {
+    this->requiresWhiteSpaceAfter = true;
+  }
   if (this->needsWhiteSpaceBefore()) {
     this->whiteSpaceBefore = 1;
   }
@@ -521,9 +529,6 @@ void CodeFormatter::Element::computeIndentationAtomic() {
   }
   this->whiteSpaceBefore = this->indentationLevel;
   this->columnFinal = this->whiteSpaceBefore + this->content.size();
-  if (this->owner->needsSpaceToTheRight(this->content)) {
-    this->requiresWhiteSpaceAfter = true;
-  }
 }
 
 int CodeFormatter::Element::minimalSizeWithSpacebars() {
@@ -552,6 +557,7 @@ void CodeFormatter::Element::computeIndentationInParentheses() {
   } else {
     this->children[1].computeIndentation();
   }
+  this->children[2].indentationLevel = this->indentationLevel;
   this->children[2].computeIndentation();
 }
 
@@ -622,8 +628,12 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationInParentheses();
     return;
   }
+  if (this->type == CodeFormatter::Element::CommaList) {
+    this->computeIndentationCommaList();
+    return;
+  }
   if (this->type == CodeFormatter::Element::CommandList) {
-    this->computeIndentationCommandListInCodeBlock();
+    this->computeIndentationCommandList();
     return;
   }
   if (this->type == CodeFormatter::Element::Comment) {
@@ -778,7 +788,7 @@ std::string CodeFormatter::Element::toStringHTMLTree() {
   return out.str();
 }
 
-void CodeFormatter::Element::computeIndentationCommandListInCodeBlock() {
+void CodeFormatter::Element::computeIndentationCommandList() {
   if (this->parent->type != CodeFormatter::Element::CodeBlock) {
     for (int i = 0; i < this->children.size; i ++) {
       if (i != this->children.size - 1) {
@@ -793,6 +803,36 @@ void CodeFormatter::Element::computeIndentationCommandListInCodeBlock() {
     this->children[i].rightMostAtomUnderMe()->newLinesAfter = 1;
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].computeIndentation();
+  }
+}
+
+bool CodeFormatter::Element::containsNewLineAfter() {
+  for ( int i = 0; i < this->children.size; i ++) {
+    if (this->children[i].containsNewLineAfter()) {
+      return true;
+    }
+  }
+  return this->newLinesAfter > 0;
+}
+
+void CodeFormatter::Element::computeIndentationCommaList() {
+  bool mustSplitLines = false;
+  if (this->minimalSizeWithSpacebars() + this->offsetFromPrevious() > this->owner->maximumDesiredLineLength) {
+    mustSplitLines = true;
+  }
+  if (mustSplitLines) {
+    this->previousAtom()->newLinesAfter = 1;
+  }
+  for (int i = 0; i < this->children.size; i ++) {
+    CodeFormatter::Element& current = this->children[i];
+    if (current.content == ",") {
+      if (mustSplitLines) {
+        current.rightMostAtomUnderMe()->newLinesAfter = 1;
+      }
+      current.requiresWhiteSpaceAfter = true;
+    }
+    current.indentationLevel = this->indentationLevel;
+    current.computeIndentation();
   }
 }
 
@@ -1106,8 +1146,8 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.consumeElements();
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
-  global.comments << this->processor.debugLog;
-  global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
+  // global.comments << "DEBUG: " << this->processor.debugLog;
+ // global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
   if (this->processor.code.children.size <= this->dummyElements + 1) {
     out << this->processor.code.format();
   } else  {
@@ -1189,7 +1229,7 @@ CodeFormatter::CodeFormatter() {
     "while",
     "switch",
   }));
-  this->needsSpaceToTheRightContainer.addOnTop("return");
+  this->needsSpaceToTheRightContainer.addListOnTop(List<std::string>({ "for", "if", "while"}));
   this->operatorList.addListOnTop(List<std::string>({
     "+",
     "++",

@@ -93,7 +93,8 @@ public:
     void computeIndentationFunctionDeclaration();
     void computeIndentationCodeBlock();
     void computeIndentationControlWantsCodeBlock();
-    void computeIndentationCommandListInCodeBlock();
+    void computeIndentationCommandList();
+    void computeIndentationCommaList();
     void computeIndentationComment();
     void computeIndentationTypeExpression();
     void computeIndentationOperator();
@@ -107,6 +108,7 @@ public:
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
     bool needsWhiteSpaceBefore();
+    bool containsNewLineAfter();
     int offsetFromPrevious();
     int minimalSizeWithSpacebars();
   public:

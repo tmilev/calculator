@@ -163,6 +163,7 @@ public:
     bool isOperator() const;
     bool isColonDoubleColonOrComma() const;
     bool isColonOrDoubleColon() const;
+    bool isDashDotOrDashGreaterThan() const;
     void initializePointers(
       CodeFormatter* inputOwner,
       CodeFormatter::Element* inputParent,

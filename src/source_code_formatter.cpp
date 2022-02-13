@@ -371,6 +371,11 @@ bool CodeFormatter::Element::isColonDoubleColonOrComma() const {
   ;
 }
 
+bool CodeFormatter::Element::isDashDotOrDashGreaterThan() const {
+  return
+  this->content == "-" || this->content == "->" || this->content == ".";
+}
+
 bool CodeFormatter::Element::isColonOrDoubleColon() const {
   return
   this->type == CodeFormatter::Element::Colon ||
@@ -1201,8 +1206,8 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.consumeElements();
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
-  // global.comments << "DEBUG: " << this->processor.debugLog;
-  global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
+   global.comments << "DEBUG: " << this->processor.debugLog;
+   global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
   if (this->processor.code.children.size <= this->dummyElements + 1) {
     out << this->processor.code.format();
   } else  {
@@ -1702,11 +1707,18 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.makeFrom2(CodeFormatter::Element::TypeAndIdentifier, thirdToLast, secondToLast);
     return this->removeBelowLast(1);
   }
+  if (secondToLast.isTypeOrIdentifierOrExpression() && last.isParenthesesBlock()) {
+    this->lastRuleName = "identifier(arguments)";
+    secondToLast.makeFrom2(CodeFormatter::Element::FunctionWithArguments, secondToLast, last);
+    return this->removeLast();
+  }
   if (
     thirdToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator &&
     secondToLast.isExpressionIdentifierOrAtom() &&
     !last.isColonOrDoubleColon()  &&
-    last.type != CodeFormatter::Element::LessThan
+    last.type != CodeFormatter::Element::LessThan &&
+  !last.isDashDotOrDashGreaterThan() &&
+  last.type != CodeFormatter::Element::LeftParenthesis
   ) {
     this->lastRuleName = "expression ending with operator and atom";
     thirdToLast.appendType(secondToLast, CodeFormatter::Element::ExpressionEndingWithOperator);
@@ -1894,11 +1906,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.makeFrom3(CodeFormatter::Element::CodeBlock, thirdToLast, secondToLast, last);
     return this->removeLast(2);
   }
-  if (secondToLast.isTypeOrIdentifierOrExpression() && last.isParenthesesBlock()) {
-    this->lastRuleName = "identifier(arguments)";
-    secondToLast.makeFrom2(CodeFormatter::Element::FunctionWithArguments, secondToLast, last);
-    return this->removeLast();
-  }
+
   if (secondToLast.type == CodeFormatter::Element::TypeExpression && last.isParenthesesBlock()) {
     this->lastRuleName = "typeExpression(arguments)";
     secondToLast.makeFrom2(CodeFormatter::Element::FunctionWithArguments, secondToLast, last);

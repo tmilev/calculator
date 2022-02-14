@@ -61,6 +61,8 @@ std::string CodeFormatter::Element::toStringType(CodeFormatter::Element::Type in
     return ")";
   case CodeFormatter::Element::InParentheses:
     return "InParentheses";
+  case CodeFormatter::Element::InBrackets:
+    return "InBrackets";
   case CodeFormatter::Element::EndLine:
     return "newline";
   case CodeFormatter::Element::SemiColon:
@@ -81,6 +83,8 @@ std::string CodeFormatter::Element::toStringType(CodeFormatter::Element::Type in
     return "includeLineStart";
   case CodeFormatter::Element::FunctionDeclaration:
     return "functionDeclaration";
+  case CodeFormatter::Element::FunctionDefinition:
+    return "functionDefinition";
   case CodeFormatter::Element::FunctionWithArguments:
     return "functionWithArguments";
   case CodeFormatter::Element::TypeAndIdentifier:
@@ -404,17 +408,6 @@ void CodeFormatter::Element::initializePointers(CodeFormatter *inputOwner, CodeF
   this->indexInParent = inputIndexInParent;
 }
 
-void CodeFormatter::wirePointersRecursively(
-  CodeFormatter::Element &current,
-  Element *parent,
-  int indexInParent
-) {
-  current.initializePointers(this, parent, indexInParent);
-  for (int i = 0; i < current.children.size; i ++) {
-    this->wirePointersRecursively(current.children[i], &current, i);
-  }
-}
-
 std::string CodeFormatter::Element::format() {
   this->computeIndentation();
   std::stringstream out;
@@ -441,6 +434,12 @@ void CodeFormatter::Element::formatContent(std::stringstream& out) {
   for (int i = 0; i < this->children.size; i ++) {
     this->children[i].formatDefault(out);
   }
+}
+
+std::string CodeFormatter::Element::toStringContentOnly() const {
+  std::stringstream out;
+  this->toStringContentOnly(out);
+  return out.str();
 }
 
 void CodeFormatter::Element::toStringContentOnly(std::stringstream& out) const {
@@ -556,9 +555,9 @@ void CodeFormatter::Element::computeIndentationInParentheses() {
   int middleSize = this->children[1].minimalSizeWithSpacebars();
   if (this->children[0].rightMostAtomUnderMe()->columnFinal + middleSize + 1 > this->owner->maximumDesiredLineLength) {
     this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
-    this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
     this->children[1].indentationLevel = this->indentationLevel + this->owner->tabLength;
     this->children[1].computeIndentation();
+    this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
   } else {
     this->children[1].computeIndentation();
   }
@@ -592,7 +591,31 @@ bool CodeFormatter::Element::isExpressionLikeForIndentation() {
   return this->type == CodeFormatter::Element::Expression ||
   this->type == CodeFormatter::Element::FunctionWithArguments ||
   this->type == CodeFormatter::Element::Atom ||
-  this->type == CodeFormatter::Element::Identifier;
+  this->type == CodeFormatter::Element::Identifier ||
+  this->type == CodeFormatter::Element::TypeAndIdentifier;
+}
+
+void CodeFormatter::Element::breakExpression() {
+  this->resetWhitespaceRecursively();
+  bool previousIsExpression = false;
+  for (int i = 0; i < this->children.size; i ++) {
+    CodeFormatter::Element& current = this->children[i];
+    current.indentationLevel = this->indentationLevel;
+    current.computeIndentation();
+    bool breakLine = false;
+    if (current.isOperator() && previousIsExpression && i != this->children.size - 1) {
+      breakLine = true;
+    }
+    if (breakLine) {
+      if (current.content == "." || current.content == "->"  || current.content == "==" ) {
+        breakLine =false;
+      }
+    }
+    if (breakLine) {
+      current.newLinesAfter = 1;
+    }
+    previousIsExpression = current.isExpressionLikeForIndentation();
+  }
 }
 
 void CodeFormatter::Element::computeIndentationReturnedExpression() {
@@ -606,28 +629,9 @@ void CodeFormatter::Element::computeIndentationReturnedExpression() {
   CodeFormatter::Element& returned = this->children[0];
   CodeFormatter::Element& expression = this->children[1];
   returned.resetWhitespaceRecursively();
-  expression.resetWhitespaceRecursively();
   returned.computeIndentation();
   returned.newLinesAfter = 1;
-  bool previousIsExpression = false;
-  for (int i = 0; i < expression.children.size; i ++) {
-    CodeFormatter::Element& current = expression.children[i];
-    current.indentationLevel = this->indentationLevel;
-    current.computeIndentation();
-    bool breakLine = false;
-    if (current.isOperator() && previousIsExpression && i != expression.children.size - 1) {
-      breakLine = true;
-    }
-    if (breakLine) {
-      if (current.content == "." || current.content == "->"  || current.content == "==" ) {
-        breakLine =false;
-      }
-    }
-    if (breakLine) {
-      current.newLinesAfter = 1;
-    }
-    previousIsExpression = current.isExpressionLikeForIndentation();
-  }
+  expression.breakExpression();
 }
 
 void CodeFormatter::Element::computeIndentation() {
@@ -671,12 +675,20 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationTypeExpression();
     return;
   }
+  if (this->type == CodeFormatter::Element::Expression) {
+    this->computeIndentationExpression();
+    return;
+  }
   if (this->type == CodeFormatter::Element::Operator) {
     this->computeIndentationOperator();
     return;
   }
   if (this->type == CodeFormatter::Element::InParentheses) {
     this->computeIndentationInParentheses();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::IfClause) {
+    this->computeIndentationIfClause();
     return;
   }
   if (this->type == CodeFormatter::Element::CommaList) {
@@ -687,12 +699,20 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationCommandList();
     return;
   }
+  if (this->type == CodeFormatter::Element::CommentCollection) {
+    this->computeIndentationCommentCollection();
+    return;
+  }
   if (this->type == CodeFormatter::Element::Comment) {
     this->computeIndentationComment();
     return;
   }
   if (this->type == CodeFormatter::Element::FunctionDeclaration) {
     this->computeIndentationFunctionDeclaration();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::FunctionDefinition) {
+    this->computeIndentationFunctionDefinition();
     return;
   }
   if (this->content != "") {
@@ -725,6 +745,18 @@ void CodeFormatter::Element::computeIndentationFunctionDeclaration() {
     }
   }
   this->computeIndentationBasic(0);
+}
+
+void CodeFormatter::Element::computeIndentationFunctionDefinition() {
+  this->computeIndentationBasic(0);
+  if (this->children.size != 2) {
+    return;
+  }
+  CodeFormatter::Element& lastElementFunctionDeclaration = *this->children[0].rightMostAtomUnderMe();
+  if (lastElementFunctionDeclaration.type == CodeFormatter::Element::ConstKeyWord) {
+    lastElementFunctionDeclaration.newLinesAfter = 0;
+    this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
+  }
 }
 
 void CodeFormatter::Element::computeIndentationComment() {
@@ -839,21 +871,36 @@ std::string CodeFormatter::Element::toStringHTMLTree() {
   return out.str();
 }
 
+void CodeFormatter::Element::computeIndentationCommentCollection() {
+  for (int i = 0; i < this->children.size; i ++) {
+    CodeFormatter::Element& current = this->children[i];
+    current.indentationLevel = this->indentationLevel;
+    current.rightMostAtomUnderMe()->newLinesAfter = 1;
+    current.leftMostAtomUnderMe()->whiteSpaceBefore = current.indentationLevel;
+  }
+  this->computeIndentationBasic(0);
+}
+
 void CodeFormatter::Element::computeIndentationCommandList() {
   if (this->parent->type != CodeFormatter::Element::CodeBlock) {
     for (int i = 0; i < this->children.size; i ++) {
+      CodeFormatter::Element& current = this->children[i];
       if (i != this->children.size - 1) {
-        this->children[i].rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
+        current.rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
       }
-      this->children[i].indentationLevel = this->indentationLevel;
-      this->children[i].computeIndentation();
+      current.indentationLevel = this->indentationLevel;
+      current.computeIndentation();
     }
     return;
   }
   for (int i = 0; i < this->children.size; i ++) {
-    this->children[i].rightMostAtomUnderMe()->newLinesAfter = 1;
-    this->children[i].indentationLevel = this->indentationLevel;
-    this->children[i].computeIndentation();
+    CodeFormatter::Element& current = this->children[i];
+    current.rightMostAtomUnderMe()->newLinesAfter = 1;
+    current.indentationLevel = this->indentationLevel;
+    if (current.type == CodeFormatter::Element::Comment) {
+      current.whiteSpaceBefore = this->indentationLevel;
+    }
+    current.computeIndentation();
   }
 }
 
@@ -875,6 +922,15 @@ bool CodeFormatter::Element::containsNewLineAfterRecursively() {
   return this->newLinesAfter > 0;
 }
 
+void CodeFormatter::Element::computeIndentationIfClause() {
+  this->computeIndentationBasic(0);
+  for (int i = 0; i < this->children.size; i ++) {
+    if (this->children[i].type == CodeFormatter::Element::Else) {
+      this->children[i].whiteSpaceBefore = 1;
+    }
+  }
+}
+
 void CodeFormatter::Element::computeIndentationCommaList() {
   bool mustSplitLines = false;
   if (this->minimalSizeWithSpacebars() + this->offsetFromPrevious() > this->owner->maximumDesiredLineLength) {
@@ -894,6 +950,16 @@ void CodeFormatter::Element::computeIndentationCommaList() {
     current.indentationLevel = this->indentationLevel;
     current.computeIndentation();
   }
+}
+
+void CodeFormatter::Element::computeIndentationExpression() {
+  this->computeIndentationBasic(0);
+  if (!this->containsNewLineAfterRecursively()) {
+    //global.comments << "DEBUG: not breaking!";
+    return;
+  }
+  global.comments << "DEBUG: About to break expression: " << this->toStringContentOnly() << " <br>";
+  this->breakExpression();
 }
 
 void CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
@@ -1206,8 +1272,8 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.consumeElements();
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
-   global.comments << "DEBUG: " << this->processor.debugLog;
-   global.comments << "DEBUG:<br>" << this->processor.code.toStringHTMLTree();
+   global.comments << "DEBUG: the log:<br>" << this->processor.debugLog;
+   global.comments << "DEBUG: the tree:<br>" << this->processor.code.toStringHTMLTree();
   if (this->processor.code.children.size <= this->dummyElements + 1) {
     out << this->processor.code.format();
   } else  {
@@ -1304,6 +1370,8 @@ CodeFormatter::CodeFormatter() {
     ".",
     "->",
     "==",
+    ">=",
+    "<=",
     "!=",
     "*=",
     "/=",
@@ -1575,13 +1643,17 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.makeFrom1(CodeFormatter::Element::Expression, thirdToLast);
     return this->removeLast(2);
   }
-  if (thirdToLast.type == CodeFormatter::Element::LeftBracket &&
+  if (
+  fourthToLast.isExpressionIdentifierOrAtom() &&
+  thirdToLast.type == CodeFormatter::Element::LeftBracket &&
     secondToLast.isExpressionIdentifierOrAtom()
     && last.type == CodeFormatter::Element::RightBracket
   ) {
     this->lastRuleName = "[expression]";
-    thirdToLast.makeFrom3(CodeFormatter::Element::Expression, thirdToLast, secondToLast, last);
-    return this->removeLast(2);
+    CodeFormatter::Element element;
+    element.makeFrom3(CodeFormatter::Element::InBrackets, thirdToLast, secondToLast, last);
+    fourthToLast.makeFrom2(CodeFormatter::Element::Expression, fourthToLast, element);
+    return this->removeLast(3);
   }
   if (secondToLast.type == CodeFormatter::Element::LeftCurlyBrace && last.type == CodeFormatter::Element::RightCurlyBrace) {
     this->lastRuleName = "{}";
@@ -1714,18 +1786,30 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (
     thirdToLast.type == CodeFormatter::Element::ExpressionEndingWithOperator &&
-    secondToLast.isExpressionIdentifierOrAtom() &&
+    (secondToLast.isExpressionIdentifierOrAtom() ||
+    secondToLast.type == CodeFormatter::Element::FunctionWithArguments
+  )&&
     !last.isColonOrDoubleColon()  &&
     last.type != CodeFormatter::Element::LessThan &&
   !last.isDashDotOrDashGreaterThan() &&
-  last.type != CodeFormatter::Element::LeftParenthesis
+  last.type != CodeFormatter::Element::LeftParenthesis &&
+  last.type != CodeFormatter::Element::LeftBracket &&
+  !this->owner->rightOperatorOverridesLeft(
+  *thirdToLast.children.lastObject(),
+  last
+)
   ) {
     this->lastRuleName = "expression ending with operator and atom";
     thirdToLast.appendType(secondToLast, CodeFormatter::Element::ExpressionEndingWithOperator);
     thirdToLast.type = CodeFormatter::Element::Expression;
     return this->removeBelowLast(1);
   }
-  if (
+
+  bool isInControl = (
+  fourthToLast .type == CodeFormatter::Element::If ||
+  fourthToLast.type == CodeFormatter::Element::ControlKeyWord) &&
+  thirdToLast.type == CodeFormatter::Element::LeftParenthesis;
+  if ( !isInControl &&
     !thirdToLast.isOperator() &&
     secondToLast.isIdentifierOrAtom() && (
       last.type == CodeFormatter::Element::Ampersand ||
@@ -1919,7 +2003,8 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if ( (secondToLast.type == CodeFormatter::Element::FunctionDeclaration || secondToLast.type == CodeFormatter::Element::FunctionWithArguments) && last.isCodeBlock()) {
     this->lastRuleName = "function declaration + code block";
-    secondToLast.makeFrom2(CodeFormatter::Element::Command, secondToLast, last);
+    secondToLast.makeFrom2(CodeFormatter::Element::FunctionDefinition, secondToLast, last);
+    secondToLast.makeFrom1(CodeFormatter::Element::Command, secondToLast);
     return this->removeLast();
   }
   if (thirdToLast.isIdentifierOrAtom() && secondToLast.isParenthesesBlock() && last.isCodeBlock()) {
@@ -2023,4 +2108,25 @@ bool CodeFormatter::writeFormatedCode(std::stringstream* comments) {
   }
   fileOut << this->transformedContent;
   return true;
+}
+
+bool CodeFormatter::rightOperatorOverridesLeft(
+CodeFormatter::Element &leftOperator, CodeFormatter::Element &rightOperator) {
+  if (leftOperator.content == "="  || leftOperator.content == "==") {
+    if (rightOperator.content == "+" || rightOperator.content == "-") {
+      return true;
+    }
+  }
+  return false;
+}
+
+void CodeFormatter::wirePointersRecursively(
+  CodeFormatter::Element &current,
+  Element *parent,
+  int indexInParent
+) {
+  current.initializePointers(this, parent, indexInParent);
+  for (int i = 0; i < current.children.size; i ++) {
+    this->wirePointersRecursively(current.children[i], &current, i);
+  }
 }

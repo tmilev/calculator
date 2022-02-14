@@ -51,6 +51,7 @@ public:
       SemiColon,
       DoubleColon,
       InParentheses,
+      InBrackets,
       LeftParenthesis,
       RightParenthesis,
       LeftBracket,
@@ -72,6 +73,7 @@ public:
       LessThan,
       FunctionWithArguments,
       FunctionDeclaration,
+      FunctionDefinition,
       Ampersand,
       Star,
       CaseKeyWord,
@@ -91,21 +93,24 @@ public:
   private:
     void computeIndentation();
     void computeIndentationFunctionDeclaration();
+    void computeIndentationFunctionDefinition();
     void computeIndentationCodeBlock();
     void computeIndentationControlWantsCodeBlock();
     void computeIndentationCommandList();
     void computeIndentationCommaList();
     void computeIndentationComment();
+    void computeIndentationCommentCollection();
     void computeIndentationTypeExpression();
     void computeIndentationReturnedExpression();
     void computeIndentationOperator();
     void computeIndentationInParentheses();
     void computeIndentationBasic(int startingIndex);
+    void computeIndentationExpression();
     void computeIndentationTopLevel();
     void computeIndentationAtomic();
     void computeIndentationCaseClause();
     void computeIndentationCaseClauseStart();
-    void computeIndentationCaseClauseList();
+    void computeIndentationIfClause();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
     bool needsWhiteSpaceBefore();
@@ -114,6 +119,7 @@ public:
     int offsetFromPrevious();
     int minimalSizeWithSpacebars();
     bool isExpressionLikeForIndentation();
+    void breakExpression();
   public:
     Element::Type type;
     std::string content;
@@ -136,6 +142,7 @@ public:
     static std::string toStringType(CodeFormatter::Element::Type inputType);
     std::string toStringHTMLTree();
     void toStringContentOnly(std::stringstream& out) const;
+    std::string toStringContentOnly() const;
     Element();
     void clear();
     void appendType(const CodeFormatter::Element& other, CodeFormatter::Element::Type inputType);
@@ -303,6 +310,11 @@ public:
     CodeFormatter::Element* parent,
     int indexInParent
   );
+  bool rightOperatorOverridesLeft(
+  CodeFormatter::Element& leftOperator,
+  CodeFormatter::Element& rightOperator
+  );
+
 };
 
 #endif // header_source_code_formatter_ALREADY_INCLUDED

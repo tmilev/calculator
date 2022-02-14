@@ -15,8 +15,8 @@
       debugLogContainer: null,
     });
     let editor = new EquationEditor(document.getElementById('editor'), options);
-    // The \caret command indicates the desired location of the caret. 
-    new EquationEditorButtonFactory("\\frac{123}{\\caret}\\sqrt{7}", "", "").attachToClickById("custom-button", editor);
+    // The \cursor command indicates the desired location of the cursor. 
+    new EquationEditorButtonFactory("\\frac{123}{\\cursor}\\sqrt{7}", "", "").attachToClickById("custom-button", editor);
     buttonFactories.sqrt.attachToClickById("sqrt-button", editor);
     editor.updateDOM();
     editor.rootNode.focus(- 1);

@@ -566,7 +566,7 @@ class MathNodeFactory {
       initialContent,
   ) {
     const result = new MathNodeAtom(equationEditor);
-    result.positionCaretBeforeKeyEvents = initialContent.length;
+    result.positionCursorBeforeKeyEvents = initialContent.length;
     result.initialContent = initialContent;
     return result;
   }
@@ -1114,7 +1114,7 @@ class MathNodeFactory {
   }
 }
 
-class MathNodeWithCaretPosition {
+class MathNodeWithCursorPosition {
   constructor(
       /** @type {MathNode?} */
       element,
@@ -1131,7 +1131,7 @@ class MathNodeWithCaretPosition {
   }
 
   assign(
-      /** @type {MathNodeWithCaretPosition?} */
+      /** @type {MathNodeWithCursorPosition?} */
       other,
   ) {
     if (other === null) {
@@ -1186,16 +1186,16 @@ class MathNodeWithCaretPosition {
     return -1;
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   leftHorizontalNeighborBalanced(
       /** @type {boolean} */
       shrinking,
   ) {
     if (this.element === null) {
-      return new MathNodeWithCaretPosition(null, -1);
+      return new MathNodeWithCursorPosition(null, -1);
     }
     if (this.position > 0 && this.element.hasHorozintalMathParent()) {
-      return new MathNodeWithCaretPosition(
+      return new MathNodeWithCursorPosition(
           this.element, this.nextPositionInDirection(-1));
     }
     let next = null;
@@ -1203,75 +1203,75 @@ class MathNodeWithCaretPosition {
         this.element.type.type === knownTypes.rightDelimiter.type) {
       let matching = this.element.findMatchingDelimiter();
       if (matching === null) {
-        return new MathNodeWithCaretPosition(null, -1);
+        return new MathNodeWithCursorPosition(null, -1);
       }
       next = matching.firstAtomSiblingOrUncle(-1);
     } else {
       next = this.element.firstAtomSiblingOrUncle(-1);
     }
     if (next === null) {
-      return new MathNodeWithCaretPosition(null, -1);
+      return new MathNodeWithCursorPosition(null, -1);
     }
-    return new MathNodeWithCaretPosition(next, -1);
+    return new MathNodeWithCursorPosition(next, -1);
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   rightHorizontalNeighborBalanced(
       /** @type {boolean} */
       shrinking,
   ) {
     if (this.element === null) {
-      return new MathNodeWithCaretPosition(null, -1);
+      return new MathNodeWithCursorPosition(null, -1);
     }
     if (this.position >= 0 &&
         this.position < this.element.lengthContentIfAtom() &&
         this.element.hasHorozintalMathParent()) {
-      return new MathNodeWithCaretPosition(
+      return new MathNodeWithCursorPosition(
           this.element, this.nextPositionInDirection(1));
     }
     let next = null;
     if (shrinking && this.element.type.type === knownTypes.leftDelimiter.type) {
       let matching = this.element.findMatchingDelimiter();
       if (matching === null) {
-        return new MathNodeWithCaretPosition(null, -1);
+        return new MathNodeWithCursorPosition(null, -1);
       }
       next = matching.firstAtomSiblingOrUncle(1);
     } else {
       next = this.element.firstAtomSiblingOrUncle(1);
     }
     if (next === null) {
-      return new MathNodeWithCaretPosition(null, -1);
+      return new MathNodeWithCursorPosition(null, -1);
     }
-    return new MathNodeWithCaretPosition(next, -1);
+    return new MathNodeWithCursorPosition(next, -1);
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   leftNeighbor() {
     if (this.element === null) {
-      return new MathNodeWithCaretPosition(null, -1);
+      return new MathNodeWithCursorPosition(null, -1);
     }
     if (this.position > 0) {
-      return new MathNodeWithCaretPosition(
+      return new MathNodeWithCursorPosition(
           this.element, this.nextPositionInDirection(-1));
     }
     let resultElement = this.element.firstAtomToTheLeft();
     if (resultElement === null) {
-      return new MathNodeWithCaretPosition(null, -1);
+      return new MathNodeWithCursorPosition(null, -1);
     }
-    return new MathNodeWithCaretPosition(
+    return new MathNodeWithCursorPosition(
         resultElement, resultElement.element.textContent.length);
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   rightNeighbor() {
     if (this.element === null) {
-      return new MathNodeWithCaretPosition(null, -1);
+      return new MathNodeWithCursorPosition(null, -1);
     }
     if (this.position < this.element.lengthContentIfAtom()) {
-      return new MathNodeWithCaretPosition(
+      return new MathNodeWithCursorPosition(
           this.element, this.nextPositionInDirection(1));
     }
-    return new MathNodeWithCaretPosition(this.element.firstAtomToTheRight(), 0);
+    return new MathNodeWithCursorPosition(this.element.firstAtomToTheRight(), 0);
   }
 
   /** @return {string} */
@@ -1412,13 +1412,13 @@ class SyntacticElement {
 }
 
 class ToLatexOptions {
-  constructor(/** @type {boolean}*/ useCaretCommand) {
+  constructor(/** @type {boolean}*/ useCursorCommand) {
     /** @type {boolean}*/
-    this.useCaretCommand = useCaretCommand;
+    this.useCursorCommand = useCursorCommand;
   }
 }
 
-let latexOptionsWithCaret = new ToLatexOptions(true);
+let latexOptionsWithCursor = new ToLatexOptions(true);
 
 class LaTeXConstants {
   constructor() {
@@ -1519,8 +1519,8 @@ class LaTeXConstants {
       'sqrt': '\\sqrt',
       'begin': '\\begin',
       // Special command reserved for indicating the
-      // caret position when the latex is used in an editable box.
-      'caret': '\\caret',
+      // cursor position when the latex is used in an editable box.
+      'cursor': '\\cursor',
       // Special command reserved for generation of input box.
       'formInput': '\\formInput',
       'end': '\\end',
@@ -1889,12 +1889,12 @@ class LaTeXConstants {
       /** @type {string} */
       input,
       /** @type {number} */
-      positionCaret,
+      positionCursor,
   ) {
     this.computeUtf16ToLatexMap();
     let result = [];
-    if (positionCaret === 0) {
-      result.push('\\caret ');
+    if (positionCursor === 0) {
+      result.push('\\cursor ');
     }
     for (let i = 0; i < input.length; i++) {
       let current = '';
@@ -1911,8 +1911,8 @@ class LaTeXConstants {
       if (current !== '') {
         result.push(current);
       }
-      if (i + 1 === positionCaret) {
-        result.push('\\caret ');
+      if (i + 1 === positionCursor) {
+        result.push('\\cursor ');
       }
     }
     return new LatexWithAnnotation(result.join(''));
@@ -2005,10 +2005,10 @@ class LaTeXParser {
     /** @type {number} */
     this.startTime = 0;
     /** @type {boolean} */
-    // Whether the special command \caret is found.
+    // Whether the special command \cursor is found.
     // Used to indicate the position of the
-    // caret when the latex is used in an editable box.
-    this.caretFound = false;
+    // cursor when the latex is used in an editable box.
+    this.cursorFound = false;
   }
 
   /** Initializes the parser. */
@@ -2462,10 +2462,10 @@ class LaTeXParser {
       );
       return this.replaceParsingStackTop(node, '', -2);
     }
-    if (last.syntacticRole === '\\caret') {
-      this.lastRuleName = 'caret location';
+    if (last.syntacticRole === '\\cursor') {
+      this.lastRuleName = 'cursor location';
       let node = mathNodeFactory.atom(this.equationEditor, '');
-      node.desiredCaretPosition = 0;
+      node.desiredCursorPosition = 0;
       return this.replaceParsingStackTop(node, '', -1);
     }
     if ((thirdToLast.syntacticRole === '\\begin' ||
@@ -2969,14 +2969,14 @@ class FocusInformation {
   constructor() {
     /** @type {MathNode?} Used to write to the last focused node.*/
     this.lastFocused = null;
-    /** @type {MathNodeWithCaretPosition!} */
-    this.lastSelectionStart = new MathNodeWithCaretPosition(null, -1);
-    /** @type {MathNodeWithCaretPosition!} */
-    this.lastSelectionStartExpanded = new MathNodeWithCaretPosition(null, -1);
-    /** @type {MathNodeWithCaretPosition!} */
-    this.lastSelectionEnd = new MathNodeWithCaretPosition(null, -1);
-    /** @type {MathNodeWithCaretPosition!} */
-    this.lastSelectionEndExpanded = new MathNodeWithCaretPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition!} */
+    this.lastSelectionStart = new MathNodeWithCursorPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition!} */
+    this.lastSelectionStartExpanded = new MathNodeWithCursorPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition!} */
+    this.lastSelectionEnd = new MathNodeWithCursorPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition!} */
+    this.lastSelectionEndExpanded = new MathNodeWithCursorPosition(null, -1);
   }
 
   setLastFocused(
@@ -3015,7 +3015,7 @@ class FocusInformation {
     result.push(document.createElement('br'));
     result.push(document.createTextNode(
         `Last focused: ${this.lastFocused.toString()}, position: ${
-            this.lastFocused.positionCaretBeforeKeyEvents}`));
+            this.lastFocused.positionCursorBeforeKeyEvents}`));
     if (this.lastFocused.isDetached()) {
       result.push(document.createElement('br'));
       result.push(boldElement('Detached last focused.', 'red'));
@@ -3081,20 +3081,20 @@ class EquationEditor {
     this.mouseIgnoreNextClick = false;
     /** @type {boolean} */
     this.mouseSelectionVisible = false;
-    /** @type {MathNodeWithCaretPosition?} */
-    this.selectionStart = new MathNodeWithCaretPosition(null, -1);
-    /** @type {MathNodeWithCaretPosition?} */
-    this.selectionStartExpanded = new MathNodeWithCaretPosition(null, -1);
-    /** @type {MathNodeWithCaretPosition?} */
-    this.selectionEnd = new MathNodeWithCaretPosition(null, -1);
-    /** @type {MathNodeWithCaretPosition?} */
-    this.selectionEndExpanded = new MathNodeWithCaretPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition?} */
+    this.selectionStart = new MathNodeWithCursorPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition?} */
+    this.selectionStartExpanded = new MathNodeWithCursorPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition?} */
+    this.selectionEnd = new MathNodeWithCursorPosition(null, -1);
+    /** @type {MathNodeWithCursorPosition?} */
+    this.selectionEndExpanded = new MathNodeWithCursorPosition(null, -1);
     /** @type {string} */
     this.latexLastWritten = '';
     /** @type {string} */
     this.latexLastEdit = '';
     /** @type {string} */
-    this.latexLastEditWithCaret = '';
+    this.latexLastEditWithCursor = '';
     /** @type {CircularBuffer!} */
     this.history = new CircularBuffer(5000);
     /** @type {Array.<string>!} */
@@ -3193,11 +3193,11 @@ class EquationEditor {
     if (this.history.totalElements() <= 0) {
       return;
     }
-    this.redoBuffer.push(this.latexLastEditWithCaret);
+    this.redoBuffer.push(this.latexLastEditWithCursor);
     let element = /** @type{string} */ (this.history.pop());
 
     this.writeLatex(element);
-    this.latexLastEditWithCaret = element;
+    this.latexLastEditWithCursor = element;
     this.latexLastEdit = this.rootNode.toLatexWithAnnotation(null).latex;
     this.focusRestore();
   }
@@ -3404,19 +3404,19 @@ class EquationEditor {
     if (this.backslashSequenceStarted) {
       return;
     }
-    let latexWithAnnotationNoCaret = this.rootNode.toLatexWithAnnotation(null);
-    if (this.latexLastEdit === latexWithAnnotationNoCaret.latex) {
+    let latexWithAnnotationNoCursor = this.rootNode.toLatexWithAnnotation(null);
+    if (this.latexLastEdit === latexWithAnnotationNoCursor.latex) {
       return;
     }
     if (wipeOffRedoBuffer) {
       this.redoBuffer = [];
     }
-    this.history.push(this.latexLastEditWithCaret);
-    this.latexLastEditWithCaret =
-        this.rootNode.toLatexWithAnnotation(latexOptionsWithCaret).latex;
-    this.latexLastEdit = latexWithAnnotationNoCaret.latex;
+    this.history.push(this.latexLastEditWithCursor);
+    this.latexLastEditWithCursor =
+        this.rootNode.toLatexWithAnnotation(latexOptionsWithCursor).latex;
+    this.latexLastEdit = latexWithAnnotationNoCursor.latex;
     if (this.options.latexInput !== null) {
-      this.options.latexInput.value = latexWithAnnotationNoCaret.latex;
+      this.options.latexInput.value = latexWithAnnotationNoCursor.latex;
     }
   }
 
@@ -3520,7 +3520,7 @@ class EquationEditor {
         console.log('Unexpected failure to find atom child.');
         return;
       }
-      toWriteTo.positionCaretBeforeKeyEvents =
+      toWriteTo.positionCursorBeforeKeyEvents =
           toWriteTo.textContentOrInitialContent().length;
       toWriteTo.writeLatex(latex);
       this.writeLatexToInput(false);
@@ -3629,7 +3629,7 @@ class EquationEditor {
     if (focused === null) {
       return;
     }
-    if (key === 'ArrowLeft' && focused.positionCaretBeforeKeyEvents > 0) {
+    if (key === 'ArrowLeft' && focused.positionCursorBeforeKeyEvents > 0) {
       focused.focus(0);
       return;
     }
@@ -3640,7 +3640,7 @@ class EquationEditor {
       this.handleKeyDownCatchAll(event);
       return;
     }
-    focused.handleKeyDownDontComputeCaretPosition(event);
+    focused.handleKeyDownDontComputeCursorPosition(event);
   }
 
   /** @return {MathNode?} */
@@ -3691,11 +3691,11 @@ class EquationEditor {
     this.resetSelectionFullSelectEventCatcher();
     let position = -1;
     if (result.isAtomEditable()) {
-      position = result.positionCaretBeforeKeyEvents;
+      position = result.positionCursorBeforeKeyEvents;
     }
     result.focus(1);
     if (position !== -1) {
-      result.positionCaretBeforeKeyEvents = position;
+      result.positionCursorBeforeKeyEvents = position;
     }
     return result;
   }
@@ -3901,10 +3901,10 @@ class EquationEditor {
       replacing = mathNodeFactory.atom(this, '');
     }
     if (replacing.type.type === knownTypes.atom.type) {
-      replacing.desiredCaretPosition =
+      replacing.desiredCursorPosition =
           replacing.textContentOrInitialContent().length;
     } else {
-      replacing.desiredCaretPosition = 1;
+      replacing.desiredCursorPosition = 1;
     }
     horizontalReplacement.appendChild(replacing);
     horizontalReplacement.appendChildren(splitBySelection.afterSplit);
@@ -4053,9 +4053,9 @@ class EquationEditor {
         this.selectionEndExpanded.element === null) {
       return null;
     }
-    /** @type {MathNodeWithCaretPosition!} */
+    /** @type {MathNodeWithCursorPosition!} */
     let start = this.selectionStartExpanded;
-    /** @type {MathNodeWithCaretPosition!} */
+    /** @type {MathNodeWithCursorPosition!} */
     let end = this.selectionEndExpanded;
 
     if (end.element.isToTheLeftOf(/** @type {MathNode!} */ (start.element))) {
@@ -4207,13 +4207,13 @@ class EquationEditor {
       return;
     }
     this.resetSelectionLeaveRangesIntact();
-    this.selectionStart = new MathNodeWithCaretPosition(
-        start, start.positionCaretBeforeKeyEvents);
-    this.selectionEnd = new MathNodeWithCaretPosition(
-        start, start.positionCaretBeforeKeyEvents);
+    this.selectionStart = new MathNodeWithCursorPosition(
+        start, start.positionCursorBeforeKeyEvents);
+    this.selectionEnd = new MathNodeWithCursorPosition(
+        start, start.positionCursorBeforeKeyEvents);
   }
 
-  /** @return {MathNodeWithCaretPosition?} */
+  /** @return {MathNodeWithCursorPosition?} */
   computeNewSelectionFromShiftKey(
       /** @type {string} */
       key,
@@ -4264,9 +4264,9 @@ class EquationEditor {
     if (element === this.selectionStart.element &&
         !this.selectionNoMoreDefault) {
       this.selectionStartExpanded.assign(this.selectionStart);
-      this.selectionEnd.element.storeCaretPosition('', false);
+      this.selectionEnd.element.storeCursorPosition('', false);
       this.selectionEnd.position =
-          this.selectionEnd.element.positionCaretBeforeKeyEvents;
+          this.selectionEnd.element.positionCursorBeforeKeyEvents;
       if (this.selectionEnd.position === this.selectionStart.position &&
           this.selectionEnd.element.selectionLength !== 0) {
         this.selectionEnd.position -= this.selectionEnd.element.selectionLength;
@@ -4298,7 +4298,7 @@ class EquationEditor {
     return true;
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   expandElementForSelection(
       /** @type {MathNode!} */
       toBeExpanded,
@@ -4307,10 +4307,10 @@ class EquationEditor {
   ) {
     let parent = toBeExpanded.commonParent(peer);
     if (parent.parent === null) {
-      return new MathNodeWithCaretPosition(this.rootNode, -1);
+      return new MathNodeWithCursorPosition(this.rootNode, -1);
     }
     let container = parent.parent.children[parent.indexInParent];
-    return new MathNodeWithCaretPosition(
+    return new MathNodeWithCursorPosition(
         container.beefUpToHorizontalParent(),
         -1,
     );
@@ -4492,7 +4492,7 @@ class EquationEditor {
     }
     e.stopPropagation();
     // e.preventDefault();
-    element.storeCaretPosition('', false);
+    element.storeCursorPosition('', false);
     // Discard previous selection data.
     this.resetSelectionLeaveRangesIntact();
     this.initializeSelectionStart(element);
@@ -4502,14 +4502,14 @@ class EquationEditor {
     if (this.options.debugLogContainer !== null) {
       this.lastSelectionAction =
           `Mouse selection start over ${element.toString()}, position:${
-              element.positionCaretBeforeKeyEvents}.`;
+              element.positionCursorBeforeKeyEvents}.`;
     }
     // The mouse down event may fire before the built-in element ranges are
     // updated. So, release the event handling to allow built-in processing to
     // take place, and schedule an element update immediately after.
     setTimeout(() => {
-      element.storeCaretPosition('', false);
-      this.selectionStart.position = element.positionCaretBeforeKeyEvents;
+      element.storeCursorPosition('', false);
+      this.selectionStart.position = element.positionCursorBeforeKeyEvents;
       this.writeDebugInfo(null);
     }, 0);
     this.writeDebugInfo(null);
@@ -4680,11 +4680,11 @@ class MathNode {
     /** @type {number} */
     this.indexInParent = -1;
     /** @type {number} */
-    this.positionCaretBeforeKeyEvents = -1;
+    this.positionCursorBeforeKeyEvents = -1;
     /** @type {number} */
     this.selectionLength = -1;
     /** @type {number} */
-    this.desiredCaretPosition = -1;
+    this.desiredCursorPosition = -1;
     /** @type {string} */
     this.initialContent = '';
     /** @type {boolean} */
@@ -4925,7 +4925,7 @@ class MathNode {
           'Reset selection on single click.';
     }
     this.equationEditor.resetSelectionLeaveRangesIntact();
-    this.storeCaretPosition('', false);
+    this.storeCursorPosition('', false);
     if (this.type.type === knownTypes.atom.type) {
       return;
     }
@@ -5622,7 +5622,7 @@ class MathNode {
   /** Handles the focus of the DOM element. */
   handleFocus(_) {
     this.focusElement();
-    this.storeCaretPosition('', false);
+    this.storeCursorPosition('', false);
   }
 
   /** Handles the blur of the DOM element. */
@@ -5640,12 +5640,12 @@ class MathNode {
       event.stopPropagation();
       return;
     }
-    this.storeCaretPosition(event.key, event.shiftKey);
-    this.handleKeyDownDontComputeCaretPosition(event);
+    this.storeCursorPosition(event.key, event.shiftKey);
+    this.handleKeyDownDontComputeCursorPosition(event);
   }
 
-  /** Handles a key down event without recomputing the caret position. */
-  handleKeyDownDontComputeCaretPosition(
+  /** Handles a key down event without recomputing the cursor position. */
+  handleKeyDownDontComputeCursorPosition(
       /** @type {KeyboardEvent!} */
       event,
   ) {
@@ -5662,7 +5662,7 @@ class MathNode {
     setTimeout(() => {
       this.equationEditor.storeSelection();
       if (handlerResult.updateAlignment) {
-        this.storeCaretPosition(event.key, event.shiftKey);
+        this.storeCursorPosition(event.key, event.shiftKey);
         this.element.style.maxWidth = '';
         this.element.style.maxHeight = '';
         this.equationEditor.updateAlignment();
@@ -5684,9 +5684,9 @@ class MathNode {
   ) {
     if (!event.shiftKey && event.key !== 'Shift') {
       this.equationEditor.selectionStart =
-          new MathNodeWithCaretPosition(null, -1);
+          new MathNodeWithCursorPosition(null, -1);
       this.equationEditor.selectionEnd =
-          new MathNodeWithCaretPosition(null, -1);
+          new MathNodeWithCursorPosition(null, -1);
     }
   }
 
@@ -5707,7 +5707,7 @@ class MathNode {
     if (key === '\\' && !shiftHeld) {
       this.equationEditor.backslashSequenceStarted = true;
       this.equationEditor.backslashSequence = '\\';
-      this.equationEditor.backslashPosition = this.positionCaretBeforeKeyEvents;
+      this.equationEditor.backslashPosition = this.positionCursorBeforeKeyEvents;
       result.keyAccountedCarryOutDefaultEvent = true;
       return result;
     }
@@ -5749,7 +5749,7 @@ class MathNode {
     event.preventDefault();
     let data = event.clipboardData.getData('text');
     event.preventDefault();
-    this.storeCaretPosition('', false);
+    this.storeCursorPosition('', false);
     this.writeLatex(data);
   }
 
@@ -5768,24 +5768,24 @@ class MathNode {
     let newContent = parser.parse();
     if (newContent === null) {
       let content = this.textContentOrInitialContent();
-      let leftSlice = content.slice(0, this.positionCaretBeforeKeyEvents);
-      let rightSlice = content.slice(this.positionCaretBeforeKeyEvents);
+      let leftSlice = content.slice(0, this.positionCursorBeforeKeyEvents);
+      let rightSlice = content.slice(this.positionCursorBeforeKeyEvents);
       let endContent = leftSlice + data + rightSlice;
       this.element.textContent = endContent;
-      this.desiredCaretPosition =
-          this.positionCaretBeforeKeyEvents + data.length;
+      this.desiredCursorPosition =
+          this.positionCursorBeforeKeyEvents + data.length;
       this.updateDOM();
       this.equationEditor.updateAlignment();
       this.focusRestore();
       return;
     }
-    let split = this.splitByCaretEmptyAtoms();
+    let split = this.splitByCursorEmptyAtoms();
     /** @type {MathNode?} */
     let newRightMostAtom = newContent.rightmostAtomChild();
     if (newRightMostAtom === null) {
-      split[1].desiredCaretPosition = 0;
+      split[1].desiredCursorPosition = 0;
     } else {
-      newRightMostAtom.desiredCaretPosition =
+      newRightMostAtom.desiredCursorPosition =
           newRightMostAtom.textContentOrInitialContent().length;
     }
     let horizontalContent = mathNodeFactory.horizontalMathFromArray(
@@ -5808,9 +5808,9 @@ class MathNode {
       /** @type {string} */
       input,
   ) {
-    let split = this.splitByCaret();
+    let split = this.splitByCursor();
     let atomNode = mathNodeFactory.atom(this.equationEditor, input);
-    atomNode.desiredCaretPosition = input.length;
+    atomNode.desiredCursorPosition = input.length;
     let node = mathNodeFactory.horizontalMathFromArray(
         this.equationEditor, [split[0], atomNode, split[1]]);
     node.normalizeHorizontalMath();
@@ -6055,16 +6055,16 @@ class MathNode {
     this.equationEditor.resetSelectionLeaveRangesIntact();
     if (this.arrowAbsorbedByAtom(key)) {
       if (key === 'ArrowLeft') {
-        this.positionCaretBeforeKeyEvents--;
+        this.positionCursorBeforeKeyEvents--;
       } else {
-        this.positionCaretBeforeKeyEvents++;
+        this.positionCursorBeforeKeyEvents++;
       }
       return new KeyHandlerResult(false, false);
     }
-    /** @type {MathNodeWithCaretPosition!} */
+    /** @type {MathNodeWithCursorPosition!} */
     const toFocus = this.getAtomToFocus(key);
     if (toFocus.element !== null) {
-      toFocus.element.positionCaretBeforeKeyEvents =
+      toFocus.element.positionCursorBeforeKeyEvents =
           toFocus.element.element.textContent.length + 1;
       toFocus.element.focus(toFocus.position);
     }
@@ -6085,21 +6085,21 @@ class MathNode {
       return false;
     }
     if (key === 'ArrowLeft') {
-      return this.positionCaretBeforeKeyEvents !== 0;
+      return this.positionCursorBeforeKeyEvents !== 0;
     }
     if (key === 'ArrowRight') {
-      return this.positionCaretBeforeKeyEvents !==
+      return this.positionCursorBeforeKeyEvents !==
           this.element.textContent.length;
     }
     return false;
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   getAtomToFocus(/** @type {string} */ key) {
     return this.getAtomToFocusFromAction(key, this.type.arrows[key]);
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   getAtomToFocusFromAction(
       /** @type {string} */ key,
       /** @type {string} */ arrowType,
@@ -6107,26 +6107,26 @@ class MathNode {
     return this.getAtomToFocusFromActionDefault(key, arrowType);
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   getAtomToFocusFromActionDefault(
     /** @type {string} */ key,
     /** @type {string} */ arrowType,
 ) {
   if (arrowType === arrowMotion.parentForward) {
       if (this.parent === null) {
-        return new MathNodeWithCaretPosition(null, -1);
+        return new MathNodeWithCursorPosition(null, -1);
       }
       return this.parent.getAtomToFocus(key);
     }
     if (arrowType === arrowMotion.firstAtomToTheLeft) {
-      return (new MathNodeWithCaretPosition(this, 0)).leftNeighbor();
+      return (new MathNodeWithCursorPosition(this, 0)).leftNeighbor();
     }
     if (arrowType === arrowMotion.firstAtomToTheRight) {
-      return (new MathNodeWithCaretPosition(
+      return (new MathNodeWithCursorPosition(
                   this, this.textContentOrInitialContent().length))
           .rightNeighbor();
     }
-    return new MathNodeWithCaretPosition(null, -1);
+    return new MathNodeWithCursorPosition(null, -1);
   }
 
   /**
@@ -6256,13 +6256,13 @@ class MathNode {
     return null;
   }
 
-  storeCaretPositionPreExisingRange(
+  storeCursorPositionPreExisingRange(
       /** @type {string} */
       key,
       /** @type {boolean} */
       shiftHeld,
   ) {
-    let previousPosition = this.positionCaretBeforeKeyEvents;
+    let previousPosition = this.positionCursorBeforeKeyEvents;
     let selection = window.getSelection();
     let range = null;
     let rangeClone = null;
@@ -6274,12 +6274,12 @@ class MathNode {
     rangeClone = range.cloneRange();
     rangeClone.selectNodeContents(this.element);
     rangeClone.setEnd(range.endContainer, range.endOffset);
-    this.positionCaretBeforeKeyEvents =
+    this.positionCursorBeforeKeyEvents =
         rangeClone.toString().length;  // range.endOffset;
     this.selectionLength = range.toString().length;
     this.equationEditor.setLastFocused(this);
     this.equationEditor.positionDebugString =
-        `Computed position: ${this.positionCaretBeforeKeyEvents}.`;
+        `Computed position: ${this.positionCursorBeforeKeyEvents}.`;
     this.equationEditor.positionDebugString += `Range: [${range}], clone: [${
         rangeClone}], previous position: ${previousPosition}.`;
     this.equationEditor.positionDebugString +=
@@ -6287,7 +6287,7 @@ class MathNode {
     this.equationEditor.writeDebugInfo(null);
   }
 
-  storeCaretPosition(
+  storeCursorPosition(
       /** @type {string} */
       key,
       /** @type {boolean} */
@@ -6297,15 +6297,15 @@ class MathNode {
       return;
     }
     if (this.type.type !== knownTypes.atom.type) {
-      this.positionCaretBeforeKeyEvents = -1;
+      this.positionCursorBeforeKeyEvents = -1;
       this.selectionLength = 0;
       this.equationEditor.setLastFocused(null);
       return;
     }
     try {
-      this.storeCaretPositionPreExisingRange(key, shiftHeld);
+      this.storeCursorPositionPreExisingRange(key, shiftHeld);
     } catch (e) {
-      console.log(`Failed to store caret position ${e}.`);
+      console.log(`Failed to store cursor position ${e}.`);
     }
   }
 
@@ -6401,12 +6401,12 @@ class MathNode {
       return false;
     }
     for (let j = 0; j < current.children.length; j++) {
-      if (current.desiredCaretPosition === 0 && j === 0) {
-        current.children[j].desiredCaretPosition = 0;
+      if (current.desiredCursorPosition === 0 && j === 0) {
+        current.children[j].desiredCursorPosition = 0;
       } else if (
-          current.desiredCaretPosition > 0 &&
+          current.desiredCursorPosition > 0 &&
           j === current.children.length - 1) {
-        current.children[j].desiredCaretPosition = 1;
+        current.children[j].desiredCursorPosition = 1;
       }
       normalizedChildren.push(/** @type {MathNode!}*/ (current.children[j]));
     }
@@ -6445,9 +6445,9 @@ class MathNode {
     if (right.element !== null) {
       rightContent = right.element.textContent;
     }
-    if (right.desiredCaretPosition !== -1) {
-      this.desiredCaretPosition =
-          thisContent.length + right.desiredCaretPosition;
+    if (right.desiredCursorPosition !== -1) {
+      this.desiredCursorPosition =
+          thisContent.length + right.desiredCursorPosition;
     }
     thisContent += rightContent;
     if (this.element === null) {
@@ -6586,7 +6586,7 @@ class MathNode {
     if (this.equationEditor.hasSelection()) {
       return this.equationEditor.deleteSelection(null);
     }
-    if (this.positionCaretBeforeKeyEvents !== this.element.textContent.length ||
+    if (this.positionCursorBeforeKeyEvents !== this.element.textContent.length ||
         this.type.type !== knownTypes.atom.type) {
       return new KeyHandlerResult(false, true);
     }
@@ -6597,7 +6597,7 @@ class MathNode {
     let cousinLeftSibling = cousinAtom.previousHorizontalSibling();
     if (cousinLeftSibling !== null) {
       if (cousinLeftSibling.implied) {
-        cousinAtom.desiredCaretPosition = 0;
+        cousinAtom.desiredCursorPosition = 0;
         this.parent.focusRestore();
         return new KeyHandlerResult(true, false);
       }
@@ -6608,8 +6608,8 @@ class MathNode {
       rightSibling.focus(-1);
       return new KeyHandlerResult(true, false);
     }
-    this.positionCaretBeforeKeyEvents = -1;
-    cousinAtom.positionCaretBeforeKeyEvents = 0;
+    this.positionCursorBeforeKeyEvents = -1;
+    cousinAtom.positionCursorBeforeKeyEvents = 0;
     return cousinAtom.backspace();
   }
 
@@ -6618,11 +6618,11 @@ class MathNode {
     if (this.equationEditor.hasSelection()) {
       return this.equationEditor.deleteSelection(null);
     }
-    if (this.positionCaretBeforeKeyEvents !== 0 ||
+    if (this.positionCursorBeforeKeyEvents !== 0 ||
         this.type.type !== knownTypes.atom.type) {
       return new KeyHandlerResult(false, true);
     }
-    this.desiredCaretPosition = 0;
+    this.desiredCursorPosition = 0;
     let result = this.applyBackspaceToTheLeft();
     return new KeyHandlerResult(result, !result);
   }
@@ -6632,7 +6632,7 @@ class MathNode {
     let parent = this.parent;
     let parentIndexInParent = parent.indexInParent;
     let base = parent.children[0];
-    this.children[0].children[0].desiredCaretPosition = 0;
+    this.children[0].children[0].desiredCursorPosition = 0;
     base.appendChild(this.children[0]);
     base.normalizeHorizontalMath();
     let parentParent = parent.parent;
@@ -6756,12 +6756,12 @@ class MathNode {
    */
   computePositionOfOperator() {
     let positionOperator = 1;
-    if (this.positionCaretBeforeKeyEvents === 0 &&
+    if (this.positionCursorBeforeKeyEvents === 0 &&
         this.element.textContent.length > 0) {
       positionOperator = -1;
     } else if (
-        this.positionCaretBeforeKeyEvents > 0 &&
-        this.positionCaretBeforeKeyEvents < this.element.textContent.length) {
+        this.positionCursorBeforeKeyEvents > 0 &&
+        this.positionCursorBeforeKeyEvents < this.element.textContent.length) {
       positionOperator = 0;
     }
     return positionOperator;
@@ -6792,7 +6792,7 @@ class MathNode {
       /** @type {string} */
       key,
   ) {
-    let split = this.splitByCaretEmptyAtoms();
+    let split = this.splitByCursorEmptyAtoms();
     this.makeHorizontalOperatorFromSplit(key, split);
   }
 
@@ -6857,7 +6857,7 @@ class MathNode {
       /** @type {number} */
       columns,
   ) {
-    let split = this.splitByCaretEmptyAtoms();
+    let split = this.splitByCursorEmptyAtoms();
     this.makeMatrixFromSplit(rows, columns, split);
   }
 
@@ -6896,7 +6896,7 @@ class MathNode {
       this.makeCancelFromSplit(splitBySelection.split);
       return;
     }
-    this.makeCancelFromSplit(this.splitByCaret());
+    this.makeCancelFromSplit(this.splitByCursor());
   }
 
   /** Constructs a sqrt box from selection. */
@@ -6905,7 +6905,7 @@ class MathNode {
     if (splitBySelection !== null) {
       this.equationEditor.makeSqrtFromSelection(splitBySelection);
     } else {
-      this.makeSqrtFromCaret();
+      this.makeSqrtFromCursor();
     }
   }
 
@@ -6920,7 +6920,7 @@ class MathNode {
       /** @type {string} */
       operator,
   ) {
-    let split = this.splitByCaret();
+    let split = this.splitByCursor();
     this.makeOperatorWithSuperscriptAndSubscriptFromSplit(operator, split);
   }
 
@@ -6953,7 +6953,7 @@ class MathNode {
       /** @type {string} */
       operator,
   ) {
-    let split = this.splitByCaret();
+    let split = this.splitByCursor();
     this.makeOperatorWithSubscriptFromSplit(operator, split);
   }
 
@@ -7001,8 +7001,8 @@ class MathNode {
   }
 
   /** Makes a sqrt box from the position of the cursor. */
-  makeSqrtFromCaret() {
-    let split = this.splitByCaret();
+  makeSqrtFromCursor() {
+    let split = this.splitByCursor();
     this.makseSqrtFromSplit(split);
   }
 
@@ -7140,13 +7140,13 @@ class MathNode {
   }
 
   /** @return {Array.<MathNode?>!} */
-  splitByCaret() {
-    return this.splitByPosition(this.positionCaretBeforeKeyEvents);
+  splitByCursor() {
+    return this.splitByPosition(this.positionCursorBeforeKeyEvents);
   }
 
   /** @return {Array.<MathNode?>!} */
-  splitByCaretEmptyAtoms() {
-    return this.splitByPositionEmptyAtoms(this.positionCaretBeforeKeyEvents);
+  splitByCursorEmptyAtoms() {
+    return this.splitByPositionEmptyAtoms(this.positionCursorBeforeKeyEvents);
   }
 
   /** @return {Array.<MathNode?>!} */
@@ -7250,7 +7250,7 @@ class MathNode {
         isLeft,
     );
     if (positionOperator === 0) {
-      let leftAndRight = this.splitByCaret();
+      let leftAndRight = this.splitByCursor();
       parent.replaceChildAtPositionWithChildren(
           oldIndexInParent,
           leftAndRight,
@@ -7476,7 +7476,7 @@ class MathNode {
         this.equationEditor.backslashPosition,
         backslashSequence.length,
     );
-    this.positionCaretBeforeKeyEvents = this.equationEditor.backslashPosition;
+    this.positionCursorBeforeKeyEvents = this.equationEditor.backslashPosition;
     this.setTextContent(split[0] + split[1]);
     return new BackslashResult(false, backslashSequence);
   }
@@ -7491,25 +7491,25 @@ class MathNode {
     }
     let splitBySelection = this.equationEditor.splitAtomsBySelection();
     if (splitBySelection === null) {
-      this.makeFractionNumeratorFromCaretPosition();
+      this.makeFractionNumeratorFromCursorPosition();
     } else {
       this.equationEditor.makeFractionNumeratorFromSelection(splitBySelection);
     }
   }
 
   /** Constructs a fraction numerator from the cursor position. */
-  makeFractionNumeratorFromCaretPosition() {
+  makeFractionNumeratorFromCursorPosition() {
     const oldParent = this.parent;
     const oldIndexInParent = this.indexInParent;
     let fraction = null;
     let childIndexToFocus = 1;
-    if (this.positionCaretBeforeKeyEvents === this.element.textContent.length) {
+    if (this.positionCursorBeforeKeyEvents === this.element.textContent.length) {
       fraction = mathNodeFactory.fraction(this.equationEditor, this, null);
-    } else if (this.positionCaretBeforeKeyEvents === 0) {
+    } else if (this.positionCursorBeforeKeyEvents === 0) {
       fraction = mathNodeFactory.fraction(this.equationEditor, null, this);
       childIndexToFocus = 0;
     } else {
-      let split = this.splitByCaret();
+      let split = this.splitByCursor();
       fraction =
           mathNodeFactory.fraction(this.equationEditor, split[0], split[1]);
     }
@@ -7608,7 +7608,7 @@ class MathNode {
     );
     const baseWithExponent =
         mathNodeFactory.baseWithExponent(this.equationEditor, base, null);
-    baseWithExponent.children[1].children[0].children[0].desiredCaretPosition =
+    baseWithExponent.children[1].children[0].children[0].desiredCursorPosition =
         0;
     originalParent.replaceChildRangeWithChildren(
         leftIndex, rightIndex, [baseWithExponent]);
@@ -7651,7 +7651,7 @@ class MathNode {
     let originalIndexInParent = this.indexInParent;
     const baseWithExponent =
         mathNodeFactory.baseWithExponent(this.equationEditor, right, null);
-    baseWithExponent.children[1].children[0].children[0].desiredCaretPosition =
+    baseWithExponent.children[1].children[0].children[0].desiredCursorPosition =
         0;
     originalParent.replaceChildAtPositionWithChildren(
         originalIndexInParent, [left, baseWithExponent]);
@@ -7668,7 +7668,7 @@ class MathNode {
     let originalIndexInParent = this.indexInParent;
     const baseWithExponent =
         mathNodeFactory.baseWithExponent(this.equationEditor, this, null);
-    baseWithExponent.children[1].children[0].children[0].desiredCaretPosition =
+    baseWithExponent.children[1].children[0].children[0].desiredCursorPosition =
         0;
     originalParent.replaceChildAtPosition(
         originalIndexInParent, baseWithExponent);
@@ -7708,7 +7708,7 @@ class MathNode {
     );
     const baseWithSubscript =
         mathNodeFactory.baseWithSubscript(this.equationEditor, base, null);
-    baseWithSubscript.children[1].children[0].children[0].desiredCaretPosition =
+    baseWithSubscript.children[1].children[0].children[0].desiredCursorPosition =
         0;
     originalParent.replaceChildRangeWithChildren(
         leftIndex, rightIndex, [baseWithSubscript]);
@@ -7723,7 +7723,7 @@ class MathNode {
     let originalIndexInParent = this.indexInParent;
     const baseWithSubscript =
         mathNodeFactory.baseWithSubscript(this.equationEditor, this, null);
-    baseWithSubscript.children[1].children[0].children[0].desiredCaretPosition =
+    baseWithSubscript.children[1].children[0].children[0].desiredCursorPosition =
         0;
     originalParent.replaceChildAtPosition(
         originalIndexInParent, baseWithSubscript);
@@ -7738,11 +7738,11 @@ class MathNode {
       endToFocus,
   ) {
     if (this.element === null) {
-      this.desiredCaretPosition = -1;
+      this.desiredCursorPosition = -1;
       return false;
     }
-    // The call to focus(null) will wipe the desiredCaretPosition.
-    let originalDesiredPosition = this.desiredCaretPosition;
+    // The call to focus(null) will wipe the desiredCursorPosition.
+    let originalDesiredPosition = this.desiredCursorPosition;
     let position = 0;
     if (endToFocus === 0) {
       position = originalDesiredPosition;
@@ -7756,9 +7756,9 @@ class MathNode {
     if (position > this.element.textContent.length) {
       position = this.element.textContent.length;
     }
-    this.setCaretPosition(position);
+    this.setCursorPosition(position);
     this.equationEditor.setLastFocused(this);
-    this.desiredCaretPosition = -1;
+    this.desiredCursorPosition = -1;
     return true;
   }
 
@@ -7766,10 +7766,10 @@ class MathNode {
    * Focuses the HTMLElement that belongs to the math node.
    *
    * The endToFocus parameter denotes where the focus should occur.
-   * At the moment, negative endToFocus indicates the caret should
-   * be on the element's left, and positive endToFocus indicates the caret
+   * At the moment, negative endToFocus indicates the cursor should
+   * be on the element's left, and positive endToFocus indicates the cursor
    * should go on the right. Zero indicates to focus at
-   * this.positionCaretBeforeKeyEvents.
+   * this.positionCursorBeforeKeyEvents.
    *
    * @return {boolean} Whether the focus was successful.
    */
@@ -7825,8 +7825,8 @@ class MathNode {
 
   /** @return {boolean} whether focus request was found. */
   focusCancelOnce() {
-    if (this.desiredCaretPosition !== -1) {
-      this.desiredCaretPosition = -1;
+    if (this.desiredCursorPosition !== -1) {
+      this.desiredCursorPosition = -1;
       return true;
     }
     for (let i = 0; i < this.children.length; i++) {
@@ -7839,20 +7839,20 @@ class MathNode {
 
   /** @return {boolean} whether focused child was found. */
   focusRestore() {
-    if (this.desiredCaretPosition !== -1) {
+    if (this.desiredCursorPosition !== -1) {
       this.focus(0);
       return true;
     }
-    this.desiredCaretPosition = -1;
+    this.desiredCursorPosition = -1;
     for (let i = 0; i < this.children.length; i++) {
       if (this.children[i].focusRestore()) {
         return true;
       }
     }
     let sibling = null;
-    if (this.desiredCaretPosition > 0) {
+    if (this.desiredCursorPosition > 0) {
       sibling = this.firstAtomToTheRight();
-    } else if (this.desiredCaretPosition === 0) {
+    } else if (this.desiredCursorPosition === 0) {
       sibling = this.firstAtomToTheLeft();
     }
     if (sibling !== null) {
@@ -7924,7 +7924,7 @@ class MathNode {
     }
   }
 
-  setCaretPosition(
+  setCursorPosition(
       /** @type {number} */
       position,
   ) {
@@ -7952,7 +7952,7 @@ class MathNode {
     range.collapse(collapseToStart);
     this.equationEditor.resetSelectionDOM();
     selection.addRange(range);
-    this.positionCaretBeforeKeyEvents = position;
+    this.positionCursorBeforeKeyEvents = position;
     //    this.element.focus();
   }
 
@@ -8074,8 +8074,8 @@ class MathNode {
     if (this.focused) {
       content += ', F';
     }
-    if (this.desiredCaretPosition !== -1) {
-      content += `, FD[${this.desiredCaretPosition}]`;
+    if (this.desiredCursorPosition !== -1) {
+      content += `, FD[${this.desiredCursorPosition}]`;
     }
     if (this.boundingBox.width !== 0) {
       content += `, w: ${this.boundingBox.width}`;
@@ -8093,7 +8093,7 @@ class MathNode {
       content += `, fl: ${this.boundingBox.fractionLineHeight}`;
     }
     if (this.type.type === knownTypes.atom.type) {
-      content += `, caret: ${this.positionCaretBeforeKeyEvents}, `;
+      content += `, cursor: ${this.positionCursorBeforeKeyEvents}, `;
     }
     result.push(document.createTextNode(content));
     for (let i = 0; i < this.children.length; i++) {
@@ -8111,13 +8111,13 @@ class MathNode {
       /** @type {ToLatexOptions?} */
       options,
   ) {
-    let positionCaret = -1;
-    if (options !== null && options.useCaretCommand) {
-      positionCaret = this.desiredCaretPosition;
+    let positionCursor = -1;
+    if (options !== null && options.useCursorCommand) {
+      positionCursor = this.desiredCursorPosition;
     }
     let result = latexConstants.convertUtf16ToLatex(
         this.contentIfAtomic(),
-        positionCaret,
+        positionCursor,
     );
     return result;
   }
@@ -8422,7 +8422,7 @@ class MathNodeAtomImmutable extends MathNode {
    */
   applyBackspaceToTheRight() {
     let parent = this.parent;
-    parent.children[this.indexInParent + 1].desiredCaretPosition = 0;
+    parent.children[this.indexInParent + 1].desiredCursorPosition = 0;
     parent.removeChild(this.indexInParent);
     parent.normalizeHorizontalMath();
     parent.updateDOM();
@@ -8858,7 +8858,7 @@ class MathNodeError extends MathNode {
    */
   applyBackspaceToTheRight() {
     let parent = this.parent;
-    parent.children[this.indexInParent + 1].desiredCaretPosition = 0;
+    parent.children[this.indexInParent + 1].desiredCursorPosition = 0;
     parent.removeChild(this.indexInParent);
     parent.normalizeHorizontalMath();
     parent.updateDOM();
@@ -8954,7 +8954,7 @@ class MathNodeCancelUnderBox extends MathNode {
     let cancel = this.parent;
     let indexCancel = cancel.indexInParent;
     let content = this.children[0];
-    content.children[0].desiredCaretPosition = 0;
+    content.children[0].desiredCursorPosition = 0;
     let parent = cancel.parent;
     parent.replaceChildAtPosition(indexCancel, content.children[0]);
     parent.normalizeHorizontalMath();
@@ -9915,7 +9915,7 @@ class MathNodeRadicalUnderBox extends MathNode {
     let sqrt = this.parent;
     let indexSqrt = sqrt.indexInParent;
     let exponent = sqrt.children[0].children[0];
-    this.children[0].children[0].desiredCaretPosition = 0;
+    this.children[0].children[0].desiredCursorPosition = 0;
     let parent = sqrt.parent;
     parent.replaceChildAtPositionWithChildren(
         indexSqrt, [exponent, sqrt.children[2].children[0]]);
@@ -9965,7 +9965,7 @@ class MathNodeRowEntry extends MathNode {
     return this.parent.applyBackspaceToTheLeft();
   }
 
-  /** @return {MathNodeWithCaretPosition!} */
+  /** @return {MathNodeWithCursorPosition!} */
   getAtomToFocusFromAction(
     /** @type {string} */ key,
     /** @type {string} */ arrowType,
@@ -9974,14 +9974,14 @@ class MathNodeRowEntry extends MathNode {
       let row = this.parent;
       let matrixTable = row.parent;
       if (row.indexInParent < matrixTable.children.length) {
-        return new MathNodeWithCaretPosition(matrixTable.children[row.indexInParent+1].children[this.indexInParent], -1);
+        return new MathNodeWithCursorPosition(matrixTable.children[row.indexInParent+1].children[this.indexInParent], -1);
       }
     }
     if (arrowType === arrowMotion.firstAtomUp) {
       let row = this.parent;
       let matrixTable = row.parent;
       if (row.indexInParent > 0) {
-        return new MathNodeWithCaretPosition(matrixTable.children[row.indexInParent-1].children[this.indexInParent], 1);
+        return new MathNodeWithCursorPosition(matrixTable.children[row.indexInParent-1].children[this.indexInParent], 1);
       }
     }
     return this.getAtomToFocusFromActionDefault(key, arrowType);
@@ -10808,7 +10808,7 @@ class EquationEditorAction {
 /** A template to  construct buttons that modify an equation editor. */
 class EquationEditorButtonFactory {
   /**
-   * @param{string} command The latex to write at the position of the caret.
+   * @param{string} command The latex to write at the position of the cursor.
    * @param{boolean} isKeyPress Whether the input is to be interpreted in the
    * same way as a keyboard input. When this is true, editor-specific functions
    * such as auto-parentheses balancing will be triggered in addition to writing
@@ -10948,7 +10948,7 @@ let buttonFactories = {
   'exponent':
       new EquationEditorButtonFactory('^', true, '^', {'width': '100%'}, ''),
   'fraction': new EquationEditorButtonFactory(
-      '\\frac{\\caret}{}', false, '(\u2022)/(\u2022)', {'width': '100%'}, ''),
+      '\\frac{\\cursor}{}', false, '(\u2022)/(\u2022)', {'width': '100%'}, ''),
   'leftParenthesis':
       new EquationEditorButtonFactory('(', true, '(', {'width': '100%'}, ''),
   'rightParenthesis':
@@ -10960,26 +10960,26 @@ let buttonFactories = {
   'sum': new EquationEditorButtonFactory(
       '\\sum', false, '\u03A3', {'width': '100%'}, ''),
       'matrix2x2': new EquationEditorButtonFactory(
-        '\\begin{matrix}\\caret&\\\\&\\end{matrix}', false, '2x2',
+        '\\begin{matrix}\\cursor&\\\\&\\end{matrix}', false, '2x2',
         {'width': '100%'}, ''),
     'pmatrix2x2': new EquationEditorButtonFactory(
-      '\\begin{pmatrix}\\caret&\\\\&\\end{pmatrix}', false, '(2x2)',
+      '\\begin{pmatrix}\\cursor&\\\\&\\end{pmatrix}', false, '(2x2)',
       {'width': '100%'}, ''),
   'bmatrix2x2': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\caret&\\\\&\\end{bmatrix}', false, '[2x2]',
+      '\\begin{bmatrix}\\cursor&\\\\&\\end{bmatrix}', false, '[2x2]',
       {'width': '100%'}, ''),
   'bmatrix3x3': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\caret&&\\\\&&\\\\&&\\end{bmatrix}', false, '[3x3]',
+      '\\begin{bmatrix}\\cursor&&\\\\&&\\\\&&\\end{bmatrix}', false, '[3x3]',
       {'width': '100%'}, ''),
   'bmatrix1x3': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\caret & & \\\\ \\end{bmatrix}', false, '[1x3]',
+      '\\begin{bmatrix}\\cursor & & \\\\ \\end{bmatrix}', false, '[1x3]',
       {'width': '100%'}, ''),
   'bmatrix1x2': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\caret&\\end{bmatrix}', false, '[1x2]',
+      '\\begin{bmatrix}\\cursor&\\end{bmatrix}', false, '[1x2]',
       {'width': '100%'}, ''),
 
   'bmatrix2x1': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\caret&\\\\\\end{bmatrix}', false, '[2x1]',
+      '\\begin{bmatrix}\\cursor&\\\\\\end{bmatrix}', false, '[2x1]',
       {'width': '100%'}, ''),
   'pi': new EquationEditorButtonFactory(
       '\\pi', false, '\u03C0', {'width': '100%'}, ''),
@@ -10994,7 +10994,7 @@ let buttonFactories = {
   'underscore':
       new EquationEditorButtonFactory('_', true, '_', {'width': '100%'}, ''),
   'limit': new EquationEditorButtonFactory(
-      '\\lim_{\\caret}', false, 'lim', {'width': '100%'}, ''),
+      '\\lim_{\\cursor}', false, 'lim', {'width': '100%'}, ''),
 };
 
 /** Generates a panel of buttons to manipulate a given equation editor. */

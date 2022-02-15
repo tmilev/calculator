@@ -119,7 +119,14 @@ public:
     int offsetFromPrevious();
     int minimalSizeWithSpacebars();
     bool isExpressionLikeForIndentation();
+    // Breaks lines in a long expression.
     void breakExpression();
+    // A special break-line rune for stringstreams, i.e.,
+    // expressions of the form:
+    // out << something1 << something2 << ...
+    // Returns false if the expression is not of that form.
+    bool breakExpressionStringStream();
+    bool isStringStreamExpressionLike();
   public:
     Element::Type type;
     std::string content;
@@ -167,6 +174,7 @@ public:
     bool isTypeWordOrTypeExpression() const;
     bool isTypeOrIdentifierOrExpression() const;
     bool isStarOrAmpersand() const;
+    bool isOperatorThatCanBeNonBinary() const;
     bool isOperator() const;
     bool isColonDoubleColonOrComma() const;
     bool isColonOrDoubleColon() const;
@@ -235,6 +243,11 @@ public:
 
     void consumeElements();
     void consumeOneElement(CodeFormatter::Element& incoming);
+    bool isSuitableForExpressionOperatorExpression(
+    CodeFormatter::Element& left,
+    CodeFormatter::Element& middle,
+    CodeFormatter::Element& right
+    );
     bool applyOneRule();
     bool removeLast();
     bool removeLast(int count);
@@ -311,8 +324,8 @@ public:
     int indexInParent
   );
   bool rightOperatorOverridesLeft(
-  CodeFormatter::Element& leftOperator,
-  CodeFormatter::Element& rightOperator
+  const CodeFormatter::Element& leftOperator,
+  const CodeFormatter::Element& rightOperator
   );
 
 };

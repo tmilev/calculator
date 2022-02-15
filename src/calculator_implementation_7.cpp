@@ -6781,17 +6781,16 @@ bool CalculatorFunctions::allVectorPartitions(Calculator& calculator, const Expr
 }
 
 template <class Coefficient>
-bool CalculatorFunctions::functionDeterminant(
-  Calculator& calculator,
+bool CalculatorFunctions::functionDeterminant(Calculator& calculator,
   const Expression& input,
   Expression& output,
   int maxiumDimension
-) {
+, bool convertByComputation) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionDeterminant");
   Matrix<Coefficient> matrix;
   ExpressionContext context;
   if (!CalculatorConversions::functionGetMatrix<Coefficient>(
-    calculator, input, matrix, false, &context, - 1, &calculator.comments
+    calculator, input, matrix, convertByComputation, &context, - 1, &calculator.comments
   )) {
     return false;
   }
@@ -6836,22 +6835,22 @@ bool CalculatorFunctions::determinant(
   }
   const Expression& argument = input[1];
   if (CalculatorFunctions::functionDeterminant<Rational>(
-    calculator, argument, output, 100
+    calculator, argument, output, 100, false
   )) {
     return true;
   }
   if (CalculatorFunctions::functionDeterminant<ElementZmodP>(
-    calculator, argument, output, 100
+    calculator, argument, output, 100, false
   )) {
     return true;
   }
   if (CalculatorFunctions::functionDeterminant<AlgebraicNumber>(
-    calculator, argument, output, 20
+    calculator, argument, output, 20, true
   )) {
     return true;
   }
   if (CalculatorFunctions::functionDeterminant<RationalFraction<Rational> >(
-    calculator, argument, output, 10
+    calculator, argument, output, 10, true
   )) {
     return true;
   }

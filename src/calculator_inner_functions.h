@@ -472,7 +472,8 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int maxiumDimension
+    int maxiumDimension,
+  bool convertByComputation
   );
 
   static bool determinant(Calculator& calculator, const Expression& input, Expression& output);

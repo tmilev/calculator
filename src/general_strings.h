@@ -36,7 +36,7 @@ public:
     const List<char>& delimiters,
     List<std::string>& output
   );
-  static bool stringContains(const std::string& desiredContainer, const std::string& content);
+  static bool stringContains(const std::string& container, const std::string& content);
   static void stringTrimWhiteSpace(const std::string& inputString, std::string& output);
   static void stringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
   static std::string stringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);

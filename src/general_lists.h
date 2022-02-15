@@ -122,6 +122,8 @@ class AffineCones;
 template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&) = ObjectType1::hashFunction, unsigned int hashFunction2(const ObjectType2&)=ObjectType2::hashFunction>
 class Pair;
 template <class Object>
+class ListIterator;
+template <class Object>
 class List;
 template <class Object>
 class ListZeroAfterUse;
@@ -479,9 +481,31 @@ public:
   }
 };
 
-// List serves the same purpose as std::vector
-// List is not thread safe!!!!
-// Lists are used in the implementation of mutexes!!!
+template <typename Object>
+class ListIterator {
+public:
+  const List<Object>* iterated;
+  int index;
+  ListIterator(const List<Object>* input) {
+    this->iterated = input;
+    this->index = 0;
+  }
+  bool operator!=(const ListIterator<Object>& other) {
+    return this->index != other.index;
+  }
+  Object& operator*() const;
+  const ListIterator<Object>& operator++() {
+    this->index ++;
+    return *this;
+  }
+};
+
+// List serves the same purpose as std::vector.
+// It was written before I knew of the existence of the
+// C++ standard library; I've had no reason to switch to
+// the standard library since.
+// Lists are not thread safe.
+// Lists are used in the implementation of mutexes.
 template <class Object>
 class List {
   friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& input);
@@ -1104,7 +1128,21 @@ public:
       }
     }
   }
+  ListIterator<Object> begin() const {
+    ListIterator<Object> result(this);
+    return result;
+  }
+  ListIterator<Object> end() const {
+    ListIterator<Object> result(this);
+    result.index = this->size;
+    return result;
+  }
 };
+
+template <typename Object>
+Object& ListIterator<Object>::operator*() const {
+  return (*this->iterated)[this->index];
+}
 
 template <typename Object>
 class ListZeroAfterUse {

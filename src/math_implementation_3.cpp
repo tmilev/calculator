@@ -2506,8 +2506,8 @@ std::string StringRoutines::replaceAll(
   return out.str();
 }
 
-bool StringRoutines::stringContains(const std::string& desiredContainer, const std::string& content) {
-  return desiredContainer.find(content) != std::string::npos;
+bool StringRoutines::stringContains(const std::string& container, const std::string& content) {
+  return container.find(content) != std::string::npos;
 }
 
 bool StringRoutines::replaceOnce(

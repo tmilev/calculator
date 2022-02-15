@@ -2325,7 +2325,6 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
 
-
   this->addOperationHandler(
     "FunctionToMatrix",
     CalculatorFunctionsLinearAlgebra::functionToMatrix,
@@ -2334,7 +2333,7 @@ void Calculator::initializeFunctionsStandard() {
     "The first argument gives the function, "
     "the second argument the number of rows, the third- the number of columns.",
     "X =FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=a/b;\n X; \\det {} X",
-    "Calculator::functionToMatrix",
+    "CalculatorFunctionsLinearAlgebra::functionToMatrix",
     "FunctionToMatrix",
     innerStandard
   );
@@ -2344,7 +2343,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2); (1,2)^t",
-    "Calculator::transpose",
+    "CalculatorFunctions::transpose",
     Calculator::Atoms::transpose,
     innerStandard
   );
@@ -2356,8 +2355,12 @@ void Calculator::initializeFunctionsStandard() {
     "functions and computes the determinant if "
     "not too large.  ",
     "X =FunctionToMatrix{}(A,5,5);\n "
-    "A{}({{a}},{{b}})=1/(a +b);\n "
-    "X; \\det {} X",
+    "A{}({{a}},{{b}})=1/(a +b);\n"
+    "X;\n"
+    "\\det {} X;\n"
+    "f{}({{a}}, {{b}}) = x_{10a+b};\n"
+    "A=FunctionToMatrix(f, 3,3);\n"
+    "\\det A",
     "CalculatorFunctions::determinant",
     "Determinant",
     innerStandard

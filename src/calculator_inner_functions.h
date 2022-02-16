@@ -542,6 +542,12 @@ public:
   static bool formatCPPSourceCode(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool formatCPPSourceCodeInternal(
+    Calculator& calculator, const Expression& input, Expression& output, bool logDebugData
+  );
+  static bool formatCPPSourceCodeDebug(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool formatCPPDirectory(
     Calculator& calculator, const Expression& input, Expression& output
   );

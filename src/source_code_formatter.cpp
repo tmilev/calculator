@@ -265,6 +265,11 @@ bool CodeFormatter::Element::isSuitableForTypeExpression() const {
   this->type == CodeFormatter::Element::TypeKeyWord;
 }
 
+bool CodeFormatter::Element::isSuitableForTemplateArgument() const {
+  return this->isSuitableForTypeExpression() ||
+  this->type == CodeFormatter::Element::CommaList;
+}
+
 bool CodeFormatter::Element::isSuitableForParenthesesEnclosure() const {
   return
   this->isCommandListOrCommand() ||
@@ -524,6 +529,9 @@ bool CodeFormatter::Element::needsWhiteSpaceBefore() {
   if (this->owner->preemptsWhitespaceBefore(first)) {
     return false;
   }
+  if (lastPrevious == ')' && !startsWithSeparator) {
+    return true;
+  }
   return previous->requiresWhiteSpaceAfter;
 }
 
@@ -570,6 +578,7 @@ void CodeFormatter::Element::computeIndentationInParentheses() {
     this->computeIndentationBasic(0);
     return;
   }
+  this->children[0].indentationLevel = this->indentationLevel;
   this->children[0].computeIndentation();
   int middleSize = this->children[1].minimalSizeWithSpacebars();
   if (this->children[0].rightMostAtomUnderMe()->columnFinal + middleSize + 1 > this->owner->maximumDesiredLineLength) {
@@ -620,7 +629,6 @@ bool CodeFormatter::Element::breakExpressionStringStream() {
   }
   this->resetWhitespaceRecursively();
   for (int i = 0; i < this->children.size; i ++) {
-    global.comments << " New line after!!!<br>";
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].leftMostAtomUnderMe()->whiteSpaceBefore = this->indentationLevel;
     this->children[i].computeIndentation();
@@ -677,7 +685,11 @@ void CodeFormatter::Element::breakExpression() {
 
 void CodeFormatter::Element::computeIndentationReturnedExpression() {
   this->computeIndentationBasic(0);
-  if (!this->containsNewLineAfterRecursively()){
+  bool shouldBreak = this->containsNewLineAfterRecursively();
+  if (!shouldBreak && this->rightMostAtomUnderMe()->columnFinal + 1 >= this->owner->maximumDesiredLineLength) {
+    shouldBreak = true;
+  }
+  if (!shouldBreak){
     return;
   }
   if (this->children.size !=2) {
@@ -750,6 +762,10 @@ void CodeFormatter::Element::computeIndentation() {
   }
   if (this->type == CodeFormatter::Element::CommaList) {
     this->computeIndentationCommaList();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::Command) {
+    this->computeIndentationCommand();
     return;
   }
   if (this->type == CodeFormatter::Element::CommandList) {
@@ -868,7 +884,6 @@ void CodeFormatter::Element::computeIndentationCodeBlock() {
   this->children[0].whiteSpaceBefore = 1;
   this->children[0].indentationLevel = this->indentationLevel;
   this->children[0].computeIndentation();
-  int indentationChildren = this->indentationLevel + this->owner->tabLength;
   if (this->children.size == 3) {
     if (this->children[1].type == CodeFormatter::Element::CommandList) {
       this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
@@ -878,6 +893,7 @@ void CodeFormatter::Element::computeIndentationCodeBlock() {
       this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
     }
   }
+  int indentationChildren = this->indentationLevel + this->owner->tabLength;
   for (int i = 1; i < this->children.size - 1; i ++) {
     this->children[i].indentationLevel = indentationChildren;
     this->children[i].computeIndentation();
@@ -919,8 +935,8 @@ void CodeFormatter::Element::computeIndentationCaseClauseStart() {
 
 std::string CodeFormatter::Element::toStringHTMLTree() {
   std::stringstream out;
-  out << "<div style='border-left-style: solid; margin-left: 10px;'>" << this->content << "[" << this->toStringType(this->type) << "]";
-  std::string indentationChildren;
+  out << "<div style='border-left-style: solid; margin-left: 10px;'>" << this->content << "[" << this->toStringType(this->type) << "]"
+  << " i: " << this->indentationLevel;
   for (int i = 0; i < this->children.size; i ++) {
     out << this->children[i].toStringHTMLTree();
   }
@@ -988,6 +1004,11 @@ void CodeFormatter::Element::computeIndentationIfClause() {
   }
 }
 
+void CodeFormatter::Element::computeIndentationCommand() {
+  MacroRegisterFunctionWithName("CodeFormatter::Element::computeIndentationCommand");
+  this->computeIndentationBasic(0);
+}
+
 void CodeFormatter::Element::computeIndentationCommaList() {
   bool mustSplitLines = false;
   if (this->minimalSizeWithSpacebars() + this->offsetFromPrevious() > this->owner->maximumDesiredLineLength) {
@@ -1012,7 +1033,6 @@ void CodeFormatter::Element::computeIndentationCommaList() {
 void CodeFormatter::Element::computeIndentationExpression() {
   this->computeIndentationBasic(0);
   if (!this->containsNewLineAfterRecursively()) {
-    //global.comments << "DEBUG: not breaking!";
     return;
   }
   this->breakExpression();
@@ -1304,7 +1324,7 @@ bool CodeFormatter::formatCPPDirectory(const std::string& inputDirectory, std::s
   }
   for (int i = 0; i < newFileNames.size; i ++) {
     CodeFormatter formatter;
-    if (!formatter.formatCPPSourceCode(oldFileNames[i], newFileNames[i], comments)) {
+    if (!formatter.formatCPPSourceCode(oldFileNames[i], newFileNames[i], comments, false)) {
       return false;
     }
   }
@@ -1314,7 +1334,8 @@ bool CodeFormatter::formatCPPDirectory(const std::string& inputDirectory, std::s
 bool CodeFormatter::formatCPPSourceCode(
   const std::string& inputFileName,
   const std::string& inputOutputFileNameEmptyForAuto,
-  std::stringstream* comments
+  std::stringstream* comments,
+  bool logDebugInfo
 ) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::formatCPPSourceCode");
   if (!this->initializeFileNames(inputFileName, inputOutputFileNameEmptyForAuto, comments)) {
@@ -1325,11 +1346,13 @@ bool CodeFormatter::formatCPPSourceCode(
     return false;
   }
   this->processor.initialize(*this);
+  this->processor.flagPrepareReport = logDebugInfo;
   this->processor.consumeElements();
   std::stringstream out;
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
-   global.comments << "DEBUG: the log:<br>" << this->processor.debugLog;
-   global.comments << "DEBUG: the tree:<br>" << this->processor.code.toStringHTMLTree();
+  if (logDebugInfo) {
+   global.comments << "<b>Parsing log follows.</b><br>" << this->processor.debugLog;
+  }
   if (this->processor.code.children.size <= this->dummyElements + 1) {
     out << this->processor.code.format();
   } else  {
@@ -1338,6 +1361,9 @@ bool CodeFormatter::formatCPPSourceCode(
       this->processor.code.children[i].toStringContentOnly(out);
       out << "\n";
     }
+  }
+  if (logDebugInfo) {
+    global.comments << "<hr>Code element tree follows<br>" << this->processor.code.toStringHTMLTree();
   }
   this->transformedContent = out.str();
   if (!this->writeFormatedCode(comments)) {
@@ -1373,6 +1399,12 @@ bool CodeFormatter::isOperator(const std::string& input) {
   return this->operatorList.contains(input);
 }
 
+void CodeFormatter::addOperatorOverride(const std::string &overridingOperator, const List<std::string> &overridden) {
+HashedList<std::string, HashFunctions::hashFunction> overridenHashed;
+overridenHashed.addListOnTop(overridden);
+this->operatorOverrides.setKeyValue(overridingOperator, overridenHashed);
+}
+
 CodeFormatter::CodeFormatter() {
   this->separatorCharacters = "(){} \t\n\r,:;.*&+-/%[]#\"'=><!|";
   this->doesntNeedSpaceToTheLeft = "&,:.()";
@@ -1380,6 +1412,20 @@ CodeFormatter::CodeFormatter() {
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"&", "&"}));
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"&", "*"}));
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"*", "&"}));
+
+  List<std::string> relations = List<std::string>({"=", "==", ">=", ">", "<="});
+  List<std::string> andAndOr = List<std::string>({"&&", "||"});
+  this->addOperatorOverride("+", relations);
+  this->addOperatorOverride("-", relations);
+  this->addOperatorOverride("==", andAndOr);
+  this->addOperatorOverride("=", andAndOr);
+  this->addOperatorOverride(">=", andAndOr);
+  this->addOperatorOverride("<=", andAndOr);
+  this->addOperatorOverride(">", andAndOr);
+  this->addOperatorOverride("<", andAndOr);
+  this->addOperatorOverride("!=", andAndOr);
+  this->addOperatorOverride("!", andAndOr);
+
   this->elementTypes.setKeyValue(":", CodeFormatter::Element::Colon);
   this->elementTypes.setKeyValue(";", CodeFormatter::Element::SemiColon);
   this->elementTypes.setKeyValue("(", CodeFormatter::Element::LeftParenthesis);
@@ -1460,8 +1506,7 @@ CodeFormatter::CodeFormatter() {
 
 CodeFormatter::Processor::Processor() {
   this->owner = nullptr;
-  global.comments << "DEBUG: preparing report!<br>";
-  this->flagPrepareReport = true;
+  this->flagPrepareReport = false;
   this->flagExceededReportSize = false;
 }
 
@@ -1809,7 +1854,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   if (
     fourthToLast.isSuitableForTypeExpression() &&
     thirdToLast.type == CodeFormatter::Element::LessThan &&
-    secondToLast.isSuitableForTypeExpression() &&
+    secondToLast.isSuitableForTemplateArgument() &&
     last.type == CodeFormatter::Element::GreaterThan
   ) {
     this->lastRuleName = "type expression less than type expression greater than";
@@ -1942,6 +1987,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.isSuitableForCommaListElement() &&
     last.type == CodeFormatter::Element::Comma
   ) {
+    this->lastRuleName = "comma list and element";
     thirdToLast.children.addOnTop(secondToLast);
     thirdToLast.children.addOnTop(last);
     return this->removeLast(2);
@@ -1949,8 +1995,9 @@ bool CodeFormatter::Processor::applyOneRule() {
   if (
     thirdToLast.type == CodeFormatter::Element::CommaList &&
     secondToLast.isSuitableForCommaListElement() &&
-    (last.isRightDelimiter() || last.type == CodeFormatter::Element::SemiColon)
+    (last.isRightDelimiter() || last.type == CodeFormatter::Element::SemiColon || last.type == CodeFormatter::Element::GreaterThan)
   ) {
+    this->lastRuleName = "comma list and delimiter";
     thirdToLast.children.addOnTop(secondToLast);
     return this->removeBelowLast(1);
   }
@@ -2124,20 +2171,28 @@ bool CodeFormatter::Processor::applyOneRule() {
 }
 
 bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpression(CodeFormatter::Element &left, CodeFormatter::Element &middle, CodeFormatter::Element &right) {
-return
-  left.type == CodeFormatter::Element::ExpressionEndingWithOperator &&
-  (middle.isExpressionIdentifierOrAtom() ||
-  middle.type == CodeFormatter::Element::FunctionWithArguments
-)&&
-  !right.isColonOrDoubleColon()  &&
-  right.type != CodeFormatter::Element::LessThan &&
-!right.isDashDotOrDashGreaterThan() &&
-right.type != CodeFormatter::Element::LeftParenthesis &&
-right.type != CodeFormatter::Element::LeftBracket &&
-!this->owner->rightOperatorOverridesLeft(
+if (
+  left.type != CodeFormatter::Element::ExpressionEndingWithOperator){
+return false;
+}
+if   (!middle.isExpressionIdentifierOrAtom() &&
+  middle.type != CodeFormatter::Element::FunctionWithArguments
+) {
+  return false;}
+if
+  (right.isColonOrDoubleColon()  ||
+  right.type == CodeFormatter::Element::LessThan ||
+right.isDashDotOrDashGreaterThan() ||
+right.type == CodeFormatter::Element::LeftParenthesis ||
+right.type == CodeFormatter::Element::LeftBracket){return false;}
+if(
+this->owner->rightOperatorOverridesLeft(
 *left.children.lastObject(),
 right
-);
+)) {
+  return false;
+}
+return true;
 }
 
 void CodeFormatter::Processor::appendLog() {
@@ -2231,21 +2286,13 @@ bool CodeFormatter::writeFormatedCode(std::stringstream* comments) {
 }
 
 bool CodeFormatter::rightOperatorOverridesLeft(const CodeFormatter::Element &leftOperator, const CodeFormatter::Element &rightOperator) {
-  if (rightOperator.type != CodeFormatter::Element::Operator) {
+  if (!rightOperator.isOperator()) {
     return false;
   }
-  if (leftOperator.content == "="  || leftOperator.content == "==") {
-    if (rightOperator.content == "+" || rightOperator.content == "-") {
-      return true;
-    }
+  if (!this->operatorOverrides.contains(rightOperator.content)) {
+    return false;
   }
-  if (leftOperator.content == "||"  || leftOperator.content == "&&") {
-    if (rightOperator.content == "==" || rightOperator.content == ">" || rightOperator.content == "<"||
-    rightOperator.content == ">=" || rightOperator.content == "<=") {
-      return true;
-    }
-  }
-  return false;
+  return this->operatorOverrides.getValueNoFail(rightOperator.content).contains(leftOperator.content);
 }
 
 void CodeFormatter::wirePointersRecursively(

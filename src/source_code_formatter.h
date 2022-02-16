@@ -98,6 +98,7 @@ public:
     void computeIndentationControlWantsCodeBlock();
     void computeIndentationCommandList();
     void computeIndentationCommaList();
+    void computeIndentationCommand();
     void computeIndentationComment();
     void computeIndentationCommentCollection();
     void computeIndentationTypeExpression();
@@ -160,6 +161,7 @@ public:
     bool isSuitableForCommand() const;
     bool isSuitableForTopLevel() const;
     bool isSuitableForTypeExpression() const;
+    bool isSuitableForTemplateArgument() const;
     bool isSuitableForParenthesesEnclosure() const;
     bool isSuitableForCommaListElement() const;
     bool isRightDelimiter() const;
@@ -285,18 +287,25 @@ public:
   // A list of elements interpreted as operators.
   HashedList<std::string, HashFunctions::hashFunction> operatorList;
 
+  // A list of operator overrides.
+  // An operator K given in the key overrides any operator V given in the values.
+  // In other words, the expression
+  // xVyKz is to be interpreted as xV(yKz) rather than as (xVy)Kz
+  MapList<std::string, HashedList<std::string, HashFunctions::hashFunction>, HashFunctions::hashFunction>
+  operatorOverrides;
+
   int maximumDesiredLineLength;
   int indexCurrentlyConsumed;
   const int tabLength = 2;
   const int dummyElements = 4;
   // A class to represent
   CodeFormatter();
+  void addOperatorOverride(const std::string& overridingOperator, const List<std::string>& overridden);
   static bool formatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
-  bool formatCPPSourceCode(
-    const std::string& inputFileName,
+  bool formatCPPSourceCode(const std::string& inputFileName,
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
-  );
+  , bool logDebugInfo);
   bool shouldSeparateWithSpace(const std::string& left, const std::string& right);
   bool preemptsWhitespaceBefore(char input);
   bool needsSpaceToTheRight(const std::string& word);

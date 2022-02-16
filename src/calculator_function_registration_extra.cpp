@@ -240,6 +240,17 @@ void Calculator::initializeFunctionsExtra() {
     innerInvisibleExperimentalNoTest
   );
   this->addOperationHandler(
+    "FormatCPPCodeDebug",
+    CalculatorFunctions::formatCPPSourceCodeDebug,
+    "",
+    "Format cpp code, debug version "
+    "that shows the code formatter internals.",
+    "FormatCPPCodeDebug{}(\"src/source_code_formatter.cpp\")",
+    "Calculator::formatCPPSourceCodeDebug",
+    "FormatCPPCodeDebug",
+    innerInvisibleExperimentalNoTest
+  );
+  this->addOperationHandler(
     "formatCPPDirectory",
     CalculatorFunctions::formatCPPDirectory,
     "",

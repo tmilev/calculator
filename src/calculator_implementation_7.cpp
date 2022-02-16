@@ -2136,8 +2136,19 @@ bool CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial(
   return output.assignValueWithContext(calculator, polynomial.content, polynomial.context);
 }
 
-bool CalculatorFunctions::formatCPPSourceCode(
-  Calculator& calculator, const Expression& input, Expression& output
+bool CalculatorFunctions::formatCPPSourceCodeDebug(Calculator &calculator, const Expression &input, Expression &output) {
+  return formatCPPSourceCodeInternal(calculator, input, output, true);
+}
+
+bool CalculatorFunctions::formatCPPSourceCode(Calculator &calculator, const Expression &input, Expression &output) {
+  return formatCPPSourceCodeInternal(calculator, input, output, false);
+}
+
+bool CalculatorFunctions::formatCPPSourceCodeInternal(
+  Calculator &calculator,
+  const Expression &input,
+Expression &output,
+bool logDebugData
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::formatCPPSourceCode");
   if (!global.userDefaultHasAdminRights()) {
@@ -2152,7 +2163,7 @@ bool CalculatorFunctions::formatCPPSourceCode(
   }
   std::stringstream report;
   CodeFormatter formatter;
-  formatter.formatCPPSourceCode(fileName, "", &report);
+  formatter.formatCPPSourceCode(fileName, "", &report, logDebugData);
   return output.assignValue(calculator, report.str());
 }
 

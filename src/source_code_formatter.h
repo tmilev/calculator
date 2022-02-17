@@ -37,11 +37,6 @@ public:
       TypeExpression,
       // A computed expression, such as this->x or x+2.
       Expression,
-      // An (incomplete) expression ending with an operator such as:
-      // x+
-      // or
-      // x==
-      ExpressionEndingWithOperator,
       // An identifier such as f::y.
       Identifier,
       // A user-defined atom such as foo or bar.
@@ -101,6 +96,7 @@ public:
     void computeIndentationCommand();
     void computeIndentationComment();
     void computeIndentationCommentCollection();
+    void computeIndentationCurlyBraceCommaDelimitedList();
     void computeIndentationTypeExpression();
     void computeIndentationReturnedExpression();
     void computeIndentationOperator();
@@ -168,16 +164,20 @@ public:
     bool isIdentifierOrAtom() const;
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;
+    bool isExpressionIdentifierAtomOrFunctionWithArguments() const;
     bool isCommandListOrCommand() const;
     bool isParenthesesBlock() const;
     bool isCodeBlock() const;
     bool isCodeBlockOrCommand() const;
+    bool isComment() const;
     bool isTypeWord() const;
     bool isTypeWordOrTypeExpression() const;
     bool isTypeOrIdentifierOrExpression() const;
     bool isStarOrAmpersand() const;
-    bool isOperatorThatCanBeNonBinary() const;
+    bool canBeUnaryOnTheRight() const;
+    bool canBeUnaryOnTheLeft() const;
     bool isOperator() const;
+    bool isOperatorOrInequality() const;
     bool isColonDoubleColonOrComma() const;
     bool isColonOrDoubleColon() const;
     bool isDashDotOrDashGreaterThan() const;
@@ -187,6 +187,7 @@ public:
       int inputIndexInParent
     );
     Element* previousAtom();
+    Element* previousSibling();
     Element* rightMostAtomUnderMe();
     Element* leftMostAtomUnderMe();
     void makeFrom1(
@@ -245,11 +246,10 @@ public:
 
     void consumeElements();
     void consumeOneElement(CodeFormatter::Element& incoming);
-    bool isSuitableForExpressionOperatorExpression(
-    CodeFormatter::Element& left,
+    bool isSuitableForExpressionOperatorExpression(CodeFormatter::Element& left,
     CodeFormatter::Element& middle,
     CodeFormatter::Element& right
-    );
+    , Element &lookAhead);
     bool applyOneRule();
     bool removeLast();
     bool removeLast(int count);

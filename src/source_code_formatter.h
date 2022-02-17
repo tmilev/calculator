@@ -250,6 +250,10 @@ public:
     CodeFormatter::Element& middle,
     CodeFormatter::Element& right
     , Element &lookAhead);
+    bool isSuitableForUnaryOperatorExpression(CodeFormatter::Element& first,
+    CodeFormatter::Element& unary,
+    CodeFormatter::Element& expression
+    , Element &lookAhead);
     bool applyOneRule();
     bool removeLast();
     bool removeLast(int count);

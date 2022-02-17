@@ -391,7 +391,7 @@ bool CodeFormatter::Element::canBeUnaryOnTheLeft() const {
   if (!this->isOperator()) {
     return false;
   }
-  return  this->content == "++" || this->content == "--" || this->content == "&" || this->content == "*";
+  return  this->content == "++" || this->content == "--" || this->content == "&" || this->content == "*"|| this->content == "!";
 }
 
 bool CodeFormatter::Element::isOperator() const {
@@ -1511,7 +1511,7 @@ CodeFormatter::CodeFormatter() {
   this->addOperatorOverride(">=", andAndOr);
   this->addOperatorOverride("<=", andAndOr);
   this->addOperatorOverride(">", andAndOr);
-  this->addOperatorOverride("<", andAndOr);
+  this->addOperatorOverride("<", List<std::string>({"&&", "||", "="}));
   this->addOperatorOverride("!=", andAndOr);
   this->addOperatorOverride("!", andAndOr);
   this->addOperatorOverride("||", List<std::string>({"->", "."}));
@@ -1820,15 +1820,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.makeFrom2(CodeFormatter::Element:: Expression, thirdToLast, secondToLast);
     return this->removeBelowLast(1);
   }
-  if (
-  thirdToLast.canBeUnaryOnTheLeft()&&
-  secondToLast.isExpressionIdentifierAtomOrFunctionWithArguments()
-  && (last.isRightDelimiter() || last.type == CodeFormatter::Element::SemiColon)
-  ) {
-    this->lastRuleName = "unary operator expression )";
-    thirdToLast.makeFrom2(CodeFormatter::Element:: Expression, thirdToLast, secondToLast);
-    return this->removeBelowLast(1);
-  }
+
   if (secondToLast.type == CodeFormatter::Element::FunctionWithArguments && last.isRightDelimiter()) {
     secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
     return true;
@@ -1945,6 +1937,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     fourthToLast.makeFrom4(CodeFormatter::Element::TypeExpression, fourthToLast, thirdToLast, secondToLast, last);
     return this->removeLast(3);
   }
+
   if (
     secondToLast.type == CodeFormatter::Element::TypeExpression &&
     last.isStarOrAmpersand()
@@ -1998,6 +1991,16 @@ bool CodeFormatter::Processor::applyOneRule() {
 
     return this->removeBelowLast(2);
   }
+
+
+  if (
+  this->isSuitableForUnaryOperatorExpression(fourthToLast, thirdToLast, secondToLast, last)){
+    this->lastRuleName = "X unary operator expression Y";
+    thirdToLast.makeFrom2(CodeFormatter::Element:: Expression, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
+  }
+
+
 
   if (
  fourthToLast.isTypeWordOrTypeExpression()
@@ -2246,12 +2249,34 @@ bool CodeFormatter::Processor::applyOneRule() {
   return false;
 }
 
+bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
+CodeFormatter::Element &first, CodeFormatter::Element &unary, CodeFormatter::Element &expression, Element &lookAhead) {
+  if (!expression.isExpressionIdentifierAtomOrFunctionWithArguments()) {
+    return false;
+  }
+  if (!unary.canBeUnaryOnTheLeft()) {
+    return false;
+  }
+  if (lookAhead.isRightDelimiter() || lookAhead.type == CodeFormatter::Element::SemiColon ) {
+    return  false;
+  }
+  if (lookAhead.type == CodeFormatter::Element::Colon || lookAhead.type == CodeFormatter::Element::DoubleColon) {
+    return  false;
+  }
+  if (lookAhead.isOperator()) {
+    return  false;
+  }
+  if (first.isIdentifierOrAtom()) {return false;}
+  return  true;
+}
+
 bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpression(
 CodeFormatter::Element &left, CodeFormatter::Element &middle, CodeFormatter::Element &right,
 CodeFormatter::Element &lookAhead
 
 ) {
 if(!  left.isExpressionIdentifierAtomOrFunctionWithArguments() &&  left.type != CodeFormatter::Element::TypeAndIdentifier) {
+  return false;
  }
 
   if (

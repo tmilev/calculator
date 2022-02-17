@@ -391,7 +391,9 @@ bool CodeFormatter::Element::canBeUnaryOnTheLeft() const {
   if (!this->isOperator()) {
     return false;
   }
-  return  this->content == "++" || this->content == "--" || this->content == "&" || this->content == "*"|| this->content == "!";
+  return  this->content == "++" || this->content == "--" ||
+  this->content == "&" || this->content == "*"|| this->content == "!" ||
+  this->content == "-";
 }
 
 bool CodeFormatter::Element::isOperator() const {
@@ -406,11 +408,6 @@ bool CodeFormatter::Element::isColonDoubleColonOrComma() const {
   this->type == CodeFormatter::Element::DoubleColon ||
   this->type == CodeFormatter::Element::Comma
   ;
-}
-
-bool CodeFormatter::Element::isDashDotOrDashGreaterThan() const {
-  return
-  this->content == "-" || this->content == "->" || this->content == ".";
 }
 
 bool CodeFormatter::Element::isColonOrDoubleColon() const {
@@ -555,6 +552,40 @@ bool CodeFormatter::Element::needsWhiteSpaceBefore() {
   return previous->requiresWhiteSpaceAfter;
 }
 
+void CodeFormatter::Element::computeIndentationLessThan() {
+  if (this->parent->type != CodeFormatter::Element::TypeExpression) {
+    this->computeIndentationAtomic();
+    return;
+  }
+}
+
+void CodeFormatter::Element::computeIndentationGreaterThan() {
+  if (this->parent->type != CodeFormatter::Element::TypeExpression) {
+    this->computeIndentationAtomic();
+    return;
+  }
+}
+
+bool CodeFormatter::Element::applyOpenParenthesisException() {
+  CodeFormatter::Element* previous = this->previousAtom();
+  if (this->content != "(" || previous == nullptr) {
+    return false;
+  }
+  if ( previous->newLinesAfter == 0){return false;}
+
+    if ( previous->columnFinal+1 >= this->owner->maximumDesiredLineLength) {
+      return  false;
+    }
+    if (previous->content == ";" || previous->content == "{"){return false;}
+    // Exception: holds naked ( on a new line is moved to the top line.
+    previous->newLinesAfter = 0;
+    if (previous->content != "(") {
+
+    this->whiteSpaceBefore=1;
+    }
+    return true;
+}
+
 void CodeFormatter::Element::computeIndentationAtomic() {
   CodeFormatter::Element* previous = this->previousAtom();
   if (previous != nullptr && this->content == "{") {
@@ -565,17 +596,9 @@ void CodeFormatter::Element::computeIndentationAtomic() {
     return;
   }
   }
-  if (previous != nullptr && this->content == "(") {
-  if (previous->newLinesAfter > 0 && previous->columnFinal+1 < this->owner->maximumDesiredLineLength) {
-    // Exception: naked ( on a new line is moved to the top line.
-    previous->newLinesAfter = 0;
-    if (previous->content != "(") {
-
-    this->whiteSpaceBefore=1;
-    }
-    return;
-  }
-  }
+if (this->applyOpenParenthesisException()) {
+  return;
+}
   if (this->owner->needsSpaceToTheRight(this->content)) {
     this->requiresWhiteSpaceAfter = true;
   }
@@ -666,7 +689,6 @@ bool CodeFormatter::Element::breakExpressionStringStream() {
   if (!this->isStringStreamExpressionLike()) {
     return false;
   }
-  global.comments << "DEBuG: here I am!";
   this->resetWhitespaceRecursively();
   for (int i = 0; i < this->children.size; i ++) {
     this->children[i].indentationLevel = this->indentationLevel;
@@ -713,7 +735,7 @@ void CodeFormatter::Element::breakExpression() {
       breakLine = true;
     }
     if (breakLine) {
-      if (current.content == "." || current.content == "->"  || current.content == "==" ) {
+      if (current.content == "." || current.content == "->" ) {
         breakLine =false;
       }
     }
@@ -831,6 +853,14 @@ void CodeFormatter::Element::computeIndentation() {
   }
   if (this->type == CodeFormatter::Element::FunctionDefinition) {
     this->computeIndentationFunctionDefinition();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::GreaterThan) {
+    this->computeIndentationGreaterThan();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::LessThan) {
+    this->computeIndentationLessThan();
     return;
   }
   if (this->content != "") {
@@ -1016,6 +1046,18 @@ std::string CodeFormatter::Element::toStringHTMLTree() {
   out << "<div style='border-left-style: solid; margin-left: 10px;'>" <<
   this->content << "[" << this->toStringType(this->type) << "]"
   << " i: " << this->indentationLevel;
+  if (this->children.size > 1) {
+  out << " c: " << this->children.size;
+}
+  if (this->whiteSpaceBefore > 0) {
+    out << " w: " << this->whiteSpaceBefore;
+  }
+  if (this->requiresWhiteSpaceAfter) {
+    out << " r: " << this->requiresWhiteSpaceAfter;
+  }
+  for (int i = 0; i < this->newLinesAfter; i ++){
+    out << "&darr;&darr;";
+  }
   for (int i = 0; i < this->children.size; i ++) {
     out << this->children[i].toStringHTMLTree();
   }
@@ -1436,6 +1478,7 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.flagPrepareReport = logDebugInfo;
   this->processor.consumeElements();
   std::stringstream out;
+  this->normalizeBinaryOperationsRecursively(this->processor.code);
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
   if (logDebugInfo) {
    global.comments << "<b>Parsing log follows.</b><br>" << this->processor.debugLog;
@@ -1487,9 +1530,9 @@ bool CodeFormatter::isOperator(const std::string& input) {
 }
 
 void CodeFormatter::addOperatorOverride(const std::string &overridingOperator, const List<std::string> &overridden) {
-HashedList<std::string, HashFunctions::hashFunction> overridenHashed;
+HashedList<std::string, HashFunctions::hashFunction>& overridenHashed =
+this->operatorOverrides.getValueCreateEmpty(overridingOperator);
 overridenHashed.addListOnTop(overridden);
-this->operatorOverrides.setKeyValue(overridingOperator, overridenHashed);
 }
 
 CodeFormatter::CodeFormatter() {
@@ -1500,12 +1543,26 @@ CodeFormatter::CodeFormatter() {
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"&", "*"}));
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"*", "&"}));
 
-  List<std::string> relations = List<std::string>({"=", "==", ">=", ">", "<="});
+  List<std::string> relations = List<std::string>({"=", "==", ">=", ">", "<=", "!="});
   List<std::string> andAndOr = List<std::string>({"&&", "||"});
-  List<std::string> andOrRelations = List<std::string>({"&&", "||", "=", "==", ">=", "<="});
+  List<std::string> arithmeticOperations = List<std::string>({"+", "-", "/", "*"});
+  List<std::string> bitShift = List<std::string>({"<<", ">>"});
+
+  List<std::string> andOrRelations = relations;
+  andOrRelations.addListOnTop(andAndOr);
 
   this->addOperatorOverride("+", andOrRelations);
+  // The negative sign may extend to the -> operator, so
+  // its presence on the right overrides the other arithmetic operators.
   this->addOperatorOverride("-", andOrRelations);
+  this->addOperatorOverride("-", arithmeticOperations);
+  this->addOperatorOverride("-", bitShift);
+  this->addOperatorOverride("->", andOrRelations);
+  this->addOperatorOverride("->", arithmeticOperations );
+  this->addOperatorOverride("->", bitShift );
+  this->addOperatorOverride(".", andOrRelations);
+  this->addOperatorOverride(".", arithmeticOperations );
+  this->addOperatorOverride(".", bitShift );
   this->addOperatorOverride("==", andAndOr);
   this->addOperatorOverride("=", andAndOr);
   this->addOperatorOverride(">=", andAndOr);
@@ -1723,8 +1780,16 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.isOperatorOrInequality() &&
     last.type == CodeFormatter::Element::InParentheses
   ) {
-    this->lastRuleName = "in parentheses to expression after expressionending with operator";
+    this->lastRuleName = "in parentheses to expression after expression ending with operator";
     last.makeFrom1(CodeFormatter::Element::Expression, last);
+    return true;
+  }
+  if (
+    secondToLast.type == CodeFormatter::Element::InParentheses &&
+    last.isOperator()
+  ) {
+    this->lastRuleName = "in parentheses X to expression X";
+    secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
     return true;
   }
   if (secondToLast.type == CodeFormatter::Element::ControlKeyWord && last.type == CodeFormatter::Element::InParentheses) {
@@ -1883,24 +1948,6 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.type = CodeFormatter::Element::Operator;
     return this->removeLast();
   }
-
-  if (
-    secondToLast.isOperator() && secondToLast.content != "=" &&
-    last.type == CodeFormatter::Element::Expression
-  ) {
-    this->lastRuleName = "operator expression";
-    secondToLast.makeFrom2(CodeFormatter::Element::Expression, secondToLast, last);
-    return this->removeLast();
-  }
-  if (
-    (thirdToLast.isOperator() && thirdToLast.content != "=") &&
-    secondToLast.type == CodeFormatter::Element::Expression &&
-    ! this->owner->rightOperatorOverridesLeft(thirdToLast, last)
-  ) {
-    this->lastRuleName = "operator expression ?";
-    thirdToLast.makeFrom2(CodeFormatter::Element::Expression, thirdToLast, secondToLast);
-    return this->removeBelowLast(1);
-  }
   if (
     thirdToLast.isOperator() &&
     secondToLast.type == CodeFormatter::Element::Atom && (
@@ -1986,7 +2033,10 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (this->isSuitableForExpressionOperatorExpression(fourthToLast, thirdToLast, secondToLast, last)
   ) {
-    this->lastRuleName = "expression ending with operator and atom";
+    this->lastRuleName = "expression operator expression";
+    // Operators such as < and > may not have their type
+    // set to Operator.
+    thirdToLast.type = CodeFormatter::Element::Operator;
     fourthToLast.makeFrom3(CodeFormatter::Element::Expression, fourthToLast, thirdToLast, secondToLast);
 
     return this->removeBelowLast(2);
@@ -2155,7 +2205,8 @@ bool CodeFormatter::Processor::applyOneRule() {
     fourthToLast.makeFrom3(CodeFormatter::Element::Expression, fourthToLast, thirdToLast, secondToLast);
     return this->removeBelowLast(2);
   }
-  if (secondToLast.isSuitableForCommand() && last.type == CodeFormatter::Element::SemiColon) {
+  if ( !thirdToLast.isOperator() &&
+  secondToLast.isSuitableForCommand() && last.type == CodeFormatter::Element::SemiColon) {
     this->lastRuleName = "expression and semicolon";
     secondToLast.makeFrom2(CodeFormatter::Element::Command, secondToLast, last);
     return this->removeLast();
@@ -2257,9 +2308,6 @@ CodeFormatter::Element &first, CodeFormatter::Element &unary, CodeFormatter::Ele
   if (!unary.canBeUnaryOnTheLeft()) {
     return false;
   }
-  if (lookAhead.isRightDelimiter() || lookAhead.type == CodeFormatter::Element::SemiColon ) {
-    return  false;
-  }
   if (lookAhead.type == CodeFormatter::Element::Colon || lookAhead.type == CodeFormatter::Element::DoubleColon) {
     return  false;
   }
@@ -2280,7 +2328,7 @@ if(!  left.isExpressionIdentifierAtomOrFunctionWithArguments() &&  left.type != 
  }
 
   if (
- !right.isExpressionIdentifierOrAtom()){
+ !right.isExpressionIdentifierAtomOrFunctionWithArguments()){
 return false;
 }
 if (!middle.isOperatorOrInequality()) {
@@ -2289,8 +2337,8 @@ if (!middle.isOperatorOrInequality()) {
 
 if
   (lookAhead.isColonOrDoubleColon()  ||
-lookAhead.isDashDotOrDashGreaterThan() ||
-lookAhead.type == CodeFormatter::Element::Comma||
+lookAhead.content
+ == "-" ||
 lookAhead.type == CodeFormatter::Element::LeftParenthesis ||
 lookAhead.type == CodeFormatter::Element::LeftBracket){return false;}
 if(
@@ -2300,6 +2348,18 @@ lookAhead
 )) {
   return false;
 }
+
+if (middle.type == CodeFormatter::Element::LessThan && (
+lookAhead.type == CodeFormatter::Element::Comma ||
+lookAhead.type == CodeFormatter::Element::GreaterThan)) {
+  // This could be something of the form:
+  // List<a,
+  // which can extend to a template: List<a,b>;
+  // or of the form:
+  // List<a>.
+  return  false;
+}
+
 return true;
 }
 
@@ -2321,7 +2381,7 @@ std::string CodeFormatter::Processor::toStringStack() {
   std::stringstream out;
   for (int i = this->owner->dummyElements; i < this->stack.size; i ++) {
     out << "<b style='color:brown'>"
-    << this->stack[i].toStringWithoutType() << "</b>["
+    << HtmlRoutines::convertStringToHtmlString( this->stack[i].toStringWithoutType(), false) << "</b>["
     << this->stack[i].toStringType(this->stack[i].type) << "] ";
   }
   return out.str();
@@ -2412,4 +2472,57 @@ void CodeFormatter::wirePointersRecursively(
   for (int i = 0; i < current.children.size; i ++) {
     this->wirePointersRecursively(current.children[i], &current, i);
   }
+}
+
+void CodeFormatter::correctMultiArguments(CodeFormatter::Element &inputOutput) {
+  if (inputOutput.type != CodeFormatter::Element::Expression || inputOutput.children.size != 3){
+    return;
+  }
+    CodeFormatter::Element& middle = inputOutput.children[1];
+    if (!this->isOperatorSuitableForNormalization(middle)) {
+      return;
+    }
+      List<CodeFormatter::Element> collector;
+      this->collectMultiArguments(middle.content, inputOutput,collector);
+  if (collector.size < 3) {
+    return;
+  }
+  inputOutput.children.clear();
+  for (int i = 0; i < collector.size; i ++) {
+    inputOutput.addChild(collector[i]);
+  }
+}
+
+void CodeFormatter::collectMultiArguments(
+const std::string &operatorName, CodeFormatter::Element &current, List<Element> &output) {
+  if (current.type != CodeFormatter::Element::Expression || current.children.size != 3){
+    output.addOnTop(current);
+    return;
+  }
+  CodeFormatter::Element& middle = current.children[1];
+
+  if (!middle.isOperator() || middle.content != operatorName) {
+    output.addOnTop(current);
+    return;
+  }
+  this->collectMultiArguments(operatorName, current.children[0], output);
+  output.addOnTop(middle);
+  this->collectMultiArguments(operatorName, current.children[2], output);
+
+
+}
+
+void CodeFormatter::normalizeBinaryOperationsRecursively(CodeFormatter::Element &current) {
+this->correctMultiArguments(current);
+  for (CodeFormatter::Element& child : current.children){
+    this->normalizeBinaryOperationsRecursively(child);
+  }
+}
+
+bool CodeFormatter::isOperatorSuitableForNormalization(const CodeFormatter::Element &element) {
+  if (!element.isOperator()) {
+    return false;
+  }
+  const std::string& name = element.content;
+  return name == "||" || name == "&&" || name == "+" || name == "-" || name =="<<";
 }

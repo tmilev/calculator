@@ -105,6 +105,9 @@ public:
     void computeIndentationExpression();
     void computeIndentationTopLevel();
     void computeIndentationAtomic();
+    bool applyOpenParenthesisException();
+    void computeIndentationGreaterThan();
+    void computeIndentationLessThan();
     void computeIndentationCaseClause();
     void computeIndentationCaseClauseStart();
     void computeIndentationIfClause();
@@ -180,7 +183,6 @@ public:
     bool isOperatorOrInequality() const;
     bool isColonDoubleColonOrComma() const;
     bool isColonOrDoubleColon() const;
-    bool isDashDotOrDashGreaterThan() const;
     void initializePointers(
       CodeFormatter* inputOwner,
       CodeFormatter::Element* inputParent,
@@ -304,12 +306,13 @@ public:
   const int dummyElements = 4;
   // A class to represent
   CodeFormatter();
-  void addOperatorOverride(const std::string& overridingOperator, const List<std::string>& overridden);
   static bool formatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
   bool formatCPPSourceCode(const std::string& inputFileName,
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
   , bool logDebugInfo);
+private:
+  void addOperatorOverride(const std::string& overridingOperator, const List<std::string>& overridden);
   bool shouldSeparateWithSpace(const std::string& left, const std::string& right);
   bool preemptsWhitespaceBefore(char input);
   bool needsSpaceToTheRight(const std::string& word);
@@ -335,6 +338,16 @@ public:
     CodeFormatter::Element& current,
     CodeFormatter::Element* parent,
     int indexInParent
+  );
+  bool isOperatorSuitableForNormalization(const CodeFormatter::Element& element);
+  void normalizeBinaryOperationsRecursively(
+    CodeFormatter::Element& current
+  );
+  void correctMultiArguments(CodeFormatter::Element& inputOutput);
+  void collectMultiArguments(
+  const std::string& operatorName,
+    CodeFormatter::Element& current,
+  List<CodeFormatter::Element>& output
   );
   bool rightOperatorOverridesLeft(
   const CodeFormatter::Element& leftOperator,

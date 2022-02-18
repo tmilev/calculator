@@ -24,6 +24,7 @@ public:
       Quote,
       SingleQuote,
       ConstKeyWord,
+      StaticKeyWord,
       ControlKeyWord,
       ConstructorExternal,
       TypeKeyWord,

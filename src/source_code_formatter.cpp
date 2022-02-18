@@ -81,6 +81,8 @@ std::string CodeFormatter::Element::toStringType(
     return "quote";
   case CodeFormatter::Element::ConstKeyWord:
     return "const";
+  case CodeFormatter::Element::StaticKeyWord:
+    return  "static";
   case CodeFormatter::Element::IncludeLine:
     return "includeLine";
   case CodeFormatter::Element::IncludeLineStart:
@@ -356,7 +358,8 @@ bool CodeFormatter::Element::isSuitableForParenthesesEnclosure() const {
 bool CodeFormatter::Element::isSuitableForCommaListElement() const {
   return
   this->isExpressionIdentifierOrAtom() ||
-  this->type == CodeFormatter::Element::TypeAndIdentifier;
+  this->type == CodeFormatter::Element::TypeAndIdentifier ||
+  this->type== CodeFormatter::Element::TypeExpression;
 }
 
 bool CodeFormatter::Element::isRightDelimiter() const {
@@ -1785,6 +1788,9 @@ CodeFormatter::CodeFormatter() {
     "const", CodeFormatter::Element::ConstKeyWord
   );
   this->elementTypes.setKeyValue(
+    "static", CodeFormatter::Element::StaticKeyWord
+  );
+  this->elementTypes.setKeyValue(
     "case", CodeFormatter::Element::CaseKeyWord
   );
   this->elementTypes.setKeyValue(
@@ -2142,6 +2148,14 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
+    secondToLast.type == CodeFormatter::Element::FunctionDeclaration &&
+    last.type == CodeFormatter::Element::SemiColon
+  ) {
+    this->lastRuleName = "function declaration ;";
+    secondToLast.makeFrom2(CodeFormatter::Element::Command, secondToLast, last);
+    return this->removeLast();
+  }
+  if (
     last.type == CodeFormatter::Element::Unknown &&
     CodeFormatter::isIdentifierWord(last.content)
   ) {
@@ -2364,12 +2378,13 @@ return this->removeLast(4);
     return true;
   }
   if (
-    thirdToLast.type == CodeFormatter::Element::ConstKeyWord &&
+    (thirdToLast.type == CodeFormatter::Element::ConstKeyWord
+  ||thirdToLast.type == CodeFormatter::Element::StaticKeyWord )&&
     secondToLast.isExpressionIdentifierOrAtom() &&
     last.type != CodeFormatter::Element::Colon &&
     last.type != CodeFormatter::Element::DoubleColon
   ) {
-    this->lastRuleName = "const something";
+    this->lastRuleName = "type adjective something";
     thirdToLast.makeFrom2(
       CodeFormatter::Element::TypeExpression, thirdToLast, secondToLast
     );
@@ -2410,12 +2425,21 @@ return this->removeLast(4);
     secondToLast.type = CodeFormatter::Element::Operator;
     return this->removeLast();
   }
-  if (secondToLast.isTypeWord() && last.isTypeWord()) {
-    this->lastRuleName = "type and type to type expression";
+  if ( secondToLast.isTypeWord()   && last.isTypeWord()) {
+    this->lastRuleName = "type and type to typeExpression";
     secondToLast.makeFrom2(
       CodeFormatter::Element::TypeExpression, secondToLast, last
     );
     return this->removeLast();
+  }
+  if ((secondToLast.type == CodeFormatter::Element::ConstKeyWord||
+  secondToLast.type == CodeFormatter::Element::StaticKeyWord) && last.isTypeWordOrTypeExpression()){
+    this->lastRuleName = "typeKeyWord and typeExpression to typeExpression";
+    secondToLast.makeFrom2(
+      CodeFormatter::Element::TypeExpression, secondToLast, last
+    );
+    return this->removeLast();
+
   }
   if (
     thirdToLast.isSuitableForTypeExpression() &&
@@ -2561,8 +2585,8 @@ return this->removeLast(4);
     last.type == CodeFormatter::Element::Comma
   ) {
     this->lastRuleName = "comma list and element";
-    thirdToLast.children.addOnTop(secondToLast);
-    thirdToLast.children.addOnTop(last);
+    thirdToLast.addChild(secondToLast);
+    thirdToLast.addChild(last);
     return this->removeLast(2);
   }
   if (

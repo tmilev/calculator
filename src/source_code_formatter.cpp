@@ -939,6 +939,10 @@ int CodeFormatter::Element::offsetFromPrevious() {
 }
 
 void CodeFormatter::Element::computeIndentationFunctionDeclaration() {
+  this->computeIndentationBasic(0);
+}
+
+void CodeFormatter::Element::computeIndentationFunctionDefinition() {
   if (this->children.size >= 3) {
     if (
       this->children[2].type == CodeFormatter::Element::ConstKeyWord
@@ -952,10 +956,6 @@ void CodeFormatter::Element::computeIndentationFunctionDeclaration() {
       previous->newLinesAfter = 2;
     }
   }
-  this->computeIndentationBasic(0);
-}
-
-void CodeFormatter::Element::computeIndentationFunctionDefinition() {
   this->computeIndentationBasic(0);
   if (this->children.size != 2) {
     return;
@@ -1134,7 +1134,7 @@ std::string CodeFormatter::Element::toStringHTMLTree() {
     out << " r: " << this->requiresWhiteSpaceAfter;
   }
   for (int i = 0; i < this->newLinesAfter; i ++) {
-    out << "&darr;&darr;";
+    out << "&darr;";
   }
   for (int i = 0; i < this->children.size; i ++) {
     out << this->children[i].toStringHTMLTree();
@@ -1449,6 +1449,7 @@ bool CodeFormatter::Words::extractCodeElements(std::stringstream* comments) {
   this->addCurrentWord();
   return true;
 }
+
 CodeFormatter::Words::Words() {
   this->flagPreviousIsStandaloneBackSlash = false;
   this->currentChar = 0;
@@ -1662,6 +1663,7 @@ void CodeFormatter::addOperatorOverride(
   this->operatorOverrides.getValueCreateEmpty(overridingOperator);
   overridenHashed.addListOnTop(overridden);
 }
+
 CodeFormatter::CodeFormatter() {
   this->separatorCharacters = "(){} \t\n\r,:;.*&+-/%[]#\"'=><!|";
   this->doesntNeedSpaceToTheLeft = "&,:.()";
@@ -1798,6 +1800,7 @@ CodeFormatter::CodeFormatter() {
     this->doesntNeedSpaceToTheRightContainer.addOnTop(incoming);
   }
 }
+
 CodeFormatter::Processor::Processor() {
   this->owner = nullptr;
   this->flagPrepareReport = false;

@@ -85,6 +85,10 @@ std::string CodeFormatter::Element::toStringType(
     return "includeLine";
   case CodeFormatter::Element::IncludeLineStart:
     return "includeLineStart";
+  case CodeFormatter::Element::MacroLine:
+    return "macroLine";
+  case CodeFormatter::Element::MacroLineStart:
+    return "macroLineStart";
   case CodeFormatter::Element::FunctionDeclaration:
     return "functionDeclaration";
   case CodeFormatter::Element::FunctionDefinition:
@@ -133,10 +137,18 @@ std::string CodeFormatter::Element::toStringType(
     return "&";
   case CodeFormatter::Element::Star:
     return "*";
+  case CodeFormatter::Element::PublicKeyWord:
+    return "public";
+  case CodeFormatter::Element::ClassKeyWord:
+    return "class";
+  case CodeFormatter::Element::PrivateKeyWord:
+    return "private";
+  case CodeFormatter::Element::VisibilityClause:
+    return "visibilityClause";
   case CodeFormatter::Element::DefaultKeyWord:
     return "default";
   case CodeFormatter::Element::ConstructorExternal:
-    return "default";
+    return "constructorExternal";
   case CodeFormatter::Element::Exclamation:
     return "!";
   case CodeFormatter::Element::If:
@@ -1743,6 +1755,9 @@ CodeFormatter::CodeFormatter() {
   this->elementTypes.setKeyValue("if", CodeFormatter::Element::If);
   this->elementTypes.setKeyValue("else", CodeFormatter::Element::Else);
   this->elementTypes.setKeyValue("return", CodeFormatter::Element::Return);
+  this->elementTypes.setKeyValue("public", CodeFormatter::Element::PublicKeyWord);
+  this->elementTypes.setKeyValue("private", CodeFormatter::Element::PrivateKeyWord);
+  this->elementTypes.setKeyValue("class", CodeFormatter::Element::ClassKeyWord);
   this->typeKeyWords.addListOnTop(
     List<std::string>({"bool", "void", "char", "unsigned"})
   );
@@ -1861,8 +1876,13 @@ bool CodeFormatter::Processor::applyOneRule() {
   CodeFormatter::Element& thirdToLast = this->stack[this->stack.size - 3];
   CodeFormatter::Element& fourthToLast = this->stack[this->stack.size - 4];
   if (secondToLast.content == "#" && last.content == "include") {
-    secondToLast.content = "#include";
+    secondToLast.content += last.content;
     secondToLast.type = CodeFormatter::Element::IncludeLineStart;
+    return this->removeLast();
+  }
+  if (secondToLast.content == "#" && (last.content == "define" || last.content == "ifdef" || last.content == "ifndef" || last.content == "endif") ){
+  secondToLast.content += last.content;
+    secondToLast.type = CodeFormatter::Element::MacroLineStart;
     return this->removeLast();
   }
   if (
@@ -1873,7 +1893,21 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
+    secondToLast.type == CodeFormatter::Element::MacroLineStart &&
+    last.type == CodeFormatter::Element::EndLine
+  ) {
+    secondToLast.type = CodeFormatter::Element::MacroLine;
+    return this->removeLast();
+  }
+  if (
     secondToLast.type == CodeFormatter::Element::IncludeLineStart &&
+    last.type != CodeFormatter::Element::EndLine
+  ) {
+    secondToLast.content.append(last.content);
+    return this->removeLast();
+  }
+  if (
+    secondToLast.type == CodeFormatter::Element::MacroLineStart &&
     last.type != CodeFormatter::Element::EndLine
   ) {
     secondToLast.content.append(last.content);
@@ -2107,6 +2141,17 @@ bool CodeFormatter::Processor::applyOneRule() {
       CodeFormatter::Element::CaseClauseStart, thirdToLast, secondToLast
     );
     return this->removeBelowLast(1);
+  }
+  if (
+    (secondToLast.type == CodeFormatter::Element::PublicKeyWord ||
+  secondToLast.type == CodeFormatter::Element::PrivateKeyWord)&&
+    last.type == CodeFormatter::Element::Colon
+  ) {
+    this->lastRuleName = "visibility clause";
+    secondToLast.makeFrom2(
+      CodeFormatter::Element::VisibilityClause, secondToLast, last
+    );
+    return this->removeLast();
   }
   if (
     secondToLast.type == CodeFormatter::Element::LeftParenthesis &&

@@ -80,6 +80,11 @@ public:
       CaseClause,
       CaseClauseList,
       ClassKeyWord,
+      ClassDeclaration,
+      ClassDefinition,
+      EnumKeyWord,
+      EnumDeclaration,
+      EnumDefinition,
       PublicKeyWord,
       PrivateKeyWord,
       VisibilityClause,
@@ -219,6 +224,14 @@ public:
       const Element& second,
       const Element& third,
       const Element& fourth
+    );
+    void makeFrom5(
+      CodeFormatter::Element::Type inputType,
+      const Element& leftmost,
+      const Element& secondToLeft,
+      const Element& middle,
+    const Element& secondToRight,
+    const Element& right
     );
     std::string format();
   };

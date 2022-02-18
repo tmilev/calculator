@@ -141,6 +141,17 @@ std::string CodeFormatter::Element::toStringType(
     return "public";
   case CodeFormatter::Element::ClassKeyWord:
     return "class";
+  case CodeFormatter::Element::ClassDeclaration:
+    return "classDeclaration";
+  case CodeFormatter::Element::ClassDefinition:
+    return "classDefinition";
+  case CodeFormatter::Element::EnumKeyWord:
+    return "enum";
+  case CodeFormatter::Element::EnumDeclaration:
+    return "enumDeclaration";
+  case CodeFormatter::Element::EnumDefinition:
+    return "enumDefinition";
+
   case CodeFormatter::Element::PrivateKeyWord:
     return "private";
   case CodeFormatter::Element::VisibilityClause:
@@ -286,6 +297,29 @@ void CodeFormatter::Element::makeFrom4(
   this->addChild(fourth);
 }
 
+void CodeFormatter::Element::makeFrom5(CodeFormatter::Element::Type inputType, const Element &leftmost, const Element &secondToLeft, const Element &middle, const Element &secondToRight, const Element &right) {
+  if (
+    this == &leftmost || this == &secondToLeft || this == &middle|| this == &secondToRight || this== &right
+  ) {
+    CodeFormatter::Element firstCopy = leftmost;
+    CodeFormatter::Element secondCopy = secondToLeft;
+    CodeFormatter::Element thirdCopy = middle;
+    CodeFormatter::Element fourthCopy = secondToRight;
+    CodeFormatter::Element fifthCopy = right;
+    this->makeFrom5(
+      inputType, firstCopy, secondCopy, thirdCopy, fourthCopy, fifthCopy
+    );
+    return;
+  }
+  this->clear();
+  this->type = inputType;
+  this->addChild(leftmost);
+  this->addChild(secondToLeft);
+  this->addChild(middle);
+  this->addChild(secondToRight);
+  this->addChild(right);
+}
+
 void CodeFormatter::Element::addChild(const CodeFormatter::Element& other) {
   this->children.addOnTop(other);
 }
@@ -363,7 +397,11 @@ bool CodeFormatter::Element::isSuitableForTopLevel() const {
   this->type == CodeFormatter::Element::IncludeLine ||
   this->type == CodeFormatter::Element::Command ||
   this->type == CodeFormatter::Element::Comment ||
-  this->type == CodeFormatter::Element::CommentMultiline;
+  this->type == CodeFormatter::Element::CommentMultiline
+  ||
+  this->type == CodeFormatter::Element::ClassDefinition ||
+  this->type == CodeFormatter::Element::EnumDefinition
+  ;
 }
 
 bool CodeFormatter::Element::isSuitableForCommand() const {
@@ -1758,6 +1796,7 @@ CodeFormatter::CodeFormatter() {
   this->elementTypes.setKeyValue("public", CodeFormatter::Element::PublicKeyWord);
   this->elementTypes.setKeyValue("private", CodeFormatter::Element::PrivateKeyWord);
   this->elementTypes.setKeyValue("class", CodeFormatter::Element::ClassKeyWord);
+  this->elementTypes.setKeyValue("enum", CodeFormatter::Element::EnumKeyWord);
   this->typeKeyWords.addListOnTop(
     List<std::string>({"bool", "void", "char", "unsigned"})
   );
@@ -1875,6 +1914,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   CodeFormatter::Element& secondToLast = this->stack[this->stack.size - 2];
   CodeFormatter::Element& thirdToLast = this->stack[this->stack.size - 3];
   CodeFormatter::Element& fourthToLast = this->stack[this->stack.size - 4];
+  CodeFormatter::Element& fifthToLast = this->stack[this->stack.size - 5];
   if (secondToLast.content == "#" && last.content == "include") {
     secondToLast.content += last.content;
     secondToLast.type = CodeFormatter::Element::IncludeLineStart;
@@ -2153,6 +2193,34 @@ bool CodeFormatter::Processor::applyOneRule() {
     );
     return this->removeLast();
   }
+  if (thirdToLast.type == CodeFormatter::Element::ClassKeyWord && secondToLast.isIdentifierOrAtom() &&
+(  last.type == CodeFormatter::Element::SemiColon || last.type == CodeFormatter::Element::LeftCurlyBrace)) {
+    this->lastRuleName = "class declaration";
+    thirdToLast.makeFrom2(CodeFormatter::Element::ClassDeclaration, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (thirdToLast.type == CodeFormatter::Element::EnumKeyWord && secondToLast.isIdentifierOrAtom() &&
+(  last.type == CodeFormatter::Element::SemiColon || last.type == CodeFormatter::Element::LeftCurlyBrace)) {
+    this->lastRuleName = "enum declaration";
+    thirdToLast.makeFrom2(CodeFormatter::Element::EnumDeclaration, thirdToLast, secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (thirdToLast.type == CodeFormatter::Element::ClassDeclaration && secondToLast.type == CodeFormatter::Element::CodeBlock &&
+  last.type == CodeFormatter::Element::SemiColon){
+    this->lastRuleName = "class definition";
+    thirdToLast.makeFrom3(CodeFormatter::Element::ClassDefinition, thirdToLast, secondToLast, last);
+return this->removeLast(2);
+  }
+  if (fifthToLast.type == CodeFormatter::Element::EnumDeclaration &&
+  fourthToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
+
+  thirdToLast .type== CodeFormatter::Element::CommaList&&
+  secondToLast.type == CodeFormatter::Element::RightCurlyBrace &&
+  last.type == CodeFormatter::Element::SemiColon){
+    this->lastRuleName = "enum definition";
+    fifthToLast.makeFrom5(CodeFormatter::Element::EnumDefinition,fifthToLast, fourthToLast, thirdToLast, secondToLast, last);
+return this->removeLast(4);
+  }
   if (
     secondToLast.type == CodeFormatter::Element::LeftParenthesis &&
     last.type == CodeFormatter::Element::RightParenthesis
@@ -2211,6 +2279,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast(2);
   }
   if (
+    fourthToLast.type != CodeFormatter::Element::EnumDeclaration &&
     thirdToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
     secondToLast.type == CodeFormatter::Element::CommaList &&
     last.type == CodeFormatter::Element::RightCurlyBrace
@@ -2480,6 +2549,13 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeBelowLast(1);
   }
   if (
+    secondToLast.type == CodeFormatter::Element::CommaList &&
+  last.isComment()){
+    this->lastRuleName="comma list and comment";
+    secondToLast.addChild(last);
+    return this->removeLast();
+  }
+  if (
     thirdToLast.type == CodeFormatter::Element::CommaList &&
     secondToLast.isSuitableForCommaListElement() &&
     last.type == CodeFormatter::Element::Comma
@@ -2630,13 +2706,21 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeBelowLast(1);
   }
   if (
-    secondToLast.isCommandListOrCommand() && (
+(    secondToLast.isCommandListOrCommand() ||
+  secondToLast.type == CodeFormatter::Element::VisibilityClause
+  ) && (
       last.type == CodeFormatter::Element::Command ||
       last.type == CodeFormatter::Element::Comment ||
       last.type == CodeFormatter::Element::CommentMultiline
+  ||
+  last.type == CodeFormatter::Element::VisibilityClause
+  ||
+  last.type == CodeFormatter::Element::EnumDefinition
+  ||
+  last.type == CodeFormatter::Element::ClassDefinition
     )
   ) {
-    this->lastRuleName = "commandList command";
+    this->lastRuleName = "commandList command|comment|clause|definition";
     secondToLast.appendCommand(last);
     return this->removeLast();
   }

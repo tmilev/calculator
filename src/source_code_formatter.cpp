@@ -398,6 +398,7 @@ bool CodeFormatter::Element::isExpressionIdentifierAtomOrFunctionWithArguments(
 bool CodeFormatter::Element::isSuitableForTopLevel() const {
   return
   this->type == CodeFormatter::Element::IncludeLine ||
+  this->type == CodeFormatter::Element::MacroLine ||
   this->type == CodeFormatter::Element::Command ||
   this->type == CodeFormatter::Element::Comment ||
   this->type == CodeFormatter::Element::CommentMultiline

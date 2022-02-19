@@ -2033,6 +2033,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   CodeFormatter::Element& thirdToLast = this->stack[this->stack.size - 3];
   CodeFormatter::Element& fourthToLast = this->stack[this->stack.size - 4];
   CodeFormatter::Element& fifthToLast = this->stack[this->stack.size - 5];
+  CodeFormatter::Element& sixthToLast = this->stack[this->stack.size - 6];
   if (secondToLast.content == "#" && last.content == "include") {
     secondToLast.content += last.content;
     secondToLast.type = CodeFormatter::Element::IncludeLineStart;
@@ -2642,10 +2643,50 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (
     this->isSuitableForExpressionOperatorExpression(
+      sixthToLast, fifthToLast, fourthToLast, thirdToLast
+    )
+  ) {
+    // Must come before rule
+    // expression oeprator expression Lookahead X
+    this->lastRuleName = "expression operator expression Lookahead XX";
+    fifthToLast.type = CodeFormatter::Element::Operator;
+    sixthToLast.makeFrom3(
+      CodeFormatter::Element::Expression,
+      sixthToLast,
+      fifthToLast,
+      fourthToLast
+    );
+    this->stack.removeIndexShiftDown(this->stack.size - 5);
+    this->stack.removeIndexShiftDown(this->stack.size - 5);
+    return true;
+  }
+  if (
+    this->isSuitableForExpressionOperatorExpression(
+      fifthToLast, fourthToLast, thirdToLast, secondToLast
+    )
+  ) {
+    // Must come before rule
+    // expression oeprator expression Lookahead
+    this->lastRuleName = "expression operator expression Lookahead X";
+    fourthToLast.type = CodeFormatter::Element::Operator;
+    fifthToLast.makeFrom3(
+      CodeFormatter::Element::Expression,
+      fifthToLast,
+      fourthToLast,
+      thirdToLast
+    );
+    this->stack.removeIndexShiftDown(this->stack.size - 4);
+    this->stack.removeIndexShiftDown(this->stack.size - 4);
+    return true;
+  }
+  if (
+    this->isSuitableForExpressionOperatorExpression(
       fourthToLast, thirdToLast, secondToLast, last
     )
   ) {
-    this->lastRuleName = "expression operator expression";
+    // This rule must come after the rule
+    // expression operator expression Lookahead X
+    this->lastRuleName = "expression operator expression Lookahead";
     // Operators such as < and > may not have their type
     // set to Operator.
     thirdToLast.type = CodeFormatter::Element::Operator;
@@ -2662,7 +2703,7 @@ bool CodeFormatter::Processor::applyOneRule() {
       fourthToLast, thirdToLast, secondToLast, last
     )
   ) {
-    this->lastRuleName = "X unary operator expression Y";
+    this->lastRuleName = "X unary expression Y";
     thirdToLast.makeFrom2(
       CodeFormatter::Element::Expression, thirdToLast, secondToLast
     );
@@ -3030,7 +3071,9 @@ bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
     return false;
   }
   if (lookAhead.isOperator()) {
-    return false;
+    if (this->owner->rightOperatorOverridesLeft(unary,lookAhead)) {
+      return false;
+    }
   }
   if (first.isIdentifierOrAtom()) {
     return false;

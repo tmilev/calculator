@@ -309,11 +309,11 @@ void CodeFormatter::Element::makeFrom5(
   const Element& right
 ) {
   if (
-    this ==
-    &leftmost ||
-    this ==
-    &secondToLeft ||
-    this == &middle || this == &secondToRight || this == &right
+    this == &leftmost ||
+    this == &secondToLeft ||
+    this == &middle ||
+    this == &secondToRight ||
+    this == &right
   ) {
     CodeFormatter::Element firstCopy = leftmost;
     CodeFormatter::Element secondCopy = secondToLeft;
@@ -3059,7 +3059,7 @@ bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
     return false;
   }
   if (lookAhead.isOperator()) {
-    if (this->owner->rightOperatorOverridesLeft(unary,lookAhead)) {
+    if (this->owner->rightOperatorOverridesLeft(unary, lookAhead)) {
       return false;
     }
   }

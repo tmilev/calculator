@@ -105,6 +105,8 @@ public:
     void computeIndentationControlWantsCodeBlock();
     void computeIndentationCommandList();
     void computeIndentationCommaList();
+    void computeIndentationEnumDefinition();
+    void computeIndentationEnumDeclaration();
     void computeIndentationCommand();
     void computeIndentationComment();
     void computeIndentationCommentCollection();

@@ -939,6 +939,14 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationIfClause();
     return;
   }
+  if (this->type == CodeFormatter::Element::EnumDefinition){
+    this->computeIndentationEnumDefinition();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::EnumDeclaration){
+    this->computeIndentationEnumDeclaration();
+    return;
+  }
   if (this->type == CodeFormatter::Element::CommaList) {
     this->computeIndentationCommaList();
     return;
@@ -1024,6 +1032,16 @@ void CodeFormatter::Element::computeIndentationFunctionDefinition() {
   }
 }
 
+void CodeFormatter::Element::computeIndentationCommentCollection() {
+  for (int i = 0; i < this->children.size; i ++) {
+    CodeFormatter::Element& current = this->children[i];
+    current.indentationLevel = this->indentationLevel;
+    current.computeIndentation();
+    current.rightMostAtomUnderMe()->newLinesAfter = 1;
+    current.leftMostAtomUnderMe()->whiteSpaceBefore = current.indentationLevel;
+  }
+}
+
 void CodeFormatter::Element::computeIndentationComment() {
   if (this->children.size > 0) {
     return;
@@ -1067,6 +1085,7 @@ void CodeFormatter::Element::computeIndentationComment() {
     this->newLinesAfter = 1;
     return;
   }
+  this->resetWhitespaceRecursively();
   this->content = "";
   this->children.clear();
   this->type = CodeFormatter::Element::CommentCollection;
@@ -1075,6 +1094,7 @@ void CodeFormatter::Element::computeIndentationComment() {
     CodeFormatter::Element next;
     next.initializePointers(this->owner, this, i);
     next.indentationLevel = this->indentationLevel;
+    next.whiteSpaceBefore = this->indentationLevel;
     next.newLinesAfter = 1;
     next.type = CodeFormatter::Element::Comment;
     next.content = lines[i];
@@ -1137,6 +1157,27 @@ void CodeFormatter::Element::computeIndentationCodeBlock() {
   this->children.lastObject()->computeIndentation();
 }
 
+void CodeFormatter::Element::computeIndentationEnumDeclaration() {
+  this->computeIndentationBasic(0);
+}
+
+void CodeFormatter::Element::computeIndentationEnumDefinition() {
+  if (this->children.size != 5) {
+    this->computeIndentationBasic(0);
+    return;
+  }
+  this->children[0].indentationLevel = this->indentationLevel;
+  this->children[0].computeIndentation();
+  this->children[1].indentationLevel = this->indentationLevel;
+  this->children[1].whiteSpaceBefore = 1;
+  this->children[1].newLinesAfter= 1;
+  this->children[2].indentationLevel = this->indentationLevel + this->owner->tabLength;
+  this->children[2].computeIndentation();
+  this->children[3].indentationLevel = this->indentationLevel;
+  this->children[3].whiteSpaceBefore = this->indentationLevel;
+  this->children[4].indentationLevel = this->indentationLevel;
+}
+
 void CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
   if (this->children.size != 2) {
     this->computeIndentationBasic(0);
@@ -1197,17 +1238,6 @@ std::string CodeFormatter::Element::toStringHTMLTree() {
   return out.str();
 }
 
-void CodeFormatter::Element::computeIndentationCommentCollection() {
-  for (int i = 0; i < this->children.size; i ++) {
-    CodeFormatter::Element& current = this->children[i];
-    current.indentationLevel = this->indentationLevel;
-    current.computeIndentation();
-    current.rightMostAtomUnderMe()->newLinesAfter = 1;
-    current.leftMostAtomUnderMe()->whiteSpaceBefore = current.indentationLevel;
-  }
-  //  this->computeIndentationBasic(0);
-}
-
 void CodeFormatter::Element::computeIndentationCommandList() {
   if (this->parent->type != CodeFormatter::Element::CodeBlock) {
     for (int i = 0; i < this->children.size; i ++) {
@@ -1220,11 +1250,25 @@ void CodeFormatter::Element::computeIndentationCommandList() {
     }
     return;
   }
-  for (CodeFormatter::Element& current : this->children) {
+  for (int i = 0; i < this->children.size; i ++) {
+    CodeFormatter::Element& current = this->children[i];
     current.rightMostAtomUnderMe()->newLinesAfter = 1;
+    bool shouldIndentNegatively = false;
+    if (current.type == CodeFormatter::Element::VisibilityClause){
+      shouldIndentNegatively = true;
+    }
     current.indentationLevel = this->indentationLevel;
+    if (shouldIndentNegatively) {
+      current.indentationLevel -= this->owner->tabLength;
+      if (current.indentationLevel <0){
+        current.indentationLevel=0;
+      }
+    }
     if (current.type == CodeFormatter::Element::Comment) {
       current.whiteSpaceBefore = this->indentationLevel;
+    }
+    if (i+ 1 < this->children.size && current.type == CodeFormatter::Element::ClassDefinition){
+      current.rightMostAtomUnderMe()->newLinesAfter=2;
     }
     current.computeIndentation();
   }
@@ -1278,13 +1322,16 @@ void CodeFormatter::Element::computeIndentationCommaList() {
   }
   for (int i = 0; i < this->children.size; i ++) {
     CodeFormatter::Element& current = this->children[i];
-    if (current.content == ",") {
+    if (current.content == "," || current.isComment()) {
       if (mustSplitLines) {
         current.rightMostAtomUnderMe()->newLinesAfter = 1;
       }
       current.requiresWhiteSpaceAfter = true;
     }
     current.indentationLevel = this->indentationLevel;
+    if (current.isComment()) {
+      current.whiteSpaceBefore = this->indentationLevel;
+    }
     current.computeIndentation();
   }
 }
@@ -1754,6 +1801,7 @@ CodeFormatter::CodeFormatter() {
   this->addOperatorOverride(">=", andAndOr);
   this->addOperatorOverride("<=", andAndOr);
   this->addOperatorOverride(">", andAndOr);
+  this->addOperatorOverride("<", List<std::string>({"<"}));
   this->addOperatorOverride(
     "<", List<std::string>({"&&", "||", "="})
   );
@@ -2296,7 +2344,9 @@ return this->removeLast(4);
   if (
     fourthToLast.type != CodeFormatter::Element::EnumDeclaration &&
     thirdToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
-    secondToLast.type == CodeFormatter::Element::CommaList &&
+    (secondToLast.type == CodeFormatter::Element::CommaList ||
+  secondToLast.isExpressionIdentifierAtomOrFunctionWithArguments())
+ &&
     last.type == CodeFormatter::Element::RightCurlyBrace
   ) {
     this->lastRuleName = "comma list in curly braces";

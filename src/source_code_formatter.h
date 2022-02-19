@@ -48,6 +48,7 @@ public:
       Colon,
       SemiColon,
       DoubleColon,
+      InAngleBrackets,
       InParentheses,
       InBrackets,
       LeftParenthesis,
@@ -115,6 +116,7 @@ public:
     void computeIndentationReturnedExpression();
     void computeIndentationOperator();
     void computeIndentationInParentheses();
+    void computeIndentationAngleBrackets();
     void computeIndentationBasic(int startingIndex);
     void computeIndentationExpression();
     void computeIndentationTopLevel();
@@ -203,6 +205,7 @@ public:
       int inputIndexInParent
     );
     Element* previousAtom();
+    Element* nextAtom();
     Element* previousSibling();
     Element* rightMostAtomUnderMe();
     Element* leftMostAtomUnderMe();

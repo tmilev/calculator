@@ -65,6 +65,8 @@ std::string CodeFormatter::Element::toStringType(
     return ")";
   case CodeFormatter::Element::InParentheses:
     return "InParentheses";
+  case CodeFormatter::Element::InAngleBrackets:
+    return "InAngleBrackets";
   case CodeFormatter::Element::InBrackets:
     return "InBrackets";
   case CodeFormatter::Element::EndLine:
@@ -153,7 +155,6 @@ std::string CodeFormatter::Element::toStringType(
     return "enumDeclaration";
   case CodeFormatter::Element::EnumDefinition:
     return "enumDefinition";
-
   case CodeFormatter::Element::PrivateKeyWord:
     return "private";
   case CodeFormatter::Element::VisibilityClause:
@@ -608,6 +609,9 @@ bool CodeFormatter::Element::needsWhiteSpaceBefore() {
   }
   char first = this->content[0];
   char lastPrevious = previous->content[previous->content.size() - 1];
+  if (lastPrevious == '>'&& first == '>') {
+    return true;
+  }
   bool startsWithSeparator = this->owner->isSeparatorCharacter(first);
   bool previousEndsWithSeparator =
   this->owner->isSeparatorCharacter(lastPrevious);
@@ -651,6 +655,14 @@ void CodeFormatter::Element::computeIndentationLessThan() {
 
 void CodeFormatter::Element::computeIndentationGreaterThan() {
   if (this->parent->type != CodeFormatter::Element::TypeExpression) {
+    this->computeIndentationAtomic();
+    return;
+  }
+  CodeFormatter::Element* previous = previousAtom();
+  if (previous == nullptr) {
+    return;
+  }
+  if (previous->type == CodeFormatter::Element::GreaterThan) {
     this->computeIndentationAtomic();
     return;
   }
@@ -732,6 +744,10 @@ int CodeFormatter::Element::minimalSizeWithSpacebars() {
   return result;
 }
 
+void CodeFormatter::Element::computeIndentationAngleBrackets(){
+  this->computeIndentationInParentheses();
+}
+
 void CodeFormatter::Element::computeIndentationInParentheses() {
   if (this->children.size != 3) {
     this->computeIndentationBasic(0);
@@ -775,7 +791,15 @@ void CodeFormatter::Element::computeIndentationOperator() {
 
 void CodeFormatter::Element::computeIndentationTypeExpression() {
   this->computeIndentationBasic(0);
-  this->rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
+  CodeFormatter::Element* next = this->nextAtom() ;
+  CodeFormatter::Element* onTheRight =
+  this->rightMostAtomUnderMe();
+  onTheRight->requiresWhiteSpaceAfter = true;
+  if (next != nullptr) {
+    if (next->content == ",") {
+      this->rightMostAtomUnderMe()->requiresWhiteSpaceAfter = false;
+    }
+  }
 }
 
 bool CodeFormatter::Element::isExpressionLikeForIndentation() {
@@ -929,6 +953,10 @@ void CodeFormatter::Element::computeIndentation() {
   }
   if (this->type == CodeFormatter::Element::Operator) {
     this->computeIndentationOperator();
+    return;
+  }
+  if (this->type == CodeFormatter::Element::InAngleBrackets){
+    this->computeIndentationAngleBrackets();
     return;
   }
   if (this->type == CodeFormatter::Element::InParentheses) {
@@ -1399,6 +1427,17 @@ CodeFormatter::Element* CodeFormatter::Element::previousAtom() {
   }
   return
   this->parent->children[this->indexInParent - 1].rightMostAtomUnderMe();
+}
+
+CodeFormatter::Element* CodeFormatter::Element::nextAtom() {
+  if (this->parent == nullptr) {
+    return nullptr;
+  }
+  if (this->indexInParent + 1 >= this->parent->children.size) {
+    return this->parent->nextAtom();
+  }
+  return
+  this->parent->children[this->indexInParent + 1 ].leftMostAtomUnderMe();
 }
 
 CodeFormatter::Element* CodeFormatter::Element::rightMostAtomUnderMe() {
@@ -2433,7 +2472,8 @@ return this->removeLast(4);
   ||thirdToLast.type == CodeFormatter::Element::StaticKeyWord )&&
     secondToLast.isExpressionIdentifierOrAtom() &&
     last.type != CodeFormatter::Element::Colon &&
-    last.type != CodeFormatter::Element::DoubleColon
+    last.type != CodeFormatter::Element::DoubleColon &&
+  last.type != CodeFormatter::Element::LessThan
   ) {
     this->lastRuleName = "type adjective something";
     thirdToLast.makeFrom2(
@@ -2449,12 +2489,11 @@ return this->removeLast(4);
   ) {
     this->lastRuleName =
     "type expression less than type expression greater than";
-    fourthToLast.makeFrom4(
+    CodeFormatter::Element inAngleBrackets;
+    inAngleBrackets.makeFrom3(CodeFormatter::Element::InAngleBrackets, thirdToLast, secondToLast, last);
+    fourthToLast.makeFrom2(
       CodeFormatter::Element::TypeExpression,
-      fourthToLast,
-      thirdToLast,
-      secondToLast,
-      last
+    fourthToLast, inAngleBrackets
     );
     return this->removeLast(3);
   }

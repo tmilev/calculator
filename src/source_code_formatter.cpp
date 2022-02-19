@@ -2511,18 +2511,6 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
-    thirdToLast.isOperator() &&
-    secondToLast.type == CodeFormatter::Element::Atom && (
-      last.type == CodeFormatter::Element::Comma || last.isRightDelimiter()
-    )
-  ) {
-    this->lastRuleName = "operator atom ?";
-    thirdToLast.makeFrom2(
-      CodeFormatter::Element::Expression, thirdToLast, secondToLast
-    );
-    return this->removeBelowLast(1);
-  }
-  if (
     secondToLast.type == CodeFormatter::Element::FunctionWithArguments &&
     last.type == CodeFormatter::Element::Operator
   ) {
@@ -2676,7 +2664,7 @@ bool CodeFormatter::Processor::applyOneRule() {
       thirdToLast
     );
     this->stack.removeIndexShiftDown(this->stack.size - 4);
-    this->stack.removeIndexShiftDown(this->stack.size - 4);
+    this->stack.removeIndexShiftDown(this->stack.size - 3);
     return true;
   }
   if (

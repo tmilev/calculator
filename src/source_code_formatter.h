@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_source_code_formatter_ALREADY_INCLUDED
 #define header_source_code_formatter_ALREADY_INCLUDED
@@ -168,7 +169,10 @@ public:
     std::string toStringContentOnly() const;
     Element();
     void clear();
-    void appendType(const CodeFormatter::Element& other, CodeFormatter::Element::Type inputType);
+    void appendType(
+      const CodeFormatter::Element& other,
+      CodeFormatter::Element::Type inputType
+    );
     void appendExpression(const CodeFormatter::Element& other);
     void appendIdentifier(const CodeFormatter::Element& other);
     void appendCommand(const CodeFormatter::Element& other);
@@ -210,8 +214,7 @@ public:
     Element* rightMostAtomUnderMe();
     Element* leftMostAtomUnderMe();
     void makeFrom1(
-      CodeFormatter::Element::Type inputType,
-      const Element& child
+      CodeFormatter::Element::Type inputType, const Element& child
     );
     void makeFrom2(
       CodeFormatter::Element::Type inputType,
@@ -236,8 +239,8 @@ public:
       const Element& leftmost,
       const Element& secondToLeft,
       const Element& middle,
-    const Element& secondToRight,
-    const Element& right
+      const Element& secondToRight,
+      const Element& right
     );
     std::string format();
   };
@@ -270,17 +273,20 @@ public:
     std::string debugLog;
     bool flagPrepareReport;
     bool flagExceededReportSize;
-
     void consumeElements();
     void consumeOneElement(CodeFormatter::Element& incoming);
-    bool isSuitableForExpressionOperatorExpression(CodeFormatter::Element& left,
-    CodeFormatter::Element& middle,
-    CodeFormatter::Element& right
-    , Element &lookAhead);
-    bool isSuitableForUnaryOperatorExpression(CodeFormatter::Element& first,
-    CodeFormatter::Element& unary,
-    CodeFormatter::Element& expression
-    , Element &lookAhead);
+    bool isSuitableForExpressionOperatorExpression(
+      CodeFormatter::Element& left,
+      CodeFormatter::Element& middle,
+      CodeFormatter::Element& right,
+      Element& lookAhead
+    );
+    bool isSuitableForUnaryOperatorExpression(
+      CodeFormatter::Element& first,
+      CodeFormatter::Element& unary,
+      CodeFormatter::Element& expression,
+      Element& lookAhead
+    );
     bool applyOneRule();
     bool removeLast();
     bool removeLast(int count);
@@ -296,7 +302,6 @@ public:
   Words words;
   CodeFormatter::Processor processor;
   std::string inputCode;
-
   std::string transformedContent;
   std::string separatorCharacters;
   std::string doesntNeedSpaceToTheRight;
@@ -306,39 +311,58 @@ public:
   std::string precedingElementThisLine;
   List<bool> separatorCharactersMap;
   HashedList<List<std::string> > pairsNotSeparatedBySpace;
-  HashedList<std::string, HashFunctions::hashFunction> doesntNeedSpaceToTheRightContainer;
-  HashedList<std::string, HashFunctions::hashFunction> doesntNeedSpaceToTheLeftContainer;
-  HashedList<std::string, HashFunctions::hashFunction> needsSpaceToTheRightContainer;
+  HashedList<std::string, HashFunctions::hashFunction>
+  doesntNeedSpaceToTheRightContainer;
+  HashedList<std::string, HashFunctions::hashFunction>
+  doesntNeedSpaceToTheLeftContainer;
+  HashedList<std::string, HashFunctions::hashFunction>
+  needsSpaceToTheRightContainer;
   // Keywords such as int, boo, etc.
   HashedList<std::string, HashFunctions::hashFunction> typeKeyWords;
-  // Keywords such as for, if, etc that take as input an in-parentheses block and an
+  // Keywords such as for, if, etc that take as input an in-parentheses block
+  // and an
   // in-curly-brace block.
   HashedList<std::string, HashFunctions::hashFunction> controlKeyWords;
-  MapList<std::string, CodeFormatter::Element::Type, HashFunctions::hashFunction> elementTypes;
+  MapList<
+    std::string,
+    CodeFormatter::Element::Type,
+    HashFunctions::hashFunction
+  > elementTypes;
   // A list of elements interpreted as operators.
   HashedList<std::string, HashFunctions::hashFunction> operatorList;
-
   // A list of operator overrides.
-  // An operator K given in the key overrides any operator V given in the values.
+  // An operator K given in the key overrides any operator V given in the
+  // values.
   // In other words, the expression
   // xVyKz is to be interpreted as xV(yKz) rather than as (xVy)Kz
-  MapList<std::string, HashedList<std::string, HashFunctions::hashFunction>, HashFunctions::hashFunction>
-  operatorOverrides;
-
+  MapList<
+    std::string,
+    HashedList<std::string, HashFunctions::hashFunction>,
+    HashFunctions::hashFunction
+  > operatorOverrides;
   int maximumDesiredLineLength;
   int indexCurrentlyConsumed;
   const int tabLength = 2;
   const int dummyElements = 4;
   // A class to represent
   CodeFormatter();
-  static bool formatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
-  bool formatCPPSourceCode(const std::string& inputFileName,
+  static bool formatCPPDirectory(
+    const std::string& inputDirectory, std::stringstream* comments
+  );
+  bool formatCPPSourceCode(
+    const std::string& inputFileName,
     const std::string& inputOutputFileNameEmptyForAuto,
-    std::stringstream* comments
-  , bool logDebugInfo);
+    std::stringstream* comments,
+    bool logDebugInfo
+  );
 private:
-  void addOperatorOverride(const std::string& overridingOperator, const List<std::string>& overridden);
-  bool shouldSeparateWithSpace(const std::string& left, const std::string& right);
+  void addOperatorOverride(
+    const std::string& overridingOperator,
+    const List<std::string> & overridden
+  );
+  bool shouldSeparateWithSpace(
+    const std::string& left, const std::string& right
+  );
   bool preemptsWhitespaceBefore(char input);
   bool needsSpaceToTheRight(const std::string& word);
   bool isSeparatorCharacter(char input);
@@ -364,21 +388,20 @@ private:
     CodeFormatter::Element* parent,
     int indexInParent
   );
-  bool isOperatorSuitableForNormalization(const CodeFormatter::Element& element);
-  void normalizeBinaryOperationsRecursively(
-    CodeFormatter::Element& current
+  bool isOperatorSuitableForNormalization(
+    const CodeFormatter::Element& element
   );
+  void normalizeBinaryOperationsRecursively(CodeFormatter::Element& current);
   void correctMultiArguments(CodeFormatter::Element& inputOutput);
   void collectMultiArguments(
-  const std::string& operatorName,
+    const std::string& operatorName,
     CodeFormatter::Element& current,
-  List<CodeFormatter::Element>& output
+    List<CodeFormatter::Element>& output
   );
   bool rightOperatorOverridesLeft(
-  const CodeFormatter::Element& leftOperator,
-  const CodeFormatter::Element& rightOperator
+    const CodeFormatter::Element& leftOperator,
+    const CodeFormatter::Element& rightOperator
   );
-
 };
-
 #endif // header_source_code_formatter_ALREADY_INCLUDED
+

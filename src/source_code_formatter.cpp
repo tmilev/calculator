@@ -84,7 +84,7 @@ std::string CodeFormatter::Element::toStringType(
   case CodeFormatter::Element::ConstKeyWord:
     return "const";
   case CodeFormatter::Element::StaticKeyWord:
-    return  "static";
+    return "static";
   case CodeFormatter::Element::IncludeLine:
     return "includeLine";
   case CodeFormatter::Element::IncludeLineStart:
@@ -300,9 +300,20 @@ void CodeFormatter::Element::makeFrom4(
   this->addChild(fourth);
 }
 
-void CodeFormatter::Element::makeFrom5(CodeFormatter::Element::Type inputType, const Element &leftmost, const Element &secondToLeft, const Element &middle, const Element &secondToRight, const Element &right) {
+void CodeFormatter::Element::makeFrom5(
+  CodeFormatter::Element::Type inputType,
+  const Element& leftmost,
+  const Element& secondToLeft,
+  const Element& middle,
+  const Element& secondToRight,
+  const Element& right
+) {
   if (
-    this == &leftmost || this == &secondToLeft || this == &middle|| this == &secondToRight || this== &right
+    this ==
+    &leftmost ||
+    this ==
+    &secondToLeft ||
+    this == &middle || this == &secondToRight || this == &right
   ) {
     CodeFormatter::Element firstCopy = leftmost;
     CodeFormatter::Element secondCopy = secondToLeft;
@@ -360,7 +371,7 @@ bool CodeFormatter::Element::isSuitableForCommaListElement() const {
   return
   this->isExpressionIdentifierOrAtom() ||
   this->type == CodeFormatter::Element::TypeAndIdentifier ||
-  this->type== CodeFormatter::Element::TypeExpression;
+  this->type == CodeFormatter::Element::TypeExpression;
 }
 
 bool CodeFormatter::Element::isRightDelimiter() const {
@@ -402,11 +413,9 @@ bool CodeFormatter::Element::isSuitableForTopLevel() const {
   this->type == CodeFormatter::Element::MacroLine ||
   this->type == CodeFormatter::Element::Command ||
   this->type == CodeFormatter::Element::Comment ||
-  this->type == CodeFormatter::Element::CommentMultiline
-  ||
+  this->type == CodeFormatter::Element::CommentMultiline ||
   this->type == CodeFormatter::Element::ClassDefinition ||
-  this->type == CodeFormatter::Element::EnumDefinition
-  ;
+  this->type == CodeFormatter::Element::EnumDefinition;
 }
 
 bool CodeFormatter::Element::isSuitableForCommand() const {
@@ -609,7 +618,7 @@ bool CodeFormatter::Element::needsWhiteSpaceBefore() {
   }
   char first = this->content[0];
   char lastPrevious = previous->content[previous->content.size() - 1];
-  if (lastPrevious == '>'&& first == '>') {
+  if (lastPrevious == '>' && first == '>') {
     return true;
   }
   bool startsWithSeparator = this->owner->isSeparatorCharacter(first);
@@ -744,7 +753,7 @@ int CodeFormatter::Element::minimalSizeWithSpacebars() {
   return result;
 }
 
-void CodeFormatter::Element::computeIndentationAngleBrackets(){
+void CodeFormatter::Element::computeIndentationAngleBrackets() {
   this->computeIndentationInParentheses();
 }
 
@@ -791,9 +800,8 @@ void CodeFormatter::Element::computeIndentationOperator() {
 
 void CodeFormatter::Element::computeIndentationTypeExpression() {
   this->computeIndentationBasic(0);
-  CodeFormatter::Element* next = this->nextAtom() ;
-  CodeFormatter::Element* onTheRight =
-  this->rightMostAtomUnderMe();
+  CodeFormatter::Element* next = this->nextAtom();
+  CodeFormatter::Element* onTheRight = this->rightMostAtomUnderMe();
   onTheRight->requiresWhiteSpaceAfter = true;
   if (next != nullptr) {
     if (next->content == ",") {
@@ -955,7 +963,7 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationOperator();
     return;
   }
-  if (this->type == CodeFormatter::Element::InAngleBrackets){
+  if (this->type == CodeFormatter::Element::InAngleBrackets) {
     this->computeIndentationAngleBrackets();
     return;
   }
@@ -967,11 +975,11 @@ void CodeFormatter::Element::computeIndentation() {
     this->computeIndentationIfClause();
     return;
   }
-  if (this->type == CodeFormatter::Element::EnumDefinition){
+  if (this->type == CodeFormatter::Element::EnumDefinition) {
     this->computeIndentationEnumDefinition();
     return;
   }
-  if (this->type == CodeFormatter::Element::EnumDeclaration){
+  if (this->type == CodeFormatter::Element::EnumDeclaration) {
     this->computeIndentationEnumDeclaration();
     return;
   }
@@ -1198,8 +1206,9 @@ void CodeFormatter::Element::computeIndentationEnumDefinition() {
   this->children[0].computeIndentation();
   this->children[1].indentationLevel = this->indentationLevel;
   this->children[1].whiteSpaceBefore = 1;
-  this->children[1].newLinesAfter= 1;
-  this->children[2].indentationLevel = this->indentationLevel + this->owner->tabLength;
+  this->children[1].newLinesAfter = 1;
+  this->children[2].indentationLevel =
+  this->indentationLevel + this->owner->tabLength;
   this->children[2].computeIndentation();
   this->children[3].indentationLevel = this->indentationLevel;
   this->children[3].whiteSpaceBefore = this->indentationLevel;
@@ -1282,21 +1291,24 @@ void CodeFormatter::Element::computeIndentationCommandList() {
     CodeFormatter::Element& current = this->children[i];
     current.rightMostAtomUnderMe()->newLinesAfter = 1;
     bool shouldIndentNegatively = false;
-    if (current.type == CodeFormatter::Element::VisibilityClause){
+    if (current.type == CodeFormatter::Element::VisibilityClause) {
       shouldIndentNegatively = true;
     }
     current.indentationLevel = this->indentationLevel;
     if (shouldIndentNegatively) {
       current.indentationLevel -= this->owner->tabLength;
-      if (current.indentationLevel <0){
-        current.indentationLevel=0;
+      if (current.indentationLevel < 0) {
+        current.indentationLevel = 0;
       }
     }
     if (current.type == CodeFormatter::Element::Comment) {
       current.whiteSpaceBefore = this->indentationLevel;
     }
-    if (i+ 1 < this->children.size && current.type == CodeFormatter::Element::ClassDefinition){
-      current.rightMostAtomUnderMe()->newLinesAfter=2;
+    if (
+      i + 1 < this->children.size &&
+      current.type == CodeFormatter::Element::ClassDefinition
+    ) {
+      current.rightMostAtomUnderMe()->newLinesAfter = 2;
     }
     current.computeIndentation();
   }
@@ -1436,8 +1448,7 @@ CodeFormatter::Element* CodeFormatter::Element::nextAtom() {
   if (this->indexInParent + 1 >= this->parent->children.size) {
     return this->parent->nextAtom();
   }
-  return
-  this->parent->children[this->indexInParent + 1 ].leftMostAtomUnderMe();
+  return this->parent->children[this->indexInParent + 1].leftMostAtomUnderMe();
 }
 
 CodeFormatter::Element* CodeFormatter::Element::rightMostAtomUnderMe() {
@@ -1780,7 +1791,7 @@ bool CodeFormatter::preemptsWhitespaceBefore(char input) {
 }
 
 bool CodeFormatter::isSeparatorCharacter(char input) {
-  unsigned char inputUnsigned = static_cast<unsigned char>(input);
+  unsigned char inputUnsigned = static_cast<unsigned char >(input);
   return this->separatorCharactersMap[inputUnsigned];
 }
 
@@ -1797,7 +1808,7 @@ bool CodeFormatter::isOperator(const std::string& input) {
 
 void CodeFormatter::addOperatorOverride(
   const std::string& overridingOperator,
-  const List<std::string>& overridden
+  const List<std::string> & overridden
 ) {
   HashedList<std::string, HashFunctions::hashFunction>& overridenHashed =
   this->operatorOverrides.getValueCreateEmpty(overridingOperator);
@@ -1817,9 +1828,11 @@ CodeFormatter::CodeFormatter() {
   this->pairsNotSeparatedBySpace.addOnTop(
     List<std::string>({"*", "&"})
   );
-  List<std::string> relations = List<std::string>({"=", "==", ">=", ">", "<=", "!="});
+  List<std::string> relations =
+  List<std::string>({"=", "==", ">=", ">", "<=", "!="});
   List<std::string> andAndOr = List<std::string>({"&&", "||"});
-  List<std::string> arithmeticOperations = List<std::string>({"+", "-", "/", "*"});
+  List<std::string> arithmeticOperations =
+  List<std::string>({"+", "-", "/", "*"});
   List<std::string> bitShift = List<std::string>({"<<", ">>"});
   List<std::string> andOrRelations = relations;
   andOrRelations.addListOnTop(andAndOr);
@@ -1887,10 +1900,18 @@ CodeFormatter::CodeFormatter() {
   this->elementTypes.setKeyValue("if", CodeFormatter::Element::If);
   this->elementTypes.setKeyValue("else", CodeFormatter::Element::Else);
   this->elementTypes.setKeyValue("return", CodeFormatter::Element::Return);
-  this->elementTypes.setKeyValue("public", CodeFormatter::Element::PublicKeyWord);
-  this->elementTypes.setKeyValue("private", CodeFormatter::Element::PrivateKeyWord);
-  this->elementTypes.setKeyValue("class", CodeFormatter::Element::ClassKeyWord);
-  this->elementTypes.setKeyValue("enum", CodeFormatter::Element::EnumKeyWord);
+  this->elementTypes.setKeyValue(
+    "public", CodeFormatter::Element::PublicKeyWord
+  );
+  this->elementTypes.setKeyValue(
+    "private", CodeFormatter::Element::PrivateKeyWord
+  );
+  this->elementTypes.setKeyValue(
+    "class", CodeFormatter::Element::ClassKeyWord
+  );
+  this->elementTypes.setKeyValue(
+    "enum", CodeFormatter::Element::EnumKeyWord
+  );
   this->typeKeyWords.addListOnTop(
     List<std::string>({"bool", "void", "char", "unsigned"})
   );
@@ -1935,7 +1956,10 @@ CodeFormatter::CodeFormatter() {
   this->indexCurrentlyConsumed = 0;
   this->separatorCharactersMap.initializeFillInObject(256, false);
   for (unsigned i = 0; i < this->separatorCharacters.size(); i ++) {
-    this->separatorCharactersMap[static_cast<signed>(this->separatorCharacters[i])] = true;
+    this->separatorCharactersMap[static_cast<signed>(
+      this->separatorCharacters[i]
+    )] =
+    true;
   }
   for (unsigned i = 0; i < this->doesntNeedSpaceToTheLeft.size(); i ++) {
     std::string incoming = this->doesntNeedSpaceToTheLeft.substr(i, 1);
@@ -2014,8 +2038,15 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.type = CodeFormatter::Element::IncludeLineStart;
     return this->removeLast();
   }
-  if (secondToLast.content == "#" && (last.content == "define" || last.content == "ifdef" || last.content == "ifndef" || last.content == "endif") ){
-  secondToLast.content += last.content;
+  if (
+    secondToLast.content == "#" && (
+      last.content == "define" ||
+      last.content == "ifdef" ||
+      last.content == "ifndef" ||
+      last.content == "endif"
+    )
+  ) {
+    secondToLast.content += last.content;
     secondToLast.type = CodeFormatter::Element::MacroLineStart;
     return this->removeLast();
   }
@@ -2240,7 +2271,9 @@ bool CodeFormatter::Processor::applyOneRule() {
     last.type == CodeFormatter::Element::SemiColon
   ) {
     this->lastRuleName = "function declaration ;";
-    secondToLast.makeFrom2(CodeFormatter::Element::Command, secondToLast, last);
+    secondToLast.makeFrom2(
+      CodeFormatter::Element::Command, secondToLast, last
+    );
     return this->removeLast();
   }
   if (
@@ -2284,9 +2317,10 @@ bool CodeFormatter::Processor::applyOneRule() {
     );
     return this->removeBelowLast(1);
   }
-  if (
-    (secondToLast.type == CodeFormatter::Element::PublicKeyWord ||
-  secondToLast.type == CodeFormatter::Element::PrivateKeyWord)&&
+  if ((
+      secondToLast.type == CodeFormatter::Element::PublicKeyWord ||
+      secondToLast.type == CodeFormatter::Element::PrivateKeyWord
+    ) &&
     last.type == CodeFormatter::Element::Colon
   ) {
     this->lastRuleName = "visibility clause";
@@ -2295,33 +2329,63 @@ bool CodeFormatter::Processor::applyOneRule() {
     );
     return this->removeLast();
   }
-  if (thirdToLast.type == CodeFormatter::Element::ClassKeyWord && secondToLast.isIdentifierOrAtom() &&
-(  last.type == CodeFormatter::Element::SemiColon || last.type == CodeFormatter::Element::LeftCurlyBrace)) {
+  if (
+    thirdToLast.type == CodeFormatter::Element::ClassKeyWord &&
+    secondToLast.isIdentifierOrAtom() && (
+      last.type == CodeFormatter::Element::SemiColon ||
+      last.type == CodeFormatter::Element::LeftCurlyBrace
+    )
+  ) {
     this->lastRuleName = "class declaration";
-    thirdToLast.makeFrom2(CodeFormatter::Element::ClassDeclaration, thirdToLast, secondToLast);
+    thirdToLast.makeFrom2(
+      CodeFormatter::Element::ClassDeclaration, thirdToLast, secondToLast
+    );
     return this->removeBelowLast(1);
   }
-  if (thirdToLast.type == CodeFormatter::Element::EnumKeyWord && secondToLast.isIdentifierOrAtom() &&
-(  last.type == CodeFormatter::Element::SemiColon || last.type == CodeFormatter::Element::LeftCurlyBrace)) {
+  if (
+    thirdToLast.type == CodeFormatter::Element::EnumKeyWord &&
+    secondToLast.isIdentifierOrAtom() && (
+      last.type == CodeFormatter::Element::SemiColon ||
+      last.type == CodeFormatter::Element::LeftCurlyBrace
+    )
+  ) {
     this->lastRuleName = "enum declaration";
-    thirdToLast.makeFrom2(CodeFormatter::Element::EnumDeclaration, thirdToLast, secondToLast);
+    thirdToLast.makeFrom2(
+      CodeFormatter::Element::EnumDeclaration, thirdToLast, secondToLast
+    );
     return this->removeBelowLast(1);
   }
-  if (thirdToLast.type == CodeFormatter::Element::ClassDeclaration && secondToLast.type == CodeFormatter::Element::CodeBlock &&
-  last.type == CodeFormatter::Element::SemiColon){
+  if (
+    thirdToLast.type == CodeFormatter::Element::ClassDeclaration &&
+    secondToLast.type == CodeFormatter::Element::CodeBlock &&
+    last.type == CodeFormatter::Element::SemiColon
+  ) {
     this->lastRuleName = "class definition";
-    thirdToLast.makeFrom3(CodeFormatter::Element::ClassDefinition, thirdToLast, secondToLast, last);
-return this->removeLast(2);
+    thirdToLast.makeFrom3(
+      CodeFormatter::Element::ClassDefinition,
+      thirdToLast,
+      secondToLast,
+      last
+    );
+    return this->removeLast(2);
   }
-  if (fifthToLast.type == CodeFormatter::Element::EnumDeclaration &&
-  fourthToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
-
-  thirdToLast .type== CodeFormatter::Element::CommaList&&
-  secondToLast.type == CodeFormatter::Element::RightCurlyBrace &&
-  last.type == CodeFormatter::Element::SemiColon){
+  if (
+    fifthToLast.type == CodeFormatter::Element::EnumDeclaration &&
+    fourthToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
+    thirdToLast.type == CodeFormatter::Element::CommaList &&
+    secondToLast.type == CodeFormatter::Element::RightCurlyBrace &&
+    last.type == CodeFormatter::Element::SemiColon
+  ) {
     this->lastRuleName = "enum definition";
-    fifthToLast.makeFrom5(CodeFormatter::Element::EnumDefinition,fifthToLast, fourthToLast, thirdToLast, secondToLast, last);
-return this->removeLast(4);
+    fifthToLast.makeFrom5(
+      CodeFormatter::Element::EnumDefinition,
+      fifthToLast,
+      fourthToLast,
+      thirdToLast,
+      secondToLast,
+      last
+    );
+    return this->removeLast(4);
   }
   if (
     secondToLast.type == CodeFormatter::Element::LeftParenthesis &&
@@ -2382,10 +2446,10 @@ return this->removeLast(4);
   }
   if (
     fourthToLast.type != CodeFormatter::Element::EnumDeclaration &&
-    thirdToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
-    (secondToLast.type == CodeFormatter::Element::CommaList ||
-  secondToLast.isExpressionIdentifierAtomOrFunctionWithArguments())
- &&
+    thirdToLast.type == CodeFormatter::Element::LeftCurlyBrace && (
+      secondToLast.type == CodeFormatter::Element::CommaList ||
+      secondToLast.isExpressionIdentifierAtomOrFunctionWithArguments()
+    ) &&
     last.type == CodeFormatter::Element::RightCurlyBrace
   ) {
     this->lastRuleName = "comma list in curly braces";
@@ -2467,13 +2531,14 @@ return this->removeLast(4);
     );
     return true;
   }
-  if (
-    (thirdToLast.type == CodeFormatter::Element::ConstKeyWord
-  ||thirdToLast.type == CodeFormatter::Element::StaticKeyWord )&&
+  if ((
+      thirdToLast.type == CodeFormatter::Element::ConstKeyWord ||
+      thirdToLast.type == CodeFormatter::Element::StaticKeyWord
+    ) &&
     secondToLast.isExpressionIdentifierOrAtom() &&
     last.type != CodeFormatter::Element::Colon &&
     last.type != CodeFormatter::Element::DoubleColon &&
-  last.type != CodeFormatter::Element::LessThan
+    last.type != CodeFormatter::Element::LessThan
   ) {
     this->lastRuleName = "type adjective something";
     thirdToLast.makeFrom2(
@@ -2490,10 +2555,16 @@ return this->removeLast(4);
     this->lastRuleName =
     "type expression less than type expression greater than";
     CodeFormatter::Element inAngleBrackets;
-    inAngleBrackets.makeFrom3(CodeFormatter::Element::InAngleBrackets, thirdToLast, secondToLast, last);
+    inAngleBrackets.makeFrom3(
+      CodeFormatter::Element::InAngleBrackets,
+      thirdToLast,
+      secondToLast,
+      last
+    );
     fourthToLast.makeFrom2(
       CodeFormatter::Element::TypeExpression,
-    fourthToLast, inAngleBrackets
+      fourthToLast,
+      inAngleBrackets
     );
     return this->removeLast(3);
   }
@@ -2515,21 +2586,24 @@ return this->removeLast(4);
     secondToLast.type = CodeFormatter::Element::Operator;
     return this->removeLast();
   }
-  if ( secondToLast.isTypeWord()   && last.isTypeWord()) {
+  if (secondToLast.isTypeWord() && last.isTypeWord()) {
     this->lastRuleName = "type and type to typeExpression";
     secondToLast.makeFrom2(
       CodeFormatter::Element::TypeExpression, secondToLast, last
     );
     return this->removeLast();
   }
-  if ((secondToLast.type == CodeFormatter::Element::ConstKeyWord||
-  secondToLast.type == CodeFormatter::Element::StaticKeyWord) && last.isTypeWordOrTypeExpression()){
+  if ((
+      secondToLast.type == CodeFormatter::Element::ConstKeyWord ||
+      secondToLast.type == CodeFormatter::Element::StaticKeyWord
+    ) &&
+    last.isTypeWordOrTypeExpression()
+  ) {
     this->lastRuleName = "typeKeyWord and typeExpression to typeExpression";
     secondToLast.makeFrom2(
       CodeFormatter::Element::TypeExpression, secondToLast, last
     );
     return this->removeLast();
-
   }
   if (
     thirdToLast.isSuitableForTypeExpression() &&
@@ -2663,9 +2737,9 @@ return this->removeLast(4);
     return this->removeBelowLast(1);
   }
   if (
-    secondToLast.type == CodeFormatter::Element::CommaList &&
-  last.isComment()){
-    this->lastRuleName="comma list and comment";
+    secondToLast.type == CodeFormatter::Element::CommaList && last.isComment()
+  ) {
+    this->lastRuleName = "comma list and comment";
     secondToLast.addChild(last);
     return this->removeLast();
   }
@@ -2819,19 +2893,16 @@ return this->removeLast(4);
     thirdToLast.appendCommand(secondToLast);
     return this->removeBelowLast(1);
   }
-  if (
-(    secondToLast.isCommandListOrCommand() ||
-  secondToLast.type == CodeFormatter::Element::VisibilityClause
-  ) && (
+  if ((
+      secondToLast.isCommandListOrCommand() ||
+      secondToLast.type == CodeFormatter::Element::VisibilityClause
+    ) && (
       last.type == CodeFormatter::Element::Command ||
       last.type == CodeFormatter::Element::Comment ||
-      last.type == CodeFormatter::Element::CommentMultiline
-  ||
-  last.type == CodeFormatter::Element::VisibilityClause
-  ||
-  last.type == CodeFormatter::Element::EnumDefinition
-  ||
-  last.type == CodeFormatter::Element::ClassDefinition
+      last.type == CodeFormatter::Element::CommentMultiline ||
+      last.type == CodeFormatter::Element::VisibilityClause ||
+      last.type == CodeFormatter::Element::EnumDefinition ||
+      last.type == CodeFormatter::Element::ClassDefinition
     )
   ) {
     this->lastRuleName = "commandList command|comment|clause|definition";

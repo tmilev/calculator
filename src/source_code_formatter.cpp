@@ -217,12 +217,6 @@ void CodeFormatter::Element::appendExpression(
   this->appendType(other, CodeFormatter::Element::Expression);
 }
 
-void CodeFormatter::Element::appendIdentifier(
-  const CodeFormatter::Element& other
-) {
-  this->appendType(other, CodeFormatter::Element::Identifier);
-}
-
 void CodeFormatter::Element::appendType(
   const CodeFormatter::Element& other,
   CodeFormatter::Element::Type inputType
@@ -1883,6 +1877,12 @@ CodeFormatter::CodeFormatter() {
   this->addOperatorOverride(
     "<", List<std::string>({"&&", "||", "="})
   );
+  this->addOperatorOverride(
+    "<", arithmeticOperations
+  );
+  this->addOperatorOverride(
+    "<", andOrRelations
+  );
   this->addOperatorOverride("!=", andAndOr);
   this->addOperatorOverride("!", andAndOr);
   this->addOperatorOverride("||", List<std::string>({"->", "."}));
@@ -2429,9 +2429,19 @@ bool CodeFormatter::Processor::applyOneRule() {
     last.type == CodeFormatter::Element::Atom
   ) {
     this->lastRuleName = "identifier::atom";
-    thirdToLast.appendIdentifier(secondToLast);
-    thirdToLast.appendIdentifier(last);
+    thirdToLast.appendType(secondToLast, CodeFormatter::Element::Identifier);
+    thirdToLast.appendType(last, CodeFormatter::Element::Identifier);
     return this->removeLast(2);
+  }
+  if (
+    fourthToLast.isOperator() &&
+    thirdToLast.type == CodeFormatter::Element::DoubleColon &&
+    secondToLast.type == CodeFormatter::Element::TypeExpression &&
+    last.type == CodeFormatter::Element::LeftParenthesis
+  ) {
+    this->lastRuleName = "operator ::typeExpression";
+    thirdToLast.appendType(secondToLast, CodeFormatter::Element::Identifier);
+    return this->removeBelowLast(1);
   }
   if (
     fourthToLast.isIdentifierOrAtom() &&
@@ -2439,8 +2449,8 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.isIdentifierOrAtom()
   ) {
     this->lastRuleName = "identifier::atom X";
-    fourthToLast.appendIdentifier(thirdToLast);
-    fourthToLast.appendIdentifier(secondToLast);
+    fourthToLast.appendType(thirdToLast, CodeFormatter::Element::Identifier);
+    fourthToLast.appendType(secondToLast, CodeFormatter::Element::Identifier);
     return this->removeBelowLast(2);
   }
   if (
@@ -2499,12 +2509,34 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if ((
+      secondToLast.type == CodeFormatter::Element::PublicKeyWord ||
+      secondToLast.type == CodeFormatter::Element::PrivateKeyWord
+    ) &&
+    last.isExpressionIdentifierOrAtom()
+  ) {
+    this->lastRuleName = "visibility of expression";
+    secondToLast.makeFrom2(
+      CodeFormatter::Element::TypeExpression, secondToLast, last
+    );
+    return this->removeLast();
+  }
+  if (fourthToLast.type == CodeFormatter::Element::ClassDeclaration &&
+  thirdToLast.type == CodeFormatter::Element::Colon &&
+  secondToLast.isTypeWordOrTypeExpression() &&
+  last.type ==CodeFormatter::Element::LeftCurlyBrace
+  ){
+    this->lastRuleName = "classDefinition colon public clause";
+    fourthToLast.makeFrom3(CodeFormatter::Element::ClassDeclaration, fourthToLast, thirdToLast, secondToLast);
+    return  this->removeBelowLast(2);
+  }
+  if ((
       thirdToLast.type == CodeFormatter::Element::ClassKeyWord ||
       thirdToLast.type == CodeFormatter::Element::StructKeyWord
     ) &&
     secondToLast.isIdentifierOrAtom() && (
       last.type == CodeFormatter::Element::SemiColon ||
       last.type == CodeFormatter::Element::LeftCurlyBrace ||
+  last.type == CodeFormatter::Element::Colon||
       last.type == CodeFormatter::Element::GreaterThan
     )
   ) {
@@ -2811,10 +2843,11 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if ((
       thirdToLast.type == CodeFormatter::Element::ConstKeyWord ||
-      thirdToLast.type == CodeFormatter::Element::TypeAdjectiveKeyWord ||
+  thirdToLast.type == CodeFormatter::Element::TypeAdjectiveKeyWord ||
       thirdToLast.type == CodeFormatter::Element::FriendKeyWord
     ) &&
-    secondToLast.isExpressionIdentifierOrAtom() &&
+    (secondToLast.isExpressionIdentifierOrAtom() ||
+  secondToLast.type == CodeFormatter::Element::TypeExpression)&&
     last.type != CodeFormatter::Element::Colon &&
     last.type != CodeFormatter::Element::DoubleColon &&
     last.type != CodeFormatter::Element::LessThan
@@ -3472,7 +3505,8 @@ bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
   ) {
     return false;
   }
-  if (lookAhead.type == CodeFormatter::Element::LeftParenthesis) {
+  if (lookAhead.type == CodeFormatter::Element::LeftParenthesis ||
+  lookAhead.type == CodeFormatter::Element::LeftBracket) {
     // We can have an expression of the form a*b() where
     // the left parenthesis signifies b is a function.
     return false;

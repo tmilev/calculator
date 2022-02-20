@@ -184,7 +184,6 @@ public:
       CodeFormatter::Element::Type inputType
     );
     void appendExpression(const CodeFormatter::Element& other);
-    void appendIdentifier(const CodeFormatter::Element& other);
     void addChild(const CodeFormatter::Element& other);
     bool isSuitableForCommand() const;
     bool isSuitableForTopLevel() const;

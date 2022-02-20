@@ -25,7 +25,7 @@ public:
       Quote,
       SingleQuote,
       ConstKeyWord,
-      StaticKeyWord,
+      TypeAdjectiveKeyWord,
       FriendKeyWord,
       OperatorKeyWord,
       ControlKeyWord,
@@ -289,12 +289,25 @@ public:
       CodeFormatter::Element& right,
       Element& lookAhead
     );
+    bool isSuitableForExpressionExpressionToExpression(
+      CodeFormatter::Element& left, CodeFormatter::Element& right
+    ) const;
+    bool allowTypeAndIdentifier(
+      CodeFormatter::Element& prefix,
+      Element& toBeTyped,
+      CodeFormatter::Element& suffix
+    );
     bool isSuitableForUnaryOperatorExpression(
       CodeFormatter::Element& first,
       CodeFormatter::Element& unary,
       CodeFormatter::Element& expression,
       Element& lookAhead
     );
+    bool isSuitableForFunction(CodeFormatter::Element& input);
+    bool areSuitableForCommaSeparatedList(
+      CodeFormatter::Element& left, CodeFormatter::Element& right
+    );
+    bool isSuitableForCommaSeparatedList(CodeFormatter::Element& input);
     bool applyOneRule();
     bool removeLast();
     bool removeLast(int count);

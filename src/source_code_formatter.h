@@ -67,7 +67,7 @@ public:
       TopLevel,
       FileContent,
       Operator,
-      NewKeyWord,
+      NewKeyWord,DeleteKeyWord,
       Command,
       CommandList,
       Comma,
@@ -185,7 +185,6 @@ public:
     );
     void appendExpression(const CodeFormatter::Element& other);
     void appendIdentifier(const CodeFormatter::Element& other);
-    void appendCommand(const CodeFormatter::Element& other);
     void addChild(const CodeFormatter::Element& other);
     bool isSuitableForCommand() const;
     bool isSuitableForTopLevel() const;
@@ -194,6 +193,7 @@ public:
     bool isSuitableForParenthesesEnclosure() const;
     bool isSuitableForCommaListElement() const;
     bool isRightDelimiter() const;
+    bool isRightDelimiterOrSemicolon() const;
     bool isIdentifierOrAtom() const;
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;

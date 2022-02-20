@@ -77,6 +77,8 @@ std::string CodeFormatter::Element::toStringType(
     return ":";
   case CodeFormatter::Element::DoubleColon:
     return "::";
+  case CodeFormatter::Element::NewKeyWord:
+    return "new";
   case CodeFormatter::Element::Operator:
     return "operator";
   case CodeFormatter::Element::Quote:
@@ -181,6 +183,8 @@ std::string CodeFormatter::Element::toStringType(
     return "!";
   case CodeFormatter::Element::Tilde:
     return "tilde";
+  case CodeFormatter::Element::QuestionMark:
+    return "?";
   case CodeFormatter::Element::If:
     return "if";
   case CodeFormatter::Element::IfWantsCodeBlock:
@@ -1833,7 +1837,7 @@ void CodeFormatter::addOperatorOverride(
 }
 
 CodeFormatter::CodeFormatter() {
-  this->separatorCharacters = "~(){} \t\n\r,:;.*&+-/%[]#\"'=><!|";
+  this->separatorCharacters = "?^~(){} \t\n\r,:;.*&+-/%[]#\"'=><!|";
   this->doesntNeedSpaceToTheLeft = "&,:.()";
   this->doesntNeedSpaceToTheRight = "():.";
   this->pairsNotSeparatedBySpace.addOnTop(
@@ -1906,9 +1910,11 @@ CodeFormatter::CodeFormatter() {
   this->elementTypes.setKeyValue(">", CodeFormatter::Element::GreaterThan);
   this->elementTypes.setKeyValue("<", CodeFormatter::Element::LessThan);
   this->elementTypes.setKeyValue("~", CodeFormatter::Element::Tilde);
+  this->elementTypes.setKeyValue("?", CodeFormatter::Element::QuestionMark);
   this->elementTypes.setKeyValue("if", CodeFormatter::Element::If);
   this->elementTypes.setKeyValue("else", CodeFormatter::Element::Else);
   this->elementTypes.setKeyValue("return", CodeFormatter::Element::Return);
+  this->elementTypes.setKeyValue("new", CodeFormatter::Element::NewKeyWord);
   this->elementTypes.setKeyValue(
     "template", CodeFormatter::Element::TemplateKeyWord
   );
@@ -1972,6 +1978,7 @@ CodeFormatter::CodeFormatter() {
         "/",
         "*",
         "|",
+  "^",
         "%",
         ".",
         "->",
@@ -2667,12 +2674,28 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast(2);
   }
   if (
-    fourthToLast.isExpressionIdentifierOrAtom() &&
+thirdToLast.type == CodeFormatter::Element::NewKeyWord &&
+
+  secondToLast.isTypeOrIdentifierOrExpression() &&
+  (last.isRightDelimiter()
+||last.type==CodeFormatter::Element::SemiColon)
+  ) {
+    this->lastRuleName = "new Expression X";
+
+    thirdToLast.makeFrom2(
+      CodeFormatter::Element::Expression, thirdToLast,secondToLast
+    );
+    return this->removeBelowLast(1);
+  }
+  if (
+(    fourthToLast.isExpressionIdentifierOrAtom() || fourthToLast.type ==CodeFormatter::Element::InParentheses ||
+  fourthToLast.isTypeWordOrTypeExpression())
+  &&
     thirdToLast.type == CodeFormatter::Element::LeftBracket &&
     secondToLast.isExpressionIdentifierOrAtom() &&
     last.type == CodeFormatter::Element::RightBracket
   ) {
-    this->lastRuleName = "[expression]";
+    this->lastRuleName = "leftBracket expression rightBracket";
     CodeFormatter::Element element;
     element.makeFrom3(
       CodeFormatter::Element::InBrackets,
@@ -2985,7 +3008,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     ) && (
       secondToLast.type == CodeFormatter::Element::Ampersand ||
       secondToLast.type == CodeFormatter::Element::Star
-    ) && (last.type != CodeFormatter::Element::Operator || last.content != "=")
+    ) &&  last.content != "="
   ) {
     this->lastRuleName = "type and ampersand or star";
     thirdToLast.makeFrom2(
@@ -3183,6 +3206,14 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (
     thirdToLast.isCommandListOrCommand() &&
+    secondToLast.type == CodeFormatter::Element::MacroLine
+  ) {
+    this->lastRuleName = "commandList macroLine";
+    thirdToLast.appendCommand(secondToLast);
+    return this->removeBelowLast(1);
+  }
+  if (
+    thirdToLast.isCommandListOrCommand() &&
     secondToLast.type == CodeFormatter::Element::Command
   ) {
     this->lastRuleName = "commandList command something";
@@ -3320,10 +3351,17 @@ bool CodeFormatter::Processor::allowTypeAndIdentifier(
   CodeFormatter::Element& toBeTyped,
   CodeFormatter::Element& suffix
 ) {
-  if (!toBeTyped.isIdentifierOrAtom()) {
+  if (!toBeTyped.isIdentifierOrAtom() && toBeTyped.type != CodeFormatter::Element::TypeExpression) {
     return false;
   }
   if (suffix.isColonOrDoubleColon()) {
+    return false;
+  }
+  if (suffix.type == CodeFormatter::Element::LessThan) {
+    // We have an expression along the lines of:
+    // bool Vectors<
+    // This likely extends along the lines of:
+    // bool Vectors<Rational>()
     return false;
   }
   if ((
@@ -3349,7 +3387,7 @@ bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
   CodeFormatter::Element& first,
   CodeFormatter::Element& unary,
   CodeFormatter::Element& expression,
-  Element& lookAhead
+    CodeFormatter::Element& lookAhead
 ) {
   if (!expression.isExpressionIdentifierAtomOrFunctionWithArguments()) {
     return false;
@@ -3366,6 +3404,12 @@ bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
   if (lookAhead.type == CodeFormatter::Element::LeftParenthesis) {
     // We can have an expression of the form a*b() where
     // the left parenthesis signifies b is a function.
+    return false;
+  }
+  if (lookAhead.type == CodeFormatter::Element::LessThan) {
+    // An expression along the lines of:
+    // !Matrix<
+    // The inequality can be extended to a template: !Matrix<a>.
     return false;
   }
   if (lookAhead.isOperator()) {
@@ -3412,6 +3456,10 @@ bool CodeFormatter::Processor::isSuitableForFunction(
     return true;
   }
   if (input.type == CodeFormatter::Element::InParentheses) {
+    return true;
+  }
+  if (input.type == CodeFormatter::Element::FunctionWithArguments) {
+    // A function with argument can return a function pointer.
     return true;
   }
   return false;

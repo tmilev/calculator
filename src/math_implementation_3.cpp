@@ -8469,7 +8469,7 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
   }
 }
 
-bool KazhdanLusztigPolynomials::computeRxy(int x, int y, int SimpleReflectionIndex) {
+bool KazhdanLusztigPolynomials::computeRxy(int x, int y, int simpleReflectionIndex) {
   MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRxy");
   if (x == y) {
     this->rPolynomials[x][y].makeOne();
@@ -8479,8 +8479,8 @@ bool KazhdanLusztigPolynomials::computeRxy(int x, int y, int SimpleReflectionInd
     this->rPolynomials[x][y].makeZero();
     return true;
   }
-  int sx = this->simpleReflectionsActionList[x][SimpleReflectionIndex];
-  int sy = this->simpleReflectionsActionList[y][SimpleReflectionIndex];
+  int sx = this->simpleReflectionsActionList[x][simpleReflectionIndex];
+  int sy = this->simpleReflectionsActionList[y][simpleReflectionIndex];
   bool boolX, boolY;
   boolX = this->indexGreaterThanIndex(x, sx);
   boolY = this->indexGreaterThanIndex(y, sy);

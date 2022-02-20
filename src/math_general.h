@@ -6837,7 +6837,7 @@ public:
   void compute(int x);
   void check();
   //returns true if computation succeeded, false otherwise
-  bool computeRxy(int x, int y, int SimpleReflectionIndex);
+  bool computeRxy(int x, int y, int simpleReflectionIndex);
   void computeKLxy(int x, int y);
   bool isMaximalNonExplored(int index);
   bool indexGEQIndex(int a, int b);

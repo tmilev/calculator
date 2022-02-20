@@ -1846,7 +1846,8 @@ CodeFormatter::CodeFormatter() {
     List<std::string>({"*", "&"})
   );
   List<std::string> relations =
-  List<std::string>({"=", "==", ">=", ">", "<=", "!="});
+  List<std::string>({"=", "==", ">=", ">", "<=", "!=", "*=", "+=", "-=", "/="}
+  );
   List<std::string> andAndOr = List<std::string>({"&&", "||"});
   List<std::string> arithmeticOperations =
   List<std::string>({"+", "-", "/", "*"});
@@ -1867,6 +1868,8 @@ CodeFormatter::CodeFormatter() {
   this->addOperatorOverride(".", bitShift);
   this->addOperatorOverride("==", andAndOr);
   this->addOperatorOverride("=", andAndOr);
+  this->addOperatorOverride("*", andOrRelations);
+  this->addOperatorOverride("*", List<std::string>({"+", "-"}));
   this->addOperatorOverride(">=", andAndOr);
   this->addOperatorOverride("<=", andAndOr);
   this->addOperatorOverride(">", andAndOr);
@@ -3360,6 +3363,11 @@ bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
   ) {
     return false;
   }
+  if (lookAhead.type == CodeFormatter::Element::LeftParenthesis) {
+    // We can have an expression of the form a*b() where
+    // the left parenthesis signifies b is a function.
+    return false;
+  }
   if (lookAhead.isOperator()) {
     if (this->owner->rightOperatorOverridesLeft(unary, lookAhead)) {
       return false;
@@ -3465,7 +3473,8 @@ void CodeFormatter::Processor::appendLog() {
     }
     return;
   }
-  this->debugLog += this->toStringStack() +
+  this->debugLog +=
+  this->toStringStack() +
   "<b style='color:red'>[[" +
   this->lastRuleName +
   "]]</b><br>";
@@ -3560,7 +3569,10 @@ bool CodeFormatter::rightOperatorOverridesLeft(
   const CodeFormatter::Element& leftOperator,
   const CodeFormatter::Element& rightOperator
 ) {
-  if (!rightOperator.isOperatorOrInequality()) {
+  if (
+    !rightOperator.isOperatorOrInequality() &&
+    !rightOperator.isStarOrAmpersand()
+  ) {
     return false;
   }
   if (!this->operatorOverrides.contains(rightOperator.content)) {

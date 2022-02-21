@@ -383,7 +383,8 @@ bool CodeFormatter::Element::isSuitableForCommaListElement() const {
   this->isExpressionIdentifierOrAtom() ||
   this->type == CodeFormatter::Element::TypeAndIdentifier ||
   this->type == CodeFormatter::Element::TypeExpression ||
-  this->type == CodeFormatter::Element::ClassDeclaration;
+  this->type == CodeFormatter::Element::ClassDeclaration ||
+  this->type == CodeFormatter::Element::FunctionWithArguments;
 }
 
 bool CodeFormatter::Element::isRightDelimiter() const {
@@ -2175,6 +2176,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast(2);
   }
   if (
+!  thirdToLast.isOperator() && thirdToLast.type!= CodeFormatter::Element::QuestionMark &&
     secondToLast.type == CodeFormatter::Element::FunctionWithArguments &&
     last.type == CodeFormatter::Element::Colon
   ) {
@@ -2857,7 +2859,25 @@ bool CodeFormatter::Processor::applyOneRule() {
       CodeFormatter::Element::TypeExpression, thirdToLast, secondToLast
     );
     return this->removeBelowLast(1);
-  }
+  }if (
+  thirdToLast.type == CodeFormatter::Element::TemplateKeyWord &&
+  secondToLast.type == CodeFormatter::Element::LessThan &&
+  last.type == CodeFormatter::Element::GreaterThan
+) {
+  this->lastRuleName = "template lessThan greaterThan";
+  CodeFormatter::Element inAngleBrackets;
+  inAngleBrackets.makeFrom2(
+    CodeFormatter::Element::InAngleBrackets,
+    secondToLast,
+    last
+  );
+  thirdToLast.makeFrom2(
+    CodeFormatter::Element::TemplateClause,
+    thirdToLast,
+    inAngleBrackets
+  );
+  return this->removeLast(2);
+}
   if (
     fourthToLast.type == CodeFormatter::Element::TemplateKeyWord &&
     thirdToLast.type == CodeFormatter::Element::LessThan &&
@@ -2902,12 +2922,12 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast(3);
   }
   if (
-    secondToLast.type == CodeFormatter::Element::TypeExpression &&
-    last.isStarOrAmpersand()
+    thirdToLast.type == CodeFormatter::Element::TypeExpression &&
+    secondToLast.isStarOrAmpersand()
   ) {
     this->lastRuleName = "absorb star or ampersand";
-    secondToLast.addChild(last);
-    return this->removeLast();
+    thirdToLast.addChild(last);
+    return this->removeBelowLast(1);
   }
   if (
     secondToLast.type == CodeFormatter::Element::TypeExpression &&
@@ -3001,12 +3021,12 @@ bool CodeFormatter::Processor::applyOneRule() {
     return true;
   }
   if (
-    this->isSuitableForExpressionOperatorExpression(
+    this->isSuitableForExpressionOperatorExpressionXX(
       fifthToLast, fourthToLast, thirdToLast, secondToLast
     )
   ) {
     // Must come before rule
-    // expression oeprator expression Lookahead
+    // expression operator expression Lookahead
     this->lastRuleName = "expression operator expression Lookahead X";
     fourthToLast.type = CodeFormatter::Element::Operator;
     fifthToLast.makeFrom3(
@@ -3493,10 +3513,14 @@ bool CodeFormatter::Processor::isSuitableForUnaryOperatorExpression(
   CodeFormatter::Element& expression,
     CodeFormatter::Element& lookAhead
 ) {
+  bool canBeUnary =unary.canBeUnaryOnTheLeft();
+  if (expression.type == CodeFormatter::Element::TypeExpression && lookAhead.isRightDelimiter() && canBeUnary) {
+    return true;
+  }
   if (!expression.isExpressionIdentifierAtomOrFunctionWithArguments()) {
     return false;
   }
-  if (!unary.canBeUnaryOnTheLeft()) {
+  if (!canBeUnary) {
     return false;
   }
   if (
@@ -3570,37 +3594,51 @@ bool CodeFormatter::Processor::isSuitableForFunction(
   return false;
 }
 
-bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpression(
-  CodeFormatter::Element& left,
-  CodeFormatter::Element& middle,
+bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpression(CodeFormatter::Element &left, CodeFormatter::Element &operatorElement, CodeFormatter::Element &right, Element &lookAhead){
+  if (!isSuitableForExpressionOperatorExpressionXX(left, operatorElement, right, lookAhead)) {
+    return false;
+  }
+  if (
+    lookAhead.isColonOrDoubleColon() )
+  {
+  return false;
+  }
+return true;
+}
+
+bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpressionXX(CodeFormatter::Element& left,
+  CodeFormatter::Element& operatorElement,
   CodeFormatter::Element& right,
   CodeFormatter::Element& lookAhead
 ) {
   if (
     !left.isExpressionIdentifierAtomOrFunctionWithArguments() &&
-    left.type != CodeFormatter::Element::TypeAndIdentifier
+    left.type != CodeFormatter::Element::TypeAndIdentifier&&
+  left.type != CodeFormatter::Element::TypeExpression
   ) {
     return false;
   }
-  if (!right.isExpressionIdentifierAtomOrFunctionWithArguments()) {
+  if (!right.isExpressionIdentifierAtomOrFunctionWithArguments()&&
+  right.type != CodeFormatter::Element::TypeAndIdentifier&&
+right.type != CodeFormatter::Element::TypeExpression) {
     return false;
   }
-  if (!middle.isOperatorOrInequality()) {
+  if (!operatorElement.isOperatorOrInequality()) {
     return false;
   }
-  if (
-    lookAhead.isColonOrDoubleColon() ||
-    lookAhead.content == "-" ||
+  if ( operatorElement.content != "->"  && operatorElement.content != ".") {
+   if( lookAhead.content == "-" ||
     lookAhead.type == CodeFormatter::Element::LeftParenthesis ||
     lookAhead.type == CodeFormatter::Element::LeftBracket
   ) {
     return false;
   }
-  if (this->owner->rightOperatorOverridesLeft(middle, lookAhead)) {
+  }
+  if (this->owner->rightOperatorOverridesLeft(operatorElement, lookAhead)) {
     return false;
   }
   if (
-    middle.type == CodeFormatter::Element::LessThan && (
+    operatorElement.type == CodeFormatter::Element::LessThan && (
       lookAhead.type == CodeFormatter::Element::Comma ||
       lookAhead.type == CodeFormatter::Element::GreaterThan
     )
@@ -3611,6 +3649,9 @@ bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpression(
     // or of the form:
     // List<a>.
     return false;
+  }
+  if (lookAhead.type == CodeFormatter::Element::QuestionMark) {
+    return  false;
   }
   return true;
 }

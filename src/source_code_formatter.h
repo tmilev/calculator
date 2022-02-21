@@ -286,7 +286,13 @@ public:
     void consumeOneElement(CodeFormatter::Element& incoming);
     bool isSuitableForExpressionOperatorExpression(
       CodeFormatter::Element& left,
-      CodeFormatter::Element& middle,
+      CodeFormatter::Element& operatorElement,
+      CodeFormatter::Element& right,
+      Element& lookAhead
+    );
+    bool isSuitableForExpressionOperatorExpressionXX(
+      CodeFormatter::Element& left,
+      CodeFormatter::Element& operatorElement,
       CodeFormatter::Element& right,
       Element& lookAhead
     );

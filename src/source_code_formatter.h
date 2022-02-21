@@ -3,6 +3,7 @@
 // For additional information refer to the file "calculator.h".
 #ifndef header_source_code_formatter_ALREADY_INCLUDED
 #define header_source_code_formatter_ALREADY_INCLUDED
+
 #include "macros.h"
 #include "general_list_references.h"
 #include "general_maps.h"
@@ -67,7 +68,8 @@ public:
       TopLevel,
       FileContent,
       Operator,
-      NewKeyWord,DeleteKeyWord,
+      NewKeyWord,
+      DeleteKeyWord,
       Command,
       CommandList,
       Comma,
@@ -154,6 +156,9 @@ public:
     // Returns false if the expression is not of that form.
     bool breakExpressionStringStream();
     bool isStringStreamExpressionLike();
+    bool shouldAddExtraLineInTopLevel(
+      CodeFormatter::Element& current, CodeFormatter::Element& next
+    );
   public:
     Element::Type type;
     std::string content;
@@ -190,13 +195,14 @@ public:
     bool isSuitableForTypeExpression() const;
     bool isSuitableForTemplateArgument() const;
     bool isSuitableForParenthesesEnclosure() const;
-    bool isSuitableForCommaListElement() const;
     bool isRightDelimiter() const;
     bool isRightDelimiterOrSemicolon() const;
     bool isIdentifierOrAtom() const;
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;
     bool isExpressionIdentifierAtomOrFunctionWithArguments() const;
+    bool isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses() const
+    ;
     bool isCommandListOrCommand() const;
     bool isParenthesesBlock() const;
     bool isCodeBlock() const;
@@ -278,6 +284,7 @@ public:
     CodeFormatter* owner;
     CodeFormatter::Element code;
     List<CodeFormatter::Element> stack;
+    CodeFormatter::Element dummy;
     std::string lastRuleName;
     std::string debugLog;
     bool flagPrepareReport;
@@ -294,7 +301,8 @@ public:
       CodeFormatter::Element& left,
       CodeFormatter::Element& operatorElement,
       CodeFormatter::Element& right,
-      Element& lookAhead
+      Element& lookAheadFirst,
+      Element& lookAheadNext
     );
     bool isSuitableForExpressionExpressionToExpression(
       CodeFormatter::Element& left, CodeFormatter::Element& right
@@ -305,6 +313,12 @@ public:
       CodeFormatter::Element& suffix
     );
     bool isSuitableForUnaryOperatorExpression(
+      CodeFormatter::Element& first,
+      CodeFormatter::Element& unary,
+      CodeFormatter::Element& expression,
+      Element& lookAhead
+    );
+    bool isSuitableForUnaryOperatorExpressionXX(
       CodeFormatter::Element& first,
       CodeFormatter::Element& unary,
       CodeFormatter::Element& expression,

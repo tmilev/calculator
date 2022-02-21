@@ -693,7 +693,7 @@ bool CodeFormatter::Element::computeIndentationGreaterThan() {
     this->computeIndentationAtomic();
     return true;
   }
-  return  true;
+  return true;
 }
 
 bool CodeFormatter::Element::applyOpenParenthesisException() {
@@ -718,9 +718,14 @@ bool CodeFormatter::Element::applyOpenParenthesisException() {
   return true;
 }
 
-bool CodeFormatter::Element::computeIndentationTemplateClause(){
+bool CodeFormatter::Element::computeIndentationTemplateClause() {
+  if (this->children.size >= 2){
+    if (this->children[1].type == CodeFormatter::Element::InAngleBrackets){
+      this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore =1;
+    }
+  }
   this->computeIndentationBasic(0);
-  this->rightMostAtomUnderMe()->newLinesAfter=1;
+  this->rightMostAtomUnderMe()->newLinesAfter = 1;
   return true;
 }
 
@@ -960,53 +965,50 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationCodeBlock();
   case CodeFormatter::Element::CurlyBraceCommaDelimitedList:
     return this->computeIndentationCurlyBraceCommaDelimitedList();
-case CodeFormatter::Element::ControlWantsCodeBlock:
+  case CodeFormatter::Element::ControlWantsCodeBlock:
     return this->computeIndentationControlWantsCodeBlock();
   case CodeFormatter::Element::CaseClause:
-return    this->computeIndentationCaseClause();
-    case CodeFormatter::Element::CaseClauseStart:
-    return     this->computeIndentationCaseClauseStart();
-  case  CodeFormatter::Element::ReturnedExpression:
-return     this->computeIndentationReturnedExpression();
+    return this->computeIndentationCaseClause();
+  case CodeFormatter::Element::CaseClauseStart:
+    return this->computeIndentationCaseClauseStart();
+  case CodeFormatter::Element::ReturnedExpression:
+    return this->computeIndentationReturnedExpression();
   case CodeFormatter::Element::TypeExpression:
-    return     this->computeIndentationTypeExpression();
+    return this->computeIndentationTypeExpression();
   case CodeFormatter::Element::Expression:
-      return  this->computeIndentationExpression();
-  case  CodeFormatter::Element::Operator:
-      return this->computeIndentationOperator();
+    return this->computeIndentationExpression();
+  case CodeFormatter::Element::Operator:
+    return this->computeIndentationOperator();
   case CodeFormatter::Element::InAngleBrackets:
-      return this->computeIndentationAngleBrackets();
+    return this->computeIndentationAngleBrackets();
   case CodeFormatter::Element::InParentheses:
-      return  this->computeIndentationInParentheses();
+    return this->computeIndentationInParentheses();
   case CodeFormatter::Element::IfClause:
-      return this->computeIndentationIfClause();
+    return this->computeIndentationIfClause();
   case CodeFormatter::Element::EnumDefinition:
-      return this->computeIndentationEnumDefinition();
+    return this->computeIndentationEnumDefinition();
   case CodeFormatter::Element::EnumDeclaration:
-      return this->computeIndentationEnumDeclaration();
+    return this->computeIndentationEnumDeclaration();
   case CodeFormatter::Element::CommaList:
-      return this->computeIndentationCommaList();
+    return this->computeIndentationCommaList();
   case CodeFormatter::Element::Command:
-      return    this->computeIndentationCommand();
-
+    return this->computeIndentationCommand();
   case CodeFormatter::Element::CommandList:
-      return this->computeIndentationCommandList();
-
+    return this->computeIndentationCommandList();
   case CodeFormatter::Element::CommentCollection:
-      return this->computeIndentationCommentCollection();
-
-  case  CodeFormatter::Element::Comment:
-      return this->computeIndentationComment();
-  case  CodeFormatter::Element::FunctionDeclaration:
-      return this->computeIndentationFunctionDeclaration();
+    return this->computeIndentationCommentCollection();
+  case CodeFormatter::Element::Comment:
+    return this->computeIndentationComment();
+  case CodeFormatter::Element::FunctionDeclaration:
+    return this->computeIndentationFunctionDeclaration();
   case CodeFormatter::Element::FunctionDefinition:
-      return this->computeIndentationFunctionDefinition();
+    return this->computeIndentationFunctionDefinition();
   case CodeFormatter::Element::GreaterThan:
-      return this->computeIndentationGreaterThan();
-  case  CodeFormatter::Element::LessThan:
-      return this->computeIndentationLessThan();
+    return this->computeIndentationGreaterThan();
+  case CodeFormatter::Element::LessThan:
+    return this->computeIndentationLessThan();
   case CodeFormatter::Element::TemplateClause:
-      return  this->computeIndentationTemplateClause();
+    return this->computeIndentationTemplateClause();
   default:
     break;
   }
@@ -1059,7 +1061,7 @@ bool CodeFormatter::Element::computeIndentationFunctionDefinition() {
     lastElementFunctionDeclaration.newLinesAfter = 0;
     this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
   }
-  return  true;
+  return true;
 }
 
 bool CodeFormatter::Element::computeIndentationCommentCollection() {
@@ -1131,7 +1133,7 @@ bool CodeFormatter::Element::computeIndentationComment() {
     next.content = lines[i];
     this->addChild(next);
   }
-  return  true;
+  return true;
 }
 
 bool CodeFormatter::Element::computeIndentationCurlyBraceCommaDelimitedList() {
@@ -1192,8 +1194,8 @@ bool CodeFormatter::Element::computeIndentationCodeBlock() {
 }
 
 bool CodeFormatter::Element::computeIndentationEnumDeclaration() {
-  this->computeIndentationBasic(0);    return true;
-
+  this->computeIndentationBasic(0);
+  return true;
 }
 
 bool CodeFormatter::Element::computeIndentationEnumDefinition() {
@@ -1315,7 +1317,7 @@ bool CodeFormatter::Element::computeIndentationCommandList() {
     }
     current.computeIndentation();
   }
-  return  true;
+  return true;
 }
 
 void CodeFormatter::Element::resetWhitespaceRecursively() {
@@ -1351,8 +1353,8 @@ bool CodeFormatter::Element::computeIndentationCommand() {
   MacroRegisterFunctionWithName(
     "CodeFormatter::Element::computeIndentationCommand"
   );
-  this->computeIndentationBasic(0);  return true;
-
+  this->computeIndentationBasic(0);
+  return true;
 }
 
 bool CodeFormatter::Element::computeIndentationCommaList() {
@@ -1388,8 +1390,8 @@ bool CodeFormatter::Element::computeIndentationExpression() {
   if (!this->containsNewLineAfterRecursively()) {
     return true;
   }
-  this->breakExpression();  return true;
-
+  this->breakExpression();
+  return true;
 }
 
 void CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
@@ -2229,8 +2231,8 @@ bool CodeFormatter::Processor::applyOneRule() {
       last.type == CodeFormatter::Element::CaseKeyWord ||
       last.type == CodeFormatter::Element::CaseClauseStart ||
       last.type == CodeFormatter::Element::CaseClauseMultipleStart ||
-      last.type == CodeFormatter::Element::RightCurlyBrace
-  ||last.type == CodeFormatter::Element::DefaultKeyWord
+      last.type == CodeFormatter::Element::RightCurlyBrace ||
+      last.type == CodeFormatter::Element::DefaultKeyWord
     )
   ) {
     thirdToLast.makeFrom2(

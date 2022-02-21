@@ -16,6 +16,7 @@
 *.autosave
 
 src/temp.cpp
+src/temp_large.cpp
 
 certificates*
 

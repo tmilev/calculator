@@ -157,8 +157,8 @@ public:
     // Returns false if the expression is not of that form.
     bool breakExpressionStringStream();
     bool isStringStreamExpressionLike();
-    bool shouldAddExtraLineInTopLevel(
-      CodeFormatter::Element& current, CodeFormatter::Element& next
+    bool isOfTypeOrCommandOfType(CodeFormatter::Element::Type input);
+    bool shouldAddExtraLineInTopLevel(CodeFormatter::Element& next
     );
   public:
     Element::Type type;
@@ -180,6 +180,7 @@ public:
     std::string toString() const;
     std::string toStringWithoutType() const;
     static std::string toStringType(CodeFormatter::Element::Type inputType);
+    std::string toStringMyType() const;
     std::string toStringHTMLTree();
     void toStringContentOnly(std::stringstream& out) const;
     std::string toStringContentOnly() const;

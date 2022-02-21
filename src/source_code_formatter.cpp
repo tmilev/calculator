@@ -35,6 +35,10 @@ std::string CodeFormatter::Element::toString() const {
   return out.str();
 }
 
+std::string CodeFormatter::Element::toStringMyType()const {
+  return this->toStringType(this->type);
+}
+
 std::string CodeFormatter::Element::toStringType(
   CodeFormatter::Element::Type input
 ) {
@@ -1401,19 +1405,39 @@ void CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
   }
 }
 
+bool CodeFormatter::Element::isOfTypeOrCommandOfType(CodeFormatter::Element::Type input){
+  if (this->type == input) {
+    return true;
+  }
+  if (this->type != CodeFormatter::Element::Command){
+    return false;
+  }
+  if (this->children.size <= 0) {
+    return  false;
+  }
+  return this->children[0].type == input;
+}
+
 bool CodeFormatter::Element::shouldAddExtraLineInTopLevel(
-  CodeFormatter::Element& current, CodeFormatter::Element& next
+CodeFormatter::Element& next
 ) {
   if (
-    current.type == CodeFormatter::Element::IncludeLine &&
+    this->type == CodeFormatter::Element::IncludeLine &&
     next.type != CodeFormatter::Element::IncludeLine
   ) {
     return true;
   }
   if (
-    current.type == CodeFormatter::Element::MacroLine &&
+    this->type == CodeFormatter::Element::MacroLine &&
     next.type != CodeFormatter::Element::MacroLine
   ) {
+    return true;
+  }
+  if (this->isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDeclaration) &&
+  !next. isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDeclaration)){
+    return true;
+  }
+  if (this->isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDefinition)){
     return true;
   }
   return false;
@@ -1433,12 +1457,10 @@ bool CodeFormatter::Element::computeIndentationTopLevel() {
     CodeFormatter::Element* rightMostAtom = current.rightMostAtomUnderMe();
     rightMostAtom->newLinesAfter = 1;
     current.computeIndentation();
-    bool addExtraLine = false;
+    bool addExtraLine = true;
     if (i + 1 < this->children.size) {
       addExtraLine =
-      this->shouldAddExtraLineInTopLevel(current, this->children[i + 1]);
-    } else {
-      addExtraLine = true;
+      current.shouldAddExtraLineInTopLevel(this->children[i + 1]);
     }
     if (addExtraLine) {
       rightMostAtom->newLinesAfter = 2;

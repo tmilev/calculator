@@ -119,6 +119,7 @@ public:
     bool computeIndentationControlWantsCodeBlock();
     bool computeIndentationCommandList();
     bool computeIndentationCommaList();
+    bool computeIndentationInitializerList();
     bool computeIndentationEnumDefinition();
     bool computeIndentationEnumDeclaration();
     bool computeIndentationCommand();
@@ -157,8 +158,7 @@ public:
     bool breakExpressionStringStream();
     bool isStringStreamExpressionLike();
     bool isOfTypeOrCommandOfType(CodeFormatter::Element::Type input);
-    bool shouldAddExtraLineInTopLevel(CodeFormatter::Element& next
-    );
+    bool shouldAddExtraLineInTopLevel(CodeFormatter::Element& next);
   public:
     Element::Type type;
     std::string content;
@@ -223,7 +223,7 @@ public:
       CodeFormatter::Element* inputParent,
       int inputIndexInParent
     );
-    Element* previousAtom();
+    Element* previousAtom() const;
     Element* nextAtom();
     Element* previousSibling();
     Element* rightMostAtomUnderMe();
@@ -400,7 +400,7 @@ public:
 private:
   void addOperatorOverride(
     const std::string& overridingOperator,
-    const List<std::string> & overridden
+    const List<std::string>& overridden
   );
   bool shouldSeparateWithSpace(
     const std::string& left, const std::string& right
@@ -443,8 +443,14 @@ private:
     const CodeFormatter::Element& leftOperator,
     const CodeFormatter::Element& rightOperator
   );
-  bool mustSplitWithWhitespace(const CodeFormatter::Element& leftAtom, const CodeFormatter::Element& rightAtom);
-  void applyNewLineExceptions(CodeFormatter::Element& leftAtom, CodeFormatter::Element& rightAtom);
+  bool mustSplitWithWhitespace(
+    const CodeFormatter::Element& leftAtom,
+    const CodeFormatter::Element& rightAtom
+  );
+  void applyNewLineExceptions(
+    CodeFormatter::Element& leftAtom, CodeFormatter::Element& rightAtom
+  );
 };
+
 #endif // header_source_code_formatter_ALREADY_INCLUDED
 

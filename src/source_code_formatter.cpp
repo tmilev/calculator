@@ -881,6 +881,8 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationEnumDeclaration();
   case CodeFormatter::Element::CommaList:
     return this->computeIndentationCommaList();
+  case CodeFormatter::Element::FunctionWithArgumentsAndInitializerList:
+    return this->computeIndentationInitializerList();
   case CodeFormatter::Element::Command:
     return this->computeIndentationCommand();
   case CodeFormatter::Element::CommandList:
@@ -924,10 +926,22 @@ bool CodeFormatter::Element::computeIndentationFunctionDeclaration() {
   for (int i = 1; i < this->children.size; i ++) {
     CodeFormatter::Element& previous = this->children[i - 1];
     if (previous.content == "," || previous.content == ":") {
-      this->children[i].whiteSpaceBefore = 1;
+      this->children[i].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
     }
   }
   this->computeIndentationBasic(0);
+  if (!this->containsNewLineAfterRecursively()) {
+    return  true;
+  }
+    this->resetWhitespaceRecursively();
+    for (int i = 1; i < this->children.size; i ++) {
+      CodeFormatter::Element& previous = this->children[i - 1];
+      if (previous.content == "," || previous.content == ":") {
+        previous.newLinesAfter = 1;
+      }
+    }
+    this->computeIndentationBasic(0);
+
   return true;
 }
 
@@ -1238,6 +1252,10 @@ bool CodeFormatter::Element::computeIndentationCommand() {
   return true;
 }
 
+bool CodeFormatter::Element::computeIndentationInitializerList() {
+  return this->computeIndentationBasic(0);
+}
+
 bool CodeFormatter::Element::computeIndentationCommaList() {
   bool mustSplitLines = false;
   if (
@@ -1366,7 +1384,7 @@ CodeFormatter::Element* CodeFormatter::Element::previousSibling() {
   return &this->parent->children[this->indexInParent - 1];
 }
 
-CodeFormatter::Element* CodeFormatter::Element::previousAtom() {
+CodeFormatter::Element* CodeFormatter::Element::previousAtom() const {
   if (this->parent == nullptr) {
     return nullptr;
   }
@@ -3022,6 +3040,8 @@ bool CodeFormatter::Processor::applyOneRule() {
     )
   ) {
     this->lastRuleName = "ternary question mark";
+    fifthToLast.type = CodeFormatter::Element::Operator;
+    thirdToLast.type = CodeFormatter::Element::Operator;
     sixthToLast.makeFrom5(
       CodeFormatter::Element::Expression,
       sixthToLast,
@@ -3925,7 +3945,7 @@ void CodeFormatter::applyNewLineExceptions(
   if (left.columnFinal + 1 >= this->maximumDesiredLineLength) {
     return;
   }
-  if (left.content == ";" || left.content == "{") {
+  if (left.content == ";" || left.content == "{" || left.content == "}") {
     return;
   }
   // Exception: holds naked ( on a new line is moved to the top line.
@@ -4045,6 +4065,12 @@ bool CodeFormatter::mustSplitWithWhitespace(
     if (leftAtom.canBeUnaryOnTheLeft()) {
       return false;
     }
+    CodeFormatter::Element* previous = leftAtom.previousAtom();
+    if (previous != nullptr) {
+      if (previous->type == CodeFormatter::Element::OperatorKeyWord){
+        return false;
+      }
+    }
   }
   if (rightAtom.content == ";") {
     return false;
@@ -4064,6 +4090,9 @@ bool CodeFormatter::mustSplitWithWhitespace(
     return false;
   }
   if (rightAtom.content == ",") {
+    return false;
+  }
+  if (leftAtom.type == CodeFormatter::Element::OperatorKeyWord&& rightAtom.isOperator() ){
     return false;
   }
   return true;

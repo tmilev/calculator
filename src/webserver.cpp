@@ -125,7 +125,6 @@ void WebServer::initSSL() {
     global << Logger::red << "SSL is DISABLED." << Logger::endL;
     return;
   }
-  //////////////////////////////////////////////////////////////////////////
   this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(true);
 }
 
@@ -3562,7 +3561,6 @@ bool WebWorker::runInitialize() {
     << this->parent->statistics.allConnections
     << ". " << Logger::endL;
   }
-  /////////////////////////////////////////////////////////////////////////
   this->statistics.allReceives = 0;
   return  true;
 }
@@ -3828,7 +3826,6 @@ bool WebServer::analyzeMainArgumentsTimeString(const std::string& timeLimitStrin
 }
 
 void WebServer::initializeBuildFlags() {
-  ////////////////////////////////////////////////////
   global.flagRunningConsoleRegular = false;
   global.flagRunningConsoleTest = false;
   #ifdef MACRO_use_open_ssl
@@ -3838,7 +3835,6 @@ void WebServer::initializeBuildFlags() {
   global.flagDatabaseCompiled = true;
   #endif
   global.flagRunningBuiltInWebServer = false;
-  ////////////////////////////////////////////////////
 }
 
 std::string MainFlags::server = "server";

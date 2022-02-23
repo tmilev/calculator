@@ -18,7 +18,6 @@ public:
   //     on the system
   // 2. (CarryOverBound*2)^2- 1 must fit inside (long long)
   //     on the system.
-  ////////////////////////////////////////////////////////
   // On a 32 bit machine any number smaller than or equal to 2^30 will work.
   // If you got no clue what to put just leave CarryOverBound as it is below.
   List<int32_t> digits;

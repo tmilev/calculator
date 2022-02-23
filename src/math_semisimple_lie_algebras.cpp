@@ -646,7 +646,6 @@ void SemisimpleLieAlgebra::exploitTheCyclicTrick(int i, int j, int k) {
   if (!this->computedChevalleyConstants.elements[i][j]) {
     global.fatal << "Bad structure constant computation order." << global.fatal;
   }
-  /////////////////////////////////////////////////////////////////
   Rational& chevalleyConstant = this->chevalleyConstants.elements[i][j];
   Rational scalarProduct = this->weylGroup.rootScalarCartanRoot(rootK, rootK);
   this->chevalleyConstants.elements[j][k] = (chevalleyConstant * this->weylGroup.rootScalarCartanRoot(rootI, rootI)) / scalarProduct;

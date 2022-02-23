@@ -26,8 +26,6 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   bool ascending
 ) {
   MacroRegisterFunctionWithName("CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner");
-   /////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////
   if (highestWeights.size == 0) {
     return false;
   }

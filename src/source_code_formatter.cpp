@@ -692,6 +692,10 @@ int CodeFormatter::Element::minimalSizeWithSpacebars() {
   return result;
 }
 
+bool CodeFormatter::Element::computeIndentationInBrackets() {
+  this->computeIndentationInParentheses();
+  return true;
+}
 bool CodeFormatter::Element::computeIndentationAngleBrackets() {
   this->computeIndentationInParentheses();
   return true;
@@ -871,6 +875,8 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationAngleBrackets();
   case CodeFormatter::Element::InParentheses:
     return this->computeIndentationInParentheses();
+  case CodeFormatter::Element::InBrackets:
+    return this->computeIndentationInBrackets();
   case CodeFormatter::Element::IfClause:
     return this->computeIndentationIfClause();
   case CodeFormatter::Element::IfWantsCodeBlock:
@@ -1395,7 +1401,7 @@ CodeFormatter::Element* CodeFormatter::Element::previousAtom() const {
   this->parent->children[this->indexInParent - 1].rightMostAtomUnderMe();
 }
 
-CodeFormatter::Element* CodeFormatter::Element::nextAtom() {
+CodeFormatter::Element* CodeFormatter::Element::nextAtom() const{
   if (this->parent == nullptr) {
     return nullptr;
   }
@@ -2580,7 +2586,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   ) {
     this->lastRuleName = "typeAndIdentifier equals expression";
     fourthToLast.makeFrom3(
-      CodeFormatter::Element::TypeAndIdentifier,
+      CodeFormatter::Element::Expression,
       fourthToLast,
       thirdToLast,
       secondToLast
@@ -4059,7 +4065,7 @@ bool CodeFormatter::mustSplitWithWhitespace(
     return false;
   }
   if (rightAtom.content == "(") {
-    if (!leftAtom.isOperator()) {
+    if (!leftAtom.isOperator() && leftAtom.type != CodeFormatter::Element::Comma) {
       return false;
     }
     if (leftAtom.canBeUnaryOnTheLeft()) {
@@ -4076,6 +4082,20 @@ bool CodeFormatter::mustSplitWithWhitespace(
     return false;
   }
   if (rightAtom.isStarOrAmpersand()) {
+
+    CodeFormatter::Element* next = rightAtom.nextAtom();
+    if (next != nullptr){
+      CodeFormatter ::Element* afterNext = next->nextAtom();
+      if (afterNext != nullptr){
+        if (
+        rightAtom.content == "*" && next->isIdentifierOrAtom() && afterNext->isOperator() &&
+        afterNext->content != "=" &&
+        afterNext->content != ","
+        ){
+          return true;
+        }
+      }
+    }
     if (
       leftAtom.type != CodeFormatter::Element::Operator &&
       leftAtom.content != ","
@@ -4092,8 +4112,17 @@ bool CodeFormatter::mustSplitWithWhitespace(
   if (rightAtom.content == ",") {
     return false;
   }
+  if (leftAtom.content == "~") {
+    return false;
+  }
   if (leftAtom.type == CodeFormatter::Element::OperatorKeyWord&& rightAtom.isOperator() ){
     return false;
+  }
+  if (leftAtom.content == "<<" && rightAtom.content == "<") {
+    return true;
+  }
+  if (leftAtom.content == "<" && rightAtom.content == ">") {
+    return  true;
   }
   return true;
 }

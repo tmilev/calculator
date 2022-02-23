@@ -3022,13 +3022,11 @@ std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
 
 JSData CalculatorHTML::getEditorBoxesHTML() {
   MacroRegisterFunctionWithName("CalculatorHTML::getEditorBoxesHTML");
-  ////////////////////////////////////////////////////////////////////
   JSData output;
   output.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->problemData.answers.size(); i ++) {
     JSData currentAnswerJS;
     Answer& currentAnswer = this->problemData.answers.values[i];
-    ///////////////
     JSData properties;
     for (int j = 0; j < currentAnswer.properties.size(); j ++) {
       properties[currentAnswer.properties.keys[j]] = currentAnswer.properties.values[j];

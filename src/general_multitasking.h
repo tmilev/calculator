@@ -4,10 +4,8 @@
 #define header_general_multitasking_ALREADY_INCLUDED
 #include "macros.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The documentation of pthreads.h can be found at:
 // https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The below class is a wrapper for mutexes. All system dependent machinery for
 // mutexes should be put here.
 // MutexRecursiveWrapper specification:
@@ -29,7 +27,6 @@
 // In order to have guaranteed wake-up when coordinating two threads only, use the
 // controller object (which uses two mutexes to achieve guaranteed wake-up).
 // 3) Mutexes cannot be copied: once allocated, they stay in place.
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MutexRecursiveWrapper {
 private:
   bool flagUnsafeFlagForDebuggingIslocked;

@@ -130,6 +130,7 @@ public:
     bool computeIndentationReturnedExpression();
     bool computeIndentationOperator();
     bool computeIndentationInParentheses();
+    bool computeIndentationInBrackets();
     bool computeIndentationAngleBrackets();
     bool computeIndentationBasic(int startingIndex);
     bool computeIndentationExpression();
@@ -224,7 +225,7 @@ public:
       int inputIndexInParent
     );
     Element* previousAtom() const;
-    Element* nextAtom();
+    Element* nextAtom()const;
     Element* previousSibling();
     Element* rightMostAtomUnderMe();
     Element* leftMostAtomUnderMe();

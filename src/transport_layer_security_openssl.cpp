@@ -328,7 +328,6 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   this->owner->flagInitializedPrivateKey = true;
   std::string certificateOfficialPhysical = this->owner->certificateOfficialPhysical();
   std::string keyOfficialPhysical = this->owner->keyOfficialPhysical();
-  //////////////////////////////////////////////////////////
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
   SSL_CTX_set_ecdh_auto(this->contextGlobal, 1);

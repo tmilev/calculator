@@ -1740,7 +1740,6 @@ public:
     void reset();
   };
   EvaluationStatistics statistics;
-  ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;
   bool flagFirstErrorEncountered;

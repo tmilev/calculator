@@ -438,7 +438,6 @@ bool Calculator::expressionMatchesPattern(
 ) {
   MacroRegisterFunctionWithName("Calculator::expressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(pattern.owner == this && input.owner == this)) {
     global.fatal
     << "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
@@ -454,7 +453,6 @@ bool Calculator::expressionMatchesPattern(
     << pattern.toString();
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.toStringHtml();
   }
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (this->recursionDepth>this->maximumRecursionDepth) {
     std::stringstream out;
     out << "Max recursion depth of " << this->maximumRecursionDepth << " exceeded whlie trying to match expression pattern "

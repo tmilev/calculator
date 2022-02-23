@@ -375,10 +375,8 @@ bool WebAPIResponse::processCompute() {
     HtmlRoutines::convertStringToURLString(calculator.inputString, false),
     calculator.inputString
   );
-  ////////////////////////////////////////////////
   // The parser used to be initialized here.
   // It has since been moved to the start of the web server.
-  ////////////////////////////////////////////////
   global.response.allowReport();
   calculator.evaluate(calculator.inputString);
   global.response.disallowReport();

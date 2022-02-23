@@ -634,7 +634,6 @@ void LargeIntegerUnsigned::dividePositive(
         }
       }
       currentQuotientDigit = static_cast<int>(remainderLeadingDigit / divisorLeadingDigitPlusSlack);
-      ///////////////////////////////////////////////////////////
       remainderBackup = remainderOutput;
       remainderOutput.addLargeIntegerUnsignedShiftedTimesDigit(divisor, quotientDigitIndex, - currentQuotientDigit);
       if (*remainderOutput.digits.lastObject() >= 0) {

@@ -1931,7 +1931,6 @@ void DrawingVariables::projectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   if (input[0].isNegative()) {
     basepoint.negate();
   }
-  //////////////////////////////////////////////////
   Rational scalarProduct;
   output.scalarEuclidean(normal, scalarProduct);
   Rational scalarProductBasePoint;
@@ -9388,7 +9387,6 @@ bool PartialFractions::computeOneVectorPartitionFunction(
   }
   this->totalFractionsWithAccountedVectorPartitionFunction = 0;
   output.makeZeroLatticeZn(this->ambientDimension);
-  ///////////////////////////////////////////////
   QuasiPolynomial summand;
   for (int i = 0; i < this->reduced.size(); i ++) {
     if (!this->reduced[i].rootIsInFractionCone(&newIndicator)) {
@@ -12952,7 +12950,6 @@ bool ConeCollection::findMaxLFOverConeProjective(
 }
 
 void Lattice::reduce() {
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   this->basis.gaussianEliminationEuclideanDomain();
   int numRowsToTrim = 0;
   for (int i = this->basis.numberOfRows - 1; i >= 0; i --) {

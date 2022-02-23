@@ -701,7 +701,6 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
   Matrix<Rational> invertedSymCartan;
   invertedSymCartan = weylGroup.cartanSymmetric;
   invertedSymCartan.invert();
-////////////////////////////////////////////////////////////////////////
   for (int i = 0; i < dimension; i ++) {
     root1.makeEi(dimension, i);
   //implementation without the ninja formula:

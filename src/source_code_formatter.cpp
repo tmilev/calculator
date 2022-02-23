@@ -16,7 +16,6 @@ CodeFormatter::Element::Element() {
   this->owner = nullptr;
   this->parent = nullptr;
   this->indexInParent = - 1;
-  this->requiresWhiteSpaceAfter = false;
 }
 
 std::string CodeFormatter::Element::toStringWithoutType() const {
@@ -35,7 +34,7 @@ std::string CodeFormatter::Element::toString() const {
   return out.str();
 }
 
-std::string CodeFormatter::Element::toStringMyType()const {
+std::string CodeFormatter::Element::toStringMyType() const {
   return this->toStringType(this->type);
 }
 
@@ -615,67 +614,6 @@ std::string CodeFormatter::Element::toStringIndentation() const {
   return out.str();
 }
 
-bool CodeFormatter::Element::needsWhiteSpaceBefore() {
-  if (this->whiteSpaceBefore > 0) {
-    // The parent nodes have already
-    // requested white space before.
-    return true;
-  }
-  if (this->content.size() == 0) {
-    return false;
-  }
-  CodeFormatter::Element* previous = this->previousAtom();
-  if (previous == nullptr) {
-    return false;
-  }
-  if (previous->content.size() == 0) {
-    return false;
-  }
-  if (previous->newLinesAfter > 0) {
-    return false;
-  }
-  if (previous->content == "return" && this->content != ";") {
-    return true;
-  }
-  char first = this->content[0];
-  char lastPrevious = previous->content[previous->content.size() - 1];
-  if (lastPrevious == '>' && first == '>') {
-    return true;
-  }
-  bool startsWithSeparator = this->owner->isSeparatorCharacter(first);
-  bool previousEndsWithSeparator =
-  this->owner->isSeparatorCharacter(lastPrevious);
-  if (!previousEndsWithSeparator) {
-    if (!startsWithSeparator) {
-      return true;
-    }
-    if (this->type == CodeFormatter::Element::Quote) {
-      return true;
-    }
-  }
-  if (this->owner->preemptsWhitespaceBefore(first)) {
-    return false;
-  }
-  if (lastPrevious == ')' && !startsWithSeparator) {
-    return true;
-  }
-  if (
-    this->indexInParent == 0 &&
-    this->parent->type == CodeFormatter::Element::InParentheses
-  ) {
-    CodeFormatter::Element* previousSibling = this->parent->previousSibling();
-    if (previousSibling != nullptr) {
-      if (
-        previousSibling->type == CodeFormatter::Element::TypeExpression &&
-        previous->type == CodeFormatter::Element::GreaterThan
-      ) {
-        return false;
-      }
-    }
-  }
-  return previous->requiresWhiteSpaceAfter;
-}
-
 bool CodeFormatter::Element::computeIndentationLessThan() {
   if (this->parent->type != CodeFormatter::Element::TypeExpression) {
     this->computeIndentationAtomic();
@@ -700,32 +638,12 @@ bool CodeFormatter::Element::computeIndentationGreaterThan() {
   return true;
 }
 
-bool CodeFormatter::Element::applyOpenParenthesisException() {
-  CodeFormatter::Element* previous = this->previousAtom();
-  if (this->content != "(" || previous == nullptr) {
-    return false;
-  }
-  if (previous->newLinesAfter == 0) {
-    return false;
-  }
-  if (previous->columnFinal + 1 >= this->owner->maximumDesiredLineLength) {
-    return false;
-  }
-  if (previous->content == ";" || previous->content == "{") {
-    return false;
-  }
-  // Exception: holds naked ( on a new line is moved to the top line.
-  previous->newLinesAfter = 0;
-  if (previous->content != "(") {
-    this->whiteSpaceBefore = 1;
-  }
-  return true;
-}
-
 bool CodeFormatter::Element::computeIndentationTemplateClause() {
-  if (this->children.size >= 2){
-    if (this->children[1].type == CodeFormatter::Element::InAngleBrackets){
-      this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore =1;
+  if (this->children.size >= 2) {
+    if (
+      this->children[1].type == CodeFormatter::Element::InAngleBrackets
+    ) {
+      this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
     }
   }
   this->computeIndentationBasic(0);
@@ -735,25 +653,12 @@ bool CodeFormatter::Element::computeIndentationTemplateClause() {
 
 void CodeFormatter::Element::computeIndentationAtomic() {
   CodeFormatter::Element* previous = this->previousAtom();
-  if (previous != nullptr && this->content == "{") {
-    if (
-      previous->content == "(" &&
-      previous->newLinesAfter > 0 &&
-      previous->columnFinal < this->owner->maximumDesiredLineLength
-    ) {
-      // Exception: formatting of ({ sequence.
-      previous->newLinesAfter = 0;
-      this->whiteSpaceBefore = 0;
-      return;
-    }
+  if (previous != nullptr) {
+    this->owner->applyNewLineExceptions(*previous, *this);
   }
-  if (this->applyOpenParenthesisException()) {
-    return;
-  }
-  if (this->owner->needsSpaceToTheRight(this->content)) {
-    this->requiresWhiteSpaceAfter = true;
-  }
-  if (this->needsWhiteSpaceBefore()) {
+  if (previous == nullptr) {
+    this->whiteSpaceBefore = 0;
+  } else if (this->owner->mustSplitWithWhitespace(*previous, *this)) {
     this->whiteSpaceBefore = 1;
   }
   this->columnFinal =
@@ -818,33 +723,12 @@ bool CodeFormatter::Element::computeIndentationInParentheses() {
 }
 
 bool CodeFormatter::Element::computeIndentationOperator() {
-  this->requiresWhiteSpaceAfter = true;
-  if (this->content == "->" || this->content == ".") {
-    this->requiresWhiteSpaceAfter = false;
-  } else if (this->whiteSpaceBefore == 0) {
-    this->whiteSpaceBefore = 1;
-  }
-  this->columnFinal = this->whiteSpaceBefore + this->content.size();
-  CodeFormatter::Element* previous = this->previousAtom();
-  if (previous == nullptr) {
-    return true;
-  }
-  if (previous->newLinesAfter == 0) {
-    this->columnFinal += previous->columnFinal;
-  }
+  this->computeIndentationAtomic();
   return true;
 }
 
 bool CodeFormatter::Element::computeIndentationTypeExpression() {
   this->computeIndentationBasic(0);
-  CodeFormatter::Element* next = this->nextAtom();
-  CodeFormatter::Element* onTheRight = this->rightMostAtomUnderMe();
-  onTheRight->requiresWhiteSpaceAfter = true;
-  if (next != nullptr) {
-    if (next->content == ",") {
-      this->rightMostAtomUnderMe()->requiresWhiteSpaceAfter = false;
-    }
-  }
   return true;
 }
 
@@ -989,6 +873,8 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationInParentheses();
   case CodeFormatter::Element::IfClause:
     return this->computeIndentationIfClause();
+  case CodeFormatter::Element::IfWantsCodeBlock:
+    return this->computeIndentationIfWantsCodeBlock();
   case CodeFormatter::Element::EnumDefinition:
     return this->computeIndentationEnumDefinition();
   case CodeFormatter::Element::EnumDeclaration:
@@ -1035,24 +921,17 @@ int CodeFormatter::Element::offsetFromPrevious() {
 }
 
 bool CodeFormatter::Element::computeIndentationFunctionDeclaration() {
+  for (int i = 1; i < this->children.size; i ++) {
+    CodeFormatter::Element& previous = this->children[i - 1];
+    if (previous.content == "," || previous.content == ":") {
+      this->children[i].whiteSpaceBefore = 1;
+    }
+  }
   this->computeIndentationBasic(0);
   return true;
 }
 
 bool CodeFormatter::Element::computeIndentationFunctionDefinition() {
-  if (this->children.size >= 3) {
-    if (
-      this->children[2].type == CodeFormatter::Element::ConstKeyWord
-    ) {
-      this->children[1].rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
-    }
-  }
-  CodeFormatter::Element* previous = this->previousAtom();
-  if (previous != nullptr) {
-    if (previous->newLinesAfter < 2) {
-      previous->newLinesAfter = 2;
-    }
-  }
   this->computeIndentationBasic(0);
   if (this->children.size != 2) {
     return true;
@@ -1178,7 +1057,8 @@ bool CodeFormatter::Element::computeIndentationCodeBlock() {
   this->children[0].computeIndentation();
   if (this->children.size == 3) {
     if (
-      this->children[1].type == CodeFormatter::Element::CommandList
+      this->children[1].type == CodeFormatter::Element::CommandList ||
+      this->children[1].type == CodeFormatter::Element::CaseClauseList
     ) {
       this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
     }
@@ -1228,7 +1108,7 @@ bool CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
   }
   this->children[0].indentationLevel = this->indentationLevel;
   this->children[1].indentationLevel = this->indentationLevel;
-  this->children[0].requiresWhiteSpaceAfter = true;
+  this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
   this->children[0].computeIndentation();
   this->children[1].computeIndentation();
   return true;
@@ -1236,12 +1116,9 @@ bool CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
 
 bool CodeFormatter::Element::computeIndentationCaseClause() {
   for (int i = 0; i < this->children.size; i ++) {
-    this->children[i].previousAtom()->newLinesAfter = 1;
+    this->children[i].rightMostAtomUnderMe()->newLinesAfter = 1;
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].computeIndentation();
-  }
-  if (this->children.size > 0) {
-    this->children.lastObject()->rightMostAtomUnderMe()->newLinesAfter = 1;
   }
   return true;
 }
@@ -1271,9 +1148,6 @@ std::string CodeFormatter::Element::toStringHTMLTree() {
   if (this->whiteSpaceBefore > 0) {
     out << " w: " << this->whiteSpaceBefore;
   }
-  if (this->requiresWhiteSpaceAfter) {
-    out << " r: " << this->requiresWhiteSpaceAfter;
-  }
   for (int i = 0; i < this->newLinesAfter; i ++) {
     out << "&darr;";
   }
@@ -1288,9 +1162,6 @@ bool CodeFormatter::Element::computeIndentationCommandList() {
   if (this->parent->type != CodeFormatter::Element::CodeBlock) {
     for (int i = 0; i < this->children.size; i ++) {
       CodeFormatter::Element& current = this->children[i];
-      if (i != this->children.size - 1) {
-        current.rightMostAtomUnderMe()->requiresWhiteSpaceAfter = true;
-      }
       current.indentationLevel = this->indentationLevel;
       current.computeIndentation();
     }
@@ -1327,7 +1198,6 @@ bool CodeFormatter::Element::computeIndentationCommandList() {
 void CodeFormatter::Element::resetWhitespaceRecursively() {
   this->newLinesAfter = 0;
   this->whiteSpaceBefore = 0;
-  this->requiresWhiteSpaceAfter = false;
   this->columnFinal = 0;
   for (int i = 0; i < this->children.size; i ++) {
     this->children[i].resetWhitespaceRecursively();
@@ -1341,6 +1211,13 @@ bool CodeFormatter::Element::containsNewLineAfterRecursively() {
     }
   }
   return this->newLinesAfter > 0;
+}
+
+bool CodeFormatter::Element::computeIndentationIfWantsCodeBlock() {
+  if (this->children.size >= 2) {
+    this->children[1].whiteSpaceBefore = 1;
+  }
+  return this->computeIndentationBasic(0);
 }
 
 bool CodeFormatter::Element::computeIndentationIfClause() {
@@ -1378,7 +1255,6 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
       if (mustSplitLines) {
         current.rightMostAtomUnderMe()->newLinesAfter = 1;
       }
-      current.requiresWhiteSpaceAfter = true;
     }
     current.indentationLevel = this->indentationLevel;
     if (current.isComment()) {
@@ -1398,28 +1274,31 @@ bool CodeFormatter::Element::computeIndentationExpression() {
   return true;
 }
 
-void CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
+bool CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
   for (int i = startingIndex; i < this->children.size; i ++) {
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].computeIndentation();
   }
+  return true;
 }
 
-bool CodeFormatter::Element::isOfTypeOrCommandOfType(CodeFormatter::Element::Type input){
+bool CodeFormatter::Element::isOfTypeOrCommandOfType(
+  CodeFormatter::Element::Type input
+) {
   if (this->type == input) {
     return true;
   }
-  if (this->type != CodeFormatter::Element::Command){
+  if (this->type != CodeFormatter::Element::Command) {
     return false;
   }
   if (this->children.size <= 0) {
-    return  false;
+    return false;
   }
   return this->children[0].type == input;
 }
 
 bool CodeFormatter::Element::shouldAddExtraLineInTopLevel(
-CodeFormatter::Element& next
+  CodeFormatter::Element& next
 ) {
   if (
     this->type == CodeFormatter::Element::IncludeLine &&
@@ -1433,11 +1312,22 @@ CodeFormatter::Element& next
   ) {
     return true;
   }
-  if (this->isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDeclaration) &&
-  !next. isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDeclaration)){
+  if (
+    this->isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDeclaration) &&
+    !next.isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDeclaration)
+  ) {
     return true;
   }
-  if (this->isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDefinition)){
+  if (
+    this->isOfTypeOrCommandOfType(CodeFormatter::Element::ClassDefinition)
+  ) {
+    return true;
+  }
+  if (
+    this->isOfTypeOrCommandOfType(
+      CodeFormatter::Element::FunctionDefinition
+    )
+  ) {
     return true;
   }
   return false;
@@ -1556,9 +1446,7 @@ bool CodeFormatter::Words::processCharacterInQuotes() {
     return false;
   }
   this->currentWord.content += this->currentChar;
-  if (
-    this->currentChar == '"' && !this->flagPreviousIsStandaloneBackSlash
-  ) {
+  if (this->currentChar == '"' && !this->flagPreviousIsStandaloneBackSlash) {
     this->addCurrentWord();
     return true;
   }
@@ -1832,12 +1720,8 @@ bool CodeFormatter::needsSpaceToTheRight(const std::string& word) {
   return this->needsSpaceToTheRightContainer.contains(word);
 }
 
-bool CodeFormatter::preemptsWhitespaceBefore(char input) {
-  return input == ')';
-}
-
 bool CodeFormatter::isSeparatorCharacter(char input) {
-  unsigned char inputUnsigned = static_cast<unsigned char > (input);
+  unsigned char inputUnsigned = static_cast<unsigned char>(input);
   return this->separatorCharactersMap[inputUnsigned];
 }
 
@@ -1854,7 +1738,7 @@ bool CodeFormatter::isOperator(const std::string& input) {
 
 void CodeFormatter::addOperatorOverride(
   const std::string& overridingOperator,
-  const List<std::string> & overridden
+  const List<std::string>& overridden
 ) {
   HashedList<std::string, HashFunctions::hashFunction>& overridenHashed =
   this->operatorOverrides.getValueCreateEmpty(overridingOperator);
@@ -1874,12 +1758,16 @@ CodeFormatter::CodeFormatter() {
   this->pairsNotSeparatedBySpace.addOnTop(
     List<std::string>({"*", "&"})
   );
-  List<std::string> relations = List<std::string> ({"=", "==", ">=", ">", "<=", "!=", "*=", "+=", "-=", "/="}
+  List<std::string> relations = List<std::string>({
+      "=", "==", ">=", ">", "<=", "!=", "*=", "+=", "-=", "/="
+    }
   );
-  List<std::string> andAndOr = List<std::string> ({"&&", "||"});
-  List<std::string> arithmeticOperations = List<std::string> ({"+", "-", "/", "*"}
+  List<std::string> andAndOr = List<std::string>({"&&", "||"});
+  List<std::string> arithmeticOperations = List<std::string>({
+      "+", "-", "/", "*"
+    }
   );
-  List<std::string> bitShift = List<std::string> ({"<<", ">>"});
+  List<std::string> bitShift = List<std::string>({"<<", ">>"});
   List<std::string> andOrRelations = relations;
   andOrRelations.addListOnTop(andAndOr);
   this->addOperatorOverride("+", andOrRelations);
@@ -1998,7 +1886,7 @@ CodeFormatter::CodeFormatter() {
     List<std::string>({"bool", "void", "char", "unsigned", "int"})
   );
   this->controlKeyWords.addListOnTop(
-    List<std::string>({"for", "while", "switch", })
+    List<std::string>({"for", "while", "switch"})
   );
   this->needsSpaceToTheRightContainer.addListOnTop(
     List<std::string>({"for", "if", "while"})
@@ -2098,7 +1986,7 @@ void CodeFormatter::Processor::consumeOneElement(
   while (this->applyOneRule()) {
     this->appendLog();
     this->lastRuleName = "";
-    rulesSinceImprovement ++ ;
+    rulesSinceImprovement ++;
     if (this->stack.size < stackSizeToImprove) {
       rulesSinceImprovement = 0;
       stackSizeToImprove = this->stack.size;
@@ -3485,7 +3373,9 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
-    thirdToLast.isCommandListOrCommand() && (secondToLast.isExpressionIdentifierOrAtom()) &&
+    thirdToLast.isCommandListOrCommand() && (
+      secondToLast.isExpressionIdentifierOrAtom()
+    ) &&
     last.type == CodeFormatter::Element::RightParenthesis
   ) {
     this->lastRuleName = "commandList expression)";
@@ -4009,5 +3899,173 @@ bool CodeFormatter::isOperatorSuitableForNormalization(
   name == "+" ||
   name == "-" ||
   name == "<<";
+}
+
+void CodeFormatter::applyNewLineExceptions(
+  CodeFormatter::Element& left, CodeFormatter::Element& right
+) {
+  if (right.content == "{") {
+    if (
+      left.content == "(" &&
+      left.newLinesAfter > 0 &&
+      left.columnFinal + 1 < this->maximumDesiredLineLength
+    ) {
+      // Exception: formatting of ({ sequence.
+      left.newLinesAfter = 0;
+      right.whiteSpaceBefore = 0;
+      return;
+    }
+  }
+  if (right.content != "(") {
+    return;
+  }
+  if (left.newLinesAfter == 0) {
+    return;
+  }
+  if (left.columnFinal + 1 >= this->maximumDesiredLineLength) {
+    return;
+  }
+  if (left.content == ";" || left.content == "{") {
+    return;
+  }
+  // Exception: holds naked ( on a new line is moved to the top line.
+  left.newLinesAfter = 0;
+}
+
+bool CodeFormatter::mustSplitWithWhitespace(
+  const CodeFormatter::Element& leftAtom,
+  const CodeFormatter::Element& rightAtom
+) {
+  if (leftAtom.newLinesAfter > 0) {
+    return false;
+  }
+  if (rightAtom.whiteSpaceBefore > 0) {
+    // The parent nodes have already
+    // requested white space before.
+    return true;
+  }
+  if (rightAtom.content.size() == 0 || leftAtom.content.size() == 0) {
+    return false;
+  }
+  if (leftAtom.newLinesAfter > 0) {
+    return false;
+  }
+  if (leftAtom.content == "return" && rightAtom.content != ";") {
+    return true;
+  }
+  char right = rightAtom.content[0];
+  char left = leftAtom.content[leftAtom.content.size() - 1];
+  if (left == '>' && right == '>') {
+    return true;
+  }
+  bool startsWithSeparator = this->isSeparatorCharacter(right);
+  bool previousEndsWithSeparator = this->isSeparatorCharacter(left);
+  if (!previousEndsWithSeparator) {
+    if (!startsWithSeparator) {
+      return true;
+    }
+    if (rightAtom.type == CodeFormatter::Element::Quote) {
+      return true;
+    }
+  }
+  if (right == ')') {
+    return false;
+  }
+  if (left == ')' && !startsWithSeparator) {
+    return true;
+  }
+  if (
+    rightAtom.indexInParent == 0 &&
+    rightAtom.parent->type == CodeFormatter::Element::InParentheses
+  ) {
+    CodeFormatter::Element* previousSiblingOfParent =
+    rightAtom.parent->previousSibling();
+    if (previousSiblingOfParent != nullptr) {
+      if (
+        previousSiblingOfParent->type == CodeFormatter::Element::TypeExpression
+        &&
+        previousSiblingOfParent->type == CodeFormatter::Element::GreaterThan
+      ) {
+        return false;
+      }
+    }
+  }
+  if (
+    rightAtom.content == "->" ||
+    rightAtom.content == "." ||
+    leftAtom.content == "->" ||
+    leftAtom.content == "."
+  ) {
+    return false;
+  }
+  if (
+    leftAtom.type == CodeFormatter::Element::DoubleColon ||
+    rightAtom.type == CodeFormatter::Element::DoubleColon
+  ) {
+    return false;
+  }
+  if (
+    leftAtom.type == CodeFormatter::Element::LessThan ||
+    rightAtom.type == CodeFormatter::Element::LessThan
+  ) {
+    // When the type is less than/greater rather than operator, this means the
+    // angle bracket is a part of a template-like syntax.
+    return false;
+  }
+  if (rightAtom.type == CodeFormatter::Element::GreaterThan) {
+    return false;
+  }
+  if (
+    leftAtom.content == "(" ||
+    leftAtom.content == "[" ||
+    leftAtom.content == "{"
+  ) {
+    return false;
+  }
+  if (leftAtom.content == "!") {
+    return false;
+  }
+  if (
+    rightAtom.content == ")" ||
+    rightAtom.content == "]" ||
+    rightAtom.content == "}"
+  ) {
+    return false;
+  }
+  if (rightAtom.content == "[") {
+    return false;
+  }
+  if (rightAtom.type == CodeFormatter::Element::Colon) {
+    return false;
+  }
+  if (rightAtom.content == "(") {
+    if (!leftAtom.isOperator()) {
+      return false;
+    }
+    if (leftAtom.canBeUnaryOnTheLeft()) {
+      return false;
+    }
+  }
+  if (rightAtom.content == ";") {
+    return false;
+  }
+  if (rightAtom.isStarOrAmpersand()) {
+    if (
+      leftAtom.type != CodeFormatter::Element::Operator &&
+      leftAtom.content != ","
+    ) {
+      return false;
+    }
+  }
+  if (leftAtom.isStarOrAmpersand()) {
+    if (leftAtom.parent->type == CodeFormatter::Element::TypeExpression) {
+      return true;
+    }
+    return false;
+  }
+  if (rightAtom.content == ",") {
+    return false;
+  }
+  return true;
 }
 

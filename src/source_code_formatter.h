@@ -130,20 +130,19 @@ public:
     bool computeIndentationOperator();
     bool computeIndentationInParentheses();
     bool computeIndentationAngleBrackets();
-    void computeIndentationBasic(int startingIndex);
+    bool computeIndentationBasic(int startingIndex);
     bool computeIndentationExpression();
     bool computeIndentationTopLevel();
     bool computeIndentationTemplateClause();
     void computeIndentationAtomic();
-    bool applyOpenParenthesisException();
     bool computeIndentationGreaterThan();
     bool computeIndentationLessThan();
     bool computeIndentationCaseClause();
     bool computeIndentationCaseClauseStart();
     bool computeIndentationIfClause();
+    bool computeIndentationIfWantsCodeBlock();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
-    bool needsWhiteSpaceBefore();
     bool containsNewLineAfterRecursively();
     void resetWhitespaceRecursively();
     int offsetFromPrevious();
@@ -174,7 +173,6 @@ public:
     // code element.
     int columnFinal;
     int newLinesAfter;
-    bool requiresWhiteSpaceAfter;
     std::string toStringContentAndMetaData() const;
     std::string toStringIndentation() const;
     std::string toString() const;
@@ -407,7 +405,6 @@ private:
   bool shouldSeparateWithSpace(
     const std::string& left, const std::string& right
   );
-  bool preemptsWhitespaceBefore(char input);
   bool needsSpaceToTheRight(const std::string& word);
   bool isSeparatorCharacter(char input);
   bool isSeparator(const std::string& input);
@@ -446,6 +443,8 @@ private:
     const CodeFormatter::Element& leftOperator,
     const CodeFormatter::Element& rightOperator
   );
+  bool mustSplitWithWhitespace(const CodeFormatter::Element& leftAtom, const CodeFormatter::Element& rightAtom);
+  void applyNewLineExceptions(CodeFormatter::Element& leftAtom, CodeFormatter::Element& rightAtom);
 };
 #endif // header_source_code_formatter_ALREADY_INCLUDED
 

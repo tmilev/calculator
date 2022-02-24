@@ -2170,11 +2170,15 @@ bool logDebugData
 bool CalculatorFunctions::formatCPPDirectory(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
+  global.comments << "DEBUG : got to here";
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Cpp code formatting available only to logged-in admins. ";
   }
+  if (input.size ()< 2){
+    return false;
+  }
   std::string fileName;
-  if (!input.isOfType(&fileName)) {
+  if (!input[1].isOfType(&fileName)) {
     return false;
   }
   std::stringstream report;

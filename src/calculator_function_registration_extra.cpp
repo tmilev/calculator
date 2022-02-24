@@ -251,13 +251,13 @@ void Calculator::initializeFunctionsExtra() {
     innerInvisibleExperimentalNoTest
   );
   this->addOperationHandler(
-    "formatCPPDirectory",
+    "FormatCPPDirectory",
     CalculatorFunctions::formatCPPDirectory,
     "",
     "Format cpp directory. ",
-    "formatCPPDirectory{}(\"src/\")",
+    "FormatCPPDirectory{}(\"src/\")",
     "Calculator::formatCPPDirectory",
-    "formatCPPDirectory",
+    "FormatCPPDirectory",
     innerInvisibleNoTest
   );
 

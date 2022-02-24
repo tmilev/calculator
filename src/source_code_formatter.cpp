@@ -865,6 +865,10 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationCaseClause();
   case CodeFormatter::Element::CaseClauseStart:
     return this->computeIndentationCaseClauseStart();
+  case CodeFormatter::Element::CaseClauseMultipleStart:
+    return this->computeIndentationCaseClauseMultipleStart();
+  case CodeFormatter::Element::CaseClauseList:
+    return  this->computeIndentationCaseClauseList();
   case CodeFormatter::Element::ReturnedExpression:
     return this->computeIndentationReturnedExpression();
   case CodeFormatter::Element::TypeExpression:
@@ -982,6 +986,9 @@ bool CodeFormatter::Element::computeIndentationCommentCollection() {
 bool CodeFormatter::Element::computeIndentationComment() {
   if (this->children.size > 0) {
     return true;
+  }
+  if (this->previousAtom()->newLinesAfter > 0) {
+    this->whiteSpaceBefore = this->indentationLevel;
   }
   List<std::string> words;
   std::string contentAfterDoubleSlash;
@@ -1142,6 +1149,31 @@ bool CodeFormatter::Element::computeIndentationCaseClause() {
     this->children[i].computeIndentation();
   }
   return true;
+}
+
+bool CodeFormatter::Element::computeIndentationCaseClauseList() {
+for (CodeFormatter::Element& child :this->children){
+  child.rightMostAtomUnderMe()->newLinesAfter = 1;
+  child.indentationLevel = this->indentationLevel;
+  if (child.isComment()) {
+    child.indentationLevel -= this->owner->tabLength;
+    if (child.indentationLevel <0 ){
+      child.indentationLevel = 0;
+    }
+  }
+  child.computeIndentation();
+}
+return true;
+
+}
+
+bool CodeFormatter::Element::computeIndentationCaseClauseMultipleStart() {
+  for (CodeFormatter::Element& child: this->children) {
+    child.indentationLevel = this->indentationLevel;
+    child.rightMostAtomUnderMe()->newLinesAfter = 1;
+    child.computeIndentation();
+  }
+return true;
 }
 
 bool CodeFormatter::Element::computeIndentationCaseClauseStart() {
@@ -4070,6 +4102,14 @@ bool CodeFormatter::mustSplitWithWhitespace(
     rightAtom.type == CodeFormatter::Element::DoubleColon
   ) {
     return false;
+  }
+  if (
+    leftAtom.type == CodeFormatter::Element::LessThan &&
+    rightAtom.type == CodeFormatter::Element::GreaterThan
+  ) {
+    // Syntax such as template < >. Leave extra white space between
+    // the brackets.
+    return true;
   }
   if (
     leftAtom.type == CodeFormatter::Element::LessThan ||

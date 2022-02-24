@@ -43,7 +43,7 @@ results/*
 
 src/calculator.pro.user*
 src/calculator.pro.user
-
+srcnew/
 node_modules
 
 external-source

@@ -140,7 +140,9 @@ public:
     bool computeIndentationGreaterThan();
     bool computeIndentationLessThan();
     bool computeIndentationCaseClause();
+    bool computeIndentationCaseClauseMultipleStart();
     bool computeIndentationCaseClauseStart();
+    bool computeIndentationCaseClauseList();
     bool computeIndentationIfClause();
     bool computeIndentationIfWantsCodeBlock();
     void formatDefault(std::stringstream& out);

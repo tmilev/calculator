@@ -2170,7 +2170,6 @@ bool logDebugData
 bool CalculatorFunctions::formatCPPDirectory(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  global.comments << "DEBUG : got to here";
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Cpp code formatting available only to logged-in admins. ";
   }

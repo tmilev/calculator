@@ -43,11 +43,10 @@ results/*
 
 src/calculator.pro.user*
 src/calculator.pro.user
-srcnew/
+output/src/
 node_modules
 
 external-source
-
 configuration
 
 calculator_html/autocomplete_keywords.js

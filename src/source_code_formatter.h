@@ -49,6 +49,7 @@ public:
       // A user-defined atom such as foo or bar.
       Atom,
       ControlWantsCodeBlock,
+      DoKeyWord,
       Colon,
       SemiColon,
       DoubleColon,
@@ -145,6 +146,7 @@ public:
     bool computeIndentationCaseClauseList();
     bool computeIndentationIfClause();
     bool computeIndentationIfWantsCodeBlock();
+    bool computeIndentationQuote();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
     bool containsNewLineAfterRecursively();
@@ -307,6 +309,8 @@ public:
       Element& lookAheadFirst,
       Element& lookAheadNext
     );
+    bool isSuitableForTypePointer(CodeFormatter::Element& prefix, CodeFormatter::Element& type,
+    CodeFormatter::Element& starOrAmpersand, CodeFormatter::Element& suffix, CodeFormatter::Element& afterSuffix);
     bool isSuitableForExpressionExpressionToExpression(
       CodeFormatter::Element& left, CodeFormatter::Element& right
     ) const;
@@ -424,6 +428,7 @@ private:
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
   );
+  bool parsingSucceeded()const;
   std::string toStringLinks();
   static bool isIdentifierWord(const std::string& input);
   bool isLetterLike(char input);

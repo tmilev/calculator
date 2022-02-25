@@ -192,6 +192,8 @@ std::string CodeFormatter::Element::toStringType(
     return "?";
   case CodeFormatter::Element::If:
     return "if";
+  case CodeFormatter::Element::DoKeyWord:
+    return "do";
   case CodeFormatter::Element::IfWantsCodeBlock:
     return "ifWantsCodeBlock";
   case CodeFormatter::Element::Else:
@@ -443,6 +445,8 @@ bool CodeFormatter::Element::isSuitableForCommand() const {
   return
   this->type == CodeFormatter::Element::Expression ||
   this->type == CodeFormatter::Element::FunctionWithArguments ||
+  this->type == CodeFormatter::Element::CommaList||
+  this->type == CodeFormatter::Element::InParentheses ||
   this->type == CodeFormatter::Element::TypeAndIdentifier;
 }
 
@@ -887,6 +891,8 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationIfClause();
   case CodeFormatter::Element::IfWantsCodeBlock:
     return this->computeIndentationIfWantsCodeBlock();
+  case CodeFormatter::Element::Quote:
+    return  this->computeIndentationQuote();
   case CodeFormatter::Element::EnumDefinition:
     return this->computeIndentationEnumDefinition();
   case CodeFormatter::Element::EnumDeclaration:
@@ -999,6 +1005,9 @@ bool CodeFormatter::Element::computeIndentationComment() {
     )
   ) {
     this->content = "// " + contentAfterDoubleSlash;
+  }
+  if (this->content == "// ") {
+    this->content = "//";
   }
   StringRoutines::splitExcludeDelimiter(this->content, ' ', words);
   if (words.size == 0) {
@@ -1264,6 +1273,21 @@ bool CodeFormatter::Element::containsNewLineAfterRecursively() {
     }
   }
   return this->newLinesAfter > 0;
+}
+
+bool CodeFormatter::Element::computeIndentationQuote() {
+  for (int i = 0; i < this->children.size ; i ++){
+    CodeFormatter::Element& child = this->children[i];
+    if (i!= this->children.size-1){
+    child.newLinesAfter = 1;
+    }
+    child.computeIndentation();
+  }
+
+  if (this->content != ""){
+    this->computeIndentationAtomic();
+  }
+  return true;
 }
 
 bool CodeFormatter::Element::computeIndentationIfWantsCodeBlock() {
@@ -1549,13 +1573,13 @@ bool CodeFormatter::Words::processCharacterInComment() {
 }
 
 bool CodeFormatter::Words::processCharacterInMultilineComment() {
-  if (this->currentWord.type != CodeFormatter::Element::Comment) {
+  if (this->currentWord.type != CodeFormatter::Element::CommentMultiline) {
     return false;
   }
   this->currentWord.content += this->currentChar;
   if (
     this->currentChar == '/' &&
-    this->currentWord.content[this->currentWord.content.size() - 1] == '*'
+    this->currentWord.content[this->currentWord.content.size() - 2] == '*'
   ) {
     this->addCurrentWord();
   }
@@ -1660,18 +1684,33 @@ bool CodeFormatter::isIdentifierWord(const std::string& input) {
 std::string CodeFormatter::toStringLinks() {
   MacroRegisterFunctionWithName("SourceCodeFormatter::toStringLinks");
   std::stringstream out;
+  bool parsingFailed =! this->parsingSucceeded();
+if (parsingFailed) {
+out << "<b style='color:red'>";
+}
   out
   << "<a href = '"
   << this->inputFileName
-  << "'>"
+  << "'";
+  if (parsingFailed ) {
+    out << " style='color:red'";
+  }
+  out
+  << ">"
   << this->inputFileName
-  << "</a>, ";
+  << "</a>&rarr; ";
   out
   << "<a href = '"
   << this->outputFileName
-  << "'>"
+  << "'";
+  if (parsingFailed ) {
+    out << " style='color:red'";
+  }
+
+out  << ">"
   << this->outputFileName
   << "</a>. ";
+  if (!this->parsingSucceeded()) {out<<"</b>";}
   return out.str();
 }
 
@@ -1697,14 +1736,16 @@ bool CodeFormatter::formatCPPDirectory(
   ) {
     return false;
   }
+  std::string newDirectory = "output/" + directory;
   newFileNames.setExpectedSize(allFiles.size);
   oldFileNames.setExpectedSize(allFiles.size);
   for (int i = 0; i < allFiles.size; i ++) {
     if (allFileExtensions[i] == ".cpp" || allFileExtensions[i] == ".h") {
       oldFileNames.addOnTop(directory + allFiles[i]);
-      newFileNames.addOnTop(directory + "new/" + allFiles[i]);
+      newFileNames.addOnTop(newDirectory + allFiles[i]);
     }
   }
+  oldFileNames.quickSortAscending(nullptr, &newFileNames);
   for (int i = 0; i < newFileNames.size; i ++) {
     CodeFormatter formatter;
     if (
@@ -1714,8 +1755,14 @@ bool CodeFormatter::formatCPPDirectory(
     ) {
       return false;
     }
+    if (comments != nullptr){
+    *comments << "<br>";
+    }
   }
   return true;
+}
+bool CodeFormatter::parsingSucceeded() const{
+return  this->processor.code.children.size <= this->dummyElements + 1;
 }
 
 bool CodeFormatter::formatCPPSourceCode(
@@ -1742,12 +1789,13 @@ bool CodeFormatter::formatCPPSourceCode(
   std::stringstream out;
   this->normalizeBinaryOperationsRecursively(this->processor.code);
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
-  if (logDebugInfo) {
-    global.comments
+  if (logDebugInfo && comments != nullptr) {
+    *comments
     << "<b>Parsing log follows.</b><br>"
     << this->processor.debugLog;
   }
-  if (this->processor.code.children.size <= this->dummyElements + 1) {
+  if (this->parsingSucceeded()
+  ) {
     out << this->processor.code.format();
   } else {
     out << "FAILED_TO_PARSE;\n";
@@ -1758,8 +1806,8 @@ bool CodeFormatter::formatCPPSourceCode(
       out << "\n";
     }
   }
-  if (logDebugInfo) {
-    global.comments
+  if (logDebugInfo && comments != nullptr) {
+    *comments
     << "<hr>Code element tree follows<br>"
     << this->processor.code.toStringHTMLTree();
   }
@@ -1854,6 +1902,7 @@ CodeFormatter::CodeFormatter() {
   this->addOperatorOverride(
     "<", List<std::string>({"&&", "||", "="})
   );
+  this->addOperatorOverride("?", relations);
   this->addOperatorOverride("<", arithmeticOperations);
   this->addOperatorOverride("<", andOrRelations);
   this->addOperatorOverride("<", List<std::string>({".", "->"}));
@@ -1890,6 +1939,8 @@ CodeFormatter::CodeFormatter() {
   this->elementTypes.setKeyValue(
     "?", CodeFormatter::Element::QuestionMark
   );
+  this->elementTypes.setKeyValue("bitand", CodeFormatter::Element::Operator);
+  this->elementTypes.setKeyValue("bitor", CodeFormatter::Element::Operator);
   this->elementTypes.setKeyValue("if", CodeFormatter::Element::If);
   this->elementTypes.setKeyValue("else", CodeFormatter::Element::Else);
   this->elementTypes.setKeyValue("return", CodeFormatter::Element::Return);
@@ -1912,7 +1963,13 @@ CodeFormatter::CodeFormatter() {
     "static", CodeFormatter::Element::TypeAdjectiveKeyWord
   );
   this->elementTypes.setKeyValue(
+    "do", CodeFormatter::Element::DoKeyWord
+  );
+  this->elementTypes.setKeyValue(
     "inline", CodeFormatter::Element::TypeAdjectiveKeyWord
+  );
+  this->elementTypes.setKeyValue(
+    "typedef", CodeFormatter::Element::TypeAdjectiveKeyWord
   );
   this->elementTypes.setKeyValue(
     "friend", CodeFormatter::Element::FriendKeyWord
@@ -1942,7 +1999,7 @@ CodeFormatter::CodeFormatter() {
     "enum", CodeFormatter::Element::EnumKeyWord
   );
   this->typeKeyWords.addListOnTop(
-    List<std::string>({"bool", "void", "char", "unsigned", "int"})
+    List<std::string>({"bool", "void", "char", "unsigned", "int","long"})
   );
   this->controlKeyWords.addListOnTop(
     List<std::string>({"for", "while", "switch"})
@@ -1978,6 +2035,8 @@ CodeFormatter::CodeFormatter() {
         ">>",
         "<<",
         "&&",
+  "bitand",
+  "bitor",
         "||"
       }
     )
@@ -2059,6 +2118,7 @@ void CodeFormatter::Processor::consumeOneElement(
 }
 
 bool CodeFormatter::Processor::applyOneRule() {
+  MacroRegisterFunctionWithName("CodeFormatter::Processor::applyOneRule");
   CodeFormatter::Element& last = this->stack[this->stack.size - 1];
   CodeFormatter::Element& secondToLast = this->stack[this->stack.size - 2];
   CodeFormatter::Element& thirdToLast = this->stack[this->stack.size - 3];
@@ -2112,6 +2172,15 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (this->owner->isWhiteSpace(last.content)) {
     this->lastRuleName = "trim whitepace";
+    return this->removeLast();
+  }
+  if (secondToLast.type == CodeFormatter::Element::Quote &&
+  last.type == CodeFormatter::Element::Quote ){
+    if (secondToLast.content == "") {
+      secondToLast.addChild(last);
+    } else {
+      secondToLast.makeFrom2(CodeFormatter::Element::Quote, last, secondToLast);
+    }
     return this->removeLast();
   }
   if (
@@ -2222,21 +2291,24 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (
 ( secondToLast.type == CodeFormatter::Element::CaseClauseStart&&
-last.type == CodeFormatter::Element::CaseClauseStart )){
+(last.type == CodeFormatter::Element::CaseClauseStart || last.isComment()) )){
   this->lastRuleName = "two case clause starts";
   secondToLast.makeFrom2(CodeFormatter::Element::CaseClauseMultipleStart, secondToLast, last);
   return  this->removeLast();
   }
   if (
-( thirdToLast.type == CodeFormatter::Element::CaseClauseStart&&
-secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
+ (thirdToLast.type == CodeFormatter::Element::CaseClauseStart|| thirdToLast.type == CodeFormatter::Element::CaseClauseMultipleStart)
+  &&
+
+(secondToLast.type == CodeFormatter::Element::CaseClauseStart || secondToLast.type == CodeFormatter::Element::CaseClauseMultipleStart
+  || secondToLast.isComment())){
   this->lastRuleName = "two case clause starts X";
-  thirdToLast.makeFrom2(CodeFormatter::Element::CaseClauseMultipleStart, thirdToLast, secondToLast);
+  thirdToLast.appendType( secondToLast,CodeFormatter::Element::CaseClauseMultipleStart);
   return  this->removeBelowLast(1);
   }
   if (
 ( thirdToLast.type == CodeFormatter::Element::CaseClauseMultipleStart&&
-secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
+(secondToLast.type == CodeFormatter::Element::CaseClauseStart || secondToLast.isComment()))){
   this->lastRuleName = "case clause multiple case clause start";
   thirdToLast.addChild(secondToLast);
   return  this->removeBelowLast(1);
@@ -2250,11 +2322,16 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     thirdToLast.children.addListOnTop(secondToLast.children);
     return this->removeBelowLast(1);
   }
+  if (    secondToLast.type == CodeFormatter::Element::Quote ){
+    this->lastRuleName = "quote to expression";
+    secondToLast.makeFrom1(CodeFormatter::Element::Expression, secondToLast);
+    return true;
+  }
+
   if (
-    last.type == CodeFormatter::Element::Quote ||
     last.type == CodeFormatter::Element::SingleQuote
   ) {
-    this->lastRuleName = "quote to expression";
+    this->lastRuleName = "single quote to expression";
     last.makeFrom1(CodeFormatter::Element::Expression, last);
     return true;
   }
@@ -2452,7 +2529,7 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
   if (
     thirdToLast.isIdentifierOrAtom() &&
     secondToLast.type == CodeFormatter::Element::DoubleColon &&
-    last.type == CodeFormatter::Element::Atom
+    last.isIdentifierOrAtom()
   ) {
     this->lastRuleName = "identifier::atom";
     thirdToLast.appendType(
@@ -2472,6 +2549,11 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
       secondToLast, CodeFormatter::Element::Identifier
     );
     return this->removeBelowLast(1);
+  }
+  if( (thirdToLast.content == "." || thirdToLast.content == "->" )&& secondToLast.type == CodeFormatter::Element::DoubleColon &&last.isIdentifierOrAtom()){
+    this->lastRuleName = "dot double colon identifier";
+  secondToLast.makeFrom2(CodeFormatter::Element::Identifier, secondToLast, last);
+  return this->removeLast();
   }
   if (
     fourthToLast.isIdentifierOrAtom() &&
@@ -2717,7 +2799,7 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
   if (
     thirdToLast.isExpressionIdentifierAtomOrFunctionWithArguments() &&
     secondToLast.canBeUnaryOnTheRight() && (
-      last.isRightDelimiter() || last.type == CodeFormatter::Element::SemiColon
+      last.isRightDelimiter() || last.type == CodeFormatter::Element::SemiColon || last.type == CodeFormatter::Element::Comma
     )
   ) {
     this->lastRuleName = "expression unary operator )";
@@ -2752,7 +2834,7 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     secondToLast.isSuitableForParenthesesEnclosure() &&
     last.type == CodeFormatter::Element::RightParenthesis
   ) {
-    this->lastRuleName = "command list in parentheses";
+    this->lastRuleName = "in parentheses";
     thirdToLast.makeFrom3(
       CodeFormatter::Element::InParentheses,
       thirdToLast,
@@ -2760,6 +2842,19 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
       last
     );
     return this->removeLast(2);
+  }
+  if (
+    fourthToLast.type == CodeFormatter::Element::LeftParenthesis &&
+    thirdToLast.isSuitableForParenthesesEnclosure() &&
+    secondToLast.type == CodeFormatter::Element::RightParenthesis
+  ) {
+    this->lastRuleName = "in parentheses";
+    fourthToLast.makeFrom3(
+      CodeFormatter::Element::InParentheses,fourthToLast,
+      thirdToLast,
+      secondToLast
+    );
+    return this->removeBelowLast(2);
   }
   if (
     fourthToLast.type != CodeFormatter::Element::EnumDeclaration &&
@@ -2792,6 +2887,11 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     );
     return this->removeBelowLast(1);
   }
+  if (fourthToLast.type == CodeFormatter::Element::DoKeyWord && thirdToLast.type == CodeFormatter::Element::CodeBlock && secondToLast.type == CodeFormatter::Element::ControlWantsCodeBlock && last.type == CodeFormatter::Element::SemiColon){
+this->lastRuleName = "do {} while;";
+    fourthToLast.makeFrom4(CodeFormatter::Element::Command, fourthToLast, thirdToLast, secondToLast, last);
+    return this->removeLast(3);
+  }
   if (
     fifthToLast.type == CodeFormatter::Element::DeleteKeyWord &&
     fourthToLast.type == CodeFormatter::Element::LeftBracket &&
@@ -2811,16 +2911,28 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     );
     return this->removeBelowLast(3);
   }
+  if (    thirdToLast.type == CodeFormatter::Element::LeftBracket &&
+  secondToLast.isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses() &&
+  last.type == CodeFormatter::Element::RightBracket
+){
+    this->lastRuleName = "leftBracket expression rightBracket";
+    thirdToLast.makeFrom3(CodeFormatter::Element::InBrackets, thirdToLast, secondToLast, last);
+    return this->removeLast(2);
+  }
+  if ( (secondToLast.isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses() || secondToLast.type == CodeFormatter::Element::TypeAndIdentifier) && last.type == CodeFormatter::Element::InBrackets) {
+  this->lastRuleName = "expression followed by brackets";
+    secondToLast.makeFrom2(CodeFormatter::Element::Expression, secondToLast, last);
+    return  this->removeLast();
+  }
   if ((
-      fourthToLast.isExpressionIdentifierOrAtom() ||
-      fourthToLast.type == CodeFormatter::Element::InParentheses ||
+      fourthToLast.isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses() ||
       fourthToLast.isTypeWordOrTypeExpression()
     ) &&
     thirdToLast.type == CodeFormatter::Element::LeftBracket &&
     secondToLast.isExpressionIdentifierOrAtom() &&
     last.type == CodeFormatter::Element::RightBracket
   ) {
-    this->lastRuleName = "leftBracket expression rightBracket";
+    this->lastRuleName = "something leftBracket expression rightBracket";
     CodeFormatter::Element element;
     element.makeFrom3(
       CodeFormatter::Element::InBrackets,
@@ -2861,9 +2973,15 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     secondToLast.type = CodeFormatter::Element::Operator;
     return this->removeLast();
   }
+
+    if (secondToLast.type == CodeFormatter::Element::FunctionWithArguments && last.type == CodeFormatter::Element::ConstKeyWord) {
+      this->lastRuleName = "function with arguments const";
+      secondToLast.makeFrom2(CodeFormatter::Element::FunctionDeclaration, secondToLast, last);
+      return this->removeLast();
+    }
   if (
     thirdToLast.type == CodeFormatter::Element::OperatorKeyWord &&
-    secondToLast.isOperatorOrInequality() && (
+(    secondToLast.isOperatorOrInequality() || secondToLast.content == "bool")  && (
       last.type == CodeFormatter::Element::LeftParenthesis ||
       last.type == CodeFormatter::Element::LessThan
     )
@@ -2962,6 +3080,28 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     );
     return this->removeLast(3);
   }
+  if (
+  fifthToLast.isSuitableForTypeExpression() &&
+  fourthToLast.type == CodeFormatter::Element::LessThan &&
+thirdToLast.isSuitableForTemplateArgument() &&
+  secondToLast.type == CodeFormatter::Element::GreaterThan
+) {
+  this->lastRuleName =
+  "type expression less than type expression greater than X";
+  CodeFormatter::Element inAngleBrackets;
+  inAngleBrackets.makeFrom3(
+    CodeFormatter::Element::InAngleBrackets,
+  fourthToLast,
+    thirdToLast,
+    secondToLast
+  );
+  fifthToLast.makeFrom2(
+    CodeFormatter::Element::TypeExpression,
+    fifthToLast,
+    inAngleBrackets
+  );
+  return this->removeBelowLast(3);
+}
   if (
     thirdToLast.type == CodeFormatter::Element::TypeExpression &&
     secondToLast.isStarOrAmpersand()
@@ -3087,7 +3227,7 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
   ) {
     // This rule must come after the rule
     // expression operator expression Lookahead X
-    this->lastRuleName = "expression operator expression Lookahead";
+    this->lastRuleName = "expression operator expression";
     // Operators such as < and > may need to have their type
     // set to Operator.
     thirdToLast.type = CodeFormatter::Element::Operator;
@@ -3124,16 +3264,25 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     );
     return this->removeBelowLast(4);
   }
+  if (this->isSuitableForTypePointer(fifthToLast, fourthToLast, thirdToLast, secondToLast, last)
+  ) {
+    this->lastRuleName = "type and ampersand or star";
+    fourthToLast.makeFrom2(
+      CodeFormatter::Element::TypeExpression, fourthToLast, thirdToLast
+    );
+    this->stack.removeIndexShiftDown(this->stack.size - 3);
+    return true;
+  }
   if (
     this->isSuitableForUnaryOperatorExpression(
-      fourthToLast, thirdToLast, secondToLast, last
+      fourthToLast, thirdToLast, secondToLast,last
     )
   ) {
-    this->lastRuleName = "X unary expression Y";
+    this->lastRuleName = "X unary expression";
     thirdToLast.makeFrom2(
-      CodeFormatter::Element::Expression, thirdToLast, secondToLast
+      CodeFormatter::Element::Expression,  thirdToLast, secondToLast
     );
-    return this->removeBelowLast(1);
+    return  this->removeBelowLast(1);
   }
   if (
     this->isSuitableForUnaryOperatorExpressionXX(
@@ -3177,27 +3326,7 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     );
     return this->removeBelowLast(2);
   }
-  bool isInIfClause = fifthToLast.type == CodeFormatter::Element::If &&
-  fourthToLast.type == CodeFormatter::Element::LeftParenthesis;
-  if (
-    !isInIfClause &&
-    !fourthToLast.isOperator() &&
-    fourthToLast.type != CodeFormatter::Element::LessThan &&
-    fourthToLast.type != CodeFormatter::Element::GreaterThan && (
-      thirdToLast.isIdentifierOrAtom() ||
-      thirdToLast.type == CodeFormatter::Element::TypeKeyWord
-    ) && (
-      secondToLast.type == CodeFormatter::Element::Ampersand ||
-      secondToLast.type == CodeFormatter::Element::Star
-    ) &&
-    last.content != "="
-  ) {
-    this->lastRuleName = "type and ampersand or star";
-    thirdToLast.makeFrom2(
-      CodeFormatter::Element::TypeExpression, thirdToLast, secondToLast
-    );
-    return this->removeBelowLast(1);
-  }
+
   if (
     this->isSuitableForExpressionExpressionToExpression(
       thirdToLast, secondToLast
@@ -3208,6 +3337,11 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     this->lastRuleName = "expression and atom";
     thirdToLast.appendExpression(secondToLast);
     return this->removeBelowLast(1);
+  }
+  if (secondToLast.isExpressionIdentifierAtomOrFunctionWithArguments() && last.isComment()) {
+    this->lastRuleName = "expression and comment";
+    secondToLast.appendType( last, CodeFormatter::Element::Expression);
+    return this->removeLast();
   }
   if (
     thirdToLast.isParenthesesBlock() && secondToLast.isExpressionOrAtom()
@@ -3294,9 +3428,8 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
   }
   if (
     thirdToLast.type == CodeFormatter::Element::Return && (
-      secondToLast.type == CodeFormatter::Element::Expression ||
-      secondToLast.type == CodeFormatter::Element::FunctionWithArguments ||
-      secondToLast.type == CodeFormatter::Element::TypeAndIdentifier
+      secondToLast.type == CodeFormatter::Element::TypeAndIdentifier ||
+  secondToLast.isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses()
     ) &&
     last.type == CodeFormatter::Element::SemiColon
   ) {
@@ -3356,6 +3489,17 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     return true;
   }
   if (
+    thirdToLast.type == CodeFormatter::Element::TypeAndIdentifier &&
+    secondToLast.isParenthesesBlock()
+  ) {
+    // Must come before expressino and semicolon.
+    this->lastRuleName = "type_identifier + parentheses block X";
+    thirdToLast.makeFrom2(
+      CodeFormatter::Element::FunctionDeclaration, thirdToLast, secondToLast
+    );
+    return this->removeBelowLast(1);
+  }
+  if (
     !thirdToLast.isOperator() &&
     secondToLast.isSuitableForCommand() &&
     last.type == CodeFormatter::Element::SemiColon
@@ -3387,16 +3531,24 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
     return this->removeLast();
   }
   if (
+  thirdToLast.type != CodeFormatter::Element::EnumDeclaration&&
     secondToLast.type == CodeFormatter::Element::LeftCurlyBrace && (
       last.isComment() ||
       last.type == CodeFormatter::Element::MacroLine ||
       last.type == CodeFormatter::Element::VisibilityClause ||
-      last.type == CodeFormatter::Element::Command
+      last.type == CodeFormatter::Element::Command ||
+  last.type == CodeFormatter::Element::EnumDefinition
     )
   ) {
     this->lastRuleName = "leftCurlyBrace comment|macro to commandList";
     last.makeFrom1(CodeFormatter::Element::CommandList, last);
     return true;
+  }
+  if (secondToLast.isComment() && last.type == CodeFormatter::Element::CommaList){
+    this->lastRuleName = "comment comma list";
+    secondToLast.makeFrom1(CodeFormatter::Element::CommaList, secondToLast);
+    secondToLast.children.addListOnTop(last.children);
+return    this->removeLast();
   }
   if (
     thirdToLast.isCommandListOrCommand() &&
@@ -3466,7 +3618,8 @@ secondToLast.type == CodeFormatter::Element::CaseClauseStart )){
   }
   if (
     thirdToLast.isCommandListOrCommand() && (
-      secondToLast.isExpressionIdentifierOrAtom()
+      secondToLast.isExpressionIdentifierOrAtom() ||
+  secondToLast.type == CodeFormatter::Element::CommaList
     ) &&
     last.type == CodeFormatter::Element::RightParenthesis
   ) {
@@ -3571,6 +3724,10 @@ bool CodeFormatter::Processor::allowTypeAndIdentifier(
     // bool Vectors<Rational>()
     return false;
   }
+  if (suffix.type == CodeFormatter::Element::LeftBracket){
+     // Example: z*w[2]
+    return false;
+  }
   if ((
       prefix.type == CodeFormatter::Element::LeftCurlyBrace ||
       prefix.isCommandListOrCommand()
@@ -3580,6 +3737,59 @@ bool CodeFormatter::Processor::allowTypeAndIdentifier(
     return false;
   }
   return true;
+}
+
+bool CodeFormatter::Processor::isSuitableForTypePointer(
+CodeFormatter::Element &prefix, CodeFormatter::Element &type,
+CodeFormatter::Element &starOrAmpersand, CodeFormatter::Element &suffix, Element &afterSuffix){
+  if (
+      starOrAmpersand.type != CodeFormatter::Element::Ampersand &&
+      starOrAmpersand.type != CodeFormatter::Element::Star
+    ) {return false;}
+
+  if (
+   !   type.isIdentifierOrAtom() &&
+  ! type.isTypeWordOrTypeExpression()
+    ){
+    return false;}
+
+if (prefix.type == CodeFormatter::Element::LessThan && suffix.type == CodeFormatter::Element::GreaterThan){
+  return true;
+}
+
+  if (prefix.type != CodeFormatter::Element::CommaList && prefix.type != CodeFormatter::Element::CommandList &&
+  prefix.type != CodeFormatter::Element::Comma && prefix.type != CodeFormatter::Element::LeftParenthesis &&
+  prefix.type != CodeFormatter::Element::LeftCurlyBrace
+  &&
+  prefix.type != CodeFormatter::Element::TopLevel &&
+  prefix.type != CodeFormatter::Element::TemplateClause){
+    return false;
+  }
+
+if (suffix.type == CodeFormatter::Element::RightParenthesis ){
+  return  true;
+}
+if (suffix.isStarOrAmpersand()){
+  return true;
+}
+if(
+!  suffix.isIdentifierOrAtom()){
+  return false;
+}
+
+if ((prefix.type == CodeFormatter::Element::LeftCurlyBrace ||
+prefix.type ==CodeFormatter::Element::CommandList || prefix.type == CodeFormatter::Element::LeftParenthesis
+|| prefix.type == CodeFormatter::Element::CommaList)&&
+afterSuffix.content == "=" ) {
+  return true;
+}
+if (afterSuffix.type != CodeFormatter::Element::Comma && afterSuffix.type != CodeFormatter::Element::RightParenthesis
+    && afterSuffix.type != CodeFormatter::Element::LeftParenthesis && afterSuffix.type != CodeFormatter::Element::SemiColon
+){
+      return false;
+    }
+
+return true;
 }
 
 bool CodeFormatter::Processor::isSuitableForExpressionExpressionToExpression(
@@ -3785,7 +3995,7 @@ bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpressionXX(
     return false;
   }
   if (lookAheadFirst.type == CodeFormatter::Element::QuestionMark) {
-    return false;
+    return true;
   }
   if (lookAheadFirst.type == CodeFormatter::Element::LessThan) {
     return false;
@@ -3908,7 +4118,8 @@ bool CodeFormatter::rightOperatorOverridesLeft(
 ) {
   if (
     !rightOperator.isOperatorOrInequality() &&
-    !rightOperator.isStarOrAmpersand()
+    !rightOperator.isStarOrAmpersand() &&
+  rightOperator.type != CodeFormatter::Element::QuestionMark
   ) {
     return false;
   }

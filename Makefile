@@ -173,7 +173,7 @@ SOURCES_RELATIVE_PATH=\
     database_fallback_json.cpp \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \
-    examRoutines.cpp \
+    exam_routines.cpp \
     global_objects.cpp \
     global_test.cpp \
     html_snippets.cpp \

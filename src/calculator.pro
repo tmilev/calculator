@@ -140,7 +140,7 @@ SOURCES += \
     database_mongo.cpp \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \
-    examRoutines.cpp \
+    exam_routines.cpp \
     general_strings_test.cpp \
     global_objects.cpp \
     html_snippets.cpp \

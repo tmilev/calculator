@@ -667,6 +667,15 @@ bool CodeFormatter::Element::computeIndentationTemplateClause() {
   this->rightMostAtomUnderMe()->newLinesAfter = 1;
   return true;
 }
+bool CodeFormatter::Element::computeIndentationMacroline(){
+  if (this->previousAtom()->newLinesAfter == 0) {
+    this->previousAtom()->newLinesAfter = 1;
+  }
+  if (  this->rightMostAtomUnderMe()->newLinesAfter == 0) {
+    this->rightMostAtomUnderMe()->newLinesAfter = 1;
+  }
+return  this->computeIndentationBasic(0);
+}
 
 void CodeFormatter::Element::computeIndentationAtomic() {
   CodeFormatter::Element* previous = this->previousAtom();
@@ -931,6 +940,8 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationLessThan();
   case CodeFormatter::Element::TemplateClause:
     return this->computeIndentationTemplateClause();
+  case CodeFormatter::Element::MacroLine:
+    return this->computeIndentationMacroline();
   default:
     break;
   }
@@ -3154,7 +3165,8 @@ this->lastRuleName ="typeExpression identifier inBrackets";
     return this->removeLast(2);
 
   }
-  if ( (secondToLast.isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses() || secondToLast.type == CodeFormatter::Element::TypeAndIdentifier) && last.type == CodeFormatter::Element::InBrackets) {
+  if ( (secondToLast.isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses() ||
+  secondToLast.type == CodeFormatter::Element::TypeAndIdentifier) && last.type == CodeFormatter::Element::InBrackets) {
   this->lastRuleName = "expression followed by brackets";
     secondToLast.makeFrom2(CodeFormatter::Element::Expression, secondToLast, last);
     return  this->removeLast();
@@ -3450,6 +3462,16 @@ thirdToLast.isSuitableForTemplateArgument() &&
     this->stack.removeIndexShiftDown(this->stack.size - 5);
     return true;
   }
+  if (this->isSuitableForTypePointer(fifthToLast, fourthToLast, thirdToLast, secondToLast, last)
+  ) {
+     // Must come before rule expression operator expression.
+    this->lastRuleName = "type and ampersand or star";
+    fourthToLast.makeFrom2(
+      CodeFormatter::Element::TypeExpression, fourthToLast, thirdToLast
+    );
+    this->stack.removeIndexShiftDown(this->stack.size - 3);
+    return true;
+  }
   if (
     this->isSuitableForExpressionOperatorExpressionXX(
       fifthToLast, fourthToLast, thirdToLast, secondToLast, last
@@ -3531,15 +3553,7 @@ thirdToLast.isSuitableForTemplateArgument() &&
     thirdToLast.makeFrom2(CodeFormatter::Element::TypeExpression, thirdToLast, secondToLast);
     return this->removeBelowLast(1);
   }
-  if (this->isSuitableForTypePointer(fifthToLast, fourthToLast, thirdToLast, secondToLast, last)
-  ) {
-    this->lastRuleName = "type and ampersand or star";
-    fourthToLast.makeFrom2(
-      CodeFormatter::Element::TypeExpression, fourthToLast, thirdToLast
-    );
-    this->stack.removeIndexShiftDown(this->stack.size - 3);
-    return true;
-  }
+
   if (
     this->isSuitableForUnaryOperatorExpression(
       fourthToLast, thirdToLast, secondToLast,last
@@ -4577,6 +4591,9 @@ void CodeFormatter::applyNewLineExceptions(
     return;
   }
   if (left.content == ";" || left.content == "{" || left.content == "}") {
+    return;
+  }
+  if (left.type == CodeFormatter::Element::Comment || left.type == CodeFormatter::Element::MacroLine){
     return;
   }
   // Exception: holds naked ( on a new line is moved to the top line.

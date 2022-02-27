@@ -139,6 +139,7 @@ public:
     bool computeIndentationExpression();
     bool computeIndentationTopLevel();
     bool computeIndentationTemplateClause();
+    bool computeIndentationMacroline();
     void computeIndentationAtomic();
     bool computeIndentationGreaterThan();
     bool computeIndentationLessThan();

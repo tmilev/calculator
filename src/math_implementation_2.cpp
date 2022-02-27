@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_lists.h"
 #include "math_general_implementation.h"
@@ -6,13 +7,34 @@
 #include "math_extra_algebraic_numbers.h"
 
 List<unsigned int> LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
-
-const unsigned int HashConstants::primeConstants[HashConstants::size] = {
-  607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
-  7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
-  9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
+const unsigned int HashConstants::primeConstants[HashConstants::size] =
+{
+  607,
+  1013,
+  2207,
+  3001,
+  4057,
+  5419,
+  5849,
+  6221,
+  7057,
+  7411,
+  7417,
+  7681,
+  7883,
+  8011,
+  8209,
+  8369,
+  8447,
+  9539,
+  10267,
+  10657,
+  11489,
+  12071,
+  12613,
+  13933,
+  14759
 };
-
 void LargeIntegerUnsigned::assignString(const std::string& input) {
   if (input.size() < 10) {
     unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));
@@ -24,22 +46,29 @@ void LargeIntegerUnsigned::assignString(const std::string& input) {
     this->operator*=(10);
     int whichDigit = input[i] - '0';
     if (whichDigit > 9 || whichDigit < 0) {
-      global.fatal << "LargeIntUnsigned::assignString "
-      << "called on the string " << input
+      global.fatal
+      << "LargeIntUnsigned::assignString "
+      << "called on the string "
+      << input
       << " which does not consist entirely of digits. "
-      << "Please note that LargeIntUnsigned::assignString is a no-fail function, intended for "
+      <<
+      "Please note that LargeIntUnsigned::assignString is a no-fail function, intended for "
       << "internal use only. If you want to parse arbitrary unsafe "
-      << "expressions coming from the user, please use the big gun (a.k.a. Calculator). "
+      <<
+      "expressions coming from the user, please use the big gun (a.k.a. Calculator). "
       << global.fatal;
     }
     this->operator+=(static_cast<unsigned>(whichDigit));
   }
 }
 
-bool LargeIntegerUnsigned::assignStringFailureAllowed(const std::string& input, bool ignoreNonDigits) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::assignStringFailureAllowed");
+bool LargeIntegerUnsigned::assignStringFailureAllowed(
+  const std::string& input, bool ignoreNonDigits
+) {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::assignStringFailureAllowed")
+  ;
   if (input.size() > 10000000) {
-    //<- sorry folks, no more than 10 million digits.
+    // <- sorry folks, no more than 10 million digits.
     return false;
   }
   if (input.size() < 10) {
@@ -62,7 +91,9 @@ bool LargeIntegerUnsigned::assignStringFailureAllowed(const std::string& input, 
   return true;
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::operator*(const LargeIntegerUnsigned& x) const {
+LargeIntegerUnsigned LargeIntegerUnsigned::operator*(
+  const LargeIntegerUnsigned& x
+) const {
   LargeIntegerUnsigned result;
   this->multiplyBy(x, result);
   return result;
@@ -77,7 +108,9 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator/(unsigned int x) const {
   return result;
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::operator/(const LargeIntegerUnsigned& x) const {
+LargeIntegerUnsigned LargeIntegerUnsigned::operator/(
+  const LargeIntegerUnsigned& x
+) const {
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
   this->dividePositive(x, result, remainder);
@@ -133,8 +166,13 @@ bool LargeIntegerUnsigned::writeBigEndianFixedNumberOfBytes(
   if (bytesTotal != desiredNumberOfBytes) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Large integer ";
-      *commentsOnFailure << "generated " << bytesTotal << " bytes instead of "
-      << "the desired " << desiredNumberOfBytes << " bytes. ";
+      *commentsOnFailure
+      << "generated "
+      << bytesTotal
+      << " bytes instead of "
+      << "the desired "
+      << desiredNumberOfBytes
+      << " bytes. ";
     }
     return false;
   }
@@ -159,7 +197,9 @@ void LargeIntegerUnsigned::writeBigEndianBytes(
       }
     }
   }
-  outputAppend.reserve(outputAppend.size + digitsReveredOrder.size + padWithZero);
+  outputAppend.reserve(
+    outputAppend.size + digitsReveredOrder.size + padWithZero
+  );
   if (padWithZero == 1) {
     outputAppend.addOnTop(0);
   }
@@ -208,7 +248,9 @@ void LargeIntegerUnsigned::operator+=(unsigned int x) {
   this->addUInt(x);
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::operator+(const LargeIntegerUnsigned& other) {
+LargeIntegerUnsigned LargeIntegerUnsigned::operator+(
+  const LargeIntegerUnsigned& other
+) {
   LargeIntegerUnsigned result = *this;
   result += other;
   return result;
@@ -235,7 +277,9 @@ bool LargeIntegerUnsigned::isIntegerFittingInInt(int* whichInt) const {
   return true;
 }
 
-bool LargeIntegerUnsigned::isGreaterThanOrEqualTo(const LargeIntegerUnsigned& x) const {
+bool LargeIntegerUnsigned::isGreaterThanOrEqualTo(
+  const LargeIntegerUnsigned& x
+) const {
   if (this->digits.size > x.digits.size) {
     return true;
   }
@@ -259,7 +303,9 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   const LargeIntegerUnsigned& oddFactorOfNminusOne,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrimeMillerRabinOnce");
+  MacroRegisterFunctionWithName(
+    "LargeIntUnsigned::isPossiblyPrimeMillerRabinOnce"
+  );
   if (*this == base) {
     return true;
   }
@@ -290,15 +336,38 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
         }
         twoPowerStream << "2";
         if (exponentOfThePowerTwoFactorOfNminusOne > 1) {
-          twoPowerStream << "^{" << exponentOfThePowerTwoFactorOfNminusOne << "}";
+          twoPowerStream
+          << "^{"
+          << exponentOfThePowerTwoFactorOfNminusOne
+          << "}";
         }
-        *comments << this->toString() << " is not prime because \\(" << base << "^{"
+        *comments
+        << this->toString()
+        << " is not prime because \\("
+        << base
+        << "^{"
         << twoPowerContradictionStream.str()
-        << oddFactorOfNminusOne.toString() << "} = " << power.value.toString() << " ~ mod ~"
-        << this->toString() << " \\)"
-        << "<br>If " << this->toString() << " were prime, we'd have to have that \\("
-        << base << "^{" << twoPowerStream.str() << "\\cdot" << oddFactorOfNminusOne
-        << "} = " << base << "^{" << this->toString() << " - 1} = 1 ~mod ~" << this->toString() << "\\)"
+        << oddFactorOfNminusOne.toString()
+        << "} = "
+        << power.value.toString()
+        << " ~ mod ~"
+        << this->toString()
+        << " \\)"
+        << "<br>If "
+        << this->toString()
+        << " were prime, we'd have to have that \\("
+        << base
+        << "^{"
+        << twoPowerStream.str()
+        << "\\cdot"
+        << oddFactorOfNminusOne
+        << "} = "
+        << base
+        << "^{"
+        << this->toString()
+        << " - 1} = 1 ~mod ~"
+        << this->toString()
+        << "\\)"
         << "<br> which can be reasoned to contradict the first equality.";
       }
       return false;
@@ -382,8 +451,10 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
       continue;
     }
     if (comments != nullptr) {
-      *comments << "Number not prime as it is divisible by "
-      << primesGenerated[i] << ". ";
+      *comments
+      << "Number not prime as it is divisible by "
+      << primesGenerated[i]
+      << ". ";
     }
     return true;
   }
@@ -415,7 +486,9 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   List<unsigned int> aFewPrimes;
   if (tryDivisionSetTrueFaster) {
     bool guaranteedPrime = false;
-    if (this->isCompositePrimeDivision(aFewPrimes, guaranteedPrime, comments)) {
+    if (
+      this->isCompositePrimeDivision(aFewPrimes, guaranteedPrime, comments)
+    ) {
       return false;
     }
     if (guaranteedPrime) {
@@ -438,17 +511,25 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   for (int i = 0; i < millerRabinTries; i ++) {
     if (report.tickAndWantReport()) {
       std::stringstream reportStream;
-      reportStream << "Testing whether " << this->toStringAbbreviate()
-      << " is prime using Miller-Rabin test " << i + 1 << " out of "
-      << millerRabinTries << ". ";
+      reportStream
+      << "Testing whether "
+      << this->toStringAbbreviate()
+      << " is prime using Miller-Rabin test "
+      << i +
+      1
+      << " out of "
+      << millerRabinTries
+      << ". ";
       report.report(reportStream.str());
     }
-    if (!this->isPossiblyPrimeMillerRabinOnce(
-      aFewPrimes[i],
-      exponentOfThePowerTwoFactorOfNminusOne,
-      oddFactorOfNminusOne,
-      comments
-    )) {
+    if (
+      !this->isPossiblyPrimeMillerRabinOnce(
+        aFewPrimes[i],
+        exponentOfThePowerTwoFactorOfNminusOne,
+        oddFactorOfNminusOne,
+        comments
+      )
+    ) {
       return false;
     }
   }
@@ -459,7 +540,9 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
   unsigned int primesUpToInclusive, List<unsigned int>& output
 ) {
   List<int> sieve;
-  sieve.initializeFillInObject(static_cast<signed>(primesUpToInclusive) + 1, 1);
+  sieve.initializeFillInObject(
+    static_cast<signed>(primesUpToInclusive) + 1, 1
+  );
   output.reserve(primesUpToInclusive / 2);
   output.size = 0;
   for (unsigned int i = 2; i <= primesUpToInclusive; i ++) {
@@ -533,13 +616,15 @@ bool LargeIntegerUnsigned::operator==(const LargeIntegerUnsigned& other) const {
 }
 
 bool LargeIntegerUnsigned::operator!=(const LargeIntegerUnsigned& other) const {
-  return ! ((*this) == other);
+  return !((*this) == other);
 }
 
 void LargeIntegerUnsigned::operator--(int) {
   if (this->isEqualToZero()) {
-    global.fatal << "Attemptto subtract "
-    << "1 from a large unsigned integer with value 0. " << global.fatal;
+    global.fatal
+    << "Attemptto subtract "
+    << "1 from a large unsigned integer with value 0. "
+    << global.fatal;
   }
   this->subtractSmallerPositive(1);
 }
@@ -596,8 +681,12 @@ void LargeIntegerUnsigned::dividePositive(
     global.fatal << "Division by zero. " << global.fatal;
   }
   if (divisor.digits.size == 1 && this->digits.size == 1) {
-    unsigned quotientDigit = static_cast<unsigned>(this->digits[0] / divisor.digits[0]);
-    unsigned remainderDigit = static_cast<unsigned>(this->digits[0] % divisor.digits[0]);
+    unsigned quotientDigit = static_cast<unsigned>(
+      this->digits[0] / divisor.digits[0]
+    );
+    unsigned remainderDigit = static_cast<unsigned>(
+      this->digits[0] % divisor.digits[0]
+    );
     quotientOutput.assignShiftedUInt(quotientDigit, 0);
     remainderOutput.assignShiftedUInt(remainderDigit, 0);
     return;
@@ -630,47 +719,67 @@ void LargeIntegerUnsigned::dividePositive(
         quotientDigitIndex --;
         remainderLeadingDigit *= LargeIntegerUnsigned::carryOverBound;
         if (remainderOutput.digits.size > 1) {
-          remainderLeadingDigit += remainderOutput.digits[remainderOutput.digits.size - 2];
+          remainderLeadingDigit +=
+          remainderOutput.digits[remainderOutput.digits.size - 2];
         }
       }
-      currentQuotientDigit = static_cast<int>(remainderLeadingDigit / divisorLeadingDigitPlusSlack);
+      currentQuotientDigit = static_cast<int>(
+        remainderLeadingDigit / divisorLeadingDigitPlusSlack
+      );
       remainderBackup = remainderOutput;
-      remainderOutput.addLargeIntegerUnsignedShiftedTimesDigit(divisor, quotientDigitIndex, - currentQuotientDigit);
+      remainderOutput.addLargeIntegerUnsignedShiftedTimesDigit(
+        divisor, quotientDigitIndex, - currentQuotientDigit
+      );
       if (*remainderOutput.digits.lastObject() >= 0) {
-        quotientOutput.addShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned>(currentQuotientDigit), quotientDigitIndex);
+        quotientOutput.addShiftedUIntSmallerThanCarryOverBound(
+          static_cast<unsigned>(currentQuotientDigit),
+          quotientDigitIndex
+        );
         break;
       }
       remainderOutput = remainderBackup;
       divisorLeadingDigitPlusSlack ++;
       if (divisorLeadingDigitPlusSlack > divisorLeadingDigit + 1) {
-        global.fatal << "Bad division algorithm: could not figure out currentQuotientDigit for more than 2 runs. " << global.fatal;
+        global.fatal
+        <<
+        "Bad division algorithm: could not figure out currentQuotientDigit for more than 2 runs. "
+        << global.fatal;
       }
     }
-    if (lastRemainderSize == remainderOutput.digits.size && lastRemainderSize != 1) {
+    if (
+      lastRemainderSize == remainderOutput.digits.size &&
+      lastRemainderSize != 1
+    ) {
       numRunsNoDigitImprovement ++;
     } else {
       numRunsNoDigitImprovement = 0;
     }
     lastRemainderSize = remainderOutput.digits.size;
     if (numRunsNoDigitImprovement > upperlimitNoImprovementRounds) {
-      global.fatal << "Bad division: while dividing " << this->toString() << " by "
+      global.fatal
+      << "Bad division: while dividing "
+      << this->toString()
+      << " by "
       << divisor.toString()
       << " got too many algorithm steps without remainder size decrease. "
-      << "." << global.fatal;
+      << "."
+      << global.fatal;
     }
   }
 }
 
 std::string LargeIntegerUnsigned::toString(FormatExpressions* format) const {
-  (void) format; //to avoid unused paramater warning
+  (void) format;
+  // to avoid unused paramater warning
   std::string tempS;
   this->toString(tempS);
   return tempS;
 }
 
-void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) const {
+void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output)
+const {
   std::stringstream out;
-  if (this->carryOverBound == 1000000000  || this->carryOverBound == 10) {
+  if (this->carryOverBound == 1000000000 || this->carryOverBound == 10) {
     std::string tempS;
     int numZeroesInCarryOver = 9;
     if (this->carryOverBound == 10) {
@@ -690,7 +799,8 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
       if (tempS[0] == '-') {
         out << "[";
       }
-      int numZeroesToPad = numZeroesInCarryOver - static_cast<signed>(tempS.length());
+      int numZeroesToPad =
+      numZeroesInCarryOver - static_cast<signed>(tempS.length());
       for (int j = 0; j < numZeroesToPad; j ++) {
         out << "0";
       }
@@ -705,8 +815,10 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
   unsigned int base = 10;
   int MaxNumIntegersPerCarryOverBound = 11;
   List<LargeIntegerUnsigned> bufferPowersOfBase;
-  int initialNumDigitsEstimate = MaxNumIntegersPerCarryOverBound*this->digits.size;
-  int sizeBufferPowersOfBase = MathRoutines::minimum(initialNumDigitsEstimate, 10000);
+  int initialNumDigitsEstimate =
+  MaxNumIntegersPerCarryOverBound * this->digits.size;
+  int sizeBufferPowersOfBase =
+  MathRoutines::minimum(initialNumDigitsEstimate, 10000);
   bufferPowersOfBase.setSize(sizeBufferPowersOfBase);
   LargeIntegerUnsigned currentPower;
   LargeIntegerUnsigned remainder = *this;
@@ -740,7 +852,9 @@ void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output) cons
       if (digit != 1) {
         bufferPowersOfBase[highestBufferIndex] *= digit;
       }
-      remainder.subtractSmallerPositive(bufferPowersOfBase[highestBufferIndex]);
+      remainder.subtractSmallerPositive(
+        bufferPowersOfBase[highestBufferIndex]
+      );
       highestBufferIndex --;
       if (highestBufferIndex == - 1) {
         highestBufferIndex = sizeBufferPowersOfBase - 1;
@@ -769,7 +883,9 @@ LargeIntegerUnsigned::LargeIntegerUnsigned(const LargeIntegerUnsigned& x) {
   (*this) = x;
 }
 
-void LargeIntegerUnsigned::addShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift) {
+void LargeIntegerUnsigned::addShiftedUIntSmallerThanCarryOverBound(
+  unsigned int x, int shift
+) {
   if (!(x < LargeIntegerUnsigned::carryOverBound)) {
     global.fatal << "Digit too large. " << global.fatal;
   }
@@ -792,12 +908,15 @@ void LargeIntegerUnsigned::addShiftedUIntSmallerThanCarryOverBound(unsigned int 
   }
 }
 
-unsigned int LargeIntegerUnsigned::logarithmBaseNCeiling(unsigned int base) const {
+unsigned int LargeIntegerUnsigned::logarithmBaseNCeiling(unsigned int base)
+const {
   if (this->isEqualToZero()) {
     return 0;
   }
   if (base <= 1) {
-    global.fatal << "Base of logarithm needs to be larger than one. " << global.fatal;
+    global.fatal
+    << "Base of logarithm needs to be larger than one. "
+    << global.fatal;
   }
   LargeIntegerUnsigned current;
   List<LargeIntegerUnsigned> baseRaisedTo2ToPowerIndex;
@@ -856,7 +975,9 @@ void LargeIntegerUnsigned::assignShiftedUInt(unsigned int x, int shift) {
 void LargeIntegerUnsigned::addNoFitSize(const LargeIntegerUnsigned& x) {
   MacroIncrementCounter(Rational::totalLargeAdditions);
   int oldsize = this->digits.size;
-  this->digits.setSize(MathRoutines::maximum(this->digits.size, x.digits.size) + 1);
+  this->digits.setSize(
+    MathRoutines::maximum(this->digits.size, x.digits.size) + 1
+  );
   for (int i = oldsize; i < this->digits.size; i ++) {
     this->digits[i] = 0;
   }
@@ -887,20 +1008,27 @@ void LargeIntegerUnsigned::operator+=(const LargeIntegerUnsigned& x) {
   this->fitSize();
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::operator-(const LargeIntegerUnsigned& other) const {
+LargeIntegerUnsigned LargeIntegerUnsigned::operator-(
+  const LargeIntegerUnsigned& other
+) const {
   LargeIntegerUnsigned result;
   result = *this;
   result.subtractSmallerPositive(other);
   return result;
 }
 
-std::string LargeIntegerUnsigned::toStringAbbreviate(FormatExpressions* format) const {
+std::string LargeIntegerUnsigned::toStringAbbreviate(
+  FormatExpressions* format
+) const {
   (void) format;
   std::string result = this->toString(format);
   if (result.size() > 100) {
     std::stringstream out;
-    out << result.substr(0, 40)
-    << "...(" << (result.size() - 80) << " omitted)..."
+    out
+    << result.substr(0, 40)
+    << "...("
+    << (result.size() - 80)
+    << " omitted)..."
     << result.substr(result.size() - 40);
     result = out.str();
   }
@@ -912,13 +1040,14 @@ const List<unsigned int>& LargeIntegerUnsigned::allPrimesSmallerThan15Bits() {
     return LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
   }
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(
-    32768,
-    LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits
+    32768, LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits
   );
   return LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
 }
 
-void LargeIntegerUnsigned::padWithZeroesToAtLeastNDigits(int desiredMinNumDigits) {
+void LargeIntegerUnsigned::padWithZeroesToAtLeastNDigits(
+  int desiredMinNumDigits
+) {
   if (this->digits.size >= desiredMinNumDigits) {
     return;
   }
@@ -932,10 +1061,21 @@ void LargeIntegerUnsigned::padWithZeroesToAtLeastNDigits(int desiredMinNumDigits
 void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
   const LargeIntegerUnsigned& other, int digitShift, int constantTerm
 ) {
-  if (constantTerm >= this->carryOverBound || (- constantTerm) <= (- this->carryOverBound)) {
-    global.fatal << "Digit: " << constantTerm << " is too large" << global.fatal;
+  if (
+    constantTerm >= this->carryOverBound || (- constantTerm) <= (
+      - this->carryOverBound
+    )
+  ) {
+    global.fatal
+    << "Digit: "
+    << constantTerm
+    << " is too large"
+    << global.fatal;
   }
-  int numDigits = MathRoutines::maximum(other.digits.size + 1 + digitShift, this->digits.size + 1);
+  int numDigits =
+  MathRoutines::maximum(
+    other.digits.size + 1 + digitShift, this->digits.size + 1
+  );
   this->padWithZeroesToAtLeastNDigits(numDigits);
   long long nextDigit = 0;
   for (int j = 0; j < other.digits.size; j ++) {
@@ -955,13 +1095,23 @@ void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
     }
   }
   this->fitSize();
-  int lastDigit =* this->digits.lastObject();
-  if (lastDigit >= this->carryOverBound || (- lastDigit) <= (- this->carryOverBound)) {
-    global.fatal << "Leading digit: " << lastDigit << " is too large" << global.fatal;
+  int lastDigit = *this->digits.lastObject();
+  if (
+    lastDigit >= this->carryOverBound || (- lastDigit) <= (
+      - this->carryOverBound
+    )
+  ) {
+    global.fatal
+    << "Leading digit: "
+    << lastDigit
+    << " is too large"
+    << global.fatal;
   }
 }
 
-void LargeIntegerUnsigned::subtractSmallerPositive(const LargeIntegerUnsigned& x) {
+void LargeIntegerUnsigned::subtractSmallerPositive(
+  const LargeIntegerUnsigned& x
+) {
   int carryOver = 0;
   for (int i = 0; i < x.digits.size; i ++) {
     int nextDigit = x.digits[i] + carryOver;
@@ -987,7 +1137,9 @@ void LargeIntegerUnsigned::subtractSmallerPositive(const LargeIntegerUnsigned& x
   this->fitSize();
 }
 
-void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const {
+void LargeIntegerUnsigned::multiplyBy(
+  const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output
+) const {
   if (this == &output || &x == &output) {
     LargeIntegerUnsigned thisCopy = *this;
     LargeIntegerUnsigned xCopy = x;
@@ -1001,7 +1153,10 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
   unsigned long long numCycles = 0;
   bool doReport = false;
   signed ticksPerReport = 1024;
-  unsigned long long totalCycles = static_cast<unsigned long long>(this->digits.size) * static_cast<unsigned long long>(x.digits.size);
+  unsigned long long totalCycles = static_cast<unsigned long long>(
+    this->digits.size
+  ) *
+  static_cast<unsigned long long>(x.digits.size);
   MemorySaving<ProgressReport> report1, report2;
   if (totalCycles >= static_cast<unsigned>(ticksPerReport)) {
     doReport = true;
@@ -1009,7 +1164,8 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
     reportStream
     << "<br>Large integer multiplication: product of integers:<br>\n"
     << this->toStringAbbreviate()
-    << "<br>\n" << x.toStringAbbreviate();
+    << "<br>\n"
+    << x.toStringAbbreviate();
     report1.getElement().report(reportStream.str());
     report2.getElement().ticksPerReport = ticksPerReport;
   }
@@ -1018,17 +1174,31 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
       unsigned long long tempLong = static_cast<unsigned>(this->digits[i]);
       unsigned long long tempLong2 = static_cast<unsigned>(x.digits[j]);
       tempLong = tempLong * tempLong2;
-      unsigned long long lowPart = tempLong % LargeIntegerUnsigned::carryOverBound;
-      unsigned long long highPart = tempLong / LargeIntegerUnsigned::carryOverBound;
-      output.addShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(lowPart), i + j);
-      output.addShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(highPart), i + j + 1);
+      unsigned long long lowPart = tempLong %
+      LargeIntegerUnsigned::carryOverBound;
+      unsigned long long highPart = tempLong /
+      LargeIntegerUnsigned::carryOverBound;
+      output.addShiftedUIntSmallerThanCarryOverBound(
+        static_cast<unsigned int>(lowPart), i + j
+      );
+      output.addShiftedUIntSmallerThanCarryOverBound(
+        static_cast<unsigned int>(highPart), i + j + 1
+      );
       if (doReport) {
         if (report2.getElement().tickAndWantReport()) {
           std::stringstream out;
-          out << "<br>Crunching " << numCycles << " out of " << totalCycles
+          out
+          << "<br>Crunching "
+          << numCycles
+          << " out of "
+          << totalCycles
           << " pairs of large integer ``digits'' = "
-          << this->digits.size << " x " << x.digits.size
-          << " digits (base " << LargeIntegerUnsigned::carryOverBound << ").";
+          << this->digits.size
+          << " x "
+          << x.digits.size
+          << " digits (base "
+          << LargeIntegerUnsigned::carryOverBound
+          << ").";
           report2.getElement().report(out.str());
         }
       }
@@ -1037,7 +1207,9 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
   output.fitSize();
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::operator%(const LargeIntegerUnsigned& other) const {
+LargeIntegerUnsigned LargeIntegerUnsigned::operator%(
+  const LargeIntegerUnsigned& other
+) const {
   LargeIntegerUnsigned result, temp;
   this->dividePositive(other, temp, result);
   return result;
@@ -1118,7 +1290,8 @@ void LargeIntegerUnsigned::accountFactor(
   }
 }
 
-int LargeIntegerUnsigned::maximumDivisorToTryWhenFactoring(int desiredByUser) const {
+int LargeIntegerUnsigned::maximumDivisorToTryWhenFactoring(int desiredByUser)
+const {
   int result = desiredByUser;
   if (result <= 0) {
     result = 100000;
@@ -1151,27 +1324,28 @@ bool LargeIntegerUnsigned::factor(
   int maximumNumberOfDigits = 1000;
   if (this->digits.size > maximumNumberOfDigits) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Number has too many digits: maximum "
+      *commentsOnFailure
+      << "Number has too many digits: maximum "
       << maximumNumberOfDigits
       << " digits accepted for factorization attempt. ";
     }
     return false;
   }
   if (this->isEqualToZero()) {
-    global.fatal << "Factoring zero is forbidden. "
-    << global.fatal;
+    global.fatal << "Factoring zero is forbidden. " << global.fatal;
   }
   LargeIntegerUnsigned toBeFactored = *this;
   outputFactors.setSize(0);
   outputMultiplicites.setSize(0);
-  maximumDivisorToTry = this->maximumDivisorToTryWhenFactoring(maximumDivisorToTry);
+  maximumDivisorToTry =
+  this->maximumDivisorToTryWhenFactoring(maximumDivisorToTry);
   List<bool> sieve;
   sieve.initializeFillInObject(maximumDivisorToTry + 1, true);
   for (int i = 2; i <= maximumDivisorToTry; i ++) {
     if (!sieve[i]) {
       continue;
     }
-    //LargeIntUnsigned current = toBeFactored % i;
+    // LargeIntUnsigned current = toBeFactored % i;
     unsigned candidate = static_cast<unsigned>(i);
     while (toBeFactored % candidate == 0) {
       this->accountFactor(i, outputFactors, outputMultiplicites);
@@ -1183,7 +1357,9 @@ bool LargeIntegerUnsigned::factor(
   }
   if (toBeFactored > 1) {
     this->accountFactor(toBeFactored, outputFactors, outputMultiplicites);
-    if (!toBeFactored.isPossiblyPrimeMillerRabin(numberMillerRabinRuns, nullptr)) {
+    if (
+      !toBeFactored.isPossiblyPrimeMillerRabin(numberMillerRabinRuns, nullptr)
+    ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "The largest remaining factor "
@@ -1191,7 +1367,8 @@ bool LargeIntegerUnsigned::factor(
         << " is known to be composite (Miller-Rabin test) "
         << "but I could not factor it. "
         << "I checked all factors smaller than or equal to: "
-        << maximumDivisorToTry << ". ";
+        << maximumDivisorToTry
+        << ". ";
       }
       return false;
     }
@@ -1206,14 +1383,18 @@ void LargeIntegerUnsigned::leastCommonMultiple(
 ) {
   LargeIntegerUnsigned tempUI, tempUI2;
   if (a.isEqualToZero() || b.isEqualToZero()) {
-    global.fatal << "Call lcm on zero elements is not allowed. " << global.fatal;
+    global.fatal
+    << "Call lcm on zero elements is not allowed. "
+    << global.fatal;
   }
   LargeIntegerUnsigned::greatestCommonDivisor(a, b, tempUI);
   a.multiplyBy(b, tempUI2);
   output = tempUI2;
   output.dividePositive(tempUI, output, tempUI2);
   if (output.isEqualToZero()) {
-    global.fatal << "Least common multiple not allowed to be zero. " << global.fatal;
+    global.fatal
+    << "Least common multiple not allowed to be zero. "
+    << global.fatal;
   }
 }
 
@@ -1287,7 +1468,8 @@ void LargeInteger::assignString(const std::string& input) {
   bool success = this->assignStringFailureAllowed(input, nullptr);
   if (!success) {
     global.fatal
-    << "LargeInt::assignString is not allowed to fail." << global.fatal;
+    << "LargeInt::assignString is not allowed to fail."
+    << global.fatal;
   }
 }
 
@@ -1491,9 +1673,11 @@ void LargeInteger::makeZero() {
 
 void LargeInteger::operator=(const Rational& other) {
   if (!other.isInteger(this)) {
-    global.fatal << "Attempt to convert implicitly rational number "
+    global.fatal
+    << "Attempt to convert implicitly rational number "
     << other.toString()
-    << " to integer is not possible as the Rational number is not integral. " << global.fatal;
+    << " to integer is not possible as the Rational number is not integral. "
+    << global.fatal;
   }
 }
 
@@ -1595,7 +1779,9 @@ void Rational::invert() {
   if (this->extended == nullptr) {
     int denominatorInteger = this->denominatorShort;
     if (denominatorInteger <= 0) {
-      global.fatal << "Denominator not allowed to be negative. " << global.fatal;
+      global.fatal
+      << "Denominator not allowed to be negative. "
+      << global.fatal;
     }
     if (this->numeratorShort < 0) {
       this->denominatorShort = - this->numeratorShort;
@@ -1606,7 +1792,9 @@ void Rational::invert() {
     }
     return;
   }
-  MathRoutines::swap(this->extended->denominator, this->extended->numerator.value);
+  MathRoutines::swap(
+    this->extended->denominator, this->extended->numerator.value
+  );
 }
 
 void Rational::readFromFile(std::istream& input) {
@@ -1623,7 +1811,9 @@ void Rational::multiplyByInteger(int x) {
 
 void Rational::multiplyBy(const Rational& r) {
   if (r.extended == nullptr && this->extended == nullptr) {
-    if (this->tryToMultiplyQuickly(r.numeratorShort, r.denominatorShort)) {
+    if (
+      this->tryToMultiplyQuickly(r.numeratorShort, r.denominatorShort)
+    ) {
       return;
     }
   }
@@ -1633,7 +1823,9 @@ void Rational::multiplyBy(const Rational& r) {
     this->extended->denominator *= r.extended->denominator;
   } else {
     this->extended->numerator.multiplyByInt(r.numeratorShort);
-    this->extended->denominator.multiplyByUInt( static_cast<unsigned int>(r.denominatorShort));
+    this->extended->denominator.multiplyByUInt(
+      static_cast<unsigned int>(r.denominatorShort)
+    );
   }
   this->simplify();
 }
@@ -1740,10 +1932,14 @@ void Rational::assignFractionalValue() {
     return;
   }
   LargeIntegerUnsigned newNumerator, quotient;
-  this->extended->numerator.value.dividePositive(this->extended->denominator, quotient, newNumerator);
+  this->extended->numerator.value.dividePositive(
+    this->extended->denominator, quotient, newNumerator
+  );
   this->extended->numerator.value = newNumerator;
   if (this->extended->numerator.isNegative()) {
-    this->extended->numerator.addLargeIntUnsigned(this->extended->denominator);
+    this->extended->numerator.addLargeIntUnsigned(
+      this->extended->denominator
+    );
   }
   if (!this->extended->numerator.isPositiveOrZero()) {
     global.fatal << "Numerator must not be negative. " << global.fatal;
@@ -1757,12 +1953,12 @@ void Rational::assignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
   this->assignLargeInteger(tempInt);
 }
 
-void Rational::assignLargeInteger(const LargeInteger& other){
+void Rational::assignLargeInteger(const LargeInteger& other) {
   if (this->extended == nullptr) {
     this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
-GlobalStatistics::globalPointerCounter ++;
-GlobalStatistics::checkPointerCounters();
+    GlobalStatistics::globalPointerCounter ++;
+    GlobalStatistics::checkPointerCounters();
 #endif
   }
   this->extended->numerator = other;
@@ -1800,10 +1996,18 @@ bool Rational::getSquareRootIfRational(Rational& output) const {
   List<LargeInteger> primeFactorsDenominator;
   List<int> multiplicitiesNumerator;
   List<int> multiplicitiesDenominator;
-  if (!numeratorLarge.value.factor(primeFactorsNumerator, multiplicitiesNumerator, 0, 3, nullptr)) {
+  if (
+    !numeratorLarge.value.factor(
+      primeFactorsNumerator, multiplicitiesNumerator, 0, 3, nullptr
+    )
+  ) {
     return false;
   }
-  if (!denominatorLarge.factor(primeFactorsDenominator, multiplicitiesDenominator, 0, 3, nullptr)) {
+  if (
+    !denominatorLarge.factor(
+      primeFactorsDenominator, multiplicitiesDenominator, 0, 3, nullptr
+    )
+  ) {
     return false;
   }
   output = 1;
@@ -1833,9 +2037,13 @@ bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
   int otherNumeratorAbsoluteValue = 0;
   int thisNumeratorAbsoluteValue = 0;
   if (this->denominatorShort <= 0 || otherDenominator <= 0) {
-    global.fatal << "Try to add corrupt rational number(s) with denominators "
-    << this->denominatorShort << " and " << otherDenominator
-    << ". The cause of the error should be in some of the calling functions. " << global.fatal;
+    global.fatal
+    << "Try to add corrupt rational number(s) with denominators "
+    << this->denominatorShort
+    << " and "
+    << otherDenominator
+    << ". The cause of the error should be in some of the calling functions. "
+    << global.fatal;
   }
   if (otherNumerator < 0) {
     otherNumeratorAbsoluteValue = - otherNumerator;
@@ -1849,14 +2057,19 @@ bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
   }
   if (
     this->extended != nullptr ||
-    thisNumeratorAbsoluteValue >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
-    this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
-    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    thisNumeratorAbsoluteValue >=
+    LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound
+    ||
+    otherNumeratorAbsoluteValue >=
+    LargeIntegerUnsigned::squareRootOfCarryOverBound ||
     otherDenominator >= LargeIntegerUnsigned::squareRootOfCarryOverBound
   ) {
     return false;
   }
-  int N = this->numeratorShort * otherDenominator + this->denominatorShort * otherNumerator;
+  int N =
+  this->numeratorShort * otherDenominator +
+  this->denominatorShort * otherNumerator;
   int D = this->denominatorShort * otherDenominator;
   if (N == 0) {
     this->numeratorShort = 0;
@@ -1882,7 +2095,8 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
     if (denominatorShort == 0 || otherDenominator == 0) {
       global.fatal << "Division by zero. ";
     } else {
-      global.fatal << "During rational number multiplication: "
+      global.fatal
+      << "During rational number multiplication: "
       << "corrupt rational number denominator. ";
     }
     global.fatal << global.fatal;
@@ -1900,8 +2114,10 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
   if (
     this->extended != nullptr ||
     thisNumAbs >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
-    this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
-    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound
+    ||
+    otherNumeratorAbsoluteValue >=
+    LargeIntegerUnsigned::squareRootOfCarryOverBound ||
     otherDenominator >= LargeIntegerUnsigned::squareRootOfCarryOverBound
   ) {
     return false;
@@ -1933,9 +2149,7 @@ Rational Rational::scaleNoSignChange(List<Rational>& inputOutput) {
   LargeIntegerUnsigned numeratorGCD = inputOutput[0].getNumerator().value;
   for (int i = 1; i < inputOutput.size; i ++) {
     LargeIntegerUnsigned::leastCommonMultiple(
-      denominatorLCM,
-      inputOutput[i].getDenominator(),
-      denominatorLCM
+      denominatorLCM, inputOutput[i].getDenominator(), denominatorLCM
     );
     LargeIntegerUnsigned::greatestCommonDivisor(
       numeratorGCD,
@@ -1984,9 +2198,13 @@ LargeInteger Rational::getNumerator() const {
   LargeInteger result;
   if (this->extended == nullptr) {
     if (this->numeratorShort < 0) {
-      result.value.assignShiftedUInt(static_cast<unsigned int>(- this->numeratorShort), 0);
+      result.value.assignShiftedUInt(
+        static_cast<unsigned int>(- this->numeratorShort), 0
+      );
     } else {
-      result.value.assignShiftedUInt(static_cast<unsigned int>(this->numeratorShort), 0);
+      result.value.assignShiftedUInt(
+        static_cast<unsigned int>(this->numeratorShort), 0
+      );
     }
   } else {
     result.value = this->extended->numerator.value;
@@ -2009,12 +2227,15 @@ bool Rational::getPrimeFactorsAbsoluteValue(
   List<int>& denominatorMultiplicities
 ) {
   MacroRegisterFunctionWithName("Rational::getPrimeFactorsAbsoluteValue");
-  if (!this->getNumerator().value.factor(
-    numeratorPrimeFactors, numeratorMultiplicities, 0, 3, nullptr
-  )) {
+  if (
+    !this->getNumerator().value.factor(
+      numeratorPrimeFactors, numeratorMultiplicities, 0, 3, nullptr
+    )
+  ) {
     return false;
   }
-  return this->getDenominator().factor(
+  return
+  this->getDenominator().factor(
     denominatorPrimeFactors, denominatorMultiplicities, 0, 3, nullptr
   );
 }
@@ -2032,20 +2253,27 @@ bool Rational::shrinkExtendedPartIfPossible() {
   if (
     this->extended->numerator.value.digits.size > 1 ||
     this->extended->denominator.digits.size > 1 ||
-    this->extended->numerator.value.digits[0] >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
-    this->extended->denominator.digits[0] >= LargeIntegerUnsigned::squareRootOfCarryOverBound
+    this->extended->numerator.value.digits[0] >=
+    LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    this->extended->denominator.digits[0] >=
+    LargeIntegerUnsigned::squareRootOfCarryOverBound
   ) {
     return false;
   }
   this->numeratorShort = this->extended->numerator.getIntValueTruncated();
-  this->denominatorShort = this->extended->denominator.getUnsignedIntValueTruncated();
+  this->denominatorShort =
+  this->extended->denominator.getUnsignedIntValueTruncated();
   this->freeExtended();
   return true;
 }
 
 Rational Rational::factorial(int n) {
   if (n < 0) {
-    global.fatal << "Take factorial of the negative number " << n << ". " << global.fatal;
+    global.fatal
+    << "Take factorial of the negative number "
+    << n
+    << ". "
+    << global.fatal;
     return 0;
   }
   LargeIntegerUnsigned result;
@@ -2109,9 +2337,14 @@ bool MathRoutines::isInteger(Rational x) {
 
 double Rational::getDoubleValue() const {
   if (this->extended == nullptr) {
-    return static_cast<double>(this->numeratorShort) / static_cast<double>(this->denominatorShort);
+    return
+    static_cast<double>(this->numeratorShort) / static_cast<double>(
+      this->denominatorShort
+    );
   } else {
-    return this->extended->numerator.getDoubleValue() / this->extended->denominator.getDoubleValue();
+    return
+    this->extended->numerator.getDoubleValue() /
+    this->extended->denominator.getDoubleValue();
   }
 }
 
@@ -2125,9 +2358,15 @@ void Rational::simplify() {
       }
       int tempGCD;
       if (this->numeratorShort > 0) {
-        tempGCD = this->greatestCommonDivisor(this->numeratorShort, this->denominatorShort);
+        tempGCD =
+        this->greatestCommonDivisor(
+          this->numeratorShort, this->denominatorShort
+        );
       } else {
-        tempGCD = this->greatestCommonDivisor(- this->numeratorShort, this->denominatorShort);
+        tempGCD =
+        this->greatestCommonDivisor(
+          - this->numeratorShort, this->denominatorShort
+        );
       }
       this->numeratorShort /= tempGCD;
       this->denominatorShort /= tempGCD;
@@ -2160,12 +2399,12 @@ void Rational::simplify() {
   this->shrinkExtendedPartIfPossible();
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::isConstant(Rational* whichConstant) const;
-
 void Rational::operator=(const Polynomial<Rational>& other) {
   if (!other.isConstant(this)) {
-    global.fatal << "Attemptto assign "
+    global.fatal
+    << "Attemptto assign "
     << "non-constant polynomial to a Rational number is not allowed. "
     << global.fatal;
   }
@@ -2173,7 +2412,8 @@ void Rational::operator=(const Polynomial<Rational>& other) {
 
 bool Rational::isEqualTo(const Rational& b) const {
   if (this->extended == nullptr && b.extended == nullptr) {
-    return (this->numeratorShort * b.denominatorShort == b.numeratorShort * this->denominatorShort);
+    return (this->numeratorShort * b.denominatorShort ==
+    b.numeratorShort * this->denominatorShort);
   }
   Rational crossProduct;
   crossProduct.assign(*this);
@@ -2183,7 +2423,8 @@ bool Rational::isEqualTo(const Rational& b) const {
 
 bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
   if (this->extended == nullptr && right.extended == nullptr) {
-    return (this->numeratorShort * right.denominatorShort >= right.numeratorShort * this->denominatorShort);
+    return (this->numeratorShort * right.denominatorShort >=
+    right.numeratorShort * this->denominatorShort);
   }
   Rational crossProduct;
   crossProduct.assign(*this);
@@ -2215,14 +2456,17 @@ std::string Rational::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-std::string Rational::toStringForFileOperations(FormatExpressions* notUsed) const {
-  (void) notUsed; //portable way of avoiding unused parameter warning
+std::string Rational::toStringForFileOperations(FormatExpressions* notUsed)
+const {
+  (void) notUsed;
+  // portable way of avoiding unused parameter warning
   std::stringstream out;
   if (this->extended == nullptr) {
     if (this->numeratorShort < 0) {
       out << "-";
     }
-    int numShortAbsoluteValue = this->numeratorShort < 0 ? - this->numeratorShort: this->numeratorShort;
+    int numShortAbsoluteValue =
+    this->numeratorShort < 0 ? - this->numeratorShort : this->numeratorShort;
     if (this->denominatorShort == 1) {
       out << numShortAbsoluteValue;
     } else {
@@ -2238,7 +2482,10 @@ std::string Rational::toStringForFileOperations(FormatExpressions* notUsed) cons
   if (this->extended->denominator.isEqualToOne()) {
     out << numAbsVal.toString();
   } else {
-    out << numAbsVal.toString() << "_div_" << this->extended->denominator.toString();
+    out
+    << numAbsVal.toString()
+    << "_div_"
+    << this->extended->denominator.toString();
   }
   return out.str();
 }
@@ -2249,11 +2496,17 @@ std::string Rational::toStringFrac() const {
     if (this->numeratorShort < 0) {
       out << "-";
     }
-    int numShortAbsoluteValue = this->numeratorShort < 0 ? - this->numeratorShort: this->numeratorShort;
+    int numShortAbsoluteValue =
+    this->numeratorShort < 0 ? - this->numeratorShort : this->numeratorShort;
     if (this->denominatorShort == 1) {
       out << numShortAbsoluteValue;
     } else {
-      out << "\\frac{" << numShortAbsoluteValue << "}{" << this->denominatorShort << "}";
+      out
+      << "\\frac{"
+      << numShortAbsoluteValue
+      << "}{"
+      << this->denominatorShort
+      << "}";
     }
     return out.str();
   }
@@ -2265,7 +2518,12 @@ std::string Rational::toStringFrac() const {
   if (this->extended->denominator.isEqualToOne()) {
     out << numAbsVal.toString();
   } else {
-    out << "\\frac{" << numAbsVal.toString() << "}{" << this->extended->denominator.toString() << "}";
+    out
+    << "\\frac{"
+    << numAbsVal.toString()
+    << "}{"
+    << this->extended->denominator.toString()
+    << "}";
   }
   return out.str();
 }
@@ -2273,9 +2531,12 @@ std::string Rational::toStringFrac() const {
 void Rational::operator=(const AlgebraicNumber& other) {
   bool isGood = other.isRational(this);
   if (!isGood) {
-    global.fatal << "Attemptto assign the "
-    << "non-rational algebraic number " << other.toString()
-    << "to a rational number. " << global.fatal;
+    global.fatal
+    << "Attemptto assign the "
+    << "non-rational algebraic number "
+    << other.toString()
+    << "to a rational number. "
+    << global.fatal;
   }
 }
 
@@ -2352,3 +2613,4 @@ void Rational::assignString(const std::string& input) {
     << global.fatal;
   }
 }
+

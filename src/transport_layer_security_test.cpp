@@ -1,6 +1,6 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
-
 #include "transport_layer_security.h"
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
@@ -24,29 +24,43 @@ std::string SSLRecord::Test::sampleClientHelloHex =
 "000000000000000000000000000000000000000000000000000000000000000"
 "000000000000000000000000000000000000000000000000000000000000000"
 "000000000000000000000000000000000000";
-
-bool SSLRecord::Test::serializationClientHello(TransportLayerSecurityServer& testServer) {
+bool SSLRecord::Test::serializationClientHello(
+  TransportLayerSecurityServer& testServer
+) {
   MacroRegisterFunctionWithName("SSLRecord::Test::serializationClientHello");
   std::string inputHex = SSLRecord::Test::sampleClientHelloHex;
   SSLRecord record;
   record.owner = &testServer;
   std::stringstream comments;
-  if (!Crypto::convertHexToListUnsignedChar(
-    inputHex, record.incomingBytes, &comments
-  )) {
+  if (
+    !Crypto::convertHexToListUnsignedChar(
+      inputHex, record.incomingBytes, &comments
+    )
+  ) {
     global.fatal << "Bad hard-coded test hex string!" << global.fatal;
   }
   if (!record.decode(&comments)) {
-    global.fatal << "Failed to decode built-in message. " << comments.str() << global.fatal;
+    global.fatal
+    << "Failed to decode built-in message. "
+    << comments.str()
+    << global.fatal;
   }
   List<unsigned char> encoded;
   record.writeBytes(encoded, nullptr);
   if (encoded != record.incomingBytes) {
-    global << "Decoded:\n" << record.content.getStringHighlighter()
-    << Crypto::convertListUnsignedCharsToHex(record.incomingBytes) << Logger::endL;
-    global << "Encoded:\n" << record.content.getStringHighlighter()
-    << Crypto::convertListUnsignedCharsToHex(encoded) << Logger::endL;
-    global.fatal << "decode->Encode did not reproduce the original input. " << global.fatal;
+    global
+    << "Decoded:\n"
+    << record.content.getStringHighlighter()
+    << Crypto::convertListUnsignedCharsToHex(record.incomingBytes)
+    << Logger::endL;
+    global
+    << "Encoded:\n"
+    << record.content.getStringHighlighter()
+    << Crypto::convertListUnsignedCharsToHex(encoded)
+    << Logger::endL;
+    global.fatal
+    << "decode->Encode did not reproduce the original input. "
+    << global.fatal;
   }
   return true;
 }
@@ -59,7 +73,6 @@ bool SSLRecord::Test::all() {
 
 bool SSLRecord::Test::serialization() {
   MacroRegisterFunctionWithName("SSLRecord::Test::serialization");
-
   TransportLayerSecurityServer server;
   server.initialize();
   server.session.initialize();
@@ -68,3 +81,4 @@ bool SSLRecord::Test::serialization() {
   }
   return true;
 }
+

@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 
@@ -18,9 +19,13 @@ bool Expression::Test::toStringTestRecodeOnce(
   Expression parsed = owner.parseOrCrash(inputHardCodedMustParse, true);
   std::string recoded = parsed.toString();
   if (recoded != inputHardCodedMustParse) {
-    global.fatal << "Recoded string: " << recoded
+    global.fatal
+    << "Recoded string: "
+    << recoded
     << " does not coincide with the original: "
-    << inputHardCodedMustParse << "." << global.fatal;
+    << inputHardCodedMustParse
+    << "."
+    << global.fatal;
   }
   return true;
 }
@@ -36,18 +41,20 @@ bool Expression::Test::toStringTestRecode(Calculator& owner) {
 }
 
 bool Expression::Test::isUserDefinedAtomOnce(
-  Calculator &owner, const std::string &input, bool isUserDefinedAtom
+  Calculator& owner, const std::string& input, bool isUserDefinedAtom
 ) {
   MacroRegisterFunctionWithName("Expression::Test::isUserDefinedAtomOnce");
   Expression expression = owner.parseOrCrash(input, true);
   if (expression.isAtomUserDefined() != isUserDefinedAtom) {
-    global.fatal << "Expression::isAtomUserDefined did not return "
+    global.fatal
+    << "Expression::isAtomUserDefined did not return "
     << isUserDefinedAtom
     << " for input: "
     << expression.toString()
     << " with lispification: "
     << expression.toStringFull()
-    << ", parsed from: " << input
+    << ", parsed from: "
+    << input
     << global.fatal;
   }
   return true;
@@ -62,3 +69,4 @@ bool Expression::Test::isUserDefinedAtom(Calculator& owner) {
   Expression::Test::isUserDefinedAtomOnce(owner, "1", false);
   return true;
 }
+

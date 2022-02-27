@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include "crypto.h"
@@ -23,6 +24,7 @@ public:
     static const std::string polynomial;
     static const std::string basic;
   };
+
   HashedList<std::string, MathRoutines::hashString> inputs;
   bool flagTestAll;
   void initialize(List<std::string>& inputArguments);
@@ -50,10 +52,13 @@ const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
 const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::API = "api";
-
 void Test::run() {
   MacroRegisterFunctionWithName("Test::run");
-  global << "Testing: " << this->inputs.toStringCommaDelimited() << " ..." << Logger::endL;
+  global
+  << "Testing: "
+  << this->inputs.toStringCommaDelimited()
+  << " ..."
+  << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->shouldTest(Test::Suites::database)) {
     Database::Test::all();
@@ -129,13 +134,16 @@ bool Test::shouldTest(const std::string& testSuite) {
 
 void Test::initialize(List<std::string>& inputArguments) {
   this->inputs = inputArguments;
-  global << "Input arguments: " << inputArguments.toStringCommaDelimited() << Logger::endL;
+  global
+  << "Input arguments: "
+  << inputArguments.toStringCommaDelimited()
+  << Logger::endL;
   if (
-    this->inputs.size == 0 ||
-    this->inputs.contains(Test::Suites::all)
+    this->inputs.size == 0 || this->inputs.contains(Test::Suites::all)
   ) {
     this->flagTestAll = true;
   } else {
     this->flagTestAll = false;
   }
 }
+

@@ -1,30 +1,29 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
-
 #include "transport_layer_security.h"
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
 #include "crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 #include "serialization_basic.h"
-
 #include <unistd.h> //<- close, open defined here
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <iomanip>
 #include <sys/time.h> // <- timeval
 
 // http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
-// openssl req -x509 -keyalg RSA -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001
+// openssl req -x509 -keyalg RSA -newkey rsa:2048 -nodes -keyout key.pem -out
+// cert.pem -days 3001
 // Alternatively:
 // certificate with certificate signing request:
-// openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout calculator-algebra.key
+// openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout
+// calculator-algebra.key
 // then get the CSR.csr file to a signing authority,
 // from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string TransportLayerSecurity::certificateSelfSigned = "cert.pem";
 const std::string TransportLayerSecurity::keySelfSigneD = "key.pem";
-
 const std::string TransportLayerSecurity::certificateFolder = "certificates/";
-
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
   this->flagInitializedPrivateKey = false;
@@ -34,15 +33,17 @@ TransportLayerSecurity::TransportLayerSecurity() {
   this->flagUseBuiltInTlS = false;
 }
 
-TransportLayerSecurity::~TransportLayerSecurity() {
-}
+TransportLayerSecurity::~TransportLayerSecurity() {}
 
 void TransportLayerSecurity::initializeNonThreadSafePartsCommon() {
   ASNObject::initializeNonThreadSafe();
 }
 
-void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::initializeNonThreadSafeOnFirstCall");
+void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
+{
+  MacroRegisterFunctionWithName(
+    "TransportLayerSecurity::initializeNonThreadSafeOnFirstCall"
+  );
   if (this->flagInitialized) {
     return;
   }
@@ -60,11 +61,15 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer) {
 }
 
 void TransportLayerSecurity::freeEverythingShutdown() {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::freeEverythingShutdown");
+  MacroRegisterFunctionWithName(
+    "TransportLayerSecurity::freeEverythingShutdown"
+  );
   this->openSSLData.freeSession();
 }
 
-bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailure) {
+bool TransportLayerSecurity::initSSLKeyFiles(
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::initSSLKeyFiles");
   if (!this->openSSLData.initSSLKeyFilesSelfSigned()) {
     return false;
@@ -77,7 +82,9 @@ bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailur
     if (commentsOnFailure != nullptr) {
       global.fatal << commentsOnFailure->str();
     }
-    global.fatal << "Failed to initialize ssl keys of built-in tls server. " << global.fatal;
+    global.fatal
+    << "Failed to initialize ssl keys of built-in tls server. "
+    << global.fatal;
   }
   return true;
 }
@@ -93,7 +100,8 @@ bool TransportLayerSecurity::sslReadLoop(
   MacroRegisterFunctionWithName("TransportLayerSecurity::sslReadLoop");
   if (!global.flagUsingSSLinCurrentConnection || !global.flagSSLAvailable) {
     if (commentsGeneral != nullptr) {
-      *commentsGeneral << "Error in ssl read loop: ssl not available in current connection. ";
+      *commentsGeneral
+      << "Error in ssl read loop: ssl not available in current connection. ";
     }
     return false;
   }
@@ -103,14 +111,14 @@ bool TransportLayerSecurity::sslReadLoop(
   std::string next;
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
-    numBytes = this->readOnce(
-      - 1,
-      outputError,
-      commentsGeneral,
-      includeNoErrorInComments
+    numBytes =
+    this->readOnce(
+      - 1, outputError, commentsGeneral, includeNoErrorInComments
     );
     if (numBytes > 0) {
-      next.assign(this->readBuffer.objects, static_cast<unsigned>(numBytes));
+      next.assign(
+        this->readBuffer.objects, static_cast<unsigned>(numBytes)
+      );
       output += next;
       if (expectedLength <= 0) {
         break;
@@ -145,7 +153,8 @@ bool TransportLayerSecurity::sslWriteLoop(
   int i = 0;
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
-    numBytes = this->writeOnce(
+    numBytes =
+    this->writeOnce(
       - 1,
       this->writeBuffer,
       outputError,
@@ -159,14 +168,20 @@ bool TransportLayerSecurity::sslWriteLoop(
   }
   if (numBytes != this->writeBuffer.size) {
     if (commentsGeneral != nullptr) {
-      *commentsGeneral  << i << " errors writing to socket.\n NumBytes: " << numBytes << ". ";
+      *commentsGeneral
+      << i
+      << " errors writing to socket.\n NumBytes: "
+      << numBytes
+      << ". ";
     }
     return false;
   }
   return true;
 }
 
-void TransportLayerSecurityOpenSSL::setSocketAddToStack(int socketFileDescriptor) {
+void TransportLayerSecurityOpenSSL::setSocketAddToStack(
+  int socketFileDescriptor
+) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::setSocketAddToStack");
   this->socketStack.addOnTop(socketFileDescriptor);
   this->doSetSocket(socketFileDescriptor);
@@ -193,12 +208,18 @@ void TransportLayerSecurityOpenSSL::removeLastSocket() {
   this->doSetSocket(*this->socketStack.lastObject());
 }
 
-CipherSuiteSpecification TransportLayerSecurityServer::getCipherNoFailure(int inputId) {
+CipherSuiteSpecification TransportLayerSecurityServer::getCipherNoFailure(
+  int inputId
+) {
   if (inputId == 0) {
-    global.fatal << "zero cipher suite specification not allowed here. " << global.fatal;
+    global.fatal
+    << "zero cipher suite specification not allowed here. "
+    << global.fatal;
   }
   if (!this->cipherSuiteNames.contains(inputId)) {
-    global.fatal << "Unknown cipher suite specification not allowed here. " << global.fatal;
+    global.fatal
+    << "Unknown cipher suite specification not allowed here. "
+    << global.fatal;
   }
   CipherSuiteSpecification result;
   result.id = inputId;
@@ -208,7 +229,9 @@ CipherSuiteSpecification TransportLayerSecurityServer::getCipherNoFailure(int in
 }
 
 void TransportLayerSecurityServer::addSupportedCipher(int inputId) {
-  this->supportedCiphers.setKeyValue(inputId, this->getCipherNoFailure(inputId));
+  this->supportedCiphers.setKeyValue(
+    inputId, this->getCipherNoFailure(inputId)
+  );
 }
 
 void TransportLayerSecurityServer::initializeExtensions() {
@@ -222,16 +245,19 @@ void TransportLayerSecurityServer::initializeExtensions() {
     SSLContent::tokensExtension::renegotiateConnection, "renegotiate"
   );
   this->extensionNames.setKeyValue(
-    SSLContent::tokensExtension::ellipticCurvePointFormat, "elliptic curve point format"
+    SSLContent::tokensExtension::ellipticCurvePointFormat,
+    "elliptic curve point format"
   );
   this->extensionNames.setKeyValue(
-    SSLContent::tokensExtension::requestOnlineCertificateStatus, "request online certificate status"
+    SSLContent::tokensExtension::requestOnlineCertificateStatus,
+    "request online certificate status"
   );
   this->extensionNames.setKeyValue(
     SSLContent::tokensExtension::serverName, "server name"
   );
   this->extensionNames.setKeyValue(
-    SSLContent::tokensExtension::extendedMasterSecret, "extended master secret"
+    SSLContent::tokensExtension::extendedMasterSecret,
+    "extended master secret"
   );
 }
 
@@ -239,24 +265,44 @@ void TransportLayerSecurityServer::initializeCipherSuites() {
   if (this->cipherSuiteNames.size() != 0) {
     return;
   }
-  this->cipherSuiteNames.setKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2"          ); // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2");
+  // (RFC 5289)
   this->addSupportedCipher(0xc02f);
-  this->cipherSuiteNames.setKeyValue(0x1301, "TLS_AES_128_GCM_SHA256"              ); //
-  this->cipherSuiteNames.setKeyValue(0x1302, "TLS_AES_256_GCM_SHA384"              ); //
-  this->cipherSuiteNames.setKeyValue(0x1303, "TLS_CHACHA20_POLY1305_SHA256"        ); //
-  this->cipherSuiteNames.setKeyValue(0xc02b, "ECDHE/ECDSA/AES 128/GCM/SHA2"        ); // (RFC 5289)
-  this->cipherSuiteNames.setKeyValue(0xc02c, "ECDHE/ECDSA/AES 128/GCM/SHA3"        ); // (RFC 5289)
-  this->cipherSuiteNames.setKeyValue(0xc030, "ECDHE/RSA/AES 256/GCM/SHA3"          ); // (RFC 5289)
-  this->cipherSuiteNames.setKeyValue(0xcca9, "ECDHE/ECDSA/CHACHA 20/POLY 1305/SHA2"); // (RFC 7905)
-  this->cipherSuiteNames.setKeyValue(0xcca8, "ECDHE/RSA/CHACHA 20/POLY 1305/SHA2"  ); // (RFC 7905)
-  this->cipherSuiteNames.setKeyValue(0xc013, "ECDHE/RSA/AES 128/CBC/SHA"           ); // (RFC 4492)
-  this->cipherSuiteNames.setKeyValue(0xc014, "ECDHE/RSA/AES 256/CBC/SHA"           ); // (RFC 4492)
-  this->cipherSuiteNames.setKeyValue(0x009c, "RSA/RSA/AES 128/GCM/SHA2"            ); // (RFC 5288)
-  this->cipherSuiteNames.setKeyValue(0x009d, "RSA/RSA/AES 256/GCM/SHA2"            ); // (RFC 5288)
-  this->cipherSuiteNames.setKeyValue(0x002f, "RSA/RSA/AES 128/CBC/SHA"             ); // (RFC 5246)
-  this->cipherSuiteNames.setKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA"             ); // (RFC 5246)
-  this->cipherSuiteNames.setKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA"                ); // (RFC 5246)
-  this->cipherSuiteNames.setKeyValue(0,      "unknown"                             );
+  this->cipherSuiteNames.setKeyValue(0x1301, "TLS_AES_128_GCM_SHA256");
+  //
+  this->cipherSuiteNames.setKeyValue(0x1302, "TLS_AES_256_GCM_SHA384");
+  //
+  this->cipherSuiteNames.setKeyValue(0x1303, "TLS_CHACHA20_POLY1305_SHA256");
+  //
+  this->cipherSuiteNames.setKeyValue(0xc02b, "ECDHE/ECDSA/AES 128/GCM/SHA2");
+  // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(0xc02c, "ECDHE/ECDSA/AES 128/GCM/SHA3");
+  // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(0xc030, "ECDHE/RSA/AES 256/GCM/SHA3");
+  // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(
+    0xcca9, "ECDHE/ECDSA/CHACHA 20/POLY 1305/SHA2"
+  );
+  // (RFC 7905)
+  this->cipherSuiteNames.setKeyValue(
+    0xcca8, "ECDHE/RSA/CHACHA 20/POLY 1305/SHA2"
+  );
+  // (RFC 7905)
+  this->cipherSuiteNames.setKeyValue(0xc013, "ECDHE/RSA/AES 128/CBC/SHA");
+  // (RFC 4492)
+  this->cipherSuiteNames.setKeyValue(0xc014, "ECDHE/RSA/AES 256/CBC/SHA");
+  // (RFC 4492)
+  this->cipherSuiteNames.setKeyValue(0x009c, "RSA/RSA/AES 128/GCM/SHA2");
+  // (RFC 5288)
+  this->cipherSuiteNames.setKeyValue(0x009d, "RSA/RSA/AES 256/GCM/SHA2");
+  // (RFC 5288)
+  this->cipherSuiteNames.setKeyValue(0x002f, "RSA/RSA/AES 128/CBC/SHA");
+  // (RFC 5246)
+  this->cipherSuiteNames.setKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA");
+  // (RFC 5246)
+  this->cipherSuiteNames.setKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA");
+  // (RFC 5246)
+  this->cipherSuiteNames.setKeyValue(0, "unknown");
 }
 
 bool TransportLayerSecurityServer::initializeAll(
@@ -266,16 +312,25 @@ bool TransportLayerSecurityServer::initializeAll(
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::initializeAll");
   this->initialize();
-  if (!this->privateKey.loadFromPEM(privateKeyPEMEncoded, commentsOnError)) {
+  if (
+    !this->privateKey.loadFromPEM(privateKeyPEMEncoded, commentsOnError)
+  ) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to load private key. ";
     }
     return false;
   }
   this->privateKey.computeFromTwoPrimes(
-    this->privateKey.primeOne, this->privateKey.primeTwo, false, commentsOnError
+    this->privateKey.primeOne,
+    this->privateKey.primeTwo,
+    false,
+    commentsOnError
   );
-  if (!this->certificate.loadFromPEM(serverCertificatePEMEncoded, commentsOnError)) {
+  if (
+    !this->certificate.loadFromPEM(
+      serverCertificatePEMEncoded, commentsOnError
+    )
+  ) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to load server certificate. ";
     }
@@ -307,7 +362,9 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->spoofer.owner = this;
 }
 
-bool TransportLayerSecurityServer::NetworkSpoofer::writeSSLRecords(List<SSLRecord>& input) {
+bool TransportLayerSecurityServer::NetworkSpoofer::writeSSLRecords(
+  List<SSLRecord>& input
+) {
   this->outgoingMessages.addOnTop(input);
   return true;
 }
@@ -328,12 +385,22 @@ bool TransportLayerSecurityServer::writeSSLRecords(
 bool TransportLayerSecurityServer::writeBytesOnce(
   List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityServer::writeBytesOnce");
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::writeBytesOnce")
+  ;
   struct timeval tv;
-  tv.tv_sec = 5;  // 5 Secs Timeout
-  tv.tv_usec = 0;  // Not initialize'ing this can cause strange errors
-  setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  ssize_t numBytesSent = send(
+  tv.tv_sec = 5;
+  // 5 Secs Timeout
+  tv.tv_usec = 0;
+  // Not initialize'ing this can cause strange errors
+  setsockopt(
+    this->session.socketId,
+    SOL_SOCKET,
+    SO_RCVTIMEO,
+    static_cast<void*>(&tv),
+    sizeof(timeval)
+  );
+  ssize_t numBytesSent =
+  send(
     this->session.socketId,
     input.objects,
     static_cast<size_t>(input.size),
@@ -347,20 +414,28 @@ bool TransportLayerSecurityServer::writeBytesOnce(
   return numBytesSent >= 0;
 }
 
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::inputMessages = "inputMessages";
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::outputMessages = "outputMessages";
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnInput = "errorsOnInput";
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnOutput = "errorsOnOutput";
-
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+inputMessages =
+"inputMessages";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+outputMessages =
+"outputMessages";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+errorsOnInput =
+"errorsOnInput";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+errorsOnOutput =
+"errorsOnOutput";
 std::string TransportLayerSecurityServer::JSLabels::spoofer = "spoofer";
 std::string TransportLayerSecurityServer::JSLabels::session = "session";
-
 JSData TransportLayerSecurityServer::toJSON() {
   JSData result;
   if (this->spoofer.flagDoSpoof) {
-    result[TransportLayerSecurityServer::JSLabels::spoofer] = this->spoofer.toJSON();
+    result[TransportLayerSecurityServer::JSLabels::spoofer] =
+    this->spoofer.toJSON();
   }
-  result[TransportLayerSecurityServer::JSLabels::session] = this->session.toJSON();
+  result[TransportLayerSecurityServer::JSLabels::session] =
+  this->session.toJSON();
   return result;
 }
 
@@ -384,18 +459,32 @@ JSData TransportLayerSecurityServer::NetworkSpoofer::toJSON() {
     }
     outputMessages[i] = currentOutputMessages;
   }
-  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnInput] = inErrors;
-  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnOutput] = outErrors;
-  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::inputMessages] = inputMessage;
-  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::outputMessages] = outputMessages;
+  result[
+    TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnInput
+  ] =
+  inErrors;
+  result[
+    TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnOutput
+  ] =
+  outErrors;
+  result[
+    TransportLayerSecurityServer::NetworkSpoofer::JSLabels::inputMessages
+  ] =
+  inputMessage;
+  result[
+    TransportLayerSecurityServer::NetworkSpoofer::JSLabels::outputMessages
+  ] =
+  outputMessages;
   return result;
 }
 
 bool TransportLayerSecurityServer::NetworkSpoofer::readBytesOnce(
   std::stringstream* commentsOnError
 ) {
-  global << Logger::red
-  << "Transport layer security server is spoofing the network. " << Logger::endL;
+  global
+  << Logger::red
+  << "Transport layer security server is spoofing the network. "
+  << Logger::endL;
   if (
     this->currentInputMessageIndex < 0 ||
     this->currentInputMessageIndex >= this->incomingMessages.size
@@ -405,34 +494,49 @@ bool TransportLayerSecurityServer::NetworkSpoofer::readBytesOnce(
     }
     return false;
   }
-  this->owner->incomingBytes = this->incomingMessages[
-    this->currentInputMessageIndex
-  ].incomingBytes;
+  this->owner->incomingBytes =
+  this->incomingMessages[this->currentInputMessageIndex].incomingBytes;
   this->currentInputMessageIndex ++;
   return true;
 }
 
-bool TransportLayerSecurityServer::readBytesOnce(std::stringstream* commentsOnError) {
+bool TransportLayerSecurityServer::readBytesOnce(
+  std::stringstream* commentsOnError
+) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::readBytesOnce");
   if (this->spoofer.flagDoSpoof) {
     return this->spoofer.readBytesOnce(commentsOnError);
   }
   struct timeval tv;
-  tv.tv_sec = 5;  // 5 Secs Timeout
-  tv.tv_usec = 0;  // Not initialize'ing this can cause strange errors
-  setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  this->incomingBytes.setSize(this->defaultBufferCapacity);
-  int numBytesInBuffer = static_cast<int>(recv(
+  tv.tv_sec = 5;
+  // 5 Secs Timeout
+  tv.tv_usec = 0;
+  // Not initialize'ing this can cause strange errors
+  setsockopt(
     this->session.socketId,
-    this->incomingBytes.objects,
-    static_cast<unsigned>(this->incomingBytes.size - 1),
-    0
-  ));
+    SOL_SOCKET,
+    SO_RCVTIMEO,
+    static_cast<void*>(&tv),
+    sizeof(timeval)
+  );
+  this->incomingBytes.setSize(this->defaultBufferCapacity);
+  int numBytesInBuffer = static_cast<int>(
+    recv(
+      this->session.socketId,
+      this->incomingBytes.objects,
+      static_cast<unsigned>(this->incomingBytes.size - 1),
+      0
+    )
+  );
   if (numBytesInBuffer >= 0) {
     this->incomingBytes.setSize(numBytesInBuffer);
   }
-  global << "Read bytes:\n"
-  << Crypto::convertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << Logger::endL;
+  global
+  << "Read bytes:\n"
+  << Crypto::convertListUnsignedCharsToHexFormat(
+    this->incomingBytes, 40, false
+  )
+  << Logger::endL;
   return numBytesInBuffer > 0;
 }
 
@@ -441,18 +545,18 @@ TransportLayerSecurityServer& SSLContent::GetServer() const {
 }
 
 void SSLContent::resetExceptOwner() {
-  this->contentType           = 0;
-  this->length            = 0;
-  this->version           = 0;
-  this->cipherSpecLength  = 0;
-  this->challengeLength   = 0;
+  this->contentType = 0;
+  this->length = 0;
+  this->version = 0;
+  this->cipherSpecLength = 0;
+  this->challengeLength = 0;
   this->compressionMethod = 0;
-  this->flagRenegotiate            = false;
+  this->flagRenegotiate = false;
   this->flagIncomingRandomIncluded = false;
   this->flagOutgoingRandomIncluded = false;
-  this->extensions             .setSize(0);
-  this->sessionId              .setSize(0);
-  this->challenge              .setSize(0);
+  this->extensions.setSize(0);
+  this->sessionId.setSize(0);
+  this->challenge.setSize(0);
 }
 
 SSLContent::SSLContent() {
@@ -462,7 +566,9 @@ SSLContent::SSLContent() {
 
 Logger::StringHighligher SSLContent::getStringHighlighter() {
   Logger::StringHighligher result("2,4,4,2,6,4,64,2,64,4,||");
-  for (int i = 0; i < this->owner->owner->session.incomingCiphers.size; i ++) {
+  for (
+    int i = 0; i < this->owner->owner->session.incomingCiphers.size; i ++
+  ) {
     result.sections.addOnTop(4);
   }
   result.sections.addOnTop(std::string("||"));
@@ -482,47 +588,52 @@ Logger::StringHighligher SSLContent::getStringHighlighter() {
 std::string SSLContent::ToStringVersion() const {
   List<char> twoBytes;
   twoBytes.setSize(2);
-  twoBytes[0] = static_cast<char> (this->version / 256);
-  twoBytes[1] = static_cast<char> (this->version % 256);
+  twoBytes[0] = static_cast<char>(this->version / 256);
+  twoBytes[1] = static_cast<char>(this->version % 256);
   std::stringstream out;
   out << Crypto::convertListCharsToHex(twoBytes, 0, false);
   return out.str();
 }
 
-
-std::string SSLContent::JSLabels::incomingRandom                    = "incomingRandom"                   ;
-std::string SSLContent::JSLabels::outgoingRandom                    = "outgoingRandom"                   ;
-std::string SSLContent::JSLabels::version                           = "version"                          ;
-std::string SSLContent::JSLabels::length                            = "length"                           ;
-std::string SSLContent::JSLabels::cipherSpecLength                  = "cipherSpecLength"                 ;
-std::string SSLContent::JSLabels::sessionId                         = "sessionId"                        ;
-std::string SSLContent::JSLabels::extensionsLength                  = "extensionsLength"                 ;
-std::string SSLContent::JSLabels::compressionMethod                 = "compressionMethod"                ;
-std::string SSLContent::JSLabels::extensions                        = "extensions"                       ;
-std::string SSLContent::JSLabels::renegotiate                       = "renegotiate"                      ;
-std::string SSLContent::JSLabels::OCSPrequest                       = "OCSPrequest"                      ;
-std::string SSLContent::JSLabels::signedCertificateTimestampRequest = "signedCertificateTimestampRequest";
-
+std::string SSLContent::JSLabels::incomingRandom = "incomingRandom";
+std::string SSLContent::JSLabels::outgoingRandom = "outgoingRandom";
+std::string SSLContent::JSLabels::version = "version";
+std::string SSLContent::JSLabels::length = "length";
+std::string SSLContent::JSLabels::cipherSpecLength = "cipherSpecLength";
+std::string SSLContent::JSLabels::sessionId = "sessionId";
+std::string SSLContent::JSLabels::extensionsLength = "extensionsLength";
+std::string SSLContent::JSLabels::compressionMethod = "compressionMethod";
+std::string SSLContent::JSLabels::extensions = "extensions";
+std::string SSLContent::JSLabels::renegotiate = "renegotiate";
+std::string SSLContent::JSLabels::OCSPrequest = "OCSPrequest";
+std::string SSLContent::JSLabels::signedCertificateTimestampRequest =
+"signedCertificateTimestampRequest";
 JSData SSLContent::toJSON() const {
   MacroRegisterFunctionWithName("SSLHello::toJSON");
   JSData result;
   result[SSLContent::JSLabels::version] = this->ToStringVersion();
   result[SSLContent::JSLabels::length] = this->length;
   result[SSLContent::JSLabels::cipherSpecLength] = this->cipherSpecLength;
-  result[SSLContent::JSLabels::sessionId] = Crypto::convertListUnsignedCharsToHex(this->sessionId);
-  result[SSLContent::JSLabels::extensionsLength ] = this->extensionsLength;
-  result[SSLContent::JSLabels::compressionMethod] = Crypto::convertIntToHex(this->compressionMethod, 2);
+  result[SSLContent::JSLabels::sessionId] =
+  Crypto::convertListUnsignedCharsToHex(this->sessionId);
+  result[SSLContent::JSLabels::extensionsLength] = this->extensionsLength;
+  result[SSLContent::JSLabels::compressionMethod] =
+  Crypto::convertIntToHex(this->compressionMethod, 2);
   JSData extensionsObject;
   extensionsObject.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->extensions.size; i ++) {
-    extensionsObject.listObjects.addOnTop(this->extensions[i].toJSON());
+    extensionsObject.listObjects.addOnTop(
+      this->extensions[i].toJSON()
+    );
   }
   result[SSLContent::JSLabels::extensions] = extensionsObject;
-  result[SSLContent::JSLabels::renegotiate                      ] = this->flagRenegotiate;
+  result[SSLContent::JSLabels::renegotiate] = this->flagRenegotiate;
   return result;
 }
 
-unsigned int CipherSuiteSpecification::hashFunction(const CipherSuiteSpecification &input) {
+unsigned int CipherSuiteSpecification::hashFunction(
+  const CipherSuiteSpecification& input
+) {
   return input.hashFunction();
 }
 
@@ -536,7 +647,9 @@ CipherSuiteSpecification::CipherSuiteSpecification() {
 
 bool CipherSuiteSpecification::checkInitialization() const {
   if (this->owner == nullptr) {
-    global.fatal << "CipherSuiteSpecification not initialized correctly. " << global.fatal;
+    global.fatal
+    << "CipherSuiteSpecification not initialized correctly. "
+    << global.fatal;
   }
   return true;
 }
@@ -547,49 +660,70 @@ bool CipherSuiteSpecification::computeName() {
   if (!this->owner->cipherSuiteNames.contains(this->id)) {
     // GREASE = deliberately invalid cipher suite code.
     // [Generate Random Extensions and Sustain Extensibility]
-    this->name = "unknown/GREASE";
+    this->name =
+    "unknown/GREASE";
     return false;
   }
   this->name = this->owner->cipherSuiteNames.getValueNoFail(this->id);
   return true;
 }
 
-void SSLRecord::writeBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
+void SSLRecord::writeBytes(
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
+) const {
   MacroRegisterFunctionWithName("SSLRecord::writeBytes");
   Serialization::WriterOneByteInteger recordTypeWriter(
-    SSLRecord::tokens::handshake, output, annotations, "SSL handshake tag"
+    SSLRecord::tokens::handshake,
+    output,
+    annotations,
+    "SSL handshake tag"
   );
-  Serialization::WriterTwoByteInteger writerVersion(this->version, output, annotations, "SSL record version");
-  Serialization::LengthWriterTwoBytes writerLength(output, annotations, "SSL handshake body");
+  Serialization::WriterTwoByteInteger writerVersion(
+    this->version, output, annotations, "SSL record version"
+  );
+  Serialization::LengthWriterTwoBytes writerLength(
+    output, annotations, "SSL handshake body"
+  );
   this->content.writeBytes(output, annotations);
 }
 
-void SSLContent::writeBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
+void SSLContent::writeBytes(
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
+) const {
   switch (this->contentType) {
-    case SSLContent::tokens::clientHello:
-      return SSLContent::writeBytesHandshakeClientHello(output, annotations);
-    case SSLContent::tokens::serverHello:
-      return SSLContent::writeBytesHandshakeServerHello(output, annotations);
-    case SSLContent::tokens::certificate:
-      return SSLContent::writeBytesHandshakeCertificate(output, annotations);
-    case SSLContent::tokens::serverKeyExchange:
-      return SSLContent::writeBytesHandshakeSecretExchange(output, annotations);
+  case SSLContent::tokens::clientHello:
+    return SSLContent::writeBytesHandshakeClientHello(output, annotations);
+  case SSLContent::tokens::serverHello:
+    return SSLContent::writeBytesHandshakeServerHello(output, annotations);
+  case SSLContent::tokens::certificate:
+    return SSLContent::writeBytesHandshakeCertificate(output, annotations);
+  case SSLContent::tokens::serverKeyExchange:
+    return SSLContent::writeBytesHandshakeSecretExchange(output, annotations);
   }
 }
 
 void SSLContent::writeBytesHandshakeServerHello(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeServerHello");
   if (this->contentType != SSLContent::tokens::serverHello) {
-    global.fatal << "Not allowed to serialize non server-hello content as server hello. " << global.fatal;
+    global.fatal
+    << "Not allowed to serialize non server-hello content as server hello. "
+    << global.fatal;
   }
   this->WriteType(output, annotations);
-  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "SSL content body");
+  Serialization::LengthWriterThreeBytes writeLength(
+    output, annotations, "SSL content body"
+  );
   this->WriteVersion(output, annotations);
   this->writeBytesMyRandomAndSessionId(output, annotations);
   // 256 = 0x0100 = no compression:
-  Serialization::WriterTwoByteInteger compressionWriter(256, output, annotations, "compression: none");
+  Serialization::WriterTwoByteInteger compressionWriter(
+    256, output, annotations, "compression: none"
+  );
   this->writeBytesExtensionsOnly(output, annotations);
 }
 
@@ -605,7 +739,8 @@ std::string SSLContent::getType(unsigned char token) {
 }
 
 void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLContent::writeNamedCurveAndPublicKey");
   Serialization::WriterOneByteInteger curveName(
@@ -623,9 +758,12 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
   this->ephemerealPublicKey.xCoordinate.value.writeBigEndianFixedNumberOfBytes(
     publicKeyBytes, 32, &shouldNotBeNeeded
   );
-  Serialization::writeOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");
+  Serialization::writeOneByteLengthFollowedByBytes(
+    publicKeyBytes, output, annotations, "public key"
+  );
   if (!mustBeTrue) {
-    global.fatal << "Internally generated public key does not serialize properly. "
+    global.fatal
+    << "Internally generated public key does not serialize properly. "
     << shouldNotBeNeeded.str()
     << global.fatal;
   }
@@ -645,60 +783,89 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
 }
 
 void SSLContent::WriteType(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   if (annotations != nullptr) {
-    annotations->addOnTop(Serialization::Marker(output.size, 1, this->getType(this->contentType)));
+    annotations->addOnTop(
+      Serialization::Marker(
+        output.size, 1, this->getType(this->contentType)
+      )
+    );
   }
   output.addOnTop(this->contentType);
 }
 
 void SSLContent::WriteVersion(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
-  Serialization::WriterTwoByteInteger(this->version, output, annotations, "SSL content version");
+  Serialization::WriterTwoByteInteger(
+    this->version, output, annotations, "SSL content version"
+  );
 }
 
 void SSLContent::writeBytesHandshakeCertificate(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeCertificate");
   if (this->contentType != SSLContent::tokens::certificate) {
-    global.fatal << "Not allowed to serialize non-certificate content as certificate. " << global.fatal;
+    global.fatal
+    << "Not allowed to serialize non-certificate content as certificate. "
+    << global.fatal;
   }
   this->WriteType(output, annotations);
-  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "certificateCollection");
-  Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(output, annotations, "certificateBody");
+  Serialization::LengthWriterThreeBytes writeLength(
+    output, annotations, "certificateCollection"
+  );
+  Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(
+    output, annotations, "certificateBody"
+  );
   this->GetServer().certificate.writeBytesASN1(output, annotations);
 }
 
 void SSLContent::writeBytesHandshakeSecretExchange(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
-  MacroRegisterFunctionWithName("SSLContent::writeBytesHandshakeSecretExchange");
+  MacroRegisterFunctionWithName(
+    "SSLContent::writeBytesHandshakeSecretExchange"
+  );
   this->checkInitialization();
   if (this->contentType != SSLContent::tokens::serverKeyExchange) {
-    global.fatal << "Not allowed to serialize non-server key exchange as such. " << global.fatal;
+    global.fatal
+    << "Not allowed to serialize non-server key exchange as such. "
+    << global.fatal;
   }
   this->WriteType(output, annotations);
-  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "server key exchange");
+  Serialization::LengthWriterThreeBytes writeLength(
+    output, annotations, "server key exchange"
+  );
   this->owner->owner->session.writeNamedCurveAndPublicKey(output, annotations);
 }
 
 void SSLContent::writeBytesHandshakeClientHello(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesHandshakeClientHello");
   if (this->contentType != SSLContent::tokens::clientHello) {
-    global.fatal << "Not allowed to serialize non client-hello content as client hello. " << global.fatal;
+    global.fatal
+    << "Not allowed to serialize non client-hello content as client hello. "
+    << global.fatal;
   }
   this->WriteType(output, annotations);
-  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "Handshake clientHello body");
+  Serialization::LengthWriterThreeBytes writeLength(
+    output, annotations, "Handshake clientHello body"
+  );
   this->WriteVersion(output, annotations);
   this->writeBytesIncomingRandomAndSessionId(output, annotations);
   this->writeBytesSupportedCiphers(output, annotations);
   // 256 = 0x0100 = no compression:
-  Serialization::WriterTwoByteInteger noCompression(256, output, annotations, "compression: none");
+  Serialization::WriterTwoByteInteger noCompression(
+    256, output, annotations, "compression: none"
+  );
   this->writeBytesExtensionsOnly(output, annotations);
 }
 
@@ -707,39 +874,53 @@ List<unsigned char>& SSLContent::getMyRandomBytes() const {
     this->owner->owner->session.myRandomBytes.size !=
     this->LengthRandomBytesInSSLHello
   ) {
-    global.fatal << "Writing non-initialized SSL hello forbidden. " << global.fatal;
+    global.fatal
+    << "Writing non-initialized SSL hello forbidden. "
+    << global.fatal;
   }
   return this->owner->owner->session.myRandomBytes;
 }
 
 void SSLContent::writeBytesIncomingRandomAndSessionId(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
-  MacroRegisterFunctionWithName("SSLHello::writeBytesIncomingRandomAndSessionId");
-  Serialization::writeBytesAnnotated(
-    this->owner->owner->session.incomingRandomBytes, output, annotations, "client random"
+  MacroRegisterFunctionWithName(
+    "SSLHello::writeBytesIncomingRandomAndSessionId"
   );
-  Serialization::writeOneByteLengthFollowedByBytes(this->sessionId, output, annotations, "session id");
+  Serialization::writeBytesAnnotated(
+    this->owner->owner->session.incomingRandomBytes,
+    output,
+    annotations,
+    "client random"
+  );
+  Serialization::writeOneByteLengthFollowedByBytes(
+    this->sessionId, output, annotations, "session id"
+  );
 }
 
 void SSLContent::writeBytesMyRandomAndSessionId(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesMyRandomAndSessionId");
-  Serialization::writeBytesAnnotated(this->getMyRandomBytes(), output, annotations, "server random");
-  Serialization::writeOneByteLengthFollowedByBytes(this->sessionId, output, annotations, "session id");
+  Serialization::writeBytesAnnotated(
+    this->getMyRandomBytes(), output, annotations, "server random"
+  );
+  Serialization::writeOneByteLengthFollowedByBytes(
+    this->sessionId, output, annotations, "session id"
+  );
 }
 
 void SSLContent::writeBytesSupportedCiphers(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesSupportedCiphers");
-  List<CipherSuiteSpecification>& ciphers = this->owner->owner->session.incomingCiphers;
+  List<CipherSuiteSpecification>& ciphers =
+  this->owner->owner->session.incomingCiphers;
   Serialization::WriterTwoByteInteger cipherNumberWriter(
-    ciphers.size * 2,
-    output,
-    annotations,
-    "number of ciphers"
+    ciphers.size * 2, output, annotations, "number of ciphers"
   );
   for (int i = 0; i < ciphers.size; i ++) {
     Serialization::WriterTwoByteInteger currentCipher(
@@ -748,28 +929,40 @@ void SSLContent::writeBytesSupportedCiphers(
   }
 }
 
-bool SSLContent::decodeSupportedCiphers(std::stringstream* commentsOnFailure) {
+bool SSLContent::decodeSupportedCiphers(
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("SSLHello::decodeSupportedCiphers");
-  if (!Serialization::readTwoByteInt(
-    this->owner->incomingBytes,
-    this->owner->offsetDecoded,
-    this->cipherSpecLength,
-    commentsOnFailure
-  )) {
+  if (
+    !Serialization::readTwoByteInt(
+      this->owner->incomingBytes,
+      this->owner->offsetDecoded,
+      this->cipherSpecLength,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read cipher suite length. ";
     }
     return false;
   }
   int halfCipherLength = this->cipherSpecLength / 2;
-  this->cipherSpecLength = halfCipherLength * 2; // make sure cipher spec length is even.
-  if (this->cipherSpecLength + this->owner->offsetDecoded >= this->owner->incomingBytes.size) {
+  this->cipherSpecLength = halfCipherLength * 2;
+  // make sure cipher spec length is even.
+  if (
+    this->cipherSpecLength + this->owner->offsetDecoded >=
+    this->owner->incomingBytes.size
+  ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "cipher suite length: " << this->cipherSpecLength << " exceeds message length. ";
+      *commentsOnFailure
+      << "cipher suite length: "
+      << this->cipherSpecLength
+      << " exceeds message length. ";
     }
     return false;
   }
-  List<CipherSuiteSpecification>& ciphers = this->owner->owner->session.incomingCiphers;
+  List<CipherSuiteSpecification>& ciphers =
+  this->owner->owner->session.incomingCiphers;
   if (ciphers.size > 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Ciphers already declared. ";
@@ -779,12 +972,14 @@ bool SSLContent::decodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   ciphers.setSize(halfCipherLength);
   for (int i = 0; i < halfCipherLength; i ++) {
     ciphers[i].owner = this->owner->owner;
-    if (!Serialization::readTwoByteInt(
-      this->owner->incomingBytes,
-      this->owner->offsetDecoded,
-      ciphers[i].id,
-      commentsOnFailure
-    )) {
+    if (
+      !Serialization::readTwoByteInt(
+        this->owner->incomingBytes,
+        this->owner->offsetDecoded,
+        ciphers[i].id,
+        commentsOnFailure
+      )
+    ) {
       // this should not happen.
       return false;
     }
@@ -800,10 +995,13 @@ bool SSLContent::decodeSupportedCiphers(std::stringstream* commentsOnFailure) {
 }
 
 void SSLContent::writeBytesExtensionsOnly(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::writeBytesExtensionsOnly");
-  Serialization::LengthWriterTwoBytes extensionsLength(output, annotations, "extensions");
+  Serialization::LengthWriterTwoBytes extensionsLength(
+    output, annotations, "extensions"
+  );
   for (int i = 0; i < this->extensions.size; i ++) {
     this->extensions[i].writeBytes(output, annotations);
   }
@@ -817,80 +1015,98 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  this->contentType = this->owner->incomingBytes[this->owner->offsetDecoded];
+  this->contentType =
+  this->owner->incomingBytes[this->owner->offsetDecoded];
   this->owner->offsetDecoded ++;
   if (
     this->contentType != SSLContent::tokens::clientHello &&
     this->contentType != SSLContent::tokens::serverHello
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Message does not appear to be a client/server hello. ";
+      *commentsOnFailure
+      << "Message does not appear to be a client/server hello. ";
     }
     return false;
   }
-  if (!Serialization::readThreeByteInt(
-    this->owner->incomingBytes,
-    this->owner->offsetDecoded,
-    this->length,
-    commentsOnFailure
-  )) {
+  if (
+    !Serialization::readThreeByteInt(
+      this->owner->incomingBytes,
+      this->owner->offsetDecoded,
+      this->length,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read ssl record length. ";
     }
     return false;
   }
-  if (this->length + this->owner->offsetDecoded > this->owner->incomingBytes.size) {
+  if (
+    this->length + this->owner->offsetDecoded > this->owner->incomingBytes.size
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Client hello length is too big. ";
     }
     return false;
   }
-  if (!Serialization::readTwoByteInt(
-    this->owner->incomingBytes,
-    this->owner->offsetDecoded,
-    this->version,
-    commentsOnFailure
-  )) {
+  if (
+    !Serialization::readTwoByteInt(
+      this->owner->incomingBytes,
+      this->owner->offsetDecoded,
+      this->version,
+      commentsOnFailure
+    )
+  ) {
     return false;
   }
   List<unsigned char> incomingRandomBytes;
-  if (!Serialization::readBytesFixedLength(
-    this->owner->incomingBytes,
-    this->LengthRandomBytesInSSLHello,
-    this->owner->offsetDecoded,
-    incomingRandomBytes,
-    commentsOnFailure
-  )) {
+  if (
+    !Serialization::readBytesFixedLength(
+      this->owner->incomingBytes,
+      this->LengthRandomBytesInSSLHello,
+      this->owner->offsetDecoded,
+      incomingRandomBytes,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to fetch session random bytes. ";
     }
     return false;
   }
-  if (!this->owner->owner->session.setIncomingRandomBytes(
-    incomingRandomBytes, commentsOnFailure
-  )) {
+  if (
+    !this->owner->owner->session.setIncomingRandomBytes(
+      incomingRandomBytes, commentsOnFailure
+    )
+  ) {
     return false;
   }
   this->flagIncomingRandomIncluded = true;
-
-  if (!Serialization::readOneByteLengthFollowedByBytes(
-    this->owner->incomingBytes,
-    this->owner->offsetDecoded,
-    nullptr,
-    &this->sessionId,
-    commentsOnFailure
-  )) {
+  if (
+    !Serialization::readOneByteLengthFollowedByBytes(
+      this->owner->incomingBytes,
+      this->owner->offsetDecoded,
+      nullptr,
+      &this->sessionId,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read session id. ";
     }
     return false;
   }
-  if (!this->decodeSupportedCiphers(commentsOnFailure)){
+  if (!this->decodeSupportedCiphers(commentsOnFailure)) {
     return false;
   }
-  if (!Serialization::readTwoByteInt(
-    this->owner->incomingBytes, this->owner->offsetDecoded, this->compressionMethod, commentsOnFailure
-  )) {
+  if (
+    !Serialization::readTwoByteInt(
+      this->owner->incomingBytes,
+      this->owner->offsetDecoded,
+      this->compressionMethod,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Compression bytes not set. ";
     }
@@ -900,18 +1116,22 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
   return this->decodeExtensions(commentsOnFailure);
 }
 
-bool SSLContent::decodeExtensions(std::stringstream *commentsOnFailure) {
+bool SSLContent::decodeExtensions(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::decodeExtensions");
-  if (this->owner->offsetDecoded + 2 >= this->owner->incomingBytes.size) {
+  if (
+    this->owner->offsetDecoded + 2 >= this->owner->incomingBytes.size
+  ) {
     // No extensions
     return true;
   }
-  if (!Serialization::readTwoByteInt(
-    this->owner->incomingBytes,
-    this->owner->offsetDecoded,
-    this->extensionsLength,
-    commentsOnFailure
-  )) {
+  if (
+    !Serialization::readTwoByteInt(
+      this->owner->incomingBytes,
+      this->owner->offsetDecoded,
+      this->extensionsLength,
+      commentsOnFailure
+    )
+  ) {
     return false;
   }
   int extensionsLimit = this->owner->offsetDecoded + this->extensionsLength;
@@ -922,25 +1142,28 @@ bool SSLContent::decodeExtensions(std::stringstream *commentsOnFailure) {
     return false;
   }
   this->extensions.setSize(0);
-
   while (this->owner->offsetDecoded < extensionsLimit) {
     SSLHelloExtension incoming;
     incoming.owner = this;
-    if (!Serialization::readTwoByteInt(
-      this->owner->incomingBytes,
-      this->owner->offsetDecoded,
-      incoming.extensionType,
-      commentsOnFailure
-    )) {
+    if (
+      !Serialization::readTwoByteInt(
+        this->owner->incomingBytes,
+        this->owner->offsetDecoded,
+        incoming.extensionType,
+        commentsOnFailure
+      )
+    ) {
       return false;
     }
-    if (!Serialization::readTwoByteLengthFollowedByBytes(
-      this->owner->incomingBytes,
-      this->owner->offsetDecoded,
-      nullptr,
-      &incoming.content,
-      commentsOnFailure
-    )) {
+    if (
+      !Serialization::readTwoByteLengthFollowedByBytes(
+        this->owner->incomingBytes,
+        this->owner->offsetDecoded,
+        nullptr,
+        &incoming.content,
+        commentsOnFailure
+      )
+    ) {
       return false;
     }
     this->extensions.addOnTop(incoming);
@@ -957,14 +1180,19 @@ void SSLHelloExtension::writeBytes(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) {
-  Serialization::WriterTwoByteInteger writer(this->extensionType, output, annotations, "ssl hello extension type");
-  Serialization::writeTwoByteLengthFollowedByBytes(this->content, output, annotations, "ssl hello extension content");
+  Serialization::WriterTwoByteInteger writer(
+    this->extensionType, output, annotations, "ssl hello extension type"
+  );
+  Serialization::writeTwoByteLengthFollowedByBytes(
+    this->content, output, annotations, "ssl hello extension content"
+  );
 }
 
 void SSLHelloExtension::makeGrease(SSLContent* inputOwner) {
   this->owner = inputOwner;
   this->content.setSize(0);
-  this->extensionType = (13 * 16 + 10) * 256 + (13 * 16 + 10); // 0xdada;
+  this->extensionType = (13 * 16 + 10) * 256 + (13 * 16 + 10);
+  // 0xdada;
 }
 
 void SSLHelloExtension::makeExtendedMasterSecret(SSLContent* inputOwner) {
@@ -987,7 +1215,9 @@ void SSLHelloExtension::makeEllipticCurvePointFormat(SSLContent* inputOwner) {
 
 bool SSLHelloExtension::checkInitialization() {
   if (this->owner == nullptr) {
-    global.fatal << "Non-initialized owner of ssl hello extension. " << global.fatal;
+    global.fatal
+    << "Non-initialized owner of ssl hello extension. "
+    << global.fatal;
   }
   return true;
 }
@@ -1005,13 +1235,20 @@ JSData SSLHelloExtension::toJSON() {
 
 std::string SSLHelloExtension::name() {
   this->checkInitialization();
-  if (this->owner->owner->owner->extensionNames.contains(this->extensionType)) {
-    return this->owner->owner->owner->extensionNames.getValueNoFail(this->extensionType);
+  if (
+    this->owner->owner->owner->extensionNames.contains(this->extensionType)
+  ) {
+    return
+    this->owner->owner->owner->extensionNames.getValueNoFail(
+      this->extensionType
+    );
   }
   return "unknown";
 }
 
-bool SSLHelloExtension::processRenegotiateConnection(std::stringstream *commentsOnError) {
+bool SSLHelloExtension::processRenegotiateConnection(
+  std::stringstream* commentsOnError
+) {
   if (this->content.size == 1) {
     if (this->content[0] == 0) {
       this->owner->flagRenegotiate = true;
@@ -1019,22 +1256,28 @@ bool SSLHelloExtension::processRenegotiateConnection(std::stringstream *comments
     }
   }
   if (commentsOnError != nullptr) {
-    *commentsOnError << "Unexpected renegotiate connection extension content. ";
+    *commentsOnError << "Unexpected renegotiate connection extension content. "
+    ;
   }
   return false;
 }
 
-bool SSLHelloExtension::processServerName(std::stringstream *commentsOnError) {
-  TransportLayerSecurityServer::Session& session = this->owner->owner->owner->session;
+bool SSLHelloExtension::processServerName(
+  std::stringstream* commentsOnError
+) {
+  TransportLayerSecurityServer::Session& session =
+  this->owner->owner->owner->session;
   if (session.serverName.size > 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Server name extension can be set only once. ";
     }
     return false;
   }
-  if (!Serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
-    this->content, 0, nullptr, &session.serverName, commentsOnError
-  )) {
+  if (
+    !Serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
+      this->content, 0, nullptr, &session.serverName, commentsOnError
+    )
+  ) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to read server name extension. ";
     }
@@ -1043,15 +1286,22 @@ bool SSLHelloExtension::processServerName(std::stringstream *commentsOnError) {
   return true;
 }
 
-bool SSLHelloExtension::processRequestOnlineCertificateStatus(std::stringstream* commentsOnError) {
+bool SSLHelloExtension::processRequestOnlineCertificateStatus(
+  std::stringstream* commentsOnError
+) {
   (void) commentsOnError;
-  this->owner->owner->owner->session.flagRequestOnlineCertificateStatusProtocol = true;
+  this->owner->owner->owner->session.flagRequestOnlineCertificateStatusProtocol
+  =
+  true;
   return true;
 }
 
-bool SSLHelloExtension::processRequestSignedCertificateTimestamp(std::stringstream* commentsOnError) {
+bool SSLHelloExtension::processRequestSignedCertificateTimestamp(
+  std::stringstream* commentsOnError
+) {
   (void) commentsOnError;
-  this->owner->owner->owner->session.flagRequestSignedCertificateTimestamp = true;
+  this->owner->owner->owner->session.flagRequestSignedCertificateTimestamp =
+  true;
   return true;
 }
 
@@ -1064,20 +1314,27 @@ SignatureAlgorithmSpecification::SignatureAlgorithmSpecification() {
 
 void SignatureAlgorithmSpecification::processValue() {
   // Works for all RSA and ECDSA-based algorithms:
-  this->hash = this->value / 256;
+  this->hash =
+  this->value /
+  256;
   this->signatureAlgorithm = this->value % 256;
 }
 
-bool SSLHelloExtension::processSignatureAlgorithms(std::stringstream* commentsOnError) {
+bool SSLHelloExtension::processSignatureAlgorithms(
+  std::stringstream* commentsOnError
+) {
   // See:
   // 1. [7.4.1.4.1., RFC5246]
   // 2. [page 41, RFC 8446].
-  TransportLayerSecurityServer::Session& session = this->owner->owner->owner->session;
+  TransportLayerSecurityServer::Session & session =
+  this->owner->owner->owner->session;
   int offset = 0;
   List<unsigned char> specifications;
-  if (!Serialization::readTwoByteLengthFollowedByBytes(
-    this->content, offset, nullptr, &specifications, commentsOnError
-  )) {
+  if (
+    !Serialization::readTwoByteLengthFollowedByBytes(
+      this->content, offset, nullptr, &specifications, commentsOnError
+    )
+  ) {
     return false;
   }
   int numberOfPairs = specifications.size / 2;
@@ -1090,7 +1347,10 @@ bool SSLHelloExtension::processSignatureAlgorithms(std::stringstream* commentsOn
   }
   if (session.incomingAlgorithmSpecifications.size == 0) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Failed to recognize any hash / algorithm pair supported by the client. ";
+      *commentsOnError
+      <<
+      "Failed to recognize any hash / algorithm pair supported by the client. "
+      ;
     }
     return false;
   }
@@ -1126,21 +1386,39 @@ bool SSLContent::processExtensions(std::stringstream* commentsOnFailure) {
 }
 
 bool Serialization::readTwoByteInt(
-  const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
+  const List<unsigned char>& input,
+  int& inputOutputOffset,
+  int& result,
+  std::stringstream* commentsOnFailure
 ) {
-  return Serialization::readNByteInt(2, input, inputOutputOffset, result, commentsOnFailure);
+  return
+  Serialization::readNByteInt(
+    2, input, inputOutputOffset, result, commentsOnFailure
+  );
 }
 
 bool Serialization::readThreeByteInt(
-  const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
+  const List<unsigned char>& input,
+  int& inputOutputOffset,
+  int& result,
+  std::stringstream* commentsOnFailure
 ) {
-  return Serialization::readNByteInt(3, input, inputOutputOffset, result, commentsOnFailure);
+  return
+  Serialization::readNByteInt(
+    3, input, inputOutputOffset, result, commentsOnFailure
+  );
 }
 
 bool Serialization::readFourByteInt(
-  const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
+  const List<unsigned char>& input,
+  int& inputOutputOffset,
+  int& result,
+  std::stringstream* commentsOnFailure
 ) {
-  return Serialization::readNByteInt(4, input, inputOutputOffset, result, commentsOnFailure);
+  return
+  Serialization::readNByteInt(
+    4, input, inputOutputOffset, result, commentsOnFailure
+  );
 }
 
 bool Serialization::readNByteInt(
@@ -1151,13 +1429,20 @@ bool Serialization::readNByteInt(
   std::stringstream* commentsOnFailure
 ) {
   if (numBytes > 4) {
-    global.fatal << "Not allowed to read more than 4 bytes into an integer. " << global.fatal;
+    global.fatal
+    << "Not allowed to read more than 4 bytes into an integer. "
+    << global.fatal;
   }
   if (numBytes + inputOutputOffset > input.size) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "At least " << numBytes
-      << " bytes required to read integer. Input has: " << input.size
-      << " bytes and offset is: " << inputOutputOffset << ". ";
+      *commentsOnFailure
+      << "At least "
+      << numBytes
+      << " bytes required to read integer. Input has: "
+      << input.size
+      << " bytes and offset is: "
+      << inputOutputOffset
+      << ". ";
     }
     return false;
   }
@@ -1185,9 +1470,14 @@ bool Serialization::readBytesFixedLength(
   }
   if (inputOutputOffset + desiredNumberOfBytes >= input.size) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Failed to read " << desiredNumberOfBytes
-      << " bytes at offset: " << inputOutputOffset
-      << ": this would exceed the input buffer size: " << input.size << ". ";
+      *commentsOnError
+      << "Failed to read "
+      << desiredNumberOfBytes
+      << " bytes at offset: "
+      << inputOutputOffset
+      << ": this would exceed the input buffer size: "
+      << input.size
+      << ". ";
     }
     return false;
   }
@@ -1206,7 +1496,8 @@ bool Serialization::readOneByteLengthFollowedByBytes(
   List<unsigned char>* output,
   std::stringstream* commentsOnError
 ) {
-  return Serialization::readNByteLengthFollowedByBytes(
+  return
+  Serialization::readNByteLengthFollowedByBytes(
     1, input, outputOffset, resultLength, output, commentsOnError
   );
 }
@@ -1218,7 +1509,8 @@ bool Serialization::readTwoByteLengthFollowedByBytes(
   List<unsigned char>* output,
   std::stringstream* commentsOnError
 ) {
-  return Serialization::readNByteLengthFollowedByBytes(
+  return
+  Serialization::readNByteLengthFollowedByBytes(
     2, input, outputOffset, resultLength, output, commentsOnError
   );
 }
@@ -1231,7 +1523,8 @@ bool Serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
   std::stringstream* commentsOnError
 ) {
   int outputOffset = offset;
-  return Serialization::readNByteLengthFollowedByBytes(
+  return
+  Serialization::readNByteLengthFollowedByBytes(
     2, input, outputOffset, resultLength, output, commentsOnError
   );
 }
@@ -1248,14 +1541,17 @@ bool Serialization::readNByteLengthFollowedByBytes(
   if (resultLength == nullptr) {
     resultLength = &temp;
   }
-  if (!Serialization::readNByteInt(
-    numBytesLength, input, outputOffset, *resultLength, commentsOnError
-  )) {
+  if (
+    !Serialization::readNByteInt(
+      numBytesLength, input, outputOffset, *resultLength, commentsOnError
+    )
+  ) {
     return false;
   }
   if (*resultLength + outputOffset > input.size) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Indicated byte sequence length exceeds input size. ";
+      *commentsOnError << "Indicated byte sequence length exceeds input size. "
+      ;
     }
     return false;
   }
@@ -1270,19 +1566,23 @@ bool Serialization::readNByteLengthFollowedByBytes(
 }
 
 void Serialization::writeTwoByteInt(
-  int input,
-  List<unsigned char>& output
+  int input, List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::writeNByteUnsigned(2, static_cast<unsigned>(input), output, inputOutputOffset);
+  return
+  Serialization::writeNByteUnsigned(
+    2, static_cast<unsigned>(input), output, inputOutputOffset
+  );
 }
 
 void Serialization::writeThreeByteInt(
-  int input,
-  List<unsigned char>& output
+  int input, List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::writeNByteUnsigned(3, static_cast<unsigned>(input), output, inputOutputOffset);
+  return
+  Serialization::writeNByteUnsigned(
+    3, static_cast<unsigned>(input), output, inputOutputOffset
+  );
 }
 
 void Serialization::writeTwoByteUnsignedAnnotated(
@@ -1292,33 +1592,35 @@ void Serialization::writeTwoByteUnsignedAnnotated(
   const std::string& label
 ) {
   if (annotations != nullptr) {
-    annotations->addOnTop(Serialization::Marker(output.size, 2, label));
+    annotations->addOnTop(
+      Serialization::Marker(output.size, 2, label)
+    );
   }
   Serialization::writeTwoByteUnsigned(input, output);
 }
 
 void Serialization::writeTwoByteUnsigned(
-  unsigned int input,
-  List<unsigned char>& output
+  unsigned int input, List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::writeNByteUnsigned(2, input, output, inputOutputOffset);
+  return
+  Serialization::writeNByteUnsigned(2, input, output, inputOutputOffset);
 }
 
 void Serialization::writeThreeByteUnsigned(
-  unsigned int input,
-  List<unsigned char>& output
+  unsigned int input, List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::writeNByteUnsigned(3, input, output, inputOutputOffset);
+  return
+  Serialization::writeNByteUnsigned(3, input, output, inputOutputOffset);
 }
 
 void Serialization::writeFourByteUnsigned(
-  unsigned int input,
-  List<unsigned char>& output
+  unsigned int input, List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::writeNByteUnsigned(4, input, output, inputOutputOffset);
+  return
+  Serialization::writeNByteUnsigned(4, input, output, inputOutputOffset);
 }
 
 void Serialization::writeNByteUnsigned(
@@ -1328,17 +1630,25 @@ void Serialization::writeNByteUnsigned(
   int& inputOutputOffset
 ) {
   if (byteCountOfLength < 0 || byteCountOfLength > 4) {
-    global.fatal << "Invalid byteCountOfLength: " << byteCountOfLength << global.fatal;
+    global.fatal
+    << "Invalid byteCountOfLength: "
+    << byteCountOfLength
+    << global.fatal;
   }
   if (inputOutputOffset + byteCountOfLength > output.size) {
     output.setSize(inputOutputOffset + byteCountOfLength);
   }
-  for (int i = byteCountOfLength - 1 + inputOutputOffset; i >= inputOutputOffset; i --) {
+  for (
+    int i = byteCountOfLength - 1 + inputOutputOffset; i >= inputOutputOffset;
+    i --
+  ) {
     output[i] = static_cast<unsigned char>(input % 256);
     input /= 256;
   }
   if (input > 0) {
-    global.fatal << "Input has more significant digits than the number of bytes allow. " << global.fatal;
+    global.fatal
+    << "Input has more significant digits than the number of bytes allow. "
+    << global.fatal;
   }
   inputOutputOffset += byteCountOfLength;
 }
@@ -1365,11 +1675,15 @@ void Serialization::writeTwoByteLengthFollowedByBytes(
   );
 }
 
-std::string Serialization::convertListUnsignedCharsToHex(const List<unsigned char>& input) {
+std::string Serialization::convertListUnsignedCharsToHex(
+  const List<unsigned char>& input
+) {
   return Crypto::convertListUnsignedCharsToHexFormat(input, 0, false);
 }
 
-std::string Serialization::convertListUnsignedCharsToString(const List<unsigned char>& input) {
+std::string Serialization::convertListUnsignedCharsToString(
+  const List<unsigned char>& input
+) {
   std::string result;
   result.resize(static_cast<unsigned>(input.size));
   for (unsigned i = 0; i < result.size(); i ++) {
@@ -1385,7 +1699,9 @@ void Serialization::writeBytesAnnotated(
   const std::string& label
 ) {
   if (annotations != nullptr) {
-    annotations->addOnTop(Serialization::Marker(output.size, input.size, label));
+    annotations->addOnTop(
+      Serialization::Marker(output.size, input.size, label)
+    );
   }
   output.addListOnTop(input);
 }
@@ -1398,7 +1714,11 @@ void Serialization::writeNByteLengthFollowedByBytes(
   const std::string& label
 ) {
   Serialization::WriterIntegerWithMarker writer(
-    byteCountOfLength, static_cast<unsigned>(input.size), output, annotations, label
+    byteCountOfLength,
+    static_cast<unsigned>(input.size),
+    output,
+    annotations,
+    label
   );
   output.addListOnTop(input);
 }
@@ -1425,10 +1745,16 @@ std::string Serialization::JSLabels::length = "length";
 std::string Serialization::JSLabels::offset = "offset";
 std::string Serialization::JSLabels::label = "label";
 std::string Serialization::JSLabels::serialization = "serialization";
-
 std::string Serialization::Marker::toString() const {
   std::stringstream out;
-  out << "[" << this->offset << ", " << this->length << ", '" << this->label << "']";
+  out
+  << "["
+  << this->offset
+  << ", "
+  << this->length
+  << ", '"
+  << this->label
+  << "']";
   return out.str();
 }
 
@@ -1455,7 +1781,6 @@ std::string SSLRecord::toHtml(int id) {
 std::string SSLRecord::JSLabels::type = "type";
 std::string SSLRecord::JSLabels::content = "content";
 std::string SSLRecord::JSLabels::session = "session";
-
 JSData SSLRecord::toJSON() {
   MacroRegisterFunctionWithName("SSLRecord::toJSON");
   JSData result;
@@ -1475,10 +1800,11 @@ std::string TransportLayerSecurityServer::Session::toStringChosenCipher() {
 
 std::string SignatureAlgorithmSpecification::JSLabels::hash = "hash";
 std::string SignatureAlgorithmSpecification::JSLabels::hashName = "hashName";
-std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm = "signatureAlgorithm";
-std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName = "signatureAlgorithmName";
+std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm =
+"signatureAlgorithm";
+std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName =
+"signatureAlgorithmName";
 std::string SignatureAlgorithmSpecification::JSLabels::valueHex = "valueHex";
-
 std::string SignatureAlgorithmSpecification::getSignatureAlgorithmName() {
   switch (this->signatureAlgorithm) {
   case SignatureAlgorithmSpecification::SignatureAlgorithm::anonymous:
@@ -1520,38 +1846,78 @@ std::string SignatureAlgorithmSpecification::toHex() {
 JSData SignatureAlgorithmSpecification::toJSON() {
   JSData result;
   result[SignatureAlgorithmSpecification::JSLabels::valueHex] = this->toHex();
-  result[SignatureAlgorithmSpecification::JSLabels::hash] = static_cast<int>(this->hash);
-  result[SignatureAlgorithmSpecification::JSLabels::hashName] = this->getHashName();
-  result[SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm] = static_cast<int>(this->signatureAlgorithm);
-  result[SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName] = this->getSignatureAlgorithmName();
+  result[SignatureAlgorithmSpecification::JSLabels::hash] = static_cast<int>(
+    this->hash
+  );
+  result[SignatureAlgorithmSpecification::JSLabels::hashName] =
+  this->getHashName();
+  result[SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm] =
+  static_cast<int>(this->signatureAlgorithm);
+  result[SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName] =
+  this->getSignatureAlgorithmName();
   return result;
 }
 
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher                      = "chosenCipher"                     ;
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName                  = "chosenCipherName"                 ;
-std::string TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes               = "incomingRandomBytes"              ;
-std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                     = "myRandomBytes"                    ;
-std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                       = "OnlineCertificateStatusProtocol"  ;
-std::string TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest = "RequestSignedCertificateTimestamp";
-std::string TransportLayerSecurityServer::Session::JSLabels::cipherSuites                      = "cipherSuites"                     ;
-std::string TransportLayerSecurityServer::Session::JSLabels::serverName                        = "serverName"                       ;
-std::string TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications           = "algorithmSpecifications"          ;
-std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId                   = "ellipticCurveId"                  ;
-std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName                 = "ellipticCurveName"                ;
-std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign                       = "bytesToSign"                      ;
-
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher =
+"chosenCipher";
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName =
+"chosenCipherName";
+std::string TransportLayerSecurityServer::Session::JSLabels::
+incomingRandomBytes =
+"incomingRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes =
+"myRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest =
+"OnlineCertificateStatusProtocol";
+std::string TransportLayerSecurityServer::Session::JSLabels::
+signedCertificateTimestampRequest =
+"RequestSignedCertificateTimestamp";
+std::string TransportLayerSecurityServer::Session::JSLabels::cipherSuites =
+"cipherSuites";
+std::string TransportLayerSecurityServer::Session::JSLabels::serverName =
+"serverName";
+std::string TransportLayerSecurityServer::Session::JSLabels::
+algorithmSpecifications =
+"algorithmSpecifications";
+std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId =
+"ellipticCurveId";
+std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName
+=
+"ellipticCurveName";
+std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign =
+"bytesToSign";
 JSData TransportLayerSecurityServer::Session::toJSON() {
   JSData result;
   result.elementType = JSData::token::tokenArray;
-  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher                     ] = Crypto::convertIntToHex(this->chosenCipher, 2);
-  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipherName                 ] = this->toStringChosenCipher();
-  result[TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes              ] = Crypto::convertListUnsignedCharsToHex(this->incomingRandomBytes);
-  result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                    ] = Crypto::convertListUnsignedCharsToHex(this->myRandomBytes);
-  result[TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                      ] = this->flagRequestOnlineCertificateStatusProtocol;
-  result[TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest] = this->flagRequestSignedCertificateTimestamp;
-  result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId                  ] = static_cast<int>(this->chosenEllipticCurve);
-  result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName                ] = this->chosenEllipticCurveName;
-  result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign                      ] = Crypto::convertListUnsignedCharsToHex(this->bytesToSign);
+  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher] =
+  Crypto::convertIntToHex(this->chosenCipher, 2);
+  result[
+    TransportLayerSecurityServer::Session::JSLabels::chosenCipherName
+  ] =
+  this->toStringChosenCipher();
+  result[
+    TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes
+  ] =
+  Crypto::convertListUnsignedCharsToHex(this->incomingRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes] =
+  Crypto::convertListUnsignedCharsToHex(this->myRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::OCSPrequest] =
+  this->flagRequestOnlineCertificateStatusProtocol;
+  result[
+    TransportLayerSecurityServer::Session::JSLabels::
+    signedCertificateTimestampRequest
+  ] =
+  this->flagRequestSignedCertificateTimestamp;
+  result[
+    TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId
+  ] =
+  static_cast<int>(this->chosenEllipticCurve);
+  result[
+    TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName
+  ] =
+  this->chosenEllipticCurveName;
+  result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign] =
+  Crypto::convertListUnsignedCharsToHex(this->bytesToSign);
   JSData ciphers;
   ciphers.elementType = JSData::token::tokenObject;
   ciphers.listObjects.setSize(this->incomingCiphers.size);
@@ -1562,16 +1928,19 @@ JSData TransportLayerSecurityServer::Session::toJSON() {
   JSData algorithmSpecifications;
   algorithmSpecifications.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->incomingAlgorithmSpecifications.size; i ++) {
-    algorithmSpecifications.listObjects.addOnTop(this->incomingAlgorithmSpecifications[i].toJSON());
-  }
-  result[TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications] = algorithmSpecifications;
-  result[TransportLayerSecurityServer::Session::JSLabels::cipherSuites] = ciphers;
-  if (this->serverName.size > 0) {
-    result[
-      TransportLayerSecurityServer::Session::JSLabels::serverName
-    ] = Crypto::convertListUnsignedCharsToHex(
-      this->serverName
+    algorithmSpecifications.listObjects.addOnTop(
+      this->incomingAlgorithmSpecifications[i].toJSON()
     );
+  }
+  result[
+    TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications
+  ] =
+  algorithmSpecifications;
+  result[TransportLayerSecurityServer::Session::JSLabels::cipherSuites] =
+  ciphers;
+  if (this->serverName.size > 0) {
+    result[TransportLayerSecurityServer::Session::JSLabels::serverName] =
+    Crypto::convertListUnsignedCharsToHex(this->serverName);
   }
   return result;
 }
@@ -1588,7 +1957,8 @@ JSData SSLRecord::toJSONSerialization() {
     jsMarkers.listObjects.addOnTop(markers[i].toJSON());
   }
   result[Serialization::JSLabels::markers] = jsMarkers;
-  result[Serialization::JSLabels::body] = Crypto::convertListUnsignedCharsToHex(serialization);
+  result[Serialization::JSLabels::body] =
+  Crypto::convertListUnsignedCharsToHex(serialization);
   return result;
 }
 
@@ -1615,89 +1985,122 @@ std::string SSLRecord::toStringType() const {
 std::string SSLRecord::toString() const {
   JSData result;
   result["length"] = this->length;
-  result["incomingBytes"] = Crypto::convertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
+  result["incomingBytes"] =
+  Crypto::convertListUnsignedCharsToHexFormat(
+    this->incomingBytes, 50, false
+  );
   result["type"] = this->toStringType();
   if (this->recordType == SSLRecord::tokens::handshake) {
     result["hello"] = this->content.toJSON();
   }
   std::string hexVersion;
   Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
-    LargeIntegerUnsigned(static_cast<unsigned>(this->version)), 0, hexVersion
+    LargeIntegerUnsigned(static_cast<unsigned>(this->version)),
+    0,
+    hexVersion
   );
   result["version"] = hexVersion;
   return result.toString();
 }
 
-bool SSLRecord::decode(std::stringstream *commentsOnFailure) {
+bool SSLRecord::decode(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLRecord::decode");
   this->checkInitialization();
   if (this->incomingBytes.size < 5 + this->offsetDecoded) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: "
-      << this->incomingBytes.size << ". ";
+      *commentsOnFailure
+      << "SSL record needs to have at least 5 bytes, yours has: "
+      << this->incomingBytes.size
+      << ". ";
     }
     return false;
   }
   this->recordType = this->incomingBytes[this->offsetDecoded];
   this->offsetDecoded ++;
   if (
-    this->recordType != SSLRecord::tokens::handshake
-  //&&
-//    this->recordType != SSLRecord::tokens::alert &&
-//    this->recordType != SSLRecord::tokens::applicationData &&
-//    this->recordType != SSLRecord::tokens::changeCipherSpec
+    this->recordType !=
+    SSLRecord::tokens::handshake// &&
+    //    this->recordType != SSLRecord::tokens::alert &&
+    //    this->recordType != SSLRecord::tokens::applicationData &&
+    //    this->recordType != SSLRecord::tokens::changeCipherSpec
   ) {
     this->recordType = SSLRecord::tokens::unknown;
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Unknown record type: "
-      << static_cast<int>(this->incomingBytes[this->offsetDecoded]) << ". ";
+      *commentsOnFailure << "Unknown record type: " << static_cast<int>(
+        this->incomingBytes[this->offsetDecoded]
+      )
+      << ". ";
     }
     return false;
   }
-  if (!Serialization::readTwoByteInt(
-    this->incomingBytes, this->offsetDecoded, this->version, commentsOnFailure
-  )) {
+  if (
+    !Serialization::readTwoByteInt(
+      this->incomingBytes,
+      this->offsetDecoded,
+      this->version,
+      commentsOnFailure
+    )
+  ) {
     return false;
   }
-  if (!Serialization::readTwoByteInt(
-    this->incomingBytes, this->offsetDecoded, this->length, commentsOnFailure
-  )) {
+  if (
+    !Serialization::readTwoByteInt(
+      this->incomingBytes,
+      this->offsetDecoded,
+      this->length,
+      commentsOnFailure
+    )
+  ) {
     return false;
   }
   int highEnd = this->length + this->offsetDecoded;
   if (highEnd > this->incomingBytes.size) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Insufficient record length: expected: 5 + " << this->length
-      << ", got: " << this->incomingBytes.size - this->offsetDecoded;
+      *commentsOnFailure
+      << "Insufficient record length: expected: 5 + "
+      << this->length
+      << ", got: "
+      << this->incomingBytes.size - this->offsetDecoded;
     }
     return false;
   }
   return this->decodeBody(commentsOnFailure);
 }
 
-bool SSLRecord::decodeBody(std::stringstream *commentsOnFailure) {
+bool SSLRecord::decodeBody(std::stringstream* commentsOnFailure) {
   switch (this->recordType) {
-    case SSLRecord::tokens::handshake:
-      return this->content.decode(commentsOnFailure);
-    default:
-      break;
+  case SSLRecord::tokens::handshake:
+    return this->content.decode(commentsOnFailure);
+  default:
+    break;
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Unrecognized ssl record type: " << static_cast<int>(this->recordType) << ". ";
+    *commentsOnFailure << "Unrecognized ssl record type: " << static_cast<int>(
+      this->recordType
+    )
+    << ". ";
   }
   return false;
 }
 
-bool TransportLayerSecurityServer::decodeSSLRecord(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityServer::decodeSSLRecord");
+bool TransportLayerSecurityServer::decodeSSLRecord(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName(
+    "TransportLayerSecurityServer::decodeSSLRecord"
+  );
   if (!this->lastReaD.decode(commentsOnFailure)) {
     return false;
   }
   return true;
 }
 
-bool TransportLayerSecurityServer::readBytesDecodeOnce(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityServer::readBytesDecodeOnce");
+bool TransportLayerSecurityServer::readBytesDecodeOnce(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName(
+    "TransportLayerSecurityServer::readBytesDecodeOnce"
+  );
   if (!this->readBytesOnce(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read bytes. ";
@@ -1726,7 +2129,9 @@ std::string CipherSuiteSpecification::toString() const {
   std::stringstream out;
   std::string hexVersion;
   Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
-    LargeIntegerUnsigned(static_cast<unsigned>(this->id)), 0, hexVersion
+    LargeIntegerUnsigned(static_cast<unsigned>(this->id)),
+    0,
+    hexVersion
   );
   out << hexVersion << "[" << this->name << "]";
   return out.str();
@@ -1740,11 +2145,18 @@ void SSLContent::prepareServerHello2Certificate() {
   this->contentType = SSLContent::tokens::certificate;
 }
 
-bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(std::stringstream* commentsOnError) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityServer::Session::computeAndSignEphemerealKey");
+bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(
+  std::stringstream* commentsOnError
+) {
+  MacroRegisterFunctionWithName(
+    "TransportLayerSecurityServer::Session::computeAndSignEphemerealKey"
+  );
   (void) commentsOnError;
-  Crypto::Random::getRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
-  this->chosenEllipticCurve = CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
+  Crypto::Random::getRandomLargeIntegerSecure(
+    this->ephemerealPrivateKey, 32
+  );
+  this->chosenEllipticCurve =
+  CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
   this->chosenEllipticCurveName = "secp256k1";
   this->bytesToSign.setSize(0);
   this->bytesToSign.addListOnTop(this->incomingRandomBytes);
@@ -1760,24 +2172,33 @@ bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(std::str
 }
 
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
-bool SSLContent::prepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError) {
-  MacroRegisterFunctionWithName("SSLContent::PrepareServerHello3SecretNegotiation");
+bool SSLContent::prepareServerHello3ServerKeyExchange(
+  std::stringstream* commentsOnError
+) {
+  MacroRegisterFunctionWithName(
+    "SSLContent::PrepareServerHello3SecretNegotiation"
+  );
   this->contentType = SSLContent::tokens::serverKeyExchange;
   if (this->owner->owner->session.ephemerealPrivateKey != 0) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Private key already generated for this session. "
+      *commentsOnError
+      << "Private key already generated for this session. "
       << "No further modifications allowed in this session. ";
     }
     return false;
   }
-  if (!this->owner->owner->session.computeAndSignEphemerealKey(commentsOnError)) {
+  if (
+    !this->owner->owner->session.computeAndSignEphemerealKey(commentsOnError)
+  ) {
     return false;
   }
   // this->owner->owner->session.ephemerealPublicKey.
   return true;
 }
 
-bool TransportLayerSecurityServer::Session::chooseCipher(std::stringstream* commentsOnFailure) {
+bool TransportLayerSecurityServer::Session::chooseCipher(
+  std::stringstream* commentsOnFailure
+) {
   (void) commentsOnFailure;
   MapList<int, CipherSuiteSpecification, HashFunctions::hashFunction>& suites =
   this->owner->supportedCiphers;
@@ -1824,9 +2245,7 @@ void SSLRecord::resetExceptOwner() {
   this->incomingBytes.setSize(0);
 }
 
-void SSLRecord::prepareServerHello1Start(
-  SSLRecord& clientHello
-) {
+void SSLRecord::prepareServerHello1Start(SSLRecord& clientHello) {
   this->resetExceptOwner();
   this->recordType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
@@ -1842,22 +2261,28 @@ void SSLRecord::prepareServerHello2Certificate() {
   this->owner->outgoingRecords.addOnTop(*this);
 }
 
-bool SSLRecord::prepareServerHello3SecretExchange(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("SSLRecord::prepareServerHello3SecretExchange");
+bool SSLRecord::prepareServerHello3SecretExchange(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("SSLRecord::prepareServerHello3SecretExchange")
+  ;
   if (this->owner->privateKey.publicKey.modulus.isEqualToZero()) {
-    if (!this->owner->privateKey.computeFromTwoPrimes(
-      this->owner->privateKey.primeOne,
-      this->owner->privateKey.primeTwo,
-      false,
-      commentsOnFailure
-    )) {
+    if (
+      !this->owner->privateKey.computeFromTwoPrimes(
+        this->owner->privateKey.primeOne,
+        this->owner->privateKey.primeTwo,
+        false,
+        commentsOnFailure
+      )
+    ) {
       global.fatal << "Failed to compute public key. " << global.fatal;
     }
   }
   this->resetExceptOwner();
   this->recordType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
-  bool success = this->content.prepareServerHello3ServerKeyExchange(commentsOnFailure);
+  bool success =
+  this->content.prepareServerHello3ServerKeyExchange(commentsOnFailure);
   this->owner->outgoingRecords.addOnTop(*this);
   return success;
 }
@@ -1870,11 +2295,14 @@ bool TransportLayerSecurityServer::replyToClientHello(
   this->outgoingRecords.setSize(0);
   this->serverHelloStart.prepareServerHello1Start(this->lastReaD);
   this->serverHelloCertificate.prepareServerHello2Certificate();
-  if (!this->serverHelloKeyExchange.prepareServerHello3SecretExchange(
-    commentsOnFailure
-  )) {
+  if (
+    !this->serverHelloKeyExchange.prepareServerHello3SecretExchange(
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to prepare server secret exchange message. ";
+      *commentsOnFailure
+      << "Failed to prepare server secret exchange message. ";
     }
     return false;
   }
@@ -1882,7 +2310,7 @@ bool TransportLayerSecurityServer::replyToClientHello(
   if (!this->writeSSLRecords(this->outgoingRecords, commentsOnFailure)) {
     global << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure  << "Error replying to client hello. ";
+      *commentsOnFailure << "Error replying to client hello. ";
     }
     return false;
   }
@@ -1933,14 +2361,19 @@ void TransportLayerSecurityServer::Session::initialize() {
 bool TransportLayerSecurityServer::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityServer::handShakeIamServer");
+  MacroRegisterFunctionWithName(
+    "TransportLayerSecurityServer::handShakeIamServer"
+  );
   this->session.initialize();
   this->session.socketId = inputSocketID;
   bool success = this->readBytesDecodeOnce(commentsOnFailure);
-  if (this->spoofer.flagDoSpoof && this->spoofer.currentInputMessageIndex > 0) {
+  if (
+    this->spoofer.flagDoSpoof && this->spoofer.currentInputMessageIndex > 0
+  ) {
     this->spoofer.incomingMessages[
       this->spoofer.currentInputMessageIndex - 1
-    ] = this->lastReaD;
+    ] =
+    this->lastReaD;
   }
   if (!success) {
     global << Logger::red << commentsOnFailure->str() << Logger::endL;
@@ -1949,7 +2382,10 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     }
     return false;
   }
-  success = TransportLayerSecurityServer::replyToClientHello(inputSocketID, commentsOnFailure);
+  success =
+  TransportLayerSecurityServer::replyToClientHello(
+    inputSocketID, commentsOnFailure
+  );
   if (!success) {
     global << Logger::red << commentsOnFailure->str() << Logger::endL;
     if (this->spoofer.flagDoSpoof) {
@@ -1957,13 +2393,17 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     }
     return false;
   }
-  //global.fatal << "Handshake i am server not implemented yet. " << global.fatal;
+  // global.fatal << "Handshake i am server not implemented yet. " <<
+  // global.fatal;
   return false;
 }
 
-bool TransportLayerSecurity::handShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
+bool TransportLayerSecurity::handShakeIamServer(
+  int inputSocketID, std::stringstream* commentsOnFailure
+) {
   if (!this->flagUseBuiltInTlS) {
-    return this->openSSLData.handShakeIamServer(inputSocketID, commentsOnFailure);
+    return
+    this->openSSLData.handShakeIamServer(inputSocketID, commentsOnFailure);
   }
   return this->server.handShakeIamServer(inputSocketID, commentsOnFailure);
 }
@@ -1973,11 +2413,15 @@ bool TransportLayerSecurity::handShakeIAmClientNoSocketCleanup(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("WebServer::handShakeIAmClientNoSocketCleanup");
+  MacroRegisterFunctionWithName("WebServer::handShakeIAmClientNoSocketCleanup")
+  ;
   this->openSSLData.checkCanInitializeToClient();
   this->initializeNonThreadSafeOnFirstCall(false);
   this->openSSLData.checkCanInitializeToClient();
-  return this->openSSLData.handShakeIAmClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);
+  return
+  this->openSSLData.handShakeIAmClientNoSocketCleanup(
+    inputSocketID, commentsOnFailure, commentsGeneral
+  );
 }
 
 int TransportLayerSecurity::readOnce(
@@ -1987,19 +2431,24 @@ int TransportLayerSecurity::readOnce(
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::readOnce");
-
-  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLAvailable;
+  bool useSSL = global.flagUsingSSLinCurrentConnection &&
+  global.flagSSLAvailable;
   this->readBuffer.setSize(this->readBufferStandardSize);
   int result = - 1;
-
   if (useSSL) {
-    result = this->openSSLData.sslRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
+    result =
+    this->openSSLData.sslRead(
+      readBuffer, outputError, commentsGeneral, includeNoErrorInComments
+    );
   } else {
-    result = static_cast<int>(recv(
-      socket,
-      this->readBuffer.objects,
-      static_cast<size_t>(readBuffer.size - 1), 0
-    ));
+    result = static_cast<int>(
+      recv(
+        socket,
+        this->readBuffer.objects,
+        static_cast<size_t>(readBuffer.size - 1),
+        0
+      )
+    );
   }
   return result;
 }
@@ -2012,9 +2461,11 @@ int TransportLayerSecurity::writeOnce(
   std::stringstream* commentsOnError,
   bool includeNoErrorInComments
 ) {
-  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLAvailable;
+  bool useSSL = global.flagUsingSSLinCurrentConnection &&
+  global.flagSSLAvailable;
   if (useSSL) {
-    return this->openSSLData.sslWrite(
+    return
+    this->openSSLData.sslWrite(
       writeBuffer,
       outputError,
       commentsGeneral,
@@ -2028,11 +2479,15 @@ int TransportLayerSecurity::writeOnce(
       }
       return - 1;
     }
-    return static_cast<int>(send(
-      socket,
-      &writeBuffer[0],
-      static_cast<unsigned>(writeBuffer.size),
-      0
-    ));
+    return
+    static_cast<int>(
+      send(
+        socket,
+        &writeBuffer[0],
+        static_cast<unsigned>(writeBuffer.size),
+        0
+      )
+    );
   }
 }
+

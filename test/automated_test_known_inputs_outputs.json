@@ -1464,8 +1464,8 @@
     "output":"(\\begin{pmatrix}1\\\\ \n2 \\end{pmatrix};\\begin{pmatrix}1\\\\ \n2 \\end{pmatrix})"
   },
   {
-    "input":"X =FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=1/(a +b);\n X; \\det {} X",
-    "output":"(X=\\begin{pmatrix}A{}\\left(1, 1\\right) & A{}\\left(1, 2\\right) & A{}\\left(1, 3\\right) & A{}\\left(1, 4\\right) & A{}\\left(1, 5\\right)\\\\ \nA{}\\left(2, 1\\right) & A{}\\left(2, 2\\right) & A{}\\left(2, 3\\right) & A{}\\left(2, 4\\right) & A{}\\left(2, 5\\right)\\\\ \nA{}\\left(3, 1\\right) & A{}\\left(3, 2\\right) & A{}\\left(3, 3\\right) & A{}\\left(3, 4\\right) & A{}\\left(3, 5\\right)\\\\ \nA{}\\left(4, 1\\right) & A{}\\left(4, 2\\right) & A{}\\left(4, 3\\right) & A{}\\left(4, 4\\right) & A{}\\left(4, 5\\right)\\\\ \nA{}\\left(5, 1\\right) & A{}\\left(5, 2\\right) & A{}\\left(5, 3\\right) & A{}\\left(5, 4\\right) & A{}\\left(5, 5\\right) \\end{pmatrix};A{}\\left({{a}}, {{b}}\\right)=\\frac{1}{{{b}}+{{a}}};\\begin{pmatrix}\\frac{1}{2} & \\frac{1}{3} & \\frac{1}{4} & \\frac{1}{5} & \\frac{1}{6}\\\\ \n\\frac{1}{3} & \\frac{1}{4} & \\frac{1}{5} & \\frac{1}{6} & \\frac{1}{7}\\\\ \n\\frac{1}{4} & \\frac{1}{5} & \\frac{1}{6} & \\frac{1}{7} & \\frac{1}{8}\\\\ \n\\frac{1}{5} & \\frac{1}{6} & \\frac{1}{7} & \\frac{1}{8} & \\frac{1}{9}\\\\ \n\\frac{1}{6} & \\frac{1}{7} & \\frac{1}{8} & \\frac{1}{9} & \\frac{1}{10} \\end{pmatrix};\\frac{1}{67212633600000})"
+    "input":"X =FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=1/(a +b);\nX;\n\\det {} X;\nf{}({{a}}, {{b}}) = x_{10a+b};\nA=FunctionToMatrix(f, 3,3);\n\\det A",
+    "output":"(X=\\begin{pmatrix}A{}\\left(1, 1\\right) & A{}\\left(1, 2\\right) & A{}\\left(1, 3\\right) & A{}\\left(1, 4\\right) & A{}\\left(1, 5\\right)\\\\ \nA{}\\left(2, 1\\right) & A{}\\left(2, 2\\right) & A{}\\left(2, 3\\right) & A{}\\left(2, 4\\right) & A{}\\left(2, 5\\right)\\\\ \nA{}\\left(3, 1\\right) & A{}\\left(3, 2\\right) & A{}\\left(3, 3\\right) & A{}\\left(3, 4\\right) & A{}\\left(3, 5\\right)\\\\ \nA{}\\left(4, 1\\right) & A{}\\left(4, 2\\right) & A{}\\left(4, 3\\right) & A{}\\left(4, 4\\right) & A{}\\left(4, 5\\right)\\\\ \nA{}\\left(5, 1\\right) & A{}\\left(5, 2\\right) & A{}\\left(5, 3\\right) & A{}\\left(5, 4\\right) & A{}\\left(5, 5\\right) \\end{pmatrix};A{}\\left({{a}}, {{b}}\\right)=\\frac{1}{{{b}}+{{a}}};\\begin{pmatrix}\\frac{1}{2} & \\frac{1}{3} & \\frac{1}{4} & \\frac{1}{5} & \\frac{1}{6}\\\\ \n\\frac{1}{3} & \\frac{1}{4} & \\frac{1}{5} & \\frac{1}{6} & \\frac{1}{7}\\\\ \n\\frac{1}{4} & \\frac{1}{5} & \\frac{1}{6} & \\frac{1}{7} & \\frac{1}{8}\\\\ \n\\frac{1}{5} & \\frac{1}{6} & \\frac{1}{7} & \\frac{1}{8} & \\frac{1}{9}\\\\ \n\\frac{1}{6} & \\frac{1}{7} & \\frac{1}{8} & \\frac{1}{9} & \\frac{1}{10} \\end{pmatrix};\\frac{1}{67212633600000};f{}\\left({{a}}, {{b}}\\right)={x}_{{{b}}+10 {{a}}};A=\\begin{pmatrix}{x}_{11} & {x}_{12} & {x}_{13}\\\\ \n{x}_{21} & {x}_{22} & {x}_{23}\\\\ \n{x}_{31} & {x}_{32} & {x}_{33} \\end{pmatrix};MakeRationalFunction{}({x}_{11} {x}_{22} {x}_{33} -{x}_{11} {x}_{23} {x}_{32} -{x}_{12} {x}_{21} {x}_{33} +{x}_{12} {x}_{23} {x}_{31} +{x}_{13} {x}_{21} {x}_{32} -{x}_{13} {x}_{22} {x}_{31} ))"
   },
   {
     "input":"DeterminantPolynomial{}\\left( \\begin{array}{ccc}x_{11} & x_{12} & x_{13} \\\\ x_{21} & x_{22} & x_{23} \\\\ x_{31} & x_{32} & x_{33} \\end{array} \\right) ",
@@ -2237,7 +2237,7 @@
   },
   {
     "input":"LispifyFull(e^x)",
-    "output":"\"(20 , 103 , 481 )\""
+    "output":"\"(20 , 103 , 482 )\""
   },
   {
     "input":"TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\nTestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",

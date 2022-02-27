@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
@@ -14,11 +15,13 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
   List<MonomialPolynomial>::Comparator& order
 ) {
   if (!order.leftGreaterThanRight(mustBeLarger, mustBeSmaller)) {
-    global.fatal << "Monomial: "
+    global.fatal
+    << "Monomial: "
     << mustBeLarger.toString()
     << " is not larger than "
     << mustBeSmaller.toString()
-    << " when using monomial: " << order.name
+    << " when using monomial: "
+    << order.name
     << global.fatal;
   }
   return true;
@@ -38,22 +41,29 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
   allOrders.lastObject()->name = "lexicographic";
   allOrders.addOnTop(MonomialPolynomial::greaterThan_rightLargerWins);
   allOrders.lastObject()->name = "lexicographic opposite";
-  allOrders.addOnTop(MonomialPolynomial::greaterThan_totalDegree_leftLargerWins);
+  allOrders.addOnTop(
+    MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
+  );
   allOrders.lastObject()->name = "graded lexicographic";
-  allOrders.addOnTop(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
+  allOrders.addOnTop(
+    MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
+  );
   allOrders.lastObject()->name = "graded reverse lexicographic";
-  List<List<MonomialPolynomial> > elementsIncreasingOrder ({
-    {one, xOne, xOneSquared},
-    {one, xTwo, xTwoSquared},
-    {one, xOne, xOneXtwo},
-    {one, xTwo, xOneXtwo}
-  });
+  List<List<MonomialPolynomial> > elementsIncreasingOrder({
+      {one, xOne, xOneSquared},
+      {one, xTwo, xTwoSquared},
+      {one, xOne, xOneXtwo},
+      {one, xTwo, xOneXtwo}
+    }
+  );
   for (int i = 0; i < allOrders.size; i ++) {
     for (int j = 0; j < elementsIncreasingOrder.size; j ++) {
       for (int k = 0; k < elementsIncreasingOrder[i].size; k ++) {
         for (int l = k + 1; l < elementsIncreasingOrder[i].size; l ++) {
           MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
-            elementsIncreasingOrder[j][k], elementsIncreasingOrder[j][l], allOrders[i]
+            elementsIncreasingOrder[j][k],
+            elementsIncreasingOrder[j][l],
+            allOrders[i]
           );
         }
       }
@@ -62,39 +72,44 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
   return true;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::oneFactorizationKronecker(
   const std::string& input, const std::string& expectedFactors
 ) {
-  Polynomial<Rational> toBeFactored =
-  Polynomial<Rational>::Test::fromString(input);
+  Polynomial<Rational> toBeFactored = Polynomial<Rational>::Test::fromString(
+    input
+  );
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationKronecker algorithm;
-  bool success = factorization.factor(
-    toBeFactored,
-    algorithm,
-    nullptr,
-    nullptr
-  );
+  bool success =
+  factorization.factor(toBeFactored, algorithm, nullptr, nullptr);
   if (!success) {
-    global.fatal << "Factorization of "
-    << toBeFactored.toString(&this->format) << " failed. " << global.fatal;
+    global.fatal
+    << "Factorization of "
+    << toBeFactored.toString(&this->format)
+    << " failed. "
+    << global.fatal;
   }
   std::string resultFactors = factorization.toStringResult(&this->format);
   if (resultFactors != expectedFactors) {
-    global.fatal << "While factoring: "
-    << input << "=" << toBeFactored.toString(&this->format)
-    << " got factors: " << resultFactors
-    << ", expected: " << expectedFactors << ". " << global.fatal;
+    global.fatal
+    << "While factoring: "
+    << input
+    << "="
+    << toBeFactored.toString(&this->format)
+    << " got factors: "
+    << resultFactors
+    << ", expected: "
+    << expectedFactors
+    << ". "
+    << global.fatal;
   }
   return true;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::factorizationKronecker() {
-  Polynomial<Rational>::Test::oneFactorizationKronecker(
-    "x+1", "(x +1)"
-  );
+  Polynomial<Rational>::Test::oneFactorizationKronecker("x+1", "(x +1)");
   Polynomial<Rational>::Test::oneFactorizationKronecker(
     "(2x+1)(-3x+1)", "-(2x +1)(3x -1)"
   );
@@ -118,21 +133,19 @@ bool Polynomial<Rational>::Test::factorizationKronecker() {
   return true;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::all() {
   Polynomial<Rational>::Test tester;
   tester.initialize();
-
   tester.fromStringTest();
   tester.fromStringCommonContextTest();
-
   tester.differential();
   tester.leastCommonMultiple();
   tester.factorizationKronecker();
   return true;
 }
 
-template <>
+template < >
 void Polynomial<Rational>::Test::initialize() {
   this->format.polynomialAlphabet.addOnTop("x");
   this->format.polynomialAlphabet.addOnTop("y");
@@ -140,13 +153,17 @@ void Polynomial<Rational>::Test::initialize() {
   this->format.flagUseHTML = false;
 }
 
-template <>
-Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& input) {
+template < >
+Polynomial<Rational> Polynomial<Rational>::Test::fromString(
+  const std::string& input
+) {
   Calculator parser;
   std::string inputModified = "Polynomial(" + input + ")";
   parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputModified);
-  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
+  if (
+    !parser.programExpression.startsWith(parser.opCommandSequence())
+  ) {
     global.fatal
     << "Polynomial::fromString parsed: "
     << parser.programExpression.toString()
@@ -155,7 +172,8 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& i
   }
   Polynomial<Rational> result;
   if (!parser.programExpression[1].isOfType(&result)) {
-    global.fatal << "RationalFunction::fromString did not "
+    global.fatal
+    << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
     << parser.programExpression.toString()
     << global.fatal;
@@ -163,25 +181,32 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& i
   return result;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::fromStringTest() {
   std::string expected = "y^{2}+x -y -1";
   std::string input = "x^2-1-x+b";
-  Polynomial<Rational> underTest = Polynomial<Rational>::Test::fromString(input);
+  Polynomial<Rational> underTest = Polynomial<Rational>::Test::fromString(
+    input
+  );
   std::string result = underTest.toString(&this->format);
   if (result != expected) {
-    global.fatal << "Polynomial from string: "
-    << "input: " << input
+    global.fatal
+    << "Polynomial from string: "
+    << "input: "
+    << input
     << ", result: "
     << result
-    << ", expected: " << expected
-    << "." << global.fatal;
+    << ", expected: "
+    << expected
+    << "."
+    << global.fatal;
   }
   return true;
 }
 
-template <>
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(
+template < >
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
+fromStringCommonContext(
   const std::string& first, const std::string& second
 ) {
   List<std::string> input;
@@ -190,10 +215,9 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
   return Polynomial<Rational>::Test::fromStringCommonContext(input);
 }
 
-template <>
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(
-  const List<std::string> & input
-) {
+template < >
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
+fromStringCommonContext(const List<std::string>& input) {
   Vector<Polynomial<Rational> > result;
   if (input.size == 0) {
     return result;
@@ -210,16 +234,20 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
   inputStream << ")";
   parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputStream.str());
-  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
+  if (
+    !parser.programExpression.startsWith(parser.opCommandSequence())
+  ) {
     global.fatal
     << "Polynomial::fromString parsed: "
     << parser.programExpression.toString()
     << " which was not expected. This function is not allowed to fail. "
     << global.fatal;
   }
-  if (!parser.getVector<Polynomial<Rational> >(
-    parser.programExpression[1], result
-  )) {
+  if (
+    !parser.getVector<Polynomial<Rational> >(
+      parser.programExpression[1], result
+    )
+  ) {
     global.fatal
     << "Extracting vector from polynomial not allowed to fail. "
     << global.fatal;
@@ -227,83 +255,107 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
   return result;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
   std::string expected = "x , y^{2}+y ";
   std::string inputFirst = "x";
   std::string inputSecond = "y^{2}+y";
-  List<Polynomial<Rational> > underTest = Polynomial<Rational>::Test::fromStringCommonContext(inputFirst, inputSecond);
+  List<Polynomial<Rational> > underTest =
+  Polynomial<Rational>::Test::fromStringCommonContext(inputFirst, inputSecond);
   std::string result = underTest.toStringCommaDelimited(&this->format);
   if (result != expected) {
-    global.fatal << "Polynomials with context from string: "
-    << "input: " << inputFirst << ", " << inputSecond
+    global.fatal
+    << "Polynomials with context from string: "
+    << "input: "
+    << inputFirst
+    << ", "
+    << inputSecond
     << ", result: "
     << result
-    << ", expected: " << expected
-    << "." << global.fatal;
+    << ", expected: "
+    << expected
+    << "."
+    << global.fatal;
   }
   return true;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   const std::string& left,
   const std::string& right,
   const std::string& expected
 ) {
-  List<Polynomial<Rational> > converted = Polynomial<Rational>::Test::fromStringCommonContext(left, right);
+  List<Polynomial<Rational> > converted =
+  Polynomial<Rational>::Test::fromStringCommonContext(left, right);
   Polynomial<Rational> output;
   Polynomial<Rational>::leastCommonMultiple(
     converted[0], converted[1], output, Rational::one(), nullptr
   );
   std::string outputString = output.toString(&this->format);
   if (outputString != expected) {
-    global.fatal << "Least common multiple of "
-    << left << ", " << right
-    << ", converted to:\n" << converted.toStringCommaDelimited(&this->format)
-    << "\ncomputed to be:\n[" << outputString
-    << "]\nexpected:\n[" << expected << "]" << global.fatal;
+    global.fatal
+    << "Least common multiple of "
+    << left
+    << ", "
+    << right
+    << ", converted to:\n"
+    << converted.toStringCommaDelimited(&this->format)
+    << "\ncomputed to be:\n["
+    << outputString
+    << "]\nexpected:\n["
+    << expected
+    << "]"
+    << global.fatal;
   }
   return true;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::leastCommonMultiple() {
   this->oneLeastCommonMultiple("x", "y", "x y ");
   this->oneLeastCommonMultiple(
     "(x^2y + 3 x + z y^2 - 1 + 7x^3)(x^3 + 5x y z + x y - z - 2)",
     "(x^2y + 3 x + z y^2 - 1 + 7x^3)(x^3 + x y z - 3y^2)",
-    "7x^{9}+x^{8}y +42x^{7}y z +7x^{6}y^{2}z +35x^{5}y^{2}z^{2}"
-    "+11x^{4}y^{3}z^{2}+5x^{2}y^{4}z^{3}+7x^{7}y -20x^{6}y^{2}"
-    "-3x^{5}y^{3}+7x^{5}y^{2}z -103x^{4}y^{3}z -18x^{3}y^{4}z "
-    "+x^{2}y^{4}z^{2}-15x y^{5}z^{2}+3x^{7}-7x^{6}z "
-    "+17x^{5}y z -21x^{4}y^{3}-7x^{4}y z^{2}-3x^{3}y^{4}"
-    "+13x^{3}y^{2}z^{2}-3x y^{5}z -x y^{3}z^{3}-15x^{6}"
-    "+x^{5}y -9x^{4}y^{2}-20x^{4}y z +20x^{3}y^{2}z -42x^{2}y^{3}z "
-    "-5x^{2}y^{2}z^{2}-2x y^{3}z^{2}+3y^{4}z^{2}-x^{4}y -3x^{4}z "
-    "+45x^{3}y^{2}-3x^{2}y^{3}-x^{2}y^{2}z -3x^{2}y z^{2}+15x y^{3}z "
-    "+6y^{4}z -6x^{4}+x^{3}z -6x^{2}y z +3x y^{3}+9x y^{2}z "
-    "+x y z^{2}+2x^{3}+18x y^{2}+2x y z -3y^{2}z -6y^{2}"
+"7x^{9}+x^{8}y +42x^{7}y z +7x^{6}y^{2}z +35x^{5}y^{2}z^{2}"
+"+11x^{4}y^{3}z^{2}+5x^{2}y^{4}z^{3}+7x^{7}y -20x^{6}y^{2}"
+"-3x^{5}y^{3}+7x^{5}y^{2}z -103x^{4}y^{3}z -18x^{3}y^{4}z "
+"+x^{2}y^{4}z^{2}-15x y^{5}z^{2}+3x^{7}-7x^{6}z "
+"+17x^{5}y z -21x^{4}y^{3}-7x^{4}y z^{2}-3x^{3}y^{4}"
+"+13x^{3}y^{2}z^{2}-3x y^{5}z -x y^{3}z^{3}-15x^{6}"
+"+x^{5}y -9x^{4}y^{2}-20x^{4}y z +20x^{3}y^{2}z -42x^{2}y^{3}z "
+"-5x^{2}y^{2}z^{2}-2x y^{3}z^{2}+3y^{4}z^{2}-x^{4}y -3x^{4}z "
+"+45x^{3}y^{2}-3x^{2}y^{3}-x^{2}y^{2}z -3x^{2}y z^{2}+15x y^{3}z "
+"+6y^{4}z -6x^{4}+x^{3}z -6x^{2}y z +3x y^{3}+9x y^{2}z "
+"+x y z^{2}+2x^{3}+18x y^{2}+2x y z -3y^{2}z -6y^{2}"
   );
   return true;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::oneDifferential(
   const std::string& input, const std::string& expected
 ) {
-  Polynomial<Rational> inputPolynomial = Polynomial<Rational>::Test::fromString(input);
+  Polynomial<Rational> inputPolynomial = Polynomial<Rational>::Test::fromString
+  (input);
   Polynomial<Rational> output;
   inputPolynomial.differential(output, nullptr);
   std::string outputString = output.toString(&this->formatDifferentials);
   if (outputString != expected) {
-    global.fatal << "Differential of " << input << " was computed to be: "
-    << outputString << ", expected: " << expected << ". " << global.fatal;
+    global.fatal
+    << "Differential of "
+    << input
+    << " was computed to be: "
+    << outputString
+    << ", expected: "
+    << expected
+    << ". "
+    << global.fatal;
   }
   return true;
 }
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::differential() {
   this->formatDifferentials.polynomialAlphabet.addOnTop("x");
   this->formatDifferentials.polynomialAlphabet.addOnTop("y");
@@ -313,7 +365,10 @@ bool Polynomial<Rational>::Test::differential() {
   this->formatDifferentials.polynomialAlphabet.addOnTop("dz");
   this->oneDifferential("1", "0");
   this->oneDifferential("x+y+z+1", "dx +dy +dz ");
-  this->oneDifferential("x^2y^3z^5 + x", "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx ");
+  this->oneDifferential(
+    "x^2y^3z^5 + x",
+    "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx "
+  );
   return true;
 }
 
@@ -334,18 +389,23 @@ bool ChevalleyGenerator::Test::basic() {
   }
   std::string allGeneratorsString = allGenerators.toStringCommaDelimited();
   std::string expected =
-  "g_{-9}, g_{-8}, g_{-7}, g_{-6}, g_{-5}, g_{-4}, g_{-3}, g_{-2}, g_{-1}, "
-  "h_{1}, h_{2}, h_{3}, "
-  "g_{1}, g_{2}, g_{3}, g_{4}, g_{5}, g_{6}, g_{7}, g_{8}, g_{9}";
+"g_{-9}, g_{-8}, g_{-7}, g_{-6}, g_{-5}, g_{-4}, g_{-3}, g_{-2}, g_{-1}, "
+"h_{1}, h_{2}, h_{3}, "
+"g_{1}, g_{2}, g_{3}, g_{4}, g_{5}, g_{6}, g_{7}, g_{8}, g_{9}";
   if (allGeneratorsString != expected) {
-    global << "Expected generator string:" << Logger::endL
-    << expected << "\nbut got:\n" << allGeneratorsString << Logger::endL;
+    global
+    << "Expected generator string:"
+    << Logger::endL
+    << expected
+    << "\nbut got:\n"
+    << allGeneratorsString
+    << Logger::endL;
     global.fatal << "Bad generators. " << global.fatal;
   }
   return true;
 }
 
-template <>
+template < >
 bool Vectors<Rational>::Test::TestCaseLinearDependence::test() {
   Vectors<Rational> vectors;
   vectors.fromStringListNoFail(this->input);
@@ -355,43 +415,45 @@ bool Vectors<Rational>::Test::TestCaseLinearDependence::test() {
   vectors.getLinearDependenceLexicographic(linearDependence);
   std::string resultLexicographic = linearDependence.toString();
   if (resultHomogeneous != this->expectedHomogeneous) {
-    global.fatal << "Linear depence homogeneous of: " << this->input
-    << "\ngot:\n" << resultHomogeneous
-    << "\nexpected:\n" << this->expectedHomogeneous << "\n" << global.fatal;
+    global.fatal
+    << "Linear depence homogeneous of: "
+    << this->input
+    << "\ngot:\n"
+    << resultHomogeneous
+    << "\nexpected:\n"
+    << this->expectedHomogeneous
+    << "\n"
+    << global.fatal;
   }
   if (resultLexicographic != this->expectedLexicographic) {
-    global.fatal << "Linear depence lexicographic of: " << this->input
-    << "\ngot:\n" << resultLexicographic
-    << "\nexpected:\n" << this->expectedLexicographic << "\n" << global.fatal;
+    global.fatal
+    << "Linear depence lexicographic of: "
+    << this->input
+    << "\ngot:\n"
+    << resultLexicographic
+    << "\nexpected:\n"
+    << this->expectedLexicographic
+    << "\n"
+    << global.fatal;
   }
   return true;
 }
 
-template<>
+template < >
 bool Vectors<Rational>::Test::linearDependence() {
   Vectors<Rational>::Test::TestCaseLinearDependence testCase;
-  testCase.input = {
-    "(1,3)",
-    "(3,1)",
-    "(1,1)",
-    "(1,2)"
-  };
+  testCase.input = {"(1,3)", "(3,1)", "(1,1)", "(1,2)"};
   testCase.expectedHomogeneous = "(-7/8, -3/8, 1, 1)";
   testCase.expectedLexicographic = "(-1/4, -1/4, 1, 0)";
   testCase.test();
-
-  testCase.input = {
-    "(1,0)",
-    "(0,1)",
-    "(1,1)",
-  };
+  testCase.input = {"(1,0)", "(0,1)", "(1,1)",};
   testCase.expectedHomogeneous = "(-1, -1, 1)";
   testCase.expectedLexicographic = "(-1, -1, 1)";
   testCase.test();
   return true;
 }
 
-template<>
+template < >
 bool Vectors<Rational>::Test::all() {
   Vectors<Rational>::Test::linearDependence();
   return true;
@@ -405,56 +467,33 @@ bool PartialFractions::Test::all() {
 bool PartialFractions::Test::splitTwoDimensional() {
   MacroRegisterFunctionWithName("PartialFractions::Test::splitTwoDimensional");
   SplitTestCase testCase;
-  testCase.vectors = {
-    "(1,0)",
-    "(0,1)",
-    "(1,1)",
-  };
+  testCase.vectors = {"(1,0)", "(0,1)", "(1,1)",};
   testCase.expected =
-  "-x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{1} x_{2} ) )"
-  "+x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{2} ) )"
+"-x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{1} x_{2} ) )"
+"+x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{2} ) )";
+  testCase.test();
+  testCase.vectors = {"(1,1)", "(1,0)", "(0,1)",};
+  testCase.expected =
+"-x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{1} x_{2} ) )"
+"+x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{2} ) )";
+  testCase.test();
+  testCase.vectors = {"(1, 0)", "(0, 1)", "(1, 1)", "(2, 2)",};
+  testCase.expected =
+"\\left(-x_{1}^{2}x_{2}^{-3}-2x_{1} x_{2}^{-3}-x_{2}^{-3}\\right)"
+"/((1-x_{1}^{2})^{3} (1-x_{1} x_{2} ) )"
+"+\\left(-x_{1}^{2}-x_{1}^{2}x_{2}^{-1}-x_{1} -2x_{1} x_{2}^{-1}-x_{1} x_{2}^{-2}-x_{2}^{-1}-x_{2}^{-2}\\right)"
+"/((1-x_{1}^{2})^{2} (1-x_{1}^{2}x_{2}^{2})^{2} )"
+"+\\left(x_{1}^{2}x_{2}^{-3}+2x_{1} x_{2}^{-3}+x_{2}^{-3}\\right)/((1-x_{1}^{2})^{3} (1-x_{2} ) )"
   ;
   testCase.test();
-
-  testCase.vectors = {
-    "(1,1)",
-    "(1,0)",
-    "(0,1)",
-  };
+  testCase.vectors = {"(1, 0)", "(1, 1)", "(1, 1)", "(1, 2)",};
   testCase.expected =
-  "-x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{1} x_{2} ) )"
-  "+x_{2}^{-1}/((1-x_{1} )^{2} (1-x_{2} ) )"
-  ;
+"\\left(x_{1}^{2}x_{2}^{2}+2x_{1} x_{2} +1\\right)"
+"/((1-x_{1} )^{3} (1-x_{1} x_{2}^{2}) )"
+"+\\left(-x_{1}^{2}x_{2} -x_{1} \\right)"
+"/((1-x_{1} )^{3} (1-x_{1} x_{2} ) )"
+"-x_{1} /((1-x_{1} )^{2} (1-x_{1} x_{2} )^{2} )";
   testCase.test();
-
-  testCase.vectors = {
-    "(1, 0)",
-    "(0, 1)",
-    "(1, 1)",
-    "(2, 2)",
-  };
-  testCase.expected =
-  "\\left(-x_{1}^{2}x_{2}^{-3}-2x_{1} x_{2}^{-3}-x_{2}^{-3}\\right)"
-  "/((1-x_{1}^{2})^{3} (1-x_{1} x_{2} ) )"
-  "+\\left(-x_{1}^{2}-x_{1}^{2}x_{2}^{-1}-x_{1} -2x_{1} x_{2}^{-1}-x_{1} x_{2}^{-2}-x_{2}^{-1}-x_{2}^{-2}\\right)"
-  "/((1-x_{1}^{2})^{2} (1-x_{1}^{2}x_{2}^{2})^{2} )"
-  "+\\left(x_{1}^{2}x_{2}^{-3}+2x_{1} x_{2}^{-3}+x_{2}^{-3}\\right)/((1-x_{1}^{2})^{3} (1-x_{2} ) )";
-  testCase.test();
-
-  testCase.vectors = {
-    "(1, 0)",
-    "(1, 1)",
-    "(1, 1)",
-    "(1, 2)",
-  };
-  testCase.expected =
-  "\\left(x_{1}^{2}x_{2}^{2}+2x_{1} x_{2} +1\\right)"
-  "/((1-x_{1} )^{3} (1-x_{1} x_{2}^{2}) )"
-  "+\\left(-x_{1}^{2}x_{2} -x_{1} \\right)"
-  "/((1-x_{1} )^{3} (1-x_{1} x_{2} ) )"
-  "-x_{1} /((1-x_{1} )^{2} (1-x_{1} x_{2} )^{2} )";
-  testCase.test();
-
   return true;
 }
 
@@ -466,14 +505,17 @@ bool PartialFractions::Test::SplitTestCase::test() {
   splitter.run(input);
   std::string result = splitter.toString(nullptr);
   if (result != this->expected) {
-    global.fatal << "Partial fraction splitter of:\n"
+    global.fatal
+    << "Partial fraction splitter of:\n"
     << this->vectors.toStringCommaDelimited()
     << "\nnormalized vectors:\n"
     << splitter.normalizedVectors.toString()
     << "\ngot:\n"
-    << result << "\nexpected:\n"
+    << result
+    << "\nexpected:\n"
     << this->expected
     << global.fatal;
   }
   return true;
 }
+

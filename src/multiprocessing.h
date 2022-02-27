@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_multiprocessing_ALREADY_INCLUDED
 #define header_multiprocessing_ALREADY_INCLUDED
@@ -9,7 +10,8 @@
 // This is a basic wrapper around linux unnamed pipes.
 class PipePrimitive {
 public:
-  List<int> pipeEnds; //pipeEnds[0] is the read end; pipeEnds[1] is the write end.
+  List<int> pipeEnds;
+  // pipeEnds[0] is the read end; pipeEnds[1] is the write end.
   List<char> lastRead;
   List<char> buffer;
   bool flagReadEndBlocks;
@@ -27,35 +29,25 @@ public:
   std::string getLastRead();
   bool checkConsistency();
   bool setPipeFlagsNoFailure(
-    int inputFlags,
-    int whichEnd,
-    bool dontCrashOnFail
+    int inputFlags, int whichEnd, bool dontCrashOnFail
   );
-
-  bool setReadNonBlocking (bool dontCrashOnFail);
+  bool setReadNonBlocking(bool dontCrashOnFail);
   bool setReadBlocking(bool dontCrashOnFail);
-
   bool setWriteBlocking(bool dontCrashOnFail);
   bool setPipeWriteNonBlockingIfFailThenCrash(bool dontCrashOnFail);
-
   bool setPipeWriteFlagsNoFailure(
-    int inputFlags,
-    int whichEnd,
-    bool dontCrashOnFail
+    int inputFlags, int whichEnd, bool dontCrashOnFail
   );
   bool writeOnceNoFailure(
-    const std::string& input,
-    int offset,
-    bool dontCrashOnFail
+    const std::string& input, int offset, bool dontCrashOnFail
   );
   bool readOnceNoFailure(bool dontCrashOnFail);
-  bool writeOnceAfterEmptying(const std::string& input, bool dontCrashOnFail);
-
+  bool writeOnceAfterEmptying(
+    const std::string& input, bool dontCrashOnFail
+  );
   bool readOnceWithoutEmptying(bool dontCrashOnFail);
   bool handleFailedWriteReturnFalse(
-    const std::string& toBeSent,
-    bool dontCrashOnFail,
-    int numBadAttempts
+    const std::string& toBeSent, bool dontCrashOnFail, int numBadAttempts
   );
   std::string toString() const;
   PipePrimitive();
@@ -67,25 +59,20 @@ public:
 class MutexProcess {
 public:
   static std::string currentProcessName;
-
   static std::string lockContent;
   PipePrimitive lockPipe;
   bool flaglockHeldByAnotherThread;
   bool flagInitialized;
   std::string name;
   MemorySaving<MutexRecursiveWrapper> lockThreads;
-  //<- to avoid two threads from the same process blocking the process.
+  // <- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;
   std::string toString() const;
   void release();
   // inputName is the display name of the mutex - something you want
   // to see in error messages and logs.
-  bool createMe(
-    const std::string& inputName,
-    bool dontCrashOnFail
-  );
+  bool createMe(const std::string& inputName, bool dontCrashOnFail);
   bool resetNoAllocation();
-
   bool checkConsistency();
   // Acts in a similar fashion to single-process mutex lock.
   // If the lock is held in another process or another thread,
@@ -105,7 +92,6 @@ public:
   // but we may choose to handle it gracefully
   // for stability reasons.
   bool lock();
-
   // unlock the mutex.
   //
   // False return may indicate an i/o failure.
@@ -140,8 +126,10 @@ public:
 // and by more than one thread in each process.
 // Multiple processes may try to send bytes through the pipe.
 // A writer to the pipe may lock access to the pipe via mutexPipe lock.
-// TheMutexPipe lock has a (pipe-based) mechanism for locking out other processes and
-// a mutex-based mechanism for locking out other threads within the same process.
+// TheMutexPipe lock has a (pipe-based) mechanism for locking out other
+// processes and
+// a mutex-based mechanism for locking out other threads within the same
+// process.
 class Pipe {
 public:
   PipePrimitive pipe;
@@ -155,7 +143,9 @@ public:
   void readOnce(bool dontCrashOnFail);
   void readOnceWithoutEmptying(bool dontCrashOnFail);
   void readLoop(List<char>& output);
-  static int writeNoInterrupts(int fileDescriptor, const std::string& input);
+  static int writeNoInterrupts(
+    int fileDescriptor, const std::string& input
+  );
   static int writeWithTimeoutViaSelect(
     int fileDescriptor,
     const std::string& input,
@@ -171,10 +161,8 @@ public:
     std::stringstream* commentsOnFailure = nullptr
   );
   void writeOnceAfterEmptying(
-    const std::string& toBeSent,
-    bool dontCrashOnFail
+    const std::string& toBeSent, bool dontCrashOnFail
   );
-
   std::string toString() const;
   void release();
   bool checkConsistency();

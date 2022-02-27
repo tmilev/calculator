@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_file_operations_encodings_ALREADY_INCLUDED
 #define header_general_file_operations_encodings_ALREADY_INCLUDED
@@ -13,26 +14,25 @@ public:
   folderStartsToWhichWeAppendInstructorUsernameSlash();
   static HashedList<std::string, MathRoutines::hashString>&
   folderVirtualLinksToWhichWeAppendTimeAndBuildHash();
-
   static MapList<std::string, std::string, MathRoutines::hashString>&
   folderVirtualLinksNonSensitive();
   static MapList<std::string, std::string, MathRoutines::hashString>&
-  folderVirtualLinksSensitive(); //<- admin access only
+  folderVirtualLinksSensitive();
+  // <- admin access only
   static MapList<std::string, std::string, MathRoutines::hashString>&
-  folderVirtualLinksULTRASensitive(); //<- no access allowed through web server
-
+  folderVirtualLinksULTRASensitive();
+  // <- no access allowed through web server
   static List<List<std::string> >& folderVirtualLinksDefault();
-
   static bool checkFolderLinks();
   static void initializeFoldersNonSensitive();
   static void initializeFoldersSensitive();
   static void initializeFoldersULTRASensitive();
   static List<List<std::string> >& initializeFolderVirtualLinksDefaults();
-
   static List<bool> safeFileCharacters;
   static List<bool>& getSafeFileChars();
-
-  static std::string convertStringToEscapedStringFileNameSafe(const std::string& input);
+  static std::string convertStringToEscapedStringFileNameSafe(
+    const std::string& input
+  );
   static std::string convertStringToLatexFileName(const std::string& input);
   static bool loadFileToStringUnsecure(
     const std::string& fileNameUnsecure,
@@ -47,23 +47,26 @@ public:
   static bool writeFileVirual(
     const std::string& fileNameVirtual,
     const std::string& fileContent,
-    std::stringstream *commentsOnError
+    std::stringstream* commentsOnError
   );
   static bool writeFileVirualWithPermissions(
     const std::string& fileNameVirtual,
     const std::string& fileContent,
     bool accessSensitiveFolders,
-    std::stringstream *commentsOnError
+    std::stringstream* commentsOnError
   );
-  static bool writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+  static bool
+  writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
     const std::string& fileNameVirtual,
     const std::string& fileContent,
     bool accessSensitiveFolders,
     bool accessUltraSensitiveFolders,
-    std::stringstream *commentsOnError
+    std::stringstream* commentsOnError
   );
   static std::string writeFileReturnHTMLLink(
-    const std::string& fileContent, const std::string& fileNameVirtual, const std::string& linkText
+    const std::string& fileContent,
+    const std::string& fileNameVirtual,
+    const std::string& linkText
   );
   static bool loadFileToStringVirtual(
     const std::string& fileName,
@@ -88,7 +91,8 @@ public:
   // Ultra sensitive data is only available through administrator ssh
   // connection, or, in the case of the results/ folder, only with a
   // 256 bit secure one-time use token (= filename of the actual report).
-  // The available tokens are only relayed to the party that initiated the computation.
+  // The available tokens are only relayed to the party that initiated the
+  // computation.
   // They available tokens can only be browsed with an ssh admin connection.
   static bool loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     const std::string& fileName,
@@ -103,10 +107,19 @@ public:
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool isFileNameWithoutDotsAndSlashes(const std::string& fileName);
-  static bool isFileNameSafeForSystemCommands(const std::string& fileName, std::stringstream* commentsOnFailure);
-  static std::string getFileNameFromFileNameWithPath(const std::string& fileName);
-  static std::string getPathFromFileNameWithPath(const std::string& fileName);
-  static std::string getFileExtensionWithDot(const std::string& fileName, std::string* outputFileNameNoExtension = nullptr);
+  static bool isFileNameSafeForSystemCommands(
+    const std::string& fileName, std::stringstream* commentsOnFailure
+  );
+  static std::string getFileNameFromFileNameWithPath(
+    const std::string& fileName
+  );
+  static std::string getPathFromFileNameWithPath(
+    const std::string& fileName
+  );
+  static std::string getFileExtensionWithDot(
+    const std::string& fileName,
+    std::string* outputFileNameNoExtension = nullptr
+  );
   static bool fileExistsUnsecure(const std::string& fileName);
   static bool fileExistsVirtual(
     const std::string& fileName,
@@ -114,7 +127,9 @@ public:
     bool accessULTRASensitiveFolders = false,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool fileExistsVirtualCustomizedReadOnly(const std::string& fileName, std::stringstream* commentsOnFailure);
+  static bool fileExistsVirtualCustomizedReadOnly(
+    const std::string& fileName, std::stringstream* commentsOnFailure
+  );
   static bool isFolderUnsecure(const std::string& folderName);
   static bool getFolderFileNamesUnsecure(
     const std::string& folderName,
@@ -123,7 +138,9 @@ public:
   );
   static std::string cleanUpForFileNameUse(const std::string& inputString);
   static std::string getCurrentFolder();
-  static std::string getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
+  static std::string getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
+    const std::string& wouldBePath
+  );
   static bool getFolderFileNamesVirtual(
     const std::string& folderName,
     List<std::string>& outputFileNamesNoPath,
@@ -142,7 +159,9 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  static std::string GetVirtualNameWithHash(const std::string& inputFileName);
+  static std::string GetVirtualNameWithHash(
+    const std::string& inputFileName
+  );
   static bool getPhysicalFileNameFromVirtual(
     const std::string& inputFileName,
     std::string& output,
@@ -166,7 +185,8 @@ public:
     bool accessSensitiveFolders = false,
     bool accessUltraSensitiveFolders = false
   );
-  static bool openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
+  static bool
+  openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
     std::fstream& file,
     const std::string& fileName,
     bool openInAppendMode,
@@ -191,9 +211,7 @@ public:
     bool openAsBinary
   );
   static bool openFileUnsecureReadOnly(
-    std::ifstream& file,
-    const std::string& fileName,
-    bool openAsBinary
+    std::ifstream& file, const std::string& fileName, bool openAsBinary
   );
   static bool openFileVirtual(
     std::fstream& file,
@@ -243,3 +261,4 @@ public:
 };
 
 #endif // header_general_file_operations_encodings_ALREADY_INCLUDED
+

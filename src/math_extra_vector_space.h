@@ -1,17 +1,18 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_vector_space_ALREADY_INCLUDED
 #define header_math_extra_vector_space_ALREADY_INCLUDED
+
 #include "math_general.h"
 
 template <typename Coefficient>
 class Basis {
-  public:
-  //vectors are vector rows
+public:
+  // vectors are vector rows
   Matrix<Coefficient> basis;
   Matrix<Coefficient> gramMatrix;
   bool haveGramMatrix;
-
   void addVector(const Vector<Coefficient>& v);
   void computeGramMatrix();
   Vector<Coefficient> putInBasis(const Vector<Coefficient>& input);
@@ -25,7 +26,6 @@ public:
   int rank;
   Matrix<Coefficient> fastbasis;
   Basis<Coefficient> basis;
-
   VectorSpace() {
     degree = - 1;
     rank = 0;
@@ -35,8 +35,12 @@ public:
   bool addVector(const Vector<Coefficient>& v);
   bool addVectorDestructively(Vector<Coefficient>& v);
   bool addVectorToBasis(const Vector<Coefficient>& v);
-  bool getCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const;
-  VectorSpace<Coefficient> intersection(const VectorSpace<Coefficient>& other) const;
+  bool getCoordinatesDestructively(
+    Vector<Coefficient>& v, Vector<Coefficient>& out
+  ) const;
+  VectorSpace<Coefficient> intersection(
+    const VectorSpace<Coefficient>& other
+  ) const;
   VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
   VectorSpace<Coefficient> orthogonalComplement(
     VectorSpace<Coefficient>* ambient = 0,
@@ -44,12 +48,11 @@ public:
   ) const;
   Vector<Coefficient> getBasisVector(int i) const;
   Vector<Coefficient> getCanonicalBasisVector(int i) const;
-  //unsigned int hashFunction() const {return this->hashFunction(*this);}
+  // unsigned int hashFunction() const {return this->hashFunction(*this);}
   static unsigned int hashFunction(const VectorSpace<Coefficient>& input) {
     return input.fastbasis.hashFunction();
   }
-
-  bool operator==(const VectorSpace<Coefficient> &other) const;
+  bool operator==(const VectorSpace<Coefficient>& other) const;
 };
 
 template <typename Coefficient>
@@ -59,9 +62,11 @@ void Basis<Coefficient>::addVector(const Vector<Coefficient>& v) {
     basis.numberOfRows = 0;
   }
   if (basis.numberOfRows == basis.numberOfColumns) {
-    global.fatal << "Attempt to add the "
+    global.fatal
+    << "Attempt to add the "
     << basis.numberOfRows
-    << " vector to a Basis of degree " << basis.numberOfColumns
+    << " vector to a Basis of degree "
+    << basis.numberOfColumns
     << global.fatal;
   }
   haveGramMatrix = false;
@@ -79,7 +84,8 @@ void Basis<Coefficient>::computeGramMatrix() {
   for (int i = 0; i < r; i ++) {
     for (int j = 0; j < r; j ++) {
       for (int k = 0; k < d; k ++) {
-        gramMatrix.elements[i][j] += basis.elements[i][k] * basis.elements[j][k];
+        gramMatrix.elements[i][j] +=
+        basis.elements[i][k] * basis.elements[j][k];
       }
     }
   }
@@ -88,7 +94,9 @@ void Basis<Coefficient>::computeGramMatrix() {
 }
 
 template <typename Coefficient>
-Vector<Coefficient> Basis<Coefficient>::putInBasis(const Vector<Coefficient>& input) {
+Vector<Coefficient> Basis<Coefficient>::putInBasis(
+  const Vector<Coefficient>& input
+) {
   if (false) {
     Vectors<Coefficient> basisVectorForm;
     this->basis.getVectorsFromRows(basisVectorForm);
@@ -99,16 +107,18 @@ Vector<Coefficient> Basis<Coefficient>::putInBasis(const Vector<Coefficient>& in
     if (!haveGramMatrix) {
       computeGramMatrix();
     }
-    return gramMatrix * (basis * input);
+    return gramMatrix *(basis* input);
   }
 }
 
 template <typename Coefficient>
-Matrix<Coefficient> Basis<Coefficient>::putInBasis(const Matrix<Coefficient>& input) {
+Matrix<Coefficient> Basis<Coefficient>::putInBasis(
+  const Matrix<Coefficient>& input
+) {
   if (!haveGramMatrix) {
     computeGramMatrix();
   }
-  return gramMatrix * (basis * input);
+  return gramMatrix *(basis* input);
 }
 
 template <typename Coefficient>
@@ -118,7 +128,9 @@ bool VectorSpace<Coefficient>::addVector(const Vector<Coefficient>& v) {
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
+bool VectorSpace<Coefficient>::addVectorDestructively(
+  Vector<Coefficient>& v
+) {
   if (fastbasis.numberOfRows == 0) {
     this->fastbasis.makeZeroMatrix(v.size);
     this->degree = v.size;
@@ -149,32 +161,39 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
       return false;
     }
     int j = i;
-    for (; (j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j ++){
-    if (jj < j) {
-      if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {
-        fastbasis.numberOfRows ++;
-      } else {
-        fastbasis.resize(fastbasis.numberOfRows + 1,fastbasis.numberOfColumns, true);
+    for (
+      ;(j < fastbasis.numberOfColumns) && (
+        fastbasis.elements[i][j] == 0
+      ); j ++
+    ) {
+      if (jj < j) {
+        if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {
+          fastbasis.numberOfRows ++;
+        } else {
+          fastbasis.resize(
+            fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true
+          );
+        }
+        Coefficient * tmp = fastbasis.elements[fastbasis.numberOfRows - 1];
+        for (int bi = fastbasis.numberOfRows - 1; bi > i; bi --) {
+          fastbasis.elements[bi] = fastbasis.elements[bi - 1];
+        }
+        fastbasis.elements[i] = tmp;
+        for (int bj = 0; bj < fastbasis.numberOfColumns; bj ++) {
+          fastbasis.elements[i][bj] = v[bj];
+        }
+        fastbasis.gaussianEliminationByRows();
+        rank ++;
+        return true;
       }
-      Coefficient* tmp = fastbasis.elements[fastbasis.numberOfRows - 1];
-      for (int bi = fastbasis.numberOfRows - 1; bi > i; bi --) {
-        fastbasis.elements[bi] = fastbasis.elements[bi - 1];
+      if (jj > j) {
+        continue;
       }
-      fastbasis.elements[i] = tmp;
-      for (int bj = 0; bj < fastbasis.numberOfColumns; bj ++) {
-        fastbasis.elements[i][bj] = v[bj];
+      Coefficient x = - v[jj] / fastbasis.elements[i][j];
+      for (int jjj = jj; jjj < v.size; jjj ++) {
+        v[jjj] += x * fastbasis.elements[i][jjj];
       }
-      fastbasis.gaussianEliminationByRows();
-      rank ++;
-      return true;
     }
-    if (jj > j) {
-      continue;
-    }
-    Coefficient x = - v[jj] / fastbasis.elements[i][j];
-    for (int jjj = jj; jjj < v.size; jjj ++) {
-      v[jjj] += x * fastbasis.elements[i][jjj];
-    }}
   }
   if (v.isEqualToZero()) {
     return false;
@@ -183,7 +202,9 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
   if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {
     fastbasis.numberOfRows ++;
   } else {
-    fastbasis.resize(fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true);
+    fastbasis.resize(
+      fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true
+    );
   }
   for (int j = 0; j < fastbasis.numberOfColumns; j ++) {
     fastbasis.elements[fastbasis.numberOfRows - 1][j] = v[j];
@@ -193,7 +214,9 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::addVectorToBasis(const Vector<Coefficient>& v) {
+bool VectorSpace<Coefficient>::addVectorToBasis(
+  const Vector<Coefficient>& v
+) {
   if (addVector(v)) {
     basis.addVector(v);
     return true;
@@ -242,40 +265,47 @@ bool VectorSpace<Coefficient>::getCoordinatesDestructively(
   }
 }
 
-template<typename Coefficient>
-VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(const VectorSpace<Coefficient>& other) const {
-  // perhaps at some point it would be nice to ban intersections with spaces of unspecified degree
-  if (this->degree != other.degree && ((this->degree != - 1) && (other.degree != - 1))) {
-    global.fatal << "Attempting to intersect vector spaces of different degrees, "
-    << this->degree << " and " << other.degree << ". " << global.fatal;
+template <typename Coefficient>
+VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(
+  const VectorSpace<Coefficient>& other
+) const {
+  // perhaps at some point it would be nice to ban intersections with spaces of
+  // unspecified degree
+  if (
+    this->degree != other.degree && ((this->degree != - 1) && (
+        other.degree != - 1
+      )
+    )
+  ) {
+    global.fatal
+    << "Attempting to intersect vector spaces of different degrees, "
+    << this->degree
+    << " and "
+    << other.degree
+    << ". "
+    << global.fatal;
   }
   VectorSpace<Coefficient> output;
   output.degree = this->degree;
   if ((this->rank == 0) or (other.rank == 0)) {
     return output;
   }
-
   if (this->rank == this->degree) {
     output.rank = other.rank;
     output.fastbasis = other.fastbasis;
     return output;
   }
-
   if (other.rank == other.degree) {
     output.rank = this->rank;
     output.fastbasis = this->fastbasis;
     return output;
   }
-
-
   Matrix<Rational> MV = this->fastbasis;
   List<Vector<Coefficient> > Vperp;
   MV.getZeroEigenSpaceModifyMe(Vperp);
-
   Matrix<Coefficient> MW = other.fastbasis;
   List<Vector<Coefficient> > Wperp;
   MW.getZeroEigenSpaceModifyMe(Wperp);
-
   Matrix<Coefficient> M;
   M.initialize(Vperp.size + Wperp.size, this->degree);
   int i = 0;
@@ -284,7 +314,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(const VectorSpac
       M.elements[i][j] = Vperp[i][j];
     }
   }
-  for (; i < Vperp.size +Wperp.size; i ++) {
+  for (; i < Vperp.size + Wperp.size; i ++) {
     for (int j = 0; j < this->degree; j ++) {
       M.elements[i][j] = Wperp[i - Vperp.size][j];
     }
@@ -295,7 +325,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(const VectorSpac
   if (outvecs.size == 0) {
     return output;
   }
-  output.fastbasis.initialize(outvecs.size,this->degree);
+  output.fastbasis.initialize(outvecs.size, this->degree);
   if (outvecs.size == 1) {
     int inz = 0;
     for (; inz < outvecs[0].size; inz ++) {
@@ -338,7 +368,8 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::orthogonalComplement(
   }
   Matrix<Coefficient> M = this->fastbasis;
   if (form) {
-    M.multiplyOnTheRight(*form); // i can never tell which one is right or left :/
+    M.multiplyOnTheRight(*form);
+    // i can never tell which one is right or left :/
   }
   List<Vector<Coefficient> > VVs;
   // this is where 'nullspace' and 'kernel' are conceptually different
@@ -364,7 +395,9 @@ void VectorSpace<Coefficient>::makeFullRank(int d) {
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::operator==(const VectorSpace<Coefficient>& other) const {
+bool VectorSpace<Coefficient>::operator==(
+  const VectorSpace<Coefficient>& other
+) const {
   return fastbasis == other.fastbasis;
 }
 
@@ -383,7 +416,8 @@ Vector<Coefficient> VectorSpace<Coefficient>::getBasisVector(int i) const {
 }
 
 template <typename Coefficient>
-Vector<Coefficient> VectorSpace<Coefficient>::getCanonicalBasisVector(int i) const {
+Vector<Coefficient> VectorSpace<Coefficient>::getCanonicalBasisVector(int i)
+const {
   if (i >= this->rank) {
     global.fatal << "Vector index too large. " << global.fatal;
   }
@@ -393,3 +427,4 @@ Vector<Coefficient> VectorSpace<Coefficient>::getCanonicalBasisVector(int i) con
 }
 
 #endif // header_math_extra_vector_space_ALREADY_INCLUDED
+

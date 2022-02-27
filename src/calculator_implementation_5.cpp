@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include "calculator_inner_functions.h"
@@ -24,7 +25,8 @@ public:
   double minTriangleSideAsPercentOfWidthPlusHeight;
   List<bool> trianglesUsed;
   List<List<Vector<double> > > triangles;
-  MapList<Vector<double>, double, MathRoutines::hashVectorDoubles> evaluatedPoints;
+  MapList<Vector<double>, double, MathRoutines::hashVectorDoubles>
+  evaluatedPoints;
   HashedList<Expression> knownEs;
   List<double> knownValues;
   Vector<double> lowerLeftCorner;
@@ -51,7 +53,9 @@ public:
     double leftVal,
     double rightVal
   );
-  bool computePoints(Calculator& calculator, const Expression& input, bool showGrid);
+  bool computePoints(
+    Calculator& calculator, const Expression& input, bool showGrid
+  );
   MeshTriangles();
 };
 
@@ -92,7 +96,11 @@ double MeshTriangles::getValueAtPoint(const Vector<double>& point) {
   this->knownValues[this->knownValues.size - 2] = point[0];
   this->knownValues[this->knownValues.size - 1] = point[1];
   double functionValue = 0;
-  if (this->functionExpression.evaluatesToDoubleUnderSubstitutions(this->knownEs, this->knownValues, &functionValue)) {
+  if (
+    this->functionExpression.evaluatesToDoubleUnderSubstitutions(
+      this->knownEs, this->knownValues, &functionValue
+    )
+  ) {
     this->numGoodEvaluations ++;
   } else {
     this->numBadEvaluations ++;
@@ -103,7 +111,8 @@ double MeshTriangles::getValueAtPoint(const Vector<double>& point) {
 }
 
 void MeshTriangles::evaluateFunAtTriangleVertices(int triangleIndex) {
-  MacroRegisterFunctionWithName("MeshTriangles::EvaluateFunAtTriangleVertices");
+  MacroRegisterFunctionWithName("MeshTriangles::EvaluateFunAtTriangleVertices")
+  ;
   for (int j = 0; j < this->triangles[triangleIndex].size; j ++) {
     this->getValueAtPoint(this->triangles[triangleIndex][j]);
   }
@@ -112,8 +121,10 @@ void MeshTriangles::evaluateFunAtTriangleVertices(int triangleIndex) {
 double MeshTriangles::getTriangleMaxSideLength(int triangleIndex) {
   MacroRegisterFunctionWithName("MeshTriangles::GetTriangleMaxSideLength");
   if (this->triangles[triangleIndex].size != 3) {
-    global.fatal << "Error: triangle needs three vertices, instead it has vertices: "
-    << this->triangles[triangleIndex] << global.fatal;
+    global.fatal
+    << "Error: triangle needs three vertices, instead it has vertices: "
+    << this->triangles[triangleIndex]
+    << global.fatal;
   }
   Vector<double>& firstV = this->triangles[triangleIndex][0];
   Vector<double>& secondV = this->triangles[triangleIndex][1];
@@ -125,7 +136,10 @@ double MeshTriangles::getTriangleMaxSideLength(int triangleIndex) {
   double result = 0;
   for (int i = 0; i < sides.size; i ++) {
     double normSquared = sides[i][0] * sides[i][0] + sides[i][1] * sides[i][1];
-    result = MathRoutines::maximum(result, FloatingPoint::sqrtFloating(normSquared));
+    result =
+    MathRoutines::maximum(
+      result, FloatingPoint::sqrtFloating(normSquared)
+    );
   }
   return result;
 }
@@ -153,9 +167,15 @@ void MeshTriangles::addPointFromVerticesValues(
   outputAppend.addOnTop(left * contributionLeft + right * contributionRight);
 }
 
-int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
-  MacroRegisterFunctionWithName("MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex");
-  if (this->flagTriangleLimitReached || this->triangles.size< this->maxNumTriangles * 2) {
+int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
+{
+  MacroRegisterFunctionWithName(
+    "MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex"
+  );
+  if (
+    this->flagTriangleLimitReached ||
+    this->triangles.size < this->maxNumTriangles * 2
+  ) {
     return currentIndex;
   }
   // clean up carried out only when we have twice
@@ -164,8 +184,14 @@ int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
   // we have generated at least maxNumTriangles since the last cleanup
   // (which leaves no more than maxNumTriangles alive).
   if (this->triangles.size != this->trianglesUsed.size) {
-    global.fatal << "this->triangles.size is not equal to this->trianglesUsed.size: the values are: "
-    << this->triangles.size << " and " << this->trianglesUsed.size << ". " << global.fatal;
+    global.fatal
+    <<
+    "this->triangles.size is not equal to this->trianglesUsed.size: the values are: "
+    << this->triangles.size
+    << " and "
+    << this->trianglesUsed.size
+    << ". "
+    << global.fatal;
   }
   int lowestFree = 0;
   for (int i = 0; i < this->triangles.size; i ++) {
@@ -190,7 +216,8 @@ void MeshTriangles::subdivide(int triangleIndex) {
   MacroRegisterFunctionWithName("MeshTriangles::subdivide");
   List<Vector<double> > currentTriangle = this->triangles[triangleIndex];
   if (currentTriangle.size != 3) {
-    global.fatal << "Triangle in mesh with less than 3 sides! " << global.fatal;
+    global.fatal << "Triangle in mesh with less than 3 sides! " << global.fatal
+    ;
   }
   List<Vector<double> > insideTriange;
   insideTriange.setSize(3);
@@ -228,19 +255,29 @@ void MeshTriangles::computeImplicitPlotPart2() {
     this->flagFunctionEvaluationFailed = true;
     return;
   }
-  double minSide = MathRoutines::minimum(this->height, this->width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
+  double minSide =
+  MathRoutines::minimum(this->height, this->width) *
+  this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
-  currentPlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
+  currentPlot.colorRGB = static_cast<int>(
+    HtmlRoutines::redGreenBlue(255, 0, 0)
+  );
   Vectors<double>& segment = currentPlot.pointsDouble;
   List<Vector<double> > currentTriangle;
   for (int i = 0; i < this->triangles.size; i ++) {
-    currentTriangle = this->triangles[i]; //making a copy in case this->triangles changes underneath.
+    currentTriangle = this->triangles[i];
+    // making a copy in case this->triangles changes underneath.
     if (currentTriangle.size != 3) {
-      global.fatal << "Error: triangle needs three vertices, instead it has vertices: " << currentTriangle << global.fatal;
+      global.fatal
+      << "Error: triangle needs three vertices, instead it has vertices: "
+      << currentTriangle
+      << global.fatal;
     }
     bool isGood = true;
     for (int j = 0; j < currentTriangle.size; j ++) {
-      if (this->getValueAtPoint(currentTriangle[j]) == std::nan("")) {
+      if (
+        this->getValueAtPoint(currentTriangle[j]) == std::nan("")
+      ) {
         isGood = false;
         break;
       }
@@ -260,19 +297,28 @@ void MeshTriangles::computeImplicitPlotPart2() {
       continue;
     }
     i = this->cleanUpTrianglesReturnUpdatedCurrentIndex(i);
-    if (this->getTriangleMaxSideLength(i) > minSide && !this->flagTriangleLimitReached) {
+    if (
+      this->getTriangleMaxSideLength(i) > minSide &&
+      !this->flagTriangleLimitReached
+    ) {
       this->subdivide(i);
       continue;
     }
     segment.setSize(0);
     if (prod01 <= 0) {
-      this->addPointFromVerticesValues(segment, currentTriangle[0], currentTriangle[1], val0, val1);
+      this->addPointFromVerticesValues(
+        segment, currentTriangle[0], currentTriangle[1], val0, val1
+      );
     }
     if (prod12 <= 0) {
-      this->addPointFromVerticesValues(segment, currentTriangle[1], currentTriangle[2], val1, val2);
+      this->addPointFromVerticesValues(
+        segment, currentTriangle[1], currentTriangle[2], val1, val2
+      );
     }
     if (prod20 <= 0 && segment.size < 2) {
-      this->addPointFromVerticesValues(segment, currentTriangle[2], currentTriangle[0], val2, val0);
+      this->addPointFromVerticesValues(
+        segment, currentTriangle[2], currentTriangle[0], val2, val0
+      );
     }
     if (segment.size != 2) {
       continue;
@@ -309,27 +355,29 @@ void MeshTriangles::computeImplicitPlot() {
     }
   }
   if (this->flagShowGrid) {
-    this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(240, 240, 0)));
+    this->plotGrid(
+      static_cast<int>(HtmlRoutines::redGreenBlue(240, 240, 0))
+    );
     this->plot.addPlotsOnTop(this->grid);
   }
   this->computeImplicitPlotPart2();
   if (this->flagShowGrid) {
-    this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(100, 100, 100)));
+    this->plotGrid(
+      static_cast<int>(HtmlRoutines::redGreenBlue(100, 100, 100))
+    );
     this->plot.addPlotsOnTop(this->grid);
   }
   this->plot.addPlotsOnTop(this->curve);
 }
 
 bool Calculator::getMatrixDoubles(
-  const Expression& input, Matrix<double>& output, int desiredNumberOfColumns
+  const Expression& input,
+  Matrix<double>& output,
+  int desiredNumberOfColumns
 ) {
-  return CalculatorConversions::functionGetMatrix<double>(
-    *this,
-    input,
-    output,
-    true,
-    nullptr,
-    desiredNumberOfColumns
+  return
+  CalculatorConversions::functionGetMatrix<double>(
+    *this, input, output, true, nullptr, desiredNumberOfColumns
   );
 }
 
@@ -338,24 +386,28 @@ bool Calculator::getVectorDoubles(
   Vector<double>& output,
   int desiredDimensionNonMandatory
 ) {
-  return this->getVector(
+  return
+  this->getVector(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory //,
+    desiredDimensionNonMandatory// ,
     // CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
 bool Calculator::getVectorDoublesFromFunctionArguments(
-  const Expression& input, Vector<double>& output, int desiredDimensionNonMandatory
+  const Expression& input,
+  Vector<double>& output,
+  int desiredDimensionNonMandatory
 ) {
-  return this->getVectorFromFunctionArguments(
+  return
+  this->getVectorFromFunctionArguments(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory //,
-    //CalculatorFunctions::functionEvaluateToDouble
+    desiredDimensionNonMandatory// ,
+    // CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
@@ -381,13 +433,19 @@ bool CalculatorFunctions::getPointsImplicitly(
 bool CalculatorFunctionsPlot::plotImplicitFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorFunctionsPlot::plotImplicitFunctionFull(calculator, input, output, false);
+  return
+  CalculatorFunctionsPlot::plotImplicitFunctionFull(
+    calculator, input, output, false
+  );
 }
 
 bool CalculatorFunctionsPlot::plotImplicitShowGridFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorFunctionsPlot::plotImplicitFunctionFull(calculator, input, output, true);
+  return
+  CalculatorFunctionsPlot::plotImplicitFunctionFull(
+    calculator, input, output, true
+  );
 }
 
 bool MeshTriangles::computePoints(
@@ -407,11 +465,18 @@ bool MeshTriangles::computePoints(
   this->knownValues.addOnTop(0);
   HashedList<Expression> freeVariables;
   if (!this->functionExpression.getFreeVariables(freeVariables, true)) {
-    return calculator << "Failed to extract free variables from: " << this->functionExpression.toString();
+    return
+    calculator
+    << "Failed to extract free variables from: "
+    << this->functionExpression.toString();
   }
   freeVariables.quickSortAscending();
   if (freeVariables.size > 2) {
-    return calculator << "I got that your curve depends on " << freeVariables.size << " expressions, namely: "
+    return
+    calculator
+    << "I got that your curve depends on "
+    << freeVariables.size
+    << " expressions, namely: "
     << freeVariables.toStringCommaDelimited()
     << " and that is too many (2 max). ";
   }
@@ -430,42 +495,73 @@ bool MeshTriangles::computePoints(
   this->knownEs.addOnTopNoRepetitionMustBeNew(freeVariables[0]);
   this->knownEs.addOnTopNoRepetitionMustBeNew(freeVariables[1]);
   if (!calculator.getVectorDoubles(input[2], this->lowerLeftCorner)) {
-    return calculator << "Failed to extract lower left corner from: " << input[2].toString();
+    return
+    calculator
+    << "Failed to extract lower left corner from: "
+    << input[2].toString();
   }
-  if (!calculator.getVectorDoubles(input[3], this->upperRightCorner)) {
-    return calculator << "Failed to extract upper right corner from: " << input[3].toString();
+  if (
+    !calculator.getVectorDoubles(input[3], this->upperRightCorner)
+  ) {
+    return
+    calculator
+    << "Failed to extract upper right corner from: "
+    << input[3].toString();
   }
   List<int> gridCount;
   if (!calculator.getVectorInt(input[4], gridCount)) {
-    return calculator << "Failed to extract pair of small integers from: " << input[4].toString();
+    return
+    calculator
+    << "Failed to extract pair of small integers from: "
+    << input[4].toString();
   }
   if (gridCount.size != 2) {
-    return calculator << "Failed to extract pair of small integers from: " << input[4].toString();
+    return
+    calculator
+    << "Failed to extract pair of small integers from: "
+    << input[4].toString();
   }
   this->xStartingGridCount = gridCount[0];
   this->yStartingGridCount = gridCount[1];
   if (input.size() >= 6) {
     if (!input[5].isSmallInteger(&this->maxNumTriangles)) {
-      return calculator << "Failed to extract small integer from: " << input[5].toString();
+      return
+      calculator
+      << "Failed to extract small integer from: "
+      << input[5].toString();
     }
     if (this->maxNumTriangles > 20000) {
       this->maxNumTriangles = 20000;
-      calculator << "Max number of triangles decreased from your input: " << input[5].toString()
-      << " to 20000. If you'd like to lift the restriction, modify code around: file: " << __FILE__
-      << " line: " << __LINE__ << ". ";
+      calculator
+      << "Max number of triangles decreased from your input: "
+      << input[5].toString()
+      <<
+      " to 20000. If you'd like to lift the restriction, modify code around: file: "
+      << __FILE__
+      << " line: "
+      << __LINE__
+      << ". ";
     }
   }
   this->computeImplicitPlot();
-  calculator << "Evaluated function in: "
-  << this->numGoodEvaluations << " points and failed to evaluate it at: "
-  << this->numBadEvaluations << " points. ";
+  calculator
+  << "Evaluated function in: "
+  << this->numGoodEvaluations
+  << " points and failed to evaluate it at: "
+  << this->numBadEvaluations
+  << " points. ";
   return true;
 }
 
 bool CalculatorFunctionsPlot::plotImplicitFunctionFull(
-  Calculator& calculator, const Expression& input, Expression& output, bool showGrid
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool showGrid
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::plotImplicitFunctionFull");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::plotImplicitFunctionFull"
+  );
   MeshTriangles mesh;
   if (!mesh.computePoints(calculator, input, showGrid)) {
     return false;
@@ -478,14 +574,11 @@ bool CalculatorConversions::functionMatrixDouble(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixDouble");
   Matrix<double> matrix;
-  if (!CalculatorConversions::functionGetMatrix(
-    calculator,
-    input,
-    matrix,
-    true,
-    nullptr,
-    0
-  )) {
+  if (
+    !CalculatorConversions::functionGetMatrix(
+      calculator, input, matrix, true, nullptr, 0
+    )
+  ) {
     return calculator << "<br>Failed to get matrix of doubles. ";
   }
   return output.makeMatrix(calculator, matrix);
@@ -494,18 +587,28 @@ bool CalculatorConversions::functionMatrixDouble(
 bool CalculatorFunctionsIntegration::integratePullConstant(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integratePullConstant");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsIntegration::integratePullConstant"
+  );
   Expression functionExpression, variableExpression, setExpression;
-  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression, &setExpression)) {
+  if (
+    !input.isIndefiniteIntegralFdx(
+      &variableExpression, &functionExpression, &setExpression
+    )
+  ) {
     return false;
   }
   Expression functionCoefficient, functionNoCoefficient;
-  functionExpression.getCoefficientMultiplicandForm(functionCoefficient, functionNoCoefficient);
+  functionExpression.getCoefficientMultiplicandForm(
+    functionCoefficient, functionNoCoefficient
+  );
   if (functionCoefficient.isEqualToOne()) {
     return false;
   }
   Expression newIntegralExpression;
-  newIntegralExpression.makeIntegral(calculator, setExpression, functionNoCoefficient, variableExpression);
+  newIntegralExpression.makeIntegral(
+    calculator, setExpression, functionNoCoefficient, variableExpression
+  );
   output = functionCoefficient * newIntegralExpression;
   return true;
 }
@@ -513,14 +616,22 @@ bool CalculatorFunctionsIntegration::integratePullConstant(
 bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared"
+  );
   Expression functionExpression, variableExpression, setExpression;
-  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression, &setExpression)) {
+  if (
+    !input.isIndefiniteIntegralFdx(
+      &variableExpression, &functionExpression, &setExpression
+    )
+  ) {
     return false;
   }
   Expression functionCoefficient;
   Expression functionNoCoefficient;
-  functionExpression.getCoefficientMultiplicandForm(functionCoefficient, functionNoCoefficient);
+  functionExpression.getCoefficientMultiplicandForm(
+    functionCoefficient, functionNoCoefficient
+  );
   if (!functionNoCoefficient.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -528,7 +639,11 @@ bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
     return false;
   }
   Expression a, b, c;
-  if (!CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(functionNoCoefficient[1], variableExpression, a, b, c)) {
+  if (
+    !CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
+      functionNoCoefficient[1], variableExpression, a, b, c
+    )
+  ) {
     return false;
   }
   if (!b.isEqualToZero()) {
@@ -541,9 +656,9 @@ bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
     return false;
   }
   Expression squareRootedCoefficient, radicalSquared, radical;
-  squareRootedCoefficient.makeSqrt(calculator, a * (- 1));
+  squareRootedCoefficient.makeSqrt(calculator, a *(- 1));
   functionCoefficient *= squareRootedCoefficient;
-  radicalSquared = c / a * (- 1);
+  radicalSquared = c / a *(- 1);
   radical.makeSqrt(calculator, radicalSquared);
   Expression rescaledArgument, arcCosPart, algSQRTPart, algPart;
   rescaledArgument = variableExpression / radical;
@@ -552,25 +667,34 @@ bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
   algSQRTPart = radicalSquared - variableExpression * variableExpression;
   algPart.makeSqrt(calculator, algSQRTPart);
   algPart *= variableExpression / 2;
-  output = functionCoefficient * (arcCosPart + algPart);
+  output = functionCoefficient *(arcCosPart + algPart);
   return true;
 }
 
 bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateXpowerNePowerAx");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsIntegration::integrateXpowerNePowerAx"
+  );
   Expression functionExpression, variableExpression, setExpression;
-  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression, &setExpression)) {
+  if (
+    !input.isIndefiniteIntegralFdx(
+      &variableExpression, &functionExpression, &setExpression
+    )
+  ) {
     return false;
   }
   if (!functionExpression.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  Expression exponentPartE = functionExpression[1]; //<- note: the seemingly odd order is intentional!
-  Expression polyPartE = functionExpression[2]; //<- note: the seemingly odd order is intentional!
+  Expression exponentPartE = functionExpression[1];
+  // <- note: the seemingly odd order is intentional!
+  Expression polyPartE = functionExpression[2];
+  // <- note: the seemingly odd order is intentional!
   Expression powerOfXE, powerOfEE;
-  Expression aE, bE; //exponent is of form aX+b
+  Expression aE, bE;
+  // exponent is of form aX+b
   powerOfXE.assignValue(calculator, 1);
   bool isGood = false;
   for (int i = 0; i < 2; i ++) {
@@ -582,7 +706,11 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
       continue;
     }
     powerOfEE = exponentPartE[2];
-    if (!CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(powerOfEE, variableExpression, aE, bE)) {
+    if (
+      !CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(
+        powerOfEE, variableExpression, aE, bE
+      )
+    ) {
       continue;
     }
     if (!aE.isConstantNumber() || !bE.isConstantNumber()) {
@@ -612,10 +740,15 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   }
   Expression remainingIntegrand, integralPart;
   remainingIntegrand.makeXOX(
-    calculator, calculator.opPower(), variableExpression, powerOfXE - calculator.expressionOne()
+    calculator,
+    calculator.opPower(),
+    variableExpression,
+    powerOfXE - calculator.expressionOne()
   );
   remainingIntegrand *= exponentPartE;
-  integralPart.makeIntegral(calculator, setExpression,remainingIntegrand, variableExpression);
+  integralPart.makeIntegral(
+    calculator, setExpression, remainingIntegrand, variableExpression
+  );
   output = (polyPartE * exponentPartE - powerOfXE * integralPart) / aE;
   return true;
 }
@@ -623,13 +756,21 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
 bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne"
+  );
   Expression functionExpression, variableExpression, setExpression;
-  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression, &setExpression)) {
+  if (
+    !input.isIndefiniteIntegralFdx(
+      &variableExpression, &functionExpression, &setExpression
+    )
+  ) {
     return false;
   }
   Expression functionCoefficient, functionNoCoefficient;
-  functionExpression.getCoefficientMultiplicandForm(functionCoefficient, functionNoCoefficient);
+  functionExpression.getCoefficientMultiplicandForm(
+    functionCoefficient, functionNoCoefficient
+  );
   if (!functionNoCoefficient.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -637,7 +778,11 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
     return false;
   }
   Expression a, b, c;
-  if (!CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(functionNoCoefficient[1], variableExpression, a, b, c)) {
+  if (
+    !CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
+      functionNoCoefficient[1], variableExpression, a, b, c
+    )
+  ) {
     return false;
   }
   if (!b.isEqualToZero()) {
@@ -652,50 +797,83 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   Expression extraCoefficient;
   Expression variableChangeCoeffiicent;
   Expression newVariableExpression;
-  extraCoefficient.makeSqrt(calculator, c * (- 1));
+  extraCoefficient.makeSqrt(calculator, c *(- 1));
   functionCoefficient *= extraCoefficient;
-  variableChangeCoeffiicent.makeSqrt(calculator, (a / c) * (- 1));
+  variableChangeCoeffiicent.makeSqrt(calculator, (a / c) *(- 1));
   newVariableExpression = variableExpression * variableChangeCoeffiicent;
   functionCoefficient /= variableChangeCoeffiicent;
   Expression algSQRTPart, algPart, lnPart;
-  algSQRTPart = newVariableExpression * newVariableExpression - calculator.expressionOne();
+  algSQRTPart =
+  newVariableExpression * newVariableExpression - calculator.expressionOne();
   algPart.makeSqrt(calculator, algSQRTPart);
-  lnPart.makeOX(calculator, calculator.opLog(), newVariableExpression - algPart);
-  output = functionCoefficient * (algPart * newVariableExpression + lnPart) / 2;
+  lnPart.makeOX(
+    calculator, calculator.opLog(), newVariableExpression - algPart
+  );
+  output = functionCoefficient *(algPart * newVariableExpression + lnPart) / 2;
   return true;
 }
 
 bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateDefiniteIntegral");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsIntegration::integrateDefiniteIntegral"
+  );
   Expression functionExpression, variableExpression, setExpression;
-  if (!input.isDefiniteIntegralOverIntervalFdx(&variableExpression, &functionExpression, &setExpression)) {
+  if (
+    !input.isDefiniteIntegralOverIntervalFdx(
+      &variableExpression, &functionExpression, &setExpression
+    )
+  ) {
     return false;
   }
   if (!setExpression.startsWith(calculator.opLimitBoundary(), 3)) {
     return false;
   }
   if (
-    setExpression[1].containsAsSubExpressionNoBuiltInTypes(calculator.opInfinity()) ||
-    setExpression[2].containsAsSubExpressionNoBuiltInTypes(calculator.opInfinity())
+    setExpression[1].containsAsSubExpressionNoBuiltInTypes(
+      calculator.opInfinity()
+    ) ||
+    setExpression[2].containsAsSubExpressionNoBuiltInTypes(
+      calculator.opInfinity()
+    )
   ) {
     return false;
   }
   Expression indefiniteIntegral, indefiniteExpression;
-  indefiniteExpression.makeAtom(calculator, calculator.opIndefiniteIndicator());
-  indefiniteIntegral.makeIntegral(calculator, indefiniteExpression, functionExpression, variableExpression);
+  indefiniteExpression.makeAtom(
+    calculator, calculator.opIndefiniteIndicator()
+  );
+  indefiniteIntegral.makeIntegral(
+    calculator, indefiniteExpression, functionExpression, variableExpression
+  );
   Expression solvedIntegral;
-  if (!calculator.evaluateExpression(calculator, indefiniteIntegral, solvedIntegral)) {
+  if (
+    !calculator.evaluateExpression(
+      calculator, indefiniteIntegral, solvedIntegral
+    )
+  ) {
     return false;
   }
-  if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(calculator.opIntegral())) {
+  if (
+    solvedIntegral.containsAsSubExpressionNoBuiltInTypes(
+      calculator.opIntegral()
+    )
+  ) {
     return false;
   }
-  if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(calculator.opDivide())) {
+  if (
+    solvedIntegral.containsAsSubExpressionNoBuiltInTypes(
+      calculator.opDivide()
+    )
+  ) {
     return false;
   }
-  if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(calculator.opLog())) {
+  if (
+    solvedIntegral.containsAsSubExpressionNoBuiltInTypes(
+      calculator.opLog()
+    )
+  ) {
     return false;
   }
   HashedList<Expression> variables;
@@ -705,7 +883,11 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   for (int i = 1; i <= 2; i ++) {
     if (setExpression[i].evaluatesToDouble(&variableValues[0])) {
       double result = 0;
-      if (!solvedIntegral.evaluatesToDoubleUnderSubstitutions(variables, variableValues, &result)) {
+      if (
+        !solvedIntegral.evaluatesToDoubleUnderSubstitutions(
+          variables, variableValues, &result
+        )
+      ) {
         return false;
       }
     }
@@ -719,15 +901,23 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   Expression topCommands(calculator), bottomCommands(calculator);
   topCommands.addChildAtomOnTop(calculator.opCommandSequence());
   bottomCommands.addChildAtomOnTop(calculator.opCommandSequence());
-
   topCommands.addChildOnTop(substitutionTop);
   bottomCommands.addChildOnTop(substitutionBottom);
-
   topCommands.addChildOnTop(solvedIntegral);
   bottomCommands.addChildOnTop(solvedIntegral);
   Expression topExpression, bottomExpression;
-  topExpression.makeXOX(calculator, calculator.opUnderscore(), topCommands, calculator.expressionTwo());
-  bottomExpression.makeXOX(calculator, calculator.opUnderscore(), bottomCommands, calculator.expressionTwo());
+  topExpression.makeXOX(
+    calculator,
+    calculator.opUnderscore(),
+    topCommands,
+    calculator.expressionTwo()
+  );
+  bottomExpression.makeXOX(
+    calculator,
+    calculator.opUnderscore(),
+    bottomCommands,
+    calculator.expressionTwo()
+  );
   output = topExpression - bottomExpression;
   return true;
 }
@@ -735,11 +925,17 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
 bool CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions"
+  );
   if (input.size() != 3) {
     return false;
   }
-  if (!input.startsWithGivenOperation("ApplyToSubexpressionsRecurseThroughCalculusFunctions")) {
+  if (
+    !input.startsWithGivenOperation(
+      "ApplyToSubexpressionsRecurseThroughCalculusFunctions"
+    )
+  ) {
     return false;
   }
   const Expression& argumentExpression = input[2];
@@ -760,7 +956,9 @@ bool CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions(
     recursivelyModifiedExpression.addChildOnTop(argumentExpression[0]);
     for (int i = 1; i < argumentExpression.size(); i ++) {
       Expression nextE(calculator);
-      nextE.addChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
+      nextE.addChildAtomOnTop(
+        "ApplyToSubexpressionsRecurseThroughCalculusFunctions"
+      );
       nextE.addChildOnTop(input[1]);
       nextE.addChildOnTop(argumentExpression[i]);
       recursivelyModifiedExpression.addChildOnTop(nextE);
@@ -773,7 +971,9 @@ bool CalculatorFunctions::applyToSubexpressionsRecurseThroughCalculusFunctions(
   return true;
 }
 
-bool CalculatorFunctions::numerator(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::numerator(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::numerator");
   if (input.size() != 2) {
     return false;
@@ -781,7 +981,8 @@ bool CalculatorFunctions::numerator(Calculator& calculator, const Expression& in
   const Expression& argument = input[1];
   Rational rational;
   if (argument.isRational(&rational)) {
-    return output.assignValue(calculator, Rational(rational.getNumerator()));
+    return
+    output.assignValue(calculator, Rational(rational.getNumerator()));
   }
   if (argument.startsWith(calculator.opDivide())) {
     if (argument.size() > 1) {
@@ -793,7 +994,9 @@ bool CalculatorFunctions::numerator(Calculator& calculator, const Expression& in
   return true;
 }
 
-bool CalculatorFunctions::denominator(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::denominator(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::denominator");
   if (input.size() != 2) {
     return false;
@@ -816,7 +1019,9 @@ bool CalculatorFunctions::denominator(Calculator& calculator, const Expression& 
 bool CalculatorFunctions::handleUnderscorePowerLimits(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::handleUnderscorePowerLimits");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::handleUnderscorePowerLimits"
+  );
   if (
     !input.startsWith(calculator.opPower(), 3) &&
     !input.startsWith(calculator.opUnderscore(), 3)
@@ -840,7 +1045,9 @@ bool CalculatorFunctions::handleUnderscorePowerLimits(
 bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::sumAsOperatorToSumInternalNotation");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::sumAsOperatorToSumInternalNotation"
+  );
   if (input.size() <= 1) {
     return false;
   }
@@ -863,7 +1070,9 @@ bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(
 bool CalculatorFunctions::sumTimesExpressionToSumOf(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::sumTimesExpressionToSumOf");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::sumTimesExpressionToSumOf"
+  );
   if (
     !input.startsWith(calculator.opTimes(), 3) &&
     !input.startsWith(calculator.opDivide(), 3)
@@ -889,7 +1098,7 @@ bool CalculatorFunctions::sumTimesExpressionToSumOf(
     accumulated.addChildOnTop(input[1][2]);
     accumulated.addChildOnTop(input[2]);
     output = input[1];
-    return output.setChild(2,accumulated);
+    return output.setChild(2, accumulated);
   }
   return false;
 }
@@ -926,7 +1135,8 @@ bool CalculatorFunctions::multiplySequence(
     return false;
   }
   if (input.size() == 2 && input[1].isSequenceNElements()) {
-    return CalculatorFunctions::multiplySequence(calculator, input[1], output);
+    return
+    CalculatorFunctions::multiplySequence(calculator, input[1], output);
   }
   List<Expression> terms;
   for (int i = 1; i < input.size(); i ++) {
@@ -938,7 +1148,9 @@ bool CalculatorFunctions::multiplySequence(
 bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::ensureExpressionDependsOnlyOnStandard");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::ensureExpressionDependsOnlyOnStandard"
+  );
   if (input.size() < 3) {
     return false;
   }
@@ -953,8 +1165,13 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
   expression.getFreeVariables(presentFreeVars, true);
   if (!allowedFreeVars.contains(presentFreeVars)) {
     out << "<hr>";
-    out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
-    << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
+    out
+    << "Your expression:<br>\\("
+    << input[1].toString()
+    << "\\)"
+    <<
+    "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>"
+    ;
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
       if (!allowedFreeVars.contains(presentFreeVars[i])) {
@@ -966,18 +1183,29 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
       }
     }
     out << "</b>.";
-    out << "<br>The expected variables are: " << allowedFreeVars.toStringCommaDelimited() << ". ";
-    out << "<br>Beware of typos such as:<br>[wrong:] <span style ='color:red'>lnx, sqrt2</span>  "
-    << "<br>[correct:] <span style ='color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
-    << "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>";
+    out
+    << "<br>The expected variables are: "
+    << allowedFreeVars.toStringCommaDelimited()
+    << ". ";
+    out
+    <<
+    "<br>Beware of typos such as:<br>[wrong:] <span style ='color:red'>lnx, sqrt2</span>  "
+    <<
+    "<br>[correct:] <span style ='color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
+    <<
+    "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>"
+    ;
     return output.assignValue(calculator, out.str());
   }
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::removeDuplicates(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::removeDuplicates(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::removeDuplicates");
-  int operationRemoveDuplicated = calculator.operations.getIndexNoFail("RemoveDuplicates");
+  int operationRemoveDuplicated =
+  calculator.operations.getIndexNoFail("RemoveDuplicates");
   if (
     !input.isListStartingWithAtom(operationRemoveDuplicated) &&
     !input.isSequenceNElements()
@@ -991,7 +1219,9 @@ bool CalculatorFunctions::removeDuplicates(Calculator& calculator, const Express
   return output.makeSequence(calculator, &result);
 }
 
-bool CalculatorFunctions::sort(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::sort(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::sort");
   List<Expression> sortedExpressions;
   const Expression* toBeSorted = &input;
@@ -1013,7 +1243,9 @@ bool CalculatorFunctions::sortDescending(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::sortDescending");
   if (
-    !input.isListStartingWithAtom(calculator.operations.getIndexNoFail("SortDescending")) &&
+    !input.isListStartingWithAtom(
+      calculator.operations.getIndexNoFail("SortDescending")
+    ) &&
     !input.isSequenceNElements()
   ) {
     return false;
@@ -1033,11 +1265,15 @@ bool CalculatorFunctions::sortDescending(
   return output.makeSequence(calculator, &sortedExpressions);
 }
 
-bool CalculatorFunctionsListsAndSets::length(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsListsAndSets::length(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::length");
-  if (!input.isListStartingWithAtom(
-    calculator.operations.getIndexNoFail("Length")
-  )) {
+  if (
+    !input.isListStartingWithAtom(
+      calculator.operations.getIndexNoFail("Length")
+    )
+  ) {
     return false;
   }
   if (input.size() == 2) {
@@ -1049,9 +1285,14 @@ bool CalculatorFunctionsListsAndSets::length(Calculator& calculator, const Expre
 }
 
 bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
-  Calculator& calculator, const Expression& input, Expression& output, bool excludeNamedConstants
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool excludeNamedConstants
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables"
+  );
   if (input.size() < 3) {
     return false;
   }
@@ -1080,8 +1321,13 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
   std::stringstream out;
   if (!presentFreeVars.contains(mandatoryFreeVars)) {
     out << "<hr>";
-    out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
-    << "<br><b style ='color:red'>is required to contain the variables:</b><br><b>";
+    out
+    << "Your expression:<br>\\("
+    << input[1].toString()
+    << "\\)"
+    <<
+    "<br><b style ='color:red'>is required to contain the variables:</b><br><b>"
+    ;
     bool found = false;
     for (int i = 0; i < mandatoryFreeVars.size; i ++) {
       if (!presentFreeVars.contains(mandatoryFreeVars[i])) {
@@ -1093,12 +1339,20 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
       }
     }
     out << "</b>.";
-    out << "<br>The mandatory variable(s) are: " << mandatoryFreeVars.toStringCommaDelimited() << ". ";
+    out
+    << "<br>The mandatory variable(s) are: "
+    << mandatoryFreeVars.toStringCommaDelimited()
+    << ". ";
   }
   if (!allowedFreeVars.contains(presentFreeVars)) {
     out << "<hr>";
-    out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
-    << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
+    out
+    << "Your expression:<br>\\("
+    << input[1].toString()
+    << "\\)"
+    <<
+    "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>"
+    ;
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
       if (!allowedFreeVars.contains(presentFreeVars[i])) {
@@ -1110,17 +1364,27 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
       }
     }
     out << "</b>.";
-    out << "<br>The expected variables are: " << allowedFreeVars.toStringCommaDelimited() << ". ";
+    out
+    << "<br>The expected variables are: "
+    << allowedFreeVars.toStringCommaDelimited()
+    << ". ";
   }
   if (out.str() != "") {
-    out << "<br>Beware of typos such as:<br>[wrong:] <span style = 'color:red'>lnx, sqrt2</span>  "
-    << "<br>[correct:] <span style = 'color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
-    << "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>";
+    out
+    <<
+    "<br>Beware of typos such as:<br>[wrong:] <span style = 'color:red'>lnx, sqrt2</span>  "
+    <<
+    "<br>[correct:] <span style = 'color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
+    <<
+    "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>"
+    ;
   }
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctionsPlot::plotGrid(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsPlot::plotGrid(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::plotGrid");
   (void) input;
   PlotObject plot;
@@ -1132,7 +1396,9 @@ bool CalculatorFunctionsPlot::plotGrid(Calculator& calculator, const Expression&
 bool CalculatorFunctionsPlot::plotRemoveCoordinateAxes(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::plotRemoveCoordinateAxes");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::plotRemoveCoordinateAxes"
+  );
   (void) input;
   Plot plotFinal;
   plotFinal.dimension = 2;
@@ -1180,7 +1446,6 @@ bool CalculatorFunctionsPlot::plotRectangle(
   plot.plotType = PlotObject::PlotTypes::pathFilled;
   Vector<double> currentCorner = rectangle[0];
   Vector<double>& dimensions = rectangle[1];
-
   plot.pointsDouble.addOnTop(currentCorner);
   currentCorner[0] += dimensions[0];
   plot.pointsDouble.addOnTop(currentCorner);
@@ -1194,8 +1459,12 @@ bool CalculatorFunctionsPlot::plotRectangle(
   plot.colorJS = "blue";
   plot.pointsDouble.addOnTop(currentCorner);
   plot.rectangles.addOnTop(rectangle);
-  plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
-  plot.colorFillRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
+  plot.colorRGB = static_cast<int>(
+    HtmlRoutines::redGreenBlue(0, 0, 255)
+  );
+  plot.colorFillRGB = static_cast<int>(
+    HtmlRoutines::redGreenBlue(0, 255, 255)
+  );
   return output.assignValue(calculator, plot);
 }
 
@@ -1213,7 +1482,8 @@ bool CalculatorFunctions::operatorBounds(
   Expression limitsExpression;
   int integralOperator = baseE.data;
   if (
-    integralOperator == calculator.opIntegral() || integralOperator == calculator.opSum()
+    integralOperator == calculator.opIntegral() ||
+    integralOperator == calculator.opSum()
   ) {
     output.reset(calculator);
     output.addChildAtomOnTop(integralOperator);
@@ -1236,7 +1506,9 @@ bool CalculatorFunctions::operatorBounds(
     if (i < baseE[1].size()) {
       limitsExpression.addChildOnTop(baseE[1][i]);
     } else {
-      limitsExpression.addChildAtomOnTop(calculator.opIndefiniteIndicator());
+      limitsExpression.addChildAtomOnTop(
+        calculator.opIndefiniteIndicator()
+      );
     }
   }
   if (input[1].isOperationGiven(calculator.opUnderscore())) {
@@ -1284,7 +1556,7 @@ bool CalculatorFunctions::distributeExponent(
   if (!base[1].isConstantNumber()) {
     return false;
   }
-  bool isGood =base[1].isPositiveNumber() || base[2].isPositiveNumber();
+  bool isGood = base[1].isPositiveNumber() || base[2].isPositiveNumber();
   if (!isGood) {
     if (exponentE.isInteger()) {
       isGood = true;
@@ -1301,8 +1573,12 @@ bool CalculatorFunctions::distributeExponent(
     return false;
   }
   Expression leftE, rightE;
-  leftE.makeXOX(calculator, calculator.opPower(), input[1][1], input[2]);
-  rightE.makeXOX(calculator, calculator.opPower(), input[1][2], input[2]);
+  leftE.makeXOX(
+    calculator, calculator.opPower(), input[1][1], input[2]
+  );
+  rightE.makeXOX(
+    calculator, calculator.opPower(), input[1][2], input[2]
+  );
   return output.makeXOX(calculator, calculator.opTimes(), leftE, rightE);
 }
 
@@ -1319,10 +1595,16 @@ bool CalculatorFunctions::sqrt(
       Expression powerE, powerEreduced, exponentExpression;
       ratPower.invert();
       exponentExpression.assignValue(calculator, ratPower);
-      powerE.makeXOX(calculator,calculator.opPower(), input[2], exponentExpression);
-      if (CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors(
-        calculator, powerE, powerEreduced
-      )) {
+      powerE.makeXOX(
+        calculator,
+        calculator.opPower(),
+        input[2],
+        exponentExpression
+      );
+      if (
+        CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors
+        (calculator, powerE, powerEreduced)
+      ) {
         if (powerEreduced != powerE && powerEreduced != input) {
           output = powerEreduced;
           return true;
@@ -1337,12 +1619,15 @@ bool CalculatorFunctions::sqrt(
   if (!input[1].isSmallInteger(&power)) {
     return false;
   }
-  if (!input[2].isRational() ) {
+  if (!input[2].isRational()) {
     calculator.checkInputNotSameAsOutput(input, output);
     Expression exponent;
     Rational powerRational(1, power);
     exponent.assignValue(calculator, powerRational);
-    return output.makeXOX(calculator, calculator.opPower(), input[2], exponent);
+    return
+    output.makeXOX(
+      calculator, calculator.opPower(), input[2], exponent
+    );
   }
   if (power > 0 && input[2].isEqualToZero()) {
     return output.assignValue(calculator, 0);
@@ -1356,9 +1641,9 @@ bool CalculatorFunctions::sqrt(
   }
   if (power < 0) {
     if (rationalValue.isEqualToZero()) {
-      return output.assignError(
-        calculator,
-        "Division by zero in expression: " + input.toString()
+      return
+      output.assignError(
+        calculator, "Division by zero in expression: " + input.toString()
       );
     }
     power *= - 1;
@@ -1368,11 +1653,13 @@ bool CalculatorFunctions::sqrt(
     return false;
   }
   AlgebraicNumber algebraicNumber;
-  if (!algebraicNumber.assignRationalQuadraticRadical(
-    rationalValue,
-    calculator.objectContainer.algebraicClosure,
-    &calculator.comments
-  )) {
+  if (
+    !algebraicNumber.assignRationalQuadraticRadical(
+      rationalValue,
+      calculator.objectContainer.algebraicClosure,
+      &calculator.comments
+    )
+  ) {
     return false;
   }
   return output.assignValue(calculator, algebraicNumber);
@@ -1392,7 +1679,10 @@ bool CalculatorFunctionsBasic::floor(
   }
   double floatingPointNumber = 0;
   if (input[1].evaluatesToDouble(&floatingPointNumber)) {
-    return output.assignValue(calculator, static_cast<int>(std::floor(floatingPointNumber)));
+    return
+    output.assignValue(
+      calculator, static_cast<int>(std::floor(floatingPointNumber))
+    );
   }
   return false;
 }
@@ -1400,9 +1690,13 @@ bool CalculatorFunctionsBasic::floor(
 bool CalculatorFunctionsBasic::logarithmBaseNCeiling(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::logarithmBaseNCeiling");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsBasic::logarithmBaseNCeiling"
+  );
   if (input.size() != 3) {
-    return calculator << "Logarithm ceiling function expects exactly two arguments. ";
+    return
+    calculator
+    << "Logarithm ceiling function expects exactly two arguments. ";
   }
   int smallInt = 0;
   if (!input[1].isSmallInteger(&smallInt)) {
@@ -1413,7 +1707,9 @@ bool CalculatorFunctionsBasic::logarithmBaseNCeiling(
   }
   LargeIntegerUnsigned argument;
   if (!input[2].isIntegerNonNegative(&argument)) {
-    return calculator << "Failed to extract positive intger from second argument. ";
+    return
+    calculator
+    << "Failed to extract positive intger from second argument. ";
   }
   int result = static_cast<int>(
     argument.logarithmBaseNCeiling(static_cast<unsigned>(smallInt))
@@ -1439,14 +1735,17 @@ bool CalculatorFunctionsBasic::round(
   }
   double doubleNumber = 0;
   if (input[1].evaluatesToDouble(&doubleNumber)) {
-    return output.assignValue(calculator,
-      static_cast<int>(std::round(doubleNumber))
+    return
+    output.assignValue(
+      calculator, static_cast<int>(std::round(doubleNumber))
     );
   }
   return false;
 }
 
-bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsPlot::plotPath(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::plotPath");
   if (input.size() < 3) {
     return false;
@@ -1454,29 +1753,40 @@ bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression&
   const Expression& matrixE = input[1];
   Matrix<double> matrix;
   if (!calculator.getMatrixDoubles(matrixE, matrix)) {
-    return calculator << "Failed to extract matrix from: " << matrixE.toString();
+    return
+    calculator
+    << "Failed to extract matrix from: "
+    << matrixE.toString();
   }
   if (matrix.numberOfColumns != 2 && matrix.numberOfColumns != 3) {
-    return calculator << "Only dimensions 2 and 3 are supported at the moment. ";
+    return
+    calculator
+    << "Only dimensions 2 and 3 are supported at the moment. ";
   }
   PlotObject segment;
   if (input.size() >= 3) {
     segment.colorJS = "black";
-    segment.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+    segment.colorRGB = static_cast<int>(
+      HtmlRoutines::redGreenBlue(0, 0, 0)
+    );
     const Expression& colorE = input[2];
     if (!colorE.isOfType<std::string>(&segment.colorJS)) {
       segment.colorJS = colorE.toString();
     }
-    if (!DrawingVariables::getColorIntFromColorString(
-      segment.colorJS, segment.colorRGB
-    )) {
+    if (
+      !DrawingVariables::getColorIntFromColorString(
+        segment.colorJS, segment.colorRGB
+      )
+    ) {
       calculator << "Unrecognized color: " << segment.colorJS;
     }
   }
   if (input.size() >= 4) {
     const Expression& lineWidthE = input[3];
     if (!lineWidthE.evaluatesToDouble(&segment.lineWidth)) {
-      calculator << "Failed to extract line width from: " << lineWidthE.toString();
+      calculator
+      << "Failed to extract line width from: "
+      << lineWidthE.toString();
     }
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
@@ -1506,7 +1816,10 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   Vector<double> leftV, rightV;
-  if (!calculator.getVectorDoubles(leftE, leftV) || !calculator.getVectorDoubles(rightE, rightV)) {
+  if (
+    !calculator.getVectorDoubles(leftE, leftV) ||
+    !calculator.getVectorDoubles(rightE, rightV)
+  ) {
     return false;
   }
   if (leftV.size != rightV.size) {
@@ -1518,7 +1831,10 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   int numSegments = 1;
   if (input.size() >= 4) {
     if (!input[3].isSmallInteger(&numSegments)) {
-      return calculator << "Could not extract small integer from " << input[3].toString();
+      return
+      calculator
+      << "Could not extract small integer from "
+      << input[3].toString();
     }
   }
   if (numSegments < 1 || numSegments > 100) {
@@ -1527,10 +1843,22 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   Expression vectorExpression = (rightE - leftE);
   Expression midPt = (rightE + leftE) / 2;
   Expression vectorX, vectorY;
-  vectorX.makeXOX(calculator, calculator.opUnderscore(), vectorExpression, calculator.expressionOne());
-  vectorY.makeXOX(calculator, calculator.opUnderscore(), vectorExpression, calculator.expressionTwo());
+  vectorX.makeXOX(
+    calculator,
+    calculator.opUnderscore(),
+    vectorExpression,
+    calculator.expressionOne()
+  );
+  vectorY.makeXOX(
+    calculator,
+    calculator.opUnderscore(),
+    vectorExpression,
+    calculator.expressionTwo()
+  );
   Expression orthogonalVector;
-  orthogonalVector.makeXOX(calculator, calculator.opSequence(), vectorY * (- 1), vectorX);
+  orthogonalVector.makeXOX(
+    calculator, calculator.opSequence(), vectorY *(- 1), vectorX
+  );
   Expression leftPt = midPt - orthogonalVector / 25;
   Expression rightPt = midPt + orthogonalVector / 25;
   output.reset(calculator);
@@ -1543,7 +1871,9 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   return true;
 }
 
-bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsPlot::plotSegment(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotSegment");
   if (input.size() < 3) {
     return false;
@@ -1551,7 +1881,10 @@ bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expressi
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   Vector<double> leftV, rightV;
-  if (!calculator.getVectorDoubles(leftE, leftV) || !calculator.getVectorDoubles(rightE, rightV)) {
+  if (
+    !calculator.getVectorDoubles(leftE, leftV) ||
+    !calculator.getVectorDoubles(rightE, rightV)
+  ) {
     return false;
   }
   if (leftV.size != rightV.size) {
@@ -1563,19 +1896,26 @@ bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expressi
   PlotObject segment;
   if (input.size() >= 4) {
     segment.colorJS = "black";
-    segment.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+    segment.colorRGB = static_cast<int>(
+      HtmlRoutines::redGreenBlue(0, 0, 0)
+    );
     const Expression& colorE = input[3];
     if (!colorE.isOfType<std::string>(&segment.colorJS)) {
       segment.colorJS = colorE.toString();
     }
-    if (!DrawingVariables::getColorIntFromColorString(segment.colorJS, segment.colorRGB)) {
+    if (
+      !DrawingVariables::getColorIntFromColorString(
+        segment.colorJS, segment.colorRGB
+      )
+    ) {
       calculator << "Unrecognized color: " << segment.colorJS;
     }
   }
   if (input.size() >= 5) {
     const Expression& lineWidthE = input[4];
     if (!lineWidthE.evaluatesToDouble(&segment.lineWidth)) {
-      calculator << "Failed to extract line width from: "
+      calculator
+      << "Failed to extract line width from: "
       << lineWidthE.toString();
     }
     std::stringstream lineWidthStream;
@@ -1601,7 +1941,9 @@ bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expressi
   return output.assignValue(calculator, plot);
 }
 
-bool CalculatorFunctions::thaw(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::thaw(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::thaw");
   if (input.size() < 2) {
     return false;
@@ -1625,16 +1967,21 @@ bool CalculatorFunctions::thaw(Calculator& calculator, const Expression& input, 
 bool CalculatorFunctions::leastCommonMultipleInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::leastCommonMultipleInteger");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::leastCommonMultipleInteger"
+  );
   if (input.size() < 3) {
     return false;
   }
   Vector<LargeInteger> integers;
-  if (!calculator.getVectorLargeIntegerFromFunctionArguments(input, integers)) {
+  if (
+    !calculator.getVectorLargeIntegerFromFunctionArguments(input, integers)
+  ) {
     return false;
   }
   if (integers.size < 1) {
-    //<-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments works as intended.
+    // <-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments
+    // works as intended.
     return false;
   }
   LargeIntegerUnsigned result = integers[0].value;
@@ -1645,7 +1992,8 @@ bool CalculatorFunctions::leastCommonMultipleInteger(
     if (integers[i].value == 0) {
       return false;
     }
-    result = LargeIntegerUnsigned::leastCommonMultiple(result, integers[i].value);
+    result =
+    LargeIntegerUnsigned::leastCommonMultiple(result, integers[i].value);
   }
   return output.assignValue(calculator, result);
 }
@@ -1653,16 +2001,21 @@ bool CalculatorFunctions::leastCommonMultipleInteger(
 bool CalculatorFunctions::greatestCommonDivisorInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::greatestCommonDivisorInteger");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::greatestCommonDivisorInteger"
+  );
   if (input.size() < 3) {
     return false;
   }
   Vector<LargeInteger> integers;
-  if (!calculator.getVectorLargeIntegerFromFunctionArguments(input, integers)) {
+  if (
+    !calculator.getVectorLargeIntegerFromFunctionArguments(input, integers)
+  ) {
     return false;
   }
   if (integers.size < 1) {
-    //<-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments works as intended.
+    // <-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments
+    // works as intended.
     return false;
   }
   LargeIntegerUnsigned result = integers[0].value;
@@ -1673,7 +2026,10 @@ bool CalculatorFunctions::greatestCommonDivisorInteger(
     if (integers[i].value == 0) {
       return false;
     }
-    result = LargeIntegerUnsigned::greatestCommonDivisor(result, integers[i].value);
+    result =
+    LargeIntegerUnsigned::greatestCommonDivisor(
+      result, integers[i].value
+    );
   }
   return output.assignValue(calculator, result);
 }
@@ -1693,7 +2049,9 @@ bool CalculatorFunctionsBasic::logarithmBaseNaturalToLn(
 bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::logarithmBaseSimpleCases");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::logarithmBaseSimpleCases"
+  );
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }
@@ -1712,8 +2070,12 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   }
   if (base == 0 || argument == 0) {
     std::stringstream errorStream;
-    errorStream << "Attempt to take logarithm base " << base
-    << " of " << argument << " is not allowed. ";
+    errorStream
+    << "Attempt to take logarithm base "
+    << base
+    << " of "
+    << argument
+    << " is not allowed. ";
     return output.assignError(calculator, errorStream.str());
   }
   if (argument == 1) {
@@ -1725,14 +2087,18 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   if (base < 1) {
     base.invert();
     newBaseE.assignValue(calculator, base);
-    output.makeXOX(calculator, calculator.opLogBase(), newBaseE, newArgE);
+    output.makeXOX(
+      calculator, calculator.opLogBase(), newBaseE, newArgE
+    );
     output *= - 1;
     return true;
   }
   if (argument < 1) {
     argument.invert();
     newArgE.assignValue(calculator, argument);
-    output.makeXOX(calculator, calculator.opLogBase(), newBaseE, newArgE);
+    output.makeXOX(
+      calculator, calculator.opLogBase(), newBaseE, newArgE
+    );
     output *= - 1;
     return true;
   }
@@ -1746,7 +2112,9 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   if (baseInt.tryIsPower(isPower, simplerBase, simplerPower)) {
     if (isPower) {
       newBaseE.assignValue(calculator, Rational(simplerBase));
-      output.makeXOX(calculator, calculator.opLogBase(), newBaseE, newArgE);
+      output.makeXOX(
+        calculator, calculator.opLogBase(), newBaseE, newArgE
+      );
       output /= simplerPower;
       return true;
     }
@@ -1755,7 +2123,11 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   LargeInteger argDen = argument.getDenominator();
   double doubleBase = baseInt.getDoubleValue();
   double doubleArgNum = argNum.getDoubleValue();
-  if (FloatingPoint::logFloating(doubleArgNum) / FloatingPoint::logFloating(doubleBase) > 1000) {
+  if (
+    FloatingPoint::logFloating(doubleArgNum) /
+    FloatingPoint::logFloating(doubleBase) >
+    1000
+  ) {
     return false;
   }
   int intPart = 0;
@@ -1786,9 +2158,12 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
 }
 
 std::string InputBox::getSliderName() const {
-  return StringRoutines::convertStringToJavascriptVariable(
+  return
+  StringRoutines::convertStringToJavascriptVariable(
     this->name +
-    Crypto::convertStringToHex(Crypto::computeSha256(this->name), 0, false)
+    Crypto::convertStringToHex(
+      Crypto::computeSha256(this->name), 0, false
+    )
   );
 }
 
@@ -1799,11 +2174,21 @@ std::string InputBox::getUserInputBox() const {
   out.precision(4);
   out << std::fixed;
   if (this->value.evaluatesToDouble(&reader)) {
-    out << "\\formInput"
-    << "{" << reader << ", " << this->getSliderName() << "}" ;
+    out
+    << "\\formInput"
+    << "{"
+    << reader
+    << ", "
+    << this->getSliderName()
+    << "}";
   } else {
-    out << "\\formInput" << "{" << this->value.toString()
-    << ", " << this->getSliderName() << "}" ;
+    out
+    << "\\formInput"
+    << "{"
+    << this->value.toString()
+    << ", "
+    << this->getSliderName()
+    << "}";
   }
   return out.str();
 }
@@ -1811,18 +2196,24 @@ std::string InputBox::getUserInputBox() const {
 bool CalculatorFunctions::makeJavascriptExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::makeJavascriptExpression");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::makeJavascriptExpression"
+  );
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionMakeJavascriptExpression(calculator, input[1], output);
+  return
+  CalculatorFunctions::functionMakeJavascriptExpression(
+    calculator, input[1], output
+  );
 }
 
 bool CalculatorFunctions::functionMakeJavascriptExpression(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::functionMakeJavascriptExpression");
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::functionMakeJavascriptExpression"
+  );
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (calculator.recursionDepthExceededHandleRoughly()) {
     return false;
@@ -1842,9 +2233,17 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
       return output.assignValue<std::string>(calculator, " 3.141592654 ");
     }
     if (input.data >= calculator.numberOfPredefinedAtoms) {
-      return output.assignValue(calculator, HtmlRoutines::getJavascriptVariable(atomString));
+      return
+      output.assignValue(
+        calculator, HtmlRoutines::getJavascriptVariable(atomString)
+      );
     }
-    if (atomString == "+" || atomString == "*" || atomString == "/" || atomString == "-") {
+    if (
+      atomString == "+" ||
+      atomString == "*" ||
+      atomString == "/" ||
+      atomString == "-"
+    ) {
       return output.assignValue(calculator, atomString);
     }
     return output.assignValue(calculator, atomString);
@@ -1864,7 +2263,8 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     doubleValue = input.getValue<Rational>().getDoubleValue();
   }
   if (input.isOfType<AlgebraicNumber>()) {
-    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&doubleValue);
+    hasDoubleValue =
+    input.getValue<AlgebraicNumber>().evaluatesToDouble(&doubleValue);
   }
   if (input.isOfType<double>()) {
     hasDoubleValue = true;
@@ -1882,11 +2282,21 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     return output.assignValue(calculator, out.str());
   }
   Expression operation, leftE, rightE;
-  if (input.startsWith(calculator.opSequence()) || input.startsWith(calculator.opIntervalOpen())) {
+  if (
+    input.startsWith(calculator.opSequence()) ||
+    input.startsWith(calculator.opIntervalOpen())
+  ) {
     out << "[";
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorFunctions::functionMakeJavascriptExpression(calculator, input[i], operation)) {
-        return output.assignValue(calculator, "(Failed to convert " + input[i].toString() + ")");
+      if (
+        !CalculatorFunctions::functionMakeJavascriptExpression(
+          calculator, input[i], operation
+        )
+      ) {
+        return
+        output.assignValue(
+          calculator, "(Failed to convert " + input[i].toString() + ")"
+        );
       }
       out << operation.toString();
       if (i != input.size() - 1) {
@@ -1902,14 +2312,28 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     Expression* currentE = &operation;
     std::string* currentString = &opString;
     for (int i = 0; i < input.size(); i ++) {
-      if (!CalculatorFunctions::functionMakeJavascriptExpression(calculator, input[i], *currentE)) {
-        return output.assignValue(calculator, "(Failed to convert " + input[i].toString() + ")");
+      if (
+        !CalculatorFunctions::functionMakeJavascriptExpression(
+          calculator, input[i], *currentE
+        )
+      ) {
+        return
+        output.assignValue(
+          calculator, "(Failed to convert " + input[i].toString() + ")"
+        );
       }
       if (!currentE->isOfType(currentString)) {
-        return output.assignValue(calculator, "(Failed to convert " + input[i].toString() + ")");
+        return
+        output.assignValue(
+          calculator, "(Failed to convert " + input[i].toString() + ")"
+        );
       }
-      logStream << "Converted: " << input[i].toString() << " to: "
-      << *currentString << ". ";
+      logStream
+      << "Converted: "
+      << input[i].toString()
+      << " to: "
+      << *currentString
+      << ". ";
       if (i == 0) {
         currentE = &leftE;
         currentString = &leftString;
@@ -1920,8 +2344,20 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
       }
     }
     if (input.size() == 3) {
-      if (opString == "+" || opString == "-" || opString == "/" || opString == "*") {
-        out << "(" << leftString <<  " " << opString << " " << rightString << ")";
+      if (
+        opString == "+" ||
+        opString == "-" ||
+        opString == "/" ||
+        opString == "*"
+      ) {
+        out
+        << "("
+        << leftString
+        << " "
+        << opString
+        << " "
+        << rightString
+        << ")";
         return output.assignValue(calculator, out.str());
       }
       if (opString == "\\sqrt") {
@@ -1933,15 +2369,22 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
         return output.assignValue(calculator, out.str());
       }
       if (opString == "LogBase") {
-        out << "Math.log(" << rightString << ") / Math.log(" << leftString << ")";
+        out
+        << "Math.log("
+        << rightString
+        << ") / Math.log("
+        << leftString
+        << ")";
         return output.assignValue(calculator, out.str());
       }
     }
     if (input.size() == 2) {
-      std::string functionName ="";
+      std::string functionName = "";
       if (
-        opString == "\\sin" || opString == "\\cos" ||
-        opString == "\\log" || opString == "\\tan" ||
+        opString == "\\sin" ||
+        opString == "\\cos" ||
+        opString == "\\log" ||
+        opString == "\\tan" ||
         opString == "\\cot"
       ) {
         functionName = opString.substr(1);
@@ -1967,15 +2410,21 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
       }
     }
   }
-  out << "(Failed to make expression from " << input.toString() << ". "
-  << logStream.str() << ")";
+  out
+  << "(Failed to make expression from "
+  << input.toString()
+  << ". "
+  << logStream.str()
+  << ")";
   return output.assignValue(calculator, out.str());
 }
 
 bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotSetProjectionScreenBasis");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPlot::plotSetProjectionScreenBasis"
+  );
   if (input.size() != 3) {
     return false;
   }
@@ -1984,8 +2433,13 @@ bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(
     !calculator.getVectorDoubles(input[1], v1, 3) ||
     !calculator.getVectorDoubles(input[2], v2, 3)
   ) {
-    return calculator << "Failed to extract 3d-vectors from "
-    << input[1].toString() << ", " << input[2].toString() << ".";
+    return
+    calculator
+    << "Failed to extract 3d-vectors from "
+    << input[1].toString()
+    << ", "
+    << input[2].toString()
+    << ".";
   }
   Plot resultPlot;
   resultPlot.dimension = 3;
@@ -1997,8 +2451,12 @@ bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(
   return output.assignValue(calculator, resultPlot);
 }
 
-bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotCoordinateSystem");
+bool CalculatorFunctionsPlot::plotCoordinateSystem(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPlot::plotCoordinateSystem"
+  );
   if (input.size() != 3) {
     return false;
   }
@@ -2007,9 +2465,13 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const
     !calculator.getVectorDoubles(input[1], corner1, 3) ||
     !calculator.getVectorDoubles(input[2], corner2, 3)
   ) {
-    return calculator << "Failed to extract 3d-vectors from "
-    << input[1].toString() << ", "
-    << input[2].toString() << ".";
+    return
+    calculator
+    << "Failed to extract 3d-vectors from "
+    << input[1].toString()
+    << ", "
+    << input[2].toString()
+    << ".";
   }
   Plot resultPlot;
   resultPlot.dimension = 3;
@@ -2039,7 +2501,9 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const
   return output.assignValue(calculator, resultPlot);
 }
 
-bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsPlot::plotSurface(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotSurface");
   PlotObject plot;
   bool found = false;
@@ -2051,13 +2515,17 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
     }
   }
   if (!found) {
-    return calculator << "Could not find a triple of "
+    return
+    calculator
+    << "Could not find a triple of "
     << "functions expressions to use for "
     << "the surface. ";
   }
   plot.manifoldImmersion.getFreeVariables(plot.variablesInPlay, true);
   if (plot.variablesInPlay.size > 2) {
-    return calculator << "Got a surface with "
+    return
+    calculator
+    << "Got a surface with "
     << plot.variablesInPlay.size
     << " variables, namely: "
     << plot.variablesInPlay.toStringCommaDelimited()
@@ -2090,14 +2558,20 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
   Expression jsConverter;
   for (int i = 1; i < plot.manifoldImmersion.size(); i ++) {
     plot.coordinateFunctionsE[i - 1] = plot.manifoldImmersion[i];
-    bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
+    bool isGood =
+    CalculatorFunctions::functionMakeJavascriptExpression(
       calculator, plot.coordinateFunctionsE[i - 1], jsConverter
     );
     if (isGood) {
-      isGood = jsConverter.isOfType<std::string>(&plot.coordinateFunctionsJS[i - 1]);
+      isGood =
+      jsConverter.isOfType<std::string>(
+        &plot.coordinateFunctionsJS[i - 1]
+      );
     }
     if (!isGood) {
-      return calculator << "Failed to convert "
+      return
+      calculator
+      << "Failed to convert "
       << plot.coordinateFunctionsE[i - 1].toString()
       << " to a javascript expression. ";
     }
@@ -2113,23 +2587,32 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
         continue;
       }
       for (int j = 0; j < 2; j ++) {
-        bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
+        bool isGood =
+        CalculatorFunctions::functionMakeJavascriptExpression(
           calculator, input[i][2][j + 1], jsConverter
         );
         if (isGood) {
-          isGood = jsConverter.isOfType<std::string>(&plot.variableRangesJS[index][j]);
+          isGood =
+          jsConverter.isOfType<std::string>(
+            &plot.variableRangesJS[index][j]
+          );
         }
         if (!isGood) {
-          return calculator << "Failed to convert "
-          << input[i][2][j + 1].toString() << " to a javascript expression. ";
+          return
+          calculator
+          << "Failed to convert "
+          << input[i][2][j + 1].toString()
+          << " to a javascript expression. ";
         }
       }
     }
   }
   MapList<std::string, Expression, MathRoutines::hashString> keys;
-  if (CalculatorConversions::loadKeysFromStatementList(
-    calculator, input, keys, &calculator.comments, true
-  )) {
+  if (
+    CalculatorConversions::loadKeysFromStatementList(
+      calculator, input, keys, &calculator.comments, true
+    )
+  ) {
     if (keys.contains("color1")) {
       plot.colorUV = keys.getValueCreateEmpty("color1").toString();
     }
@@ -2144,25 +2627,32 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
       if (!keys.contains(keysToConvert.keys[i])) {
         continue;
       }
-      Expression expressionToConvert = keys.getValueCreateEmpty(keysToConvert.keys[i]);
-      bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
+      Expression expressionToConvert =
+      keys.getValueCreateEmpty(keysToConvert.keys[i]);
+      bool isGood =
+      CalculatorFunctions::functionMakeJavascriptExpression(
         calculator, expressionToConvert, jsConverter
       );
       if (isGood) {
-        isGood = jsConverter.isOfType<std::string>(&keysToConvert.values[i]);
+        isGood =
+        jsConverter.isOfType<std::string>(&keysToConvert.values[i]);
       }
       if (!isGood) {
-        return calculator << "Failed to convert "
+        return
+        calculator
+        << "Failed to convert "
         << expressionToConvert.toString()
         << " to a javascript expression. ";
       }
     }
     plot.numberOfSegmentsJS.setSize(2);
     if (keysToConvert.getValueCreateEmpty("numSegments1") != "") {
-      plot.numberOfSegmentsJS[0] = keysToConvert.getValueCreateEmpty("numSegments1");
+      plot.numberOfSegmentsJS[0] =
+      keysToConvert.getValueCreateEmpty("numSegments1");
     }
     if (keysToConvert.getValueCreateEmpty("numSegments2") != "") {
-      plot.numberOfSegmentsJS[1] = keysToConvert.getValueCreateEmpty("numSegments2");
+      plot.numberOfSegmentsJS[1] =
+      keysToConvert.getValueCreateEmpty("numSegments2");
     }
     if (keysToConvert.getValueCreateEmpty("lineWidth") != "") {
       plot.lineWidthJS = keysToConvert.getValueCreateEmpty("lineWidth");
@@ -2174,16 +2664,20 @@ bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expressi
     plot.variableRangesJS[1][0] == "" ||
     plot.variableRangesJS[1][1] == ""
   ) {
-    return calculator << "Could not extract variable ranges, got the var ranges: "
+    return
+    calculator
+    << "Could not extract variable ranges, got the var ranges: "
     << plot.variableRangesJS;
   }
   plot.plotType = "surface";
   plot.dimension = plot.coordinateFunctionsE.size;
-  input.hasInputBoxVariables(&plot.parametersInPlay, &plot.parametersInPlayJS);
+  input.hasInputBoxVariables(
+    &plot.parametersInPlay, &plot.parametersInPlayJS
+  );
   Plot result;
   result += plot;
   return output.assignValue(calculator, result);
 }
 
-class QRFactorizationComputation{
-};
+class QRFactorizationComputation {};
+

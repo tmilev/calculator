@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
 #include "math_extra_universal_enveloping_implementation.h"
@@ -26,11 +27,11 @@ void ExpressionContext::initialize(Calculator& inputOwner) {
 bool ExpressionContext::operator==(const ExpressionContext& other) const {
   return
   this->owner == other.owner &&
-  this->indexAmbientSemisimpleLieAlgebra == other.indexAmbientSemisimpleLieAlgebra &&
+  this->indexAmbientSemisimpleLieAlgebra ==
+  other.indexAmbientSemisimpleLieAlgebra &&
   this->variables == other.variables &&
   this->differentialOperatorVariables == other.differentialOperatorVariables &&
-  this->defaultModulus == other.defaultModulus
-  ;
+  this->defaultModulus == other.defaultModulus;
 }
 
 template <class Coefficient>
@@ -41,10 +42,14 @@ void ExpressionContext::polynomialSubstitutionNoFailure(
 ) const {
   bool mustBeTrue = this->polynomialSubstitution(largerContext, output, one);
   if (!mustBeTrue) {
-    global.fatal << "Unable to "
+    global.fatal
+    << "Unable to "
     << "extract a polynomial substitution from smaller context "
-    << this->toString() << " relative to larger context "
-    << largerContext.toString() << ". " << global.fatal;
+    << this->toString()
+    << " relative to larger context "
+    << largerContext.toString()
+    << ". "
+    << global.fatal;
   }
 }
 
@@ -115,16 +120,16 @@ Expression ExpressionContext::toExpressionDifferntialOperators() const {
 Expression ExpressionContext::toExpressionPolynomialVariables() const {
   Expression polynomialVariables;
   polynomialVariables.reset(*this->owner);
-  polynomialVariables.addChildAtomOnTop(this->owner->opPolynomialVariables());
+  polynomialVariables.addChildAtomOnTop(
+    this->owner->opPolynomialVariables()
+  );
   for (int i = 0; i < this->variables.size; i ++) {
     polynomialVariables.addChildOnTop(this->variables[i]);
   }
   return polynomialVariables;
 }
 
-void ExpressionContext::addVariable(
-  const Expression& inputVariable
-) {
+void ExpressionContext::addVariable(const Expression& inputVariable) {
   this->variables.addOnTop(inputVariable);
 }
 
@@ -175,7 +180,8 @@ SemisimpleLieAlgebra* ExpressionContext::getAmbientSemisimpleLieAlgebra() const 
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
     return nullptr;
   }
-  return &this->owner->objectContainer.semisimpleLieAlgebras.values[
+  return
+  &this->owner->objectContainer.semisimpleLieAlgebras.values[
     this->indexAmbientSemisimpleLieAlgebra
   ];
 }
@@ -188,11 +194,14 @@ std::string ExpressionContext::toString() const {
     out << "Variables: " << this->variables.toStringCommaDelimited() << ". ";
   }
   if (this->differentialOperatorVariables.size > 0) {
-    out << "Differential operators: "
-    << this->variables.toStringCommaDelimited() << ". ";
+    out
+    << "Differential operators: "
+    << this->variables.toStringCommaDelimited()
+    << ". ";
   }
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
-    out << "Ambient semisimple Lie algebra: "
+    out
+    << "Ambient semisimple Lie algebra: "
     << this->getAmbientSemisimpleLieAlgebra()->weylGroup.dynkinType.toString();
   }
   return out.str();
@@ -203,7 +212,8 @@ Expression ExpressionContext::getVariable(int variableIndex) const {
   if (variableIndex < 0 || variableIndex >= this->variables.size) {
     Expression errorE;
     std::stringstream out;
-    out << "Context does not have variable index " << variableIndex + 1 << ". ";
+    out << "Context does not have variable index " << variableIndex + 1 << ". "
+    ;
     return errorE.assignError(*this->owner, out.str());
   }
   return this->variables[variableIndex];
@@ -217,9 +227,7 @@ LargeIntegerUnsigned ExpressionContext::getDefaultModulus() {
   return this->defaultModulus;
 }
 
-void ExpressionContext::setIndexAmbientSemisimpleLieAlgebra(
-  int index
-) {
+void ExpressionContext::setIndexAmbientSemisimpleLieAlgebra(int index) {
   this->indexAmbientSemisimpleLieAlgebra = index;
 }
 
@@ -227,24 +235,28 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   SemisimpleLieAlgebra& algebra
 ) {
   this->checkInitialization();
-  MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras = this->owner->objectContainer.semisimpleLieAlgebras;
-  this->indexAmbientSemisimpleLieAlgebra = algebras.getIndex(
-    algebra.weylGroup.dynkinType
-  );
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& algebras =
+  this->owner->objectContainer.semisimpleLieAlgebras;
+  this->indexAmbientSemisimpleLieAlgebra =
+  algebras.getIndex(algebra.weylGroup.dynkinType);
   if (this->indexAmbientSemisimpleLieAlgebra == - 1) {
-    global.fatal << "Attempt to add semisimple algebra of type "
-    << algebra.weylGroup.dynkinType << " which is unknown to the calculator. "
+    global.fatal
+    << "Attempt to add semisimple algebra of type "
+    << algebra.weylGroup.dynkinType
+    << " which is unknown to the calculator. "
     << global.fatal;
   }
   return true;
 }
 
 bool Expression::contextSetDifferentialOperatorVariable(
-  const Expression& polynomialVariable, const Expression& differentialOperatorVariable
+  const Expression& polynomialVariable,
+  const Expression& differentialOperatorVariable
 ) {
   if (!this->isContext()) {
     global.fatal
-    << "Calling Expression::contextSetDifferentialOperatorVariable on a non-context expression. "
+    <<
+    "Calling Expression::contextSetDifferentialOperatorVariable on a non-context expression. "
     << global.fatal;
   }
   Expression diffVarsE, polyVarsE;
@@ -257,10 +269,12 @@ bool Expression::contextSetDifferentialOperatorVariable(
   bool foundDiffVarsE = false;
   bool foundPolyVarsE = false;
   for (int i = 0; i < this->children.size; i ++) {
-    if ((*this)[i].startsWith(this->owner->opWeylAlgebraVariables())) {
+    if ((*this)[i].startsWith(this->owner->opWeylAlgebraVariables())
+    ) {
       this->setChild(i, diffVarsE);
       foundDiffVarsE = true;
-    } else if ((*this)[i].startsWith(this->owner->opPolynomialVariables())) {
+    } else if ((*this)[i].startsWith(this->owner->opPolynomialVariables())
+    ) {
       this->setChild(i, polyVarsE);
       foundPolyVarsE = true;
     }
@@ -274,9 +288,7 @@ bool Expression::contextSetDifferentialOperatorVariable(
   return true;
 }
 
-bool ExpressionContext::fromExpressionOneContext(
-  const Expression& input
-) {
+bool ExpressionContext::fromExpressionOneContext(const Expression& input) {
   if (input.startsWith(this->owner->opPolynomialVariables())) {
     return this->fromExpressionPolynomialVariables(input);
   }
@@ -297,9 +309,11 @@ bool ExpressionContext::fromExpression(const Expression& input) {
   Calculator& commands = *input.owner;
   this->initialize(commands);
   if (!input.isContext()) {
-    return commands
+    return
+    commands
     << "Not allowed: call getContext from non-context expression: "
-    << input << ". ";
+    << input
+    << ". ";
   }
   for (int i = 1; i < input.size(); i ++) {
     if (!this->fromExpressionOneContext(input[i])) {
@@ -312,7 +326,9 @@ bool ExpressionContext::fromExpression(const Expression& input) {
 bool ExpressionContext::fromExpressionPolynomialVariables(
   const Expression& input
 ) {
-  MacroRegisterFunctionWithName("Expression::fromExpressionPolynomialVariables");
+  MacroRegisterFunctionWithName(
+    "Expression::fromExpressionPolynomialVariables"
+  );
   for (int i = 1; i < input.size(); i ++) {
     this->variables.addOnTop(input[i]);
   }
@@ -322,7 +338,9 @@ bool ExpressionContext::fromExpressionPolynomialVariables(
 bool ExpressionContext::fromExpressionDifferentialOperatorVariables(
   const Expression& input
 ) {
-  MacroRegisterFunctionWithName("Expression::fromExpressionDifferentialOperatorVariables");
+  MacroRegisterFunctionWithName(
+    "Expression::fromExpressionDifferentialOperatorVariables"
+  );
   for (int i = 1; i < input.size(); i ++) {
     this->differentialOperatorVariables.addOnTop(input[i]);
   }
@@ -332,23 +350,29 @@ bool ExpressionContext::fromExpressionDifferentialOperatorVariables(
 bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
   const Expression& input
 ) {
-  MacroRegisterFunctionWithName("Expression::fromExpressionSemisimpleLieAlgebra");
+  MacroRegisterFunctionWithName(
+    "Expression::fromExpressionSemisimpleLieAlgebra"
+  );
   if (input.size() != 2) {
-    return *this->owner << "Corrupt semisimple Lie algebra context: " << input.toString();
+    return
+    *this->owner
+    << "Corrupt semisimple Lie algebra context: "
+    << input.toString();
   }
   this->indexAmbientSemisimpleLieAlgebra = input[1].data;
   return true;
 }
 
-bool ExpressionContext::fromExpressionDefaultModulus(
-  const Expression& input
-) {
-  MacroRegisterFunctionWithName("Expression::fromExpressionSemisimpleLieAlgebra");
+bool ExpressionContext::fromExpressionDefaultModulus(const Expression& input) {
+  MacroRegisterFunctionWithName(
+    "Expression::fromExpressionSemisimpleLieAlgebra"
+  );
   if (input.size() != 2) {
     return *this->owner << "Corrupt modulus " << input.toString();
   }
   if (!input[1].isIntegerNonNegative(&this->defaultModulus)) {
-    return *this->owner
+    return
+    *this->owner
     << "Corrupt modulus: modulus needs to be a non-negative integer: "
     << input.toString();
   }
@@ -369,8 +393,7 @@ bool ExpressionContext::mergeModuli(
 }
 
 bool ExpressionContext::mergeSemisimpleLieAlgebraContexts(
-  const ExpressionContext& other,
-  ExpressionContext& outputContext
+  const ExpressionContext& other, ExpressionContext& outputContext
 ) {
   int left = this->indexAmbientSemisimpleLieAlgebra;
   int right = other.indexAmbientSemisimpleLieAlgebra;
@@ -388,8 +411,7 @@ bool ExpressionContext::mergeSemisimpleLieAlgebraContexts(
 }
 
 bool ExpressionContext::mergeVariables(
-  const ExpressionContext& other,
-  ExpressionContext& outputContext
+  const ExpressionContext& other, ExpressionContext& outputContext
 ) {
   outputContext.variables.addOnTopNoRepetition(this->variables);
   outputContext.variables.addOnTopNoRepetition(other.variables);
@@ -402,30 +424,38 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
   ExpressionContext& outputContext
 ) const {
   if (this->variables.size != this->differentialOperatorVariables.size) {
-    return *this->owner << "Context merge fail: variable "
+    return
+    *this->owner
+    << "Context merge fail: variable "
     << "count does not match differential variable count. ";
   }
   for (int i = 0; i < this->variables.size; i ++) {
-    const Expression& variable= this->variables[i];
-    const Expression& differentialOperatorVariable = this->differentialOperatorVariables[i];
+    const Expression& variable = this->variables[i];
+    const Expression& differentialOperatorVariable =
+    this->differentialOperatorVariables[i];
     int index = outputContext.variables.getIndex(variable);
     if (differentialOperatorVariablesFound.selected[index]) {
       if (
         differentialOperatorVariable !=
         outputContext.differentialOperatorVariables[index]
       ) {
-        return *this->owner
+        return
+        *this->owner
         << "<hr>Failed to merge context "
-        << this->toString() << " into "
+        << this->toString()
+        << " into "
         << outputContext.toString()
-        << " because " << variable.toString()
+        << " because "
+        << variable.toString()
         << " has two different corresponding differential operator variables: "
         << outputContext.differentialOperatorVariables[index].toString()
-        << " and " << differentialOperatorVariable.toString();
+        << " and "
+        << differentialOperatorVariable.toString();
       }
     }
     differentialOperatorVariablesFound.addSelectionAppendNewIndex(index);
-    outputContext.differentialOperatorVariables[index] = this->differentialOperatorVariables[i];
+    outputContext.differentialOperatorVariables[index] =
+    this->differentialOperatorVariables[i];
   }
   // Generate missing differntial operator variables.
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
@@ -437,12 +467,19 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
     Expression variableIndex;
     variableIndex.assignValue(*this->owner, i);
     differentialOperator.addChildOnTop(variableIndex);
-    if (outputContext.differentialOperatorVariables.contains(
-      differentialOperator
-    )) {
-      return *this->owner << "<hr>Failed to merge context "
-      << this->toString() << " into" << outputContext.toString()
-      << ": " << outputContext.variables[i].toString()
+    if (
+      outputContext.differentialOperatorVariables.contains(
+        differentialOperator
+      )
+    ) {
+      return
+      *this->owner
+      << "<hr>Failed to merge context "
+      << this->toString()
+      << " into"
+      << outputContext.toString()
+      << ": "
+      << outputContext.variables[i].toString()
       << " had no differential letter assigned to it. "
       << "I tried to assign automatically  "
       << differentialOperator.toString()
@@ -454,20 +491,23 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
 }
 
 bool ExpressionContext::mergeDifferentialOperators(
-  const ExpressionContext& other,
-  ExpressionContext& outputContext
+  const ExpressionContext& other, ExpressionContext& outputContext
 ) {
   if (other.differentialOperatorVariables.size == 0) {
-    outputContext.differentialOperatorVariables = this->differentialOperatorVariables;
+    outputContext.differentialOperatorVariables =
+    this->differentialOperatorVariables;
     return true;
   }
   if (this->differentialOperatorVariables.size == 0) {
-    outputContext.differentialOperatorVariables = other.differentialOperatorVariables;
+    outputContext.differentialOperatorVariables =
+    other.differentialOperatorVariables;
     return true;
   }
   Selection foundEWAVar;
   foundEWAVar.initialize(outputContext.variables.size);
-  outputContext.differentialOperatorVariables.setSize(outputContext.variables.size);
+  outputContext.differentialOperatorVariables.setSize(
+    outputContext.variables.size
+  );
   if (!this->mergeDifferentialOperatorsOnce(foundEWAVar, outputContext)) {
     return false;
   }
@@ -478,8 +518,7 @@ bool ExpressionContext::mergeDifferentialOperators(
 }
 
 bool ExpressionContext::mergeContexts(
-  const ExpressionContext& other,
-  ExpressionContext& outputContext
+  const ExpressionContext& other, ExpressionContext& outputContext
 ) {
   MacroRegisterFunctionWithName("Expression::mergeContexts");
   if (this == &outputContext || &other == &outputContext) {
@@ -529,7 +568,9 @@ void ExpressionContext::getFormat(FormatExpressions& output) const {
   for (int i = 0; i < this->variables.size; i ++) {
     output.polynomialAlphabet[i] = this->variables[i].toString();
   }
-  output.weylAlgebraLetters.setSize(this->differentialOperatorVariables.size);
+  output.weylAlgebraLetters.setSize(
+    this->differentialOperatorVariables.size
+  );
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
     output.weylAlgebraLetters[i] =
     this->differentialOperatorVariables[i].toString();
@@ -559,15 +600,18 @@ void ExpressionContext::polynomialAndWeylAlgebraSubstitutionNoFailure(
   PolynomialSubstitution<Coefficient>& outputPolyPart,
   PolynomialSubstitution<Coefficient>& outputDifferntialPart
 ) const {
-  bool mustBeTrue = this->polynomialAndWeylAlgebraSubstitution(
+  bool mustBeTrue =
+  this->polynomialAndWeylAlgebraSubstitution(
     largerContext, outputPolyPart, outputDifferntialPart
   );
   if (!mustBeTrue) {
     global.fatal
     << "Unable to extract a polynomial / differential "
     << "operator substitution from smaller context "
-    << this->toString() << " relative to larger context "
-    << largerContext.toString() << global.fatal;
+    << this->toString()
+    << " relative to larger context "
+    << largerContext.toString()
+    << global.fatal;
   }
 }
 
@@ -577,14 +621,17 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   PolynomialSubstitution<Coefficient>& outputPolynomialPart,
   PolynomialSubstitution<Coefficient>& outputDifferentialPart
 ) const {
-  if (!this->polynomialSubstitution(
-    largerContext, outputPolynomialPart, Rational::one()
-  )) {
+  if (
+    !this->polynomialSubstitution(
+      largerContext, outputPolynomialPart, Rational::one()
+    )
+  ) {
     return false;
   }
   outputDifferentialPart.setSize(this->differentialOperatorVariables.size);
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
-    int newIndex = largerContext.differentialOperatorVariables.getIndex(
+    int newIndex =
+    largerContext.differentialOperatorVariables.getIndex(
       this->differentialOperatorVariables[i]
     );
     if (newIndex == - 1) {
@@ -595,50 +642,54 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   return true;
 }
 
-template<>
+template < >
 bool WithContext<Rational>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   return this->extendContextTrivially(newContext, commentsOnFailure);
 }
 
-template<>
+template < >
 bool WithContext<std::string>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   return this->extendContextTrivially(newContext, commentsOnFailure);
 }
 
-template<>
+template < >
 bool WithContext<ElementWeylGroup>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   return this->extendContextTrivially(newContext, commentsOnFailure);
 }
 
-template<>
+template < >
 bool WithContext<AlgebraicNumber>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   return this->extendContextTrivially(newContext, commentsOnFailure);
 }
 
-template<>
+template < >
 bool WithContext<double>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   return this->extendContextTrivially(newContext, commentsOnFailure);
 }
 
-template<>
+template < >
 bool WithContext<ElementZmodP>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   LargeIntegerUnsigned contextModulus = newContext.getDefaultModulus();
   if (this->content.modulus != contextModulus) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "The modulus of " << this->content.toString()
-      << " does not equal incoming context modulus: " << contextModulus << ". ";
+      *commentsOnFailure
+      << "The modulus of "
+      << this->content.toString()
+      << " does not equal incoming context modulus: "
+      << contextModulus
+      << ". ";
     }
     return false;
   }
@@ -646,25 +697,30 @@ bool WithContext<ElementZmodP>::extendContext(
   return true;
 }
 
-template<>
-bool WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >::extendContext(
+template < >
+bool WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >::
+extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
+) {
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  this->context.polynomialSubstitutionNoFailure(
+    newContext, substitution, Rational::one()
+  );
   this->content.substitution(substitution);
   this->context = newContext;
   return true;
 }
 
-template<>
+template < >
 bool WithContext<Polynomial<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
+) {
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  this->context.polynomialSubstitutionNoFailure(
+    newContext, substitution, Rational::one()
+  );
   if (!this->content.substitution(substitution, Rational::one())) {
     return false;
   }
@@ -672,10 +728,10 @@ bool WithContext<Polynomial<Rational> >::extendContext(
   return true;
 }
 
-template<>
+template < >
 bool WithContext<Polynomial<ElementZmodP> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
+) {
   (void) commentsOnFailure;
   if (!this->content.isEqualToZero()) {
     PolynomialSubstitution<ElementZmodP> substitution;
@@ -691,10 +747,10 @@ bool WithContext<Polynomial<ElementZmodP> >::extendContext(
   return true;
 }
 
-template<>
+template < >
 bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
+) {
   (void) commentsOnFailure;
   PolynomialSubstitution<AlgebraicNumber> substitution;
   this->context.polynomialSubstitutionNoFailure<AlgebraicNumber>(
@@ -709,24 +765,33 @@ bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
   return true;
 }
 
-template<>
+template < >
 bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
-){
-  MacroRegisterFunctionWithName("WithContext_ElementWeylAlgebra_Rational::extendContext");
+) {
+  MacroRegisterFunctionWithName(
+    "WithContext_ElementWeylAlgebra_Rational::extendContext"
+  );
   PolynomialSubstitution<Rational> substitutionDifferentialOperatorPart;
   PolynomialSubstitution<Rational> substitutionPolynomialPart;
   this->context.polynomialAndWeylAlgebraSubstitutionNoFailure(
-    newContext, substitutionPolynomialPart, substitutionDifferentialOperatorPart
+    newContext,
+    substitutionPolynomialPart,
+    substitutionDifferentialOperatorPart
   );
-  if (!this->content.substitution(
-    substitutionPolynomialPart, substitutionDifferentialOperatorPart
-  )) {
+  if (
+    !this->content.substitution(
+      substitutionPolynomialPart, substitutionDifferentialOperatorPart
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<hr>Failed to convert "
-      << this->content.toString() << ": failed to carry out substitution "
+      *commentsOnFailure
+      << "<hr>Failed to convert "
+      << this->content.toString()
+      << ": failed to carry out substitution "
       << substitutionDifferentialOperatorPart.toString()
-      << ", " << substitutionPolynomialPart.toString();
+      << ", "
+      << substitutionPolynomialPart.toString();
     }
     return false;
   }
@@ -734,19 +799,29 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
   return true;
 }
 
-template<>
+template < >
 bool WithContext<RationalFraction<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("WithContext_RationalFunction_Rational::extendContext");
+  MacroRegisterFunctionWithName(
+    "WithContext_RationalFunction_Rational::extendContext"
+  );
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
-  if (!this->content.substitution(substitution, Rational::one(), commentsOnFailure)) {
+  this->context.polynomialSubstitutionNoFailure(
+    newContext, substitution, Rational::one()
+  );
+  if (
+    !this->content.substitution(
+      substitution, Rational::one(), commentsOnFailure
+    )
+  ) {
     // This is not supposed to happen.
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<hr>Failed to apply substitution: "
+      *commentsOnFailure
+      << "<hr>Failed to apply substitution: "
       << substitution.toString()
-      << " to " << this->content.toString();
+      << " to "
+      << this->content.toString();
     }
     return false;
   }
@@ -754,20 +829,31 @@ bool WithContext<RationalFraction<Rational> >::extendContext(
   return true;
 }
 
-template<>
+template < >
 bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("WithContext_RationalFunction_AlgebraicNumber::extendContext");
+  MacroRegisterFunctionWithName(
+    "WithContext_RationalFunction_AlgebraicNumber::extendContext"
+  );
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  AlgebraicClosureRationals& closure = this->context.owner->objectContainer.algebraicClosure;
-  this->context.polynomialSubstitutionNoFailure(newContext, substitution, closure.one());
-  if (!this->content.substitution(substitution, closure.one(), commentsOnFailure)) {
+  AlgebraicClosureRationals& closure =
+  this->context.owner->objectContainer.algebraicClosure;
+  this->context.polynomialSubstitutionNoFailure(
+    newContext, substitution, closure.one()
+  );
+  if (
+    !this->content.substitution(
+      substitution, closure.one(), commentsOnFailure
+    )
+  ) {
     // This is not supposed to happen.
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<hr>Failed to apply substitution: "
+      *commentsOnFailure
+      << "<hr>Failed to apply substitution: "
       << substitution.toString()
-      << " to " << this->content.toString();
+      << " to "
+      << this->content.toString();
     }
     return false;
   }
@@ -775,27 +861,40 @@ bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
   return true;
 }
 
-template<>
-bool WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >::extendContext(
+template < >
+bool WithContext<
+  ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
-  this->content.substitution(substitution, this->context.owner->objectContainer.categoryOModules);
+  this->context.polynomialSubstitutionNoFailure(
+    newContext, substitution, Rational::one()
+  );
+  this->content.substitution(
+    substitution,
+    this->context.owner->objectContainer.categoryOModules
+  );
   this->context = newContext;
   return true;
 }
 
-template<>
+template < >
 bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitution(newContext, substitution, Rational::one());
-  for (int i = 0; i < this->content.weightFundamentalCoordinates.size; i ++) {
-    this->content.weightFundamentalCoordinates[i].substitution(substitution, Rational::one());
+  this->context.polynomialSubstitution(
+    newContext, substitution, Rational::one()
+  );
+  for (
+    int i = 0; i < this->content.weightFundamentalCoordinates.size; i ++
+  ) {
+    this->content.weightFundamentalCoordinates[i].substitution(
+      substitution, Rational::one()
+    );
   }
   this->context = newContext;
   return true;
@@ -808,74 +907,122 @@ bool Expression::setContextAtLeastEqualTo(
   MacroRegisterFunctionWithName("Expression::setContextAtLeastEqualTo");
   this->checkInitialization();
   if (!this->isBuiltInType()) {
-    global.fatal << "Calling "
+    global.fatal
+    << "Calling "
     << "Expression::setContextAtLeastEqualTo on an expression "
     << "that is not of built-in type. "
-    << "Contexts are Reserved for built-in data types. " << global.fatal;
+    << "Contexts are Reserved for built-in data types. "
+    << global.fatal;
   }
   WithContext<Rational> rational;
   if (this->isOfTypeWithContext(&rational)) {
-    return rational.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    rational.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<std::string> stringValue;
   if (this->isOfTypeWithContext(&stringValue)) {
-    return stringValue.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    stringValue.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<ElementZmodP> modularElement;
   if (this->isOfTypeWithContext(&modularElement)) {
-    return modularElement.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    modularElement.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<double> floatingPointNumber;
   if (this->isOfTypeWithContext(&floatingPointNumber)) {
-    return floatingPointNumber.setContextAndSerialize(
+    return
+    floatingPointNumber.setContextAndSerialize(
       inputOutputMinContext, *this, commentsOnFailure
     );
   }
   WithContext<ElementWeylGroup> elementWeylGroup;
   if (this->isOfTypeWithContext(&elementWeylGroup)) {
-    return elementWeylGroup.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    elementWeylGroup.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<AlgebraicNumber> algebraicNumber;
   if (this->isOfTypeWithContext(&algebraicNumber)) {
-    return algebraicNumber.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    algebraicNumber.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
-  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > elementUniversalEnveloping;
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
+  elementUniversalEnveloping;
   if (this->isOfTypeWithContext(&elementUniversalEnveloping)) {
-    return elementUniversalEnveloping.setContextAndSerialize(
+    return
+    elementUniversalEnveloping.setContextAndSerialize(
       inputOutputMinContext, *this, commentsOnFailure
     );
   }
   WithContext<Polynomial<Rational> > polynomial;
   if (this->isOfTypeWithContext(&polynomial)) {
-    return polynomial.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    polynomial.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<Polynomial<ElementZmodP> > polynomialModular;
   if (this->isOfTypeWithContext(&polynomialModular)) {
-    return polynomialModular.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    polynomialModular.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<Polynomial<AlgebraicNumber> > polynomialAlgebraic;
   if (this->isOfTypeWithContext(&polynomialAlgebraic)) {
-    return polynomialAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    polynomialAlgebraic.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<RationalFraction<Rational> > rationalFunction;
   if (this->isOfTypeWithContext(&rationalFunction)) {
-    return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    rationalFunction.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<RationalFraction<AlgebraicNumber> > rationalFunctionAlgebraic;
   if (this->isOfTypeWithContext(&rationalFunctionAlgebraic)) {
-    return rationalFunctionAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    rationalFunctionAlgebraic.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<ElementWeylAlgebra<Rational> > elementWeylAlgebra;
   if (this->isOfTypeWithContext(&elementWeylAlgebra)) {
-    return elementWeylAlgebra.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    elementWeylAlgebra.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
-  WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > > elementTensorProductGeneralizedVermaModules;
-  if (this->isOfTypeWithContext(&elementTensorProductGeneralizedVermaModules)) {
-    return elementTensorProductGeneralizedVermaModules.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+  WithContext<
+    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+  > elementTensorProductGeneralizedVermaModules;
+  if (
+    this->isOfTypeWithContext(&elementTensorProductGeneralizedVermaModules)
+  ) {
+    return
+    elementTensorProductGeneralizedVermaModules.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   WithContext<Weight<Polynomial<Rational> > > weightPolynomial;
   if (this->isOfTypeWithContext(&weightPolynomial)) {
-    return weightPolynomial.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+    return
+    weightPolynomial.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
+    );
   }
   if (this->isMatrixOfType<RationalFraction<Rational> >()) {
     ExpressionContext newContext(*this->owner);
@@ -888,20 +1035,39 @@ bool Expression::setContextAtLeastEqualTo(
     }
     inputOutputMinContext = newContext;
     Matrix<RationalFraction<Rational> > newMatrix;
-    CalculatorConversions::functionGetMatrix(*this->owner, *this, newMatrix, false, &newContext);
+    CalculatorConversions::functionGetMatrix(
+      *this->owner, *this, newMatrix, false, &newContext
+    );
     PolynomialSubstitution<Rational> substitution;
-    oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, substitution, Rational::one());
+    oldContext.polynomialSubstitutionNoFailure<Rational>(
+      newContext, substitution, Rational::one()
+    );
     for (int i = 0; i < newMatrix.numberOfRows; i ++) {
       for (int j = 0; j < newMatrix.numberOfColumns; j ++) {
-        if (!newMatrix(i, j).substitution(substitution, Rational::one(), commentsOnFailure)) {
-          return *this->owner << "Failed to carry out the substitution "
-          << substitution.toString() << " in the matrix " << this->toString() << ". ";
+        if (
+          !newMatrix(i, j).substitution(
+            substitution, Rational::one(), commentsOnFailure
+          )
+        ) {
+          return
+          *this->owner
+          << "Failed to carry out the substitution "
+          << substitution.toString()
+          << " in the matrix "
+          << this->toString()
+          << ". ";
         }
       }
     }
-    return this->makeMatrix(*this->owner, newMatrix, &inputOutputMinContext);
+    return
+    this->makeMatrix(*this->owner, newMatrix, &inputOutputMinContext);
   }
-  this->owner->comments << "Expression " << this->toString()
-  << " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. ";
+  this->owner->comments
+  << "Expression "
+  << this->toString()
+  <<
+  " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. "
+  ;
   return false;
 }
+

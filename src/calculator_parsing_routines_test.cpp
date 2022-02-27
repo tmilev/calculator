@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include "string_constants.h"
@@ -18,7 +19,9 @@ bool Calculator::Test::all() {
   return true;
 }
 
-bool Calculator::Test::checkBuiltInInitializations(Calculator& ownerInitialized) {
+bool Calculator::Test::checkBuiltInInitializations(
+  Calculator& ownerInitialized
+) {
   if (!ownerInitialized.checkPredefinedFunctionNameRepetitions()) {
     global.fatal << "Predefined function name repetitions." << global.fatal;
     return false;
@@ -33,7 +36,10 @@ bool Calculator::Test::checkBuiltInInitializations(Calculator& ownerInitialized)
 bool Calculator::Test::numberOfTestFunctions(Calculator& ownerInitialized) {
   int numberOfBuiltInFunction = ownerInitialized.getNumberOfBuiltInFunctions();
   if (numberOfBuiltInFunction <= 0) {
-    global.fatal << "Calculator built in functions: " << numberOfBuiltInFunction << global.fatal;
+    global.fatal
+    << "Calculator built in functions: "
+    << numberOfBuiltInFunction
+    << global.fatal;
   }
   return true;
 }
@@ -46,12 +52,16 @@ bool Calculator::Test::cacheWorks() {
   int64_t duration = global.getElapsedMilliseconds() - startTime;
   int64_t maximumDuration = 3000;
   if (duration > maximumDuration) {
-    global.fatal << "Large cacheable computation took too long: "
+    global.fatal
+    << "Large cacheable computation took too long: "
     << duration
-    << " ms, maximum allowed " << maximumDuration << ". "
+    << " ms, maximum allowed "
+    << maximumDuration
+    << ". "
     << "Computed: "
     << calculator.programExpression.toString()
-    << "Perhaps the caches are not functioning correctly?" << global.fatal;
+    << "Perhaps the caches are not functioning correctly?"
+    << global.fatal;
   }
   return true;
 }
@@ -69,7 +79,8 @@ bool Calculator::Test::loopDetectionEverExpanding() {
   if (!calculator.flagAbortComputationASAP) {
     global.fatal
     << "Expanding cycle did not generate error as expected. "
-    << "Instead, generated result was: " << calculator.programExpression.toString()
+    << "Instead, generated result was: "
+    << calculator.programExpression.toString()
     << global.fatal;
   }
   return true;
@@ -78,11 +89,9 @@ bool Calculator::Test::loopDetectionEverExpanding() {
 bool Calculator::Test::loopDetectionCycle() {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::educational);
-  calculator.evaluate(
-    "TurnOffRules(CheckAutoEquality);\n"
-    "x=x;\n"
-    "x"
-  );
+  calculator.evaluate("TurnOffRules(CheckAutoEquality);\n"
+"x=x;\n"
+"x");
   if (!calculator.flagAbortComputationASAP) {
     global.fatal
     << "Simple infinite loop did not generate error as expected. Result: "
@@ -100,19 +109,29 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
     if (operationPointer.isZeroPointer()) {
       continue;
     }
-    Calculator::OperationHandlers& operationHandlers = operationPointer.getElement();
+    Calculator::OperationHandlers& operationHandlers =
+    operationPointer.getElement();
     List<Function> handlers = operationHandlers.mergeHandlers();
     for (int i = 0; i < handlers.size; i ++) {
       Function& currentHandler = handlers[i];
       if (currentHandler.example == "") {
-        global.fatal << "Empty example for operation: "
-        << currentHandler.calculatorIdentifier << global.fatal;
+        global.fatal
+        << "Empty example for operation: "
+        << currentHandler.calculatorIdentifier
+        << global.fatal;
       }
       Expression notUsed;
-      if (!ownerInitialized.parser.parse(currentHandler.example, false, notUsed)) {
-        global.fatal << "Failed to parse built-in example for rule: "
+      if (
+        !ownerInitialized.parser.parse(
+          currentHandler.example, false, notUsed
+        )
+      ) {
+        global.fatal
+        << "Failed to parse built-in example for rule: "
         << currentHandler.calculatorIdentifier
-        << ". The example was: " << currentHandler.example << ". "
+        << ". The example was: "
+        << currentHandler.example
+        << ". "
         << global.fatal;
       }
     }
@@ -126,15 +145,24 @@ bool Calculator::Test::parseConsumeQuote(Calculator& ownerInitialized) {
   unsigned int index = 0;
   ownerInitialized.parser.parseConsumeQuote(input, index, output);
   if (output.size != 3) {
-    global.fatal << "Expected 3 output elements in parseConsumeQuote, got: "
-    << output.size << ". Input: " << input << global.fatal;
+    global.fatal
+    << "Expected 3 output elements in parseConsumeQuote, got: "
+    << output.size
+    << ". Input: "
+    << input
+    << global.fatal;
   }
   std::string result = output[1].data.toString();
   std::string expected = "\\\"\\\\\\\"";
   if (result != expected) {
-    global.fatal << "Input: " << input
-    << "; unexpected content of consumed quote:\n" << result
-    << "\nexpected:\n" << expected  << global.fatal;
+    global.fatal
+    << "Input: "
+    << input
+    << "; unexpected content of consumed quote:\n"
+    << result
+    << "\nexpected:\n"
+    << expected
+    << global.fatal;
   }
   return true;
 }
@@ -143,13 +171,21 @@ bool Calculator::Test::parseQuotes(Calculator& ownerInitialized) {
   std::string input = "\"\\\"\\\\\\\"\"";
   std::string expected = "\"\\\"\\\\\\\"\"";
   Expression output;
-  if (!ownerInitialized.parser.parseNoEmbeddingInCommand(input, output)) {
+  if (
+    !ownerInitialized.parser.parseNoEmbeddingInCommand(input, output)
+  ) {
     global.fatal << "Failed to parse: " << input << global.fatal;
   }
   std::string result = output.toString();
   if (result != expected) {
-    global.fatal << "Parsing and re-coding of: " << input << " resulted in: "
-    << result << " instead of the expected: " << expected << global.fatal;
+    global.fatal
+    << "Parsing and re-coding of: "
+    << input
+    << " resulted in: "
+    << result
+    << " instead of the expected: "
+    << expected
+    << global.fatal;
   }
   return true;
 }
@@ -158,16 +194,27 @@ bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
   std::string mustEvaluateToZero = "2.01 - 201/100";
   ownerInitialized.evaluate(mustEvaluateToZero);
   if (ownerInitialized.programExpression.toString() != "0") {
-    global.fatal << "Expression: " << mustEvaluateToZero << " evaluates to: "
-    << ownerInitialized.programExpression.toString() << " instead of 0. " << global.fatal;
+    global.fatal
+    << "Expression: "
+    << mustEvaluateToZero
+    << " evaluates to: "
+    << ownerInitialized.programExpression.toString()
+    << " instead of 0. "
+    << global.fatal;
   }
   std::string mustEvaluateToOne =
-  "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 - 10^128 + 1";
+  "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 - 10^128 + 1"
+  ;
   ownerInitialized.evaluate(mustEvaluateToOne);
   if (ownerInitialized.programExpression.toString() != "1") {
     std::cout << "Must crash!\n";
-    global.fatal << "Expression: " << mustEvaluateToOne << " evaluates to: "
-    << ownerInitialized.programExpression.toString() << " instead of 1. " << global.fatal;
+    global.fatal
+    << "Expression: "
+    << mustEvaluateToOne
+    << " evaluates to: "
+    << ownerInitialized.programExpression.toString()
+    << " instead of 1. "
+    << global.fatal;
   }
   return true;
 }
@@ -183,16 +230,26 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
   if (!test.calculatorTestRun()) {
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;
-    crashFile << "<html><link "
+    crashFile
+    << "<html><link "
     << "type = 'text/css' "
     << "rel = 'stylesheet' "
-    << "href = '" << WebAPI::request::calculatorCSS << "'>"
-    << "<body><div style='overflow:auto;height:100%'>" << test.reportHtml << "</div></body></html>";
-
-    FileOperations::writeFileVirual("output/crash_test.html", crashFile.str(), &crashFileWriteReport);
-    global.fatal << crashFileWriteReport.str() << "Calculator AB test failed with " << test.inconsistencies
+    << "href = '"
+    << WebAPI::request::calculatorCSS
+    << "'>"
+    << "<body><div style='overflow:auto;height:100%'>"
+    << test.reportHtml
+    << "</div></body></html>";
+    FileOperations::writeFileVirual(
+      "output/crash_test.html", crashFile.str(), &crashFileWriteReport
+    );
+    global.fatal
+    << crashFileWriteReport.str()
+    << "Calculator AB test failed with "
+    << test.inconsistencies
     << " inconsistencies. See report html in file:\n"
-    << "https://localhost:8166/output/crash_test.html\n" << global.fatal;
+    << "https://localhost:8166/output/crash_test.html\n"
+    << global.fatal;
   }
   return true;
 }
@@ -208,3 +265,4 @@ bool Calculator::Examples::Test::compose() {
   calculator.examples.writeExamplesReadme();
   return true;
 }
+

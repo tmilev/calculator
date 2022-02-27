@@ -1,7 +1,9 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_web_api_ALREADY_INCLUDED
 #define header_web_api_ALREADY_INCLUDED
+
 #include "macros.h"
 #include "general_maps.h"
 #include "general_list_references.h"
@@ -16,12 +18,10 @@ public:
   std::string buildFile;
   List<std::string> jsFileNames;
   List<std::string> jsFileContents;
-
   std::string allInOneJavascriptTagOriginal;
   std::string allInOneJavascriptTagDesired;
   std::string calculatorCSSTagOriginal;
   std::string calculatorCSSTagDesired;
-
   void initializeTags(bool appendBuildHash);
   bool fileNameAllowedToBeMissing(const std::string& input);
   void buildHtmlJavascriptPage(bool appendBuildHash);
@@ -35,11 +35,10 @@ public:
 class WebWorker;
 
 class WebAPIResponse {
-  public:
+public:
   WebWorker* owner;
   static std::string youHaveReachedTheBackend;
   WebAPIResponse();
-
   bool processDatabaseJSON();
   bool processDatabaseDeleteEntry();
   bool processDatabaseModifyEntry();
@@ -64,7 +63,6 @@ class WebAPIResponse {
   bool processModifyPage();
   bool processAddUserEmails();
   bool processComputationIndicator();
-
   bool processChangePassword(const std::string& reasonForNoAuthentication);
   bool processActivateAccount();
   bool processScores();
@@ -88,7 +86,6 @@ class WebAPIResponse {
   bool processSignUp();
   bool processForgotLogin();
   bool processEditPageJSON(bool showSourceRelaxed);
-
   void reset(WebWorker& inputOwner);
   bool serveResponseFalseIfUnrecognized(
     std::stringstream& argumentProcessingFailureComments,
@@ -98,19 +95,19 @@ class WebAPIResponse {
   static std::string modifyProblemReport();
   static JSData clonePageResult();
   static std::string addTeachersSections();
-  static std::string addUserEmails(const std::string& hostWebAddressWithPort);
+  static std::string addUserEmails(
+    const std::string& hostWebAddressWithPort
+  );
   static JSData submitAnswersJSON(
     const std::string& inputRandomSeed,
     bool* outputIsCorrect,
     bool timeSafetyBrake
   );
-
   static JSData submitAnswersPreviewJSON();
   static JSData submitAnswersJSON();
   JSData submitAnswersHardcoded(bool hideDesiredAnswer);
   static JSData getProblemSolutionJSON();
   static JSData getAnswerOnGiveUp();
-
   static JSData getEditPageJSON(
     // When this is set, will returns the source of the problem
     // even though the user has no admin rights.
@@ -129,7 +126,6 @@ class WebAPIResponse {
   static JSData getTopicTableJSON();
   JSData solveJSON();
   JSData compareExpressions(bool hideDesiredAnswer);
-
   static JSData getAnswerOnGiveUp(
     const std::string& inputRandomSeed,
     std::string* outputNakedAnswer = nullptr,
@@ -141,7 +137,6 @@ class WebAPIResponse {
     int indexShift,
     FormatExpressions& format
   );
-
   static JSData getSelectCourseJSON();
   static std::string getScoresPage();
   static std::string getApp(bool appendBuildHash);
@@ -158,7 +153,9 @@ class WebAPIResponse {
   static std::string getScoresInCoursePage();
   static std::string setProblemDeadline();
   static std::string setProblemWeight();
-  static JSData getAccountsPageJSON(const std::string& hostWebAddressWithPort);
+  static JSData getAccountsPageJSON(
+    const std::string& hostWebAddressWithPort
+  );
   static std::string getAccountsPageBody(
     const std::string& hostWebAddressWithPort
   );
@@ -197,9 +194,9 @@ private:
     int upperNumChars = 10000,
     bool useDisplayStyle = false
   );
-
 public:
-  static MapList<std::string, std::string, MathRoutines::hashString>& preLoadedFiles();
+  static MapList<std::string, std::string, MathRoutines::hashString>&
+  preLoadedFiles();
   static std::stringstream outputStream;
   static int globalMathSpanID;
   static int globalGeneralPurposeID;
@@ -212,25 +209,29 @@ public:
   static int scale;
   static void loadStrings();
   static std::string gitRepository;
-
   static std::string URLKeyValuePairsToNormalRecursiveHtml(
     const std::string& input, int recursionDepth = 0
   );
-
   // A script tag a that contains a json data structure.
-  static std::string scriptFromJSON(const std::string& scriptType, const JSData& scriptContent);
+  static std::string scriptFromJSON(
+    const std::string& scriptType, const JSData& scriptContent
+  );
   // Same as scriptFromJSON but uses a no-display span with name="script".
   static std::string jsonContainer(
     const std::string& scriptType, const JSData& scriptContent
   );
   static void convertURLStringToNormal(
-    const std::string& input, std::string& output, bool replacePlusBySpace
+    const std::string& input,
+    std::string& output,
+    bool replacePlusBySpace
   );
   static std::string convertURLStringToNormal(
     const std::string& input, bool replacePlusBySpace
   );
   static bool convertStringToHtmlStringReturnTrueIfModified(
-    const std::string& input, std::string& output, bool doReplaceNewLineByBr
+    const std::string& input,
+    std::string& output,
+    bool doReplaceNewLineByBr
   );
   static std::string convertStringToURLStringExceptDashesAndSlashes(
     const std::string& input
@@ -242,7 +243,9 @@ public:
     const std::string& inputString, bool doReplaceNewLineByBr
   );
   static std::string convertStringToHtmlStringRestrictSize(
-    const std::string& inputString, bool doReplaceNewLineByBr, int maxStringSize
+    const std::string& inputString,
+    bool doReplaceNewLineByBr,
+    int maxStringSize
   );
   static std::string convertStringEscapeQuotesAndBackslashes(
     const std::string& input
@@ -250,11 +253,14 @@ public:
   static std::string convertStringEscapeNewLinesQuotesBackslashes(
     const std::string& input
   );
-
   static bool URLStringToNormalOneStep(
-    std::string& readAhead, std::stringstream& out, bool replacePlusBySpace
+    std::string& readAhead,
+    std::stringstream& out,
+    bool replacePlusBySpace
   );
-  static void replaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
+  static void replaceEqualitiesAndAmpersandsBySpaces(
+    std::string& inputOutput
+  );
   // Returns an url with a calculator computation
   static std::string getCalculatorComputationURL(
     const std::string& inputNoEncoding
@@ -267,7 +273,6 @@ public:
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );
-
   static std::string getCalculatorComputationAnchorThisServer(
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
@@ -281,17 +286,17 @@ public:
     const std::string& label = "Expand/collapse",
     const std::string& desiredID = ""
   );
-  static std::string getHtmlLinkToGithubRepository(const std::string& displayString);
+  static std::string getHtmlLinkToGithubRepository(
+    const std::string& displayString
+  );
   static std::string getHtmlLinkFromProjectFileName(
     const std::string& fileName,
     const std::string& fileDesc = "",
     int line = - 1
   );
   static std::string doubleBackslashes(const std::string& input);
-
   static std::string getCSSLink(const std::string& fileNameVirtual);
   static std::string getJavascriptLink(const std::string& fileNameVirtual);
-
   static const std::string& getCSSAddStyleTags(
     const std::string& fileNameVirtual
   );
@@ -303,11 +308,8 @@ public:
     const std::string& additionalBeginTag = "",
     const std::string& additionalEndTag = ""
   );
-
   static const std::string& getJavascriptAceEditorScriptWithTags();
-
   static std::string getJavascriptVariable(const std::string& variableName);
-
   static std::string getMathDisplayStyle(
     const std::string& input, int upperNumChars = 10000
   );
@@ -347,10 +349,14 @@ public:
     bool useHtml
   );
   static std::string elementToStringTooltip(
-    const std::string& input, const std::string& inputTooltip, bool useHtml
+    const std::string& input,
+    const std::string& inputTooltip,
+    bool useHtml
   ) {
     std::string result;
-    HtmlRoutines::elementToStringTooltip(input, inputTooltip, result, useHtml);
+    HtmlRoutines::elementToStringTooltip(
+      input, inputTooltip, result, useHtml
+    );
     return result;
   }
   static std::string elementToStringTooltip(
@@ -358,7 +364,9 @@ public:
   ) {
     return HtmlRoutines::elementToStringTooltip(input, inputTooltip, true);
   }
-  static uint32_t redGreenBlue(unsigned int r, unsigned int g, unsigned int b);
+  static uint32_t redGreenBlue(
+    unsigned int r, unsigned int g, unsigned int b
+  );
   static void makeStdCoutReport(const std::string& input);
   static void makeReportIndicatorFile(const std::string& input);
   static std::string toHtmlTable(
@@ -373,3 +381,4 @@ public:
 };
 
 #endif // header_web_api_ALREADY_INCLUDED
+

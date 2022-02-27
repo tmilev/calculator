@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_packed_vector_implementation_ALREADY_INCLUDED
 #define header_math_extra_packed_vector_implementation_ALREADY_INCLUDED
@@ -8,9 +9,10 @@
 
 template <typename scalar>
 const int PackedVector<scalar>::size;
-
 template <typename scalar>
-PackedVector<scalar> PackedVector<scalar>::operator+(const PackedVector<scalar>& w) const {
+PackedVector<scalar> PackedVector<scalar>::operator+(
+  const PackedVector<scalar>& w
+) const {
   PackedVector<scalar> out;
   for (int i = 0; i < this->size; i ++) {
     out[i] = this->data[i] + w[i];
@@ -35,7 +37,9 @@ PackedVector<scalar> PackedVector<scalar>::operator*(scalar x) const {
 }
 
 template <typename scalar>
-scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const {
+scalar PackedVector<scalar>::scalarProduct(
+  const PackedVector<scalar>& v, const Matrix<scalar>& B
+) const {
   PackedVector<scalar> Bv;
   Bv.makeZero(B.numberOfRows);
   for (int i = 0; i < B.numberOfRows; i ++) {
@@ -49,6 +53,7 @@ scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const 
   }
   return wBv;
 }
+
 /*
 template <typename scalar>
 scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const PackedVector* B) const {
@@ -63,9 +68,8 @@ scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const 
   return wBv;
 }
 */
-
 template <typename scalar>
-scalar& PackedVector<scalar>::operator[](int i) {
+scalar&PackedVector<scalar>::operator[](int i) {
   return this->data[i];
 }
 
@@ -77,7 +81,10 @@ scalar PackedVector<scalar>::operator[](int i) const {
 template <typename scalar>
 void PackedVector<scalar>::setSize(int s) {
   if (s > this->size) {
-    global.comments << "if this was intentional, recompile PackedVector with size>=" << s << "\n";
+    global.comments
+    << "if this was intentional, recompile PackedVector with size>="
+    << s
+    << "\n";
     global.fatal << "Bad template argument." << global.fatal;
   }
 }
@@ -98,7 +105,7 @@ bool PackedVector<scalar>::operator==(const PackedVector<scalar>& w) const {
 }
 
 template <typename scalar>
-bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const {
+bool PackedVector<scalar>::operator>(const PackedVector<scalar>& w) const {
   for (int i = 0; i < this->size; i ++) {
     if (this->data[i] > w[i]) {
       return true;
@@ -109,7 +116,6 @@ bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const {
   }
   return false;
 }
-
 
 template <typename scalar>
 void PackedVector<scalar>::makeZero(int n) {
@@ -129,7 +135,9 @@ void PackedVector<scalar>::makeEi(int d, int ei) {
 }
 
 template <typename scalar>
-unsigned int PackedVector<scalar>::hashFunction(const PackedVector<scalar>& in) {
+unsigned int PackedVector<scalar>::hashFunction(
+  const PackedVector<scalar>& in
+) {
   return in.hashFunction();
 }
 
@@ -138,14 +146,17 @@ unsigned int PackedVector<scalar>::hashFunction() const {
   unsigned int result = 0;
   int j = 0;
   for (int i = 0; i < this->size; i ++) {
-    result += this->data[i].hashFunction() *
+    result +=
+    this->data[i].hashFunction() *
     HashConstants::getConstantIncrementCounter(j);
   }
   return result;
 }
 
 template <typename scalar>
-std::ostream& operator<<(std::ostream& out, const PackedVector<scalar>& v) {
+std::ostream& operator<<(
+  std::ostream& out, const PackedVector<scalar>& v
+) {
   out << '(';
   for (int i = 0; i < v.size; i ++) {
     out << v[i];
@@ -158,3 +169,4 @@ std::ostream& operator<<(std::ostream& out, const PackedVector<scalar>& v) {
 }
 
 #endif // header_math_extra_packed_vector_implementation_ALREADY_INCLUDED
+

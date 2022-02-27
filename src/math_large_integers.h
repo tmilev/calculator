@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_large_integers_ALREADY_INCLUDED
 #define header_math_large_integers_ALREADY_INCLUDED
@@ -23,18 +24,24 @@ public:
   List<int32_t> digits;
   // static const int CarryOverBound =10; //<-for extreme "corner case" testing
   static const int carryOverBound = 1000000000;
-  // the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
+  // the above choice of CarryOverBound facilitates very quick conversions of
+  // Large integers into decimal, with
   // relatively small loss of speed and RAM memory.
   // static const unsigned int CarryOverBound =2147483648UL; //=2^31
-  // The following must be less than or equal to the square root of CarryOverBound.
+  // The following must be less than or equal to the square root of
+  // CarryOverBound.
   // It is used for quick multiplication of Rational-s.
-  // static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner case" testing
-  static const int squareRootOfCarryOverBound = 31000; //31000*31000=961000000<1000000000
+  // static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner
+  // case" testing
+  static const int squareRootOfCarryOverBound = 31000;
+  // 31000*31000=961000000<1000000000
   // static const int SquareRootOfCarryOverBound =32768; //=2^15
   friend bool operator<(int left, const LargeIntegerUnsigned& right) {
     return right > left;
   }
-  friend std::ostream& operator<<(std::ostream& output, const LargeIntegerUnsigned& largeIntegerUnsigned) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const LargeIntegerUnsigned& largeIntegerUnsigned
+  ) {
     output << largeIntegerUnsigned.toString();
     return output;
   }
@@ -60,7 +67,9 @@ public:
   bool isEqualToZero() const;
   bool isEven() const;
   bool isPositive() const;
-  bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
+  bool tryIsPower(
+    bool& outputIsPower, LargeInteger& outputBase, int& outputPower
+  ) const;
   bool isCompositePrimeDivision(
     List<unsigned int>& primesGenerated,
     bool& outputGuaranteedPrime,
@@ -85,10 +94,22 @@ public:
   static void getPrimesEratosthenesSieve(
     unsigned int primesUpToInclusive, List<unsigned int>& output
   );
-  static void greatestCommonDivisor(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
-  static LargeIntegerUnsigned greatestCommonDivisor(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
-  static LargeIntegerUnsigned leastCommonMultiple(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
-  static void leastCommonMultiple(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
+  static void greatestCommonDivisor(
+    const LargeIntegerUnsigned& a,
+    const LargeIntegerUnsigned& b,
+    LargeIntegerUnsigned& output
+  );
+  static LargeIntegerUnsigned greatestCommonDivisor(
+    const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b
+  );
+  static LargeIntegerUnsigned leastCommonMultiple(
+    const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b
+  );
+  static void leastCommonMultiple(
+    const LargeIntegerUnsigned& a,
+    const LargeIntegerUnsigned& b,
+    LargeIntegerUnsigned& output
+  );
   unsigned int hashFunction() const;
   void multiplyBy(const LargeIntegerUnsigned& right);
   void operator*=(const LargeIntegerUnsigned& right);
@@ -97,7 +118,9 @@ public:
   void operator++(int);
   bool isIntegerFittingInInt(int* whichInt) const;
   void assignFactorial(unsigned int x);
-  void multiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const;
+  void multiplyBy(
+    const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output
+  ) const;
   void multiplyByUInt(unsigned int x);
   void addShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void assignShiftedUInt(unsigned int x, int shift);
@@ -106,9 +129,7 @@ public:
   // returns ceiling of the logarithm base two of the number,
   // i.e., the smallest x such that this <= 2^x.
   unsigned int logarithmBaseNCeiling(unsigned int base) const;
-
   int maximumDivisorToTryWhenFactoring(int desiredByUser) const;
-
   static void accountFactor(
     const LargeInteger& prime,
     List<LargeInteger>& outputPrimeFactors,
@@ -125,11 +146,13 @@ public:
     std::stringstream* commentsOnFailure
   ) const;
   void assignString(const std::string& input);
-  bool assignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
+  bool assignStringFailureAllowed(
+    const std::string& input, bool ignoreNonDigits
+  );
   int getUnsignedIntValueTruncated();
   int operator%(unsigned int x);
   void operator=(const LargeIntegerUnsigned& x);
-  //void operator=(LargeIntUnsigned&& other);
+  // void operator=(LargeIntUnsigned&& other);
   void operator=(unsigned int x);
   void operator+=(const LargeIntegerUnsigned& other);
   bool operator==(const LargeIntegerUnsigned& other) const;
@@ -157,17 +180,21 @@ public:
   bool operator<(const LargeInteger& other) const;
   bool operator>=(const LargeIntegerUnsigned& other) const;
   bool operator>(const LargeIntegerUnsigned& other) const;
-  void writeBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const;
+  void writeBigEndianBytes(
+    List<unsigned char>& outputAppend, bool leadingZeroPad
+  ) const;
   bool writeBigEndianFixedNumberOfBytes(
     List<unsigned char>& outputAppend,
     int desiredNumberOfBytes,
     std::stringstream* commentsOnFailure
   ) const;
-  void getHexBigEndian(int numberOfLeadingZeroesToPadWith, std::string& output) const;
-  //must be rewritten:
+  void getHexBigEndian(
+    int numberOfLeadingZeroesToPadWith, std::string& output
+  ) const;
+  // must be rewritten:
   double getDoubleValue() const;
   class Test {
-    public:
+  public:
     static bool all();
     static bool serializationToHex(const LargeIntegerUnsigned& input);
     static bool serializationToHex();
@@ -199,7 +226,9 @@ public:
 
 class LargeInteger {
   friend class Rational;
-  friend LargeInteger operator*(const LargeInteger& left, const LargeInteger& right) {
+  friend LargeInteger operator*(
+    const LargeInteger& left, const LargeInteger& right
+  ) {
     LargeInteger result;
     result = left;
     result *= right;
@@ -209,12 +238,16 @@ class LargeInteger {
     LargeInteger leftCopy = left;
     return right > leftCopy;
   }
-  friend LargeInteger operator*(const LargeInteger& left, const LargeIntegerUnsigned& right) {
+  friend LargeInteger operator*(
+    const LargeInteger& left, const LargeIntegerUnsigned& right
+  ) {
     LargeInteger rightCopy;
     rightCopy = right;
     return left * rightCopy;
   }
-  friend std::ostream& operator<<(std::ostream& output, const LargeInteger& largeInteger) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const LargeInteger& largeInteger
+  ) {
     output << largeInteger.toString();
     return output;
   }
@@ -251,7 +284,9 @@ public:
   }
   static LargeInteger zero();
   static LargeInteger zeroStatic();
-  bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
+  bool tryIsPower(
+    bool& outputIsPower, LargeInteger& outputBase, int& outputPower
+  ) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
     return false;
@@ -277,13 +312,15 @@ public:
     converted.assignInteger(x);
     *this += converted;
   }
-  //bool IsGEQ(LargeInt& x);
+  // bool IsGEQ(LargeInt& x);
   bool checkConsistensy();
   void writeToFile(std::fstream& output);
   void assignString(const std::string& input);
-  bool assignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure);
+  bool assignStringFailureAllowed(
+    const std::string& input, std::stringstream* commentsOnFailure
+  );
   void readFromFile(std::fstream& input);
-  void checkConsistency(){}
+  void checkConsistency() {}
   void makeZero();
   bool getDivisors(List<int>& output, bool includeNegative);
   void makeOne() {
@@ -298,14 +335,16 @@ public:
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return this->value.hashFunction() + static_cast<unsigned int>(this->sign) + 3;
+    return
+    this->value.hashFunction() + static_cast<unsigned int>(this->sign) +
+    3;
   }
   int getIntValueTruncated() {
-   return this->sign * this->value.getUnsignedIntValueTruncated();
+    return this->sign * this->value.getUnsignedIntValueTruncated();
   }
   double getDoubleValue() const;
-  int operator %(int x);
-  inline void assignFloor(){}
+  int operator%(int x);
+  inline void assignFloor() {}
   void operator=(const Rational& x);
   void operator=(const LargeInteger& x);
   inline void operator=(int x) {
@@ -349,12 +388,12 @@ public:
     this->negate();
   }
   inline bool operator<=(const LargeInteger& other) const {
-    return !(other<*this);
+    return !(other < *this);
   }
   inline bool operator<(const LargeInteger& other) const {
     if (other.isPositiveOrZero()) {
       if (this->isPositiveOrZero()) {
-        return this->value<other.value;
+        return this->value < other.value;
       }
       return true;
     }
@@ -390,10 +429,10 @@ public:
     if (this->isEqualToZero()) {
       return;
     }
-    this->sign*= other.sign;
+    this->sign *= other.sign;
     LargeIntegerUnsigned quotient, remainder;
     this->value.dividePositive(other.value, quotient, remainder);
-    this->value =quotient;
+    this->value = quotient;
   }
   inline bool operator>(const LargeInteger& other) const {
     return other < *this;
@@ -427,14 +466,12 @@ public:
   LargeInteger(uint64_t x) {
     this->assignUInt64(x);
   }
-  LargeInteger(const LargeIntegerUnsigned& other) : sign(1), value(other) {
-  }
+  LargeInteger(const LargeIntegerUnsigned& other): sign(1), value(other) {}
   LargeInteger(): sign(1) {}
 };
 
 Rational operator-(const Rational& argument);
 Rational operator/(int left, const Rational& right);
-
 class Rational {
 private:
   struct LargeRationalExtended {
@@ -442,14 +479,17 @@ private:
     LargeInteger numerator;
     LargeIntegerUnsigned denominator;
   };
+
   friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
-  friend std::ostream& operator << (std::ostream& output, const Rational& rational) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const Rational& rational
+  ) {
     output << rational.toString();
     return output;
   }
   friend Rational operator*(int left, const Rational& right) {
-    return Rational (left) * right;
+    return Rational(left) * right;
   }
   friend bool operator<(int left, const Rational& right) {
     return Rational(left) < right;
@@ -462,8 +502,8 @@ private:
     }
     this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter ++;
-  GlobalStatistics::checkPointerCounters();
+    GlobalStatistics::globalPointerCounter ++;
+    GlobalStatistics::checkPointerCounters();
 #endif
   }
   bool initializeExtendedFromShortIfNeeded() {
@@ -472,10 +512,12 @@ private:
     }
     this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter ++;
-  GlobalStatistics::checkPointerCounters();
+    GlobalStatistics::globalPointerCounter ++;
+    GlobalStatistics::checkPointerCounters();
 #endif
-    this->extended->denominator.assignShiftedUInt( static_cast<unsigned int>(this->denominatorShort), 0);
+    this->extended->denominator.assignShiftedUInt(
+      static_cast<unsigned int>(this->denominatorShort), 0
+    );
     this->extended->numerator.assignInteger(this->numeratorShort);
     return true;
   }
@@ -486,8 +528,8 @@ private:
     delete this->extended;
     this->extended = nullptr;
 #ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter ++;
-  GlobalStatistics::checkPointerCounters();
+    GlobalStatistics::globalPointerCounter ++;
+    GlobalStatistics::checkPointerCounters();
 #endif
   }
   bool shrinkExtendedPartIfPossible();
@@ -510,13 +552,15 @@ public:
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
     return false;
-    //return this->isNegative();
+    // return this->isNegative();
   }
   bool getSquareRootIfRational(Rational& output) const;
   // Scales a vector of rationals so as to make all coordinates
   // relatively prime integers such that the non-zero coefficient is positive.
   // Returns the number by which the vector was multiplied.
-  static Rational scaleNormalizeIndex(List<Rational>& inputOutput, int indexNonZeroEntry);
+  static Rational scaleNormalizeIndex(
+    List<Rational>& inputOutput, int indexNonZeroEntry
+  );
   static Rational scaleNoSignChange(List<Rational>& inputOutput);
   LargeIntegerUnsigned getDenominator() const;
   bool beginsWithMinus();
@@ -555,10 +599,14 @@ public:
       if (this->numeratorShort == 0) {
         return 0;
       }
-      return static_cast<unsigned int>(this->numeratorShort) * HashConstants::constant0 +
-      static_cast<unsigned int>(this->denominatorShort) * HashConstants::constant1;
+      return
+      static_cast<unsigned int>(this->numeratorShort) *
+      HashConstants::constant0 +
+      static_cast<unsigned int>(this->denominatorShort) *
+      HashConstants::constant1;
     }
-    return this->extended->numerator.hashFunction() * HashConstants::constant0 +
+    return
+    this->extended->numerator.hashFunction() * HashConstants::constant0 +
     this->extended->denominator.hashFunction() * HashConstants::constant1;
   }
   static inline unsigned int hashFunction(const Rational& input) {
@@ -615,7 +663,9 @@ public:
       return;
     }
     this->initializeExtendedFromShortIfNeeded();
-    this->extended->denominator.multiplyByUInt(static_cast<unsigned int>(denominator));
+    this->extended->denominator.multiplyByUInt(
+      static_cast<unsigned int>(denominator)
+    );
     this->extended->numerator.sign *= tempSign;
     this->simplify();
   }
@@ -632,7 +682,8 @@ public:
   }
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;
-  std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
+  std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr)
+  const;
   bool isEqualTo(const Rational& r) const;
   bool isGreaterThanOrEqualTo(const Rational& right) const;
   bool isEven() const {
@@ -644,7 +695,8 @@ public:
     if (this->extended == nullptr) {
       return (this->numeratorShort == 1 && this->denominatorShort == 1);
     } else {
-      return (this->extended->numerator.isEqualToOne() && this->extended->denominator.isEqualToOne());
+      return (this->extended->numerator.isEqualToOne() &&
+      this->extended->denominator.isEqualToOne());
     }
   }
   inline bool isEqualToZero() const {
@@ -719,10 +771,16 @@ public:
     }
   }
   static long long int totalAdditions() {
-    return static_cast<long long int>(Rational::totalLargeAdditions + Rational::totalSmallAdditions);
+    return
+    static_cast<long long int>(
+      Rational::totalLargeAdditions + Rational::totalSmallAdditions
+    );
   }
   static long long int totalMultiplications() {
-    return static_cast<long long int>(Rational::totalLargeMultiplications + Rational::totalSmallMultiplications);
+    return
+    static_cast<long long int>(
+      Rational::totalLargeMultiplications + Rational::totalSmallMultiplications
+    );
   }
   static long long int totalArithmeticOperations() {
     return Rational::totalAdditions() + Rational::totalMultiplications();
@@ -732,7 +790,8 @@ public:
   static Rational twoToTheNth(int n);
   static Rational NtoTheKth(int n, int k);
   void raiseToPower(int x);
-  // Calling the following constructor on an already initialized object will leak the
+  // Calling the following constructor on an already initialized object will
+  // leak the
   // extended pointer.
   Rational(int n, int d) {
     this->extended = nullptr;
@@ -746,8 +805,7 @@ public:
     this->extended = nullptr;
     *this = other;
   }
-  Rational(): numeratorShort(0), denominatorShort(0), extended(nullptr) {
-  }
+  Rational(): numeratorShort(0), denominatorShort(0), extended(nullptr) {}
   Rational(int n) {
     this->extended = nullptr;
     this->assignNumeratorAndDenominator(n, 1);
@@ -756,13 +814,16 @@ public:
     this->extended = nullptr;
     this->assign(right);
   }
-  Rational(const std::string& input): numeratorShort(0), denominatorShort(0), extended(nullptr) {
+  Rational(const std::string& input):
+  numeratorShort(0),
+  denominatorShort(0),
+  extended(nullptr) {
     this->assignString(input);
   }
   ~Rational() {
     this->freeExtended();
   }
-  //the below must be called only with positive arguments!
+  // the below must be called only with positive arguments!
   static inline int greatestCommonDivisor(int a, int b) {
     MacroIncrementCounter(Rational::totalSmallGreatestCommonDivisors);
     return MathRoutines::greatestCommonDivisor(a, b);
@@ -819,7 +880,9 @@ public:
     LargeInteger numeratorCopy;
     numeratorCopy = rightCopy.extended->numerator;
     numeratorCopy.value.multiplyBy(this->extended->denominator);
-    this->extended->numerator.value.multiplyBy(rightCopy.extended->denominator);
+    this->extended->numerator.value.multiplyBy(
+      rightCopy.extended->denominator
+    );
     this->extended->numerator += numeratorCopy;
     this->extended->denominator.multiplyBy(rightCopy.extended->denominator);
     this->simplify();
@@ -899,3 +962,4 @@ public:
 };
 
 #endif // header_math_large_integers_ALREADY_INCLUDED
+

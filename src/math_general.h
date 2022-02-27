@@ -340,7 +340,7 @@ private:
   // Note that by the above token I decided to declare operator[] as non-const
   // function and operator() as a const function but returning a copy of the
   // underlying element, rather than a reference to the element.
-  // 
+  //
   // IMPORTANT. The default monomial order, implemented by operator>, is the
   // graded lexicographic
   // last variable strongest order. Other monomial orders are not referred by
@@ -354,7 +354,8 @@ private:
 public:
   struct Order {
     // Lexicographic order, see documentation below.
-    static const int lexicographic = 0;
+    static const int lexicographic =
+    0;
     // Lexicographic with opposite letter order.
     static const int lexicographicOpposite = 1;
     // Graded lexicographic order, ties resolved with lexicographic order.
@@ -1721,16 +1722,16 @@ void Matrix<Element>::resize(
   int newActualNumRows = MathRoutines::maximum(this->actualNumberOfRows, r);
   if (r > this->actualNumberOfRows || c > this->actualNumberOfColumns) {
     newElements = new Element*[newActualNumRows];
-    #ifdef AllocationLimitsSafeguard
+#ifdef AllocationLimitsSafeguard
     GlobalStatistics::globalPointerCounter += newActualNumRows;
     GlobalStatistics::checkPointerCounters();
-    #endif
+#endif
     for (int i = 0; i < newActualNumRows; i ++) {
       newElements[i] = new Element[newActualNumCols];
-      #ifdef AllocationLimitsSafeguard
+#ifdef AllocationLimitsSafeguard
       GlobalStatistics::globalPointerCounter += newActualNumCols;
       GlobalStatistics::checkPointerCounters();
-      #endif
+#endif
     }
   }
   int firstInvalidRow = MathRoutines::minimum(this->numberOfRows, r);
@@ -1848,12 +1849,12 @@ void Matrix<Element>::releaseMemory() {
     delete[] this->elements[i];
   }
   delete[] this->elements;
-  #ifdef AllocationLimitsSafeguard
+#ifdef AllocationLimitsSafeguard
   GlobalStatistics::globalPointerCounter -=
   this->actualNumberOfRows * this->actualNumberOfColumns +
   this->actualNumberOfRows;
   GlobalStatistics::checkPointerCounters();
-  #endif
+#endif
   this->elements = nullptr;
   this->numberOfColumns = 0;
   this->numberOfRows = 0;
@@ -2126,7 +2127,7 @@ void Matrix<Element>::switchRows(int row1, int row2) {
   if (row1 == row2) {
     return;
   }
-  Element* tmp = this->elements[row1];
+  Element * tmp = this->elements[row1];
   this->elements[row1] = this->elements[row2];
   this->elements[row2] = tmp;
 }
@@ -3480,41 +3481,41 @@ public:
   );
 };
 
-template <>
+template < >
 bool Polynomial<Rational>::Test::differential();
-template <>
+template < >
 bool Polynomial<Rational>::Test::oneDifferential(
   const std::string& input, const std::string& expected
 );
-template <>
+template < >
 bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   const std::string& left,
   const std::string& right,
   const std::string& expected
 );
-template <>
+template < >
 Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
 fromStringCommonContext(
   const std::string& first, const std::string& second
 );
-template <>
+template < >
 Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
 fromStringCommonContext(const List<std::string>& input);
-template <>
+template < >
 bool Polynomial<Rational>::Test::fromStringCommonContextTest();
-template <>
+template < >
 void Polynomial<Rational>::Test::initialize();
-template <>
+template < >
 bool Polynomial<Rational>::Test::leastCommonMultiple();
-template <>
+template < >
 bool Polynomial<Rational>::Test::all();
-template <>
+template < >
 Polynomial<Rational> Polynomial<Rational>::Test::fromString(
   const std::string& input
 );
-template <>
+template < >
 bool Polynomial<Rational>::Test::fromStringTest();
-template <>
+template < >
 bool Polynomial<Rational>::findOneVariableRationalRoots(
   List<Rational>& output
 );
@@ -4711,9 +4712,9 @@ public:
   }
 };
 
-template <>
+template < >
 bool Complex<double>::flagEqualityIsApproximate;
-template <>
+template < >
 double Complex<double>::equalityPrecision;
 template <class Coefficient>
 bool Complex<Coefficient>::isEqualToZero() const {
@@ -5925,7 +5926,7 @@ public:
 // Suppose the initial vectors are v_1, ..., v_n.
 // For every vector v=(a_1, ..., a_k), define
 // x^{v} as the monomial x_1^{a_1} ... x_n^{a_k}.
-// 
+//
 // Then the denominator recorded here has the form:
 // (1-x^{v_1})^m_1 ... (1-x^{v_n})^m_n,
 // where we call

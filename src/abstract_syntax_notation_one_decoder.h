@@ -1,7 +1,9 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
 #define header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
+
 #include "json.h"
 #include "serialization_basic.h"
 
@@ -27,7 +29,7 @@
 //
 class ASNElement {
 public:
-  class JSLabels{
+  class JSLabels {
   public:
     static std::string offsetLastRead;
     static std::string offsetLastWrite;
@@ -45,7 +47,9 @@ public:
     static std::string comment;
   };
 
-  friend std::ostream& operator<<(std::ostream& output, const ASNElement& element) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const ASNElement& element
+  ) {
     output << element.toString();
     return output;
   }
@@ -69,8 +73,12 @@ public:
   bool hasCostructedStartByte() const;
   void resetExceptContent();
   void reset();
-  bool isIntegerUnsigned(LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
-  bool isInteger(LargeInteger* whichInteger, std::stringstream* commentsOnFalse) const;
+  bool isIntegerUnsigned(
+    LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse
+  ) const;
+  bool isInteger(
+    LargeInteger* whichInteger, std::stringstream* commentsOnFalse
+  ) const;
   std::string interpretAsObjectIdentifier() const;
   std::string interpretAsObjectIdentifierGetNameAndId() const;
   void toJSON(JSData& output) const;
@@ -92,13 +100,22 @@ public:
   // it is in fact used for public key and
   // certificate extension serializations.
   void makeBitStringSequence(const List<ASNElement>& input);
-  void makeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed);
+  void makeSet(
+    int numberOfEmptyElements,
+    bool setLeadingBit,
+    bool setSecondMostSignificantBit,
+    bool constructed
+  );
   void makeNull();
   void makeInteger(const LargeIntegerUnsigned& input);
   void makeBitString(const List<unsigned char>& input);
   void makeOctetString(const List<unsigned char>& input);
-  void setStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
-  void makeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
+  void setStartByteFlags(
+    bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed
+  );
+  void makeBitStringEmpty(
+    bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed
+  );
   void makeObjectId(const List<unsigned char>& input);
   template <typename thisPointerType>
   static bool hasSubElementTemplate(
@@ -147,7 +164,8 @@ public:
 class ASNObject {
 private:
   // the map below records samples for each known objectId
-  static MapList<std::string, ASNObject, MathRoutines::hashString> objectIdSamples;
+  static MapList<std::string, ASNObject, MathRoutines::hashString>
+  objectIdSamples;
 public:
   class names {
   public:
@@ -156,19 +174,22 @@ public:
     static std::string sha384;
     static std::string sha512;
     static std::string sha256WithRSAEncryption;
-    static std::string RSAEncryption          ;
-    static std::string subjectKeyIdentifier   ;
-    static std::string authorityKeyIdentifier ;
-    static std::string basicConstraints       ;
-    static std::string countryName            ;
-    static std::string stateOrProvinceName    ;
-    static std::string localityName           ;
-    static std::string organizationName       ;
-    static std::string organizationalUnitName ;
-    static std::string commonName             ;
-    static std::string emailAddress           ;
+    static std::string RSAEncryption;
+    static std::string subjectKeyIdentifier;
+    static std::string authorityKeyIdentifier;
+    static std::string basicConstraints;
+    static std::string countryName;
+    static std::string stateOrProvinceName;
+    static std::string localityName;
+    static std::string organizationName;
+    static std::string organizationalUnitName;
+    static std::string commonName;
+    static std::string emailAddress;
   };
-  friend std::ostream& operator<<(std::ostream& output, const ASNObject& element) {
+
+  friend std::ostream& operator<<(
+    std::ostream& output, const ASNObject& element
+  ) {
     output << element.toString();
     return output;
   }
@@ -183,12 +204,14 @@ public:
   );
   // static initialization order fiasco guard:
   // The function is thread-safe after returning once.
-  static MapList<std::string, ASNObject, MathRoutines::hashString>& namesToObjectIdsNonThreadSafe();
-  static MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& objectIdsToNames();
+  static MapList<std::string, ASNObject, MathRoutines::hashString>&
+  namesToObjectIdsNonThreadSafe();
+  static MapList<
+    List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars
+  >& objectIdsToNames();
   static void initializeNonThreadSafe();
   bool loadFromASN(
-    const ASNElement& input,
-    std::stringstream* commentsOnFailure
+    const ASNElement& input, std::stringstream* commentsOnFailure
   );
   static bool loadFieldsFromASNSequence(
     const ASNElement& input,
@@ -197,10 +220,13 @@ public:
   );
   // Returns 1 if field was found, 0 otherwise.
   int loadField(
-    const MapList<std::string, ASNObject, MathRoutines::hashString>& inputFields,
+    const MapList<std::string, ASNObject, MathRoutines::hashString>&
+    inputFields,
     const std::string& fieldName
   );
-  static const List<unsigned char>& objectIdFromNameNoFail(const std::string& input);
+  static const List<unsigned char>& objectIdFromNameNoFail(
+    const std::string& input
+  );
   static std::string toStringAllRecognizedObjectIds();
   void computeASN(ASNElement& output);
   std::string toString() const;
@@ -210,10 +236,13 @@ public:
 // The following class (is supposed to) implement a sufficiently
 // large subset of the ASN-1 so as to serve our cryptographic needs.
 // Materials used, in no particular order:
-// https://www.w3.org/Protocols/HTTP-NG/asn1.html [brief philosophy of the how of the encoding, must read]
-// http://luca.ntop.org/Teaching/Appunti/asn1.html [long technical discussion and tables, no proper explanations, use for reference]
+// https://www.w3.org/Protocols/HTTP-NG/asn1.html [brief philosophy of the how
+// of the encoding, must read]
+// http://luca.ntop.org/Teaching/Appunti/asn1.html [long technical discussion
+// and tables, no proper explanations, use for reference]
 // https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One
-// https://lapo.it/asn1js [decodes messages and highlights and annotates individual bytes.]
+// https://lapo.it/asn1js [decodes messages and highlights and annotates
+// individual bytes.]
 class AbstractSyntaxNotationOneSubsetDecoder {
   // BER (basic encoding rules) concepts.
   // A piece of data is identified via a tag-length-value encoding.
@@ -226,8 +255,10 @@ class AbstractSyntaxNotationOneSubsetDecoder {
   // The top 2 bits are reserved as follows:
   // 00 - universal data type.
   // 01 - application-specific type.
-  // 10 - context specific type (interpret as you wish: it's not self-explanatory and the standards do not give a proper definition).
-  // 11 - private type (interpret as you wish: it's not self-explanatory and the standards do not give a proper definition).
+  // 10 - context specific type (interpret as you wish: it's not
+  // self-explanatory and the standards do not give a proper definition).
+  // 11 - private type (interpret as you wish: it's not self-explanatory and the
+  // standards do not give a proper definition).
 public:
   struct tags {
     static const unsigned char reserved0 = 0;
@@ -235,7 +266,8 @@ public:
     static const unsigned char integer0x02 = 2;
     static const unsigned char bitString0x03 = 3;
     static const unsigned char octetString0x04 = 4;
-    static const unsigned char null0x05; // cannot initialize here: gcc linker bug?
+    static const unsigned char null0x05;
+    // cannot initialize here: gcc linker bug?
     static const unsigned char objectIdentifier0x06 = 6;
     static const unsigned char utf8String0x0c = 12;
     static const unsigned char sequence0x10 = 16;
@@ -247,8 +279,10 @@ public:
     static const unsigned char timeOfDay0x20 = 32;
     static const unsigned char dateTime0x21 = 33;
     static const unsigned char duration0x22 = 34;
-    static const unsigned char anyType0xff = 255; // Used exclusively for type matching.
+    static const unsigned char anyType0xff = 255;
+    // Used exclusively for type matching.
   };
+
   // writes fixed lenght encodings.
   class WriterObjectFixedLength {
   private:
@@ -261,7 +295,9 @@ public:
     int totalByteLength;
     int reservedBytesForLength;
     static int getReservedBytesForLength(int length);
-    static void writeLength(unsigned int input, List<unsigned char>& output, int offset);
+    static void writeLength(
+      unsigned int input, List<unsigned char>& output, int offset
+    );
     WriterObjectFixedLength(
       unsigned char startByte,
       int expectedTotalElementByteLength,
@@ -270,14 +306,16 @@ public:
     );
     ~WriterObjectFixedLength();
   };
+
   int recursionDepthGuard;
   int maxRecursionDepth;
   int dataPointer;
   bool flagMustDecodeAll;
   const List<unsigned char>* rawData;
   ASNElement* decodedData;
-  typedef bool (*typeDecoder)(
-    AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError
+  typedef bool(*typeDecoder)(
+    AbstractSyntaxNotationOneSubsetDecoder& thisPointer,
+    std::stringstream* commentsOnError
   );
   List<typeDecoder> decodersByByteValue;
   bool decode(
@@ -291,16 +329,20 @@ public:
   bool decodeCurrent(ASNElement& output);
   bool decodeSequenceLikeContent(ASNElement& output);
   bool decodeBitString(ASNElement& output);
-  static LargeInteger variableLengthQuantityDecode(const List<unsigned char>& input, int& inputOutputDataPointer);
+  static LargeInteger variableLengthQuantityDecode(
+    const List<unsigned char>& input, int& inputOutputDataPointer
+  );
   void decodeASNAtomContent(ASNElement& output);
   bool decodeNull(ASNElement& output);
   bool decodeLengthIncrementDataPointerNoCheck(ASNElement& output);
   bool decodeLengthIncrementDataPointer(ASNElement& output);
-
-  static void writeUnsignedIntegerObject(const LargeIntegerUnsigned& input, List<unsigned char>& output);
-  static void writeObjectId(const List<unsigned char>& input, List<unsigned char>& output);
+  static void writeUnsignedIntegerObject(
+    const LargeIntegerUnsigned& input, List<unsigned char>& output
+  );
+  static void writeObjectId(
+    const List<unsigned char>& input, List<unsigned char>& output
+  );
   static void writeNull(List<unsigned char>& output);
-
   std::string toStringAnnotateBinary();
   bool checkInitialization() const;
   void reset();
@@ -309,3 +351,4 @@ public:
 };
 
 #endif // header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
+

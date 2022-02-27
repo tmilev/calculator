@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_subsets_selections_ALREADY_INCLUDED
 #define header_math_subsets_selections_ALREADY_INCLUDED
@@ -74,7 +75,8 @@ public:
   void operator=(const Selection& right);
   void operator=(const Vector<Rational>& other);
   // void operator=(const std::string& other);
-  // warning: to call the comparison operator sucessfully, cardinalitySelection must
+  // warning: to call the comparison operator sucessfully, cardinalitySelection
+  // must
   // be properly computed!
   bool operator==(const Selection& right) const {
     if (
@@ -98,7 +100,9 @@ public:
   Selection(const Vector<Rational>& other) {
     this->operator=(other);
   }
-  Selection(const Selection& other): numberOfElements(0), cardinalitySelection(0) {
+  Selection(const Selection& other):
+  numberOfElements(0),
+  cardinalitySelection(0) {
     *this = other;
   }
   class Test {
@@ -124,7 +128,8 @@ public:
       int j = input.elements[i];
       result += static_cast<unsigned int>(
         input.multiplicities[input.elements[i]]
-      ) * HashConstants::getConstantIncrementCounter(j);
+      ) *
+      HashConstants::getConstantIncrementCounter(j);
     }
     return result;
   }
@@ -140,7 +145,10 @@ public:
   LargeInteger numberOfCombinationsOfCardinality(int cardinality);
   LargeInteger getTotalCombinationCount() const;
   int numberOfSelectionsTotal() {
-    return MathRoutines::kToTheNth(maximumMultiplicity, this->multiplicities.size);
+    return
+    MathRoutines::kToTheNth(
+      maximumMultiplicity, this->multiplicities.size
+    );
   }
   bool incrementReturnFalseIfPastLast();
   void incrementSubset();
@@ -151,7 +159,8 @@ public:
   }
   int cardinalitySelectionWithMultiplicities();
   static unsigned int hashFunction(const SelectionWithMaxMultiplicity& input) {
-    return static_cast<unsigned int>(input.maximumMultiplicity) *
+    return
+    static_cast<unsigned int>(input.maximumMultiplicity) *
     HashConstants::constant0 +
     input.::SelectionWithMultiplicities::hashFunction(input);
   }
@@ -170,11 +179,12 @@ public:
   int totalMultiplicity();
   int maximumTotalMultiplicity();
   void initializeFromIntegers(
-    int* maximalMultiplicities,
-    int numberOfMaximalMultiplicities
+    int* maximalMultiplicities, int numberOfMaximalMultiplicities
   );
   void initializeFromIntegers(const List<int>& maximalMultiplicities);
-  bool hasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
+  bool hasSameMaxMultiplicities(
+    SelectionWithDifferentMaxMultiplicities& other
+  ) {
     return this->capacities.isEqualTo(other.capacities);
   }
   void operator=(const SelectionWithDifferentMaxMultiplicities& right) {
@@ -185,12 +195,10 @@ public:
 };
 
 class SelectionOneItem {
-  public:
+public:
   int maximumMultiplicity;
   int amount;
-  SelectionOneItem(): maximumMultiplicity(0), amount(- 1) {
-   
-  }
+  SelectionOneItem(): maximumMultiplicity(0), amount(- 1) {}
   bool incrementReturnFalseIfPastLast() {
     if (this->maximumMultiplicity == 0) {
       return false;
@@ -243,8 +251,10 @@ public:
       this->elements[i].initializeFromMultiplicities(inputBase);
     }
   }
-  template<class Element>
-  void initializeFromMultiplicities(const List<Element>& input, int useOnlyNElementsOnly = 0) {
+  template <class Element>
+  void initializeFromMultiplicities(
+    const List<Element>& input, int useOnlyNElementsOnly = 0
+  ) {
     if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size) {
       this->elements.setSize(useOnlyNElementsOnly);
     } else {
@@ -274,26 +284,38 @@ public:
   int desiredSubsetSize;
   LargeInteger totalCombinations() {
     LargeInteger result;
-    MathRoutines::nChooseK(selection.numberOfElements, desiredSubsetSize, result);
+    MathRoutines::nChooseK(
+      selection.numberOfElements, desiredSubsetSize, result
+    );
     return result;
   }
-  void setNumberOfItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumberOfItems) {
+  void setNumberOfItemsAndDesiredSubsetSize(
+    int inputDesiredSubsetSize, int inputNumberOfItems
+  ) {
     if (inputDesiredSubsetSize < 0 || inputNumberOfItems < 0) {
-      global.fatal << "Request to initialize a selection of size "
-      << inputDesiredSubsetSize << " out of "
-      << inputNumberOfItems << " elements, which does not make sense. " << global.fatal;
+      global.fatal
+      << "Request to initialize a selection of size "
+      << inputDesiredSubsetSize
+      << " out of "
+      << inputNumberOfItems
+      << " elements, which does not make sense. "
+      << global.fatal;
     }
     this->selection.initialize(inputNumberOfItems);
     this->desiredSubsetSize = inputDesiredSubsetSize;
     if (this->desiredSubsetSize > 0) {
-      this->selection.incrementSelectionFixedCardinality(this->desiredSubsetSize);
+      this->selection.incrementSelectionFixedCardinality(
+        this->desiredSubsetSize
+      );
     }
   }
   std::string toString() const {
     return this->selection.toString();
   }
   bool incrementReturnFalseIfPastLast() {
-    this->selection.incrementSelectionFixedCardinality(this->desiredSubsetSize);
+    this->selection.incrementSelectionFixedCardinality(
+      this->desiredSubsetSize
+    );
     for (int i = 0; i < this->desiredSubsetSize; i ++) {
       if (!this->selection.selected[i]) {
         return true;
@@ -304,7 +326,7 @@ public:
 };
 
 class SelectionPositiveIntegers {
-  public:
+public:
   Vector<LargeIntegerUnsigned> integers;
   std::string toString(FormatExpressions* format = nullptr) {
     (void) format;
@@ -339,7 +361,7 @@ class SelectionPositiveIntegers {
   }
 };
 
-template<class Coefficient>
+template <class Coefficient>
 bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(
   Vector<Coefficient>& output,
   Vector<Coefficient>& extraRoot1,
@@ -357,10 +379,16 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(
   bufferMatrix.initialize(selection.cardinalitySelection + 2, dimension);
   for (int j = 0; j < dimension; j ++) {
     for (int i = 0; i < selection.cardinalitySelection; i ++) {
-      bufferMatrix.elements[i][j].assign(this->objects[selection.elements[i]].objects[j]);
+      bufferMatrix.elements[i][j].assign(
+        this->objects[selection.elements[i]].objects[j]
+      );
     }
-    bufferMatrix.elements[selection.cardinalitySelection][j].assign(extraRoot1.objects[j]);
-    bufferMatrix.elements[selection.cardinalitySelection + 1][j].assign(extraRoot2.objects[j]);
+    bufferMatrix.elements[selection.cardinalitySelection][j].assign(
+      extraRoot1.objects[j]
+    );
+    bufferMatrix.elements[selection.cardinalitySelection + 1][j].assign(
+      extraRoot2.objects[j]
+    );
   }
   bufferMatrix.gaussianEliminationByRows(0, nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection != 1) {
@@ -408,7 +436,7 @@ void Vectors<Coefficient>::selectionToMatrix(
   }
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool Vectors<Coefficient>::computeNormalExcludingIndex(
   Vector<Coefficient>& output,
   int index,
@@ -435,13 +463,11 @@ bool Vectors<Coefficient>::computeNormalExcludingIndex(
   if (nonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
-  bufferMatrix.nonPivotPointsToEigenVectorHomogeneous(
-    nonPivotPoints, output
-  );
+  bufferMatrix.nonPivotPointsToEigenVectorHomogeneous(nonPivotPoints, output);
   return true;
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool Vectors<Coefficient>::computeNormalFromSelection(
   Vector<Coefficient>& output,
   Selection& selection,
@@ -453,7 +479,8 @@ bool Vectors<Coefficient>::computeNormalFromSelection(
   bufferMatrix.initialize(selection.cardinalitySelection, dimension);
   for (int i = 0; i < selection.cardinalitySelection; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      bufferMatrix.elements[i][j] = this->objects[selection.elements[i]].objects[j];
+      bufferMatrix.elements[i][j] =
+      this->objects[selection.elements[i]].objects[j];
     }
   }
   bufferMatrix.gaussianEliminationByRows(0, &nonPivotPoints);
@@ -464,7 +491,7 @@ bool Vectors<Coefficient>::computeNormalFromSelection(
   return true;
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   Vector<Coefficient>& output,
   Vector<Coefficient>& extraRoot,
@@ -483,9 +510,13 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   matOutputEmpty.initialize(- 1, - 1);
   for (int j = 0; j < dimension; j ++) {
     for (int i = 0; i < selection.cardinalitySelection; i ++) {
-      bufferMatrix.elements[i][j].assign(this->objects[selection.elements[i]][j]);
+      bufferMatrix.elements[i][j].assign(
+        this->objects[selection.elements[i]][j]
+      );
     }
-    bufferMatrix.elements[selection.cardinalitySelection][j].assign(extraRoot[j]);
+    bufferMatrix.elements[selection.cardinalitySelection][j].assign(
+      extraRoot[j]
+    );
   }
   bufferMatrix.gaussianEliminationByRows(matOutputEmpty, nonPivotPoints);
   if (nonPivotPoints.cardinalitySelection != 1) {
@@ -497,7 +528,9 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
 
 template <class Coefficient>
 void Vectors<Coefficient>::gaussianEliminationForNormalComputation(
-  Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int dimension
+  Matrix<Coefficient>& inputMatrix,
+  Selection& outputNonPivotPoints,
+  int dimension
 ) const {
   inputMatrix.initialize(this->size, dimension);
   outputNonPivotPoints.initialize(dimension);
@@ -525,7 +558,9 @@ int Vectors<Coefficient>::getRankElementSpan(
   if (bufferSelection == nullptr) {
     bufferSelection = &emergencySelectionBuffer.getElement();
   }
-  this->gaussianEliminationForNormalComputation(*buffer, *bufferSelection, dimension);
+  this->gaussianEliminationForNormalComputation(
+    *buffer, *bufferSelection, dimension
+  );
   return (dimension - bufferSelection->cardinalitySelection);
 }
 
@@ -544,17 +579,11 @@ bool Vectors<Coefficient>::getLinearDependence(
   }
   if (homogeneous) {
     eliminated.nonPivotPointsToEigenVectorHomogeneous(
-      nonPivotPoints,
-      outputLinearCombination,
-      one,
-      zero
+      nonPivotPoints, outputLinearCombination, one, zero
     );
   } else {
     eliminated.nonPivotPointsToEigenVectorLexicographic(
-      nonPivotPoints,
-      outputLinearCombination,
-      one,
-      zero
+      nonPivotPoints, outputLinearCombination, one, zero
     );
   }
   return true;
@@ -615,3 +644,4 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
 }
 
 #endif // header_math_subsets_selections_ALREADY_INCLUDED
+

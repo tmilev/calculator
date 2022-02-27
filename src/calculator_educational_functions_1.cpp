@@ -1,11 +1,14 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_educational_functions_1.h"
 #include "calculator_inner_functions.h"
 #include "string_constants.h"
 #include "macros.h"
 
-bool UnivariateEquation::getSolutions(Calculator& calculator, Expression& output) {
+bool UnivariateEquation::getSolutions(
+  Calculator& calculator, Expression& output
+) {
   if (this->solutions.size == 1) {
     output = this->solutions[0];
     return true;
@@ -16,7 +19,8 @@ bool UnivariateEquation::getSolutions(Calculator& calculator, Expression& output
 bool UnivariateEquation::getOneSolutionEquation(
   int solutionIndex, Calculator& calculator, Expression& output
 ) {
-  return output.makeXOX(
+  return
+  output.makeXOX(
     calculator,
     calculator.opDefine(),
     this->variable,
@@ -24,7 +28,9 @@ bool UnivariateEquation::getOneSolutionEquation(
   );
 }
 
-bool UnivariateEquation::getSolutionEquations(Calculator& calculator, Expression& output) {
+bool UnivariateEquation::getSolutionEquations(
+  Calculator& calculator, Expression& output
+) {
   if (this->solutions.size == 1) {
     return this->getOneSolutionEquation(0, calculator, output);
   }
@@ -37,11 +43,15 @@ bool UnivariateEquation::getSolutionEquations(Calculator& calculator, Expression
   return true;
 }
 
-bool UnivariateEquation::solve(Calculator& calculator){
-  if (!Calculator::evaluateExpression(
-    calculator, this->equationAllTermsOnLeftHandSide, this->simplified
-  )) {
-    return calculator << "Failed to simplify: "
+bool UnivariateEquation::solve(Calculator& calculator) {
+  if (
+    !Calculator::evaluateExpression(
+      calculator, this->equationAllTermsOnLeftHandSide, this->simplified
+    )
+  ) {
+    return
+    calculator
+    << "Failed to simplify: "
     << this->equationAllTermsOnLeftHandSide.toString();
   }
   Expression powers;
@@ -52,30 +62,45 @@ bool UnivariateEquation::solve(Calculator& calculator){
     this->variable,
     this->simplified
   );
-  if (!CalculatorFunctions::coefficientsPowersOf(
-    calculator, powerExtractor, powers
-  )) {
+  if (
+    !CalculatorFunctions::coefficientsPowersOf(
+      calculator, powerExtractor, powers
+    )
+  ) {
     std::string simplifiedString = this->simplified.toString();
-    calculator << "Failed to extract the coefficients of "
+    calculator
+    << "Failed to extract the coefficients of "
     << this->variable.toString()
-    << " in " << simplifiedString << ". ";
-    std::string originalString = this->equationAllTermsOnLeftHandSide.toString();
+    << " in "
+    << simplifiedString
+    << ". ";
+    std::string originalString =
+    this->equationAllTermsOnLeftHandSide.toString();
     if (originalString != simplifiedString) {
-      calculator << "This was obtained from the original epxression "
+      calculator
+      << "This was obtained from the original epxression "
       << this->equationAllTermsOnLeftHandSide.toString();
     }
     return false;
   }
   if (!powers.isSequenceNElements()) {
-    return calculator << "This is not supposed to happen: expression "
+    return
+    calculator
+    << "This is not supposed to happen: expression "
     << powers.toString()
     << " should be a list. This may be a programming bug. ";
   }
   if (powers.size() == 2) {
-    return calculator << "Cannot solve: " << this->equationAllTermsOnLeftHandSide.toString()
-    << ". The expression does not depend on " << this->variable.toString()
+    return
+    calculator
+    << "Cannot solve: "
+    << this->equationAllTermsOnLeftHandSide.toString()
+    << ". The expression does not depend on "
+    << this->variable.toString()
     << ". The coefficients of "
-    << this->variable.toString() << " are: " << powers.toString();
+    << this->variable.toString()
+    << " are: "
+    << powers.toString();
   }
   if (powers.size() == 3) {
     Expression solution;
@@ -94,9 +119,9 @@ bool UnivariateEquation::solve(Calculator& calculator){
     discriminant = b * b - a * c * 4;
     Expression sqrtDiscriminant;
     sqrtDiscriminant.makeSqrt(calculator, discriminant, 2);
-    currentRoot = (b * (- 1) - sqrtDiscriminant) / (a * 2);
+    currentRoot = (b *(- 1) - sqrtDiscriminant) / (a* 2);
     this->solutions.addOnTop(currentRoot);
-    currentRoot = (b * (- 1) + sqrtDiscriminant) / (a * 2);
+    currentRoot = (b *(- 1) + sqrtDiscriminant) / (a* 2);
     this->solutions.addOnTop(currentRoot);
     return true;
   }
@@ -111,12 +136,14 @@ bool UnivariateEquation::solve(Calculator& calculator){
     polynomial += coefficient;
   }
   List<AlgebraicNumber> solutions;
-  if (PolynomialFactorizationKronecker::solvePolynomial(
-    polynomial,
-    solutions,
-    calculator.objectContainer.algebraicClosure,
-    &calculator.comments
-  )) {
+  if (
+    PolynomialFactorizationKronecker::solvePolynomial(
+      polynomial,
+      solutions,
+      calculator.objectContainer.algebraicClosure,
+      &calculator.comments
+    )
+  ) {
     for (int i = 0; i < solutions.size; i ++) {
       Expression currentSolution;
       currentSolution.assignValue(calculator, solutions[i]);
@@ -130,7 +157,9 @@ bool UnivariateEquation::solve(Calculator& calculator){
 bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo"
+  );
   if (input.size() != 3) {
     return calculator << "SolveFor takes as input three arguments. ";
   }
@@ -145,8 +174,17 @@ bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
   equation.variable = modifiedInput[1];
   if (!modifiedInput[2].startsWith(calculator.opDefine())) {
     equation.equationAllTermsOnLeftHandSide = modifiedInput[2];
-  } else if (!CalculatorFunctions::functionEqualityToArithmeticExpression(calculator, modifiedInput[2], equation.equationAllTermsOnLeftHandSide)) {
-    return calculator << "Failed to interpret the equality " << modifiedInput[2].toString();
+  } else if (
+    !CalculatorFunctions::functionEqualityToArithmeticExpression(
+      calculator,
+      modifiedInput[2],
+      equation.equationAllTermsOnLeftHandSide
+    )
+  ) {
+    return
+    calculator
+    << "Failed to interpret the equality "
+    << modifiedInput[2].toString();
   }
   if (!equation.solve(calculator)) {
     return false;
@@ -167,9 +205,11 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
     return false;
   }
   Expression leftMinusRight;
-  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(
-    calculator, this->toBeSolved, leftMinusRight
-  )) {
+  if (
+    !CalculatorFunctions::functionEqualityToArithmeticExpression(
+      calculator, this->toBeSolved, leftMinusRight
+    )
+  ) {
     return false;
   }
   HashedList<Expression> freeVariables;
@@ -180,39 +220,54 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
     equation.equationAllTermsOnLeftHandSide = leftMinusRight;
     if (!equation.solve(calculator)) {
       this->addAnnotationStep(
-        calculator,
-        "Sorry, I haven't been taught how to solve this equation."
+        calculator, "Sorry, I haven't been taught how to solve this equation."
       );
       return true;
     }
     equation.getSolutionEquations(calculator, this->solutionsNonSimplified);
     this->solutionsSimplified = this->solutionsNonSimplified;
-    calculator.evaluateExpression(calculator, this->solutionsNonSimplified, this->solutionsSimplified);
+    calculator.evaluateExpression(
+      calculator, this->solutionsNonSimplified, this->solutionsSimplified
+    );
     if (this->solutionsNonSimplified != this->solutionsSimplified) {
       Calculator::ExpressionHistoryEnumerator::Step step;
-      step.assignContentAndAnnotation(this->solutionsNonSimplified, "non-simplified solutions");
+      step.assignContentAndAnnotation(
+        this->solutionsNonSimplified, "non-simplified solutions"
+      );
       this->steps.addOnTop(step);
     }
     Calculator::ExpressionHistoryEnumerator::Step finalAnswer;
-    finalAnswer.assignContentAndAnnotation(this->solutionsSimplified, "final answer");
+    finalAnswer.assignContentAndAnnotation(
+      this->solutionsSimplified, "final answer"
+    );
     this->steps.addOnTop(finalAnswer);
     return true;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::functionPolynomial(
-    calculator, leftMinusRight, polynomial, 50, 10, false
-  )) {
-    this->addAnnotationStep(calculator, "Sorry, I've only been taught to solve polynomial equations.");
+  if (
+    !CalculatorConversions::functionPolynomial(
+      calculator, leftMinusRight, polynomial, 50, 10, false
+    )
+  ) {
+    this->addAnnotationStep(
+      calculator,
+      "Sorry, I've only been taught to solve polynomial equations."
+    );
     return true;
   }
   if (polynomial.content.minimalNumberOfVariables() == 2) {
-    this->addAnnotationStep(calculator, "This is an equation in two variables. Such equations are plots of curves. ");
+    this->addAnnotationStep(
+      calculator,
+      "This is an equation in two variables. Such equations are plots of curves. "
+    );
     return true;
   }
   return false;
 }
 
-void ProblemWithSolution::addAnnotationStep(Calculator& calculator, const std::string& input) {
+void ProblemWithSolution::addAnnotationStep(
+  Calculator& calculator, const std::string& input
+) {
   Calculator::ExpressionHistoryEnumerator::Step step;
   step.content.assignValue(calculator, input);
   this->steps.addOnTop(step);
@@ -253,12 +308,11 @@ bool CalculatorEducationalFunctions::solveJSON(
 }
 
 bool CalculatorEducationalFunctions::compareExpressionsJSON(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   CompareExpressions comparison(false);
-  return CalculatorEducationalFunctions::compareExpressionsJSONInternal(
+  return
+  CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     calculator, input, output, comparison
   );
 }
@@ -269,7 +323,9 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   Expression& output,
   CompareExpressions& comparison
 ) {
-  MacroRegisterFunctionWithName("CalculatorEducationalFunctions::compareExpressionsJSONInternal");
+  MacroRegisterFunctionWithName(
+    "CalculatorEducationalFunctions::compareExpressionsJSONInternal"
+  );
   if (input.size() != 3) {
     return false;
   }
@@ -281,12 +337,20 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   }
   comparison.given = input[1];
   comparison.desired = input[2];
-  if (!comparison.desired.getFreeVariables(comparison.freeVariablesDesired, false)) {
-    comparison.errorEvaluation = "Unexpected failure to extract free variables from desired answer.";
+  if (
+    !comparison.desired.getFreeVariables(
+      comparison.freeVariablesDesired, false
+    )
+  ) {
+    comparison.errorEvaluation =
+    "Unexpected failure to extract free variables from desired answer.";
     return output.assignValue(calculator, comparison.toJSON());
   }
-  if (!comparison.given.getFreeVariables(comparison.freeVariablesFound, false)) {
-    comparison.errorEvaluation = "Unexpected failure to extract free variables from given answer.";
+  if (
+    !comparison.given.getFreeVariables(comparison.freeVariablesFound, false)
+  ) {
+    comparison.errorEvaluation =
+    "Unexpected failure to extract free variables from given answer.";
     return output.assignValue(calculator, comparison.toJSON());
   }
   for (int i = 0; i < comparison.freeVariablesFound.size; i ++) {
@@ -297,8 +361,10 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   }
   if (comparison.unexpectedVariables.size > 0) {
     std::stringstream errorStream;
-    errorStream << "Unexpected symbols: <b style='color:red'>"
-    << comparison.unexpectedVariables.toStringCommaDelimited() << "</b>";
+    errorStream
+    << "Unexpected symbols: <b style='color:red'>"
+    << comparison.unexpectedVariables.toStringCommaDelimited()
+    << "</b>";
     comparison.errorInAnswer = errorStream.str();
     return output.assignValue(calculator, comparison.toJSON());
   }
@@ -312,7 +378,6 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     calculator.getOperations().getIndexNoFail("Polynomialize"),
     comparison.desired
   );
-
   comparison.comparisonStandardRaw.makeXOX(
     calculator,
     calculator.opEqualEqual(),
@@ -324,22 +389,21 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     comparison.comparisonStandardRaw,
     comparison.comparisonStandardEvaluated
   );
-
   MapList<std::string, Expression, MathRoutines::hashString> substitution;
   substitution.setKeyValue("a", comparison.given);
   substitution.setKeyValue("b", comparison.desired);
   comparison.comparisonNoDistributionRaw.assignStringParsed(
-    "(TurnOffRules("
-    "DistributeMultiplication, "
-    "AddRationals, "
-    "AddTerms, "
-    "DivideByNumber, "
-    "ConvertShortDenominatorToNegativePower,"
-    "DivideRationalByRational,"
-    "ConstantExtraction"
-    ");\n"
-    "TurnOnRules(SortTerms, DivideByNumberTrivial);\n"
-    "a===b)_3",
+"(TurnOffRules("
+"DistributeMultiplication, "
+"AddRationals, "
+"AddTerms, "
+"DivideByNumber, "
+"ConvertShortDenominatorToNegativePower,"
+"DivideRationalByRational,"
+"ConstantExtraction"
+");\n"
+"TurnOnRules(SortTerms, DivideByNumberTrivial);\n"
+"a===b)_3",
     &substitution,
     calculator
   );
@@ -353,8 +417,12 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
 }
 
 void CompareExpressions::processComparisonRestricted() {
-  MacroRegisterFunctionWithName("CompareExpressions::processComparisonRestricted");
-  this->flagAreEqualAsAnswers = this->comparisonNoDistributionEvaluated.toString() == "1";
+  MacroRegisterFunctionWithName(
+    "CompareExpressions::processComparisonRestricted"
+  );
+  this->flagAreEqualAsAnswers =
+  this->comparisonNoDistributionEvaluated.toString() ==
+  "1";
   this->flagAreEqual = this->comparisonStandardEvaluated.toString() == "1";
 }
 
@@ -363,7 +431,8 @@ JSData Calculator::extractSolution() {
   JSData result;
   if (this->parser.syntaxErrors != "") {
     result[WebAPI::result::error] = "Failed to parse.";
-    result[WebAPI::result::syntaxErrors] = this->parser.toStringSyntacticStackHTMLSimple();
+    result[WebAPI::result::syntaxErrors] =
+    this->parser.toStringSyntacticStackHTMLSimple();
     return result;
   }
   JSData solutionJSON;
@@ -384,7 +453,12 @@ void CompareExpressions::compare(
   MacroRegisterFunctionWithName("CompareExpressions::compare");
   this->givenString = givenInput;
   this->desiredString = desiredInput;
-  calculator.inputString = "CompareExpressionsJSON{}(" + this->givenString + ", " + this->desiredString + ")";
+  calculator.inputString =
+  "CompareExpressionsJSON{}(" +
+  this->givenString +
+  ", " +
+  this->desiredString +
+  ")";
   global.initOutputReportAndCrashFileNames(
     HtmlRoutines::convertStringToURLString(calculator.inputString, false),
     calculator.inputString
@@ -397,14 +471,26 @@ void CompareExpressions::compare(
 void CompareExpressions::comparePartTwo(Calculator& calculator) {
   MacroRegisterFunctionWithName("Calculator::compareExpressions");
   calculator.statistics.initialize();
-  if (!calculator.parser.parseNoEmbeddingInCommand(this->givenString, this->given)) {
-    this->syntaxErrorsLeftRaw = "Error parsing given expression." + calculator.parser.syntaxErrors;
-    this->syntaxErrorsLeftFormatted = calculator.parser.toStringSyntacticStackHTMLSimple();
+  if (
+    !calculator.parser.parseNoEmbeddingInCommand(
+      this->givenString, this->given
+    )
+  ) {
+    this->syntaxErrorsLeftRaw =
+    "Error parsing given expression." + calculator.parser.syntaxErrors;
+    this->syntaxErrorsLeftFormatted =
+    calculator.parser.toStringSyntacticStackHTMLSimple();
     return;
   }
-  if (!calculator.parser.parseNoEmbeddingInCommand(this->desiredString, this->desired)) {
-    this->syntaxErrorsRightRaw = "Error parsing desired expression." + calculator.parser.syntaxErrors;
-    this->syntaxErrorsRightFormatted = calculator.parser.toStringSyntacticStackHTMLSimple();
+  if (
+    !calculator.parser.parseNoEmbeddingInCommand(
+      this->desiredString, this->desired
+    )
+  ) {
+    this->syntaxErrorsRightRaw =
+    "Error parsing desired expression." + calculator.parser.syntaxErrors;
+    this->syntaxErrorsRightFormatted =
+    calculator.parser.toStringSyntacticStackHTMLSimple();
     return;
   }
   this->comparisonExpression.makeXOX(
@@ -436,25 +522,30 @@ JSData CompareExpressions::toJSON() const {
     result[WebAPI::result::ComparisonData::desiredRaw] = this->desiredString;
   }
   if (this->syntaxErrorsLeftRaw != "") {
-    result[WebAPI::result::error] = "Failed to parse the given (student) answer.";
+    result[WebAPI::result::error] =
+    "Failed to parse the given (student) answer.";
     result[WebAPI::result::syntaxErrors] = this->syntaxErrorsLeftFormatted;
     result[WebAPI::result::syntaxErrorsExtra] = this->syntaxErrorsLeftRaw;
     return result;
   }
   if (this->syntaxErrorsRightRaw != "") {
-    result[WebAPI::result::error] = "Failed to parse the desired (teacher) answer.";
+    result[WebAPI::result::error] =
+    "Failed to parse the desired (teacher) answer.";
     result[WebAPI::result::syntaxErrors] = this->syntaxErrorsRightFormatted;
     result[WebAPI::result::syntaxErrorsExtra] = this->syntaxErrorsRightRaw;
     return result;
   }
   if (this->errorEvaluation != "") {
-    result[WebAPI::result::ComparisonData::errorEvaluation] = this->errorEvaluation;
+    result[WebAPI::result::ComparisonData::errorEvaluation] =
+    this->errorEvaluation;
   }
   if (this->errorInAnswer != "") {
-    result[WebAPI::result::ComparisonData::errorInAnswer] = this->errorInAnswer;
+    result[WebAPI::result::ComparisonData::errorInAnswer] = this->errorInAnswer
+    ;
   }
   result[WebAPI::result::ComparisonData::areEqual] = this->flagAreEqual;
-  result[WebAPI::result::ComparisonData::areEqualAsAnswers] = this->flagAreEqualAsAnswers;
+  result[WebAPI::result::ComparisonData::areEqualAsAnswers] =
+  this->flagAreEqualAsAnswers;
   if (
     this->syntaxErrorsLeftRaw != "" ||
     this->syntaxErrorsLeftFormatted != "" ||
@@ -464,12 +555,16 @@ JSData CompareExpressions::toJSON() const {
   }
   std::stringstream resultHTML;
   if (!this->flagAreEqual) {
-    resultHTML <<  "<b style='color:red;font-size: x-large;'>&cross;</b><br>";
+    resultHTML << "<b style='color:red;font-size: x-large;'>&cross;</b><br>";
   } else {
     if (!this->flagAreEqualAsAnswers) {
-      resultHTML << "<b style='color:blue;font-size: x-large;'>&#x2713;</b> [more work needed]<br>";
+      resultHTML
+      <<
+      "<b style='color:blue;font-size: x-large;'>&#x2713;</b> [more work needed]<br>"
+      ;
     } else {
-      resultHTML << "<b style='color:green;font-size: x-large;'>&#x2713;</b><br>";
+      resultHTML
+      << "<b style='color:green;font-size: x-large;'>&#x2713;</b><br>";
     }
   }
   result[WebAPI::problem::answerWasHardCoded] = true;
@@ -481,11 +576,12 @@ JSData ProblemWithSolution::toJSON() {
   JSData result;
   result[WebAPI::result::SolutionData::input] = this->toBeSolved.toString();
   JSData stepsJSON = JSData::makeEmptyArray();
-  for (int i = 0; i < this->steps.size; i ++){
+  for (int i = 0; i < this->steps.size; i ++) {
     stepsJSON[i] = this->steps[i].toJSON();
   }
   result[WebAPI::result::SolutionData::steps] = stepsJSON;
-  result[WebAPI::result::SolutionData::finalExpression] = this->solutionsSimplified.toString();
+  result[WebAPI::result::SolutionData::finalExpression] =
+  this->solutionsSimplified.toString();
   result[WebAPI::result::SolutionData::comments] = this->comments;
   result[WebAPI::result::error] = this->error;
   return result;
@@ -494,7 +590,9 @@ JSData ProblemWithSolution::toJSON() {
 bool CalculatorEducationalFunctions::divideByNumberTrivial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorEducationalFunctions::divideByNumberTrivial");
+  MacroRegisterFunctionWithName(
+    "CalculatorEducationalFunctions::divideByNumberTrivial"
+  );
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -509,16 +607,17 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
     return false;
   }
   Rational result = numerator / denominator;
-  if (numerator == result.getNumerator() && denominator == result.getDenominator()) {
+  if (
+    numerator == result.getNumerator() &&
+    denominator == result.getDenominator()
+  ) {
     return output.assignValue(calculator, result);
   }
   return false;
 }
 
 bool CalculatorFunctions::cardanoFormula(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::cardanoFormula");
   if (input.size() != 2) {
@@ -528,13 +627,16 @@ bool CalculatorFunctions::cardanoFormula(
   if (polynomialExpression.startsWith(calculator.opDefine(), 3)) {
     // The argument is an equality.
     // Replace it with the left hand side minus the right hand side.
-    polynomialExpression = polynomialExpression[1] +
+    polynomialExpression =
+    polynomialExpression[1] +
     calculator.expressionMinusOne() * polynomialExpression[2];
   }
   WithContext<Polynomial<Rational> > withContext;
-  if (!CalculatorConversions::functionPolynomial(
-    calculator, polynomialExpression, withContext, 5, 4, false
-  )) {
+  if (
+    !CalculatorConversions::functionPolynomial(
+      calculator, polynomialExpression, withContext, 5, 4, false
+    )
+  ) {
     return calculator << "Failed to extract polynomial. ";
   }
   Polynomial<Rational>& polynomialInternal = withContext.content;
@@ -548,11 +650,17 @@ bool CalculatorFunctions::cardanoFormula(
     }
   }
   if (maximumPower != 3) {
-    return calculator << "Could not find a third power variable in your input. ";
+    return
+    calculator
+    << "Could not find a third power variable in your input. ";
   }
   Selection nonCoefficientVariables;
-  nonCoefficientVariables.initialize(withContext.context.numberOfVariables());
-  nonCoefficientVariables.addSelectionAppendNewIndex(indexVariableMaximumDegree);
+  nonCoefficientVariables.initialize(
+    withContext.context.numberOfVariables()
+  );
+  nonCoefficientVariables.addSelectionAppendNewIndex(
+    indexVariableMaximumDegree
+  );
   Expression aCoefficient;
   Expression bCoefficient;
   Expression cCoefficient;
@@ -563,13 +671,29 @@ bool CalculatorFunctions::cardanoFormula(
   );
   ExpressionContext contextCopy = withContext.context;
   CalculatorConversions::expressionFromPolynomial(
-    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 3), aCoefficient, &contextCopy);
+    calculator,
+    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 3),
+    aCoefficient,
+    &contextCopy
+  );
   CalculatorConversions::expressionFromPolynomial(
-    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 2), bCoefficient, &contextCopy);
+    calculator,
+    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 2),
+    bCoefficient,
+    &contextCopy
+  );
   CalculatorConversions::expressionFromPolynomial(
-    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 1), cCoefficient, &contextCopy);
+    calculator,
+    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 1),
+    cCoefficient,
+    &contextCopy
+  );
   CalculatorConversions::expressionFromPolynomial(
-    calculator, coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 0), dCoefficient, &contextCopy);
+    calculator,
+    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 0),
+    dCoefficient,
+    &contextCopy
+  );
   Expression bMonic;
   Expression cMonic;
   Expression dMonic;
@@ -588,24 +712,24 @@ bool CalculatorFunctions::cardanoFormula(
   // CoefficientsPowersOf(y, Polynomialize( x^3 + b x^2 + c x + d) );
   // Resulting coefficients:
   // y^3 + (-b^2/3+c)y + (2/27 b^3-b/3 c+d)
-  // Let y^3+p y + q be the depressed cubic above (suppressed = no quadratic term).
+  // Let y^3+p y + q be the depressed cubic above (suppressed = no quadratic
+  // term).
   // Therefore:
   // p = -b^2/3+c
   // q = 2/27b^3-b/3c+d
-  Expression p = cCoefficient + calculator.expressionMinusOne() * bCoefficient * bCoefficient;
+  Expression p =
+  cCoefficient + calculator.expressionMinusOne() * bCoefficient * bCoefficient;
   Expression q =
-  calculator.expressionRational(Rational(2, 27))
-  * bCoefficient * bCoefficient * bCoefficient
-  +
-  calculator.expressionRational(Rational(-1, 3))
-  * bCoefficient *cCoefficient
+  calculator.expressionRational(Rational(2, 27)) * bCoefficient * bCoefficient
+  *
+  bCoefficient +
+  calculator.expressionRational(Rational(- 1, 3)) * bCoefficient * cCoefficient
   +
   dCoefficient;
   // The discriminant of the depressed cubic equals:
   // -(4p^3+27q^2)
   Expression discriminant =
-  calculator.expressionInteger(- 4) * p * p *p
-  +
+  calculator.expressionInteger(- 4) * p * p * p +
   calculator.expressionInteger(- 27) * q * q;
   Expression discriminantOverNegative108 = discriminant / - 108;
   Expression squareRootD;
@@ -619,3 +743,4 @@ bool CalculatorFunctions::cardanoFormula(
   output = left + right;
   return true;
 }
+

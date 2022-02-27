@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_time_date.h"
 #include "general_lists.h"
@@ -16,7 +17,6 @@ TimeWrapper::TimeWrapper() {
   this->timeGM.tm_yday = 0;
   this->timeGM.tm_year = 0;
   this->timeGM.tm_zone = nullptr;
-
   this->timeLocal.tm_gmtoff = 0;
   this->timeLocal.tm_hour = 0;
   this->timeLocal.tm_isdst = 0;
@@ -30,8 +30,11 @@ TimeWrapper::TimeWrapper() {
   this->timeLocal.tm_zone = nullptr;
 }
 
-bool TimeWrapper::assignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure) {
-  this->assignLocalTime(); //<-hopefully this initialized time properly ...
+bool TimeWrapper::assignMonthDayYear(
+  const std::string& input, std::stringstream& commentsOnFailure
+) {
+  this->assignLocalTime();
+  // <-hopefully this initialized time properly ...
   List<char> delimiters;
   delimiters.addOnTop('/');
   delimiters.addOnTop('-');
@@ -57,9 +60,15 @@ bool TimeWrapper::assignMonthDayYear(const std::string& input, std::stringstream
 
 void TimeWrapper::computeTimeStringNonReadable() {
   std::stringstream out;
-  out << this->timeGM.tm_year << "-" << this->timeGM.tm_mon << "-"
+  out
+  << this->timeGM.tm_year
+  << "-"
+  << this->timeGM.tm_mon
+  << "-"
   << this->timeGM.tm_mday
-  << "-" << this->timeGM.tm_hour << "-"
+  << "-"
+  << this->timeGM.tm_hour
+  << "-"
   << this->timeGM.tm_min
   << "-"
   << this->timeGM.tm_sec;
@@ -76,16 +85,20 @@ void TimeWrapper::assignLocalTime() {
   this->computeTimeStringNonReadable();
 }
 
-std::string TimeWrapper::toStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort) {
+std::string TimeWrapper::toStringSecondsToDaysHoursSecondsString(
+  double input, bool includeSeconds, bool beShort
+) {
   std::stringstream out;
   out.precision(2);
   bool isPositive = (input > 0);
   if (!isPositive) {
     input *= - 1;
   }
-  int days = static_cast<int>(FloatingPoint::floorFloating(input / (24 * 3600)));
+  int days = static_cast<int>(
+    FloatingPoint::floorFloating(input / (24* 3600))
+  );
   if (beShort && days > 0) {
-    double daysfloat = input / (24 * 3600);
+    double daysfloat = input / (24* 3600);
     out << "~" << daysfloat << " day(s)";
     return out.str();
   }
@@ -102,7 +115,9 @@ std::string TimeWrapper::toStringSecondsToDaysHoursSecondsString(double input, b
   }
   if (includeSeconds && !beShort) {
     out << std::fixed << static_cast<int>(static_cast<int>(input) / 60)
-    << " minute(s) " << static_cast<int>(static_cast<int>(input) % 60) << " second(s).";
+    << " minute(s) "
+    << static_cast<int>(static_cast<int>(input) % 60)
+    << " second(s).";
   }
   if (!isPositive) {
     out << ")";
@@ -110,7 +125,9 @@ std::string TimeWrapper::toStringSecondsToDaysHoursSecondsString(double input, b
   return out.str();
 }
 
-double TimeWrapper::subtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other) {
+double TimeWrapper::subtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(
+  TimeWrapper& other
+) {
   return this->subtractAnotherTimeFromMeInSeconds(other) / 3600;
 }
 
@@ -135,12 +152,17 @@ std::string TimeWrapper::toStringLocal() const {
 std::string TimeWrapper::toString() const {
   std::stringstream out;
   out
-  <<        this->timeGM.tm_year
-  << " " << this->timeGM.tm_mon
-  << " " << this->timeGM.tm_mday
-  << " " << this->timeGM.tm_hour
-  << " " << this->timeGM.tm_min
-  << " " << this->timeGM.tm_sec;
+  << this->timeGM.tm_year
+  << " "
+  << this->timeGM.tm_mon
+  << " "
+  << this->timeGM.tm_mday
+  << " "
+  << this->timeGM.tm_hour
+  << " "
+  << this->timeGM.tm_min
+  << " "
+  << this->timeGM.tm_sec;
   return out.str();
 }
 
@@ -165,3 +187,4 @@ void TimeWrapper::operator=(const std::string& input) {
   inputStream >> this->timeGM.tm_sec;
   this->computeTimeStringNonReadable();
 }
+

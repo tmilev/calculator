@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
 #include "math_general_implementation.h"
@@ -13,7 +14,6 @@ std::string UserCalculatorData::Roles::administator = "admin";
 std::string UserCalculatorData::Roles::student = "student";
 std::string UserCalculatorData::Roles::instructor = "instructor";
 std::string UserCalculatorData::Roles::teacher = "teacher";
-
 void fatalCrash(const std::string& input) {
   global.fatal << input << global.fatal;
 }
@@ -24,16 +24,22 @@ GlobalVariables::Crasher::Crasher() {
 }
 
 void GlobalVariables::Crasher::firstRun() {
-  if (
-    !this->flagCrashInitiated &&
-    global.flagRunningBuiltInWebServer
-  ) {
+  if (!this->flagCrashInitiated && global.flagRunningBuiltInWebServer) {
     double elapsedSeconds = global.getElapsedSeconds();
-    this->crashReportHtml << "\n<b style = 'color:red'>Crash</b> "
-    << elapsedSeconds << " second(s) from the start.<hr>";
-    this->crashReportConsolE << Logger::consoleRed() << "Crash " << elapsedSeconds
-    << " second(s)" << Logger::consoleNormal() << " from the start.\n";
-    this->crashReportFile << "Crash " << elapsedSeconds
+    this->crashReportHtml
+    << "\n<b style = 'color:red'>Crash</b> "
+    << elapsedSeconds
+    << " second(s) from the start.<hr>";
+    this->crashReportConsolE
+    << Logger::consoleRed()
+    << "Crash "
+    << elapsedSeconds
+    << " second(s)"
+    << Logger::consoleNormal()
+    << " from the start.\n";
+    this->crashReportFile
+    << "Crash "
+    << elapsedSeconds
     << " second(s) from the start.\n";
   }
   this->flagCrashInitiated = true;
@@ -45,27 +51,36 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
   (void) dummyCrasherSignalsActualCrash;
   this->firstRun();
   if (this->flagFinishingCrash) {
-    std::cout << "Recursion within the crashing mechanism detected. "
+    std::cout
+    << "Recursion within the crashing mechanism detected. "
     << "Something is very wrong. "
-    << this->crashReportConsolE.str() << std::endl;
+    << this->crashReportConsolE.str()
+    << std::endl;
     std::exit(- 1);
   }
   this->crashReportConsolE << this->crashReport.str();
   this->crashReportHtml << this->crashReport.str();
   this->crashReportFile << this->crashReport.str();
-
   this->flagFinishingCrash = true;
   if (!global.flagNotAllocated) {
     this->crashReportConsolE << "\n";
   }
   if (!global.flagNotAllocated) {
     if (global.userInputStringIfAvailable != "") {
-      this->crashReportHtml << "<hr>User input: <br> "
-      << global.userInputStringIfAvailable << "<hr>";
-      this->crashReportConsolE << "User input: "
-      << Logger::consoleBlue() << global.userInputStringIfAvailable
-      << Logger::consoleNormal() << "\n";
-      this->crashReportFile << "User input:\n" << global.userInputStringIfAvailable << "\n";
+      this->crashReportHtml
+      << "<hr>User input: <br> "
+      << global.userInputStringIfAvailable
+      << "<hr>";
+      this->crashReportConsolE
+      << "User input: "
+      << Logger::consoleBlue()
+      << global.userInputStringIfAvailable
+      << Logger::consoleNormal()
+      << "\n";
+      this->crashReportFile
+      << "User input:\n"
+      << global.userInputStringIfAvailable
+      << "\n";
     }
   }
   this->crashReportConsolE << Crasher::getStackTraceEtcErrorMessageConsole();
@@ -79,9 +94,9 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
       this->crashReportFile
       << "<hr><b>Computation progress report strings:</b><br>"
       << global.toStringProgressReportNoThreadData(true);
-
       this->crashReportConsolE << "Computation progress strings:\n";
-      this->crashReportConsolE << global.toStringProgressReportNoThreadData(false);
+      this->crashReportConsolE
+      << global.toStringProgressReportNoThreadData(false);
     }
   }
   this->writeCrashFile();
@@ -107,12 +122,14 @@ void GlobalVariables::Crasher::writeCrashFile() {
   }
   if (!global.calculator().isZeroPointer()) {
     if (global.calculator().getElement().comments.str() != "") {
-      this->crashReportHtml << "<hr>Additional comments follow. "
+      this->crashReportHtml
+      << "<hr>Additional comments follow. "
       << global.calculator().getElement().comments.str();
     }
   }
   std::fstream crashFile;
-  bool openSuccess = FileOperations::openFileCreateIfNotPresentVirtual(
+  bool openSuccess =
+  FileOperations::openFileCreateIfNotPresentVirtual(
     crashFile,
     "crashes/" + global.relativePhysicalNameCrashReport,
     false,
@@ -122,21 +139,29 @@ void GlobalVariables::Crasher::writeCrashFile() {
     true
   );
   if (openSuccess) {
-    this->crashReportHtml << "<hr>Crash dumped in folder "
+    this->crashReportHtml
+    << "<hr>Crash dumped in folder "
     << "results/crashes/. Not visible through the web server. "
     << "If running locally, simply open the results/crashes "
     << "folder within your calculator folder. "
     << "If running remotely, you will need an ssh connection. ";
-    this->crashReportConsolE << "Crash dumped in file: " << Logger::consoleGreen()
-    << global.relativePhysicalNameCrashReport << Logger::consoleNormal() << "\n";
+    this->crashReportConsolE
+    << "Crash dumped in file: "
+    << Logger::consoleGreen()
+    << global.relativePhysicalNameCrashReport
+    << Logger::consoleNormal()
+    << "\n";
   } else {
-    this->crashReportHtml << "<hr>Failed to open crash report file: "
+    this->crashReportHtml
+    << "<hr>Failed to open crash report file: "
     << global.relativePhysicalNameCrashReport
     << ". check file permissions. ";
-    this->crashReportConsolE << "Failed to open crash report file: "
+    this->crashReportConsolE
+    << "Failed to open crash report file: "
     << Logger::consoleRed()
     << global.relativePhysicalNameCrashReport
-    << Logger::consoleNormal() << "\n";
+    << Logger::consoleNormal()
+    << "\n";
   }
   crashFile << this->crashReportFile.str();
   crashFile.flush();
@@ -145,34 +170,56 @@ void GlobalVariables::Crasher::writeCrashFile() {
 
 std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
   std::stringstream out;
-  out << "A partial stack trace follows (function calls not explicitly logged not included).";
+  out
+  <<
+  "A partial stack trace follows (function calls not explicitly logged not included)."
+  ;
   out << "<table><tr>";
-  for (int threadCounter = 0; threadCounter < global.customStackTrace.size; threadCounter ++) {
+  for (
+    int threadCounter = 0; threadCounter < global.customStackTrace.size;
+    threadCounter ++
+  ) {
     if (threadCounter >= global.threadData.size) {
-      out << "<td><b>WARNING: the stack trace reports "
+      out
+      << "<td><b>WARNING: the stack trace reports "
       << global.customStackTrace.size
       << " threads but the thread data array has record of only "
       << global.threadData.size
-      << " threads. " << "</b></td>";
+      << " threads. "
+      << "</b></td>";
       break;
     }
-    out << "<td>" << global.threadData[threadCounter].toStringHtml() << "</td>";
+    out << "<td>" << global.threadData[threadCounter].toStringHtml() << "</td>"
+    ;
   }
   out << "</tr> <tr>";
-  for (int threadCounter = 0; threadCounter<global.customStackTrace.size; threadCounter ++) {
+  for (
+    int threadCounter = 0; threadCounter < global.customStackTrace.size;
+    threadCounter ++
+  ) {
     if (threadCounter >= global.threadData.size) {
       break;
     }
     if (ThreadData::getCurrentThreadId() != threadCounter) {
       out << "<td>Stack trace available only for current thread.</td>";
-      //<-to avoid coordinating threads
+      // <-to avoid coordinating threads
       continue;
     }
-    ListReferences<StackInfo>& currentInfo = global.customStackTrace[threadCounter];
-    out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
+    ListReferences<StackInfo>& currentInfo =
+    global.customStackTrace[threadCounter];
+    out
+    <<
+    "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>"
+    ;
     for (int i = currentInfo.size - 1; i >= 0; i --) {
-      out << "<tr><td>" << HtmlRoutines::getHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
-      << "</td><td>" << currentInfo[i].line << "</td>";
+      out
+      << "<tr><td>"
+      << HtmlRoutines::getHtmlLinkFromProjectFileName(
+        currentInfo[i].fileName, "", currentInfo[i].line
+      )
+      << "</td><td>"
+      << currentInfo[i].line
+      << "</td>";
       if (currentInfo[i].functionName != "") {
         out << "<td>" << currentInfo[i].functionName << "</td>";
       }
@@ -186,19 +233,29 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
 
 std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
   std::stringstream out;
-  for (int threadCounter = 0; threadCounter<global.customStackTrace.size; threadCounter ++) {
+  for (
+    int threadCounter = 0; threadCounter < global.customStackTrace.size;
+    threadCounter ++
+  ) {
     if (threadCounter >= global.threadData.size) {
-      out << "WARNING: stack trace reports " << global.customStackTrace.size << " threads "
-      << "while I have only " << global.threadData.size << " registered threads. ";
+      out
+      << "WARNING: stack trace reports "
+      << global.customStackTrace.size
+      << " threads "
+      << "while I have only "
+      << global.threadData.size
+      << " registered threads. ";
       break;
     }
-    out << "********************\r\nThread index " << threadCounter << ": \r\n";
+    out << "********************\r\nThread index " << threadCounter << ": \r\n"
+    ;
     if (ThreadData::getCurrentThreadId() != threadCounter) {
       out << "Stack trace available only for current thread.\n";
-      //<-to avoid coordinating threads
+      // <-to avoid coordinating threads
       continue;
     }
-    ListReferences<StackInfo>& currentInfo = global.customStackTrace[threadCounter];
+    ListReferences<StackInfo>& currentInfo =
+    global.customStackTrace[threadCounter];
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << currentInfo[i].functionName << "\n";
     }
@@ -207,7 +264,8 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
 }
 
 std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
-  MacroRegisterFunctionWithName("GlobalVariables::toHTMLTopCommandLinuxSystem");
+  MacroRegisterFunctionWithName("GlobalVariables::toHTMLTopCommandLinuxSystem")
+  ;
   std::string topString = this->externalCommandReturnOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
@@ -223,7 +281,10 @@ std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
   out << "<table>";
   for (; std::getline(topStream, lineString);) {
     out << "<tr>";
-    for (std::stringstream nextLineStream(lineString); nextLineStream >> wordString;) {
+    for (
+      std::stringstream nextLineStream(lineString); nextLineStream >>
+      wordString;
+    ) {
       out << "<td>" << wordString << "</td>";
     }
     out << "</tr>";
@@ -236,14 +297,19 @@ std::string GlobalVariables::toStringFolderInfo() const {
   std::stringstream out;
   out << "<br>Physical path server base: " << this->physicalPathServerBase;
   out << "<br>Diplay name executable: " << this->displayNameExecutable;
-  out << "<br>Physical name folder below executable: " << this->physicalNameFolderExecutable;
+  out
+  << "<br>Physical name folder below executable: "
+  << this->physicalNameFolderExecutable;
   out << "<br>Display path output folder: " << this->displayPathOutputFolder;
   return out.str();
 }
 
 std::string GlobalVariables::toStringThreadData(bool useHTML) {
   std::stringstream out;
-  for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
+  for (
+    int threadIndex = 0; threadIndex < this->progressReportStrings.size;
+    threadIndex ++
+  ) {
     if (useHTML) {
       out << "<hr><b>";
     }
@@ -256,8 +322,11 @@ std::string GlobalVariables::toStringThreadData(bool useHTML) {
   return out.str();
 }
 
-std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML) {
-  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlWithThreadData");
+std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML)
+{
+  MacroRegisterFunctionWithName(
+    "GlobalVariables::ToStringProgressReportHtmlWithThreadData"
+  );
   std::stringstream out;
   out << global.toStringThreadData(useHTML);
   out << global.toStringProgressReportNoThreadData(useHTML);
@@ -265,27 +334,40 @@ std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML) 
 }
 
 std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
-  MacroRegisterFunctionWithName("GlobalVariables::toStringProgressReportNoThreadData");
-
+  MacroRegisterFunctionWithName(
+    "GlobalVariables::toStringProgressReportNoThreadData"
+  );
   std::stringstream reportStream;
-  for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
+  for (
+    int threadIndex = 0; threadIndex < this->progressReportStrings.size;
+    threadIndex ++
+  ) {
     int currentThreadID = ThreadData::getCurrentThreadId();
     if (currentThreadID != threadIndex) {
-      //<-to avoid coordinating threads
+      // <-to avoid coordinating threads
       continue;
     }
     if (useHTML) {
-      reportStream << "<b>Current thread id: "
-      << currentThreadID
-      << ". </b>";
+      reportStream << "<b>Current thread id: " << currentThreadID << ". </b>";
     } else {
-      reportStream << "Thread id: " << Logger::consoleBlue() << currentThreadID << Logger::consoleNormal() << "\n";
+      reportStream
+      << "Thread id: "
+      << Logger::consoleBlue()
+      << currentThreadID
+      << Logger::consoleNormal()
+      << "\n";
     }
-    for (int i = 0; i < this->progressReportStrings[threadIndex].size; i ++) {
+    for (
+      int i = 0; i < this->progressReportStrings[threadIndex].size; i ++
+    ) {
       if (this->progressReportStrings[threadIndex][i] != "") {
         if (useHTML) {
-          reportStream << "\n<div id = \"divProgressReport" << i << "\">"
-          << this->progressReportStrings[threadIndex][i] << "\n</div>\n<hr>";
+          reportStream
+          << "\n<div id = \"divProgressReport"
+          << i
+          << "\">"
+          << this->progressReportStrings[threadIndex][i]
+          << "\n</div>\n<hr>";
         } else {
           reportStream << this->progressReportStrings[threadIndex][i] << "\n";
         }
@@ -298,37 +380,45 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
     } else {
       reportStream << global.fatal.getStackTraceEtcErrorMessageConsole();
     }
-    reportStream << global.getElapsedMilliseconds()
-    << " ms elapsed. ";
+    reportStream << global.getElapsedMilliseconds() << " ms elapsed. ";
     if (global.millisecondsMaxComputation > 0) {
       if (useHTML) {
         reportStream << "<br>";
       }
-      reportStream << "\nHard limit: "
+      reportStream
+      << "\nHard limit: "
       << global.millisecondsMaxComputation
       << " ms [system crash if limit exceeded].";
       if (useHTML) {
         reportStream << "<br>";
       }
-      reportStream << "\nSoft limit: "
-      << global.millisecondsMaxComputation / 2
-      << " ms [computation error if limit exceeded, triggered between calculator/atomic functions].";
+      reportStream << "\nSoft limit: " << global.millisecondsMaxComputation / 2
+      <<
+      " ms [computation error if limit exceeded, triggered between calculator/atomic functions]."
+      ;
     }
   }
   return reportStream.str();
 }
 
 std::string GlobalVariables::toStringProgressReportConsole() {
-  MacroRegisterFunctionWithName("GlobalVariables::toStringProgressReportConsole");
+  MacroRegisterFunctionWithName(
+    "GlobalVariables::toStringProgressReportConsole"
+  );
   std::stringstream reportStream;
-  for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
+  for (
+    int threadIndex = 0; threadIndex < this->progressReportStrings.size;
+    threadIndex ++
+  ) {
     if (ThreadData::getCurrentThreadId() != threadIndex) {
       reportStream << "Progress report available only for current thread.<br>";
-      //<-to avoid coordinating threads
+      // <-to avoid coordinating threads
       continue;
     }
     reportStream << this->threadData[threadIndex].toStringConsole();
-    for (int i = 0; i < this->progressReportStrings[threadIndex].size; i ++) {
+    for (
+      int i = 0; i < this->progressReportStrings[threadIndex].size; i ++
+    ) {
       reportStream << this->progressReportStrings[threadIndex][i];
     }
   }
@@ -337,7 +427,8 @@ std::string GlobalVariables::toStringProgressReportConsole() {
 }
 
 void GlobalVariables::initThreadsExecutableStart() {
-  // <-Stack trace forbidden this is running before anything has been initialized!
+  // <-Stack trace forbidden this is running before anything has been
+  // initialized!
   ThreadData::registerFirstThread("main");
 }
 
@@ -345,13 +436,20 @@ void GlobalVariables::initializeMathematics() {
   int start = global.getElapsedMilliseconds();
   LargeIntegerUnsigned::allPrimesSmallerThan15Bits();
   int duration = global.getElapsedMilliseconds() - start;
-  global <<  "Initializing precomputed math took "
-  << Logger::blue << duration << " ms." << Logger::endL;
+  global
+  << "Initializing precomputed math took "
+  << Logger::blue
+  << duration
+  << " ms."
+  << Logger::endL;
 }
 
-void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExecutable) {
+void GlobalVariables::initFoldersProjectBase(
+  const std::string& inputPhysicalExecutable
+) {
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  this->physicalPathProjectBase = FileOperations::getPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
+  this->physicalPathProjectBase =
+  FileOperations::getPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
   this->changeDirectory(this->physicalPathProjectBase);
   this->physicalPathProjectBase = FileOperations::getCurrentFolder() + "/";
 }
@@ -359,18 +457,24 @@ void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExe
 void GlobalVariables::initDefaultFolderAndFileNames() {
   this->initFoldersProjectBase(global.pathExecutableUserInputOrDeduced);
   this->physicalNameFolderExecutable = this->physicalPathProjectBase;
-  this->physicalNameExecutableNoPath = FileOperations::getFileNameFromFileNameWithPath(global.pathExecutableUserInputOrDeduced);
-  this->physicalNameExecutableWithPath = this->physicalNameFolderExecutable + this->physicalNameExecutableNoPath;
+  this->physicalNameExecutableNoPath =
+  FileOperations::getFileNameFromFileNameWithPath(
+    global.pathExecutableUserInputOrDeduced
+  );
+  this->physicalNameExecutableWithPath =
+  this->physicalNameFolderExecutable + this->physicalNameExecutableNoPath;
   this->physicalPathServerBase = this->physicalPathProjectBase;
   this->displayPathOutputFolder = "/output/";
-
-  this->displayNameExecutable = "/cgi-bin/" + this->physicalNameExecutableNoPath;
+  this->displayNameExecutable =
+  "/cgi-bin/" + this->physicalNameExecutableNoPath;
   this->displayApplication = "/" + WebAPI::app;
   this->displayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
   this->initOutputReportAndCrashFileNames("", "");
 }
 
-void GlobalVariables::setWebInput(const std::string& inputName, const std::string& inputValue) {
+void GlobalVariables::setWebInput(
+  const std::string& inputName, const std::string& inputValue
+) {
   MacroRegisterFunctionWithName("GlobalVariables::setWebInput");
   this->webArguments.setKeyValue(inputName, inputValue);
 }
@@ -406,7 +510,9 @@ std::string GlobalVariables::LogData::toStringProcessType() const {
 
 bool GlobalVariables::checkConsistency() {
   if (this->flagDeallocated) {
-    global.fatal << "Global variables not allowed to be deallocated. " << global.fatal;
+    global.fatal
+    << "Global variables not allowed to be deallocated. "
+    << global.fatal;
   }
   return true;
 }
@@ -419,11 +525,15 @@ bool GlobalVariables::userDefaultHasAdminRights() {
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
-  return this->flagLoggedIn && (this->userDefault.userRole == UserCalculatorData::Roles::administator);
+  return
+  this->flagLoggedIn && (
+    this->userDefault.userRole == UserCalculatorData::Roles::administator
+  );
 }
 
 bool GlobalVariables::userDefaultHasProblemComposingRights() {
-  return this->flagLoggedIn && (
+  return
+  this->flagLoggedIn && (
     this->userDefault.userRole == UserCalculatorData::Roles::administator ||
     this->userDefault.userRole == UserCalculatorData::Roles::teacher
   );
@@ -445,7 +555,8 @@ bool GlobalVariables::userRequestRequiresLoadingRealExamData() {
   if (this->userGuestMode()) {
     return false;
   }
-  return this->flagLoggedIn && (
+  return
+  this->flagLoggedIn && (
     this->requestType == "scoredQuiz" ||
     this->requestType == "scoredQuizJSON" ||
     this->requestType == "submitAnswers" ||
@@ -454,13 +565,15 @@ bool GlobalVariables::userRequestRequiresLoadingRealExamData() {
 }
 
 bool GlobalVariables::userRequestMustBePromptedToLogInIfNotLoggedIn() {
-  return
-  this->requestType == "scoredQuiz" ||
-  this->requestType == "exercise";
+  return this->requestType == "scoredQuiz" || this->requestType == "exercise";
 }
 
-std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::string>* tagsToExclude) {
-  MacroRegisterFunctionWithName("GlobalVariables::toStringCalculatorArgumentsNoNavigation");
+std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(
+  List<std::string>* tagsToExclude
+) {
+  MacroRegisterFunctionWithName(
+    "GlobalVariables::toStringCalculatorArgumentsNoNavigation"
+  );
   if (!this->flagLoggedIn && !this->userGuestMode()) {
     return "";
   }
@@ -493,7 +606,9 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::s
         continue;
       }
     }
-    out << global.webArguments.keys[i] << "="
+    out
+    << global.webArguments.keys[i]
+    << "="
     << global.webArguments.values[i]
     << "&";
   }
@@ -519,22 +634,23 @@ void GlobalVariables::makeReport() {
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames(
-  const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized
+  const std::string& inputUserStringRAW,
+  const std::string& inputUserStringCivilized
 ) {
   std::string inputAbbreviated;
   this->userInputStringIfAvailable =
-  FileOperations::cleanUpForFileNameUse(
-    inputUserStringCivilized
-  );
+  FileOperations::cleanUpForFileNameUse(inputUserStringCivilized);
   if (!global.flagUsingSSLinCurrentConnection) {
     this->userInputStringRAWIfAvailable = inputUserStringRAW;
     inputAbbreviated = this->userInputStringRAWIfAvailable;
   } else {
-    this->userInputStringRAWIfAvailable = "Raw user input string not available in SSL mode. ";
+    this->userInputStringRAWIfAvailable =
+    "Raw user input string not available in SSL mode. ";
     inputAbbreviated = this->userInputStringIfAvailable;
   }
   StringRoutines::stringTrimToLengthWithHash(inputAbbreviated, 150);
-  this->relativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html";
+  this->relativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html"
+  ;
 }
 
 UserCalculatorData::UserCalculatorData() {
@@ -560,7 +676,9 @@ void UserCalculatorData::reset() {
 
 void UserCalculatorData::clearPasswordFromMemory() {
   MacroRegisterFunctionWithName("UserCalculatorData::clearPasswordFromMemory");
-  for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++) {
+  for (
+    unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++
+  ) {
     this->actualHashedSaltedPassword[i] = ' ';
   }
   this->actualHashedSaltedPassword = "";
@@ -568,7 +686,9 @@ void UserCalculatorData::clearPasswordFromMemory() {
     this->enteredPassword[i] = ' ';
   }
   this->enteredPassword = "";
-  for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++) {
+  for (
+    unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++
+  ) {
     this->enteredHashedSaltedPassword[i] = ' ';
   }
   this->enteredHashedSaltedPassword = "";
@@ -583,9 +703,13 @@ void UserCalculatorData::clearPasswordFromMemory() {
 }
 
 void UserCalculatorData::clearAuthenticationTokenAndPassword() {
-  MacroRegisterFunctionWithName("UserCalculatorData::clearAuthenticationTokenAndPassword");
+  MacroRegisterFunctionWithName(
+    "UserCalculatorData::clearAuthenticationTokenAndPassword"
+  );
   this->clearPasswordFromMemory();
-  for (unsigned i = 0; i < this->actualAuthenticationToken.size(); i ++) {
+  for (
+    unsigned i = 0; i < this->actualAuthenticationToken.size(); i ++
+  ) {
     this->actualAuthenticationToken[i] = ' ';
   }
   this->actualAuthenticationToken = "";
@@ -593,16 +717,23 @@ void UserCalculatorData::clearAuthenticationTokenAndPassword() {
 
 std::string UserCalculatorData::toStringCourseInfo() {
   std::stringstream out;
-  out << "Course name:\n" << this->courseComputed
-  << "\n<br>Deadline schema:\n" << this->deadlines.toString(nullptr)
-  << "\n<hr>Problem weight schema:\n" << this->problemWeights.toString(nullptr);
+  out
+  << "Course name:\n"
+  << this->courseComputed
+  << "\n<br>Deadline schema:\n"
+  << this->deadlines.toString(nullptr)
+  << "\n<hr>Problem weight schema:\n"
+  << this->problemWeights.toString(nullptr);
   return out.str();
 }
 
 std::string UserCalculatorData::toStringUnsecure() {
   MacroRegisterFunctionWithName("UserCalculatorData::toStringUnsecure");
   std::stringstream out;
-  out << "User: " << this->username << "\n<br>"
+  out
+  << "User: "
+  << this->username
+  << "\n<br>"
   << this->toStringCourseInfo()
   << "\n<br>Actual authentication token: "
   << this->actualAuthenticationToken
@@ -617,15 +748,16 @@ std::string UserCalculatorData::toStringUnsecure() {
   return out.str();
 }
 
-template<>
-List<Weight<RationalFraction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<Weight<RationalFraction<Rational> > >() {
+template < >
+List<Weight<RationalFraction<Rational> > >::Comparator* FormatExpressions::
+getMonomialOrder<Weight<RationalFraction<Rational> > >() {
   return nullptr;
 }
 
-template<>
-List<Weight<Rational> >::Comparator*
-FormatExpressions::getMonomialOrder<Weight<Rational> >() {
+template < >
+List<Weight<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
+  Weight<Rational>
+>() {
   return nullptr;
 }
 
@@ -637,15 +769,26 @@ void DynkinDiagramRootSubalgebra::swapDynkinStrings(int i, int j) {
 }
 
 void DynkinDiagramRootSubalgebra::sort() {
-  //doing bubble sort -> shortest to code
+  // doing bubble sort -> shortest to code
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
-    for (int j = i + 1; j < this->simpleBasesConnectedComponents.size; j ++) {
+    for (
+      int j = i + 1; j < this->simpleBasesConnectedComponents.size; j ++
+    ) {
       bool tempBool = false;
-      if (this->simpleBasesConnectedComponents[i].size < this->simpleBasesConnectedComponents[j].size) {
+      if (
+        this->simpleBasesConnectedComponents[i].size < this->
+        simpleBasesConnectedComponents[j].size
+      ) {
         tempBool = true;
       }
-      if (this->simpleBasesConnectedComponents[i].size == this->simpleBasesConnectedComponents[j].size) {
-        tempBool = ((this->simpleComponentTypes[i]) < (this->simpleComponentTypes[j]));
+      if (
+        this->simpleBasesConnectedComponents[i].size ==
+        this->simpleBasesConnectedComponents[j].size
+      ) {
+        tempBool = ((this->simpleComponentTypes[i]) < (
+            this->simpleComponentTypes[j]
+          )
+        );
       }
       if (tempBool) {
         this->swapDynkinStrings(i, j);
@@ -653,9 +796,15 @@ void DynkinDiagramRootSubalgebra::sort() {
     }
   }
   this->sameTypeComponents.size = 0;
-  this->indexInUniComponent.setSize(this->simpleBasesConnectedComponents.size);
-  this->indexUniComponent.setSize(this->simpleBasesConnectedComponents.size);
-  this->sameTypeComponents.reserve(this->simpleBasesConnectedComponents.size);
+  this->indexInUniComponent.setSize(
+    this->simpleBasesConnectedComponents.size
+  );
+  this->indexUniComponent.setSize(
+    this->simpleBasesConnectedComponents.size
+  );
+  this->sameTypeComponents.reserve(
+    this->simpleBasesConnectedComponents.size
+  );
   DynkinSimpleType tempType;
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     if (!(this->simpleComponentTypes[i] == tempType)) {
@@ -665,16 +814,29 @@ void DynkinDiagramRootSubalgebra::sort() {
     }
     this->sameTypeComponents.lastObject()->addOnTop(i);
     this->indexUniComponent[i] = this->sameTypeComponents.size - 1;
-    this->indexInUniComponent[i] = this->sameTypeComponents.lastObject()->size - 1;
+    this->indexInUniComponent[i] =
+    this->sameTypeComponents.lastObject()->size - 1;
   }
 }
 
-Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo");
+Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(
+  const Vector<Rational>& inputVector
+) {
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo"
+  );
   Rational result = 0;
   for (int i = 0; i < this->ambientRootSystem.size; i ++) {
-    if (inputVector.scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm) != 0) {
-      Rational squareLength = this->ambientRootSystem[i].scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm);
+    if (
+      inputVector.scalarProduct(
+        this->ambientRootSystem[i], this->ambientBilinearForm
+      ) !=
+      0
+    ) {
+      Rational squareLength =
+      this->ambientRootSystem[i].scalarProduct(
+        this->ambientRootSystem[i], this->ambientBilinearForm
+      );
       if (result < squareLength) {
         result = squareLength;
       }
@@ -683,12 +845,25 @@ Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(const V
   return result;
 }
 
-Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo");
-  Rational result = inputVector.scalarProduct(inputVector, this->ambientBilinearForm);
+Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(
+  const Vector<Rational>& inputVector
+) {
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo"
+  );
+  Rational result =
+  inputVector.scalarProduct(inputVector, this->ambientBilinearForm);
   for (int i = 0; i < this->ambientRootSystem.size; i ++) {
-    if (inputVector.scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm) != 0) {
-      Rational squareLength = this->ambientRootSystem[i].scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm);
+    if (
+      inputVector.scalarProduct(
+        this->ambientRootSystem[i], this->ambientBilinearForm
+      ) !=
+      0
+    ) {
+      Rational squareLength =
+      this->ambientRootSystem[i].scalarProduct(
+        this->ambientRootSystem[i], this->ambientBilinearForm
+      );
       if (squareLength < result) {
         result = squareLength;
       }
@@ -698,41 +873,60 @@ Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(const 
 }
 
 void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDynkinString");
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::computeDynkinString"
+  );
   this->checkInitialization();
   if (indexComponent >= this->simpleBasesConnectedComponents.size) {
     global.fatal << "Bad Dynkin index. " << global.fatal;
   }
   DynkinSimpleType& outputType = this->simpleComponentTypes[indexComponent];
-  Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[indexComponent];
+  Vectors<Rational>& currentComponent =
+  this->simpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds = this->indicesEnds[indexComponent];
   if (currentComponent.size < 1) {
-    global.fatal << "CurrentComponent is empty which is impossible. " << global.fatal;
+    global.fatal
+    << "CurrentComponent is empty which is impossible. "
+    << global.fatal;
   }
   if (this->numberOfThreeValencyNodes(indexComponent) == 1) {
     // type D or E
-    // in type D first comes the triple node, then the long string, then the one-root strings
-    // the long string is oriented with the end that is connected to the triple node having
+    // in type D first comes the triple node, then the long string, then the
+    // one-root strings
+    // the long string is oriented with the end that is connected to the triple
+    // node having
     // smaller index
-    // in type E similarly the longest string comes first oriented with the root that is
+    // in type E similarly the longest string comes first oriented with the root
+    // that is
     // linked to the triple node having smaller index
     // then comes the second longest string (oriented in the same fashion)
     // and last the one-root string
     Vector<Rational> tripleNode;
     tripleNode = currentComponent[this->indicesThreeNodes[indexComponent]];
     Vectors<Rational> rootsWithoutTripleNode = currentComponent;
-    rootsWithoutTripleNode.removeIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
+    rootsWithoutTripleNode.removeIndexSwapWithLast(
+      this->indicesThreeNodes[indexComponent]
+    );
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
     diagramWithoutTripleNode.ambientBilinearForm = this->ambientBilinearForm;
     diagramWithoutTripleNode.ambientRootSystem = this->ambientRootSystem;
-    diagramWithoutTripleNode.computeDiagramInputIsSimple(rootsWithoutTripleNode);
+    diagramWithoutTripleNode.computeDiagramInputIsSimple(
+      rootsWithoutTripleNode
+    );
     if (diagramWithoutTripleNode.simpleBasesConnectedComponents.size != 3) {
-      global.fatal << "Dynkin diagram has a triple "
-      << "node whose removal does not yield 3 connected components. " << global.fatal;
+      global.fatal
+      << "Dynkin diagram has a triple "
+      << "node whose removal does not yield 3 connected components. "
+      << global.fatal;
     }
     for (int i = 0; i < 3; i ++) {
-      if (diagramWithoutTripleNode.simpleBasesConnectedComponents[i][0].scalarProduct(tripleNode, this->ambientBilinearForm) == 0) {
-        diagramWithoutTripleNode.simpleBasesConnectedComponents[i].reverseElements();
+      if (
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[i][0].
+        scalarProduct(tripleNode, this->ambientBilinearForm) ==
+        0
+      ) {
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[i].
+        reverseElements();
       }
     }
     for (int i = 0; i < 3; i ++) {
@@ -746,88 +940,169 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       }
     }
     currentComponent.setSize(0);
-    if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size == 1) {
-      //<- components are sorted by length, therefore the second and third component are of length 1,
-      //therefore we have type D_n
-      Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
+    if (
+      diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size == 1
+    ) {
+      // <- components are sorted by length, therefore the second and third
+      // component are of length 1,
+      // therefore we have type D_n
+      Rational scale =
+      DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
       tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
-      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[0]);//<-first long component
-      if (!tripleNode.scalarProduct(currentComponent[0], this->ambientBilinearForm).isEqualToZero()) {
+      currentComponent.addListOnTop(
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[0]
+      );
+      // <-first long component
+      if (
+        !tripleNode.scalarProduct(
+          currentComponent[0], this->ambientBilinearForm
+        ).isEqualToZero()
+      ) {
         currentComponent.reverseElements();
       }
-      currentComponent.addOnTop(tripleNode);//<-then triple node
-      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1]);//<-last two vectors
-      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[2]);//<-last two vectors
+      currentComponent.addOnTop(tripleNode);
+      // <-then triple node
+      currentComponent.addListOnTop(
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1]
+      );
+      // <-last two vectors
+      currentComponent.addListOnTop(
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[2]
+      );
+      // <-last two vectors
       outputType.makeArbitrary('D', currentComponent.size, scale);
     } else {
-      //the second largest component has more than one element, hence we are in type E_n.
-      Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
-      if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2) {
-        global.fatal << "The Dynkin diagram has two components of "
+      // the second largest component has more than one element, hence we are in
+      // type E_n.
+      Rational scale =
+      DynkinSimpleType::getDefaultLongRootLengthSquared('E') /
+      tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
+      if (
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2
+      ) {
+        global.fatal
+        << "The Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
         << global.fatal;
       }
-      if (!tripleNode.scalarProduct(
-        diagramWithoutTripleNode.simpleBasesConnectedComponents[1][0],
-        this->ambientBilinearForm).isEqualToZero()
+      if (
+        !tripleNode.scalarProduct(
+          diagramWithoutTripleNode.simpleBasesConnectedComponents[1][0],
+          this->ambientBilinearForm
+        ).isEqualToZero()
       ) {
-        diagramWithoutTripleNode.simpleBasesConnectedComponents[1].reverseElements(); //<-the 2-root component has the first root perpendicular to the triple node
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1].
+        reverseElements();
+        // <-the 2-root component has the first root perpendicular to the triple
+        // node
       }
       if (
-        tripleNode.scalarProduct(diagramWithoutTripleNode.simpleBasesConnectedComponents[0][0],
-        this->ambientBilinearForm).isEqualToZero()
+        tripleNode.scalarProduct(
+          diagramWithoutTripleNode.simpleBasesConnectedComponents[0][0],
+          this->ambientBilinearForm
+        ).isEqualToZero()
       ) {
-        diagramWithoutTripleNode.simpleBasesConnectedComponents[0].reverseElements(); //<-the largest component has the first root non-perpendicular to the triple node
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[0].
+        reverseElements();
+        // <-the largest component has the first root non-perpendicular to the
+        // triple node
       }
-      currentComponent.addOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1][0]); //<-first root from 2-element component
-      currentComponent.addOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[2][0]); //<-then the small sticky part of the Dynkin diagram
-      currentComponent.addOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1][1]); //<-next the second root from 2-element component
-      currentComponent.addOnTop(tripleNode); //<- next the triple node
-      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[0]); //<-finally the longest component. Conventions, conventions...
+      currentComponent.addOnTop(
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1][0]
+      );
+      // <-first root from 2-element component
+      currentComponent.addOnTop(
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[2][0]
+      );
+      // <-then the small sticky part of the Dynkin diagram
+      currentComponent.addOnTop(
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1][1]
+      );
+      // <-next the second root from 2-element component
+      currentComponent.addOnTop(tripleNode);
+      // <- next the triple node
+      currentComponent.addListOnTop(
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[0]
+      );
+      // <-finally the longest component. Conventions, conventions...
       outputType.makeArbitrary('E', currentComponent.size, scale);
     }
-   return;
+    return;
   }
   Rational length1, length2;
-  length1 = currentComponent[0].scalarProduct(currentComponent[0], this->ambientBilinearForm);
+  length1 =
+  currentComponent[0].scalarProduct(
+    currentComponent[0], this->ambientBilinearForm
+  );
   int numLength1 = 1;
   int numLength2 = 0;
   for (int i = 1; i < currentComponent.size; i ++) {
-    if (currentComponent[i].scalarProduct(currentComponent[i], this->ambientBilinearForm) == length1) {
+    if (
+      currentComponent[i].scalarProduct(
+        currentComponent[i], this->ambientBilinearForm
+      ) ==
+      length1
+    ) {
       numLength1 ++;
     } else {
       numLength2 ++;
-      length2 = currentComponent[i].scalarProduct(currentComponent[i], this->ambientBilinearForm);
+      length2 =
+      currentComponent[i].scalarProduct(
+        currentComponent[i], this->ambientBilinearForm
+      );
     }
   }
   if (numLength2 == 0) {
-    //type A
-    outputType.makeArbitrary('A', numLength1, DynkinSimpleType::getDefaultLongRootLengthSquared('A') / length1);
+    // type A
+    outputType.makeArbitrary(
+      'A',
+      numLength1,
+      DynkinSimpleType::getDefaultLongRootLengthSquared('A') / length1
+    );
   } else {
     if (length1 < length2) {
       MathRoutines::swap(length1, length2);
       MathRoutines::swap(numLength1, numLength2);
       currentEnds.swapTwoIndices(0, 1);
-    } // <-so far we made sure the first length is long
-    // By convention, in types G and C, in the Dynkin diagram the long root comes last
-    // This is handled at the very end of this function (outside all the if clauses).
+    }
+    // <-so far we made sure the first length is long
+    // By convention, in types G and C, in the Dynkin diagram the long root
+    // comes last
+    // This is handled at the very end of this function (outside all the if
+    // clauses).
     if (numLength1 == numLength2) {
-      //B2, C2, F4 or G2
+      // B2, C2, F4 or G2
       if (numLength1 == 2) {
-        outputType.makeArbitrary('F', 4, DynkinSimpleType::getDefaultLongRootLengthSquared('F') / length1);
-      } else if (length1 / length2 == 3) {
-        outputType.makeArbitrary('G', 2, DynkinSimpleType::getDefaultLongRootLengthSquared('G') / length1);
-      } else {
-        outputType.makeArbitrary('B', 2, DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1);
-      }
-    } else {
-      if (numLength1>numLength2) {
         outputType.makeArbitrary(
-          'B', currentComponent.size, DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1
+          'F',
+          4,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('F') / length1
+        );
+      } else if (length1 / length2 == 3) {
+        outputType.makeArbitrary(
+          'G',
+          2,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('G') / length1
         );
       } else {
         outputType.makeArbitrary(
-          'C', currentComponent.size, DynkinSimpleType::getDefaultLongRootLengthSquared('C') / length1
+          'B',
+          2,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1
+        );
+      }
+    } else {
+      if (numLength1 > numLength2) {
+        outputType.makeArbitrary(
+          'B',
+          currentComponent.size,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1
+        );
+      } else {
+        outputType.makeArbitrary(
+          'C',
+          currentComponent.size,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('C') / length1
         );
       }
     }
@@ -836,19 +1111,27 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   currentComponent.swapTwoIndices(0, currentEnds[0]);
   for (int i = 0; i < currentComponent.size; i ++) {
     for (int j = i + 1; j < currentComponent.size; j ++) {
-      if (!currentComponent[i].scalarProduct(currentComponent[j], this->ambientBilinearForm).isEqualToZero()) {
+      if (
+        !currentComponent[i].scalarProduct(
+          currentComponent[j], this->ambientBilinearForm
+        ).isEqualToZero()
+      ) {
         currentComponent.swapTwoIndices(i + 1, j);
         break;
       }
     }
   }
-  // so far we made sure the entire component is one properly ordered string, starting with the long root.
-  if (outputType.letter == 'G' || outputType.letter == 'C' ) {
-    currentComponent.reverseElements(); // <-in G_2 and C_n the short root comes first so we need to reverse elements.
+  // so far we made sure the entire component is one properly ordered string,
+  // starting with the long root.
+  if (outputType.letter == 'G' || outputType.letter == 'C') {
+    currentComponent.reverseElements();
+    // <-in G_2 and C_n the short root comes first so we need to reverse
+    // elements.
   }
 }
 
-std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* format) const {
+std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* format)
+const {
   DynkinType dynkinType;
   dynkinType.makeZero();
   for (int j = 0; j < this->simpleComponentTypes.size; j ++) {
@@ -858,42 +1141,61 @@ std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* format) con
 }
 
 bool DynkinDiagramRootSubalgebra::checkInitialization() const {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::checkInitialization");
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::checkInitialization"
+  );
   if (this->ambientRootSystem.size != 0) {
-    if (this->ambientBilinearForm.numberOfRows != this->ambientRootSystem[0].size) {
-      global.fatal << "Ambient bilinear form of Dynkin subdiagram not initialized. " << global.fatal;
+    if (
+      this->ambientBilinearForm.numberOfRows != this->ambientRootSystem[0].size
+    ) {
+      global.fatal
+      << "Ambient bilinear form of Dynkin subdiagram not initialized. "
+      << global.fatal;
     }
   }
   return true;
 }
 
-void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple");
+void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(
+  const Vectors<Rational>& simpleBasisInput
+) {
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple"
+  );
   this->checkInitialization();
   this->simpleBasesConnectedComponents.size = 0;
   this->simpleBasesConnectedComponents.reserve(simpleBasisInput.size);
   for (int i = 0; i < simpleBasisInput.size; i ++) {
     int indexFirstComponentConnectedToRoot = - 1;
     for (int j = 0; j < this->simpleBasesConnectedComponents.size; j ++) {
-      if (this->simpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
-        simpleBasisInput[i], this->ambientBilinearForm)
+      if (
+        this->simpleBasesConnectedComponents[j].
+        containsVectorNonPerpendicularTo(
+          simpleBasisInput[i], this->ambientBilinearForm
+        )
       ) {
         if (indexFirstComponentConnectedToRoot == - 1) {
           indexFirstComponentConnectedToRoot = j;
-          this->simpleBasesConnectedComponents[j].addOnTop(simpleBasisInput[i]);
-        } else {
-          this->simpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].addListOnTop(
-            this->simpleBasesConnectedComponents[j]
+          this->simpleBasesConnectedComponents[j].addOnTop(
+            simpleBasisInput[i]
           );
+        } else {
+          this->simpleBasesConnectedComponents[
+            indexFirstComponentConnectedToRoot
+          ].addListOnTop(this->simpleBasesConnectedComponents[j]);
           this->simpleBasesConnectedComponents.removeIndexSwapWithLast(j);
           j --;
         }
       }
     }
     if (indexFirstComponentConnectedToRoot == - 1) {
-      this->simpleBasesConnectedComponents.setSize(this->simpleBasesConnectedComponents.size + 1);
+      this->simpleBasesConnectedComponents.setSize(
+        this->simpleBasesConnectedComponents.size + 1
+      );
       this->simpleBasesConnectedComponents.lastObject()->size = 0;
-      this->simpleBasesConnectedComponents.lastObject()->addOnTop(simpleBasisInput[i]);
+      this->simpleBasesConnectedComponents.lastObject()->addOnTop(
+        simpleBasisInput[i]
+      );
     }
   }
   this->computeDynkinStrings();
@@ -904,12 +1206,16 @@ void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(const Vectors<Rati
   if (tempType.isEqualToZero() && simpleBasisInput.size != 0) {
     global.fatal
     << "Dynkin type of zero but the roots generating the type are: "
-    << simpleBasisInput.toString() << global.fatal;
+    << simpleBasisInput.toString()
+    << global.fatal;
   }
 }
 
-bool DynkinDiagramRootSubalgebra::letterIsDynkinGreaterThanLetter(char letter1, char letter2) {
-  if ((letter1 == 'B' || letter1 == 'D') && (letter2 == 'B' || letter2 == 'D') ) {
+bool DynkinDiagramRootSubalgebra::letterIsDynkinGreaterThanLetter(
+  char letter1, char letter2
+) {
+  if ((letter1 == 'B' || letter1 == 'D') && (letter2 == 'B' || letter2 == 'D')
+  ) {
     if (letter1 == letter2) {
       return false;
     }
@@ -922,23 +1228,35 @@ bool DynkinDiagramRootSubalgebra::letterIsDynkinGreaterThanLetter(char letter1, 
   return letter1 > letter2;
 }
 
-bool DynkinDiagramRootSubalgebra::isGreaterThan(DynkinDiagramRootSubalgebra& right) {
+bool DynkinDiagramRootSubalgebra::isGreaterThan(
+  DynkinDiagramRootSubalgebra& right
+) {
   if (this->rankTotal() > right.rankTotal()) {
     return true;
   }
   if (this->rankTotal() < right.rankTotal()) {
     return false;
   }
-  if (this->simpleComponentTypes.size != this->simpleBasesConnectedComponents.size) {
+  if (
+    this->simpleComponentTypes.size !=
+    this->simpleBasesConnectedComponents.size
+  ) {
     global.fatal
     << "Simple component types do "
-    << "not match number of connected components. " << global.fatal;
+    << "not match number of connected components. "
+    << global.fatal;
   }
   for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
-    if (this->simpleBasesConnectedComponents[i].size > right.simpleBasesConnectedComponents[i].size) {
+    if (
+      this->simpleBasesConnectedComponents[i].size >
+      right.simpleBasesConnectedComponents[i].size
+    ) {
       return true;
     }
-    if (right.simpleBasesConnectedComponents[i].size > this->simpleBasesConnectedComponents[i].size) {
+    if (
+      right.simpleBasesConnectedComponents[i].size >
+      this->simpleBasesConnectedComponents[i].size
+    ) {
       return false;
     }
     if (this->simpleComponentTypes[i] > right.simpleComponentTypes[i]) {
@@ -951,11 +1269,14 @@ bool DynkinDiagramRootSubalgebra::isGreaterThan(DynkinDiagramRootSubalgebra& rig
   return false;
 }
 
-Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
+Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula()
+{
   Rational output = 1;
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
-    output *= WeylGroupData::sizeByFormulaOrNegative1(
-      this->simpleComponentTypes[i].letter, this->simpleComponentTypes[i].rank
+    output *=
+    WeylGroupData::sizeByFormulaOrNegative1(
+      this->simpleComponentTypes[i].letter,
+      this->simpleComponentTypes[i].rank
     );
   }
   return output;
@@ -964,29 +1285,45 @@ Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
 void DynkinDiagramRootSubalgebra::getMapFromPermutation(
   Vectors<Rational>& domain,
   Vectors<Rational>& range,
-  List<int>& permutation, List<List<List<int > > >& automorphisms,
+  List<int>& permutation,
+  List<List<List<int> > >& automorphisms,
   SelectionWithDifferentMaxMultiplicities& autosPermutations,
   DynkinDiagramRootSubalgebra& right
 ) {
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
-    for (int j = 0; j < this->simpleBasesConnectedComponents[i].size; j ++) {
-      if (this->simpleBasesConnectedComponents[i].size != right.simpleBasesConnectedComponents[permutation[i]].size) {
-        global.fatal << "Connected components simple bases sizes do not match. " << global.fatal;
+    for (
+      int j = 0; j < this->simpleBasesConnectedComponents[i].size; j ++
+    ) {
+      if (
+        this->simpleBasesConnectedComponents[i].size !=
+        right.simpleBasesConnectedComponents[permutation[i]].size
+      ) {
+        global.fatal
+        << "Connected components simple bases sizes do not match. "
+        << global.fatal;
       }
-      domain.addOnTop( this->simpleBasesConnectedComponents[i][j]);
+      domain.addOnTop(this->simpleBasesConnectedComponents[i][j]);
       int indexTargetComponent = permutation[i];
       int indexAutomorphismInComponent = autosPermutations.multiplicities[i];
       int indexRoot = automorphisms[i][indexAutomorphismInComponent][j];
-      range.addOnTop(right.simpleBasesConnectedComponents[indexTargetComponent][indexRoot]);
+      range.addOnTop(
+        right.simpleBasesConnectedComponents[indexTargetComponent][indexRoot]
+      );
     }
   }
 }
 
-void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& weylGroup) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput");
+void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(
+  Vectors<Rational>& inputRoots, WeylGroupData& weylGroup
+) {
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput"
+  );
   this->ambientRootSystem = weylGroup.rootSystem;
   this->ambientBilinearForm = weylGroup.cartanSymmetric;
-  weylGroup.transformToSimpleBasisGenerators(inputRoots, weylGroup.rootSystem);
+  weylGroup.transformToSimpleBasisGenerators(
+    inputRoots, weylGroup.rootSystem
+  );
   this->computeDiagramInputIsSimple(inputRoots);
 }
 
@@ -995,31 +1332,50 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
   const HashedList<Vector<Rational> >& weightSystem,
   const Matrix<Rational>& bilinearForm
 ) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative");
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative"
+  );
   this->ambientRootSystem = weightSystem;
   this->ambientBilinearForm = bilinearForm;
-  WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(inputOutputSimpleWeightSystem, weightSystem);
+  WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
+    inputOutputSimpleWeightSystem, weightSystem
+  );
   this->computeDiagramInputIsSimple(inputOutputSimpleWeightSystem);
 }
 
 void DynkinDiagramRootSubalgebra::computeDynkinStrings() {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDynkinStrings");
-  this->indicesThreeNodes.setSize(this->simpleBasesConnectedComponents.size);
-  this->simpleComponentTypes.setSize(this->simpleBasesConnectedComponents.size);
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::computeDynkinStrings"
+  );
+  this->indicesThreeNodes.setSize(
+    this->simpleBasesConnectedComponents.size
+  );
+  this->simpleComponentTypes.setSize(
+    this->simpleBasesConnectedComponents.size
+  );
   this->indicesEnds.setSize(this->simpleBasesConnectedComponents.size);
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     this->computeDynkinString(i);
   }
 }
 
-bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& right) const {
-  if (right.simpleBasesConnectedComponents.size != this->simpleBasesConnectedComponents.size) {
+bool DynkinDiagramRootSubalgebra::operator==(
+  const DynkinDiagramRootSubalgebra& right
+) const {
+  if (
+    right.simpleBasesConnectedComponents.size !=
+    this->simpleBasesConnectedComponents.size
+  ) {
     return false;
   }
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
-    bool tempBool =
-      ((this->simpleBasesConnectedComponents[i].size == right.simpleBasesConnectedComponents[i].size) &&
-      (this->simpleComponentTypes[i] == right.simpleComponentTypes[i]));
+    bool tempBool = ((
+        this->simpleBasesConnectedComponents[i].size ==
+        right.simpleBasesConnectedComponents[i].size
+      ) && (
+        this->simpleComponentTypes[i] == right.simpleComponentTypes[i]
+      )
+    );
     if (!tempBool) {
       return false;
     }
@@ -1035,8 +1391,11 @@ void DynkinDiagramRootSubalgebra::getDynkinType(DynkinType& output) const {
   }
 }
 
-void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int index) {
-  Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[index];
+void DynkinDiagramRootSubalgebra::getAutomorphism(
+  List<List<int> >& output, int index
+) {
+  Vectors<Rational>& currentComponent =
+  this->simpleBasesConnectedComponents[index];
   DynkinSimpleType& currentStrinG = this->simpleComponentTypes[index];
   List<int> permutation;
   permutation.setSize(currentComponent.size);
@@ -1051,8 +1410,9 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int 
   }
   if (currentStrinG.letter == 'D') {
     if (currentComponent.size == 4) {
-     //the automorphism group of the Dynkin Diagram is S3
-      permutation[1] = 2;
+      // the automorphism group of the Dynkin Diagram is S3
+      permutation[1] =
+      2;
       permutation[2] = 3;
       permutation[3] = 1;
       output.addOnTop(permutation);
@@ -1087,7 +1447,9 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int 
   }
 }
 
-void DynkinDiagramRootSubalgebra::getAutomorphisms(List<List<List<int> > >& output) {
+void DynkinDiagramRootSubalgebra::getAutomorphisms(
+  List<List<List<int> > >& output
+) {
   output.setSize(this->simpleBasesConnectedComponents.size);
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     this->getAutomorphism(output[i], i);
@@ -1104,19 +1466,28 @@ int DynkinDiagramRootSubalgebra::rankTotal() {
 
 int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   int result = 0;
-  if (this->simpleBasesConnectedComponents.size != this->simpleComponentTypes.size) {
-    global.fatal << "Number of simple connected components does not match the number of types. " << global.fatal;
+  if (
+    this->simpleBasesConnectedComponents.size !=
+    this->simpleComponentTypes.size
+  ) {
+    global.fatal
+    <<
+    "Number of simple connected components does not match the number of types. "
+    << global.fatal;
   }
   for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
     int Rank = this->simpleBasesConnectedComponents[i].size;
     if (this->simpleComponentTypes[i].letter == 'A') {
-      result += Rank * (Rank + 1);
+      result += Rank *(Rank + 1);
     }
-    if (this->simpleComponentTypes[i].letter == 'B' || this->simpleComponentTypes[i].letter == 'C') {
+    if (
+      this->simpleComponentTypes[i].letter == 'B' ||
+      this->simpleComponentTypes[i].letter == 'C'
+    ) {
       result += Rank * Rank * 2;
     }
     if (this->simpleComponentTypes[i].letter == 'D') {
-      result += Rank * (Rank - 1) * 2;
+      result += Rank *(Rank - 1) * 2;
     }
     if (this->simpleComponentTypes[i].letter == 'E') {
       if (Rank == 6) {
@@ -1139,9 +1510,13 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   return result;
 }
 
-int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes");
-  Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[indexComponent];
+int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
+{
+  MacroRegisterFunctionWithName(
+    "DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes"
+  );
+  Vectors<Rational>& currentComponent =
+  this->simpleBasesConnectedComponents[indexComponent];
   int numEnds = 0;
   int result = 0;
   this->indicesThreeNodes[indexComponent] = - 1;
@@ -1149,20 +1524,30 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
   for (int i = 0; i < currentComponent.size; i ++) {
     int counter = 0;
     for (int j = 0; j < currentComponent.size; j ++) {
-      if (currentComponent[i].scalarProduct(currentComponent[j], this->ambientBilinearForm).isNegative()) {
+      if (
+        currentComponent[i].scalarProduct(
+          currentComponent[j], this->ambientBilinearForm
+        ).isNegative()
+      ) {
         counter ++;
       }
     }
     if (counter > 3) {
       Matrix<Rational> gramMatrix;
-      currentComponent.getGramMatrix(gramMatrix, &this->ambientBilinearForm);
-      global.fatal << "Corrupt simple basis corresponding to "
+      currentComponent.getGramMatrix(
+        gramMatrix, &this->ambientBilinearForm
+      );
+      global.fatal
+      << "Corrupt simple basis corresponding to "
       << "Dynkin diagram: the Dynkin diagram should have nodes with "
       << "valency at most 3, but this diagram has node with valency "
-      << counter << ". The current component is: "
+      << counter
+      << ". The current component is: "
       << currentComponent.toString()
       << ". The corresponding Symmetric Cartan is: "
-      << gramMatrix.toString() << ". " << global.fatal;
+      << gramMatrix.toString()
+      << ". "
+      << global.fatal;
     }
     if (counter == 3) {
       result ++;
@@ -1174,34 +1559,52 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
     }
   }
   if (result > 1) {
-    global.fatal << "numEnds variable equals: " << numEnds
+    global.fatal
+    << "numEnds variable equals: "
+    << numEnds
     << ", number of three-nodes equals: "
-    << result << "; this should not happen. The bilinear form is: "
-    << this->ambientBilinearForm.toString() << global.fatal;
+    << result
+    << "; this should not happen. The bilinear form is: "
+    << this->ambientBilinearForm.toString()
+    << global.fatal;
   }
   if (result == 1) {
     if (numEnds != 3) {
-      global.fatal << "numEnds variable equals: " << numEnds
+      global.fatal
+      << "numEnds variable equals: "
+      << numEnds
       << ", number of three-nodes equals: "
-      << result << "; this should not happen. The bilinear form is: "
-      << this->ambientBilinearForm.toString() << global.fatal;
+      << result
+      << "; this should not happen. The bilinear form is: "
+      << this->ambientBilinearForm.toString()
+      << global.fatal;
     }
   } else {
     if (numEnds > 2) {
-      global.fatal << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
-      << result << "; this should not happen. The bilinear form is: " << this->ambientBilinearForm.toString() << global.fatal;
+      global.fatal
+      << "numEnds variable equals: "
+      << numEnds
+      << ", number of three-nodes equals: "
+      << result
+      << "; this should not happen. The bilinear form is: "
+      << this->ambientBilinearForm.toString()
+      << global.fatal;
     }
   }
   return result;
 }
 
-bool AffineCone::splitByAffineHyperplane(AffineHyperplane<Rational>& killerPlane, AffineCones& output) {
+bool AffineCone::splitByAffineHyperplane(
+  AffineHyperplane<Rational>& killerPlane, AffineCones& output
+) {
   (void) killerPlane;
   (void) output;
   return true;
 }
 
-bool AffineCone::wallIsInternalInCone(AffineHyperplane<Rational>& killerCandidate) {
+bool AffineCone::wallIsInternalInCone(
+  AffineHyperplane<Rational>& killerCandidate
+) {
   (void) killerCandidate;
   return true;
 }
@@ -1217,7 +1620,9 @@ unsigned int AffineCone::hashFunction() const {
   unsigned int result = 0;
   int j = 0;
   for (int i = 0; i < this->walls.size; i ++) {
-    result += this->walls[i].hashFunction() * HashConstants::getConstantIncrementCounter(j);
+    result +=
+    this->walls[i].hashFunction() *
+    HashConstants::getConstantIncrementCounter(j);
   }
   return result;
 }
@@ -1240,7 +1645,9 @@ void Permutation::initPermutation(int n) {
   }
 }
 
-void Permutation::initPermutation(List<int>& disjointSubsets, int totalNumberOfElements) {
+void Permutation::initPermutation(
+  List<int>& disjointSubsets, int totalNumberOfElements
+) {
   this->initializePart1(totalNumberOfElements);
   int counter = 0;
   for (int i = 0; i < disjointSubsets.size; i ++) {
@@ -1252,7 +1659,9 @@ void Permutation::initPermutation(List<int>& disjointSubsets, int totalNumberOfE
     totalNumberOfElements -= disjointSubsets[i];
   }
   if (totalNumberOfElements != 0) {
-    global.fatal << "Permutations with 0 elements not allowed. " << global.fatal;
+    global.fatal
+    << "Permutations with 0 elements not allowed. "
+    << global.fatal;
   }
 }
 
@@ -1261,25 +1670,38 @@ void Permutation::incrementAndGetPermutation(List<int>& output) {
   this->getPermutationLthElementIsTheImageofLthIndex(output);
 }
 
-void Permutation::getPermutationLthElementIsTheImageofLthIndex(List<int>& output) {
+void Permutation::getPermutationLthElementIsTheImageofLthIndex(
+  List<int>& output
+) {
   int numberOfElements = this->multiplicities.size;
   output.setSize(numberOfElements);
   for (int i = 0; i < numberOfElements; i ++) {
     output[i] = i;
   }
   for (int i = 0; i < numberOfElements; i ++) {
-    MathRoutines::swap(output[i], output[i + this->multiplicities[i]]);
+    MathRoutines::swap(
+      output[i], output[i + this->multiplicities[i]]
+    );
   }
 }
 
-bool WeylGroupData::areMaximallyDominantGroupInner(List<Vector<Rational> >& weights) {
+bool WeylGroupData::areMaximallyDominantGroupInner(
+  List<Vector<Rational> >& weights
+) {
   MacroRegisterFunctionWithName("WeylGroup::areMaximallyDominantGroupInner");
   for (int i = 0; i < weights.size; i ++) {
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
-      if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[i]) < 0) {
+      if (
+        this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[i]) < 0
+      ) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) > 0) {
+          if (
+            this->rootScalarCartanRoot(
+              this->rootsOfBorel[j], weights[k]
+            ) >
+            0
+          ) {
             reflectionDoesRaise = false;
             break;
           }
@@ -1295,15 +1717,21 @@ bool WeylGroupData::areMaximallyDominantGroupInner(List<Vector<Rational> >& weig
 
 bool WeylGroupAutomorphisms::checkInitialization() const {
   if (this->flagDeallocated) {
-    global.fatal << "Use after free of Weyl group automorphism. " << global.fatal;
+    global.fatal
+    << "Use after free of Weyl group automorphism. "
+    << global.fatal;
   }
   if (this->weylGroup == nullptr) {
-    global.fatal << "Non-initialized Weyl group automorphisms. " << global.fatal;
+    global.fatal
+    << "Non-initialized Weyl group automorphisms. "
+    << global.fatal;
   }
   return true;
 }
 
-bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational> >& weights) {
+bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(
+  List<Vector<Rational> >& weights
+) {
   MacroRegisterFunctionWithName("WeylGroup::areMaximallyDominantGroupOuter");
   this->checkInitialization();
   MemorySaving<Vectors<Rational> > weightsCopy;
@@ -1312,10 +1740,20 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
   zeroWeight.makeZero(this->weylGroup->getDimension());
   for (int i = 0; i < weights.size; i ++) {
     for (int j = 0; j < this->weylGroup->rootsOfBorel.size; j ++) {
-      if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], weights[i]) < 0) {
+      if (
+        this->weylGroup->rootScalarCartanRoot(
+          this->weylGroup->rootsOfBorel[j], weights[i]
+        ) <
+        0
+      ) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->weylGroup->rootScalarCartanRoot(this->weylGroup->rootsOfBorel[j], weights[k]) > 0) {
+          if (
+            this->weylGroup->rootScalarCartanRoot(
+              this->weylGroup->rootsOfBorel[j], weights[k]
+            ) >
+            0
+          ) {
             reflectionDoesRaise = false;
             break;
           }
@@ -1327,10 +1765,14 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
     }
     for (int j = 0; j < this->outerAutomorphisms.elements.size; j ++) {
       weightsCopy.getElement() = weights;
-      this->outerAutomorphisms.elements[j].actOnVectorsColumn(weightsCopy.getElement());
+      this->outerAutomorphisms.elements[j].actOnVectorsColumn(
+        weightsCopy.getElement()
+      );
       bool isGood = true;
       for (int k = 0; k < i; k ++) {
-        if (!(weightsCopy.getElement()[k] - weights[k]).isPositiveOrZero()) {
+        if (
+          !(weightsCopy.getElement()[k] - weights[k]).isPositiveOrZero()
+        ) {
           isGood = false;
           break;
         }
@@ -1338,7 +1780,11 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
       if (!isGood) {
         continue;
       }
-      if (!(weightsCopy.getElement()[i] - weights[i]).isGreaterThanLexicographic(zeroWeight)) {
+      if (
+        !(weightsCopy.getElement()[i] - weights[i]).isGreaterThanLexicographic(
+          zeroWeight
+        )
+      ) {
         continue;
       }
       return false;
@@ -1380,17 +1826,22 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   out << this->partialFractions.toString(&format);
   this->partialFractions.split(nullptr);
   out << "=" << this->partialFractions.toString(&format);
-  //  int totalDim = this->translationS[0].size +this->translationsProjecteD[0].size;
-  this->quasiPolynomialsSubstituted.setSize(this->projectivizedChamber.nonRefinedCones.size);
-  global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;
-//  this->pfs.chambersOld.initialize();
-//  this->pfs.chambersOld.directions = this->GmodKNegWeightsBasisChanged;
-//  this->pfs.chambersOld.SliceEuclideanSpace(false);
-//  this->qPsNonSubstituted.setSize(this->pfs.chambersOld.size);
-//  this->qPsSubstituted.setSize(this->pfs.chambersOld.size);
+  // int totalDim = this->translationS[0].size
+  // +this->translationsProjecteD[0].size;
+  this->quasiPolynomialsSubstituted.setSize(
+    this->projectivizedChamber.nonRefinedCones.size
+  );
+  global.fatal
+  << "not implemented fully, crashing to let you know. "
+  << global.fatal;
+  //  this->pfs.chambersOld.initialize();
+  //  this->pfs.chambersOld.directions = this->GmodKNegWeightsBasisChanged;
+  //  this->pfs.chambersOld.SliceEuclideanSpace(false);
+  //  this->qPsNonSubstituted.setSize(this->pfs.chambersOld.size);
+  //  this->qPsSubstituted.setSize(this->pfs.chambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
   global.fatal << "Not implemented yet. " << global.fatal;
-/*
+  /*
   for (int i = 0; i < this->pfs.chambersOld.size; i ++)
     if (this->pfs.chambersOld.objects[i] != 0) {
       QuasiPolynomial& currentQPNoSub = this->qPsNonSubstituted.objects[i];
@@ -1408,22 +1859,32 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       }
     }
     */
-  //out << "\nThe integral lattice:\n" << integralLattice.toString(false, false);
-  //this->multiplicitiesMaxOutputReport2.flush();
+  // out << "\nThe integral lattice:\n" << integralLattice.toString(false,
+  // false);
+  // this->multiplicitiesMaxOutputReport2.flush();
   this->projectivizedChamber.checkIsRefinedOrCrash();
   QuasiPolynomial tempQP;
-  this->multiplicities.setSize(this->projectivizedChamber.refinedCones.size);
+  this->multiplicities.setSize(
+    this->projectivizedChamber.refinedCones.size
+  );
   this->numberNonZeroMultiplicities = 0;
   ProgressReport report;
   ProgressReport report2;
-  for (int i = 0; i < this->projectivizedChamber.refinedCones.size; i ++) {
+  for (
+    int i = 0; i < this->projectivizedChamber.refinedCones.size; i ++
+  ) {
     QuasiPolynomial& currentSum = this->multiplicities.objects[i];
     currentSum.makeZeroOverLattice(this->extendedIntegralLatticeMatrixForm);
     for (int k = 0; k < this->linearOperators.size; k ++) {
-      this->getProjection(k, this->projectivizedChamber.refinedCones[i].getInternalPoint(), root);
+      this->getProjection(
+        k,
+        this->projectivizedChamber.refinedCones[i].getInternalPoint(),
+        root
+      );
       root -= this->nonIntegralOriginModificationBasisChanged;
-      global.fatal << global.fatal ;
-      int index = - 1; //= this->pfs.chambersOld.GetFirstChamberIndexContainingPoint(root);
+      global.fatal << global.fatal;
+      int index = - 1;
+      // = this->pfs.chambersOld.GetFirstChamberIndexContainingPoint(root);
       if (index != - 1) {
         tempQP = this->quasiPolynomialsSubstituted[index][k];
         tempQP *= this->coefficients[k];
@@ -1437,26 +1898,34 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       this->numberNonZeroMultiplicities ++;
     }
     std::stringstream tempStream;
-    tempStream << " So far " << i + 1 << " out of "
+    tempStream << " So far " << i + 1
+    << " out of "
     << this->projectivizedChamber.refinedCones.size
-    << " processed " << this->numberNonZeroMultiplicities
+    << " processed "
+    << this->numberNonZeroMultiplicities
     << " non-zero total.";
     report2.report(tempStream.str());
-    out << "\nChamber " << i + 1 << ": the quasipolynomial is: " << currentSum.toString(false, false);
-    out << "\nThe chamber is: "
+    out << "\nChamber " << i + 1
+    << ": the quasipolynomial is: "
+    << currentSum.toString(false, false);
+    out
+    << "\nThe chamber is: "
     << this->projectivizedChamber.refinedCones[i].toString(&format);
   }
-//  this->projectivizedChamber.ComputeDebugString();
-//  out << "\n\n" << this->projectivizedChamber.DebugString;
+  //  this->projectivizedChamber.ComputeDebugString();
+  //  out << "\n\n" << this->projectivizedChamber.DebugString;
   report.report(out.str());
   this->multiplicitiesMaxOutputReport2 << out.str();
 }
 
-std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebraHighestWeight(
-  Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel
+std::string GeneralizedVermaModuleCharacters::
+computeMultiplicitiesLargerAlgebraHighestWeight(
+  Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords,
+  Vector<Rational>& parabolicSel
 ) {
   std::stringstream out;
-  WeylGroupData& largeWeylGroup = this->homomorphism.coDomainAlgebra().weylGroup;
+  WeylGroupData& largeWeylGroup =
+  this->homomorphism.coDomainAlgebra().weylGroup;
   WeylGroupData& smallWeylGroup = this->homomorphism.domainAlgebra().weylGroup;
   if (!largeWeylGroup.isOfSimpleType('B', 3)) {
     return "Error: algebra is not so(7).";
@@ -1465,7 +1934,10 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   this->transformToWeylProjectiveStep1();
   this->transformToWeylProjectiveStep2();
   Vector<Rational> highestWeightLargerAlgSimpleCoords;
-  highestWeightLargerAlgSimpleCoords = largeWeylGroup.getSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
+  highestWeightLargerAlgSimpleCoords =
+  largeWeylGroup.getSimpleCoordinatesFromFundamental(
+    highestWeightLargerAlgebraFundamentalCoords
+  );
   Vector<Rational> root;
   DrawingVariables drawOps;
   int smallDimension = smallWeylGroup.cartanSymmetric.numberOfRows;
@@ -1473,25 +1945,40 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   draggableBasis.makeEiBasis(smallDimension);
   WeylGroupData tmpWeyl;
   tmpWeyl.makeArbitrarySimple('A', 2);
-  drawOps.operations.initDimensions(tmpWeyl.cartanSymmetric, draggableBasis, draggableBasis);
+  drawOps.operations.initDimensions(
+    tmpWeyl.cartanSymmetric, draggableBasis, draggableBasis
+  );
   FormatExpressions format;
   drawOps.operations.basisProjectionPlane[0][0] = 1;
   drawOps.operations.basisProjectionPlane[0][1] = 0;
   drawOps.operations.basisProjectionPlane[1][0] = 1;
   drawOps.operations.basisProjectionPlane[1][1] = 1;
-  drawOps.operations.modifyToOrthonormalNoShiftSecond
-  (drawOps.operations.basisProjectionPlane[1], drawOps.operations.basisProjectionPlane[0]);
+  drawOps.operations.modifyToOrthonormalNoShiftSecond(
+    drawOps.operations.basisProjectionPlane[1],
+    drawOps.operations.basisProjectionPlane[0]
+  );
   drawOps.operations.graphicsUnit = 50;
-  PiecewiseQuasipolynomial startingPolynomial, substitutedPolynomial, accumulator;
+  PiecewiseQuasipolynomial
+  startingPolynomial,
+  substitutedPolynomial,
+  accumulator;
   std::string tempS;
   startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.setSize(this->linearOperators.size);
-  this->linearOperators[0].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
-  out << "<br>Input so(7)-highest weight: " << highestWeightLargerAlgSimpleCoords.toString();
+  this->linearOperators[0].actOnVectorColumn(
+    highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]
+  );
+  out
+  << "<br>Input so(7)-highest weight: "
+  << highestWeightLargerAlgSimpleCoords.toString();
   out << "<br>Input parabolics selections: " << parabolicSel.toString();
-  out << "<br>the argument translations: " << this->translationsProjectedBasisChanged.toString();
-  out << "<br>Element u_w: projection, multiplication by - 1, and basis change of so(7)-highest weight to G_2: "
+  out
+  << "<br>the argument translations: "
+  << this->translationsProjectedBasisChanged.toString();
+  out
+  <<
+  "<br>Element u_w: projection, multiplication by - 1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
   startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
   drawOps.drawCoordSystemBuffer(drawOps, 2);
@@ -1502,7 +1989,10 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vectors<Rational> tempVertices;
   Vector<Rational> tMpRt;
   tMpRt = this->ParabolicSelectionSmallerAlgebra;
-  for (int i = 0; i < this->ParabolicSelectionSmallerAlgebra.numberOfElements; i ++) {
+  for (
+    int i = 0; i < this->ParabolicSelectionSmallerAlgebra.numberOfElements; i
+    ++
+  ) {
     invertedCartan.getVectorFromRow(i, root);
     tempVertices.addOnTop(root);
     if (this->ParabolicSelectionSmallerAlgebra.selected[i]) {
@@ -1519,13 +2009,21 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   basisChange.transpose();
   smallWeylChamber.changeBasis(basisChange);
   out << "<br> The small Weyl chamber: " << smallWeylChamber.toString(&format);
-  Vector<Rational> highestWeightSmallAlgBasisChanged = - translationsProjectedFinal[0];
+  Vector<Rational> highestWeightSmallAlgBasisChanged =
+  - translationsProjectedFinal[0];
   for (int i = 0; i < this->linearOperators.size; i ++) {
-    this->linearOperators[i].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
-    translationsProjectedFinal[i] += this->translationsProjectedBasisChanged[i];
-    drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], "red", 3);
+    this->linearOperators[i].actOnVectorColumn(
+      highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]
+    );
+    translationsProjectedFinal[i] += this->translationsProjectedBasisChanged[i]
+    ;
+    drawOps.drawCircleAtVectorBufferRational(
+      - translationsProjectedFinal[i], "red", 3
+    );
   }
-  out << "<br>the translations projected final: " << translationsProjectedFinal.toString();
+  out
+  << "<br>the translations projected final: "
+  << translationsProjectedFinal.toString();
   accumulator.makeZero(startingPolynomial.numberOfVariables);
   for (int i = 0; i < this->linearOperators.size; i ++) {
     substitutedPolynomial = startingPolynomial;
@@ -1533,7 +2031,9 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
     substitutedPolynomial.translateArgument(translationsProjectedFinal[i]);
     accumulator += substitutedPolynomial;
   }
-  accumulator.drawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
+  accumulator.drawMe(
+    drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged
+  );
   out << drawOps.getHTMLDiv(2, false);
   out << accumulator.toString(false, true);
   return out.str();
@@ -1546,7 +2046,8 @@ void GeneralizedVermaModuleCharacters::sortMultiplicities() {
   List<QuasiPolynomial> quasipolynomialList;
   quasipolynomialList.setExpectedSize(this->multiplicities.size);
   for (int i = 0; i < this->multiplicities.size; i ++) {
-    int index = this->projectivizedChamber.refinedCones.getIndex(sortedCones[i]);
+    int index =
+    this->projectivizedChamber.refinedCones.getIndex(sortedCones[i]);
     quasipolynomialList.addOnTop(this->multiplicities[index]);
   }
   this->multiplicities = quasipolynomialList;
@@ -1557,17 +2058,22 @@ void GeneralizedVermaModuleCharacters::sortMultiplicities() {
 }
 
 std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
-  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits");
+  MacroRegisterFunctionWithName(
+    "GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits"
+  );
   this->checkInitialization();
   std::stringstream out;
-  int totalDimensionAffine = this->weylLarger->getDimension() + this->weylSmaller->getDimension();
+  int totalDimensionAffine =
+  this->weylLarger->getDimension() + this->weylSmaller->getDimension();
   int smallDimension = this->weylSmaller->getDimension();
   Vector<Rational> normal;
   normal.makeZero(totalDimensionAffine + 1);
   Vectors<Rational> newWalls;
   ConeCollection tempComplex;
   tempComplex = this->projectivizedChamber;
-  for (int i = 0; i < this->weylChamberSmallerAlgebra.normals.size; i ++) {
+  for (
+    int i = 0; i < this->weylChamberSmallerAlgebra.normals.size; i ++
+  ) {
     for (int j = 0; j < smallDimension; j ++) {
       normal[j] = this->weylChamberSmallerAlgebra.normals[i][j];
     }
@@ -1580,53 +2086,53 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& parabolicSel) {
+void GeneralizedVermaModuleCharacters::incrementComputation(
+  Vector<Rational>& parabolicSel
+) {
   std::stringstream out;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
   switch (this->computationPhase) {
-    case 0:
-//      this->parser.hmm.MakeG2InB3(this->parser);
-      this->initFromHomomorphism(parabolicSel, this->homomorphism);
-      this->transformToWeylProjectiveStep1();
-//      out << global.indicatorVariables.StatusString1;
-      this->transformToWeylProjectiveStep2();
-//      out << global.indicatorVariables.StatusString1;
-      break;
-    case 1:
-      this->projectivizedChamber.refine();
-      this->sortMultiplicities();
-      out << this->projectivizedChamber.toString();
-//      out << global.indicatorVariables.StatusString1;
-      break;
-    case 2:
-      this->computeQPsFromChamberComplex();
-      out << this->elementToStringMultiplicitiesReport();
-      break;
-    case 3:
-//      out << this->checkMultiplicitiesVsOrbits();
-      break;
-    case 4:
-      this->inititializeMaximumComputation();
-//      out << global.indicatorVariables.StatusString1;
-      break;
-    case 5:
-      this->maximumComputation.findExtremaParametricStep1();
-//      out << global.indicatorVariables.StatusString1;
-      break;
-    case 6:
-      this->maximumComputation.findExtremaParametricStep3();
-//      out << global.indicatorVariables.StatusString1;
-      break;
-    case 7:
-      this->maximumComputation.findExtremaParametricStep4();
-//      out << global.indicatorVariables.StatusString1;
-      break;
-    case 8:
-      this->maximumComputation.findExtremaParametricStep5();
-//      out << global.indicatorVariables.StatusString1;
-      break;
-    default:
-      break;
+  case 0:
+    //      this->parser.hmm.MakeG2InB3(this->parser);
+    this->initFromHomomorphism(parabolicSel, this->homomorphism); this->
+    transformToWeylProjectiveStep1();    // out <<
+    // global.indicatorVariables.StatusString1;
+    this->transformToWeylProjectiveStep2();    // out <<
+    // global.indicatorVariables.StatusString1;
+    break;
+  case 1:
+    this->projectivizedChamber.refine(); this->sortMultiplicities(); out
+    << this->projectivizedChamber.toString();    // out <<
+    // global.indicatorVariables.StatusString1;
+    break;
+  case 2:
+    this->computeQPsFromChamberComplex(); out
+    << this->elementToStringMultiplicitiesReport(); break;
+  case 3:
+    //      out << this->checkMultiplicitiesVsOrbits();
+    break;
+  case 4:
+    this->inititializeMaximumComputation();    // out <<
+    // global.indicatorVariables.StatusString1;
+    break;
+  case 5:
+    this->maximumComputation.findExtremaParametricStep1();    // out <<
+    // global.indicatorVariables.StatusString1;
+    break;
+  case 6:
+    this->maximumComputation.findExtremaParametricStep3();    // out <<
+    // global.indicatorVariables.StatusString1;
+    break;
+  case 7:
+    this->maximumComputation.findExtremaParametricStep4();    // out <<
+    // global.indicatorVariables.StatusString1;
+    break;
+  case 8:
+    this->maximumComputation.findExtremaParametricStep5();    // out <<
+    // global.indicatorVariables.StatusString1;
+    break;
+  default:
+    break;
   }
   this->computationPhase ++;
 }
@@ -1643,52 +2149,66 @@ GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
 
 bool GeneralizedVermaModuleCharacters::checkInitialization() const {
   if (this->weylLarger == nullptr || this->weylSmaller == nullptr) {
-    global.fatal << "Use of non-initialized Weyl group within generalized Verma module characters. " << global.fatal;
+    global.fatal
+    <<
+    "Use of non-initialized Weyl group within generalized Verma module characters. "
+    << global.fatal;
   }
-  if (this->weylLarger->flagDeallocated || this->weylSmaller->flagDeallocated) {
-    global.fatal << "Use after free of Weyl group within Verma module characters. " << global.fatal;
+  if (
+    this->weylLarger->flagDeallocated || this->weylSmaller->flagDeallocated
+  ) {
+    global.fatal
+    << "Use after free of Weyl group within Verma module characters. "
+    << global.fatal;
   }
   return true;
 }
 
 void GeneralizedVermaModuleCharacters::initFromHomomorphism(
-  Vector<Rational>& parabolicSelection, HomomorphismSemisimpleLieAlgebra& input
+  Vector<Rational>& parabolicSelection,
+  HomomorphismSemisimpleLieAlgebra& input
 ) {
-  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
+  MacroRegisterFunctionWithName(
+    "GeneralizedVermaModuleCharacters::initFromHomomorphism"
+  );
   Vectors<Rational> roots;
   this->weylLarger = &input.coDomainAlgebra().weylGroup;
   this->weylSmaller = &input.domainAlgebra().weylGroup;
   WeylGroupData& weylGroupCoDomain = input.coDomainAlgebra().weylGroup;
-//  input.projectOntoSmallCartan(weylSmaller.rootsOfBorel, roots);
+  //  input.projectOntoSmallCartan(weylSmaller.rootsOfBorel, roots);
   this->log << "projections: " << roots.toString();
   weylGroupCoDomain.group.computeAllElements(false);
-  this->nonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
+  this->nonIntegralOriginModificationBasisChanged = "(1/2,1/2)";
   Matrix<Rational> projectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions format;
   global.fatal << "Not implemented. " << global.fatal;
-//  SSalgebraModuleOld tempM;
+  //  SSalgebraModuleOld tempM;
   input.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
   global.fatal << "Not implemented. " << global.fatal;
-//  tempM.InduceFromEmbedding(tempStream, input);
+  //  tempM.InduceFromEmbedding(tempStream, input);
   input.getWeightsGmodKInSimpleCoordinatesK(this->gModKNegativeWeights);
-//  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.toString();
-//  matrix.actOnVectorsColumn(this->GmodKnegativeWeightS);
+  // this->log << "weights of g mod k: " <<
+  // this->GmodKnegativeWeights.toString();
+  //  matrix.actOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->gModKNegativeWeights.toString();
   this->preferredBasis.setSize(2);
   this->preferredBasis[0] = - this->gModKNegativeWeights[1];
   this->preferredBasis[1] = - this->gModKNegativeWeights[2];
-  /////////////////////////////////////////
-  //this->preferredBasiS[0] ="(1,0)";
-  //this->preferredBasiS[1] ="(0,1)";
-  ////////////////////////////////////////
+  // ///////////////////////////////////////
+  // this->preferredBasiS[0] ="(1,0)";
+  // this->preferredBasiS[1] ="(0,1)";
+  // //////////////////////////////////////
   this->preferredBasisChangE.assignVectorsToRows(this->preferredBasis);
   this->preferredBasisChangE.transpose();
   this->preferredBasisChangeInversE = this->preferredBasisChangE;
   this->preferredBasisChangeInversE.invert();
-  this->preferredBasisChangeInversE.actOnVectorsColumn
-  (this->gModKNegativeWeights, this->gModKNegativeWeightsBasisChanged);
-  this->log << "\nWeights after basis change: " << this->gModKNegativeWeightsBasisChanged.toString();
+  this->preferredBasisChangeInversE.actOnVectorsColumn(
+    this->gModKNegativeWeights, this->gModKNegativeWeightsBasisChanged
+  );
+  this->log
+  << "\nWeights after basis change: "
+  << this->gModKNegativeWeightsBasisChanged.toString();
   for (int i = 0; i < this->gModKNegativeWeights.size; i ++) {
     if (this->gModKNegativeWeights[i].isPositiveOrZero()) {
       this->gModKNegativeWeights.removeIndexSwapWithLast(i);
@@ -1701,8 +2221,13 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
       i --;
     }
   }
-  this->log << "\nNegative weights after basis change: " << this->gModKNegativeWeightsBasisChanged.toString();
-  projectionBasisChanged.initialize(input.domainAlgebra().getRank(), input.coDomainAlgebra().getRank());
+  this->log
+  << "\nNegative weights after basis change: "
+  << this->gModKNegativeWeightsBasisChanged.toString();
+  projectionBasisChanged.initialize(
+    input.domainAlgebra().getRank(),
+    input.coDomainAlgebra().getRank()
+  );
   for (int i = 0; i < input.coDomainAlgebra().getRank(); i ++) {
     startingWeight.makeEi(input.coDomainAlgebra().getRank(), i);
     input.projectOntoSmallCartan(startingWeight, projectedWeight);
@@ -1711,85 +2236,141 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
       projectionBasisChanged.elements[j][i] = projectedWeight[j];
     }
   }
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subgroup;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
+  subgroup;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSelection;
   Matrix<Rational> DualCartanEmbedding;
   input.getMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   Vector<Rational> ParabolicEvaluationRootImage, root;
-  ParabolicEvaluationRootImage = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
-  this->ParabolicSelectionSmallerAlgebra.initialize(input.domainAlgebra().getRank());
+  ParabolicEvaluationRootImage =
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
+  this->ParabolicSelectionSmallerAlgebra.initialize(
+    input.domainAlgebra().getRank()
+  );
   for (int i = 0; i < input.domainAlgebra().getRank(); i ++) {
     DualCartanEmbedding.getVectorFromColumn(i, root);
-    if (ParabolicEvaluationRootImage.scalarEuclidean(root).isPositive()) {
+    if (
+      ParabolicEvaluationRootImage.scalarEuclidean(root).isPositive()
+    ) {
       this->ParabolicSelectionSmallerAlgebra.addSelectionAppendNewIndex(i);
     }
   }
-  this->log << "\nDual cartan embedding smaller into larger:\n" <<
-  DualCartanEmbedding.toString(&global.defaultFormat.getElement());
-  this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.toString();
+  this->log
+  << "\nDual cartan embedding smaller into larger:\n"
+  << DualCartanEmbedding.toString(&global.defaultFormat.getElement());
+  this->log
+  << "\nParabolic subalgebra large algebra: "
+  << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.toString();
   root = this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << root.toString();
-  subgroup.makeParabolicFromSelectionSimpleRoots(weylGroupCoDomain, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
-
+  subgroup.makeParabolicFromSelectionSimpleRoots(
+    weylGroupCoDomain,
+    this->ParabolicLeviPartRootSpacesZeroStandsForSelected,
+    - 1
+  );
   this->linearOperators.setSize(subgroup.allElements.size);
   this->linearOperatorsExtended.setSize(subgroup.allElements.size);
   this->translations.setSize(subgroup.allElements.size);
-  this->translationsProjectedBasisChanged.setSize(subgroup.allElements.size);
+  this->translationsProjectedBasisChanged.setSize(
+    subgroup.allElements.size
+  );
   this->coefficients.setSize(subgroup.allElements.size);
-  this->log << " \n******************\nthe subgroup: \n" << subgroup.toString() << "\n\n\n\n\n\n";
+  this->log
+  << " \n******************\nthe subgroup: \n"
+  << subgroup.toString()
+  << "\n\n\n\n\n\n";
   this->log << subgroup.toStringBruhatGraph();
-  this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
-  << subgroup.allElements.size << " elements):\n";
+  this->log
+  <<
+  "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
+  << subgroup.allElements.size
+  << " elements):\n";
   for (int i = 0; i < subgroup.allElements.size; i ++) {
     Matrix<Rational>& currentLinearOperator = this->linearOperators[i];
-    subgroup.getMatrixOfElement(subgroup.allElements[i], currentLinearOperator);
-//    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
-    this->log << "\n" << currentLinearOperator.toString(&global.defaultFormat.getElement());
-    currentLinearOperator.actOnVectorColumn(subgroup.getRho(), this->translations[i]);
+    subgroup.getMatrixOfElement(
+      subgroup.allElements[i], currentLinearOperator
+    );
+    //    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
+    this->log
+    << "\n"
+    << currentLinearOperator.toString(
+      &global.defaultFormat.getElement()
+    );
+    currentLinearOperator.actOnVectorColumn(
+      subgroup.getRho(), this->translations[i]
+    );
     this->translations[i] -= subgroup.getRho();
     this->translations[i].negate();
-    projectionBasisChanged.actOnVectorColumn(this->translations[i], this->translationsProjectedBasisChanged[i]);
-    if (subgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
+    projectionBasisChanged.actOnVectorColumn(
+      this->translations[i],
+      this->translationsProjectedBasisChanged[i]
+    );
+    if (
+      subgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0
+    ) {
       this->coefficients[i] = 1;
     } else {
       this->coefficients[i] = - 1;
     }
   }
-  this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
+  this->log
+  << "\n\n\nMatrix of the projection operator (basis-changed):\n"
   << projectionBasisChanged.toString(&global.defaultFormat.getElement());
-  this->log << "\n\n\nMatrix form of the operators $u_w$, "
-  << "the translations $\tau_w$ and their projections (" << this->linearOperatorsExtended.size << "):";
-  //List<Matrix<Rational> > tempList;
+  this->log
+  << "\n\n\nMatrix form of the operators $u_w$, "
+  << "the translations $\tau_w$ and their projections ("
+  << this->linearOperatorsExtended.size
+  << "):";
+  // List<Matrix<Rational> > tempList;
   for (int k = 0; k < this->linearOperators.size; k ++) {
     Matrix<Rational>& currentLO = this->linearOperators[k];
     Matrix<Rational>& currentLOExtended = this->linearOperatorsExtended[k];
     currentLO.multiplyOnTheLeft(projectionBasisChanged);
     currentLO *= - 1;
-    //tempList.addOnTopNoRepetition(this->linearOperators.objects[i]);
+    // tempList.addOnTopNoRepetition(this->linearOperators.objects[i]);
     currentLOExtended.makeIdentityMatrix(currentLO.numberOfRows);
-    currentLOExtended.resize(currentLO.numberOfRows, currentLO.numberOfRows + currentLO.numberOfColumns, true);
+    currentLOExtended.resize(
+      currentLO.numberOfRows,
+      currentLO.numberOfRows + currentLO.numberOfColumns,
+      true
+    );
     for (int i = 0; i < currentLO.numberOfRows; i ++) {
       for (int j = 0; j < currentLO.numberOfColumns; j ++) {
-        currentLOExtended.elements[i][j + currentLO.numberOfRows] = currentLO.elements[i][j];
+        currentLOExtended.elements[i][j + currentLO.numberOfRows] =
+        currentLO.elements[i][j];
       }
     }
-    this->log << "\n\n" << currentLOExtended.toString(&global.defaultFormat.getElement());
-    this->log << this->translations[k].toString() << ";   " << this->translationsProjectedBasisChanged[k].toString();
+    this->log
+    << "\n\n"
+    << currentLOExtended.toString(&global.defaultFormat.getElement());
+    this->log
+    << this->translations[k].toString()
+    << ";   "
+    << this->translationsProjectedBasisChanged[k].toString();
   }
-
   List<int> displayIndicesReflections;
-  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements; i ++) {
-    if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]) {
+  for (
+    int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.
+    numberOfElements; i ++
+  ) {
+    if (
+      !this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]
+    ) {
       displayIndicesReflections.addOnTop(i + 1);
     }
   }
   Matrix<Polynomial<Rational> > matrixPoly;
   Vector<Polynomial<Rational> > tempVect, tempVect2;
-  tempVect.setSize(input.domainAlgebra().weylGroup.getDimension() + input.coDomainAlgebra().weylGroup.getDimension());
+  tempVect.setSize(
+    input.domainAlgebra().weylGroup.getDimension() +
+    input.coDomainAlgebra().weylGroup.getDimension()
+  );
   for (int i = 0; i < tempVect.size; i ++) {
     tempVect[i].makeMonomial(i, 1, Rational(1));
   }
-  matrixPoly.initialize(input.domainAlgebra().weylGroup.getDimension(), tempVect.size);
+  matrixPoly.initialize(
+    input.domainAlgebra().weylGroup.getDimension(), tempVect.size
+  );
   Polynomial<Rational> polyZero;
   polyZero.makeZero();
   format.polynomialAlphabet.setSize(5);
@@ -1802,33 +2383,52 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->linearOperators[0].actOnVectorColumn(root);
   this->preferredBasisChangE.actOnVectorColumn(root);
   root.negate();
-  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
-  << subgroup.getRho().toStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
-  << root.toStringLetterFormat("\\alpha") << "$.";
-  this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
-  << "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
-  << tempVect.toString(&format) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
+  this->log
+  << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
+  << subgroup.getRho().toStringLetterFormat("\\eta")
+  << "$; $\\pr(\\rho)="
+  << root.toStringLetterFormat("\\alpha")
+  << "$.";
+  this->log
+  << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
+  <<
+  "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
+  << tempVect.toString(&format)
+  << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
   for (int i = 0; i < this->linearOperatorsExtended.size; i ++) {
     Matrix<Rational>& currentLoExt = this->linearOperatorsExtended[i];
     for (int j = 0; j < currentLoExt.numberOfRows; j ++) {
       for (int k = 0; k < currentLoExt.numberOfColumns; k ++) {
-        matrixPoly.elements[j][k].makeConstant(currentLoExt.elements[j][k]);
+        matrixPoly.elements[j][k].makeConstant(
+          currentLoExt.elements[j][k]
+        );
       }
     }
     matrixPoly.actOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j = 0; j < tempVect2.size; j ++) {
       tempVect2[j] += this->translationsProjectedBasisChanged[i][j];
     }
-    this->log << "\n$" << subgroup.allElements[i].toString() << "$&$"
-    << tempVect2.toString(&format) << "$\\\\";
+    this->log
+    << "\n$"
+    << subgroup.allElements[i].toString()
+    << "$&$"
+    << tempVect2.toString(&format)
+    << "$\\\\";
   }
   this->log << "\\end{longtable}\n\n";
-//  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
+  // this->log << "\n\n\nThere are " << tempList.size << " different
+  // operators.";
   Lattice tempLattice;
   weylGroupCoDomain.getIntegralLatticeInSimpleCoordinates(tempLattice);
-  this->extendedIntegralLatticeMatrixForm.basisRationalForm.makeIdentityMatrix(input.domainAlgebra().getRank());
-  this->extendedIntegralLatticeMatrixForm.basisRationalForm.directSumWith(tempLattice.basisRationalForm, Rational(0));
-  this->extendedIntegralLatticeMatrixForm.makeFromMatrix(this->extendedIntegralLatticeMatrixForm.basisRationalForm);
+  this->extendedIntegralLatticeMatrixForm.basisRationalForm.makeIdentityMatrix(
+    input.domainAlgebra().getRank()
+  );
+  this->extendedIntegralLatticeMatrixForm.basisRationalForm.directSumWith(
+    tempLattice.basisRationalForm, Rational(0)
+  );
+  this->extendedIntegralLatticeMatrixForm.makeFromMatrix(
+    this->extendedIntegralLatticeMatrixForm.basisRationalForm
+  );
   Matrix<Rational> invertedCartan;
   invertedCartan = weylGroupCoDomain.cartanSymmetric;
   invertedCartan.invert();
@@ -1836,26 +2436,45 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < invertedCartan.numberOfRows; i ++) {
     invertedCartan.getVectorFromRow(i, root);
     if (ParabolicEvaluationRootImage[i].isEqualToZero()) {
-      WallsWeylChamberLargerAlgebra.setSize(WallsWeylChamberLargerAlgebra.size + 1);
+      WallsWeylChamberLargerAlgebra.setSize(
+        WallsWeylChamberLargerAlgebra.size + 1
+      );
       *WallsWeylChamberLargerAlgebra.lastObject() = root;
     }
   }
-  this->log << "\n\n\n**************\nParabolic selection larger algebra:"
-  << ParabolicEvaluationRootImage.toString() << "\nWalls Weyl chamber larger algebra: "
+  this->log
+  << "\n\n\n**************\nParabolic selection larger algebra:"
+  << ParabolicEvaluationRootImage.toString()
+  << "\nWalls Weyl chamber larger algebra: "
   << WallsWeylChamberLargerAlgebra.toString();
   this->log << "\n**************\n\n";
   Vectors<Rational> rootsGeneratingExtendedLattice;
-  int totalDim = input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank();
+  int totalDim =
+  input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank();
   rootsGeneratingExtendedLattice.setSize(totalDim);
-  this->log << "\n" << invertedCartan.toString(&global.defaultFormat.getElement()) << "\n";
+  this->log
+  << "\n"
+  << invertedCartan.toString(&global.defaultFormat.getElement())
+  << "\n";
   this->log << this->extendedIntegralLatticeMatrixForm.toString();
-  this->weylChamberSmallerAlgebra.createFromNormals(WallsWeylChamberLargerAlgebra);
-  this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->weylChamberSmallerAlgebra.toString(&format) << "\n";
-  this->preimageWeylChamberSmallerAlgebra.normals = this->weylChamberSmallerAlgebra.normals;
-  for (int i = 0; i < this->PreimageWeylChamberLargerAlgebra.normals.size; i ++) {
-    root.makeZero(input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1);
+  this->weylChamberSmallerAlgebra.createFromNormals(
+    WallsWeylChamberLargerAlgebra
+  );
+  this->log
+  << "\nWeyl chamber larger algebra before projectivizing: "
+  << this->weylChamberSmallerAlgebra.toString(&format)
+  << "\n";
+  this->preimageWeylChamberSmallerAlgebra.normals =
+  this->weylChamberSmallerAlgebra.normals;
+  for (
+    int i = 0; i < this->PreimageWeylChamberLargerAlgebra.normals.size; i ++
+  ) {
+    root.makeZero(
+      input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
+    );
     for (int j = 0; j < input.coDomainAlgebra().getRank(); j ++) {
-      root[j + input.domainAlgebra().getRank()] = this->PreimageWeylChamberLargerAlgebra.normals[i][j];
+      root[j + input.domainAlgebra().getRank()] =
+      this->PreimageWeylChamberLargerAlgebra.normals[i][j];
     }
     this->PreimageWeylChamberLargerAlgebra.normals[i] = root;
   }
@@ -1863,46 +2482,73 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   invertedCartan.invert();
   roots.size = 0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
-  ParabolicEvaluationRootSmallerAlgebra = this->ParabolicSelectionSmallerAlgebra;
+  ParabolicEvaluationRootSmallerAlgebra =
+  this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < invertedCartan.numberOfRows; i ++) {
     input.domainAlgebra().weylGroup.cartanSymmetric.getVectorFromRow(i, root);
-    if (root.scalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
+    if (
+      root.scalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero
+      ()
+    ) {
       roots.setSize(roots.size + 1);
       invertedCartan.getVectorFromRow(i, *roots.lastObject());
     }
   }
   this->preferredBasisChangeInversE.actOnVectorsColumn(roots);
   this->log << "**********************\n\n\n";
-  this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.toString();
-  this->log << "the Vectors<Rational> generating the chamber walls: " << roots.toString();
+  this->log
+  << "\nthe smaller parabolic selection: "
+  << this->ParabolicSelectionSmallerAlgebra.toString();
+  this->log
+  << "the Vectors<Rational> generating the chamber walls: "
+  << roots.toString();
   this->preimageWeylChamberSmallerAlgebra.createFromVertices(roots);
-  this->log << "\nWeyl chamber smaller algebra: " << this->preimageWeylChamberSmallerAlgebra.toString(&format) << "\n";
+  this->log
+  << "\nWeyl chamber smaller algebra: "
+  << this->preimageWeylChamberSmallerAlgebra.toString(&format)
+  << "\n";
   this->log << "**********************\n\n\n";
-  this->log << "\nThe first operator extended:\n"
-  << this->linearOperatorsExtended[0].toString(&global.defaultFormat.getElement()) << "\n";
-  this->log << "\nThe second operator extended:\n"
-  << this->linearOperatorsExtended[1].toString(&global.defaultFormat.getElement()) << "\n";
-  for (int i = 0; i < this->preimageWeylChamberSmallerAlgebra.normals.size; i ++) {
-    root.makeZero(input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1);
+  this->log
+  << "\nThe first operator extended:\n"
+  << this->linearOperatorsExtended[0].toString(
+    &global.defaultFormat.getElement()
+  )
+  << "\n";
+  this->log
+  << "\nThe second operator extended:\n"
+  << this->linearOperatorsExtended[1].toString(
+    &global.defaultFormat.getElement()
+  )
+  << "\n";
+  for (
+    int i = 0; i < this->preimageWeylChamberSmallerAlgebra.normals.size; i ++
+  ) {
+    root.makeZero(
+      input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
+    );
     for (int j = 0; j < input.domainAlgebra().getRank(); j ++) {
       root[j] = this->preimageWeylChamberSmallerAlgebra.normals[i][j];
     }
-  //  for (int j = 0; j < input.range.getRank(); j ++)
-   //   root.objects[j+ input.domain.getRank()] = root2.objects[j];
+    //  for (int j = 0; j < input.range.getRank(); j ++)
+    //   root.objects[j+ input.domain.getRank()] = root2.objects[j];
     this->preimageWeylChamberSmallerAlgebra.normals[i] = root;
   }
-
   root.makeEi(
     input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1,
     input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank()
   );
   this->PreimageWeylChamberLargerAlgebra.normals.addOnTop(root);
-  this->log << "\nPreimage Weyl chamber smaller algebra: " << this->preimageWeylChamberSmallerAlgebra.toString(&format) << "\n";
-  this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.toString(&format) << "\n";
-
-  //global.indicatorVariables.StatusString1NeedsRefresh = true;
-  //global.indicatorVariables.StatusString1= this->log.str();
-  //global.makeReport();
+  this->log
+  << "\nPreimage Weyl chamber smaller algebra: "
+  << this->preimageWeylChamberSmallerAlgebra.toString(&format)
+  << "\n";
+  this->log
+  << "\nPreimage Weyl chamber larger algebra: "
+  << this->PreimageWeylChamberLargerAlgebra.toString(&format)
+  << "\n";
+  // global.indicatorVariables.StatusString1NeedsRefresh = true;
+  // global.indicatorVariables.StatusString1= this->log.str();
+  // global.makeReport();
 }
 
 std::string GeneralizedVermaModuleCharacters::prepareReport() {
@@ -1920,40 +2566,67 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   variableIndex ++;
   format.polynomialAlphabet[variableIndex] = "y_3";
   variableIndex ++;
-  out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
+  out
+  <<
+  "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
   << "\n\\begin{document}\\tiny\n";
-  out << "\n The chamber complex + multiplicities follow.\n\n\n"
-  << "\\begin{longtable}{cc}\\caption{multiplicities of generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
+  out
+  << "\n The chamber complex + multiplicities follow.\n\n\n"
+  <<
+  "\\begin{longtable}{cc}\\caption{multiplicities of generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
   << " for $\\gop$ with Dynkin diagram";
   std::stringstream tempStream;
   tempStream << "(";
-  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements; i ++) {
-    if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]) {
+  for (
+    int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.
+    numberOfElements; i ++
+  ) {
+    if (
+      this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]
+    ) {
       tempStream << "+";
     } else {
       tempStream << "0";
     }
-    if (i != this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements - 1) {
+    if (
+      i !=
+      this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements -
+      1
+    ) {
       tempStream << ",";
     }
   }
   tempStream << ")";
-  out << "$" << tempStream.str() <<  "$ \\label{table" << tempStream.str() << "}}\\\\\n";
+  out
+  << "$"
+  << tempStream.str()
+  << "$ \\label{table"
+  << tempStream.str()
+  << "}}\\\\\n";
   out << "Inequlities& $m(x_1,x_2, y_1, y_2, y_3)$\\endhead\n";
   int numFoundChambers = 0;
   List<int> displayIndicesprojectivizedChambers;
   this->projectivizedChamber.checkIsRefinedOrCrash();
-  for (int i = 0; i < this->projectivizedChamber.refinedCones.size; i ++) {
+  for (
+    int i = 0; i < this->projectivizedChamber.refinedCones.size; i ++
+  ) {
     QuasiPolynomial& currentMultiplicity = this->multiplicities[i];
     if (!currentMultiplicity.isEqualToZero()) {
       numFoundChambers ++;
-      out << "\\hline\\multicolumn{2}{c}{Chamber " << numFoundChambers << "}\\\\\n";
+      out
+      << "\\hline\\multicolumn{2}{c}{Chamber "
+      << numFoundChambers
+      << "}\\\\\n";
       displayIndicesprojectivizedChambers.addOnTop(numFoundChambers);
-      out << this->prepareReportOneCone(
+      out
+      << this->prepareReportOneCone(
         format, this->projectivizedChamber.refinedCones[i]
-      ) << "&";
+      )
+      << "&";
       out << "\\begin{tabular}{c}";
-      out << currentMultiplicity.toString(false, true, &format) << "\\end{tabular}\\\\\n";
+      out
+      << currentMultiplicity.toString(false, true, &format)
+      << "\\end{tabular}\\\\\n";
     } else {
       displayIndicesprojectivizedChambers.addOnTop(- 1);
     }
@@ -1961,8 +2634,10 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   out << "\\end{longtable}\n\n\n Multiplicity free chambers \n";
   numFoundChambers = 0;
   out << "\n\\begin{longtable}{cc} ";
-  out << "normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
- /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++) {
+  out
+  <<
+  "normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
+  /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++) {
     root = this->projectivezedChambersSplitByMultFreeWalls.objects[i].getInternalPoint();
     bool found = false;
     for (int j = 0; j < this->projectivizedChamber.size; j ++)
@@ -1998,19 +2673,25 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
       }
     }
   }*/
-  out << "Total number of chambers with multiplicity 1 or less: " << numFoundChambers;
+  out
+  << "Total number of chambers with multiplicity 1 or less: "
+  << numFoundChambers;
   out << "\\end{longtable}\n\n\n\n";
   out << "\\end{document}";
   return out.str();
 }
 
 void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
-  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::inititializeMaximumComputation");
+  MacroRegisterFunctionWithName(
+    "GeneralizedVermaModuleCharacters::inititializeMaximumComputation"
+  );
   this->maximumComputation.numNonParaM = 2;
   this->maximumComputation.conesLargerDimension.reserve(
     this->projectivizedChamber.refinedCones.size
   );
-  this->maximumComputation.LPtoMaximizeLargerDim.reserve(this->multiplicities.size);
+  this->maximumComputation.LPtoMaximizeLargerDim.reserve(
+    this->multiplicities.size
+  );
   this->maximumComputation.conesLargerDimension.setSize(0);
   this->maximumComputation.LPtoMaximizeLargerDim.setSize(0);
   Lattice ZnLattice;
@@ -2021,11 +2702,14 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
   ConeLatticeAndShift currentCLS;
   Vector<Rational> latticePtoMax;
   for (int i = 0; i < this->multiplicities.size; i ++) {
-    if (! this->multiplicities[i].isEqualToZero()) {
-      currentCLS.projectivizedCone = this->projectivizedChamber.refinedCones[i];
+    if (!this->multiplicities[i].isEqualToZero()) {
+      currentCLS.projectivizedCone = this->projectivizedChamber.refinedCones[i]
+      ;
       currentCLS.shift.makeZero(affineDimension);
       currentCLS.lattice = ZnLattice;
-      bool tempBool = this->multiplicities[i].valueOnEachLatticeShift[0].getRootFromLinearPolynomialConstantTermLastVariable(latticePtoMax);
+      bool tempBool =
+      this->multiplicities[i].valueOnEachLatticeShift[0].
+      getRootFromLinearPolynomialConstantTermLastVariable(latticePtoMax);
       if (!tempBool) {
         global.fatal << "This should not happen. " << global.fatal;
       }
@@ -2033,14 +2717,20 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
       this->maximumComputation.LPtoMaximizeLargerDim.addOnTop(latticePtoMax);
       this->numberNonZeroMultiplicities ++;
       std::stringstream out;
-      out << "Initialized " << i + 1 << " out of " << this->maximumComputation.conesLargerDimension.size
-      << "; so far " << this->numberNonZeroMultiplicities << " non-zero multiplicities";
+      out << "Initialized " << i + 1
+      << " out of "
+      << this->maximumComputation.conesLargerDimension.size
+      << "; so far "
+      << this->numberNonZeroMultiplicities
+      << " non-zero multiplicities";
       report.report(out.str());
     }
   }
 }
 
-std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpressions& format, const Cone& cone) {
+std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(
+  FormatExpressions& format, const Cone& cone
+) {
   std::stringstream out1;
   Vector<Rational> normalNoConstant;
   int dimSmallerAlgebra = this->linearOperators[0].numberOfRows;
@@ -2051,18 +2741,25 @@ std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpress
     Vector<Rational>& currentNormal = cone.normals[i];
     normalNoConstant = currentNormal;
     normalNoConstant.setSize(dimSmallerAlgebra + dimLargerAlgebra);
-    rationalConstant = - (*currentNormal.lastObject());
+    rationalConstant = -(*currentNormal.lastObject());
     if (!normalNoConstant.isEqualToZero()) {
-      out1 << "$" << normalNoConstant.toStringLetterFormat("x", &format) << "$ & $\\geq$ & $"
-      << rationalConstant.toString() << "$ \\\\";
+      out1
+      << "$"
+      << normalNoConstant.toStringLetterFormat("x", &format)
+      << "$ & $\\geq$ & $"
+      << rationalConstant.toString()
+      << "$ \\\\";
     }
   }
   out1 << "\\end{tabular}";
   return out1.str();
 }
 
-std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesReport() {
-  if (this->multiplicities.size != this->projectivizedChamber.refinedCones.size) {
+std::string GeneralizedVermaModuleCharacters::
+elementToStringMultiplicitiesReport() {
+  if (
+    this->multiplicities.size != this->projectivizedChamber.refinedCones.size
+  ) {
     global.fatal << "Bad number of multiplicities. " << global.fatal;
   }
   std::stringstream out;
@@ -2073,14 +2770,24 @@ std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesRepor
   format.polynomialAlphabet[2] = "y_1";
   format.polynomialAlphabet[3] = "y_2";
   format.polynomialAlphabet[4] = "y_3";
-  out << "Number chambers: " << projectivizedChamber.refinedCones.size
-  << " of them " << this->numberNonZeroMultiplicities << " non-zero.";
+  out
+  << "Number chambers: "
+  << projectivizedChamber.refinedCones.size
+  << " of them "
+  << this->numberNonZeroMultiplicities
+  << " non-zero.";
   int numInequalities = 0;
-  for (int i = 0; i < this->projectivizedChamber.refinedCones.size; i ++) {
+  for (
+    int i = 0; i < this->projectivizedChamber.refinedCones.size; i ++
+  ) {
     numInequalities += this->projectivizedChamber.refinedCones[i].normals.size;
   }
   out << "\nNumber of inequalities: " << numInequalities;
-  if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.cardinalitySelection != 0) {
+  if (
+    this->ParabolicLeviPartRootSpacesZeroStandsForSelected.cardinalitySelection
+    !=
+    0
+  ) {
     out << this->prepareReport();
   }
   return out.str();
@@ -2092,9 +2799,13 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
   Vectors<Rational>& nonParameters,
   int numberOfParameters
 ) {
-  //Reminder: the very last variable comes from the projectivization and contributes to the translation only!
-  int numNonParams = nonParameters.size;
-  output.initialize(numberOfParameters + numNonParams - 1, numberOfParameters - 1);
+  // Reminder: the very last variable comes from the projectivization and
+  // contributes to the translation only!
+  int numNonParams =
+  nonParameters.size;
+  output.initialize(
+    numberOfParameters + numNonParams - 1, numberOfParameters - 1
+  );
   outputTranslation.makeZero(numberOfParameters + numNonParams - 1);
   output.makeZero();
   for (int l = 0; l < numNonParams; l ++) {
@@ -2109,12 +2820,18 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
 }
 
 void GeneralizedVermaModuleCharacters::getProjection(
-  int indexOperator, const Vector<Rational>& input, Vector<Rational>& output
+  int indexOperator,
+  const Vector<Rational>& input,
+  Vector<Rational>& output
 ) {
-  Matrix<Rational>& currentExtendedOperator = this->linearOperatorsExtended[indexOperator];
-  Vector<Rational>& currentTranslation = this->translationsProjectedBasisChanged[indexOperator];
+  Matrix<Rational>& currentExtendedOperator =
+  this->linearOperatorsExtended[indexOperator];
+  Vector<Rational>& currentTranslation =
+  this->translationsProjectedBasisChanged[indexOperator];
   if (input.lastObject()->isEqualToZero()) {
-    global.fatal << "Last coordinate is not supposed to be be zero. " << global.fatal;
+    global.fatal
+    << "Last coordinate is not supposed to be be zero. "
+    << global.fatal;
   }
   output = input;
   output /= *output.lastObject();
@@ -2126,34 +2843,48 @@ void GeneralizedVermaModuleCharacters::getProjection(
 void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
   PolynomialSubstitution<Rational>& outputSub,
   Matrix<LargeInteger>& outputMat,
-  LargeIntegerUnsigned& outputDen, int index
+  LargeIntegerUnsigned& outputDen,
+  int index
 ) {
   Matrix<Rational>& matrixOperator = this->linearOperators[index];
   int dimLargerAlgebra = matrixOperator.numberOfColumns;
   int dimSmallerAlgebra = matrixOperator.numberOfRows;
   Vector<Rational>& translation = this->translations[index];
   Matrix<Rational> matrix;
-  matrix.initialize(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra);
+  matrix.initialize(
+    dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra
+  );
   matrix.makeZero();
   for (int j = 0; j < dimSmallerAlgebra; j ++) {
     matrix.elements[j][j] = 1;
     for (int i = 0; i < dimLargerAlgebra; i ++) {
       matrix.elements[i][j] -= matrixOperator.elements[j][i];
     }
-    matrix.elements[dimLargerAlgebra + dimSmallerAlgebra][j] = - translation[j];
+    matrix.elements[dimLargerAlgebra + dimSmallerAlgebra][j] = - translation[j]
+    ;
   }
   matrix.getMatrixIntegerWithDenominator(outputMat, outputDen);
-  outputSub.makeSubstitutionFromMatrixIntegerAndDenominator(outputMat, outputDen);
+  outputSub.makeSubstitutionFromMatrixIntegerAndDenominator(
+    outputMat, outputDen
+  );
 }
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjective(
-  int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal
+  int indexOperator,
+  Vector<Rational>& startingNormal,
+  Vector<Rational>& outputNormal
 ) {
-  Matrix<Rational> operatorExtended = this->linearOperatorsExtended[indexOperator];
-  Vector<Rational>& translation = this->translationsProjectedBasisChanged[indexOperator];
-  //the goddamned sign in front of translation is now checked: it should be + and not -
+  Matrix<Rational> operatorExtended =
+  this->linearOperatorsExtended[indexOperator];
+  Vector<Rational>& translation =
+  this->translationsProjectedBasisChanged[indexOperator];
+  // the goddamned sign in front of translation is now checked: it should be +
+  // and not -
   Rational rationalConstant;
-  startingNormal.scalarEuclidean(this->nonIntegralOriginModificationBasisChanged + translation, rationalConstant);
+  startingNormal.scalarEuclidean(
+    this->nonIntegralOriginModificationBasisChanged + translation,
+    rationalConstant
+  );
   operatorExtended.transpose();
   outputNormal = startingNormal;
   operatorExtended.actOnVectorColumn(outputNormal);
@@ -2162,11 +2893,14 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
 }
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep1() {
-  this->smallerAlgebraChamber.initializeFromDirectionsAndRefine(this->gModKNegativeWeightsBasisChanged);
+  this->smallerAlgebraChamber.initializeFromDirectionsAndRefine(
+    this->gModKNegativeWeightsBasisChanged
+  );
   ProgressReport report1;
   ProgressReport report2;
   report1.report(this->smallerAlgebraChamber.toString());
-  this->log << "Directions for making the chamber basis changed: "
+  this->log
+  << "Directions for making the chamber basis changed: "
   << this->gModKNegativeWeightsBasisChanged.toString()
   << "\nResulting chamber before projectivization:\n "
   << this->smallerAlgebraChamber.toString();
@@ -2181,31 +2915,50 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   Vector<Rational> wallToSliceWith;
   ProgressReport report;
   projectivizedChamberFinal.initialize();
-  for (int i = 0; i < this->smallerAlgebraChamber.refinedCones.size; i ++) {
-    const Cone& currentAffineCone = this->smallerAlgebraChamber.refinedCones[i];
+  for (
+    int i = 0; i < this->smallerAlgebraChamber.refinedCones.size; i ++
+  ) {
+    const Cone& currentAffineCone = this->smallerAlgebraChamber.refinedCones[i]
+    ;
     roots.setSize(currentAffineCone.normals.size);
     for (int j = 0; j < currentAffineCone.normals.size; j ++) {
-      this->transformToWeylProjective(0, currentAffineCone.normals[j], roots[j]);
+      this->transformToWeylProjective(
+        0, currentAffineCone.normals[j], roots[j]
+      );
     }
     roots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.normals);
     report.report(roots.toString());
     currentProjectiveCone.createFromNormals(roots);
     projectivizedChamberFinal.refinedCones.addOnTop(currentProjectiveCone);
-    projectivizedChamberFinal.convexHull.makeConvexHullOfMeAnd(currentProjectiveCone);
+    projectivizedChamberFinal.convexHull.makeConvexHullOfMeAnd(
+      currentProjectiveCone
+    );
   }
-  for (int i = 0; i < this->preimageWeylChamberSmallerAlgebra.normals.size; i ++) {
-    projectivizedChamberFinal.splittingNormals.addOnTop(this->preimageWeylChamberSmallerAlgebra.normals[i]);
+  for (
+    int i = 0; i < this->preimageWeylChamberSmallerAlgebra.normals.size; i ++
+  ) {
+    projectivizedChamberFinal.splittingNormals.addOnTop(
+      this->preimageWeylChamberSmallerAlgebra.normals[i]
+    );
   }
-  out << "projectivized chamber before chopping non-dominant part:\n"
+  out
+  << "projectivized chamber before chopping non-dominant part:\n"
   << projectivizedChamberFinal.toString();
   projectivizedChamberFinal.refine();
-  out << "Refined projectivized chamber before chopping non-dominant part:\n"
+  out
+  << "Refined projectivized chamber before chopping non-dominant part:\n"
   << projectivizedChamberFinal.toString();
   for (int i = 0; i < projectivizedChamberFinal.refinedCones.size; i ++) {
     const Cone& currentCone = projectivizedChamberFinal.refinedCones[i];
     bool isNonDominant = false;
-    for (int j = 0; j < this->preimageWeylChamberSmallerAlgebra.normals.size; j ++) {
-      if (currentCone.getInternalPoint().scalarEuclidean(this->preimageWeylChamberSmallerAlgebra.normals[j]).isNegative()) {
+    for (
+      int j = 0; j < this->preimageWeylChamberSmallerAlgebra.normals.size; j ++
+    ) {
+      if (
+        currentCone.getInternalPoint().scalarEuclidean(
+          this->preimageWeylChamberSmallerAlgebra.normals[j]
+        ).isNegative()
+      ) {
         isNonDominant = true;
         break;
       }
@@ -2216,17 +2969,30 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
     }
   }
   report.report(out.str());
-  this->projectivizedChamber= projectivizedChamberFinal;
+  this->projectivizedChamber = projectivizedChamberFinal;
   for (int k = 1; k < this->linearOperators.size; k ++) {
-    for (int i = 0; i < this->smallerAlgebraChamber.refinedCones.size; i ++) {
-      for (int j = 0; j < this->smallerAlgebraChamber.refinedCones[i].normals.size; j ++) {
-        this->transformToWeylProjective(k, this->smallerAlgebraChamber.refinedCones[i].normals[j], wallToSliceWith);
+    for (
+      int i = 0; i < this->smallerAlgebraChamber.refinedCones.size; i ++
+    ) {
+      for (
+        int j = 0; j < this->smallerAlgebraChamber.refinedCones[i].normals.size
+        ; j ++
+      ) {
+        this->transformToWeylProjective(
+          k,
+          this->smallerAlgebraChamber.refinedCones[i].normals[j],
+          wallToSliceWith
+        );
         wallToSliceWith.scaleNormalizeFirstNonZero();
-        this->projectivizedChamber.splittingNormals.addOnTopNoRepetition(wallToSliceWith);
+        this->projectivizedChamber.splittingNormals.addOnTopNoRepetition(
+          wallToSliceWith
+        );
       }
     }
   }
-  out << "projectivized chamber chopped non-dominant part:\n"
+  out
+  << "projectivized chamber chopped non-dominant part:\n"
   << this->projectivizedChamber.toString();
   report.report(out.str());
 }
+

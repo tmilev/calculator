@@ -1,5 +1,7 @@
+
 #ifndef header_signals_infrastructure_ALREADY_INCLUDED
 #define header_signals_infrastructure_ALREADY_INCLUDED
+
 #include <sys/wait.h>//<-waitpid f-n here
 
 class SignalsInfrastructure {
@@ -19,5 +21,6 @@ public:
   void initializeSignals();
   static SignalsInfrastructure& signals();
 };
+
 #endif // header_signals_infrastructure_ALREADY_INCLUDED
 

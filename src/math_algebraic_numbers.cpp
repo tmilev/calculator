@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
@@ -7,10 +8,12 @@
 #include "math_general_implementation.h"
 
 const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
-
 std::string MonomialVector::toString(FormatExpressions* format) const {
   if (format != nullptr) {
-    if (this->monomialIndex < format->vectorSpaceEiBasisNames.size && this->monomialIndex >= 0) {
+    if (
+      this->monomialIndex < format->vectorSpaceEiBasisNames.size &&
+      this->monomialIndex >= 0
+    ) {
       return format->vectorSpaceEiBasisNames[this->monomialIndex];
     }
   }
@@ -19,20 +22,24 @@ std::string MonomialVector::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-PolynomialSolverWithQuadraticRadicalsUnivariate::PolynomialSolverWithQuadraticRadicalsUnivariate(
+PolynomialSolverWithQuadraticRadicalsUnivariate::
+PolynomialSolverWithQuadraticRadicalsUnivariate(
   AlgebraicClosureRationals& inputField
 ) {
   this->ownerField = &inputField;
 }
 
-bool PolynomialSolverWithQuadraticRadicalsUnivariate::solvePolynomialWithRadicals(
+bool PolynomialSolverWithQuadraticRadicalsUnivariate::
+solvePolynomialWithRadicals(
   const Polynomial<Rational>& input,
   std::stringstream* commentsOnFailure
 ) {
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
-  if (!factorization.factor(input, algorithm, nullptr, commentsOnFailure)) {
-    if (commentsOnFailure!= nullptr) {
+  if (
+    !factorization.factor(input, algorithm, nullptr, commentsOnFailure)
+  ) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to factor the characteristic polynomial.";
     }
     return false;
@@ -41,8 +48,9 @@ bool PolynomialSolverWithQuadraticRadicalsUnivariate::solvePolynomialWithRadical
   for (int i = 0; i < factorization.reduced.size; i ++) {
     Polynomial<Rational>& factor = factorization.reduced[i];
     if (factor.totalDegreeInt() > 2) {
-      if (commentsOnFailure!= nullptr) {
-        *commentsOnFailure << "Characteristic polynomial has factor of degree larger than 2.";
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Characteristic polynomial has factor of degree larger than 2.";
       }
       return false;
     }
@@ -57,13 +65,15 @@ bool PolynomialSolverWithQuadraticRadicalsUnivariate::solvePolynomialWithRadical
       Rational c = factor.getCoefficientOf(MonomialPolynomial(0, 0));
       Rational discriminant = b * b - 4 * a * c;
       AlgebraicNumber squareRootDiscriminant;
-      if (!squareRootDiscriminant.assignRationalQuadraticRadical(
-        discriminant, *this->ownerField, commentsOnFailure
-      )) {
+      if (
+        !squareRootDiscriminant.assignRationalQuadraticRadical(
+          discriminant, *this->ownerField, commentsOnFailure
+        )
+      ) {
         return false;
       }
-      AlgebraicNumber leftRoot = (squareRootDiscriminant * (- 1) - b) / (2 * a);
-      AlgebraicNumber rightRoot = (squareRootDiscriminant - b) / (2 * a);
+      AlgebraicNumber leftRoot = (squareRootDiscriminant *(- 1) - b) / (2* a);
+      AlgebraicNumber rightRoot = (squareRootDiscriminant - b) / (2* a);
       this->solutions.addOnTop(leftRoot);
       this->solutions.addOnTop(rightRoot);
     }
@@ -82,7 +92,9 @@ bool AlgebraicClosureRationals::checkConsistency() const {
 void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
   const Selection& selection, MatrixTensor<Rational>& output
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection");
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection"
+  );
   output.makeZero();
   Selection vectorActedOnSel, resultVectorSel;
   vectorActedOnSel.initialize(this->quadraticRadicals.size);
@@ -95,20 +107,27 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
       if (vectorActedOnSel.selected[i] && selection.selected[i]) {
         resultVectorSel.selected[i] = false;
         coefficient *= this->quadraticRadicals[i];
-      } else if (!vectorActedOnSel.selected[i] && !selection.selected[i]) {
+      } else if (
+        !vectorActedOnSel.selected[i] && !selection.selected[i]
+      ) {
         resultVectorSel.selected[i] = false;
       } else {
         resultVectorSel.selected[i] = true;
       }
     }
     resultVectorSel.computeIndicesFromSelection();
-    tempM.makeEij(this->getIndexFromRadicalSelection(resultVectorSel), this->getIndexFromRadicalSelection(vectorActedOnSel));
+    tempM.makeEij(
+      this->getIndexFromRadicalSelection(resultVectorSel),
+      this->getIndexFromRadicalSelection(vectorActedOnSel)
+    );
     output.addMonomial(tempM, coefficient);
   } while (vectorActedOnSel.incrementReturnFalseIfPastLast());
 }
 
 void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::computeDisplayStringsFromRadicals");
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::computeDisplayStringsFromRadicals"
+  );
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     return;
   }
@@ -124,11 +143,16 @@ void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
     if (radical != 1) {
       out << "\\sqrt{" << radical.toString() << "}";
     }
-    this->displayNamesBasisElements[this->getIndexFromRadicalSelection(selection)] = out.str();
+    this->displayNamesBasisElements[
+      this->getIndexFromRadicalSelection(selection)
+    ] =
+    out.str();
   } while (selection.incrementReturnFalseIfPastLast());
 }
 
-bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(int inputIndex, Selection& selection) {
+bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(
+  int inputIndex, Selection& selection
+) {
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     return false;
   }
@@ -144,10 +168,13 @@ bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(int inputIndex, Sel
   return true;
 }
 
-int AlgebraicClosureRationals::getIndexFromRadicalSelection(const Selection& selection) {
+int AlgebraicClosureRationals::getIndexFromRadicalSelection(
+  const Selection& selection
+) {
   if (selection.numberOfElements > 30) {
     global.fatal
-    << "The algebraic extension is too large to be handled by the current data structures. "
+    <<
+    "The algebraic extension is too large to be handled by the current data structures. "
     << global.fatal;
   }
   int result = 0;
@@ -160,14 +187,20 @@ int AlgebraicClosureRationals::getIndexFromRadicalSelection(const Selection& sel
   return result;
 }
 
-bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& radicals) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
+bool AlgebraicClosureRationals::mergeRadicals(
+  const List<LargeInteger>& radicals
+) {
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions"
+  );
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
-    global.fatal << "AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
-    << "with at least one of two arguments that is not a quadratic radical extension of the rationals. "
+    global.fatal
+    << "AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
+    <<
+    "with at least one of two arguments that is not a quadratic radical extension of the rationals. "
     << global.fatal;
   }
-  //refine factors:
+  // refine factors:
   HashedList<LargeInteger> radicalsNew = this->quadraticRadicals;
   radicalsNew.addOnTopNoRepetition(radicals);
   bool found = true;
@@ -179,7 +212,9 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& radicals
         if (radicalsNew[i] == - 1 || radicalsNew[j] == - 1) {
           continue;
         }
-        LargeIntegerUnsigned::greatestCommonDivisor(radicalsNew[i].value, radicalsNew[j].value, candidateGCD);
+        LargeIntegerUnsigned::greatestCommonDivisor(
+          radicalsNew[i].value, radicalsNew[j].value, candidateGCD
+        );
         if (candidateGCD > 1) {
           leftQuotient = radicalsNew[i].value / candidateGCD;
           rightQuotient = radicalsNew[j].value / candidateGCD;
@@ -199,7 +234,8 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& radicals
   }
   radicalsNew.quickSortAscending();
   if (radicalsNew.size > 16) {
-    global.comments << "Computing with fields whose dimension over the "
+    global.comments
+    << "Computing with fields whose dimension over the "
     << "rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current "
     << "implementation of algberaic extensions of the rationals. "
@@ -217,20 +253,27 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& radicals
     for (int j = 0; j < this->quadraticRadicals.size; j ++) {
       if (smallerFieldSel.selected[j]) {
         if (this->quadraticRadicals[j] == - 1) {
-          largerFieldSel.addSelectionAppendNewIndex(radicalsNew.getIndex(- 1));
+          largerFieldSel.addSelectionAppendNewIndex(
+            radicalsNew.getIndex(- 1)
+          );
           continue;
         }
         for (int k = 0; k < radicalsNew.size; k ++) {
-          if (this->quadraticRadicals[j] % radicalsNew[k] == 0 && radicalsNew[k] != - 1) {
+          if (
+            this->quadraticRadicals[j] % radicalsNew[k] == 0 &&
+            radicalsNew[k] != - 1
+          ) {
             largerFieldSel.addSelectionAppendNewIndex(k);
           }
         }
       }
     }
-    currentInjection.addMonomial(MonomialMatrix(
+    currentInjection.addMonomial(
+      MonomialMatrix(
         this->getIndexFromRadicalSelection(largerFieldSel),
         this->getIndexFromRadicalSelection(smallerFieldSel)
-      ), 1
+      ),
+      1
     );
   } while (smallerFieldSel.incrementReturnFalseIfPastLast());
   this->quadraticRadicals = radicalsNew;
@@ -238,7 +281,9 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& radicals
   do {
     this->getMultiplicativeOperatorFromRadicalSelection(
       largerFieldSel,
-      this->latestBasis[this->getIndexFromRadicalSelection(largerFieldSel)]
+      this->latestBasis[
+        this->getIndexFromRadicalSelection(largerFieldSel)
+      ]
     );
   } while (largerFieldSel.incrementReturnFalseIfPastLast());
   this->injectOldBases(&currentInjection);
@@ -265,10 +310,13 @@ void AlgebraicClosureRationals::injectOldBases(
   }
   for (int j = 0; j < this->basisInjections.size; j ++) {
     for (int i = 0; i < this->basisInjections[j].size; i ++) {
-      injectionNullForIdentity->actOnVectorColumn(this->basisInjections[j][i]);
+      injectionNullForIdentity->actOnVectorColumn(
+        this->basisInjections[j][i]
+      );
     }
   }
 }
+
 void AlgebraicClosureRationals::appendAdditiveEiBasis() {
   this->basisInjections.setSize(this->basisInjections.size + 1);
   this->basisInjections.lastObject()->setSize(this->latestBasis.size);
@@ -280,7 +328,9 @@ void AlgebraicClosureRationals::appendAdditiveEiBasis() {
 bool AlgebraicClosureRationals::chooseGeneratingElement(
   int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::chooseGeneratingElement");
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::chooseGeneratingElement"
+  );
   SelectionPositiveIntegers selection;
   int DimensionOverRationals = this->latestBasis.size;
   selection.initialize(DimensionOverRationals);
@@ -290,41 +340,64 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
   this->generatingElement.basisIndex = this->basisInjections.size - 1;
   int attemptsSoFar = 0;
   if (this->basisInjections.size > 1) {
-    int indexToSkipFirst = this->basisInjections[this->basisInjections.size - 2].size - 1;
+    int indexToSkipFirst =
+    this->basisInjections[this->basisInjections.size - 2].size - 1;
     if (indexToSkipFirst < DimensionOverRationals) {
       selection.integers.makeEi(DimensionOverRationals, indexToSkipFirst);
     }
   }
-  for (selection.incrementReturnFalseIfPastLast(); ; selection.incrementReturnFalseIfPastLast()) {
+  for (
+    selection.incrementReturnFalseIfPastLast();; selection.incrementReturnFalseIfPastLast()
+  ) {
     attemptsSoFar ++;
-    if (attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone) {
+    if (
+      attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone
+    ) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Choice of generating element is taking too long: made "
-        << attemptsSoFar << " attempts so far, limit: " << attemptsLimitZeroForNone << ". ";
+        *commentsOnFailure
+        << "Choice of generating element is taking too long: made "
+        << attemptsSoFar
+        << " attempts so far, limit: "
+        << attemptsLimitZeroForNone
+        << ". ";
       }
-      global.comments << "Choice of generating element is taking too long: made "
-      << attemptsSoFar << " attempts so far, limit: " << attemptsLimitZeroForNone << ". ";
+      global.comments
+      << "Choice of generating element is taking too long: made "
+      << attemptsSoFar
+      << " attempts so far, limit: "
+      << attemptsLimitZeroForNone
+      << ". ";
       return false;
     }
     this->generatingElement.element.makeZero();
     for (int i = 0; i < selection.integers.size; i ++) {
       MonomialVector tempV;
       tempV.makeEi(i);
-      this->generatingElement.element.addMonomial(tempV, selection.integers[i]);
+      this->generatingElement.element.addMonomial(
+        tempV, selection.integers[i]
+      );
     }
-    this->getMultiplicationBy(this->generatingElement, this->generatingElementTensorForm);
-    this->generatingElementTensorForm.getMatrix(this->generatingElementMatrixForm, DimensionOverRationals);
+    this->getMultiplicationBy(
+      this->generatingElement, this->generatingElementTensorForm
+    );
+    this->generatingElementTensorForm.getMatrix(
+      this->generatingElementMatrixForm, DimensionOverRationals
+    );
     this->generatingElementPowersBasis.setSize(0);
     currentVect.makeEi(DimensionOverRationals, 0);
     this->generatingElementPowersBasis.addOnTop(currentVect);
     do {
-      this->generatingElementMatrixForm.actOnVectorColumn(currentVect, Rational::zero());
+      this->generatingElementMatrixForm.actOnVectorColumn(
+        currentVect, Rational::zero()
+      );
       this->generatingElementPowersBasis.addOnTop(currentVect);
       if (
         this->generatingElementPowersBasis.size >
         this->generatingElementPowersBasis.getRankElementSpan()
       ) {
-        this->generatingElementPowersBasis.setSize(this->generatingElementPowersBasis.size - 1);
+        this->generatingElementPowersBasis.setSize(
+          this->generatingElementPowersBasis.size - 1
+        );
         break;
       }
     } while (true);
@@ -339,7 +412,9 @@ void AlgebraicClosureRationals::contractBasesIfRedundant(
   AlgebraicClosureRationals& previousCopy,
   AlgebraicNumber* outputImageGenerator
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::contractBasesIfRedundant");
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::contractBasesIfRedundant"
+  );
   if (
     previousCopy.latestBasis.size != this->latestBasis.size ||
     this->basisInjections.size < 3
@@ -352,8 +427,9 @@ void AlgebraicClosureRationals::contractBasesIfRedundant(
   }
   this->getAdditionTo(*outputImageGenerator, outputImageGenerator->element);
   MatrixTensor<Rational> reverseMap;
-
-  reverseMap.assignVectorsToColumns(this->basisInjections[this->basisInjections.size - 3]);
+  reverseMap.assignVectorsToColumns(
+    this->basisInjections[this->basisInjections.size - 3]
+  );
   reverseMap.invert();
   reverseMap.actOnVectorColumn(outputImageGenerator->element);
   outputImageGenerator->basisIndex = this->basisInjections.size - 3;
@@ -371,20 +447,19 @@ bool AlgebraicClosureRationals::reduceMe(
     return true;
   }
   Polynomial<Rational> minimalPolynomial, smallestFactor;
-  minimalPolynomial.assignMinimalPolynomial(this->generatingElementMatrixForm);
+  minimalPolynomial.assignMinimalPolynomial(
+    this->generatingElementMatrixForm
+  );
   int dimension = this->latestBasis.size;
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
-  bool mustBeTrue = factorization.factor(
-    minimalPolynomial,
-    algorithm,
-    nullptr,
-    nullptr
-  );
+  bool mustBeTrue =
+  factorization.factor(minimalPolynomial, algorithm, nullptr, nullptr);
   if (!mustBeTrue) {
     global.fatal
     << "Failed to factor polynomial "
-    << minimalPolynomial.toString() << ". "
+    << minimalPolynomial.toString()
+    << ". "
     << global.fatal;
   }
   smallestFactor = factorization.reduced[0];
@@ -398,7 +473,9 @@ bool AlgebraicClosureRationals::reduceMe(
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   MatrixTensor<Rational> projectionGeneratorCoordinates;
   int smallestFactorDegree = - 1;
-  if (!smallestFactor.totalDegree().isSmallInteger(&smallestFactorDegree)) {
+  if (
+    !smallestFactor.totalDegree().isSmallInteger(&smallestFactorDegree)
+  ) {
     global.fatal
     << smallestFactor.toString()
     << " has non-integral exponent, which should be "
@@ -411,7 +488,12 @@ bool AlgebraicClosureRationals::reduceMe(
   }
   for (int i = smallestFactorDegree; i < dimension; i ++) {
     zToTheNth.makeMonomial(0, i, 1);
-    zToTheNth.divideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialPolynomial::orderDefault());
+    zToTheNth.divideBy(
+      smallestFactor,
+      tempP,
+      remainderAfterReduction,
+      &MonomialPolynomial::orderDefault()
+    );
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int index = - 1;
       remainderAfterReduction[j](0).isSmallInteger(&index);
@@ -431,7 +513,8 @@ bool AlgebraicClosureRationals::reduceMe(
       generatorProjected.addMonomial(termBelowMainDiagonal, 1);
     }
     termInLastColumn.makeEij(i, smallestFactorDegree - 1);
-    Rational coefficientLastColumn = - smallestFactor.getCoefficientOf(MonomialPolynomial(0, i));
+    Rational coefficientLastColumn =
+    - smallestFactor.getCoefficientOf(MonomialPolynomial(0, i));
     coefficientLastColumn /= leadingCoefficient;
     generatorProjected.addMonomial(termInLastColumn, coefficientLastColumn);
     if (coefficientLastColumn != 0 && generatorProjected.isEqualToZero()) {
@@ -464,10 +547,13 @@ bool AlgebraicClosureRationals::reduceMe(
   return true;
 }
 
-bool AlgebraicClosureRationals::checkElement(const AlgebraicNumber& input) const {
+bool AlgebraicClosureRationals::checkElement(const AlgebraicNumber& input)
+const {
   input.checkConsistency();
   if (input.owner != nullptr && input.owner != this) {
-    global.fatal << "Element has a different algebraic closure owner." << global.fatal;
+    global.fatal
+    << "Element has a different algebraic closure owner."
+    << global.fatal;
   }
   return true;
 }
@@ -489,12 +575,12 @@ void AlgebraicClosureRationals::getAdditionTo(
     return;
   }
   if (
-    input.basisIndex < 0 ||
-    input.basisIndex >= this->basisInjections.size
+    input.basisIndex < 0 || input.basisIndex >= this->basisInjections.size
   ) {
     global.fatal
     << "Element has out-of-range basis index "
-    << input.basisIndex << ". "
+    << input.basisIndex
+    << ". "
     << global.fatal;
   }
   // The basis is already the latest one.
@@ -515,9 +601,11 @@ void AlgebraicClosureRationals::getAdditionTo(
       global.fatal
       << "I am getting basis index "
       << input.basisIndex
-      << " with current index " << currentIndex
+      << " with current index "
+      << currentIndex
       << ". A printout of the algebraic closure follows. "
-      << this->toString() << global.fatal;
+      << this->toString()
+      << global.fatal;
     }
     output.addOtherTimesConst(
       this->basisInjections[input.basisIndex][currentIndex],
@@ -529,7 +617,9 @@ void AlgebraicClosureRationals::getAdditionTo(
 void AlgebraicClosureRationals::getMultiplicationBy(
   const AlgebraicNumber& input, MatrixTensor<Rational>& output
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::getMultiplicationBy");
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::getMultiplicationBy"
+  );
   output.makeZero();
   VectorSparse<Rational> inputAdditiveForm;
   this->getAdditionTo(input, inputAdditiveForm);
@@ -539,9 +629,15 @@ void AlgebraicClosureRationals::getMultiplicationBy(
       inputAdditiveForm[i].monomialIndex < 0 ||
       inputAdditiveForm[i].monomialIndex >= this->latestBasis.size
     ) {
-      global.fatal << "Element " << input.toString()
-      << " has bad index, namely, " << inputAdditiveForm[i].monomialIndex
-      << ". The algebraic closure is: " << this->toString() << ". " << global.fatal;
+      global.fatal
+      << "Element "
+      << input.toString()
+      << " has bad index, namely, "
+      << inputAdditiveForm[i].monomialIndex
+      << ". The algebraic closure is: "
+      << this->toString()
+      << ". "
+      << global.fatal;
     }
     currentMat = this->latestBasis[inputAdditiveForm[i].monomialIndex];
     currentMat *= inputAdditiveForm.coefficients[i];
@@ -549,7 +645,9 @@ void AlgebraicClosureRationals::getMultiplicationBy(
   }
 }
 
-bool AlgebraicNumber::assignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
+bool AlgebraicNumber::assignCosRationalTimesPi(
+  const Rational& input, AlgebraicClosureRationals& inputOwner
+) {
   MacroRegisterFunctionWithName("AlgebraicNumber::assignCosRationalTimesPi");
   Rational fractionalPart = input;
   fractionalPart.assignFractionalValue();
@@ -557,7 +655,9 @@ bool AlgebraicNumber::assignCosRationalTimesPi(const Rational& input, AlgebraicC
   halfIntegerPart.assignFloor();
   LargeInteger halfIntegerPartTimesTwo;
   if (!halfIntegerPart.isInteger(&halfIntegerPartTimesTwo)) {
-    global.fatal << "something went wrong: floor function returns non-integer" << global.fatal;
+    global.fatal
+    << "something went wrong: floor function returns non-integer"
+    << global.fatal;
   }
   halfIntegerPart /= 2;
   Rational halfFractionalPart = input - halfIntegerPart;
@@ -677,11 +777,14 @@ bool AlgebraicNumber::needsParenthesisForMultiplication(
   return (additiveForm.size() > 1);
 }
 
-bool AlgebraicNumber::needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
+bool AlgebraicNumber::
+needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
   if (this->owner == nullptr) {
     Rational rationalValue;
     if (this->isRational(&rationalValue)) {
-      return rationalValue.needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+      return
+      rationalValue.needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
+      );
     }
     return false;
   }
@@ -690,13 +793,17 @@ bool AlgebraicNumber::needsParenthesisForMultiplicationWhenSittingOnTheRightMost
   if (additiveForm.size() != 1) {
     return true;
   }
-  return additiveForm.coefficients[0].needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  return
+  additiveForm.coefficients[0].
+  needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
 }
 
 bool AlgebraicNumber::checkNonZeroOwner() const {
   if (this->owner == nullptr) {
-    global.fatal << "Algebraic number with "
-    << "non-initialized owner not permitted in the current context." << global.fatal;
+    global.fatal
+    << "Algebraic number with "
+    << "non-initialized owner not permitted in the current context."
+    << global.fatal;
   }
   return true;
 }
@@ -706,8 +813,11 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::constructFromMinimalPolynomial");
-  return inputOwner.adjoinRootMinimalPolynomial(
+  MacroRegisterFunctionWithName(
+    "AlgebraicNumber::constructFromMinimalPolynomial"
+  );
+  return
+  inputOwner.adjoinRootMinimalPolynomial(
     polynomial, *this, commentsOnFailure
   );
 }
@@ -716,7 +826,6 @@ void AlgebraicClosureRationals::reset() {
   this->flagIsQuadraticRadicalExtensionRationals = true;
   this->latestBasis.setSize(1);
   this->latestBasis[0].makeIdentity(1);
-
   this->generatingElementPowersBasis.setSize(1);
   this->generatingElementPowersBasis[0].makeEi(1, 0);
   this->basisInjections.setSize(1);
@@ -726,70 +835,105 @@ void AlgebraicClosureRationals::reset() {
   this->displayNamesBasisElements.setSize(1);
   this->displayNamesBasisElements[0] = "";
   this->generatingElementTensorForm.makeIdentity(1);
-  this->generatingElementMatrixForm.makeIdentityMatrix(1, Rational::one(), Rational::zero());
+  this->generatingElementMatrixForm.makeIdentityMatrix(
+    1, Rational::one(), Rational::zero()
+  );
   this->generatingElement.owner = this;
   this->generatingElement.element.makeEi(0);
 }
 
-bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
+bool AlgebraicClosureRationals::
+adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   const Polynomial<AlgebraicNumber>& polynomial,
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension");
-  if (polynomial.totalDegree() != 2 || !this->flagIsQuadraticRadicalExtensionRationals) {
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension"
+  );
+  if (
+    polynomial.totalDegree() != 2 ||
+    !this->flagIsQuadraticRadicalExtensionRationals
+  ) {
     return false;
   }
   Polynomial<AlgebraicNumber> algebraicNumberPolynomial;
-  this->convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(polynomial, algebraicNumberPolynomial);
+  this->
+  convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
+  (polynomial, algebraicNumberPolynomial);
   Polynomial<Rational> minimialPolynomial;
   minimialPolynomial.makeZero();
   Rational currentCF, linearTermCoefficientFDividedByTwo, constantTermShifted;
   for (int i = 0; i < algebraicNumberPolynomial.size(); i ++) {
-    if (!algebraicNumberPolynomial.coefficients[i].isRational(&currentCF)) {
+    if (
+      !algebraicNumberPolynomial.coefficients[i].isRational(&currentCF)
+    ) {
       return false;
     } else {
-      minimialPolynomial.addMonomial(algebraicNumberPolynomial[i], currentCF);
+      minimialPolynomial.addMonomial(
+        algebraicNumberPolynomial[i], currentCF
+      );
     }
   }
-  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
-  minimialPolynomial /= minimialPolynomial.getLeadingCoefficient(monomialOrder);
-  minimialPolynomial.getCoefficientInFrontOfLinearTermVariableIndex(0, linearTermCoefficientFDividedByTwo);
+  List<MonomialPolynomial>::Comparator* monomialOrder =
+  &MonomialPolynomial::orderDefault();
+  minimialPolynomial /= minimialPolynomial.getLeadingCoefficient(monomialOrder)
+  ;
+  minimialPolynomial.getCoefficientInFrontOfLinearTermVariableIndex(
+    0, linearTermCoefficientFDividedByTwo
+  );
   linearTermCoefficientFDividedByTwo /= 2;
   minimialPolynomial.getConstantTerm(constantTermShifted);
-  constantTermShifted -= linearTermCoefficientFDividedByTwo * linearTermCoefficientFDividedByTwo;
+  constantTermShifted -=
+  linearTermCoefficientFDividedByTwo * linearTermCoefficientFDividedByTwo;
   constantTermShifted *= - 1;
-  if (!outputRoot.assignRationalQuadraticRadical(
-    constantTermShifted, *this, commentsOnFailure
-  )) {
+  if (
+    !outputRoot.assignRationalQuadraticRadical(
+      constantTermShifted, *this, commentsOnFailure
+    )
+  ) {
     return false;
   }
   outputRoot -= linearTermCoefficientFDividedByTwo;
-  //check our work:
+  // check our work:
   PolynomialSubstitution<AlgebraicNumber> checkSub;
   checkSub.setSize(1);
   checkSub[0].makeConstant(outputRoot);
   algebraicNumberPolynomial.substitution(checkSub, this->one());
   if (!algebraicNumberPolynomial.isEqualToZero()) {
-    global.fatal << "The number z = " << outputRoot.toString()
-    << " was just adjoined to a quadratic radical extension of the rationals; z "
-    << "was given by requesting that it has minimial polynomial " << algebraicNumberPolynomial.toString()
+    global.fatal
+    << "The number z = "
+    << outputRoot.toString()
+    <<
+    " was just adjoined to a quadratic radical extension of the rationals; z "
+    << "was given by requesting that it has minimial polynomial "
+    << algebraicNumberPolynomial.toString()
     << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << algebraicNumberPolynomial.toString() << ". " << global.fatal;
+    << "does not yield zero, rather yields "
+    << algebraicNumberPolynomial.toString()
+    << ". "
+    << global.fatal;
   }
   return true;
 }
 
-void AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(
-  const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
+void AlgebraicClosureRationals::
+convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
+(
+  const Polynomial<AlgebraicNumber>& input,
+  Polynomial<AlgebraicNumber>& output
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail");
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail"
+  );
   int indexVariable = - 1;
   if (!input.isOneVariableNonConstantPolynomial(&indexVariable)) {
     global.fatal
     << "I am being asked convert to a one-variable polynomial a polynomial "
     << "depending on more than one variables. "
-    << "The input poly is: " << input.toString() << global.fatal;
+    << "The input poly is: "
+    << input.toString()
+    << global.fatal;
   }
   PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.makeIdentitySubstitution(indexVariable + 1);
@@ -803,16 +947,24 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::adjoinRootMinimalPolynomial");
-  if (this->adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
-    polynomial, outputRoot, commentsOnFailure
-  )) {
+  MacroRegisterFunctionWithName(
+    "AlgebraicClosureRationals::adjoinRootMinimalPolynomial"
+  );
+  if (
+    this->adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
+      polynomial, outputRoot, commentsOnFailure
+    )
+  ) {
     return true;
   }
   Polynomial<AlgebraicNumber> minimialPolynomial;
-  this->convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(polynomial, minimialPolynomial);
-  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
-  AlgebraicNumber leadingCoefficient = minimialPolynomial.getLeadingCoefficient(monomialOrder);
+  this->
+  convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
+  (polynomial, minimialPolynomial);
+  List<MonomialPolynomial>::Comparator* monomialOrder =
+  &MonomialPolynomial::orderDefault();
+  AlgebraicNumber leadingCoefficient =
+  minimialPolynomial.getLeadingCoefficient(monomialOrder);
   minimialPolynomial /= leadingCoefficient;
   AlgebraicClosureRationals backUpCopy;
   backUpCopy = *this;
@@ -825,13 +977,19 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
     degreeMinimialPolynomial > 10000
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<hr>Adjoining root of minimial polynomial failed: "
+      *commentsOnFailure
+      << "<hr>Adjoining root of minimial polynomial failed: "
       << "the current field extension dimension over the rationals is "
-      << startingDimension << ", the degree of the minimial polynomial is "
+      << startingDimension
+      << ", the degree of the minimial polynomial is "
       << degreeMinimialPolynomial
       << ", yielding expected final dimension "
-      << startingDimension << "*" << degreeMinimialPolynomial << " = "
-      << startingDimension * degreeMinimialPolynomial
+      << startingDimension
+      << "*"
+      << degreeMinimialPolynomial
+      << " = "
+      << startingDimension *
+      degreeMinimialPolynomial
       << " over the rationals. The calculator is hard-coded "
       << "to accept dimension over the rationals no larger than 10000 "
       << "- multiplication in such a field corresponds to a "
@@ -840,30 +998,47 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
       << "If you do indeed want to carry out "
       << "such large computations, you need to "
       << "compile the calculator on your own, modifying file "
-      << __FILE__ << ", line " << __LINE__ << ".";
+      << __FILE__
+      << ", line "
+      << __LINE__
+      << ".";
     }
     return false;
   }
   generatorMatrix.makeZero();
   for (int i = 0; i < degreeMinimialPolynomial - 1; i ++) {
     for (int j = 0; j < startingDimension; j ++) {
-      generatorMatrix.addMonomial(MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension + j), 1);
+      generatorMatrix.addMonomial(
+        MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension +
+          j
+        ),
+        1
+      );
     }
   }
-  Polynomial<AlgebraicNumber> minusMinimalPolynomialMinusMaximalMonomial = minimialPolynomial;
+  Polynomial<AlgebraicNumber> minusMinimalPolynomialMinusMaximalMonomial =
+  minimialPolynomial;
   MonomialPolynomial leadingMonomial;
   AlgebraicNumber leadingCoefficientModified;
   minusMinimalPolynomialMinusMaximalMonomial.getIndexLeadingMonomial(
     &leadingMonomial, &leadingCoefficientModified, monomialOrder
   );
-  minusMinimalPolynomialMinusMaximalMonomial.subtractMonomial(leadingMonomial, leadingCoefficientModified);
+  minusMinimalPolynomialMinusMaximalMonomial.subtractMonomial(
+    leadingMonomial, leadingCoefficientModified
+  );
   minusMinimalPolynomialMinusMaximalMonomial /= leadingCoefficientModified;
   minusMinimalPolynomialMinusMaximalMonomial *= - 1;
   MatrixTensor<Rational> currentCoefficientMatrixForm;
-  for (int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++) {
-    AlgebraicNumber& currentCoefficient = minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
-    const MonomialPolynomial& currentMonomial = minusMinimalPolynomialMinusMaximalMonomial[i];
-    this->getMultiplicationBy(currentCoefficient, currentCoefficientMatrixForm);
+  for (
+    int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++
+  ) {
+    AlgebraicNumber& currentCoefficient =
+    minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
+    const MonomialPolynomial& currentMonomial =
+    minusMinimalPolynomialMinusMaximalMonomial[i];
+    this->getMultiplicationBy(
+      currentCoefficient, currentCoefficientMatrixForm
+    );
     for (int j = 0; j < currentCoefficientMatrixForm.size(); j ++) {
       int relationRowIndex = currentCoefficientMatrixForm[j].vIndex;
       int relationColumnIndex = currentCoefficientMatrixForm[j].dualIndex;
@@ -872,8 +1047,10 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
       }
       generatorMatrix.addMonomial(
         MonomialMatrix(
-          currentMonomial.totalDegreeInt() * startingDimension + relationRowIndex,
-          startingDimension * (degreeMinimialPolynomial - 1) + relationColumnIndex
+          currentMonomial.totalDegreeInt() * startingDimension +
+          relationRowIndex,
+          startingDimension *(degreeMinimialPolynomial - 1) +
+          relationColumnIndex
         ),
         currentCoefficientMatrixForm.coefficients[j]
       );
@@ -885,7 +1062,9 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   MatrixTensor<Rational> generatorMatrixPower;
   generatorMatrixPower.makeIdentity(degreeMinimialPolynomial);
   for (int i = 0; i < startingDimension; i ++) {
-    finalBasis[i].assignTensorProduct(generatorMatrixPower, this->latestBasis[i]);
+    finalBasis[i].assignTensorProduct(
+      generatorMatrixPower, this->latestBasis[i]
+    );
   }
   this->latestBasis = finalBasis;
   this->latestBasis.setSize(finalDimension);
@@ -925,15 +1104,19 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   substitutedMinimalPolynomial = minimialPolynomial;
   substitutedMinimalPolynomial.substitution(substitution, this->one());
   if (!substitutedMinimalPolynomial.isEqualToZero()) {
-    global.fatal << "The number z = "
-    << outputRoot.toString() << " was just adjoined to the base field; z "
+    global.fatal
+    << "The number z = "
+    << outputRoot.toString()
+    << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial "
     << minimialPolynomial.toString()
     << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields "
-    << substitutedMinimalPolynomial.toString() << ". "
+    << substitutedMinimalPolynomial.toString()
+    << ". "
     << "The algebraic closure printout follows. "
-    << this->toStringFull() << global.fatal;
+    << this->toStringFull()
+    << global.fatal;
   }
   return true;
 }
@@ -949,9 +1132,12 @@ void AlgebraicNumber::invert() {
       isGood = (this->element[0].monomialIndex == 0);
     }
     if (!isGood) {
-      global.fatal << "Algebraic number has no owner, "
+      global.fatal
+      << "Algebraic number has no owner, "
       << "so it must be rational, but it appears to be not. "
-      << "Its element vector is: " << this->element.toString() << global.fatal;
+      << "Its element vector is: "
+      << this->element.toString()
+      << global.fatal;
     }
     this->element.coefficients[0].invert();
     return;
@@ -983,8 +1169,10 @@ bool AlgebraicNumber::checkCommonOwner(const AlgebraicNumber& other) const {
     return true;
   }
   if (this->owner != other.owner) {
-    global.fatal << "Two algebraic numbers have "
-    << "different algebraic closures when they shouldn't. " << global.fatal;
+    global.fatal
+    << "Two algebraic numbers have "
+    << "different algebraic closures when they shouldn't. "
+    << global.fatal;
     return false;
   }
   return true;
@@ -1002,8 +1190,10 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
     correctedOwner = other.owner;
   }
   if (correctedOwner == nullptr && this->basisIndex != other.basisIndex) {
-    global.fatal << "Algebraic numbers "
-    << "with zero owners but different basis indices. " << global.fatal;
+    global.fatal
+    << "Algebraic numbers "
+    << "with zero owners but different basis indices. "
+    << global.fatal;
   }
   VectorSparse<Rational> additiveFormOther;
   correctedOwner->getAdditionTo(*this, this->element);
@@ -1029,9 +1219,13 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
     correctedOwner = other.owner;
   }
   if (correctedOwner == nullptr && this->basisIndex != other.basisIndex) {
-    global.fatal << "Algebraic numbers: "
-    << this->toString() << " and " << other.toString()
-    << " have with zero owners but different basis indices. " << global.fatal;
+    global.fatal
+    << "Algebraic numbers: "
+    << this->toString()
+    << " and "
+    << other.toString()
+    << " have with zero owners but different basis indices. "
+    << global.fatal;
   }
   if (this->basisIndex == other.basisIndex) {
     this->owner = correctedOwner;
@@ -1061,20 +1255,28 @@ bool AlgebraicNumber::checkConsistency() const {
     ) {
       global.fatal
       << "Element has out-of-range basis index "
-      << this->basisIndex << ". "
+      << this->basisIndex
+      << ". "
       << global.fatal;
     }
   }
   if (this->owner == nullptr) {
     if (!this->isRational()) {
       for (int i = 0; i < this->element.size(); i ++) {
-        global.comments << "<br>index: " << this->element[i].monomialIndex << ", coefficient: "
+        global.comments
+        << "<br>index: "
+        << this->element[i].monomialIndex
+        << ", coefficient: "
         << this->element.coefficients[i];
       }
-      global.fatal << "Detected non-rational algebraic number with zero owner. " << global.fatal;
+      global.fatal
+      << "Detected non-rational algebraic number with zero owner. "
+      << global.fatal;
     }
     if (this->basisIndex != 0) {
-      global.fatal << "Algebraic number with non-zero basis and zero owner. " << global.fatal;
+      global.fatal
+      << "Algebraic number with non-zero basis and zero owner. "
+      << global.fatal;
     }
   }
   return true;
@@ -1105,12 +1307,17 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     *this *= copy;
     return;
   }
-  bool doReport = (this->element.size() * other.element.size() > 100);
+  bool doReport = (
+    this->element.size() * other.element.size() > 100
+  );
   ProgressReport report;
   if (doReport) {
     std::stringstream reportStream;
-    reportStream << "Large multiplication:<br>"
-    << this->toString() << "\n<br>by<br>\n" << other.toString()
+    reportStream
+    << "Large multiplication:<br>"
+    << this->toString()
+    << "\n<br>by<br>\n"
+    << other.toString()
     << "\n<br>...";
     report.report(reportStream.str());
   }
@@ -1149,7 +1356,10 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
 ) {
   Polynomial<AlgebraicNumber> polyConverted;
   polyConverted = polynomial;
-  return this->constructFromMinimalPolynomial(polyConverted, inputOwner, commentsOnFailure);
+  return
+  this->constructFromMinimalPolynomial(
+    polyConverted, inputOwner, commentsOnFailure
+  );
 }
 
 AlgebraicNumber AlgebraicNumber::oneStatic() {
@@ -1181,8 +1391,7 @@ void AlgebraicNumber::makeZero() {
 }
 
 void AlgebraicNumber::assignRational(
-  const Rational& input,
-  AlgebraicClosureRationals* inputOwner
+  const Rational& input, AlgebraicClosureRationals* inputOwner
 ) {
   this->basisIndex = 0;
   this->owner = inputOwner;
@@ -1222,7 +1431,9 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
     return true;
   }
   if (this->owner == nullptr) {
-    global.fatal << "Owner is zero but algebraic number is not rational. " << global.fatal;
+    global.fatal
+    << "Owner is zero but algebraic number is not rational. "
+    << global.fatal;
   }
   if (!this->owner->flagIsQuadraticRadicalExtensionRationals) {
     return false;
@@ -1233,17 +1444,27 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
   Selection currentRadicalSelection;
   double currentMultiplicand = 0;
   for (int i = 0; i < this->element.size(); i ++) {
-    this->owner->getRadicalSelectionFromIndex(this->element[i].monomialIndex, currentRadicalSelection);
+    this->owner->getRadicalSelectionFromIndex(
+      this->element[i].monomialIndex, currentRadicalSelection
+    );
     if (outputWhichDouble != nullptr) {
       currentMultiplicand = this->element.coefficients[i].getDoubleValue();
     }
     for (int j = 0; j < currentRadicalSelection.cardinalitySelection; j ++) {
-      if (this->owner->quadraticRadicals[currentRadicalSelection.elements[j]] < 0) {
+      if (
+        this->owner->quadraticRadicals[
+          currentRadicalSelection.elements[j]
+        ] <
+        0
+      ) {
         return false;
       } else {
         if (outputWhichDouble != nullptr) {
-          currentMultiplicand *= FloatingPoint::sqrtFloating(
-            this->owner->quadraticRadicals[currentRadicalSelection.elements[j]].getDoubleValue()
+          currentMultiplicand *=
+          FloatingPoint::sqrtFloating(
+            this->owner->quadraticRadicals[
+              currentRadicalSelection.elements[j]
+            ].getDoubleValue()
           );
         }
       }
@@ -1260,7 +1481,9 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::assignRationalQuadraticRadical");
+  MacroRegisterFunctionWithName(
+    "AlgebraicNumber::assignRationalQuadraticRadical"
+  );
   this->checkConsistency();
   if (input == 0) {
     return false;
@@ -1269,7 +1492,10 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
     Polynomial<AlgebraicNumber> minPoly;
     minPoly.makeMonomial(0, 2);
     minPoly -= input;
-    bool result = this->constructFromMinimalPolynomial(minPoly, inputOwner, commentsOnFailure);
+    bool result =
+    this->constructFromMinimalPolynomial(
+      minPoly, inputOwner, commentsOnFailure
+    );
     if (result) {
       this->checkConsistency();
     }
@@ -1285,9 +1511,11 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   squareFreeInput *= absoluteInput.getDenominator();
   List<LargeInteger> primeFactors;
   List<int> multiplicities;
-  if (!squareFreeInput.value.factor(
-    primeFactors, multiplicities, 0, 4, nullptr
-  )) {
+  if (
+    !squareFreeInput.value.factor(
+      primeFactors, multiplicities, 0, 4, nullptr
+    )
+  ) {
     return false;
   }
   squareFreeInput.value = 1;
@@ -1315,7 +1543,9 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   FactorSel.initialize(inputOwner.quadraticRadicals.size);
   for (int i = 0; i < factors.size; i ++) {
     if (factors[i] == - 1) {
-      FactorSel.addSelectionAppendNewIndex(inputOwner.quadraticRadicals.getIndex(- 1));
+      FactorSel.addSelectionAppendNewIndex(
+        inputOwner.quadraticRadicals.getIndex(- 1)
+      );
     } else {
       for (int j = 0; j < inputOwner.quadraticRadicals.size; j ++) {
         if (inputOwner.quadraticRadicals[j] != - 1) {
@@ -1328,7 +1558,9 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   }
   this->owner = &inputOwner;
   this->basisIndex = this->owner->basisInjections.size - 1;
-  this->element.makeEi(this->owner->getIndexFromRadicalSelection(FactorSel));
+  this->element.makeEi(
+    this->owner->getIndexFromRadicalSelection(FactorSel)
+  );
   this->element *= squareRootRationalPart;
   this->checkConsistency();
   return true;
@@ -1340,7 +1572,8 @@ bool AlgebraicNumber::radicalMeDefault(
   MacroRegisterFunctionWithName("AlgebraicNumber::radicalMeDefault");
   if (this->owner == nullptr) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Failed to extract radical: algebraic closure is missing. ";
+      *commentsOnError
+      << "Failed to extract radical: algebraic closure is missing. ";
     }
     return false;
   }
@@ -1352,9 +1585,11 @@ bool AlgebraicNumber::radicalMeDefault(
   MonomialPolynomial leadingMonomial;
   leadingMonomial.makeEi(0, radical);
   polynomial.addMonomial(leadingMonomial, one);
-  if (!this->owner->adjoinRootMinimalPolynomial(
-    polynomial, result, commentsOnError
-  )) {
+  if (
+    !this->owner->adjoinRootMinimalPolynomial(
+      polynomial, result, commentsOnError
+    )
+  ) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to extend algebraic closure field. ";
     }
@@ -1380,10 +1615,13 @@ std::string AlgebraicClosureRationals::toStringQuadraticRadical(
   return HtmlRoutines::getMathNoDisplay(out.str());
 }
 
-std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* format) const {
+std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* format)
+const {
   std::stringstream out;
-  out << "Dimension over the rationals: "
-  << this->latestBasis.size << ". Multiplicative basis follows. ";
+  out
+  << "Dimension over the rationals: "
+  << this->latestBasis.size
+  << ". Multiplicative basis follows. ";
   for (int i = 0; i < this->latestBasis.size; i ++) {
     out << "<br>";
     std::stringstream formulaStream;
@@ -1405,14 +1643,26 @@ std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* format) c
   if (this->flagIsQuadraticRadicalExtensionRationals) {
     out << "<br>Generating element not selected. ";
   } else {
-    out << "<br>Generating element: "
-    << HtmlRoutines::getMathNoDisplay(this->generatingElementMatrixForm.toString(format));
+    out
+    << "<br>Generating element: "
+    << HtmlRoutines::getMathNoDisplay(
+      this->generatingElementMatrixForm.toString(format)
+    );
   }
-  out << "<br>There are " << this->basisInjections.size << " registered old bases. ";
+  out
+  << "<br>There are "
+  << this->basisInjections.size
+  << " registered old bases. ";
   for (int i = 0; i < this->basisInjections.size; i ++) {
-    out << "<hr>Basis " << i + 1 << " has " << this->basisInjections[i].size << " elements: ";
+    out << "<hr>Basis " << i + 1
+    << " has "
+    << this->basisInjections[i].size
+    << " elements: ";
     for (int j = 0; j < this->basisInjections[i].size; j ++) {
-      out << HtmlRoutines::getMathNoDisplay(this->basisInjections[i][j].toString(format));
+      out
+      << HtmlRoutines::getMathNoDisplay(
+        this->basisInjections[i][j].toString(format)
+      );
       if (j != this->basisInjections[i].size - 1) {
         out << ", ";
       }
@@ -1440,8 +1690,9 @@ AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
     }
     allCoefficients.addListOnTop(output[i].element.coefficients);
   }
-  Rational scale = Rational::scaleNormalizeIndex(allCoefficients, indexNonZeroRational);
-  for (int i = 0; i < output.size; i ++){
+  Rational scale =
+  Rational::scaleNormalizeIndex(allCoefficients, indexNonZeroRational);
+  for (int i = 0; i < output.size; i ++) {
     output[i] *= scale;
   }
   return scale;
@@ -1450,17 +1701,20 @@ AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
 AlgebraicNumber AlgebraicClosureRationals::one() {
   return this->fromRational(1);
 }
+
 AlgebraicNumber AlgebraicClosureRationals::zero() {
   return this->fromRational(0);
 }
 
-AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input) {
+AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input)
+{
   AlgebraicNumber result(input);
   result.owner = this;
   return result;
 }
 
-std::string AlgebraicClosureRationals::toString(FormatExpressions* format) const {
+std::string AlgebraicClosureRationals::toString(FormatExpressions* format)
+const {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::toString");
   (void) format;
   std::stringstream out;
@@ -1514,14 +1768,19 @@ std::string AlgebraicNumber::toString(FormatExpressions* format) const {
   tempFormat.flagUseHTML = false;
   VectorSparse<Rational> additiveVector;
   this->owner->getAdditionTo(*this, additiveVector);
-  out << additiveVector.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();
-  if (this->basisIndex < this->owner->basisInjections.size - 1 && global.userDebugFlagOn()) {
+  out << additiveVector.toString(&tempFormat);
+  // << "~ in~ the~ field~ " << this->owner->toString();
+  if (
+    this->basisIndex < this->owner->basisInjections.size - 1 &&
+    global.userDebugFlagOn()
+  ) {
     out << "[=" << this->toStringNonInjected() << "]";
   }
   return out.str();
 }
 
-std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* format) const {
+std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* format)
+const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
       return "0";
@@ -1532,16 +1791,16 @@ std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* format) cons
   FormatExpressions tempFormat;
   int dimension = this->owner->basisInjections[this->basisIndex].size;
   tempFormat.vectorSpaceEiBasisNames.setSize(dimension);
-
   for (int i = 0; i < dimension; i ++) {
     std::stringstream letter;
-    letter << "e_{" << this->basisIndex + 1 << ", " << i+1 << "}";
+    letter << "e_{" << this->basisIndex + 1 << ", " << i + 1 << "}";
     tempFormat.vectorSpaceEiBasisNames[i] = letter.str();
   }
   if (format != nullptr) {
     tempFormat.flagUseFrac = format->flagUseFrac;
   }
-  out << this->element.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();
+  out << this->element.toString(&tempFormat);
+  // << "~ in~ the~ field~ " << this->owner->toString();
   return out.str();
 }
 
@@ -1553,7 +1812,7 @@ bool AlgebraicNumber::operator!=(const AlgebraicNumber& other) const {
   return !(*this == other);
 }
 
-bool AlgebraicNumber::operator!= (int other) const {
+bool AlgebraicNumber::operator!=(int other) const {
   return !(*this == other);
 }
 
@@ -1572,11 +1831,17 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
     return *this == rationalValue;
   }
   if (this->owner != other.owner) {
-    global.fatal << "This might or might not be a programming error: "
+    global.fatal
+    << "This might or might not be a programming error: "
     << "comparing two algebraic number that do not have the same owner. "
     << "The numbers have owners of respective addresses "
-    << this->owner << " and " << other.owner << ". The numbers are: "
-    << this->toString() << " and " << other.toString()
+    << this->owner
+    << " and "
+    << other.owner
+    << ". The numbers are: "
+    << this->toString()
+    << " and "
+    << other.toString()
     << ". Crashing to let you know. "
     << global.fatal;
   }
@@ -1594,7 +1859,8 @@ void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
   if (!other.isConstant(this)) {
     global.fatal
     << "Attempt to assign non-constant "
-    << "polynomial to a Rational number is not allowed. " << global.fatal;
+    << "polynomial to a Rational number is not allowed. "
+    << global.fatal;
   }
 }
 
@@ -1637,7 +1903,12 @@ std::string ElementZmodP::toStringPolynomial(
   const Polynomial<ElementZmodP>& input, FormatExpressions* format
 ) const {
   std::stringstream out;
-  out << "PolynomialModP{}(" << input.toString(format) << ", " << this->modulus << ")";
+  out
+  << "PolynomialModP{}("
+  << input.toString(format)
+  << ", "
+  << this->modulus
+  << ")";
   return out.str();
 }
 
@@ -1650,8 +1921,7 @@ std::string ElementZmodP::toString(FormatExpressions* format) const {
   if (suppressModulus) {
     out << this->value.toString();
   } else {
-    out << "(" << this->value.toString() << " "
-    << this->toStringModP() << ")";
+    out << "(" << this->value.toString() << " " << this->toStringModP() << ")";
   }
   return out.str();
 }
@@ -1679,18 +1949,19 @@ unsigned int ElementZmodP::hashFunction() const {
   if (this->value.isEqualToZero()) {
     return 0;
   }
-  return this->value.hashFunction() * HashConstants::constant0 +
+  return
+  this->value.hashFunction() * HashConstants::constant0 +
   this->modulus.hashFunction() * HashConstants::constant1;
 }
 
 void ElementZmodP::checkIamInitialized() const {
   if (this->modulus.isEqualToZero()) {
-    global.fatal << "Element of Z mod p has non-initialized modulus. "
+    global.fatal
+    << "Element of Z mod p has non-initialized modulus. "
     << global.fatal;
   }
   if (this->flagDeallocated) {
-    global.fatal
-    << "Use after free of element of Z mod p. " << global.fatal;
+    global.fatal << "Use after free of element of Z mod p. " << global.fatal;
   }
 }
 
@@ -1731,7 +2002,9 @@ ElementZmodP ElementZmodP::zero() const {
   ElementZmodP result;
   result.modulus = this->modulus;
   if (this->modulus == 0) {
-    global.fatal << "Extracting constant one from non-initialized element not allowed. " << global.fatal;
+    global.fatal
+    << "Extracting constant one from non-initialized element not allowed. "
+    << global.fatal;
   }
   return result;
 }
@@ -1741,15 +2014,21 @@ ElementZmodP ElementZmodP::one() const {
   result.modulus = this->modulus;
   result.value = 1;
   if (this->modulus == 0) {
-    global.fatal << "Extracting zero constant from non-initialized element not allowed. " << global.fatal;
+    global.fatal
+    << "Extracting zero constant from non-initialized element not allowed. "
+    << global.fatal;
   }
   return result;
 }
 
 void ElementZmodP::convertPolynomialModularToPolynomialIntegral(
-  const Polynomial<ElementZmodP>& input, Polynomial<Rational>& output, bool useNegatives
+  const Polynomial<ElementZmodP>& input,
+  Polynomial<Rational>& output,
+  bool useNegatives
 ) {
-  MacroRegisterFunctionWithName("ElementZmodP::convertPolynomialModularToPolynomialIntegral");
+  MacroRegisterFunctionWithName(
+    "ElementZmodP::convertPolynomialModularToPolynomialIntegral"
+  );
   output.makeZero();
   if (input.size() == 0) {
     return;
@@ -1796,10 +2075,14 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   Polynomial<ElementZmodP>& output,
   const LargeIntegerUnsigned& newModulo
 ) {
-  MacroRegisterFunctionWithName("ElementZmodP::convertModuloIntegerAfterScalingToIntegral");
+  MacroRegisterFunctionWithName(
+    "ElementZmodP::convertModuloIntegerAfterScalingToIntegral"
+  );
   Polynomial<Rational> rescaled;
   rescaled = input;
-  rescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  rescaled.scaleNormalizeLeadingMonomial(
+    &MonomialPolynomial::orderDefault()
+  );
   output.setExpectedSize(input.size());
   ElementZmodP coefficient;
   coefficient.modulus = newModulo;
@@ -1852,9 +2135,7 @@ void ElementZmodP::makeMinusOne(const LargeIntegerUnsigned& newModulo) {
   this->value --;
 }
 
-void ElementZmodP::makeFrom(
-  int inputModulus, int inputValue
-) {
+void ElementZmodP::makeFrom(int inputModulus, int inputValue) {
   if (inputModulus <= 0) {
     global.fatal << "Non-positive modulus not allowed. " << global.fatal;
   }
@@ -1881,10 +2162,14 @@ void ElementZmodP::negate() {
 
 void ElementZmodP::checkEqualModuli(const ElementZmodP& other) {
   if (this->modulus != other.modulus) {
-    global.fatal << "Attempt to make an operation "
+    global.fatal
+    << "Attempt to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
-    << this->modulus.toString() << " and "
-    << other.modulus.toString() << ". " << global.fatal;
+    << this->modulus.toString()
+    << " and "
+    << other.modulus.toString()
+    << ". "
+    << global.fatal;
   }
 }
 
@@ -1936,11 +2221,11 @@ void ElementZmodP::operator*=(int other) {
 
 void ElementZmodP::operator*=(const LargeInteger& other) {
   this->value *= other.value;
-   if (other.isNegative()) {
-     this->value *= this->modulus - 1;
-   }
-   this->value %= this->modulus;
- }
+  if (other.isNegative()) {
+    this->value *= this->modulus - 1;
+  }
+  this->value %= this->modulus;
+}
 
 bool ElementZmodP::operator+=(const Rational& other) {
   ElementZmodP otherElement;
@@ -1980,7 +2265,8 @@ void ElementZmodP::operator=(const Rational& other) {
   if (!tempB) {
     global.fatal
     << "Using ElementZmodP::operator= to assign a Rational number failed. "
-    << "Operator = does not allow failure. " << global.fatal;
+    << "Operator = does not allow failure. "
+    << global.fatal;
   }
 }
 
@@ -2033,3 +2319,4 @@ bool ElementZmodP::operator/=(const ElementZmodP& other) {
   *this *= inverted;
   return true;
 }
+

@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_rational_function_ALREADY_INCLUDED
 #define header_math_rational_function_ALREADY_INCLUDED
@@ -9,7 +10,9 @@ template <class Coefficient>
 class RationalFraction {
 private:
   void addSameTypes(const RationalFraction<Coefficient>& other);
-  void addHonestRationalFunction(const RationalFraction<Coefficient>& other);
+  void addHonestRationalFunction(
+    const RationalFraction<Coefficient>& other
+  );
   void reduceRationalFunctionToPolynomial();
   void reducePolynomialToRational();
   bool convertToType(int inputExpressionType);
@@ -19,7 +22,10 @@ private:
     Polynomial<Coefficient>& output
   );
 public:
-  friend std::ostream& operator<<(std::ostream& output, const RationalFraction<Coefficient>& rationalFraction) {
+  friend std::ostream& operator<<(
+    std::ostream& output,
+    const RationalFraction<Coefficient>& rationalFraction
+  ) {
     output << rationalFraction.toString();
     return output;
   }
@@ -31,10 +37,10 @@ public:
     typeConstant = 0,
     typePolynomial = 1,
     typeRationalFunction = 2,
-    typeError = 3
-  };
+    typeError = 3  };
   std::string toString(FormatExpressions* format = nullptr) const;
-  bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr) const;
+  bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
+  const;
   bool findOneVariableRationalRoots(List<Rational>& output);
   static RationalFraction one();
   static RationalFraction zero();
@@ -57,7 +63,9 @@ public:
   void raiseToPower(int power);
   void reduceMemory();
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(const RationalFraction<Coefficient>& input);
+  static unsigned int hashFunction(
+    const RationalFraction<Coefficient>& input
+  );
   void operator=(int other);
   void operator=(const Coefficient& other);
   void operator=(const RationalFraction<Rational>& other);
@@ -65,11 +73,17 @@ public:
   bool checkConsistency() const;
   void setNumberOfVariables(int goalNumberOfVariables);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
-  void makeOneLetterMonomial(int index, const Coefficient& coefficient, int expectedNumberOfVariables = 0);
+  void makeOneLetterMonomial(
+    int index,
+    const Coefficient& coefficient,
+    int expectedNumberOfVariables = 0
+  );
   void getNumerator(Polynomial<Coefficient>& output) const;
   void getDenominator(Polynomial<Coefficient>& output) const;
   bool isNegative();
-  void clearDenominators(RationalFraction<Coefficient>& outputWasMultipliedBy);
+  void clearDenominators(
+    RationalFraction<Coefficient>& outputWasMultipliedBy
+  );
   void operator+=(int coefficient);
   void operator+=(const Polynomial<Coefficient>& other);
   void operator+=(const RationalFraction<Coefficient>& other);
@@ -100,11 +114,8 @@ public:
   void invert();
   void makeOne();
   void makeZero();
-
   void makeMonomial(
-    int letterIndex,
-    const Rational& power,
-    const Rational& coefficient = 1
+    int letterIndex, const Rational& power, const Rational& coefficient = 1
   );
   void makeConstant(const Coefficient& coefficient) {
     this->makeZero();
@@ -126,10 +137,14 @@ public:
   bool isInteger() const;
   bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isEqualToZero() const {
-    return this->expressionType == TypeExpression::typeConstant && this->constantValue.isEqualToZero();
+    return
+    this->expressionType == TypeExpression::typeConstant &&
+    this->constantValue.isEqualToZero();
   }
   bool isEqualToOne() const {
-    return this->expressionType == TypeExpression::typeConstant && this->constantValue.isEqualToOne();
+    return
+    this->expressionType == TypeExpression::typeConstant &&
+    this->constantValue.isEqualToOne();
   }
   bool isEqualTo(const RationalFraction<Coefficient>& other) const;
   static bool getRelations(
@@ -175,9 +190,9 @@ public:
   };
 };
 
-template<>
+template < >
 bool RationalFraction<Rational>::Test::fromStringTest();
-template<>
+template < >
 bool RationalFraction<Rational>::Test::scaleNormalizeIndex();
-
 #endif // header_math_rational_function_ALREADY_INCLUDED
+

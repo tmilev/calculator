@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_list_references_ALREADY_INCLUDED
 #define header_general_list_references_ALREADY_INCLUDED
@@ -6,11 +7,14 @@
 #include "general_lists.h"
 
 // class ListReferences is to be used in the same way as class List.
-// The essential difference between ListReferences and List is in the way the objects are
+// The essential difference between ListReferences and List is in the way the
+// objects are
 // stored in memory. A copy of each object of ListReferences
-// is allocated with an individual copy constructor (call of new Object; rather than new Object[size];),
+// is allocated with an individual copy constructor (call of new Object; rather
+// than new Object[size];),
 // and a pointer to the so allocated memory is stored.
-// Motivation for this class: when a pointer/reference to an object is requested,
+// Motivation for this class: when a pointer/reference to an object is
+// requested,
 // the class returns a pointer to the individually allocated object.
 // This piece of memory is allocated exactly once,
 // i.e. the individual piece of memory never moves, and is thus completely safe
@@ -27,9 +31,9 @@
 // Data that is not meant to be shared
 // or that is otherwise small (lists of ints, monomials, Rationals, etc.)
 // should be kept in simple Lists and copied around when needed.
-// So long as a List is const, it is safe to pass references to data from the List.
+// So long as a List is const, it is safe to pass references to data from the
+// List.
 // Whenever in doubt, use ListReferences.
-
 template <class Object>
 class ListReferences {
 public:
@@ -39,14 +43,20 @@ public:
   Object& operator[](int i) const {
     if (i < 0 || i >= this->size) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "Attempt to access element of index "
-      << i << " in ListReferences that has only " << this->size << " elements. ";
+      commentsOnCrash
+      << "Attempt to access element of index "
+      << i
+      << " in ListReferences that has only "
+      << this->size
+      << " elements. ";
       fatalCrash(commentsOnCrash.str());
     }
     if (this->references[i] == 0) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "Element of index "
-      << i << " in ListReferences has zero pointer. ";
+      commentsOnCrash
+      << "Element of index "
+      << i
+      << " in ListReferences has zero pointer. ";
       fatalCrash(commentsOnCrash.str());
     }
     return *this->references[i];
@@ -70,7 +80,7 @@ public:
     return false;
   }
   void removeIndexSwapWithLast(int index) {
-    //This is not thread-safe
+    // This is not thread-safe
     this->killElementIndex(index);
     this->references[index] = this->references[this->size - 1];
     this->references[this->size - 1] = 0;
@@ -87,7 +97,8 @@ public:
     this->setSize(0);
   }
   // Resizes the array.
-  // Fills newly created objects with objects allocated with default constructors.
+  // Fills newly created objects with objects allocated with default
+  // constructors.
   void setSize(int newSize) {
     this->allocateElements(newSize);
     this->size = newSize;
@@ -102,14 +113,15 @@ public:
   // fixed percent, which gurantees that N non-trivial resizes
   // will result in exponential in N growth.
   void setExpectedSize(int desiredSize) {
-    int newSize = (desiredSize * 6) / 5;
+    int newSize = (desiredSize* 6) / 5;
     if (newSize > 0) {
       this->allocateElements(newSize);
     }
   }
   void killAllElements();
   void killElementIndex(int i) {
-    delete this->references[i]; //<- NOT thread safe!
+    delete this->references[i];
+    // <- NOT thread safe!
     this->references[i] = 0;
   }
   void addOnTop(const Object& o);
@@ -154,23 +166,27 @@ public:
     return (*this)[this->size - 1];
   }
   template <class otherList = List<Object> >
-  void quickSortAscending(const typename List<Object>::Comparator* order = nullptr, otherList* carbonCopy = nullptr) {
+  void quickSortAscending(
+    const typename List<Object>::Comparator* order = nullptr,
+    otherList* carbonCopy = nullptr
+  ) {
     List<Object>::quickSortAscending(*this, order, carbonCopy);
   }
-  ListReferences():flagDeallocated(false), size(0) {
-  }
+  ListReferences(): flagDeallocated(false), size(0) {}
   ~ListReferences() {
     this->flagDeallocated = true;
     this->killAllElements();
   }
 };
 
-template<class Object>
+template <class Object>
 void ListReferences<Object>::allocateElements(int newSize) {
   if (newSize < 0) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "Requested to set negative size "
-    << newSize << " of List of References. If a "
+    commentsOnCrash
+    << "Requested to set negative size "
+    << newSize
+    << " of List of References. If a "
     << "List is to be set empty, then one should call setSize(0), "
     << "rather than provide a negative argument to setSize.";
     fatalCrash(commentsOnCrash.str());
@@ -189,7 +205,7 @@ void ListReferences<Object>::allocateElements(int newSize) {
 #endif
 }
 
-template<class Object>
+template <class Object>
 void ListReferences<Object>::killAllElements() {
   for (int i = 0; i < this->references.size; i ++) {
     delete this->references[i];
@@ -203,13 +219,13 @@ void ListReferences<Object>::killAllElements() {
   this->size = 0;
 }
 
-template<class Object>
+template <class Object>
 void ListReferences<Object>::addOnTop(const Object& o) {
   this->setSize(this->size + 1);
   (*this)[this->size - 1] = o;
 }
 
-template<class Object>
+template <class Object>
 int ListReferences<Object>::getIndex(const Object& o) const {
   for (int i = 0; i < this->size; i ++) {
     if ((*this)[i] == o) {
@@ -219,42 +235,67 @@ int ListReferences<Object>::getIndex(const Object& o) const {
   return - 1;
 }
 
-template <class Object, unsigned int hashFunction(const Object&)=Object::hashFunction>
-class HashedListReferences : public HashTemplate<Object, ListReferences<Object>, hashFunction> {
-  public:
-  //Note The following function specializations are declared entirely in order to
-  //facilitate autocomplete in my current IDE. If I find a better autocompletion
-  //IDE the following should be removed.
+template <
+  class Object,
+  unsigned int hashFunction(const Object&) = Object::hashFunction
+>
+class HashedListReferences: public HashTemplate<
+  Object, ListReferences<Object>, hashFunction
+> {
+public:
+  // Note The following function specializations are declared entirely in order
+  // to
+  // facilitate autocomplete in my current IDE. If I find a better
+  // autocompletion
+  // IDE the following should be removed.
   inline void addOnTopNoRepetition(const List<Object>& inputList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTopNoRepetition(inputList);
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    addOnTopNoRepetition(inputList);
   }
   inline bool addOnTopNoRepetition(const Object& o) {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTopNoRepetition(o);
+    return
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    addOnTopNoRepetition(o);
   }
   inline void addOnTop(const Object& o) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(o);
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    addOnTop(o);
   }
   inline void addListOnTop(const List<Object>& inputList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addListOnTop(inputList);
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    addListOnTop(inputList);
   }
   inline bool contains(const Object& o) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(o);
+    return
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    contains(o);
   }
   inline bool contains(const List<Object>& inputList) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(inputList);
+    return
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    contains(inputList);
   }
   Object& getElement(int objectIndex) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getElement(objectIndex);
+    return
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    getElement(objectIndex);
   }
   int getIndex(const Object& o) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndex(o);
+    return
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    getIndex(o);
   }
   inline int getIndexNoFail(const Object& o) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndexNoFail(o);
+    return
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    getIndexNoFail(o);
   }
   inline int addNoRepetitionOrReturnIndexFirst(const Object& o) {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addNoRepetitionOrReturnIndexFirst(o);
+    return
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
+    addNoRepetitionOrReturnIndexFirst(o);
   }
 };
 
 #endif // header_general_list_references_ALREADY_INCLUDED
+

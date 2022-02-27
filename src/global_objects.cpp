@@ -1,6 +1,6 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
-
 #include "system_functions_global_objects.h"
 #include "webserver.h"
 #include "calculator_interface.h"
@@ -8,7 +8,6 @@
 #include "general_time_date.h"
 
 GlobalVariables global;
-
 std::string GlobalVariables::getDateForLogFiles() {
   static std::string tempDate;
   if (tempDate != "") {
@@ -44,7 +43,8 @@ void initializeGlobalObjects() {
   global.flagIsChildProcess = false;
   initializeTimer();
   global.pointerExternalCommandNoOutput = &externalCommandNoOutput;
-  global.pointerExternalCommandReturnOutput = &externalCommandReturnStandardOut;
+  global.pointerExternalCommandReturnOutput = &externalCommandReturnStandardOut
+  ;
   global.pointerExternalCommandStream = &externalCommandStreamOutput;
   global.pointerCallChDir = &callChDirWrapper;
 }
@@ -56,7 +56,10 @@ void HtmlRoutines::makeReportIndicatorFile(const std::string& input) {
   FileOperations::openFileCreateIfNotPresentVirtual(
     file, "result/output.html", false, true, false
   );
-  file << " Elapsed calculator time: " << global.getElapsedSeconds() << " second(s).";
+  file
+  << " Elapsed calculator time: "
+  << global.getElapsedSeconds()
+  << " second(s).";
   file << input;
   file.flush();
   file.close();
@@ -66,3 +69,4 @@ void HtmlRoutines::makeStdCoutReport(const std::string& input) {
   global.comments << input;
   HtmlRoutines::makeReportIndicatorFile(input);
 }
+

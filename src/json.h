@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_json_ALREADY_INCLUDED
 #define header_json_ALREADY_INCLUDED
@@ -7,8 +8,7 @@
 #include "general_list_references.h"
 #include "general_maps.h"
 
-
-//struct JSHashData;
+// struct JSHashData;
 class Rational;
 template <typename Coefficient>
 class Matrix;
@@ -20,26 +20,27 @@ class JSData {
 public:
   static const int numEmptyTokensAtStart = 6;
   struct token {
-    static const char tokenUndefined                = 0;
-    static const char tokenNull                     = 1;
-    static const char tokenBool                     = 2;
-    static const char tokenFloat                    = 3;
-    static const char tokenString                   = 4;
-    static const char tokenArray                    = 5;
-    static const char tokenObject                   = 6;
-    static const char tokenLargeInteger             = 7;
-    static const char tokenOpenBrace                = 8;
-    static const char tokenCloseBrace               = 9;
-    static const char tokenOpenBracket              = 10;
-    static const char tokenCloseBracket             = 11;
-    static const char tokenColon                    = 12;
-    static const char tokenComma                    = 13;
-    static const char tokenError                    = 14;
-    static const char tokenBackslash                = 15;
+    static const char tokenUndefined = 0;
+    static const char tokenNull = 1;
+    static const char tokenBool = 2;
+    static const char tokenFloat = 3;
+    static const char tokenString = 4;
+    static const char tokenArray = 5;
+    static const char tokenObject = 6;
+    static const char tokenLargeInteger = 7;
+    static const char tokenOpenBrace = 8;
+    static const char tokenCloseBrace = 9;
+    static const char tokenOpenBracket = 10;
+    static const char tokenCloseBracket = 11;
+    static const char tokenColon = 12;
+    static const char tokenComma = 13;
+    static const char tokenError = 14;
+    static const char tokenBackslash = 15;
     static const char tokenQuoteUnclosedEscapeAtEnd = 16;
-    static const char tokenQuoteUnclosedStandard    = 17;
-    static const char tokenUnknown                  = 18;
+    static const char tokenQuoteUnclosedStandard = 17;
+    static const char tokenUnknown = 18;
   };
+
   char elementType;
   bool booleanValue;
   double floatValue;
@@ -60,15 +61,39 @@ public:
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
   JSData getValue(const std::string& key);
-  bool mergeInMe(const JSData& input, std::stringstream* commentsOnFailure);
+  bool mergeInMe(
+    const JSData& input, std::stringstream* commentsOnFailure
+  );
   bool hasKey(const std::string& key) const;
-  bool hasCompositeKey(const std::string& key, JSData* whichValue, std::stringstream* commentsOnFailure) const;
-  bool hasCompositeKeyOfToken(const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure) const;
-  bool hasCompositeKeyOfType(const std::string& key, std::string& output, std::stringstream* commentsOnFailure) const;
-  bool hasCompositeKeyOfType(const std::string& key, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure) const;
-  bool hasCompositeKeyOfType(const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure) const;
-  bool hasCompositeKeyValueNull(const std::string& key, std::stringstream* commentsOnFailure) const;
-
+  bool hasCompositeKey(
+    const std::string& key,
+    JSData* whichValue,
+    std::stringstream* commentsOnFailure
+  ) const;
+  bool hasCompositeKeyOfToken(
+    const std::string& key,
+    JSData* whichValue,
+    char targetType,
+    std::stringstream* commentsOnFailure
+  ) const;
+  bool hasCompositeKeyOfType(
+    const std::string& key,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  ) const;
+  bool hasCompositeKeyOfType(
+    const std::string& key,
+    LargeIntegerUnsigned& output,
+    std::stringstream* commentsOnFailure
+  ) const;
+  bool hasCompositeKeyOfType(
+    const std::string& key,
+    List<unsigned char>& output,
+    std::stringstream* commentsOnFailure
+  ) const;
+  bool hasCompositeKeyValueNull(
+    const std::string& key, std::stringstream* commentsOnFailure
+  ) const;
   void setKeyValue(const std::string& key, const JSData& value);
   int getKeyIndex(const std::string& key) const;
   static JSData makeEmptyArray();
@@ -111,11 +136,11 @@ public:
     static const JSData::PrintOptions& newLine();
     static const JSData::PrintOptions& HTML();
   };
+
   std::string toString(const JSData::PrintOptions* options = nullptr) const;
   template <typename somestream>
   somestream& intoStream(
-    somestream& out,
-    const JSData::PrintOptions* optionsIncoming
+    somestream& out, const JSData::PrintOptions* optionsIncoming
   ) const;
   bool tokenizePrependOneDummyElement(
     const std::string& input,
@@ -142,14 +167,23 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool operator==(const JSData& other) const;
-  bool parse(const std::string& json, bool relaxedInput = false, std::stringstream* commentsOnFailure = nullptr);
+  bool parse(
+    const std::string& json,
+    bool relaxedInput = false,
+    std::stringstream* commentsOnFailure = nullptr
+  );
   bool tryToComputeType(std::stringstream* commentsOnFailure);
-  static void filterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
+  static void filterColumnsJSDataObjectList(
+    List<JSData>& inputOutput,
+    const List<std::string>& columnsToPreserve
+  );
   class Test {
   public:
     static bool all();
     static bool recode();
-    static bool recodeOnce(const List<std::string>& pair, bool relaxedInput);
+    static bool recodeOnce(
+      const List<std::string>& pair, bool relaxedInput
+    );
     static bool recodeRelaxed();
     static bool decodeEscapedUnicode();
     static bool badInput();
@@ -157,7 +191,6 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);
-
 template <typename Coefficient>
 void JSData::operator=(const Vector<Coefficient>& other) {
   for (int i = 0; i < other.size; i ++) {
@@ -175,3 +208,4 @@ void JSData::operator=(const Matrix<Coefficient>& other) {
 }
 
 #endif // header_json_ALREADY_INCLUDED
+

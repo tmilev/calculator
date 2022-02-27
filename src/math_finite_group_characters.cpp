@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h" // WeylGroup::getSignSignatureAllRootSubsystems
@@ -7,31 +8,46 @@
 #include "math_extra_graph.h"
 #include "math_general_implementation.h"
 
-template<>
-List<ElementWeylGroup>::Comparator* FormatExpressions::getMonomialOrder<ElementWeylGroup>() {
+template < >
+List<ElementWeylGroup>::Comparator* FormatExpressions::getMonomialOrder<
+  ElementWeylGroup
+>() {
   return nullptr;
 }
 
-Vector<Rational> WeylGroupData::applyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational>& vv) const {
+Vector<Rational> WeylGroupData::applyReflectionList(
+  const List<int>& rightReflectionsActFirst,
+  const Vector<Rational>& vv
+) const {
   Vector<Rational> v = vv;
   for (int i = rightReflectionsActFirst.size - 1; i >= 0; i --) {
     Rational x = 0;
     for (int j = 0; j < this->getDimension(); j ++) {
       x += v[j] * cartanSymmetric(rightReflectionsActFirst[i], j);
     }
-    //cartanSymmetric(i, j) is slower than cartanSymmetric.elements[i][j] but includes index checking
-    //(we want to catch a rogue call to applyReflectionList
-    v[rightReflectionsActFirst[i]] -= x * 2 / cartanSymmetric(rightReflectionsActFirst[i], rightReflectionsActFirst[i]);
+    // cartanSymmetric(i, j) is slower than cartanSymmetric.elements[i][j] but
+    // includes index checking
+    // (we want to catch a rogue call to applyReflectionList
+    v[rightReflectionsActFirst[i]] -= x * 2 /
+    cartanSymmetric(
+      rightReflectionsActFirst[i], rightReflectionsActFirst[i]
+    );
   }
   return v;
 }
 
-void WeylGroupData::getSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const {
+void WeylGroupData::getSimpleReflectionMatrix(
+  int indexSimpleRoot, Matrix<Rational>& output
+) const {
   MacroRegisterFunctionWithName("WeylGroup::getSimpleReflectionMatrix");
   int rank = this->getDimension();
   output.makeIdentityMatrix(rank, Rational::one(), Rational::zero());
   for (int j = 0; j < rank; j ++) {
-    output(indexSimpleRoot, j) -= (this->cartanSymmetric(indexSimpleRoot, j) / cartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
+    output(indexSimpleRoot, j) -= (
+      this->cartanSymmetric(indexSimpleRoot, j) /
+      cartanSymmetric(indexSimpleRoot, indexSimpleRoot)
+    ) *
+    2;
   }
 }
 
@@ -41,7 +57,9 @@ Matrix<Rational> WeylGroupData::simpleReflectionMatrix(int i) const {
   return result;
 }
 
-ElementWeylGroup WeylGroupData::simpleConjugation(int i, const ElementWeylGroup& vv) {
+ElementWeylGroup WeylGroupData::simpleConjugation(
+  int i, const ElementWeylGroup& vv
+) {
   (void) vv;
   ElementWeylGroup eltSimpleReflection;
   eltSimpleReflection.makeSimpleReflection(i, *this);
@@ -56,14 +74,18 @@ void FiniteGroup<elementSomeGroup>::computeSquaresCCReps() {
   }
   this->squaresCCReps.setExpectedSize(this->conjugacyClassCount());
   this->squaresCCReps.setSize(this->conjugacyClassCount());
-  //elementSomeGroup currentSquare;
+  // elementSomeGroup currentSquare;
   for (int i = 0; i < this->conjugacyClassCount(); i ++) {
-    this->squaresCCReps[i] = this->conjugacyClasses[i].representative * this->conjugacyClasses[i].representative;
+    this->squaresCCReps[i] =
+    this->conjugacyClasses[i].representative *
+    this->conjugacyClasses[i].representative;
   }
 }
 
 void WeylGroupData::computeInitialIrreducibleRepresentations() {
-  MacroRegisterFunctionWithName("WeylGroup::computeInitialIrreducibleRepresentations");
+  MacroRegisterFunctionWithName(
+    "WeylGroup::computeInitialIrreducibleRepresentations"
+  );
   if (!this->group.flagCCsComputed) {
     this->group.computeConjugacyClassesFromAllElements();
   }
@@ -73,10 +95,18 @@ void WeylGroupData::computeInitialIrreducibleRepresentations() {
   this->group.irreducibleRepresentations.setSize(0);
   this->group.characterTable.setSize(0);
   this->group.irreps_grcam.setSize(0);
-  this->group.characterTable.setExpectedSize(this->group.conjugacyClassCount());
-  this->group.irreducibleRepresentations.setExpectedSize(this->group.conjugacyClassCount());
-  this->group.irreps_grcam.setExpectedSize(this->group.conjugacyClassCount());
-  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> trivialRep, signRep, standardRep;
+  this->group.characterTable.setExpectedSize(
+    this->group.conjugacyClassCount()
+  );
+  this->group.irreducibleRepresentations.setExpectedSize(
+    this->group.conjugacyClassCount()
+  );
+  this->group.irreps_grcam.setExpectedSize(
+    this->group.conjugacyClassCount()
+  );
+  GroupRepresentationCarriesAllMatrices<
+    FiniteGroup<ElementWeylGroup>, Rational
+  > trivialRep, signRep, standardRep;
   this->getTrivialRepresentation(trivialRep);
   this->getSignRepresentation(signRep);
   this->getStandardRepresentation(standardRep);
@@ -99,14 +129,16 @@ public:
     List<Vector<Coefficient> >& output
   );
   void intersection(
-    const List<Vector<Coefficient> > &left,
-    const List<Vector<Coefficient> > &right,
+    const List<Vector<Coefficient> >& left,
+    const List<Vector<Coefficient> >& right,
     List<Vector<Coefficient> >& output
   );
 };
 
 template <typename Coefficient>
-void SpaceTree<Coefficient>::placeInTree(const List<Vector<Coefficient> >& vector) {
+void SpaceTree<Coefficient>::placeInTree(
+  const List<Vector<Coefficient> >& vector
+) {
   List<Vector<Coefficient> > U;
   for (int i = 0; i < subspaces.size; i ++) {
     intersection(vector, subspaces[i].space, U);
@@ -132,7 +164,9 @@ void SpaceTree<Coefficient>::placeInTree(const List<Vector<Coefficient> >& vecto
 }
 
 template <typename Coefficient>
-void SpaceTree<Coefficient>::getLeaves(List<List<Vector<Coefficient> > >& leaves) const {
+void SpaceTree<Coefficient>::getLeaves(
+  List<List<Vector<Coefficient> > >& leaves
+) const {
   if (subspaces.size > 0) {
     for (int i = 0; i < subspaces.size; i ++) {
       subspaces[i].GetLeaves(leaves);
@@ -153,33 +187,61 @@ void SpaceTree<Coefficient>::displayTree() const {
 class CharacterFunctions {
 public:
   template <typename elementSomeGroup>
-  static void exportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data);
+  static void exportCharTable(
+    FiniteGroup<elementSomeGroup>& G, JSData& data
+  );
   static void exportTauSignatures(
-    WeylGroupData& groupData, const List<List<bool> >& ts, JSData& output
+    WeylGroupData& groupData,
+    const List<List<bool> >& ts,
+    JSData& output
   );
   template <typename Somegroup>
-  static List<ClassFunction<Somegroup, Rational> > computeCharacterTable(Somegroup& group);
-  static void computeTauSignatures(WeylGroupData* group, List<List<bool> >& tauSignatures, bool pseudo = false);
-  static List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0);
+  static List<ClassFunction<Somegroup, Rational> > computeCharacterTable(
+    Somegroup& group
+  );
+  static void computeTauSignatures(
+    WeylGroupData* group,
+    List<List<bool> >& tauSignatures,
+    bool pseudo = false
+  );
+  static List<List<Vector<Rational> > > eigenspaces(
+    const Matrix<Rational>& M, int checkDivisorsOf = 0
+  );
   template <typename Somegroup>
   static Matrix<Rational> getClassMatrix(
-    const Somegroup &group, int cci, List<int>* classmap = nullptr
+    const Somegroup& group, int cci, List<int>* classmap = nullptr
   );
   template <typename Coefficient>
-  static List<VectorSpace<Coefficient> > getEigenspaces(const Matrix<Coefficient>& matrix);
+  static List<VectorSpace<Coefficient> > getEigenspaces(
+    const Matrix<Coefficient>& matrix
+  );
   template <typename Coefficient>
-  static Matrix<Coefficient> getMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& classFunction);
-  static void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>& gens, List<bool>& out);
+  static Matrix<Coefficient> getMatrix(
+    const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>&
+    classFunction
+  );
+  static void getTauSignaturesFromSubgroup(
+    WeylGroupData& G,
+    const List<ElementWeylGroup>& gens,
+    List<bool>& out
+  );
   template <typename Coefficient>
-  static bool isIsotypicComponent(WeylGroupData& group, const List<Vector<Coefficient> >& vector);
+  static bool isIsotypicComponent(
+    WeylGroupData& group, const List<Vector<Coefficient> >& vector
+  );
   static Matrix<Rational> matrixInBasis(
-    const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X, const List<Vector<Rational> >& B
+    const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X,
+    const List<Vector<Rational> >& B
   );
   template <typename Coefficient>
-  static Vector<Coefficient> putInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B);
+  static Vector<Coefficient> putInBasis(
+    const Vector<Coefficient>& v,
+    const List<Vector<Coefficient> >& B
+  );
   template <typename Coefficient>
   List<Vector<Coefficient> > orthogonalComplement(
-    const List<Vector<Coefficient> >& V, const List<Vector<Coefficient> >& WW
+    const List<Vector<Coefficient> >& V,
+    const List<Vector<Coefficient> >& WW
   );
   template <typename Coefficient>
   bool spaceContains(
@@ -188,23 +250,26 @@ public:
   );
 };
 
-
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
   const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other,
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) const {
   if (&output == this || &output == &other) {
-    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> thisCopy, otherCopy;
+    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>
+    thisCopy,
+    otherCopy;
     thisCopy = *this;
     otherCopy = other;
     thisCopy.multiplyBy(otherCopy, output);
     return;
   }
-  //////////////////////////////////
+  // ////////////////////////////////
   if (this->ownerGroup != other.ownerGroup) {
-    global.fatal << "Attempt to multiply "
-    << "representations with different owner groups. " << global.fatal;
+    global.fatal
+    << "Attempt to multiply "
+    << "representations with different owner groups. "
+    << global.fatal;
   }
   output.reset(this->G);
   int Vd = this->basis[0].size;
@@ -224,7 +289,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
   }
   output.generators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
-    output.generators[i].assignTensorProduct(this->generators[i],other.generators[i]);
+    output.generators[i].assignTensorProduct(
+      this->generators[i], other.generators[i]
+    );
   }
   output.ownerGroup = this->ownerGroup;
 }
@@ -244,8 +311,10 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> out;
   out.generators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
-  //     MatrixInBasisFast(out.generators[i], this->generators[i], BM);
-    matrixInBasis(out.generators[i], this->generators[i], this->basis, GM);
+    //     MatrixInBasisFast(out.generators[i], this->generators[i], BM);
+    matrixInBasis(
+      out.generators[i], this->generators[i], this->basis, GM
+    );
   }
   out.ownerGroup = ownerGroup;
   out.basis.makeEiBasis(d);
@@ -253,7 +322,9 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
 }
 
 template <typename somegroup, typename Coefficient>
-VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::findBasis() const {
+VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<
+  somegroup, Coefficient
+>::findBasis() const {
   VectorSpace<Coefficient> V;
   int d = this->generators[0].numberOfColumns;
   for (int geni = 0; geni < this->generators.size; geni ++) {
@@ -278,17 +349,24 @@ VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coeffi
   // if it gets here, it deserves to crash
 }
 
-
 template <typename somegroup, typename Coefficient>
 List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
-  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeThomasVersion() {
-  MacroRegisterFunctionWithName("WeylGroupRepresentation::decomposeThomasVersion");
+GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
+decomposeThomasVersion() {
+  MacroRegisterFunctionWithName(
+    "WeylGroupRepresentation::decomposeThomasVersion"
+  );
   Matrix<Coefficient> splittingOperatorMatrix;
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if (getNumberOfComponents() == 1) {
-    if (this->ownerGroup->characterTable.getIndex(this->character) == - 1) {
-      global.comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
+    if (
+      this->ownerGroup->characterTable.getIndex(this->character) == - 1
+    ) {
+      global.comments
+      << "new irrep found, have "
+      << this->ownerGroup->characterTable.size
+      << "\n";
       this->ownerGroup->addIrreducibleRepresentation(*this);
     }
     out.addOnTop(*this);
@@ -297,9 +375,13 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   List<Vector<Coefficient> > Vb = this->basis;
   List<Vector<Coefficient> > tempVectors;
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
-    if (this->character.innerProduct(this->ownerGroup->characterTable[i]) != 0) {
+    if (
+      this->character.innerProduct(this->ownerGroup->characterTable[i]) != 0
+    ) {
       global.comments << "contains irrep " << i << "\n";
-      this->classFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
+      this->classFunctionMatrix(
+        this->ownerGroup->characterTable[i], splittingOperatorMatrix
+      );
       splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb = tempVectors;
@@ -320,7 +402,9 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
     return out;
   }
   List<List<Vector<Coefficient> > > es;
-  for (int cfi = this->ownerGroup->conjugacyClassCount() - 1; cfi >= 0; cfi --) {
+  for (
+    int cfi = this->ownerGroup->conjugacyClassCount() - 1; cfi >= 0; cfi --
+  ) {
     ClassFunction<somegroup, Coefficient> cf;
     cf.makeZero(*this->ownerGroup);
     cf[cfi] = 1;
@@ -337,7 +421,6 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
       break;
     }
   }
-
   for (int i = 0; i < es.size; i ++) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> outeme;
     outeme.ownerGroup = this->ownerGroup;
@@ -349,7 +432,10 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
 }
 
 template <typename Coefficient>
-DivisionResult<PolynomialUnivariateDense<Coefficient> > PolynomialUnivariateDense<Coefficient>::divideBy(const PolynomialUnivariateDense<Coefficient>& divisor) const {
+DivisionResult<PolynomialUnivariateDense<Coefficient> >
+PolynomialUnivariateDense<Coefficient>::divideBy(
+  const PolynomialUnivariateDense<Coefficient>& divisor
+) const {
   DivisionResult<PolynomialUnivariateDense<Coefficient> > out;
   out.remainder = *this;
   if (data.size < divisor.data.size) {
@@ -363,7 +449,8 @@ DivisionResult<PolynomialUnivariateDense<Coefficient> > PolynomialUnivariateDens
       continue;
     }
     PolynomialUnivariateDense<Coefficient> p = divisor.timesXn(i);
-    out.quotient[i] = out.remainder.data[out.remainder.data.size - 1] / divisor.data[divisor.data.size - 1];
+    out.quotient[i] = out.remainder.data[out.remainder.data.size - 1] /
+    divisor.data[divisor.data.size - 1];
     p *= out.quotient[i];
     out.remainder -= p;
   }
@@ -371,14 +458,18 @@ DivisionResult<PolynomialUnivariateDense<Coefficient> > PolynomialUnivariateDens
 }
 
 template <typename Coefficient>
-PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::operator/(const PolynomialUnivariateDense<Coefficient>& divisor) const {
-  DivisionResult<PolynomialUnivariateDense<Coefficient> > tmp = this->divideBy(divisor);
+PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::
+operator/(const PolynomialUnivariateDense<Coefficient>& divisor) const {
+  DivisionResult<PolynomialUnivariateDense<Coefficient> > tmp =
+  this->divideBy(divisor);
   return tmp.quotient;
 }
 
 template <typename Coefficient>
-PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::operator%(const PolynomialUnivariateDense<Coefficient>& divisor) const {
-  DivisionResult<PolynomialUnivariateDense<Coefficient> > tmp = this->divideBy(divisor);
+PolynomialUnivariateDense<Coefficient> PolynomialUnivariateDense<Coefficient>::
+operator%(const PolynomialUnivariateDense<Coefficient>& divisor) const {
+  DivisionResult<PolynomialUnivariateDense<Coefficient> > tmp =
+  this->divideBy(divisor);
   return tmp.remainder;
 }
 
@@ -399,8 +490,7 @@ bool PolynomialUnivariateDense<Coefficient>::operator==(const int other) const {
   return false;
 }
 
-template <typename Coefficient>
-//template <typename integral>
+template <typename Coefficient>// template <typename integral>
 void PolynomialUnivariateDense<Coefficient>::clearDenominators() {
   int acc = 1;
   for (int i = 0; i < data.size; i ++) {
@@ -421,7 +511,9 @@ void PolynomialUnivariateDense<Coefficient>::formalDerivative() {
 }
 
 template <typename Coefficient>
-bool PolynomialUnivariateDense<Coefficient>::operator<(const PolynomialUnivariateDense<Coefficient>& right) const {
+bool PolynomialUnivariateDense<Coefficient>::operator<(
+  const PolynomialUnivariateDense<Coefficient>& right
+) const {
   if (data.size < right.data.size) {
     return true;
   }
@@ -479,7 +571,7 @@ bool CharacterFunctions::spaceContains(
   }
 }
 
-template<typename Coefficient>
+template <typename Coefficient>
 void SpaceTree<Coefficient>::getunion(
   const List<Vector<Coefficient> >& left,
   const List<Vector<Coefficient> >& right,
@@ -497,7 +589,7 @@ void SpaceTree<Coefficient>::getunion(
   }
   int d = left[0].size;
   Matrix<Coefficient> matrix;
-  matrix.initialize(left.size + right.size,d);
+  matrix.initialize(left.size + right.size, d);
   for (int i = 0; i < left.size; i ++) {
     for (int j = 0; j < d; j ++) {
       matrix.elements[i][j] = left[i][j];
@@ -523,7 +615,7 @@ void SpaceTree<Coefficient>::getunion(
   }
 }
 
-template<typename Coefficient>
+template <typename Coefficient>
 void SpaceTree<Coefficient>::intersection(
   const List<Vector<Coefficient> >& left,
   const List<Vector<Coefficient> >& right,
@@ -534,7 +626,6 @@ void SpaceTree<Coefficient>::intersection(
     return;
   }
   int d = left[0].size;
-
   Matrix<Coefficient> MV;
   MV.initialize(left.size, d);
   for (int i = 0; i < left.size; i ++) {
@@ -544,7 +635,6 @@ void SpaceTree<Coefficient>::intersection(
   }
   List<Vector<Coefficient> > Vperp;
   MV.getZeroEigenSpaceModifyMe(Vperp);
-
   Matrix<Coefficient> MW;
   MW.initialize(right.size, d);
   for (int i = 0; i < right.size; i ++) {
@@ -554,9 +644,8 @@ void SpaceTree<Coefficient>::intersection(
   }
   List<Vector<Coefficient> > Wperp;
   MW.getZeroEigenSpaceModifyMe(Wperp);
-
   Matrix<Coefficient> M;
-  M.initialize(Vperp.size + Wperp.size,d);
+  M.initialize(Vperp.size + Wperp.size, d);
   int i = 0;
   for (; i < Vperp.size; i ++) {
     for (int j = 0; j < d; j ++) {
@@ -573,7 +662,8 @@ void SpaceTree<Coefficient>::intersection(
 
 template <typename Coefficient>
 List<Vector<Coefficient> > CharacterFunctions::orthogonalComplement(
-  const List<Vector<Coefficient> >& V, const List<Vector<Coefficient> >& WW
+  const List<Vector<Coefficient> >& V,
+  const List<Vector<Coefficient> >& WW
 ) {
   List<Vector<Coefficient> > W = intersection(V, WW);
   if (W.size == 0) {
@@ -589,7 +679,7 @@ List<Vector<Coefficient> > CharacterFunctions::orthogonalComplement(
   }
   GM.invert();
   Matrix<Coefficient> VM;
-  VM.initialize(W.size,V.size);
+  VM.initialize(W.size, V.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < V.size; j ++) {
       VM.elements[i][j] = W[i].scalarEuclidean(V[j]);
@@ -609,7 +699,7 @@ List<Vector<Coefficient> > CharacterFunctions::orthogonalComplement(
   }
   Matrix<Coefficient> tmp;
   Selection s;
-  outm.gaussianEliminationByRows(outm,tmp,s);
+  outm.gaussianEliminationByRows(outm, tmp, s);
   List<Vector<Coefficient> > out;
   for (int i = 0; i < outm.numberOfRows; i ++) {
     Vector<Coefficient> v;
@@ -635,7 +725,8 @@ List<List<Vector<Rational> > > CharacterFunctions::eigenspaces(
   PolynomialUnivariateDense<Rational> p;
   p.assignMinimalPolynomial(M);
   for (int ii = 0; ii < 2 * n + 2; ii ++) {
-    int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,-1,2,-2,3,-3,...
+    int i = ((ii + 1) / 2) *(2 *(ii % 2) - 1);
+    // 0,1,-1,2,-2,3,-3,...
     Rational r = i;
     if (p(r) == 0) {
       Matrix<Rational> M2 = M;
@@ -652,7 +743,9 @@ List<List<Vector<Rational> > > CharacterFunctions::eigenspaces(
 }
 
 template <typename Coefficient>
-Vector<Coefficient> CharacterFunctions::putInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B) {
+Vector<Coefficient> CharacterFunctions::putInBasis(
+  const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B
+) {
   Vector<Coefficient> w;
   w.makeZero(B.size);
   Matrix<Coefficient> M;
@@ -728,7 +821,8 @@ bool CharacterFunctions::isIsotypicComponent(
 }
 
 Matrix<Rational> CharacterFunctions::matrixInBasis(
-  const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X, const List<Vector<Rational> >& B
+  const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X,
+  const List<Vector<Rational> >& B
 ) {
   List<Vector<Rational> > rows;
   for (int i = 0; i < B.size; i ++) {
@@ -740,7 +834,8 @@ Matrix<Rational> CharacterFunctions::matrixInBasis(
     for (int i2 = 0; i2 < X.G->conjugacyClasses[i1].size; i2 ++) {
       for (int j = 0; j < X.G->getSize(); j ++) {
         for (int k = 0; k < B.size; k ++) {
-          int l = X.G->elements.getIndex(
+          int l =
+          X.G->elements.getIndex(
             X.G->conjugacyClasses[i1].elements[i2] * X.G->elements[j]
           );
           rows[k][l] = X.data[i1] * B[k][j];
@@ -794,13 +889,17 @@ SubgroupDataRootReflections::SubgroupDataRootReflections() {
 
 bool SubgroupDataWeylGroup::checkInitialization() {
   if (this->weylData == nullptr) {
-    global.fatal << "SubgroupDataWeylGroup: non-initialized weylData pointer. " << global.fatal;
+    global.fatal
+    << "SubgroupDataWeylGroup: non-initialized weylData pointer. "
+    << global.fatal;
   }
   return true;
 }
 
 template <class someGroup, class elementSomeGroup>
-std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpressions* format) {
+std::string SubgroupData<someGroup, elementSomeGroup>::toString(
+  FormatExpressions* format
+) {
   MacroRegisterFunctionWithName("SubgroupData::toString");
   (void) format;
   if (this->groupContent == nullptr) {
@@ -811,9 +910,7 @@ std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpression
   }
   std::stringstream out;
   out << "<br>\nSubgroup: " << this->subgroupContent->toString();
-
   out << "<br>\nOwner group: " << this->groupContent->toString();
-
   return out.str();
 }
 
@@ -835,76 +932,119 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   this->checkInitialization();
   if (!this->subgroupData.groupContent->flagCCRepresentativesComputed) {
-    this->subgroupData.groupContent->computeConjugacyClassSizesAndRepresentatives();
+    this->subgroupData.groupContent->
+    computeConjugacyClassSizesAndRepresentatives();
   }
-  this->subgroupData.groupContent->checkConjugacyClassRepresentationsMatchCCSizes();
+  this->subgroupData.groupContent->
+  checkConjugacyClassRepresentationsMatchCCSizes();
   this->subgroupData.groupContent->checkOrthogonalityCharacterTable();
   Vector<Rational> Xs;
   this->subgroupData.subgroupContent->getSignCharacter(Xs);
   this->subgroupData.computeCCRepresentativesPreimages();
-  //if (global.printOutThisKindaThing)
-  //{
-  //global.Comments << "here is the character table of the group, the representatives and sizes for "
-  //         << "conjugacy classes of the group and the subgroup, and for your convenience, "
-  //         << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
-  //global.Comments << this->subgroupData.group->prettyPrintCharacterTable();
-  //global.Comments << Xs << " <- subgroup sign character\n";
-  //global.Comments << this->subgroupData.group->prettyPrintCCRepsSizes();
-  //global.Comments << this->subgroupData.subgroup->prettyPrintCCRepsSizes();
-  //global.Comments << this->subgroupData.ccRepresentativesPreimages.toStringCommaDelimited() << '\n';
- //}
-
-  this->tauSignature.setSize(this->subgroupData.groupContent->conjugacyClassCount());
-
+  // if (global.printOutThisKindaThing)
+  // {
+  // global.Comments << "here is the character table of the group, the
+  // representatives and sizes for "
+  // << "conjugacy classes of the group and the subgroup, and for your
+  // convenience, "
+  // << "a mapping from subgroup conjugacy classes to their preimages in the
+  // group. ";
+  // global.Comments << this->subgroupData.group->prettyPrintCharacterTable();
+  // global.Comments << Xs << " <- subgroup sign character\n";
+  // global.Comments << this->subgroupData.group->prettyPrintCCRepsSizes();
+  // global.Comments << this->subgroupData.subgroup->prettyPrintCCRepsSizes();
+  // global.Comments <<
+  // this->subgroupData.ccRepresentativesPreimages.toStringCommaDelimited() <<
+  // '\n';
+  // }
+  this->tauSignature.setSize(
+    this->subgroupData.groupContent->conjugacyClassCount()
+  );
   Vector<Rational> XiS;
-  XiS.makeZero(this->subgroupData.subgroupContent->conjugacyClasses.size);
-  for (int i = 0; i < this->subgroupData.groupContent->conjugacyClasses.size; i ++) {
+  XiS.makeZero(
+    this->subgroupData.subgroupContent->conjugacyClasses.size
+  );
+  for (
+    int i = 0; i < this->subgroupData.groupContent->conjugacyClasses.size; i ++
+  ) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->weylData->group.characterTable[i];
-    //global.Comments << "Restricting character: " << Xip.toString() << "<br>";
-    for (int j = 0; j < this->subgroupData.subgroupContent->conjugacyClasses.size; j ++) {
+    // global.Comments << "Restricting character: " << Xip.toString() << "<br>";
+    for (
+      int j = 0; j < this->subgroupData.subgroupContent->conjugacyClasses.size;
+      j ++
+    ) {
       XiS[j] = XiG[this->subgroupData.ccRepresentativesPreimages[j]];
     }
-    this->tauSignature[i] = this->subgroupData.subgroupContent->getHermitianProduct(Xs, XiS);
-    //global.Comments << "<br>Hermitian product of " << Xs.toString() << " and "
-    //<< XiS.toString() << " = " << this->tauSignature[i];
+    this->tauSignature[i] =
+    this->subgroupData.subgroupContent->getHermitianProduct(Xs, XiS);
+    // global.Comments << "<br>Hermitian product of " << Xs.toString() << " and
+    // "
+    // << XiS.toString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].isSmallInteger()) {
-      global.fatal << " Tau signature is not integral, something is wrong. " << global.fatal ;
+      global.fatal
+      << " Tau signature is not integral, something is wrong. "
+      << global.fatal;
     }
   }
 }
 
 void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
-  MacroRegisterFunctionWithName("SubgroupRootReflections::computeCCSizesRepresentativesPreimages");
-  if (this->dynkinType == this->weylData->dynkinType && this->weylData->group.flagCCRepresentativesComputed) {
-    this->subgroupData.subgroupContent->conjugacyClasses.setSize(this->subgroupData.groupContent->conjugacyClasses.size);
-    for (int i = 0; i < this->subgroupData.subgroupContent->conjugacyClasses.size; i ++) {
-      this->subgroupData.subgroupContent->conjugacyClasses[i].flagRepresentativeComputed = true;
-      this->subgroupData.subgroupContent->conjugacyClasses[i].representative = this->subgroupData.groupContent->conjugacyClasses[i].representative;
-      this->subgroupData.subgroupContent->conjugacyClasses[i].size = this->subgroupData.groupContent->conjugacyClasses[i].size;
-      this->subgroupData.subgroupContent->conjugacyClasses[i].flagElementsComputed = false;
+  MacroRegisterFunctionWithName(
+    "SubgroupRootReflections::computeCCSizesRepresentativesPreimages"
+  );
+  if (
+    this->dynkinType == this->weylData->dynkinType &&
+    this->weylData->group.flagCCRepresentativesComputed
+  ) {
+    this->subgroupData.subgroupContent->conjugacyClasses.setSize(
+      this->subgroupData.groupContent->conjugacyClasses.size
+    );
+    for (
+      int i = 0; i < this->subgroupData.subgroupContent->conjugacyClasses.size;
+      i ++
+    ) {
+      this->subgroupData.subgroupContent->conjugacyClasses[i].
+      flagRepresentativeComputed =
+      true;
+      this->subgroupData.subgroupContent->conjugacyClasses[i].representative =
+      this->subgroupData.groupContent->conjugacyClasses[i].representative;
+      this->subgroupData.subgroupContent->conjugacyClasses[i].size =
+      this->subgroupData.groupContent->conjugacyClasses[i].size;
+      this->subgroupData.subgroupContent->conjugacyClasses[i].
+      flagElementsComputed =
+      false;
     }
-    this->subgroupData.ccRepresentativesPreimages.setSize(this->subgroupData.groupContent->conjugacyClasses.size);
-    for (int i = 0; i < this->subgroupData.ccRepresentativesPreimages.size; i ++) {
+    this->subgroupData.ccRepresentativesPreimages.setSize(
+      this->subgroupData.groupContent->conjugacyClasses.size
+    );
+    for (
+      int i = 0; i < this->subgroupData.ccRepresentativesPreimages.size; i ++
+    ) {
       this->subgroupData.ccRepresentativesPreimages[i] = i;
     }
     this->subgroupData.subgroupContent->flagCCRepresentativesComputed = true;
   } else {
     if (this->dynkinType.getRank() <= 6) {
-      this->subgroupData.subgroupContent->computeConjugacyClassesFromAllElements();
+      this->subgroupData.subgroupContent->
+      computeConjugacyClassesFromAllElements();
     } else {
-      this->subgroupData.subgroupContent->computeConjugacyClassSizesAndRepresentatives();
+      this->subgroupData.subgroupContent->
+      computeConjugacyClassSizesAndRepresentatives();
     }
-
     this->subgroupData.computeCCRepresentativesPreimages();
   }
 }
 
 void SubgroupDataRootReflections::initializeGenerators() {
-  MacroRegisterFunctionWithName("SubgroupRootReflections::initializeGenerators");
+  MacroRegisterFunctionWithName(
+    "SubgroupRootReflections::initializeGenerators"
+  );
   if (this->dynkinType.getRank() == 0) {
     this->subgroupData.subgroupContent->generators.setSize(1);
-    this->subgroupData.subgroupContent->generators[0].makeIdentity(*this->subgroupData.groupContent);
+    this->subgroupData.subgroupContent->generators[0].makeIdentity(
+      *this->subgroupData.groupContent
+    );
     return;
   }
   int d = this->subCartanSymmetric.numberOfRows;
@@ -912,14 +1052,21 @@ void SubgroupDataRootReflections::initializeGenerators() {
   this->subgroupData.subgroupContent->generators.setSize(d);
   ElementWeylGroup currentReflection;
   for (int i = 0; i < d; i ++) {
-    currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->weylData);
-    this->subgroupData.generatorPreimages[i] = this->subgroupData.groupContent->elements.getIndex(currentReflection);
+    currentReflection.MakeRootReflection(
+      this->generatingSimpleRoots[i], *this->weylData
+    );
+    this->subgroupData.generatorPreimages[i] =
+    this->subgroupData.groupContent->elements.getIndex(currentReflection);
     this->subgroupData.subgroupContent->generators[i] = currentReflection;
   }
 }
 
-void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots) {
-  MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeParabolicSubgroup");
+void SubgroupDataRootReflections::makeParabolicSubgroup(
+  WeylGroupData& G, const Selection& inputGeneratingSimpleRoots
+) {
+  MacroRegisterFunctionWithName(
+    "SubgroupDataRootReflections::makeParabolicSubgroup"
+  );
   G.checkConsistency();
   this->weylData = &G;
   this->subgroupData.makeSubgroupOf(G.group);
@@ -928,13 +1075,17 @@ void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const 
   this->simpleRootsInLeviParabolic = inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
   EiBasis.makeEiBasis(G.getDimension());
-  EiBasis.subSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
+  EiBasis.subSelection(
+    inputGeneratingSimpleRoots, this->generatingSimpleRoots
+  );
   int d = inputGeneratingSimpleRoots.cardinalitySelection;
   this->subCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
     for (int jj = 0; jj < d; jj ++) {
-      this->subCartanSymmetric(ii, jj) = G.rootScalarCartanRoot(
-        this->generatingSimpleRoots[ii], this->generatingSimpleRoots[jj]
+      this->subCartanSymmetric(ii, jj) =
+      G.rootScalarCartanRoot(
+        this->generatingSimpleRoots[ii],
+        this->generatingSimpleRoots[jj]
       );
     }
   }
@@ -942,7 +1093,9 @@ void SubgroupDataRootReflections::makeParabolicSubgroup(WeylGroupData& G, const 
   this->initializeGenerators();
 }
 
-void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections) {
+void SubgroupDataRootReflections::makeFromRoots(
+  WeylGroupData& G, const Vectors<Rational>& inputRootReflections
+) {
   MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeFromRoots");
   this->subgroupData.makeSubgroupOf(G.group);
   this->weylData = &G;
@@ -953,7 +1106,8 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   this->subCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
     for (int jj = 0; jj < d; jj ++) {
-      this->subCartanSymmetric(ii, jj) = G.rootScalarCartanRoot(
+      this->subCartanSymmetric(ii, jj) =
+      G.rootScalarCartanRoot(
         this->generatingSimpleRoots[ii], generatingSimpleRoots[jj]
       );
     }
@@ -962,27 +1116,36 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   DynkinType verificationType;
   diagram.getDynkinType(verificationType);
   if (this->dynkinType != verificationType) {
-    global.fatal << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << global.fatal;
+    global.fatal
+    <<
+    "Two different comptuations of the Dynkin type a set of roots did not coincide. "
+    << global.fatal;
   }
   this->initializeGenerators();
 }
 
 template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::areConjugate_OLD_Deprecated_Version_By_Todor(
+bool FiniteGroup<elementSomeGroup>::
+areConjugate_OLD_Deprecated_Version_By_Todor(
   const elementSomeGroup& left, const elementSomeGroup& right
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::areConjugate_OLD_Deprecated_Version_By_Todor");
+  MacroRegisterFunctionWithName(
+    "WeylGroup::areConjugate_OLD_Deprecated_Version_By_Todor"
+  );
   if (left.hasDifferentConjugacyInvariantsFrom(right)) {
     return false;
   }
   OrbitIteratorWeylGroup iterator;
-  iterator.initialize(this->generators, left, ElementWeylGroup::conjugationAction);
+  iterator.initialize(
+    this->generators, left, ElementWeylGroup::conjugationAction
+  );
   if (this->generators.size == 0) {
     global.fatal << "Generators not allowed to be 0. " << global.fatal;
   }
   do {
-    //if (left.toString() == "s_{4}")
-    //  global.Comments << "<br>" << iterator.getCurrentElement().toString() << "=?=" << right.toString();
+    // if (left.toString() == "s_{4}")
+    // global.Comments << "<br>" << iterator.getCurrentElement().toString() <<
+    // "=?=" << right.toString();
     if (iterator.getCurrentElement() == right) {
       return true;
     }
@@ -990,8 +1153,11 @@ bool FiniteGroup<elementSomeGroup>::areConjugate_OLD_Deprecated_Version_By_Todor
   return false;
 }
 
-void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups) {
-  MacroRegisterFunctionWithName("WeylGroup::getSignSignatureAllRootSubsystems");
+void WeylGroupData::getSignSignatureAllRootSubsystems(
+  List<SubgroupDataRootReflections>& outputSubgroups
+) {
+  MacroRegisterFunctionWithName("WeylGroup::getSignSignatureAllRootSubsystems")
+  ;
   RootSubalgebras rootSubalgebras;
   SemisimpleLieAlgebra semisimpleLieAlgebra;
   semisimpleLieAlgebra.weylGroup.makeFromDynkinType(this->dynkinType);
@@ -1000,14 +1166,18 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   List<Vectors<Rational> > rootSubalgebrasBases;
   rootSubalgebrasBases.setExpectedSize(rootSubalgebras.subalgebras.size);
   for (int i = rootSubalgebras.subalgebras.size - 1; i >= 0; i --) {
-    rootSubalgebrasBases.addOnTop(rootSubalgebras.subalgebras[i].simpleRootsReductiveSubalgebra);
+    rootSubalgebrasBases.addOnTop(
+      rootSubalgebras.subalgebras[i].simpleRootsReductiveSubalgebra
+    );
   }
   this->getSignSignatureRootSubgroups(outputSubgroups, rootSubalgebrasBases);
 }
 
-void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups) {
+void WeylGroupData::getSignSignatureParabolics(
+  List<SubgroupDataRootReflections>& outputSubgroups
+) {
   MacroRegisterFunctionWithName("WeylGroup::getSignSignatureParabolics");
-//  this->computeIrreducibleRepresentationsThomasVersion();
+  //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->group);
@@ -1018,15 +1188,18 @@ void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>
   outputSubgroups.setSize(numCycles);
   ElementWeylGroup g;
   g.owner = this;
-//  global.Comments << "<hr>Meself is: " << this->toString();
-  for (int i = 0; i < outputSubgroups.size; i ++, sel.incrementSelection()) {
+  //  global.Comments << "<hr>Meself is: " << this->toString();
+  for (
+    int i = 0; i < outputSubgroups.size; i ++, sel.incrementSelection()
+  ) {
     SubgroupDataRootReflections& currentParabolic = outputSubgroups[i];
     currentParabolic.makeParabolicSubgroup(*this, sel);
     currentParabolic.computeCCSizesRepresentativesPreimages();
-//    global.Comments << "<hr>Current parabolic is: " << currentParabolic.toString();
+    // global.Comments << "<hr>Current parabolic is: " <<
+    // currentParabolic.toString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
-    //global.Comments << "<hr>before compute initial irreps";
+    // global.Comments << "<hr>before compute initial irreps";
   }
   this->group.checkConjugacyClassRepresentationsMatchCCSizes();
   for (int j = 0; j < outputSubgroups.size; j ++) {
@@ -1034,9 +1207,13 @@ void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>
   }
 }
 
-void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups) {
-  MacroRegisterFunctionWithName("WeylGroup::getSignSignatureExtendedParabolics");
-//  this->computeIrreducibleRepresentationsThomasVersion();
+void WeylGroupData::getSignSignatureExtendedParabolics(
+  List<SubgroupDataRootReflections>& outputSubgroups
+) {
+  MacroRegisterFunctionWithName(
+    "WeylGroup::getSignSignatureExtendedParabolics"
+  );
+  //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->group);
@@ -1046,12 +1223,19 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.makeEiBasis(this->getDimension());
   extendedBasis.addOnTop(this->rootSystem[0]);
-  outputSubgroups.setExpectedSize(MathRoutines::twoToTheNth(this->getDimension()));
+  outputSubgroups.setExpectedSize(
+    MathRoutines::twoToTheNth(this->getDimension())
+  );
   outputSubgroups.setSize(0);
   SubgroupDataRootReflections subgroup;
   do {
-    extendedBasis.subSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
-    if (currentBasisExtendedParabolic.getRankElementSpan() == currentBasisExtendedParabolic.size) {
+    extendedBasis.subSelection(
+      parSelrootsAreInLevi, currentBasisExtendedParabolic
+    );
+    if (
+      currentBasisExtendedParabolic.getRankElementSpan() ==
+      currentBasisExtendedParabolic.size
+    ) {
       subgroup.makeFromRoots(*this, currentBasisExtendedParabolic);
       subgroup.flagIsExtendedParabolic = true;
       subgroup.simpleRootsInLeviParabolic = parSelrootsAreInLevi;
@@ -1068,7 +1252,8 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
 }
 
 void WeylGroupData::getSignSignatureRootSubgroups(
-  List<SubgroupDataRootReflections>& outputSubgroups, const List<Vectors<Rational> >& rootsGeneratingReflections
+  List<SubgroupDataRootReflections>& outputSubgroups,
+  const List<Vectors<Rational> >& rootsGeneratingReflections
 ) {
   MacroRegisterFunctionWithName("WeylGroup::getSignSignatureRootSubgroups");
   this->computeOrLoadCharacterTable();
@@ -1115,10 +1300,10 @@ void CharacterFunctions::computeTauSignatures(
     tsg[i] = group->group.characterTable[i].data == Xs;
   }
   tss.addOnTop(tsg);
-
   if (pseudo) {
     global.comments << "pseudo-parabolics" << "\n";
-    ElementWeylGroup hr = group->getRootReflection(group->rootSystem.size- 1);
+    ElementWeylGroup hr =
+    group->getRootReflection(group->rootSystem.size - 1);
     sel.initialize(group->cartanSymmetric.numberOfColumns);
     for (int i = 0; i < numCycles - 1; i ++) {
       generators.setSize(sel.cardinalitySelection);
@@ -1132,10 +1317,7 @@ void CharacterFunctions::computeTauSignatures(
       sel.incrementSelection();
     }
   }
-
   // we will need the sign character for the group
-
-
   tauSignatures.setSize(group->group.characterTable.size);
   for (int i = 0; i < group->group.characterTable.size; i ++) {
     tauSignatures[i].setSize(tss.size + 1);
@@ -1154,31 +1336,36 @@ void CharacterFunctions::computeTauSignatures(
 }
 
 template <typename elementSomeGroup>
-void CharacterFunctions::exportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data) {
+void CharacterFunctions::exportCharTable(
+  FiniteGroup<elementSomeGroup>& G, JSData& data
+) {
   data.elementType = JSData::token::tokenObject;
   JSData emptyArray;
   emptyArray.makeEmptyArray();
-  JSData& representatives = data.objects.getValueCreate("representatives", emptyArray);
+  JSData& representatives =
+  data.objects.getValueCreate("representatives", emptyArray);
   JSData& sizes = data.objects.getValueCreate("sizes", emptyArray);
   JSData& characters = data.objects.getValueCreate("characters", emptyArray);
   representatives.elementType = JSData::token::tokenArray;
   representatives.listObjects.setSize(G.conjugacyClassCount());
-
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
     List<int> reprefs;
     G.getWord(G.conjugacyClasses[i].representative, reprefs);
     representatives.listObjects[i].elementType = JSData::token::tokenArray;
     representatives.listObjects[i].listObjects.setSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
-      representatives.listObjects[i].listObjects[j].elementType = JSData::token::tokenLargeInteger;
-      representatives.listObjects[i].listObjects[j].integerValue.getElement() = reprefs[j];
+      representatives.listObjects[i].listObjects[j].elementType =
+      JSData::token::tokenLargeInteger;
+      representatives.listObjects[i].listObjects[j].integerValue.getElement() =
+      reprefs[j];
     }
   }
   sizes.elementType = JSData::token::tokenArray;
   sizes.listObjects.setSize(G.conjugacyClassCount());
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
     sizes.listObjects[i].elementType = JSData::token::tokenLargeInteger;
-    sizes.listObjects[i].integerValue.getElement() = G.conjugacyClasses[i].size;
+    sizes.listObjects[i].integerValue.getElement() = G.conjugacyClasses[i].size
+    ;
   }
   characters.elementType = JSData::token::tokenArray;
   characters.listObjects.setSize(G.characterTable.size);
@@ -1190,9 +1377,13 @@ void CharacterFunctions::exportCharTable(FiniteGroup<elementSomeGroup>& G, JSDat
 }
 
 void CharacterFunctions::exportTauSignatures(
-  WeylGroupData& groupData, const List<List<bool> >& ts, JSData& output
+  WeylGroupData& groupData,
+  const List<List<bool> >& ts,
+  JSData& output
 ) {
-  CharacterFunctions::exportCharTable(groupData.group, output["chartable"]);
+  CharacterFunctions::exportCharTable(
+    groupData.group, output["chartable"]
+  );
   for (int i = 0; i < ts.size; i ++) {
     for (int j = 0; j < ts[i].size; j ++) {
       output["tausigs"][i][j] = ts[i][j];
@@ -1217,7 +1408,9 @@ List<VectorSpace<Coefficient> > CharacterFunctions::getEigenspaces(
 }
 
 void CharacterFunctions::getTauSignaturesFromSubgroup(
-  WeylGroupData& G, const List<ElementWeylGroup>& gens, List<bool>& out
+  WeylGroupData& G,
+  const List<ElementWeylGroup>& gens,
+  List<bool>& out
 ) {
   SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> HD;
   HD.initFromGroupAndGenerators(G.group, gens);
@@ -1225,21 +1418,30 @@ void CharacterFunctions::getTauSignaturesFromSubgroup(
   H.computeAllElements(true, - 1);
   Vector<Rational> HXs;
   H.getSignCharacter(HXs);
-
   List<int> ccPreimages;
   ccPreimages.setSize(H.conjugacyClassCount());
   for (int i = 0; i < H.conjugacyClassCount(); i ++) {
     bool notFound = true;
-    for (int ci = 0; notFound && ci < G.group.conjugacyClassCount(); ci ++) {
-      for (int cj = 0; notFound && cj < G.group.conjugacyClasses[ci].size; cj ++) {
-        if (G.group.conjugacyClasses[ci].elements[cj] == H.conjugacyClasses[i].representative) {
+    for (
+      int ci = 0; notFound && ci < G.group.conjugacyClassCount(); ci ++
+    ) {
+      for (
+        int cj = 0; notFound && cj < G.group.conjugacyClasses[ci].size; cj ++
+      ) {
+        if (
+          G.group.conjugacyClasses[ci].elements[cj] ==
+          H.conjugacyClasses[i].representative
+        ) {
           ccPreimages[i] = ci;
           notFound = false;
         }
       }
     }
     if (notFound) {
-      global.fatal << "Something went very wrong: couldn't find preimage of conjugacy class of subgroup. " << global.fatal;
+      global.fatal
+      <<
+      "Something went very wrong: couldn't find preimage of conjugacy class of subgroup. "
+      << global.fatal;
     }
   }
   out.setSize(G.group.characterTable.size);
@@ -1261,7 +1463,8 @@ void CharacterFunctions::getTauSignaturesFromSubgroup(
 // Reference: Schneider, 1990.
 // TODO(tmilev): apply improvements described in the reference
 template <typename Somegroup>
-List<ClassFunction<Somegroup, Rational> > CharacterFunctions::computeCharacterTable(Somegroup &group) {
+List<ClassFunction<Somegroup, Rational> > CharacterFunctions::
+computeCharacterTable(Somegroup& group) {
   if (group.conjugacyClassCount() == 0) {
     group.computeConjugacyClassesFromAllElements();
   }
@@ -1271,10 +1474,16 @@ List<ClassFunction<Somegroup, Rational> > CharacterFunctions::computeCharacterTa
   classmap.setSize(sizeOfG);
   for (int i = 0; i < group.conjugacyClassCount(); i ++) {
     for (int j = 0; j < group.conjugacyClasses[i].size; j ++) {
-      classmap[group.elements.getIndex(group.conjugacyClasses[i].elements[j])] = i;
+      classmap[
+        group.elements.getIndex(
+          group.conjugacyClasses[i].elements[j]
+        )
+      ] =
+      i;
     }
   }
-  Matrix<Rational> form; // so inefficient
+  Matrix<Rational> form;
+  // so inefficient
   form.makeZeroMatrix(group.conjugacyClassCount());
   for (int i = 0; i < group.conjugacyClassCount(); i ++) {
     form.elements[i][i] = group.conjugacyClasses[i].size;
@@ -1304,17 +1513,18 @@ List<ClassFunction<Somegroup, Rational> > CharacterFunctions::computeCharacterTa
   for (int i = 0; !foundEmAll && i < group.conjugacyClassCount(); i ++) {
     Matrix<Rational> M;
     global.comments << "Getting class matrix " << i << "\n";
-    M = getClassMatrix(group,i,&classmap);
+    M = getClassMatrix(group, i, &classmap);
     List<VectorSpace<Rational> > es = getEigenspaces(M);
     for (int esi = 0; !foundEmAll && esi < es.size; esi ++) {
       int spsize = spaces.size;
-      for (int spi = 0; !foundEmAll &&spi < spsize; spi ++) {
+      for (int spi = 0; !foundEmAll && spi < spsize; spi ++) {
         if (spaces[spi].rank == 1) {
           continue;
         }
         VectorSpace<Rational> V = spaces[spi].intersection(es[esi]);
         if ((V.rank > 0) and (V.rank < spaces[spi].rank)) {
-          VectorSpace<Rational> W = es[esi].orthogonalComplement(&spaces[spi],&form);
+          VectorSpace<Rational> W =
+          es[esi].orthogonalComplement(&spaces[spi], &form);
           spaces[spi] = V;
           spaces.addOnTop(W);
           if (spaces.size == group.conjugacyClassCount()) {
@@ -1348,7 +1558,6 @@ List<ClassFunction<Somegroup, Rational> > CharacterFunctions::computeCharacterTa
     }
     global.comments << x2 << "\n";
   }
-
   chars.quickSortAscending(/*&CharacterComparator*/);
   for (int i = 0; i < chars.size; i ++) {
     for (int j = i; j < chars.size; j ++) {
@@ -1369,32 +1578,44 @@ List<ClassFunction<Somegroup, Rational> > CharacterFunctions::computeCharacterTa
 
 template <typename Somegroup>
 Matrix<Rational> CharacterFunctions::getClassMatrix(
-  const Somegroup &group, int cci, List<int>* classmap
+  const Somegroup& group, int cci, List<int>* classmap
 ) {
   List<int> invl;
   int classSize = - 1;
   group.conjugacyClasses[cci].size.isIntegerFittingInInt(&classSize);
   invl.setSize(classSize);
   for (int i = 0; i < group.conjugacyClasses[cci].size; i ++) {
-    invl[i] = group.invert(group.elements.getIndex(group.conjugacyClasses[cci].elements[i]));
+    invl[i] =
+    group.invert(
+      group.elements.getIndex(
+        group.conjugacyClasses[cci].elements[i]
+      )
+    );
   }
   Matrix<int> M;
   M.makeZeroMatrix(group.conjugacyClassCount());
-  for (int t = 0; t < group.conjugacyClassCount(); t ++)
-    for (int xi = 0; xi < invl.size; xi ++) {
-      int yi = group.multiplyElements(invl[xi], group.elements.getIndex(group.conjugacyClasses[t].representative));
-      int ci;
-      if (classmap) {
-        M.elements[t][(*classmap)[yi]] += 1;
-      } else {
-        for (ci = 0; ci < group.conjugacyClassCount(); ci ++) {
-          if (group.conjugacyClasses[ci].indicesEltsInOwner.sortedContains(yi)) {
-            M.elements[t][ci] += 1;
-            break;
-          }
+  for (int t = 0; t < group.conjugacyClassCount(); t ++) for (
+    int xi = 0; xi < invl.size; xi ++
+  ) {
+    int yi =
+    group.multiplyElements(
+      invl[xi],
+      group.elements.getIndex(group.conjugacyClasses[t].representative)
+    );
+    int ci;
+    if (classmap) {
+      M.elements[t][(*classmap)[yi]] += 1;
+    } else {
+      for (ci = 0; ci < group.conjugacyClassCount(); ci ++) {
+        if (
+          group.conjugacyClasses[ci].indicesEltsInOwner.sortedContains(yi)
+        ) {
+          M.elements[t][ci] += 1;
+          break;
         }
       }
     }
+  }
   Matrix<Rational> out;
   out.initialize(M.numberOfRows, M.numberOfColumns);
   for (int i = 0; i < M.numberOfRows; i ++) {
@@ -1404,3 +1625,4 @@ Matrix<Rational> CharacterFunctions::getClassMatrix(
   }
   return out;
 }
+

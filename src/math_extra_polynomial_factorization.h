@@ -1,7 +1,9 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_polynomial_factorization_ALREADY_INCLUDED
 #define header_math_extra_polynomial_factorization_ALREADY_INCLUDED
+
 #include "math_general.h"
 
 class IntegerModulusSmall {
@@ -15,8 +17,7 @@ public:
 // Intended for very fast computations.
 class PolynomialUnivariateModular {
   friend std::ostream& operator<<(
-    std::ostream& output,
-    const PolynomialUnivariateModular& input
+    std::ostream& output, const PolynomialUnivariateModular& input
   ) {
     output << input.toString();
     return output;
@@ -66,21 +67,15 @@ public:
     const PolynomialUnivariateModular& other, int coefficient
   );
   void addAnotherTimesTerm(
-    const PolynomialUnivariateModular& other,
-    int coefficient,
-    int termPower
+    const PolynomialUnivariateModular& other, int coefficient, int termPower
   );
-  void addTerm(
-    int coefficient,
-    int termPower
-  );
+  void addTerm(int coefficient, int termPower);
   void toPolynomialNonDense(Polynomial<ElementZmodP>& output) const;
   bool isConstant() const;
   bool checkInitialization() const;
   int totalDegreeInt() const;
   ElementZmodP evaluate(
-    const ElementZmodP& input,
-    const ElementZmodP& unused
+    const ElementZmodP& input, const ElementZmodP& unused
   ) const;
   inline int getModulus() const {
     return this->modulusData->modulus;
@@ -98,12 +93,10 @@ public:
   // Multiplies the polynomial by a constant so the leading coefficient is one.
   void rescaleSoLeadingCoefficientIsOne();
   bool makeFromPolynomialAndModulus(
-    IntegerModulusSmall* modulus,
-    const Polynomial<Rational>& input
+    IntegerModulusSmall* modulus, const Polynomial<Rational>& input
   );
   void makeFromPolynomialAndModulusNoFailure(
-    IntegerModulusSmall* modulus,
-    const Polynomial<Rational>& input
+    IntegerModulusSmall* modulus, const Polynomial<Rational>& input
   );
   class Test {
   public:
@@ -148,7 +141,9 @@ public:
   List<List<int> > imagesPowersOfX;
   void operator=(const PolynomialUnivariateModular& inputModulus);
   void computeFromModulus();
-  void computeOneReductionRow(const List<int>& previous, List<int>& output);
+  void computeOneReductionRow(
+    const List<int>& previous, List<int>& output
+  );
   bool checkInitialization() const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringImagesOfX() const;
@@ -174,17 +169,14 @@ class PolynomialModuloPolynomialModuloInteger {
 public:
   PolynomialUnivariateModularAsModulus* modulus;
   PolynomialUnivariateModular value;
-
   void makeFromModulusAndValue(
     PolynomialUnivariateModularAsModulus* inputModulus,
     const Polynomial<ElementZmodP>& inputValue
   );
-
   void operator-=(const PolynomialModuloPolynomialModuloInteger& other);
   void operator+=(const ElementZmodP& other);
   void operator-=(const ElementZmodP& other);
   void operator*=(const PolynomialModuloPolynomialModuloInteger& other);
-
   bool isEqualToZero() const;
   const PolynomialUnivariateModular& getValue() const {
     return this->value;
@@ -211,7 +203,9 @@ public:
 
 template <class Coefficient>
 class PolynomialModuloPolynomial {
-  friend std::ostream& operator<<(std::ostream& output, const PolynomialModuloPolynomial& unused) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const PolynomialModuloPolynomial& unused
+  ) {
     (void) unused;
     output << "A polynomial modulo polynomial.";
     return output;
@@ -227,17 +221,17 @@ public:
   void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
   std::string toString(FormatExpressions* format = nullptr) const;
   PolynomialModuloPolynomial<Coefficient> one();
-  static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);
+  static unsigned int hashFunction(
+    const PolynomialModuloPolynomial<Coefficient>& input
+  );
   unsigned int hashFunction() const;
-  bool operator==(const PolynomialModuloPolynomial<Coefficient>& other)const;
+  bool operator==(const PolynomialModuloPolynomial<Coefficient>& other) const;
   bool isEqualToZero() const;
   void makeFromModulusAndValue(
     const Polynomial<Coefficient>* inputModulus,
     const Polynomial<Coefficient>& inputValue
   );
-  void setValue(
-    const Polynomial<Coefficient>& inputValue
-  ) {
+  void setValue(const Polynomial<Coefficient>& inputValue) {
     this->value = inputValue;
   }
   const Polynomial<Coefficient>& getValue() {
@@ -249,13 +243,12 @@ public:
 };
 
 class PolynomialFactorizationKronecker {
-  public:
+public:
   static const int maximumDegreeDefault = 20;
   PolynomialFactorizationUnivariate<Rational>* output;
   Polynomial<Rational> current;
   bool oneFactor(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   PolynomialFactorizationKronecker() {
     this->output = nullptr;
@@ -271,33 +264,41 @@ class PolynomialFactorizationKronecker {
   }
 };
 
-template<class Coefficient>
+template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator*=(
   const PolynomialModuloPolynomial& other
 ) {
   if (other.modulus != this->modulus) {
-    global.fatal << "Not allowed to multiply quotient-ring "
+    global.fatal
+    << "Not allowed to multiply quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
-    << this->modulus << ", " << other.modulus << global.fatal;
+    << this->modulus
+    << ", "
+    << other.modulus
+    << global.fatal;
   }
   this->value *= other.value;
   this->reduce();
 }
 
-template<class Coefficient>
+template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator+=(
   const PolynomialModuloPolynomial& other
 ) {
   if (other.modulus != this->modulus) {
-    global.fatal << "Not allowed to add quotient-ring "
+    global.fatal
+    << "Not allowed to add quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
-    << this->modulus << ", " << other.modulus << global.fatal;
+    << this->modulus
+    << ", "
+    << other.modulus
+    << global.fatal;
   }
   this->value += other.value;
   this->reduce();
 }
 
-template<class Coefficient>
+template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator+=(
   const Coefficient& other
 ) {
@@ -305,7 +306,7 @@ void PolynomialModuloPolynomial<Coefficient>::operator+=(
   this->reduce();
 }
 
-template<class Coefficient>
+template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator-=(
   const Coefficient& other
 ) {
@@ -313,63 +314,72 @@ void PolynomialModuloPolynomial<Coefficient>::operator-=(
   this->reduce();
 }
 
-template<class Coefficient>
+template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator-=(
   const PolynomialModuloPolynomial& other
 ) {
   if (other.modulus != this->modulus) {
-    global.fatal << "Not allowed to subtract quotient-ring "
+    global.fatal
+    << "Not allowed to subtract quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
-    << this->modulus << ", " << other.modulus << global.fatal;
+    << this->modulus
+    << ", "
+    << other.modulus
+    << global.fatal;
   }
   this->value -= other.value;
   this->reduce();
 }
 
-template<class Coefficient>
+template <class Coefficient>
 unsigned int PolynomialModuloPolynomial<Coefficient>::hashFunction() const {
   return
   this->value.hashFunction() * HashConstants::constant0 +
   this->modulus.hashFunction() * HashConstants::constant1;
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool PolynomialModuloPolynomial<Coefficient>::operator==(
   const PolynomialModuloPolynomial<Coefficient>& other
 ) const {
   return this->modulus == other.modulus && this->value == other.value;
 }
 
-template<class Coefficient>
+template <class Coefficient>
 unsigned int PolynomialModuloPolynomial<Coefficient>::hashFunction(
   const PolynomialModuloPolynomial<Coefficient>& input
 ) {
   return input.hashFunction();
 }
 
-template<class Coefficient>
+template <class Coefficient>
 std::string PolynomialModuloPolynomial<Coefficient>::toString(
   FormatExpressions* format
 ) const {
   std::stringstream out;
-  out << this->value.toString(format) << "(mod (" << this->modulus.toString(format) << "))";
+  out
+  << this->value.toString(format)
+  << "(mod ("
+  << this->modulus.toString(format)
+  << "))";
   return out.str();
 }
 
-template<class Coefficient>
-PolynomialModuloPolynomial<Coefficient> PolynomialModuloPolynomial<Coefficient>::one() {
+template <class Coefficient>
+PolynomialModuloPolynomial<Coefficient> PolynomialModuloPolynomial<Coefficient>
+::one() {
   PolynomialModuloPolynomial<Coefficient> result;
   result.modulus = this->modulus;
   result.value.makeConstant(this->modulus.coefficients[0].one());
   return result;
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool PolynomialModuloPolynomial<Coefficient>::isEqualToZero() const {
   return this->value.isEqualToZero();
 }
 
-template<class Coefficient>
+template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::reduce() {
   Polynomial<Coefficient> unusedQuotient;
   this->value.divideBy(
@@ -391,4 +401,6 @@ void PolynomialModuloPolynomial<Coefficient>::makeFromModulusAndValue(
   this->modulus = *inputModulus;
   this->value = inputValue;
 }
+
 #endif // header_math_extra_polynomial_factorization_ALREADY_INCLUDED
+

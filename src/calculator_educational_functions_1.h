@@ -1,7 +1,9 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_educational_functions_ALREADY_INCLUDED
 #define header_calculator_educational_functions_ALREADY_INCLUDED
+
 #include "calculator_interface.h"
 
 class UnivariateEquation {
@@ -19,7 +21,9 @@ public:
   // For the equation (x-1)(x-2)=0,
   // this returns the expression (x=1,x=2).
   bool getSolutionEquations(Calculator& calculator, Expression& output);
-  bool getOneSolutionEquation(int solutionIndex, Calculator& calculator, Expression& output);
+  bool getOneSolutionEquation(
+    int solutionIndex, Calculator& calculator, Expression& output
+  );
 };
 
 class ProblemWithSolution {
@@ -78,15 +82,13 @@ public:
   void processComparisonRestricted();
 };
 
-class CalculatorEducationalFunctions{
+class CalculatorEducationalFunctions {
 public:
   static bool solveJSON(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool compareExpressionsJSON(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool compareExpressionsJSONInternal(
     Calculator& calculator,
@@ -95,10 +97,9 @@ public:
     CompareExpressions& comparison
   );
   static bool divideByNumberTrivial(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
 };
 
 #endif //header_calculator_educational_functions_ALREADY_INCLUDED
+

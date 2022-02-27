@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_strings_ALREADY_INCLUDED
 #define header_general_strings_ALREADY_INCLUDED
@@ -22,8 +23,7 @@ public:
     std::string* outputStringBeginning = nullptr
   );
   static void stringSplitDefaultDelimiters(
-    const std::string& inputString,
-    List<std::string>& output
+    const std::string& inputString, List<std::string>& output
   );
   static void splitExcludeDelimiter(
     const std::string& inputString,
@@ -36,21 +36,28 @@ public:
     const List<char>& delimiters,
     List<std::string>& output
   );
-  static bool stringContains(const std::string& container, const std::string& content);
-  static void stringTrimWhiteSpace(const std::string& inputString, std::string& output);
-  static void stringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
-  static std::string stringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);
+  static bool stringContains(
+    const std::string& container, const std::string& content
+  );
+  static void stringTrimWhiteSpace(
+    const std::string& inputString, std::string& output
+  );
+  static void stringTrimToLengthWithHash(
+    std::string& inputOutput, int desiredLength50AtLeast = 150
+  );
+  static std::string stringTrimToLengthForDisplay(
+    const std::string& input, int desiredLength20AtLeast = 50
+  );
   static std::string convertStringToHexIfNonReadable(
     const std::string& input, int lineWidthZeroForNone, bool useHTML
   );
   static std::string convertByteToHex(unsigned char byte);
-
   static bool isLatinLetterSequence(const std::string& input);
   static bool isLatinLetterOrDigitSequence(const std::string& input);
-
   class Conversions {
   public:
-    // Converts an arbitrary string (byte sequence) to a list of unicode code points
+    // Converts an arbitrary string (byte sequence) to a list of unicode code
+    // points
     // that can be recoded back to another format.
     // If the input is valid utf8 string, will write
     // the corresponding code points in the output variable and return true;
@@ -71,24 +78,20 @@ public:
     // Converts an arbitrary byte sequence to a format suitable for displaying
     // in a web-browser without additional encoding and that can be
     // pasted back in the calculator.
-    static std::string stringToCalculatorDisplay(
-      const std::string& input
-    );
+    static std::string stringToCalculatorDisplay(const std::string& input);
     static bool isValidUtf8(const std::string& input);
     // Escapes quotes, backslashes and new lines. Does not do utf16 decoding.
-    static std::string escapeQuotesBackslashesNewLines(const std::string& input);
+    static std::string escapeQuotesBackslashesNewLines(
+      const std::string& input
+    );
     // Converts an arbitrary byte sequence to a string suited for json notation:
     // escapes quote, backslash, newline, and uses \u-notation to encode
     // utf-16-like two-byte sequences.
     static std::string stringToJSONStringEscaped(
       const std::string& inputUtf8
     );
-    static std::string codePointToBackslashEscapedString(
-      uint32_t input
-    );
-    static std::string codePointToUtf8(
-      uint32_t input
-    );
+    static std::string codePointToBackslashEscapedString(uint32_t input);
+    static std::string codePointToUtf8(uint32_t input);
     // Similar to utf8StringToJSONStringEscaped but uses
     // \x-notation to encode arbitrary byte sequences.
     // The "like" part in the name stands for the fact that we do
@@ -98,8 +101,10 @@ public:
     // The "like" part in the name stands for the fact that we do
     // not guarantee implementation up to javascript spec.
     static std::string unescapeJavascriptLike(const std::string& input);
-    // Transforms an arbitrary string to a string that is an acceptable javascript variable.
-    // Avoid use of underscores and other characters so as attempt to produce a name that is
+    // Transforms an arbitrary string to a string that is an acceptable
+    // javascript variable.
+    // Avoid use of underscores and other characters so as attempt to produce a
+    // name that is
     // in addition a valid latex string and a valid html tag.
     class Test {
     public:
@@ -108,11 +113,12 @@ public:
       static bool unescapeJavascriptLike();
       static bool convertStringToJSONStringEscapeOnly();
       static bool codePointToUtf8();
-      static bool oneCodePointToUtf8(uint32_t codePoint, const std::string& expectedHex);
+      static bool oneCodePointToUtf8(
+        uint32_t codePoint, const std::string& expectedHex
+      );
       static bool convertUtf8StringToUnicodeCodePoints();
       static bool oneUtf8ToJSONSuccess(
-        const std::string& givenInput,
-        const std::string& expectedOutput
+        const std::string& givenInput, const std::string& expectedOutput
       );
       static bool oneConversionUtf8Success(
         const std::string& givenInput,
@@ -122,7 +128,10 @@ public:
       );
     };
   };
-  static std::string convertStringToJavascriptVariable(const std::string& input);
+
+  static std::string convertStringToJavascriptVariable(
+    const std::string& input
+  );
   static std::string stringTrimWhiteSpace(const std::string& inputString);
   static void splitStringInTwo(
     const std::string& inputString,
@@ -141,7 +150,9 @@ public:
     const std::string& subStringToReplace,
     const std::string& replaceWith
   );
-  static std::string stringShortenInsertDots(const std::string& inputString, int maxNumChars);
+  static std::string stringShortenInsertDots(
+    const std::string& inputString, int maxNumChars
+  );
   static bool isASCIICharacterVisible(char input);
   class Differ {
   private:
@@ -170,20 +181,26 @@ public:
       const std::string& labelRight
     );
     std::string differenceHTML(
-      const std::string& labelLeft,
-      const std::string& labelRight
+      const std::string& labelLeft, const std::string& labelRight
     );
     bool computeDifference(std::stringstream* commentsOnFailure);
     void computeLongestSubsequenceMatrix();
-    void computeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight);
+    void computeBestStartingIndices(
+      int& outputIndexLeft, int& outputIndexRight
+    );
     void extractCommonStrings(int indexLeft, int indexRight);
     void extractDifferences();
-    void extractResult(const List<int>& starts, const std::string& input, List<std::string>& output);
+    void extractResult(
+      const List<int>& starts,
+      const std::string& input,
+      List<std::string>& output
+    );
     void pushCommonString(int indexLeft, int indexRight);
     std::string toString();
     Differ();
   };
-  template<typename CoefficientType>
+
+  template <typename CoefficientType>
   static std::string toStringElement(CoefficientType x) {
     std::stringstream result;
     result << x;
@@ -194,4 +211,6 @@ public:
     static bool all();
   };
 };
+
 #endif
+

@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "database.h"
 #include "string_constants.h"
@@ -33,7 +34,11 @@ bool Database::Test::all() {
 bool Database::Test::deleteDatabase() {
   std::stringstream commentsOnFailure;
   if (!Database::get().deleteDatabase(&commentsOnFailure)) {
-    global << Logger::red << "Failed to delete database: " << commentsOnFailure.str() << Logger::endL;
+    global
+    << Logger::red
+    << "Failed to delete database: "
+    << commentsOnFailure.str()
+    << Logger::endL;
   }
   return true;
 }
@@ -44,9 +49,13 @@ bool Database::Test::adminAccountCreation() {
   userData.username = WebAPI::userDefaultAdmin;
   userData.enteredPassword = "111";
   std::stringstream commentsOnFailure;
-
-  if (!Database::get().user.loginViaDatabase(userData, &commentsOnFailure)) {
-    global.fatal << "Failed to login as administrator on an empty database. " << global.fatal;
+  if (
+    !Database::get().user.loginViaDatabase(userData, &commentsOnFailure)
+  ) {
+    global.fatal
+    << "Failed to login as administrator on an empty database. "
+    << global.fatal;
   }
   return true;
 }
+

@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 #define header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
@@ -10,16 +11,21 @@
 template <class Coefficient>
 std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
-  bool formatWeightAsIndexVectorSpace = format == nullptr ? true : format->flagFormatWeightAsVectorSpaceIndex;
+  bool formatWeightAsIndexVectorSpace = format ==
+  nullptr ? true : format->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace) {
     if (this->owner == nullptr) {
-      return this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", format);
+      return
+      this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", format);
     }
     Vector<Coefficient> weightEpsCoords, weightSimpleCoords;
-    weightSimpleCoords = this->owner->weylGroup.getSimpleCoordinatesFromFundamental(
+    weightSimpleCoords =
+    this->owner->weylGroup.getSimpleCoordinatesFromFundamental(
       this->weightFundamentalCoordinates, Coefficient::zero()
     );
-    this->owner->weylGroup.getEpsilonCoordinates(weightSimpleCoords, weightEpsCoords);
+    this->owner->weylGroup.getEpsilonCoordinates(
+      weightSimpleCoords, weightEpsCoords
+    );
     return weightEpsCoords.toStringLetterFormat("\\varepsilon", format);
   }
   bool useOmega = true;
@@ -32,10 +38,21 @@ std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
     VectorSpaceLetter = format->finiteDimensionalRepresentationLetter;
   }
   if (useOmega) {
-    out << VectorSpaceLetter << "_{" << this->weightFundamentalCoordinates.toStringLetterFormat("\\omega", format) << "}";
+    out
+    << VectorSpaceLetter
+    << "_{"
+    << this->weightFundamentalCoordinates.toStringLetterFormat(
+      "\\omega", format
+    )
+    << "}";
   } else {
-    out << VectorSpaceLetter << "_{"
-    << this->weightFundamentalCoordinates.toStringLetterFormat(format->fundamentalWeightLetter, format) << "}";
+    out
+    << VectorSpaceLetter
+    << "_{"
+    << this->weightFundamentalCoordinates.toStringLetterFormat(
+      format->fundamentalWeightLetter, format
+    )
+    << "}";
   }
   if (format != nullptr) {
     format->customPlusSign = oldCustomPlus;
@@ -50,9 +67,9 @@ void Weight<Coefficient>::accountSingleWeight(
   Rational& multiplicity,
   CharacterSemisimpleLieAlgebraModule<Coefficient>& outputAccum
 ) const {
-  //This is the Brauer-Klimyk formula. Reference:
-  //Humphreys J., Introduction to Lie algebras and representation theory
-  //page 142, exercise 9.
+  // This is the Brauer-Klimyk formula. Reference:
+  // Humphreys J., Introduction to Lie algebras and representation theory
+  // page 142, exercise 9.
   MacroRegisterFunctionWithName("Weight_CoefficientType::accountSingleWeight");
   this->checkNonZeroOwner();
   Vector<Rational> dominant = currentWeightSimpleCoords;
@@ -60,9 +77,13 @@ void Weight<Coefficient>::accountSingleWeight(
   WeylGroupData& weylGroup = this->owner->weylGroup;
   dominant += weylGroup.rho;
   int sign;
-  // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
+  // a weight has no stabilizer if and only if it is not stabilized by all root
+  // reflections.
   for (int i = 0; i < weylGroup.rootsOfBorel.size; i ++) {
-    if (weylGroup.rootScalarCartanRoot(dominant, weylGroup.rootsOfBorel[i]).isEqualToZero()) {
+    if (
+      weylGroup.rootScalarCartanRoot(dominant, weylGroup.rootsOfBorel[i]).
+      isEqualToZero()
+    ) {
       return;
     }
   }
@@ -73,7 +94,8 @@ void Weight<Coefficient>::accountSingleWeight(
   }
   Weight<Rational> tempMon;
   tempMon.owner = this->owner;
-  tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(dominant);
+  tempMon.weightFundamentalCoordinates =
+  weylGroup.getFundamentalCoordinatesFromSimple(dominant);
   Coefficient coeffChange;
   coeffChange = multiplicity;
   coeffChange *= sign;
@@ -86,9 +108,9 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   CharacterSemisimpleLieAlgebraModule<Coefficient>& output,
   const Coefficient& zero
 ) const {
-  //This is the Brauer-Klimyk formula. Reference:
-  //Humphreys J. Introduction to Lie algebras and representation theory
-  //page 142, exercise 9.
+  // This is the Brauer-Klimyk formula. Reference:
+  // Humphreys J. Introduction to Lie algebras and representation theory
+  // page 142, exercise 9.
   MacroRegisterFunctionWithName("Weight_CoefficientType::tensorAndDecompose");
   this->checkNonZeroOwner();
   std::stringstream errorLog;
@@ -99,46 +121,72 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   leftHWFundCoords = this->weightFundamentalCoordinates;
   Vector<Rational> rightHWFundCoords;
   rightHWFundCoords = other.weightFundamentalCoordinates;
-
-  Rational leftTotalDim = weylGrouop.weylDimFormulaFundamentalCoords(leftHWFundCoords);
-  Rational rightTotalDim = weylGrouop.weylDimFormulaFundamentalCoords(rightHWFundCoords);
+  Rational leftTotalDim =
+  weylGrouop.weylDimFormulaFundamentalCoords(leftHWFundCoords);
+  Rational rightTotalDim =
+  weylGrouop.weylDimFormulaFundamentalCoords(rightHWFundCoords);
   if (leftTotalDim > rightTotalDim) {
     MathRoutines::swap(leftTotalDim, rightTotalDim);
     MathRoutines::swap(leftHWFundCoords, rightHWFundCoords);
   }
   HashedList<Vector<Coefficient> > weightsLeftSimpleCoords;
   List<Rational> multsLeft;
-  if (!weylGrouop.freudenthalFormula(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, 1000000)) {
+  if (
+    !weylGrouop.freudenthalFormula(
+      leftHWFundCoords,
+      weightsLeftSimpleCoords,
+      multsLeft,
+      &tempS,
+      1000000
+    )
+  ) {
     errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
   HashedList<Vector<Coefficient> > currentOrbit;
   const int OrbitSizeHardLimit = 10000000;
-  Vector<Rational> rightHWSimpleCoords = weylGrouop.getSimpleCoordinatesFromFundamental(rightHWFundCoords, zero);
+  Vector<Rational> rightHWSimpleCoords =
+  weylGrouop.getSimpleCoordinatesFromFundamental(rightHWFundCoords, zero);
   Vectors<Rational> roots;
   roots.setSize(1);
   for (int i = 0; i < weightsLeftSimpleCoords.size; i ++) {
     roots[0] = weightsLeftSimpleCoords[i];
-    weylGrouop.generateOrbit(roots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit);
+    weylGrouop.generateOrbit(
+      roots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit
+    );
     if (currentOrbit.size >= OrbitSizeHardLimit) {
-      errorLog << "Error: orbit layer size exceeded hard-coded limit of " << OrbitSizeHardLimit << ".";
+      errorLog
+      << "Error: orbit layer size exceeded hard-coded limit of "
+      << OrbitSizeHardLimit
+      << ".";
       return errorLog.str();
     }
     for (int j = 0; j < currentOrbit.size; j ++) {
-      this->accountSingleWeight(currentOrbit[j], rightHWSimpleCoords, multsLeft[i], output);
+      this->accountSingleWeight(
+        currentOrbit[j], rightHWSimpleCoords, multsLeft[i], output
+      );
     }
   }
   return errorLog.str();
 }
 
 template <class Coefficient>
-bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvaluateMeFullCharacter(
-  CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
+bool CharacterSemisimpleLieAlgebraModule<Coefficient>::
+freudenthalEvaluateMeFullCharacter(
+  CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
+  int upperBoundNumDominantWeights,
+  std::string* outputDetails
 ) {
-  MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::freudenthalEvaluateMeFullCharacter");
+  MacroRegisterFunctionWithName(
+    "charSSAlgMod_CoefficientType::freudenthalEvaluateMeFullCharacter"
+  );
   this->checkNonZeroOwner();
   CharacterSemisimpleLieAlgebraModule<Coefficient> domChar;
-  if (!this->freudenthalEvalMeDominantWeightsOnly(domChar, upperBoundNumDominantWeights, outputDetails)) {
+  if (
+    !this->freudenthalEvalMeDominantWeightsOnly(
+      domChar, upperBoundNumDominantWeights, outputDetails
+    )
+  ) {
     return false;
   }
   outputCharOwnerSetToZero.makeZero();
@@ -148,8 +196,23 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvaluateMeFull
   Weight<Coefficient> tempMon;
   tempMon.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
-    vector[0] = this->getOwner()->weylGroup.getSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordinates, Rational::zero());
-    if (!(this->getOwner()->weylGroup.generateOrbit(vector, false, orbit, false, - 1, 0, upperBoundNumDominantWeights))) {
+    vector[0] =
+    this->getOwner()->weylGroup.getSimpleCoordinatesFromFundamental(
+      domChar[i].weightFundamentalCoordinates, Rational::zero()
+    );
+    if (
+      !(
+        this->getOwner()->weylGroup.generateOrbit(
+          vector,
+          false,
+          orbit,
+          false,
+          - 1,
+          0,
+          upperBoundNumDominantWeights
+        )
+      )
+    ) {
       if (outputDetails != nullptr) {
         *outputDetails = "failed to generate orbit (possibly too large?)";
       }
@@ -157,15 +220,22 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvaluateMeFull
     }
     int orbitSize = orbit.size;
     for (int j = 0; j < orbitSize; j ++) {
-      tempMon.weightFundamentalCoordinates = this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(orbit[j]);
-      outputCharOwnerSetToZero.addMonomial(tempMon, domChar.coefficients[i]);
+      tempMon.weightFundamentalCoordinates =
+      this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(
+        orbit[j]
+      );
+      outputCharOwnerSetToZero.addMonomial(
+        tempMon, domChar.coefficients[i]
+      );
     }
   }
   return true;
 }
 
 template <class Coefficient>
-void CharacterSemisimpleLieAlgebraModule<Coefficient>::getDual(CharacterSemisimpleLieAlgebraModule<Coefficient>& output) const {
+void CharacterSemisimpleLieAlgebraModule<Coefficient>::getDual(
+  CharacterSemisimpleLieAlgebraModule<Coefficient>& output
+) const {
   if (&output == this) {
     CharacterSemisimpleLieAlgebraModule<Coefficient> thisCopy = *this;
     thisCopy.getDual(output);
@@ -182,30 +252,46 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::getDual(CharacterSemisimp
 
 template <class Coefficient>
 void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeFromWeight(
-  const Vector<Coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner
+  const Vector<Coefficient>& inputWeightSimpleCoords,
+  SemisimpleLieAlgebra* inputOwner
 ) {
   this->makeZero();
   if (inputWeightSimpleCoords.size != inputOwner->getRank()) {
-    global.fatal << "Attempting to create a character from highest weight in simple coords "
-    << inputWeightSimpleCoords.toString() << "("
-    << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
-    << " Lie algebra is of rank " << (inputOwner->getRank()) << global.fatal;
+    global.fatal
+    << "Attempting to create a character from highest weight in simple coords "
+    << inputWeightSimpleCoords.toString()
+    << "("
+    << inputWeightSimpleCoords.size
+    << " coordinates) while the owner semisimple "
+    << " Lie algebra is of rank "
+    << (inputOwner->getRank())
+    << global.fatal;
   }
   Weight<Coefficient> monomial;
   monomial.owner = inputOwner;
   monomial.weightFundamentalCoordinates =
-  inputOwner->weylGroup.getFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
+  inputOwner->weylGroup.getFundamentalCoordinatesFromSimple(
+    inputWeightSimpleCoords
+  );
   this->addMonomial(monomial, 1);
 }
 
 template <class Coefficient>
-bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvalMeDominantWeightsOnly(
-  CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
+bool CharacterSemisimpleLieAlgebraModule<Coefficient>::
+freudenthalEvalMeDominantWeightsOnly(
+  CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
+  int upperBoundNumDominantWeights,
+  std::string* outputDetails
 ) {
-  MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::freudenthalEvalMeDominantWeightsOnly");
+  MacroRegisterFunctionWithName(
+    "charSSAlgMod_CoefficientType::freudenthalEvalMeDominantWeightsOnly"
+  );
   if (&outputCharOwnerSetToZero == this) {
     CharacterSemisimpleLieAlgebraModule<Coefficient> thisCopy = *this;
-    return thisCopy.freudenthalEvalMeDominantWeightsOnly(outputCharOwnerSetToZero, upperBoundNumDominantWeights, outputDetails);
+    return
+    thisCopy.freudenthalEvalMeDominantWeightsOnly(
+      outputCharOwnerSetToZero, upperBoundNumDominantWeights, outputDetails
+    );
   }
   this->checkNonZeroOwner();
   outputCharOwnerSetToZero.makeZero();
@@ -219,21 +305,36 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvalMeDominant
   Coefficient bufferCoeff;
   for (int i = 0; i < this->size(); i ++) {
     currentWeightFundCoords = (*this)[i].weightFundamentalCoordinates;
-    if (!this->getOwner()->weylGroup.freudenthalFormula(
-      currentWeightFundCoords, currentWeights, currentMults, &localDetail, upperBoundNumDominantWeights
-    )) {
+    if (
+      !this->getOwner()->weylGroup.freudenthalFormula(
+        currentWeightFundCoords,
+        currentWeights,
+        currentMults,
+        &localDetail,
+        upperBoundNumDominantWeights
+      )
+    ) {
       if (outputDetails != nullptr) {
-        localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localDetail
-        << "<br> Further computation detail: " << localDetails.str();
+        localErrors
+        <<
+        "Encountered error while evaluating freudenthal formula. Error details: "
+        << localDetail
+        << "<br> Further computation detail: "
+        << localDetails.str();
         *outputDetails = localErrors.str();
       }
       return false;
     }
     if (localDetail != "") {
-      localDetails << "<br>MonomialPolynomial " << i + 1 << " computation details: " << localDetail;
+      localDetails << "<br>MonomialPolynomial " << i + 1
+      << " computation details: "
+      << localDetail;
     }
     for (int j = 0; j < currentWeights.size; j ++) {
-      tempMon.weightFundamentalCoordinates = this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(currentWeights[j]);
+      tempMon.weightFundamentalCoordinates =
+      this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(
+        currentWeights[j]
+      );
       bufferCoeff = this->coefficients[i];
       bufferCoeff *= currentMults[j];
       outputCharOwnerSetToZero.addMonomial(tempMon, bufferCoeff);
@@ -246,14 +347,20 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvalMeDominant
 }
 
 template <class Coefficient>
-void SemisimpleLieAlgebra::getAdjoint(MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e) {
+void SemisimpleLieAlgebra::getAdjoint(
+  MatrixTensor<Coefficient>& output,
+  ElementSemisimpleLieAlgebra<Coefficient>& e
+) {
   Matrix<Coefficient> matForm;
   this->getAdjoint(matForm, e);
   output = matForm;
 }
 
 template <class Coefficient>
-void SemisimpleLieAlgebra::getAdjoint(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e) {
+void SemisimpleLieAlgebra::getAdjoint(
+  Matrix<Coefficient>& output,
+  ElementSemisimpleLieAlgebra<Coefficient>& e
+) {
   int numberOfGenerators = this->getNumberOfGenerators();
   output.initialize(numberOfGenerators, numberOfGenerators);
   output.makeZero();
@@ -269,7 +376,8 @@ void SemisimpleLieAlgebra::getAdjoint(Matrix<Coefficient>& output, ElementSemisi
 
 template <class Coefficient>
 void SemisimpleLieAlgebra::getCommonCentralizer(
-  const List<ElementSemisimpleLieAlgebra<Coefficient> >& inputElementsToCentralize,
+  const List<ElementSemisimpleLieAlgebra<Coefficient> >&
+  inputElementsToCentralize,
   List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getCommonCentralizer");
@@ -282,8 +390,11 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
   commonAdjointOperator.getZeroEigenSpace(outputV);
   outputCentralizingElements.setSize(outputV.size);
   for (int i = 0; i < outputV.size; i ++) {
-    ElementSemisimpleLieAlgebra<Coefficient>& currentElt = outputCentralizingElements[i];
-    currentElt.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(outputV[i], *this);
+    ElementSemisimpleLieAlgebra<Coefficient>& currentElt =
+    outputCentralizingElements[i];
+    currentElt.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
+      outputV[i], *this
+    );
   }
 }
 
@@ -309,7 +420,10 @@ void SemisimpleLieAlgebra::lieBracket(
   ElementSemisimpleLieAlgebra<Coefficient> buffer;
   for (int i = 0; i < g1.size(); i ++) {
     for (int j = 0; j < g2.size(); j ++) {
-      buffer = this->lieBrackets.elements[g1[i].generatorIndex][g2[j].generatorIndex];
+      buffer =
+      this->lieBrackets.elements[g1[i].generatorIndex][
+        g2[j].generatorIndex
+      ];
       coefficient = g1.coefficients[i];
       coefficient *= g2.coefficients[j];
       buffer *= coefficient;
@@ -328,7 +442,8 @@ void ElementSemisimpleLieAlgebra<Coefficient>::actOnMe(
 }
 
 template <class Coefficient>
-Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart() const {
+Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart()
+const {
   Vector<Coefficient> result;
   if (this->isEqualToZero()) {
     result.makeZero(0);
@@ -340,8 +455,10 @@ Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart() co
   int numPosRoots = owner->getNumberOfPositiveRoots();
   result.makeZero(rank);
   if (rank <= 0 || owner == nullptr) {
-    global.fatal << "The owner of "
-    << "a semisimple Lie algebra element is non-present or corrupted. " << global.fatal;
+    global.fatal
+    << "The owner of "
+    << "a semisimple Lie algebra element is non-present or corrupted. "
+    << global.fatal;
   }
   for (int i = 0; i < rank; i ++) {
     tempGen.makeGenerator(*owner, i + numPosRoots);
@@ -386,16 +503,18 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGGenerator(
   if (generatorIndex < 0) {
     global.fatal
     << "Function makeGGenerator does not allow non-root input: "
-    << root.toString() << global.fatal;
+    << root.toString()
+    << global.fatal;
   }
   this->makeGenerator(generatorIndex, inputOwner);
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
+void ElementSemisimpleLieAlgebra<Coefficient>::
+assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
   const Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
 ) {
-  //Changing RootSystem order invalidates this function!
+  // Changing RootSystem order invalidates this function!
   this->makeZero();
   ChevalleyGenerator generator;
   for (int i = 0; i < input.size; i ++) {
@@ -407,12 +526,12 @@ void ElementSemisimpleLieAlgebra<Coefficient>::assignVectorNegativeRootSpacesCar
   }
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool ElementSemisimpleLieAlgebra<Coefficient>::isElementCartan() const {
   if (this->size() == 0) {
     return true;
   }
-  SemisimpleLieAlgebra* owner = (*this)[0].owner;
+  SemisimpleLieAlgebra * owner = (*this)[0].owner;
   for (int i = 0; i < this->size(); i ++) {
     if (!owner->isGeneratorFromCartan((*this)[i].generatorIndex)) {
       return false;
@@ -423,8 +542,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::isElementCartan() const {
 
 template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGenerator(
-  const Vector<Coefficient>& elementH,
-  SemisimpleLieAlgebra& inputOwner
+  const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwner
 ) {
   ChevalleyGenerator generator;
   this->makeZero();
@@ -437,7 +555,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGenerator(
   }
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   std::string& outputDetails,
   DrawingVariables& drawingVariables,
@@ -447,7 +565,10 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::drawMe");
   this->checkNonZeroOwner();
   CharacterSemisimpleLieAlgebraModule<Coefficient> CharCartan;
-  bool result = this->freudenthalEvalMeDominantWeightsOnly(CharCartan, upperBoundWeights, &outputDetails);
+  bool result =
+  this->freudenthalEvalMeDominantWeightsOnly(
+    CharCartan, upperBoundWeights, &outputDetails
+  );
   std::stringstream out;
   WeylGroupData& weylGroup = this->getOwner()->weylGroup;
   weylGroup.drawRootSystem(drawingVariables, false, true);
@@ -458,24 +579,41 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   for (int i = 0; i < CharCartan.size(); i ++) {
     const Weight<Coefficient>& currentMon = CharCartan[i];
     dominantWeightsNonHashed.size = 0;
-    dominantWeightsNonHashed.addOnTop(weylGroup.getSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoordinates));
-    bool isTrimmed = !weylGroup.generateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0,  0, upperBoundWeights);
+    dominantWeightsNonHashed.addOnTop(
+      weylGroup.getSimpleCoordinatesFromFundamental(
+        currentMon.weightFundamentalCoordinates
+      )
+    );
+    bool isTrimmed =
+    !weylGroup.generateOrbit(
+      dominantWeightsNonHashed,
+      false,
+      finalWeights,
+      false,
+      0,
+      0,
+      upperBoundWeights
+    );
     totalWeights += finalWeights.size;
-    if (isTrimmed || totalWeights>upperBoundWeights) {
+    if (isTrimmed || totalWeights > upperBoundWeights) {
       out << "Did not generate all weights of the module due to RAM limits. ";
       result = false;
       break;
     }
     for (int j = 0; j < finalWeights.size; j ++) {
       convertor = finalWeights[j].getVectorRational();
-      drawingVariables.drawCircleAtVectorBufferRational(convertor, "black", 3);
+      drawingVariables.drawCircleAtVectorBufferRational(
+        convertor, "black", 3
+      );
       if (useMultiplicities) {
-        drawingVariables.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].toString(), "black");
+        drawingVariables.drawTextAtVectorBufferRational(
+          convertor, CharCartan.coefficients[i].toString(), "black"
+        );
       }
     }
   }
   out << "<br>Number of computed weights: " << totalWeights << ". ";
-  if (result && totalWeights<upperBoundWeights) {
+  if (result && totalWeights < upperBoundWeights) {
     out << "<br>All weights were computed and are drawn. <br>";
   } else {
     out << "<br><b> Not all weights were computed. </b>";
@@ -485,7 +623,8 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
 }
 
 template <class Coefficient>
-void CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMeAssumeCharIsOverCartan(
+void CharacterSemisimpleLieAlgebraModule<Coefficient>::
+drawMeAssumeCharIsOverCartan(
   WeylGroupData& actualAmbientWeyl, DrawingVariables& drawingVariables
 ) const {
   if (actualAmbientWeyl.getDimension() < 2) {
@@ -493,18 +632,31 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMeAssumeCharIsOverCar
   }
   Vector<Coefficient> actualWeight;
   Vector<Rational> actualWeightRationalPart;
-
-  actualAmbientWeyl.drawRootSystem(drawingVariables, true, false, nullptr, false);
+  actualAmbientWeyl.drawRootSystem(
+    drawingVariables, true, false, nullptr, false
+  );
   for (int j = 0; j < this->size(); j ++) {
-    actualWeight = actualAmbientWeyl.getSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordinates);
-    actualWeightRationalPart = actualWeight.getVectorRational(); // <-type conversion here!
-    drawingVariables.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
-    drawingVariables.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].toString(), "black");
+    actualWeight =
+    actualAmbientWeyl.getSimpleCoordinatesFromFundamental((*this)[j].
+      weightFundamentalCoordinates
+    );
+    actualWeightRationalPart = actualWeight.getVectorRational();
+    // <-type conversion here!
+    drawingVariables.drawCircleAtVectorBufferRational(
+      actualWeightRationalPart, "black", 5
+    );
+    drawingVariables.drawTextAtVectorBufferRational(
+      actualWeightRationalPart,
+      this->coefficients[j].toString(),
+      "black"
+    );
   }
 }
 
 template <class Coefficient>
-void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeTrivial(SemisimpleLieAlgebra& inputOwner) {
+void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeTrivial(
+  SemisimpleLieAlgebra& inputOwner
+) {
   this->makeZero();
   Weight<Rational> tempMon;
   tempMon.owner = &inputOwner;
@@ -513,15 +665,21 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeTrivial(SemisimpleLie
 }
 
 template <class Coefficient>
-std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::operator*=(const CharacterSemisimpleLieAlgebraModule& other) {
+std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::operator*=(
+  const CharacterSemisimpleLieAlgebraModule& other
+) {
   return this->multiplyBy(other);
 }
 
 template <class Coefficient>
-std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(const CharacterSemisimpleLieAlgebraModule& other) {
+std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(
+  const CharacterSemisimpleLieAlgebraModule& other
+) {
   if (this->getOwner() != other.getOwner() || this->getOwner() == 0) {
-    global.fatal << "Attempt to multiply characters of "
-    << "different or non-initialized semisimple Lie algebras." << global.fatal;
+    global.fatal
+    << "Attempt to multiply characters of "
+    << "different or non-initialized semisimple Lie algebras."
+    << global.fatal;
   }
   this->setExpectedSize(other.size() + this->size());
   CharacterSemisimpleLieAlgebraModule result, summand;
@@ -547,8 +705,11 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(const C
 }
 
 template <class Coefficient>
-bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReductiveSubalgebra(
-  std::string* report, CharacterSemisimpleLieAlgebraModule& output, BranchingData& inputData
+bool CharacterSemisimpleLieAlgebraModule<Coefficient>::
+splitCharacterOverReductiveSubalgebra(
+  std::string* report,
+  CharacterSemisimpleLieAlgebraModule& output,
+  BranchingData& inputData
 ) {
   if (this->isEqualToZero()) {
     return false;
@@ -558,26 +719,35 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   std::stringstream out;
   std::string tempS;
   inputData.initializeAfterParabolicSelectionAndHomomorphism();
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmallAsSubgroupInLarge = inputData.weylGroupFiniteDimensionalSmallAsSubgroupInLarge;
-  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& weylGroupFiniteDimensionalSmall = inputData.weylGroupFiniteDimensionalSmall;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms&
+  weylGroupFiniteDimensionalSmallAsSubgroupInLarge =
+  inputData.weylGroupFiniteDimensionalSmallAsSubgroupInLarge;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms&
+  weylGroupFiniteDimensionalSmall =
+  inputData.weylGroupFiniteDimensionalSmall;
   SemisimpleLieAlgebra& smallAlgebra = inputData.homomorphism.domainAlgebra();
-  Vectors<Rational>& embeddingsSimpleEiGoesTo = inputData.homomorphism.imagesCartanDomain;
-
-  CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;
-
+  Vectors<Rational>& embeddingsSimpleEiGoesTo =
+  inputData.homomorphism.imagesCartanDomain;
+  CharacterSemisimpleLieAlgebraModule
+  charAmbientFDWeyl,
+  remainingCharProjected,
+  remainingCharDominantLevI;
   Weight<Coefficient> tempMon, localHighest;
   List<Coefficient> tempMults;
   HashedList<Vector<Coefficient> > tempHashedRoots;
   Coefficient bufferCoeff, highestCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& currentMon = (*this)[i];
-    if (!inputData.weylGroupFiniteDimensional.freudenthalFormulaIrrepIsWRTLeviPart(
-      currentMon.weightFundamentalCoordinates,
-      tempHashedRoots,
-      tempMults,
-      tempS,
-      10000
-    )) {
+    if (
+      !inputData.weylGroupFiniteDimensional.
+      freudenthalFormulaIrrepIsWRTLeviPart(
+        currentMon.weightFundamentalCoordinates,
+        tempHashedRoots,
+        tempMults,
+        tempS,
+        10000
+      )
+    ) {
       if (report != nullptr) {
         *report = tempS;
       }
@@ -585,7 +755,8 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     }
     for (int j = 0; j < tempHashedRoots.size; j ++) {
       bufferCoeff = this->coefficients[i];
-      tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.weightFundamentalCoordinates =
+      weylGroup.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
       tempMon.owner = this->getOwner();
       bufferCoeff *= tempMults[j];
       charAmbientFDWeyl.addMonomial(tempMon, bufferCoeff);
@@ -594,16 +765,22 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   Vectors<Coefficient> orbitDom;
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
-    if (!inputData.weylGroupFiniteDimensional.generateOrbitReturnFalseIfTruncated(
-      weylGroup.getSimpleCoordinatesFromFundamental(
+    if (
+      !inputData.weylGroupFiniteDimensional.generateOrbitReturnFalseIfTruncated
+      (
+        weylGroup.getSimpleCoordinatesFromFundamental(
+          charAmbientFDWeyl[i].weightFundamentalCoordinates
+        ),
+        orbitDom,
+        true,
+        10000
+      )
+    ) {
+      out
+      << "Failed to generate the complement-sub-Weyl-orbit of weight "
+      << weylGroup.getSimpleCoordinatesFromFundamental(
         charAmbientFDWeyl[i].weightFundamentalCoordinates
-      ),
-      orbitDom,
-      true,
-      10000
-    )) {
-      out << "Failed to generate the complement-sub-Weyl-orbit of weight "
-      << weylGroup.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordinates).toString();
+      ).toString();
       if (report != nullptr) {
         *report = out.str();
       }
@@ -611,9 +788,16 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     }
     tempMon.owner = this->getOwner();
     for (int k = 0; k < orbitDom.size; k ++) {
-      if (weylGroupFiniteDimensionalSmallAsSubgroupInLarge.isDominantWeight(orbitDom[k])) {
-        tempMon.weightFundamentalCoordinates = weylGroup.getFundamentalCoordinatesFromSimple(orbitDom[k]);
-        remainingCharDominantLevI.addMonomial(tempMon, charAmbientFDWeyl.coefficients[i]);
+      if (
+        weylGroupFiniteDimensionalSmallAsSubgroupInLarge.isDominantWeight(
+          orbitDom[k]
+        )
+      ) {
+        tempMon.weightFundamentalCoordinates =
+        weylGroup.getFundamentalCoordinatesFromSimple(orbitDom[k]);
+        remainingCharDominantLevI.addMonomial(
+          tempMon, charAmbientFDWeyl.coefficients[i]
+        );
       }
     }
   }
@@ -621,20 +805,38 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   format.flagUseLatex = true;
   format.customPlusSign = "\\oplus ";
   format.fundamentalWeightLetter = "\\omega";
-  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
-  << HtmlRoutines::getMathNoDisplay(remainingCharDominantLevI.toString(&format));
+  out
+  << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
+  << HtmlRoutines::getMathNoDisplay(
+    remainingCharDominantLevI.toString(&format)
+  );
   remainingCharProjected.makeZero();
   Vector<Coefficient> fundCoordsSmaller, inSimpleCoords;
-  fundCoordsSmaller.setSize(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension());
+  fundCoordsSmaller.setSize(
+    weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension()
+  );
   for (int i = 0; i < remainingCharDominantLevI.size(); i ++) {
-    inSimpleCoords = weylGroup.getSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordinates);
-    for (int j = 0; j < weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(); j ++) {
-      fundCoordsSmaller[j] = weylGroup.rootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
-      fundCoordsSmaller[j] /= weylGroupFiniteDimensionalSmall.ambientWeyl->cartanSymmetric(j, j) / 2;
+    inSimpleCoords =
+    weylGroup.getSimpleCoordinatesFromFundamental(
+      remainingCharDominantLevI[i].weightFundamentalCoordinates
+    );
+    for (
+      int j = 0; j < weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(
+      ); j ++
+    ) {
+      fundCoordsSmaller[j] =
+      weylGroup.rootScalarCartanRoot(
+        inSimpleCoords, embeddingsSimpleEiGoesTo[j]
+      );
+      fundCoordsSmaller[j] /=
+      weylGroupFiniteDimensionalSmall.ambientWeyl->cartanSymmetric(j, j) /
+      2;
     }
     tempMon.owner = &smallAlgebra;
     tempMon.weightFundamentalCoordinates = fundCoordsSmaller;
-    remainingCharProjected.addMonomial(tempMon, remainingCharDominantLevI.coefficients[i]);
+    remainingCharProjected.addMonomial(
+      tempMon, remainingCharDominantLevI.coefficients[i]
+    );
   }
   Vector<Coefficient> simpleGeneratorBaseField;
   output.makeZero();
@@ -642,23 +844,36 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     localHighest = *remainingCharProjected.monomials.lastObject();
     for (bool Found = true; Found;) {
       Found = false;
-      for (int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i ++) {
+      for (
+        int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i ++
+      ) {
         tempMon = localHighest;
-        simpleGeneratorBaseField = weylGroupFiniteDimensionalSmall.rootsOfBorel[i]; // <- implicit type conversion here!
-        tempMon.weightFundamentalCoordinates += weylGroupFiniteDimensionalSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(
-          simpleGeneratorBaseField
-        );
+        simpleGeneratorBaseField =
+        weylGroupFiniteDimensionalSmall.rootsOfBorel[i];
+        // <- implicit type conversion here!
+        tempMon.weightFundamentalCoordinates +=
+        weylGroupFiniteDimensionalSmall.ambientWeyl->
+        getFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
         if (remainingCharProjected.monomials.contains(tempMon)) {
           localHighest = tempMon;
           Found = true;
         }
       }
     }
-    highestCoeff = remainingCharProjected.coefficients[remainingCharProjected.monomials.getIndex(localHighest)];
+    highestCoeff =
+    remainingCharProjected.coefficients[
+      remainingCharProjected.monomials.getIndex(localHighest)
+    ];
     output.addMonomial(localHighest, highestCoeff);
-    if (!weylGroupFiniteDimensionalSmall.freudenthalFormulaIrrepIsWRTLeviPart(
-      localHighest.weightFundamentalCoordinates, tempHashedRoots, tempMults, tempS, 10000
-    )) {
+    if (
+      !weylGroupFiniteDimensionalSmall.freudenthalFormulaIrrepIsWRTLeviPart(
+        localHighest.weightFundamentalCoordinates,
+        tempHashedRoots,
+        tempMults,
+        tempS,
+        10000
+      )
+    ) {
       if (report != nullptr) {
         *report = tempS;
       }
@@ -667,14 +882,17 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     for (int i = 0; i < tempHashedRoots.size; i ++) {
       tempMon.owner = &smallAlgebra;
       tempMon.weightFundamentalCoordinates =
-      weylGroupFiniteDimensionalSmall.ambientWeyl->getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+      weylGroupFiniteDimensionalSmall.ambientWeyl->
+      getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff = tempMults[i];
       bufferCoeff *= highestCoeff;
       remainingCharProjected.subtractMonomial(tempMon, bufferCoeff);
     }
   }
   format.fundamentalWeightLetter = "\\psi";
-  out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
+  out
+  <<
+  "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
   << HtmlRoutines::getMathNoDisplay(output.toString(&format));
   if (report != nullptr) {
     DrawingVariables drawingVariables1;
@@ -682,22 +900,39 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     output.drawMeNoMultiplicities(tempS, drawingVariables1, 10000);
     Vector<Rational> leftRoot;
     Vector<Rational> rightRoot;
-    weylGroupFiniteDimensionalSmall.ambientWeyl->group.computeAllElements(false, 20);
+    weylGroupFiniteDimensionalSmall.ambientWeyl->group.computeAllElements(
+      false, 20
+    );
     out << "<hr>";
     for (int i = 0; i < output.size(); i ++) {
-      leftRoot = weylGroupFiniteDimensionalSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
+      leftRoot =
+      weylGroupFiniteDimensionalSmall.ambientWeyl->
+      getSimpleCoordinatesFromFundamental(
         output[i].weightFundamentalCoordinates
       ).getVectorRational();
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
-      drawingVariables1.drawTextAtVectorBufferRational(leftRoot, tempStream.str(), "black");
-      for (int j = 1; j < weylGroupFiniteDimensionalSmall.ambientWeyl->group.elements.size; j ++) {
+      drawingVariables1.drawTextAtVectorBufferRational(
+        leftRoot, tempStream.str(), "black"
+      );
+      for (
+        int j = 1; j < weylGroupFiniteDimensionalSmall.ambientWeyl->group.
+        elements.size; j ++
+      ) {
         rightRoot = leftRoot;
-        weylGroupFiniteDimensionalSmall.ambientWeyl->actOnRhoModified(j, rightRoot);
-        drawingVariables1.drawCircleAtVectorBufferRational(rightRoot, "#a00000", 5);
+        weylGroupFiniteDimensionalSmall.ambientWeyl->actOnRhoModified(
+          j, rightRoot
+        );
+        drawingVariables1.drawCircleAtVectorBufferRational(
+          rightRoot, "#a00000", 5
+        );
       }
     }
-    out << "<hr>" << drawingVariables1.getHTMLDiv(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(), false);
+    out
+    << "<hr>"
+    << drawingVariables1.getHTMLDiv(
+      weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(), false
+    );
     *report = out.str();
   }
   return true;
@@ -743,7 +978,9 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   const ElementSemisimpleLieAlgebra<Coefficient>& element,
   Matrix<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getElementStandardRepresentation");
+  MacroRegisterFunctionWithName(
+    "SemisimpleLieAlgebra::getElementStandardRepresentation"
+  );
   char dynkinType = 0;
   if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
     return false;
@@ -755,9 +992,7 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   output.makeZeroMatrix(this->getRank() + 1, 0);
   for (int i = 0; i < element.size(); i ++) {
     this->accumulateChevalleyGeneratorStandardRepresentation(
-      element[i],
-      element.coefficients[i],
-      output
+      element[i], element.coefficients[i], output
     );
   }
   return true;
@@ -769,17 +1004,23 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getElementStandardRepresentation");
+  MacroRegisterFunctionWithName(
+    "SemisimpleLieAlgebra::getElementStandardRepresentation"
+  );
   char dynkinType = 0;
   if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "getElementStandardRepresentation implemented only for simple Lie algebras.";
+      *commentsOnFailure
+      <<
+      "getElementStandardRepresentation implemented only for simple Lie algebras."
+      ;
     }
     return false;
   }
   if (dynkinType != 'A') {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "getElementStandardRepresentation implemented only for type A.";
+      *commentsOnFailure
+      << "getElementStandardRepresentation implemented only for type A.";
     }
     // Only type A is supported as of writing.
     return false;
@@ -794,15 +1035,13 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   for (int i = 0; i < element.size(); i ++) {
     const MonomialUniversalEnveloping<Coefficient>& monomial = element[i];
     monomialMatrix.makeIdentity(output, 0, 1);
-    for (int j = 0; j < monomial.generatorsIndices.size; j++) {
+    for (int j = 0; j < monomial.generatorsIndices.size; j ++) {
       ChevalleyGenerator generator;
       generator.makeGenerator(*this, monomial.generatorsIndices[j]);
       powerMatrix.initialize(dimension, dimension);
       powerMatrix.makeZero(zero);
       this->accumulateChevalleyGeneratorStandardRepresentation(
-        generator,
-        one,
-        powerMatrix
+        generator, one, powerMatrix
       );
       int power = 0;
       if (!monomial.powers[j].isSmallInteger(&power)) {
@@ -836,20 +1075,29 @@ bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentation(
     return false;
   }
   if (element.owner != this) {
-    global.fatal << "Generator does not belong to this semisimple Lie algebra." << global.fatal;
+    global.fatal
+    << "Generator does not belong to this semisimple Lie algebra."
+    << global.fatal;
   }
-  return accumulateChevalleyGeneratorStandardRepresentationInTypeA(element, coefficient, output);
+  return
+  accumulateChevalleyGeneratorStandardRepresentationInTypeA(
+    element, coefficient, output
+  );
 }
 
 template <typename Coefficient>
-bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA(
+bool SemisimpleLieAlgebra::
+accumulateChevalleyGeneratorStandardRepresentationInTypeA(
   const ChevalleyGenerator& element,
   const Coefficient& coefficient,
   Matrix<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA");
+  MacroRegisterFunctionWithName(
+    "SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA"
+  );
   if (element.isInCartan(nullptr)) {
-    int index = this->getCartanCoordinateIndexFromCartanGeneratorIndex(
+    int index =
+    this->getCartanCoordinateIndexFromCartanGeneratorIndex(
       element.generatorIndex
     );
     output(index, index) += coefficient;
@@ -859,7 +1107,8 @@ bool SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInT
   Vector<Rational> vector;
   if (!element.isInRootSpace(&vector)) {
     global.fatal
-    << "Chevalley generator is neither in a root space nor in the Cartan subalgebra. "
+    <<
+    "Chevalley generator is neither in a root space nor in the Cartan subalgebra. "
     << global.fatal;
   }
   int firstNonZeroIndex = 0;
@@ -912,9 +1161,11 @@ bool SemisimpleLieAlgebra::hasImplementedCartanInvolutionMaximallyCompactCase(
     positive.makeGeneratorRootSpace(*this, root);
     ChevalleyGenerator negative;
     negative.makeGeneratorRootSpace(*this, - root);
-    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex].makeGGenerator(- root, *this);
+    whichInvolution->imagesChevalleyGenerators[positive.generatorIndex].
+    makeGGenerator(- root, *this);
     whichInvolution->imagesChevalleyGenerators[positive.generatorIndex] *= - 1;
-    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex].makeGGenerator(root, *this);
+    whichInvolution->imagesChevalleyGenerators[negative.generatorIndex].
+    makeGGenerator(root, *this);
     whichInvolution->imagesChevalleyGenerators[negative.generatorIndex] *= - 1;
   }
   for (int i = 0; i < rank; i ++) {
@@ -951,9 +1202,10 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::applyTo(
 }
 
 template <class Coefficient>
-SemisimpleLieAlgebra& LinearMapSemisimpleLieAlgebra<Coefficient>::owner() {
+SemisimpleLieAlgebra&LinearMapSemisimpleLieAlgebra<Coefficient>::owner() {
   for (int i = 0; i < this->imagesChevalleyGenerators.size; i ++) {
-    ElementSemisimpleLieAlgebra<Coefficient>& current = this->imagesChevalleyGenerators[i];
+    ElementSemisimpleLieAlgebra<Coefficient>& current =
+    this->imagesChevalleyGenerators[i];
     if (current.size() == 0) {
       continue;
     }
@@ -972,7 +1224,9 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::findEigenSpace(
   const Coefficient& eigenValue,
   List<ElementSemisimpleLieAlgebra<Coefficient> >& outputBasis
 ) {
-  MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::findEigenSpace");
+  MacroRegisterFunctionWithName(
+    "LinearMapSemisimpleLieAlgebra::findEigenSpace"
+  );
   outputBasis.clear();
   Matrix<Coefficient> matrix;
   this->getMatrix(matrix);
@@ -992,7 +1246,9 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::findEigenSpace(
 }
 
 template <class Coefficient>
-void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(Matrix<Coefficient>& output) {
+void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(
+  Matrix<Coefficient>& output
+) {
   MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::getMatrix");
   if (this->imagesChevalleyGenerators.size == 0) {
     output.makeZero();
@@ -1000,7 +1256,8 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(Matrix<Coefficient>& 
   }
   output.makeZeroMatrix(this->imagesChevalleyGenerators.size, 0);
   for (int i = 0; i < this->imagesChevalleyGenerators.size; i ++) {
-    ElementSemisimpleLieAlgebra<Coefficient>& current = this->imagesChevalleyGenerators[i];
+    ElementSemisimpleLieAlgebra<Coefficient>& current =
+    this->imagesChevalleyGenerators[i];
     for (int j = 0; j < current.size(); j ++) {
       const ChevalleyGenerator& currentMonomial = current.monomials[j];
       int rowIndex = currentMonomial.generatorIndex;
@@ -1010,3 +1267,4 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(Matrix<Coefficient>& 
 }
 
 #endif // header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
+

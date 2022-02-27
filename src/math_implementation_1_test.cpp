@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
 #include "crypto.h"
@@ -6,19 +7,32 @@
 #include "calculator.h"
 #include "math_rational_function_implementation.h"
 
-bool LargeIntegerUnsigned::Test::serializationToHex(const LargeIntegerUnsigned& input) {
+bool LargeIntegerUnsigned::Test::serializationToHex(
+  const LargeIntegerUnsigned& input
+) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::Test::serializationToHex");
   std::string resultCryptoHex, resultByteSerializationHex;
-  if (!Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
-    global.fatal << "Function Crypto::convertLargeUnsignedToHexSignificantDigitsFirst is not supposed to return false. " << global.fatal;
+  if (
+    !Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
+      input, 0, resultCryptoHex
+    )
+  ) {
+    global.fatal
+    <<
+    "Function Crypto::convertLargeUnsignedToHexSignificantDigitsFirst is not supposed to return false. "
+    << global.fatal;
   }
   List<unsigned char> serialization;
   input.writeBigEndianBytes(serialization, true);
-  resultByteSerializationHex = Crypto::convertListUnsignedCharsToHex(serialization);
+  resultByteSerializationHex =
+  Crypto::convertListUnsignedCharsToHex(serialization);
   if (resultByteSerializationHex != resultCryptoHex) {
-    global.fatal << "Byte serialization hex: " << resultByteSerializationHex
+    global.fatal
+    << "Byte serialization hex: "
+    << resultByteSerializationHex
     << " not equal to crypto hex conversion: "
-    << resultCryptoHex << ". "
+    << resultCryptoHex
+    << ". "
     << global.fatal;
   }
   return true;
@@ -35,7 +49,8 @@ bool LargeIntegerUnsigned::Test::all() {
 }
 
 bool LargeIntegerUnsigned::Test::comparisons() {
-  List<LargeIntegerUnsigned> toTest = {
+  List<LargeIntegerUnsigned> toTest =
+  {
     LargeIntegerUnsigned(0),
     LargeIntegerUnsigned(1),
     LargeIntegerUnsigned(2),
@@ -44,7 +59,9 @@ bool LargeIntegerUnsigned::Test::comparisons() {
   for (int i = 0; i < toTest.size; i ++) {
     LargeIntegerUnsigned& current = toTest[i];
     if (!current.isGreaterThanOrEqualTo(current)) {
-      global.fatal << "Number: " << current
+      global.fatal
+      << "Number: "
+      << current
       << " not greater than or equal to itself. "
       << global.fatal;
     }
@@ -52,15 +69,23 @@ bool LargeIntegerUnsigned::Test::comparisons() {
   for (int i = 0; i < toTest.size; i ++) {
     for (int j = i + 1; j < toTest.size; j ++) {
       bool mustBeTrue = toTest[j] > toTest[i];
-      if (! mustBeTrue) {
-        global.fatal << "Number: " << toTest[j]
-        << " not greater than " << toTest[i] << ". "
+      if (!mustBeTrue) {
+        global.fatal
+        << "Number: "
+        << toTest[j]
+        << " not greater than "
+        << toTest[i]
+        << ". "
         << global.fatal;
       }
-      mustBeTrue = toTest[i] < toTest[j] ;
+      mustBeTrue = toTest[i] < toTest[j];
       if (!mustBeTrue) {
-        global.fatal << "Number: " << toTest[i]
-        << " not less than " << toTest[j] << ". "
+        global.fatal
+        << "Number: "
+        << toTest[i]
+        << " not less than "
+        << toTest[j]
+        << ". "
         << global.fatal;
       }
     }
@@ -80,12 +105,24 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
   mustReturnFalse.addOnTop(4);
   mustReturnFalse.addOnTop(6);
   mustReturnFalse.addOnTop(9989);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 0, 3);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 100, 3);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 0, 3);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 100, 3);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(mustReturnTrue, true, 100);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(mustReturnFalse, false, 100);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+    mustReturnTrue, true, 0, 3
+  );
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+    mustReturnTrue, true, 100, 3
+  );
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+    mustReturnFalse, false, 0, 3
+  );
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+    mustReturnFalse, false, 100, 3
+  );
+  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
+    mustReturnTrue, true, 100
+  );
+  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
+    mustReturnFalse, false, 100
+  );
   return true;
 }
 
@@ -103,15 +140,24 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
       if (!mustBeTrue) {
         compositeOrPrime = "prime";
       }
-      global.fatal << "Input " << input[i] << " is incorrectly computed to be "
-      << compositeOrPrime << ". Miller-Rabin tries: "
-      << millerRabinTries << ". "
+      global.fatal
+      << "Input "
+      << input[i]
+      << " is incorrectly computed to be "
+      << compositeOrPrime
+      << ". Miller-Rabin tries: "
+      << millerRabinTries
+      << ". "
       << global.fatal;
     }
     int64_t elapsed = global.getElapsedMilliseconds() - millisecondsStart;
     if (elapsed > maximumRunningTimeMilliseconds) {
-      global.fatal << "It took longer than " << maximumRunningTimeMilliseconds
-      << "ms to determine whether " << input[i] << " is prime."
+      global.fatal
+      << "It took longer than "
+      << maximumRunningTimeMilliseconds
+      << "ms to determine whether "
+      << input[i]
+      << " is prime."
       << global.fatal;
     }
   }
@@ -119,18 +165,26 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
 }
 
 bool LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
-  const List<LargeIntegerUnsigned> &input, bool mustBeTrue, int millerRabinTries
+  const List<LargeIntegerUnsigned>& input,
+  bool mustBeTrue,
+  int millerRabinTries
 ) {
   for (int i = 0; i < input.size; i ++) {
-    bool result = input[i].isPossiblyPrimeMillerRabin(millerRabinTries, nullptr);
+    bool result =
+    input[i].isPossiblyPrimeMillerRabin(millerRabinTries, nullptr);
     if (result != mustBeTrue) {
       std::string compositeOrPrime = "composite";
       if (!mustBeTrue) {
         compositeOrPrime = "prime";
       }
-      global.fatal << "Input " << input[i] << " is incorrectly computed via Miller-Rabin to be "
-      << compositeOrPrime << ". Miller-Rabin tries: "
-      << millerRabinTries << ". "
+      global.fatal
+      << "Input "
+      << input[i]
+      << " is incorrectly computed via Miller-Rabin to be "
+      << compositeOrPrime
+      << ". Miller-Rabin tries: "
+      << millerRabinTries
+      << ". "
       << global.fatal;
     }
   }
@@ -154,31 +208,46 @@ bool LargeIntegerUnsigned::Test::guaranteedPrime() {
   for (int i = 0; i < primes.size; i ++) {
     List<unsigned int> notUsed;
     bool mustBeTrue = false;
-    bool mustBeFalse = primes[i].isCompositePrimeDivision(notUsed, mustBeTrue, nullptr);
+    bool mustBeFalse =
+    primes[i].isCompositePrimeDivision(notUsed, mustBeTrue, nullptr);
     if (mustBeFalse) {
-      global.fatal << "Prime number: " << primes[i] << " computed as composite." << global.fatal;
+      global.fatal
+      << "Prime number: "
+      << primes[i]
+      << " computed as composite."
+      << global.fatal;
     }
     if (!mustBeTrue) {
-      global.fatal << "Prime number: " << primes[i] << " not reported as guaranteed prime." << global.fatal;
+      global.fatal
+      << "Prime number: "
+      << primes[i]
+      << " not reported as guaranteed prime."
+      << global.fatal;
     }
   }
   LargeIntegerUnsigned notGuaranteedPrime;
   notGuaranteedPrime.assignString("10000000019");
   bool guaranteed = true;
   List<unsigned int> notUsed;
-  bool mustBeFalse = notGuaranteedPrime.isCompositePrimeDivision(notUsed, guaranteed, nullptr);
+  bool mustBeFalse =
+  notGuaranteedPrime.isCompositePrimeDivision(notUsed, guaranteed, nullptr);
   if (mustBeFalse) {
-    global.fatal << "Prime number: " << notGuaranteedPrime
-    << " should be too large to be a guaranteed prime." << global.fatal;
+    global.fatal
+    << "Prime number: "
+    << notGuaranteedPrime
+    << " should be too large to be a guaranteed prime."
+    << global.fatal;
   }
-
   return true;
 }
 
-
 bool LargeIntegerUnsigned::Test::factor() {
-  LargeIntegerUnsigned::Test::factorSmall(120, "2, 3, 5", "3, 1, 1", 100, 100, 3);
-  LargeIntegerUnsigned::Test::factorSmall(120, "2, 3, 5", "3, 1, 1", 0, 100, 3);
+  LargeIntegerUnsigned::Test::factorSmall(
+    120, "2, 3, 5", "3, 1, 1", 100, 100, 3
+  );
+  LargeIntegerUnsigned::Test::factorSmall(
+    120, "2, 3, 5", "3, 1, 1", 0, 100, 3
+  );
   return true;
 }
 
@@ -193,21 +262,44 @@ bool LargeIntegerUnsigned::Test::factorSmall(
   List<LargeInteger> factors;
   List<int> multiplicitiesInt;
   int64_t millisecondsStart = global.getElapsedMilliseconds();
-  input.factor(factors, multiplicitiesInt, maximumDivisorToTry, numberMillerRabinRuns, nullptr);
+  input.factor(
+    factors,
+    multiplicitiesInt,
+    maximumDivisorToTry,
+    numberMillerRabinRuns,
+    nullptr
+  );
   int64_t elapsed = global.getElapsedMilliseconds() - millisecondsStart;
   if (elapsed > maximumRunningTime) {
-    global.fatal << "Factoring " << input << " with maximumDivisorToTry: " << maximumDivisorToTry
-    << " and " << numberMillerRabinRuns << " Miller-rabin runs took "
-    << elapsed << " ms, maximum allowed: "
-    << maximumRunningTime << " ms. " << global.fatal;
+    global.fatal
+    << "Factoring "
+    << input
+    << " with maximumDivisorToTry: "
+    << maximumDivisorToTry
+    << " and "
+    << numberMillerRabinRuns
+    << " Miller-rabin runs took "
+    << elapsed
+    << " ms, maximum allowed: "
+    << maximumRunningTime
+    << " ms. "
+    << global.fatal;
   }
   List<LargeInteger> multiplicities;
   multiplicities = multiplicitiesInt;
   std::stringstream out;
-  out << "Factoring: " << input << ". Got factors: "
-  << expectedFactors << " with multiplicities: "
-  << multiplicities.toStringCommaDelimited() << ". Expected: "
-  << expectedFactors << " with multiplicities: " << expectedMultiplicities << ". ";
+  out
+  << "Factoring: "
+  << input
+  << ". Got factors: "
+  << expectedFactors
+  << " with multiplicities: "
+  << multiplicities.toStringCommaDelimited()
+  << ". Expected: "
+  << expectedFactors
+  << " with multiplicities: "
+  << expectedMultiplicities
+  << ". ";
   if (
     factors.toStringCommaDelimited() != expectedFactors ||
     multiplicities.toStringCommaDelimited() != expectedMultiplicities
@@ -216,7 +308,6 @@ bool LargeIntegerUnsigned::Test::factorSmall(
   }
   return true;
 }
-
 
 bool Rational::Test::all() {
   Rational::Test::testScale();
@@ -229,10 +320,11 @@ public:
   int distinguishedIndex;
   std::string expected;
   TestRationalScale(
-    const List<std::string>& inputVector, int inputIndex, const std::string& inputExpected
+    const List<std::string>& inputVector,
+    int inputIndex,
+    const std::string& inputExpected
   );
-  TestRationalScale() {
-  }
+  TestRationalScale() {}
 };
 
 TestRationalScale::TestRationalScale(
@@ -249,7 +341,8 @@ TestRationalScale::TestRationalScale(
 }
 
 bool Rational::Test::testScale() {
-  List<TestRationalScale> toTest = {
+  List<TestRationalScale> toTest =
+  {
     TestRationalScale({"1/2", "2/3"}, 0, "3, 4"),
     TestRationalScale({"-1/2", "2/3"}, 0, "3, -4")
   };
@@ -258,9 +351,13 @@ bool Rational::Test::testScale() {
     List<Rational> copy = current.vector;
     Rational::scaleNormalizeIndex(copy, current.distinguishedIndex);
     if (copy.toStringCommaDelimited() != current.expected) {
-      global.fatal << "Vector " << current.vector.toStringCommaDelimited()
-      << " scaled to " << copy.toStringCommaDelimited()
-      << " instead of the expected: " << current.expected
+      global.fatal
+      << "Vector "
+      << current.vector.toStringCommaDelimited()
+      << " scaled to "
+      << copy.toStringCommaDelimited()
+      << " instead of the expected: "
+      << current.expected
       << global.fatal;
     }
   }
@@ -282,8 +379,15 @@ bool ElementZmodP::Test::basicOperations() {
   ElementZmodP z = y;
   z *= x;
   if (!(z.value == 1)) {
-    global.fatal << "Bad arithmetic: " << x.toString() << " * "
-    << y.toString() << " equals: " << z.toString() << ". " << global.fatal;
+    global.fatal
+    << "Bad arithmetic: "
+    << x.toString()
+    << " * "
+    << y.toString()
+    << " equals: "
+    << z.toString()
+    << ". "
+    << global.fatal;
   }
   return true;
 }
@@ -302,7 +406,13 @@ bool ElementZmodP::Test::scale() {
   std::string scaled = elementList.toStringCommaDelimited();
   std::string expected = "(1 mod (7)), (0 mod (7)), (5 mod (7))";
   if (scaled != expected) {
-    global.fatal << "Bad scaling, got: " << scaled << ", expected: " << expected << ". " << global.fatal;
+    global.fatal
+    << "Bad scaling, got: "
+    << scaled
+    << ", expected: "
+    << expected
+    << ". "
+    << global.fatal;
   }
   if (scale.value != 4) {
     global.fatal << "Bad scaling, scale expected to be 4. " << global.fatal;
@@ -310,13 +420,17 @@ bool ElementZmodP::Test::scale() {
   return true;
 }
 
-template<>
-RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(const std::string& input) {
+template < >
+RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(
+  const std::string& input
+) {
   Calculator parser;
   std::string inputModified = "MakeRationalFunction(" + input + ")";
   parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputModified);
-  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
+  if (
+    !parser.programExpression.startsWith(parser.opCommandSequence())
+  ) {
     global.fatal
     << "RationalFunction::fromString parsed: "
     << parser.programExpression.toString()
@@ -325,7 +439,8 @@ RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(const st
   }
   RationalFraction<Rational> result;
   if (!parser.programExpression[1].isOfType(&result)) {
-    global.fatal << "RationalFunction::fromString did not "
+    global.fatal
+    << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
     << parser.programExpression.toString()
     << global.fatal;
@@ -333,49 +448,65 @@ RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(const st
   return result;
 }
 
-template<>
+template < >
 bool RationalFraction<Rational>::Test::all() {
   RationalFraction<Rational>::Test::fromStringTest();
   RationalFraction<Rational>::Test::scaleNormalizeIndex();
   return true;
 }
 
-template<>
+template < >
 bool RationalFraction<Rational>::Test::fromStringTest() {
   MacroRegisterFunctionWithName("RationalFunction::Test::fromString");
   std::string input = "(a^2+7b)/(2+d*c)";
   std::string expected = "(x_{1}^{2}+7x_{2} )/(x_{3} x_{4} +2)";
-  RationalFraction<Rational> underTest = RationalFraction<Rational>::Test::fromString(input);
+  RationalFraction<Rational> underTest =
+  RationalFraction<Rational>::Test::fromString(input);
   if (underTest.toString() != expected) {
-    global.fatal << "Input: " << input << " parsed as: "
-    << underTest.toString() << ", expected: "
-    << expected << ". " << global.fatal;
+    global.fatal
+    << "Input: "
+    << input
+    << " parsed as: "
+    << underTest.toString()
+    << ", expected: "
+    << expected
+    << ". "
+    << global.fatal;
   }
   return true;
 }
 
-template<>
+template < >
 bool RationalFraction<Rational>::Test::scaleNormalizeIndex() {
-  RationalFraction<Rational> a = RationalFraction<Rational>::Test::fromString("(a+1/2)/(b+1/3)");
-  RationalFraction<Rational> b = RationalFraction<Rational>::Test::fromString("2a/5");
-  RationalFraction<Rational> c = RationalFraction<Rational>::Test::fromString("3a/(7x)");
-  List<List<RationalFraction<Rational> > > toScale = {
-    {a},
-    {a, b},
-    {a, b, c}
-  };
-  List<std::string> expected = {
-  "(2x_{1} +1)/(3x_{2} +1)",
-  "(30x_{1} +15)/(3x_{2} +1), 4x_{1} ",
-  "(210x_{1} +105)/(3x_{2} +1), 28x_{1} , 30x_{1} /(x_{2} )"
+  RationalFraction<Rational> a = RationalFraction<Rational>::Test::fromString(
+    "(a+1/2)/(b+1/3)"
+  );
+  RationalFraction<Rational> b = RationalFraction<Rational>::Test::fromString(
+    "2a/5"
+  );
+  RationalFraction<Rational> c = RationalFraction<Rational>::Test::fromString(
+    "3a/(7x)"
+  );
+  List<List<RationalFraction<Rational> > > toScale =
+  {{a}, {a, b}, {a, b, c}};
+  List<std::string> expected =
+  {
+    "(2x_{1} +1)/(3x_{2} +1)",
+    "(30x_{1} +15)/(3x_{2} +1), 4x_{1} ",
+    "(210x_{1} +105)/(3x_{2} +1), 28x_{1} , 30x_{1} /(x_{2} )"
   };
   for (int i = 0; i < toScale.size; i ++) {
     std::string atStart = toScale[i].toStringCommaDelimited();
     RationalFraction::scaleNormalizeIndex(toScale[i], 0);
     if (toScale[i].toStringCommaDelimited() != expected[i]) {
-      global.fatal << "Scaling rational functions: " << atStart
-      << " produced: " << toScale[i].toStringCommaDelimited()
-      << " instead of the expected: " << expected[i] << global.fatal;
+      global.fatal
+      << "Scaling rational functions: "
+      << atStart
+      << " produced: "
+      << toScale[i].toStringCommaDelimited()
+      << " instead of the expected: "
+      << expected[i]
+      << global.fatal;
     }
   }
   return true;
@@ -400,7 +531,15 @@ bool Selection::Test::testNElements(int n) {
   LargeInteger twoToTheNth = 2;
   twoToTheNth.raiseToPower(n);
   if (twoToTheNth != counter) {
-    global.fatal << "Got " << counter << " subsets of " << n << " elements, expected: " << twoToTheNth << global.fatal;
+    global.fatal
+    << "Got "
+    << counter
+    << " subsets of "
+    << n
+    << " elements, expected: "
+    << twoToTheNth
+    << global.fatal;
   }
   return true;
 }
+

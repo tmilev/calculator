@@ -1,28 +1,53 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_functions_polynomial_ALREADY_INCLUDED
 #define header_calculator_functions_polynomial_ALREADY_INCLUDED
+
 #include "calculator_interface.h"
+
 class CalculatorFunctionsPolynomial {
 public:
-  static bool polynomialDivisionSlidesGrLex(Calculator& calculator, const Expression& input, Expression& output);
-  static bool polynomialDivisionRemainder(Calculator& calculator, const Expression& input, Expression& output);
-  static bool polynomialDivisionQuotient(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialDivisionSlidesGrLex(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool polynomialDivisionRemainder(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool polynomialDivisionQuotient(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool polynomialDivisionVerbose(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
     List<MonomialPolynomial>::Comparator* monomialOrder
   );
-  static bool polynomialDivisionVerboseGrLex(Calculator& calculator, const Expression& input, Expression& output);
-  static bool polynomialDivisionVerboseGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output);
-  static bool polynomialDivisionVerboseLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output);
-  static bool polynomialDivisionVerboseLexicographic(Calculator& calculator, const Expression& input, Expression& output);
-  static bool factorPolynomialModPrime(Calculator& calculator, const Expression& input, Expression& output);
-  static bool factorPolynomialFiniteFields(Calculator& calculator, const Expression& input, Expression& output);
-  static bool factorPolynomialKronecker(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialDivisionVerboseGrLex(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool polynomialDivisionVerboseGradedReverseLexicographic(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool polynomialDivisionVerboseLexicographicOpposite(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool polynomialDivisionVerboseLexicographic(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool factorPolynomialModPrime(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool factorPolynomialFiniteFields(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool factorPolynomialKronecker(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   // Chooses between Kronecker / finite field factorization.
-  static bool factorPolynomialKroneckerThenFiniteFields(Calculator& calculator, const Expression& input, Expression& output);
+  static bool factorPolynomialKroneckerThenFiniteFields(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool factorPolynomialProcess(
     Calculator& calculator,
     WithContext<Polynomial<Rational> >& originalPolynomial,
@@ -30,16 +55,20 @@ public:
     List<Polynomial<Rational> >& factors,
     Expression& output
   );
-  static bool sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool polynomialRelations(Calculator& calculator, const Expression& input, Expression& output);
-  template<class Coefficient>
+  static bool sylvesterMatrix(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool polynomialRelations(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  template <class Coefficient>
   static bool sylvesterMatrixFromPolynomials(
     Calculator& calculator,
-    const List<Polynomial<Coefficient>> & polynomials,
+    const List<Polynomial<Coefficient> >& polynomials,
     ExpressionContext* context,
     Expression& output
   );
-  template<class Coefficient>
+  template <class Coefficient>
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
     Calculator& calculator,
     const Polynomial<Coefficient>& left,
@@ -49,15 +78,26 @@ public:
     bool doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomial(
-    Calculator& calculator, const Expression& input, Expression& output, bool doGCD
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
   );
-  static bool leastCommonMultiplePolynomial(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial(
+  static bool leastCommonMultiplePolynomial(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::
+    greatestCommonDivisorOrLeastCommonMultiplePolynomial(
       calculator, input, output, false
     );
   }
-  static bool greatestCommonDivisorPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial(
+  static bool greatestCommonDivisorPolynomial(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::
+    greatestCommonDivisorOrLeastCommonMultiplePolynomial(
       calculator, input, output, true
     );
   }
@@ -73,20 +113,61 @@ public:
     Expression& output,
     bool doGCD
   );
-  static bool groebnerGradedLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::gradedLexicographic);
+  static bool groebnerGradedLexicographic(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::groebner(
+      calculator,
+      input,
+      output,
+      MonomialPolynomial::Order::gradedLexicographic
+    );
   }
-  static bool groebnerGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::gradedReverseLexicographic);
+  static bool groebnerGradedReverseLexicographic(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::groebner(
+      calculator,
+      input,
+      output,
+      MonomialPolynomial::Order::gradedReverseLexicographic
+    );
   }
-  static bool groebnerLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::lexicographic);
+  static bool groebnerLexicographic(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::groebner(
+      calculator,
+      input,
+      output,
+      MonomialPolynomial::Order::lexicographic
+    );
   }
-  static bool groebnerLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::lexicographicOpposite);
+  static bool groebnerLexicographicOpposite(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::groebner(
+      calculator,
+      input,
+      output,
+      MonomialPolynomial::Order::lexicographicOpposite
+    );
   }
-  static bool groebnerModZpLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialPolynomial::Order::lexicographic, true);
+  static bool groebnerModZpLexicographic(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::groebner(
+      calculator,
+      input,
+      output,
+      MonomialPolynomial::Order::lexicographic,
+      true
+    );
   }
   static bool groebner(
     Calculator& calculator,
@@ -95,8 +176,12 @@ public:
     int order,
     bool useModZp = false
   );
-  static bool divideExpressionsAsIfPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool combineFractionsCommutativeWithInternalLibrary(Calculator& calculator, const Expression& input, Expression& output);
+  static bool divideExpressionsAsIfPolynomial(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool combineFractionsCommutativeWithInternalLibrary(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
 };
 
 #endif // header_calculator_functions_polynomial_ALREADY_INCLUDED

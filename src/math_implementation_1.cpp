@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_extra_finite_groups_implementation.h"
 #include "general_lists.h"
@@ -11,13 +12,21 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   List<int>& outputIndicesFormatAd0Ad1Ad2etc,
   Rational& outputMultiplyLieBracketsToGetGenerator
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators");
+  MacroRegisterFunctionWithName(
+    "SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators"
+  );
   outputIndicesFormatAd0Ad1Ad2etc.size = 0;
   if (this->isGeneratorFromCartan(generatorIndex)) {
     int simpleIndex = generatorIndex - this->getNumberOfPositiveRoots();
-    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->getRank());
-    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(2 * this->getNumberOfPositiveRoots() - 1 - generatorIndex);
-    outputMultiplyLieBracketsToGetGenerator = this->weylGroup.cartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
+    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(
+      generatorIndex + this->getRank()
+    );
+    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(
+      2 * this->getNumberOfPositiveRoots() - 1 - generatorIndex
+    );
+    outputMultiplyLieBracketsToGetGenerator =
+    this->weylGroup.cartanSymmetric.elements[simpleIndex][simpleIndex] /
+    2;
     return;
   }
   Vector<Rational> weight = this->getWeightOfGenerator(generatorIndex);
@@ -30,18 +39,25 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
         genWeight.negate();
       }
       newWeight = weight + genWeight;
-      if (newWeight.isEqualToZero() || this->weylGroup.isARoot(newWeight)) {
+      if (
+        newWeight.isEqualToZero() || this->weylGroup.isARoot(newWeight)
+      ) {
         weight = newWeight;
         int index = this->getGeneratorIndexFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(index);
         if (!weight.isEqualToZero()) {
           int currentIndex = this->weylGroup.rootSystem.getIndex(weight);
           index = this->getRootIndexFromGenerator(index);
-          if (!this->computedChevalleyConstants.elements[index][currentIndex]) {
+          if (
+            !this->computedChevalleyConstants.elements[index][currentIndex]
+          ) {
             global.fatal
-            << "For some reason I am not computed. Here is me: " << this->toString() << global.fatal;
+            << "For some reason I am not computed. Here is me: "
+            << this->toString()
+            << global.fatal;
           }
-          outputMultiplyLieBracketsToGetGenerator /= this->chevalleyConstants.elements[index][currentIndex];
+          outputMultiplyLieBracketsToGetGenerator /=
+          this->chevalleyConstants.elements[index][currentIndex];
         }
         break;
       }
@@ -58,16 +74,24 @@ bool PartialFractions::argumentsAllowed(
   Cone tempCone;
   bool result = tempCone.createFromVertices(arguments);
   if (tempCone.isEntireSpace()) {
-    outputWhatWentWrong = "Error: the vectors you gave as input span the entire space.";
+    outputWhatWentWrong =
+    "Error: the vectors you gave as input span the entire space.";
     return false;
   }
   for (int i = 0; i < tempCone.vertices.size; i ++) {
-    if (tempCone.isInCone(tempCone.vertices[i]) && tempCone.isInCone(- tempCone.vertices[i])) {
+    if (
+      tempCone.isInCone(tempCone.vertices[i]) &&
+      tempCone.isInCone(- tempCone.vertices[i])
+    ) {
       std::stringstream out;
-      out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
-      << tempCone.vertices[i].toString() << " as well as its opposite vector "
+      out
+      <<
+      "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
+      << tempCone.vertices[i].toString()
+      << " as well as its opposite vector "
       << (- tempCone.vertices[i]).toString()
-      << "), hence the vector partition function is " << "can only take values infinity or zero. ";
+      << "), hence the vector partition function is "
+      << "can only take values infinity or zero. ";
       outputWhatWentWrong = out.str();
       return false;
     }
@@ -75,7 +99,9 @@ bool PartialFractions::argumentsAllowed(
   return result;
 }
 
-void Lattice::intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator) {
+void Lattice::intersectWithLineGivenBy(
+  Vector<Rational>& inputLine, Vector<Rational>& outputGenerator
+) {
   Vectors<Rational> roots;
   roots.addOnTop(inputLine);
   this->intersectWithLinearSubspaceSpannedBy(roots);
@@ -91,7 +117,9 @@ void Lattice::intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 
 void LittelmannPath::actByEFDisplayIndex(int displayIndex) {
   if (this->owner == nullptr) {
-    global.fatal << "LS path without initialized owner is begin acted upon. " << global.fatal;
+    global.fatal
+    << "LS path without initialized owner is begin acted upon. "
+    << global.fatal;
   }
   if (displayIndex > 0) {
     this->actByEAlpha(displayIndex - 1);
@@ -102,10 +130,14 @@ void LittelmannPath::actByEFDisplayIndex(int displayIndex) {
 
 void LittelmannPath::actByEAlpha(int indexAlpha) {
   if (this->owner == nullptr) {
-    global.fatal << "LS path without initialized owner is begin acted upon. " << global.fatal;
+    global.fatal
+    << "LS path without initialized owner is begin acted upon. "
+    << global.fatal;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->getDimension()) {
-    global.fatal << "Index of Littelmann root operator out of range. " << global.fatal;
+    global.fatal
+    << "Index of Littelmann root operator out of range. "
+    << global.fatal;
   }
   if (this->waypoints.size == 0) {
     return;
@@ -121,7 +153,8 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   Rational lengthAlpha = weylGroup.rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / lengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
-    Rational scalarProduct = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
+    Rational scalarProduct =
+    this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (scalarProduct <= minimalScalarProduct) {
       minimalScalarProduct = scalarProduct;
       indexMinimalScalarProduct = i;
@@ -133,7 +166,8 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   }
   int precedingIndex = 0;
   for (int i = 0; i <= indexMinimalScalarProduct; i ++) {
-    Rational tempScalar = weylGroup.rootScalarCartanRoot(this->waypoints[i], alphaScaled);
+    Rational tempScalar =
+    weylGroup.rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (tempScalar >= minimalScalarProduct + 1) {
       precedingIndex = i;
     }
@@ -141,7 +175,10 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
       break;
     }
   }
-  Rational s2 = this->owner->rootScalarCartanRoot(this->waypoints[precedingIndex], alphaScaled);
+  Rational s2 =
+  this->owner->rootScalarCartanRoot(
+    this->waypoints[precedingIndex], alphaScaled
+  );
   if (!this->minimaAreIntegral()) {
     global.comments << "<br>Something is wrong: starting path is BAD!";
   }
@@ -159,21 +196,27 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
     this->waypoints[precedingIndex] = (r1 - r2) * x + r2;
   }
   Vectors<Rational> differences;
-  differences.setSize(indexMinimalScalarProduct-precedingIndex);
+  differences.setSize(indexMinimalScalarProduct - precedingIndex);
   Rational currentDist = 0;
   Rational minDist = 0;
   for (int i = 0; i < differences.size; i ++) {
-    differences[i] = this->waypoints[i + precedingIndex + 1] - this->waypoints[i + precedingIndex];
-    currentDist += weylGroup.rootScalarCartanRoot(differences[i], alphaScaled);
+    differences[i] =
+    this->waypoints[i + precedingIndex + 1] -
+    this->waypoints[i + precedingIndex];
+    currentDist +=
+    weylGroup.rootScalarCartanRoot(differences[i], alphaScaled);
     if (currentDist < minDist) {
       weylGroup.reflectSimple(indexAlpha, differences[i]);
       minDist = currentDist;
     }
   }
   for (int i = 0; i < differences.size; i ++) {
-    this->waypoints[i + precedingIndex + 1] = this->waypoints[i + precedingIndex] + differences[i];
+    this->waypoints[i + precedingIndex + 1] =
+    this->waypoints[i + precedingIndex] + differences[i];
   }
-  for (int i = indexMinimalScalarProduct + 1; i < this->waypoints.size; i ++) {
+  for (
+    int i = indexMinimalScalarProduct + 1; i < this->waypoints.size; i ++
+  ) {
     this->waypoints[i] += alpha;
   }
   this->simplify();
@@ -184,10 +227,14 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
     return;
   }
   if (this->owner == nullptr) {
-    global.fatal << "LS path without initialized owner is begin acted upon. " << global.fatal;
+    global.fatal
+    << "LS path without initialized owner is begin acted upon. "
+    << global.fatal;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->getDimension()) {
-    global.fatal << "Index of Littelmann root operator out of range. " << global.fatal;
+    global.fatal
+    << "Index of Littelmann root operator out of range. "
+    << global.fatal;
   }
   Rational minimalScalarProduct = 0;
   int indexMinimalScalarProduct = - 1;
@@ -196,20 +243,27 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
-    Rational scalarProduct = this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
+    Rational scalarProduct =
+    this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
     if (scalarProduct <= minimalScalarProduct) {
       minimalScalarProduct = scalarProduct;
       indexMinimalScalarProduct = i;
     }
   }
-  Rational lastScalar = this->owner->rootScalarCartanRoot(*this->waypoints.lastObject(), alphaScaled);
+  Rational lastScalar =
+  this->owner->rootScalarCartanRoot(
+    *this->waypoints.lastObject(), alphaScaled
+  );
   if (indexMinimalScalarProduct < 0 || lastScalar - minimalScalarProduct < 1) {
     this->waypoints.size = 0;
     return;
   }
   int succeedingIndex = 0;
-  for (int i = this->waypoints.size - 1; i >= indexMinimalScalarProduct; i --) {
-    Rational tempScalar = weylGroup.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
+  for (
+    int i = this->waypoints.size - 1; i >= indexMinimalScalarProduct; i --
+  ) {
+    Rational tempScalar =
+    weylGroup.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
     if (tempScalar >= minimalScalarProduct + 1) {
       succeedingIndex = i;
     }
@@ -217,13 +271,20 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
       break;
     }
   }
-  Rational s1 = this->owner->rootScalarCartanRoot(this->waypoints[succeedingIndex], alphaScaled);
+  Rational s1 =
+  this->owner->rootScalarCartanRoot(
+    this->waypoints[succeedingIndex], alphaScaled
+  );
   if (s1 > minimalScalarProduct + 1) {
     this->waypoints.setSize(this->waypoints.size + 1);
-    for (int i = this->waypoints.size - 1; i >= succeedingIndex + 1; i --) {
+    for (
+      int i = this->waypoints.size - 1; i >= succeedingIndex + 1; i --
+    ) {
       this->waypoints[i] = this->waypoints[i - 1];
     }
-    //Rational scalarNext = weylGroup.rootScalarCartanRoot(this->waypoints[succeedingIndex], alphaScaled);
+    // Rational scalarNext =
+    // weylGroup.rootScalarCartanRoot(this->waypoints[succeedingIndex],
+    // alphaScaled);
     Vector<Rational>& r1 = this->waypoints[succeedingIndex];
     Vector<Rational>& r2 = this->waypoints[succeedingIndex - 1];
     Rational s2 = weylGroup.rootScalarCartanRoot(r2, alphaScaled);
@@ -241,7 +302,8 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
       currentDist = 0;
     }
     oldWayPoint = this->waypoints[i + indexMinimalScalarProduct + 1];
-    this->waypoints[i + indexMinimalScalarProduct + 1] = this->waypoints[i + indexMinimalScalarProduct] + diff;
+    this->waypoints[i + indexMinimalScalarProduct + 1] =
+    this->waypoints[i + indexMinimalScalarProduct] + diff;
   }
   for (int i = succeedingIndex + 1; i < this->waypoints.size; i ++) {
     this->waypoints[i] -= alpha;
@@ -266,7 +328,8 @@ void LittelmannPath::simplify() {
     d11 = d1.scalarEuclidean(d1);
     d12 = d1.scalarEuclidean(d2);
     d22 = d2.scalarEuclidean(d2);
-    bool isBad = ((d11 * d22 - d12 * d12).isEqualToZero() && (d12 <= 0));
+    bool isBad = ((d11 * d22 - d12 * d12).isEqualToZero() && (d12 <= 0)
+    );
     if (!isBad) {
       leftIndex ++;
       this->waypoints[leftIndex] = middle;
@@ -287,12 +350,16 @@ bool LittelmannPath::minimaAreIntegral() {
   int dimension = weyl.getDimension();
   minima.setSize(dimension);
   for (int i = 0; i < dimension; i ++) {
-    minima[i] = weyl.getScalarProductSimpleRoot(this->waypoints[0], i) * 2 / weyl.cartanSymmetric.elements[i][i];
+    minima[i] = weyl.getScalarProductSimpleRoot(this->waypoints[0], i) * 2 /
+    weyl.cartanSymmetric.elements[i][i];
   }
   for (int i = 1; i < this->waypoints.size; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      minima[j] = MathRoutines::minimum(weyl.getScalarProductSimpleRoot(
-        this->waypoints[i], j) * 2 / weyl.cartanSymmetric.elements[j][j], minima[j]
+      minima[j] =
+      MathRoutines::minimum(
+        weyl.getScalarProductSimpleRoot(this->waypoints[i], j) * 2 /
+        weyl.cartanSymmetric.elements[j][j],
+        minima[j]
       );
     }
   }
@@ -314,7 +381,9 @@ void LittelmannPath::makeFromWeightInSimpleCoords(
   this->simplify();
 }
 
-std::string LittelmannPath::toStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input) {
+std::string LittelmannPath::toStringIndicesToCalculatorOutput(
+  LittelmannPath& inputStartingPath, List<int>& input
+) {
   std::stringstream out;
   for (int i = input.size - 1; i >= 0; i --) {
     int displayIndex = input[i];
@@ -323,8 +392,11 @@ std::string LittelmannPath::toStringIndicesToCalculatorOutput(LittelmannPath& in
     }
     out << "eAlpha(" << displayIndex << ", ";
   }
-  out << "littelmann"
-  << inputStartingPath.owner->getFundamentalCoordinatesFromSimple(*inputStartingPath.waypoints.lastObject()).toString();
+  out
+  << "littelmann"
+  << inputStartingPath.owner->getFundamentalCoordinatesFromSimple(
+    *inputStartingPath.waypoints.lastObject()
+  ).toString();
   for (int i = 0; i < input.size; i ++) {
     out << " ) ";
   }
@@ -351,17 +423,24 @@ bool LittelmannPath::generateOrbit(
   Selection parabolicSelectionSelectedAreInLeviPart;
   parabolicSelectionSelectedAreInLeviPart.initialize(dimension);
   if (parabolicNonSelectedAreInLeviPart != nullptr) {
-    parabolicSelectionSelectedAreInLeviPart = *parabolicNonSelectedAreInLeviPart;
+    parabolicSelectionSelectedAreInLeviPart =
+    *parabolicNonSelectedAreInLeviPart;
     parabolicSelectionSelectedAreInLeviPart.invertSelection();
   } else {
     parabolicSelectionSelectedAreInLeviPart.makeFullSelection();
   }
-  for (int lowestNonExplored = 0; lowestNonExplored < hashedOutput.size; lowestNonExplored ++) {
+  for (
+    int lowestNonExplored = 0; lowestNonExplored < hashedOutput.size;
+    lowestNonExplored ++
+  ) {
     if (upperBoundNumElts > 0 && upperBoundNumElts < hashedOutput.size) {
       result = false;
       break;
     } else {
-      for (int j = 0; j < parabolicSelectionSelectedAreInLeviPart.cardinalitySelection; j ++) {
+      for (
+        int j = 0; j < parabolicSelectionSelectedAreInLeviPart.
+        cardinalitySelection; j ++
+      ) {
         bool found = true;
         currentPath = hashedOutput[lowestNonExplored];
         currentSequence = outputOperators[lowestNonExplored];
@@ -406,7 +485,9 @@ bool LittelmannPath::generateOrbit(
   return result;
 }
 
-std::string LittelmannPath:: toStringOperatorSequenceStartingOnMe(List<int>& input) {
+std::string LittelmannPath::toStringOperatorSequenceStartingOnMe(
+  List<int>& input
+) {
   MonomialTensor<Rational> tempMon;
   tempMon = input;
   tempMon.generatorsIndices.reverseElements();
@@ -415,16 +496,21 @@ std::string LittelmannPath:: toStringOperatorSequenceStartingOnMe(List<int>& inp
 }
 
 template <class Coefficient>
-bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimental(
+bool MonomialUniversalEnvelopingOrdered<Coefficient>::
+modOutFDRelationsExperimental(
   const Vector<Rational>& highestWeightSimpleCoordinates,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
   WeylGroupData& weyl = this->owner->ownerSemisimpleLieAlgebra->weylGroup;
-  Vector<Rational> highestWeightSimpleCoordinatesTrue = highestWeightSimpleCoordinates;
+  Vector<Rational> highestWeightSimpleCoordinatesTrue =
+  highestWeightSimpleCoordinates;
   weyl.raiseToDominantWeight(highestWeightSimpleCoordinatesTrue);
-  Vector<Rational> highestWeightDualCoordinates = weyl.getDualCoordinatesFromFundamental(
-    weyl.getFundamentalCoordinatesFromSimple(highestWeightSimpleCoordinatesTrue)
+  Vector<Rational> highestWeightDualCoordinates =
+  weyl.getDualCoordinatesFromFundamental(
+    weyl.getFundamentalCoordinatesFromSimple(
+      highestWeightSimpleCoordinatesTrue
+    )
   );
   List<Coefficient> substitution;
   substitution.setSize(highestWeightDualCoordinates.size);
@@ -432,7 +518,8 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     substitution[i] = highestWeightDualCoordinates[i];
   }
   this->modOutVermaRelations(&substitution, ringUnit, ringZero);
-  int numberOfPositiveRoots = this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
+  int numberOfPositiveRoots =
+  this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   Vector<Rational> currentWeight = highestWeightSimpleCoordinatesTrue;
   Vector<Rational> testWeight;
   for (int k = this->generatorsIndices.size - 1; k >= 0; k --) {
@@ -440,21 +527,29 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     if (indexCurrentGenerator >= numberOfPositiveRoots) {
       return false;
     }
-    ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->elementOrder[indexCurrentGenerator];
-    if (!currentElt.getCartanPart().isEqualToZero() || currentElt.size() > 1) {
+    ElementSemisimpleLieAlgebra<Rational>& currentElt =
+    this->owner->elementOrder[indexCurrentGenerator];
+    if (
+      !currentElt.getCartanPart().isEqualToZero() || currentElt.size() > 1
+    ) {
       return false;
     }
     int power = 0;
     if (!this->powers[k].isSmallInteger(power)) {
       return false;
     }
-    int rootIndex = this->owner->ownerSemisimpleLieAlgebra->getRootIndexFromGenerator(currentElt[0].generatorIndex);
+    int rootIndex =
+    this->owner->ownerSemisimpleLieAlgebra->getRootIndexFromGenerator(
+      currentElt[0].generatorIndex
+    );
     const Vector<Rational>& currentRoot = weyl.rootSystem[rootIndex];
     for (int j = 0; j < power; j ++) {
       currentWeight += currentRoot;
       testWeight = currentWeight;
       weyl.raiseToDominantWeight(testWeight);
-      if (!(highestWeightSimpleCoordinatesTrue - testWeight).isPositiveOrZero()) {
+      if (
+        !(highestWeightSimpleCoordinatesTrue - testWeight).isPositiveOrZero()
+      ) {
         this->makeZero(ringZero, *this->owner);
         return true;
       }
@@ -464,7 +559,8 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
 }
 
 template <class Coefficient>
-bool ElementUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimental(
+bool ElementUniversalEnvelopingOrdered<Coefficient>::
+modOutFDRelationsExperimental(
   const Vector<Rational>& highestWeightSimpleCoordinates,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
@@ -475,7 +571,11 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperiment
   bool result = true;
   for (int i = 0; i < this->size; i ++) {
     tempMon = this->objects[i];
-    if (!tempMon.modOutFDRelationsExperimental(highestWeightSimpleCoordinates, ringUnit, ringZero)) {
+    if (
+      !tempMon.modOutFDRelationsExperimental(
+        highestWeightSimpleCoordinates, ringUnit, ringZero
+      )
+    ) {
       result = false;
     }
     output.addMonomial(tempMon);
@@ -495,7 +595,11 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   tempBasis = basis;
   tempBasis.addOnTop(*this);
   Vectors<Coefficient> tempCoords;
-  if (!this->getBasisFromSpanOfElements(tempBasis, tempCoords, elements, ringUnit, ringZero)) {
+  if (
+    !this->getBasisFromSpanOfElements(
+      tempBasis, tempCoords, elements, ringUnit, ringZero
+    )
+  ) {
     return false;
   }
   Vector<Coefficient> root;
@@ -504,8 +608,8 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   return root.getCoordinatesInBasis(tempCoords, output);
 }
 
-template<class Coefficient>
-template<class CoefficientTypeQuotientField>
+template <class Coefficient>
+template <class CoefficientTypeQuotientField>
 bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   List<ElementUniversalEnveloping<Coefficient> >& elements,
   Vectors<CoefficientTypeQuotientField>& outputCoords,
@@ -526,12 +630,14 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   }
   outputCoordsBeforeReduction.setSize(elements.size);
   for (int i = 0; i < elements.size; i ++) {
-    Vector<CoefficientTypeQuotientField>& currentList = outputCoordsBeforeReduction[i];
+    Vector<CoefficientTypeQuotientField>& currentList =
+    outputCoordsBeforeReduction[i];
     currentList.makeZero(outputCorrespondingMonomials.size);
     ElementUniversalEnveloping<Coefficient>& currentElt = elements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnveloping<Coefficient>& currentMon = currentElt[j];
-      currentList[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.coefficient;
+      currentList[outputCorrespondingMonomials.getIndex(currentMon)] =
+      currentMon.coefficient;
     }
   }
   outputBasis.size = 0;
@@ -539,19 +645,26 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   Vectors<CoefficientTypeQuotientField> basisCoordForm;
   basisCoordForm.reserve(elements.size);
   Selection selectedBasis;
-  outputCoordsBeforeReduction.SelectABasis(basisCoordForm, fieldZero, selectedBasis);
+  outputCoordsBeforeReduction.SelectABasis(
+    basisCoordForm, fieldZero, selectedBasis
+  );
   for (int i = 0; i < selectedBasis.cardinalitySelection; i ++) {
     outputBasis.addOnTop(elements.objects[selectedBasis.elements[i]]);
   }
   Matrix<Coefficient> bufferMat;
   Vectors<Coefficient> bufferVectors;
   outputCoordsBeforeReduction.getCoordinatesInBasis(
-    basisCoordForm, outputCoords, bufferVectors, bufferMat, fieldUnit, fieldZero
+    basisCoordForm,
+    outputCoords,
+    bufferVectors,
+    bufferMat,
+    fieldUnit,
+    fieldZero
   );
   return true;
 }
 
-template<class Coefficient>
+template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
   const Vector<Rational>& highestWeightInSimpleCoordinates,
   const Coefficient& ringUnit,
@@ -564,10 +677,18 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
   while (Found) {
     Found = false;
     for (int j = numPosRoots - 1; j >= 0; j --) {
-      this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(j, numPosRoots - 1);
+      this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
+        j, numPosRoots - 1
+      );
       this->simplify(ringUnit);
-      this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(j, numPosRoots - 1);
-      if (this->modOutFDRelationsExperimental(highestWeightInSimpleCoordinates, ringUnit, ringZero)) {
+      this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
+        j, numPosRoots - 1
+      );
+      if (
+        this->modOutFDRelationsExperimental(
+          highestWeightInSimpleCoordinates, ringUnit, ringZero
+        )
+      ) {
         Found = true;
       }
     }
@@ -575,7 +696,7 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
   this->simplify(ringUnit);
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
   MonomialUniversalEnveloping<Coefficient> tempMon;
   ElementUniversalEnveloping<Coefficient> result;
@@ -600,7 +721,9 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
       } else if (generator >= numPosRoots + rank) {
         generator = - generator + 2 * numPosRoots + rank - 1;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(generator, currentMon.powers[j]);
+      tempMon.multiplyByGeneratorPowerOnTheRight(
+        generator, currentMon.powers[j]
+      );
       if (power % 2 == 1) {
         coefficient *= - 1;
       }
@@ -631,44 +754,80 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
   MonomialUniversalEnveloping<Coefficient> constMon;
   constMon.makeConstant();
   if (logStream != nullptr) {
-    *logStream << "backtraced elt: " << MTright.toString(&global.defaultFormat.getElement()) << "<br>";
-    *logStream << "this element: " << this->toString(&global.defaultFormat.getElement()) << "<br>";
+    *logStream
+    << "backtraced elt: "
+    << MTright.toString(&global.defaultFormat.getElement())
+    << "<br>";
+    *logStream
+    << "this element: "
+    << this->toString(&global.defaultFormat.getElement())
+    << "<br>";
   }
   for (int j = 0; j < right.size; j ++) {
     intermediateAccum = *this;
     intermediateAccum.simplify(global, ringUnit, ringZero);
     if (logStream != nullptr) {
-      *logStream << "intermediate after simplification: "
-      << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
+      *logStream
+      << "intermediate after simplification: "
+      << intermediateAccum.toString(&global.defaultFormat.getElement())
+      << "<br>";
     }
-    intermediateAccum.modOutVermaRelations(&global, substitutionHiGoesToIthElement, ringUnit, ringZero);
+    intermediateAccum.modOutVermaRelations(
+      &global, substitutionHiGoesToIthElement, ringUnit, ringZero
+    );
     MonomialUniversalEnveloping<Coefficient>& rightMon = MTright[j];
     Coefficient& rightMonCoeff = MTright.coefficients[j];
     int power;
     for (int i = rightMon.powers.size - 1; i >= 0; i --) {
       if (rightMon.powers[i].isSmallInteger(&power)) {
         for (int k = 0; k < power; k ++) {
-          element.makeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, ringUnit);
+          element.makeOneGenerator(
+            rightMon.generatorsIndices[i],
+            *this->owners,
+            this->indexInOwners,
+            ringUnit
+          );
           MathRoutines::swap(element, intermediateAccum);
           if (logStream != nullptr) {
-            *logStream << "element before mult: " << element.toString(&global.defaultFormat) << "<br>";
-            *logStream << "intermediate before mult: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
+            *logStream
+            << "element before mult: "
+            << element.toString(&global.defaultFormat)
+            << "<br>";
+            *logStream
+            << "intermediate before mult: "
+            << intermediateAccum.toString(
+              &global.defaultFormat.getElement()
+            )
+            << "<br>";
           }
           intermediateAccum *= (element);
           if (logStream != nullptr) {
-            *logStream << "intermediate before simplification: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
+            *logStream
+            << "intermediate before simplification: "
+            << intermediateAccum.toString(
+              &global.defaultFormat.getElement()
+            )
+            << "<br>";
           }
           intermediateAccum.simplify(ringUnit);
           if (logStream != nullptr) {
-            *logStream << "intermediate after simplification: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
+            *logStream
+            << "intermediate after simplification: "
+            << intermediateAccum.toString(
+              &global.defaultFormat.getElement()
+            )
+            << "<br>";
           }
-          intermediateAccum.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
+          intermediateAccum.modOutVermaRelations(
+            substitutionHiGoesToIthElement, ringUnit, ringZero
+          );
           if (logStream != nullptr) {
-            *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement()) << "<br>";
+            *logStream
+            << "intermediate after Verma rels: "
+            << intermediateAccum.toString(
+              &global.defaultFormat.getElement()
+            )
+            << "<br>";
           }
         }
       } else {
@@ -683,14 +842,18 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.toString(&global.defaultFormat.getElement());
+    *logStream
+    << "final UE element: "
+    << Accum.toString(&global.defaultFormat.getElement());
   }
   return true;
 }
 
 template <class Coefficient>
 std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
-  const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
+  const Vector<Coefficient>* substitutionHiGoesToIthElement,
+  const Coefficient& ringUnit,
+  const Coefficient& ringZero
 ) {
   std::stringstream out;
   List<ElementUniversalEnveloping<Coefficient> > orbit;
@@ -701,10 +864,14 @@ std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   orbit.addOnTop(*this);
   for (int i = 0; i < orbit.size; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      element.makeOneGenerator(j + numPosRoots + dimension, *this->owner, ringUnit);
+      element.makeOneGenerator(
+        j + numPosRoots + dimension, *this->owner, ringUnit
+      );
       element *= orbit[i];
       element.simplify(ringUnit);
-      element.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
+      element.modOutVermaRelations(
+        substitutionHiGoesToIthElement, ringUnit, ringZero
+      );
       if (!element.isEqualToZero()) {
         orbit.addOnTop(element);
       }
@@ -712,13 +879,17 @@ std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   }
   for (int i = 0; i < orbit.size; i ++) {
     ElementUniversalEnveloping<Coefficient>& current = orbit[i];
-    out << "<br>" << current.toString(&global.defaultFormat.getElement());
+    out
+    << "<br>"
+    << current.toString(&global.defaultFormat.getElement());
   }
   return out.str();
 }
 
 template <class Coefficient>
-bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(ElementUniversalEnveloping<Rational>& output) {
+bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(
+  ElementUniversalEnveloping<Rational>& output
+) {
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Rational> tempMon;
   Rational coefficient;
@@ -733,7 +904,9 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
       if (!currentMon.powers[j].isConstant(constantPower)) {
         return false;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], constantPower);
+      tempMon.multiplyByGeneratorPowerOnTheRight(
+        currentMon.generatorsIndices[j], constantPower
+      );
     }
     output.addMonomial(tempMon, Coefficient(1));
   }
@@ -741,16 +914,25 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
 }
 
 void BranchingData::initializePart1NoSubgroups() {
-  MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl = &this->homomorphism.coDomainAlgebra().weylGroup;
-  this->weylGroupFiniteDimensionalSmall.ambientWeyl = &this->homomorphism.domainAlgebra().weylGroup;
-  this->weylGroupFiniteDimensional.ambientWeyl = &this->homomorphism.coDomainAlgebra().weylGroup;
-  this->smallParabolicSelection.initialize(weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension());
+  MacroRegisterFunctionWithName(
+    "BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups"
+  );
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl =
+  &this->homomorphism.coDomainAlgebra().weylGroup;
+  this->weylGroupFiniteDimensionalSmall.ambientWeyl =
+  &this->homomorphism.domainAlgebra().weylGroup;
+  this->weylGroupFiniteDimensional.ambientWeyl =
+  &this->homomorphism.coDomainAlgebra().weylGroup;
+  this->smallParabolicSelection.initialize(
+    weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension()
+  );
   for (int i = 0; i < this->homomorphism.imagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->homomorphism.imagesCartanDomain[i];
     this->generatorsSmallSub.addOnTop(currentV);
     for (int j = 0; j < currentV.size; j ++) {
-      if (!currentV[j].isEqualToZero() && this->inducing.selected[j]) {
+      if (
+        !currentV[j].isEqualToZero() && this->inducing.selected[j]
+      ) {
         this->generatorsSmallSub.removeLastObject();
         this->smallParabolicSelection.addSelectionAppendNewIndex(i);
         break;
@@ -766,15 +948,20 @@ void BranchingData::initializePart1NoSubgroups() {
   this->indicesNilradicalLarge.setSize(0);
   this->indicesNilradicalSmall.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> element;
-  WeylGroupData& largeWeylGroup = this->homomorphism.coDomainAlgebra().weylGroup;
+  WeylGroupData& largeWeylGroup =
+  this->homomorphism.coDomainAlgebra().weylGroup;
   WeylGroupData& smallWeylGroup = this->homomorphism.domainAlgebra().weylGroup;
-  int numB3NegGenerators = this->homomorphism.coDomainAlgebra().getNumberOfPositiveRoots();
-  int numG2NegGenerators = this->homomorphism.domainAlgebra().getNumberOfPositiveRoots();
+  int numB3NegGenerators =
+  this->homomorphism.coDomainAlgebra().getNumberOfPositiveRoots();
+  int numG2NegGenerators =
+  this->homomorphism.domainAlgebra().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = largeWeylGroup.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->inducing.cardinalitySelection; k ++) {
-      if (!currentWeight[this->inducing.elements[k]].isEqualToZero()) {
+      if (
+        !currentWeight[this->inducing.elements[k]].isEqualToZero()
+      ) {
         isInNilradical = true;
         break;
       }
@@ -789,8 +976,13 @@ void BranchingData::initializePart1NoSubgroups() {
   for (int i = 0; i < numG2NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = smallWeylGroup.rootSystem[i];
     bool isInNilradical = false;
-    for (int k = 0; k < this->smallParabolicSelection.cardinalitySelection; k ++) {
-      if (!currentWeight[this->smallParabolicSelection.elements[k]].isEqualToZero()) {
+    for (
+      int k = 0; k < this->smallParabolicSelection.cardinalitySelection; k ++
+    ) {
+      if (
+        !currentWeight[this->smallParabolicSelection.elements[k]].isEqualToZero
+        ()
+      ) {
         isInNilradical = true;
         break;
       }
@@ -807,7 +999,9 @@ void BranchingData::initializePart1NoSubgroups() {
   Vector<Rational> proj;
   for (int i = 0; i < this->nilradicalSmall.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& eltImage =
-    this->homomorphism.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
+    this->homomorphism.imagesAllChevalleyGenerators[
+      this->indicesNilradicalSmall[i]
+    ];
     int index = this->nilradicalModuloPreimageNilradical.getIndex(eltImage);
     if (index != - 1) {
       this->nilradicalModuloPreimageNilradical.removeIndexSwapWithLast(index);
@@ -825,10 +1019,16 @@ void BranchingData::initializePart1NoSubgroups() {
       }
     }
     if (!isGood) {
-      global.fatal << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
-      << " is wrong. The question is, which is the more desirable case... The bad apple is element "
-      << this->nilradicalSmall[i].toString() << " of weight "
-      << this->weightsNilradicalSmall[i].toString() << ". " << global.fatal;
+      global.fatal
+      <<
+      "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
+      <<
+      " is wrong. The question is, which is the more desirable case... The bad apple is element "
+      << this->nilradicalSmall[i].toString()
+      << " of weight "
+      << this->weightsNilradicalSmall[i].toString()
+      << ". "
+      << global.fatal;
     }
   }
 }
@@ -840,17 +1040,29 @@ BranchingData::BranchingData() {
 
 void BranchingData::initializePart2NoSubgroups() {
   List<Vectors<Rational> > emptyList;
-  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
-  this->weylGroupFiniteDimensionalSmall.makeParabolicFromSelectionSimpleRoots(
-    *this->weylGroupFiniteDimensionalSmall.ambientWeyl, this->smallParabolicSelection, 1000
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.
+  computeSubGroupFromGeneratingReflections(
+    &this->generatorsSmallSub, &emptyList, 1000, true
   );
-  this->weylGroupFiniteDimensional.makeParabolicFromSelectionSimpleRoots(this->homomorphism.coDomainAlgebra().weylGroup, this->inducing, 1000);
+  this->weylGroupFiniteDimensionalSmall.makeParabolicFromSelectionSimpleRoots(
+    *this->weylGroupFiniteDimensionalSmall.ambientWeyl,
+    this->smallParabolicSelection,
+    1000
+  );
+  this->weylGroupFiniteDimensional.makeParabolicFromSelectionSimpleRoots(
+    this->homomorphism.coDomainAlgebra().weylGroup,
+    this->inducing,
+    1000
+  );
   this->weylGroupFiniteDimensional.computeRootSubsystem();
-  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeRootSubsystem();
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeRootSubsystem()
+  ;
   this->weylGroupFiniteDimensionalSmall.computeRootSubsystem();
 }
 
-std::string BranchingData::getStringCasimirProjector(int index, const Rational& additionalMultiple) {
+std::string BranchingData::getStringCasimirProjector(
+  int index, const Rational& additionalMultiple
+) {
   Vector<RationalFraction<Rational> > weightDifference;
   std::stringstream formulaStream1;
   HashedList<Vector<RationalFraction<Rational> > > accountedDiffs;
@@ -858,12 +1070,18 @@ std::string BranchingData::getStringCasimirProjector(int index, const Rational& 
   bool found = false;
   for (int i = 0; i < this->g2Weights.size; i ++) {
     weightDifference = this->g2Weights[i] - this->g2Weights[index];
-    if (weightDifference.isPositive() && !accountedDiffs.contains(weightDifference)) {
+    if (
+      weightDifference.isPositive() &&
+      !accountedDiffs.contains(weightDifference)
+    ) {
       accountedDiffs.addOnTop(weightDifference);
       if (additionalMultiple != 1) {
         formulaStream1 << additionalMultiple.toString(&this->format);
       }
-      formulaStream1 << "(i(\\bar c) - (" << this->allCharacters[i].toString(&this->format) << "))";
+      formulaStream1
+      << "(i(\\bar c) - ("
+      << this->allCharacters[i].toString(&this->format)
+      << "))";
       found = true;
     }
   }
@@ -881,7 +1099,9 @@ LittelmannPath::LittelmannPath(const LittelmannPath& other) {
   *this = other;
 }
 
-bool LittelmannPath::isAdaptedString(MonomialTensor<int, HashFunctions::hashFunction>& inputString) {
+bool LittelmannPath::isAdaptedString(
+  MonomialTensor<int, HashFunctions::hashFunction>& inputString
+) {
   LittelmannPath tempPath = *this;
   LittelmannPath tempPath2;
   for (int i = 0; i < inputString.generatorsIndices.size; i ++) {
@@ -900,12 +1120,14 @@ bool LittelmannPath::isAdaptedString(MonomialTensor<int, HashFunctions::hashFunc
   return true;
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup(
-  List<ElementWeylGroup>& output
-) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+getGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output) {
+  MacroRegisterFunctionWithName(
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup"
+  );
   if (this->externalAutomorphisms.size > 0) {
-    global.fatal << "This is  a programming error: a function meant for subgroups that are "
+    global.fatal
+    << "This is  a programming error: a function meant for subgroups that are "
     << "Weyl groups of Levi parts of parabolics "
     << "is called on a subgroup that is not of that type. "
     << global.fatal;
@@ -917,19 +1139,30 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   Vector<int> indexShifts;
   indexShifts.setSize(this->simpleRootsInner.size);
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
-    indexShifts[i] = this->simpleRootsInner[i].getIndexFirstNonZeroCoordinate();
+    indexShifts[i] = this->simpleRootsInner[i].getIndexFirstNonZeroCoordinate()
+    ;
   }
   for (int i = 0; i < this->allElements.size; i ++) {
-    const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& other = this->allElements[i];
-    currentOutput.generatorsLastAppliedFirst.setSize(other.generatorsLastAppliedFirst.size);
-    for (int j = 0; j < currentOutput.generatorsLastAppliedFirst.size; j ++) {
-      currentOutput.generatorsLastAppliedFirst[j].index = indexShifts[other.generatorsLastAppliedFirst[j].index];
+    const
+    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
+    & other =
+    this->allElements[i];
+    currentOutput.generatorsLastAppliedFirst.setSize(
+      other.generatorsLastAppliedFirst.size
+    );
+    for (
+      int j = 0; j < currentOutput.generatorsLastAppliedFirst.size; j ++
+    ) {
+      currentOutput.generatorsLastAppliedFirst[j].index =
+      indexShifts[other.generatorsLastAppliedFirst[j].index];
     }
     output.addOnTop(currentOutput);
   }
 }
 
-std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool includeDominance) const {
+std::string LittelmannPath::toString(
+  bool useSimpleCoords, bool useArrows, bool includeDominance
+) const {
   if (this->waypoints.size == 0) {
     return "0";
   }
@@ -938,7 +1171,10 @@ std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool 
     if (useSimpleCoords) {
       out << this->waypoints[i].toString();
     } else {
-      out << this->owner->getFundamentalCoordinatesFromSimple(this->waypoints[i]).toString();
+      out
+      << this->owner->getFundamentalCoordinatesFromSimple(
+        this->waypoints[i]
+      ).toString();
     }
     if (i != this->waypoints.size - 1) {
       if (useArrows) {
@@ -965,3 +1201,4 @@ std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool 
   }
   return out.str();
 }
+

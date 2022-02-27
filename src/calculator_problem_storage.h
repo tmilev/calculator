@@ -1,14 +1,16 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_problem_storage_ALREADY_INCLUDED
 #define header_calculator_problem_storage_ALREADY_INCLUDED
+
 #include "calculator_interface.h"
 #include "general_time_date.h"
 #include "general_database_system_independent.h"
 
 class SyntacticElementHTML {
 public:
-  struct Tags{
+  struct Tags {
   public:
     static std::string filler;
     static std::string command;
@@ -25,6 +27,7 @@ public:
     static std::string answerCalculatorHighlightStart;
     static std::string answerCalculatorHighlightEnd;
   };
+
   int indexInOwner;
   int commandIndex;
   std::string syntacticRole;
@@ -64,7 +67,9 @@ public:
   void resetAllExceptContent();
   std::string toStringInterpretedBody();
   std::string toStringTagAndContent() const;
-  std::string toStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false) const;
+  std::string toStringOpenTag(
+    const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false
+  ) const;
   std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty) const;
   std::string getTagClass() const;
   std::string toStringDebug() const;
@@ -141,12 +146,12 @@ public:
   std::string idButtonAnswer;
   std::string idButtonSolution;
   std::string javascriptPreviewAnswer;
-  //std::string htmlMQjavascript;
+  // std::string htmlMQjavascript;
   std::string htmlSpanVerifyAnswer;
   std::string htmlAnswerHighlight;
-  //////////////////////////////////////
+  // ////////////////////////////////////
   std::string mathQuillPanelOptions;
-  //////////////////////////////////////
+  // ////////////////////////////////////
   std::string idSpanSolution;
   std::string idMathEquationField;
   std::string idMQFieldLocation;
@@ -156,7 +161,8 @@ public:
   std::string firstCorrectAnswerURLed;
   std::string firstCorrectAnswerClean;
   Answer();
-  // Returns true if answer checking instructions could be extracted from the input.
+  // Returns true if answer checking instructions could be extracted from the
+  // input.
   bool prepareAnswer(
     const SyntacticElementHTML& input,
     std::stringstream& commands,
@@ -171,8 +177,10 @@ public:
 
 class ProblemDataAdministrative {
 public:
-  MapList<std::string, std::string, MathRoutines::hashString> problemWeightsPerCourse;
-  MapList<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
+  MapList<std::string, std::string, MathRoutines::hashString>
+  problemWeightsPerCourse;
+  MapList<std::string, std::string, MathRoutines::hashString>
+  deadlinesPerSection;
   bool getWeightFromCourse(
     const std::string& courseNonURLed,
     Rational& output,
@@ -186,7 +194,9 @@ private:
   int expectedNumberOfAnswersFromDB;
   int knownNumberOfAnswersFromHD;
 public:
-  friend std::ostream& operator << (std::ostream& output, const ProblemData& data) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const ProblemData& data
+  ) {
     output << data.toString();
     return output;
   }
@@ -202,12 +212,18 @@ public:
   std::string commandsGenerateProblemLink;
   MapList<std::string, Answer, MathRoutines::hashString> answers;
   List<std::string> inputNonAnswerIds;
-  int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
+  int getExpectedNumberOfAnswers(
+    const std::string& problemName, std::stringstream& commentsOnFailure
+  );
   ProblemData();
   bool checkConsistency() const;
   bool checkConsistencyMathQuillIds() const;
-  bool loadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure);
-  bool loadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
+  bool loadFromOldFormat(
+    const std::string& inputData, std::stringstream& commentsOnFailure
+  );
+  bool loadFromJSON(
+    const JSData& inputData, std::stringstream& commentsOnFailure
+  );
   std::string store();
   JSData storeJSON() const;
   std::string toString() const;
@@ -224,8 +240,10 @@ public:
   static List<bool> recognizedEmailCharacters;
   static List<bool>& getRecognizedEmailChars();
   EmailRoutines();
-  //bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
-  static bool isOKEmail(const std::string& input, std::stringstream* commentsOnError);
+  // bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
+  static bool isOKEmail(
+    const std::string& input, std::stringstream* commentsOnError
+  );
   bool sendEmailWithMailGun(
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral,
@@ -234,7 +252,8 @@ public:
 };
 
 class TopicElement;
-class UserCalculator : public UserCalculatorData {
+
+class UserCalculator: public UserCalculatorData {
 public:
   MapList<std::string, ProblemData, MathRoutines::hashString> problemData;
   TimeWrapper authenticationCreationTime;
@@ -247,15 +266,28 @@ public:
     MapList<std::string, TopicElement, MathRoutines::hashString>* topics,
     std::stringstream& commentsOnFailure
   );
-  void setProblemData(const std::string& problemName, const ProblemData& inputData);
-  bool interpretDatabaseProblemData(const std::string& information, std::stringstream& commentsOnFailure);
-  bool interpretDatabaseProblemDataJSON(const JSData& data, std::stringstream& commentsOnFailure);
-  bool storeProblemData(const std::string& fileName, std::stringstream* commentsOnFailure);
+  void setProblemData(
+    const std::string& problemName, const ProblemData& inputData
+  );
+  bool interpretDatabaseProblemData(
+    const std::string& information, std::stringstream& commentsOnFailure
+  );
+  bool interpretDatabaseProblemDataJSON(
+    const JSData& data, std::stringstream& commentsOnFailure
+  );
+  bool storeProblemData(
+    const std::string& fileName, std::stringstream* commentsOnFailure
+  );
   std::string GetSelectedRowEntry(const std::string& key);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
-  bool loadFromDatabase(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral = nullptr);
+  bool loadFromDatabase(
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral = nullptr
+  );
   bool fetchOneColumn(
-    const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = nullptr
+    const std::string& columnNameUnsafe,
+    std::string& outputUnsafe,
+    std::stringstream* failureComments = nullptr
   );
   bool authenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);
   bool authenticateWithToken(std::stringstream* commentsOnFailure);
@@ -265,13 +297,23 @@ public:
   bool resetAuthenticationToken(std::stringstream* commentsOnFailure);
   bool setPassword(std::stringstream* commentsOnFailure);
   bool exists(std::stringstream* comments);
-  bool storeToDatabase(bool doSetPassword, std::stringstream* commentsOnFailure);
-  static bool isAcceptableDatabaseInput(const std::string& input, std::stringstream* comments);
+  bool storeToDatabase(
+    bool doSetPassword, std::stringstream* commentsOnFailure
+  );
+  static bool isAcceptableDatabaseInput(
+    const std::string& input, std::stringstream* comments
+  );
   static bool isAcceptableCharDatabaseInput(char character);
   bool computeAndStoreActivationToken(std::stringstream* commentsOnFailure);
   void computeHashedSaltedPassword();
-  bool getActivationAbsoluteAddress(std::string& output, std::stringstream& comments);
-  bool getActivationAddress(std::string& output, const std::string& calculatorBase, std::stringstream& comments);
+  bool getActivationAbsoluteAddress(
+    std::string& output, std::stringstream& comments
+  );
+  bool getActivationAddress(
+    std::string& output,
+    const std::string& calculatorBase,
+    std::stringstream& comments
+  );
   static std::string getActivationAddressFromActivationToken(
     const std::string& activationToken,
     const std::string& calculatorBase,
@@ -279,9 +321,13 @@ public:
     const std::string& inputEmailUnsafe
   );
   bool computeAndStoreActivationEmailAndTokens(
-    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
   );
-  bool computeAndStoreActivationStats(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool computeAndStoreActivationStats(
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
   std::string toString();
   std::string toStringSelectedColumns();
   UserCalculator();
@@ -289,3 +335,4 @@ public:
 };
 
 #endif // header_calculator_problem_storage_ALREADY_INCLUDED
+

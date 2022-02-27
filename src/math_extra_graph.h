@@ -1,5 +1,7 @@
+
 #ifndef header_math_extra_graph_ALREADY_INCLUDED
 #define header_math_extra_graph_ALREADY_INCLUDED
+
 #include "math_general.h"
 
 class GraphOLD {
@@ -24,23 +26,30 @@ private:
 
 class GraphEdge {
 public:
-  friend std::ostream& operator<<(std::ostream& output, const GraphEdge& edge) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const GraphEdge& edge
+  ) {
     output << edge.toString();
     return output;
   }
   int vStart;
   int vEnd;
   std::string label;
-  GraphEdge() : vStart(- 1), vEnd(- 1) {}
-  GraphEdge(int inputStart, int inputEnd):vStart(inputStart), vEnd(inputEnd) {}
-  GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
-  : vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
+  GraphEdge(): vStart(- 1), vEnd(- 1) {}
+  GraphEdge(int inputStart, int inputEnd): vStart(inputStart), vEnd(inputEnd) {
+  }
+  GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel):
+  vStart(inputStart),
+  vEnd(inputEnd),
+  label(inputLabel) {}
   std::string toString(FormatExpressions* format = nullptr) const;
   static unsigned int hashFunction(const GraphEdge& input) {
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * HashConstants::constant0;
+    return
+    static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) *
+    HashConstants::constant0;
   }
   bool operator==(const GraphEdge& other) const {
     return
@@ -67,7 +76,7 @@ public:
   List<int> positionInDisplayGroup;
   List<int> displayGroupIndices;
   List<int> connectedComponentSizes;
-  GraphWeightedLabeledEdges(): numberOfNodes(- 1), groupMaxSize(- 1){}
+  GraphWeightedLabeledEdges(): numberOfNodes(- 1), groupMaxSize(- 1) {}
   bool checkConsistency() const;
   void addEdge(int i, int j);
   void computeEdgesPerNodesNoMultiplicities();
@@ -80,7 +89,10 @@ public:
   void addEdge(int i, int j, const std::string& inputLabel);
   std::string toStringPsTricks(FormatExpressions* format);
   std::string toStringNodesAndEdges(FormatExpressions* format);
-  std::string toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* format = nullptr);
+  std::string toStringPsTricksEdge(
+    int fromIndex, int toIndex, FormatExpressions* format = nullptr
+  );
 };
 
 #endif // header_math_extra_graph_ALREADY_INCLUDED
+

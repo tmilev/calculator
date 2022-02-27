@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
 #include "math_general_implementation.h"
@@ -16,66 +17,93 @@
 // - Try moving template *EXPLICIT* specializations (i.e. template <>)
 //   to the *beginning* (!) of .cpp files.
 // - Try moving template generics into .h files.
-
-template <>
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<RationalFraction<Rational> >(
+template < >
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+isDominantWithRespectToGenerator<RationalFraction<Rational> >(
   const Vector<RationalFraction<Rational> >& weight, int generatorIndex
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::isDominantWithRespectToGenerator");
+  MacroRegisterFunctionWithName(
+    "SubgroupWeylGroupOLD::isDominantWithRespectToGenerator"
+  );
   this->checkInitialization();
   Vector<RationalFraction<Rational> > tempVect;
   RationalFraction<Rational> tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
   tempRF = this->ambientWeyl->rootScalarCartanRoot(weight, tempVect);
-  if (tempRF.expressionType != RationalFraction<Rational>::TypeExpression::typeConstant) {
-    global.fatal << "This might or might not be a programming mistake: "
+  if (
+    tempRF.expressionType !=
+    RationalFraction<Rational>::TypeExpression::typeConstant
+  ) {
+    global.fatal
+    << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
     << "I took the scalar products with the positive simple roots "
     << "whose reflections generate the ambient group, "
     << "however one of the scalar products in question was non-constant. "
     << "More precisely, the scalar product of "
-    << weight.toString() << " and " << tempVect.toString() << " "
-    << "equals " << tempRF.toString() << ". "
-    << "I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << weight.toString()
+    << " and "
+    << tempVect.toString()
+    << " "
+    << "equals "
+    << tempRF.toString()
+    << ". "
+    <<
+    "I cannot decide (more precisely, do not want to *silently* decide for you) "
     << "whether a non-constant function is to be declared positive or not. "
     << "If this is not a programming mistake, "
     << "you might want to consider introducing a substitution "
     << "evaluating the rational function, some sort of a monomial order, "
     << "or some other method of deciding the \"sign\" of a rational function. "
-    << "Whether or not this is a mistake, I am crashing. " << global.fatal;
+    << "Whether or not this is a mistake, I am crashing. "
+    << global.fatal;
     return false;
   }
   return !tempRF.constantValue.isNegative();
 }
 
-template <>
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<Rational>(
+template < >
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+isDominantWithRespectToGenerator<Rational>(
   const Vector<Rational>& weight, int generatorIndex
 ) {
   this->checkInitialization();
-  return !this->ambientWeyl->rootScalarCartanRoot(weight, this->simpleRootsInner[generatorIndex]).isNegative();
+  return
+  !this->ambientWeyl->rootScalarCartanRoot(
+    weight, this->simpleRootsInner[generatorIndex]
+  ).isNegative();
 }
 
-template <>
-bool WeylGroupData::isDominantWithRespectToGenerator<RationalFraction<Rational> >(
-  const Vector<RationalFraction<Rational> >& weight, int generatorIndex
-) {
+template < >
+bool WeylGroupData::isDominantWithRespectToGenerator<
+  RationalFraction<Rational>
+>(const Vector<RationalFraction<Rational> >& weight, int generatorIndex) {
   Vector<Rational> tempVect;
   RationalFraction<Rational> tempRF;
   tempVect.makeEi(this->getDimension(), generatorIndex);
   tempRF = this->rootScalarCartanRoot(weight, tempVect);
-  if (tempRF.expressionType != RationalFraction<Rational>::TypeExpression::typeConstant) {
-    global.fatal << "This might or might not be a programming mistake: "
+  if (
+    tempRF.expressionType !=
+    RationalFraction<Rational>::TypeExpression::typeConstant
+  ) {
+    global.fatal
+    << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
     << "I took the scalar products with the positive simple roots "
     << "whose reflections generate the ambient group, "
     << "however one of the scalar products in question was non-constant. "
     << "More precisely, the scalar product of "
-    << weight.toString() << " and " << tempVect.toString() << " "
-    << "equals " << tempRF.toString() << ". "
-    << "I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << weight.toString()
+    << " and "
+    << tempVect.toString()
+    << " "
+    << "equals "
+    << tempRF.toString()
+    << ". "
+    <<
+    "I cannot decide (more precisely, do not want to *silently* decide for you) "
     << "whether a non-constant function is positive or not. "
     << "If this is not a programming mistake, "
     << "you might want to consider introducing a substitution "
@@ -88,26 +116,37 @@ bool WeylGroupData::isDominantWithRespectToGenerator<RationalFraction<Rational> 
   return !tempRF.constantValue.isNegative();
 }
 
-template <>
-bool WeylGroupData::isDominantWithRespectToGenerator<Rational>(const Vector<Rational>& weight, int generatorIndex) {
-  return !this->getScalarProductSimpleRoot(weight, generatorIndex).isNegative();
+template < >
+bool WeylGroupData::isDominantWithRespectToGenerator<Rational>(
+  const Vector<Rational>& weight, int generatorIndex
+) {
+  return
+  !this->getScalarProductSimpleRoot(weight, generatorIndex).isNegative();
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::makeParabolicFromSelectionSimpleRoots(
-  WeylGroupData& inputWeyl, const Vector<Rational>& zeroesMeanSimpleRootSpaceIsInParabolic, int upperLimitNumberOfElements
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+makeParabolicFromSelectionSimpleRoots(
+  WeylGroupData& inputWeyl,
+  const Vector<Rational>& zeroesMeanSimpleRootSpaceIsInParabolic,
+  int upperLimitNumberOfElements
 ) {
   Selection tempSel;
   tempSel = zeroesMeanSimpleRootSpaceIsInParabolic;
-  this->makeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, upperLimitNumberOfElements);
+  this->makeParabolicFromSelectionSimpleRoots(
+    inputWeyl, tempSel, upperLimitNumberOfElements
+  );
 }
 
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   Vector<Rational>& highestWeightSimpleCoords,
   HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
+  MacroRegisterFunctionWithName(
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra"
+  );
   this->checkInitialization();
   std::stringstream out;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
@@ -115,16 +154,22 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   int dimension = this->ambientWeyl->getDimension();
   basisEi.makeEiBasis(dimension);
   this->raiseToDominantWeightInner(highestWeightTrue);
-  Vector<Rational> highestWeightFundCoords = this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<Rational> highestWeightFundCoords =
+  this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
     return false;
   }
-  int topHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.sumCoordinates().getDoubleValue()) + 1;
+  int topHeightSimpleCoords = static_cast<int>(
+    highestWeightSimpleCoords.sumCoordinates().getDoubleValue()
+  ) +
+  1;
   if (topHeightSimpleCoords < 0) {
     topHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
+  int topHeightRootSystem =
+  this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort
+  ;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -135,30 +180,46 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numTotalWeightsFound = 0;
   int numPosRoots = this->ambientWeyl->rootsOfBorel.size;
-  Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
+  Vector<Rational>
+  currentWeight,
+  currentWeightRaisedToDominantWRTAmbientAlgebra;
   for (
-    int lowestUnexploredHeightDiff = 0;
-    lowestUnexploredHeightDiff <= topHeightSimpleCoords;
-    lowestUnexploredHeightDiff ++
+    int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <=
+    topHeightSimpleCoords; lowestUnexploredHeightDiff ++
   ) {
-    //double startCycleTime = global.getElapsedSeconds();
-    if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights) {
+    // double startCycleTime = global.getElapsedSeconds();
+    if (
+      upperBoundDominantWeights > 0 &&
+      numTotalWeightsFound > upperBoundDominantWeights
+    ) {
       break;
     }
-    int bufferIndexShift = lowestUnexploredHeightDiff % topHeightRootSystemPlusOne;
-    HashedList<Vector<Rational> >& currentHashes = outputWeightsByHeight[bufferIndexShift];
+    int bufferIndexShift = lowestUnexploredHeightDiff %
+    topHeightRootSystemPlusOne;
+    HashedList<Vector<Rational> >& currentHashes =
+    outputWeightsByHeight[bufferIndexShift];
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
       for (int i = 0; i < numPosRoots; i ++) {
         currentWeight = currentHashes[lowest];
         currentWeight -= this->ambientWeyl->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
           currentWeightRaisedToDominantWRTAmbientAlgebra = currentWeight;
-          this->ambientWeyl->raiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
+          this->ambientWeyl->raiseToDominantWeight(
+            currentWeightRaisedToDominantWRTAmbientAlgebra
+          );
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
-          if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
-            int currentIndexShift = this->ambientWeyl->rootsOfBorel[i].sumCoordinates().numeratorShort;
-            currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
-            if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
+          if (
+            currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()
+          ) {
+            int currentIndexShift =
+            this->ambientWeyl->rootsOfBorel[i].sumCoordinates().numeratorShort;
+            currentIndexShift = (currentIndexShift + bufferIndexShift) %
+            topHeightRootSystemPlusOne;
+            if (
+              outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(
+                currentWeight
+              )
+            ) {
               numTotalWeightsFound ++;
               outputWeightsByHeight[currentIndexShift].adjustHashes();
             }
@@ -170,19 +231,26 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
   }
-  out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
+  out
+  << " Total number of dominant weights: "
+  << outputWeightsSimpleCoords.size;
   if (numTotalWeightsFound >= upperBoundDominantWeights) {
-    out << "<hr>This message is generated either because the number of "
+    out
+    << "<hr>This message is generated either because the number of "
     << "weights has exceeded the hard-coded RAM memory limits, or because "
     << "a priori bound for the number of weights is WRONG. "
-    << "If the latter is the case, make sure to send an angry email to the author(s).";
+    <<
+    "If the latter is the case, make sure to send an angry email to the author(s)."
+    ;
   }
   outputDetails = out.str();
   return (numTotalWeightsFound <= upperBoundDominantWeights);
 }
 
 std::string HtmlRoutines::getSliderSpanStartsHidden(
-  const std::string& content, const std::string& label, const std::string& desiredID
+  const std::string& content,
+  const std::string& label,
+  const std::string& desiredID
 ) {
   (void) label;
   std::stringstream out;
@@ -192,9 +260,16 @@ std::string HtmlRoutines::getSliderSpanStartsHidden(
   if (desiredID == "") {
     idStringStream << "UnnamedSpan" << HtmlRoutines::globalGeneralPurposeID;
   }
-  out << "<a href=\"javascript:;\" onmusedown =\"document.getElementById('"
-  << idStringStream.str() << "').slideToggle('slow');\">Expand/collapse</a>";
-  out << "<span id =\"" << idStringStream.str() << "\" style =\"display:none\">" << content << "</span>";
+  out
+  << "<a href=\"javascript:;\" onmusedown =\"document.getElementById('"
+  << idStringStream.str()
+  << "').slideToggle('slow');\">Expand/collapse</a>";
+  out
+  << "<span id =\""
+  << idStringStream.str()
+  << "\" style =\"display:none\">"
+  << content
+  << "</span>";
   return out.str();
 }
 
@@ -203,7 +278,10 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   List<LittelmannPath> orbit;
   List<List<int> > generators;
   if (!this->generateOrbit(orbit, generators, 1000, nullptr)) {
-    out  << "<b>Not all paths were genenerated, only the first " << orbit.size << "</b>";
+    out
+    << "<b>Not all paths were genenerated, only the first "
+    << orbit.size
+    << "</b>";
   }
   Vectors<double> coxeterPlane;
   coxeterPlane.setSize(2);
@@ -213,23 +291,43 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   this->owner->drawRootSystem(collapsed, true, true);
   for (int i = 0; i < orbit.size; i ++) {
     LittelmannPath& currentPath = orbit[i];
-    animated.drawPath(currentPath.waypoints, "black", 1, this->owner->dynkinType.toString(), i);
+    animated.drawPath(
+      currentPath.waypoints,
+      "black",
+      1,
+      this->owner->dynkinType.toString(),
+      i
+    );
     collapsed.drawPath(currentPath.waypoints, "black", 1);
     for (int j = 0; j < currentPath.waypoints.size; j ++) {
-      animated.drawCircleAtVector(currentPath.waypoints[j], "purple", 3, this->owner->dynkinType.toString(), i);
-      collapsed.drawCircleAtVector(currentPath.waypoints[j], "purple", 3);
+      animated.drawCircleAtVector(
+        currentPath.waypoints[j],
+        "purple",
+        3,
+        this->owner->dynkinType.toString(),
+        i
+      );
+      collapsed.drawCircleAtVector(
+        currentPath.waypoints[j], "purple", 3
+      );
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
   out << animated.getHTMLDiv(this->owner->getDimension(), false);
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
   out << collapsed.getHTMLDiv(this->owner->getDimension(), false);
-  out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
-  << orbit.size << " total):<br>";
+  out
+  <<
+  "Littelmann paths in simple coordinates given in the order in which they are generated ("
+  << orbit.size
+  << " total):<br>";
   out << "<table>";
   for (int i = 0; i < orbit.size; i ++) {
     LittelmannPath& currentPath = orbit[i];
-    out << "<tr><td>" << currentPath.toString() << "</td>"
+    out
+    << "<tr><td>"
+    << currentPath.toString()
+    << "</td>"
     << "<td>"
     << this->toStringOperatorSequenceStartingOnMe(generators[i])
     << "</td></tr>";
@@ -250,18 +348,29 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     }
     tempPath = lastPath;
     tempPath.actByEAlpha(nextInd);
-    out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.toString() << ") =</td>" << "<td>"
-    << tempPath.toString() << "</td>";
+    out << "<tr><td> e_" << nextInd + 1
+    << "("
+    << lastPath.toString()
+    << ") =</td>"
+    << "<td>"
+    << tempPath.toString()
+    << "</td>";
     for (int j = 0; j < this->owner->getDimension(); j ++) {
       tempPath = lastPath;
       tempPath.actByEAlpha(j);
-      out << "<td> e_" << j + 1 << "("
-      << lastPath.toString() << ")=</td>" << "<td>" << tempPath.toString() << "</td>";
+      out << "<td> e_" << j + 1
+      << "("
+      << lastPath.toString()
+      << ")=</td>"
+      << "<td>"
+      << tempPath.toString()
+      << "</td>";
     }
     out << "</tr>";
   }
   out << "</table>";
-  out << "<table><td>corresponding element of U(g)</td><td>is adapted</td>"
+  out
+  << "<table><td>corresponding element of U(g)</td><td>is adapted</td>"
   << "<td>path</td><td>e operators with non-zero action.</td>";
   for (int i = 0; i < generators.size; i ++) {
     tempPath = orbit[i];
@@ -269,9 +378,14 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     tempMon.generatorsIndices.reverseElements();
     tempMon.powers.reverseElements();
     bool isadapted = tempPath.isAdaptedString(tempMon);
-    out << "<tr><td>" << tempMon.toString() << "</td><td>"
-    << (isadapted ? "is adapted to" : "is not adapted to" ) << "</td><td>"
-    << tempPath.toString() << "</td><td>";
+    out
+    << "<tr><td>"
+    << tempMon.toString()
+    << "</td><td>"
+    << (isadapted ? "is adapted to" : "is not adapted to")
+    << "</td><td>"
+    << tempPath.toString()
+    << "</td><td>";
     for (int j = 0; j < this->owner->getDimension(); j ++) {
       tempPath = orbit[i];
       tempPath.actByEFDisplayIndex(j + 1);
@@ -295,19 +409,25 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   DynkinType b3Type, g2Type;
   b3Type.makeSimpleType('B', 3);
   g2Type.makeSimpleType('G', 2);
-  output.domain = &this->objectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
-  output.coDomain = &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
-
+  output.domain =
+  &this->objectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
+  output.coDomain =
+  &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
   output.coDomainAlgebra().computeChevalleyConstants();
   output.domainAlgebra().computeChevalleyConstants();
-  ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, element;
-  g_2.makeGenerator         (13, output.coDomainAlgebra());
-  g_m2.makeGenerator        (7,  output.coDomainAlgebra());
-  g_1plusg_3.makeGenerator  (12, output.coDomainAlgebra());
-  element.makeGenerator     (14, output.coDomainAlgebra());
+  ElementSemisimpleLieAlgebra<Rational>
+  g_2,
+  g_1plusg_3,
+  g_m2,
+  g_m1plusg_m3,
+  element;
+  g_2.makeGenerator(13, output.coDomainAlgebra());
+  g_m2.makeGenerator(7, output.coDomainAlgebra());
+  g_1plusg_3.makeGenerator(12, output.coDomainAlgebra());
+  element.makeGenerator(14, output.coDomainAlgebra());
   g_1plusg_3 += element;
   g_m1plusg_m3.makeGenerator(6, output.coDomainAlgebra());
-  element.makeGenerator     (8, output.coDomainAlgebra());
+  element.makeGenerator(8, output.coDomainAlgebra());
   g_m1plusg_m3 += element;
   output.imagesPositiveSimpleChevalleyGenerators.setSize(2);
   output.imagesPositiveSimpleChevalleyGenerators[0] = g_1plusg_3;
@@ -316,7 +436,9 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   output.imagesNegativeSimpleChevalleyGenerators[0] = g_m1plusg_m3;
   output.imagesNegativeSimpleChevalleyGenerators[1] = g_m2;
   output.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
-  output.getRestrictionAmbientRootSystemToTheSmallerCartanSubalgebra(output.restrictedRootSystem);
+  output.getRestrictionAmbientRootSystemToTheSmallerCartanSubalgebra(
+    output.restrictedRootSystem
+  );
 }
 
 void BranchingData::resetOutputData() {
@@ -328,8 +450,10 @@ void BranchingData::resetOutputData() {
   this->characterDifferences.clear();
 }
 
-void WeylGroupData::getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
-  List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
+void WeylGroupData::
+getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
+  List<Vector<Rational> >& outputHighestWeightsFundCoords,
+  int inputDimBound
 ) {
   if (inputDimBound < 1) {
     outputHighestWeightsFundCoords.setSize(0);
@@ -385,8 +509,7 @@ bool Expression::assignMatrixExpressions(
     typePolynomialRational,
     typePolynomialAlgebraic,
     typeRationalFraction,
-    typeExpression
-  };
+    typeExpression  };
   MatrixType outType = typeUnknown;
   Expression currentRow;
   for (int i = 0; i < input.numberOfRows; i ++) {
@@ -404,9 +527,13 @@ bool Expression::assignMatrixExpressions(
         inType = typeDouble;
       } else if (input(i, j).isOfType<Polynomial<Rational> >()) {
         inType = typePolynomialRational;
-      } else if (input(i, j).isOfType<Polynomial<AlgebraicNumber> >()) {
+      } else if (
+        input(i, j).isOfType<Polynomial<AlgebraicNumber> >()
+      ) {
         inType = typeAlgebraic;
-      } else if (input(i, j).isOfType<RationalFraction<Rational> >()) {
+      } else if (
+        input(i, j).isOfType<RationalFraction<Rational> >()
+      ) {
         inType = typeRationalFraction;
       } else {
         inType = typeExpression;
@@ -419,13 +546,21 @@ bool Expression::assignMatrixExpressions(
           outType = inType;
           continue;
         }
-        if (outType == typeDouble || outType == typeAlgebraic || outType == typePolynomialAlgebraic) {
+        if (
+          outType == typeDouble ||
+          outType == typeAlgebraic ||
+          outType == typePolynomialAlgebraic
+        ) {
           continue;
         }
         outType = typeExpression;
         continue;
       } else if (inType == typeDouble) {
-        if (outType == typeRational || outType == typeAlgebraic || outType == typeDouble) {
+        if (
+          outType == typeRational ||
+          outType == typeAlgebraic ||
+          outType == typeDouble
+        ) {
           outType = inType;
           continue;
         }
@@ -443,7 +578,12 @@ bool Expression::assignMatrixExpressions(
         outType = typeExpression;
         continue;
       } else if (inType == typePolynomialAlgebraic) {
-        if (outType == typeRational || outType == typeAlgebraic || outType == typePolynomialRational || outType == typePolynomialAlgebraic) {
+        if (
+          outType == typeRational ||
+          outType == typeAlgebraic ||
+          outType == typePolynomialRational ||
+          outType == typePolynomialAlgebraic
+        ) {
           outType = inType;
           continue;
         }
@@ -462,27 +602,21 @@ bool Expression::assignMatrixExpressions(
     }
     this->addChildOnTop(currentRow);
   }
-  switch(outType) {
-    case typeRational:
-      matrixType.addChildAtomOnTop(owner.opRational());
-      break;
-    case typeDouble:
-      matrixType.addChildAtomOnTop(owner.opDouble());
-      break;
-    case typeAlgebraic:
-      matrixType.addChildAtomOnTop(owner.opAlgebraicNumber());
-      break;
-    case typePolynomialRational:
-      matrixType.addChildAtomOnTop(owner.opPolynomialRational());
-      break;
-    case typePolynomialAlgebraic:
-      matrixType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
-      break;
-    case typeRationalFraction:
-      matrixType.addChildAtomOnTop(owner.opRationalFraction());
-      break;
-    default:
-      break;
+  switch (outType) {
+  case typeRational:
+    matrixType.addChildAtomOnTop(owner.opRational()); break;
+  case typeDouble:
+    matrixType.addChildAtomOnTop(owner.opDouble()); break;
+  case typeAlgebraic:
+    matrixType.addChildAtomOnTop(owner.opAlgebraicNumber()); break;
+  case typePolynomialRational:
+    matrixType.addChildAtomOnTop(owner.opPolynomialRational()); break;
+  case typePolynomialAlgebraic:
+    matrixType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers()); break;
+  case typeRationalFraction:
+    matrixType.addChildAtomOnTop(owner.opRationalFraction()); break;
+  default:
+    break;
   }
   if (outType != typeUnknown && outType != typeExpression && !dontReduceTypes) {
     this->setChild(0, matrixType);
@@ -491,22 +625,37 @@ bool Expression::assignMatrixExpressions(
 }
 
 bool Calculator::getMatrixExpressionsFromArguments(
-  const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols
+  const Expression& input,
+  Matrix<Expression>& output,
+  int desiredNumRows,
+  int desiredNumCols
 ) {
-  MacroRegisterFunctionWithName("Calculator::getMatrixExpressionsFromArguments");
+  MacroRegisterFunctionWithName(
+    "Calculator::getMatrixExpressionsFromArguments"
+  );
   if (!input.isList()) {
     return false;
   }
   Expression inputModified = input;
   inputModified.setChildAtomValue(0, this->opSequence());
-  return this->getMatrixExpressions(inputModified, output, desiredNumRows, desiredNumCols);
+  return
+  this->getMatrixExpressions(
+    inputModified, output, desiredNumRows, desiredNumCols
+  );
 }
 
 bool Calculator::getMatrixExpressions(
-  const Expression& input, Matrix<Expression>& output, int desiredNumberOfRows, int desiredNumberOfColumns
+  const Expression& input,
+  Matrix<Expression>& output,
+  int desiredNumberOfRows,
+  int desiredNumberOfColumns
 ) {
   MacroRegisterFunctionWithName("Calculator::getMatrixExpressions");
-  if (!input.isSequenceNElements() && !input.isMatrix() && !input.isIntervalRealLine()) {
+  if (
+    !input.isSequenceNElements() &&
+    !input.isMatrix() &&
+    !input.isIntervalRealLine()
+  ) {
     output.initialize(1, 1);
     output(0, 0) = input;
     return true;
@@ -518,7 +667,10 @@ bool Calculator::getMatrixExpressions(
     }
     return false;
   }
-  if (!input[1].isSequenceNElements() && !input[1].startsWith(this->opIntervalOpen())) {
+  if (
+    !input[1].isSequenceNElements() &&
+    !input[1].startsWith(this->opIntervalOpen())
+  ) {
     if (desiredNumberOfRows > 0) {
       if (desiredNumberOfRows != 1) {
         return false;
@@ -549,7 +701,9 @@ bool Calculator::getMatrixExpressions(
   for (int i = 1; i < input.size(); i ++) {
     if (
       input[i].isSequenceNElements(output.numberOfColumns) ||
-      input[i].startsWith(this->opIntervalOpen(), output.numberOfColumns + 1)
+      input[i].startsWith(
+        this->opIntervalOpen(), output.numberOfColumns + 1
+      )
     ) {
       for (int j = 1; j < input[i].size(); j ++) {
         output(i - 1, j - 1) = input[i][j];
@@ -569,7 +723,9 @@ bool Calculator::Test::processOneTest(JSData& input) {
   std::string command = input["input"].stringValue;
   if (!this->commands.contains(command)) {
     std::stringstream reportStream;
-    reportStream << "Command [" << command
+    reportStream
+    << "Command ["
+    << command
     << "] not recognized. "
     << "If the testing commands have recently changed, this is OK, "
     << "otherwise, it isn't.";
@@ -577,22 +733,27 @@ bool Calculator::Test::processOneTest(JSData& input) {
     return false;
   }
   if (input["output"].elementType != JSData::token::tokenString) {
-    global << Logger::red << "Command: " << command
-    << " is missing its expected output. " << Logger::endL;
+    global
+    << Logger::red
+    << "Command: "
+    << command
+    << " is missing its expected output. "
+    << Logger::endL;
     return false;
   }
-  Calculator::Test::OneTest& currentTest = this->commands.getValueCreateEmpty(command);
+  Calculator::Test::OneTest& currentTest =
+  this->commands.getValueCreateEmpty(command);
   currentTest.expectedResult = input["output"].stringValue;
   return true;
 }
 
-bool Calculator::Test::loadTestStrings(
-  std::stringstream* commentsOnFailure
-) {
+bool Calculator::Test::loadTestStrings(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Calculator::loadTestStrings");
-  if (!FileOperations::fileExistsVirtual(
-    WebAPI::calculator::testFileNameVirtual, false, false, nullptr
-  )) {
+  if (
+    !FileOperations::fileExistsVirtual(
+      WebAPI::calculator::testFileNameVirtual, false, false, nullptr
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Test json file does not exist. ";
     }
@@ -600,12 +761,14 @@ bool Calculator::Test::loadTestStrings(
     return false;
   }
   std::string testStrings;
-  if (!FileOperations::loadFileToStringVirtual(
-    WebAPI::calculator::testFileNameVirtual,
-    testStrings,
-    false,
-    commentsOnFailure
-  )) {
+  if (
+    !FileOperations::loadFileToStringVirtual(
+      WebAPI::calculator::testFileNameVirtual,
+      testStrings,
+      false,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load test json. ";
     }
@@ -630,14 +793,23 @@ bool Calculator::Test::loadTestStrings(
 }
 
 std::string Calculator::writeFileToOutputFolderReturnLink(
-  const std::string& fileContent, const std::string& fileName, const std::string& linkText
+  const std::string& fileContent,
+  const std::string& fileName,
+  const std::string& linkText
 ) {
-  MacroRegisterFunctionWithName("Calculator::writeFileToOutputFolderReturnLink");
+  MacroRegisterFunctionWithName(
+    "Calculator::writeFileToOutputFolderReturnLink"
+  );
   std::string fileNameVirtual = "output/" + fileName;
-  return FileOperations::writeFileReturnHTMLLink(fileContent, fileNameVirtual, linkText);
+  return
+  FileOperations::writeFileReturnHTMLLink(
+    fileContent, fileNameVirtual, linkText
+  );
 }
 
-bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
+bool Calculator::Test::writeTestStrings(
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("Calculator::writeTestStrings");
   JSData result;
   result.elementType = JSData::token::tokenArray;
@@ -649,7 +821,8 @@ bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
     nextEntry["output"] = output.actualResult;
     result.listObjects[i] = nextEntry;
   }
-  return FileOperations::writeFileVirual(
+  return
+  FileOperations::writeFileVirual(
     WebAPI::calculator::testFileNameVirtual,
     result.toString(&JSData::PrintOptions::newLine()),
     commentsOnFailure
@@ -676,16 +849,20 @@ bool Calculator::automatedTest(
     return calculator << "Automated test requires administrator access";
   }
   if (input.size() != 3) {
-    return calculator << "Automated test expects two arguments: "
+    return
+    calculator
+    << "Automated test expects two arguments: "
     << "index of first test to run and number of tests to run. ";
   }
-  global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have administrator access
+  global.millisecondsMaxComputation = 30000000;
+  // 30k seconds, ok as we have administrator access
   Calculator::Test test(calculator);
   if (
     !input[1].isSmallInteger(&test.startIndex) ||
     !input[2].isSmallInteger(&test.numberOfTests)
   ) {
-    return calculator
+    return
+    calculator
     << "Automated test takes two arguments: "
     << "index of the first test to run and total "
     << "number of tests to run after that. ";
@@ -696,30 +873,48 @@ bool Calculator::automatedTest(
 
 bool Calculator::Test::processResults() {
   std::stringstream commentsOnFailure, out;
-
   if (!this->loadTestStrings(&commentsOnFailure)) {
-    global << Logger::red << "Failed to load test strings. " << Logger::endL
+    global
+    << Logger::red
+    << "Failed to load test strings. "
+    << Logger::endL
     << commentsOnFailure.str();
-    out << "<b style='color:red'>Failed to load test strings. </b>" << commentsOnFailure.str();
+    out
+    << "<b style='color:red'>Failed to load test strings. </b>"
+    << commentsOnFailure.str();
   }
   if (!this->flagTestResultsExist) {
-    out << "<b style='color:green'>Writing new test strings into: "
-    << WebAPI::calculator::testFileNameVirtual << ". </b>";
+    out
+    << "<b style='color:green'>Writing new test strings into: "
+    << WebAPI::calculator::testFileNameVirtual
+    << ". </b>";
     std::stringstream commentsOnFailure2;
     if (!this->writeTestStrings(&commentsOnFailure2)) {
-      global << Logger::red << "Failed to write test strings. " << Logger::endL
+      global
+      << Logger::red
+      << "Failed to write test strings. "
+      << Logger::endL
       << commentsOnFailure2.str();
-      out << "<b style='color:red'>Write file failed. </b>" << commentsOnFailure2.str();
+      out
+      << "<b style='color:red'>Write file failed. </b>"
+      << commentsOnFailure2.str();
     }
   }
-  std::stringstream goodCommands, unknownCommands, badCommands, badCommandsConsole;
+  std::stringstream
+  goodCommands,
+  unknownCommands,
+  badCommands,
+  badCommandsConsole;
   this->inconsistencies = 0;
   if (
-    this->startIndex > 0 ||
-    this->lastIndexNotTested < this->commands.size()
+    this->startIndex > 0 || this->lastIndexNotTested < this->commands.size()
   ) {
-    out << "<b style='color:red'>Only " << this->numberOfTests
-    << " out of " << this->commands.size() << " processed. </b>";
+    out
+    << "<b style='color:red'>Only "
+    << this->numberOfTests
+    << " out of "
+    << this->commands.size()
+    << " processed. </b>";
   }
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     Calculator::Test::OneTest& currentTest = this->commands.values[i];
@@ -727,33 +922,56 @@ bool Calculator::Test::processResults() {
     currentLine << "<tr>";
     currentLine << "<td style = 'min-width:25px;'>" << i << "</td>";
     currentLineConsole << "Test " << i << "\n";
-    currentLine << "<td style = 'min-width:200px;'>" << currentTest.functionAdditionalIdentifier
+    currentLine
+    << "<td style = 'min-width:200px;'>"
+    << currentTest.functionAdditionalIdentifier
     << "</td>";
-    currentLineConsole << "Function " << currentTest.functionAdditionalIdentifier << ", atom: " << currentTest.atom << "\n";
-    currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
+    currentLineConsole
+    << "Function "
+    << currentTest.functionAdditionalIdentifier
+    << ", atom: "
+    << currentTest.atom
+    << "\n";
+    currentLine
+    << "<td style = 'min-width:45px;'>"
+    << currentTest.atom
+    << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.keys[i] << "\n";
-    currentLine << "<td style = 'min-width:200px;'>"
+    currentLine
+    << "<td style = 'min-width:200px;'>"
     << HtmlRoutines::getCalculatorComputationAnchorThisServer(
       this->commands.keys[i], this->commands.keys[i]
-    ) << "</td>";
+    )
+    << "</td>";
     bool isBad = false;
     bool isUknown = false;
     if (currentTest.actualResult == currentTest.expectedResult) {
-      currentLine << "<td style = 'min-width:30px;'><b style='color:green;'>OK</b></td>";
+      currentLine
+      << "<td style = 'min-width:30px;'><b style='color:green;'>OK</b></td>";
     } else if (currentTest.expectedResult == "") {
-      currentLine << "<td><b style='color:orange;'>expected result unknown</b></td>";
+      currentLine
+      << "<td><b style='color:orange;'>expected result unknown</b></td>";
       isUknown = true;
       this->unknown ++;
     } else {
       StringRoutines::Differ differ;
-      differ.left = HtmlRoutines::convertStringToHtmlString(currentTest.actualResult, false);
-      differ.right = HtmlRoutines::convertStringToHtmlString(currentTest.expectedResult, false);
-      currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
+      differ.left =
+      HtmlRoutines::convertStringToHtmlString(
+        currentTest.actualResult, false
+      );
+      differ.right =
+      HtmlRoutines::convertStringToHtmlString(
+        currentTest.expectedResult, false
+      );
+      currentLine
+      <<
+      "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
       << "<td class = 'cellCalculatorResult'>";
       currentLine << differ.differenceHTML("actual", "expected");
       currentLine << "</td>";
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
-      currentLineConsole << "Expected:\n" << currentTest.expectedResult << "\n";
+      currentLineConsole << "Expected:\n" << currentTest.expectedResult << "\n"
+      ;
       isBad = true;
       this->inconsistencies ++;
     }
@@ -768,43 +986,70 @@ bool Calculator::Test::processResults() {
     }
   }
   if (this->noTestSkips > 0) {
-    out << this->noTestSkips << " functions were not tested. "
+    out
+    << this->noTestSkips
+    << " functions were not tested. "
     << "The kinds of functions not auto-tested are "
     << "described in the comments of class Function::Options. ";
   }
   if (this->inconsistencies > 0) {
-    out << "<b style = 'color:red'>"
+    out
+    << "<b style = 'color:red'>"
     << "The test file results do not match the current results. </b>"
-    << "There were " << this->inconsistencies << " inconsistencies. "
+    << "There were "
+    << this->inconsistencies
+    << " inconsistencies. "
     << "If you think the current computations are correct, "
     << "say, the expected results have changed since the last test run, "
     << "erase file: "
     << WebAPI::calculator::testFileNameVirtual
     << " and rerun the present test to store the expected results. ";
-    out << "<table class = 'tableCalculatorOutput'>" << badCommands.str() << "</table>";
-    global << Logger::red << "There were "
-    << this->inconsistencies << " inconsistencies. " << Logger::endL;
+    out
+    << "<table class = 'tableCalculatorOutput'>"
+    << badCommands.str()
+    << "</table>";
+    global
+    << Logger::red
+    << "There were "
+    << this->inconsistencies
+    << " inconsistencies. "
+    << Logger::endL;
     global << badCommandsConsole.str() << Logger::endL;
   }
   if (this->unknown > 0) {
-    out << "<b style = 'color:orange'>There were " << this->unknown
+    out
+    << "<b style = 'color:orange'>There were "
+    << this->unknown
     << " commands with no previous recorded results. </b>";
-    global << Logger::orange << "There were " << this->unknown
-    << " commands with no previous recorded results." << Logger::endL;
+    global
+    << Logger::orange
+    << "There were "
+    << this->unknown
+    << " commands with no previous recorded results."
+    << Logger::endL;
     if (this->flagTestResultsExist) {
       out
-      << "<b>Erase file " << WebAPI::calculator::testFileNameVirtual
+      << "<b>Erase file "
+      << WebAPI::calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results.</b>";
-      global << Logger::yellow << "Erase file " << WebAPI::calculator::testFileNameVirtual
+      global
+      << Logger::yellow
+      << "Erase file "
+      << WebAPI::calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results. ";
     }
     out << "<table>" << unknownCommands.str() << "</table>";
   }
   if (this->unknown == 0 && this->inconsistencies == 0) {
-    out << "<b style ='color:green'>No inconsistencies or uknown computations.</b> ";
+    out
+    <<
+    "<b style ='color:green'>No inconsistencies or uknown computations.</b> ";
   }
   out << "<table>" << goodCommands.str() << "</table>";
-  out << "<br>Total run time: " << global.getElapsedMilliseconds() - this->startTime << " ms. ";
+  out
+  << "<br>Total run time: "
+  << global.getElapsedMilliseconds() - this->startTime
+  << " ms. ";
   this->reportHtml = out.str();
   return this->inconsistencies == 0;
 }
@@ -812,11 +1057,15 @@ bool Calculator::Test::processResults() {
 int Calculator::getNumberOfBuiltInFunctions() {
   int result = 0;
   for (int i = this->numberOfPredefinedAtoms - 1; i >= 0; i --) {
-    MemorySaving<Calculator::OperationHandlers>& current = this->operations.values[i];
+    MemorySaving<Calculator::OperationHandlers>& current =
+    this->operations.values[i];
     if (current.isZeroPointer()) {
       continue;
     }
-    result += current.getElement().handlers.size + current.getElement().compositeHandlers.size;
+    result +=
+    current.getElement().handlers.size +
+    current.getElement().compositeHandlers.size;
   }
   return result;
 }
+

@@ -1,11 +1,12 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include <chrono>
 #include <sys/time.h>
 #include <unistd.h>
 #include <memory>
-//#define cgiLimitRAMuseNumPointersInList
 
+// #define cgiLimitRAMuseNumPointersInList
 #include "system_functions_global_objects.h"
 #include "general_logging_global_variables.h"
 
@@ -17,11 +18,17 @@ public:
 
 timeval SytemFunctionsGlobal::computationStartGlobal;
 timeval SytemFunctionsGlobal::lastTimeMeasure;
-
 int64_t GlobalVariables::getElapsedMilliseconds() {
   gettimeofday(&SytemFunctionsGlobal::lastTimeMeasure, nullptr);
-  return (SytemFunctionsGlobal::lastTimeMeasure.tv_sec - SytemFunctionsGlobal::computationStartGlobal.tv_sec) * 1000 +
-  (SytemFunctionsGlobal::lastTimeMeasure.tv_usec - SytemFunctionsGlobal::computationStartGlobal.tv_usec) / 1000 - global.millisecondOffset;
+  return (
+    SytemFunctionsGlobal::lastTimeMeasure.tv_sec -
+    SytemFunctionsGlobal::computationStartGlobal.tv_sec
+  ) *
+  1000 + (
+    SytemFunctionsGlobal::lastTimeMeasure.tv_usec -
+    SytemFunctionsGlobal::computationStartGlobal.tv_usec
+  ) /
+  1000 - global.millisecondOffset;
 }
 
 void initializeTimer() {
@@ -41,7 +48,7 @@ class TimeoutThread {
 public:
   int64_t elapsedTimeInMilliseconds;
   int64_t elapsedComputationTimeInMilliseconds;
-  int counter ;
+  int counter;
   int intervalBetweenChecksInMilliseconds;
   TimeoutThread();
   void reset();
@@ -60,7 +67,8 @@ bool TimeoutThread::HandleComputationTimer() {
   }
   this->elapsedTimeInMilliseconds = global.getElapsedMilliseconds();
   if (global.millisecondsComputationStart > 0) {
-    this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - global.millisecondsComputationStart;
+    this->elapsedComputationTimeInMilliseconds =
+    this->elapsedTimeInMilliseconds - global.millisecondsComputationStart;
   }
   return false;
 }
@@ -72,27 +80,36 @@ bool TimeoutThread::HandleMaxComputationTime() {
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
   }
-  if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsMaxComputation) {
+  if (
+    this->elapsedComputationTimeInMilliseconds <=
+    global.millisecondsMaxComputation
+  ) {
     return false;
   }
   if (global.flagComputationComplete) {
     return false;
   }
   if (!global.flagComputationStarted) {
-    global.fatal << "Something has gone wrong. Computation has not started, yet " << this->elapsedTimeInMilliseconds
+    global.fatal
+    << "Something has gone wrong. Computation has not started, yet "
+    << this->elapsedTimeInMilliseconds
     << " ms have already passed."
-    << " This may be an error in the web-server routines of the calculator. " << global.fatal;
+    << " This may be an error in the web-server routines of the calculator. "
+    << global.fatal;
   }
   std::stringstream out;
-  out << "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
+  out
+  <<
+  "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
   << "</b> Your computation ran for ";
   if (this->elapsedComputationTimeInMilliseconds > 0) {
     out << this->elapsedComputationTimeInMilliseconds << " ms";
   } else {
     out << " (unknown amount of time)";
   }
-  out << ". The allowed run time is "
-  << global. millisecondsMaxComputation
+  out
+  << ". The allowed run time is "
+  << global.millisecondsMaxComputation
   << " ms (twice the amount allowed for calculator interpretation). "
   << "<br>This restriction may be lifted "
   << "by restarting the server "
@@ -111,7 +128,8 @@ bool TimeoutThread::HandleMaxComputationTime() {
   << "global.MaxComputationTimeMillisecondsNonPositiveForNoLimit. "
   << "<br>This may be a lot of work but will allow you to alter "
   << "time limits dynamically. You will need to modify file: "
-  << __FILE__ << "<br>";
+  << __FILE__
+  << "<br>";
   global.fatal << out.str() << global.fatal;
   return true;
 }
@@ -127,7 +145,10 @@ bool TimeoutThread::HandleComputationTimeout() {
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
   }
-  if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsReplyAfterComputation) {
+  if (
+    this->elapsedComputationTimeInMilliseconds <=
+    global.millisecondsReplyAfterComputation
+  ) {
     return false;
   }
   global.response.initiate("Triggered by timer thread.");
@@ -186,9 +207,14 @@ int externalCommandNoOutput(const std::string& command) {
 }
 
 #ifndef MACRO_use_wasm
-std::string externalCommandReturnStandardOut(const std::string& inputCommand) {
+
+std::string externalCommandReturnStandardOut(
+  const std::string& inputCommand
+) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
-  std::shared_ptr<FILE> pipe(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
+  std::shared_ptr<FILE> pipe(
+    popen(inputCommandWithRedirection.c_str(), "r"), pclose
+  );
   if (!pipe) {
     return "ERROR";
   }
@@ -205,7 +231,9 @@ std::string externalCommandReturnStandardOut(const std::string& inputCommand) {
 
 int externalCommandStreamOutput(const std::string& inputCommand) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
-  std::shared_ptr<FILE> reader(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
+  std::shared_ptr<FILE> reader(
+    popen(inputCommandWithRedirection.c_str(), "r"), pclose
+  );
   if (!reader) {
     global << Logger::red << "Failed to create pipe. " << Logger::endL;
     return - 1;
@@ -227,23 +255,38 @@ int externalCommandStreamOutput(const std::string& inputCommand) {
 }
 
 #else
+
 std::string externalCommandReturnStandardOut(const std::string& command) {
   global.fatal
   << "In externalCommandReturnStandardOut(...): external commands such as: "
-  << command << " are not allowed. " << global.fatal;
+  << command
+  << " are not allowed. "
+  << global.fatal;
   return "";
 }
 
 int externalCommandStreamOutput(const std::string& command) {
-  global.fatal << "In externalCommandStreamOutput(...): external commands such as: " << command << " are not allowed. " << global.fatal;
+  global.fatal
+  << "In externalCommandStreamOutput(...): external commands such as: "
+  << command
+  << " are not allowed. "
+  << global.fatal;
   return - 1;
 }
+
 #endif
 
 void callChDirWrapper(const std::string& command) {
   int systemOutput = chdir(command.c_str());
   if (systemOutput != 0) {
-    global << Logger::red << "Chdir command to directory: " << command << " exited with " << systemOutput
-    << ". " << Logger::endL;
+    global
+    << Logger::red
+    << "Chdir command to directory: "
+    << command
+    << " exited with "
+    << systemOutput
+    << ". "
+    << Logger::endL;
   }
 }
+

@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include "calculator_inner_typed_functions.h"
@@ -8,22 +9,27 @@
 #include "math_extra_algebraic_numbers.h"
 #include "math_general_implementation.h"
 
-template <>
-bool CalculatorConversions::getPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
-
+template < >
+bool CalculatorConversions::getPolynomial<Rational>(
+  Calculator& calculator, const Expression& input, Expression& output
+);
 bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::polynomialDivisionRemainder");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomials;
-  if (!calculator.getListPolynomialVariableLabelsLexicographic(
-    input, polynomials, context
-  )) {
-    return output.assignError(calculator, "Failed to extract list of polynomials. ");
+  if (
+    !calculator.getListPolynomialVariableLabelsLexicographic(
+      input, polynomials, context
+    )
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract list of polynomials. ");
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
-  computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
+  computation.polynomialOrder.monomialOrder =
+  MonomialPolynomial::orderDefault();
   computation.flagStoreQuotients = true;
   for (int i = 1; i < polynomials.size; i ++) {
     if (polynomials[i].isEqualToZero()) {
@@ -32,9 +38,13 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
     computation.addBasisElementNoReduction(polynomials[i]);
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  computation.remainderDivisionByBasis(polynomials[0], outputRemainder, - 1);
+  computation.remainderDivisionByBasis(
+    polynomials[0], outputRemainder, - 1
+  );
   Expression polynomialExpression;
-  polynomialExpression.assignValueWithContext(calculator, outputRemainder, context);
+  polynomialExpression.assignValueWithContext(
+    calculator, outputRemainder, context
+  );
   output.reset(calculator);
   output.addChildAtomOnTop("MakeExpression");
   output.addChildOnTop(polynomialExpression);
@@ -44,18 +54,24 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
-    calculator, input, output, &MonomialPolynomial::orderDegreeThenLeftLargerWins()
+  return
+  CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
+    calculator,
+    input,
+    output,
+    &MonomialPolynomial::orderDegreeThenLeftLargerWins()
   );
 }
 
-bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGradedReverseLexicographic(
+bool CalculatorFunctionsPolynomial::
+polynomialDivisionVerboseGradedReverseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   List<MonomialPolynomial>::Comparator order(
     MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
   );
-  return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
+  return
+  CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     calculator, input, output, &order
   );
 }
@@ -63,25 +79,27 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGradedReverseLexico
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::polynomialDivisionVerboseLexicographic");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::polynomialDivisionVerboseLexicographic"
+  );
   List<MonomialPolynomial>::Comparator order(
     MonomialPolynomial::greaterThan_leftLargerWins
   );
-  return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
-    calculator,
-    input,
-    output,
-    &order
+  return
+  CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
+    calculator, input, output, &order
   );
 }
 
-bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographicOpposite(
+bool CalculatorFunctionsPolynomial::
+polynomialDivisionVerboseLexicographicOpposite(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   List<MonomialPolynomial>::Comparator order(
     MonomialPolynomial::greaterThan_rightLargerWins
   );
-  return CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
+  return
+  CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     calculator, input, output, &order
   );
 }
@@ -95,13 +113,13 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   MacroRegisterFunctionWithName("Calculator::polynomialDivisionVerbose");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (!calculator.getListPolynomialVariableLabelsLexicographic(
-    input, polynomialsRational, context
-  )) {
-    return output.assignError(
-      calculator,
-      "Failed to extract list of polynomials. "
-    );
+  if (
+    !calculator.getListPolynomialVariableLabelsLexicographic(
+      input, polynomialsRational, context
+    )
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract list of polynomials. ");
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
   computation.flagDoLogDivision = true;
@@ -116,12 +134,15 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   if (monomialOrder != nullptr) {
     computation.polynomialOrder.monomialOrder = *monomialOrder;
   }
-  computation.remainderDivisionByBasis(polynomialsRational[0], computation.remainderDivision, - 1);
+  computation.remainderDivisionByBasis(
+    polynomialsRational[0], computation.remainderDivision, - 1
+  );
   context.getFormat(computation.format);
   computation.format.flagUseLatex = true;
   computation.format.flagUseFrac = true;
   std::stringstream latexOutput;
-  latexOutput << "<br>In latex: <br>"
+  latexOutput
+  << "<br>In latex: <br>"
   << "\\documentclass{article}\\usepackage{longtable}"
   << "\\usepackage{xcolor}\\usepackage{multicol}"
   << "\\begin{document} "
@@ -139,13 +160,17 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   MacroRegisterFunctionWithName("Calculator::polynomialDivisionSlidesGrLex");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (!calculator.getListPolynomialVariableLabelsLexicographic(
-    input, polynomialsRational, context
-  )) {
-    return output.assignError(calculator, "Failed to extract list of polynomials. ");
+  if (
+    !calculator.getListPolynomialVariableLabelsLexicographic(
+      input, polynomialsRational, context
+    )
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract list of polynomials. ");
   }
   if (polynomialsRational.size < 3) {
-    return calculator
+    return
+    calculator
     << "Function takes at least 3 inputs: "
     << "index of first slide, dividend, divisor(s).";
   }
@@ -161,10 +186,16 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
     }
     computation.addBasisElementNoReduction(polynomialsRational[i]);
   }
-  if (!polynomialsRational[0].isSmallInteger(&computation.divisionReport.getElement().firstIndexLatexSlide)) {
+  if (
+    !polynomialsRational[0].isSmallInteger(
+      &computation.divisionReport.getElement().firstIndexLatexSlide
+    )
+  ) {
     return calculator << "Failed to extract integer from first argument";
   }
-  computation.remainderDivisionByBasis(polynomialsRational[1], computation.remainderDivision, - 1);
+  computation.remainderDivisionByBasis(
+    polynomialsRational[1], computation.remainderDivision, - 1
+  );
   context.getFormat(computation.format);
   computation.format.flagUseLatex = true;
   computation.format.flagUseFrac = true;
@@ -182,7 +213,9 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   << computation.divisionReport.getElement().getDivisionLaTeXSlide()
   << "\\end{frame}"
   << "\\end{document}\r\n";
-  return output.assignValue(calculator,
+  return
+  output.assignValue(
+    calculator,
     HtmlRoutines::convertStringToHtmlString(latexOutput.str(), true)
   );
 }
@@ -190,17 +223,24 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
 bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::factorPolynomialModPrime");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::factorPolynomialModPrime"
+  );
   if (input.size() != 2 && input.size() != 3) {
-    return calculator << "Expected two arguments "
+    return
+    calculator
+    << "Expected two arguments "
     << "(polynomial and prime) or one argument (modular polynomial).";
   }
   Expression converted;
   if (input.size() == 3) {
-    if (!CalculatorConversions::polynomialModuloInteger(
-      calculator, input, converted
-    )) {
-      return calculator
+    if (
+      !CalculatorConversions::polynomialModuloInteger(
+        calculator, input, converted
+      )
+    ) {
+      return
+      calculator
       << "Failed to convert arguments to modular polynomial.";
     }
   } else {
@@ -219,8 +259,12 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   }
   std::stringstream commentsOnFailure;
   if (!prime.value.isPossiblyPrime(2, true, &commentsOnFailure)) {
-    return calculator << "The modulus: " << prime
-    << " appears not to be prime. " << commentsOnFailure.str();
+    return
+    calculator
+    << "The modulus: "
+    << prime
+    << " appears not to be prime. "
+    << commentsOnFailure.str();
   }
   std::stringstream comments;
   std::stringstream out;
@@ -232,21 +276,34 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   > algorithm;
   polynomial.context.getFormat(result.format);
   result.format.flagSuppressModP = true;
-  comments << "Converted polynomial: \\("
-  << polynomial.content.toString(&result.format) << "\\)<br>";
-  if (!result.factor(polynomial.content, algorithm, &comments, &comments)) {
-    out << "Failed to factor. " << comments.str()
-    << "Factorization so far: " << result.toStringResult(&result.format);
+  comments
+  << "Converted polynomial: \\("
+  << polynomial.content.toString(&result.format)
+  << "\\)<br>";
+  if (
+    !result.factor(polynomial.content, algorithm, &comments, &comments)
+  ) {
+    out
+    << "Failed to factor. "
+    << comments.str()
+    << "Factorization so far: "
+    << result.toStringResult(&result.format);
     return output.assignValue(calculator, out.str());
   }
-  calculator << "Factorization success: " << result.toStringResult(&result.format);
+  calculator
+  << "Factorization success: "
+  << result.toStringResult(&result.format);
   List<Expression> factorsList;
   Expression constant;
-  constant.assignValueWithContext(calculator, result.constantFactor, polynomial.context);
+  constant.assignValueWithContext(
+    calculator, result.constantFactor, polynomial.context
+  );
   factorsList.addOnTop(constant);
   for (int i = 0; i < result.reduced.size; i ++) {
     Expression next;
-    next.assignValueWithContext(calculator, result.reduced[i], polynomial.context);
+    next.assignValueWithContext(
+      calculator, result.reduced[i], polynomial.context
+    );
     factorsList.addOnTop(next);
   }
   return output.makeSequence(calculator, &factorsList);
@@ -258,11 +315,17 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   MacroRegisterFunctionWithName("Calculator::polynomialDivisionQuotient");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (!calculator.getListPolynomialVariableLabelsLexicographic(input, polynomialsRational, context)) {
-    return output.assignError(calculator, "Failed to extract list of polynomials. ");
+  if (
+    !calculator.getListPolynomialVariableLabelsLexicographic(
+      input, polynomialsRational, context
+    )
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract list of polynomials. ");
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
-  computation.polynomialOrder.monomialOrder = MonomialPolynomial::orderDefault();
+  computation.polynomialOrder.monomialOrder =
+  MonomialPolynomial::orderDefault();
   computation.flagStoreQuotients = true;
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
@@ -271,13 +334,17 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
     computation.addBasisElementNoReduction(polynomialsRational[i]);
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  computation.remainderDivisionByBasis(polynomialsRational[0], outputRemainder, - 1);
+  computation.remainderDivisionByBasis(
+    polynomialsRational[0], outputRemainder, - 1
+  );
   Expression currentE, polynomialExpression;
   List<Expression> quotients;
   for (int i = 0; i < computation.quotients.size; i ++) {
     currentE.reset(calculator);
     currentE.addChildAtomOnTop("MakeExpression");
-    polynomialExpression.assignValueWithContext(calculator, computation.quotients[i], context);
+    polynomialExpression.assignValueWithContext(
+      calculator, computation.quotients[i], context
+    );
     currentE.addChildOnTop(polynomialExpression);
     quotients.addOnTop(currentE);
   }
@@ -291,17 +358,18 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
 bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPolynomial::factorPolynomialFiniteFields"
+  );
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convert(
-    calculator,
-    input[1],
-    polynomial
-  )) {
+  if (
+    !CalculatorConversions::convert(calculator, input[1], polynomial)
+  ) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
-    return output.assignError(
+    return
+    output.assignError(
       calculator,
       "I have been taught to factor one variable polynomials only. "
     );
@@ -309,12 +377,11 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
   std::stringstream comments;
-  if (!factorization.factor(
-    polynomial.content,
-    algorithm,
-    &comments,
-    &comments
-  )) {
+  if (
+    !factorization.factor(
+      polynomial.content, algorithm, &comments, &comments
+    )
+  ) {
     return output.assignValue(calculator, comments.str());
   }
   List<Expression> resultSequence;
@@ -322,7 +389,6 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   constantFactor.assignValue(calculator, factorization.constantFactor);
   resultSequence.addOnTop(constantFactor);
   Expression polynomialE;
-
   for (int i = 0; i < factorization.reduced.size; i ++) {
     Expression expressionE(calculator);
     polynomialE.assignValueWithContext(
@@ -340,27 +406,28 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
 ) {
   MacroRegisterFunctionWithName("Calculator::factorPolynomialKronecker");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::convert(
-    calculator,
-    input[1],
-    polynomial
-  )) {
+  if (
+    !CalculatorConversions::convert(calculator, input[1], polynomial)
+  ) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
-    return output.assignError(
+    return
+    output.assignError(
       calculator,
       "I have been taught to factor one variable polynomials only. "
     );
   }
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationKronecker algorithm;
-  if (!factorization.factor(
-    polynomial.content,
-    algorithm,
-    &calculator.comments,
-    &calculator.comments
-  )) {
+  if (
+    !factorization.factor(
+      polynomial.content,
+      algorithm,
+      &calculator.comments,
+      &calculator.comments
+    )
+  ) {
     return false;
   }
   List<Expression> resultSequence;
@@ -369,10 +436,17 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   resultSequence.addOnTop(constantFactor);
   Expression polynomialE;
   for (int i = 0; i < factorization.reduced.size; i ++) {
-    if (! CalculatorConversions::expressionFromPolynomial(
-      calculator, factorization.reduced[i], polynomialE, &polynomial.context
-    )) {
-      return calculator << "Unexpected failure to convert factor to expression. ";
+    if (
+      !CalculatorConversions::expressionFromPolynomial(
+        calculator,
+        factorization.reduced[i],
+        polynomialE,
+        &polynomial.context
+      )
+    ) {
+      return
+      calculator
+      << "Unexpected failure to convert factor to expression. ";
     }
     resultSequence.addOnTop(polynomialE);
   }
@@ -382,15 +456,20 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
 bool CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::factorPolynomialKroneckerThenFiniteFields");
+  MacroRegisterFunctionWithName(
+    "Calculator::factorPolynomialKroneckerThenFiniteFields"
+  );
   WithContext<Polynomial<Rational> > polynomial;
-  if (!CalculatorConversions::functionPolynomial(
-    calculator, input[1], polynomial, 1, 50, false
-  )) {
+  if (
+    !CalculatorConversions::functionPolynomial(
+      calculator, input[1], polynomial, 1, 50, false
+    )
+  ) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
-    return output.assignError(
+    return
+    output.assignError(
       calculator,
       "I have been taught to factor one variable polynomials only. "
     );
@@ -398,13 +477,16 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields(
   PolynomialFactorizationUnivariate<Rational> factorizationKronecker;
   PolynomialFactorizationKronecker algorithmKronecker;
   factorizationKronecker.maximumComputations = 10000;
-  if (factorizationKronecker.factor(
-    polynomial.content,
-    algorithmKronecker,
-    &calculator.comments,
-    &calculator.comments
-  )) {
-    return CalculatorFunctionsPolynomial::factorPolynomialProcess(
+  if (
+    factorizationKronecker.factor(
+      polynomial.content,
+      algorithmKronecker,
+      &calculator.comments,
+      &calculator.comments
+    )
+  ) {
+    return
+    CalculatorFunctionsPolynomial::factorPolynomialProcess(
       calculator,
       polynomial,
       factorizationKronecker.constantFactor,
@@ -414,15 +496,18 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields(
   }
   PolynomialFactorizationUnivariate<Rational> factorizationFiniteFields;
   PolynomialFactorizationFiniteFields algorithmFiniteFields;
-  if (!factorizationFiniteFields.factor(
-    polynomial.content,
-    algorithmFiniteFields,
-    &calculator.comments,
-    &calculator.comments
-  )) {
+  if (
+    !factorizationFiniteFields.factor(
+      polynomial.content,
+      algorithmFiniteFields,
+      &calculator.comments,
+      &calculator.comments
+    )
+  ) {
     return false;
   }
-  return CalculatorFunctionsPolynomial::factorPolynomialProcess(
+  return
+  CalculatorFunctionsPolynomial::factorPolynomialProcess(
     calculator,
     polynomial,
     factorizationFiniteFields.constantFactor,
@@ -438,18 +523,28 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   List<Polynomial<Rational> >& factors,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialProcess");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPolynomial::factorPolynomialProcess"
+  );
   List<Expression> resultSequence;
   Expression constantFactorExpression;
   constantFactorExpression.assignValue(calculator, constantFactor);
   resultSequence.addOnTop(constantFactorExpression);
   Expression polynomialE;
   for (int i = 0; i < factors.size; i ++) {
-    if (!CalculatorConversions::expressionFromPolynomial(
-      calculator, factors[i], polynomialE, &originalPolynomial.context
-    )) {
-      return calculator << "Unexpected failure to convert "
-      << factors[i].toString() << " to expression. ";
+    if (
+      !CalculatorConversions::expressionFromPolynomial(
+        calculator,
+        factors[i],
+        polynomialE,
+        &originalPolynomial.context
+      )
+    ) {
+      return
+      calculator
+      << "Unexpected failure to convert "
+      << factors[i].toString()
+      << " to expression. ";
     }
     resultSequence.addOnTop(polynomialE);
   }
@@ -463,22 +558,30 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   ExpressionContext* context,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials"
+  );
   if (polynomials.size < 2) {
     return output.assignError(calculator, "Too few polynomials");
   }
   Matrix<Coefficient> result;
   std::stringstream commentsOnFailure;
-  if (!SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
-    polynomials, result, &commentsOnFailure
-  )) {
+  if (
+    !SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
+      polynomials, result, &commentsOnFailure
+    )
+  ) {
     return output.assignError(calculator, commentsOnFailure.str());
   }
   return output.makeMatrix(calculator, result, context, false);
 }
 
-bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::sylvesterMatrix");
+bool CalculatorFunctionsPolynomial::sylvesterMatrix(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPolynomial::sylvesterMatrix"
+  );
   if (input.size() < 3) {
     return false;
   }
@@ -491,10 +594,12 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
   }
   if (isModular) {
     Expression inputMerged;
-    if (!input.mergeContextsMyAruments(inputMerged, &calculator.comments)) {
-      return output.assignError(
-        calculator,
-        "Sylvester matrix: failed to merge polynomial contexts."
+    if (
+      !input.mergeContextsMyAruments(inputMerged, &calculator.comments)
+    ) {
+      return
+      output.assignError(
+        calculator, "Sylvester matrix: failed to merge polynomial contexts."
       );
     }
     List<Polynomial<ElementZmodP> > polynomials;
@@ -505,31 +610,38 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
       }
     }
     ExpressionContext context = inputMerged[1].getContext();
-    return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
+    return
+    CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
       calculator, polynomials, &context, output
     );
   }
   Vector<Polynomial<Rational> > inputs;
-  if (calculator.getVectorFromFunctionArguments(
-    input,
-    inputs,
-    nullptr,
-    - 1 //,
-//    CalculatorConversions::functionPolynomial<Rational>
-  )) {
-    return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
+  if (
+    calculator.getVectorFromFunctionArguments(
+      input,
+      inputs,
+      nullptr,
+      - 1// ,
+      //    CalculatorConversions::functionPolynomial<Rational>
+    )
+  ) {
+    return
+    CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
       calculator, inputs, nullptr, output
     );
   }
   Vector<Polynomial<AlgebraicNumber> > inputsAlgebraic;
-  if (calculator.getVectorFromFunctionArguments(
-    input,
-    inputsAlgebraic,
-    nullptr,
-    - 1 //,
-   // CalculatorConversions::functionPolynomial<AlgebraicNumber>
-  )) {
-    return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
+  if (
+    calculator.getVectorFromFunctionArguments(
+      input,
+      inputsAlgebraic,
+      nullptr,
+      - 1// ,
+      // CalculatorConversions::functionPolynomial<AlgebraicNumber>
+    )
+  ) {
+    return
+    CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
       calculator, inputs, nullptr, output
     );
   }
@@ -538,15 +650,20 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
 
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::getDivisionLaTeXSlide");
+  MacroRegisterFunctionWithName(
+    "GroebnerBasisComputation::getDivisionLaTeXSlide"
+  );
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& subtrahends = this->intermediateSubtractands;
-  this->owner->format.monomialOrder = this->owner->polynomialOrder.monomialOrder;
+  this->owner->format.monomialOrder =
+  this->owner->polynomialOrder.monomialOrder;
   bool oneDivisor = (this->owner->basis.size == 1);
   this->allMonomials.clear();
-  this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
+  this->allMonomials.addOnTopNoRepetition(
+    this->startingPolynomial.monomials
+  );
   for (int i = 0; i < remainders.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(remainders[i].monomials);
   }
@@ -558,46 +675,70 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     Polynomial<Coefficient>& current = basis[i].element;
     this->allMonomials.addOnTopNoRepetition(current.monomials);
   }
-
   for (int i = 0; i < this->owner->quotients.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(this->owner->quotients[i].monomials);
+    this->allMonomials.addOnTopNoRepetition(
+      this->owner->quotients[i].monomials
+    );
   }
   if (this->owner->remainderDivision.isEqualToZero()) {
     MonomialPolynomial constMon;
     constMon.makeOne();
     this->allMonomials.addOnTopNoRepetition(constMon);
   }
-  this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
+  this->allMonomials.quickSortDescending(
+    &this->owner->polynomialOrder.monomialOrder
+  );
   List<List<int> > dummyListList;
   List<int> dummyList;
   dummyListList.setSize(this->allMonomials.size);
   dummyList.initializeFillInObject(this->allMonomials.size, - 1);
-  this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(subtrahends.size, 0);
-  this->highlightMonsRemainders.initializeFillInObject(remainders.size,   dummyListList);
-  this->highlightMonsSubtrahends.initializeFillInObject(subtrahends.size, dummyListList);
-  this->highlightMonsQuotients.initializeFillInObject(basis.size, dummyListList);
-  this->highlightMonsDivisors.initializeFillInObject (basis.size, dummyListList);
-  this->fcAnswerMonsRemainders.initializeFillInObject(remainders.size, dummyList);
-  this->fcAnswerMonsSubtrahends.initializeFillInObject(subtrahends.size, dummyList);
+  this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(
+    subtrahends.size, 0
+  );
+  this->highlightMonsRemainders.initializeFillInObject(
+    remainders.size, dummyListList
+  );
+  this->highlightMonsSubtrahends.initializeFillInObject(
+    subtrahends.size, dummyListList
+  );
+  this->highlightMonsQuotients.initializeFillInObject(
+    basis.size, dummyListList
+  );
+  this->highlightMonsDivisors.initializeFillInObject(
+    basis.size, dummyListList
+  );
+  this->fcAnswerMonsRemainders.initializeFillInObject(
+    remainders.size, dummyList
+  );
+  this->fcAnswerMonsSubtrahends.initializeFillInObject(
+    subtrahends.size, dummyList
+  );
   this->fcAnswerMonsQuotients.initializeFillInObject(basis.size, dummyList);
   this->fcAnswerMonsDivisors.initializeFillInObject(basis.size, dummyList);
   this->uncoverAllMonsRemainders.initializeFillInObject(remainders.size, 1);
-  this->uncoverAllMonsSubtrahends.initializeFillInObject(subtrahends.size, 1);
+  this->uncoverAllMonsSubtrahends.initializeFillInObject(
+    subtrahends.size, 1
+  );
   this->uncoverAllMonsQuotients.initializeFillInObject(basis.size, 1);
   this->uncoverAllMonsDivisors.initializeFillInObject(basis.size, 1);
-  this->uncoverMonsFinalRemainder.initializeFillInObject(this->allMonomials.size, - 1);
-  this->additionalHighlightFinalRemainder.initializeFillInObject(this->allMonomials.size,- 1);
-  this->additionalHighlightRemainders.initializeFillInObject(this->allMonomials.size, dummyList);
+  this->uncoverMonsFinalRemainder.initializeFillInObject(
+    this->allMonomials.size, - 1
+  );
+  this->additionalHighlightFinalRemainder.initializeFillInObject(
+    this->allMonomials.size, - 1
+  );
+  this->additionalHighlightRemainders.initializeFillInObject(
+    this->allMonomials.size, dummyList
+  );
   this->highlightAllMonsFinalRemainder = - 1;
   int currentSlideNumer = this->firstIndexLatexSlide + 1;
   for (int i = 0; i < remainders.size; i ++) {
     this->computeHighLightsFromRemainder(i, currentSlideNumer);
   }
   for (int i = 0; i < subtrahends.size; i ++) {
-    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = subtrahends[i].getIndexLeadingMonomial(
-      nullptr,
-      nullptr,
-      &this->owner->polynomialOrder.monomialOrder
+    this->firstNonZeroIndicesPerIntermediateSubtracand[i] =
+    subtrahends[i].getIndexLeadingMonomial(
+      nullptr, nullptr, &this->owner->polynomialOrder.monomialOrder
     );
   }
   this->owner->format.flagUseLatex = true;
@@ -608,7 +749,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   }
   out << "}";
   if (!oneDivisor) {
-    out << "{\\color{orange}\\textbf{Remainder:} }&"
+    out
+    << "{\\color{orange}\\textbf{Remainder:} }&"
     << this->getSpacedMonomialsWithHighlightLaTeX(
       this->owner->remainderDivision,
       nullptr,
@@ -621,9 +763,15 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     << "\\\\\\hline";
   }
   if (!oneDivisor) {
-    out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
-    << this->allMonomials.size * 2 << "}{c}{"
-    << "\\alertNoH{" << this->uncoverAllMonsQuotients[0] << "}{"
+    out
+    << "\\textbf{Divisor(s)} &"
+    << "\\multicolumn{"
+    << this->allMonomials.size *
+    2
+    << "}{c}{"
+    << "\\alertNoH{"
+    << this->uncoverAllMonsQuotients[0]
+    << "}{"
     << "\\textbf{Quotient(s)}"
     << "}"
     << "}"
@@ -631,7 +779,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   }
   for (int i = 0; i < this->owner->basis.size; i ++) {
     if (!oneDivisor) {
-      out << this->getSpacedMonomialsWithHighlightLaTeX(
+      out
+      << this->getSpacedMonomialsWithHighlightLaTeX(
         this->owner->basis[i].element,
         &this->highlightMonsDivisors[i],
         &this->fcAnswerMonsDivisors[i],
@@ -641,15 +790,21 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
         false
       );
     } else {
-      out << "\\uncover<" << this->uncoverAllMonsQuotients[0] << "->{"
-      << "\\alertNoH{" << this->uncoverAllMonsQuotients[0] << "}{"
+      out
+      << "\\uncover<"
+      << this->uncoverAllMonsQuotients[0]
+      << "->{"
+      << "\\alertNoH{"
+      << this->uncoverAllMonsQuotients[0]
+      << "}{"
       << "\\textbf{Quotient: }"
       << "}"
       << "}";
     }
     out << "&";
     out << "\\multicolumn{" << this->allMonomials.size * 2 << "}{c}{";
-    out << this->getSpacedMonomialsWithHighlightLaTeX(
+    out
+    << this->getSpacedMonomialsWithHighlightLaTeX(
       this->owner->quotients[i],
       &this->highlightMonsQuotients[i],
       &this->fcAnswerMonsQuotients[i],
@@ -664,12 +819,18 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
       out << "\\hline";
     }
   }
-  out << " \\cline{2-" << this->allMonomials.size * 2 + 1 << "}"
-  << " \\cline{2-" << this->allMonomials.size * 2 + 1 << "}";
+  out << " \\cline{2-" << this->allMonomials.size * 2 + 1
+  << "}"
+  << " \\cline{2-"
+  << this->allMonomials.size *
+  2 +
+  1
+  << "}";
   for (int i = 0; i < remainders.size; i ++) {
     if (i == 0) {
       if (oneDivisor) {
-        out << "\\multicolumn{1}{c|}{"
+        out
+        << "\\multicolumn{1}{c|}{"
         << this->getSpacedMonomialsWithHighlightLaTeX(
           this->owner->basis[0].element,
           &this->highlightMonsDivisors[0],
@@ -685,12 +846,16 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
       out << "\\uncover<" << this->uncoverAllMonsRemainders[i] << "->{";
     }
     if (i == remainders.size - 1 && i != 0 && oneDivisor) {
-      out << "\\uncover<" << this->highlightAllMonsFinalRemainder << "->{"
+      out
+      << "\\uncover<"
+      << this->highlightAllMonsFinalRemainder
+      << "->{"
       << "\\textbf{\\color{orange}Remainder: }"
       << "}";
     }
     out << "&";
-    out << this->getSpacedMonomialsWithHighlightLaTeX(
+    out
+    << this->getSpacedMonomialsWithHighlightLaTeX(
       remainders[i],
       &this->highlightMonsRemainders[i],
       &this->fcAnswerMonsRemainders[i],
@@ -703,13 +868,18 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     if (i < subtrahends.size) {
       out << "\\uncover<" << this->uncoverAllMonsSubtrahends[i] << "->{";
       out << "\\uncover<" << this->uncoverAllMonsSubtrahends[i] + 2
-      << "->{\\alertNoH{" << this->uncoverAllMonsSubtrahends[i] + 2
-      << ", " << this->uncoverAllMonsSubtrahends[i] + 3
+      << "->{\\alertNoH{"
+      << this->uncoverAllMonsSubtrahends[i] +
+      2
+      << ", "
+      << this->uncoverAllMonsSubtrahends[i] +
+      3
       << "}{"
       << "$\\overline{\\phantom{A}}$"
       << "}}";
       out << "&";
-      out << this->getSpacedMonomialsWithHighlightLaTeX(
+      out
+      << this->getSpacedMonomialsWithHighlightLaTeX(
         subtrahends[i],
         &this->highlightMonsSubtrahends[i],
         &this->fcAnswerMonsSubtrahends[i],
@@ -718,9 +888,16 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
         this->uncoverAllMonsSubtrahends[i],
         true
       );
-      out << "\\\\\\cline{"
-      << this->firstNonZeroIndicesPerIntermediateSubtracand[i] * 2 + 2
-      << "-" << this->allMonomials.size * 2 + 1 << "}";
+      out
+      << "\\\\\\cline{"
+      << this->firstNonZeroIndicesPerIntermediateSubtracand[i] *
+      2 +
+      2
+      << "-"
+      << this->allMonomials.size *
+      2 +
+      1
+      << "}";
       out << "}";
     }
     if (i != 0) {
@@ -734,7 +911,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
 }
 
 template <class Coefficient>
-std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlightLaTeX(
+std::string PolynomialDivisionReport<Coefficient>::
+getSpacedMonomialsWithHighlightLaTeX(
   const Polynomial<Coefficient>& polynomial,
   List<List<int> >* slidesToHighlightMon,
   List<int>* slidesToFcAnswer,
@@ -743,7 +921,9 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
   int slidesToUncoverAllMons,
   bool useColumnSeparator
 ) {
-  MacroRegisterFunctionWithName("PolynomialDivisionReport::getSpacedMonomialsWithHighlightLaTeX");
+  MacroRegisterFunctionWithName(
+    "PolynomialDivisionReport::getSpacedMonomialsWithHighlightLaTeX"
+  );
   (void) slidesToUncoverAllMons;
   std::stringstream out;
   bool found = false;
@@ -761,7 +941,8 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     int monIndex = this->allMonomials.getIndex(tempM);
     if (slidesAdditionalHighlight != nullptr && monIndex != - 1) {
       if ((*slidesAdditionalHighlight)[monIndex] > 0) {
-        highlightHeadStream << "{ \\only<"
+        highlightHeadStream
+        << "{ \\only<"
         << (*slidesAdditionalHighlight)[monIndex]
         << "->{\\color{orange}}";
         highlightTailStream << "}";
@@ -769,12 +950,19 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     }
     if (slidesToFcAnswer != nullptr && monIndex != - 1) {
       if ((*slidesToFcAnswer)[monIndex] > 1) {
-        highlightHeadStream << "\\fcAnswer{" << (*slidesToFcAnswer)[monIndex] << "}{";
+        highlightHeadStream
+        << "\\fcAnswer{"
+        << (*slidesToFcAnswer)[monIndex]
+        << "}{";
         highlightTailStream << "}";
       }
     }
-    out << "$ " << highlightHeadStream.str() << "0"
-    << highlightTailStream.str() << "$";
+    out
+    << "$ "
+    << highlightHeadStream.str()
+    << "0"
+    << highlightTailStream.str()
+    << "$";
     return out.str();
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
@@ -810,14 +998,19 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     }
     if (slidesToHighlightMon != nullptr) {
       if ((*slidesToHighlightMon)[i].size > 0) {
-        highlightHead += "\\alertNoH{" + (*slidesToHighlightMon)[i].toStringCommaDelimited() + "}{";
+        highlightHead +=
+        "\\alertNoH{" + (*slidesToHighlightMon)[i].toStringCommaDelimited() +
+        "}{";
         highlightTail = "}" + highlightTail;
       }
     }
     if (slidesAdditionalHighlight != nullptr) {
       if ((*slidesAdditionalHighlight)[i] > 0) {
         std::stringstream highlightStream;
-        highlightStream << "{\\only<" << (*slidesAdditionalHighlight)[i] << "->{\\color{orange}}";
+        highlightStream
+        << "{\\only<"
+        << (*slidesAdditionalHighlight)[i]
+        << "->{\\color{orange}}";
         highlightHead += highlightStream.str();
         highlightTail = "}" + highlightTail;
       }
@@ -825,7 +1018,10 @@ std::string PolynomialDivisionReport<Coefficient>::getSpacedMonomialsWithHighlig
     countMons ++;
     std::string monWithSign =
     Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-      polynomial[index], polynomial.coefficients[index], true, &this->owner->format
+      polynomial[index],
+      polynomial.coefficients[index],
+      true,
+      &this->owner->format
     );
     std::string sign = monWithSign.substr(0, 1);
     std::string monNoSign = monWithSign.substr(1);
@@ -872,12 +1068,16 @@ template <class Coefficient>
 void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   int remainderIndex, int& currentSlideNumber
 ) {
-  MacroRegisterFunctionWithName("PolynomialDivisionReport::computeHighLightsFromRemainder");
+  MacroRegisterFunctionWithName(
+    "PolynomialDivisionReport::computeHighLightsFromRemainder"
+  );
   this->checkInitialization();
   auto& basis = this->owner->basis;
   if (remainderIndex == 0) {
     for (int i = 0; i < this->allMonomials.size; i ++) {
-      this->highlightMonsRemainders[remainderIndex][i].addOnTop(currentSlideNumber);
+      this->highlightMonsRemainders[remainderIndex][i].addOnTop(
+        currentSlideNumber
+      );
     }
     currentSlideNumber ++;
     for (int j = 0; j < basis.size; j ++) {
@@ -887,12 +1087,17 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
       currentSlideNumber ++;
     }
   }
-  for (int i = 0; i < this->intermediateHighlightedMons[remainderIndex].size; i ++) {
-    int monomialIndex = this->allMonomials.getIndex(
+  for (
+    int i = 0; i < this->intermediateHighlightedMons[remainderIndex].size; i ++
+  ) {
+    int monomialIndex =
+    this->allMonomials.getIndex(
       this->intermediateHighlightedMons[remainderIndex][i]
     );
-    this->additionalHighlightRemainders[remainderIndex][monomialIndex] = currentSlideNumber;
-    this->additionalHighlightFinalRemainder[monomialIndex] = currentSlideNumber;
+    this->additionalHighlightRemainders[remainderIndex][monomialIndex] =
+    currentSlideNumber;
+    this->additionalHighlightFinalRemainder[monomialIndex] = currentSlideNumber
+    ;
     this->uncoverMonsFinalRemainder[monomialIndex] = currentSlideNumber;
     currentSlideNumber ++;
   }
@@ -900,7 +1105,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   constMon.makeOne();
   int zeroMonIndex = this->allMonomials.getIndex(constMon);
   if (this->intermediateRemainders[remainderIndex].isEqualToZero()) {
-    this->additionalHighlightRemainders[remainderIndex][zeroMonIndex] = currentSlideNumber;
+    this->additionalHighlightRemainders[remainderIndex][zeroMonIndex] =
+    currentSlideNumber;
     this->additionalHighlightFinalRemainder[zeroMonIndex] = currentSlideNumber;
     currentSlideNumber ++;
   }
@@ -917,45 +1123,66 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   if (remainderIndex >= this->intermediateSelectedDivisors.size) {
     return;
   }
-  Polynomial<Coefficient>& currentRemainder = this->intermediateRemainders[remainderIndex];
+  Polynomial<Coefficient>& currentRemainder =
+  this->intermediateRemainders[remainderIndex];
   int indexCurrentDivisor = this->intermediateSelectedDivisors[remainderIndex];
   Polynomial<Coefficient>& currentDivisor = basis[indexCurrentDivisor].element;
   MonomialPolynomial divisorLeadingMonomial;
-  int indexCurrentDivisorLeadingMoN = currentDivisor.getIndexLeadingMonomial(
-    &divisorLeadingMonomial, nullptr, &this->owner->polynomialOrder.monomialOrder
+  int indexCurrentDivisorLeadingMoN =
+  currentDivisor.getIndexLeadingMonomial(
+    &divisorLeadingMonomial,
+    nullptr,
+    &this->owner->polynomialOrder.monomialOrder
   );
-  int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.getIndex(
-    divisorLeadingMonomial
-  );
+  int indexCurrentDivisorLeadingMonInAllMons =
+  this->allMonomials.getIndex(divisorLeadingMonomial);
   MonomialPolynomial maxMonCurrentRemainder;
   Coefficient leadingCFCurrentRemainder;
   currentRemainder.getIndexLeadingMonomial(
-    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->owner->polynomialOrder.monomialOrder
+    &maxMonCurrentRemainder,
+    &leadingCFCurrentRemainder,
+    &this->owner->polynomialOrder.monomialOrder
   );
-  int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.getIndex(maxMonCurrentRemainder);
-  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].addOnTop(currentSlideNumber);
-  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
-
+  int indexCurrentRemainderLeadingMonInAllMons =
+  this->allMonomials.getIndex(maxMonCurrentRemainder);
+  this->highlightMonsDivisors[indexCurrentDivisor][
+    indexCurrentDivisorLeadingMonInAllMons
+  ].addOnTop(currentSlideNumber);
+  this->highlightMonsRemainders[remainderIndex][
+    indexCurrentRemainderLeadingMonInAllMons
+  ].addOnTop(currentSlideNumber);
   if (remainderIndex == 0) {
-    this->divisionLog << "$\\vphantom"
-    << "{\\frac{x^1}{x^1}}$";
+    this->divisionLog << "$\\vphantom" << "{\\frac{x^1}{x^1}}$";
   }
   FormatExpressions& format = this->owner->format;
-  this->divisionLog << "\\only<" << currentSlideNumber << ","
-  << currentSlideNumber + 1 << "| handout:0>{Divide "
+  this->divisionLog
+  << "\\only<"
+  << currentSlideNumber
+  << ","
+  << currentSlideNumber +
+  1
+  << "| handout:0>{Divide "
   << "\\alertNoH{"
-  << currentSlideNumber << ","
-  << currentSlideNumber + 1 << "}{"
-  << "$" << currentRemainder.getBlendCoefficientAndMonomial(
+  << currentSlideNumber
+  << ","
+  << currentSlideNumber +
+  1
+  << "}{"
+  << "$"
+  << currentRemainder.getBlendCoefficientAndMonomial(
     maxMonCurrentRemainder, leadingCFCurrentRemainder, false, &format
   )
   << "$ "
   << "}"
   << " by "
   << "\\alertNoH{"
-  << currentSlideNumber << ","
-  << currentSlideNumber + 1 << "}{"
-  << "$" << currentRemainder.getBlendCoefficientAndMonomial(
+  << currentSlideNumber
+  << ","
+  << currentSlideNumber +
+  1
+  << "}{"
+  << "$"
+  << currentRemainder.getBlendCoefficientAndMonomial(
     currentDivisor.monomials[indexCurrentDivisorLeadingMoN],
     currentDivisor.coefficients[indexCurrentDivisorLeadingMoN],
     false,
@@ -965,31 +1192,48 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "}."
   << "}";
   currentSlideNumber ++;
-  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].
-  addOnTop(currentSlideNumber);
-  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
+  this->highlightMonsDivisors[indexCurrentDivisor][
+    indexCurrentDivisorLeadingMonInAllMons
+  ].addOnTop(currentSlideNumber);
+  this->highlightMonsRemainders[remainderIndex][
+    indexCurrentRemainderLeadingMonInAllMons
+  ].addOnTop(currentSlideNumber);
   int indexCurrentQuotientMonInAllMons =
-  this->allMonomials.getIndex(this->intermediateHighestMonDivHighestMon[remainderIndex]);
-  Polynomial<Coefficient>& currentQuotient = this->owner->quotients[indexCurrentDivisor];
-  int indexCurrentQuotientMoN = currentQuotient.monomials.getIndex(
+  this->allMonomials.getIndex(
     this->intermediateHighestMonDivHighestMon[remainderIndex]
   );
-  this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
+  Polynomial<Coefficient>& currentQuotient =
+  this->owner->quotients[indexCurrentDivisor];
+  int indexCurrentQuotientMoN =
+  currentQuotient.monomials.getIndex(
+    this->intermediateHighestMonDivHighestMon[remainderIndex]
+  );
+  this->fcAnswerMonsQuotients[indexCurrentDivisor][
+    indexCurrentQuotientMonInAllMons
+  ] =
+  currentSlideNumber;
   currentSlideNumber ++;
-  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
+  this->highlightMonsQuotients[indexCurrentDivisor][
+    indexCurrentQuotientMonInAllMons
+  ].addOnTop(currentSlideNumber);
   for (int i = 0; i < currentDivisor.size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
       this->allMonomials.getIndex(currentDivisor[i])
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsSubtrahends[remainderIndex] = currentSlideNumber;
-  this->divisionLog << "\\only<"
-  << currentSlideNumber << ", "
-  << currentSlideNumber + 1
+  this->divisionLog
+  << "\\only<"
+  << currentSlideNumber
+  << ", "
+  << currentSlideNumber +
+  1
   << "| handout:0>{Multiply "
   << "\\alertNoH{"
-  << currentSlideNumber << ", "
-  << currentSlideNumber + 1
+  << currentSlideNumber
+  << ", "
+  << currentSlideNumber +
+  1
   << "}{$"
   << currentQuotient.getBlendCoefficientAndMonomial(
     currentQuotient.monomials[indexCurrentQuotientMoN],
@@ -1001,55 +1245,97 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << " by divisor. "
   << "}";
   currentSlideNumber ++;
-  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
+  this->highlightMonsQuotients[indexCurrentDivisor][
+    indexCurrentQuotientMonInAllMons
+  ].addOnTop(currentSlideNumber);
   for (int i = 0; i < currentDivisor.size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
       this->allMonomials.getIndex(currentDivisor[i])
     ].addOnTop(currentSlideNumber);
   }
-  if (this->fcAnswerMonsSubtrahends[remainderIndex].size != this->allMonomials.size) {
-    this->fcAnswerMonsSubtrahends[remainderIndex].initializeFillInObject(this->allMonomials.size, - 1);
+  if (
+    this->fcAnswerMonsSubtrahends[remainderIndex].size !=
+    this->allMonomials.size
+  ) {
+    this->fcAnswerMonsSubtrahends[remainderIndex].initializeFillInObject(
+      this->allMonomials.size, - 1
+    );
   }
-  for (int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++) {
+  for (
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+  ) {
     this->fcAnswerMonsSubtrahends[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateSubtractands[remainderIndex][i])
-    ] = currentSlideNumber;
+      this->allMonomials.getIndex(
+        this->intermediateSubtractands[remainderIndex][i]
+      )
+    ] =
+    currentSlideNumber;
   }
   currentSlideNumber ++;
-  for (int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++) {
+  for (
+    int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
+  ) {
     this->highlightMonsRemainders[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateRemainders[remainderIndex][i])
+      this->allMonomials.getIndex(
+        this->intermediateRemainders[remainderIndex][i]
+      )
     ].addOnTop(currentSlideNumber);
   }
-  for (int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++) {
+  for (
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+  ) {
     this->highlightMonsSubtrahends[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateSubtractands[remainderIndex][i])
+      this->allMonomials.getIndex(
+        this->intermediateSubtractands[remainderIndex][i]
+      )
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsRemainders[remainderIndex + 1] = currentSlideNumber;
-  this->divisionLog << "\\only<" << currentSlideNumber << ", "
-  << currentSlideNumber + 1 << "| handout:0>{subtract last two polynomials.}";
+  this->divisionLog
+  << "\\only<"
+  << currentSlideNumber
+  << ", "
+  << currentSlideNumber +
+  1
+  << "| handout:0>{subtract last two polynomials.}";
   currentSlideNumber ++;
-  for (int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++) {
+  for (
+    int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
+  ) {
     this->highlightMonsRemainders[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateRemainders[remainderIndex][i])
+      this->allMonomials.getIndex(
+        this->intermediateRemainders[remainderIndex][i]
+      )
     ].addOnTop(currentSlideNumber);
   }
-  for (int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++) {
+  for (
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+  ) {
     this->highlightMonsSubtrahends[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateSubtractands[remainderIndex][i])
+      this->allMonomials.getIndex(
+        this->intermediateSubtractands[remainderIndex][i]
+      )
     ].addOnTop(currentSlideNumber);
   }
   if (remainderIndex + 1 >= this->intermediateRemainders.size) {
-    global.fatal << "Something is wrong: not enough intermediate remainders. " << global.fatal;
+    global.fatal
+    << "Something is wrong: not enough intermediate remainders. "
+    << global.fatal;
   }
-  for (int i = 0; i < this->intermediateRemainders[remainderIndex + 1].size(); i ++) {
+  for (
+    int i = 0; i < this->intermediateRemainders[remainderIndex + 1].size(); i
+    ++
+  ) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][
-      this->allMonomials.getIndex(this->intermediateRemainders[remainderIndex + 1][i])
-    ] = currentSlideNumber;
+      this->allMonomials.getIndex(
+        this->intermediateRemainders[remainderIndex + 1][i]
+      )
+    ] =
+    currentSlideNumber;
   }
   if (this->intermediateRemainders[remainderIndex + 1].isEqualToZero()) {
-    this->fcAnswerMonsRemainders[remainderIndex + 1][zeroMonIndex] = currentSlideNumber;
+    this->fcAnswerMonsRemainders[remainderIndex + 1][zeroMonIndex] =
+    currentSlideNumber;
   }
   currentSlideNumber ++;
 }
@@ -1060,24 +1346,27 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   MacroRegisterFunctionWithName("Calculator::groebner");
   Vector<Polynomial<Rational> > inputVector;
   if (input.size() < 3) {
-    return output.assignError(calculator, "Function takes at least two arguments. ");
+    return
+    output.assignError(calculator, "Function takes at least two arguments. ");
   }
   const Expression& numComputationsE = input[1];
   Rational upperBound = 0;
   if (!numComputationsE.isOfType(&upperBound)) {
-    return output.assignError(
+    return
+    output.assignError(
       calculator,
-      "Failed to convert the first argument "
-      "of the expression to rational number."
+"Failed to convert the first argument "
+"of the expression to rational number."
     );
   }
   if (upperBound > 1000000) {
-    return output.assignError(
+    return
+    output.assignError(
       calculator,
-      "Error: your upper limit of polynomial "
-      "operations exceeds 1000000, which is too large."
-      "You may use negative or zero number give "
-      "no computation bound, but please don't. "
+"Error: your upper limit of polynomial "
+"operations exceeds 1000000, which is too large."
+"You may use negative or zero number give "
+"no computation bound, but please don't. "
     );
   }
   output.reset(calculator);
@@ -1085,14 +1374,17 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
     output.addChildOnTop(input[i]);
   }
   ExpressionContext context(calculator);
-  if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
-    output,
-    inputVector,
-    &context,
-    - 1//,
-    //CalculatorConversions::functionPolynomial<Rational>
-  )) {
-    return output.assignError(calculator, "Failed to extract polynomial expressions");
+  if (
+    !calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
+      output,
+      inputVector,
+      &context,
+      - 1// ,
+      // CalculatorConversions::functionPolynomial<Rational>
+    )
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract polynomial expressions");
   }
   Vector<Polynomial<Rational> > relations;
   Vector<Polynomial<Rational> > generators;
@@ -1106,32 +1398,45 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
       format.polynomialAlphabet.addOnTop(currentString);
     }
   }
-  if (!RationalFraction<Rational>::getRelations(inputVector, generators, relations, calculator.comments)) {
+  if (
+    !RationalFraction<Rational>::getRelations(
+      inputVector, generators, relations, calculator.comments
+    )
+  ) {
     return calculator << "Failed to extract relations. ";
   }
   std::stringstream out;
   out << "Polynomials:";
   for (int i = 0; i < generators.size; i ++) {
-    out << "<br>" << generators[i].toString(&format) << "=" << inputVector[i].toString(&format);
+    out
+    << "<br>"
+    << generators[i].toString(&format)
+    << "="
+    << inputVector[i].toString(&format);
   }
   out << "<br>Relations: ";
   for (int i = 0; i < relations.size; i ++) {
-    relations[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+    relations[i].scaleNormalizeLeadingMonomial(
+      &MonomialPolynomial::orderDefault()
+    );
     out << "<br>" << relations[i].toString(&format);
   }
   return output.assignValue(calculator, out.str());
 }
 
 template <class Coefficient>
-bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+bool CalculatorFunctionsPolynomial::
+greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
   Calculator& calculator,
   const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right,
-  const ExpressionContext &context,
+  const ExpressionContext& context,
   Expression& output,
   bool doGCD
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo"
+  );
   Polynomial<Coefficient> outputPolynomial;
   if (left.isEqualToZero()) {
     return calculator << "Not allowed to take gcd/lcm of zero. ";
@@ -1149,7 +1454,8 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePo
   return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 
-bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+bool CalculatorFunctionsPolynomial::
+greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1164,15 +1470,25 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleAl
     return false;
   }
   Polynomial<AlgebraicNumber> leftPolynomial, rightPolynomial;
-  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+  if (
+    !left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)
+  ) {
     return false;
   }
-  return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  return
+  CalculatorFunctionsPolynomial::
+  greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator,
+    leftPolynomial,
+    rightPolynomial,
+    left.getContext(),
+    output,
+    doGCD
   );
 }
 
-bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleModular(
+bool CalculatorFunctionsPolynomial::
+greatestCommonDivisorOrLeastCommonMultipleModular(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1187,68 +1503,105 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleMo
     return false;
   }
   Polynomial<ElementZmodP> leftPolynomial, rightPolynomial;
-  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+  if (
+    !left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)
+  ) {
     return false;
   }
   if (leftPolynomial.isEqualToZero() || rightPolynomial.isEqualToZero()) {
     calculator
     << "Greatest common divisor / "
     << "least common multiple with zero not allowed. ";
-    return output.assignError(
-      calculator,
-      "Error in least common multiple / greatest common divisor."
+    return
+    output.assignError(
+      calculator, "Error in least common multiple / greatest common divisor."
     );
   }
   LargeIntegerUnsigned modulus = leftPolynomial.coefficients[0].modulus;
-
-  if (modulus > static_cast<unsigned>(ElementZmodP::maximumModulusForUserFacingPolynomialDivision)) {
-    return calculator
+  if (
+    modulus > static_cast<unsigned>(
+      ElementZmodP::maximumModulusForUserFacingPolynomialDivision
+    )
+  ) {
+    return
+    calculator
     << "Polynomial modulus exceeds the maximum allowed "
     << "for user-facing polynomial division: "
-    << ElementZmodP::maximumModulusForUserFacingPolynomialDivision << ". ";
+    << ElementZmodP::maximumModulusForUserFacingPolynomialDivision
+    << ". ";
   }
   if (!modulus.isPossiblyPrime(0, true)) {
-    return calculator << "Cannot do GCD / lcm: modulus "
-    << modulus << " is not prime. ";
+    return
+    calculator
+    << "Cannot do GCD / lcm: modulus "
+    << modulus
+    << " is not prime. ";
   }
-  return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  return
+  CalculatorFunctionsPolynomial::
+  greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator,
+    leftPolynomial,
+    rightPolynomial,
+    left.getContext(),
+    output,
+    doGCD
   );
 }
 
-bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial(
+bool CalculatorFunctionsPolynomial::
+greatestCommonDivisorOrLeastCommonMultiplePolynomial(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool doGCD
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial"
+  );
   if (input.size() != 3) {
     return false;
   }
   const Expression& left = input[1];
   if (left.isOfType<Polynomial<ElementZmodP> >()) {
-    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleModular(calculator, input, output, doGCD);
+    return
+    CalculatorFunctionsPolynomial::
+    greatestCommonDivisorOrLeastCommonMultipleModular(
+      calculator, input, output, doGCD
+    );
   }
   if (left.isOfType<Polynomial<AlgebraicNumber> >()) {
-    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleAlgebraic(calculator, input, output, doGCD);
+    return
+    CalculatorFunctionsPolynomial::
+    greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+      calculator, input, output, doGCD
+    );
   }
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext context(calculator);
-  if (!calculator.getVectorFromFunctionArguments(
-    input,
-    polynomials,
-    &context,
-    2//,
-    //CalculatorConversions::functionPolynomial<Rational>
-  )) {
-    return output.assignError(
-      calculator,
-      "Failed to extract a list of 2 polynomials. "
+  if (
+    !calculator.getVectorFromFunctionArguments(
+      input,
+      polynomials,
+      &context,
+      2// ,
+      // CalculatorConversions::functionPolynomial<Rational>
+    )
+  ) {
+    return
+    output.assignError(
+      calculator, "Failed to extract a list of 2 polynomials. "
     );
   }
-  return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator, polynomials[0], polynomials[1], context, output, doGCD
+  return
+  CalculatorFunctionsPolynomial::
+  greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator,
+    polynomials[0],
+    polynomials[1],
+    context,
+    output,
+    doGCD
   );
 }
 
@@ -1264,24 +1617,27 @@ bool CalculatorFunctionsPolynomial::groebner(
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   ExpressionContext context(calculator);
   if (input.size() < 3) {
-    return output.assignError(calculator, "Function takes at least two arguments. ");
+    return
+    output.assignError(calculator, "Function takes at least two arguments. ");
   }
   const Expression& numComputationsE = input[1];
   Rational upperBound = 0;
   if (!numComputationsE.isOfType(&upperBound)) {
-    return output.assignError(
+    return
+    output.assignError(
       calculator,
-      "Failed to convert the first argument of "
-      "the expression to rational number. "
+"Failed to convert the first argument of "
+"the expression to rational number. "
     );
   }
   if (upperBound > 1000000) {
-    return output.assignError(
+    return
+    output.assignError(
       calculator,
-      "Error: your upper limit of polynomial "
-      "operations exceeds 1000000, which is too large. "
-      "You may use negative or zero number "
-      "give no computation bound. "
+"Error: your upper limit of polynomial "
+"operations exceeds 1000000, which is too large. "
+"You may use negative or zero number "
+"give no computation bound. "
     );
   }
   int upperBoundComputations = int(upperBound.getDoubleValue());
@@ -1293,32 +1649,32 @@ bool CalculatorFunctionsPolynomial::groebner(
   int modulus = 0;
   if (useModZp) {
     if (!output[1].isSmallInteger(&modulus)) {
-      return output.assignError(
+      return
+      output.assignError(
         calculator,
         "Error: failed to extract modulo from the second argument. "
       );
     }
     if (!MathRoutines::isPrimeSimple(modulus)) {
-      return output.assignError(
-        calculator,
-        "Error: modulus not prime. "
-      );
+      return output.assignError(calculator, "Error: modulus not prime. ");
     }
   }
-  if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
-    output,
-    inputVector,
-    &context,
-    - 1//,
-    //CalculatorConversions::functionPolynomial<Rational>
-  )) {
-    return output.assignError(
-      calculator,
-      "Failed to extract polynomial expressions"
-    );
+  if (
+    !calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
+      output,
+      inputVector,
+      &context,
+      - 1// ,
+      // CalculatorConversions::functionPolynomial<Rational>
+    )
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract polynomial expressions");
   }
   for (int i = 0; i < inputVector.size; i ++) {
-    inputVector[i].scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+    inputVector[i].scaleNormalizeLeadingMonomial(
+      &MonomialPolynomial::orderDefault()
+    );
   }
   GroebnerBasisComputation<AlgebraicNumber> groebnerComputation;
   context.getFormat(groebnerComputation.format);
@@ -1350,16 +1706,18 @@ bool CalculatorFunctionsPolynomial::groebner(
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_rightLargerWins
     );
-  } else if (order == MonomialPolynomial::Order::lexicographic){
+  } else if (order == MonomialPolynomial::Order::lexicographic) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_leftLargerWins
     );
   } else {
     global.fatal << "Unexpected order value: " << order << global.fatal;
   }
-  groebnerComputation.format.monomialOrder = groebnerComputation.polynomialOrder.monomialOrder;
+  groebnerComputation.format.monomialOrder =
+  groebnerComputation.polynomialOrder.monomialOrder;
   groebnerComputation.maximumMonomialOperations = upperBoundComputations;
-  bool success = groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
+  bool success =
+  groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
   out << groebnerComputation.toStringLetterOrder(false);
   out << "Letter/expression order: ";
@@ -1370,21 +1728,25 @@ bool CalculatorFunctionsPolynomial::groebner(
       out << "&lt;";
     }
   }
-  out << "<br>Starting basis (" << inputVector.size  << " elements): ";
+  out << "<br>Starting basis (" << inputVector.size << " elements): ";
   for (int i = 0; i < inputVector.size; i ++) {
-    out << "<br>"
+    out
+    << "<br>"
     << HtmlRoutines::getMathNoDisplay(
       inputVector[i].toString(&groebnerComputation.format)
     );
   }
   if (success) {
-    out << "<br>Minimal Groebner basis with "
+    out
+    << "<br>Minimal Groebner basis with "
     << outputGroebner.size
     << " elements, computed using algorithm 1, using "
     << groebnerComputation.numberPolynomialDivisions
     << " polynomial divisions. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << "<br> " << HtmlRoutines::getMathNoDisplay(
+      out
+      << "<br> "
+      << HtmlRoutines::getMathNoDisplay(
         outputGroebner[i].toString(&groebnerComputation.format)
       );
     }
@@ -1398,15 +1760,21 @@ bool CalculatorFunctionsPolynomial::groebner(
     }
     out << ")";
   } else {
-    out << "<br>Minimal Groebner basis not computed: "
+    out
+    << "<br>Minimal Groebner basis not computed: "
     << "exceeded the user-given limit of "
-    << upperBoundComputations << " polynomial operations. ";
-    out << "<br>An intermediate non-Groebner basis containing total "
+    << upperBoundComputations
+    << " polynomial operations. ";
+    out
+    << "<br>An intermediate non-Groebner basis containing total "
     << groebnerComputation.basis.size
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
     for (int i = 0; i < groebnerComputation.basis.size; i ++) {
-      out << groebnerComputation.basis[i].element.toString(&groebnerComputation.format);
+      out
+      << groebnerComputation.basis[i].element.toString(
+        &groebnerComputation.format
+      );
       if (i != groebnerComputation.basis.size - 1) {
         out << ", <br>";
       }
@@ -1416,10 +1784,13 @@ bool CalculatorFunctionsPolynomial::groebner(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibrary(
+bool CalculatorFunctionsPolynomial::
+combineFractionsCommutativeWithInternalLibrary(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary"
+  );
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
@@ -1432,28 +1803,38 @@ bool CalculatorFunctionsPolynomial::combineFractionsCommutativeWithInternalLibra
     return false;
   }
   WithContext<RationalFraction<AlgebraicNumber> > rationalFunction;
-  if (!CalculatorConversions::functionRationalFunction<AlgebraicNumber>(
-    calculator, input, rationalFunction, true
-  )) {
+  if (
+    !CalculatorConversions::functionRationalFunction<AlgebraicNumber>(
+      calculator, input, rationalFunction, true
+    )
+  ) {
     return false;
   }
-  return CalculatorConversions::expressionFromRationalFraction(
-    calculator, rationalFunction.content, output, &rationalFunction.context
+  return
+  CalculatorConversions::expressionFromRationalFraction(
+    calculator,
+    rationalFunction.content,
+    output,
+    &rationalFunction.context
   );
 }
 
 bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial"
+  );
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
   WithContext<Polynomial<AlgebraicNumber> > numerator;
   WithContext<Polynomial<AlgebraicNumber> > denominator;
-  if (!CalculatorConversions::functionPolynomial(
-    calculator, input[2], denominator, 1, 6, true
-  )) {
+  if (
+    !CalculatorConversions::functionPolynomial(
+      calculator, input[2], denominator, 1, 6, true
+    )
+  ) {
     return false;
   }
   Rational denominatorDegree = denominator.content.totalDegree();
@@ -1461,24 +1842,28 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     // The denominator is a constant;
     return false;
   }
-  if (!CalculatorConversions::functionPolynomial(
-    calculator,
-    input[1],
-    numerator,
-    1,
-    20,
-    true
-  )) {
+  if (
+    !CalculatorConversions::functionPolynomial(
+      calculator, input[1], numerator, 1, 20, true
+    )
+  ) {
     return false;
   }
-  if (!WithContext<Polynomial<AlgebraicNumber> >::mergeContexts(numerator, denominator, nullptr)) {
+  if (
+    !WithContext<Polynomial<AlgebraicNumber> >::mergeContexts(
+      numerator, denominator, nullptr
+    )
+  ) {
     return false;
   }
   if (!numerator.context.hasAtomicUserDefinedVariables()) {
     return false;
   }
   if (numerator.content.minimalNumberOfVariables() > 1) {
-    if (numerator.content.totalDegree() > 4 || denominator.content.totalDegree() > 4) {
+    if (
+      numerator.content.totalDegree() > 4 ||
+      denominator.content.totalDegree() > 4
+    ) {
       return false;
     }
   }
@@ -1497,10 +1882,13 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   Expression simplifiedExpression;
   simplifiedExpression.assignWithContext(calculator, simplified);
   Expression outputCandidate;
-  if (!CalculatorConversions::functionExpressionFromBuiltInType(
-    calculator, simplifiedExpression, outputCandidate
-  )) {
-    return calculator
+  if (
+    !CalculatorConversions::functionExpressionFromBuiltInType(
+      calculator, simplifiedExpression, outputCandidate
+    )
+  ) {
+    return
+    calculator
     << "Unexpected failure to convert "
     << simplifiedExpression.toString()
     << " to expression.";
@@ -1510,9 +1898,13 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   result.getDenominator(simplifiedDenominator);
   if (simplifiedDenominator.totalDegree() < denominatorDegree) {
     Polynomial<AlgebraicNumber> quotient, remainder;
-    denominator.content.divideBy(simplifiedDenominator, quotient, remainder, nullptr);
+    denominator.content.divideBy(
+      simplifiedDenominator, quotient, remainder, nullptr
+    );
     if (!remainder.isEqualToZero()) {
-      global.fatal << "Remainder of quotient must not be zero. " << global.fatal;
+      global.fatal
+      << "Remainder of quotient must not be zero. "
+      << global.fatal;
     }
     WithContext<Polynomial<AlgebraicNumber> > quotientWithContext;
     quotientWithContext.context = numerator.context;
@@ -1520,8 +1912,14 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
     Expression quotientExpression;
     quotientExpression.assignWithContext(calculator, quotientWithContext);
     Expression quotientNotZero;
-    quotientNotZero.makeXOX(calculator, calculator.opNotEqual(), quotientExpression, calculator.expressionZero());
+    quotientNotZero.makeXOX(
+      calculator,
+      calculator.opNotEqual(),
+      quotientExpression,
+      calculator.expressionZero()
+    );
     calculator.objectContainer.constraints.addOnTop(quotientNotZero);
   }
   return true;
 }
+

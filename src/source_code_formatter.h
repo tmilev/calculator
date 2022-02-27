@@ -233,7 +233,7 @@ public:
       int inputIndexInParent
     );
     Element* previousAtom() const;
-    Element* nextAtom()const;
+    Element* nextAtom() const;
     Element* previousSibling();
     Element* rightMostAtomUnderMe();
     Element* leftMostAtomUnderMe();
@@ -313,8 +313,13 @@ public:
       Element& lookAheadFirst,
       Element& lookAheadNext
     );
-    bool isSuitableForTypePointer(CodeFormatter::Element& prefix, CodeFormatter::Element& type,
-    CodeFormatter::Element& starOrAmpersand, CodeFormatter::Element& suffix, CodeFormatter::Element& afterSuffix);
+    bool isSuitableForTypePointer(
+      CodeFormatter::Element& prefix,
+      CodeFormatter::Element& type,
+      CodeFormatter::Element& starOrAmpersand,
+      CodeFormatter::Element& suffix,
+      CodeFormatter::Element& afterSuffix
+    );
     bool isSuitableForExpressionExpressionToExpression(
       CodeFormatter::Element& left, CodeFormatter::Element& right
     ) const;
@@ -433,7 +438,7 @@ private:
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
   );
-  bool parsingSucceeded()const;
+  bool parsingSucceeded() const;
   std::string toStringLinks();
   static bool isIdentifierWord(const std::string& input);
   bool isLetterLike(char input);

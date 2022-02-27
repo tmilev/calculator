@@ -1,7 +1,9 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_multitasking_ALREADY_INCLUDED
 #define header_general_multitasking_ALREADY_INCLUDED
+
 #include "macros.h"
 
 // The documentation of pthreads.h can be found at:
@@ -21,10 +23,13 @@
 // 2) Second, if the mutex is locked, the calling thread must pause execution,
 // without consuming computational/processor power.
 // As soon as the mutex is unlocked (by another thread or by the system),
-// the calling thread is allowed to wake up and perform the sequence described in 1).
-// The wake-up time is unspecified/not guaranteed to be immediate: another thread
+// the calling thread is allowed to wake up and perform the sequence described
+// in 1).
+// The wake-up time is unspecified/not guaranteed to be immediate: another
+// thread
 // might "jump in" and overtake, again locking the calling thread.
-// In order to have guaranteed wake-up when coordinating two threads only, use the
+// In order to have guaranteed wake-up when coordinating two threads only, use
+// the
 // controller object (which uses two mutexes to achieve guaranteed wake-up).
 // 3) Mutexes cannot be copied: once allocated, they stay in place.
 class MutexRecursiveWrapper {
@@ -42,7 +47,8 @@ public:
   void* mutexImplementation;
   // note: the mutex implementation is not a named type for system portability.
   bool islockedUnsafeUseForWINguiOnly();
-  // locks the mutex if the mutex is free. If not it suspends calling thread until
+  // locks the mutex if the mutex is free. If not it suspends calling thread
+  // until
   // mutex becomes free and then locks it.
   void lockMe();
   // unlocks the mutex.
@@ -59,7 +65,8 @@ public:
   ~MutexRecursiveWrapper();
 };
 
-//this class uses RAII to lock MutexRecursiveWrapper's -> equivalent to std::lock_guard
+// this class uses RAII to lock MutexRecursiveWrapper's -> equivalent to
+// std::lock_guard
 class MutexlockGuard {
 public:
   MutexRecursiveWrapper* mutexWrapper;
@@ -82,8 +89,8 @@ public:
   static unsigned int numberOfListsCreated;
   static unsigned int numberOfListResizesTotal;
   static unsigned int numberOfHashResizes;
-
   static void checkPointerCounters();
 };
 
 #endif // header_general_multitasking_ALREADY_INCLUDED
+

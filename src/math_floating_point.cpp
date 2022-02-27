@@ -1,6 +1,6 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
-
 #include "math_general.h"
 #include <math.h>
 
@@ -18,7 +18,9 @@ std::string FloatingPoint::doubleToString(double input) {
   out << std::fixed << input;
   std::string result = out.str();
   bool hasDot = false;
-  for (int i = static_cast<signed>(result.size()) - 1; i >= 0; i --) {
+  for (
+    int i = static_cast<signed>(result.size()) - 1; i >= 0; i --
+  ) {
     if (result[static_cast<unsigned>(i)] == '.') {
       hasDot = true;
       break;
@@ -28,7 +30,10 @@ std::string FloatingPoint::doubleToString(double input) {
     return result;
   }
   int firstNonZeroIndex = 0;
-  for (firstNonZeroIndex = static_cast<signed>(result.size()) - 1; firstNonZeroIndex >= 0; firstNonZeroIndex --) {
+  for (
+    firstNonZeroIndex = static_cast<signed>(result.size()) - 1;
+    firstNonZeroIndex >= 0; firstNonZeroIndex --
+  ) {
     if (result[static_cast<unsigned>(firstNonZeroIndex)] == '.') {
       result.resize(static_cast<unsigned>(firstNonZeroIndex));
       return result;
@@ -49,7 +54,7 @@ double FloatingPoint::absFloating(double argument) {
   return argument >= 0 ? argument : - argument;
 }
 
-bool FloatingPoint::isNaN(const double &argument) {
+bool FloatingPoint::isNaN(const double& argument) {
 #ifdef MACRO_use_wasm
   return isnan(argument);
 #else
@@ -85,7 +90,7 @@ unsigned int HashFunctions::hashFunction(const double& input) {
   if (FloatingPoint::isNaN(input)) {
     return 5;
   }
-  return static_cast<unsigned>(input * 10000);
+  return static_cast<unsigned>(input* 10000);
 }
 
 unsigned int MathRoutines::hashDouble(const double& input) {

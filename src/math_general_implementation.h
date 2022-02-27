@@ -1,5 +1,7 @@
+
 #ifndef header_math_general_implementation_ALREADY_INCLUDED
 #define header_math_general_implementation_ALREADY_INCLUDED
+
 #include "math_general.h"
 
 template <class Coefficient>
@@ -9,14 +11,23 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   const Coefficient& ringZero
 ) {
   MacroRegisterFunctionWithName("Matrix::computeDeterminantOverwriteMatrix");
-  bool doReport = this->numberOfColumns > 10 && this->numberOfRows > 10 && this->numberOfColumns * this->numberOfRows >= 400;
-  ProgressReport report(1, GlobalVariables::Response::ReportType::gaussianElimination);
-  ProgressReport report2(400, GlobalVariables::Response::ReportType::gaussianElimination);
+  bool doReport = this->numberOfColumns > 10 &&
+  this->numberOfRows > 10 &&
+  this->numberOfColumns * this->numberOfRows >= 400;
+  ProgressReport report(
+    1, GlobalVariables::Response::ReportType::gaussianElimination
+  );
+  ProgressReport report2(
+    400, GlobalVariables::Response::ReportType::gaussianElimination
+  );
   int pivotIndex = 0;
   output = ringOne;
   Coefficient scalar;
   if (this->numberOfColumns != this->numberOfRows) {
-    global.fatal << "Error: determinant computation: number of columns different from number of rows. " << global.fatal;
+    global.fatal
+    <<
+    "Error: determinant computation: number of columns different from number of rows. "
+    << global.fatal;
   }
   int dim = this->numberOfColumns;
   for (int i = 0; i < dim; i ++) {
@@ -37,7 +48,9 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
       if (report.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Pivot row " << i + 1 << " out of " << dim << ": ";
-        for (int colCounter = 0; colCounter < this->numberOfColumns; colCounter ++) {
+        for (
+          int colCounter = 0; colCounter < this->numberOfColumns; colCounter ++
+        ) {
           reportStream << (*this)(i, colCounter).toString();
           if (colCounter != this->numberOfColumns - 1) {
             reportStream << ", ";
@@ -54,8 +67,14 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
         if (doReport) {
           if (report2.tickAndWantReport()) {
             std::stringstream reportStream;
-            reportStream << "Computing large determinant: pivot " << i + 1 << ", row " << j << " out of "
-            << dim <<  " times  " << dim << " total.";
+            reportStream << "Computing large determinant: pivot " << i + 1
+            << ", row "
+            << j
+            << " out of "
+            << dim
+            << " times  "
+            << dim
+            << " total.";
             report2.report(reportStream.str());
           }
         }
@@ -64,8 +83,10 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   }
 }
 
-template<class Coefficient>
-std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matrix) {
+template <class Coefficient>
+std::ostream& operator<<(
+  std::ostream& output, const Matrix<Coefficient>& matrix
+) {
   output << "\\left(\\begin{array}{";
   for (int j = 0; j < matrix.numberOfColumns; j ++) {
     output << "c";
@@ -79,11 +100,15 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matri
   if (format.flagSuppressLongMatrices) {
     if (matrix.numberOfRows > format.maximumMatrixDisplayedRows) {
       firstMatRowIndexToHide = format.maximumMatrixDisplayedRows / 2;
-      lastMatRowIndexToHide = matrix.numberOfRows - 1 - format.maximumMatrixDisplayedRows / 2;
+      lastMatRowIndexToHide =
+      matrix.numberOfRows - 1 - format.maximumMatrixDisplayedRows /
+      2;
     }
     if (matrix.numberOfColumns > format.maximumMatrixLineLength) {
       firstMatColIndexToHide = format.maximumMatrixLineLength / 2;
-      lastMatColIndexToHide = matrix.numberOfColumns - 1 - format.maximumMatrixLineLength / 2;
+      lastMatColIndexToHide =
+      matrix.numberOfColumns - 1 - format.maximumMatrixLineLength /
+      2;
     }
   }
   for (int i = 0; i < matrix.numberOfRows; i ++) {
@@ -115,7 +140,9 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& matri
 
 template <class Coefficient, typename IntegerType>
 void MathRoutines::raiseToPower(
-  Coefficient& element, const IntegerType& power, const Coefficient& ringUnit
+  Coefficient& element,
+  const IntegerType& power,
+  const Coefficient& ringUnit
 ) {
   MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
   IntegerType powerCopy;
@@ -131,7 +158,9 @@ void MathRoutines::raiseToPower(
     return;
   }
   ProgressReport reportOne;
-  ProgressReport reportTwo(32, GlobalVariables::Response::ReportType::general);
+  ProgressReport reportTwo(
+    32, GlobalVariables::Response::ReportType::general
+  );
   Coefficient squares;
   squares = element;
   if (powerCopy < 4) {
@@ -142,8 +171,11 @@ void MathRoutines::raiseToPower(
   }
   if (reportOne.tickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "Raising " << element.toString()
-    << " to power: " << powerCopy;
+    reportStream
+    << "Raising "
+    << element.toString()
+    << " to power: "
+    << powerCopy;
     reportOne.report(reportStream.str());
   }
   element = ringUnit;
@@ -152,8 +184,11 @@ void MathRoutines::raiseToPower(
       if (reportTwo.tickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << powerCopy << "<br>";
-        reportStream2 << "Multiplying " << element.toString()
-        << " by " << squares.toString();
+        reportStream2
+        << "Multiplying "
+        << element.toString()
+        << " by "
+        << squares.toString();
         reportTwo.report(reportStream2.str());
       }
       element *= squares;
@@ -184,7 +219,9 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
     return;
   }
   if (&bufferPoly == this || &bufferPoly == &other) {
-    global.fatal << "Bad buffer in ElementMonomialAlgebra::multiplyBy." << global.fatal;
+    global.fatal
+    << "Bad buffer in ElementMonomialAlgebra::multiplyBy."
+    << global.fatal;
   }
   this->checkConsistency();
   other.checkConsistency();
@@ -194,13 +231,23 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
   }
   int totalMonPairs = 0;
   ProgressReport report1;
-  ProgressReport report2(400, GlobalVariables::Response::ReportType::monomialAlgebraProduct);
+  ProgressReport report2(
+    400, GlobalVariables::Response::ReportType::monomialAlgebraProduct
+  );
   if (report1.tickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
     std::stringstream reportStream;
-    reportStream << "Large polynomial computation: " << this->size() << " x "
-    << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
-    << this->toString() << " times " << other.toString();
+    reportStream
+    << "Large polynomial computation: "
+    << this->size()
+    << " x "
+    << other.size()
+    << "="
+    << totalMonPairs
+    << " monomials:\n<br>\n"
+    << this->toString()
+    << " times "
+    << other.toString();
     report1.report(reportStream.str());
   }
   bufferPoly.makeZero();
@@ -212,9 +259,15 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
     for (int j = 0; j < this->size(); j ++) {
       if (report2.tickAndWantReport()) {
         std::stringstream reportStream2;
-        reportStream2 << "Multiplying monomials: "
-        << i + 1 << " out of " << other.size() << " by " << j + 1
-        << " out of " << this->size() << ". ";
+        reportStream2 << "Multiplying monomials: " << i + 1
+        << " out of "
+        << other.size()
+        << " by "
+        << j +
+        1
+        << " out of "
+        << this->size()
+        << ". ";
         report2.report(reportStream2.str());
       }
       bufferMon = (*this)[j];
@@ -246,10 +299,13 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
   }
 }
 
-template<class Coefficient>
+template <class Coefficient>
 void MatrixTensor<Coefficient>::raiseToPower(int power) {
   if (power <= 0) {
-    global.fatal << "MatrixTensor::raiseToPower is currently implemented for positive integer power only. " << global.fatal;
+    global.fatal
+    <<
+    "MatrixTensor::raiseToPower is currently implemented for positive integer power only. "
+    << global.fatal;
   }
   MatrixTensor<Coefficient> id;
   id.makeIdentitySpecial();
@@ -273,13 +329,23 @@ void MatrixTensor<Coefficient>::operator*=(
   }
   int totalMonPairs = 0;
   ProgressReport report1;
-  ProgressReport report2(400, GlobalVariables::Response::ReportType::monomialAlgebraProduct);
+  ProgressReport report2(
+    400, GlobalVariables::Response::ReportType::monomialAlgebraProduct
+  );
   if (report1.tickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
     std::stringstream reportStream;
-    reportStream << "Large matrix monomial computation: " << this->size() << " x "
-    << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
-    << this->toString() << " times " << other.toString();
+    reportStream
+    << "Large matrix monomial computation: "
+    << this->size()
+    << " x "
+    << other.size()
+    << "="
+    << totalMonPairs
+    << " monomials:\n<br>\n"
+    << this->toString()
+    << " times "
+    << other.toString();
     report1.report(reportStream.str());
   }
   MatrixTensor<Coefficient> result;
@@ -290,9 +356,15 @@ void MatrixTensor<Coefficient>::operator*=(
     for (int j = 0; j < this->size(); j ++) {
       if (report2.tickAndWantReport()) {
         std::stringstream reportStream2;
-        reportStream2 << "Multiplying monomials: "
-        << i + 1 << " out of " << other.size() << " by " << j + 1
-        << " out of " << this->size() << ". ";
+        reportStream2 << "Multiplying monomials: " << i + 1
+        << " out of "
+        << other.size()
+        << " by "
+        << j +
+        1
+        << " out of "
+        << this->size()
+        << ". ";
         report2.report(reportStream2.str());
       }
       currentMonomial = (*this)[j];
@@ -313,14 +385,22 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   Matrix<Coefficient>* otherMatrix,
   const Coefficient& negativeOne,
   const Coefficient& ringUnit,
-  bool (*comparisonGEQFunction) (const Coefficient& left, const Coefficient& right)
+  bool(*comparisonGEQFunction)(
+    const Coefficient& left, const Coefficient& right
+  )
 ) {
-  MacroRegisterFunctionWithName("Matrix_Element::gaussianEliminationEuclideanDomain");
-  ProgressReport report(1, GlobalVariables::Response::ReportType::gaussianElimination);
+  MacroRegisterFunctionWithName(
+    "Matrix_Element::gaussianEliminationEuclideanDomain"
+  );
+  ProgressReport report(
+    1, GlobalVariables::Response::ReportType::gaussianElimination
+  );
   if (otherMatrix == this) {
-    global.fatal << "The Carbon copy in the Gaussian elimination "
+    global.fatal
+    << "The Carbon copy in the Gaussian elimination "
     << "coincides with the matrix which we are row-reducing "
-    << "(most probably this is a wrong pointer typo). " << global.fatal;
+    << "(most probably this is a wrong pointer typo). "
+    << global.fatal;
   }
   int col = 0;
   Coefficient element;
@@ -342,22 +422,32 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
       while (ExploringRow < this->numberOfRows) {
         if (report.tickAndWantReport()) {
           std::stringstream out;
-          out << "Pivotting on row of index " << row + 1 << " with exploring row of index "
-          << ExploringRow + 1 << "; total rows: " << this->numberOfRows;
+          out << "Pivotting on row of index " << row + 1
+          << " with exploring row of index "
+          << ExploringRow +
+          1
+          << "; total rows: "
+          << this->numberOfRows;
           report.report(out.str());
         }
-        Coefficient& pivotElement = this->elements[row][col];
+        Coefficient & pivotElement = this->elements[row][col];
         Coefficient& otherElt = this->elements[ExploringRow][col];
         if (otherElt.isNegative()) {
-          this->rowTimesScalarWithCarbonCopy(ExploringRow, negativeOne, otherMatrix);
+          this->rowTimesScalarWithCarbonCopy(
+            ExploringRow, negativeOne, otherMatrix
+          );
         }
-        bool isSmallerOrEqualTo = comparisonGEQFunction == 0 ? pivotElement <= otherElt :
+        bool isSmallerOrEqualTo = comparisonGEQFunction ==
+        0 ?
+        pivotElement <= otherElt :
         comparisonGEQFunction(otherElt, pivotElement);
         if (isSmallerOrEqualTo) {
           element = otherElt;
           element /= pivotElement;
           element.assignFloor();
-          this->subtractRowsWithCarbonCopy(ExploringRow, row, 0, element, otherMatrix);
+          this->subtractRowsWithCarbonCopy(
+            ExploringRow, row, 0, element, otherMatrix
+          );
         }
         if (this->elements[ExploringRow][col].isEqualToZero()) {
           ExploringRow ++;
@@ -388,7 +478,9 @@ void Vectors<Coefficient>::chooseABasis() {
   Selection selection;
   for (int i = 0; i < this->size; i ++) {
     output.addOnTop(this->objects[i]);
-    if (output.getRankElementSpan(&toBeEliminated, &selection) < output.size) {
+    if (
+      output.getRankElementSpan(&toBeEliminated, &selection) < output.size
+    ) {
       output.removeLastObject();
     }
   }
@@ -396,7 +488,9 @@ void Vectors<Coefficient>::chooseABasis() {
 }
 
 template <class Coefficient>
-void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int dimension) {
+void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(
+  int dimension
+) {
   Selection selection;
   Matrix<Coefficient> buffer;
   if (this->size != 0 && dimension != this->getDimension()) {
@@ -423,7 +517,9 @@ void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int dimension)
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::linearSpanContainsVector(const Vector<Coefficient>& input) const {
+bool Vectors<Coefficient>::linearSpanContainsVector(
+  const Vector<Coefficient>& input
+) const {
   Matrix<Coefficient> buffer;
   Selection bufferSelection;
   return this->linearSpanContainsVector(input, buffer, bufferSelection);
@@ -431,11 +527,15 @@ bool Vectors<Coefficient>::linearSpanContainsVector(const Vector<Coefficient>& i
 
 template <class Coefficient>
 void Vectors<Coefficient>::selectBasisInSubspace(
-  const List<Vector<Coefficient> >& input, List<Vector<Coefficient> >& output, Selection& outputSelectedPivotColumns
+  const List<Vector<Coefficient> >& input,
+  List<Vector<Coefficient> >& output,
+  Selection& outputSelectedPivotColumns
 ) {
   if (&input == &output) {
     List<Vector<Coefficient> > inputCopy = input;
-    Vectors<Coefficient>::selectBasisInSubspace(inputCopy, output, outputSelectedPivotColumns);
+    Vectors<Coefficient>::selectBasisInSubspace(
+      inputCopy, output, outputSelectedPivotColumns
+    );
     return;
   }
   if (input.size == 0) {
@@ -443,13 +543,21 @@ void Vectors<Coefficient>::selectBasisInSubspace(
     return;
   }
   MacroRegisterFunctionWithName("Vectors::selectBasisInSubspace");
-  ProgressReport reportTask(1, GlobalVariables::Response::ReportType::gaussianElimination);
-  ProgressReport reportProgress(200, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport reportTask(
+    1, GlobalVariables::Response::ReportType::gaussianElimination
+  );
+  ProgressReport reportProgress(
+    200, GlobalVariables::Response::ReportType::gaussianElimination
+  );
   int dimension = input[0].size;
   if (reportTask.tickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "Selecting a basis of a vector space with " << input.size
-    << " generators in dimension " << dimension << "... " ;
+    reportStream
+    << "Selecting a basis of a vector space with "
+    << input.size
+    << " generators in dimension "
+    << dimension
+    << "... ";
     reportTask.report(reportStream.str());
   }
   Matrix<Coefficient> matrix;
@@ -475,24 +583,35 @@ void Vectors<Coefficient>::selectBasisInSubspace(
   }
   if (reportProgress.tickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "Selecting a basis of a vector space with " << input.size
-    << " generators in dimension " << dimension << "... done. " ;
+    reportStream
+    << "Selecting a basis of a vector space with "
+    << input.size
+    << " generators in dimension "
+    << dimension
+    << "... done. ";
     reportProgress.report(reportStream.str());
   }
 }
 
 template <typename Coefficient>
 void Matrix<Coefficient>::addTwoRows(
-  int fromRowIndex, int toRowIndex, int startColumnIndex, const Coefficient& scalar
+  int fromRowIndex,
+  int toRowIndex,
+  int startColumnIndex,
+  const Coefficient& scalar
 ) {
-  ProgressReport report(10, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport report(
+    10, GlobalVariables::Response::ReportType::gaussianElimination
+  );
   Coefficient coefficient;
   for (int i = startColumnIndex; i < this->numberOfColumns; i ++) {
     coefficient = this->elements[fromRowIndex][i];
     coefficient *= scalar;
     if (report.tickAndWantReport()) {
       std::stringstream out;
-      out << "Processing row, element " << i + 1 << " out of " << this->numberOfColumns;
+      out << "Processing row, element " << i + 1
+      << " out of "
+      << this->numberOfColumns;
       report.report(out.str());
     }
     this->elements[toRowIndex][i] += coefficient;
@@ -509,20 +628,27 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
 ) {
   MacroRegisterFunctionWithName("Matrix::gaussianEliminationByRows");
   if (this->numberOfRows == 0) {
-    global.fatal << "Request to do Gaussian elimination on a matrix with "
-    << " zero rows. " << global.fatal;
+    global.fatal
+    << "Request to do Gaussian elimination on a matrix with "
+    << " zero rows. "
+    << global.fatal;
   }
   if (carbonCopyMatrix != 0) {
     if (carbonCopyMatrix->numberOfRows != this->numberOfRows) {
-      global.fatal << "Request to do "
+      global.fatal
+      << "Request to do "
       << "Gaussian elimination with carbon copy, however the matrix has "
-      << this->numberOfRows << " rows, while the carbon copy has "
-      << carbonCopyMatrix->numberOfRows << " rows. " << global.fatal;
+      << this->numberOfRows
+      << " rows, while the carbon copy has "
+      << carbonCopyMatrix->numberOfRows
+      << " rows. "
+      << global.fatal;
     }
   }
-  ///////////////////
+  // /////////////////
   int numberOfPivots = 0;
-  int maximumMatrixRank = MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
+  int maximumMatrixRank =
+  MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
   Coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
     outputNonPivotColumns->initialize(this->numberOfColumns);
@@ -530,15 +656,23 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (outputPivotColumns != nullptr) {
     outputPivotColumns->initialize(this->numberOfColumns);
   }
-  bool formatAsLinearSystem = format == nullptr ? false : format->flagFormatMatrixAsLinearSystem;
+  bool formatAsLinearSystem = format ==
+  nullptr ? false : format->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = format == nullptr ? true : format->flagUseHTML;
-  ProgressReport report(100, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport report(
+    100, GlobalVariables::Response::ReportType::gaussianElimination
+  );
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
-      *humanReadableReport << "\n\n\n\n<table><tr><td style='border-bottom:3pt solid black;'>System status</td>"
-      << "<td style='border-bottom:3pt solid black;mid-width:100px;'>action</td></tr>";
+      *humanReadableReport
+      <<
+      "\n\n\n\n<table><tr><td style='border-bottom:3pt solid black;'>System status</td>"
+      <<
+      "<td style='border-bottom:3pt solid black;mid-width:100px;'>action</td></tr>"
+      ;
     } else {
-      *humanReadableReport << "\n\n\\begin{longtable}{cc} System status&Action \\\\\\hline\n";
+      *humanReadableReport
+      << "\n\n\\begin{longtable}{cc} System status&Action \\\\\\hline\n";
     }
   }
   // Initialization done! Time to do actual work:
@@ -560,27 +694,47 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     }
     if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
-        *humanReadableReport << "<tr><td style='border-bottom:1pt solid black;'>";
+        *humanReadableReport
+        << "<tr><td style='border-bottom:1pt solid black;'>";
         if (formatAsLinearSystem) {
-          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1);
+          *humanReadableReport
+          << HtmlRoutines::getMathNoDisplay(
+            this->toStringSystemLatex(carbonCopyMatrix, format), - 1
+          );
         } else {
-          *humanReadableReport << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format), - 1);
+          *humanReadableReport
+          << HtmlRoutines::getMathNoDisplay(
+            this->toStringLatex(format), - 1
+          );
         }
-        *humanReadableReport << "</td><td style='border-bottom:1pt solid black;'><div style='display:inline-block;min-width:100px'>Selected pivot column "
-        << i + 1 << ". ";
+        *humanReadableReport
+        <<
+        "</td><td style='border-bottom:1pt solid black;'><div style='display:inline-block;min-width:100px'>Selected pivot column "
+        << i +
+        1
+        << ". ";
         if (numberOfPivots != pivotIndex) {
-          *humanReadableReport << "Swapping rows so the pivot row is number " << numberOfPivots << ". ";
+          *humanReadableReport
+          << "Swapping rows so the pivot row is number "
+          << numberOfPivots
+          << ". ";
         }
       } else {
         if (formatAsLinearSystem) {
-          *humanReadableReport << "\\(" << this->toStringSystemLatex(carbonCopyMatrix, format) << "\\)";
+          *humanReadableReport
+          << "\\("
+          << this->toStringSystemLatex(carbonCopyMatrix, format)
+          << "\\)";
         } else {
-          *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)";
+          *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)"
+          ;
         }
         *humanReadableReport << "& Selected pivot column " << i + 1 << ". ";
         if (numberOfPivots != pivotIndex) {
-          *humanReadableReport << "Swapping rows so the pivot row is number "
-          << numberOfPivots << ". ";
+          *humanReadableReport
+          << "Swapping rows so the pivot row is number "
+          << numberOfPivots
+          << ". ";
         }
       }
     }
@@ -604,11 +758,24 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
           tempElement.negate();
           if (report.tickAndWantReport()) {
             std::stringstream reportStream;
-            reportStream << "Gaussian elimination ("
-            << this->numberOfRows << "x" << this->numberOfColumns
-            << "): column " << i + 1 << " out of " << this->numberOfColumns
-            << ".\n<br>Pivot row: " << numberOfPivots + 1
-            << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
+            reportStream
+            << "Gaussian elimination ("
+            << this->numberOfRows
+            << "x"
+            << this->numberOfColumns
+            << "): column "
+            << i +
+            1
+            << " out of "
+            << this->numberOfColumns
+            << ".\n<br>Pivot row: "
+            << numberOfPivots +
+            1
+            << ", eliminating row "
+            << j +
+            1
+            << " out of "
+            << this->numberOfRows;
             report.report(reportStream.str());
           }
           this->addTwoRows(numberOfPivots, j, i, tempElement);
@@ -620,9 +787,13 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     }
     if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
-        *humanReadableReport << "Eliminated the non-zero entries in the pivot column</div></td></tr>";
+        *humanReadableReport
+        <<
+        "Eliminated the non-zero entries in the pivot column</div></td></tr>";
       } else {
-        *humanReadableReport << "Eliminated the non-zero entries in the pivot column. \\\\\\hline\n";
+        *humanReadableReport
+        << "Eliminated the non-zero entries in the pivot column. \\\\\\hline\n"
+        ;
       }
     }
     numberOfPivots ++;
@@ -630,22 +801,29 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "<tr><td>"
-        << HtmlRoutines::getMathNoDisplay(this->toStringSystemLatex(carbonCopyMatrix, format), - 1)
+        *humanReadableReport
+        << "<tr><td>"
+        << HtmlRoutines::getMathNoDisplay(
+          this->toStringSystemLatex(carbonCopyMatrix, format), - 1
+        )
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {
-        *humanReadableReport << "<tr><td>"
+        *humanReadableReport
+        << "<tr><td>"
         << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format))
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       }
     } else {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "\\("
+        *humanReadableReport
+        << "\\("
         << this->toStringSystemLatex(carbonCopyMatrix, format)
         << "\\)& Final result.\\\\\n";
       } else {
-        *humanReadableReport << "\\("
-        << this->toStringLatex(format) << "\\)& Final result.\\\\\n";
+        *humanReadableReport
+        << "\\("
+        << this->toStringLatex(format)
+        << "\\)& Final result.\\\\\n";
       }
       *humanReadableReport << "\\end{longtable}";
     }

@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_lists_ALREADY_INCLUDED
 #define header_general_lists_ALREADY_INCLUDED
@@ -37,7 +38,6 @@
 // Note that sorting N monomials of an arbitrary polynomial
 // is at best O(N log(N)) operations, while
 // computing the hash functions is only O(N) operations.
-
 // Used for hashing.
 class HashConstants {
 private:
@@ -62,10 +62,12 @@ public:
   static const unsigned constant2 = 2207;
 };
 
-// The following class is for buffers, i/o function pointers, multitasking, general purpose.
+// The following class is for buffers, i/o function pointers, multitasking,
+// general purpose.
 class GlobalVariables;
 
-// Simple math routines (min, max, etc.) that I have not been able to find a better placement for
+// Simple math routines (min, max, etc.) that I have not been able to find a
+// better placement for
 class MathRoutines;
 
 // Rationals and integers:
@@ -74,7 +76,7 @@ class LargeInteger;
 class Rational;
 
 // More involved mathematical types
-template<class Base>
+template <class Base>
 class Complex;
 class AlgebraicNumber;
 template <class Coefficient>
@@ -84,32 +86,35 @@ class RootSubalgebra;
 class RootSubalgebras;
 class ChevalleyGenerator;
 class DynkinDiagramRootSubalgebra;
-template<class Coefficient>
+template <class Coefficient>
 class ElementSemisimpleLieAlgebra;
-template<class Coefficient>
+template <class Coefficient>
 class ElementUniversalEnveloping;
-template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+template <
+  class Coefficient, unsigned int inputHashFunction(const Coefficient&)
+>
 class MonomialTensor;
-template<class Coefficient>
+template <class Coefficient>
 class MonomialUniversalEnveloping;
-template<class Coefficient>
+template <class Coefficient>
 class ElementSumGeneralizedVermas;
 template <class Coefficient>
 class CharacterSemisimpleLieAlgebraModule;
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms;
-template<class Coefficient>
+template <class Coefficient>
 class ModuleSSalgebra;
 class SlTwoSubalgebras;
-template<class Coefficient>
+template <class Coefficient>
 class MonomialTensorGeneralizedVermas;
-template<class Coefficient>
+template <class Coefficient>
 class ElementTensorsGeneralizedVermas;
 struct BranchingData;
 class QuasiDifferentialMononomial;
-template<class Coefficient>
+template <class Coefficient>
 class QuasiDifferentialOperator;
 
-//classes related to linear integral programming (polyhedra, lattices, quasipolynomials)
+// classes related to linear integral programming (polyhedra, lattices,
+// quasipolynomials)
 class Cone;
 class ConeCollection;
 class Lattice;
@@ -119,7 +124,12 @@ class AffineCones;
 
 // Hybrid classes that serve both memory-management and mathematical purposes
 // (Matrices, Vectors, PolynomialSubstitution, etc.)
-template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&) = ObjectType1::hashFunction, unsigned int hashFunction2(const ObjectType2&)=ObjectType2::hashFunction>
+template <
+  class ObjectType1,
+  class ObjectType2,
+  unsigned int hashFunction1(const ObjectType1&) = ObjectType1::hashFunction,
+  unsigned int hashFunction2(const ObjectType2&) = ObjectType2::hashFunction
+>
 class Pair;
 template <class Object>
 class ListIterator;
@@ -143,15 +153,16 @@ class Polynomial;
 template <class Coefficient>
 class PolynomialSubstitution;
 
-//algebraic geometry computation class:
+// algebraic geometry computation class:
 template <class Coefficient>
 class GroebnerBasisComputation;
 
-//combinatorial classes
+// combinatorial classes
 class Selection;
 class SubsetWithMultiplicities;
 
-//the following classes have to do with user interface/displaying/drawing information
+// the following classes have to do with user interface/displaying/drawing
+// information
 class FormatExpressions;
 struct IndicatorWindowVariables;
 class DrawingVariables;
@@ -168,14 +179,18 @@ class Expression;
 class RegisterFunctionCall {
 public:
   int threadIndex;
-  RegisterFunctionCall(const char* fileName, int line, const std::string& functionName = "");
+  RegisterFunctionCall(
+    const char* fileName, int line, const std::string& functionName = ""
+  );
   ~RegisterFunctionCall();
 };
 
 class MathRoutines {
 public:
   template <class Coefficient>
-  static bool invertXModN(const Coefficient& x, const Coefficient& n, Coefficient& output) {
+  static bool invertXModN(
+    const Coefficient& x, const Coefficient& n, Coefficient& output
+  ) {
     Coefficient quotient;
     Coefficient remainder;
     Coefficient dividend;
@@ -202,18 +217,16 @@ public:
       remainder = dividend % divisor;
       dividend = divisor;
       divisor = remainder;
-
       swapX = dividendX;
       swapN = dividendN;
-
       dividendX = divisorX;
       dividendN = divisorN;
-
       divisorX = swapX - quotient * divisorX;
       divisorN = swapN - quotient * divisorN;
     }
     if (dividend != 1) {
-      return false; //d and p were not relatively prime.
+      return false;
+      // d and p were not relatively prime.
     }
     output = dividendX % n;
     if (output < 0) {
@@ -247,8 +260,11 @@ public:
   static bool hasDecimalDigitsOnly(const std::string& input);
   static bool isHexDigit(char digitCandidate);
   template <class Type>
-  static bool generateVectorSpaceClosedWithRespectToLieBracket(List<Type>& inputOutputElements, int upperDimensionBound) {
-    return MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
+  static bool generateVectorSpaceClosedWithRespectToLieBracket(
+    List<Type>& inputOutputElements, int upperDimensionBound
+  ) {
+    return
+    MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       inputOutputElements, upperDimensionBound, Type::lieBracket
     );
   }
@@ -257,9 +273,10 @@ public:
   static bool generateVectorSpaceClosedWithRespectToOperation(
     List<Type>& inputOutputElts,
     int upperDimensionBound,
-    void (*binaryOperation)(const Type& left, const Type& right, Type& output)
+    void(*binaryOperation)(
+      const Type& left, const Type& right, Type& output
+    )
   );
-
   static char convertHumanReadableHexToCharValue(char input);
   static void nChooseK(int n, int k, LargeInteger& result);
   static LargeInteger nChooseK(int n, int k);
@@ -284,7 +301,9 @@ public:
     const Coefficient& ringUnit
   );
   template <typename Coefficient>
-  inline static Coefficient maximum(const Coefficient& a, const Coefficient& b) {
+  inline static Coefficient maximum(
+    const Coefficient& a, const Coefficient& b
+  ) {
     if (a > b) {
       return a;
     } else {
@@ -309,7 +328,7 @@ public:
       return a;
     }
   }
-  template<class Element>
+  template <class Element>
   static std::string toStringBrackets(const Element& input) {
     if (!input.needsParenthesisForMultiplication()) {
       return input.toString();
@@ -320,8 +339,10 @@ public:
     result.append(")");
     return result;
   }
-  template<class Element>
-  static std::string toStringBrackets(const Element& input, FormatExpressions* format) {
+  template <class Element>
+  static std::string toStringBrackets(
+    const Element& input, FormatExpressions* format
+  ) {
     if (!input.needsParenthesisForMultiplication()) {
       return input.toString(format);
     }
@@ -336,11 +357,17 @@ public:
   static unsigned int hashVectorDoubles(const Vector<double>& input);
   static unsigned int hashListDoubles(const List<double>& input);
   static unsigned int hashListInts(const List<int>& input);
-  static unsigned int hashListUnsignedChars(const List<unsigned char>& input);
+  static unsigned int hashListUnsignedChars(
+    const List<unsigned char>& input
+  );
   static unsigned int hashListStrings(const List<std::string>& input);
   static unsigned int hashString(const std::string& x);
   template <class Element>
-  static void lieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
+  static void lieBracket(
+    const Element& standsOnTheLeft,
+    const Element& standsOnTheRight,
+    Element& output
+  );
   template <typename number>
   static number complexConjugate(number x) {
     return x.getComplexConjugate();
@@ -352,8 +379,14 @@ public:
     return x;
   }
   static bool isInteger(Rational x);
-  static bool parseListIntegers(const std::string& input, List<int>& result, std::stringstream* commentsOnFailure);
-  static void parseListIntegersNoFailure(const std::string& input, List<int>& result);
+  static bool parseListIntegers(
+    const std::string& input,
+    List<int>& result,
+    std::stringstream* commentsOnFailure
+  );
+  static void parseListIntegersNoFailure(
+    const std::string& input, List<int>& result
+  );
 };
 
 class DrawElementInputOutput {
@@ -403,8 +436,7 @@ public:
 class RecursionDepthCounter {
 public:
   int* counter;
-  RecursionDepthCounter(): counter(nullptr) {
-  }
+  RecursionDepthCounter(): counter(nullptr) {}
   RecursionDepthCounter(int* inputCounter): counter(nullptr) {
     if (inputCounter == nullptr) {
       return;
@@ -412,9 +444,9 @@ public:
     this->counter = inputCounter;
     (*this->counter) ++;
   }
-  void initialize(int* inputCounter){
+  void initialize(int* inputCounter) {
     this->counter = inputCounter;
-    (*this->counter)++;
+    (*this->counter) ++;
   }
   ~RecursionDepthCounter() {
     if (this->counter != nullptr) {
@@ -425,7 +457,9 @@ public:
 };
 
 template <class Object>
-std::ostream& operator<<(std::ostream& output, const List<Object>& input) {
+std::ostream& operator<<(
+  std::ostream& output, const List<Object>& input
+) {
   output << input.size << " elements: \n";
   for (int i = 0; i < input.size; i ++) {
     output << input[i];
@@ -437,7 +471,9 @@ std::ostream& operator<<(std::ostream& output, const List<Object>& input) {
 }
 
 template <class Object>
-std::iostream& operator>>(std::iostream& input, List<Object>& outputList) {
+std::iostream& operator>>(
+  std::iostream& input, List<Object>& outputList
+) {
   std::string tempS;
   int reader = 0;
   input >> tempS >> reader;
@@ -453,7 +489,7 @@ std::iostream& operator>>(std::iostream& input, List<Object>& outputList) {
 
 class HashFunctions {
 public:
-  template<class Object>
+  template <class Object>
   static unsigned int hashFunction(const Object& object) {
     return object.hashFunction();
   }
@@ -466,7 +502,8 @@ public:
     unsigned int result = 0;
     int hashCounter = 0;
     for (unsigned i = 0; i < numCycles; i ++) {
-      result += static_cast<unsigned>(input[i]) * HashConstants::getConstantIncrementCounter(hashCounter);
+      result += static_cast<unsigned>(input[i]) *
+      HashConstants::getConstantIncrementCounter(hashCounter);
     }
     return result;
   }
@@ -508,17 +545,25 @@ public:
 // Lists are used in the implementation of mutexes.
 template <class Object>
 class List {
-  friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& input);
-  friend std::iostream& operator>> <Object>(std::iostream& input, List<Object>& inputList);
+  friend std::ostream& operator<<<Object>(
+    std::ostream& output, const List<Object>& input
+  );
+  friend std::iostream& operator>><Object>(
+    std::iostream& input, List<Object>& inputList
+  );
 public:
   class Comparator {
   public:
-    bool (*leftGreaterThanRight) (const Object& left, const Object& right);
+    bool(*leftGreaterThanRight)(const Object& left, const Object& right);
     std::string name;
     Comparator() {
       this->leftGreaterThanRight = nullptr;
     }
-    Comparator(bool (*inputLeftGreaterThanRight)(const Object& left, const Object& right)) {
+    Comparator(
+      bool(*inputLeftGreaterThanRight)(
+        const Object& left, const Object& right
+      )
+    ) {
       this->setComparison(inputLeftGreaterThanRight);
     }
     bool checkConsistency() const {
@@ -531,7 +576,11 @@ public:
       }
       return true;
     }
-    void setComparison(bool (*inputLeftGreaterThanRight)(const Object& left, const Object& right)) {
+    void setComparison(
+      bool(*inputLeftGreaterThanRight)(
+        const Object& left, const Object& right
+      )
+    ) {
       this->leftGreaterThanRight = inputLeftGreaterThanRight;
     }
     bool greaterThan(const Object& left, const Object& right) const {
@@ -547,6 +596,7 @@ public:
       return left == right;
     }
   };
+
 private:
   friend class ListZeroAfterUse<Object>;
   void expandArrayOnTop(int increase);
@@ -603,7 +653,7 @@ public:
     if (expectedSize == 2) {
       return 2;
     }
-    return (expectedSize * 4) / 3 + 1;
+    return (expectedSize* 4) / 3 + 1;
   }
   void setExpectedSize(int desiredSize) {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -618,7 +668,8 @@ public:
     }
     this->setSize(newSize);
   }
-  void setSize(int incomingSize); // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void setSize(int incomingSize);
+  // <-Registering stack trace forbidden! Multithreading deadlock alert.
   void clear() {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
     this->setSize(0);
@@ -633,7 +684,8 @@ public:
     }
   }
   void initializeFillInObject(int incomingSize, const Object& o);
-  void reserve(int desiredSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void reserve(int desiredSize);
+  // <-Registering stack trace forbidden! Multithreading deadlock alert.
   void insertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
     this->shiftUpExpandOnTop(desiredIndex);
     (*this)[desiredIndex] = o;
@@ -679,7 +731,8 @@ public:
     }
     this->setSize(currentIndex);
   }
-  // The below function is named a bit awkwardly because otherwise there is a risk of confusion
+  // The below function is named a bit awkwardly because otherwise there is a
+  // risk of confusion
   // with the removeIndexSwapWithLast when selecting from autocomplete list.
   // This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
@@ -699,38 +752,52 @@ public:
   }
   // The following function returns false if the comparison operator failed!!!!
   template <class compareClass, class carbonCopyType = Object>
-  bool quickSortAscendingCustom(compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr) {
-    return this->quickSortAscendingCustomRecursive(0, this->size - 1, comparator, carbonCopy);
+  bool quickSortAscendingCustom(
+    compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr
+  ) {
+    return
+    this->quickSortAscendingCustomRecursive(
+      0, this->size - 1, comparator, carbonCopy
+    );
   }
   template <class compareClass, class carbonCopyType = Object>
-  bool quickSortDescendingCustom(compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr) {
-    bool result = this->quickSortAscendingCustomRecursive(0, this->size - 1, comparator, carbonCopy);
+  bool quickSortDescendingCustom(
+    compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr
+  ) {
+    bool result =
+    this->quickSortAscendingCustomRecursive(
+      0, this->size - 1, comparator, carbonCopy
+    );
     this->reverseElements();
     if (carbonCopy != 0) {
       carbonCopy->reverseElements();
     }
     return result;
   }
-  // The function below is required to reserve the order of elements given by selection.elements.
+  // The function below is required to reserve the order of elements given by
+  // selection.elements.
   void subSelection(const Selection& selection, List<Object>& output);
-  // If comparison function is not specified, quickSortAscending uses operator >, else it uses the given
+  // If comparison function is not specified, quickSortAscending uses operator
+  // >, else it uses the given
   // comparison function
   template <class otherType = Object>
   void quickSortAscending(
     const List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object>::quickSortAscending<List<Object>, List<otherType> >(*this, order, carbonCopy);
+    List<Object>::quickSortAscending<List<Object>, List<otherType> >(
+      *this, order, carbonCopy
+    );
   }
-
   template <class otherType = Object>
   void quickSortDescending(
     const List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object>::quickSortDescending<List<Object>, List<otherType> >(*this, order, carbonCopy);
+    List<Object>::quickSortDescending<List<Object>, List<otherType> >(
+      *this, order, carbonCopy
+    );
   }
-
   template <class templateList, class otherList>
   static void quickSortAscending(
     templateList& other,
@@ -740,9 +807,12 @@ public:
     if (carbonCopy != 0) {
       if (carbonCopy->size != other.size) {
         std::stringstream crashComments;
-        crashComments << "Quicksort with carbon copy requested on a list with "
-        << other.size << " elements, but the carbon copy has "
-        << carbonCopy->size << " elements. ";
+        crashComments
+        << "Quicksort with carbon copy requested on a list with "
+        << other.size
+        << " elements, but the carbon copy has "
+        << carbonCopy->size
+        << " elements. ";
         fatalCrash(crashComments.str());
       }
     }
@@ -755,27 +825,29 @@ public:
       }
     }
     if (order == nullptr) {
-      List<Object>::quickSortAscendingNoOrder(other, 0, other.size - 1, carbonCopy);
+      List<Object>::quickSortAscendingNoOrder(
+        other, 0, other.size - 1, carbonCopy
+      );
     } else {
       List<Object>::quickSortAscendingOrder<templateList, otherList>(
         other, 0, other.size - 1, *order, carbonCopy
       );
     }
   }
-
   template <class templateList, class otherList>
   static void quickSortDescending(
     templateList& other,
     const List<Object>::Comparator* order = nullptr,
     otherList* carbonCopy = 0
   ) {
-    List<Object>::quickSortAscending<templateList, otherList>(other, order, carbonCopy);
+    List<Object>::quickSortAscending<templateList, otherList>(
+      other, order, carbonCopy
+    );
     other.reverseElements();
     if (carbonCopy != 0) {
       carbonCopy->reverseElements();
     }
   }
-
   template <class templateList, class otherList>
   static void quickSortAscendingOrder(
     templateList& other,
@@ -789,7 +861,9 @@ public:
     }
     int highIndex = topIndex;
     for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
-      if (order.greaterThan(other[lowIndex], (other[bottomIndex]))) {
+      if (
+        order.greaterThan(other[lowIndex], (other[bottomIndex]))
+      ) {
         other.swapTwoIndices(lowIndex, highIndex);
         if (carbonCopy != 0) {
           carbonCopy->swapTwoIndices(lowIndex, highIndex);
@@ -803,8 +877,11 @@ public:
         std::stringstream crashStream;
         crashStream
         << "Bad strict order: the order claims that object "
-        << other[highIndex] << " of index "
-        << highIndex << " is strictly greater than itself which is not allowed for strict orders. "
+        << other[highIndex]
+        << " of index "
+        << highIndex
+        <<
+        " is strictly greater than itself which is not allowed for strict orders. "
         << "Maybe the programmer has given a "
         << "non-strict order instead of strict one by mistake? ";
         fatalCrash(crashStream.str());
@@ -850,8 +927,12 @@ public:
     if (carbonCopy != 0) {
       carbonCopy->swapTwoIndices(bottomIndex, highIndex);
     }
-    List<Object>::quickSortAscendingNoOrder(input, bottomIndex, highIndex - 1, carbonCopy);
-    List<Object>::quickSortAscendingNoOrder(input, highIndex + 1, topIndex, carbonCopy);
+    List<Object>::quickSortAscendingNoOrder(
+      input, bottomIndex, highIndex - 1, carbonCopy
+    );
+    List<Object>::quickSortAscendingNoOrder(
+      input, highIndex + 1, topIndex, carbonCopy
+    );
   }
   bool hasCommonElementWith(List<Object>& right);
   void swapTwoIndices(int index1, int index2);
@@ -877,20 +958,23 @@ public:
     }
     return true;
   }
-
   // The "sorted" family of operations
   // assume that the list is sorted in ascending order
   // and that each object has the comparison operator <=.
   // The objective is fast, stable insertion sorting of partially ordered data.
   // The data that has x <= y and y <= x is called a bin. The methods
-  // sortedIndexFirstGreaterThan and sortedIndexFirstNotLessThan find the edges of the bin.
-  // The insertion methods return the index at which the object was inserted, or - 1
+  // sortedIndexFirstGreaterThan and sortedIndexFirstNotLessThan find the edges
+  // of the bin.
+  // The insertion methods return the index at which the object was inserted, or
+  // - 1
   // sortedInsert inserts the element at the end of the bin.
   // sortedInsertDontDup searches the bin for the element before inserting.
-  // sortedInsertNextTo searches the bin for an equal element and inserts the new element
+  // sortedInsertNextTo searches the bin for an equal element and inserts the
+  // new element
   //   next to the existing element
   // sortedGetIndex searches the bin for the element and returns its index
-  // sortedContains searches the bin for the element and returns whether it was found.
+  // sortedContains searches the bin for the element and returns whether it was
+  // found.
   int sortedIndexFirstNotLessThan(const Object& o) const {
     if (this->size == 0) {
       return 0;
@@ -900,7 +984,7 @@ public:
     while (true) {
       int halfLength = (end - start) / 2;
       if (halfLength == 0) {
-        if ((start == this->size ) || (o > this->objects[start])) {
+        if ((start == this->size) || (o > this->objects[start])) {
           return end;
         } else {
           return start;
@@ -914,7 +998,6 @@ public:
       }
     }
   }
-
   int sortedIndexFirstGreaterThan(const Object& o) const {
     if (this->size == 0) {
       return 0;
@@ -938,7 +1021,6 @@ public:
       }
     }
   }
-
   // sortedGetIndex
   int sortedGetIndex(const Object& o) const {
     int n = this->sortedIndexFirstNotLessThan(o);
@@ -969,7 +1051,6 @@ public:
     }
     return n;
   }
-
   int sortedInsertDontDup(const Object& o) {
     int n = sortedIndexFirstNotLessThan(o);
     for (int i = n; i < this->size; i ++) {
@@ -984,7 +1065,6 @@ public:
     this->addOnTop(o);
     return this->size - 1;
   }
-
   int sortedInsertNextToExisting(const Object& o) {
     int n = sortedIndexFirstNotLessThan(o);
     int existing_index = - 1;
@@ -1009,13 +1089,16 @@ public:
     this->insertAtIndexShiftElementsUp(o, outdex);
     return outdex;
   }
-
   void rotate(int r) {
-    std::rotate(this->objects, this->objects + r, this->objects + (this->size - 1));
+    std::rotate(
+      this->objects,
+      this->objects + r,
+      this->objects + (this->size - 1)
+    );
   }
-  Object* lastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  Object* lastObject() const;
+  // <-Registering stack trace forbidden! Multithreading deadlock alert.
   void releaseMemory();
-
   unsigned int hashFunction() const {
     unsigned int result = 0;
     int j = - 1;
@@ -1024,7 +1107,9 @@ public:
     for (int i = 0; i < this->size; i ++) {
       j ++;
       k ++;
-      result += k * HashConstants::getConstantIncrementCounter(hashCounter) * HashFunctions::hashFunction(objects[i]);
+      result +=
+      k * HashConstants::getConstantIncrementCounter(hashCounter) *
+      HashFunctions::hashFunction(objects[i]);
     }
     return result;
   }
@@ -1042,9 +1127,9 @@ public:
     this->setSize(other.size());
     int counter = 0;
     for (
-      auto otherIterator = other.begin();
-      otherIterator != other.end();
-      otherIterator ++, counter ++
+      auto otherIterator = other.begin(); otherIterator != other.end();
+      otherIterator ++,
+      counter ++
     ) {
       this->objects[counter] = *otherIterator;
     }
@@ -1089,7 +1174,10 @@ public:
       std::stringstream crashReport;
       crashReport
       << "Attempt to access the entry of index "
-      << i << " in an array of " << this->size << " elements. ";
+      << i
+      << " in an array of "
+      << this->size
+      << " elements. ";
       fatalCrash(crashReport.str());
     }
     return this->objects[i];
@@ -1140,55 +1228,72 @@ public:
 };
 
 template <typename Object>
-Object& ListIterator<Object>::operator*() const {
+Object&ListIterator<Object>::operator*() const {
   return (*this->iterated)[this->index];
 }
 
 template <typename Object>
 class ListZeroAfterUse {
-  public:
+public:
   List<Object> data;
   ~ListZeroAfterUse() {
     for (int i = 0; i < this->data.actualSize; i ++) {
       // We zero the underlying buffer:
       // this->data[i] may be out of bounds if
       // the actual size does not equal the size.
-      this->data.objects[i] = 0;
+      this->data.objects[i] =
+      0;
     }
   }
 };
 
-template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&), unsigned int hashFunction2(const ObjectType2&)>
+template <
+  class ObjectType1,
+  class ObjectType2,
+  unsigned int hashFunction1(const ObjectType1&),
+  unsigned int hashFunction2(const ObjectType2&)
+>
 class Pair {
-  friend std::ostream& operator << (
-    std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& pair
+  friend std::ostream& operator<<(
+    std::ostream& output,
+    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& pair
   ) {
-    output << "("  << pair.object1 << ", " <<  pair.object2 << ")";
+    output << "(" << pair.object1 << ", " << pair.object2 << ")";
     return output;
   }
 public:
   ObjectType1 object1;
   ObjectType2 object2;
-  Pair(){}
-  Pair(const ObjectType1& o1, const ObjectType2& o2): object1(o1), object2(o2) {}
+  Pair() {}
+  Pair(const ObjectType1& o1, const ObjectType2& o2): object1(o1), object2(o2)
+  {}
   static unsigned int hashFunction(
     const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input
   ) {
     return
-      HashConstants::constant0 * hashFunction1(input.object1) +
-      HashConstants::constant1 * hashFunction2(input.object2);
+    HashConstants::constant0 * hashFunction1(input.object1) +
+    HashConstants::constant1 * hashFunction2(input.object2);
   }
   unsigned int hashFunction() const {
-    return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::hashFunction(*this);
+    return
+    Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::hashFunction(
+      *this
+    );
   }
-  void operator=(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) {
+  void operator=(
+    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other
+  ) {
     this->object1 = other.object1;
     this->object2 = other.object2;
   }
-  bool operator==(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) const {
+  bool operator==(
+    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other
+  ) const {
     return this->object1 == other.object1 && this->object2 == other.object2;
   }
-  bool operator>(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) {
+  bool operator>(
+    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other
+  ) {
     if (this->object1 > other.object1) {
       return true;
     }
@@ -1204,15 +1309,20 @@ public:
     return false;
   }
 };
-typedef Pair<int, int, HashFunctions::hashFunction, HashFunctions::hashFunction> PairInts;
 
-template <class Object, class TemplateList, unsigned int hashFunctionObject(const Object&) = Object::hashFunction>
+typedef Pair<
+  int, int, HashFunctions::hashFunction, HashFunctions::hashFunction
+> PairInts;
+template <
+  class Object,
+  class TemplateList,
+  unsigned int hashFunctionObject(const Object&) = Object::hashFunction
+>
 class HashTemplate: public TemplateList {
 private:
   Object popIndexShiftDown(int index);
   void reverseElements();
   void shiftUpExpandOnTop(int startingIndex);
-
 protected:
   // In the i^th bucket, we store the indices of all objects
   // for which (hash(object) mod hashBuckets.size) equals i.
@@ -1231,10 +1341,13 @@ public:
     // (above 20 entries), we clear the hash by finding the occupied hashes and
     // nullifying them one by one.
     // else, we simply go through the entire hash index and nullify everything.
-    // Note: for better performance, 20 entries should probably be changed to 100+,
-    // however the smaller number is a good consistency test (it would make it easier to
+    // Note: for better performance, 20 entries should probably be changed to
+    // 100+,
+    // however the smaller number is a good consistency test (it would make it
+    // easier to
     // detect a faulty hash).
-    // If this program ever gets to do some hard-core number crunching, the 20 entries
+    // If this program ever gets to do some hard-core number crunching, the 20
+    // entries
     // should be increased.
     if (this->isSparse() && this->hashBuckets.size > 20) {
       for (int i = 0; i < this->size; i ++) {
@@ -1255,13 +1368,18 @@ public:
     int maxHashSize = 0;
     int numNonZeroHashes = 0;
     for (int i = 0; i < this->hashBuckets.size; i ++) {
-      maxHashSize = MathRoutines::maximum(maxHashSize, this->hashBuckets[i].size);
+      maxHashSize =
+      MathRoutines::maximum(maxHashSize, this->hashBuckets[i].size);
       if (this->hashBuckets[i].size > 0) {
         numNonZeroHashes ++;
       }
     }
     out << "<br>Max hash array size: " << maxHashSize;
-    out << "<br>Average hash array size: " << (static_cast<double>(this->size)) / (static_cast<double>(numNonZeroHashes));
+    out
+    << "<br>Average hash array size: "
+    << (static_cast<double>(this->size)) / (
+      static_cast<double>(numNonZeroHashes)
+    );
     return out.str();
   }
   void addOnTop(const Object& o) {
@@ -1295,22 +1413,39 @@ public:
         int index = current[j];
         if (index >= this->size) {
           std::stringstream commentsOnCrash;
-          commentsOnCrash << "Hash lookup array of index "
-          << i << ", entry of index " << j << " reports index "
-          << index << " but I have only " << this->size << " entries. ";
+          commentsOnCrash
+          << "Hash lookup array of index "
+          << i
+          << ", entry of index "
+          << j
+          << " reports index "
+          << index
+          << " but I have only "
+          << this->size
+          << " entries. ";
           fatalCrash(commentsOnCrash.str());
         }
-        if (this->getHash((*this)[index]) != static_cast<unsigned>(i)) {
+        if (
+          this->getHash((*this)[index]) != static_cast<unsigned>(i)
+        ) {
           std::stringstream commentsOnCrash;
-
-          commentsOnCrash << "<hr>The hashed element in position "
-          << index << " is recorded in hash array of index "
-          << i << ", however its hash value is instead "
-          << this->getHash((*this)[index]) << ". The hash size is "
-          << this->hashBuckets.size << "<br>hashes of objects: ";
+          commentsOnCrash
+          << "<hr>The hashed element in position "
+          << index
+          << " is recorded in hash array of index "
+          << i
+          << ", however its hash value is instead "
+          << this->getHash((*this)[index])
+          << ". The hash size is "
+          << this->hashBuckets.size
+          << "<br>hashes of objects: ";
           for (int l = 0; l < this->size; l ++) {
-            commentsOnCrash << this->getHash((*this)[l]) << "= "
-            << this->getHash((*this)[l]) % this->hashBuckets.size << ", ";
+            commentsOnCrash
+            << this->getHash((*this)[l])
+            << "= "
+            << this->getHash((*this)[l]) %
+            this->hashBuckets.size
+            << ", ";
           }
           commentsOnCrash << "<br>hashes recorded: ";
           for (int l = 0; l < this->hashBuckets.size; l ++) {
@@ -1350,8 +1485,10 @@ public:
   bool addOnTopNoRepetitionMustBeNew(const Object& o) {
     if (this->getIndex(o) != - 1) {
       std::stringstream crashStream;
-      crashStream << "Request to add object "
-      << o << " does not allow repetition, "
+      crashStream
+      << "Request to add object "
+      << o
+      << " does not allow repetition, "
       << "but the object is already in the list. ";
       fatalCrash(crashStream.str());
     }
@@ -1380,9 +1517,13 @@ public:
   void setObjectAtIndex(int index, const Object& input) {
     if (index < 0 || index >= this->size) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "Attempt to pop out index "
-      << index << " out of hashed array "
-      << "of size " << this->size << ". ";
+      commentsOnCrash
+      << "Attempt to pop out index "
+      << index
+      << " out of hashed array "
+      << "of size "
+      << this->size
+      << ". ";
       fatalCrash(commentsOnCrash.str());
     }
     int hashIndexPop = this->getHash(this->objects[index]);
@@ -1394,12 +1535,16 @@ public:
   void removeIndexSwapWithLast(int index) {
     if (index < 0 || index >= this->size) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "Attemp to pop out index "
-      << index << " out of hashed array "
-      << "of size " << this->size << ". ";
+      commentsOnCrash
+      << "Attemp to pop out index "
+      << index
+      << " out of hashed array "
+      << "of size "
+      << this->size
+      << ". ";
       fatalCrash(commentsOnCrash.str());
     }
-    Object* oPop = &this->objects[index];
+    Object * oPop = &this->objects[index];
     int hashIndexPop = this->getHash(*oPop);
     this->hashBuckets[hashIndexPop].removeFirstOccurenceSwapWithLast(index);
     if (index == this->size - 1) {
@@ -1409,7 +1554,8 @@ public:
     int lastIndex = this->size - 1;
     Object* oTop = &this->objects[lastIndex];
     int hashIndexTop = this->getHash(*oTop);
-    this->hashBuckets[hashIndexTop].removeFirstOccurenceSwapWithLast(lastIndex);
+    this->hashBuckets[hashIndexTop].removeFirstOccurenceSwapWithLast(lastIndex)
+    ;
     this->hashBuckets[hashIndexTop].addOnTop(index);
     this->TemplateList::removeIndexSwapWithLast(index);
   }
@@ -1442,9 +1588,14 @@ public:
       int j = this->hashBuckets[hashIndex].objects[i];
       if (j >= this->size) {
         std::stringstream commentsOnCrash;
-        commentsOnCrash << "Corrupt hash table: at hashindex = "
-        << hashIndex << " I need to look up index " << j
-        << " but I have only " << this->size << " elements. ";
+        commentsOnCrash
+        << "Corrupt hash table: at hashindex = "
+        << hashIndex
+        << " I need to look up index "
+        << j
+        << " but I have only "
+        << this->size
+        << " elements. ";
         fatalCrash(commentsOnCrash.str());
       }
       if ((*this)[j] == o) {
@@ -1458,7 +1609,8 @@ public:
     if (result == - 1) {
       std::stringstream errorStream;
       errorStream
-      << "Request to get the index of object " << o
+      << "Request to get the index of object "
+      << o
       << " with a function that does not allow failure, "
       << "however, the container array does not contain this object. ";
       fatalCrash(errorStream.str());
@@ -1471,19 +1623,18 @@ public:
     }
     if (inputSize > this->size) {
       fatalCrash(
-        "Function setSize is allowed for hashed lists only when "
-        "resizing the hashed list to smaller. "
-        "This is because if I was to resize to larger, "
-        "I would have to allocate non-initialized "
-        "objects, and those will have to be rehashed "
-        "which does not make sense. "
+"Function setSize is allowed for hashed lists only when "
+"resizing the hashed list to smaller. "
+"This is because if I was to resize to larger, "
+"I would have to allocate non-initialized "
+"objects, and those will have to be rehashed "
+"which does not make sense. "
       );
     }
     for (int i = this->size - 1; i >= inputSize; i --) {
       this->popLastObject();
     }
   }
-
   bool isSparseRelativeToExpectedSize(int expectedSize) const {
     return expectedSize * 3 < this->hashBuckets.size;
   }
@@ -1500,18 +1651,21 @@ public:
     }
     this->TemplateList::setExpectedSize(expectedSize);
     if (!this->isSparseRelativeToExpectedSize(expectedSize)) {
-      this->setHashSize(expectedSize * 5);
+      this->setHashSize(expectedSize* 5);
     }
   }
   inline void setHashSize(int inputHashSize) {
     return this->setHashSize(static_cast<unsigned>(inputHashSize));
   }
   void setHashSize(unsigned int desiredHashSize) {
-    if (desiredHashSize == static_cast<unsigned>(this->hashBuckets.size)) {
+    if (
+      desiredHashSize == static_cast<unsigned>(this->hashBuckets.size)
+    ) {
       return;
     }
     MacroIncrementCounter(GlobalStatistics::numberOfHashResizes);
-    List<int> emptyList; //<-empty list has size 0
+    List<int> emptyList;
+    // <-empty list has size 0
     this->hashBuckets.initializeFillInObject(desiredHashSize, emptyList);
     if (this->size > 0) {
       for (int i = 0; i < this->size; i ++) {
@@ -1520,7 +1674,7 @@ public:
       }
     }
   }
-  template<typename otherType = int>
+  template <typename otherType = int>
   void quickSortAscending(
     typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
@@ -1530,7 +1684,7 @@ public:
     myCopy.quickSortAscending(order, carbonCopy);
     this->operator=(myCopy);
   }
-  template<typename otherType>
+  template <typename otherType>
   void quickSortDescending(
     typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
@@ -1567,7 +1721,9 @@ public:
     if (from.isSparse()) {
       for (int i = 0; i < this->size; i ++) {
         unsigned int hashIndex = this->getHash(this->objects[i]);
-        this->hashBuckets[hashIndex].reserve(from.hashBuckets[hashIndex].size);
+        this->hashBuckets[hashIndex].reserve(
+          from.hashBuckets[hashIndex].size
+        );
         this->hashBuckets[hashIndex].addOnTop(i);
       }
     } else {
@@ -1592,86 +1748,114 @@ public:
   }
 };
 
-template <class Object, unsigned int hashFunction(const Object&) = Object::hashFunction>
+template <
+  class Object,
+  unsigned int hashFunction(const Object&) = Object::hashFunction
+>
 class HashedList: public HashTemplate<Object, List<Object>, hashFunction> {
 public:
-  HashedList(const HashedList& other):HashTemplate<Object, List<Object>, hashFunction>() {
+  HashedList(const HashedList& other):
+  HashTemplate<Object, List<Object>, hashFunction>() {
     this->operator=(other);
   }
-  HashedList() {
-  }
+  HashedList() {}
   void operator=(const HashedList& other) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
   }
   void operator=(const List<Object>& other) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
   }
-  // Note The following function specializations are declared entirely in order to
-  // facilitate autocomplete in my current IDE. If I find a better autocompletion
+  // Note The following function specializations are declared entirely in order
+  // to
+  // facilitate autocomplete in my current IDE. If I find a better
+  // autocompletion
   // IDE the following should be removed.
   void addOnTopNoRepetition(const List<Object>& input) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTopNoRepetition(input);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    addOnTopNoRepetition(input);
   }
   bool addOnTopNoRepetition(const Object& o) {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTopNoRepetition(o);
+    return
+    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    addOnTopNoRepetition(o);
   }
   void addOnTop(const Object& o) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(o);
   }
   void addListOnTop(const List<Object>& input) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addListOnTop(input);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addListOnTop(
+      input
+    );
   }
   bool contains(const Object& o) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(o);
+    return
+    this->::HashTemplate<Object, List<Object>, hashFunction>::contains(o);
   }
   bool contains(const List<Object>& input) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(input);
+    return
+    this->::HashTemplate<Object, List<Object>, hashFunction>::contains(input);
   }
   Object& getElement(int objectIndex) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::getElement(objectIndex);
+    return
+    this->::HashTemplate<Object, List<Object>, hashFunction>::getElement(
+      objectIndex
+    );
   }
   void setObjectAtIndex(int index, const Object& object) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::setObjectAtIndex(index, object);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::setObjectAtIndex(
+      index, object
+    );
   }
   void removeIndexShiftDown(int index) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::removeIndexShiftDown(index);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    removeIndexShiftDown(index);
   }
   void removeIndexSwapWithLast(int index) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::removeIndexSwapWithLast(index);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    removeIndexSwapWithLast(index);
   }
   int getIndex(const Object& o) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::getIndex(o);
+    return
+    this->::HashTemplate<Object, List<Object>, hashFunction>::getIndex(o);
   }
   int getIndexNoFail(const Object& o) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::getIndexNoFail(o);
+    return
+    this->::HashTemplate<Object, List<Object>, hashFunction>::getIndexNoFail(o)
+    ;
   }
   int addNoRepetitionOrReturnIndexFirst(const Object& o) {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::addNoRepetitionOrReturnIndexFirst(o);
+    return
+    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    addNoRepetitionOrReturnIndexFirst(o);
   }
   template <typename otherType = int>
   void quickSortAscending(
     typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortAscending(order, carbonCopy);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    quickSortAscending(order, carbonCopy);
   }
   template <typename otherType = int>
   void quickSortDescending(
     typename List<Object>::Comparator* order = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortDescending(order, carbonCopy);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::
+    quickSortDescending(order, carbonCopy);
   }
   void setExpectedSize(int expectedSize) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::setExpectedSize(expectedSize);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::setExpectedSize(
+      expectedSize
+    );
   }
 };
 
 // Class used to avoid issues with gcc compilation.
 // This class should probably be removed as soon as the issue is resolved.
 template <class Object>
-class HashedListSpecialized: public HashedList<Object, Object::hashFunction> {
-};
+class HashedListSpecialized: public HashedList<Object, Object::hashFunction> {}
+;
 
 struct StackInfo {
 public:
@@ -1730,16 +1914,21 @@ public:
   UnsecurePseudoRandomGenerator();
   uint32_t getRandomSeed();
   void setRandomSeedSmall(uint32_t inputRandomSeed);
-  void setRandomSeedLarge(const LargeInteger& inputRandomSeed, std::stringstream* comments);
+  void setRandomSeedLarge(
+    const LargeInteger& inputRandomSeed, std::stringstream* comments
+  );
   unsigned int getRandomNonNegativeLessThanMaximumSeed();
   signed getRandom();
 };
 
-template<class Base>
-std::iostream& operator<<(std::iostream& output, const Complex<Base>& input);
-
+template <class Base>
+std::iostream& operator<<(
+  std::iostream& output, const Complex<Base>& input
+);
 template <typename Element>
-std::iostream& operator<<(std::iostream& output, const Matrix<Element>& matrix) {
+std::iostream& operator<<(
+  std::iostream& output, const Matrix<Element>& matrix
+) {
   output << "<table>";
   for (int i = 0; i < matrix.numberOfRows; i ++) {
     output << "<tr>";
@@ -1755,8 +1944,10 @@ std::iostream& operator<<(std::iostream& output, const Matrix<Element>& matrix) 
 }
 
 template <class Coefficient>
-std::ostream& operator<<(std::ostream& out, const Vector<Coefficient>& input) {
-  out  << "(";
+std::ostream& operator<<(
+  std::ostream& out, const Vector<Coefficient>& input
+) {
+  out << "(";
   for (int i = 0; i < input.size; i ++) {
     out << input[i];
     if (i != input.size - 1) {
@@ -1780,9 +1971,11 @@ bool List<Object>::quickSortAscendingCustomRecursive(
   }
   int highIndex = topIndex;
   for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
-    if (comparator.compareLeftGreaterThanRight(
-      this->objects[lowIndex], this->objects[bottomIndex]
-    )) {
+    if (
+      comparator.compareLeftGreaterThanRight(
+        this->objects[lowIndex], this->objects[bottomIndex]
+      )
+    ) {
       if (carbonCopy != nullptr) {
         carbonCopy->swapTwoIndices(lowIndex, highIndex);
       }
@@ -1791,17 +1984,29 @@ bool List<Object>::quickSortAscendingCustomRecursive(
       highIndex --;
     }
   }
-  if (comparator.compareLeftGreaterThanRight(this->objects[highIndex], this->objects[bottomIndex])) {
+  if (
+    comparator.compareLeftGreaterThanRight(
+      this->objects[highIndex], this->objects[bottomIndex]
+    )
+  ) {
     highIndex --;
   }
   if (carbonCopy != nullptr) {
     carbonCopy->swapTwoIndices(bottomIndex, highIndex);
   }
   this->swapTwoIndices(bottomIndex, highIndex);
-  if (!this->quickSortAscendingCustomRecursive(bottomIndex, highIndex - 1, comparator, carbonCopy)) {
+  if (
+    !this->quickSortAscendingCustomRecursive(
+      bottomIndex, highIndex - 1, comparator, carbonCopy
+    )
+  ) {
     return false;
   }
-  if (!this->quickSortAscendingCustomRecursive(highIndex + 1, topIndex, comparator, carbonCopy)) {
+  if (
+    !this->quickSortAscendingCustomRecursive(
+      highIndex + 1, topIndex, comparator, carbonCopy
+    )
+  ) {
     return false;
   }
   return true;
@@ -1817,14 +2022,20 @@ void List<Object>::addListOnTop(const List<Object>& incoming) {
   }
 }
 
-template<class Object>
+template <class Object>
 void List<Object>::swapTwoIndices(int index1, int index2) {
-  if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size) {
+  if (
+    index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size
+  ) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "Requested elements with indices "
-    << index1 << " and " << index2 << " in a list that has "
-    << this->size << " elements. ";
+    << index1
+    << " and "
+    << index2
+    << " in a list that has "
+    << this->size
+    << " elements. ";
     fatalCrash(commentsOnCrash.str());
   }
   if (index1 == index2) {
@@ -1836,7 +2047,7 @@ void List<Object>::swapTwoIndices(int index1, int index2) {
   this->objects[index2] = tempO;
 }
 
-template<class Object>
+template <class Object>
 void List<Object>::cycleIndices(const List<int>& cycle) {
   if (cycle.size < 2) {
     return;
@@ -1844,8 +2055,12 @@ void List<Object>::cycleIndices(const List<int>& cycle) {
   for (int i = 0; i < cycle.size; i ++) {
     if ((cycle[i] >= this->size) || (cycle[i] < 0)) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "Request to cycle indices "
-      << cycle << " in list of " << this->size << " elements.";
+      commentsOnCrash
+      << "Request to cycle indices "
+      << cycle
+      << " in list of "
+      << this->size
+      << " elements.";
       fatalCrash(commentsOnCrash.str());
     }
   }
@@ -1857,14 +2072,14 @@ void List<Object>::cycleIndices(const List<int>& cycle) {
   this->objects[cycle[0]] = tail;
 }
 
-template<class Object>
+template <class Object>
 void List<Object>::permuteIndices(const List<List<int> >& cycles) {
   for (int i = 0; i < cycles.size; i ++) {
     this->cycleIndices(cycles[i]);
   }
 }
 
-template<class Object>
+template <class Object>
 int List<Object>::getIndex(const Object& o) const {
   for (int i = 0; i < this->size; i ++) {
     if (this->objects[i] == o) {
@@ -1945,7 +2160,9 @@ void List<Object>::shiftUpExpandOnTop(int startingIndex) {
 }
 
 template <class Object>
-void List<Object>::shiftUpExpandOnTopRepeated(int startingIndex, int numberOfNewElements) {
+void List<Object>::shiftUpExpandOnTopRepeated(
+  int startingIndex, int numberOfNewElements
+) {
   this->setSize(this->size + numberOfNewElements);
   int lowBound = startingIndex + numberOfNewElements;
   for (int i = this->size - 1; i >= lowBound; i --) {
@@ -1966,7 +2183,9 @@ List<Object> List<Object>::sliceCopy(int startingIndex, int sizeOfSlice) const {
 }
 
 template <class Object>
-void List<Object>::slice(int startingIndex, int sizeOfSlice, List<Object>& output) const {
+void List<Object>::slice(
+  int startingIndex, int sizeOfSlice, List<Object>& output
+) const {
   // output allowed to equal this
   if (startingIndex < 0) {
     startingIndex = 0;
@@ -2006,13 +2225,14 @@ bool List<Object>::addOnTopNoRepetition(const Object& o) {
 }
 
 template <class Object>
-Object* List<Object>::lastObject() const {
+Object*List<Object>::lastObject() const {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size <= 0) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "Trying to fetch the last object of an array with "
-    << this->size << " elements. ";
+    << this->size
+    << " elements. ";
     fatalCrash(commentsOnCrash.str());
   }
   return &this->objects[this->size - 1];
@@ -2099,7 +2319,8 @@ std::string List<Object>::toString(FormatExpressions* format) const {
 }
 
 template <class Object>
-std::string List<Object>::toStringCommaDelimited(FormatExpressions* format) const {
+std::string List<Object>::toStringCommaDelimited(FormatExpressions* format)
+const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     out << this->objects[i].toString(format);
@@ -2138,7 +2359,7 @@ Object List<Object>::popLastObject() {
 
 template <class Object>
 void List<Object>::releaseMemory() {
-  delete [] this->objects;
+  delete[] this->objects;
   this->size = 0;
   this->objects = 0;
 #ifdef AllocationLimitsSafeguard
@@ -2150,7 +2371,7 @@ void List<Object>::releaseMemory() {
 
 template <class Object>
 List<Object>::~List() {
-  delete [] this->objects;
+  delete[] this->objects;
 #ifdef AllocationLimitsSafeguard
   GlobalStatistics::globalPointerCounter -= this->actualSize;
   GlobalStatistics::checkPointerCounters();
@@ -2170,10 +2391,13 @@ void List<Object>::expandArrayOnTop(int increase) {
   Object* newArray = 0;
   try {
     newArray = new Object[this->actualSize + increase];
-  } catch (std::bad_alloc&) {
+  } catch(std::bad_alloc&) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "Memory allocation failure: failed to allocate "
-    << this->actualSize + increase << " objects. ";
+    commentsOnCrash
+    << "Memory allocation failure: failed to allocate "
+    << this->actualSize +
+    increase
+    << " objects. ";
     fatalCrash(commentsOnCrash.str());
   }
 #ifdef AllocationLimitsSafeguard
@@ -2183,9 +2407,12 @@ void List<Object>::expandArrayOnTop(int increase) {
   for (int i = 0; i < this->size; i ++) {
     newArray[i] = this->objects[i];
   }
-  Object* oldPointer = this->objects; // <-store the old memory block
-  this->objects = newArray; // <-replace objects with newArray
-  delete [] oldPointer; // <-only then we delete the non-used memory.
+  Object* oldPointer = this->objects;
+  // <-store the old memory block
+  this->objects = newArray;
+  // <-replace objects with newArray
+  delete[] oldPointer;
+  // <-only then we delete the non-used memory.
   // The above looks complicated but is safe:
   // if another thread jumps and requests operator[]
   // on our list exactly between the two instructions above
@@ -2221,14 +2448,20 @@ void List<Object>::addOnTop(const Object& o) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "The actual size of the list is "
-    << this->actualSize << " but this->size equals " << this->size
+    << this->actualSize
+    << " but this->size equals "
+    << this->size
     << ". ";
     fatalCrash(commentsOnCrash.str());
   }
   if (this->size == this->actualSize) {
-    this->expandArrayOnTop(this->getNewSizeRelativeToExpectedSize(this->actualSize + 1) - this->size);
+    this->expandArrayOnTop(
+      this->getNewSizeRelativeToExpectedSize(this->actualSize + 1) - this->size
+    );
   }
   this->objects[this->size] = o;
   this->size ++;
 }
+
 #endif
+

@@ -1,7 +1,9 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_html_interpretation_ALREADY_INCLUDED
 #define header_calculator_html_interpretation_ALREADY_INCLUDED
+
 #include "general_lists.h"
 #include "database.h"
 #include "calculator_problem_storage.h"
@@ -14,7 +16,9 @@ class TopicElementParser {
 public:
   class TopicLine {
   public:
-    friend std::ostream& operator<<(std::ostream& output, const TopicLine& line) {
+    friend std::ostream& operator<<(
+      std::ostream& output, const TopicLine& line
+    ) {
       output << line.toString();
       return output;
     }
@@ -27,11 +31,15 @@ public:
     std::string toString() const;
     bool accountIfStateChanger(CalculatorHTML& owner) const;
   };
+
   CalculatorHTML* owner;
   MapList<std::string, TopicElement, MathRoutines::hashString> topics;
-  MapList<std::string, List<TopicElementParser::TopicLine>, MathRoutines::hashString> knownTopicBundles;
+  MapList<
+    std::string,
+    List<TopicElementParser::TopicLine>,
+    MathRoutines::hashString
+  > knownTopicBundles;
   HashedList<std::string, MathRoutines::hashString> loadedTopicBundleFiles;
-
   MapList<std::string, int, MathRoutines::hashString> elementTypes;
   MapList<int, std::string, HashFunctions::hashFunction> elementNames;
   List<TopicElementParser::TopicLine> crawled;
@@ -46,8 +54,8 @@ public:
   void computeTopicNumbers();
   void computeTopicHierarchyPartOne();
   void computeTopicHierarchyPartTwo();
-  void addNewTopicElementFromLine(const TopicLine &input);
-  void compressOneTopicLine(const TopicLine &input, CalculatorHTML& owner);
+  void addNewTopicElementFromLine(const TopicLine& input);
+  void compressOneTopicLine(const TopicLine& input, CalculatorHTML& owner);
   void crawl(const std::string& inputString);
   void exhaustCrawlStack();
   void loadTopicBundleFile(TopicLine& input);
@@ -78,35 +86,36 @@ public:
   int type;
   class types {
   public:
-    static const int unknown                = 0 ;
-    static const int empty                  = 1 ;
+    static const int unknown = 0;
+    static const int empty = 1;
     // Note: the fact that:
     // chapter < section < topic < problem
     // is used when determining parent-child
     // relations between topics.
-    static const int chapter                = 2 ;
-    static const int section                = 3 ;
-    static const int topic                  = 4 ;
-    static const int problem                = 5 ;
-    static const int error                  = 6 ;
-    static const int texHeader              = 7 ;
+    static const int chapter = 2;
+    static const int section = 3;
+    static const int topic = 4;
+    static const int problem = 5;
+    static const int error = 6;
+    static const int texHeader = 7;
     // service elements
-    static const int title                  = 8 ;
-    static const int video                  = 9 ;
-    static const int videoHandwritten       = 10;
-    static const int slidesLatex            = 11;
-    static const int slidesSource           = 12;
-    static const int homeworkLatex          = 13;
-    static const int homeworkSource         = 14;
+    static const int title = 8;
+    static const int video = 9;
+    static const int videoHandwritten = 10;
+    static const int slidesLatex = 11;
+    static const int slidesSource = 12;
+    static const int homeworkLatex = 13;
+    static const int homeworkSource = 14;
     static const int homeworkSolutionSource = 15;
-    static const int handwrittenSolutions   = 16;
-    static const int slidesSourceHeader     = 17;
-    static const int homeworkSourceHeader   = 18;
-    static const int loadTopicBundles       = 19;
-    static const int topicBundle            = 20;
-    static const int bundleBegin            = 21;
-    static const int bundleEnd              = 22;
+    static const int handwrittenSolutions = 16;
+    static const int slidesSourceHeader = 17;
+    static const int homeworkSourceHeader = 18;
+    static const int loadTopicBundles = 19;
+    static const int topicBundle = 20;
+    static const int bundleBegin = 21;
+    static const int bundleEnd = 22;
   };
+
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
   bool flagHasLectureTag;
@@ -117,7 +126,8 @@ public:
   int indexInParent;
   int totalSubSectionsUnderME;
   int totalSubSectionsUnderMeIncludingEmptySubsections;
-  std::string id; //<- for problems the id is the problem file name. For all other topic
+  std::string id;
+  // <- for problems the id is the problem file name. For all other topic
   // elements the id is the title of the element.
   List<std::string> idsDeadlines;
   List<std::string> deadlinesPerSectioN;
@@ -127,14 +137,11 @@ public:
   std::string idDeadlineReport;
   std::string idDeadlineTable;
   std::string idDeadlineButton;
-
   std::string title;
   std::string video;
   std::string videoHandwritten;
-
   std::string querySlides;
   std::string queryHomework;
-
   std::string handwrittenSolution;
   List<std::string> sourceSlides;
   List<std::string> sourceHomework;
@@ -158,15 +165,23 @@ public:
   //  Rational maxCorrectAnswersInAllChildren;
   void computeID(int elementIndex, TopicElementParser& owner);
   void reset();
-  friend std::ostream& operator << (std::ostream& output, const TopicElement& element) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const TopicElement& element
+  ) {
     output << element.toString();
     return output;
   }
   bool isError();
   bool problemOpensIfAvailable(std::stringstream* commentsOnFailure);
-  bool pdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
-  bool pdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
-  bool pdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
+  bool pdfsOpenIfAvailable(
+    CalculatorHTML& owner, std::stringstream* commentsOnFailure
+  );
+  bool pdfSlidesOpenIfAvailable(
+    CalculatorHTML& owner, std::stringstream* commentsOnFailure
+  );
+  bool pdfHomeworkOpensIfAvailable(
+    CalculatorHTML& owner, std::stringstream* commentsOnFailure
+  );
   std::string toString() const;
   JSData toJSON(CalculatorHTML& owner);
   void computeSlides(CalculatorHTML& owner);
@@ -256,11 +271,9 @@ public:
   std::string outputProblemTitle;
   std::string outputDebugInformationBody;
   MapList<std::string, std::string, MathRoutines::hashString> outputScripts;
-
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
-
   static const std::string bugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorTopicElementNames;
@@ -279,7 +292,7 @@ public:
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
   class Parser {
-    public:
+  public:
     enum Phase {
       none,
       leftAngleBracketEncountered,
@@ -296,8 +309,10 @@ public:
     Phase phase;
     std::string inputHtml;
     CalculatorHTML* owner;
-    static HashedList<std::string, HashFunctions::hashFunction> calculatorClasses;
-    static HashedList<std::string, HashFunctions::hashFunction> calculatorClassesAnswerFields;
+    static HashedList<std::string, HashFunctions::hashFunction>
+    calculatorClasses;
+    static HashedList<std::string, HashFunctions::hashFunction>
+    calculatorClassesAnswerFields;
     List<char> splittingChars;
     List<SyntacticElementHTML> elementStack;
     Parser();
@@ -331,12 +346,15 @@ public:
     bool reduceStackMergeContentsRetainLast(int numberOfElementsToRemove);
     bool setLastToError(const std::string& errorMessage);
     std::string toStringPhaseInfo();
-    bool canBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
+    bool canBeMerged(
+      const SyntacticElementHTML& left, const SyntacticElementHTML& right
+    );
     bool setTagClassFromOpenTag(SyntacticElementHTML& output);
     bool isStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
   };
+
   Parser parser;
-  /////////////////
+  // ///////////////
   int getAnswerIndex(const std::string& desiredAnswerId);
   bool parseHTML(std::stringstream* comments) {
     return this->parser.parseHTML(comments);
@@ -353,7 +371,6 @@ public:
   std::string cleanUpFileName(const std::string& inputLink);
   void initAutocompleteExtras();
   void initBuiltInSpanClasses();
-
   void loadFileNames();
   bool extractContent(std::stringstream* comments);
   bool processParsedElements(std::stringstream* comments);
@@ -364,37 +381,60 @@ public:
     Answer* currentAnswer;
     SolutionProcessor();
   };
+
   bool processSolutions(std::stringstream* comments);
   bool processOneSolution(
     SyntacticElementHTML& input,
     SolutionProcessor& processor,
     std::stringstream* comments
   );
-  bool extractAnswerIdsOnce(SyntacticElementHTML& element, std::stringstream* comments);
+  bool extractAnswerIdsOnce(
+    SyntacticElementHTML& element, std::stringstream* comments
+  );
   bool extractAnswerIds(std::stringstream* comments);
-  bool extractOneAnswerId(SyntacticElementHTML& input, std::stringstream* comments);
+  bool extractOneAnswerId(
+    SyntacticElementHTML& input, std::stringstream* comments
+  );
   bool interpretHtml(std::stringstream* comments);
-  bool interpretHtmlOneAttempt(Calculator& interpreter, std::stringstream& comments);
+  bool interpretHtmlOneAttempt(
+    Calculator& interpreter, std::stringstream& comments
+  );
   void computeProblemLabel();
   void computeBodyDebugString();
-  std::string toStringInterprettedCommands(Calculator& calculator, List<SyntacticElementHTML>& elements);
+  std::string toStringInterprettedCommands(
+    Calculator& calculator, List<SyntacticElementHTML>& elements
+  );
   void logProblemGenerationObsolete(Calculator& interpreter);
   bool processExecutedCommands(
-    Calculator& interpreter, List<SyntacticElementHTML>& elements, std::stringstream& comments
+    Calculator& interpreter,
+    List<SyntacticElementHTML>& elements,
+    std::stringstream& comments
   );
   bool processOneExecutedCommand(
-    Calculator& interpreter, SyntacticElementHTML& element, std::stringstream& comments
+    Calculator& interpreter,
+    SyntacticElementHTML& element,
+    std::stringstream& comments
   );
   bool prepareAnswerElements(std::stringstream& comments);
   bool interpretAnswerHighlights(std::stringstream& comments);
   bool interpretAnswerElements(std::stringstream& comments);
   bool interpretOneAnswerElement(SyntacticElementHTML& inputOutput);
-  bool prepareAndExecuteCommands(Calculator& interpreter, std::stringstream* comments);
+  bool prepareAndExecuteCommands(
+    Calculator& interpreter, std::stringstream* comments
+  );
   std::string prepareUserInputBoxes();
-  bool prepareCommandsAnswerOnGiveUp(Answer& answer, std::stringstream* comments);
-  bool prepareCommentsBeforeSubmission(Answer& answer, std::stringstream* comments);
-  bool prepareCommentsBeforeInterpretation(Answer& answer, std::stringstream* comments);
-  bool exrtactSolutionCommands(Answer& answer, std::stringstream* comments);
+  bool prepareCommandsAnswerOnGiveUp(
+    Answer& answer, std::stringstream* comments
+  );
+  bool prepareCommentsBeforeSubmission(
+    Answer& answer, std::stringstream* comments
+  );
+  bool prepareCommentsBeforeInterpretation(
+    Answer& answer, std::stringstream* comments
+  );
+  bool exrtactSolutionCommands(
+    Answer& answer, std::stringstream* comments
+  );
   bool prepareCommandsAnswer(Answer& answer, std::stringstream* comments);
   bool prepareCommandsGenerateProblem(std::stringstream* comments);
   std::string getProblemHeaderEnclosure();
@@ -416,20 +456,24 @@ public:
     std::stringstream& commentsOnFailure
   );
   bool mergeProblemWeightAndStore(
-    std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
+    std::string& incomingProblemInfo,
+    std::stringstream* commentsOnFailure
   );
   bool mergeProblemDeadlineAndStore(
-    std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
+    std::string& incomingProblemInfo,
+    std::stringstream* commentsOnFailure
   );
   bool mergeProblemWeight(
     const JSData& inputJSON,
-    MapList<std::string, ProblemData, MathRoutines::hashString>& outputAppendProblemInfo,
+    MapList<std::string, ProblemData, MathRoutines::hashString>&
+    outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
   bool mergeProblemDeadline(
     const JSData& inputJSON,
-    MapList<std::string, ProblemData, MathRoutines::hashString>& outputAppendProblemInfo,
+    MapList<std::string, ProblemData, MathRoutines::hashString>&
+    outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemWeights(
@@ -440,26 +484,45 @@ public:
     MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
     std::stringstream* commentsOnFailure
   );
-  QuerySet toQuerySetProblemWeights(MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
-  JSData toJSONDeadlines(MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
+  QuerySet toQuerySetProblemWeights(
+    MapList<std::string, ProblemData, MathRoutines::hashString>&
+    inputProblemInfo
+  );
+  JSData toJSONDeadlines(
+    MapList<std::string, ProblemData, MathRoutines::hashString>&
+    inputProblemInfo
+  );
   std::string toStringDeadline(
-    const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection
+    const std::string& topicID,
+    bool problemAlreadySolved,
+    bool returnEmptyStringIfNoDeadline,
+    bool isSection
   );
   void computeDeadlinesAllSections(TopicElement& inputOutput);
   void computeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
   JSData toStringTopicListJSON(std::stringstream* comments);
-  std::string toStringProblemInfo(const std::string& fileName, const std::string& stringToDisplay = "");
+  std::string toStringProblemInfo(
+    const std::string& fileName, const std::string& stringToDisplay = ""
+  );
   static std::string toStringLinkFromProblem(
     const std::string& fileName,
     bool practiceMode = true,
     int randomSeed = - 1
   );
   std::string toStringLinkFromFileName(const std::string& fileName);
-  std::string toStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
-  std::string toStringCalculatorProblemSourceFromFileName(const std::string& fileName);
+  std::string toStringLinkCurrentAdmin(
+    const std::string& displayString,
+    bool setDebugFlag,
+    bool includeRandomSeed
+  );
+  std::string toStringCalculatorProblemSourceFromFileName(
+    const std::string& fileName
+  );
   void interpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string toStringProblemScoreFull(const std::string& fileName);
-  std::string toStringProblemScoreShort(const std::string& fileName, bool& outputAlreadySolved);
+  std::string toStringProblemScoreShort(
+    const std::string& fileName, bool& outputAlreadySolved
+  );
   bool computeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void interpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool prepareSectionList(std::stringstream& commentsOnFailure);
@@ -469,11 +532,15 @@ public:
   void interpretJavascripts(SyntacticElementHTML& inputOutput);
   JSData getEditorBoxesHTML();
   void loadCurrentProblemItem(
-    bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure
+    bool needToLoadDatabaseMayIgnore,
+    const std::string& inputRandomSeed,
+    std::stringstream* commentsOnFailure
   );
   void figureOutCurrentProblemList(std::stringstream& comments);
   std::string loadAndInterpretCurrentProblemItemJSON(
-    bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure
+    bool needToLoadDatabaseMayIgnore,
+    const std::string& desiredRandomSeed,
+    std::stringstream* commentsOnFailure
   );
   static unsigned int hashFunction(const CalculatorHTML& input) {
     return input.hashFunction();
@@ -484,7 +551,9 @@ public:
   bool operator==(const CalculatorHTML& other) const {
     return this->fileName == other.fileName;
   }
-  std::string toStringAllSectionDeadlines(const std::string& topicID, bool isSection);
+  std::string toStringAllSectionDeadlines(
+    const std::string& topicID, bool isSection
+  );
   std::string toStringOneDeadlineFormatted(
     const std::string& topicID,
     const std::string& sectionNumber,
@@ -518,6 +587,7 @@ public:
         bool flagBuiltInWorks;
         OneAnswer();
       };
+
       std::string fileName;
       std::string errorLoad;
       std::string errorInterpretation;
@@ -531,6 +601,7 @@ public:
       bool run();
       std::string toStringHTMLTableRow(int rowIndex);
     };
+
     int filesToInterpret;
     int firstFileIndex;
     int randomSeed;
@@ -550,9 +621,7 @@ public:
       std::stringstream* comments
     );
     bool builtIn(
-      int inputFirstFileIndex,
-      int inputFilesToInterpret,
-      int inputRandomSeed
+      int inputFirstFileIndex, int inputFilesToInterpret, int inputRandomSeed
     );
     static bool builtInCrashOnFailure();
     static bool all();
@@ -587,3 +656,4 @@ public:
 };
 
 #endif // header_calculator_html_interpretation_ALREADY_INCLUDED
+

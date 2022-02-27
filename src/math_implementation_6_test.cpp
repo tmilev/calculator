@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
@@ -6,27 +7,27 @@
 
 bool PolynomialFactorizationFiniteFields::Test::all() {
   PolynomialFactorizationFiniteFields::Test::test(
-    "1176 x^14-7224x^13-10506x^12-7434x^11+1247x^10+6085x^9+6195x^8"
-    "+2607x^7+11577x^6+32x^5+7265x^4-2841x^3-1794x^2-1320x-2880",
-    "(14x^{7}-103x^{6}-76x^{4}+19x^{3}+18x^{2}+9x +24)"
-    "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+"1176 x^14-7224x^13-10506x^12-7434x^11+1247x^10+6085x^9+6195x^8"
+"+2607x^7+11577x^6+32x^5+7265x^4-2841x^3-1794x^2-1320x-2880",
+"(14x^{7}-103x^{6}-76x^{4}+19x^{3}+18x^{2}+9x +24)"
+"(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
   );
   PolynomialFactorizationFiniteFields::Test::test("x+1", "(x +1)");
   PolynomialFactorizationFiniteFields::Test::test("x^2+1", "(x^{2}+1)");
   PolynomialFactorizationFiniteFields::Test::test("x^2-1", "(x -1)(x +1)");
   PolynomialFactorizationFiniteFields::Test::test("x^2+2x+1", "(x +1)(x +1)");
   PolynomialFactorizationFiniteFields::Test::test(
-    "4507104x^15+7359384x^14+1298256x^13-5390778x^12-1915130x^11+2884723x^10"
-    "+321265x^9-7734159x^8-2806758x^7+1609059x^6-90547x^5-1699161x^4"
-    "+23910x^3-1608x^2-302400x+138240",
-    "(76x^{4}+19x^{3}-18x^{2}-9x +24)"
-    "(706x^{4}+119x^{3}-18x^{2}+91x -48)"
-    "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+"4507104x^15+7359384x^14+1298256x^13-5390778x^12-1915130x^11+2884723x^10"
+"+321265x^9-7734159x^8-2806758x^7+1609059x^6-90547x^5-1699161x^4"
+"+23910x^3-1608x^2-302400x+138240",
+"(76x^{4}+19x^{3}-18x^{2}-9x +24)"
+"(706x^{4}+119x^{3}-18x^{2}+91x -48)"
+"(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
   );
   PolynomialFactorizationFiniteFields::Test::test(
     "109x^13+9x^12+100x^11-98x^10+x^8 -84x^7+12x^6-75x^4-23x^3+19x^2-10x-120",
-    "(109x^{13}+9x^{12}+100x^{11}-98x^{10}+x^{8}"
-    "-84x^{7}+12x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+"(109x^{13}+9x^{12}+100x^{11}-98x^{10}+x^{8}"
+"-84x^{7}+12x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
   );
   // The input is (2x^2+3x+4)^3
   PolynomialFactorizationFiniteFields::Test::test(
@@ -34,29 +35,13 @@ bool PolynomialFactorizationFiniteFields::Test::all() {
     "(2x^{2}+3x +4)(2x^{2}+3x +4)(2x^{2}+3x +4)"
   );
   PolynomialFactorizationFiniteFields::Test::test(
-    "x^{6}",
-    "(x )(x )(x )(x )(x )(x )"
+    "x^{6}", "(x )(x )(x )(x )(x )(x )"
   );
-  PolynomialFactorizationFiniteFields::Test::test(
-    "x^{2}",
-    "(x )(x )"
-  );
-  PolynomialFactorizationFiniteFields::Test::test(
-    "x",
-    "(x )"
-  );
-  PolynomialFactorizationFiniteFields::Test::test(
-    "4",
-    "4"
-  );
-  PolynomialFactorizationFiniteFields::Test::test(
-    "4x+1",
-    "(4x +1)"
-  );
-  PolynomialFactorizationFiniteFields::Test::test(
-    "4x+2",
-    "2(2x +1)"
-  );
+  PolynomialFactorizationFiniteFields::Test::test("x^{2}", "(x )(x )");
+  PolynomialFactorizationFiniteFields::Test::test("x", "(x )");
+  PolynomialFactorizationFiniteFields::Test::test("4", "4");
+  PolynomialFactorizationFiniteFields::Test::test("4x+1", "(4x +1)");
+  PolynomialFactorizationFiniteFields::Test::test("4x+2", "2(2x +1)");
   return true;
 }
 
@@ -78,8 +63,10 @@ bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
   Polynomial<Rational> input = this->parser.fromString(this->toBeFactored);
   int64_t start = global.getElapsedMilliseconds();
   if (!factorization.factor(input, algorithm, &comments, &comments)) {
-    global.fatal << "Factorization failed: "
-    << this->toBeFactored << "\nComments:\n"
+    global.fatal
+    << "Factorization failed: "
+    << this->toBeFactored
+    << "\nComments:\n"
     << comments.str()
     << global.fatal;
   }
@@ -100,22 +87,34 @@ bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
   if (duration > 200) {
     color = Logger::red;
   }
-  global << color << "Finite field factorization: polynomial of degree: "
-  << input.totalDegree() << " factored in "
-  << duration << " ms. ";
+  global
+  << color
+  << "Finite field factorization: polynomial of degree: "
+  << input.totalDegree()
+  << " factored in "
+  << duration
+  << " ms. ";
   if (algorithm.numberOfRunsOfFactor > 1) {
-    global << "Total runs of factor: " << algorithm.numberOfRunsOfFactor << ". ";
+    global
+    << "Total runs of factor: "
+    << algorithm.numberOfRunsOfFactor
+    << ". ";
   }
   global
   << "Square-free check took: "
-  << algorithm.millisecondsSquareFree << " ms. "
+  << algorithm.millisecondsSquareFree
+  << " ms. "
   << "Cantor-Zassenhaus algorithm took: "
-  << algorithm.millisecondsCantorZassenhaus << " ms. "
-  << "Hensel lift took: " << algorithm.millisecondsLift
+  << algorithm.millisecondsCantorZassenhaus
+  << " ms. "
+  << "Hensel lift took: "
+  << algorithm.millisecondsLift
   << " ms. Factorization from lift took: "
   << algorithm.millisecondsFactorizationFromLift
   << "ms. Factorization total: "
-  << algorithm.millisecondsTotal << " ms. " << Logger::endL;
+  << algorithm.millisecondsTotal
+  << " ms. "
+  << Logger::endL;
   return true;
 }
 
@@ -161,11 +160,17 @@ bool PolynomialUnivariateModular::Test::testOneGreatestCommonDivisor(
   PolynomialUnivariateModular leftPolynomial =
   PolynomialUnivariateModular::Test::fromStringAndModulus(left, &modulusData);
   PolynomialUnivariateModular rightPolynomial =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(right, &modulusData);
+  PolynomialUnivariateModular::Test::fromStringAndModulus(
+    right, &modulusData
+  );
   PolynomialUnivariateModular result;
-  leftPolynomial.greatestCommonDivisor(leftPolynomial, rightPolynomial, result, nullptr);
+  leftPolynomial.greatestCommonDivisor(
+    leftPolynomial, rightPolynomial, result, nullptr
+  );
   if (result.toString() != expected) {
-    global.fatal << "Greatest common divisor of " << leftPolynomial.toString()
+    global.fatal
+    << "Greatest common divisor of "
+    << leftPolynomial.toString()
     << " and "
     << rightPolynomial.toString()
     << " equals:\n"
@@ -197,7 +202,9 @@ bool PolynomialUnivariateModular::Test::testOneDivision(
     quotient.toString() != expectedQuotient ||
     remainder.toString() != expectedRemainder
   ) {
-    global.fatal << "Dividing " << divisorPolynomial.toString()
+    global.fatal
+    << "Dividing "
+    << divisorPolynomial.toString()
     << " by "
     << divisorPolynomial.toString()
     << " gave quotient:\n"
@@ -221,11 +228,15 @@ bool PolynomialUnivariateModular::Test::testOneDerivative(
   IntegerModulusSmall modulus;
   modulus.initializeModulusData(modulusData);
   PolynomialUnivariateModular input =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(toBeDifferentiated, &modulus);
+  PolynomialUnivariateModular::Test::fromStringAndModulus(
+    toBeDifferentiated, &modulus
+  );
   PolynomialUnivariateModular result;
   input.derivative(result);
   if (result.toString() != expected) {
-    global.fatal << "Derivative of:\n" << input.toString()
+    global.fatal
+    << "Derivative of:\n"
+    << input.toString()
     << "\ncomputed to be:\n"
     << result.toString()
     << "\nexpected:\n"
@@ -235,10 +246,12 @@ bool PolynomialUnivariateModular::Test::testOneDerivative(
   return true;
 }
 
-PolynomialUnivariateModular PolynomialUnivariateModular::Test::fromStringAndModulus(
+PolynomialUnivariateModular PolynomialUnivariateModular::Test::
+fromStringAndModulus(
   const std::string& input, IntegerModulusSmall* modulus
 ) {
-  Polynomial<Rational> polynomialRational = Polynomial<Rational>::Test::fromString(input);
+  Polynomial<Rational> polynomialRational =
+  Polynomial<Rational>::Test::fromString(input);
   PolynomialUnivariateModular result;
   result.makeFromPolynomialAndModulusNoFailure(modulus, polynomialRational);
   return result;
@@ -258,13 +271,14 @@ std::string PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(
   return out.str();
 }
 
-Polynomial<ElementZmodP> PolynomialUnivariateModular::Test::fromStringAndModulus(
-  const std::string& input, int modulus
-) {
+Polynomial<ElementZmodP> PolynomialUnivariateModular::Test::
+fromStringAndModulus(const std::string& input, int modulus) {
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   PolynomialUnivariateModular modulusPolynomialInternal =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(input, &modulusData);
+  PolynomialUnivariateModular::Test::fromStringAndModulus(
+    input, &modulusData
+  );
   Polynomial<ElementZmodP> result;
   modulusPolynomialInternal.toPolynomialNonDense(result);
   return result;
@@ -274,13 +288,13 @@ bool PolynomialUnivariateModularAsModulus::Test::all() {
   PolynomialUnivariateModularAsModulus::Test::oneTest(
     5,
     "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1",
-    "4, 2, 3, 3, 2, 0\n"
-    "x^6 -> 4, 2, 3, 3, 2, 0\n"
-    "x^7 -> 0, 4, 2, 3, 3, 2\n"
-    "x^8 -> 3, 4, 0, 3, 2, 3\n"
-    "x^9 -> 2, 4, 3, 4, 4, 2\n"
-    "x^10 -> 3, 1, 0, 4, 3, 4\n"
-    "x^11 -> 1, 1, 3, 2, 2, 3"
+"4, 2, 3, 3, 2, 0\n"
+"x^6 -> 4, 2, 3, 3, 2, 0\n"
+"x^7 -> 0, 4, 2, 3, 3, 2\n"
+"x^8 -> 3, 4, 0, 3, 2, 3\n"
+"x^9 -> 2, 4, 3, 4, 4, 2\n"
+"x^10 -> 3, 1, 0, 4, 3, 4\n"
+"x^11 -> 1, 1, 3, 2, 2, 3"
   );
   return true;
 }
@@ -293,11 +307,14 @@ bool PolynomialUnivariateModularAsModulus::Test::oneTest(
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   PolynomialUnivariateModular modulusPolynomialInternal =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(modulusPolynomial, &modulusData);
+  PolynomialUnivariateModular::Test::fromStringAndModulus(
+    modulusPolynomial, &modulusData
+  );
   PolynomialUnivariateModularAsModulus result;
   result = modulusPolynomialInternal;
   if (result.toStringImagesOfX() != expectedImagesOfX) {
-    global.fatal << "Images of x: got:\n"
+    global.fatal
+    << "Images of x: got:\n"
     << result.toStringImagesOfX()
     << "\nexpected:\n"
     << expectedImagesOfX
@@ -313,11 +330,7 @@ bool PolynomialModuloPolynomialModuloInteger::Test::all() {
 
 bool PolynomialModuloPolynomialModuloInteger::Test::product() {
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
-    5,
-    "x^2",
-    "x^3",
-    "x^2+2x+3",
-    "4x +3 (mod 5)"
+    5, "x^2", "x^3", "x^2+2x+3", "4x +3 (mod 5)"
   );
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
     5,
@@ -350,7 +363,9 @@ bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
   Polynomial<ElementZmodP> rightPolynomial =
   PolynomialUnivariateModular::Test::fromStringAndModulus(right, modulus);
   PolynomialUnivariateModular modulusPolynomialInternal =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(modulusPolynomial, &modulusData);
+  PolynomialUnivariateModular::Test::fromStringAndModulus(
+    modulusPolynomial, &modulusData
+  );
   PolynomialUnivariateModularAsModulus modulusInternal;
   modulusInternal = modulusPolynomialInternal;
   PolynomialModuloPolynomialModuloInteger leftElement;
@@ -362,10 +377,15 @@ bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
   format.flagSuppressModP = true;
   format.polynomialAlphabet.addOnTop("x");
   if (leftElement.value.toString(&format) != expected) {
-    global.fatal << "Product of " << leftPolynomial.toString(&format)
-    << " and " << rightPolynomial.toString(&format) << " mod "
+    global.fatal
+    << "Product of "
+    << leftPolynomial.toString(&format)
+    << " and "
+    << rightPolynomial.toString(&format)
+    << " mod "
     << modulusPolynomialInternal.toString(&format)
-    << " computed as:\n" << leftElement.value.toString(&format)
+    << " computed as:\n"
+    << leftElement.value.toString(&format)
     << "\nexpected:\n"
     << expected
     << global.fatal;
@@ -384,36 +404,42 @@ bool PolynomialConversions::Test::univariateModularToDense() {
 }
 
 bool PolynomialConversions::Test::oneUnivariateModularToDense(
-  int modulus,
-  const std::string& input,
-  const std::string& expected
+  int modulus, const std::string& input, const std::string& expected
 ) {
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   PolynomialUnivariateModular inputPolynomial =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(input, &modulusData);
+  PolynomialUnivariateModular::Test::fromStringAndModulus(
+    input, &modulusData
+  );
   Polynomial<ElementZmodP> resultPolynomial;
-  PolynomialConversions::convertToPolynomial(inputPolynomial, resultPolynomial);
-  std::string result = PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(resultPolynomial);
+  PolynomialConversions::convertToPolynomial(
+    inputPolynomial, resultPolynomial
+  );
+  std::string result =
+  PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(
+    resultPolynomial
+  );
   if (result != expected) {
-    global.fatal << "Converted "
-    << inputPolynomial.toString() << " to: "
+    global.fatal
+    << "Converted "
+    << inputPolynomial.toString()
+    << " to: "
     << result
-    << "\nexpected:\n" << expected << global.fatal;
+    << "\nexpected:\n"
+    << expected
+    << global.fatal;
   }
   return true;
 }
 
-template <>
+template < >
 bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialModuloInteger,
   PolynomialUnivariateModular,
   PolynomialUnivariateModularAsModulus
->
-::Test::testOnce(
-  int modulus,
-  const std::string& input,
-  const std::string& expected
+>::Test::testOnce(
+  int modulus, const std::string& input, const std::string& expected
 ) {
   Polynomial<ElementZmodP> polynomial =
   PolynomialUnivariateModular::Test::fromStringAndModulus(input, modulus);
@@ -429,16 +455,23 @@ bool PolynomialFactorizationCantorZassenhaus<
   algorithm.initialize(zero);
   PolynomialFactorizationUnivariate<ElementZmodP> factorization;
   std::stringstream comments;
-  if (!factorization.factor(polynomial, algorithm, &comments, &comments)) {
-    global.fatal << "Unexpected failure to factor: "
-    << PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(polynomial)
+  if (
+    !factorization.factor(polynomial, algorithm, &comments, &comments)
+  ) {
+    global.fatal
+    << "Unexpected failure to factor: "
+    << PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(
+      polynomial
+    )
     << global.fatal;
   }
   std::string resultString = factorization.toStringResult();
   if (resultString != expected) {
     global.fatal
     << "Factorization of "
-    << PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(polynomial)
+    << PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(
+      polynomial
+    )
     << " mod "
     << modulus
     << ":\n"
@@ -450,19 +483,20 @@ bool PolynomialFactorizationCantorZassenhaus<
   return true;
 }
 
-template <>
+template < >
 bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialModuloInteger,
   PolynomialUnivariateModular,
   PolynomialUnivariateModularAsModulus
->
-::Test::testOneStartingPolynomial(
+>::Test::testOneStartingPolynomial(
   int modulus,
   int constant,
   int currentDegree,
   const std::string& expected
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::testOneStartingPolynomial");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::testOneStartingPolynomial"
+  );
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   PolynomialUnivariateModular one;
@@ -481,7 +515,8 @@ bool PolynomialFactorizationCantorZassenhaus<
   algorithm.initializeOneFactorComputation();
   algorithm.computeStartingPolynomial(constant, result);
   if (result.value.toString() != expected) {
-    global.fatal << "Compute starting polynomial, modulus:\n"
+    global.fatal
+    << "Compute starting polynomial, modulus:\n"
     << modulus
     << "\nconstant:\n"
     << constant
@@ -494,87 +529,34 @@ bool PolynomialFactorizationCantorZassenhaus<
   return true;
 }
 
-template <>
+template < >
 bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialModuloInteger,
   PolynomialUnivariateModular,
   PolynomialUnivariateModularAsModulus
->
-::Test::constructStartingPolynomial() {
-  Test::testOneStartingPolynomial(
-    3,
-    0,
-    2,
-    "x  (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    1,
-    2,
-    "x +1 (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    2,
-    2,
-    "x +2 (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    2,
-    3,
-    "x +2 (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    3,
-    3,
-    "x^{2}+1 (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    4,
-    3,
-    "x^{2}+2 (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    5,
-    3,
-    "x +1 (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    3,
-    2,
-    "x +1 (mod 3)"
-  );
-  Test::testOneStartingPolynomial(
-    3,
-    7,
-    2,
-    "x +1 (mod 3)"
-  );
+>::Test::constructStartingPolynomial() {
+  Test::testOneStartingPolynomial(3, 0, 2, "x  (mod 3)");
+  Test::testOneStartingPolynomial(3, 1, 2, "x +1 (mod 3)");
+  Test::testOneStartingPolynomial(3, 2, 2, "x +2 (mod 3)");
+  Test::testOneStartingPolynomial(3, 2, 3, "x +2 (mod 3)");
+  Test::testOneStartingPolynomial(3, 3, 3, "x^{2}+1 (mod 3)");
+  Test::testOneStartingPolynomial(3, 4, 3, "x^{2}+2 (mod 3)");
+  Test::testOneStartingPolynomial(3, 5, 3, "x +1 (mod 3)");
+  Test::testOneStartingPolynomial(3, 3, 2, "x +1 (mod 3)");
+  Test::testOneStartingPolynomial(3, 7, 2, "x +1 (mod 3)");
   return true;
 }
 
-template <>
+template < >
 bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialModuloInteger,
   PolynomialUnivariateModular,
   PolynomialUnivariateModularAsModulus
->
-::Test::all() {
+>::Test::all() {
   Test::constructStartingPolynomial();
+  Test::testOnce(11, "x^3+3x+7", "(x +10)(x^{2}+x +4)");
   Test::testOnce(
-    11,
-    "x^3+3x+7",
-    "(x +10)(x^{2}+x +4)"
-  );
-  Test::testOnce(
-    5,
-    "x^{6}+3 x^{4}+2 x^{3}+2 x^{2}+3 x+1",
-    "(x^{3}+x +1)(x^{3}+2x +1)"
+    5, "x^{6}+3 x^{4}+2 x^{3}+2 x^{2}+3 x+1", "(x^{3}+x +1)(x^{3}+2x +1)"
   );
   Test::testOnce(
     17,
@@ -583,12 +565,13 @@ bool PolynomialFactorizationCantorZassenhaus<
   );
   Test::testOnce(
     11,
-    "10x^{14}+3x^{13}+10x^{12}+2x^{11}+4x^{10}"
-    "+2x^{9}+2x^{8}+5x^{6}+10x^{5}+5x^{4}+8x^{3}+10x^{2}+2",
-    "10(x +4)(x^{2}+5x +2)"
-    "(x^{2}+6x +2)"
-    "(x^{4}+7x^{3}+3x^{2}+4x +1)"
-    "(x^{5}+8x^{4}+2x^{3}+x^{2}+5x +4)"
+"10x^{14}+3x^{13}+10x^{12}+2x^{11}+4x^{10}"
+"+2x^{9}+2x^{8}+5x^{6}+10x^{5}+5x^{4}+8x^{3}+10x^{2}+2",
+"10(x +4)(x^{2}+5x +2)"
+"(x^{2}+6x +2)"
+"(x^{4}+7x^{3}+3x^{2}+4x +1)"
+"(x^{5}+8x^{4}+2x^{3}+x^{2}+5x +4)"
   );
   return true;
 }
+

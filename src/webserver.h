@@ -1,5 +1,7 @@
+
 #ifndef header_webserver_ALREADY_INCLUDED
 #define header_webserver_ALREADY_INCLUDED
+
 #include "multiprocessing.h"
 #include "system_functions_global_objects.h"
 #include "transport_layer_security.h"
@@ -17,19 +19,16 @@ public:
     int allReceives;
     int pingReceives;
   };
+
   Statistics statistics;
   int lastResult;
   int64_t millisecondsServerAtWorkerStart;
   int64_t millisecondsLastPingServerSideOnly;
   int64_t millisecondsAfterSelect;
-
   std::string displayUserInput;
-
   std::string messageHead;
   std::string messageBody;
-
   JSData resultWork;
-
   MonomialWrapper<std::string, MathRoutines::hashString> userAddress;
   std::string hostWithPort;
   std::string hostNoPort;
@@ -73,7 +72,6 @@ public:
   PipePrimitive pipeWorkerToWorkerStatus;
   PipePrimitive pipeWorkerToServerControls;
   PipePrimitive pipeWorkerToServerTimerPing;
-
   WebAPIResponse response;
   std::string error;
   void prepareFullMessageHeaderAndFooter();
@@ -87,7 +85,6 @@ public:
   int processFileDoesntExist();
   int processFileCantOpen();
   int processFileTooLarge(long fileSize);
-
   JSData setEmail(const std::string& input);
   bool doSetEmail(
     UserCalculatorData& inputOutputUser,
@@ -95,7 +92,9 @@ public:
     std::stringstream* commentsGeneralNonSensitive,
     std::stringstream* commentsGeneralSensitive
   );
-  int processgetAuthenticationToken(const std::string& reasonForNoAuthentication);
+  int processgetAuthenticationToken(
+    const std::string& reasonForNoAuthentication
+  );
   int processLoginNeededOverUnsecureConnection();
   bool processRedirectAwayFromWWW();
   int processUnknown();
@@ -104,24 +103,28 @@ public:
   bool runOnce();
   bool failReceiveReturnFalse();
   bool checkConsistency();
-
   bool loginProcedure(
     std::stringstream& argumentProcessingFailureComments,
     std::stringstream* comments
   );
   bool correctRequestsBEFORELoginReturnFalseIfModified();
   bool correctRequestsAFTERLoginReturnFalseIfModified();
-  bool redirectIfNeeded(std::stringstream& argumentProcessingFailureComments);
-
+  bool redirectIfNeeded(
+    std::stringstream& argumentProcessingFailureComments
+  );
   bool extractArgumentsFromMessage(
     const std::string& input,
     std::stringstream& argumentProcessingFailureComments,
     int recursionDepth = 0
   );
-  bool extractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
+  bool extractArgumentsFromCookies(
+    std::stringstream& argumentProcessingFailureComments
+  );
   void writeAfterTimeoutShowIndicator(const std::string& message);
-  void writeAfterTimeoutProgress(const std::string& input, bool forceFileWrite);
-  ///////
+  void writeAfterTimeoutProgress(
+    const std::string& input, bool forceFileWrite
+  );
+  // /////
   void pauseIfRequested();
   // writes json to body, sanitizes.
   bool writeToBodyJSON(const JSData& result);
@@ -142,12 +145,15 @@ public:
     const std::string& fileNameCarbonCopy
   );
   void writeAfterTimeoutCarbonCopy(
-    const JSData& input,
-    const std::string& fileNameCarbonCopy
+    const JSData& input, const std::string& fileNameCarbonCopy
   );
-  void getIndicatorOnTimeout(JSData &output, const std::string& message);
-  void queueStringForSendingNoHeader(const std::string& stringToSend, bool mustSendAll = false);
-  void queueBytesForSendingNoHeader(const List<char>& bytesToSend, bool mustSendAll = false);
+  void getIndicatorOnTimeout(JSData& output, const std::string& message);
+  void queueStringForSendingNoHeader(
+    const std::string& stringToSend, bool mustSendAll = false
+  );
+  void queueBytesForSendingNoHeader(
+    const List<char>& bytesToSend, bool mustSendAll = false
+  );
   bool shouldDisplayLoginPage();
   void wrapUpConnection();
   void resetMutexProcesses();
@@ -161,11 +167,14 @@ public:
   void sendAllBytesNoHeaders();
   std::string mimeTypeFromFileExtension(const std::string& fileExtension);
   std::string headerFromFileExtension(const std::string& fileExtension);
-
-  std::string getChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
+  std::string getChangePasswordPagePartOne(
+    bool& outputDoShowPasswordChangeField
+  );
   JSData getClonePageResult();
   JSData getSignUpRequestResult();
-  std::string getAuthenticationToken(const std::string& reasonForNoAuthentication = "");
+  std::string getAuthenticationToken(
+    const std::string& reasonForNoAuthentication = ""
+  );
   JSData getDatabaseJSON();
   std::string getDatabaseDeleteOneItem();
   std::string getAddUserEmails();
@@ -177,7 +186,6 @@ public:
     const std::string& httpResponseNoTermination,
     const std::string& remainingHeaderNoTermination
   );
-
   std::string getHeaderConnectionClose();
   std::string getHeaderConnectionKeepAlive();
   std::string getHeaderSetCookie();
@@ -188,7 +196,8 @@ public:
   bool receiveAll();
   void attemptUnknownRequestErrorCorrection();
   bool requireSSL();
-  enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
+  enum requestTypes {
+    requestUnknown, requestGet, requestPost, requestHead, requestChunked  };
   std::string toStringAddressRequest() const;
   std::string toStringStatus() const;
   std::string toStringMessageShort() const;
@@ -202,7 +211,8 @@ public:
 
 class WebServer {
 public:
-  static const int maxNumPendingConnections;     // how many pending connections queue will hold
+  static const int maxNumPendingConnections;
+  // how many pending connections queue will hold
   int listeningSocketHTTP;
   int listeningSocketHTTPSOpenSSL;
   int listeningSocketHTTPSBuiltIn;
@@ -230,6 +240,7 @@ public:
     long long failedSelectsSoFar;
     long long successfulSelectsSoFar;
   };
+
   Statististics statistics;
   int webServerPingIntervalInSeconds;
   int previousServerStatReport;
@@ -239,7 +250,10 @@ public:
   bool flagDeallocated;
   std::string pingAuthentication;
   TransportLayerSecurity transportLayerSecurity;
-  LinearCombination<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInteger> currentlyConnectedAddresses;
+  LinearCombination<
+    MonomialWrapper<std::string, MathRoutines::hashString>,
+    LargeInteger
+  > currentlyConnectedAddresses;
   std::string portHTTP;
   std::string portHTTPSOpenSSL;
   std::string portHTTPSBuiltIn;
@@ -247,12 +261,11 @@ public:
   List<int> listeningSockets;
   ListReferences<WebWorker> allWorkers;
   MapList<std::string, int, MathRoutines::hashString> workerIds;
-
   HashedList<std::string, MathRoutines::hashString> requestsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
   List<std::string> addressStartsSentWithCacheMaxAge;
-  HashedList<std::string, MathRoutines::hashString> addressStartsInterpretedAsCalculatorRequest;
-
+  HashedList<std::string, MathRoutines::hashString>
+  addressStartsInterpretedAsCalculatorRequest;
   MapList<std::string, std::string, MathRoutines::hashString> MIMETypes;
   int activeWorker;
   int64_t timeLastExecutableModification;
@@ -267,7 +280,9 @@ public:
   static void checkMongoDatabaseSetup();
   static void checkFreecalcSetup();
   static void analyzeMainArguments(int argC, char** argv);
-  static bool analyzeMainArgumentsTimeString(const std::string& timeLimitString);
+  static bool analyzeMainArgumentsTimeString(
+    const std::string& timeLimitString
+  );
   void initializeBuildFlags();
   void initializeMainAll();
   void initializeMainHashes();
@@ -275,9 +290,10 @@ public:
   void initializeMainAddresses();
   void initializeMainFoldersInstructorSpecific();
   void initializeMainMIMETypes();
-
   void markChildNotInUse(int childIndex);
-  bool requiresLogin(const std::string& inputRequest, const std::string& inputAddress);
+  bool requiresLogin(
+    const std::string& inputRequest, const std::string& inputAddress
+  );
   void releaseWorkerSideResources();
   void releaseActiveWorker();
   void releaseSocketsNonActiveWorkers();
@@ -309,7 +325,9 @@ public:
   bool initPrepareWebServerALL();
   void initializeSignals();
   bool initBindToPorts();
-  bool initBindToOnePort(const std::string& port, int& outputListeningSocket);
+  bool initBindToOnePort(
+    const std::string& port, int& outputListeningSocket
+  );
   void initPortsITry();
   void initListeningSockets();
   void initSSL();

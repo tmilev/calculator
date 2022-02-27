@@ -1,10 +1,13 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
 #include "string_constants.h"
 
 void Calculator::ExpressionHistoryEnumerator::initializeComputation() {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::initializeComputation");
+  MacroRegisterFunctionWithName(
+    "ExpressionHistoryEnumerator::initializeComputation"
+  );
   this->output.setSize(0);
   this->rulesNames.setSize(0);
 }
@@ -18,17 +21,23 @@ Calculator::ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {
 bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
   int incomingRecursionDepth, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::computeRecursively");
+  MacroRegisterFunctionWithName(
+    "ExpressionHistoryEnumerator::computeRecursively"
+  );
   this->recursionDepth = incomingRecursionDepth;
   if (recursionDepth > this->maximumRecursionDepth) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "While computing expression history, "
+      *commentsOnFailure
+      << "While computing expression history, "
       << "exceeded maximum recursion depth of "
-      << this->maximumRecursionDepth << ". ";
+      << this->maximumRecursionDepth
+      << ". ";
     }
     return false;
   }
-  if (!this->history.startsWith(this->owner->opExpressionHistory())) {
+  if (
+    !this->history.startsWith(this->owner->opExpressionHistory())
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Corrupt expression history does not start with the expected atom: "
@@ -40,18 +49,20 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
   int firstNonAccountedChildIndex = - 1;
   for (int i = 1; i < this->history.size(); i ++) {
     const Expression& current = this->history[i];
-    if (current.startsWith(this->owner->opExpressionHistorySetChild())) {
+    if (
+      current.startsWith(this->owner->opExpressionHistorySetChild())
+    ) {
       if (childrenToAccount == 0) {
         firstNonAccountedChildIndex = i;
       }
       childrenToAccount ++;
       continue;
     }
-    if (!this->processChildrenTransformations(
-      firstNonAccountedChildIndex,
-      childrenToAccount,
-      commentsOnFailure
-    )) {
+    if (
+      !this->processChildrenTransformations(
+        firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure
+      )
+    ) {
       return false;
     }
     childrenToAccount = 0;
@@ -59,18 +70,24 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
       return false;
     }
   }
-  if (!this->processChildrenTransformations(
-    firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure
-  )) {
+  if (
+    !this->processChildrenTransformations(
+      firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure
+    )
+  ) {
     return false;
   }
   return true;
 }
 
 bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
-  int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure
+  int startIndex,
+  int numberOfChildren,
+  std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::processChildrenTransformations");
+  MacroRegisterFunctionWithName(
+    "ExpressionHistoryEnumerator::processChildrenTransformations"
+  );
   if (numberOfChildren <= 0) {
     return true;
   }
@@ -82,30 +99,36 @@ bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
     const Expression& current = this->history[startIndex + i];
     if (current.size() < 3) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "ExpressionHistorySetChild "
+        *commentsOnFailure
+        << "ExpressionHistorySetChild "
         << "expression does not have enough children. "
-        << current.toString() ;
+        << current.toString();
       }
       return false;
     }
     if (!current[1].isSmallInteger(&indicesInParent[i])) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "ExpressionHistorySetChild: bad child index. "
-        << current.toString() ;
+        *commentsOnFailure
+        << "ExpressionHistorySetChild: bad child index. "
+        << current.toString();
       }
       return false;
     }
     childrenEnumerators[i].owner = this->owner;
     childrenEnumerators[i].history = current[2];
-    if (!childrenEnumerators[i].computeRecursively(
-      this->recursionDepth + 1, commentsOnFailure
-    )) {
+    if (
+      !childrenEnumerators[i].computeRecursively(
+        this->recursionDepth + 1, commentsOnFailure
+      )
+    ) {
       return false;
     }
   }
   if (this->output.size == 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Missing starting expression. History: " << this->history.toString();
+      *commentsOnFailure
+      << "Missing starting expression. History: "
+      << this->history.toString();
     }
     return false;
   }
@@ -124,7 +147,9 @@ bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
         found = true;
         int indexInParent = indicesInParent[i];
         next.setChild(indexInParent, expressionSequence[currentIndex]);
-        nextRules.addListOnTop(childrenEnumerators[i].rulesNames[currentIndex]);
+        nextRules.addListOnTop(
+          childrenEnumerators[i].rulesNames[currentIndex]
+        );
       }
     }
     if (!found) {
@@ -141,13 +166,17 @@ bool Calculator::ExpressionHistoryEnumerator::processTransformation(
 ) {
   if (!current.startsWith(this->owner->opExpressionHistorySet())) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Bad first atom in history child: " << current.toString();
+      *commentsOnFailure
+      << "Bad first atom in history child: "
+      << current.toString();
     }
     return false;
   }
   if (current.size() < 2) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Not enough elements in history child: " << current.toString();
+      *commentsOnFailure
+      << "Not enough elements in history child: "
+      << current.toString();
     }
     return false;
   }
@@ -216,13 +245,14 @@ void Calculator::ExpressionHistoryEnumerator::toStepsWithMerge(
 }
 
 List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
-  "IntegralOperatorFromProduct",
-  "InterpretAsDifferential",
-  "CommuteConstants",
-  "MultiplyByOne"
-});
-HashedList<std::string, MathRoutines::hashString> Calculator::ExpressionHistoryEnumerator::ruleIgnoreListHashList;
-
+    "IntegralOperatorFromProduct",
+    "InterpretAsDifferential",
+    "CommuteConstants",
+    "MultiplyByOne"
+  }
+);
+HashedList<std::string, MathRoutines::hashString> Calculator::
+ExpressionHistoryEnumerator::ruleIgnoreListHashList;
 void Calculator::ExpressionHistoryEnumerator::toStepsCleanUp(
   List<Calculator::ExpressionHistoryEnumerator::Step>& raw,
   List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps
@@ -239,7 +269,8 @@ void Calculator::ExpressionHistoryEnumerator::toStepsCleanUp(
 bool Calculator::ExpressionHistoryEnumerator::isIgnorable(
   const Calculator::ExpressionHistoryEnumerator::Step& step
 ) {
-  List<std::string>& ignoreList = Calculator::ExpressionHistoryEnumerator::ruleIgnoreList;
+  List<std::string>& ignoreList =
+  Calculator::ExpressionHistoryEnumerator::ruleIgnoreList;
   HashedList<std::string, MathRoutines::hashString>& ignoreSet =
   Calculator::ExpressionHistoryEnumerator::ruleIgnoreListHashList;
   if (ignoreList.size > 0 && ignoreSet.size == 0) {
@@ -261,7 +292,8 @@ void Calculator::ExpressionHistoryEnumerator::Step::mergeAnnotations(
 
 JSData Calculator::ExpressionHistoryEnumerator::Step::toJSON() {
   JSData result;
-  result[WebAPI::result::SolutionData::transformation] = this->content.toString();
+  result[WebAPI::result::SolutionData::transformation] =
+  this->content.toString();
   JSData annotationJSON = JSData::makeEmptyArray();
   for (int i = 0; i < this->annotations.size; i ++) {
     annotationJSON[i] = this->annotations[i];
@@ -287,7 +319,8 @@ void Calculator::ExpressionHistoryEnumerator::toOneStep(
   outputStep.content = this->output[stepIndex];
 }
 
-std::string Calculator::ExpressionHistoryEnumerator::toStringExpressionHistoryMerged() {
+std::string Calculator::ExpressionHistoryEnumerator::
+toStringExpressionHistoryMerged() {
   std::stringstream out;
   out << "\\(\\begin{array}{ll|l}";
   std::string prevEstring = "";
@@ -302,7 +335,7 @@ std::string Calculator::ExpressionHistoryEnumerator::toStringExpressionHistoryMe
     currentRules.addListOnTop(this->rulesNames[j]);
     if (j > 0) {
       if (currentRules.size > 0) {
-        out << "&" ;
+        out << "&";
         for (int i = 0; i < currentRules.size; i ++) {
           out << currentRules[i];
           if (i != currentRules.size - 1) {
@@ -326,13 +359,19 @@ std::string Calculator::ExpressionHistoryEnumerator::toStringExpressionHistoryMe
 bool CalculatorSteps::logEvaluationStepsDebug(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorSteps::logEvaluationStepsHumanReadableMerged(calculator, input, output, true);
+  return
+  CalculatorSteps::logEvaluationStepsHumanReadableMerged(
+    calculator, input, output, true
+  );
 }
 
 bool CalculatorSteps::logEvaluationSteps(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorSteps::logEvaluationStepsHumanReadableMerged(calculator, input, output, false);
+  return
+  CalculatorSteps::logEvaluationStepsHumanReadableMerged(
+    calculator, input, output, false
+  );
 }
 
 bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
@@ -341,7 +380,9 @@ bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
   Expression& output,
   bool doDebug
 ) {
-  MacroRegisterFunctionWithName("CalculatorSteps::logEvaluationStepsHumanReadableMerged");
+  MacroRegisterFunctionWithName(
+    "CalculatorSteps::logEvaluationStepsHumanReadableMerged"
+  );
   Expression argument;
   if (input.size() == 2) {
     argument = input[1];
@@ -369,3 +410,4 @@ bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
   }
   return output.assignValue(calculator, out.str());
 }
+

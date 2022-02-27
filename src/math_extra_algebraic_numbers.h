@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_algebraic_numbers_ALREADY_INCLUDED
 #define header_math_extra_algebraic_numbers_ALREADY_INCLUDED
@@ -8,8 +9,11 @@
 #include "math_extra_polynomial_factorization.h"
 
 class AlgebraicClosureRationals;
+
 class AlgebraicNumber {
-  friend std::ostream& operator<<(std::ostream& output, const AlgebraicNumber& number) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const AlgebraicNumber& number
+  ) {
     output << number.toString();
     return output;
   }
@@ -21,19 +25,28 @@ class AlgebraicNumber {
     result.checkConsistency();
     return result;
   }
-  public:
+public:
   AlgebraicClosureRationals* owner;
   int basisIndex;
   VectorSparse<Rational> element;
   bool flagDeallocated;
   AlgebraicNumber(): owner(nullptr), basisIndex(0), flagDeallocated(false) {}
-  AlgebraicNumber(const Rational& other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
+  AlgebraicNumber(const Rational& other):
+  owner(nullptr),
+  basisIndex(0),
+  flagDeallocated(false) {
     this->operator=(other);
   }
-  AlgebraicNumber(int other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
+  AlgebraicNumber(int other):
+  owner(nullptr),
+  basisIndex(0),
+  flagDeallocated(false) {
     this->operator=(Rational(other));
   }
-  AlgebraicNumber(const AlgebraicNumber& other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
+  AlgebraicNumber(const AlgebraicNumber& other):
+  owner(nullptr),
+  basisIndex(0),
+  flagDeallocated(false) {
     this->operator=(other);
   }
   AlgebraicNumber(AlgebraicClosureRationals* inputOwner) {
@@ -46,17 +59,22 @@ class AlgebraicNumber {
   static AlgebraicNumber oneStatic();
   AlgebraicNumber zero() const;
   AlgebraicNumber one() const;
-
   bool isExpressedViaLatestBasis() const;
   void expressViaLatestBasis();
-  bool assignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
-  bool assignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
+  bool assignCosRationalTimesPi(
+    const Rational& input, AlgebraicClosureRationals& inputOwner
+  );
+  bool assignSinRationalTimesPi(
+    const Rational& input, AlgebraicClosureRationals& inputOwner
+  ) {
     Rational half(1, 2);
     return this->assignCosRationalTimesPi(half - input, inputOwner);
   }
-  // For the purposes fo rescaling rational functions with algebraic number coefficients.
+  // For the purposes fo rescaling rational functions with algebraic number
+  // coefficients.
   AlgebraicNumber getNumerator() const;
-  // For the purposes fo rescaling rational functions with algebraic number coefficients.
+  // For the purposes fo rescaling rational functions with algebraic number
+  // coefficients.
   AlgebraicNumber getDenominator() const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
@@ -108,7 +126,9 @@ class AlgebraicNumber {
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  void assignRational(const Rational& input, AlgebraicClosureRationals* inputOwner);
+  void assignRational(
+    const Rational& input, AlgebraicClosureRationals* inputOwner
+  );
   void squareRootDefault(std::stringstream* commentsOnError);
   bool isSmallInteger(int* whichInteger) const {
     Rational rational;
@@ -131,8 +151,8 @@ class AlgebraicNumber {
   bool operator==(const AlgebraicNumber& other) const;
   bool operator==(const Rational& other) const;
   bool operator==(int other) const;
-  bool operator!= (const AlgebraicNumber& other) const;
-  bool operator!= (int other) const;
+  bool operator!=(const AlgebraicNumber& other) const;
+  bool operator!=(int other) const;
   void negate();
   void operator=(const Polynomial<AlgebraicNumber>& other);
   AlgebraicNumber operator+(const AlgebraicNumber& other) const {
@@ -158,7 +178,6 @@ class AlgebraicNumber {
     this->checkConsistency();
     other.checkConsistency();
     AlgebraicNumber result = *this;
-
     result /= other;
     return result;
   }
@@ -169,13 +188,13 @@ class AlgebraicNumber {
   void operator*=(LargeInteger other) {
     this->operator*=(Rational(other));
   }
-  void operator*= (int other) {
+  void operator*=(int other) {
     this->operator*=(Rational(other));
   }
   bool operator>(const AlgebraicNumber& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
-  class Test{
+  class Test {
   public:
     static bool all();
     static bool constantValues();
@@ -191,25 +210,25 @@ class AlgebraicClosureRationals {
 public:
   // Basis over the rationals of the latest algebraic extension.
   List<MatrixTensor<Rational> > latestBasis;
-
   // Injections of earlier rational number bases
   // into the latest basis.
   // The [i][j]-th element refers to the image basis element e_{i, j},
   // i.e., the j^th basis element of the i^th [extension A_i].
-  // More precisely, the [i][j]-th element of the map below describes the image of
+  // More precisely, the [i][j]-th element of the map below describes the image
+  // of
   // e_{i, j} when injected down to the latest extension A_n, with
   // coordinates relative to the latest basis e_{n, 1}, ..., e_{n, n}.
   List<List<VectorSparse<Rational> > > basisInjections;
-
   MatrixTensor<Rational> generatingElementTensorForm;
   Matrix<Rational> generatingElementMatrixForm;
   AlgebraicNumber generatingElement;
   Vectors<Rational> generatingElementPowersBasis;
-
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInteger> quadraticRadicals;
   List<std::string> displayNamesBasisElements;
-  void injectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
+  void injectOldBases(
+    const MatrixTensor<Rational>* injectionNullForIdentity
+  );
   void appendAdditiveEiBasis();
   void assignDefaultBasisDisplayNames();
   void reset();
@@ -219,7 +238,9 @@ public:
     this->reset();
   }
   bool mergeRadicals(const List<LargeInteger>& radicals);
-  bool chooseGeneratingElement(int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure);
+  bool chooseGeneratingElement(
+    int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure
+  );
   bool reduceMe(std::stringstream* commentsOnFailure);
   void contractBasesIfRedundant(
     AlgebraicClosureRationals& previousCopy,
@@ -232,10 +253,17 @@ public:
   void getMultiplicativeOperatorFromRadicalSelection(
     const Selection& selection, MatrixTensor<Rational>& output
   );
-  void getMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
-  void getAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
-  void convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(
-    const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
+  void getMultiplicationBy(
+    const AlgebraicNumber& input, MatrixTensor<Rational>& output
+  );
+  void getAdditionTo(
+    const AlgebraicNumber& input, VectorSparse<Rational>& output
+  );
+  void
+  convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
+  (
+    const Polynomial<AlgebraicNumber>& input,
+    Polynomial<AlgebraicNumber>& output
   );
   bool adjoinRootMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& polynomial,
@@ -247,7 +275,8 @@ public:
     AlgebraicNumber& outputRoot,
     std::stringstream* commentsOnFailure
   );
-  std::string toStringQuadraticRadical(FormatExpressions* format = nullptr) const;
+  std::string toStringQuadraticRadical(FormatExpressions* format = nullptr)
+  const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFull(FormatExpressions* format = nullptr) const;
   AlgebraicNumber one();
@@ -257,7 +286,9 @@ public:
 
 class ElementZmodP {
 public:
-  friend std::ostream& operator<<(std::ostream& output, const ElementZmodP& input) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const ElementZmodP& input
+  ) {
     output << input.toString();
     return output;
   }
@@ -333,7 +364,8 @@ public:
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
-  bool needsParenthesisForMultiplication(FormatExpressions* format = nullptr) const;
+  bool needsParenthesisForMultiplication(FormatExpressions* format = nullptr)
+  const;
   static void convertModuloIntegerAfterScalingToIntegral(
     const Polynomial<Rational>& input,
     Polynomial<ElementZmodP>& output,
@@ -344,7 +376,8 @@ public:
     Polynomial<Rational>& output,
     bool useNegatives
   );
-  // Convert modular polynomial to another modular polynomial by copying all values
+  // Convert modular polynomial to another modular polynomial by copying all
+  // values
   // using the new modulus.
   static void convertLiftPolynomialModular(
     const Polynomial<ElementZmodP>& input,
@@ -352,11 +385,11 @@ public:
     const LargeIntegerUnsigned& newModulus
   );
   // Format a polynomial with modular coefficients.
-  // The modulo information will not be repeated for all coefficients, but will be put
+  // The modulo information will not be repeated for all coefficients, but will
+  // be put
   // at the end of the expression.
   std::string toStringPolynomial(
-    const Polynomial<ElementZmodP>& input,
-    FormatExpressions* format
+    const Polynomial<ElementZmodP>& input, FormatExpressions* format
   ) const;
   ElementZmodP zero() const;
   ElementZmodP one() const;
@@ -385,7 +418,6 @@ public:
   PolynomialFactorizationUnivariate<ElementZmodP>* output;
   PolynomialModuloPolynomialImplementation baseLetter;
   PolynomialModuloPolynomialImplementation oneQuotientRing;
-
   // The modular polynomial currently factored.
   PolynomialImplementation current;
   // A conversion of the current polynomial to a
@@ -401,20 +433,17 @@ public:
   void initialize(const PolynomialImplementation& modulusInitializer);
   void initializeOneFactorComputation();
   bool oneFactor(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   // Input is either irreuducible polynomial of prime degree, or a product
   // of linear polynomials.
   bool handlePrimeDegreeSeparatedFactor(PolynomialImplementation& input);
   bool oneFactorGo(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   bool hasFactorsOfDifferentDegree(std::stringstream* comments);
   bool handleFactorsOfSameDegree(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   bool oneFactorProbabilityHalf(
     unsigned int constant,
@@ -422,10 +451,8 @@ public:
     std::stringstream* commentsOnFailure
   );
   void computeStartingPolynomial(
-    unsigned int constant,
-    PolynomialModuloPolynomialImplementation& output
+    unsigned int constant, PolynomialModuloPolynomialImplementation& output
   );
-
   bool divisorFromCandidate(
     const PolynomialImplementation& candidate,
     const std::string& candidateDisplayName,
@@ -447,7 +474,9 @@ public:
       const std::string& expected
     );
     static bool testOnce(
-      int modulus, const std::string& input, const std::string& expected
+      int modulus,
+      const std::string& input,
+      const std::string& expected
     );
   };
 };
@@ -490,8 +519,7 @@ public:
   bool tryFactor(SelectionFixedRank& selection);
   void henselLift(std::stringstream* comments);
   void henselLiftOnce(
-    const LargeIntegerUnsigned& oldModulus,
-    std::stringstream* comments
+    const LargeIntegerUnsigned& oldModulus, std::stringstream* comments
   );
   // Same as factor.
   // The name oneFactor is
@@ -516,24 +544,20 @@ public:
   // as finding all factors, which is not assumed to
   // be the case for all methods for factorization.
   bool oneFactor(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   ) {
     return this->factorWithTiming(comments, commentsOnFailure);
   }
   // Factors the polynomial fully.
   bool factorWithTiming(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   // Factors the polynomial fully.
   bool factor(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   bool hasSquareFactor(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   // An elementary method for computing coefficient
   // bounds of the individual factors.
@@ -543,8 +567,7 @@ public:
   // am having difficulty establishing at 100% its correctness.
   void computeCoefficientBoundsGelfond();
   bool oneFactorFromModularization(
-    std::stringstream* comments,
-    std::stringstream* commentsOnFailure
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   static std::string name() {
     return "finite field factorization";
@@ -559,12 +582,13 @@ public:
       Polynomial<Rational>::Test parser;
       bool run();
     };
+
     static bool all();
     static bool test(
-      const std::string& toFactor,
-      const std::string& desiredResult
+      const std::string& toFactor, const std::string& desiredResult
     );
   };
 };
 
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED
+

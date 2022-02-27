@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "webserver.h"
 #include <unistd.h>
@@ -6,6 +7,7 @@
 #include <signal.h> // <-signals here
 
 #ifndef MACRO_use_wasm
+
 int WebServer::forkRaw() {
   return fork();
 }
@@ -42,37 +44,52 @@ int WebServer::forkProcess() {
     Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
   } else if (result == 0) {
     global.logs.logType = GlobalVariables::LogData::type::worker;
-
     // Child process.
     // Lose 256 bits of entropy from the server.
-    global.randomBytesCurrent.setSize(static_cast<signed>(global.maximumExtractedRandomBytes));
+    global.randomBytesCurrent.setSize(
+      static_cast<signed>(global.maximumExtractedRandomBytes)
+    );
     // Forget previous random bytes, and gain a little extra entropy.
     Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
-
     // Set death signal of the parent trigger death signal of the child.
     // If the parent process was killed before the prctl executed,
     // this will not work.
     int success = prctl(PR_SET_PDEATHSIG, SIGKILL);
-    if (success == -1) {
-      global << Logger::red << "Failed to set parent death signal. " << Logger::endL;
+    if (success == - 1) {
+      global
+      << Logger::red
+      << "Failed to set parent death signal. "
+      << Logger::endL;
       exit(1);
     }
   }
   if (result < 0) {
-    global << Logger::red
-    << "Negative result while forking: " << result << "." << Logger::endL;
+    global
+    << Logger::red
+    << "Negative result while forking: "
+    << result
+    << "."
+    << Logger::endL;
   }
   // if the result is negative, this is an error.
   return result;
 }
+
 #else
+
 int WebServer::forkProcess() {
-  global.fatal << "In forkProcess(): Process forks are not allowed when running under wasm." << global.fatal;
+  global.fatal
+  << "In forkProcess(): Process forks are not allowed when running under wasm."
+  << global.fatal;
   return - 1;
 }
 
 int WebServer::forkRaw() {
-  global.fatal << "In forkRaw(): process forks are not allowed when running under wasm." << global.fatal;
+  global.fatal
+  << "In forkRaw(): process forks are not allowed when running under wasm."
+  << global.fatal;
   return - 1;
 }
+
 #endif
+

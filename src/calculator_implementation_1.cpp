@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
 #include "calculator_weyl_group_characters.h"
@@ -12,65 +13,65 @@
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
 #include "math_rational_function_implementation.h"
 #include "string_constants.h"
-
 #include <cmath>
 #include <cfloat>
 
-std::string PlotObject::Labels::point               = "point";
-std::string PlotObject::Labels::path                = "path";
-std::string PlotObject::Labels::functionLabel       = "function";
+std::string PlotObject::Labels::point = "point";
+std::string PlotObject::Labels::path = "path";
+std::string PlotObject::Labels::functionLabel = "function";
 std::string PlotObject::Labels::coordinateFunctions = "coordinateFunctions";
-std::string PlotObject::Labels::left                = "left";
-std::string PlotObject::Labels::right               = "right";
-std::string PlotObject::Labels::numberOfSegments    = "numberOfSegments";
-std::string PlotObject::Labels::color               = "color";
-std::string PlotObject::Labels::colorFront          = "colorFront";
-std::string PlotObject::Labels::colorBack           = "colorBack";
-std::string PlotObject::Labels::colorContour        = "colorContour";
-std::string PlotObject::Labels::colorFill           = "colorFill";
-std::string PlotObject::Labels::lineWidth           = "lineWidth";
-std::string PlotObject::Labels::manifoldImmersion   = "manifoldImmersion";
-std::string PlotObject::Labels::variableRange       = "variableRange";
-std::string PlotObject::Labels::defaultLength       = "defaultLength";
-std::string PlotObject::Labels::plotType            = "plotType";
-std::string PlotObject::Labels::body                = "body";
-std::string PlotObject::Labels::text                = "text";
-std::string PlotObject::Labels::arguments           = "arguments";
-std::string PlotObject::Labels::parameters          = "parameters";
-std::string PlotObject::Labels::viewWindow          = "viewWindow";
-
-std::string PlotObject::PlotTypes::parametricCurve  = "parametricCurve";
-std::string PlotObject::PlotTypes::plotFunction     = "plotFunction";
-std::string PlotObject::PlotTypes::points           = "points";
-std::string PlotObject::PlotTypes::segment          = "segment";
-std::string PlotObject::PlotTypes::plotFillStart    = "plotFillStart";
-std::string PlotObject::PlotTypes::plotFillFinish   = "plotFillFinish";
-std::string PlotObject::PlotTypes::pathFilled       = "pathFilled";
-std::string PlotObject::PlotTypes::label            = "label";
-
-std::string Plot::Labels::canvasName                = "canvasName";
-std::string Plot::Labels::controlsName              = "controlsName";
-std::string Plot::Labels::messagesName              = "messagesName";
-std::string Plot::Labels::graphicsType              = "graphicsType";
-std::string Plot::Labels::graphicsThreeDimensional  = "graphicsThreeDimensional";
-std::string Plot::Labels::graphicsTwoDimensional    = "graphicsTwoDimensional";
-std::string Plot::Labels::plotObjects               = "plotObjects";
-
-
+std::string PlotObject::Labels::left = "left";
+std::string PlotObject::Labels::right = "right";
+std::string PlotObject::Labels::numberOfSegments = "numberOfSegments";
+std::string PlotObject::Labels::color = "color";
+std::string PlotObject::Labels::colorFront = "colorFront";
+std::string PlotObject::Labels::colorBack = "colorBack";
+std::string PlotObject::Labels::colorContour = "colorContour";
+std::string PlotObject::Labels::colorFill = "colorFill";
+std::string PlotObject::Labels::lineWidth = "lineWidth";
+std::string PlotObject::Labels::manifoldImmersion = "manifoldImmersion";
+std::string PlotObject::Labels::variableRange = "variableRange";
+std::string PlotObject::Labels::defaultLength = "defaultLength";
+std::string PlotObject::Labels::plotType = "plotType";
+std::string PlotObject::Labels::body = "body";
+std::string PlotObject::Labels::text = "text";
+std::string PlotObject::Labels::arguments = "arguments";
+std::string PlotObject::Labels::parameters = "parameters";
+std::string PlotObject::Labels::viewWindow = "viewWindow";
+std::string PlotObject::PlotTypes::parametricCurve = "parametricCurve";
+std::string PlotObject::PlotTypes::plotFunction = "plotFunction";
+std::string PlotObject::PlotTypes::points = "points";
+std::string PlotObject::PlotTypes::segment = "segment";
+std::string PlotObject::PlotTypes::plotFillStart = "plotFillStart";
+std::string PlotObject::PlotTypes::plotFillFinish = "plotFillFinish";
+std::string PlotObject::PlotTypes::pathFilled = "pathFilled";
+std::string PlotObject::PlotTypes::label = "label";
+std::string Plot::Labels::canvasName = "canvasName";
+std::string Plot::Labels::controlsName = "controlsName";
+std::string Plot::Labels::messagesName = "messagesName";
+std::string Plot::Labels::graphicsType = "graphicsType";
+std::string Plot::Labels::graphicsThreeDimensional = "graphicsThreeDimensional"
+;
+std::string Plot::Labels::graphicsTwoDimensional = "graphicsTwoDimensional";
+std::string Plot::Labels::plotObjects = "plotObjects";
 bool Calculator::getListPolynomialVariableLabelsLexicographic(
   const Expression& input,
   Vector<Polynomial<AlgebraicNumber> >& output,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("Calculator::getListPolynomialVariableLabelsLexicographic");
+  MacroRegisterFunctionWithName(
+    "Calculator::getListPolynomialVariableLabelsLexicographic"
+  );
   ExpressionContext contextStart(*this);
-  if (!this->getVectorFromFunctionArguments(
-    input,
-    output,
-    &contextStart,
-    0//,
-    //CalculatorConversions::functionPolynomial<AlgebraicNumber>
-  )) {
+  if (
+    !this->getVectorFromFunctionArguments(
+      input,
+      output,
+      &contextStart,
+      0// ,
+      // CalculatorConversions::functionPolynomial<AlgebraicNumber>
+    )
+  ) {
     return false;
   }
   if (output.size < 2) {
@@ -88,11 +89,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   const AlgebraicNumber& one = this->objectContainer.algebraicClosure.one();
   for (int i = 0; i < substitution.size; i ++) {
     int currentIndex = variables.getIndex(contextStart.getVariable(i));
-    substitution[i].makeMonomial(
-      currentIndex,
-      1,
-      one
-    );
+    substitution[i].makeMonomial(currentIndex, 1, one);
   }
   for (int i = 0; i < output.size; i ++) {
     Polynomial<AlgebraicNumber>& currentP = output[i];
@@ -101,7 +98,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   return outputContext.setVariables(variables);
 }
 
-bool DynkinSimpleType:: hasPrecomputedSubalgebras() const {
+bool DynkinSimpleType::hasPrecomputedSubalgebras() const {
   if (this->letter == 'F') {
     return true;
   }
@@ -148,19 +145,18 @@ bool DynkinSimpleType:: hasPrecomputedSubalgebras() const {
 // - that would be an evil site prompting me for password.
 // So, only in this very special circumstance,
 // we can only rely on a hard-coded web address.
-
 std::string GlobalVariables::hopefullyPermanentWebAdress =
 "https://calculator-algebra.org";
-
 std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable =
 "http://calculator-algebra.org/cgi-bin/calculator";
-std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressOfServerExecutable =
+std::string GlobalVariables::
+hopefullyPermanent_HTTPS_WebAdressOfServerExecutable =
 "https://calculator-algebra.org/cgi-bin/calculator";
 std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
 "http://calculator-algebra.org/";
-std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
+std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder
+=
 "https://calculator-algebra.org/";
-
 std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   const std::string& prefixFolder,
   const DynkinType& dynkinType,
@@ -170,30 +166,43 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   std::stringstream out;
   SemisimpleLieAlgebra folderComputer;
   folderComputer.weylGroup.dynkinType = dynkinType;
-  out << "<tr><td><a href='"
+  out
+  << "<tr><td><a href='"
   << folderComputer.fileNames.displayFolderName(prefixFolder)
   << folderComputer.fileNames.fileNameNoPathStructureConstants()
   << "'>"
-  << dynkinType[0].letter << dynkinType[0].rank << " structure constants</a></td>\n ";
+  << dynkinType[0].letter
+  << dynkinType[0].rank
+  << " structure constants</a></td>\n ";
   if (dynkinType[0].hasPrecomputedSubalgebras()) {
-    out << "<td><a href='"
+    out
+    << "<td><a href='"
     << folderComputer.fileNames.displayFolderName(prefixFolder)
     << folderComputer.fileNames.fileNameNoPathSemisimpleSubalgebras()
     << "'>"
-    << dynkinType[0].letter << dynkinType[0].rank << " semisimple subalgebras</a>";
+    << dynkinType[0].letter
+    << dynkinType[0].rank
+    << " semisimple subalgebras</a>";
     out << "</td>\n ";
   } else {
     out << "<td>Not available</td>\n";
   }
-  out << "<td><a href='"
+  out
+  << "<td><a href='"
   << folderComputer.fileNames.displayFolderName(prefixFolder)
-  << folderComputer.fileNames.fileNameRelativePathSlTwoSubalgebras() << "'>"
-  << dynkinType[0].letter << dynkinType[0].rank << " sl(2) triples</a></td>\n";
-  out << "<td><a href='"
+  << folderComputer.fileNames.fileNameRelativePathSlTwoSubalgebras()
+  << "'>"
+  << dynkinType[0].letter
+  << dynkinType[0].rank
+  << " sl(2) triples</a></td>\n";
+  out
+  << "<td><a href='"
   << folderComputer.fileNames.displayFolderName(prefixFolder)
   << folderComputer.fileNames.fileNameNoPathRootSubalgebras()
-  << "'>" << dynkinType[0].letter
-  << dynkinType[0].rank << " root subalgebras</a></td>\n";
+  << "'>"
+  << dynkinType[0].letter
+  << dynkinType[0].rank
+  << " root subalgebras</a></td>\n";
   return out.str();
 }
 
@@ -201,7 +210,10 @@ void Plot::operator+=(const Plot& other) {
   MacroRegisterFunctionWithName("Plot::operator+=");
   if (other.priorityCanvasName > this->priorityCanvasName) {
     this->setCanvasName(other.getCanvasName());
-  } else if (this->getCanvasName() == "" && this->priorityCanvasName == other.priorityCanvasName) {
+  } else if (
+    this->getCanvasName() == "" &&
+    this->priorityCanvasName == other.priorityCanvasName
+  ) {
     this->setCanvasName(other.getCanvasName());
   }
   if (other.priorityCanvasName > this->priorityCanvasName) {
@@ -220,10 +232,14 @@ void Plot::operator+=(const Plot& other) {
     this->upperBoundAxes = other.upperBoundAxes;
   }
   if (other.priorityViewRectangle == this->priorityViewRectangle) {
-    this->highBoundY = MathRoutines::maximum(this->highBoundY, other.highBoundY);
-    this->lowBoundY = MathRoutines::minimum(this->lowBoundY,  other.lowBoundY);
-    this->upperBoundAxes = MathRoutines::maximum(this->upperBoundAxes, other.upperBoundAxes);
-    this->lowerBoundAxes = MathRoutines::minimum(this->lowerBoundAxes, other.lowerBoundAxes);
+    this->highBoundY =
+    MathRoutines::maximum(this->highBoundY, other.highBoundY);
+    this->lowBoundY =
+    MathRoutines::minimum(this->lowBoundY, other.lowBoundY);
+    this->upperBoundAxes =
+    MathRoutines::maximum(this->upperBoundAxes, other.upperBoundAxes);
+    this->lowerBoundAxes =
+    MathRoutines::minimum(this->lowerBoundAxes, other.lowerBoundAxes);
   }
   this->plotObjects.addListOnTop(other.plotObjects);
   if (other.priorityWindow > this->priorityWindow) {
@@ -241,8 +257,12 @@ void Plot::operator+=(const Plot& other) {
     this->flagIncludeCoordinateSystem = false;
   }
   this->parameterNamesJS.addOnTopNoRepetition(other.parameterNamesJS);
-  this->priorityWindow = MathRoutines::maximum(this->priorityWindow, other.priorityWindow);
-  this->priorityViewRectangle = MathRoutines::maximum(this->priorityViewRectangle, other.priorityViewRectangle);
+  this->priorityWindow =
+  MathRoutines::maximum(this->priorityWindow, other.priorityWindow);
+  this->priorityViewRectangle =
+  MathRoutines::maximum(
+    this->priorityViewRectangle, other.priorityViewRectangle
+  );
 }
 
 bool Plot::operator==(const Plot& other) const {
@@ -251,11 +271,15 @@ bool Plot::operator==(const Plot& other) const {
   this->priorityCanvasName == other.priorityCanvasName &&
   this->priorityViewRectangle == other.priorityViewRectangle &&
   this->desiredHtmlHeightInPixels == other.desiredHtmlHeightInPixels &&
-  this->desiredHtmlWidthInPixels == other.desiredHtmlWidthInPixels &&
-  ((this->highBoundY        - other.highBoundY       ) == 0.0) &&
-  ((this->lowBoundY         - other.lowBoundY        ) == 0.0) &&
-  ((this->lowerBoundAxes - other.lowerBoundAxes) == 0.0) &&
-  ((this->upperBoundAxes - other.upperBoundAxes) == 0.0) &&
+  this->desiredHtmlWidthInPixels == other.desiredHtmlWidthInPixels && ((
+      this->highBoundY - other.highBoundY
+    ) ==
+    0.0
+  ) && ((this->lowBoundY - other.lowBoundY) == 0.0) && ((
+      this->lowerBoundAxes - other.lowerBoundAxes
+    ) ==
+    0.0
+  ) && ((this->upperBoundAxes - other.upperBoundAxes) == 0.0) &&
   this->plotObjects == other.plotObjects &&
   this->parameterNames == other.parameterNames &&
   this->parameterNamesJS == other.parameterNamesJS &&
@@ -265,10 +289,18 @@ bool Plot::operator==(const Plot& other) const {
 }
 
 void Plot::operator+=(const PlotObject& other) {
-  if (other.dimension != - 1 && this->dimension != - 1 && this->dimension != other.dimension) {
-    global.fatal << "Attempting to add plot of dimension: "
-    << this->dimension << " to a plot of dimension: "
-    << other.dimension << ". " << global.fatal;
+  if (
+    other.dimension != - 1 &&
+    this->dimension != - 1 &&
+    this->dimension != other.dimension
+  ) {
+    global.fatal
+    << "Attempting to add plot of dimension: "
+    << this->dimension
+    << " to a plot of dimension: "
+    << other.dimension
+    << ". "
+    << global.fatal;
   }
   if (this->dimension == - 1) {
     this->dimension = other.dimension;
@@ -280,64 +312,64 @@ void Plot::operator+=(const PlotObject& other) {
 }
 
 bool PlotObject::operator==(const PlotObject& other) const {
-  return
-  ((this->xLow      - other.xLow     ) == 0.0)                               &&
-  ((this->xHigh     - other.xHigh    ) == 0.0)                               &&
-  ((this->yLow      - other.yLow     ) == 0.0)                               &&
-  ((this->yHigh     - other.yHigh    ) == 0.0)                               &&
-  ((this->paramLow  - other.paramLow ) == 0.0)                               &&
-  ((this->paramHigh - other.paramHigh) == 0.0)                               &&
-  ((this->lineWidth - other.lineWidth) == 0.0)                               &&
-  this->plotString                     == other.plotString                   &&
-  this->fillStyle                      == other.fillStyle                    &&
-  this->plotStringWithHtml             == other.plotStringWithHtml           &&
-  this->colorRGB                       == other.colorRGB                     &&
-  this->colorFillRGB                   == other.colorFillRGB                 &&
-  this->dimension                      == other.dimension                    &&
-  this->colorUV                        == other.colorUV                      &&
-  this->colorVU                        == other.colorVU                      &&
-  this->colorJS                        == other.colorJS                      &&
-  this->lineWidthJS                    == other.lineWidthJS                  &&
-  this->numberOfSegmentsJS             == other.numberOfSegmentsJS           &&
-  this->points                         == other.points                       &&
-  this->pointsDouble                   == other.pointsDouble                 &&
-  this->pointsJS                       == other.pointsJS                     &&
-  this->rectangles                  == other.rectangles                &&
-  this->plotType                       == other.plotType                     &&
-  this->manifoldImmersion              == other.manifoldImmersion            &&
-  this->coordinateFunctionsE           == other.coordinateFunctionsE         &&
-  this->coordinateFunctionsJS          == other.coordinateFunctionsJS        &&
-  this->variablesInPlay                == other.variablesInPlay              &&
-  this->variableRangesJS               == other.variableRangesJS             &&
-  this->leftPoint                      == other.leftPoint                    &&
-  this->rightPoint                     == other.rightPoint                   &&
-  this->paramLowE                      == other.paramLowE                    &&
-  this->paramHighE                     == other.paramHighE                   &&
-  this->numSegmentsE                   == other.numSegmentsE                 &&
-  this->variablesInPlayJS              == other.variablesInPlayJS            &&
-  this->leftBoundaryIsMinusInfinity    == other.leftBoundaryIsMinusInfinity  &&
-  this->rightBoundaryIsMinusInfinity   == other.rightBoundaryIsMinusInfinity &&
-  this->leftPtJS                       == other.leftPtJS                     &&
-  this->rightPtJS                      == other.rightPtJS                    &&
-  this->colorFillJS                    == other.colorFillJS                  &&
-  this->paramLowJS                     == other.paramLowJS                   &&
-  this->paramHighJS                    == other.paramHighJS                  &&
-  this->defaultLengthJS                == other.defaultLengthJS              &&
-  this->parametersInPlayJS             == other.parametersInPlayJS
-  ;
+  return ((this->xLow - other.xLow) == 0.0) && ((this->xHigh - other.xHigh) ==
+    0.0
+  ) && ((this->yLow - other.yLow) == 0.0) && ((this->yHigh - other.yHigh) ==
+    0.0
+  ) && ((this->paramLow - other.paramLow) == 0.0) && ((
+      this->paramHigh - other.paramHigh
+    ) ==
+    0.0
+  ) && ((this->lineWidth - other.lineWidth) == 0.0) &&
+  this->plotString == other.plotString &&
+  this->fillStyle == other.fillStyle &&
+  this->plotStringWithHtml == other.plotStringWithHtml &&
+  this->colorRGB == other.colorRGB &&
+  this->colorFillRGB == other.colorFillRGB &&
+  this->dimension == other.dimension &&
+  this->colorUV == other.colorUV &&
+  this->colorVU == other.colorVU &&
+  this->colorJS == other.colorJS &&
+  this->lineWidthJS == other.lineWidthJS &&
+  this->numberOfSegmentsJS == other.numberOfSegmentsJS &&
+  this->points == other.points &&
+  this->pointsDouble == other.pointsDouble &&
+  this->pointsJS == other.pointsJS &&
+  this->rectangles == other.rectangles &&
+  this->plotType == other.plotType &&
+  this->manifoldImmersion == other.manifoldImmersion &&
+  this->coordinateFunctionsE == other.coordinateFunctionsE &&
+  this->coordinateFunctionsJS == other.coordinateFunctionsJS &&
+  this->variablesInPlay == other.variablesInPlay &&
+  this->variableRangesJS == other.variableRangesJS &&
+  this->leftPoint == other.leftPoint &&
+  this->rightPoint == other.rightPoint &&
+  this->paramLowE == other.paramLowE &&
+  this->paramHighE == other.paramHighE &&
+  this->numSegmentsE == other.numSegmentsE &&
+  this->variablesInPlayJS == other.variablesInPlayJS &&
+  this->leftBoundaryIsMinusInfinity == other.leftBoundaryIsMinusInfinity &&
+  this->rightBoundaryIsMinusInfinity == other.rightBoundaryIsMinusInfinity &&
+  this->leftPtJS == other.leftPtJS &&
+  this->rightPtJS == other.rightPtJS &&
+  this->colorFillJS == other.colorFillJS &&
+  this->paramLowJS == other.paramLowJS &&
+  this->paramHighJS == other.paramHighJS &&
+  this->defaultLengthJS == other.defaultLengthJS &&
+  this->parametersInPlayJS == other.parametersInPlayJS;
 }
 
 PlotObject::PlotObject() {
-  this->xLow         = 0;
-  this->xHigh        = 0;
-  this->paramLow     = 0;
-  this->paramHigh    = 0;
-  this->yLow         = 0;
-  this->yHigh        = 0;
-  this->colorRGB     = 0;
-  this->lineWidth    = 1;
+  this->xLow = 0;
+  this->xHigh = 0;
+  this->paramLow = 0;
+  this->paramHigh = 0;
+  this->yLow = 0;
+  this->yHigh = 0;
+  this->colorRGB = 0;
+  this->lineWidth = 1;
   this->colorFillRGB = 0;
-  this->dimension    = - 1;
+  this->dimension = - 1;
   this->rightBoundaryIsMinusInfinity = false;
   this->leftBoundaryIsMinusInfinity = false;
 }
@@ -345,8 +377,10 @@ PlotObject::PlotObject() {
 void PlotObject::computeYBounds() {
   MacroRegisterFunctionWithName("PlotObject::computeYBounds");
   for (int i = 0; i < this->pointsDouble.size; i ++) {
-    this->yHigh = MathRoutines::maximum(this->yHigh, this->pointsDouble[i][1]);
-    this->yLow = MathRoutines::minimum(this->yLow, this->pointsDouble[i][1]);
+    this->yHigh =
+    MathRoutines::maximum(this->yHigh, this->pointsDouble[i][1]);
+    this->yLow =
+    MathRoutines::minimum(this->yLow, this->pointsDouble[i][1]);
   }
 }
 
@@ -365,9 +399,12 @@ std::string PlotObject::getPlotStringFromFunctionStringAndRanges(
   if (useHtml) {
     out << "<br>";
   }
-  out << "\\psplot[linecolor =\\fcColorGraph, plotpoints =1000]{"
-  << FloatingPoint::doubleToString(inputLowerBound) << "}{"
-  << FloatingPoint::doubleToString(inputUpperBound) << "}{";
+  out
+  << "\\psplot[linecolor =\\fcColorGraph, plotpoints =1000]{"
+  << FloatingPoint::doubleToString(inputLowerBound)
+  << "}{"
+  << FloatingPoint::doubleToString(inputUpperBound)
+  << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }
@@ -398,19 +435,31 @@ void Plot::computeAxesAndBoundingBox() {
   this->highBoundY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->lowerBoundAxes = MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
-    this->upperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
-    this->lowBoundY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
-    this->highBoundY = MathRoutines::maximum(this->plotObjects[k].yHigh, this->highBoundY);
-    for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
+    this->lowerBoundAxes =
+    MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
+    this->upperBoundAxes =
+    MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
+    this->lowBoundY =
+    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
+    this->highBoundY =
+    MathRoutines::maximum(
+      this->plotObjects[k].yHigh, this->highBoundY
+    );
+    for (
+      int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
+    ) {
       Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->lowerBoundAxes = MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
-      this->upperBoundAxes = MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
-      this->lowBoundY = MathRoutines::minimum (currentPoint[1], this->lowBoundY);
-      this->highBoundY = MathRoutines::maximum (currentPoint[1], this->highBoundY);
+      this->lowerBoundAxes =
+      MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
+      this->upperBoundAxes =
+      MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
+      this->lowBoundY =
+      MathRoutines::minimum(currentPoint[1], this->lowBoundY);
+      this->highBoundY =
+      MathRoutines::maximum(currentPoint[1], this->highBoundY);
     }
   }
 }
@@ -423,19 +472,31 @@ void Plot::computeAxesAndBoundingBox3d() {
   this->highBoundY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->lowerBoundAxes = MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
-    this->upperBoundAxes = MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
-    this->lowBoundY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
-    this->highBoundY = MathRoutines::maximum(this->plotObjects[k].yHigh, this->highBoundY);
-    for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
+    this->lowerBoundAxes =
+    MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
+    this->upperBoundAxes =
+    MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
+    this->lowBoundY =
+    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
+    this->highBoundY =
+    MathRoutines::maximum(
+      this->plotObjects[k].yHigh, this->highBoundY
+    );
+    for (
+      int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
+    ) {
       Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->lowerBoundAxes = MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
-      this->upperBoundAxes = MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
-      this->lowBoundY = MathRoutines::minimum(currentPoint[1], this->lowBoundY);
-      this->highBoundY = MathRoutines::maximum(currentPoint[1], this->highBoundY);
+      this->lowerBoundAxes =
+      MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
+      this->upperBoundAxes =
+      MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
+      this->lowBoundY =
+      MathRoutines::minimum(currentPoint[1], this->lowBoundY);
+      this->highBoundY =
+      MathRoutines::maximum(currentPoint[1], this->highBoundY);
     }
   }
 }
@@ -449,8 +510,7 @@ void Plot::addPlotOnTop(PlotObject& input) {
 }
 
 void PlotObject::makeSegment(
-  const Vector<Rational>& left,
-  const Vector<Rational>& right
+  const Vector<Rational>& left, const Vector<Rational>& right
 ) {
   this->pointsDouble.addOnTop(left.getVectorDouble());
   this->pointsDouble.addOnTop(right.getVectorDouble());
@@ -458,15 +518,13 @@ void PlotObject::makeSegment(
 }
 
 void PlotObject::makeLabel(
-  const Vector<Rational>& position,
-  const std::string& label
+  const Vector<Rational>& position, const std::string& label
 ) {
   this->makeLabel(position.getVectorDouble(), label);
 }
 
 void PlotObject::makeLabel(
-  const Vector<double>& position,
-    const std::string& label
+  const Vector<double>& position, const std::string& label
 ) {
   this->dimension = position.size;
   this->plotString = label;
@@ -497,15 +555,17 @@ void PlotObject::makeCircle(
   this->variableRangesJS[0].setSize(2);
   this->variableRangesJS[0][0] = "0";
   this->variableRangesJS[0][1] = "3.14159";
-  this->paramLowJS  = "0";
+  this->paramLowJS = "0";
   this->paramHighJS = "2*3.14159";
   this->numberOfSegmentsJS.setSize(1);
   this->numberOfSegmentsJS[0] = "30";
   this->coordinateFunctionsJS.setSize(2);
   this->variablesInPlayJS.addOnTop("t");
   std::string radiusString = StringRoutines::toStringElement(radius);
-  this->coordinateFunctionsJS[0] = center[0].toString() + "+" + radiusString + "*Math.cos(t)";
-  this->coordinateFunctionsJS[1] = center[1].toString() + "+" + radiusString + "*Math.sin(t)";
+  this->coordinateFunctionsJS[0] =
+  center[0].toString() + "+" + radiusString + "*Math.cos(t)";
+  this->coordinateFunctionsJS[1] =
+  center[1].toString() + "+" + radiusString + "*Math.sin(t)";
   this->colorJS = color;
   this->plotType = PlotObject::PlotTypes::parametricCurve;
 }
@@ -575,30 +635,42 @@ bool Plot::isOKVector(const Vector<double>& input) {
 std::string Plot::getPlotHtml3d(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
-  this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
+  this->computeCanvasNameIfNecessary(
+    owner.objectContainer.canvasPlotCounter
+  );
   JSData result;
   std::stringstream out;
   if (!owner.flagPlotShowJavascriptOnly) {
     std::string canvasId = this->getCanvasName();
     std::string controlsId = canvasId + "Controls";
     std::string messagesId = canvasId + "Messages";
-    out << "<canvas width='" << this->desiredHtmlWidthInPixels
-    << "' height='" << this->desiredHtmlHeightInPixels << "' "
+    out
+    << "<canvas width='"
+    << this->desiredHtmlWidthInPixels
+    << "' height='"
+    << this->desiredHtmlHeightInPixels
+    << "' "
     << "style='border:solid 1px' name='"
     << canvasId
     << "'"
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span name='" << controlsId << "'></span>"
-    << "<span name='" << messagesId << "'></span>";
+    << "<span name='"
+    << controlsId
+    << "'></span>"
+    << "<span name='"
+    << messagesId
+    << "'></span>";
     result[Plot::Labels::canvasName] = this->getCanvasName();
     result[Plot::Labels::controlsName] = controlsId;
     result[Plot::Labels::messagesName] = messagesId;
   }
   JSData plotUpdaters;
   for (int i = 0; i < this->parameterNames.size; i ++) {
-    InputBox& currentBox = owner.objectContainer.
-    userInputTextBoxesWithValues.getValueCreateEmpty(this->parameterNames[i]);
+    InputBox& currentBox =
+    owner.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(
+      this->parameterNames[i]
+    );
     plotUpdaters[currentBox.getSliderName()] = this->getCanvasName();
   }
   result["plotUpdaters"] = plotUpdaters;
@@ -611,10 +683,11 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   result["showPerformance"] = owner.flagPlotNoControls;
   result["setBoundingBoxAsDefaultViewWindow"] = true;
   result[Plot::Labels::graphicsType] = "threeDimensional";
-
   std::string script = HtmlRoutines::scriptFromJSON("graphics3d", result);
   out << script;
-  owner.objectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), script);
+  owner.objectContainer.graphicsScripts.setKeyValue(
+    this->getCanvasName(), script
+  );
   return out.str();
 }
 
@@ -628,7 +701,7 @@ std::string Plot::getCanvasName() const {
 
 std::string Plot::toStringDebug() {
   std::stringstream out;
-  out <<  "Objects: " << this->plotObjects.size << "<br>";
+  out << "Objects: " << this->plotObjects.size << "<br>";
   for (int i = 0; i < this->plotObjects.size; i ++) {
     if (this->plotObjects[i].plotType == "surface") {
       PlotObject& surface = this->plotObjects[i];
@@ -643,7 +716,10 @@ std::string PlotObject::toStringDebug() {
   std::stringstream out;
   out << "colorUV: " << this->colorUV << "<br>";
   out << "colorVU: " << this->colorVU << "<br>";
-  out << "Coord f-ns: " << this->coordinateFunctionsE.toStringCommaDelimited() << "<br>";
+  out
+  << "Coord f-ns: "
+  << this->coordinateFunctionsE.toStringCommaDelimited()
+  << "<br>";
   out << "Vars: " << this->variablesInPlay << "<br>";
   out << "Var ranges: " << this->variableRangesJS << "<br>";
   return out.str();
@@ -720,12 +796,14 @@ void PlotObject::writeVariables(JSData& output) {
   MacroRegisterFunctionWithName("PlotObject::writeVariables");
   JSData arguments = JSData::makeEmptyArray();
   for (int i = 0; i < this->variablesInPlayJS.size; i ++) {
-    arguments[i] = HtmlRoutines::getJavascriptVariable(this->variablesInPlayJS[i]);
+    arguments[i] =
+    HtmlRoutines::getJavascriptVariable(this->variablesInPlayJS[i]);
   }
   output[PlotObject::Labels::arguments] = arguments;
   JSData parameters = JSData::makeEmptyArray();
   for (int i = 0; i < this->parametersInPlayJS.size; i ++) {
-    parameters[i] = HtmlRoutines::getJavascriptVariable(this->parametersInPlayJS[i]);
+    parameters[i] =
+    HtmlRoutines::getJavascriptVariable(this->parametersInPlayJS[i]);
   }
   output[PlotObject::Labels::parameters] = parameters;
 }
@@ -784,14 +862,17 @@ JSData PlotObject::toJSON2dDrawFunction() {
 }
 
 JSData PlotObject::manifoldImmersionFunctionsJS() {
-  return this->functionFromString("return " + this->manifoldImmersionJS + ";");
+  return
+  this->functionFromString("return " + this->manifoldImmersionJS + ";");
 }
 
 JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONDirectionFieldInTwoDimensions");
+  MacroRegisterFunctionWithName(
+    "PlotSurfaceIn3d::toJSONDirectionFieldInTwoDimensions"
+  );
   JSData result;
-
-  result[PlotObject::Labels::manifoldImmersion] = this->manifoldImmersionFunctionsJS();
+  result[PlotObject::Labels::manifoldImmersion] =
+  this->manifoldImmersionFunctionsJS();
   JSData variableRange = JSData::makeEmptyArray();
   for (int i = 0; i < 2; i ++) {
     JSData currentRange = JSData::makeEmptyArray();
@@ -867,7 +948,7 @@ JSData PlotObject::toJSON() {
   if (correctedPlotType == "") {
     correctedPlotType = "path";
   }
-  if (correctedPlotType == "setProjectionScreen" ) {
+  if (correctedPlotType == "setProjectionScreen") {
     result = this->toJSONSetProjectionScreen();
   } else if (correctedPlotType == "segment") {
     result = this->toJSONSegment();
@@ -878,18 +959,18 @@ JSData PlotObject::toJSON() {
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFunction) {
     result = this->toJSON2dDrawFunction();
   } else if (correctedPlotType == "plotDirectionField") {
-    result = this->toJSONDirectionFieldInTwoDimensions() ;
+    result = this->toJSONDirectionFieldInTwoDimensions();
   } else if (correctedPlotType == PlotObject::PlotTypes::points) {
     result = this->toJSONPoints();
   } else if (correctedPlotType == "label") {
     result = this->toJSONDrawText();
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFillStart) {
     result = this->toJSONPlotFillStart();
-  } else if (correctedPlotType == "plotFillFinish") {
-    // The plot type carries all information.
-  } else if (correctedPlotType == "axesGrid") {
-    // The plot type carries all information.
-  } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled ) {
+  } else if (correctedPlotType == "plotFillFinish") {    // The plot type carries all
+    // information.
+  } else if (correctedPlotType == "axesGrid") {    // The plot type carries all
+    // information.
+  } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled) {
     result = this->toJSONDrawPathFilled();
   } else {
     result = this->toJSONDrawPath();
@@ -960,7 +1041,9 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     return "[plot alredy displayed]";
   }
   this->flagDivAlreadyDisplayed = true;
-  this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
+  this->computeCanvasNameIfNecessary(
+    owner.objectContainer.canvasPlotCounter
+  );
   std::stringstream out;
   if (this->priorityViewRectangle <= 0) {
     this->computeAxesAndBoundingBox();
@@ -969,10 +1052,16 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   std::string controls = this->getCanvasName() + "Controls";
   std::string messages = this->getCanvasName() + "Messages";
   if (!this->flagPlotShowJavascriptOnly) {
-    out << "<canvas width='" << this->desiredHtmlWidthInPixels
-    << "' height='" << this->desiredHtmlHeightInPixels << "' "
+    out
+    << "<canvas width='"
+    << this->desiredHtmlWidthInPixels
+    << "' height='"
+    << this->desiredHtmlHeightInPixels
+    << "' "
     << "style='border:solid 1px' "
-    << "name='" << this->getCanvasName() << "'"
+    << "name='"
+    << this->getCanvasName()
+    << "'"
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>";
     out << "<span name='" << controls << "'></span>";
@@ -988,7 +1077,10 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->parameterNames.size; i ++) {
-    InputBox& currentBox = owner.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(this->parameterNames[i]);
+    InputBox& currentBox =
+    owner.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(
+      this->parameterNames[i]
+    );
     result["plotUpdaters"][i] = currentBox.getSliderName();
   }
   JSData plotObjects = JSData::makeEmptyArray();
@@ -1014,27 +1106,55 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   std::stringstream resultStream;
   this->computeAxesAndBoundingBox();
   std::string lineSeparator = useHtml ? "<br>\n" : "\n";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}"
+  resultStream
+  << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}"
   << "\\usepackage{pst-math}\\usepackage{pst-plot}";
-  resultStream << lineSeparator << "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
-  resultStream << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}"
+  resultStream
+  << lineSeparator
+  <<
+  "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}"
+  << lineSeparator;
+  resultStream
+  << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}"
   << "\\addtolength{\\voffset}{-3.2cm}\\addtolength{\\textheight}{6.3cm}"
   << lineSeparator;
-  resultStream << "\\newcommand{\\fcColorGraph}{red}" << lineSeparator << "\\begin{document} \\pagestyle{empty}" << lineSeparator
-  << "\\newcommand{\\fcColorAreaUnderGraph}{cyan}" << lineSeparator << "\\newcommand{\\fcColorNegativeAreaUnderGraph}{orange}"
-  << "\\newcommand{\\fcAxesStandard}[4]{ \\psframe*[linecolor =white](! #1 #2)(! #3 0.1 add #4 01 add) "
-  << "\\psaxes[ticks = none, labels = none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
-  << lineSeparator << " \\psset{xunit =1cm, yunit =1cm}";
+  resultStream
+  << "\\newcommand{\\fcColorGraph}{red}"
+  << lineSeparator
+  << "\\begin{document} \\pagestyle{empty}"
+  << lineSeparator
+  << "\\newcommand{\\fcColorAreaUnderGraph}{cyan}"
+  << lineSeparator
+  << "\\newcommand{\\fcColorNegativeAreaUnderGraph}{orange}"
+  <<
+  "\\newcommand{\\fcAxesStandard}[4]{ \\psframe*[linecolor =white](! #1 #2)(! #3 0.1 add #4 01 add) "
+  <<
+  "\\psaxes[ticks = none, labels = none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
+  << lineSeparator
+  << " \\psset{xunit =1cm, yunit =1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << FloatingPoint::doubleToString(lowerBoundAxes - 0.4) << ", "
-  << FloatingPoint::doubleToString(lowBoundY - 0.4) << ")("
+  resultStream
+  << "\\begin{pspicture}("
+  << FloatingPoint::doubleToString(lowerBoundAxes - 0.4)
+  << ", "
+  << FloatingPoint::doubleToString(lowBoundY - 0.4)
+  << ")("
   << FloatingPoint::doubleToString(upperBoundAxes + 0.4)
-  << "," << FloatingPoint::doubleToString(highBoundY + 0.5) << ")\n\n";
+  << ","
+  << FloatingPoint::doubleToString(highBoundY + 0.5)
+  << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\fcAxesStandard{" << FloatingPoint::doubleToString(lowerBoundAxes - 0.15)
-  << "}{" << FloatingPoint::doubleToString(lowBoundY - 0.15) << "}{"
-  << FloatingPoint::doubleToString(upperBoundAxes + 0.15) << "}{"
-  << FloatingPoint::doubleToString(highBoundY + 0.15) << "}" << lineSeparator;
+  resultStream
+  << " \\fcAxesStandard{"
+  << FloatingPoint::doubleToString(lowerBoundAxes - 0.15)
+  << "}{"
+  << FloatingPoint::doubleToString(lowBoundY - 0.15)
+  << "}{"
+  << FloatingPoint::doubleToString(upperBoundAxes + 0.15)
+  << "}{"
+  << FloatingPoint::doubleToString(highBoundY + 0.15)
+  << "}"
+  << lineSeparator;
   for (int i = 0; i < this->plotObjects.size; i ++) {
     if (useHtml) {
       resultStream << this->plotObjects[i].plotStringWithHtml << lineSeparator;
@@ -1055,9 +1175,15 @@ bool Expression::assignStringParsed(
   Expression commands, result;
   List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
   std::string outputSyntacticErrors;
-  if (!owner.parser.parseAndExtractExpressions(
-    input, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors
-  )) {
+  if (
+    !owner.parser.parseAndExtractExpressions(
+      input,
+      commands,
+      outputSyntacticSoup,
+      outputSyntacticStack,
+      &outputSyntacticErrors
+    )
+  ) {
     this->assignValue(owner, outputSyntacticErrors);
     return false;
   }
@@ -1083,7 +1209,9 @@ bool Expression::isSuitableForSubstitution() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->isBuiltInType() || this->startsWith(this->owner->opBind())) {
+  if (
+    this->isBuiltInType() || this->startsWith(this->owner->opBind())
+  ) {
     return false;
   }
   return true;
@@ -1093,7 +1221,11 @@ bool Expression::isSuitableForRecursion() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->isAtom() || this->isBuiltInType() || this->startsWith(this->owner->opBind())) {
+  if (
+    this->isAtom() ||
+    this->isBuiltInType() ||
+    this->startsWith(this->owner->opBind())
+  ) {
     return false;
   }
   return true;
@@ -1118,7 +1250,9 @@ void Expression::substituteRecursivelyInChildren(
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
     if (substitutions.contains((*this)[i])) {
-      this->setChild(i, substitutions.getValueCreateEmpty((*this)[i]));
+      this->setChild(
+        i, substitutions.getValueCreateEmpty((*this)[i])
+      );
     } else {
       tempE = (*this)[i];
       tempE.substituteRecursivelyInChildren(substitutions);
@@ -1158,3 +1292,4 @@ void Expression::substituteRecursivelyInChildren(
     }
   }
 }
+

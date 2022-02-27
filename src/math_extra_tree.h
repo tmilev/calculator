@@ -1,11 +1,13 @@
+
 #ifndef header_math_extra_tree_ALREADY_INCLUDED
 #define header_math_extra_tree_ALREADY_INCLUDED
+
 #include "math_general.h"
 
-template<typename data>
+template <typename data>
 class Tree;
 
-template<typename Data>
+template <typename Data>
 class TreeNode {
 public:
   Tree<Data>* owner;
@@ -13,9 +15,7 @@ public:
   int myIndex;
   List<int> children;
   Data data;
-  TreeNode(): owner(0), parent(- 1), myIndex(- 1) {
-   
-  }
+  TreeNode(): owner(0), parent(- 1), myIndex(- 1) {}
   bool checkInitialization() const {
     if (this->owner == nullptr) {
       global.fatal << "Tree node without parent. " << global.fatal;
@@ -37,7 +37,6 @@ public:
   std::string toString() const;
 };
 
-
 template <typename Data>
 void TreeNode<Data>::addChild(const Data& inputData) {
   int newNodeIndex = this->owner->nodes.size;
@@ -55,7 +54,10 @@ void TreeNode<Data>::removeAllChildren() {
   for (int i = 0; i < this->children.size; i ++) {
     TreeNode<Data>& currentNode = this->owner->nodes[this->children[i]];
     if (currentNode.myIndex == - 1) {
-      global.fatal << "Faulty index in tree node: " << this->children[i] << global.fatal;
+      global.fatal
+      << "Faulty index in tree node: "
+      << this->children[i]
+      << global.fatal;
     }
     currentNode.myIndex = - 1;
     currentNode.removeAllChildren();
@@ -115,3 +117,4 @@ std::string Tree<Data>::toString() const {
 }
 
 #endif // header_math_extra_tree_ALREADY_INCLUDED
+

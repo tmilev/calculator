@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_semisimple_lie_algebras_ALREADY_INCLUDED
 #define header_math_extra_semisimple_lie_algebras_ALREADY_INCLUDED
@@ -8,33 +9,43 @@
 class Plot;
 class CartanInvolution;
 
-template<class Coefficient>
-class ElementSemisimpleLieAlgebra : public LinearCombination<ChevalleyGenerator, Coefficient> {
+template <class Coefficient>
+class ElementSemisimpleLieAlgebra: public LinearCombination<
+  ChevalleyGenerator, Coefficient
+> {
 public:
   bool checkConsistency() const {
     if (this->size() == 0) {
       return true;
     }
-    SemisimpleLieAlgebra* owner = (*this)[0].owner;
+    SemisimpleLieAlgebra * owner = (*this)[0].owner;
     for (int i = 1; i < this->size(); i ++) {
       if (owner != (*this)[i].owner) {
-        global.fatal << "ElementSemisimpleLieAlgebra "
-        << "contains Chevalley generators with different owners. " << global.fatal;
+        global.fatal
+        << "ElementSemisimpleLieAlgebra "
+        << "contains Chevalley generators with different owners. "
+        << global.fatal;
       }
     }
     return true;
   }
   bool needsParenthesisForMultiplication() const;
   Vector<Coefficient> getCartanPart() const;
-  void makeGGenerator(const Vector<Rational>& root, SemisimpleLieAlgebra& inputOwner);
+  void makeGGenerator(
+    const Vector<Rational>& root, SemisimpleLieAlgebra& inputOwner
+  );
   bool isElementCartan() const;
-  void makeCartanGenerator(const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwners);
+  void makeCartanGenerator(
+    const Vector<Coefficient>& elementH,
+    SemisimpleLieAlgebra& inputOwners
+  );
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
-  void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output, SemisimpleLieAlgebra& owner) const;
+  void toVectorNegativeRootSpacesFirst(
+    Vector<Coefficient>& output, SemisimpleLieAlgebra& owner
+  ) const;
   void assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
-    const Vector<Coefficient>& input,
-    SemisimpleLieAlgebra& owner
+    const Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
   );
   bool getCoordinatesInBasis(
     const List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
@@ -64,7 +75,9 @@ public:
     const RationalFraction<Rational>& ringZero
   );
   bool isCoefficientOneChevalleyGenerator();
-  bool isProportionalTo(const ElementSemisimpleLieAlgebra<Coefficient>& other) const {
+  bool isProportionalTo(
+    const ElementSemisimpleLieAlgebra<Coefficient>& other
+  ) const {
     Vector<Rational> left, right;
     this->toVectorNegativeRootSpacesFirst(left);
     other.toVectorNegativeRootSpacesFirst(right);
@@ -81,15 +94,21 @@ public:
     return root1.isProportionalTo(root2, outputTimesMeEqualsInput);
   }
   unsigned int hashFunction() const {
-    return this->::LinearCombination<ChevalleyGenerator, Coefficient>::
-    hashFunction() * HashConstants::constant1;
+    return
+    this->::LinearCombination<ChevalleyGenerator, Coefficient>::hashFunction()
+    *
+    HashConstants::constant1;
   }
-  static unsigned int hashFunction(const ElementSemisimpleLieAlgebra<Coefficient>& input) {
+  static unsigned int hashFunction(
+    const ElementSemisimpleLieAlgebra<Coefficient>& input
+  ) {
     return input.hashFunction();
   }
-  template<class otherElement>
+  template <class otherElement>
   void operator=(const otherElement& other) {
-    this->::LinearCombination<ChevalleyGenerator, Coefficient>::operator=(other);
+    this->::LinearCombination<ChevalleyGenerator, Coefficient>::operator=(
+      other
+    );
   }
   Vector<Rational> getRootIMustBeWeight() const;
 };
@@ -113,7 +132,6 @@ public:
   SemisimpleLieAlgebra& owner();
 };
 
-
 // From
 // Shôrô Araki,
 // "On root systems and an infinitesimal
@@ -122,14 +140,7 @@ class SatakeDiagram {
 private:
 public:
   enum DiagramType {
-    AI,
-    AII,
-    AIII,
-    BI,
-    CI,
-    DI,
-    DII,
-  };
+    AI, AII, AIII, BI, CI, DI, DII,  };
   DiagramType diagram;
   // Some of the classical Satake types
   // depend on an additional parameter,
@@ -137,7 +148,6 @@ public:
   int parameter;
   // Rank of the simple root system.
   int rank;
-
   void plot(Plot& output, int verticalOffset);
   void plotAI(Plot& output, int verticalOffset);
   void plotAII(Plot& output, int verticalOffset);
@@ -177,8 +187,7 @@ public:
     EIX,
     FI,
     FII,
-    G
-  };
+    G  };
   DiagramType diagram;
   static const int radiusOfRootCircle = 1;
   static const int distanceBetweenRootCenters = 20;
@@ -202,12 +211,10 @@ public:
   bool adjustParameter();
   bool parameterChecks(std::stringstream* commentsOnFailure) const;
   bool dynkinTypeAmbient(
-    DynkinType& output,
-    std::stringstream* commentsOnFailure
+    DynkinType& output, std::stringstream* commentsOnFailure
   );
   DynkinType dynkinTypeAmbientNoFailure();
   std::string toString();
-
   void plot(Plot& output);
   void plotAI(Plot& output);
   void plotAII(Plot& output);
@@ -227,7 +234,6 @@ public:
     int verticalOffset,
     int rootsOnThisPlotRow
   );
-
   SatakeDiagram computeSatakeDiagram();
 };
 
@@ -260,11 +266,13 @@ public:
   // Let $\alpha$ be a root.
   // Then our choice of elements h_\alpha
   // of the Cartan subalgebra is such that
-  // 1. [g_{\alpha}, g_{-\alpha}] = h_\alpha * (2 / \langle\alpha, \alpha\rangle)
+  // 1. [g_{\alpha}, g_{-\alpha}] = h_\alpha * (2 / \langle\alpha,
+  // \alpha\rangle)
   // 2. [h_{\alpha}, g_\beta] = \langle \alpha, \beta \rangle g^\beta
   // Reference: Samelson, Notes on Lie algebras, pages 46-51
   // We fix a total order to all generators (i.e., linear space basis vectors).
-  // We put first the generators corresponding to the negative roots in ascending order,
+  // We put first the generators corresponding to the negative roots in
+  // ascending order,
   // we put second the elements of the Cartan
   // we put last the positive roots in ascending order.
   Matrix<Rational> chevalleyConstants;
@@ -272,7 +280,6 @@ public:
   Matrix<ElementSemisimpleLieAlgebra<Rational> > lieBrackets;
   // Order on all generators.
   List<int> universalEnvelopingGeneratorOrder;
-
   bool flagHasNilradicalOrder;
   bool flagDeallocated;
   bool hasComputedStructureConstants();
@@ -286,7 +293,9 @@ public:
   public:
     SemisimpleLieAlgebra* owner;
     std::string displayFolderName(const std::string& baseFolder) const;
-    std::string fileNameWithPathStructureConstants(const std::string& baseFolder) const;
+    std::string fileNameWithPathStructureConstants(
+      const std::string& baseFolder
+    ) const;
     std::string virtualFolderName() const;
     std::string virtualFileNameWithPathStructureConstants() const;
     std::string fileNameNoPathStructureConstants() const;
@@ -295,6 +304,7 @@ public:
     std::string fileNameRelativePathSlTwoSubalgebras() const;
     std::string fileNameSlTwoRealFormSubalgebraStructure() const;
   };
+
   SemisimpleLieAlgebra::FileNames fileNames;
   template <class Coefficient>
   void getGenericElementCartan(
@@ -345,14 +355,17 @@ public:
   }
   bool checkConsistency() const;
   template <class Coefficient>
-  void generateLieSubalgebra(List<ElementSemisimpleLieAlgebra<Coefficient> >& inputOutputGenerators);
+  void generateLieSubalgebra(
+    List<ElementSemisimpleLieAlgebra<Coefficient> >& inputOutputGenerators
+  );
   void computeLieBracketTable();
   bool isOfSimpleType(char desiredType, int desiredRank) const {
     return this->weylGroup.isOfSimpleType(desiredType, desiredRank);
   }
   template <class Coefficient>
   void getCommonCentralizer(
-    const List<ElementSemisimpleLieAlgebra<Coefficient> >& inputElementsToCentralize,
+    const List<ElementSemisimpleLieAlgebra<Coefficient> >&
+    inputElementsToCentralize,
     List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
   );
   void getChevalleyGeneratorAsLieBracketsSimpleGenerators(
@@ -368,7 +381,6 @@ public:
     bool includeSl2Subalgebras,
     bool includeSemisimpleSubalgebras
   );
-
   std::string toStringMenuStructurePages(
     const std::string& relativeTo,
     bool includeStructureConstants,
@@ -391,12 +403,16 @@ public:
   );
   static std::string toHTMLCalculatorBodyOnload();
   static std::string toHTMLCalculatorMainDiv();
-  std::string getStringFromChevalleyGenerator(int index, FormatExpressions* polynomialFormat) const;
+  std::string getStringFromChevalleyGenerator(
+    int index, FormatExpressions* polynomialFormat
+  ) const;
   std::string toStringLieAlgebraNameFullHTML() const;
   std::string toStringLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;
   int getNumberOfGenerators() const {
-    return this->weylGroup.cartanSymmetric.numberOfRows + this->weylGroup.rootSystem.size;
+    return
+    this->weylGroup.cartanSymmetric.numberOfRows +
+    this->weylGroup.rootSystem.size;
   }
   int getNumberOfPositiveRoots() const {
     return this->weylGroup.rootsOfBorel.size;
@@ -404,17 +420,31 @@ public:
   int getRank() const {
     return this->weylGroup.cartanSymmetric.numberOfRows;
   }
-  void orderNilradical(const Selection& parabolicSelectionZeroMeansLeviPart, bool useNilWeight, bool ascending);
-  void orderNilradicalFirstTotalWeightAscending(const Selection& parabolicSelectionZeroMeansLeviPart);
-  void orderNilradicalFirstTotalWeightDescending(const Selection& parabolicSelectionZeroMeansLeviPart);
-  void orderNilradicalNilWeightAscending(const Selection& parSelZeroMeansLeviPart);
-  void orderNilradicalNilWeightDescending(const Selection& parSelZeroMeansLeviPart);
+  void orderNilradical(
+    const Selection& parabolicSelectionZeroMeansLeviPart,
+    bool useNilWeight,
+    bool ascending
+  );
+  void orderNilradicalFirstTotalWeightAscending(
+    const Selection& parabolicSelectionZeroMeansLeviPart
+  );
+  void orderNilradicalFirstTotalWeightDescending(
+    const Selection& parabolicSelectionZeroMeansLeviPart
+  );
+  void orderNilradicalNilWeightAscending(
+    const Selection& parSelZeroMeansLeviPart
+  );
+  void orderNilradicalNilWeightDescending(
+    const Selection& parSelZeroMeansLeviPart
+  );
   void orderStandardAscending();
   void orderStandardDescending();
-
   void orderSSalgebraForHWbfComputation();
   int getGeneratorIndexFromRoot(const Vector<Rational>& input) {
-    return this->getGeneratorFromRootIndex(this->weylGroup.rootSystem.getIndex(input));
+    return
+    this->getGeneratorFromRootIndex(
+      this->weylGroup.rootSystem.getIndex(input)
+    );
   }
   int getRootIndexFromDisplayIndex(int index);
   int getGeneratorFromDisplayIndex(int index) {
@@ -428,36 +458,41 @@ public:
   // The function below returns an negative number if the chevalley generator
   // is an element of the Cartan subalgebra.
   int getRootIndexFromGenerator(int index) const;
-  int getGeneratorIndexFromNonZeroCoefficientIndexInCartan(int simpleRootIndex) const;
-  int getCartanCoordinateIndexFromCartanGeneratorIndex(int generatorIndex) const;
+  int getGeneratorIndexFromNonZeroCoefficientIndexInCartan(int simpleRootIndex)
+  const;
+  int getCartanCoordinateIndexFromCartanGeneratorIndex(int generatorIndex)
+  const;
   int getDisplayIndexFromGenerator(int index) const;
   bool areOrderedProperly(int leftIndex, int rightIndex);
   bool isGeneratorFromCartan(int index) const;
   bool areOppositeRootSpaces(int leftIndex, int rightIndex) {
-    if (this->isGeneratorFromCartan(leftIndex) || this->isGeneratorFromCartan(rightIndex)) {
+    if (
+      this->isGeneratorFromCartan(leftIndex) ||
+      this->isGeneratorFromCartan(rightIndex)
+    ) {
       return false;
     }
     int left = this->getRootIndexFromGenerator(leftIndex);
     int right = this->getRootIndexFromGenerator(rightIndex);
-    return (this->weylGroup.rootSystem[left] + this->weylGroup.rootSystem[right]).isEqualToZero();
+    return (
+      this->weylGroup.rootSystem[left] + this->weylGroup.rootSystem[right]
+    ).isEqualToZero();
   }
   void computeChevalleyConstants();
-  template<class Coefficient>
+  template <class Coefficient>
   Coefficient getKillingForm(
     const ElementSemisimpleLieAlgebra<Coefficient>& left,
     const ElementSemisimpleLieAlgebra<Coefficient>& right
   );
-  template<class Coefficient>
-  void getKillingFormMatrix(
-    Matrix<Coefficient>& output
-  );
+  template <class Coefficient>
+  void getKillingFormMatrix(Matrix<Coefficient>& output);
   template <class Coefficient>
   Coefficient getKillingFormProductWRTLevi(
     const ElementSemisimpleLieAlgebra<Coefficient>& left,
     const ElementSemisimpleLieAlgebra<Coefficient>& right,
     const Selection& rootsNotInLevi
   );
-  template<class Coefficient>
+  template <class Coefficient>
   void lieBracket(
     const ElementSemisimpleLieAlgebra<Coefficient>& g1,
     const ElementSemisimpleLieAlgebra<Coefficient>& g2,
@@ -465,16 +500,31 @@ public:
   );
   // Setup: \gamma +\delta =\epsilon +\zeta =\eta is a Vector<Rational> .
   // then the below function computes n_{-\epsilon, -\zeta}
-  void computeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
+  void computeOneChevalleyConstant(
+    int indexGamma,
+    int indexDelta,
+    int indexMinusEpsilon,
+    int indexMinusZeta,
+    int indexEta
+  );
   void exploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void exploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void exploitTheCyclicTrick(int i, int j, int k);
-  bool getMaxQForWhichBetaMinusQAlphaisARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const;
-  Rational getConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
+  bool getMaxQForWhichBetaMinusQAlphaisARoot(
+    const Vector<Rational>& alpha,
+    const Vector<Rational>& beta,
+    int& output
+  ) const;
+  Rational getConstant(
+    const Vector<Rational>& root1, const Vector<Rational>& root2
+  );
   Vector<Rational> getWeightOfGenerator(int index);
-  //returns true if returning constant, false if returning element of h
+  // returns true if returning constant, false if returning element of h
   bool getConstantOrHElement(
-    const Vector<Rational>& root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH
+    const Vector<Rational>& root1,
+    const Vector<Rational>& root2,
+    Rational& outputRat,
+    Vector<Rational>& outputH
   );
   bool testForConsistency();
   bool attemptFindingHEF(
@@ -495,20 +545,32 @@ public:
     bool computeRealForm,
     AlgebraicClosureRationals* algebraicClosure
   );
-  template<class Coefficient>
-  void getAdjoint(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
-  template<class Coefficient>
-  void getAdjoint(MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
+  template <class Coefficient>
+  void getAdjoint(
+    Matrix<Coefficient>& output,
+    ElementSemisimpleLieAlgebra<Coefficient>& e
+  );
+  template <class Coefficient>
+  void getAdjoint(
+    MatrixTensor<Coefficient>& output,
+    ElementSemisimpleLieAlgebra<Coefficient>& e
+  );
   void makeChevalleyTestReport(int i, int j, int k, int Total);
-  bool isInTheWeightSupport(Vector<Rational>& weight, Vector<Rational>& highestWeight);
-  void createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& highestWeight);
+  bool isInTheWeightSupport(
+    Vector<Rational>& weight, Vector<Rational>& highestWeight
+  );
+  void createEmbeddingFromFDModuleHaving1dimWeightSpaces(
+    Vector<Rational>& highestWeight
+  );
   int getLengthStringAlongAlphaThroughBeta(
     Vector<Rational>& alpha,
     Vector<Rational>& beta,
     int& distanceToHighestWeight,
     Vectors<Rational>& weightSupport
   );
-  void computeOneAutomorphism(Matrix<Rational>& outputAutomorphism, bool useNegativeRootsFirst);
+  void computeOneAutomorphism(
+    Matrix<Rational>& outputAutomorphism, bool useNegativeRootsFirst
+  );
   bool operator==(const SemisimpleLieAlgebra& other) const {
     return this->weylGroup == other.weylGroup;
   }
@@ -516,26 +578,28 @@ public:
   // preferred "standard" representation of the lie algebra.
   // As of writing, the "standard" representation is only implemented for
   // sl(n) - the natural (n x n)- matrix realization.
-  template<typename Coefficient>
+  template <typename Coefficient>
   bool getElementStandardRepresentation(
     const ElementSemisimpleLieAlgebra<Coefficient>& element,
     Matrix<Coefficient>& output
   );
-  // Same as the previous function but for elements of the Universal Enveloping Algebra.
-  template<typename Coefficient>
+  // Same as the previous function but for elements of the Universal Enveloping
+  // Algebra.
+  template <typename Coefficient>
   bool getElementStandardRepresentation(
     const ElementUniversalEnveloping<Coefficient>& element,
     Matrix<Coefficient>& output,
     std::stringstream* commentsOnFailure
   );
-  // Same as the previous function but for elements of the Universal Enveloping Algebra.
-  template<typename Coefficient>
+  // Same as the previous function but for elements of the Universal Enveloping
+  // Algebra.
+  template <typename Coefficient>
   bool getElementAdjointRepresentation(
     const ElementUniversalEnveloping<Coefficient>& element,
     Matrix<Coefficient>& output,
     std::stringstream* commentsOnFailure
   );
-  template<typename Coefficient>
+  template <typename Coefficient>
   bool accumulateChevalleyGeneratorStandardRepresentation(
     const ChevalleyGenerator& element,
     const Coefficient& coefficient,
@@ -547,7 +611,8 @@ public:
     const Coefficient& coefficient,
     Matrix<Coefficient>& output
   );
-  // Whether the ambient Lie algebra has a Cartan involution that has been implemented.
+  // Whether the ambient Lie algebra has a Cartan involution that has been
+  // implemented.
   bool hasImplementedCartanInvolution(
     const VoganDiagram& voganDiagram,
     CartanInvolution* whichInvolution,
@@ -564,18 +629,21 @@ class Weight {
 public:
   SemisimpleLieAlgebra* owner;
   Vector<Coefficient> weightFundamentalCoordinates;
-  friend std::ostream& operator << (std::ostream& output, const Weight<Coefficient>& input) {
+  friend std::ostream& operator<<(
+    std::ostream& output, const Weight<Coefficient>& input
+  ) {
     output << input.toString();
     return output;
   }
-  Weight(): owner(nullptr) {
-  }
+  Weight(): owner(nullptr) {}
   void checkNonZeroOwner() const {
     if (this->owner != nullptr) {
       return;
     }
-    global.fatal << "Monomial char has zero owner, "
-    << "which is not allowed by the current function call. " << global.fatal;
+    global.fatal
+    << "Monomial char has zero owner, "
+    << "which is not allowed by the current function call. "
+    << global.fatal;
   }
   void accountSingleWeight(
     const Vector<Rational>& currentWeightSimpleCoords,
@@ -597,7 +665,9 @@ public:
   }
   void operator+=(const Weight<Coefficient>& other) {
     if (this->owner != other.owner) {
-      global.fatal << "Attempting to add weights with different owner algebras. " << global.fatal;
+      global.fatal
+      << "Attempting to add weights with different owner algebras. "
+      << global.fatal;
     }
     this->weightFundamentalCoordinates += other.weightFundamentalCoordinates;
   }
@@ -605,16 +675,22 @@ public:
     this->weightFundamentalCoordinates *= other;
   }
   inline bool operator==(const Weight<Coefficient>& other) const {
-    return this->weightFundamentalCoordinates == other.weightFundamentalCoordinates && this->owner == other.owner;
+    return
+    this->weightFundamentalCoordinates == other.weightFundamentalCoordinates &&
+    this->owner == other.owner;
   }
   inline bool operator>(const Weight<Coefficient>& other) const {
-    return this->weightFundamentalCoordinates > other.weightFundamentalCoordinates;
+    return
+    this->weightFundamentalCoordinates >
+    other.weightFundamentalCoordinates;
   }
 };
 
 template <class Coefficient>
-class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coefficient>, Coefficient> {
-  public:
+class CharacterSemisimpleLieAlgebraModule: public LinearCombination<
+  Weight<Coefficient>, Coefficient
+> {
+public:
   void checkConsistency() const {
     if (this->size() == 0) {
       return;
@@ -622,16 +698,21 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     const SemisimpleLieAlgebra* owner = (*this)[0].owner;
     for (int i = 1; i < this->size(); i ++) {
       if ((*this)[i].owner != owner) {
-        global.fatal << "CharacterSemisimpleLieAlgebraModule contains "
-        << "elements belonging to different semisimple Lie algebras. " << global.fatal;
+        global.fatal
+        << "CharacterSemisimpleLieAlgebraModule contains "
+        << "elements belonging to different semisimple Lie algebras. "
+        << global.fatal;
       }
     }
   }
   void checkNonZeroOwner() const {
     this->checkConsistency();
     if (this->getOwner() == 0) {
-      global.fatal << "CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "
-      << "which is not allowed at by the calling function. " << global.fatal;
+      global.fatal
+      <<
+      "CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "
+      << "which is not allowed at by the calling function. "
+      << global.fatal;
     }
   }
   bool isEqualToZero() {
@@ -640,11 +721,19 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
-  static unsigned int hashFunction(const CharacterSemisimpleLieAlgebraModule<Coefficient>& input) {
-    return input.::LinearCombination<Weight<Coefficient>, Coefficient>::hashFunction(input);
+  static unsigned int hashFunction(
+    const CharacterSemisimpleLieAlgebraModule<Coefficient>& input
+  ) {
+    return
+    input.::LinearCombination<Weight<Coefficient>, Coefficient>::hashFunction(
+      input
+    );
   }
   void getDual(CharacterSemisimpleLieAlgebraModule<Coefficient>& output) const;
-  void makeFromWeight(const Vector<Coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
+  void makeFromWeight(
+    const Vector<Coefficient>& inputWeightSimpleCoords,
+    SemisimpleLieAlgebra* inputOwner
+  );
   bool splitCharacterOverReductiveSubalgebra(
     std::string* report,
     CharacterSemisimpleLieAlgebraModule& output,
@@ -661,20 +750,34 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     std::string* outputDetails
   );
   std::string toStringFullCharacterWeightsTable();
-  bool drawMeNoMultiplicities(std::string& outputDetails, DrawingVariables& drawingVariables, int upperBoundWeights) {
-    return this->drawMe(outputDetails, drawingVariables, upperBoundWeights, false);
+  bool drawMeNoMultiplicities(
+    std::string& outputDetails,
+    DrawingVariables& drawingVariables,
+    int upperBoundWeights
+  ) {
+    return
+    this->drawMe(outputDetails, drawingVariables, upperBoundWeights, false);
   }
   int getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
     const Weight<Coefficient>& weightInFundamentalCoordinates,
     const Vector<Coefficient>& alphaInFundamentalCoordinates
   );
-  bool drawMeWithMultiplicities(std::string& outputDetails, DrawingVariables& drawingVariables, int upperBoundWeights) {
-    return this->drawMe(outputDetails, drawingVariables, upperBoundWeights, true);
+  bool drawMeWithMultiplicities(
+    std::string& outputDetails,
+    DrawingVariables& drawingVariables,
+    int upperBoundWeights
+  ) {
+    return
+    this->drawMe(outputDetails, drawingVariables, upperBoundWeights, true);
   }
-  void drawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& drawingVariables) const;
+  void drawMeAssumeCharIsOverCartan(
+    WeylGroupData& actualAmbientWeyl, DrawingVariables& drawingVariables
+  ) const;
   SemisimpleLieAlgebra* getOwner() const {
     if (this->size() == 0) {
-      global.fatal << "Requesting owner semisimple Lie algebra of zero character. " << global.fatal;
+      global.fatal
+      << "Requesting owner semisimple Lie algebra of zero character. "
+      << global.fatal;
     }
     return (*this)[0].owner;
   }
@@ -689,7 +792,8 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     CharacterSemisimpleLieAlgebraModule& output,
     const Selection& splittingParabolicSelection,
     const Selection& parabolicSelectionFiniteDimensionalInducingPart,
-    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSubgroup
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms&
+    outputWeylSubgroup
   );
   int getIndexExtremeWeightRelativeToWeyl(WeylGroupData& weyl) const;
   void makeTrivial(SemisimpleLieAlgebra& inputOwner);
@@ -704,7 +808,9 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     return output;
   }
   void operator*=(const Coefficient& other) {
-    this->::LinearCombination<Weight<Coefficient>, Coefficient>::operator*=(other);
+    this->::LinearCombination<Weight<Coefficient>, Coefficient>::operator*=(
+      other
+    );
   }
 };
 
@@ -713,9 +819,11 @@ public:
   SemisimpleLieAlgebra* domain;
   SemisimpleLieAlgebra* coDomain;
   // Images of g_1, g_2, ..., g_{rank}, in this order.
-  List<ElementSemisimpleLieAlgebra<Rational> > imagesPositiveSimpleChevalleyGenerators;
+  List<ElementSemisimpleLieAlgebra<Rational> >
+  imagesPositiveSimpleChevalleyGenerators;
   // Images of g_-1, g_-2, ..., g_{-rank}, in this order.
-  List<ElementSemisimpleLieAlgebra<Rational> > imagesNegativeSimpleChevalleyGenerators;
+  List<ElementSemisimpleLieAlgebra<Rational> >
+  imagesNegativeSimpleChevalleyGenerators;
   // imagesAllChevalleyGenerators are given in the same order as
   // the one used in MonomialUniversalEnveloping.
   List<ElementSemisimpleLieAlgebra<Rational> > imagesAllChevalleyGenerators;
@@ -725,35 +833,51 @@ public:
   Vectors<Rational> imagesCartanDomain;
   SemisimpleLieAlgebra& domainAlgebra() {
     if (this->domain == nullptr) {
-      global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
+      global.fatal
+      << "Non-initialized HomomorphismSemisimpleLieAlgebra. "
+      << global.fatal;
     }
     return *this->domain;
   }
   SemisimpleLieAlgebra& coDomainAlgebra() {
     if (this->coDomain == nullptr) {
-      global.fatal << "Non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
+      global.fatal
+      << "Non-initialized HomomorphismSemisimpleLieAlgebra. "
+      << global.fatal;
     }
     return *this->coDomain;
   }
-  HomomorphismSemisimpleLieAlgebra(): domain(nullptr), coDomain(nullptr) {
-  }
-  void getWeightsGmodKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
-    this->getWeightsRelativeToKInSimpleKCoordinates(outputWeights, this->gModK);
+  HomomorphismSemisimpleLieAlgebra(): domain(nullptr), coDomain(nullptr) {}
+  void getWeightsGmodKInSimpleCoordinatesK(
+    Vectors<Rational>& outputWeights
+  ) {
+    this->getWeightsRelativeToKInSimpleKCoordinates(
+      outputWeights, this->gModK
+    );
   }
   void getWeightsRelativeToKInSimpleKCoordinates(
-    Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElements
+    Vectors<Rational>& outputWeights,
+    List<ElementSemisimpleLieAlgebra<Rational> >& inputElements
   );
   void toString(std::string& output) {
     this->toString(output, false);
   }
   void toString(std::string& output, bool useHtml);
   void makeGInGWithIdentity(SemisimpleLieAlgebra& owner);
-  void projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
-  void projectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
-  void getMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
+  void projectOntoSmallCartan(
+    Vector<Rational>& input, Vector<Rational>& output
+  );
+  void projectOntoSmallCartan(
+    Vectors<Rational>& input, Vectors<Rational>& output
+  );
+  void getMapSmallCartanDualToLargeCartanDual(Matrix<Rational>& output);
   std::string toString(bool useHtml = true);
-  void getRestrictionAmbientRootSystemToTheSmallerCartanSubalgebra(Vectors<Rational>& output);
-  bool computeHomomorphismFromImagesSimpleChevalleyGenerators(std::stringstream* commentsOnFailure);
+  void getRestrictionAmbientRootSystemToTheSmallerCartanSubalgebra(
+    Vectors<Rational>& output
+  );
+  bool computeHomomorphismFromImagesSimpleChevalleyGenerators(
+    std::stringstream* commentsOnFailure
+  );
   bool checkIsHomomorphism();
   bool checkClosednessLieBracket();
   bool checkInitialization();
@@ -791,46 +915,21 @@ public:
   DynkinType dynkinTypeAmbientNoFailure();
   std::string toString();
   CartanInvolution();
-  bool computeSimpleRootImagesTypeAI(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeAII(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeAIII(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeBI(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeCI(
-    std::stringstream* commentsOnFailure
-  );
+  bool computeSimpleRootImagesTypeAI(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeAII(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeAIII(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeBI(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeCI(std::stringstream* commentsOnFailure);
   bool computeSimpleRootImagesTypeD(
-    std::stringstream* commentsOnFailure,
-    bool useAutomorphism
+    std::stringstream* commentsOnFailure, bool useAutomorphism
   );
-  bool computeSimpleRootImagesTypeDI(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeDII(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeEI(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeEII(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeEIII(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImagesTypeEIV(
-    std::stringstream* commentsOnFailure
-  );
-  bool computeSimpleRootImages(
-    std::stringstream* commentsOnFailure
-  );
+  bool computeSimpleRootImagesTypeDI(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeDII(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeEI(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeEII(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeEIII(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImagesTypeEIV(std::stringstream* commentsOnFailure);
+  bool computeSimpleRootImages(std::stringstream* commentsOnFailure);
   bool computeFromDiagram(
     const VoganDiagram& inputDiagram,
     SemisimpleLieAlgebra& inputOwner,
@@ -842,9 +941,12 @@ public:
 
 template <class Coefficient>
 bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
-  const List<ElementSemisimpleLieAlgebra>& basis, Vector<Coefficient>& output
+  const List<ElementSemisimpleLieAlgebra>& basis,
+  Vector<Coefficient>& output
 ) const {
-  MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
+  MacroRegisterFunctionWithName(
+    "ElementSemisimpleLieAlgebra::getCoordinatesInBasis"
+  );
   if (basis.size == 0) {
     return false;
   }
@@ -855,7 +957,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
   Vectors<Coefficient> basisVectors;
   Vector<Coefficient> element;
   basisVectors.setSize(basis.size);
-  for (int i = 0 ; i < basis.size; i ++) {
+  for (int i = 0; i < basis.size; i ++) {
     basis[i].toVectorNegativeRootSpacesFirst(basisVectors[i]);
   }
   this->toVectorNegativeRootSpacesFirst(element);
@@ -873,3 +975,4 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(
 }
 
 #endif // header_math_extra_semisimple_lie_algebras_ALREADY_INCLUDED
+

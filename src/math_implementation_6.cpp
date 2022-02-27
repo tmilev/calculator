@@ -1,10 +1,11 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_general_implementation.h"
 #include "math_extra_polynomial_factorization.h"
 
-template<>
+template < >
 void PolynomialConversions::convertToPolynomial(
   const PolynomialUnivariateModular& input,
   Polynomial<ElementZmodP>& output
@@ -13,32 +14,38 @@ void PolynomialConversions::convertToPolynomial(
   ElementZmodP coefficient;
   MonomialPolynomial monomial;
   for (int i = 0; i < input.coefficients.size; i ++) {
-    coefficient.makeFrom(input.modulusData->modulus, input.coefficients[i]);
+    coefficient.makeFrom(
+      input.modulusData->modulus, input.coefficients[i]
+    );
     monomial.makeEi(0, i);
     output.addMonomial(monomial, coefficient);
   }
 }
 
-template<class Coefficient>
+template <class Coefficient>
 bool Polynomial<Coefficient>::isSquareFreeAndUnivariate(
-  const Coefficient& one,
-  std::stringstream* comments
+  const Coefficient& one, std::stringstream* comments
 ) const {
   int numberOfVariables = this->minimalNumberOfVariables();
   if (numberOfVariables > 1) {
     if (comments != nullptr) {
-      *comments << "Not univariate: polynomial has "
-      << numberOfVariables << " variables. ";
+      *comments
+      << "Not univariate: polynomial has "
+      << numberOfVariables
+      << " variables. ";
     }
     return false;
   }
   return this->isSquareFree(one, comments);
 }
 
-template<>
-bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) {
+template < >
+bool Polynomial<Rational>::findOneVariableRationalRoots(
+  List<Rational>& output
+) {
   MacroRegisterFunctionWithName("Polynomial::findOneVariableRationalRoots");
-  List<MonomialPolynomial>::Comparator* monomialOrder = &MonomialPolynomial::orderDefault();
+  List<MonomialPolynomial>::Comparator* monomialOrder =
+  &MonomialPolynomial::orderDefault();
   if (this->minimalNumberOfVariables() > 1) {
     return false;
   }
@@ -48,7 +55,9 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   }
   Polynomial<Rational> myCopy;
   myCopy = *this;
-  myCopy.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+  myCopy.scaleNormalizeLeadingMonomial(
+    &MonomialPolynomial::orderDefault()
+  );
   Rational lowestTerm, highestCoefficient;
   this->getConstantTerm(lowestTerm);
   if (lowestTerm == 0) {
@@ -65,7 +74,9 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
     return true;
   }
   highestCoefficient = this->getLeadingCoefficient(monomialOrder);
-  if (!highestCoefficient.isSmallInteger() || !lowestTerm.isSmallInteger()) {
+  if (
+    !highestCoefficient.isSmallInteger() || !lowestTerm.isSmallInteger()
+  ) {
     return false;
   }
   Vector<Rational> tempV;
@@ -75,7 +86,9 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   LargeInteger hT, lT;
   hT = highestCoefficient.getNumerator();
   lT = lowestTerm.getNumerator();
-  if (!hT.getDivisors(divisorsH, false) || !lT.getDivisors(divisorsS, true)) {
+  if (
+    !hT.getDivisors(divisorsH, false) || !lT.getDivisors(divisorsS, true)
+  ) {
     return false;
   }
   for (int i = 0; i < divisorsH.size; i ++) {
@@ -97,7 +110,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   return true;
 }
 
-template <>
+template < >
 void Polynomial<Rational>::getValuesLagrangeInterpolands(
   Vector<Rational>& pointsOfInterpolation,
   Vector<Rational>& pointsOfEvaluation,
@@ -110,22 +123,25 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
     for (int j = 0; j < pointsOfInterpolation.size; j ++) {
       currentInterpoland[j] = (i == j) ? 1 : 0;
     }
-    for (int j = pointsOfInterpolation.size; j < pointsOfEvaluation.size; j ++) {
+    for (
+      int j = pointsOfInterpolation.size; j < pointsOfEvaluation.size; j ++
+    ) {
       currentInterpoland[j] = 1;
       for (int k = 0; k < pointsOfInterpolation.size; k ++) {
         if (i == k) {
           continue;
         }
-        currentInterpoland[j] *= pointsOfEvaluation[j] - pointsOfInterpolation[k];
-        currentInterpoland[j] /= pointsOfInterpolation[i] - pointsOfInterpolation[k];
+        currentInterpoland[j] *=
+        pointsOfEvaluation[j] - pointsOfInterpolation[k];
+        currentInterpoland[j] /=
+        pointsOfInterpolation[i] - pointsOfInterpolation[k];
       }
     }
   }
 }
 
 bool PolynomialFactorizationKronecker::oneFactor(
-  std::stringstream* comments,
-  std::stringstream* commentsOnFailure
+  std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Polynomial::oneFactor");
   (void) comments;
@@ -150,7 +166,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   primeFactorsMults.setSize(degreeLeft + 1);
   allPointsOfEvaluation[0] = 0;
   for (int i = 1; i < allPointsOfEvaluation.size; i ++) {
-    allPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : - (i / 2);
+    allPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : -(i / 2);
   }
   Vector<Rational> argument;
   argument.setSize(1);
@@ -169,9 +185,15 @@ bool PolynomialFactorizationKronecker::oneFactor(
       continue;
     }
     valuesAtPoints[i].isInteger(&tempLI);
-    if (!tempLI.value.factor(
-      primeFactorsAtPoints[i], primeFactorsMults[i], 0, 3, commentsOnFailure
-    )) {
+    if (
+      !tempLI.value.factor(
+        primeFactorsAtPoints[i],
+        primeFactorsMults[i],
+        0,
+        3,
+        commentsOnFailure
+      )
+    ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "<br>Aborting polynomial factorization: "
@@ -197,13 +219,18 @@ bool PolynomialFactorizationKronecker::oneFactor(
   Polynomial<Rational>::getValuesLagrangeInterpolands(
     pointsOfInterpolationLeft, allPointsOfEvaluation, valuesLeftInterpolands
   );
-  ProgressReport report(1000, GlobalVariables::Response::ReportType::general);
+  ProgressReport report(
+    1000, GlobalVariables::Response::ReportType::general
+  );
   LargeInteger total = divisorSelection.totalCombinations();
   do {
     if (report.tickAndWantReport()) {
       std::stringstream reportStream;
-      reportStream << "Trying divisor combination "
-      << report.ticks << " out of " << total.toString();
+      reportStream
+      << "Trying divisor combination "
+      << report.ticks
+      << " out of "
+      << total.toString();
       report.report(reportStream.str());
     }
     this->output->computations ++;
@@ -213,22 +240,27 @@ bool PolynomialFactorizationKronecker::oneFactor(
     ) {
       // We've exceeded our computational budget.
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Kronecker factorization ran too "
+        *commentsOnFailure
+        << "Kronecker factorization ran too "
         << "many combinations: maximum allowed was: "
         << this->output->maximumComputations
         << ", but the total computations was "
-        << total.toString() << ". ";
+        << total.toString()
+        << ". ";
       }
       return false;
     }
     valuesAtRemainingPoints.makeZero(valuesAtPoints.size);
     Rational firstValue;
-    bool isGood = false; //<-we shall first check if the divisor is constant.
+    bool isGood = false;
+    // <-we shall first check if the divisor is constant.
     for (int j = 0; j < divisorSelection.elements.size; j ++) {
       currentPointContribution = 1;
       for (int k = 0; k < divisorSelection[j].elements.size; k ++) {
         currentPrimePowerContribution = primeFactorsAtPoints[j][k];
-        currentPrimePowerContribution.raiseToPower(divisorSelection[j][k].amount);
+        currentPrimePowerContribution.raiseToPower(
+          divisorSelection[j][k].amount
+        );
         currentPointContribution *= currentPrimePowerContribution;
       }
       if (!isGood) {
@@ -236,11 +268,14 @@ bool PolynomialFactorizationKronecker::oneFactor(
           firstValue = currentPointContribution;
         } else {
           if (firstValue != currentPointContribution) {
-            isGood = true; //<- the divisor has takes two different values, hence is non-constant.
+            isGood = true;
+            // <- the divisor has takes two different values, hence is
+            // non-constant.
           }
         }
       }
-      valuesAtRemainingPoints += valuesLeftInterpolands[j] * currentPointContribution;
+      valuesAtRemainingPoints +=
+      valuesLeftInterpolands[j] * currentPointContribution;
     }
     if (!isGood) {
       continue;
@@ -250,7 +285,8 @@ bool PolynomialFactorizationKronecker::oneFactor(
         isGood = false;
         break;
       }
-      currentPointContribution = valuesAtPoints[j] / valuesAtRemainingPoints[j];
+      currentPointContribution = valuesAtPoints[j] / valuesAtRemainingPoints[j]
+      ;
       if (!currentPointContribution.isInteger()) {
         isGood = false;
         break;
@@ -260,10 +296,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       continue;
     }
     Polynomial<Rational> incoming;
-    incoming.interpolate(
-      pointsOfInterpolationLeft,
-      valuesAtRemainingPoints
-    );
+    incoming.interpolate(pointsOfInterpolationLeft, valuesAtRemainingPoints);
     if (this->output->accountNonReducedFactor(incoming)) {
       return true;
     }
@@ -277,7 +310,9 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   AlgebraicClosureRationals& closure,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationKronecker::solvePolynomial");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationKronecker::solvePolynomial"
+  );
   PolynomialFactorizationUnivariate<Rational> factorization;
   if (input.totalDegree() < 1) {
     if (commentsOnFailure != nullptr) {
@@ -308,8 +343,10 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
     a = factor.getCoefficientOf(xSquared);
     if (factor.totalDegree() > 2 || factor.totalDegree() < 1) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Degree of factor "
-        << factor.toString() << " is not 1 or 2. ";
+        *commentsOnFailure
+        << "Degree of factor "
+        << factor.toString()
+        << " is not 1 or 2. ";
       }
       return false;
     }
@@ -319,18 +356,21 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
     if (factor.totalDegree() == 2) {
       AlgebraicNumber squareRootOfDiscriminant;
       Rational discriminant = factor.getDiscriminant();
-      if (!squareRootOfDiscriminant.assignRationalQuadraticRadical(
-        discriminant, closure, nullptr
-      )) {
+      if (
+        !squareRootOfDiscriminant.assignRationalQuadraticRadical(
+          discriminant, closure, nullptr
+        )
+      ) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "Failed to extract the square root of the discriminant: "
-          << discriminant.toString() << ".";
+          << discriminant.toString()
+          << ".";
         }
         return false;
       }
-      AlgebraicNumber xOne = (squareRootOfDiscriminant - b) / (2 * a);
-      AlgebraicNumber xTwo = (squareRootOfDiscriminant * (- 1) - b) / (2 * a);
+      AlgebraicNumber xOne = (squareRootOfDiscriminant - b) / (2* a);
+      AlgebraicNumber xTwo = (squareRootOfDiscriminant *(- 1) - b) / (2* a);
       output.addOnTop(xOne);
       output.addOnTop(xTwo);
     }
@@ -352,8 +392,7 @@ PolynomialFactorizationFiniteFields::PolynomialFactorizationFiniteFields() {
 }
 
 bool PolynomialFactorizationFiniteFields::factorWithTiming(
-  std::stringstream* comments,
-  std::stringstream* commentsOnFailure
+  std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
   int64_t startMilliseconds = global.getElapsedMilliseconds();
   this->millisecondsLift = 0;
@@ -363,13 +402,19 @@ bool PolynomialFactorizationFiniteFields::factorWithTiming(
   this->millisecondsFactorizationFromLift = 0;
   this->numberOfRunsOfFactor ++;
   bool result = this->factor(comments, commentsOnFailure);
-  int64_t ellapsedMillseconds = global.getElapsedMilliseconds() - startMilliseconds;
+  int64_t ellapsedMillseconds =
+  global.getElapsedMilliseconds() - startMilliseconds;
   if (this->millisecondsTotal == 0) {
     this->millisecondsTotal = ellapsedMillseconds;
   } else {
-    global << Logger::red << "Second run of factorWithTiming; input: "
-    << this->output->original.toString() << ". Milliseconds: "
-    << ellapsedMillseconds << " ms. " << Logger::endL;
+    global
+    << Logger::red
+    << "Second run of factorWithTiming; input: "
+    << this->output->original.toString()
+    << ". Milliseconds: "
+    << ellapsedMillseconds
+    << " ms. "
+    << Logger::endL;
   }
   return result;
 }
@@ -377,7 +422,9 @@ bool PolynomialFactorizationFiniteFields::factorWithTiming(
 bool PolynomialFactorizationFiniteFields::hasSquareFactor(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::hasSquareFactor");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::hasSquareFactor"
+  );
   (void) comments;
   List<int> quickCheckPrimes = List<int>({101, 103, 107, 109, 113});
   for (int i = 0; i < quickCheckPrimes.size; i ++) {
@@ -389,7 +436,9 @@ bool PolynomialFactorizationFiniteFields::hasSquareFactor(
     // The current polynomial is supposed to have integer coefficients,
     // hence the modular conversion cannot fail due to division by
     // zero.
-    converted.makeFromPolynomialAndModulusNoFailure(&modulus, this->current);
+    converted.makeFromPolynomialAndModulusNoFailure(
+      &modulus, this->current
+    );
     converted.derivative(derivative);
     converted.greatestCommonDivisor(
       converted,
@@ -432,8 +481,7 @@ bool PolynomialFactorizationFiniteFields::hasSquareFactor(
 }
 
 bool PolynomialFactorizationFiniteFields::factor(
-  std::stringstream* comments,
-  std::stringstream* commentsOnFailure
+  std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factor");
   this->current = this->output->current;
@@ -458,9 +506,9 @@ bool PolynomialFactorizationFiniteFields::factor(
   global.getElapsedMilliseconds() - squareFreeStart;
   const List<unsigned int>& primeFactors =
   LargeIntegerUnsigned::allPrimesSmallerThan15Bits();
-  this->leadingCoefficient = this->current.getLeadingCoefficient(
-    &MonomialPolynomial::orderDefault()
-  ).getNumerator();
+  this->leadingCoefficient =
+  this->current.getLeadingCoefficient(&MonomialPolynomial::orderDefault()).
+  getNumerator();
   for (int i = 1; i < primeFactors.size; i ++) {
     if (this->leadingCoefficient.value % primeFactors[i] == 0) {
       // Leading coefficient is divisible by prime.
@@ -477,7 +525,9 @@ bool PolynomialFactorizationFiniteFields::factor(
     ) {
       continue;
     }
-    this->modularization.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
+    this->modularization.scaleNormalizeLeadingMonomial(
+      &MonomialPolynomial::orderDefault()
+    );
     return this->oneFactorFromModularization(comments, commentsOnFailure);
   }
   return this->output->accountNonReducedFactorTemplate(this->current);
@@ -486,23 +536,24 @@ bool PolynomialFactorizationFiniteFields::factor(
 bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::oneFactorFromModularization");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::oneFactorFromModularization"
+  );
   int64_t startCantorZassenhaus = global.getElapsedMilliseconds();
   PolynomialFactorizationUnivariate<ElementZmodP> factorizationModular;
   PolynomialFactorizationCantorZassenhaus<
     PolynomialModuloPolynomialModuloInteger,
     PolynomialUnivariateModular,
     PolynomialUnivariateModularAsModulus
-  > algorithm;  
+  > algorithm;
   PolynomialUnivariateModular zero;
   zero.makeZero(&this->smallModulus);
   algorithm.initialize(zero);
-  if (!factorizationModular.factor(
-    this->modularization,
-    algorithm,
-    comments,
-    commentsOnFailure
-  )) {
+  if (
+    !factorizationModular.factor(
+      this->modularization, algorithm, comments, commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to factor modular polynomial: "
@@ -510,10 +561,10 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
     }
     return false;
   }
-  this->millisecondsCantorZassenhaus = global.getElapsedMilliseconds() - startCantorZassenhaus;
+  this->millisecondsCantorZassenhaus =
+  global.getElapsedMilliseconds() - startCantorZassenhaus;
   this->factorsOverPrime = factorizationModular.reduced;
   this->format.flagSuppressModP = true;
-
   //  this->computeCoefficientBoundsElementary();
   this->computeCoefficientBoundsGelfond();
   int64_t startHenselLift = global.getElapsedMilliseconds();
@@ -521,16 +572,23 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   this->millisecondsLift = global.getElapsedMilliseconds() - startHenselLift;
   int64_t startFactorizationFromHenselLift = global.getElapsedMilliseconds();
   bool result = this->factorizationFromHenselLift(comments, commentsOnFailure);
-  this->millisecondsFactorizationFromLift = global.getElapsedMilliseconds() - startFactorizationFromHenselLift;
+  this->millisecondsFactorizationFromLift =
+  global.getElapsedMilliseconds() - startFactorizationFromHenselLift;
   return result;
 }
 
-void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary() {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary");
+void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary()
+{
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary"
+  );
   this->largestCoefficient = 0;
   for (int i = 0; i < this->current.size(); i ++) {
-    this->largestCoefficient = MathRoutines::maximum(
-      LargeInteger(this->current.coefficients[i].getNumerator().value),
+    this->largestCoefficient =
+    MathRoutines::maximum(
+      LargeInteger(
+        this->current.coefficients[i].getNumerator().value
+      ),
       this->largestCoefficient
     );
   }
@@ -545,42 +603,60 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary() {
   // i_1, ..., i_k run over the different roots of the polynomial.
   // There are (n choose k) summands and each summand can be bounded above
   // by replacing x_j with upperBoundAbsoluteValueRoot.
-  // Therefore |a_k| <= leadingCoefficient * (n choose k) * upperBoundAbsoluteValueRoot^k
+  // Therefore |a_k| <= leadingCoefficient * (n choose k) *
+  // upperBoundAbsoluteValueRoot^k
   // Since the largest binomial coefficient is (n choose floor(n/2)), this is
   // bounded above by
   // leadingCoefficient * (n choose floor(n/2)) * upperBoundAbsoluteValueRoot^n
   this->coefficientBound = this->upperBoundAbsoluteValueRoot;
   this->coefficientBound.raiseToPower(this->degree);
   this->coefficientBound *= this->largestCoefficient;
-  this->coefficientBound *= MathRoutines::nChooseK(this->degree, this->degree / 2);
+  this->coefficientBound *=
+  MathRoutines::nChooseK(this->degree, this->degree / 2);
 }
 
 void PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond() {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond"
+  );
   this->largestCoefficient = 0;
   for (int i = 0; i < this->current.size(); i ++) {
-    this->largestCoefficient = MathRoutines::maximum(
-      LargeInteger(this->current.coefficients[i].getNumerator().value),
+    this->largestCoefficient =
+    MathRoutines::maximum(
+      LargeInteger(
+        this->current.coefficients[i].getNumerator().value
+      ),
       this->largestCoefficient
     );
   }
   this->coefficientBound = 2;
-  MathRoutines::raiseToPower(this->coefficientBound, this->degree, LargeInteger(1));
+  MathRoutines::raiseToPower(
+    this->coefficientBound, this->degree, LargeInteger(1)
+  );
   this->coefficientBound *= this->largestCoefficient;
   this->coefficientBound *= this->degree;
 }
 
-void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::henselLift");
-  SylvesterMatrix<ElementZmodP>::sylvesterMatrixProduct(this->factorsOverPrime, this->sylvesterMatrix, comments);
-
+void PolynomialFactorizationFiniteFields::henselLift(
+  std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::henselLift"
+  );
+  SylvesterMatrix<ElementZmodP>::sylvesterMatrixProduct(
+    this->factorsOverPrime, this->sylvesterMatrix, comments
+  );
   if (comments != nullptr) {
-    *comments << "Sylvester matrix: " << this->sylvesterMatrix.toString(&this->format);
+    *comments
+    << "Sylvester matrix: "
+    << this->sylvesterMatrix.toString(&this->format);
   }
   this->sylvesterMatrixInverted = this->sylvesterMatrix;
   bool mustBeTrue = this->sylvesterMatrixInverted.invert();
   if (!mustBeTrue) {
-    global.fatal << "Sylvester product matrix is supposed to be invertible. " << global.fatal;
+    global.fatal
+    << "Sylvester product matrix is supposed to be invertible. "
+    << global.fatal;
   }
   this->factorsLifted = this->factorsOverPrime;
   this->modulusHenselLift = this->oneModular.modulus;
@@ -595,25 +671,32 @@ void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments
 }
 
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
-  const LargeIntegerUnsigned& oldModulus,
-  std::stringstream* comments
+  const LargeIntegerUnsigned& oldModulus, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::henselLiftOnce");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::henselLiftOnce"
+  );
   for (int i = 0; i < this->factorsLifted.size; i ++) {
     ElementZmodP::convertLiftPolynomialModular(
-      this->factorsLifted[i], this->factorsLifted[i], this->modulusHenselLift
+      this->factorsLifted[i],
+      this->factorsLifted[i],
+      this->modulusHenselLift
     );
   }
   if (comments != nullptr) {
-    *comments << "<hr>"
-    << "Modulus: " << this->modulusHenselLift << ". "
+    *comments
+    << "<hr>"
+    << "Modulus: "
+    << this->modulusHenselLift
+    << ". "
     << "Lifted factors without correction: "
     << this->factorsLifted.toStringCommaDelimited(&this->format);
   }
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
     this->current, this->desiredLift, this->modulusHenselLift
   );
-  this->scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(
+  this->scaleProductLift =
+  this->desiredLift.scaleNormalizeLeadingMonomial(
     &MonomialPolynomial::orderDefault()
   );
   Polynomial<ElementZmodP> newProduct;
@@ -624,13 +707,16 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     newProduct *= this->factorsLifted[i];
   }
   if (comments != nullptr) {
-    *comments << "<br>Lifted product without correction: "
+    *comments
+    << "<br>Lifted product without correction: "
     << newProduct.toString(&this->format);
   }
   newProduct -= this->desiredLift;
   if (comments != nullptr) {
     *comments << "<br>Desired lift: " << desiredLift.toString(&this->format);
-    *comments << "<br>To be corrected: " << newProduct.toString(&this->format);
+    *comments
+    << "<br>To be corrected: "
+    << newProduct.toString(&this->format);
   }
   Vector<ElementZmodP> coefficientsCorrection;
   coefficientsCorrection.makeZero(
@@ -642,35 +728,42 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   for (int i = 0; i < newProduct.size(); i ++) {
     int index =
     this->sylvesterMatrixInverted.numberOfColumns -
-    newProduct.monomials[i].totalDegreeInt() - 1;
-    coefficientsCorrection[index].value =
-    newProduct.coefficients[i].value / oldModulus;
+    newProduct.monomials[i].totalDegreeInt() -
+    1;
+    coefficientsCorrection[index].value = newProduct.coefficients[i].value /
+    oldModulus;
     coefficientsCorrection[index] *= minusOne;
   }
   if (comments != nullptr) {
-    *comments << "<br>Z-vector: " << coefficientsCorrection.toString(&this->format);
+    *comments
+    << "<br>Z-vector: "
+    << coefficientsCorrection.toString(&this->format);
   }
   this->sylvesterMatrixInverted.actOnVectorColumn(
     coefficientsCorrection, this->oneModular.zero()
   );
   if (comments != nullptr) {
-    *comments << "<br>solution vector: " << coefficientsCorrection.toString(&this->format);
+    *comments
+    << "<br>solution vector: "
+    << coefficientsCorrection.toString(&this->format);
   }
   int offset = 0;
   for (int i = 0; i < this->factorsLifted.size; i ++) {
-    int summandsCurrentFactor =
-    this->factorsLifted[i].totalDegreeInt();
+    int summandsCurrentFactor = this->factorsLifted[i].totalDegreeInt();
     for (int j = 0; j < summandsCurrentFactor; j ++) {
       ElementZmodP incoming;
       incoming.modulus = this->modulusHenselLift;
       int index = offset + summandsCurrentFactor - 1 - j;
       incoming.value = coefficientsCorrection[index].value * oldModulus;
-      this->factorsLifted[i].addMonomial(MonomialPolynomial(0, j), incoming);
+      this->factorsLifted[i].addMonomial(
+        MonomialPolynomial(0, j), incoming
+      );
     }
     offset += summandsCurrentFactor;
   }
   if (comments != nullptr) {
-    *comments << "<br>Lifted factors, modulus: "
+    *comments
+    << "<br>Lifted factors, modulus: "
     << this->factorsLifted.toStringCommaDelimited(&this->format);
   }
   Polynomial<ElementZmodP> productLift;
@@ -679,21 +772,32 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     productLift *= this->factorsLifted[i];
   }
   if (comments != nullptr) {
-    *comments << "<br>Lifted product, corrected, before rescaling: "
+    *comments
+    << "<br>Lifted product, corrected, before rescaling: "
     << productLift.toString(&this->format);
   }
   productLift /= this->scaleProductLift;
   if (comments != nullptr) {
-    *comments << "<br>Lifted product, corrected: "
+    *comments
+    << "<br>Lifted product, corrected: "
     << productLift.toString(&this->format);
     Polynomial<Rational> negativesIncluded;
-    ElementZmodP::convertPolynomialModularToPolynomialIntegral(productLift, negativesIncluded, true);
-    *comments << "<br>Lifted product, over Z: " << negativesIncluded.toString(&this->format) << "<hr>";
+    ElementZmodP::convertPolynomialModularToPolynomialIntegral(
+      productLift, negativesIncluded, true
+    );
+    *comments
+    << "<br>Lifted product, over Z: "
+    << negativesIncluded.toString(&this->format)
+    << "<hr>";
   }
 }
 
-bool PolynomialFactorizationFiniteFields::tryFactor(SelectionFixedRank& selection) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::tryFactor");
+bool PolynomialFactorizationFiniteFields::tryFactor(
+  SelectionFixedRank& selection
+) {
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::tryFactor"
+  );
   Polynomial<ElementZmodP> product;
   ElementZmodP start;
   start.makeOne(this->modulusHenselLift);
@@ -703,26 +807,34 @@ bool PolynomialFactorizationFiniteFields::tryFactor(SelectionFixedRank& selectio
     product *= this->factorsLifted[selection.selection.elements[i]];
   }
   Polynomial<Rational> candidate;
-  ElementZmodP::convertPolynomialModularToPolynomialIntegral(product, candidate, true);
+  ElementZmodP::convertPolynomialModularToPolynomialIntegral(
+    product, candidate, true
+  );
   if (!this->output->accountReducedFactor(candidate, false)) {
     return false;
   }
   selection.selection.invertSelection();
   List<Polynomial<ElementZmodP> > factorsLiftedTrimmed;
   for (int i = 0; i < selection.selection.cardinalitySelection; i ++) {
-    factorsLiftedTrimmed.addOnTop(this->factorsLifted[selection.selection.elements[i]]);
+    factorsLiftedTrimmed.addOnTop(
+      this->factorsLifted[selection.selection.elements[i]]
+    );
   }
   this->factorsLifted = factorsLiftedTrimmed;
   return true;
 }
 
 bool PolynomialFactorizationFiniteFields::factorizationFromHenselLift(
-  std::stringstream *comments, std::stringstream *commentsOnFailure
+  std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factorizationFromHenselLift");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::factorizationFromHenselLift"
+  );
   this->maximumFactorsLiftedTries = 1000;
   while (this->factorsLifted.size > 0) {
-    if (!this->factorizationFromHenselLiftOnce(comments, commentsOnFailure)) {
+    if (
+      !this->factorizationFromHenselLiftOnce(comments, commentsOnFailure)
+    ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to carry out hensel lift. ";
       }
@@ -735,22 +847,29 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLift(
 bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce");
+  MacroRegisterFunctionWithName(
+    "PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce"
+  );
   (void) comments;
   SelectionFixedRank selection;
-  // global.comments << "And the factors are: " << this->factorsLifted.toStringCommaDelimited();
+  // global.comments << "And the factors are: " <<
+  // this->factorsLifted.toStringCommaDelimited();
   int maximumSubsetsToTry = this->factorsLifted.size / 2;
   LargeInteger twoPowerN = 2;
   twoPowerN.raiseToPower(maximumSubsetsToTry);
   for (int i = 1; i <= maximumSubsetsToTry; i ++) {
-    selection.setNumberOfItemsAndDesiredSubsetSize(i, this->factorsLifted.size);
+    selection.setNumberOfItemsAndDesiredSubsetSize(
+      i, this->factorsLifted.size
+    );
     do {
       this->factorsLiftedTries ++;
       if (this->factorsLiftedTries > this->maximumFactorsLiftedTries) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "The maximum allowed Hensel lift combinations is: "
-          << this->maximumFactorsLiftedTries << ". Total possibilities: " << twoPowerN;
+          << this->maximumFactorsLiftedTries
+          << ". Total possibilities: "
+          << twoPowerN;
         }
         return false;
       }
@@ -759,18 +878,22 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
       }
     } while (selection.incrementReturnFalseIfPastLast());
   }
-  selection.setNumberOfItemsAndDesiredSubsetSize(this->factorsLifted.size, this->factorsLifted.size);
+  selection.setNumberOfItemsAndDesiredSubsetSize(
+    this->factorsLifted.size, this->factorsLifted.size
+  );
   if (!this->tryFactor(selection)) {
     // The product of all lifts should be equal to the
     // original polynomial, which is not the case.
     // We've made an algorithmic or programming error.
-    global.fatal << "This code section should not be reachable. " << global.fatal;
+    global.fatal
+    << "This code section should not be reachable. "
+    << global.fatal;
   }
   return true;
 }
 
-PolynomialUnivariateModular::PolynomialUnivariateModular() : modulusData(nullptr) {
-}
+PolynomialUnivariateModular::PolynomialUnivariateModular():
+modulusData(nullptr) {}
 
 PolynomialUnivariateModular::PolynomialUnivariateModular(
   const PolynomialUnivariateModular& other
@@ -781,8 +904,8 @@ PolynomialUnivariateModular::PolynomialUnivariateModular(
 
 PolynomialUnivariateModular::PolynomialUnivariateModular(
   IntegerModulusSmall* inputModulus
-) : modulusData(inputModulus) {
-}
+):
+modulusData(inputModulus) {}
 
 bool PolynomialUnivariateModular::greatestCommonDivisor(
   const PolynomialUnivariateModular& left,
@@ -792,7 +915,8 @@ bool PolynomialUnivariateModular::greatestCommonDivisor(
   std::stringstream* commentsOnFailure
 ) {
   (void) unused;
-  return PolynomialUnivariateModular::greatestCommonDivisor(
+  return
+  PolynomialUnivariateModular::greatestCommonDivisor(
     left, right, output, commentsOnFailure
   );
 }
@@ -806,7 +930,8 @@ bool PolynomialUnivariateModular::greatestCommonDivisor(
   if (&output == &left || &output == &right) {
     PolynomialUnivariateModular leftCopy = left;
     PolynomialUnivariateModular rightCopy = right;
-    return PolynomialUnivariateModular::greatestCommonDivisor(
+    return
+    PolynomialUnivariateModular::greatestCommonDivisor(
       leftCopy, rightCopy, output, commentsOnFailure
     );
   }
@@ -868,9 +993,7 @@ void PolynomialUnivariateModular::addTerm(int coefficient, int termPower) {
 }
 
 void PolynomialUnivariateModular::addAnotherTimesTerm(
-  const PolynomialUnivariateModular& other,
-  int coefficient,
-  int termPower
+  const PolynomialUnivariateModular& other, int coefficient, int termPower
 ) {
   coefficient = this->reduceIntModP(coefficient);
   this->ensureCoefficientLength(other.coefficients.size + termPower);
@@ -878,7 +1001,8 @@ void PolynomialUnivariateModular::addAnotherTimesTerm(
   for (int i = 0; i < other.coefficients.size; i ++) {
     this->coefficients[i + termPower] = (
       this->coefficients[i + termPower] + other.coefficients[i] * coefficient
-    ) % modulus;
+    ) %
+    modulus;
   }
   this->trimTrailingZeroes();
 }
@@ -897,38 +1021,43 @@ void PolynomialUnivariateModular::divideBy(
 ) const {
   if (
     this == &outputQuotient ||
-    &divisor == & outputQuotient ||
-    this == & outputRemainder ||
-    &divisor == & outputRemainder
+    &divisor == &outputQuotient ||
+    this == &outputRemainder ||
+    &divisor == &outputRemainder
   ) {
     PolynomialUnivariateModular thisCopy = *this;
     PolynomialUnivariateModular divisorCopy = divisor;
     thisCopy.divideBy(divisorCopy, outputQuotient, outputRemainder);
     return;
   }
-  int divisorInvertedLeadingCoefficient = this->modulusData->inverses[
-    divisor.getLeadingCoefficient()
-  ];
+  int divisorInvertedLeadingCoefficient =
+  this->modulusData->inverses[divisor.getLeadingCoefficient()];
   outputRemainder = *this;
   outputQuotient.makeZero(this->modulusData);
   int modulus = this->getModulus();
   if (divisor.isEqualToZero()) {
-    global.fatal
-    << "Dividing by zero is not allowed. "
-    << global.fatal;
+    global.fatal << "Dividing by zero is not allowed. " << global.fatal;
   }
-  while (outputRemainder.coefficients.size >= divisor.coefficients.size) {
-    int coefficient = (outputRemainder.getLeadingCoefficient() * divisorInvertedLeadingCoefficient) % modulus;
-    int termPower = outputRemainder.coefficients.size - divisor.coefficients.size;
+  while (
+    outputRemainder.coefficients.size >= divisor.coefficients.size
+  ) {
+    int coefficient = (
+      outputRemainder.getLeadingCoefficient() *
+      divisorInvertedLeadingCoefficient
+    ) %
+    modulus;
+    int termPower =
+    outputRemainder.coefficients.size - divisor.coefficients.size;
     outputQuotient.addTerm(coefficient, termPower);
     int coefficientNegated = modulus - coefficient;
-    outputRemainder.addAnotherTimesTerm(divisor, coefficientNegated, termPower);
+    outputRemainder.addAnotherTimesTerm(
+      divisor, coefficientNegated, termPower
+    );
   }
 }
 
 bool PolynomialUnivariateModular::makeFromPolynomialAndModulus(
-  IntegerModulusSmall* modulus,
-  const Polynomial<Rational>& input
+  IntegerModulusSmall* modulus, const Polynomial<Rational>& input
 ) {
   this->makeZero(modulus);
   for (int i = 0; i < input.size(); i ++) {
@@ -945,12 +1074,12 @@ bool PolynomialUnivariateModular::makeFromPolynomialAndModulus(
 }
 
 void PolynomialUnivariateModular::makeFromPolynomialAndModulusNoFailure(
-  IntegerModulusSmall* modulus,
-  const Polynomial<Rational>& input
+  IntegerModulusSmall* modulus, const Polynomial<Rational>& input
 ) {
   bool mustBeTrue = this->makeFromPolynomialAndModulus(modulus, input);
   if (!mustBeTrue) {
-    global.fatal << "Failed to create modular polynomial form "
+    global.fatal
+    << "Failed to create modular polynomial form "
     << input.toString()
     << " and modulus: "
     << modulus->modulus
@@ -958,9 +1087,7 @@ void PolynomialUnivariateModular::makeFromPolynomialAndModulusNoFailure(
   }
 }
 
-int PolynomialUnivariateModular::reduceModP(
-  const LargeInteger& input
-) {
+int PolynomialUnivariateModular::reduceModP(const LargeInteger& input) {
   LargeInteger reduced;
   reduced = input;
   reduced %= this->getModulus();
@@ -969,9 +1096,7 @@ int PolynomialUnivariateModular::reduceModP(
   return result;
 }
 
-void PolynomialUnivariateModular::makeZero(
-  IntegerModulusSmall* inputModulus
-) {
+void PolynomialUnivariateModular::makeZero(IntegerModulusSmall* inputModulus) {
   this->modulusData = inputModulus;
   this->coefficients.clear();
 }
@@ -993,17 +1118,14 @@ void PolynomialUnivariateModular::rescaleSoLeadingCoefficientIsOne() {
   if (this->coefficients.size == 0) {
     return;
   }
-  int invertedLeadingCoefficient = this->modulusData->inverses[
-    *this->coefficients.lastObject()
-  ];
+  int invertedLeadingCoefficient =
+  this->modulusData->inverses[*this->coefficients.lastObject()];
   *this *= invertedLeadingCoefficient;
 }
 
 bool PolynomialUnivariateModular::checkInitialization() const {
   if (this->modulusData == nullptr) {
-    global.fatal
-    << "Uninitialized modular polynomial. "
-    << global.fatal;
+    global.fatal << "Uninitialized modular polynomial. " << global.fatal;
   }
   return true;
 }
@@ -1024,9 +1146,8 @@ void PolynomialUnivariateModular::toPolynomialNonDense(
   }
 }
 
-std::string PolynomialUnivariateModular::toString(
-  FormatExpressions* format
-) const {
+std::string PolynomialUnivariateModular::toString(FormatExpressions* format)
+const {
   if (this->modulusData == nullptr) {
     return "[uninitialized]";
   }
@@ -1043,12 +1164,17 @@ std::string PolynomialUnivariateModular::toString(
     converter.addMonomial(monomial, coefficient);
   }
   std::stringstream out;
-  out << converter.toString(format) << " (mod "
-  << this->modulusData->modulus << ")";
+  out
+  << converter.toString(format)
+  << " (mod "
+  << this->modulusData->modulus
+  << ")";
   return out.str();
 }
 
-void PolynomialUnivariateModular::operator=(const PolynomialUnivariateModular& other) {
+void PolynomialUnivariateModular::operator=(
+  const PolynomialUnivariateModular& other
+) {
   other.checkInitialization();
   this->modulusData = other.modulusData;
   this->coefficients = other.coefficients;
@@ -1056,8 +1182,12 @@ void PolynomialUnivariateModular::operator=(const PolynomialUnivariateModular& o
 
 void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
   if (other.modulus != this->getModulus()) {
-    global.fatal << "Attempt to assign " << other.toString()
-    << " to polynomial with modulus: " << this->getModulus() << global.fatal;
+    global.fatal
+    << "Attempt to assign "
+    << other.toString()
+    << " to polynomial with modulus: "
+    << this->getModulus()
+    << global.fatal;
   }
   this->coefficients.clear();
   LargeInteger otherReduced = other.value;
@@ -1068,13 +1198,18 @@ void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
   this->trimTrailingZeroes();
 }
 
-void PolynomialUnivariateModular::operator=(const Polynomial<ElementZmodP>& other) {
+void PolynomialUnivariateModular::operator=(
+  const Polynomial<ElementZmodP>& other
+) {
   MacroRegisterFunctionWithName("PolynomialUnivariateModular::operator=");
   this->checkInitialization();
   this->makeZero(this->modulusData);
   if (other.minimalNumberOfVariables() > 1) {
-    global.fatal << "Attempt to assign " << other.toString()
-    << " to polynomial with one variable. " << global.fatal;
+    global.fatal
+    << "Attempt to assign "
+    << other.toString()
+    << " to polynomial with one variable. "
+    << global.fatal;
   }
   for (int i = 0; i < other.size(); i ++) {
     LargeInteger otherReduced = other.coefficients[i].value;
@@ -1085,7 +1220,9 @@ void PolynomialUnivariateModular::operator=(const Polynomial<ElementZmodP>& othe
   }
 }
 
-void PolynomialUnivariateModular::operator-=(const PolynomialUnivariateModular& other) {
+void PolynomialUnivariateModular::operator-=(
+  const PolynomialUnivariateModular& other
+) {
   this->addAnotherTimesConstant(other, - 1);
 }
 
@@ -1098,7 +1235,7 @@ void PolynomialUnivariateModular::derivative(
     return;
   }
   output.makeZero(this->modulusData);
-  for (int i = this->coefficients.size - 1; i > 0; i--) {
+  for (int i = this->coefficients.size - 1; i > 0; i --) {
     output.addTerm(this->coefficients[i] * i, i - 1);
   }
 }
@@ -1135,13 +1272,17 @@ ElementZmodP PolynomialUnivariateModular::evaluate(
 void PolynomialUnivariateModularAsModulus::operator=(
   const PolynomialUnivariateModular& inputModulus
 ) {
-  MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::operator=");
+  MacroRegisterFunctionWithName(
+    "PolynomialUnivariateModularAsModulus::operator="
+  );
   this->modulus = inputModulus;
   this->computeFromModulus();
 }
 
 void PolynomialUnivariateModularAsModulus::computeFromModulus() {
-  MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::computeFromModulus");
+  MacroRegisterFunctionWithName(
+    "PolynomialUnivariateModularAsModulus::computeFromModulus"
+  );
   this->modulus.checkInitialization();
   int totalModulusDegree = this->modulus.totalDegreeInt();
   if (totalModulusDegree < 0) {
@@ -1166,7 +1307,9 @@ void PolynomialUnivariateModularAsModulus::computeFromModulus() {
   }
 }
 
-std::string PolynomialUnivariateModularAsModulus::toString(FormatExpressions *format) const {
+std::string PolynomialUnivariateModularAsModulus::toString(
+  FormatExpressions* format
+) const {
   return this->modulus.toString(format) + this->toStringImagesOfX();
 }
 
@@ -1175,7 +1318,8 @@ std::string PolynomialUnivariateModularAsModulus::toStringImagesOfX() const {
   out << this->imageXToTheNth.toStringCommaDelimited();
   int degree = this->imageXToTheNth.size;
   for (int i = 0; i < this->imagesPowersOfX.size; i ++) {
-    out << "\nx^" << degree + i << " -> "
+    out << "\nx^" << degree + i
+    << " -> "
     << this->imagesPowersOfX[i].toStringCommaDelimited();
   }
   return out.str();
@@ -1187,10 +1331,11 @@ bool PolynomialUnivariateModularAsModulus::checkInitialization() const {
 }
 
 void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
-  const List<int>& previous,
-  List<int>& output
+  const List<int>& previous, List<int>& output
 ) {
-  MacroRegisterFunctionWithName("PolynomialUnivariateModularAsModulus::computeOneReductionRow");
+  MacroRegisterFunctionWithName(
+    "PolynomialUnivariateModularAsModulus::computeOneReductionRow"
+  );
   int totalModulusDegree = this->modulus.totalDegreeInt();
   output.setSize(totalModulusDegree);
   int modulusInteger = this->modulus.modulusData->modulus;
@@ -1203,17 +1348,22 @@ void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
   }
 }
 
-void PolynomialUnivariateModular::operator*=(const PolynomialUnivariateModular& other) {
+void PolynomialUnivariateModular::operator*=(
+  const PolynomialUnivariateModular& other
+) {
   this->checkInitialization();
   PolynomialUnivariateModular output;
   output.makeZero(this->modulusData);
-  output.ensureCoefficientLength(other.coefficients.size + this->coefficients.size - 1);
+  output.ensureCoefficientLength(
+    other.coefficients.size + this->coefficients.size - 1
+  );
   int modulus = this->getModulus();
   for (int i = 0; i < this->coefficients.size; i ++) {
     int thisCoefficient = this->coefficients[i];
     for (int j = 0; j < other.coefficients.size; j ++) {
-      output.coefficients[i + j] =
-      (output.coefficients[i + j] + thisCoefficient * other.coefficients[j]) %
+      output.coefficients[i + j] = (
+        output.coefficients[i + j] + thisCoefficient * other.coefficients[j]
+      ) %
       modulus;
     }
   }
@@ -1224,7 +1374,9 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
   PolynomialUnivariateModularAsModulus* inputModulus,
   const Polynomial<ElementZmodP>& inputValue
 ) {
-  MacroRegisterFunctionWithName("PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue");
+  MacroRegisterFunctionWithName(
+    "PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue"
+  );
   inputModulus->checkInitialization();
   this->modulus = inputModulus;
   this->value.modulusData = this->modulus->modulus.modulusData;
@@ -1233,11 +1385,15 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
   this->checkInitialization();
 }
 
-void PolynomialModuloPolynomialModuloInteger::operator+=(const ElementZmodP& other) {
+void PolynomialModuloPolynomialModuloInteger::operator+=(
+  const ElementZmodP& other
+) {
   this->value.addTerm(this->value.reduceModP(other.value), 0);
 }
 
-void PolynomialModuloPolynomialModuloInteger::operator-=(const ElementZmodP& other) {
+void PolynomialModuloPolynomialModuloInteger::operator-=(
+  const ElementZmodP& other
+) {
   LargeInteger negative = other.value;
   negative.negate();
   this->value.addTerm(this->value.reduceModP(negative), 0);
@@ -1264,14 +1420,13 @@ void PolynomialModuloPolynomialModuloInteger::reduce() {
     global.fatal
     << "Reduction of polynomial of too-large degree: "
     << this->value.toString()
-    << " mod: " << this->modulus->modulus.toString()
+    << " mod: "
+    << this->modulus->modulus.toString()
     << global.fatal;
   }
   List<List<int> >& reductions = this->modulus->imagesPowersOfX;
   for (
-    int i = totalModulusDegree;
-    i < this->value.coefficients.size;
-    i ++
+    int i = totalModulusDegree; i < this->value.coefficients.size; i ++
   ) {
     int coefficient = this->value.coefficients[i];
     this->value.coefficients[i] = 0;
@@ -1289,18 +1444,22 @@ bool PolynomialModuloPolynomialModuloInteger::isEqualToZero() const {
 
 bool PolynomialModuloPolynomialModuloInteger::checkInitialization() const {
   if (this->modulus == nullptr) {
-    global.fatal << "Uninitialized PolynomialModuloPolynomialModuloInteger. " << global.fatal;
+    global.fatal
+    << "Uninitialized PolynomialModuloPolynomialModuloInteger. "
+    << global.fatal;
   }
   this->modulus->checkInitialization();
   this->value.checkInitialization();
   return true;
 }
 
-std::string PolynomialModuloPolynomialModuloInteger::toString(FormatExpressions* format) const {
+std::string PolynomialModuloPolynomialModuloInteger::toString(
+  FormatExpressions* format
+) const {
   (void) format;
   std::stringstream out;
-  out << this->value.toString() << " mod (" << this->modulus->toString()
-  << ")";
+  out << this->value.toString() << " mod (" << this->modulus->toString() << ")"
+  ;
   return out.str();
 }
 
@@ -1308,8 +1467,15 @@ void IntegerModulusSmall::initializeModulusData(int inputModulus) {
   this->modulus = inputModulus;
   this->inverses.initializeFillInObject(inputModulus, 0);
   for (int i = 1; i < inputModulus; i ++) {
-    if (!MathRoutines::invertXModN(i, inputModulus, this->inverses[i])) {
-      global.fatal << "Modulus " << inputModulus << " is not prime. " << global.fatal;
+    if (
+      !MathRoutines::invertXModN(i, inputModulus, this->inverses[i])
+    ) {
+      global.fatal
+      << "Modulus "
+      << inputModulus
+      << " is not prime. "
+      << global.fatal;
     }
   }
 }
+

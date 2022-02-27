@@ -1,15 +1,21 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
-
 #include "general_logging_global_variables.h"
 #include "database.h"
 #include "string_constants.h"
 
-std::string Database::FallBack::databaseFilename = "database_fallback/database.json";
-
-bool Database::FallBack::deleteDatabase(std::stringstream* commentsOnFailure) {
+std::string Database::FallBack::databaseFilename =
+"database_fallback/database.json";
+bool Database::FallBack::deleteDatabase(
+  std::stringstream* commentsOnFailure
+) {
   this->reader.reset(JSData::token::tokenObject);
-  if (!FileOperations::writeFileVirual(Database::FallBack::databaseFilename, "{}", commentsOnFailure)) {
+  if (
+    !FileOperations::writeFileVirual(
+      Database::FallBack::databaseFilename, "{}", commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to delete database. ";
     }
@@ -53,7 +59,9 @@ bool Database::FallBack::updateOne(
     global << "Failed to read and index database. " << Logger::endL;
     return false;
   }
-  if (!this->updateOneNolocks(findQuery, dataToMerge, commentsOnFailure)) {
+  if (
+    !this->updateOneNolocks(findQuery, dataToMerge, commentsOnFailure)
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to update one. ";
     }
@@ -72,7 +80,11 @@ bool Database::FallBack::updateOneNolocks(
     return false;
   }
   int index = - 1;
-  if (!this->findIndexOneNolocksMinusOneNotFound(findQuery, index, commentsOnFailure)) {
+  if (
+    !this->findIndexOneNolocksMinusOneNotFound(
+      findQuery, index, commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to find one entry. ";
     }
@@ -89,7 +101,8 @@ bool Database::FallBack::updateOneNolocks(
     modified = &((*modified)[dataToMerge.nestedLabels[i]]);
   }
   for (int i = 0; i < dataToMerge.value.objects.size(); i ++) {
-    (*modified)[dataToMerge.value.objects.keys[i]] = dataToMerge.value.objects.values[i];
+    (*modified)[dataToMerge.value.objects.keys[i]] =
+    dataToMerge.value.objects.values[i];
   }
   return true;
 }
@@ -105,9 +118,11 @@ bool Database::FallBack::findOne(
     return false;
   }
   int index = - 1;
-  if (!this->findIndexOneNolocksMinusOneNotFound(
-    query, index, commentsOnFailure
-  )) {
+  if (
+    !this->findIndexOneNolocksMinusOneNotFound(
+      query, index, commentsOnFailure
+    )
+  ) {
     return false;
   }
   if (index < 0) {
@@ -122,10 +137,17 @@ std::string Database::FallBack::toStringIndices() const {
   out << this->indices.size() << " indices total.\n";
   int maxIndexedToDisplay = 3;
   for (int i = 0; i < this->indices.size(); i ++) {
-    const MapList<std::string, List<int32_t>, MathRoutines::hashString>& currentLocation =
+    const MapList<
+      std::string, List<int32_t>, MathRoutines::hashString
+    >& currentLocation =
     this->indices.values[i].locations;
-    out << this->indices.keys[i] << ": " << currentLocation.size() << " indexed: ";
-    int numberToDisplay = MathRoutines::minimum(currentLocation.size(), maxIndexedToDisplay);
+    out
+    << this->indices.keys[i]
+    << ": "
+    << currentLocation.size()
+    << " indexed: ";
+    int numberToDisplay =
+    MathRoutines::minimum(currentLocation.size(), maxIndexedToDisplay);
     out << "[";
     for (int j = 0; j < numberToDisplay; j ++) {
       out << currentLocation.keys[j];
@@ -147,40 +169,52 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
   int& output,
   std::stringstream* commentsOnNotFound
 ) {
-  MacroRegisterFunctionWithName("Database::FallBack::findIndexOneNolocksMinusOneNotFound");
+  MacroRegisterFunctionWithName(
+    "Database::FallBack::findIndexOneNolocksMinusOneNotFound"
+  );
   output = - 1;
   if (!this->hasCollection(query.collection, commentsOnNotFound)) {
     if (commentsOnNotFound != nullptr) {
-      *commentsOnNotFound << "Collection " << query.collection << " not found. ";
+      *commentsOnNotFound
+      << "Collection "
+      << query.collection
+      << " not found. ";
     }
     return false;
   }
   std::string key = query.getCollectionAndLabel();
   if (!this->indices.contains(key)) {
     if (commentsOnNotFound != nullptr) {
-      *commentsOnNotFound << "Finding by non-indexed key: "
-      << key << " not allowed. Indices allowed: "
-      << this->toStringIndices() << ". ";
+      *commentsOnNotFound
+      << "Finding by non-indexed key: "
+      << key
+      << " not allowed. Indices allowed: "
+      << this->toStringIndices()
+      << ". ";
     }
     return false;
   }
   Database::FallBack::Index& currentIndex = indices.getValueCreateEmpty(key);
   if (query.value.elementType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
-      *commentsOnNotFound << "At the moment, only string value queries are supported.";
+      *commentsOnNotFound
+      << "At the moment, only string value queries are supported.";
     }
     return false;
   }
-  int currentLocationIndex = currentIndex.locations.getIndex(query.value.stringValue);
+  int currentLocationIndex =
+  currentIndex.locations.getIndex(query.value.stringValue);
   if (currentLocationIndex == - 1) {
-    if (commentsOnNotFound != nullptr ) {
-      *commentsOnNotFound << "Entry "
-      << query.value.toString(nullptr) << " not found. " ;
+    if (commentsOnNotFound != nullptr) {
+      *commentsOnNotFound
+      << "Entry "
+      << query.value.toString(nullptr)
+      << " not found. ";
     }
     return true;
   }
   if (currentIndex.locations.values[currentLocationIndex].size == 0) {
-    if (commentsOnNotFound != nullptr ) {
+    if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound << "Element not found. ";
     }
     return true;
@@ -213,8 +247,10 @@ bool Database::FallBack::hasCollection(
     return true;
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database collection "
-    << collection << " not found. "
+    *commentsOnFailure
+    << "Database collection "
+    << collection
+    << " not found. "
     << "Known collections: "
     << this->knownCollectionS.toStringCommaDelimited()
     << ". ";
@@ -230,14 +266,15 @@ Database::FallBack::FallBack() {
 void Database::FallBack::initialize() {
   this->access.createMe("databaseFallback", false);
   this->knownIndices.addOnTop({
-    DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
-  });
-  this->knownCollectionS.addOnTop({
-    DatabaseStrings::tableUsers
-  });
+      DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
+    }
+  );
+  this->knownCollectionS.addOnTop({DatabaseStrings::tableUsers});
 }
 
-void Database::FallBack::createHashIndex(const std::string& collectionName, const std::string& key) {
+void Database::FallBack::createHashIndex(
+  const std::string& collectionName, const std::string& key
+) {
   Database::FallBack::Index newIndex;
   newIndex.collection = collectionName;
   newIndex.label = key;
@@ -255,7 +292,9 @@ std::string Database::FallBack::Index::collectionAndLabel() {
   return this->collectionAndLabelStatic(this->collection, this->label);
 }
 
-bool Database::FallBack::readAndIndexDatabase(std::stringstream* commentsOnFailure) {
+bool Database::FallBack::readAndIndexDatabase(
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("Database::FallBack::readAndIndexDatabase");
   if (!this->readDatabase(commentsOnFailure)) {
     return false;
@@ -267,7 +306,9 @@ bool Database::FallBack::readAndIndexDatabase(std::stringstream* commentsOnFailu
     std::string collection = this->reader.objects.keys[i];
     JSData& currentCollection = this->reader.objects.values[i];
     for (int i = 0; i < currentCollection.listObjects.size; i ++) {
-      this->indexOneRecord(currentCollection.listObjects[i], i, collection);
+      this->indexOneRecord(
+        currentCollection.listObjects[i], i, collection
+      );
     }
   }
   // global << "Database indexed. " << this->toStringIndices() << Logger::endL;
@@ -281,7 +322,10 @@ void Database::FallBack::indexOneRecord(
     return;
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
-    std::string indexLabel = Database::FallBack::Index::collectionAndLabelStatic(collection, entry.objects.keys[i]);
+    std::string indexLabel =
+    Database::FallBack::Index::collectionAndLabelStatic(
+      collection, entry.objects.keys[i]
+    );
     if (!this->indices.contains(indexLabel)) {
       continue;
     }
@@ -289,13 +333,16 @@ void Database::FallBack::indexOneRecord(
     if (keyToIndexBy.elementType != JSData::token::tokenString) {
       continue;
     }
-    Database::FallBack::Index& currentIndex = this->indices.getValueCreateEmpty(indexLabel);
-    currentIndex.locations.getValueCreateEmpty(keyToIndexBy.stringValue).addOnTop(row);
+    Database::FallBack::Index& currentIndex =
+    this->indices.getValueCreateEmpty(indexLabel);
+    currentIndex.locations.getValueCreateEmpty(keyToIndexBy.stringValue).
+    addOnTop(row);
   }
 }
 
 bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
-  return FileOperations::writeFileVirualWithPermissions(
+  return
+  FileOperations::writeFileVirualWithPermissions(
     Database::FallBack::databaseFilename,
     this->reader.toString(nullptr),
     true,
@@ -305,24 +352,39 @@ bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
 
 bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
   std::string database;
-  if (!FileOperations::loadFileToStringVirtual(
-    Database::FallBack::databaseFilename, database, true, commentsOnFailure
-  )) {
+  if (
+    !FileOperations::loadFileToStringVirtual(
+      Database::FallBack::databaseFilename,
+      database,
+      true,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Database load failed. ";
     }
-    if (!FileOperations::fileExistsVirtual(
-      Database::FallBack::databaseFilename,
-      true,
-      false,
-      commentsOnFailure
-    )) {
-      global << Logger::green << "Fallback database file does not exist. Creating ..." << Logger::endL;
+    if (
+      !FileOperations::fileExistsVirtual(
+        Database::FallBack::databaseFilename,
+        true,
+        false,
+        commentsOnFailure
+      )
+    ) {
+      global
+      << Logger::green
+      << "Fallback database file does not exist. Creating ..."
+      << Logger::endL;
       this->reader.elementType = JSData::token::tokenObject;
       return true;
     }
     return false;
   }
-  global << "Database size: " << Logger::blue << database.size() << Logger::endL;
+  global
+  << "Database size: "
+  << Logger::blue
+  << database.size()
+  << Logger::endL;
   return this->reader.parse(database, commentsOnFailure);
 }
+

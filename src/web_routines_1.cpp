@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_inner_functions.h"
 #include "general_time_date.h"
@@ -31,7 +32,6 @@ public:
   std::string bodyReceived;
   std::string bodyReceivedWithHeader;
   std::string bodyReceivedOutsideOfExpectedLength;
-
   bool flagInitialized;
   bool flagContinueWasNeeded;
   bool flagDoUseGET;
@@ -45,13 +45,22 @@ public:
   WebClient();
   ~WebClient();
   void closeEverything();
-  void updatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  void fetchWebPagePart2(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  void updatePublicKeys(
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
+  void fetchWebPagePart2(
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
   void initialize();
   // Ping authentication used for pings only, over localhost connections only.
   void pingCalculatorStatus(const std::string& pingAuthentication);
   void freeAddressInfo();
-  void fetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  void fetchWebPage(
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
   bool verifyRecaptcha(
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNONsensitive,
@@ -85,54 +94,91 @@ void WebServerMonitor::backupDatabaseIfNeeded() {
   MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
   if (
     this->timeAtLastBackup > 0 &&
-    global.getElapsedSeconds() - this->timeAtLastBackup < (24 * 3600)
+    global.getElapsedSeconds() - this->timeAtLastBackup < (24* 3600)
   ) {
     return;
   }
   std::stringstream commandStream;
-  commandStream << "mongodump --db calculator --archive ="
+  commandStream
+  << "mongodump --db calculator --archive ="
   << global.physicalPathProjectBase
   << "database-backups/dbBackup"
-  << global.getDateForLogFiles() << ".mongo";
-  global << Logger::orange << "Backing up database with command: " << Logger::endL;
+  << global.getDateForLogFiles()
+  << ".mongo";
+  global
+  << Logger::orange
+  << "Backing up database with command: "
+  << Logger::endL;
   global << commandStream.str() << Logger::endL;
   global.externalCommandReturnOutput(commandStream.str());
   global << Logger::green << "Backing up completed. " << Logger::endL;
   this->timeAtLastBackup = global.getElapsedSeconds();
 }
 
-void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthentication) {
+void WebServerMonitor::monitor(
+  int pidServer, const std::string& pingAuthentication
+) {
   if (!global.flagLocalhostConnectionMonitor) {
     return;
   }
   this->pidServer = pidServer;
   MacroRegisterFunctionWithName("Monitor");
   int maxNumPingFailures = 3;
-  // warning: setting global.server().WebServerPingIntervalInSeconds to more than 1000
+  // warning: setting global.server().WebServerPingIntervalInSeconds to more
+  // than 1000
   // may overflow the variable int microsecondsToSleep.
-  int microsecondsToSleep = 1000000 * global.server().webServerPingIntervalInSeconds;//
+  int microsecondsToSleep =
+  1000000 * global.server().webServerPingIntervalInSeconds;
+  //
   if (global.server().webServerPingIntervalInSeconds > 30) {
-    global << Logger::red << "**********WARNING**************"
+    global
+    << Logger::red
+    << "**********WARNING**************"
     << Logger::endL
-    << Logger::red << " The ping interval: "
+    << Logger::red
+    << " The ping interval: "
     << global.server().webServerPingIntervalInSeconds
     << " is set to a large value. "
-    << "Set the ping interval to less than 30 seconds to remove this message. " << Logger::endL;
+    << "Set the ping interval to less than 30 seconds to remove this message. "
+    << Logger::endL;
   }
   std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    fileStream, "/LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
+    fileStream,
+    "/LogFiles/server_starts_and_unexpected_restarts.html",
+    true,
+    false,
+    false,
+    true
   );
-  fileStream << "<a href=\"/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/\">"
-  << GlobalVariables::getDateForLogFiles() << "</a>" << "<br>\n";
+  fileStream
+  << "<a href=\"/LogFiles/"
+  << GlobalVariables::getDateForLogFiles()
+  << "/\">"
+  << GlobalVariables::getDateForLogFiles()
+  << "</a>"
+  << "<br>\n";
   fileStream.close();
   WebClient webCrawler;
   webCrawler.initialize();
-  global << Logger::blue << "Pinging " << webCrawler.addressToConnectTo << " at port/service "
-  << webCrawler.portOrService << " every " << (microsecondsToSleep / 1000000) << " second(s). "
+  global
+  << Logger::blue
+  << "Pinging "
+  << webCrawler.addressToConnectTo
+  << " at port/service "
+  << webCrawler.portOrService
+  << " every "
+  << (microsecondsToSleep / 1000000)
+  << " second(s). "
   << Logger::endL;
-  global << Logger::red << "Please beware that the server will restart and you will lose all computations "
-  << "if " << maxNumPingFailures << " consecutive pings fail. " << Logger::endL;
+  global
+  << Logger::red
+  <<
+  "Please beware that the server will restart and you will lose all computations "
+  << "if "
+  << maxNumPingFailures
+  << " consecutive pings fail. "
+  << Logger::endL;
   int numConsecutiveFailedPings = 0;
   int numPings = 0;
   TimeWrapper now;
@@ -144,16 +190,33 @@ void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthenticat
     if (webCrawler.lastTransactionErrors != "") {
       now.assignLocalTime();
       numConsecutiveFailedPings ++;
-      global << Logger::red << "Connection monitor: ping of " << webCrawler.addressToConnectTo
-      << " at port/service " << webCrawler.portOrService
-      << " failed. GM time: " << now.toStringGM() << ", local time: " << now.toStringLocal()
-      << ". " << "Errors: "
-      << webCrawler.lastTransactionErrors << webCrawler.lastTransaction
-      << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
-      << ". " << Logger::endL;
+      global
+      << Logger::red
+      << "Connection monitor: ping of "
+      << webCrawler.addressToConnectTo
+      << " at port/service "
+      << webCrawler.portOrService
+      << " failed. GM time: "
+      << now.toStringGM()
+      << ", local time: "
+      << now.toStringLocal()
+      << ". "
+      << "Errors: "
+      << webCrawler.lastTransactionErrors
+      << webCrawler.lastTransaction
+      << numConsecutiveFailedPings
+      << " consecutive fails so far, restarting on "
+      << maxNumPingFailures
+      << ". "
+      << Logger::endL;
     } else {
-      std::cout << "Connection monitor: ping #" << numPings
-      << ": received " << webCrawler.lastNumBytesRead << " bytes. " << std::endl;
+      std::cout
+      << "Connection monitor: ping #"
+      << numPings
+      << ": received "
+      << webCrawler.lastNumBytesRead
+      << " bytes. "
+      << std::endl;
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {
@@ -165,8 +228,11 @@ void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthenticat
 void WebServerMonitor::stop() {
   TimeWrapper now;
   now.assignLocalTime();
-  global << Logger::red << "Server stopped responding. "
-  << "Logging this event and stopping the monitor." << Logger::endL;
+  global
+  << Logger::red
+  << "Server stopped responding. "
+  << "Logging this event and stopping the monitor."
+  << Logger::endL;
   std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
     fileStream,
@@ -176,16 +242,32 @@ void WebServerMonitor::stop() {
     false,
     true
   );
-  fileStream << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
-  << now.toStringLocal() << ", GM: " << now.toStringGM() << "</b><br>\n";
+  fileStream
+  <<
+  "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
+  << now.toStringLocal()
+  << ", GM: "
+  << now.toStringGM()
+  << "</b><br>\n";
   fileStream.flush();
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
-  global << "Terminating server children with command: " << killServerChildrenCommand.str() << Logger::endL;
+  global
+  << "Terminating server children with command: "
+  << killServerChildrenCommand.str()
+  << Logger::endL;
   global.externalCommandNoOutput(killServerChildrenCommand.str(), true);
-  global << Logger::red << "Terminating server with pid: " << this->pidServer << Logger::endL;
+  global
+  << Logger::red
+  << "Terminating server with pid: "
+  << this->pidServer
+  << Logger::endL;
   WebServer::terminateProcessId(this->pidServer);
-  global << Logger::red << "Restarting monitor. " << this->pidServer << Logger::endL;
+  global
+  << Logger::red
+  << "Restarting monitor. "
+  << this->pidServer
+  << Logger::endL;
   global.server().stopKillAll();
 }
 
@@ -235,14 +317,25 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   std::stringstream reportStream;
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
-  memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
-  this->hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
-  this->hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
-  this->hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
+  memset(&this->hints, 0, sizeof this->hints);
+  // make sure the struct is empty
+  this->hints.ai_family = AF_UNSPEC;
+  // don't care IPv4 or IPv6
+  this->hints.ai_socktype = SOCK_STREAM;
+  // TCP stream sockets
+  this->hints.ai_flags = AI_PASSIVE;
+  // fill in my IP for me
   this->serverInfo = nullptr;
-  int status = getaddrinfo(this->addressToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
+  int status =
+  getaddrinfo(
+    this->addressToConnectTo.c_str(),
+    this->portOrService.c_str(),
+    &hints,
+    &this->serverInfo
+  );
   if (status != 0) {
-    this->lastTransactionErrors = "Could not find address: getaddrinfo error: ";
+    this->lastTransactionErrors = "Could not find address: getaddrinfo error: "
+    ;
     this->lastTransactionErrors += gai_strerror(status);
     this->freeAddressInfo();
     return;
@@ -251,30 +344,42 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
     this->lastTransactionErrors = "Server info is zero";
     return;
   }
-  struct addrinfo *p = nullptr;  // will point to the results
+  struct addrinfo* p = nullptr;
+  // will point to the results
   this->socketInteger = - 1;
   char ipString[INET6_ADDRSTRLEN];
   int numBytesWritten = - 1;
-  for (p = this->serverInfo; p != nullptr; p = p->ai_next, close(this->socketInteger)) {
+  for (
+    p = this->serverInfo; p != nullptr;
+    p = p->ai_next,
+    close(this->socketInteger)
+  ) {
     void* adress = nullptr;
     this->socketInteger = - 1;
     // get the pointer to the address itself,
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
-      struct sockaddr_in *ipv4 = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
+      struct sockaddr_in* ipv4 =
+      reinterpret_cast<struct sockaddr_in*>(p->ai_addr);
       adress = &(ipv4->sin_addr);
       reportStream << "IPv4: ";
     } else {
       // IPv6
-      struct sockaddr_in6 *ipv6 = reinterpret_cast<struct sockaddr_in6 *>(p->ai_addr);
+      struct sockaddr_in6* ipv6 =
+      reinterpret_cast<struct sockaddr_in6*>(p->ai_addr);
       adress = &(ipv6->sin6_addr);
       reportStream << "IPv6: ";
     }
     // convert the IP to a string and print it:
     inet_ntop(p->ai_family, adress, ipString, sizeof ipString);
     reportStream << this->addressToConnectTo << ": " << ipString << "<br>";
-    this->socketInteger = socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
+    this->socketInteger =
+    socket(
+      this->serverInfo->ai_family,
+      this->serverInfo->ai_socktype,
+      this->serverInfo->ai_protocol
+    );
     int connectionResult = - 1;
     if (this->socketInteger < 0) {
       this->lastTransactionErrors = "Failed to create socket ";
@@ -293,54 +398,100 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
         if (numPingFails > 10) {
           break;
         }
-        numSelected = select(this->socketInteger + 1, &fdConnectSockets, nullptr, nullptr, &timeOut);
-        failStream << "While pinging, select failed. Error message: "
-        << strerror(errno) << ". \n";
+        numSelected =
+        select(
+          this->socketInteger + 1,
+          &fdConnectSockets,
+          nullptr,
+          nullptr,
+          &timeOut
+        );
+        failStream
+        << "While pinging, select failed. Error message: "
+        << strerror(errno)
+        << ". \n";
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
         global << Logger::red << failStream.str() << Logger::endL;
-        reportStream << failStream.str() << "Could not connect through port. select returned: " << numSelected;
+        reportStream
+        << failStream.str()
+        << "Could not connect through port. select returned: "
+        << numSelected;
         connectionResult = - 1;
       } else {
-        connectionResult = connect(this->socketInteger, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+        connectionResult =
+        connect(
+          this->socketInteger,
+          this->serverInfo->ai_addr,
+          this->serverInfo->ai_addrlen
+        );
       }
     }
     if (connectionResult == - 1) {
-      reportStream << "<br>Failed to connect: address: " << this->addressToConnectTo << " port: "
-      << this->portOrService << ". ";
+      reportStream
+      << "<br>Failed to connect: address: "
+      << this->addressToConnectTo
+      << " port: "
+      << this->portOrService
+      << ". ";
       this->lastTransactionErrors = reportStream.str();
       close(this->socketInteger);
       continue;
     } else {
-      reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
+      reportStream
+      << "<br>connected: "
+      << this->addressToConnectTo
+      << " port: "
+      << this->portOrService
+      << ". ";
     }
-    std::string getMessage = "GET /cgi-bin/calculator?request=" + pingAuthentication;
+    std::string getMessage =
+    "GET /cgi-bin/calculator?request=" + pingAuthentication;
     std::stringstream errorStream1;
-    numBytesWritten = Pipe::writeWithTimeoutViaSelect(this->socketInteger, getMessage, 1, 10, &errorStream1);
+    numBytesWritten =
+    Pipe::writeWithTimeoutViaSelect(
+      this->socketInteger, getMessage, 1, 10, &errorStream1
+    );
     if (static_cast<unsigned>(numBytesWritten) != getMessage.size()) {
-      this->lastTransactionErrors += "\nERROR writing to socket. " + errorStream1.str();
+      this->lastTransactionErrors +=
+      "\nERROR writing to socket. " + errorStream1.str();
       close(this->socketInteger);
       continue;
     }
     std::stringstream errorStream2;
-    this->lastNumBytesRead = Pipe::readWithTimeOutViaSelect(this->socketInteger, this->buffer, 1, 10, &errorStream2);
+    this->lastNumBytesRead =
+    Pipe::readWithTimeOutViaSelect(
+      this->socketInteger, this->buffer, 1, 10, &errorStream2
+    );
     if (this->lastNumBytesRead < 0) {
-      this->lastTransactionErrors += "ERROR reading from socket. " + errorStream2.str();
+      this->lastTransactionErrors +=
+      "ERROR reading from socket. " + errorStream2.str();
       close(this->socketInteger);
       continue;
     }
     std::string readString;
-    readString.assign(buffer.objects, static_cast<unsigned>(this->lastNumBytesRead));
-    reportStream << "Wrote " << numBytesWritten  << ", read "
-    << this->lastNumBytesRead << " bytes: " << readString << ". ";
+    readString.assign(
+      buffer.objects, static_cast<unsigned>(this->lastNumBytesRead)
+    );
+    reportStream
+    << "Wrote "
+    << numBytesWritten
+    << ", read "
+    << this->lastNumBytesRead
+    << " bytes: "
+    << readString
+    << ". ";
     this->lastTransaction = reportStream.str();
     close(this->socketInteger);
   }
   this->freeAddressInfo();
 }
 
-void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+void WebClient::fetchWebPage(
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral
+) {
   MacroRegisterFunctionWithName("WebCrawler::fetchWebPage");
   (void) commentsOnFailure;
   (void) commentsGeneral;
@@ -349,18 +500,34 @@ void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringst
 #ifdef MACRO_use_open_ssl
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
-  memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
-  this->hints.ai_family   = AF_UNSPEC  ;       // don't care IPv4 or IPv6
-  this->hints.ai_socktype = SOCK_STREAM;       // TCP stream sockets
-  this->hints.ai_flags    = AI_PASSIVE ;       // fill in my IP for me
+  memset(&this->hints, 0, sizeof this->hints);
+  // make sure the struct is empty
+  this->hints.ai_family = AF_UNSPEC;
+  // don't care IPv4 or IPv6
+  this->hints.ai_socktype = SOCK_STREAM;
+  // TCP stream sockets
+  this->hints.ai_flags = AI_PASSIVE;
+  // fill in my IP for me
   this->serverInfo = nullptr;
-  int status = getaddrinfo(this->serverToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
+  int status =
+  getaddrinfo(
+    this->serverToConnectTo.c_str(),
+    this->portOrService.c_str(),
+    &hints,
+    &this->serverInfo
+  );
   if (status != 0) {
-    this->lastTransactionErrors =  "Error calling getaddrinfo: ";
+    this->lastTransactionErrors = "Error calling getaddrinfo: ";
     this->lastTransactionErrors += gai_strerror(status);
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << this->lastTransactionErrors << ". "
-      << "Server: " << this->serverToConnectTo << ", port or service: " << this->portOrService << ". ";
+      *commentsOnFailure
+      << this->lastTransactionErrors
+      << ". "
+      << "Server: "
+      << this->serverToConnectTo
+      << ", port or service: "
+      << this->portOrService
+      << ". ";
     }
     this->freeAddressInfo();
     return;
@@ -369,25 +536,32 @@ void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringst
     this->lastTransactionErrors = "Server info is zero";
     return;
   }
-  struct addrinfo *p = nullptr;// will point to the results
+  struct addrinfo* p = nullptr;
+  // will point to the results
   this->socketInteger = - 1;
   char ipString[INET6_ADDRSTRLEN];
   timeval timeOut;
-  for (p = this->serverInfo; p != nullptr; p = p->ai_next, close(this->socketInteger)) {
-    void *address = nullptr;
+  for (
+    p = this->serverInfo; p != nullptr;
+    p = p->ai_next,
+    close(this->socketInteger)
+  ) {
+    void* address = nullptr;
     this->socketInteger = - 1;
     // get the pointer to the address itself,
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
-      struct sockaddr_in *ipv4 = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
+      struct sockaddr_in* ipv4 =
+      reinterpret_cast<struct sockaddr_in*>(p->ai_addr);
       address = &(ipv4->sin_addr);
       if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv4: ";
       }
     } else {
       // IPv6
-      struct sockaddr_in6 *ipv6 = reinterpret_cast<struct sockaddr_in6 *> (p->ai_addr);
+      struct sockaddr_in6* ipv6 =
+      reinterpret_cast<struct sockaddr_in6*>(p->ai_addr);
       address = &(ipv6->sin6_addr);
       if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv6: ";
@@ -395,11 +569,20 @@ void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringst
     }
     // convert the IP to a string and print it:
     inet_ntop(p->ai_family, address, ipString, sizeof ipString);
-//    std::string ipString()
+    //    std::string ipString()
     if (commentsGeneral != nullptr) {
-      *commentsGeneral << this->addressToConnectTo << ": " << ipString << "<br>";
+      *commentsGeneral
+      << this->addressToConnectTo
+      << ": "
+      << ipString
+      << "<br>";
     }
-    this->socketInteger = socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
+    this->socketInteger =
+    socket(
+      this->serverInfo->ai_family,
+      this->serverInfo->ai_socktype,
+      this->serverInfo->ai_protocol
+    );
     int connectionResult = - 1;
     if (this->socketInteger < 0) {
       this->lastTransactionErrors = "failed to create socket ";
@@ -417,30 +600,57 @@ void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringst
         if (numPingFails > 10) {
           break;
         }
-        numSelected = select(this->socketInteger + 1, &fdConnectSockets, nullptr, nullptr, &timeOut);
-        failStream << "While pinging, select failed. Error message: "
-        << strerror(errno) << ". \n";
+        numSelected =
+        select(
+          this->socketInteger + 1,
+          &fdConnectSockets,
+          nullptr,
+          nullptr,
+          &timeOut
+        );
+        failStream
+        << "While pinging, select failed. Error message: "
+        << strerror(errno)
+        << ". \n";
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
         global << Logger::red << failStream.str() << Logger::endL;
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << failStream.str()
-          << "Could not connect through port. select returned: " << numSelected;
+          *commentsOnFailure
+          << failStream.str()
+          << "Could not connect through port. select returned: "
+          << numSelected;
         }
         connectionResult = - 1;
       } else {
-        connectionResult = connect(this->socketInteger, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+        connectionResult =
+        connect(
+          this->socketInteger,
+          this->serverInfo->ai_addr,
+          this->serverInfo->ai_addrlen
+        );
       }
-      timeOut.tv_sec = 3;  // 5 Secs Timeout
-      timeOut.tv_usec = 0;  // Not initialize'ing this can cause strange errors
-      setsockopt(connectionResult, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&timeOut), sizeof(timeval));
+      timeOut.tv_sec = 3;
+      // 5 Secs Timeout
+      timeOut.tv_usec = 0;
+      // Not initialize'ing this can cause strange errors
+      setsockopt(
+        connectionResult,
+        SOL_SOCKET,
+        SO_RCVTIMEO,
+        static_cast<void*>(&timeOut),
+        sizeof(timeval)
+      );
     }
     if (connectionResult == - 1) {
       std::stringstream errorStream;
       errorStream
-      << "Failed to connect: address: " << this->addressToConnectTo << " port: "
-      << this->portOrService << ".<br>";
+      << "Failed to connect: address: "
+      << this->addressToConnectTo
+      << " port: "
+      << this->portOrService
+      << ".<br>";
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << errorStream.str();
       }
@@ -449,8 +659,12 @@ void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringst
       continue;
     } else {
       if (commentsGeneral != nullptr) {
-        *commentsGeneral << "connected: "
-        << this->addressToConnectTo << " port: " << this->portOrService << ". <hr>";
+        *commentsGeneral
+        << "connected: "
+        << this->addressToConnectTo
+        << " port: "
+        << this->portOrService
+        << ". <hr>";
       }
     }
     this->fetchWebPagePart2(commentsOnFailure, commentsGeneral);
@@ -463,7 +677,8 @@ void WebClient::fetchWebPage(std::stringstream* commentsOnFailure, std::stringst
 }
 
 void WebClient::fetchWebPagePart2(
-  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
   (void) commentsOnFailure;
@@ -471,19 +686,32 @@ void WebClient::fetchWebPagePart2(
 #ifdef MACRO_use_open_ssl
   std::stringstream messageHeader, continueHeader;
   if (this->flagDoUseGET) {
-    messageHeader << "GET " << this->addressToConnectTo << " HTTP/1.0"
-    << "\r\n" << "Host: " << this->serverToConnectTo << "\r\n\r\n";
+    messageHeader
+    << "GET "
+    << this->addressToConnectTo
+    << " HTTP/1.0"
+    << "\r\n"
+    << "Host: "
+    << this->serverToConnectTo
+    << "\r\n\r\n";
   } else {
-    messageHeader << "POST " << this->addressToConnectTo << " HTTP/1.0"
-    << "\r\n" << "Host: " << this->serverToConnectTo;
+    messageHeader
+    << "POST "
+    << this->addressToConnectTo
+    << " HTTP/1.0"
+    << "\r\n"
+    << "Host: "
+    << this->serverToConnectTo;
     messageHeader << "\r\nContent-length: " << this->postMessageToSend.size();
     messageHeader << "\r\n\r\n";
     messageHeader << this->postMessageToSend;
   }
   this->transportLayerSecurity.openSSLData.checkCanInitializeToClient();
-  if (!this->transportLayerSecurity.handShakeIAmClientNoSocketCleanup(
-    this->socketInteger, commentsOnFailure, commentsGeneral
-  )) {
+  if (
+    !this->transportLayerSecurity.handShakeIAmClientNoSocketCleanup(
+      this->socketInteger, commentsOnFailure, commentsGeneral
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not shake hands. ";
     }
@@ -496,17 +724,21 @@ void WebClient::fetchWebPagePart2(
     *commentsGeneral << "<hr>";
   }
   std::string errorSSL;
-  if (!this->transportLayerSecurity.sslWriteLoop(
-    10, messageHeader.str(), &errorSSL, commentsGeneral, true
-  )) {
+  if (
+    !this->transportLayerSecurity.sslWriteLoop(
+      10, messageHeader.str(), &errorSSL, commentsGeneral, true
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
     return;
   }
-  if (!this->transportLayerSecurity.sslReadLoop(
-    10, this->headerReceived, 0, &errorSSL, commentsGeneral, true
-  )) {
+  if (
+    !this->transportLayerSecurity.sslReadLoop(
+      10, this->headerReceived, 0, &errorSSL, commentsGeneral, true
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
@@ -514,12 +746,15 @@ void WebClient::fetchWebPagePart2(
   }
   unsigned bodyStart = 0;
   int numcrlfs = 0;
-  //std::stringstream tempStream;
+  // std::stringstream tempStream;
   for (; bodyStart < this->headerReceived.size(); bodyStart ++) {
     if (numcrlfs >= 4) {
       break;
     }
-    if (this->headerReceived[bodyStart] == '\n' || this->headerReceived[bodyStart] == '\r') {
+    if (
+      this->headerReceived[bodyStart] == '\n' ||
+      this->headerReceived[bodyStart] == '\r'
+    ) {
       numcrlfs ++;
     } else {
       numcrlfs = 0;
@@ -530,7 +765,9 @@ void WebClient::fetchWebPagePart2(
     this->headerReceived = this->headerReceived.substr(0, bodyStart);
   }
   List<std::string> headerPieces;
-  StringRoutines::stringSplitDefaultDelimiters(this->headerReceived, headerPieces);
+  StringRoutines::stringSplitDefaultDelimiters(
+    this->headerReceived, headerPieces
+  );
   std::string expectedLengthString;
   for (int i = 0; i < headerPieces.size; i ++) {
     if (
@@ -539,7 +776,7 @@ void WebClient::fetchWebPagePart2(
       headerPieces[i] == "content-length:"
     ) {
       if (i + 1 < headerPieces.size) {
-        expectedLengthString=headerPieces[i + 1];
+        expectedLengthString = headerPieces[i + 1];
         break;
       }
     }
@@ -556,28 +793,38 @@ void WebClient::fetchWebPagePart2(
   }
   if (this->headerReceived.find("200 OK") == std::string::npos) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "No 200 ok message found. Headers received: " << this->headerReceived;
+      *commentsOnFailure
+      << "No 200 ok message found. Headers received: "
+      << this->headerReceived;
     }
     return;
   }
-  if (expectedLength == static_cast<int64_t>(this->bodyReceivedWithHeader.size())) {
+  if (
+    expectedLength == static_cast<int64_t>(
+      this->bodyReceivedWithHeader.size()
+    )
+  ) {
     this->bodyReceived = this->bodyReceivedWithHeader;
     return;
   }
   this->flagContinueWasNeeded = true;
   continueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
-  if (!this->transportLayerSecurity.sslWriteLoop(
-    10, continueHeader.str(), &errorSSL, commentsGeneral, true
-  )) {
+  if (
+    !this->transportLayerSecurity.sslWriteLoop(
+      10, continueHeader.str(), &errorSSL, commentsGeneral, true
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
     return;
   }
   std::string secondPart;
-  if (!this->transportLayerSecurity.sslReadLoop(
-    10, secondPart, expectedLength, &errorSSL, commentsGeneral, true
-  )) {
+  if (
+    !this->transportLayerSecurity.sslReadLoop(
+      10, secondPart, expectedLength, &errorSSL, commentsGeneral, true
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
@@ -590,33 +837,50 @@ void WebClient::fetchWebPagePart2(
   int length = 0;
   this->expectedLength.isIntegerFittingInInt(&length);
   if (static_cast<unsigned>(length) < this->bodyReceived.size()) {
-    this->bodyReceivedOutsideOfExpectedLength = this->bodyReceived.substr(static_cast<unsigned>(length));
-    this->bodyReceived = this->bodyReceived.substr(0, static_cast<unsigned>(length));
+    this->bodyReceivedOutsideOfExpectedLength =
+    this->bodyReceived.substr(static_cast<unsigned>(length));
+    this->bodyReceived =
+    this->bodyReceived.substr(0, static_cast<unsigned>(length));
   }
   if (commentsGeneral != nullptr) {
-    *commentsGeneral << "<br>Body (length: "
+    *commentsGeneral
+    << "<br>Body (length: "
     << this->bodyReceived.size()
-    << ")<br>" << this->bodyReceived;
+    << ")<br>"
+    << this->bodyReceived;
     if (this->bodyReceivedOutsideOfExpectedLength.size() == 0) {
-      *commentsGeneral << "<br><b style='color:green'>No extraneous data received</b>";
+      *commentsGeneral
+      << "<br><b style='color:green'>No extraneous data received</b>";
     } else {
-      *commentsGeneral<< "<br><b style='color:red'>Received more data than expected "
+      *commentsGeneral
+      << "<br><b style='color:red'>Received more data than expected "
       << "(perhaps due to a protocol error?).</b>"
-      << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
+      << "<br>"
+      << this->bodyReceivedOutsideOfExpectedLength;
     }
   }
   this->transportLayerSecurity.free();
 #endif
 }
 
-bool CalculatorFunctions::fetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::fetchWebPageGET(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::fetchWebPageGET");
   if (!global.userDefaultHasAdminRights()) {
-    return output.assignValue(calculator, std::string("Fetching web pages available only for logged-in admins. "));
+    return
+    output.assignValue(
+      calculator,
+      std::string("Fetching web pages available only for logged-in admins. ")
+    );
   }
   WebClient webClient;
   if (input.size() != 4) {
-    return calculator << "Fetching web page expects 3 arguments: server, service/port, and webpage. ";
+    return
+    calculator
+    <<
+    "Fetching web page expects 3 arguments: server, service/port, and webpage. "
+    ;
   }
   if (!input[1].isOfType(&webClient.serverToConnectTo)) {
     webClient.serverToConnectTo = input[1].toString();
@@ -630,23 +894,40 @@ bool CalculatorFunctions::fetchWebPageGET(Calculator& calculator, const Expressi
   std::stringstream out;
   webClient.flagDoUseGET = true;
   out
-  << "Server:  " << webClient.serverToConnectTo
-  << " port: " << webClient.portOrService
-  << " resource: " << webClient.addressToConnectTo
+  << "Server:  "
+  << webClient.serverToConnectTo
+  << " port: "
+  << webClient.portOrService
+  << " resource: "
+  << webClient.addressToConnectTo
   << "<br>";
   webClient.fetchWebPage(&out, &out);
-  out << "<br>" << webClient.lastTransactionErrors << "<hr>" << webClient.lastTransaction;
+  out
+  << "<br>"
+  << webClient.lastTransactionErrors
+  << "<hr>"
+  << webClient.lastTransaction;
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::fetchWebPagePOST(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::fetchWebPagePOST");
   if (!global.userDefaultHasAdminRights()) {
-    return output.assignValue(calculator, std::string("Fetching web pages available only for logged-in admins. "));
+    return
+    output.assignValue(
+      calculator,
+      std::string("Fetching web pages available only for logged-in admins. ")
+    );
   }
   WebClient crawler;
   if (input.size() != 5) {
-    return calculator << "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. ";
+    return
+    calculator
+    <<
+    "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. "
+    ;
   }
   if (!input[1].isOfType(&crawler.serverToConnectTo)) {
     crawler.serverToConnectTo = input[1].toString();
@@ -662,13 +943,20 @@ bool CalculatorFunctions::fetchWebPagePOST(Calculator& calculator, const Express
   }
   std::stringstream out;
   out
-  << "Server:  " << crawler.serverToConnectTo
-  << " port: " << crawler.portOrService
-  << " resource: " << crawler.addressToConnectTo
+  << "Server:  "
+  << crawler.serverToConnectTo
+  << " port: "
+  << crawler.portOrService
+  << " resource: "
+  << crawler.addressToConnectTo
   << "<br>";
   crawler.flagDoUseGET = false;
   crawler.fetchWebPage(&out, &out);
-  out << "<br>" << crawler.lastTransactionErrors << "<hr>" << crawler.lastTransaction;
+  out
+  << "<br>"
+  << crawler.lastTransactionErrors
+  << "<hr>"
+  << crawler.lastTransaction;
   return output.assignValue(calculator, out.str());
 }
 
@@ -690,10 +978,13 @@ bool CalculatorFunctions::fetchKnownPublicKeys(
   return output.assignValue(calculator, out.str());
 }
 
-void WebClient::updatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+void WebClient::updatePublicKeys(
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral
+) {
   MacroRegisterFunctionWithName("WebCrawler::updatePublicKeys");
-  this->serverToConnectTo  = "www.googleapis.com";
-  this->portOrService      = "https";
+  this->serverToConnectTo = "www.googleapis.com";
+  this->portOrService = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
   this->flagDoUseGET = true;
   if (commentsGeneral != nullptr) {
@@ -701,7 +992,10 @@ void WebClient::updatePublicKeys(std::stringstream* commentsOnFailure, std::stri
   }
   this->fetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceived == "") {
-    global << Logger::red << "Could not fetch the google public keys ..." << Logger::endL;
+    global
+    << Logger::red
+    << "Could not fetch the google public keys ..."
+    << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not fetch google certificate list. ";
     }
@@ -709,33 +1003,47 @@ void WebClient::updatePublicKeys(std::stringstream* commentsOnFailure, std::stri
   }
   std::string googleKeysFileName = "certificates-public/google.txt";
   std::string googleKeysDebugFileName = "certificates-public/debug-google.txt";
-  if (!FileOperations::writeFileVirualWithPermissions(
-    googleKeysFileName, this->bodyReceived, true, commentsOnFailure
-  )) {
+  if (
+    !FileOperations::writeFileVirualWithPermissions(
+      googleKeysFileName, this->bodyReceived, true, commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
     }
-    global << Logger::red << "Failed to create google keys file name. " << Logger::endL;
+    global
+    << Logger::red
+    << "Failed to create google keys file name. "
+    << Logger::endL;
     return;
   }
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }
-  global << Logger::green << "Updated public key file: " << googleKeysFileName << Logger::endL;
+  global
+  << Logger::green
+  << "Updated public key file: "
+  << googleKeysFileName
+  << Logger::endL;
   std::stringstream debugData;
   debugData
-  << "Expected body length: " << this->expectedLength.toString() << "\n";
+  << "Expected body length: "
+  << this->expectedLength.toString()
+  << "\n";
   if (this->flagContinueWasNeeded) {
     debugData << "Did send a continue message.\n";
   } else {
     debugData << "Did NOT send a continue message.\n";
   }
-  debugData << "\nBody received with header, "
-  << "length: " << this->bodyReceivedWithHeader.size()
+  debugData
+  << "\nBody received with header, "
+  << "length: "
+  << this->bodyReceivedWithHeader.size()
   << ":\n"
   << this->bodyReceivedWithHeader
   << "\nBody received, after header "
-  << "length: " << this->bodyReceived.size()
+  << "length: "
+  << this->bodyReceived.size()
   << ":\n"
   << this->bodyReceived
   << "\nBody received, beyond expected length: "
@@ -743,7 +1051,9 @@ void WebClient::updatePublicKeys(std::stringstream* commentsOnFailure, std::stri
   << "\n"
   << "\nHeader:\n "
   << this->headerReceived;
-  FileOperations::writeFileVirualWithPermissions(googleKeysDebugFileName, debugData.str(), true, commentsOnFailure);
+  FileOperations::writeFileVirualWithPermissions(
+    googleKeysDebugFileName, debugData.str(), true, commentsOnFailure
+  );
 }
 
 bool Crypto::verifyJWTagainstKnownKeys(
@@ -791,7 +1101,10 @@ bool Crypto::verifyJWTagainstKnownKeys(
   }
   int index = - 1;
   if (commentsGeneral != nullptr) {
-    *commentsGeneral << "Seeking key: <b style =\"color:brown\">" << keyIDstring << "</b>. ";
+    *commentsGeneral
+    << "Seeking key: <b style =\"color:brown\">"
+    << keyIDstring
+    << "</b>. ";
   }
   for (int i = 0; i < 2; i ++) {
     Crypto::loadKnownCertificates(commentsOnFailure, commentsGeneral);
@@ -805,8 +1118,10 @@ bool Crypto::verifyJWTagainstKnownKeys(
       break;
     }
     if (commentsGeneral != nullptr && i == 0) {
-      *commentsGeneral << "<br><b style =\"color:red\">Couldn't find key ID: "
-      << keyIDstring << " from cached certificate.</b>";
+      *commentsGeneral
+      << "<br><b style =\"color:red\">Couldn't find key ID: "
+      << keyIDstring
+      << " from cached certificate.</b>";
     }
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "<br>Reloading google public keys. ";
@@ -817,18 +1132,26 @@ bool Crypto::verifyJWTagainstKnownKeys(
   }
   if (index == - 1) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<b style =\"color:red\">Could not find key id: "
-      << keyIDstring << "</b>. ";
+      *commentsOnFailure
+      << "<b style =\"color:red\">Could not find key id: "
+      << keyIDstring
+      << "</b>. ";
     }
     return false;
   }
   if (commentsGeneral != nullptr) {
-    *commentsGeneral << "<b style =\"color:green\">Found key id: "
-    << keyIDstring << ".</b>";
+    *commentsGeneral
+    << "<b style =\"color:green\">Found key id: "
+    << keyIDstring
+    << ".</b>";
   }
   PublicKeyRSA& currentCert = Crypto::knownCertificates[index];
-  return webToken.verifyRSA256(
-    currentCert.modulus, currentCert.exponent, commentsOnFailure, commentsGeneral
+  return
+  webToken.verifyRSA256(
+    currentCert.modulus,
+    currentCert.exponent,
+    commentsOnFailure,
+    commentsGeneral
   );
 }
 
@@ -844,11 +1167,19 @@ bool WebClient::verifyRecaptcha(
   if (commentsOnFailure == nullptr) {
     commentsOnFailure = &notUsed;
   }
-  if (!FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
-    "certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure
-  )) {
+  if (
+    !FileOperations::
+    loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+      "certificates/recaptcha-secret.txt",
+      secret,
+      true,
+      true,
+      commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<b style =\"color:red\">"
+      *commentsOnFailure
+      << "<b style =\"color:red\">"
       << "Failed to load recaptcha secret."
       << "</b>";
     }
@@ -860,11 +1191,13 @@ bool WebClient::verifyRecaptcha(
   }
   if (recaptchaURLencoded == "") {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<b style =\"color:red\">Recaptcha appears to be missing. </b>";
+      *commentsOnFailure
+      << "<b style =\"color:red\">Recaptcha appears to be missing. </b>";
     }
     return false;
   }
-  messageToSendStream << "response="
+  messageToSendStream
+  << "response="
   << recaptchaURLencoded
   << "&"
   << "secret="
@@ -881,7 +1214,8 @@ bool WebClient::verifyRecaptcha(
   if (!jsonParser.parse(response, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<b style ='color:red'>" << "Failed to extract response token from captcha verification. "
+      << "<b style ='color:red'>"
+      << "Failed to extract response token from captcha verification. "
       << "</b>"
       << "<br>The response string was: "
       << response;
@@ -891,22 +1225,25 @@ bool WebClient::verifyRecaptcha(
   if (!jsonParser.hasKey("success")) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<b style ='color:red'>" << "Captcha failure: could not find key 'success'."
-      << "</b>"
-      ;
+      << "<b style ='color:red'>"
+      << "Captcha failure: could not find key 'success'."
+      << "</b>";
     }
     return false;
   }
   JSData success;
   success = jsonParser.getValue("success");
-  if (success.elementType != JSData::token::tokenBool || success.booleanValue != true) {
+  if (
+    success.elementType != JSData::token::tokenBool ||
+    success.booleanValue != true
+  ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<br><b style =\"color:red\">"
+      *commentsOnFailure
+      << "<br><b style =\"color:red\">"
       << "Could not verify your captcha solution. "
       << "</b>"
       << "The response from google was: "
-      << response
-      ;
+      << response;
     }
     return false;
   } else {
@@ -917,9 +1254,8 @@ bool WebClient::verifyRecaptcha(
       << "</b>\n<br>\n";
     }
     if (commentsGeneralSensitive != nullptr) {
-      *commentsGeneralSensitive
-      << "The response from google was: "
-      << response;
+      *commentsGeneralSensitive << "The response from google was: " << response
+      ;
     }
   }
   return true;
@@ -938,9 +1274,13 @@ bool WebAPIResponse::processForgotLogin() {
     Database::get().user.logoutViaDatabase();
   }
   UserCalculator user;
-  user.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
+  user.email =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("email"), false
+  );
   WebClient webClient;
-  out << "<br><b> "
+  out
+  << "<br><b> "
   << "Please excuse our verbose technical messages.</b>"
   << "<br><b>We are still testing our system; "
   << "we will remove the technical garbage as soon as we are done. "
@@ -950,29 +1290,36 @@ bool WebAPIResponse::processForgotLogin() {
     return global.response.writeResponse(result, false);
   }
   if (!user.exists(&out)) {
-    out << "<br><b style ='color:red'>"
-    << "We failed to find your email: " << user.email << " in our records. "
+    out
+    << "<br><b style ='color:red'>"
+    << "We failed to find your email: "
+    << user.email
+    << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
   if (!user.loadFromDatabase(&out, &out)) {
-    out << "<br><b style='color:red'>"
-    << "Failed to fetch user info for email: " << user.email
+    out
+    << "<br><b style='color:red'>"
+    << "Failed to fetch user info for email: "
+    << user.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
-  out << "<b style ='color:green'>"
-  << "Your email is on record. "
-  << "</b>";
+  out << "<b style ='color:green'>" << "Your email is on record. " << "</b>";
   if (!global.userDefaultHasAdminRights()) {
     this->owner->doSetEmail(user, &out, &out, nullptr);
   } else {
     this->owner->doSetEmail(user, &out, &out, &out);
   }
-  out << "<br>Response time: " << global.getElapsedSeconds() << " second(s); "
-  << global.getElapsedSeconds() << " second(s) spent creating account. ";
+  out
+  << "<br>Response time: "
+  << global.getElapsedSeconds()
+  << " second(s); "
+  << global.getElapsedSeconds()
+  << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
   return global.response.writeResponse(result, false);
 }
@@ -987,14 +1334,24 @@ JSData WebWorker::getSignUpRequestResult() {
   }
   Database::get().user.logoutViaDatabase();
   UserCalculator user;
-  user.username = HtmlRoutines::convertURLStringToNormal(global.getWebInput("desiredUsername"), false);
-  user.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
+  user.username =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("desiredUsername"), false
+  );
+  user.email =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("email"), false
+  );
   std::stringstream generalCommentsStream;
   std::stringstream outputStream;
   generalCommentsStream
   << "<b>Please excuse our technical messages, they will be removed soon.</b>";
   WebClient webClient;
-  if (!webClient.verifyRecaptcha(&errorStream, &generalCommentsStream, nullptr)) {
+  if (
+    !webClient.verifyRecaptcha(
+      &errorStream, &generalCommentsStream, nullptr
+    )
+  ) {
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
@@ -1022,7 +1379,8 @@ JSData WebWorker::getSignUpRequestResult() {
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   } else {
-    outputStream << "<b style ='color:green'>"
+    outputStream
+    << "<b style ='color:green'>"
     << "Username ("
     << user.username
     << ") with email ("
@@ -1040,9 +1398,11 @@ JSData WebWorker::getSignUpRequestResult() {
   if (global.userDefaultHasAdminRights()) {
     adminOutputStream = &generalCommentsStream;
   }
-  //int fixThis;
-  //adminOutputStream = &generalCommentsStream;
-  this->doSetEmail(user, &errorStream, &generalCommentsStream, adminOutputStream);
+  // int fixThis;
+  // adminOutputStream = &generalCommentsStream;
+  this->doSetEmail(
+    user, &errorStream, &generalCommentsStream, adminOutputStream
+  );
   result["error"] = errorStream.str();
   result[WebAPI::result::comments] = generalCommentsStream.str();
   result[WebAPI::result::resultHtml] = outputStream.str();
@@ -1050,22 +1410,39 @@ JSData WebWorker::getSignUpRequestResult() {
 }
 
 bool WebWorker::writeToBodyJSON(const JSData& result) {
-  std::string toWrite = HtmlRoutines::convertStringToHtmlString(
+  std::string toWrite =
+  HtmlRoutines::convertStringToHtmlString(
     result.toString(nullptr), false
   );
   if (toWrite.size() < 2000) {
-    if (toWrite.find(WebAPIResponse::youHaveReachedTheBackend) != std::string::npos) {
-      std::string sanitizedCalculatorApp = HtmlRoutines::convertStringToHtmlString(global.displayApplication, false);
+    if (
+      toWrite.find(WebAPIResponse::youHaveReachedTheBackend) !=
+      std::string::npos
+    ) {
+      std::string sanitizedCalculatorApp =
+      HtmlRoutines::convertStringToHtmlString(
+        global.displayApplication, false
+      );
       std::stringstream outLinkApp;
-      outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '"
-      << sanitizedCalculatorApp << "'>app</a>";
-      toWrite = StringRoutines::replaceAll(toWrite, WebAPIResponse::youHaveReachedTheBackend, outLinkApp.str());
+      outLinkApp
+      <<
+      "You've reached the calculator's backend. The app can be accessed here: <a href = '"
+      << sanitizedCalculatorApp
+      << "'>app</a>";
+      toWrite =
+      StringRoutines::replaceAll(
+        toWrite,
+        WebAPIResponse::youHaveReachedTheBackend,
+        outLinkApp.str()
+      );
     }
-  }  
+  }
   return this->writeToBody(toWrite);
 }
 
-bool GlobalVariables::Response::writeResponse(const JSData& incoming, bool isCrash) {
+bool GlobalVariables::Response::writeResponse(
+  const JSData& incoming, bool isCrash
+) {
   MutexlockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("WebWorker::writeResponse");
   if (!global.flagRunningBuiltInWebServer) {
@@ -1086,9 +1463,7 @@ bool GlobalVariables::Response::writeResponse(const JSData& incoming, bool isCra
   }
   if (this->flagTimedOut) {
     worker.writeAfterTimeoutJSON(
-      output,
-      status,
-      global.relativePhysicalNameOptionalResult
+      output, status, global.relativePhysicalNameOptionalResult
     );
   } else {
     worker.setHeaderOKNoContentLength("");
@@ -1101,10 +1476,11 @@ bool GlobalVariables::Response::writeResponse(const JSData& incoming, bool isCra
   return true;
 }
 
-void GlobalVariables::Response::report(const std::string &input) {
+void GlobalVariables::Response::report(const std::string& input) {
   MutexlockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::report");
-  return global.server().getActiveWorker().writeAfterTimeoutProgress(input, false);
+  return
+  global.server().getActiveWorker().writeAfterTimeoutProgress(input, false);
 }
 
 void GlobalVariables::Response::initiate(const std::string& message) {
@@ -1123,3 +1499,4 @@ void GlobalVariables::Response::initiate(const std::string& message) {
   global.response.flagTimedOut = true;
   global.server().getActiveWorker().writeAfterTimeoutShowIndicator(message);
 }
+

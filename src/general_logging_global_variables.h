@@ -1,7 +1,9 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_logging_global_variables_ALREADY_INCLUDED
 #define header_general_logging_global_variables_ALREADY_INCLUDED
+
 #include "general_lists.h"
 #include "general_list_references.h"
 #include "general_maps.h"
@@ -21,7 +23,9 @@ public:
   static int getCurrentThreadId();
   static void registerFirstThread(const std::string& inputName = "");
   static ThreadData& registerNewThread(const std::string& inputName = "");
-  static void createThread(void (*InputFunction)(int), const std::string& inputName);
+  static void createThread(
+    void(*InputFunction)(int), const std::string& inputName
+  );
   static std::string toStringAllThreadsHtml();
   static std::string toStringAllThreadsConsole();
   static void runTimerThread(int threadIndex);
@@ -30,9 +34,9 @@ public:
 };
 
 class Logger {
-  public:
+public:
   class StringHighligher {
-    public:
+  public:
     class Section {
     public:
       int length;
@@ -41,11 +45,13 @@ class Logger {
       Section(int inputLength);
       Section(const std::string& input);
     };
+
     List<Logger::StringHighligher::Section> sections;
     StringHighligher();
     StringHighligher(const std::string& input);
     void reset();
   };
+
   StringHighligher nextHighlighter;
   int currentColor;
   int maximumLogSize;
@@ -60,7 +66,8 @@ class Logger {
   bool flagResetLogFileWhenTooLarge;
   Logger();
   void checkLogSize();
-  enum LoggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
+  enum LoggerSpecialSymbols {
+    endL, red, blue, yellow, green, purple, cyan, normalColor, orange  };
   static std::string consoleRed();
   static std::string consoleBlue();
   static std::string consoleYellow();
@@ -79,7 +86,8 @@ class Logger {
   void reset();
   Logger& operator<<(const Logger::StringHighligher& input);
   Logger& operator<<(const std::string& input) {
-    // The operator overloading causes issues qtcreator finding the right method,
+    // The operator overloading causes issues qtcreator finding the right
+    // method,
     // so redirecting to something that's easy to find.
     return this->logString(input);
   }
@@ -140,7 +148,6 @@ public:
   MutexRecursiveWrapper mutexWebWorkerPipeReadlock;
   MutexRecursiveWrapper mutexParallelComputingCrash;
   MutexRecursiveWrapper mutexRegisterNewThread;
-
   GlobalVariables();
   ~GlobalVariables();
   class LogData {
@@ -150,10 +157,13 @@ public:
       // Listed in approximate order of appearance.
       // This process type initializes the system.
       static const int initialization = 0;
-      // This optional process monitors the entire system and reboots it if it goes down.
+      // This optional process monitors the entire system and reboots it if it
+      // goes down.
       static const int daemon = 1;
-      // This optional process monitors the server process over a localhost connection.
-      // Attempts to kill the server process if the localhost connection is lost.
+      // This optional process monitors the server process over a localhost
+      // connection.
+      // Attempts to kill the server process if the localhost connection is
+      // lost.
       static const int serverMonitor = 2;
       // This process type runs the web server and accepts connections.
       static const int server = 3;
@@ -161,6 +171,7 @@ public:
       // and does the actual internet input/output.
       static const int worker = 4;
     };
+
     int logType;
     Logger server;
     Logger serverMonitor;
@@ -172,47 +183,45 @@ public:
     }
     std::string toStringProcessType() const;
   };
+
   LogData logs;
   template <typename Type>
   GlobalVariables& operator<<(const Type& toBePrinted) {
     switch (this->logs.logType) {
     case GlobalVariables::LogData::type::server:
-      this->logs.server << toBePrinted;
-      return *this;
+      this->logs.server << toBePrinted; return *this;
     case GlobalVariables::LogData::type::serverMonitor:
-      this->logs.serverMonitor << toBePrinted;
-      return *this;
+      this->logs.serverMonitor << toBePrinted; return *this;
     case GlobalVariables::LogData::type::worker:
-      this->logs.worker << toBePrinted;
-      return *this;
+      this->logs.worker << toBePrinted; return *this;
     case GlobalVariables::LogData::type::daemon:
-      this->logs.daemon << toBePrinted;
-      return *this;
+      this->logs.daemon << toBePrinted; return *this;
     default:
-      this->logs.worker << toBePrinted;
-      return *this;
+      this->logs.worker << toBePrinted; return *this;
     }
   }
   // When non-null, usually points to:
   // int externalCommandNoOutput(const std::string& command)
-  int (*pointerExternalCommandNoOutput)(const std::string& systemCommand);
+  int(*pointerExternalCommandNoOutput)(const std::string& systemCommand);
   // When non-null, usually points to:
-  // std::string externalCommandReturnStandardOut(const std::string& inputCommand)
-  std::string (*pointerExternalCommandReturnOutput)(const std::string& systemCommand);
+  // std::string externalCommandReturnStandardOut(const std::string&
+  // inputCommand)
+  std::string(*pointerExternalCommandReturnOutput)(
+    const std::string& systemCommand
+  );
   // When non-null, usually points to:
   // int externalCommandStream(const std::string& inputCommand)
-  int (*pointerExternalCommandStream)(const std::string& systemCommand);
+  int(*pointerExternalCommandStream)(const std::string& systemCommand);
   // When non-null, this usually points to: callChDirWrapper.
-  void (*pointerCallChDir)(const std::string& directoryName);
-  //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
+  void(*pointerCallChDir)(const std::string& directoryName);
+  // double
+  // MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   MemorySaving<Calculator>& calculator();
-
   int64_t millisecondOffset;
   int64_t millisecondsMaxComputation;
   int64_t millisecondsNoPingBeforeChildIsPresumedDead;
   int64_t millisecondsReplyAfterComputation;
   int64_t millisecondsComputationStart;
-
   //  bool flagLogInterprocessCommunication;
   // flags: what mode are we running in?
   bool flagRunningConsoleHelp;
@@ -220,14 +229,12 @@ public:
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
   bool flagRunningWebAssembly;
-
   // bool flagTesting;
   // webserver flags and variables
   bool flagRunServerOnEmptyCommandLine;
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;
   bool flagIsChildProcess;
-
   bool flagLoggedIn;
   bool flagLogInAttempted;
   bool flagUsingSSLinCurrentConnection;
@@ -236,7 +243,6 @@ public:
   bool flagSSLAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
-
   // If false, signals use of a mock database.
   // Mock database = simple json file that
   // is 100% read/overwritten on each database
@@ -253,18 +259,15 @@ public:
   // Setting this flag will turn off web server
   // self-pinging.
   bool flagDaemonMonitor;
-
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
   std::string operatingSystem;
   std::string hostWithPort;
   std::string hostNoPort;
-
   bool flagRequestComingLocally;
   // internal infrastructure flags
   bool flagServerforkedIntoWorker;
   bool flagNotAllocated;
-
   // Used for cryptographic purposes.
   // Initialized once, securely, in the
   // parent process.
@@ -273,12 +276,13 @@ public:
   // When not initialized, contains 0 bytes.
   List<unsigned char> randomBytesCurrent;
   // Random bytes to keep as internal state.
-  const unsigned int numberOfRandomBytes = 64; // = 512 bits
+  const unsigned int numberOfRandomBytes = 64;
+  // = 512 bits
   // Not allowed to extract more than this many random bytes at once.
-  const unsigned int maximumExtractedRandomBytes = 32; // = 256 bits
-
+  const unsigned int maximumExtractedRandomBytes = 32;
+  // = 256 bits
   MemorySaving<FormatExpressions> defaultFormat;
-  //status flags:
+  // status flags:
   bool flagComputationComplete;
   bool flagComputationStarted;
   bool flagComputationFinishedAllOutputSentClosing;
@@ -302,6 +306,7 @@ public:
         this->owner->flagReportAllowed = this->flagReportAllowed;
       }
     };
+
     class ReportType {
     public:
       static const int general = 0;
@@ -310,15 +315,14 @@ public:
       static const int fileInputOutput = 3;
       static const int largeIntegerArithmetic = 4;
     };
+
     // Respond functions start here.
     // The functions below lock one another out.
     void report(const std::string& input);
     void initiate(const std::string& message);
     // Respond functions end here.
-
     // returns true
     bool writeResponse(const JSData& incoming, bool isCrash = false);
-
     bool monitoringAllowed();
     bool reportDesired(int type = Response::ReportType::general);
     void disallowReport();
@@ -326,21 +330,21 @@ public:
     bool isTimedOut();
     Response();
   };
+
   Response response;
   ListReferences<std::thread> allThreads;
   ListReferences<ThreadData> threadData;
   ListReferences<ListReferences<StackInfo> > customStackTrace;
   ListReferences<ListReferences<std::string> > progressReportStrings;
   List<std::string> programArguments;
-
   MapList<std::string, std::string, MathRoutines::hashString> webArguments;
   MapList<std::string, std::string, MathRoutines::hashString> cookiesToBeSent;
   UserCalculatorData userDefault;
-  MapList<std::string, int, MathRoutines::hashString> problemExpectedNumberOfAnswers;
-
+  MapList<std::string, int, MathRoutines::hashString>
+  problemExpectedNumberOfAnswers;
   std::string requestType;
-
-  // location of the configuration file. Can be overridden with command line flags.
+  // location of the configuration file. Can be overridden with command line
+  // flags.
   std::string configurationFileName;
   std::string configurationFileContent;
   // The configuration is computed by merging a configuration file
@@ -357,28 +361,22 @@ public:
   JSData configurationCommandLine;
   JSData timeStats;
   List<List<std::string> > databaseModifiableFields;
-
   static std::string hopefullyPermanentWebAdress;
   static std::string hopefullyPermanentWebAdressOfServerExecutable;
   static std::string hopefullyPermanent_HTTPS_WebAdressOfServerExecutable;
   static std::string hopefullyPermanent_HTTPS_WebAdressJavascriptFolder;
   static std::string hopefullyPermanentWebAdressOfServerOutputFolder;
-
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
-
   std::string relativePhysicalNameCrashReport;
   std::string relativePhysicalNameOptionalProgressReport;
   std::string relativePhysicalNameOptionalResult;
-
   std::string pathExecutableUserInputOrDeduced;
-
   std::string physicalPathProjectBase;
   std::string physicalPathServerBase;
   std::string physicalNameFolderExecutable;
   std::string physicalNameExecutableNoPath;
   std::string physicalNameExecutableWithPath;
-
   std::string displayPathOutputFolder;
   // The backend URL, for example
   // displayNameExecutable ="/cgi-bin/calculator";
@@ -387,20 +385,19 @@ public:
   // displayApplication ="/app";
   std::string displayApplication;
   std::string displayNameExecutableAppNoCache;
-
   std::string IPAdressCaller;
-
   bool flagUseMathTags;
-
-  MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
+  MemorySaving<DynkinDiagramRootSubalgebra> dynGetEpsCoords;
   class Crasher {
-    public:
+  public:
     std::stringstream crashReport;
     std::stringstream crashReportHtml;
     std::stringstream crashReportConsolE;
     std::stringstream crashReportFile;
-    bool flagCrashInitiated; //<-we crash only once, and we do not resume execution after a crash
-    bool flagFinishingCrash; //<-we crash only once, and we do not resume execution after a crash
+    bool flagCrashInitiated;
+    // <-we crash only once, and we do not resume execution after a crash
+    bool flagFinishingCrash;
+    // <-we crash only once, and we do not resume execution after a crash
     Crasher();
     void firstRun();
     static std::string getStackTraceEtcErrorMessageHTML();
@@ -422,6 +419,7 @@ public:
       return *this;
     }
   };
+
   Crasher fatal;
   class CommentsCurrentConnection {
     MemorySaving<std::stringstream> container;
@@ -440,6 +438,7 @@ public:
       return result;
     }
   };
+
   CommentsCurrentConnection comments;
   void joinAllThreads();
   bool configurationStore();
@@ -457,11 +456,12 @@ public:
   bool userRequestRequiresLoadingRealExamData();
   bool userRequestMustBePromptedToLogInIfNotLoggedIn();
   void fallAsleep(int microseconds);
-
   static std::string getDateForLogFiles();
   static std::string getTimeGM();
   static std::string getTimeLocal();
-  void setWebInput(const std::string& inputName, const std::string& inputValue);
+  void setWebInput(
+    const std::string& inputName, const std::string& inputValue
+  );
   std::string getWebInput(const std::string& inputName);
   void initialize();
   void initializeMathematics();
@@ -478,10 +478,14 @@ public:
   bool userStudentVieWOn();
   bool checkConsistency();
   int externalCommandStream(const std::string& systemCommand);
-  int externalCommandNoOutput(const std::string& systemCommand, bool logErrors);
+  int externalCommandNoOutput(
+    const std::string& systemCommand, bool logErrors
+  );
   std::string externalCommandReturnOutput(const std::string& systemCommand);
   void changeDirectory(const std::string& systemCommand);
-  std::string toStringCalculatorArgumentsNoNavigation(List<std::string>* tagsToExclude);
+  std::string toStringCalculatorArgumentsNoNavigation(
+    List<std::string>* tagsToExclude
+  );
   std::string toHTMLTopCommandLinuxSystem();
   std::string toStringFolderInfo() const;
   std::string toStringThreadData(bool useHTML);
@@ -503,11 +507,12 @@ Logger& Logger::doTheLogging(const Type& toBePrinted) {
   std::stringstream out;
   out << toBePrinted;
   this->bufferStandardOutput += out.str();
-
   if (!this->flagStopWritingToFile) {
     this->bufferFile += out.str();
   }
   this->checkLogSize();
   return *this;
 }
+
 #endif // header_general_logging_global_variables_ALREADY_INCLUDED
+

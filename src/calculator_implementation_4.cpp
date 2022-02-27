@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include "math_general_implementation.h"
@@ -11,7 +12,6 @@
 #include "string_constants.h"
 #include "math_rational_function_implementation.h"
 #include "math_extra_differential_operators.h"
-
 #include <cmath>
 #include <cfloat>
 
@@ -42,53 +42,96 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
-  if (!FileOperations::openFileCreateIfNotPresentVirtual(
-    fileStream, global.displayPathOutputFolder + fileName.str() + ".tex", false, true, false
-  )) {
+  if (
+    !FileOperations::openFileCreateIfNotPresentVirtual(
+      fileStream,
+      global.displayPathOutputFolder + fileName.str() + ".tex",
+      false,
+      true,
+      false
+    )
+  ) {
     return "failed to create file: " + fileName.str() + ".tex";
   }
   std::string baseFolder;
   std::string fileNameWithPathPhysical;
-  FileOperations::getPhysicalFileNameFromVirtual("output/", baseFolder, false, false, nullptr);
   FileOperations::getPhysicalFileNameFromVirtual(
-    "output/" + fileName.str(), fileNameWithPathPhysical, false, false, nullptr
+    "output/", baseFolder, false, false, nullptr
+  );
+  FileOperations::getPhysicalFileNameFromVirtual(
+    "output/" + fileName.str(),
+    fileNameWithPathPhysical,
+    false,
+    false,
+    nullptr
   );
   fileStream << fileContent;
   fileStream.flush();
   fileStream.close();
-  systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
+  systemCommand1
+  << " latex -output-directory="
+  << baseFolder
+  << " "
+  << fileName.str()
+  << ".tex";
   global.externalCommandNoOutput(systemCommand1.str(), true);
   if (useLatexDviPSpsToPNG) {
-    systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "
-    << fileNameWithPathPhysical << ".dvi";
+    systemCommand2
+    << " dvips -o "
+    << fileNameWithPathPhysical
+    << ".ps "
+    << fileNameWithPathPhysical
+    << ".dvi";
     global.externalCommandNoOutput(systemCommand2.str(), true);
-    systemCommand3 << " convert " << fileNameWithPathPhysical
-    << ".ps " << fileNameWithPathPhysical << ".png";
+    systemCommand3
+    << " convert "
+    << fileNameWithPathPhysical
+    << ".ps "
+    << fileNameWithPathPhysical
+    << ".png";
     global.externalCommandNoOutput(systemCommand3.str(), true);
   }
   std::stringstream out;
-  out << "<img src =\"" << global.displayPathOutputFolder
-  << fileName.str() << ".png\"></img><a href=\""
+  out
+  << "<img src =\""
   << global.displayPathOutputFolder
-  << fileName.str() << ".tex\">" << global.displayPathOutputFolder
-  << fileName.str() << ".tex</a>";
+  << fileName.str()
+  << ".png\"></img><a href=\""
+  << global.displayPathOutputFolder
+  << fileName.str()
+  << ".tex\">"
+  << global.displayPathOutputFolder
+  << fileName.str()
+  << ".tex</a>";
   if (outputFileNameNoExtension != nullptr) {
-    *outputFileNameNoExtension = global.displayPathOutputFolder + fileName.str();
+    *outputFileNameNoExtension =
+    global.displayPathOutputFolder + fileName.str();
   }
   this->numOutputFileS ++;
   return out.str();
 }
 
-bool Calculator::getVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
+bool Calculator::getVectorExpressions(
+  const Expression& input,
+  List<Expression>& output,
+  int targetDimNonMandatory
+) {
   MacroRegisterFunctionWithName("Calculator::getVectorExpressions");
   input.checkInitialization();
   output.reserve(input.size());
   output.setSize(0);
-  if (!input.isSequenceNElements() && !input.startsWith(this->opIntervalOpen())) {
+  if (
+    !input.isSequenceNElements() &&
+    !input.startsWith(this->opIntervalOpen())
+  ) {
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
-        return *this << "<hr>getVector failure: target dim is "
-        << targetDimNonMandatory << " but the input " << input.toString()
+        return
+        *this
+        << "<hr>getVector failure: target dim is "
+        << targetDimNonMandatory
+        << " but the input "
+        << input.toString()
         << " can only be interpreted as a single element";
       }
     }
@@ -97,9 +140,13 @@ bool Calculator::getVectorExpressions(const Expression& input, List<Expression>&
   }
   if (targetDimNonMandatory > 0) {
     if (targetDimNonMandatory != input.size() - 1) {
-      return *this << "<hr>Failed to getVector: the input is required to have "
-      << targetDimNonMandatory << " columns but it has "
-      << input.size() - 1 << " columns instead. <hr>";
+      return
+      *this
+      << "<hr>Failed to getVector: the input is required to have "
+      << targetDimNonMandatory
+      << " columns but it has "
+      << input.size() - 1
+      << " columns instead. <hr>";
     }
   }
   targetDimNonMandatory = input.size() - 1;
@@ -111,8 +158,12 @@ bool Calculator::getVectorExpressions(const Expression& input, List<Expression>&
   return true;
 }
 
-template<class Element>
-void MathRoutines::lieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output) {
+template <class Element>
+void MathRoutines::lieBracket(
+  const Element& standsOnTheLeft,
+  const Element& standsOnTheRight,
+  Element& output
+) {
   if (&standsOnTheLeft == &output || &standsOnTheRight == &output) {
     Element standsOnTheLeftNew, standsOnTheRightNew;
     standsOnTheLeftNew = standsOnTheLeft;
@@ -128,14 +179,19 @@ void MathRoutines::lieBracket(const Element& standsOnTheLeft, const Element& sta
   output -= tempE;
 }
 
-bool Calculator::recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
+bool Calculator::recursionDepthExceededHandleRoughly(
+  const std::string& additionalErrorInfo
+) {
   if (this->recursionDepth <= this->maximumRecursionDepth) {
     return false;
   }
   if (!this->flagMaxRecursionErrorEncountered) {
-    *this << additionalErrorInfo
-    << "<span style =\"color:#FF0000\"><b> maximum recursion depth of " << this->maximumRecursionDepth
-    << " exceeded. </b></span>" << "Aborting computation ASAP. ";
+    *this
+    << additionalErrorInfo
+    << "<span style =\"color:#FF0000\"><b> maximum recursion depth of "
+    << this->maximumRecursionDepth
+    << " exceeded. </b></span>"
+    << "Aborting computation ASAP. ";
   }
   this->flagAbortComputationASAP = true;
   this->flagMaxRecursionErrorEncountered = true;
@@ -145,7 +201,8 @@ bool Calculator::recursionDepthExceededHandleRoughly(const std::string& addition
 bool Calculator::checkOperationHandlers() {
   MacroRegisterFunctionWithName("Calculator::checkOperationHandlers");
   for (int i = 0; i < this->operations.size(); i ++) {
-    MemorySaving<Calculator::OperationHandlers>& current = this->operations.values[i];
+    MemorySaving<Calculator::OperationHandlers>& current =
+    this->operations.values[i];
     if (current.isZeroPointer()) {
       continue;
     }
@@ -165,13 +222,17 @@ bool Calculator::checkConsistencyAfterInitialization() {
   this->allChildExpressions.grandMasterConsistencyCheck();
   this->evaluatedExpressionsStack.grandMasterConsistencyCheck();
   if (this->numberExpectedExpressionsAtInitialization < 0) {
-    this->numberExpectedExpressionsAtInitialization = this->allChildExpressions.size;
+    this->numberExpectedExpressionsAtInitialization =
+    this->allChildExpressions.size;
   } else if (
-    this->allChildExpressions.size != this->numberExpectedExpressionsAtInitialization
+    this->allChildExpressions.size !=
+    this->numberExpectedExpressionsAtInitialization
   ) {
-    global.fatal << "Expression container expected to have "
+    global.fatal
+    << "Expression container expected to have "
     << this->numberExpectedExpressionsAtInitialization
-    << " elements but instead it has " << this->allChildExpressions.size
+    << " elements but instead it has "
+    << this->allChildExpressions.size
     << ". Expression container: ";
     for (int i = 0; i < this->allChildExpressions.size; i ++) {
       global.fatal << this->allChildExpressions[i].toString() << ", ";
@@ -182,12 +243,15 @@ bool Calculator::checkConsistencyAfterInitialization() {
     this->cachedExpressions.size() != 0 ||
     this->evaluatedExpressionsStack.size != 0
   ) {
-    global.fatal << "Cached expressions, evaluatedExpressionsStack "
+    global.fatal
+    << "Cached expressions, evaluatedExpressionsStack "
     << "are supposed to be empty, but "
     << "instead they contain respectively "
-    << this->cachedExpressions.size() << ", "
+    << this->cachedExpressions.size()
+    << ", "
     << this->evaluatedExpressionsStack.size
-    << " elements. " << global.fatal;
+    << " elements. "
+    << global.fatal;
   }
   return this->objectContainer.checkConsistencyAfterReset();
 }
@@ -211,7 +275,8 @@ bool Expression::checkInitialization() const {
 
 bool Expression::hasInputBoxVariables(
   HashedList<std::string, HashFunctions::hashFunction>* outputBoxNames,
-  HashedList<std::string, HashFunctions::hashFunction>* outputBoxNamesJavascript
+  HashedList<std::string, HashFunctions::hashFunction>*
+  outputBoxNamesJavascript
 ) const {
   MacroRegisterFunctionWithName("Expression::hasInputBoxVariables");
   if (this->owner == nullptr) {
@@ -221,7 +286,8 @@ bool Expression::hasInputBoxVariables(
   if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
     global.fatal
     << "Function hasInputBoxVariables has exceeded "
-    << "recursion depth limit. " << global.fatal;
+    << "recursion depth limit. "
+    << global.fatal;
   }
   InputBox box;
   if (this->isOfType<InputBox>(&box)) {
@@ -235,7 +301,10 @@ bool Expression::hasInputBoxVariables(
   }
   bool result = false;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].hasInputBoxVariables(outputBoxNames, outputBoxNamesJavascript)) {
+    if ((*this)[i].hasInputBoxVariables(
+        outputBoxNames, outputBoxNamesJavascript
+      )
+    ) {
       if (outputBoxNames == nullptr && outputBoxNamesJavascript == nullptr) {
         // We don't care for the names of all input boxes.
         return true;
@@ -248,13 +317,17 @@ bool Expression::hasInputBoxVariables(
 
 bool Expression::hasBoundVariables() const {
   if (this->owner == nullptr) {
-    global.fatal << "Calling function "
-    << "hasBoundVariables on non-initialized expression. " << global.fatal;
+    global.fatal
+    << "Calling function "
+    << "hasBoundVariables on non-initialized expression. "
+    << global.fatal;
   }
   RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
   MacroRegisterFunctionWithName("Expression::hasBoundVariables");
-  if (this->owner->recursionDepth>this->owner->maximumRecursionDepth) {
-    global.fatal << "Function hasBoundVariables has exceeded recursion depth limit. " << global.fatal;
+  if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
+    global.fatal
+    << "Function hasBoundVariables has exceeded recursion depth limit. "
+    << global.fatal;
   }
   if (this->isListOfTwoAtomsStartingWith(this->owner->opBind())) {
     return true;
@@ -279,10 +352,18 @@ bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
     output.addOnTop(input);
   } else {
     for (int i = 1; i < input.size(); i ++) {
-      if (this->appendOpandsReturnTrueIfOrderNonCanonical(input[i], output, operation)) {
+      if (
+        this->appendOpandsReturnTrueIfOrderNonCanonical(
+          input[i], output, operation
+        )
+      ) {
         result = true;
       }
-      if (i < input.size() - 1 && input[i].isListStartingWithAtom(operation) && input[i].size() > 2) {
+      if (
+        i < input.size() - 1 &&
+        input[i].isListStartingWithAtom(operation) &&
+        input[i].size() > 2
+      ) {
         result = true;
       }
     }
@@ -295,13 +376,23 @@ bool CalculatorBasics::tensorProductStandard(
 ) {
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::outerTensorProductStandard");
-  if (CalculatorBasics::distribute(calculator, input, output, calculator.opPlus(), calculator.opTensor())) {
+  if (
+    CalculatorBasics::distribute(
+      calculator,
+      input,
+      output,
+      calculator.opPlus(),
+      calculator.opTensor()
+    )
+  ) {
     return true;
   }
   if (CalculatorBasics::associate(calculator, input, output)) {
     return true;
   }
-  if (CalculatorBasics::extractBaseMultiplication(calculator, input, output)) {
+  if (
+    CalculatorBasics::extractBaseMultiplication(calculator, input, output)
+  ) {
     return true;
   }
   return false;
@@ -310,7 +401,9 @@ bool CalculatorBasics::tensorProductStandard(
 bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY");
+  MacroRegisterFunctionWithName(
+    "Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY"
+  );
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -337,8 +430,15 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
           }
         }
         if (isGood) {
-          power.makeXOX(calculator, calculator.opPlus(), (*right)[2], calculator.expressionOne());
-          return output.makeXOX(calculator, calculator.opPower(), *left, power);
+          power.makeXOX(
+            calculator,
+            calculator.opPlus(), (*right)[2],
+            calculator.expressionOne()
+          );
+          return
+          output.makeXOX(
+            calculator, calculator.opPower(), *left, power
+          );
         }
       }
       if (left->startsWith(calculator.opPower(), 3)) {
@@ -352,7 +452,10 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
           }
           Rational leftRat, rightRat;
           if (!isGood) {
-            if ((*left)[2].isOfType<Rational>(&leftRat) && (*right)[2].isOfType<Rational>(&rightRat)) {
+            if ((*left)[2].isOfType<Rational>(&leftRat) && (*right)[2].isOfType<
+                Rational
+              >(&rightRat)
+            ) {
               if (leftRat.isInteger() && !rightRat.isInteger()) {
                 isGood = true;
               }
@@ -364,8 +467,14 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
           if (!isGood) {
             continue;
           }
-          power.makeXOX(calculator, calculator.opPlus(), (*left)[2], (*right)[2]);
-          return output.makeXOX(calculator, calculator.opPower(), (*left)[1], power);
+          power.makeXOX(
+            calculator,
+            calculator.opPlus(), (*left)[2], (*right)[2]
+          );
+          return
+          output.makeXOX(
+            calculator, calculator.opPower(), (*left)[1], power
+          );
         }
       }
     }
@@ -373,7 +482,9 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   return false;
 }
 
-bool CalculatorBasics::combineFractions(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::combineFractions(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
@@ -391,12 +502,21 @@ bool CalculatorBasics::combineFractions(Calculator& calculator, const Expression
   const Expression& quotientNumeratorE = (*quotientE)[1];
   const Expression& quotientDenominatorE = (*quotientE)[2];
   Expression outputSummandE, outputNumE;
-  outputSummandE.makeXOX(calculator, calculator.opTimes(), *summandE, quotientDenominatorE);
-  outputNumE.makeXOX(calculator, calculator.opPlus(), quotientNumeratorE, outputSummandE);
-  return output.makeXOX(calculator, calculator.opDivide(), outputNumE, quotientDenominatorE);
+  outputSummandE.makeXOX(
+    calculator, calculator.opTimes(), *summandE, quotientDenominatorE
+  );
+  outputNumE.makeXOX(
+    calculator, calculator.opPlus(), quotientNumeratorE, outputSummandE
+  );
+  return
+  output.makeXOX(
+    calculator, calculator.opDivide(), outputNumE, quotientDenominatorE
+  );
 }
 
-bool CalculatorBasics::checkRule(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::checkRule(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (!input.startsWith(calculator.opDefine(), 3)) {
     return false;
   }
@@ -404,12 +524,19 @@ bool CalculatorBasics::checkRule(Calculator& calculator, const Expression& input
     return false;
   }
   std::stringstream out;
-  out << "Bad rule: you are asking me to substitute " << input[1] << " by itself ("
-  << input[2] << ")" << " which is an infinite substitution cycle. ";
+  out
+  << "Bad rule: you are asking me to substitute "
+  << input[1]
+  << " by itself ("
+  << input[2]
+  << ")"
+  << " which is an infinite substitution cycle. ";
   return output.assignError(calculator, out.str());
 }
 
-bool CalculatorBasics::subZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::subZeroDivAnythingWithZero(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -421,7 +548,9 @@ bool CalculatorBasics::subZeroDivAnythingWithZero(Calculator& calculator, const 
   return false;
 }
 
-bool CalculatorBasics::cancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::cancelMultiplicativeInverse(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -435,7 +564,9 @@ bool CalculatorBasics::cancelMultiplicativeInverse(Calculator& calculator, const
   return false;
 }
 
-bool CalculatorBasics::associateTimesDivision(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::associateTimesDivision(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -443,18 +574,26 @@ bool CalculatorBasics::associateTimesDivision(Calculator& calculator, const Expr
     return false;
   }
   Expression newLeftE;
-  newLeftE.makeXOX(calculator, calculator.opTimes(), input[1], input[2][1]);
-  output.makeXOX(calculator, calculator.opDivide(), newLeftE, input[2][2]);
+  newLeftE.makeXOX(
+    calculator, calculator.opTimes(), input[1], input[2][1]
+  );
+  output.makeXOX(
+    calculator, calculator.opDivide(), newLeftE, input[2][2]
+  );
   return true;
 }
 
-bool CalculatorBasics::associate(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::associate(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorBasics::associate");
   if (input.size() != 3) {
     return false;
   }
   int operation = input[0].data;
-  if (!input[1].startsWith(operation) && !input[2].startsWith(operation)) {
+  if (
+    !input[1].startsWith(operation) && !input[2].startsWith(operation)
+  ) {
     return false;
   }
   // int64_t startTime = global.getElapsedMilliseconds();
@@ -469,7 +608,9 @@ bool CalculatorBasics::associate(Calculator& calculator, const Expression& input
   return true;
 }
 
-bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::standardIsDenotedBy(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::standardIsDenotedBy");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opIsDenotedBy(), 3)) {
@@ -477,26 +618,45 @@ bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Express
   }
   const Expression& withNotation = input[2];
   const Expression& notation = input[1];
-  calculator << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
+  calculator
+  << "<br>Registering notation: globally, "
+  << withNotation.toString()
+  << " will be denoted by "
   << notation.toString();
-  calculator.objectContainer.expressionNotation.addOnTop(notation.toString());
+  calculator.objectContainer.expressionNotation.addOnTop(
+    notation.toString()
+  );
   calculator.objectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
   output.setChildAtomValue(0, calculator.opDefine());
-  ////
-  if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()) {
-    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >().isHighestWeightVector()) {
+  // //
+  if (
+    withNotation.isOfType<
+      ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+    >()
+  ) {
+    if (
+      withNotation.getValue<
+        ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+      >().isHighestWeightVector()
+    ) {
       MonomialGeneralizedVerma<RationalFraction<Rational> >& element =
-      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >()[0].monomials[0];
+      withNotation.getValue<
+        ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+      >()[0].monomials[0];
       element.getOwner().highestWeightVectorNotation = notation.toString();
     }
   }
   return true;
 }
 
-bool CalculatorBasics::multiplyByOne(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::multiplyByOne(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::multiplyByOne");
-  if (!input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3) {
+  if (
+    !input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3
+  ) {
     return false;
   }
   if (!input[1].isEqualToOne()) {
@@ -506,8 +666,12 @@ bool CalculatorBasics::multiplyByOne(Calculator& calculator, const Expression& i
   return true;
 }
 
-bool Calculator::getVectorLargeIntegerFromFunctionArguments(const Expression& input, List<LargeInteger>& output) {
-  MacroRegisterFunctionWithName("Calculator::getVectorLargeIntegerFromFunctionArguments");
+bool Calculator::getVectorLargeIntegerFromFunctionArguments(
+  const Expression& input, List<LargeInteger>& output
+) {
+  MacroRegisterFunctionWithName(
+    "Calculator::getVectorLargeIntegerFromFunctionArguments"
+  );
   Vector<Rational> rationals;
   if (!this->getVectorFromFunctionArguments(input, rationals)) {
     return false;
@@ -515,9 +679,13 @@ bool Calculator::getVectorLargeIntegerFromFunctionArguments(const Expression& in
   output.initializeFillInObject(rationals.size, 0);
   for (int i = 0; i < rationals.size; i ++) {
     if (!rationals[i].isInteger(&output[i])) {
-      return *this << "<hr>Succeeded to convert "
-      << input.toString() << " to the vector of rationals: "
-      << rationals.toString() << " but failed to convert that to list of integers. ";
+      return
+      *this
+      << "<hr>Succeeded to convert "
+      << input.toString()
+      << " to the vector of rationals: "
+      << rationals.toString()
+      << " but failed to convert that to list of integers. ";
     }
   }
   return true;
@@ -529,11 +697,14 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
   if (!this->getVector(input, rationals)) {
     return false;
   }
-  output.initializeFillInObject(rationals.size,0);
+  output.initializeFillInObject(rationals.size, 0);
   for (int i = 0; i < rationals.size; i ++) {
     if (!rationals[i].isSmallInteger(&output[i])) {
-      return *this << "<hr>Succeeded to convert "
-      << input.toString() << " to the vector of rationals: "
+      return
+      *this
+      << "<hr>Succeeded to convert "
+      << input.toString()
+      << " to the vector of rationals: "
       << rationals.toString()
       << " but failed to convert that to list of small integers. ";
     }
@@ -541,7 +712,9 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
   return true;
 }
 
-bool CalculatorBasics::timesToFunctionApplication(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::timesToFunctionApplication(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
   if (!input.startsWith(calculator.opTimes())) {
     return false;
@@ -562,7 +735,10 @@ bool CalculatorBasics::timesToFunctionApplication(Calculator& calculator, const 
     return false;
   }
   const Expression& secondElt = input[2];
-  if (secondElt.isSequenceNElements() || secondElt.startsWith(calculator.opIntervalOpen())) {
+  if (
+    secondElt.isSequenceNElements() ||
+    secondElt.startsWith(calculator.opIntervalOpen())
+  ) {
     output = secondElt;
     return output.setChild(0, firstElt);
   }
@@ -582,17 +758,20 @@ bool CalculatorBasics::distribute(
   int multiplicativeOperation,
   bool constantsOnly
 ) {
-  if (CalculatorBasics::leftDistributeBracketIsOnTheLeft(
-    calculator,
-    input,
-    output,
-    additiveOperation,
-    multiplicativeOperation,
-    constantsOnly
-  )) {
+  if (
+    CalculatorBasics::leftDistributeBracketIsOnTheLeft(
+      calculator,
+      input,
+      output,
+      additiveOperation,
+      multiplicativeOperation,
+      constantsOnly
+    )
+  ) {
     return true;
   }
-  return CalculatorBasics::rightDistributeBracketIsOnTheRight(
+  return
+  CalculatorBasics::rightDistributeBracketIsOnTheRight(
     calculator,
     input,
     output,
@@ -602,8 +781,11 @@ bool CalculatorBasics::distribute(
   );
 }
 
-bool CalculatorBasics::distributeTimes(Calculator& calculator, const Expression& input, Expression& output) {
-  return CalculatorBasics::distribute(
+bool CalculatorBasics::distributeTimes(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  return
+  CalculatorBasics::distribute(
     calculator,
     input,
     output,
@@ -613,8 +795,18 @@ bool CalculatorBasics::distributeTimes(Calculator& calculator, const Expression&
   );
 }
 
-bool CalculatorBasics::distributeTimesConstant(Calculator& calculator, const Expression& input, Expression& output) {
-  return CalculatorBasics::distribute(calculator, input, output,calculator.opPlus(), calculator.opTimes(), true);
+bool CalculatorBasics::distributeTimesConstant(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  return
+  CalculatorBasics::distribute(
+    calculator,
+    input,
+    output,
+    calculator.opPlus(),
+    calculator.opTimes(),
+    true
+  );
 }
 
 bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
@@ -625,7 +817,9 @@ bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
   int multiplicativeOperation,
   bool constantsOnly
 ) {
-  MacroRegisterFunctionWithName("CalculatorBasics::leftDistributeBracketIsOnTheLeft");
+  MacroRegisterFunctionWithName(
+    "CalculatorBasics::leftDistributeBracketIsOnTheLeft"
+  );
   if (additiveOperation == - 1) {
     additiveOperation = calculator.opPlus();
   }
@@ -644,8 +838,12 @@ bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
     }
   }
   Expression leftE, rightE;
-  leftE.makeXOX(calculator, multiplicativeOperation, input[1][1], input[2]);
-  rightE.makeXOX(calculator, multiplicativeOperation, input[1][2], input[2]);
+  leftE.makeXOX(
+    calculator, multiplicativeOperation, input[1][1], input[2]
+  );
+  rightE.makeXOX(
+    calculator, multiplicativeOperation, input[1][2], input[2]
+  );
   return output.makeXOX(calculator, additiveOperation, leftE, rightE);
 }
 
@@ -657,7 +855,9 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
   int multiplicativeOperation,
   bool constantsOnly
 ) {
-  MacroRegisterFunctionWithName("Calculator::rightDistributeBracketIsOnTheRight");
+  MacroRegisterFunctionWithName(
+    "Calculator::rightDistributeBracketIsOnTheRight"
+  );
   if (additiveOperation == - 1) {
     additiveOperation = calculator.opPlus();
   }
@@ -675,10 +875,14 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
       return false;
     }
   }
-//  int format = input.format;
+  //  int format = input.format;
   Expression leftE, rightE;
-  leftE.makeXOX(calculator, multiplicativeOperation, input[1], input[2][1]);
-  rightE.makeXOX(calculator, multiplicativeOperation, input[1], input[2][2]);
+  leftE.makeXOX(
+    calculator, multiplicativeOperation, input[1], input[2][1]
+  );
+  rightE.makeXOX(
+    calculator, multiplicativeOperation, input[1], input[2][2]
+  );
   return output.makeXOX(calculator, additiveOperation, leftE, rightE);
 }
 
@@ -687,14 +891,18 @@ bool Calculator::collectCoefficientsPowersVariables(
   const Expression& variable,
   VectorSparse<Expression>& outputPositionIiscoeffXtoIth
 ) {
-  MacroRegisterFunctionWithName("Calculator::collectCoefficientsPowersVariables");
+  MacroRegisterFunctionWithName(
+    "Calculator::collectCoefficientsPowersVariables"
+  );
   List<Expression> summands, currentMultiplicands, remainingMultiplicands;
   Calculator& calculator = *input.owner;
   calculator.collectOpands(input, calculator.opPlus(), summands);
   Expression currentCoeff;
   outputPositionIiscoeffXtoIth.makeZero();
   for (int i = 0; i < summands.size; i ++) {
-    calculator.collectOpands(summands[i], calculator.opTimes(), currentMultiplicands);
+    calculator.collectOpands(
+      summands[i], calculator.opTimes(), currentMultiplicands
+    );
     bool found = false;
     for (int j = 0; j < currentMultiplicands.size; j ++) {
       const Expression& currentE = currentMultiplicands[j];
@@ -706,7 +914,9 @@ bool Calculator::collectCoefficientsPowersVariables(
         currentCoeff.makeProduct(calculator, remainingMultiplicands);
       }
       if (currentE == variable) {
-        outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(1), currentCoeff);
+        outputPositionIiscoeffXtoIth.addMonomial(
+          MonomialVector(1), currentCoeff
+        );
         found = true;
         break;
       }
@@ -714,7 +924,9 @@ bool Calculator::collectCoefficientsPowersVariables(
         int power;
         if (currentE[1] == variable) {
           if (currentE[2].isSmallInteger(&power)) {
-            outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(power), currentCoeff);
+            outputPositionIiscoeffXtoIth.addMonomial(
+              MonomialVector(power), currentCoeff
+            );
             found = true;
             break;
           }
@@ -722,13 +934,17 @@ bool Calculator::collectCoefficientsPowersVariables(
       }
     }
     if (!found) {
-      outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(0), summands[i]);
+      outputPositionIiscoeffXtoIth.addMonomial(
+        MonomialVector(0), summands[i]
+      );
     }
   }
   return true;
 }
 
-bool Calculator::collectOpands(const Expression& input, int operation, List<Expression>& outputOpands) {
+bool Calculator::collectOpands(
+  const Expression& input, int operation, List<Expression>& outputOpands
+) {
   MacroRegisterFunctionWithName("Calculator::collectOpands");
   outputOpands.setSize(0);
   return this->collectOpandsAccumulate(input, operation, outputOpands);
@@ -796,10 +1012,15 @@ bool Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical(
   List<Expression>& outputMonomials,
   List<Rational>& outputCoefficients
 ) {
-  MacroRegisterFunctionWithName("Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical");
-  bool result = calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
+  MacroRegisterFunctionWithName(
+    "Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical"
+  );
+  bool result =
+  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   for (int i = 0; i < summands.size; i ++) {
-    Calculator::functionCollectOneSummand(calculator, summands[i], outputMonomials, outputCoefficients);
+    Calculator::functionCollectOneSummand(
+      calculator, summands[i], outputMonomials, outputCoefficients
+    );
   }
   return result;
 }
@@ -824,17 +1045,25 @@ bool Calculator::functionCollectSummandsCombine(
       continue;
     }
     if (summands[i].startsWith(calculator.opTimes(), 3)) {
-      if (summands[i][1].isOfType<Rational>(&coefficientRational)) {
+      if (
+        summands[i][1].isOfType<Rational>(&coefficientRational)
+      ) {
         outputSum.addMonomial(summands[i][2], coefficientRational);
         continue;
-      } else if (summands[i][1].isOfType<AlgebraicNumber>(&coefficientAlgebraic)) {
+      } else if (
+        summands[i][1].isOfType<AlgebraicNumber>(&coefficientAlgebraic)
+      ) {
         if (coefficientAlgebraic.isRational(&coefficientRational)) {
           outputSum.addMonomial(summands[i][2], coefficientRational);
           continue;
         }
-        sumOverAlgebraicNumbers.addMonomial(summands[i][2], coefficientAlgebraic);
+        sumOverAlgebraicNumbers.addMonomial(
+          summands[i][2], coefficientAlgebraic
+        );
         continue;
-      } else if (summands[i][1].isOfType<double>(&coefficientDouble)) {
+      } else if (
+        summands[i][1].isOfType<double>(&coefficientDouble)
+      ) {
         sumOverDoubles.addMonomial(summands[i][2], coefficientDouble);
         if (FloatingPoint::isNaN(coefficientDouble)) {
           hasNAN = true;
@@ -843,7 +1072,9 @@ bool Calculator::functionCollectSummandsCombine(
       }
     }
     if (summands[i].isRational(&coefficientRational)) {
-      outputSum.addMonomial(calculator.expressionOne(), coefficientRational);
+      outputSum.addMonomial(
+        calculator.expressionOne(), coefficientRational
+      );
     } else {
       outputSum.addMonomial(summands[i], 1);
     }
@@ -864,7 +1095,9 @@ bool Calculator::functionCollectSummandsCombine(
   return !hasNAN;
 }
 
-bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::associateExponentExponent(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::associateExponentExponent");
   int opPower = calculator.opPower();
   if (!input.startsWith(opPower, 3)) {
@@ -883,8 +1116,10 @@ bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const E
   if (!isGood) {
     Rational powerInner;
     Rational powerOuter;
-    if (input[2].isRational(&powerOuter) && input[1][2].isRational(&powerInner)) {
-      if ((powerInner * powerOuter).isEven()) {
+    if (
+      input[2].isRational(&powerOuter) && input[1][2].isRational(&powerInner)
+    ) {
+      if ((powerInner* powerOuter).isEven()) {
         isGood = true;
       }
     }
@@ -898,7 +1133,9 @@ bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const E
   return true;
 }
 
-bool Calculator::outerPowerRaiseToFirst(Calculator& calculator, const Expression& input, Expression& output) {
+bool Calculator::outerPowerRaiseToFirst(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
@@ -922,13 +1159,19 @@ bool Expression::makeXOXOdotsOX(
   MacroRegisterFunctionWithName("Expression::makeXOXOdotsOX");
   if (opands.size == 0) {
     global.fatal
-    << "Cannot create operation sequence from an empty list. " << global.fatal;
+    << "Cannot create operation sequence from an empty list. "
+    << global.fatal;
   }
   if (opands.size == 1) {
     *this = opands[0];
     return true;
   }
-  this->makeXOX(owner, operation, opands[opands.size - 2], *opands.lastObject());
+  this->makeXOX(
+    owner,
+    operation,
+    opands[opands.size - 2],
+    *opands.lastObject()
+  );
   for (int i = opands.size - 3; i >= 0; i --) {
     this->makeXOX(owner, operation, opands[i], *this);
   }
@@ -941,9 +1184,13 @@ bool Expression::makeAtom(Calculator& newBoss, int input) {
   return true;
 }
 
-bool Expression::makeIdentityMatrixExpressions(int dimension, Calculator& inputBoss) {
+bool Expression::makeIdentityMatrixExpressions(
+  int dimension, Calculator& inputBoss
+) {
   Matrix<Expression> matrix;
-  matrix.makeIdentityMatrix(dimension, inputBoss.expressionOne(), inputBoss.expressionZero());
+  matrix.makeIdentityMatrix(
+    dimension, inputBoss.expressionOne(), inputBoss.expressionZero()
+  );
   return this->assignMatrixExpressions(matrix, inputBoss, false, true);
 }
 
@@ -951,7 +1198,10 @@ bool CalculatorBasics::evaluateIf(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!input.startsWith(calculator.opDefineConditional(), 4)) {
-    return output.assignError(calculator, "Error: operation :if = takes three arguments.");
+    return
+    output.assignError(
+      calculator, "Error: operation :if = takes three arguments."
+    );
   }
   Rational conditionRat;
   if (!input[1].isOfType<Rational>(&conditionRat)) {
@@ -968,16 +1218,27 @@ bool CalculatorBasics::evaluateIf(
   return false;
 }
 
-bool CalculatorBasics::minus(Calculator& calculator, const Expression& input, Expression& output) {
-  if (!(input.startsWith(calculator.opMinus(), 3) || input.startsWith(calculator.opMinus(), 2))) {
+bool CalculatorBasics::minus(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  if (
+    !(
+      input.startsWith(calculator.opMinus(), 3) ||
+      input.startsWith(calculator.opMinus(), 2)
+    )
+  ) {
     return false;
   }
   Expression tempE, minusOne;
   minusOne.assignValue(calculator, - 1);
   if (input.size() == 2) {
-    output.makeXOX(calculator, calculator.opTimes(), minusOne, input[1]);
+    output.makeXOX(
+      calculator, calculator.opTimes(), minusOne, input[1]
+    );
   } else {
-    tempE.makeXOX(calculator, calculator.opTimes(), minusOne, input[2]);
+    tempE.makeXOX(
+      calculator, calculator.opTimes(), minusOne, input[2]
+    );
     output.makeXOX(calculator, calculator.opPlus(), input[1], tempE);
   }
   return true;
@@ -988,7 +1249,9 @@ void Expression::operator+=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data += other.data;
     if (this->data != 1 && this->data != 0) {
-      global.fatal << "Attempting to add non-initialized expressions" << global.fatal;
+      global.fatal
+      << "Attempting to add non-initialized expressions"
+      << global.fatal;
     }
     return;
   }
@@ -1002,10 +1265,14 @@ void Expression::operator+=(const Expression& other) {
     this->assignValue(*other.owner, this->data);
   }
   if (this->owner != other.owner) {
-    global.fatal << "Error: adding expressions with different owners. " << global.fatal;
+    global.fatal
+    << "Error: adding expressions with different owners. "
+    << global.fatal;
   }
   Expression resultE;
-  resultE.makeXOX(*this->owner, this->owner->opPlus(), *this, other);
+  resultE.makeXOX(
+    *this->owner, this->owner->opPlus(), *this, other
+  );
   *this = resultE;
 }
 
@@ -1014,7 +1281,9 @@ void Expression::operator-=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data -= other.data;
     if (this->data != 1 && this->data != 0) {
-      global.fatal << "Attempt to subtract non-initialized expressions. " << global.fatal;
+      global.fatal
+      << "Attempt to subtract non-initialized expressions. "
+      << global.fatal;
     }
     return;
   }
@@ -1028,10 +1297,14 @@ void Expression::operator-=(const Expression& other) {
     this->assignValue(*other.owner, this->data);
   }
   if (this->owner != other.owner) {
-    global.fatal << "Error: attempt to add expressions with different owners. " << global.fatal;
+    global.fatal
+    << "Error: attempt to add expressions with different owners. "
+    << global.fatal;
   }
   Expression resultE;
-  resultE.makeXOX(*this->owner, this->owner->opMinus(), *this, other);
+  resultE.makeXOX(
+    *this->owner, this->owner->opMinus(), *this, other
+  );
   *this = resultE;
 }
 
@@ -1048,13 +1321,18 @@ Expression Expression::operator*(int other) {
   Expression result;
   if (this->owner == nullptr) {
     // perhaps we should allow the code below for convenience: really
-    // hard to judge if the convenience is worth it, or whether it will cause hard-to-detect bugs.
+    // hard to judge if the convenience is worth it, or whether it will cause
+    // hard-to-detect bugs.
     // Rational resultRat = this->data;
     // resultRat*= other;
     // if (resultRat.isSmallInteger(&result.data))
     //  return result;
-    global.fatal << "Multiplying non-initialized expression with data: "
-    << this->data << " by integer " << other << " is not allowed. "
+    global.fatal
+    << "Multiplying non-initialized expression with data: "
+    << this->data
+    << " by integer "
+    << other
+    << " is not allowed. "
     << global.fatal;
   }
   Expression otherE;
@@ -1068,8 +1346,11 @@ Expression Expression::operator/(int other) {
   MacroRegisterFunctionWithName("Expression::operator/");
   Expression result;
   if (this->owner == nullptr) {
-    global.fatal << "Multiplying non-initialized expression with data: "
-    << this->data << " by integer " << other
+    global.fatal
+    << "Multiplying non-initialized expression with data: "
+    << this->data
+    << " by integer "
+    << other
     << " is not allowed. "
     << global.fatal;
   }
@@ -1107,7 +1388,9 @@ void Expression::operator/=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data /= other.data;
     if (this->data != 1 && this->data != 0) {
-      global.fatal << "Attempting to divide non-initialized expressions. " << global.fatal;
+      global.fatal
+      << "Attempting to divide non-initialized expressions. "
+      << global.fatal;
     }
     return;
   }
@@ -1121,10 +1404,14 @@ void Expression::operator/=(const Expression& other) {
     this->assignValue(*other.owner, this->data);
   }
   if (this->owner != other.owner) {
-    global.fatal << "Error: dividing expressions with different owners. " << global.fatal;
+    global.fatal
+    << "Error: dividing expressions with different owners. "
+    << global.fatal;
   }
   Expression resultE;
-  resultE.makeXOX(*this->owner, this->owner->opDivide(), *this, other);
+  resultE.makeXOX(
+    *this->owner, this->owner->opDivide(), *this, other
+  );
   *this = resultE;
 }
 
@@ -1133,7 +1420,9 @@ void Expression::operator*=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data *= other.data;
     if (this->data != 1 && this->data != 0) {
-      global.fatal << "Attempting to add non-initialized expressions. " << global.fatal;
+      global.fatal
+      << "Attempting to add non-initialized expressions. "
+      << global.fatal;
     }
     return;
   }
@@ -1147,10 +1436,14 @@ void Expression::operator*=(const Expression& other) {
     this->assignValue(*other.owner, this->data);
   }
   if (this->owner != other.owner) {
-    global.fatal << "Error: adding expressions with different owners. " << global.fatal;
+    global.fatal
+    << "Error: adding expressions with different owners. "
+    << global.fatal;
   }
   Expression resultE;
-  resultE.makeXOX(*this->owner, this->owner->opTimes(), *this, other);
+  resultE.makeXOX(
+    *this->owner, this->owner->opTimes(), *this, other
+  );
   *this = resultE;
 }
 
@@ -1184,13 +1477,19 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
     return algebraicNumber == rational;
   }
   double leftD = - 1, rightD = - 1;
-  if (this->evaluatesToDouble(&leftD) && other.evaluatesToDouble(&rightD)) {
+  if (
+    this->evaluatesToDouble(&leftD) && other.evaluatesToDouble(&rightD)
+  ) {
     return (leftD - rightD == 0.0);
   }
   Expression differenceE = *this;
   differenceE -= other;
   Expression differenceEsimplified;
-  if (!this->owner->evaluateExpression(*this->owner, differenceE, differenceEsimplified)) {
+  if (
+    !this->owner->evaluateExpression(
+      *this->owner, differenceE, differenceEsimplified
+    )
+  ) {
     return false;
   }
   if (differenceEsimplified.isEqualToZero()) {
@@ -1218,8 +1517,11 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
   return true;
 }
 
-SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const {
-  MacroRegisterFunctionWithName("Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithCaution");
+SemisimpleLieAlgebra* Expression::
+getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const {
+  MacroRegisterFunctionWithName(
+    "Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithCaution"
+  );
   this->checkInitialization();
   if (!this->isBuiltInType()) {
     return nullptr;
@@ -1229,21 +1531,31 @@ SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithC
   if (indexSemisimpleLieAlgebra == - 1) {
     return nullptr;
   }
-  return &this->owner->objectContainer.semisimpleLieAlgebras.values[indexSemisimpleLieAlgebra];
+  return
+  &this->owner->objectContainer.semisimpleLieAlgebras.values[
+    indexSemisimpleLieAlgebra
+  ];
 }
 
-Function& Calculator::getFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
+Function& Calculator::getFunctionHandlerFromNamedRule(
+  const std::string& inputNamedRule
+) {
   const Calculator::NamedRuleLocation& current =
   this->namedRules.getValueNoFail(inputNamedRule);
   const MemorySaving<Calculator::OperationHandlers>& currentOperation =
   this->operations.getValueNoFail(current.containerOperation);
   if (currentOperation.isZeroPointer()) {
-    global.fatal << "Named rule " << inputNamedRule
-    << " registered with operation " << current.containerOperation
-    << " but the operation has no handlers. " << global.fatal;
+    global.fatal
+    << "Named rule "
+    << inputNamedRule
+    << " registered with operation "
+    << current.containerOperation
+    << " but the operation has no handlers. "
+    << global.fatal;
   }
   if (current.isComposite) {
-    return currentOperation.getElementConst().compositeHandlers[current.index];
+    return
+    currentOperation.getElementConst().compositeHandlers[current.index];
   }
   return currentOperation.getElementConst().handlers[current.index];
 }
@@ -1259,15 +1571,22 @@ int Calculator::addOperationNoRepetitionOrReturnIndexFirst(
   return result;
 }
 
-void Calculator::addOperationBuiltInType(const std::string& operationBuiltIn) {
+void Calculator::addOperationBuiltInType(
+  const std::string& operationBuiltIn
+) {
   this->addOperationNoRepetitionAllowed(operationBuiltIn);
   this->builtInTypes.addOnTop(operationBuiltIn);
 }
 
-void Calculator::addOperationNoRepetitionAllowed(const std::string& operation) {
+void Calculator::addOperationNoRepetitionAllowed(
+  const std::string& operation
+) {
   if (this->operations.contains(operation)) {
-    global.fatal << "Operation " << operation
-    << " already created. " << global.fatal;
+    global.fatal
+    << "Operation "
+    << operation
+    << " already created. "
+    << global.fatal;
   }
   this->operations.getValueCreateEmpty(operation);
 }
@@ -1291,8 +1610,10 @@ Function::Function(
 ) {
   this->owner = nullptr;
   if (&this->options == &inputOptions) {
-    global.fatal << "Input options and target "
-    << "options have the same address. " << global.fatal;
+    global.fatal
+    << "Input options and target "
+    << "options have the same address. "
+    << global.fatal;
   }
   this->reset(inputOwner);
   this->indexOperation = inputIndexOperation;
@@ -1343,14 +1664,21 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   this->registerCalculatorFunction(innerFunction, indexOperation);
 }
 
-void Calculator::registerCalculatorFunction(Function& inputFunction, int indexOperation) {
+void Calculator::registerCalculatorFunction(
+  Function& inputFunction, int indexOperation
+) {
   MacroRegisterFunctionWithName("Calculator::registerCalculatorFunction");
   if (indexOperation < 0 || indexOperation >= this->operations.size()) {
-    global.fatal << "Invalid index operation: " << indexOperation
-    << ", there are: " << this->operations.size()
-    << " operations total." << global.fatal;
+    global.fatal
+    << "Invalid index operation: "
+    << indexOperation
+    << ", there are: "
+    << this->operations.size()
+    << " operations total."
+    << global.fatal;
   }
-  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.values[indexOperation];
+  MemorySaving<Calculator::OperationHandlers>& handlerPointer =
+  this->operations.values[indexOperation];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
   handler.checkConsistency();
   if (inputFunction.options.flagIsCompositeHandler) {
@@ -1374,11 +1702,12 @@ void Calculator::registerCalculatorFunction(Function& inputFunction, int indexOp
   namedRule.index = inputFunction.indexInOperationHandlers;
   namedRule.isComposite = inputFunction.options.flagIsCompositeHandler;
   this->namedRules.setKeyValue(
-    inputFunction.calculatorIdentifier,
-    namedRule
+    inputFunction.calculatorIdentifier, namedRule
   );
   if (inputFunction.options.freezesArguments) {
-    this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew(namedRule.containerOperation);
+    this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew(
+      namedRule.containerOperation
+    );
   }
 }
 
@@ -1394,7 +1723,10 @@ void Calculator::addOperationHandler(
   const List<std::string>* parentsThatBanHandler
 ) {
   if (opArgumentListIgnoredForTheTimeBeing != "") {
-    global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
+    global.fatal
+    <<
+    "This section of code is not implemented yet. Crashing to let you know. "
+    << global.fatal;
   }
   int indexOperation = this->operations.getIndex(operation);
   if (indexOperation == - 1) {
@@ -1404,7 +1736,8 @@ void Calculator::addOperationHandler(
   List<int> parentOperationsThatBanHandler;
   if (parentsThatBanHandler != nullptr) {
     for (int i = 0; i < parentsThatBanHandler->size; i ++) {
-      int atom = this->operations.getIndexNoFail((*parentsThatBanHandler)[i]);
+      int atom =
+      this->operations.getIndexNoFail((*parentsThatBanHandler)[i]);
       parentOperationsThatBanHandler.addOnTop(atom);
     }
   }
@@ -1420,7 +1753,10 @@ void Calculator::addOperationHandler(
     options,
     parentOperationsThatBanHandler
   );
-  if (functionWrapper.functionAddress == nullptr || functionWrapper.owner == nullptr) {
+  if (
+    functionWrapper.functionAddress == nullptr ||
+    functionWrapper.owner == nullptr
+  ) {
     global.fatal << "Function not initialized properly. " << global.fatal;
   }
   this->registerCalculatorFunction(functionWrapper, indexOperation);
@@ -1566,16 +1902,16 @@ Function::Options Function::Options::adminNoTestInvisibleExperimental() {
 }
 
 void Function::Options::reset() {
-  this->flagIsCompositeHandler    = false;
-  this->flagIsInner               = true ;
-  this->flagMayActOnBoundVars     = false;
-  this->visible                   = true ;
-  this->flagIsExperimental        = false;
-  this->disabledByUser            = false;
-  this->disabledByUserDefault     = false;
-  this->dontTestAutomatically     = false;
-  this->adminOnly                 = false;
-  this->freezesArguments          = false;
+  this->flagIsCompositeHandler = false;
+  this->flagIsInner = true;
+  this->flagMayActOnBoundVars = false;
+  this->visible = true;
+  this->flagIsExperimental = false;
+  this->disabledByUser = false;
+  this->disabledByUserDefault = false;
+  this->dontTestAutomatically = false;
+  this->adminOnly = false;
+  this->freezesArguments = false;
 }
 
 Function::Options::Options() {
@@ -1592,8 +1928,14 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   if (input.size() != 3) {
     return false;
   }
-  bool argument1Good = this->argumentTypes[0].data == - 1 ? true : input[1].isListStartingWithAtom(this->argumentTypes[0].data);
-  bool argument2Good = this->argumentTypes[1].data == - 1 ? true : input[2].isListStartingWithAtom(this->argumentTypes[1].data);
+  bool argument1Good = this->argumentTypes[0].data ==
+  - 1 ?
+  true :
+  input[1].isListStartingWithAtom(this->argumentTypes[0].data);
+  bool argument2Good = this->argumentTypes[1].data ==
+  - 1 ?
+  true :
+  input[2].isListStartingWithAtom(this->argumentTypes[1].data);
   return argument1Good && argument2Good;
 }
 
@@ -1603,15 +1945,19 @@ std::string Function::toStringShort() const {
   }
   std::stringstream out;
   out << this->owner->operations.keys[this->indexOperation];
-  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->owner->operations.values[this->indexOperation];
+  MemorySaving<Calculator::OperationHandlers>& handlerPointer =
+  this->owner->operations.values[this->indexOperation];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
   if (this->options.flagIsCompositeHandler) {
-    out << " (composite) ("
-    << this->indexInOperationHandlers + 1 << " out of "
-    << handler.compositeHandlers.size << ") ";
+    out << " (composite) (" << this->indexInOperationHandlers + 1
+    << " out of "
+    << handler.compositeHandlers.size
+    << ") ";
   } else {
-    out << "(" << this->indexInOperationHandlers + 1 << " out of "
-    << handler.handlers.size << "). ";
+    out << "(" << this->indexInOperationHandlers + 1
+    << " out of "
+    << handler.handlers.size
+    << "). ";
   }
   return out.str();
 }
@@ -1623,7 +1969,10 @@ std::string Function::toStringSummary() const {
   std::stringstream out;
   out << this->toStringShort();
   if (this->calculatorIdentifier != "") {
-    out << "Rule name: <span style ='color:blue'>" << this->calculatorIdentifier << "</span>. ";
+    out
+    << "Rule name: <span style ='color:blue'>"
+    << this->calculatorIdentifier
+    << "</span>. ";
   }
   if (this->additionalIdentifier != "") {
     out << "Handler: " << this->additionalIdentifier << ". ";
@@ -1640,7 +1989,9 @@ bool Function::shouldBeApplied(int parentOperationIfAvailable) {
   }
   if (this->options.adminOnly) {
     if (!global.userDefaultHasAdminRights()) {
-      return (*this->owner) << "Rule " << this->calculatorIdentifier
+      return (*this->owner)
+      << "Rule "
+      << this->calculatorIdentifier
       << " requires logged-in administrator account. ";
     }
   }
@@ -1660,7 +2011,8 @@ JSData Function::toJSON() const {
   } else {
     result["visible"] = false;
   }
-  Calculator::OperationHandlers& operationHandlers = this->owner->operations.values[this->indexOperation].getElement();
+  Calculator::OperationHandlers& operationHandlers =
+  this->owner->operations.values[this->indexOperation].getElement();
   result["number"] = this->indexInOperationHandlers + 1;
   if (this->options.flagIsCompositeHandler) {
     result["composite"] = true;
@@ -1689,7 +2041,9 @@ JSData Function::toJSON() const {
     result["additionalIdentifier"] = this->additionalIdentifier;
   }
   std::stringstream functionAddress;
-  functionAddress << std::hex << reinterpret_cast<unsigned long>(this->functionAddress);
+  functionAddress << std::hex << reinterpret_cast<unsigned long>(
+    this->functionAddress
+  );
   result["memoryAddress"] = functionAddress.str();
   if (this->options.flagIsInner) {
     result["inner"] = true;
@@ -1723,18 +2077,29 @@ std::string Function::toStringFull() const {
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++ 0x
     // Please fix if the following code is not portable:
-    out << "Function memory address: " << std::hex << reinterpret_cast<unsigned long>(this->functionAddress) << ". ";
+    out
+    << "Function memory address: "
+    << std::hex
+    << reinterpret_cast<unsigned long>(this->functionAddress)
+    << ". ";
     if (!this->options.flagIsInner) {
-      out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
+      out
+      <<
+      "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. "
+      ;
     }
     if (this->example != "") {
       out << " <br> " << this->example << "&nbsp&nbsp&nbsp";
     }
     if (this->example != "") {
-      out2 << "<a href=\"" << global.displayNameExecutable
+      out2
+      << "<a href=\""
+      << global.displayNameExecutable
       << "?request=calculator&showExamples = true&mainInput="
       << HtmlRoutines::convertStringToURLString(this->example, false)
-      << "\"> " << " Example" << "</a>" ;
+      << "\"> "
+      << " Example"
+      << "</a>";
     }
   } else {
     out2 << "<b>Experimental, please don't use.</b>";
@@ -1746,7 +2111,10 @@ std::string ObjectContainer::toString() {
   MacroRegisterFunctionWithName("ObjectContainer::toString");
   std::stringstream out;
   if (this->semisimpleLieAlgebras.values.size > 0) {
-    out << "Lie algebras created (" << this->semisimpleLieAlgebras.values.size << " total): ";
+    out
+    << "Lie algebras created ("
+    << this->semisimpleLieAlgebras.values.size
+    << " total): ";
     for (int i = 0; i < this->semisimpleLieAlgebras.values.size; i ++) {
       out << this->semisimpleLieAlgebras.values[i].toStringLieAlgebraName();
       if (i != this->semisimpleLieAlgebras.values.size - 1) {
@@ -1755,11 +2123,17 @@ std::string ObjectContainer::toString() {
     }
   }
   if (this->semisimpleSubalgebras.values.size > 0) {
-    out << "<br>Lie semisimple subalgebras computation data structures ("
-    << this->semisimpleSubalgebras.values.size << " total): ";
+    out
+    << "<br>Lie semisimple subalgebras computation data structures ("
+    << this->semisimpleSubalgebras.values.size
+    << " total): ";
     for (int i = 0; i < this->semisimpleSubalgebras.values.size; i ++) {
-      out << " Type " << this->semisimpleSubalgebras.values[i].owner->toStringLieAlgebraName() << " with "
-      << this->semisimpleSubalgebras.values[i].subalgebras.values.size << " candidates";
+      out
+      << " Type "
+      << this->semisimpleSubalgebras.values[i].owner->toStringLieAlgebraName()
+      << " with "
+      << this->semisimpleSubalgebras.values[i].subalgebras.values.size
+      << " candidates";
       if (i != this->semisimpleSubalgebras.values.size - 1) {
         out << ", ";
       }
@@ -1787,11 +2161,19 @@ std::string Calculator::toStringOutputAndSpecials() {
 void Calculator::writeAutoCompleteKeyWordsToFile() {
   MacroRegisterFunctionWithName("Calculator::writeAutoCompleteKeyWordsToFile");
   std::stringstream out;
-  out << "\"use strict\"; //This file is automatically generated, please do not modify.\n";
+  out
+  <<
+  "\"use strict\"; //This file is automatically generated, please do not modify.\n"
+  ;
   out << "  var autoCompleteDictionary = [\n  ";
   for (int i = 0; i < this->autoCompleteKeyWords.size; i ++) {
     if (this->autoCompleteKeyWords[i].size() > 2) {
-      out << "\"" << HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(this->autoCompleteKeyWords[i]) << "\"";
+      out
+      << "\""
+      << HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(
+        this->autoCompleteKeyWords[i]
+      )
+      << "\"";
       if (i != this->autoCompleteKeyWords.size - 1) {
         out << ", ";
       }
@@ -1801,8 +2183,12 @@ void Calculator::writeAutoCompleteKeyWordsToFile() {
   out << "module.exports = {autoCompleteDictionary};";
   std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    fileStream, "/calculator_html/autocomplete_keywords.js",
-    false, true, false, false
+    fileStream,
+    "/calculator_html/autocomplete_keywords.js",
+    false,
+    true,
+    false,
+    false
   );
   fileStream << out.str();
 }
@@ -1811,15 +2197,25 @@ void Calculator::computeAutoCompleteKeyWords() {
   MacroRegisterFunctionWithName("Calculator::computeAutoCompleteKeyWords");
   this->autoCompleteKeyWords.setExpectedSize(this->operations.size() * 2);
   for (int i = 0; i < this->operations.size(); i ++) {
-    this->autoCompleteKeyWords.addOnTopNoRepetition(this->operations.keys[i]);
+    this->autoCompleteKeyWords.addOnTopNoRepetition(
+      this->operations.keys[i]
+    );
   }
   for (int i = 0; i < this->namedRules.size(); i ++) {
-    this->autoCompleteKeyWords.addOnTopNoRepetition(this->namedRules.keys[i]);
+    this->autoCompleteKeyWords.addOnTopNoRepetition(
+      this->namedRules.keys[i]
+    );
   }
   for (int i = 0; i < this->parser.controlSequences.size; i ++) {
     if (this->parser.controlSequences[i].size() > 0) {
-      if (MathRoutines::isLatinLetter(this->parser.controlSequences[i][0])) {
-        autoCompleteKeyWords.addOnTopNoRepetition(this->parser.controlSequences[i]);
+      if (
+        MathRoutines::isLatinLetter(
+          this->parser.controlSequences[i][0]
+        )
+      ) {
+        autoCompleteKeyWords.addOnTopNoRepetition(
+          this->parser.controlSequences[i]
+        );
       }
     }
   }
@@ -1828,72 +2224,141 @@ void Calculator::computeAutoCompleteKeyWords() {
 JSData Calculator::toJSONPerformance() {
   MacroRegisterFunctionWithName("Calculator::toStringPerformance");
   int64_t elapsedMilliseconds = global.getElapsedMilliseconds();
-  int64_t computationMilliseconds = elapsedMilliseconds - this->statistics.startTimeEvaluationMilliseconds;
-  int64_t requestMilliseconds = elapsedMilliseconds - global.millisecondsComputationStart;
+  int64_t computationMilliseconds =
+  elapsedMilliseconds - this->statistics.startTimeEvaluationMilliseconds;
+  int64_t requestMilliseconds =
+  elapsedMilliseconds - global.millisecondsComputationStart;
   int64_t waitingMilliseconds = elapsedMilliseconds - requestMilliseconds;
   JSData result;
   std::stringstream moreDetails;
-  moreDetails << "<br>Max computation time soft: "
+  moreDetails
+  << "<br>Max computation time soft: "
   << (static_cast<double>(global.millisecondsMaxComputation) / 2000)
   << " s [calculator error when exceeded]. ";
-  moreDetails << "<br>Max computation time hard: "
-  << (static_cast<double>(global.millisecondsMaxComputation) / 1000) << " s [worker crash when exceeded]. ";
-  moreDetails << "<br>Total process request time: "
-  << requestMilliseconds << " ms (~"
-  << (static_cast<double> (requestMilliseconds) / 1000)
+  moreDetails
+  << "<br>Max computation time hard: "
+  << (static_cast<double>(global.millisecondsMaxComputation) / 1000)
+  << " s [worker crash when exceeded]. ";
+  moreDetails
+  << "<br>Total process request time: "
+  << requestMilliseconds
+  << " ms (~"
+  << (static_cast<double>(requestMilliseconds) / 1000)
   << " s). ";
-  moreDetails << "<br>Time waiting on open connection: "
-  << waitingMilliseconds << " ms (~"
+  moreDetails
+  << "<br>Time waiting on open connection: "
+  << waitingMilliseconds
+  << " ms (~"
   << (static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
-  moreDetails << "<br>Runs of evaluation loop: " << this->statistics.totalEvaluationLoops << ". ";
-  moreDetails << "<br>Expressions generated: " << this->allChildExpressions.size << ". ";
-  moreDetails << "<br>Cached expression at last rule stack: " << this->cachedExpressions.size() << ". ";
-  moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";
-  moreDetails << "<br>Total number of pattern matches performed: "
-  << this->statistics.totalPatternMatchesPerformed << "";
+  moreDetails
+  << "<br>Runs of evaluation loop: "
+  << this->statistics.totalEvaluationLoops
+  << ". ";
+  moreDetails
+  << "<br>Expressions generated: "
+  << this->allChildExpressions.size
+  << ". ";
+  moreDetails
+  << "<br>Cached expression at last rule stack: "
+  << this->cachedExpressions.size()
+  << ". ";
+  moreDetails
+  << "<br>Expressions evaluated: "
+  << this->statistics.expressionsEvaluated
+  << ". ";
+  moreDetails
+  << "<br>Total number of pattern matches performed: "
+  << this->statistics.totalPatternMatchesPerformed
+  << "";
   if (this->depthRecursionReached > 0) {
-    moreDetails << "<br>maximum recursion depth reached: " << this->depthRecursionReached << ".";
+    moreDetails
+    << "<br>maximum recursion depth reached: "
+    << this->depthRecursionReached
+    << ".";
   }
-  moreDetails << "<br>Lists created: " << "computation: "
-  << (GlobalStatistics::numberOfListsCreated - static_cast<unsigned>(this->statistics.numberOfListsStart))
-  << ", total: " << GlobalStatistics::numberOfListsCreated;
-  moreDetails << "<br> # List resizes: computation: "
-  << (GlobalStatistics::numberOfListResizesTotal - static_cast<unsigned>(this->statistics.numberListResizesStart))
-  << ", total: " << GlobalStatistics::numberOfListResizesTotal
+  moreDetails
+  << "<br>Lists created: "
+  << "computation: "
+  << (
+    GlobalStatistics::numberOfListsCreated - static_cast<unsigned>(
+      this->statistics.numberOfListsStart
+    )
+  )
+  << ", total: "
+  << GlobalStatistics::numberOfListsCreated;
+  moreDetails
+  << "<br> # List resizes: computation: "
+  << (
+    GlobalStatistics::numberOfListResizesTotal - static_cast<unsigned>(
+      this->statistics.numberListResizesStart
+    )
+  )
+  << ", total: "
+  << GlobalStatistics::numberOfListResizesTotal
   << "<br> # hash resizing: computation: "
-  << (GlobalStatistics::numberOfHashResizes - static_cast<unsigned>(this->statistics.numberHashResizesStart))
-  << ", total: " << GlobalStatistics::numberOfHashResizes;
+  << (
+    GlobalStatistics::numberOfHashResizes - static_cast<unsigned>(
+      this->statistics.numberHashResizesStart
+    )
+  )
+  << ", total: "
+  << GlobalStatistics::numberOfHashResizes;
   if (Rational::totalSmallAdditions > 0) {
-    moreDetails << "<br>Small rational additions: computation: "
-    << Rational::totalSmallAdditions - static_cast<unsigned long long>(this->statistics.numberOfSmallAdditionsStart)
-    << ", total: " << Rational::totalSmallAdditions;
+    moreDetails
+    << "<br>Small rational additions: computation: "
+    << Rational::totalSmallAdditions - static_cast<unsigned long long>(
+      this->statistics.numberOfSmallAdditionsStart
+    )
+    << ", total: "
+    << Rational::totalSmallAdditions;
   }
   if (Rational::totalSmallMultiplications > 0) {
-    moreDetails << "<br>Small rational multiplications: computation: "
-    << Rational::totalSmallMultiplications - static_cast<unsigned long long>(this->statistics.numberOfSmallMultiplicationsStart)
-    << ", total: " << Rational::totalSmallMultiplications;
+    moreDetails
+    << "<br>Small rational multiplications: computation: "
+    << Rational::totalSmallMultiplications - static_cast<unsigned long long>(
+      this->statistics.numberOfSmallMultiplicationsStart
+    )
+    << ", total: "
+    << Rational::totalSmallMultiplications;
   }
   if (Rational::totalSmallGreatestCommonDivisors > 0) {
-    moreDetails << "<br>Small gcd calls: computation: "
-    << Rational::totalSmallGreatestCommonDivisors - static_cast<unsigned long long>(this->statistics.numberOfSmallGreatestCommonDivisorsStart)
-    << ", total: " << Rational::totalSmallGreatestCommonDivisors;
+    moreDetails
+    << "<br>Small gcd calls: computation: "
+    << Rational::totalSmallGreatestCommonDivisors -
+    static_cast<unsigned long long>(
+      this->statistics.numberOfSmallGreatestCommonDivisorsStart
+    )
+    << ", total: "
+    << Rational::totalSmallGreatestCommonDivisors;
   }
   if (Rational::totalLargeAdditions > 0) {
-    moreDetails << "<br>Large integer additions: "
-    << Rational::totalLargeAdditions - static_cast<unsigned long long>(this->statistics.numberOfLargeAdditionsStart)
+    moreDetails
+    << "<br>Large integer additions: "
+    << Rational::totalLargeAdditions - static_cast<unsigned long long>(
+      this->statistics.numberOfLargeAdditionsStart
+    )
     << ", total: "
     << Rational::totalLargeAdditions;
   }
   if (Rational::totalLargeMultiplications > 0) {
-    moreDetails << "<br>Large integer multiplications: computation: "
-    << Rational::totalLargeMultiplications - static_cast<unsigned long long>(this->statistics.numberOfLargeMultiplicationsStart)
-    << ", total: " << Rational::totalLargeMultiplications;
+    moreDetails
+    << "<br>Large integer multiplications: computation: "
+    << Rational::totalLargeMultiplications - static_cast<unsigned long long>(
+      this->statistics.numberOfLargeMultiplicationsStart
+    )
+    << ", total: "
+    << Rational::totalLargeMultiplications;
   }
   if (Rational::totalLargeGreatestCommonDivisors > 0) {
-    moreDetails << "<br>Large gcd calls: "
-    << Rational::totalLargeGreatestCommonDivisors - static_cast<unsigned long long>(this->statistics.numberOfLargeGreatestCommonDivisorsStart)
-    << ", total: " << Rational::totalLargeGreatestCommonDivisors;
+    moreDetails
+    << "<br>Large gcd calls: "
+    << Rational::totalLargeGreatestCommonDivisors -
+    static_cast<unsigned long long>(
+      this->statistics.numberOfLargeGreatestCommonDivisorsStart
+    )
+    << ", total: "
+    << Rational::totalLargeGreatestCommonDivisors;
   }
   std::stringstream millisecondsStream;
   millisecondsStream << computationMilliseconds << " ms";
@@ -1908,7 +2373,8 @@ std::string Calculator::toString() {
   std::string openTag1 = "<span style='color:blue'>";
   std::string closeTag1 = "</span>";
   if (global.millisecondsMaxComputation > 0) {
-    out2 << "Computation time limit: "
+    out2
+    << "Computation time limit: "
     << global.millisecondsMaxComputation
     << " ms.<hr>";
   } else {
@@ -1932,8 +2398,11 @@ std::string Calculator::toString() {
   << "<br><b>Object container information</b>. "
   << "The object container is the data "
   << "structure storing all c++ built-in data types "
-  << "requested by the user<br> " << this->objectContainer.toString();
-  out << "<hr>Control sequences (" << this->parser.controlSequences.size
+  << "requested by the user<br> "
+  << this->objectContainer.toString();
+  out
+  << "<hr>Control sequences ("
+  << this->parser.controlSequences.size
   << " total):\n<br>\n";
   for (int i = 0; i < this->parser.controlSequences.size; i ++) {
     out << openTag1 << this->parser.controlSequences[i] << closeTag1;
@@ -1941,34 +2410,60 @@ std::string Calculator::toString() {
       out << ", ";
     }
   }
-  out << "<br>\n User or run-time defined atoms = " << this->operations.size() << " (= "
-  << this->numberOfPredefinedAtoms << " predefined + "
-  << this->operations.size() - this->numberOfPredefinedAtoms << " user-defined):<br>\n";
+  out
+  << "<br>\n User or run-time defined atoms = "
+  << this->operations.size()
+  << " (= "
+  << this->numberOfPredefinedAtoms
+  << " predefined + "
+  << this->operations.size() - this->numberOfPredefinedAtoms
+  << " user-defined):<br>\n";
   for (int i = 0; i < this->operations.size(); i ++) {
-    out << "\n" << i << ": " << openTag1 << this->operations.keys[i] << closeTag1;
+    out
+    << "\n"
+    << i
+    << ": "
+    << openTag1
+    << this->operations.keys[i]
+    << closeTag1;
     if (i != this->operations.size() - 1) {
       out << ", ";
     }
   }
   out << "<hr>";
-  out << "Children expressions (" << this->allChildExpressions.size << " total): <br>";
+  out
+  << "Children expressions ("
+  << this->allChildExpressions.size
+  << " total): <br>";
   int numExpressionsToDisplay = this->allChildExpressions.size;
   if (this->allChildExpressions.size > 1000) {
     numExpressionsToDisplay = 1000;
-    out << " <b>Displaying first " << numExpressionsToDisplay << " only </b><br>";
+    out
+    << " <b>Displaying first "
+    << numExpressionsToDisplay
+    << " only </b><br>";
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
     out << this->allChildExpressions[i].toString() << ", ";
   }
   out << "<hr>";
-  out << "\n Cached expressions (" << this->cachedExpressions.size() << " total):\n<br>\n";
+  out
+  << "\n Cached expressions ("
+  << this->cachedExpressions.size()
+  << " total):\n<br>\n";
   numExpressionsToDisplay = this->cachedExpressions.size();
   if (numExpressionsToDisplay > 1000) {
     numExpressionsToDisplay = 1000;
-    out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only. </b><br>";
+    out
+    << "<b>Displaying first "
+    << numExpressionsToDisplay
+    << " expressions only. </b><br>";
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
-    out << this->cachedExpressions.keys[i].toString() << " -> " << this->cachedExpressions.values[i].reducesTo.toString();
+    out
+    << this->cachedExpressions.keys[i].toString()
+    << " -> "
+    << this->cachedExpressions.values[i].reducesTo.toString();
     if (i != this->cachedExpressions.size() - 1) {
       out << "<br>";
     }
@@ -1982,24 +2477,35 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
 ) {
   MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");
   std::stringstream out;
-  if ((*this->currentSyntacticStack).size < this->numberOfEmptyTokensStart) {
-    return
-    "Not enough empty tokens in the start of the syntactic stack.";
+  if ((*this->currentSyntacticStack).size < this->numberOfEmptyTokensStart
+  ) {
+    return "Not enough empty tokens in the start of the syntactic stack.";
   }
-  bool isBad = ((*this->currentSyntacticStack).size > this->numberOfEmptyTokensStart + 1);
-  SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1) {
+  bool isBad = ((*this->currentSyntacticStack).size >
+    this->numberOfEmptyTokensStart + 1
+  );
+  SyntacticElement& lastSyntacticElt =
+  *(*this->currentSyntacticStack).lastObject();
+  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1
+  ) {
     if (lastSyntacticElt.controlIndex != this->conExpression()) {
       isBad = true;
     }
   }
   if (!isBad) {
-    out << this->currentSyntacticStack->lastObject()->toStringHumanReadable(*this, includeLispifiedExpressions);
+    out
+    << this->currentSyntacticStack->lastObject()->toStringHumanReadable(
+      *this, includeLispifiedExpressions
+    );
     return out.str();
   }
   out << "<table style='vertical-align:top;border-spacing:0px 0px;'><tr>";
   int counter = 0;
-  for (int i = this->numberOfEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
+  for (
+    int i = this->numberOfEmptyTokensStart; i < (
+      *this->currentSyntacticStack
+    ).size; i ++
+  ) {
     SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
     if (ignoreCommandEnclosures) {
       if (currentElt.isCommandEnclosure()) {
@@ -2008,7 +2514,8 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
     }
     out
     << "<td style='vertical-align:top;background-color:"
-    << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0" ) << "'>"
+    << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0")
+    << "'>"
     << currentElt.toStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
     counter ++;
@@ -2017,27 +2524,40 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   return out.str();
 }
 
-SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
-  MacroRegisterFunctionWithName("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
-  SemisimpleSubalgebras& result = this->semisimpleSubalgebras.getValueCreateNoInitialization(input);
+SemisimpleSubalgebras& ObjectContainer::
+getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
+  MacroRegisterFunctionWithName(
+    "ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent"
+  );
+  SemisimpleSubalgebras& result =
+  this->semisimpleSubalgebras.getValueCreateNoInitialization(input);
   return result;
 }
 
-SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const DynkinType& input) {
-  MacroRegisterFunctionWithName("ObjectContainer::getLieAlgebraCreateIfNotPresent");
+SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(
+  const DynkinType& input
+) {
+  MacroRegisterFunctionWithName(
+    "ObjectContainer::getLieAlgebraCreateIfNotPresent"
+  );
   bool needToInit = false;
   if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
   }
-  SemisimpleLieAlgebra& lieAlgebra = this->semisimpleLieAlgebras.getValueCreateNoInitialization(input);
+  SemisimpleLieAlgebra& lieAlgebra =
+  this->semisimpleLieAlgebras.getValueCreateNoInitialization(input);
   if (needToInit) {
     lieAlgebra.weylGroup.makeFromDynkinType(input);
   }
   return lieAlgebra;
 }
 
-WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(const DynkinType& input) {
-  MacroRegisterFunctionWithName("ObjectContainer::getWeylGroupDataCreateIfNotPresent");
+WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(
+  const DynkinType& input
+) {
+  MacroRegisterFunctionWithName(
+    "ObjectContainer::getWeylGroupDataCreateIfNotPresent"
+  );
   return this->getLieAlgebraCreateIfNotPresent(input).weylGroup;
 }
 
@@ -2066,42 +2586,68 @@ void ObjectContainer::resetPlots() {
 }
 
 void ObjectContainer::resetSliders() {
-  this->userInputBoxSliderDisplayed.initializeFillInObject(this->userInputTextBoxesWithValues.size(), false);
+  this->userInputBoxSliderDisplayed.initializeFillInObject(
+    this->userInputTextBoxesWithValues.size(), false
+  );
 }
 
 bool ObjectContainer::checkConsistencyAfterReset() {
   MacroRegisterFunctionWithName("ObjectContainer::checkConsistencyAfterReset");
   if (this->weylGroupElements.size != 0) {
-    global.fatal << "WeylGroupElements expected to be empty, got "
-    << this->weylGroupElements.size << " elements. " << global.fatal;
+    global.fatal
+    << "WeylGroupElements expected to be empty, got "
+    << this->weylGroupElements.size
+    << " elements. "
+    << global.fatal;
   }
   if (this->semisimpleLieAlgebras.size() != 0) {
-    global.fatal << "theSSLieAlgebras expected to be empty, got "
-    << this->semisimpleLieAlgebras.size() << " elements. " << global.fatal;
+    global.fatal
+    << "theSSLieAlgebras expected to be empty, got "
+    << this->semisimpleLieAlgebras.size()
+    << " elements. "
+    << global.fatal;
   }
   if (this->weylGroupRepresentations.size != 0) {
-    global.fatal << "weylGroupRepresentations expected to be empty, got "
-    << this->weylGroupRepresentations.size << " elements. " << global.fatal;
+    global.fatal
+    << "weylGroupRepresentations expected to be empty, got "
+    << this->weylGroupRepresentations.size
+    << " elements. "
+    << global.fatal;
   }
   if (this->weylGroupVirtualRepresentations.size != 0) {
-    global.fatal << "weylGroupVirtualRepresentations expected to be empty, got "
-    << this->weylGroupVirtualRepresentations.size << " elements. " << global.fatal;
+    global.fatal
+    << "weylGroupVirtualRepresentations expected to be empty, got "
+    << this->weylGroupVirtualRepresentations.size
+    << " elements. "
+    << global.fatal;
   }
   if (this->polynomialsRational.size != 0) {
-    global.fatal << "The rational polynomials are expected to be empty, have: "
-    << this->polynomialsRational.size << " elements instead. " << global.fatal;
+    global.fatal
+    << "The rational polynomials are expected to be empty, have: "
+    << this->polynomialsRational.size
+    << " elements instead. "
+    << global.fatal;
   }
   if (this->allRationals.size != 0) {
-    global.fatal << "Rationals expected to be empty, have: "
-    << this->allRationals.size << " elements instead. " << global.fatal;
+    global.fatal
+    << "Rationals expected to be empty, have: "
+    << this->allRationals.size
+    << " elements instead. "
+    << global.fatal;
   }
   if (this->doubleNumbers.size != 1) {
-    global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: "
-    << this->doubleNumbers.size << " elements instead. " << global.fatal;
+    global.fatal
+    << "Doubles expected to be have exactly 1 element (namely, nan), have: "
+    << this->doubleNumbers.size
+    << " elements instead. "
+    << global.fatal;
   }
   if (this->allAlgebraicNumbers.size != 0) {
-    global.fatal << "Algebraic numbers expected to be empty, have: "
-    << this->allAlgebraicNumbers.size << " elements instead. " << global.fatal;
+    global.fatal
+    << "Algebraic numbers expected to be empty, have: "
+    << this->allAlgebraicNumbers.size
+    << " elements instead. "
+    << global.fatal;
   }
   return true;
 }
@@ -2145,7 +2691,9 @@ void ObjectContainer::reset() {
   this->weightsPolynomial.clear();
   this->hyperOctahedralGroups.setSize(0);
   this->elementsHyperOctGroup.clear();
-  this->pseudoRandom.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
+  this->pseudoRandom.setRandomSeedSmall(
+    static_cast<uint32_t>(time(nullptr))
+  );
   this->userInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();
   this->ellipticCurveElementsZmodP.clear();
@@ -2162,7 +2710,9 @@ bool Expression::isMeltable(int* numberOfResultingChildren) const {
     return false;
   }
   if (numberOfResultingChildren != nullptr) {
-    if (!(*this)[1].startsWith(this->owner->opCommandSequence())) {
+    if (
+      !(*this)[1].startsWith(this->owner->opCommandSequence())
+    ) {
       *numberOfResultingChildren = 1;
     } else {
       *numberOfResultingChildren = (*this)[1].children.size - 1;
@@ -2184,8 +2734,10 @@ bool Expression::mergeContextsMyAruments(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "<hr>Failed to merge the arguments of the expression "
-        << this->toString() << ": the argument "
-        << (*this)[i].toString() << " is not of built-in type";
+        << this->toString()
+        << ": the argument "
+        << (*this)[i].toString()
+        << " is not of built-in type";
       }
       return false;
     }
@@ -2213,9 +2765,11 @@ bool Expression::mergeContextsMyAruments(
     }
     ExpressionContext currentContext = (*this)[i].getContext();
     if (!commonContext.mergeContexts(currentContext, commonContext)) {
-      *this->owner << "<hr>Failed to merge context "
+      *this->owner
+      << "<hr>Failed to merge context "
       << commonContext.toString()
-      << " with " << (*this)[i].getContext().toString();
+      << " with "
+      << (*this)[i].getContext().toString();
       return false;
     }
   }
@@ -2224,11 +2778,13 @@ bool Expression::mergeContextsMyAruments(
   Expression convertedE;
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
-    if (!convertedE.setContextAtLeastEqualTo(
-      commonContext, commentsOnFailure
-    )) {
-      *this->owner << "<hr>Failed to convert "
-      << convertedE.toString() << " to context "
+    if (
+      !convertedE.setContextAtLeastEqualTo(commonContext, commentsOnFailure)
+    ) {
+      *this->owner
+      << "<hr>Failed to convert "
+      << convertedE.toString()
+      << " to context "
       << commonContext.toString();
       return false;
     }
@@ -2237,7 +2793,9 @@ bool Expression::mergeContextsMyAruments(
   return true;
 }
 
-bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::meltBrackets(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opCommandSequence())) {
@@ -2264,7 +2822,9 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
       output.addChildOnTop(input[i]);
       continue;
     }
-    if (!currentChild[1].startsWith(calculator.opCommandSequence())) {
+    if (
+      !currentChild[1].startsWith(calculator.opCommandSequence())
+    ) {
       output.addChildOnTop(currentChild[1]);
       continue;
     }
@@ -2274,3 +2834,4 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
   }
   return true;
 }
+

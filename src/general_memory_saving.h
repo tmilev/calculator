@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_memory_saving_ALREADY_INCLUDED
 #define header_memory_saving_ALREADY_INCLUDED
@@ -29,13 +30,13 @@ public:
     }
     return *this->value;
   }
-  Object& getElement()  {
+  Object& getElement() {
     if (this->value == 0) {
       this->value = new Object;
-      #ifdef AllocationLimitsSafeguard
+#ifdef AllocationLimitsSafeguard
       GlobalStatistics::globalPointerCounter ++;
       GlobalStatistics::checkPointerCounters();
-      #endif
+#endif
     }
     return *(this->value);
   }
@@ -63,10 +64,10 @@ public:
   void freeMemory() {
     delete this->value;
     this->value = 0;
-    #ifdef AllocationLimitsSafeguard
+#ifdef AllocationLimitsSafeguard
     GlobalStatistics::globalPointerCounter --;
     GlobalStatistics::checkPointerCounters();
-    #endif
+#endif
   }
   MemorySaving() {
     this->value = 0;
@@ -77,3 +78,4 @@ public:
 };
 
 #endif
+

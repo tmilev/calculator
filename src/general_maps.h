@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_maps_ALREADY_INCLUDED
 #define header_general_maps_ALREADY_INCLUDED
@@ -6,7 +7,12 @@
 #include "general_lists.h"
 #include "general_list_references.h"
 
-template <class ListType, class Key, class Value, unsigned int keyHashFunction(const Key&) = Key::hashFunction>
+template <
+  class ListType,
+  class Key,
+  class Value,
+  unsigned int keyHashFunction(const Key&) = Key::hashFunction
+>
 class MapTemplate {
 public:
   HashedList<Key, keyHashFunction> keys;
@@ -14,7 +20,8 @@ public:
   unsigned int hashFunction() const {
     unsigned int result = 0;
     for (int i = 0; i < this->keys.size; i ++) {
-      result += keyHashFunction(this->keys[i]) *
+      result +=
+      keyHashFunction(this->keys[i]) *
       HashFunctions::hashFunction(this->values[i]);
     }
     return result;
@@ -39,7 +46,9 @@ public:
   const Value& getValueNoFail(const Key& input) const {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
-      fatalCrash("Map does not contain key at a place where that is not allowed. ");
+      fatalCrash(
+        "Map does not contain key at a place where that is not allowed. "
+      );
     }
     return this->values[index];
   }
@@ -60,7 +69,6 @@ public:
     }
     return this->values[index];
   }
-
   Value& getValueCreate(const Key& input, const Value& initialValue) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
@@ -113,7 +121,9 @@ public:
   inline Value& operator[](const Key& index) {
     return this->getValueCreate(index);
   }
-  bool operator==(const MapTemplate<ListType, Key, Value, keyHashFunction>& other) const {
+  bool operator==(
+    const MapTemplate<ListType, Key, Value, keyHashFunction>& other
+  ) const {
     if (this->size() != other.size()) {
       return false;
     }
@@ -133,9 +143,19 @@ public:
 
 // using C++ 11, not sure if that is a good idea:
 // In case this does not compile, please see the commented code below.
-template <class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
-using MapReferences = MapTemplate<ListReferences<value>, key, value, hashFunction>;
-template <class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
-using MapList = MapTemplate<List<value>, key, value, hashFunction>;
-
+template <
+  class key,
+  class value,
+  unsigned int hashFunction(const key&) = key::hashFunction
+>
+using MapReferences =
+MapTemplate<ListReferences<value>, key, value, hashFunction>;
+template <
+  class key,
+  class value,
+  unsigned int hashFunction(const key&) = key::hashFunction
+>
+using MapList =
+MapTemplate<List<value>, key, value, hashFunction>;
 #endif // header_general_maps_ALREADY_INCLUDED
+

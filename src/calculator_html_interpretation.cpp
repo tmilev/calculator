@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_html_interpretation.h"
 #include "web_api.h"
@@ -16,11 +17,18 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   CalculatorHTML problem;
   std::stringstream out, errorStream;
   JSData result;
-  problem.loadCurrentProblemItem(false, global.getWebInput(WebAPI::problem::randomSeed), &errorStream);
+  problem.loadCurrentProblemItem(
+    false,
+    global.getWebInput(WebAPI::problem::randomSeed),
+    &errorStream
+  );
   if (!problem.flagLoadedSuccessfully) {
-    out << "Problem name is: " << problem.fileName
+    out
+    << "Problem name is: "
+    << problem.fileName
     << " <b>Could not load problem, this may be a bug. "
-    << CalculatorHTML::bugsGenericMessage << "</b>";
+    << CalculatorHTML::bugsGenericMessage
+    << "</b>";
     if (errorStream.str() != "") {
       out << " Comments: " << errorStream.str();
     }
@@ -28,12 +36,17 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   if (problem.flagIsForReal) {
-    out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
+    out
+    <<
+    " <b>Not allowed to show answer of a problem being tested for real. </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
   if (global.getWebInput(WebAPI::problem::randomSeed) == "") {
-    out << "<b>I could not figure out the exercise problem (missing random seed). </b>";
+    out
+    <<
+    "<b>I could not figure out the exercise problem (missing random seed). </b>"
+    ;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
@@ -42,23 +55,30 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
-
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
-    StringRoutines::stringBeginsWith(arguments.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
+    StringRoutines::stringBeginsWith(
+      arguments.keys[i],
+      WebAPI::problem::calculatorAnswerPrefix,
+      &lastStudentAnswerID
+    );
   }
   int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
-    out << "<b>Student submitted answerID: " << lastStudentAnswerID
+    out
+    << "<b>Student submitted answerID: "
+    << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       out << "<hr>" << problem.problemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   Answer& answer = problem.problemData.answers.values[indexLastAnswerId];
@@ -67,47 +87,69 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   interpreter.flagPlotNoControls = true;
   interpreter.flagWriteLatexPlots = false;
   if (!problem.prepareCommands(&comments)) {
-    out << "<b>Failed to prepare calculator commands.</b>"
-    << "<br>Comments:<br>" << comments.str();
+    out
+    << "<b>Failed to prepare calculator commands.</b>"
+    << "<br>Comments:<br>"
+    << comments.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
   if (answer.solutionElements.size == 0) {
-    out << "<b>There is no solution given for this question (answerID: " << lastStudentAnswerID << ").</b>";
+    out
+    << "<b>There is no solution given for this question (answerID: "
+    << lastStudentAnswerID
+    << ").</b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
   std::stringstream answerCommands, answerCommandsNoEnclosures;
-  answerCommands << Calculator::Atoms::commandEnclosure
-  << "{}(" << answer.commandsBeforeAnswer << "); "
+  answerCommands
+  << Calculator::Atoms::commandEnclosure
+  << "{}("
+  << answer.commandsBeforeAnswer
+  << "); "
   << answer.commandsSolutionOnly;
   answerCommandsNoEnclosures
   << answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING
   << answer.commandsSolutionOnly;
   interpreter.evaluate(answerCommands.str());
   if (interpreter.parser.syntaxErrors != "") {
-    out << "<b style = 'color:red'>Failed to compose the solution. "
+    out
+    << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
-    << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
+    << "<br>"
+    << CalculatorHTML::bugsGenericMessage
+    << "<br>Details: <br>"
     << interpreter.parser.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   if (interpreter.flagAbortComputationASAP) {
-    out << "<b style = 'color:red'>Failed to compose the solution. "
+    out
+    << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
-    << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
+    << "<br>"
+    << CalculatorHTML::bugsGenericMessage
+    << "<br>Details: <br>"
     << interpreter.outputString
     << interpreter.outputCommentsString
-    << "<hr>Input: <br>" << interpreter.inputString;
+    << "<hr>Input: <br>"
+    << interpreter.inputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  if (!problem.processExecutedCommands(interpreter, answer.solutionElements, out)) {
+  if (
+    !problem.processExecutedCommands(
+      interpreter, answer.solutionElements, out
+    )
+  ) {
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   for (int i = 0; i < answer.solutionElements.size; i ++) {
@@ -116,15 +158,21 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     }
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-    out << "<hr>"
+    out
+    << "<hr>"
     << HtmlRoutines::getCalculatorComputationAnchorSameURL(
       answerCommandsNoEnclosures.str(), "Input link"
-    ) << "<br>" << interpreter.outputString
-    << "<hr>" << interpreter.outputCommentsString
-    << "<hr><b>Raw command:</b> " << answer.commandsSolutionOnly;
+    )
+    << "<br>"
+    << interpreter.outputString
+    << "<hr>"
+    << interpreter.outputCommentsString
+    << "<hr><b>Raw command:</b> "
+    << answer.commandsSolutionOnly;
   }
   result[WebAPI::result::resultHtml] = out.str();
-  result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
+  result[WebAPI::result::millisecondsComputation] =
+  global.getElapsedMilliseconds() - startMilliseconds;
   return result;
 }
 
@@ -137,9 +185,14 @@ std::string WebAPIResponse::setProblemWeight() {
     return "<b>Only admins may set problem weights.</b>";
   }
   CalculatorHTML problem;
-  std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false);
+  std::string inputProblemInfo =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("mainInput"), false
+  );
   std::stringstream commentsOnFailure, out;
-  if (problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)) {
+  if (
+    problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)
+  ) {
     out << "<b style = 'color:green'>Modified.</b>";
   } else {
     out << "<b style = 'color:red'>" << commentsOnFailure.str() << "</b>";
@@ -156,10 +209,19 @@ std::string WebAPIResponse::setProblemDeadline() {
     return "<b>Only admins may set problem weights.</b>";
   }
   CalculatorHTML problem;
-  std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false);
+  std::string inputProblemInfo =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("mainInput"), false
+  );
   std::stringstream commentsOnFailure, out;
-  if (problem.mergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)) {
-    out << "<b style ='color:green'>Modified. </b>" << global.comments.getCurrentReset();
+  if (
+    problem.mergeProblemDeadlineAndStore(
+      inputProblemInfo, &commentsOnFailure
+    )
+  ) {
+    out
+    << "<b style ='color:green'>Modified. </b>"
+    << global.comments.getCurrentReset();
   } else {
     out << "<b style ='color:red'>" << commentsOnFailure.str() << "</b>";
   }
@@ -174,7 +236,11 @@ std::string WebAPIResponse::getSanitizedComment(
   resultIsPlot = false;
   std::string currentString;
   if (input.isOfType<std::string>(&currentString)) {
-    if (StringRoutines::stringBeginsWith(currentString, "Approximations have been")) {
+    if (
+      StringRoutines::stringBeginsWith(
+        currentString, "Approximations have been"
+      )
+    ) {
       return "";
     }
     return input.toString(&format);
@@ -186,7 +252,7 @@ std::string WebAPIResponse::getSanitizedComment(
   if (input.hasType<Plot>()) {
     return "";
   }
-  //<- expression has a partially drawn plot-> not displaying.
+  // <- expression has a partially drawn plot-> not displaying.
   if (input.owner == nullptr) {
     return "";
   }
@@ -200,7 +266,9 @@ std::string WebAPIResponse::getSanitizedComment(
 }
 
 std::string WebAPIResponse::getCommentsInterpretation(
-  Calculator& interpreterWithAdvice, int indexShift, FormatExpressions& format
+  Calculator& interpreterWithAdvice,
+  int indexShift,
+  FormatExpressions& format
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::getCommentsInterpretation");
   std::stringstream out;
@@ -210,15 +278,18 @@ std::string WebAPIResponse::getCommentsInterpretation(
   if (indexShift >= interpreterWithAdvice.programExpression.size()) {
     return "";
   }
-  const Expression& currentE = interpreterWithAdvice.programExpression[indexShift][1];
+  const Expression& currentE =
+  interpreterWithAdvice.programExpression[indexShift][1];
   bool resultIsPlot = false;
   if (!currentE.startsWith(interpreterWithAdvice.opCommandSequence())) {
-    out << WebAPIResponse::getSanitizedComment(currentE, format, resultIsPlot);
+    out
+    << WebAPIResponse::getSanitizedComment(currentE, format, resultIsPlot);
     return out.str();
   }
   std::string currentS;
   for (int i = 1; i < currentE.size(); i ++) {
-    currentS = WebAPIResponse::getSanitizedComment(currentE[i], format, resultIsPlot);
+    currentS =
+    WebAPIResponse::getSanitizedComment(currentE[i], format, resultIsPlot);
     if (StringRoutines::stringTrimWhiteSpace(currentS) == "") {
       continue;
     }
@@ -243,14 +314,25 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   global.webArguments;
   JSData result;
   for (int i = 0; i < arguments.size(); i ++) {
-    if (StringRoutines::stringBeginsWith(
-      arguments.keys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID)
+    if (
+      StringRoutines::stringBeginsWith(
+        arguments.keys[i],
+        WebAPI::problem::calculatorAnswerPrefix,
+        &lastStudentAnswerID
+      )
     ) {
-      lastAnswer = "(" + HtmlRoutines::convertURLStringToNormal(arguments.values[i], false) + "); ";
+      lastAnswer =
+      "(" +
+      HtmlRoutines::convertURLStringToNormal(arguments.values[i], false) +
+      "); ";
     }
   }
   studentAnswerSream << lastAnswer;
-  out << "Your answer(s): \\(\\displaystyle " << lastAnswer << "\\)" << "\n<br>\n";
+  out
+  << "Your answer(s): \\(\\displaystyle "
+  << lastAnswer
+  << "\\)"
+  << "\n<br>\n";
   CalculatorHTML problem;
   std::stringstream errorStream, comments;
   problem.loadCurrentProblemItem(
@@ -266,9 +348,12 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
-    errorStream << "<br>Student submitted answerID: " << lastStudentAnswerID
+    errorStream
+    << "<br>Student submitted answerID: "
+    << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "<br>Response time: " << global.getElapsedSeconds() - startTime
+    << "<br>Response time: "
+    << global.getElapsedSeconds() - startTime
     << " second(s). ";
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::resultHtml] = out.str();
@@ -276,11 +361,13 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
   if (!problem.prepareCommands(&comments)) {
-    errorStream << "Something went wrong while interpreting the problem file. ";
+    errorStream << "Something went wrong while interpreting the problem file. "
+    ;
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       errorStream << comments.str();
     }
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedSeconds() - startTime;
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -292,24 +379,28 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   interpreter.flagPlotNoControls = true;
   std::stringstream studentAnswerWithComments;
   studentAnswerWithComments
-  << Calculator::Atoms::commandEnclosure << "{}("
+  << Calculator::Atoms::commandEnclosure
+  << "{}("
   << currentA.commandsCommentsBeforeInterpretation
   << ");"
   << studentAnswerSream.str();
-
   interpreter.evaluate(studentAnswerWithComments.str());
   if (interpreter.parser.syntaxErrors != "") {
-    errorStream << "<b style ='color:red'>Parsing failure:</b><br>"
+    errorStream
+    << "<b style ='color:red'>Parsing failure:</b><br>"
     << interpreter.parser.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   } else if (interpreter.flagAbortComputationASAP) {
-    out << "<b style='color:red'>Failed to evaluate your answer, got:</b><br>"
+    out
+    << "<b style='color:red'>Failed to evaluate your answer, got:</b><br>"
     << interpreter.outputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedSeconds() - startTime;
     return result;
   }
   FormatExpressions format;
@@ -318,30 +409,46 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   const Expression& studentAnswerNoContextE =
   interpreter.programExpression[interpreter.programExpression.size() - 1];
   out << "<b style='color:magenta'>Interpreting as:</b><br>";
-  out << "\\(\\displaystyle "
-  << studentAnswerNoContextE.toString(&format) << "\\)";
+  out
+  << "\\(\\displaystyle "
+  << studentAnswerNoContextE.toString(&format)
+  << "\\)";
   Calculator interpreterWithAdvice;
   interpreterWithAdvice.flagUseLnInsteadOfLog = true;
   interpreterWithAdvice.initialize(Calculator::Mode::educational);
   interpreterWithAdvice.flagWriteLatexPlots = false;
   interpreterWithAdvice.flagPlotNoControls = true;
-  std::stringstream calculatorInputStream,
-  calculatorInputStreamNoEnclosures;
-
-  calculatorInputStream << Calculator::Atoms::commandEnclosure << "{}("
-  << currentA.commandsBeforeAnswer << ");";
-  calculatorInputStreamNoEnclosures
-  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
-
-  calculatorInputStream << Calculator::Atoms::commandEnclosure << "{}("
-  << currentA.answerId << " = " << lastAnswer
+  std::stringstream calculatorInputStream, calculatorInputStreamNoEnclosures;
+  calculatorInputStream
+  << Calculator::Atoms::commandEnclosure
+  << "{}("
+  << currentA.commandsBeforeAnswer
   << ");";
   calculatorInputStreamNoEnclosures
-  << currentA.answerId << " = " << lastAnswer << "";
-  bool hasCommentsBeforeSubmission = (StringRoutines::stringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
+  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  calculatorInputStream
+  << Calculator::Atoms::commandEnclosure
+  << "{}("
+  << currentA.answerId
+  << " = "
+  << lastAnswer
+  << ");";
+  calculatorInputStreamNoEnclosures
+  << currentA.answerId
+  << " = "
+  << lastAnswer
+  << "";
+  bool hasCommentsBeforeSubmission = (
+    StringRoutines::stringTrimWhiteSpace(
+      currentA.commandsCommentsBeforeSubmission
+    ) !=
+    ""
+  );
   if (hasCommentsBeforeSubmission) {
-    calculatorInputStream << Calculator::Atoms::commandEnclosure << "{}("
-    <<  currentA.commandsCommentsBeforeSubmission
+    calculatorInputStream
+    << Calculator::Atoms::commandEnclosure
+    << "{}("
+    << currentA.commandsCommentsBeforeSubmission
     << ");";
     calculatorInputStreamNoEnclosures
     << currentA.commandsCommentsBeforeSubmission;
@@ -353,51 +460,68 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   );
   interpreterWithAdvice.evaluate(calculatorInputStream.str());
   if (interpreterWithAdvice.parser.syntaxErrors != "") {
-    out << "<br><b style='color:red'>"
+    out
+    << "<br><b style='color:red'>"
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b>";
     if (global.userDefaultHasAdminRights()) {
       out
       << problemLinkStream.str()
-      << interpreterWithAdvice.outputString << "<br>"
+      << interpreterWithAdvice.outputString
+      << "<br>"
       << interpreterWithAdvice.outputCommentsString;
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedSeconds() - startTime;
     return result;
   }
   if (interpreterWithAdvice.flagAbortComputationASAP) {
-    out << "<br><b style='color:red'>"
+    out
+    << "<br><b style='color:red'>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b>";
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
-      out << "<br>Logged-in as administator with debug flag on => printing error details. "
-      << interpreterWithAdvice.outputString << "<br>"
+      out
+      <<
+      "<br>Logged-in as administator with debug flag on => printing error details. "
+      << interpreterWithAdvice.outputString
+      << "<br>"
       << interpreterWithAdvice.outputCommentsString;
-      out << "<hr><b>Calculator input:</b> "
-      << problemLinkStream.str() << "<br>"
+      out
+      << "<hr><b>Calculator input:</b> "
+      << problemLinkStream.str()
+      << "<br>"
       << calculatorInputStream.str();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedSeconds() - startTime;
     return result;
   }
-  if (hasCommentsBeforeSubmission){
-    out << WebAPIResponse::getCommentsInterpretation(interpreterWithAdvice, 3, format);
+  if (hasCommentsBeforeSubmission) {
+    out
+    << WebAPIResponse::getCommentsInterpretation(
+      interpreterWithAdvice, 3, format
+    );
   }
-  result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+  result[WebAPI::result::millisecondsComputation] =
+  global.getElapsedSeconds() - startTime;
   if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
-    out << "<hr> " << problemLinkStream.str()
+    out
+    << "<hr> "
+    << problemLinkStream.str()
     << "<br>"
     << calculatorInputStreamNoEnclosures.str()
     << "<br>"
     << "Result:<br>"
     << interpreterWithAdvice.outputString
-    << "<br>" << interpreterWithAdvice.outputCommentsString
-    << "<br>Parsed elements: " << problem.parser.toStringParsingStack(problem.content)
-    ;
+    << "<br>"
+    << interpreterWithAdvice.outputCommentsString
+    << "<br>Parsed elements: "
+    << problem.parser.toStringParsingStack(problem.content);
   }
   result[WebAPI::result::resultHtml] = out.str();
   return result;
@@ -407,31 +531,48 @@ JSData WebAPIResponse::clonePageResult() {
   MacroRegisterFunctionWithName("WebAPIReponse::clonePageResult");
   JSData result;
   if (
-    ! global.flagLoggedIn ||
-    ! global.userDefaultHasAdminRights() ||
-    ! global.flagUsingSSLinCurrentConnection
+    !global.flagLoggedIn ||
+    !global.userDefaultHasAdminRights() ||
+    !global.flagUsingSSLinCurrentConnection
   ) {
-    result[WebAPI::result::error] = "Cloning problems allowed only for logged-in admins under ssl connection.";
+    result[WebAPI::result::error] =
+    "Cloning problems allowed only for logged-in admins under ssl connection.";
     return result;
   }
-  std::string fileNameTarget = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::fileNameTarget), false);
-  std::string fileNameToBeCloned = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::fileName), false);
+  std::string fileNameTarget =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::fileNameTarget), false
+  );
+  std::string fileNameToBeCloned =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::fileName), false
+  );
   std::stringstream out;
   std::string startingFileString;
-  if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
+  if (
+    !FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
+      fileNameToBeCloned, startingFileString, &out
+    )
+  ) {
     out << "Could not find input file: " << fileNameToBeCloned;
     result[WebAPI::result::error] = out.str();
     return result;
   }
   std::fstream fileStream;
-  if (FileOperations::fileExistsVirtualCustomizedReadOnly(fileNameTarget, nullptr)) {
+  if (
+    FileOperations::fileExistsVirtualCustomizedReadOnly(
+      fileNameTarget, nullptr
+    )
+  ) {
     out << "Output file: " << fileNameTarget << " already exists. ";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (!FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
-    fileStream, fileNameTarget, false, false, false, &out
-  )) {
+  if (
+    !FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
+      fileStream, fileNameTarget, false, false, false, &out
+    )
+  ) {
     out << "Failed to open output file: " << fileNameTarget << ".";
     result[WebAPI::result::error] = out.str();
     return result;
@@ -440,12 +581,18 @@ JSData WebAPIResponse::clonePageResult() {
   fileStream.close();
   std::string fileNameNonVirtual;
   std::stringstream comments;
-  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
-    fileNameTarget, fileNameNonVirtual, &comments
-  )) {
+  if (
+    !FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
+      fileNameTarget, fileNameNonVirtual, &comments
+    )
+  ) {
     out << "Could not get physical file name from virtual. " << comments.str();
   } else {
-    out << "Wrote " << startingFileString.size() << " bytes to file: " << fileNameTarget;
+    out
+    << "Wrote "
+    << startingFileString.size()
+    << " bytes to file: "
+    << fileNameTarget;
   }
   result[WebAPI::result::resultHtml] = out.str();
   return result;
@@ -453,20 +600,26 @@ JSData WebAPIResponse::clonePageResult() {
 
 void BuilderApplication::initializeTags(bool appendBuildHash) {
   this->allInOneJavascriptTagOriginal =
-  "<script type='text/javascript' src='" + WebAPI::request::onePageJS + "'></script>";
+  "<script type='text/javascript' src='" +
+  WebAPI::request::onePageJS +
+  "'></script>";
   std::string virtualJavascriptFileName = WebAPI::request::onePageJS;
   if (appendBuildHash) {
-    virtualJavascriptFileName = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
+    virtualJavascriptFileName =
+    FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
   }
   this->allInOneJavascriptTagDesired =
   "<script src='" +
   virtualJavascriptFileName +
   "' onerror = 'errorLoadingScript(this);'></script>\n";
   this->calculatorCSSTagOriginal =
-  "<link type='text/css' rel='stylesheet' href='" + WebAPI::request::calculatorCSS + "'>";
+  "<link type='text/css' rel='stylesheet' href='" +
+  WebAPI::request::calculatorCSS +
+  "'>";
   std::string virtualCSSFileName = WebAPI::request::calculatorCSS;
   if (appendBuildHash) {
-    virtualCSSFileName = FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorCSS);
+    virtualCSSFileName =
+    FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorCSS);
   }
   this->calculatorCSSTagDesired =
   "<link type='text/css' rel='stylesheet' href='" +
@@ -478,82 +631,114 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
   MacroRegisterFunctionWithName("BuilderApplication::buildHtmlJavascriptPage");
   this->initializeTags(appendBuildHash);
   this->htmlJSbuild = this->htmlRaw;
-  if (!StringRoutines::replaceOnce(
-    this->htmlJSbuild, this->allInOneJavascriptTagOriginal, this->allInOneJavascriptTagDesired
-  )) {
-    global << Logger::red
+  if (
+    !StringRoutines::replaceOnce(
+      this->htmlJSbuild,
+      this->allInOneJavascriptTagOriginal,
+      this->allInOneJavascriptTagDesired
+    )
+  ) {
+    global
+    << Logger::red
     << "Failed to find javascript_all_in_one.js tag in the html data."
     << Logger::endL;
   }
-  if (!StringRoutines::replaceOnce(
-    this->htmlJSbuild, this->calculatorCSSTagOriginal, this->calculatorCSSTagDesired
-  )) {
-    global << Logger::red
+  if (
+    !StringRoutines::replaceOnce(
+      this->htmlJSbuild,
+      this->calculatorCSSTagOriginal,
+      this->calculatorCSSTagDesired
+    )
+  ) {
+    global
+    << Logger::red
     << "Failed to find javascript_all_in_one.js tag in the html data."
     << Logger::endL;
   }
 }
 
-bool BuilderApplication::fileNameAllowedToBeMissing(const std::string& input) {
+bool BuilderApplication::fileNameAllowedToBeMissing(
+  const std::string& input
+) {
   if (input == "/calculator_html/external/build/output-min.js") {
     return true;
   }
-  return  false;
+  return false;
 }
 
 std::string WebAPIResponse::getOnePageJS() {
   MacroRegisterFunctionWithName("WebAPIResponse::getOnePageJS");
-  return WebAPIResponse::getBrowserification("/calculator_html/BUILD.json", "./app");
+  return
+  WebAPIResponse::getBrowserification("/calculator_html/BUILD.json", "./app");
 }
 
 std::string WebAPIResponse::getCalculatorWorkerJS() {
   MacroRegisterFunctionWithName("WebAPIResponse::getCalculatorWorkerJS");
-  return WebAPIResponse::getBrowserification("/calculator_html/web_assembly/BUILD.json", "./web_assembly/calculator_web_assembly_runner");
+  return
+  WebAPIResponse::getBrowserification(
+    "/calculator_html/web_assembly/BUILD.json",
+    "./web_assembly/calculator_web_assembly_runner"
+  );
 }
 
 std::string WebAPIResponse::getBrowserification(
   const std::string& buildJSONVirtualFileName,
   const std::string& scriptEntryPoint
-){
+) {
   MacroRegisterFunctionWithName("WebAPIReponse::getBrowserification");
   BuilderApplication builder;
   std::stringstream errorStream;
-  if (!builder.loadJavascriptFileNames(buildJSONVirtualFileName, &errorStream)) {
-    errorStream << "<b>Failed to load the javascript build json file: "
-    << buildJSONVirtualFileName << "</b>";
+  if (
+    !builder.loadJavascriptFileNames(buildJSONVirtualFileName, &errorStream)
+  ) {
+    errorStream
+    << "<b>Failed to load the javascript build json file: "
+    << buildJSONVirtualFileName
+    << "</b>";
     return errorStream.str();
   }
   builder.jsFileContents.setSize(builder.jsFileNames.size);
   for (int i = 0; i < builder.jsFileNames.size; i ++) {
-    if (!FileOperations::loadFileToStringVirtual(
-      builder.jsFileNames[i],
-      builder.jsFileContents[i],
-      false,
-      &errorStream
-    )) {
-      if (!builder.fileNameAllowedToBeMissing(builder.jsFileNames[i])) {
-        errorStream << "Failed to load javascript file: " << builder.jsFileNames[i];
+    if (
+      !FileOperations::loadFileToStringVirtual(
+        builder.jsFileNames[i],
+        builder.jsFileContents[i],
+        false,
+        &errorStream
+      )
+    ) {
+      if (
+        !builder.fileNameAllowedToBeMissing(builder.jsFileNames[i])
+      ) {
+        errorStream
+        << "Failed to load javascript file: "
+        << builder.jsFileNames[i];
         return errorStream.str();
       }
       std::stringstream moduleNotFound;
-      moduleNotFound << "console.log(\"File '"
-      << builder.jsFileNames[i] << "' not found. "
+      moduleNotFound
+      << "console.log(\"File '"
+      << builder.jsFileNames[i]
+      << "' not found. "
       << "Failure to find that file has been "
       << "specifically white-listed as ok. \");";
       builder.jsFileContents[i] = moduleNotFound.str();
     }
-    if (builder.jsFileNames[i] == "/calculator_html/web_assembly/calculator.js") {
+    if (
+      builder.jsFileNames[i] == "/calculator_html/web_assembly/calculator.js"
+    ) {
       // Special exception for web assembly.
       // Save ourselves lots of headache and
       // configuration by manually inserting the snippets we
       // care about into the auto-generated calculator.js file.
-      builder.jsFileContents[i] += "module.exports={\n"
-      "TTY,\n"
-      "Module,\n"
-      "intArrayFromString,\n"
-      "addOnInit,\n"
-      "_free,\n"
-      "};";
+      builder.jsFileContents[i] +=
+"module.exports={\n"
+"TTY,\n"
+"Module,\n"
+"intArrayFromString,\n"
+"addOnInit,\n"
+"_free,\n"
+"};";
     }
   }
   return builder.getBrowserificationAssembled(scriptEntryPoint);
@@ -563,9 +748,11 @@ bool BuilderApplication::loadJavascriptFileNames(
   const std::string& buildFileNameVirtual,
   std::stringstream* commentsOnFailure
 ) {
-  if (!FileOperations::loadFileToStringVirtual(
-    buildFileNameVirtual, this->buildFile, false, commentsOnFailure
-  )) {
+  if (
+    !FileOperations::loadFileToStringVirtual(
+      buildFileNameVirtual, this->buildFile, false, commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load build file. ";
     }
@@ -597,23 +784,33 @@ bool BuilderApplication::loadJavascriptFileNames(
   return true;
 }
 
-std::string BuilderApplication::getBrowserificationAssembled(const std::string& entryPoint) {
-  MacroRegisterFunctionWithName("BuilderApplication::getBrowserificationAssembled");
+std::string BuilderApplication::getBrowserificationAssembled(
+  const std::string& entryPoint
+) {
+  MacroRegisterFunctionWithName(
+    "BuilderApplication::getBrowserificationAssembled"
+  );
   std::stringstream out;
-  out << "(()=>{\n"
-  << "let jsContent = {\n";
+  out << "(()=>{\n" << "let jsContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
     std::string fileNameNoJS;
-    if (!StringRoutines::stringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
+    if (
+      !StringRoutines::stringEndsWith(
+        this->jsFileNames[i], ".js", &fileNameNoJS
+      )
+    ) {
       fileNameNoJS = this->jsFileNames[i];
     }
-    out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n";
+    out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n"
+    ;
     out << this->jsFileContents[i];
     out << "\n},\n";
   }
-  out << "};\n"
+  out
+  << "};\n"
   << "jsContent['/calculator_html/browserifier'](jsContent, '"
-  << entryPoint << "', null);\n"
+  << entryPoint
+  << "', null);\n"
   << "\n})();";
   return out.str();
 }
@@ -625,14 +822,16 @@ std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
   BuilderApplication builder;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::loadFileToStringVirtual(
-    virtualHTMLFileName,
-    builder.htmlRaw,
-    false,
-    &errorStream
-  )) {
-    out << "<html><body><b>Failed to load the application file. </b>"
-    << "Further comments follow. " << errorStream.str() << "</body></html>";
+  if (
+    !FileOperations::loadFileToStringVirtual(
+      virtualHTMLFileName, builder.htmlRaw, false, &errorStream
+    )
+  ) {
+    out
+    << "<html><body><b>Failed to load the application file. </b>"
+    << "Further comments follow. "
+    << errorStream.str()
+    << "</body></html>";
     return out.str();
   }
   builder.buildHtmlJavascriptPage(appendBuildHash);
@@ -640,18 +839,26 @@ std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
 }
 
 std::string WebAPIResponse::getApp(bool appendBuildHash) {
-  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator_html/index.html", appendBuildHash);
+  return
+  WebAPIResponse::getHTMLAllInOneJavascriptCSS(
+    "/calculator_html/index.html", appendBuildHash
+  );
 }
 
 std::string WebAPIResponse::getCompareExpressionsPage(bool appendBuildHash) {
-  return WebAPIResponse::getHTMLAllInOneJavascriptCSS("/calculator_html/compare_expressions_calculator.html", appendBuildHash);
+  return
+  WebAPIResponse::getHTMLAllInOneJavascriptCSS(
+    "/calculator_html/compare_expressions_calculator.html", appendBuildHash
+  );
 }
 
 JSData Course::toJSON() const {
   JSData result;
   result[WebAPI::problem::courseTitle] = this->title;
-  result[WebAPI::problem::courseHome] = Configuration::courseTemplates + this->courseTemplate;
-  result[WebAPI::problem::topicList] = Configuration::topicLists + this->courseTopicsNoFolder;
+  result[WebAPI::problem::courseHome] =
+  Configuration::courseTemplates + this->courseTemplate;
+  result[WebAPI::problem::topicList] =
+  Configuration::topicLists + this->courseTopicsNoFolder;
   if (this->flagRoughDraft != "") {
     result["roughDraft"] = this->flagRoughDraft;
   }
@@ -664,13 +871,20 @@ std::string Course::courseTopicsWithFolder() {
 
 std::string Course::toString() const {
   std::stringstream out;
-  out << "Html: " << this->courseTemplate
-  << "\n" << "Topics: " << this->courseTopicsNoFolder;
+  out
+  << "Html: "
+  << this->courseTemplate
+  << "\n"
+  << "Topics: "
+  << this->courseTopicsNoFolder;
   return out.str();
 }
 
 bool Course::isEmpty() {
-  return this->courseTemplate == "" && this->courseTopicsNoFolder == "" && this->title == "";
+  return
+  this->courseTemplate == "" &&
+  this->courseTopicsNoFolder == "" &&
+  this->title == "";
 }
 
 void Course::reset() {
@@ -690,33 +904,52 @@ bool CourseList::loadFromString(const std::string& input) {
   std::string currentLine, currentArgument;
   Course current;
   while (std::getline(tableReader, currentLine, '\n')) {
-    if (StringRoutines::stringBeginsWith(currentLine, "Html:", &currentArgument)) {
+    if (
+      StringRoutines::stringBeginsWith(
+        currentLine, "Html:", &currentArgument
+      )
+    ) {
       if (current.courseTemplate != "") {
         this->allCourses.addOnTop(current);
         current.reset();
       }
-      current.courseTemplate = StringRoutines::stringTrimWhiteSpace(currentArgument);
+      current.courseTemplate =
+      StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
-    if (StringRoutines::stringBeginsWith(currentLine, "Topics:", &currentArgument)) {
+    if (
+      StringRoutines::stringBeginsWith(
+        currentLine, "Topics:", &currentArgument
+      )
+    ) {
       if (current.courseTopicsNoFolder != "") {
         this->allCourses.addOnTop(current);
         current.reset();
       }
-      current.courseTopicsNoFolder = StringRoutines::stringTrimWhiteSpace(currentArgument);
+      current.courseTopicsNoFolder =
+      StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
-    if (StringRoutines::stringBeginsWith(currentLine, "Title:", &currentArgument)) {
+    if (
+      StringRoutines::stringBeginsWith(
+        currentLine, "Title:", &currentArgument
+      )
+    ) {
       if (current.title != "") {
         this->allCourses.addOnTop(current);
         current.reset();
       }
       current.title = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
-    if (StringRoutines::stringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
+    if (
+      StringRoutines::stringBeginsWith(
+        currentLine, "RoughDraft:", &currentArgument
+      )
+    ) {
       if (current.flagRoughDraft != "") {
         this->allCourses.addOnTop(current);
         current.reset();
       }
-      current.flagRoughDraft = StringRoutines::stringTrimWhiteSpace(currentArgument);
+      current.flagRoughDraft =
+      StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
   }
   if (!current.isEmpty()) {
@@ -728,10 +961,14 @@ bool CourseList::loadFromString(const std::string& input) {
 bool CourseList::load() {
   std::string topicFile;
   std::stringstream commentsOnFailure;
-  if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
-    "/coursesavailable/default.txt", topicFile, &commentsOnFailure
-  )) {
-    commentsOnFailure << "Failed to fetch available courses from /coursesavailable/default.txt. ";
+  if (
+    !FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
+      "/coursesavailable/default.txt", topicFile, &commentsOnFailure
+    )
+  ) {
+    commentsOnFailure
+    << "Failed to fetch available courses from /coursesavailable/default.txt. "
+    ;
     this->errorMessage = commentsOnFailure.str();
     return false;
   }
@@ -762,7 +999,9 @@ std::string WebAPIResponse::getHtmlTagWithManifest() {
   MacroRegisterFunctionWithName("WebAPIReponse::getHtmlTagWithManifest");
   std::stringstream out;
   out << "<!DOCTYPE HTML>\n";
-  out << "<html>\n<!-- tag added automatically; user-specified html tag ignored-->\n";
+  out
+  <<
+  "<html>\n<!-- tag added automatically; user-specified html tag ignored-->\n";
   return out.str();
 }
 
@@ -771,17 +1010,31 @@ JSData WebAPIResponse::getTopicTableJSON() {
   std::stringstream out;
   CalculatorHTML page;
   std::stringstream comments;
-  page.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
-  page.topicListFileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::topicList), false);
+  page.fileName =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::courseHome), false
+  );
+  page.topicListFileName =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::topicList), false
+  );
   JSData result;
   if (!page.loadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (!page.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
-    comments << "While loading topic table, failed to load file: ["
-    << global.getWebInput(WebAPI::problem::courseHome) << "].";
+  if (
+    !page.loadMe(
+      true,
+      global.getWebInput(WebAPI::problem::randomSeed),
+      &comments
+    )
+  ) {
+    comments
+    << "While loading topic table, failed to load file: ["
+    << global.getWebInput(WebAPI::problem::courseHome)
+    << "].";
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
@@ -789,25 +1042,30 @@ JSData WebAPIResponse::getTopicTableJSON() {
   return page.toStringTopicListJSON(&comments);
 }
 
-void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
+void WebAPIResponse::getJSDataUserInfo(
+  JSData& outputAppend, const std::string& comments
+) {
   MacroRegisterFunctionWithName("WebAPIReponse::getJSDataUserInfo");
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
-  outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = global.flagDisableDatabaseLogEveryoneAsAdmin;
-  outputAppend[WebAPI::result::useFallbackDatabase] = !global.flagDatabaseCompiled;
+  outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] =
+  global.flagDisableDatabaseLogEveryoneAsAdmin;
+  outputAppend[WebAPI::result::useFallbackDatabase] =
+  !global.flagDatabaseCompiled;
   outputAppend[WebAPI::result::httpsSupport] = global.flagSSLAvailable;
   if (comments != "") {
-    outputAppend[WebAPI::result::comments] = HtmlRoutines::convertStringToHtmlString(comments, false);
+    outputAppend[WebAPI::result::comments] =
+    HtmlRoutines::convertStringToHtmlString(comments, false);
   }
   if (global.response.monitoringAllowed()) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
-    outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(
-      global.millisecondsReplyAfterComputation
-    );
+    outputAppend[Configuration::millisecondsReplyAfterComputation] =
+    static_cast<double>(global.millisecondsReplyAfterComputation);
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
   if (global.getWebInput(WebAPI::result::error) != "") {
-    outputAppend[WebAPI::result::error] = HtmlRoutines::convertStringToHtmlString(
+    outputAppend[WebAPI::result::error] =
+    HtmlRoutines::convertStringToHtmlString(
       global.getWebInput(WebAPI::result::error), false
     );
   }
@@ -816,18 +1074,42 @@ void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& 
     return;
   }
   outputAppend[WebAPI::result::status] = "logged in";
-  outputAppend[DatabaseStrings::labelUsername]            = HtmlRoutines::convertStringToHtmlString(global.userDefault.username                 , false);
-  outputAppend[DatabaseStrings::labelAuthenticationToken] = HtmlRoutines::convertStringToHtmlString(global.userDefault.actualAuthenticationToken, false);
-  outputAppend[DatabaseStrings::labelUserRole]            = HtmlRoutines::convertStringToHtmlString(global.userDefault.userRole                 , false);
-  outputAppend[DatabaseStrings::labelInstructor]          = HtmlRoutines::convertStringToHtmlString(global.userDefault.instructorInDB           , false);
-  outputAppend[DatabaseStrings::labelSection]             = HtmlRoutines::convertStringToHtmlString(global.userDefault.sectionInDB              , false);
-  outputAppend[DatabaseStrings::labelCurrentCourses]      = HtmlRoutines::convertStringToHtmlString(global.userDefault.courseInDB               , false);
-  outputAppend[DatabaseStrings::labelDeadlinesSchema]     = HtmlRoutines::convertStringToHtmlString(global.userDefault.deadlineSchema           , false);
+  outputAppend[DatabaseStrings::labelUsername] =
+  HtmlRoutines::convertStringToHtmlString(
+    global.userDefault.username, false
+  );
+  outputAppend[DatabaseStrings::labelAuthenticationToken] =
+  HtmlRoutines::convertStringToHtmlString(
+    global.userDefault.actualAuthenticationToken, false
+  );
+  outputAppend[DatabaseStrings::labelUserRole] =
+  HtmlRoutines::convertStringToHtmlString(
+    global.userDefault.userRole, false
+  );
+  outputAppend[DatabaseStrings::labelInstructor] =
+  HtmlRoutines::convertStringToHtmlString(
+    global.userDefault.instructorInDB, false
+  );
+  outputAppend[DatabaseStrings::labelSection] =
+  HtmlRoutines::convertStringToHtmlString(
+    global.userDefault.sectionInDB, false
+  );
+  outputAppend[DatabaseStrings::labelCurrentCourses] =
+  HtmlRoutines::convertStringToHtmlString(
+    global.userDefault.courseInDB, false
+  );
+  outputAppend[DatabaseStrings::labelDeadlinesSchema] =
+  HtmlRoutines::convertStringToHtmlString(
+    global.userDefault.deadlineSchema, false
+  );
   JSData sectionsTaught;
   sectionsTaught.elementType = JSData::token::tokenArray;
   for (int i = 0; i < global.userDefault.sectionsTaught.size; i ++) {
     JSData nextSection;
-    nextSection = HtmlRoutines::convertStringToHtmlString(global.userDefault.sectionsTaught[i], false);
+    nextSection =
+    HtmlRoutines::convertStringToHtmlString(
+      global.userDefault.sectionsTaught[i], false
+    );
     sectionsTaught.listObjects.addOnTop(nextSection);
   }
   outputAppend[DatabaseStrings::labelSectionsTaught] = sectionsTaught;
@@ -845,24 +1127,43 @@ std::string WebAPIResponse::getJSONFromTemplate() {
   std::stringstream out;
   CalculatorHTML page;
   std::stringstream comments;
-  page.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
-  if (!page.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
-    out << "<b>Failed to load file: "
-    << global.getWebInput(WebAPI::problem::courseHome) << ". </b>"
-    << "<br>Comments:<br> " << comments.str();
+  page.fileName =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::courseHome), false
+  );
+  if (
+    !page.loadMe(
+      true,
+      global.getWebInput(WebAPI::problem::randomSeed),
+      &comments
+    )
+  ) {
+    out
+    << "<b>Failed to load file: "
+    << global.getWebInput(WebAPI::problem::courseHome)
+    << ". </b>"
+    << "<br>Comments:<br> "
+    << comments.str();
     return out.str();
   }
   if (!page.interpretHtml(&comments)) {
-    out << "<b>Failed to interpret as template the following file: "
-    << global.getWebInput(WebAPI::problem::courseHome) << ". </b>"
-    << "<br>Comments:<br> " << comments.str();
+    out
+    << "<b>Failed to interpret as template the following file: "
+    << global.getWebInput(WebAPI::problem::courseHome)
+    << ". </b>"
+    << "<br>Comments:<br> "
+    << comments.str();
     return out.str();
   }
-  out << "<!-- File automatically generated from template: "
+  out
+  << "<!-- File automatically generated from template: "
   << global.getWebInput(WebAPI::problem::fileName)
   << ".-->\n";
   out << page.outputHtmlBodyNoTag;
-  out << "<small>Generated in " << global.getElapsedMilliseconds() << " ms. </small>";
+  out
+  << "<small>Generated in "
+  << global.getElapsedMilliseconds()
+  << " ms. </small>";
   return out.str();
 }
 
@@ -876,16 +1177,18 @@ JSData WebAPIResponse::getExamPageJSON() {
   }
   CalculatorHTML problem;
   std::stringstream errorAndDebugStream;
-  std::string problemBody = problem.loadAndInterpretCurrentProblemItemJSON(
+  std::string problemBody =
+  problem.loadAndInterpretCurrentProblemItemJSON(
     global.userRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorAndDebugStream
   );
-  //<-must come after file.outputHtmlHeadNoTag
+  // <-must come after file.outputHtmlHeadNoTag
   errorAndDebugStream << problem.outputDebugInformationBody;
   out << problemBody;
   std::string commentsProblem = errorAndDebugStream.str();
-  output[WebAPI::problem::content] = HtmlRoutines::convertStringToURLString(out.str(), false);
+  output[WebAPI::problem::content] =
+  HtmlRoutines::convertStringToURLString(out.str(), false);
   if (commentsProblem != "") {
     output[WebAPI::problem::commentsProblem] = commentsProblem;
   }
@@ -901,7 +1204,9 @@ JSData WebAPIResponse::getExamPageJSON() {
     scripts.listObjects.setSize(problem.scripts.size());
     for (int i = 0; i < problem.scripts.size(); i ++) {
       scripts[problem.scripts.keys[i]] =
-      HtmlRoutines::convertStringToURLString(problem.scripts.values[i], false);
+      HtmlRoutines::convertStringToURLString(
+        problem.scripts.values[i], false
+      );
     }
     output["scripts"] = scripts;
     output[WebAPI::problem::forReal] = problem.flagIsForReal;
@@ -914,16 +1219,11 @@ JSData WebAPIResponse::getExamPageJSON() {
   return output;
 }
 
-JSData WebAPIResponse::getEditPageJSON(
-  bool showSourceRelaxed
-) {
+JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
   MacroRegisterFunctionWithName("WebAPIReponse::getEditPageJSON");
   JSData output;
-  if (
-    !global.flagLoggedIn ||
-    !global.userDefaultHasAdminRights()
-  ) {
-    if (!showSourceRelaxed){
+  if (!global.flagLoggedIn || !global.userDefaultHasAdminRights()) {
+    if (!showSourceRelaxed) {
       output[WebAPI::result::error] = "Only logged-in admins can edit pages.";
       return output;
     } else {
@@ -934,36 +1234,62 @@ JSData WebAPIResponse::getEditPageJSON(
   CalculatorHTML editedFile;
   editedFile.loadFileNames();
   std::stringstream failureStream;
-  if (!editedFile.loadMe(false, global.getWebInput(WebAPI::problem::randomSeed), &failureStream)) {
+  if (
+    !editedFile.loadMe(
+      false,
+      global.getWebInput(WebAPI::problem::randomSeed),
+      &failureStream
+    )
+  ) {
     std::stringstream errorStream;
-    errorStream << " <b>Failed to load file: ["
-    << editedFile.fileName << "], perhaps the file does not exist. </b>"
+    errorStream
+    << " <b>Failed to load file: ["
+    << editedFile.fileName
+    << "], perhaps the file does not exist. </b>"
     << failureStream.str();
     output[WebAPI::result::error] = errorStream.str();
     return output;
   }
   if (!editedFile.parser.parseHTML(&failureStream)) {
     std::stringstream errorStream;
-    errorStream << "<b>Failed to parse file: " << editedFile.fileName
-    << ".</b> Details:<br>" << failureStream.str();
+    errorStream
+    << "<b>Failed to parse file: "
+    << editedFile.fileName
+    << ".</b> Details:<br>"
+    << failureStream.str();
     output[WebAPI::result::error] = errorStream.str();
-    //return output.toString(false);
+    // return output.toString(false);
   }
   HashedList<std::string, MathRoutines::hashString> autocompleteKeyWords;
   editedFile.initBuiltInSpanClasses();
   std::stringstream comments;
-  if (editedFile.courseHome == editedFile.fileName || editedFile.topicListFileName == editedFile.fileName) {
+  if (
+    editedFile.courseHome == editedFile.fileName ||
+    editedFile.topicListFileName == editedFile.fileName
+  ) {
     editedFile.loadAndParseTopicList(comments);
-    autocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
-    autocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClassesAnswerFields);
-    autocompleteKeyWords.addOnTopNoRepetition(editedFile.calculatorTopicElementNames);
-    autocompleteKeyWords.addOnTopNoRepetition(editedFile.topics.knownTopicBundles.keys);
+    autocompleteKeyWords.addOnTopNoRepetition(
+      editedFile.parser.calculatorClasses
+    );
+    autocompleteKeyWords.addOnTopNoRepetition(
+      editedFile.parser.calculatorClassesAnswerFields
+    );
+    autocompleteKeyWords.addOnTopNoRepetition(
+      editedFile.calculatorTopicElementNames
+    );
+    autocompleteKeyWords.addOnTopNoRepetition(
+      editedFile.topics.knownTopicBundles.keys
+    );
   } else {
     Calculator tempCalculator;
     tempCalculator.initialize(Calculator::Mode::educational);
     tempCalculator.computeAutoCompleteKeyWords();
-    autocompleteKeyWords.addOnTopNoRepetition(editedFile.parser.calculatorClasses);
-    autocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
+    autocompleteKeyWords.addOnTopNoRepetition(
+      editedFile.parser.calculatorClasses
+    );
+    autocompleteKeyWords.addOnTopNoRepetition(
+      tempCalculator.autoCompleteKeyWords
+    );
     editedFile.initAutocompleteExtras();
     autocompleteKeyWords.addOnTopNoRepetition(editedFile.autoCompleteExtras);
   }
@@ -973,12 +1299,18 @@ JSData WebAPIResponse::getEditPageJSON(
     autoCompleteWordsJS[i] = autocompleteKeyWords[i];
   }
   output["autoComplete"] = autoCompleteWordsJS;
-  output["content"] = HtmlRoutines::convertStringToURLString(editedFile.parser.inputHtml, false);
+  output["content"] =
+  HtmlRoutines::convertStringToURLString(
+    editedFile.parser.inputHtml, false
+  );
   return output;
 }
 
 JSData WebAPIResponse::submitAnswersJSON() {
-  return WebAPIResponse::submitAnswersJSON(global.getWebInput(WebAPI::problem::randomSeed), nullptr, true);
+  return
+  WebAPIResponse::submitAnswersJSON(
+    global.getWebInput(WebAPI::problem::randomSeed), nullptr, true
+  );
 }
 
 class AnswerCheckerNoProblem {
@@ -1000,9 +1332,7 @@ public:
   std::string verification;
   std::string completedProblem;
   std::string completedProblemNoEnclosures;
-
   std::string administratorViewInternals;
-
   bool hasCommentsBeforeSubmission;
   bool answerIsCorrect;
   bool hideGivenAnswer;
@@ -1022,7 +1352,9 @@ public:
   int answerIndex;
   std::string storageReport;
   JSData submitAnswersJSON(
-    const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+    const std::string& inputRandomSeed,
+    bool* outputIsCorrect,
+    bool timeSafetyBrake
   );
   bool prepareProblem(const std::string& inputRandomSeed);
   bool extractStudentAnswerPartOne();
@@ -1039,14 +1371,14 @@ AnswerChecker::AnswerChecker() {
   this->answerIndex = - 1;
 }
 
-bool AnswerChecker::prepareProblem(
-  const std::string& inputRandomSeed
-) {
+bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
   MacroRegisterFunctionWithName("AnswerChecker::prepareProblem");
   std::stringstream errorStream, comments;
   this->startTimE = global.getElapsedMilliseconds();
   this->problem.loadCurrentProblemItem(
-    global.userRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
+    global.userRequestRequiresLoadingRealExamData(),
+    inputRandomSeed,
+    &errorStream
   );
   if (!this->problem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
@@ -1059,7 +1391,10 @@ bool AnswerChecker::prepareProblem(
     this->result[WebAPI::result::comments] = comments.str();
     return false;
   }
-  if (!this->problem.problemData.flagRandomSeedGiven && !this->problem.flagIsForReal) {
+  if (
+    !this->problem.problemData.flagRandomSeedGiven &&
+    !this->problem.flagIsForReal
+  ) {
     errorStream << "<b>Random seed not given.</b>";
     this->result[WebAPI::result::error] = errorStream.str();
     return false;
@@ -1073,13 +1408,20 @@ bool AnswerChecker::prepareProblem(
 bool AnswerChecker::extractStudentAnswerPartOne() {
   MacroRegisterFunctionWithName("AnswerChecker::extractStudentAnswerPartOne");
   std::string studentAnswerNameReader;
-  this->problem.studentTagsAnswered.initialize(this->problem.problemData.answers.size());
-  MapList<std::string, std::string, MathRoutines::hashString>& webArguments = global.webArguments;
+  this->problem.studentTagsAnswered.initialize(
+    this->problem.problemData.answers.size()
+  );
+  MapList<std::string, std::string, MathRoutines::hashString>& webArguments =
+  global.webArguments;
   this->answerIndex = - 1;
   for (int i = 0; i < webArguments.size(); i ++) {
-    if (!StringRoutines::stringBeginsWith(
-      webArguments.keys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
-    )) {
+    if (
+      !StringRoutines::stringBeginsWith(
+        webArguments.keys[i],
+        WebAPI::problem::calculatorAnswerPrefix,
+        &studentAnswerNameReader
+      )
+    ) {
       continue;
     }
     int newAnswerIndex = this->problem.getAnswerIndex(studentAnswerNameReader);
@@ -1091,26 +1433,32 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
       newAnswerIndex != - 1
     ) {
       std::stringstream out;
-      out << "<b>You submitted two or more answers [answer tags: "
+      out
+      << "<b>You submitted two or more answers [answer tags: "
       << this->problem.problemData.answers.values[this->answerIndex].answerId
-      << " and " << this->problem.problemData.answers.values[newAnswerIndex].answerId
+      << " and "
+      << this->problem.problemData.answers.values[newAnswerIndex].answerId
       << "].</b> At present, multiple answer submission is not supported. ";
       this->result[WebAPI::result::resultHtml] = out.str();
       return false;
     }
     if (this->answerIndex == - 1) {
       std::stringstream out;
-      out << "<b> You submitted an answer to tag with id "
+      out
+      << "<b> You submitted an answer to tag with id "
       << studentAnswerNameReader
       << " which is not on my list of answerable tags. </b>";
       this->result[WebAPI::result::resultHtml] = out.str();
       return false;
     }
-    Answer& currentProblemData = this->problem.problemData.answers.values[this->answerIndex];
+    Answer& currentProblemData =
+    this->problem.problemData.answers.values[this->answerIndex];
     currentProblemData.currentAnswerURLed = webArguments.values[i];
     if (currentProblemData.currentAnswerURLed == "") {
       std::stringstream out;
-      out << "<b> Your answer to tag with id " << studentAnswerNameReader
+      out
+      << "<b> Your answer to tag with id "
+      << studentAnswerNameReader
       << " appears to be empty, please resubmit. </b>";
       this->result[WebAPI::result::resultHtml] = out.str();
       return false;
@@ -1129,14 +1477,14 @@ bool AnswerChecker::extractStudentAnswerPartTwo() {
   MacroRegisterFunctionWithName("AnswerChecker::extractStudentAnswerPartTwo");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
-
-  currentA.currentAnswerClean = HtmlRoutines::convertURLStringToNormal(
-    currentA.currentAnswerURLed, false
+  currentA.currentAnswerClean =
+  HtmlRoutines::convertURLStringToNormal(currentA.currentAnswerURLed, false);
+  currentA.currentAnswerURLed =
+  HtmlRoutines::convertStringToURLString(currentA.currentAnswerClean, false);
+  // <-encoding back to overwrite malformed input
+  this->problem.studentTagsAnswered.addSelectionAppendNewIndex(
+    this->answerIndex
   );
-  currentA.currentAnswerURLed = HtmlRoutines::convertStringToURLString(
-    currentA.currentAnswerClean, false
-  );//<-encoding back to overwrite malformed input
-  this->problem.studentTagsAnswered.addSelectionAppendNewIndex(this->answerIndex);
   return true;
 }
 
@@ -1163,35 +1511,43 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   sqlString = user.sectionComputed;
   if (hasDeadline) {
     bool unused = false;
-    std::string deadlineString = this->problem.getDeadline(
+    std::string deadlineString =
+    this->problem.getDeadline(
       this->problem.fileName,
       HtmlRoutines::convertStringToURLString(sqlString, false),
       unused
     );
-
     if (deadlineString == "" || deadlineString == " ") {
       hasDeadline = false;
     } else {
-      TimeWrapper now, deadline; //<-needs a fix for different time formats.
+      TimeWrapper now, deadline;
+      // <-needs a fix for different time formats.
       // <-For the time being, we hard-code it
       // to month/day/year format (no time to program it better).
       std::stringstream badDateStream;
       if (!deadline.assignMonthDayYear(deadlineString, badDateStream)) {
-        out << "<b>Problem reading deadline. </b> The deadline string was: "
-        << deadlineString << ". Comments: "
-        << "<span style='color:red'>" << badDateStream.str() << "</span>"
+        out
+        << "<b>Problem reading deadline. </b> The deadline string was: "
+        << deadlineString
+        << ". Comments: "
+        << "<span style='color:red'>"
+        << badDateStream.str()
+        << "</span>"
         << "This should not happen. "
-        << CalculatorHTML::bugsGenericMessage << "";
+        << CalculatorHTML::bugsGenericMessage
+        << "";
         this->result[WebAPI::result::resultHtml] = out.str();
         return false;
       }
       now.assignLocalTime();
-      secondsTillDeadline = deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
+      secondsTillDeadline =
+      deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
       deadLinePassed = (secondsTillDeadline < - 18000);
     }
   }
   if (deadLinePassed) {
-    out << "<b style='color:red'>"
+    out
+    << "<b style='color:red'>"
     << "Deadline passed, attempt not recorded."
     << "</b>";
   } else {
@@ -1201,21 +1557,26 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
       if (currentA.firstCorrectAnswerClean == "") {
         currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
       } else {
-        out << "[first correct answer: "
-        << currentA.firstCorrectAnswerClean << "]";
+        out
+        << "[first correct answer: "
+        << currentA.firstCorrectAnswerClean
+        << "]";
       }
     }
   }
   std::stringstream comments;
   user.setProblemData(this->problem.fileName, currentProblemData);
   if (!user.storeProblemData(this->problem.fileName, &comments)) {
-    out << "<b>This shouldn't happen and may be a bug: "
+    out
+    << "<b>This shouldn't happen and may be a bug: "
     << "failed to store your answer in the database. "
     << CalculatorHTML::bugsGenericMessage
     << "</b><br>Comments: "
     << comments.str();
   } else {
-    out << "So far " << currentA.numCorrectSubmissions
+    out
+    << "So far "
+    << currentA.numCorrectSubmissions
     << " correct and "
     << currentA.numSubmissions - currentA.numCorrectSubmissions
     << " incorrect submissions.";
@@ -1225,28 +1586,28 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
       secondsTillDeadline *= - 1;
     }
     if (deadLinePassed) {
-      out << "<b style='color:red'>Submission "
+      out
+      << "<b style='color:red'>Submission "
       << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
         secondsTillDeadline, false, false
-      ) << " after deadline. </b>";
+      )
+      << " after deadline. </b>";
     } else {
-      out << "<b style='color:green'>Submission "
+      out
+      << "<b style='color:green'>Submission "
       << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
         secondsTillDeadline, false, false
-      ) << " before deadline. </b>";
+      )
+      << " before deadline. </b>";
     }
   } else {
-    out << "<b style='color:green'>"
-    << "No deadline yet."
-    << "</b>";
+    out << "<b style='color:green'>" << "No deadline yet." << "</b>";
   }
   this->storageReport = out.str();
   return true;
 }
 
-bool AnswerChecker::checkAnswerHardcoded(
-  bool* outputIsCorrect
-) {
+bool AnswerChecker::checkAnswerHardcoded(bool* outputIsCorrect) {
   MacroRegisterFunctionWithName("AnswerChecker::checkAnswerHardcoded");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
@@ -1261,11 +1622,12 @@ bool AnswerChecker::checkAnswerHardcoded(
   );
   this->checker.answerIsCorrect = comparison.flagAreEqual;
   if (outputIsCorrect != nullptr) {
-    *outputIsCorrect = this->checker.answerIsCorrect ;
+    *outputIsCorrect = this->checker.answerIsCorrect;
   }
   this->result = comparison.toJSON();
   if (this->result.hasKey(WebAPI::result::resultHtml)) {
-    this->checker.verification += this->result.getValue(WebAPI::result::resultHtml).stringValue;
+    this->checker.verification +=
+    this->result.getValue(WebAPI::result::resultHtml).stringValue;
   }
   return
   comparison.syntaxErrorsLeftRaw == "" &&
@@ -1279,20 +1641,19 @@ AnswerCheckerNoProblem::AnswerCheckerNoProblem() {
   this->hasCommentsBeforeSubmission = false;
 }
 
-bool AnswerChecker::checkAnswerStandard(
- bool* outputIsCorrect
-) {
+bool AnswerChecker::checkAnswerStandard(bool* outputIsCorrect) {
   MacroRegisterFunctionWithName("AnswerChecker::checkAnswerStandard");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
   this->checker.commandsBeforeAnswer = answer.commandsBeforeAnswer;
-  this->checker.commandsBeforeAnswerNoEnclosuresForDEBUGGING = answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  this->checker.commandsBeforeAnswerNoEnclosuresForDEBUGGING =
+  answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   this->checker.answerId = answer.answerId;
   this->checker.answerGiven = answer.currentAnswerClean;
-  this->checker.commandsCommentsBeforeSubmission = answer.commandsCommentsBeforeSubmission;
+  this->checker.commandsCommentsBeforeSubmission =
+  answer.commandsCommentsBeforeSubmission;
   this->checker.answerCheck = answer.commandVerificationOnly;
   bool result = this->checker.checkAnswer(outputIsCorrect);
-
   return result;
 }
 
@@ -1300,45 +1661,62 @@ JSData AnswerCheckerNoProblem::toJSON(bool hideGivenAnswer) {
   (void) hideGivenAnswer;
   JSData result;
   if (this->errorSyntax != "") {
-    result[WebAPI::result::resultHtml] =this->errorSyntax;
+    result[WebAPI::result::resultHtml] = this->errorSyntax;
   }
   return result;
 }
 
 void AnswerCheckerNoProblem::prepareForEvaluation() {
   std::stringstream completedProblemStreamNoEnclosures;
-
   std::stringstream completedProblemStream;
-  completedProblemStream << Calculator::Atoms::commandEnclosure << "{}("
+  completedProblemStream
+  << Calculator::Atoms::commandEnclosure
+  << "{}("
   << this->commandsBeforeAnswer
   << ");";
-  completedProblemStreamNoEnclosures << this->commandsBeforeAnswerNoEnclosuresForDEBUGGING;
-
-  completedProblemStream << Calculator::Atoms::commandEnclosure << "{}("
-  << this->answerId << "= (" << this->answerGiven << ");"
+  completedProblemStreamNoEnclosures
+  << this->commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  completedProblemStream
+  << Calculator::Atoms::commandEnclosure
+  << "{}("
+  << this->answerId
+  << "= ("
+  << this->answerGiven
+  << ");"
   << ");";
-  completedProblemStreamNoEnclosures << this->answerId << "= (" << this->answerGiven << ");";
-
+  completedProblemStreamNoEnclosures
+  << this->answerId
+  << "= ("
+  << this->answerGiven
+  << ");";
   this->hasCommentsBeforeSubmission = (
-    StringRoutines::stringTrimWhiteSpace(this->commandsCommentsBeforeSubmission) != ""
+    StringRoutines::stringTrimWhiteSpace(
+      this->commandsCommentsBeforeSubmission
+    ) !=
+    ""
   );
   if (this->hasCommentsBeforeSubmission) {
     completedProblemStream
-    << Calculator::Atoms::commandEnclosure << "{}("
+    << Calculator::Atoms::commandEnclosure
+    << "{}("
     << this->commandsCommentsBeforeSubmission
     << ");";
-    completedProblemStreamNoEnclosures << this->commandsCommentsBeforeSubmission;
+    completedProblemStreamNoEnclosures
+    << this->commandsCommentsBeforeSubmission;
   }
-  completedProblemStream << SyntacticElementHTML::cleanUpCommandString(this->answerCheck);
-  completedProblemStreamNoEnclosures << SyntacticElementHTML::cleanUpCommandString(this->answerCheck);
-
+  completedProblemStream
+  << SyntacticElementHTML::cleanUpCommandString(this->answerCheck);
+  completedProblemStreamNoEnclosures
+  << SyntacticElementHTML::cleanUpCommandString(this->answerCheck);
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-    this->administratorViewInternals += HtmlRoutines::getCalculatorComputationAnchorSameURL(
+    this->administratorViewInternals +=
+    HtmlRoutines::getCalculatorComputationAnchorSameURL(
       completedProblemStreamNoEnclosures.str(), "Input, no enclosures. "
     );
   }
   this->completedProblem = completedProblemStream.str();
-  this->completedProblemNoEnclosures = completedProblemStreamNoEnclosures.str();
+  this->completedProblemNoEnclosures = completedProblemStreamNoEnclosures.str()
+  ;
 }
 
 bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
@@ -1349,16 +1727,21 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
   this->interpreter.flagPlotNoControls = true;
   this->interpreter.evaluate(this->completedProblem);
   this->answerIsCorrect = false;
-  if (this->interpreter.flagAbortComputationASAP || this->interpreter.parser.syntaxErrors != "") {
+  if (
+    this->interpreter.flagAbortComputationASAP ||
+    this->interpreter.parser.syntaxErrors != ""
+  ) {
     std::stringstream out;
     if (this->interpreter.errorsPublic.str() != "") {
-      out << "While checking your answer, got the error: "
+      out
+      << "While checking your answer, got the error: "
       << "<br><b style='color:red'>"
       << this->interpreter.errorsPublic.str()
       << "</b> "
       << "<br><b>Most likely your answer is wrong. </b>";
     } else {
-      out << "<b>Error while processing your answer(s).</b> "
+      out
+      << "<b>Error while processing your answer(s).</b> "
       << "<br>Perhaps your answer was wrong and "
       << "generated division by zero during checking. ";
     }
@@ -1374,10 +1757,13 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
       out << isolatedInterpreter.outputString;
     }
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-      out << "<hr><b>Administartor view internals.</b><hr>"
-      << this->administratorViewInternals << "<hr>"
+      out
+      << "<hr><b>Administartor view internals.</b><hr>"
+      << this->administratorViewInternals
+      << "<hr>"
       << interpreter.outputString
-      << "<br>" << interpreter.outputCommentsString
+      << "<br>"
+      << interpreter.outputCommentsString
       << "<hr>Input, no enclosures: <hr>"
       << this->completedProblemNoEnclosures
       << "<br>";
@@ -1388,7 +1774,10 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
   this->answerIsCorrect = false;
   *outputIsCorrect = false;
   int mustBeOne = - 1;
-  Expression last = this->interpreter.programExpression[this->interpreter.programExpression.size() - 1];
+  Expression last =
+  this->interpreter.programExpression[
+    this->interpreter.programExpression.size() - 1
+  ];
   if (!last.isSmallInteger(&mustBeOne)) {
     this->answerIsCorrect = false;
   } else {
@@ -1409,21 +1798,28 @@ void AnswerCheckerNoProblem::computeVerificationString() {
     out << "<b style='color:red'>Your answer appears to be incorrect. </b>";
     out << "</td></tr>";
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
-      out << "<tr><td>Administrator view internals. "
-      << "<hr>" << this->administratorViewInternals
-      << "<br>The calculator output is: " << this->interpreter.outputString
-      << "Comments: " <<  this->interpreter.comments.str()
+      out
+      << "<tr><td>Administrator view internals. "
+      << "<hr>"
+      << this->administratorViewInternals
+      << "<br>The calculator output is: "
+      << this->interpreter.outputString
+      << "Comments: "
+      << this->interpreter.comments.str()
       << "<hr>Input, no enclosures: <hr>"
-      <<  this->completedProblemNoEnclosures;
-      out << "<hr>Input, full:<hr>"
-      << this->interpreter.inputString << "<hr></td></tr>";
+      << this->completedProblemNoEnclosures;
+      out
+      << "<hr>Input, full:<hr>"
+      << this->interpreter.inputString
+      << "<hr></td></tr>";
     }
   } else {
     out << "<tr><td><b style='color:green'>Correct!</b>" << "</td></tr>";
   }
   if (this->hasCommentsBeforeSubmission) {
     FormatExpressions format;
-    out << "<tr><td>"
+    out
+    << "<tr><td>"
     << WebAPIResponse::getCommentsInterpretation(interpreter, 3, format)
     << "</td></tr>\n";
   }
@@ -1432,9 +1828,14 @@ void AnswerCheckerNoProblem::computeVerificationString() {
   out << this->answerGiven;
   out << "\\)";
   std::string errorMessage;
-  errorMessage = this->interpreter.parser.toStringIsCorrectAsciiCalculatorString(this->answerGiven);
+  errorMessage =
+  this->interpreter.parser.toStringIsCorrectAsciiCalculatorString(
+    this->answerGiven
+  );
   if (errorMessage != "") {
-    out << "<br>" << errorMessage
+    out
+    << "<br>"
+    << errorMessage
     << "<hr><b>If you entered this expression through the "
     << "keyboard (without copying + pasting) this is a bug: "
     << "please report it to the web site administrator. "
@@ -1452,15 +1853,26 @@ void AnswerCheckerNoProblem::computeVerificationString() {
 
 JSData WebAPIResponse::checkAnswer(bool hideDesiredAnswer) {
   AnswerCheckerNoProblem checker;
-  checker.answerId = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerId), false);
-  checker.answerGiven = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerValue), false);
-  checker.answerCheck = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerCheck), false);
+  checker.answerId =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::answerId), false
+  );
+  checker.answerGiven =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::answerValue), false
+  );
+  checker.answerCheck =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::answerCheck), false
+  );
   checker.checkAnswer(&checker.answerIsCorrect);
   return checker.toJSON(hideDesiredAnswer);
 }
 
 JSData AnswerChecker::submitAnswersJSON(
-  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+  const std::string& inputRandomSeed,
+  bool* outputIsCorrect,
+  bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("AnswerChecker::submitAnswersJSON");
   if (!global.userDefaultHasAdminRights()) {
@@ -1482,7 +1894,9 @@ JSData AnswerChecker::submitAnswersJSON(
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
   bool errorsCheckingAnswer = false;
   if (timeSafetyBrake) {
-    global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; // + 20 sec
+    global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000
+    ;
+    // + 20 sec
   }
   bool temporary = false;
   if (outputIsCorrect == nullptr) {
@@ -1505,8 +1919,10 @@ JSData AnswerChecker::submitAnswersJSON(
 }
 
 void AnswerChecker::computeResultHTML() {
-  this->result[WebAPI::result::resultHtml] = this->checker.verification + this->checker.errorSyntax + this->storageReport;
-  this->result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - this->startTimE;
+  this->result[WebAPI::result::resultHtml] =
+  this->checker.verification + this->checker.errorSyntax + this->storageReport;
+  this->result[WebAPI::result::millisecondsComputation] =
+  global.getElapsedMilliseconds() - this->startTimE;
   this->result[WebAPI::problem::forReal] = this->problem.flagIsForReal;
 }
 
@@ -1514,34 +1930,55 @@ JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
   double startTime = global.getElapsedSeconds();
   (void) hideDesiredAnswer;
   AnswerChecker checker;
-  checker.checker.answerId = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerId), false);
-  checker.checker.answerGiven = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerValue), false);
-  checker.checker.answerCheck = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::answerCheck), false);
+  checker.checker.answerId =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::answerId), false
+  );
+  checker.checker.answerGiven =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::answerValue), false
+  );
+  checker.checker.answerCheck =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::answerCheck), false
+  );
   checker.checker.commandsBeforeAnswer = "1";
-  bool errorsCheckingAnswer = checker.checker.checkAnswer(&checker.checker.answerIsCorrect);
+  bool errorsCheckingAnswer =
+  checker.checker.checkAnswer(&checker.checker.answerIsCorrect);
   if (!errorsCheckingAnswer) {
     return checker.checker.toJSON(hideDesiredAnswer);
   }
-  checker.result[WebAPI::result::resultHtml] = checker.checker.verification + checker.storageReport;
-  checker.result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
+  checker.result[WebAPI::result::resultHtml] =
+  checker.checker.verification + checker.storageReport;
+  checker.result[WebAPI::result::millisecondsComputation] =
+  global.getElapsedSeconds() - startTime;
   return checker.result;
 }
 
 JSData WebAPIResponse::submitAnswersJSON(
-  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+  const std::string& inputRandomSeed,
+  bool* outputIsCorrect,
+  bool timeSafetyBrake
 ) {
   AnswerChecker checker;
-  return checker.submitAnswersJSON(inputRandomSeed, outputIsCorrect, timeSafetyBrake);
+  return
+  checker.submitAnswersJSON(
+    inputRandomSeed, outputIsCorrect, timeSafetyBrake
+  );
 }
 
 std::string WebAPIResponse::addTeachersSections() {
   MacroRegisterFunctionWithName("WebAPIReponse::addTeachersSections");
   std::stringstream out;
-  if (!global.userDefaultHasAdminRights() || !global.flagUsingSSLinCurrentConnection) {
+  if (
+    !global.userDefaultHasAdminRights() ||
+    !global.flagUsingSSLinCurrentConnection
+  ) {
     out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
-  std::string input = HtmlRoutines::convertURLStringToNormal(
+  std::string input =
+  HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("teachersAndSections"), false
   );
   JSData inputParsed;
@@ -1549,23 +1986,35 @@ std::string WebAPIResponse::addTeachersSections() {
     out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }
-  if (inputParsed["teachers"].elementType != JSData::token::tokenString) {
-    out << "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>";
+  if (
+    inputParsed["teachers"].elementType != JSData::token::tokenString
+  ) {
+    out
+    <<
+    "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>"
+    ;
     return out.str();
   }
-  if (inputParsed["students"].elementType != JSData::token::tokenString) {
-    out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
+  if (
+    inputParsed["students"].elementType != JSData::token::tokenString
+  ) {
+    out
+    << "<b style='color:red'>Failed to find key 'students' in your input. </b>"
+    ;
     return out.str();
   }
   if (!global.flagDatabaseCompiled) {
     return "<b>no database present.</b>";
   }
   std::string desiredUsers =
-  HtmlRoutines::convertURLStringToNormal(inputParsed["teachers"].stringValue, false);
+  HtmlRoutines::convertURLStringToNormal(
+    inputParsed["teachers"].stringValue, false
+  );
   std::string desiredSectionsOneString =
-  HtmlRoutines::convertURLStringToNormal(inputParsed["students"].stringValue, false);
+  HtmlRoutines::convertURLStringToNormal(
+    inputParsed["students"].stringValue, false
+  );
   List<std::string> desiredSectionsList;
-
   List<std::string> teachers;
   List<char> delimiters;
   delimiters.addOnTop(' ');
@@ -1574,10 +2023,14 @@ std::string WebAPIResponse::addTeachersSections() {
   delimiters.addOnTop('\t');
   delimiters.addOnTop(',');
   delimiters.addOnTop(';');
-  delimiters.addOnTop(static_cast<char>(160)); //<-&nbsp
-  StringRoutines::stringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
-
-  StringRoutines::stringSplitExcludeDelimiters(desiredUsers, delimiters, teachers);
+  delimiters.addOnTop(static_cast<char>(160));
+  // <-&nbsp
+  StringRoutines::stringSplitExcludeDelimiters(
+    desiredSectionsOneString, delimiters, desiredSectionsList
+  );
+  StringRoutines::stringSplitExcludeDelimiters(
+    desiredUsers, delimiters, teachers
+  );
   if (teachers.size == 0) {
     out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();
@@ -1587,7 +2040,10 @@ std::string WebAPIResponse::addTeachersSections() {
     currentTeacher.reset();
     currentTeacher.username = teachers[i];
     if (!currentTeacher.loadFromDatabase(&out, &out)) {
-      out << "<span style='color:red'>Failed to fetch teacher: " << teachers[i] << "</span><br>";
+      out
+      << "<span style='color:red'>Failed to fetch teacher: "
+      << teachers[i]
+      << "</span><br>";
       continue;
     }
     currentTeacher.sectionsTaught = desiredSectionsList;
@@ -1599,16 +2055,25 @@ std::string WebAPIResponse::addTeachersSections() {
     QuerySet setQuery;
     setQuery.value[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
     if (!Database::get().updateOne(findQuery, setQuery, &out)) {
-      out << "<span style='color:red'>Failed to store course info of instructor: " << teachers[i] << ". </span><br>";
+      out
+      << "<span style='color:red'>Failed to store course info of instructor: "
+      << teachers[i]
+      << ". </span><br>";
     } else {
-      out << "<span style='color:green'>Assigned " << teachers[i] << " to section(s): "
-      << desiredSectionsList << "</span><br>";
+      out
+      << "<span style='color:green'>Assigned "
+      << teachers[i]
+      << " to section(s): "
+      << desiredSectionsList
+      << "</span><br>";
     }
   }
   return out.str();
 }
 
-std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithPort) {
+std::string WebAPIResponse::addUserEmails(
+  const std::string& hostWebAddressWithPort
+) {
   MacroRegisterFunctionWithName("WebAPIReponse::addUserEmails");
   (void) hostWebAddressWithPort;
   std::stringstream out;
@@ -1619,45 +2084,65 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
     out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
-  std::string inputEmails = HtmlRoutines::convertURLStringToNormal(
+  std::string inputEmails =
+  HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::request::userList), false
   );
-  std::string userPasswords = HtmlRoutines::convertURLStringToNormal(
+  std::string userPasswords =
+  HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::request::passwordList), false
   );
   std::string userGroup =
-  StringRoutines::stringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(DatabaseStrings::labelSection), false
-  ));
-  std::string userRole = HtmlRoutines::convertURLStringToNormal(global.getWebInput("userRole"), false);
-
+  StringRoutines::stringTrimWhiteSpace(
+    HtmlRoutines::convertURLStringToNormal(
+      global.getWebInput(DatabaseStrings::labelSection), false
+    )
+  );
+  std::string userRole =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("userRole"), false
+  );
   if (inputEmails == "") {
     out << "addUserEmails failed: <b>No emails to add</b>";
     return out.str();
   }
   std::stringstream comments;
   bool sentEmails = true;
-  bool doSendEmails = global.requestType == "sendEmails" ?  true : false;
+  bool doSendEmails = global.requestType == "sendEmails" ? true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
-  bool createdUsers = Database::get().user.addUsersFromEmails(
-    inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers
+  bool createdUsers =
+  Database::get().user.addUsersFromEmails(
+    inputEmails,
+    userPasswords,
+    userRole,
+    userGroup,
+    comments,
+    numNewUsers,
+    numUpdatedUsers
   );
   if (createdUsers) {
-    out << "<span style='color:green'>Success: "
-    << numNewUsers << " new users and " << numUpdatedUsers
-    << " user updates.</span> User roles: " << userRole;
-  } else
-    out << "<b style='color:red'>Failed to add all users.</b> "
-    << "Errors follow.<hr>"
-    << comments.str() << "<hr>";
+    out
+    << "<span style='color:green'>Success: "
+    << numNewUsers
+    << " new users and "
+    << numUpdatedUsers
+    << " user updates.</span> User roles: "
+    << userRole;
+  } else out
+  << "<b style='color:red'>Failed to add all users.</b> "
+  << "Errors follow.<hr>"
+  << comments.str()
+  << "<hr>";
   if (doSendEmails) {
     if (sentEmails) {
-      out << "<b style='color:green'>"
+      out
+      << "<b style='color:green'>"
       << "Activation emails successfully sent. "
       << "</b>";
     } else {
-      out << "<b style='color:red'>"
+      out
+      << "<b style='color:red'>"
       << "Failed to send all activation emails. "
       << "</b>";
     }
@@ -1668,9 +2153,11 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
 const std::string CalculatorHTML::bugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along "
 "with a short explanation to the administrator of the web site. ";
-
 JSData WebAPIResponse::getAnswerOnGiveUp() {
-  return WebAPIResponse::getAnswerOnGiveUp(global.getWebInput(WebAPI::problem::randomSeed));
+  return
+  WebAPIResponse::getAnswerOnGiveUp(
+    global.getWebInput(WebAPI::problem::randomSeed)
+  );
 }
 
 JSData WebAPIResponse::getAnswerOnGiveUp(
@@ -1697,21 +2184,26 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   std::stringstream errorStream;
   problem.loadCurrentProblemItem(false, inputRandomSeed, &errorStream);
   if (!problem.flagLoadedSuccessfully) {
-    errorStream << "Problem name is: " << problem.fileName
+    errorStream
+    << "Problem name is: "
+    << problem.fileName
     << " <b>Could not load problem, this may be a bug. "
-    << CalculatorHTML::bugsGenericMessage << "</b>";
+    << CalculatorHTML::bugsGenericMessage
+    << "</b>";
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
   if (problem.flagIsForReal) {
-    errorStream << " <b>Not allowed to show answer "
+    errorStream
+    << " <b>Not allowed to show answer "
     << "of a problem being tested for real. </b>";
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
   if (inputRandomSeed == "") {
-    result[WebAPI::result::error] = "<b>I could not figure out "
-    "the exercise problem (missing random seed). </b>";
+    result[WebAPI::result::error] =
+"<b>I could not figure out "
+"the exercise problem (missing random seed). </b>";
     return result;
   }
   result[WebAPI::problem::randomSeed] = inputRandomSeed;
@@ -1721,7 +2213,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
       arguments.keys[i],
@@ -1732,23 +2225,32 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
   std::stringstream out;
   if (indexLastAnswerId == - 1) {
-    errorStream << "File: "
+    errorStream
+    << "File: "
     << problem.fileName
-    << "<br><b>Student submitted answerID: " << lastStudentAnswerID
+    << "<br><b>Student submitted answerID: "
+    << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-      errorStream << "<hr>" << problem.problemData.toStringAvailableAnswerIds();
+      errorStream << "<hr>" << problem.problemData.toStringAvailableAnswerIds()
+      ;
     }
-    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] =
+    global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
   Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
   if (currentA.commandAnswerOnGiveUp == "") {
-    out << "<b>No answer given for "
-    << "question (answerID: " << lastStudentAnswerID << ").</b>";
-    if (global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()) {
+    out
+    << "<b>No answer given for "
+    << "question (answerID: "
+    << lastStudentAnswerID
+    << ").</b>";
+    if (
+      global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()
+    ) {
       out << "<br>Answer status: " << currentA.toString();
     }
     result[WebAPI::result::error] = out.str();
@@ -1760,39 +2262,56 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   interpreter.flagWriteLatexPlots = false;
   std::stringstream answerCommands, answerCommandsNoEnclosure;
   answerCommands << currentA.commandsBeforeAnswer;
-  answerCommandsNoEnclosure << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
-  answerCommands << Calculator::Atoms::commandEnclosure
-  << "{}(" << currentA.commandAnswerOnGiveUp << ");";
+  answerCommandsNoEnclosure
+  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  answerCommands
+  << Calculator::Atoms::commandEnclosure
+  << "{}("
+  << currentA.commandAnswerOnGiveUp
+  << ");";
   answerCommandsNoEnclosure << currentA.commandAnswerOnGiveUp;
   interpreter.evaluate(answerCommands.str());
   if (interpreter.parser.syntaxErrors != "") {
-    out << "<b style='color:red'>Failed to evaluate the default answer. "
+    out
+    << "<b style='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
-      out << HtmlRoutines::getCalculatorComputationAnchorSameURL(
+      out
+      << HtmlRoutines::getCalculatorComputationAnchorSameURL(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
-    out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
+    out
+    << "<br>"
+    << CalculatorHTML::bugsGenericMessage
+    << "<br>Details: <br>"
     << interpreter.parser.toStringSyntacticStackHTMLSimple();
     result[WebAPI::result::resultHtml] = out.str();
-    int64_t elapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
+    int64_t elapsedTime =
+    global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = elapsedTime;
     return result;
   }
   if (interpreter.flagAbortComputationASAP) {
-    out << "<b style='color:red'>Failed to evaluate the default answer. "
+    out
+    << "<b style='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
-      out << HtmlRoutines::getCalculatorComputationAnchorSameURL(
+      out
+      << HtmlRoutines::getCalculatorComputationAnchorSameURL(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
-    out << "<br>" << CalculatorHTML::bugsGenericMessage << "<br>Details: <br>"
+    out
+    << "<br>"
+    << CalculatorHTML::bugsGenericMessage
+    << "<br>Details: <br>"
     << interpreter.outputString
     << interpreter.outputCommentsString
-    << "<hr>Input: <br>" << interpreter.inputString;
-    int64_t elapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
+    << "<hr>Input: <br>"
+    << interpreter.inputString;
+    int64_t elapsedTime =
+    global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = elapsedTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -1804,9 +2323,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   format.flagUseLatex = true;
   format.flagUsePmatrix = true;
   bool isFirst = true;
-  const Expression& currentE = interpreter.programExpression[
-    interpreter.programExpression.size() - 1
-  ][1];
+  const Expression& currentE =
+  interpreter.programExpression[interpreter.programExpression.size() - 1][1];
   if (!currentE.startsWith(interpreter.opCommandSequence())) {
     out << "\\(\\displaystyle " << currentE.toString(&format) << "\\)";
     if (outputNakedAnswer != nullptr) {
@@ -1826,7 +2344,11 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       }
       std::string stringAnswer;
       if (currentE[j].isOfType<std::string>(&stringAnswer)) {
-        if (StringRoutines::stringBeginsWith(stringAnswer, "Approximations have been")) {
+        if (
+          StringRoutines::stringBeginsWith(
+            stringAnswer, "Approximations have been"
+          )
+        ) {
           continue;
         }
       }
@@ -1855,19 +2377,22 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     }
   }
   if (doIncludeTimeStats) {
-    int64_t elapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
+    int64_t elapsedTime =
+    global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = elapsedTime;
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out
     << "<hr>"
     << HtmlRoutines::getCalculatorComputationAnchorSameURL(
-      answerCommandsNoEnclosure.str(),
-      "Calculator input no enclosures"
+      answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
     );
-    out << interpreter.outputString << "<hr>"
+    out
+    << interpreter.outputString
+    << "<hr>"
     << interpreter.outputCommentsString
-    << "<hr>" << HtmlRoutines::getCalculatorComputationAnchorSameURL(
+    << "<hr>"
+    << HtmlRoutines::getCalculatorComputationAnchorSameURL(
       interpreter.inputString, "Raw calculator input"
     );
   }
@@ -1875,12 +2400,15 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   return result;
 }
 
-JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWithPort) {
+JSData WebAPIResponse::getAccountsPageJSON(
+  const std::string& hostWebAddressWithPort
+) {
   MacroRegisterFunctionWithName("WebAPIReponse::getAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    output[WebAPI::result::error] = "Database disabled (cannot get accounts). ";
+    output[WebAPI::result::error] = "Database disabled (cannot get accounts). "
+    ;
     return output;
   }
   if (
@@ -1888,7 +2416,8 @@ JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWith
     !global.flagLoggedIn ||
     !global.flagUsingSSLinCurrentConnection
   ) {
-    output[WebAPI::result::error] = "Must be logged-in administrator over ssl.";
+    output[WebAPI::result::error] = "Must be logged-in administrator over ssl."
+    ;
     return output;
   }
   std::stringstream commentsOnFailure;
@@ -1898,7 +2427,8 @@ JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWith
   List<JSData> admins;
   long long totalStudents;
   findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
-  findAdmins[DatabaseStrings::labelUserRole] = UserCalculator::Roles::administator;
+  findAdmins[DatabaseStrings::labelUserRole] =
+  UserCalculator::Roles::administator;
   List<std::string> columnsToRetain;
   columnsToRetain.addOnTop(DatabaseStrings::labelUsername);
   columnsToRetain.addOnTop(DatabaseStrings::labelEmail);
@@ -1907,28 +2437,34 @@ JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWith
   columnsToRetain.addOnTop(DatabaseStrings::labelInstructor);
   columnsToRetain.addOnTop(DatabaseStrings::labelSection);
   columnsToRetain.addOnTop(DatabaseStrings::labelSemester);
-  if (!Database::findFromJSONWithProjection(
-    DatabaseStrings::tableUsers,
-    findStudents,
-    students,
-    columnsToRetain,
-    - 1,
-    &totalStudents,
-    &commentsOnFailure
-  )) {
-    output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
+  if (
+    !Database::findFromJSONWithProjection(
+      DatabaseStrings::tableUsers,
+      findStudents,
+      students,
+      columnsToRetain,
+      - 1,
+      &totalStudents,
+      &commentsOnFailure
+    )
+  ) {
+    output["error"] =
+    "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output;
   }
-  if (!Database::findFromJSONWithProjection(
-    DatabaseStrings::tableUsers,
-    findAdmins,
-    admins,
-    columnsToRetain,
-    - 1,
-    nullptr,
-    &commentsOnFailure
-  )) {
-    output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
+  if (
+    !Database::findFromJSONWithProjection(
+      DatabaseStrings::tableUsers,
+      findAdmins,
+      admins,
+      columnsToRetain,
+      - 1,
+      nullptr,
+      &commentsOnFailure
+    )
+  ) {
+    output["error"] =
+    "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output;
   }
   output["admins"] = admins;
@@ -1936,7 +2472,9 @@ JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWith
   return output;
 }
 
-std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddressWithPort) {
+std::string WebAPIResponse::getAccountsPageBody(
+  const std::string& hostWebAddressWithPort
+) {
   MacroRegisterFunctionWithName("WebAPIReponse::getAccountsPageBody");
   (void) hostWebAddressWithPort;
   if (!global.flagDatabaseCompiled) {
@@ -1948,7 +2486,9 @@ std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddres
     !global.flagLoggedIn ||
     !global.flagUsingSSLinCurrentConnection
   ) {
-    out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
+    out
+    <<
+    "Browsing accounts allowed only for logged-in admins over ssl connection.";
     return out.str();
   }
   std::stringstream commentsOnFailure;
@@ -1958,27 +2498,35 @@ std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddres
   List<JSData> admins;
   long long totalStudents;
   findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
-  findAdmins[DatabaseStrings::labelUserRole] = UserCalculator::Roles::administator;
-  if (!Database::get().findFromJSON(
-    DatabaseStrings::tableUsers,
-    findStudents,
-    students,
-    - 1,
-    &totalStudents,
-    &commentsOnFailure
-  )) {
-    out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
+  findAdmins[DatabaseStrings::labelUserRole] =
+  UserCalculator::Roles::administator;
+  if (
+    !Database::get().findFromJSON(
+      DatabaseStrings::tableUsers,
+      findStudents,
+      students,
+      - 1,
+      &totalStudents,
+      &commentsOnFailure
+    )
+  ) {
+    out
+    << "<b>Failed to load user info.</b> Comments: "
+    << commentsOnFailure.str();
     return out.str();
   }
-  if (!Database::get().findFromJSON(
-    DatabaseStrings::tableUsers,
-    findAdmins,
-    admins,
-    - 1,
-    nullptr,
-    &commentsOnFailure
-  )) {
-    out << "<b>Failed to load user info.</b> Comments: "
+  if (
+    !Database::get().findFromJSON(
+      DatabaseStrings::tableUsers,
+      findAdmins,
+      admins,
+      - 1,
+      nullptr,
+      &commentsOnFailure
+    )
+  ) {
+    out
+    << "<b>Failed to load user info.</b> Comments: "
     << commentsOnFailure.str();
     return out.str();
   }
@@ -1986,9 +2534,12 @@ std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddres
   out << WebAPIResponse::toStringAssignSection();
   out << "<hr>";
   out
-  << WebAPIResponse::toStringUserDetails(true, admins, hostWebAddressWithPort);
+  << WebAPIResponse::toStringUserDetails(
+    true, admins, hostWebAddressWithPort
+  );
   out << "<hr>";
-  out << WebAPIResponse::toStringUserDetails(
+  out
+  << WebAPIResponse::toStringUserDetails(
     false, students, hostWebAddressWithPort
   );
   return out.str();
@@ -2005,21 +2556,29 @@ std::string WebAPIResponse::getScoresPage() {
 }
 
 std::string WebAPIResponse::toStringUserDetailsTable(
-  bool adminsOnly, List<JSData>& users, const std::string& hostWebAddressWithPort
+  bool adminsOnly,
+  List<JSData>& users,
+  const std::string& hostWebAddressWithPort
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetailsTable");
   if (!global.flagDatabaseCompiled) {
     return "Compiled without database support. ";
   }
   std::stringstream out;
-  bool flagFilterCourse = (!adminsOnly) && (global.getWebInput("filterAccounts") == "true");
-  std::string currentCourse = HtmlRoutines::convertURLStringToNormal(
+  bool flagFilterCourse = (!adminsOnly) && (
+    global.getWebInput("filterAccounts") == "true"
+  );
+  std::string currentCourse =
+  HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::problem::courseHome), false
   );
   if (flagFilterCourse) {
-    out << "<br>Displaying only students in course: <b style =\"color:blue\">"
-    << currentCourse << "</b>. "
-    << "<a href=\"" << global.displayNameExecutable
+    out
+    << "<br>Displaying only students in course: <b style =\"color:blue\">"
+    << currentCourse
+    << "</b>. "
+    << "<a href=\""
+    << global.displayNameExecutable
     << "?request=accounts&"
     << global.toStringCalculatorArgumentsNoNavigation(nullptr)
     << "filterAccounts=false&"
@@ -2034,17 +2593,23 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   List<List<std::string> > nonActivatedAccountBucketsBySection;
   for (int i = 0; i < users.size; i ++) {
     currentUser.loadFromJSON(users[i]);
-    if (flagFilterCourse && (
-      currentUser.courseInDB != currentCourse ||
-      currentUser.instructorInDB != global.userDefault.username
-    )) {
+    if (
+      flagFilterCourse && (
+        currentUser.courseInDB != currentCourse ||
+        currentUser.instructorInDB != global.userDefault.username
+      )
+    ) {
       continue;
     }
     if (!sections.contains(currentUser.sectionInDB)) {
       std::stringstream currentSectionInfo;
-      currentSectionInfo << "<b>Section: </b>" << currentUser.sectionInDB
-      << ", <b>Course: </b>" << currentUser.courseInDB
-      << ", <b>Instructor: </b>" << currentUser.instructorInDB;
+      currentSectionInfo
+      << "<b>Section: </b>"
+      << currentUser.sectionInDB
+      << ", <b>Course: </b>"
+      << currentUser.courseInDB
+      << ", <b>Instructor: </b>"
+      << currentUser.instructorInDB;
       sections.addOnTop(currentUser.sectionInDB);
       sectionDescriptions.addOnTop(currentSectionInfo.str());
     }
@@ -2057,39 +2622,56 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   for (int i = 0; i < users.size; i ++) {
     currentUser.loadFromJSON(users[i]);
     if (currentUser.courseInDB.find('%') != std::string::npos) {
-      out << "<b style = \"color:red\">Non-expected behavior: user: "
+      out
+      << "<b style = \"color:red\">Non-expected behavior: user: "
       << currentUser.username
       << "current course: "
       << currentUser.courseInDB
       << " contains the % symbol. </b><br>";
     }
     std::stringstream oneTableLineStream;
-    oneTableLineStream << "<tr>"
-    << "<td>" << currentUser.username << "</td>"
-    << "<td>" << currentUser.email << "</td>";
+    oneTableLineStream
+    << "<tr>"
+    << "<td>"
+    << currentUser.username
+    << "</td>"
+    << "<td>"
+    << currentUser.email
+    << "</td>";
     bool isActivated = true;
-    std::string webAddress = "https://" + hostWebAddressWithPort + "/cgi-bin/calculator";
-    if (currentUser.actualActivationToken != "activated" && currentUser.actualActivationToken != "error") {
+    std::string webAddress =
+    "https://" + hostWebAddressWithPort + "/cgi-bin/calculator";
+    if (
+      currentUser.actualActivationToken != "activated" &&
+      currentUser.actualActivationToken != "error"
+    ) {
       isActivated = false;
       numActivatedUsers ++;
-      oneTableLineStream << "<td><span style ='color:red'>not activated</span></td>";
+      oneTableLineStream
+      << "<td><span style ='color:red'>not activated</span></td>";
       if (currentUser.actualActivationToken != "") {
-        oneTableLineStream << "<td>"
+        oneTableLineStream
+        << "<td>"
         << "<a href=\""
-        << UserCalculator::getActivationAddressFromActivationToken
-        (currentUser.actualActivationToken, hostWebAddressWithPort,
-         currentUser.username, currentUser.email)
+        << UserCalculator::getActivationAddressFromActivationToken(
+          currentUser.actualActivationToken,
+          hostWebAddressWithPort,
+          currentUser.username,
+          currentUser.email
+        )
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
       }
       oneTableLineStream << "<td>";
       oneTableLineStream
-      << "<a href='mailto:" << currentUser.email
+      << "<a href='mailto:"
+      << currentUser.email
       << "?subject =Math 140 Homework account activation&";
-
       oneTableLineStream << "body =";
       std::stringstream emailBody;
-      emailBody << "Dear user,\n you have not activated your homework server account yet. \n"
+      emailBody
+      <<
+      "Dear user,\n you have not activated your homework server account yet. \n"
       << "To activate your account and set your password please use the link: "
       << HtmlRoutines::convertStringToURLString("\n\n", false)
       << HtmlRoutines::convertStringToURLString(
@@ -2112,21 +2694,35 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     } else if (currentUser.actualActivationToken == "error") {
       oneTableLineStream << "<td>error</td><td></td>";
     } else {
-      oneTableLineStream << "<td><span style='color:green'>activated</span></td><td></td><td></td>";
+      oneTableLineStream
+      <<
+      "<td><span style='color:green'>activated</span></td><td></td><td></td>";
     }
     std::stringstream oneLink;
-    oneLink << "<a href=\"" << global.displayNameExecutable << "?request=login&username="
-    << currentUser.username << "\">" << currentUser.username << "</a>";
+    oneLink
+    << "<a href=\""
+    << global.displayNameExecutable
+    << "?request=login&username="
+    << currentUser.username
+    << "\">"
+    << currentUser.username
+    << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     oneTableLineStream << "</tr>";
     int indexCurrentBucket = sections.getIndex(currentUser.sectionInDB);
     if (indexCurrentBucket != - 1) {
       if (isActivated) {
-        activatedAccountBucketsBySection[indexCurrentBucket].addOnTop(oneTableLineStream.str());
+        activatedAccountBucketsBySection[indexCurrentBucket].addOnTop(
+          oneTableLineStream.str()
+        );
       } else {
-        nonActivatedAccountBucketsBySection[indexCurrentBucket].addOnTop(oneTableLineStream.str());
+        nonActivatedAccountBucketsBySection[indexCurrentBucket].addOnTop(
+          oneTableLineStream.str()
+        );
       }
-      preFilledLinkBucketsBySection[indexCurrentBucket].addOnTop(oneLink.str());
+      preFilledLinkBucketsBySection[indexCurrentBucket].addOnTop(
+        oneLink.str()
+      );
     }
   }
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
@@ -2139,25 +2735,33 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     preFilledLinkBucketsBySection[i].quickSortAscending();
   }
   std::stringstream tableStream;
-  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
+  tableStream
+  <<
+  "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
   << "<th>Pre-filled login link</th><th>Course info</th></tr>";
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
     if (!adminsOnly) {
       if (nonActivatedAccountBucketsBySection[i].size > 0) {
-        tableStream << "<tr><td colspan =\"6\" style =\"text-align:center\">"
-        << sections[i] << "</td></tr>";
+        tableStream
+        << "<tr><td colspan =\"6\" style =\"text-align:center\">"
+        << sections[i]
+        << "</td></tr>";
       }
     }
-    for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++) {
+    for (
+      int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++
+    ) {
       tableStream << nonActivatedAccountBucketsBySection[i][j];
     }
   }
   for (int i = 0; i < activatedAccountBucketsBySection.size; i ++) {
     if (!adminsOnly) {
       if (activatedAccountBucketsBySection[i].size > 0) {
-        tableStream << "<tr><td colspan =\"7\" style =\"text-align:center\">"
-        << sections[i] << "</td></tr>";
+        tableStream
+        << "<tr><td colspan =\"7\" style =\"text-align:center\">"
+        << sections[i]
+        << "</td></tr>";
       }
     }
     for (int j = 0; j < activatedAccountBucketsBySection[i].size; j ++) {
@@ -2172,14 +2776,15 @@ std::string WebAPIResponse::toStringUserDetailsTable(
         preFilledLoginLinks << sections[i] << "<br>";
       }
       for (int j = 0; j < preFilledLinkBucketsBySection[i].size; j ++) {
-        preFilledLoginLinks << preFilledLinkBucketsBySection[i][j]
-        << "<br>";
+        preFilledLoginLinks << preFilledLinkBucketsBySection[i][j] << "<br>";
       }
     }
   }
   out << "\n" << users.size << " user(s)";
   if (numActivatedUsers > 0) {
-    out << ", <span style='color:red'>" << numActivatedUsers
+    out
+    << ", <span style='color:red'>"
+    << numActivatedUsers
     << " have not activated their accounts. </span>";
   }
   out << tableStream.str() << preFilledLoginLinks.str();
@@ -2205,11 +2810,19 @@ std::string WebAPIResponse::toStringAssignSection() {
   out
   << "<button class =\"normalButton\" onclick=\"submitStringAsMainInput("
   << "'teachers ='+ "
-  << "encodeURIComponent(document.getElementById('" << idAddressTextarea << "').value)"
+  << "encodeURIComponent(document.getElementById('"
+  << idAddressTextarea
+  << "').value)"
   << " + '&sections =' + "
-  << "encodeURIComponent(document.getElementById('" << idExtraTextarea << "').value),"
-  << "'" << idOutput << "',"
-  << " 'setTeacher', null, '" << idOutput << "'"
+  << "encodeURIComponent(document.getElementById('"
+  << idExtraTextarea
+  << "').value),"
+  << "'"
+  << idOutput
+  << "',"
+  << " 'setTeacher', null, '"
+  << idOutput
+  << "'"
   << " )\"> Set teacher</button> ";
   out << "<br><span id =\"" << idOutput << "\">\n";
   out << "</span>";
@@ -2230,26 +2843,25 @@ int ProblemData::getExpectedNumberOfAnswers(
     List<std::string> fields;
     fields.addOnTop(DatabaseStrings::labelProblemFileName);
     fields.addOnTop(DatabaseStrings::labelProblemTotalQuestions);
-
-    if (Database::findFromJSONWithProjection(
-      DatabaseStrings::tableProblemInformation,
-      findProblemInfo,
-      result,
-      fields,
-      - 1,
-      nullptr,
-      &commentsOnFailure
-    )) {
+    if (
+      Database::findFromJSONWithProjection(
+        DatabaseStrings::tableProblemInformation,
+        findProblemInfo,
+        result,
+        fields,
+        - 1,
+        nullptr,
+        &commentsOnFailure
+      )
+    ) {
       for (int i = 0; i < result.size; i ++) {
-        const std::string& currentProblemName = result[i][
-          DatabaseStrings::labelProblemFileName
-        ].stringValue;
+        const std::string& currentProblemName =
+        result[i][DatabaseStrings::labelProblemFileName].stringValue;
         if (currentProblemName == "") {
           continue;
         }
-        const std::string& expectedNumberOfAnswersString = result[i][
-          DatabaseStrings::labelProblemTotalQuestions
-        ].stringValue;
+        const std::string& expectedNumberOfAnswersString =
+        result[i][DatabaseStrings::labelProblemTotalQuestions].stringValue;
         if (expectedNumberOfAnswersString == "") {
           continue;
         }
@@ -2266,26 +2878,42 @@ int ProblemData::getExpectedNumberOfAnswers(
     }
   }
   if (global.problemExpectedNumberOfAnswers.contains(problemName)) {
-    return global.problemExpectedNumberOfAnswers.getValueCreate(problemName, 0);
+    return
+    global.problemExpectedNumberOfAnswers.getValueCreate(problemName, 0);
   }
-  global << Logger::yellow << "Couldn't find problem info in DB for: "
-  << problemName << ", trying to read problem from hd. " << Logger::endL;
+  global
+  << Logger::yellow
+  << "Couldn't find problem info in DB for: "
+  << problemName
+  << ", trying to read problem from hd. "
+  << Logger::endL;
   CalculatorHTML problemParser;
   problemParser.fileName = problemName;
   if (!problemParser.loadMe(false, "", &commentsOnFailure)) {
-    global << Logger::yellow << WebAPI::problem::failedToLoadProblem
-    << commentsOnFailure.str() << Logger::endL;
+    global
+    << Logger::yellow
+    << WebAPI::problem::failedToLoadProblem
+    << commentsOnFailure.str()
+    << Logger::endL;
     return 0;
   }
   if (!problemParser.parseHTML(&commentsOnFailure)) {
-    global << Logger::red << "<b>Failed to parse file: "
+    global
+    << Logger::red
+    << "<b>Failed to parse file: "
     << problemParser.fileName
-    << ".</b> Details:<br>" << commentsOnFailure.str();
+    << ".</b> Details:<br>"
+    << commentsOnFailure.str();
     return 0;
   }
   this->knownNumberOfAnswersFromHD = problemParser.problemData.answers.size();
-  global << Logger::yellow << "Loaded problem: " << problemName
-  << "; number of answers: " << this->knownNumberOfAnswersFromHD << Logger::endL;
+  global
+  << Logger::yellow
+  << "Loaded problem: "
+  << problemName
+  << "; number of answers: "
+  << this->knownNumberOfAnswersFromHD
+  << Logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
   JSData newDBentry;
   QueryExact findEntry(
@@ -2296,10 +2924,9 @@ int ProblemData::getExpectedNumberOfAnswers(
   newDBentry[DatabaseStrings::labelProblemFileName] = problemName;
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
-  newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
-  Database::get().updateOne(
-    findEntry, newDBentry, &commentsOnFailure
-  );
+  newDBentry[DatabaseStrings::labelProblemTotalQuestions] =
+  stringConverter.str();
+  Database::get().updateOne(findEntry, newDBentry, &commentsOnFailure);
   return this->knownNumberOfAnswersFromHD;
 }
 
@@ -2330,7 +2957,9 @@ void UserCalculator::computePointsEarned(
     currentP.numCorrectlyAnswered = 0;
     Rational currentWeight;
     currentP.flagProblemWeightIsOK =
-    currentP.adminData.getWeightFromCourse(this->courseComputed, currentWeight);
+    currentP.adminData.getWeightFromCourse(
+      this->courseComputed, currentWeight
+    );
     if (!currentP.flagProblemWeightIsOK) {
       currentWeight = 0;
     }
@@ -2338,12 +2967,15 @@ void UserCalculator::computePointsEarned(
       if (currentP.answers.values[j].numCorrectSubmissions > 0) {
         currentP.numCorrectlyAnswered ++;
       }
-      currentP.totalNumSubmissions += currentP.answers.values[j].numSubmissions;
+      currentP.totalNumSubmissions += currentP.answers.values[j].numSubmissions
+      ;
     }
     if (currentP.flagProblemWeightIsOK) {
-      int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
+      int expectedNumberOfAnswers =
+      currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
       if (expectedNumberOfAnswers > 0) {
-        currentP.points = (currentWeight * currentP.numCorrectlyAnswered) / expectedNumberOfAnswers;
+        currentP.points = (currentWeight * currentP.numCorrectlyAnswered) /
+        expectedNumberOfAnswers;
         this->pointsEarned += currentP.points;
       }
     }
@@ -2352,15 +2984,22 @@ void UserCalculator::computePointsEarned(
         TopicElement& currentElt = topics->getValueCreateEmpty(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElt.parentTopics.size; j ++) {
-          (*topics).values[currentElt.parentTopics[j]].totalPointsEarned += currentP.points;
-          (*topics).values[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
+          (*topics).values[currentElt.parentTopics[j]].totalPointsEarned +=
+          currentP.points;
+          (*topics).values[currentElt.parentTopics[j]].maxPointsInAllChildren
+          +=
+          currentWeight;
           if (currentWeight == 0) {
-            (*topics).values[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
+            (*topics).values[currentElt.parentTopics[j]].
+            flagSubproblemHasNoWeight =
+            true;
           }
         }
         if (currentElt.parentTopics.size > 1) {
-          (*topics).values[currentElt.parentTopics[currentElt.parentTopics.size - 2]].
-            pointsEarnedInProblemsThatAreImmediateChildren += currentP.points;
+          (*topics).values[
+            currentElt.parentTopics[currentElt.parentTopics.size - 2]
+          ].pointsEarnedInProblemsThatAreImmediateChildren +=
+          currentP.points;
         }
       }
     }
@@ -2372,7 +3011,8 @@ public:
   CalculatorHTML problem;
   std::string currentSection;
   std::string currentCourse;
-  List<MapList<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
+  List<MapList<std::string, Rational, MathRoutines::hashString> >
+  scoresBreakdown;
   List<JSData> userProblemData;
   List<Rational> userScores;
   List<std::string> userInfos;
@@ -2397,7 +3037,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     return false;
   }
   if (!this->problem.loadDatabaseInfo(comments)) {
-    comments << "<span style ='color:red'>Could not load your problem history.</span> <br>";
+    comments
+    <<
+    "<span style ='color:red'>Could not load your problem history.</span> <br>"
+    ;
   }
   problem.currentUser.computePointsEarned(
     problem.currentUser.problemData.keys,
@@ -2410,7 +3053,8 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     comments << "Could not find username column. ";
     return false;
   }
-  int problemDataIndex = userLabels.getIndex(DatabaseStrings::labelProblemDataJSON);
+  int problemDataIndex =
+  userLabels.getIndex(DatabaseStrings::labelProblemDataJSON);
   if (problemDataIndex == - 1) {
     comments << "Could not find problem data column. ";
     return false;
@@ -2424,45 +3068,64 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->userNames.setSize(0);
   this->userInfos.setSize(0);
   this->scoresBreakdown.setSize(0);
-  this->numStudentsSolvedEntireTopic.initializeFillInObject(this->problem.topics.topics.size(), 0);
-  this->numStudentsSolvedPartOfTopic.initializeFillInObject(this->problem.topics.topics.size(), 0);
-  this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->problem.topics.topics.size(), 0);
+  this->numStudentsSolvedEntireTopic.initializeFillInObject(
+    this->problem.topics.topics.size(), 0
+  );
+  this->numStudentsSolvedPartOfTopic.initializeFillInObject(
+    this->problem.topics.topics.size(), 0
+  );
+  this->numStudentsSolvedNothingInTopic.initializeFillInObject(
+    this->problem.topics.topics.size(), 0
+  );
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = global.userDefault.sectionComputed;
   this->currentCourse = global.getWebInput(WebAPI::problem::courseHome);
   if (global.getWebInput("request") == "scoresInCoursePage") {
-    this->currentSection = StringRoutines::stringTrimWhiteSpace(
-      HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false)
+    this->currentSection =
+    StringRoutines::stringTrimWhiteSpace(
+      HtmlRoutines::convertURLStringToNormal(
+        global.getWebInput("mainInput"), false
+      )
     );
   }
   for (int i = 0; i < this->userProblemData.size; i ++) {
-    //currentUserRecord.currentUser.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
-    //currentUserRecord.currentUser.AssignCourseInfoString(&comments);
+    // currentUserRecord.currentUser.courseInfo.rawStringStoredInDB =
+    // this->userTablE[i][courseInfoIndex];
+    // currentUserRecord.currentUser.AssignCourseInfoString(&comments);
     if (ignoreSectionsIdontTeach) {
-      if (currentUserRecord.currentUser.courseComputed != this->currentCourse) {
+      if (
+        currentUserRecord.currentUser.courseComputed != this->currentCourse
+      ) {
         continue;
       }
       if (global.userStudentVieWOn()) {
-        if (currentUserRecord.currentUser.sectionInDB != this->currentSection) {
+        if (
+          currentUserRecord.currentUser.sectionInDB != this->currentSection
+        ) {
           continue;
         }
       } else {
-        if (currentUserRecord.currentUser.sectionInDB != this->currentSection) {
+        if (
+          currentUserRecord.currentUser.sectionInDB != this->currentSection
+        ) {
           continue;
         }
       }
     }
     this->userScores.addOnTop(- 1);
-    this->userNames.addOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].stringValue);
+    this->userNames.addOnTop(
+      this->userProblemData[i][DatabaseStrings::labelUsername].stringValue
+    );
     this->userInfos.addOnTop(currentUserRecord.currentUser.sectionInDB);
     this->scoresBreakdown.setSize(this->scoresBreakdown.size + 1);
-    currentUserRecord.currentUser.username = this->userProblemData[i][
-      DatabaseStrings::labelUsername
-    ].stringValue;
-    if (!currentUserRecord.currentUser.interpretDatabaseProblemDataJSON(
-      this->userProblemData[i][DatabaseStrings::labelProblemDataJSON],
-      comments
-    )) {
+    currentUserRecord.currentUser.username =
+    this->userProblemData[i][DatabaseStrings::labelUsername].stringValue;
+    if (
+      !currentUserRecord.currentUser.interpretDatabaseProblemDataJSON(
+        this->userProblemData[i][DatabaseStrings::labelProblemDataJSON],
+        comments
+      )
+    ) {
       continue;
     }
     currentUserRecord.mergeProblemWeight(
@@ -2472,9 +3135,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       &comments
     );
     currentUserRecord.currentUser.computePointsEarned(
-      problem.problemNamesNoTopics,
-      &problem.topics.topics,
-      comments
+      problem.problemNamesNoTopics, &problem.topics.topics, comments
     );
     this->scoresBreakdown.lastObject()->clear();
     for (int j = 0; j < problem.topics.topics.size(); j ++) {
@@ -2492,7 +3153,8 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
         this->numStudentsSolvedNothingInTopic[j] ++;
       }
     }
-    *this->userScores.lastObject() = currentUserRecord.currentUser.pointsEarned;
+    *this->userScores.lastObject() = currentUserRecord.currentUser.pointsEarned
+    ;
   }
   return true;
 }
@@ -2510,8 +3172,10 @@ std::string WebAPIResponse::getScoresInCoursePage() {
   }
   out << "Section: " << scores.currentSection << ". ";
   out << "<script type =\"text/javascript\">\n";
-  out << "studentScoresInHomePage = new Array("
-  << scores.problem.topics.topics.size() << ");\n";
+  out
+  << "studentScoresInHomePage = new Array("
+  << scores.problem.topics.topics.size()
+  << ");\n";
   for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
     TopicElement& currentElt = scores.problem.topics.topics.values[i];
     out << "studentScoresInHomePage[" << i << "] = new Object;\n";
@@ -2520,16 +3184,23 @@ std::string WebAPIResponse::getScoresInCoursePage() {
     } else {
       out << "studentScoresInHomePage[" << i << "].weightsOK = true;\n";
     }
-    out << "studentScoresInHomePage[" << i << "].theId ="
-    << "'"
-    << "';\n";
-    out << "studentScoresInHomePage[" << i << "].numSolvedAll ="
+    out << "studentScoresInHomePage[" << i << "].theId =" << "'" << "';\n";
+    out
+    << "studentScoresInHomePage["
+    << i
+    << "].numSolvedAll ="
     << scores.numStudentsSolvedEntireTopic[i]
     << ";\n";
-    out << "studentScoresInHomePage[" << i << "].numSolvedPart ="
+    out
+    << "studentScoresInHomePage["
+    << i
+    << "].numSolvedPart ="
     << scores.numStudentsSolvedPartOfTopic[i]
     << ";\n";
-    out << "studentScoresInHomePage[" << i << "].numSolvedNone ="
+    out
+    << "studentScoresInHomePage["
+    << i
+    << "].numSolvedNone ="
     << scores.numStudentsSolvedNothingInTopic[i]
     << ";\n";
   }
@@ -2545,17 +3216,20 @@ std::string WebAPIResponse::toStringUserScores() {
   if (!global.flagDatabaseCompiled) {
     return "Error: database not running. ";
   }
-
   std::stringstream out;
   out.precision(4);
   UserScores scores;
   if (!scores.ComputeScoresAndStats(out)) {
     return out.str();
   }
-  out << "<b>Section: </b>" << scores.currentSection
+  out
+  << "<b>Section: </b>"
+  << scores.currentSection
   << "<br><b>Course: </b>"
-  << scores.currentCourse << "\n<br>\n";
-  out << "<table class =\"scoreTable\"><tr><th rowspan =\"3\">User</th>"
+  << scores.currentCourse
+  << "\n<br>\n";
+  out
+  << "<table class =\"scoreTable\"><tr><th rowspan =\"3\">User</th>"
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
   for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
     TopicElement& currentElt = scores.problem.topics.topics.values[i];
@@ -2579,12 +3253,18 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "<tr>";
   for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
     TopicElement& currentElt = scores.problem.topics.topics.values[i];
-    if (currentElt.problemFileName != "" || currentElt.type != TopicElement::types::section) {
+    if (
+      currentElt.problemFileName != "" ||
+      currentElt.type != TopicElement::types::section
+    ) {
       continue;
     }
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numCols << "\"";
-    if (currentElt.totalSubSectionsUnderME == 0 && currentElt.flagContainsProblemsNotInSubsection) {
+    if (
+      currentElt.totalSubSectionsUnderME == 0 &&
+      currentElt.flagContainsProblemsNotInSubsection
+    ) {
       out << " rowspan =\"2\"";
     }
     out << ">" << currentElt.title << "</td>";
@@ -2602,7 +3282,8 @@ std::string WebAPIResponse::toStringUserScores() {
       if ((
           currentElt.flagContainsProblemsNotInSubsection &&
           currentElt.totalSubSectionsUnderMeIncludingEmptySubsections > 1
-        ) || currentElt.immediateChildren.size == 0
+        ) ||
+        currentElt.immediateChildren.size == 0
       ) {
         out << "<td></td>";
       }
@@ -2617,11 +3298,10 @@ std::string WebAPIResponse::toStringUserScores() {
     out << "<td>" << currentElt.title << "</td>";
   }
   out << "</tr>\n";
-
-  out << "<tr><td><b>maximum score</b></td>"
-  << "<td>-</td>";
+  out << "<tr><td><b>maximum score</b></td>" << "<td>-</td>";
   out
-  << "<td>" << scores.problem.currentUser.pointsMax.getDoubleValue()
+  << "<td>"
+  << scores.problem.currentUser.pointsMax.getDoubleValue()
   << "</td>";
   for (int j = 0; j < scores.problem.topics.topics.size(); j ++) {
     TopicElement& currentElt = scores.problem.topics.topics.values[j];
@@ -2638,9 +3318,16 @@ std::string WebAPIResponse::toStringUserScores() {
   }
   out << "</tr>";
   for (int i = 0; i < scores.userInfos.size; i ++) {
-    out << "<tr><td>" << scores.userNames[i] << "</td>"
-    << "<td>" << scores.userInfos[i] << "</td>"
-    << "<td>" << scores.userScores[i].getDoubleValue() << "</td>";
+    out
+    << "<tr><td>"
+    << scores.userNames[i]
+    << "</td>"
+    << "<td>"
+    << scores.userInfos[i]
+    << "</td>"
+    << "<td>"
+    << scores.userScores[i].getDoubleValue()
+    << "</td>";
     for (int j = 0; j < scores.problem.topics.topics.size(); j ++) {
       TopicElement& currentElt = scores.problem.topics.topics.values[j];
       if (currentElt.problemFileName != "") {
@@ -2652,10 +3339,13 @@ std::string WebAPIResponse::toStringUserScores() {
       ) {
         continue;
       }
-      if (scores.scoresBreakdown[i].contains(
-        scores.problem.topics.topics.keys[j]
-      )) {
-        out << "<td>"
+      if (
+        scores.scoresBreakdown[i].contains(
+          scores.problem.topics.topics.keys[j]
+        )
+      ) {
+        out
+        << "<td>"
         << scores.scoresBreakdown[i].values[j].getDoubleValue()
         << "</td>";
       } else {
@@ -2669,7 +3359,9 @@ std::string WebAPIResponse::toStringUserScores() {
 }
 
 std::string WebAPIResponse::toStringUserDetails(
-  bool adminsOnly, List<JSData>& users, const std::string& hostWebAddressWithPort
+  bool adminsOnly,
+  List<JSData>& users,
+  const std::string& hostWebAddressWithPort
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetails");
   std::stringstream out;
@@ -2677,22 +3369,29 @@ std::string WebAPIResponse::toStringUserDetails(
     out << "<b>Adding emails not available (database not present).</b> ";
     return out.str();
   }
-  std::string userRole = adminsOnly ? UserCalculator::Roles::administator : "student";
+  std::string userRole =
+  adminsOnly ? UserCalculator::Roles::administator : "student";
   std::string idAddressTextarea = "inputAddUsers" + userRole;
   std::string idExtraTextarea = "inputAddExtraInfo" + userRole;
   std::string idOutput = "idOutput" + userRole;
   std::string idPasswordTextarea = "inputAddDefaultPasswords" + userRole;
   out << "<ul><li>Add <b>" << userRole << "(s)</b> here.</li> ";
-  out << "<li>Added/updated users will have their current course set to: <br>"
+  out
+  << "<li>Added/updated users will have their current course set to: <br>"
   << "<span class =\"currentCourseIndicator\">"
-  << HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false)
+  << HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::problem::courseHome), false
+  )
   << "</span></li>"
   << "<li>To change course use the select course link in the top panel.</li>"
-  << "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"
+  <<
+  "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"
   << "<li>List default passwords with a similarly separated list.</li> "
   << "<li>If left blank, password(s) are not (re)set.</li> "
-  << "<li>If the password entries are not left blank and the number of passwords "
-  << "does not match the number of added users, the operation will fail (no users will be added).</li> "
+  <<
+  "<li>If the password entries are not left blank and the number of passwords "
+  <<
+  "does not match the number of added users, the operation will fail (no users will be added).</li> "
   << "</ul>\n";
   out << "<textarea width =\"500px\" ";
   out << "id =\"" << idAddressTextarea << "\"";
@@ -2709,16 +3408,25 @@ std::string WebAPIResponse::toStringUserDetails(
   out << "<br>";
   out
   << "<button class =\"normalButton\" onclick=\"addEmailsOrUsers("
-  << "'"    << idAddressTextarea
+  << "'"
+  << idAddressTextarea
   << "', '"
-  << "', '" << idOutput
-  << "', '" << userRole
-  << "', '" << idExtraTextarea
-  << "', '" << idPasswordTextarea
+  << "', '"
+  << idOutput
+  << "', '"
+  << userRole
+  << "', '"
+  << idExtraTextarea
+  << "', '"
+  << idPasswordTextarea
   << "', 'addUsers'"
   << " )\"> Add users</button> ";
   out << "<br><span id =\"" << idOutput << "\">\n";
-  out << WebAPIResponse::toStringUserDetailsTable(adminsOnly, users, hostWebAddressWithPort);
+  out
+  << WebAPIResponse::toStringUserDetailsTable(
+    adminsOnly, users, hostWebAddressWithPort
+  );
   out << "</span>";
   return out.str();
 }
+

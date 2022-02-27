@@ -1,5 +1,7 @@
+
 #ifndef header_string_constants_ALREADY_INCLUDED
 #define header_string_constants_ALREADY_INCLUDED
+
 #include "macros.h"
 
 class MainFlags {
@@ -70,6 +72,7 @@ public:
       static std::string queryHomework;
       static std::string slideFilename;
     };
+
     static std::string homeworkSource;
     static std::string submitAnswers;
     static std::string modifyPage;
@@ -87,6 +90,7 @@ public:
     static std::string userList;
     static std::string passwordList;
   };
+
   struct result {
     static std::string resultHtml;
     static std::string syntaxErrors;
@@ -148,6 +152,7 @@ public:
       static std::string stepType;
     };
   };
+
   struct frontend {
     static std::string problemFileName;
     static std::string problemPage;
@@ -157,6 +162,7 @@ public:
     static std::string scoredQuiz;
     static std::string exercise;
   };
+
   struct problem {
     static std::string title;
     static std::string fileName;
@@ -165,8 +171,10 @@ public:
     static std::string topicList;
     static std::string fileNameTarget;
     static std::string fileContent;
-    static std::string idProblem; //<- a little more specific than just id, easier to string-search
-    static std::string answerId; //<- a little more specific than just id, easier to string-search
+    static std::string idProblem;
+    // <- a little more specific than just id, easier to string-search
+    static std::string answerId;
+    // <- a little more specific than just id, easier to string-search
     static std::string answerValue;
     static std::string answerCheck;
     static std::string deadlineSingle;
@@ -180,61 +188,64 @@ public:
     static std::string answerWasHardCoded;
     static std::string forReal;
   };
+
   struct databaseParameters {
     static std::string labels;
     static std::string operation;
     static std::string fetch;
   };
+
   struct calculator {
   public:
     static std::string testFileNameVirtual;
   };
+
   static std::string headerCacheControl;
   static std::string commentsServer;
   struct UserInfo {
     static std::string processMonitoring;
   };
+
   static std::string userDefaultAdmin;
 };
 
 class Configuration {
 public:
-  static std::string processMonitoringBanned                 ;
-  static std::string processMonitoringTriggerTime            ;
-  static std::string millisecondsReplyAfterComputation       ;
-  static std::string builtInTLSAvailable                     ;
-  static std::string dontUseOpenSSL                          ;
-  static std::string serverAutoMonitor                       ;
-  static std::string monitorPingTime                         ;
-  static std::string disableDatabaseLogEveryoneAsAdmin       ;
-  static std::string serverDetailedLog                       ;
-  static std::string gitRepository                           ;
-  static std::string portHTTP                                ;
-  static std::string portHTTPSOpenSSL                        ;
-  static std::string portHTTPSBuiltIn                        ;
+  static std::string processMonitoringBanned;
+  static std::string processMonitoringTriggerTime;
+  static std::string millisecondsReplyAfterComputation;
+  static std::string builtInTLSAvailable;
+  static std::string dontUseOpenSSL;
+  static std::string serverAutoMonitor;
+  static std::string monitorPingTime;
+  static std::string disableDatabaseLogEveryoneAsAdmin;
+  static std::string serverDetailedLog;
+  static std::string gitRepository;
+  static std::string portHTTP;
+  static std::string portHTTPSOpenSSL;
+  static std::string portHTTPSBuiltIn;
   // Folder links follow.
-  static std::string calculatorWasm            ;
-  static std::string calculatorHTML            ;
-  static std::string HTMLCommon                ;
-  static std::string HTMLCommonFonts           ;
-  static std::string HTMLAceSrcMin             ;
-  static std::string examples                  ;
-
-  static std::string HTMLCommonFont            ;
-  static std::string publicHTML                ;
-  static std::string certificatesPublic        ;
-  static std::string sourceCode                ;
-  static std::string testFolder                ;
-  static std::string outputFolder              ;
-  static std::string HTMLGeneral               ;
-  static std::string problemsFolder            ;
-  static std::string courseTemplates           ;
-  static std::string coursesAvailable          ;
-  static std::string topicLists                ;
-  static std::string laTeXMaterials            ;
-  static std::string slidesVideo               ;
-  static std::string freecalc                  ;
-  static std::string useMathTags               ;
+  static std::string calculatorWasm;
+  static std::string calculatorHTML;
+  static std::string HTMLCommon;
+  static std::string HTMLCommonFonts;
+  static std::string HTMLAceSrcMin;
+  static std::string examples;
+  static std::string HTMLCommonFont;
+  static std::string publicHTML;
+  static std::string certificatesPublic;
+  static std::string sourceCode;
+  static std::string testFolder;
+  static std::string outputFolder;
+  static std::string HTMLGeneral;
+  static std::string problemsFolder;
+  static std::string courseTemplates;
+  static std::string coursesAvailable;
+  static std::string topicLists;
+  static std::string laTeXMaterials;
+  static std::string slidesVideo;
+  static std::string freecalc;
+  static std::string useMathTags;
 };
 
 class DatabaseStrings {
@@ -247,21 +258,18 @@ public:
   static std::string labelEmail;
   static std::string labelPassword;
   static std::string labelAuthenticationToken;
-
   static std::string labelActivationToken;
   static std::string labelUserRole;
   static std::string labelProblemDataJSON;
   static std::string labelProblemFileName;
   static std::string labelTimeOfActivationTokenCreation;
   static std::string labelTimeOfAuthenticationTokenCreation;
-
   static std::string tableUsers;
   // email info
   static std::string tableEmailInfo;
   static std::string labelLastActivationEmailTime;
   static std::string labelNumActivationEmails;
   static std::string labelUsernameAssociatedWithToken;
-
   // course info column names
   static std::string labelCurrentCourses;
   static std::string labelSection;
@@ -300,3 +308,4 @@ public:
 };
 
 #endif // header_string_constants_ALREADY_INCLUDED
+

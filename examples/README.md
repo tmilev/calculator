@@ -3036,7 +3036,7 @@ UnivariatePartialFractionAlgrithm(\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2
 ```
 Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers. At the moment, the function factors the denominator over the rationals. If this factorization yields quadratic and linear terms at the function succeeds, else fails.
 
-*UnivariatePartialFractions* [UnivariatePartialFractions] {CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealS}. 
+*UnivariatePartialFractions* [UnivariatePartialFractions] {CalculatorFunctions::splitToPartialFractionsOverAlgebraicReals}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%5c%5cfrac%7bx%5e3%7d%7bx%5e%7b3%7d-x%5e2%2b2x%5e2-2%7d%3b%5cnB%3dUnivariatePartialFractions%28A%29%3b%5cnA-%5c%5csum%28B%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A =\frac{x^3}{x^{3}-x^2+2x^2-2};
@@ -3368,7 +3368,7 @@ DiagonalizeMatrix a
 ```
 Tries to diagonalize a matrix (Jordan normal form). As of writing, will succeed only when the eigenvalues are rational or use quadratic radicals and the Jordan normal form is diagonal. When successful, returns a list of three matrices, X, A and X^-1, such that XAX^-1 equals the orignal matrix and A is in Jordan normal form.
 
-*FunctionToMatrix* [FunctionToMatrix] {Calculator::functionToMatrix}. 
+*FunctionToMatrix* [FunctionToMatrix] {CalculatorFunctionsLinearAlgebra::functionToMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cn%20A%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3da%2fb%3b%5cn%20X%3b%20%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =FunctionToMatrix{}(A,5,5);
@@ -3377,7 +3377,7 @@ X =FunctionToMatrix{}(A,5,5);
 ```
 Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, the third- the number of columns.
 
-*Transpose* [Transpose] {Calculator::transpose}. 
+*Transpose* [Transpose] {CalculatorFunctions::transpose}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Transpose%7b%7d%281%2c2%29%3b%20%281%2c2%29%5et%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Transpose{}(1,2); (1,2)^t
@@ -3385,11 +3385,15 @@ Transpose{}(1,2); (1,2)^t
 Transposes a matrix of expressions. 
 
 *\det* [Determinant] {CalculatorFunctions::determinant}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cn%20A%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3d1%2f%28a%20%2bb%29%3b%5cn%20X%3b%20%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cn%20A%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3d1%2f%28a%20%2bb%29%3b%5cnX%3b%5cn%5c%5cdet%20%7b%7d%20X%3b%5cnf%7b%7d%28%7b%7ba%7d%7d%2c%20%7b%7bb%7d%7d%29%20%3d%20x_%7b10a%2bb%7d%3b%5cnA%3dFunctionToMatrix%28f%2c%203%2c3%29%3b%5cn%5c%5cdet%20A%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =FunctionToMatrix{}(A,5,5);
  A{}({{a}},{{b}})=1/(a +b);
- X; \det {} X
+X;
+\det {} X;
+f{}({{a}}, {{b}}) = x_{10a+b};
+A=FunctionToMatrix(f, 3,3);
+\det A
 ```
 Tries to convert to a matrix of rationals or matrix of rational functions and computes the determinant if not too large.  
 
@@ -5487,16 +5491,23 @@ TestJSON("{\"a\":\"\\\"\"}");
 Tests the JSON parsing mechanism. Input: json string, use backslash escapes for backslashes and quotes.
 
 *FormatCPPCode* [FormatCPPCode] {Calculator::formatCPPSourceCode}. (invisible) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPCode%7b%7d%28%5c%22src%2fdatabase.cpp%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPCode%7b%7d%28%5c%22src%2fsource_code_formatter.cpp%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-FormatCPPCode{}("src/database.cpp")
+FormatCPPCode{}("src/source_code_formatter.cpp")
 ```
 Format cpp code. 
 
-*formatCPPDirectory* [formatCPPDirectory] {Calculator::formatCPPDirectory}. (invisible) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22formatCPPDirectory%7b%7d%28%5c%22src%2f%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*FormatCPPCodeDebug* [FormatCPPCodeDebug] {Calculator::formatCPPSourceCodeDebug}. (invisible) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPCodeDebug%7b%7d%28%5c%22src%2fsource_code_formatter.cpp%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-formatCPPDirectory{}("src/")
+FormatCPPCodeDebug{}("src/source_code_formatter.cpp")
+```
+Format cpp code, debug version that shows the code formatter internals.
+
+*FormatCPPDirectory* [FormatCPPDirectory] {Calculator::formatCPPDirectory}. (invisible) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPDirectory%7b%7d%28%5c%22src%2f%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+FormatCPPDirectory{}("src/")
 ```
 Format cpp directory. 
 

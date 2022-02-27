@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_lists.h"
 #include "math_general_implementation.h"
@@ -36,22 +37,29 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-std::string QuasiDifferentialMononomial::toString(FormatExpressions* format) const {
+std::string QuasiDifferentialMononomial::toString(FormatExpressions* format)
+const {
   std::stringstream out;
   out << this->weylMonomial.toString(format) << "\\otimes ";
   out << this->matrixMonomial.toString(format);
   return out.str();
 }
 
-Vector<Rational> SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getRho() {
+Vector<Rational>
+SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+getRho() {
   Vector<Rational> result;
   this->rootsOfBorel.sum(result, this->ambientWeyl->getDimension());
   result /= 2;
   return result;
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getMatrixOfElement(
-  const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input, Matrix<Rational>& outputMatrix
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+getMatrixOfElement(
+  const
+  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
+  & input,
+  Matrix<Rational>& outputMatrix
 ) const {
   Vectors<Rational> startBasis, imageBasis;
   startBasis.makeEiBasis(this->ambientWeyl->getDimension());
@@ -60,13 +68,16 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   outputMatrix.transpose();
 }
 
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::computeSubGroupFromGeneratingReflections(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
+computeSubGroupFromGeneratingReflections(
   Vectors<Rational>* inputRoots,
   List<Vectors<Rational> >* inputExternalAutos,
   int upperLimitNumberOfElements,
   bool recomputeAmbientRho
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms");
+  MacroRegisterFunctionWithName(
+    "SubgroupWeylGroupAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+  );
   this->checkInitialization();
   HashedList<Vector<Rational> > orbitRho;
   this->truncated = false;
@@ -85,9 +96,12 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
   if (inputExternalAutos != nullptr) {
     this->externalAutomorphisms = *inputExternalAutos;
   }
-  this->ambientWeyl->transformToSimpleBasisGenerators(this->simpleRootsInner, this->ambientWeyl->rootSystem);
+  this->ambientWeyl->transformToSimpleBasisGenerators(
+    this->simpleRootsInner, this->ambientWeyl->rootSystem
+  );
   this->computeRootSubsystem();
-  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms currentElement;
+  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
+  currentElement;
   currentElement.owner = this;
   Vector<Rational> vectorGeneratingFaithfulOrbit;
   vectorGeneratingFaithfulOrbit = this->ambientWeyl->rho;
@@ -102,8 +116,10 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
   // To circumvent the issue, we make the following dirty hack
   // which will work on any simple Weyl group. A proper fix
   // requires some math work and we postpone it to the future.
-  vectorGeneratingFaithfulOrbit *= 50; // scale rho by 50
-  vectorGeneratingFaithfulOrbit[0].addInteger(1); // <- slightly perturb the first coordinate.
+  vectorGeneratingFaithfulOrbit *= 50;
+  // scale rho by 50
+  vectorGeneratingFaithfulOrbit[0].addInteger(1);
+  // <- slightly perturb the first coordinate.
   // This perturbation breaks the outer automorphism invariance for all
   // simple Weyl group of simple Lie algebras.
   // This needs needs improvement for non-simple groups.
@@ -112,7 +128,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
   Vector<Rational> currentRoot;
   for (int i = 0; i < this->allElements.size; i ++) {
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
-      this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], orbitRho[i], false, currentRoot);
+      this->ambientWeyl->reflectBetaWithRespectToAlpha(
+        this->simpleRootsInner[j], orbitRho[i], false, currentRoot
+      );
       if (!orbitRho.contains(currentRoot)) {
         orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
@@ -121,7 +139,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
       }
     }
     for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
-      orbitRho[i].getCoordinatesInBasis(this->externalAutomorphisms[j], currentRoot);
+      orbitRho[i].getCoordinatesInBasis(
+        this->externalAutomorphisms[j], currentRoot
+      );
       if (!orbitRho.contains(currentRoot)) {
         orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
@@ -147,7 +167,6 @@ std::string DrawOperations::typeTextAtVector = "text";
 std::string DrawOperations::typeText2DFixed = "text2DFixed";
 std::string DrawOperations::typeFilledShape = "filledShape";
 std::string DrawOperations::typeHighlightGroup = "highlightGroup";
-
 std::string DrawOperations::fieldColor = "color";
 std::string DrawOperations::fieldOperation = "operation";
 std::string DrawOperations::fieldPoints = "points";
@@ -159,12 +178,16 @@ std::string DrawOperations::fieldLabels = "labels";
 std::string DrawOperations::fieldLineWidth = "lineWidth";
 std::string DrawOperations::fieldFrameId = "frameId";
 std::string DrawOperations::fieldFrameIndex = "frameIndex";
-
 void DrawOperations::drawCircleAtVectorBufferRational(
-  const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId, int frameIndex
+  const Vector<Rational>& input,
+  const std::string& color,
+  double radius,
+  const std::string& frameId,
+  int frameIndex
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
+  operation[DrawOperations::fieldOperation] =
+  DrawOperations::typeCircleAtVector;
   operation[DrawOperations::fieldLocation] = input.getVectorDouble();
   operation[DrawOperations::fieldRadius] = radius;
   operation[DrawOperations::fieldColor] = color;
@@ -172,7 +195,7 @@ void DrawOperations::drawCircleAtVectorBufferRational(
     operation[DrawOperations::fieldFrameId] = frameId;
     operation[DrawOperations::fieldFrameIndex] = frameIndex;
   }
-  //operation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
+  // operation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
   this->operations.addOnTop(operation);
 }
 
@@ -180,7 +203,8 @@ void DrawOperations::drawCircleAtVectorBufferDouble(
   const Vector<double>& input, const std::string& color, double radius
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
+  operation[DrawOperations::fieldOperation] =
+  DrawOperations::typeCircleAtVector;
   operation[DrawOperations::fieldLocation] = input;
   operation[DrawOperations::fieldRadius] = radius;
   operation[DrawOperations::fieldColor] = color;
@@ -225,7 +249,10 @@ void DrawOperations::drawPath(
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
-  const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color, double lineWidth
+  const Vector<double>& vector1,
+  const Vector<double>& vector2,
+  const std::string& color,
+  double lineWidth
 ) {
   JSData operation;
   operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
@@ -304,14 +331,20 @@ void DrawingVariables::drawLineDirectly(
   int colorIndex,
   double lineWidth
 ) {
-  this->operations.drawLineBuffer(x1, y1, x2, y2, penStyle, colorIndex, lineWidth);
+  this->operations.drawLineBuffer(
+    x1, y1, x2, y2, penStyle, colorIndex, lineWidth
+  );
 }
 
 void DrawOperations::drawHighlightGroup(
-  Vectors<double>& highlightGroup, List<std::string>& labels, const std::string& color, int radius
+  Vectors<double>& highlightGroup,
+  List<std::string>& labels,
+  const std::string& color,
+  int radius
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeHighlightGroup;
+  operation[DrawOperations::fieldOperation] =
+  DrawOperations::typeHighlightGroup;
   operation[DrawOperations::fieldPoints] = highlightGroup;
   operation[DrawOperations::fieldLabels] = labels;
   operation[DrawOperations::fieldColor] = color;
@@ -332,8 +365,10 @@ void DrawOperations::drawLineBuffer(
   (void) colorIndex;
   (void) lineWidth;
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  operation[DrawOperations::fieldPoints].elementType = JSData::token::tokenArray;
+  operation[DrawOperations::fieldOperation] =
+  DrawOperations::typeSegment2DFixed;
+  operation[DrawOperations::fieldPoints].elementType =
+  JSData::token::tokenArray;
   operation[DrawOperations::fieldPoints][0][0] = x1;
   operation[DrawOperations::fieldPoints][0][1] = y1;
   operation[DrawOperations::fieldPoints][1][0] = x2;
@@ -353,8 +388,10 @@ void DrawOperations::drawTextBuffer(
   (void) colorIndex;
   (void) textStyle;
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  operation[DrawOperations::fieldLocation].elementType = JSData::token::tokenArray;
+  operation[DrawOperations::fieldOperation] =
+  DrawOperations::typeSegment2DFixed;
+  operation[DrawOperations::fieldLocation].elementType =
+  JSData::token::tokenArray;
   operation[DrawOperations::fieldLocation][0] = x1;
   operation[DrawOperations::fieldLocation][1] = y1;
   operation[DrawOperations::fieldText] = inputText;
@@ -395,7 +432,10 @@ int DrawingVariables::getActualPenStyleFromFlagsAnd(int inputPenStyle) {
       return this->PenStyleInvisible;
     }
   }
-  if (inputPenStyle == this->PenStylePermanentlyZeroChamber || inputPenStyle == this->PenStyleZeroChamber) {
+  if (
+    inputPenStyle == this->PenStylePermanentlyZeroChamber ||
+    inputPenStyle == this->PenStyleZeroChamber
+  ) {
     return this->PenStyleDotted;
   }
   return this->PenStyleNormal;
@@ -408,16 +448,21 @@ int DrawingVariables::getActualTextStyleFromFlagsAnd(int inputTextStyle) {
   if (inputTextStyle == this->TextStyleNormal) {
     return this->TextStyleNormal;
   }
-  if (!this->flagDrawChamberIndices && (
+  if (
+    !this->flagDrawChamberIndices && (
       inputTextStyle == this->TextStyleChamber ||
       inputTextStyle == this->TextStylePermanentlyZeroChamber ||
       inputTextStyle == this->TextStyleZeroChamber
-  )) {
+    )
+  ) {
     return this->TextStyleInvisible;
   }
-  if (!this->flagDrawingInvisibles && (
-    inputTextStyle == this->TextStylePermanentlyZeroChamber || inputTextStyle == this->TextStyleZeroChamber
-  )) {
+  if (
+    !this->flagDrawingInvisibles && (
+      inputTextStyle == this->TextStylePermanentlyZeroChamber ||
+      inputTextStyle == this->TextStyleZeroChamber
+    )
+  ) {
     return this->TextStyleInvisible;
   }
   return this->TextStyleNormal;
@@ -432,17 +477,32 @@ void DrawingVariables::drawLineBuffer(
   int colorIndex,
   double lineWidth
 ) {
-  this->operations.drawLineBuffer(x1, y1, x2, y2, penStyle, colorIndex, lineWidth);
+  this->operations.drawLineBuffer(
+    x1, y1, x2, y2, penStyle, colorIndex, lineWidth
+  );
 }
 
-void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color) {
-  this->operations.drawTextBuffer(X1, Y1, inputText, color, this->fontSizeNormal, this->TextStyleNormal);
+void DrawingVariables::drawTextBuffer(
+  double X1, double Y1, const std::string& inputText, int color
+) {
+  this->operations.drawTextBuffer(
+    X1,
+    Y1,
+    inputText,
+    color,
+    this->fontSizeNormal,
+    this->TextStyleNormal
+  );
 }
 
 void DrawingVariables::drawString(
-  DrawElementInputOutput& drawData, const std::string& input, int fontSize, int textStyle
+  DrawElementInputOutput& drawData,
+  const std::string& input,
+  int fontSize,
+  int textStyle
 ) {
-  drawData.outputHeight = 0; drawData.outputWidth = 0;
+  drawData.outputHeight = 0;
+  drawData.outputWidth = 0;
   if (input == "") {
     return;
   }
@@ -457,11 +517,15 @@ void DrawingVariables::drawString(
       fontSize,
       textStyle
     );
-    drawData.outputWidth += static_cast<int>(static_cast<double>(fontSize) / 1.15);
+    drawData.outputWidth += static_cast<int>(
+      static_cast<double>(fontSize) / 1.15
+    );
   }
 }
 
-void HtmlRoutines::replaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput) {
+void HtmlRoutines::replaceEqualitiesAndAmpersandsBySpaces(
+  std::string& inputOutput
+) {
   for (unsigned i = 0; i < inputOutput.size(); i ++) {
     if (inputOutput[i] == '=' || inputOutput[i] == '&') {
       inputOutput[i] = ' ';
@@ -469,7 +533,10 @@ void HtmlRoutines::replaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutp
   }
 }
 
-bool VectorPartition::initialize(const Vectors<Rational>& inputPartitioningRoots, const Vector<Rational>& inputRoot) {
+bool VectorPartition::initialize(
+  const Vectors<Rational>& inputPartitioningRoots,
+  const Vector<Rational>& inputRoot
+) {
   MacroRegisterFunctionWithName("VectorPartition::initialize");
   for (int i = 0; i < inputPartitioningRoots.size; i ++) {
     if (!inputPartitioningRoots[i].isPositive()) {
@@ -484,7 +551,9 @@ bool VectorPartition::initialize(const Vectors<Rational>& inputPartitioningRoots
     return false;
   }
   this->goalVector = inputRoot;
-  this->currentPartition.initializeFillInObject(this->partitioningRoots.size, 0);
+  this->currentPartition.initializeFillInObject(
+    this->partitioningRoots.size, 0
+  );
   this->currentPartitionSum.makeZero(this->goalVector.size);
   return true;
 }
@@ -501,7 +570,8 @@ Vector<Rational> VectorPartition::getPartitionSum() {
 void VectorPartition::beefUpPartition() {
   MacroRegisterFunctionWithName("VectorPartition::beefUpPartition");
   Vector<Rational> remainder = this->goalVector - this->currentPartitionSum;
-  while ((remainder - *this->partitioningRoots.lastObject()).isPositiveOrZero()) {
+  while ((remainder - *this->partitioningRoots.lastObject()).isPositiveOrZero()
+  ) {
     (*this->currentPartition.lastObject()) ++;
     this->currentPartitionSum += *(this->partitioningRoots.lastObject());
     remainder -= *this->partitioningRoots.lastObject();
@@ -518,20 +588,27 @@ bool VectorPartition::nudgePartition() {
     }
   }
   if (indexFirstNonZero == - 1) {
-    global.fatal << "Error: an internal check has failed in VectorPartition::incrementReturnFalseIfPastLast." << global.fatal;
+    global.fatal
+    <<
+    "Error: an internal check has failed in VectorPartition::incrementReturnFalseIfPastLast."
+    << global.fatal;
   }
   if (indexFirstNonZero == 0) {
     return false;
   }
   this->currentPartition[indexFirstNonZero - 1] ++;
   this->currentPartitionSum += this->partitioningRoots[indexFirstNonZero - 1];
-  this->currentPartitionSum -= this->partitioningRoots[indexFirstNonZero] * this->currentPartition[indexFirstNonZero];
+  this->currentPartitionSum -=
+  this->partitioningRoots[indexFirstNonZero] *
+  this->currentPartition[indexFirstNonZero];
   this->currentPartition[indexFirstNonZero] = 0;
   return true;
 }
 
 bool VectorPartition::incrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName("VectorPartition::incrementReturnFalseIfPastLast");
+  MacroRegisterFunctionWithName(
+    "VectorPartition::incrementReturnFalseIfPastLast"
+  );
   if (this->currentPartitionSum == this->goalVector) {
     this->nudgePartition();
   }
@@ -548,10 +625,14 @@ bool VectorPartition::incrementReturnFalseIfPastLast() {
 }
 
 std::string VectorPartition::toStringPartitioningVectors() {
-  MacroRegisterFunctionWithName("VectorPartition::toStringPartitioningVectors");
+  MacroRegisterFunctionWithName("VectorPartition::toStringPartitioningVectors")
+  ;
   std::stringstream out;
   for (int i = 0; i < this->partitioningRoots.size; i ++) {
-    out << "e_{" << i + 1 << "}=" << this->partitioningRoots[i].toString() << "<br>";
+    out << "e_{" << i + 1
+    << "}="
+    << this->partitioningRoots[i].toString()
+    << "<br>";
   }
   out << "<hr>";
   out << "Looking for partitions of: " << this->goalVector.toString();
@@ -559,7 +640,9 @@ std::string VectorPartition::toStringPartitioningVectors() {
   return out.str();
 }
 
-std::string VectorPartition::toStringOnePartition(const List<int>& currentPartition) {
+std::string VectorPartition::toStringOnePartition(
+  const List<int>& currentPartition
+) {
   Vector<Rational> vector;
   vector = currentPartition;
   return vector.toStringLetterFormat("e");
@@ -584,8 +667,11 @@ std::string VectorPartition::toStringAllPartitions(bool useHtml) {
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::assignFromCoordinateFormWithRespectToBasis(
-  List<ElementUniversalEnveloping<Coefficient> >& basis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
+void ElementUniversalEnveloping<Coefficient>::
+assignFromCoordinateFormWithRespectToBasis(
+  List<ElementUniversalEnveloping<Coefficient> >& basis,
+  Vector<Coefficient>& input,
+  SemisimpleLieAlgebra& owner
 ) {
   this->makeZero(owner);
   ElementUniversalEnveloping<Coefficient> element;
@@ -600,7 +686,9 @@ void ElementUniversalEnveloping<Coefficient>::assignFromCoordinateFormWithRespec
 
 bool SemisimpleLieAlgebraOrdered::checkInitialization() const {
   if (this->ownerSemisimpleLieAlgebra == nullptr) {
-    global.fatal << "Use of semisimple Lie algebra without an owner. " << global.fatal;
+    global.fatal
+    << "Use of semisimple Lie algebra without an owner. "
+    << global.fatal;
   }
   if (this->ownerSemisimpleLieAlgebra->flagDeallocated) {
     global.fatal << "Use after free of semisimple Lie algebra. ";
@@ -609,25 +697,37 @@ bool SemisimpleLieAlgebraOrdered::checkInitialization() const {
 }
 
 void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
-  ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& coefficients
+  ElementSemisimpleLieAlgebra<Rational>& input,
+  Vector<Rational>& coefficients
 ) {
   this->checkInitialization();
-  coefficients.makeZero(this->ownerSemisimpleLieAlgebra->getNumberOfGenerators());
+  coefficients.makeZero(
+    this->ownerSemisimpleLieAlgebra->getNumberOfGenerators()
+  );
   for (int i = 0; i < input.size(); i ++) {
     int index = input[i].generatorIndex;
-    coefficients[this->ownerSemisimpleLieAlgebra->getGeneratorFromRootIndex(index)] = input.coefficients[i];
+    coefficients[
+      this->ownerSemisimpleLieAlgebra->getGeneratorFromRootIndex(index)
+    ] =
+    input.coefficients[i];
   }
-  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
+  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots()
+  ;
   Vector<Rational> tempH = input.getCartanPart();
   for (int i = 0; i < this->ownerSemisimpleLieAlgebra->getRank(); i ++) {
     coefficients[numPosRoots + i] = tempH[i];
   }
-  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(coefficients);
+  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(coefficients)
+  ;
 }
 
-int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int generatorIndex) {
-  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
-  int posRootsPlusRank = numPosRoots + this->ownerSemisimpleLieAlgebra->getRank();
+int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(
+  int generatorIndex
+) {
+  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots()
+  ;
+  int posRootsPlusRank =
+  numPosRoots + this->ownerSemisimpleLieAlgebra->getRank();
   if (generatorIndex >= posRootsPlusRank) {
     return generatorIndex - posRootsPlusRank + 1;
   }
@@ -638,7 +738,8 @@ int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int generator
 }
 
 void SemisimpleLieAlgebraOrdered::initialize(
-  List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner
+  List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder,
+  SemisimpleLieAlgebra& owner
 ) {
   global.fatal << "not implemented" << global.fatal;
   if (inputOrder.size != owner.getNumberOfGenerators()) {
@@ -646,20 +747,27 @@ void SemisimpleLieAlgebraOrdered::initialize(
   }
   this->ownerSemisimpleLieAlgebra = &owner;
   this->elementOrder = inputOrder;
-  this->chevalleyGeneratorsInCurrentCoordinates.initialize(owner.getNumberOfGenerators(), owner.getNumberOfGenerators());
+  this->chevalleyGeneratorsInCurrentCoordinates.initialize(
+    owner.getNumberOfGenerators(), owner.getNumberOfGenerators()
+  );
   this->chevalleyGeneratorsInCurrentCoordinates.makeZero();
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
     currentElt.makeGenerator(i, owner);
-    currentElt.getCoordinatesInBasis(this->elementOrder, coordsInCurrentBasis);
+    currentElt.getCoordinatesInBasis(
+      this->elementOrder, coordsInCurrentBasis
+    );
     for (int j = 0; j < coordsInCurrentBasis.size; j ++) {
-      this->chevalleyGeneratorsInCurrentCoordinates.elements[j][i] = coordsInCurrentBasis[j];
+      this->chevalleyGeneratorsInCurrentCoordinates.elements[j][i] =
+      coordsInCurrentBasis[j];
     }
   }
 }
 
-void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner) {
+void SemisimpleLieAlgebraOrdered::initDefaultOrder(
+  SemisimpleLieAlgebra& owner
+) {
   List<ElementSemisimpleLieAlgebra<Rational> > defaultOrder;
   defaultOrder.setSize(owner.getNumberOfGenerators());
   for (int i = 0; i < defaultOrder.size; i ++) {
@@ -670,14 +778,16 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner) 
 }
 
 template <class Coefficient>
-bool ElementSemisimpleLieAlgebra<Coefficient>::isCoefficientOneChevalleyGenerator() {
+bool ElementSemisimpleLieAlgebra<Coefficient>::
+isCoefficientOneChevalleyGenerator() {
   if (this->size == 1) {
     return this->coefficients[0] == 1;
   }
   return false;
 }
 
-void HomomorphismSemisimpleLieAlgebra::getWeightsRelativeToKInSimpleKCoordinates(
+void HomomorphismSemisimpleLieAlgebra::
+getWeightsRelativeToKInSimpleKCoordinates(
   Vectors<Rational>& outputWeights,
   List<ElementSemisimpleLieAlgebra<Rational> >& inputElements
 ) {
@@ -690,18 +800,23 @@ void HomomorphismSemisimpleLieAlgebra::getWeightsRelativeToKInSimpleKCoordinates
     ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElements[i];
     for (int j = 0; j < this->domainAlgebra().getRank(); j ++) {
       this->coDomainAlgebra().lieBracket(
-        this->imagesAllChevalleyGenerators[j + this->domainAlgebra().getNumberOfPositiveRoots()],
+        this->imagesAllChevalleyGenerators[
+          j + this->domainAlgebra().getNumberOfPositiveRoots()
+        ],
         currentLieElt,
         tempLieElement
       );
       if (!currentLieElt.isProportionalTo(tempLieElement, scalar)) {
-        global.fatal << "Lie algebra elements not "
-        << "proportional as expected. " << global.fatal;
+        global.fatal
+        << "Lie algebra elements not "
+        << "proportional as expected. "
+        << global.fatal;
       }
       currentWeight[j] = scalar;
     }
   }
-  Matrix<Rational> invertedCartan = this->domainAlgebra().weylGroup.cartanSymmetric;
+  Matrix<Rational> invertedCartan =
+  this->domainAlgebra().weylGroup.cartanSymmetric;
   invertedCartan.invert();
   invertedCartan.actOnVectorsColumn(outputWeights);
 }
@@ -728,14 +843,20 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
 }
 
 template <class Coefficient>
-bool ElementSemisimpleLieAlgebra<Coefficient>::needsParenthesisForMultiplication() const {
+bool ElementSemisimpleLieAlgebra<Coefficient>::
+needsParenthesisForMultiplication() const {
   return this->size > 1;
 }
 
 void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
-  Matrix<Rational>& input, Matrix<Rational>& output, Rational& outputCoeff, int generatorPower
+  Matrix<Rational>& input,
+  Matrix<Rational>& output,
+  Rational& outputCoeff,
+  int generatorPower
 ) {
-  MacroRegisterFunctionWithName("SlTwoInSlN::climbDownFromHighestWeightAlongSl2String");
+  MacroRegisterFunctionWithName(
+    "SlTwoInSlN::climbDownFromHighestWeightAlongSl2String"
+  );
   if (&input == &output) {
     global.fatal << "Input coincides with output. " << global.fatal;
   }
@@ -770,7 +891,7 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
   }
   Matrix<Rational>& currentHW = this->highestWeightVectors.objects[input];
   int currentEtaHw = this->gModKModules.objects[input].size - 1;
-  //currentEtaHw-= currentEtaHw/2;
+  // currentEtaHw-= currentEtaHw/2;
   int firstNonZeroRow = - 1, firstNonZeroColumn = - 1;
   bool found = false;
   for (int i = 0; i < currentHW.numberOfRows; i ++) {
@@ -810,18 +931,22 @@ void SlTwoInSlN::getIsPlusKIndexingFrom(int input, int& s, int& k) {
   if (input >= this->dimension || input < 0) {
     return;
   }
-  for (int offset = 0; offset <= input; offset += this->partition[s - 1]) {
+  for (
+    int offset = 0; offset <= input; offset += this->partition[s - 1]
+  ) {
     k = input - offset;
     s ++;
   }
 }
 
-std::string SlTwoInSlN::elementMatrixToTensorString(const Matrix<Rational>& input, bool useHtml) {
+std::string SlTwoInSlN::elementMatrixToTensorString(
+  const Matrix<Rational>& input, bool useHtml
+) {
   std::string beginMath, endMath, newLine;
   if (useHtml) {
     beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
-    newLine ="<br>";
+    newLine = "<br>";
   } else {
     beginMath = "$";
     endMath = "$";
@@ -860,7 +985,7 @@ std::string SlTwoInSlN::elementMatrixToTensorString(const Matrix<Rational>& inpu
         }
         out << "}\\otimes v^*_{i_{" << sJ << "}";
         if (kJ != 0) {
-          out  << "+" << kJ;
+          out << "+" << kJ;
         }
         out << "}";
       }
@@ -870,7 +995,9 @@ std::string SlTwoInSlN::elementMatrixToTensorString(const Matrix<Rational>& inpu
 }
 
 void SlTwoInSlN::extractHighestWeightVectorsFromVector(
-  Matrix<Rational>& input, List<Matrix<Rational> >& outputDecompositionOfInput, List<Matrix<Rational> >& outputTheHWVectors
+  Matrix<Rational>& input,
+  List<Matrix<Rational> >& outputDecompositionOfInput,
+  List<Matrix<Rational> >& outputTheHWVectors
 ) {
   outputDecompositionOfInput.size = 0;
   outputTheHWVectors.size = 0;
@@ -882,10 +1009,15 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
   Rational coefficient;
   Rational scalar;
   int largestPowerNotKillingInput;
-  while (!remainder.isEqualToZero() ) {
-    this->climbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
+  while (!remainder.isEqualToZero()) {
+    this->climbUpFromVector(
+      remainder, highestWeightVector, largestPowerNotKillingInput
+    );
     this->climbDownFromHighestWeightAlongSl2String(
-      highestWeightVector, component, coefficient, largestPowerNotKillingInput
+      highestWeightVector,
+      component,
+      coefficient,
+      largestPowerNotKillingInput
     );
     for (int i = 0; i < this->projectors.size; i ++) {
       Matrix<Rational>& currentProjector = this->projectors[i];
@@ -897,7 +1029,9 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
         outputTheHWVectors.addOnTop(matrix);
       }
     }
-    global.fatal << "Extract highest vector not fully implemented yet. " << global.fatal;
+    global.fatal
+    << "Extract highest vector not fully implemented yet. "
+    << global.fatal;
     component /= coefficient;
     outputDecompositionOfInput.addOnTop(component);
     remainder -= component;
@@ -911,14 +1045,17 @@ void SlTwoInSlN::climbUpFromVector(
 ) {
   Matrix<Rational> matrix;
   if (&input == &outputLastNonZero) {
-    global.fatal << "Input not allowed to coincide with the output. " << global.fatal;
+    global.fatal
+    << "Input not allowed to coincide with the output. "
+    << global.fatal;
   }
   outputLastNonZero = input;
   largestPowerNotKillingInput = 0;
   for (
-    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, matrix);
-    !matrix.isEqualToZero();
-    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, matrix)
+    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, matrix); !
+    matrix.isEqualToZero(); Matrix<Rational>::lieBracket(
+      this->eElement, outputLastNonZero, matrix
+    )
   ) {
     largestPowerNotKillingInput ++;
     outputLastNonZero = matrix;
@@ -931,13 +1068,18 @@ std::string SlTwoInSlN::GetNotationString(bool useHtml) {
   if (useHtml) {
     beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
-    newLine ="<br>";
+    newLine = "<br>";
   } else {
     beginMath = "$";
     endMath = "$";
     newLine = "\n\n\n";
   }
-  out << newLine << "Let the starting index of the j-th block be " << beginMath << "i_j" << endMath;
+  out
+  << newLine
+  << "Let the starting index of the j-th block be "
+  << beginMath
+  << "i_j"
+  << endMath;
   out << "." << newLine << "In particular let: ";
   int offset = 1;
   for (int i = 0; i < this->partition.size; i ++) {
@@ -945,12 +1087,28 @@ std::string SlTwoInSlN::GetNotationString(bool useHtml) {
     out << " (size of block = " << this->partition[i] << "), ";
     offset += this->partition[i];
   }
-  out << newLine << "Let " << beginMath << "\\eta" << endMath << " be the weight corresponding to h.";
-  out << newLine << "Let " << beginMath << "\\zeta_{j}" << endMath << " be the weight corresponding to the j-th block";
+  out
+  << newLine
+  << "Let "
+  << beginMath
+  << "\\eta"
+  << endMath
+  << " be the weight corresponding to h.";
+  out
+  << newLine
+  << "Let "
+  << beginMath
+  << "\\zeta_{j}"
+  << endMath
+  << " be the weight corresponding to the j-th block";
   return out.str();
 }
 
-std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml, bool computePairingTable) {
+std::string SlTwoInSlN::initFromModuleDecomposition(
+  List<int>& decompositionDimensions,
+  bool useHtml,
+  bool computePairingTable
+) {
   std::stringstream out;
   this->partition = decompositionDimensions;
   this->partition.quickSortDescending();
@@ -980,33 +1138,60 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     this->projectors[i].initialize(this->dimension, this->dimension);
     this->projectors[i].makeZero();
     for (int j = 0; j < this->partition[i]; j ++) {
-      hElement.elements[currentOffset + j][currentOffset + j] = this->partition[i] - 1 - 2 * j;
+      hElement.elements[currentOffset + j][currentOffset + j] =
+      this->partition[i] - 1 - 2 * j;
       this->projectors[i].elements[currentOffset + j][currentOffset + j] = 1;
       if (j != this->partition[i] - 1) {
         fElement.elements[currentOffset + j + 1][currentOffset + j] = 1;
-        eElement.elements[currentOffset + j][currentOffset + j + 1] = (j + 1) * (this->partition[i] - j - 1);
+        eElement.elements[currentOffset + j][currentOffset + j + 1] = (j + 1) *
+        (this->partition[i] - j - 1);
       }
     }
     currentOffset += this->partition[i];
   }
-  out << newLine << beginMath << "h =" << this->elementMatrixToTensorString(this->hElement, useHtml) << "="
-  << this->hElement.toStringWithBlocks(this->partition) << endMath;
-  out << newLine << beginMath << "e =" << this->elementMatrixToTensorString(this->eElement, useHtml) << "="
-  << this->eElement.toStringWithBlocks(this->partition) << endMath;
-  out << newLine << beginMath << "f =" << this->elementMatrixToTensorString(this->fElement, useHtml) << "="
-  << this->fElement.toStringWithBlocks(this->partition) << endMath;
+  out
+  << newLine
+  << beginMath
+  << "h ="
+  << this->elementMatrixToTensorString(this->hElement, useHtml)
+  << "="
+  << this->hElement.toStringWithBlocks(this->partition)
+  << endMath;
+  out
+  << newLine
+  << beginMath
+  << "e ="
+  << this->elementMatrixToTensorString(this->eElement, useHtml)
+  << "="
+  << this->eElement.toStringWithBlocks(this->partition)
+  << endMath;
+  out
+  << newLine
+  << beginMath
+  << "f ="
+  << this->elementMatrixToTensorString(this->fElement, useHtml)
+  << "="
+  << this->fElement.toStringWithBlocks(this->partition)
+  << endMath;
   Matrix<Rational> matrix;
   matrix.initialize(this->dimension, this->dimension);
-  List<Matrix<Rational> > Decomposition, highestWeightCandidatesBeforeProjection, highestWeightCandidatesProjected;
+  List<Matrix<Rational> >
+  Decomposition,
+  highestWeightCandidatesBeforeProjection,
+  highestWeightCandidatesProjected;
   this->highestWeightVectors.size = 0;
   this->gModKModules.size = 0;
   for (int i = 0; i < this->dimension; i ++) {
     for (int j = 0; j < this->dimension; j ++) {
       matrix.makeZero();
       matrix.elements[i][j] = 1;
-      this->extractHighestWeightVectorsFromVector(matrix, Decomposition, highestWeightCandidatesBeforeProjection);
+      this->extractHighestWeightVectorsFromVector(
+        matrix, Decomposition, highestWeightCandidatesBeforeProjection
+      );
       highestWeightCandidatesProjected.size = 0;
-      for (int k = 0; k < highestWeightCandidatesBeforeProjection.size; k ++) {
+      for (
+        int k = 0; k < highestWeightCandidatesBeforeProjection.size; k ++
+      ) {
         for (int l = 0; l < this->projectors.size; l ++) {
           matrix = highestWeightCandidatesBeforeProjection[k];
           matrix.multiplyOnTheLeft(this->projectors[l]);
@@ -1016,16 +1201,22 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
         }
       }
       for (int k = 0; k < highestWeightCandidatesProjected.size; k ++) {
-        if (this->getModuleIndexFromHighestWeightVector(highestWeightCandidatesProjected[k]) == - 1) {
-          Matrix<Rational>& currentHighest = highestWeightCandidatesProjected[k];
+        if (
+          this->getModuleIndexFromHighestWeightVector(
+            highestWeightCandidatesProjected[k]
+          ) ==
+          - 1
+        ) {
+          Matrix<Rational>& currentHighest =
+          highestWeightCandidatesProjected[k];
           this->highestWeightVectors.addOnTop(currentHighest);
           this->gModKModules.expandOnTop(1);
-          List<Matrix<Rational> >& currentMod = *this->gModKModules.lastObject();
+          List<Matrix<Rational> >& currentMod =
+          *this->gModKModules.lastObject();
           currentMod.size = 0;
           for (
-            matrix = currentHighest;
-            !matrix.isEqualToZero();
-            Matrix<Rational>::lieBracket(this->fElement, matrix, matrix)
+            matrix = currentHighest; !matrix.isEqualToZero(); Matrix<Rational>
+            ::lieBracket(this->fElement, matrix, matrix)
           ) {
             currentMod.addOnTop(matrix);
           }
@@ -1034,12 +1225,20 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     }
   }
   out << this->GetNotationString(useHtml);
-  out << newLine << "...and the highest weights of the module decomposition are ("
-  << this->highestWeightVectors.size << " modules):";
+  out
+  << newLine
+  << "...and the highest weights of the module decomposition are ("
+  << this->highestWeightVectors.size
+  << " modules):";
   for (int i = 0; i < this->highestWeightVectors.size; i ++) {
-    out << newLine << beginMath << this->elementMatrixToTensorString(highestWeightVectors[i], useHtml)
-    << endMath << ", highest weight of ";
-    out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
+    out
+    << newLine
+    << beginMath
+    << this->elementMatrixToTensorString(highestWeightVectors[i], useHtml)
+    << endMath
+    << ", highest weight of ";
+    out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath
+    ;
   }
   if (computePairingTable) {
     out << this->initPairingTable(useHtml);
@@ -1060,7 +1259,9 @@ std::string SlTwoInSlN::initPairingTable(bool useHtml) {
   return out.str();
 }
 
-std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rightIndex, bool useHtml) {
+std::string SlTwoInSlN::pairTwoIndices(
+  List<int>& output, int leftIndex, int rightIndex, bool useHtml
+) {
   std::string beginMath, endMath, newLine;
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
@@ -1087,21 +1288,51 @@ std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rig
       Matrix<Rational>& rightElt = rightElements[j];
       Matrix<Rational>::lieBracket(leftElt, rightElt, matrix);
       if (!matrix.isEqualToZero()) {
-        this->extractHighestWeightVectorsFromVector(matrix, tempDecomposition, HighestWeightsContainingModules);
+        this->extractHighestWeightVectorsFromVector(
+          matrix, tempDecomposition, HighestWeightsContainingModules
+        );
         for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
-          output.addOnTopNoRepetition(this->getModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
-          if (this->getModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
-            global.comments << newLine << beginMath << "[" << leftElt.toString(&latexFormat) << ", "
-            << rightElt.toString(&latexFormat) << "] =" << matrix.toString(&latexFormat) << endMath;
+          output.addOnTopNoRepetition(
+            this->getModuleIndexFromHighestWeightVector(
+              HighestWeightsContainingModules[k]
+            )
+          );
+          if (
+            this->getModuleIndexFromHighestWeightVector(
+              HighestWeightsContainingModules[k]
+            ) ==
+            - 1
+          ) {
+            global.comments
+            << newLine
+            << beginMath
+            << "["
+            << leftElt.toString(&latexFormat)
+            << ", "
+            << rightElt.toString(&latexFormat)
+            << "] ="
+            << matrix.toString(&latexFormat)
+            << endMath;
           }
         }
       }
     }
   }
-  out << newLine << beginMath << this->ElementModuleIndexToString(leftIndex, useHtml) << endMath << " and "
-  << beginMath << this->ElementModuleIndexToString(rightIndex, useHtml) << endMath << " pair to: ";
-  for (int i = 0; i <output.size; i ++) {
-    out << beginMath << this->ElementModuleIndexToString(output[i], useHtml) << endMath;
+  out
+  << newLine
+  << beginMath
+  << this->ElementModuleIndexToString(leftIndex, useHtml)
+  << endMath
+  << " and "
+  << beginMath
+  << this->ElementModuleIndexToString(rightIndex, useHtml)
+  << endMath
+  << " pair to: ";
+  for (int i = 0; i < output.size; i ++) {
+    out
+    << beginMath
+    << this->ElementModuleIndexToString(output[i], useHtml)
+    << endMath;
     if (i != output.size - 1) {
       out << beginMath << "\\oplus" << endMath;
     }
@@ -1109,14 +1340,21 @@ std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rig
   if (output.size > 0) {
     out << "  hw vectors: ";
     for (int i = 0; i < output.size; i ++) {
-      out << beginMath << this->elementMatrixToTensorString(this->highestWeightVectors[output[i]], useHtml)
-      << endMath << ",";
+      out
+      << beginMath
+      << this->elementMatrixToTensorString(
+        this->highestWeightVectors[output[i]], useHtml
+      )
+      << endMath
+      << ",";
     }
   }
   return out.str();
 }
 
-void MonomialPolynomial::makeEi(int letterIndex, int power, int expectedNumberOfVariables) {
+void MonomialPolynomial::makeEi(
+  int letterIndex, int power, int expectedNumberOfVariables
+) {
   (void) expectedNumberOfVariables;
   this->makeOne();
   if (power == 0) {
@@ -1135,12 +1373,16 @@ void MonomialPolynomial::setVariable(
   this->trimTrailingZeroes();
 }
 
-void MonomialPolynomial::makeFromPowers(const Vector<Rational>& inputMonomialBody) {
+void MonomialPolynomial::makeFromPowers(
+  const Vector<Rational>& inputMonomialBody
+) {
   this->monomialBody = inputMonomialBody;
   this->trimTrailingZeroes();
 }
 
-void MonomialPolynomial::multiplyByVariable(int variableIndex, const Rational& variablePower) {
+void MonomialPolynomial::multiplyByVariable(
+  int variableIndex, const Rational& variablePower
+) {
   if (variablePower.isEqualToZero()) {
     return;
   }
@@ -1158,11 +1400,14 @@ MonomialPolynomial::MonomialPolynomial(const Vector<Rational>& exponents) {
 
 const Rational& MonomialPolynomial::operator[](int i) const {
   if (i < 0 || i >= this->monomialBody.size) {
-    global.fatal << "Requested exponent "
+    global.fatal
+    << "Requested exponent "
     << "of monomial variable with index "
-    << i << " which is out of range (size = "
+    << i
+    << " which is out of range (size = "
     << this->monomialBody.size
-    << "). " << global.fatal;
+    << "). "
+    << global.fatal;
   }
   return this->monomialBody[i];
 }
@@ -1171,7 +1416,10 @@ Rational MonomialPolynomial::operator()(int i) const {
   if (i < 0) {
     global.fatal
     << "Requested exponent of monomial variable "
-    << "with index " << i << " which is negative. " << global.fatal;
+    << "with index "
+    << i
+    << " which is negative. "
+    << global.fatal;
   }
   if (i >= this->monomialBody.size) {
     return 0;
@@ -1189,16 +1437,22 @@ bool MonomialPolynomial::hasPositiveOrZeroExponents() const {
 }
 
 bool MonomialPolynomial::operator>(const MonomialPolynomial& other) const {
-  return MonomialPolynomial::greaterThan_totalDegree_leftLargerWins(*this, other);
+  return
+  MonomialPolynomial::greaterThan_totalDegree_leftLargerWins(*this, other);
 }
 
 bool MonomialPolynomial::isDivisibleBy(const MonomialPolynomial& other) const {
-  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --) {
+  for (
+    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
+  ) {
     if (other.monomialBody[i] > 0) {
       return false;
     }
   }
-  int upperLimit = MathRoutines::minimum(this->monomialBody.size, other.monomialBody.size);
+  int upperLimit =
+  MathRoutines::minimum(
+    this->monomialBody.size, other.monomialBody.size
+  );
   for (int i = 0; i < upperLimit; i ++) {
     if (this->monomialBody[i] < other.monomialBody[i]) {
       return false;
@@ -1208,17 +1462,25 @@ bool MonomialPolynomial::isDivisibleBy(const MonomialPolynomial& other) const {
 }
 
 bool MonomialPolynomial::operator==(const MonomialPolynomial& other) const {
-  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --) {
+  for (
+    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
+  ) {
     if (other.monomialBody[i] != 0) {
       return false;
     }
   }
-  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --) {
+  for (
+    int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --
+  ) {
     if (this->monomialBody[i] != 0) {
       return false;
     }
   }
-  int highestIndex = MathRoutines::minimum(this->minimalNumberOfVariables(), other.minimalNumberOfVariables()) - 1;
+  int highestIndex =
+  MathRoutines::minimum(
+    this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
+  ) -
+  1;
   for (int i = highestIndex; i >= 0; i --) {
     if (this->monomialBody[i] != other.monomialBody[i]) {
       return false;
@@ -1255,8 +1517,12 @@ bool MonomialPolynomial::greaterThan_totalDegree_leftLargerWins(
   return left.greaterThan_leftLargerWins(right);
 }
 
-bool MonomialPolynomial::greaterThan_rightLargerWins(const MonomialPolynomial& other) const {
-  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --) {
+bool MonomialPolynomial::greaterThan_rightLargerWins(
+  const MonomialPolynomial& other
+) const {
+  for (
+    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
+  ) {
     if (other.monomialBody[i] > 0) {
       return false;
     }
@@ -1264,7 +1530,9 @@ bool MonomialPolynomial::greaterThan_rightLargerWins(const MonomialPolynomial& o
       return true;
     }
   }
-  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --) {
+  for (
+    int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --
+  ) {
     if (this->monomialBody[i] > 0) {
       return true;
     }
@@ -1272,9 +1540,11 @@ bool MonomialPolynomial::greaterThan_rightLargerWins(const MonomialPolynomial& o
       return false;
     }
   }
-  int highestIndex = MathRoutines::minimum(
+  int highestIndex =
+  MathRoutines::minimum(
     this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
-  ) - 1;
+  ) -
+  1;
   for (int i = highestIndex; i >= 0; i --) {
     if (this->monomialBody[i] > other.monomialBody[i]) {
       return true;
@@ -1287,22 +1557,33 @@ bool MonomialPolynomial::greaterThan_rightLargerWins(const MonomialPolynomial& o
 }
 
 List<MonomialPolynomial>::Comparator& MonomialPolynomial::orderDefault() {
-  static List<MonomialPolynomial>::Comparator result(MonomialPolynomial::greaterThan_totalDegree_leftLargerWins);
+  static List<MonomialPolynomial>::Comparator result(
+    MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
+  );
   return result;
 }
 
-List<MonomialPolynomial>::Comparator& MonomialPolynomial::orderForGreatestCommonDivisor() {
-  static List<MonomialPolynomial>::Comparator result(MonomialPolynomial::greaterThan_rightLargerWins);
+List<MonomialPolynomial>::Comparator& MonomialPolynomial::
+orderForGreatestCommonDivisor() {
+  static List<MonomialPolynomial>::Comparator result(
+    MonomialPolynomial::greaterThan_rightLargerWins
+  );
   return result;
 }
 
-List<MonomialPolynomial>::Comparator& MonomialPolynomial::orderDegreeThenLeftLargerWins() {
-  static List<MonomialPolynomial>::Comparator result(MonomialPolynomial::greaterThan_totalDegree_leftLargerWins);
+List<MonomialPolynomial>::Comparator& MonomialPolynomial::
+orderDegreeThenLeftLargerWins() {
+  static List<MonomialPolynomial>::Comparator result(
+    MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
+  );
   return result;
 }
 
-bool MonomialPolynomial::greaterThan_leftLargerWins(const MonomialPolynomial &other) const {
-  int commonSize = MathRoutines::minimum(
+bool MonomialPolynomial::greaterThan_leftLargerWins(
+  const MonomialPolynomial& other
+) const {
+  int commonSize =
+  MathRoutines::minimum(
     this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
   );
   for (int i = 0; i < commonSize; i ++) {
@@ -1313,7 +1594,9 @@ bool MonomialPolynomial::greaterThan_leftLargerWins(const MonomialPolynomial &ot
       return false;
     }
   }
-  for (int i = this->monomialBody.size; i < other.monomialBody.size; i ++) {
+  for (
+    int i = this->monomialBody.size; i < other.monomialBody.size; i ++
+  ) {
     if (other.monomialBody[i] > 0) {
       return false;
     }
@@ -1321,7 +1604,9 @@ bool MonomialPolynomial::greaterThan_leftLargerWins(const MonomialPolynomial &ot
       return true;
     }
   }
-  for (int i = other.monomialBody.size; i < this->monomialBody.size; i ++) {
+  for (
+    int i = other.monomialBody.size; i < this->monomialBody.size; i ++
+  ) {
     if (this->monomialBody[i] > 0) {
       return true;
     }
@@ -1341,7 +1626,8 @@ void MonomialPolynomial::trimTrailingZeroes() {
   }
 }
 
-bool MonomialPolynomial::hasSmallIntegralPositivePowers(int* whichtotalDegree) const {
+bool MonomialPolynomial::hasSmallIntegralPositivePowers(int* whichtotalDegree)
+const {
   for (int i = 0; i < this->monomialBody.size; i ++) {
     if (!this->monomialBody[i].isIntegerFittingInInt(nullptr)) {
       return false;
@@ -1361,7 +1647,11 @@ void MonomialPolynomial::raiseToPower(const Rational& power) {
 }
 
 void MonomialPolynomial::operator*=(const MonomialPolynomial& other) {
-  this->setSize(MathRoutines::maximum(this->monomialBody.size, other.monomialBody.size));
+  this->setSize(
+    MathRoutines::maximum(
+      this->monomialBody.size, other.monomialBody.size
+    )
+  );
   for (int i = 0; i < other.monomialBody.size; i ++) {
     this->monomialBody[i] += other.monomialBody[i];
   }
@@ -1369,7 +1659,11 @@ void MonomialPolynomial::operator*=(const MonomialPolynomial& other) {
 }
 
 void MonomialPolynomial::operator/=(const MonomialPolynomial& other) {
-  this->setSize(MathRoutines::maximum(this->monomialBody.size, other.monomialBody.size));
+  this->setSize(
+    MathRoutines::maximum(
+      this->monomialBody.size, other.monomialBody.size
+    )
+  );
   for (int i = 0; i < other.monomialBody.size; i ++) {
     this->monomialBody[i] -= other.monomialBody[i];
   }
@@ -1410,7 +1704,8 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
   return true;
 }
 
-std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat) const {
+std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat)
+const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
   if (polynomialFormat == nullptr) {
@@ -1432,3 +1727,4 @@ std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat) co
   }
   return out.str();
 }
+

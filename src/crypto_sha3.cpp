@@ -10,7 +10,6 @@ public:
   static const unsigned triangularNumbers[24];
   static const uint64_t roundEndXORConstants[24];
   static const signed powersOfA[24];
-
   // The portion of the input message that we didn't consume yet.
   bool flagUseKeccak;
   uint64_t saved;
@@ -19,9 +18,9 @@ public:
     uint64_t stateStorage[Sha3::numberOfSpongeWords];
     uint8_t stateBytes[Sha3::numberOfSpongeWords * 8];
   };
+
   // 0..7--the next byte after the set one (starts from 0; 0--none are buffered)
   int byteIndex;
-
   // 0..24--the next word to integrate input (starts from 0)
   signed wordIndex;
   // The double size of the hash output in words (e.g. 16 for Keccak 512)
@@ -31,7 +30,7 @@ public:
   std::string getResultString();
   void initialize();
   void update(const std::string& input);
-  void update(List<unsigned char> &input);
+  void update(List<unsigned char>& input);
   void finalize();
   Sha3();
   void transform();
@@ -58,8 +57,8 @@ Sha3::Sha3() {
 // (see the reference below). The used test vectors aren't correct for SHA3,
 // however, they are helpful to verify the implementation.
 // SHA3_USE_KECCAK only changes one line of code in Finalize.
-
-const uint64_t Sha3::roundEndXORConstants[24] = {
+const uint64_t Sha3::roundEndXORConstants[24] =
+{
   0x0000000000000001UL,
   0x0000000000008082UL,
   0x800000000000808aUL,
@@ -85,11 +84,33 @@ const uint64_t Sha3::roundEndXORConstants[24] = {
   0x0000000080000001UL,
   0x8000000080008008UL
 };
-
-const unsigned Sha3::triangularNumbers[24] = {
-  1,  3,  6, 10, 15, 21, 28, 36, 45, 55,  2, 14, 27, 41, 56,  8, 25, 43, 62, 18, 39, 61, 20, 44
+const unsigned Sha3::triangularNumbers[24] =
+{
+  1,
+  3,
+  6,
+  10,
+  15,
+  21,
+  28,
+  36,
+  45,
+  55,
+  2,
+  14,
+  27,
+  41,
+  56,
+  8,
+  25,
+  43,
+  62,
+  18,
+  39,
+  61,
+  20,
+  44
 };
-
 // Let A be the matrix:
 // ( 3 2 )
 // ( 1 0 )
@@ -101,22 +122,44 @@ const unsigned Sha3::triangularNumbers[24] = {
 // ( w_0 )
 // ( w_1 )
 // computed by w = A^{i+1} * v.
-const signed Sha3::powersOfA[24] = {
-  10, 7, 11, 17, 18,  3,  5, 16,  8, 21, 24,  4, 15, 23, 19, 13, 12,  2, 20, 14, 22,  9,  6,  1
+const signed Sha3::powersOfA[24] =
+{
+  10,
+  7,
+  11,
+  17,
+  18,
+  3,
+  5,
+  16,
+  8,
+  21,
+  24,
+  4,
+  15,
+  23,
+  19,
+  13,
+  12,
+  2,
+  20,
+  14,
+  22,
+  9,
+  6,
+  1
 };
-
 void Sha3::theta() {
   uint64_t columnXORed[5];
   for (int i = 0; i < 5; i ++) {
-    columnXORed[i] =
-    this->stateStorage[i] xor
-    this->stateStorage[i + 5] xor
+    columnXORed[i] = this->stateStorage[i] xor this->stateStorage[i + 5] xor
     this->stateStorage[i + 10] xor
     this->stateStorage[i + 15] xor
     this->stateStorage[i + 20];
   }
   for (int i = 0; i < 5; i ++) {
-    uint64_t t = columnXORed[(i + 4) % 5] xor Sha3::rotateLeft(columnXORed[(i + 1) % 5], 1);
+    uint64_t t = columnXORed[(i + 4) % 5] xor
+    Sha3::rotateLeft(columnXORed[(i + 1) % 5], 1);
     for (int j = 0; j < 25; j += 5) {
       this->stateStorage[j + i] ^= t;
     }
@@ -129,20 +172,21 @@ void Sha3::piOfRho() {
   for (int i = 0; i < 24; i ++) {
     int j = Sha3::powersOfA[i];
     y = this->stateStorage[j];
-    this->stateStorage[j] = Sha3::rotateLeft(x, Sha3::triangularNumbers[i]);
+    this->stateStorage[j] =
+    Sha3::rotateLeft(x, Sha3::triangularNumbers[i]);
     x = y;
   }
-
 }
 
 void Sha3::chi() {
   uint64_t combined[5];
   for (int j = 0; j < 25; j += 5) {
-    for(int i = 0; i < 5; i ++) {
+    for (int i = 0; i < 5; i ++) {
       combined[i] = this->stateStorage[j + i];
     }
-    for(int i = 0; i < 5; i ++) {
-      this->stateStorage[j + i] ^= (compl combined[(i + 1) % 5]) & combined[(i + 2) % 5];
+    for (int i = 0; i < 5; i ++) {
+      this->stateStorage[j + i] ^= (compl combined[(i + 1) % 5]) &
+      combined[(i + 2) % 5];
     }
   }
 }
@@ -233,27 +277,43 @@ void Sha3::finalize() {
   // 01 00...00 80,
   // with zero or more 0x00 bytes sandwitched between byte 0x01 and byte 0x80.
   // 2) Padding with the single byte 0x81 = binary(10000001) = 129.
-
   if (!this->flagUseKeccak) {
     // Append 2-bit suffix 01, per SHA-3 spec. Instead of 1 for padding we
     // use 1 << 2 below. The 0x02 below corresponds to the suffix 01.
     // Overall, we feed 0, then 1, and finally 1 to start padding. Without
     // M || 01, we would simply use 1 to start padding.
     // SHA3 version
-    this->stateStorage[this->wordIndex] ^= (this->saved ^ (static_cast<uint64_t>(static_cast<uint64_t>(0x02 | (1 << 2)) << ((this->byteIndex) * 8))));
+    this->stateStorage[this->wordIndex] ^= (
+      this->saved ^ (
+        static_cast<uint64_t>(
+          static_cast<uint64_t>(0x02 | (1 << 2)) << ((this->byteIndex) * 8)
+        )
+      )
+    );
   } else {
     // Original Keccak.
-    this->stateStorage[this->wordIndex] ^= (this->saved ^ (static_cast<uint64_t>(static_cast<uint64_t>(1) << (this->byteIndex * 8))));
+    this->stateStorage[this->wordIndex] ^= (
+      this->saved ^ (
+        static_cast<uint64_t>(
+          static_cast<uint64_t>(1) << (this->byteIndex * 8)
+        )
+      )
+    );
   }
-  this->stateStorage[Sha3::numberOfSpongeWords - this->capacityWords - 1] ^= 0x8000000000000000UL;
+  this->stateStorage[Sha3::numberOfSpongeWords - this->capacityWords - 1] ^=
+  0x8000000000000000UL;
   this->transform();
   // Return first bytes. This conversion is not needed for
   // little-endian platforms.
   {
     unsigned i;
     for (i = 0; i < Sha3::numberOfSpongeWords; i ++) {
-      const unsigned t1  = static_cast<uint32_t>(this->stateStorage[i]);
-      const unsigned t2  = static_cast<uint32_t>((this->stateStorage[i] >> 16) >> 16);
+      const unsigned t1 = static_cast<uint32_t>(this->stateStorage[i]);
+      const unsigned t2 = static_cast<uint32_t>((
+          this->stateStorage[i] >> 16
+        ) >>
+        16
+      );
       this->stateBytes[i * 8 + 0] = static_cast<uint8_t>(t1);
       this->stateBytes[i * 8 + 1] = static_cast<uint8_t>(t1 >> 8);
       this->stateBytes[i * 8 + 2] = static_cast<uint8_t>(t1 >> 16);
@@ -306,7 +366,9 @@ std::string Crypto::computeSha3_256OutputBase64URL(const std::string& input) {
   return Crypto::convertListUnsignedCharsToBase64(outputList, true);
 }
 
-void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& output) {
+void Crypto::computeKeccak3_256(
+  const std::string& input, List<unsigned char>& output
+) {
   Sha3 hasher;
   hasher.flagUseKeccak = true;
   hasher.initialize();
@@ -315,7 +377,9 @@ void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& o
   hasher.getResultVector(output);
 }
 
-void Crypto::computeSha3_256(const std::string& input, List<unsigned char>& output) {
+void Crypto::computeSha3_256(
+  const std::string& input, List<unsigned char>& output
+) {
   Sha3 hasher;
   hasher.flagUseKeccak = false;
   hasher.initialize();
@@ -323,3 +387,4 @@ void Crypto::computeSha3_256(const std::string& input, List<unsigned char>& outp
   hasher.finalize();
   hasher.getResultVector(output);
 }
+

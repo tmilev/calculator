@@ -1,4 +1,5 @@
-// The current file is licensed under the license terms found in the main header file "calculator.h".
+// The current file is licensed under the license terms found in the main header
+// file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "web_api.h"
 #include "json.h"
@@ -15,20 +16,24 @@ bool WebAPIResponse::Test::all() {
 bool WebAPIResponse::Test::solveJSON() {
   WebAPIResponse response;
   global.calculator().freeMemory();
-  global.calculator().getElement().initialize(Calculator::Mode::educational);
+  global.calculator().getElement().initialize(
+    Calculator::Mode::educational
+  );
   global.setWebInput(WebAPI::request::calculatorInput, "1+1");
   JSData result = response.solveJSON();
   std::string expected =
-    "{\"solution\":{\"solution\":{\"input\":\"1+1\",\"solutionSteps\":"
-    "[{\"transformation\":\"2\",\"stepType\":\"=\",\"annotations\":"
-    "[\"AddRationals\"]}],\"finalExpression\":\"2\",\"comments\":"
-    "\"\",\"error\":\"\"}},\"commentsGlobal\":\"\"}"
-  ;
+"{\"solution\":{\"solution\":{\"input\":\"1+1\",\"solutionSteps\":"
+"[{\"transformation\":\"2\",\"stepType\":\"=\",\"annotations\":"
+"[\"AddRationals\"]}],\"finalExpression\":\"2\",\"comments\":"
+"\"\",\"error\":\"\"}},\"commentsGlobal\":\"\"}";
   std::string got = result.toString();
-
   if (got != expected) {
-    global.fatal << "Got solution:\n" << got
-    << "\nExpected solution:\n" << expected << "\nWhat I got, escaped:\n"
+    global.fatal
+    << "Got solution:\n"
+    << got
+    << "\nExpected solution:\n"
+    << expected
+    << "\nWhat I got, escaped:\n"
     << HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(got)
     << global.fatal;
   }
@@ -109,9 +114,15 @@ bool OneComparisonSet::doCompareAll() {
 
 std::string OneComparison::toString() const {
   std::stringstream out;
-  out << "{ given: " << this->given << ", desired: " << this->desired
-  << ", expectedWrong: " << this->expectedWrong
-  << ", expectedIncomplete: " << this->expectedIncomplete
+  out
+  << "{ given: "
+  << this->given
+  << ", desired: "
+  << this->desired
+  << ", expectedWrong: "
+  << this->expectedWrong
+  << ", expectedIncomplete: "
+  << this->expectedIncomplete
   << "}";
   return out.str();
 }
@@ -119,33 +130,59 @@ std::string OneComparison::toString() const {
 bool OneComparison::compare(bool hideDesiredAnswer) {
   WebAPIResponse response;
   global.calculator().freeMemory();
-  global.calculator().getElement().initialize(Calculator::Mode::educational);
-  global.setWebInput(WebAPI::request::compareExpressionsGiven, HtmlRoutines::convertStringToURLString(this->given, false));
-  global.setWebInput(WebAPI::request::compareExpressionsDesired, HtmlRoutines::convertStringToURLString(this->desired, false));
+  global.calculator().getElement().initialize(
+    Calculator::Mode::educational
+  );
+  global.setWebInput(
+    WebAPI::request::compareExpressionsGiven,
+    HtmlRoutines::convertStringToURLString(this->given, false)
+  );
+  global.setWebInput(
+    WebAPI::request::compareExpressionsDesired,
+    HtmlRoutines::convertStringToURLString(this->desired, false)
+  );
   JSData result = response.compareExpressions(false);
-  std::string areEqual = result[WebAPI::result::ComparisonData::areEqual].toString();
-  std::string areEqualAsAnswers = result[WebAPI::result::ComparisonData::areEqualAsAnswers].toString();
+  std::string areEqual =
+  result[WebAPI::result::ComparisonData::areEqual].toString();
+  std::string areEqualAsAnswers =
+  result[WebAPI::result::ComparisonData::areEqualAsAnswers].toString();
   if (this->expectedWrong) {
     if (areEqual != "false" || areEqualAsAnswers != "false") {
-      global.fatal << "Expected wrong answer for: " << this->toString() << ", got: "
-      << result.toString() << global.fatal;
+      global.fatal
+      << "Expected wrong answer for: "
+      << this->toString()
+      << ", got: "
+      << result.toString()
+      << global.fatal;
     }
     return true;
   }
   if (this->expectedIncomplete) {
     if (areEqual != "true" || areEqualAsAnswers != "false") {
-      global.fatal << "Expected incomplete answer for: " << this->toString() << ", got: "
-      << result.toString() << global.fatal;
+      global.fatal
+      << "Expected incomplete answer for: "
+      << this->toString()
+      << ", got: "
+      << result.toString()
+      << global.fatal;
     }
     return true;
   }
   if (areEqual != "true" && areEqualAsAnswers != "true") {
-    global.fatal << "Expected correct answer for: " << this->toString() << ", got: "
-    << result.toString() << global.fatal;
+    global.fatal
+    << "Expected correct answer for: "
+    << this->toString()
+    << ", got: "
+    << result.toString()
+    << global.fatal;
   }
   if (hideDesiredAnswer) {
-    if (result[WebAPI::result::ComparisonData::desired].isString(nullptr)) {
-      global.fatal << "Desired answer must be absent but was given. " << global.fatal;
+    if (
+      result[WebAPI::result::ComparisonData::desired].isString(nullptr)
+    ) {
+      global.fatal
+      << "Desired answer must be absent but was given. "
+      << global.fatal;
     }
   }
   return true;
@@ -154,16 +191,25 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
 bool WebAPIResponse::Test::compareExpressions() {
   std::string comparisonJSON;
   std::stringstream commentsOnFailure;
-  if (!FileOperations::loadFileToStringVirtual(
-    "test/compare_expressions.json", comparisonJSON, false, &commentsOnFailure
-  )) {
-    global.fatal << "File compare_expressions.json is missing. "
-    << commentsOnFailure.str() << global.fatal;
+  if (
+    !FileOperations::loadFileToStringVirtual(
+      "test/compare_expressions.json",
+      comparisonJSON,
+      false,
+      &commentsOnFailure
+    )
+  ) {
+    global.fatal
+    << "File compare_expressions.json is missing. "
+    << commentsOnFailure.str()
+    << global.fatal;
   }
   JSData comparison;
   if (!comparison.parse(comparisonJSON, false, &commentsOnFailure)) {
-    global.fatal << "Failed to parse compare_expressions.json. "
-    << commentsOnFailure.str() << global.fatal;
+    global.fatal
+    << "Failed to parse compare_expressions.json. "
+    << commentsOnFailure.str()
+    << global.fatal;
   }
   for (int i = 0; i < comparison.listObjects.size; i ++) {
     OneComparisonSet example;
@@ -171,3 +217,4 @@ bool WebAPIResponse::Test::compareExpressions() {
   }
   return true;
 }
+

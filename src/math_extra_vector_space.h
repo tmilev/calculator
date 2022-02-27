@@ -149,7 +149,7 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
       return false;
     }
     int j = i;
-    for (; (j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j ++);
+    for (; (j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j ++){
     if (jj < j) {
       if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {
         fastbasis.numberOfRows ++;
@@ -174,7 +174,7 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
     Coefficient x = - v[jj] / fastbasis.elements[i][j];
     for (int jjj = jj; jjj < v.size; jjj ++) {
       v[jjj] += x * fastbasis.elements[i][jjj];
-    }
+    }}
   }
   if (v.isEqualToZero()) {
     return false;

@@ -204,6 +204,7 @@ public:
     bool isSuitableForParenthesesEnclosure() const;
     bool isRightDelimiter() const;
     bool isRightDelimiterOrSemicolon() const;
+    bool isLeftDelimiter() const;
     bool isIdentifierOrAtom() const;
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;
@@ -338,6 +339,7 @@ public:
       CodeFormatter::Element& left, CodeFormatter::Element& right
     );
     bool isSuitableForCommaSeparatedList(CodeFormatter::Element& input);
+    bool isNoReturn(CodeFormatter::Element& input);
     bool applyOneRule();
     bool removeLast();
     bool removeLast(int count);

@@ -2222,10 +2222,11 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (secondToLast.type == CodeFormatter::Element::Quote &&
   last.type == CodeFormatter::Element::Quote ){
+    this->lastRuleName = "quote quote";
     if (secondToLast.content == "") {
       secondToLast.addChild(last);
     } else {
-      secondToLast.makeFrom2(CodeFormatter::Element::Quote, last, secondToLast);
+      secondToLast.makeFrom2(CodeFormatter::Element::Quote, secondToLast,last);
     }
     return this->removeLast();
   }

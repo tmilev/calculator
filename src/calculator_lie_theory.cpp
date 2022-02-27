@@ -732,8 +732,8 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
     return
     output.assignError(
       calculator,
-"The rank bound must be an integer between 2 and 100, "
-"and the dim bound must be an integer between 1 and 10000. "
+      "The rank bound must be an integer between 2 and 100, "
+      "and the dim bound must be an integer between 1 and 10000. "
     );
   }
   std::stringstream out;
@@ -919,8 +919,8 @@ bool CalculatorLieTheory::littelmannOperator(
     return
     output.assignError(
       calculator,
-"The argument of the Littelmann root operator is "
-"expected to be a small integer, instead you gave me " +
+      "The argument of the Littelmann root operator is "
+      "expected to be a small integer, instead you gave me " +
       input.toString()
     );
   }
@@ -1719,8 +1719,8 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
     return
     output.assignError(
       calculator,
-"Function splitGenericGeneralizedVermaTensorFiniteDimensional is expected "
-"to have three arguments: SS algebra type, Number, List{}. "
+      "Function splitGenericGeneralizedVermaTensorFiniteDimensional is expected "
+      "to have three arguments: SS algebra type, Number, List{}. "
     );
   }
   const Expression& leftE = input[1];
@@ -1914,8 +1914,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   if (!input.isListNElements(4)) return
   output.assignError(
     calculator,
-"Function splitGenericGeneralizedVermaTensorFiniteDimensional is expected to "
-"have three arguments: SS algebra type, weight, weight. "
+    "Function splitGenericGeneralizedVermaTensorFiniteDimensional is expected to "
+    "have three arguments: SS algebra type, weight, weight. "
   );
   const Expression& leftE = input[1];
   const Expression& genVemaWeightNode = input[3];
@@ -1989,9 +1989,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
       return
       output.assignError(
         calculator,
-"Error: the third argument of "
-"splitGenericGeneralizedVermaTensorFiniteDimensional "
-"must be a list of small non-negative integers."
+        "Error: the third argument of "
+        "splitGenericGeneralizedVermaTensorFiniteDimensional "
+        "must be a list of small non-negative integers."
       );
     }
   }
@@ -2627,8 +2627,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
     return
     output.assignError(
       calculator,
-"Splitting the f.d. part of a B_3-representation "
-"over G_2 requires 3 arguments"
+      "Splitting the f.d. part of a B_3-representation "
+      "over G_2 requires 3 arguments"
     );
   }
   if (
@@ -2697,8 +2697,8 @@ bool CalculatorLieTheory::elementsInSameLieAlgebra(
   if (input.size() < 3) {
     output.assignError(
       calculator,
-"Function ad common eigenspaces needs at least 2 arguments - "
-"type and at least one element of the algebra."
+      "Function ad common eigenspaces needs at least 2 arguments - "
+      "type and at least one element of the algebra."
     );
     return false;
   }
@@ -4482,8 +4482,8 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
     return
     output.assignError(
       calculator,
-"Function decompose finite-dimensional part of "
-"generalized Verma over Levi expects 4 arguments."
+      "Function decompose finite-dimensional part of "
+      "generalized Verma over Levi expects 4 arguments."
     );
   }
   const Expression& typeNode = input[1];
@@ -4620,8 +4620,8 @@ bool CalculatorLieTheory::weylDimensionFormula(
     return
     output.assignError(
       calculator,
-"Failed to convert the argument of the "
-"function to a highest weight vector"
+      "Failed to convert the argument of the "
+      "function to a highest weight vector"
     );
   }
   RationalFraction<Rational> rfOne;
@@ -6166,8 +6166,8 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
     return
     output.assignError(
       calculator,
-"I know only to compute with finite "
-"dimensional characters, for the time being. "
+      "I know only to compute with finite "
+      "dimensional characters, for the time being. "
     );
   }
   CharacterSemisimpleLieAlgebraModule<Rational> element;

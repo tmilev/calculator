@@ -393,17 +393,17 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   substitution.setKeyValue("a", comparison.given);
   substitution.setKeyValue("b", comparison.desired);
   comparison.comparisonNoDistributionRaw.assignStringParsed(
-"(TurnOffRules("
-"DistributeMultiplication, "
-"AddRationals, "
-"AddTerms, "
-"DivideByNumber, "
-"ConvertShortDenominatorToNegativePower,"
-"DivideRationalByRational,"
-"ConstantExtraction"
-");\n"
-"TurnOnRules(SortTerms, DivideByNumberTrivial);\n"
-"a===b)_3",
+    "(TurnOffRules("
+    "DistributeMultiplication, "
+    "AddRationals, "
+    "AddTerms, "
+    "DivideByNumber, "
+    "ConvertShortDenominatorToNegativePower,"
+    "DivideRationalByRational,"
+    "ConstantExtraction"
+    ");\n"
+    "TurnOnRules(SortTerms, DivideByNumberTrivial);\n"
+    "a===b)_3",
     &substitution,
     calculator
   );

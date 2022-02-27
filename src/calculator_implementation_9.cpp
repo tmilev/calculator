@@ -660,8 +660,8 @@ bool CalculatorFunctions::printAllVectorPartitions(
       return
       output.assignError(
         calculator,
-"The input weight you gave is bad: "
-"it must consist of non-negative small integers"
+        "The input weight you gave is bad: "
+        "it must consist of non-negative small integers"
       );
     }
   }

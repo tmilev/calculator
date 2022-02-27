@@ -1574,8 +1574,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
       return
       output.assignError(
         calculator,
-"Exponentiating non-square matrices or matrices "
-"with zero rows is not allowed."
+        "Exponentiating non-square matrices or matrices "
+        "with zero rows is not allowed."
       );
     }
     int maximumDimensions = 4;

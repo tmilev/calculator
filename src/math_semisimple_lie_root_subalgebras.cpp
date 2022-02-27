@@ -4430,11 +4430,11 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
   // taking care of unused parameter in a portable way.
   std::stringstream out;
   std::string tooltipSAs =
-"h - fixed Cartan subalgebra. k - subalgebra containing h. "
-"k_{ss}=[k, k] - regular semisimple subalgebra in the sense of "
-"Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. "
-"k_{ss} is parametrized by a root subsytem of \\Delta(g). "
-"C(k_{ss}) consists of root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h"
+  "h - fixed Cartan subalgebra. k - subalgebra containing h. "
+  "k_{ss}=[k, k] - regular semisimple subalgebra in the sense of "
+  "Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. "
+  "k_{ss} is parametrized by a root subsytem of \\Delta(g). "
+  "C(k_{ss}) consists of root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h"
   ;
   int col = 0;
   int row = 0;

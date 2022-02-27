@@ -1797,7 +1797,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     out << "$" << i + 1
     << "$ & "
-"$"
+    "$"
     << this->group.conjugacyClasses[i].representative.toString()
     << "$&$ "
     << this->group.conjugacyClasses[i].size.toString()

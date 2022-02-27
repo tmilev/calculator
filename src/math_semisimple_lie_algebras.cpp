@@ -221,7 +221,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
 std::string SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload() {
   std::stringstream out;
   out
-  << "<body onload='"  // <<
+  << "<body onload='"// <<
   // "window.calculator.equationEditor.typeset(document.body, null); "
   <<
   "window.calculator.dynamicJavascript.dynamicJavascript.bootstrapAllScripts(document.body);"

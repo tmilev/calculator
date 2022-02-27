@@ -878,9 +878,9 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
     return
     output.assignError(
       calculator,
-"Vector fields take at least four arguments: the vector field, "
-"the low left corner, the upper right, and the "
-"number of segments in each direction. "
+      "Vector fields take at least four arguments: the vector field, "
+      "the low left corner, the upper right, and the "
+      "number of segments in each direction. "
     );
   }
   if (input.hasBoundVariables()) {
@@ -3100,10 +3100,10 @@ bool CalculatorFunctions::newtonsMethod(
   substitution.setKeyValue("numIterations", input[3]);
   return
   output.assignStringParsed(
-"(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
-"y_{0} = startingPoint;"
-"y_{{a}} = NewtonMap{}(y_{a- 1});"
-"y_{numIterations})_4",
+    "(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
+    "y_{0} = startingPoint;"
+    "y_{{a}} = NewtonMap{}(y_{a- 1});"
+    "y_{numIterations})_4",
     &substitution,
     calculator
   );

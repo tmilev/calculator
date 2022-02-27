@@ -8201,8 +8201,8 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     << "</div>";
     out
     <<
-"<br><br><table><tr><td>Type + realization link</td><td style =\"padding-right:20px\">"
-"<a href=\"#"
+    "<br><br><table><tr><td>Type + realization link</td><td style =\"padding-right:20px\">"
+    "<a href=\"#"
     << idSpanHCharacteristicDescription
     << "\">h-Characteristic</a>"
     << "</td>";
@@ -8567,8 +8567,8 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
   if (format != nullptr) {
     if (!format->flagIncludeMutableInformation) {
       return
-"<br>Weight diagram not drawn to avoid javascript problems "
-"(use command PrintSemisimpleSubalgebras if you want to see the weight diagram). "
+      "<br>Weight diagram not drawn to avoid javascript problems "
+      "(use command PrintSemisimpleSubalgebras if you want to see the weight diagram). "
       ;
     }
   }
@@ -9758,7 +9758,7 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
   }
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
     out << "<td><b>" << "W_{" << i + 1
-    << "}"    // << "=" <<
+    << "}"// << "=" <<
     // this->primalChar[i].toString(&characterFormat)
     << "</b></td>";
   }

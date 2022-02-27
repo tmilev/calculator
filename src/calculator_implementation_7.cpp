@@ -8206,8 +8206,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
     return
     output.assignError(
       calculator,
-"Plotting coordinates takes the following arguments: lower function, "
-"upper function, lower and upper bound, delta x. "
+      "Plotting coordinates takes the following arguments: lower function, "
+      "upper function, lower and upper bound, delta x. "
     );
   }
   Expression lowerEplot = input;
@@ -8508,8 +8508,8 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionTheta(
     return
     output.assignError(
       calculator,
-"Drawing polar coordinates takes at least three arguments: "
-"function, lower angle bound and upper angle bound. "
+      "Drawing polar coordinates takes at least three arguments: "
+      "function, lower angle bound and upper angle bound. "
     );
   }
   if (input.size() < 4) {
@@ -8564,8 +8564,8 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended(
     return
     output.assignError(
       calculator,
-"Drawing polar coordinates takes three arguments: "
-"function, lower angle bound and upper angle bound. "
+      "Drawing polar coordinates takes three arguments: "
+      "function, lower angle bound and upper angle bound. "
     );
   }
   Expression plotXYE, plotRthetaE;
@@ -9189,8 +9189,8 @@ bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
     return
     output.assignError(
       calculator,
-"Failed to merge the contexts of the highest "
-"weight and the elements of the Universal enveloping. "
+      "Failed to merge the contexts of the highest "
+      "weight and the elements of the Universal enveloping. "
     );
   }
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >

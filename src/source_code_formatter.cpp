@@ -1307,6 +1307,7 @@ bool CodeFormatter::Element::computeIndentationQuote() {
     if (i != this->children.size - 1) {
       child.newLinesAfter = 1;
     }
+    child.indentationLevel = this->indentationLevel;
     child.computeIndentation();
   }
   if (this->content != "") {

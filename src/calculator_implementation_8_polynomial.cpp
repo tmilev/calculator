@@ -1355,18 +1355,18 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
     return
     output.assignError(
       calculator,
-"Failed to convert the first argument "
-"of the expression to rational number."
+      "Failed to convert the first argument "
+      "of the expression to rational number."
     );
   }
   if (upperBound > 1000000) {
     return
     output.assignError(
       calculator,
-"Error: your upper limit of polynomial "
-"operations exceeds 1000000, which is too large."
-"You may use negative or zero number give "
-"no computation bound, but please don't. "
+      "Error: your upper limit of polynomial "
+      "operations exceeds 1000000, which is too large."
+      "You may use negative or zero number give "
+      "no computation bound, but please don't. "
     );
   }
   output.reset(calculator);
@@ -1626,18 +1626,18 @@ bool CalculatorFunctionsPolynomial::groebner(
     return
     output.assignError(
       calculator,
-"Failed to convert the first argument of "
-"the expression to rational number. "
+      "Failed to convert the first argument of "
+      "the expression to rational number. "
     );
   }
   if (upperBound > 1000000) {
     return
     output.assignError(
       calculator,
-"Error: your upper limit of polynomial "
-"operations exceeds 1000000, which is too large. "
-"You may use negative or zero number "
-"give no computation bound. "
+      "Error: your upper limit of polynomial "
+      "operations exceeds 1000000, which is too large. "
+      "You may use negative or zero number "
+      "give no computation bound. "
     );
   }
   int upperBoundComputations = int(upperBound.getDoubleValue());

@@ -925,10 +925,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(ASNElement& output)
   case tags::sequence0x10:
     return this->decodeSequenceLikeContent(output);
   case tags::set0x11:
-    return this->decodeSequenceLikeContent(output);    // either non-pure composite
+    return this->decodeSequenceLikeContent(output);// either non-pure composite
     // or atom:
   case tags::bitString0x03:
-    return this->decodeBitString(output);    // atoms with extra
+    return this->decodeBitString(output);// atoms with extra
     // comments/interpretation:
   case tags::null0x05:
     return this->decodeNull(output);// atoms without additional interpretation:

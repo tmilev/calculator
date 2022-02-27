@@ -1623,12 +1623,12 @@ public:
     }
     if (inputSize > this->size) {
       fatalCrash(
-"Function setSize is allowed for hashed lists only when "
-"resizing the hashed list to smaller. "
-"This is because if I was to resize to larger, "
-"I would have to allocate non-initialized "
-"objects, and those will have to be rehashed "
-"which does not make sense. "
+        "Function setSize is allowed for hashed lists only when "
+        "resizing the hashed list to smaller. "
+        "This is because if I was to resize to larger, "
+        "I would have to allocate non-initialized "
+        "objects, and those will have to be rehashed "
+        "which does not make sense. "
       );
     }
     for (int i = this->size - 1; i >= inputSize; i --) {

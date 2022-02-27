@@ -2095,14 +2095,14 @@ void GeneralizedVermaModuleCharacters::incrementComputation(
   case 0:
     //      this->parser.hmm.MakeG2InB3(this->parser);
     this->initFromHomomorphism(parabolicSel, this->homomorphism); this->
-    transformToWeylProjectiveStep1();    // out <<
+    transformToWeylProjectiveStep1();// out <<
     // global.indicatorVariables.StatusString1;
-    this->transformToWeylProjectiveStep2();    // out <<
+    this->transformToWeylProjectiveStep2();// out <<
     // global.indicatorVariables.StatusString1;
     break;
   case 1:
     this->projectivizedChamber.refine(); this->sortMultiplicities(); out
-    << this->projectivizedChamber.toString();    // out <<
+    << this->projectivizedChamber.toString();// out <<
     // global.indicatorVariables.StatusString1;
     break;
   case 2:
@@ -2112,23 +2112,23 @@ void GeneralizedVermaModuleCharacters::incrementComputation(
     //      out << this->checkMultiplicitiesVsOrbits();
     break;
   case 4:
-    this->inititializeMaximumComputation();    // out <<
+    this->inititializeMaximumComputation();// out <<
     // global.indicatorVariables.StatusString1;
     break;
   case 5:
-    this->maximumComputation.findExtremaParametricStep1();    // out <<
+    this->maximumComputation.findExtremaParametricStep1();// out <<
     // global.indicatorVariables.StatusString1;
     break;
   case 6:
-    this->maximumComputation.findExtremaParametricStep3();    // out <<
+    this->maximumComputation.findExtremaParametricStep3();// out <<
     // global.indicatorVariables.StatusString1;
     break;
   case 7:
-    this->maximumComputation.findExtremaParametricStep4();    // out <<
+    this->maximumComputation.findExtremaParametricStep4();// out <<
     // global.indicatorVariables.StatusString1;
     break;
   case 8:
-    this->maximumComputation.findExtremaParametricStep5();    // out <<
+    this->maximumComputation.findExtremaParametricStep5();// out <<
     // global.indicatorVariables.StatusString1;
     break;
   default:

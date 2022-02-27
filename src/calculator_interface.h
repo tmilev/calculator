@@ -4131,10 +4131,10 @@ bool Calculator::getTypeHighestWeightParabolic(
     return
     output.assignError(
       calculator,
-"Function typeHighestWeightParabolic is "
-"expected to have two or three arguments: "
-"semisimple Lie algebra type, highest weight, "
-"[optional] parabolic selection. "
+      "Function typeHighestWeightParabolic is "
+      "expected to have two or three arguments: "
+      "semisimple Lie algebra type, highest weight, "
+      "[optional] parabolic selection. "
     );
   }
   const Expression& leftE = input[1];

@@ -833,7 +833,7 @@ bool WebWorker::loginProcedure(
   }
   global.cookiesToBeSent.setKeyValue(
     "username",
-    HtmlRoutines::convertStringToURLString(user.username, false)    // <-User name
+    HtmlRoutines::convertStringToURLString(user.username, false)// <-User name
     // must be stored in URL-encoded fashion, NO PLUSES.
   );
   if (global.flagLoggedIn && user.enteredActivationToken == "") {
@@ -2109,8 +2109,8 @@ std::string WebAPIResponse::modifyProblemReport() {
   }
   if (!shouldProceed) {
     return
-"<b>Modifying problems allowed only for "
-"logged-in admins under ssl connection. </b>";
+    "<b>Modifying problems allowed only for "
+    "logged-in admins under ssl connection. </b>";
   }
   std::string mainInput =
   HtmlRoutines::convertURLStringToNormal(
@@ -2352,7 +2352,7 @@ bool WebWorker::processRedirectAwayFromWWW() {
   std::stringstream out;
   out
   << "<html><body>Please remove the www. "
-  << "from the address, it creates issues with authentication services. "  // Address
+  << "from the address, it creates issues with authentication services. "// Address
   // is quote-escaped to prevent content injection.
   << "Click <a href=\""
   << newAddressStream.str()
@@ -2392,7 +2392,7 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
       "HTTP/1.0 301 Moved Permanently", redirectStream.str()
     );
     outBody
-    << "<html><body>Address available through secure (SSL) connection only. "    // The
+    << "<html><body>Address available through secure (SSL) connection only. "// The
     // newAddressStream is quote-escaped;
     // this should prevent content injection in the snippet below.
     << "Click <a href=\""

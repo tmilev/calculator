@@ -691,7 +691,7 @@ std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(
   << "\n"
   << "Problem: "
   << fileName
-  << "\n"  // <<
+  << "\n"// <<
   // "\n</span>"
   ;
   return out.str();
@@ -1787,8 +1787,8 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
   std::string desiredAnswerId = inputOutput.answerIdIfAnswer();
   if (desiredAnswerId == "") {
     inputOutput.interpretedCommand =
-"<b>Error: could not generate submit button: "
-"the answer tag does not have a valid id. Please fix the problem template.</b>"
+    "<b>Error: could not generate submit button: "
+    "the answer tag does not have a valid id. Please fix the problem template.</b>"
     ;
     return false;
   }

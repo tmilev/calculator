@@ -732,13 +732,13 @@ std::string WebAPIResponse::getBrowserification(
       // configuration by manually inserting the snippets we
       // care about into the auto-generated calculator.js file.
       builder.jsFileContents[i] +=
-"module.exports={\n"
-"TTY,\n"
-"Module,\n"
-"intArrayFromString,\n"
-"addOnInit,\n"
-"_free,\n"
-"};";
+      "module.exports={\n"
+      "TTY,\n"
+      "Module,\n"
+      "intArrayFromString,\n"
+      "addOnInit,\n"
+      "_free,\n"
+      "};";
     }
   }
   return builder.getBrowserificationAssembled(scriptEntryPoint);
@@ -2202,8 +2202,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   }
   if (inputRandomSeed == "") {
     result[WebAPI::result::error] =
-"<b>I could not figure out "
-"the exercise problem (missing random seed). </b>";
+    "<b>I could not figure out "
+    "the exercise problem (missing random seed). </b>";
     return result;
   }
   result[WebAPI::problem::randomSeed] = inputRandomSeed;

@@ -12,8 +12,18 @@ uniformization.
 
 ## Code formatting automation tools
 
-At the time of writing, we do not use any auto-code-formatting.
-Should that change, we will update the present style guide accordingly.
+
+As of February 28, 2022, we have a working end-to-end self-contained source 
+code formatter. To format your source code changes, use the command:
+
+```
+calculator format
+```
+
+If the source code formatter fails to parse one of your files, it will not 
+overwrite your old code. Our source code formatter is located in
+[source_code_formatter.cpp](src/source_code_formatter.cpp). If you think you 
+can improve the code formatter, you are welcome to do so.
 
 ## Variable and class names
 

@@ -2840,7 +2840,7 @@ bool CalculatorFunctions::formatCPPSourceCodeInternal(
   }
   std::stringstream report;
   CodeFormatter formatter;
-  formatter.formatCPPSourceCode(fileName, "", &report, logDebugData);
+  formatter.formatCPPSourceCode(fileName, "","", &report, logDebugData);
   return output.assignValue(calculator, report.str());
 }
 
@@ -2860,7 +2860,7 @@ bool CalculatorFunctions::formatCPPDirectory(
     return false;
   }
   std::stringstream report;
-  CodeFormatter::formatCPPDirectory(fileName, &report);
+  CodeFormatter::formatCPPDirectory(fileName,false ,&report);
   return output.assignValue(calculator, report.str());
 }
 

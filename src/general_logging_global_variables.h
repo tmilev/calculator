@@ -229,6 +229,7 @@ public:
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
   bool flagRunningWebAssembly;
+  bool flagRunningFormatCode;
   // bool flagTesting;
   // webserver flags and variables
   bool flagRunServerOnEmptyCommandLine;

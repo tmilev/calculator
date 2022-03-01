@@ -1666,9 +1666,8 @@ void CodeFormatter::Words::initialize(CodeFormatter& inputOwner) {
   this->owner = &inputOwner;
 }
 
-bool CodeFormatter::initializeFileNames(
-  const std::string& fileName,
-  const std::string& inputOutputFileNameEmptyForAuto,
+bool CodeFormatter::initializeFileNames(const std::string& fileName,
+  const std::string& output, const std::string &outputOnFail,
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::initializeFileNames");
@@ -1683,10 +1682,14 @@ bool CodeFormatter::initializeFileNames(
     }
     return false;
   }
-  if (inputOutputFileNameEmptyForAuto != "") {
-    this->outputFileName = inputOutputFileNameEmptyForAuto;
+  if (output != "") {
+    this->outputFileName = output;
   } else {
     this->outputFileName = this->inputFileName + ".new";
+  }
+  this->outputOnFailFileName = outputOnFail;
+  if (this->outputOnFailFileName == "") {
+    this->outputOnFailFileName = this->inputFileName+".fail";
   }
   return true;
 }
@@ -1732,8 +1735,12 @@ std::string CodeFormatter::toStringLinks() {
   return out.str();
 }
 
+bool CodeFormatter::formatCalculatorInPlace(){
+  return CodeFormatter::formatCPPDirectory("src/", true, nullptr);
+}
+
 bool CodeFormatter::formatCPPDirectory(
-  const std::string& inputDirectory, std::stringstream* comments
+  const std::string& inputDirectory, bool inPlace, std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::formatCPPDirectory");
   std::string directory = inputDirectory;
@@ -1754,7 +1761,10 @@ bool CodeFormatter::formatCPPDirectory(
   ) {
     return false;
   }
-  std::string newDirectory = "output/" + directory;
+  std::string newDirectory ;
+  if (inPlace) {
+    newDirectory =directory;
+  }newDirectory= "output/" + directory;
   newFileNames.setExpectedSize(allFiles.size);
   oldFileNames.setExpectedSize(allFiles.size);
   for (int i = 0; i < allFiles.size; i ++) {
@@ -1765,16 +1775,29 @@ bool CodeFormatter::formatCPPDirectory(
   }
   oldFileNames.quickSortAscending(nullptr, &newFileNames);
   for (int i = 0; i < newFileNames.size; i ++) {
+    std::string fileNameOnFail = newFileNames[i];
+    if (inPlace){
+      fileNameOnFail += ".fail";
+    }
     CodeFormatter formatter;
     if (
       !formatter.formatCPPSourceCode(
-        oldFileNames[i], newFileNames[i], comments, false
+        oldFileNames[i], newFileNames[i], fileNameOnFail, comments, false
       )
     ) {
       return false;
     }
     if (comments != nullptr) {
       *comments << "<br>";
+    }
+    if (inPlace) {
+      global << "Formatted: " << oldFileNames[i];
+      if (formatter.parsingSucceeded()) {
+        global << Logger::green << "OK.";
+      } else {
+        global << Logger::red << "FAILED";
+      }
+      global<<Logger::endL;
     }
   }
   return true;
@@ -1786,14 +1809,15 @@ bool CodeFormatter::parsingSucceeded() const {
 
 bool CodeFormatter::formatCPPSourceCode(
   const std::string& inputFileName,
-  const std::string& inputOutputFileNameEmptyForAuto,
+  const std::string& output,
+const std::string& outputOnFail,
   std::stringstream* comments,
   bool logDebugInfo
 ) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::formatCPPSourceCode");
   if (
     !this->initializeFileNames(
-      inputFileName, inputOutputFileNameEmptyForAuto, comments
+      inputFileName, output,outputOnFail, comments
     )
   ) {
     return false;
@@ -4714,18 +4738,18 @@ bool CodeFormatter::isWhiteSpace(const std::string& input) {
 
 bool CodeFormatter::writeFormatedCode(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::writeFormatedCode");
-  std::fstream fileOut;
-  if (
-    !FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
-      fileOut, this->outputFileName, false, true, false
-    )
+  std::string filenameOut = this->outputFileName;
+  if (!this->parsingSucceeded()){
+    filenameOut = this->outputOnFailFileName;
+  }if(!
+  FileOperations::writeFileVirual(filenameOut,this->transformedContent, comments)
+
   ) {
     if (comments != nullptr) {
       *comments << "Failed to open source code formatting output file. ";
     }
     return false;
   }
-  fileOut << this->transformedContent;
   return true;
 }
 

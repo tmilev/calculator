@@ -7,6 +7,7 @@
 #include "database.h"
 #include "calculator_html_interpretation.h"
 #include "signals_infrastructure.h"
+#include "source_code_formatter.h"
 
 class Test {
 public:
@@ -38,6 +39,12 @@ int mainTest(List<std::string>& inputArguments) {
   inputArguments.sliceInPlace(2, inputArguments.size - 2);
   tester.initialize(inputArguments);
   tester.run();
+  return 0;
+}
+
+int mainFormat() {
+  SignalsInfrastructure::signals().initializeSignals();
+  CodeFormatter::formatCalculatorInPlace();
   return 0;
 }
 

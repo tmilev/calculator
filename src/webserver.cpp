@@ -4829,6 +4829,7 @@ void WebServer::initializeBuildFlags() {
 }
 
 std::string MainFlags::server = "server";
+std::string MainFlags::format= "format";
 std::string MainFlags::daemon = "daemon";
 std::string MainFlags::help = "help";
 std::string MainFlags::pathExecutable = "path_executable";
@@ -4839,12 +4840,19 @@ public:
   int currentIndex;
   HashedList<std::string, MathRoutines::hashString> commandLineConfigurations;
   bool processOneArgument();
+  bool setFormat();
   bool setServer();
   bool setTest();
   bool setPathExecutable();
   bool setConfigurationFile();
   bool processCommandLineConfigurations(std::string& input);
 };
+bool ArgumentAnalyzer::setFormat() {
+global.flagRunningFormatCode = true;
+
+  return false
+  ;
+}
 
 bool ArgumentAnalyzer::setServer() {
   std::string timeLimitString;
@@ -4921,6 +4929,9 @@ bool ArgumentAnalyzer::processOneArgument() {
   StringRoutines::stringTrimWhiteSpace(
     global.programArguments[this->currentIndex]
   );
+  if (current == MainFlags::format ) {
+    return this->setFormat();
+  }
   if (current == MainFlags::server) {
     return this->setServer();
   }
@@ -5633,7 +5644,9 @@ int WebServer::main(int argc, char** argv) {
       return global.server().run();
     } else if (global.flagRunningConsoleTest) {
       return mainTest(global.programArguments);
-    } else {
+    } else if (global.flagRunningFormatCode) {
+
+    }else {
       return WebServer::mainCommandLine();
     }
   } catch(...) {

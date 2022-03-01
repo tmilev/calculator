@@ -7,6 +7,7 @@
 class MainFlags {
 public:
   static std::string server;
+  static std::string format;
   static std::string pathExecutable;
   static std::string configurationFile;
   static std::string test;

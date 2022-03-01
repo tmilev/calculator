@@ -358,6 +358,7 @@ public:
 
   std::string inputFileName;
   std::string outputFileName;
+  std::string outputOnFailFileName;
   Words words;
   CodeFormatter::Processor processor;
   std::string inputCode;
@@ -405,12 +406,12 @@ public:
   const int dummyElements = 6;
   // A class to represent
   CodeFormatter();
-  static bool formatCPPDirectory(
-    const std::string& inputDirectory, std::stringstream* comments
+  static bool formatCPPDirectory(const std::string& inputDirectory, bool inPlace, std::stringstream* comments
   );
-  bool formatCPPSourceCode(
-    const std::string& inputFileName,
-    const std::string& inputOutputFileNameEmptyForAuto,
+  static bool formatCalculatorInPlace(
+  );
+  bool formatCPPSourceCode(const std::string& inputFileName,
+    const std::string& output, const std::string &outputOnFail,
     std::stringstream* comments,
     bool logDebugInfo
   );
@@ -433,9 +434,9 @@ private:
   bool computeState(int maximumElementsToProcess);
   bool addAndAccount(const std::string& incoming);
   bool decreaseStack(int numberToPop);
-  bool initializeFileNames(
-    const std::string& fileName,
-    const std::string& inputOutputFileNameEmptyForAuto,
+  bool initializeFileNames(const std::string& fileName,
+  const std::string& output,
+  const std::string& outputOnFail,
     std::stringstream* comments
   );
   bool parsingSucceeded() const;

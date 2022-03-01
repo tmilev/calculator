@@ -1736,7 +1736,10 @@ std::string CodeFormatter::toStringLinks() {
 }
 
 bool CodeFormatter::formatCalculatorInPlace(){
-  return CodeFormatter::formatCPPDirectory("src/", true, nullptr);
+  std::stringstream comments;
+  CodeFormatter::formatCPPDirectory("src/", true, &comments);
+  global << comments.str() << Logger::endL;
+  return  true;
 }
 
 bool CodeFormatter::formatCPPDirectory(
@@ -1764,8 +1767,8 @@ bool CodeFormatter::formatCPPDirectory(
   std::string newDirectory ;
   if (inPlace) {
     newDirectory =directory;
-  }newDirectory= "output/" + directory;
-  newFileNames.setExpectedSize(allFiles.size);
+  }else{newDirectory= "output/" + directory;
+  }newFileNames.setExpectedSize(allFiles.size);
   oldFileNames.setExpectedSize(allFiles.size);
   for (int i = 0; i < allFiles.size; i ++) {
     if (allFileExtensions[i] == ".cpp" || allFileExtensions[i] == ".h") {
@@ -1791,7 +1794,7 @@ bool CodeFormatter::formatCPPDirectory(
       *comments << "<br>";
     }
     if (inPlace) {
-      global << "Formatted: " << oldFileNames[i];
+      global << "Formatted: " << oldFileNames[i] << " ... ";
       if (formatter.parsingSucceeded()) {
         global << Logger::green << "OK.";
       } else {

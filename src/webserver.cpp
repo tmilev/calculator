@@ -46,6 +46,7 @@ SignalsInfrastructure::SignalsInfrastructure() {
   this->flagInitialized = false;
 }
 
+
 // This class locks/unlocks all signals within its scope
 class SignalLock {
   SignalLock() {
@@ -55,6 +56,7 @@ class SignalLock {
     SignalsInfrastructure::signals().unblockSignals();
   }
 };
+
 
 void SignalsInfrastructure::unblockSignals() {
   int error = sigprocmask(SIG_SETMASK, &oldSignals, nullptr);
@@ -4546,7 +4548,7 @@ int WebWorker::run() {
 void WebServer::release(int& descriptor) {
   MutexProcess::release(descriptor);
 }
-
+extern int mainFormat();
 extern int mainTest(List<std::string>& remainingArgs);
 void WebServer::figureOutOperatingSystem() {
   MacroRegisterFunctionWithName("WebServer::figureOutOperatingSystem");
@@ -5645,7 +5647,7 @@ int WebServer::main(int argc, char** argv) {
     } else if (global.flagRunningConsoleTest) {
       return mainTest(global.programArguments);
     } else if (global.flagRunningFormatCode) {
-
+      return mainFormat();
     }else {
       return WebServer::mainCommandLine();
     }

@@ -3409,7 +3409,7 @@ bool CalculatorFunctions::outerEqualEqual(
   }
 }
 
-bool CalculatorFunctions::outerAssociateAdivBdivCpowerD(
+bool CalculatorFunctions::associateAdivBdivCPowerD(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName(
@@ -6852,7 +6852,7 @@ bool Expression::splitProduct(
   );
 }
 
-bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
+bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName(

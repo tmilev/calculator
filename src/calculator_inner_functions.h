@@ -852,7 +852,7 @@ public:
   static bool outerDivideReplaceAdivBpowerItimesBpowerJ(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool outerAtimesBpowerJplusEtcDivBpowerI(
+  static bool atimesBpowerJplusEtcDivBpowerI(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool combineFractionsCommutative(
@@ -912,7 +912,7 @@ public:
   static bool associateDivisionDivision(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool outerAssociateAdivBdivCpowerD(
+  static bool associateAdivBdivCPowerD(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool outerEqualEqual(

@@ -47,10 +47,10 @@ Some functions are marked as "admin only". These are only available to administr
 
 
 *=* [CheckAutoEquality] {Calculator::checkRule}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25LogEvaluation%5cn%28%7b%7ba%7d%7d%2a%7b%7bb%7d%7d%29%2a%7b%7bc%7d%7d%3da%2a%28b%2ac%29%3b%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25LogEvaluation%5cn%28%7b%7ba%7d%7d%2a%7b%7bb%7d%7d%29%2a%7b%7bc%7d%7d%3da%2a%28b%2ac%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %LogEvaluation
-({{a}}*{{b}})*{{c}}=a*(b*c);  
+({{a}}*{{b}})*{{c}}=a*(b*c);
 ```
 Checks whether the rule is of the form A = A, and substitutes the expression with an error if that is the case. This usually happens when a general rule is entered twice. In the following example, we try to redefine the associative rule of the calculator. This fails because the associative rule is already implemented: the left hand side of the below expression is substituted with a*(b*c), and thus the rule becomes a*(b*c)=a*(b*c), which clearly is infinite substitution.
 
@@ -74,7 +74,7 @@ If the k^th child X is a list of two elements starting with Melt, then the opera
 
 Operator or function \+ is overloaded with 45 total handlers.
 
-*\+* [TrigSumToTrigProduct] {CalculatorFunctions::trigonometricSumToTrigonometricProduct}. 
+*\+* [TrigSumToTrigProduct] {CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22TrigSumToTrigProduct%5c%22%29%3b%5cnsin%28a%29%20%2b%20sin%28b%29%3b%5cnsin%28b%29%20-%20sin%28a%29%3b%5cn-%20sin%28b%29%20%2b%20sin%28a%29%3b%5cn-%20sin%28b%29%20-%20sin%28a%29%3b%5cncos%28a%29%20%2b%20cos%28b%29%3b%5cncos%28a%29%20-%20cos%28b%29%3b%5cn-%20cos%28a%29%20-%20cos%28b%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOnRules("TrigSumToTrigProduct");
@@ -213,7 +213,7 @@ w=(x-3)(x+1);
 ```
 Combines fractions under the assumption that all participants commute. Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a * lcm(b,d)/b+c*lcm(b,d)/d)/(lcm(b,d)); Please note that this transformation is not correct if b and d do not commute. 
 
-*\+* [CommonDenominatorSimple] {CalculatorFunctions::outerCombineFractionsCommutative}. 
+*\+* [CommonDenominatorSimple] {CalculatorFunctions::combineFractionsCommutative}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffRules%28%5c%22CommonDenominator%5c%22%29%3b%5cna%2fb%2bc%2fd%3b%5cnz%3d%28x-2%29%28x%2b1%29%3b%5cnw%3d%28x-3%29%28x%2b1%29%3b%5cn1%2fz%2b1%2fw%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOffRules("CommonDenominator");
@@ -224,7 +224,7 @@ w=(x-3)(x+1);
 ```
 Combines fractions on condition that all participants commute. Similar to the CommonDenominator rule but does not compute least common multiples.Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a *d+c*b)/(d*b); Please note that this transformation is not correct if b and d do not commute. 
 
-*\+* [CommonDenominatorOneNonFraction] {Calculator::outerCombineFractions}. 
+*\+* [CommonDenominatorOneNonFraction] {CalculatorBasics::combineFractions}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%7b%7bx%7d%7d%3d%20%282x%20%2b3%29%2f%282x%20%2b%201%29%3b%5cng%7b%7d%7b%7by%7d%7d%3d%20%28y-2%29%2f%28y%2b3%29%3b%5cng%7b%7df%7b%7dz%3b%5cnf%7b%7dg%7b%7dz%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 f{}{{x}}= (2x +3)/(2x + 1);
@@ -235,16 +235,18 @@ f{}g{}z
 Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}= (a +c*b)/b; 
 
 *\+* [AddRationalToPolynomial] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2bPolynomial%7b%7d%5c%5clambda%3b%20Polynomial%7b%7d%5c%5clambda%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2bPolynomial%7b%7d%5c%5clambda%3b%5cnPolynomial%7b%7d%5c%5clambda%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-1+Polynomial{}\lambda; Polynomial{}\lambda + 1
+1+Polynomial{}\lambda;
+Polynomial{}\lambda + 1
 ```
 Adds a rational to a polynomial. 
 
 *\+* [AddPolynomialToRational] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2bPolynomial%7b%7d%5c%5clambda%3b%20Polynomial%7b%7d%5c%5clambda%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%221%2bPolynomial%7b%7d%5c%5clambda%3b%5cnPolynomial%7b%7d%5c%5clambda%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-1+Polynomial{}\lambda; Polynomial{}\lambda + 1
+1+Polynomial{}\lambda;
+Polynomial{}\lambda + 1
 ```
 Adds a polynomial to a rational. 
 
@@ -264,9 +266,9 @@ PolynomialAlgebraicNumbers(\sqrt{12}x) + PolynomialAlgebraicNumbers(-\sqrt{3}x)
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
 *\+* [AddAlgebraicNumberToPolynomialOverAlgebraicNumbers] {CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28%5c%5csqrt%7b12%7d%29%20%2bPolynomialAlgebraicNumbers%28%5c%5csqrt%7b3%7dx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolynomialAlgebraicNumbers%28%5c%5csqrt%7b12%7d%29%20%2b%20PolynomialAlgebraicNumbers%28%5c%5csqrt%7b3%7dx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PolynomialAlgebraicNumbers(\sqrt{12}) +PolynomialAlgebraicNumbers(\sqrt{3}x)
+PolynomialAlgebraicNumbers(\sqrt{12}) + PolynomialAlgebraicNumbers(\sqrt{3}x)
 ```
 Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. 
 
@@ -444,17 +446,20 @@ Transforms a - b to a +(- 1) * b and - b to (- 1) * b. Equivalent to a rule -{{b
 Operator or function / is overloaded with 26 total handlers.
 
 */* [SumProductNotationToOperatorRelativeToDivision] {CalculatorFunctions::sumTimesExpressionToSumOf}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PlotExpressionTree(  \sum\limits_{b}^c);
+PlotExpressionTree( \sum\limits_{b}^c);
 PlotExpressionTree( \sum\limits_{b}^c*a) 
 ```
 Transforms \sum\limits_{b}^c* a to (\sum\limits_b^c){} a. 
 
-*/* [IntegralOperatorFromQuotient] {CalculatorFunctions::integralOperator}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%3b%20%5c%5cint%20x%20%281%2bx%29%20dx%3b%20%5c%5cint_2%5e3%20x%20dx%3b%20%5c%5cint_2%5e3%20x%281%2bx%29dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*/* [IntegralOperatorFromQuotient] {CalculatorFunctionsIntegration::integralOperator}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%3b%5cn%5c%5cint%20x%20%281%2bx%29%20dx%3b%5cn%5c%5cint_2%5e3%20x%20dx%3b%5cn%5c%5cint_2%5e3%20x%281%2bx%29dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\int x dx; \int x (1+x) dx; \int_2^3 x dx; \int_2^3 x(1+x)dx
+\int x dx;
+\int x (1+x) dx;
+\int_2^3 x dx;
+\int_2^3 x(1+x)dx
 ```
 Transforms integral notation into an integral expression. 
 
@@ -465,14 +470,14 @@ Transforms integral notation into an integral expression.
 ```
 Divides elements of Z/pZ. 
 
-*/* [LeibnizDifferentialOperatorToDifferentialOperator] {CalculatorFunctions::diffdivDiffxToDifferentiation}. 
+*/* [LeibnizDifferentialOperatorToDifferentialOperator] {CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Differential%20%2fDifferential%20%7b%7dx%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Differential /Differential {}x x
 ```
 Replaces Differential / Differential {}x by Differentiate{}(x). Should also work on the notation (Differential y)/(Differential x). 
 
-*/* [LeibnizDifferentialOperatorNotation] {CalculatorFunctions::ddivDxToDiffDivDiffx}. 
+*/* [LeibnizDifferentialOperatorNotation] {CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22d%2fdx%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 d/dx x
@@ -528,14 +533,14 @@ Intended for educational purposes. Divides rationals only if the operation is tr
 ```
 Provided that x is not equal to zero, substitutes 0/x with 0. 
 
-*/* [DivideCancellations] {CalculatorFunctions::outerDivCancellations}. 
+*/* [DivideCancellations] {CalculatorFunctions::divisionCancellations}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2fb%29%2f%28a%2fd%29%3b%20%28a%2fb%29%2f%28c%2fb%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a/b)/(a/d); (a/b)/(c/b)
 ```
 Division cancellations. Substitutes (a/b)/(a/d) with d/a and (a/b)/(c/b) with a/c. 
 
-*/* [AssociateDivisionDivision] {CalculatorFunctions::outerAssociateDivisionDivision}. 
+*/* [AssociateDivisionDivision] {CalculatorFunctions::associateDivisionDivision}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2fb%29%2fc%3b%5cna%2f%28b%2fc%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a/b)/c;
@@ -550,7 +555,7 @@ a/(b/c)^d;
 ```
 Substitutes a/(b/c)^d =a c^d/b^d.Note the order of multiplication in the rules: this operation is safe and correct for non-commutative rings as well.
 
-*/* [ConvertShortDenominatorToNegativePower] {CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI}. 
+*/* [ConvertShortDenominatorToNegativePower] {CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%20x%5e%7b1%2f2%7d%20%2b%20b%20x%20%29%2fx%3b%5cn%28a%20x%5e%7b1%2f2%7d%20%2b%20b%20x%20%29%2fx%5e2%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a x^{1/2} + b x )/x;
@@ -566,9 +571,14 @@ Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t =a_0 x^{-t}+ a_1 x^{c_1-t}+...
 Divides two rational numbers. 
 
 */* [DivideRationalByDouble] {CalculatorFunctionsBinaryOps::divideDoubleByDouble}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%200.5%3b%20b%3d%200.5%3b%20c%20%3d%20DoubleValue%7b%7d3.3%3b%20a%2fc%3b%20c%2fa%3b%20c%2fc%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%200.5%3b%5cnb%3d%200.5%3b%5cnc%20%3d%20DoubleValue%7b%7d3.3%3b%5cna%2fc%3b%5cnc%2fa%3b%5cnc%2fc%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c
+a = 0.5;
+b= 0.5;
+c = DoubleValue{}3.3;
+a/c;
+c/a;
+c/c
 ```
 Divides doubles. 
 
@@ -678,7 +688,7 @@ Multiplies matrices.
 Multiplies a matrix standing on the left by a sequence/list (matrix-row) standing on the right.
 This operation is valid only if the the matrix on the right is a column-vector.
 
-*\** [InterpretAsDifferential] {CalculatorFunctions::interpretAsDifferential}. 
+*\** [InterpretAsDifferential] {CalculatorFunctionsDifferentiation::interpretAsDifferential}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%3b%20%5c%5cint%20x%20%281%20%2b%20x%29%20dx%3b%20%5c%5cint_2%5e3%20x%20dx%3b%20%5c%5cint_2%5e3%20x%20%281%20%2b%20x%29%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int x dx; \int x (1 + x) dx; \int_2^3 x dx; \int_2^3 x (1 + x) dx
@@ -699,9 +709,9 @@ If contexts implies it, interprets an atom of the form dx as Differential {} x.
 Transforms integral notation into an integral expression. 
 
 *\** [SumProductNotationToOperator] {CalculatorFunctions::sumTimesExpressionToSumOf}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PlotExpressionTree(  \sum\limits_{b}^c);
+PlotExpressionTree( \sum\limits_{b}^c);
 PlotExpressionTree( \sum\limits_{b}^c*a) 
 ```
 Transforms \sum\limits_{b}^c* a to (\sum\limits_b^c){} a. 
@@ -928,9 +938,10 @@ Rule that commutes constants to the left-most positions. Provided that a is a co
 If a and b are constants, replaces a^{c}b^c by (a b)^c.
 
 *\** [AssociativeRule] {Calculator::outerAssociate}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%2a%28c%2a%28d%2ae%29%2af%29%20-%20a%2ab%2ac%2ad%2a%20e%20%2af%3b%28a%2ab%29%2a%28c%2a%28e%20%2a%20d%29%2af%29%20-%20a%2ab%2ac%2ad%2a%20e%20%2af%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%2a%28c%2a%28d%2ae%29%2af%29%20-%20a%2ab%2ac%2ad%2a%20e%20%2af%3b%5cn%28a%2ab%29%2a%28c%2a%28e%20%2a%20d%29%2af%29%20-%20a%2ab%2ac%2ad%2a%20e%20%2af%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;(a*b)*(c*(e * d)*f) - a*b*c*d* e *f
+(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;
+(a*b)*(c*(e * d)*f) - a*b*c*d* e *f
 ```
 Associative law: reorders the multiplicative tree in standard form. 
 
@@ -942,9 +953,10 @@ x(x + 1)^{- 1}x; x(y+ 1)^{- 1}x; (\sin x ) x (\cos x)
 Commutative law: replaces a*b by b*a provided that 1) a and and b depend on exactly one user-defined variable, 2) a is not a constant and 3) a>b as an expression. 
 
 *\** [CommuteIfUnivariate] {CalculatorFunctions::outerCommuteAtimesBifUnivariate}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%28x%20%2b%201%29%5e%7b-%201%7dx%3b%20x%28y%2b%201%29%5e%7b-%201%7dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%28x%20%2b%201%29%5e%7b-%201%7dx%3b%5cnx%28y%2b%201%29%5e%7b-%201%7dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-x(x + 1)^{- 1}x; x(y+ 1)^{- 1}x
+x(x + 1)^{- 1}x;
+x(y+ 1)^{- 1}x
 ```
 Commutative law: replaces a*b by b*a provided that 1) a and and b depend on exactly one user-defined variable, 2) a is not a constant and 3) a>b as an expression. 
 
@@ -956,9 +968,10 @@ Commutative law: replaces a*b by b*a provided that 1) a and and b depend on exac
 Pulls rationals in the front of multiplicative terms.
 
 *\** [AssociateTimesDivision] {Calculator::outerAssociateTimesDivision}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%2a%28b%2fc%29%3b%20%28a%2ab%29%2fc-a%2a%28b%2fc%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%2a%28b%2fc%29%3b%5cn%28a%2ab%29%2fc-a%2a%28b%2fc%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-a*(b/c); (a*b)/c-a*(b/c)
+a*(b/c);
+(a*b)/c-a*(b/c)
 ```
 Associative law w.r.t. division. 
 
@@ -1303,9 +1316,14 @@ Logical and.
 Operator or function or is overloaded with 2 total handlers.
 
 *or* [or] {CalculatorConversions::or}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%20or%200%3b%200%20or%201%3b%201%20or%200%3b%201%20or%201%3b%20a%20or%201%3b%20a%20or%200%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%220%20or%200%3b%5cn0%20or%201%3b%5cn1%20or%200%3b%5cn1%20or%201%3b%5cna%20or%201%3b%5cna%20or%200%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;
+0 or 0;
+0 or 1;
+1 or 0;
+1 or 1;
+a or 1;
+a or 0;
 ```
 Logical or.
 
@@ -1402,17 +1420,18 @@ Evaluates the binomial coefficient if possible.
 
 Operator or function \sqrt is overloaded with 2 total handlers.
 
-*\sqrt* [sqrt] {Calculator::sqrt}. 
+*\sqrt* [sqrt] {CalculatorFunctions::sqrt}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%202%2b%5c%5csqrt%203%3b%28%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d6%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt 2+\sqrt 3;(\sqrt{}2+\sqrt{}3+\sqrt{}6)^2
 ```
 Square root of a rational, implemented as algebraic extension of the rationals. 
 
-*\sqrt* [DistributeSqrt] {Calculator::distributeSqrt}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%20TurnOffApproximations%200%3b%20%5c%5csqrt%7b%5c%5cfrac%7b676%7d%7b25%7d%20ln%203%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\sqrt* [DistributeSqrt] {CalculatorFunctions::distributeSqrt}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%200%3b%5cn%5c%5csqrt%7b%5c%5cfrac%7b676%7d%7b25%7d%20ln%203%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
- TurnOffApproximations 0; \sqrt{\frac{676}{25} ln 3}
+TurnOffApproximations 0;
+\sqrt{\frac{676}{25} ln 3}
 ```
 If a is a positive constant, substitutes sqrt(a b) by sqrt(a) sqrt(b).
 
@@ -1492,7 +1511,7 @@ Operator or function ^ is overloaded with 35 total handlers.
 TurnOnRules("EulerFormula");
 e^{i x}
 ```
-Trigonometrizes an exponential expression using Euler's formula.  
+Trigonometrizes an exponential expression using Euler's formula.
 
 *^* [PowerImaginaryUnit] {CalculatorFunctions::powerImaginaryUnit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22PowerImaginaryUnit%5c%22%29%3b%5cni%5e%7b-50%21%2b%201%7d%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -1545,22 +1564,24 @@ If a rational number is small enough to factor, reduces the rational exponents o
 If the rational power is small enough, converts to an algebraic number. At the moment works with rational powers whose denominator is 2, may be extended to larger powers in the future. 
 
 *^* [PowerDoubleToDouble] {CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%7b%7bx%7d%7d%3dx%5e3%2bp%20x%20%2bq%3b%5cnXcardano%20%3d%20%28%20-q%2f2%2b%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%20%2b%28%20-q%2f2-%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%3b%5cnq%20%3d%20DoubleValue%7b%7d1%3b%20%5cnp%20%3d%20DoubleValue%7b%7d1%3b%20%5cnXcardano%3b%20%5cnf%7b%7dx%3b%20%5cnf%7b%7dXcardano%20%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%7b%7bx%7d%7d%3dx%5e3%2bp%20x%20%2bq%3b%5cnXcardano%20%3d%20%28%20-q%2f2%2b%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%20%2b%28%20-q%2f2-%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%3b%5cnq%20%3d%20DoubleValue%7b%7d1%3b%5cnp%20%3d%20DoubleValue%7b%7d1%3b%5cnXcardano%3b%5cnf%7b%7dx%3b%5cnf%7b%7dXcardano%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 f{}{{x}}=x^3+p x +q;
 Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);
-q = DoubleValue{}1; 
-p = DoubleValue{}1; 
-Xcardano; 
-f{}x; 
-f{}Xcardano   
+q = DoubleValue{}1;
+p = DoubleValue{}1;
+Xcardano;
+f{}x;
+f{}Xcardano 
 ```
 Calls the built-in cpp functions to approximately raise a double to a power, provided either the base or the exponent is a double, and provided that the base is non-negative. 
 
 *^* [TransposePowerNotation] {CalculatorFunctionsBinaryOps::powerSequenceOrMatrixByT}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20%281%2c2%29%5et%3b%20X-Transpose%7b%7d%281%2c2%29%3b%20%5c%5cbegin%7bpmatrix%7d1%262%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5et%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20%281%2c2%29%5et%3b%5cnX-Transpose%7b%7d%281%2c2%29%3b%5cn%5c%5cbegin%7bpmatrix%7d1%262%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5et%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-X = (1,2)^t; X-Transpose{}(1,2); \begin{pmatrix}1&2\\ 3& 5\end{pmatrix}^t  
+X = (1,2)^t;
+X-Transpose{}(1,2);
+\begin{pmatrix}1&2\\ 3& 5\end{pmatrix}^t  
 ```
 Provided the exponent is t or T, calls the Transpose function on the base.
 
@@ -1578,9 +1599,9 @@ a*b
 If the base is a matrix and the exponent is a rational number: 1. If the base is not square, returns error. 2. If the base is (a) square, (b) has a supported built-in coefficient type and (c) the exponent is a small integer, raises the base to the corresponding power. If the power is 0 or negative and the determinant of the matrix is zero, returns error. As of writing, the supported built-in coefficient types are: (1) rational numbers;(2) algebraic numbers; (3) polynomial and rational functions in one variable.
 
 *^* [PowerMatrixNumbersByLargeIntegerIfPossible] {CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%5c%5cbegin%7bpmatrix%7d%201%20%26%20-1%20%5c%5c%5c%5c%204%20%26%20-3%5c%5cend%7bpmatrix%7d%3b%20X%5e%7b-55%21-%201%7d%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%5c%5cbegin%7bpmatrix%7d%201%20%26%20-1%20%5c%5c%5c%5c%204%20%26%20-3%5c%5cend%7bpmatrix%7d%3b%20X%5e%7b-55%21-%201%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-X =\begin{pmatrix} 1 & -1 \\ 4 & -3\end{pmatrix}; X^{-55!- 1}  
+X =\begin{pmatrix} 1 & -1 \\ 4 & -3\end{pmatrix}; X^{-55!- 1}
 ```
 Attempts to exponentiate matrix by a large power. 
 
@@ -1694,22 +1715,30 @@ Raises algebraic number to small integer or half-integer power.
 Takes the radical of an algebraic number, if the algebraic number is a positive numberthat whose radical lies in the underlying algebraic closure.
 
 *^* [PowerFloatingToPower] {CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%7b%7bx%7d%7d%3dx%5e3%2bp%20x%20%2bq%3b%5cnXcardano%20%3d%20%28%20-q%2f2%2b%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%20%2b%28%20-q%2f2-%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%3b%5cnq%3d%20DoubleValue%7b%7d1%3b%20%5cnp%20%3d%20DoubleValue%7b%7d1%3b%20%5cnXcardano%3b%20%5cnf%7b%7dx%3b%20%5cnf%7b%7dXcardano%20%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%7b%7bx%7d%7d%3dx%5e3%2bp%20x%20%2bq%3b%5cnXcardano%20%3d%20%28%20-q%2f2%2b%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%20%2b%28%20-q%2f2-%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%3b%5cnq%3d%20DoubleValue%7b%7d1%3b%5cnp%20%3d%20DoubleValue%7b%7d1%3b%5cnXcardano%3b%5cnf%7b%7dx%3b%5cnf%7b%7dXcardano%20%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 f{}{{x}}=x^3+p x +q;
 Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);
-q= DoubleValue{}1; 
-p = DoubleValue{}1; 
-Xcardano; 
-f{}x; 
+q= DoubleValue{}1;
+p = DoubleValue{}1;
+Xcardano;
+f{}x;
 f{}Xcardano   
 ```
 Calls the built-in cpp functions to approximately raise a double to a power, provided either the base or the exponent is a double. If the base is negative and the exponent is rational with odd denominator, the exponent is evaluated to the corresponding real negative root. 
 
-*^* [PowerPowerToPower] {Calculator::associateExponentExponent}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%5em%29%5en%3b%20%28%28ln%283%29%29%5em%29%5en%3b%20%28%28ln%280.5%29%29%5em%29%5en%3b%20%28a%5em%29%5e2%3b%20%28a%5e2%29%5em%3b%20%28a%5e%7b1%2f2%7d%29%5e2%3b%20%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%20%28a%3e0%29%3d1%3b%20%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*^* [PowerPowerToPower] {CalculatorBasics::associateExponentExponent}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%5em%29%5en%3b%5cn%28%28ln%283%29%29%5em%29%5en%3b%5cn%28%28ln%280.5%29%29%5em%29%5en%3b%5cn%28a%5em%29%5e2%3b%5cn%28a%5e2%29%5em%3b%5cn%28a%5e%7b1%2f2%7d%29%5e2%3b%5cn%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%5cn%28a%3e0%29%3d1%3b%5cn%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-(a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m; (a^{1/2})^2; (a^{2})^{1/2}; (a>0)=1; (a^{2})^{1/2};
+(a^m)^n;
+((ln(3))^m)^n;
+((ln(0.5))^m)^n;
+(a^m)^2;
+(a^2)^m;
+(a^{1/2})^2;
+(a^{2})^{1/2};
+(a>0)=1;
+(a^{2})^{1/2};
 ```
 If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{b*c}. The rule acts when one of the following holds:
 1) a is real and positive;
@@ -1805,9 +1834,10 @@ g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i);
 Provided that an element of Universal Enveloping algebra is a single generator (raised to arbitrary formal RF power) with coefficient 1, raises (formally) the element of the UE to arbitrary RF power. 
 
 *^* (_composite_) [ApowerBevaluatedAtC] {CalculatorFunctions::compositeAPowerBEvaluatedAtC}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%5e2%20x%3b%20%28f%5e-2%29%20%7b%7dx%20%3b%20%28f%5e-%201%29%7b%7dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%5e2%20x%3b%5cn%28f%5e-2%29%20%7b%7dx%20%3b%20%28f%5e-%201%29%7b%7dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\tan^2 x; (f^-2) {}x ; (f^- 1){}x 
+\tan^2 x;
+(f^-2) {}x ; (f^- 1){}x 
 ```
 Provided that n is not equal to - 1 and f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}= (f{}x)^n.
 
@@ -1889,7 +1919,7 @@ In for the expression a \cup (b\cup c) the expression a\cup b can be reduced to 
 ```
 If the union of two intervals is one interval, replaces the interval. 
 
-*\cup* [UnionEmptySet] {CalculatorFunctions::unionEmptySet}. 
+*\cup* [UnionEmptySet] {CalculatorFunctionsListsAndSets::unionEmptySet}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%5b3%2c%207%29%20%5c%5ccup%20%5c%5cemptyset%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
@@ -1897,14 +1927,14 @@ If the union of two intervals is one interval, replaces the interval.
 ```
 Takes union with the empty set. 
 
-*\cup* [\cup] {CalculatorFunctions::union}. 
+*\cup* [\cup] {CalculatorFunctionsListsAndSets::union}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%5c%5ccup%20%28MakeSequence%7b%7d%20x%20%5c%5ccup%20MakeSequence%7b%7dx%20%5c%5ccup%20%28a%2cb%2cx%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x\cup (MakeSequence{} x \cup MakeSequence{}x \cup (a,b,x))
 ```
 If all arguments of \cup are of type list, substitutes the expression with a list containing the union of all members (with repetition). If a flag is set requesting that (a,b) is interpreted as an interval, does nothing if either of the two sequences has two elements.
 
-*\sqcup* [\sqcup] {CalculatorFunctions::unionNoRepetition}. 
+*\sqcup* [\sqcup] {CalculatorFunctionsListsAndSets::unionNoRepetition}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28x%2cy%2cx%29%5c%5csqcup%281%2cx%2cy%2c2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (x,y,x)\sqcup(1,x,y,2)
@@ -1913,7 +1943,7 @@ If all arguments of \sqcup are of type list, substitutes the expression with a l
 
 Operator or function \cap is overloaded with 4 total handlers.
 
-*\cap* [IntersectUnion] {CalculatorFunctions::intersectUnion}. 
+*\cap* [IntersectUnion] {CalculatorFunctionsListsAndSets::intersectUnion}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%28%5b3%2c%207%29%20%5c%5ccup%20%289%2c%2010%29%29%20%5c%5ccap%20%284%2c%208.5%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
@@ -1929,7 +1959,7 @@ Intersects with the empty set.
 ```
 Intersects with the empty set. 
 
-*\cap* [InersectIntervals] {CalculatorFunctions::intersectIntervals}. 
+*\cap* [InersectIntervals] {CalculatorFunctionsIntervals::intersectIntervals}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%5b3%2c%207%29%20%5c%5ccup%20%5b6%2c%208%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
@@ -1937,7 +1967,7 @@ Intersects with the empty set.
 ```
 Intersects two intervals. 
 
-*\cap* [\cap] {CalculatorFunctions::intersection}. 
+*\cap* [\cap] {CalculatorFunctionsListsAndSets::intersection}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2cb%2cc%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%5cnx%20%3d%20%28a%2cb%2cc%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%5cna%20%3d%201%3b%5cnd%20%3d1%3b%5cn%28a%2c%20b%2c%20c%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a,b,c)\cap (c, d, e);
@@ -2003,17 +2033,22 @@ Operator or function LogBase is overloaded with 3 total handlers.
 ```
 Converts \log_e A to \ln A. 
 
-*LogBase* [LogBaseSimpleCases] {CalculatorFunctions::logarithmBaseSimpleCases}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog_5%2025%3b%20log_5%201%3b%20log_5%20%281%2f5%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*LogBase* [LogBaseSimpleCases] {CalculatorFunctionsBasic::logarithmBaseSimpleCases}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog_5%2025%3b%5cnlog_5%201%3b%5cnlog_5%20%281%2f5%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\log_5 25; log_5 1; log_5 (1/5)
+\log_5 25;
+log_5 1;
+log_5 (1/5)
 ```
 If the argument is a power of the base does the computation. 
 
-*LogBase* [LogBase] {CalculatorFunctions::logarithmBase}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog_10%205%3b%20%5c%5clog%20_e%2010%3b%20%5c%5cln%2010%3b%20%5c%5clog_a%20b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*LogBase* [LogBase] {CalculatorFunctionsBasic::logarithmBase}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog_10%205%3b%5cn%5c%5clog%20_e%2010%3b%5cn%5c%5cln%2010%3b%5cn%5c%5clog_a%20b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\log_10 5; \log _e 10; \ln 10; \log_a b
+\log_10 5;
+\log _e 10;
+\ln 10;
+\log_a b
 ```
 Logarithm function (arbitrary base). Equivalent to \log_{{a}} {{b}}= (\log b)/(\log a). 
 
@@ -2031,7 +2066,7 @@ Integrates a definite integral.
 ```
 \int \left( \frac{x(x + 1)}{2} \right)^2 dx 
 ```
-Attempts to rearrange into standard polynomial form and then integrate.  
+Attempts to rearrange into standard polynomial form and then integrate.
 
 *\int* [IntegratePowerRule] {CalculatorFunctionsIntegration::integrateXnDiffX}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2049,9 +2084,9 @@ Integrates x^n dx.
 If a is a number, integrates e^{a x} dx. 
 
 *\int* [IntegratePullConstant] {CalculatorFunctionsIntegration::integratePullConstant}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%202%5c%5csqrt%7b2-x%5e2%7d%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%202%5c%5csqrt%7b2-x%5e2%7d%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\int 2\sqrt{2-x^2} dx 
+\int 2\sqrt{2-x^2} dx
 ```
 Pulls out constants from integrals  
 
@@ -2067,14 +2102,14 @@ Integrates \int \sqrt{a-x^2}dx, a > 0.
 ```
 \int 2\sqrt{3x^2-5} dx 
 ```
-Integrates \int \sqrt{x^2-a}dx, a > 0.  
+Integrates \int \sqrt{x^2-a}dx, a > 0.
 
 *\int* [IntegrateXpowerNePowerAx] {CalculatorFunctionsIntegration::integrateXpowerNePowerAx}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%202%20x%5e%7b3%7d%20e%5e%7b5x%7d%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int 2 x^{3} e^{5x} dx 
 ```
-Integrates by parts \int x^n e^{a x} dx, where n is a positive integer.  
+Integrates by parts \int x^n e^{a x} dx, where n is a positive integer.
 
 *\int* [IntegrateSinPowerNCosPowerM] {CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%5c%5csin%5e%7b4%7dx%20%5c%5ccos%5e%7b6%7dx%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2110,35 +2145,35 @@ Pulls out the imaginary unit in front of the integral.
 ```
 \int (\frac{3}{(x / 2 - 1)}) dx 
 ```
-Integrates building block Ia.  
+Integrates building block Ia.
 
 *\int* [IntegrateBlockIb] {CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%28%5c%5cfrac%7b2%7d%7b%283x-%201%29%5e2%7d%29%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int (\frac{2}{(3x- 1)^2}) dx 
 ```
-Integrates building block Ib.  
+Integrates building block Ib.
 
 *\int* [IntegrateBlockIIaIIIa] {CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaandIIIa}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%28%5c%5cfrac%7b3x%20%2b%202%7d%7bx%5e2%20%2b%20x%20%2b%201%7d%29%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int (\frac{3x + 2}{x^2 + x + 1}) dx 
 ```
-Integrates building blocks IIa and IIIa.  
+Integrates building blocks IIa and IIIa.
 
 *\int* [IntegrateBlockIIIb] {CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%28%5c%5cfrac%7b3x%20%2b%202%7d%7b%28x%5e2%20%2b%20x%20%2b%201%29%5e2%7d%29%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int (\frac{3x + 2}{(x^2 + x + 1)^2}) dx 
 ```
-Integrates building blocks IIIb.  
+Integrates building blocks IIIb.
 
 *\int* [IntegrateBlockIIb] {CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%28%5c%5cfrac%7b3x%20%2b%202%7d%7b%28x%5e2%20%2b%20x%20%2b%201%29%5e2%7d%29%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int (\frac{3x + 2}{(x^2 + x + 1)^2}) dx 
 ```
-Integrates building blocks IIb.  
+Integrates building blocks IIb.
 
 *\int* [IntegratePartialFractions] {CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%5c%5cfrac%7b1%7d%7bx%28x%20%2b%201%29%7d%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2182,24 +2217,30 @@ x = ElementWeylAlgebraPoly{}(\partial, x);\partial = ElementWeylAlgebraDO{}(\par
 ```
 Differential operation acting on a polynomial. 
 
-*[)* [[)] {CalculatorFunctions::intervalToSequence}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%20PlotExpressionTree%5b1%2c2%29%3b%20PlotExpressionTree%281%2c2%5d%3b%20PlotExpressionTree%5b1%2c2%5d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*[)* [[)] {CalculatorFunctions::intervalLeftClosedFromSequence}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%20PlotExpressionTree%5b1%2c2%29%3b%5cnPlotExpressionTree%281%2c2%5d%3b%5cnPlotExpressionTree%5b1%2c2%5d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];
+%UseBracketForIntervals PlotExpressionTree[1,2);
+PlotExpressionTree(1,2];
+PlotExpressionTree[1,2];
 ```
 Internal data structure transformation: sequence ->left-closed interval.
 
-*(]* [(]] {CalculatorFunctions::intervalToSequence}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%20PlotExpressionTree%5b1%2c2%29%3b%20PlotExpressionTree%281%2c2%5d%3b%20PlotExpressionTree%5b1%2c2%5d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*(]* [(]] {CalculatorFunctions::intervalRightClosedFromSequence}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%20PlotExpressionTree%5b1%2c2%29%3b%5cnPlotExpressionTree%281%2c2%5d%3b%5cnPlotExpressionTree%5b1%2c2%5d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];
+%UseBracketForIntervals PlotExpressionTree[1,2);
+PlotExpressionTree(1,2];
+PlotExpressionTree[1,2];
 ```
 Internal data structure transformation: sequence ->right-closed interval.
 
-*IntervalClosed* [IntervalClosed] {CalculatorFunctions::intervalToSequence}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%20PlotExpressionTree%5b1%2c2%29%3b%20PlotExpressionTree%281%2c2%5d%3b%20PlotExpressionTree%5b1%2c2%5d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*IntervalClosed* [IntervalClosed] {CalculatorFunctions::intervalClosedFromSequence}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%20PlotExpressionTree%5b1%2c2%29%3b%5cnPlotExpressionTree%281%2c2%5d%3b%5cnPlotExpressionTree%5b1%2c2%5d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];
+%UseBracketForIntervals PlotExpressionTree[1,2);
+PlotExpressionTree(1,2];
+PlotExpressionTree[1,2];
 ```
 Internal data structure transformation: sequence ->closed interval.
 
@@ -2211,9 +2252,10 @@ Internal data structure transformation: sequence ->closed interval.
 Internal data structure transformation: sequence ->open interval.
 
 *\log* [\log] {CalculatorFunctionsBasic::logarithm}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog%7b%7d%28e%29%3b%20%5c%5clog%2010%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5clog%7b%7d%28e%29%3b%5cn%5c%5clog%2010%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\log{}(e); \log 10
+\log{}(e);
+\log 10
 ```
 Logarithm function. Gives a decimal approximation of the natural logarithm provided the input is a double number. 
 
@@ -2306,10 +2348,13 @@ ln(2)
 ```
 Turns on numerical approximations. Will wipe out the expression cache. Takes as input dummy argument. 
 
-*TurnOffApproximations* [TurnOffApproximations] {CalculatorConversions::turnOnRules}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%20ln%282%29%3b%20TurnOnApproximations%280%29%3b%20ln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*TurnOffApproximations* [TurnOffApproximations] {CalculatorConversions::turnOffApproximations}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%5cnln%282%29%3b%5cnTurnOnApproximations%280%29%3b%5cnln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)
+TurnOffApproximations(0);
+ln(2);
+TurnOnApproximations(0);
+ln(2)
 ```
 Turns on numerical approximations. Takes as input dummy argument. 
 
@@ -2353,9 +2398,12 @@ SetInputBox(name = a, value = 3); MakeInputBox(name = a)
 Sets value for input box that overrides the input box (no box is displayed). 
 
 *Thaw* [Thaw] {CalculatorFunctions::thaw}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3dFreeze%7b%7d%281%20%2b%201%29%3b%20Thaw%20a%3b%20c%20%3dThaw%28Freeze%28a%2cb%29%29%3b%20PlotExpressionTree%20c%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3dFreeze%7b%7d%281%20%2b%201%29%3b%5cnThaw%20a%3b%5cnc%20%3dThaw%28Freeze%28a%2cb%29%29%3b%5cnPlotExpressionTree%20c%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-a =Freeze{}(1 + 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c
+a =Freeze{}(1 + 1);
+Thaw a;
+c =Thaw(Freeze(a,b));
+PlotExpressionTree c
 ```
 If the argument is frozen, removes the top freeze command and returns the argument, else returns the argument unchanged.
 
@@ -2373,7 +2421,7 @@ LogEvaluationSteps((x +2)(x +3))
 ```
 Show a step-by step evaluation of the calculator. Some steps my be combined or omitted for improved human readability. 
 
-*FlattenCommandEnclosuresOneLayer* [FlattenCommandEnclosuresOneLayer] {Calculator::flattenCommandEnclosuresOneLayeR}. 
+*FlattenCommandEnclosuresOneLayer* [FlattenCommandEnclosuresOneLayer] {CalculatorBasics::flattenCommandEnclosuresOneLayer}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FlattenCommandEnclosuresOneLayer%28CommandEnclosure%7b%7d%28x%20%3d%205%3b%20x%29%3b%20CommandEnclosure%7b%7d%28y%3b%20x%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x = 5; x); CommandEnclosure{}(y; x))
@@ -2381,17 +2429,19 @@ FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x = 5; x); CommandEnclosure{
 Flattens command enclosures. 
 
 *ChildExpression* [ChildExpression] {CalculatorFunctions::childExpression}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ChildExpression%28e%5ex%2c%201%29%3b%20ChildExpression%28e%5ex%2c%202%29%3b%20ChildExpression%28e%5ex%2c%203%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ChildExpression%28e%5ex%2c%201%29%3b%5cnChildExpression%28e%5ex%2c%202%29%3b%5cnChildExpression%28e%5ex%2c%203%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)
+ChildExpression(e^x, 1);
+ChildExpression(e^x, 2);
+ChildExpression(e^x, 3)
 ```
 If defined, returns the nth child of an expression.
 
 *ToString* [ToString] {CalculatorFunctions::expressionToString}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ToString%28%20e%5ex%29%3b%20%5cn%20%5c%22e%5ex%5c%22%3b%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.%5c%22%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ToString%28%20e%5ex%29%3b%5cn%5c%22e%5ex%5c%22%3b%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.%5c%22%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-ToString( e^x); 
- "e^x";"The quick brown fox jumps over the lazy dog."
+ToString( e^x);
+"e^x";"The quick brown fox jumps over the lazy dog."
 ```
 Transforms an arbitrary expression to its string representation. The string representation is (supposed to be) LaTeX-compatible. 
 
@@ -2472,9 +2522,10 @@ ApplyToList(SolveForX,(x^2 + 1, x^2 - x - 2))
 Applies a transformation to each element of a list. 
 
 *Denominator* [Denominator] {CalculatorFunctions::denominator}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Denominator%28a%2fb%29%3b%20Denominator%281%2b%201%2fx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Denominator%28a%2fb%29%3b%5cnDenominator%281%2b%201%2fx%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-Denominator(a/b); Denominator(1+ 1/x)
+Denominator(a/b);
+Denominator(1+ 1/x)
 ```
 If the expression is a fraction, returns the denominator, else returns 1. 
 
@@ -2553,20 +2604,24 @@ IsDifferentialOneFormOneVariable(x {\text{d}} y);
 IsDifferentialOneFormOneVariable(\frac{\text{d} y}{y});
 IsDifferentialOneFormOneVariable(1/(\text{d} y));
 ```
-Tests whether the expression is a differential form in one variable.  
+Tests whether the expression is a differential form in one variable. 
 
-*Polynomialize* [Polynomialize] {CalculatorFunctions::outerPolynomializE}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22C%20%3d%20%28c%20a%20%2b%20a%20b%20%2b%20b%20c%20%2b%201%29%5e3%3b%5cnA%20%3d%20Polynomialize%28C%29%3b%20B%20%3d%20MakeExpression%28Polynomial%28C%29%29%3b%20A%20-%20B%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*Polynomialize* [Polynomialize] {CalculatorFunctions::polynomialize}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22C%20%3d%20%28c%20a%20%2b%20a%20b%20%2b%20b%20c%20%2b%201%29%5e3%3b%5cnA%20%3d%20Polynomialize%28C%29%3b%5cnB%20%3d%20MakeExpression%28Polynomial%28C%29%29%3b%5cnA%20-%20B%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 C = (c a + a b + b c + 1)^3;
-A = Polynomialize(C); B = MakeExpression(Polynomial(C)); A - B
+A = Polynomialize(C);
+B = MakeExpression(Polynomial(C));
+A - B
 ```
 Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).
 
 *IsAlgebraicRadical* [IsAlgebraicRadical] {CalculatorFunctionsAlgebraic::isAlgebraicRadical}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsAlgebraicRadical%28%5c%5csqrt%7b5%20%2b%20%5c%5csqrt%7b2%7d%7d%29%3b%20IsAlgebraicRadical%28%5c%5csqrt%7bx%7d%29%3b%20IsAlgebraicRadical%28%5c%5csqrt%7b%5c%5cpi%20%2b%20e%20%2b%201%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsAlgebraicRadical%28%5c%5csqrt%7b5%20%2b%20%5c%5csqrt%7b2%7d%7d%29%3b%5cnIsAlgebraicRadical%28%5c%5csqrt%7bx%7d%29%3b%5cnIsAlgebraicRadical%28%5c%5csqrt%7b%5c%5cpi%20%2b%20e%20%2b%201%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-IsAlgebraicRadical(\sqrt{5 + \sqrt{2}}); IsAlgebraicRadical(\sqrt{x}); IsAlgebraicRadical(\sqrt{\pi + e + 1})
+IsAlgebraicRadical(\sqrt{5 + \sqrt{2}});
+IsAlgebraicRadical(\sqrt{x});
+IsAlgebraicRadical(\sqrt{\pi + e + 1})
 ```
 Tests whether the expression is an algebraic expression obtained using radicals and the four arithmetic operations.  
 
@@ -2576,13 +2631,13 @@ Tests whether the expression is an algebraic expression obtained using radicals 
 IsReal(\sqrt{5 + \sqrt{- 1}}); IsReal(\sqrt{\sqrt{5} - 1});
 IsReal(sqrt(\sqrt{\pi} - 2) )
 ```
-Tests whether the expression is a real constant.  
+Tests whether the expression is a real constant. 
 
 *IsConstant* [IsConstant] {CalculatorFunctions::isConstant}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsConstant%28%5c%5cpi%5e2%29%3b%20IsConstant%281%29%3bIsConstant%28x%29%3b%5cnIsConstant%28e%5e%7b%5c%5csin%28%5c%5cpi%5e2%20%2b%20e%20%2b%5c%5csqrt%7b2%7d%20%2b%203%29%7d%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsConstant%28%5c%5cpi%5e2%29%3b%20IsConstant%281%29%3bIsConstant%28x%29%3b%5cnIsConstant%28e%5e%7b%5c%5csin%28%5c%5cpi%5e2%20%2b%20e%20%2b%5c%5csqrt%7b2%7d%20%2b%203%29%7d%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 IsConstant(\pi^2); IsConstant(1);IsConstant(x);
-IsConstant(e^{\sin(\pi^2 + e +\sqrt{2} + 3)}); 
+IsConstant(e^{\sin(\pi^2 + e +\sqrt{2} + 3)});
 ```
 Tests whether the expression is a constant.  
 
@@ -2595,7 +2650,7 @@ TurnOnRules("SineOfAngleSum"); \sin(a + b)
 ```
 Implementation of sin (a + b) = sin(a) cos(b) + cos(a) sin(b).
 
-*\sin* [ExpressSinViaExponent] {CalculatorFunctions::convertSineToExponent}. 
+*\sin* [ExpressSinViaExponent] {CalculatorFunctionsTrigonometry::convertSineToExponent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22ExpressSinViaExponent%5c%22%2c%20%5c%22ExpressCosViaExponent%5c%22%29%3b%5cn%5c%5csin%20x%3b%5cncos%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOnRules("ExpressSinViaExponent", "ExpressCosViaExponent");
@@ -2612,7 +2667,7 @@ sin(- 5x)
 ```
 If a is negative, converts sin (a) to -sin(-a).
 
-*\sin* [Sine] {CalculatorFunctions::sin}. 
+*\sin* [Sine] {CalculatorFunctionsTrigonometry::sin}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csin%7b%7d%283.1415%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sin{}(3.1415)
@@ -2646,7 +2701,7 @@ cos(- 5x)
 ```
 If a is negative, converts cos (a) to cos(- a).
 
-*\cos* [Cosine] {CalculatorFunctions::cos}. 
+*\cos* [Cosine] {CalculatorFunctionsTrigonometry::cos}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ccos%7b%7d%283.1415%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \cos{}(3.1415)
@@ -2690,14 +2745,14 @@ Differentiate(x, f / g);
 Differentiate(x, f / g^5);
 Differentiate(x, f / g^n)
 ```
-Differentiation - division rule, commutative. For the time being differentiation is assumed to be over commutative rings. This might change in the future. The commutative division rule is d/dx (f/g^n) = ((d/dx f) g - n f (d/dx g))/g^{n + 1}. 
+Differentiation - division rule, commutative. For the time being differentiation is assumed to be over commutative rings. This might change in the future. The commutative division rule is d/dx (f/g^n) = ((d/dx f) g - n f (d/dx g))/g^{n + 1}.
 
 *Differentiate* [DifferentiateSum] {CalculatorFunctions::differentiateAplusB}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Differentiate%28x%2c%20f%20%2b%20g%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Differentiate(x, f + g)
 ```
-Differentiation - sum rule.  
+Differentiation - sum rule.
 
 *Differentiate* [DifferentiateConstant] {CalculatorFunctions::differentiateConstant}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Differentiate%28x%2c%205%20%29%3b%5cnd%2fdx%20%5c%5csqrt%7b5%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2715,7 +2770,7 @@ Differentiate(x, x )
 ```
 Differentiation - d/dx x = 1.
 
-*Differentiate* [DifferentiateConstPower] {CalculatorFunctions::differentiateConstPower}. 
+*Differentiate* [DifferentiateConstPower] {CalculatorFunctionsDifferentiation::differentiateConstPower}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Differentiate%28x%2c%20x%5e2%20%29%3b%5cnd%2fdx%20x%5e-%201%3b%5cnd%2fdt%20t%5e%7b%5c%5csqrt%7b2%7d%7d%3b%5cnd%2fdc%20c%5e%7bDoubleValue%203.14%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Differentiate(x, x^2 );
@@ -2733,7 +2788,7 @@ d/dx x^- 1;
 d/dt t^{\sqrt{2}};
 d/dc c^{DoubleValue 3.14}
 ```
-Differentiation - d/dx a^b = d/dx(e^{b\log a}) = a^b d/dx(b\log a) .
+Differentiation: d/dx a^b = d/dx(e^{b\log a}) = a^b d/dx(b\log a) .
 
 *Differentiate* (_composite_) [DifferentiateLog] {CalculatorFunctions::compositeDifferentiateLog}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22d%2fdx%20%28%5c%5clog%20x%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2749,7 +2804,7 @@ MakeRationalFunction{}(x_1 + MakeRationalFunction{}x_1 + x_2)
 ```
 Creates a built-in rational function.
 
-*MakeMatrix* [MakeMatrix] {CalculatorConversions::matrixRational}. 
+*MakeMatrix* [MakeMatrix] {CalculatorConversions::makeMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_1%20%3d%20MakeMatrix%7b%7d%28%28-%201%2c-%201%2c%200%2c%200%29%2c%20%280%2c%201%2c%200%2c%200%29%2c%20%280%2c%200%2c%201%2c%200%29%2c%20%280%2c%200%2c%200%2c%201%29%29%3b%5cns_2%20%3d%20MakeMatrix%7b%7d%28%281%2c%200%2c%200%2c%200%29%2c%20%28-%201%2c%20-%201%2c%20-%201%2c%200%29%2c%20%280%2c%200%2c%201%2c%200%29%2c%20%280%2c%200%2c%200%2c%201%29%29%3b%5cns_3%20%3d%20MakeMatrix%7b%7d%28%281%2c%200%2c%200%2c%200%29%2c%20%280%2c%201%2c%200%2c%200%29%2c%20%280%2c%20-%202%2c%20-%201%2c%20-%201%29%2c%20%280%2c%200%2c%200%2c%201%29%29%3b%5cns_4%20%3d%20MakeMatrix%7b%7d%28%281%2c%200%2c%200%2c%200%29%2c%20%280%2c%201%2c%200%2c%200%29%2c%20%280%2c%200%2c%201%2c%200%29%2c%20%280%2c%200%2c%20-%201%2c%20-%201%29%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_1 = MakeMatrix{}((- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
@@ -2759,7 +2814,7 @@ s_4 = MakeMatrix{}((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, - 1, - 1));
 ```
 Creates an internal c++ matrix structure from double list of rationals. 
 
-*MakeMatrixTensorForm* [MakeMatrixTensorForm] {CalculatorConversions::matrixRationalTensorForM}. 
+*MakeMatrixTensorForm* [MakeMatrixTensorForm] {CalculatorConversions::matrixRationalTensorForm}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_1%20%3d%20MakeMatrixTensorForm%7b%7d%28%5cn%28-%201%2c-%201%2c%200%2c%200%29%2c%5cn%280%2c%201%2c%200%2c%200%29%2c%5cn%280%2c%200%2c%201%2c%200%29%2c%5cn%280%2c%200%2c%200%2c%201%29%5cn%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_1 = MakeMatrixTensorForm{}(
@@ -2787,9 +2842,10 @@ EnsureExpressionDependsOnlyOn(\sin (\ln x) x y, x);
 Ensures the expression in the first argument depends only on the free variables given in the remaining arguments. Returns a warning string if that is not the case, else returns an empty string. Intended to warn users of potentially mistyped expressions. 
 
 *EnsureExpressionDependsMandatoryVariables* [EnsureExpressionDependsMandatoryVariables] {CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22EnsureExpressionDependsMandatoryVariables%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20x%2c%20y%29%3b%20EnsureExpressionDependsMandatoryVariables%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20%20%28x%2cy%2cz%29%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22EnsureExpressionDependsMandatoryVariables%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20x%2c%20y%29%3b%5cnEnsureExpressionDependsMandatoryVariables%28%5c%5csin%20%28%5c%5cln%20x%29%20x%20y%2c%20%20%28x%2cy%2cz%29%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-EnsureExpressionDependsMandatoryVariables(\sin (\ln x) x y, x, y); EnsureExpressionDependsMandatoryVariables(\sin (\ln x) x y,  (x,y,z) );
+EnsureExpressionDependsMandatoryVariables(\sin (\ln x) x y, x, y);
+EnsureExpressionDependsMandatoryVariables(\sin (\ln x) x y,  (x,y,z) );
 ```
 Similar to EnsureExpressionDependsOnlyOn, but requests that the expression depend on two lists, first with mandatory variables, second with non-mandatory. 
 
@@ -2803,14 +2859,14 @@ Same as EnsureExpressionDependsMandatoryVariables including named constants such
 
 Operator or function \arcsin is overloaded with 2 total handlers.
 
-*\arcsin* [arcsinAlgebraic] {CalculatorFunctions::arcsinAlgebraic}. 
+*\arcsin* [arcsinAlgebraic] {CalculatorFunctionsTrigonometry::arcsinAlgebraic}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carcsin%281%2f2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \arcsin(1/2)
 ```
 Arcsin function for special angles. 
 
-*\arcsin* [\arcsin] {CalculatorFunctions::arcsin}. 
+*\arcsin* [\arcsin] {CalculatorFunctionsTrigonometry::arcsin}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carcsin%283%2f4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \arcsin(3/4)
@@ -2819,45 +2875,49 @@ Arcsin function. Tries to evaluate the arcsin function.
 
 Operator or function \arccos is overloaded with 2 total handlers.
 
-*\arccos* [arccosAlgebraic] {CalculatorFunctions::arccosAlgebraic}. 
+*\arccos* [arccosAlgebraic] {CalculatorFunctionsTrigonometry::arccosAlgebraic}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carccos%28%5c%5csqrt%7b2%7d%2f2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \arccos(\sqrt{2}/2)
 ```
 Arccos function for special angles. 
 
-*\arccos* [\arccos] {CalculatorFunctions::arccos}. 
+*\arccos* [\arccos] {CalculatorFunctionsTrigonometry::arccos}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carccos%283%2f4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \arccos(3/4)
 ```
 Arccos function. Tries to evaluate the arccos function. 
 
-*\tan* [ExpressTanViaSineCosine] {CalculatorFunctions::tan}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%7b%7d%283.1415%29%3b%20%5c%5ctan%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\tan* [ExpressTanViaSineCosine] {CalculatorFunctionsTrigonometry::tan}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%7b%7d%283.1415%29%3b%5cn%5c%5ctan%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\tan{}(3.1415); \tan 1.570796327
+\tan{}(3.1415);
+\tan 1.570796327
 ```
 Tangent function. Substitutes \tan{}{{x}}=\sin{}x/\cos x. 
 
-*\cot* [ExpressCotViaSineCosine] {CalculatorFunctions::cotangent}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ccot%7b%7d%283.1415%29%3b%20%5c%5ccot%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\cot* [ExpressCotViaSineCosine] {CalculatorFunctionsTrigonometry::cotangent}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ccot%7b%7d%283.1415%29%3b%5cn%5c%5ccot%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\cot{}(3.1415); \cot 1.570796327
+\cot{}(3.1415);
+\cot 1.570796327
 ```
 Tangent function. Substitutes \tan{}{{x}}=\cos{}x/\sin x. 
 
-*\csc* [ExpressCscViaSine] {CalculatorFunctions::csc}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ccsc%7b%7d%283.1415%29%3b%20%5c%5ccsc%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\csc* [ExpressCscViaSine] {CalculatorFunctionsTrigonometry::csc}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ccsc%7b%7d%283.1415%29%3b%5cn%5c%5ccsc%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\csc{}(3.1415); \csc 1.570796327
+\csc{}(3.1415);
+\csc 1.570796327
 ```
 Cosecant function. Substitutes \csc{}{{x}}=1/\sin x. 
 
-*\sec* [ExpressSecViaCosine] {CalculatorFunctions::sec}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csec%7b%7d%283.1415%29%3b%20%5c%5csec%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\sec* [ExpressSecViaCosine] {CalculatorFunctionsTrigonometry::sec}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csec%7b%7d%283.1415%29%3b%5cn%5c%5csec%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\sec{}(3.1415); \sec 1.570796327
+\sec{}(3.1415);
+\sec 1.570796327
 ```
 Secant function. Substitutes \sec{}{{x}}=1/\sec x. 
 
@@ -2889,7 +2949,7 @@ ModP{}(7, 3)
 ```
 Number modulo P. First argument = number, second argument = modulo.
 
-*GCD* [GCD] {CalculatorFunctions::leastCommonMultipleInteger}. 
+*GCD* [GCD] {CalculatorFunctions::greatestCommonDivisorInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GCD%28100%21%2b%201%2c%20101%20%2a%20103%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GCD(100!+ 1, 101 * 103)
@@ -2904,7 +2964,7 @@ LCM(91, 1001)
 Least common multiple of two integers.
 
 *GCDPoly* [GCDPoly] {CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GCDPoly%7b%7d%28x%5e3-1%2c%20x%5e2-1%29%5cn%3bGCDPoly%7b%7d%282%2f3x%5e3-2%2f3%2c%2010x%5e2-10%29%5cn%3bGCDPoly%28%20%28a%5e2-b%5e2%29%28a%5e3-b%5e3%29%2c%20%28a%5e4-b%5e4%29%28a%5e5-b%5e5%29%29%3b%5cnGCDPoly%28PolynomialModP%28%28x%5e2%2b3%29%28x%5e3%2b1%29%2c%207%29%2c%20PolynomialModP%28%28x%5e2%2b3%29%28x%5e3%2bx%2b1%29%2c%207%29%29%3b%5cnf%3dPolynomialModP%7b%7d%28x%5e%7b5%7d%2bx%5e%7b4%7d%2b3x%5e%7b3%7d%2bx%5e%7b2%7d%2bx%20%2b3%2c7%29%3b%5cny%3dPolynomialModP%7b%7d%283x%5e%7b4%7d%2b2x%5e%7b3%7d%2b3x%20%2b3%2c7%29%3b%5cnGCDPoly%28f%2c%20y%29%3b%5cnGCDPoly%7b%7d%28x%20y%2c%20y%2bx%20z%29%3b%5cnGCDPoly%7b%7d%28-x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b3%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b%202x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b17%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b17%7d%5e%7b2%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2c%20x_%7b13%7d%5e%7b3%7dx_%7b15%7dx_%7b18%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b3%7dx_%7b17%7d%5e%7b2%7dx_%7b21%7d%5e%7b3%7d-%204x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d-%202x_%7b13%7d%5e%7b3%7dx_%7b17%7dx_%7b18%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%20%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GCDPoly%7b%7d%28x%5e3-1%2c%20x%5e2-1%29%5cn%3bGCDPoly%7b%7d%282%2f3x%5e3-2%2f3%2c%2010x%5e2-10%29%5cn%3bGCDPoly%28%20%28a%5e2-b%5e2%29%28a%5e3-b%5e3%29%2c%20%28a%5e4-b%5e4%29%28a%5e5-b%5e5%29%29%3b%5cnGCDPoly%28PolynomialModP%28%28x%5e2%2b3%29%28x%5e3%2b1%29%2c%207%29%2c%20PolynomialModP%28%28x%5e2%2b3%29%28x%5e3%2bx%2b1%29%2c%207%29%29%3b%5cnf%3dPolynomialModP%7b%7d%28x%5e%7b5%7d%2bx%5e%7b4%7d%2b3x%5e%7b3%7d%2bx%5e%7b2%7d%2bx%20%2b3%2c7%29%3b%5cny%3dPolynomialModP%7b%7d%283x%5e%7b4%7d%2b2x%5e%7b3%7d%2b3x%20%2b3%2c7%29%3b%5cnGCDPoly%28f%2c%20y%29%3b%5cnGCDPoly%7b%7d%28x%20y%2c%20y%2bx%20z%29%3b%5cnGCDPoly%7b%7d%28-x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b3%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b%202x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b17%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b17%7d%5e%7b2%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2c%20x_%7b13%7d%5e%7b3%7dx_%7b15%7dx_%7b18%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b3%7dx_%7b17%7d%5e%7b2%7dx_%7b21%7d%5e%7b3%7d-%204x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d-%202x_%7b13%7d%5e%7b3%7dx_%7b17%7dx_%7b18%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 GCDPoly{}(x^3-1, x^2-1)
 ;GCDPoly{}(2/3x^3-2/3, 10x^2-10)
@@ -2914,14 +2974,14 @@ f=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);
 y=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);
 GCDPoly(f, y);
 GCDPoly{}(x y, y+x z);
-GCDPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )
+GCDPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2})
 ```
 Greatest common divisor polynomial of two polynomials. The divisor is scaled so that all coefficients are relatively prime integers, and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.) has positive coefficient.
 
 *LCMPoly* [LCMPoly] {CalculatorFunctionsPolynomial::leastCommonMultiplePolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LCMPoly%7b%7d%28-x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b3%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b%202x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b17%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b17%7d%5e%7b2%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2c%20x_%7b13%7d%5e%7b3%7dx_%7b15%7dx_%7b18%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b3%7dx_%7b17%7d%5e%7b2%7dx_%7b21%7d%5e%7b3%7d-%204x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d-%202x_%7b13%7d%5e%7b3%7dx_%7b17%7dx_%7b18%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%20%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LCMPoly%7b%7d%28-x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b3%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b%202x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b17%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2b%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b17%7d%5e%7b2%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%2c%20x_%7b13%7d%5e%7b3%7dx_%7b15%7dx_%7b18%7dx_%7b21%7d%5e%7b2%7dx_%7b22%7d-2x_%7b13%7d%5e%7b3%7dx_%7b17%7d%5e%7b2%7dx_%7b21%7d%5e%7b3%7d-%204x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b15%7dx_%7b17%7dx_%7b21%7d%5e%7b3%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b15%7d%5e%7b2%7dx_%7b16%7dx_%7b21%7d%5e%7b3%7d-%202x_%7b13%7d%5e%7b3%7dx_%7b17%7dx_%7b18%7dx_%7b20%7dx_%7b21%7d%5e%7b2%7d%2b2x_%7b13%7d%5e%7b2%7dx_%7b14%7dx_%7b17%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d-%20x_%7b13%7d%5e%7b2%7dx_%7b15%7dx_%7b16%7dx_%7b18%7dx_%7b19%7dx_%7b21%7d%5e%7b2%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-LCMPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )
+LCMPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2})
 ```
 Least common multiple of two polynomials. The output is scaled so that all coefficients are relatively prime integers, and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.) has positive coefficient.
 
@@ -2948,23 +3008,24 @@ PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;
 Returns the quotients of a polynomial divided by a set of polynomials using the default monomial order (lexicographic).
 
 *PolyDivSlidesGrLex* [PolyDivSlidesGrLex] {Calculator::polynomialDivisionSlidesGrLex}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivSlidesGrLex%7b%7d%281%2c%20x%5e3%20%2b%20x%20%2b%2010%2c%20x%20%2b2%29%20%3b%20PolyDivSlidesGrLex%7b%7d%281%2cx%20%2b%20y%20%2b%2010%2c%20x%20%2b%201%2c%20y%20-%201%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivSlidesGrLex%7b%7d%281%2c%20x%5e3%20%2b%20x%20%2b%2010%2c%20x%20%2b2%29%3b%5cnPolyDivSlidesGrLex%7b%7d%281%2cx%20%2b%20y%20%2b%2010%2c%20x%20%2b%201%2c%20y%20-%201%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2) ; PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) 
+PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2);
+PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) 
 ```
 Creates a slide with the polynomial disivion algorithm. First element = starting slide number.
 
-*PolyDivStringGrLex* [PolyDivStringGrLex] {CalculatorFunctions::polynomialDivisionVerboseGrLex}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringGrLex%7b%7d%28x%5e7%2b6x%20y%2b5x%20y%5e8%2by%5e5%2c%20x%5e2%2b2%2c%20y%5e3-%201%29%20%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PolyDivStringGrLex* [PolyDivStringGrLex] {CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringGrLex%7b%7d%28x%5e7%2b6x%20y%2b5x%20y%5e8%2by%5e5%2c%20x%5e2%2b2%2c%20y%5e3-%201%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;
+PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1);
 ```
 Prints a string representing division of a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. 
 
-*PolyDivStringGrLexRev* [PolyDivStringGrLexRev] {CalculatorFunctions::polynomialDivisionVerboseGradedReverseLexicographic}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringGrLexRev%7b%7d%28x%5e7%2b6x%20y%2b5x%20y%5e8%2by%5e5%2c%20x%5e2%2b2%2c%20y%5e3-%201%29%20%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PolyDivStringGrLexRev* [PolyDivStringGrLexRev] {CalculatorFunctionsPolynomial::polynomialDivisionVerboseGradedReverseLexicographic}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringGrLexRev%7b%7d%28x%5e7%2b6x%20y%2b5x%20y%5e8%2by%5e5%2c%20x%5e2%2b2%2c%20y%5e3-%201%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;
+PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1);
 ```
 String that presents the division of a polynomial by a set of polynomials. Uses the graded reverse lexicographic order. More precisely, compares monomials by total degree. Ties are broken by comparing powers right to left. First **smaller** power on the right is declared the winner ('larger').For example,  x^2 y^3 > x y^4, x^11 > y^10. 
 
@@ -2999,19 +3060,19 @@ NewtonsMethod(e^x = ( 200 sin{} x + x^7), 0, 10);
 Applies Newton's method with a given starting point and given number of iterations.The first argument gives the function whose zeroes we are trying to find. The second argument gives the starting point. The last argument gives the number of iterations of the method. 
 
 *PlotDirectionField* [PlotDirectionField] {CalculatorFunctions::plotDirectionField}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotDirectionField%28%20%28-%20y%2c%20x%29%2c%20%28-%202%2c%20-%202%29%2c%20%282%2c%202%29%2c%20%2820%2c%2020%29%2c%200.2%2c%20blue%2c%201%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotDirectionField%28%28-%20y%2c%20x%29%2c%28-%202%2c%20-%202%29%2c%282%2c%202%29%2c%20%2820%2c%2020%29%2c%200.2%2c%20blue%2c%201%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PlotDirectionField( (- y, x), (- 2, - 2), (2, 2), (20, 20), 0.2, blue, 1);
+PlotDirectionField((- y, x),(- 2, - 2),(2, 2), (20, 20), 0.2, blue, 1);
 ```
 Plots a direction field (in 2d for the time being, 3d coming soon). Direction field is like a vector field except that all vectors are normalized to have the same length. First argument = the vector field. Second, third arguments: bottom left and top right corner of the viewing rectangle. Next argument: (numX,numY,...), where numX is the number of segments along the x axis and so on. Next argument: length of each direction line. Next arguments: color, line width. 
 
 *PlotPolar* [PlotPolar] {CalculatorFunctions::plotPolarRfunctionTheta}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPolar%281%2bsin%20%20t%2c%200%2c%20%5c%5cpi%29%3b%5cnPlotPolar%28%281%20%2b%209%2f10%20cos%288%20t%29%20%29%20%281%20%2b%201%2f10%20cos%20%2824%20t%29%20%29%289%2f10%20%2b%205%2f100%20cos%20%28200%20t%29%29%20%281%20%2b%20sin%20t%29%2c%200%2c%202%5c%5cpi%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPolar%281%2bsin%20%20t%2c%200%2c%20%5c%5cpi%29%3b%5cnPlotPolar%28%281%20%2b%209%2f10%20cos%288%20t%29%20%29%20%281%20%2b%201%2f10%20cos%20%2824%20t%29%29%289%2f10%20%2b%205%2f100%20cos%20%28200%20t%29%29%20%281%20%2b%20sin%20t%29%2c%200%2c%202%5c%5cpi%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotPolar(1+sin  t, 0, \pi);
-PlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\pi)
+PlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t))(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\pi)
 ```
-<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates  in the form r = f(t), where t is the angle variable. The angle variable is measured in degrees. The first argument gives the function, the second and third argument give the upper and lower bounds of the angle. 
+<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form r = f(t), where t is the angle variable. The angle variable is measured in degrees. The first argument gives the function, the second and third argument give the upper and lower bounds of the angle. 
 
 *PlotPolarExtended* [PlotPolarExtended] {CalculatorFunctions::plotPolarRfunctionThetaExtended}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPolarExtended%281%20%2b%20sin%20%20t%2c%200%2c%20%5c%5cpi%29%3b%5cnPlotPolarExtended%28%281%20%2b%209%2f10%20cos%288%20t%29%20%29%20%281%20%2b%201%2f10%20cos%20%2824%20t%29%20%29%5cn%289%2f10%20%2b%205%2f100%20cos%20%28200%20t%29%29%20%281%20%2b%20sin%20t%29%2c%200%2c%202%5c%5cpi%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3059,28 +3120,28 @@ PointsImplicitly((x - 1) (y - 1) - ((x - 1) ^ 2 (y - 1) + 1) ^ 2, (- 2, - 2), (2
 ```
 Returns points on or close to the curve in two dimensions. Same as plotImplicit but rather than plotting the curve returns the (x,y) pairs of points found. The output given as a nx2 matrix of floating point numbers. 
 
-*PlotImplicit* [PlotImplicit] {CalculatorFunctions::plotImplicitFunction}. 
+*PlotImplicit* [PlotImplicit] {CalculatorFunctionsPlot::plotImplicitFunction}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotImplicit%28%28x%20-%201%29%20%28y%20-%201%29%20-%20%28%28x%20-%201%29%5e2%20%28y%20-%201%29%20%2b%201%29%5e2%2c%20%28-%202%2c%20-%202%29%2c%20%282%2c%202%29%2c%20%2810%2c%2010%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotImplicit((x - 1) (y - 1) - ((x - 1)^2 (y - 1) + 1)^2, (- 2, - 2), (2, 2), (10, 10))
 ```
 Plots implicitly a curve given by the zeros of an expression in the letters x and y. The relation between x and y is assumed continuous at the points where it is defined. The function has not been optimized for speed, please use with care. The first argument gives the relation between x and y, the next two arguments give the lower left and upper right corners of the viewing screen in the format (lowLeftX, lowLeftY), (upperRightX, upperRightY). The next argument gives the initial grid precision in the form (numIntervalsVertical, numIntervalsHorizontal). The next two arguments give the width and height of the image in the format (width, height). The last argument is optional and gives an upper limit for the number of triangles to use (max =20000, default =2000). The triangle used to generate the implicit plot is algorithmically chosen.
 
-*PlotImplicitShowGrid* [PlotImplicitShowGrid] {CalculatorFunctions::plotImplicitShowGridFunction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotImplicitShowGrid%28%28x-%201%29%20%28y-%201%29-%28%28x-%201%29%5e2%28y-%201%29%20%2b%201%29%5e2%2c%20%28-2%2c%20-2%29%2c%20%282%2c%202%29%2c%20%2810%2c10%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PlotImplicitShowGrid* [PlotImplicitShowGrid] {CalculatorFunctionsPlot::plotImplicitShowGridFunction}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotImplicitShowGrid%28%28x-%201%29%20%28y-%201%29-%28%28x-%201%29%5e2%28y-%201%29%20%2b%201%29%5e2%2c%28-2%2c%20-2%29%2c%20%282%2c%202%29%2c%20%2810%2c10%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PlotImplicitShowGrid((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2, (-2, -2), (2, 2), (10,10))
+PlotImplicitShowGrid((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2,(-2, -2), (2, 2), (10,10))
 ```
 Same as plotImplicit but shows the underlying grid. The yellow grid is the initial one (specified by the user), and the gray grid is obtained by a subdivision which depends on the concrete function.
 
-*PlotCoordinateSystem* [PlotCoordinateSystem] {CalculatorFunctions::plotCoordinateSystem}. 
+*PlotCoordinateSystem* [PlotCoordinateSystem] {CalculatorFunctionsPlot::plotCoordinateSystem}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotCoordinateSystem%28%28-%203%2c%20-%202%2c%20-%203%29%2c%20%281%2c%205%2c%204%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4));
 ```
-Plots a 3d coordinate system, fitting in a box given by two opposite corners.  
+Plots a 3d coordinate system, fitting in a box given by two opposite corners.
 
-*PlotSetProjectionScreen* [PlotSetProjectionScreen] {CalculatorFunctions::plotSetProjectionScreenBasis}. 
+*PlotSetProjectionScreen* [PlotSetProjectionScreen] {CalculatorFunctionsPlot::plotSetProjectionScreenBasis}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotCoordinateSystem%28%28-%202%2c%20-%202%2c%20-%202%29%2c%20%282%2c%202%2c%202%29%29%5cn%2b%20PlotSetProjectionScreen%28%281%2c%200%2c%20-%200.1%29%2c%20%280%2c%201%2c%20-%200.2%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotCoordinateSystem((- 2, - 2, - 2), (2, 2, 2))
@@ -3088,14 +3149,14 @@ PlotCoordinateSystem((- 2, - 2, - 2), (2, 2, 2))
 ```
 Set the projection screen. Input: two 3d vectors that give the 2d-basis of the viewing screen. 
 
-*PlotSurface* [PlotSurface] {CalculatorFunctions::plotSurface}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%20x%20%3d%20%28R%2bv%2acos%28u%2f2%29%29%2acos%28u%29%3b%5cny%20%3d%20%28R%2bv%2acos%28u%2f2%29%29%2asin%28u%29%3b%5cnz%20%3d%20v%2asin%28u%2f2%29%3b%5cnR%20%3d%20MakeInputBox%20%28name%20%3d%20radiusBig%2c%20value%20%3d%202%2c%20min%20%3d%202%2c%20max%20%3d%205%29%3b%5cnr%20%3d%20MakeInputBox%20%28name%20%3d%20radiusSmall%2c%20value%20%3d%200.6%2c%20min%20%3d%200.2%2c%20max%20%3d%201%2c%20step%20%3d%200.2%29%3b%5cnuSegments%20%3d%20MakeInputBox%28name%20%3d%20uSegments%2c%20value%20%3d%2022%2c%20min%20%3d%208%2c%20max%20%3d%2040%29%3b%5cnvSegments%20%3d%20MakeInputBox%28name%20%3d%20vSegments%2c%20value%20%3d%204%2c%20min%20%3d%202%2c%20max%20%3d%2010%29%3b%5cnPlotSurface%28%5cn%28x%2c%20y%2c%20z%29%2c%20u%20%5c%5cin%20%280%2c%202%5c%5cpi%29%2c%20v%20%5c%5cin%20%28-%20r%2c%20r%29%2c%20%5cncolor1%20%3d%20blue%2c%20color2%20%3d%20cyan%2c%20numSegments1%20%3d%20uSegments%2c%20numSegments2%20%3d%20vSegments%5cn%29%20%2b%20PlotSurface%28%5cn%28%20x%20%2b%202%2c%20z%2c%20y%29%2c%20u%20%5c%5cin%20%280%2c%202%20%5c%5cpi%29%2c%20v%20%5c%5cin%20%28-%20r%2cr%29%2c%20%5cncolor1%20%3d%20red%2c%20color2%20%3d%20pink%2c%20numSegments1%20%3d%20uSegments%2c%20numSegments2%20%3d%20vSegments%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PlotSurface* [PlotSurface] {CalculatorFunctionsPlot::plotSurface}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%20x%20%3d%20%28R%2bv%2acos%28u%2f2%29%29%2acos%28u%29%3b%5cny%20%3d%20%28R%2bv%2acos%28u%2f2%29%29%2asin%28u%29%3b%5cnz%20%3d%20v%2asin%28u%2f2%29%3b%5cnR%3dMakeInputBox%28name%20%3d%20radiusBig%2c%20value%20%3d%202%2c%20min%20%3d%202%2c%20max%20%3d%205%29%3b%5cnr%3dMakeInputBox%28name%20%3d%20radiusSmall%2c%20value%20%3d%200.6%2c%20min%20%3d%200.2%2c%20max%20%3d%201%2c%20step%20%3d%200.2%29%3b%5cnuSegments%20%3d%20MakeInputBox%28name%20%3d%20uSegments%2c%20value%20%3d%2022%2c%20min%20%3d%208%2c%20max%20%3d%2040%29%3b%5cnvSegments%20%3d%20MakeInputBox%28name%20%3d%20vSegments%2c%20value%20%3d%204%2c%20min%20%3d%202%2c%20max%20%3d%2010%29%3b%5cnPlotSurface%28%5cn%28x%2c%20y%2c%20z%29%2c%20u%20%5c%5cin%20%280%2c%202%5c%5cpi%29%2c%20v%20%5c%5cin%20%28-%20r%2c%20r%29%2c%20%5cncolor1%20%3d%20blue%2c%20color2%20%3d%20cyan%2c%20numSegments1%20%3d%20uSegments%2c%20numSegments2%20%3d%20vSegments%5cn%29%20%2b%20PlotSurface%28%5cn%28%20x%20%2b%202%2c%20z%2c%20y%29%2c%20u%20%5c%5cin%20%280%2c%202%20%5c%5cpi%29%2c%20v%20%5c%5cin%20%28-%20r%2cr%29%2c%20%5cncolor1%20%3d%20red%2c%20color2%20%3d%20pink%2c%20numSegments1%20%3d%20uSegments%2c%20numSegments2%20%3d%20vSegments%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %HideLHS x = (R+v*cos(u/2))*cos(u);
 y = (R+v*cos(u/2))*sin(u);
 z = v*sin(u/2);
-R = MakeInputBox (name = radiusBig, value = 2, min = 2, max = 5);
-r = MakeInputBox (name = radiusSmall, value = 0.6, min = 0.2, max = 1, step = 0.2);
+R=MakeInputBox(name = radiusBig, value = 2, min = 2, max = 5);
+r=MakeInputBox(name = radiusSmall, value = 0.6, min = 0.2, max = 1, step = 0.2);
 uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);
 vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);
 PlotSurface(
@@ -3107,37 +3168,37 @@ color1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments)
 ```
  Plots a surface. 
 
-*PlotCurve* [PlotCurve] {CalculatorFunctions::plotParametricCurve}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%20MakeInputBox%28name%20%3d%20%5c%22a%5c%22%2c%20value%20%3d%2012%2c%20min%20%3d%201%2c%20max%20%3d%2025%29%3b%5cnb%20%3d%20MakeInputBox%28name%20%3d%20%5c%22b%5c%22%2c%20value%20%3d%2013%2c%20min%20%3d%201%2c%20max%20%3d%2025%29%3b%5cnPlotFill%28PlotCurve%28%28sin%28a%20t%29%2c%20cos%28b%20t%29%29%2c%200%2c%202%5c%5cpi%2c%20blue%2c%202%2c%202000%29%2c%20pink%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PlotCurve* [PlotCurve] {CalculatorFunctionsPlot::plotParametricCurve}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%20MakeInputBox%28name%20%3d%20%5c%22a%5c%22%2c%20value%20%3d%2012%2c%20min%20%3d%201%2c%20max%20%3d%2025%29%3b%5cnb%20%3d%20MakeInputBox%28name%20%3d%20%5c%22b%5c%22%2c%20value%20%3d%2013%2c%20min%20%3d%201%2c%20max%20%3d%2025%29%3b%5cnPlotFill%28PlotCurve%28%28sin%28a%20t%29%2c%20cos%28b%20t%29%29%2c%200%2c%202%5c%5cpi%2c%20blue%2c%202%2c%202000%29%2c%20pink%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a = MakeInputBox(name = "a", value = 12, min = 1, max = 25);
 b = MakeInputBox(name = "b", value = 13, min = 1, max = 25);
-PlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\pi, blue, 2, 2000), pink) 
+PlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\pi, blue, 2, 2000), pink)
 ```
 Plots a curve sitting in 2-dimensional space. The first and second argument give the x and y coordinate functions; the curve parameter must be t.The third and fourth argument give the start/finish range for t. The next argument gives the curve color. The next argument gives the curve width. The next argument gives the number of points used to draw the curve. 
 
-*PlotSegment* [PlotSegment] {CalculatorFunctions::plotSegment}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotSegment%28%20%281%2c2%29%2c%20%283%2c4%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PlotSegment* [PlotSegment] {CalculatorFunctionsPlot::plotSegment}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotSegment%28%281%2c2%29%2c%20%283%2c4%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PlotSegment( (1,2), (3,4))
+PlotSegment((1,2), (3,4))
 ```
 Plots a segment connecting two points. 
 
-*PlotMarkSegment* [PlotMarkSegment] {CalculatorFunctions::plotMarkSegment}. 
+*PlotMarkSegment* [PlotMarkSegment] {CalculatorFunctionsPlot::plotMarkSegment}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotSegment%28%281%2c%202%29%2c%20%283%2c4%29%29%20%2b%20PlotMarkSegment%28%281%2c%202%29%2c%20%283%2c%204%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotSegment((1, 2), (3,4)) + PlotMarkSegment((1, 2), (3, 4))
 ```
 Plots a segment mark. 
 
-*PlotPath* [PlotPath] {CalculatorFunctions::plotPath}. 
+*PlotPath* [PlotPath] {CalculatorFunctionsPlot::plotPath}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPath%28%28%280%2c%200%29%2c%20%283%2c%200%29%2c%20%283%2c%204%29%2c%20%280%2c%200%29%29%2c%20blue%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)
 ```
 Plots a straight segment path. The path should be enclosed in parentheses, and color must be indicated. 
 
-*PlotSetId* [PlotSetId] {CalculatorFunctions::plotSetId}. 
+*PlotSetId* [PlotSetId] {CalculatorFunctionsPlot::plotSetId}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotSetId%28myId%29%20%2b%20PlotCoordinateSystem%28%28-%203%2c%20-%202%2c%20-%203%29%2c%20%281%2c%205%2c%204%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotSetId(myId) + PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))
@@ -3152,20 +3213,22 @@ MatchesPattern{}(a = b * 10, a = {{c}} * b); MatchesPattern{}(a = b * 10, a = b 
 Checks whether the first argument matches the pattern of the second argument. If no, returns 0. Pattern parametric entries are indicated with the bound variable notation {{a}}. If the expression matches the pattern, the return is a command enclosure in which each of the variables is freed and assigned the matched value. 
 
 *GetVariablesExcludeNamedConstants* [GetVariablesExcludeNamedConstants] {CalculatorFunctions::getFreeVariablesExcludeNamedConstants}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetVariablesExcludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%3b%20GetVariablesIncludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetVariablesExcludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%3b%5cnGetVariablesIncludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\arctan x + x *y + x^y + x^{y^z}); GetVariablesIncludeNamedConstants{}(e^x + x + 5 +\arctan x + x *y + x^y + x^{y^z})
+GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\arctan x + x *y + x^y + x^{y^z});
+GetVariablesIncludeNamedConstants{}(e^x + x + 5 +\arctan x + x *y + x^y + x^{y^z})
 ```
 Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as ``free variables'' but the possibility for small distinctions is reserved (to allow dealing with named constants, reserved keywords, etc.). 
 
 *GetVariablesIncludeNamedConstants* [GetVariablesIncludeNamedConstants] {CalculatorFunctions::getFreeVariablesIncludeNamedConstants}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetVariablesExcludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b5%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2bx%5ey%2bx%5e%7by%5ez%7d%29%3b%20GetVariablesIncludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b5%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2bx%5ey%2bx%5e%7by%5ez%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetVariablesExcludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b5%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2bx%5ey%2bx%5e%7by%5ez%7d%29%3b%5cnGetVariablesIncludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b5%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2bx%5ey%2bx%5e%7by%5ez%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GetVariablesExcludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z}); GetVariablesIncludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z})
+GetVariablesExcludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z});
+GetVariablesIncludeNamedConstants{}(e^x + x +5 +\arctan x + x *y +x^y+x^{y^z})
 ```
 Gets the variables on which the expression depends. Includes the named constants. Here, the word ``variables'' is to be thought of as ``free variables'' but the possibility for small distinctions is reserved (to allow dealing with named constants, reserved keywords, etc.). 
 
-*PlotPoint* [PlotPoint] {CalculatorFunctions::plotPoint}. 
+*PlotPoint* [PlotPoint] {CalculatorFunctionsPlot::plotPoint}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPoint%7b%7d%28%281%2c%202%5c%5cpi%29%2c%20blue%29%3b%5cnPlotPoint%7b%7d%28%28%281%2c%202%29%2c%20%282%2c3%29%29%2c%20blue%29%3b%5cna%20%3d%20MakeInputBox%28name%20%3d%20a%2c%20value%20%3d%203%29%3b%5cnb%20%3d%20MakeInputBox%28name%20%3d%20b%2c%20value%20%3d%205%29%3b%5cnPlotPoint%28%28a%2c%20b%29%2c%20red%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotPoint{}((1, 2\pi), blue);
@@ -3178,22 +3241,22 @@ PlotPoint((a, b), red)
 
 Operator or function Plot2D is overloaded with 2 total handlers.
 
-*Plot2D* [Plot2DoverIntervals] {CalculatorFunctions::plot2DOverIntervals}. 
+*Plot2D* [Plot2DoverIntervals] {CalculatorFunctionsPlot::plot2DOverIntervals}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cnPlot2D%7b%7d%28%5c%5csin%7b%7dx%20%2bcos%7b%7dx%2c%20%5b0%2c%20%5c%5cpi%5d%5c%5ccup%20%5b2%5c%5cpi%2c%203%5c%5cpi%29%2c%20%5c%22blue%5c%22%2c2%2c8%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
 Plot2D{}(\sin{}x +cos{}x, [0, \pi]\cup [2\pi, 3\pi), "blue",2,8)
 ```
-If the second argument is a union of intervals, replaces the plot command with a sum of Plot2d's in which the second and third argument are extracted from each of the intervals. 
+If the second argument is a union of intervals, replaces the plot command with a sum of Plot2d's in which the second and third argument are extracted from each of the intervals.
 
-*Plot2D* [Plot2D] {CalculatorFunctions::plot2D}. 
+*Plot2D* [Plot2D] {CalculatorFunctionsPlot::plot2D}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Plot2D%7b%7d%28%5c%5csin%7b%7dx%20%2bcos%7b%7dx%2c%200%2c%205%2c%20%5c%22blue%5c%22%2c2%2c8%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Plot2D{}(\sin{}x +cos{}x, 0, 5, "blue",2,8)
 ```
-<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form y = f(x). The the second and third argument give the upper and lower bounds of x. The remaining arguments are optional. The next argument specifies color. Next argument gives line width. Next argument gives number of sample points. Plots may be added together- adding plots superimposes the plots. 
+<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form y = f(x). The the second and third argument give the upper and lower bounds of x. The remaining arguments are optional. The next argument specifies color. Next argument gives line width. Next argument gives number of sample points. Plots may be added together: adding plots superimposes the plots. 
 
-*IsPlot* [IsPlot] {CalculatorFunctions::isPlot}. 
+*IsPlot* [IsPlot] {CalculatorFunctionsPlot::isPlot}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%20%5cnIsPlot%28%20Plot2D%7b%7d%28%5c%5csin%7b%7dx%20%2bcos%7b%7dx%2c%20%5b0%2c%20%5c%5cpi%5d%5c%5ccup%20%5b2%5c%5cpi%2c%203%5c%5cpi%29%2c%20%5c%22blue%5c%22%2c2%2c8%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals 
@@ -3201,19 +3264,19 @@ IsPlot( Plot2D{}(\sin{}x +cos{}x, [0, \pi]\cup [2\pi, 3\pi), "blue",2,8))
 ```
 Returns 1 if the argument is a plot, 0 otherwise.
 
-*PlotFill* [PlotFill] {CalculatorFunctions::plotFill}. 
+*PlotFill* [PlotFill] {CalculatorFunctionsPlot::plotFill}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotFill%28Plot2D%7b%7d%28sqrt%281%20-%20x%5e2%29%2c%20-%201%2c%201%2c%20%5c%22blue%5c%22%2c%202%29%20%2b%20Plot2D%28-%20sqrt%281%20-%20x%5e2%29%2c%20-%201%2c%201%29%2c%20%5c%22blue%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotFill(Plot2D{}(sqrt(1 - x^2), - 1, 1, "blue", 2) + Plot2D(- sqrt(1 - x^2), - 1, 1), "blue")
 ```
 Fills a plot with color. 
 
-*PlotRectangle* [PlotRectangle] {CalculatorFunctions::plotRectangle}. 
+*PlotRectangle* [PlotRectangle] {CalculatorFunctionsPlot::plotRectangle}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotRectangle%7b%7d%28%281%2c%202%29%2c%20%282%2c%201%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotRectangle{}((1, 2), (2, 1))
 ```
-Plots a rectangle. Arguments format: PlotRectangle{}((lowerCornerLeftXcoord,  lowerCornerLeftXcoord), (width, height)).
+Plots a rectangle. Arguments format: PlotRectangle{}((lowerCornerLeftXcoord, lowerCornerLeftXcoord), (width, height)).
 
 *PlotGrid* [PlotGrid] {CalculatorFunctionsPlot::plotGrid}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotGrid%7b%7d%280%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3243,7 +3306,7 @@ Plot2D{}(1/x, -30, 30, "red") + PlotViewRectangle((-5,-5), (5,5))
 ```
 Creates an empty plot whose sole purpose is to fix the view rectangle of another plot. To restrict/expand the view rectangle of another plot, simply add PlotViewRectangle to the other plot. Takes as input two pairs of numbers: first pair gives the lower left corner of the viewing rectangle, the second argument gives the upper right corner.
 
-*PlotWindow* [PlotWindow] {CalculatorFunctionsPlot::plotWindow}. 
+*PlotWindow* [PlotWindow] {CalculatorFunctionsPlot::plotViewWindow}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Plot2D%7b%7d%281%2fx%2c%20-30%2c%2030%2c%20%5c%22red%5c%22%29%20%2b%20PlotWindow%28400%2c400%29%20%2b%20PlotViewRectangle%28%28-5%2c-5%29%2c%20%285%2c5%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Plot2D{}(1/x, -30, 30, "red") + PlotWindow(400,400) + PlotViewRectangle((-5,-5), (5,5))
@@ -3266,7 +3329,7 @@ Plot2DWithBars{}(A, B, 0, 5, 1)
 CompareFunctionsNumerically{}(arctan (x), arcsin(x/\sqrt{x^2+ 1}),0, 5,50,0.0001);
 CompareFunctionsNumerically{}(e^x, 1+x +x^2/2+x^3/3!+x^4/4!+x^5/5!+x^6/6!,0, 5,50,0.0001)
 ```
-<b>Calculus teaching function.</b> Compares two one-variable functions numerically. First two arguments give the two functions. Third and fourth arguments give the interval [a,b] over which to compare. Fifth argument is optional (default: 50) and gives the number of sampling points. Sixth argument is optional (default: 0.0001) and gives the numerical tolerance eps- if two numbers are at a distance less than eps they are considered equal. 
+<b>Calculus teaching function.</b> Compares two one-variable functions numerically. First two arguments give the two functions. Third and fourth arguments give the interval [a,b] over which to compare. Fifth argument is optional (default: 50) and gives the number of sampling points. Sixth argument is optional (default: 0.0001) and gives the numerical tolerance eps: if two numbers are at a distance less than eps they are considered equal. 
 
 *CompareExpressionsNumerically* [CompareExpressionsNumerically] {CalculatorFunctions::compareExpressionsNumerically}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CompareExpressionsNumerically%7b%7d%28%5c%5carctan%20x%20%2b%20%5c%5carctan%20y%2c%20%5c%5carctan%28%28x%20%2by%29%2f%281-%20x%20y%29%29%2c%200.0001%2c%20x%5c%5cin%280%2c0.5%29%2c%2020%2c%20y%5c%5cin%280%2c0.5%29%2c%2020%20%29%3b%5cnCompareExpressionsNumerically%7b%7d%28%5c%5carctan%20x%20%2b%20%5c%5carctan%20y%2c%5c%5carctan%28%28x%20%2by%29%2f%281-%20x%20y%29%29%2c%200.0001%2c%20x%5c%5cin%280%2c2%29%2c%2020%2c%20y%5c%5cin%280%2c2%29%2c%2020%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3304,9 +3367,10 @@ f{}b
 If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. 
 
 *IsEven* [IsEven] {CalculatorFunctions::isEven}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22i%5e%7b%7bn%7d%7d%20%3a%20if%20IsEven%20n%20%3d%20%28-%201%29%5e%28n%2f2%29%3b%20i%5e100%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22i%5e%7b%7bn%7d%7d%20%3a%20if%20IsEven%20n%20%3d%20%28-%201%29%5e%28n%2f2%29%3b%5cni%5e100%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-i^{{n}} : if IsEven n = (- 1)^(n/2); i^100 
+i^{{n}} : if IsEven n = (- 1)^(n/2);
+i^100 
 ```
 If the argument has no bound variables, returns 1 if the argument is an even integer, 0 otherwise. 
 
@@ -3319,16 +3383,19 @@ IsSquareFree(12)
 If the argument is an integer, returns 1 if the integer is square-free (no primes in the decomposition of the integer appear with power greater than one) 
 
 *IsPower* [IsPower] {CalculatorFunctions::isPower}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsPower%286%29%3b%20IsPower%288%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsPower%286%29%3b%5cnIsPower%288%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-IsPower(6); IsPower(8)
+IsPower(6);
+IsPower(8)
 ```
 If the argument is an integer, returns 1 if the integer is plus or minus the power of a prime (no primes in the decomposition of the integer appear with power greater than one) 
 
 *IsSquare* [IsSquare] {CalculatorFunctions::isSquare}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsSquare%288%29%3b%20IsSquare%2816%29%3b%20IsSquare%28100%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsSquare%288%29%3b%5cnIsSquare%2816%29%3b%5cnIsSquare%28100%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-IsSquare(8); IsSquare(16); IsSquare(100);
+IsSquare(8);
+IsSquare(16);
+IsSquare(100);
 ```
 If the argument is an integer, returns 1 if the number is the square of an integer. 
 
@@ -3343,7 +3410,7 @@ a{}((2,3))
 ```
 Returns 1 if the input is a non-empty sequence; 0 otherwise. Does not reduce the expression if it has bound variables.
 
-*IsRational* [IsRational] {Calculator::isRational}. 
+*IsRational* [IsRational] {CalculatorFunctions::isRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsRational%7b%7da%3bIsRational%7b%7d-%201%3b%5cnf%7b%7d%7b%7ba%7d%7d%3dIsRational%7b%7da%3b%5cnIsRational%7b%7d1%3b%5cnIsRational%7b%7db%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 IsRational{}a;IsRational{}- 1;
@@ -3353,14 +3420,17 @@ IsRational{}b
 ```
 If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. 
 
-*not* [not] {Calculator::notFunction}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22not%7b%7d1%3bnot%7b%7da%3b%20not%7b%7d0%3b%20not%7b%7d%283%3d%3d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*not* [not] {CalculatorFunctions::notFunction}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22not%7b%7d1%3b%5cnnot%7b%7da%3b%5cnnot%7b%7d0%3b%5cnnot%7b%7d%283%3d%3d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-not{}1;not{}a; not{}0; not{}(3==4)
+not{}1;
+not{}a;
+not{}0;
+not{}(3==4)
 ```
 If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. If the argument is not a small integer, does nothing. 
 
-*DiagonalizeMatrix* [DiagonalizeMatrix] {Calculator::diagonalizeMatrix}. 
+*DiagonalizeMatrix* [DiagonalizeMatrix] {CalculatorFunctionsLinearAlgebra::diagonalizeMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3d%5c%5cbegin%7bpmatrix%7d1%261%5c%5c%5c%5c%201%260%5c%5cend%7bpmatrix%7d%3b%5cnDiagonalizeMatrix%20a%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 a=\begin{pmatrix}1&1\\ 1&0\end{pmatrix};
@@ -3369,18 +3439,20 @@ DiagonalizeMatrix a
 Tries to diagonalize a matrix (Jordan normal form). As of writing, will succeed only when the eigenvalues are rational or use quadratic radicals and the Jordan normal form is diagonal. When successful, returns a list of three matrices, X, A and X^-1, such that XAX^-1 equals the orignal matrix and A is in Jordan normal form.
 
 *FunctionToMatrix* [FunctionToMatrix] {CalculatorFunctionsLinearAlgebra::functionToMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cn%20A%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3da%2fb%3b%5cn%20X%3b%20%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3dFunctionToMatrix%7b%7d%28A%2c5%2c5%29%3b%5cnA%7b%7d%28%7b%7ba%7d%7d%2c%7b%7bb%7d%7d%29%3da%2fb%3b%5cnX%3b%5cn%5c%5cdet%20%7b%7d%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X =FunctionToMatrix{}(A,5,5);
- A{}({{a}},{{b}})=a/b;
- X; \det {} X
+A{}({{a}},{{b}})=a/b;
+X;
+\det {} X
 ```
 Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, the third- the number of columns.
 
 *Transpose* [Transpose] {CalculatorFunctions::transpose}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Transpose%7b%7d%281%2c2%29%3b%20%281%2c2%29%5et%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Transpose%7b%7d%281%2c2%29%3b%5cn%281%2c2%29%5et%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-Transpose{}(1,2); (1,2)^t
+Transpose{}(1,2);
+(1,2)^t
 ```
 Transposes a matrix of expressions. 
 
@@ -3425,11 +3497,11 @@ GetMultiplicandList(a*b*c)
 ```
 Converts a sum to a sequence containing the summands. 
 
-*NormalizeIntervals* [NormalizeIntervals] {CalculatorFunctions::normalizeIntervals}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%20NormalizeIntervals%28%5b2%2c3%5d%20%5c%5ccup%20%5b5%2c%207%5d%20%5c%5ccup%20%5b-%201%2c-%201%2f2%5d%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*NormalizeIntervals* [NormalizeIntervals] {CalculatorFunctionsIntervals::normalizeIntervals}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cnNormalizeIntervals%28%5b2%2c3%5d%20%5c%5ccup%20%5b5%2c%207%5d%20%5c%5ccup%20%5b-%201%2c-%201%2f2%5d%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
- NormalizeIntervals([2,3] \cup [5, 7] \cup [- 1,- 1/2]);
+NormalizeIntervals([2,3] \cup [5, 7] \cup [- 1,- 1/2]);
 ```
 Sorts interval union. 
 
@@ -3443,10 +3515,10 @@ BelongsTo(x,(w,y,z));
 Returns 1 if an element belongs to a list, 0 otherwise. 
 
 *CompareIntervalsNumerically* [CompareIntervalsNumerically] {CalculatorFunctions::compareIntervalsNumerically}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cn%20%20CompareIntervalsNumerically%28%5b3%2c7%29%5c%5ccup%20%5b8%2c9%5d%2c%20%5b3%2c7.00000001%29%5c%5ccup%20%5b7.9999999%2c%209%5d%2c%200.0001%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25UseBracketForIntervals%5cnCompareIntervalsNumerically%28%5b3%2c7%29%5c%5ccup%20%5b8%2c9%5d%2c%20%5b3%2c7.00000001%29%5c%5ccup%20%5b7.9999999%2c%209%5d%2c%200.0001%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %UseBracketForIntervals
-  CompareIntervalsNumerically([3,7)\cup [8,9], [3,7.00000001)\cup [7.9999999, 9], 0.0001);
+CompareIntervalsNumerically([3,7)\cup [8,9], [3,7.00000001)\cup [7.9999999, 9], 0.0001);
 ```
 Compares unions of intervals numerically. First and second arguments: two unions of intervals to compare. Third argument: precisions to compare with. 
 
@@ -3466,9 +3538,9 @@ GetSummandList(1+a +b)
 Converts a sum to a sequence containing the summands. 
 
 *GetSummand* [GetSummand] {CalculatorFunctions::getSummand}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetSummand%28%5c%5csum_%7bn%20%3d1%7d%5e%5c%5cinfty%20%28-%201%29%5e%7b2n%20%2b%201%7d%20x%5e%7b2n%20%2b%201%7d%2f%282n%20%2b%201%29%21%2c%205%20%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetSummand%28%5c%5csum_%7bn%20%3d1%7d%5e%5c%5cinfty%20%28-%201%29%5e%7b2n%20%2b%201%7d%20x%5e%7b2n%20%2b%201%7d%2f%282n%20%2b%201%29%21%2c%205%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GetSummand(\sum_{n =1}^\infty (- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!, 5 ) 
+GetSummand(\sum_{n =1}^\infty (- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!, 5 )
 ```
 Extracts the nth summand from a sum, <b>starts with the ZEROETH summand</b>. 
 
@@ -3519,16 +3591,18 @@ InvertMatrixVerbose((1, 2), (2, 3))
 <b>Calculus teaching function.</b> Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed printout of all Gaussian elimantion steps. 
 
 *InvertMatrix* [InvertMatrix] {CalculatorFunctions::invertMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20MakeMatrix%28%281%2c2%2c1%29%2c%20%281%2c0%2c1%29%2c%20%28-%201%2c1%2c0%29%29%3b%20InvertMatrix%20X-%20X%5e%7b-%201%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20MakeMatrix%28%281%2c2%2c1%29%2c%20%281%2c0%2c1%29%2c%20%28-%201%2c1%2c0%29%29%3b%5cnInvertMatrix%20X-%20X%5e%7b-%201%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); InvertMatrix X- X^{- 1}
+X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0));
+InvertMatrix X- X^{- 1}
 ```
 Inverts a matrix of rationals or algebraic numbers if invertible. 
 
 *Trace* [Trace] {CalculatorFunctions::trace}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20MakeMatrix%28%281%2c2%2c1%29%2c%20%281%2c0%2c1%29%2c%20%28-%201%2c1%2c0%29%29%3b%20Trace%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20MakeMatrix%28%281%2c2%2c1%29%2c%20%281%2c0%2c1%29%2c%20%28-%201%2c1%2c0%29%29%3b%5cnTrace%20X%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); Trace X
+X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0));
+Trace X
 ```
 Gets trace of a square matrix. 
 
@@ -3539,14 +3613,14 @@ ReverseBytes{}("abc")
 ```
 Reverses the bytes of a string. Does not respect utf-8 encoding. 
 
-*Reverse* [Reverse] {Calculator::reverseOrder}. 
+*Reverse* [Reverse] {CalculatorFunctions::reverseOrder}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Reverse%7b%7d%28s_1%20s_2%20s_3%20s_4%20s_2%20s_3%20s_1%20s_2%20s_3%20s_4%20s_1%20s_2%20s_3%20s_2%20s_1%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Reverse{}(s_1 s_2 s_3 s_4 s_2 s_3 s_1 s_2 s_3 s_4 s_1 s_2 s_3 s_2 s_1)
 ```
 Reverses order of elements. This operation will reverse products, lists, etc. More precisely, the command leaves the fist child in the internal representation of the object in place and flips the order of all other children.
 
-*ReverseRecursively* [ReverseRecursively] {Calculator::reverseOrderRecursively}. 
+*ReverseRecursively* [ReverseRecursively] {CalculatorFunctions::reverseOrderRecursively}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ReverseRecursively%7b%7d%28s_1%20s_2%20s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)
@@ -3800,7 +3874,7 @@ Operator or function Differential is overloaded with 2 total handlers.
 ```
 Transforms Differential{}a to the standard internal form Differential {}(a, 1).
 
-*Differential* [DifferentialOfPolynomial] {CalculatorFunctionsBinaryOps::differentialOfPolynomial}. 
+*Differential* [DifferentialOfPolynomial] {CalculatorFunctions::differentialOfPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Differential%7b%7d%28Polynomial%7b%7d%28x%2by%29%29%3b%5cnDifferential%7b%7d%28Polynomial%7b%7d%28x%5e3y%20z%2by%20z%20%2b%20x%20y%20%2b%20x%5e5%20y%5e2%20z%20%2b%20x%20y%5e2%20z%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Differential{}(Polynomial{}(x+y));

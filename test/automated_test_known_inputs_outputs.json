@@ -1,6 +1,6 @@
 [
   {
-    "input":"%LogEvaluation\n({{a}}*{{b}})*{{c}}=a*(b*c);  ",
+    "input":"%LogEvaluation\n({{a}}*{{b}})*{{c}}=a*(b*c);",
     "output":"\\text{Error:~\"Bad~rule:~you~are~asking~me~to~substitute~{{a}}~{{b}}~{{c}}~by~itself~({{a}}~{{b}}~{{c}})~which~is~an~infinite~substitution~cycle.~\"}"
   },
   {
@@ -76,7 +76,7 @@
     "output":"(f{}\\left({{x}}\\right)=\\frac{2 {{x}}+3}{2 {{x}}+1};g{}\\left({{y}}\\right)=\\frac{{{y}}-2}{{{y}}+3};\\frac{-2 z+1}{8 z+6};\\frac{5 z+5}{3 z-1})"
   },
   {
-    "input":"1+Polynomial{}\\lambda; Polynomial{}\\lambda + 1",
+    "input":"1+Polynomial{}\\lambda;\nPolynomial{}\\lambda + 1",
     "output":"(Polynomial{}(\\lambda +1);Polynomial{}(\\lambda +1))"
   },
   {
@@ -88,7 +88,7 @@
     "output":"PolynomialAlgebraicNumbers{}(\\sqrt{3}x )"
   },
   {
-    "input":"PolynomialAlgebraicNumbers(\\sqrt{12}) +PolynomialAlgebraicNumbers(\\sqrt{3}x)",
+    "input":"PolynomialAlgebraicNumbers(\\sqrt{12}) + PolynomialAlgebraicNumbers(\\sqrt{3}x)",
     "output":"PolynomialAlgebraicNumbers{}(\\sqrt{3}x +2\\sqrt{3})"
   },
   {
@@ -168,11 +168,11 @@
     "output":"-6"
   },
   {
-    "input":"PlotExpressionTree(  \\sum\\limits_{b}^c);\nPlotExpressionTree( \\sum\\limits_{b}^c*a) ",
+    "input":"PlotExpressionTree( \\sum\\limits_{b}^c);\nPlotExpressionTree( \\sum\\limits_{b}^c*a) ",
     "output":"([plot alredy displayed];[plot alredy displayed])"
   },
   {
-    "input":"\\int x dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
+    "input":"\\int x dx;\n\\int x (1+x) dx;\n\\int_2^3 x dx;\n\\int_2^3 x(1+x)dx",
     "output":"(\\frac{1}{2} x^{2};\\frac{1}{3} x^{3}+\\frac{1}{2} x^{2};\\frac{5}{2};\\frac{53}{6})"
   },
   {
@@ -232,7 +232,7 @@
     "output":"(\\frac{2}{3};\\text{Error:~\"Division~by~zero.~\"})"
   },
   {
-    "input":"a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c",
+    "input":"a = 0.5;\nb= 0.5;\nc = DoubleValue{}3.3;\na/c;\nc/a;\nc/c",
     "output":"(a=\\frac{1}{2};b=\\frac{1}{2};c=3.3;0.15151515;6.6;1)"
   },
   {
@@ -388,7 +388,7 @@
     "output":"\\sqrt{6}"
   },
   {
-    "input":"(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
+    "input":"(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;\n(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
     "output":"(a b c e d f-e a b c d f;a b c e d f-e a b c d f)"
   },
   {
@@ -396,7 +396,7 @@
     "output":"(x^{2} \\left(x+1\\right)^{-1};x \\left(y+1\\right)^{-1} x;x \\left(\\cos{}x\\right)\\sin{}x)"
   },
   {
-    "input":"x(x + 1)^{- 1}x; x(y+ 1)^{- 1}x",
+    "input":"x(x + 1)^{- 1}x;\nx(y+ 1)^{- 1}x",
     "output":"(x^{2} \\left(x+1\\right)^{-1};x \\left(y+1\\right)^{-1} x)"
   },
   {
@@ -404,7 +404,7 @@
     "output":"(24 c d;0)"
   },
   {
-    "input":"a*(b/c); (a*b)/c-a*(b/c)",
+    "input":"a*(b/c);\n(a*b)/c-a*(b/c)",
     "output":"(\\frac{a b}{c};0)"
   },
   {
@@ -528,7 +528,7 @@
     "output":"(0;0;0;1;\\left(a\\right) and \\left(1\\right);0)"
   },
   {
-    "input":"0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;",
+    "input":"0 or 0;\n0 or 1;\n1 or 0;\n1 or 1;\na or 1;\na or 0;",
     "output":"(0;1;1;1;1;\\left(a\\right) ~or~ \\left(0\\right))"
   },
   {
@@ -568,7 +568,7 @@
     "output":"(\\sqrt{3}+\\sqrt{2};2\\sqrt{6}+4\\sqrt{3}+6\\sqrt{2}+11)"
   },
   {
-    "input":" TurnOffApproximations 0; \\sqrt{\\frac{676}{25} ln 3}",
+    "input":"TurnOffApproximations 0;\n\\sqrt{\\frac{676}{25} ln 3}",
     "output":"(RulesOff{}\\left(\"Approximations\"\\right);\\frac{26}{5} {\\sqrt{\\log}}{}3)"
   },
   {
@@ -632,11 +632,11 @@
     "output":"3\\sqrt{6}"
   },
   {
-    "input":"f{}{{x}}=x^3+p x +q;\nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\nq = DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+    "input":"f{}{{x}}=x^3+p x +q;\nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\nq = DoubleValue{}1;\np = DoubleValue{}1;\nXcardano;\nf{}x;\nf{}Xcardano ",
     "output":"(f{}\\left({{x}}\\right)={{x}}^{3}+p {{x}}+q;Xcardano=\\left(-\\sqrt{\\frac{1}{4} q^{2}+\\frac{1}{27} p^{3}}-\\frac{1}{2} q\\right)^{\\frac{1}{3}}+\\left(\\sqrt{\\frac{1}{4} q^{2}+\\frac{1}{27} p^{3}}-\\frac{1}{2} q\\right)^{\\frac{1}{3}};q=1;p=1;-0.6823278;x^{3}+x+1;-0)"
   },
   {
-    "input":"X = (1,2)^t; X-Transpose{}(1,2); \\begin{pmatrix}1&2\\\\ 3& 5\\end{pmatrix}^t  ",
+    "input":"X = (1,2)^t;\nX-Transpose{}(1,2);\n\\begin{pmatrix}1&2\\\\ 3& 5\\end{pmatrix}^t  ",
     "output":"(X=\\begin{pmatrix}1\\\\ \n2 \\end{pmatrix};\\begin{pmatrix}0\\\\ \n0 \\end{pmatrix};\\begin{pmatrix}1 & 3\\\\ \n2 & 5 \\end{pmatrix})"
   },
   {
@@ -644,7 +644,7 @@
     "output":"(X=\\begin{pmatrix}0 & 1\\\\ \n1 & 1 \\end{pmatrix};\\begin{pmatrix}3 & 5\\\\ \n5 & 8 \\end{pmatrix};\\begin{pmatrix}-8 & 5\\\\ \n5 & -3 \\end{pmatrix};f{}\\left({{a}}, {{b}}\\right)={{a}} Polynomial{}(x )+{{b}};a=\\begin{pmatrix}Polynomial{}(x +1) & Polynomial{}(x +2)\\\\ \nPolynomial{}(2x +1) & Polynomial{}(2x +2) \\end{pmatrix};b=\\begin{pmatrix}MakeRationalFunction{}(\\frac{-2x -2}{x }) & MakeRationalFunction{}(\\frac{x +2}{x })\\\\ \nMakeRationalFunction{}(\\frac{2x +1}{x }) & MakeRationalFunction{}(\\frac{-x -1}{x }) \\end{pmatrix};\\begin{pmatrix}MakeRationalFunction{}(\\frac{x }{x }) & MakeRationalFunction{}(0)\\\\ \nMakeRationalFunction{}(0) & MakeRationalFunction{}(\\frac{x }{x }) \\end{pmatrix})"
   },
   {
-    "input":"X =\\begin{pmatrix} 1 & -1 \\\\ 4 & -3\\end{pmatrix}; X^{-55!- 1}  ",
+    "input":"X =\\begin{pmatrix} 1 & -1 \\\\ 4 & -3\\end{pmatrix}; X^{-55!- 1}",
     "output":"(X=\\begin{pmatrix}1 & -1\\\\ \n4 & -3 \\end{pmatrix};\\begin{pmatrix}-25392806707316551851930201695133033919160642102898873524551680000000000003 & 12696403353658275925965100847566516959580321051449436762275840000000000001\\\\ \n-50785613414633103703860403390266067838321284205797747049103360000000000004 & 25392806707316551851930201695133033919160642102898873524551680000000000001 \\end{pmatrix})"
   },
   {
@@ -692,11 +692,11 @@
     "output":"(\\sqrt{2}+1;-169\\sqrt{2}+239)"
   },
   {
-    "input":"f{}{{x}}=x^3+p x +q;\nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\nq= DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+    "input":"f{}{{x}}=x^3+p x +q;\nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\nq= DoubleValue{}1;\np = DoubleValue{}1;\nXcardano;\nf{}x;\nf{}Xcardano   ",
     "output":"(f{}\\left({{x}}\\right)={{x}}^{3}+p {{x}}+q;Xcardano=\\left(-\\sqrt{\\frac{1}{4} q^{2}+\\frac{1}{27} p^{3}}-\\frac{1}{2} q\\right)^{\\frac{1}{3}}+\\left(\\sqrt{\\frac{1}{4} q^{2}+\\frac{1}{27} p^{3}}-\\frac{1}{2} q\\right)^{\\frac{1}{3}};q=1;p=1;-0.6823278;x^{3}+x+1;-0)"
   },
   {
-    "input":"(a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m; (a^{1/2})^2; (a^{2})^{1/2}; (a>0)=1; (a^{2})^{1/2};",
+    "input":"(a^m)^n;\n((ln(3))^m)^n;\n((ln(0.5))^m)^n;\n(a^m)^2;\n(a^2)^m;\n(a^{1/2})^2;\n(a^{2})^{1/2};\n(a>0)=1;\n(a^{2})^{1/2};",
     "output":"(\\left(a^{m}\\right)^{n};1.09861229^{m n};\\left(\\left(-0.69314718\\right)^{m}\\right)^{n};a^{2 m};\\left(a^{2}\\right)^{m};a;\\sqrt{a^{2}};\\left(a&gt;0\\right)=1;a)"
   },
   {
@@ -736,7 +736,7 @@
     "output":"({g}_{{{i}}}=ChevalleyGenerator{}\\left({G}_{2}, {{i}}\\right);{h}_{{{i}}}=CartanGenerator{}\\left({G}_{2}, {{i}}\\right);UEE{}(g_{2}g_{1}^{x y }+g_{1}^{x y }g_{2}+g_{2}^{2}+g_{1}^{2x y }))"
   },
   {
-    "input":"\\tan^2 x; (f^-2) {}x ; (f^- 1){}x ",
+    "input":"\\tan^2 x;\n(f^-2) {}x ; (f^- 1){}x ",
     "output":"(\\left(\\frac{\\sin{}x}{\\cos{}x}\\right)^{2};\\left(f{}\\left(x\\right)\\right)^{-2};\\left(f{}\\left(x\\right)\\right)^{-1})"
   },
   {
@@ -820,11 +820,11 @@
     "output":"\\log{}A"
   },
   {
-    "input":"\\log_5 25; log_5 1; log_5 (1/5)",
+    "input":"\\log_5 25;\nlog_5 1;\nlog_5 (1/5)",
     "output":"(2;0;-1)"
   },
   {
-    "input":"\\log_10 5; \\log _e 10; \\ln 10; \\log_a b",
+    "input":"\\log_10 5;\n\\log _e 10;\n\\ln 10;\n\\log_a b",
     "output":"(0.69897;2.30258509;2.30258509;\\frac{\\log{}b}{\\log{}a})"
   },
   {
@@ -842,6 +842,10 @@
   {
     "input":"\\int e^{5x} dx;\n\\int e^{-x} dx",
     "output":"(\\frac{1}{5} e^{5 x};-e^{-x})"
+  },
+  {
+    "input":"\\int 2\\sqrt{2-x^2} dx",
+    "output":"x \\sqrt{-x^{2}+2}-2 \\arccos{}\\left(\\frac{\\sqrt{2}}{2} x\\right)"
   },
   {
     "input":"\\int 2\\sqrt{2-x^2} dx ",
@@ -900,7 +904,7 @@
     "output":"(x=ElementWeylAlgebra{}(x );\\partial=ElementWeylAlgebra{}(\\partial );Polynomial{}(1);Polynomial{}(6x +2);Polynomial{}(x^{3}))"
   },
   {
-    "input":"%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];",
+    "input":"%UseBracketForIntervals PlotExpressionTree[1,2);\nPlotExpressionTree(1,2];\nPlotExpressionTree[1,2];",
     "output":"([plot alredy displayed];[plot alredy displayed];[plot alredy displayed])"
   },
   {
@@ -908,7 +912,7 @@
     "output":"[plot alredy displayed]"
   },
   {
-    "input":"\\log{}(e); \\log 10",
+    "input":"\\log{}(e);\n\\log 10",
     "output":"(1;2.30258509)"
   },
   {
@@ -940,7 +944,7 @@
     "output":"(RulesOff{}\\left(\"Approximations\"\\right);\\log{}\\left(2\\right);RulesOn{}\\left(\"Approximations\"\\right);0.69314718;(RulesOff{}\\left(\"Approximations\"\\right);\\log{}\\left(2\\right));0.69314718)"
   },
   {
-    "input":"TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
+    "input":"TurnOffApproximations(0);\nln(2);\nTurnOnApproximations(0);\nln(2)",
     "output":"(RulesOff{}\\left(\"Approximations\"\\right);\\log{}\\left(2\\right);RulesOn{}\\left(\"Approximations\"\\right);0.69314718)"
   },
   {
@@ -964,7 +968,7 @@
     "output":"(\"Set value to input box name: a\";\\formInput{3.0000, aca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb})"
   },
   {
-    "input":"a =Freeze{}(1 + 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c",
+    "input":"a =Freeze{}(1 + 1);\nThaw a;\nc =Thaw(Freeze(a,b));\nPlotExpressionTree c",
     "output":"(a=Freeze{}\\left(1+1\\right);2;c=\\left(Freeze{}\\left(1+1\\right), b\\right);[plot alredy displayed])"
   },
   {
@@ -980,11 +984,11 @@
     "output":"(CommandEnclosureStart;x=5;5;CommandEnclosureFinish;CommandEnclosureStart;y;5;CommandEnclosureFinish)"
   },
   {
-    "input":"ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)",
+    "input":"ChildExpression(e^x, 1);\nChildExpression(e^x, 2);\nChildExpression(e^x, 3)",
     "output":"(^;e;x)"
   },
   {
-    "input":"ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
+    "input":"ToString( e^x);\n\"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
     "output":"(\"e^{x}\";\"e^x\";\"The quick brown fox jumps over the lazy dog.\")"
   },
   {
@@ -1020,7 +1024,7 @@
     "output":"(SolveForX{}\\left({{a}}\\right)=SolveFor{}\\left(x, {{a}}\\right);SolveForX x^{2}+2 SolveForX;\\left(\\left(-\\sqrt{-1}, \\sqrt{-1}\\right), \\left(-1, 2\\right)\\right))"
   },
   {
-    "input":"Denominator(a/b); Denominator(1+ 1/x)",
+    "input":"Denominator(a/b);\nDenominator(1+ 1/x)",
     "output":"(b;1)"
   },
   {
@@ -1056,11 +1060,11 @@
     "output":"(1;1;0;0;0)"
   },
   {
-    "input":"C = (c a + a b + b c + 1)^3;\nA = Polynomialize(C); B = MakeExpression(Polynomial(C)); A - B",
+    "input":"C = (c a + a b + b c + 1)^3;\nA = Polynomialize(C);\nB = MakeExpression(Polynomial(C));\nA - B",
     "output":"(C=\\left(c a+b c+a b+1\\right)^{3};A=6 a^{2} b^{2} c^{2}+3 a^{3} b^{2} c+3 a^{3} b c^{2}+3 a^{2} b^{3} c+3 a^{2} b c^{3}+3 a b^{3} c^{2}+3 a b^{2} c^{3}+b^{3} c^{3}+3 b^{2} c^{2}+a^{3} c^{3}+a^{3} b^{3}+3 a^{2} c^{2}+3 a^{2} b^{2}+6 a^{2} b c+6 a b^{2} c+6 a b c^{2}+3 b c+3 a c+3 a b+1;B=6 a^{2} b^{2} c^{2}+3 a^{3} b^{2} c+3 a^{3} b c^{2}+3 a^{2} b^{3} c+3 a^{2} b c^{3}+3 a b^{3} c^{2}+3 a b^{2} c^{3}+b^{3} c^{3}+3 b^{2} c^{2}+a^{3} c^{3}+a^{3} b^{3}+3 a^{2} c^{2}+3 a^{2} b^{2}+6 a^{2} b c+6 a b^{2} c+6 a b c^{2}+3 b c+3 a c+3 a b+1;0)"
   },
   {
-    "input":"IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}}); IsAlgebraicRadical(\\sqrt{x}); IsAlgebraicRadical(\\sqrt{\\pi + e + 1})",
+    "input":"IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}});\nIsAlgebraicRadical(\\sqrt{x});\nIsAlgebraicRadical(\\sqrt{\\pi + e + 1})",
     "output":"(1;0;0)"
   },
   {
@@ -1068,7 +1072,7 @@
     "output":"(0;1;0)"
   },
   {
-    "input":"IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\nIsConstant(e^{\\sin(\\pi^2 + e +\\sqrt{2} + 3)}); ",
+    "input":"IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\nIsConstant(e^{\\sin(\\pi^2 + e +\\sqrt{2} + 3)});",
     "output":"(1;1;0;1)"
   },
   {
@@ -1164,7 +1168,7 @@
     "output":"(\"\";\"<hr>Your expression:<br>\\\\(x \\\\left(\\\\sin{}\\\\left(\\\\log{}x\\\\right)\\\\right)y\\\\)<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>y</b>.<br>The expected variables are: x. <br>Beware of typos such as:<br>[wrong:] <span style ='color:red'>lnx, sqrt2</span>  <br>[correct:] <span style ='color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, <span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>\")"
   },
   {
-    "input":"EnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y, x, y); EnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y,  (x,y,z) );",
+    "input":"EnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y, x, y);\nEnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y,  (x,y,z) );",
     "output":"(\"\";\"<hr>Your expression:<br>\\\\(x \\\\left(\\\\sin{}\\\\left(\\\\log{}x\\\\right)\\\\right)y\\\\)<br><b style ='color:red'>is required to contain the variables:</b><br><b>\\\\(z\\\\)</b>.<br>The mandatory variable(s) are: x, y, z. <br>Beware of typos such as:<br>[wrong:] <span style = 'color:red'>lnx, sqrt2</span>  <br>[correct:] <span style = 'color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, <span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>\")"
   },
   {
@@ -1188,19 +1192,19 @@
     "output":"0.72273425"
   },
   {
-    "input":"\\tan{}(3.1415); \\tan 1.570796327",
+    "input":"\\tan{}(3.1415);\n\\tan 1.570796327",
     "output":"(-0.00009265;-4875588902.82154179)"
   },
   {
-    "input":"\\cot{}(3.1415); \\cot 1.570796327",
+    "input":"\\cot{}(3.1415);\n\\cot 1.570796327",
     "output":"(-10792.88993953;-0)"
   },
   {
-    "input":"\\csc{}(3.1415); \\csc 1.570796327",
+    "input":"\\csc{}(3.1415);\n\\csc 1.570796327",
     "output":"(10792.88998585;1)"
   },
   {
-    "input":"\\sec{}(3.1415); \\sec 1.570796327",
+    "input":"\\sec{}(3.1415);\n\\sec 1.570796327",
     "output":"(-1;-4875588902.82154179)"
   },
   {
@@ -1228,11 +1232,11 @@
     "output":"1001"
   },
   {
-    "input":"GCDPoly{}(x^3-1, x^2-1)\n;GCDPoly{}(2/3x^3-2/3, 10x^2-10)\n;GCDPoly( (a^2-b^2)(a^3-b^3), (a^4-b^4)(a^5-b^5));\nGCDPoly(PolynomialModP((x^2+3)(x^3+1), 7), PolynomialModP((x^2+3)(x^3+x+1), 7));\nf=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);\ny=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);\nGCDPoly(f, y);\nGCDPoly{}(x y, y+x z);\nGCDPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
+    "input":"GCDPoly{}(x^3-1, x^2-1)\n;GCDPoly{}(2/3x^3-2/3, 10x^2-10)\n;GCDPoly( (a^2-b^2)(a^3-b^3), (a^4-b^4)(a^5-b^5));\nGCDPoly(PolynomialModP((x^2+3)(x^3+1), 7), PolynomialModP((x^2+3)(x^3+x+1), 7));\nf=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);\ny=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);\nGCDPoly(f, y);\nGCDPoly{}(x y, y+x z);\nGCDPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2})",
     "output":"(Polynomial{}(x -1);Polynomial{}(x -1);Polynomial{}(a^{3}-a^{2}b -a b^{2}+b^{3});PolynomialModP{}(x^{2}+3, 7);f=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3, 7);y=PolynomialModP{}(3x^{4}+2x^{3}+3x +3, 7);PolynomialModP{}(1, 7);Polynomial{}(1);Polynomial{}({x}_{13}^{2}{x}_{21}^{2}))"
   },
   {
-    "input":"LCMPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
+    "input":"LCMPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2})",
     "output":"Polynomial{}(2{x}_{13}^{3}{x}_{14} {x}_{15}^{2}{x}_{17} {x}_{18} {x}_{21}^{3}{x}_{22} -4{x}_{13}^{3}{x}_{14} {x}_{15} {x}_{17}^{3}{x}_{21}^{4}-4{x}_{13}^{3}{x}_{14} {x}_{15} {x}_{17}^{2}{x}_{18} {x}_{20} {x}_{21}^{3}-{x}_{13}^{3}{x}_{14} {x}_{15} {x}_{17} {x}_{18}^{2}{x}_{19} {x}_{21}^{2}{x}_{22} +2{x}_{13}^{3}{x}_{14} {x}_{17}^{3}{x}_{18} {x}_{19} {x}_{21}^{3}+2{x}_{13}^{3}{x}_{14} {x}_{17}^{2}{x}_{18}^{2}{x}_{19} {x}_{20} {x}_{21}^{2}+{x}_{13}^{3}{x}_{15}^{4}{x}_{18} {x}_{21}^{2}{x}_{22}^{2}-2{x}_{13}^{3}{x}_{15}^{3}{x}_{16} {x}_{18} {x}_{21}^{3}{x}_{22} -2{x}_{13}^{3}{x}_{15}^{3}{x}_{17}^{2}{x}_{21}^{3}{x}_{22} -4{x}_{13}^{3}{x}_{15}^{3}{x}_{17} {x}_{18} {x}_{20} {x}_{21}^{2}{x}_{22} +4{x}_{13}^{3}{x}_{15}^{2}{x}_{16} {x}_{17}^{2}{x}_{21}^{4}+4{x}_{13}^{3}{x}_{15}^{2}{x}_{16} {x}_{17} {x}_{18} {x}_{20} {x}_{21}^{3}+{x}_{13}^{3}{x}_{15}^{2}{x}_{16} {x}_{18}^{2}{x}_{19} {x}_{21}^{2}{x}_{22} +4{x}_{13}^{3}{x}_{15}^{2}{x}_{17}^{3}{x}_{20} {x}_{21}^{3}-{x}_{13}^{3}{x}_{15}^{2}{x}_{17}^{2}{x}_{18} {x}_{19} {x}_{21}^{2}{x}_{22} +4{x}_{13}^{3}{x}_{15}^{2}{x}_{17}^{2}{x}_{18} {x}_{20}^{2}{x}_{21}^{2}-2{x}_{13}^{3}{x}_{15} {x}_{16} {x}_{17}^{2}{x}_{18} {x}_{19} {x}_{21}^{3}-2{x}_{13}^{3}{x}_{15} {x}_{16} {x}_{17} {x}_{18}^{2}{x}_{19} {x}_{20} {x}_{21}^{2}+2{x}_{13}^{3}{x}_{15} {x}_{17}^{4}{x}_{19} {x}_{21}^{3}+2{x}_{13}^{3}{x}_{15} {x}_{17}^{3}{x}_{18} {x}_{19} {x}_{20} {x}_{21}^{2}-8{x}_{13}^{2}{x}_{14}^{2}{x}_{15}^{2}{x}_{17}^{2}{x}_{21}^{4}+8{x}_{13}^{2}{x}_{14}^{2}{x}_{15} {x}_{17}^{2}{x}_{18} {x}_{19} {x}_{21}^{3}-2{x}_{13}^{2}{x}_{14}^{2}{x}_{17}^{2}{x}_{18}^{2}{x}_{19}^{2}{x}_{21}^{2}-4{x}_{13}^{2}{x}_{14} {x}_{15}^{4}{x}_{17} {x}_{21}^{3}{x}_{22} +12{x}_{13}^{2}{x}_{14} {x}_{15}^{3}{x}_{16} {x}_{17} {x}_{21}^{4}+8{x}_{13}^{2}{x}_{14} {x}_{15}^{3}{x}_{17}^{2}{x}_{20} {x}_{21}^{3}+2{x}_{13}^{2}{x}_{14} {x}_{15}^{3}{x}_{17} {x}_{18} {x}_{19} {x}_{21}^{2}{x}_{22} -12{x}_{13}^{2}{x}_{14} {x}_{15}^{2}{x}_{16} {x}_{17} {x}_{18} {x}_{19} {x}_{21}^{3}+4{x}_{13}^{2}{x}_{14} {x}_{15}^{2}{x}_{17}^{3}{x}_{19} {x}_{21}^{3}-4{x}_{13}^{2}{x}_{14} {x}_{15}^{2}{x}_{17}^{2}{x}_{18} {x}_{19} {x}_{20} {x}_{21}^{2}+3{x}_{13}^{2}{x}_{14} {x}_{15} {x}_{16} {x}_{17} {x}_{18}^{2}{x}_{19}^{2}{x}_{21}^{2}-2{x}_{13}^{2}{x}_{14} {x}_{15} {x}_{17}^{3}{x}_{18} {x}_{19}^{2}{x}_{21}^{2}+2{x}_{13}^{2}{x}_{15}^{5}{x}_{16} {x}_{21}^{3}{x}_{22} -4{x}_{13}^{2}{x}_{15}^{4}{x}_{16}^{2}{x}_{21}^{4}-4{x}_{13}^{2}{x}_{15}^{4}{x}_{16} {x}_{17} {x}_{20} {x}_{21}^{3}-{x}_{13}^{2}{x}_{15}^{4}{x}_{16} {x}_{18} {x}_{19} {x}_{21}^{2}{x}_{22} +4{x}_{13}^{2}{x}_{15}^{3}{x}_{16}^{2}{x}_{18} {x}_{19} {x}_{21}^{3}-2{x}_{13}^{2}{x}_{15}^{3}{x}_{16} {x}_{17}^{2}{x}_{19} {x}_{21}^{3}+2{x}_{13}^{2}{x}_{15}^{3}{x}_{16} {x}_{17} {x}_{18} {x}_{19} {x}_{20} {x}_{21}^{2}-{x}_{13}^{2}{x}_{15}^{2}{x}_{16}^{2}{x}_{18}^{2}{x}_{19}^{2}{x}_{21}^{2}+{x}_{13}^{2}{x}_{15}^{2}{x}_{16} {x}_{17}^{2}{x}_{18} {x}_{19}^{2}{x}_{21}^{2})"
   },
   {
@@ -1248,15 +1252,15 @@
     "output":"\\left(5 x^{3} y^{2}-5 x^{2} y^{4}-10 x^{2} y^{2}+5 x y^{6}+5 x y^{4}+5 x y^{2}+y^{3}-5 x^{4}+15 x^{3}-15 x^{2}-x y+y+5 x, 0\\right)"
   },
   {
-    "input":"PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2) ; PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
+    "input":"PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2);\nPolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
     "output":"(\"In latex: <br>\\n \\\\documentclass{beamer}\\n\\\\usepackage{longtable}\\\\usepackage{xcolor}\\\\usepackage{multicol}\\n\\\\newcommand{\\\\alertNoH}[2]{\\\\alert&lt;handout:0|#1&gt;{#2}}\\n\\\\newcommand{\\\\fcAnswer}[2]{\\\\uncover&lt;handout:0|\\\\the\\\\numexpr#1- 1\\\\relax&gt;{\\\\alertNoH{\\\\the\\\\numexpr#1- 1\\\\relax}{\\\\textbf{?}}}{\\\\uncover&lt;#1-&gt;{\\\\alertNoH{#1}{\\\\!\\\\!\\\\!#2}}}}<br>\\n\\\\begin{document} \\\\begin{frame}\\\\renewcommand{\\\\arraystretch}{1.2}\\\\begin{longtable}{@{}c@{}c@{}c@{}c@{}c@{}c@{}c@{}c@{}c}\\\\uncover&lt;23-&gt;{\\\\alertNoH{23}{\\\\textbf{Quotient: }}}&amp;\\\\multicolumn{8}{c}{ \\\\fcAnswer{5}{\\\\alertNoH{6, 7, 23, 5}{$x^{2}$}} \\\\uncover&lt;11-&gt;{\\\\alertNoH{12, 13, 23, 11}{$-$}} \\\\fcAnswer{11}{\\\\alertNoH{12, 13, 23, 11}{$2x $}} \\\\uncover&lt;17-&gt;{\\\\alertNoH{18, 19, 23, 17}{$+$}} \\\\fcAnswer{17}{\\\\alertNoH{18, 19, 23, 17}{$5$}} }\\\\\\\\ \\\\cline{2-9} \\\\cline{2-9}\\\\multicolumn{1}{c|}{ \\\\alertNoH{3, 4, 5, 6, 7, 10, 11, 12, 13, 16, 17, 18, 19}{$x $} \\\\alertNoH{3, 6, 7, 12, 13, 18, 19}{$+$} \\\\alertNoH{3, 6, 7, 12, 13, 18, 19}{$2$} }&amp;&amp;\\\\alertNoH{2, 4, 5, 8, 9}{$x^{3}$}&amp;&amp;&amp;\\\\alertNoH{2, 8, 9}{$+$}&amp;\\\\alertNoH{2, 8, 9}{$x $}&amp;\\\\alertNoH{2, 8, 9}{$+$}&amp;\\\\alertNoH{2, 8, 9}{$10$}\\\\\\\\\\\\uncover&lt;6-&gt;{\\\\uncover&lt;8-&gt;{\\\\alertNoH{8, 9}{$\\\\overline{\\\\phantom{A}}$}}&amp;&amp;\\\\fcAnswer{7}{\\\\alertNoH{8, 9, 7}{$x^{3}$}}&amp;\\\\uncover&lt;7-&gt;{\\\\alertNoH{8, 9, 7}{$+$}}&amp;\\\\fcAnswer{7}{\\\\alertNoH{8, 9, 7}{$2x^{2}$}}&amp;&amp;&amp;\\\\\\\\\\\\cline{2-9}}\\\\uncover&lt;8-&gt;{&amp;&amp;&amp;\\\\uncover&lt;9-&gt;{\\\\alertNoH{10, 11, 14, 15, 9}{$-$}}&amp;\\\\fcAnswer{9}{\\\\alertNoH{10, 11, 14, 15, 9}{$2x^{2}$}}&amp;\\\\uncover&lt;9-&gt;{\\\\alertNoH{14, 15, 9}{$+$}}&amp;\\\\fcAnswer{9}{\\\\alertNoH{14, 15, 9}{$x $}}&amp;\\\\uncover&lt;9-&gt;{\\\\alertNoH{14, 15, 9}{$+$}}&amp;\\\\fcAnswer{9}{\\\\alertNoH{14, 15, 9}{$10$}}\\\\\\\\\\\\uncover&lt;12-&gt;{\\\\uncover&lt;14-&gt;{\\\\alertNoH{14, 15}{$\\\\overline{\\\\phantom{A}}$}}&amp;&amp;&amp;\\\\uncover&lt;13-&gt;{\\\\alertNoH{14, 15, 13}{$-$}}&amp;\\\\fcAnswer{13}{\\\\alertNoH{14, 15, 13}{$2x^{2}$}}&amp;\\\\uncover&lt;13-&gt;{\\\\alertNoH{14, 15, 13}{$-$}}&amp;\\\\fcAnswer{13}{\\\\alertNoH{14, 15, 13}{$4x $}}&amp;\\\\\\\\\\\\cline{2-9}}}\\\\uncover&lt;14-&gt;{&amp;&amp;&amp;&amp;&amp;&amp;\\\\fcAnswer{15}{\\\\alertNoH{16, 17, 20, 21, 15}{$5x $}}&amp;\\\\uncover&lt;15-&gt;{\\\\alertNoH{20, 21, 15}{$+$}}&amp;\\\\fcAnswer{15}{\\\\alertNoH{20, 21, 15}{$10$}}\\\\\\\\\\\\uncover&lt;18-&gt;{\\\\uncover&lt;20-&gt;{\\\\alertNoH{20, 21}{$\\\\overline{\\\\phantom{A}}$}}&amp;&amp;&amp;&amp;&amp;&amp;\\\\fcAnswer{19}{\\\\alertNoH{20, 21, 19}{$5x $}}&amp;\\\\uncover&lt;19-&gt;{\\\\alertNoH{20, 21, 19}{$+$}}&amp;\\\\fcAnswer{19}{\\\\alertNoH{20, 21, 19}{$10$}}\\\\\\\\\\\\cline{2-9}}}\\\\uncover&lt;20-&gt;{\\\\uncover&lt;24-&gt;{\\\\textbf{\\\\color{orange}Remainder: }}&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;$ { \\\\only&lt;22-&gt;{\\\\color{orange}}\\\\fcAnswer{21}{0}}$\\\\\\\\}\\\\end{longtable}<br>\\n$\\\\vphantom{\\\\frac{x^1}{x^1}}$\\\\only&lt;4,5| handout:0&gt;{Divide \\\\alertNoH{4,5}{$x^{3}$ } by \\\\alertNoH{4,5}{$x $}.}\\\\only&lt;6, 7| handout:0&gt;{Multiply \\\\alertNoH{6, 7}{$x^{2}$} by divisor. }\\\\only&lt;8, 9| handout:0&gt;{subtract last two polynomials.}\\\\only&lt;10,11| handout:0&gt;{Divide \\\\alertNoH{10,11}{$-2x^{2}$ } by \\\\alertNoH{10,11}{$x $}.}\\\\only&lt;12, 13| handout:0&gt;{Multiply \\\\alertNoH{12, 13}{$-2x $} by divisor. }\\\\only&lt;14, 15| handout:0&gt;{subtract last two polynomials.}\\\\only&lt;16,17| handout:0&gt;{Divide \\\\alertNoH{16,17}{$5x $ } by \\\\alertNoH{16,17}{$x $}.}\\\\only&lt;18, 19| handout:0&gt;{Multiply \\\\alertNoH{18, 19}{$5$} by divisor. }\\\\only&lt;20, 21| handout:0&gt;{subtract last two polynomials.}\\\\end{frame}\\\\end{document}<br>\\n\";\"In latex: <br>\\n \\\\documentclass{beamer}\\n\\\\usepackage{longtable}\\\\usepackage{xcolor}\\\\usepackage{multicol}\\n\\\\newcommand{\\\\alertNoH}[2]{\\\\alert&lt;handout:0|#1&gt;{#2}}\\n\\\\newcommand{\\\\fcAnswer}[2]{\\\\uncover&lt;handout:0|\\\\the\\\\numexpr#1- 1\\\\relax&gt;{\\\\alertNoH{\\\\the\\\\numexpr#1- 1\\\\relax}{\\\\textbf{?}}}{\\\\uncover&lt;#1-&gt;{\\\\alertNoH{#1}{\\\\!\\\\!\\\\!#2}}}}<br>\\n\\\\begin{document} \\\\begin{frame}\\\\renewcommand{\\\\arraystretch}{1.2}\\\\begin{longtable}{@{}c@{}c@{}c@{}c@{}c@{}c@{}c}{\\\\color{orange}\\\\textbf{Remainder:} }&amp;&amp;&amp;&amp;&amp;&amp;\\\\uncover&lt;17-&gt;{{\\\\only&lt;17-&gt;{\\\\color{orange}}$10$}}\\\\\\\\\\\\hline\\\\textbf{Divisor(s)} &amp;\\\\multicolumn{6}{c}{\\\\alertNoH{18}{\\\\textbf{Quotient(s)}}}\\\\\\\\ \\\\alertNoH{3, 5, 6, 7, 8}{$x $} \\\\alertNoH{3, 7, 8}{$+$} \\\\alertNoH{3, 7, 8}{$1$} &amp;\\\\multicolumn{6}{c}{ \\\\fcAnswer{6}{\\\\alertNoH{7, 8, 18, 6}{$1$}} }\\\\\\\\\\\\hline \\\\alertNoH{4, 11, 12, 13, 14}{$y $} \\\\alertNoH{4, 13, 14}{$-$} \\\\alertNoH{4, 13, 14}{$1$} &amp;\\\\multicolumn{6}{c}{ \\\\fcAnswer{12}{\\\\alertNoH{13, 14, 18, 12}{$1$}} }\\\\\\\\\\\\hline \\\\cline{2-7} \\\\cline{2-7}&amp;&amp;\\\\alertNoH{2, 5, 6, 9, 10}{$x $}&amp;\\\\alertNoH{2, 9, 10}{$+$}&amp;\\\\alertNoH{2, 9, 10}{$y $}&amp;\\\\alertNoH{2, 9, 10}{$+$}&amp;\\\\alertNoH{2, 9, 10}{$10$}\\\\\\\\\\\\uncover&lt;7-&gt;{\\\\uncover&lt;9-&gt;{\\\\alertNoH{9, 10}{$\\\\overline{\\\\phantom{A}}$}}&amp;&amp;\\\\fcAnswer{8}{\\\\alertNoH{9, 10, 8}{$x $}}&amp;&amp;&amp;\\\\uncover&lt;8-&gt;{\\\\alertNoH{9, 10, 8}{$+$}}&amp;\\\\fcAnswer{8}{\\\\alertNoH{9, 10, 8}{$1$}}\\\\\\\\\\\\cline{2-7}}\\\\uncover&lt;9-&gt;{&amp;&amp;&amp;&amp;\\\\fcAnswer{10}{\\\\alertNoH{11, 12, 15, 16, 10}{$y $}}&amp;\\\\uncover&lt;10-&gt;{\\\\alertNoH{15, 16, 10}{$+$}}&amp;\\\\fcAnswer{10}{\\\\alertNoH{15, 16, 10}{$9$}}\\\\\\\\\\\\uncover&lt;13-&gt;{\\\\uncover&lt;15-&gt;{\\\\alertNoH{15, 16}{$\\\\overline{\\\\phantom{A}}$}}&amp;&amp;&amp;&amp;\\\\fcAnswer{14}{\\\\alertNoH{15, 16, 14}{$y $}}&amp;\\\\uncover&lt;14-&gt;{\\\\alertNoH{15, 16, 14}{$-$}}&amp;\\\\fcAnswer{14}{\\\\alertNoH{15, 16, 14}{$1$}}\\\\\\\\\\\\cline{2-7}}}\\\\uncover&lt;15-&gt;{&amp;&amp;&amp;&amp;&amp;&amp;\\\\fcAnswer{16}{\\\\alertNoH{16}{{\\\\only&lt;17-&gt;{\\\\color{orange}}$10$}}}\\\\\\\\}\\\\end{longtable}<br>\\n$\\\\vphantom{\\\\frac{x^1}{x^1}}$\\\\only&lt;5,6| handout:0&gt;{Divide \\\\alertNoH{5,6}{$x $ } by \\\\alertNoH{5,6}{$x $}.}\\\\only&lt;7, 8| handout:0&gt;{Multiply \\\\alertNoH{7, 8}{$1$} by divisor. }\\\\only&lt;9, 10| handout:0&gt;{subtract last two polynomials.}\\\\only&lt;11,12| handout:0&gt;{Divide \\\\alertNoH{11,12}{$y $ } by \\\\alertNoH{11,12}{$y $}.}\\\\only&lt;13, 14| handout:0&gt;{Multiply \\\\alertNoH{13, 14}{$1$} by divisor. }\\\\only&lt;15, 16| handout:0&gt;{subtract last two polynomials.}\\\\end{frame}\\\\end{document}<br>\\n\")"
   },
   {
-    "input":"PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
+    "input":"PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1);",
     "output":"\"Variable name(s), ascending order: <br>7 division steps total.<br><table style ='white-space: nowrap; border:1px solid black;'><tr><td  style ='white-space: nowrap; border-bottom:1px solid black;'><b>Remainder:</b></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(5x y^{2}\\\\)</span></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(+6x y \\\\)</span></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(+y^{2}\\\\)</span></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(-8x \\\\)</span></td></td></tr><tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='11'><b>Quotient(s) </b></td></tr><tr><td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>\\\\(x^{2}+2\\\\)</td><td style ='border-bottom:1px solid gray;' colspan ='11'>\\\\(x^{5}-2x^{3}+4x \\\\)</td></tr><tr><td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>\\\\(y^{3}-1\\\\)</td><td style ='border-bottom:1px solid gray;' colspan ='11'>\\\\(5x y^{5}+5x y^{2}+y^{2}\\\\)</td></tr></tr><tr><td></td><td>\\\\(5x y^{8}\\\\)</td><td>\\\\(+x^{7}\\\\)</td><td></td><td></td><td>\\\\(+y^{5}\\\\)</td><td></td><td></td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(5x y^{8}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-5x y^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td>\\\\(x^{7}\\\\)</td><td>\\\\(+5x y^{5}\\\\)</td><td></td><td>\\\\(+y^{5}\\\\)</td><td></td><td></td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(x^{7}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(+2x^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td>\\\\(5x y^{5}\\\\)</td><td>\\\\(-2x^{5}\\\\)</td><td>\\\\(+y^{5}\\\\)</td><td></td><td></td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(5x y^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-5x y^{2}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td></td><td>\\\\(-2x^{5}\\\\)</td><td>\\\\(+y^{5}\\\\)</td><td></td><td>\\\\(+5x y^{2}\\\\)</td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-2x^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-4x^{3}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td>\\\\(y^{5}\\\\)</td><td>\\\\(+4x^{3}\\\\)</td><td>\\\\(+5x y^{2}\\\\)</td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(y^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-y^{2}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>\\\\(4x^{3}\\\\)</td><td>\\\\(+5x y^{2}\\\\)</td><td>\\\\(+6x y \\\\)</td><td>\\\\(+y^{2}\\\\)</td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(4x^{3}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(+8x \\\\)</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span style ='color:red'>\\\\(5x y^{2}\\\\)</span></td><td><span style ='color:red'>\\\\(+6x y \\\\)</span></td><td><span style ='color:red'>\\\\(+y^{2}\\\\)</span></td><td><span style ='color:red'>\\\\(-8x \\\\)</span></td></tr></table><br>In latex: <br>\\\\documentclass{article}\\\\usepackage{longtable}\\\\usepackage{xcolor}\\\\usepackage{multicol}\\\\begin{document} Variable name(s), ascending order: $$7 division steps total.\\\\renewcommand{\\\\arraystretch}{1.2}\\\\begin{longtable}{|ccccccccccc|} \\\\hline&\\\\multicolumn{10}{|c|}{\\\\textbf{Remainder}}\\\\\\\\\\\\multicolumn{1}{|c|}{} & &&&&&&$\\\\color{red}{5x y^{2}}\\\\color{black}$ & $\\\\color{red}{+6x y }\\\\color{black}$ & $\\\\color{red}{+y^{2}}\\\\color{black}$ & $\\\\color{red}{-8x }\\\\color{black}$ \\\\\\\\\\\\hline\\\\textbf{Divisor(s)} &\\\\multicolumn{10}{|c|}{\\\\textbf{Quotient(s)}}\\\\\\\\$x^{2}+2$& \\\\multicolumn{10}{|l|}{$x^{5}-2x^{3}+4x $}\\\\\\\\\\\\hline\\\\hline$y^{3}-1$& \\\\multicolumn{10}{|l|}{$5x y^{5}+5x y^{2}+y^{2}$}\\\\\\\\\\\\hline\\\\hline$\\\\underline{~}$&$5x y^{8}$ & $+x^{7}$ & &&$+y^{5}$ & &&$+6x y $ & &\\\\\\\\\\n&$5x y^{8}$ & &$-5x y^{5}$ & &&&&&&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&$x^{7}$ & $+5x y^{5}$ & &$+y^{5}$ & &&$+6x y $ & &\\\\\\\\\\n&&$x^{7}$ & &$+2x^{5}$ & &&&&&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&$5x y^{5}$ & $-2x^{5}$ & $+y^{5}$ & &&$+6x y $ & &\\\\\\\\\\n&&&$5x y^{5}$ & &&&$-5x y^{2}$ & &&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&&$-2x^{5}$ & $+y^{5}$ & &$+5x y^{2}$ & $+6x y $ & &\\\\\\\\\\n&&&&$-2x^{5}$ & &$-4x^{3}$ & &&&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&&&$y^{5}$ & $+4x^{3}$ & $+5x y^{2}$ & $+6x y $ & &\\\\\\\\\\n&&&&&$y^{5}$ & &&&$-y^{2}$ & \\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&&&&$4x^{3}$ & $+5x y^{2}$ & $+6x y $ & $+y^{2}$ & \\\\\\\\\\n&&&&&&$4x^{3}$ & &&&$+8x $ \\\\\\\\\\\\cline{2-11}&&&&&&&$\\\\color{red}{5x y^{2}}\\\\color{black}$ & $\\\\color{red}{+6x y }\\\\color{black}$ & $\\\\color{red}{+y^{2}}\\\\color{black}$ & $\\\\color{red}{-8x }\\\\color{black}$ \\\\\\\\\\n\\\\hline\\\\end{longtable}\\\\end{document}\""
   },
   {
-    "input":"PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
+    "input":"PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1);",
     "output":"\"Variable name(s), ascending order: <br>7 division steps total.<br><table style ='white-space: nowrap; border:1px solid black;'><tr><td  style ='white-space: nowrap; border-bottom:1px solid black;'><b>Remainder:</b></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(5x y^{2}\\\\)</span></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(+6x y \\\\)</span></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(+y^{2}\\\\)</span></td><td style ='white-space: nowrap; border-bottom:1px solid black;'><span style ='color:red'>\\\\(-8x \\\\)</span></td></td></tr><tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='11'><b>Quotient(s) </b></td></tr><tr><td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>\\\\(x^{2}+2\\\\)</td><td style ='border-bottom:1px solid gray;' colspan ='11'>\\\\(x^{5}-2x^{3}+4x \\\\)</td></tr><tr><td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>\\\\(y^{3}-1\\\\)</td><td style ='border-bottom:1px solid gray;' colspan ='11'>\\\\(5x y^{5}+5x y^{2}+y^{2}\\\\)</td></tr></tr><tr><td></td><td>\\\\(5x y^{8}\\\\)</td><td>\\\\(+x^{7}\\\\)</td><td></td><td></td><td>\\\\(+y^{5}\\\\)</td><td></td><td></td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(5x y^{8}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-5x y^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td>\\\\(x^{7}\\\\)</td><td>\\\\(+5x y^{5}\\\\)</td><td></td><td>\\\\(+y^{5}\\\\)</td><td></td><td></td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(x^{7}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(+2x^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td>\\\\(5x y^{5}\\\\)</td><td>\\\\(-2x^{5}\\\\)</td><td>\\\\(+y^{5}\\\\)</td><td></td><td></td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(5x y^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-5x y^{2}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td></td><td>\\\\(-2x^{5}\\\\)</td><td>\\\\(+y^{5}\\\\)</td><td></td><td>\\\\(+5x y^{2}\\\\)</td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-2x^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-4x^{3}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td>\\\\(y^{5}\\\\)</td><td>\\\\(+4x^{3}\\\\)</td><td>\\\\(+5x y^{2}\\\\)</td><td>\\\\(+6x y \\\\)</td><td></td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(y^{5}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(-y^{2}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>\\\\(4x^{3}\\\\)</td><td>\\\\(+5x y^{2}\\\\)</td><td>\\\\(+6x y \\\\)</td><td>\\\\(+y^{2}\\\\)</td><td></td></tr><tr><td>-</td></tr><tr><td></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(4x^{3}\\\\)</td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'></td><td style ='white-space: nowrap; border-bottom:1px solid black;'>\\\\(+8x \\\\)</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span style ='color:red'>\\\\(5x y^{2}\\\\)</span></td><td><span style ='color:red'>\\\\(+6x y \\\\)</span></td><td><span style ='color:red'>\\\\(+y^{2}\\\\)</span></td><td><span style ='color:red'>\\\\(-8x \\\\)</span></td></tr></table><br>In latex: <br>\\\\documentclass{article}\\\\usepackage{longtable}\\\\usepackage{xcolor}\\\\usepackage{multicol}\\\\begin{document} Variable name(s), ascending order: $$7 division steps total.\\\\renewcommand{\\\\arraystretch}{1.2}\\\\begin{longtable}{|ccccccccccc|} \\\\hline&\\\\multicolumn{10}{|c|}{\\\\textbf{Remainder}}\\\\\\\\\\\\multicolumn{1}{|c|}{} & &&&&&&$\\\\color{red}{5x y^{2}}\\\\color{black}$ & $\\\\color{red}{+6x y }\\\\color{black}$ & $\\\\color{red}{+y^{2}}\\\\color{black}$ & $\\\\color{red}{-8x }\\\\color{black}$ \\\\\\\\\\\\hline\\\\textbf{Divisor(s)} &\\\\multicolumn{10}{|c|}{\\\\textbf{Quotient(s)}}\\\\\\\\$x^{2}+2$& \\\\multicolumn{10}{|l|}{$x^{5}-2x^{3}+4x $}\\\\\\\\\\\\hline\\\\hline$y^{3}-1$& \\\\multicolumn{10}{|l|}{$5x y^{5}+5x y^{2}+y^{2}$}\\\\\\\\\\\\hline\\\\hline$\\\\underline{~}$&$5x y^{8}$ & $+x^{7}$ & &&$+y^{5}$ & &&$+6x y $ & &\\\\\\\\\\n&$5x y^{8}$ & &$-5x y^{5}$ & &&&&&&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&$x^{7}$ & $+5x y^{5}$ & &$+y^{5}$ & &&$+6x y $ & &\\\\\\\\\\n&&$x^{7}$ & &$+2x^{5}$ & &&&&&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&$5x y^{5}$ & $-2x^{5}$ & $+y^{5}$ & &&$+6x y $ & &\\\\\\\\\\n&&&$5x y^{5}$ & &&&$-5x y^{2}$ & &&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&&$-2x^{5}$ & $+y^{5}$ & &$+5x y^{2}$ & $+6x y $ & &\\\\\\\\\\n&&&&$-2x^{5}$ & &$-4x^{3}$ & &&&\\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&&&$y^{5}$ & $+4x^{3}$ & $+5x y^{2}$ & $+6x y $ & &\\\\\\\\\\n&&&&&$y^{5}$ & &&&$-y^{2}$ & \\\\\\\\\\\\cline{2-11}$\\\\underline{~}$&&&&&&$4x^{3}$ & $+5x y^{2}$ & $+6x y $ & $+y^{2}$ & \\\\\\\\\\n&&&&&&$4x^{3}$ & &&&$+8x $ \\\\\\\\\\\\cline{2-11}&&&&&&&$\\\\color{red}{5x y^{2}}\\\\color{black}$ & $\\\\color{red}{+6x y }\\\\color{black}$ & $\\\\color{red}{+y^{2}}\\\\color{black}$ & $\\\\color{red}{-8x }\\\\color{black}$ \\\\\\\\\\n\\\\hline\\\\end{longtable}\\\\end{document}\""
   },
   {
@@ -1276,11 +1280,11 @@
     "output":"(0.00502521;0.00502521)"
   },
   {
-    "input":"PlotDirectionField( (- y, x), (- 2, - 2), (2, 2), (20, 20), 0.2, blue, 1);",
+    "input":"PlotDirectionField((- y, x),(- 2, - 2),(2, 2), (20, 20), 0.2, blue, 1);",
     "output":"[plot alredy displayed]"
   },
   {
-    "input":"PlotPolar(1+sin  t, 0, \\pi);\nPlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
+    "input":"PlotPolar(1+sin  t, 0, \\pi);\nPlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t))(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
     "output":"([plot alredy displayed];[plot alredy displayed])"
   },
   {
@@ -1312,7 +1316,7 @@
     "output":"[plot alredy displayed]"
   },
   {
-    "input":"PlotImplicitShowGrid((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2, (-2, -2), (2, 2), (10,10))",
+    "input":"PlotImplicitShowGrid((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2,(-2, -2), (2, 2), (10,10))",
     "output":"[plot alredy displayed]"
   },
   {
@@ -1324,15 +1328,15 @@
     "output":"<canvas width='350' height='350' style='border:solid 1px' name='theCanvas1'>Your browser does not support the HTML5 canvas tag.</canvas><br><span name='theCanvas1Controls'></span><span name='theCanvas1Messages'></span><script scriptType='graphics3d'>\n{\"canvasName\":\"theCanvas1\",\"controlsName\":\"theCanvas1Controls\",\"messagesName\":\"theCanvas1Messages\",\"plotUpdaters\":null,\"plotObjects\":[{\"points\":[[-2,0,0],[2,0,0]],\"lineWidth\":1,\"color\":\"black\",\"plotType\":\"segment\"},{\"points\":[[0,-2,0],[0,2,0]],\"lineWidth\":1,\"color\":\"black\",\"plotType\":\"segment\"},{\"points\":[[0,0,-2],[0,0,2]],\"lineWidth\":1,\"color\":\"black\",\"plotType\":\"segment\"},{\"text\":\"x\",\"color\":\"blue\",\"point\":[2,0,0],\"plotType\":\"label\"},{\"text\":\"y\",\"color\":\"blue\",\"point\":[0,2,0],\"plotType\":\"label\"},{\"text\":\"z\",\"color\":\"blue\",\"point\":[0,0,2],\"plotType\":\"label\"},{\"projectionScreen\":[[1,0,-0.1],[0,1,-0.2]],\"plotType\":\"setProjectionScreen\"}],\"showPerformance\":true,\"setBoundingBoxAsDefaultViewWindow\":true,\"graphicsType\":\"threeDimensional\"}</script>"
   },
   {
-    "input":"%HideLHS x = (R+v*cos(u/2))*cos(u);\ny = (R+v*cos(u/2))*sin(u);\nz = v*sin(u/2);\nR = MakeInputBox (name = radiusBig, value = 2, min = 2, max = 5);\nr = MakeInputBox (name = radiusSmall, value = 0.6, min = 0.2, max = 1, step = 0.2);\nuSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);\nvSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);\nPlotSurface(\n(x, y, z), u \\in (0, 2\\pi), v \\in (- r, r), \ncolor1 = blue, color2 = cyan, numSegments1 = uSegments, numSegments2 = vSegments\n) + PlotSurface(\n( x + 2, z, y), u \\in (0, 2 \\pi), v \\in (- r,r), \ncolor1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments); ",
+    "input":"%HideLHS x = (R+v*cos(u/2))*cos(u);\ny = (R+v*cos(u/2))*sin(u);\nz = v*sin(u/2);\nR=MakeInputBox(name = radiusBig, value = 2, min = 2, max = 5);\nr=MakeInputBox(name = radiusSmall, value = 0.6, min = 0.2, max = 1, step = 0.2);\nuSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);\nvSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);\nPlotSurface(\n(x, y, z), u \\in (0, 2\\pi), v \\in (- r, r), \ncolor1 = blue, color2 = cyan, numSegments1 = uSegments, numSegments2 = vSegments\n) + PlotSurface(\n( x + 2, z, y), u \\in (0, 2 \\pi), v \\in (- r,r), \ncolor1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments); ",
     "output":"(x=v \\left(\\cos{}u\\right)\\cos{}\\left(\\frac{1}{2} u\\right)+R \\cos{}u;y=v \\left(\\sin{}u\\right)\\cos{}\\left(\\frac{1}{2} u\\right)+R \\sin{}u;z=v \\sin{}\\left(\\frac{1}{2} u\\right);R=\\formInput{2.0000, radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552};r=\\formInput{0.6000, radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762};uSegments=\\formInput{22.0000, uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b};vSegments=\\formInput{4.0000, vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0};<canvas width='350' height='350' style='border:solid 1px' name='theCanvas1'>Your browser does not support the HTML5 canvas tag.</canvas><br><span name='theCanvas1Controls'></span><span name='theCanvas1Messages'></span><script scriptType='graphics3d'>\n{\"canvasName\":\"theCanvas1\",\"controlsName\":\"theCanvas1Controls\",\"messagesName\":\"theCanvas1Messages\",\"plotUpdaters\":{\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\":\"theCanvas1\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\":\"theCanvas1\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\":\"theCanvas1\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\":\"theCanvas1\"},\"plotObjects\":[{\"arguments\":[\"u\",\"v\"],\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"],\"coordinateFunctions\":\"return [((v * ((Math.cos( u)) * (Math.cos( ( 0.5 * u))))) + (radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552  * (Math.cos( u)))), ((v * ((Math.sin( u)) * (Math.cos( ( 0.5 * u))))) + (radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552  * (Math.sin( u)))), (v * (Math.sin( ( 0.5 * u))))];\",\"variableRange\":[[\" 0\",\"( 2 *  3.141592654 )\"],[\"((-1) * radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762 )\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762 \"]],\"numberOfSegments\":[\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b \",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0 \"],\"colorContour\":\"black\",\"colorBack\":\"blue\",\"colorFront\":\"cyan\",\"lineWidth\":1,\"plotType\":\"surface\"},{\"arguments\":[\"u\",\"v\"],\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"],\"coordinateFunctions\":\"return [((v * ((Math.cos( u)) * (Math.cos( ( 0.5 * u))))) + ((radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552  * (Math.cos( u))) +  2)), (v * (Math.sin( ( 0.5 * u)))), ((v * ((Math.sin( u)) * (Math.cos( ( 0.5 * u))))) + (radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552  * (Math.sin( u))))];\",\"variableRange\":[[\" 0\",\"( 2 *  3.141592654 )\"],[\"((-1) * radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762 )\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762 \"]],\"numberOfSegments\":[\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b \",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0 \"],\"colorContour\":\"black\",\"colorBack\":\"red\",\"colorFront\":\"pink\",\"lineWidth\":1,\"plotType\":\"surface\"}],\"showPerformance\":true,\"setBoundingBoxAsDefaultViewWindow\":true,\"graphicsType\":\"threeDimensional\"}</script>)"
   },
   {
-    "input":"a = MakeInputBox(name = \"a\", value = 12, min = 1, max = 25);\nb = MakeInputBox(name = \"b\", value = 13, min = 1, max = 25);\nPlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\\pi, blue, 2, 2000), pink) ",
+    "input":"a = MakeInputBox(name = \"a\", value = 12, min = 1, max = 25);\nb = MakeInputBox(name = \"b\", value = 13, min = 1, max = 25);\nPlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\\pi, blue, 2, 2000), pink)",
     "output":"(a=\\formInput{12.0000, aca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb};b=\\formInput{13.0000, b3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d};[plot alredy displayed])"
   },
   {
-    "input":"PlotSegment( (1,2), (3,4))",
+    "input":"PlotSegment((1,2), (3,4))",
     "output":"[plot alredy displayed]"
   },
   {
@@ -1352,11 +1356,11 @@
     "output":"(CommandEnclosure{}\\left(c=10\\right);0)"
   },
   {
-    "input":"GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z}); GetVariablesIncludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z})",
+    "input":"GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z});\nGetVariablesIncludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z})",
     "output":"(\\left(x, y, z\\right);\\left(x, y, z, e\\right))"
   },
   {
-    "input":"GetVariablesExcludeNamedConstants{}(e^x + x +5 +\\arctan x + x *y +x^y+x^{y^z}); GetVariablesIncludeNamedConstants{}(e^x + x +5 +\\arctan x + x *y +x^y+x^{y^z})",
+    "input":"GetVariablesExcludeNamedConstants{}(e^x + x +5 +\\arctan x + x *y +x^y+x^{y^z});\nGetVariablesIncludeNamedConstants{}(e^x + x +5 +\\arctan x + x *y +x^y+x^{y^z})",
     "output":"(\\left(x, y, z\\right);\\left(x, y, z, e\\right))"
   },
   {
@@ -1424,7 +1428,7 @@
     "output":"(0;1;f{}\\left({{a}}\\right)=IsInteger{}\\left({{a}}\\right);1;0)"
   },
   {
-    "input":"i^{{n}} : if IsEven n = (- 1)^(n/2); i^100 ",
+    "input":"i^{{n}} : if IsEven n = (- 1)^(n/2);\ni^100 ",
     "output":"(i^{{{n}}} :if \\left(IsEven{}\\left({{n}}\\right)\\right)=\\left(-1\\right)^{\\frac{1}{2} {{n}}};1)"
   },
   {
@@ -1432,11 +1436,11 @@
     "output":"(1;0)"
   },
   {
-    "input":"IsPower(6); IsPower(8)",
+    "input":"IsPower(6);\nIsPower(8)",
     "output":"(0;1)"
   },
   {
-    "input":"IsSquare(8); IsSquare(16); IsSquare(100);",
+    "input":"IsSquare(8);\nIsSquare(16);\nIsSquare(100);",
     "output":"(0;1;1)"
   },
   {
@@ -1448,7 +1452,7 @@
     "output":"(0;1;f{}\\left({{a}}\\right)=IsRational{}\\left({{a}}\\right);1;0)"
   },
   {
-    "input":"not{}1;not{}a; not{}0; not{}(3==4)",
+    "input":"not{}1;\nnot{}a;\nnot{}0;\nnot{}(3==4)",
     "output":"(0;not{}\\left(a\\right);1;1)"
   },
   {
@@ -1456,11 +1460,11 @@
     "output":"(a=\\begin{pmatrix}1 & 1\\\\ \n1 & 0 \\end{pmatrix};\\left(\\begin{pmatrix}-\\frac{\\sqrt{5}}{2}+\\frac{1}{2} & \\frac{\\sqrt{5}}{2}+\\frac{1}{2}\\\\ \n1 & 1 \\end{pmatrix}, \\begin{pmatrix}-\\frac{\\sqrt{5}}{2}+\\frac{1}{2} & 0\\\\ \n0 & \\frac{\\sqrt{5}}{2}+\\frac{1}{2} \\end{pmatrix}, \\begin{pmatrix}-\\frac{\\sqrt{5}}{5} & \\frac{\\sqrt{5}}{10}+\\frac{1}{2}\\\\ \n\\frac{\\sqrt{5}}{5} & -\\frac{\\sqrt{5}}{10}+\\frac{1}{2} \\end{pmatrix}\\right))"
   },
   {
-    "input":"X =FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=a/b;\n X; \\det {} X",
+    "input":"X =FunctionToMatrix{}(A,5,5);\nA{}({{a}},{{b}})=a/b;\nX;\n\\det {} X",
     "output":"(X=\\begin{pmatrix}A{}\\left(1, 1\\right) & A{}\\left(1, 2\\right) & A{}\\left(1, 3\\right) & A{}\\left(1, 4\\right) & A{}\\left(1, 5\\right)\\\\ \nA{}\\left(2, 1\\right) & A{}\\left(2, 2\\right) & A{}\\left(2, 3\\right) & A{}\\left(2, 4\\right) & A{}\\left(2, 5\\right)\\\\ \nA{}\\left(3, 1\\right) & A{}\\left(3, 2\\right) & A{}\\left(3, 3\\right) & A{}\\left(3, 4\\right) & A{}\\left(3, 5\\right)\\\\ \nA{}\\left(4, 1\\right) & A{}\\left(4, 2\\right) & A{}\\left(4, 3\\right) & A{}\\left(4, 4\\right) & A{}\\left(4, 5\\right)\\\\ \nA{}\\left(5, 1\\right) & A{}\\left(5, 2\\right) & A{}\\left(5, 3\\right) & A{}\\left(5, 4\\right) & A{}\\left(5, 5\\right) \\end{pmatrix};A{}\\left({{a}}, {{b}}\\right)=\\frac{{{a}}}{{{b}}};\\begin{pmatrix}1 & \\frac{1}{2} & \\frac{1}{3} & \\frac{1}{4} & \\frac{1}{5}\\\\ \n2 & 1 & \\frac{2}{3} & \\frac{1}{2} & \\frac{2}{5}\\\\ \n3 & \\frac{3}{2} & 1 & \\frac{3}{4} & \\frac{3}{5}\\\\ \n4 & 2 & \\frac{4}{3} & 1 & \\frac{4}{5}\\\\ \n5 & \\frac{5}{2} & \\frac{5}{3} & \\frac{5}{4} & 1 \\end{pmatrix};0)"
   },
   {
-    "input":"Transpose{}(1,2); (1,2)^t",
+    "input":"Transpose{}(1,2);\n(1,2)^t",
     "output":"(\\begin{pmatrix}1\\\\ \n2 \\end{pmatrix};\\begin{pmatrix}1\\\\ \n2 \\end{pmatrix})"
   },
   {
@@ -1480,7 +1484,7 @@
     "output":"\\left(a, b, c\\right)"
   },
   {
-    "input":"%UseBracketForIntervals\n NormalizeIntervals([2,3] \\cup [5, 7] \\cup [- 1,- 1/2]);",
+    "input":"%UseBracketForIntervals\nNormalizeIntervals([2,3] \\cup [5, 7] \\cup [- 1,- 1/2]);",
     "output":"\\left[-1, -\\frac{1}{2}\\right]\\cup \\left[2, 3\\right]\\cup \\left[5, 7\\right]"
   },
   {
@@ -1488,7 +1492,7 @@
     "output":"(1;0)"
   },
   {
-    "input":"%UseBracketForIntervals\n  CompareIntervalsNumerically([3,7)\\cup [8,9], [3,7.00000001)\\cup [7.9999999, 9], 0.0001);",
+    "input":"%UseBracketForIntervals\nCompareIntervalsNumerically([3,7)\\cup [8,9], [3,7.00000001)\\cup [7.9999999, 9], 0.0001);",
     "output":"1"
   },
   {
@@ -1500,7 +1504,7 @@
     "output":"\\left(b, a, 1\\right)"
   },
   {
-    "input":"GetSummand(\\sum_{n =1}^\\infty (- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!, 5 ) ",
+    "input":"GetSummand(\\sum_{n =1}^\\infty (- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!, 5 )",
     "output":"-\\frac{1}{6227020800} x^{13}"
   },
   {
@@ -1528,11 +1532,11 @@
     "output":"\"Computing \\\\(\\\\begin{pmatrix}1 & 2\\\\\\\\\\n2 & 3\\\\\\\\\\n\\\\end{pmatrix}^{- 1}\\\\)<br>\\\\(\\\\begin{pmatrix}1 & 2 & 1 & 0\\\\\\\\\\n2 & 3 & 0 & 1\\\\\\\\\\n\\\\end{pmatrix}\\\\)<br> Row index 1 times -2 added to row index 2: <br> \\\\(\\\\begin{pmatrix}1 & 2 & 1 & 0\\\\\\\\\\n0 & -1 & -2 & 1\\\\\\\\\\n\\\\end{pmatrix}\\\\)<br> multiply row 2 by -1: \\\\(\\\\begin{pmatrix}1 & 2 & 1 & 0\\\\\\\\\\n0 & 1 & 2 & -1\\\\\\\\\\n\\\\end{pmatrix}\\\\)<br> Row index 2 times -2 added to row index 1: <br> \\\\(\\\\begin{pmatrix}1 & 0 & -3 & 2\\\\\\\\\\n0 & 1 & 2 & -1\\\\\\\\\\n\\\\end{pmatrix}\\\\)<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: \\\\(\\\\begin{pmatrix}-3 & 2\\\\\\\\\\n2 & -1\\\\\\\\\\n\\\\end{pmatrix}\\\\)\""
   },
   {
-    "input":"X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); InvertMatrix X- X^{- 1}",
+    "input":"X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0));\nInvertMatrix X- X^{- 1}",
     "output":"(X=\\begin{pmatrix}1 & 2 & 1\\\\ \n1 & 0 & 1\\\\ \n-1 & 1 & 0 \\end{pmatrix};\\begin{pmatrix}0 & 0 & 0\\\\ \n0 & 0 & 0\\\\ \n0 & 0 & 0 \\end{pmatrix})"
   },
   {
-    "input":"X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); Trace X",
+    "input":"X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0));\nTrace X",
     "output":"(X=\\begin{pmatrix}1 & 2 & 1\\\\ \n1 & 0 & 1\\\\ \n-1 & 1 & 0 \\end{pmatrix};1)"
   },
   {

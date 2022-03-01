@@ -406,12 +406,16 @@ public:
   const int dummyElements = 6;
   // A class to represent
   CodeFormatter();
-  static bool formatCPPDirectory(const std::string& inputDirectory, bool inPlace, std::stringstream* comments
+  static bool formatCPPDirectory(
+    const std::string& inputDirectory,
+    bool inPlace,
+    std::stringstream* comments
   );
-  static bool formatCalculatorInPlace(
-  );
-  bool formatCPPSourceCode(const std::string& inputFileName,
-    const std::string& output, const std::string &outputOnFail,
+  static bool formatCalculatorInPlace();
+  bool formatCPPSourceCode(
+    const std::string& inputFileName,
+    const std::string& output,
+    const std::string& outputOnFail,
     std::stringstream* comments,
     bool logDebugInfo
   );
@@ -434,9 +438,10 @@ private:
   bool computeState(int maximumElementsToProcess);
   bool addAndAccount(const std::string& incoming);
   bool decreaseStack(int numberToPop);
-  bool initializeFileNames(const std::string& fileName,
-  const std::string& output,
-  const std::string& outputOnFail,
+  bool initializeFileNames(
+    const std::string& fileName,
+    const std::string& output,
+    const std::string& outputOnFail,
     std::stringstream* comments
   );
   bool parsingSucceeded() const;

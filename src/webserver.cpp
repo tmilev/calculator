@@ -46,7 +46,6 @@ SignalsInfrastructure::SignalsInfrastructure() {
   this->flagInitialized = false;
 }
 
-
 // This class locks/unlocks all signals within its scope
 class SignalLock {
   SignalLock() {
@@ -56,7 +55,6 @@ class SignalLock {
     SignalsInfrastructure::signals().unblockSignals();
   }
 };
-
 
 void SignalsInfrastructure::unblockSignals() {
   int error = sigprocmask(SIG_SETMASK, &oldSignals, nullptr);
@@ -4548,6 +4546,7 @@ int WebWorker::run() {
 void WebServer::release(int& descriptor) {
   MutexProcess::release(descriptor);
 }
+
 extern int mainFormat();
 extern int mainTest(List<std::string>& remainingArgs);
 void WebServer::figureOutOperatingSystem() {
@@ -4831,7 +4830,7 @@ void WebServer::initializeBuildFlags() {
 }
 
 std::string MainFlags::server = "server";
-std::string MainFlags::format= "format";
+std::string MainFlags::format = "format";
 std::string MainFlags::daemon = "daemon";
 std::string MainFlags::help = "help";
 std::string MainFlags::pathExecutable = "path_executable";
@@ -4849,11 +4848,10 @@ public:
   bool setConfigurationFile();
   bool processCommandLineConfigurations(std::string& input);
 };
-bool ArgumentAnalyzer::setFormat() {
-global.flagRunningFormatCode = true;
 
-  return false
-  ;
+bool ArgumentAnalyzer::setFormat() {
+  global.flagRunningFormatCode = true;
+  return false;
 }
 
 bool ArgumentAnalyzer::setServer() {
@@ -4931,7 +4929,7 @@ bool ArgumentAnalyzer::processOneArgument() {
   StringRoutines::stringTrimWhiteSpace(
     global.programArguments[this->currentIndex]
   );
-  if (current == MainFlags::format ) {
+  if (current == MainFlags::format) {
     return this->setFormat();
   }
   if (current == MainFlags::server) {
@@ -5648,7 +5646,7 @@ int WebServer::main(int argc, char** argv) {
       return mainTest(global.programArguments);
     } else if (global.flagRunningFormatCode) {
       return mainFormat();
-    }else {
+    } else {
       return WebServer::mainCommandLine();
     }
   } catch(...) {

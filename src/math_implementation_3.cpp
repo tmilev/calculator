@@ -194,7 +194,7 @@ GlobalVariables::GlobalVariables() {
   this->flagDaemonMonitor = false;
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;
   this->flagUseMathTags = false;
-  this->flagRunningFormatCode=false;
+  this->flagRunningFormatCode = false;
 }
 
 bool ProgressReport::tickAndWantReport() {

@@ -42,7 +42,6 @@ int mainTest(List<std::string>& inputArguments) {
   return 0;
 }
 
-
 int mainFormat() {
   SignalsInfrastructure::signals().initializeSignals();
   CodeFormatter::formatCalculatorInPlace();

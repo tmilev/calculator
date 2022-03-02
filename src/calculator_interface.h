@@ -187,7 +187,7 @@ public:
   bool addChildAtomOnTop(const std::string& operationString);
   bool addChildAtomOnTop(int operationIndex);
   void getBlocksOfCommutativity(
-    HashedListSpecialized<Expression>& inputOutputList
+    HashedList<Expression>& inputOutputList
   ) const;
   bool splitProduct(
     int numDesiredMultiplicandsLeft,

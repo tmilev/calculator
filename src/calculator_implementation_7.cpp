@@ -3670,7 +3670,7 @@ bool CalculatorFunctions::outerCommuteAtimesBifUnivariate(
   if (input[1].isConstantNumber()) {
     return false;
   }
-  HashedListSpecialized<Expression> commutativityBlocks;
+  HashedList<Expression> commutativityBlocks;
   input.getBlocksOfCommutativity(commutativityBlocks);
   if (commutativityBlocks.size != 1) {
     return false;
@@ -3700,7 +3700,7 @@ bool CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate(
     return false;
   }
   const Expression& middleExpression = input[2][1];
-  HashedListSpecialized<Expression> commutativityBlocks;
+  HashedList<Expression> commutativityBlocks;
   leftExpression.getBlocksOfCommutativity(commutativityBlocks);
   middleExpression.getBlocksOfCommutativity(commutativityBlocks);
   if (commutativityBlocks.size != 1) {
@@ -6612,8 +6612,7 @@ bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
   return output.makeSum(calculator, numeratorsNew);
 }
 
-void Expression::getBlocksOfCommutativity(
-  HashedListSpecialized<Expression>& inputOutputList
+void Expression::getBlocksOfCommutativity(HashedList<Expression> &inputOutputList
 ) const {
   MacroRegisterFunctionWithName("Expression::getBlocksOfCommutativity");
   this->checkInitialization();
@@ -6717,7 +6716,7 @@ bool CalculatorFunctions::getUserDefinedSubExpressions(
   if (input.size() != 2) {
     return false;
   }
-  HashedListSpecialized<Expression> commutativityBlocks;
+  HashedList<Expression> commutativityBlocks;
   input[1].getBlocksOfCommutativity(commutativityBlocks);
   return output.makeSequence(calculator, &commutativityBlocks);
 }

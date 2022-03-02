@@ -275,7 +275,7 @@ public:
   // [Update:] made a bug report on this in the gcc bug tracker.
   // This issue has officially been recognized as a gcc bug. Hope to get a fix
   // soon.
-  HashedListSpecialized<MonomialTensor<int, HashFunctions::hashFunction> >
+  HashedList<MonomialTensor<int, HashFunctions::hashFunction> >
   generatingWordsNonReducedInt;
   Vectors<Rational> generatingWordsWeightsPlusWeightFiniteDimensionalPart;
   List<LittelmannPath> allPaths;
@@ -305,7 +305,7 @@ public:
   // Note: for some reason, the linker fails to resolve without the
   // explicit template specialization below.
   // [Update:] This is now a recognized gcc bug.
-  HashedListSpecialized<
+  HashedList<
     Pair<
       MonomialTensor<int, HashFunctions::hashFunction>,
       MonomialTensor<int, HashFunctions::hashFunction>

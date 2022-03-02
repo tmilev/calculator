@@ -491,32 +491,26 @@ class HashFunctions {
 public:
   template <class Object>
   static unsigned int hashFunction(const Object& object) {
-    return object.hashFunction();
-  }
-  static unsigned int hashFunction(const bool& input) {
-    return static_cast<unsigned int>(input);
-  }
-  static unsigned int hashFunction(const double& input);
-  static unsigned int hashFunction(const std::string& input) {
-    size_t numCycles = input.size();
-    unsigned int result = 0;
-    int hashCounter = 0;
-    for (unsigned i = 0; i < numCycles; i ++) {
-      result += static_cast<unsigned>(input[i]) *
-      HashConstants::getConstantIncrementCounter(hashCounter);
-    }
-    return result;
-  }
-  static unsigned int hashFunction(const int& input) {
-    return static_cast<unsigned>(input);
-  }
-  static unsigned int hashFunction(const char& input) {
-    return static_cast<unsigned int>(input);
-  }
-  static unsigned int hashFunction(const unsigned char& input) {
-    return static_cast<unsigned int>(input);
+    return Object::hashFunction(object);
   }
 };
+
+template <>
+
+ unsigned int HashFunctions::hashFunction(const std::string& input);
+ template <>
+
+  unsigned int HashFunctions::hashFunction(const bool& input);
+  template <>
+
+   unsigned int HashFunctions::hashFunction(const int& input);
+   template <>
+
+    unsigned int HashFunctions::hashFunction(const  unsigned char& input);
+    template <>
+
+     unsigned int HashFunctions::hashFunction(const  double& input);
+
 
 template <typename Object>
 class ListIterator {
@@ -1750,7 +1744,7 @@ public:
 
 template <
   class Object,
-  unsigned int hashFunction(const Object&) = Object::hashFunction
+  unsigned int hashFunction(const Object&) = HashFunctions::hashFunction<Object>
 >
 class HashedList: public HashTemplate<Object, List<Object>, hashFunction> {
 public:
@@ -1850,12 +1844,6 @@ public:
     );
   }
 };
-
-// Class used to avoid issues with gcc compilation.
-// This class should probably be removed as soon as the issue is resolved.
-template <class Object>
-class HashedListSpecialized: public HashedList<Object, Object::hashFunction> {}
-;
 
 struct StackInfo {
 public:

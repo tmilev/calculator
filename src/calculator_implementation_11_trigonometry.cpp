@@ -647,12 +647,9 @@ void TrigonometricReduction::initialize(
 }
 
 bool TrigonometricReduction::reduce() {
-  if (
-    !CalculatorConversions::functionRationalFraction(
-      *this->owner, this->input, this->inputFraction, false
-    )
-  ) {
-    return false;
-  }
+  HashedList<std::string> variables;
+  std::string reductionRules;
+
+  reductionRules = "";
   return false;
 }

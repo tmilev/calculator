@@ -423,6 +423,10 @@ struct SimpleReflectionOrOuterAutomorphism {
   unsigned int hashFunction() const {
     return static_cast<unsigned>(1 + this->index + 100 * flagIsOuter);
   }
+  static unsigned int hashFunction(const SimpleReflectionOrOuterAutomorphism& input)
+   {
+    return input.hashFunction();
+  }
   bool operator==(const SimpleReflectionOrOuterAutomorphism& other) const {
     return
     this->flagIsOuter == other.flagIsOuter &&
@@ -434,10 +438,6 @@ struct SimpleReflectionOrOuterAutomorphism {
     }
     return this->index > right.index;
   }
-  unsigned int hashFunction(const SimpleReflectionOrOuterAutomorphism& input)
-  const {
-    return input.hashFunction();
-  }
 };
 
 struct SimpleReflection {
@@ -448,6 +448,9 @@ struct SimpleReflection {
   std::string toString() const;
   void makeSimpleReflection(int inputIndex) {
     this->index = inputIndex;
+  }
+  static unsigned int hashFunction(const SimpleReflection& input){
+    return input.hashFunction();
   }
   unsigned int hashFunction() const {
     return static_cast<unsigned>(index);

@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_inner_typed_functions_ALREADY_INCLUDED
@@ -650,14 +650,14 @@ bool CalculatorConversions::extractPolynomialMakeAtom(
 }
 
 template <class Coefficient>
-bool CalculatorConversions::functionRationalFunction(
+bool CalculatorConversions::functionRationalFraction(
   Calculator& calculator,
   const Expression& input,
   WithContext<RationalFraction<Coefficient> >& output,
   bool allowNonIntegerPowers
 ) {
   MacroRegisterFunctionWithName(
-    "CalculatorConversions::functionRationalFunction"
+    "CalculatorConversions::functionRationalFraction"
   );
   if (
     CalculatorConversions::convertWithoutComputation(
@@ -673,7 +673,7 @@ bool CalculatorConversions::functionRationalFunction(
   ) {
     WithContext<RationalFraction<Coefficient> > left, right;
     if (
-      !CalculatorConversions::functionRationalFunction<Coefficient>(
+      !CalculatorConversions::functionRationalFraction<Coefficient>(
         calculator, input[1], left, allowNonIntegerPowers
       )
     ) {
@@ -684,7 +684,7 @@ bool CalculatorConversions::functionRationalFunction(
       << " to rational function. ";
     }
     if (
-      !CalculatorConversions::functionRationalFunction<Coefficient>(
+      !CalculatorConversions::functionRationalFraction<Coefficient>(
         calculator, input[2], right, allowNonIntegerPowers
       )
     ) {
@@ -725,14 +725,14 @@ bool CalculatorConversions::functionRationalFunction(
     if (input[2].isSmallInteger(&smallPower)) {
       WithContext<RationalFraction<Coefficient> > base;
       if (
-        !CalculatorConversions::functionRationalFunction<Coefficient>(
+        !CalculatorConversions::functionRationalFraction<Coefficient>(
           calculator, input[1], base, allowNonIntegerPowers
         )
       ) {
         return
         calculator
-        <<
-        "<hr>CalculatorConversions::functionRationalFunction: failed to convert "
+        << "<hr>CalculatorConversions::functionRationalFraction: "
+        << "failed to convert "
         << input[1].toString()
         << " to rational fraction. ";
       }
@@ -757,4 +757,3 @@ bool CalculatorConversions::functionRationalFunction(
 }
 
 #endif // header_calculator_inner_typed_functions_ALREADY_INCLUDED
-

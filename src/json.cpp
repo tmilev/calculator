@@ -1061,4 +1061,3 @@ bool JSData::operator==(const JSData& other) const {
 std::ostream& operator<<(std::ostream& out, const JSData& data) {
   return data.intoStream(out, nullptr);
 }
-

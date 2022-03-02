@@ -831,4 +831,3 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
 }
 
 #endif // header_math_general_implementation_ALREADY_INCLUDED
-

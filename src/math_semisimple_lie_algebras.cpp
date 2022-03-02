@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
@@ -221,7 +221,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
 std::string SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload() {
   std::stringstream out;
   out
-  << "<body onload='"// <<
+  << "<body onload='" // <<
   // "window.calculator.equationEditor.typeset(document.body, null); "
   <<
   "window.calculator.dynamicJavascript.dynamicJavascript.bootstrapAllScripts(document.body);"
@@ -2111,4 +2111,3 @@ int SemisimpleLieAlgebra::getRootIndexFromGenerator(int index) const {
   }
   return - 1;
 }
-

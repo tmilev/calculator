@@ -1,8 +1,7 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_inner_functions.h"
-
 
 bool CalculatorFunctionsTrigonometry::sin(
   Calculator& calculator, const Expression& input, Expression& output
@@ -151,6 +150,7 @@ bool CalculatorFunctionsTrigonometry::csc(
   den.makeOX(calculator, calculator.opSin(), argument);
   return output.makeXOX(calculator, calculator.opDivide(), num, den);
 }
+
 bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -607,7 +607,52 @@ bool CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry(
   return true;
 }
 
-bool CalculatorFunctionsTrigonometry::fourierFractionForm(Calculator &calculator, const Expression &input, Expression &output){
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::fourierFractionForm");
-  return calculator << "Not implemented yet";
+class TrigonometricReduction {
+public:
+  Expression input;
+  Calculator* owner;
+  WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
+  void initialize(Calculator& inputOwner, const Expression& incoming);
+  bool reduce();
+  std::string toString();
+};
+
+bool CalculatorFunctionsTrigonometry::fourierFractionForm(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsTrigonometry::fourierFractionForm"
+  );
+  if (input.size() != 2) {
+    return false;
+  }
+  TrigonometricReduction trigonometricReduction;
+  trigonometricReduction.initialize(calculator, input[1]);
+  trigonometricReduction.reduce();
+  return output.assignValue(calculator, trigonometricReduction.toString());
+}
+
+std::string TrigonometricReduction::toString() {
+  std::stringstream out;
+  out << this->inputFraction.toString();
+  out << "not implemented yet";
+  return out.str();
+}
+
+void TrigonometricReduction::initialize(
+  Calculator& inputOwner, const Expression& incoming
+) {
+  this->owner = &inputOwner;
+  this->input = incoming;
+}
+
+bool TrigonometricReduction::reduce() {
+  if (
+    !CalculatorConversions::functionRationalFraction(
+      *this->owner, this->input, this->inputFraction, false
+    )
+  ) {
+    return false;
+  }
+  return false;
 }

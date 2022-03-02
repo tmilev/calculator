@@ -23,4 +23,3 @@ public:
 };
 
 #endif // header_signals_infrastructure_ALREADY_INCLUDED
-

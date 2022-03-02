@@ -1934,7 +1934,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
       genVemaWeightNode,
       highestWeightFundCoords,
       &hwContext,
-      rank// CalculatorConversions::functionRationalFunction<Rational>
+      rank // CalculatorConversions::functionRationalFraction<Rational>
     )
   ) {
     return
@@ -2636,8 +2636,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
       input,
       g2b3Data.weightFundamentalCoordinates,
       &outputContext,
-      3// ,
-      // CalculatorConversions::functionRationalFunction<Rational>
+      3 // ,
+      // CalculatorConversions::functionRationalFraction<Rational>
     )
   ) {
     output.assignError(
@@ -6433,4 +6433,3 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   );
   return output.assignValue(calculator, out.str());
 }
-

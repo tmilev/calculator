@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -391,7 +391,7 @@ bool Calculator::getVectorDoubles(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory// ,
+    desiredDimensionNonMandatory // ,
     // CalculatorFunctions::functionEvaluateToDouble
   );
 }
@@ -406,7 +406,7 @@ bool Calculator::getVectorDoublesFromFunctionArguments(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory// ,
+    desiredDimensionNonMandatory // ,
     // CalculatorFunctions::functionEvaluateToDouble
   );
 }
@@ -2680,4 +2680,3 @@ bool CalculatorFunctionsPlot::plotSurface(
 }
 
 class QRFactorizationComputation {};
-

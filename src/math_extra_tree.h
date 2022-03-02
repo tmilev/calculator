@@ -117,4 +117,3 @@ std::string Tree<Data>::toString() const {
 }
 
 #endif // header_math_extra_tree_ALREADY_INCLUDED
-

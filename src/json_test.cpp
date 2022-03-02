@@ -160,4 +160,3 @@ bool JSData::Test::badInput() {
   }
   return true;
 }
-

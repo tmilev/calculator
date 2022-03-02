@@ -3842,4 +3842,3 @@ bool WeylGroupData::loadGAPRootSystem(
   }
   return true;
 }
-

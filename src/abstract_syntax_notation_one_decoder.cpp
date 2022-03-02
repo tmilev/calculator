@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "abstract_syntax_notation_one_decoder.h"
@@ -925,13 +925,13 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(ASNElement& output)
   case tags::sequence0x10:
     return this->decodeSequenceLikeContent(output);
   case tags::set0x11:
-    return this->decodeSequenceLikeContent(output);// either non-pure composite
+    return this->decodeSequenceLikeContent(output); // either non-pure composite
     // or atom:
   case tags::bitString0x03:
-    return this->decodeBitString(output);// atoms with extra
+    return this->decodeBitString(output); // atoms with extra
     // comments/interpretation:
   case tags::null0x05:
-    return this->decodeNull(output);// atoms without additional interpretation:
+    return this->decodeNull(output); // atoms without additional interpretation:
   case tags::boolean0x01:
   case tags::integer0x02:
   case tags::objectIdentifier0x06:
@@ -2528,4 +2528,3 @@ bool X509Certificate::loadFromASNEncoded(
   this->signatureValue = this->sourceASN[2];
   return true;
 }
-

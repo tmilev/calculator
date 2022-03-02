@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
@@ -96,4 +96,3 @@ unsigned int HashFunctions::hashFunction(const double& input) {
 unsigned int MathRoutines::hashDouble(const double& input) {
   return HashFunctions::hashFunction(input);
 }
-

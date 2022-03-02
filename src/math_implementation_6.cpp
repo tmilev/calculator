@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_advanced_implementation.h"
@@ -1478,4 +1478,3 @@ void IntegerModulusSmall::initializeModulusData(int inputModulus) {
     }
   }
 }
-

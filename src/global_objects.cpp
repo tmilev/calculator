@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "system_functions_global_objects.h"
@@ -69,4 +69,3 @@ void HtmlRoutines::makeStdCoutReport(const std::string& input) {
   global.comments << input;
   HtmlRoutines::makeReportIndicatorFile(input);
 }
-

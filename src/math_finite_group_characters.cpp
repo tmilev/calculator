@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
@@ -490,7 +490,7 @@ bool PolynomialUnivariateDense<Coefficient>::operator==(const int other) const {
   return false;
 }
 
-template <typename Coefficient>// template <typename integral>
+template <typename Coefficient> // template <typename integral>
 void PolynomialUnivariateDense<Coefficient>::clearDenominators() {
   int acc = 1;
   for (int i = 0; i < data.size; i ++) {
@@ -1625,4 +1625,3 @@ Matrix<Rational> CharacterFunctions::getClassMatrix(
   }
   return out;
 }
-

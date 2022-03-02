@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_lists.h"
@@ -2613,4 +2613,3 @@ void Rational::assignString(const std::string& input) {
     << global.fatal;
   }
 }
-

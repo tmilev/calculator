@@ -620,7 +620,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
       vectorNode,
       highestWeightFundamentalCoordinates,
       &context,
-      dynkinType.getRank()// ,
+      dynkinType.getRank() // ,
       // CalculatorConversions::functionPolynomial<Rational>
     )
   ) {
@@ -3298,4 +3298,3 @@ bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   outputRepresentation.assignRepresentation(inputRepresentation);
   return output.assignValue(calculator, outputRepresentation);
 }
-

@@ -78,4 +78,3 @@ bool ElementEllipticCurve<ElementZmodP>::makeGeneratorNISTCurve(
   }
   return false;
 }
-

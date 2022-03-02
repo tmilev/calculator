@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".#include
 // "calculator_interface.h"
@@ -423,7 +423,7 @@ bool CalculatorConversions::convert(
   WithContext<RationalFraction<Rational> >& output
 ) {
   return
-  CalculatorConversions::functionRationalFunction(
+  CalculatorConversions::functionRationalFraction(
     calculator, input, output, false
   );
 }
@@ -2074,7 +2074,7 @@ bool CalculatorConversions::rationalFunction(
   }
   WithContext<RationalFraction<Rational> > outputCandidate;
   if (
-    !CalculatorConversions::functionRationalFunction(
+    !CalculatorConversions::functionRationalFraction(
       calculator, input[1], outputCandidate, true
     )
   ) {
@@ -2361,4 +2361,3 @@ bool CalculatorConversions::polynomialModuloInteger(
   return
   output.assignValueWithContext(calculator, converted, polynomial.context);
 }
-

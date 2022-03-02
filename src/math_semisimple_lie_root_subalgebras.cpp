@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_implementation.h"
@@ -5739,7 +5739,7 @@ bool ConeRelation::isStrictlyWeaklyProhibiting(
   if (
     this->diagram.simpleComponentTypes[0].letter == 'A' &&
     this->diagram.simpleComponentTypes[0].rank == 1
-  ) {//  global.fatal << global.fatal;
+  ) { //  global.fatal << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
   tempSubgroup;
@@ -6112,4 +6112,3 @@ void ConeRelations::toString(
   }
   output = out.str();
 }
-

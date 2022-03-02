@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_implementation.h"
@@ -9758,7 +9758,7 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
   }
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
     out << "<td><b>" << "W_{" << i + 1
-    << "}"// << "=" <<
+    << "}" // << "=" <<
     // this->primalChar[i].toString(&characterFormat)
     << "</b></td>";
   }
@@ -11183,4 +11183,3 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
     (i, this->CartanOfCentralizer[i-this->getRank()]);
 */
 }
-

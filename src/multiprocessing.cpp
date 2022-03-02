@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "multiprocessing.h"
@@ -1187,9 +1187,8 @@ Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {
       this->flagStopWritingToFile
     ) {
       return *this;
-    } logFile << this->closeTagHtml(); return *this;// default:
+    } logFile << this->closeTagHtml(); return *this; // default:
     //   ;
   }
   return *this;
 }
-

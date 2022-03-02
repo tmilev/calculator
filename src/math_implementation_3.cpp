@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_lists.h"
@@ -715,7 +715,7 @@ std::string StringRoutines::convertStringToJavascriptVariable(
 std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
   std::stringstream out;
   if (input >=
-2097152// = 2^21-1
+2097152 // = 2^21-1
   ) {
     // Invalid code point.
     // A unicode code point must be smaller than 2^21.
@@ -734,7 +734,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     return out.str();
   }
   if (input <
-2048// = 2^11, encoding fits in b_110?????, b_10??????
+2048 // = 2^11, encoding fits in b_110?????, b_10??????
   ) {
     unsigned char high = input >> 6;
     high += 128 + 64;
@@ -746,7 +746,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
   }
   if (
     input <
-    65536// = 2^16, encoding fits in b_1110????, b_10??????, b_10??????
+    65536 // = 2^16, encoding fits in b_1110????, b_10??????, b_10??????
   ) {
     unsigned char high = input >> 12;
     high += 128 + 64 + 32;
@@ -15318,4 +15318,3 @@ std::string Lattice::toString() const {
   out << ">";
   return out.str();
 }
-

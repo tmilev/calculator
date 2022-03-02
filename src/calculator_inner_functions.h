@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_inner_functions_ALREADY_INCLUDED
@@ -310,12 +310,15 @@ public:
   static bool eulerFormulaAsLaw(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool fourierFractionForm(    Calculator& calculator, const Expression& input, Expression& output
-);
-  static bool maximalCosineForm(    Calculator& calculator, const Expression& input, Expression& output
-);
-  static bool maximalSineForm(    Calculator& calculator, const Expression& input, Expression& output
-);
+  static bool fourierFractionForm(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool maximalCosineForm(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool maximalSineForm(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
 };
 
 class CalculatorFunctionsIntegration {
@@ -1294,4 +1297,3 @@ public:
 };
 
 #endif
-

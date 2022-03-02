@@ -309,4 +309,3 @@ public:
 };
 
 #endif // header_string_constants_ALREADY_INCLUDED
-

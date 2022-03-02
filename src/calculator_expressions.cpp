@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -2900,7 +2900,7 @@ bool Expression::toStringBuiltIn<
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   out
-  << "UEE{}("// << input.getContext().toString() << ", "
+  << "UEE{}(" // << input.getContext().toString() << ", "
   << input.getValue<
     ElementUniversalEnveloping<RationalFraction<Rational> >
   >().toString(&formatLocal)
@@ -5963,4 +5963,3 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
   }
   return this->toString(format);
 }
-

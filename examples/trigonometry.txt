@@ -1,7 +1,6 @@
 A=cos(2x) / (cos^3 x - sin^3 x);
 
-TurnOnRules(ExpressSinViaExponent);
-TurnOnRules(ExpressCosViaExponent);
+TurnOnRules(ExpressSinViaExponent, ExpressCosViaExponent);
 A;
 e^{{{n}} i  x}  = z^n;
 e^{i x} = z;

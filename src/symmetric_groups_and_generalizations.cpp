@@ -1597,4 +1597,3 @@ std::ostream& operator<<(
 ) {
   return data.intoStream(out);
 }
-

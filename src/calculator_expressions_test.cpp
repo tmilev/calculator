@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -69,4 +69,3 @@ bool Expression::Test::isUserDefinedAtom(Calculator& owner) {
   Expression::Test::isUserDefinedAtomOnce(owner, "1", false);
   return true;
 }
-

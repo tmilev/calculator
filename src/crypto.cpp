@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "crypto.h"
@@ -624,13 +624,13 @@ bool Crypto::get6BitFromChar(unsigned char input, uint32_t& output) {
   case '9':
     output = 61; return true;
   case '-':
-    output = 62; return true;// RFC 4648 base64url.
+    output = 62; return true; // RFC 4648 base64url.
   case '_':
-    output = 63; return true;// RFC 4648 base64url.
+    output = 63; return true; // RFC 4648 base64url.
   case '+':
-    output = 62; return true;// RFC 4648: "standard" base64.
+    output = 62; return true; // RFC 4648: "standard" base64.
   case '/':
-    output = 63; return true;// RFC 4648: "standard" base64.
+    output = 63; return true; // RFC 4648: "standard" base64.
     // Note: there is no collision between the original base64 and RFC 7515,
     // both can be supported for input.
   case '=':
@@ -2623,4 +2623,3 @@ bool Crypto::External::encryptAES_CBC_256_string(
   );
   return true;
 }
-

@@ -52,4 +52,3 @@ bool Crypto::Test::sha256() {
   }
   return true;
 }
-

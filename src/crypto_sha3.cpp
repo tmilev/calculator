@@ -387,4 +387,3 @@ void Crypto::computeSha3_256(
   hasher.finalize();
   hasher.getResultVector(output);
 }
-

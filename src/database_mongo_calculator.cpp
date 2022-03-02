@@ -56,4 +56,3 @@ bool CalculatorDatabaseFunctions::executeMongoQuery(
     calculator, HtmlRoutines::toHtmlTableRowsFromJSON(finalOutput)
   );
 }
-

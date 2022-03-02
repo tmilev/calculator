@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -829,7 +829,7 @@ bool CalculatorFunctions::getSummand(
     return false;
   }
   Expression substitution = bottomBoundary;
-  Expression// oneE,
+  Expression // oneE,
   valueToSubWith;
   valueToSubWith = bottomBoundary[2] + input[2];
   substitution.setChild(2, valueToSubWith);
@@ -2567,7 +2567,6 @@ bool CalculatorFunctions::orIdentical(
   return false;
 }
 
-
 bool CalculatorFunctions::distributeSqrt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -2811,8 +2810,8 @@ bool CalculatorFunctions::newtonsMethod(
   if (!input[3].isSmallInteger(&numIterations)) {
     std::stringstream errorStream;
     errorStream
-    <<
-    "While doing Newton's method, could not extract a **small** integer from the third argument "
+    << "While doing Newton's method, "
+    << "could not extract a **small** integer from the third argument "
     << input[3].toString()
     << " of "
     << input.toString()
@@ -2826,8 +2825,8 @@ bool CalculatorFunctions::newtonsMethod(
     << input.toString()
     << ", the third argument requests "
     << numIterations
-    <<
-    " iterations. However, the number of iterations is required to be a number between 1 and 50. "
+    << " iterations. However, "
+    << "the number of iterations is required to be a number between 1 and 50. "
     ;
     return output.assignError(calculator, errorStream.str());
   }
@@ -2842,7 +2841,12 @@ bool CalculatorFunctions::newtonsMethod(
   substitution.setKeyValue("numIterations", input[3]);
   return
   output.assignStringParsed(
-    "(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
+    "(NewtonMap{}{{a}} = "
+    "DoubleValue( "
+    "(iteratedMap =x- f/ Differentiate{}(x, f); "
+    "x ={{a}}; "
+    "iteratedMap "
+    ")_3); "
     "y_{0} = startingPoint;"
     "y_{{a}} = NewtonMap{}(y_{a- 1});"
     "y_{numIterations})_4",
@@ -2897,9 +2901,8 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   if (input.size() != 4) {
     return
     calculator
-    <<
-    "Elliptic curve expects 3 arguments (curve, generator letter, baseX and baseY) "
-    ;
+    << "Elliptic curve expects 3 arguments "
+    << "(curve, generator letter, baseX and baseY) ";
   }
   const Expression& xDefE = input[2];
   const Expression& yDefE = input[3];
@@ -3048,8 +3051,8 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   ) {
     return
     calculator
-    <<
-    "At the moment only integer elliptic curve coefficients are supported. Your coefficients were: "
+    << "At the moment only integer elliptic curve "
+    "coefficients are supported. Your coefficients were: "
     << coefficientXLinear
     << ", "
     << constCoefficient
@@ -3103,8 +3106,8 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   if (!input[1].isSmallInteger(&startingIndex)) {
     return
     calculator
-    <<
-    "Argument of precomputeSemisimpleLieAlgebraStructure not a small integer.";
+    << "Argument of precomputeSemisimpleLieAlgebraStructure "
+    << "not a small integer.";
   }
   List<DynkinType> allTypes;
   DynkinType::getPrecomputedDynkinTypes(allTypes);
@@ -3295,7 +3298,8 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
     return
     output.assignError(
       calculator,
-      "I need at least two arguments - upper bound and at least one element to multiply. "
+      "I need at least two arguments - "
+      "upper bound and at least one element to multiply. "
     );
   }
   int upperLimit;
@@ -3303,14 +3307,15 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
     return
     output.assignError(
       calculator,
-      "First argument must be a small integer, serving as upper bound for the set. "
+      "First argument must be a small integer, "
+      "serving as upper bound for the set. "
     );
   }
   if (upperLimit <= 0) {
     upperLimit = 10000;
     calculator
-    <<
-    "The upper computation limit I got was 0 or less; I replaced it with the default value "
+    << "The upper computation limit I got was 0 or less; "
+    << "I replaced it with the default value "
     << upperLimit
     << ".";
   }
@@ -3339,8 +3344,8 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
       if (set.size > upperLimit) {
         std::stringstream out;
         out
-        <<
-        "<hr>While generating multiplicatively closed set, I went above the upper limit of "
+        << "<hr>While generating multiplicatively closed set, "
+        << "I went above the upper limit of "
         << upperLimit
         << " elements.";
         evaluatedProduct.assignError(calculator, out.str());
@@ -3385,8 +3390,8 @@ bool Matrix<Rational>::jordanNormalForm(
   ) {
     // We have made a programming error.
     global.fatal
-    <<
-    "The characteristic polynomial should not be an honest rational fraction. "
+    << "The characteristic polynomial "
+    << "should not be an honest rational fraction. "
     << global.fatal;
   }
   PolynomialSolverWithQuadraticRadicalsUnivariate solver(ownerField);
@@ -3457,9 +3462,8 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
   if (!matrix.isSquare()) {
     return
     calculator
-    <<
-    "Diagonalization (Jordan normal form) is allowed only for square matrices. "
-    ;
+    << "Diagonalization (Jordan normal form) "
+    << "is allowed only for square matrices. ";
   }
   Matrix<AlgebraicNumber> eigenMatrix, jordanNormalForm, eigenMatrixInverted;
   std::stringstream comments;
@@ -3900,4 +3904,3 @@ bool CalculatorFunctions::jacobiSymbol(
   }
   return true;
 }
-

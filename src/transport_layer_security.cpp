@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "transport_layer_security.h"
@@ -2019,7 +2019,7 @@ bool SSLRecord::decode(std::stringstream* commentsOnFailure) {
   this->offsetDecoded ++;
   if (
     this->recordType !=
-    SSLRecord::tokens::handshake// &&
+    SSLRecord::tokens::handshake // &&
     //    this->recordType != SSLRecord::tokens::alert &&
     //    this->recordType != SSLRecord::tokens::applicationData &&
     //    this->recordType != SSLRecord::tokens::changeCipherSpec
@@ -2490,4 +2490,3 @@ int TransportLayerSecurity::writeOnce(
     );
   }
 }
-

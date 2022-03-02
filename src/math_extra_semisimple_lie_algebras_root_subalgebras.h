@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_semisimple_lie_algebras_root_subalgebras_ALREADY_INCLUDED
@@ -870,4 +870,3 @@ public:
 };
 
 #endif // header_math_extra_semisimple_lie_algebras_root_subalgebras_ALREADY_INCLUDED
-

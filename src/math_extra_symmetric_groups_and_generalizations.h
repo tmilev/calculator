@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
@@ -2055,4 +2055,3 @@ somestream& HyperoctahedralGroupData::intoStream(somestream& out) const {
 }
 
 #endif // header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
-

@@ -1682,4 +1682,3 @@ std::string Database::toHtmlDatabaseCollection(
   out << "<br>" << HtmlRoutines::toHtmlTable(labels, rows, true);
   return out.str();
 }
-

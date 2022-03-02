@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_system_functions_global_objects_ALREADY_INCLUDED
@@ -26,4 +26,3 @@ extern void createTimerThread();
 extern void initializeTimer();
 extern void* runTimerVoidPointer(void* ptr);
 #endif // header_system_functions_global_objects_ALREADY_INCLUDED
-

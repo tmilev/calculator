@@ -331,4 +331,3 @@ public:
 };
 
 #endif // header_serialization_basic_ALREADY_INCLUDED
-

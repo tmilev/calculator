@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_time_date.h"
@@ -187,4 +187,3 @@ void TimeWrapper::operator=(const std::string& input) {
   inputStream >> this->timeGM.tm_sec;
   this->computeTimeStringNonReadable();
 }
-

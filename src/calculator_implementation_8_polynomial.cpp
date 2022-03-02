@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -621,7 +621,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(
       input,
       inputs,
       nullptr,
-      - 1// ,
+      - 1 // ,
       //    CalculatorConversions::functionPolynomial<Rational>
     )
   ) {
@@ -636,7 +636,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(
       input,
       inputsAlgebraic,
       nullptr,
-      - 1// ,
+      - 1 // ,
       // CalculatorConversions::functionPolynomial<AlgebraicNumber>
     )
   ) {
@@ -1379,7 +1379,7 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
       output,
       inputVector,
       &context,
-      - 1// ,
+      - 1 // ,
       // CalculatorConversions::functionPolynomial<Rational>
     )
   ) {
@@ -1584,7 +1584,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
       input,
       polynomials,
       &context,
-      2// ,
+      2 // ,
       // CalculatorConversions::functionPolynomial<Rational>
     )
   ) {
@@ -1664,7 +1664,7 @@ bool CalculatorFunctionsPolynomial::groebner(
       output,
       inputVector,
       &context,
-      - 1// ,
+      - 1 // ,
       // CalculatorConversions::functionPolynomial<Rational>
     )
   ) {
@@ -1804,7 +1804,7 @@ combineFractionsCommutativeWithInternalLibrary(
   }
   WithContext<RationalFraction<AlgebraicNumber> > rationalFunction;
   if (
-    !CalculatorConversions::functionRationalFunction<AlgebraicNumber>(
+    !CalculatorConversions::functionRationalFraction<AlgebraicNumber>(
       calculator, input, rationalFunction, true
     )
   ) {
@@ -1922,4 +1922,3 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   }
   return true;
 }
-

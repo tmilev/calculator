@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_inner_functions.h"
@@ -685,13 +685,13 @@ std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(
     "CalculatorHTML::toStringCalculatorProblemSourceFromFileName"
   );
   std::stringstream out;
-  out// << "<span class =\"calculatorExamProblem\">\n"
+  out // << "<span class =\"calculatorExamProblem\">\n"
   << "Title: "
   << fileName
   << "\n"
   << "Problem: "
   << fileName
-  << "\n"// <<
+  << "\n" // <<
   // "\n</span>"
   ;
   return out.str();
@@ -5573,4 +5573,3 @@ std::string TopicElement::toString() const {
   << ". ";
   return out.str();
 }
-

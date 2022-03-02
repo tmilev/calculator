@@ -392,4 +392,3 @@ std::string GraphWeightedLabeledEdges::toStringPsTricks(
   out << "\\end{document}<br><br>\n";
   return out.str();
 }
-

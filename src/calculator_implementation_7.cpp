@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -2385,7 +2385,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   IntegralRationalFunctionComputation computation(&calculator);
   computation.inputIntegrand = input;
   if (
-    !CalculatorConversions::functionRationalFunction<Rational>(
+    !CalculatorConversions::functionRationalFraction<Rational>(
       calculator, input, computation.rationalFraction, false
     )
   ) {
@@ -2437,7 +2437,7 @@ bool CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm(
     return false;
   }
   if (
-    !CalculatorConversions::functionRationalFunction(
+    !CalculatorConversions::functionRationalFraction(
       calculator, input[1], computation.rationalFraction, false
     )
   ) {
@@ -4924,13 +4924,13 @@ integrateRationalFunctionSplitToBuidingBlocks(
   IntegralRationalFunctionComputation computation(&calculator);
   computation.inputIntegrand = functionExpression;
   if (
-    !CalculatorConversions::functionRationalFunction<Rational>(
+    !CalculatorConversions::functionRationalFraction<Rational>(
       calculator, functionExpression, computation.rationalFraction, false
     )
   ) {
     return
     calculator
-    << "<hr>Call of function CalculatorConversions::functionRationalFunction "
+    << "<hr>Call of function CalculatorConversions::functionRationalFraction "
     << "failed, input was: "
     << functionExpression.toString();
   }
@@ -6143,7 +6143,6 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   output = outputCandidate;
   return true;
 }
-
 
 bool CalculatorFunctions::powerImaginaryUnit(
   Calculator& calculator, const Expression& input, Expression& output
@@ -10707,4 +10706,3 @@ bool CalculatorFunctions::selectAtRandom(
   output = input[randomIndex];
   return true;
 }
-

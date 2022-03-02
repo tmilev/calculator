@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_interface_ALREADY_INCLUDED
@@ -3460,7 +3460,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   template <class Coefficient>
-  static bool functionRationalFunction(
+  static bool functionRationalFraction(
     Calculator& calculator,
     const Expression& input,
     WithContext<RationalFraction<Coefficient> >& output,
@@ -4156,8 +4156,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   ) {
     std::stringstream tempStream;
     tempStream
-    <<
-    "Failed to convert the second argument of "
+    << "Failed to convert the second argument of "
     << "highest weight vector to a list of "
     << ambientSemisimpleLieAlgebra->getRank()
     << " polynomials. The second argument you gave is "
@@ -4178,9 +4177,8 @@ bool Calculator::getTypeHighestWeightParabolic(
     ) {
       std::stringstream tempStream;
       tempStream
-      <<
-      "Failed to convert the third argument "
-      <<"of highest weight vector to a list of "
+      << "Failed to convert the third argument "
+      << "of highest weight vector to a list of "
       << ambientSemisimpleLieAlgebra->getRank()
       << " rationals. The third argument you gave is "
       << rightE.toString()
@@ -4449,4 +4447,3 @@ bool WithContext<BuiltIn>::mergeContexts(
 }
 
 #endif // header_calculator_interface_ALREADY_INCLUDED
-

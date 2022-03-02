@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -903,9 +903,11 @@ void Calculator::initializeFunctionsStandard() {
     "FourierFractionForm",
     CalculatorFunctionsTrigonometry::fourierFractionForm,
     "",
-    "Converts a trigonometric expression in one variable to fourier fraction form. ",
-    "A = (cos(2x)/(cos^3 x - sin^3 x);\n"
-    "FourierFractionForm",
+    "Converts a trigonometric expression in one variable to fourier fraction form. "
+    ,
+    "A = cos(2x)/(cos^3 x - sin^3 x);\n"
+    "FourierFractionForm A;\n"
+    "",
     "CalculatorFunctionsTrigonometry::fourierFractionForm",
     "FourierFractionForm",
     innerStandard
@@ -1030,8 +1032,7 @@ void Calculator::initializeFunctionsStandard() {
     "Integrates building blocks IIIb.",
     "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
     "CalculatorFunctionsIntegration::"
-  "integrateRationalFunctionBuidingBlockIIIb"
-    ,
+    "integrateRationalFunctionBuidingBlockIIIb",
     "IntegrateBlockIIIb",
     innerStandard
   );
@@ -1042,7 +1043,7 @@ void Calculator::initializeFunctionsStandard() {
     "Integrates building blocks IIb.",
     "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
     "CalculatorFunctionsIntegration::"
-  "integrateRationalFunctionBuidingBlockIIb",
+    "integrateRationalFunctionBuidingBlockIIb",
     "IntegrateBlockIIb",
     innerStandard
   );
@@ -6158,4 +6159,3 @@ void Calculator::initializeAtomsThatFreezeArguments() {
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Freeze");
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Bind");
 }
-

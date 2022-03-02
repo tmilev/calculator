@@ -95,4 +95,3 @@ public:
 };
 
 #endif // header_math_extra_graph_ALREADY_INCLUDED
-

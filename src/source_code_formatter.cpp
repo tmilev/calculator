@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_file_operations_encodings.h"
@@ -591,7 +591,6 @@ void CodeFormatter::Element::formatDefault(std::stringstream& out) {
 void CodeFormatter::Element::formatContent(std::stringstream& out) {
   if (this->content != "") {
     out << this->content;
-    // out << "[" << this->toStringIndentation() << "]";
     return;
   }
   for (int i = 0; i < this->children.size; i ++) {
@@ -1022,6 +1021,8 @@ bool CodeFormatter::Element::computeIndentationComment() {
   }
   if (this->previousAtom()->newLinesAfter > 0) {
     this->whiteSpaceBefore = this->indentationLevel;
+  } else {
+    this->leftMostAtomUnderMe()->whiteSpaceBefore = 1;
   }
   List<std::string> words;
   std::string contentAfterDoubleSlash;
@@ -1454,7 +1455,7 @@ bool CodeFormatter::Element::computeIndentationTopLevel() {
     CodeFormatter::Element* rightMostAtom = current.rightMostAtomUnderMe();
     rightMostAtom->newLinesAfter = 1;
     current.computeIndentation();
-    bool addExtraLine = true;
+    bool addExtraLine = false;
     if (i + 1 < this->children.size) {
       addExtraLine =
       current.shouldAddExtraLineInTopLevel(this->children[i + 1]);
@@ -5087,4 +5088,3 @@ bool CodeFormatter::mustSplitWithWhitespace(
   }
   return true;
 }
-

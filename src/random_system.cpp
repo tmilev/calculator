@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "crypto.h"
@@ -38,7 +38,7 @@ void Crypto::Random::initializeRandomBytes() {
       output.objects,
       static_cast<unsigned>(output.size),
       GRND_NONBLOCK
-    )// Does not compile on older linux systems:
+    ) // Does not compile on older linux systems:
     // getrandom(output.objects, static_cast<unsigned>(output.size), 0)
   );
   if (generatedBytes != output.size) {
@@ -82,4 +82,3 @@ void Crypto::Random::initializeRandomBytes() {
 }
 
 #endif
-

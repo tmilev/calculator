@@ -515,4 +515,3 @@ void CryptoPublicDomain::computeRIPEMD160(
   );
   RIPEMD160Internal::ripemd160Done(&md, output.objects);
 }
-

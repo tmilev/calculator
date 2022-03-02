@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "database.h"
@@ -58,4 +58,3 @@ bool Database::Test::adminAccountCreation() {
   }
   return true;
 }
-

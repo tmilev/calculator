@@ -1,4 +1,4 @@
-// The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED
@@ -473,4 +473,3 @@ bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(
 }
 
 #endif // header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED
-

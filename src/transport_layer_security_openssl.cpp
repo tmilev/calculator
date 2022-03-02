@@ -567,7 +567,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
           *commentsOnFailure
           << " Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented).  <br>";
-        } maxNumHandshakeTries = 1; break;// case SSL_ERROR_WANT_ASYNC:
+        } maxNumHandshakeTries = 1; break; // case SSL_ERROR_WANT_ASYNC:
         // logOpenSSL << Logger::red << "Asynchronous engine is still processing
         // data. <br>"
         //  << Logger::endL;
@@ -822,7 +822,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
           *commentsOnFailure
           << "Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented). ";
-        } maxNumHandshakeTries = 1; break;// case SSL_ERROR_WANT_ASYNC:
+        } maxNumHandshakeTries = 1; break; // case SSL_ERROR_WANT_ASYNC:
         // logOpenSSL << Logger::red << "Asynchronous engine is still processing
         // data. "
         //  << Logger::endL;
@@ -862,4 +862,3 @@ TransportLayerSecurityOpenSSL::TransportLayerSecurityOpenSSL() {
   this->flagContextInitialized = false;
   this->flagIsServer = true;
 }
-

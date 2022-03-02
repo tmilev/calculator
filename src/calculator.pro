@@ -119,6 +119,7 @@ SOURCES += \
     calculator_html_routines.cpp \
     calculator_implementation_1.cpp \
     calculator_implementation_10.cpp \
+    calculator_implementation_11_trigonometry.cpp \
     calculator_implementation_2.cpp \
     calculator_implementation_3.cpp \
     calculator_implementation_4.cpp \

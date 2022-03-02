@@ -310,6 +310,12 @@ public:
   static bool eulerFormulaAsLaw(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool fourierFractionForm(    Calculator& calculator, const Expression& input, Expression& output
+);
+  static bool maximalCosineForm(    Calculator& calculator, const Expression& input, Expression& output
+);
+  static bool maximalSineForm(    Calculator& calculator, const Expression& input, Expression& output
+);
 };
 
 class CalculatorFunctionsIntegration {

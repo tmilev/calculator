@@ -125,7 +125,7 @@ void Calculator::initializeFunctionsStandard() {
     "SetRandomSeed(123);\n"
     "RandomInteger(- 100, 100);\n"
     "RandomInteger(- 100, 100)",
-    "CalculatorConversions::setRandomSeed",
+    "CalculatorFunctions::setRandomSeed",
     Calculator::Atoms::setRandomSeed,
     innerStandard
   );
@@ -156,7 +156,7 @@ void Calculator::initializeFunctionsStandard() {
     "For non-overlapping intervals, the random "
     "number distribution should be approximately uniform.",
     "RandomInteger((-2,- 1), (2,5));",
-    "CalculatorConversions::randomInteger",
+    "CalculatorFunctions::randomInteger",
     "RandomInteger",
     innerNoTest
   );
@@ -173,7 +173,7 @@ void Calculator::initializeFunctionsStandard() {
     "b=1/t^3;"
     "TurnOnRules(\"ConvertShortDenominatorToNegativePower\");"
     "b",
-    "CalculatorConversions::turnOffRules",
+    "CalculatorFunctions::turnOffRules",
     "TurnOffRules",
     innerStandard
   );
@@ -183,7 +183,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Turns on computational rules.",
     "TurnOffRules(\"sqrt\"); a = \\sqrt[4]{t}; TurnOnRules(\"sqrt\"); a",
-    "CalculatorConversions::turnOnRules",
+    "CalculatorFunctions::turnOnRules",
     "TurnOnRules",
     innerStandard
   );
@@ -230,7 +230,7 @@ void Calculator::initializeFunctionsStandard() {
     "ln(2);\n"
     "TurnOnApproximations(0);\n"
     "ln(2)",
-    "CalculatorConversions::turnOffApproximations",
+    "CalculatorFunctions::turnOffApproximations",
     "TurnOffApproximations",
     innerStandard
   );
@@ -258,7 +258,7 @@ void Calculator::initializeFunctionsStandard() {
     "1 or 1;\n"
     "a or 1;\n"
     "a or 0;",
-    "CalculatorConversions::or",
+    "CalculatorFunctions::or",
     "or",
     innerStandard
   );
@@ -274,7 +274,7 @@ void Calculator::initializeFunctionsStandard() {
     "may fail to be identical, for example "
     "a rational number 5 and an algebraic number 5. ",
     "a or b; a or a",
-    "CalculatorConversions::orIdentical",
+    "CalculatorFunctions::orIdentical",
     "orIdentical",
     innerStandard
   );
@@ -293,7 +293,7 @@ void Calculator::initializeFunctionsStandard() {
     "IfStandard (1, x, y);\n"
     "IfStandard (0, x, y);\n"
     "IfStandard (2, x, y)",
-    "CalculatorConversions::ifStandard",
+    "CalculatorFunctions::ifStandard",
     "IfStandard",
     innerStandard
   );
@@ -318,7 +318,7 @@ void Calculator::initializeFunctionsStandard() {
     "if (2 - 1, x, 1 / 0);\n"
     "if (1 + 1, 1 / 0, 1 / 0);\n"
     "if (0, x, 1 / 0);\n",
-    "CalculatorConversions::ifFrozen",
+    "CalculatorFunctions::ifFrozen",
     "if",
     innerFreezesArguments
   );
@@ -328,7 +328,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Logical and. ",
     "0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",
-    "CalculatorConversions::and",
+    "CalculatorFunctions::and",
     "and",
     innerStandard
   );
@@ -386,7 +386,7 @@ void Calculator::initializeFunctionsStandard() {
     "Creates an expression evaluation tree. "
     "Intended for debugging the system. ",
     "LogEvaluationStepsDebug((x +2)(x +3))",
-    "CalculatorFunctions::logEvaluationStepsDebug",
+    "CalculatorSteps::logEvaluationStepsDebug",
     "LogEvaluationStepsDebug",
     innerFreezesArguments
   );
@@ -397,7 +397,7 @@ void Calculator::initializeFunctionsStandard() {
     "Show a step-by step evaluation of the calculator. "
     "Some steps my be combined or omitted for improved human readability. ",
     "LogEvaluationSteps((x +2)(x +3))",
-    "CalculatorFunctions::logEvaluationSteps",
+    "CalculatorSteps::logEvaluationSteps",
     "LogEvaluationSteps",
     innerFreezesArguments
   );
@@ -511,7 +511,7 @@ void Calculator::initializeFunctionsStandard() {
     "LogarithmBaseNCeiling(2, 1);\n"
     "LogarithmBaseNCeiling(- 2, 1);\n"
     "LogarithmBaseNCeiling(2, - 1);\n",
-    "CalculatorFunctions::logarithmBaseNCeiling",
+    "CalculatorFunctionsBasic::logarithmBaseNCeiling",
     "LogarithmBaseNCeiling",
     innerStandard
   );
@@ -822,7 +822,7 @@ void Calculator::initializeFunctionsStandard() {
     "Trigonometrizes an exponential expression using Euler's formula.",
     "TurnOnRules(\"EulerFormula\");\n"
     "e^{i x}",
-    "CalculatorFunctions::eulerFormulaAsLaw",
+    "CalculatorFunctionsTrigonometry::eulerFormulaAsLaw",
     "EulerFormula",
     innerStandardOffByDefault
   );
@@ -860,7 +860,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Implementation of sin (a + b) = sin(a) cos(b) + cos(a) sin(b).",
     "TurnOnRules(\"SineOfAngleSum\"); \\sin(a + b)",
-    "CalculatorFunctions::sineOfAngleSumToTrigonometry",
+    "CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry",
     "SineOfAngleSum",
     innerStandardOffByDefault
   );
@@ -871,7 +871,7 @@ void Calculator::initializeFunctionsStandard() {
     "Implementation of cos (a + b) = cos(a)cos(b) - sin(a)sin(b).",
     "TurnOnRules(\"CosineOfAngleSum\");\n"
     "\\cos(a + b)",
-    "CalculatorFunctions::cosineOfAngleSumToTrigonometry",
+    "CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry",
     "CosineOfAngleSum",
     innerStandardOffByDefault
   );
@@ -895,9 +895,20 @@ void Calculator::initializeFunctionsStandard() {
     "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\");\n"
     "\\sin x;\n"
     "cos x",
-    "CalculatorFunctions::convertCosineToExponent",
+    "CalculatorFunctionsTrigonometry::convertCosineToExponent",
     "ExpressCosViaExponent",
     innerStandardOffByDefault
+  );
+  this->addOperationHandler(
+    "FourierFractionForm",
+    CalculatorFunctionsTrigonometry::fourierFractionForm,
+    "",
+    "Converts a trigonometric expression in one variable to fourier fraction form. ",
+    "A = (cos(2x)/(cos^3 x - sin^3 x);\n"
+    "FourierFractionForm",
+    "CalculatorFunctionsTrigonometry::fourierFractionForm",
+    "FourierFractionForm",
+    innerStandard
   );
   this->addOperationHandler(
     "\\cos",
@@ -906,7 +917,7 @@ void Calculator::initializeFunctionsStandard() {
     "If a is negative, converts cos (a) to cos(- a).",
     "TurnOnRules(\"ExploitCosEvenness\");\n"
     "cos(- 5x)",
-    "CalculatorFunctions::exploitCosineEvenness",
+    "CalculatorFunctionsTrigonometry::exploitCosineEvenness",
     "ExploitCosEvenness",
     innerStandardOffByDefault
   );
@@ -917,7 +928,7 @@ void Calculator::initializeFunctionsStandard() {
     "If a is negative, converts sin (a) to -sin(-a).",
     "TurnOnRules(\"ExploitSinOddness\");\n"
     "sin(- 5x)",
-    "CalculatorFunctions::exploitSineOddness",
+    "CalculatorFunctionsTrigonometry::exploitSineOddness",
     "ExploitSinOddness",
     innerStandardOffByDefault
   );
@@ -939,7 +950,7 @@ void Calculator::initializeFunctionsStandard() {
     "Transforms an integral of the form \\int \\tan^n x \\sec^m x.",
     "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaCosine\");\n"
     "\\int \\tan^2 x \\sec^{2}x dx ",
-    "CalculatorFunctions::integrateTanPowerNSecPowerM",
+    "CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM",
     "IntegrateTanPowerNSecPowerM",
     innerStandard
   );
@@ -971,7 +982,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Differentiation - square root function. ",
     "d/dx(sqrt(x));",
-    "CalculatorFunctions::differentiateSqrt",
+    "CalculatorFunctionsDifferentiation::differentiateSqrt",
     "DifferentiateSqrt",
     innerStandard
   );
@@ -1018,7 +1029,8 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Integrates building blocks IIIb.",
     "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
-    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb"
+    "CalculatorFunctionsIntegration::"
+  "integrateRationalFunctionBuidingBlockIIIb"
     ,
     "IntegrateBlockIIIb",
     innerStandard
@@ -1029,7 +1041,8 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Integrates building blocks IIb.",
     "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
-    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb",
+    "CalculatorFunctionsIntegration::"
+  "integrateRationalFunctionBuidingBlockIIb",
     "IntegrateBlockIIb",
     innerStandard
   );
@@ -1052,7 +1065,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Differentiation - product rule. ",
     "Differentiate(x, (\\sin x) \\cos x )",
-    "CalculatorFunctions::differentiateTrigAndInverseTrig",
+    "CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig",
     "DifferentiateTrigAndInverseTrig",
     innerStandard
   );
@@ -1062,7 +1075,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Differentiation - chain rule.  ",
     "Differentiate(x, \\sin x^2 \\cos (\\sin x))",
-    "CalculatorFunctions::differentiateChainRule",
+    "CalculatorFunctionsDifferentiation::differentiateChainRule",
     "DifferentiateChainRule",
     innerStandard
   );
@@ -1072,7 +1085,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Differentiation - product rule.  ",
     "Differentiate(x, f * g)",
-    "CalculatorFunctions::differentiateAtimesB",
+    "CalculatorFunctionsDifferentiation::differentiateAtimesB",
     "DifferentiateProductRule",
     innerStandard
   );
@@ -1089,7 +1102,7 @@ void Calculator::initializeFunctionsStandard() {
     "Differentiate(x, f / g);\n"
     "Differentiate(x, f / g^5);\n"
     "Differentiate(x, f / g^n)",
-    "CalculatorFunctions::differentiateAdivideBCommutative",
+    "CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative",
     "DifferentiateQuotientRule",
     innerStandard
   );
@@ -1099,7 +1112,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Differentiation - sum rule.",
     "Differentiate(x, f + g)",
-    "CalculatorFunctions::differentiateAplusB",
+    "CalculatorFunctionsDifferentiation::differentiateAplusB",
     "DifferentiateSum",
     innerStandard
   );
@@ -1110,7 +1123,7 @@ void Calculator::initializeFunctionsStandard() {
     "Differentiation - constant rule. ",
     "Differentiate(x, 5 );\n"
     "d/dx \\sqrt{5}",
-    "CalculatorFunctions::differentiateConstant",
+    "CalculatorFunctionsDifferentiation::differentiateConstant",
     "DifferentiateConstant",
     innerStandard
   );
@@ -1121,7 +1134,7 @@ void Calculator::initializeFunctionsStandard() {
     "Differentiation - d/dx x = 1.",
     "Differentiate(x, x )\n;"
     "d/dx x",
-    "CalculatorFunctions::differentiateX",
+    "CalculatorFunctionsDifferentiation::differentiateX",
     "DifferentiateIdentity",
     innerStandard
   );
@@ -1147,7 +1160,7 @@ void Calculator::initializeFunctionsStandard() {
     "d/dx x^- 1;\n"
     "d/dt t^{\\sqrt{2}};\n"
     "d/dc c^{DoubleValue 3.14}",
-    "CalculatorFunctions::differentiateAPowerB",
+    "CalculatorFunctionsDifferentiation::differentiateAPowerB",
     "DifferentiateApowerB",
     innerStandard
   );
@@ -1319,7 +1332,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Arctan function. Tries to evaluate the arctan function. ",
     "\\arctan(3/4)",
-    "CalculatorFunctions::arctan",
+    "CalculatorFunctionsTrigonometry::arctan",
     "\\arctan",
     innerStandard
   );
@@ -1488,7 +1501,7 @@ void Calculator::initializeFunctionsStandard() {
     "Number modulo P. "
     "First argument = number, second argument = modulo.",
     "ModP{}(7, 3)",
-    "Calculator::zModP",
+    "CalculatorFunctions::zModP",
     "ModP",
     innerStandard
   );
@@ -1587,7 +1600,7 @@ void Calculator::initializeFunctionsStandard() {
     "((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))",
     "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3));\n"
     "Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))",
-    "Calculator::interpolatePoly",
+    "CalculatorFunctions::interpolatePolynomial",
     "Interpolate",
     innerStandard
   );
@@ -1599,7 +1612,7 @@ void Calculator::initializeFunctionsStandard() {
     "polynomial divided by a set of polynomials "
     "using the default monomial order (lexicographic).",
     "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y);",
-    "CalculatorFunctions::polynomialDivisionRemainder",
+    "CalculatorFunctionsPolynomial::polynomialDivisionRemainder",
     "PolyDivRemainder",
     innerStandard
   );
@@ -1623,7 +1636,7 @@ void Calculator::initializeFunctionsStandard() {
     "First element = starting slide number.",
     "PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2);\n"
     "PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
-    "Calculator::polynomialDivisionSlidesGrLex",
+    "CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex",
     "PolyDivSlidesGrLex",
     innerStandard
   );
@@ -1671,7 +1684,7 @@ void Calculator::initializeFunctionsStandard() {
     "words 'expansions' (x^2y^3->xxyyy) of the monomials. ",
     "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);\n"
     "PolyDivStringLex{}(x^7 + \\sqrt{2} x + 1, \\sqrt{3}x^2 + 2x + 1)",
-    "CalculatorFunctions::polynomialDivisionVerboseLex",
+    "CalculatorFunctionsPolynomial::polynomialDivisionVerboseLex",
     "PolyDivStringLex",
     innerStandard
   );
@@ -1689,7 +1702,7 @@ void Calculator::initializeFunctionsStandard() {
     "is not related to the lexicographic order on the "
     "words 'expansions' (x^2y^3->xxyyy) of the monomials. ",
     "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1) ;",
-    "CalculatorFunctions::polynomialDivisionVerboseLexRev",
+    "CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexRev",
     "PolyDivStringLexRev",
     innerStandard
   );
@@ -1742,7 +1755,7 @@ void Calculator::initializeFunctionsStandard() {
     "each direction line. "
     "Next arguments: color, line width. ",
     "PlotDirectionField((- y, x),(- 2, - 2),(2, 2), (20, 20), 0.2, blue, 1);",
-    "CalculatorFunctions::plotDirectionField",
+    "CalculatorFunctionsPlot::plotDirectionField",
     "PlotDirectionField",
     innerStandard
   );
@@ -1759,7 +1772,7 @@ void Calculator::initializeFunctionsStandard() {
     "PlotPolar(1+sin  t, 0, \\pi);\n"
     "PlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t))"
     "(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
-    "CalculatorFunctions::plotPolarRfunctionTheta",
+    "CalculatorFunctionsPlot::plotPolarRfunctionTheta",
     "PlotPolar",
     innerStandard
   );
@@ -1772,7 +1785,7 @@ void Calculator::initializeFunctionsStandard() {
     "PlotPolarExtended(1 + sin  t, 0, \\pi);\n"
     "PlotPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )\n"
     "(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
-    "CalculatorFunctions::plotPolarRfunctionThetaExtended",
+    "CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended",
     "PlotPolarExtended",
     innerStandard
   );
@@ -2303,7 +2316,7 @@ void Calculator::initializeFunctionsStandard() {
     "IsInteger{}1;\n"
     "f{}{{a}}=IsInteger{}a;\n"
     "f{}1;\nf{}b",
-    "Calculator::isInteger",
+    "CalculatorFunctions::isInteger",
     "IsInteger",
     innerStandard
   );
@@ -2539,7 +2552,7 @@ void Calculator::initializeFunctionsStandard() {
     "x_{11} & x_{12} & x_{13} \\\\ "
     "x_{21} & x_{22} & x_{23} \\\\ "
     "x_{31} & x_{32} & x_{33} \\end{array} \\right) ",
-    "Calculator::determinantPolynomial",
+    "CalculatorFunctions::determinantPolynomial",
     "DeterminantPolynomial",
     innerStandard
   );
@@ -2694,7 +2707,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Converts a sum to a sequence containing the summands. ",
     "GetSummandList(1+a +b) ",
-    "CalculatorFunctions::outerGetSummands",
+    "CalculatorFunctions::collectSummands",
     "GetSummandList",
     innerStandard
   );
@@ -2774,7 +2787,7 @@ void Calculator::initializeFunctionsStandard() {
     "in any other case generates an error. Makes a detailed "
     "printout of all Gaussian elimantion steps. ",
     "InvertMatrixVerbose((1, 2), (2, 3))",
-    "Calculator::invertMatrixVerbose",
+    "CalculatorFunctions::invertMatrixVerbose",
     "InvertMatrixVerbose",
     innerStandard
   );
@@ -2797,7 +2810,7 @@ void Calculator::initializeFunctionsStandard() {
     "Gets trace of a square matrix. ",
     "X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0));\n"
     "Trace X",
-    "CalculatorFunctions::trace",
+    "CalculatorFunctions::matrixTrace",
     "Trace",
     innerStandard
   );
@@ -2808,7 +2821,7 @@ void Calculator::initializeFunctionsStandard() {
     "Reverses the bytes of a string. "
     "Does not respect utf-8 encoding. ",
     "ReverseBytes{}(\"abc\")",
-    "Calculator::reverseBytes",
+    "CalculatorFunctions::reverseBytes",
     "ReverseBytes",
     innerStandard
   );
@@ -2978,7 +2991,7 @@ void Calculator::initializeFunctionsStandard() {
     "FactorInteger(1);\n"
     "FactorInteger(- 10);\n"
     "FactorInteger(0);",
-    "Calculator::factorInteger",
+    "CalculatorFunctions::factorInteger",
     "FactorInteger",
     innerStandard
   );
@@ -2995,7 +3008,7 @@ void Calculator::initializeFunctionsStandard() {
     "f{}{{x}}=f{}(x-1) \\cup Sequence{}( NumberOfIntegerDivisors(x));\n"
     "a=f{}100;\n"
     "Max a",
-    "Calculator::numberOfIntegerDivisors",
+    "CalculatorFunctions::numberOfIntegerDivisors",
     "NumberOfIntegerDivisors",
     innerStandard
   );
@@ -3105,7 +3118,7 @@ void Calculator::initializeFunctionsStandard() {
     "Melt{}d;\n"
     "e;\n"
     "g;",
-    "Calculator::outerMeltBrackets",
+    "CalculatorBasics::outerMeltBrackets",
     "MeltBrackets",
     outerStandard
   );
@@ -3124,7 +3137,7 @@ void Calculator::initializeFunctionsStandard() {
     "a*(b*c)=a*(b*c), which clearly is infinite substitution.",
     "%LogEvaluation\n"
     "({{a}}*{{b}})*{{c}}=a*(b*c);",
-    "Calculator::checkRule",
+    "CalculatorBasics::checkRule",
     "CheckAutoEquality",
     outerStandard
   );
@@ -3327,7 +3340,7 @@ void Calculator::initializeFunctionsStandard() {
     "proportional up to a rational number. "
     "Zero summands are removed, unless zero is the only term left. ",
     "1+a-2a_1+ 1/2+a_1",
-    "Calculator::addTerms",
+    "CalculatorFunctions::addTerms",
     "AddTerms",
     outerStandard,
     &additiveOperations
@@ -3725,7 +3738,7 @@ void Calculator::initializeFunctionsStandard() {
     "\\int_2^3 x dx;\n"
     "\\int_2^3 x(1+x)dx;\n"
     "\\int\\theta d\\theta",
-    "CalculatorFunctions::integralOperator",
+    "CalculatorFunctionsIntegration::integralOperator",
     "IntegralOperatorFromProduct",
     innerStandard
   );
@@ -3777,7 +3790,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Replaces Differentiate{}(x)*a by Differentiate{}(x, a).",
     "d/dx (1/x) ",
-    "CalculatorFunctions::differentiateWithRespectToXTimesAny",
+    "CalculatorFunctionsDifferentiation::differentiateWithRespectToXTimesAny",
     "DifferentiateWithRespectToXTimeAny",
     outerStandard
   );
@@ -4096,7 +4109,7 @@ void Calculator::initializeFunctionsStandard() {
     "(x>0)=1;\n"
     "x^{2/3}x^{1/2};\n"
     "(x^{1/2})^2;",
-    "Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY",
+    "CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY",
     "CombineExponents",
     innerStandard
   );
@@ -4107,7 +4120,7 @@ void Calculator::initializeFunctionsStandard() {
     "Rule 1*{{anything}} = anything.",
     "x*1;\n"
     "x*1-x ",
-    "Calculator::multiplyByOne",
+    "CalculatorBasics::multiplyByOne",
     "MultiplyByOne",
     innerStandard
   );
@@ -4141,7 +4154,7 @@ void Calculator::initializeFunctionsStandard() {
     "Associative law: reorders the multiplicative tree in standard form. ",
     "(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;\n"
     "(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
-    "Calculator::outerAssociate",
+    "CalculatorBasics::associate",
     "AssociativeRule",
     outerStandard,
     &multiplicativeOperations
@@ -4177,7 +4190,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Pulls rationals in the front of multiplicative terms.",
     "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)",
-    "Calculator::outerExtractBaseMultiplication",
+    "CalculatorBasics::extractBaseMultiplication",
     "ConstantExtraction",
     outerStandard
   );
@@ -4188,7 +4201,7 @@ void Calculator::initializeFunctionsStandard() {
     "Associative law w.r.t. division. ",
     "a*(b/c);\n"
     "(a*b)/c-a*(b/c)",
-    "Calculator::outerAssociateTimesDivision",
+    "CalculatorBasics::associateTimesDivision",
     "AssociateTimesDivision",
     outerStandard
   );
@@ -4198,7 +4211,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Cancels multiplicative inverse. ",
     "(a*b)/b; (a/b)*b",
-    "Calculator::cancelMultiplicativeInverse",
+    "CalculatorBasics::cancelMultiplicativeInverse",
     "CancelMultiplicativeInverse",
     innerStandard
   );
@@ -4209,7 +4222,7 @@ void Calculator::initializeFunctionsStandard() {
     "Distributive law (left and right).",
     "(a + b) * c;\n"
     "a * (b + c)",
-    "Calculator::outerDistributeTimes",
+    "CalculatorBasics::distributeTimes",
     "DistributeMultiplication",
     outerStandard
   );
@@ -4223,7 +4236,7 @@ void Calculator::initializeFunctionsStandard() {
     "the DistributeMultiplication rule is turned off "
     "(which is the intended use case of this rule).",
     "a(b+c); TurnOffRules(DistributeMultiplication); a(b+c); -5(b+c) ",
-    "Calculator::outerDistributeTimes",
+    "CalculatorBasics::distributeTimesConstant",
     "DistributeMultiplicationConstants",
     outerStandard
   );
@@ -4400,7 +4413,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Same as ModP but uses the mod notation.",
     "7 mod 3",
-    "Calculator::zModP",
+    "CalculatorFunctions::zModP",
     "mod",
     innerStandard
   );
@@ -4420,7 +4433,7 @@ void Calculator::initializeFunctionsStandard() {
     "a^10;\n"
     "r mod q;\n"
     "s mod q",
-    "Calculator::polynomialModPModuloPolynomialModP",
+    "CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP",
     "moduloPolynomial",
     innerStandard
   );
@@ -4588,7 +4601,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Provided that x is not equal to zero, substitutes 0/x with 0. ",
     "0/b; ",
-    "Calculator::subZeroDivAnythingWithZero",
+    "CalculatorBasics::subZeroDivAnythingWithZero",
     "DivideZeroDivideByAnything",
     innerStandard
   );
@@ -4625,7 +4638,7 @@ void Calculator::initializeFunctionsStandard() {
     "this operation is safe and correct for "
     "non-commutative rings as well.",
     "a/(b/c)^d;",
-    "CalculatorFunctions::outerAssociateAdivBdivCpowerD",
+    "CalculatorFunctions::associateAdivBdivCPowerD",
     "AssociateAdividedByBdividedByCpowerD",
     outerStandard
   );
@@ -4931,7 +4944,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Raises an element of Z mod p to an integer power. ",
     "a = 3 mod 7; a^2",
-    "CalculatorFunctions::powerElementZmodPByInteger",
+    "CalculatorFunctionsBinaryOps::powerElementZmodPByInteger",
     "PowerElementZmodPToInteger",
     innerStandard
   );
@@ -5175,7 +5188,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Takes care of the integral superscript notation \\int^a ",
     "\\int^a_b f dx; \\int_a^b f dx",
-    "Calculator::operatorBounds",
+    "CalculatorFunctions::operatorBounds",
     "OperatorBoundsUnderscore",
     innerStandard
   );
@@ -5279,7 +5292,7 @@ void Calculator::initializeFunctionsStandard() {
     "v=HeighestWeightVector{}(X, (1,0),(0,0));\n"
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v); ",
-    "Calculator::outerTensor",
+    "CalculatorBasics::outerTensor",
     "TensorProductStandard",
     innerNoTestInvisibleExperimental
   );
@@ -5302,7 +5315,7 @@ void Calculator::initializeFunctionsStandard() {
     "z;\n"
     "z=y;\n"
     "z",
-    "Calculator::standardIsDenotedBy",
+    "CalculatorBasics::standardIsDenotedBy",
     "standardIsDenotedBy",
     innerStandard
   );
@@ -5339,7 +5352,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Maximum function.",
     "Max(- 4,2)",
-    "CalculatorFunctions::max",
+    "CalculatorFunctions::maximum",
     "Max",
     innerStandard
   );
@@ -5349,7 +5362,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Maximum function.",
     "Min(- 4,2)",
-    "CalculatorFunctions::min",
+    "CalculatorFunctions::minimum",
     "Min",
     innerStandard
   );
@@ -5361,7 +5374,7 @@ void Calculator::initializeFunctionsStandard() {
     "A = (2>=x);\n"
     "x =1;\n"
     "A",
-    "Calculator::greaterThanOrEqualTo",
+    "CalculatorFunctions::greaterThanOrEqualTo",
     "greaterThanOrEqualTo",
     innerStandard
   );
@@ -5371,7 +5384,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Transforms \\(a\\leq b\\) to \\(b\\geq a\\).",
     "a \\leq b",
-    "Calculator::lessThanOrEqualTo",
+    "CalculatorFunctions::lessThanOrEqualTo",
     "lessThanOrEqualTo",
     innerStandard
   );
@@ -5457,7 +5470,7 @@ void Calculator::initializeFunctionsStandard() {
     "p{}((), {{n}}) = 0;\n"
     "p{}({{x}}, {{n}}) = p{}(x, n - Last x) +p{}(RemoveLast x, n);\n"
     "p{}((1, 2, 5, 10, 25, 100), 100);",
-    "CalculatorFunctions::lastElement",
+    "CalculatorFunctionsListsAndSets::lastElement",
     "Last",
     innerStandard
   );
@@ -5660,7 +5673,7 @@ void Calculator::initializeFunctionsStandard() {
     "Returns its result in JSON format. "
     "Freezes its inputs.",
     "SolveJSON(x^2+2x-3=0);\n",
-    "CalculatorFunctions::solveJSON",
+    "CalculatorEducationalFunctions::solveJSON",
     "SolveJSON",
     innerFreezesArguments
   );

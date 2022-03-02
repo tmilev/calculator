@@ -3401,9 +3401,8 @@ private:
     WithContext<Polynomial<Coefficient> >& output
   );
 public:
-  // //////////////////Conversion from expression
-  // tree/////////////////////////////////
-  // conversions from expression tree to type
+  // Conversion from expression tree
+  // Conversions from expression tree to type
   static bool loadElementSemisimpleLieAlgebraRationalCoefficients(
     Calculator& calculator,
     const Expression& input,
@@ -3506,9 +3505,8 @@ public:
   static bool makeElementHyperOctahedral(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  // //////////////////Conversion to expression
-  // tree/////////////////////////////////////
-  // converstion from type to expression tree.
+  // Conversion to expression tree.
+  // Converstion from type to expression tree.
   template <class Coefficient>
   static bool expressionFromPolynomial(
     Calculator& calculator,
@@ -3584,7 +3582,7 @@ public:
     const ElementSemisimpleLieAlgebra<Rational>& input,
     Expression& output
   );
-  // conversions from expression containing type to expression tree
+  // Conversions from expression containing type to expression tree.
   static bool storeSemisimpleLieAlgebra(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -4159,7 +4157,8 @@ bool Calculator::getTypeHighestWeightParabolic(
     std::stringstream tempStream;
     tempStream
     <<
-    "Failed to convert the second argument of highest weight vector to a list of "
+    "Failed to convert the second argument of "
+    << "highest weight vector to a list of "
     << ambientSemisimpleLieAlgebra->getRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString()
@@ -4180,7 +4179,8 @@ bool Calculator::getTypeHighestWeightParabolic(
       std::stringstream tempStream;
       tempStream
       <<
-      "Failed to convert the third argument of highest weight vector to a list of "
+      "Failed to convert the third argument "
+      <<"of highest weight vector to a list of "
       << ambientSemisimpleLieAlgebra->getRank()
       << " rationals. The third argument you gave is "
       << rightE.toString()

@@ -100,7 +100,7 @@ public:
     return this->relationString == right.relationString;
   }
   unsigned int hashFunction() const {
-    return MathRoutines::hashString(this->relationString);
+    return HashFunctions::hashFunction(this->relationString);
   }
   static unsigned int hashFunction(const ConeRelation& input) {
     return input.hashFunction();

@@ -338,10 +338,10 @@ public:
   ListReferences<ListReferences<StackInfo> > customStackTrace;
   ListReferences<ListReferences<std::string> > progressReportStrings;
   List<std::string> programArguments;
-  MapList<std::string, std::string, MathRoutines::hashString> webArguments;
-  MapList<std::string, std::string, MathRoutines::hashString> cookiesToBeSent;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > webArguments;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > cookiesToBeSent;
   UserCalculatorData userDefault;
-  MapList<std::string, int, MathRoutines::hashString>
+  MapList<std::string, int, HashFunctions::hashFunction<std::string> >
   problemExpectedNumberOfAnswers;
   std::string requestType;
   // location of the configuration file. Can be overridden with command line

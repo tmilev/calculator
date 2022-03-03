@@ -361,7 +361,6 @@ public:
     const List<unsigned char>& input
   );
   static unsigned int hashListStrings(const List<std::string>& input);
-  static unsigned int hashString(const std::string& x);
   template <class Element>
   static void lieBracket(
     const Element& standsOnTheLeft,

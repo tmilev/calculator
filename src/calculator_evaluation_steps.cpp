@@ -251,7 +251,7 @@ List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
     "MultiplyByOne"
   }
 );
-HashedList<std::string, MathRoutines::hashString> Calculator::
+HashedList<std::string> Calculator::
 ExpressionHistoryEnumerator::ruleIgnoreListHashList;
 void Calculator::ExpressionHistoryEnumerator::toStepsCleanUp(
   List<Calculator::ExpressionHistoryEnumerator::Step>& raw,
@@ -271,7 +271,7 @@ bool Calculator::ExpressionHistoryEnumerator::isIgnorable(
 ) {
   List<std::string>& ignoreList =
   Calculator::ExpressionHistoryEnumerator::ruleIgnoreList;
-  HashedList<std::string, MathRoutines::hashString>& ignoreSet =
+  HashedList<std::string>& ignoreSet =
   Calculator::ExpressionHistoryEnumerator::ruleIgnoreListHashList;
   if (ignoreList.size > 0 && ignoreSet.size == 0) {
     ignoreSet.addListOnTop(ignoreList);

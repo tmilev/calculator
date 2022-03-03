@@ -9,9 +9,9 @@
 #include "string_constants.h"
 #include "general_strings.h"
 
-MapList<std::string, std::string, MathRoutines::hashString>& HtmlRoutines::
+MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& HtmlRoutines::
 preLoadedFiles() {
-  static MapList<std::string, std::string, MathRoutines::hashString> result;
+  static MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > result;
   return result;
 }
 
@@ -298,7 +298,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
   if (recursionDepth > 50) {
     return input;
   }
-  MapList<std::string, std::string, MathRoutines::hashString> currentMap;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > currentMap;
   std::stringstream notUsed;
   if (
     !HtmlRoutines::chopPercentEncodedString(input, currentMap, notUsed)
@@ -409,7 +409,7 @@ void HtmlRoutines::convertURLStringToNormal(
 bool HtmlRoutines::accountOneInputPercentEncodedString(
   const std::string& fieldName,
   const std::string& fieldValue,
-  MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName(
@@ -434,7 +434,7 @@ bool HtmlRoutines::accountOneInputPercentEncodedString(
 
 bool HtmlRoutines::chopPercentEncodedString(
   const std::string& input,
-  MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedString");
@@ -446,9 +446,8 @@ bool HtmlRoutines::chopPercentEncodedString(
   );
 }
 
-bool HtmlRoutines::chopPercentEncodedStringAppend(
-  const std::string& input,
-  MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+bool HtmlRoutines::chopPercentEncodedStringAppend(const std::string& input,
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > &outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedStringAppend")

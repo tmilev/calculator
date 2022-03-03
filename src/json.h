@@ -47,7 +47,7 @@ public:
   std::string stringValue;
   MemorySaving<LargeInteger> integerValue;
   ListReferences<JSData> listObjects;
-  MapReferences<std::string, JSData, MathRoutines::hashString> objects;
+  MapReferences<std::string, JSData, HashFunctions::hashFunction<std::string> > objects;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const JSData& input) {
     return input.hashFunction();

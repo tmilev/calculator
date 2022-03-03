@@ -3539,7 +3539,7 @@ bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
 }
 
 std::string Expression::toStringAllSlidersInExpression() const {
-  HashedList<std::string, HashFunctions::hashFunction> boxNames;
+  HashedList<std::string> boxNames;
   if (!this->hasInputBoxVariables(&boxNames)) {
     return "";
   }
@@ -3549,7 +3549,7 @@ std::string Expression::toStringAllSlidersInExpression() const {
   ) {
     this->owner->objectContainer.resetSliders();
   }
-  MapReferences<std::string, InputBox, MathRoutines::hashString>& sliders =
+  MapReferences<std::string, InputBox, HashFunctions::hashFunction<std::string> >& sliders =
   this->owner->objectContainer.userInputTextBoxesWithValues;
   std::stringstream out;
   for (int i = 0; i < boxNames.size; i ++) {

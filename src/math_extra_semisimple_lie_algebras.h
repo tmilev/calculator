@@ -197,7 +197,7 @@ public:
   // Rank of the simple root system.
   int rank;
   static MapList<
-    std::string, VoganDiagram::DiagramType, MathRoutines::hashString
+    std::string, VoganDiagram::DiagramType, HashFunctions::hashFunction<std::string>
   > mapStringToType;
   VoganDiagram();
   void computeMapStringToType();

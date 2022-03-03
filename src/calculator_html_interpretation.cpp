@@ -57,7 +57,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
   global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
@@ -310,7 +310,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
   global.webArguments;
   JSData result;
   for (int i = 0; i < arguments.size(); i ++) {
@@ -1260,7 +1260,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
     output[WebAPI::result::error] = errorStream.str();
     // return output.toString(false);
   }
-  HashedList<std::string, MathRoutines::hashString> autocompleteKeyWords;
+  HashedList<std::string> autocompleteKeyWords;
   editedFile.initBuiltInSpanClasses();
   std::stringstream comments;
   if (
@@ -1411,7 +1411,7 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
   this->problem.studentTagsAnswered.initialize(
     this->problem.problemData.answers.size()
   );
-  MapList<std::string, std::string, MathRoutines::hashString>& webArguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& webArguments =
   global.webArguments;
   this->answerIndex = - 1;
   for (int i = 0; i < webArguments.size(); i ++) {
@@ -2213,7 +2213,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
   global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
@@ -2586,7 +2586,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     << "<br>";
   }
   UserCalculator currentUser;
-  HashedList<std::string, MathRoutines::hashString> sections;
+  HashedList<std::string> sections;
   List<std::string> sectionDescriptions;
   List<List<std::string> > activatedAccountBucketsBySection;
   List<List<std::string> > preFilledLinkBucketsBySection;
@@ -2931,8 +2931,8 @@ int ProblemData::getExpectedNumberOfAnswers(
 }
 
 void UserCalculator::computePointsEarned(
-  const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-  MapList<std::string, TopicElement, MathRoutines::hashString>* topics,
+  const HashedList<std::string>& gradableProblems,
+  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> >* topics,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::computePointsEarned");
@@ -3011,7 +3011,7 @@ public:
   CalculatorHTML problem;
   std::string currentSection;
   std::string currentCourse;
-  List<MapList<std::string, Rational, MathRoutines::hashString> >
+  List<MapList<std::string, Rational, HashFunctions::hashFunction<std::string> > >
   scoresBreakdown;
   List<JSData> userProblemData;
   List<Rational> userScores;

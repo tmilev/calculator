@@ -1466,7 +1466,7 @@ bool Database::FetchTable(
   Database::get().findFromJSON(
     tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure
   );
-  HashedList<std::string, MathRoutines::hashString> labels;
+  HashedList<std::string> labels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
       labels.addOnTopNoRepetition(rowsJSON[i].objects.keys[j]);

@@ -26,7 +26,7 @@ public:
     static const std::string basic;
   };
 
-  HashedList<std::string, MathRoutines::hashString> inputs;
+  HashedList<std::string> inputs;
   bool flagTestAll;
   void initialize(List<std::string>& inputArguments);
   void run();

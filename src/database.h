@@ -138,8 +138,8 @@ public:
   public:
     Database* owner;
     MutexProcess access;
-    HashedList<std::string, MathRoutines::hashString> knownCollectionS;
-    HashedList<std::string, MathRoutines::hashString> knownIndices;
+    HashedList<std::string> knownCollectionS;
+    HashedList<std::string> knownIndices;
     JSData reader;
     bool flagDatabaseRead;
     static std::string databaseFilename;
@@ -150,7 +150,7 @@ public:
       std::string collection;
       std::string label;
       std::string collectionAndLabelCache;
-      MapList<std::string, List<int32_t>, MathRoutines::hashString> locations;
+      MapList<std::string, List<int32_t>, HashFunctions::hashFunction<std::string> > locations;
       static std::string collectionAndLabelStatic(
         const std::string& inputCollection,
         const std::string& inputLabel
@@ -161,7 +161,7 @@ public:
     MapReferences<
       std::string,
       Database::FallBack::Index,
-      MathRoutines::hashString
+      HashFunctions::hashFunction<std::string>
     > indices;
     bool deleteDatabase(std::stringstream* commentsOnFailure);
     bool updateOne(

@@ -71,7 +71,7 @@ CalculatorHTML::CalculatorHTML() {
 
 bool CalculatorHTML::mergeProblemWeight(
   const JSData& inputJSON,
-  MapList<std::string, ProblemData, MathRoutines::hashString>&
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
   outputAppendProblemInfo,
   bool checkFileExistence,
   std::stringstream* commentsOnFailure
@@ -148,7 +148,7 @@ bool CalculatorHTML::mergeProblemWeight(
 
 bool CalculatorHTML::mergeProblemDeadline(
   const JSData& inputJSON,
-  MapList<std::string, ProblemData, MathRoutines::hashString>&
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
   outputAppendProblemInfo,
   std::stringstream* commentsOnFailure
 ) {
@@ -189,7 +189,7 @@ bool CalculatorHTML::mergeProblemDeadline(
 }
 
 JSData CalculatorHTML::toJSONDeadlines(
-  MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& inputProblemInfo
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::toJSONDeadlines");
   JSData output;
@@ -225,7 +225,7 @@ JSData CalculatorHTML::toJSONDeadlines(
 }
 
 QuerySet CalculatorHTML::toQuerySetProblemWeights(
-  MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& inputProblemInfo
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::toQuerySetProblemWeights");
   QuerySet output;
@@ -287,15 +287,15 @@ bool CalculatorHTML::mergeOneProblemAdminData(
   ProblemDataAdministrative& currentProblem =
   this->currentUser.problemData.getValueCreateEmpty(inputProblemName).adminData
   ;
-  MapList<std::string, std::string, MathRoutines::hashString>& currentDeadlines
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& currentDeadlines
   =
   currentProblem.deadlinesPerSection;
-  MapList<std::string, std::string, MathRoutines::hashString>&
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
   incomingDeadlines =
   inputProblemInfo.adminData.deadlinesPerSection;
-  MapList<std::string, std::string, MathRoutines::hashString>& currentWeightS =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& currentWeightS =
   currentProblem.problemWeightsPerCourse;
-  MapList<std::string, std::string, MathRoutines::hashString>& incomingWeightS
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& incomingWeightS
   =
   inputProblemInfo.adminData.problemWeightsPerCourse;
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
@@ -334,7 +334,7 @@ bool CalculatorHTML::mergeProblemWeightAndStore(
     }
     return false;
   }
-  MapList<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> > incomingProblems;
   if (
     !this->mergeProblemWeight(
       problemJSON, incomingProblems, true, commentsOnFailure
@@ -361,7 +361,7 @@ bool CalculatorHTML::mergeProblemDeadlineAndStore(
     }
     return false;
   }
-  MapList<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> > incomingProblems;
   if (
     !this->mergeProblemDeadline(
       problemJSON, incomingProblems, commentsOnFailure
@@ -376,7 +376,7 @@ bool CalculatorHTML::mergeProblemDeadlineAndStore(
 }
 
 bool CalculatorHTML::storeProblemWeights(
-  MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& toStore,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
@@ -404,7 +404,7 @@ bool CalculatorHTML::storeProblemWeights(
 }
 
 bool CalculatorHTML::storeProblemDeadlines(
-  MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& toStore,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
@@ -1300,7 +1300,7 @@ std::string CalculatorHTML::prepareUserInputBoxes() {
     return "";
   }
   std::stringstream out;
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
   global.webArguments;
   std::string inputNonAnswerReader;
   for (int i = 0; i < arguments.size(); i ++) {
@@ -4056,7 +4056,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
     }
   }
   if (interpreter.flagHasGraphics) {
-    MapReferences<std::string, std::string, MathRoutines::hashString>&
+    MapReferences<std::string, std::string, HashFunctions::hashFunction<std::string> >&
     interpreterScripts =
     interpreter.objectContainer.graphicsScripts;
     for (int i = 0; i < interpreterScripts.size(); i ++) {
@@ -5149,7 +5149,7 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(
     this->flagIncludeStudentScores = global.userDefaultHasAdminRights() &&
     !global.userStudentVieWOn() &&
     global.requestType != "templateNoLogin";
-    HashedList<std::string, MathRoutines::hashString> gradableProblems;
+    HashedList<std::string> gradableProblems;
     for (int i = 0; i < this->topics.topics.size(); i ++) {
       if (
         this->topics.topics.values[i].type == TopicElement::types::problem

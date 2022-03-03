@@ -41,7 +41,7 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   std::fstream fileStream;
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
-  fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
+  fileName << "defaultOutput" << HashFunctions::hashFunction(fileContent);
   if (
     !FileOperations::openFileCreateIfNotPresentVirtual(
       fileStream,
@@ -274,8 +274,8 @@ bool Expression::checkInitialization() const {
 }
 
 bool Expression::hasInputBoxVariables(
-  HashedList<std::string, HashFunctions::hashFunction>* outputBoxNames,
-  HashedList<std::string, HashFunctions::hashFunction>*
+  HashedList<std::string>* outputBoxNames,
+  HashedList<std::string>*
   outputBoxNamesJavascript
 ) const {
   MacroRegisterFunctionWithName("Expression::hasInputBoxVariables");

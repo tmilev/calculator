@@ -918,7 +918,7 @@ public:
   // The inputExpressions give us the ability to specify substitutions
   bool assignStringParsed(
     const std::string& input,
-    MapList<std::string, Expression, MathRoutines::hashString>* substitutions,
+    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >* substitutions,
     Calculator& owner
   );
   const Expression& operator[](int n) const;
@@ -1572,9 +1572,9 @@ public:
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> >
   charactersSemisimpleLieAlgebraFiniteDimensional;
   HashedListReferences<double, MathRoutines::hashDouble> doubleNumbers;
-  HashedListReferences<std::string, MathRoutines::hashString> allStrings;
+  HashedListReferences<std::string, HashFunctions::hashFunction<std::string> > allStrings;
   HashedListReferences<JSData> jsonObjects;
-  HashedListReferences<std::string, MathRoutines::hashString>
+  HashedListReferences<std::string, HashFunctions::hashFunction<std::string> >
   expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<Expression> constraints;
@@ -1595,9 +1595,9 @@ public:
   > hyperoctahedralRepresentations;
   ListReferences<Plot> allPlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferences<std::string, InputBox, MathRoutines::hashString>
+  MapReferences<std::string, InputBox, HashFunctions::hashFunction<std::string> >
   userInputTextBoxesWithValues;
-  MapReferences<std::string, std::string, MathRoutines::hashString>
+  MapReferences<std::string, std::string, HashFunctions::hashFunction<std::string> >
   graphicsScripts;
   AlgebraicClosureRationals algebraicClosure;
   HashedList<AlgebraicNumber> allAlgebraicNumbers;
@@ -1647,13 +1647,13 @@ private:
   List<SyntacticElement>* currentSyntacticStack;
   HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
-  HashedList<std::string, MathRoutines::hashString>
+  HashedList<std::string>
   stringsThatSplitIfFollowedByDigit;
-  MapList<std::string, List<std::string>, MathRoutines::hashString>
+  MapList<std::string, List<std::string>, HashFunctions::hashFunction<std::string> >
   predefinedWordSplits;
 public:
   // Control sequences parametrize the syntactical elements
-  HashedList<std::string, MathRoutines::hashString> controlSequences;
+  HashedList<std::string> controlSequences;
   std::string syntaxErrors;
   List<std::string> parsingLog;
   std::string lastRuleName;
@@ -2095,22 +2095,22 @@ public:
     MemorySaving<OperationHandlers>,
     HashFunctions::hashFunction
   > operations;
-  HashedList<std::string, MathRoutines::hashString>
+  HashedList<std::string>
   atomsThatAllowCommutingOfCompositesStartingWithThem;
-  HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
-  HashedList<std::string, MathRoutines::hashString> builtInTypes;
-  HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
-  HashedList<std::string, MathRoutines::hashString>
+  HashedList<std::string> atomsNotAllowingChainRule;
+  HashedList<std::string> builtInTypes;
+  HashedList<std::string> arithmeticOperations;
+  HashedList<std::string>
   knownOperationsInterpretedAsFunctionsMultiplicatively;
-  HashedList<std::string, MathRoutines::hashString>
+  HashedList<std::string>
   knownFunctionsWithComplexRange;
-  HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
-  HashedList<std::string, MathRoutines::hashString>
+  HashedList<std::string> atomsThatFreezeArguments;
+  HashedList<std::string>
   atomsWhoseExponentsAreInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::hashString>
+  HashedList<std::string>
   atomsNotInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
-  HashedList<std::string, MathRoutines::hashString> autoCompleteKeyWords;
+  HashedList<std::string> atomsThatMustNotBeCached;
+  HashedList<std::string> autoCompleteKeyWords;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringHandlersAtoms;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
@@ -2128,7 +2128,7 @@ public:
     NamedRuleLocation();
   };
 
-  MapList<std::string, NamedRuleLocation, MathRoutines::hashString> namedRules;
+  MapList<std::string, NamedRuleLocation, HashFunctions::hashFunction<std::string> > namedRules;
   // Calculator functions have as arguments two expressions passed by reference,
   // const Expression& input and Expression& output. Calculator functions
   // return bool. It is forbidden to pass the same object as input and output.
@@ -2348,7 +2348,7 @@ public:
   const HashedList<std::string, HashFunctions::hashFunction>& getOperations() {
     return this->operations.keys;
   }
-  const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
+  const HashedList<std::string>& getBuiltInTypes() {
     return this->builtInTypes;
   }
   const List<Function>* getOperationHandlers(int operation);
@@ -2894,7 +2894,7 @@ public:
     MapList<
       std::string,
       Calculator::Test::OneTest,
-      MathRoutines::hashString
+      HashFunctions::hashFunction<std::string>
     > commands;
     JSData storedResults;
     Test(Calculator& inputOwner);
@@ -3208,10 +3208,10 @@ public:
     List<Expression> output;
     List<List<std::string> > rulesNames;
     static List<std::string> ruleIgnoreList;
-    static HashedList<std::string, MathRoutines::hashString>
+    static HashedList<std::string>
     ruleIgnoreListHashList;
-    HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
-    MapList<std::string, std::string, MathRoutines::hashString>
+    HashedList<std::string> rulesToBeIgnored;
+    MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
     rulesDisplayNamesMap;
     bool computeRecursively(
       int incomingRecursionDepth, std::stringstream* commentsOnFailure
@@ -3534,7 +3534,7 @@ public:
   static bool loadKeysFromStatementList(
     Calculator& calculator,
     const Expression& input,
-    MapList<std::string, Expression, MathRoutines::hashString>& output,
+    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );

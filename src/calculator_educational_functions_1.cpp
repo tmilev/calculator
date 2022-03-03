@@ -389,7 +389,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     comparison.comparisonStandardRaw,
     comparison.comparisonStandardEvaluated
   );
-  MapList<std::string, Expression, MathRoutines::hashString> substitution;
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > substitution;
   substitution.setKeyValue("a", comparison.given);
   substitution.setKeyValue("b", comparison.desired);
   comparison.comparisonNoDistributionRaw.assignStringParsed(

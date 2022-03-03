@@ -610,7 +610,7 @@ bool WebWorker::extractArgumentsFromCookies(
   std::stringstream& argumentProcessingFailureComments
 ) {
   MacroRegisterFunctionWithName("WebWorker::extractArgumentsFromCookies");
-  MapList<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > newlyFoundArgs;
   bool result = true;
   for (int i = 0; i < this->cookies.size; i ++) {
     if (
@@ -675,7 +675,7 @@ bool WebWorker::extractArgumentsFromMessage(
     << "Error: input string encoded too many times";
     return false;
   }
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
   global.webArguments;
   if (
     !HtmlRoutines::chopPercentEncodedStringAppend(
@@ -701,7 +701,7 @@ bool WebWorker::loginProcedure(
     global.flagDatabaseCompiled = false;
     return true;
   }
-  MapList<std::string, std::string, MathRoutines::hashString>& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
   global.webArguments;
   UserCalculatorData& user = global.userDefault;
   user.username =
@@ -3457,7 +3457,7 @@ void WebServer::handleTooManyConnections(
     << "too many connections handler start. "
     << Logger::endL;
   }
-  MonomialWrapper<std::string, MathRoutines::hashString> incomingAddress(
+  MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> > incomingAddress(
     incomingUserAddress
   );
   bool purgeIncomingAddress = (
@@ -4839,7 +4839,7 @@ std::string MainFlags::test = "test";
 class ArgumentAnalyzer {
 public:
   int currentIndex;
-  HashedList<std::string, MathRoutines::hashString> commandLineConfigurations;
+  HashedList<std::string> commandLineConfigurations;
   bool processOneArgument();
   bool setFormat();
   bool setServer();

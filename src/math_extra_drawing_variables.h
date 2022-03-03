@@ -19,7 +19,7 @@ public:
   // selectedindex
   Vectors<double> basisToDrawCirclesAt;
   Matrix<double> bilinearForm;
-  MapList<std::string, List<int>, MathRoutines::hashString> frames;
+  MapList<std::string, List<int>, HashFunctions::hashFunction<std::string> > frames;
   double clickToleranceX;
   double clickToleranceY;
   double centerX;

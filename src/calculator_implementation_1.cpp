@@ -1170,7 +1170,7 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
 
 bool Expression::assignStringParsed(
   const std::string& input,
-  MapList<std::string, Expression, MathRoutines::hashString>* substitutions,
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >* substitutions,
   Calculator& owner
 ) {
   MacroRegisterFunctionWithName("Expression::assignStringParsed");

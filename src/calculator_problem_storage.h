@@ -34,7 +34,7 @@ public:
   std::string content;
   std::string tag;
   std::string errorComment;
-  MapList<std::string, std::string, MathRoutines::hashString> properties;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > properties;
   List<std::string> propertiesWithoutValue;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
@@ -137,7 +137,7 @@ public:
   std::string commandsSolutionOnly;
   std::string commandAnswerOnGiveUp;
   List<SyntacticElementHTML> solutionElements;
-  MapList<std::string, std::string, MathRoutines::hashString> properties;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > properties;
   std::string answerId;
   std::string idVerificationSpan;
   std::string idAnswerPanel;
@@ -177,9 +177,9 @@ public:
 
 class ProblemDataAdministrative {
 public:
-  MapList<std::string, std::string, MathRoutines::hashString>
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
   problemWeightsPerCourse;
-  MapList<std::string, std::string, MathRoutines::hashString>
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
   deadlinesPerSection;
   bool getWeightFromCourse(
     const std::string& courseNonURLed,
@@ -210,7 +210,7 @@ public:
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
-  MapList<std::string, Answer, MathRoutines::hashString> answers;
+  MapList<std::string, Answer, HashFunctions::hashFunction<std::string> > answers;
   List<std::string> inputNonAnswerIds;
   int getExpectedNumberOfAnswers(
     const std::string& problemName, std::stringstream& commentsOnFailure
@@ -255,15 +255,14 @@ class TopicElement;
 
 class UserCalculator: public UserCalculatorData {
 public:
-  MapList<std::string, ProblemData, MathRoutines::hashString> problemData;
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> > problemData;
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMax;
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
   void computeExpectedNumberOfAnswersPerProblem();
-  void computePointsEarned(
-    const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-    MapList<std::string, TopicElement, MathRoutines::hashString>* topics,
+  void computePointsEarned(const HashedList<std::string> &gradableProblems,
+    MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> >* topics,
     std::stringstream& commentsOnFailure
   );
   void setProblemData(

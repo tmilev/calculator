@@ -627,7 +627,7 @@ bool Calculator::checkPredefinedFunctionNameRepetitions() {
   MacroRegisterFunctionWithName(
     "Calculator::checkPredefinedFunctionNameRepetitions"
   );
-  HashedList<std::string, MathRoutines::hashString> ruleIds;
+  HashedList<std::string> ruleIds;
   for (int i = 0; i < this->operations.size(); i ++) {
     MemorySaving<Calculator::OperationHandlers>& current =
     this->operations.values[i];

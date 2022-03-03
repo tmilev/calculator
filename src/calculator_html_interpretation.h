@@ -33,14 +33,14 @@ public:
   };
 
   CalculatorHTML* owner;
-  MapList<std::string, TopicElement, MathRoutines::hashString> topics;
+  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> > topics;
   MapList<
     std::string,
     List<TopicElementParser::TopicLine>,
-    MathRoutines::hashString
+    HashFunctions::hashFunction<std::string>
   > knownTopicBundles;
-  HashedList<std::string, MathRoutines::hashString> loadedTopicBundleFiles;
-  MapList<std::string, int, MathRoutines::hashString> elementTypes;
+  HashedList<std::string> loadedTopicBundleFiles;
+  MapList<std::string, int, HashFunctions::hashFunction<std::string> > elementTypes;
   MapList<int, std::string, HashFunctions::hashFunction> elementNames;
   List<TopicElementParser::TopicLine> crawled;
   List<TopicElementParser::TopicLine> bundleStack;
@@ -270,12 +270,12 @@ public:
   std::string outputProblemLabel;
   std::string outputProblemTitle;
   std::string outputDebugInformationBody;
-  MapList<std::string, std::string, MathRoutines::hashString> outputScripts;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > outputScripts;
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
   static const std::string bugsGenericMessage;
-  HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
+  HashedList<std::string> tagKeysNoValue;
   List<std::string> calculatorTopicElementNames;
   List<std::string> autoCompleteExtras;
   //  List<std::string> answerFirstCorrectSubmission;
@@ -285,9 +285,9 @@ public:
   int topicLectureCounter;
   std::string topicListContent;
   std::string topicListFileName;
-  HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;
+  HashedList<std::string> problemNamesNoTopics;
   TopicElementParser topics;
-  MapList<std::string, std::string, MathRoutines::hashString> scripts;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > scripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
@@ -463,33 +463,31 @@ public:
     std::string& incomingProblemInfo,
     std::stringstream* commentsOnFailure
   );
-  bool mergeProblemWeight(
-    const JSData& inputJSON,
-    MapList<std::string, ProblemData, MathRoutines::hashString>&
-    outputAppendProblemInfo,
+  bool mergeProblemWeight(const JSData& inputJSON,
+    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> > &outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
   bool mergeProblemDeadline(
     const JSData& inputJSON,
-    MapList<std::string, ProblemData, MathRoutines::hashString>&
+    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
     outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemWeights(
-    MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
+    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& toStore,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemDeadlines(
-    MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
+    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& toStore,
     std::stringstream* commentsOnFailure
   );
   QuerySet toQuerySetProblemWeights(
-    MapList<std::string, ProblemData, MathRoutines::hashString>&
+    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
     inputProblemInfo
   );
   JSData toJSONDeadlines(
-    MapList<std::string, ProblemData, MathRoutines::hashString>&
+    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
     inputProblemInfo
   );
   std::string toStringDeadline(
@@ -546,7 +544,7 @@ public:
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return MathRoutines::hashString(this->fileName);
+    return HashFunctions::hashFunction<std::string> (this->fileName);
   }
   bool operator==(const CalculatorHTML& other) const {
     return this->fileName == other.fileName;

@@ -612,6 +612,7 @@ public:
   Expression input;
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
+  std::string errorString;
   void initialize(Calculator& inputOwner, const Expression& incoming);
   bool reduce();
   std::string toString();
@@ -649,6 +650,11 @@ void TrigonometricReduction::initialize(
 bool TrigonometricReduction::reduce() {
   HashedList<std::string> variables;
   std::string reductionRules;
+  if (CalculatorConversions::functionRationalFraction(*this->owner, this->input, this->inputFraction, false)){
+    this->errorString = "Failed to extract rational fraction.";
+    return  false;
+  }
+
 
   reductionRules = "";
   return false;

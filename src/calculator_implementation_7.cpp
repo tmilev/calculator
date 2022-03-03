@@ -7401,7 +7401,7 @@ bool CalculatorFunctionsPlot::plotViewWindow(
     widthHeight.setSize(2);
     widthHeight[0] = 100;
     widthHeight[1] = 100;
-    MapList<std::string, Expression, MathRoutines::hashString> map;
+    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > map;
     if (
       !CalculatorConversions::loadKeysFromStatementList(
         calculator, input, map, nullptr, false
@@ -10026,7 +10026,7 @@ public:
   int maxNumCharsInString;
   bool flagUseFullTree;
   Expression baseExpression;
-  HashedList<std::string, MathRoutines::hashString> displayedExpressionStrings;
+  HashedList<std::string> displayedExpressionStrings;
   List<bool> displayedStringIsLeaf;
   List<Vector<Rational> > nodePositions;
   List<Vector<double> > nodePositionsDouble;
@@ -10474,7 +10474,7 @@ bool CalculatorFunctions::turnRulesOnOff(
       }
     }
   }
-  HashedList<std::string, MathRoutines::hashString> rulesToSwitch;
+  HashedList<std::string> rulesToSwitch;
   rulesToSwitch.reserve(rulesToConsider.size);
   for (int i = 0; i < rulesToConsider.size; i ++) {
     if (!calculator.namedRules.contains(rulesToConsider[i])) {

@@ -903,7 +903,8 @@ void Calculator::initializeFunctionsStandard() {
     "FourierFractionForm",
     CalculatorFunctionsTrigonometry::fourierFractionForm,
     "",
-    "Converts a trigonometric expression in one variable to fourier fraction form. "
+    "Converts a trigonometric expression "
+  "in one variable to fourier fraction form. "
     ,
     "A = cos(2x)/(cos^3 x - sin^3 x);\n"
     "FourierFractionForm A;\n"

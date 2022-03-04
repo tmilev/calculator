@@ -10,7 +10,11 @@ bool CalculatorHtmlFunctions::userInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::userInputBox");
-  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > arguments;
+  MapList<
+    std::string,
+    Expression,
+    HashFunctions::hashFunction<std::string>
+  > arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
       calculator, input, arguments, &calculator.comments
@@ -104,7 +108,11 @@ bool CalculatorHtmlFunctions::setInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::setInputBox");
-  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > arguments;
+  MapList<
+    std::string,
+    Expression,
+    HashFunctions::hashFunction<std::string>
+  > arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
       calculator, input, arguments, &calculator.comments
@@ -154,7 +162,11 @@ std::string CalculatorHtmlFunctions::getUserInputBoxName(
     return "non-initialized-expression";
   }
   Calculator& calculator = *box.owner;
-  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > arguments;
+  MapList<
+    std::string,
+    Expression,
+    HashFunctions::hashFunction<std::string>
+  > arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
       calculator, box, arguments

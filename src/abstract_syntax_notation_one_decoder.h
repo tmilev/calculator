@@ -164,8 +164,9 @@ public:
 class ASNObject {
 private:
   // the map below records samples for each known objectId
-  static MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >
-  objectIdSamples;
+  static MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  > objectIdSamples;
 public:
   class names {
   public:
@@ -197,15 +198,20 @@ public:
   ASNElement objectId;
   ASNElement content;
   static void initializeAddSample(
-    MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >& container,
+    MapList<
+      std::string,
+      ASNObject,
+      HashFunctions::hashFunction<std::string>
+    >& container,
     const std::string& inputName,
     const std::string& inputObjectIdHex,
     unsigned char inputContentTag
   );
   // static initialization order fiasco guard:
   // The function is thread-safe after returning once.
-  static MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&
-  namesToObjectIdsNonThreadSafe();
+  static MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  >& namesToObjectIdsNonThreadSafe();
   static MapList<
     List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars
   >& objectIdsToNames();
@@ -215,13 +221,20 @@ public:
   );
   static bool loadFieldsFromASNSequence(
     const ASNElement& input,
-    MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >& output,
+    MapList<
+      std::string,
+      ASNObject,
+      HashFunctions::hashFunction<std::string>
+    >& output,
     std::stringstream* commentsOnFailure
   );
   // Returns 1 if field was found, 0 otherwise.
   int loadField(
-    const MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&
-    inputFields,
+    const MapList<
+      std::string,
+      ASNObject,
+      HashFunctions::hashFunction<std::string>
+    >& inputFields,
     const std::string& fieldName
   );
   static const List<unsigned char>& objectIdFromNameNoFail(

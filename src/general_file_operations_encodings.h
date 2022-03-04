@@ -14,13 +14,22 @@ public:
   folderStartsToWhichWeAppendInstructorUsernameSlash();
   static HashedList<std::string>&
   folderVirtualLinksToWhichWeAppendTimeAndBuildHash();
-  static MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  folderVirtualLinksNonSensitive();
-  static MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  folderVirtualLinksSensitive();
+  static MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& folderVirtualLinksNonSensitive();
+  static MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& folderVirtualLinksSensitive();
   // <- admin access only
-  static MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  folderVirtualLinksULTRASensitive();
+  static MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& folderVirtualLinksULTRASensitive();
   // <- no access allowed through web server
   static List<List<std::string> >& folderVirtualLinksDefault();
   static bool checkFolderLinks();

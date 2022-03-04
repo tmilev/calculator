@@ -2626,7 +2626,7 @@ bool CalculatorFunctions::formatCPPSourceCodeInternal(
   }
   std::stringstream report;
   CodeFormatter formatter;
-  formatter.formatCPPSourceCode(fileName, "", "", &report, logDebugData);
+  formatter.formatCPPSourceCode(fileName, fileName+".new", fileName+".new", &report, logDebugData);
   return output.assignValue(calculator, report.str());
 }
 
@@ -6612,7 +6612,8 @@ bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
   return output.makeSum(calculator, numeratorsNew);
 }
 
-void Expression::getBlocksOfCommutativity(HashedList<Expression> &inputOutputList
+void Expression::getBlocksOfCommutativity(
+  HashedList<Expression>& inputOutputList
 ) const {
   MacroRegisterFunctionWithName("Expression::getBlocksOfCommutativity");
   this->checkInitialization();
@@ -7401,7 +7402,11 @@ bool CalculatorFunctionsPlot::plotViewWindow(
     widthHeight.setSize(2);
     widthHeight[0] = 100;
     widthHeight[1] = 100;
-    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > map;
+    MapList<
+      std::string,
+      Expression,
+      HashFunctions::hashFunction<std::string>
+    > map;
     if (
       !CalculatorConversions::loadKeysFromStatementList(
         calculator, input, map, nullptr, false

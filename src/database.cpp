@@ -1214,7 +1214,11 @@ bool ProblemData::loadFromOldFormat(
   const std::string& inputData, std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("ProblemData::loadFromOldFormat");
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > mapStrings;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > mapStrings;
   if (
     !HtmlRoutines::chopPercentEncodedString(
       inputData, mapStrings, commentsOnFailure
@@ -1239,8 +1243,11 @@ bool ProblemData::loadFromOldFormat(
   }
   this->answers.clear();
   bool result = true;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
-  currentQuestionMap;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > currentQuestionMap;
   for (int i = 0; i < mapStrings.size(); i ++) {
     if (mapStrings.keys[i] == WebAPI::problem::randomSeed) {
       continue;
@@ -1367,7 +1374,11 @@ bool UserCalculator::interpretDatabaseProblemData(
 ) {
   MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemData")
   ;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > mapStrings;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > mapStrings;
   if (
     !HtmlRoutines::chopPercentEncodedString(
       information, mapStrings, commentsOnFailure

@@ -1202,10 +1202,8 @@ std::string LittelmannPath::toString(
   return out.str();
 }
 
-
-template <>
-
- unsigned int HashFunctions::hashFunction(const std::string& input) {
+template < >
+unsigned int HashFunctions::hashFunction(const std::string& input) {
   size_t numCycles = input.size();
   unsigned int result = 0;
   int hashCounter = 0;
@@ -1216,20 +1214,22 @@ template <>
   return result;
 }
 
- template <>
-  unsigned int HashFunctions::hashFunction(const bool& input) {
-   return static_cast<unsigned int>(input);
- }
+template < >
+unsigned int HashFunctions::hashFunction(const bool& input) {
+  return static_cast<unsigned int>(input);
+}
 
-  template <>
-   unsigned int HashFunctions::hashFunction(const int& input) {
-    return static_cast<unsigned>(input);
-  }
-   template <>
-   unsigned int HashFunctions:: hashFunction(const char& input) {
-    return static_cast<unsigned int>(input);
-  }
-   template <>
-   unsigned int HashFunctions::hashFunction(const unsigned char& input) {
-    return static_cast<unsigned int>(input);
-  }
+template < >
+unsigned int HashFunctions::hashFunction(const int& input) {
+  return static_cast<unsigned>(input);
+}
+
+template < >
+unsigned int HashFunctions::hashFunction(const char& input) {
+  return static_cast<unsigned int>(input);
+}
+
+template < >
+unsigned int HashFunctions::hashFunction(const unsigned char& input) {
+  return static_cast<unsigned int>(input);
+}

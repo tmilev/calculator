@@ -219,7 +219,11 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   problem.fileName = this->fileName;
   this->flagSuccess = false;
   StateMaintainer<
-    MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    >
   > maintainArguments(global.webArguments);
   if (
     !problem.loadMe(
@@ -2830,7 +2834,11 @@ bool CalculatorFunctions::newtonsMethod(
     ;
     return output.assignError(calculator, errorStream.str());
   }
-  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > substitution;
+  MapList<
+    std::string,
+    Expression,
+    HashFunctions::hashFunction<std::string>
+  > substitution;
   substitution.setKeyValue("x", variables[0]);
   substitution.setKeyValue("f", functionExpression);
   substitution.setKeyValue("a", calculator.getNewAtom());

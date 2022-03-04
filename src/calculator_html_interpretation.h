@@ -33,14 +33,20 @@ public:
   };
 
   CalculatorHTML* owner;
-  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> > topics;
+  MapList<
+    std::string,
+    TopicElement,
+    HashFunctions::hashFunction<std::string>
+  > topics;
   MapList<
     std::string,
     List<TopicElementParser::TopicLine>,
     HashFunctions::hashFunction<std::string>
   > knownTopicBundles;
   HashedList<std::string> loadedTopicBundleFiles;
-  MapList<std::string, int, HashFunctions::hashFunction<std::string> > elementTypes;
+  MapList<
+    std::string, int, HashFunctions::hashFunction<std::string>
+  > elementTypes;
   MapList<int, std::string, HashFunctions::hashFunction> elementNames;
   List<TopicElementParser::TopicLine> crawled;
   List<TopicElementParser::TopicLine> bundleStack;
@@ -270,7 +276,11 @@ public:
   std::string outputProblemLabel;
   std::string outputProblemTitle;
   std::string outputDebugInformationBody;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > outputScripts;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > outputScripts;
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
@@ -287,7 +297,11 @@ public:
   std::string topicListFileName;
   HashedList<std::string> problemNamesNoTopics;
   TopicElementParser topics;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > scripts;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > scripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
@@ -463,32 +477,54 @@ public:
     std::string& incomingProblemInfo,
     std::stringstream* commentsOnFailure
   );
-  bool mergeProblemWeight(const JSData& inputJSON,
-    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> > &outputAppendProblemInfo,
+  bool mergeProblemWeight(
+    const JSData& inputJSON,
+    MapList<
+      std::string,
+      ProblemData,
+      HashFunctions::hashFunction<std::string>
+    >& outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
   bool mergeProblemDeadline(
     const JSData& inputJSON,
-    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
-    outputAppendProblemInfo,
+    MapList<
+      std::string,
+      ProblemData,
+      HashFunctions::hashFunction<std::string>
+    >& outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemWeights(
-    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& toStore,
+    MapList<
+      std::string,
+      ProblemData,
+      HashFunctions::hashFunction<std::string>
+    >& toStore,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemDeadlines(
-    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >& toStore,
+    MapList<
+      std::string,
+      ProblemData,
+      HashFunctions::hashFunction<std::string>
+    >& toStore,
     std::stringstream* commentsOnFailure
   );
   QuerySet toQuerySetProblemWeights(
-    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
-    inputProblemInfo
+    MapList<
+      std::string,
+      ProblemData,
+      HashFunctions::hashFunction<std::string>
+    >& inputProblemInfo
   );
   JSData toJSONDeadlines(
-    MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >&
-    inputProblemInfo
+    MapList<
+      std::string,
+      ProblemData,
+      HashFunctions::hashFunction<std::string>
+    >& inputProblemInfo
   );
   std::string toStringDeadline(
     const std::string& topicID,
@@ -544,7 +580,7 @@ public:
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return HashFunctions::hashFunction<std::string> (this->fileName);
+    return HashFunctions::hashFunction<std::string>(this->fileName);
   }
   bool operator==(const CalculatorHTML& other) const {
     return this->fileName == other.fileName;

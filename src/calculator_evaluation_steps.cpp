@@ -251,8 +251,8 @@ List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
     "MultiplyByOne"
   }
 );
-HashedList<std::string> Calculator::
-ExpressionHistoryEnumerator::ruleIgnoreListHashList;
+HashedList<std::string> Calculator::ExpressionHistoryEnumerator::
+ruleIgnoreListHashList;
 void Calculator::ExpressionHistoryEnumerator::toStepsCleanUp(
   List<Calculator::ExpressionHistoryEnumerator::Step>& raw,
   List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps

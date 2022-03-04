@@ -57,7 +57,11 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& arguments =
   global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
@@ -310,7 +314,11 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& arguments =
   global.webArguments;
   JSData result;
   for (int i = 0; i < arguments.size(); i ++) {
@@ -1411,7 +1419,11 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
   this->problem.studentTagsAnswered.initialize(
     this->problem.problemData.answers.size()
   );
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& webArguments =
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& webArguments =
   global.webArguments;
   this->answerIndex = - 1;
   for (int i = 0; i < webArguments.size(); i ++) {
@@ -2213,7 +2225,11 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& arguments =
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& arguments =
   global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
@@ -2932,7 +2948,11 @@ int ProblemData::getExpectedNumberOfAnswers(
 
 void UserCalculator::computePointsEarned(
   const HashedList<std::string>& gradableProblems,
-  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> >* topics,
+  MapList<
+    std::string,
+    TopicElement,
+    HashFunctions::hashFunction<std::string>
+  >* topics,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::computePointsEarned");
@@ -3011,8 +3031,13 @@ public:
   CalculatorHTML problem;
   std::string currentSection;
   std::string currentCourse;
-  List<MapList<std::string, Rational, HashFunctions::hashFunction<std::string> > >
-  scoresBreakdown;
+  List<
+    MapList<
+      std::string,
+      Rational,
+      HashFunctions::hashFunction<std::string>
+    >
+  > scoresBreakdown;
   List<JSData> userProblemData;
   List<Rational> userScores;
   List<std::string> userInfos;

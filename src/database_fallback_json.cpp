@@ -138,7 +138,9 @@ std::string Database::FallBack::toStringIndices() const {
   int maxIndexedToDisplay = 3;
   for (int i = 0; i < this->indices.size(); i ++) {
     const MapList<
-      std::string, List<int32_t>, HashFunctions::hashFunction<std::string>
+      std::string,
+      List<int32_t>,
+      HashFunctions::hashFunction<std::string>
     >& currentLocation =
     this->indices.values[i].locations;
     out

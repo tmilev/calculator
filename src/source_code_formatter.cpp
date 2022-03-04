@@ -3073,7 +3073,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     ) &&
     thirdToLast.isOperator() &&
     thirdToLast.content == "=" &&
-    secondToLast.isTypeOrIdentifierOrExpression() && (
+(    secondToLast.isTypeOrIdentifierOrExpression() || secondToLast.isTypeWordOrTypeExpression()) && (
       last.type == CodeFormatter::Element::Comma ||
       last.type == CodeFormatter::Element::GreaterThan ||
       last.type == CodeFormatter::Element::RightParenthesis

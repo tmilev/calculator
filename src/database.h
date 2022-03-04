@@ -150,7 +150,11 @@ public:
       std::string collection;
       std::string label;
       std::string collectionAndLabelCache;
-      MapList<std::string, List<int32_t>, HashFunctions::hashFunction<std::string> > locations;
+      MapList<
+        std::string,
+        List<int32_t>,
+        HashFunctions::hashFunction<std::string>
+      > locations;
       static std::string collectionAndLabelStatic(
         const std::string& inputCollection,
         const std::string& inputLabel

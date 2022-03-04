@@ -2607,7 +2607,11 @@ bool CalculatorFunctionsPlot::plotSurface(
       }
     }
   }
-  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> > keys;
+  MapList<
+    std::string,
+    Expression,
+    HashFunctions::hashFunction<std::string>
+  > keys;
   if (
     CalculatorConversions::loadKeysFromStatementList(
       calculator, input, keys, &calculator.comments, true
@@ -2619,7 +2623,11 @@ bool CalculatorFunctionsPlot::plotSurface(
     if (keys.contains("color2")) {
       plot.colorVU = keys.getValueCreateEmpty("color2").toString();
     }
-    MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > keysToConvert;
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    > keysToConvert;
     keysToConvert.getValueCreateEmpty("numSegments1");
     keysToConvert.getValueCreateEmpty("numSegments2");
     keysToConvert.getValueCreateEmpty("lineWidth");

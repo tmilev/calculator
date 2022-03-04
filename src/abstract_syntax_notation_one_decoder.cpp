@@ -1168,7 +1168,9 @@ void AbstractSyntaxNotationOneSubsetDecoder::writeObjectId(
 }
 
 void ASNObject::initializeAddSample(
-  MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >& container,
+  MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  >& container,
   const std::string& inputName,
   const std::string& inputObjectIdHex,
   unsigned char inputContentTag
@@ -1221,9 +1223,12 @@ std::string ASNObject::names::basicConstraints = "basicConstraints";
 std::string ASNObject::names::subjectKeyIdentifier = "subjectKeyIdentifier";
 std::string ASNObject::names::authorityKeyIdentifier = "authorityKeyIdentifier"
 ;
-MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >& ASNObject::
-namesToObjectIdsNonThreadSafe() {
-  static MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> > container;
+MapList<
+  std::string, ASNObject, HashFunctions::hashFunction<std::string>
+>& ASNObject::namesToObjectIdsNonThreadSafe() {
+  static MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  > container;
   // Object ids of some hash functions are given in RFC4055.
   // Object ids of hash functions may be deduced from [Page 42, RFC 3447]
   if (container.size() != 0) {
@@ -1336,7 +1341,10 @@ namesToObjectIdsNonThreadSafe() {
   return container;
 }
 
-int ASNObject::loadField(const MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> > &inputFields,
+int ASNObject::loadField(
+  const MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  >& inputFields,
   const std::string& fieldName
 ) {
   if (!ASNObject::namesToObjectIdsNonThreadSafe().contains(fieldName)) {
@@ -1404,7 +1412,9 @@ const List<unsigned char>& ASNObject::objectIdFromNameNoFail(
 
 bool ASNObject::loadFieldsFromASNSequence(
   const ASNElement& input,
-  MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >& output,
+  MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  >& output,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("ASNObject::loadFieldsFromASNSequence");
@@ -2278,8 +2288,12 @@ bool TBSCertificateInfo::loadValidity(
 bool TBSCertificateInfo::Organization::loadFromASN(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::Organization::loadFromASN");
-  MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> > fields;
+  MacroRegisterFunctionWithName(
+    "TBSCertificateInfo::Organization::loadFromASN"
+  );
+  MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  > fields;
   if (
     !ASNObject::loadFieldsFromASNSequence(input, fields, commentsOnFailure)
   ) {
@@ -2294,7 +2308,10 @@ bool TBSCertificateInfo::Organization::loadFromASN(
   return this->loadFields(fields, commentsOnFailure);
 }
 
-bool TBSCertificateInfo::Organization::loadFields(const MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> > &fields,
+bool TBSCertificateInfo::Organization::loadFields(
+  const MapList<
+    std::string, ASNObject, HashFunctions::hashFunction<std::string>
+  >& fields,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::loadFields");

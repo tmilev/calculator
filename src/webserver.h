@@ -29,7 +29,9 @@ public:
   std::string messageHead;
   std::string messageBody;
   JSData resultWork;
-  MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> > userAddress;
+  MonomialWrapper<
+    std::string, HashFunctions::hashFunction<std::string>
+  > userAddress;
   std::string hostWithPort;
   std::string hostNoPort;
   std::string cookiesApache;
@@ -54,7 +56,11 @@ public:
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
   List<std::string> messageHeaderStrings;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > requestHeaders;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > requestHeaders;
   int contentLength;
   int requestType;
   int connectedSocketID;
@@ -251,7 +257,9 @@ public:
   std::string pingAuthentication;
   TransportLayerSecurity transportLayerSecurity;
   LinearCombination<
-    MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >,
+    MonomialWrapper<
+      std::string, HashFunctions::hashFunction<std::string>
+    >,
     LargeInteger
   > currentlyConnectedAddresses;
   std::string portHTTP;
@@ -260,13 +268,18 @@ public:
   std::string portHTTPSDefault;
   List<int> listeningSockets;
   ListReferences<WebWorker> allWorkers;
-  MapList<std::string, int, HashFunctions::hashFunction<std::string> > workerIds;
+  MapList<
+    std::string, int, HashFunctions::hashFunction<std::string>
+  > workerIds;
   HashedList<std::string> requestsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
   List<std::string> addressStartsSentWithCacheMaxAge;
-  HashedList<std::string>
-  addressStartsInterpretedAsCalculatorRequest;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > MIMETypes;
+  HashedList<std::string> addressStartsInterpretedAsCalculatorRequest;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > MIMETypes;
   int activeWorker;
   int64_t timeLastExecutableModification;
   ListReferences<std::string> progressReports;

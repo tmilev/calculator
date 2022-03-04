@@ -609,24 +609,27 @@ bool CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry(
 
 class TrigonometricReduction {
 public:
-  class TrigonometricFunction  {
+  class TrigonometricFunction {
   public:
     Rational coefficient;
     Expression argument;
     bool isSine;
     TrigonometricFunction();
-    bool extractFrom(Expression& trigonometricExpression,std::stringstream* commentsOnFailure);
+    bool extractFrom(
+      Expression& trigonometricExpression,
+      std::stringstream* commentsOnFailure
+    );
   };
+
   Expression input;
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
   MapList<Expression, TrigonometricFunction> arguments;
   std::string errorString;
   void initialize(Calculator& inputOwner, const Expression& incoming);
-  bool reduce(std::stringstream *commentsOnFailure);
-  bool extractSinesAndCosines(std::stringstream *commentsOnFailure);
+  bool reduce(std::stringstream* commentsOnFailure);
+  bool extractSinesAndCosines(std::stringstream* commentsOnFailure);
   std::string toString();
-
 };
 
 bool CalculatorFunctionsTrigonometry::fourierFractionForm(
@@ -646,9 +649,9 @@ bool CalculatorFunctionsTrigonometry::fourierFractionForm(
 
 std::string TrigonometricReduction::toString() {
   std::stringstream out;
-  if (this->errorString != ""){
+  if (this->errorString != "") {
     out << this->errorString;
-  out << "<hr>";
+    out << "<hr>";
   }
   out << this->inputFraction.toString();
   out << "not implemented yet";
@@ -662,40 +665,46 @@ void TrigonometricReduction::initialize(
   this->input = incoming;
 }
 
-bool TrigonometricReduction::reduce(std::stringstream *commentsOnFailure) {
+bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
   HashedList<std::string> variables;
   std::string reductionRules;
-  if (!CalculatorConversions::functionRationalFraction(*this->owner, this->input, this->inputFraction, false)){
+  if (
+    !CalculatorConversions::functionRationalFraction(
+      *this->owner, this->input, this->inputFraction, false
+    )
+  ) {
     this->errorString = "Failed to extract rational fraction.";
-    return  false;
-  }
-  if (!this->extractSinesAndCosines(commentsOnFailure)){
     return false;
   }
-
+  if (!this->extractSinesAndCosines(commentsOnFailure)) {
+    return false;
+  }
   reductionRules = "";
   return false;
 }
 
-bool TrigonometricReduction::extractSinesAndCosines(std::stringstream* commentsOnFailure) {
-  for (Expression& input: this->inputFraction.context.getVariables()) {
+bool TrigonometricReduction::extractSinesAndCosines(
+  std::stringstream* commentsOnFailure
+) {
+  for (Expression & input : this->inputFraction.context.getVariables()) {
     TrigonometricReduction::TrigonometricFunction trigonometricFunction;
-    if (!trigonometricFunction.extractFrom(input, commentsOnFailure)){
-
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Failed to extract sine/cosine.";
-  }
-  return false;
-  }
+    if (!trigonometricFunction.extractFrom(input, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to extract sine/cosine.";
+      }
+      return false;
+    }
   }
   return true;
-
 }
 
-TrigonometricReduction::TrigonometricFunction::TrigonometricFunction(){
+TrigonometricReduction::TrigonometricFunction::TrigonometricFunction() {
   this->isSine = false;
 }
 
-bool TrigonometricReduction::TrigonometricFunction::extractFrom(Expression &trigonometricExpression, std::stringstream *commentsOnFailure){
-  return  false;
+bool TrigonometricReduction::TrigonometricFunction::extractFrom(
+  Expression& trigonometricExpression,
+  std::stringstream* commentsOnFailure
+) {
+  return false;
 }

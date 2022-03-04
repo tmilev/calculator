@@ -97,7 +97,11 @@ public:
     void computeASN(ASNElement& output);
     std::string toString();
     bool loadFields(
-      const MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >& fields,
+      const MapList<
+        std::string,
+        ASNObject,
+        HashFunctions::hashFunction<std::string>
+      >& fields,
       std::stringstream* commentsOnFailure
     );
     bool loadFromASN(
@@ -525,7 +529,11 @@ public:
   std::string signatureBase64;
   std::string headerJSON;
   std::string claimsJSON;
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > payloadKeys;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > payloadKeys;
   bool assignString(
     const std::string& other, std::stringstream* commentsOnFailure
   );

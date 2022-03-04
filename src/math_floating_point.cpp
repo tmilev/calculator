@@ -86,7 +86,7 @@ double FloatingPoint::power(double base, double exponent) {
   return pow(base, exponent);
 }
 
-template<>
+template < >
 unsigned int HashFunctions::hashFunction(const double& input) {
   if (FloatingPoint::isNaN(input)) {
     return 5;

@@ -9,7 +9,9 @@
 #include "math_rational_function_implementation.h"
 
 MapList<
-  std::string, VoganDiagram::DiagramType, HashFunctions::hashFunction<std::string>
+  std::string,
+  VoganDiagram::DiagramType,
+  HashFunctions::hashFunction<std::string>
 > VoganDiagram::mapStringToType;
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   Calculator& calculator,

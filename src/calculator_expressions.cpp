@@ -3549,7 +3549,9 @@ std::string Expression::toStringAllSlidersInExpression() const {
   ) {
     this->owner->objectContainer.resetSliders();
   }
-  MapReferences<std::string, InputBox, HashFunctions::hashFunction<std::string> >& sliders =
+  MapReferences<
+    std::string, InputBox, HashFunctions::hashFunction<std::string>
+  >& sliders =
   this->owner->objectContainer.userInputTextBoxesWithValues;
   std::stringstream out;
   for (int i = 0; i < boxNames.size; i ++) {

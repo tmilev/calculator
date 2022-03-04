@@ -186,9 +186,7 @@ public:
   bool addChildOnTop(const Expression& inputChild);
   bool addChildAtomOnTop(const std::string& operationString);
   bool addChildAtomOnTop(int operationIndex);
-  void getBlocksOfCommutativity(
-    HashedList<Expression>& inputOutputList
-  ) const;
+  void getBlocksOfCommutativity(HashedList<Expression>& inputOutputList) const;
   bool splitProduct(
     int numDesiredMultiplicandsLeft,
     Expression& outputLeftMultiplicand,
@@ -918,7 +916,11 @@ public:
   // The inputExpressions give us the ability to specify substitutions
   bool assignStringParsed(
     const std::string& input,
-    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >* substitutions,
+    MapList<
+      std::string,
+      Expression,
+      HashFunctions::hashFunction<std::string>
+    >* substitutions,
     Calculator& owner
   );
   const Expression& operator[](int n) const;
@@ -1572,10 +1574,13 @@ public:
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> >
   charactersSemisimpleLieAlgebraFiniteDimensional;
   HashedListReferences<double, MathRoutines::hashDouble> doubleNumbers;
-  HashedListReferences<std::string, HashFunctions::hashFunction<std::string> > allStrings;
+  HashedListReferences<
+    std::string, HashFunctions::hashFunction<std::string>
+  > allStrings;
   HashedListReferences<JSData> jsonObjects;
-  HashedListReferences<std::string, HashFunctions::hashFunction<std::string> >
-  expressionNotation;
+  HashedListReferences<
+    std::string, HashFunctions::hashFunction<std::string>
+  > expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<Expression> constraints;
   HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
@@ -1595,10 +1600,14 @@ public:
   > hyperoctahedralRepresentations;
   ListReferences<Plot> allPlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferences<std::string, InputBox, HashFunctions::hashFunction<std::string> >
-  userInputTextBoxesWithValues;
-  MapReferences<std::string, std::string, HashFunctions::hashFunction<std::string> >
-  graphicsScripts;
+  MapReferences<
+    std::string, InputBox, HashFunctions::hashFunction<std::string>
+  > userInputTextBoxesWithValues;
+  MapReferences<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > graphicsScripts;
   AlgebraicClosureRationals algebraicClosure;
   HashedList<AlgebraicNumber> allAlgebraicNumbers;
   HashedListReferences<
@@ -1647,10 +1656,12 @@ private:
   List<SyntacticElement>* currentSyntacticStack;
   HashedList<int, HashFunctions::hashFunction> nonBoundVariablesInContext;
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
-  HashedList<std::string>
-  stringsThatSplitIfFollowedByDigit;
-  MapList<std::string, List<std::string>, HashFunctions::hashFunction<std::string> >
-  predefinedWordSplits;
+  HashedList<std::string> stringsThatSplitIfFollowedByDigit;
+  MapList<
+    std::string,
+    List<std::string>,
+    HashFunctions::hashFunction<std::string>
+  > predefinedWordSplits;
 public:
   // Control sequences parametrize the syntactical elements
   HashedList<std::string> controlSequences;
@@ -2095,20 +2106,16 @@ public:
     MemorySaving<OperationHandlers>,
     HashFunctions::hashFunction
   > operations;
-  HashedList<std::string>
-  atomsThatAllowCommutingOfCompositesStartingWithThem;
+  HashedList<std::string> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string> atomsNotAllowingChainRule;
   HashedList<std::string> builtInTypes;
   HashedList<std::string> arithmeticOperations;
-  HashedList<std::string>
-  knownOperationsInterpretedAsFunctionsMultiplicatively;
-  HashedList<std::string>
-  knownFunctionsWithComplexRange;
+  HashedList<std::string> knownOperationsInterpretedAsFunctionsMultiplicatively
+  ;
+  HashedList<std::string> knownFunctionsWithComplexRange;
   HashedList<std::string> atomsThatFreezeArguments;
-  HashedList<std::string>
-  atomsWhoseExponentsAreInterpretedAsFunctions;
-  HashedList<std::string>
-  atomsNotInterpretedAsFunctions;
+  HashedList<std::string> atomsWhoseExponentsAreInterpretedAsFunctions;
+  HashedList<std::string> atomsNotInterpretedAsFunctions;
   HashedList<std::string> atomsThatMustNotBeCached;
   HashedList<std::string> autoCompleteKeyWords;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
@@ -2128,7 +2135,11 @@ public:
     NamedRuleLocation();
   };
 
-  MapList<std::string, NamedRuleLocation, HashFunctions::hashFunction<std::string> > namedRules;
+  MapList<
+    std::string,
+    NamedRuleLocation,
+    HashFunctions::hashFunction<std::string>
+  > namedRules;
   // Calculator functions have as arguments two expressions passed by reference,
   // const Expression& input and Expression& output. Calculator functions
   // return bool. It is forbidden to pass the same object as input and output.
@@ -3208,11 +3219,13 @@ public:
     List<Expression> output;
     List<List<std::string> > rulesNames;
     static List<std::string> ruleIgnoreList;
-    static HashedList<std::string>
-    ruleIgnoreListHashList;
+    static HashedList<std::string> ruleIgnoreListHashList;
     HashedList<std::string> rulesToBeIgnored;
-    MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
-    rulesDisplayNamesMap;
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    > rulesDisplayNamesMap;
     bool computeRecursively(
       int incomingRecursionDepth, std::stringstream* commentsOnFailure
     );
@@ -3534,7 +3547,11 @@ public:
   static bool loadKeysFromStatementList(
     Calculator& calculator,
     const Expression& input,
-    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >& output,
+    MapList<
+      std::string,
+      Expression,
+      HashFunctions::hashFunction<std::string>
+    >& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );

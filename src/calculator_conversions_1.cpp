@@ -1061,7 +1061,11 @@ bool CalculatorConversions::algebraicNumber(
 bool CalculatorConversions::loadKeysFromStatementList(
   Calculator& calculator,
   const Expression& input,
-  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >& output,
+  MapList<
+    std::string,
+    Expression,
+    HashFunctions::hashFunction<std::string>
+  >& output,
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {

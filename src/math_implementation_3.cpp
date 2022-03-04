@@ -1451,9 +1451,16 @@ bool FileOperations::loadFileToStringUnsecure(
 
 #include "general_list_references.h"
 
-MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& FileOperations::
-folderVirtualLinksNonSensitive() {
-  static MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > result;
+MapList<
+  std::string,
+  std::string,
+  HashFunctions::hashFunction<std::string>
+>& FileOperations::folderVirtualLinksNonSensitive() {
+  static MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > result;
   return result;
 }
 
@@ -1469,15 +1476,29 @@ folderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
   return result;
 }
 
-MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& FileOperations::
-folderVirtualLinksSensitive() {
-  static MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > result;
+MapList<
+  std::string,
+  std::string,
+  HashFunctions::hashFunction<std::string>
+>& FileOperations::folderVirtualLinksSensitive() {
+  static MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > result;
   return result;
 }
 
-MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >& FileOperations::
-folderVirtualLinksULTRASensitive() {
-  static MapList<std::string, std::string, HashFunctions::hashFunction<std::string> > result;
+MapList<
+  std::string,
+  std::string,
+  HashFunctions::hashFunction<std::string>
+>& FileOperations::folderVirtualLinksULTRASensitive() {
+  static MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > result;
   return result;
 }
 
@@ -1490,8 +1511,11 @@ void FileOperations::initializeFoldersULTRASensitive() {
   MacroRegisterFunctionWithName(
     "WebServer::InitializeMainFoldersULTRASensitive"
   );
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  folderSubstitutionsULTRASensitive =
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& folderSubstitutionsULTRASensitive =
   FileOperations::folderVirtualLinksULTRASensitive();
   // <- allocates data structure
   folderSubstitutionsULTRASensitive.setKeyValue(
@@ -1507,8 +1531,11 @@ void FileOperations::initializeFoldersULTRASensitive() {
 
 void FileOperations::initializeFoldersSensitive() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersSensitive");
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  folderSubstitutionsSensitive =
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& folderSubstitutionsSensitive =
   FileOperations::folderVirtualLinksSensitive();
   folderSubstitutionsSensitive.clear();
   folderSubstitutionsSensitive.setKeyValue("LogFiles/", "LogFiles/");
@@ -1597,8 +1624,11 @@ void FileOperations::initializeFoldersNonSensitive() {
   // No further rules are applied after that.
   // Location keys that start with "/" are coming from webserver references.
   // Location keys that do not start with "/" are for internal use.
-  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  folderSubstitutionsNonSensitive =
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  >& folderSubstitutionsNonSensitive =
   FileOperations::folderVirtualLinksNonSensitive();
   // initializeFolderVirtualLinksDefaults() is called in
   // GlobalVariables::configurationProcess and its contents
@@ -2561,7 +2591,7 @@ unsigned int MathRoutines::hashListStrings(
   for (int i = 0; i < input.size; i ++) {
     result +=
     HashConstants::getConstantIncrementCounter(j) *
-    HashFunctions::hashFunction<std::string> (input[i]);
+    HashFunctions::hashFunction<std::string>(input[i]);
   }
   return result;
 }
@@ -2959,7 +2989,7 @@ void StringRoutines::stringTrimToLengthWithHash(
     0, static_cast<unsigned>(desiredLength50AtLeast - 30)
   )
   << "_abbrev_hash_"
-  << HashFunctions::hashFunction<std::string> (inputOutput);
+  << HashFunctions::hashFunction<std::string>(inputOutput);
   inputOutput = inputAbbreviatedStream.str();
 }
 
@@ -3578,9 +3608,14 @@ unsigned int Selection::hashFunction() const {
 
 // Format expression monomial orders for the toString() function follow.
 template < >
-List<MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> > >::Comparator*
-FormatExpressions::getMonomialOrder<
-  MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >
+List<
+  MonomialWrapper<
+    std::string, HashFunctions::hashFunction<std::string>
+  >
+>::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialWrapper<
+    std::string, HashFunctions::hashFunction<std::string>
+  >
 >() {
   return nullptr;
 }

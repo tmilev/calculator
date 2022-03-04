@@ -275,8 +275,7 @@ bool Expression::checkInitialization() const {
 
 bool Expression::hasInputBoxVariables(
   HashedList<std::string>* outputBoxNames,
-  HashedList<std::string>*
-  outputBoxNamesJavascript
+  HashedList<std::string>* outputBoxNamesJavascript
 ) const {
   MacroRegisterFunctionWithName("Expression::hasInputBoxVariables");
   if (this->owner == nullptr) {

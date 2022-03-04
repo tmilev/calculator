@@ -494,23 +494,16 @@ public:
   }
 };
 
-template <>
-
- unsigned int HashFunctions::hashFunction(const std::string& input);
- template <>
-
-  unsigned int HashFunctions::hashFunction(const bool& input);
-  template <>
-
-   unsigned int HashFunctions::hashFunction(const int& input);
-   template <>
-
-    unsigned int HashFunctions::hashFunction(const  unsigned char& input);
-    template <>
-
-     unsigned int HashFunctions::hashFunction(const  double& input);
-
-
+template < >
+unsigned int HashFunctions::hashFunction(const std::string& input);
+template < >
+unsigned int HashFunctions::hashFunction(const bool& input);
+template < >
+unsigned int HashFunctions::hashFunction(const int& input);
+template < >
+unsigned int HashFunctions::hashFunction(const unsigned char& input);
+template < >
+unsigned int HashFunctions::hashFunction(const double& input);
 template <typename Object>
 class ListIterator {
 public:
@@ -1743,7 +1736,9 @@ public:
 
 template <
   class Object,
-  unsigned int hashFunction(const Object&) = HashFunctions::hashFunction<Object>
+  unsigned int hashFunction(const Object&) = HashFunctions::hashFunction<
+    Object
+  >
 >
 class HashedList: public HashTemplate<Object, List<Object>, hashFunction> {
 public:

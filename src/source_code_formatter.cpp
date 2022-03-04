@@ -3072,8 +3072,10 @@ bool CodeFormatter::Processor::applyOneRule() {
       fourthToLast.type == CodeFormatter::Element::TypeAndIdentifier
     ) &&
     thirdToLast.isOperator() &&
-    thirdToLast.content == "=" &&
-(    secondToLast.isTypeOrIdentifierOrExpression() || secondToLast.isTypeWordOrTypeExpression()) && (
+    thirdToLast.content == "=" && (
+      secondToLast.isTypeOrIdentifierOrExpression() ||
+      secondToLast.isTypeWordOrTypeExpression()
+    ) && (
       last.type == CodeFormatter::Element::Comma ||
       last.type == CodeFormatter::Element::GreaterThan ||
       last.type == CodeFormatter::Element::RightParenthesis

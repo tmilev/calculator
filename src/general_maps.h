@@ -118,8 +118,16 @@ public:
     out << "}";
     return out.str();
   }
-  inline Value& operator[](const Key& index) {
-    return this->getValueCreate(index);
+  // Fetches a value with a given key.
+  // If not present, creates an empty object with the given key.
+  // If you need to use object lookup with a const function, use
+  // function:
+  //
+  // getValueNoFail() const
+  //
+  // instead (this function will crash if the object's not there).
+  inline Value& operator[](const Key& key) {
+    return this->getValueCreateNoInitialization(key);
   }
   bool operator==(
     const MapTemplate<ListType, Key, Value, keyHashFunction>& other

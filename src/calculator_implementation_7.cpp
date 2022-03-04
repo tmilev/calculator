@@ -2626,7 +2626,9 @@ bool CalculatorFunctions::formatCPPSourceCodeInternal(
   }
   std::stringstream report;
   CodeFormatter formatter;
-  formatter.formatCPPSourceCode(fileName, fileName+".new", fileName+".new", &report, logDebugData);
+  formatter.formatCPPSourceCode(
+    fileName, fileName + ".new", fileName + ".new", &report, logDebugData
+  );
   return output.assignValue(calculator, report.str());
 }
 

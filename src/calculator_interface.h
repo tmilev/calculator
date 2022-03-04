@@ -2083,6 +2083,11 @@ public:
     static std::string turnOnRules;
     static std::string turnOffRules;
     static std::string elementTensorsGeneralizedVermas;
+    class Trigonometry {
+    public:
+      static std::string sine;
+      static std::string cosine;
+    };
   };
 
   // Initialization mode for the calculator.
@@ -4403,7 +4408,7 @@ std::string WithContext<BuiltIn>::toString() const {
   std::stringstream out;
   out
   << this->content.toString()
-  << "[ctx: "
+  << " [context: "
   << this->context.toString()
   << "]";
   return out.str();

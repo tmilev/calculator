@@ -14,16 +14,21 @@ uniformization.
 
 
 As of February 28, 2022, we have a working end-to-end self-contained source 
-code formatter. To format your source code changes, use the command:
+code formatter. To format every `.cpp` and `.h` file in the src/ directory, 
+use the command:
 
 ```
 calculator format
 ```
 
 If the source code formatter fails to parse one of your files, it will not 
-overwrite your old code. Our source code formatter is located in
+overwrite your old code, but write a `.fail` file with a partially parsed file.
+Our source code formatter is semantic and will parse your source code into an 
+abstract code tree, so it will fail to format your code if you have unbalanced 
+parentheses, etc.
+The source code formatter is located in
 [source_code_formatter.cpp](src/source_code_formatter.cpp). If you think you 
-can improve the code formatter, you are welcome to do so.
+can improve it, you are welcome to do so.
 
 ## Variable and class names
 
@@ -73,6 +78,16 @@ for (int i = 30; i < 50; i ++) {
 }
 ```
 
+OK:
+``` 
+int sumOfSquares = 0;
+for (int i = 0; i < 11; i ++) {
+  sumOfSquares += i * i;
+}
+for (int i = 30; i < 50; i ++) {
+  sumOfSquares += i * i;
+}
+```
 ## Braces, blocks, tabs
 
 ### Tabs

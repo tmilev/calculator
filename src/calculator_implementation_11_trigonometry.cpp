@@ -619,17 +619,21 @@ public:
       Expression& trigonometricExpression,
       std::stringstream* commentsOnFailure
     );
+    std::string toString() const;
   };
 
+  static const int maximumArguments = 3;
   Expression input;
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
   MapList<Expression, TrigonometricFunction> arguments;
-  std::string errorString;
+  HashedList<Expression> trigonometricArguments;
   void initialize(Calculator& inputOwner, const Expression& incoming);
   bool reduce(std::stringstream* commentsOnFailure);
   bool extractSinesAndCosines(std::stringstream* commentsOnFailure);
   std::string toString();
+  std::string toStringTrigonometry();
+  std::string toStringTrigonometricArguments();
 };
 
 bool CalculatorFunctionsTrigonometry::fourierFractionForm(
@@ -649,12 +653,40 @@ bool CalculatorFunctionsTrigonometry::fourierFractionForm(
 
 std::string TrigonometricReduction::toString() {
   std::stringstream out;
-  if (this->errorString != "") {
-    out << this->errorString;
-    out << "<hr>";
+  FormatExpressions format;
+  format.flagUseFrac = true;
+  out << "<b>Starting expression.</b><br>";
+  out << "\\(" << this->inputFraction.content.toString(&format) << "\\)";
+  out << "<br><b>where the x_i's are given by: </b><br>";
+  out << this->toStringTrigonometry();
+  out << this->toStringTrigonometricArguments();
+  out << "<br><b style='color:red'>not fully implemented yet.</b>";
+  return out.str();
+}
+
+std::string TrigonometricReduction::toStringTrigonometricArguments() {
+  std::stringstream out;
+  out << "<b>Base arguments</b>: ";
+  out << this->trigonometricArguments.toStringCommaDelimited();
+  return out.str();
+}
+
+std::string TrigonometricReduction::toStringTrigonometry() {
+  std::stringstream out;
+  out << "\\(\\begin{array}{rclcl}\n";
+  for (int i = 0; i < this->arguments.size(); i ++) {
+    const TrigonometricReduction::TrigonometricFunction& trigonometricFunction
+    =
+    this->arguments.values[i];
+    out << "x_{" << i + 1
+    << "}&=&"
+    << this->arguments.keys[i].toString()
+    << "&\\to& "
+    << trigonometricFunction.toString();
+    out << "\\\\\n";
   }
-  out << this->inputFraction.toString();
-  out << "not implemented yet";
+  out << "\\end{array}\\)";
+  out << "<br>";
   return out.str();
 }
 
@@ -673,11 +705,24 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
       *this->owner, this->input, this->inputFraction, false
     )
   ) {
-    this->errorString = "Failed to extract rational fraction.";
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to extract rational fraction.";
+    }
     return false;
   }
   if (!this->extractSinesAndCosines(commentsOnFailure)) {
     return false;
+  }
+  if (this->trigonometricArguments.size > this->maximumArguments) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Too many base trig arguments: "
+      << this->trigonometricArguments.size
+      << ", maximum: "
+      << this->maximumArguments
+      << ".";
+    }
+    return true;
   }
   reductionRules = "";
   return false;
@@ -694,6 +739,10 @@ bool TrigonometricReduction::extractSinesAndCosines(
       }
       return false;
     }
+    this->arguments[input] = trigonometricFunction;
+    this->trigonometricArguments.addOnTopNoRepetition(
+      trigonometricFunction.argument
+    );
   }
   return true;
 }
@@ -706,5 +755,45 @@ bool TrigonometricReduction::TrigonometricFunction::extractFrom(
   Expression& trigonometricExpression,
   std::stringstream* commentsOnFailure
 ) {
-  return false;
+  std::string trigonometricFunction;
+  if (
+    trigonometricExpression.startsWithGivenOperation(
+      Calculator::Atoms::Trigonometry::sine
+    )
+  ) {
+    trigonometricFunction = Calculator::Atoms::Trigonometry::sine;
+    this->isSine = true;
+  }
+  if (
+    trigonometricExpression.startsWithGivenOperation(
+      Calculator::Atoms::Trigonometry::cosine
+    )
+  ) {
+    trigonometricFunction = Calculator::Atoms::Trigonometry::cosine;
+    this->isSine = false;
+  }
+  if (trigonometricFunction == "") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to extract sine or cosine from: "
+      << trigonometricExpression.toString();
+    }
+    return false;
+  }
+  trigonometricExpression[1].getCoefficientMultiplicandForm(
+    this->coefficient, this->argument
+  );
+  return true;
+}
+
+std::string TrigonometricReduction::TrigonometricFunction::toString() const {
+  std::stringstream out;
+  if (this->isSine) {
+    out << "sin(";
+  } else {
+    out << "cos(";
+  }
+  out << this->coefficient.toString() << " * " << this->argument.toString();
+  out << ")";
+  return out.str();
 }

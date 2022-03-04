@@ -25,6 +25,8 @@ std::string Calculator::Atoms::approximations = "Approximations";
 std::string Calculator::Atoms::turnOnRules = "TurnOnRules";
 std::string Calculator::Atoms::turnOffRules = "TurnOffRules";
 std::string Calculator::Atoms::elementTensorsGeneralizedVermas = "ETGVM";
+std::string Calculator::Atoms::Trigonometry::sine = "\\sin";
+std::string Calculator::Atoms::Trigonometry::cosine = "\\cos";
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
   adminDefault.dontTestAutomatically = true;

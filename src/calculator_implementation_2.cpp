@@ -259,10 +259,10 @@ Expression Calculator::expressionMinusInfinity() {
 
 Expression Calculator::expressionSquareRootNegativeOne() {
   Expression result;
-  return
   result.assignValue(
     *this, this->objectContainer.algebraicClosure.imaginaryUnit()
   );
+  return result;
 }
 
 List<Function> Calculator::OperationHandlers::mergeHandlers() {

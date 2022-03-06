@@ -1709,7 +1709,8 @@ AlgebraicNumber AlgebraicClosureRationals::zero() {
 AlgebraicNumber AlgebraicClosureRationals::imaginaryUnit() {
   AlgebraicNumber result = - 1;
   result.owner = this;
-  result.squareRootDefault(nullptr);
+  std::stringstream comments;
+  result.squareRootDefault(&comments);
   return result;
 }
 

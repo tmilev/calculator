@@ -803,23 +803,14 @@ void TrigonometricReduction::computeBaseScales() {
 Rational TrigonometricReduction::computeScaleOneBaseMonomial(
   HashedList<Rational>& coefficients
 ) {
-  LargeInteger numerator;
   LargeIntegerUnsigned denominator = 1;
   for (int i = 0; i < coefficients.size; i ++) {
-    if (i == 0) {
-      numerator = coefficients[i].getNumerator();
-    } else {
-      numerator =
-      MathRoutines::greatestCommonDivisor(
-        numerator, coefficients[i].getNumerator()
-      );
-    }
     denominator =
     MathRoutines::leastCommonMultiple(
       denominator, coefficients[i].getDenominator()
     );
   }
-  Rational result = numerator;
+  Rational result = 1;
   result /= denominator;
   return result;
 }

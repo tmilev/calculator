@@ -1707,10 +1707,10 @@ AlgebraicNumber AlgebraicClosureRationals::zero() {
 }
 
 AlgebraicNumber AlgebraicClosureRationals::imaginaryUnit() {
-AlgebraicNumber result = -1;
-result.owner = this;
-result.squareRootDefault(nullptr);
-return result;
+  AlgebraicNumber result = - 1;
+  result.owner = this;
+  result.squareRootDefault(nullptr);
+  return result;
 }
 
 AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input)

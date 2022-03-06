@@ -148,7 +148,10 @@ bool CalculatorFunctionsTrigonometry::csc(
   Expression numerator, denominator;
   numerator.assignValue(calculator, 1);
   denominator.makeOX(calculator, calculator.opSin(), argument);
-  return output.makeXOX(calculator, calculator.opDivide(), numerator, denominator);
+  return
+  output.makeXOX(
+    calculator, calculator.opDivide(), numerator, denominator
+  );
 }
 
 bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
@@ -196,7 +199,9 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
   }
   const Expression& argument = input[1];
   Expression coefficientExpression, nonCoefficientPart;
-  argument.getCoefficientMultiplicandForm(coefficientExpression, nonCoefficientPart);
+  argument.getCoefficientMultiplicandForm(
+    coefficientExpression, nonCoefficientPart
+  );
   Rational rational;
   if (!coefficientExpression.isRational(&rational)) {
     return false;
@@ -207,7 +212,11 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
   Expression negativeOne;
   negativeOne.assignValue(calculator, - 1);
   return
-  output.makeOX(calculator, calculator.opCos(), negativeOne * coefficientExpression * nonCoefficientPart);
+  output.makeOX(
+    calculator,
+    calculator.opCos(),
+    negativeOne * coefficientExpression * nonCoefficientPart
+  );
 }
 
 bool CalculatorFunctionsTrigonometry::exploitSineOddness(
@@ -231,7 +240,11 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   }
   Expression moneE, sinE;
   moneE.assignValue(calculator, - 1);
-  sinE.makeOX(calculator, calculator.opSin(), moneE * coefficientExpression * nonCFpart);
+  sinE.makeOX(
+    calculator,
+    calculator.opSin(),
+    moneE * coefficientExpression * nonCFpart
+  );
   output = moneE * sinE;
   return true;
 }
@@ -285,7 +298,9 @@ bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
 bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arccosAlgebraic");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsTrigonometry::arccosAlgebraic"
+  );
   if (input.size() != 2) {
     return false;
   }
@@ -358,7 +373,9 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
 bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arcsinAlgebraic");
+  MacroRegisterFunctionWithName(
+    "CalculatorFunctionsTrigonometry::arcsinAlgebraic"
+  );
   if (input.size() != 2) {
     return false;
   }
@@ -611,15 +628,17 @@ class TrigonometricReduction {
 public:
   class TrigonometricFunction {
   public:
-   LinearCombination<  Expression , Rational>arguments;
+    LinearCombination<Expression, Rational> arguments;
     bool isSine;
     Polynomial<AlgebraicNumber> eulerForm;
     Expression eulerFormExpression;
     TrigonometricReduction* owner;
     TrigonometricFunction();
-    bool extractFrom(Expression& trigonometricExpression,
-      std::stringstream* commentsOnFailure
-, TrigonometricReduction& inputOwner    );
+    bool extractFrom(
+      Expression& trigonometricExpression,
+      std::stringstream* commentsOnFailure,
+      TrigonometricReduction& inputOwner
+    );
     std::string toString() const;
     void computeEulerFormAnonymous();
     void computeEulerFormExpression();
@@ -631,7 +650,7 @@ public:
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
   MapList<Expression, TrigonometricFunction> arguments;
   MapList<Expression, HashedList<Rational> > trigonometricBaseMonomials;
-  MapList<Expression, Rational > trigonometricBaseScales;
+  MapList<Expression, Rational> trigonometricBaseScales;
   void initialize(Calculator& inputOwner, const Expression& incoming);
   bool reduce(std::stringstream* commentsOnFailure);
   bool extractSinesAndCosines(std::stringstream* commentsOnFailure);
@@ -690,7 +709,9 @@ std::string TrigonometricReduction::toStringTrigonometry() {
     << this->arguments.keys[i].toString()
     << "&\\to& "
     << trigonometricFunction.toString();
-    out << "&=&" << trigonometricFunction.eulerFormExpression.toString()
+    out
+    << "&=&"
+    << trigonometricFunction.eulerFormExpression.toString()
     << "&=&"
     << trigonometricFunction.eulerForm.toString();
     out << "\\\\\n";
@@ -724,7 +745,7 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
     return false;
   }
   this->computeBaseScales();
-this->computeEulerForm();
+  this->computeEulerForm();
   if (this->trigonometricBaseMonomials.size() > this->maximumArguments) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -745,7 +766,9 @@ bool TrigonometricReduction::extractSinesAndCosines(
 ) {
   for (Expression & input : this->inputFraction.context.getVariables()) {
     TrigonometricReduction::TrigonometricFunction trigonometricFunction;
-    if (!trigonometricFunction.extractFrom(input, commentsOnFailure, *this)) {
+    if (
+      !trigonometricFunction.extractFrom(input, commentsOnFailure, *this)
+    ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to extract sine/cosine.";
       }
@@ -753,38 +776,59 @@ bool TrigonometricReduction::extractSinesAndCosines(
     }
     this->arguments[input] = trigonometricFunction;
     for (int i = 0; i < trigonometricFunction.arguments.size(); i ++) {
-      HashedList<Rational> &currentCoefficients = this->trigonometricBaseMonomials.getValueCreateEmpty(trigonometricFunction.arguments.monomials[i]);
-      currentCoefficients.addOnTopNoRepetition(trigonometricFunction.arguments.coefficients[i]);
+      HashedList<Rational>& currentCoefficients =
+      this->trigonometricBaseMonomials.getValueCreateEmpty(
+        trigonometricFunction.arguments.monomials[i]
+      );
+      currentCoefficients.addOnTopNoRepetition(
+        trigonometricFunction.arguments.coefficients[i]
+      );
     }
   }
   return true;
 }
 
-void TrigonometricReduction::computeBaseScales(){
-  for (int i  =0; i < this->trigonometricBaseMonomials.size(); i ++){
-Rational scale =     this->computeScaleOneBaseMonomial(this->trigonometricBaseMonomials.values[i]);
-this->trigonometricBaseScales.setKeyValue(this->trigonometricBaseMonomials.keys[i], scale);
+void TrigonometricReduction::computeBaseScales() {
+  for (int i = 0; i < this->trigonometricBaseMonomials.size(); i ++) {
+    Rational scale =
+    this->computeScaleOneBaseMonomial(
+      this->trigonometricBaseMonomials.values[i]
+    );
+    this->trigonometricBaseScales.setKeyValue(
+      this->trigonometricBaseMonomials.keys[i], scale
+    );
   }
 }
 
-Rational TrigonometricReduction::computeScaleOneBaseMonomial(HashedList<Rational> &coefficients){
+Rational TrigonometricReduction::computeScaleOneBaseMonomial(
+  HashedList<Rational>& coefficients
+) {
   LargeInteger numerator;
-  LargeIntegerUnsigned denominator=1;
-  for (int i = 0; i < coefficients.size; i ++){
-    if (i == 0){
+  LargeIntegerUnsigned denominator = 1;
+  for (int i = 0; i < coefficients.size; i ++) {
+    if (i == 0) {
       numerator = coefficients[i].getNumerator();
-    }else{
-      numerator = MathRoutines::greatestCommonDivisor(numerator, coefficients[i].getNumerator());
+    } else {
+      numerator =
+      MathRoutines::greatestCommonDivisor(
+        numerator, coefficients[i].getNumerator()
+      );
     }
-    denominator = MathRoutines::leastCommonMultiple(denominator, coefficients[i].getDenominator());
+    denominator =
+    MathRoutines::leastCommonMultiple(
+      denominator, coefficients[i].getDenominator()
+    );
   }
   Rational result = numerator;
-  result/= denominator;
-  return  result;
+  result /= denominator;
+  return result;
 }
 
-void TrigonometricReduction::computeEulerForm(){
-  for (TrigonometricReduction::TrigonometricFunction& current : this->arguments.values){
+void TrigonometricReduction::computeEulerForm() {
+  for (
+    TrigonometricReduction::TrigonometricFunction & current :
+    this->arguments.values
+  ) {
     current.computeEulerFormAnonymous();
     current.computeEulerFormExpression();
   }
@@ -795,9 +839,11 @@ TrigonometricReduction::TrigonometricFunction::TrigonometricFunction() {
   this->owner = nullptr;
 }
 
-bool TrigonometricReduction::TrigonometricFunction::extractFrom(Expression& trigonometricExpression,
-  std::stringstream* commentsOnFailure
-, TrigonometricReduction &inputOwner) {
+bool TrigonometricReduction::TrigonometricFunction::extractFrom(
+  Expression& trigonometricExpression,
+  std::stringstream* commentsOnFailure,
+  TrigonometricReduction& inputOwner
+) {
   this->owner = &inputOwner;
   std::string trigonometricFunction;
   if (
@@ -824,57 +870,80 @@ bool TrigonometricReduction::TrigonometricFunction::extractFrom(Expression& trig
     }
     return false;
   }
-  this->owner->owner->functionCollectSummandsCombine(*this->owner->owner, trigonometricExpression[1], this->arguments);
+  this->owner->owner->functionCollectSummandsCombine(
+    *this->owner->owner,
+    trigonometricExpression[1],
+    this->arguments
+  );
   return true;
 }
 
-void TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous(){
-  MacroRegisterFunctionWithName("TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous");
+void TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous()
+{
+  MacroRegisterFunctionWithName(
+    "TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous"
+  );
   this->eulerForm.makeZero();
   Polynomial<AlgebraicNumber> plusSummand, minusSummand;
-  plusSummand.makeConstant(this->owner->owner->objectContainer.algebraicClosure.one());
-  minusSummand.makeConstant(this->owner->owner->objectContainer.algebraicClosure.one());
-  for (int i = 0; i < this->arguments.size(); i ++){
-      const Expression& monomial = this->arguments.monomials[i];
-      int variableIndex = this->owner->trigonometricBaseMonomials.getIndex(monomial);
-      MonomialPolynomial anonymousMonomial;
-      Rational scale = this->arguments.coefficients[i]/ this->owner->trigonometricBaseScales.values[variableIndex];
-      if (!scale.isInteger() ) {
-        global.fatal << "The base monomial scale is supposed to be an integer. " << global.fatal;
-      }
-      anonymousMonomial.setVariable(variableIndex, scale);
-      plusSummand *= anonymousMonomial;
-      anonymousMonomial.setVariable(variableIndex, -scale);
-      minusSummand *= anonymousMonomial;
+  plusSummand.makeConstant(
+    this->owner->owner->objectContainer.algebraicClosure.one()
+  );
+  minusSummand.makeConstant(
+    this->owner->owner->objectContainer.algebraicClosure.one()
+  );
+  for (int i = 0; i < this->arguments.size(); i ++) {
+    const Expression& monomial = this->arguments.monomials[i];
+    int variableIndex =
+    this->owner->trigonometricBaseMonomials.getIndex(monomial);
+    MonomialPolynomial anonymousMonomial;
+    Rational scale = this->arguments.coefficients[i] /
+    this->owner->trigonometricBaseScales.values[variableIndex];
+    if (!scale.isInteger()) {
+      global.fatal
+      << "The base monomial scale is supposed to be an integer. "
+      << global.fatal;
+    }
+    anonymousMonomial.setVariable(variableIndex, scale);
+    plusSummand *= anonymousMonomial;
+    anonymousMonomial.setVariable(variableIndex, - scale);
+    minusSummand *= anonymousMonomial;
   }
   this->eulerForm = plusSummand;
-  if (this->isSine){
+  if (this->isSine) {
     this->eulerForm -= minusSummand;
-    this->eulerForm /=this->owner->owner->objectContainer.algebraicClosure.imaginaryUnit();
+    this->eulerForm /=
+    this->owner->owner->objectContainer.algebraicClosure.imaginaryUnit();
   } else {
     this->eulerForm += minusSummand;
   }
   this->eulerForm /= 2;
 }
 
-void TrigonometricReduction::TrigonometricFunction::computeEulerFormExpression(){
-  Expression sum ;
+void TrigonometricReduction::TrigonometricFunction::computeEulerFormExpression(
+) {
+  Expression sum;
   Calculator& calculator = *this->owner->owner;
   sum.makeSum(calculator, this->arguments);
   Expression plusExponent = calculator.expressionSquareRootNegativeOne() * sum;
-  Expression minusExponent = calculator.expressionMinusOne()* plusExponent;
+  Expression minusExponent = calculator.expressionMinusOne() * plusExponent;
   Expression plusSummand;
   Expression e;
   e.makeAtom(calculator, calculator.opE());
   plusSummand.makeXOX(calculator, calculator.opPower(), e, plusExponent);
   Expression minusSummand;
-  minusSummand.makeXOX(calculator, calculator.opPower(), e, minusExponent);
-  if (this->isSine){
-    Expression twoI = calculator.expressionTwo()* calculator.expressionSquareRootNegativeOne();
-  this->eulerFormExpression =  (plusSummand+ calculator.expressionMinusOne()* minusSummand)/twoI;
-
-  }else{
-    this->eulerFormExpression=(plusSummand+minusSummand)/ calculator.expressionTwo();
+  minusSummand.makeXOX(
+    calculator, calculator.opPower(), e, minusExponent
+  );
+  if (this->isSine) {
+    Expression twoI =
+    calculator.expressionTwo() * calculator.expressionSquareRootNegativeOne();
+    this->eulerFormExpression = (
+      plusSummand + calculator.expressionMinusOne() * minusSummand
+    ) /
+    twoI;
+  } else {
+    this->eulerFormExpression = (plusSummand + minusSummand) /
+    calculator.expressionTwo();
   }
 }
 

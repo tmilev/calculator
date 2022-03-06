@@ -21,17 +21,17 @@ bool CalculatorFunctionsTrigonometry::sin(
   if (argumentExpression.startsWith(calculator.opTimes(), 3)) {
     if (argumentExpression[2].isOperationGiven(calculator.opPi())) {
       if (argumentExpression[1].isOfType<Rational>(&piProportion)) {
-        AlgebraicNumber algOutput;
+        AlgebraicNumber algebraicOutput;
         Rational ratOutput;
         if (
-          algOutput.assignSinRationalTimesPi(
+          algebraicOutput.assignSinRationalTimesPi(
             piProportion, calculator.objectContainer.algebraicClosure
           )
         ) {
-          if (algOutput.isRational(&ratOutput)) {
+          if (algebraicOutput.isRational(&ratOutput)) {
             return output.assignValue(calculator, ratOutput);
           }
-          return output.assignValue(calculator, algOutput);
+          return output.assignValue(calculator, algebraicOutput);
         }
       }
     }
@@ -52,7 +52,7 @@ bool CalculatorFunctionsTrigonometry::sin(
 bool CalculatorFunctionsTrigonometry::cos(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::cos");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::cos");
   if (input.size() != 2) {
     return false;
   }
@@ -67,17 +67,17 @@ bool CalculatorFunctionsTrigonometry::cos(
   if (argument.startsWith(calculator.opTimes(), 3)) {
     if (argument[2].isOperationGiven(calculator.opPi())) {
       if (argument[1].isOfType<Rational>(&piProportion)) {
-        AlgebraicNumber algOutput;
+        AlgebraicNumber algebraicOutput;
         Rational ratOutput;
         if (
-          algOutput.assignCosRationalTimesPi(
+          algebraicOutput.assignCosRationalTimesPi(
             piProportion, calculator.objectContainer.algebraicClosure
           )
         ) {
-          if (algOutput.isRational(&ratOutput)) {
+          if (algebraicOutput.isRational(&ratOutput)) {
             return output.assignValue(calculator, ratOutput);
           }
-          return output.assignValue(calculator, algOutput);
+          return output.assignValue(calculator, algebraicOutput);
         }
       }
     }
@@ -145,10 +145,10 @@ bool CalculatorFunctionsTrigonometry::csc(
     return false;
   }
   const Expression& argument = input[1];
-  Expression num, den;
-  num.assignValue(calculator, 1);
-  den.makeOX(calculator, calculator.opSin(), argument);
-  return output.makeXOX(calculator, calculator.opDivide(), num, den);
+  Expression numerator, denominator;
+  numerator.assignValue(calculator, 1);
+  denominator.makeOX(calculator, calculator.opSin(), argument);
+  return output.makeXOX(calculator, calculator.opDivide(), numerator, denominator);
 }
 
 bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
@@ -195,19 +195,19 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
     return false;
   }
   const Expression& argument = input[1];
-  Expression cfE, nonCFpart;
-  argument.getCoefficientMultiplicandForm(cfE, nonCFpart);
+  Expression coefficientExpression, nonCoefficientPart;
+  argument.getCoefficientMultiplicandForm(coefficientExpression, nonCoefficientPart);
   Rational rational;
-  if (!cfE.isRational(&rational)) {
+  if (!coefficientExpression.isRational(&rational)) {
     return false;
   }
   if (rational >= 0) {
     return false;
   }
-  Expression moneE;
-  moneE.assignValue(calculator, - 1);
+  Expression negativeOne;
+  negativeOne.assignValue(calculator, - 1);
   return
-  output.makeOX(calculator, calculator.opCos(), moneE * cfE * nonCFpart);
+  output.makeOX(calculator, calculator.opCos(), negativeOne * coefficientExpression * nonCoefficientPart);
 }
 
 bool CalculatorFunctionsTrigonometry::exploitSineOddness(
@@ -220,10 +220,10 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
     return false;
   }
   const Expression& argument = input[1];
-  Expression cfE, nonCFpart;
-  argument.getCoefficientMultiplicandForm(cfE, nonCFpart);
+  Expression coefficientExpression, nonCFpart;
+  argument.getCoefficientMultiplicandForm(coefficientExpression, nonCFpart);
   Rational rational;
-  if (!cfE.isRational(&rational)) {
+  if (!coefficientExpression.isRational(&rational)) {
     return false;
   }
   if (rational >= 0) {
@@ -231,7 +231,7 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   }
   Expression moneE, sinE;
   moneE.assignValue(calculator, - 1);
-  sinE.makeOX(calculator, calculator.opSin(), moneE * cfE * nonCFpart);
+  sinE.makeOX(calculator, calculator.opSin(), moneE * coefficientExpression * nonCFpart);
   output = moneE * sinE;
   return true;
 }
@@ -285,7 +285,7 @@ bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
 bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::arccosAlgebraic");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arccosAlgebraic");
   if (input.size() != 2) {
     return false;
   }
@@ -358,7 +358,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
 bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::arcsinAlgebraic");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arcsinAlgebraic");
   if (input.size() != 2) {
     return false;
   }
@@ -430,7 +430,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
 bool CalculatorFunctionsTrigonometry::arctan(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::arctan");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arctan");
   if (input.size() != 2) {
     return false;
   }
@@ -460,7 +460,7 @@ bool CalculatorFunctionsTrigonometry::arctan(
 bool CalculatorFunctionsTrigonometry::arccos(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::arccos");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arccos");
   if (calculator.approximationsBanned()) {
     return false;
   }
@@ -479,7 +479,7 @@ bool CalculatorFunctionsTrigonometry::arccos(
 bool CalculatorFunctionsTrigonometry::arcsin(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::arcsin");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arcsin");
   if (input.size() != 2) {
     return false;
   }
@@ -611,26 +611,33 @@ class TrigonometricReduction {
 public:
   class TrigonometricFunction {
   public:
-    Rational coefficient;
-    Expression argument;
+   LinearCombination<  Expression , Rational>arguments;
     bool isSine;
+    Polynomial<AlgebraicNumber> eulerForm;
+    Expression eulerFormExpression;
+    TrigonometricReduction* owner;
     TrigonometricFunction();
-    bool extractFrom(
-      Expression& trigonometricExpression,
+    bool extractFrom(Expression& trigonometricExpression,
       std::stringstream* commentsOnFailure
-    );
+, TrigonometricReduction& inputOwner    );
     std::string toString() const;
+    void computeEulerFormAnonymous();
+    void computeEulerFormExpression();
   };
 
-  static const int maximumArguments = 3;
+  static const int maximumArguments = 5;
   Expression input;
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
   MapList<Expression, TrigonometricFunction> arguments;
-  HashedList<Expression> trigonometricArguments;
+  MapList<Expression, HashedList<Rational> > trigonometricBaseMonomials;
+  MapList<Expression, Rational > trigonometricBaseScales;
   void initialize(Calculator& inputOwner, const Expression& incoming);
   bool reduce(std::stringstream* commentsOnFailure);
   bool extractSinesAndCosines(std::stringstream* commentsOnFailure);
+  Rational computeScaleOneBaseMonomial(HashedList<Rational>& coefficients);
+  void computeBaseScales();
+  void computeEulerForm();
   std::string toString();
   std::string toStringTrigonometry();
   std::string toStringTrigonometricArguments();
@@ -667,13 +674,13 @@ std::string TrigonometricReduction::toString() {
 std::string TrigonometricReduction::toStringTrigonometricArguments() {
   std::stringstream out;
   out << "<b>Base arguments</b>: ";
-  out << this->trigonometricArguments.toStringCommaDelimited();
+  out << this->trigonometricBaseMonomials.toStringHtml();
   return out.str();
 }
 
 std::string TrigonometricReduction::toStringTrigonometry() {
   std::stringstream out;
-  out << "\\(\\begin{array}{rclcl}\n";
+  out << "\\(\\begin{array}{rclclclcl}\n";
   for (int i = 0; i < this->arguments.size(); i ++) {
     const TrigonometricReduction::TrigonometricFunction& trigonometricFunction
     =
@@ -683,6 +690,9 @@ std::string TrigonometricReduction::toStringTrigonometry() {
     << this->arguments.keys[i].toString()
     << "&\\to& "
     << trigonometricFunction.toString();
+    out << "&=&" << trigonometricFunction.eulerFormExpression.toString()
+    << "&=&"
+    << trigonometricFunction.eulerForm.toString();
     out << "\\\\\n";
   }
   out << "\\end{array}\\)";
@@ -713,11 +723,13 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
   if (!this->extractSinesAndCosines(commentsOnFailure)) {
     return false;
   }
-  if (this->trigonometricArguments.size > this->maximumArguments) {
+  this->computeBaseScales();
+this->computeEulerForm();
+  if (this->trigonometricBaseMonomials.size() > this->maximumArguments) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Too many base trig arguments: "
-      << this->trigonometricArguments.size
+      << this->trigonometricBaseMonomials.size()
       << ", maximum: "
       << this->maximumArguments
       << ".";
@@ -733,28 +745,60 @@ bool TrigonometricReduction::extractSinesAndCosines(
 ) {
   for (Expression & input : this->inputFraction.context.getVariables()) {
     TrigonometricReduction::TrigonometricFunction trigonometricFunction;
-    if (!trigonometricFunction.extractFrom(input, commentsOnFailure)) {
+    if (!trigonometricFunction.extractFrom(input, commentsOnFailure, *this)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to extract sine/cosine.";
       }
       return false;
     }
     this->arguments[input] = trigonometricFunction;
-    this->trigonometricArguments.addOnTopNoRepetition(
-      trigonometricFunction.argument
-    );
+    for (int i = 0; i < trigonometricFunction.arguments.size(); i ++) {
+      HashedList<Rational> &currentCoefficients = this->trigonometricBaseMonomials.getValueCreateEmpty(trigonometricFunction.arguments.monomials[i]);
+      currentCoefficients.addOnTopNoRepetition(trigonometricFunction.arguments.coefficients[i]);
+    }
   }
   return true;
 }
 
-TrigonometricReduction::TrigonometricFunction::TrigonometricFunction() {
-  this->isSine = false;
+void TrigonometricReduction::computeBaseScales(){
+  for (int i  =0; i < this->trigonometricBaseMonomials.size(); i ++){
+Rational scale =     this->computeScaleOneBaseMonomial(this->trigonometricBaseMonomials.values[i]);
+this->trigonometricBaseScales.setKeyValue(this->trigonometricBaseMonomials.keys[i], scale);
+  }
 }
 
-bool TrigonometricReduction::TrigonometricFunction::extractFrom(
-  Expression& trigonometricExpression,
+Rational TrigonometricReduction::computeScaleOneBaseMonomial(HashedList<Rational> &coefficients){
+  LargeInteger numerator;
+  LargeIntegerUnsigned denominator=1;
+  for (int i = 0; i < coefficients.size; i ++){
+    if (i == 0){
+      numerator = coefficients[i].getNumerator();
+    }else{
+      numerator = MathRoutines::greatestCommonDivisor(numerator, coefficients[i].getNumerator());
+    }
+    denominator = MathRoutines::leastCommonMultiple(denominator, coefficients[i].getDenominator());
+  }
+  Rational result = numerator;
+  result/= denominator;
+  return  result;
+}
+
+void TrigonometricReduction::computeEulerForm(){
+  for (TrigonometricReduction::TrigonometricFunction& current : this->arguments.values){
+    current.computeEulerFormAnonymous();
+    current.computeEulerFormExpression();
+  }
+}
+
+TrigonometricReduction::TrigonometricFunction::TrigonometricFunction() {
+  this->isSine = false;
+  this->owner = nullptr;
+}
+
+bool TrigonometricReduction::TrigonometricFunction::extractFrom(Expression& trigonometricExpression,
   std::stringstream* commentsOnFailure
-) {
+, TrigonometricReduction &inputOwner) {
+  this->owner = &inputOwner;
   std::string trigonometricFunction;
   if (
     trigonometricExpression.startsWithGivenOperation(
@@ -780,10 +824,58 @@ bool TrigonometricReduction::TrigonometricFunction::extractFrom(
     }
     return false;
   }
-  trigonometricExpression[1].getCoefficientMultiplicandForm(
-    this->coefficient, this->argument
-  );
+  this->owner->owner->functionCollectSummandsCombine(*this->owner->owner, trigonometricExpression[1], this->arguments);
   return true;
+}
+
+void TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous(){
+  MacroRegisterFunctionWithName("TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous");
+  this->eulerForm.makeZero();
+  Polynomial<AlgebraicNumber> plusSummand, minusSummand;
+  plusSummand.makeConstant(this->owner->owner->objectContainer.algebraicClosure.one());
+  minusSummand.makeConstant(this->owner->owner->objectContainer.algebraicClosure.one());
+  for (int i = 0; i < this->arguments.size(); i ++){
+      const Expression& monomial = this->arguments.monomials[i];
+      int variableIndex = this->owner->trigonometricBaseMonomials.getIndex(monomial);
+      MonomialPolynomial anonymousMonomial;
+      Rational scale = this->arguments.coefficients[i]/ this->owner->trigonometricBaseScales.values[variableIndex];
+      if (!scale.isInteger() ) {
+        global.fatal << "The base monomial scale is supposed to be an integer. " << global.fatal;
+      }
+      anonymousMonomial.setVariable(variableIndex, scale);
+      plusSummand *= anonymousMonomial;
+      anonymousMonomial.setVariable(variableIndex, -scale);
+      minusSummand *= anonymousMonomial;
+  }
+  this->eulerForm = plusSummand;
+  if (this->isSine){
+    this->eulerForm -= minusSummand;
+    this->eulerForm /=this->owner->owner->objectContainer.algebraicClosure.imaginaryUnit();
+  } else {
+    this->eulerForm += minusSummand;
+  }
+  this->eulerForm /= 2;
+}
+
+void TrigonometricReduction::TrigonometricFunction::computeEulerFormExpression(){
+  Expression sum ;
+  Calculator& calculator = *this->owner->owner;
+  sum.makeSum(calculator, this->arguments);
+  Expression plusExponent = calculator.expressionSquareRootNegativeOne() * sum;
+  Expression minusExponent = calculator.expressionMinusOne()* plusExponent;
+  Expression plusSummand;
+  Expression e;
+  e.makeAtom(calculator, calculator.opE());
+  plusSummand.makeXOX(calculator, calculator.opPower(), e, plusExponent);
+  Expression minusSummand;
+  minusSummand.makeXOX(calculator, calculator.opPower(), e, minusExponent);
+  if (this->isSine){
+    Expression twoI = calculator.expressionTwo()* calculator.expressionSquareRootNegativeOne();
+  this->eulerFormExpression =  (plusSummand+ calculator.expressionMinusOne()* minusSummand)/twoI;
+
+  }else{
+    this->eulerFormExpression=(plusSummand+minusSummand)/ calculator.expressionTwo();
+  }
 }
 
 std::string TrigonometricReduction::TrigonometricFunction::toString() const {
@@ -793,7 +885,9 @@ std::string TrigonometricReduction::TrigonometricFunction::toString() const {
   } else {
     out << "cos(";
   }
-  out << this->coefficient.toString() << " * " << this->argument.toString();
+  Expression sum;
+  sum.makeSum(*this->owner->owner, this->arguments);
+  out << sum.toString();
   out << ")";
   return out.str();
 }

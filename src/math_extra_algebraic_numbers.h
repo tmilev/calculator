@@ -281,6 +281,7 @@ public:
   std::string toStringFull(FormatExpressions* format = nullptr) const;
   AlgebraicNumber one();
   AlgebraicNumber zero();
+  AlgebraicNumber imaginaryUnit();
   AlgebraicNumber fromRational(const Rational& input);
 };
 

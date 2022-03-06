@@ -2380,6 +2380,7 @@ public:
   Expression expressionMinusHalf();
   Expression expressionInfinity();
   Expression expressionMinusInfinity();
+  Expression expressionSquareRootNegativeOne();
   void logFunctionWithTime(Function& input, int64_t startTime);
   void logTime(int64_t startTime);
   void logPublicError(const std::string& error);

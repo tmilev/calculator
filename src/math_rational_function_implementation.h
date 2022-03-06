@@ -447,11 +447,14 @@ void RationalFraction<Coefficient>::operator=(
   this->expressionType = other.expressionType;
   switch (this->expressionType) {
   case RationalFraction::typeConstant:
-    this->constantValue = other.constantValue; break;
+    this->constantValue = other.constantValue;
+    break;
   case RationalFraction::typePolynomial:
     if (other.numerator.isZeroPointer()) {
       global.fatal << "zero pointer in numerator of other. " << global.fatal;
-    } this->numerator.getElement() = other.numerator.getElementConst(); break;
+    }
+    this->numerator.getElement() = other.numerator.getElementConst();
+    break;
   case RationalFraction::typeRationalFunction:
     if (
       other.numerator.isZeroPointer() || other.denominator.isZeroPointer()
@@ -459,9 +462,10 @@ void RationalFraction<Coefficient>::operator=(
       global.fatal
       << "zero pointer in numerator or denominator of other. "
       << global.fatal;
-    } this->numerator.getElement() = other.numerator.getElementConst(); this->
-    denominator.getElement() =
-    other.denominator.getElementConst(); break;
+    }
+    this->numerator.getElement() = other.numerator.getElementConst();
+    this->denominator.getElement() = other.denominator.getElementConst();
+    break;
   default:
     break;
   }
@@ -591,12 +595,15 @@ void RationalFraction<Coefficient>::operator*=(const Coefficient& other) {
   }
   switch (this->expressionType) {
   case RationalFraction::typeConstant:
-    this->constantValue *= other; return;
+    this->constantValue *= other;
+    return;
   case RationalFraction::typePolynomial:
-    this->numerator.getElement() *= other; return;
+    this->numerator.getElement() *= other;
+    return;
   case RationalFraction::typeRationalFunction:
-    this->numerator.getElement() *= other; this->simplifyLeadingCoefficientOnly
-    (); return;
+    this->numerator.getElement() *= other;
+    this->simplifyLeadingCoefficientOnly();
+    return;
   }
 }
 
@@ -974,17 +981,21 @@ void RationalFraction<Coefficient>::raiseToPower(int power) {
   case RationalFraction::typeConstant:
     MathRoutines::raiseToPower(
       this->constantValue, power, this->constantValue.one()
-    ); break;
+    );
+    break;
   case RationalFraction::typePolynomial:
     this->numerator.getElement().raiseToPower(
       power, this->constantValue.one()
-    ); break;
+    );
+    break;
   case RationalFraction::typeRationalFunction:
     this->numerator.getElement().raiseToPower(
       power, this->constantValue.one()
-    ); this->denominator.getElement().raiseToPower(
+    );
+    this->denominator.getElement().raiseToPower(
       power, this->constantValue.one()
-    ); break;
+    );
+    break;
   }
   this->checkConsistency();
 }
@@ -996,16 +1007,21 @@ void RationalFraction<Coefficient>::clearDenominators(
   Rational scalar;
   switch (this->expressionType) {
   case RationalFraction::typeConstant:
-    scalar = this->constantValue.getDenominator(); outputWasMultipliedBy.
-    makeConstant(scalar); this->constantValue *= scalar; break;
+    scalar = this->constantValue.getDenominator();
+    outputWasMultipliedBy.makeConstant(scalar);
+    this->constantValue *= scalar;
+    break;
   case RationalFraction::typePolynomial:
     this->numerator.getElement().clearDenominators(scalar);
-    outputWasMultipliedBy.makeConstant(scalar); break;
+    outputWasMultipliedBy.makeConstant(scalar);
+    break;
   case RationalFraction::typeRationalFunction:
-    RationalFraction tempRF; outputWasMultipliedBy.operator=(
-      this->denominator.getElement()
-    ); *this *= outputWasMultipliedBy; this->clearDenominators(tempRF);
-    outputWasMultipliedBy *= tempRF; break;
+    RationalFraction tempRF;
+    outputWasMultipliedBy.operator=(this->denominator.getElement());
+    *this *= outputWasMultipliedBy;
+    this->clearDenominators(tempRF);
+    outputWasMultipliedBy *= tempRF;
+    break;
   }
 }
 
@@ -1015,11 +1031,14 @@ void RationalFraction<Coefficient>::addSameTypes(
 ) {
   switch (this->expressionType) {
   case RationalFraction::typeConstant:
-    this->constantValue += other.constantValue; break;
+    this->constantValue += other.constantValue;
+    break;
   case RationalFraction::typePolynomial:
-    this->numerator.getElement() += other.numerator.getElementConst(); break;
+    this->numerator.getElement() += other.numerator.getElementConst();
+    break;
   case RationalFraction::typeRationalFunction:
-    this->addHonestRationalFunction(other); break;
+    this->addHonestRationalFunction(other);
+    break;
   }
   this->reduceMemory();
   if (!this->checkConsistency()) {
@@ -1191,9 +1210,11 @@ void RationalFraction<Coefficient>::getNumerator(
 ) const {
   switch (this->expressionType) {
   case RationalFraction::typeConstant:
-    output.makeConstant(this->constantValue); return;
+    output.makeConstant(this->constantValue);
+    return;
   default:
-    output = this->numerator.getElementConst(); return;
+    output = this->numerator.getElementConst();
+    return;
   }
 }
 
@@ -1216,9 +1237,12 @@ void RationalFraction<Coefficient>::getDenominator(
       << "The rational function is "
       << "supposed to be honest, but the denominator pointer is zero. "
       << global.fatal;
-    } output = this->denominator.getElementConst(); return;
+    }
+    output = this->denominator.getElementConst();
+    return;
   default:
-    output.makeConstant(Rational(1)); return;
+    output.makeConstant(Rational(1));
+    return;
   }
 }
 
@@ -1277,11 +1301,13 @@ bool RationalFraction<Coefficient>::operator>(
       other.denominator.getElementConst() > this->denominator.getElementConst()
     ) {
       return true;
-    } if (
+    }
+    if (
       this->denominator.getElementConst() > other.denominator.getElementConst()
     ) {
       return false;
-    } return
+    }
+    return
     this->numerator.getElementConst() >
     other.numerator.getElementConst();
   default:
@@ -1363,29 +1389,36 @@ bool RationalFraction<Coefficient>::substitution(
       !this->numerator.getElement().substitution(substitution, one)
     ) {
       return false;
-    } this->simplify(); return true;
+    }
+    this->simplify();
+    return true;
   case RationalFraction::typeRationalFunction:
     if (
       !this->numerator.getElement().substitution(substitution, one)
     ) {
       return false;
-    } if (
+    }
+    if (
       !this->denominator.getElement().substitution(substitution, one)
     ) {
       return false;
-    } if (this->denominator.getElement().isEqualToZero()) {
+    }
+    if (this->denominator.getElement().isEqualToZero()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Substitution leads to division by zero. ";
       }
       return false;
-    } this->simplify(); return true;
+    }
+    this->simplify();
+    return true;
   default:
     global.fatal
     <<
     "Default case not allowed in RationalFunction::substitution. Rational function: "
     << this->toString()
     << "."
-    << global.fatal; break;
+    << global.fatal;
+    break;
   }
   return false;
 }

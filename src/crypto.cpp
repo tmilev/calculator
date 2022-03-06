@@ -246,7 +246,8 @@ char Crypto::getCharFrom6Bit(uint32_t input, bool useBase64URL) {
     global.fatal
     <<
     "Requesting character from a purported 6 bit integer, which in fact has more significant bits. "
-    << global.fatal; break;
+    << global.fatal;
+    break;
   }
   return - 1;
 }
@@ -254,121 +255,179 @@ char Crypto::getCharFrom6Bit(uint32_t input, bool useBase64URL) {
 bool Crypto::getCharFromBase58(uint32_t input, char& output) {
   switch (input) {
   case 0:
-    output = '1'; return true;
+    output = '1';
+    return true;
   case 1:
-    output = '2'; return true;
+    output = '2';
+    return true;
   case 2:
-    output = '3'; return true;
+    output = '3';
+    return true;
   case 3:
-    output = '4'; return true;
+    output = '4';
+    return true;
   case 4:
-    output = '5'; return true;
+    output = '5';
+    return true;
   case 5:
-    output = '6'; return true;
+    output = '6';
+    return true;
   case 6:
-    output = '7'; return true;
+    output = '7';
+    return true;
   case 7:
-    output = '8'; return true;
+    output = '8';
+    return true;
   case 8:
-    output = '9'; return true;
+    output = '9';
+    return true;
   case 9:
-    output = 'A'; return true;
+    output = 'A';
+    return true;
   case 10:
-    output = 'B'; return true;
+    output = 'B';
+    return true;
   case 11:
-    output = 'C'; return true;
+    output = 'C';
+    return true;
   case 12:
-    output = 'D'; return true;
+    output = 'D';
+    return true;
   case 13:
-    output = 'E'; return true;
+    output = 'E';
+    return true;
   case 14:
-    output = 'F'; return true;
+    output = 'F';
+    return true;
   case 15:
-    output = 'G'; return true;
+    output = 'G';
+    return true;
   case 16:
-    output = 'H'; return true;
+    output = 'H';
+    return true;
   case 17:
-    output = 'J'; return true;
+    output = 'J';
+    return true;
   case 18:
-    output = 'K'; return true;
+    output = 'K';
+    return true;
   case 19:
-    output = 'L'; return true;
+    output = 'L';
+    return true;
   case 20:
-    output = 'M'; return true;
+    output = 'M';
+    return true;
   case 21:
-    output = 'N'; return true;
+    output = 'N';
+    return true;
   case 22:
-    output = 'P'; return true;
+    output = 'P';
+    return true;
   case 23:
-    output = 'Q'; return true;
+    output = 'Q';
+    return true;
   case 24:
-    output = 'R'; return true;
+    output = 'R';
+    return true;
   case 25:
-    output = 'S'; return true;
+    output = 'S';
+    return true;
   case 26:
-    output = 'T'; return true;
+    output = 'T';
+    return true;
   case 27:
-    output = 'U'; return true;
+    output = 'U';
+    return true;
   case 28:
-    output = 'V'; return true;
+    output = 'V';
+    return true;
   case 29:
-    output = 'W'; return true;
+    output = 'W';
+    return true;
   case 30:
-    output = 'X'; return true;
+    output = 'X';
+    return true;
   case 31:
-    output = 'Y'; return true;
+    output = 'Y';
+    return true;
   case 32:
-    output = 'Z'; return true;
+    output = 'Z';
+    return true;
   case 33:
-    output = 'a'; return true;
+    output = 'a';
+    return true;
   case 34:
-    output = 'b'; return true;
+    output = 'b';
+    return true;
   case 35:
-    output = 'c'; return true;
+    output = 'c';
+    return true;
   case 36:
-    output = 'd'; return true;
+    output = 'd';
+    return true;
   case 37:
-    output = 'e'; return true;
+    output = 'e';
+    return true;
   case 38:
-    output = 'f'; return true;
+    output = 'f';
+    return true;
   case 39:
-    output = 'g'; return true;
+    output = 'g';
+    return true;
   case 40:
-    output = 'h'; return true;
+    output = 'h';
+    return true;
   case 41:
-    output = 'i'; return true;
+    output = 'i';
+    return true;
   case 42:
-    output = 'j'; return true;
+    output = 'j';
+    return true;
   case 43:
-    output = 'k'; return true;
+    output = 'k';
+    return true;
   case 44:
-    output = 'm'; return true;
+    output = 'm';
+    return true;
   case 45:
-    output = 'n'; return true;
+    output = 'n';
+    return true;
   case 46:
-    output = 'o'; return true;
+    output = 'o';
+    return true;
   case 47:
-    output = 'p'; return true;
+    output = 'p';
+    return true;
   case 48:
-    output = 'q'; return true;
+    output = 'q';
+    return true;
   case 49:
-    output = 'r'; return true;
+    output = 'r';
+    return true;
   case 50:
-    output = 's'; return true;
+    output = 's';
+    return true;
   case 51:
-    output = 't'; return true;
+    output = 't';
+    return true;
   case 52:
-    output = 'u'; return true;
+    output = 'u';
+    return true;
   case 53:
-    output = 'v'; return true;
+    output = 'v';
+    return true;
   case 54:
-    output = 'w'; return true;
+    output = 'w';
+    return true;
   case 55:
-    output = 'x'; return true;
+    output = 'x';
+    return true;
   case 56:
-    output = 'y'; return true;
+    output = 'y';
+    return true;
   case 57:
-    output = 'z'; return true;
+    output = 'z';
+    return true;
   default:
     return false;
   }
@@ -377,121 +436,179 @@ bool Crypto::getCharFromBase58(uint32_t input, char& output) {
 bool Crypto::getBase58FromChar(char input, uint32_t& output) {
   switch (input) {
   case '1':
-    output = 0; return true;
+    output = 0;
+    return true;
   case '2':
-    output = 1; return true;
+    output = 1;
+    return true;
   case '3':
-    output = 2; return true;
+    output = 2;
+    return true;
   case '4':
-    output = 3; return true;
+    output = 3;
+    return true;
   case '5':
-    output = 4; return true;
+    output = 4;
+    return true;
   case '6':
-    output = 5; return true;
+    output = 5;
+    return true;
   case '7':
-    output = 6; return true;
+    output = 6;
+    return true;
   case '8':
-    output = 7; return true;
+    output = 7;
+    return true;
   case '9':
-    output = 8; return true;
+    output = 8;
+    return true;
   case 'A':
-    output = 9; return true;
+    output = 9;
+    return true;
   case 'B':
-    output = 10; return true;
+    output = 10;
+    return true;
   case 'C':
-    output = 11; return true;
+    output = 11;
+    return true;
   case 'D':
-    output = 12; return true;
+    output = 12;
+    return true;
   case 'E':
-    output = 13; return true;
+    output = 13;
+    return true;
   case 'F':
-    output = 14; return true;
+    output = 14;
+    return true;
   case 'G':
-    output = 15; return true;
+    output = 15;
+    return true;
   case 'H':
-    output = 16; return true;
+    output = 16;
+    return true;
   case 'J':
-    output = 17; return true;
+    output = 17;
+    return true;
   case 'K':
-    output = 18; return true;
+    output = 18;
+    return true;
   case 'L':
-    output = 19; return true;
+    output = 19;
+    return true;
   case 'M':
-    output = 20; return true;
+    output = 20;
+    return true;
   case 'N':
-    output = 21; return true;
+    output = 21;
+    return true;
   case 'P':
-    output = 22; return true;
+    output = 22;
+    return true;
   case 'Q':
-    output = 23; return true;
+    output = 23;
+    return true;
   case 'R':
-    output = 24; return true;
+    output = 24;
+    return true;
   case 'S':
-    output = 25; return true;
+    output = 25;
+    return true;
   case 'T':
-    output = 26; return true;
+    output = 26;
+    return true;
   case 'U':
-    output = 27; return true;
+    output = 27;
+    return true;
   case 'V':
-    output = 28; return true;
+    output = 28;
+    return true;
   case 'W':
-    output = 29; return true;
+    output = 29;
+    return true;
   case 'X':
-    output = 30; return true;
+    output = 30;
+    return true;
   case 'Y':
-    output = 31; return true;
+    output = 31;
+    return true;
   case 'Z':
-    output = 32; return true;
+    output = 32;
+    return true;
   case 'a':
-    output = 33; return true;
+    output = 33;
+    return true;
   case 'b':
-    output = 34; return true;
+    output = 34;
+    return true;
   case 'c':
-    output = 35; return true;
+    output = 35;
+    return true;
   case 'd':
-    output = 36; return true;
+    output = 36;
+    return true;
   case 'e':
-    output = 37; return true;
+    output = 37;
+    return true;
   case 'f':
-    output = 38; return true;
+    output = 38;
+    return true;
   case 'g':
-    output = 39; return true;
+    output = 39;
+    return true;
   case 'h':
-    output = 40; return true;
+    output = 40;
+    return true;
   case 'i':
-    output = 41; return true;
+    output = 41;
+    return true;
   case 'j':
-    output = 42; return true;
+    output = 42;
+    return true;
   case 'k':
-    output = 43; return true;
+    output = 43;
+    return true;
   case 'm':
-    output = 44; return true;
+    output = 44;
+    return true;
   case 'n':
-    output = 45; return true;
+    output = 45;
+    return true;
   case 'o':
-    output = 46; return true;
+    output = 46;
+    return true;
   case 'p':
-    output = 47; return true;
+    output = 47;
+    return true;
   case 'q':
-    output = 48; return true;
+    output = 48;
+    return true;
   case 'r':
-    output = 49; return true;
+    output = 49;
+    return true;
   case 's':
-    output = 50; return true;
+    output = 50;
+    return true;
   case 't':
-    output = 51; return true;
+    output = 51;
+    return true;
   case 'u':
-    output = 52; return true;
+    output = 52;
+    return true;
   case 'v':
-    output = 53; return true;
+    output = 53;
+    return true;
   case 'w':
-    output = 54; return true;
+    output = 54;
+    return true;
   case 'x':
-    output = 55; return true;
+    output = 55;
+    return true;
   case 'y':
-    output = 56; return true;
+    output = 56;
+    return true;
   case 'z':
-    output = 57; return true;
+    output = 57;
+    return true;
   default:
     return false;
   }
@@ -500,137 +617,207 @@ bool Crypto::getBase58FromChar(char input, uint32_t& output) {
 bool Crypto::get6BitFromChar(unsigned char input, uint32_t& output) {
   switch (input) {
   case 'A':
-    output = 0; return true;
+    output = 0;
+    return true;
   case 'B':
-    output = 1; return true;
+    output = 1;
+    return true;
   case 'C':
-    output = 2; return true;
+    output = 2;
+    return true;
   case 'D':
-    output = 3; return true;
+    output = 3;
+    return true;
   case 'E':
-    output = 4; return true;
+    output = 4;
+    return true;
   case 'F':
-    output = 5; return true;
+    output = 5;
+    return true;
   case 'G':
-    output = 6; return true;
+    output = 6;
+    return true;
   case 'H':
-    output = 7; return true;
+    output = 7;
+    return true;
   case 'I':
-    output = 8; return true;
+    output = 8;
+    return true;
   case 'J':
-    output = 9; return true;
+    output = 9;
+    return true;
   case 'K':
-    output = 10; return true;
+    output = 10;
+    return true;
   case 'L':
-    output = 11; return true;
+    output = 11;
+    return true;
   case 'M':
-    output = 12; return true;
+    output = 12;
+    return true;
   case 'N':
-    output = 13; return true;
+    output = 13;
+    return true;
   case 'O':
-    output = 14; return true;
+    output = 14;
+    return true;
   case 'P':
-    output = 15; return true;
+    output = 15;
+    return true;
   case 'Q':
-    output = 16; return true;
+    output = 16;
+    return true;
   case 'R':
-    output = 17; return true;
+    output = 17;
+    return true;
   case 'S':
-    output = 18; return true;
+    output = 18;
+    return true;
   case 'T':
-    output = 19; return true;
+    output = 19;
+    return true;
   case 'U':
-    output = 20; return true;
+    output = 20;
+    return true;
   case 'V':
-    output = 21; return true;
+    output = 21;
+    return true;
   case 'W':
-    output = 22; return true;
+    output = 22;
+    return true;
   case 'X':
-    output = 23; return true;
+    output = 23;
+    return true;
   case 'Y':
-    output = 24; return true;
+    output = 24;
+    return true;
   case 'Z':
-    output = 25; return true;
+    output = 25;
+    return true;
   case 'a':
-    output = 26; return true;
+    output = 26;
+    return true;
   case 'b':
-    output = 27; return true;
+    output = 27;
+    return true;
   case 'c':
-    output = 28; return true;
+    output = 28;
+    return true;
   case 'd':
-    output = 29; return true;
+    output = 29;
+    return true;
   case 'e':
-    output = 30; return true;
+    output = 30;
+    return true;
   case 'f':
-    output = 31; return true;
+    output = 31;
+    return true;
   case 'g':
-    output = 32; return true;
+    output = 32;
+    return true;
   case 'h':
-    output = 33; return true;
+    output = 33;
+    return true;
   case 'i':
-    output = 34; return true;
+    output = 34;
+    return true;
   case 'j':
-    output = 35; return true;
+    output = 35;
+    return true;
   case 'k':
-    output = 36; return true;
+    output = 36;
+    return true;
   case 'l':
-    output = 37; return true;
+    output = 37;
+    return true;
   case 'm':
-    output = 38; return true;
+    output = 38;
+    return true;
   case 'n':
-    output = 39; return true;
+    output = 39;
+    return true;
   case 'o':
-    output = 40; return true;
+    output = 40;
+    return true;
   case 'p':
-    output = 41; return true;
+    output = 41;
+    return true;
   case 'q':
-    output = 42; return true;
+    output = 42;
+    return true;
   case 'r':
-    output = 43; return true;
+    output = 43;
+    return true;
   case 's':
-    output = 44; return true;
+    output = 44;
+    return true;
   case 't':
-    output = 45; return true;
+    output = 45;
+    return true;
   case 'u':
-    output = 46; return true;
+    output = 46;
+    return true;
   case 'v':
-    output = 47; return true;
+    output = 47;
+    return true;
   case 'w':
-    output = 48; return true;
+    output = 48;
+    return true;
   case 'x':
-    output = 49; return true;
+    output = 49;
+    return true;
   case 'y':
-    output = 50; return true;
+    output = 50;
+    return true;
   case 'z':
-    output = 51; return true;
+    output = 51;
+    return true;
   case '0':
-    output = 52; return true;
+    output = 52;
+    return true;
   case '1':
-    output = 53; return true;
+    output = 53;
+    return true;
   case '2':
-    output = 54; return true;
+    output = 54;
+    return true;
   case '3':
-    output = 55; return true;
+    output = 55;
+    return true;
   case '4':
-    output = 56; return true;
+    output = 56;
+    return true;
   case '5':
-    output = 57; return true;
+    output = 57;
+    return true;
   case '6':
-    output = 58; return true;
+    output = 58;
+    return true;
   case '7':
-    output = 59; return true;
+    output = 59;
+    return true;
   case '8':
-    output = 60; return true;
+    output = 60;
+    return true;
   case '9':
-    output = 61; return true;
+    output = 61;
+    return true;
   case '-':
-    output = 62; return true; // RFC 4648 base64url.
+    output = 62;
+    return true;
+    // RFC 4648 base64url.
   case '_':
-    output = 63; return true; // RFC 4648 base64url.
+    output = 63;
+    return true;
+    // RFC 4648 base64url.
   case '+':
-    output = 62; return true; // RFC 4648: "standard" base64.
+    output = 62;
+    return true;
+    // RFC 4648: "standard" base64.
   case '/':
-    output = 63; return true; // RFC 4648: "standard" base64.
+    output = 63;
+    return true;
+    // RFC 4648: "standard" base64.
     // Note: there is no collision between the original base64 and RFC 7515,
     // both can be supported for input.
   case '=':

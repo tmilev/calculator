@@ -542,18 +542,23 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "No error reported, this shouldn't happen. <br>";
-        } maxNumHandshakeTries = 1; break;
+        }
+        maxNumHandshakeTries = 1;
+        break;
       case SSL_ERROR_ZERO_RETURN:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "The TLS/SSL connection has been closed (possibly cleanly). <br>";
-        } maxNumHandshakeTries = 1; break;
+        }
+        maxNumHandshakeTries = 1;
+        break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << " During regular I/O: repeat needed (not implemented). <br>";
-        } break;
+        }
+        break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
         if (commentsOnFailure != nullptr) {
@@ -561,13 +566,17 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
           <<
           " During handshake negotiations: repeat needed (not implemented). <br> "
           ;
-        } break;
+        }
+        break;
       case SSL_ERROR_WANT_X509_LOOKUP:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << " Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented).  <br>";
-        } maxNumHandshakeTries = 1; break; // case SSL_ERROR_WANT_ASYNC:
+        }
+        maxNumHandshakeTries = 1;
+        break;
+        // case SSL_ERROR_WANT_ASYNC:
         // logOpenSSL << Logger::red << "Asynchronous engine is still processing
         // data. <br>"
         //  << Logger::endL;
@@ -576,15 +585,20 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
         if (commentsOnFailure != nullptr) *commentsOnFailure
         << Logger::red
         << "Error: some I/O error occurred. <br>"
-        << Logger::endL; maxNumHandshakeTries = 1; break;
+        << Logger::endL;
+        maxNumHandshakeTries = 1;
+        break;
       case SSL_ERROR_SSL:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "A failure in the SSL library occurred. <br>";
-        } break;
+        }
+        break;
       default:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Unknown error. <br>";
-        } maxNumHandshakeTries = 1; break;
+        }
+        maxNumHandshakeTries = 1;
+        break;
       }
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Retrying connection in 0.5 seconds... <br>";
@@ -798,31 +812,40 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
       case SSL_ERROR_NONE:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "No error reported, this shouldn't happen. ";
-        } maxNumHandshakeTries = 1; break;
+        }
+        maxNumHandshakeTries = 1;
+        break;
       case SSL_ERROR_ZERO_RETURN:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "The TLS/SSL connection has been closed (possibly cleanly). ";
-        } maxNumHandshakeTries = 1; break;
+        }
+        maxNumHandshakeTries = 1;
+        break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << " During regular I/O: repeat needed (not implemented). ";
-        } break;
+        }
+        break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           <<
           " During handshake negotiations: repeat needed (not implemented). ";
-        } break;
+        }
+        break;
       case SSL_ERROR_WANT_X509_LOOKUP:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented). ";
-        } maxNumHandshakeTries = 1; break; // case SSL_ERROR_WANT_ASYNC:
+        }
+        maxNumHandshakeTries = 1;
+        break;
+        // case SSL_ERROR_WANT_ASYNC:
         // logOpenSSL << Logger::red << "Asynchronous engine is still processing
         // data. "
         //  << Logger::endL;
@@ -830,15 +853,20 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
       case SSL_ERROR_SYSCALL:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Error: some I/O error occurred. ";
-        } maxNumHandshakeTries = 1; break;
+        }
+        maxNumHandshakeTries = 1;
+        break;
       case SSL_ERROR_SSL:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "A failure in the SSL library occurred. ";
-        } break;
+        }
+        break;
       default:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Unknown error. ";
-        } maxNumHandshakeTries = 1; break;
+        }
+        maxNumHandshakeTries = 1;
+        break;
       }
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Retrying connection in 0.5 seconds... ";

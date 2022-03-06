@@ -846,15 +846,19 @@ public:
         if (stack[frame_pointer].c == 0) {
           frame_pointer --;
           return *this;
-        } stack[frame_pointer].loop_i = 0; break;
+        }
+        stack[frame_pointer].loop_i = 0;
+        break;
       case pcpositions::loop:
         if (stack[frame_pointer].loop_i == stack[frame_pointer].c) {
           stack[frame_pointer].program_counter = pcpositions::afterloop;
           break;
-        } stack[frame_pointer].program_counter = pcpositions::firstout;
-        frame_pointer ++; stack[frame_pointer].c =
-        stack[frame_pointer - 1].c - 1; stack[frame_pointer].program_counter =
-        pcpositions::beginning; break;
+        }
+        stack[frame_pointer].program_counter = pcpositions::firstout;
+        frame_pointer ++;
+        stack[frame_pointer].c = stack[frame_pointer - 1].c - 1;
+        stack[frame_pointer].program_counter = pcpositions::beginning;
+        break;
       case firstout:
         if (stack[frame_pointer].c % 2 != 0) {
           l.swapTwoIndices(
@@ -865,17 +869,19 @@ public:
           l.swapTwoIndices(
             l.size - 1, l.size - 1 - stack[frame_pointer].c
           );
-        } stack[frame_pointer].loop_i ++; stack[frame_pointer].program_counter
-        =
-        pcpositions::loop; break;
+        }
+        stack[frame_pointer].loop_i ++;
+        stack[frame_pointer].program_counter = pcpositions::loop;
+        break;
       case afterloop:
-        stack[frame_pointer].program_counter = pcpositions::end; frame_pointer
-        ++; stack[frame_pointer].c = stack[frame_pointer - 1].c - 1; stack[
-          frame_pointer
-        ].program_counter =
-        pcpositions::beginning; break;
+        stack[frame_pointer].program_counter = pcpositions::end;
+        frame_pointer ++;
+        stack[frame_pointer].c = stack[frame_pointer - 1].c - 1;
+        stack[frame_pointer].program_counter = pcpositions::beginning;
+        break;
       case end:
-        frame_pointer --; break;
+        frame_pointer --;
+        break;
       }
     }
   }
@@ -990,12 +996,14 @@ public:
       }
       switch (stack[frame_pointer].program_counter) {
       case pcpositions::beginning:
-        this->generators[frame_pointer].resetIteration(); break;
+        this->generators[frame_pointer].resetIteration();
+        break;
       case pcpositions::loop:
         if (this->generators[frame_pointer].doneIterating()) {
           stack[frame_pointer].program_counter = pcpositions::end;
           break;
-        } {
+        }
+        {
           PermutationR2 permi = *(this->generators[frame_pointer]);
           if (frame_pointer == 0) {
             stack[frame_pointer].subprod = permi;
@@ -1015,11 +1023,12 @@ public:
           }
         }
       case pcpositions::midloop:
-        ++ this->generators[frame_pointer]; stack[frame_pointer].
-        program_counter =
-        pcpositions::loop; break;
+        ++ this->generators[frame_pointer];
+        stack[frame_pointer].program_counter = pcpositions::loop;
+        break;
       case pcpositions::end:
-        frame_pointer --; break;
+        frame_pointer --;
+        break;
       }
     }
   }

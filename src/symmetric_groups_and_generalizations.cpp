@@ -654,17 +654,22 @@ void PermutationR2::makeFromString(const std::string& cppin) {
   for (unsigned i = 0; i < insize; i ++) {
     switch (in[i]) {
     case '(':
-      cycles.setSize(cycles.size + 1); curintstart = i + 1; break;
+      cycles.setSize(cycles.size + 1);
+      curintstart = i + 1;
+      break;
     case ')':
       if (curintstart != i) {
         std::string ss = cppin.substr(curintstart, i);
         cycles.lastObject()->addOnTop(atoi(ss.c_str()));
       } else {
         cycles.setSize(cycles.size - 1);
-      } break;
+      }
+      break;
     case ',':
-      std::string ss = cppin.substr(curintstart, i); cycles.lastObject()->
-      addOnTop(atoi(ss.c_str())); curintstart = i + 1; break;
+      std::string ss = cppin.substr(curintstart, i);
+      cycles.lastObject()->addOnTop(atoi(ss.c_str()));
+      curintstart = i + 1;
+      break;
     }
   }
   this->makeFromListOfCycles(cycles);

@@ -648,7 +648,7 @@ public:
   Expression input;
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
-  RationalFraction<AlgebraicNumber> fractionSubstituted ;
+  RationalFraction<AlgebraicNumber> fractionSubstituted;
   MapList<Expression, TrigonometricFunction> arguments;
   MapList<Expression, HashedList<Rational> > trigonometricBaseMonomials;
   MapList<Expression, Rational> trigonometricBaseScales;
@@ -658,7 +658,7 @@ public:
   Rational computeScaleOneBaseMonomial(HashedList<Rational>& coefficients);
   void computeBaseScales();
   void computeEulerFormArguments();
-  bool computeEulerFormExpression(std::stringstream *commentsOnFailure);
+  bool computeEulerFormExpression(std::stringstream* commentsOnFailure);
   std::string toString();
   std::string toStringTrigonometry();
   std::string toStringTrigonometricArguments();
@@ -688,9 +688,10 @@ std::string TrigonometricReduction::toString() {
   out << "<br><b>where the x_i's are given by: </b><br>";
   out << this->toStringTrigonometry();
   out << this->toStringTrigonometricArguments();
-  out << "<br>Trigonometric form:<br>\\("
+  out
+  << "<br>Trigonometric form:<br>\\("
   << this->fractionSubstituted.toString(&format)
-  <<"\\)";
+  << "\\)";
   out << "<br><b style='color:red'>not fully implemented yet.</b>";
   return out.str();
 }
@@ -763,8 +764,7 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
     }
     return true;
   }
-  if(!
-  this->computeEulerFormExpression(commentsOnFailure)){
+  if (!this->computeEulerFormExpression(commentsOnFailure)) {
     return false;
   }
   reductionRules = "";
@@ -835,16 +835,28 @@ void TrigonometricReduction::computeEulerFormArguments() {
   }
 }
 
-bool TrigonometricReduction::computeEulerFormExpression(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TrigonometricReduction::computeEulerFormExpression");
+bool TrigonometricReduction::computeEulerFormExpression(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName(
+    "TrigonometricReduction::computeEulerFormExpression"
+  );
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  for (Expression & expression: this->arguments.keys){
-    substitution.addOnTop(this->arguments.getValueNoFail(expression).eulerForm);
+  for (Expression & expression : this->arguments.keys) {
+    substitution.addOnTop(
+      this->arguments.getValueNoFail(expression).eulerForm
+    );
   }
- if(! this->inputFraction.content.substitution(substitution,this->owner->objectContainer.algebraicClosure.one(),commentsOnFailure)){
-   return  false;
- }
- return true;
+  if (
+    !this->inputFraction.content.substitution(
+      substitution,
+      this->owner->objectContainer.algebraicClosure.one(),
+      commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  return true;
 }
 
 TrigonometricReduction::TrigonometricFunction::TrigonometricFunction() {

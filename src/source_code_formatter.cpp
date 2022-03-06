@@ -1248,8 +1248,10 @@ std::string CodeFormatter::Element::toStringHTMLTree() {
 }
 
 bool CodeFormatter::Element::computeIndentationCommandList() {
-  if (this->parent->type != CodeFormatter::Element::CodeBlock &&
-  this->parent->type != CodeFormatter::Element::CaseClause) {
+  if (
+    this->parent->type != CodeFormatter::Element::CodeBlock &&
+    this->parent->type != CodeFormatter::Element::CaseClause
+  ) {
     for (int i = 0; i < this->children.size; i ++) {
       CodeFormatter::Element& current = this->children[i];
       current.indentationLevel = this->indentationLevel;

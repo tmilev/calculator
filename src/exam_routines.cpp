@@ -4856,25 +4856,32 @@ bool TopicElement::mergeTopicLine(
   }
   switch (input.topicType) {
   case TopicElement::types::video:
-    this->video = input.contentTrimmedWhiteSpace; return true;
+    this->video = input.contentTrimmedWhiteSpace;
+    return true;
   case TopicElement::types::videoHandwritten:
-    this->videoHandwritten = input.contentTrimmedWhiteSpace; return true;
+    this->videoHandwritten = input.contentTrimmedWhiteSpace;
+    return true;
   case TopicElement::types::slidesSource:
-    this->sourceSlides.addOnTop(input.contentTrimmedWhiteSpace); return true;
+    this->sourceSlides.addOnTop(input.contentTrimmedWhiteSpace);
+    return true;
   case TopicElement::types::homeworkSource:
-    this->sourceHomework.addOnTop(input.contentTrimmedWhiteSpace); this->
-    sourceHomeworkIsSolution.addOnTop(false); return true;
+    this->sourceHomework.addOnTop(input.contentTrimmedWhiteSpace);
+    this->sourceHomeworkIsSolution.addOnTop(false);
+    return true;
   case TopicElement::types::homeworkSolutionSource:
-    this->sourceHomework.addOnTop(input.contentTrimmedWhiteSpace); this->
-    sourceHomeworkIsSolution.addOnTop(true); return true;
+    this->sourceHomework.addOnTop(input.contentTrimmedWhiteSpace);
+    this->sourceHomeworkIsSolution.addOnTop(true);
+    return true;
   case TopicElement::types::slidesLatex:
     this->sourceSlides.addOnTop("LaTeX: " + input.contentTrimmedWhiteSpace);
     return true;
   case TopicElement::types::homeworkLatex:
     this->sourceHomework.addOnTop("LaTeX: " + input.contentTrimmedWhiteSpace);
-    this->sourceHomeworkIsSolution.addOnTop(false); return true;
+    this->sourceHomeworkIsSolution.addOnTop(false);
+    return true;
   case TopicElement::types::handwrittenSolutions:
-    this->handwrittenSolution = input.contentTrimmedWhiteSpace; return true;
+    this->handwrittenSolution = input.contentTrimmedWhiteSpace;
+    return true;
   }
   return false;
 }

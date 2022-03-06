@@ -6290,13 +6290,17 @@ std::string DynkinSimpleType::toStringNonTechnicalName(
   std::stringstream out;
   switch (this->letter) {
   case 'A':
-    out << "sl(" << this->rank + 1 << ")"; break;
+    out << "sl(" << this->rank + 1 << ")";
+    break;
   case 'B':
-    out << "so(" << 2 * this->rank + 1 << ")"; break;
+    out << "so(" << 2 * this->rank + 1 << ")";
+    break;
   case 'C':
-    out << "sp(" << 2 * this->rank << ")"; break;
+    out << "sp(" << 2 * this->rank << ")";
+    break;
   case 'D':
-    out << "so(" << 2 * this->rank << ")"; break;
+    out << "so(" << 2 * this->rank << ")";
+    break;
   default:
     break;
   }
@@ -6453,19 +6457,24 @@ const {
     if (rootIndex == this->rank - 1) {
       result.assignNumeratorAndDenominator(1, 2);
       return result;
-    } return 1;
+    }
+    return 1;
   case 'C':
     if (rootIndex == this->rank - 1) {
       return 2;
-    } return 1;
+    }
+    return 1;
   case 'F':
     if (rootIndex < 2) {
       return 1;
-    } result.assignNumeratorAndDenominator(1, 2); return result;
+    }
+    result.assignNumeratorAndDenominator(1, 2);
+    return result;
   case 'G':
     if (rootIndex == 1) {
       return 3;
-    } return 1;
+    }
+    return 1;
   default:
     return - 1;
   }
@@ -6490,26 +6499,31 @@ Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
   case 'B':
     if (rootIndex == this->rank - 1) {
       return 1;
-    } return 2;
+    }
+    return 2;
   case 'F':
     if (rootIndex < 2) {
       return 2;
-    } return 1;
+    }
+    return 1;
   case 'C':
     if (rootIndex == this->rank - 1) {
       return 2;
-    } return 1;
+    }
+    return 1;
   case 'G':
     if (rootIndex == 1) {
       return 2;
-    } return Rational(2, 3);
+    }
+    return Rational(2, 3);
   default:
     global.fatal
     << "Calling "
     <<
     "DynkinSimpleType::getDefaultRootLengthSquared on the non-initialized Dynkin type "
     << this->toString()
-    << global.fatal; return - 1;
+    << global.fatal;
+    return - 1;
   }
 }
 
@@ -6683,7 +6697,8 @@ Rational DynkinSimpleType::getDynkinIndexParabolicallyInducingSubalgebra(
     "DynkinSimpleType::getDynkinIndexParabolicallyInducingSubalgebra called with input "
     << inputType
     << ", this is not allowed. "
-    << global.fatal; return - 1;
+    << global.fatal;
+    return - 1;
   }
 }
 
@@ -6928,31 +6943,41 @@ Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const 
   Rational nonScaled = 0;
   switch (this->letter) {
   case 'A':
-    nonScaled = (this->rank + 2) *(this->rank + 1) * this->rank / 6; break;
+    nonScaled = (this->rank + 2) *(this->rank + 1) * this->rank / 6;
+    break;
   case 'B':
-    nonScaled = this->rank *(this->rank + 1) *(2 * this->rank + 1) / 3; break;
+    nonScaled = this->rank *(this->rank + 1) *(2 * this->rank + 1) / 3;
+    break;
   case 'C':
     nonScaled = (this->rank * 2 + 1) *(this->rank * 2) *(this->rank * 2 - 1) /
-    6; break;
+    6;
+    break;
   case 'D':
-    nonScaled = (this->rank - 1) * this->rank *(2 * this->rank - 1) / 3; break;
+    nonScaled = (this->rank - 1) * this->rank *(2 * this->rank - 1) / 3;
+    break;
   case 'E':
     if (this->rank == 6) {
       nonScaled = 156;
-    } if (this->rank == 7) {
+    }
+    if (this->rank == 7) {
       nonScaled = 399;
-    } if (this->rank == 8) {
+    }
+    if (this->rank == 8) {
       nonScaled = 1240;
-    } break;
+    }
+    break;
   case 'F':
-    nonScaled = 156; break;
+    nonScaled = 156;
+    break;
   case 'G':
-    nonScaled = 28; break;
+    nonScaled = 28;
+    break;
   default:
     global.fatal
     << "Request DynkinSimpleType::getCartanSymmetric "
     << "from a non-initialized Dynkin simple type. "
-    << global.fatal; break;
+    << global.fatal;
+    break;
   }
   return nonScaled * this->cartanSymmetricInverseScale;
 }
@@ -6960,25 +6985,33 @@ Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const 
 void DynkinSimpleType::getCartanSymmetric(Matrix<Rational>& output) const {
   switch (this->letter) {
   case 'A':
-    this->getAn(this->rank, output); break;
+    this->getAn(this->rank, output);
+    break;
   case 'B':
-    this->getBn(this->rank, output); break;
+    this->getBn(this->rank, output);
+    break;
   case 'C':
-    this->getCn(this->rank, output); break;
+    this->getCn(this->rank, output);
+    break;
   case 'D':
-    this->getDn(this->rank, output); break;
+    this->getDn(this->rank, output);
+    break;
   case 'E':
-    this->getEn(this->rank, output); break;
+    this->getEn(this->rank, output);
+    break;
   case 'F':
-    this->getF4(output); break;
+    this->getF4(output);
+    break;
   case 'G':
-    this->getG2(output); break;
+    this->getG2(output);
+    break;
   default:
     global.fatal
     << "Request "
     <<
     "DynkinSimpleType::getCartanSymmetric from a non-initialized Dynkin simple type. "
-    << global.fatal; break;
+    << global.fatal;
+    break;
   }
   output /= this->cartanSymmetricInverseScale;
 }
@@ -10163,25 +10196,35 @@ void LaTeXProcedures::getStringFromColorIndex(
 ) {
   switch (colorIndex) {
   case 0:
-    output.assign("black"); break;
+    output.assign("black");
+    break;
   case 1:
-    output.assign("blue"); break;
+    output.assign("blue");
+    break;
   case 2:
-    output.assign("purple"); break;
+    output.assign("purple");
+    break;
   case 3:
-    output.assign("green"); break;
+    output.assign("green");
+    break;
   case 4:
-    output.assign("cyan"); break;
+    output.assign("cyan");
+    break;
   case 5:
-    output.assign("red"); break;
+    output.assign("red");
+    break;
   case 6:
-    output.assign("purple"); break;
+    output.assign("purple");
+    break;
   case 7:
-    output.assign("cyan"); break;
+    output.assign("cyan");
+    break;
   case 56540:
-    output.assign("yellow"); break;
+    output.assign("yellow");
+    break;
   default:
-    output.assign("black"); break;
+    output.assign("black");
+    break;
   }
   if (colorIndex == drawInput.getColorFromChamberIndex(1)) {
     output.assign("blue");

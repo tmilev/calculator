@@ -546,18 +546,24 @@ bool JSData::readstringConsumeNextCharacter(
       result =
       JSData::readstringConsumeUnicodeFourHexAppendUtf8(
         last.stringValue, currentIndex, input, commentsOnFailure
-      ); break;
+      );
+      break;
     case 'n':
-      last.stringValue.push_back('\n'); break;
+      last.stringValue.push_back('\n');
+      break;
     case '\\':
-      last.stringValue.push_back('\\'); break;
+      last.stringValue.push_back('\\');
+      break;
     case 't':
-      last.stringValue.push_back('\t'); break;
+      last.stringValue.push_back('\t');
+      break;
     case '"':
-      last.stringValue.push_back('"'); break;
+      last.stringValue.push_back('"');
+      break;
     default:
-      last.stringValue.push_back('\\'); last.stringValue.push_back(next); break
-      ;
+      last.stringValue.push_back('\\');
+      last.stringValue.push_back(next);
+      break;
     }
     last.elementType = JSData::token::tokenQuoteUnclosedStandard;
     return result;
@@ -574,24 +580,31 @@ bool JSData::readstringConsumeNextCharacter(
   }
   switch (next) {
   case '{':
-    incoming.elementType = JSData::token::tokenOpenBrace; break;
+    incoming.elementType = JSData::token::tokenOpenBrace;
+    break;
   case '}':
-    incoming.elementType = JSData::token::tokenCloseBrace; break;
+    incoming.elementType = JSData::token::tokenCloseBrace;
+    break;
   case '[':
-    incoming.elementType = JSData::token::tokenOpenBracket; break;
+    incoming.elementType = JSData::token::tokenOpenBracket;
+    break;
   case ']':
-    incoming.elementType = JSData::token::tokenCloseBracket; break;
+    incoming.elementType = JSData::token::tokenCloseBracket;
+    break;
   case ':':
-    incoming.elementType = JSData::token::tokenColon; break;
+    incoming.elementType = JSData::token::tokenColon;
+    break;
   case ',':
-    incoming.elementType = JSData::token::tokenComma; break;
+    incoming.elementType = JSData::token::tokenComma;
+    break;
   default:
     if (last.elementType == JSData::token::tokenUnknown) {
       last.stringValue.push_back(next);
       return true;
-    } incoming.elementType = JSData::token::tokenUnknown; incoming.stringValue
-    =
-    next; break;
+    }
+    incoming.elementType = JSData::token::tokenUnknown;
+    incoming.stringValue = next;
+    break;
   }
   readingStack.addOnTop(incoming);
   return true;
@@ -872,44 +885,51 @@ somestream& JSData::intoStream(
   options.indentation ++;
   switch (this->elementType) {
   case JSData::token::tokenNull:
-    out << "null"; return out;
+    out << "null";
+    return out;
   case JSData::token::tokenFloat:
-    out << this->floatValue; return out;
+    out << this->floatValue;
+    return out;
   case JSData::token::tokenLargeInteger:
-    out << this->integerValue.getElementConst().toString(); return out;
+    out << this->integerValue.getElementConst().toString();
+    return out;
   case JSData::token::tokenBool:
     if (this->booleanValue == true) {
       out << "true";
     } else {
       out << "false";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenString:
     out
     << '"'
     << StringRoutines::Conversions::stringToJSONStringEscaped(
       this->stringValue
     )
-    << '"'; return out;
+    << '"';
+    return out;
   case JSData::token::tokenArray:
     if (this->listObjects.size == 0) {
       out << "[]";
       return out;
-    } out << "[" << newLine; for (
-      int i = 0; i < this->listObjects.size; i ++
-    ) {
+    }
+    out << "[" << newLine;
+    for (int i = 0; i < this->listObjects.size; i ++) {
       out << whiteSpaceInner << whiteSpaceOuter;
       this->listObjects[i].intoStream(out, &options);
       if (i != this->listObjects.size - 1) {
         out << "," << newLine;
       }
-    } out << newLine << whiteSpaceOuter << ']'; return out;
+    }
+    out << newLine << whiteSpaceOuter << ']';
+    return out;
   case JSData::token::tokenObject:
     if (this->objects.size() == 0) {
       out << "{}";
       return out;
-    } out << "{" << newLine; for (
-      int i = 0; i < this->objects.size(); i ++
-    ) {
+    }
+    out << "{" << newLine;
+    for (int i = 0; i < this->objects.size(); i ++) {
       out << whiteSpaceInner << whiteSpaceOuter;
       out
       << '"'
@@ -922,79 +942,117 @@ somestream& JSData::intoStream(
       if (i != this->objects.size() - 1) {
         out << "," << newLine;
       }
-    } out << newLine << whiteSpaceOuter << '}'; return out;
+    }
+    out << newLine << whiteSpaceOuter << '}';
+    return out;
   case JSData::token::tokenOpenBrace:
     if (options.useHTML) {
       out << "<b>";
-    } out << "{"; if (options.useHTML) {
+    }
+    out << "{";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenCloseBrace:
     if (options.useHTML) {
       out << "<b>";
-    } out << "}"; if (options.useHTML) {
+    }
+    out << "}";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenOpenBracket:
     if (options.useHTML) {
       out << "<b>";
-    } out << "["; if (options.useHTML) {
+    }
+    out << "[";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenCloseBracket:
     if (options.useHTML) {
       out << "<b>";
-    } out << "]"; if (options.useHTML) {
+    }
+    out << "]";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenColon:
     if (options.useHTML) {
       out << "<b>";
-    } out << ":"; if (options.useHTML) {
+    }
+    out << ":";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenComma:
     if (options.useHTML) {
       out << "<b>";
-    } out << ","; if (options.useHTML) {
+    }
+    out << ",";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenUndefined:
     if (options.useHTML) {
       out << "<b>";
-    } out << "null"; if (options.useHTML) {
+    }
+    out << "null";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenError:
     if (options.useHTML) {
       out << "<b>";
-    } out << "error"; if (options.useHTML) {
+    }
+    out << "error";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenBackslash:
     if (options.useHTML) {
       out << "<b>";
-    } out << "\\backslash"; if (options.useHTML) {
+    }
+    out << "\\backslash";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenQuoteUnclosedEscapeAtEnd:
     if (options.useHTML) {
       out << "<b>";
-    } out << "\\QuoteUnclosedEscapeAtEnd"; if (options.useHTML) {
+    }
+    out << "\\QuoteUnclosedEscapeAtEnd";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenQuoteUnclosedStandard:
     if (options.useHTML) {
       out << "<b>";
-    } out << "\\tokenQuoteUnclosedStandard"; if (options.useHTML) {
+    }
+    out << "\\tokenQuoteUnclosedStandard";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   case JSData::token::tokenUnknown:
     if (options.useHTML) {
       out << "<b>";
-    } out << "unknown"; if (options.useHTML) {
+    }
+    out << "unknown";
+    if (options.useHTML) {
       out << "</b>";
-    } return out;
+    }
+    return out;
   default:
     break;
   }

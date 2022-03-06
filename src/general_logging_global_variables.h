@@ -189,15 +189,20 @@ public:
   GlobalVariables& operator<<(const Type& toBePrinted) {
     switch (this->logs.logType) {
     case GlobalVariables::LogData::type::server:
-      this->logs.server << toBePrinted; return *this;
+      this->logs.server << toBePrinted;
+      return *this;
     case GlobalVariables::LogData::type::serverMonitor:
-      this->logs.serverMonitor << toBePrinted; return *this;
+      this->logs.serverMonitor << toBePrinted;
+      return *this;
     case GlobalVariables::LogData::type::worker:
-      this->logs.worker << toBePrinted; return *this;
+      this->logs.worker << toBePrinted;
+      return *this;
     case GlobalVariables::LogData::type::daemon:
-      this->logs.daemon << toBePrinted; return *this;
+      this->logs.daemon << toBePrinted;
+      return *this;
     default:
-      this->logs.worker << toBePrinted; return *this;
+      this->logs.worker << toBePrinted;
+      return *this;
     }
   }
   // When non-null, usually points to:

@@ -2857,29 +2857,41 @@ std::string VoganDiagram::toString() {
   std::stringstream out;
   switch (this->diagram) {
   case VoganDiagram::G:
-    out << "G"; break;
+    out << "G";
+    break;
   case VoganDiagram::AI:
-    out << "AI"; break;
+    out << "AI";
+    break;
   case VoganDiagram::AII:
-    out << "AII"; break;
+    out << "AII";
+    break;
   case VoganDiagram::AIII:
-    out << "AIII"; break;
+    out << "AIII";
+    break;
   case VoganDiagram::BI:
-    out << "BI"; break;
+    out << "BI";
+    break;
   case VoganDiagram::CI:
-    out << "CI"; break;
+    out << "CI";
+    break;
   case VoganDiagram::DI:
-    out << "DI"; break;
+    out << "DI";
+    break;
   case VoganDiagram::DII:
-    out << "DII"; break;
+    out << "DII";
+    break;
   case VoganDiagram::EI:
-    out << "EI"; break;
+    out << "EI";
+    break;
   case VoganDiagram::EII:
-    out << "EII"; break;
+    out << "EII";
+    break;
   case VoganDiagram::EIII:
-    out << "EIII"; break;
+    out << "EIII";
+    break;
   case VoganDiagram::EIV:
-    out << "EIV"; break;
+    out << "EIV";
+    break;
   default:
     out << "[unknown vogan diagram]";
   }
@@ -2906,19 +2918,24 @@ bool VoganDiagram::dynkinTypeAmbient(
   case VoganDiagram::AI:
   case VoganDiagram::AII:
   case VoganDiagram::AIII:
-    output.makeSimpleType('A', this->rank, nullptr); return true;
+    output.makeSimpleType('A', this->rank, nullptr);
+    return true;
   case VoganDiagram::BI:
-    output.makeSimpleType('B', this->rank, nullptr); return true;
+    output.makeSimpleType('B', this->rank, nullptr);
+    return true;
   case VoganDiagram::CI:
-    output.makeSimpleType('C', this->rank, nullptr); return true;
+    output.makeSimpleType('C', this->rank, nullptr);
+    return true;
   case VoganDiagram::DI:
   case VoganDiagram::DII:
-    output.makeSimpleType('D', this->rank, nullptr); return true;
+    output.makeSimpleType('D', this->rank, nullptr);
+    return true;
   case VoganDiagram::EI:
   case VoganDiagram::EII:
   case VoganDiagram::EIII:
   case VoganDiagram::EIV:
-    output.makeSimpleType('E', 6, nullptr); return true;
+    output.makeSimpleType('E', 6, nullptr);
+    return true;
   default:
     break;
   }
@@ -2993,11 +3010,14 @@ bool VoganDiagram::adjustRank() {
   case VoganDiagram::EII:
   case VoganDiagram::EIII:
   case VoganDiagram::EIV:
-    this->rank = 6; break;
+    this->rank = 6;
+    break;
   case VoganDiagram::EV:
-    this->rank = 7; break;
+    this->rank = 7;
+    break;
   case VoganDiagram::EVII:
-    this->rank = 8; break;
+    this->rank = 8;
+    break;
   default:
     break;
   }
@@ -3011,7 +3031,8 @@ bool VoganDiagram::adjustParameter() {
   switch (this->diagram) {
   case VoganDiagram::DiagramType::AI:
   case VoganDiagram::DiagramType::AII:
-    this->parameter --; break;
+    this->parameter --;
+    break;
   default:
     break;
   }
@@ -3555,7 +3576,8 @@ bool CartanInvolution::computeSimpleRootImages(
       << "Not implemented: Vogan diagram: "
       << this->voganDiagram.toString()
       << ". ";
-    } return false;
+    }
+    return false;
   }
 }
 
@@ -3681,26 +3703,33 @@ void DynkinSimpleType::plot(Plot& output, int verticalOffset) const {
   case 'E':
     switch (this->rank) {
     case 6:
-      DynkinSimpleType::plotE6(output, verticalOffset); break;
+      DynkinSimpleType::plotE6(output, verticalOffset);
+      break;
     case 7:
-      DynkinSimpleType::plotE7(output, verticalOffset); break;
+      DynkinSimpleType::plotE7(output, verticalOffset);
+      break;
     case 8:
-      DynkinSimpleType::plotE8(output, verticalOffset); break;
+      DynkinSimpleType::plotE8(output, verticalOffset);
+      break;
     default:
       global.comments
       << "Plotting of type: "
       << this->toString()
       << " not implemented. ";
-    } break;
+    }
+    break;
   case 'F':
-    DynkinSimpleType::plotF4(output, verticalOffset); break;
+    DynkinSimpleType::plotF4(output, verticalOffset);
+    break;
   case 'G':
-    DynkinSimpleType::plotG2(output, verticalOffset); break;
+    DynkinSimpleType::plotG2(output, verticalOffset);
+    break;
   default:
     global.comments
     << "Plotting of type: "
     << this->toString()
-    << " not implemented. "; break;
+    << " not implemented. ";
+    break;
   }
 }
 
@@ -3934,13 +3963,17 @@ void SatakeDiagram::plot(Plot& output, int verticalOffset) {
   DynkinType::plotInitialize(output);
   switch (this->diagram) {
   case SatakeDiagram::AI:
-    this->plotAI(output, verticalOffset); return;
+    this->plotAI(output, verticalOffset);
+    return;
   case SatakeDiagram::AII:
-    this->plotAII(output, verticalOffset); return;
+    this->plotAII(output, verticalOffset);
+    return;
   case SatakeDiagram::AIII:
-    this->plotAIII(output, verticalOffset); return;
+    this->plotAIII(output, verticalOffset);
+    return;
   case SatakeDiagram::BI:
-    this->plotBI(output, verticalOffset); return;
+    this->plotBI(output, verticalOffset);
+    return;
   default:
     break;
   }
@@ -4000,19 +4033,26 @@ SatakeDiagram VoganDiagram::computeSatakeDiagram() {
   SatakeDiagram result;
   switch (this->diagram) {
   case VoganDiagram::DiagramType::AI:
-    result.diagram = SatakeDiagram::DiagramType::AI; break;
+    result.diagram = SatakeDiagram::DiagramType::AI;
+    break;
   case VoganDiagram::DiagramType::AII:
-    result.diagram = SatakeDiagram::DiagramType::AII; break;
+    result.diagram = SatakeDiagram::DiagramType::AII;
+    break;
   case VoganDiagram::DiagramType::AIII:
-    result.diagram = SatakeDiagram::DiagramType::AIII; break;
+    result.diagram = SatakeDiagram::DiagramType::AIII;
+    break;
   case VoganDiagram::DiagramType::BI:
-    result.diagram = SatakeDiagram::DiagramType::BI; break;
+    result.diagram = SatakeDiagram::DiagramType::BI;
+    break;
   case VoganDiagram::DiagramType::CI:
-    result.diagram = SatakeDiagram::DiagramType::CI; break;
+    result.diagram = SatakeDiagram::DiagramType::CI;
+    break;
   case VoganDiagram::DiagramType::DI:
-    result.diagram = SatakeDiagram::DiagramType::DI; break;
+    result.diagram = SatakeDiagram::DiagramType::DI;
+    break;
   case VoganDiagram::DiagramType::DII:
-    result.diagram = SatakeDiagram::DiagramType::DII; break;
+    result.diagram = SatakeDiagram::DiagramType::DII;
+    break;
   default:
     global.fatal
     << "ComputeSatakeDiagram: not implemented yet."
@@ -4027,27 +4067,38 @@ void VoganDiagram::plot(Plot& output) {
   DynkinType::plotInitialize(output);
   switch (this->diagram) {
   case VoganDiagram::AI:
-    this->plotAI(output); return;
+    this->plotAI(output);
+    return;
   case VoganDiagram::AII:
-    this->plotAII(output); return;
+    this->plotAII(output);
+    return;
   case VoganDiagram::AIII:
-    this->plotAIII(output); return;
+    this->plotAIII(output);
+    return;
   case VoganDiagram::BI:
-    this->plotBI(output); return;
+    this->plotBI(output);
+    return;
   case VoganDiagram::CI:
-    this->plotCI(output); return;
+    this->plotCI(output);
+    return;
   case VoganDiagram::DI:
-    this->plotDI(output); return;
+    this->plotDI(output);
+    return;
   case VoganDiagram::DII:
-    this->plotDII(output); return;
+    this->plotDII(output);
+    return;
   case VoganDiagram::EI:
-    this->plotEI(output); return;
+    this->plotEI(output);
+    return;
   case VoganDiagram::EII:
-    this->plotEII(output); return;
+    this->plotEII(output);
+    return;
   case VoganDiagram::EIII:
-    this->plotEIII(output); return;
+    this->plotEIII(output);
+    return;
   case VoganDiagram::EIV:
-    this->plotEIV(output); return;
+    this->plotEIV(output);
+    return;
   default:
     return;
   }

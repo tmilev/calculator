@@ -604,17 +604,23 @@ bool Expression::assignMatrixExpressions(
   }
   switch (outType) {
   case typeRational:
-    matrixType.addChildAtomOnTop(owner.opRational()); break;
+    matrixType.addChildAtomOnTop(owner.opRational());
+    break;
   case typeDouble:
-    matrixType.addChildAtomOnTop(owner.opDouble()); break;
+    matrixType.addChildAtomOnTop(owner.opDouble());
+    break;
   case typeAlgebraic:
-    matrixType.addChildAtomOnTop(owner.opAlgebraicNumber()); break;
+    matrixType.addChildAtomOnTop(owner.opAlgebraicNumber());
+    break;
   case typePolynomialRational:
-    matrixType.addChildAtomOnTop(owner.opPolynomialRational()); break;
+    matrixType.addChildAtomOnTop(owner.opPolynomialRational());
+    break;
   case typePolynomialAlgebraic:
-    matrixType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers()); break;
+    matrixType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
+    break;
   case typeRationalFraction:
-    matrixType.addChildAtomOnTop(owner.opRationalFraction()); break;
+    matrixType.addChildAtomOnTop(owner.opRationalFraction());
+    break;
   default:
     break;
   }

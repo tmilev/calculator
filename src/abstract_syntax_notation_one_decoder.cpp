@@ -925,13 +925,16 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(ASNElement& output)
   case tags::sequence0x10:
     return this->decodeSequenceLikeContent(output);
   case tags::set0x11:
-    return this->decodeSequenceLikeContent(output); // either non-pure composite
+    return this->decodeSequenceLikeContent(output);
+    // either non-pure composite
     // or atom:
   case tags::bitString0x03:
-    return this->decodeBitString(output); // atoms with extra
+    return this->decodeBitString(output);
+    // atoms with extra
     // comments/interpretation:
   case tags::null0x05:
-    return this->decodeNull(output); // atoms without additional interpretation:
+    return this->decodeNull(output);
+    // atoms without additional interpretation:
   case tags::boolean0x01:
   case tags::integer0x02:
   case tags::objectIdentifier0x06:
@@ -940,7 +943,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(ASNElement& output)
   case tags::IA5String0x16:
   case tags::UTCTime0x17:
   case tags::octetString0x04:
-    this->decodeASNAtomContent(output); return true;
+    this->decodeASNAtomContent(output);
+    return true;
   default:
     errorStream << "Unknown object tag: " << static_cast<int>(output.tag)
     << ", byte: "
@@ -949,7 +953,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(ASNElement& output)
     << output.offsetLastRead
     << ". Length: "
     << output.lengthPromised
-    << ". "; output.error = errorStream.str(); return false;
+    << ". ";
+    output.error = errorStream.str();
+    return false;
   }
 }
 
@@ -2017,10 +2023,12 @@ void PrivateKeyRSA::hashAndPadPKCS1(
   ASNObject hashObject;
   switch (hash) {
   case SignatureAlgorithmSpecification::HashAlgorithm::sha256:
-    Crypto::computeSha256(input, inputHashed); hashObject =
+    Crypto::computeSha256(input, inputHashed);
+    hashObject =
     ASNObject::namesToObjectIdsNonThreadSafe().getValueNoFail(
       ASNObject::names::sha256
-    ); break;
+    );
+    break;
   default:
     global.fatal
     << "Non-allowed or non-implemented value for the hash algorithm. "

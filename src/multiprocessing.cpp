@@ -892,26 +892,33 @@ std::string Logger::openTagConsole() {
   out << Logger::closeTagConsole();
   switch (this->currentColor) {
   case Logger::red:
-    out << "\x1b[1;31m"; this->flagTagColorConsoleOpened = true; return
-    out.str();
+    out << "\x1b[1;31m";
+    this->flagTagColorConsoleOpened = true;
+    return out.str();
   case Logger::green:
-    out << "\x1b[1;32m"; this->flagTagColorConsoleOpened = true; return
-    out.str();
+    out << "\x1b[1;32m";
+    this->flagTagColorConsoleOpened = true;
+    return out.str();
   case Logger::yellow:
-    out << "\x1b[1;33m"; this->flagTagColorConsoleOpened = true; return
-    out.str();
+    out << "\x1b[1;33m";
+    this->flagTagColorConsoleOpened = true;
+    return out.str();
   case Logger::blue:
-    out << "\x1b[1;34m"; this->flagTagColorConsoleOpened = true; return
-    out.str();
+    out << "\x1b[1;34m";
+    this->flagTagColorConsoleOpened = true;
+    return out.str();
   case Logger::purple:
-    out << "\x1b[1;35m"; this->flagTagColorConsoleOpened = true; return
-    out.str();
+    out << "\x1b[1;35m";
+    this->flagTagColorConsoleOpened = true;
+    return out.str();
   case Logger::cyan:
-    out << "\x1b[1;36m"; this->flagTagColorConsoleOpened = true; return
-    out.str();
+    out << "\x1b[1;36m";
+    this->flagTagColorConsoleOpened = true;
+    return out.str();
   case Logger::orange:
-    out << "\x1b[0;33m"; this->flagTagColorConsoleOpened = true; return
-    out.str();
+    out << "\x1b[0;33m";
+    this->flagTagColorConsoleOpened = true;
+    return out.str();
   default:
     return out.str();
   }
@@ -922,22 +929,28 @@ std::string Logger::openTagHtml() {
   out << Logger::closeTagHtml();
   switch (this->currentColor) {
   case Logger::red:
-    out << "<span style='color:red'>"; this->flagTagColorHtmlOpened = true;
+    out << "<span style='color:red'>";
+    this->flagTagColorHtmlOpened = true;
     return out.str();
   case Logger::green:
-    out << "<span style='color:green'>"; this->flagTagColorHtmlOpened = true;
+    out << "<span style='color:green'>";
+    this->flagTagColorHtmlOpened = true;
     return out.str();
   case Logger::blue:
-    out << "<span style='color:blue'>"; this->flagTagColorHtmlOpened = true;
+    out << "<span style='color:blue'>";
+    this->flagTagColorHtmlOpened = true;
     return out.str();
   case Logger::yellow:
-    out << "<span style='color:yellow'>"; this->flagTagColorHtmlOpened = true;
+    out << "<span style='color:yellow'>";
+    this->flagTagColorHtmlOpened = true;
     return out.str();
   case Logger::orange:
-    out << "<span style='color:orange'>"; this->flagTagColorHtmlOpened = true;
+    out << "<span style='color:orange'>";
+    this->flagTagColorHtmlOpened = true;
     return out.str();
   case Logger::purple:
-    out << "<span style='color:purple'>"; this->flagTagColorHtmlOpened = true;
+    out << "<span style='color:purple'>";
+    this->flagTagColorHtmlOpened = true;
     return out.str();
   default:
     return out.str();
@@ -1136,11 +1149,14 @@ Logger& Logger::logString(const std::string& input) {
     int colorIndex = i % 3;
     switch (colorIndex) {
     case 0:
-      *this << Logger::blue; break;
+      *this << Logger::blue;
+      break;
     case 1:
-      *this << Logger::red; break;
+      *this << Logger::red;
+      break;
     case 2:
-      *this << Logger::green; break;
+      *this << Logger::green;
+      break;
     default:
       break;
     }
@@ -1158,16 +1174,21 @@ Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {
   global.flagRunningConsoleTest;
   switch (input) {
   case Logger::endL:
-    std::cout << this->getStampShort() << this->bufferStandardOutput; this->
-    bufferStandardOutput.clear(); if (doUseColors) {
+    std::cout << this->getStampShort() << this->bufferStandardOutput;
+    this->bufferStandardOutput.clear();
+    if (doUseColors) {
       std::cout << this->closeTagConsole();
-    } std::cout << std::endl; this->currentColor = Logger::normalColor; if (
-      this->flagStopWritingToFile
-    ) {
+    }
+    std::cout << std::endl;
+    this->currentColor = Logger::normalColor;
+    if (this->flagStopWritingToFile) {
       return *this;
-    } this->bufferFile += this->closeTagHtml() + "\n<br>\n"; logFile
-    << this->getStamp()
-    << this->bufferFile; this->bufferFile = ""; logFile.flush(); return *this;
+    }
+    this->bufferFile += this->closeTagHtml() + "\n<br>\n";
+    logFile << this->getStamp() << this->bufferFile;
+    this->bufferFile = "";
+    logFile.flush();
+    return *this;
   case Logger::red:
   case Logger::blue:
   case Logger::yellow:
@@ -1175,19 +1196,26 @@ Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {
   case Logger::purple:
   case Logger::orange:
   case Logger::cyan:
-    this->currentColor = input; if (doUseColors) {
+    this->currentColor = input;
+    if (doUseColors) {
       this->bufferStandardOutput += this->openTagConsole();
-    } if (this->flagStopWritingToFile) {
+    }
+    if (this->flagStopWritingToFile) {
       return *this;
-    } this->logFile << this->openTagHtml(); return *this;
+    }
+    this->logFile << this->openTagHtml();
+    return *this;
   case Logger::normalColor:
     if (doUseColors) {
       this->bufferStandardOutput += this->closeTagConsole();
-    } this->currentColor = Logger::normalColor; if (
-      this->flagStopWritingToFile
-    ) {
+    }
+    this->currentColor = Logger::normalColor;
+    if (this->flagStopWritingToFile) {
       return *this;
-    } logFile << this->closeTagHtml(); return *this; // default:
+    }
+    logFile << this->closeTagHtml();
+    return *this;
+    // default:
     //   ;
   }
   return *this;

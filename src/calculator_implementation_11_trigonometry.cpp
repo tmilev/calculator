@@ -816,7 +816,7 @@ Rational TrigonometricReduction::computeScaleOneBaseMonomial(
 
 void TrigonometricReduction::computeEulerFormArguments() {
   for (
-    TrigonometricReduction::TrigonometricFunction & current :
+    TrigonometricReduction::TrigonometricFunction& current :
     this->arguments.values
   ) {
     current.computeEulerFormAnonymous();
@@ -837,7 +837,7 @@ bool TrigonometricReduction::computeEulerFormExpression(
   this->inputFractionSubstituted = this->inputFraction;
   List<Expression> eulerFormVariables;
   for (
-    TrigonometricReduction::TrigonometricFunction & trigonometricFunction :
+    TrigonometricReduction::TrigonometricFunction& trigonometricFunction :
     this->arguments.values
   ) {
     eulerFormVariables.addOnTop(trigonometricFunction.eulerFormExpression);

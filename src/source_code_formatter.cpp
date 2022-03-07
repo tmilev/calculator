@@ -1189,7 +1189,7 @@ bool CodeFormatter::Element::computeIndentationCaseClause() {
 }
 
 bool CodeFormatter::Element::computeIndentationCaseClauseList() {
-  for (CodeFormatter::Element & child : this->children) {
+  for (CodeFormatter::Element& child : this->children) {
     child.rightMostAtomUnderMe()->newLinesAfter = 1;
     child.indentationLevel = this->indentationLevel;
     if (child.isComment()) {
@@ -1204,7 +1204,7 @@ bool CodeFormatter::Element::computeIndentationCaseClauseList() {
 }
 
 bool CodeFormatter::Element::computeIndentationCaseClauseMultipleStart() {
-  for (CodeFormatter::Element & child : this->children) {
+  for (CodeFormatter::Element& child : this->children) {
     child.indentationLevel = this->indentationLevel;
     child.rightMostAtomUnderMe()->newLinesAfter = 1;
     child.computeIndentation();
@@ -3699,6 +3699,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   if (
     sixthToLast.type == CodeFormatter::Element::LeftParenthesis && (
       fifthToLast.isExpressionOrAtom() ||
+      fifthToLast.isIdentifierOrAtom() ||
       fifthToLast.isTypeWordOrTypeExpression()
     ) &&
     fourthToLast.isStarOrAmpersand() &&
@@ -4865,7 +4866,7 @@ void CodeFormatter::normalizeBinaryOperationsRecursively(
   CodeFormatter::Element& current
 ) {
   this->correctMultiArguments(current);
-  for (CodeFormatter::Element & child : current.children) {
+  for (CodeFormatter::Element& child : current.children) {
     this->normalizeBinaryOperationsRecursively(child);
   }
 }

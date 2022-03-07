@@ -138,7 +138,7 @@ void RootSubalgebra::computeDynkinDiagramKAndCentralizer() {
 }
 
 void RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly"
   );
   this->moduleDecompoAmbientAlgebraDimensionsOnly.makeZero();
@@ -150,9 +150,7 @@ void RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly() {
 }
 
 void RootSubalgebra::computeCentralizerFromKModulesAndSortKModules() {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebra::computeCentralizerFromKModulesAndSortKModules"
-  );
+  STACK_TRACE("RootSubalgebra::computeCentralizerFromKModulesAndSortKModules");
   this->centralizerKmodules.initialize(this->modules.size);
   this->centralizerRoots.size = 0;
   this->centralizerRoots.reserve(this->modules.size);
@@ -547,7 +545,7 @@ void RootSubalgebra::makeProgressReportGeneratorAutomorphisms(
 void RootSubalgebra::makeProgressReportpossibleNilradicalComputation(
   RootSubalgebras& owner
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebra::makeProgressReportpossibleNilradicalComputation"
   );
   if (!global.response.monitoringAllowed()) {
@@ -638,7 +636,7 @@ void RootSubalgebra::kModuleLieBracketKModule(
   List<int>& oppositeKModules,
   List<int>& output
 ) {
-  MacroRegisterFunctionWithName("RootSubalgebra::kModuleLieBracketKModule");
+  STACK_TRACE("RootSubalgebra::kModuleLieBracketKModule");
   ElementSemisimpleLieAlgebra<Rational> lieBracket;
   output.size = 0;
   for (int i = 0; i < this->modules[index1].size; i ++) {
@@ -677,7 +675,7 @@ Vector<Rational> RootSubalgebra::
 getFundamentalCoordinatessOverSubalgebraSemisimplePart(
   const Vector<Rational>& inputGWeightSimpleCoordinates
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebra::getFundamentalCoordinatessOverSubalgebraSemisimplePart"
   );
   Vector<Rational> output;
@@ -701,7 +699,7 @@ Vector<Rational> RootSubalgebra::
 getSimpleCoordinatesOverSubalgebraSemisimplePart(
   const Vector<Rational>& inputGWeightSimpleCoordinates
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebra::getSimpleCoordinatesOverSubalgebraSemisimplePart"
   );
   Vector<Rational> result;
@@ -721,9 +719,7 @@ getSimpleCoordinatesOverSubalgebraSemisimplePart(
 }
 
 void RootSubalgebra::computeHighestVectorsHighestWeights() {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebra::computeHighestVectorsHighestWeights"
-  );
+  STACK_TRACE("RootSubalgebra::computeHighestVectorsHighestWeights");
   this->highestVectors.setExpectedSize(
     this->getOwnerLieAlgebra().getNumberOfGenerators()
   );
@@ -789,9 +785,7 @@ bool RootSubalgebra::compareLeftGreaterThanRight(
 }
 
 void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebra::computeModuleFromHighestVector"
-  );
+  STACK_TRACE("RootSubalgebra::computeModuleFromHighestVector");
   HashedList<Vector<Rational> > currentWeights;
   Vectors<Rational> zeroSpace;
   Vector<Rational> currentWeight;
@@ -883,9 +877,7 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
 }
 
 void RootSubalgebra::computeModulesFromHighestVectors() {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebra::computeModulesFromHighestVectors"
-  );
+  STACK_TRACE("RootSubalgebra::computeModulesFromHighestVectors");
   this->checkScalarProductMatrixOrdered();
   this->weightsModulesPrimalSimple.setSize(this->getNumberOfModules());
   this->weightsModulesNONPrimalSimple.setSize(this->getNumberOfModules());
@@ -900,7 +892,7 @@ void RootSubalgebra::computeModulesFromHighestVectors() {
 }
 
 void RootSubalgebra::computeModuleDecomposition() {
-  MacroRegisterFunctionWithName("RootSubalgebra::computeModuleDecomposition");
+  STACK_TRACE("RootSubalgebra::computeModuleDecomposition");
   this->moduleDecompositionHighestWeights.makeZero();
   Weight<Rational> weight;
   for (int i = 0; i < this->modules.size; i ++) {
@@ -911,7 +903,7 @@ void RootSubalgebra::computeModuleDecomposition() {
 }
 
 void RootSubalgebra::computeKModules() {
-  MacroRegisterFunctionWithName("RootSubalgebra::computeKModules");
+  STACK_TRACE("RootSubalgebra::computeKModules");
   this->computeRootsOfK();
   this->scalarProdInvertedMatrixOrdered = this->scalarProdMatrixOrdered;
   if (this->scalarProdInvertedMatrixOrdered.numberOfRows > 0) {
@@ -1036,7 +1028,7 @@ bool RootSubalgebra::checkRankInequality() const {
 bool RootSubalgebra::checkForSmallRelations(
   ConeRelation& relation, Vectors<Rational>& nilradicalRoots
 ) {
-  MacroRegisterFunctionWithName("RootSubalgebra::checkForSmallRelations");
+  STACK_TRACE("RootSubalgebra::checkForSmallRelations");
   Vector<Rational> weightSum;
   bool foundSmallRelation = false;
   int index = 0;
@@ -1622,7 +1614,7 @@ bool RootSubalgebra::isAnIsomorphism(
 }
 
 void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
-  MacroRegisterFunctionWithName("RootSubalgebra::toHTML");
+  STACK_TRACE("RootSubalgebra::toHTML");
   this->checkInitialization();
   std::fstream output;
   std::stringstream myPath;
@@ -1650,7 +1642,7 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
 }
 
 std::string RootSubalgebra::toString(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("RootSubalgebra::toString");
+  STACK_TRACE("RootSubalgebra::toString");
   (void) format;
   // taking care of unused parameter warning in a portable way
   std::stringstream out;
@@ -2030,7 +2022,7 @@ void RootSubalgebra::initForNilradicalGeneration() {
 std::string RootSubalgebra::toStringLieBracketTable(
   bool useLaTeX, bool useHtml, RootSubalgebra& owner
 ) {
-  MacroRegisterFunctionWithName("RootSubalgebra::toStringLieBracketTable");
+  STACK_TRACE("RootSubalgebra::toStringLieBracketTable");
   std::stringstream out;
   out << "\t";
   if (!(useLaTeX || useHtml)) {
@@ -2686,7 +2678,7 @@ bool RootSubalgebra::checkScalarProductMatrixOrdered() const {
 }
 
 void RootSubalgebra::computePotentialExtensions() {
-  MacroRegisterFunctionWithName("RootSubalgebra::computePotentialExtensions");
+  STACK_TRACE("RootSubalgebra::computePotentialExtensions");
   this->owner->growDynkinType(
     this->dynkinType,
     this->potentialExtensionDynkinTypes,
@@ -2707,7 +2699,7 @@ bool RootSubalgebras::growDynkinType(
   List<DynkinType>& output,
   List<List<int> >* outputPermutationSimpleRoots
 ) const {
-  MacroRegisterFunctionWithName("RootSubalgebras::growDynkinType");
+  STACK_TRACE("RootSubalgebras::growDynkinType");
   input.grow(
     this->validScales,
     this->getOwnerWeyl().getDimension(),
@@ -2796,7 +2788,7 @@ bool RootSubalgebras::growDynkinType(
 void RootSubalgebra::
 computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
 {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators"
   );
   if (this->simpleRootsReductiveSubalgebra.size == 0) {
@@ -2847,9 +2839,7 @@ computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
 }
 
 bool RootSubalgebra::checkForMaximalDominanceCartanSubalgebra() {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebra::checkForMaximalDominanceCartanSubalgebra"
-  );
+  STACK_TRACE("RootSubalgebra::checkForMaximalDominanceCartanSubalgebra");
   Vectors<Rational> simpleBasisOriginalOrderCopy;
   for (int i = 0; i < this->outerSAautos.elements.size; i ++) {
     if (!this->outerSAautos.elements[i].isIdentity()) {
@@ -2886,7 +2876,7 @@ bool RootSubalgebra::checkForMaximalDominanceCartanSubalgebra() {
 }
 
 void RootSubalgebra::computeEssentials() {
-  MacroRegisterFunctionWithName("RootSubalgebra::computeEssentials");
+  STACK_TRACE("RootSubalgebra::computeEssentials");
   this->simpleRootsReductiveSubalgebra = this->genK;
   this->simpleRootsReductiveSubalgebra.getGramMatrix(
     this->scalarProdMatrixOrdered,
@@ -2917,7 +2907,7 @@ void RootSubalgebra::computeEssentials() {
 }
 
 bool RootSubalgebra::computeEssentialsIfNew() {
-  MacroRegisterFunctionWithName("RootSubalgebra::computeEssentialsIfNew");
+  STACK_TRACE("RootSubalgebra::computeEssentialsIfNew");
   this->genK = this->simpleRootsReductiveSubalgebra;
   this->checkInitialization();
   ProgressReport report;
@@ -3090,7 +3080,7 @@ void RootSubalgebra::generateAutomorphismsPreservingBorel(
 void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
   bool sort, bool computeEpsilonCoordinates
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD"
   );
   this->subalgebras.size = 0;
@@ -3118,7 +3108,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
 }
 
 bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {
-  MacroRegisterFunctionWithName("SlTwoSubalgebra::operatorGreaterThan");
+  STACK_TRACE("SlTwoSubalgebra::operatorGreaterThan");
   if (this->owner != right.owner) {
     global.fatal
     << "Error: comparing sl(2) subalgebras with different owners."
@@ -3329,7 +3319,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   bool computeRealForm,
   AlgebraicClosureRationals* inputAlgebraicClosure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra"
   );
   if (
@@ -3420,9 +3410,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
 }
 
 bool SlTwoSubalgebra::attemptRealizingKostantSekiguchi() {
-  MacroRegisterFunctionWithName(
-    "SlTwoSubalgebra::attemptRealizingKostantSekiguchi"
-  );
+  STACK_TRACE("SlTwoSubalgebra::attemptRealizingKostantSekiguchi");
   PolynomialSystem<AlgebraicNumber> computation;
   computation.algebraicClosure = this->algebraicClosure;
   computation.initializeForSystemSolution();
@@ -3450,9 +3438,7 @@ bool SlTwoSubalgebra::attemptRealizingKostantSekiguchi() {
 bool SlTwoSubalgebra::checkConsistencyParticipatingRoots(
   const Vector<Rational>& targetH
 ) {
-  MacroRegisterFunctionWithName(
-    "SlTwoSubalgebra::checkConsistencyParticipatingRoots"
-  );
+  STACK_TRACE("SlTwoSubalgebra::checkConsistencyParticipatingRoots");
   for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
     if (
       this->getOwnerWeyl().rootScalarCartanRoot(
@@ -3595,7 +3581,7 @@ void SlTwoSubalgebra::adjoinKostantSekiguchiRelationsToPolynomialSystem(
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
   cartanInvolutionPreservedByEMinusF
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SlTwoSubalgebra::adjoinKostantSekiguchiRelationsToPolynomialSystem"
   );
   if (cartanInvolutionPreservedByEMinusF == nullptr) {
@@ -3620,9 +3606,7 @@ void SlTwoSubalgebra::initializeHEFSystemFromFCoefficients(
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
   cartanInvolutionPreservedByEMinusF
 ) {
-  MacroRegisterFunctionWithName(
-    "SlTwoSubalgebra::initializeHEFSystemFromFCoefficients"
-  );
+  STACK_TRACE("SlTwoSubalgebra::initializeHEFSystemFromFCoefficients");
   this->checkConsistencyParticipatingRoots(targetH);
   this->initializeUnknownTriples(targetH);
   this->computeLieBracketsUnknowns();
@@ -3634,9 +3618,7 @@ void SlTwoSubalgebra::initializeHEFSystemFromFCoefficients(
 }
 
 void SlTwoSubalgebra::initializeHEFSystemFromFCoefficientsPartTwo() {
-  MacroRegisterFunctionWithName(
-    "SlTwoSubalgebra::initializeHEFSystemFromECoefficientsPartTwo"
-  );
+  STACK_TRACE("SlTwoSubalgebra::initializeHEFSystemFromECoefficientsPartTwo");
   this->systemArbitraryMatrix.initialize(
     this->systemToSolve.size, this->participatingPositiveRoots.size
   );
@@ -3656,9 +3638,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   bool computeRealForm,
   AlgebraicClosureRationals* algebraicClosure
 ) {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition"
-  );
+  STACK_TRACE("RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition");
   // reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems
   // 10.1 - 10.4
   int relativeDimension = this->simpleRootsReductiveSubalgebra.size;
@@ -3904,9 +3884,7 @@ void RootSubalgebras::computeAllReductiveRootSAsInit() {
 }
 
 void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder"
-  );
+  STACK_TRACE("RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder");
   Selection parSel;
   parSel.initialize(this->owner->getRank());
   Vectors<Rational> basis, currentBasis;
@@ -4004,7 +3982,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
 }
 
 void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism"
   );
   this->initOwnerMustBeNonZero();
@@ -4195,8 +4173,7 @@ void RootSubalgebras::computeLProhibitingRelations() {
 }
 
 void RootSubalgebras::sortDescendingOrderBySSRank() {
-  MacroRegisterFunctionWithName("RootSubalgebras::sortDescendingOrderBySSRank")
-  ;
+  STACK_TRACE("RootSubalgebras::sortDescendingOrderBySSRank");
   // Bubble sort
   RootSubalgebras output;
   List<int> SortingArray;
@@ -4244,7 +4221,7 @@ void RootSubalgebras::sortDescendingOrderBySSRank() {
 }
 
 void RootSubalgebras::toHTML(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("RootSubalgebras::toHTML");
+  STACK_TRACE("RootSubalgebras::toHTML");
   this->checkInitialization();
   std::string myPathVirtual =
   this->owner->fileNames.virtualFolderName() +
@@ -4425,7 +4402,7 @@ Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::getRootIMustBeWeight
 std::string RootSubalgebras::toStringDynkinTableHTML(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("RootSubalgebras::ToStringDynkinTable");
+  STACK_TRACE("RootSubalgebras::ToStringDynkinTable");
   (void) format;
   // taking care of unused parameter in a portable way.
   std::stringstream out;
@@ -4609,9 +4586,7 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
 std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebras::toStringDynkinTableFormatToLaTeX"
-  );
+  STACK_TRACE("RootSubalgebras::toStringDynkinTableFormatToLaTeX");
   std::stringstream out;
   std::string endline = "\n<br>";
   if (format != nullptr) {
@@ -4694,7 +4669,7 @@ bool RootSubalgebras::checkInitialization() const {
 }
 
 void RootSubalgebras::initOwnerMustBeNonZero() {
-  MacroRegisterFunctionWithName("RootSubalgebras::initOwnerMustBeNonZero");
+  STACK_TRACE("RootSubalgebras::initOwnerMustBeNonZero");
   this->checkInitialization();
   this->subalgebras.setSize(0);
   this->owner->weylGroup.computeRho(false);
@@ -4703,7 +4678,7 @@ void RootSubalgebras::initOwnerMustBeNonZero() {
 int RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions(
   const RootSubalgebra& subalgebra
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions"
   );
   int result = - 1;
@@ -4723,9 +4698,7 @@ int RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions(
 }
 
 int RootSubalgebras::getindexSubalgebraIsomorphicTo(RootSubalgebra& input) {
-  MacroRegisterFunctionWithName(
-    "RootSubalgebras::getindexSubalgebraIsomorphicTo"
-  );
+  STACK_TRACE("RootSubalgebras::getindexSubalgebraIsomorphicTo");
   for (int i = 0; i < this->subalgebras.size; i ++) {
     if (
       input.simpleRootsReductiveSubalgebra ==
@@ -5399,7 +5372,7 @@ bool RootSubalgebras::isNewSubalgebra(RootSubalgebra& input) {
 }
 
 void RootSubalgebra::computeRootsOfK() {
-  MacroRegisterFunctionWithName("RootSubalgebra::computeRootsOfK");
+  STACK_TRACE("RootSubalgebra::computeRootsOfK");
   this->allRootsSubalgebra.clear();
   HashedList<Vector<Rational> >& ambientRootSystem =
   this->getAmbientWeyl().rootSystem;

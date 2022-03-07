@@ -616,7 +616,7 @@ bool JSData::tokenizePrependOneDummyElement(
   bool relaxedInput,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("JSData::tokenizePrependOneDummyElement");
+  STACK_TRACE("JSData::tokenizePrependOneDummyElement");
   output.setSize(0);
   output.setExpectedSize(static_cast<int>(input.size()));
   JSData emptyElt;
@@ -687,7 +687,7 @@ bool JSData::parse(
   bool relaxedInput,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("JSData::readstring");
+  STACK_TRACE("JSData::readstring");
   this->reset();
   List<JSData> inputTokens;
   if (

@@ -24,7 +24,7 @@ void Database::Test::tearDown() {
 }
 
 bool Database::Test::all() {
-  MacroRegisterFunctionWithName("Database::Test::all");
+  STACK_TRACE("Database::Test::all");
   Database::Test tester;
   tester.deleteDatabase();
   tester.adminAccountCreation();
@@ -44,7 +44,7 @@ bool Database::Test::deleteDatabase() {
 }
 
 bool Database::Test::adminAccountCreation() {
-  MacroRegisterFunctionWithName("Database::Test::adminAccountCreation");
+  STACK_TRACE("Database::Test::adminAccountCreation");
   UserCalculatorData userData;
   userData.username = WebAPI::userDefaultAdmin;
   userData.enteredPassword = "111";

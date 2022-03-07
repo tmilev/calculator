@@ -39,7 +39,7 @@ Vector<Rational> WeylGroupData::applyReflectionList(
 void WeylGroupData::getSimpleReflectionMatrix(
   int indexSimpleRoot, Matrix<Rational>& output
 ) const {
-  MacroRegisterFunctionWithName("WeylGroup::getSimpleReflectionMatrix");
+  STACK_TRACE("WeylGroup::getSimpleReflectionMatrix");
   int rank = this->getDimension();
   output.makeIdentityMatrix(rank, Rational::one(), Rational::zero());
   for (int j = 0; j < rank; j ++) {
@@ -68,7 +68,7 @@ ElementWeylGroup WeylGroupData::simpleConjugation(
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeSquaresCCReps() {
-  MacroRegisterFunctionWithName("WeylGroup::computeSquares");
+  STACK_TRACE("WeylGroup::computeSquares");
   if (!this->flagCCsComputed) {
     this->computeConjugacyClassesFromAllElements();
   }
@@ -83,9 +83,7 @@ void FiniteGroup<elementSomeGroup>::computeSquaresCCReps() {
 }
 
 void WeylGroupData::computeInitialIrreducibleRepresentations() {
-  MacroRegisterFunctionWithName(
-    "WeylGroup::computeInitialIrreducibleRepresentations"
-  );
+  STACK_TRACE("WeylGroup::computeInitialIrreducibleRepresentations");
   if (!this->group.flagCCsComputed) {
     this->group.computeConjugacyClassesFromAllElements();
   }
@@ -353,9 +351,7 @@ template <typename somegroup, typename Coefficient>
 List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
 GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 decomposeThomasVersion() {
-  MacroRegisterFunctionWithName(
-    "WeylGroupRepresentation::decomposeThomasVersion"
-  );
+  STACK_TRACE("WeylGroupRepresentation::decomposeThomasVersion");
   Matrix<Coefficient> splittingOperatorMatrix;
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
@@ -900,7 +896,7 @@ template <class someGroup, class elementSomeGroup>
 std::string SubgroupData<someGroup, elementSomeGroup>::toString(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("SubgroupData::toString");
+  STACK_TRACE("SubgroupData::toString");
   (void) format;
   if (this->groupContent == nullptr) {
     return "(not initialized (no owner group))";
@@ -915,21 +911,21 @@ std::string SubgroupData<someGroup, elementSomeGroup>::toString(
 }
 
 std::string SubgroupDataRootReflections::toString(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("SubgroupDataRootReflections::toString");
+  STACK_TRACE("SubgroupDataRootReflections::toString");
   std::stringstream out;
   out << subGroupDataContainer.toString(format);
   return out.str();
 }
 
 std::string SubgroupDataWeylGroup::toString(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("SubgroupDataWeylGroup::toString");
+  STACK_TRACE("SubgroupDataWeylGroup::toString");
   std::stringstream out;
   out << this->subgroupData.toString(format);
   return out.str();
 }
 
 void SubgroupDataWeylGroup::ComputeTauSignature() {
-  MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
+  STACK_TRACE("SubgroupWeylGroup::ComputeTauSignature");
   this->checkInitialization();
   if (!this->subgroupData.groupContent->flagCCRepresentativesComputed) {
     this->subgroupData.groupContent->
@@ -990,7 +986,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 }
 
 void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupRootReflections::computeCCSizesRepresentativesPreimages"
   );
   if (
@@ -1037,9 +1033,7 @@ void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
 }
 
 void SubgroupDataRootReflections::initializeGenerators() {
-  MacroRegisterFunctionWithName(
-    "SubgroupRootReflections::initializeGenerators"
-  );
+  STACK_TRACE("SubgroupRootReflections::initializeGenerators");
   if (this->dynkinType.getRank() == 0) {
     this->subgroupData.subgroupContent->generators.setSize(1);
     this->subgroupData.subgroupContent->generators[0].makeIdentity(
@@ -1064,9 +1058,7 @@ void SubgroupDataRootReflections::initializeGenerators() {
 void SubgroupDataRootReflections::makeParabolicSubgroup(
   WeylGroupData& G, const Selection& inputGeneratingSimpleRoots
 ) {
-  MacroRegisterFunctionWithName(
-    "SubgroupDataRootReflections::makeParabolicSubgroup"
-  );
+  STACK_TRACE("SubgroupDataRootReflections::makeParabolicSubgroup");
   G.checkConsistency();
   this->weylData = &G;
   this->subgroupData.makeSubgroupOf(G.group);
@@ -1096,7 +1088,7 @@ void SubgroupDataRootReflections::makeParabolicSubgroup(
 void SubgroupDataRootReflections::makeFromRoots(
   WeylGroupData& G, const Vectors<Rational>& inputRootReflections
 ) {
-  MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeFromRoots");
+  STACK_TRACE("SubgroupDataRootReflections::makeFromRoots");
   this->subgroupData.makeSubgroupOf(G.group);
   this->weylData = &G;
   this->generatingSimpleRoots = inputRootReflections;
@@ -1129,9 +1121,7 @@ bool FiniteGroup<elementSomeGroup>::
 areConjugate_OLD_Deprecated_Version_By_Todor(
   const elementSomeGroup& left, const elementSomeGroup& right
 ) {
-  MacroRegisterFunctionWithName(
-    "WeylGroup::areConjugate_OLD_Deprecated_Version_By_Todor"
-  );
+  STACK_TRACE("WeylGroup::areConjugate_OLD_Deprecated_Version_By_Todor");
   if (left.hasDifferentConjugacyInvariantsFrom(right)) {
     return false;
   }
@@ -1156,8 +1146,7 @@ areConjugate_OLD_Deprecated_Version_By_Todor(
 void WeylGroupData::getSignSignatureAllRootSubsystems(
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::getSignSignatureAllRootSubsystems")
-  ;
+  STACK_TRACE("WeylGroup::getSignSignatureAllRootSubsystems");
   RootSubalgebras rootSubalgebras;
   SemisimpleLieAlgebra semisimpleLieAlgebra;
   semisimpleLieAlgebra.weylGroup.makeFromDynkinType(this->dynkinType);
@@ -1176,7 +1165,7 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(
 void WeylGroupData::getSignSignatureParabolics(
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::getSignSignatureParabolics");
+  STACK_TRACE("WeylGroup::getSignSignatureParabolics");
   //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
@@ -1210,9 +1199,7 @@ void WeylGroupData::getSignSignatureParabolics(
 void WeylGroupData::getSignSignatureExtendedParabolics(
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {
-  MacroRegisterFunctionWithName(
-    "WeylGroup::getSignSignatureExtendedParabolics"
-  );
+  STACK_TRACE("WeylGroup::getSignSignatureExtendedParabolics");
   //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
@@ -1255,7 +1242,7 @@ void WeylGroupData::getSignSignatureRootSubgroups(
   List<SubgroupDataRootReflections>& outputSubgroups,
   const List<Vectors<Rational> >& rootsGeneratingReflections
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::getSignSignatureRootSubgroups");
+  STACK_TRACE("WeylGroup::getSignSignatureRootSubgroups");
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->group);

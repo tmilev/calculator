@@ -618,9 +618,7 @@ template <class Coefficient>
 bool FinitelyGeneratedMatrixMonoid<Coefficient>::generateElements(
   int upperBoundNonPositiveMeansNoLimit
 ) {
-  MacroRegisterFunctionWithName(
-    "FinitelyGeneratedMatrixMonoid::generateElements"
-  );
+  STACK_TRACE("FinitelyGeneratedMatrixMonoid::generateElements");
   this->elements.clear();
   this->elements.addOnTopNoRepetition(generators);
   MatrixTensor<Coefficient> currentElement;
@@ -2650,7 +2648,7 @@ template <typename Coefficient>
 void ElementWeylGroupRing<Coefficient>::makeFromClassFunction(
   WeylGroupData* GG, const List<Coefficient>& l
 ) {
-  MacroRegisterFunctionWithName("ElementWeylGroupRing::makeFromClassFunction");
+  STACK_TRACE("ElementWeylGroupRing::makeFromClassFunction");
   if (GG == nullptr) {
     global.fatal
     << "Weyl group pointer not allowed to be zero. "
@@ -3076,7 +3074,7 @@ template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::registerConjugacyClass(
   const elementSomeGroup& inputRepresentative, bool dontAddIfSameInvariants
 ) {
-  MacroRegisterFunctionWithName("FiniteGroup::registerConjugacyClass");
+  STACK_TRACE("FiniteGroup::registerConjugacyClass");
   ConjugacyClass conjugacyClass;
   conjugacyClass.representative = inputRepresentative;
   Polynomial<Rational> characterPolynomial;

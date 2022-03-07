@@ -79,7 +79,7 @@ bool CalculatorHTML::mergeProblemWeight(
   bool checkFileExistence,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
+  STACK_TRACE("DatabaseRoutines::LoadProblemWeightsAppend");
   (void) commentsOnFailure;
   if (inputJSON.elementType != JSData::token::tokenObject) {
     return true;
@@ -158,7 +158,7 @@ bool CalculatorHTML::mergeProblemDeadline(
   >& outputAppendProblemInfo,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
+  STACK_TRACE("DatabaseRoutines::LoadProblemWeightsAppend");
   (void) commentsOnFailure;
   if (inputJSON.elementType != JSData::token::tokenObject) {
     return true;
@@ -201,7 +201,7 @@ JSData CalculatorHTML::toJSONDeadlines(
     HashFunctions::hashFunction<std::string>
   >& inputProblemInfo
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toJSONDeadlines");
+  STACK_TRACE("CalculatorHTML::toJSONDeadlines");
   JSData output;
   output.elementType = JSData::token::tokenObject;
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
@@ -241,7 +241,7 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
     HashFunctions::hashFunction<std::string>
   >& inputProblemInfo
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toQuerySetProblemWeights");
+  STACK_TRACE("CalculatorHTML::toQuerySetProblemWeights");
   QuerySet output;
   output.nestedLabels.addOnTop(DatabaseStrings::labelProblemWeight);
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
@@ -280,7 +280,7 @@ bool CalculatorHTML::mergeOneProblemAdminData(
   ProblemData& inputProblemInfo,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::mergeOneProblemAdminData");
+  STACK_TRACE("CalculatorHTML::mergeOneProblemAdminData");
   if (!this->topics.topics.contains(inputProblemName)) {
     commentsOnFailure
     << "Did not find "
@@ -352,8 +352,7 @@ bool CalculatorHTML::mergeOneProblemAdminData(
 bool CalculatorHTML::mergeProblemWeightAndStore(
   std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase")
-  ;
+  STACK_TRACE("DatabaseRoutines::MergeProblemInfoInDatabase");
   JSData problemJSON;
   if (!problemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -382,9 +381,7 @@ bool CalculatorHTML::mergeProblemWeightAndStore(
 bool CalculatorHTML::mergeProblemDeadlineAndStore(
   std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "DatabaseRoutines::mergeProblemDeadlineAndStore"
-  );
+  STACK_TRACE("DatabaseRoutines::mergeProblemDeadlineAndStore");
   JSData problemJSON;
   if (!problemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -418,7 +415,7 @@ bool CalculatorHTML::storeProblemWeights(
   >& toStore,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
+  STACK_TRACE("DatabaseRoutines::StoreProblemDatabaseInfo");
   QueryExact weightFinder;
   weightFinder.collection = DatabaseStrings::tableProblemWeights;
   weightFinder.setLabelValue(
@@ -450,7 +447,7 @@ bool CalculatorHTML::storeProblemDeadlines(
   >& toStore,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
+  STACK_TRACE("DatabaseRoutines::StoreProblemDatabaseInfo");
   QueryExact deadlineSchema;
   deadlineSchema.collection = DatabaseStrings::tableDeadlines;
   deadlineSchema.setLabelValue(
@@ -472,7 +469,7 @@ bool CalculatorHTML::storeProblemDeadlines(
 }
 
 bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::loadDatabaseInfo");
+  STACK_TRACE("CalculatorHTML::loadDatabaseInfo");
   this->currentUser.::UserCalculatorData::operator=(global.userDefault);
   if (!this->prepareSectionList(comments)) {
     return false;
@@ -533,7 +530,7 @@ bool CalculatorHTML::loadMe(
   const std::string& inputRandomSeed,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::loadMe");
+  STACK_TRACE("CalculatorHTML::loadMe");
   if (
     !FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
       this->fileName,
@@ -595,9 +592,7 @@ std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
   const std::string& desiredRandomSeed,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON"
-  );
+  STACK_TRACE("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
   double startTime = global.getElapsedSeconds();
   this->loadCurrentProblemItem(
     needToLoadDatabaseMayIgnore, desiredRandomSeed, commentsOnFailure
@@ -660,7 +655,7 @@ void CalculatorHTML::loadCurrentProblemItem(
   const std::string& inputRandomSeed,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::loadCurrentProblemItem");
+  STACK_TRACE("CalculatorHTML::loadCurrentProblemItem");
   this->loadFileNames();
   this->flagLoadedSuccessfully = false;
   if (global.userGuestMode()) {
@@ -686,9 +681,7 @@ void CalculatorHTML::loadCurrentProblemItem(
 bool CalculatorHTML::Parser::isStateModifierApplyIfYes(
   SyntacticElementHTML& inputElt
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::Parser::isStateModifierApplyIfYes"
-  );
+  STACK_TRACE("CalculatorHTML::Parser::isStateModifierApplyIfYes");
   if (inputElt.syntacticRole != "command") {
     return false;
   }
@@ -701,7 +694,7 @@ bool Answer::hasSolution() const {
 }
 
 std::string Answer::toString() {
-  MacroRegisterFunctionWithName("Answer::toString");
+  STACK_TRACE("Answer::toString");
   std::stringstream out;
   out << "Answer id: " << this->answerId;
   out << "<br>Answer commands on give-up: " << this->commandAnswerOnGiveUp;
@@ -709,7 +702,7 @@ std::string Answer::toString() {
 }
 
 std::string Answer::toStringSolutionElements() {
-  MacroRegisterFunctionWithName("Answer::toStringSolutionElements");
+  STACK_TRACE("Answer::toStringSolutionElements");
   std::stringstream out;
   out << this->solutionElements.size << " total solution elements. ";
   for (int i = 0; i < this->solutionElements.size; i ++) {
@@ -724,9 +717,7 @@ std::string Answer::toStringSolutionElements() {
 std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(
   const std::string& fileName
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::toStringCalculatorProblemSourceFromFileName"
-  );
+  STACK_TRACE("CalculatorHTML::toStringCalculatorProblemSourceFromFileName");
   std::stringstream out;
   out // << "<span class =\"calculatorExamProblem\">\n"
   << "Title: "
@@ -741,7 +732,7 @@ std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(
 }
 
 void CalculatorHTML::interpretGenerateLink(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretGenerateLink");
+  STACK_TRACE("CalculatorHTML::interpretGenerateLink");
   inputOutput.interpretedCommand =
   this->toStringProblemInfo(this->cleanUpFileName(inputOutput.content));
 }
@@ -751,7 +742,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   bool setDebugFlag,
   bool includeRandomSeed
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringLinkCurrentAdmin");
+  STACK_TRACE("CalculatorHTML::toStringLinkCurrentAdmin");
   if (!global.userDefaultHasAdminRights()) {
     return "";
   }
@@ -798,7 +789,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
 std::string CalculatorHTML::toStringLinkFromFileName(
   const std::string& fileName
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringLinkFromFileName");
+  STACK_TRACE("CalculatorHTML::toStringLinkFromFileName");
   std::stringstream
   out,
   refStreamNoRequest,
@@ -875,7 +866,7 @@ std::string CalculatorHTML::toStringLinkFromFileName(
 std::string CalculatorHTML::toStringProblemInfo(
   const std::string& fileName, const std::string& stringToDisplay
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringLinksFromFileName");
+  STACK_TRACE("CalculatorHTML::toStringLinksFromFileName");
   std::stringstream out;
   out << this->toStringLinkFromFileName(fileName);
   out << this->toStringProblemScoreFull(fileName);
@@ -905,7 +896,7 @@ std::string CalculatorHTML::toStringProblemInfo(
 bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::interpretProblemGiveUp");
+  STACK_TRACE("CalculatorFunctions::interpretProblemGiveUp");
   if (input.size() != 4) {
     return
     calculator
@@ -942,7 +933,7 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
 bool CalculatorHtmlFunctions::interpretProblem(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::interpretProblem");
+  STACK_TRACE("CalculatorFunctions::interpretProblem");
   CalculatorHTML problem;
   if (!input.isOfType<std::string>(&problem.parser.inputHtml)) {
     return
@@ -980,7 +971,7 @@ bool CalculatorHtmlFunctions::interpretProblem(
 }
 
 std::string CalculatorHTML::toStringExtractedCommands() {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringExtractedCommands");
+  STACK_TRACE("CalculatorHTML::toStringExtractedCommands");
   std::stringstream out;
   out << "<hr><b>The commands extracted from the HTML follow.</b><br>";
   out << "<table>";
@@ -1007,7 +998,7 @@ std::string CalculatorHTML::toStringExtractedCommands() {
 }
 
 std::string CalculatorHTML::toStringContent() {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringContent");
+  STACK_TRACE("CalculatorHTML::toStringContent");
   std::stringstream out;
   out << "<hr><b>The extracted commands follow.</b><br>";
   for (int i = 0; i < this->content.size; i ++) {
@@ -1085,7 +1076,7 @@ std::string SyntacticElementHTML::toStringCloseTag(
 }
 
 std::string SyntacticElementHTML::toStringTagAndContent() const {
-  MacroRegisterFunctionWithName("SyntacticElementHTML::toStringTagAndContent");
+  STACK_TRACE("SyntacticElementHTML::toStringTagAndContent");
   if (this->syntacticRole == "") {
     return this->content;
   }
@@ -1096,7 +1087,7 @@ std::string SyntacticElementHTML::toStringTagAndContent() const {
 }
 
 std::string SyntacticElementHTML::toStringDebug() const {
-  MacroRegisterFunctionWithName("SyntacticElementHTML::toStringDebug");
+  STACK_TRACE("SyntacticElementHTML::toStringDebug");
   if (this->syntacticRole == "") {
     return
     HtmlRoutines::convertStringToHtmlString(
@@ -1120,7 +1111,7 @@ std::string SyntacticElementHTML::toStringDebug() const {
 }
 
 std::string SyntacticElementHTML::getKeyValue(const std::string& key) const {
-  MacroRegisterFunctionWithName("SyntacticElementHTML::getKeyValue");
+  STACK_TRACE("SyntacticElementHTML::getKeyValue");
   if (!this->properties.contains(key)) {
     return "";
   }
@@ -1130,7 +1121,7 @@ std::string SyntacticElementHTML::getKeyValue(const std::string& key) const {
 void SyntacticElementHTML::setKeyValue(
   const std::string& key, const std::string& value
 ) {
-  MacroRegisterFunctionWithName("SyntacticElementHTML::setKeyValue");
+  STACK_TRACE("SyntacticElementHTML::setKeyValue");
   this->properties.setKeyValue(key, value);
 }
 
@@ -1160,9 +1151,7 @@ std::string SyntacticElementHTML::toStringInterpretedBody() {
 }
 
 bool SyntacticElementHTML::isInterpretedNotByCalculator() {
-  MacroRegisterFunctionWithName(
-    "SyntacticElementHTML::isInterpretedNotByCalculator"
-  );
+  STACK_TRACE("SyntacticElementHTML::isInterpretedNotByCalculator");
   if (this->syntacticRole != "command") {
     return false;
   }
@@ -1338,7 +1327,7 @@ bool SyntacticElementHTML::isAnswerElement(std::string* desiredAnswerId) {
 }
 
 std::string CalculatorHTML::prepareUserInputBoxes() {
-  MacroRegisterFunctionWithName("CalculatorHTML::PrepareInterpreter");
+  STACK_TRACE("CalculatorHTML::PrepareInterpreter");
   if (this->flagIsForReal) {
     return "";
   }
@@ -1399,9 +1388,7 @@ std::string CalculatorHTML::getProblemHeaderWithoutEnclosure() {
 bool CalculatorHTML::prepareCommandsGenerateProblem(
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::prepareCommandsGenerateProblem"
-  );
+  STACK_TRACE("CalculatorHTML::prepareCommandsGenerateProblem");
   (void) comments;
   std::stringstream streamCommands, streamCommandsNoEnclosures;
   streamCommandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
@@ -1436,7 +1423,7 @@ bool CalculatorHTML::prepareCommandsGenerateProblem(
 }
 
 bool CalculatorHTML::parseHTMLPrepareCommands(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::parseHTMLPrepareCommands");
+  STACK_TRACE("CalculatorHTML::parseHTMLPrepareCommands");
   if (!this->parser.parseHTML(comments)) {
     return false;
   }
@@ -1444,7 +1431,7 @@ bool CalculatorHTML::parseHTMLPrepareCommands(std::stringstream* comments) {
 }
 
 bool CalculatorHTML::prepareCommands(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::prepareCommands");
+  STACK_TRACE("CalculatorHTML::prepareCommands");
   if (!this->prepareCommandsGenerateProblem(comments)) {
     return false;
   }
@@ -1472,9 +1459,7 @@ bool CalculatorHTML::prepareCommands(std::stringstream* comments) {
 bool CalculatorHTML::prepareCommandsAnswerOnGiveUp(
   Answer& answer, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::prepareCommandsAnswerOnGiveUp"
-  );
+  STACK_TRACE("CalculatorHTML::prepareCommandsAnswerOnGiveUp");
   if (answer.flagAnswerHardcoded) {
     return true;
   }
@@ -1496,9 +1481,7 @@ bool CalculatorHTML::prepareCommandsAnswerOnGiveUp(
 bool CalculatorHTML::prepareCommentsBeforeSubmission(
   Answer& answer, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::prepareCommentsBeforeSubmission"
-  );
+  STACK_TRACE("CalculatorHTML::prepareCommentsBeforeSubmission");
   (void) comments;
   std::stringstream streamCommands;
   for (int i = 0; i < this->content.size; i ++) {
@@ -1518,9 +1501,7 @@ bool CalculatorHTML::prepareCommentsBeforeSubmission(
 bool CalculatorHTML::prepareCommentsBeforeInterpretation(
   Answer& answer, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::prepareCommentsBeforeInterpretation"
-  );
+  STACK_TRACE("CalculatorHTML::prepareCommentsBeforeInterpretation");
   (void) comments;
   std::stringstream streamCommands;
   for (int i = 0; i < this->content.size; i ++) {
@@ -1652,7 +1633,7 @@ bool Answer::prepareAnswerHardCoded(
 bool CalculatorHTML::prepareCommandsAnswer(
   Answer& answer, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::prepareCommandsAnswer");
+  STACK_TRACE("CalculatorHTML::prepareCommandsAnswer");
   std::stringstream commands;
   std::stringstream commandsNoEnclosures;
   commands << this->getProblemHeaderEnclosure();
@@ -1700,7 +1681,7 @@ bool CalculatorHTML::prepareCommandsAnswer(
 bool CalculatorHTML::prepareAndExecuteCommands(
   Calculator& interpreter, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("Problem::prepareAndExecuteCommands");
+  STACK_TRACE("Problem::prepareAndExecuteCommands");
   double startTime = global.getElapsedSeconds();
   this->prepareCommands(comments);
   interpreter.initialize(Calculator::Mode::educational);
@@ -1782,7 +1763,7 @@ std::string SyntacticElementHTML::getTagClass() const {
 bool CalculatorHTML::prepareSectionList(
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::prepareSectionList");
+  STACK_TRACE("CalculatorHTML::prepareSectionList");
   (void) commentsOnFailure;
   if (this->flagSectionsPrepared) {
     return true;
@@ -1808,7 +1789,7 @@ bool CalculatorHTML::prepareSectionList(
 }
 
 void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretManageClass");
+  STACK_TRACE("CalculatorHTML::interpretManageClass");
   if (
     !global.userDefaultHasAdminRights() || global.userStudentVieWOn()
   ) {
@@ -1830,7 +1811,7 @@ void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
 bool CalculatorHTML::computeAnswerRelatedStrings(
   SyntacticElementHTML& inputOutput
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::computeAnswerRelatedStrings");
+  STACK_TRACE("CalculatorHTML::computeAnswerRelatedStrings");
   std::string desiredAnswerId = inputOutput.answerIdIfAnswer();
   if (desiredAnswerId == "") {
     inputOutput.interpretedCommand =
@@ -1918,9 +1899,7 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
 void CalculatorHTML::interpretGenerateStudentAnswerButton(
   SyntacticElementHTML& inputOutput
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::interpretGenerateStudentAnswerButton"
-  );
+  STACK_TRACE("CalculatorHTML::interpretGenerateStudentAnswerButton");
   if (!this->computeAnswerRelatedStrings(inputOutput)) {
     return;
   }
@@ -1936,7 +1915,7 @@ void CalculatorHTML::interpretGenerateStudentAnswerButton(
 }
 
 void CalculatorHTML::interpretIfAnswer(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretIfAnswer");
+  STACK_TRACE("CalculatorHTML::interpretIfAnswer");
   if (!inputOutput.isAnswer()) {
     return;
   }
@@ -1946,9 +1925,7 @@ void CalculatorHTML::interpretIfAnswer(SyntacticElementHTML& inputOutput) {
 void CalculatorHTML::interpretNotByCalculatorNotAnswer(
   SyntacticElementHTML& inputOutput
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::interpretNotByCalculatorNotAnswer"
-  );
+  STACK_TRACE("CalculatorHTML::interpretNotByCalculatorNotAnswer");
   std::string tagClass = inputOutput.getTagClass();
   if (
     tagClass == SyntacticElementHTML::Tags::calculatorExamProblem ||
@@ -1965,7 +1942,7 @@ void CalculatorHTML::interpretNotByCalculatorNotAnswer(
 }
 
 std::string CalculatorHTML::cleanUpFileName(const std::string& inputLink) {
-  MacroRegisterFunctionWithName("CalculatorHTML::cleanUpFileName");
+  STACK_TRACE("CalculatorHTML::cleanUpFileName");
   if (inputLink.size() == 0) {
     return inputLink;
   }
@@ -2003,7 +1980,7 @@ std::string CalculatorHTML::cleanUpFileName(const std::string& inputLink) {
 #include "crypto.h"
 
 std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
-  MacroRegisterFunctionWithName("CalculatorHTML::getDeadlineNoInheritance");
+  STACK_TRACE("CalculatorHTML::getDeadlineNoInheritance");
   (void) id;
   if (!global.flagDatabaseCompiled) {
     // deadline not present.
@@ -2032,7 +2009,7 @@ std::string CalculatorHTML::getDeadline(
   const std::string& sectionNumber,
   bool& outputIsInherited
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::getDeadline");
+  STACK_TRACE("CalculatorHTML::getDeadline");
   (void) problemName;
   (void) sectionNumber;
   (void) outputIsInherited;
@@ -2157,7 +2134,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
 std::string CalculatorHTML::toStringAllSectionDeadlines(
   const std::string& topicID, bool isSection
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringAllSectionDeadlines");
+  STACK_TRACE("CalculatorHTML::toStringAllSectionDeadlines");
   if (!global.userDefaultHasAdminRights()) return "";
   std::stringstream out;
   out << "<table>";
@@ -2188,9 +2165,7 @@ std::string CalculatorHTML::toStringDeadline(
   bool returnEmptyStringIfNoDeadline,
   bool isSection
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::ToStringDeadlineWithModifyButton"
-  );
+  STACK_TRACE("CalculatorHTML::ToStringDeadlineWithModifyButton");
   (void) topicID;
   (void) problemAlreadySolved;
   (void) returnEmptyStringIfNoDeadline;
@@ -2229,7 +2204,7 @@ std::string CalculatorHTML::toStringDeadline(
 }
 
 void CalculatorHTML::computeDeadlinesAllSections(TopicElement& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::computeDeadlinesAllSections");
+  STACK_TRACE("CalculatorHTML::computeDeadlinesAllSections");
   inputOutput.deadlinesPerSectioN.initializeFillInObject(
     this->databaseStudentSections.size, ""
   );
@@ -2252,9 +2227,7 @@ void CalculatorHTML::computeDeadlinesAllSections(TopicElement& inputOutput) {
 void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(
   TopicElement& inputOutput
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::computeDeadlinesAllSectionsNoInheritance"
-  );
+  STACK_TRACE("CalculatorHTML::computeDeadlinesAllSectionsNoInheritance");
   inputOutput.deadlinesPerSectioN.initializeFillInObject(
     this->databaseStudentSections.size, ""
   );
@@ -2273,8 +2246,7 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(
 std::string CalculatorHTML::toStringInterprettedCommands(
   Calculator& calculator, List<SyntacticElementHTML>& elements
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringInterprettedCommands")
-  ;
+  STACK_TRACE("CalculatorHTML::toStringInterprettedCommands");
   std::stringstream out;
   out << "<table>";
   int commandCounter = calculator.programExpression.size() - 1;
@@ -2317,7 +2289,7 @@ bool CalculatorHTML::processOneExecutedCommand(
   std::stringstream& comments
 ) {
   (void) comments;
-  MacroRegisterFunctionWithName("CalculatorHTML::processOneExecutedCommand");
+  STACK_TRACE("CalculatorHTML::processOneExecutedCommand");
   if (!element.isInterpretedByCalculatorOnGeneration()) {
     element.interpretedCommand = "";
     return true;
@@ -2393,7 +2365,7 @@ bool CalculatorHTML::processExecutedCommands(
   List<SyntacticElementHTML>& elements,
   std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::processExecutedCommands");
+  STACK_TRACE("CalculatorHTML::processExecutedCommands");
   (void) comments;
   bool result = true;
   interpreter.objectContainer.resetPlots();
@@ -2434,7 +2406,7 @@ void CalculatorHTML::logProblemGenerationObsolete(Calculator& interpreter) {
 void CalculatorHTML::figureOutCurrentProblemList(
   std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::figureOutCurrentProblemList");
+  STACK_TRACE("CalculatorHTML::figureOutCurrentProblemList");
   if (this->flagParentInvestigated) {
     return;
   }
@@ -2447,7 +2419,7 @@ void CalculatorHTML::figureOutCurrentProblemList(
 }
 
 bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretHtml");
+  STACK_TRACE("CalculatorHTML::interpretHtml");
   double startTime = global.getElapsedSeconds();
   if (!this->parser.parseHTML(comments)) {
     this->outputHtmlBodyNoTag =
@@ -2543,7 +2515,7 @@ bool CalculatorHTML::Parser::isSplittingChar(const std::string& input) {
 std::string CalculatorHTML::Parser::toStringParsingStack(
   List<SyntacticElementHTML>& stack
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringParsingStack");
+  STACK_TRACE("CalculatorHTML::toStringParsingStack");
   std::stringstream out;
   out
   << "#Non-dummy elts: "
@@ -2572,7 +2544,7 @@ int CalculatorHTML::getAnswerIndex(const std::string& desiredAnswerId) {
 bool CalculatorHTML::Parser::canBeMerged(
   const SyntacticElementHTML& left, const SyntacticElementHTML& right
 ) {
-  MacroRegisterFunctionWithName("SyntacticElementHTML::canBeMerged");
+  STACK_TRACE("SyntacticElementHTML::canBeMerged");
   if (left.syntacticRole != "" || right.syntacticRole != "") {
     return false;
   }
@@ -2586,7 +2558,7 @@ bool CalculatorHTML::Parser::canBeMerged(
 }
 
 void TopicElementParser::initializeElementTypes() {
-  MacroRegisterFunctionWithName("CalculatorHTML::initializeElementTypes");
+  STACK_TRACE("CalculatorHTML::initializeElementTypes");
   // Please note: the static_cast<int> below is needed with the present gcc
   // compiler version.
   // Without it, you should get linker errors.
@@ -2676,7 +2648,7 @@ void TopicElementParser::initializeElementTypes() {
 }
 
 void CalculatorHTML::initAutocompleteExtras() {
-  MacroRegisterFunctionWithName("CalculatorHTML::initAutocompleteExtras");
+  STACK_TRACE("CalculatorHTML::initAutocompleteExtras");
   if (this->autoCompleteExtras.size > 0) {
     return;
   }
@@ -2692,9 +2664,7 @@ void CalculatorHTML::initBuiltInSpanClasses() {
 }
 
 void CalculatorHTML::Parser::initBuiltInSpanClasses() {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::Parser::initBuiltInSpanClasses"
-  );
+  STACK_TRACE("CalculatorHTML::Parser::initBuiltInSpanClasses");
   if (this->calculatorClassesAnswerFields.size == 0) {
     this->calculatorClassesAnswerFields.addOnTop("calculatorButtonSubmit");
     this->calculatorClassesAnswerFields.addOnTop("calculatorButtonInterpret");
@@ -2749,7 +2719,7 @@ void CalculatorHTML::Parser::reset() {
 }
 
 bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::Parser::parseHTML");
+  STACK_TRACE("CalculatorHTML::Parser::parseHTML");
   this->reset();
   std::stringstream reader(this->inputHtml);
   reader.seekg(0);
@@ -2813,7 +2783,7 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
 }
 
 bool CalculatorHTML::extractContent(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::extractContent");
+  STACK_TRACE("CalculatorHTML::extractContent");
   bool result = true;
   for (
     int i = SyntacticElementHTML::parsingDummyElements; i < this->parser.
@@ -3402,7 +3372,7 @@ bool CalculatorHTML::Parser::reduceMore() {
 bool CalculatorHTML::interpretOneAnswerElement(
   SyntacticElementHTML& inputOutput
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretOneAnswerElement");
+  STACK_TRACE("CalculatorHTML::interpretOneAnswerElement");
   std::string answerId;
   if (!inputOutput.isAnswerElement(&answerId)) {
     return true;
@@ -3430,7 +3400,7 @@ bool CalculatorHTML::interpretOneAnswerElement(
 }
 
 bool CalculatorHTML::interpretAnswerHighlights(std::stringstream& comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretAnswerHighlights");
+  STACK_TRACE("CalculatorHTML::interpretAnswerHighlights");
   (void) comments;
   this->answerHighlights.setSize(0);
   bool answerHighlightStarted = false;
@@ -3467,7 +3437,7 @@ bool CalculatorHTML::interpretAnswerHighlights(std::stringstream& comments) {
 }
 
 bool CalculatorHTML::interpretAnswerElements(std::stringstream& comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretAnswerElements");
+  STACK_TRACE("CalculatorHTML::interpretAnswerElements");
   (void) comments;
   for (int i = 0; i < this->content.size; i ++) {
     this->interpretOneAnswerElement(this->content[i]);
@@ -3476,7 +3446,7 @@ bool CalculatorHTML::interpretAnswerElements(std::stringstream& comments) {
 }
 
 bool CalculatorHTML::prepareAnswerElements(std::stringstream& comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::prepareAnswerElements");
+  STACK_TRACE("CalculatorHTML::prepareAnswerElements");
   (void) comments;
   std::string currentId;
   for (int i = 0; i < this->content.size; i ++) {
@@ -3514,7 +3484,7 @@ bool CalculatorHTML::prepareAnswerElements(std::stringstream& comments) {
 bool CalculatorHTML::extractOneAnswerId(
   SyntacticElementHTML& input, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::extractOneAnswerId");
+  STACK_TRACE("CalculatorHTML::extractOneAnswerId");
   if (!input.isAnswer()) {
     return true;
   }
@@ -3558,7 +3528,7 @@ bool CalculatorHTML::processOneSolution(
   CalculatorHTML::SolutionProcessor& processor,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::processOneSolution");
+  STACK_TRACE("CalculatorHTML::processOneSolution");
   std::string tagName = input.getTagClass();
   if (processor.currentAnswer != nullptr) {
     if (tagName == SyntacticElementHTML::Tags::calculatorSolutionEnd) {
@@ -3593,7 +3563,7 @@ bool CalculatorHTML::processOneSolution(
 }
 
 bool CalculatorHTML::processSolutions(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::processSolutions");
+  STACK_TRACE("CalculatorHTML::processSolutions");
   CalculatorHTML::SolutionProcessor processor;
   for (int i = 0; i < this->content.size; i ++) {
     if (
@@ -3609,7 +3579,7 @@ bool CalculatorHTML::processSolutions(std::stringstream* comments) {
 bool CalculatorHTML::extractAnswerIdsOnce(
   SyntacticElementHTML& element, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIdsOnce");
+  STACK_TRACE("CalculatorHTML::extractAnswerIdsOnce");
   if (!this->extractOneAnswerId(element, comments)) {
     return false;
   }
@@ -3661,7 +3631,7 @@ bool CalculatorHTML::extractAnswerIdsOnce(
 }
 
 bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIds");
+  STACK_TRACE("CalculatorHTML::extractAnswerIds");
   // we shouldn't clear this->problemData.answers: it may contain
   // outdated information loaded from the database. We don't want to loose that
   // info
@@ -3677,7 +3647,7 @@ bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
 }
 
 bool CalculatorHTML::checkContent(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::checkContent");
+  STACK_TRACE("CalculatorHTML::checkContent");
   bool result = true;
   for (int i = 0; i < this->content.size; i ++) {
     SyntacticElementHTML& current = this->content[i];
@@ -3719,7 +3689,7 @@ std::string SyntacticElementHTML::cleanUpEncloseCommand(
 std::string SyntacticElementHTML::cleanUpCommandString(
   const std::string& inputCommand
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::cleanUpCommandString");
+  STACK_TRACE("CalculatorHTML::cleanUpCommandString");
   if (inputCommand == "") {
     return "";
   }
@@ -3793,9 +3763,7 @@ std::string SyntacticElementHTML::cleanUpCommandString(
 bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::extractCalculatorExpressionFromHtml"
-  );
+  STACK_TRACE("CalculatorFunctions::extractCalculatorExpressionFromHtml");
   if (input.size() != 2) {
     return false;
   }
@@ -3834,7 +3802,7 @@ std::string CalculatorHTML::answerLabels::idVerificationSpan =
 "idVerificationSpan";
 std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
 JSData CalculatorHTML::getEditorBoxesHTML() {
-  MacroRegisterFunctionWithName("CalculatorHTML::getEditorBoxesHTML");
+  STACK_TRACE("CalculatorHTML::getEditorBoxesHTML");
   JSData output;
   output.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->problemData.answers.size(); i ++) {
@@ -3883,7 +3851,7 @@ JSData CalculatorHTML::getEditorBoxesHTML() {
 bool CalculatorHTML::storeRandomSeedCurrent(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::storeRandomSeedCurrent");
+  STACK_TRACE("CalculatorHTML::storeRandomSeedCurrent");
   this->problemData.flagRandomSeedGiven = true;
   this->currentUser.setProblemData(this->fileName, this->problemData);
   if (
@@ -3947,12 +3915,12 @@ std::string SyntacticElementHTML::toHTMLElements(
 }
 
 std::string CalculatorHTML::toStringParsedElements() const {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringParsedElements");
+  STACK_TRACE("CalculatorHTML::toStringParsedElements");
   return SyntacticElementHTML::toHTMLElements(this->content);
 }
 
 void CalculatorHTML::computeBodyDebugString() {
-  MacroRegisterFunctionWithName("CalculatorHTML::computeBodyDebugString");
+  STACK_TRACE("CalculatorHTML::computeBodyDebugString");
   this->outputDebugInformationBody = "";
   if (
     !global.userDebugFlagOn() || !global.userDefaultHasAdminRights()
@@ -3988,7 +3956,7 @@ void CalculatorHTML::computeBodyDebugString() {
 bool CalculatorHTML::interpretHtmlOneAttempt(
   Calculator& interpreter, std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretHtmlOneAttempt");
+  STACK_TRACE("CalculatorHTML::interpretHtmlOneAttempt");
   double startTime = global.getElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeadPt2;
@@ -4055,9 +4023,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   std::stringstream& outBody,
   std::stringstream& outHeadPt2
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::interpretHtmlOneAttemptPartTwo"
-  );
+  STACK_TRACE("CalculatorHTML::interpretHtmlOneAttemptPartTwo");
   // ////////////////////////////
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
     global.getElapsedSeconds() - startTime
@@ -4168,9 +4134,7 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
   const std::string& studentSection,
   bool includeRandomSeedIfAppropriate
 ) const {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::toStringCalculatorArgumentsForProblem"
-  );
+  STACK_TRACE("CalculatorHTML::toStringCalculatorArgumentsForProblem");
   if (!global.flagLoggedIn && !global.userGuestMode()) {
     return "";
   }
@@ -4215,7 +4179,7 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
 std::string CalculatorHTML::toStringProblemScoreFull(
   const std::string& fileName
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringProblemScoreFull");
+  STACK_TRACE("CalculatorHTML::toStringProblemScoreFull");
   (void) fileName;
   std::stringstream out;
   if (global.userGuestMode()) {
@@ -4287,7 +4251,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(
 std::string CalculatorHTML::toStringProblemScoreShort(
   const std::string& fileName, bool& outputAlreadySolved
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringProblemScoreShort");
+  STACK_TRACE("CalculatorHTML::toStringProblemScoreShort");
   (void) fileName;
   (void) outputAlreadySolved;
   if (!global.flagDatabaseCompiled) {
@@ -4373,7 +4337,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(
 }
 
 void TopicElement::computeID(int elementIndex, TopicElementParser& owner) {
-  MacroRegisterFunctionWithName("TopicElement::computeID");
+  STACK_TRACE("TopicElement::computeID");
   if (this->problemFileName != "") {
     this->id = this->problemFileName;
     if (this->type != TopicElement::types::problem) {
@@ -4397,7 +4361,7 @@ TopicElementParser::TopicElementParser() {
 }
 
 void TopicElementParser::addTopic(TopicElement& inputElt, int index) {
-  MacroRegisterFunctionWithName("TopicElement::addTopic");
+  STACK_TRACE("TopicElement::addTopic");
   if (this->topics.contains(inputElt.id)) {
     std::stringstream out;
     out
@@ -4449,7 +4413,7 @@ void TopicElement::reset() {
 }
 
 bool TopicElementParser::checkConsistencyParsed() {
-  MacroRegisterFunctionWithName("TopicElementParser::checkConsistencyParsed");
+  STACK_TRACE("TopicElementParser::checkConsistencyParsed");
   for (int i = 0; i < this->topics.size(); i ++) {
     if (
       this->topics.values[i].type == TopicElement::types::problem
@@ -4468,7 +4432,7 @@ bool TopicElementParser::checkConsistencyParsed() {
 }
 
 bool TopicElementParser::checkNoErrors(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TopicElementParser::checkNoErrors");
+  STACK_TRACE("TopicElementParser::checkNoErrors");
   for (int i = 0; i < this->topics.size(); i ++) {
     TopicElement& current = this->topics.values[i];
     if (current.isError()) {
@@ -4610,7 +4574,7 @@ bool TopicElement::problemOpensIfAvailable(
 bool TopicElementParser::checkProblemsOpen(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TopicElementParser::checkProblemsOpen");
+  STACK_TRACE("TopicElementParser::checkProblemsOpen");
   for (int i = 0; i < this->topics.size(); i ++) {
     TopicElement& current = this->topics.values[i];
     if (!current.problemOpensIfAvailable(commentsOnFailure)) {
@@ -4623,7 +4587,7 @@ bool TopicElementParser::checkProblemsOpen(
 bool TopicElementParser::checkTopicPdfs(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TopicElementParser::checkTopicPdfs");
+  STACK_TRACE("TopicElementParser::checkTopicPdfs");
   this->checkInitialization();
   for (int i = 0; i < this->topics.size(); i ++) {
     TopicElement& current = this->topics.values[i];
@@ -4659,7 +4623,7 @@ void TopicElementParser::TopicLine::MakeEmpty() {
 void TopicElementParser::insertTopicBundle(
   TopicElementParser::TopicLine& input
 ) {
-  MacroRegisterFunctionWithName("TopicElementParser::insertTopicBundle");
+  STACK_TRACE("TopicElementParser::insertTopicBundle");
   std::string bundleId = input.contentTrimmedWhiteSpace;
   if (!this->knownTopicBundles.contains(bundleId)) {
     std::stringstream out;
@@ -4678,7 +4642,7 @@ void TopicElementParser::insertTopicBundle(
 void TopicElementParser::loadTopicBundleFile(
   TopicElementParser::TopicLine& input
 ) {
-  MacroRegisterFunctionWithName("TopicElement::loadTopicBundleFile");
+  STACK_TRACE("TopicElement::loadTopicBundleFile");
   std::string fileName = input.contentTrimmedWhiteSpace;
   if (this->loadedTopicBundleFiles.contains(fileName)) {
     return;
@@ -4932,7 +4896,7 @@ void TopicElementParser::compressOneTopicLine(
 }
 
 void TopicElementParser::compressTopicLines() {
-  MacroRegisterFunctionWithName("TopicElementParser::compressTopicLines");
+  STACK_TRACE("TopicElementParser::compressTopicLines");
   this->checkInitialization();
   this->elements.setSize(0);
   for (int i = 0; i < this->crawled.size; i ++) {
@@ -4955,7 +4919,7 @@ std::string TopicElementParser::toString() const {
 }
 
 void TopicElementParser::parseTopicList(const std::string& inputString) {
-  MacroRegisterFunctionWithName("TopicElementParser::parseTopicList");
+  STACK_TRACE("TopicElementParser::parseTopicList");
   this->crawl(inputString);
   this->compressTopicLines();
   this->computeIds();
@@ -4989,7 +4953,7 @@ void TopicElementParser::computeTopicHierarchy() {
 }
 
 void TopicElementParser::computeTopicHierarchyPartOne() {
-  MacroRegisterFunctionWithName("computeTopicHierarchyPartOne");
+  STACK_TRACE("computeTopicHierarchyPartOne");
   List<int> parentChain;
   List<int> parentTypes;
   for (int i = 0; i < this->topics.size(); i ++) {
@@ -5022,9 +4986,7 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
 }
 
 void TopicElementParser::computeTopicHierarchyPartTwo() {
-  MacroRegisterFunctionWithName(
-    "TopicElementParser::computeTopicHierarchyPartTwo"
-  );
+  STACK_TRACE("TopicElementParser::computeTopicHierarchyPartTwo");
   for (int i = this->topics.size() - 1; i >= 0; i --) {
     TopicElement& currentElt = this->topics.values[i];
     if (currentElt.problemFileName != "") {
@@ -5063,9 +5025,7 @@ void TopicElementParser::computeTopicHierarchyPartTwo() {
 void CalculatorHTML::interpretAccountInformationLinks(
   SyntacticElementHTML& inputOutput
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::interpretAccountInformationLinks"
-  );
+  STACK_TRACE("CalculatorHTML::interpretAccountInformationLinks");
   std::stringstream out;
   if (!global.flagLoggedIn) {
     out << "<b>User not logged-in.</b>";
@@ -5094,7 +5054,7 @@ void CalculatorHTML::interpretAccountInformationLinks(
 bool CalculatorHTML::loadAndParseTopicIndex(
   int index, std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::loadAndParseTopicIndex");
+  STACK_TRACE("CalculatorHTML::loadAndParseTopicIndex");
   if (index == 0) {
     return CalculatorHTML::loadAndParseTopicList(comments);
   }
@@ -5115,7 +5075,7 @@ bool CalculatorHTML::loadAndParseTopicIndex(
 }
 
 bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::loadAndParseTopicList");
+  STACK_TRACE("CalculatorHTML::loadAndParseTopicList");
   if (this->topics.topics.size() != 0) {
     return true;
   }
@@ -5152,7 +5112,7 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
 }
 
 JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::toStringTopicListJSON");
+  STACK_TRACE("CalculatorHTML::toStringTopicListJSON");
   std::stringstream out;
   JSData output, topicBundleFiles;
   if (!this->loadAndParseTopicList(out)) {
@@ -5181,7 +5141,7 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
 }
 
 void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::interpretJavascripts");
+  STACK_TRACE("CalculatorHTML::interpretJavascripts");
   std::string javascriptName =
   StringRoutines::stringTrimWhiteSpace(inputOutput.content);
 }
@@ -5190,9 +5150,7 @@ int TopicElement::scoreButtonCounter = 0;
 bool CalculatorHTML::computeTopicListAndPointsEarned(
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::computeTopicListAndPointsEarned"
-  );
+  STACK_TRACE("CalculatorHTML::computeTopicListAndPointsEarned");
   if (!this->loadAndParseTopicList(commentsOnFailure)) {
     return false;
   }
@@ -5367,7 +5325,7 @@ JSData TopicElement::computeHomeworkJSON(CalculatorHTML& owner) {
 }
 
 void TopicElement::computeHomework(CalculatorHTML& owner) {
-  MacroRegisterFunctionWithName("TopicElement::computeHomework");
+  STACK_TRACE("TopicElement::computeHomework");
   if (this->sourceHomework.size == 0) {
     return;
   }
@@ -5379,7 +5337,7 @@ void TopicElement::computeHomework(CalculatorHTML& owner) {
 }
 
 void TopicElement::computeSlides(CalculatorHTML& owner) {
-  MacroRegisterFunctionWithName("TopicElement::computeSlides");
+  STACK_TRACE("TopicElement::computeSlides");
   if (this->sourceSlides.size == 0) {
     return;
   }
@@ -5391,7 +5349,7 @@ void TopicElement::computeSlides(CalculatorHTML& owner) {
 }
 
 void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
-  MacroRegisterFunctionWithName("TopicElement::computeLinks");
+  STACK_TRACE("TopicElement::computeLinks");
   (void) plainStyle;
   if (this->displayProblemLink != "") {
     return;
@@ -5533,7 +5491,7 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
 }
 
 JSData TopicElement::toJSON(CalculatorHTML& owner) {
-  MacroRegisterFunctionWithName("TopicElement::toJSON");
+  STACK_TRACE("TopicElement::toJSON");
   JSData output;
   output["title"] = this->title;
   std::string elementType =

@@ -42,7 +42,7 @@ bool Database::FallBack::updateOne(
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("DatabaseFallback::updateOneFromQueryString");
+  STACK_TRACE("DatabaseFallback::updateOneFromQueryString");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -75,7 +75,7 @@ bool Database::FallBack::updateOneNolocks(
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FallBack::updateOneNolocks");
+  STACK_TRACE("Database::FallBack::updateOneNolocks");
   if (!this->hasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
@@ -112,7 +112,7 @@ bool Database::FallBack::findOne(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FallBack::findOne");
+  STACK_TRACE("Database::FallBack::findOne");
   MutexProcesslockGuard guardDB(this->access);
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     return false;
@@ -171,9 +171,7 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
   int& output,
   std::stringstream* commentsOnNotFound
 ) {
-  MacroRegisterFunctionWithName(
-    "Database::FallBack::findIndexOneNolocksMinusOneNotFound"
-  );
+  STACK_TRACE("Database::FallBack::findIndexOneNolocksMinusOneNotFound");
   output = - 1;
   if (!this->hasCollection(query.collection, commentsOnNotFound)) {
     if (commentsOnNotFound != nullptr) {
@@ -240,7 +238,7 @@ bool Database::FallBack::fetchCollectionNames(
 bool Database::FallBack::hasCollection(
   const std::string& collection, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FallBack::hasCollection");
+  STACK_TRACE("Database::FallBack::hasCollection");
   if (Database::FallBack::knownCollectionS.contains(collection)) {
     this->reader[collection].elementType = JSData::token::tokenArray;
     return true;
@@ -297,7 +295,7 @@ std::string Database::FallBack::Index::collectionAndLabel() {
 bool Database::FallBack::readAndIndexDatabase(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FallBack::readAndIndexDatabase");
+  STACK_TRACE("Database::FallBack::readAndIndexDatabase");
   if (!this->readDatabase(commentsOnFailure)) {
     return false;
   }

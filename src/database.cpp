@@ -19,8 +19,7 @@ bool Database::User::setPassword(
     comments << "Database not present. ";
     return false;
   }
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::setPassword")
-  ;
+  STACK_TRACE("DatabaseRoutinesGlobalFunctions::setPassword");
   if (!global.flagLoggedIn) {
     comments << "Changing passwords allowed for logged-in users only. ";
     return false;
@@ -41,7 +40,7 @@ bool Database::User::userExists(
     comments << "No database available.";
     return false;
   }
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::userExists");
+  STACK_TRACE("DatabaseRoutinesGlobalFunctions::userExists");
   if (!global.flagLoggedIn) {
     return false;
   }
@@ -60,7 +59,7 @@ bool Database::User::userExists(
 }
 
 bool Database::User::userDefaultHasInstructorRights() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "DatabaseRoutinesGlobalFunctions::userDefaultHasInstructorRights"
   );
   if (global.userDefaultHasAdminRights()) return true;
@@ -80,9 +79,7 @@ bool Database::User::logoutViaDatabase() {
   if (!global.flagDatabaseCompiled) {
     return true;
   }
-  MacroRegisterFunctionWithName(
-    "DatabaseRoutinesGlobalFunctions::logoutViaDatabase"
-  );
+  STACK_TRACE("DatabaseRoutinesGlobalFunctions::logoutViaDatabase");
   if (!global.flagLoggedIn) {
     return true;
   }
@@ -298,7 +295,7 @@ bool Database::findOneWithOptions(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
-  MacroRegisterFunctionWithName("Database::findOneWithOptions");
+  STACK_TRACE("Database::findOneWithOptions");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -396,7 +393,7 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
 void Database::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
-  MacroRegisterFunctionWithName("Database::createHashIndex");
+  STACK_TRACE("Database::createHashIndex");
   if (global.flagDatabaseCompiled) {
     this->mongoDB.createHashIndex(collectionName, key);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
@@ -405,7 +402,7 @@ void Database::createHashIndex(
 }
 
 bool Database::initializeWorker() {
-  MacroRegisterFunctionWithName("Database::initializeWorker");
+  STACK_TRACE("Database::initializeWorker");
   if (this->flagInitializedWorker) {
     return true;
   }
@@ -442,7 +439,7 @@ bool Database::initializeWorker() {
 }
 
 bool Database::initializeServer() {
-  MacroRegisterFunctionWithName("Database::initializeServer");
+  STACK_TRACE("Database::initializeServer");
   this->user.owner = this;
   this->fallBack.owner = this;
   this->flagInitializedServer = true;
@@ -477,9 +474,7 @@ void GlobalVariables::initialize() {
 }
 
 void GlobalVariables::initModifiableDatabaseFields() {
-  MacroRegisterFunctionWithName(
-    "GlobalVariables::initModifiableDatabaseFields"
-  );
+  STACK_TRACE("GlobalVariables::initModifiableDatabaseFields");
   List<List<std::string> >& modifiableData = global.databaseModifiableFields;
   List<std::string> currentEntry;
   modifiableData.reserve(10);
@@ -544,9 +539,7 @@ bool ProblemDataAdministrative::getWeightFromCourse(
   Rational& output,
   std::string* outputAsGivenByInstructor
 ) {
-  MacroRegisterFunctionWithName(
-    "ProblemDataAdministrative::getWeightFromCourse"
-  );
+  STACK_TRACE("ProblemDataAdministrative::getWeightFromCourse");
   if (!this->problemWeightsPerCourse.contains(courseNonURLed)) {
     return false;
   }
@@ -567,7 +560,7 @@ std::string ProblemDataAdministrative::toString() const {
 }
 
 bool ProblemData::checkConsistency() const {
-  MacroRegisterFunctionWithName("ProblemData::checkConsistency");
+  STACK_TRACE("ProblemData::checkConsistency");
   for (int i = 0; i < this->answers.size(); i ++) {
     if (
       StringRoutines::stringTrimWhiteSpace(
@@ -584,7 +577,7 @@ bool ProblemData::checkConsistency() const {
 }
 
 bool ProblemData::checkConsistencyMathQuillIds() const {
-  MacroRegisterFunctionWithName("ProblemData::checkConsistencyMathQuillIds");
+  STACK_TRACE("ProblemData::checkConsistencyMathQuillIds");
   for (int i = 0; i < this->answers.size(); i ++) {
     if (
       StringRoutines::stringTrimWhiteSpace(
@@ -658,7 +651,7 @@ UserCalculator::~UserCalculator() {
 }
 
 std::string UserCalculator::toStringSelectedColumns() {
-  MacroRegisterFunctionWithName("DatabaseRoutines::toStringSelectedColumns");
+  STACK_TRACE("DatabaseRoutines::toStringSelectedColumns");
   std::stringstream out;
   out << this->selectedColumnsUnsafe.size << " columns selected. ";
   for (int i = 0; i < this->selectedColumnsUnsafe.size; i ++) {
@@ -673,7 +666,7 @@ std::string UserCalculator::toStringSelectedColumns() {
 }
 
 std::string UserCalculator::toString() {
-  MacroRegisterFunctionWithName("UserCalculator::toString");
+  STACK_TRACE("UserCalculator::toString");
   std::stringstream out;
   out
   << "Calculator user: "
@@ -725,7 +718,7 @@ bool UserCalculator::fetchOneColumn(
   std::string& outputUnsafe,
   std::stringstream* failureComments
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::fetchOneColumn");
+  STACK_TRACE("UserCalculator::fetchOneColumn");
   (void) columnNameUnsafe;
   (void) outputUnsafe;
   (void) failureComments;
@@ -736,7 +729,7 @@ bool UserCalculator::fetchOneColumn(
 bool UserCalculator::authenticateWithToken(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::authenticateWithToken");
+  STACK_TRACE("UserCalculator::authenticateWithToken");
   (void) commentsOnFailure;
   if (this->enteredAuthenticationToken == "") {
     return false;
@@ -755,7 +748,7 @@ bool UserCalculator::loadFromDatabase(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
+  STACK_TRACE("UserCalculator::FetchOneUserRow");
   (void) commentsGeneral;
   double startTime = global.getElapsedSeconds();
   if (
@@ -800,7 +793,7 @@ bool UserCalculator::loadFromDatabase(
 }
 
 bool UserCalculatorData::loadFromJSON(JSData& input) {
-  MacroRegisterFunctionWithName("UserCalculatorData::loadFromJSON");
+  STACK_TRACE("UserCalculatorData::loadFromJSON");
   this->userId = input[DatabaseStrings::labelUserId].stringValue;
   this->username = input[DatabaseStrings::labelUsername].stringValue;
   this->email = input[DatabaseStrings::labelEmail].stringValue;
@@ -846,7 +839,7 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
 }
 
 JSData UserCalculatorData::toJSON() {
-  MacroRegisterFunctionWithName("UserCalculatorData::toJSON");
+  STACK_TRACE("UserCalculatorData::toJSON");
   JSData result;
   result[DatabaseStrings::labelUserId] = this->userId;
   result[DatabaseStrings::labelUsername] = this->username;
@@ -891,7 +884,7 @@ JSData UserCalculatorData::toJSON() {
 }
 
 bool UserCalculatorData::computeCourseInformation() {
-  MacroRegisterFunctionWithName("UserCalculator::computeCourseInformation");
+  STACK_TRACE("UserCalculator::computeCourseInformation");
   bool isAdmin = (
     this->userRole == UserCalculator::Roles::administator &&
     this->username == global.userDefault.username
@@ -936,12 +929,12 @@ bool UserCalculatorData::computeCourseInformation() {
 void UserCalculator::setProblemData(
   const std::string& problemName, const ProblemData& inputData
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::setProblemData");
+  STACK_TRACE("UserCalculator::setProblemData");
   this->problemData.setKeyValue(problemName, inputData);
 }
 
 std::string ProblemData::store() {
-  MacroRegisterFunctionWithName("ProblemData::store");
+  STACK_TRACE("ProblemData::store");
   std::stringstream out;
   if (this->flagRandomSeedGiven) {
     out << "randomSeed=" << this->randomSeed;
@@ -973,7 +966,7 @@ std::string ProblemData::store() {
 }
 
 JSData ProblemData::storeJSON() const {
-  MacroRegisterFunctionWithName("ProblemData::storeJSON");
+  STACK_TRACE("ProblemData::storeJSON");
   JSData result;
   result.elementType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
@@ -1026,7 +1019,7 @@ std::string UserCalculator::firstLoginMessage() {
 }
 
 bool UserCalculator::authenticate(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("UserCalculator::authenticate");
+  STACK_TRACE("UserCalculator::authenticate");
   std::stringstream secondCommentsStream;
   if (!this->loadFromDatabase(&secondCommentsStream)) {
     if (commentsOnFailure != nullptr && this->shouldCommentOnMissingUser()) {
@@ -1050,7 +1043,7 @@ bool UserCalculator::authenticate(std::stringstream* commentsOnFailure) {
 bool UserCalculator::authenticateWithUserNameAndPass(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::authenticate");
+  STACK_TRACE("UserCalculator::authenticate");
   (void) commentsOnFailure;
   this->computeHashedSaltedPassword();
   // TODO(tmilev): timing attacks on the comparison may be used to guess the
@@ -1062,7 +1055,7 @@ bool UserCalculator::authenticateWithUserNameAndPass(
 bool UserCalculator::resetAuthenticationToken(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::resetAuthenticationToken");
+  STACK_TRACE("UserCalculator::resetAuthenticationToken");
   TimeWrapper now;
   now.assignLocalTime();
   std::stringstream out;
@@ -1088,7 +1081,7 @@ bool UserCalculator::resetAuthenticationToken(
 }
 
 bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("UserCalculator::setPassword");
+  STACK_TRACE("UserCalculator::setPassword");
   if (this->enteredPassword == "") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty password not allowed. ";
@@ -1131,7 +1124,7 @@ bool UserCalculator::isAcceptableCharDatabaseInput(char character) {
 bool UserCalculator::isAcceptableDatabaseInput(
   const std::string& input, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::IsAcceptableDatabaseInput");
+  STACK_TRACE("UserCalculator::IsAcceptableDatabaseInput");
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!UserCalculator::isAcceptableCharDatabaseInput(input[i])) {
       if (comments != nullptr) {
@@ -1149,7 +1142,7 @@ bool UserCalculator::isAcceptableDatabaseInput(
 }
 
 std::string UserCalculator::GetSelectedRowEntry(const std::string& key) {
-  MacroRegisterFunctionWithName("UserCalculator::GetSelectedRowEntry");
+  STACK_TRACE("UserCalculator::GetSelectedRowEntry");
   int index = this->selectedRowFieldNamesUnsafe.getIndex(key);
   if (index == - 1) {
     return "";
@@ -1163,7 +1156,7 @@ bool Database::User::sendActivationEmail(
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::sendActivationEmail");
+  STACK_TRACE("DatabaseRoutines::sendActivationEmail");
   List<std::string> emails;
   StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   return
@@ -1178,7 +1171,7 @@ bool Database::User::sendActivationEmail(
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::sendActivationEmail");
+  STACK_TRACE("DatabaseRoutines::sendActivationEmail");
   UserCalculator currentUser;
   bool result = true;
   for (int i = 0; i < emails.size; i ++) {
@@ -1213,7 +1206,7 @@ bool Database::User::sendActivationEmail(
 bool ProblemData::loadFromOldFormat(
   const std::string& inputData, std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ProblemData::loadFromOldFormat");
+  STACK_TRACE("ProblemData::loadFromOldFormat");
   MapList<
     std::string,
     std::string,
@@ -1304,7 +1297,7 @@ bool ProblemData::loadFromOldFormat(
 bool ProblemData::loadFromJSON(
   const JSData& inputData, std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ProblemData::loadFromJSON");
+  STACK_TRACE("ProblemData::loadFromJSON");
   (void) commentsOnFailure;
   this->points = 0;
   this->numCorrectlyAnswered = 0;
@@ -1372,8 +1365,7 @@ bool ProblemData::loadFromJSON(
 bool UserCalculator::interpretDatabaseProblemData(
   const std::string& information, std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::interpretDatabaseProblemData")
-  ;
+  STACK_TRACE("UserCalculator::interpretDatabaseProblemData");
   MapList<
     std::string,
     std::string,
@@ -1418,9 +1410,7 @@ bool UserCalculator::interpretDatabaseProblemData(
 bool UserCalculator::interpretDatabaseProblemDataJSON(
   const JSData& data, std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "UserCalculator::interpretDatabaseProblemDataJSON"
-  );
+  STACK_TRACE("UserCalculator::interpretDatabaseProblemDataJSON");
   this->problemData.clear();
   this->problemData.setExpectedSize(data.objects.size());
   bool result = true;
@@ -1444,7 +1434,7 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
 }
 
 bool UserCalculator::exists(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("UserCalculator::exists");
+  STACK_TRACE("UserCalculator::exists");
   JSData notUsed;
   return
   Database::get().findOneFromSome(
@@ -1455,9 +1445,7 @@ bool UserCalculator::exists(std::stringstream* comments) {
 bool UserCalculator::computeAndStoreActivationToken(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "UserCalculator::computeAndStoreActivationToken"
-  );
+  STACK_TRACE("UserCalculator::computeAndStoreActivationToken");
   TimeWrapper now;
   now.assignLocalTime();
   List<unsigned char> activationToken;
@@ -1490,9 +1478,7 @@ bool UserCalculator::computeAndStoreActivationEmailAndTokens(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName(
-    "UserCalculator::computeAndStoreActivationEmailAndTokens"
-  );
+  STACK_TRACE("UserCalculator::computeAndStoreActivationEmailAndTokens");
   if (!this->computeAndStoreActivationToken(commentsOnFailure)) {
     return false;
   }
@@ -1510,9 +1496,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     }
     return false;
   }
-  MacroRegisterFunctionWithName(
-    "UserCalculator::computeAndStoreActivationStats"
-  );
+  STACK_TRACE("UserCalculator::computeAndStoreActivationStats");
   std::string activationAddress =
   this->getActivationAddressFromActivationToken(
     this->actualActivationToken,
@@ -1646,7 +1630,7 @@ List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() {
 bool UserCalculator::storeProblemData(
   const std::string& fileName, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::storeProblemData");
+  STACK_TRACE("UserCalculator::storeProblemData");
   if (!this->problemData.contains(fileName)) {
     global.fatal
     << "I was asked to store fileName: "
@@ -1673,7 +1657,7 @@ bool Database::User::addUsersFromEmails(
   int& outputNumNewUsers,
   int& outputNumUpdatedUsers
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::addUsersFromEmails");
+  STACK_TRACE("DatabaseRoutines::addUsersFromEmails");
   global.millisecondsMaxComputation = 100000;
   // 100 seconds
   global.millisecondsReplyAfterComputation = 200000;
@@ -1810,8 +1794,7 @@ bool Database::User::addUsersFromEmails(
 bool UserCalculator::getActivationAbsoluteAddress(
   std::string& output, std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::getActivationAbsoluteAddress")
-  ;
+  STACK_TRACE("UserCalculator::getActivationAbsoluteAddress");
   return
   this->getActivationAddress(
     output,
@@ -1825,7 +1808,7 @@ bool UserCalculator::getActivationAddress(
   const std::string& calculatorBase,
   std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::getActivationAddress");
+  STACK_TRACE("UserCalculator::getActivationAddress");
   if (!this->loadFromDatabase(&comments, &comments)) {
     return false;
   }
@@ -1854,7 +1837,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
 ) {
-  MacroRegisterFunctionWithName("EmailRoutines::sendEmailWithMailGun");
+  STACK_TRACE("EmailRoutines::sendEmailWithMailGun");
   std::string mailGunKey, hostnameToSendEmailFrom;
   if (
     !FileOperations::
@@ -2001,7 +1984,7 @@ List<bool>& EmailRoutines::getRecognizedEmailChars() {
 bool EmailRoutines::isOKEmail(
   const std::string& input, std::stringstream* commentsOnError
 ) {
-  MacroRegisterFunctionWithName("EmailRoutines::isOKEmail");
+  STACK_TRACE("EmailRoutines::isOKEmail");
   if (input.size() == 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Empty email not allowed. ";
@@ -2054,9 +2037,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   if (!global.flagDatabaseCompiled) {
     return Database::User::loginNoDatabaseSupport(user, commentsGeneral);
   }
-  MacroRegisterFunctionWithName(
-    "Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded"
-  );
+  STACK_TRACE("Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(user);
   if (userWrapper.enteredGoogleToken == "") {
@@ -2173,9 +2154,7 @@ bool Database::User::loginViaDatabase(
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return Database::User::loginNoDatabaseSupport(user, commentsOnFailure);
   }
-  MacroRegisterFunctionWithName(
-    "DatabaseRoutinesGlobalFunctions::loginViaDatabase"
-  );
+  STACK_TRACE("DatabaseRoutinesGlobalFunctions::loginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(user);
   if (userWrapper.authenticate(commentsOnFailure)) {
@@ -2260,8 +2239,7 @@ bool Database::User::loginViaDatabase(
 }
 
 void UserCalculator::computeHashedSaltedPassword() {
-  MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword")
-  ;
+  STACK_TRACE("UserCalculator::ComputeShaonedSaltedPassword");
   this->usernameHashedPlusPassWordHashed.resize(
     Crypto::LengthSha3DefaultInBytes* 2
   );
@@ -2289,7 +2267,7 @@ void UserCalculator::computeHashedSaltedPassword() {
 bool UserCalculator::storeToDatabase(
   bool doSetPassword, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::storeToDatabase");
+  STACK_TRACE("UserCalculator::storeToDatabase");
   QueryExact findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
@@ -2309,9 +2287,7 @@ std::string UserCalculator::getActivationAddressFromActivationToken(
   const std::string& inputUserNameUnsafe,
   const std::string& inputEmailUnsafe
 ) {
-  MacroRegisterFunctionWithName(
-    "UserCalculator::getActivationAddressFromActivationToken"
-  );
+  STACK_TRACE("UserCalculator::getActivationAddressFromActivationToken");
   std::stringstream out;
   if (StringRoutines::stringBeginsWith(calculatorBase, "localhost")) {
     out << "https://" << calculatorBase;

@@ -12,9 +12,7 @@ Coefficient SemisimpleLieAlgebra::getKillingFormProductWRTLevi(
   const ElementSemisimpleLieAlgebra<Coefficient>& right,
   const Selection& rootsNotInLevi
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::getKillingFormProductWRTLevi"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::getKillingFormProductWRTLevi");
   Coefficient result = 0;
   ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, element;
   ChevalleyGenerator baseGen;
@@ -39,9 +37,7 @@ template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   SemisimpleLieAlgebra& owner, const Selection& leviRoots
 ) {
-  MacroRegisterFunctionWithName(
-    "ElementUniversalEnveloping::makeCasimirWRTLeviParabolic"
-  );
+  STACK_TRACE("ElementUniversalEnveloping::makeCasimirWRTLeviParabolic");
   if (leviRoots.cardinalitySelection == 0) {
     this->makeZero(owner);
     return;
@@ -541,9 +537,7 @@ bool SemisimpleLieAlgebra::getElementAdjointRepresentation(
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::getElementAdjointRepresentation"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::getElementAdjointRepresentation");
   int numberOfGenerators = this->getNumberOfGenerators();
   output.makeZeroMatrix(numberOfGenerators, 0);
   Coefficient one;
@@ -2519,9 +2513,7 @@ template <class Coefficient>
 Coefficient ElementUniversalEnveloping<Coefficient>::getKillingFormProduct(
   const ElementUniversalEnveloping<Coefficient>& right
 ) const {
-  MacroRegisterFunctionWithName(
-    "ElementUniversalEnveloping::getKillingFormProduct"
-  );
+  STACK_TRACE("ElementUniversalEnveloping::getKillingFormProduct");
   if (this->isEqualToZero()) {
     return 0;
   }

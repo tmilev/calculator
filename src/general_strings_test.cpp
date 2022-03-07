@@ -21,7 +21,7 @@ bool StringRoutines::Conversions::Test::all() {
 }
 
 bool StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "StringRoutines::Conversions::Test::convertStringToJSONStringEscapeOnly"
   );
   List<List<std::string> > conversionPairs;
@@ -50,9 +50,7 @@ bool StringRoutines::Conversions::Test::oneConversionUtf8Success(
   uint32_t codePoint2,
   uint32_t codePoint3
 ) {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::Conversions::Test::oneConversionUtf8Success"
-  );
+  STACK_TRACE("StringRoutines::Conversions::Test::oneConversionUtf8Success");
   List<uint32_t> expected, computed;
   expected.addOnTop(codePoint1);
   if (codePoint2 != 0xffffffff) {
@@ -125,9 +123,7 @@ bool StringRoutines::Conversions::Test::oneUtf8ToJSONSuccess(
 bool StringRoutines::Conversions::Test::oneCodePointToUtf8(
   uint32_t codePoint, const std::string& expectedHex
 ) {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::Conversions::Test::oneCodePointToUtf8"
-  );
+  STACK_TRACE("StringRoutines::Conversions::Test::oneCodePointToUtf8");
   std::string converted =
   StringRoutines::Conversions::codePointToUtf8(codePoint);
   std::string convertedHex = Crypto::convertStringToHex(converted, 0, false);
@@ -145,9 +141,7 @@ bool StringRoutines::Conversions::Test::oneCodePointToUtf8(
 }
 
 bool StringRoutines::Conversions::Test::codePointToUtf8() {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::Conversions::Test::codePointToUtf8"
-  );
+  STACK_TRACE("StringRoutines::Conversions::Test::codePointToUtf8");
   StringRoutines::Conversions::Test::oneCodePointToUtf8(67, "43");
   StringRoutines::Conversions::Test::oneCodePointToUtf8(960, "cf80");
   // \pi.

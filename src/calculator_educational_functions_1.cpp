@@ -157,7 +157,7 @@ bool UnivariateEquation::solve(Calculator& calculator) {
 bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo"
   );
   if (input.size() != 3) {
@@ -200,7 +200,7 @@ bool ProblemWithSolution::solve(Calculator& calculator) {
 }
 
 bool ProblemWithSolution::solveEquation(Calculator& calculator) {
-  MacroRegisterFunctionWithName("ProblemWithSolution::solveEquation");
+  STACK_TRACE("ProblemWithSolution::solveEquation");
   if (!this->toBeSolved.startsWith(calculator.opDefine(), 3)) {
     return false;
   }
@@ -274,7 +274,7 @@ void ProblemWithSolution::addAnnotationStep(
 }
 
 bool ProblemWithSolution::solveOther(Calculator& calculator) {
-  MacroRegisterFunctionWithName("ProblemWithSolution::solveOther");
+  STACK_TRACE("ProblemWithSolution::solveOther");
   bool outputNonCacheable = false;
   Calculator::ExpressionHistoryEnumerator history;
   calculator.evaluateExpression(
@@ -297,7 +297,7 @@ bool ProblemWithSolution::solveOther(Calculator& calculator) {
 bool CalculatorEducationalFunctions::solveJSON(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorEducationalFunctions::solveJSON");
+  STACK_TRACE("CalculatorEducationalFunctions::solveJSON");
   if (input.size() != 2) {
     return false;
   }
@@ -323,9 +323,8 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   Expression& output,
   CompareExpressions& comparison
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorEducationalFunctions::compareExpressionsJSONInternal"
-  );
+  STACK_TRACE("CalculatorEducationalFunctions::compareExpressionsJSONInternal")
+  ;
   if (input.size() != 3) {
     return false;
   }
@@ -421,9 +420,7 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
 }
 
 void CompareExpressions::processComparisonRestricted() {
-  MacroRegisterFunctionWithName(
-    "CompareExpressions::processComparisonRestricted"
-  );
+  STACK_TRACE("CompareExpressions::processComparisonRestricted");
   this->flagAreEqualAsAnswers =
   this->comparisonNoDistributionEvaluated.toString() ==
   "1";
@@ -431,7 +428,7 @@ void CompareExpressions::processComparisonRestricted() {
 }
 
 JSData Calculator::extractSolution() {
-  MacroRegisterFunctionWithName("Calculator::extractSolution");
+  STACK_TRACE("Calculator::extractSolution");
   JSData result;
   if (this->parser.syntaxErrors != "") {
     result[WebAPI::result::error] = "Failed to parse.";
@@ -454,7 +451,7 @@ void CompareExpressions::compare(
   const std::string& desiredInput,
   Calculator& calculator
 ) {
-  MacroRegisterFunctionWithName("CompareExpressions::compare");
+  STACK_TRACE("CompareExpressions::compare");
   this->givenString = givenInput;
   this->desiredString = desiredInput;
   calculator.inputString =
@@ -473,7 +470,7 @@ void CompareExpressions::compare(
 }
 
 void CompareExpressions::comparePartTwo(Calculator& calculator) {
-  MacroRegisterFunctionWithName("Calculator::compareExpressions");
+  STACK_TRACE("Calculator::compareExpressions");
   calculator.statistics.initialize();
   if (
     !calculator.parser.parseNoEmbeddingInCommand(
@@ -594,9 +591,7 @@ JSData ProblemWithSolution::toJSON() {
 bool CalculatorEducationalFunctions::divideByNumberTrivial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorEducationalFunctions::divideByNumberTrivial"
-  );
+  STACK_TRACE("CalculatorEducationalFunctions::divideByNumberTrivial");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -623,7 +618,7 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
 bool CalculatorFunctions::cardanoFormula(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::cardanoFormula");
+  STACK_TRACE("CalculatorFunctions::cardanoFormula");
   if (input.size() != 2) {
     return false;
   }

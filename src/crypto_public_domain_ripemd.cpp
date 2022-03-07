@@ -504,7 +504,7 @@ void RIPEMD160Internal::ripemd160Done(
 void CryptoPublicDomain::computeRIPEMD160(
   const std::string& input, List<unsigned char>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::computeRIPEMD160");
+  STACK_TRACE("Crypto::computeRIPEMD160");
   Ripemd160State md;
   RIPEMD160Internal::ripemd160Initialize(&md);
   output.setSize(20);

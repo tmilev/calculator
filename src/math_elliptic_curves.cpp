@@ -64,8 +64,7 @@ template < >
 bool ElementEllipticCurve<ElementZmodP>::makeGeneratorNISTCurve(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ElementEllipticCurve::makeGeneratorNISTCurve")
-  ;
+  STACK_TRACE("ElementEllipticCurve::makeGeneratorNISTCurve");
   if (input == "secp256k1") {
     this->makeGeneratorSecp256k1();
     return true;

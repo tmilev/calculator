@@ -4,7 +4,7 @@
 #include "calculator.h"
 
 bool Expression::Test::all() {
-  MacroRegisterFunctionWithName("Expression::Test::all");
+  STACK_TRACE("Expression::Test::all");
   Calculator tester;
   tester.initialize(Calculator::Mode::full);
   Expression::Test::toStringTestRecode(tester);
@@ -15,7 +15,7 @@ bool Expression::Test::all() {
 bool Expression::Test::toStringTestRecodeOnce(
   const std::string& inputHardCodedMustParse, Calculator& owner
 ) {
-  MacroRegisterFunctionWithName("Expression::Test::toStringTestRecodeOnce");
+  STACK_TRACE("Expression::Test::toStringTestRecodeOnce");
   Expression parsed = owner.parseOrCrash(inputHardCodedMustParse, true);
   std::string recoded = parsed.toString();
   if (recoded != inputHardCodedMustParse) {
@@ -31,7 +31,7 @@ bool Expression::Test::toStringTestRecodeOnce(
 }
 
 bool Expression::Test::toStringTestRecode(Calculator& owner) {
-  MacroRegisterFunctionWithName("Expression::Test::toStringTestRecode");
+  STACK_TRACE("Expression::Test::toStringTestRecode");
   owner.initialize(Calculator::Mode::full);
   Expression::Test::toStringTestRecodeOnce("1+1", owner);
   Expression::Test::toStringTestRecodeOnce("\"\u00B0\"", owner);
@@ -43,7 +43,7 @@ bool Expression::Test::toStringTestRecode(Calculator& owner) {
 bool Expression::Test::isUserDefinedAtomOnce(
   Calculator& owner, const std::string& input, bool isUserDefinedAtom
 ) {
-  MacroRegisterFunctionWithName("Expression::Test::isUserDefinedAtomOnce");
+  STACK_TRACE("Expression::Test::isUserDefinedAtomOnce");
   Expression expression = owner.parseOrCrash(input, true);
   if (expression.isAtomUserDefined() != isUserDefinedAtom) {
     global.fatal
@@ -61,7 +61,7 @@ bool Expression::Test::isUserDefinedAtomOnce(
 }
 
 bool Expression::Test::isUserDefinedAtom(Calculator& owner) {
-  MacroRegisterFunctionWithName("Expression::Test::isUserDefinedAtom");
+  STACK_TRACE("Expression::Test::isUserDefinedAtom");
   owner.initialize(Calculator::Mode::full);
   Expression::Test::isUserDefinedAtomOnce(owner, "x", true);
   Expression::Test::isUserDefinedAtomOnce(owner, "x+y", false);

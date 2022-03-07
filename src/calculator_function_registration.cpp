@@ -5683,7 +5683,7 @@ void Calculator::initializeFunctionsStandard() {
 }
 
 void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "Calculator::initializePredefinedStandardOperationsWithoutHandler"
   );
   // additional operations treated like function
@@ -5722,7 +5722,7 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
 }
 
 void Calculator::initializeAtomsNonCacheable() {
-  MacroRegisterFunctionWithName("Calculator::initializeAtomsNonCacheable");
+  STACK_TRACE("Calculator::initializeAtomsNonCacheable");
   this->atomsThatMustNotBeCached.setExpectedSize(30);
   this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("RandomInteger")
   ;
@@ -5738,16 +5738,12 @@ void Calculator::initializeAtomsNonCacheable() {
 }
 
 void Calculator::initializeAtomsNotGoodForChainRule() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeAtomsNotGoodForChainRule"
-  );
+  STACK_TRACE("Calculator::initializeAtomsNotGoodForChainRule");
   this->atomsNotAllowingChainRule.addOnTopNoRepetitionMustBeNew("Bind");
 }
 
 void Calculator::initializeAtomsThatAllowCommutingOfArguments() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeAtomsThatAllowCommutingOfArguments"
-  );
+  STACK_TRACE("Calculator::initializeAtomsThatAllowCommutingOfArguments");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.setExpectedSize(30)
   ;
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.
@@ -5769,7 +5765,7 @@ void Calculator::initializeAtomsThatAllowCommutingOfArguments() {
 }
 
 void Calculator::initializeArithmeticOperations() {
-  MacroRegisterFunctionWithName("Calculator::initializeArithmeticOperations");
+  STACK_TRACE("Calculator::initializeArithmeticOperations");
   this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("+");
   this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("-");
   this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("*");
@@ -5778,7 +5774,7 @@ void Calculator::initializeArithmeticOperations() {
 }
 
 void Calculator::initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "Calculator::initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions"
   );
   // Related heavily to
@@ -5800,7 +5796,7 @@ void Calculator::initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions() {
 }
 
 void Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively"
   );
   // Related heavily to
@@ -5828,9 +5824,7 @@ void Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively() {
 }
 
 void Calculator::initializeOperationsThatAreKnownFunctions() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeOperationsThatAreKnownFunctions"
-  );
+  STACK_TRACE("Calculator::initializeOperationsThatAreKnownFunctions");
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("+");
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("-");
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("*");
@@ -5871,9 +5865,7 @@ void Calculator::addKnownDoubleConstant(
 }
 
 void Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions"
-  );
+  STACK_TRACE("Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions");
   this->atomsNotInterpretedAsFunctions.setExpectedSize(30);
   this->addKnownDoubleConstant("\\pi", MathRoutines::pi());
   this->addKnownDoubleConstant("e", MathRoutines::E());
@@ -5885,7 +5877,7 @@ void CalculatorParser::addTrigonometricSplit(
   const std::string& trigonometricFunction,
   const List<std::string>& variables
 ) {
-  MacroRegisterFunctionWithName("Calculator::addTrigonometricSplit");
+  STACK_TRACE("Calculator::addTrigonometricSplit");
   List<std::string> split;
   for (int i = 0; i < variables.size; i ++) {
     const std::string& variable = variables[i];
@@ -5953,7 +5945,7 @@ void Calculator::addOneStringHandler(
 }
 
 void Calculator::initializeToStringHandlers() {
-  MacroRegisterFunctionWithName("Calculator::initializeToStringHandlers");
+  STACK_TRACE("Calculator::initializeToStringHandlers");
   this->addOneStringAtomHandler(
     this->opDefine(), Expression::toStringDefine
   );
@@ -6145,9 +6137,7 @@ void Calculator::initializeToStringHandlers() {
 }
 
 void Calculator::initializeBuiltInsFreezeArguments() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeBuiltInsFreezeArguments"
-  );
+  STACK_TRACE("Calculator::initializeBuiltInsFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(
     this->builtInTypes.size + 100
   );
@@ -6155,9 +6145,7 @@ void Calculator::initializeBuiltInsFreezeArguments() {
 }
 
 void Calculator::initializeAtomsThatFreezeArguments() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeAtomsThatFreezeArguments"
-  );
+  STACK_TRACE("Calculator::initializeAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Freeze");
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Bind");
 }

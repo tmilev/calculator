@@ -94,7 +94,7 @@ const std::string& HtmlRoutines::getFile(
   const std::string& additionalBeginTag,
   const std::string& additionalEndTag
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::getFile");
+  STACK_TRACE("HtmlRoutines::getFile");
   std::string fileId = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (global.flagCachingInternalFilesOn) {
     if (
@@ -133,14 +133,14 @@ const std::string& HtmlRoutines::getFile(
 const std::string& HtmlRoutines::getJavascriptAddScriptTags(
   const std::string& fileNameVirtual
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptAddScriptTags");
+  STACK_TRACE("HtmlRoutines::getJavascriptAddScriptTags");
   return HtmlRoutines::getFile(fileNameVirtual, "<script>", "</script>");
 }
 
 std::string HtmlRoutines::getJavascriptLink(
   const std::string& fileNameVirtual
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptLink");
+  STACK_TRACE("HtmlRoutines::getJavascriptLink");
   std::stringstream out;
   std::string fileName =
   FileOperations::GetVirtualNameWithHash(fileNameVirtual);
@@ -149,7 +149,7 @@ std::string HtmlRoutines::getJavascriptLink(
 }
 
 std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
-  MacroRegisterFunctionWithName("HtmlRoutines::getCSSLink");
+  STACK_TRACE("HtmlRoutines::getCSSLink");
   std::stringstream out;
   std::string fileName =
   FileOperations::GetVirtualNameWithHash(fileNameVirtual);
@@ -160,7 +160,7 @@ std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
 const std::string& HtmlRoutines::getCSSAddStyleTags(
   const std::string& fileNameVirtual
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::getCSSAddStyleTags");
+  STACK_TRACE("HtmlRoutines::getCSSAddStyleTags");
   return HtmlRoutines::getFile(fileNameVirtual, "<style>", "</style>");
 }
 
@@ -299,9 +299,7 @@ std::string HtmlRoutines::getMathDisplayStyle(
 std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
   const std::string& input, int recursionDepth
 ) {
-  MacroRegisterFunctionWithName(
-    "HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml"
-  );
+  STACK_TRACE("HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml");
   if (recursionDepth > 50) {
     return input;
   }
@@ -427,9 +425,7 @@ bool HtmlRoutines::accountOneInputPercentEncodedString(
   >& outputMap,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "HtmlRoutines::accountOneInputPercentEncodedString"
-  );
+  STACK_TRACE("HtmlRoutines::accountOneInputPercentEncodedString");
   if (fieldName == "") {
     return true;
   }
@@ -456,7 +452,7 @@ bool HtmlRoutines::chopPercentEncodedString(
   >& outputMap,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedString");
+  STACK_TRACE("HtmlRoutines::chopPercentEncodedString");
   outputMap.clear();
   outputMap.setExpectedSize(15);
   return
@@ -474,8 +470,7 @@ bool HtmlRoutines::chopPercentEncodedStringAppend(
   >& outputMap,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedStringAppend")
-  ;
+  STACK_TRACE("HtmlRoutines::chopPercentEncodedStringAppend");
   unsigned inputLength = static_cast<unsigned>(input.size());
   bool readingData = false;
   std::string currentFieldName = "";

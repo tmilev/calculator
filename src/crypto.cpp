@@ -851,7 +851,7 @@ bool Crypto::convertBase64ToBitStream(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Crypto::Base64ToBitStream");
+  STACK_TRACE("Crypto::Base64ToBitStream");
   output.reserve(static_cast<signed>((3 * input.size()) / 4 + 1));
   output.setSize(0);
   uint32_t stack = 0;
@@ -913,7 +913,7 @@ bool Crypto::convertBase64ToBitStream(
 void Crypto::convertBitStreamToString(
   const List<unsigned char>& input, std::string& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::convertBitStreamToString");
+  STACK_TRACE("Crypto::convertBitStreamToString");
   output.clear();
   output.reserve(static_cast<unsigned>(input.size));
   for (int i = 0; i < input.size; i ++) {
@@ -924,14 +924,14 @@ void Crypto::convertBitStreamToString(
 void Crypto::convertStringToListBytes(
   const std::string& input, List<unsigned char>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::convertStringToListBytes");
+  STACK_TRACE("Crypto::convertStringToListBytes");
   output = input;
 }
 
 void Crypto::convertStringToListBytesSigned(
   const std::string& input, List<char>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::convertStringToListBytesSigned");
+  STACK_TRACE("Crypto::convertStringToListBytesSigned");
   output = input;
 }
 
@@ -950,7 +950,7 @@ std::string Crypto::convertStringToBase64URL(const std::string& input) {
 std::string Crypto::convertListUnsignedCharsToBase64(
   const List<unsigned char>& input, bool useBase64URL
 ) {
-  MacroRegisterFunctionWithName("Crypto::convertListUnsignedCharsToBase64");
+  STACK_TRACE("Crypto::convertListUnsignedCharsToBase64");
   uint32_t stack = 0;
   int numberOfBitsInStack = 0;
   std::string result;
@@ -1083,7 +1083,7 @@ void Crypto::convertUint32ToUcharBigendiaN(
 void Crypto::convertListUint32ToListUcharBigendian(
   const List<uint32_t>& input, List<unsigned char>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::convertUint32ToUcharBigendian");
+  STACK_TRACE("Crypto::convertUint32ToUcharBigendian");
   output.setSize(input.size * 4);
   for (int i = 0; i < input.size; i ++) {
     output[i * 4 + 0] = static_cast<unsigned char>(input[i] / 16777216);
@@ -1097,7 +1097,7 @@ void Crypto::convertListUint32ToListUcharBigendian(
 void Crypto::convertListUint32ToString(
   const List<uint32_t>& input, std::string& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::convertUint32ToString");
+  STACK_TRACE("Crypto::convertUint32ToString");
   output.resize(static_cast<unsigned>(input.size * 4));
   for (unsigned i = 0; i < static_cast<unsigned>(input.size); i ++) {
     output[i * 4 + 0] = static_cast<char>(
@@ -1471,9 +1471,7 @@ void Crypto::convertStringToListUInt32BigendianZeroPad(
 void Crypto::convertStringToListUInt32BigendianZeroPad(
   const List<unsigned char>& input, List<uint32_t>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "Crypto::convertStringToListUInt32BigendianZeroPad"
-  );
+  STACK_TRACE("Crypto::convertStringToListUInt32BigendianZeroPad");
   List<unsigned char> converter;
   converter.setSize(4);
   int finalSize = input.size / 4;
@@ -1503,7 +1501,7 @@ uint32_t Crypto::getUInt32FromCharBigendian(
 void Crypto::computeSha1(
   const std::string& inputString, List<uint32_t>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::computeSha1");
+  STACK_TRACE("Crypto::computeSha1");
   // Reference: wikipedia page on sha1.
   // the Algorithm here is a direct implementation of the Wikipedia pseudocode.
   uint32_t h0 = 0x67452301;
@@ -1622,7 +1620,7 @@ void Crypto::computeSha1(
 }
 
 void Crypto::initSha256() {
-  MacroRegisterFunctionWithName("Crypto::initSha256");
+  STACK_TRACE("Crypto::initSha256");
   if (Crypto::kArraySha2xx.size != 0) {
     return;
   }
@@ -1694,7 +1692,7 @@ void Crypto::initSha256() {
 }
 
 void Crypto::initSha512() {
-  MacroRegisterFunctionWithName("Crypto::initSha512");
+  STACK_TRACE("Crypto::initSha512");
   if (Crypto::kArraySha512.size != 0) {
     return;
   }
@@ -1861,9 +1859,7 @@ void Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
 void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST(
   const LargeIntegerUnsigned& input, std::string& output
 ) {
-  MacroRegisterFunctionWithName(
-    "Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST"
-  );
+  STACK_TRACE("Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST");
   output.clear();
   LargeIntegerUnsigned copy = input;
   while (copy > 0) {
@@ -1936,9 +1932,7 @@ bool Crypto::convertBase58ToHexSignificantDigitsFirst(
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "Crypto::convertBase58ToHexSignificantDigitsFirst"
-  );
+  STACK_TRACE("Crypto::convertBase58ToHexSignificantDigitsFirst");
   LargeIntegerUnsigned outputLIU;
   bool result = true;
   int numberOfLeadingZeroes = 0;
@@ -1972,7 +1966,7 @@ void Crypto::convertStringToLargeIntUnsigned(
 void Crypto::computeSha224(
   const List<unsigned char>& input, List<uint32_t>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::computeSha224");
+  STACK_TRACE("Crypto::computeSha224");
   return Crypto::computeSha2xx(input, output, true);
 }
 
@@ -2005,7 +1999,7 @@ void Crypto::computeSha256(
 void Crypto::computeSha256(
   const List<unsigned char>& input, List<uint32_t>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::computeSha256");
+  STACK_TRACE("Crypto::computeSha256");
   return Crypto::computeSha2xx(input, output, false);
 }
 
@@ -2016,7 +2010,7 @@ void Crypto::computeSha2xx(
   List<uint32_t>& output,
   bool is224
 ) {
-  MacroRegisterFunctionWithName("Crypto::computeSha2xx");
+  STACK_TRACE("Crypto::computeSha2xx");
   // Reference: wikipedia page on sha256.
   // the Algorithm here is a direct implementation of the Wikipedia pseudocode.
   uint32_t h0 = 0x6a09e667;
@@ -2178,7 +2172,7 @@ void Crypto::computeSha512(
 void Crypto::computeSha512(
   const List<unsigned char>& input, List<uint64_t>& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::computeSha512");
+  STACK_TRACE("Crypto::computeSha512");
   // Reference: wikipedia page on sha2.
   // the Algorithm here is a direct implementation of the Wikipedia pseudocode.
   uint64_t h0 = 0x6a09e667f3bcc908;
@@ -2303,7 +2297,7 @@ bool PublicKeyRSA::loadFromJSON(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Certificate::loadFromJSON");
+  STACK_TRACE("Certificate::loadFromJSON");
   if (commentsGeneral != nullptr) {
     *commentsGeneral
     << "<hr>Loading certificate from: "
@@ -2338,9 +2332,7 @@ bool PublicKeyRSA::loadFromJSON(
 bool PublicKeyRSA::loadFromModulusAndExponentStrings(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CertificateRSA::loadFromModulusAndExponentStrings"
-  );
+  STACK_TRACE("CertificateRSA::loadFromModulusAndExponentStrings");
   if (
     !Crypto::convertBase64ToLargeUnsigned(
       this->modulusString, this->modulus, commentsOnFailure
@@ -2364,7 +2356,7 @@ bool Crypto::loadOneKnownCertificate(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Crypto::loadOneKnownCertificate");
+  STACK_TRACE("Crypto::loadOneKnownCertificate");
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Loading from: " << input;
   }
@@ -2429,7 +2421,7 @@ bool Crypto::loadKnownCertificates(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Crypto::loadKnownCertificates");
+  STACK_TRACE("Crypto::loadKnownCertificates");
   Crypto::knownCertificates.setSize(0);
   List<std::string> fileNames;
   if (
@@ -2493,7 +2485,7 @@ LargeIntegerUnsigned Crypto::rsaEncrypt(
   const LargeInteger& exponent,
   const LargeInteger& message
 ) {
-  MacroRegisterFunctionWithName("Crypto::rsaEncrypt");
+  STACK_TRACE("Crypto::rsaEncrypt");
   if (modulus == 0 || exponent == 0) {
     global.fatal
     <<
@@ -2635,7 +2627,7 @@ bool JSONWebToken::verifyRSA256(
 bool JSONWebToken::assignString(
   const std::string& other, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("JSONWebToken::assignString");
+  STACK_TRACE("JSONWebToken::assignString");
   List<std::string> stringSplitter;
   StringRoutines::splitExcludeDelimiter(other, '.', stringSplitter);
   if (stringSplitter.size != 3) {

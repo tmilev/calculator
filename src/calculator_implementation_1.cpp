@@ -61,9 +61,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   Vector<Polynomial<AlgebraicNumber> >& output,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::getListPolynomialVariableLabelsLexicographic"
-  );
+  STACK_TRACE("Calculator::getListPolynomialVariableLabelsLexicographic");
   ExpressionContext contextStart(*this);
   if (
     !this->getVectorFromFunctionArguments(
@@ -209,7 +207,7 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
 }
 
 void Plot::operator+=(const Plot& other) {
-  MacroRegisterFunctionWithName("Plot::operator+=");
+  STACK_TRACE("Plot::operator+=");
   if (other.priorityCanvasName > this->priorityCanvasName) {
     this->setCanvasName(other.getCanvasName());
   } else if (
@@ -377,7 +375,7 @@ PlotObject::PlotObject() {
 }
 
 void PlotObject::computeYBounds() {
-  MacroRegisterFunctionWithName("PlotObject::computeYBounds");
+  STACK_TRACE("PlotObject::computeYBounds");
   for (int i = 0; i < this->pointsDouble.size; i ++) {
     this->yHigh =
     MathRoutines::maximum(this->yHigh, this->pointsDouble[i][1]);
@@ -430,7 +428,7 @@ Plot::Plot() {
 }
 
 void Plot::computeAxesAndBoundingBox() {
-  MacroRegisterFunctionWithName("Plot::computeAxesAndBoundingBox");
+  STACK_TRACE("Plot::computeAxesAndBoundingBox");
   this->lowerBoundAxes = - 0.5;
   this->upperBoundAxes = 1.1;
   this->lowBoundY = - 0.5;
@@ -467,7 +465,7 @@ void Plot::computeAxesAndBoundingBox() {
 }
 
 void Plot::computeAxesAndBoundingBox3d() {
-  MacroRegisterFunctionWithName("Plot::computeAxesAndBoundingBox3d");
+  STACK_TRACE("Plot::computeAxesAndBoundingBox3d");
   this->lowerBoundAxes = - 0.5;
   this->upperBoundAxes = 1.1;
   this->lowBoundY = - 0.5;
@@ -635,7 +633,7 @@ bool Plot::isOKVector(const Vector<double>& input) {
 }
 
 std::string Plot::getPlotHtml3d(Calculator& owner) {
-  MacroRegisterFunctionWithName("Plot::getPlotHtml3d");
+  STACK_TRACE("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
   this->computeCanvasNameIfNecessary(
     owner.objectContainer.canvasPlotCounter
@@ -714,7 +712,7 @@ std::string Plot::toStringDebug() {
 }
 
 std::string PlotObject::toStringDebug() {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toStringDebug");
+  STACK_TRACE("PlotSurfaceIn3d::toStringDebug");
   std::stringstream out;
   out << "colorUV: " << this->colorUV << "<br>";
   out << "colorVU: " << this->colorVU << "<br>";
@@ -728,7 +726,7 @@ std::string PlotObject::toStringDebug() {
 }
 
 JSData PlotObject::toJSONParametricCurve() {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSONCurveImmersionIn3d");
+  STACK_TRACE("PlotSurfaceIn3d::toJSONCurveImmersionIn3d");
   JSData result;
   this->writeVariables(result);
   List<std::string> coordinates;
@@ -750,7 +748,7 @@ JSData PlotObject::toJSONParametricCurve() {
 }
 
 JSData PlotObject::toJSONSurfaceImmersion() {
-  MacroRegisterFunctionWithName("PlotObject::toJSONSurfaceImmersion");
+  STACK_TRACE("PlotObject::toJSONSurfaceImmersion");
   JSData result;
   this->writeVariables(result);
   if (this->coordinateFunctionsJS.size == 3) {
@@ -782,7 +780,7 @@ JSData PlotObject::toJSONSurfaceImmersion() {
 }
 
 std::string Plot::getPlotHtml(Calculator& owner) {
-  MacroRegisterFunctionWithName("Plot::getPlotHtml");
+  STACK_TRACE("Plot::getPlotHtml");
   if (this->dimension == 3) {
     return this->getPlotHtml3d(owner);
   } else if (this->dimension == 2) {
@@ -795,7 +793,7 @@ std::string Plot::getPlotHtml(Calculator& owner) {
 }
 
 void PlotObject::writeVariables(JSData& output) {
-  MacroRegisterFunctionWithName("PlotObject::writeVariables");
+  STACK_TRACE("PlotObject::writeVariables");
   JSData arguments = JSData::makeEmptyArray();
   for (int i = 0; i < this->variablesInPlayJS.size; i ++) {
     arguments[i] =
@@ -854,7 +852,7 @@ void PlotObject::writeLineWidth(JSData& output) {
 }
 
 JSData PlotObject::toJSON2dDrawFunction() {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toJSON2dDrawFunction");
+  STACK_TRACE("PlotSurfaceIn3d::toJSON2dDrawFunction");
   JSData result;
   result[PlotObject::Labels::functionLabel] = this->coordinateFunction(0);
   result[PlotObject::Labels::left] = this->leftPtJS;
@@ -869,9 +867,7 @@ JSData PlotObject::manifoldImmersionFunctionsJS() {
 }
 
 JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
-  MacroRegisterFunctionWithName(
-    "PlotSurfaceIn3d::toJSONDirectionFieldInTwoDimensions"
-  );
+  STACK_TRACE("PlotSurfaceIn3d::toJSONDirectionFieldInTwoDimensions");
   JSData result;
   result[PlotObject::Labels::manifoldImmersion] =
   this->manifoldImmersionFunctionsJS();
@@ -982,7 +978,7 @@ JSData PlotObject::toJSON() {
 }
 
 JSData PlotObject::toJSONPoints() {
-  MacroRegisterFunctionWithName("PlotObject::toJSONPoints");
+  STACK_TRACE("PlotObject::toJSONPoints");
   JSData result;
   JSData points = JSData::makeEmptyArray();
   for (int i = 0; i < this->pointsJS.numberOfRows; i ++) {
@@ -1037,7 +1033,7 @@ JSData Plot::getSetViewWindow() {
 }
 
 std::string Plot::getPlotHtml2d(Calculator& owner) {
-  MacroRegisterFunctionWithName("Plot::getPlotHtml2d");
+  STACK_TRACE("Plot::getPlotHtml2d");
   owner.flagHasGraphics = true;
   if (this->flagDivAlreadyDisplayed) {
     return "[plot alredy displayed]";
@@ -1104,7 +1100,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
 }
 
 std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
-  MacroRegisterFunctionWithName("Plot::getPlotStringAddLatexCommands");
+  STACK_TRACE("Plot::getPlotStringAddLatexCommands");
   std::stringstream resultStream;
   this->computeAxesAndBoundingBox();
   std::string lineSeparator = useHtml ? "<br>\n" : "\n";
@@ -1177,7 +1173,7 @@ bool Expression::assignStringParsed(
   >* substitutions,
   Calculator& owner
 ) {
-  MacroRegisterFunctionWithName("Expression::assignStringParsed");
+  STACK_TRACE("Expression::assignStringParsed");
   Expression commands, result;
   List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
   std::string outputSyntacticErrors;

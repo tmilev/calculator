@@ -10,7 +10,7 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   const Coefficient& ringOne,
   const Coefficient& ringZero
 ) {
-  MacroRegisterFunctionWithName("Matrix::computeDeterminantOverwriteMatrix");
+  STACK_TRACE("Matrix::computeDeterminantOverwriteMatrix");
   bool doReport = this->numberOfColumns > 10 &&
   this->numberOfRows > 10 &&
   this->numberOfColumns * this->numberOfRows >= 400;
@@ -144,7 +144,7 @@ void MathRoutines::raiseToPower(
   const IntegerType& power,
   const Coefficient& ringUnit
 ) {
-  MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
+  STACK_TRACE("MathRoutines::raiseToPower");
   IntegerType powerCopy;
   powerCopy = power;
   if (powerCopy < 0) {
@@ -213,7 +213,7 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
   ElementMonomialAlgebra<TemplateMonomial, Coefficient>& bufferPoly,
   TemplateMonomial& bufferMon
 ) const {
-  MacroRegisterFunctionWithName("ElementMonomialAlgebra::multiplyBy");
+  STACK_TRACE("ElementMonomialAlgebra::multiplyBy");
   if (other.isEqualToZero()) {
     output.makeZero();
     return;
@@ -316,7 +316,7 @@ template <class Coefficient>
 void MatrixTensor<Coefficient>::operator*=(
   const MatrixTensor<Coefficient>& other
 ) {
-  MacroRegisterFunctionWithName("MatrixTensor::multiplyBy");
+  STACK_TRACE("MatrixTensor::multiplyBy");
   if (other.isEqualToZero()) {
     this->makeZero();
     return;
@@ -389,9 +389,7 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
     const Coefficient& left, const Coefficient& right
   )
 ) {
-  MacroRegisterFunctionWithName(
-    "Matrix_Element::gaussianEliminationEuclideanDomain"
-  );
+  STACK_TRACE("Matrix_Element::gaussianEliminationEuclideanDomain");
   ProgressReport report(
     1, GlobalVariables::Response::ReportType::gaussianElimination
   );
@@ -542,7 +540,7 @@ void Vectors<Coefficient>::selectBasisInSubspace(
     output = input;
     return;
   }
-  MacroRegisterFunctionWithName("Vectors::selectBasisInSubspace");
+  STACK_TRACE("Vectors::selectBasisInSubspace");
   ProgressReport reportTask(
     1, GlobalVariables::Response::ReportType::gaussianElimination
   );
@@ -626,7 +624,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   std::stringstream* humanReadableReport,
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("Matrix::gaussianEliminationByRows");
+  STACK_TRACE("Matrix::gaussianEliminationByRows");
   if (this->numberOfRows == 0) {
     global.fatal
     << "Request to do Gaussian elimination on a matrix with "

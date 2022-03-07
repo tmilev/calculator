@@ -9,9 +9,7 @@
 #include "calculator_inner_typed_functions.h"
 
 void Calculator::initializeFunctionsScientificBasic() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeFunctionsScientificBasic"
-  );
+  STACK_TRACE("Calculator::initializeFunctionsScientificBasic");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerFreezesArguments =
   Function::Options::innerFreezesArguments();

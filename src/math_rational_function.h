@@ -36,7 +36,7 @@ public:
   enum TypeExpression {
     typeConstant = 0,
     typePolynomial = 1,
-    typeRationalFunction = 2,
+    typeRationalFraction = 2,
     typeError = 3  };
   std::string toString(FormatExpressions* format = nullptr) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
@@ -91,6 +91,7 @@ public:
   bool operator!=(int other);
   bool operator==(const RationalFraction<Coefficient>& other) const;
   void simplify();
+  void reduceRationalFraction();
   // Scales the numerator and denominator simultaneously
   // so all coefficients are integers,
   // the leading monomial of the denominator has positive coefficient,

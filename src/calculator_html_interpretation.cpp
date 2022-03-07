@@ -9,7 +9,7 @@
 #include "calculator_educational_functions_1.h"
 
 JSData WebAPIResponse::getProblemSolutionJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getProblemSolutionJSON");
+  STACK_TRACE("WebAPIReponse::getProblemSolutionJSON");
   if (!global.userDefaultHasAdminRights()) {
     global.response.disallowReport();
   }
@@ -181,7 +181,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
 }
 
 std::string WebAPIResponse::setProblemWeight() {
-  MacroRegisterFunctionWithName("WebAPIReponse::setProblemWeight");
+  STACK_TRACE("WebAPIReponse::setProblemWeight");
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
@@ -205,7 +205,7 @@ std::string WebAPIResponse::setProblemWeight() {
 }
 
 std::string WebAPIResponse::setProblemDeadline() {
-  MacroRegisterFunctionWithName("WebAPIReponse::setProblemDeadline");
+  STACK_TRACE("WebAPIReponse::setProblemDeadline");
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
@@ -235,7 +235,7 @@ std::string WebAPIResponse::setProblemDeadline() {
 std::string WebAPIResponse::getSanitizedComment(
   const Expression& input, FormatExpressions& format, bool& resultIsPlot
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getSanitizedComment");
+  STACK_TRACE("WebAPIReponse::getSanitizedComment");
   format.flagUseQuotes = false;
   resultIsPlot = false;
   std::string currentString;
@@ -274,7 +274,7 @@ std::string WebAPIResponse::getCommentsInterpretation(
   int indexShift,
   FormatExpressions& format
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getCommentsInterpretation");
+  STACK_TRACE("WebAPIReponse::getCommentsInterpretation");
   std::stringstream out;
   format.flagExpressionIsFinal = true;
   format.flagIncludeExtraHtmlDescriptionsInPlots = false;
@@ -306,7 +306,7 @@ std::string WebAPIResponse::getCommentsInterpretation(
 }
 
 JSData WebAPIResponse::submitAnswersPreviewJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::submitAnswersPreviewJSON");
+  STACK_TRACE("WebAPIResponse::submitAnswersPreviewJSON");
   if (!global.userDefaultHasAdminRights()) {
     global.response.disallowReport();
   }
@@ -536,7 +536,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
 }
 
 JSData WebAPIResponse::clonePageResult() {
-  MacroRegisterFunctionWithName("WebAPIReponse::clonePageResult");
+  STACK_TRACE("WebAPIReponse::clonePageResult");
   JSData result;
   if (
     !global.flagLoggedIn ||
@@ -636,7 +636,7 @@ void BuilderApplication::initializeTags(bool appendBuildHash) {
 }
 
 void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("BuilderApplication::buildHtmlJavascriptPage");
+  STACK_TRACE("BuilderApplication::buildHtmlJavascriptPage");
   this->initializeTags(appendBuildHash);
   this->htmlJSbuild = this->htmlRaw;
   if (
@@ -675,13 +675,13 @@ bool BuilderApplication::fileNameAllowedToBeMissing(
 }
 
 std::string WebAPIResponse::getOnePageJS() {
-  MacroRegisterFunctionWithName("WebAPIResponse::getOnePageJS");
+  STACK_TRACE("WebAPIResponse::getOnePageJS");
   return
   WebAPIResponse::getBrowserification("/calculator_html/BUILD.json", "./app");
 }
 
 std::string WebAPIResponse::getCalculatorWorkerJS() {
-  MacroRegisterFunctionWithName("WebAPIResponse::getCalculatorWorkerJS");
+  STACK_TRACE("WebAPIResponse::getCalculatorWorkerJS");
   return
   WebAPIResponse::getBrowserification(
     "/calculator_html/web_assembly/BUILD.json",
@@ -693,7 +693,7 @@ std::string WebAPIResponse::getBrowserification(
   const std::string& buildJSONVirtualFileName,
   const std::string& scriptEntryPoint
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getBrowserification");
+  STACK_TRACE("WebAPIReponse::getBrowserification");
   BuilderApplication builder;
   std::stringstream errorStream;
   if (
@@ -795,9 +795,7 @@ bool BuilderApplication::loadJavascriptFileNames(
 std::string BuilderApplication::getBrowserificationAssembled(
   const std::string& entryPoint
 ) {
-  MacroRegisterFunctionWithName(
-    "BuilderApplication::getBrowserificationAssembled"
-  );
+  STACK_TRACE("BuilderApplication::getBrowserificationAssembled");
   std::stringstream out;
   out << "(()=>{\n" << "let jsContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
@@ -826,7 +824,7 @@ std::string BuilderApplication::getBrowserificationAssembled(
 std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
   const std::string& virtualHTMLFileName, bool appendBuildHash
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getHTMLAllInOneJavascriptCSS");
+  STACK_TRACE("WebAPIReponse::getHTMLAllInOneJavascriptCSS");
   BuilderApplication builder;
   std::stringstream out;
   std::stringstream errorStream;
@@ -907,7 +905,7 @@ std::string CourseList::toHtml() {
 }
 
 bool CourseList::loadFromString(const std::string& input) {
-  MacroRegisterFunctionWithName("CourseList::loadFromString");
+  STACK_TRACE("CourseList::loadFromString");
   std::stringstream tableReader(input);
   std::string currentLine, currentArgument;
   Course current;
@@ -997,14 +995,14 @@ JSData CourseList::toJSON() {
 }
 
 JSData WebAPIResponse::getSelectCourseJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getSelectCourseJSON");
+  STACK_TRACE("WebAPIReponse::getSelectCourseJSON");
   CourseList courses;
   courses.load();
   return courses.toJSON();
 }
 
 std::string WebAPIResponse::getHtmlTagWithManifest() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getHtmlTagWithManifest");
+  STACK_TRACE("WebAPIReponse::getHtmlTagWithManifest");
   std::stringstream out;
   out << "<!DOCTYPE HTML>\n";
   out
@@ -1014,7 +1012,7 @@ std::string WebAPIResponse::getHtmlTagWithManifest() {
 }
 
 JSData WebAPIResponse::getTopicTableJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getTopicTableJSON");
+  STACK_TRACE("WebAPIReponse::getTopicTableJSON");
   std::stringstream out;
   CalculatorHTML page;
   std::stringstream comments;
@@ -1053,7 +1051,7 @@ JSData WebAPIResponse::getTopicTableJSON() {
 void WebAPIResponse::getJSDataUserInfo(
   JSData& outputAppend, const std::string& comments
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getJSDataUserInfo");
+  STACK_TRACE("WebAPIReponse::getJSDataUserInfo");
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] =
   global.flagDisableDatabaseLogEveryoneAsAdmin;
@@ -1124,14 +1122,14 @@ void WebAPIResponse::getJSDataUserInfo(
 }
 
 JSData WebAPIResponse::getJSONUserInfo(const std::string& comments) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getJSONUserInfo");
+  STACK_TRACE("WebAPIReponse::getJSONUserInfo");
   JSData output;
   WebAPIResponse::getJSDataUserInfo(output, comments);
   return output;
 }
 
 std::string WebAPIResponse::getJSONFromTemplate() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getJSONFromTemplate");
+  STACK_TRACE("WebAPIReponse::getJSONFromTemplate");
   std::stringstream out;
   CalculatorHTML page;
   std::stringstream comments;
@@ -1176,7 +1174,7 @@ std::string WebAPIResponse::getJSONFromTemplate() {
 }
 
 JSData WebAPIResponse::getExamPageJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::getExamPageJSON");
+  STACK_TRACE("WebAPIReponse::getExamPageJSON");
   std::stringstream out;
   JSData output;
   if (!global.flagLoggedIn && global.requestType == "scoredQuizJSON") {
@@ -1228,7 +1226,7 @@ JSData WebAPIResponse::getExamPageJSON() {
 }
 
 JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getEditPageJSON");
+  STACK_TRACE("WebAPIReponse::getEditPageJSON");
   JSData output;
   if (!global.flagLoggedIn || !global.userDefaultHasAdminRights()) {
     if (!showSourceRelaxed) {
@@ -1380,7 +1378,7 @@ AnswerChecker::AnswerChecker() {
 }
 
 bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
-  MacroRegisterFunctionWithName("AnswerChecker::prepareProblem");
+  STACK_TRACE("AnswerChecker::prepareProblem");
   std::stringstream errorStream, comments;
   this->startTimE = global.getElapsedMilliseconds();
   this->problem.loadCurrentProblemItem(
@@ -1414,7 +1412,7 @@ bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
 }
 
 bool AnswerChecker::extractStudentAnswerPartOne() {
-  MacroRegisterFunctionWithName("AnswerChecker::extractStudentAnswerPartOne");
+  STACK_TRACE("AnswerChecker::extractStudentAnswerPartOne");
   std::string studentAnswerNameReader;
   this->problem.studentTagsAnswered.initialize(
     this->problem.problemData.answers.size()
@@ -1486,7 +1484,7 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
 }
 
 bool AnswerChecker::extractStudentAnswerPartTwo() {
-  MacroRegisterFunctionWithName("AnswerChecker::extractStudentAnswerPartTwo");
+  STACK_TRACE("AnswerChecker::extractStudentAnswerPartTwo");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
   currentA.currentAnswerClean =
@@ -1501,7 +1499,7 @@ bool AnswerChecker::extractStudentAnswerPartTwo() {
 }
 
 bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
-  MacroRegisterFunctionWithName("AnswerChecker::storeInDatabase");
+  STACK_TRACE("AnswerChecker::storeInDatabase");
   if (!global.flagDatabaseCompiled) {
     return true;
   }
@@ -1620,7 +1618,7 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
 }
 
 bool AnswerChecker::checkAnswerHardcoded(bool* outputIsCorrect) {
-  MacroRegisterFunctionWithName("AnswerChecker::checkAnswerHardcoded");
+  STACK_TRACE("AnswerChecker::checkAnswerHardcoded");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
   this->checker.interpreter.initialize(Calculator::Mode::educational);
@@ -1654,7 +1652,7 @@ AnswerCheckerNoProblem::AnswerCheckerNoProblem() {
 }
 
 bool AnswerChecker::checkAnswerStandard(bool* outputIsCorrect) {
-  MacroRegisterFunctionWithName("AnswerChecker::checkAnswerStandard");
+  STACK_TRACE("AnswerChecker::checkAnswerStandard");
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
   this->checker.commandsBeforeAnswer = answer.commandsBeforeAnswer;
@@ -1732,7 +1730,7 @@ void AnswerCheckerNoProblem::prepareForEvaluation() {
 }
 
 bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
-  MacroRegisterFunctionWithName("AnswerCheckerNoProblem::checkAnswer");
+  STACK_TRACE("AnswerCheckerNoProblem::checkAnswer");
   this->prepareForEvaluation();
   this->interpreter.initialize(Calculator::Mode::educational);
   this->interpreter.flagWriteLatexPlots = false;
@@ -1886,7 +1884,7 @@ JSData AnswerChecker::submitAnswersJSON(
   bool* outputIsCorrect,
   bool timeSafetyBrake
 ) {
-  MacroRegisterFunctionWithName("AnswerChecker::submitAnswersJSON");
+  STACK_TRACE("AnswerChecker::submitAnswersJSON");
   if (!global.userDefaultHasAdminRights()) {
     global.response.disallowReport();
   }
@@ -1980,7 +1978,7 @@ JSData WebAPIResponse::submitAnswersJSON(
 }
 
 std::string WebAPIResponse::addTeachersSections() {
-  MacroRegisterFunctionWithName("WebAPIReponse::addTeachersSections");
+  STACK_TRACE("WebAPIReponse::addTeachersSections");
   std::stringstream out;
   if (
     !global.userDefaultHasAdminRights() ||
@@ -2086,7 +2084,7 @@ std::string WebAPIResponse::addTeachersSections() {
 std::string WebAPIResponse::addUserEmails(
   const std::string& hostWebAddressWithPort
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::addUserEmails");
+  STACK_TRACE("WebAPIReponse::addUserEmails");
   (void) hostWebAddressWithPort;
   std::stringstream out;
   if (
@@ -2178,7 +2176,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   bool* answerGenerationSuccess,
   bool doIncludeTimeStats
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::getAnswerOnGiveUp");
+  STACK_TRACE("CalculatorHTML::getAnswerOnGiveUp");
   GlobalVariables::Response::StateMaintainer maintain(global.response);
   if (!global.userDefaultHasAdminRights()) {
     global.response.disallowReport();
@@ -2419,7 +2417,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
 JSData WebAPIResponse::getAccountsPageJSON(
   const std::string& hostWebAddressWithPort
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getAccountsPageJSON");
+  STACK_TRACE("WebAPIReponse::getAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
@@ -2491,7 +2489,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
 std::string WebAPIResponse::getAccountsPageBody(
   const std::string& hostWebAddressWithPort
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::getAccountsPageBody");
+  STACK_TRACE("WebAPIReponse::getAccountsPageBody");
   (void) hostWebAddressWithPort;
   if (!global.flagDatabaseCompiled) {
     return "Database not available. ";
@@ -2562,7 +2560,7 @@ std::string WebAPIResponse::getAccountsPageBody(
 }
 
 std::string WebAPIResponse::getScoresPage() {
-  MacroRegisterFunctionWithName("WebWorker::getScoresPage");
+  STACK_TRACE("WebWorker::getScoresPage");
   std::stringstream out;
   CalculatorHTML page;
   page.loadDatabaseInfo(out);
@@ -2576,7 +2574,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   List<JSData>& users,
   const std::string& hostWebAddressWithPort
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetailsTable");
+  STACK_TRACE("WebAPIReponse::toStringUserDetailsTable");
   if (!global.flagDatabaseCompiled) {
     return "Compiled without database support. ";
   }
@@ -2808,7 +2806,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
 }
 
 std::string WebAPIResponse::toStringAssignSection() {
-  MacroRegisterFunctionWithName("WebAPIReponse::toStringAssignSection");
+  STACK_TRACE("WebAPIReponse::toStringAssignSection");
   std::stringstream out;
   std::string idAddressTextarea = "inputSetTeacher";
   std::string idExtraTextarea = "inputSections";
@@ -2848,7 +2846,7 @@ std::string WebAPIResponse::toStringAssignSection() {
 int ProblemData::getExpectedNumberOfAnswers(
   const std::string& problemName, std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ProblemData::getExpectedNumberOfAnswers");
+  STACK_TRACE("ProblemData::getExpectedNumberOfAnswers");
   if (this->knownNumberOfAnswersFromHD != - 1) {
     return this->knownNumberOfAnswersFromHD;
   }
@@ -2955,7 +2953,7 @@ void UserCalculator::computePointsEarned(
   >* topics,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::computePointsEarned");
+  STACK_TRACE("UserCalculator::computePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
   if (topics != nullptr) {
@@ -3049,7 +3047,7 @@ public:
 };
 
 bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
-  MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
+  STACK_TRACE("UserScores::ComputeScoresAndStats");
   if (!global.flagDatabaseCompiled) {
     return false;
   }
@@ -3185,7 +3183,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
 }
 
 std::string WebAPIResponse::getScoresInCoursePage() {
-  MacroRegisterFunctionWithName("WebWorker::getScoresInCoursePage");
+  STACK_TRACE("WebWorker::getScoresInCoursePage");
   if (!global.userDefaultHasAdminRights()) {
     return "Only admins are allowed to view student scores.";
   }
@@ -3234,7 +3232,7 @@ std::string WebAPIResponse::getScoresInCoursePage() {
 }
 
 std::string WebAPIResponse::toStringUserScores() {
-  MacroRegisterFunctionWithName("WebAPIReponse::toStringUserScores");
+  STACK_TRACE("WebAPIReponse::toStringUserScores");
   if (!global.userDefaultHasAdminRights()) {
     return "only admins are allowed to view scores";
   }
@@ -3388,7 +3386,7 @@ std::string WebAPIResponse::toStringUserDetails(
   List<JSData>& users,
   const std::string& hostWebAddressWithPort
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetails");
+  STACK_TRACE("WebAPIReponse::toStringUserDetails");
   std::stringstream out;
   if (!global.flagDatabaseCompiled) {
     out << "<b>Adding emails not available (database not present).</b> ";

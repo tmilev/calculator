@@ -946,9 +946,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
   const List<ElementSemisimpleLieAlgebra>& basis,
   Vector<Coefficient>& output
 ) const {
-  MacroRegisterFunctionWithName(
-    "ElementSemisimpleLieAlgebra::getCoordinatesInBasis"
-  );
+  STACK_TRACE("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
   if (basis.size == 0) {
     return false;
   }

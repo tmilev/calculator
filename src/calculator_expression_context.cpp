@@ -153,7 +153,7 @@ bool ExpressionContext::setVariablesFromStrings(
 }
 
 bool Expression::mergeContexts(Expression& leftE, Expression& rightE) {
-  MacroRegisterFunctionWithName("Expression::mergeContexts");
+  STACK_TRACE("Expression::mergeContexts");
   if (!leftE.hasContext() || !rightE.hasContext()) {
     return false;
   }
@@ -208,7 +208,7 @@ std::string ExpressionContext::toString() const {
 }
 
 Expression ExpressionContext::getVariable(int variableIndex) const {
-  MacroRegisterFunctionWithName("Expression::getVariable");
+  STACK_TRACE("Expression::getVariable");
   if (variableIndex < 0 || variableIndex >= this->variables.size) {
     Expression errorE;
     std::stringstream out;
@@ -326,9 +326,7 @@ bool ExpressionContext::fromExpression(const Expression& input) {
 bool ExpressionContext::fromExpressionPolynomialVariables(
   const Expression& input
 ) {
-  MacroRegisterFunctionWithName(
-    "Expression::fromExpressionPolynomialVariables"
-  );
+  STACK_TRACE("Expression::fromExpressionPolynomialVariables");
   for (int i = 1; i < input.size(); i ++) {
     this->variables.addOnTop(input[i]);
   }
@@ -338,9 +336,7 @@ bool ExpressionContext::fromExpressionPolynomialVariables(
 bool ExpressionContext::fromExpressionDifferentialOperatorVariables(
   const Expression& input
 ) {
-  MacroRegisterFunctionWithName(
-    "Expression::fromExpressionDifferentialOperatorVariables"
-  );
+  STACK_TRACE("Expression::fromExpressionDifferentialOperatorVariables");
   for (int i = 1; i < input.size(); i ++) {
     this->differentialOperatorVariables.addOnTop(input[i]);
   }
@@ -350,9 +346,7 @@ bool ExpressionContext::fromExpressionDifferentialOperatorVariables(
 bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
   const Expression& input
 ) {
-  MacroRegisterFunctionWithName(
-    "Expression::fromExpressionSemisimpleLieAlgebra"
-  );
+  STACK_TRACE("Expression::fromExpressionSemisimpleLieAlgebra");
   if (input.size() != 2) {
     return
     *this->owner
@@ -364,9 +358,7 @@ bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
 }
 
 bool ExpressionContext::fromExpressionDefaultModulus(const Expression& input) {
-  MacroRegisterFunctionWithName(
-    "Expression::fromExpressionSemisimpleLieAlgebra"
-  );
+  STACK_TRACE("Expression::fromExpressionSemisimpleLieAlgebra");
   if (input.size() != 2) {
     return *this->owner << "Corrupt modulus " << input.toString();
   }
@@ -520,7 +512,7 @@ bool ExpressionContext::mergeDifferentialOperators(
 bool ExpressionContext::mergeContexts(
   const ExpressionContext& other, ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("Expression::mergeContexts");
+  STACK_TRACE("Expression::mergeContexts");
   if (this == &outputContext || &other == &outputContext) {
     ExpressionContext leftCopy = *this;
     ExpressionContext rightCopy = other;
@@ -769,9 +761,7 @@ template < >
 bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "WithContext_ElementWeylAlgebra_Rational::extendContext"
-  );
+  STACK_TRACE("WithContext_ElementWeylAlgebra_Rational::extendContext");
   PolynomialSubstitution<Rational> substitutionDifferentialOperatorPart;
   PolynomialSubstitution<Rational> substitutionPolynomialPart;
   this->context.polynomialAndWeylAlgebraSubstitutionNoFailure(
@@ -803,9 +793,7 @@ template < >
 bool WithContext<RationalFraction<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "WithContext_RationalFunction_Rational::extendContext"
-  );
+  STACK_TRACE("WithContext_RationalFunction_Rational::extendContext");
   PolynomialSubstitution<Rational> substitution;
   this->context.polynomialSubstitutionNoFailure(
     newContext, substitution, Rational::one()
@@ -833,9 +821,7 @@ template < >
 bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "WithContext_RationalFunction_AlgebraicNumber::extendContext"
-  );
+  STACK_TRACE("WithContext_RationalFunction_AlgebraicNumber::extendContext");
   PolynomialSubstitution<AlgebraicNumber> substitution;
   AlgebraicClosureRationals& closure =
   this->context.owner->objectContainer.algebraicClosure;
@@ -904,7 +890,7 @@ bool Expression::setContextAtLeastEqualTo(
   ExpressionContext& inputOutputMinContext,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Expression::setContextAtLeastEqualTo");
+  STACK_TRACE("Expression::setContextAtLeastEqualTo");
   this->checkInitialization();
   if (!this->isBuiltInType()) {
     global.fatal

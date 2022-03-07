@@ -12,7 +12,7 @@ bool MonomialPolynomial::substitution(
   Polynomial<Coefficient>& output,
   const Coefficient& one
 ) const {
-  MacroRegisterFunctionWithName("MonomialPolynomial::substitution");
+  STACK_TRACE("MonomialPolynomial::substitution");
   output.makeConstant(one);
   if (this->isConstant()) {
     return true;
@@ -194,7 +194,7 @@ bool Polynomial<Coefficient>::substitution(
   const List<Polynomial<Coefficient> >& substitution,
   const Coefficient& one
 ) {
-  MacroRegisterFunctionWithName("Polynomial::substitution");
+  STACK_TRACE("Polynomial::substitution");
   Polynomial<Coefficient> sum, monomialContribution;
   for (int i = 0; i < this->size(); i ++) {
     if (
@@ -256,7 +256,7 @@ template <class Coefficient>
 Coefficient Polynomial<Coefficient>::evaluate(
   const Vector<Coefficient>& input, const Coefficient& zero
 ) {
-  MacroRegisterFunctionWithName("Polynomial::evaluate");
+  STACK_TRACE("Polynomial::evaluate");
   Coefficient output = zero;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialPolynomial& currentMonomial = (*this)[i];
@@ -271,9 +271,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(
   int newNumberOfVariables
 ) {
-  MacroRegisterFunctionWithName(
-    "Polynomial::setNumberOfVariablesSubstituteDeletedByOne"
-  );
+  STACK_TRACE("Polynomial::setNumberOfVariablesSubstituteDeletedByOne");
   if (newNumberOfVariables >= this->minimalNumberOfVariables()) {
     return;
   }
@@ -314,6 +312,16 @@ bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
   }
   if (whichTotalDegree != nullptr) {
     *whichTotalDegree = maximum;
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool Polynomial<Coefficient>::hasNonNegativeIntegralExponents() const {
+  for (MonomialPolynomial & monomial : this->monomials) {
+    if (!monomial.hasNonNegativeIntegralExponents()) {
+      return false;
+    }
   }
   return true;
 }
@@ -434,7 +442,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixProduct");
+  STACK_TRACE("SylvesterMatrix::sylvesterMatrixProduct");
   LargeInteger totalPower = 0;
   for (int i = 0; i < polynomials.size; i ++) {
     Polynomial<Coefficient>& current = polynomials[i];
@@ -519,7 +527,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrix(
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Polynomial::sylvesterMatrix");
+  STACK_TRACE("Polynomial::sylvesterMatrix");
   List<Polynomial<Coefficient> > polynomials;
   polynomials.addOnTop(left);
   polynomials.addOnTop(right);
@@ -535,7 +543,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrixMultiple(
   int dimension,
   Matrix<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixMultiple");
+  STACK_TRACE("SylvesterMatrix::sylvesterMatrixMultiple");
   output.initialize(dimension, dimension);
   output.makeZero(polynomials[0].coefficients[0].zero());
   int columnOffset = 0;
@@ -610,7 +618,7 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
   const Matrix<Coefficient>& input
 ) {
   // for univariate polynomials only
-  MacroRegisterFunctionWithName("Polynomial::evaluateUnivariatePolynomial");
+  STACK_TRACE("Polynomial::evaluateUnivariatePolynomial");
   Matrix<Coefficient> output, element, idMat;
   idMat.makeIdentityMatrix(input.numberOfColumns);
   output.makeZeroMatrix(input.numberOfColumns);
@@ -660,20 +668,22 @@ getHighestIndexSuchThatHigherIndexVariablesDontParticipate() {
 
 template <class Coefficient>
 void Polynomial<Coefficient>::scaleToPositiveMonomialExponents(
-  MonomialPolynomial& outputScale
+  MonomialPolynomial& outputIWasMultipliedBy
 ) {
   int numberOfVariables = this->minimalNumberOfVariables();
-  outputScale.makeOne();
+  outputIWasMultipliedBy.makeOne();
   for (int i = 0; i < numberOfVariables; i ++) {
     for (int j = 0; j < this->size(); j ++) {
       const MonomialPolynomial& currentMonomial = (*this)[j];
       Rational currentScale =
-      MathRoutines::minimum(outputScale(i), currentMonomial(i));
-      outputScale.setVariable(i, currentScale);
+      MathRoutines::minimum(
+        outputIWasMultipliedBy(i), currentMonomial(i)
+      );
+      outputIWasMultipliedBy.setVariable(i, currentScale);
     }
   }
-  outputScale.invert();
-  this->multiplyBy(outputScale);
+  outputIWasMultipliedBy.invert();
+  this->multiplyBy(outputIWasMultipliedBy);
 }
 
 template <class Coefficient>
@@ -932,7 +942,7 @@ void Polynomial<Coefficient>::divideBy(
   Polynomial<Coefficient>& outputRemainder,
   typename List<MonomialPolynomial>::Comparator* monomialOrder
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::divideBy");
+  STACK_TRACE("Polynomial::divideBy");
   if (monomialOrder == nullptr) {
     monomialOrder = &MonomialPolynomial::orderDefault();
   }
@@ -1018,7 +1028,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::assignCharacteristicPolynomial(
   const Matrix<Coefficient>& input
 ) {
-  MacroRegisterFunctionWithName("Polynomial::assignCharacteristicPolynomial");
+  STACK_TRACE("Polynomial::assignCharacteristicPolynomial");
   if (input.numberOfColumns != input.numberOfRows) {
     global.fatal
     << "Request the "
@@ -1053,7 +1063,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::assignMinimalPolynomial(
   const Matrix<Coefficient>& input
 ) {
-  MacroRegisterFunctionWithName("Polynomial::assignMinimalPolynomial");
+  STACK_TRACE("Polynomial::assignMinimalPolynomial");
   if (input.numberOfColumns != input.numberOfRows) {
     global.fatal
     << "Request the "
@@ -1139,7 +1149,7 @@ void Polynomial<Coefficient>::interpolate(
 
 template <class Coefficient>
 Coefficient Polynomial<Coefficient>::getDiscriminant() {
-  MacroRegisterFunctionWithName("Polynomial::getDiscriminant");
+  STACK_TRACE("Polynomial::getDiscriminant");
   if (this->minimalNumberOfVariables() > 1) {
     global.fatal
     << "I do not have a definition of discriminant "
@@ -1210,7 +1220,7 @@ template <class Coefficient>
 bool Polynomial<Coefficient>::isSquareFree(
   const Coefficient& one, std::stringstream* comments
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::isSquareFree");
+  STACK_TRACE("Polynomial::isSquareFree");
   Vector<Polynomial<Coefficient> > differentials;
   if (this->isConstant()) {
     return false;
@@ -1235,7 +1245,7 @@ bool Polynomial<Coefficient>::differential(
   Vector<Polynomial<Coefficient> >& output,
   std::stringstream* comments
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::differential");
+  STACK_TRACE("Polynomial::differential");
   int numberOfVariables = this->minimalNumberOfVariables();
   output.setSize(numberOfVariables);
   for (int i = 0; i < this->size(); i ++) {
@@ -1264,7 +1274,7 @@ bool Polynomial<Coefficient>::differential(
 
 template <class Coefficient>
 void Polynomial<Coefficient>::derivative(Polynomial<Coefficient>& output) const {
-  MacroRegisterFunctionWithName("Polynomial::derivative");
+  STACK_TRACE("Polynomial::derivative");
   if (this->minimalNumberOfVariables() > 1) {
     global.fatal
     << "Derivative function called on a polynomial of "
@@ -1298,7 +1308,7 @@ template <class Coefficient>
 bool Polynomial<Coefficient>::differential(
   Polynomial<Coefficient>& output, std::stringstream* comments
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::differential");
+  STACK_TRACE("Polynomial::differential");
   if (&output == this) {
     Polynomial<Coefficient> thisCopy = *this;
     return thisCopy.differential(output, comments);
@@ -1323,8 +1333,7 @@ bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
   const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right
 ) const {
-  MacroRegisterFunctionWithName("PolynomialOrder::compareLeftGreaterThanRight")
-  ;
+  STACK_TRACE("PolynomialOrder::compareLeftGreaterThanRight");
   List<MonomialPolynomial> sortedLeft = left.monomials;
   List<MonomialPolynomial> sortedRight = right.monomials;
   sortedLeft.quickSortAscending(&this->monomialOrder);
@@ -1366,7 +1375,7 @@ getPolynomialStringSpacedMonomialsLaTeX(
   List<MonomialPolynomial>* highlightedMonomials,
   int* firstNonZeroIndex
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "GroebnerBasisComputation::getPolynomialStringSpacedMonomialsLaTeX"
   );
   std::stringstream out;
@@ -1424,9 +1433,7 @@ getPolynomialStringSpacedMonomialsLaTeX(
 
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::getDivisionStringLaTeX"
-  );
+  STACK_TRACE("GroebnerBasisComputation::getDivisionStringLaTeX");
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
@@ -1582,9 +1589,7 @@ bool PolynomialDivisionReport<Coefficient>::checkInitialization() {
 
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::getDivisionStringHtml"
-  );
+  STACK_TRACE("GroebnerBasisComputation::getDivisionStringHtml");
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
@@ -1694,9 +1699,7 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
   Selection& nonCoefficientVariables,
   Polynomial<Polynomial<Coefficient> >& output
 ) const {
-  MacroRegisterFunctionWithName(
-    "Polynomial::getPolynomialWithPolynomialCoefficient"
-  );
+  STACK_TRACE("Polynomial::getPolynomialWithPolynomialCoefficient");
   if (
     nonCoefficientVariables.numberOfElements < this->minimalNumberOfVariables()
   ) {

@@ -286,7 +286,7 @@ bool CalculatorParser::parseAndExtractExpressions(
   List<SyntacticElement>& outputSyntacticStack,
   std::string* outputSyntacticErrors
 ) {
-  MacroRegisterFunctionWithName("Calculator::parseAndExtractExpressions");
+  STACK_TRACE("Calculator::parseAndExtractExpressions");
   this->currentSyntacticStack = &outputSyntacticStack;
   this->currrentSyntacticSoup = &outputAllSyntacticElements;
   this->parseFillDictionary(input);
@@ -297,8 +297,7 @@ bool CalculatorParser::parseAndExtractExpressions(
 }
 
 std::string CalculatorParser::toStringSyntacticStackHTMLSimple() {
-  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLSimple")
-  ;
+  STACK_TRACE("Calculator::toStringSyntacticStackHTMLSimple");
   if (this->currentSyntacticStack->size == 0) {
     global.fatal << "Unexpected empty syntactic stack." << global.fatal;
   }
@@ -340,9 +339,7 @@ std::string CalculatorParser::toStringSyntacticStackHTMLSimple() {
 }
 
 void CalculatorParser::initializeStringsThatSplitIfFollowedByDigit() {
-  MacroRegisterFunctionWithName(
-    "CalculatorParser::initializeStringsThatSplitIfFollowedByDigit"
-  );
+  STACK_TRACE("CalculatorParser::initializeStringsThatSplitIfFollowedByDigit");
   this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew(
     "\\cdot"
   );
@@ -492,7 +489,7 @@ void Calculator::initializeLogDuration(Calculator::Mode desiredMode) {
 }
 
 void Calculator::initialize(Calculator::Mode desiredMode) {
-  MacroRegisterFunctionWithName("Calculator::initialize");
+  STACK_TRACE("Calculator::initialize");
   this->reset();
   this->mode = desiredMode;
   this->operations.setExpectedSize(1000);
@@ -624,9 +621,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
 }
 
 bool Calculator::checkPredefinedFunctionNameRepetitions() {
-  MacroRegisterFunctionWithName(
-    "Calculator::checkPredefinedFunctionNameRepetitions"
-  );
+  STACK_TRACE("Calculator::checkPredefinedFunctionNameRepetitions");
   HashedList<std::string> ruleIds;
   for (int i = 0; i < this->operations.size(); i ++) {
     MemorySaving<Calculator::OperationHandlers>& current =
@@ -1374,7 +1369,7 @@ bool CalculatorParser::isInterpretedAsEmptySpace(unsigned char input) {
 }
 
 void CalculatorParser::initializePredefinedWordSplits() {
-  MacroRegisterFunctionWithName("Calculator::initializePredefinedWordSplits");
+  STACK_TRACE("Calculator::initializePredefinedWordSplits");
   List<std::string> splitVariables;
   splitVariables.addOnTop("x");
   splitVariables.addOnTop("y");
@@ -1397,7 +1392,7 @@ void CalculatorParser::initializePredefinedWordSplits() {
 }
 
 void CalculatorParser::parseFillDictionary(const std::string& input) {
-  MacroRegisterFunctionWithName("Calculator::parseFillDictionary");
+  STACK_TRACE("Calculator::parseFillDictionary");
   this->parseFillDictionary(input, *this->currrentSyntacticSoup);
   SyntacticElement currentElement;
   currentElement.data.reset(*this->owner);
@@ -1481,7 +1476,7 @@ bool CalculatorParser::parseEmbedInCommandSequence(
 void CalculatorParser::parseFillDictionary(
   const std::string& input, List<SyntacticElement>& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::parseFillDictionary");
+  STACK_TRACE("Calculator::parseFillDictionary");
   std::string current;
   output.reserve(static_cast<signed>(input.size()));
   output.setSize(0);
@@ -2196,9 +2191,7 @@ bool CalculatorParser::replaceEOXbyEX() {
 }
 
 bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
-  MacroRegisterFunctionWithName(
-    "Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits"
-  );
+  STACK_TRACE("Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits");
   SyntacticElement& currentElement = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
@@ -3056,7 +3049,7 @@ bool CalculatorParser::allowsDivideInPreceding(const std::string& lookAhead) {
 bool CalculatorParser::extractExpressions(
   Expression& outputExpression, std::string* outputErrors
 ) {
-  MacroRegisterFunctionWithName("Calculator::extractExpressions");
+  STACK_TRACE("Calculator::extractExpressions");
   // std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->currentSyntacticStack).reserve((*this->currrentSyntacticSoup).size +
@@ -3191,7 +3184,7 @@ void CalculatorParser::logParsingOperation() {
 }
 
 bool CalculatorParser::applyOneRule() {
-  MacroRegisterFunctionWithName("CalculatorParser::applyOneRule");
+  STACK_TRACE("CalculatorParser::applyOneRule");
   if (this->currentSyntacticStack->size <= this->numberOfEmptyTokensStart) {
     return false;
   }

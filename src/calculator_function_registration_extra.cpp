@@ -7,7 +7,7 @@
 #include "calculator_educational_functions_1.h"
 
 void Calculator::initializeFunctionsExtra() {
-  MacroRegisterFunctionWithName("Calculator::initializeFunctionsExtra");
+  STACK_TRACE("Calculator::initializeFunctionsExtra");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
   Function::Options innerAdminNoTest = Function::Options::adminNoTest();
@@ -420,9 +420,7 @@ void Calculator::initializeFunctionsExtra() {
 }
 
 void Calculator::initializeFunctionsCryptoAndEncoding() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeFunctionsCryptoAndEncoding"
-  );
+  STACK_TRACE("Calculator::initializeFunctionsCryptoAndEncoding");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
   Function::Options innerAdminNoTest = Function::Options::adminNoTest();

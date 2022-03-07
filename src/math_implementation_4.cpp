@@ -264,8 +264,7 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
 }
 
 std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
-  MacroRegisterFunctionWithName("GlobalVariables::toHTMLTopCommandLinuxSystem")
-  ;
+  STACK_TRACE("GlobalVariables::toHTMLTopCommandLinuxSystem");
   std::string topString = this->externalCommandReturnOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
@@ -324,9 +323,7 @@ std::string GlobalVariables::toStringThreadData(bool useHTML) {
 
 std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML)
 {
-  MacroRegisterFunctionWithName(
-    "GlobalVariables::ToStringProgressReportHtmlWithThreadData"
-  );
+  STACK_TRACE("GlobalVariables::ToStringProgressReportHtmlWithThreadData");
   std::stringstream out;
   out << global.toStringThreadData(useHTML);
   out << global.toStringProgressReportNoThreadData(useHTML);
@@ -334,9 +331,7 @@ std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML)
 }
 
 std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
-  MacroRegisterFunctionWithName(
-    "GlobalVariables::toStringProgressReportNoThreadData"
-  );
+  STACK_TRACE("GlobalVariables::toStringProgressReportNoThreadData");
   std::stringstream reportStream;
   for (
     int threadIndex = 0; threadIndex < this->progressReportStrings.size;
@@ -402,9 +397,7 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
 }
 
 std::string GlobalVariables::toStringProgressReportConsole() {
-  MacroRegisterFunctionWithName(
-    "GlobalVariables::toStringProgressReportConsole"
-  );
+  STACK_TRACE("GlobalVariables::toStringProgressReportConsole");
   std::stringstream reportStream;
   for (
     int threadIndex = 0; threadIndex < this->progressReportStrings.size;
@@ -475,7 +468,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
 void GlobalVariables::setWebInput(
   const std::string& inputName, const std::string& inputValue
 ) {
-  MacroRegisterFunctionWithName("GlobalVariables::setWebInput");
+  STACK_TRACE("GlobalVariables::setWebInput");
   this->webArguments.setKeyValue(inputName, inputValue);
 }
 
@@ -571,9 +564,7 @@ bool GlobalVariables::userRequestMustBePromptedToLogInIfNotLoggedIn() {
 std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(
   List<std::string>* tagsToExclude
 ) {
-  MacroRegisterFunctionWithName(
-    "GlobalVariables::toStringCalculatorArgumentsNoNavigation"
-  );
+  STACK_TRACE("GlobalVariables::toStringCalculatorArgumentsNoNavigation");
   if (!this->flagLoggedIn && !this->userGuestMode()) {
     return "";
   }
@@ -620,7 +611,7 @@ std::string GlobalVariables::getWebInput(const std::string& inputName) {
 }
 
 void GlobalVariables::makeReport() {
-  MacroRegisterFunctionWithName("GlobalVariables::makeReport");
+  STACK_TRACE("GlobalVariables::makeReport");
   if (!global.response.monitoringAllowed()) {
     return;
   }
@@ -665,7 +656,7 @@ UserCalculatorData::UserCalculatorData() {
 }
 
 void UserCalculatorData::reset() {
-  MacroRegisterFunctionWithName("UserCalculatorData::reset");
+  STACK_TRACE("UserCalculatorData::reset");
   for (unsigned i = 0; i < this->username.size(); i ++) {
     this->username[i] = '*';
   }
@@ -675,7 +666,7 @@ void UserCalculatorData::reset() {
 }
 
 void UserCalculatorData::clearPasswordFromMemory() {
-  MacroRegisterFunctionWithName("UserCalculatorData::clearPasswordFromMemory");
+  STACK_TRACE("UserCalculatorData::clearPasswordFromMemory");
   for (
     unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++
   ) {
@@ -703,9 +694,7 @@ void UserCalculatorData::clearPasswordFromMemory() {
 }
 
 void UserCalculatorData::clearAuthenticationTokenAndPassword() {
-  MacroRegisterFunctionWithName(
-    "UserCalculatorData::clearAuthenticationTokenAndPassword"
-  );
+  STACK_TRACE("UserCalculatorData::clearAuthenticationTokenAndPassword");
   this->clearPasswordFromMemory();
   for (
     unsigned i = 0; i < this->actualAuthenticationToken.size(); i ++
@@ -728,7 +717,7 @@ std::string UserCalculatorData::toStringCourseInfo() {
 }
 
 std::string UserCalculatorData::toStringUnsecure() {
-  MacroRegisterFunctionWithName("UserCalculatorData::toStringUnsecure");
+  STACK_TRACE("UserCalculatorData::toStringUnsecure");
   std::stringstream out;
   out
   << "User: "
@@ -822,7 +811,7 @@ void DynkinDiagramRootSubalgebra::sort() {
 Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(
   const Vector<Rational>& inputVector
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo"
   );
   Rational result = 0;
@@ -848,7 +837,7 @@ Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(
 Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(
   const Vector<Rational>& inputVector
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo"
   );
   Rational result =
@@ -873,9 +862,7 @@ Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(
 }
 
 void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
-  MacroRegisterFunctionWithName(
-    "DynkinDiagramRootSubalgebra::computeDynkinString"
-  );
+  STACK_TRACE("DynkinDiagramRootSubalgebra::computeDynkinString");
   this->checkInitialization();
   if (indexComponent >= this->simpleBasesConnectedComponents.size) {
     global.fatal << "Bad Dynkin index. " << global.fatal;
@@ -1141,9 +1128,7 @@ const {
 }
 
 bool DynkinDiagramRootSubalgebra::checkInitialization() const {
-  MacroRegisterFunctionWithName(
-    "DynkinDiagramRootSubalgebra::checkInitialization"
-  );
+  STACK_TRACE("DynkinDiagramRootSubalgebra::checkInitialization");
   if (this->ambientRootSystem.size != 0) {
     if (
       this->ambientBilinearForm.numberOfRows != this->ambientRootSystem[0].size
@@ -1159,9 +1144,7 @@ bool DynkinDiagramRootSubalgebra::checkInitialization() const {
 void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(
   const Vectors<Rational>& simpleBasisInput
 ) {
-  MacroRegisterFunctionWithName(
-    "DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple"
-  );
+  STACK_TRACE("DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple");
   this->checkInitialization();
   this->simpleBasesConnectedComponents.size = 0;
   this->simpleBasesConnectedComponents.reserve(simpleBasisInput.size);
@@ -1316,9 +1299,7 @@ void DynkinDiagramRootSubalgebra::getMapFromPermutation(
 void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(
   Vectors<Rational>& inputRoots, WeylGroupData& weylGroup
 ) {
-  MacroRegisterFunctionWithName(
-    "DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput"
-  );
+  STACK_TRACE("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput");
   this->ambientRootSystem = weylGroup.rootSystem;
   this->ambientBilinearForm = weylGroup.cartanSymmetric;
   weylGroup.transformToSimpleBasisGenerators(
@@ -1332,7 +1313,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
   const HashedList<Vector<Rational> >& weightSystem,
   const Matrix<Rational>& bilinearForm
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative"
   );
   this->ambientRootSystem = weightSystem;
@@ -1344,9 +1325,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
 }
 
 void DynkinDiagramRootSubalgebra::computeDynkinStrings() {
-  MacroRegisterFunctionWithName(
-    "DynkinDiagramRootSubalgebra::computeDynkinStrings"
-  );
+  STACK_TRACE("DynkinDiagramRootSubalgebra::computeDynkinStrings");
   this->indicesThreeNodes.setSize(
     this->simpleBasesConnectedComponents.size
   );
@@ -1512,9 +1491,7 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
 
 int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
 {
-  MacroRegisterFunctionWithName(
-    "DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes"
-  );
+  STACK_TRACE("DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes");
   Vectors<Rational>& currentComponent =
   this->simpleBasesConnectedComponents[indexComponent];
   int numEnds = 0;
@@ -1688,7 +1665,7 @@ void Permutation::getPermutationLthElementIsTheImageofLthIndex(
 bool WeylGroupData::areMaximallyDominantGroupInner(
   List<Vector<Rational> >& weights
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::areMaximallyDominantGroupInner");
+  STACK_TRACE("WeylGroup::areMaximallyDominantGroupInner");
   for (int i = 0; i < weights.size; i ++) {
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       if (
@@ -1732,7 +1709,7 @@ bool WeylGroupAutomorphisms::checkInitialization() const {
 bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(
   List<Vector<Rational> >& weights
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::areMaximallyDominantGroupOuter");
+  STACK_TRACE("WeylGroup::areMaximallyDominantGroupOuter");
   this->checkInitialization();
   MemorySaving<Vectors<Rational> > weightsCopy;
   Vector<Rational> zeroWeight;
@@ -2058,9 +2035,7 @@ void GeneralizedVermaModuleCharacters::sortMultiplicities() {
 }
 
 std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
-  MacroRegisterFunctionWithName(
-    "GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits"
-  );
+  STACK_TRACE("GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits");
   this->checkInitialization();
   std::stringstream out;
   int totalDimensionAffine =
@@ -2178,9 +2153,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vector<Rational>& parabolicSelection,
   HomomorphismSemisimpleLieAlgebra& input
 ) {
-  MacroRegisterFunctionWithName(
-    "GeneralizedVermaModuleCharacters::initFromHomomorphism"
-  );
+  STACK_TRACE("GeneralizedVermaModuleCharacters::initFromHomomorphism");
   Vectors<Rational> roots;
   this->weylLarger = &input.coDomainAlgebra().weylGroup;
   this->weylSmaller = &input.domainAlgebra().weylGroup;
@@ -2692,7 +2665,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
 }
 
 void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "GeneralizedVermaModuleCharacters::inititializeMaximumComputation"
   );
   this->maximumComputation.numNonParaM = 2;

@@ -39,7 +39,7 @@ void ElementWeylGroup::makeFromReadableReflections(
 void WeylGroupData::computeOrLoadCharacterTable(
   std::stringstream* reportStream
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::computeOrLoadCharacterTable");
+  STACK_TRACE("WeylGroup::computeOrLoadCharacterTable");
   if (this->flagCharTableIsComputed) {
     return;
   }
@@ -71,8 +71,7 @@ void WeylGroupData::computeOrLoadCharacterTable(
 void WeylGroupData::computeOrLoadConjugacyClasses(
   std::stringstream* reportStream
 ) {
-  MacroRegisterFunctionWithName("WeylGroupData::computeOrLoadConjugacyClasses")
-  ;
+  STACK_TRACE("WeylGroupData::computeOrLoadConjugacyClasses");
   if (this->group.flagCCRepresentativesComputed) {
     return;
   }
@@ -2703,7 +2702,7 @@ bool HardCodedWeylGroupData::loadOutputSubgroupsFromJSData(
   WeylGroupData& inputGroup,
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {
-  MacroRegisterFunctionWithName("LoadOutputSubgroupsFromJSData");
+  STACK_TRACE("LoadOutputSubgroupsFromJSData");
   HashedList<Vector<Rational> > gapRootSystem;
   if (!inputGroup.loadGAPRootSystem(gapRootSystem)) {
     return false;

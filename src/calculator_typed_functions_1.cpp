@@ -16,7 +16,7 @@ bool CalculatorFunctionsBinaryOps::
 addElementZModPOrRationalToElementZModPOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational"
   );
   if (input.size() != 3) {
@@ -55,7 +55,7 @@ addElementZModPOrRationalToElementZModPOrRational(
 bool CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat"
   );
   if (!input.isListNElements(3)) {
@@ -94,7 +94,7 @@ bool CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat(
 bool CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat"
   );
   if (!input.isListNElements(3)) {
@@ -144,9 +144,7 @@ bool CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat(
 bool CalculatorFunctionsBinaryOps::addRationalToRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::addRationalToRational"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addRationalToRational");
   if (input.size() != 3) {
     return false;
   }
@@ -162,9 +160,7 @@ bool CalculatorFunctionsBinaryOps::addRationalToRational(
 bool CalculatorFunctionsBinaryOps::addStringToString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::addStringToString"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addStringToString");
   if (input.size() != 3) {
     return false;
   }
@@ -181,7 +177,7 @@ bool CalculatorFunctionsBinaryOps::
 divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational"
   );
   if (!input.isListNElements(3)) {
@@ -219,9 +215,7 @@ divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
 bool CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -239,7 +233,7 @@ bool CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct(
 bool CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber"
   );
   if (!input.isListNElements(3)) {
@@ -273,7 +267,7 @@ bool CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber(
 bool CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber"
   );
   if (!input.isListNElements(3)) {
@@ -311,9 +305,7 @@ bool CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber(
 bool CalculatorFunctionsBinaryOps::multiplyRationalByRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyRationalByRational"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyRationalByRational");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -329,9 +321,7 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalByRational(
 bool CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -355,9 +345,7 @@ bool CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt(
 bool CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger");
   if (input.size() != 3) {
     return false;
   }
@@ -378,9 +366,7 @@ bool CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger(
 bool CalculatorFunctionsBinaryOps::divideRationalByRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::divideRationalByRational"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::divideRationalByRational");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -399,9 +385,7 @@ bool CalculatorFunctionsBinaryOps::divideRationalByRational(
 bool CalculatorFunctionsBinaryOps::divideDoubleByDouble(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::divideDoubleByDouble"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::divideDoubleByDouble");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -430,7 +414,7 @@ bool CalculatorFunctionsBinaryOps::divideDoubleByDouble(
 bool CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -464,9 +448,7 @@ bool CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor(
 bool CalculatorFunctionsBinaryOps::addWeightToWeight(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::addWeightToWeight"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addWeightToWeight");
   return
   CalculatorFunctionsBinaryOps::addTypeToType<
     Weight<Polynomial<Rational> >
@@ -477,7 +459,7 @@ bool CalculatorFunctionsBinaryOps::
 multiplyRationalOrPolynomialByWeightPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialByWeightPolynomial"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -516,9 +498,8 @@ multiplyRationalOrPolynomialByWeightPolynomial(
 bool CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly")
+  ;
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -562,9 +543,7 @@ bool CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly(
 bool CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -586,9 +565,7 @@ bool CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements(
 bool CalculatorFunctionsBinaryOps::multiplyEllipticCurveElementsZmodP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -618,9 +595,7 @@ bool CalculatorFunctionsBinaryOps::multiplyEllipticCurveElementsZmodP(
 bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -685,7 +660,7 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
 bool CalculatorFunctionsBinaryOps::
 multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra
 (Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra"
   );
   if (input.size() != 3) {
@@ -728,7 +703,7 @@ bool CalculatorFunctionsBinaryOps::
 multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction"
   );
   if (
@@ -768,7 +743,7 @@ bool CalculatorFunctionsBinaryOps::
 divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial"
   );
   if (
@@ -808,7 +783,7 @@ bool CalculatorFunctionsBinaryOps::
 addRationalOrPolynomialOrRationalFunctionToRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction"
   );
   if (
@@ -831,7 +806,7 @@ addRationalOrPolynomialOrRationalFunctionToRationalFunction(
 bool CalculatorFunctionsBinaryOps::
 addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
 (Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra"
   );
   return
@@ -844,7 +819,7 @@ bool CalculatorFunctionsBinaryOps::
 multiplyNumberOrPolynomialByNumberOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyNumberOrPolynomialByNumberOrPolynomial"
   );
   if (input.size() < 3) {
@@ -872,7 +847,7 @@ multiplyNumberOrPolynomialByNumberOrPolynomial(
 bool CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny"
   );
   return
@@ -884,7 +859,7 @@ bool CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny(
 bool CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -917,9 +892,7 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping(
 bool CalculatorFunctionsBinaryOps::multiplyLRObyLRO(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyLRObyLRO"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyLRObyLRO");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -957,9 +930,7 @@ bool CalculatorFunctionsBinaryOps::
 multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyLRObyLSPath"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyLRObyLSPath");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1011,9 +982,7 @@ multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(
 bool CalculatorFunctionsBinaryOps::addElementTensorToElementTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::addElementTensorToElementTensor"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addElementTensorToElementTensor");
   return
   CalculatorFunctionsBinaryOps::addTypeToType<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
@@ -1023,7 +992,7 @@ bool CalculatorFunctionsBinaryOps::addElementTensorToElementTensor(
 bool CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial"
   );
   if (input.size() < 3) {
@@ -1051,7 +1020,7 @@ bool CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(
 bool CalculatorFunctionsBinaryOps::
 addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger
 (Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger"
   );
   if (input.size() != 3) {
@@ -1086,7 +1055,7 @@ addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInte
 bool CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToInteger"
   );
   if (input.size() != 3) {
@@ -1129,7 +1098,7 @@ bool CalculatorFunctionsBinaryOps::
 addPolynomialModuloIntegerToPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToPolynomialModuloInteger"
   );
   if (input.size() != 3) {
@@ -1167,7 +1136,7 @@ bool CalculatorFunctionsBinaryOps::
 dividePolynomialModuloIntegerByPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::dividePolynomialModuloIntegerByPolynomialModuloInteger"
   );
   if (input.size() != 3) {
@@ -1221,7 +1190,7 @@ dividePolynomialModuloIntegerByPolynomialModuloInteger(
 bool CalculatorFunctionsBinaryOps::multiplyPolynomialModPByPolynomialModP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyPolynomialModPByPolynomialModP"
   );
   if (input.size() != 3) {
@@ -1259,7 +1228,7 @@ bool CalculatorFunctionsBinaryOps::
 multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP"
   );
   if (input.size() != 3) {
@@ -1292,7 +1261,7 @@ multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(
 bool CalculatorFunctionsBinaryOps::addPlotToPlot(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addPlotToPlot");
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addPlotToPlot");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1318,9 +1287,7 @@ bool CalculatorFunctionsBinaryOps::addPlotToPlot(
 bool CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1371,7 +1338,7 @@ bool CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible"
   );
   if (!input.startsWith(calculator.opPower(), 3)) {
@@ -1471,9 +1438,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible(
 bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger")
+  ;
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
@@ -1632,7 +1598,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
 
 bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger
 (Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -1665,7 +1631,7 @@ bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger
 bool CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -1699,7 +1665,7 @@ bool CalculatorFunctionsBinaryOps::powerRationalFractionBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerPolynomialModuloIntegerBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerPolynomialModuloIntegerBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -1742,7 +1708,7 @@ bool CalculatorFunctionsBinaryOps::
 powerPolynomialModPModuloPolynomialModPBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerPolynomialModPModuloPolynomialModPBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -1781,7 +1747,7 @@ powerPolynomialModPModuloPolynomialModPBySmallInteger(
 bool CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -1853,7 +1819,7 @@ bool CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault(
 bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -1915,9 +1881,7 @@ bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::powerEWABySmallInteger"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::powerEWABySmallInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -2001,9 +1965,7 @@ bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerRationalByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::powerRationalByInteger"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::powerRationalByInteger");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -2040,7 +2002,7 @@ bool CalculatorFunctionsBinaryOps::
 powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -2098,7 +2060,7 @@ powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction(
 bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -2157,7 +2119,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors"
   );
   if (!input.startsWith(calculator.opPower(), 3)) {
@@ -2364,7 +2326,7 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalReducePrimeFactors(
 bool CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -2417,7 +2379,7 @@ bool CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational(
 bool CalculatorFunctionsBinaryOps::multiplyDoubleOrRationalByDoubleOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyDoubleOrRationalByDoubleOrRational"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -2442,7 +2404,7 @@ bool CalculatorFunctionsBinaryOps::multiplyDoubleOrRationalByDoubleOrRational(
 bool CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -2467,7 +2429,7 @@ bool CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational(
 bool CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg"
   );
   calculator.checkInputNotSameAsOutput(input, output);
@@ -2504,9 +2466,7 @@ bool CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg(
 bool CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -2533,9 +2493,7 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyScalarByMatrix(
 bool CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -2559,9 +2517,7 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence(
 bool CalculatorFunctionsBinaryOps::multiplyMatrixBySequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyMatrixBySequence"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyMatrixBySequence");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -2642,9 +2598,7 @@ bool CalculatorFunctionsBinaryOps::makeMatrixProduct(
 bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -2732,9 +2686,7 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
 bool CalculatorFunctionsBinaryOps::multiplySequenceByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplySequenceByMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplySequenceByMatrix");
   if (!input.startsWith(calculator.opTimes())) {
     return false;
   }
@@ -2768,9 +2720,7 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrix(
   if (!input.startsWith(calculator.opTensor(), 3)) {
     return false;
   }
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::tensorMatrixByMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::tensorMatrixByMatrix");
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   if ((!rightE.isMatrix() && !rightE.isSequenceNElements()) || (
@@ -2809,9 +2759,7 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor(
   if (!input.startsWith(calculator.opTensor())) {
     return false;
   }
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor");
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   if (
@@ -2831,7 +2779,7 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor(
 bool CalculatorFunctionsBinaryOps::multiplyRatOrAlgebraicByMatRatOrMatAlg(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyRatOrAlgebraicByMatRatOrMatAlg"
   );
   if (!input.isListNElements(3)) {
@@ -2886,7 +2834,7 @@ bool CalculatorFunctionsBinaryOps::multiplyRatOrAlgebraicByMatRatOrMatAlg(
 bool CalculatorFunctionsBinaryOps::multiplyMatRatOrMatAlgByMatRatOrMatAlg(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyMatRatOrMatAlgByMatRatOrMatAlg"
   );
   if (!input.isListNElements(3)) {
@@ -2950,7 +2898,7 @@ bool CalculatorFunctionsBinaryOps::
 multiplyMatrixRationalOrRationalByMatrixRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyMatrixRationalOrRationalByMatrixRational"
   );
   if (!input.isListNElements(3)) {
@@ -2995,7 +2943,7 @@ bool CalculatorFunctionsBinaryOps::
 multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction"
   );
   if (!input.isListNElements(3)) {
@@ -3065,7 +3013,7 @@ multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
 
 bool CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor
 (Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor"
   );
   if (!input.isListNElements(3)) {
@@ -3095,9 +3043,7 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor
 bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::lieBracketExtractConstant"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::lieBracketExtractConstant");
   if (!input.startsWith(calculator.opLieBracket(), 3)) {
     return false;
   }
@@ -3133,9 +3079,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
 bool CalculatorFunctionsBinaryOps::lieBracketDistribute(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::lieBracketDistribute"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::lieBracketDistribute");
   return
   CalculatorBasics::distribute(
     calculator,
@@ -3149,9 +3093,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketDistribute(
 bool CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -3192,9 +3134,8 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE(
 bool CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded")
+  ;
   if (!input.startsWith(calculator.opLieBracket(), 3)) {
     return false;
   }
@@ -3236,9 +3177,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded(
 bool CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded");
   if (!input.startsWith(calculator.opLieBracket(), 3)) {
     return false;
   }
@@ -3262,9 +3201,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketSwapTermsIfNeeded(
 bool CalculatorFunctionsBinaryOps::lieBracketOfMatrices(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::lieBracketOfMatrices"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::lieBracketOfMatrices");
   (void) calculator;
   if (input.size() != 3) {
     return false;
@@ -3296,7 +3233,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketOfMatrices(
 bool CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA"
   );
   if (!input.isListNElements(3)) {
@@ -3347,9 +3284,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA(
 bool CalculatorFunctionsBinaryOps::addMatrixToMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::addMatrixToMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addMatrixToMatrix");
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
@@ -3392,9 +3327,7 @@ bool CalculatorFunctionsBinaryOps::addMatrixToMatrix(
 bool CalculatorFunctionsBinaryOps::augmentMatrixToTheRight(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::augmentMatrixToTheRight"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::augmentMatrixToTheRight");
   if (input.size() != 3) {
     return false;
   }
@@ -3422,9 +3355,7 @@ bool CalculatorFunctionsBinaryOps::augmentMatrixToTheRight(
 bool CalculatorFunctionsBinaryOps::augmentMatrixBelow(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::augmentMatrixBelow"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::augmentMatrixBelow");
   if (input.size() != 3) {
     return false;
   }
@@ -3452,9 +3383,7 @@ bool CalculatorFunctionsBinaryOps::augmentMatrixBelow(
 bool CalculatorFunctionsBinaryOps::directSumMatrixWithMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::directSumMatrixWithMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::directSumMatrixWithMatrix");
   if (!input.startsWith(calculator.opDirectSum(), 3)) {
     return false;
   }
@@ -3478,7 +3407,7 @@ bool CalculatorFunctionsBinaryOps::
 addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic"
   );
   if (!input.isListNElements(3)) {
@@ -3585,7 +3514,7 @@ addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
 bool CalculatorFunctionsBinaryOps::setMinus(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::setMinus");
+  STACK_TRACE("CalculatorFunctionsBinaryOps::setMinus");
   if (input.size() != 3) {
     return false;
   }
@@ -3617,7 +3546,7 @@ bool CalculatorFunctionsBinaryOps::
 addMatrixRationalFractionsToMatrixRationalFractions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::addMatrixRationalFractionsToMatrixRationalFractions"
   );
   if (!input.isListNElements(3)) {
@@ -3686,9 +3615,7 @@ bool CalculatorFunctionsBinaryOps::addMatrixTensorToMatrixTensor(
 bool CalculatorFunctionsBinaryOps::multiplySequenceByAnyScalar(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplySequenceByAnyScalar"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplySequenceByAnyScalar");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -3703,9 +3630,7 @@ bool CalculatorFunctionsBinaryOps::multiplySequenceByAnyScalar(
 bool CalculatorFunctionsBinaryOps::addSequenceToSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::addSequenceToSequence"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addSequenceToSequence");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -3743,9 +3668,7 @@ bool CalculatorFunctionsBinaryOps::addSequenceToSequence(
 bool CalculatorFunctionsBinaryOps::binomialCoefficient(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::binomialCoefficient"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::binomialCoefficient");
   if (input.size() != 3) {
     return false;
   }
@@ -3778,9 +3701,7 @@ bool CalculatorFunctionsBinaryOps::binomialCoefficient(
 bool CalculatorFunctionsBinaryOps::powerElementZmodPByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::powerElementZmodPByInteger"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::powerElementZmodPByInteger");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -3811,7 +3732,7 @@ bool CalculatorFunctionsBinaryOps::powerElementZmodPByInteger(
 bool CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger"
   );
   if (!input.startsWith(calculator.opPower(), 3)) {
@@ -3843,7 +3764,7 @@ bool CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger(
 bool CalculatorFunctionsBinaryOps::powerEllipticCurveZmodPElementByInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::powerEllipticCurveZmodPElementByInteger"
   );
   if (!input.startsWith(calculator.opPower(), 3)) {
@@ -3875,7 +3796,7 @@ bool CalculatorFunctionsBinaryOps::powerEllipticCurveZmodPElementByInteger(
 bool CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP"
   );
   if (input.size() != 3) {

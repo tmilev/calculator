@@ -19,7 +19,7 @@ template <class Coefficient>
 void SemisimpleLieAlgebra::generateLieSubalgebra(
   List<ElementSemisimpleLieAlgebra<Coefficient> >& inputOutputGenerators
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::generateLieSubalgebra");
+  STACK_TRACE("SemisimpleLieAlgebra::generateLieSubalgebra");
   ElementSemisimpleLieAlgebra<Coefficient> bracket;
   HashedList<ChevalleyGenerator> seedMons;
   ProgressReport report;
@@ -65,9 +65,7 @@ void SemisimpleLieAlgebra::generateLieSubalgebra(
 }
 
 std::string SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML() const {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML");
   std::stringstream out;
   if (this->weylGroup.dynkinType.hasExceptionalComponent()) {
     out
@@ -90,9 +88,7 @@ std::string SemisimpleLieAlgebra::toStringLieAlgebraName() const {
 
 std::string SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML()
 const {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::toStringLieAlgebraNameNonTechnicalHTML");
   std::stringstream out;
   const DynkinType& dynkinType = this->weylGroup.dynkinType;
   for (int indexType = 0; indexType < dynkinType.size(); indexType ++) {
@@ -146,7 +142,7 @@ bool SemisimpleLieAlgebra::attemptFindingHEF(
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF,
   std::stringstream* logStream
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptFindingHEF");
+  STACK_TRACE("SemisimpleLieAlgebra::AttemptFindingHEF");
   List<Polynomial<AlgebraicNumber> > input;
   PolynomialSystem<AlgebraicNumber> system;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero;
@@ -222,9 +218,7 @@ bool SemisimpleLieAlgebra::attemptExtendingEtoHEFwithHinCartan(
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
   std::stringstream* logStream
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::attemptExtendingEtoHEFwithHinCartan"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::attemptExtendingEtoHEFwithHinCartan");
   Matrix<AlgebraicNumber> matrix;
   this->getAdjoint(matrix, elementE);
   MatrixTensor<AlgebraicNumber> matrixTensor, identity;
@@ -278,7 +272,7 @@ bool SubalgebraSemisimpleLieAlgebra::checkInitialization() {
 std::string SubalgebraSemisimpleLieAlgebra::toString(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::toString");
+  STACK_TRACE("SubalgebraSemisimpleLieAlgebra::toString");
   (void) format;
   // avoid unused parameter warning in a portable way
   if (this->owner == nullptr) {
@@ -296,8 +290,7 @@ std::string SubalgebraSemisimpleLieAlgebra::toString(
 }
 
 void SubalgebraSemisimpleLieAlgebra::computeBasis() {
-  MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::computeBasis")
-  ;
+  STACK_TRACE("SubalgebraSemisimpleLieAlgebra::computeBasis");
   this->checkInitialization();
   this->basis = this->generators;
   this->owner->generateLieSubalgebra(this->basis);
@@ -308,9 +301,7 @@ bool SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate(
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputCandidate,
   const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentCentralizer
 ) {
-  MacroRegisterFunctionWithName(
-    "SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate"
-  );
+  STACK_TRACE("SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate");
   MatrixTensor<AlgebraicNumber> candidateMatrix;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> candidate;
   for (int i = 0; i < adjointOperators.size; i ++) {
@@ -344,9 +335,7 @@ bool SubalgebraSemisimpleLieAlgebra::findCartanSubalgebraCandidate(
 }
 
 void SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra() {
-  MacroRegisterFunctionWithName(
-    "SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra"
-  );
+  STACK_TRACE("SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra");
   this->checkInitialization();
   List<MatrixTensor<AlgebraicNumber> > adjointOperators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > currentCentralizer;
@@ -415,9 +404,7 @@ void WeylGroupData::operator+=(const WeylGroupData& other) {
 }
 
 int SemisimpleSubalgebras::getIndexFullSubalgebra() const {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::getIndexFullSubalgebra"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::getIndexFullSubalgebra");
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (
       this->owner->weylGroup.dynkinType ==
@@ -559,9 +546,7 @@ std::string DynkinType::toString(FormatExpressions* format) const {
 }
 
 void SemisimpleSubalgebras::checkFileWritePermissions() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::checkFileWritePermissions"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::checkFileWritePermissions");
   this->checkConsistency();
   this->computeFolderNames(this->currentFormat);
   std::fstream testFile;
@@ -636,7 +621,7 @@ std::string SemisimpleSubalgebras::toStringHTML() {
 
 void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat)
 {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeFolderNames");
+  STACK_TRACE("SemisimpleSubalgebras::computeFolderNames");
   (void) inputFormat;
   // avoid unused parameter warning in a portable way
   this->checkConsistency();
@@ -660,9 +645,8 @@ void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat)
 std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML")
+  ;
   (void) format;
   // avoid unused parameter warning in a portable way
   if (!this->flagComputeNilradicals) {
@@ -745,7 +729,7 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
 std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX"
   );
   if (!this->flagComputeNilradicals) {
@@ -878,7 +862,7 @@ std::string SemisimpleSubalgebras::toStringShort() const {
 std::string SemisimpleSubalgebras::toString(
   FormatExpressions* format, bool writeToHardDisk
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::toString");
+  STACK_TRACE("SemisimpleSubalgebras::toString");
   HtmlRoutines::globalMathSpanID = 0;
   std::stringstream out;
   int candidatesRealized = 0;
@@ -1135,7 +1119,7 @@ std::string SemisimpleSubalgebras::toStringTableSubalgebraLinksTable(
 std::string SemisimpleSubalgebras::toStringPart2(
   FormatExpressions* format, bool writeToHardDisk
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::toStringPart2");
+  STACK_TRACE("SemisimpleSubalgebras::toStringPart2");
   std::stringstream out;
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
@@ -1279,7 +1263,7 @@ std::string SemisimpleSubalgebras::toStringPart3(
 void SemisimpleSubalgebras::getCentralizerChains(
   List<List<int> >& outputChains
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::getCentralizerChains");
+  STACK_TRACE("SemisimpleSubalgebras::getCentralizerChains");
   outputChains.setSize(0);
   Selection explored;
   explored.initialize(this->subalgebras.values.size);
@@ -1302,7 +1286,7 @@ void SemisimpleSubalgebras::getCentralizerChains(
 void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
   bool computeRealSlTwos
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand"
   );
   this->getSemisimpleOwner().findSl2Subalgebras(
@@ -1355,7 +1339,7 @@ bool SemisimpleSubalgebras::loadState(
   List<int>& numberOfExploredHs,
   std::stringstream& reportStream
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::loadState");
+  STACK_TRACE("SemisimpleSubalgebras::loadState");
   this->findSemisimpleSubalgebrasInitialize();
   if (
     currentChainIntegers.size != numberOfExploredTypes.size ||
@@ -1471,9 +1455,7 @@ bool SemisimpleSubalgebras::loadState(
 }
 
 bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue");
   ProgressReport report;
   std::stringstream reportstream;
   this->checkAll();
@@ -1511,9 +1493,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
 }
 
 void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize");
   this->checkConsistency();
   if (this->owner == nullptr) {
     global.fatal
@@ -1555,9 +1535,7 @@ void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
 void SemisimpleSubalgebras::makeEmptyCandidateSubalgebra(
   CandidateSemisimpleSubalgebra& output
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::makeEmptyCandidateSubalgebra"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::makeEmptyCandidateSubalgebra");
   DynkinType zeroType;
   this->makeCandidateSubalgebra(zeroType, output);
   Matrix<Rational> zeroCartan;
@@ -1572,9 +1550,7 @@ void SemisimpleSubalgebras::makeEmptyCandidateSubalgebra(
 void SemisimpleSubalgebras::makeCandidateSubalgebra(
   const DynkinType& input, CandidateSemisimpleSubalgebra& output
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::makeCandidateSubalgebra"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::makeCandidateSubalgebra");
   output.owner = this;
   bool needsInitialization = false;
   if (!this->subalgebrasNonEmbedded->contains(input)) {
@@ -1591,7 +1567,7 @@ void SemisimpleSubalgebras::makeCandidateSubalgebra(
 }
 
 void DynkinType::getPrecomputedDynkinTypes(List<DynkinType>& output) {
-  MacroRegisterFunctionWithName("DynkinType::getPrecomputedDynkinTypes");
+  STACK_TRACE("DynkinType::getPrecomputedDynkinTypes");
   output.setSize(0);
   DynkinType dynkinType;
   dynkinType.makeSimpleType('F', 4);
@@ -1636,9 +1612,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   bool adjustCentralizers,
   const std::string& extraDynkinDiagramPlot
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computeStructureWriteFiles"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computeStructureWriteFiles");
   this->toStringExpressionString = toStringExpression;
   this->owner = &newOwner;
   this->computeFolderNames(this->currentFormat);
@@ -1695,9 +1669,7 @@ bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   std::stringstream* outputStream
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computeStructureRealFormsWriteFiles"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computeStructureRealFormsWriteFiles");
   this->computeStructureRealForms(
     newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
   );
@@ -1711,9 +1683,7 @@ bool SemisimpleSubalgebras::computeStructureRealFormsInitialize(
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computeStructureRealFormsInitialize"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computeStructureRealFormsInitialize");
   if (this->subalgebrasNonEmbedded == nullptr || this->owner == nullptr) {
     this->initHookUpPointers(
       newOwner,
@@ -1734,9 +1704,7 @@ bool SemisimpleSubalgebras::computeStructureRealForms(
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computeStructureRealForms"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computeStructureRealForms");
   this->computeStructureRealFormsInitialize(
     newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
   );
@@ -1749,9 +1717,7 @@ bool SemisimpleSubalgebras::computeStructureRealForms(
 }
 
 bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computeStructureRealFormsSlTwos"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computeStructureRealFormsSlTwos");
   CandidateSemisimpleSubalgebra emptyCandidate;
   this->makeEmptyCandidateSubalgebra(emptyCandidate);
   this->addSubalgebraToStack(emptyCandidate, 0, 0);
@@ -1771,9 +1737,7 @@ bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
 void SemisimpleSubalgebras::makeCandidateFromSlTwo(
   SlTwoSubalgebra& input, CandidateSemisimpleSubalgebra& candidate
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::makeCandidateFromSlTwo"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::makeCandidateFromSlTwo");
   candidate.indexInducedFrom = - 1;
   DynkinType incomingType;
   input.computeDynkinTypeEmbedded(incomingType);
@@ -1802,9 +1766,7 @@ void SemisimpleSubalgebras::makeCandidateFromSlTwo(
 bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
   SlTwoSubalgebra& input, int indexInSlTwos
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computeStructureRealFormOneSlTwo"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computeStructureRealFormOneSlTwo");
   CandidateSemisimpleSubalgebra candidate;
   this->makeCandidateFromSlTwo(input, candidate);
   candidate.indexInSlTwos = indexInSlTwos;
@@ -1833,7 +1795,7 @@ bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwoPartTwo(
 bool SemisimpleSubalgebras::writeFilesRealForms(
   std::stringstream* outputStream
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::writeFilesRealForms");
+  STACK_TRACE("SemisimpleSubalgebras::writeFilesRealForms");
   this->fileNamePrefix = "real_form_";
   FormatExpressions format;
   this->computeFolderNames(format);
@@ -1857,7 +1819,7 @@ bool SemisimpleSubalgebras::writeFilesRealForms(
 }
 
 bool SemisimpleSubalgebras::checkIsEmpty() const {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::checkIsEmpty");
+  STACK_TRACE("SemisimpleSubalgebras::checkIsEmpty");
   if (this->subalgebras.size() != 0) {
     global.fatal
     << "Not expected: subalgebras are supposed to be empty, but there are: "
@@ -1877,9 +1839,8 @@ bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   const DynkinType* targetType
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch")
+  ;
   this->resetComputations();
   this->initHookUpPointers(
     newOwner,
@@ -1922,7 +1883,7 @@ bool SemisimpleSubalgebras::growDynkinType(
   List<DynkinType>& output,
   List<List<int> >* outputImagesSimpleRoots
 ) const {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::growDynkinType");
+  STACK_TRACE("SemisimpleSubalgebras::growDynkinType");
   HashedList<Rational> lengths;
   lengths.setExpectedSize(this->orbitHElementLengths.size);
   for (int i = 0; i < this->orbitHElementLengths.size; i ++) {
@@ -1944,7 +1905,7 @@ getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
   const List<int>& imagesOldSimpleRootsAndNewRoot,
   CandidateSemisimpleSubalgebra& subalgebraToBeModified
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleSubalgebras::getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot"
   );
   subalgebraToBeModified.owner = this;
@@ -2004,9 +1965,7 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
   const List<int>& rootInjection,
   Vector<Rational>* newHScaledToActByTwo
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::setUpInjectionHs"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::setUpInjectionHs");
   this->reset(baseSubalgebra.owner);
   this->owner->makeCandidateSubalgebra(newType, *this);
   this->checkCandidateInitialization();
@@ -2063,7 +2022,7 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
 
 void CandidateSemisimpleSubalgebra::
 computeHsAndHsScaledToActByTwoFromComponents() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents"
   );
   this->cartanElementsScaledToActByTwo.assignListList(
@@ -2112,7 +2071,7 @@ computeHsAndHsScaledToActByTwoFromComponents() {
 bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(
   CandidateSemisimpleSubalgebra& candidate
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra"
   );
   int indexPrecomputed =
@@ -2143,7 +2102,7 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
   const DynkinType& newType,
   const List<int>& rootInjection
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra"
   );
   this->setUpInjectionHs(
@@ -2224,7 +2183,7 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
 
 const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::
 getCurrentElement() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "OrbitIteratorRootActionWeylGroupAutomorphisms::getCurrentElement"
   );
   if (this->flagOrbitIsBuffered) {
@@ -2281,7 +2240,7 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
 
 bool OrbitIteratorRootActionWeylGroupAutomorphisms::
 incrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "OrbitIteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast"
   );
   this->checkConsistency();
@@ -2333,9 +2292,7 @@ incrementReturnFalseIfPastLast() {
 }
 
 void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
-  MacroRegisterFunctionWithName(
-    "OrbitFDRepIteratorWeylGroupAutomorphisms::initialize"
-  );
+  STACK_TRACE("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
   this->iterator.checkInitialization();
   this->currentIndexInBuffer = 0;
   if (this->flagOrbitIsBuffered) {
@@ -2362,9 +2319,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
   const List<ElementWeylGroupAutomorphisms>& inputGenerators,
   const Vector<Rational>& inputElement
 ) {
-  MacroRegisterFunctionWithName(
-    "OrbitFDRepIteratorWeylGroupAutomorphisms::initialize"
-  );
+  STACK_TRACE("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
   if (this->orbitDefiningElement == inputElement) {
     if (this->flagOrbitIsBuffered) {
       this->currentIndexInBuffer = 0;
@@ -2461,7 +2416,7 @@ void SemisimpleSubalgebras::getHCandidates(
   DynkinType& currentType,
   List<int>& currentRootInjection
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::getHCandidates");
+  STACK_TRACE("SemisimpleSubalgebras::getHCandidates");
   ProgressReport report1;
   ProgressReport report2;
   ProgressReport report3;
@@ -2582,9 +2537,7 @@ const CandidateSemisimpleSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
 }
 
 bool SemisimpleSubalgebras::removeLastSubalgebraFromStack() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::removeLastSubalgebraFromStack"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::removeLastSubalgebraFromStack");
   this->currentSubalgebraChain.setSize(
     this->currentSubalgebraChain.size - 1
   );
@@ -2607,9 +2560,7 @@ bool SemisimpleSubalgebras::removeLastSubalgebraFromStack() {
 bool SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown(
   const DynkinType& input, DynkinType& output
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown");
   // This function is rudimentary and fails to return a good result in many
   // cases when
   // a result is actually computable. This needs to be improved.
@@ -2647,9 +2598,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
   HashedList<Rational>& outputDynkinIndices,
   AlgebraicClosureRationals* algebraicClosure
 ) {
-  MacroRegisterFunctionWithName(
-    "DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType"
-  );
+  STACK_TRACE("DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType");
   DynkinSimpleType typeDefaultScale(
     desiredType.letter, desiredType.rank, 1
   );
@@ -2696,7 +2645,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
   HashedList<Rational>& outputDynkinIndices,
   AlgebraicClosureRationals* algebraicClosure
 ) {
-  MacroRegisterFunctionWithName("DynkinType::getDynkinIndicesSl2Subalgebras");
+  STACK_TRACE("DynkinType::getDynkinIndicesSl2Subalgebras");
   List<DynkinSimpleType> dynkinTypes;
   this->getTypesWithMults(dynkinTypes);
   List<List<Rational> > dynkinIndicesPerType;
@@ -2733,7 +2682,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
 
 bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
 () {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits"
   );
   int stackIndex = this->currentSubalgebraChain.size - 1;
@@ -2849,7 +2798,7 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
 }
 
 bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed"
   );
   this->checkFullInitialization();
@@ -2878,7 +2827,7 @@ bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
 
 bool SemisimpleSubalgebras::
 centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits"
   );
   if (!this->baseSubalgebra().flagCentralizerTypeIsComputed) {
@@ -2962,9 +2911,7 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
 }
 
 bool SemisimpleSubalgebras::combinatorialCriteriaAllowRealization() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::combinatorialCriteriaAllowRealization"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::combinatorialCriteriaAllowRealization");
   int stackIndex = this->currentSubalgebraChain.size - 1;
   int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
   if (
@@ -2989,9 +2936,7 @@ bool SemisimpleSubalgebras::combinatorialCriteriaAllowRealization() {
 }
 
 bool SemisimpleSubalgebras::computeCurrentHCandidates() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computeCurrentHCandidates"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computeCurrentHCandidates");
   int stackIndex = this->currentSubalgebraChain.size - 1;
   int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
   this->currentHCandidatesScaledToActByTwo[stackIndex].setSize(0);
@@ -3094,9 +3039,7 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
 
 CandidateSemisimpleSubalgebra* SemisimpleSubalgebras::
 addSubalgebraIfNewSetToStackTop(const CandidateSemisimpleSubalgebra& input) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::addSubalgebraIfNewSetToStackTop");
   this->checkConsistencyHs();
   CandidateSemisimpleSubalgebra* storedInput = nullptr;
   if (this->subalgebras.contains(input.cartanElementsSubalgebra)) {
@@ -3130,7 +3073,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   int inputNumberOfLargerTypesExplored,
   int inputNumberOfHCandidatesExplored
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::addSubalgebraToStack");
+  STACK_TRACE("SemisimpleSubalgebras::addSubalgebraToStack");
   input.checkFullInitialization();
   if (
     input.indexInOwner == - 1 &&
@@ -3197,7 +3140,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
 std::string SemisimpleSubalgebras::toStringCurrentChain(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringCurrentChain");
+  STACK_TRACE("SemisimpleSubalgebras::ToStringCurrentChain");
   (void) format;
   // avoid unused parameter warning in a portable way
   std::stringstream out;
@@ -3216,7 +3159,7 @@ std::string SemisimpleSubalgebras::toStringCurrentChain(
 }
 
 std::string SemisimpleSubalgebras::toStringState(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::toStringState");
+  STACK_TRACE("SemisimpleSubalgebras::toStringState");
   std::stringstream out;
   out
   << "Subalgebras found so far: "
@@ -3282,9 +3225,7 @@ std::string SemisimpleSubalgebras::toStringState(FormatExpressions* format) {
 std::string SemisimpleSubalgebras::toStringProgressReport(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::toStringProgressReport"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::toStringProgressReport");
   std::stringstream out;
   out << this->toStringState(format);
   if (this->toStringExpressionString != nullptr) {
@@ -3298,9 +3239,7 @@ std::string SemisimpleSubalgebras::toStringProgressReport(
 }
 
 bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::incrementReturnFalseIfPastLast"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::incrementReturnFalseIfPastLast");
   this->checkConsistency();
   if (this->currentSubalgebraChain.size == 0) {
     return false;
@@ -3410,9 +3349,7 @@ void DynkinType::getDynkinTypeWithDefaultScales(DynkinType& output) const {
 void DynkinSimpleType::getAutomorphismActingOnVectorColumn(
   MatrixTensor<Rational>& output, int autoIndex
 ) const {
-  MacroRegisterFunctionWithName(
-    "DynkinSimpleType::getAutomorphismActingOnVectorColumn"
-  );
+  STACK_TRACE("DynkinSimpleType::getAutomorphismActingOnVectorColumn");
   if (
     autoIndex == 0 ||
     this->letter == 'B' ||
@@ -3541,9 +3478,7 @@ DynkinSimpleType DynkinType::getGreatestSimpleType() const {
 }
 
 Rational DynkinType::getPrincipalSlTwoCartanSymmetricInverseScale() const {
-  MacroRegisterFunctionWithName(
-    "DynkinType::getPrincipalSlTwoCartanSymmetricInverseScale"
-  );
+  STACK_TRACE("DynkinType::getPrincipalSlTwoCartanSymmetricInverseScale");
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
     result +=
@@ -3556,7 +3491,7 @@ Rational DynkinType::getPrincipalSlTwoCartanSymmetricInverseScale() const {
 bool CandidateSemisimpleSubalgebra::checkElementSemisimpleLieAlgebra(
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& toBeChecked
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::checkElementSemisimpleLieAlgebra"
   );
   for (int i = 0; i < toBeChecked.size(); i ++) {
@@ -3566,7 +3501,7 @@ bool CandidateSemisimpleSubalgebra::checkElementSemisimpleLieAlgebra(
 }
 
 bool CandidateSemisimpleSubalgebra::checkAll() const {
-  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::checkAll");
+  STACK_TRACE("CandidateSemisimpleSubalgebra::checkAll");
   this->checkFullInitialization();
   this->checkCandidateInitialization();
   for (int i = 0; i < this->negativeGenerators.size; i ++) {
@@ -3634,9 +3569,7 @@ getAmbientSemisimpleLieAlgebra() const {
 void CandidateSemisimpleSubalgebra::addHIncomplete(
   const Vector<Rational>& hElement
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::addHIncomplete"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::addHIncomplete");
   this->checkBasicInitialization();
   if (this->cartanSubalgebrasByComponentScaledToActByTwo.size == 1) {
     if (
@@ -3672,9 +3605,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
   const Vector<Rational>& hNewActingByTwo,
   const List<int>& rootInjections
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo");
   // check if input weight is maximally dominant:
   Rational scalarProduct;
   int indexHneW = *rootInjections.lastObject();
@@ -3779,9 +3710,7 @@ getIndexExtremeWeightRelativeToWeyl(WeylGroupData& weyl) const {
 bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(
   int index, const Vector<Rational>& ambientRootTestedForWeightSpace
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex");
   for (int k = 0; k < this->cartanElementsSubalgebra.size; k ++) {
     Rational desiredScalarProduct =
     this->subalgebraNonEmbeddedDefaultScale->weylGroup.cartanSymmetric(
@@ -3801,8 +3730,7 @@ bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(
 bool CandidateSemisimpleSubalgebra::computeSystem(
   bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
 ) {
-  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::computeSystem")
-  ;
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
   this->involvedNegativeGenerators.setSize(
     this->cartanElementsScaledToActByTwo.size
@@ -3862,9 +3790,7 @@ bool CandidateSemisimpleSubalgebra::computeSystem(
 }
 
 bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs");
   if (
     this->negativeGenerators.size != this->positiveGenerators.size ||
     this->negativeGenerators.size != this->weylNonEmbedded->getDimension()
@@ -3892,9 +3818,7 @@ bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
 bool CandidateSemisimpleSubalgebra::computeSystemPart2(
   bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeSystemPart2"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeSystemPart2");
   systemToSolve.setSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
   lieBracketMinusGoalValue,
@@ -4166,9 +4090,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
 bool CandidateSemisimpleSubalgebra::computeFromGenerators(
   bool allowNonPolynomialSystemFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeFromGenerators"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeFromGenerators");
   if (!this->flagSystemSolved) {
     return true;
   }
@@ -4210,9 +4132,7 @@ bool CandidateSemisimpleSubalgebra::computeFromGenerators(
 void CandidateSemisimpleSubalgebra::extendToModule(
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::extendToModule"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::extendToModule");
   ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > vectorSpace;
   HashedList<ChevalleyGenerator> bufferList;
@@ -4250,7 +4170,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::intersectVectorSpaces(
   List<LinearCombinationTemplate>& outputIntersection,
   HashedList<TemplateMonomial>* seedMonomials
 ) {
-  MacroRegisterFunctionWithName("LinearCombination::intersectVectorSpaces");
+  STACK_TRACE("LinearCombination::intersectVectorSpaces");
   List<LinearCombinationTemplate> workingSpace = vectorSpace1;
   List<LinearCombinationTemplate> vectorSpace2Eliminated = vectorSpace2;
   LinearCombination<TemplateMonomial, Coefficient>::
@@ -4302,7 +4222,7 @@ toStringElementSemisimpleLieAlgebraOrMatrix(
   const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& input,
   const std::string& notationLetter
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleSubalgebras::WConjecture::toStringElementSemisimpleLieAlgebraOrMatrix"
   );
   std::stringstream generatorForm, matrixFormStream;
@@ -4341,9 +4261,7 @@ toStringElementSemisimpleLieAlgebraOrMatrix(
 std::string SemisimpleSubalgebras::WConjecture::toStringRealForm(
   const SemisimpleSubalgebras& owner
 ) const {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::WConjecture::toStringRealForm"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::WConjecture::toStringRealForm");
   std::stringstream out;
   FormatExpressions matrixFormat;
   matrixFormat.flagUseLatex = true;
@@ -4394,7 +4312,7 @@ bool SemisimpleSubalgebras::WConjecture::wConjectureHolds(
 void SemisimpleSubalgebras::WConjecture::computeBeforeSubalgebras(
   SemisimpleSubalgebras& owner
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::WConjecture::compute");
+  STACK_TRACE("SemisimpleSubalgebras::WConjecture::compute");
   if (!owner.flagRealForms) {
     return;
   }
@@ -4432,9 +4350,7 @@ void SemisimpleSubalgebras::WConjecture::computeAfterSubalgebras(
 }
 
 bool CandidateSemisimpleSubalgebra::checkModuleDimensions() const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::checkModuleDimensions"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::checkModuleDimensions");
   int totalDimension = 0;
   for (int i = 0; i < this->modules.size; i ++) {
     for (int j = 0; j < this->modules[i].size; j ++) {
@@ -4463,9 +4379,8 @@ bool CandidateSemisimpleSubalgebra::checkModuleDimensions() const {
 }
 
 void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent")
+  ;
   ElementSemisimpleLieAlgebra<AlgebraicNumber>
   currentElement,
   adActionElement,
@@ -4554,9 +4469,7 @@ toStringWConjectureHolds() const {
 std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   const CandidateSemisimpleSubalgebra& owner
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::WConjecture::toString"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::WConjecture::toString");
   std::stringstream out;
   if (this->flagSlTwoIsSmall) {
     out << "sl(2)-subalgebra is <b style='color:blue'>small</b><br>";
@@ -4671,9 +4584,7 @@ toStringLieBracketTriples(const List<std::string>& triple) const {
 void CandidateSemisimpleSubalgebra::WConjecture::compute(
   CandidateSemisimpleSubalgebra& owner, SlTwoSubalgebra& ownerSl2
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::WConjecture::compute"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::WConjecture::compute");
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > hWrapper;
   hWrapper.addOnTop(ownerSl2.hAlgebraic);
   owner.owner->owner->getCommonCentralizer(
@@ -4748,7 +4659,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
 void CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap(
   const CandidateSemisimpleSubalgebra& owner
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap"
   );
   this->elementE = owner.positiveGenerators[0];
@@ -4813,9 +4724,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::computeSmallOrbits(
 void CandidateSemisimpleSubalgebra::WConjecture::processOnePair(
   int indexLeft, int indexRight
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::WConjecture::processOnePair"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::WConjecture::processOnePair");
   std::stringstream out;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& wSpace =
   this->
@@ -4854,7 +4763,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::processOnePair(
 }
 
 void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition"
   );
   for (int i = 0; i < this->modules.size; i ++) {
@@ -5013,7 +4922,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
 }
 
 void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
-  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::reset");
+  STACK_TRACE("CandidateSemisimpleSubalgebra::reset");
   this->owner = inputOwner;
   this->indexInSlTwos = - 1;
   this->indexInOwner = - 1;
@@ -5056,7 +4965,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
   int rightIndex,
   List<int>& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule"
   );
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& rightModule =
@@ -5105,9 +5014,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
 void CandidateSemisimpleSubalgebra::computeSinglePair(
   int leftIndex, int rightIndex, List<int>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeSinglePair"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeSinglePair");
   output.setSize(0);
   List<int> tempList;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& leftModule =
@@ -5130,9 +5037,7 @@ void CandidateSemisimpleSubalgebra::computeSinglePair(
 }
 
 void CandidateSemisimpleSubalgebra::computePairingTable() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computePairingTable"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computePairingTable");
   if (!this->flagCentralizerIsWellChosen) {
     return;
   }
@@ -5206,9 +5111,7 @@ void CandidateSemisimpleSubalgebra::computePairingTable() {
 }
 
 void CandidateSemisimpleSubalgebra::computeCharactersPrimalModules() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeCharactersPrimalModules"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeCharactersPrimalModules");
   this->charactersPrimalModules.setSize(this->modules.size);
   this->charactersPrimalModulesMerged.setSize(this->modules.size);
   Weight<Rational> currentWeight;
@@ -5252,7 +5155,7 @@ computeKsl2TriplesGetOppositeElementsInOppositeModule(
   inputOppositeModule,
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsInOppositeModule"
   );
   outputElements.setSize(0);
@@ -5295,7 +5198,7 @@ void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll(
   const Vector<Rational>& weight,
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll"
   );
   outputElements.setSize(0);
@@ -5330,7 +5233,7 @@ bool CandidateSemisimpleSubalgebra::computeKsl2TripleSetUpAndSolveSystem(
   fIsLinearCombinationOf,
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeKsl2TriplesetUpAndSolveSystem"
   );
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
@@ -5362,9 +5265,7 @@ bool CandidateSemisimpleSubalgebra::computeKsl2TripleSetUpAndSolveSystem(
 }
 
 void CandidateSemisimpleSubalgebra::computeKsl2Triples() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeKsl2Triples"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeKsl2Triples");
   if (!this->owner->flagComputeNilradicals) {
     return;
   }
@@ -5505,9 +5406,7 @@ Vector<Rational> NilradicalCandidate::getNilradicalLinearCombination() const {
 }
 
 void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
-  MacroRegisterFunctionWithName(
-    "NilradicalCandidate::computeParabolicACExtendsToParabolicAC"
-  );
+  STACK_TRACE("NilradicalCandidate::computeParabolicACExtendsToParabolicAC");
   Vector<Rational> projectionRoot;
   WeylGroupData& weyl = this->owner->owner->owner->weylGroup;
   this->leviRootsAmbienT.reserve(weyl.rootSystem.size);
@@ -5615,9 +5514,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
 }
 
 bool NilradicalCandidate::tryFindingLInfiniteRelations() {
-  MacroRegisterFunctionWithName(
-    "NilradicalCandidate::tryFindingLInfiniteRelations"
-  );
+  STACK_TRACE("NilradicalCandidate::tryFindingLInfiniteRelations");
   Vector<Rational> betterIntersection;
   this->nilradicalSubselection.initialize(this->nilradicalWeights.size);
   this->flagComputedRelativelyStrongIntersections = false;
@@ -5780,9 +5677,7 @@ bool NilradicalCandidate::isStronglySingular(int moduleIndex) {
 bool NilradicalCandidate::isStronglySingularRelativeToSubset(
   int nonFernandoKacWeightIndex
 ) {
-  MacroRegisterFunctionWithName(
-    "NilradicalCandidate::isStronglySingularRelativeToSubset"
-  );
+  STACK_TRACE("NilradicalCandidate::isStronglySingularRelativeToSubset");
   this->checkInitialization();
   ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
   for (
@@ -5825,7 +5720,7 @@ void NilradicalCandidate::reset() {
 }
 
 void NilradicalCandidate::computeTheTwoConesRelativeToNilradicalSubset() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "NilradicalCandidate::computeTheTwoConesRelativeToNilradicalSubset"
   );
   this->nilradical.subSelection(
@@ -5849,7 +5744,7 @@ void NilradicalCandidate::computeTheTwoConesRelativeToNilradicalSubset() {
 }
 
 void NilradicalCandidate::computeTheTwoCones() {
-  MacroRegisterFunctionWithName("NilradicalCandidate::computeTheTwoCones");
+  STACK_TRACE("NilradicalCandidate::computeTheTwoCones");
   this->checkInitialization();
   this->reset();
   for (int i = 0; i < this->nilradicalSelection.size; i ++) {
@@ -5903,9 +5798,7 @@ void NilradicalCandidate::computeTheTwoCones() {
 }
 
 void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::enumerateAllNilradicals"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::enumerateAllNilradicals");
   ProgressReport report;
   ProgressReport report2;
   std::stringstream reportStream;
@@ -6002,7 +5895,7 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   const Vectors<Rational>& nonStrictConeNonPositiveScalar,
   const List<Vector<Rational> >& vectorsToBeInGeneralPosition
 ) {
-  MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
+  STACK_TRACE("Vectors::PerturbSplittingNormal");
   for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
     if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
       global.fatal
@@ -6262,9 +6155,8 @@ extendNilradicalSelectionToMultFreeOverSemisimplePartSubalgebra(
 void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(
   List<int>& selection, std::stringstream* logStream
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively")
+  ;
   RecursionDepthCounter counter(
     &this->recursionDepthCounterForNilradicalGeneration
   );
@@ -6322,7 +6214,7 @@ void CandidateSemisimpleSubalgebra::
 computePrimalModuleDecompositionHighestWeights(
   HashedList<Vector<Rational> >& outputHighestWeightsCoordinates
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightsOnly"
   );
   outputHighestWeightsCoordinates.clear();
@@ -6358,7 +6250,7 @@ computePrimalModuleDecompositionHighestWeights(
 
 void CandidateSemisimpleSubalgebra::
 computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors"
   );
   HashedList<Vector<Rational> > weightsCartanRestrictedDualCoords;
@@ -6394,7 +6286,7 @@ bool CandidateSemisimpleSubalgebra::compareLeftGreaterThanRight(
 void CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates(
   const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates"
   );
   this->checkFullInitialization();
@@ -6413,7 +6305,7 @@ void CandidateSemisimpleSubalgebra::
 getPrimalWeightProjectionFundamentalCoordinates(
   const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::getPrimalWeightProjectionFundamentalCoordinates"
   );
   this->checkFullInitialization();
@@ -6439,7 +6331,7 @@ getPrimalWeightProjectionFundamentalCoordinates(
 
 void CandidateSemisimpleSubalgebra::
 computePrimalModuleDecompositionHighestWeightsLastPart() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightsLastPart"
   );
   this->highestWeightsPrimalNonSorted.setSize(
@@ -6658,7 +6550,7 @@ void CandidateSemisimpleSubalgebra::
 computePrimalModuleDecompositionHighestWeightVectors(
   HashedList<Vector<Rational> >& inputHighestWeights
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightVectors"
   );
   this->checkConsistency();
@@ -6710,7 +6602,7 @@ computePrimalModuleDecompositionHighestWeightVectors(
 }
 
 bool SemisimpleSubalgebras::checkConsistencyHs() const {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::checkConsistencyHs");
+  STACK_TRACE("SemisimpleSubalgebras::checkConsistencyHs");
   this->checkInitialization();
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (
@@ -6749,7 +6641,7 @@ bool SemisimpleSubalgebras::checkConsistency() const {
 }
 
 bool SemisimpleSubalgebras::checkAll() const {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::checkAll");
+  STACK_TRACE("SemisimpleSubalgebras::checkAll");
   for (int i = 0; i < this->subalgebras.size(); i ++) {
     this->subalgebras.values[i].checkAll();
   }
@@ -6808,9 +6700,7 @@ void SemisimpleSubalgebras::resetComputations() {
 }
 
 bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::attemptToSolveSystem"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::attemptToSolveSystem");
   this->checkFullInitialization();
   this->transformedSystem = this->systemToSolve;
   ProgressReport report;
@@ -6990,9 +6880,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
     << "has not been initialized properly. "
     << global.fatal;
   }
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeCharacter"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeCharacter");
   this->checkCandidateInitialization();
   this->weylNonEmbedded->computeRho(true);
   Weight<Rational> tempMon;
@@ -7285,7 +7173,7 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization(
 }
 
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
-  MacroRegisterFunctionWithName("SlTwoSubalgebra::toString");
+  STACK_TRACE("SlTwoSubalgebra::toString");
   if (this->container == nullptr) {
     return "sl(2) subalgebra not initialized.";
   }
@@ -7455,9 +7343,7 @@ bool SlTwoSubalgebra::moduleDecompositionLeftFitsIntoRight(
   const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft,
   const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoRight
 ) {
-  MacroRegisterFunctionWithName(
-    "SlTwoSubalgebra::moduleDecompositionLeftFitsIntoRight"
-  );
+  STACK_TRACE("SlTwoSubalgebra::moduleDecompositionLeftFitsIntoRight");
   CharacterSemisimpleLieAlgebraModule<Rational> moduleDifference =
   moduleDecompoRight - moduleDecompoLeft;
   for (int i = 0; i < moduleDifference.size(); i ++) {
@@ -7478,7 +7364,7 @@ void SlTwoSubalgebra::toHTML(std::string& filePath) {
 }
 
 void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
-  MacroRegisterFunctionWithName("SlTwoSubalgebras::reset");
+  STACK_TRACE("SlTwoSubalgebras::reset");
   this->indicesSl2sContainedInRootSubalgebras.setSize(0);
   this->indicesSl2DecompositionFormulas.setSize(0);
   this->badHCharacteristics.setSize(0);
@@ -7494,7 +7380,7 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   bool computeRealForm,
   AlgebraicClosureRationals* algebraicClosure
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::findSl2Subalgebras");
+  STACK_TRACE("SemisimpleLieAlgebra::findSl2Subalgebras");
   ProgressReport report0;
   if (report0.tickAndWantReport()) {
     std::stringstream reportStream0;
@@ -7612,7 +7498,7 @@ bool CandidateSemisimpleSubalgebra::checkConsistency() const {
 }
 
 bool CandidateSemisimpleSubalgebra::computeAndVerifyFromGeneratorsAndHs() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeAndVerifyFromGeneratorsAndHs"
   );
   if (!this->flagSubalgebraPreloadedButNotVerified) {
@@ -7657,9 +7543,7 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromGeneratorsAndHs() {
 }
 
 bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::checkMaximalDominance"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::checkMaximalDominance");
   this->checkBasicInitialization();
   Rational scalarProduct;
   for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
@@ -7807,8 +7691,7 @@ bool SlTwoSubalgebra::checkIndicesMinimalContainingRootSubalgebras() const {
 }
 
 bool SlTwoSubalgebra::attemptToComputeCentralizer() {
-  MacroRegisterFunctionWithName("SlTwoSubalgebra::attemptToComputeCentralizer")
-  ;
+  STACK_TRACE("SlTwoSubalgebra::attemptToComputeCentralizer");
   this->flagCentralizerIsRegular = false;
   this->flagCentralizerTypeComputed = false;
   Weight<Rational> zeroWeight;
@@ -7865,7 +7748,7 @@ void SlTwoSubalgebra::
 computeModuleDecompositionsitionOfMinimalContainingRegularSAs(
   SlTwoSubalgebras& owner
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegularSAs"
   );
   this->moduleDecompositionMinimalContainingRootSubalgebras.setSize(
@@ -7893,7 +7776,7 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   int indexMinimalContainingRegularSA,
   RootSubalgebra& minimalContainingRegularSubalgebra
 ) {
-  MacroRegisterFunctionWithName("SlTwoSubalgebra::makeReportPrecomputations");
+  STACK_TRACE("SlTwoSubalgebra::makeReportPrecomputations");
   int dimension = this->getOwnerSemisimpleAlgebra().getRank();
   this->indicesContainingRootSubalgebras.size = 0;
   Vectors<Rational> roots;
@@ -7956,9 +7839,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   CharacterSemisimpleLieAlgebraModule<Rational>& outputHighestWeights,
   List<int>& outputModuleDimensions
 ) {
-  MacroRegisterFunctionWithName(
-    "SlTwoSubalgebra::computeModuleDecompositionsition"
-  );
+  STACK_TRACE("SlTwoSubalgebra::computeModuleDecompositionsition");
   this->checkConsistency();
   positiveRootsContainingRegularSubalgebra.checkConsistency();
   if (positiveRootsContainingRegularSubalgebra.size <= 0) {
@@ -8113,7 +7994,7 @@ std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
 "In turn, the highest weight is a positive integer multiple of the fundamental highest weight \\(\\psi\\). "
 "\\(V_{k\\psi}\\) is \\(k + 1\\)-dimensional. ";
 std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("SlTwoSubalgebras::toStringSummary");
+  STACK_TRACE("SlTwoSubalgebras::toStringSummary");
   std::stringstream out;
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   std::string displayPathAlgebra;
@@ -8372,7 +8253,7 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
 }
 
 void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("SlTwoSubalgebras::writeHTML");
+  STACK_TRACE("SlTwoSubalgebras::writeHTML");
   std::string virtualFileName =
   this->owner->fileNames.virtualFolderName() +
   this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras();
@@ -8466,9 +8347,7 @@ Rational CandidateSemisimpleSubalgebra::getScalarSubalgebra(
 std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
   int indexModule, const Vector<Rational>& weight
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper");
   std::stringstream out;
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > >& currentModule =
   this->modules[indexModule];
@@ -8558,9 +8437,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
 std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringDrawWeights"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringDrawWeights");
   if (!this->flagCentralizerIsWellChosen) {
     return "";
   }
@@ -8731,7 +8608,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
 std::string CandidateSemisimpleSubalgebra::toStringModuleDecompositionLaTeX(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::toStringModuleDecompositionLaTeX"
   );
   if (this->modules.size <= 0) {
@@ -8837,9 +8714,7 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecompositionLaTeX(
 std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringModuleDecomposition"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringModuleDecomposition");
   (void) format;
   if (this->modules.size <= 0) {
     return "";
@@ -9075,7 +8950,7 @@ std::string NilradicalCandidate::toStringTableElementWithWeights(
 }
 
 std::string NilradicalCandidate::toString(FormatExpressions* format) const {
-  MacroRegisterFunctionWithName("NilradicalCandidate::toString");
+  STACK_TRACE("NilradicalCandidate::toString");
   (void) format;
   // avoid unused parameter warning in a portable way.
   std::stringstream out;
@@ -9251,7 +9126,7 @@ getModGeneratedByNonHighestWeightVectorAndNilradElement(
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputRight,
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputBrackets
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "NilradicalCandidate::getModGeneratedByNonHighestWeightVectorAndNilradElement"
   );
   outputBrackets.setSize(0);
@@ -9286,9 +9161,7 @@ getModGeneratedByNonHighestWeightVectorAndNilradElement(
 std::string CandidateSemisimpleSubalgebra::toStringNilradicalsSummary(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringNilradicalsSummary"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringNilradicalsSummary");
   (void) format;
   // avoid unused parameter warning in a portable way.
   if (this->fernandoKacNilradicalCandidates.size == 0) {
@@ -9355,9 +9228,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicalsSummary(
 std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringNilradicals"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringNilradicals");
   if (this->fernandoKacNilradicalCandidates.size == 0) {
     if (this->owner->flagComputeNilradicals) {
       if (this->isRegularSubalgebra()) {
@@ -9674,9 +9545,7 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTableLaTeX(
 std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringPairingTable"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringPairingTable");
   (void) format;
   if (!(this->nilradicalPairingTable.size > 0)) {
     return "";
@@ -9885,7 +9754,7 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
 
 int CandidateSemisimpleSubalgebra::
 getSemisimplePartCentralizerOfSemisimplePartCentralizer() const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CandidateSemisimpleSubalgebra::getSemisimplePartCentralizerOfSemisimplePartCentralizer"
   );
   if (!this->flagCentralizerIsWellChosen) {
@@ -9902,9 +9771,7 @@ getSemisimplePartCentralizerOfSemisimplePartCentralizer() const {
 std::string CandidateSemisimpleSubalgebra::toStringCentralizer(
   FormatExpressions* format, bool writeToHardDisk
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringCentralizer"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringCentralizer");
   if (this->flagSystemProvedToHaveNoSolution) {
     return "";
   }
@@ -9981,9 +9848,7 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(
 std::string CandidateSemisimpleSubalgebra::toStringCentralizerDebugData(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringCentralizerDebugData"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringCentralizerDebugData");
   (void) format;
   // avoid unused parameter warning in a portable way.
   std::stringstream out;
@@ -10011,9 +9876,7 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizerDebugData(
 }
 
 void CandidateSemisimpleSubalgebra::computeCentralizerManually() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeCentralizerManually"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeCentralizerManually");
   this->owner->owner->getCommonCentralizer(
     this->basis, this->centralizerManualBasis
   );
@@ -10038,9 +9901,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerManually() {
 }
 
 void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen");
   this->flagCentralizerIsWellChosen = false;
   if (this->flagSystemProvedToHaveNoSolution) {
     global.comments
@@ -10152,9 +10013,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
 std::string CandidateSemisimpleSubalgebra::toStringSystem(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringSystem"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSystem");
   std::stringstream out;
   if (this->flagSystemSolved) {
     out << "<br>Subalgebra realized. ";
@@ -10250,9 +10109,7 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
 ) const {
   (void) format;
   // avoid unused parameter warning in a portable way
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringSystemPart2"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSystemPart2");
   std::stringstream out;
   out
   << "<br><b>For the calculator:</b><br>\n"
@@ -10273,9 +10130,7 @@ std::string CandidateSemisimpleSubalgebra::toStringLoadUnknown(
   FormatExpressions* format
 ) const {
   (void) format;
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringLoadUnknown"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringLoadUnknown");
   std::stringstream out;
   out << "(";
   out
@@ -10324,9 +10179,7 @@ std::string CandidateSemisimpleSubalgebra::toStringTypeAndHs(
 std::string CandidateSemisimpleSubalgebra::toStringGenerators(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::toStringGenerators"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringGenerators");
   if (this->basis.size == 0) {
     return "";
   }
@@ -10374,7 +10227,7 @@ bool CandidateSemisimpleSubalgebra::isRegularSubalgebra() const {
 std::string CandidateSemisimpleSubalgebra::toString(
   FormatExpressions* format, bool generateLinks
 ) const {
-  MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::toString");
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toString");
   std::stringstream out;
   bool shortReportOnly = format ==
   nullptr ? true : format->flagCandidateSubalgebraShortReportOnly;
@@ -10667,9 +10520,7 @@ void CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType(
   List<List<Vectors<Rational> > >& outputHsByType,
   List<DynkinSimpleType>& outputTypeList
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType");
   List<DynkinSimpleType> allTypes;
   this->weylNonEmbedded->dynkinType.getTypesWithMults(allTypes);
   outputHsByType.setSize(0);
@@ -10701,9 +10552,7 @@ void CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType(
 bool CandidateSemisimpleSubalgebra::hasHsScaledByTwoConjugateTo(
   List<Vector<Rational> >& input
 ) const {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::hasHsScaledByTwoConjugateTo"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::hasHsScaledByTwoConjugateTo");
   if (input.size != this->cartanElementsScaledToActByTwo.size) {
     return false;
   }
@@ -10739,9 +10588,7 @@ std::string SimpleReflection::toString() const {
 bool CandidateSemisimpleSubalgebra::isDirectSummandOf(
   const CandidateSemisimpleSubalgebra& other
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::isDirectSummandOf"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::isDirectSummandOf");
   if (other.flagSystemProvedToHaveNoSolution) {
     return false;
   }
@@ -10847,9 +10694,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(
 void CandidateSemisimpleSubalgebra::adjustCentralizerAndRecompute(
   bool allowNonPolynomialSystemFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::adjustCentralizerAndRecompute"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::adjustCentralizerAndRecompute");
   if (this->flagSystemProvedToHaveNoSolution) {
     return;
   }
@@ -10876,9 +10721,7 @@ int CandidateSemisimpleSubalgebra::getNumberOfModules() const {
 }
 
 void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::computePairingTablesAndFKFTtypes"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::computePairingTablesAndFKFTtypes");
   ProgressReport report;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     CandidateSemisimpleSubalgebra& currentSubalgebra =
@@ -10928,7 +10771,7 @@ void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
 void SemisimpleSubalgebras::hookUpCentralizers(
   bool allowNonPolynomialSystemFailure
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::hookUpCentralizers");
+  STACK_TRACE("SemisimpleSubalgebras::hookUpCentralizers");
   this->checkAll();
   List<int> candidatePermutation;
   candidatePermutation.setSize(this->subalgebras.values.size);
@@ -11083,9 +10926,7 @@ bool CandidateSemisimpleSubalgebra::operator>(
 }
 
 void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
-  MacroRegisterFunctionWithName(
-    "CandidateSemisimpleSubalgebra::computeCartanOfCentralizer"
-  );
+  STACK_TRACE("CandidateSemisimpleSubalgebra::computeCartanOfCentralizer");
   Vectors<AlgebraicNumber> highestWeightsNonSorted;
   Vectors<AlgebraicNumber> cartanGenerators;
   highestWeightsNonSorted.setSize(this->highestVectorsNonSorted.size);

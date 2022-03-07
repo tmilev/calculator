@@ -92,7 +92,7 @@ bool AlgebraicClosureRationals::checkConsistency() const {
 void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
   const Selection& selection, MatrixTensor<Rational>& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection"
   );
   output.makeZero();
@@ -125,9 +125,7 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
 }
 
 void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
-  MacroRegisterFunctionWithName(
-    "AlgebraicClosureRationals::computeDisplayStringsFromRadicals"
-  );
+  STACK_TRACE("AlgebraicClosureRationals::computeDisplayStringsFromRadicals");
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     return;
   }
@@ -190,9 +188,7 @@ int AlgebraicClosureRationals::getIndexFromRadicalSelection(
 bool AlgebraicClosureRationals::mergeRadicals(
   const List<LargeInteger>& radicals
 ) {
-  MacroRegisterFunctionWithName(
-    "AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions"
-  );
+  STACK_TRACE("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     global.fatal
     << "AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
@@ -328,9 +324,7 @@ void AlgebraicClosureRationals::appendAdditiveEiBasis() {
 bool AlgebraicClosureRationals::chooseGeneratingElement(
   int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "AlgebraicClosureRationals::chooseGeneratingElement"
-  );
+  STACK_TRACE("AlgebraicClosureRationals::chooseGeneratingElement");
   SelectionPositiveIntegers selection;
   int DimensionOverRationals = this->latestBasis.size;
   selection.initialize(DimensionOverRationals);
@@ -412,9 +406,7 @@ void AlgebraicClosureRationals::contractBasesIfRedundant(
   AlgebraicClosureRationals& previousCopy,
   AlgebraicNumber* outputImageGenerator
 ) {
-  MacroRegisterFunctionWithName(
-    "AlgebraicClosureRationals::contractBasesIfRedundant"
-  );
+  STACK_TRACE("AlgebraicClosureRationals::contractBasesIfRedundant");
   if (
     previousCopy.latestBasis.size != this->latestBasis.size ||
     this->basisInjections.size < 3
@@ -439,7 +431,7 @@ void AlgebraicClosureRationals::contractBasesIfRedundant(
 bool AlgebraicClosureRationals::reduceMe(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::reduceMe");
+  STACK_TRACE("AlgebraicClosureRationals::reduceMe");
   if (!this->chooseGeneratingElement(1000, commentsOnFailure)) {
     return false;
   }
@@ -561,7 +553,7 @@ const {
 void AlgebraicClosureRationals::getAdditionTo(
   const AlgebraicNumber& input, VectorSparse<Rational>& output
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::getAdditionTo");
+  STACK_TRACE("AlgebraicClosureRationals::getAdditionTo");
   if (&output == &input.element) {
     AlgebraicNumber copy = input;
     this->getAdditionTo(copy, output);
@@ -617,9 +609,7 @@ void AlgebraicClosureRationals::getAdditionTo(
 void AlgebraicClosureRationals::getMultiplicationBy(
   const AlgebraicNumber& input, MatrixTensor<Rational>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "AlgebraicClosureRationals::getMultiplicationBy"
-  );
+  STACK_TRACE("AlgebraicClosureRationals::getMultiplicationBy");
   output.makeZero();
   VectorSparse<Rational> inputAdditiveForm;
   this->getAdditionTo(input, inputAdditiveForm);
@@ -648,7 +638,7 @@ void AlgebraicClosureRationals::getMultiplicationBy(
 bool AlgebraicNumber::assignCosRationalTimesPi(
   const Rational& input, AlgebraicClosureRationals& inputOwner
 ) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::assignCosRationalTimesPi");
+  STACK_TRACE("AlgebraicNumber::assignCosRationalTimesPi");
   Rational fractionalPart = input;
   fractionalPart.assignFractionalValue();
   Rational halfIntegerPart = input * 2;
@@ -813,9 +803,7 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "AlgebraicNumber::constructFromMinimalPolynomial"
-  );
+  STACK_TRACE("AlgebraicNumber::constructFromMinimalPolynomial");
   return
   inputOwner.adjoinRootMinimalPolynomial(
     polynomial, *this, commentsOnFailure
@@ -848,7 +836,7 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension"
   );
   if (
@@ -923,7 +911,7 @@ convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
   const Polynomial<AlgebraicNumber>& input,
   Polynomial<AlgebraicNumber>& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail"
   );
   int indexVariable = - 1;
@@ -947,9 +935,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "AlgebraicClosureRationals::adjoinRootMinimalPolynomial"
-  );
+  STACK_TRACE("AlgebraicClosureRationals::adjoinRootMinimalPolynomial");
   if (
     this->adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
       polynomial, outputRoot, commentsOnFailure
@@ -1122,7 +1108,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
 }
 
 void AlgebraicNumber::invert() {
-  MacroRegisterFunctionWithName("AlgebraicNumber::invert");
+  STACK_TRACE("AlgebraicNumber::invert");
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
       global.fatal << "Division by zero. " << global.fatal;
@@ -1154,7 +1140,7 @@ void AlgebraicNumber::invert() {
 }
 
 void AlgebraicNumber::operator/=(const AlgebraicNumber& other) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::operator/=");
+  STACK_TRACE("AlgebraicNumber::operator/=");
   AlgebraicNumber otherCopy = other;
   otherCopy.invert();
   *this *= otherCopy;
@@ -1179,7 +1165,7 @@ bool AlgebraicNumber::checkCommonOwner(const AlgebraicNumber& other) const {
 }
 
 void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::operator=");
+  STACK_TRACE("AlgebraicNumber::operator=");
   this->checkCommonOwner(other);
   if (this->basisIndex == other.basisIndex) {
     this->element -= other.element;
@@ -1204,7 +1190,7 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
 }
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
+  STACK_TRACE("AlgebraicNumber::operator+=");
   this->checkConsistency();
   other.checkConsistency();
   if (this == &other) {
@@ -1283,7 +1269,7 @@ bool AlgebraicNumber::checkConsistency() const {
 }
 
 void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::operator*=");
+  STACK_TRACE("AlgebraicNumber::operator*=");
   if (this == &other) {
     AlgebraicNumber otherCopy = other;
     *this *= otherCopy;
@@ -1417,7 +1403,7 @@ void AlgebraicNumber::expressViaLatestBasis() {
 }
 
 bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
-  MacroRegisterFunctionWithName("AlgebraicNumber::evaluatesToDouble");
+  STACK_TRACE("AlgebraicNumber::evaluatesToDouble");
   if (!this->isExpressedViaLatestBasis()) {
     AlgebraicNumber thisCopy = *this;
     thisCopy.expressViaLatestBasis();
@@ -1481,9 +1467,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "AlgebraicNumber::assignRationalQuadraticRadical"
-  );
+  STACK_TRACE("AlgebraicNumber::assignRationalQuadraticRadical");
   this->checkConsistency();
   if (input == 0) {
     return false;
@@ -1569,7 +1553,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
 bool AlgebraicNumber::radicalMeDefault(
   int radical, std::stringstream* commentsOnError
 ) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::radicalMeDefault");
+  STACK_TRACE("AlgebraicNumber::radicalMeDefault");
   if (this->owner == nullptr) {
     if (commentsOnError != nullptr) {
       *commentsOnError
@@ -1723,7 +1707,7 @@ AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input)
 
 std::string AlgebraicClosureRationals::toString(FormatExpressions* format)
 const {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::toString");
+  STACK_TRACE("AlgebraicClosureRationals::toString");
   (void) format;
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -2034,9 +2018,7 @@ void ElementZmodP::convertPolynomialModularToPolynomialIntegral(
   Polynomial<Rational>& output,
   bool useNegatives
 ) {
-  MacroRegisterFunctionWithName(
-    "ElementZmodP::convertPolynomialModularToPolynomialIntegral"
-  );
+  STACK_TRACE("ElementZmodP::convertPolynomialModularToPolynomialIntegral");
   output.makeZero();
   if (input.size() == 0) {
     return;
@@ -2060,7 +2042,7 @@ void ElementZmodP::convertLiftPolynomialModular(
   Polynomial<ElementZmodP>& output,
   const LargeIntegerUnsigned& newModulus
 ) {
-  MacroRegisterFunctionWithName("ElementZmodP::convertLiftPolynomialModular");
+  STACK_TRACE("ElementZmodP::convertLiftPolynomialModular");
   if (&input == &output) {
     Polynomial<ElementZmodP> inputCopy = input;
     ElementZmodP::convertLiftPolynomialModular(inputCopy, output, newModulus);
@@ -2083,9 +2065,7 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   Polynomial<ElementZmodP>& output,
   const LargeIntegerUnsigned& newModulo
 ) {
-  MacroRegisterFunctionWithName(
-    "ElementZmodP::convertModuloIntegerAfterScalingToIntegral"
-  );
+  STACK_TRACE("ElementZmodP::convertModuloIntegerAfterScalingToIntegral");
   Polynomial<Rational> rescaled;
   rescaled = input;
   rescaled.scaleNormalizeLeadingMonomial(

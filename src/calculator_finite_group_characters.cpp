@@ -98,7 +98,7 @@ checkRepresentationIsMultiplicativelyClosed() {
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 computeAllGeneratorImagesFromSimple() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "GroupRepresentationCarriesAllMatrices::computeAllGeneratorImagesFromSimple"
   );
   this->checkInitialization();
@@ -138,7 +138,7 @@ computeAllGeneratorImagesFromSimple() {
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 computeAllElementImages() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple"
   );
   this->checkInitialization();
@@ -174,7 +174,7 @@ template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
   const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
 ) {
-  MacroRegisterFunctionWithName("WeylGroupRepresentation::operator*=");
+  STACK_TRACE("WeylGroupRepresentation::operator*=");
   // lazy programmers handling://////
   if (&other == this) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> otherCopy;
@@ -218,7 +218,7 @@ template <typename somegroup, typename Coefficient>
 void GroupRepresentation<somegroup, Coefficient>::operator*=(
   const GroupRepresentation<somegroup, Coefficient>& other
 ) {
-  MacroRegisterFunctionWithName("GroupRepresentation::operator*=");
+  STACK_TRACE("GroupRepresentation::operator*=");
   // lazy programmers handling://////
   if (&other == this) {
     GroupRepresentation<somegroup, Coefficient> otherCopy;
@@ -257,9 +257,7 @@ restrictRepresentation(
   const ClassFunction<somegroup, Rational>& remainingCharacter,
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "GroupRepresentationCarriesAllMatrices::restrictRepresentation"
-  );
+  STACK_TRACE("GroupRepresentationCarriesAllMatrices::restrictRepresentation");
   this->checkAllSimpleGeneratorsAreOK();
   if (vectorSpaceBasisSubrep.size == 0) {
     global.fatal
@@ -295,9 +293,7 @@ decomposeTodorsVersion(
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
   appendOnlyGRCAMSList
 ) {
-  MacroRegisterFunctionWithName(
-    "WeylGroupRepresentation::decomposeTodorsVersion"
-  );
+  STACK_TRACE("WeylGroupRepresentation::decomposeTodorsVersion");
   this->checkInitialization();
   this->ownerGroup->
   checkInitializationFiniteDimensionalRepresentationComputation();
@@ -508,9 +504,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   Expression& output,
   bool useOuter
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant");
   if (input.size() < 2) {
     return
     output.assignError(
@@ -590,9 +584,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
 bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple");
   if (!input.isListNElements(3)) {
     return output.assignError(calculator, "weylOrbit takes two arguments");
   }
@@ -729,9 +721,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
 bool CalculatorFunctionsWeylGroup::weylGroupOrbitSize(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::weylGroupOrbitSize"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylGroupOrbitSize");
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   semisimpleLieAlgebra.content = nullptr;
   Vector<Rational> weightRational;
@@ -764,7 +754,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   bool useFundCoords,
   bool useRho
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::weylOrbit");
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylOrbit");
   if (!input.isListNElements(3)) {
     return output.assignError(calculator, "weylOrbit takes two arguments");
   }
@@ -985,9 +975,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
 bool CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable");
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
@@ -1010,9 +998,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable(
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS");
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
@@ -1038,7 +1024,7 @@ bool CalculatorFunctionsWeylGroup::
 weylGroupOuterConjugacyClassesFromAllElements(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements"
   );
   if (
@@ -1136,7 +1122,7 @@ weylGroupOuterConjugacyClassesFromAllElements(
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements"
   );
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
@@ -1168,7 +1154,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
 bool CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives"
   );
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
@@ -1203,7 +1189,7 @@ bool CalculatorFunctionsWeylGroup::
 weylGroupIrrepsAndCharTableComputeFromScratch(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch"
   );
   if (
@@ -1240,7 +1226,7 @@ weylGroupIrrepsAndCharTableComputeFromScratch(
 bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint"
   );
   DynkinType dynkinType;
@@ -1343,8 +1329,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitSimple(
 bool CalculatorFunctionsWeylGroup::tensorWeylReps(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::tensorWeylReps")
-  ;
+  STACK_TRACE("CalculatorFunctionsWeylGroup::tensorWeylReps");
   if (input.size() != 3) {
     return false;
   }
@@ -1381,9 +1366,7 @@ bool CalculatorFunctionsWeylGroup::tensorWeylReps(
 bool CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps");
   Expression tensorExpression;
   if (input.size() != 3) {
     return false;
@@ -1429,9 +1412,7 @@ std::string WeylGroupData::toStringIrreducibleRepresentationLabel(
 std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   const List<SubgroupDataRootReflections>& inputSubgroups
 ) {
-  MacroRegisterFunctionWithName(
-    "WeylGroup::toStringSignSignatureRootSubsystem"
-  );
+  STACK_TRACE("WeylGroup::toStringSignSignatureRootSubsystem");
   if (inputSubgroups.size == 0) {
     return "";
   }
@@ -1944,7 +1925,7 @@ bool KostkaNumber::compute(
   HashedList<KostkaNumber>* kostkaNumberCache,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("KostkaNumber::compute");
+  STACK_TRACE("KostkaNumber::compute");
   this->value = - 1;
   if (!this->initTableaux(comments)) {
     return false;
@@ -2003,9 +1984,7 @@ bool KostkaNumber::compute(
 }
 
 std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
-  MacroRegisterFunctionWithName(
-    "KostkaNumber::GetTypeBParabolicSignMultiplicityTable"
-  );
+  STACK_TRACE("KostkaNumber::GetTypeBParabolicSignMultiplicityTable");
   std::stringstream out;
   List<Pair<Partition, Partition> > partitionPairs;
   List<Partition> partitionsLeft, partitionsRight;
@@ -2157,9 +2136,7 @@ Rational KostkaNumber::computeTypeBParabolicSignMultiplicity(
   const Partition& rightPartition,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "KostkaNumber::computeTypeBParabolicSignMultiplicity"
-  );
+  STACK_TRACE("KostkaNumber::computeTypeBParabolicSignMultiplicity");
   int rank = leftPartition.n + rightPartition.n;
   int BcomponentSize = rank - parabolicPartition.n;
   if (comments != nullptr) {
@@ -2240,9 +2217,7 @@ bool SelectionFixedRankDifferentMaxMultiplicities::initialize() {
 }
 
 bool SelectionFixedRankDifferentMaxMultiplicities::firstIncrement() {
-  MacroRegisterFunctionWithName(
-    "SelectionFixedRankDifferentMaxMultiplicities::firstIncrement"
-  );
+  STACK_TRACE("SelectionFixedRankDifferentMaxMultiplicities::firstIncrement");
   this->flagFirstComputed = true;
   this->multiplicities.setSize(this->capacities.size);
   int remainingRank = this->rank;
@@ -2262,7 +2237,7 @@ bool SelectionFixedRankDifferentMaxMultiplicities::firstIncrement() {
 
 bool SelectionFixedRankDifferentMaxMultiplicities::
 incrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SelectionFixedRankDifferentMaxMultiplicities::incrementReturnFalseIfPastLast"
   );
   if (this->rank < 0) {
@@ -2300,7 +2275,7 @@ incrementReturnFalseIfPastLast() {
 bool CalculatorFunctionsWeylGroup::kostkaNumber(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::kostkaNumber");
+  STACK_TRACE("CalculatorFunctions::kostkaNumber");
   if (input.size() != 3) {
     return false;
   }
@@ -2325,9 +2300,7 @@ bool CalculatorFunctionsWeylGroup::kostkaNumber(
 bool CalculatorFunctionsWeylGroup::allSelectionsFixedRank(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::allSelectionsFixedRank"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::allSelectionsFixedRank");
   if (input.size() != 3) {
     return false;
   }
@@ -2359,9 +2332,7 @@ bool CalculatorFunctionsWeylGroup::allSelectionsFixedRank(
 
 bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers
 (Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystems"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::signSignatureRootSubsystems");
   std::stringstream out;
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
@@ -2416,9 +2387,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers
 bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystems"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::signSignatureRootSubsystems");
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
   }
@@ -2484,9 +2453,7 @@ getValueNonConst() const;
 bool CalculatorFunctionsWeylGroup::decomposeWeylRep(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::decomposeWeylRep"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::decomposeWeylRep");
   if (
     !input.isOfType<
       GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
@@ -2507,9 +2474,7 @@ bool CalculatorFunctionsWeylGroup::decomposeWeylRep(
 bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup");
   if (input.size() != 3) {
     return calculator << "<hr>IsOuterAuto expects 2 arguments.";
   }
@@ -2569,9 +2534,7 @@ bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(
 bool CalculatorFunctionsWeylGroup::weylGroupNaturalRep(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::weylGroupNaturalRep"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylGroupNaturalRep");
   if (
     !CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
       calculator, input, output
@@ -2629,7 +2592,7 @@ public:
 };
 
 std::string MonomialMacdonald::toString(FormatExpressions* format) const {
-  MacroRegisterFunctionWithName("MonomialMacdonald::toString");
+  STACK_TRACE("MonomialMacdonald::toString");
   (void) format;
   if (this->owner == nullptr) {
     return "(non-initialized)";
@@ -2657,7 +2620,7 @@ MonomialMacdonald::~MonomialMacdonald() {
 void MonomialMacdonald::generateMyOrbit(
   HashedList<MonomialMacdonald>& output
 ) {
-  MacroRegisterFunctionWithName("MonomialMacdonald::GenerateMyOrbit");
+  STACK_TRACE("MonomialMacdonald::GenerateMyOrbit");
   output.clear();
   output.addOnTop(*this);
   MonomialMacdonald currentMon;
@@ -2674,7 +2637,7 @@ void MonomialMacdonald::generateMyOrbit(
 void MonomialMacdonald::makeFromRootSubsystem(
   const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner
 ) {
-  MacroRegisterFunctionWithName("MonomialMacdonald::makeFromRootSubsystem");
+  STACK_TRACE("MonomialMacdonald::makeFromRootSubsystem");
   this->owner = &inputOwner;
   this->rootSelection.initialize(inputOwner.weylGroup.rootSystem.size);
   Vector<Rational> currentV;
@@ -2724,8 +2687,7 @@ void MonomialMacdonald::actOnMeSimpleReflection(
 bool CalculatorFunctionsWeylGroup::macdonaldPolys(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::macdonaldPolys")
-  ;
+  STACK_TRACE("CalculatorFunctionsWeylGroup::macdonaldPolys");
   // note that if input is list of 2 elements then input[0] is sequence atom,
   // and your two elements are in fact
   // input[1] and input[2];
@@ -2768,9 +2730,7 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(
 bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::lieAlgebraWeight"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::lieAlgebraWeight");
   Weight<Polynomial<Rational> > resultWeight;
   if (input.size() != 4) {
     return false;
@@ -2856,9 +2816,7 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
 bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight");
   if (input.size() != 2) {
     return calculator << "Lie algebra rho weight expects a single argument. ";
   }
@@ -2889,9 +2847,7 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
 bool CalculatorFunctionsWeylGroup::testSpechtModules(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::testSpechtModules"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::testSpechtModules");
   int symmetricGroupRank = 0;
   if (!input.isSmallInteger(&symmetricGroupRank)) {
     return
@@ -2927,9 +2883,7 @@ bool CalculatorFunctionsWeylGroup::testSpechtModules(
 bool CalculatorFunctionsWeylGroup::representElementHyperOctahedral(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::representElementHyperOctahedral"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::representElementHyperOctahedral");
   if (input.size() != 3) {
     return calculator << "Representating takes 2 arguments: element and rep.";
   }
@@ -2963,7 +2917,7 @@ bool CalculatorFunctionsWeylGroup::representElementHyperOctahedral(
 bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation"
   );
   Vector<Rational> inputLeftRat, inputRightRat;
@@ -3063,7 +3017,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
 bool CalculatorFunctionsWeylGroup::spechtModule(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::spechtModule");
+  STACK_TRACE("CalculatorFunctionsWeylGroup::spechtModule");
   Vector<Rational> inputRat;
   if (!calculator.getVectorFromFunctionArguments(input, inputRat)) {
     return false;
@@ -3117,7 +3071,7 @@ bool CalculatorFunctionsWeylGroup::
 hyperOctahedralAllModulesInducedFromSpechtModules(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules"
   );
   if (input.size() != 2) {
@@ -3145,7 +3099,7 @@ bool CalculatorFunctionsWeylGroup::
 hyperOctahedralPrintGeneratorCommutationRelations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations"
   );
   if (input.size() != 2) {
@@ -3172,9 +3126,7 @@ hyperOctahedralPrintGeneratorCommutationRelations(
 bool CalculatorFunctionsWeylGroup::weylGroupElement(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::weylGroupElement"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::weylGroupElement");
   if (input.size() < 2) {
     return
     output.assignError(
@@ -3217,7 +3169,7 @@ template <typename somegroup, typename Coefficient>
 void VirtualRepresentation<somegroup, Coefficient>::operator*=(
   const VirtualRepresentation<somegroup, Coefficient>& other
 ) {
-  MacroRegisterFunctionWithName("VirtualRepresentation::operator*=");
+  STACK_TRACE("VirtualRepresentation::operator*=");
   (void) other;
   VirtualRepresentation<somegroup, Coefficient> output, currentContribution;
   output.makeZero();
@@ -3260,9 +3212,7 @@ void VirtualRepresentation<somegroup, Coefficient>::assignRepresentation(
 bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsWeylGroup::makeVirtualWeylRep"
-  );
+  STACK_TRACE("CalculatorFunctionsWeylGroup::makeVirtualWeylRep");
   if (
     input.isOfType<
       VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>

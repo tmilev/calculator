@@ -27,7 +27,7 @@ std::string SSLRecord::Test::sampleClientHelloHex =
 bool SSLRecord::Test::serializationClientHello(
   TransportLayerSecurityServer& testServer
 ) {
-  MacroRegisterFunctionWithName("SSLRecord::Test::serializationClientHello");
+  STACK_TRACE("SSLRecord::Test::serializationClientHello");
   std::string inputHex = SSLRecord::Test::sampleClientHelloHex;
   SSLRecord record;
   record.owner = &testServer;
@@ -66,13 +66,13 @@ bool SSLRecord::Test::serializationClientHello(
 }
 
 bool SSLRecord::Test::all() {
-  MacroRegisterFunctionWithName("SSLRecord::Test::all");
+  STACK_TRACE("SSLRecord::Test::all");
   SSLRecord::Test::serialization();
   return true;
 }
 
 bool SSLRecord::Test::serialization() {
-  MacroRegisterFunctionWithName("SSLRecord::Test::serialization");
+  STACK_TRACE("SSLRecord::Test::serialization");
   TransportLayerSecurityServer server;
   server.initialize();
   server.session.initialize();

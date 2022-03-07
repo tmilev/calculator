@@ -256,7 +256,7 @@ std::string ASNElement::interpretAsObjectIdentifierGetNameAndId() const {
 }
 
 std::string ASNElement::interpretAsObjectIdentifier() const {
-  MacroRegisterFunctionWithName("ASNElement::interpretAsObjectIdentifier");
+  STACK_TRACE("ASNElement::interpretAsObjectIdentifier");
   if (this->ASNAtom.size <= 0) {
     return "not an object id";
   }
@@ -726,7 +726,7 @@ void ASNElement::toJSON(JSData& output) const {
 bool ASNElement::isIntegerUnsigned(
   LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse
 ) const {
-  MacroRegisterFunctionWithName("ASNElement::isIntegerUnsigned");
+  STACK_TRACE("ASNElement::isIntegerUnsigned");
   if (
     this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02
   ) {
@@ -762,7 +762,7 @@ bool ASNElement::isIntegerUnsigned(
 bool ASNElement::isInteger(
   LargeInteger* whichInteger, std::stringstream* commentsOnFalse
 ) const {
-  MacroRegisterFunctionWithName("ASNElement::isInteger");
+  STACK_TRACE("ASNElement::isInteger");
   if (
     this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02
   ) {
@@ -860,9 +860,7 @@ void ASNElement::resetExceptContent() {
 void AbstractSyntaxNotationOneSubsetDecoder::writeNull(
   List<unsigned char>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "AbstractSyntaxNotationOneSubsetDecoder::writeNull"
-  );
+  STACK_TRACE("AbstractSyntaxNotationOneSubsetDecoder::writeNull");
   output.addOnTop(AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05);
   output.addOnTop(0);
 }
@@ -893,9 +891,7 @@ void ASNElement::computeTag() {
 
 bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(ASNElement& output)
 {
-  MacroRegisterFunctionWithName(
-    "AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent"
-  );
+  STACK_TRACE("AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent");
   RecursionDepthCounter recursionGuard(&this->recursionDepthGuard);
   if (this->recursionDepthGuard > this->maxRecursionDepth) {
     std::stringstream errorStream;
@@ -965,9 +961,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decode(
   ASNElement& output,
   std::stringstream* commentsOnError
 ) {
-  MacroRegisterFunctionWithName(
-    "AbstractSyntaxNotationOneSubsetDecoder::decode"
-  );
+  STACK_TRACE("AbstractSyntaxNotationOneSubsetDecoder::decode");
   if (inputRawData.size == 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError
@@ -1384,7 +1378,7 @@ std::string ASNObject::toString() const {
 }
 
 std::string ASNObject::toStringAllRecognizedObjectIds() {
-  MacroRegisterFunctionWithName("ASNObject::toStringAllRecognizedObjectIds");
+  STACK_TRACE("ASNObject::toStringAllRecognizedObjectIds");
   // This function is safe after the first run, which should have already
   // happened, unless we are unit-testing.
   ASNObject::namesToObjectIdsNonThreadSafe();
@@ -1423,7 +1417,7 @@ bool ASNObject::loadFieldsFromASNSequence(
   >& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ASNObject::loadFieldsFromASNSequence");
+  STACK_TRACE("ASNObject::loadFieldsFromASNSequence");
   output.clear();
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10
@@ -1456,7 +1450,7 @@ std::string ASNElement::getType() const {
 bool ASNObject::loadFromASN(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ASNObject::loadFromASN");
+  STACK_TRACE("ASNObject::loadFromASN");
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11 ||
     input.elements.size != 1
@@ -1522,7 +1516,7 @@ bool ASNObject::loadFromASN(
 }
 
 void ASNObject::initializeNonThreadSafe() {
-  MacroRegisterFunctionWithName("ASNObject::initializeNonThreadSafe");
+  STACK_TRACE("ASNObject::initializeNonThreadSafe");
   ASNObject::namesToObjectIdsNonThreadSafe();
 }
 
@@ -1749,7 +1743,7 @@ void X509Certificate::writeBytesASN1(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) {
-  MacroRegisterFunctionWithName("X509Certificate::writeBytesASN1");
+  STACK_TRACE("X509Certificate::writeBytesASN1");
   this->computeASN(this->recodedASN);
   this->recodedASN.writeBytesUpdatePromisedLength(output);
   if (annotations != nullptr) {
@@ -1846,7 +1840,7 @@ bool PrivateKeyRSA::basicChecks(std::stringstream* comments) {
 bool PrivateKeyRSA::loadFromPEMFile(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::loadFromPEMFile");
+  STACK_TRACE("PrivateKeyRSA::loadFromPEMFile");
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the
   // server's private key.
@@ -1867,7 +1861,7 @@ bool PrivateKeyRSA::loadFromPEMFile(
 bool PrivateKeyRSA::loadFromPEM(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::loadFromPEM");
+  STACK_TRACE("PrivateKeyRSA::loadFromPEM");
   std::string certificateContentStripped =
   StringRoutines::stringTrimWhiteSpace(input);
   if (
@@ -1916,7 +1910,7 @@ bool PrivateKeyRSA::loadFromPEM(
 void PrivateKeyRSA::signBytesPadPKCS1(
   List<unsigned char>& input, int hash, List<unsigned char>& output
 ) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::signBytesPadPKCS1");
+  STACK_TRACE("PrivateKeyRSA::signBytesPadPKCS1");
   List<unsigned char> inputHashedPadded;
   this->hashAndPadPKCS1(input, hash, inputHashedPadded);
   ElementZmodP element, one;
@@ -2055,7 +2049,7 @@ void PrivateKeyRSA::hashAndPadPKCS1(
 bool PrivateKeyRSA::loadFromASNEncoded(
   List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::loadFromASNEncoded");
+  STACK_TRACE("PrivateKeyRSA::loadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder outerDecoder, innerDecoder;
   if (
     !outerDecoder.decode(
@@ -2269,7 +2263,7 @@ bool TBSCertificateInfo::loadExtensions(
 bool TBSCertificateInfo::loadValidity(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::loadValidity");
+  STACK_TRACE("TBSCertificateInfo::loadValidity");
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
     input.elements.size != 2
@@ -2296,9 +2290,7 @@ bool TBSCertificateInfo::loadValidity(
 bool TBSCertificateInfo::Organization::loadFromASN(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "TBSCertificateInfo::Organization::loadFromASN"
-  );
+  STACK_TRACE("TBSCertificateInfo::Organization::loadFromASN");
   MapList<
     std::string, ASNObject, HashFunctions::hashFunction<std::string>
   > fields;
@@ -2322,7 +2314,7 @@ bool TBSCertificateInfo::Organization::loadFields(
   >& fields,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::loadFields");
+  STACK_TRACE("TBSCertificateInfo::loadFields");
   int numberOfLoadedFields = 0;
   numberOfLoadedFields +=
   this->commonName.loadField(fields, ASNObject::names::commonName);
@@ -2402,7 +2394,7 @@ bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
 bool TBSCertificateInfo::load(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::load");
+  STACK_TRACE("TBSCertificateInfo::load");
   if (input.elements.size < 7) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Certificate ASN element needs at least 7 fields. "
@@ -2507,7 +2499,7 @@ bool X509Certificate::loadFromASNEncoded(
   const List<unsigned char>& input,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("X509Certificate::loadFromASNEncoded");
+  STACK_TRACE("X509Certificate::loadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder decoder;
   if (!decoder.decode(input, 0, this->sourceASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {

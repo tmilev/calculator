@@ -22,9 +22,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 isDominantWithRespectToGenerator<RationalFraction<Rational> >(
   const Vector<RationalFraction<Rational> >& weight, int generatorIndex
 ) {
-  MacroRegisterFunctionWithName(
-    "SubgroupWeylGroupOLD::isDominantWithRespectToGenerator"
-  );
+  STACK_TRACE("SubgroupWeylGroupOLD::isDominantWithRespectToGenerator");
   this->checkInitialization();
   Vector<RationalFraction<Rational> > tempVect;
   RationalFraction<Rational> tempRF;
@@ -144,7 +142,7 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra"
   );
   this->checkInitialization();
@@ -405,7 +403,7 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
 }
 
 void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
-  MacroRegisterFunctionWithName("Calculator::makeHmmG2InB3");
+  STACK_TRACE("Calculator::makeHmmG2InB3");
   DynkinType b3Type, g2Type;
   b3Type.makeSimpleType('B', 3);
   g2Type.makeSimpleType('G', 2);
@@ -485,7 +483,7 @@ bool Expression::assignMatrixExpressions(
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix,
   bool dontReduceTypes
 ) {
-  MacroRegisterFunctionWithName("Expression::assignMatrixExpressions");
+  STACK_TRACE("Expression::assignMatrixExpressions");
   if (reduceOneRowToSequenceAndOneByOneToNonMatrix && input.numberOfRows == 1) {
     if (input.numberOfColumns == 1) {
       (*this) = input(0, 0);
@@ -636,9 +634,7 @@ bool Calculator::getMatrixExpressionsFromArguments(
   int desiredNumRows,
   int desiredNumCols
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::getMatrixExpressionsFromArguments"
-  );
+  STACK_TRACE("Calculator::getMatrixExpressionsFromArguments");
   if (!input.isList()) {
     return false;
   }
@@ -656,7 +652,7 @@ bool Calculator::getMatrixExpressions(
   int desiredNumberOfRows,
   int desiredNumberOfColumns
 ) {
-  MacroRegisterFunctionWithName("Calculator::getMatrixExpressions");
+  STACK_TRACE("Calculator::getMatrixExpressions");
   if (
     !input.isSequenceNElements() &&
     !input.isMatrix() &&
@@ -754,7 +750,7 @@ bool Calculator::Test::processOneTest(JSData& input) {
 }
 
 bool Calculator::Test::loadTestStrings(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("Calculator::loadTestStrings");
+  STACK_TRACE("Calculator::loadTestStrings");
   if (
     !FileOperations::fileExistsVirtual(
       WebAPI::calculator::testFileNameVirtual, false, false, nullptr
@@ -803,9 +799,7 @@ std::string Calculator::writeFileToOutputFolderReturnLink(
   const std::string& fileName,
   const std::string& linkText
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::writeFileToOutputFolderReturnLink"
-  );
+  STACK_TRACE("Calculator::writeFileToOutputFolderReturnLink");
   std::string fileNameVirtual = "output/" + fileName;
   return
   FileOperations::writeFileReturnHTMLLink(
@@ -816,7 +810,7 @@ std::string Calculator::writeFileToOutputFolderReturnLink(
 bool Calculator::Test::writeTestStrings(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Calculator::writeTestStrings");
+  STACK_TRACE("Calculator::writeTestStrings");
   JSData result;
   result.elementType = JSData::token::tokenArray;
   result.listObjects.setSize(this->commands.size());
@@ -850,7 +844,7 @@ Calculator::Test::Test(Calculator& inputOwner) {
 bool Calculator::automatedTest(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::automatedTest");
+  STACK_TRACE("Calculator::automatedTest");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Automated test requires administrator access";
   }

@@ -1338,9 +1338,7 @@ bool CodeFormatter::Element::computeIndentationIfClause() {
 }
 
 bool CodeFormatter::Element::computeIndentationCommand() {
-  MacroRegisterFunctionWithName(
-    "CodeFormatter::Element::computeIndentationCommand"
-  );
+  STACK_TRACE("CodeFormatter::Element::computeIndentationCommand");
   this->computeIndentationBasic(0);
   return true;
 }
@@ -1445,9 +1443,7 @@ bool CodeFormatter::Element::shouldAddExtraLineInTopLevel(
 }
 
 bool CodeFormatter::Element::computeIndentationTopLevel() {
-  MacroRegisterFunctionWithName(
-    "CodeFormatter::Element::computeIndentationTopLevel"
-  );
+  STACK_TRACE("CodeFormatter::Element::computeIndentationTopLevel");
   for (int i = 0; i < this->children.size; i ++) {
     CodeFormatter::Element& current = this->children[i];
     if (current.type == CodeFormatter::Element::Dummy) {
@@ -1619,7 +1615,7 @@ bool CodeFormatter::Words::processCharacterInMultilineComment() {
 }
 
 bool CodeFormatter::Words::extractCodeElements(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CodeFormatter::Words::extractCodeElements");
+  STACK_TRACE("CodeFormatter::Words::extractCodeElements");
   (void) comments;
   std::string& inputCode = this->owner->inputCode;
   this->elements.setExpectedSize(
@@ -1676,7 +1672,7 @@ bool CodeFormatter::initializeFileNames(
   const std::string& outputOnFail,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::initializeFileNames");
+  STACK_TRACE("SourceCodeFormatter::initializeFileNames");
   this->inputFileName = fileName;
   if (
     !FileOperations::loadFileToStringVirtual(
@@ -1719,7 +1715,7 @@ bool CodeFormatter::isIdentifierWord(const std::string& input) {
 }
 
 std::string CodeFormatter::toStringLinks() {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::toStringLinks");
+  STACK_TRACE("SourceCodeFormatter::toStringLinks");
   std::stringstream out;
   bool parsingFailed = !this->parsingSucceeded();
   if (parsingFailed) {
@@ -1753,7 +1749,7 @@ bool CodeFormatter::formatCPPDirectory(
   bool inPlace,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::formatCPPDirectory");
+  STACK_TRACE("SourceCodeFormatter::formatCPPDirectory");
   std::string directory = inputDirectory;
   if (directory == "") {
     if (comments != nullptr) {
@@ -1831,7 +1827,7 @@ bool CodeFormatter::formatCPPSourceCode(
   std::stringstream* comments,
   bool logDebugInfo
 ) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::formatCPPSourceCode");
+  STACK_TRACE("SourceCodeFormatter::formatCPPSourceCode");
   if (
     !this->initializeFileNames(
       inputFileName, output, outputOnFail, comments
@@ -2183,7 +2179,7 @@ void CodeFormatter::Processor::consumeElements() {
 void CodeFormatter::Processor::consumeOneElement(
   CodeFormatter::Element& incoming
 ) {
-  MacroRegisterFunctionWithName("CodeFormatter::Processor::consumeOneElement");
+  STACK_TRACE("CodeFormatter::Processor::consumeOneElement");
   this->lastRuleName = "consume";
   this->stack.addOnTop(incoming);
   this->appendLog();
@@ -2206,7 +2202,7 @@ void CodeFormatter::Processor::consumeOneElement(
 }
 
 bool CodeFormatter::Processor::applyOneRule() {
-  MacroRegisterFunctionWithName("CodeFormatter::Processor::applyOneRule");
+  STACK_TRACE("CodeFormatter::Processor::applyOneRule");
   CodeFormatter::Element& last = this->stack[this->stack.size - 1];
   CodeFormatter::Element& secondToLast = this->stack[this->stack.size - 2];
   CodeFormatter::Element& thirdToLast = this->stack[this->stack.size - 3];
@@ -3672,7 +3668,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     )
   ) {
     // Must come before rule
-    // expression oeprator expression Lookahead X
+    // expression oeprator expression Lookahead X.
     this->lastRuleName =
     "expression operator expression Lookahead XX";
     fifthToLast.type = CodeFormatter::Element::Operator;
@@ -3700,13 +3696,20 @@ bool CodeFormatter::Processor::applyOneRule() {
     this->stack.removeIndexShiftDown(this->stack.size - 3);
     return true;
   }
+  if (sixthToLast.type == CodeFormatter::Element::LeftParenthesis && (fifthToLast.isExpressionOrAtom() ||fifthToLast.isTypeWordOrTypeExpression())
+ && fourthToLast.isStarOrAmpersand() && thirdToLast.type == CodeFormatter::Element::Atom && secondToLast.type == CodeFormatter::Element::Colon ){
+    this->lastRuleName = "(expression& atom:X";
+    fifthToLast.makeFrom2(CodeFormatter::Element::TypeExpression, fifthToLast, fourthToLast);
+    this->stack.removeIndexShiftDown(this->stack.size-4);
+    return true;
+  }
   if (
     this->isSuitableForExpressionOperatorExpressionXX(
       fifthToLast, fourthToLast, thirdToLast, secondToLast, last
     )
   ) {
     // Must come before rule
-    // expression operator expression Lookahead
+    // expression operator expression Lookahead.
     this->lastRuleName =
     "expression operator expression Lookahead X";
     fourthToLast.type = CodeFormatter::Element::Operator;
@@ -4756,7 +4759,7 @@ bool CodeFormatter::isWhiteSpace(const std::string& input) {
 }
 
 bool CodeFormatter::writeFormatedCode(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::writeFormatedCode");
+  STACK_TRACE("SourceCodeFormatter::writeFormatedCode");
   std::string filenameOut = this->outputFileName;
   if (!this->parsingSucceeded()) {
     filenameOut = this->outputOnFailFileName;

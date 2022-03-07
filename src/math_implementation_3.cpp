@@ -489,9 +489,7 @@ std::string HtmlRoutines::getStyleButtonLikeHtml() {
 std::string HtmlRoutines::convertStringEscapeQuotesAndBackslashes(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName(
-    "HtmlRoutines::convertStringEscapeQuotesAndBackslashes"
-  );
+  STACK_TRACE("HtmlRoutines::convertStringEscapeQuotesAndBackslashes");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -667,9 +665,7 @@ std::string StringRoutines::Conversions::stringToJSONStringEscaped(
 std::string StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::escapeQuotesBackslashesNewLines"
-  );
+  STACK_TRACE("StringRoutines::escapeQuotesBackslashesNewLines");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -690,7 +686,7 @@ std::string StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
 std::string StringRoutines::convertStringToJavascriptVariable(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
+  STACK_TRACE("StringRoutines::ConvertStringForJavascript");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (i == 0 && MathRoutines::isDigit(input[i])) {
@@ -774,9 +770,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
 std::string StringRoutines::Conversions::unescapeJavascriptLike(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::Conversions::unescapeJavascriptLike"
-  );
+  STACK_TRACE("StringRoutines::Conversions::unescapeJavascriptLike");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (i + 1 >= input.size() || input[i] != '\\') {
@@ -852,9 +846,7 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(
 std::string StringRoutines::Conversions::escapeJavascriptLike(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::Conversions::escapeJavascriptLike"
-  );
+  STACK_TRACE("StringRoutines::Conversions::escapeJavascriptLike");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     unsigned char current = input[i];
@@ -878,9 +870,7 @@ std::string StringRoutines::Conversions::escapeJavascriptLike(
 std::string HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName(
-    "HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes"
-  );
+  STACK_TRACE("HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -937,7 +927,7 @@ uint32_t HtmlRoutines::redGreenBlue(
 }
 
 bool FileOperations::isFolderUnsecure(const std::string& folderName) {
-  MacroRegisterFunctionWithName("FileOperations::isFolderUnsecure");
+  STACK_TRACE("FileOperations::isFolderUnsecure");
   DIR* pDir;
   pDir = opendir(folderName.c_str());
   if (pDir != nullptr) {
@@ -950,7 +940,7 @@ bool FileOperations::isFolderUnsecure(const std::string& folderName) {
 std::string FileOperations::getFileExtensionWithDot(
   const std::string& fileName, std::string* outputFileNameNoExtension
 ) {
-  MacroRegisterFunctionWithName("FileOperations::getFileExtensionWithDot");
+  STACK_TRACE("FileOperations::getFileExtensionWithDot");
   if (fileName == "" || fileName.size() <= 0) {
     return "";
   }
@@ -977,8 +967,7 @@ std::string FileOperations::getFileExtensionWithDot(
 std::string FileOperations::convertStringToLatexFileName(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName("FileOperations::convertStringToLatexFileName")
-  ;
+  STACK_TRACE("FileOperations::convertStringToLatexFileName");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (
@@ -1000,9 +989,7 @@ std::string FileOperations::convertStringToLatexFileName(
 std::string FileOperations::convertStringToEscapedStringFileNameSafe(
   const std::string& input
 ) {
-  MacroRegisterFunctionWithName(
-    "FileOperations::convertStringToEscapedStringFileNameSafe"
-  );
+  STACK_TRACE("FileOperations::convertStringToEscapedStringFileNameSafe");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == ' ') {
@@ -1023,7 +1010,7 @@ bool FileOperations::isOKFileNameVirtual(
   bool accessSensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::isOKFileNameVirtual");
+  STACK_TRACE("FileOperations::isOKFileNameVirtual");
   (void) accessSensitiveFolders;
   std::string fileNameNoPath =
   FileOperations::getFileNameFromFileNameWithPath(fileName);
@@ -1077,9 +1064,7 @@ bool FileOperations::isOKFileNameVirtual(
 bool FileOperations::isFileNameWithoutDotsAndSlashes(
   const std::string& fileName
 ) {
-  MacroRegisterFunctionWithName(
-    "FileOperations::isFileNameWithoutDotsAndSlashes"
-  );
+  STACK_TRACE("FileOperations::isFileNameWithoutDotsAndSlashes");
   for (unsigned i = 0; i < fileName.size(); i ++) {
     if (
       fileName[i] == '/' || fileName[i] == '\\' || fileName[i] == '.'
@@ -1132,9 +1117,7 @@ std::string FileOperations::cleanUpForFileNameUse(
 bool FileOperations::isFileNameSafeForSystemCommands(
   const std::string& fileName, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "FileOperations::isFileNameSafeForSystemCommands"
-  );
+  STACK_TRACE("FileOperations::isFileNameSafeForSystemCommands");
   const unsigned maxAllowedFileNameSize = 1000;
   if (fileName.size() > maxAllowedFileNameSize) {
     if (commentsOnFailure != nullptr) {
@@ -1202,7 +1185,7 @@ bool FileOperations::getFolderFileNamesVirtual(
   bool accessULTRASensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::getFolderFileNamesVirtual");
+  STACK_TRACE("FileOperations::getFolderFileNamesVirtual");
   std::string computedFolderName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtual(
@@ -1226,7 +1209,7 @@ bool FileOperations::getFolderFileNamesUnsecure(
   List<std::string>& outputFileNamesNoPath,
   List<std::string>* outputFileTypesWithDot
 ) {
-  MacroRegisterFunctionWithName("FileOperations::getFolderFileNamesUnsecure");
+  STACK_TRACE("FileOperations::getFolderFileNamesUnsecure");
   DIR* directory = opendir(folderName.c_str());
   if (directory == nullptr) {
     return false;
@@ -1353,7 +1336,7 @@ std::string FileOperations::writeFileReturnHTMLLink(
   const std::string& fileNameVirtual,
   const std::string& linkText
 ) {
-  MacroRegisterFunctionWithName("Calculator::writeFileReturnHTMLLink");
+  STACK_TRACE("Calculator::writeFileReturnHTMLLink");
   std::stringstream commentsOnError;
   bool success =
   FileOperations::writeFileVirual(
@@ -1508,9 +1491,7 @@ List<List<std::string> >& FileOperations::folderVirtualLinksDefault() {
 }
 
 void FileOperations::initializeFoldersULTRASensitive() {
-  MacroRegisterFunctionWithName(
-    "WebServer::InitializeMainFoldersULTRASensitive"
-  );
+  STACK_TRACE("WebServer::InitializeMainFoldersULTRASensitive");
   MapList<
     std::string,
     std::string,
@@ -1530,7 +1511,7 @@ void FileOperations::initializeFoldersULTRASensitive() {
 }
 
 void FileOperations::initializeFoldersSensitive() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersSensitive");
+  STACK_TRACE("WebServer::InitializeMainFoldersSensitive");
   MapList<
     std::string,
     std::string,
@@ -1617,8 +1598,7 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults(
 }
 
 void FileOperations::initializeFoldersNonSensitive() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersNonSensitive")
-  ;
+  STACK_TRACE("WebServer::InitializeMainFoldersNonSensitive");
   // Warning: order of substitutions is important.
   // Only the first rule that applies is applied, once.
   // No further rules are applied after that.
@@ -1656,7 +1636,7 @@ void FileOperations::initializeFoldersNonSensitive() {
 }
 
 bool FileOperations::checkFolderLinks() {
-  MacroRegisterFunctionWithName("FileOperations::checkFolderLinks");
+  STACK_TRACE("FileOperations::checkFolderLinks");
   List<List<std::string> > links = FileOperations::folderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     if (links[i].size != 2) {
@@ -1757,9 +1737,7 @@ bool FileOperations::openFileVirtualCustomizedWriteOnly(
   bool openAsBinary,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "FileOperations::openFileVirtualCustomizedWriteOnly"
-  );
+  STACK_TRACE("FileOperations::openFileVirtualCustomizedWriteOnly");
   std::string computedFileName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
@@ -1782,9 +1760,7 @@ bool FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
   bool openAsBinary,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "FileOperations::openFileVirtualCustomizedWriteOnly"
-  );
+  STACK_TRACE("FileOperations::openFileVirtualCustomizedWriteOnly");
   std::string computedFileName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
@@ -1807,9 +1783,7 @@ bool FileOperations::openFileVirtualCustomizedReadOnly(
   bool openAsBinary,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "FileOperations::openFileVirtualCustomizedReadOnly"
-  );
+  STACK_TRACE("FileOperations::openFileVirtualCustomizedReadOnly");
   std::string computedFileName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
@@ -1925,7 +1899,7 @@ bool FileOperations::openFileUnsecureReadOnly(
 std::string FileOperations::GetVirtualNameWithHash(
   const std::string& inputFileName
 ) {
-  MacroRegisterFunctionWithName("FileOperations::GetVirtualNameWithHash");
+  STACK_TRACE("FileOperations::GetVirtualNameWithHash");
   std::string result = inputFileName;
   std::string fileNameEnd;
   for (
@@ -1950,7 +1924,7 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly"
   );
   std::string fileEnd = "";
@@ -2026,7 +2000,7 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly"
   );
   std::string fileEnd = "";
@@ -2081,9 +2055,7 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   bool accessULTRASensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "FileOperations::getPhysicalFileNameFromVirtual"
-  );
+  STACK_TRACE("FileOperations::getPhysicalFileNameFromVirtual");
   // Using loggers forbidden here: function is used by the loggers themselves.
   if (
     !FileOperations::isOKFileNameVirtual(
@@ -2345,7 +2317,7 @@ StateMaintainerCurrentFolder::~StateMaintainerCurrentFolder() {
 void DrawingVariables::drawCoordSystemBuffer(
   DrawingVariables& variables, int dimension
 ) {
-  MacroRegisterFunctionWithName("DrawingVariables::drawCoordSystemBuffer");
+  STACK_TRACE("DrawingVariables::drawCoordSystemBuffer");
   Vector<Rational> root;
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(dimension);
@@ -2637,7 +2609,7 @@ std::string StringRoutines::Differ::differenceHTMLStatic(
 std::string StringRoutines::Differ::differenceHTML(
   const std::string& labelLeft, const std::string& labelRight
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::Differ::differenceHTML");
+  STACK_TRACE("StringRoutines::Differ::differenceHTML");
   std::stringstream leftOut, rightOut, commentsOnFailure;
   if (!this->computeDifference(&commentsOnFailure)) {
     commentsOnFailure
@@ -2723,9 +2695,7 @@ std::string StringRoutines::Differ::toString() {
 void StringRoutines::Differ::computeBestStartingIndices(
   int& outputIndexLeft, int& outputIndexRight
 ) {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::Differ::computeBestStartingIndices"
-  );
+  STACK_TRACE("StringRoutines::Differ::computeBestStartingIndices");
   Matrix<int> matrix = this->matrixLongestCommonSubsequence.getElement();
   outputIndexLeft = matrix.numberOfRows - 1;
   outputIndexRight = matrix.numberOfColumns - 1;
@@ -2756,9 +2726,7 @@ void StringRoutines::Differ::computeBestStartingIndices(
 }
 
 void StringRoutines::Differ::computeLongestSubsequenceMatrix() {
-  MacroRegisterFunctionWithName(
-    "StringRoutines::Differ::computeLongestSubsequenceMatrix"
-  );
+  STACK_TRACE("StringRoutines::Differ::computeLongestSubsequenceMatrix");
   unsigned numberOfRows = static_cast<unsigned>(left.size()) + 1;
   unsigned numberOfColumns = static_cast<unsigned>(right.size()) + 1;
   Matrix<int>& matrix = this->matrixLongestCommonSubsequence.getElement();
@@ -2799,8 +2767,7 @@ void StringRoutines::Differ::pushCommonString(int indexLeft, int indexRight) {
 void StringRoutines::Differ::extractCommonStrings(
   int indexLeft, int indexRight
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::Differ::extractCommonStrings")
-  ;
+  STACK_TRACE("StringRoutines::Differ::extractCommonStrings");
   if (
     this->left.size() == 0 ||
     this->right.size() == 0 ||
@@ -2864,7 +2831,7 @@ void StringRoutines::Differ::extractResult(
   const std::string& input,
   List<std::string>& output
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::Differ::extractResult");
+  STACK_TRACE("StringRoutines::Differ::extractResult");
   output.setSize(0);
   unsigned int previousEnd = 0;
   for (
@@ -2897,7 +2864,7 @@ void StringRoutines::Differ::extractResult(
 bool StringRoutines::Differ::computeDifference(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::Differ::computeDifference");
+  STACK_TRACE("StringRoutines::Differ::computeDifference");
   LargeInteger leftSize;
   // Warning: putting this in the line above may cause ambiguous conversions,
   // depending on your compiler.
@@ -3065,8 +3032,7 @@ void StringRoutines::stringTrimWhiteSpace(
 void StringRoutines::stringSplitDefaultDelimiters(
   const std::string& inputString, List<std::string>& output
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::stringSplitDefaultDelimiters")
-  ;
+  STACK_TRACE("StringRoutines::stringSplitDefaultDelimiters");
   List<char> delimiters;
   delimiters.addOnTop(' ');
   delimiters.addOnTop('\r');
@@ -3086,8 +3052,7 @@ void StringRoutines::stringSplitExcludeDelimiters(
   const List<char>& delimiters,
   List<std::string>& output
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::stringSplitExcludeDelimiters")
-  ;
+  STACK_TRACE("StringRoutines::stringSplitExcludeDelimiters");
   output.setSize(0);
   std::string reader;
   for (unsigned i = 0; i < inputString.size(); i ++) {
@@ -3245,7 +3210,7 @@ bool StringRoutines::stringEndsWith(
   const std::string& desiredEnd,
   std::string* outputStringBeginning
 ) {
-  MacroRegisterFunctionWithName("StringRoutines::stringEndsWith");
+  STACK_TRACE("StringRoutines::stringEndsWith");
   if (desiredEnd.size() == 0) {
     if (outputStringBeginning == nullptr) {
       *outputStringBeginning = input;
@@ -3705,6 +3670,14 @@ FormatExpressions::getMonomialOrder<
   return nullptr;
 }
 
+FormatExpressions* FormatExpressions::defaultFormat() {
+  static FormatExpressions result;
+  if (result.polynomialAlphabet.size == 0) {
+    result.polynomialAlphabet.addOnTop("x");
+  }
+  return &result;
+}
+
 FormatExpressions::FormatExpressions() {
   this->ambientWeylLetter = 'X';
   this->extraLinesCounterLatex = 0;
@@ -3803,7 +3776,7 @@ bool OnePartialFractionDenominator::reduceOnce(
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   >& output
 ) {
-  MacroRegisterFunctionWithName("OnePartialFractionDenominator::reduceOnce");
+  STACK_TRACE("OnePartialFractionDenominator::reduceOnce");
   this->checkInitialization();
   if (this->denominators.size() <= this->owner->ambientDimension) {
     return false;
@@ -3840,7 +3813,7 @@ bool OnePartialFractionDenominator::operator>(
 void OnePartialFractionDenominator::computeOneCheckSum(
   Vector<Rational>& variableValues, Rational& output
 ) const {
-  MacroRegisterFunctionWithName("OnePartialFraction::computeOneCheckSum");
+  STACK_TRACE("OnePartialFraction::computeOneCheckSum");
   Rational multiplicand;
   output = 1;
   for (int i = 0; i < this->denominators.size(); i ++) {
@@ -3965,7 +3938,7 @@ int OnePartialFractionDenominator::
 computeGainingMultiplicityIndexInLinearRelation(
   Vector<Rational>& linearRelation
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "OnePartialFractionDenominator::computeGainingMultiplicityIndexInLinearRelation"
   );
   for (int i = 0; i < linearRelation.size; i ++) {
@@ -3983,9 +3956,8 @@ void OnePartialFractionDenominator::getLinearRelationFromNormalized(
   Vector<Rational>& linearRelationBetweenNormalizedVectors,
   Vector<Rational>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "OnePartialFractionDenominator::getLinearRelationFromNormalized"
-  );
+  STACK_TRACE("OnePartialFractionDenominator::getLinearRelationFromNormalized")
+  ;
   output = linearRelationBetweenNormalizedVectors;
   for (int i = 0; i < output.size; i ++) {
     if (output[i].isEqualToZero()) {
@@ -4007,7 +3979,7 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   >& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation"
   );
   MapList<Vector<Rational>, OnePartialFractionDenominatorComponent> reduced;
@@ -4061,7 +4033,7 @@ void OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula(
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   >& output
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula"
   );
   Polynomial<LargeInteger> geometricSeriesNumerator;
@@ -4211,9 +4183,7 @@ void OnePartialFractionDenominator::getNElongationPolynomial(
   const Vector<Rational>& exponent,
   Polynomial<LargeInteger>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "OnePartialFractionDenominator::getNElongationPolynomial"
-  );
+  STACK_TRACE("OnePartialFractionDenominator::getNElongationPolynomial");
   int start = 0;
   int increment = 1;
   int count = lengthOfGeometricSeries;
@@ -4399,7 +4369,7 @@ bool PartialFractions::assureIndicatorRegularity(
 }
 
 void PartialFractions::prepareCheckSums() {
-  MacroRegisterFunctionWithName("PartialFractions::prepareCheckSums");
+  STACK_TRACE("PartialFractions::prepareCheckSums");
   if (!this->flagUsingCheckSum) {
     return;
   }
@@ -4407,7 +4377,7 @@ void PartialFractions::prepareCheckSums() {
 }
 
 void PartialFractions::compareCheckSums() {
-  MacroRegisterFunctionWithName("PartialFractions::compareCheckSums");
+  STACK_TRACE("PartialFractions::compareCheckSums");
   if (!this->flagUsingCheckSum || this->flagDiscardingFractions) {
     return;
   }
@@ -4442,7 +4412,7 @@ void PartialFractions::prepareIndicatorVariables() {
 }
 
 bool PartialFractions::splitPartial() {
-  MacroRegisterFunctionWithName("PartialFractions::splitPartial");
+  STACK_TRACE("PartialFractions::splitPartial");
   OnePartialFractionDenominator currentFraction;
   LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
@@ -4486,9 +4456,7 @@ void OnePartialFractionDenominator::addMultiplicity(
   int multiplicity,
   int elongation
 ) {
-  MacroRegisterFunctionWithName(
-    "OnePartialFractionDenominator::addMultiplicity"
-  );
+  STACK_TRACE("OnePartialFractionDenominator::addMultiplicity");
   this->checkInitialization();
   if (!this->owner->normalizedVectors.contains(normalizedVector)) {
     global.fatal << "Unrecognized normalized vector." << global.fatal;
@@ -4513,7 +4481,7 @@ void OnePartialFractionDenominator::addMultiplicity(
 bool OnePartialFractionDenominator::initializeFromPartialFractions(
   PartialFractions& owner
 ) {
-  MacroRegisterFunctionWithName("OnePartialFraction::initializeFromVectors");
+  STACK_TRACE("OnePartialFraction::initializeFromVectors");
   *this = owner.initialPartialFraction;
   return true;
 }
@@ -4743,7 +4711,7 @@ void PartialFractions::accumulateCheckSum(
 }
 
 void PartialFractions::computeCheckSum(Rational& output) {
-  MacroRegisterFunctionWithName("PartialFractions::computeCheckSum");
+  STACK_TRACE("PartialFractions::computeCheckSum");
   output.makeZero();
   this->accumulateCheckSum(this->reduced, output);
   this->accumulateCheckSum(this->reducedWithElongationRedundancies, output);
@@ -4771,7 +4739,7 @@ void PartialFractions::initializeDimension() {
 void PartialFractions::initializeInput(
   const List<Vector<Rational> >& input
 ) {
-  MacroRegisterFunctionWithName("PartialFractions::initializeInput");
+  STACK_TRACE("PartialFractions::initializeInput");
   this->originalVectors = input;
   List<int> coefficients;
   List<Vector<Rational> > normalizedWithMultiplicity;
@@ -4848,7 +4816,7 @@ bool PartialFractions::inputIsValid(std::stringstream* commentsOnFailure) const 
 bool PartialFractions::initializeFromVectors(
   Vectors<Rational>& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PartialFractions::initializeFromVectors");
+  STACK_TRACE("PartialFractions::initializeFromVectors");
   this->initializeCommon();
   this->initializeInput(input);
   this->initializeDimension();
@@ -4867,7 +4835,7 @@ bool PartialFractions::initializeFromVectors(
 void PartialFractions::initializeAndSplit(
   Vectors<Rational>& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PartialFractions::initializeAndSplit");
+  STACK_TRACE("PartialFractions::initializeAndSplit");
   this->initializeFromVectors(input, commentsOnFailure);
   this->split(nullptr);
 }
@@ -4882,7 +4850,7 @@ void PartialFractions::run(Vectors<Rational>& input) {
 void PartialFractions::removeRedundantShortRoots(
   Vector<Rational>* indicator
 ) {
-  MacroRegisterFunctionWithName("PartialFractions::removeRedundantShortRoots");
+  STACK_TRACE("PartialFractions::removeRedundantShortRoots");
   Rational startCheckSum;
   OnePartialFractionDenominator denominator;
   Polynomial<LargeInteger> coefficient;
@@ -5051,9 +5019,7 @@ void OnePartialFractionDenominatorComponent::getPolynomialDenominator(
 }
 
 int OnePartialFractionDenominatorComponent::getLargestElongation() const {
-  MacroRegisterFunctionWithName(
-    "OnePartialFractionDenominatorComponent::getLargestElongation"
-  );
+  STACK_TRACE("OnePartialFractionDenominatorComponent::getLargestElongation");
   if (this->elongations.size == 0) {
     global.fatal
     << "Elongations are not supposed to be empty. "
@@ -5159,9 +5125,7 @@ void OnePartialFractionDenominatorComponent::getMonomial(
 void OnePartialFractionDenominatorComponent::computeOneCheckSum(
   Rational& output, const Vector<Rational>& variableValues
 ) {
-  MacroRegisterFunctionWithName(
-    "OnePartialFractionDenominator::computeOneCheckSum"
-  );
+  STACK_TRACE("OnePartialFractionDenominator::computeOneCheckSum");
   output = 1;
   MonomialPolynomial monomial;
   Rational scalar;
@@ -5617,7 +5581,7 @@ void::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
 
 bool SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast()
 {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast"
   );
   for (int i = this->multiplicities.size - 1; i >= 0; i --) {
@@ -5653,9 +5617,7 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   const DynkinSimpleType& dynkinType,
   int multiplicity
 ) {
-  MacroRegisterFunctionWithName(
-    "DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn"
-  );
+  STACK_TRACE("DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn");
   output.setSize(0);
   MatrixTensor<Rational> directSummand, finalMat;
   if (
@@ -5698,7 +5660,7 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
 void DynkinType::getOuterAutosGeneratorsActOnVectorColumn(
   List<MatrixTensor<Rational> >& output
 ) {
-  MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGenerators");
+  STACK_TRACE("DynkinType::GetOuterAutosGenerators");
   this->sortDynkinTypes();
   List<MatrixTensor<Rational> > intermediateGenerators;
   MatrixTensor<Rational> matrixFinal, matrixToGo;
@@ -5778,9 +5740,7 @@ std::string DynkinType::getWeylGroupName(FormatExpressions* format) const {
 bool DynkinType::canBeExtendedParabolicallyOrIsEqualTo(
   const DynkinType& other
 ) const {
-  MacroRegisterFunctionWithName(
-    "DynkinType::canBeExtendedParabolicallyOrIsEqualTo"
-  );
+  STACK_TRACE("DynkinType::canBeExtendedParabolicallyOrIsEqualTo");
   if (this->isEqualToZero()) {
     return true;
   }
@@ -5809,7 +5769,7 @@ bool DynkinType::canBeExtendedParabolicallyOrIsEqualTo(
 }
 
 bool DynkinType::canBeExtendedParabolicallyTo(const DynkinType& other) const {
-  MacroRegisterFunctionWithName("DynkinType::canBeExtendedParabolicallyTo");
+  STACK_TRACE("DynkinType::canBeExtendedParabolicallyTo");
   if (*this == other) {
     return false;
   }
@@ -5822,7 +5782,7 @@ bool DynkinType::grow(
   List<DynkinType>& output,
   List<List<int> >* outputPermutationRoots
 ) const {
-  MacroRegisterFunctionWithName("DynkinType::grow");
+  STACK_TRACE("DynkinType::grow");
   output.setSize(0);
   if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->setSize(0);
@@ -5905,9 +5865,7 @@ bool DynkinType::grow(
 int DynkinType::getIndexPreimageFromRootInjection(
   int inputIndex, const List<int>& inputRootInjection
 ) {
-  MacroRegisterFunctionWithName(
-    "DynkinType::getIndexPreimageFromRootInjection"
-  );
+  STACK_TRACE("DynkinType::getIndexPreimageFromRootInjection");
   for (int i = 0; i < inputRootInjection.size; i ++) {
     if (inputRootInjection[i] == inputIndex) {
       return i;
@@ -6143,7 +6101,7 @@ void DynkinType::getSortedDynkinTypes(List<DynkinSimpleType>& output) const {
 }
 
 void DynkinType::getCartanSymmetric(Matrix<Rational>& output) const {
-  MacroRegisterFunctionWithName("DynkinType::getCartanSymmetric");
+  STACK_TRACE("DynkinType::getCartanSymmetric");
   output.initialize(0, 0);
   Matrix<Rational> currentCartan;
   List<DynkinSimpleType> sortedMons;
@@ -6159,7 +6117,7 @@ void DynkinType::getCartanSymmetric(Matrix<Rational>& output) const {
 }
 
 void DynkinType::getCoCartanSymmetric(Matrix<Rational>& output) const {
-  MacroRegisterFunctionWithName("DynkinType::getCartanSymmetric");
+  STACK_TRACE("DynkinType::getCartanSymmetric");
   Matrix<Rational> curCartan;
   this->getCartanSymmetric(curCartan);
   WeylGroupData::getCoCartanSymmetric(curCartan, output);
@@ -6168,9 +6126,7 @@ void DynkinType::getCoCartanSymmetric(Matrix<Rational>& output) const {
 void DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder(
   Matrix<Rational>& output
 ) const {
-  MacroRegisterFunctionWithName(
-    "DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder"
-  );
+  STACK_TRACE("DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder");
   output.initialize(0, 0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
@@ -6225,7 +6181,7 @@ int DynkinType::getCoxeterEdgeWeight(int v, int w) {
 }
 
 LargeInteger DynkinType::getWeylGroupSizeByFormula() const {
-  MacroRegisterFunctionWithName("DynkinType::getWeylGroupSizeByFormula");
+  STACK_TRACE("DynkinType::getWeylGroupSizeByFormula");
   this->checkFlagDeallocated();
   LargeInteger result = 1;
   LargeInteger tempLI;
@@ -6705,9 +6661,7 @@ Rational DynkinSimpleType::getDynkinIndexParabolicallyInducingSubalgebra(
 bool DynkinSimpleType::canBeExtendedParabolicallyTo(
   const DynkinSimpleType& other
 ) const {
-  MacroRegisterFunctionWithName(
-    "DynkinSimpleType::canBeExtendedParabolicallyTo"
-  );
+  STACK_TRACE("DynkinSimpleType::canBeExtendedParabolicallyTo");
   if (other.rank <= this->rank) {
     return false;
   }
@@ -6743,7 +6697,7 @@ void DynkinSimpleType::grow(
   List<DynkinSimpleType>& output,
   List<List<int> >* outputPermutationRoots
 ) const {
-  MacroRegisterFunctionWithName("DynkinSimpleType::grow");
+  STACK_TRACE("DynkinSimpleType::grow");
   // Almost all simple types are grown from type A. Exceptions only for types F4
   // (grown from B_3),
   // E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
@@ -6935,9 +6889,8 @@ void DynkinSimpleType::getCoCartanSymmetric(Matrix<Rational>& output) const {
 }
 
 Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const {
-  MacroRegisterFunctionWithName(
-    "DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale"
-  );
+  STACK_TRACE("DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale")
+  ;
   // Reference: Panyushev, On the Dynkin index of a principal sl(2)-subalgebra,
   // Advances in Mathematics, 2008.
   Rational nonScaled = 0;
@@ -7156,7 +7109,7 @@ unsigned int ElementWeylGroupAutomorphisms::hashFunction() const {
 
 std::string ElementWeylGroupAutomorphisms::toString(FormatExpressions* format)
 const {
-  MacroRegisterFunctionWithName("ElementWeylGroupAutomorphisms::toString");
+  STACK_TRACE("ElementWeylGroupAutomorphisms::toString");
   (void) format;
   if (this->generatorsLastAppliedFirst.size == 0) {
     return "id";
@@ -7204,7 +7157,7 @@ ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
 std::string
 ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
 ::toString(FormatExpressions* format) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString"
   );
   (void) format;
@@ -7353,7 +7306,7 @@ void ElementWeylGroup::makeFromRhoImage(
 }
 
 void ElementWeylGroup::makeCanonical() {
-  MacroRegisterFunctionWithName("ElementWeylGroup::makeCanonical");
+  STACK_TRACE("ElementWeylGroup::makeCanonical");
   this->checkInitialization();
   if (this->owner->rho.size == 0) {
     this->owner->computeRho(false);
@@ -7366,9 +7319,7 @@ void ElementWeylGroup::makeCanonical() {
 bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
   const ElementWeylGroup& right
 ) const {
-  MacroRegisterFunctionWithName(
-    "ElementWeylGroup::hasDifferentConjugacyInvariantsFrom"
-  );
+  STACK_TRACE("ElementWeylGroup::hasDifferentConjugacyInvariantsFrom");
   if ((this->generatorsLastAppliedFirst.size % 2) != (
       right.generatorsLastAppliedFirst.size % 2
     )
@@ -7397,7 +7348,7 @@ bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
 
 std::string ElementWeylGroup::toStringInvariants(FormatExpressions* format)
 const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::getCycleStructure");
+  STACK_TRACE("ElementWeylGroup::getCycleStructure");
   (void) format;
   VectorSparse<Rational> cycleStructure;
   this->getCycleStructure(cycleStructure);
@@ -7414,7 +7365,7 @@ const {
 void ElementWeylGroup::getCycleStructure(
   VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult
 ) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::getCycleStructure");
+  STACK_TRACE("ElementWeylGroup::getCycleStructure");
   this->checkInitialization();
   outputIndexIsCycleSizeCoordinateIsCycleMult.makeZero();
   List<bool> explored;
@@ -7442,7 +7393,7 @@ void ElementWeylGroup::getCycleStructure(
 void ElementWeylGroup::getCharacteristicPolynomialStandardRepresentation(
   Polynomial<Rational>& output
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "ElementWeylGroup::getCharacteristicPolynomialStandardRepresentation"
   );
   this->checkInitialization();
@@ -7459,7 +7410,7 @@ ElementWeylGroup ElementWeylGroup::inverse() const {
 }
 
 std::string ElementWeylGroup::toString(FormatExpressions* format) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::toString");
+  STACK_TRACE("ElementWeylGroup::toString");
   (void) format;
   if (this->generatorsLastAppliedFirst.size == 0) {
     return "id";
@@ -7656,7 +7607,7 @@ void WeylGroupData::getSignCharacter(Vector<Rational>& out) {
 /*
 // this is only used in one place.
 void SubgroupDataWeylGroup::getSignCharacter(Vector<Rational>& out) {
-  MacroRegisterFunctionWithName("SubgroupRootReflections::getSignCharacter");
+  STACK_TRACE("SubgroupRootReflections::getSignCharacter");
   this->subgroupData->subgroup->getSignCharacter(out);
 //  if (!this->subgroup->flagCCRepresentativesComputed)
 //    this->subgroup->computeConjugacyClassSizesAndRepresentatives(0);
@@ -7670,7 +7621,7 @@ void WeylGroupData::getTrivialRepresentation(
     FiniteGroup<ElementWeylGroup>, Rational
   >& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::getTrivialRepresentation");
+  STACK_TRACE("WeylGroup::getTrivialRepresentation");
   this->group.checkInitializationConjugacyClasses();
   output.initialize(this->group);
   output.basis.makeEiBasis(1);
@@ -7687,7 +7638,7 @@ void WeylGroupData::getSignRepresentation(
     FiniteGroup<ElementWeylGroup>, Rational
   >& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::getSignRepresentation");
+  STACK_TRACE("WeylGroup::getSignRepresentation");
   this->group.checkInitializationConjugacyClasses();
   output.initialize(this->group);
   output.basis.makeEiBasis(1);
@@ -7705,7 +7656,7 @@ void WeylGroupData::getStandardRepresentation(
     FiniteGroup<ElementWeylGroup>, Rational
   >& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::getStandardRepresentation");
+  STACK_TRACE("WeylGroup::getStandardRepresentation");
   this->group.checkInitializationConjugacyClasses();
   output.initialize(this->group);
   output.basis.makeEiBasis(this->getDimension());
@@ -7896,7 +7847,7 @@ void WeylGroupData::actOnRootByGroupElement(
 void WeylGroupData::getCoCartanSymmetric(
   const Matrix<Rational>& input, Matrix<Rational>& output
 ) {
-  MacroRegisterFunctionWithName("DynkinType::getCoCartanSymmetric");
+  STACK_TRACE("DynkinType::getCoCartanSymmetric");
   if (&input == &output) {
     Matrix<Rational> inputCopy = input;
     WeylGroupData::getCoCartanSymmetric(inputCopy, output);
@@ -7986,7 +7937,7 @@ void WeylGroupData::computeRootsOfBorel(Vectors<Rational>& output) {
 }
 
 std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("WeylGroup::toStringCppConjugacyClasses");
+  STACK_TRACE("WeylGroup::toStringCppConjugacyClasses");
   (void) format;
   // portable way to avoid non-used parameter warning.
   if (!this->flagCharTableIsComputed) {
@@ -8047,7 +7998,7 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
 std::string WeylGroupData::toStringCppConjugacyClasses(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::toStringCppConjugacyClasses");
+  STACK_TRACE("WeylGroup::toStringCppConjugacyClasses");
   (void) format;
   // portable way to avoid non-used parameter warning.
   if (!this->group.flagCCRepresentativesComputed) {
@@ -8127,7 +8078,7 @@ std::string WeylGroupData::toStringCppConjugacyClasses(
 std::string WeylGroupData::toStringRootsAndRootReflections(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::toStringRootsAndRootReflections");
+  STACK_TRACE("WeylGroup::toStringRootsAndRootReflections");
   (void) format;
   // portable way to avoid non-used parameter warning.
   std::stringstream out, outLatex;
@@ -8165,7 +8116,7 @@ std::string WeylGroupData::toStringRootsAndRootReflections(
 }
 
 std::string WeylGroupData::toString(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("WeylGroupData::toString");
+  STACK_TRACE("WeylGroupData::toString");
   std::stringstream out;
   out << "<br>Size: " << this->group.elements.size << "\n";
   out << "Number of Vectors: " << this->rootSystem.size << "\n";
@@ -8333,9 +8284,7 @@ WeylGroupAutomorphisms::~WeylGroupAutomorphisms() {
 }
 
 void WeylGroupAutomorphisms::computeOuterAutomorphisms() {
-  MacroRegisterFunctionWithName(
-    "WeylGroupAutomorphisms::computeOuterAutomorphisms"
-  );
+  STACK_TRACE("WeylGroupAutomorphisms::computeOuterAutomorphisms");
   this->checkInitialization();
   if (this->flagAllOuterAutosComputed) {
     return;
@@ -8346,9 +8295,7 @@ void WeylGroupAutomorphisms::computeOuterAutomorphisms() {
 }
 
 void WeylGroupAutomorphisms::computeOuterAutoGenerators() {
-  MacroRegisterFunctionWithName(
-    "WeylGroupAutomorphisms::computeOuterAutoGenerators"
-  );
+  STACK_TRACE("WeylGroupAutomorphisms::computeOuterAutoGenerators");
   if (this->flagOuterAutosGeneratorsComputed) {
     return;
   }
@@ -8565,7 +8512,7 @@ void WeylGroupData::getExtremeElementInOrbit(
 }
 
 LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& weight) {
-  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::getOrbitSize");
+  STACK_TRACE("WeylGroupAutomorphisms::getOrbitSize");
   this->checkInitialization();
   HashedList<Vector<Rational> > highestWeights;
   for (int i = 0; i < this->outerAutomorphisms.elements.size; i ++) {
@@ -8580,7 +8527,7 @@ LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& weight) {
 bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(
   const MatrixTensor<Rational>& matrix
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::IsElementGroupOrOuterAuto");
+  STACK_TRACE("WeylGroup::IsElementGroupOrOuterAuto");
   this->computeOuterAutomorphisms();
   Vector<Rational> rhoImage;
   matrix.actOnVectorColumn(this->weylGroup->rho, rhoImage);
@@ -8625,7 +8572,7 @@ void WeylGroupData::getMatrixReflection(
 void WeylGroupData::getCoxeterPlane(
   Vector<double>& outputBasis1, Vector<double>& outputBasis2
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::getCoxeterPlane");
+  STACK_TRACE("WeylGroup::getCoxeterPlane");
   this->computeRho(true);
   int dimension = this->getDimension();
   if (dimension < 2) {
@@ -8698,7 +8645,7 @@ void WeylGroupData::drawRootSystem(
   bool labelDynkinDiagramVertices,
   Vectors<Rational>* predefinedProjectionPlane
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::drawRootSystem");
+  STACK_TRACE("WeylGroup::drawRootSystem");
   DrawOperations& output = outputDV.operations;
   if (wipeCanvas) {
     output.initialize();
@@ -8967,7 +8914,7 @@ Rational WeylGroupData::getLongestRootLengthSquared() const {
 bool WeylGroupData::isElementWeylGroup(
   const MatrixTensor<Rational>& matrix
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::isElementWeylGroup");
+  STACK_TRACE("WeylGroup::isElementWeylGroup");
   Vector<Rational> rhoImage;
   matrix.actOnVectorColumn(this->rho, rhoImage);
   ElementWeylGroup elementCandidate;
@@ -9046,7 +8993,7 @@ toStringFromLayersAndArrows(
   int graphWidth,
   bool useAmbientIndices
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringFromLayersAndArrows"
   );
   this->checkInitialization();
@@ -9121,7 +9068,7 @@ toStringFromLayersAndArrows(
 std::string
 SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 toStringBruhatGraph() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringBruhatGraph"
   );
   this->checkInitialization();
@@ -9190,7 +9137,7 @@ toStringBruhatGraph() {
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 toString(std::string& output, bool displayElements) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString"
   );
   this->checkInitialization();
@@ -9282,9 +9229,7 @@ makeParabolicFromSelectionSimpleRoots(
   const Selection& zeroesMeanSimpleRootSpaceIsInParabolic,
   int upperLimitNumberOfElements
 ) {
-  MacroRegisterFunctionWithName(
-    "SubgroupWeylGroupOLD::makeParabolicFromSelectionSimpleRoots"
-  );
+  STACK_TRACE("SubgroupWeylGroupOLD::makeParabolicFromSelectionSimpleRoots");
   this->ambientWeyl = &inputWeyl;
   this->checkInitialization();
   Vectors<Rational> selectedRoots;
@@ -9323,7 +9268,7 @@ makeParabolicFromSelectionSimpleRoots(
 std::string
 SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 toStringCosetGraph() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringCosetGraph"
   );
   this->checkInitialization();
@@ -9400,7 +9345,7 @@ toStringCosetGraph() {
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 findQuotientRepresentatives(int upperLimit) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives"
   );
   this->checkInitialization();
@@ -9439,7 +9384,7 @@ drawContour(
   const std::string& color,
   int upperBoundVertices
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::drawContour"
   );
   HashedList<Vector<Rational> > orbit;
@@ -9502,7 +9447,7 @@ checkInitialization() {
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 computeRootSubsystem() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::computeRootSubsystem"
   );
   this->rootSubsystem.clear();
@@ -9636,7 +9581,7 @@ bool KazhdanLusztigPolynomials::isMaximalNonExplored(int index) {
 }
 
 std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::toString");
+  STACK_TRACE("KazhdanLusztigPolynomials::toString");
   std::stringstream out;
   bool useHtml = false;
   if (format != nullptr) {
@@ -9715,9 +9660,7 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
 }
 
 void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
-  MacroRegisterFunctionWithName(
-    "KazhdanLusztigPolynomials::generatePartialBruhatOrder"
-  );
+  STACK_TRACE("KazhdanLusztigPolynomials::generatePartialBruhatOrder");
   int dimension = this->weylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(dimension);
@@ -9853,9 +9796,7 @@ int KazhdanLusztigPolynomials::chamberIndicatorToIndex(
 }
 
 void KazhdanLusztigPolynomials::computeKLCoefficients() {
-  MacroRegisterFunctionWithName(
-    "KazhdanLusztigPolynomials::computeKLCoefficients"
-  );
+  STACK_TRACE("KazhdanLusztigPolynomials::computeKLCoefficients");
   this->kazhdanLuzstigCoefficients.setSize(
     this->kazhdanLuzstigPolynomials.size
   );
@@ -9889,7 +9830,7 @@ void KazhdanLusztigPolynomials::initFromWeyl(WeylGroupData* weylGroup) {
 }
 
 bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* weylGroup) {
-  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeKLPolys");
+  STACK_TRACE("KazhdanLusztigPolynomials::computeKLPolys");
   weylGroup->group.computeAllElements(- 1);
   this->initFromWeyl(weylGroup);
   this->generatePartialBruhatOrder();
@@ -9918,7 +9859,7 @@ bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* weylGroup) {
 }
 
 void KazhdanLusztigPolynomials::computeRPolys() {
-  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRPolys");
+  STACK_TRACE("KazhdanLusztigPolynomials::computeRPolys");
   int dimension = this->weylGroup->getDimension();
   this->rPolynomials.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
@@ -10071,7 +10012,7 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
 bool KazhdanLusztigPolynomials::computeRxy(
   int x, int y, int simpleReflectionIndex
 ) {
-  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRxy");
+  STACK_TRACE("KazhdanLusztigPolynomials::computeRxy");
   if (x == y) {
     this->rPolynomials[x][y].makeOne();
     return true;
@@ -10317,7 +10258,7 @@ void WeylGroupData::transformToSimpleBasisGenerators(
   Vectors<Rational>& generators,
   const HashedList<Vector<Rational> >& inputRootSystem
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::transformToSimpleBasisGenerators");
+  STACK_TRACE("WeylGroup::transformToSimpleBasisGenerators");
   for (int i = 0; i < generators.size; i ++) {
     if (!generators[i].isPositiveOrZero()) {
       generators[i].negate();
@@ -10353,7 +10294,7 @@ template <class Coefficient>
 void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(
   const List<Vector<Coefficient> >& inputVectors
 ) {
-  MacroRegisterFunctionWithName("Vector::perturbNoZeroScalarProductWithMe");
+  STACK_TRACE("Vector::perturbNoZeroScalarProductWithMe");
   Coefficient scalarProductInverted;
   for (int i = 0; i < inputVectors.size; i ++) {
     if (this->scalarEuclidean(inputVectors[i]) == 0) {
@@ -10399,7 +10340,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
   if (generators.size == 0) {
     return;
   }
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "WeylGroup::transformToSimpleBasisGeneratorsArbitraryCoordinates"
   );
   Vector<Rational> hElement;
@@ -10476,7 +10417,7 @@ void WeylGroupData::computeExtremeRootInTheSameKMod(
   Vector<Rational>& output,
   bool lookingForHighest
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::computeExtremeRootInTheSameKMod");
+  STACK_TRACE("WeylGroup::computeExtremeRootInTheSameKMod");
   output = inputRoot;
   Vector<Rational> root;
   bool FoundHigher = true;
@@ -11255,7 +11196,7 @@ void QuasiPolynomial::substitution(
   const Lattice& ambientLatticeNewSpace,
   QuasiPolynomial& output
 ) {
-  MacroRegisterFunctionWithName("QuasiPolynomial::substitution");
+  STACK_TRACE("QuasiPolynomial::substitution");
   // Format of the substitution.
   // If we want to carry out a substitution in P(y_1, ..., y_m),
   // of the form
@@ -11323,7 +11264,7 @@ void QuasiPolynomial::substitution(
   const Vector<Rational>& inputTranslationSubtractedFromArgument,
   QuasiPolynomial& output
 ) {
-  MacroRegisterFunctionWithName("QuasiPolynomial::substitution");
+  STACK_TRACE("QuasiPolynomial::substitution");
   // format of the translation. If the starting quasipolynomial was P(y_1, ...,
   // y_n),
   // and the translation has coordinates (t_1, ..., t_n),
@@ -11751,9 +11692,7 @@ bool Cone::solveLQuasiPolyEqualsZeroIAmProjective(
 std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(
   const std::string& inputJSON
 ) {
-  MacroRegisterFunctionWithName(
-    "HtmlRoutines::toHtmlTableRowsFromStringContainingJSON"
-  );
+  STACK_TRACE("HtmlRoutines::toHtmlTableRowsFromStringContainingJSON");
   JSData parser;
   if (!parser.parse(inputJSON)) {
     return StringRoutines::stringTrimToLengthForDisplay(inputJSON, 1000);
@@ -11762,7 +11701,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(
 }
 
 std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
-  MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromJSON");
+  STACK_TRACE("HtmlRoutines::ToHtmlTableFromJSON");
   if (input.elementType == JSData::token::tokenObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
@@ -11801,7 +11740,7 @@ std::string HtmlRoutines::toHtmlTable(
   List<List<std::string> >& content,
   bool nestTables
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::toHtmlTable");
+  STACK_TRACE("HtmlRoutines::toHtmlTable");
   std::stringstream out;
   out << "<table class='tableDatabase'>";
   out << "<tr>";
@@ -11948,9 +11887,7 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
   >& output,
   Vector<Rational>* indicator
 ) {
-  MacroRegisterFunctionWithName(
-    "PartialFractions::reducePartiallyRedundantShortRoots"
-  );
+  STACK_TRACE("PartialFractions::reducePartiallyRedundantShortRoots");
   output.makeZero();
   if (!toBeReduced.rootIsInFractionCone(indicator)) {
     return false;
@@ -12312,7 +12249,7 @@ bool ConeCollection::drawMeLastCoordinateAffine(
   DrawingVariables& drawingVariables,
   FormatExpressions& format
 ) {
-  MacroRegisterFunctionWithName("ConeCollection::drawMeLastCoordinateAffine");
+  STACK_TRACE("ConeCollection::drawMeLastCoordinateAffine");
   this->checkIsRefinedOrCrash();
   bool result = true;
   if (initializeDrawingVariables) {
@@ -12346,7 +12283,7 @@ bool ConeCollection::drawMeProjective(
   DrawingVariables& drawingVariables,
   FormatExpressions& format
 ) {
-  MacroRegisterFunctionWithName("ConeCollection::drawMeProjective");
+  STACK_TRACE("ConeCollection::drawMeProjective");
   // There's no non-technical reason to refuse drawing non-refined cones
   // perhaps this needs to be relaxed.
   this->checkIsRefinedOrCrash();
@@ -13451,9 +13388,7 @@ void ConeCollection::refineMakeCommonRefinement(const ConeCollection& other) {
 void ConeCollection::translateMeMyLastCoordinateAffinization(
   Vector<Rational>& translationVector
 ) {
-  MacroRegisterFunctionWithName(
-    "ConeCollection::translateMeMyLastCoordinateAffinization"
-  );
+  STACK_TRACE("ConeCollection::translateMeMyLastCoordinateAffinization");
   this->checkIsRefinedOrCrash();
   ConeCollection myCopy;
   myCopy = *this;
@@ -13737,7 +13672,7 @@ void Lattice::getDefaultFundamentalDomainInternalPoint(
 }
 
 bool PartialFractions::split(Vector<Rational>* indicator) {
-  MacroRegisterFunctionWithName("PartialFractions::split");
+  STACK_TRACE("PartialFractions::split");
   if (!this->flagInitialized) {
     this->prepareIndicatorVariables();
     this->prepareCheckSums();
@@ -14403,7 +14338,7 @@ bool ConeCollection::splitChamber(
   const Vector<Rational>& killerNormal,
   List<Cone>& output
 ) {
-  MacroRegisterFunctionWithName("ConeCollection::splitChamber");
+  STACK_TRACE("ConeCollection::splitChamber");
   Cone newPlusCone;
   Cone newMinusCone;
   bool needToRecomputeVertices = (
@@ -14503,7 +14438,7 @@ void ConeCollection::addNonRefinedChamberOnTopNoRepetition(
 }
 
 bool ConeCollection::refineOneStep(Cone& toBeRefined, List<Cone>& output) {
-  MacroRegisterFunctionWithName("ConeCollection::refineOneStep");
+  STACK_TRACE("ConeCollection::refineOneStep");
   if (this->refineByNormals(toBeRefined, output)) {
     return true;
   }
@@ -14516,7 +14451,7 @@ bool ConeCollection::refineOneStep(Cone& toBeRefined, List<Cone>& output) {
 bool ConeCollection::refineByNormals(
   Cone& toBeRefined, List<Cone>& output
 ) {
-  MacroRegisterFunctionWithName("ConeCollection::refineByNormals");
+  STACK_TRACE("ConeCollection::refineByNormals");
   output.clear();
   for (
     ; toBeRefined.lowestIndexNotCheckedForChopping < this->splittingNormals.
@@ -14539,7 +14474,7 @@ bool ConeCollection::refineByNormals(
 bool ConeCollection::refineByDirections(
   Cone& toBeRefined, List<Cone>& output
 ) {
-  MacroRegisterFunctionWithName("ConeCollection::refineByDirections");
+  STACK_TRACE("ConeCollection::refineByDirections");
   output.clear();
   Vector<Rational> currentNewWall;
   for (
@@ -14588,9 +14523,7 @@ bool ConeCollection::refineByDirections(
 void ConeCollection::initializeFromDirectionsAndRefine(
   Vectors<Rational>& inputVectors
 ) {
-  MacroRegisterFunctionWithName(
-    "ConeCollection::initializeFromDirectionsAndRefine"
-  );
+  STACK_TRACE("ConeCollection::initializeFromDirectionsAndRefine");
   this->initialize();
   Cone startingCone;
   startingCone.createFromVertices(inputVectors);
@@ -14610,7 +14543,7 @@ void ConeCollection::refineAndSort() {
 }
 
 void ConeCollection::refine() {
-  MacroRegisterFunctionWithName("ConeCollection::refine");
+  STACK_TRACE("ConeCollection::refine");
   ProgressReport report;
   List<Cone> incoming;
   while (this->nonRefinedCones.size > 0) {
@@ -14928,7 +14861,7 @@ int Cone::getDimension() const {
 bool Cone::createFromNormals(
   Vectors<Rational>& inputNormals, bool hasEnoughProjectiveVertices
 ) {
-  MacroRegisterFunctionWithName("Cone::createFromNormals");
+  STACK_TRACE("Cone::createFromNormals");
   this->flagIsTheZeroCone = false;
   this->lowestIndexNotCheckedForChopping = 0;
   this->lowestIndexNotCheckedForSlicingInDirection = 0;
@@ -15019,7 +14952,7 @@ void ConeCollection::initFromConeWalls(
   List<Vectors<Rational> >& normalsOfCones,
   bool hasEnoughProjectiveVertices
 ) {
-  MacroRegisterFunctionWithName("ConeCollection::initFromConeWalls");
+  STACK_TRACE("ConeCollection::initFromConeWalls");
   Cone startingCone;
   this->refinedCones.clear();
   this->nonRefinedCones.clear();
@@ -15063,7 +14996,7 @@ void ConeCollection::initFromConeWalls(
 }
 
 bool ConeCollection::checkIsRefinedOrCrash() const {
-  MacroRegisterFunctionWithName("ConeCollection::checkIsRefinedOrCrash");
+  STACK_TRACE("ConeCollection::checkIsRefinedOrCrash");
   if (this->nonRefinedCones.size > 0) {
     global.fatal
     << "Non-refined cones not allowed by this function."

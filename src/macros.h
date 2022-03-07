@@ -53,10 +53,10 @@
 // non-commented lines.
 // The below code might end up being substituted with a regular class
 // definition.
-#ifndef MacroRegisterFunctionWithName
-#define MacroRegisterFunctionWithName(FunctionName) RegisterFunctionCall functionCallRegistration(__FILE__, __LINE__, FunctionName)
+#ifndef STACK_TRACE
+#define STACK_TRACE(FunctionName) RegisterFunctionCall functionCallRegistration(__FILE__, __LINE__, FunctionName)
 
-// #define MacroRegisterFunctionWithName(x)
+// #define STACK_TRACE(x)
 #endif
 
 // -----------------------------------------------------------

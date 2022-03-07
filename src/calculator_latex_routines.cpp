@@ -11,7 +11,7 @@
 bool LaTeXCrawler::isInCrawlableFolder(
   const std::string& folderName, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("LaTeXcrawler::isInCrawlableFolder");
+  STACK_TRACE("LaTeXcrawler::isInCrawlableFolder");
   for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i ++) {
     if (
       StringRoutines::stringBeginsWith(
@@ -33,7 +33,7 @@ bool LaTeXCrawler::isInCrawlableFolder(
 }
 
 void LaTeXCrawler::computeAllowedFolders() {
-  MacroRegisterFunctionWithName("LaTeXcrawler::computeAllowedFolders");
+  STACK_TRACE("LaTeXcrawler::computeAllowedFolders");
   if (this->baseFoldersCrawlableFilesPhysical.size > 0) {
     return;
   }
@@ -79,9 +79,7 @@ void LaTeXCrawler::addSlidesOnTop(List<std::string>& inputSlides) {
 bool LaTeXCrawler::extractFileNamesFromRelativeFileName(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "LaTeXcrawler::extractFileNamesFromRelativeFileName"
-  );
+  STACK_TRACE("LaTeXcrawler::extractFileNamesFromRelativeFileName");
   if (
     !FileOperations::isOKFileNameVirtual(this->fileNameToCrawlRelative)
   ) {
@@ -133,7 +131,7 @@ bool LaTeXCrawler::extractFileNamesFromRelativeFileName(
 }
 
 void LaTeXCrawler::buildFreecalc() {
-  MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
+  STACK_TRACE("LaTeXcrawler::BuildFreecalc");
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (!global.userDefaultHasAdminRights()) {
     this->displayResult
@@ -651,7 +649,7 @@ void LaTeXCrawler::buildFreecalc() {
 }
 
 void LaTeXCrawler::crawl() {
-  MacroRegisterFunctionWithName("LaTeXcrawler::crawl");
+  STACK_TRACE("LaTeXcrawler::crawl");
   if (
     !this->extractFileNamesFromRelativeFileName(&this->displayResult)
   ) {
@@ -712,7 +710,7 @@ LaTeXCrawler::LaTeXCrawler() {
 void LaTeXCrawler::crawlRecursive(
   std::stringstream& crawlingResult, const std::string& currentFileNamE
 ) {
-  MacroRegisterFunctionWithName("LaTeXcrawler::crawlRecursive");
+  STACK_TRACE("LaTeXcrawler::crawlRecursive");
   RecursionDepthCounter counter(&this->recursionDepth);
   if (this->recursionDepth > 1000) {
     this->errorStream
@@ -830,7 +828,7 @@ bool LaTeXCrawler::extractFileNames(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("LaTeXcrawler::ExtractPresentationFileNames");
+  STACK_TRACE("LaTeXcrawler::ExtractPresentationFileNames");
   (void) commentsGeneral;
   if (this->slideFileNamesVirtualWithPath.size < 1) {
     if (commentsOnFailure != nullptr) {
@@ -1073,7 +1071,7 @@ bool LaTeXCrawler::extractFileNames(
 std::string LaTeXCrawler::adjustDisplayTitle(
   const std::string& input, bool isHomework
 ) {
-  MacroRegisterFunctionWithName("LaTeXcrawler::adjustDisplayTitle");
+  STACK_TRACE("LaTeXcrawler::adjustDisplayTitle");
   std::string result = input;
   List<std::string> ignoredTags;
   ignoredTags.addOnTop("lectureTag");
@@ -1140,7 +1138,7 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("LaTeXcrawler::buildOrFetchFromCachePDF");
+  STACK_TRACE("LaTeXcrawler::buildOrFetchFromCachePDF");
   if (
     !this->extractFileNamesPdfExists(commentsOnFailure, commentsGeneral)
   ) {
@@ -1395,7 +1393,7 @@ bool LaTeXCrawler::buildTopicList(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("LaTeXCrawler::buildTopicList");
+  STACK_TRACE("LaTeXCrawler::buildTopicList");
   StateMaintainerCurrentFolder preserveCurrentFolder;
   ProgressReport report;
   CalculatorHTML topicParser;

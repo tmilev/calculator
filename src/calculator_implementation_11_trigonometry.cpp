@@ -6,7 +6,7 @@
 bool CalculatorFunctionsTrigonometry::sin(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::sin");
+  STACK_TRACE("CalculatorFunctions::sin");
   if (input.size() != 2) {
     return false;
   }
@@ -52,7 +52,7 @@ bool CalculatorFunctionsTrigonometry::sin(
 bool CalculatorFunctionsTrigonometry::cos(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::cos");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::cos");
   if (input.size() != 2) {
     return false;
   }
@@ -98,7 +98,7 @@ bool CalculatorFunctionsTrigonometry::cos(
 bool CalculatorFunctionsTrigonometry::tan(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::tan");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::tan");
   if (input.size() != 2) {
     return false;
   }
@@ -112,7 +112,7 @@ bool CalculatorFunctionsTrigonometry::tan(
 bool CalculatorFunctionsTrigonometry::cotangent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::cotangent");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::cotangent");
   if (input.size() != 2) {
     return false;
   }
@@ -126,7 +126,7 @@ bool CalculatorFunctionsTrigonometry::cotangent(
 bool CalculatorFunctionsTrigonometry::sec(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::sec");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::sec");
   if (input.size() != 2) {
     return false;
   }
@@ -140,7 +140,7 @@ bool CalculatorFunctionsTrigonometry::sec(
 bool CalculatorFunctionsTrigonometry::csc(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::csc");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::csc");
   if (input.size() != 2) {
     return false;
   }
@@ -157,9 +157,7 @@ bool CalculatorFunctionsTrigonometry::csc(
 bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::eulerFormulaAsLaw"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::eulerFormulaAsLaw");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -191,9 +189,7 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
 bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::exploitCosineEvenness"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::exploitCosineEvenness");
   if (input.size() != 2) {
     return false;
   }
@@ -222,9 +218,7 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
 bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::exploitSineOddness"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::exploitSineOddness");
   if (input.size() != 2) {
     return false;
   }
@@ -252,9 +246,7 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
 bool CalculatorFunctionsTrigonometry::convertSineToExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::convertSineToExponent"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::convertSineToExponent");
   if (input.size() != 2) {
     return false;
   }
@@ -275,9 +267,7 @@ bool CalculatorFunctionsTrigonometry::convertSineToExponent(
 bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::convertCosineToExponent"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::convertCosineToExponent");
   if (input.size() != 2) {
     return false;
   }
@@ -298,9 +288,7 @@ bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
 bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::arccosAlgebraic"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arccosAlgebraic");
   if (input.size() != 2) {
     return false;
   }
@@ -373,9 +361,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
 bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::arcsinAlgebraic"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arcsinAlgebraic");
   if (input.size() != 2) {
     return false;
   }
@@ -447,7 +433,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
 bool CalculatorFunctionsTrigonometry::arctan(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arctan");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arctan");
   if (input.size() != 2) {
     return false;
   }
@@ -477,7 +463,7 @@ bool CalculatorFunctionsTrigonometry::arctan(
 bool CalculatorFunctionsTrigonometry::arccos(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arccos");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arccos");
   if (calculator.approximationsBanned()) {
     return false;
   }
@@ -496,7 +482,7 @@ bool CalculatorFunctionsTrigonometry::arccos(
 bool CalculatorFunctionsTrigonometry::arcsin(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::arcsin");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arcsin");
   if (input.size() != 2) {
     return false;
   }
@@ -513,9 +499,7 @@ bool CalculatorFunctionsTrigonometry::arcsin(
 bool CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry");
   if (input.size() != 2) {
     return false;
   }
@@ -535,7 +519,7 @@ bool CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry(
 bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct"
   );
   if (!input.startsWith(calculator.opPlus(), 3)) {
@@ -605,7 +589,7 @@ bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
 bool CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry"
   );
   if (input.size() != 2) {
@@ -648,6 +632,8 @@ public:
   Expression input;
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
+  WithContext<RationalFraction<AlgebraicNumber> > inputFractionSubstituted;
+  Expression eulerForm;
   RationalFraction<AlgebraicNumber> fractionSubstituted;
   MapList<Expression, TrigonometricFunction> arguments;
   MapList<Expression, HashedList<Rational> > trigonometricBaseMonomials;
@@ -667,9 +653,7 @@ public:
 bool CalculatorFunctionsTrigonometry::fourierFractionForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsTrigonometry::fourierFractionForm"
-  );
+  STACK_TRACE("CalculatorFunctionsTrigonometry::fourierFractionForm");
   if (input.size() != 2) {
     return false;
   }
@@ -689,7 +673,12 @@ std::string TrigonometricReduction::toString() {
   out << this->toStringTrigonometry();
   out << this->toStringTrigonometricArguments();
   out
-  << "<br>Trigonometric form:<br>\\("
+  << "<br>Trigonometric form, non-reduced:"
+  << "<br>\\("
+  << this->eulerForm.toString()
+  << "\\)"
+  << "<br>reduced:"
+  "<br>\\("
   << this->fractionSubstituted.toString(&format)
   << "\\)";
   out << "<br><b style='color:red'>not fully implemented yet.</b>";
@@ -735,7 +724,7 @@ void TrigonometricReduction::initialize(
 }
 
 bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TrigonometricReduction::reduce");
+  STACK_TRACE("TrigonometricReduction::reduce");
   HashedList<std::string> variables;
   std::string reductionRules;
   if (
@@ -838,17 +827,31 @@ void TrigonometricReduction::computeEulerFormArguments() {
 bool TrigonometricReduction::computeEulerFormExpression(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "TrigonometricReduction::computeEulerFormExpression"
-  );
+  STACK_TRACE("TrigonometricReduction::computeEulerFormExpression");
   PolynomialSubstitution<AlgebraicNumber> substitution;
   for (Expression & expression : this->arguments.keys) {
     substitution.addOnTop(
       this->arguments.getValueNoFail(expression).eulerForm
     );
   }
+  this->inputFractionSubstituted = this->inputFraction;
+  List<Expression> eulerFormVariables;
+  for (
+    TrigonometricReduction::TrigonometricFunction & trigonometricFunction :
+    this->arguments.values
+  ) {
+    eulerFormVariables.addOnTop(trigonometricFunction.eulerFormExpression);
+  }
+  this->inputFractionSubstituted.context.setVariables(eulerFormVariables);
+  CalculatorConversions::expressionFromRationalFraction(
+    *this->owner,
+    this->inputFractionSubstituted.content,
+    this->eulerForm,
+    &this->inputFractionSubstituted.context
+  );
+  this->fractionSubstituted = this->inputFraction.content;
   if (
-    !this->inputFraction.content.substitution(
+    !this->fractionSubstituted.substitution(
       substitution,
       this->owner->objectContainer.algebraicClosure.one(),
       commentsOnFailure
@@ -905,7 +908,7 @@ bool TrigonometricReduction::TrigonometricFunction::extractFrom(
 
 void TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous()
 {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous"
   );
   this->eulerForm.makeZero();

@@ -102,7 +102,7 @@ bool Calculator::Test::loopDetectionCycle() {
 }
 
 bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
-  MacroRegisterFunctionWithName("Calculator::Test::parseAllExamples");
+  STACK_TRACE("Calculator::Test::parseAllExamples");
   for (int i = 0; i < ownerInitialized.numberOfPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& operationPointer =
     ownerInitialized.operations.values[i];

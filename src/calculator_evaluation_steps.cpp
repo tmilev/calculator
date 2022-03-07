@@ -5,9 +5,7 @@
 #include "string_constants.h"
 
 void Calculator::ExpressionHistoryEnumerator::initializeComputation() {
-  MacroRegisterFunctionWithName(
-    "ExpressionHistoryEnumerator::initializeComputation"
-  );
+  STACK_TRACE("ExpressionHistoryEnumerator::initializeComputation");
   this->output.setSize(0);
   this->rulesNames.setSize(0);
 }
@@ -21,9 +19,7 @@ Calculator::ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {
 bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
   int incomingRecursionDepth, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "ExpressionHistoryEnumerator::computeRecursively"
-  );
+  STACK_TRACE("ExpressionHistoryEnumerator::computeRecursively");
   this->recursionDepth = incomingRecursionDepth;
   if (recursionDepth > this->maximumRecursionDepth) {
     if (commentsOnFailure != nullptr) {
@@ -85,9 +81,7 @@ bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
   int numberOfChildren,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "ExpressionHistoryEnumerator::processChildrenTransformations"
-  );
+  STACK_TRACE("ExpressionHistoryEnumerator::processChildrenTransformations");
   if (numberOfChildren <= 0) {
     return true;
   }
@@ -193,7 +187,7 @@ bool Calculator::ExpressionHistoryEnumerator::processTransformation(
 }
 
 std::string Calculator::ExpressionHistoryEnumerator::toStringDebug() {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::toStringDebug");
+  STACK_TRACE("ExpressionHistoryEnumerator::toStringDebug");
   std::stringstream out;
   out << "<b>History</b><br>" << this->history.toStringTreeHtml(- 1) << "<hr>";
   out << "" << this->history.toStringSemiFull() << "<hr>";
@@ -380,9 +374,7 @@ bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
   Expression& output,
   bool doDebug
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorSteps::logEvaluationStepsHumanReadableMerged"
-  );
+  STACK_TRACE("CalculatorSteps::logEvaluationStepsHumanReadableMerged");
   Expression argument;
   if (input.size() == 2) {
     argument = input[1];

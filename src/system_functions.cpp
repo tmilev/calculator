@@ -135,7 +135,7 @@ bool TimeoutThread::HandleMaxComputationTime() {
 }
 
 bool TimeoutThread::HandleComputationTimeout() {
-  MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
+  STACK_TRACE("TimerThreadData::HandleComputationTimeout");
   if (!global.flagRunningBuiltInWebServer) {
     return false;
   }
@@ -171,7 +171,7 @@ void TimeoutThread::reset() {
 }
 
 void TimeoutThread::run() {
-  MacroRegisterFunctionWithName("TimerThreadData::run");
+  STACK_TRACE("TimerThreadData::run");
   this->reset();
   for (;;) {
     this->counter ++;
@@ -193,7 +193,7 @@ void TimeoutThread::run() {
 
 void ThreadData::runTimerThread(int threadIndex) {
   global.threadData[threadIndex].id = std::this_thread::get_id();
-  MacroRegisterFunctionWithName("RunTimerThread");
+  STACK_TRACE("RunTimerThread");
   TimeoutThread timeoutThread;
   timeoutThread.run();
 }

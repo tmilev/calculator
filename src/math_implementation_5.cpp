@@ -75,7 +75,7 @@ computeSubGroupFromGeneratingReflections(
   int upperLimitNumberOfElements,
   bool recomputeAmbientRho
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
   );
   this->checkInitialization();
@@ -537,7 +537,7 @@ bool VectorPartition::initialize(
   const Vectors<Rational>& inputPartitioningRoots,
   const Vector<Rational>& inputRoot
 ) {
-  MacroRegisterFunctionWithName("VectorPartition::initialize");
+  STACK_TRACE("VectorPartition::initialize");
   for (int i = 0; i < inputPartitioningRoots.size; i ++) {
     if (!inputPartitioningRoots[i].isPositive()) {
       return false;
@@ -568,7 +568,7 @@ Vector<Rational> VectorPartition::getPartitionSum() {
 }
 
 void VectorPartition::beefUpPartition() {
-  MacroRegisterFunctionWithName("VectorPartition::beefUpPartition");
+  STACK_TRACE("VectorPartition::beefUpPartition");
   Vector<Rational> remainder = this->goalVector - this->currentPartitionSum;
   while ((remainder - *this->partitioningRoots.lastObject()).isPositiveOrZero()
   ) {
@@ -579,7 +579,7 @@ void VectorPartition::beefUpPartition() {
 }
 
 bool VectorPartition::nudgePartition() {
-  MacroRegisterFunctionWithName("VectorPartition::nudgePartition");
+  STACK_TRACE("VectorPartition::nudgePartition");
   int indexFirstNonZero = - 1;
   for (int i = this->currentPartition.size - 1; i >= 0; i --) {
     if (this->currentPartition[i] != 0) {
@@ -606,9 +606,7 @@ bool VectorPartition::nudgePartition() {
 }
 
 bool VectorPartition::incrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName(
-    "VectorPartition::incrementReturnFalseIfPastLast"
-  );
+  STACK_TRACE("VectorPartition::incrementReturnFalseIfPastLast");
   if (this->currentPartitionSum == this->goalVector) {
     this->nudgePartition();
   }
@@ -625,8 +623,7 @@ bool VectorPartition::incrementReturnFalseIfPastLast() {
 }
 
 std::string VectorPartition::toStringPartitioningVectors() {
-  MacroRegisterFunctionWithName("VectorPartition::toStringPartitioningVectors")
-  ;
+  STACK_TRACE("VectorPartition::toStringPartitioningVectors");
   std::stringstream out;
   for (int i = 0; i < this->partitioningRoots.size; i ++) {
     out << "e_{" << i + 1
@@ -649,7 +646,7 @@ std::string VectorPartition::toStringOnePartition(
 }
 
 std::string VectorPartition::toStringAllPartitions(bool useHtml) {
-  MacroRegisterFunctionWithName("VectorPartition::toString");
+  STACK_TRACE("VectorPartition::toString");
   std::stringstream out;
   out << this->goalVector.toString() << "\n\n";
   if (useHtml) {
@@ -854,9 +851,7 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
   Rational& outputCoeff,
   int generatorPower
 ) {
-  MacroRegisterFunctionWithName(
-    "SlTwoInSlN::climbDownFromHighestWeightAlongSl2String"
-  );
+  STACK_TRACE("SlTwoInSlN::climbDownFromHighestWeightAlongSl2String");
   if (&input == &output) {
     global.fatal << "Input coincides with output. " << global.fatal;
   }
@@ -1624,6 +1619,15 @@ void MonomialPolynomial::trimTrailingZeroes() {
     }
     this->monomialBody.setSize(this->monomialBody.size - 1);
   }
+}
+
+bool MonomialPolynomial::hasNonNegativeIntegralExponents() const {
+  for (Rational & power : this->monomialBody) {
+    if (!power.isInteger() || power.isNegative()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool MonomialPolynomial::hasSmallIntegralPositivePowers(int* whichtotalDegree)

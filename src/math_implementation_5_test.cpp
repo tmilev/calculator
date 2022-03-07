@@ -465,7 +465,7 @@ bool PartialFractions::Test::all() {
 }
 
 bool PartialFractions::Test::splitTwoDimensional() {
-  MacroRegisterFunctionWithName("PartialFractions::Test::splitTwoDimensional");
+  STACK_TRACE("PartialFractions::Test::splitTwoDimensional");
   SplitTestCase testCase;
   testCase.vectors = {"(1,0)", "(0,1)", "(1,1)",};
   testCase.expected =
@@ -498,7 +498,7 @@ bool PartialFractions::Test::splitTwoDimensional() {
 }
 
 bool PartialFractions::Test::SplitTestCase::test() {
-  MacroRegisterFunctionWithName("PartialFractions::Test::SplitTestCase::test");
+  STACK_TRACE("PartialFractions::Test::SplitTestCase::test");
   PartialFractions splitter;
   Vectors<Rational> input;
   input.fromStringListNoFail(this->vectors);

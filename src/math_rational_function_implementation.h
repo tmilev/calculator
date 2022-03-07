@@ -8,7 +8,7 @@
 
 template <class Coefficient>
 bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
-  MacroRegisterFunctionWithName("RationalFunction::convertToType");
+  STACK_TRACE("RationalFunction::convertToType");
   if (inputExpressionType < this->expressionType) {
     return false;
   }
@@ -26,7 +26,7 @@ bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
     this->expressionType == TypeExpression::typePolynomial &&
     this->expressionType < inputExpressionType
   ) {
-    this->expressionType = TypeExpression::typeRationalFunction;
+    this->expressionType = TypeExpression::typeRationalFraction;
     this->denominator.getElement().makeConstant(
       this->constantValue.one()
     );
@@ -36,7 +36,7 @@ bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::invert() {
-  MacroRegisterFunctionWithName("RationalFunction::invert");
+  STACK_TRACE("RationalFunction::invert");
   if (!this->checkConsistency()) {
     global.fatal << "Inconsistent rational function. " << global.fatal;
   }
@@ -52,7 +52,7 @@ void RationalFraction<Coefficient>::invert() {
     return;
   }
   if (this->expressionType == TypeExpression::typePolynomial) {
-    this->convertToType(TypeExpression::typeRationalFunction);
+    this->convertToType(TypeExpression::typeRationalFraction);
   }
   if (this->numerator.getElement().isEqualToZero()) {
     global.fatal
@@ -62,7 +62,7 @@ void RationalFraction<Coefficient>::invert() {
   MathRoutines::swap(
     this->numerator.getElement(), this->denominator.getElement()
   );
-  this->expressionType = TypeExpression::typeRationalFunction;
+  this->expressionType = TypeExpression::typeRationalFraction;
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
   if (!this->checkConsistency()) {
@@ -88,7 +88,7 @@ bool RationalFraction<Coefficient>::checkConsistency() const {
       return false;
     }
   }
-  if (this->expressionType == TypeExpression::typeRationalFunction) {
+  if (this->expressionType == TypeExpression::typeRationalFraction) {
     if (
       this->numerator.isZeroPointer() || this->denominator.isZeroPointer()
     ) {
@@ -110,7 +110,7 @@ bool RationalFraction<Coefficient>::checkConsistency() const {
   if (
     this->expressionType != TypeExpression::typeConstant &&
     this->expressionType != TypeExpression::typePolynomial &&
-    this->expressionType != TypeExpression::typeRationalFunction
+    this->expressionType != TypeExpression::typeRationalFraction
   ) {
     global.fatal
     << "A rational function is not initialized properly: its type is "
@@ -287,7 +287,7 @@ bool RationalFraction<Coefficient>::needsParenthesisForMultiplication(
   case RationalFraction::typePolynomial:
     return
     this->numerator.getElementConst().needsParenthesisForMultiplication();
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     return false;
   }
   return false;
@@ -350,7 +350,7 @@ void RationalFraction<Coefficient>::greatestCommonDivisor(
   ) {
     return;
   }
-  MacroRegisterFunctionWithName("RationalFunctionOld::gcd");
+  STACK_TRACE("RationalFunctionOld::gcd");
   Polynomial<Coefficient>
   leastCommonMultipleBuffer,
   productBuffer,
@@ -455,7 +455,7 @@ void RationalFraction<Coefficient>::operator=(
     }
     this->numerator.getElement() = other.numerator.getElementConst();
     break;
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     if (
       other.numerator.isZeroPointer() || other.denominator.isZeroPointer()
     ) {
@@ -600,7 +600,7 @@ void RationalFraction<Coefficient>::operator*=(const Coefficient& other) {
   case RationalFraction::typePolynomial:
     this->numerator.getElement() *= other;
     return;
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     this->numerator.getElement() *= other;
     this->simplifyLeadingCoefficientOnly();
     return;
@@ -759,47 +759,60 @@ void RationalFraction<Coefficient>::operator+=(
 }
 
 template <class Coefficient>
-void RationalFraction<Coefficient>::simplify() {
-  MacroRegisterFunctionWithName("RationalFunction::simplify");
+void RationalFraction<Coefficient>::reduceRationalFraction() {
+  if (this->expressionType != TypeExpression::typeRationalFraction) {
+    return;
+  }
+  if (this->numerator.getElement().isEqualToZero()) {
+    return;
+  }
+  Polynomial<Coefficient>& simplifiedNumerator = this->numerator.getElement();
+  Polynomial<Coefficient>& simplifiedDenominator =
+  this->denominator.getElement();
+  MonomialPolynomial scale;
+  simplifiedNumerator.scaleToPositiveMonomialExponents(scale);
+  simplifiedDenominator *= scale;
+  simplifiedDenominator.scaleToPositiveMonomialExponents(scale);
+  simplifiedNumerator *= scale;
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderForGreatestCommonDivisor();
-  if (this->expressionType == TypeExpression::typeRationalFunction) {
-    if (!this->numerator.getElement().isEqualToZero()) {
-      Polynomial<Coefficient>
-      greatestCommonDivisor,
-      quotientByGreatestCommonDivisor,
-      remainderByGCD;
-      this->greatestCommonDivisor(
-        this->numerator.getElement(),
-        this->denominator.getElement(),
-        greatestCommonDivisor
-      );
-      if (greatestCommonDivisor.isEqualToZero()) {
-        global.fatal
-        << "This is a programing error: "
-        << " while fetching the gcd of "
-        << this->numerator.getElement().toString()
-        << " and "
-        << this->denominator.getElement().toString()
-        << " I got 0, which is impossible. "
-        << global.fatal;
-      }
-      this->numerator.getElement().divideBy(
-        greatestCommonDivisor,
-        quotientByGreatestCommonDivisor,
-        remainderByGCD,
-        monomialOrder
-      );
-      this->numerator.getElement() = quotientByGreatestCommonDivisor;
-      this->denominator.getElement().divideBy(
-        greatestCommonDivisor,
-        quotientByGreatestCommonDivisor,
-        remainderByGCD,
-        monomialOrder
-      );
-      this->denominator.getElement() = quotientByGreatestCommonDivisor;
-    }
+  Polynomial<Coefficient>
+  greatestCommonDivisor,
+  quotientByGreatestCommonDivisor,
+  remainderByGCD;
+  this->greatestCommonDivisor(
+    simplifiedNumerator, simplifiedDenominator, greatestCommonDivisor
+  );
+  if (greatestCommonDivisor.isEqualToZero()) {
+    global.fatal
+    << "This is a programing error: "
+    << " while fetching the gcd of "
+    << simplifiedNumerator.toString()
+    << " and "
+    << simplifiedDenominator.toString()
+    << " I got 0, which is impossible. "
+    << global.fatal;
   }
+  this->numerator.getElement().divideBy(
+    greatestCommonDivisor,
+    quotientByGreatestCommonDivisor,
+    remainderByGCD,
+    monomialOrder
+  );
+  simplifiedNumerator = quotientByGreatestCommonDivisor;
+  simplifiedDenominator.divideBy(
+    greatestCommonDivisor,
+    quotientByGreatestCommonDivisor,
+    remainderByGCD,
+    monomialOrder
+  );
+  this->denominator.getElement() = quotientByGreatestCommonDivisor;
+}
+
+template <class Coefficient>
+void RationalFraction<Coefficient>::simplify() {
+  STACK_TRACE("RationalFunction::simplify");
+  this->reduceRationalFraction();
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
 }
@@ -821,7 +834,7 @@ Rational RationalFraction<Coefficient>::scaleToIntegral() {
       &MonomialPolynomial::orderDefault()
     );
   }
-  if (this->expressionType != TypeExpression::typeRationalFunction) {
+  if (this->expressionType != TypeExpression::typeRationalFraction) {
     return Rational::one();
   }
   Rational result;
@@ -838,7 +851,7 @@ Rational RationalFraction<Coefficient>::scaleToIntegral() {
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::simplifyLeadingCoefficientOnly() {
-  if (this->expressionType != TypeExpression::typeRationalFunction) {
+  if (this->expressionType != TypeExpression::typeRationalFraction) {
     return;
   }
   Coefficient scaleNumerator =
@@ -967,7 +980,7 @@ bool RationalFraction<Coefficient>::greatestCommonDivisorQuick(
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::raiseToPower(int power) {
-  MacroRegisterFunctionWithName("RationalFraction::raiseToPower");
+  STACK_TRACE("RationalFraction::raiseToPower");
   this->checkConsistency();
   if (power < 0) {
     this->invert();
@@ -988,7 +1001,7 @@ void RationalFraction<Coefficient>::raiseToPower(int power) {
       power, this->constantValue.one()
     );
     break;
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     this->numerator.getElement().raiseToPower(
       power, this->constantValue.one()
     );
@@ -1015,7 +1028,7 @@ void RationalFraction<Coefficient>::clearDenominators(
     this->numerator.getElement().clearDenominators(scalar);
     outputWasMultipliedBy.makeConstant(scalar);
     break;
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     RationalFraction tempRF;
     outputWasMultipliedBy.operator=(this->denominator.getElement());
     *this *= outputWasMultipliedBy;
@@ -1036,7 +1049,7 @@ void RationalFraction<Coefficient>::addSameTypes(
   case RationalFraction::typePolynomial:
     this->numerator.getElement() += other.numerator.getElementConst();
     break;
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     this->addHonestRationalFunction(other);
     break;
   }
@@ -1067,7 +1080,7 @@ template <class Coefficient>
 void RationalFraction<Coefficient>::addHonestRationalFunction(
   const RationalFraction<Coefficient>& other
 ) {
-  MacroRegisterFunctionWithName("RationalFunction::addHonestRationalFunction");
+  STACK_TRACE("RationalFunction::addHonestRationalFunction");
   Coefficient proportionalityCoefficient;
   if (
     !this->denominator.getElement().isProportionalTo(
@@ -1108,7 +1121,7 @@ bool RationalFraction<Coefficient>::isEqualTo(
     return false;
   }
   switch (this->expressionType) {
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     return
     this->numerator.getElementConst().isEqualTo(
       other.numerator.getElementConst()
@@ -1169,7 +1182,7 @@ unsigned int RationalFraction<Coefficient>::hashFunction() const {
     return this->constantValue.hashFunction();
   case RationalFraction::typePolynomial:
     return this->numerator.getElementConst().hashFunction();
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     return
     this->numerator.getElementConst().hashFunction() * HashConstants::constant0
     +
@@ -1231,7 +1244,7 @@ void RationalFraction<Coefficient>::getDenominator(
   Polynomial<Coefficient>& output
 ) const {
   switch (this->expressionType) {
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     if (this->denominator.isZeroPointer()) {
       global.fatal
       << "The rational function is "
@@ -1296,7 +1309,7 @@ bool RationalFraction<Coefficient>::operator>(
     return
     this->numerator.getElementConst() >
     other.numerator.getElementConst();
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     if (
       other.denominator.getElementConst() > this->denominator.getElementConst()
     ) {
@@ -1352,7 +1365,7 @@ void RationalFraction<Coefficient>::operator/=(
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::reduceRationalFunctionToPolynomial() {
-  if (this->expressionType != TypeExpression::typeRationalFunction) {
+  if (this->expressionType != TypeExpression::typeRationalFraction) {
     return;
   }
   if (this->denominator.getElement().isConstant()) {
@@ -1380,7 +1393,7 @@ bool RationalFraction<Coefficient>::substitution(
   const Coefficient& one,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("RationalFunction::substitution");
+  STACK_TRACE("RationalFunction::substitution");
   switch (this->expressionType) {
   case RationalFraction::typeConstant:
     return true;
@@ -1392,7 +1405,7 @@ bool RationalFraction<Coefficient>::substitution(
     }
     this->simplify();
     return true;
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     if (
       !this->numerator.getElement().substitution(substitution, one)
     ) {
@@ -1430,7 +1443,7 @@ int RationalFraction<Coefficient>::minimalNumberOfVariables() const {
     return 0;
   case RationalFraction::typePolynomial:
     return this->numerator.getElementConst().minimalNumberOfVariables();
-  case RationalFraction::typeRationalFunction:
+  case RationalFraction::typeRationalFraction:
     return
     MathRoutines::maximum(
       this->numerator.getElementConst().minimalNumberOfVariables(),
@@ -1449,9 +1462,7 @@ bool RationalFraction<Coefficient>::getRelations(
   List<Polynomial<Rational> >& outputRelations,
   std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName(
-    "RationalFunctionOld::GetRelationsGetRelations"
-  );
+  STACK_TRACE("RationalFunctionOld::GetRelationsGetRelations");
   outputGeneratorLabels.setSize(inputElements.size);
   outputRelations.setSize(0);
   if (inputElements.size == 0) {

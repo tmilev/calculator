@@ -45,9 +45,7 @@ void TransportLayerSecurityOpenSSL::freeContextGlobal() {
 }
 
 void TransportLayerSecurityOpenSSL::initSSLLibrary() {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurityOpenSSL::initSSLlibrary"
-  );
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLlibrary");
   if (this->flagSSLlibraryInitialized) {
     return;
   }
@@ -84,9 +82,7 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
 }
 
 bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand"
-  );
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand");
   if (!global.flagSSLAvailable) {
     return false;
   }
@@ -148,9 +144,7 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
 }
 
 bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned() {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned"
-  );
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned");
   if (
     !TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand()
   ) {
@@ -195,8 +189,7 @@ bool TransportLayerSecurityOpenSSL::checkCanInitialize(bool toServer) {
 }
 
 void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLCommon")
-  ;
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLCommon");
   this->checkCanInitialize(isServer);
   if (this->flagContextInitialized) {
     return;
@@ -208,9 +201,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
 }
 
 std::string TransportLayerSecurity::certificateSelfSignedPhysical() {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurity::certificateSelfSignedPhysical"
-  );
+  STACK_TRACE("TransportLayerSecurity::certificateSelfSignedPhysical");
   std::string result;
   FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::certificateSelfSignedVirtual(),
@@ -235,9 +226,7 @@ std::string TransportLayerSecurity::keySelfSignedVirtual() {
 }
 
 std::string TransportLayerSecurity::certificateOfficialPhysical() {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurity::certificateOfficialPhysical"
-  );
+  STACK_TRACE("TransportLayerSecurity::certificateOfficialPhysical");
   List<std::string> filesInCertificateFolder;
   List<std::string> extensions;
   FileOperations::getFolderFileNamesVirtual(
@@ -288,7 +277,7 @@ std::string TransportLayerSecurity::certificateOfficialPhysical() {
 }
 
 std::string TransportLayerSecurity::keyOfficialPhysical() {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::keyOfficialPhysical");
+  STACK_TRACE("TransportLayerSecurity::keyOfficialPhysical");
   List<std::string> filesInCertificateFolder;
   List<std::string> extensions;
   FileOperations::getFolderFileNamesVirtual(
@@ -332,9 +321,7 @@ std::string TransportLayerSecurity::keyOfficialPhysical() {
 }
 
 void TransportLayerSecurityOpenSSL::initSSLServerSelfSigned() {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurityOpenSSL::initSSLServerSelfSigned"
-  );
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLServerSelfSigned");
   if (!this->initSSLKeyFilesSelfSigned()) {
     return;
   }
@@ -389,8 +376,7 @@ void TransportLayerSecurityOpenSSL::initSSLServerSelfSigned() {
 }
 
 void TransportLayerSecurityOpenSSL::initSSLServer() {
-  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLServer")
-  ;
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLServer");
   this->initSSLCommon(true);
   if (this->owner->flagInitializedPrivateKey) {
     return;
@@ -443,9 +429,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
 void TransportLayerSecurityOpenSSL::clearErrorQueue(
   int numberOfTransferredBytes
 ) {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurityOpenSSL::clearErrorQueue"
-  );
+  STACK_TRACE("TransportLayerSecurityOpenSSL::clearErrorQueue");
   (void) numberOfTransferredBytes;
 #ifdef MACRO_use_open_ssl
   char buffer[200];
@@ -481,7 +465,7 @@ void TransportLayerSecurityOpenSSL::clearErrorQueue(
 }
 
 void TransportLayerSecurityOpenSSL::doSetSocket(int socketFileDescriptor) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::doSetSocket");
+  STACK_TRACE("TransportLayerSecurity::doSetSocket");
   (void) socketFileDescriptor;
 #ifdef MACRO_use_open_ssl
   int result = 0;
@@ -637,7 +621,7 @@ bool TransportLayerSecurityOpenSSL::inspectCertificates(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::inspectCertificates");
+  STACK_TRACE("TransportLayerSecurity::inspectCertificates");
   (void) commentsOnFailure;
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
@@ -773,7 +757,7 @@ int TransportLayerSecurityOpenSSL::sslWrite(
 bool TransportLayerSecurityOpenSSL::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("WebServer::handShakeIamServer");
+  STACK_TRACE("WebServer::handShakeIamServer");
   (void) inputSocketID;
   (void) commentsOnFailure;
   if (this->sslData != nullptr) {

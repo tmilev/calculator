@@ -16,7 +16,7 @@ bool CalculatorConversions::getPolynomial<Rational>(
 bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::polynomialDivisionRemainder");
+  STACK_TRACE("Calculator::polynomialDivisionRemainder");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomials;
   if (
@@ -79,9 +79,7 @@ polynomialDivisionVerboseGradedReverseLexicographic(
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::polynomialDivisionVerboseLexicographic"
-  );
+  STACK_TRACE("CalculatorFunctions::polynomialDivisionVerboseLexicographic");
   List<MonomialPolynomial>::Comparator order(
     MonomialPolynomial::greaterThan_leftLargerWins
   );
@@ -110,7 +108,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   Expression& output,
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
-  MacroRegisterFunctionWithName("Calculator::polynomialDivisionVerbose");
+  STACK_TRACE("Calculator::polynomialDivisionVerbose");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (
@@ -157,7 +155,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
 bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::polynomialDivisionSlidesGrLex");
+  STACK_TRACE("Calculator::polynomialDivisionSlidesGrLex");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (
@@ -223,9 +221,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
 bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::factorPolynomialModPrime"
-  );
+  STACK_TRACE("CalculatorFunctions::factorPolynomialModPrime");
   if (input.size() != 2 && input.size() != 3) {
     return
     calculator
@@ -312,7 +308,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
 bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::polynomialDivisionQuotient");
+  STACK_TRACE("Calculator::polynomialDivisionQuotient");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (
@@ -358,9 +354,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
 bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsPolynomial::factorPolynomialFiniteFields"
-  );
+  STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
   if (
     !CalculatorConversions::convert(calculator, input[1], polynomial)
@@ -404,7 +398,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
 bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::factorPolynomialKronecker");
+  STACK_TRACE("Calculator::factorPolynomialKronecker");
   WithContext<Polynomial<Rational> > polynomial;
   if (
     !CalculatorConversions::convert(calculator, input[1], polynomial)
@@ -456,9 +450,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
 bool CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::factorPolynomialKroneckerThenFiniteFields"
-  );
+  STACK_TRACE("Calculator::factorPolynomialKroneckerThenFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
   if (
     !CalculatorConversions::functionPolynomial(
@@ -523,9 +515,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   List<Polynomial<Rational> >& factors,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsPolynomial::factorPolynomialProcess"
-  );
+  STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialProcess");
   List<Expression> resultSequence;
   Expression constantFactorExpression;
   constantFactorExpression.assignValue(calculator, constantFactor);
@@ -558,9 +548,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   ExpressionContext* context,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials"
-  );
+  STACK_TRACE("CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials");
   if (polynomials.size < 2) {
     return output.assignError(calculator, "Too few polynomials");
   }
@@ -579,9 +567,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
 bool CalculatorFunctionsPolynomial::sylvesterMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsPolynomial::sylvesterMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsPolynomial::sylvesterMatrix");
   if (input.size() < 3) {
     return false;
   }
@@ -650,9 +636,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(
 
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::getDivisionLaTeXSlide"
-  );
+  STACK_TRACE("GroebnerBasisComputation::getDivisionLaTeXSlide");
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
@@ -921,9 +905,8 @@ getSpacedMonomialsWithHighlightLaTeX(
   int slidesToUncoverAllMons,
   bool useColumnSeparator
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialDivisionReport::getSpacedMonomialsWithHighlightLaTeX"
-  );
+  STACK_TRACE("PolynomialDivisionReport::getSpacedMonomialsWithHighlightLaTeX")
+  ;
   (void) slidesToUncoverAllMons;
   std::stringstream out;
   bool found = false;
@@ -1068,9 +1051,7 @@ template <class Coefficient>
 void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   int remainderIndex, int& currentSlideNumber
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialDivisionReport::computeHighLightsFromRemainder"
-  );
+  STACK_TRACE("PolynomialDivisionReport::computeHighLightsFromRemainder");
   this->checkInitialization();
   auto& basis = this->owner->basis;
   if (remainderIndex == 0) {
@@ -1343,7 +1324,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
 bool CalculatorFunctionsPolynomial::polynomialRelations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::groebner");
+  STACK_TRACE("Calculator::groebner");
   Vector<Polynomial<Rational> > inputVector;
   if (input.size() < 3) {
     return
@@ -1434,7 +1415,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
   Expression& output,
   bool doGCD
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo"
   );
   Polynomial<Coefficient> outputPolynomial;
@@ -1556,7 +1537,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
   Expression& output,
   bool doGCD
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial"
   );
   if (input.size() != 3) {
@@ -1612,7 +1593,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   int order,
   bool useModZp
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::groebner");
+  STACK_TRACE("CalculatorFunctionsPolynomial::groebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   ExpressionContext context(calculator);
@@ -1788,7 +1769,7 @@ bool CalculatorFunctionsPolynomial::
 combineFractionsCommutativeWithInternalLibrary(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary"
   );
   if (!input.startsWith(calculator.opPlus(), 3)) {
@@ -1822,9 +1803,8 @@ combineFractionsCommutativeWithInternalLibrary(
 bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial"
-  );
+  STACK_TRACE("CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial")
+  ;
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }

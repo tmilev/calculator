@@ -116,7 +116,7 @@ bool Calculator::getVectorExpressions(
   List<Expression>& output,
   int targetDimNonMandatory
 ) {
-  MacroRegisterFunctionWithName("Calculator::getVectorExpressions");
+  STACK_TRACE("Calculator::getVectorExpressions");
   input.checkInitialization();
   output.reserve(input.size());
   output.setSize(0);
@@ -199,7 +199,7 @@ bool Calculator::recursionDepthExceededHandleRoughly(
 }
 
 bool Calculator::checkOperationHandlers() {
-  MacroRegisterFunctionWithName("Calculator::checkOperationHandlers");
+  STACK_TRACE("Calculator::checkOperationHandlers");
   for (int i = 0; i < this->operations.size(); i ++) {
     MemorySaving<Calculator::OperationHandlers>& current =
     this->operations.values[i];
@@ -257,7 +257,7 @@ bool Calculator::checkConsistencyAfterInitialization() {
 }
 
 bool Expression::checkInitializationRecursively() const {
-  MacroRegisterFunctionWithName("Expression::checkInitializationRecursively");
+  STACK_TRACE("Expression::checkInitializationRecursively");
   this->checkInitialization();
   for (int i = 0; i < this->children.size; i ++) {
     (*this)[i].checkInitializationRecursively();
@@ -277,7 +277,7 @@ bool Expression::hasInputBoxVariables(
   HashedList<std::string>* outputBoxNames,
   HashedList<std::string>* outputBoxNamesJavascript
 ) const {
-  MacroRegisterFunctionWithName("Expression::hasInputBoxVariables");
+  STACK_TRACE("Expression::hasInputBoxVariables");
   if (this->owner == nullptr) {
     return false;
   }
@@ -322,7 +322,7 @@ bool Expression::hasBoundVariables() const {
     << global.fatal;
   }
   RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
-  MacroRegisterFunctionWithName("Expression::hasBoundVariables");
+  STACK_TRACE("Expression::hasBoundVariables");
   if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
     global.fatal
     << "Function hasBoundVariables has exceeded recursion depth limit. "
@@ -374,7 +374,7 @@ bool CalculatorBasics::tensorProductStandard(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
-  MacroRegisterFunctionWithName("Calculator::outerTensorProductStandard");
+  STACK_TRACE("Calculator::outerTensorProductStandard");
   if (
     CalculatorBasics::distribute(
       calculator,
@@ -400,9 +400,7 @@ bool CalculatorBasics::tensorProductStandard(
 bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY"
-  );
+  STACK_TRACE("Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -585,7 +583,7 @@ bool CalculatorBasics::associateTimesDivision(
 bool CalculatorBasics::associate(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorBasics::associate");
+  STACK_TRACE("CalculatorBasics::associate");
   if (input.size() != 3) {
     return false;
   }
@@ -610,7 +608,7 @@ bool CalculatorBasics::associate(
 bool CalculatorBasics::standardIsDenotedBy(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::standardIsDenotedBy");
+  STACK_TRACE("Calculator::standardIsDenotedBy");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opIsDenotedBy(), 3)) {
     return false;
@@ -652,7 +650,7 @@ bool CalculatorBasics::standardIsDenotedBy(
 bool CalculatorBasics::multiplyByOne(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::multiplyByOne");
+  STACK_TRACE("Calculator::multiplyByOne");
   if (
     !input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3
   ) {
@@ -668,9 +666,7 @@ bool CalculatorBasics::multiplyByOne(
 bool Calculator::getVectorLargeIntegerFromFunctionArguments(
   const Expression& input, List<LargeInteger>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::getVectorLargeIntegerFromFunctionArguments"
-  );
+  STACK_TRACE("Calculator::getVectorLargeIntegerFromFunctionArguments");
   Vector<Rational> rationals;
   if (!this->getVectorFromFunctionArguments(input, rationals)) {
     return false;
@@ -691,7 +687,7 @@ bool Calculator::getVectorLargeIntegerFromFunctionArguments(
 }
 
 bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
-  MacroRegisterFunctionWithName("Calculator::getVectorInt");
+  STACK_TRACE("Calculator::getVectorInt");
   Vector<Rational> rationals;
   if (!this->getVector(input, rationals)) {
     return false;
@@ -714,7 +710,7 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
 bool CalculatorBasics::timesToFunctionApplication(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
+  STACK_TRACE("Calculator::outerTimesToFunctionApplication");
   if (!input.startsWith(calculator.opTimes())) {
     return false;
   }
@@ -816,9 +812,7 @@ bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
   int multiplicativeOperation,
   bool constantsOnly
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorBasics::leftDistributeBracketIsOnTheLeft"
-  );
+  STACK_TRACE("CalculatorBasics::leftDistributeBracketIsOnTheLeft");
   if (additiveOperation == - 1) {
     additiveOperation = calculator.opPlus();
   }
@@ -854,9 +848,7 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
   int multiplicativeOperation,
   bool constantsOnly
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::rightDistributeBracketIsOnTheRight"
-  );
+  STACK_TRACE("Calculator::rightDistributeBracketIsOnTheRight");
   if (additiveOperation == - 1) {
     additiveOperation = calculator.opPlus();
   }
@@ -890,9 +882,7 @@ bool Calculator::collectCoefficientsPowersVariables(
   const Expression& variable,
   VectorSparse<Expression>& outputPositionIiscoeffXtoIth
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::collectCoefficientsPowersVariables"
-  );
+  STACK_TRACE("Calculator::collectCoefficientsPowersVariables");
   List<Expression> summands, currentMultiplicands, remainingMultiplicands;
   Calculator& calculator = *input.owner;
   calculator.collectOpands(input, calculator.opPlus(), summands);
@@ -944,7 +934,7 @@ bool Calculator::collectCoefficientsPowersVariables(
 bool Calculator::collectOpands(
   const Expression& input, int operation, List<Expression>& outputOpands
 ) {
-  MacroRegisterFunctionWithName("Calculator::collectOpands");
+  STACK_TRACE("Calculator::collectOpands");
   outputOpands.setSize(0);
   return this->collectOpandsAccumulate(input, operation, outputOpands);
 }
@@ -952,7 +942,7 @@ bool Calculator::collectOpands(
 bool Calculator::collectOpandsAccumulate(
   const Expression& input, int operation, List<Expression>& outputOpands
 ) {
-  MacroRegisterFunctionWithName("Calculator::collectOpandsAccumulate");
+  STACK_TRACE("Calculator::collectOpandsAccumulate");
   if (!input.startsWith(operation)) {
     outputOpands.addOnTop(input);
     return true;
@@ -969,7 +959,7 @@ bool Calculator::functionCollectOneSummand(
   List<Expression>& outputMonomials,
   List<Rational>& outputCoefficients
 ) {
-  MacroRegisterFunctionWithName("Calculator::functionCollectOneSummand");
+  STACK_TRACE("Calculator::functionCollectOneSummand");
   if (input.isEqualToZero()) {
     outputMonomials.addOnTop(calculator.expressionZero());
     outputCoefficients.addOnTop(1);
@@ -1011,7 +1001,7 @@ bool Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical(
   List<Expression>& outputMonomials,
   List<Rational>& outputCoefficients
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical"
   );
   bool result =
@@ -1029,7 +1019,7 @@ bool Calculator::functionCollectSummandsCombine(
   const Expression& input,
   LinearCombination<Expression, Rational>& outputSum
 ) {
-  MacroRegisterFunctionWithName("Calculator::functionCollectSummandsCombine");
+  STACK_TRACE("Calculator::functionCollectSummandsCombine");
   List<Expression> summands;
   calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   outputSum.makeZero();
@@ -1097,7 +1087,7 @@ bool Calculator::functionCollectSummandsCombine(
 bool CalculatorBasics::associateExponentExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::associateExponentExponent");
+  STACK_TRACE("Calculator::associateExponentExponent");
   int opPower = calculator.opPower();
   if (!input.startsWith(opPower, 3)) {
     return false;
@@ -1135,7 +1125,7 @@ bool CalculatorBasics::associateExponentExponent(
 bool Calculator::outerPowerRaiseToFirst(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
+  STACK_TRACE("Calculator::outerPowerRaiseToFirst");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -1155,7 +1145,7 @@ bool Calculator::outerPowerRaiseToFirst(
 bool Expression::makeXOXOdotsOX(
   Calculator& owner, int operation, const List<Expression>& opands
 ) {
-  MacroRegisterFunctionWithName("Expression::makeXOXOdotsOX");
+  STACK_TRACE("Expression::makeXOXOdotsOX");
   if (opands.size == 0) {
     global.fatal
     << "Cannot create operation sequence from an empty list. "
@@ -1244,7 +1234,7 @@ bool CalculatorBasics::minus(
 }
 
 void Expression::operator+=(const Expression& other) {
-  MacroRegisterFunctionWithName("Expression::operator+=");
+  STACK_TRACE("Expression::operator+=");
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data += other.data;
     if (this->data != 1 && this->data != 0) {
@@ -1276,7 +1266,7 @@ void Expression::operator+=(const Expression& other) {
 }
 
 void Expression::operator-=(const Expression& other) {
-  MacroRegisterFunctionWithName("Expression::operator+=");
+  STACK_TRACE("Expression::operator+=");
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data -= other.data;
     if (this->data != 1 && this->data != 0) {
@@ -1308,7 +1298,7 @@ void Expression::operator-=(const Expression& other) {
 }
 
 Expression Expression::operator*(const Expression& other) {
-  MacroRegisterFunctionWithName("Expression::operator*");
+  STACK_TRACE("Expression::operator*");
   Expression result;
   result = *this;
   result *= other;
@@ -1316,7 +1306,7 @@ Expression Expression::operator*(const Expression& other) {
 }
 
 Expression Expression::operator*(int other) {
-  MacroRegisterFunctionWithName("Expression::operator*");
+  STACK_TRACE("Expression::operator*");
   Expression result;
   if (this->owner == nullptr) {
     // perhaps we should allow the code below for convenience: really
@@ -1342,7 +1332,7 @@ Expression Expression::operator*(int other) {
 }
 
 Expression Expression::operator/(int other) {
-  MacroRegisterFunctionWithName("Expression::operator/");
+  STACK_TRACE("Expression::operator/");
   Expression result;
   if (this->owner == nullptr) {
     global.fatal
@@ -1375,7 +1365,7 @@ Expression Expression::operator-(const Expression& other) {
 }
 
 Expression Expression::operator/(const Expression& other) {
-  MacroRegisterFunctionWithName("Expression::operator/");
+  STACK_TRACE("Expression::operator/");
   Expression result;
   result = *this;
   result /= other;
@@ -1383,7 +1373,7 @@ Expression Expression::operator/(const Expression& other) {
 }
 
 void Expression::operator/=(const Expression& other) {
-  MacroRegisterFunctionWithName("Expression::operator/=");
+  STACK_TRACE("Expression::operator/=");
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data /= other.data;
     if (this->data != 1 && this->data != 0) {
@@ -1415,7 +1405,7 @@ void Expression::operator/=(const Expression& other) {
 }
 
 void Expression::operator*=(const Expression& other) {
-  MacroRegisterFunctionWithName("Expression::operator*=");
+  STACK_TRACE("Expression::operator*=");
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data *= other.data;
     if (this->data != 1 && this->data != 0) {
@@ -1454,7 +1444,7 @@ bool Expression::operator==(const Expression& other) const {
 }
 
 bool Expression::isEqualToMathematically(const Expression& other) const {
-  MacroRegisterFunctionWithName("Expression::isEqualToMathematically");
+  STACK_TRACE("Expression::isEqualToMathematically");
   if (this->owner == nullptr && other.owner == nullptr) {
     return this->data == other.data;
   }
@@ -1518,7 +1508,7 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
 
 SemisimpleLieAlgebra* Expression::
 getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithCaution"
   );
   this->checkInitialization();
@@ -1666,7 +1656,7 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
 void Calculator::registerCalculatorFunction(
   Function& inputFunction, int indexOperation
 ) {
-  MacroRegisterFunctionWithName("Calculator::registerCalculatorFunction");
+  STACK_TRACE("Calculator::registerCalculatorFunction");
   if (indexOperation < 0 || indexOperation >= this->operations.size()) {
     global.fatal
     << "Invalid index operation: "
@@ -1998,7 +1988,7 @@ bool Function::shouldBeApplied(int parentOperationIfAvailable) {
 }
 
 JSData Function::toJSON() const {
-  MacroRegisterFunctionWithName("Function::toJSON");
+  STACK_TRACE("Function::toJSON");
   JSData result;
   result.elementType = JSData::token::tokenObject;
   if (this->owner == nullptr) {
@@ -2107,7 +2097,7 @@ std::string Function::toStringFull() const {
 }
 
 std::string ObjectContainer::toString() {
-  MacroRegisterFunctionWithName("ObjectContainer::toString");
+  STACK_TRACE("ObjectContainer::toString");
   std::stringstream out;
   if (this->semisimpleLieAlgebras.values.size > 0) {
     out
@@ -2142,7 +2132,7 @@ std::string ObjectContainer::toString() {
 }
 
 JSData Calculator::toJSONOutputAndSpecials() {
-  MacroRegisterFunctionWithName("Calculator::toJSONOutputAndSpecials");
+  STACK_TRACE("Calculator::toJSONOutputAndSpecials");
   JSData result = this->outputJS;
   if (this->inputString == "") {
     return result;
@@ -2153,12 +2143,12 @@ JSData Calculator::toJSONOutputAndSpecials() {
 }
 
 std::string Calculator::toStringOutputAndSpecials() {
-  MacroRegisterFunctionWithName("Calculator::toStringOutputAndSpecials");
+  STACK_TRACE("Calculator::toStringOutputAndSpecials");
   return this->toJSONOutputAndSpecials().toString(nullptr);
 }
 
 void Calculator::writeAutoCompleteKeyWordsToFile() {
-  MacroRegisterFunctionWithName("Calculator::writeAutoCompleteKeyWordsToFile");
+  STACK_TRACE("Calculator::writeAutoCompleteKeyWordsToFile");
   std::stringstream out;
   out
   <<
@@ -2193,7 +2183,7 @@ void Calculator::writeAutoCompleteKeyWordsToFile() {
 }
 
 void Calculator::computeAutoCompleteKeyWords() {
-  MacroRegisterFunctionWithName("Calculator::computeAutoCompleteKeyWords");
+  STACK_TRACE("Calculator::computeAutoCompleteKeyWords");
   this->autoCompleteKeyWords.setExpectedSize(this->operations.size() * 2);
   for (int i = 0; i < this->operations.size(); i ++) {
     this->autoCompleteKeyWords.addOnTopNoRepetition(
@@ -2221,7 +2211,7 @@ void Calculator::computeAutoCompleteKeyWords() {
 }
 
 JSData Calculator::toJSONPerformance() {
-  MacroRegisterFunctionWithName("Calculator::toStringPerformance");
+  STACK_TRACE("Calculator::toStringPerformance");
   int64_t elapsedMilliseconds = global.getElapsedMilliseconds();
   int64_t computationMilliseconds =
   elapsedMilliseconds - this->statistics.startTimeEvaluationMilliseconds;
@@ -2367,7 +2357,7 @@ JSData Calculator::toJSONPerformance() {
 }
 
 std::string Calculator::toString() {
-  MacroRegisterFunctionWithName("Calculator::toString");
+  STACK_TRACE("Calculator::toString");
   std::stringstream out2;
   std::string openTag1 = "<span style='color:blue'>";
   std::string closeTag1 = "</span>";
@@ -2474,7 +2464,7 @@ std::string Calculator::toString() {
 std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   bool includeLispifiedExpressions, bool ignoreCommandEnclosures
 ) {
-  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHTMLTable");
+  STACK_TRACE("Calculator::toStringSyntacticStackHTMLTable");
   std::stringstream out;
   if ((*this->currentSyntacticStack).size < this->numberOfEmptyTokensStart
   ) {
@@ -2525,9 +2515,7 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
 
 SemisimpleSubalgebras& ObjectContainer::
 getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
-  MacroRegisterFunctionWithName(
-    "ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent"
-  );
+  STACK_TRACE("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
   SemisimpleSubalgebras& result =
   this->semisimpleSubalgebras.getValueCreateNoInitialization(input);
   return result;
@@ -2536,9 +2524,7 @@ getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
 SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(
   const DynkinType& input
 ) {
-  MacroRegisterFunctionWithName(
-    "ObjectContainer::getLieAlgebraCreateIfNotPresent"
-  );
+  STACK_TRACE("ObjectContainer::getLieAlgebraCreateIfNotPresent");
   bool needToInit = false;
   if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
@@ -2554,9 +2540,7 @@ SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(
 WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(
   const DynkinType& input
 ) {
-  MacroRegisterFunctionWithName(
-    "ObjectContainer::getWeylGroupDataCreateIfNotPresent"
-  );
+  STACK_TRACE("ObjectContainer::getWeylGroupDataCreateIfNotPresent");
   return this->getLieAlgebraCreateIfNotPresent(input).weylGroup;
 }
 
@@ -2591,7 +2575,7 @@ void ObjectContainer::resetSliders() {
 }
 
 bool ObjectContainer::checkConsistencyAfterReset() {
-  MacroRegisterFunctionWithName("ObjectContainer::checkConsistencyAfterReset");
+  STACK_TRACE("ObjectContainer::checkConsistencyAfterReset");
   if (this->weylGroupElements.size != 0) {
     global.fatal
     << "WeylGroupElements expected to be empty, got "
@@ -2652,7 +2636,7 @@ bool ObjectContainer::checkConsistencyAfterReset() {
 }
 
 void ObjectContainer::reset() {
-  MacroRegisterFunctionWithName("ObjectContainer::reset");
+  STACK_TRACE("ObjectContainer::reset");
   this->weylGroupElements.clear();
   this->weylGroupRepresentations.clear();
   this->weylGroupVirtualRepresentations.clear();
@@ -2723,7 +2707,7 @@ bool Expression::isMeltable(int* numberOfResultingChildren) const {
 bool Expression::mergeContextsMyAruments(
   Expression& output, std::stringstream* commentsOnFailure
 ) const {
-  MacroRegisterFunctionWithName("Expression::mergeContextsMyAruments");
+  STACK_TRACE("Expression::mergeContextsMyAruments");
   this->checkInitialization();
   if (this->size() < 2) {
     return false;
@@ -2795,7 +2779,7 @@ bool Expression::mergeContextsMyAruments(
 bool CalculatorBasics::meltBrackets(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
+  STACK_TRACE("Calculator::outerMeltBrackets");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opCommandSequence())) {
     return false;

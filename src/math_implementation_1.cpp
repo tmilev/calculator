@@ -12,7 +12,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   List<int>& outputIndicesFormatAd0Ad1Ad2etc,
   Rational& outputMultiplyLieBracketsToGetGenerator
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators"
   );
   outputIndicesFormatAd0Ad1Ad2etc.size = 0;
@@ -914,9 +914,8 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(
 }
 
 void BranchingData::initializePart1NoSubgroups() {
-  MacroRegisterFunctionWithName(
-    "BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups"
-  );
+  STACK_TRACE("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups")
+  ;
   this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl =
   &this->homomorphism.coDomainAlgebra().weylGroup;
   this->weylGroupFiniteDimensionalSmall.ambientWeyl =
@@ -1122,7 +1121,7 @@ bool LittelmannPath::isAdaptedString(
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 getGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup"
   );
   if (this->externalAutomorphisms.size > 0) {

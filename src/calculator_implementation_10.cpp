@@ -5,7 +5,7 @@
 
 bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
 (Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula"
   );
   Vectors<Rational> vectors;
@@ -31,9 +31,7 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
 bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsVectorPartitionFunction::coneDecomposition"
-  );
+  STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::coneDecomposition");
   Vectors<Rational> vectors;
   Matrix<Rational> matrix;
   if (

@@ -28,9 +28,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner"
-  );
+  STACK_TRACE("CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner");
   if (highestWeights.size == 0) {
     return false;
   }
@@ -403,7 +401,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
   SemisimpleLieAlgebra* owner,
   bool Verbose
 ) {
-  MacroRegisterFunctionWithName("Calculator::highestWeightVectorCommon");
+  STACK_TRACE("Calculator::highestWeightVectorCommon");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   RationalFraction<Rational> RFOne, RFZero;
   RFOne.makeOne();
@@ -472,7 +470,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
 bool CalculatorLieTheory::animateLittelmannPaths(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::animateLittelmannPaths");
+  STACK_TRACE("Calculator::animateLittelmannPaths");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return output.assignError(calculator, "This function takes 2 arguments");
@@ -516,7 +514,7 @@ bool CalculatorLieTheory::animateLittelmannPaths(
 bool CalculatorLieTheory::splitFDpartB3overG2inner(
   Calculator& calculator, BranchingData& g2B3Data, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2inner");
+  STACK_TRACE("Calculator::splitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFraction<Rational> > modulusCopy;
   modulusCopy.makeFromHW(
     g2B3Data.homomorphism.coDomainAlgebra(),
@@ -710,7 +708,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
 bool CalculatorLieTheory::testMonomialBaseConjecture(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::testMonomialBaseConjecture");
+  STACK_TRACE("Calculator::testMonomialBaseConjecture");
   RecursionDepthCounter recursion(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return
@@ -911,7 +909,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
 bool CalculatorLieTheory::littelmannOperator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::littelmannOperator");
+  STACK_TRACE("Calculator::littelmannOperator");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   if (input.hasBoundVariables()) {
     return false;
@@ -940,7 +938,7 @@ bool CalculatorLieTheory::LSPath(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter recutionIncrementer(&calculator.recursionDepth);
-  MacroRegisterFunctionWithName("Calculator::LSPath");
+  STACK_TRACE("Calculator::LSPath");
   if (input.size() < 3) {
     return
     output.assignError(calculator, "LSPath needs at least two arguments.");
@@ -981,7 +979,7 @@ bool CalculatorLieTheory::LSPath(
 bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::kazhdanLuzstigCoeffificents");
+  STACK_TRACE("Calculator::kazhdanLuzstigCoeffificents");
   if (input.size() != 2) {
     return
     calculator
@@ -1032,9 +1030,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::writeGenVermaModAsDiffOperators"
-  );
+  STACK_TRACE("CalculatorLieTheory::writeGenVermaModAsDiffOperators");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   Vectors<Polynomial<Rational> > highestWeights;
   highestWeights.setSize(1);
@@ -1104,7 +1100,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   BranchingData& g2inB3Data,
   ExpressionContext& context
 ) {
-  MacroRegisterFunctionWithName("Calculator::printB3G2branchingIntermediate");
+  STACK_TRACE("Calculator::printB3G2branchingIntermediate");
   (void) input;
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
@@ -1419,7 +1415,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
 bool CalculatorLieTheory::printB3G2branchingTable(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::printB3G2branchingTable");
+  STACK_TRACE("Calculator::printB3G2branchingTable");
   Vectors<RationalFraction<Rational> > highestWeights;
   BranchingData g2B3Data;
   ExpressionContext context(calculator);
@@ -1442,8 +1438,7 @@ bool CalculatorLieTheory::printB3G2branchingTable(
 bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCharsOnly")
-  ;
+  STACK_TRACE("Calculator::printB3G2branchingTableCharsOnly");
   BranchingData g3InB3Data;
   ExpressionContext context(calculator);
   Vectors<RationalFraction<Rational> > highestWeights;
@@ -1655,9 +1650,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
 bool CalculatorLieTheory::printGeneralizedVermaModule(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::printGeneralizedVermaModule"
-  );
+  STACK_TRACE("CalculatorLieTheory::printGeneralizedVermaModule");
   Selection selectionParSel;
   Vector<RationalFraction<Rational> > highestWeightFundamentalCoordinates;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
@@ -1713,7 +1706,7 @@ bool CalculatorLieTheory::
 writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel"
   );
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
@@ -1823,7 +1816,7 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
 bool CalculatorLieTheory::killingForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::killingForm");
+  STACK_TRACE("Calculator::killingForm");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1909,7 +1902,7 @@ bool CalculatorLieTheory::highestWeightVector(
 bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional"
   );
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
@@ -2361,7 +2354,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
 bool CalculatorLieTheory::splitFDpartB3overG2(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2");
+  STACK_TRACE("CalculatorLieTheory::splitFDpartB3overG2");
   BranchingData g3InB3Data;
   ExpressionContext context(calculator);
   CalculatorLieTheory::splitFDpartB3overG2Init(
@@ -2386,7 +2379,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(
   BranchingData& g2InB3Data,
   ExpressionContext& context
 ) {
-  MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCommon");
+  STACK_TRACE("Calculator::printB3G2branchingTableCommon");
   Vector<RationalFraction<Rational> > highestWeightRationalFraction;
   SelectionWithMaxMultiplicity highestWeightEnumerator;
   int desiredHeight = 0;
@@ -2430,7 +2423,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(
 bool CalculatorLieTheory::splitFDpartB3overG2old(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2old");
+  STACK_TRACE("CalculatorLieTheory::splitFDpartB3overG2old");
   BranchingData g2B3Data;
   CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
     calculator, input, output, g2B3Data
@@ -2543,9 +2536,7 @@ bool CalculatorLieTheory::printB3G2branchingTableInit(
   int& desiredHeight,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::printB3G2branchingTableInit"
-  );
+  STACK_TRACE("CalculatorLieTheory::printB3G2branchingTableInit");
   if (input.size() != 3) {
     return
     output.assignError(
@@ -2579,9 +2570,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   Expression& output,
   BranchingData& g2B3Data
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::splitFDpartB3overG2CharsOutput"
-  );
+  STACK_TRACE("CalculatorLieTheory::splitFDpartB3overG2CharsOutput");
   ExpressionContext context(calculator);
   CalculatorLieTheory::splitFDpartB3overG2Init(
     calculator, input, output, g2B3Data, context
@@ -2623,8 +2612,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
   BranchingData& g2b3Data,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2Init")
-  ;
+  STACK_TRACE("CalculatorLieTheory::splitFDpartB3overG2Init");
   if (!input.isListNElements(4)) {
     return
     output.assignError(
@@ -2693,9 +2681,7 @@ bool CalculatorLieTheory::elementsInSameLieAlgebra(
   SemisimpleLieAlgebra*& outputOwner,
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::getElementsInSameLieAlgebra"
-  );
+  STACK_TRACE("CalculatorLieTheory::getElementsInSameLieAlgebra");
   if (input.size() < 3) {
     output.assignError(
       calculator,
@@ -2734,9 +2720,7 @@ bool CalculatorLieTheory::elementsInSameLieAlgebra(
 bool CalculatorLieTheory::adjointCommonEigenSpaces(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::adjointCommonEigenSpaces"
-  );
+  STACK_TRACE("CalculatorLieTheory::adjointCommonEigenSpaces");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
   if (
@@ -2768,9 +2752,7 @@ bool CalculatorLieTheory::adjointCommonEigenSpaces(
 bool CalculatorLieTheory::standardRepresentationMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::standardRepresentationMatrix"
-  );
+  STACK_TRACE("CalculatorLieTheory::standardRepresentationMatrix");
   if (input.size() != 2) {
     return calculator << "Expected a single argument.";
   }
@@ -2814,7 +2796,7 @@ bool CalculatorLieTheory::standardRepresentationMatrix(
 bool CalculatorLieTheory::adjointMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::adjointMatrix");
+  STACK_TRACE("CalculatorLieTheory::adjointMatrix");
   if (input.size() != 2) {
     return calculator << "Expected a single argument.";
   }
@@ -2979,7 +2961,7 @@ bool VoganDiagram::assignParameter(
   int inputParameter,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("VoganDiagram::assignParameter");
+  STACK_TRACE("VoganDiagram::assignParameter");
   this->computeMapStringToType();
   if (!this->mapStringToType.contains(input)) {
     if (commentsOnFailure != nullptr) {
@@ -3079,7 +3061,7 @@ VoganDiagram::VoganDiagram() {
 }
 
 std::string CartanInvolution::toString() {
-  MacroRegisterFunctionWithName("CartanInvolution::toString");
+  STACK_TRACE("CartanInvolution::toString");
   std::stringstream out;
   out << this->voganDiagram.toString() << ". ";
   out << this->automorphism.toString();
@@ -3110,7 +3092,7 @@ CartanInvolution::CartanInvolution() {
 }
 
 void CartanInvolution::setSimpleRootSwap(int indexLeft, int indexRight) {
-  MacroRegisterFunctionWithName("CartanInvolution::setSimpleRootSwap");
+  STACK_TRACE("CartanInvolution::setSimpleRootSwap");
   int rank = this->dynkinTypeAmbientNoFailure().getRank();
   Vector<Rational> simpleLeft, simpleRight;
   simpleLeft.makeEi(rank, indexLeft);
@@ -3126,7 +3108,7 @@ void CartanInvolution::setSimpleRootSwap(int indexLeft, int indexRight) {
 }
 
 void CartanInvolution::setFilledSimpleRoot(int index) {
-  MacroRegisterFunctionWithName("CartanInvolution::setFilledSimpleRoot");
+  STACK_TRACE("CartanInvolution::setFilledSimpleRoot");
   this->setHollowSimpleRoot(index);
   this->automorphism.imagesPositiveSimpleChevalleyGenerators[index] *= - 1;
   this->automorphism.imagesNegativeSimpleChevalleyGenerators[index] *= - 1;
@@ -3144,9 +3126,7 @@ void CartanInvolution::setHollowSimpleRoot(int index) {
 bool CartanInvolution::computeSimpleRootImagesTypeAI(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeAI"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeAI");
   if (!this->owner->weylGroup.dynkinType.isSimpleOfType('A')) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Type is not simple type A. ";
@@ -3168,9 +3148,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAI(
 bool CartanInvolution::computeSimpleRootImagesTypeAII(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeAII"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeAII");
   if (!this->owner->weylGroup.dynkinType.isSimpleOfType('A')) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Type is not simple type A. ";
@@ -3196,9 +3174,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAII(
 bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeAIII"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeAIII");
   if (!this->owner->weylGroup.dynkinType.isSimpleOfType('A')) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Type is not simple type A. ";
@@ -3247,9 +3223,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
 bool CartanInvolution::computeSimpleRootImagesTypeBI(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeBI"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeBI");
   if (!this->owner->weylGroup.dynkinType.isSimpleOfType('B')) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Type is not simple type B. ";
@@ -3299,9 +3273,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeBI(
 bool CartanInvolution::computeSimpleRootImagesTypeCI(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeCI"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeCI");
   if (!this->owner->weylGroup.dynkinType.isSimpleOfType('C')) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -3365,9 +3337,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeDII(
 bool CartanInvolution::computeSimpleRootImagesTypeD(
   std::stringstream* commentsOnFailure, bool useAutomorphism
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeD"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeD");
   if (!this->owner->weylGroup.dynkinType.isSimpleOfType('D')) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -3429,9 +3399,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
 bool CartanInvolution::computeSimpleRootImagesTypeEI(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeEI"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeEI");
   // Vogan diagram of type EI is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
@@ -3457,9 +3425,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEI(
 bool CartanInvolution::computeSimpleRootImagesTypeEII(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeEII"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeEII");
   // Vogan diagram of type EII is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
@@ -3486,9 +3452,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEII(
 bool CartanInvolution::computeSimpleRootImagesTypeEIII(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeEIII"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeEIII");
   // Vogan diagram of type EIII is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
@@ -3515,9 +3479,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIII(
 bool CartanInvolution::computeSimpleRootImagesTypeEIV(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CartanInvolution::computeSimpleRootImagesTypeEIV"
-  );
+  STACK_TRACE("CartanInvolution::computeSimpleRootImagesTypeEIV");
   // Vogan diagram of type EIV is for Lie algebra E_6.
   if (
     !this->owner->weylGroup.dynkinType.isSimpleOfType('E') ||
@@ -3543,7 +3505,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeEIV(
 bool CartanInvolution::computeSimpleRootImages(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("CartanInvolution::computeSimpleRootImages");
+  STACK_TRACE("CartanInvolution::computeSimpleRootImages");
   this->automorphism.domain = this->owner;
   this->automorphism.coDomain = this->owner;
   this->owner->weylGroup.computeRho(false);
@@ -3818,7 +3780,7 @@ void DynkinSimpleType::plotCn(
 void DynkinSimpleType::plotBn(
   Plot& output, int rank, Selection* filledRoots, int verticalOffset
 ) {
-  MacroRegisterFunctionWithName("DynkinSimpleType::plotBn");
+  STACK_TRACE("DynkinSimpleType::plotBn");
   DynkinSimpleType::plotBC(output, rank, filledRoots, verticalOffset);
   if (rank < 2) {
     return;
@@ -4276,9 +4238,7 @@ bool CalculatorLieTheory::cartanInvolutionInternal(
   const Expression& input,
   CartanInvolution& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::cartanInvolutionInternal"
-  );
+  STACK_TRACE("CalculatorLieTheory::cartanInvolutionInternal");
   if (input.size() != 4 && input.size() != 3 && input.size() != 2) {
     return
     calculator
@@ -4329,7 +4289,7 @@ bool CalculatorLieTheory::cartanInvolutionInternal(
 bool CalculatorLieTheory::cartanInvolution(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::cartanInvolution");
+  STACK_TRACE("CalculatorLieTheory::cartanInvolution");
   CartanInvolution involution;
   if (
     !CalculatorLieTheory::cartanInvolutionInternal(
@@ -4356,9 +4316,7 @@ bool CalculatorLieTheory::cartanInvolution(
 bool CalculatorLieTheory::isReductiveLieSubalgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::isReductiveLieSubalgebra"
-  );
+  STACK_TRACE("CalculatorLieTheory::isReductiveLieSubalgebra");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
   if (
@@ -4378,7 +4336,7 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
   Expression& output,
   bool forceRecompute
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::slTwoRealFormStructure");
+  STACK_TRACE("CalculatorLieTheory::slTwoRealFormStructure");
   if (input.size() != 2) {
     return
     calculator
@@ -4456,7 +4414,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   bool computeRealFormSlTwos,
   bool mustRecompute
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::rootSAsAndSltwos");
+  STACK_TRACE("CalculatorLieTheory::rootSAsAndSltwos");
   if (input.size() != 2) {
     return
     calculator
@@ -4615,7 +4573,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
 bool CalculatorLieTheory::parabolicWeylGroups(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::parabolicWeylGroups");
+  STACK_TRACE("CalculatorLieTheory::parabolicWeylGroups");
   if (input.size() != 2) {
     return false;
   }
@@ -4648,7 +4606,7 @@ bool CalculatorLieTheory::parabolicWeylGroups(
 bool CalculatorLieTheory::weylDimensionFormula(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::weylDimensionFormula");
+  STACK_TRACE("CalculatorLieTheory::weylDimensionFormula");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (input.size() != 3) {
     return output.assignError(calculator, "This function takes 2 arguments");
@@ -4703,9 +4661,7 @@ bool CalculatorLieTheory::weylDimensionFormula(
 bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::parabolicWeylGroupsBruhatGraph"
-  );
+  STACK_TRACE("CalculatorLieTheory::parabolicWeylGroupsBruhatGraph");
   RecursionDepthCounter recursion(&calculator.recursionDepth);
   Selection parabolicSel;
   Vector<RationalFraction<Rational> > highestWeightFundamentalCoordinates;
@@ -4889,7 +4845,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
-  MacroRegisterFunctionWithName("CalculatorLieTheory::decomposeCharGenVerma");
+  STACK_TRACE("CalculatorLieTheory::decomposeCharGenVerma");
   Vector<RationalFraction<Rational> > highestWeightFundamentalCoordinates;
   Vector<RationalFraction<Rational> > highestWeightSimpleCoordinates;
   Vector<RationalFraction<Rational> >
@@ -5077,9 +5033,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
 bool CalculatorLieTheory::constructCartanSubalgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::constructCartanSubalgebra"
-  );
+  STACK_TRACE("CalculatorFunctions::constructCartanSubalgebra");
   SubalgebraSemisimpleLieAlgebra subalgebra;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
   for (int i = 1; i < input.size(); i ++) {
@@ -5124,7 +5078,7 @@ bool CalculatorLieTheory::constructCartanSubalgebra(
 bool CalculatorLieTheory::growDynkinType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::growDynkinType");
+  STACK_TRACE("CalculatorLieTheory::growDynkinType");
   if (input.size() != 3) {
     return false;
   }
@@ -5226,9 +5180,7 @@ bool CalculatorLieTheory::growDynkinType(
 bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::computeSemisimpleSubalgebras"
-  );
+  STACK_TRACE("CalculatorLieTheory::computeSemisimpleSubalgebras");
   if (input.size() != 2) {
     return
     calculator
@@ -5274,9 +5226,7 @@ SemisimpleSubalgebras& Expression::getValueNonConst() const;
 bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras"
-  );
+  STACK_TRACE("CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras");
   if (!global.userDefaultHasAdminRights()) {
     return
     calculator
@@ -5318,9 +5268,8 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
 bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras"
-  );
+  STACK_TRACE("CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras")
+  ;
   if (!input.isOfType<SemisimpleSubalgebras>()) {
     return
     calculator
@@ -5359,7 +5308,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
 bool CalculatorLieTheory::getPrincipalSl2Index(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::getPrincipalSl2Index");
+  STACK_TRACE("CalculatorFunctions::getPrincipalSl2Index");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return
@@ -5377,9 +5326,7 @@ bool CalculatorLieTheory::getPrincipalSl2Index(
 bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras"
-  );
+  STACK_TRACE("CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return
@@ -5416,7 +5363,7 @@ bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
 bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket"
   );
   Vector<ElementWeylAlgebra<Rational> > operations;
@@ -5538,7 +5485,7 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
 bool CalculatorLieTheory::casimirWithRespectToLevi(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::casimir");
+  STACK_TRACE("CalculatorLieTheory::casimir");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return false;
@@ -5579,9 +5526,7 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
     const Type& left, const Type& right, Type& output
   )
 ) {
-  MacroRegisterFunctionWithName(
-    "MathRoutines::generateVectorSpaceClosedWithRespectToOperation"
-  );
+  STACK_TRACE("MathRoutines::generateVectorSpaceClosedWithRespectToOperation");
   inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   Type operationResult;
   ProgressReport report1(
@@ -5632,9 +5577,7 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
 bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::canBeExtendedParabolicallyTo"
-  );
+  STACK_TRACE("CalculatorLieTheory::canBeExtendedParabolicallyTo");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -5663,7 +5606,7 @@ bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
 bool CalculatorLieTheory::getSymmetricCartan(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::getSymmetricCartan");
+  STACK_TRACE("CalculatorLieTheory::getSymmetricCartan");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return
@@ -5738,7 +5681,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
 bool CalculatorLieTheory::drawRootSystem(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::drawRootSystem");
+  STACK_TRACE("CalculatorLieTheory::drawRootSystem");
   if (input.size() < 2) {
     return calculator << "drawRootSystem expects at least 1 argument. ";
   }
@@ -5794,7 +5737,7 @@ getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
   const Weight<Coefficient>& weightInFundamentalCoordinates,
   const Vector<Coefficient>& alphaInFundamentalCoordinates
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CharacterSemisimpleLieAlgebraModule::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight"
   );
   int result = - 1;
@@ -5811,7 +5754,7 @@ getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
 template <class Coefficient>
 std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::
 toStringFullCharacterWeightsTable() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CharacterSemisimpleLieAlgebraModule::toStringFullCharacterWeightsTable"
   );
   std::stringstream out;
@@ -5892,7 +5835,7 @@ toStringFullCharacterWeightsTable() {
 bool CalculatorLieTheory::drawWeightSupport(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::drawWeightSupport");
+  STACK_TRACE("CalculatorLieTheory::drawWeightSupport");
   if (!input.isListNElements(3)) {
     return
     output.assignError(calculator, "Wrong number of arguments, must be 2. ");
@@ -6036,9 +5979,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   bool doComputeNilradicals,
   bool doAdjustCentralizers
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::printSemisimpleSubalgebras"
-  );
+  STACK_TRACE("CalculatorLieTheory::printSemisimpleSubalgebras");
   if (doForceRecompute) {
     if (!global.userDefaultHasAdminRights()) {
       return
@@ -6129,7 +6070,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
 bool CalculatorLieTheory::casimir(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::casimir");
+  STACK_TRACE("Calculator::casimir");
   if (input.size() != 2) {
     return calculator << "Casimir function expects a single input. ";
   }
@@ -6198,9 +6139,7 @@ bool CalculatorLieTheory::embedG2InB3(
 bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::characterSemisimpleLieAlgebraFiniteDimensional"
-  );
+  STACK_TRACE("Calculator::characterSemisimpleLieAlgebraFiniteDimensional");
   Vector<Rational> highestWeight;
   Selection parSel;
   WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
@@ -6236,7 +6175,7 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
 bool CalculatorLieTheory::chevalleyGenerator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::chevalleyGenerator");
+  STACK_TRACE("CalculatorLieTheory::chevalleyGenerator");
   if (input.size() != 3) {
     return false;
   }
@@ -6287,7 +6226,7 @@ bool CalculatorLieTheory::chevalleyGenerator(
 bool CalculatorLieTheory::cartanGenerator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::cartanGenerator");
+  STACK_TRACE("CalculatorLieTheory::cartanGenerator");
   if (input.size() != 3) {
     return false;
   }
@@ -6343,7 +6282,7 @@ bool CalculatorLieTheory::cartanGenerator(
 bool CalculatorLieTheory::rootSubsystem(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::rootSubsystem");
+  STACK_TRACE("CalculatorLieTheory::rootSubsystem");
   if (input.size() < 3) {
     return false;
   }
@@ -6405,9 +6344,7 @@ bool CalculatorLieTheory::printSemisimpleLieAlgebra(
 bool CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk"
-  );
+  STACK_TRACE("CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk");
   calculator.checkInputNotSameAsOutput(input, output);
   if (
     !global.userDefaultHasAdminRights() && !global.flagRunningConsoleTest
@@ -6431,9 +6368,7 @@ bool CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(
   bool verbose,
   bool writeToHD
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra"
-  );
+  STACK_TRACE("Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra");
   if (input.size() != 2) {
     return calculator << "Print semisimple Lie algebras expects 1 argument. ";
   }
@@ -6450,7 +6385,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   bool verbose,
   bool writeToHD
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra"
   );
   WithContext<SemisimpleLieAlgebra*> algebraPointer;

@@ -30,7 +30,7 @@ template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::computeAllElements(
   bool andWords, int maximumElements
 ) {
-  MacroRegisterFunctionWithName("FiniteGroup::computeAllElements");
+  STACK_TRACE("FiniteGroup::computeAllElements");
   this->checkConsistency();
   // double startTimeDebug= global.getElapsedSeconds();
   this->sizePrivate = this->sizeByFormulaOrNegative1();
@@ -51,7 +51,7 @@ template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(
   bool andWords, int maximumElements
 ) {
-  MacroRegisterFunctionWithName("Subgroup::computeAllElementsLargeGroup");
+  STACK_TRACE("Subgroup::computeAllElementsLargeGroup");
   this->initializeGenerators();
   if (this->generators.size == 0) {
     global.fatal
@@ -172,9 +172,7 @@ toStringLayerSize() const {
 template <class elementGroup, class elementRepresentation>
 bool OrbitIterator<elementGroup, elementRepresentation>::
 incrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName(
-    "OrbitIterator::incrementReturnFalseIfPastLast"
-  );
+  STACK_TRACE("OrbitIterator::incrementReturnFalseIfPastLast");
   if (this->groupGeneratingElements.size == 0) {
     return false;
   }
@@ -211,9 +209,7 @@ const {
 template <class elementGroup, class elementRepresentation>
 bool OrbitIterator<elementGroup, elementRepresentation>::
 incrementReturnFalseIfPastLastFALSE() {
-  MacroRegisterFunctionWithName(
-    "OrbitIterator::incrementReturnFalseIfPastLastFALSE"
-  );
+  STACK_TRACE("OrbitIterator::incrementReturnFalseIfPastLastFALSE");
   if (this->groupGeneratingElements.size == 0) {
     return false;
   }
@@ -254,7 +250,7 @@ template <class someGroup, class elementSomeGroup>
 void SubgroupData<someGroup, elementSomeGroup>::initFromGroupAndGenerators(
   someGroup& inputGroup, const List<elementSomeGroup>& inputGenerators
 ) {
-  MacroRegisterFunctionWithName("Subgroup::initFromGroupAndGenerators");
+  STACK_TRACE("Subgroup::initFromGroupAndGenerators");
   if (&inputGenerators == &this->subgroupContent->generators) {
     List<elementSomeGroup> inputGeneratorsCopy = inputGenerators;
     this->initFromGroupAndGenerators(inputGroup, inputGeneratorsCopy);
@@ -280,7 +276,7 @@ template <class someGroup, class elementSomeGroup>
 void SubgroupData<someGroup, elementSomeGroup>::makeTranslatableWordsSubgroup(
   someGroup& inputGroup, const List<elementSomeGroup>& subGenerators
 ) {
-  MacroRegisterFunctionWithName("Subgroup::makeTranslatableWordsSubgroup");
+  STACK_TRACE("Subgroup::makeTranslatableWordsSubgroup");
   this->groupContent = &inputGroup;
   this->subgroupContent = &this->subgroupMayBeHere;
   this->subgroupContent->generators = subGenerators;
@@ -340,7 +336,7 @@ template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::getSignCharacter(
   Vector<Rational>& outputCharacter
 ) {
-  MacroRegisterFunctionWithName("FiniteGroup::getSignCharacter");
+  STACK_TRACE("FiniteGroup::getSignCharacter");
   if (!this->flagCCsComputed) {
     this->computeConjugacyClassSizesAndRepresentatives();
   }
@@ -420,7 +416,7 @@ int FiniteGroup<elementSomeGroup>::conjugacyClassCount() const {
 template <class someGroup, class elementSomeGroup>
 void SubgroupData<someGroup, elementSomeGroup>::
 computeCCRepresentativesPreimages() {
-  MacroRegisterFunctionWithName("Subgroup::computeCCRepresentativesPreimages");
+  STACK_TRACE("Subgroup::computeCCRepresentativesPreimages");
   this->ccRepresentativesPreimages.setSize(
     this->subgroupContent->conjugacyClassCount()
   );
@@ -466,7 +462,7 @@ template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::toStringElements(
   FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName("FiniteGroup::toStringElements");
+  STACK_TRACE("FiniteGroup::toStringElements");
   (void) format;
   if (!this->flagAllElementsAreComputed) {
     return "";
@@ -487,7 +483,7 @@ template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName("Subgroup::toStringConjugacyClasses");
+  STACK_TRACE("Subgroup::toStringConjugacyClasses");
   std::stringstream out;
   out << "<br>Size: " << this->getSize().toString() << "\n";
   FormatExpressions charPolyFormat;
@@ -596,9 +592,7 @@ bool FiniteGroup<elementSomeGroup>::checkInitialization() const {
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::checkOrthogonalityCharacterTable"
-  );
+  STACK_TRACE("FiniteGroup::checkOrthogonalityCharacterTable");
   for (int i = 0; i < this->characterTable.size; i ++) {
     for (int j = i; j < this->characterTable.size; j ++) {
       ClassFunction<FiniteGroup, Rational>& leftChar = this->characterTable[i];
@@ -645,9 +639,7 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeGeneratorsConjugacyClasses() {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::computeGeneratorsConjugacyClasses"
-  );
+  STACK_TRACE("FiniteGroup::computeGeneratorsConjugacyClasses");
   if (this->flagGeneratorsConjugacyClassesComputed) {
     return;
   }
@@ -669,9 +661,7 @@ template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   ConjugacyClass& inputOutputClass, bool storeCC
 ) {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::ComputeCCSizesFromCCRepresentatives"
-  );
+  STACK_TRACE("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
   OrbitIterator<elementSomeGroup, elementSomeGroup> orbitIterator;
   orbitIterator.groupAction.actOn = elementSomeGroup::conjugationAction;
   orbitIterator.groupAction.name = "conjugation action";
@@ -707,9 +697,7 @@ void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::
 checkConjugacyClassRepresentationsMatchCCSizes() {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::checkConjugacyClassRepresentationsMatchCCSizes"
-  );
+  STACK_TRACE("FiniteGroup::checkConjugacyClassRepresentationsMatchCCSizes");
   LargeInteger computedSize = 0;
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
     LargeInteger oldCCsize = this->conjugacyClasses[i].size;
@@ -749,9 +737,7 @@ checkConjugacyClassRepresentationsMatchCCSizes() {
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::computeConjugacyClassesRepresentatives"
-  );
+  STACK_TRACE("FiniteGroup::computeConjugacyClassesRepresentatives");
   // This algorithm is effective if the sum of the sizes of the conjugacy
   // classes
   // of the generators is small.
@@ -826,9 +812,7 @@ void FiniteGroup<elementSomeGroup>::
 computeConjugacyClassSizesAndRepresentatives(
   bool useComputeCCSizesRepresentativesWords
 ) {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::computeConjugacyClassSizesAndRepresentatives"
-  );
+  STACK_TRACE("FiniteGroup::computeConjugacyClassSizesAndRepresentatives");
   this->checkConsistency();
   if (this->getSizeByFormula != 0) {
     LargeInteger expectedSize = this->getSizeByFormula(*this);
@@ -848,7 +832,7 @@ computeConjugacyClassSizesAndRepresentatives(
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::
 computeConjugacyClassSizesAndRepresentativesWithOrbitIterator() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "FiniteGroup::computeConjugacyClassSizesAndRepresentativesWithOrbitIterator"
   );
   if (this->flagCCRepresentativesComputed) {
@@ -879,7 +863,7 @@ void FiniteGroup<elementSomeGroup>::
 computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
   const List<List<int> >& ccIndices
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "FiniteGroup::computeConjugacyClassesFromConjugacyClassIndicesInAllElements"
   );
   this->conjugacyClasses.setSize(ccIndices.size);
@@ -903,9 +887,7 @@ computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::computeConjugacyClassesFromAllElements"
-  );
+  STACK_TRACE("FiniteGroup::computeConjugacyClassesFromAllElements");
   this->computeAllElements(false, - 1);
   List<bool> accounted;
   accounted.initializeFillInObject(this->elements.size, false);
@@ -945,7 +927,7 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
 
 template <class Coefficient>
 LargeInteger WeylGroupData::getOrbitSize(Vector<Coefficient>& weight) {
-  MacroRegisterFunctionWithName("WeylGroup::getOrbitSize");
+  STACK_TRACE("WeylGroup::getOrbitSize");
   // I read somewhere, I think it was a paper by W. de Graaf, that the
   // stabilizer
   // of a weight is generated by
@@ -1014,7 +996,7 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
   HashedList<ElementWeylGroupAutomorphisms>* outputSubset,
   int upperLimitNumberOfElements
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::generateOuterOrbit");
+  STACK_TRACE("WeylGroup::generateOuterOrbit");
   this->checkInitialization();
   this->computeOuterAutoGenerators();
   List<MatrixTensor<Rational> > outerGenerators =
@@ -1087,7 +1069,7 @@ void WeylGroupData::raiseToDominantWeight(
   bool* stabilizerFound,
   ElementWeylGroup* raisingElt
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::raiseToDominantWeight");
+  STACK_TRACE("WeylGroup::raiseToDominantWeight");
   if (sign != nullptr) {
     *sign = 1;
   }
@@ -1158,7 +1140,7 @@ bool WeylGroupData::generateOrbit(
   HashedList<ElementWeylGroup>* outputSubset,
   int upperLimitNumberOfElements
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::generateOrbit");
+  STACK_TRACE("WeylGroup::generateOrbit");
   output.clear();
   for (int i = 0; i < weights.size; i ++) {
     output.addOnTopNoRepetition(weights[i]);
@@ -1394,7 +1376,7 @@ bool WeylGroupData::freudenthalFormula(
   std::string* outputDetails,
   int UpperBoundFreudenthal
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::freudenthalFormula");
+  STACK_TRACE("WeylGroup::freudenthalFormula");
   for (int i = 0; i < inputHWfundamentalCoords.size; i ++) {
     if (inputHWfundamentalCoords[i] < 0) {
       if (outputDetails != nullptr) {
@@ -2038,9 +2020,7 @@ weylDimensionFormulaInnerSimpleCoords(
   const Vector<Coefficient>& weightInnerSimpleCoords,
   const Coefficient& ringUnit
 ) {
-  MacroRegisterFunctionWithName(
-    "SubgroupWeylGroupOLD::weylDimensionFormulaSimpleCoordinates"
-  );
+  STACK_TRACE("SubgroupWeylGroupOLD::weylDimensionFormulaSimpleCoordinates");
   this->checkInitialization();
   Coefficient result, buffer;
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;
@@ -2074,9 +2054,7 @@ getAllDominantWeightsHWFDIM(
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
-  MacroRegisterFunctionWithName(
-    "SubgroupWeylGroupOLD::getAllDominantWeightsHWFDIM"
-  );
+  STACK_TRACE("SubgroupWeylGroupOLD::getAllDominantWeightsHWFDIM");
   std::stringstream out;
   this->checkInitialization();
   this->computeRootSubsystem();
@@ -2168,9 +2146,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 raiseToDominantWeightInner(
   Vector<Coefficient>& weight, int* sign, bool* stabilizerFound
 ) {
-  MacroRegisterFunctionWithName(
-    "SubgroupWeylGroupOLD::raiseToDominantWeightInner"
-  );
+  STACK_TRACE("SubgroupWeylGroupOLD::raiseToDominantWeightInner");
   if (sign != nullptr) {
     *sign = 1;
   }
@@ -2207,7 +2183,7 @@ generateOrbitReturnFalseIfTruncated(
   bool restrictToInner,
   int upperLimitNumberOfElements
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::generateOrbitReturnFalseIfTruncated"
   );
   HashedList<Vector<Coefficient> > orbit;
@@ -2251,7 +2227,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   std::string& outputDetails,
   int upperBoundFreudenthal
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::freudenthalFormulaIrrepIsWRTLeviPart"
   );
   // double startTimer = global.getElapsedSeconds();
@@ -2641,9 +2617,7 @@ void FiniteGroup<elementSomeGroup>::addCharacter(
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::
 computeIrreducibleRepresentationsTodorsVersion() {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::computeIrreducibleRepresentationsTodorsVersion"
-  );
+  STACK_TRACE("FiniteGroup::computeIrreducibleRepresentationsTodorsVersion");
   if (this->irreps_grcam.size == 0) {
     if (this->irreducibleRepresentations.size == 0) {
       global.fatal
@@ -2787,7 +2761,7 @@ getLargestDenominatorSimpleGenerators(
   LargeIntegerUnsigned& outputLeastCommonMultiple,
   LargeIntegerUnsigned& outputDenominator
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "GroupRepresentationCarriesAllMatrices::getLargestDenominatorSimpleGenerators"
   );
   outputLeastCommonMultiple = 1;
@@ -2820,9 +2794,7 @@ decomposeTodorsVersionRecursive(
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
   appendOnlyGRCAMSList
 ) {
-  MacroRegisterFunctionWithName(
-    "WeylGroupRepresentation::decomposeTodorsVersionRecursive"
-  );
+  STACK_TRACE("WeylGroupRepresentation::decomposeTodorsVersionRecursive");
   this->checkInitialization();
   this->ownerGroup->
   checkInitializationFiniteDimensionalRepresentationComputation();
@@ -3054,9 +3026,7 @@ computeIrreducibleRepresentationsThomasVersion(
     FiniteGroup<elementSomeGroup>, Rational
   >* startingIrrep
 ) {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::computeIrreducibleRepresentationsThomasVersion"
-  );
+  STACK_TRACE("FiniteGroup::computeIrreducibleRepresentationsThomasVersion");
   if (!startingIrrep) {
     if (this->irreps_grcam.size != 0) {
       startingIrrep = &(this->irreps_grcam[0]);
@@ -3240,9 +3210,7 @@ template <class Coefficient>
 void WeylGroupAutomorphisms::raiseToMaximallyDominant(
   List<Vector<Coefficient> >& weights
 ) {
-  MacroRegisterFunctionWithName(
-    "WeylGroupAutomorphisms::raiseToMaximallyDominant"
-  );
+  STACK_TRACE("WeylGroupAutomorphisms::raiseToMaximallyDominant");
   this->checkInitialization();
   bool found;
   Vectors<Coefficient> weightsCopy;

@@ -309,7 +309,7 @@ public:
   int getExpressionTreeSize() const;
   template <class Type>
   bool isOfType() const {
-    MacroRegisterFunctionWithName("Expression::isOfType");
+    STACK_TRACE("Expression::isOfType");
     if (this->owner == nullptr) {
       return false;
     }
@@ -338,7 +338,7 @@ public:
   }
   template <class Type>
   bool isOfType(Type* whichElement) const {
-    MacroRegisterFunctionWithName("Expression::isOfType");
+    STACK_TRACE("Expression::isOfType");
     if (this->owner == nullptr) {
       return false;
     }
@@ -837,7 +837,7 @@ public:
     this->reset();
   }
   Expression(int x): flagDeallocated(false) {
-    MacroRegisterFunctionWithName("Expression::Expression(int)");
+    STACK_TRACE("Expression::Expression(int)");
     this->reset();
     this->data = x;
   }
@@ -930,12 +930,12 @@ public:
     this->owner = other.owner;
   }
   void operator=(const Rational& other) {
-    MacroRegisterFunctionWithName("Expression::operator=(Rational)");
+    STACK_TRACE("Expression::operator=(Rational)");
     this->checkInitialization();
     this->assignValue(*this->owner, other);
   }
   void operator=(int other) {
-    MacroRegisterFunctionWithName("Expression::operator=(int)");
+    STACK_TRACE("Expression::operator=(int)");
     this->checkInitialization();
     this->assignValue(*this->owner, Rational(other));
   }
@@ -3003,8 +3003,7 @@ public:
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetDimNonMandatory = - 1
   ) {
-    MacroRegisterFunctionWithName("Calculator::getVectorFromFunctionArguments")
-    ;
+    STACK_TRACE("Calculator::getVectorFromFunctionArguments");
     input.checkInitialization();
     Expression sequence = input;
     if (sequence.isList()) {
@@ -3706,7 +3705,7 @@ bool Calculator::getVector(
   ExpressionContext* inputOutputStartingContext,
   int targetDimensionNonMandatory
 ) {
-  MacroRegisterFunctionWithName("Calculator::getVector");
+  STACK_TRACE("Calculator::getVector");
   input.checkInitialization();
   List<Expression> nonConvertedExpressions;
   if (
@@ -3770,9 +3769,7 @@ template <class Coefficient>
 bool CalculatorConversions::functionExpressionFromPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::functionExpressionFromPolynomial"
-  );
+  STACK_TRACE("CalculatorConversions::functionExpressionFromPolynomial");
   if (!input.isOfType<Polynomial<Coefficient> >()) {
     return false;
   }
@@ -3825,7 +3822,7 @@ bool Expression::isMatrixOfType(
 
 template <class Type>
 bool Expression::isOfTypeWithContext(WithContext<Type>* whichElement) const {
-  MacroRegisterFunctionWithName("Expression::isOfTypeWithContext");
+  STACK_TRACE("Expression::isOfTypeWithContext");
   if (this->owner == nullptr) {
     return false;
   }
@@ -3853,7 +3850,7 @@ bool CalculatorConversions::functionGetMatrix(
   int targetNumberOfColumnsNonMandatory,
   std::stringstream* commentsOnError
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::functionGetMatrix");
+  STACK_TRACE("CalculatorConversions::functionGetMatrix");
   Matrix<Expression> matrixExpressions;
   Matrix<WithContext<Type> > outputCandidate;
   Expression transformer = input;
@@ -3940,7 +3937,7 @@ bool Expression::makeSum(
   Calculator& calculator,
   const LinearCombination<Expression, Coefficient>& summands
 ) {
-  MacroRegisterFunctionWithName("Expression::makeSum");
+  STACK_TRACE("Expression::makeSum");
   Expression oneE;
   // used to record the constant term
   oneE.assignValue<Rational>(calculator, 1);
@@ -4033,9 +4030,7 @@ template <class Type>
 bool Expression::mergeContextsMyArumentsAndConvertThem(
   Expression& output, std::stringstream* commentsOnFailure
 ) const {
-  MacroRegisterFunctionWithName(
-    "Expression::mergeContextsMyArumentsAndConvertThem"
-  );
+  STACK_TRACE("Expression::mergeContextsMyArumentsAndConvertThem");
   this->checkInitialization();
   Expression mergedContexts;
   if (!this->mergeContextsMyAruments(mergedContexts, commentsOnFailure)) {
@@ -4072,7 +4067,7 @@ bool Calculator::getTypeWeight(
   Vector<Coefficient>& outputWeightSimpleCoords,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra
 ) {
-  MacroRegisterFunctionWithName("Calculator::getTypeWeight");
+  STACK_TRACE("Calculator::getTypeWeight");
   if (input.size() != 3) {
     return
     calculator
@@ -4245,7 +4240,7 @@ bool Expression::makeMatrix(
   const ExpressionContext* inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {
-  MacroRegisterFunctionWithName("Expression::assignMatrix");
+  STACK_TRACE("Expression::assignMatrix");
   Matrix<Expression> matrixExpressions;
   matrixExpressions.initialize(input.numberOfRows, input.numberOfColumns);
   Expression currentElt;
@@ -4277,9 +4272,7 @@ bool CalculatorConversions::expressionFromPolynomial(
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::expressionFromPolynomial"
-  );
+  STACK_TRACE("CalculatorConversions::expressionFromPolynomial");
   LinearCombination<Expression, Coefficient> terms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
   if (!input.isConstant() && inputContext == nullptr) {
@@ -4331,9 +4324,7 @@ template <class Coefficient>
 bool CalculatorConversions::expressionFromRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::expressionFromRationalFraction"
-  );
+  STACK_TRACE("CalculatorConversions::expressionFromRationalFraction");
   if (!input.isOfType<RationalFraction<Coefficient> >()) {
     return false;
   }
@@ -4353,9 +4344,7 @@ bool CalculatorConversions::expressionFromRationalFraction(
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::expressionFromRationalFraction"
-  );
+  STACK_TRACE("CalculatorConversions::expressionFromRationalFraction");
   Rational aConst;
   if (input.isConstant(&aConst)) {
     return output.assignValue(calculator, aConst);
@@ -4420,7 +4409,7 @@ bool WithContext<BuiltIn>::setContextAtLeast(
   ExpressionContext& inputOutputContext,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("WithContext::setContextAtLeast");
+  STACK_TRACE("WithContext::setContextAtLeast");
   ExpressionContext newContext;
   if (!inputOutputContext.mergeContexts(this->context, newContext)) {
     if (commentsOnFailure != nullptr) {

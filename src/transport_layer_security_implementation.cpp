@@ -63,9 +63,7 @@ bool TransportLayerSecurity::loadPEMPrivateKey(
 bool TransportLayerSecurity::initSSLKeyFilesInternal(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "TransportLayerSecurity::initSSLKeyFilesInternal"
-  );
+  STACK_TRACE("TransportLayerSecurity::initSSLKeyFilesInternal");
   this->openSSLData.initSSLKeyFilesSelfSignedCreateOnDemand();
   global << Logger::purple << "Using self-signed certificate. " << Logger::endL
   ;

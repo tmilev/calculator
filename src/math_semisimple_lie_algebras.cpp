@@ -11,7 +11,7 @@
 #include "math_extra_algebraic_numbers.h"
 
 std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toString");
+  STACK_TRACE("SemisimpleLieAlgebra::toString");
   std::stringstream out;
   std::string tempS;
   Vector<Rational> root;
@@ -239,7 +239,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   bool flagWriteLatexPlots,
   const std::string& extraDynkinDiagramPlot
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toHTMLCalculator");
+  STACK_TRACE("SemisimpleLieAlgebra::toHTMLCalculator");
   std::stringstream out;
   FormatExpressions format, latexFormat;
   latexFormat.flagUseLatex = true;
@@ -515,9 +515,7 @@ const {
 }
 
 std::string SemisimpleLieAlgebra::FileNames::virtualFolderName() const {
-  MacroRegisterFunctionWithName(
-    "SemisimpleSubalgebras::toStringVirtualFolderName"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::toStringVirtualFolderName");
   this->owner->checkConsistency();
   return this->owner->weylGroup.dynkinType.toStringVirtualNameFolder();
 }
@@ -567,9 +565,7 @@ std::string SemisimpleLieAlgebra::FileNames::fileNameWithPathStructureConstants
 }
 
 void SemisimpleLieAlgebra::computeChevalleyConstants() {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::computeChevalleyConstants"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::computeChevalleyConstants");
   this->weylGroup.computeRho(true);
   this->chevalleyConstants.initialize(
     this->weylGroup.rootSystem.size,
@@ -1215,9 +1211,7 @@ bool SemisimpleLieAlgebra::hasImplementedCartanInvolution(
   CartanInvolution* whichInvolution,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::hasImplementedCartanInvolution"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::hasImplementedCartanInvolution");
   CartanInvolution outputBuffer;
   if (whichInvolution == nullptr) {
     whichInvolution = &outputBuffer;
@@ -1331,7 +1325,7 @@ bool HomomorphismSemisimpleLieAlgebra::
 computeHomomorphismFromImagesSimpleChevalleyGenerators(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleChevalleyGenerators"
   );
   (void) commentsOnFailure;
@@ -1588,9 +1582,7 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
 void HomomorphismSemisimpleLieAlgebra::makeGInGWithIdentity(
   SemisimpleLieAlgebra& owner
 ) {
-  MacroRegisterFunctionWithName(
-    "HomomorphismSemisimpleLieAlgebra::makeGInGWithIdentity"
-  );
+  STACK_TRACE("HomomorphismSemisimpleLieAlgebra::makeGInGWithIdentity");
   DynkinType dynkinType;
   this->domain = &owner;
   this->coDomain = this->domain;
@@ -1622,7 +1614,7 @@ void HomomorphismSemisimpleLieAlgebra::makeGInGWithIdentity(
 }
 
 std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
-  MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::toString");
+  STACK_TRACE("HomomorphismSemisimpleLieAlgebra::toString");
   this->checkInitialization();
   std::stringstream out;
   if (this->checkClosednessLieBracket()) {
@@ -1751,9 +1743,7 @@ bool HomomorphismSemisimpleLieAlgebra::checkInitialization() {
 }
 
 bool HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism() {
-  MacroRegisterFunctionWithName(
-    "HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism"
-  );
+  STACK_TRACE("HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism");
   ElementSemisimpleLieAlgebra<Rational> coDomainElement;
   ElementSemisimpleLieAlgebra<Rational> domainElement;
   ElementSemisimpleLieAlgebra<Rational> imageOfDomainElement;
@@ -1783,9 +1773,7 @@ bool HomomorphismSemisimpleLieAlgebra::checkIsHomomorphism() {
 }
 
 bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
-  MacroRegisterFunctionWithName(
-    "HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket"
-  );
+  STACK_TRACE("HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket");
   ElementSemisimpleLieAlgebra<Rational> element;
   Vectors<Rational> roots;
   Vector<Rational> root;
@@ -1914,7 +1902,7 @@ std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
 void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending(
   const Selection& parabolicSelectionZeroMeansLeviPart
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending"
   );
   Vector<Rational> selection;
@@ -1930,7 +1918,7 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending(
 void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(
   const Selection& parabolicSelectionZeroMeansLeviPart
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending"
   );
   Vector<Rational> tempVect;
@@ -1981,7 +1969,7 @@ void SemisimpleLieAlgebra::orderNilradical(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::orderNilradical");
+  STACK_TRACE("SemisimpleLieAlgebra::orderNilradical");
   if (useNilWeight) {
     if (ascending) {
       this->orderNilradicalNilWeightAscending(

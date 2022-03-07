@@ -10,7 +10,7 @@
 bool LargeIntegerUnsigned::Test::serializationToHex(
   const LargeIntegerUnsigned& input
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::Test::serializationToHex");
+  STACK_TRACE("LargeIntUnsigned::Test::serializationToHex");
   std::string resultCryptoHex, resultByteSerializationHex;
   if (
     !Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
@@ -39,7 +39,7 @@ bool LargeIntegerUnsigned::Test::serializationToHex(
 }
 
 bool LargeIntegerUnsigned::Test::all() {
-  MacroRegisterFunctionWithName("LargeIntegerUnsigned::Test::all");
+  STACK_TRACE("LargeIntegerUnsigned::Test::all");
   LargeIntegerUnsigned::Test::serializationToHex(LargeIntegerUnsigned(100));
   LargeIntegerUnsigned::Test::comparisons();
   LargeIntegerUnsigned::Test::guaranteedPrime();
@@ -457,7 +457,7 @@ bool RationalFraction<Rational>::Test::all() {
 
 template < >
 bool RationalFraction<Rational>::Test::fromStringTest() {
-  MacroRegisterFunctionWithName("RationalFunction::Test::fromString");
+  STACK_TRACE("RationalFunction::Test::fromString");
   std::string input = "(a^2+7b)/(2+d*c)";
   std::string expected = "(x_{1}^{2}+7x_{2} )/(x_{3} x_{4} +2)";
   RationalFraction<Rational> underTest =

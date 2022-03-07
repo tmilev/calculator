@@ -354,7 +354,7 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
   const PolynomialSubstitution<Rational>& substitutionPolynomialPart,
   const PolynomialSubstitution<Rational>& substitutionDifferentialPart
 ) {
-  MacroRegisterFunctionWithName("ElementWeylAlgebra::substitution");
+  STACK_TRACE("ElementWeylAlgebra::substitution");
   Polynomial<Rational> differentialOperatorPart, polyPart;
   MonomialWeylAlgebra monomial;
   ElementWeylAlgebra output;
@@ -397,7 +397,7 @@ template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::fourierTransform(
   ElementWeylAlgebra<Coefficient>& output
 ) const {
-  MacroRegisterFunctionWithName("ElementWeylAlgebra::fourierTransform");
+  STACK_TRACE("ElementWeylAlgebra::fourierTransform");
   if (&output == this) {
     ElementWeylAlgebra thisCopy = *this;
     thisCopy.fourierTransform(output);

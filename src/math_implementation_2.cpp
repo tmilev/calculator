@@ -65,8 +65,7 @@ void LargeIntegerUnsigned::assignString(const std::string& input) {
 bool LargeIntegerUnsigned::assignStringFailureAllowed(
   const std::string& input, bool ignoreNonDigits
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::assignStringFailureAllowed")
-  ;
+  STACK_TRACE("LargeIntUnsigned::assignStringFailureAllowed");
   if (input.size() > 10000000) {
     // <- sorry folks, no more than 10 million digits.
     return false;
@@ -303,9 +302,7 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   const LargeIntegerUnsigned& oddFactorOfNminusOne,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "LargeIntUnsigned::isPossiblyPrimeMillerRabinOnce"
-  );
+  STACK_TRACE("LargeIntUnsigned::isPossiblyPrimeMillerRabinOnce");
   if (*this == base) {
     return true;
   }
@@ -383,7 +380,7 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
 bool LargeIntegerUnsigned::tryIsPower(
   bool& outputIsPower, LargeInteger& outputBase, int& outputPower
 ) const {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::tryIsPower");
+  STACK_TRACE("LargeIntUnsigned::tryIsPower");
   List<LargeInteger> factors;
   List<int> multiplicities;
   if (!this->factor(factors, multiplicities, 0, 4, nullptr)) {
@@ -425,7 +422,7 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
   bool& outputGuaranteedPrime,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::isCompositePrimeDivision");
+  STACK_TRACE("LargeIntUnsigned::isCompositePrimeDivision");
   outputGuaranteedPrime = false;
   if (this->isEqualToOne() || this->isEqualToZero()) {
     return false;
@@ -470,7 +467,7 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   bool tryDivisionSetTrueFaster,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrime");
+  STACK_TRACE("LargeIntUnsigned::isPossiblyPrime");
   if (this->isEqualToOne()) {
     if (comments != nullptr) {
       *comments << "1 is not prime by definition. ";
@@ -1320,7 +1317,7 @@ bool LargeIntegerUnsigned::factor(
   int numberMillerRabinRuns,
   std::stringstream* commentsOnFailure
 ) const {
-  MacroRegisterFunctionWithName("LargeIntegerUnsigned::factor");
+  STACK_TRACE("LargeIntegerUnsigned::factor");
   int maximumNumberOfDigits = 1000;
   if (this->digits.size > maximumNumberOfDigits) {
     if (commentsOnFailure != nullptr) {
@@ -2226,7 +2223,7 @@ bool Rational::getPrimeFactorsAbsoluteValue(
   List<LargeInteger>& denominatorPrimeFactors,
   List<int>& denominatorMultiplicities
 ) {
-  MacroRegisterFunctionWithName("Rational::getPrimeFactorsAbsoluteValue");
+  STACK_TRACE("Rational::getPrimeFactorsAbsoluteValue");
   if (
     !this->getNumerator().value.factor(
       numeratorPrimeFactors, numeratorMultiplicities, 0, 3, nullptr

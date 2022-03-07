@@ -219,7 +219,7 @@ MongoQuery::~MongoQuery() {
 }
 
 bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("MongoQuery::RemoveOne");
+  STACK_TRACE("MongoQuery::RemoveOne");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -284,7 +284,7 @@ std::string MongoQuery::toStringDebug() {
 bool MongoQuery::InsertOne(
   const JSData& incoming, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("MongoQuery::InsertOne");
+  STACK_TRACE("MongoQuery::InsertOne");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -346,7 +346,7 @@ bool MongoQuery::InsertOne(
 bool MongoQuery::updateOne(
   std::stringstream* commentsOnFailure, bool doUpsert
 ) {
-  MacroRegisterFunctionWithName("MongoQuery::updateOne");
+  STACK_TRACE("MongoQuery::updateOne");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -465,7 +465,7 @@ bool MongoQuery::FindMultiple(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
-  MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
+  STACK_TRACE("MongoQuery::FindMultiple");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -609,7 +609,7 @@ std::string Database::Mongo::convertErrorToString(void* bson_error_t_pointer) {
 }
 
 bool Database::Mongo::deleteDatabase(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("Database::Mongo::deleteDatabase");
+  STACK_TRACE("Database::Mongo::deleteDatabase");
   if (DatabaseStrings::databaseName != "calculatortest") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -650,9 +650,7 @@ void Database::Mongo::createHashIndex(
   (void) collectionName;
   (void) key;
 #ifdef MACRO_use_MongoDB
-  MacroRegisterFunctionWithName(
-    "DatabaseRoutinesGlobalFunctionsMongo::createHashIndex"
-  );
+  STACK_TRACE("DatabaseRoutinesGlobalFunctionsMongo::createHashIndex");
   MongoQuery query;
   std::stringstream command;
   command
@@ -690,7 +688,7 @@ bool Database::findFromString(
   long long* totalItems,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::findFromString");
+  STACK_TRACE("Database::findFromString");
 #ifdef MACRO_use_MongoDB
   JSData data;
   // global << Logger::blue << "Query input: " << findQuery << Logger::endL;
@@ -795,7 +793,7 @@ bool Database::findFromJSONWithOptions(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
-  MacroRegisterFunctionWithName("Database::findFromJSONWithOptions");
+  STACK_TRACE("Database::findFromJSONWithOptions");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -848,7 +846,7 @@ bool Database::Mongo::findOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::Mongo::findOneFromSome");
+  STACK_TRACE("Database::Mongo::findOneFromSome");
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
   if (
@@ -892,7 +890,7 @@ bool Database::Mongo::getOrFindQuery(
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::Mongo::getOrFindQuery");
+  STACK_TRACE("Database::Mongo::getOrFindQuery");
   (void) commentsOnFailure;
   std::stringstream queryStream;
   queryStream << "{\"$or\": [";
@@ -948,7 +946,7 @@ bool Database::matchesPattern(
   const List<std::string>& fieldLabel,
   const List<std::string>& pattern
 ) {
-  MacroRegisterFunctionWithName("Database::matchesPattern");
+  STACK_TRACE("Database::matchesPattern");
   if (fieldLabel.size != pattern.size) {
     return false;
   }
@@ -971,7 +969,7 @@ bool Database::isDeleteable(
   List<std::string>** outputPattern,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::isDeleteable");
+  STACK_TRACE("Database::isDeleteable");
   for (int i = 0; i < global.databaseModifiableFields.size; i ++) {
     if (
       Database::matchesPattern(
@@ -998,7 +996,7 @@ bool Database::getLabels(
   List<std::string>& labels,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::getLabels");
+  STACK_TRACE("Database::getLabels");
   labels.setSize(0);
   for (int i = 0; i < fieldEntries.listObjects.size; i ++) {
     if (
@@ -1022,7 +1020,7 @@ bool Database::isDeleteable(
   List<std::string>** outputPattern,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::isDeleteable");
+  STACK_TRACE("Database::isDeleteable");
   if (
     entry.elementType != JSData::token::tokenObject ||
     !entry.hasKey(DatabaseStrings::labelFields)
@@ -1051,7 +1049,7 @@ bool Database::isDeleteable(
 bool Database::deleteOneEntry(
   const JSData& entry, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::deleteOneEntry");
+  STACK_TRACE("Database::deleteOneEntry");
   if (!global.userDefaultHasAdminRights()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only logged-in admins can delete DB entries.";
@@ -1111,7 +1109,7 @@ bool Database::deleteOneEntry(
 bool Database::deleteOneEntryById(
   const QueryExact& findQuery, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::deleteOneEntryById");
+  STACK_TRACE("Database::deleteOneEntryById");
 #ifdef MACRO_use_MongoDB
   JSData foundItem;
   if (!this->findOne(findQuery, foundItem, commentsOnFailure)) {
@@ -1152,7 +1150,7 @@ bool Database::deleteOneEntryUnsetUnsecure(
   List<std::string>& selector,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::deleteOneEntryUnsetUnsecure");
+  STACK_TRACE("Database::deleteOneEntryUnsetUnsecure");
 #ifdef MACRO_use_MongoDB
   std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
   JSData foundItem;
@@ -1210,7 +1208,7 @@ bool Database::Mongo::updateOneFromQueryString(
   const std::string& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::updateOneFromQueryString");
+  STACK_TRACE("Database::updateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.findQuery = findQuery;
@@ -1250,7 +1248,7 @@ bool Database::Mongo::updateOneFromSome(
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::Mongo::updateOneFromSome");
+  STACK_TRACE("Database::Mongo::updateOneFromSome");
   std::string queryString;
   if (
     !this->getOrFindQuery(findOrQueries, queryString, commentsOnFailure)
@@ -1350,7 +1348,7 @@ bool Database::Mongo::updateOne(
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::updateOneFromJSON");
+  STACK_TRACE("Database::updateOneFromJSON");
   JSData updateQueryJSON;
   if (!updateQuery.toJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;
@@ -1378,7 +1376,7 @@ bool Database::Mongo::updateOne(
 bool Database::User::loadUserInformation(
   UserCalculatorData& output, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::loadUserInformation");
+  STACK_TRACE("Database::loadUserInformation");
   if (output.username == "" && output.email == "") {
     return false;
   }
@@ -1396,7 +1394,7 @@ bool Database::User::loadUserInformation(
 bool Database::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::fetchCollectionNames");
+  STACK_TRACE("Database::fetchCollectionNames");
   if (!Database::get().initializeWorker()) {
     return false;
   }
@@ -1459,7 +1457,7 @@ bool Database::FetchTable(
   long long* totalItems,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FetchTable");
+  STACK_TRACE("Database::FetchTable");
   JSData findQuery;
   findQuery.elementType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
@@ -1488,7 +1486,7 @@ bool Database::FetchTable(
 }
 
 JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
-  MacroRegisterFunctionWithName("Database::toJSONDatabaseFetch");
+  STACK_TRACE("Database::toJSONDatabaseFetch");
   JSData result;
   JSData labels;
   std::stringstream commentsOnFailure;
@@ -1515,7 +1513,7 @@ JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
 }
 
 JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
-  MacroRegisterFunctionWithName("Database::toJSONFetchItem");
+  STACK_TRACE("Database::toJSONFetchItem");
   JSData result;
   if (labelStrings.size < 1) {
     result["error"] = "No collection specified. ";
@@ -1573,7 +1571,7 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
 }
 
 JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
-  MacroRegisterFunctionWithName("Database::toJSONDatabaseCollection");
+  STACK_TRACE("Database::toJSONDatabaseCollection");
   JSData result;
   std::stringstream out;
   result["currentTable"] = currentTable;
@@ -1646,7 +1644,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
 std::string Database::toHtmlDatabaseCollection(
   const std::string& currentTable
 ) {
-  MacroRegisterFunctionWithName("Database::ToStringDatabaseCollection");
+  STACK_TRACE("Database::ToStringDatabaseCollection");
   std::stringstream out;
   if (currentTable == "") {
     List<std::string> collectionNames;

@@ -2,7 +2,7 @@
 #include "math_general.h"
 
 bool JSData::Test::all() {
-  MacroRegisterFunctionWithName("JSData::Test::all");
+  STACK_TRACE("JSData::Test::all");
   JSData::Test::recode();
   JSData::Test::badInput();
   JSData::Test::decodeEscapedUnicode();
@@ -10,7 +10,7 @@ bool JSData::Test::all() {
 }
 
 bool JSData::Test::recode() {
-  MacroRegisterFunctionWithName("JSData::Test::recode");
+  STACK_TRACE("JSData::Test::recode");
   // first element is string input, second element
   // is expected recoded output.
   List<List<std::string> > toRecode;
@@ -53,7 +53,7 @@ bool JSData::Test::recode() {
 bool JSData::Test::recodeOnce(
   const List<std::string>& pair, bool relaxedInput
 ) {
-  MacroRegisterFunctionWithName("JSData::Test::recodeOnce");
+  STACK_TRACE("JSData::Test::recodeOnce");
   JSData parser;
   std::string input = pair[0];
   std::stringstream commentsOnFailure;
@@ -103,7 +103,7 @@ bool JSData::Test::recodeOnce(
 }
 
 bool JSData::Test::recodeRelaxed() {
-  MacroRegisterFunctionWithName("JSData::Test::recodeRelaxed");
+  STACK_TRACE("JSData::Test::recodeRelaxed");
   // first element is string input, second element
   // is expected recoded output.
   List<List<std::string> > toRecode;
@@ -142,7 +142,7 @@ bool JSData::Test::decodeEscapedUnicode() {
 }
 
 bool JSData::Test::badInput() {
-  MacroRegisterFunctionWithName("JSData::Test::testBadInput");
+  STACK_TRACE("JSData::Test::testBadInput");
   // first element is string input, second element
   // is expected recoded output.
   List<std::string> broken = List<std::string>({"{", "ab", "]", ""});

@@ -72,7 +72,7 @@ MutexProcess::~MutexProcess() {
 }
 
 std::string PipePrimitive::getLastRead() {
-  MacroRegisterFunctionWithName("PipePrimitive::getLastRead");
+  STACK_TRACE("PipePrimitive::getLastRead");
   std::string result(
     this->lastRead.objects,
     static_cast<unsigned>(this->lastRead.size)
@@ -176,7 +176,7 @@ bool MutexProcess::lock() {
 }
 
 bool MutexProcess::unlock() {
-  MacroRegisterFunctionWithName("MutexProcess::unlock");
+  STACK_TRACE("MutexProcess::unlock");
   bool success =
   this->lockPipe.writeOnceNoFailure(MutexProcess::lockContent, 0, true);
   if (!success) {
@@ -207,7 +207,7 @@ int Pipe::writeWithTimeoutViaSelect(
   int maxNumTries,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Pipe::writeWithTimeoutViaSelect");
+  STACK_TRACE("Pipe::writeWithTimeoutViaSelect");
   fd_set fileDescriptorContainer;
   FD_ZERO(&fileDescriptorContainer);
   FD_SET(fileDescriptor, &fileDescriptorContainer);
@@ -257,7 +257,7 @@ int Pipe::readWithTimeOutViaSelect(
   int maxNumTries,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Pipe::readWithTimeOutViaSelect");
+  STACK_TRACE("Pipe::readWithTimeOutViaSelect");
   if (fileDescriptor < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -340,7 +340,7 @@ int Pipe::readWithTimeOutViaSelect(
 bool PipePrimitive::setPipeFlagsNoFailure(
   int inputFlags, int whichEnd, bool dontCrashOnFail
 ) {
-  MacroRegisterFunctionWithName("Pipe::SetPipeBlockingModeCrashIfFail");
+  STACK_TRACE("Pipe::SetPipeBlockingModeCrashIfFail");
   int counter = 0;
   while (fcntl(this->pipeEnds[whichEnd], F_SETFL, inputFlags) < 0) {
     std::string errorString = strerror(errno);
@@ -370,7 +370,7 @@ bool PipePrimitive::setPipeFlagsNoFailure(
 }
 
 bool PipePrimitive::setReadNonBlocking(bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::SetPipeReadNonBlockingIfFailThenCrash");
+  STACK_TRACE("Pipe::SetPipeReadNonBlockingIfFailThenCrash");
   bool result = this->setPipeFlagsNoFailure(O_NONBLOCK, 0, dontCrashOnFail);
   if (result) {
     this->flagReadEndBlocks = false;
@@ -379,8 +379,7 @@ bool PipePrimitive::setReadNonBlocking(bool dontCrashOnFail) {
 }
 
 bool PipePrimitive::setReadBlocking(bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::SetPipeReadBlockingModeIfFailThenCrash")
-  ;
+  STACK_TRACE("Pipe::SetPipeReadBlockingModeIfFailThenCrash");
   bool result = this->setPipeFlagsNoFailure(0, 0, dontCrashOnFail);
   if (result) {
     this->flagReadEndBlocks = true;
@@ -391,8 +390,7 @@ bool PipePrimitive::setReadBlocking(bool dontCrashOnFail) {
 bool PipePrimitive::setPipeWriteNonBlockingIfFailThenCrash(
   bool dontCrashOnFail
 ) {
-  MacroRegisterFunctionWithName("Pipe::setPipeWriteNonBlockingIfFailThenCrash")
-  ;
+  STACK_TRACE("Pipe::setPipeWriteNonBlockingIfFailThenCrash");
   bool result = this->setPipeFlagsNoFailure(O_NONBLOCK, 1, dontCrashOnFail);
   if (result) {
     this->flagWriteEndBlocks = false;
@@ -401,7 +399,7 @@ bool PipePrimitive::setPipeWriteNonBlockingIfFailThenCrash(
 }
 
 bool PipePrimitive::setWriteBlocking(bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::SetPipeWriteBlockingIfFailThenCrash");
+  STACK_TRACE("Pipe::SetPipeWriteBlockingIfFailThenCrash");
   bool result = this->setPipeFlagsNoFailure(0, 1, dontCrashOnFail);
   if (result) {
     this->flagWriteEndBlocks = true;
@@ -442,7 +440,7 @@ int Pipe::writeNoInterrupts(int fileDescriptor, const std::string& input) {
 }
 
 void Pipe::readLoop(List<char>& output) {
-  MacroRegisterFunctionWithName("Pipe::readLoop");
+  STACK_TRACE("Pipe::readLoop");
   this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
   safetyFirst.lockMe();
@@ -468,7 +466,7 @@ void Pipe::readLoop(List<char>& output) {
 void Pipe::writeOnceAfterEmptying(
   const std::string& toBeSent, bool dontCrashOnFail
 ) {
-  MacroRegisterFunctionWithName("Pipe::writeOnceAfterEmptying");
+  STACK_TRACE("Pipe::writeOnceAfterEmptying");
   MutexlockGuard safety(global.mutexWebWorkerPipeWritelock);
   this->mutexPipe.lock();
   this->pipe.readOnceNoFailure(dontCrashOnFail);
@@ -538,7 +536,7 @@ bool PipePrimitive::handleFailedWriteReturnFalse(
 bool PipePrimitive::writeOnceNoFailure(
   const std::string& toBeSent, int offset, bool dontCrashOnFail
 ) {
-  MacroRegisterFunctionWithName("PipePrimitive::writeNoFailure");
+  STACK_TRACE("PipePrimitive::writeNoFailure");
   if (this->pipeEnds[1] == - 1) {
     global
     << Logger::yellow
@@ -671,7 +669,7 @@ bool Pipe::createMe(const std::string& inputPipeName) {
 }
 
 bool Pipe::checkConsistency() {
-  MacroRegisterFunctionWithName("Pipe::checkConsistency");
+  STACK_TRACE("Pipe::checkConsistency");
   if (this->flagDeallocated) {
     global.fatal << "Use after free of pipe. " << global.fatal;
   }
@@ -697,7 +695,7 @@ void Pipe::release() {
 }
 
 bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("PipePrimitive::readOnceNoFailure");
+  STACK_TRACE("PipePrimitive::readOnceNoFailure");
   this->checkConsistency();
   this->lastRead.setSize(0);
   if (this->pipeEnds[0] == - 1) {
@@ -750,7 +748,7 @@ bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
 }
 
 void Pipe::readOnceWithoutEmptying(bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::readOnceWithoutEmptying");
+  STACK_TRACE("Pipe::readOnceWithoutEmptying");
   MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
   MutexlockGuard guard(safetyFirst);
   // guard from other threads.
@@ -765,7 +763,7 @@ void Pipe::readOnceWithoutEmptying(bool dontCrashOnFail) {
 }
 
 void Pipe::readOnce(bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::readOnce");
+  STACK_TRACE("Pipe::readOnce");
   this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
   MutexlockGuard guard(safetyFirst);

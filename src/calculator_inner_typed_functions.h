@@ -320,9 +320,7 @@ template <class Type>
 bool CalculatorFunctionsBinaryOps::multiplyTypeByType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::multiplyTypeByType"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyTypeByType");
   if (input.size() != 3) {
     return false;
   }
@@ -347,7 +345,7 @@ template <class Type>
 bool CalculatorFunctionsBinaryOps::addTypeToType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::addTypeToType");
+  STACK_TRACE("CalculatorFunctionsBinaryOps::addTypeToType");
   if (input.size() != 3) {
     return false;
   }
@@ -372,9 +370,7 @@ template <class Type>
 bool CalculatorFunctionsBinaryOps::divideTypeByType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::divideTypeByType"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::divideTypeByType");
   if (input.size() != 3) {
     return false;
   }
@@ -402,7 +398,7 @@ template <class Coefficient>
 bool CalculatorConversions::getPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::getPolynomial");
+  STACK_TRACE("CalculatorConversions::getPolynomial");
   if (input.size() != 2) {
     return false;
   }
@@ -429,9 +425,8 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
   int maximumPowerToExpand,
   bool acceptNonPositiveOrNonIntegerPowers
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::extractPolynomialSumDifferenceOrProduct"
-  );
+  STACK_TRACE("CalculatorConversions::extractPolynomialSumDifferenceOrProduct")
+  ;
   if (
     !input.isListStartingWithAtom(calculator.opTimes()) &&
     !input.isListStartingWithAtom(calculator.opPlus()) &&
@@ -512,9 +507,7 @@ bool CalculatorConversions::extractPolynomialFromPower(
   int maximumPowerToExpand,
   bool acceptNonPositiveOrNonIntegerPowers
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::extractPolynomialFromPower"
-  );
+  STACK_TRACE("CalculatorConversions::extractPolynomialFromPower");
   if (!input.startsWith(calculator.opPower(), 3)) {
     global.fatal
     << "Incorrect call of extractPolynomialFromPower with input: "
@@ -587,7 +580,7 @@ bool CalculatorConversions::functionPolynomial(
   int maximumPowerToExpand,
   bool acceptNonPositiveOrNonIntegerPowers
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
+  STACK_TRACE("CalculatorConversions::functionPolynomial");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (calculator.recursionDepth > calculator.maximumRecursionDepth) {
     return
@@ -656,9 +649,7 @@ bool CalculatorConversions::functionRationalFraction(
   WithContext<RationalFraction<Coefficient> >& output,
   bool allowNonIntegerPowers
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::functionRationalFraction"
-  );
+  STACK_TRACE("CalculatorConversions::functionRationalFraction");
   if (
     CalculatorConversions::convertWithoutComputation(
       calculator, input, output

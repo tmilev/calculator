@@ -196,7 +196,7 @@ void Partition::getAllStandardTableaux(List<Tableau>& out) const {
 }
 
 void Partition::testAllSpechtModules(int n) {
-  MacroRegisterFunctionWithName("Partition::testAllSpechtModules");
+  STACK_TRACE("Partition::testAllSpechtModules");
   List<Partition> partitions;
   Partition::GetPartitions(partitions, n);
   int fac = 1;

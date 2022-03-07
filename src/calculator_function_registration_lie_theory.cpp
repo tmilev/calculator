@@ -9,9 +9,7 @@
 #include "calculator_inner_typed_functions.h"
 
 void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeFunctionsSemisimpleLieAlgebras"
-  );
+  STACK_TRACE("Calculator::initializeFunctionsSemisimpleLieAlgebras");
   Function::Options standardOptions = Function::Options::standard();
   Function::Options noTest = Function::Options::innerNoTest();
   Function::Options invisible = Function::Options::innerInvisible();

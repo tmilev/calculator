@@ -30,7 +30,7 @@ Calculator::Examples::Examples() {
 }
 
 JSData Calculator::Examples::toJSONFunctionHandlers() {
-  MacroRegisterFunctionWithName("Calculator::toJSONFunctionHandlers");
+  STACK_TRACE("Calculator::toJSONFunctionHandlers");
   JSData output;
   output.elementType = JSData::token::tokenObject;
   MapReferences<
@@ -82,7 +82,7 @@ std::string Calculator::Examples::escape(const std::string& atom) {
 }
 
 std::string Calculator::Examples::getExamplesReadmeFragment() {
-  MacroRegisterFunctionWithName("Calculator::getExamplesReadmeFragment");
+  STACK_TRACE("Calculator::getExamplesReadmeFragment");
   std::stringstream out;
   MapReferences<
     std::string,
@@ -292,7 +292,7 @@ std::string Calculator::OperationHandlers::toStringRuleStatusUser() {
 }
 
 std::string Calculator::toStringRuleStatusUser() {
-  MacroRegisterFunctionWithName("Calculator::toStringRuleStatusUser");
+  STACK_TRACE("Calculator::toStringRuleStatusUser");
   std::stringstream out;
   for (int i = 0; i < this->operations.size(); i ++) {
     if (this->operations.values[i].isZeroPointer()) {
@@ -501,7 +501,7 @@ bool Calculator::outerStandardFunction(
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
-  MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
+  STACK_TRACE("Calculator::outerStandardFunction");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isList()) {
@@ -530,7 +530,7 @@ bool Calculator::expressionMatchesPattern(
   MapList<Expression, Expression>& matchedExpressions,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Calculator::expressionMatchesPattern");
+  STACK_TRACE("Calculator::expressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (!(pattern.owner == this && input.owner == this)) {
     global.fatal
@@ -756,7 +756,7 @@ Expression Calculator::getNewAtom() {
 bool Calculator::accountRule(
   const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
 ) {
-  MacroRegisterFunctionWithName("Calculator::accountRule");
+  STACK_TRACE("Calculator::accountRule");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (this->recursionDepth > this->maximumRecursionDepth) {
     return false;
@@ -784,7 +784,7 @@ bool Calculator::accountRule(
 bool Calculator::evaluateExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::evaluateExpression");
+  STACK_TRACE("Calculator::evaluateExpression");
   bool notUsed = false;
   return
   calculator.evaluateExpression(
@@ -853,7 +853,7 @@ void Calculator::EvaluateLoop::accountHistoryChildTransformation(
 void Calculator::EvaluateLoop::accountHistory(
   Function* handler, const std::string& info
 ) {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::accountHistory");
+  STACK_TRACE("Calculator::EvaluateLoop::accountHistory");
   this->checkInitialization();
   if (this->history == nullptr) {
     return;
@@ -899,7 +899,7 @@ void Calculator::EvaluateLoop::accountHistory(
 bool Calculator::EvaluateLoop::setOutput(
   const Expression& input, Function* handler, const std::string& info
 ) {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::setOutput");
+  STACK_TRACE("Calculator::EvaluateLoop::setOutput");
   if (this->output == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
@@ -915,9 +915,7 @@ Calculator::ExpressionCache::ExpressionCache() {
 }
 
 void Calculator::EvaluateLoop::accountIntermediateState() {
-  MacroRegisterFunctionWithName(
-    "Calculator:EvaluateLoop:::accountIntermediateState"
-  );
+  STACK_TRACE("Calculator:EvaluateLoop:::accountIntermediateState");
   std::string atomValue;
   if (this->output->isOperation(&atomValue)) {
     if (this->owner->atomsThatMustNotBeCached.contains(atomValue)) {
@@ -930,7 +928,7 @@ void Calculator::EvaluateLoop::accountIntermediateState() {
 }
 
 bool Calculator::EvaluateLoop::outputHasErrors() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::outputHasErrors");
+  STACK_TRACE("Calculator::EvaluateLoop::outputHasErrors");
   if (this->owner->isTimedOut()) {
     return true;
   }
@@ -998,7 +996,7 @@ void Calculator::EvaluateLoop::reportChildEvaluation(
 bool Calculator::EvaluateLoop::evaluateChildren(
   StateMaintainerCalculator& maintainRuleStack
 ) {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::evaluateChildren");
+  STACK_TRACE("Calculator::EvaluateLoop::evaluateChildren");
   if (this->output->isFrozen()) {
     return true;
   }
@@ -1067,9 +1065,7 @@ bool Calculator::EvaluateLoop::evaluateChildren(
 }
 
 bool Calculator::EvaluateLoop::userDefinedEvaluation() {
-  MacroRegisterFunctionWithName(
-    "Calculator::EvaluateLoop::userDefinedEvaluation"
-  );
+  STACK_TRACE("Calculator::EvaluateLoop::userDefinedEvaluation");
   Expression beforepatternMatch, afterpatternMatch;
   for (
     int i = 0; i < this->owner->ruleStack.size() &&
@@ -1122,7 +1118,7 @@ bool Calculator::EvaluateLoop::checkInitialization() {
 }
 
 bool Calculator::EvaluateLoop::builtInEvaluation() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::builtInEvaluation");
+  STACK_TRACE("Calculator::EvaluateLoop::builtInEvaluation");
   this->checkInitialization();
   Expression result;
   Function* handlerContainer = nullptr;
@@ -1166,7 +1162,7 @@ bool Calculator::EvaluateLoop::detectLoops() {
 }
 
 bool Calculator::EvaluateLoop::reduceOnce() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::reduceOnce");
+  STACK_TRACE("Calculator::EvaluateLoop::reduceOnce");
   this->checkInitialization();
   this->numberOfTransformations ++;
   this->owner->statistics.totalEvaluationLoops ++;
@@ -1246,7 +1242,7 @@ bool Calculator::evaluateExpression(
   int opIndexParentIfAvailable,
   Expression* outputHistory
 ) {
-  MacroRegisterFunctionWithName("Calculator::evaluateExpression");
+  STACK_TRACE("Calculator::evaluateExpression");
   RecursionDepthCounter recursionCounter;
   recursionCounter.initialize(&calculator.recursionDepth);
   calculator.statistics.expressionsEvaluated ++;
@@ -1333,7 +1329,7 @@ Expression* Calculator::patternMatch(
   const Expression* condition,
   std::stringstream* logStream
 ) {
-  MacroRegisterFunctionWithName("Calculator::patternMatch");
+  STACK_TRACE("Calculator::patternMatch");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (this->recursionDepth >= this->maximumRecursionDepth) {
     std::stringstream out;
@@ -1399,7 +1395,7 @@ void Calculator::specializeBoundVariables(
   Expression& toBeSubbedIn,
   MapList<Expression, Expression>& matchedPairs
 ) {
-  MacroRegisterFunctionWithName("Calculator::specializeBoundVariables");
+  STACK_TRACE("Calculator::specializeBoundVariables");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
     if (matchedPairs.contains(toBeSubbedIn)) {
@@ -1425,9 +1421,7 @@ bool Calculator::processOneExpressionOnePatternOneSubstitution(
   MapList<Expression, Expression>& bufferPairs,
   std::stringstream* logStream
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::processOneExpressionOnePatternOneSub"
-  );
+  STACK_TRACE("Calculator::processOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (
     !pattern.startsWith(this->opDefine(), 3) &&
@@ -1515,7 +1509,7 @@ void Calculator::EvaluationStatistics::initialize() {
 }
 
 void Calculator::evaluate(const std::string& input) {
-  MacroRegisterFunctionWithName("Calculator::evaluate");
+  STACK_TRACE("Calculator::evaluate");
   this->statistics.initialize();
   this->inputString = input;
   this->parser.parseAndExtractExpressionsDefault(
@@ -1525,7 +1519,7 @@ void Calculator::evaluate(const std::string& input) {
 }
 
 JSData Calculator::solve(const std::string& input) {
-  MacroRegisterFunctionWithName("Calculator::solve");
+  STACK_TRACE("Calculator::solve");
   this->statistics.initialize();
   // this->inputString = input;
   Expression toBeSolved;
@@ -1543,7 +1537,7 @@ JSData Calculator::solve(const std::string& input) {
 }
 
 void Calculator::evaluateCommands() {
-  MacroRegisterFunctionWithName("Calculator::evaluateCommands");
+  STACK_TRACE("Calculator::evaluateCommands");
   std::stringstream out;
   if (this->parser.syntaxErrors != "") {
     if (!global.flagRunningConsoleRegular) {

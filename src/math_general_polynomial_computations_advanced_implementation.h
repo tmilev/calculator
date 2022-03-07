@@ -39,9 +39,7 @@ template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::transformToReducedBasis(
   List<Polynomial<Coefficient> >& inputOutput
 ) {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::transformToReducedBasis"
-  );
+  STACK_TRACE("GroebnerBasisComputation::transformToReducedBasis");
   this->initializeForGroebnerComputation();
   this->basisCandidates = inputOutput;
   ProgressReport report;
@@ -112,7 +110,7 @@ generateOneSymmetricDifferenceCandidate(
 template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::
 generateSymmetricDifferenceCandidates() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "GroebnerBasisComputation::generateSymmetricDifferenceCandidates"
   );
   ProgressReport reportProgress("Groebner basis report");
@@ -153,9 +151,7 @@ template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
   List<Polynomial<Coefficient> >& inputOutput
 ) {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::transformToReducedGroebnerBasis"
-  );
+  STACK_TRACE("GroebnerBasisComputation::transformToReducedGroebnerBasis");
   this->initializeForGroebnerComputation();
   this->basisCandidates = inputOutput;
   ProgressReport reportStart("Groebner basis start");
@@ -182,9 +178,7 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
 template <class Coefficient>
 std::string GroebnerBasisComputation<Coefficient>::
 toStringPolynomialBasisStatus() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::toStringPolynomialBasisStatus"
-  );
+  STACK_TRACE("GroebnerBasisComputation::toStringPolynomialBasisStatus");
   std::stringstream out;
   out
   << "There are "
@@ -233,9 +227,7 @@ bool GroebnerBasisComputation<Coefficient>::limitsExceeded() const {
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::addAndReduceOnePolynomial"
-  );
+  STACK_TRACE("GroebnerBasisComputation::addAndReduceOnePolynomial");
   if (this->basisCandidates.size == 0) {
     return true;
   }
@@ -259,9 +251,7 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::addAndReducePolynomials() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::addAndReducePolynomials"
-  );
+  STACK_TRACE("GroebnerBasisComputation::addAndReducePolynomials");
   ProgressReport report("Add polynomial");
   this->flagFoundNewBasisElements = false;
   while (this->basisCandidates.size > 0) {
@@ -280,9 +270,7 @@ bool GroebnerBasisComputation<Coefficient>::addAndReducePolynomials() {
 
 template <class Coefficient>
 int GroebnerBasisComputation<Coefficient>::minimalNumberOfVariables() const {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::minimalNumberOfVariables"
-  );
+  STACK_TRACE("GroebnerBasisComputation::minimalNumberOfVariables");
   int result = 0;
   for (int i = 0; i < this->basis.size; i ++) {
     Polynomial<Coefficient>& current = this->basis[i].element;
@@ -295,9 +283,7 @@ template <class Coefficient>
 std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(
   bool addDollars
 ) const {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::toStringLetterOrder"
-  );
+  STACK_TRACE("GroebnerBasisComputation::toStringLetterOrder");
   std::stringstream out;
   int numberOfVariables = this->minimalNumberOfVariables();
   List<MonomialPolynomial> variables;
@@ -347,9 +333,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   int index,
   ProgressReport* report
 ) {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::oneDivisonSubStepWithBasis"
-  );
+  STACK_TRACE("GroebnerBasisComputation::oneDivisonSubStepWithBasis");
   const MonomialPolynomial& leadingMonomialBasis =
   this->basis[index].leadingMonomial;
   const Coefficient& leadingCoefficientBasis =
@@ -439,9 +423,7 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
   int basisIndexToIgnore,
   ProgressReport* report
 ) {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::oneDivisonStepWithBasis"
-  );
+  STACK_TRACE("GroebnerBasisComputation::oneDivisonStepWithBasis");
   MonomialPolynomial highestMonomial;
   Coefficient leadingCoefficient;
   int indexLeadingMonomial =
@@ -488,9 +470,7 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
   int basisIndexToIgnore
 ) {
   // Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62.
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::remainderDivisionByBasis"
-  );
+  STACK_TRACE("GroebnerBasisComputation::remainderDivisionByBasis");
   if (this->flagDoLogDivision) {
     this->divisionReport.getElement().owner = this;
   }
@@ -563,9 +543,7 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::addRemainderToBasis"
-  );
+  STACK_TRACE("GroebnerBasisComputation::addRemainderToBasis");
   if (this->remainderDivision.isEqualToZero()) {
     return true;
   }
@@ -649,9 +627,7 @@ template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::addBasisElementNoReduction(
   const Polynomial<Coefficient>& input
 ) {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::addBasisElementNoReduction"
-  );
+  STACK_TRACE("GroebnerBasisComputation::addBasisElementNoReduction");
   if (this->polynomialOrder.monomialOrder.leftGreaterThanRight == nullptr) {
     global.fatal << "Uninitialized monomial order. " << global.fatal;
   }
@@ -672,9 +648,7 @@ void GroebnerBasisComputation<Coefficient>::addBasisElementNoReduction(
 template <class Coefficient>
 void GroebnerBasisComputation<Coefficient>::initializeForGroebnerComputation()
 {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::initializeForGroebnerComputation"
-  );
+  STACK_TRACE("GroebnerBasisComputation::initializeForGroebnerComputation");
   this->basisCandidates.setSize(0);
   this->basis.setSize(0);
   this->numberPolynomialDivisions = 0;
@@ -689,7 +663,7 @@ void PolynomialSystem<Coefficient>::
 getSubstitutionFromPartialSolutionSerreLikeSystem(
   PolynomialSubstitution<Coefficient>& outputSubstitution
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialSystem::getSubstitutionFromPartialSolutionSerreLikeSystem"
   );
   outputSubstitution.makeIdentitySubstitution(this->systemSolution.size);
@@ -845,9 +819,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
   int index,
   PolynomialSubstitution<Coefficient>& finalSubstitution
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialSystem::backSubstituteIntoSinglePolynomial"
-  );
+  STACK_TRACE("PolynomialSystem::backSubstituteIntoSinglePolynomial");
   Polynomial<Coefficient> tempP;
   tempP.makeMonomial(index, 1, 1);
   if (substitution == tempP) {
@@ -896,9 +868,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::backSubstituteIntoPolynomialSystem(
   List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialSystem::backSubstituteIntoPolynomialSystem"
-  );
+  STACK_TRACE("PolynomialSystem::backSubstituteIntoPolynomialSystem");
   PolynomialSubstitution<Coefficient> finalSubstitution;
   this->getSubstitutionFromPartialSolutionSerreLikeSystem(finalSubstitution);
   for (int i = impliedSubstitutions.size - 1; i >= 0; i --) {
@@ -923,7 +893,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::getVariablesToSolveFor(
   const List<Polynomial<Coefficient> >& input, Selection& output
 ) {
-  MacroRegisterFunctionWithName("PolynomialSystem::getVariablesToSolveFor");
+  STACK_TRACE("PolynomialSystem::getVariablesToSolveFor");
   int numberOfVariables = 0;
   for (int i = 0; i < input.size; i ++) {
     numberOfVariables =
@@ -967,9 +937,7 @@ bool PolynomialSystem<Coefficient>::isContradictoryReducedSystem(
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
 (List<Polynomial<Coefficient> >& inputSystem) {
-  MacroRegisterFunctionWithName(
-    "PolynomialSystem::polynomialSystemSolutionSimplificationPhase"
-  );
+  STACK_TRACE("PolynomialSystem::polynomialSystemSolutionSimplificationPhase");
   ProgressReport report1, report2, report3;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
@@ -1074,9 +1042,7 @@ FormatExpressions&PolynomialSystem<Coefficient>::format() {
 
 template <class Coefficient>
 std::string PolynomialSystem<Coefficient>::toStringImpliedSubstitutions() {
-  MacroRegisterFunctionWithName(
-    "PolynomialSystem::toStringImpliedSubstitutions"
-  );
+  STACK_TRACE("PolynomialSystem::toStringImpliedSubstitutions");
   if (this->impliedSubstitutions.size == 0) {
     return "";
   }
@@ -1105,9 +1071,7 @@ std::string PolynomialSystem<Coefficient>::toStringImpliedSubstitutions() {
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::initializeForSystemSolution() {
-  MacroRegisterFunctionWithName(
-    "PolynomialSystem::initializeForSystemSolution"
-  );
+  STACK_TRACE("PolynomialSystem::initializeForSystemSolution");
   this->groebner.initializeForGroebnerComputation();
   this->impliedSubstitutions.setSize(0);
   this->flagSystemProvenToHaveNoSolution = false;
@@ -1119,7 +1083,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   PolynomialSystem<Coefficient>& toBeModified
 ) {
-  MacroRegisterFunctionWithName("PolynomialSystem::setUpRecursiveComputation");
+  STACK_TRACE("PolynomialSystem::setUpRecursiveComputation");
   toBeModified.initializeForSystemSolution();
   toBeModified.recursionCounterSerreLikeSystem =
   this->recursionCounterSerreLikeSystem;
@@ -1142,7 +1106,7 @@ void PolynomialSystem<Coefficient>::
 processSolvedSubcaseIfSolvedOrProvenToHaveSolution(
   PolynomialSystem<Coefficient>& potentiallySolvedCase
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialSystem::processSolvedSubcaseIfSolvedOrProvenToHaveSolution"
   );
   if (potentiallySolvedCase.flagSystemSolvedOverBaseField) {
@@ -1168,9 +1132,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   List<Polynomial<Coefficient> >& inputSystem,
   const Rational& aValueToTryOnPreferredVariable
 ) {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::trySettingValueToVariable"
-  );
+  STACK_TRACE("GroebnerBasisComputation::trySettingValueToVariable");
   ProgressReport report1;
   PolynomialSystem<Coefficient>& heuristicAttempt =
   this->computationUsedInRecursiveCalls.getElement();
@@ -1217,7 +1179,7 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
   const List<Polynomial<Coefficient> >& inputSystem,
   MonomialPolynomial& outputMonomial
 ) {
-  MacroRegisterFunctionWithName("PolynomialSystem::hasSingleMonomialEquation");
+  STACK_TRACE("PolynomialSystem::hasSingleMonomialEquation");
   bool result = false;
   int minimalNumberOfNonZeroMonomialEntries =
   this->numberOfVariablesToSolveForStart * 2 + 1;
@@ -1248,9 +1210,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
   List<Polynomial<Coefficient> >& inputSystem,
   const MonomialPolynomial& monomial
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialSystem::solveWhenSystemHasSingleMonomial"
-  );
+  STACK_TRACE("PolynomialSystem::solveWhenSystemHasSingleMonomial");
   ProgressReport report1;
   List<Polynomial<Coefficient> > inputSystemCopy = inputSystem;
   bool allProvenToHaveNoSolution = true;
@@ -1298,9 +1258,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialSystem::solveSerreLikeSystemRecursively"
-  );
+  STACK_TRACE("PolynomialSystem::solveSerreLikeSystemRecursively");
   RecursionDepthCounter counter(&this->recursionCounterSerreLikeSystem);
   ProgressReport report1, report2, report3;
   List<Polynomial<Coefficient> > startingSystemNoModifications = inputSystem;
@@ -1431,7 +1389,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
-  MacroRegisterFunctionWithName("PolynomialSystem::solveSerreLikeSystem");
+  STACK_TRACE("PolynomialSystem::solveSerreLikeSystem");
   this->flagSystemProvenToHaveNoSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagSystemProvenToHaveSolution = false;
@@ -1524,9 +1482,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
 
 template <class Coefficient>
 std::string PolynomialSystem<Coefficient>::toStringSerreLikeSolution() {
-  MacroRegisterFunctionWithName(
-    "GroebnerBasisComputation::toStringSerreLikeSolution"
-  );
+  STACK_TRACE("GroebnerBasisComputation::toStringSerreLikeSolution");
   std::stringstream out;
   Polynomial<Rational> monomial;
   for (int i = 0; i < this->systemSolution.size; i ++) {
@@ -1564,7 +1520,7 @@ bool Polynomial<Coefficient>::leastCommonMultipleOneVariable(
   Polynomial<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Polynomial::leastCommonMultipleOneVariable");
+  STACK_TRACE("Polynomial::leastCommonMultipleOneVariable");
   Polynomial<Coefficient> divisor;
   if (
     !Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
@@ -1600,7 +1556,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   const Coefficient& one,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Polynomial::leastCommonMultiple");
+  STACK_TRACE("Polynomial::leastCommonMultiple");
   if (left.isEqualToZero() || right.isEqualToZero()) {
     global.fatal
     << "Least common multiple of zero polynomials is not allowed. "
@@ -1700,18 +1656,29 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   Polynomial<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Polynomial::greatestCommonDivisorOneVariable")
-  ;
+  STACK_TRACE("Polynomial::greatestCommonDivisorOneVariable");
   Polynomial<Coefficient> leftCopy = left;
   Polynomial<Coefficient> rightCopy = right;
   Polynomial<Coefficient> quotient, remainder;
+  if (
+    !leftCopy.hasNonNegativeIntegralExponents() ||
+    !rightCopy.hasNonNegativeIntegralExponents()
+  ) {
+    global.fatal
+    << "Your inputs are expected to have "
+    << "non-negative integral powers. Instead, they are: "
+    << leftCopy.toString(FormatExpressions::defaultFormat())
+    << " and "
+    << rightCopy.toString(FormatExpressions::defaultFormat())
+    << global.fatal;
+  }
   if (
     left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "This greatest common divisor computation method requires one variable.";
+      << "This greatest common divisor computation "
+      << "method requires one variable.";
     }
     return false;
   }
@@ -1732,11 +1699,11 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
     ) {
       global.fatal
       << "Univariate polynomial division of "
-      << leftCopy.toString()
+      << leftCopy.toString(FormatExpressions::defaultFormat())
       << " by "
-      << rightCopy.toString()
+      << rightCopy.toString(FormatExpressions::defaultFormat())
       << " yields remainder "
-      << remainder.toString()
+      << remainder.toString(FormatExpressions::defaultFormat())
       << " which does not reduce the degree. "
       << global.fatal;
     }
@@ -1756,7 +1723,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   const Coefficient& one,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Polynomial::greatestCommonDivisor");
+  STACK_TRACE("Polynomial::greatestCommonDivisor");
   if (left.isEqualToZero() || right.isEqualToZero()) {
     global.fatal
     << "Greatest common divisor including zeroes not allowed. "
@@ -1880,7 +1847,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::factor(
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::factor");
+  STACK_TRACE("PolynomialFactorizationUnivariate::factor");
   this->original = input;
   if (this->original.isConstant(&this->constantFactor)) {
     return true;
@@ -1918,9 +1885,7 @@ template <class Coefficient>
 bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
   Polynomial<Coefficient>& incoming
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationUnivariate::accountNonReducedFactor"
-  );
+  STACK_TRACE("PolynomialFactorizationUnivariate::accountNonReducedFactor");
   incoming.scaleNormalizeLeadingMonomial(
     &MonomialPolynomial::orderDefault()
   );
@@ -1957,9 +1922,7 @@ template <class Coefficient>
 bool PolynomialFactorizationUnivariate<Coefficient>::accountReducedFactor(
   Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationUnivariate::accountReducedFactor"
-  );
+  STACK_TRACE("PolynomialFactorizationUnivariate::accountReducedFactor");
   if (incoming.isConstant()) {
     global.fatal
     << "Constant factors are not to be accounted. "
@@ -1991,9 +1954,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountReducedFactor(
 
 template <class Coefficient>
 bool PolynomialFactorizationUnivariate<Coefficient>::checkFactorization() const {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationUnivariate::checkFactorization"
-  );
+  STACK_TRACE("PolynomialFactorizationUnivariate::checkFactorization");
   Polynomial<Coefficient> checkComputations;
   checkComputations.makeConstant(this->constantFactor);
   for (int i = 0; i < this->nonReduced.size; i ++) {
@@ -2112,9 +2073,7 @@ bool PolynomialFactorizationCantorZassenhaus<
 >::oneFactor(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationCantorZassenhaus::oneFactor"
-  );
+  STACK_TRACE("PolynomialFactorizationCantorZassenhaus::oneFactor");
   this->checkInitialization();
   this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
@@ -2165,7 +2124,7 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialImplementation,
   PolynomialModulusImplementation
 >::hasFactorsOfDifferentDegree(std::stringstream* comments) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationCantorZassenhaus::hasFactorsOfDifferentDegree"
   );
   (void) comments;
@@ -2305,7 +2264,7 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialImplementation,
   PolynomialModulusImplementation
 >::handlePrimeDegreeSeparatedFactor(PolynomialImplementation& input) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor"
   );
   this->checkInitialization();
@@ -2366,7 +2325,7 @@ void PolynomialFactorizationCantorZassenhaus<
   PolynomialImplementation,
   PolynomialModulusImplementation
 >::initializeOneFactorComputation() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationCantorZassenhaus::initializeOneFactorComputation"
   );
   Polynomial<ElementZmodP> polynomial;
@@ -2391,9 +2350,7 @@ bool PolynomialFactorizationCantorZassenhaus<
 >::oneFactorGo(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationCantorZassenhaus::oneFactorGo"
-  );
+  STACK_TRACE("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
   (void) commentsOnFailure;
   this->initializeOneFactorComputation();
   if (this->hasFactorsOfDifferentDegree(comments)) {
@@ -2462,7 +2419,7 @@ void PolynomialFactorizationCantorZassenhaus<
 >::computeStartingPolynomial(
   unsigned int constant, PolynomialModuloPolynomialImplementation& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationCantorZassenhaus::computeStartingPolynomial"
   );
   Polynomial<ElementZmodP> constructed;

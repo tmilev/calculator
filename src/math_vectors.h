@@ -1161,7 +1161,7 @@ public:
 
 template <class Coefficient>
 bool Vector<Coefficient>::fromString(const std::string& input) {
-  MacroRegisterFunctionWithName("Vector::assignString");
+  STACK_TRACE("Vector::assignString");
   this->setSize(0);
   int currentDigit = - 1;
   int sign = 1;
@@ -1189,7 +1189,7 @@ bool Vector<Coefficient>::getCoordinatesInBasis(
   if (inputBasis.size == 0) {
     return false;
   }
-  MacroRegisterFunctionWithName("Vector::getCoordinatesInBasis");
+  STACK_TRACE("Vector::getCoordinatesInBasis");
   Vectors<Coefficient> bufferVectors;
   Vector<Coefficient> linearCombination;
   if (this->size != inputBasis[0].size) {
@@ -1222,7 +1222,7 @@ template <class Coefficient>
 void Vectors<Coefficient>::getLinearDependenceCompute(
   Matrix<Coefficient>& outputSystem, Selection& outputNonPivotPoints
 ) {
-  MacroRegisterFunctionWithName("Vectors::getLinearDependenceCompute");
+  STACK_TRACE("Vectors::getLinearDependenceCompute");
   if (this->size == 0) {
     return;
   }
@@ -1242,7 +1242,7 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
   Matrix<Coefficient>& bufferMatrix,
   Selection& bufferSelection
 ) const {
-  MacroRegisterFunctionWithName("Vectors::linearSpanContainsVector");
+  STACK_TRACE("Vectors::linearSpanContainsVector");
   Vectors<Coefficient> tempVectors;
   tempVectors = *this;
   tempVectors.addOnTop(input);
@@ -1256,7 +1256,7 @@ bool Vectors<Coefficient>::getCoordinatesInBasis(
   const Vectors<Coefficient>& inputBasis,
   Vectors<Coefficient>& outputCoords
 ) const {
-  MacroRegisterFunctionWithName("Vectors::getCoordinatesInBasis");
+  STACK_TRACE("Vectors::getCoordinatesInBasis");
   outputCoords.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
     if (

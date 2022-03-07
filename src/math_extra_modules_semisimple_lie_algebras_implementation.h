@@ -18,7 +18,7 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   >& pair,
   ProgressReport* progressReport
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::highestWeightTrace");
+  STACK_TRACE("ModuleSSalgebra::highestWeightTrace");
   int indexInCache = this->cachedPairs.getIndex(pair);
   if (indexInCache != - 1) {
     return this->cachedTraces[indexInCache];
@@ -124,9 +124,7 @@ highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
   const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
   ProgressReport* progressReport
 ) {
-  MacroRegisterFunctionWithName(
-    "ModuleSSalgebra<Coefficient>::hwtaabfSimpleGensOnly"
-  );
+  STACK_TRACE("ModuleSSalgebra<Coefficient>::hwtaabfSimpleGensOnly");
   const MonomialTensor<int, HashFunctions::hashFunction>* left = &leftMon;
   const MonomialTensor<int, HashFunctions::hashFunction>* right = &rightMon;
   if (leftMon > rightMon) {
@@ -200,7 +198,7 @@ void ModuleSSalgebra<Coefficient>::substitution(
 template <class Coefficient>
 MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::
 getActionGeneratorIndex(int generatorIndex) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::getActionGeneratorIndex");
+  STACK_TRACE("ModuleSSalgebra::getActionGeneratorIndex");
   int numGenerators = this->getOwner().getNumberOfGenerators();
   if (generatorIndex < 0 || generatorIndex >= numGenerators) {
     global.fatal
@@ -287,7 +285,7 @@ void ModuleSSalgebra<Coefficient>::getMatrixHomogenousElt(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::getMatrixHomogenousElt");
+  STACK_TRACE("ModuleSSalgebra::getMatrixHomogenousElt");
   this->getAdActionHomogenousElt(
     inputHomogeneous,
     weightUEEltSimpleCoords,
@@ -334,7 +332,7 @@ splitOverLeviMonomialsEncodeHighestWeight(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms&
   outputWeylSubgroup
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CharacterSemisimpleLieAlgebraModule::splitOverLeviMonomialsEncodeHighestWeight"
   );
   this->checkNonZeroOwner();
@@ -541,7 +539,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   Vectors<Coefficient>* outputEigenSpace,
   CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::splitOverLevi");
+  STACK_TRACE("ModuleSSalgebra<Coefficient>::splitOverLevi");
   this->checkInitialization();
   if (this->character.size() != 1) {
     if (report != nullptr) {
@@ -790,7 +788,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   std::string* outputReport,
   bool computeSimpleGens
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::makeFromHW");
+  STACK_TRACE("ModuleSSalgebra<Coefficient>::makeFromHW");
   ProgressReport report;
   this->owner = &inputAlgebra;
   SemisimpleLieAlgebra& algebra = inputAlgebra;
@@ -1066,9 +1064,7 @@ template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
   const Coefficient& ringUnit, const Coefficient& ringZero
 ) {
-  MacroRegisterFunctionWithName(
-    "ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW"
-  );
+  STACK_TRACE("ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW");
   ProgressReport report;
   ProgressReport report2;
   this->bilinearFormsAtEachWeightLevel.setSize(
@@ -1201,7 +1197,7 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
 
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::checkConsistency() {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::checkConsistency");
+  STACK_TRACE("ModuleSSalgebra::checkConsistency");
   ProgressReport report;
   MatrixTensor<Coefficient>
   left,
@@ -1549,7 +1545,7 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
   SemisimpleLieAlgebra& ownerAlgebra,
   const Coefficient& ringUnit
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft"
   );
   if (&output == this) {
@@ -1613,9 +1609,8 @@ template <class Coefficient>
 void ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight(
   const ElementTensorsGeneralizedVermas<Coefficient>& right
 ) {
-  MacroRegisterFunctionWithName(
-    "ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight"
-  );
+  STACK_TRACE("ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight")
+  ;
   if (right.isEqualToZero()) {
     this->makeZero();
     return;
@@ -1641,7 +1636,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight(
 template <class Coefficient>
 std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* format)
 const {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::toString");
+  STACK_TRACE("ModuleSSalgebra::toString");
   if (this->owner == nullptr) {
     return "(Error: module not initialized)";
   }
@@ -1877,7 +1872,7 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
+  STACK_TRACE("ModuleSSalgebra::getGenericUnMinusElt");
   List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
   this->getElementsNilradical(
     elementsNilradical, true, useNilWeight, ascending
@@ -1908,7 +1903,7 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
+  STACK_TRACE("ModuleSSalgebra::getGenericUnMinusElt");
   List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
   this->getElementsNilradical(
     elementsNilradical, true, nullptr, useNilWeight, ascending
@@ -1940,7 +1935,7 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "ModuleSSalgebra_CoefficientType::getActionGeneralizedVermaModuleAsDifferentialOperator"
   );
   List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
@@ -1990,7 +1985,7 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
       for (int k = 0; k < matrix.size(); k ++) {
         if (
           matrix.coefficients[k].expressionType ==
-          RationalFraction<Rational>::TypeExpression::typeRationalFunction
+          RationalFraction<Rational>::TypeExpression::typeRationalFraction
         ) {
           return false;
         }
@@ -2066,9 +2061,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   Vectors<Coefficient>* outputEigenSpace,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg"
-  );
+  STACK_TRACE("ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg");
   if (this->character.size() != 1) {
     if (comments != nullptr) {
       std::stringstream out;
@@ -2249,7 +2242,7 @@ bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
   const MonomialPolynomial& coefficient,
   ElementWeylAlgebra<Rational>& output
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::getActionEulerOperatorPart");
+  STACK_TRACE("ModuleSSalgebra::getActionEulerOperatorPart");
   int powerMonCoeff = 0;
   ElementWeylAlgebra<Rational> currentMonomialContribution;
   output.makeOne();
@@ -2360,7 +2353,7 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
   const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping,
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft"
   );
   MonomialGeneralizedVerma<Coefficient> currentMon;
@@ -2399,7 +2392,7 @@ template <class Coefficient>
 void ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft(
   const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft"
   );
   ElementSumGeneralizedVermas<Coefficient> buffer, Accum;
@@ -2416,7 +2409,7 @@ template <class Coefficient>
 void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
-  MacroRegisterFunctionWithName("MonomialGeneralizedVerma::reduceMe");
+  STACK_TRACE("MonomialGeneralizedVerma::reduceMe");
   ModuleSSalgebra<Coefficient>& module = *this->owner;
   output.makeZero();
   MonomialUniversalEnveloping<Coefficient> tempMon;

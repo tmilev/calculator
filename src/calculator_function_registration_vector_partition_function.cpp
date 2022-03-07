@@ -4,9 +4,7 @@
 #include "calculator_inner_functions_vector_partition_function_1.h"
 
 void Calculator::initializeFunctionsVectorPartitionFunctions() {
-  MacroRegisterFunctionWithName(
-    "Calculator::initializeFunctionsVectorPartitionFunctions"
-  );
+  STACK_TRACE("Calculator::initializeFunctionsVectorPartitionFunctions");
   Function::Options innerStandard = Function::Options::standard();
   this->addOperationHandler(
     "VectorPartitionFunction",

@@ -9,7 +9,7 @@
 bool CalculatorHtmlFunctions::userInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::userInputBox");
+  STACK_TRACE("CalculatorHtmlFunctions::userInputBox");
   MapList<
     std::string,
     Expression,
@@ -61,7 +61,7 @@ bool CalculatorHtmlFunctions::userInputBox(
 bool CalculatorHtmlFunctions::evaluateSymbols(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::evaluateSymbols");
+  STACK_TRACE("CalculatorHtmlFunctions::evaluateSymbols");
   if (input.size() != 2) {
     return false;
   }
@@ -107,7 +107,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
 bool CalculatorHtmlFunctions::setInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::setInputBox");
+  STACK_TRACE("CalculatorHtmlFunctions::setInputBox");
   MapList<
     std::string,
     Expression,
@@ -156,8 +156,7 @@ bool CalculatorHtmlFunctions::setInputBox(
 std::string CalculatorHtmlFunctions::getUserInputBoxName(
   const Expression& box
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::getUserInputBoxName")
-  ;
+  STACK_TRACE("CalculatorHtmlFunctions::getUserInputBoxName");
   if (box.owner == nullptr) {
     return "non-initialized-expression";
   }

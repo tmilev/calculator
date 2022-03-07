@@ -21,9 +21,7 @@ bool CalculatorConversions::convertWithoutComputation<
   const Expression& input,
   WithContext<Polynomial<AlgebraicNumber> >& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::convertWithoutComputation"
-  );
+  STACK_TRACE("CalculatorConversions::convertWithoutComputation");
   (void) calculator;
   input.checkInitialization();
   WithContext<Rational> rational;
@@ -55,9 +53,7 @@ bool CalculatorConversions::convertWithoutComputation<Polynomial<Rational> >(
   const Expression& input,
   WithContext<Polynomial<Rational> >& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::convertWithoutComputation"
-  );
+  STACK_TRACE("CalculatorConversions::convertWithoutComputation");
   (void) calculator;
   input.checkInitialization();
   WithContext<Rational> rational;
@@ -112,9 +108,7 @@ bool CalculatorConversions::convertWithoutComputation<
   const Expression& input,
   WithContext<RationalFraction<Rational> >& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::convertWithoutComputation"
-  );
+  STACK_TRACE("CalculatorConversions::convertWithoutComputation");
   (void) calculator;
   input.checkInitialization();
   WithContext<Rational> rational;
@@ -152,7 +146,7 @@ bool CalculatorConversions::convertWithoutComputation<
   const Expression& input,
   WithContext<RationalFraction<AlgebraicNumber> >& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::convertWithoutComputation_RationalFraction_AlgebraicNumber"
   );
   input.checkInitialization();
@@ -191,7 +185,7 @@ bool CalculatorConversions::convertWithoutComputation<
   const Expression& input,
   WithContext<ElementWeylAlgebra<Rational> >& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::convertWithoutComputation_ElementWeylAlgebra_Rational"
   );
   (void) calculator;
@@ -235,7 +229,7 @@ bool CalculatorConversions::convertWithoutComputation<
   const Expression& input,
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::convertWithoutComputation_ElementUniversalEnveloping_RationalFraction_Rational"
   );
   SemisimpleLieAlgebra* owner =
@@ -265,7 +259,7 @@ bool CalculatorConversions::convertWithoutComputation<
   const Expression& input,
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::convertWithoutComputation_ElementSemisimpleLieAlgebra_AlgebraicNumber"
   );
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element
@@ -327,9 +321,7 @@ bool CalculatorConversions::convertWithoutComputation<AlgebraicNumber>(
   const Expression& input,
   WithContext<AlgebraicNumber>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::convertWithoutComputation"
-  );
+  STACK_TRACE("CalculatorConversions::convertWithoutComputation");
   WithContext<Rational> rational;
   if (input.isOfTypeWithContext(&rational)) {
     output.context = rational.context;
@@ -502,9 +494,7 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
   const ChevalleyGenerator& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::expressionFromChevalleyGenerator"
-  );
+  STACK_TRACE("CalculatorConversions::expressionFromChevalleyGenerator");
   input.checkInitialization();
   output.reset(calculator, 2);
   Expression generatorLetterE, generatorIndexE;
@@ -539,7 +529,7 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
 bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType"
   );
   WithContext<SemisimpleLieAlgebra*> unused;
@@ -552,7 +542,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
 bool CalculatorConversions::semisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::semisimpleLieAlgebra");
+  STACK_TRACE("Calculator::semisimpleLieAlgebra");
   if (input.size() != 2) {
     return calculator << "Semisimple Lie algebra expects a single argument. ";
   }
@@ -566,7 +556,7 @@ bool CalculatorConversions::semisimpleLieAlgebra(
 bool CalculatorConversions::loadWeylGroup(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::loadWeylGroup");
+  STACK_TRACE("Calculator::loadWeylGroup");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return false;
@@ -581,7 +571,7 @@ bool CalculatorConversions::dynkinSimpleType(
   const Expression& input,
   DynkinSimpleType& outputMon
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::dynkinSimpleType");
+  STACK_TRACE("CalculatorConversions::dynkinSimpleType");
   if (input.size() != 2) {
     return
     calculator
@@ -598,9 +588,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
   const Expression& input,
   DynkinSimpleType& outputMon
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorBuiltInTypeConversions::functionDynkinSimpleType"
-  );
+  STACK_TRACE("CalculatorBuiltInTypeConversions::functionDynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
   if (input.startsWith(calculator.opUnderscore(), 3)) {
     rankE = input[2];
@@ -735,7 +723,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
 bool CalculatorConversions::dynkinType(
   Calculator& calculator, const Expression& input, DynkinType& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::dynkinType");
+  STACK_TRACE("Calculator::dynkinType");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (input.size() != 2) {
     return calculator << "Dynkin type takes as input one argument. ";
@@ -747,7 +735,7 @@ bool CalculatorConversions::dynkinType(
 bool CalculatorConversions::functionDynkinType(
   Calculator& calculator, const Expression& input, DynkinType& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::functionDynkinType");
+  STACK_TRACE("CalculatorConversions::functionDynkinType");
   LinearCombination<Expression, Rational> typeComputer;
   if (
     !calculator.functionCollectSummandsCombine(
@@ -790,9 +778,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
   Expression& output,
   WithContext<SemisimpleLieAlgebra*>& outputPointer
 ) {
-  MacroRegisterFunctionWithName(
-    "Calculator::functionSemisimpleLieAlgebraFromDynkinType"
-  );
+  STACK_TRACE("Calculator::functionSemisimpleLieAlgebraFromDynkinType");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   DynkinType dynkinType;
   outputPointer.content = nullptr;
@@ -847,9 +833,7 @@ bool CalculatorConversions::expressionFromDynkinSimpleType(
   const DynkinSimpleType& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::expressionFromDynkinSimpleType"
-  );
+  STACK_TRACE("CalculatorConversions::expressionFromDynkinSimpleType");
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
   letterS = input.letter;
@@ -890,7 +874,7 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraRationals(
   const ElementSemisimpleLieAlgebra<Rational>& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::storeElementSemisimpleLieAlgebraRational"
   );
   LinearCombination<Expression, Rational> monomials;
@@ -908,9 +892,7 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraRationals(
 bool CalculatorConversions::expressionFromDynkinType(
   Calculator& calculator, const DynkinType& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::expressionFromDynkinType"
-  );
+  STACK_TRACE("CalculatorConversions::expressionFromDynkinType");
   LinearCombination<Expression, AlgebraicNumber> monomials;
   monomials.makeZero();
   Expression currentMonomial;
@@ -929,7 +911,7 @@ expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers"
   );
   LinearCombination<Expression, AlgebraicNumber> monomials;
@@ -948,9 +930,7 @@ expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
 bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, SlTwoSubalgebra& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::slTwoSubalgebraPrecomputed"
-  );
+  STACK_TRACE("CalculatorConversions::slTwoSubalgebraPrecomputed");
   if (!input.isListNElements(4)) {
     return
     calculator
@@ -1028,9 +1008,7 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
 bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::slTwoSubalgebraPrecomputed"
-  );
+  STACK_TRACE("CalculatorConversions::slTwoSubalgebraPrecomputed");
   SlTwoSubalgebra tempSL2;
   if (
     !CalculatorConversions::slTwoSubalgebraPrecomputed(
@@ -1045,7 +1023,7 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
 bool CalculatorConversions::algebraicNumber(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::algebraicNumber");
+  STACK_TRACE("CalculatorConversions::algebraicNumber");
   if (input.isOfType<AlgebraicNumber>()) {
     output = input;
     return true;
@@ -1069,9 +1047,7 @@ bool CalculatorConversions::loadKeysFromStatementList(
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::loadKeysFromStatementList"
-  );
+  STACK_TRACE("CalculatorConversions::loadKeysFromStatementList");
   MapList<Expression, Expression> outputExpressionFormat;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
@@ -1104,9 +1080,7 @@ bool CalculatorConversions::loadKeysFromStatementList(
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::loadKeysFromStatementList"
-  );
+  STACK_TRACE("CalculatorConversions::loadKeysFromStatementList");
   output.clear();
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].startsWith(calculator.opDefine(), 3)) {
@@ -1131,7 +1105,7 @@ bool CalculatorConversions::loadKey(
   const std::string& inputKey,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::loadKey");
+  STACK_TRACE("CalculatorConversions::loadKey");
   Expression keyExpression;
   keyExpression.makeAtom(calculator, inputKey);
   for (int i = 0; i < inputStatementList.size(); i ++) {
@@ -1156,9 +1130,7 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   const CandidateSemisimpleSubalgebra& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::storeCandidateSubalgebra"
-  );
+  STACK_TRACE("CalculatorConversions::storeCandidateSubalgebra");
   Expression currentE;
   List<std::string> keys;
   List<Expression> values;
@@ -1202,9 +1174,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   CandidateSemisimpleSubalgebra& outputSubalgebra,
   SemisimpleSubalgebras& owner
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::candidateSubalgebraPrecomputed"
-  );
+  STACK_TRACE("CalculatorConversions::candidateSubalgebraPrecomputed");
   owner.checkInitialization();
   ProgressReport report;
   std::stringstream reportStream;
@@ -1369,9 +1339,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
 bool CalculatorConversions::loadSemisimpleSubalgebras(
   Calculator& calculator, const Expression& inpuT, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::loadSemisimpleSubalgebras"
-  );
+  STACK_TRACE("CalculatorConversions::loadSemisimpleSubalgebras");
   Expression input = inpuT;
   Expression
   ambientTypeE,
@@ -1572,9 +1540,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
 std::string CalculatorConversions::stringFromSemisimpleSubalgebras(
   SemisimpleSubalgebras& input
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::stringFromSemisimpleSubalgebras"
-  );
+  STACK_TRACE("CalculatorConversions::stringFromSemisimpleSubalgebras");
   Expression expression;
   FormatExpressions format;
   CalculatorConversions::storeSemisimpleSubalgebras(
@@ -1589,9 +1555,7 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   const SemisimpleSubalgebras& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::storeSemisimpleSubalgebras"
-  );
+  STACK_TRACE("CalculatorConversions::storeSemisimpleSubalgebras");
   Expression dynkinTypeE;
   List<std::string> keys;
   List<Expression> values;
@@ -1657,7 +1621,7 @@ bool CalculatorConversions::expressionFromMonomialUniversalEnveloping(
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::expressionFromMonomialUniversalEnveloping"
   );
   if (input.isConstant()) {
@@ -1689,7 +1653,7 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
   Expression& output,
   ExpressionContext* inputContext
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::expressionFromElementUniversalEnveloping"
   );
   LinearCombination<Expression, RationalFraction<Rational> >
@@ -1718,7 +1682,7 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients
   ElementSemisimpleLieAlgebra<Rational>& output,
   SemisimpleLieAlgebra& owner
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients"
   );
   ElementSemisimpleLieAlgebra<AlgebraicNumber> outputAlgebraic;
@@ -1755,7 +1719,7 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,
   SemisimpleLieAlgebra& owner
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers"
   );
   WithContext<Polynomial<AlgebraicNumber> > polynomialFormWithContext;
@@ -1862,9 +1826,7 @@ bool CalculatorConversions::elementUniversalEnveloping(
   Expression& output,
   SemisimpleLieAlgebra& owner
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::elementUniversalEnveloping"
-  );
+  STACK_TRACE("CalculatorConversions::elementUniversalEnveloping");
   if (input.size() != 2) {
     return
     calculator
@@ -2005,9 +1967,7 @@ bool CalculatorConversions::expressionFromBuiltInType(
 bool CalculatorConversions::functionExpressionFromBuiltInType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::functionExpressionFromBuiltInType"
-  );
+  STACK_TRACE("CalculatorConversions::functionExpressionFromBuiltInType");
   if (
     input.isOfType<Rational>() ||
     input.isOfType<double>() ||
@@ -2046,7 +2006,7 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
 bool CalculatorConversions::expressionFromElementUniversalEnveloping(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "CalculatorConversions::expressionFromElementUniversalEnveloping"
   );
   ElementUniversalEnveloping<RationalFraction<Rational> >
@@ -2072,7 +2032,7 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
 bool CalculatorConversions::rationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::rationalFunction");
+  STACK_TRACE("CalculatorConversions::rationalFunction");
   if (input.size() != 2) {
     return false;
   }
@@ -2090,9 +2050,7 @@ bool CalculatorConversions::rationalFunction(
 bool CalculatorConversions::functionMatrixRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::functionMatrixRational"
-  );
+  STACK_TRACE("CalculatorConversions::functionMatrixRational");
   Matrix<Rational> outputMatrix;
   if (
     !CalculatorConversions::functionGetMatrix(
@@ -2107,7 +2065,7 @@ bool CalculatorConversions::functionMatrixRational(
 bool CalculatorConversions::matrixRationalTensorForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::matrixRationalTensorForm");
+  STACK_TRACE("Calculator::matrixRationalTensorForm");
   if (!CalculatorConversions::makeMatrix(calculator, input, output)) {
     return calculator << "Failed to extract matrix of rationals. ";
   }
@@ -2127,8 +2085,7 @@ bool CalculatorConversions::matrixRationalTensorForm(
 bool CalculatorConversions::functionMatrixRationalTensorForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::functionMatrixRationalTensorForm")
-  ;
+  STACK_TRACE("Calculator::functionMatrixRationalTensorForm");
   Matrix<Rational> matrixRational;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
@@ -2145,9 +2102,7 @@ bool CalculatorConversions::functionMatrixRationalTensorForm(
 bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::outerMatrixExpressionsToMatrixOfType"
-  );
+  STACK_TRACE("CalculatorConversions::outerMatrixExpressionsToMatrixOfType");
   if (!input.isMatrix()) {
     return false;
   }
@@ -2184,7 +2139,7 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
 bool CalculatorConversions::makeMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::makeMatrix");
+  STACK_TRACE("CalculatorConversions::makeMatrix");
   Matrix<Expression> outputMatrix;
   if (calculator.getMatrixExpressionsFromArguments(input, outputMatrix)) {
     return
@@ -2196,9 +2151,7 @@ bool CalculatorConversions::makeMatrix(
 bool CalculatorConversions::functionMatrixAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::functionMatrixAlgebraic"
-  );
+  STACK_TRACE("CalculatorConversions::functionMatrixAlgebraic");
   Matrix<AlgebraicNumber> outputMatrix;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
@@ -2213,9 +2166,7 @@ bool CalculatorConversions::functionMatrixAlgebraic(
 bool CalculatorConversions::matrixRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::matrixRationalFunction"
-  );
+  STACK_TRACE("CalculatorConversions::matrixRationalFunction");
   return
   CalculatorConversions::functionMatrixRationalFunction(
     calculator, input, output
@@ -2225,9 +2176,7 @@ bool CalculatorConversions::matrixRationalFunction(
 bool CalculatorConversions::functionMatrixRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::functionMatrixRationalFunction"
-  );
+  STACK_TRACE("CalculatorConversions::functionMatrixRationalFunction");
   Matrix<RationalFraction<Rational> > outputMatrix;
   ExpressionContext context(calculator);
   if (
@@ -2251,7 +2200,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
 bool CalculatorConversions::loadFileIntoString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::loadFileIntoString");
+  STACK_TRACE("CalculatorConversions::loadFileIntoString");
   if (input.size() != 2) {
     return false;
   }
@@ -2277,9 +2226,7 @@ bool CalculatorConversions::loadFileIntoString(
 bool CalculatorConversions::makeElementHyperOctahedral(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorConversions::makeElementHyperOctahedral"
-  );
+  STACK_TRACE("CalculatorConversions::makeElementHyperOctahedral");
   std::string inputStringFormat;
   ElementHyperoctahedralGroupR2 element;
   if (input.isOfType<std::string>(&inputStringFormat)) {
@@ -2333,8 +2280,7 @@ bool CalculatorConversions::makeElementHyperOctahedral(
 bool CalculatorConversions::polynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::polynomialModuloInteger")
-  ;
+  STACK_TRACE("CalculatorFunctions::polynomialModuloInteger");
   if (input.size() != 3) {
     return
     calculator

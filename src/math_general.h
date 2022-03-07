@@ -388,6 +388,7 @@ public:
     return this->monomialBody.hashFunction();
   }
   bool hasPositiveOrZeroExponents() const;
+  bool hasNonNegativeIntegralExponents() const;
   // Warning: hashFunction must return the same result
   // for equal monomials represented by different monBodies.
   // Two such different representation may differ by extra entries filled in
@@ -1783,7 +1784,7 @@ template <typename Coefficient>
 void Vectors<Coefficient>::getOrthogonalComplement(
   Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm
 ) {
-  MacroRegisterFunctionWithName("Vectors::getOrthogonalComplement");
+  STACK_TRACE("Vectors::getOrthogonalComplement");
   if (this->size == 0) {
     if (bilinearForm != nullptr) {
       output.makeEiBasis(bilinearForm->numberOfRows);
@@ -1864,7 +1865,7 @@ void Matrix<Element>::releaseMemory() {
 
 template <typename Coefficient>
 bool Matrix<Coefficient>::invert() {
-  MacroRegisterFunctionWithName("Matrix::invert");
+  STACK_TRACE("Matrix::invert");
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal
     << "Request to invert a non-square matrix of "
@@ -2313,6 +2314,7 @@ public:
   typename List<TemplateMonomial>::Comparator* getMonomialOrder();
   std::string getPolynomialLetter(int index) const;
   FormatExpressions();
+  static FormatExpressions* defaultFormat();
 };
 
 class MonomialWeylAlgebra {
@@ -2724,7 +2726,7 @@ public:
   void substitutionCoefficients(
     const List<Polynomial<baseType> >& substitution
   ) {
-    MacroRegisterFunctionWithName("Polynomial::substitutionCoefficients");
+    STACK_TRACE("Polynomial::substitutionCoefficients");
     Coefficient newCoefficient;
     for (int i = 0; i < this->size(); i ++) {
       newCoefficient = this->coefficients[i];
@@ -2810,7 +2812,7 @@ public:
   Coefficient scaleNormalizeLeadingMonomial(
     const typename List<TemplateMonomial>::Comparator* monomialOrder
   ) {
-    MacroRegisterFunctionWithName("Polynomial::scaleNormalizeLeadingMonomial");
+    STACK_TRACE("Polynomial::scaleNormalizeLeadingMonomial");
     if (this->isEqualToZero()) {
       return Coefficient();
     }
@@ -3283,7 +3285,9 @@ public:
   void shiftVariableIndicesToTheRight(int variableIndexShift);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
-  void scaleToPositiveMonomialExponents(MonomialPolynomial& outputScale);
+  void scaleToPositiveMonomialExponents(
+    MonomialPolynomial& outputIWasMultipliedBy
+  );
   bool substitution(
     const List<Polynomial<Coefficient> >& substitution,
     const Coefficient& one
@@ -3392,6 +3396,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
+  bool hasNonNegativeIntegralExponents() const;
   static Polynomial<Coefficient> zeroStatic() {
     Polynomial<Coefficient> zero;
     return zero;
@@ -4037,9 +4042,7 @@ bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
   Matrix<Coefficient>& outputHomogenousPart,
   Matrix<Coefficient>& outputConstantTerms
 ) {
-  MacroRegisterFunctionWithName(
-    "Polynomial::getLinearSystemFromLinearPolynomials"
-  );
+  STACK_TRACE("Polynomial::getLinearSystemFromLinearPolynomials");
   int letter = 0;
   int numberOfVariables = 0;
   for (int i = 0; i < linearPolynomials.size; i ++) {
@@ -4210,8 +4213,7 @@ gaussianEliminationByRows(
   Matrix<Coefficient>* carbonCopyMatrix,
   List<LinearCombinationTemplate>* carbonCopyList
 ) {
-  MacroRegisterFunctionWithName("LinearCombination::gaussianEliminationByRows")
-  ;
+  STACK_TRACE("LinearCombination::gaussianEliminationByRows");
   if (carbonCopyMatrix != 0) {
     if (carbonCopyMatrix->numberOfRows != toBeEliminated.size) {
       global.fatal
@@ -5069,7 +5071,7 @@ template <typename Coefficient>
 void Matrix<Coefficient>::getZeroEigenSpaceModifyMe(
   List<Vector<Coefficient> >& output
 ) {
-  MacroRegisterFunctionWithName("Matrix::getZeroEigenSpaceModifyMe");
+  STACK_TRACE("Matrix::getZeroEigenSpaceModifyMe");
   if (this->numberOfRows == 0) {
     output.setSize(this->numberOfColumns);
     for (int i = 0; i < this->numberOfColumns; i ++) {
@@ -5644,7 +5646,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   if (this->size() == 0) {
     return "0";
   }
-  MacroRegisterFunctionWithName("LinearCombination::toString");
+  STACK_TRACE("LinearCombination::toString");
   std::stringstream out;
   List<TemplateMonomial> sortedMons;
   sortedMons = this->monomials;
@@ -7177,7 +7179,7 @@ public:
     return out.str();
   }
   void operator*=(const MonomialMatrix& other) {
-    MacroRegisterFunctionWithName("MonomialMatrix::operator*=");
+    STACK_TRACE("MonomialMatrix::operator*=");
     if (this == &other) {
       MonomialMatrix otherCopy;
       otherCopy = other;
@@ -7354,9 +7356,7 @@ public:
   void lieBracketOnTheLeft(
     const MatrixTensor<Coefficient>& standsOnTheLeft
   ) {
-    MacroRegisterFunctionWithName(
-      "MatrixTensor<Coefficient>::lieBracketOnTheLeft"
-    );
+    STACK_TRACE("MatrixTensor<Coefficient>::lieBracketOnTheLeft");
     MatrixTensor<Coefficient> output;
     MonomialMatrix monomial;
     output.makeZero();

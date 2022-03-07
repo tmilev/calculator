@@ -1411,9 +1411,7 @@ void FiniteGroup<elementSomeGroup>::makeIdentity(elementSomeGroup& e) {
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::
 computeConjugacyClassesSizesRepresentativesWords() {
-  MacroRegisterFunctionWithName(
-    "FiniteGroup::computeConjugacyClassesSizesRepresentativesWords"
-  );
+  STACK_TRACE("FiniteGroup::computeConjugacyClassesSizesRepresentativesWords");
   this->checkConsistency();
   if (this->getWordByFormula != 0) {
     this->flagWordsComputed = true;

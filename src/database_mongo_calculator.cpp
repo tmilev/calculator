@@ -4,9 +4,7 @@
 bool CalculatorDatabaseFunctions::executeMongoQuery(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorDatabaseFunctions::executeMongoQuery"
-  );
+  STACK_TRACE("CalculatorDatabaseFunctions::executeMongoQuery");
   if (!global.userDefaultHasAdminRights()) {
     return
     output.assignValue(

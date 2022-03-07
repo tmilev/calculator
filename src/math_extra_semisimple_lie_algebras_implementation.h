@@ -70,7 +70,7 @@ void Weight<Coefficient>::accountSingleWeight(
   // This is the Brauer-Klimyk formula. Reference:
   // Humphreys J., Introduction to Lie algebras and representation theory
   // page 142, exercise 9.
-  MacroRegisterFunctionWithName("Weight_CoefficientType::accountSingleWeight");
+  STACK_TRACE("Weight_CoefficientType::accountSingleWeight");
   this->checkNonZeroOwner();
   Vector<Rational> dominant = currentWeightSimpleCoords;
   dominant += otherHighestWeightSimpleCoords;
@@ -111,7 +111,7 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   // This is the Brauer-Klimyk formula. Reference:
   // Humphreys J. Introduction to Lie algebras and representation theory
   // page 142, exercise 9.
-  MacroRegisterFunctionWithName("Weight_CoefficientType::tensorAndDecompose");
+  STACK_TRACE("Weight_CoefficientType::tensorAndDecompose");
   this->checkNonZeroOwner();
   std::stringstream errorLog;
   std::string tempS;
@@ -177,7 +177,7 @@ freudenthalEvaluateMeFullCharacter(
   int upperBoundNumDominantWeights,
   std::string* outputDetails
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "charSSAlgMod_CoefficientType::freudenthalEvaluateMeFullCharacter"
   );
   this->checkNonZeroOwner();
@@ -283,7 +283,7 @@ freudenthalEvalMeDominantWeightsOnly(
   int upperBoundNumDominantWeights,
   std::string* outputDetails
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "charSSAlgMod_CoefficientType::freudenthalEvalMeDominantWeightsOnly"
   );
   if (&outputCharOwnerSetToZero == this) {
@@ -380,7 +380,7 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
   inputElementsToCentralize,
   List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getCommonCentralizer");
+  STACK_TRACE("SemisimpleLieAlgebra::getCommonCentralizer");
   Matrix<Coefficient> currentAdjointOperator, commonAdjointOperator;
   for (int i = 0; i < inputElementsToCentralize.size; i ++) {
     this->getAdjoint(currentAdjointOperator, inputElementsToCentralize[i]);
@@ -562,7 +562,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   int upperBoundWeights,
   bool useMultiplicities
 ) {
-  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::drawMe");
+  STACK_TRACE("CharacterSemisimpleLieAlgebraModule::drawMe");
   this->checkNonZeroOwner();
   CharacterSemisimpleLieAlgebraModule<Coefficient> CharCartan;
   bool result =
@@ -958,7 +958,7 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
   const ElementSemisimpleLieAlgebra<Coefficient>& left,
   const ElementSemisimpleLieAlgebra<Coefficient>& right
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getKillingForm");
+  STACK_TRACE("SemisimpleLieAlgebra::getKillingForm");
   Coefficient result = 0;
   ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMonomial, element;
   ChevalleyGenerator baseGenerator;
@@ -978,9 +978,7 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   const ElementSemisimpleLieAlgebra<Coefficient>& element,
   Matrix<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::getElementStandardRepresentation"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::getElementStandardRepresentation");
   char dynkinType = 0;
   if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
     return false;
@@ -1004,9 +1002,7 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "SemisimpleLieAlgebra::getElementStandardRepresentation"
-  );
+  STACK_TRACE("SemisimpleLieAlgebra::getElementStandardRepresentation");
   char dynkinType = 0;
   if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
     if (commentsOnFailure != nullptr) {
@@ -1092,7 +1088,7 @@ accumulateChevalleyGeneratorStandardRepresentationInTypeA(
   const Coefficient& coefficient,
   Matrix<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA"
   );
   if (element.isInCartan(nullptr)) {
@@ -1184,7 +1180,7 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::applyTo(
   const ElementSemisimpleLieAlgebra<Coefficient>& input,
   ElementSemisimpleLieAlgebra<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::applyTo");
+  STACK_TRACE("LinearMapSemisimpleLieAlgebra::applyTo");
   if (&input == &output) {
     ElementSemisimpleLieAlgebra<Coefficient> copy = input;
     this->applyTo(copy, output);
@@ -1224,9 +1220,7 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::findEigenSpace(
   const Coefficient& eigenValue,
   List<ElementSemisimpleLieAlgebra<Coefficient> >& outputBasis
 ) {
-  MacroRegisterFunctionWithName(
-    "LinearMapSemisimpleLieAlgebra::findEigenSpace"
-  );
+  STACK_TRACE("LinearMapSemisimpleLieAlgebra::findEigenSpace");
   outputBasis.clear();
   Matrix<Coefficient> matrix;
   this->getMatrix(matrix);
@@ -1249,7 +1243,7 @@ template <class Coefficient>
 void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(
   Matrix<Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("LinearMapSemisimpleLieAlgebra::getMatrix");
+  STACK_TRACE("LinearMapSemisimpleLieAlgebra::getMatrix");
   if (this->imagesChevalleyGenerators.size == 0) {
     output.makeZero();
     return;

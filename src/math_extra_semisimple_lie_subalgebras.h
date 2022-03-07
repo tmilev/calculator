@@ -592,7 +592,7 @@ public:
   ) const;
   const CandidateSemisimpleSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other) {
-    MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
+    STACK_TRACE("SemisimpleSubalgebras::operator==");
     if (this->owner == other.owner) {
       return true;
     }

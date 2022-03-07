@@ -27,7 +27,7 @@ CalculatorHTML::Test::Test() {
 }
 
 bool CalculatorHTML::Test::computeTotalFiles() {
-  MacroRegisterFunctionWithName("CalculatorHTML::Test::computeTotalFiles");
+  STACK_TRACE("CalculatorHTML::Test::computeTotalFiles");
   std::stringstream commentsOnFailure;
   if (
     !FileOperations::getFolderFileNamesVirtual(
@@ -84,9 +84,7 @@ std::string CalculatorHTML::toStringLinkFromProblem(
 std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(
   int rowIndex
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow"
-  );
+  STACK_TRACE("CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow");
   std::stringstream out;
   out << "<tr>";
   out << "<td style = 'min-width:25px'>" << rowIndex << ". </td>";
@@ -376,7 +374,7 @@ bool CalculatorHTML::Test::builtInMultiple(
 bool CalculatorHTML::Test::builtIn(
   int inputFirstFileIndex, int inputFilesToInterpret, int inputRandomSeed
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::Test::builtIn");
+  STACK_TRACE("CalculatorHTML::Test::builtIn");
   this->firstFileIndex = inputFirstFileIndex;
   this->filesToInterpret = inputFilesToInterpret;
   this->randomSeed = inputRandomSeed;
@@ -502,7 +500,7 @@ bool TopicElementParser::Test::defaultPdfsOKCrashOnFailure() {
 }
 
 bool TopicElementParser::Test::defaultPdfsOK(int& whichTopic) {
-  MacroRegisterFunctionWithName("TopicElementParser::Test::defaultPdfsOK");
+  STACK_TRACE("TopicElementParser::Test::defaultPdfsOK");
   CourseList courses;
   if (!courses.load()) {
     this->comments
@@ -532,9 +530,7 @@ bool TopicElementParser::Test::defaultPdfsOK(int& whichTopic) {
 }
 
 bool TopicElementParser::Test::defaultTopicListsOK() {
-  MacroRegisterFunctionWithName(
-    "TopicElementParser::Test::defaultTopicListsOK"
-  );
+  STACK_TRACE("TopicElementParser::Test::defaultTopicListsOK");
   CourseList courses;
   if (!courses.load()) {
     this->comments
@@ -632,7 +628,7 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
 bool CalculatorFunctions::testTopicListProblems(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::testTopicListProblems");
+  STACK_TRACE("CalculatorFunctions::testTopicListProblems");
   if (!global.userDefaultHasAdminRights()) {
     return
     calculator
@@ -647,9 +643,7 @@ bool CalculatorFunctions::testTopicListProblems(
 bool CalculatorFunctions::testProblemInterpretation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::testProblemInterpretation"
-  );
+  STACK_TRACE("CalculatorFunctions::testProblemInterpretation");
   if (!global.userDefaultHasAdminRights()) {
     return
     calculator
@@ -683,9 +677,7 @@ bool CalculatorFunctions::testProblemInterpretation(
 bool CalculatorFunctions::intervalClosedFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::intervalClosedFromSequence"
-  );
+  STACK_TRACE("CalculatorFunctions::intervalClosedFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -699,9 +691,7 @@ bool CalculatorFunctions::intervalClosedFromSequence(
 bool CalculatorFunctions::intervalOpenFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::intervalOpenFromSequence"
-  );
+  STACK_TRACE("CalculatorFunctions::intervalOpenFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -715,9 +705,7 @@ bool CalculatorFunctions::intervalOpenFromSequence(
 bool CalculatorFunctions::intervalRightClosedFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::intervalRightClosedFromSequence"
-  );
+  STACK_TRACE("CalculatorFunctions::intervalRightClosedFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -731,9 +719,7 @@ bool CalculatorFunctions::intervalRightClosedFromSequence(
 bool CalculatorFunctions::intervalLeftClosedFromSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::intervalLeftClosedFromSequence"
-  );
+  STACK_TRACE("CalculatorFunctions::intervalLeftClosedFromSequence");
   if (input.size() != 2) {
     return false;
   }
@@ -747,9 +733,7 @@ bool CalculatorFunctions::intervalLeftClosedFromSequence(
 bool CalculatorFunctions::getFirstSummandContaining(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::getFirstSummandContaining"
-  );
+  STACK_TRACE("CalculatorFunctions::getFirstSummandContaining");
   if (!input.startsWithGivenOperation("GetFirstSummandContaining", 3)) {
     return false;
   }
@@ -767,7 +751,7 @@ bool CalculatorFunctions::getFirstSummandContaining(
 bool CalculatorFunctions::getSummand(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::getSummand");
+  STACK_TRACE("CalculatorFunctions::getSummand");
   if (!input.startsWithGivenOperation("GetSummand", 3)) {
     return false;
   }
@@ -874,9 +858,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   Expression& output,
   bool vectorsAreNormalized
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::plotDirectionOrVectorField"
-  );
+  STACK_TRACE("CalculatorFunctions::plotDirectionOrVectorField");
   (void) vectorsAreNormalized;
   if (input.size() < 5) {
     return
@@ -1024,9 +1006,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
 bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256"
-  );
+  STACK_TRACE("CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256");
   if (input.size() != 4) {
     return
     calculator
@@ -1078,9 +1058,7 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
 bool CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys"
-  );
+  STACK_TRACE("CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys");
   if (!global.userDefaultHasAdminRights()) {
     return
     calculator
@@ -1101,9 +1079,7 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys(
 bool CalculatorFunctionsEncoding::convertHexToString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsEncoding::convertHexToString"
-  );
+  STACK_TRACE("CalculatorFunctionsEncoding::convertHexToString");
   if (input.size() != 2) {
     return false;
   }
@@ -1127,9 +1103,7 @@ bool CalculatorFunctionsEncoding::convertHexToString(
 bool CalculatorFunctionsEncoding::convertIntegerToHex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsEncoding::convertIntegerToHex"
-  );
+  STACK_TRACE("CalculatorFunctionsEncoding::convertIntegerToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -1158,9 +1132,7 @@ bool CalculatorFunctionsEncoding::convertIntegerToHex(
 bool CalculatorFunctionsEncoding::convertHexToInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsEncoding::convertHexToInteger"
-  );
+  STACK_TRACE("CalculatorFunctionsEncoding::convertHexToInteger");
   if (input.size() != 2) {
     return false;
   }
@@ -1188,7 +1160,7 @@ bool CalculatorFunctionsEncoding::convertHexToInteger(
 bool CalculatorFunctionsEncoding::testJSON(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::testJSON");
+  STACK_TRACE("CalculatorFunctionsEncoding::testJSON");
   if (input.size() != 2) {
     return false;
   }
@@ -1215,9 +1187,7 @@ bool CalculatorFunctionsEncoding::testJSON(
 bool CalculatorFunctionsEncoding::convertBase64ToHex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsEncoding::convertBase64ToHex"
-  );
+  STACK_TRACE("CalculatorFunctionsEncoding::convertBase64ToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -1243,9 +1213,7 @@ bool CalculatorFunctionsEncoding::convertBase64ToHex(
 bool CalculatorFunctionsCrypto::generateRandomPrime(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsCrypto::generateRandomPrime"
-  );
+  STACK_TRACE("CalculatorFunctionsCrypto::generateRandomPrime");
   if (input.size() != 2) {
     return false;
   }
@@ -1274,7 +1242,7 @@ bool CalculatorFunctionsCrypto::generateRandomPrime(
 bool CalculatorFunctionsCrypto::testRSASign(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::testRSASign");
+  STACK_TRACE("CalculatorFunctionsCrypto::testRSASign");
   if (input.size() != 4) {
     return
     calculator
@@ -1352,7 +1320,7 @@ bool CalculatorFunctionsCrypto::testRSASign(
 bool CalculatorFunctionsCrypto::RSAEncrypt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::RSAEncrypt");
+  STACK_TRACE("CalculatorFunctionsCrypto::RSAEncrypt");
   if (input.size() != 4) {
     return false;
   }
@@ -1386,7 +1354,7 @@ bool CalculatorFunctionsCrypto::RSAEncrypt(
 bool CalculatorFunctions::sendEmailWithMailGun(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::sendEmailWithMailGun");
+  STACK_TRACE("CalculatorFunctions::sendEmailWithMailGun");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Sending mail available to logged-in admins only. ";
   }
@@ -1418,7 +1386,7 @@ bool CalculatorFunctions::sendEmailWithMailGun(
 bool CalculatorFunctions::isSquare(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::isSquare");
+  STACK_TRACE("CalculatorFunctions::isSquare");
   if (input.size() != 2) {
     return false;
   }
@@ -1454,7 +1422,7 @@ bool CalculatorFunctions::isSquare(
 bool CalculatorFunctions::isSquareFree(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::isSquareFree");
+  STACK_TRACE("CalculatorFunctions::isSquareFree");
   if (input.size() != 2) {
     return false;
   }
@@ -1488,7 +1456,7 @@ bool CalculatorFunctions::isSquareFree(
 bool CalculatorFunctions::isSquareFreePolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::isSquareFreePolynomial");
+  STACK_TRACE("CalculatorFunctions::isSquareFreePolynomial");
   if (input.size() != 2) {
     return false;
   }
@@ -1509,7 +1477,7 @@ bool CalculatorFunctions::isSquareFreePolynomial(
 bool CalculatorFunctions::isPower(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::isPower");
+  STACK_TRACE("CalculatorFunctions::isPower");
   if (input.size() != 2) {
     return false;
   }
@@ -1549,8 +1517,7 @@ bool CalculatorFunctions::isPower(
 bool CalculatorFunctions::numberOfIntegerDivisors(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::numberOfIntegerDivisors")
-  ;
+  STACK_TRACE("CalculatorFunctions::numberOfIntegerDivisors");
   if (input.size() != 2) {
     return false;
   }
@@ -1577,7 +1544,7 @@ bool CalculatorFunctions::numberOfIntegerDivisors(
 bool CalculatorFunctions::factorInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::factorInteger");
+  STACK_TRACE("CalculatorFunctions::factorInteger");
   if (input.size() != 2) {
     return false;
   }
@@ -1588,7 +1555,7 @@ bool CalculatorFunctions::factorInteger(
 bool CalculatorFunctions::functionFactorInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::functionFactorInteger");
+  STACK_TRACE("CalculatorFunctions::functionFactorInteger");
   LargeInteger integer;
   int upperBound = 30000;
   int opFactorInteger = calculator.operations.getIndexNoFail("FactorInteger");
@@ -1654,7 +1621,7 @@ bool CalculatorFunctions::functionFactorInteger(
 bool CalculatorFunctions::factorOutNumberContent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::factorOutNumberContent");
+  STACK_TRACE("CalculatorFunctions::factorOutNumberContent");
   if (input.size() != 2) {
     return calculator << "FactorOutNumberContent expects single argument. ";
   }
@@ -1691,7 +1658,7 @@ bool CalculatorFunctions::factorOutNumberContent(
 bool CalculatorFunctions::subList(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::subList");
+  STACK_TRACE("CalculatorFunctions::subList");
   if (input.size() != 3) {
     return false;
   }
@@ -1737,7 +1704,7 @@ bool CalculatorFunctions::subList(
 bool CalculatorFunctions::applyToList(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::applyToList");
+  STACK_TRACE("CalculatorFunctions::applyToList");
   if (input.size() != 3) {
     return false;
   }
@@ -1758,7 +1725,7 @@ bool CalculatorFunctions::applyToList(
 bool CalculatorFunctions::matchesPattern(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::matchesPattern");
+  STACK_TRACE("CalculatorFunctions::matchesPattern");
   if (input.size() != 3) {
     return false;
   }
@@ -1801,7 +1768,7 @@ bool CalculatorFunctions::matchesPattern(
 bool CalculatorFunctions::degreesToRadians(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::degreesToRadians");
+  STACK_TRACE("CalculatorFunctions::degreesToRadians");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -1818,7 +1785,7 @@ bool CalculatorFunctions::degreesToRadians(
 bool CalculatorFunctions::lessThanOrEqualTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::lessThanOrEqualTo");
+  STACK_TRACE("CalculatorFunctions::lessThanOrEqualTo");
   if (input.size() != 3) {
     return false;
   }
@@ -1833,7 +1800,7 @@ bool CalculatorFunctions::lessThanOrEqualTo(
 bool CalculatorFunctions::greaterThanOrEqualTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::greaterThanOrEqualTo");
+  STACK_TRACE("CalculatorFunctions::greaterThanOrEqualTo");
   if (input.size() != 3) {
     return false;
   }
@@ -1861,7 +1828,7 @@ bool CalculatorFunctions::greaterThanOrEqualTo(
 bool CalculatorFunctions::greaterThan(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::greaterThan");
+  STACK_TRACE("CalculatorFunctions::greaterThan");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1889,7 +1856,7 @@ bool CalculatorFunctions::greaterThan(
 bool CalculatorFunctions::lessThan(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::lessThan");
+  STACK_TRACE("CalculatorFunctions::lessThan");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1903,7 +1870,7 @@ bool CalculatorFunctions::lessThan(
 bool CalculatorFunctions::collectOpands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::collectOpands");
+  STACK_TRACE("CalculatorFunctions::collectOpands");
   if (input.size() != 3) {
     return false;
   }
@@ -1920,7 +1887,7 @@ bool CalculatorFunctions::collectOpands(
 bool CalculatorFunctions::collectMultiplicands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::outerCollectSummands");
+  STACK_TRACE("CalculatorFunctions::outerCollectSummands");
   if (input.size() != 2) {
     return false;
   }
@@ -1934,7 +1901,7 @@ bool CalculatorFunctions::collectMultiplicands(
 bool CalculatorFunctions::collectSummands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::collectSummands");
+  STACK_TRACE("CalculatorFunctions::collectSummands");
   if (input.size() != 2) {
     return false;
   }
@@ -2017,9 +1984,7 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(
 bool CalculatorFunctionsIntervals::intersectIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsIntervals::intersectIntervals"
-  );
+  STACK_TRACE("CalculatorFunctionsIntervals::intersectIntervals");
   if (!input.startsWith(calculator.opIntersection(), 3)) {
     return false;
   }
@@ -2154,9 +2119,7 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
 bool CalculatorFunctionsIntervals::unionUnionIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsIntervals::unionUnionIntervals"
-  );
+  STACK_TRACE("CalculatorFunctionsIntervals::unionUnionIntervals");
   if (input.size() != 3) {
     return false;
   }
@@ -2187,7 +2150,7 @@ bool CalculatorFunctionsIntervals::unionUnionIntervals(
 bool CalculatorFunctionsIntervals::unionIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::unionIntervals");
+  STACK_TRACE("CalculatorFunctions::unionIntervals");
   if (input.size() != 3) {
     return false;
   }
@@ -2325,9 +2288,7 @@ bool CalculatorFunctionsIntervals::unionIntervals(
 bool CalculatorFunctionsIntervals::normalizeIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsIntervals::outerNormalizeIntervals"
-  );
+  STACK_TRACE("CalculatorFunctionsIntervals::outerNormalizeIntervals");
   if (input.size() != 2) {
     return false;
   }
@@ -2350,9 +2311,7 @@ bool CalculatorFunctionsIntervals::normalizeIntervals(
 bool CalculatorFunctionsListsAndSets::unionEmptySet(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsListsAndSets::unionEmptySet"
-  );
+  STACK_TRACE("CalculatorFunctionsListsAndSets::unionEmptySet");
   if (!input.startsWith(calculator.opUnion(), 3)) {
     return false;
   }
@@ -2370,9 +2329,7 @@ bool CalculatorFunctionsListsAndSets::unionEmptySet(
 bool CalculatorFunctionsListsAndSets::intersectUnion(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsListsAndSets::intersectUnion"
-  );
+  STACK_TRACE("CalculatorFunctionsListsAndSets::intersectUnion");
   return
   CalculatorBasics::distribute(
     calculator,
@@ -2387,9 +2344,7 @@ bool CalculatorFunctionsListsAndSets::intersectUnion(
 bool CalculatorFunctions::compareIntervalsNumerically(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::compareIntervalsNumerically"
-  );
+  STACK_TRACE("CalculatorFunctions::compareIntervalsNumerically");
   if (input.size() != 4) {
     return
     calculator
@@ -2467,7 +2422,7 @@ bool CalculatorFunctions::compareIntervalsNumerically(
 bool CalculatorFunctions::intersectEmptySet(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::intersectEmptySet");
+  STACK_TRACE("CalculatorFunctions::intersectEmptySet");
   if (!input.startsWith(calculator.opIntersection(), 3)) {
     return false;
   }
@@ -2485,7 +2440,7 @@ bool CalculatorFunctions::intersectEmptySet(
 bool CalculatorFunctions::isLinearOrConstantIn(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::isLinearOrConstantIn");
+  STACK_TRACE("CalculatorFunctions::isLinearOrConstantIn");
   if (input.size() < 3) {
     return false;
   }
@@ -2512,9 +2467,7 @@ bool CalculatorFunctions::isLinearOrConstantIn(
 bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::isProductLinearOrConstantTermsIn"
-  );
+  STACK_TRACE("CalculatorFunctions::isProductLinearOrConstantTermsIn");
   if (input.size() < 3) {
     return false;
   }
@@ -2559,7 +2512,7 @@ bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
 bool CalculatorFunctions::orIdentical(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::orIdentical");
+  STACK_TRACE("CalculatorFunctions::orIdentical");
   (void) calculator;
   if (!input.startsWithGivenOperation("or", 3)) {
     return false;
@@ -2574,7 +2527,7 @@ bool CalculatorFunctions::orIdentical(
 bool CalculatorFunctions::distributeSqrt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::distributeSqrt");
+  STACK_TRACE("Calculator::distributeSqrt");
   if (!input.startsWith(calculator.opSqrt(), 3)) {
     return false;
   }
@@ -2615,9 +2568,7 @@ bool CalculatorFunctions::distributeSqrt(
 bool CalculatorFunctionsAlgebraic::isAlgebraicRadical(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsAlgebraic::isAlgebraicRadical"
-  );
+  STACK_TRACE("CalculatorFunctionsAlgebraic::isAlgebraicRadical");
   if (input.size() != 2) {
     return false;
   }
@@ -2628,7 +2579,7 @@ bool CalculatorFunctionsAlgebraic::isAlgebraicRadical(
 bool CalculatorFunctions::isReal(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::isReal");
+  STACK_TRACE("CalculatorFunctions::isReal");
   if (input.size() != 2) {
     return false;
   }
@@ -2641,7 +2592,7 @@ bool CalculatorFunctions::isReal(
 bool CalculatorFunctions::expressionToUTF8String(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::expressiontoUTF8String");
+  STACK_TRACE("CalculatorFunctions::expressiontoUTF8String");
   if (input.size() > 2) {
     Expression argumentSequence = input;
     argumentSequence.setChildAtomValue(0, calculator.opSequence());
@@ -2653,8 +2604,7 @@ bool CalculatorFunctions::expressionToUTF8String(
 bool CalculatorFunctions::isProductTermsUpToPower(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::isProductTermsUpToPower")
-  ;
+  STACK_TRACE("CalculatorFunctions::isProductTermsUpToPower");
   if (input.size() < 3) {
     return false;
   }
@@ -2724,7 +2674,7 @@ bool CalculatorFunctions::isProductTermsUpToPower(
 bool CalculatorFunctions::scaleToLeadingUnit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::scaleToLeadingUnit");
+  STACK_TRACE("CalculatorFunctions::scaleToLeadingUnit");
   if (input.size() != 2) {
     return false;
   }
@@ -2738,9 +2688,7 @@ bool CalculatorFunctions::scaleToLeadingUnit(
 bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsBinaryOps::powerRatByRatReducePrimeFactors"
-  );
+  STACK_TRACE("CalculatorFunctionsBinaryOps::powerRatByRatReducePrimeFactors");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -2780,7 +2728,7 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
 bool CalculatorFunctions::newtonsMethod(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::newtonsMethod");
+  STACK_TRACE("CalculatorFunctions::newtonsMethod");
   if (input.size() != 4) {
     return false;
   }
@@ -2866,9 +2814,7 @@ bool CalculatorFunctions::newtonsMethod(
 bool CalculatorFunctions::valueOfModularExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::valueOfModularExpression"
-  );
+  STACK_TRACE("CalculatorFunctions::valueOfModularExpression");
   if (input.size() != 2) {
     return false;
   }
@@ -2903,9 +2849,7 @@ bool CalculatorFunctions::valueOfModularExpression(
 bool CalculatorFunctions::elementEllipticCurveNormalForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::elementEllipticCurveNormalForm"
-  );
+  STACK_TRACE("CalculatorFunctions::elementEllipticCurveNormalForm");
   if (input.size() != 4) {
     return
     calculator
@@ -3095,9 +3039,7 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
 bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure"
-  );
+  STACK_TRACE("CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure");
   if (!global.response.monitoringAllowed()) {
     global.response.initiate(
       "Triggered by precomputeSemisimpleLieAlgebraStructure."
@@ -3192,9 +3134,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
 bool CalculatorFunctionsCrypto::showKnownObjectIds(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsCrypto::showKnownObjectIds"
-  );
+  STACK_TRACE("CalculatorFunctionsCrypto::showKnownObjectIds");
   (void) input;
   return
   output.assignValue(
@@ -3205,7 +3145,7 @@ bool CalculatorFunctionsCrypto::showKnownObjectIds(
 bool CalculatorFunctionsCrypto::testASN1Decode(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::testASN1Decode");
+  STACK_TRACE("CalculatorFunctions::testASN1Decode");
   if (input.size() != 2) {
     return false;
   }
@@ -3256,7 +3196,7 @@ bool CalculatorFunctions::isInteger(
 bool CalculatorFunctions::determinantPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::determinantPolynomial");
+  STACK_TRACE("CalculatorFunctions::determinantPolynomial");
   if (input.size() != 2) {
     return false;
   }
@@ -3299,9 +3239,7 @@ bool CalculatorFunctions::determinantPolynomial(
 bool CalculatorFunctions::generateMultiplicativelyClosedSet(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::generateMultiplicativelyClosedSet"
-  );
+  STACK_TRACE("CalculatorFunctions::generateMultiplicativelyClosedSet");
   if (input.size() <= 2) {
     return
     output.assignError(
@@ -3453,9 +3391,7 @@ bool Matrix<Rational>::jordanNormalForm(
 bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsLinearAlgebra::diagonalizeMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsLinearAlgebra::diagonalizeMatrix");
   if (input.size() != 2) {
     return false;
   }
@@ -3506,9 +3442,7 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
 bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctionsLinearAlgebra::functionToMatrix"
-  );
+  STACK_TRACE("CalculatorFunctionsLinearAlgebra::functionToMatrix");
   if (!input.isListNElements(4)) {
     return false;
   }
@@ -3557,7 +3491,7 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
 bool CalculatorFunctions::suffixNotationForPostScript(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::suffixNotationForPostScript");
+  STACK_TRACE("Calculator::suffixNotationForPostScript");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (*counter.counter == calculator.maximumRecursionDepth - 2) {
     return output.assignValue(calculator, std::string("..."));
@@ -3895,7 +3829,7 @@ bool StringRoutines::isLatinLetterOrDigitSequence(const std::string& input) {
 bool CalculatorFunctions::jacobiSymbol(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::jacobiSymbol");
+  STACK_TRACE("Calculator::jacobiSymbol");
   global.fatal << "Function not implemented yet." << global.fatal;
   (void) calculator;
   (void) output;

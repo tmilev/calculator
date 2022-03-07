@@ -25,9 +25,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   std::stringstream& argumentProcessingFailureComments,
   std::stringstream& comments
 ) {
-  MacroRegisterFunctionWithName(
-    "WebAPIResponse::serveResponseFalseIfUnrecognized"
-  );
+  STACK_TRACE("WebAPIResponse::serveResponseFalseIfUnrecognized");
   if (
     global.flagLoggedIn &&
     global.userDefaultHasAdminRights() &&
@@ -203,9 +201,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
 }
 
 bool WebAPIResponse::processCalculatorExamplesJSON() {
-  MacroRegisterFunctionWithName(
-    "WebAPIResponse::processCalculatorExamplesJSON"
-  );
+  STACK_TRACE("WebAPIResponse::processCalculatorExamplesJSON");
   global.response.writeResponse(
     global.calculator().getElement().examples.toJSONFunctionHandlers(),
     false
@@ -214,7 +210,7 @@ bool WebAPIResponse::processCalculatorExamplesJSON() {
 }
 
 bool WebAPIResponse::processServerStatusJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processServerStatusJSON");
+  STACK_TRACE("WebAPIResponse::processServerStatusJSON");
   this->owner->setHeaderOKNoContentLength("");
   std::stringstream out;
   out
@@ -229,7 +225,7 @@ bool WebAPIResponse::processServerStatusJSON() {
 }
 
 bool WebAPIResponse::processUnpauseWorker() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processUnpauseWorker");
+  STACK_TRACE("WebAPIResponse::processUnpauseWorker");
   this->owner->setHeaderOKNoContentLength("");
   JSData progressReader, result;
   int indexWorker = this->owner->getIndexIfRunningWorkerId(progressReader);
@@ -247,7 +243,7 @@ bool WebAPIResponse::processUnpauseWorker() {
 }
 
 bool WebAPIResponse::processPauseWorker() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processPauseWorker");
+  STACK_TRACE("WebAPIResponse::processPauseWorker");
   this->owner->setHeaderOKNoContentLength("");
   JSData progressReader, result;
   int indexWorker = this->owner->getIndexIfRunningWorkerId(progressReader);
@@ -265,7 +261,7 @@ bool WebAPIResponse::processPauseWorker() {
 }
 
 bool WebAPIResponse::processComputationIndicator() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processComputationIndicator");
+  STACK_TRACE("WebAPIResponse::processComputationIndicator");
   this->owner->setHeaderOKNoContentLength("");
   global << "Processing get request indicator." << Logger::endL;
   JSData result = this->owner->processComputationIndicatorJSData();
@@ -273,7 +269,7 @@ bool WebAPIResponse::processComputationIndicator() {
 }
 
 bool WebAPIResponse::processSignUp() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processSignUp");
+  STACK_TRACE("WebAPIResponse::processSignUp");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(
@@ -284,7 +280,7 @@ bool WebAPIResponse::processSignUp() {
 bool WebAPIResponse::processChangePassword(
   const std::string& reasonForNoAuthentication
 ) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processChangePassword");
+  STACK_TRACE("WebAPIResponse::processChangePassword");
   (void) reasonForNoAuthentication;
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
@@ -394,9 +390,7 @@ bool WebAPIResponse::processChangePassword(
 }
 
 void WebAPIResponse::initializeCalculatorComputation() {
-  MacroRegisterFunctionWithName(
-    "WebAPIResponse::initializeCalculatorComputation"
-  );
+  STACK_TRACE("WebAPIResponse::initializeCalculatorComputation");
   if (this->owner != nullptr) {
     this->owner->setHeaderOKNoContentLength("");
   }
@@ -409,7 +403,7 @@ void WebAPIResponse::initializeCalculatorComputation() {
 }
 
 bool WebAPIResponse::processCompute() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCompute");
+  STACK_TRACE("WebAPIResponse::processCompute");
   this->initializeCalculatorComputation();
   Calculator& calculator = global.calculator().getElement();
   calculator.inputString =
@@ -434,7 +428,7 @@ bool WebAPIResponse::processCompute() {
 }
 
 JSData WebAPIResponse::solveJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::solveJSON");
+  STACK_TRACE("WebAPIResponse::solveJSON");
   this->initializeCalculatorComputation();
   Calculator& calculator = global.calculator().getElement();
   calculator.inputString =
@@ -457,7 +451,7 @@ JSData WebAPIResponse::solveJSON() {
 }
 
 JSData WebAPIResponse::compareExpressions(bool hideDesiredAnswer) {
-  MacroRegisterFunctionWithName("WebAPIResponse::compareExpressions");
+  STACK_TRACE("WebAPIResponse::compareExpressions");
   std::string given =
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::request::compareExpressionsGiven),
@@ -476,7 +470,7 @@ JSData WebAPIResponse::compareExpressions(bool hideDesiredAnswer) {
 }
 
 bool WebAPIResponse::processActivateAccount() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processActivateAccount");
+  STACK_TRACE("WebAPIResponse::processActivateAccount");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   bool notUsed = false;
@@ -486,35 +480,35 @@ bool WebAPIResponse::processActivateAccount() {
 }
 
 bool WebAPIResponse::processLogout() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processLogout");
+  STACK_TRACE("WebAPIResponse::processLogout");
   this->owner->setHeaderOKNoContentLength("");
   Database::get().user.logoutViaDatabase();
   return this->processLoginUserInfo("Coming from logout");
 }
 
 bool WebAPIResponse::processSelectCourseJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processSelectCourseJSON");
+  STACK_TRACE("WebAPIResponse::processSelectCourseJSON");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(WebAPIResponse::getSelectCourseJSON());
 }
 
 bool WebAPIResponse::processTopicListJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processTopicListJSON");
+  STACK_TRACE("WebAPIResponse::processTopicListJSON");
   this->owner->setHeaderOKNoContentLength("");
   JSData resultJSON = WebAPIResponse::getTopicTableJSON();
   return global.response.writeResponse(resultJSON);
 }
 
 bool WebAPIResponse::processSolveJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processSolveJSON");
+  STACK_TRACE("WebAPIResponse::processSolveJSON");
   this->owner->setHeaderOKNoContentLength("");
   JSData resultJSON = this->solveJSON();
   return global.response.writeResponse(resultJSON);
 }
 
 bool WebAPIResponse::processCompareExpressions(bool hideDesiredAnswer) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCompareExpressions");
+  STACK_TRACE("WebAPIResponse::processCompareExpressions");
   this->owner->setHeaderOKNoContentLength("", "text/html");
   JSData resultJSON = this->compareExpressions(hideDesiredAnswer);
   return global.response.writeResponse(resultJSON);
@@ -522,7 +516,7 @@ bool WebAPIResponse::processCompareExpressions(bool hideDesiredAnswer) {
 }
 
 bool WebAPIResponse::processCheckAnswer(bool hideDesiredAnswer) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCheckAnswer");
+  STACK_TRACE("WebAPIResponse::processCheckAnswer");
   this->owner->setHeaderOKNoContentLength("", "text/html");
   JSData resultJSON = WebAPIResponse::checkAnswer(hideDesiredAnswer);
   return global.response.writeResponse(resultJSON);
@@ -530,8 +524,7 @@ bool WebAPIResponse::processCheckAnswer(bool hideDesiredAnswer) {
 }
 
 bool WebAPIResponse::processCalculatorWebWorkerJS(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorWebWorkerJS")
-  ;
+  STACK_TRACE("WebAPIResponse::processCalculatorWebWorkerJS");
   if (appendBuildHash) {
     this->owner->setHeaderOKNoContentLength(
       WebAPI::headerCacheControl, "text/javascript"
@@ -545,7 +538,7 @@ bool WebAPIResponse::processCalculatorWebWorkerJS(bool appendBuildHash) {
 }
 
 bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorOnePageJS");
+  STACK_TRACE("WebAPIResponse::processCalculatorOnePageJS");
   if (appendBuildHash) {
     this->owner->setHeaderOKNoContentLength(
       WebAPI::headerCacheControl, "text/javascript"
@@ -559,7 +552,7 @@ bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
 }
 
 bool WebAPIResponse::processApp(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processApp");
+  STACK_TRACE("WebAPIResponse::processApp");
   this->owner->setHeaderOKNoContentLength("", "text/html");
   this->owner->writeToBody(WebAPIResponse::getApp(appendBuildHash));
   this->owner->sendPending();
@@ -567,9 +560,7 @@ bool WebAPIResponse::processApp(bool appendBuildHash) {
 }
 
 bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
-  MacroRegisterFunctionWithName(
-    "WebAPIResponse::processCompareExpressionsPage"
-  );
+  STACK_TRACE("WebAPIResponse::processCompareExpressionsPage");
   this->owner->setHeaderOKNoContentLength("", "text/html");
   this->owner->writeToBody(
     WebAPIResponse::getCompareExpressionsPage(appendBuildHash)
@@ -579,7 +570,7 @@ bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
 }
 
 bool WebAPIResponse::processLoginUserInfo(const std::string& comments) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processLoginUserInfo");
+  STACK_TRACE("WebAPIResponse::processLoginUserInfo");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(
@@ -588,7 +579,7 @@ bool WebAPIResponse::processLoginUserInfo(const std::string& comments) {
 }
 
 bool WebAPIResponse::processTemplateJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processTemplateJSON");
+  STACK_TRACE("WebAPIResponse::processTemplateJSON");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::getJSONFromTemplate();
@@ -596,13 +587,13 @@ bool WebAPIResponse::processTemplateJSON() {
 }
 
 bool WebAPIResponse::processExamPageJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processExamPageJSON");
+  STACK_TRACE("WebAPIResponse::processExamPageJSON");
   this->owner->setHeaderOKNoContentLength("");
   return global.response.writeResponse(WebAPIResponse::getExamPageJSON());
 }
 
 bool WebAPIResponse::processSetProblemWeight() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processSetProblemWeight");
+  STACK_TRACE("WebAPIResponse::processSetProblemWeight");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::setProblemWeight();
@@ -610,9 +601,7 @@ bool WebAPIResponse::processSetProblemWeight() {
 }
 
 bool WebAPIResponse::processSetProblemDeadline() {
-  MacroRegisterFunctionWithName(
-    "WebAPIResponse::processSetProblemDatabaseInfo"
-  );
+  STACK_TRACE("WebAPIResponse::processSetProblemDatabaseInfo");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::setProblemDeadline();
@@ -620,7 +609,7 @@ bool WebAPIResponse::processSetProblemDeadline() {
 }
 
 bool WebAPIResponse::processAddUserEmails() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processAddUserEmails");
+  STACK_TRACE("WebAPIResponse::processAddUserEmails");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = this->owner->getAddUserEmails();
@@ -628,7 +617,7 @@ bool WebAPIResponse::processAddUserEmails() {
 }
 
 bool WebAPIResponse::processModifyPage() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processModifyPage");
+  STACK_TRACE("WebAPIResponse::processModifyPage");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::modifyProblemReport();
@@ -636,9 +625,7 @@ bool WebAPIResponse::processModifyPage() {
 }
 
 bool WebAPIResponse::processAssignTeacherToSection() {
-  MacroRegisterFunctionWithName(
-    "WebAPIResponse::processAssignTeacherToSection"
-  );
+  STACK_TRACE("WebAPIResponse::processAssignTeacherToSection");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::addTeachersSections();
@@ -646,7 +633,7 @@ bool WebAPIResponse::processAssignTeacherToSection() {
 }
 
 bool WebAPIResponse::processScores() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processScores");
+  STACK_TRACE("WebAPIResponse::processScores");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::getScoresPage();
@@ -654,7 +641,7 @@ bool WebAPIResponse::processScores() {
 }
 
 bool WebAPIResponse::processScoresInCoursePage() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processScoresInCoursePage");
+  STACK_TRACE("WebAPIResponse::processScoresInCoursePage");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::getScoresInCoursePage();
@@ -662,7 +649,7 @@ bool WebAPIResponse::processScoresInCoursePage() {
 }
 
 bool WebAPIResponse::processAccountsJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processAccountsJSON");
+  STACK_TRACE("WebAPIResponse::processAccountsJSON");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(
@@ -671,13 +658,13 @@ bool WebAPIResponse::processAccountsJSON() {
 }
 
 bool WebAPIResponse::processDatabaseJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processDatabaseJSON");
+  STACK_TRACE("WebAPIResponse::processDatabaseJSON");
   this->owner->setHeaderOKNoContentLength("");
   return global.response.writeResponse(this->owner->getDatabaseJSON());
 }
 
 bool WebAPIResponse::processDatabaseDeleteEntry() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processDatabaseDeleteEntry");
+  STACK_TRACE("WebAPIResponse::processDatabaseDeleteEntry");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = this->owner->getDatabaseDeleteOneItem();
@@ -685,7 +672,7 @@ bool WebAPIResponse::processDatabaseDeleteEntry() {
 }
 
 bool WebAPIResponse::processDatabaseModifyEntry() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processDatabaseModifyEntry");
+  STACK_TRACE("WebAPIResponse::processDatabaseModifyEntry");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::error] =
@@ -694,7 +681,7 @@ bool WebAPIResponse::processDatabaseModifyEntry() {
 }
 
 bool WebAPIResponse::processEditPageJSON(bool showSourceRelaxed) {
-  MacroRegisterFunctionWithName("WebAPIResponse::processEditPageJSON");
+  STACK_TRACE("WebAPIResponse::processEditPageJSON");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(
@@ -703,9 +690,7 @@ bool WebAPIResponse::processEditPageJSON(bool showSourceRelaxed) {
 }
 
 bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
-  MacroRegisterFunctionWithName(
-    "WebAPIResponse::processSlidesOrHomeworkFromSource"
-  );
+  STACK_TRACE("WebAPIResponse::processSlidesOrHomeworkFromSource");
   this->owner->setHeaderOKNoContentLength("");
   LaTeXCrawler latexCrawler;
   JSData resultOnError;
@@ -767,7 +752,7 @@ bool LaTeXCrawler::initializeFromGlobalVariables(
 }
 
 bool WebAPIResponse::processSlidesSource() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processSlidesSource");
+  STACK_TRACE("WebAPIResponse::processSlidesSource");
   this->owner->setHeaderOKNoContentLength("");
   LaTeXCrawler latexCrawler;
   JSData result;
@@ -807,19 +792,19 @@ bool WebAPIResponse::processSlidesSource() {
 }
 
 bool WebAPIResponse::processClonePage() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processClonePage");
+  STACK_TRACE("WebAPIResponse::processClonePage");
   this->owner->setHeaderOKNoContentLength("");
   return global.response.writeResponse(this->owner->getClonePageResult());
 }
 
 bool WebAPIResponse::processProblemGiveUp() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processProblemGiveUp");
+  STACK_TRACE("WebAPIResponse::processProblemGiveUp");
   this->owner->setHeaderOKNoContentLength("");
   return global.response.writeResponse(WebAPIResponse::getAnswerOnGiveUp());
 }
 
 bool WebAPIResponse::processPing() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processPing");
+  STACK_TRACE("WebAPIResponse::processPing");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result["ping"] = "ok";
@@ -829,27 +814,27 @@ bool WebAPIResponse::processPing() {
 }
 
 bool WebAPIResponse::processProblemSolution() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processProblemSolution");
+  STACK_TRACE("WebAPIResponse::processProblemSolution");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(WebAPIResponse::getProblemSolutionJSON());
 }
 
 bool WebAPIResponse::processSubmitAnswersPreview() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processSubmitAnswersPreview");
+  STACK_TRACE("WebAPIResponse::processSubmitAnswersPreview");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(WebAPIResponse::submitAnswersPreviewJSON());
 }
 
 bool WebAPIResponse::processSubmitAnswers() {
-  MacroRegisterFunctionWithName("WebWorker::processSubmitAnswers");
+  STACK_TRACE("WebWorker::processSubmitAnswers");
   this->owner->setHeaderOKNoContentLength("");
   return global.response.writeResponse(WebAPIResponse::submitAnswersJSON());
 }
 
 bool WebAPIResponse::processSubmitAnswerHardcoded() {
-  MacroRegisterFunctionWithName("WebWorker::processSubmitAnswerHardcoded");
+  STACK_TRACE("WebWorker::processSubmitAnswerHardcoded");
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(

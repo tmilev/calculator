@@ -91,7 +91,7 @@ WebServerMonitor::WebServerMonitor() {
 }
 
 void WebServerMonitor::backupDatabaseIfNeeded() {
-  MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
+  STACK_TRACE("WebServer::BackupDatabaseIfNeeded");
   if (
     this->timeAtLastBackup > 0 &&
     global.getElapsedSeconds() - this->timeAtLastBackup < (24* 3600)
@@ -122,7 +122,7 @@ void WebServerMonitor::monitor(
     return;
   }
   this->pidServer = pidServer;
-  MacroRegisterFunctionWithName("Monitor");
+  STACK_TRACE("Monitor");
   int maxNumPingFailures = 3;
   // warning: setting global.server().WebServerPingIntervalInSeconds to more
   // than 1000
@@ -291,7 +291,7 @@ void WebClient::initialize() {
     return;
   }
   this->flagContinueWasNeeded = false;
-  MacroRegisterFunctionWithName("WebCrawler::initialize");
+  STACK_TRACE("WebCrawler::initialize");
   this->flagDoUseGET = true;
   buffer.initializeFillInObject(50000, 0);
   this->portOrService = "8155";
@@ -313,7 +313,7 @@ void WebClient::closeEverything() {
 }
 
 void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
-  MacroRegisterFunctionWithName("WebCrawler::PingCalculatorStatus");
+  STACK_TRACE("WebCrawler::PingCalculatorStatus");
   std::stringstream reportStream;
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
@@ -492,7 +492,7 @@ void WebClient::fetchWebPage(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("WebCrawler::fetchWebPage");
+  STACK_TRACE("WebCrawler::fetchWebPage");
   (void) commentsOnFailure;
   (void) commentsGeneral;
   this->transportLayerSecurity.openSSLData.checkCanInitializeToClient();
@@ -680,7 +680,7 @@ void WebClient::fetchWebPagePart2(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
+  STACK_TRACE("WebCrawler::FetchWebPagePart2");
   (void) commentsOnFailure;
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
@@ -866,7 +866,7 @@ void WebClient::fetchWebPagePart2(
 bool CalculatorFunctions::fetchWebPageGET(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::fetchWebPageGET");
+  STACK_TRACE("CalculatorFunctions::fetchWebPageGET");
   if (!global.userDefaultHasAdminRights()) {
     return
     output.assignValue(
@@ -913,7 +913,7 @@ bool CalculatorFunctions::fetchWebPageGET(
 bool CalculatorFunctions::fetchWebPagePOST(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::fetchWebPagePOST");
+  STACK_TRACE("CalculatorFunctions::fetchWebPagePOST");
   if (!global.userDefaultHasAdminRights()) {
     return
     output.assignValue(
@@ -963,7 +963,7 @@ bool CalculatorFunctions::fetchWebPagePOST(
 bool CalculatorFunctions::fetchKnownPublicKeys(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::fetchKnownPublicKeys");
+  STACK_TRACE("CalculatorFunctions::fetchKnownPublicKeys");
   (void) input;
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
@@ -982,7 +982,7 @@ void WebClient::updatePublicKeys(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("WebCrawler::updatePublicKeys");
+  STACK_TRACE("WebCrawler::updatePublicKeys");
   this->serverToConnectTo = "www.googleapis.com";
   this->portOrService = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
@@ -1061,7 +1061,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Crypto::verifyJWTagainstKnownKeys");
+  STACK_TRACE("Crypto::verifyJWTagainstKnownKeys");
   // This function is slightly insecure.
   // If an attacker hijacks a machine connecting the server to the outside
   // and impersonates google
@@ -1160,7 +1160,7 @@ bool WebClient::verifyRecaptcha(
   std::stringstream* commentsGeneralNONsensitive,
   std::stringstream* commentsGeneralSensitive
 ) {
-  MacroRegisterFunctionWithName("WebCrawler::VerifyRecaptcha");
+  STACK_TRACE("WebCrawler::VerifyRecaptcha");
   std::stringstream messageToSendStream;
   std::string secret;
   std::stringstream notUsed;
@@ -1262,7 +1262,7 @@ bool WebClient::verifyRecaptcha(
 }
 
 bool WebAPIResponse::processForgotLogin() {
-  MacroRegisterFunctionWithName("WebAPIResponse::processForgotLogin");
+  STACK_TRACE("WebAPIResponse::processForgotLogin");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   if (!global.flagDatabaseCompiled) {
@@ -1325,7 +1325,7 @@ bool WebAPIResponse::processForgotLogin() {
 }
 
 JSData WebWorker::getSignUpRequestResult() {
-  MacroRegisterFunctionWithName("WebWorker::getSignUpRequestResult");
+  STACK_TRACE("WebWorker::getSignUpRequestResult");
   JSData result;
   std::stringstream errorStream;
   if (!global.flagDatabaseCompiled) {
@@ -1444,7 +1444,7 @@ bool GlobalVariables::Response::writeResponse(
   const JSData& incoming, bool isCrash
 ) {
   MutexlockGuard guard(global.mutexReturnBytes);
-  MacroRegisterFunctionWithName("WebWorker::writeResponse");
+  STACK_TRACE("WebWorker::writeResponse");
   if (!global.flagRunningBuiltInWebServer) {
     if (!isCrash) {
       global << incoming.toString();
@@ -1478,7 +1478,7 @@ bool GlobalVariables::Response::writeResponse(
 
 void GlobalVariables::Response::report(const std::string& input) {
   MutexlockGuard guard(global.mutexReturnBytes);
-  MacroRegisterFunctionWithName("GlobalVariables::Progress::report");
+  STACK_TRACE("GlobalVariables::Progress::report");
   return
   global.server().getActiveWorker().writeAfterTimeoutProgress(input, false);
 }
@@ -1489,7 +1489,7 @@ void GlobalVariables::Response::initiate(const std::string& message) {
     return;
   }
   MutexlockGuard guard(global.mutexReturnBytes);
-  MacroRegisterFunctionWithName("GlobalVariables::Progress::initiate");
+  STACK_TRACE("GlobalVariables::Progress::initiate");
   if (!global.response.monitoringAllowed()) {
     return;
   }

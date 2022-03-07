@@ -65,7 +65,7 @@ struct BranchingData {
   void initializePart1NoSubgroups();
   void initializePart2NoSubgroups();
   void initializeAfterParabolicSelectionAndHomomorphism() {
-    MacroRegisterFunctionWithName(
+    STACK_TRACE(
       "BranchingData::initializeAfterParabolicSelectionAndHomomorphism"
     );
     this->initializePart1NoSubgroups();

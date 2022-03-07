@@ -16,7 +16,7 @@
 #include "string_constants.h"
 
 Expression operator*(const Expression& left, const Expression& right) {
-  MacroRegisterFunctionWithName("operator*(Expression, Expression)");
+  STACK_TRACE("operator*(Expression, Expression)");
   left.checkInitialization();
   Expression result;
   result.makeXOX(*left.owner, left.owner->opTimes(), left, right);
@@ -1118,9 +1118,7 @@ const {
 
 template < >
 SemisimpleLieAlgebra*& Expression::getValueNonConst() const {
-  MacroRegisterFunctionWithName(
-    "Expression::getValueNonConst(SemisimpleLieAlgebra*)"
-  );
+  STACK_TRACE("Expression::getValueNonConst(SemisimpleLieAlgebra*)");
   if (!this->isOfType<SemisimpleLieAlgebra*>()) {
     global.fatal
     << "Expression not of required type "
@@ -1286,7 +1284,7 @@ const {
 bool Expression::isMatrix(
   int* outputNumberOfRows, int* outputNumberOfColumns
 ) const {
-  MacroRegisterFunctionWithName("Expression::isMatrix");
+  STACK_TRACE("Expression::isMatrix");
   if (this->owner == nullptr) {
     return false;
   }
@@ -1311,7 +1309,7 @@ bool Expression::isMatrix(
 }
 
 bool Expression::checkConsistencyRecursively() const {
-  MacroRegisterFunctionWithName("Expression::checkConsistencyRecursively");
+  STACK_TRACE("Expression::checkConsistencyRecursively");
   this->checkConsistency();
   for (int i = 0; i < this->children.size; i ++) {
     (*this)[i].checkConsistency();
@@ -1320,7 +1318,7 @@ bool Expression::checkConsistencyRecursively() const {
 }
 
 bool Expression::checkConsistency() const {
-  MacroRegisterFunctionWithName("Expression::checkConsistency");
+  STACK_TRACE("Expression::checkConsistency");
   // warning: do not use toString method from here: toString itself calls
   // CheckConsistency,
   // so that causes an "infinite" recursion call cycle,
@@ -1603,7 +1601,7 @@ bool Expression::startsWith(int operation, int numberOfChildren) const {
 bool Expression::getExpressionLeafs(
   HashedList<Expression>& outputAccumulateLeafs
 ) const {
-  MacroRegisterFunctionWithName("Expression::getExpressionLeafs");
+  STACK_TRACE("Expression::getExpressionLeafs");
   if (this->owner == nullptr) {
     return true;
   }
@@ -1630,7 +1628,7 @@ bool Expression::getExpressionLeafs(
 bool Expression::getBoundVariables(
   HashedList<Expression>& outputAccumulateBoundVariables
 ) const {
-  MacroRegisterFunctionWithName("Expression::getBoundVariables");
+  STACK_TRACE("Expression::getBoundVariables");
   if (this->owner == nullptr) {
     return true;
   }
@@ -1689,7 +1687,7 @@ bool Expression::getFreeVariables(
   HashedList<Expression>& outputAccumulateFreeVariables,
   bool excludeNamedConstants
 ) const {
-  MacroRegisterFunctionWithName("Expression::getFreeVariables");
+  STACK_TRACE("Expression::getFreeVariables");
   if (this->owner == nullptr) {
     return true;
   }
@@ -1743,7 +1741,7 @@ bool Expression::isIntegralFdx(
   Expression* functionToIntegrate,
   Expression* integrationSet
 ) const {
-  MacroRegisterFunctionWithName("Expression::isIntegralFdx");
+  STACK_TRACE("Expression::isIntegralFdx");
   if (this->owner == nullptr) {
     return false;
   }
@@ -1768,7 +1766,7 @@ bool Expression::isIndefiniteIntegralFdx(
   Expression* functionToIntegrate,
   Expression* integrationSet
 ) const {
-  MacroRegisterFunctionWithName("Expression::isIndefiniteIntegralFdx");
+  STACK_TRACE("Expression::isIndefiniteIntegralFdx");
   this->checkConsistency();
   Expression tempE;
   if (integrationSet == nullptr) {
@@ -1790,9 +1788,7 @@ bool Expression::isDefiniteIntegralOverIntervalFdx(
   Expression* functionToIntegrate,
   Expression* integrationSet
 ) const {
-  MacroRegisterFunctionWithName(
-    "Expression::isDefiniteIntegralOverIntervalFdx"
-  );
+  STACK_TRACE("Expression::isDefiniteIntegralOverIntervalFdx");
   this->checkConsistency();
   Expression tempE;
   if (integrationSet == nullptr) {
@@ -1812,8 +1808,7 @@ bool Expression::isDifferentialOneFormOneVariable(
   Expression* outputDifferentialOfWhat,
   Expression* outputCoefficientInFrontOfDifferential
 ) const {
-  MacroRegisterFunctionWithName("Expression::isDifferentialOneFormOneVariable")
-  ;
+  STACK_TRACE("Expression::isDifferentialOneFormOneVariable");
   if (this->owner == nullptr) {
     return false;
   }
@@ -1959,7 +1954,7 @@ bool Expression::isEqualToHalf() const {
 }
 
 bool Expression::isKnownToBeNonNegative() const {
-  MacroRegisterFunctionWithName("Expression::isKnownToBeNonNegative");
+  STACK_TRACE("Expression::isKnownToBeNonNegative");
   double number = 0;
   if (this->evaluatesToDouble(&number)) {
     return number >= 0;
@@ -2017,7 +2012,7 @@ bool Expression::isNegativeConstant() const {
 }
 
 bool Expression::isEqualToMOne() const {
-  MacroRegisterFunctionWithName("Expression::isEqualToMOne");
+  STACK_TRACE("Expression::isEqualToMOne");
   if (!this->isConstantNumber()) {
     return false;
   }
@@ -2104,7 +2099,7 @@ bool Expression::divisionByMeShouldBeWrittenInExponentForm() const {
 }
 
 bool Expression::isPositiveNumber() const {
-  MacroRegisterFunctionWithName("Expression::isPositiveNumber");
+  STACK_TRACE("Expression::isPositiveNumber");
   Rational rational;
   if (this->isOfType<Rational>(&rational)) {
     return rational.isPositive();
@@ -2120,7 +2115,7 @@ bool Expression::isPositiveNumber() const {
 }
 
 bool Expression::isConstantNumber() const {
-  MacroRegisterFunctionWithName("Expression::isConstantNumber");
+  STACK_TRACE("Expression::isConstantNumber");
   if (this->owner == nullptr) {
     return false;
   }
@@ -2157,7 +2152,7 @@ bool Expression::isConstantNumber() const {
 }
 
 bool Expression::isAlgebraicRadical() const {
-  MacroRegisterFunctionWithName("Expression::isAlgebraicRadical");
+  STACK_TRACE("Expression::isAlgebraicRadical");
   if (this->owner == nullptr) {
     return false;
   }
@@ -2292,7 +2287,7 @@ ExpressionContext Expression::getContext() const {
 }
 
 int Expression::getNumberOfColumns() const {
-  MacroRegisterFunctionWithName("Expression::getNumberOfColumns");
+  STACK_TRACE("Expression::getNumberOfColumns");
   if (!this->isSequenceNElements()) {
     return - 1;
   }
@@ -2309,7 +2304,7 @@ int Expression::getNumberOfColumns() const {
 void Expression::getMultiplicandsRecursive(
   List<Expression>& outputAppendList, int depth
 ) const {
-  MacroRegisterFunctionWithName("Expression::getMultiplicandsRecursive");
+  STACK_TRACE("Expression::getMultiplicandsRecursive");
   this->checkInitialization();
   if (depth == 0) {
     outputAppendList.setSize(0);
@@ -2326,9 +2321,7 @@ void Expression::getMultiplicandsRecursive(
 void Expression::getMultiplicandsDivisorsRecursive(
   List<Expression>& outputAppendList, int depth
 ) const {
-  MacroRegisterFunctionWithName(
-    "Expression::getMultiplicandsDivisorsRecursive"
-  );
+  STACK_TRACE("Expression::getMultiplicandsDivisorsRecursive");
   this->checkInitialization();
   if (depth == 0) {
     outputAppendList.setSize(0);
@@ -2348,7 +2341,7 @@ void Expression::getMultiplicandsDivisorsRecursive(
 void Expression::getCoefficientMultiplicandForm(
   Expression& outputCoefficient, Expression& outputNoCoefficient
 ) const {
-  MacroRegisterFunctionWithName("Expression::getCoefficientMultiplicandForm");
+  STACK_TRACE("Expression::getCoefficientMultiplicandForm");
   this->checkInitialization();
   if (this->startsWith(this->owner->opTimes(), 3)) {
     if ((*this)[1].isConstantNumber()) {
@@ -2400,7 +2393,7 @@ int Expression::getExpressionTreeSize() const {
 }
 
 bool Expression::operator>(const Expression& other) const {
-  MacroRegisterFunctionWithName("Expression::operatorGreaterThan");
+  STACK_TRACE("Expression::operatorGreaterThan");
   double left = 0;
   double right = 0;
   bool leftEvalsToDouble = this->evaluatesToDouble(&left);
@@ -2446,7 +2439,7 @@ bool Expression::operator>(const Expression& other) const {
 }
 
 bool Expression::greaterThanNoCoefficient(const Expression& other) const {
-  MacroRegisterFunctionWithName("Expression::greaterThanNoCoefficient");
+  STACK_TRACE("Expression::greaterThanNoCoefficient");
   if (this->isOfType<Rational>() && other.isOfType<Rational>()) {
     return this->getValue<Rational>() > other.getValue<Rational>();
   }
@@ -2825,7 +2818,7 @@ bool Expression::toStringBuiltIn<RationalFraction<ElementZmodP> >(
   input.getValue<RationalFraction<ElementZmodP> >();
   if (
     data.expressionType ==
-    RationalFraction<ElementZmodP>::TypeExpression::typeRationalFunction
+    RationalFraction<ElementZmodP>::TypeExpression::typeRationalFraction
   ) {
     ElementZmodP constantSample =
     data.numerator.getElementConst().coefficients[0];
@@ -2880,9 +2873,7 @@ bool Expression::toStringBuiltIn<SemisimpleLieAlgebra*>(
   std::stringstream& out,
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName(
-    "Expression::toStringBuiltIn(SemisimpleLieAlgebra*)"
-  );
+  STACK_TRACE("Expression::toStringBuiltIn(SemisimpleLieAlgebra*)");
   (void) format;
   out << "SSLieAlg{}(" << input.getValue<SemisimpleLieAlgebra*>()->toStringLieAlgebraName() << ")";
   return true;
@@ -3195,7 +3186,7 @@ bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
 bool Expression::toStringData(
   std::stringstream& out, FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName("Expression::toStringData");
+  STACK_TRACE("Expression::toStringData");
   if (this->owner == nullptr) {
     out << "(non-initialized)";
     return true;
@@ -3386,7 +3377,7 @@ bool Expression::needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
 }
 
 bool Expression::needsParenthesisForAddition() const {
-  MacroRegisterFunctionWithName("Expression::needsParenthesisForAddition");
+  STACK_TRACE("Expression::needsParenthesisForAddition");
   if (this->owner == nullptr) {
     return false;
   }
@@ -3480,9 +3471,7 @@ bool CalculatorBasics::flattenCommandEnclosuresOneLayer(
 bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName(
-    "CalculatorFunctions::functionFlattenCommandEnclosuresOneLayer"
-  );
+  STACK_TRACE("CalculatorFunctions::functionFlattenCommandEnclosuresOneLayer");
   if (input.startsWith(calculator.opCommandEnclosure())) {
     if (input.size() <= 1) {
       return false;
@@ -5188,7 +5177,7 @@ bool Expression::toStringEqualEqualEqual(
 bool Expression::toStringWithAtomHandler(
   std::stringstream& out, FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName("Expression::toStringWithAtomHandler");
+  STACK_TRACE("Expression::toStringWithAtomHandler");
   if (!this->isList()) {
     return false;
   }
@@ -5209,7 +5198,7 @@ bool Expression::toStringWithAtomHandler(
 bool Expression::toStringWithCompositeHandler(
   std::stringstream& out, FormatExpressions* format
 ) const {
-  MacroRegisterFunctionWithName("Expression::toStringWithCompositeHandler");
+  STACK_TRACE("Expression::toStringWithCompositeHandler");
   if (!this->isList()) {
     return false;
   }
@@ -5234,7 +5223,7 @@ std::string Expression::toString(
   bool unfoldCommandEnclosures,
   JSData* outputJS
 ) const {
-  MacroRegisterFunctionWithName("Expression::toString");
+  STACK_TRACE("Expression::toString");
   MemorySaving<FormatExpressions> tempFormat;
   if (format == nullptr) {
     format = &tempFormat.getElement();
@@ -5630,7 +5619,7 @@ bool Expression::hasNonEmptyContext() const {
 }
 
 bool Expression::isCacheableExpression() const {
-  MacroRegisterFunctionWithName("Expression::isCacheableExpression");
+  STACK_TRACE("Expression::isCacheableExpression");
   if (this->owner == nullptr) {
     return true;
   }
@@ -5728,7 +5717,7 @@ bool Expression::makeProduct(
 bool Expression::makeSum(
   Calculator& owner, const List<Expression>& summands
 ) {
-  MacroRegisterFunctionWithName("Expression::makeSum");
+  STACK_TRACE("Expression::makeSum");
   if (summands.size == 0) {
     return this->assignValue(owner, 0);
   }
@@ -5738,7 +5727,7 @@ bool Expression::makeSum(
 bool Expression::makeOXdotsX(
   Calculator& owner, int operation, const List<Expression>& opands
 ) {
-  MacroRegisterFunctionWithName("Expression::makeOXdotsX");
+  STACK_TRACE("Expression::makeOXdotsX");
   if (opands.size == 0) {
     global.fatal << "zero opands not allowed at this point. " << global.fatal;
   }
@@ -5791,7 +5780,7 @@ bool Expression::makeSqrt(
   const Rational& argument,
   const Rational& radicalSuperIndex
 ) {
-  MacroRegisterFunctionWithName("Expression::makeSqrt");
+  STACK_TRACE("Expression::makeSqrt");
   Expression argumentE;
   argumentE.assignValue(owner, argument);
   return this->makeSqrt(owner, argumentE, radicalSuperIndex);
@@ -5802,7 +5791,7 @@ bool Expression::makeSqrt(
   const Expression& argument,
   const Rational& radicalSuperIndex
 ) {
-  MacroRegisterFunctionWithName("Expression::makeSqrt");
+  STACK_TRACE("Expression::makeSqrt");
   this->reset(owner, 3);
   Expression radicalIndexE;
   radicalIndexE.assignValue(owner, radicalSuperIndex);
@@ -5817,7 +5806,7 @@ bool Expression::makeXOX(
   const Expression& left,
   const Expression& right
 ) {
-  MacroRegisterFunctionWithName("Expression::makeXOX");
+  STACK_TRACE("Expression::makeXOX");
   if (&left == this || &right == this) {
     Expression leftCopy = left;
     Expression rightCopy = right;
@@ -5885,7 +5874,7 @@ bool Expression::operator==(const std::string& other) const {
 }
 
 std::string Expression::toUTF8String(FormatExpressions* format) const {
-  MacroRegisterFunctionWithName("Expression::toUTF8String");
+  STACK_TRACE("Expression::toUTF8String");
   if (this->owner == nullptr) {
     return this->toString(format);
   }

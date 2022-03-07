@@ -125,9 +125,7 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
   List<QuasiDifferentialOperator<Coefficient> >& inputElements,
   FormatExpressions* format
 ) {
-  MacroRegisterFunctionWithName(
-    "QuasiDifferentialOperator::generateBasisLieAlgebra"
-  );
+  STACK_TRACE("QuasiDifferentialOperator::generateBasisLieAlgebra");
   ProgressReport report;
   HashedList<QuasiDifferentialMononomial> bufferMons;
   List<LinearCombination<QuasiDifferentialMononomial, Coefficient> >

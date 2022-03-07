@@ -43,7 +43,7 @@ template < >
 bool Polynomial<Rational>::findOneVariableRationalRoots(
   List<Rational>& output
 ) {
-  MacroRegisterFunctionWithName("Polynomial::findOneVariableRationalRoots");
+  STACK_TRACE("Polynomial::findOneVariableRationalRoots");
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
   if (this->minimalNumberOfVariables() > 1) {
@@ -143,7 +143,7 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
 bool PolynomialFactorizationKronecker::oneFactor(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Polynomial::oneFactor");
+  STACK_TRACE("Polynomial::oneFactor");
   (void) comments;
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
@@ -310,9 +310,7 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   AlgebraicClosureRationals& closure,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationKronecker::solvePolynomial"
-  );
+  STACK_TRACE("PolynomialFactorizationKronecker::solvePolynomial");
   PolynomialFactorizationUnivariate<Rational> factorization;
   if (input.totalDegree() < 1) {
     if (commentsOnFailure != nullptr) {
@@ -422,9 +420,7 @@ bool PolynomialFactorizationFiniteFields::factorWithTiming(
 bool PolynomialFactorizationFiniteFields::hasSquareFactor(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationFiniteFields::hasSquareFactor"
-  );
+  STACK_TRACE("PolynomialFactorizationFiniteFields::hasSquareFactor");
   (void) comments;
   List<int> quickCheckPrimes = List<int>({101, 103, 107, 109, 113});
   for (int i = 0; i < quickCheckPrimes.size; i ++) {
@@ -483,7 +479,7 @@ bool PolynomialFactorizationFiniteFields::hasSquareFactor(
 bool PolynomialFactorizationFiniteFields::factor(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factor");
+  STACK_TRACE("PolynomialFactorizationFiniteFields::factor");
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
     return false;
@@ -536,7 +532,7 @@ bool PolynomialFactorizationFiniteFields::factor(
 bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationFiniteFields::oneFactorFromModularization"
   );
   int64_t startCantorZassenhaus = global.getElapsedMilliseconds();
@@ -579,7 +575,7 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
 
 void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary()
 {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary"
   );
   this->largestCoefficient = 0;
@@ -616,7 +612,7 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary()
 }
 
 void PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond() {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond"
   );
   this->largestCoefficient = 0;
@@ -640,9 +636,7 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond() {
 void PolynomialFactorizationFiniteFields::henselLift(
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationFiniteFields::henselLift"
-  );
+  STACK_TRACE("PolynomialFactorizationFiniteFields::henselLift");
   SylvesterMatrix<ElementZmodP>::sylvesterMatrixProduct(
     this->factorsOverPrime, this->sylvesterMatrix, comments
   );
@@ -673,9 +667,7 @@ void PolynomialFactorizationFiniteFields::henselLift(
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
   const LargeIntegerUnsigned& oldModulus, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationFiniteFields::henselLiftOnce"
-  );
+  STACK_TRACE("PolynomialFactorizationFiniteFields::henselLiftOnce");
   for (int i = 0; i < this->factorsLifted.size; i ++) {
     ElementZmodP::convertLiftPolynomialModular(
       this->factorsLifted[i],
@@ -795,9 +787,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
 bool PolynomialFactorizationFiniteFields::tryFactor(
   SelectionFixedRank& selection
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialFactorizationFiniteFields::tryFactor"
-  );
+  STACK_TRACE("PolynomialFactorizationFiniteFields::tryFactor");
   Polynomial<ElementZmodP> product;
   ElementZmodP start;
   start.makeOne(this->modulusHenselLift);
@@ -827,7 +817,7 @@ bool PolynomialFactorizationFiniteFields::tryFactor(
 bool PolynomialFactorizationFiniteFields::factorizationFromHenselLift(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationFiniteFields::factorizationFromHenselLift"
   );
   this->maximumFactorsLiftedTries = 1000;
@@ -847,7 +837,7 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLift(
 bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce"
   );
   (void) comments;
@@ -1201,7 +1191,7 @@ void PolynomialUnivariateModular::operator=(const ElementZmodP& other) {
 void PolynomialUnivariateModular::operator=(
   const Polynomial<ElementZmodP>& other
 ) {
-  MacroRegisterFunctionWithName("PolynomialUnivariateModular::operator=");
+  STACK_TRACE("PolynomialUnivariateModular::operator=");
   this->checkInitialization();
   this->makeZero(this->modulusData);
   if (other.minimalNumberOfVariables() > 1) {
@@ -1272,17 +1262,13 @@ ElementZmodP PolynomialUnivariateModular::evaluate(
 void PolynomialUnivariateModularAsModulus::operator=(
   const PolynomialUnivariateModular& inputModulus
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialUnivariateModularAsModulus::operator="
-  );
+  STACK_TRACE("PolynomialUnivariateModularAsModulus::operator=");
   this->modulus = inputModulus;
   this->computeFromModulus();
 }
 
 void PolynomialUnivariateModularAsModulus::computeFromModulus() {
-  MacroRegisterFunctionWithName(
-    "PolynomialUnivariateModularAsModulus::computeFromModulus"
-  );
+  STACK_TRACE("PolynomialUnivariateModularAsModulus::computeFromModulus");
   this->modulus.checkInitialization();
   int totalModulusDegree = this->modulus.totalDegreeInt();
   if (totalModulusDegree < 0) {
@@ -1333,9 +1319,7 @@ bool PolynomialUnivariateModularAsModulus::checkInitialization() const {
 void PolynomialUnivariateModularAsModulus::computeOneReductionRow(
   const List<int>& previous, List<int>& output
 ) {
-  MacroRegisterFunctionWithName(
-    "PolynomialUnivariateModularAsModulus::computeOneReductionRow"
-  );
+  STACK_TRACE("PolynomialUnivariateModularAsModulus::computeOneReductionRow");
   int totalModulusDegree = this->modulus.totalDegreeInt();
   output.setSize(totalModulusDegree);
   int modulusInteger = this->modulus.modulusData->modulus;
@@ -1374,7 +1358,7 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
   PolynomialUnivariateModularAsModulus* inputModulus,
   const Polynomial<ElementZmodP>& inputValue
 ) {
-  MacroRegisterFunctionWithName(
+  STACK_TRACE(
     "PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue"
   );
   inputModulus->checkInitialization();

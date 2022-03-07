@@ -318,7 +318,7 @@ bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::hasNonNegativeIntegralExponents() const {
-  for (MonomialPolynomial & monomial : this->monomials) {
+  for (MonomialPolynomial& monomial : this->monomials) {
     if (!monomial.hasNonNegativeIntegralExponents()) {
       return false;
     }

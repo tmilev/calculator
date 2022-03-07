@@ -1622,7 +1622,7 @@ void MonomialPolynomial::trimTrailingZeroes() {
 }
 
 bool MonomialPolynomial::hasNonNegativeIntegralExponents() const {
-  for (Rational & power : this->monomialBody) {
+  for (Rational& power : this->monomialBody) {
     if (!power.isInteger() || power.isNegative()) {
       return false;
     }

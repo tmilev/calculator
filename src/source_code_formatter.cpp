@@ -3696,11 +3696,20 @@ bool CodeFormatter::Processor::applyOneRule() {
     this->stack.removeIndexShiftDown(this->stack.size - 3);
     return true;
   }
-  if (sixthToLast.type == CodeFormatter::Element::LeftParenthesis && (fifthToLast.isExpressionOrAtom() ||fifthToLast.isTypeWordOrTypeExpression())
- && fourthToLast.isStarOrAmpersand() && thirdToLast.type == CodeFormatter::Element::Atom && secondToLast.type == CodeFormatter::Element::Colon ){
+  if (
+    sixthToLast.type == CodeFormatter::Element::LeftParenthesis && (
+      fifthToLast.isExpressionOrAtom() ||
+      fifthToLast.isTypeWordOrTypeExpression()
+    ) &&
+    fourthToLast.isStarOrAmpersand() &&
+    thirdToLast.type == CodeFormatter::Element::Atom &&
+    secondToLast.type == CodeFormatter::Element::Colon
+  ) {
     this->lastRuleName = "(expression& atom:X";
-    fifthToLast.makeFrom2(CodeFormatter::Element::TypeExpression, fifthToLast, fourthToLast);
-    this->stack.removeIndexShiftDown(this->stack.size-4);
+    fifthToLast.makeFrom2(
+      CodeFormatter::Element::TypeExpression, fifthToLast, fourthToLast
+    );
+    this->stack.removeIndexShiftDown(this->stack.size - 4);
     return true;
   }
   if (

@@ -763,7 +763,7 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
 bool TrigonometricReduction::extractSinesAndCosines(
   std::stringstream* commentsOnFailure
 ) {
-  for (Expression & input : this->inputFraction.context.getVariables()) {
+  for (Expression& input : this->inputFraction.context.getVariables()) {
     TrigonometricReduction::TrigonometricFunction trigonometricFunction;
     if (
       !trigonometricFunction.extractFrom(input, commentsOnFailure, *this)
@@ -829,7 +829,7 @@ bool TrigonometricReduction::computeEulerFormExpression(
 ) {
   STACK_TRACE("TrigonometricReduction::computeEulerFormExpression");
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  for (Expression & expression : this->arguments.keys) {
+  for (Expression& expression : this->arguments.keys) {
     substitution.addOnTop(
       this->arguments.getValueNoFail(expression).eulerForm
     );

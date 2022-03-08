@@ -633,24 +633,29 @@ public:
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
   WithContext<RationalFraction<AlgebraicNumber> > inputFractionSubstituted;
-  WithContext<RationalFraction<AlgebraicNumber> > inputFractionSubstitutedAlgebraic;
+  WithContext<RationalFraction<AlgebraicNumber> >
+  inputFractionSubstitutedAlgebraic;
   Expression eulerForm;
   Expression eulerFormAlgebraic;
   Polynomial<AlgebraicNumber> eulerFormPhase1Numerator;
   Polynomial<AlgebraicNumber> eulerFormPhase1Denominator;
-
   Polynomial<AlgebraicNumber> eulerFormPhase2Numerator;
   Polynomial<AlgebraicNumber> eulerFormPhase2Denominator;
   Polynomial<AlgebraicNumber> eulerFormPhase2GreatestCommonDivisor;
-
   RationalFraction<AlgebraicNumber> eulerFormAlgebraicReduced;
+  Expression fourierFractionForm;
   ExpressionContext variables;
   MapList<Expression, TrigonometricFunction> arguments;
   MapList<Expression, HashedList<Rational> > trigonometricBaseMonomials;
   MapList<Expression, Rational> trigonometricBaseScales;
   FormatExpressions formatAlgebraic;
   FormatExpressions formatTrigonometric;
-  void eulerFormToTrigonometry(Polynomial<AlgebraicNumber>& input, Expression& output);
+  bool eulerFormToTrigonometry(
+    Polynomial<AlgebraicNumber>& input,
+    MonomialPolynomial& outputMonomialShift,
+    Expression& output,
+    std::stringstream* commentsOnFailure
+  );
   void initialize(Calculator& inputOwner, const Expression& incoming);
   bool reduce(std::stringstream* commentsOnFailure);
   bool extractSinesAndCosines(std::stringstream* commentsOnFailure);
@@ -681,7 +686,10 @@ bool CalculatorFunctionsTrigonometry::fourierFractionForm(
 std::string TrigonometricReduction::toString() {
   std::stringstream out;
   out << "<b>Starting expression.</b><br>";
-  out << "\\(" << this->inputFraction.content.toString(&this->formatTrigonometric) << "\\)";
+  out
+  << "\\("
+  << this->inputFraction.content.toString(&this->formatTrigonometric)
+  << "\\)";
   out << "<br>";
   out << this->toStringTrigonometry();
   out << this->toStringTrigonometricArguments();
@@ -691,12 +699,17 @@ std::string TrigonometricReduction::toString() {
   << this->eulerForm.toString()
   << "\\)"
   << "<br>Euler form algebraic: "
-  << "<br>\\("<< this->eulerFormAlgebraic.toString()
+  << "<br>\\("
+  << this->eulerFormAlgebraic.toString()
   << "\\)<br>reduced:"
-  "<br>\\("
+  << "<br>\\("
   << this->eulerFormAlgebraicReduced.toString(&this->formatAlgebraic)
   << "\\)";
-  out << "<br><b style='color:red'>not fully implemented yet.</b>";
+  out
+  << "<br><b>Fourier fraction form:</b>"
+  << "<br>\\("
+  << this->fourierFractionForm.toString()
+  << "\\)<br>";
   return out.str();
 }
 
@@ -830,17 +843,19 @@ Rational TrigonometricReduction::computeScaleOneBaseMonomial(
   return result;
 }
 
-void TrigonometricReduction::prepareFormatting(){
+void TrigonometricReduction::prepareFormatting() {
   for (int i = 0; i < this->trigonometricBaseMonomials.size(); i ++) {
-    Expression newAtom =this->owner->getNewAtom();
+    Expression newAtom = this->owner->getNewAtom();
     this->variables.addVariable(newAtom);
     this->formatAlgebraic.polynomialAlphabet.addOnTop(newAtom.toString());
   }
-  this->formatAlgebraic.flagUseFrac=true;
-  for (int i = 0; i < this->arguments.size(); i ++){
-    this->formatTrigonometric.polynomialAlphabet.addOnTop(this->arguments.keys[i].toString());
+  this->formatAlgebraic.flagUseFrac = true;
+  for (int i = 0; i < this->arguments.size(); i ++) {
+    this->formatTrigonometric.polynomialAlphabet.addOnTop(
+      this->arguments.keys[i].toString()
+    );
   }
-  this->formatTrigonometric.flagUseFrac=true;
+  this->formatTrigonometric.flagUseFrac = true;
 }
 
 void TrigonometricReduction::computeEulerFormArguments() {
@@ -863,7 +878,6 @@ bool TrigonometricReduction::computeEulerFormExpression(
       this->arguments.getValueNoFail(expression).eulerForm
     );
   }
-
   this->eulerFormAlgebraicReduced = this->inputFraction.content;
   if (
     !this->eulerFormAlgebraicReduced.substitution(
@@ -874,11 +888,34 @@ bool TrigonometricReduction::computeEulerFormExpression(
   ) {
     return false;
   }
+  MonomialPolynomial shift;
+  Polynomial<AlgebraicNumber> converted;
+  this->eulerFormAlgebraicReduced.getNumerator(converted);
+  Expression numerator, denominator;
+  if (
+    !this->eulerFormToTrigonometry(
+      converted, shift, numerator, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  this->eulerFormAlgebraicReduced.getDenominator(converted);
+  if (
+    !this->eulerFormToTrigonometry(
+      converted, shift, denominator, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  this->fourierFractionForm.makeXOX(
+    *this->owner, this->owner->opDivide(), numerator, denominator
+  );
   return true;
 }
 
-void TrigonometricReduction::computeEulerFormExpressionPresentation(){
-  STACK_TRACE("TrigonometricReduction::computeEulerFormExpressionPresentation");
+void TrigonometricReduction::computeEulerFormExpressionPresentation() {
+  STACK_TRACE("TrigonometricReduction::computeEulerFormExpressionPresentation")
+  ;
   this->inputFractionSubstituted = this->inputFraction;
   this->inputFractionSubstitutedAlgebraic = this->inputFraction;
   List<Expression> eulerFormVariables;
@@ -889,12 +926,18 @@ void TrigonometricReduction::computeEulerFormExpressionPresentation(){
   ) {
     eulerFormVariables.addOnTop(trigonometricFunction.eulerFormExpression);
     Expression currentEulerFormAlgebraic;
-    CalculatorConversions::expressionFromPolynomial(*this->owner, trigonometricFunction.eulerForm, currentEulerFormAlgebraic, &this->variables);
+    CalculatorConversions::expressionFromPolynomial(
+      *this->owner,
+      trigonometricFunction.eulerForm,
+      currentEulerFormAlgebraic,
+      &this->variables
+    );
     eulerFormVariablesAlgebraicForm.addOnTop(currentEulerFormAlgebraic);
   }
   this->inputFractionSubstituted.context.setVariables(eulerFormVariables);
-  this->inputFractionSubstitutedAlgebraic.context.setVariables(eulerFormVariablesAlgebraicForm);
-
+  this->inputFractionSubstitutedAlgebraic.context.setVariables(
+    eulerFormVariablesAlgebraicForm
+  );
   CalculatorConversions::expressionFromRationalFraction(
     *this->owner,
     this->inputFractionSubstituted.content,
@@ -902,12 +945,96 @@ void TrigonometricReduction::computeEulerFormExpressionPresentation(){
     &this->inputFractionSubstituted.context
   );
   CalculatorConversions::expressionFromRationalFraction(
-  *this->owner, this->inputFractionSubstitutedAlgebraic.content, this->eulerFormAlgebraic, & this->inputFractionSubstitutedAlgebraic.context);
-
+    *this->owner,
+    this->inputFractionSubstitutedAlgebraic.content,
+    this->eulerFormAlgebraic,
+    &this->inputFractionSubstitutedAlgebraic.context
+  );
 }
 
-void TrigonometricReduction::eulerFormToTrigonometry(Polynomial<AlgebraicNumber> &input, Expression &output){
-
+bool TrigonometricReduction::eulerFormToTrigonometry(
+  Polynomial<AlgebraicNumber>& input,
+  MonomialPolynomial& outputMonomialShift,
+  Expression& output,
+  std::stringstream* commentsOnFailure
+) {
+  MonomialPolynomial maximumMonomial;
+  MonomialPolynomial minimumMonomial;
+  int numberOfVariables = input.minimalNumberOfVariables();
+  for (int i = 0; i < numberOfVariables; i ++) {
+    const MonomialPolynomial& current = input.monomials[i];
+    for (int j = 0; j < current.minimalNumberOfVariables(); j ++) {
+      Rational power =
+      MathRoutines::maximum(maximumMonomial[j], current[j]);
+      maximumMonomial.setVariable(j, power);
+      power = current[j];
+      if (i > 0) {
+        power = MathRoutines::minimum(minimumMonomial[j], power);
+      }
+      minimumMonomial.setVariable(j, power);
+    }
+  }
+  outputMonomialShift.makeOne();
+  for (int i = 0; i < numberOfVariables; i ++) {
+    Rational difference = maximumMonomial[i] - minimumMonomial[i];
+    if (!difference.isEven()) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        <<
+        "Difference between maximum and minimum monomials must have only even powers. "
+        ;
+      }
+      return false;
+    }
+    outputMonomialShift.setVariable(i, - difference / 2);
+  }
+  Polynomial<AlgebraicNumber> remainder = input;
+  int startingMonomialCount = remainder.size();
+  LinearCombination<Expression, AlgebraicNumber> result;
+  for (int i = 0; i < startingMonomialCount; i ++) {
+    if (remainder.isEqualToZero()) {
+      break;
+    }
+    MonomialPolynomial leading = remainder.getLeadingMonomial(nullptr);
+    leading *= outputMonomialShift;
+    MonomialPolynomial opposite = leading;
+    opposite.invert();
+    LinearCombination<Expression, Rational> currentArgument;
+    for (int j = 0; j < numberOfVariables; j ++) {
+      Expression term = this->trigonometricBaseScales.keys[j];
+      if (this->trigonometricBaseScales.values[j] != 1) {
+        Expression coefficient;
+        coefficient.assignValue(
+          *this->owner, this->trigonometricBaseScales.values[j]
+        );
+        term = coefficient * term;
+      }
+      currentArgument.addMonomial(term, leading[j]);
+    }
+    Expression currentArgumentSummed;
+    currentArgumentSummed.makeSum(*this->owner, currentArgument);
+    Expression sine;
+    sine.makeOX(
+      *this->owner, this->owner->opSin(), currentArgumentSummed
+    );
+    Expression cosine;
+    sine.makeOX(
+      *this->owner, this->owner->opCos(), currentArgumentSummed
+    );
+    AlgebraicNumber leadingCoefficient = remainder.getCoefficientOf(leading);
+    AlgebraicNumber oppositeCoefficient = remainder.getCoefficientOf(opposite);
+    AlgebraicNumber sineCoefficient = leadingCoefficient - oppositeCoefficient;
+    sineCoefficient *=
+    this->owner->objectContainer.algebraicClosure.imaginaryUnit();
+    AlgebraicNumber cosineCoefficient =
+    leadingCoefficient + oppositeCoefficient;
+    result.addMonomial(cosine, cosineCoefficient);
+    result.addMonomial(sine, sineCoefficient);
+    remainder.subtractMonomial(leading, leadingCoefficient);
+    remainder.subtractMonomial(opposite, oppositeCoefficient);
+  }
+  output.makeSum(*this->owner, result);
+  return true;
 }
 
 TrigonometricReduction::TrigonometricFunction::TrigonometricFunction() {

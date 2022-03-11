@@ -210,8 +210,7 @@ class AlgebraicClosureRationals {
 public:
   // Basis over the rationals of the latest algebraic extension.
   List<MatrixTensor<Rational> > latestBasis;
-  // Injections of earlier rational number bases
-  // into the latest basis.
+  // Injections of earlier rational number bases into the latest basis.
   // The [i][j]-th element refers to the image basis element e_{i, j},
   // i.e., the j^th basis element of the i^th [extension A_i].
   // More precisely, the [i][j]-th element of the map below describes the image

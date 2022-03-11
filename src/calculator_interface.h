@@ -46,8 +46,7 @@ private:
   //      explicit reference to the Expression::data
   //      and Expression::children members should be made.
   // 1.3. A list is an expression with 1 or more children whose data entry
-  // equals
-  //      0. The atom 0 *MUST* be equal to Calculator::opList().
+  //      equals 0. The atom 0 *MUST* be equal to Calculator::opList().
   // 1.4. An expression with 1 or more children is
   //      not allowed to have data entry different
   //      from 0 = Calculator::opList(). The system is instructed to
@@ -61,8 +60,7 @@ private:
   // 2.3. A bound variable is a list with two atomic entries, the first of which
   //      equals Bind.
   // 2.4. An error is a list with two entries whose first entry is an atom equal
-  // to Error,
-  //      and whose second entry is a string.
+  // to Error, and whose second entry is a string.
   // *Note that Calculator::opList() is required to equal zero for reasons of
   // program speed.
   // This is GUARANTEED, and you MAY assume it.
@@ -83,40 +81,32 @@ private:
   // is an integer that uniquely (up to operator==) identifies a C++ structure
   // with the corresponding type.
   // 3. A context is a list of 1 or more elements starting with the atom
-  // Context. If
-  // a context has only one child (which must then be equal to the atom
-  // Context),
-  //    then we say that we have an "empty context".
+  // Context. If a context has only one child (which must then be
+  // equal to the atom Context), then we say that we have an "empty context".
   // 4. An expression is said to have context if it is a list of at least two
-  // elements,
-  //    the second element of which is a context.
+  // elements, the second element of which is a context.
   // 5. If an expression of built-in type has 3 children, the middle child
   // must be a context. If an expression of built-in type has 2 children, we say
-  // that
-  //    the expression does not have context.
+  // that the expression does not have context.
   // 6. Two expressions of built-in type with equal types and C++ identifiers,
-  // one having a
-  //    context that is empty, and the other having no context,
-  //    are considered to represent one and the same element.
+  // one having a context that is empty, and the other having no context,
+  // are considered to represent one and the same element.
   // -------------------------------------------------------
   // -------------------------------------------------------
   // -------------------------------------------------------
   // Notes on Expression implementation.
   // While the preceding notes are to be considered as fixed, the following
-  // notes
-  // are implementation specific and are subject to change.
+  // notes are implementation specific and are subject to change.
   // The i^th child of an expression can be accessed as const using
   // operator[](i).
-  // The children of an expression are kept as a list of integers indicating the
-  // children's
-  // position in Calculator::expressionContainer.
-  // Calculator::expressionContainer is a Hashed List of references and must not
-  // be modified
-  // directly in any way.
+  // The children of an expression are kept as a list of integers indicating
+  // the children's position in Calculator::expressionContainer.
+  // Calculator::expressionContainer is a Hashed List of references and must
+  // not be modified directly in any way.
   // Motivation for this implementation choice. The original implementation
   // had Expression contain all of its children as List<Expression>, making the
-  // copy operator=
-  // a recursive function. While this is one of the least-head-aching designs,
+  // copy operator= a recursive function.
+  // While this is one of the least-head-aching designs,
   // it also proved to be remarkably slow: here is why.
   // When processing an expression, one must traverse all of its subtrees.
   // Making temporary copies of all subtrees is then approximately O(n^2),
@@ -126,22 +116,19 @@ private:
   // If most subtrees are subject to change, then the
   // approximate cost of O(n^2) operations seems justified.
   // However, in most computations, subtrees need not be changed - in reality,
-  // most expression
-  // will arrive to the calculator in reduced or close-to-reduced form.
+  // most expression will arrive to the calculator in reduced
+  // or close-to-reduced form.
   //
   // This explains our choice of keeping all children of an expression as a
-  // reference to
-  // an ever-growing collection of Expressions.
+  // reference to an ever-growing collection of Expressions.
   // If a single instance of Calculator is to run over long periods of time,
   // it is possible that not all such expressions are in use, and we run out of
-  // RAM memory
-  // due to our fault [bad], rather than because the
+  // RAM memory due to our fault [bad], rather than because the
   // user requested a large computation [good].
   // If that is to happen, some sort of garbage collection will have to be
-  // implemented.
-  // However, currently the calculator resets after each user-facing operation,
-  // so
-  // this should not present a practical problem.
+  // implemented. However, currently the calculator resets after
+  // each user-facing operation, so this should not present a practical
+  // problem.
 public:
   Calculator* owner;
   int data;
@@ -2177,11 +2164,10 @@ public:
   // the outer function.
   // 1.2  Call the outer function with input argument equal to X.
   // 1.3. If the outer function returns true but the output argument is
-  // identically equal to
-  //      X, nothing is done (the action of the outer function is ignored).
-  // 1.4. If an outer function returns true and the output argument is different
-  // from X,
-  //      X is replaced by this output.
+  // identically equal to X, nothing is done
+  // (the action of the outer function is ignored).
+  // 1.4. If an outer function returns true and the output argument is
+  // different from X, X is replaced by this output.
   // 2. Inner functions ("functions").
   // 2.1. Let X be expression whose first child is an atom equal to the name of
   // the inner function. We define Argument as follows.
@@ -2191,22 +2177,16 @@ public:
   // 2.2. The inner function is called with input argument equal to Argument.
   // 2.3. If the inner function returns true, X is substituted with
   //      the output argument of the inner function, else nothing is done.
-  //
   // As explained above, the distinction between inner functions and outer
-  // functions
-  // is only practical. The notions of inner and outer functions do not apply to
-  // user-defined
+  // functions is only practical.
+  // The notions of inner and outer functions do not apply to user-defined
   // substitution rules entered via the calculator. User-defined substitution
-  // rules are
-  // processed like outer functions, with the
+  // rules are processed like outer functions, with the
   // major difference that even if their output coincides
   // with their input the substitution is carried out, resulting in an infinite
-  // cycle.
-  // Here, by ``infinite cycle'' we either mean a 100% CPU run until the
-  // timeout& algebraic
-  // safety kicks in, or error interception with a ``detected substitution
-  // cycle'' or
-  // similar error message.
+  // cycle. Here, by ``infinite cycle'' we either mean a 100% CPU run until the
+  // timeout& algebraic safety kicks in, or error interception with a
+  // ``detected substitution cycle'' or similar error message.
   //
   // ----------------------------------------------------------
   HashedList<Expression> knownDoubleConstants;

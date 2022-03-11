@@ -867,7 +867,8 @@ public:
         << " of index "
         << highIndex
         <<
-        " is strictly greater than itself which is not allowed for strict orders. "
+        " is strictly greater than itself "
+        << "which is not allowed for strict orders. "
         << "Maybe the programmer has given a "
         << "non-strict order instead of strict one by mistake? ";
         fatalCrash(crashStream.str());
@@ -950,14 +951,12 @@ public:
   // The objective is fast, stable insertion sorting of partially ordered data.
   // The data that has x <= y and y <= x is called a bin. The methods
   // sortedIndexFirstGreaterThan and sortedIndexFirstNotLessThan find the edges
-  // of the bin.
-  // The insertion methods return the index at which the object was inserted, or
-  // - 1
+  // of the bin. The insertion methods return the index
+  // at which the object was inserted, or - 1
   // sortedInsert inserts the element at the end of the bin.
   // sortedInsertDontDup searches the bin for the element before inserting.
   // sortedInsertNextTo searches the bin for an equal element and inserts the
-  // new element
-  //   next to the existing element
+  // new element next to the existing element
   // sortedGetIndex searches the bin for the element and returns its index
   // sortedContains searches the bin for the element and returns whether it was
   // found.
@@ -1328,13 +1327,10 @@ public:
     // nullifying them one by one.
     // else, we simply go through the entire hash index and nullify everything.
     // Note: for better performance, 20 entries should probably be changed to
-    // 100+,
-    // however the smaller number is a good consistency test (it would make it
-    // easier to
-    // detect a faulty hash).
+    // 100+, however the smaller number is a good consistency test
+    // (it would make it easier to detect a faulty hash).
     // If this program ever gets to do some hard-core number crunching, the 20
-    // entries
-    // should be increased.
+    // entries should be increased.
     if (this->isSparse() && this->hashBuckets.size > 20) {
       for (int i = 0; i < this->size; i ++) {
         int hashIndex = this->getHash((*this)[i]);
@@ -1754,10 +1750,8 @@ public:
     this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
   }
   // Note The following function specializations are declared entirely in order
-  // to
-  // facilitate autocomplete in my current IDE. If I find a better
-  // autocompletion
-  // IDE the following should be removed.
+  // to facilitate autocomplete in my current IDE. If I find a better
+  // autocompletion IDE the following should be removed.
   void addOnTopNoRepetition(const List<Object>& input) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::
     addOnTopNoRepetition(input);

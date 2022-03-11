@@ -56,7 +56,8 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(
   if (this->generators.size == 0) {
     global.fatal
     <<
-    "Groups with zero generators are not allowed: if you wanted to create a trivial group, "
+    "Groups with zero generators are not allowed: "
+    << "if you wanted to create a trivial group, "
     << " trivial groups are assumed to have a generator (the identity). "
     << global.fatal;
   }
@@ -289,7 +290,7 @@ void SubgroupData<someGroup, elementSomeGroup>::makeTranslatableWordsSubgroup(
   for (int i = 0; i < superGeneratorSubWordExists.size; i ++) {
     superGeneratorSubWordExists[i] = false;
   }
-  // done initializing things.  Now for actual code.
+  // done initializing things. Now for actual code.
   // not the most comprehensive algorithm, is it?
   // I mean, not that I care to prove it incomplete at this point.
   // and so much work for this silly little speed optimization, too
@@ -407,7 +408,8 @@ int FiniteGroup<elementSomeGroup>::conjugacyClassCount() const {
   if (!this->flagCCRepresentativesComputed) {
     global.fatal
     <<
-    "Requesting conjugacy class count but conjugacy class representatives are not computed."
+    "Requesting conjugacy class count but "
+    << "conjugacy class representatives are not computed."
     << global.fatal;
   }
   return this->conjugacyClasses.size;
@@ -1381,7 +1383,8 @@ bool WeylGroupData::freudenthalFormula(
     if (inputHWfundamentalCoords[i] < 0) {
       if (outputDetails != nullptr) {
         *outputDetails =
-        "The highest weight is not dominant and I cannot apply the Freudenthal formula."
+        "The highest weight is not dominant and "
+        "I cannot apply the Freudenthal formula."
         ;
       }
       return false;
@@ -1440,7 +1443,8 @@ bool WeylGroupData::freudenthalFormula(
             errorLog
             << "This is an internal error check. "
             <<
-            "If you see it, that means that the Freudenthal algorithm implementation is "
+            "If you see it, that means that the "
+            << "Freudenthal algorithm implementation is "
             << "wrong (because the author of the implementation "
             << "tried to write less code than what is suggested by LiE).";
             *outputDetails = errorLog.str();
@@ -1570,7 +1574,8 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
     ) {
       out
       <<
-      "<hr>The number of weights has exceeded the RAM memory limits, aborting the weight generation. "
+      "<hr>The number of weights has exceeded "
+      << "the RAM memory limits, aborting the weight generation. "
       ;
       return false;
     }
@@ -2054,7 +2059,9 @@ getAllDominantWeightsHWFDIM(
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
-  STACK_TRACE("SubgroupWeylGroupOLD::getAllDominantWeightsHWFDIM");
+  STACK_TRACE(
+  "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+  "::getAllDominantWeightsHWFDIM");
   std::stringstream out;
   this->checkInitialization();
   this->computeRootSubsystem();
@@ -2134,7 +2141,8 @@ getAllDominantWeightsHWFDIM(
     << "weights has exceeded the hard-coded RAM memory limits, or because "
     << " a priori bound for the number of weights is WRONG. "
     <<
-    "If the latter is the case, make sure to send an angry email to the author(s)."
+    "If the latter is the case, make sure "
+    << "to send an angry email to the author(s)."
     ;
   }
   outputDetails = out.str();
@@ -2146,7 +2154,8 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 raiseToDominantWeightInner(
   Vector<Coefficient>& weight, int* sign, bool* stabilizerFound
 ) {
-  STACK_TRACE("SubgroupWeylGroupOLD::raiseToDominantWeightInner");
+  STACK_TRACE("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+  "::raiseToDominantWeightInner");
   if (sign != nullptr) {
     *sign = 1;
   }
@@ -2184,7 +2193,8 @@ generateOrbitReturnFalseIfTruncated(
   int upperLimitNumberOfElements
 ) {
   STACK_TRACE(
-    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::generateOrbitReturnFalseIfTruncated"
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+  "::generateOrbitReturnFalseIfTruncated"
   );
   HashedList<Vector<Coefficient> > orbit;
   bool result = true;
@@ -2228,7 +2238,8 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   int upperBoundFreudenthal
 ) {
   STACK_TRACE(
-    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::freudenthalFormulaIrrepIsWRTLeviPart"
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+  "::freudenthalFormulaIrrepIsWRTLeviPart"
   );
   // double startTimer = global.getElapsedSeconds();
   this->computeRootSubsystem();
@@ -2270,7 +2281,8 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     << "Error: the number of dominant weights exceeded hard-coded limit of "
     << upperBoundFreudenthal
     <<
-    ". Please check out whether LiE's implementation of the Freudenthal formula can do your computation."
+    ". Please check out whether LiE's implementation "
+    << "of the Freudenthal formula can do your computation."
     ;
     outputDetails = errorLog.str();
     return false;
@@ -2315,11 +2327,12 @@ freudenthalFormulaIrrepIsWRTLeviPart(
           std::stringstream errorLog;
           errorLog
           << "This is an internal error check. If you see it, that means "
-          << " that the Freudenthal algorithm implementation is "
+          << "that the Freudenthal algorithm implementation is "
           <<
-          " wrong (because the author of the implementation was dumb enough to"
-          << " try to write less code than what is "
-          << " suggested by LiE).";
+          "wrong (because the author of the "
+          << "implementation was dumb enough to "
+          << "try to write less code than what is "
+          << "suggested by LiE).";
           outputDetails = errorLog.str();
           return false;
         }

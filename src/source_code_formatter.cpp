@@ -1929,6 +1929,7 @@ CodeFormatter::CodeFormatter() {
   List<std::string> andOrRelations = relations;
   andOrRelations.addListOnTop(andAndOr);
   this->addOperatorOverride("+", andOrRelations);
+  this->addOperatorOverride("+", List<std::string>({"<<"}));
   // The negative sign may extend to the -> operator, so
   // its presence on the right overrides the other arithmetic operators.
   this->addOperatorOverride("-", andOrRelations);

@@ -48,9 +48,9 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   index -
   this->getOwner().getNumberOfPositiveRoots() -
   this->getOwner().getRank();
-  MonomialTensor<int, HashFunctions::hashFunction> Accum;
-  Accum.powers.reserve(oldRight.powers.size);
-  Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
+  MonomialTensor<int, HashFunctions::hashFunction> accumulator;
+  accumulator.powers.reserve(oldRight.powers.size);
+  accumulator.generatorsIndices.reserve(oldRight.generatorsIndices.size);
   Vector<Rational> remainingWeight;
   Rational result = 0;
   Rational summand;
@@ -58,7 +58,7 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
   for (int i = 0; i < oldRight.generatorsIndices.size; i ++) {
     if (oldRight.generatorsIndices[i] == indexMinus) {
       summand = 0;
-      newRight = Accum;
+      newRight = accumulator;
       newRight.multiplyByGeneratorPowerOnTheRight(
         oldRight.generatorsIndices[i], oldRight.powers[i] - 1
       );
@@ -85,8 +85,8 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
       summand *= oldRight.powers[i];
       result += summand;
     }
-    Accum.generatorsIndices.addOnTop(oldRight.generatorsIndices[i]);
-    Accum.powers.addOnTop(oldRight.powers[i]);
+    accumulator.generatorsIndices.addOnTop(oldRight.generatorsIndices[i]);
+    accumulator.powers.addOnTop(oldRight.powers[i]);
   }
   if (this->cachedPairs.size < this->maximumNumberOfCachedPairs) {
     this->cachedPairs.addOnTop(pair);
@@ -506,7 +506,8 @@ splitOverLeviMonomialsEncodeHighestWeight(
     << "a yellow line is drawn if the corresponding weights are "
     << "simple reflections of one another, "
     <<
-    "with respect to a simple root of the Levi part of the parabolic subalgebra. "
+    "with respect to a simple root of "
+    << "the Levi part of the parabolic subalgebra. "
     ;
     for (int i = 0; i < output.size(); i ++) {
       root =
@@ -546,7 +547,8 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
       std::stringstream out;
       out
       <<
-      "I have been instructed only to split modules that are irreducible over the ambient Lie algebra"
+      "I have been instructed only to split modules "
+      << "that are irreducible over the ambient Lie algebra"
       ;
       out
       << " Instead I got the character "
@@ -598,7 +600,8 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   ) {
     out
     <<
-    "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra. "
+    "The parabolic subalgebra you selected is "
+    << "not a subalgebra of the ambient parabolic subalgebra. "
     << "The parabolic has root of Levi given by "
     << splittingParSel.toString()
     << " while the ambient parabolic subalgebra has root of Levi given by "
@@ -936,7 +939,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     if (index == - 1) {
       out2
       <<
-      "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
+      "Error: could not generate all weights "
+      << "in the weight support. Maybe they are too many? Allowed "
       << "# of weights is 10000";
       if (outputReport != nullptr) {
         *outputReport = out2.str();
@@ -996,7 +1000,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     if (outputReport != nullptr) {
       out2
       <<
-      "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. "
+      "<br>Error: the Littelmann-path induced "
+      << "monomials do not give a monomial basis. "
       ;
       *outputReport = out2.str();
     }

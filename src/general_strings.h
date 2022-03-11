@@ -57,8 +57,7 @@ public:
   class Conversions {
   public:
     // Converts an arbitrary string (byte sequence) to a list of unicode code
-    // points
-    // that can be recoded back to another format.
+    // points that can be recoded back to another format.
     // If the input is valid utf8 string, will write
     // the corresponding code points in the output variable and return true;
     // If the input is invalid, will still read the entire sequence and
@@ -104,8 +103,7 @@ public:
     // Transforms an arbitrary string to a string that is an acceptable
     // javascript variable.
     // Avoid use of underscores and other characters so as attempt to produce a
-    // name that is
-    // in addition a valid latex string and a valid html tag.
+    // name that is in addition a valid latex string and a valid html tag.
     class Test {
     public:
       static bool all();

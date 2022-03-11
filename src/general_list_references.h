@@ -21,8 +21,7 @@
 // to pass a reference of the object around. This reference will not expire,
 // should the list be resized.
 //
-// Use guideline.
-// ListReferences is slower, but pointers
+// Use guideline. ListReferences is slower, but pointers
 // to data stored in ListReferences are safe to share.
 // You should use ListReferences/HashedListReferences
 // for objects that will be shared and passed accross functions.
@@ -32,8 +31,7 @@
 // or that is otherwise small (lists of ints, monomials, Rationals, etc.)
 // should be kept in simple Lists and copied around when needed.
 // So long as a List is const, it is safe to pass references to data from the
-// List.
-// Whenever in doubt, use ListReferences.
+// List. Whenever in doubt, use ListReferences.
 template <class Object>
 class ListReferences {
 public:
@@ -244,10 +242,8 @@ class HashedListReferences: public HashTemplate<
 > {
 public:
   // Note The following function specializations are declared entirely in order
-  // to
-  // facilitate autocomplete in my current IDE. If I find a better
-  // autocompletion
-  // IDE the following should be removed.
+  // to facilitate autocomplete in my current IDE. If I find a better
+  // autocompletion IDE the following should be removed.
   inline void addOnTopNoRepetition(const List<Object>& inputList) {
     this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::
     addOnTopNoRepetition(inputList);

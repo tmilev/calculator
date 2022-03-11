@@ -9,7 +9,7 @@
 template <typename Coefficient>
 class Basis {
 public:
-  // vectors are vector rows
+  // Vectors are vector rows.
   Matrix<Coefficient> basis;
   Matrix<Coefficient> gramMatrix;
   bool haveGramMatrix;

@@ -49,7 +49,7 @@ public:
     ExpressionContext& hwContext,
     Selection& selInducing,
     SemisimpleLieAlgebra* owner,
-    bool AllGenerators,
+    bool allGenerators,
     std::string* xLetter,
     std::string* partialLetter,
     std::string* exponentVariableLetter,
@@ -62,7 +62,7 @@ public:
     const Expression& input,
     Expression& output,
     Vector<Coefficient>& outputWeight,
-    Selection& outputInducingSel,
+    Selection& outputInducingSelection,
     Expression* outputContext = nullptr
   );
   static bool printB3G2branchingTableCharsOnly(

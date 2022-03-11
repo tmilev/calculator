@@ -838,7 +838,8 @@ public:
     if (&standsOnTheLeft == &output) {
       global.fatal
       <<
-      "In actMultiplyVectorRowOnTheRight: output not allowed to equal input. "
+      "In actMultiplyVectorRowOnTheRight: "
+      <<"output not allowed to equal input. "
       << global.fatal;
     }
     if (this->numberOfRows != standsOnTheLeft.size) {
@@ -1239,11 +1240,11 @@ public:
   );
   // If m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below
-  // function
-  // corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
-  // this means you write the matrix m1 in the upper left corner m2 in the lower
-  // right
-  // and everything else you fill with zeros
+  // function corresponds to the linear operator
+  // from V1+W1 to V2+W2 (direct sum)
+  // this means you write the matrix m1 in
+  // the upper left corner m2 in the lower
+  // right and everything else you fill with zeros
   void assignDirectSum(
     Matrix<Coefficient>& m1, Matrix<Coefficient>& m2
   );
@@ -1489,7 +1490,8 @@ public:
   // 0 1 0 0 0
   // 0 0 0 1 0
   // 0 0 0 0 0
-  // In the Gaussian elimination below, we define non-pivot points to be indices
+  // In the Gaussian elimination below, we define
+  // non-pivot points to be indices
   // of the columns
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do
@@ -2006,7 +2008,8 @@ void Matrix<Element>::assignDirectSum(
 ) {
   if (this == &m1 || this == &m2) {
     global.fatal
-    << "In assignDirectSum: output not allowed to equal any of the inputs. "
+    << "In assignDirectSum: output not allowed "
+    <<"to equal any of the inputs. "
     << global.fatal;
   }
   this->resize(
@@ -3948,7 +3951,8 @@ bool LinearCombination<TemplateMonomial, Coefficient>::operator==(int x) const {
     return this->size() == 0;
   }
   global.fatal
-  << "This is either a programming error, or an unforeseen use of operator==. "
+  << "This is either a programming error, "
+  <<"or an unforeseen use of operator==. "
   << "If the second is the case, an audit/careful "
   << "proofreading of the code calling this function is needed; "
   << "I am crashing just in case. "
@@ -6657,7 +6661,8 @@ public:
 // This class may need a modification: perhaps it should not inherit monomial
 // collection,
 // but rather have a monomial collection as a private member.
-// Many important operations with Dynkin types require fixed order of monomials,
+// Many important operations with Dynkin types require
+// fixed order of monomials,
 // which may impose this reorganization.
 class DynkinType: public LinearCombination<DynkinSimpleType, Rational> {
 private:
@@ -6796,7 +6801,8 @@ public:
   bool letterIsDynkinGreaterThanLetter(char letter1, char letter2);
   // The function below takes as an input a set of roots and
   // computes the corredponding Dynkin diagram of the
-  // root subsystem. Note: the simleBasisInput is required to be a set of simple
+  // root subsystem. Note: the simleBasisInput
+  // is required to be a set of simple
   // roots.
   // The procedure calls a
   // transformation to simple basis on the simpleBasisInput,
@@ -7302,7 +7308,8 @@ public:
       this->assignTensorProduct(leftCopy, rightCopy);
       return;
     }
-    // The basis of the tensor product vector space MUST be in the SAME order as
+    // The basis of the tensor product
+    // vector space MUST be in the SAME order as
     // the one used by Matrix::assignTensorProduct.
     // int leftDomainDim= left.getMinimalNumberOfColumns();
     int rightDomainDim = right.getMinimalNumberOfColumns();
@@ -7862,7 +7869,8 @@ void PolynomialSubstitution<Coefficient>::getLinearSystemFromLinearPolynomials(
   if (!mustBeTrue) {
     global.fatal
     <<
-    "Function PolynomialSubstitution::getLinearSystemFromLinearPolynomialsSystem "
+    "Function PolynomialSubstitution::"
+    <<"getLinearSystemFromLinearPolynomialsSystem "
     << "was called with non-linear inputs: "
     << this->toString()
     << "."

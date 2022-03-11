@@ -104,7 +104,7 @@ public:
     static const int problem = 5;
     static const int error = 6;
     static const int texHeader = 7;
-    // service elements
+    // Service elements.
     static const int title = 8;
     static const int video = 9;
     static const int videoHandwritten = 10;
@@ -133,7 +133,7 @@ public:
   int totalSubSectionsUnderME;
   int totalSubSectionsUnderMeIncludingEmptySubsections;
   std::string id;
-  // <- for problems the id is the problem file name. For all other topic
+  // <- For problems the id is the problem file name. For all other topic
   // elements the id is the title of the element.
   List<std::string> idsDeadlines;
   List<std::string> deadlinesPerSectioN;

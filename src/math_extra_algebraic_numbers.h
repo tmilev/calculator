@@ -215,8 +215,7 @@ public:
   // The [i][j]-th element refers to the image basis element e_{i, j},
   // i.e., the j^th basis element of the i^th [extension A_i].
   // More precisely, the [i][j]-th element of the map below describes the image
-  // of
-  // e_{i, j} when injected down to the latest extension A_n, with
+  // of e_{i, j} when injected down to the latest extension A_n, with
   // coordinates relative to the latest basis e_{n, 1}, ..., e_{n, n}.
   List<List<VectorSparse<Rational> > > basisInjections;
   MatrixTensor<Rational> generatingElementTensorForm;
@@ -378,8 +377,7 @@ public:
     bool useNegatives
   );
   // Convert modular polynomial to another modular polynomial by copying all
-  // values
-  // using the new modulus.
+  // values using the new modulus.
   static void convertLiftPolynomialModular(
     const Polynomial<ElementZmodP>& input,
     Polynomial<ElementZmodP>& output,
@@ -387,8 +385,7 @@ public:
   );
   // Format a polynomial with modular coefficients.
   // The modulo information will not be repeated for all coefficients, but will
-  // be put
-  // at the end of the expression.
+  // be put at the end of the expression.
   std::string toStringPolynomial(
     const Polynomial<ElementZmodP>& input, FormatExpressions* format
   ) const;

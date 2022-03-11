@@ -1141,7 +1141,7 @@ bool UserCalculator::isAcceptableDatabaseInput(
   return true;
 }
 
-std::string UserCalculator::GetSelectedRowEntry(const std::string& key) {
+std::string UserCalculator::getSelectedRowEntry(const std::string& key) {
   STACK_TRACE("UserCalculator::GetSelectedRowEntry");
   int index = this->selectedRowFieldNamesUnsafe.getIndex(key);
   if (index == - 1) {
@@ -1812,7 +1812,7 @@ bool UserCalculator::getActivationAddress(
   if (!this->loadFromDatabase(&comments, &comments)) {
     return false;
   }
-  this->actualActivationToken = this->GetSelectedRowEntry("activationToken");
+  this->actualActivationToken = this->getSelectedRowEntry("activationToken");
   if (this->actualActivationToken == "") {
     comments << "Failed to fetch activation token for user: " << this->username
     ;

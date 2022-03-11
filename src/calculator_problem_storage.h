@@ -302,8 +302,7 @@ public:
   bool storeProblemData(
     const std::string& fileName, std::stringstream* commentsOnFailure
   );
-  std::string GetSelectedRowEntry(const std::string& key);
-  std::string GetMySQLclauseIdentifyingUserByEmailOrID();
+  std::string getSelectedRowEntry(const std::string& key);
   bool loadFromDatabase(
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral = nullptr

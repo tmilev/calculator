@@ -3419,8 +3419,8 @@ private:
     WithContext<Polynomial<Coefficient> >& output
   );
 public:
-  // Conversion from expression tree
-  // Conversions from expression tree to type
+  // Conversion from expression tree.
+  // Conversions from expression tree to type.
   static bool loadElementSemisimpleLieAlgebraRationalCoefficients(
     Calculator& calculator,
     const Expression& input,

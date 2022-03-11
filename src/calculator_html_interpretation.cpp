@@ -44,9 +44,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   if (global.getWebInput(WebAPI::problem::randomSeed) == "") {
     out
-    <<
-    "<b>I could not figure out the exercise problem (missing random seed). </b>"
-    ;
+    << "<b>I could not figure out the "
+    << "exercise problem (missing random seed). </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
@@ -1006,8 +1005,8 @@ std::string WebAPIResponse::getHtmlTagWithManifest() {
   std::stringstream out;
   out << "<!DOCTYPE HTML>\n";
   out
-  <<
-  "<html>\n<!-- tag added automatically; user-specified html tag ignored-->\n";
+  << "<html>\n<!-- tag added automatically; "
+  << "user-specified html tag ignored-->\n";
   return out.str();
 }
 
@@ -2000,17 +1999,16 @@ std::string WebAPIResponse::addTeachersSections() {
     inputParsed["teachers"].elementType != JSData::token::tokenString
   ) {
     out
-    <<
-    "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>"
-    ;
+    << "<b style='color:red'>Failed to extract key "
+    << "'teachers' from your input. </b>";
     return out.str();
   }
   if (
     inputParsed["students"].elementType != JSData::token::tokenString
   ) {
     out
-    << "<b style='color:red'>Failed to find key 'students' in your input. </b>"
-    ;
+    << "<b style='color:red'>Failed to find key "
+    << "'students' in your input. </b>";
     return out.str();
   }
   if (!global.flagDatabaseCompiled) {
@@ -2501,8 +2499,8 @@ std::string WebAPIResponse::getAccountsPageBody(
     !global.flagUsingSSLinCurrentConnection
   ) {
     out
-    <<
-    "Browsing accounts allowed only for logged-in admins over ssl connection.";
+    << "Browsing accounts allowed only for "
+    << "logged-in admins over ssl connection.";
     return out.str();
   }
   std::stringstream commentsOnFailure;
@@ -2684,9 +2682,10 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       oneTableLineStream << "body =";
       std::stringstream emailBody;
       emailBody
-      <<
-      "Dear user,\n you have not activated your homework server account yet. \n"
-      << "To activate your account and set your password please use the link: "
+      << "Dear user,\n you have not activated "
+      << "your homework server account yet. \n"
+      << "To activate your account and set "
+      << "your password please use the link: "
       << HtmlRoutines::convertStringToURLString("\n\n", false)
       << HtmlRoutines::convertStringToURLString(
         UserCalculator::getActivationAddressFromActivationToken(
@@ -2709,8 +2708,8 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       oneTableLineStream << "<td>error</td><td></td>";
     } else {
       oneTableLineStream
-      <<
-      "<td><span style='color:green'>activated</span></td><td></td><td></td>";
+      << "<td><span style='color:green'>activated</span></td>"
+      << "<td></td><td></td>";
     }
     std::stringstream oneLink;
     oneLink
@@ -2750,8 +2749,8 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   }
   std::stringstream tableStream;
   tableStream
-  <<
-  "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
+  << "<table><tr><th>User</th><th>Email</th>"
+  << "<th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
   << "<th>Pre-filled login link</th><th>Course info</th></tr>";
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
@@ -3061,9 +3060,8 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   }
   if (!this->problem.loadDatabaseInfo(comments)) {
     comments
-    <<
-    "<span style ='color:red'>Could not load your problem history.</span> <br>"
-    ;
+    << "<span style ='color:red'>"
+    << "Could not load your problem history.</span> <br>";
   }
   problem.currentUser.computePointsEarned(
     problem.currentUser.problemData.keys,
@@ -3406,15 +3404,16 @@ std::string WebAPIResponse::toStringUserDetails(
     global.getWebInput(WebAPI::problem::courseHome), false
   )
   << "</span></li>"
-  << "<li>To change course use the select course link in the top panel.</li>"
+  << "<li>To change course use "
+  << "the select course link in the top panel.</li>"
   <<
   "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"
   << "<li>List default passwords with a similarly separated list.</li> "
   << "<li>If left blank, password(s) are not (re)set.</li> "
-  <<
-  "<li>If the password entries are not left blank and the number of passwords "
-  <<
-  "does not match the number of added users, the operation will fail (no users will be added).</li> "
+  << "<li>If the password entries "
+  << "are not left blank and the number of passwords "
+  << "does not match the number of added users, "
+  << "the operation will fail (no users will be added).</li> "
   << "</ul>\n";
   out << "<textarea width =\"500px\" ";
   out << "id =\"" << idAddressTextarea << "\"";

@@ -326,7 +326,9 @@ freudenthalEvalMeDominantWeightsOnly(
       return false;
     }
     if (localDetail != "") {
-      localDetails << "<br>MonomialPolynomial " << i + 1
+      localDetails
+      << "<br>MonomialPolynomial "
+      << i + 1
       << " computation details: "
       << localDetail;
     }

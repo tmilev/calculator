@@ -152,13 +152,15 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         tmpStream
         << universalEnvelopingFormat.polynomialDefaultLetter
         << "_{"
-        << k - hwContext.numberOfVariables() +
-        1
+        << k - hwContext.numberOfVariables() + 1
         << "}";
         universalEnvelopingFormat.polynomialAlphabet[k] = tmpStream.str();
         tempstream2 << finalXletter << "_{" << k - numStartingVars + 1 << "}";
         tempstream3 << finalXletter << "_" << k - numStartingVars + 1;
-        tempStream4 << finalPartialLetter << "_{" << k - numStartingVars + 1
+        tempStream4
+        << finalPartialLetter
+        << "_{"
+        << k - numStartingVars + 1
         << "}";
         if (
           weylFormat.polynomialAlphabet.contains(tempstream2.str()) ||
@@ -169,7 +171,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
             calculator,
             "Error: the variable " +
             tempstream2.str() +
-            " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. "
+            " is reserved for me: you are not "
+            "allowed to use it as a coordinate of the highest weight. "
           );
         }
         weylFormat.polynomialAlphabet[k] = tempstream2.str();
@@ -314,9 +317,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       << HtmlRoutines::getMathNoDisplay(
         currentModule.character.toString()
       )
-      <<
-      ", differential operators Fourier transformed - formatted for calculator input. <br><br>"
-      ;
+      << ", differential operators Fourier transformed - "
+      << "formatted for calculator input. <br><br>";
       reportfourierTransformedCalculatorCommands
       << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
@@ -493,7 +495,8 @@ bool CalculatorLieTheory::animateLittelmannPaths(
     return
     output.assignError(
       calculator,
-      "Failed to convert the argument of the function to a highest weight vector"
+      "Failed to convert the argument of "
+      "the function to a highest weight vector"
     );
   }
   Vector<Rational> weightInSimpleCoords;
@@ -502,7 +505,8 @@ bool CalculatorLieTheory::animateLittelmannPaths(
     weight, Rational::zero()
   );
   calculator
-  << "<br>Function animateLittelmannPaths: your input in simple coords: "
+  << "<br>Function animateLittelmannPaths: "
+  << "your input in simple coords: "
   << weightInSimpleCoords.toString();
   LittelmannPath path;
   path.makeFromWeightInSimpleCoords(
@@ -595,13 +599,15 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
     g2B3Data.homomorphism.coDomainAlgebra().weylGroup.rootScalarCartanRoot(
       currentWeight, g2B3Data.homomorphism.imagesCartanDomain[0]
     );
-    // <-note: implicit type conversion: the return type is the left coefficient
+    // <-note: implicit type conversion:
+    // the return type is the left coefficient
     // type.
     currentG2DualWeight[1] =
     g2B3Data.homomorphism.coDomainAlgebra().weylGroup.rootScalarCartanRoot(
       currentWeight, g2B3Data.homomorphism.imagesCartanDomain[1]
     );
-    // <-note: implicit type conversion: the return type is the left coefficient
+    // <-note: implicit type conversion:
+    // the return type is the left coefficient
     // type.
     invertedG2cartanMat.actOnVectorColumn(
       currentG2DualWeight, currentG2Weight, zero
@@ -769,9 +775,8 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
   Selection tempSel;
   std::stringstream latexReport;
   latexReport
-  <<
-  "\\documentclass{article} <br>\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n"
-  ;
+  << "\\documentclass{article} <br>"
+  << "\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
   latexReport << " \\begin{longtable}{|lllll|} ";
   ProgressReport report;
   bool ConjectureBholds = true;
@@ -795,9 +800,8 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
     << "$"
     << currentAlg.toStringLieAlgebraName()
     << "$}\\\\\\hline\n\n"
-    <<
-    "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline"
-    ;
+    << "$\\lambda$ & dim &\\# pairs 1& \\# "
+    << "pairs total  & \\# Arithmetic op.  \\\\\\hline";
     out
     << "<br>"
     << " <table><tr><td  border =\"1\" colspan =\"3\">"
@@ -821,8 +825,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
       << "Processing "
       << currentAlg.toStringLieAlgebraName()
       << ", index  "
-      << i +
-      1
+      << i + 1
       << " out of "
       << ranks.size
       << ",  highest weight "
@@ -830,8 +833,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
       << ", dim: "
       << currentAlg.weylGroup.weylDimFormulaFundamentalCoords(currentHW)
       << ", index "
-      << j +
-      1
+      << j + 1
       << " out of "
       << currentHighestWeight.size;
       report.report(reportStream.str());
@@ -928,7 +930,8 @@ bool CalculatorLieTheory::littelmannOperator(
     return
     output.assignError(
       calculator,
-      "The index of the Littelmann root operator is expected to be non-zero."
+      "The index of the Littelmann root "
+      "operator is expected to be non-zero."
     );
   }
   return output.assignValue(calculator, index);
@@ -983,7 +986,8 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   if (input.size() != 2) {
     return
     calculator
-    << "Kazhdan-Lusztig coefficients function expects 1 argument. ";
+    << "Kazhdan-Lusztig coefficients "
+    << "function expects 1 argument. ";
   }
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
@@ -1457,7 +1461,8 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     out
     << "<table>"
     << "<tr><td>$so(7)$-highest weight</td>"
-    << "<td>Dimension</td><td>Decomposition over $G_2$</td><td>Dimensions</td>"
+    << "<td>Dimension</td><td>Decomposition over $G_2$</td>"
+    << "<td>Dimensions</td>"
     << "</tr>";
     latexTable
     << "\\begin{longtable}{|rl|} \\caption{\\label{tableB3fdsOverG2charsonly} "
@@ -1705,14 +1710,16 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel"
+    "CalculatorLieTheory::"
+    "writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel"
   );
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   if (!input.isListNElements(4)) {
     return
     output.assignError(
       calculator,
-      "Function splitGenericGeneralizedVermaTensorFiniteDimensional is expected "
+      "Function splitGenericGeneralizedVermaTensorFiniteDimensional "
+      "is expected "
       "to have three arguments: SS algebra type, Number, List{}. "
     );
   }
@@ -2180,8 +2187,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     toStringLetterFormat("\\psi", &tempFormat)
     << "$"
     << "&$p_{"
-    << i +
-    1
+    << i + 1
     << "}=$ $"
     << currentChar.toString(&tempFormat)
     << "$\\\\<br>";
@@ -2210,8 +2216,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   out << "</tr>";
   std::stringstream latexReport2;
   latexReport2
-  <<
-  "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{\\label{tableDecompo"
+  << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}"
+  << "\\caption{\\label{tableDecompo"
   << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "times7dim}Decomposition for the $"
   << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
@@ -2533,7 +2539,8 @@ bool CalculatorLieTheory::printB3G2branchingTableInit(
     return
     output.assignError(
       calculator,
-      "I need two arguments: first is height, second is parabolic selection. "
+      "I need two arguments: first is height, "
+      "second is parabolic selection. "
     );
   }
   desiredHeight = 0;
@@ -3023,8 +3030,9 @@ bool VoganDiagram::parameterChecks(std::stringstream* commentsOnFailure) const {
     2
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter must be at most rank/2=" << this->rank /
-      2
+      *commentsOnFailure
+      << "Parameter must be at most rank/2="
+      << this->rank / 2
       << ", it is instead: "
       << this->parameter
       << ". ";
@@ -3188,7 +3196,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
   }
   if (this->voganDiagram.parameter >= rank) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter " << this->voganDiagram.parameter + 1
+      *commentsOnFailure
+      << "Parameter "
+      << this->voganDiagram.parameter + 1
       << " must be less than or equal to: "
       << rank
       << ". ";
@@ -3228,7 +3238,8 @@ bool CartanInvolution::computeSimpleRootImagesTypeBI(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "Parameter must be between 0 and the rank less one. The rank is: "
+      << "Parameter must be between 0 and "
+      << "the rank less one. The rank is: "
       << rank
       << " the parameter is: "
       << this->voganDiagram.parameter
@@ -3238,7 +3249,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeBI(
   }
   if (this->voganDiagram.parameter >= rank) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter " << this->voganDiagram.parameter + 1
+      *commentsOnFailure
+      << "Parameter "
+      << this->voganDiagram.parameter + 1
       << " must be less than or equal to: "
       << rank
       << ". ";
@@ -3290,7 +3303,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeCI(
   }
   if (this->voganDiagram.parameter >= rank) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter " << this->voganDiagram.parameter + 1
+      *commentsOnFailure
+      << "Parameter "
+      << this->voganDiagram.parameter + 1
       << " must be less than or equal to: "
       << rank
       << ". ";
@@ -3356,7 +3371,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
   }
   if (this->voganDiagram.parameter >= rank) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Parameter " << this->voganDiagram.parameter + 1
+      *commentsOnFailure
+      << "Parameter "
+      << this->voganDiagram.parameter + 1
       << " must be less than or equal to: "
       << rank
       << ". ";
@@ -4692,7 +4709,8 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     return
     output.assignError(
       calculator,
-      "<br><br>Failed to generate Weyl subgroup, 500 elements is the limit"
+      "<br><br>Failed to generate Weyl subgroup, "
+      "500 elements is the limit"
     );
   }
   subgroup.findQuotientRepresentatives(2000);
@@ -4721,13 +4739,13 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     std::string fileHasse, fileCosetGraph;
     bool useJavascript = (subgroup.allElements.size < 100);
     outputFileContent
-    << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n"
-    ;
+    << "\\documentclass{article}\\usepackage[all,cmtip]{xy}"
+    << "\\begin{document}\n";
     outputFileContent << "\\[" << subgroup.toStringBruhatGraph() << "\\]";
     outputFileContent << "\n\\end{document}";
     outputFileContent2
-    << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n"
-    ;
+    << "\\documentclass{article}\\usepackage[all,cmtip]{xy}"
+    << "\\begin{document}\n";
     outputFileContent2 << "\\[" << subgroup.toStringCosetGraph() << "\\]";
     outputFileContent2 << "\n\\end{document}";
     calculator.writeDefaultLatexFileReturnHtmlLink(
@@ -5276,7 +5294,9 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
   Expression currentChainE;
   out << chains.size << " chains total. <br>";
   for (int i = 0; i < chains.size; i ++) {
-    out << "<br>Chain " << i + 1
+    out
+    << "<br>Chain "
+    << i + 1
     << ": LoadSemisimpleSubalgebras{}( "
     << subalgebras.owner->weylGroup.dynkinType.toString()
     << ", (";
@@ -5551,10 +5571,11 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       }
       if (report2.tickAndWantReport()) {
         std::stringstream reportStream;
-        reportStream << "Accounted operation between elements " << i + 1
+        reportStream
+        << "Accounted operation between elements "
+        << i + 1
         << " and "
-        << j +
-        1
+        << j + 1
         << " out of "
         << inputOutputElts.size;
         report2.report(reportStream.str());
@@ -5731,7 +5752,8 @@ getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
   const Vector<Coefficient>& alphaInFundamentalCoordinates
 ) {
   STACK_TRACE(
-    "CharacterSemisimpleLieAlgebraModule::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight"
+    "CharacterSemisimpleLieAlgebraModule::"
+    "getPositiveNStringSuchThatWeightMinusNAlphaIsWeight"
   );
   int result = - 1;
   Weight<Coefficient> currentWeight;

@@ -557,7 +557,9 @@ public:
     for (int j = 0; j < this->minimalNumberOfVariables(); j ++) {
       int numCycles = 0;
       if (!this->monomialBody[j].isSmallInteger(&numCycles)) {
-        global.fatal << "Attempting to evaluate a monomial whose " << j + 1
+        global.fatal
+        << "Attempting to evaluate a monomial whose "
+        << j + 1
         << "^{th} variable is raised to the power "
         << this->monomialBody[j].toString()
         << ". Raising variables to power is allowed "
@@ -3675,7 +3677,9 @@ public:
       displayedElementsMinus1ForAll = this->size;
     }
     for (int i = 0; i < this->size; i ++) {
-      out << "x_{" << i + 1
+      out
+      << "x_{"
+      << i + 1
       << "} \\mapsto "
       << this->objects[i].toString(&polynomialFormatLocal);
       if (i != this->size - 1) {

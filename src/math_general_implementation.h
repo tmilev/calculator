@@ -67,7 +67,9 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
         if (doReport) {
           if (report2.tickAndWantReport()) {
             std::stringstream reportStream;
-            reportStream << "Computing large determinant: pivot " << i + 1
+            reportStream
+            << "Computing large determinant: pivot "
+            << i + 1
             << ", row "
             << j
             << " out of "
@@ -259,12 +261,13 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
     for (int j = 0; j < this->size(); j ++) {
       if (report2.tickAndWantReport()) {
         std::stringstream reportStream2;
-        reportStream2 << "Multiplying monomials: " << i + 1
+        reportStream2
+        << "Multiplying monomials: "
+        << i + 1
         << " out of "
         << other.size()
         << " by "
-        << j +
-        1
+        << j + 1
         << " out of "
         << this->size()
         << ". ";
@@ -356,12 +359,13 @@ void MatrixTensor<Coefficient>::operator*=(
     for (int j = 0; j < this->size(); j ++) {
       if (report2.tickAndWantReport()) {
         std::stringstream reportStream2;
-        reportStream2 << "Multiplying monomials: " << i + 1
+        reportStream2
+        << "Multiplying monomials: "
+        << i + 1
         << " out of "
         << other.size()
         << " by "
-        << j +
-        1
+        << j + 1
         << " out of "
         << this->size()
         << ". ";
@@ -420,10 +424,11 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
       while (ExploringRow < this->numberOfRows) {
         if (report.tickAndWantReport()) {
           std::stringstream out;
-          out << "Pivotting on row of index " << row + 1
+          out
+          << "Pivotting on row of index "
+          << row + 1
           << " with exploring row of index "
-          << ExploringRow +
-          1
+          << ExploringRow + 1
           << "; total rows: "
           << this->numberOfRows;
           report.report(out.str());
@@ -607,7 +612,9 @@ void Matrix<Coefficient>::addTwoRows(
     coefficient *= scalar;
     if (report.tickAndWantReport()) {
       std::stringstream out;
-      out << "Processing row, element " << i + 1
+      out
+      << "Processing row, element "
+      << i + 1
       << " out of "
       << this->numberOfColumns;
       report.report(out.str());
@@ -710,8 +717,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
         << "</td><td style='border-bottom:1pt solid black;'>"
         << "<div style='display:inline-block;min-width:100px'>"
         << "Selected pivot column "
-        << i +
-        1
+        << i + 1
         << ". ";
         if (numberOfPivots != pivotIndex) {
           *humanReadableReport
@@ -764,16 +770,13 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
             << "x"
             << this->numberOfColumns
             << "): column "
-            << i +
-            1
+            << i + 1
             << " out of "
             << this->numberOfColumns
             << ".\n<br>Pivot row: "
-            << numberOfPivots +
-            1
+            << numberOfPivots + 1
             << ", eliminating row "
-            << j +
-            1
+            << j + 1
             << " out of "
             << this->numberOfRows;
             report.report(reportStream.str());

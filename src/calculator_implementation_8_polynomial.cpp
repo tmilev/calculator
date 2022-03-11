@@ -851,13 +851,13 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     << "\\\\";
     if (i < subtrahends.size) {
       out << "\\uncover<" << this->uncoverAllMonsSubtrahends[i] << "->{";
-      out << "\\uncover<" << this->uncoverAllMonsSubtrahends[i] + 2
+      out
+      << "\\uncover<"
+      << this->uncoverAllMonsSubtrahends[i] + 2
       << "->{\\alertNoH{"
-      << this->uncoverAllMonsSubtrahends[i] +
-      2
+      << this->uncoverAllMonsSubtrahends[i] + 2
       << ", "
-      << this->uncoverAllMonsSubtrahends[i] +
-      3
+      << this->uncoverAllMonsSubtrahends[i] + 3
       << "}{"
       << "$\\overline{\\phantom{A}}$"
       << "}}";
@@ -1140,14 +1140,12 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "\\only<"
   << currentSlideNumber
   << ","
-  << currentSlideNumber +
-  1
+  << currentSlideNumber + 1
   << "| handout:0>{Divide "
   << "\\alertNoH{"
   << currentSlideNumber
   << ","
-  << currentSlideNumber +
-  1
+  << currentSlideNumber + 1
   << "}{"
   << "$"
   << currentRemainder.getBlendCoefficientAndMonomial(
@@ -1159,8 +1157,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "\\alertNoH{"
   << currentSlideNumber
   << ","
-  << currentSlideNumber +
-  1
+  << currentSlideNumber + 1
   << "}{"
   << "$"
   << currentRemainder.getBlendCoefficientAndMonomial(
@@ -1207,14 +1204,12 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "\\only<"
   << currentSlideNumber
   << ", "
-  << currentSlideNumber +
-  1
+  << currentSlideNumber + 1
   << "| handout:0>{Multiply "
   << "\\alertNoH{"
   << currentSlideNumber
   << ", "
-  << currentSlideNumber +
-  1
+  << currentSlideNumber + 1
   << "}{$"
   << currentQuotient.getBlendCoefficientAndMonomial(
     currentQuotient.monomials[indexCurrentQuotientMoN],
@@ -1276,8 +1271,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "\\only<"
   << currentSlideNumber
   << ", "
-  << currentSlideNumber +
-  1
+  << currentSlideNumber + 1
   << "| handout:0>{subtract last two polynomials.}";
   currentSlideNumber ++;
   for (
@@ -1538,7 +1532,8 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
   bool doGCD
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial"
+    "CalculatorFunctionsPolynomial::"
+    "greatestCommonDivisorOrLeastCommonMultiplePolynomial"
   );
   if (input.size() != 3) {
     return false;

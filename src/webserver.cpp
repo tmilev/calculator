@@ -322,7 +322,9 @@ bool WebWorker::receiveAll() {
 void WebWorker::sendAllBytesNoHeaders() {
   STACK_TRACE("WebWorker::sendAllBytesNoHeaders");
   this->checkConsistency();
-  global << "Worker " << this->indexInParent + 1
+  global
+  << "Worker "
+  << this->indexInParent + 1
   << " sending "
   << this->remainingBytesToSend.size
   << " bytes in chunks of: ";
@@ -2745,11 +2747,9 @@ std::string WebWorker::toStringStatus() const {
     }
     out
     << ", <a href='calculator?request=monitor&mainInput="
-    << this->indexInParent +
-    1
+    << this->indexInParent + 1
     << "'>monitor process "
-    << this->indexInParent +
-    1
+    << this->indexInParent + 1
     << "</a>";
   } else {
     out << ", not in use";
@@ -3215,8 +3215,9 @@ std::string WebServer::toStringStatusAll() {
   if (this->activeWorker == - 1) {
     out << "This is a server process.";
   } else {
-    out << "This is a worker process. Active worker: " << this->activeWorker +
-    1
+    out
+    << "This is a worker process. Active worker: "
+    << this->activeWorker + 1
     << ". ";
     out << "<br>" << this->toStringStatusActive();
   }
@@ -3500,7 +3501,9 @@ void WebServer::handleTooManyConnections(
     this->terminateChildSystemCall(indices[j]);
     this->statistics.processKilled ++;
     std::stringstream errorStream;
-    errorStream << "Terminating child " << indices[j] + 1
+    errorStream
+    << "Terminating child "
+    << indices[j] + 1
     << " with PID "
     << this->allWorkers[indices[j]].ProcessPID
     << ": address: "
@@ -3534,13 +3537,19 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   std::stringstream commentsOnFailure;
   JSData workerMessage;
   if (!workerMessage.parse(messageString, false, &commentsOnFailure)) {
-    global << Logger::red << "Worker " << childIndex + 1
+    global
+    << Logger::red
+    << "Worker "
+    << childIndex + 1
     << " sent corrupted result message: "
     << messageString
     << ". Marking for reuse. "
     << Logger::endL;
   } else {
-    global << Logger::green << "Worker " << childIndex + 1
+    global
+    << Logger::green
+    << "Worker "
+    << childIndex + 1
     << " done with message: "
     << messageString
     << ". Marking for reuse. "
@@ -3591,7 +3600,10 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   if (currentControlPipe.lastRead.size > 0) {
     this->processOneChildMessage(childIndex, numberInUse);
   } else {
-    global << Logger::orange << "Worker " << childIndex + 1
+    global
+    << Logger::orange
+    << "Worker "
+    << childIndex + 1
     << " not done yet. "
     << Logger::endL;
   }
@@ -3609,7 +3621,10 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
     currentWorker.millisecondsLastPingServerSideOnly =
     global.getElapsedMilliseconds();
     if (currentWorker.pingMessage != "") {
-      global << Logger::blue << "Worker " << childIndex + 1
+      global
+      << Logger::blue
+      << "Worker "
+      << childIndex + 1
       << " ping: "
       << currentWorker.pingMessage
       << ". "
@@ -3633,8 +3648,7 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   pingTimeoutStream
   << millisecondsElapsed
   << " milliseconds passed since worker "
-  << childIndex +
-  1
+  << childIndex + 1
   << " last pinged the server; "
   << "the maximum allowed is: "
   << global.millisecondsNoPingBeforeChildIsPresumedDead
@@ -3668,7 +3682,9 @@ void WebServer::handleTooManyWorkers(int& numInUse) {
     }
     this->terminateChildSystemCall(i);
     std::stringstream errorStream;
-    errorStream << "Terminating child " << i + 1
+    errorStream
+    << "Terminating child "
+    << i + 1
     << " with PID "
     << this->allWorkers[i].ProcessPID
     << ": too many workers in use. ";
@@ -4032,8 +4048,7 @@ int Listener::acceptWrapper() {
       global
       << Logger::green
       << "Connection candidate "
-      << this->owner->statistics.allConnections +
-      1
+      << this->owner->statistics.allConnections + 1
       << ". "
       << "Connected via listening socket "
       << currentListeningSocket

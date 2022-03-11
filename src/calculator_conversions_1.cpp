@@ -648,8 +648,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
     <<
     "the type of a simple Lie algebra must be the letter A, B, C, D, E, F or G. "
     << "Instead, it is "
-    << typeName +
-    ". Error encountered while processing "
+    << typeName + ". Error encountered while processing "
     << input.toString();
   }
   char weylLetter = typeName[0];

@@ -36,12 +36,14 @@ void Calculator::initializeFunctionsExtra() {
     "is white-listed. To access this file simply "
     "start your file name with the foldername. "
     "Do not start the folder name with the / character."
-    "2) The file can be located in a folder in a level parallel to the project base "
-    "- such folders are outside of the project folder - **provided that** "
+    "2) The file can be located in a folder in "
+    "a level parallel to the project base "
+    "- such folders are outside of "
+    "the project folder - **provided that** "
     "the folder is white listed in the C++ code. ",
     "LoadFileIntoString(\"test/certificate_self_signed.base64\");\n"
-    "LoadFileIntoString(\"problems/default/Functions-composing-fractional-linear-1.html\")"
-    ,
+    "LoadFileIntoString"
+    "(\"problems/default/Functions-composing-fractional-linear-1.html\")",
     "CalculatorConversions::loadFileIntoString",
     "LoadFileIntoString",
     innerStandard
@@ -79,8 +81,10 @@ void Calculator::initializeFunctionsExtra() {
     "ExtractCalculatorExpressionFromHtml",
     CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml,
     "",
-    "Reads html and extracts embedded calculator commands. Content enclosed in "
-    "spans with appropriate class names is interpreted; all other content "
+    "Reads html and extracts embedded calculator commands. "
+    "Content enclosed in "
+    "spans with appropriate class "
+    "names is interpreted; all other content "
     "is copied without any change. At the moment of writing, "
     "the planned span class names are: \"calculator\", "
     "\"calculatorHidden\", \"calculatorAnswer\".",
@@ -97,8 +101,10 @@ void Calculator::initializeFunctionsExtra() {
     "(This is not a mathematical function). "
     "Tests the calculator indicator mechanism."
     "First argument times number of iterations. "
-    "Second argument = length of dummy comment appended to the calculator comments. "
-    "Use a large dummy comment to test that large outputs are piped correctly to the "
+    "Second argument = length of dummy "
+    "comment appended to the calculator comments. "
+    "Use a large dummy comment to test that large "
+    "outputs are piped correctly to the "
     "monitoring process. ",
     "TestCalculatorIndicator(1000, 200000)",
     "CalculatorFunctions::testIndicator",
@@ -163,8 +169,8 @@ void Calculator::initializeFunctionsExtra() {
     "PlotExpressionTreeFull",
     CalculatorFunctionsPlot::drawExpressionGraphFull,
     "",
-    "Draws the internal tree structure of an expression. Unfolds built-in types. "
-    ,
+    "Draws the internal tree structure of an expression. "
+    "Unfolds built-in types. ",
     "PlotExpressionTreeFull(1);\n"
     "PlotExpressionTree(1 + 1);\n"
     "PlotExpressionTree(Freeze{}(1 + 1));",
@@ -199,7 +205,8 @@ void Calculator::initializeFunctionsExtra() {
     "TestBase64",
     CalculatorFunctionsEncoding::base64ToCharToBase64Test,
     "",
-    "Test function: converts a base64 string to bitstream and back to base64. "
+    "Test function: converts a base64 string to "
+    "bitstream and back to base64. "
     "Output must be identical to input. ",
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\n"
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",
@@ -225,7 +232,8 @@ void Calculator::initializeFunctionsExtra() {
     "TestJSON",
     CalculatorFunctionsEncoding::testJSON,
     "",
-    "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for "
+    "Tests the JSON parsing mechanism. "
+    "Input: json string, use backslash escapes for "
     "backslashes and quotes.",
     "TestJSON(\"{a:1, b: false,}\");\n"
     "TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
@@ -341,9 +349,12 @@ void Calculator::initializeFunctionsExtra() {
     CalculatorFunctionsFreecalc::buildFreecalc,
     "",
     "Builds the freecalc lecture pdfs. "
-    "This function performs file operations and is allowed only to logged-in administrator accounts. "
-    "Takes as arguments the lecture folder (within the freecalc project) and the file name. "
-    "The function assumes the freecalc project is installed in a folder called freecalc, "
+    "This function performs file operations and "
+    "is allowed only to logged-in administrator accounts. "
+    "Takes as arguments the lecture folder "
+    "(within the freecalc project) and the file name. "
+    "The function assumes the freecalc "
+    "project is installed in a folder called freecalc, "
     "parallel to the calculator project folder "
     "(i.e, we have folders /vectorpartition and /freecalc next to one another). "
     "The folders are given relative to the /freecalc base.",
@@ -388,8 +399,8 @@ void Calculator::initializeFunctionsExtra() {
     "SuffixNotationForPostScript",
     CalculatorFunctions::suffixNotationForPostScript,
     "",
-    "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX."
-    ,
+    "Suffix notation. for postscript, used to "
+    "quickly generate pstricks drawings in LaTeX.",
     "suffixNotationForPostScript{}((1/3 + a + b) * c)",
     "CalculatorFunctions::suffixNotationForPostScript",
     "SuffixNotationForPostScript",
@@ -410,8 +421,8 @@ void Calculator::initializeFunctionsExtra() {
     "CompareExpressionsJSON",
     CalculatorEducationalFunctions::compareExpressionsJSON,
     "",
-    "Compares two expressions and returns the result in JSON format. Freezes its inputs."
-    ,
+    "Compares two expressions and returns "
+    "the result in JSON format. Freezes its inputs.",
     "CompareExpressionsJSON((x+1)(x+2),x^2+3x+2);\n",
     "CalculatorFunctions::CompareExpressionsJSON",
     "CompareExpressionsJSON",
@@ -482,8 +493,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctions::urlStringToNormalString,
     "",
     "Converts an url-encoded string to a normal string. ",
-    "URLStringToNormalString(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")"
-    ,
+    "URLStringToNormalString"
+    "(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")",
     "CalculatorConversions::urlStringToNormalString",
     "URLStringToNormalString",
     innerStandard
@@ -537,8 +548,9 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsCrypto::aes_cbc_256_encrypt,
     "",
     "Encodes using aes 256 bit in cbc (cipher block chain) mode. "
-    "First argument = key. Second argument = text. Reference: NIST SP 800-38A."
-    ,
+    "First argument = key. "
+    "Second argument = text. "
+    "Reference: NIST SP 800-38A.",
     "text = ConvertHexToString \"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
     "key = ConvertHexToString \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
     "ConvertStringToHex AESCBCEncrypt(key, text);\n"
@@ -568,7 +580,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "AppendDoubleSha256Check",
     CalculatorFunctionsCrypto::appendDoubleSha256Check,
     "",
-    "Appends a sha 256 checksum to a string. More precisely, appends the first 4 bytes "
+    "Appends a sha 256 checksum to a string. "
+    "More precisely, appends the first 4 bytes "
     "of sha256 of the string to the string. ",
     "A= \"80aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751facf35411509701\";\n"
     "B= ConvertHexToString(A);\n"
@@ -626,8 +639,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "loadKnownCertificates",
     CalculatorFunctionsCrypto::loadKnownCertificates,
     "",
-    "Loads known security certificates from the <a href=\"/certificates-public/\">certificates-public/</a> folder. "
-    ,
+    "Loads known security certificates from the "
+    "<a href=\"/certificates-public/\">certificates-public/</a> folder. ",
     "loadKnownCertificates(0);",
     "CalculatorFunctionsCrypto::loadKnownCertificates",
     "loadKnownCertificates",
@@ -745,7 +758,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "JWTVerifyRSA256",
     CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256,
     "",
-    "Tries to verify a Json Web Token with respect to a given rsa modulus and exponent. "
+    "Tries to verify a Json Web Token with "
+    "respect to a given rsa modulus and exponent. "
     "The reference JWT token was taken from: https://tools.ietf.org/html/rfc7515#page-38, "
     "Appendix A.2.",
     "%HideLHS "
@@ -761,7 +775,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Sha1",
     CalculatorFunctionsCrypto::sha1OfString,
     "",
-    "Converts characters to a sequence of bits and computes the sha1 hash value of those bits. "
+    "Converts characters to a sequence of bits and "
+    "computes the sha1 hash value of those bits. "
     "The examples below are taken from Wikipedia. ",
     "Sha1(\"The quick brown fox jumps over the lazy dog\");\n"
     "Sha1(\"The quick brown fox jumps over the lazy cog\");",
@@ -773,7 +788,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Sha224",
     CalculatorFunctionsCrypto::sha224OfString,
     "",
-    "Converts characters to a sequence of bits and computes the sha224 hash value of those bits. "
+    "Converts characters to a sequence of bits and "
+    "computes the sha224 hash value of those bits. "
     "Reference: Wikipedia. ",
     "Sha224(\"\");",
     "CalculatorFunctionsCrypto::sha224OfString",
@@ -817,7 +833,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "RSAEncrypt",
     CalculatorFunctionsCrypto::RSAEncrypt,
     "",
-    "Encrypts with RSA. First argument: modulus. Second argument: (public) exponent. "
+    "Encrypts with RSA. First argument: modulus. "
+    "Second argument: (public) exponent. "
     "Third argument: message given as a large integer.",
     "RSAEncrypt(3233, 17, 65)",
     "CalculatorFunctionsCrypto::RSAEncrypt",
@@ -863,8 +880,10 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Keccak256",
     CalculatorFunctionsCrypto::keccak256OfString,
     "",
-    "Keccak256 of input string, 256 bit version. This is ``non-stardard sha3'' "
-    "and is different from the sha3. See the wikipedia page on SHA3/Keccak. ",
+    "Keccak256 of input string, 256 bit version. "
+    "This is ``non-stardard sha3'' "
+    "and is different from the sha3. "
+    "See the wikipedia page on SHA3/Keccak. ",
     "ConvertStringToHex ShaThree256(\"abc\");\n"
     "\"3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532\";\n"
     "ConvertStringToHex ShaThree256(\"\");\n"
@@ -881,7 +900,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Sha256",
     CalculatorFunctionsCrypto::sha256OfString,
     "",
-    "Converts characters to a sequence of bits and computes the sha256 hash value of those bits. "
+    "Converts characters to a sequence of bits and "
+    "computes the sha256 hash value of those bits. "
     "Reference: Wikipedia. ",
     "%HideLHS\n"
     "ConvertStringToHex Sha256(\"\");\n"

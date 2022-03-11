@@ -1638,7 +1638,9 @@ const {
   << this->basisInjections.size
   << " registered old bases. ";
   for (int i = 0; i < this->basisInjections.size; i ++) {
-    out << "<hr>Basis " << i + 1
+    out
+    << "<hr>Basis "
+    << i + 1
     << " has "
     << this->basisInjections[i].size
     << " elements: ";

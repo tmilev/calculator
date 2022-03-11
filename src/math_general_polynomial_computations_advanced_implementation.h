@@ -125,11 +125,9 @@ generateSymmetricDifferenceCandidates() {
         << "Computing S-poly of depth "
         << this->numberOfSymmetricDifferenceRounds
         << ". Taking s-difference of indices "
-        << i +
-        1
+        << i + 1
         << " and "
-        << j +
-        1
+        << j + 1
         << " out of "
         << this->basis.size
         << ".<br>Before proceding to adjoin candidates, "
@@ -393,8 +391,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
     << " by the leading monomial "
     << leadingMonomialBasis.toString()
     << " of basis element: "
-    << index +
-    1
+    << index + 1
     << " out of "
     << this->basis.size
     << "\n<br>"
@@ -836,7 +833,9 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
           this->setSerreLikeSolutionIndex(j, 0);
         } else {
           if (this->systemSolution[j] != 0) {
-            global.fatal << "Variable index " << j + 1
+            global.fatal
+            << "Variable index "
+            << j + 1
             << " is supposed to be a free parameter, "
             << "i.e., be set to zero, but "
             << "instead it has a non-zero value. "
@@ -2396,7 +2395,9 @@ bool PolynomialFactorizationCantorZassenhaus<
     unsigned i = 0; i < static_cast<unsigned>(maximumDivisors); i ++
   ) {
     std::stringstream reportStream;
-    reportStream << "Looking for factors round " << i + 1
+    reportStream
+    << "Looking for factors round "
+    << i + 1
     << " out of "
     << maximumDivisors;
     report.report(reportStream.str());
@@ -2483,7 +2484,11 @@ bool PolynomialFactorizationCantorZassenhaus<
       PolynomialConversions::convertToPolynomial(
         currentPolynomial.getValue(), converted
       );
-      *comments << "<br>\\(A=x^{\\frac{" << modulus << "^{" << i + 1
+      *comments
+      << "<br>\\(A=x^{\\frac{"
+      << modulus
+      << "^{"
+      << i + 1
       << "} - 1}{2}} \\)=\\( "
       << this->one.toStringPolynomial(converted, &this->output->format)
       << "\\)";

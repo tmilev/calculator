@@ -110,8 +110,7 @@ bool GraphWeightedLabeledEdges::checkConsistency() const {
         << "Graph error in graph with "
         << this->numberOfNodes
         << " nodes: display group "
-        << i +
-        1
+        << i + 1
         << " is corrupt: has "
         << " node of index "
         << this->nodeGroupsForDisplay[i][j]
@@ -323,7 +322,9 @@ std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(
   bool goingRight = (startX < endX);
   bool goingLeft = (startX > endX);
   if (goingRight) {
-    out << "\\psline[linecolor =red, arrows =<-](" << startX + 0.7
+    out
+    << "\\psline[linecolor =red, arrows =<-]("
+    << startX + 0.7
     << ", "
     << startY
     << ")";
@@ -362,13 +363,11 @@ std::string GraphWeightedLabeledEdges::toStringPsTricks(
   out << "\\begin{document}<br>\n";
   out
   << "\\psset{xunit=1.5cm,yunit=1.5cm}\\begin{pspicture}(0,"
-  << -(this->groupMaxSize + 1) /
-  2
+  << -(this->groupMaxSize + 1) / 2
   << ")("
   << this->nodeGroupsForDisplay.size
   << ", "
-  << (this->groupMaxSize + 1) /
-  2
+  << (this->groupMaxSize + 1) / 2
   << ")"
   << "\n<br>\\tiny\n<br>\n";
   for (int i = 0; i < this->edgesPerNodeNoMultiplicities.size; i ++) {

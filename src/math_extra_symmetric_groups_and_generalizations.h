@@ -1858,7 +1858,9 @@ somestream& PermutationGroupData::intoStream(somestream& out) {
       }
     }
   }
-  out << "Symmetric Group on " << this->group->generators.size + 1
+  out
+  << "Symmetric Group on "
+  << this->group->generators.size + 1
   << " letters (";
   if (this->flagHasGenerators1j) {
     out << "generators are (1 j))";

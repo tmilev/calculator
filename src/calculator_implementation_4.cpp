@@ -1938,12 +1938,16 @@ std::string Function::toStringShort() const {
   this->owner->operations.values[this->indexOperation];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
   if (this->options.flagIsCompositeHandler) {
-    out << " (composite) (" << this->indexInOperationHandlers + 1
+    out
+    << " (composite) ("
+    << this->indexInOperationHandlers + 1
     << " out of "
     << handler.compositeHandlers.size
     << ") ";
   } else {
-    out << "(" << this->indexInOperationHandlers + 1
+    out
+    << "("
+    << this->indexInOperationHandlers + 1
     << " out of "
     << handler.handlers.size
     << "). ";

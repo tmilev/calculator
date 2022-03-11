@@ -47,8 +47,8 @@ isDominantWithRespectToGenerator<RationalFraction<Rational> >(
     << "equals "
     << tempRF.toString()
     << ". "
-    <<
-    "I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << "I cannot decide (more precisely, "
+    << "do not want to *silently* decide for you) "
     << "whether a non-constant function is to be declared positive or not. "
     << "If this is not a programming mistake, "
     << "you might want to consider introducing a substitution "
@@ -100,8 +100,8 @@ bool WeylGroupData::isDominantWithRespectToGenerator<
     << "equals "
     << tempRF.toString()
     << ". "
-    <<
-    "I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << "I cannot decide (more precisely, "
+    << "do not want to *silently* decide for you) "
     << "whether a non-constant function is positive or not. "
     << "If this is not a programming mistake, "
     << "you might want to consider introducing a substitution "
@@ -143,7 +143,8 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   std::string& outputDetails
 ) {
   STACK_TRACE(
-    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra"
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::"
+    "getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra"
   );
   this->checkInitialization();
   std::stringstream out;
@@ -237,9 +238,8 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
     << "<hr>This message is generated either because the number of "
     << "weights has exceeded the hard-coded RAM memory limits, or because "
     << "a priori bound for the number of weights is WRONG. "
-    <<
-    "If the latter is the case, make sure to send an angry email to the author(s)."
-    ;
+    << "If the latter is the case, "
+    << "make sure to send an angry email to the author(s).";
   }
   outputDetails = out.str();
   return (numTotalWeightsFound <= upperBoundDominantWeights);
@@ -315,8 +315,8 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
   out << collapsed.getHTMLDiv(this->owner->getDimension(), false);
   out
-  <<
-  "Littelmann paths in simple coordinates given in the order in which they are generated ("
+  << "Littelmann paths in simple coordinates "
+  << "given in the order in which they are generated ("
   << orbit.size
   << " total):<br>";
   out << "<table>";
@@ -346,7 +346,9 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     }
     tempPath = lastPath;
     tempPath.actByEAlpha(nextInd);
-    out << "<tr><td> e_" << nextInd + 1
+    out
+    << "<tr><td> e_"
+    << nextInd + 1
     << "("
     << lastPath.toString()
     << ") =</td>"
@@ -356,7 +358,9 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     for (int j = 0; j < this->owner->getDimension(); j ++) {
       tempPath = lastPath;
       tempPath.actByEAlpha(j);
-      out << "<td> e_" << j + 1
+      out
+      << "<td> e_"
+      << j + 1
       << "("
       << lastPath.toString()
       << ")=</td>"
@@ -964,8 +968,8 @@ bool Calculator::Test::processResults() {
         currentTest.expectedResult, false
       );
       currentLine
-      <<
-      "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
+      << "<td style = 'min-width:100px;'>"
+      << "<b style='color:red'>unexpected result</b></td>"
       << "<td class = 'cellCalculatorResult'>";
       currentLine << differ.differenceHTML("actual", "expected");
       currentLine << "</td>";
@@ -1042,8 +1046,8 @@ bool Calculator::Test::processResults() {
   }
   if (this->unknown == 0 && this->inconsistencies == 0) {
     out
-    <<
-    "<b style ='color:green'>No inconsistencies or uknown computations.</b> ";
+    << "<b style ='color:green'>"
+    << "No inconsistencies or uknown computations.</b> ";
   }
   out << "<table>" << goodCommands.str() << "</table>";
   out

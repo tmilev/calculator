@@ -1096,12 +1096,17 @@ void SemisimpleLieAlgebra::makeChevalleyTestReport(
   }
   std::stringstream out2, out3;
   int x = i * Total * Total + j * Total + k + 1;
-  out2 << "i: " << i + 1 << " of " << Total << " j: " << j + 1
+  out2
+  << "i: "
+  << i + 1
+  << " of "
+  << Total
+  << " j: "
+  << j + 1
   << " of "
   << Total
   << " k: "
-  << k +
-  1
+  << k + 1
   << " of "
   << Total;
   out3 << "Total progress: " << x << " out of " << (Total * Total * Total);
@@ -1884,8 +1889,7 @@ std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
     out
     << polynomialFormat->chevalleyHGeneratorLetter
     << "_{"
-    << index - this->getNumberOfPositiveRoots() +
-    1
+    << index - this->getNumberOfPositiveRoots() + 1
     << "}";
   } else {
     out << polynomialFormat->chevalleyGGeneratorLetter << "_{";

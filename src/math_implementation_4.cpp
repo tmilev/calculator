@@ -387,7 +387,9 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
       if (useHTML) {
         reportStream << "<br>";
       }
-      reportStream << "\nSoft limit: " << global.millisecondsMaxComputation / 2
+      reportStream
+      << "\nSoft limit: "
+      << global.millisecondsMaxComputation / 2
       <<
       " ms [computation error if limit exceeded, triggered between calculator/atomic functions]."
       ;
@@ -1875,14 +1877,18 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       this->numberNonZeroMultiplicities ++;
     }
     std::stringstream tempStream;
-    tempStream << " So far " << i + 1
+    tempStream
+    << " So far "
+    << i + 1
     << " out of "
     << this->projectivizedChamber.refinedCones.size
     << " processed "
     << this->numberNonZeroMultiplicities
     << " non-zero total.";
     report2.report(tempStream.str());
-    out << "\nChamber " << i + 1
+    out
+    << "\nChamber "
+    << i + 1
     << ": the quasipolynomial is: "
     << currentSum.toString(false, false);
     out
@@ -2700,7 +2706,9 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
       this->maximumComputation.LPtoMaximizeLargerDim.addOnTop(latticePtoMax);
       this->numberNonZeroMultiplicities ++;
       std::stringstream out;
-      out << "Initialized " << i + 1
+      out
+      << "Initialized "
+      << i + 1
       << " out of "
       << this->maximumComputation.conesLargerDimension.size
       << "; so far "

@@ -512,8 +512,7 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
       << "Testing whether "
       << this->toStringAbbreviate()
       << " is prime using Miller-Rabin test "
-      << i +
-      1
+      << i + 1
       << " out of "
       << millerRabinTries
       << ". ";

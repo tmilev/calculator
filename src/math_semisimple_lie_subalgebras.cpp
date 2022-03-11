@@ -41,11 +41,9 @@ void SemisimpleLieAlgebra::generateLieSubalgebra(
         reportStream
         << "Generating Lie subalgebra of a semisimple Lie algebra. "
         << "I am taking the Lie bracket of elements "
-        << i +
-        1
+        << i + 1
         << " and "
-        << j +
-        1
+        << j + 1
         << " out of "
         << inputOutputGenerators.size;
         report.report(reportStream.str());
@@ -961,7 +959,9 @@ std::string SemisimpleSubalgebras::toString(
     }
   }
   if (this->numberOfAdditions > 0) {
-    out << "<br>" << this->numberOfAdditions + this->numberOfMultiplications
+    out
+    << "<br>"
+    << this->numberOfAdditions + this->numberOfMultiplications
     << " total arithmetic operations performed = "
     << this->numberOfAdditions
     << " additions and "
@@ -2364,7 +2364,9 @@ std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toString() const {
   << " The orbit defining element is: "
   << this->orbitDefiningElement.toString()
   << ". ";
-  out << "<br>Current element number: " << this->currentIndexInBuffer + 1
+  out
+  << "<br>Current element number: "
+  << this->currentIndexInBuffer + 1
   << ". ";
   if (this->orbitSize != - 1) {
     out << "<br>The orbit size is: " << this->orbitSize << ".";
@@ -2450,8 +2452,7 @@ void SemisimpleSubalgebras::getHCandidates(
         << " of length "
         << this->orbitHElementLengths[j].toString()
         << " generating orbit number "
-        << j +
-        1
+        << j + 1
         << " out of "
         << this->slTwoSubalgebras.size
         << " does not have the required length of "
@@ -2486,8 +2487,9 @@ void SemisimpleSubalgebras::getHCandidates(
       ) {
         if (report3.tickAndWantReport()) {
           std::stringstream out2, out3;
-          out3 << "So far, found " << outputHCandidatesScaledToActByTwo.size +
-          1
+          out3
+          << "So far, found "
+          << outputHCandidatesScaledToActByTwo.size + 1
           << " good candidates. ";
           report2.report(out3.str());
           out2 << "sl(2) orbit " << j + 1 << ". " << currentOrbit.toString();
@@ -2500,7 +2502,9 @@ void SemisimpleSubalgebras::getHCandidates(
       } else {
         if (report3.tickAndWantReport()) {
           std::stringstream out2;
-          out2 << "sl(2) orbit " << j + 1
+          out2
+          << "sl(2) orbit "
+          << j + 1
           << ". "
           << currentOrbit.toString()
           << "\n<br>Current element is not a valid candidate. ";
@@ -2510,7 +2514,9 @@ void SemisimpleSubalgebras::getHCandidates(
     } while (currentOrbit.incrementReturnFalseIfPastLast());
     if (outputHCandidatesScaledToActByTwo.size == 0) {
       std::stringstream out2;
-      out2 << "Sl(2) orbit " << j + 1
+      out2
+      << "Sl(2) orbit "
+      << j + 1
       << ": extension to "
       << currentType.toString()
       << " not possible because there were no h candidates.";
@@ -2972,8 +2978,7 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
     << " to "
     << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].toString()
     << ": "
-    << typeIndex +
-    1
+    << typeIndex + 1
     << " out of "
     << this->currentPossibleLargerDynkinTypes[stackIndex].size
     << " possibilities. ";
@@ -3007,7 +3012,9 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
     if (indicesModulesNewComponentExtensionMod.size == 0) {
       if (report1.tickAndWantReport()) {
         std::stringstream reportStream;
-        reportStream << " Extension " << typeIndex + 1
+        reportStream
+        << " Extension "
+        << typeIndex + 1
         << " out of "
         << this->currentPossibleLargerDynkinTypes[stackIndex].size
         << ", type  "
@@ -3309,7 +3316,9 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
     this->addSubalgebraIfNewSetToStackTop(newCandidate);
   } else {
     std::stringstream reportstream;
-    reportstream << "h element " << hIndex + 1
+    reportstream
+    << "h element "
+    << hIndex + 1
     << " out of "
     << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
@@ -4141,11 +4150,11 @@ void CandidateSemisimpleSubalgebra::extendToModule(
   for (int i = 0; i < inputOutput.size; i ++) {
     for (int j = 0; j < this->negativeGenerators.size; j ++) {
       std::stringstream reportStream;
-      reportStream << "extendToModule: Lie bracket of element of index " << i +
-      1
+      reportStream
+      << "extendToModule: Lie bracket of element of index "
+      << i + 1
       << " and negative generator index "
-      << j +
-      1
+      << j + 1
       << ".";
       report.report(reportStream.str());
       this->getAmbientSemisimpleLieAlgebra().lieBracket(
@@ -4737,8 +4746,14 @@ void CandidateSemisimpleSubalgebra::WConjecture::processOnePair(
   if (lieBracket.isEqualToZero()) {
     return;
   }
-  out << "[" << "w_{" << indexLeft + 1 << "}" << ", " << "w_{" << indexRight +
-  1
+  out
+  << "["
+  << "w_{"
+  << indexLeft + 1
+  << "}"
+  << ", "
+  << "w_{"
+  << indexRight + 1
   << "}"
   << "] &=& "
   << "["
@@ -5023,7 +5038,9 @@ void CandidateSemisimpleSubalgebra::computeSinglePair(
   for (int i = 0; i < leftModule.size; i ++) {
     if (report.tickAndWantReport()) {
       std::stringstream reportStream;
-      reportStream << "Bracketing element number " << i + 1
+      reportStream
+      << "Bracketing element number "
+      << i + 1
       << " out of "
       << leftModule.size
       << " with other module. ";
@@ -5054,7 +5071,11 @@ void CandidateSemisimpleSubalgebra::computePairingTable() {
     for (int j = i; j < this->nilradicalPairingTable[i].size; j ++) {
       if (report.tickAndWantReport()) {
         std::stringstream reportStream;
-        reportStream << "Pairing indices " << i + 1 << " and " << j + 1
+        reportStream
+        << "Pairing indices "
+        << i + 1
+        << " and "
+        << j + 1
         << " out of "
         << this->nilradicalPairingTable.size
         << ".";
@@ -5611,7 +5632,11 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
       this->nilradicalSubselection.incrementSelectionFixedCardinality(i)
     ) {
       std::stringstream out;
-      out << "<br>Trying " << i + 1 << "-tuples (up to 5-tuples): " << j + 1
+      out
+      << "<br>Trying "
+      << i + 1
+      << "-tuples (up to 5-tuples): "
+      << j + 1
       << " out of "
       << numberOfCycles
       << " cycles to process. ";
@@ -5842,7 +5867,9 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
   }
   for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
     std::stringstream reportStream2;
-    reportStream2 << "Processing nilradical: " << i + 1
+    reportStream2
+    << "Processing nilradical: "
+    << i + 1
     << " out of "
     << this->fernandoKacNilradicalCandidates.size;
     report2.report(reportStream2.str());
@@ -6084,8 +6111,7 @@ isPossibleNilradicalCarryOutSelectionImplications(
         << this->toStringNilradicalSelection(selection)
         << " is contradictory, as the only way to extend it to a subalgebra "
         << "(i.e., closed under Lie bracket) is by requesting that module V_{"
-        << i +
-        1
+        << i + 1
         << "} be included, but at the same time we have already "
         << "decided to exclude that module in one of our preceding choices. ";
       }
@@ -7220,7 +7246,9 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   latexFormat.flagUseHTML = false;
   latexFormat.flagUseLatex = true;
   for (int i = 0; i < this->indicesContainingRootSubalgebras.size; i ++) {
-    out << "\nContaining regular semisimple subalgebra number " << i + 1
+    out
+    << "\nContaining regular semisimple subalgebra number "
+    << i + 1
     << ": ";
     RootSubalgebra& currentSubalgebra =
     this->container->rootSubalgebras.subalgebras[
@@ -7230,8 +7258,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     if (useHtml) {
       out
       << "<a href='../rootSubalgebra_"
-      << this->indicesContainingRootSubalgebras[i] +
-      1
+      << this->indicesContainingRootSubalgebras[i] + 1
       << ".html'>";
     }
     out << "\\(" << dynkinType << "\\)";
@@ -7937,8 +7964,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
           << outputModuleDimensions
           << ". "
           << " I got that the root space of index  "
-          << k +
-          1
+          << k + 1
           << " has negative dimension. Something is wrong. ";
           global.fatal << crashStream.str() << global.fatal;
         }
@@ -8003,8 +8029,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
   std::stringstream out2;
   out2
   << "<br>Length longest root ambient algebra squared/4= "
-  << this->getOwnerWeyl().getLongestRootLengthSquared() /
-  4
+  << this->getOwnerWeyl().getLongestRootLengthSquared() / 4
   << "<br>";
   out2
   << "<br> Given a root subsystem P, and a root subsubsystem P_0, "
@@ -8186,8 +8211,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       << "<a href='"
       << displayPathAlgebra
       << "rootSubalgebra_"
-      << currentSubalgebra.indicesMinimalContainingRootSubalgebras[j] +
-      1
+      << currentSubalgebra.indicesMinimalContainingRootSubalgebras[j] + 1
       << ".html'>"
       << "\\("
       << currentRootSubalgebra.dynkinDiagram.toString()
@@ -8209,8 +8233,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       << "<a href='"
       << displayPathAlgebra
       << "rootSubalgebra_"
-      << currentSubalgebra.indicesContainingRootSubalgebras[j] +
-      1
+      << currentSubalgebra.indicesContainingRootSubalgebras[j] + 1
       << ".html'>"
       << "\\("
       << currentRootSubalgebra.dynkinDiagram.toString()
@@ -9447,7 +9470,9 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
     out << "\\end{longtable}";
   }
   for (int i = 0; i < this->fernandoKacNilradicalCandidates.size; i ++) {
-    out << "<hr>Subalgebra " << i + 1
+    out
+    << "<hr>Subalgebra "
+    << i + 1
     << ": "
     << this->fernandoKacNilradicalCandidates[i].toString(format);
   }
@@ -9626,7 +9651,10 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
     characterFormat = this->characterFormat.getElementConst();
   }
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
-    out << "<td><b>" << "W_{" << i + 1
+    out
+    << "<td><b>"
+    << "W_{"
+    << i + 1
     << "}" // << "=" <<
     // this->primalChar[i].toString(&characterFormat)
     << "</b></td>";
@@ -10737,7 +10765,9 @@ void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
     }
     if (report.tickAndWantReport()) {
       std::stringstream reportStream2;
-      reportStream2 << "Computing pairing table of subalgebra number " << i + 1
+      reportStream2
+      << "Computing pairing table of subalgebra number "
+      << i + 1
       << " out of "
       << this->subalgebras.values.size
       << ". The subalgebra is of type "
@@ -10751,7 +10781,9 @@ void SemisimpleSubalgebras::computePairingTablesAndFKFTtypes() {
     currentSubalgebra.computePairingTable();
     if (report.tickAndWantReport()) {
       std::stringstream reportStream2;
-      reportStream2 << "Computing pairing table of subalgebra number " << i + 1
+      reportStream2
+      << "Computing pairing table of subalgebra number "
+      << i + 1
       << " out of "
       << this->subalgebras.values.size
       << ". The subalgebra is of type "
@@ -10801,7 +10833,9 @@ void SemisimpleSubalgebras::hookUpCentralizers(
     CandidateSemisimpleSubalgebra& currentSubalgebra =
     this->subalgebras.values[i];
     std::stringstream reportStream2;
-    reportStream2 << "Computing centralizer of subalgebra number " << i + 1
+    reportStream2
+    << "Computing centralizer of subalgebra number "
+    << i + 1
     << " out of "
     << this->subalgebras.values.size
     << ". The subalgebra is of type "
@@ -10860,7 +10894,9 @@ void SemisimpleSubalgebras::hookUpCentralizers(
       continue;
     }
     std::stringstream reportStream2;
-    reportStream2 << "Adjusting the centralizer of subalgebra number " << i + 1
+    reportStream2
+    << "Adjusting the centralizer of subalgebra number "
+    << i + 1
     << " out of "
     << this->subalgebras.values.size
     << ". The subalgebra is of type "
@@ -10881,8 +10917,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(
         std::stringstream reportStream2;
         reportStream2
         << "Computing primal module decomposition of subalgebra number "
-        << i +
-        1
+        << i + 1
         << " out of "
         << this->subalgebras.values.size
         << ". The subalgebra is of type "

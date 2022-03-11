@@ -75,8 +75,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk,
     "",
     "Writes semisimple Lie algebra structure constants to "
-    "the output folder of the calculator. Available to logged-in admins only. "
-    ,
+    "the output folder of the calculator. "
+    "Available to logged-in admins only. ",
     "WriteSemisimpleLieAlgebra(F_4)",
     "Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra",
     "WriteSemisimpleLieAlgebra",
@@ -103,7 +103,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Function available to logged-in admins only. "
     "Precomputes all built-in semisimple Lie algebra information. "
-    "Argument gives a starting point (0 or negative to start at the beginning). "
+    "Argument gives a starting point "
+    "(0 or negative to start at the beginning). "
     "Turn process monitoring on when using this function. ",
     "PrecomputeSemisimpleLieAlgebraStructure 0",
     "CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure",
@@ -264,8 +265,9 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Computes common eigenspace of the adjoint action of semisimple Lie "
     "algebra elements inside the semisimple Lie algebra. ",
-    "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})"
-    ,
+    "AdCommonEigenspace{}(F_4, "
+    "-5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), "
+    "g_{14}+g_{22}+g_{20})",
     "CalculatorLieTheory::adCommonEigenSpaces",
     "AdCommonEigenspace",
     standardOptions
@@ -312,13 +314,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "MakeCharacterLieAlg",
     CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional,
     "",
-    "Creates character of a semisimple Lie algebra finite dimensional irreducible module. "
-    "First argument gives type, second argument gives highest weight in fundamental coordinates."
-    ,
+    "Creates character of a semisimple Lie algebra "
+    "finite dimensional irreducible module. "
+    "First argument gives type, second argument "
+    "gives highest weight in fundamental coordinates.",
     "x = MakeCharacterLieAlg{}(G_2, (1, 0));\n"
     "y = MakeCharacterLieAlg{}(G_2, (0, 1));\n"
     "x * y",
-    "Calculator::characterSemisimpleLieAlgebraFiniteDimensional",
+    "CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional",
     "MakeCharacterLieAlg",
     standardOptions
   );
@@ -339,7 +342,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes the Lie algebra structure over Kostant-Sekiguchi sl twos "
     "with respect to maximally compact real form.",
     "SlTwoRealFormStructure{}(a_3)",
-    "Calculator::slTwoRealFormStructureComputeOnDemand",
+    "CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand",
     "SlTwoRealFormStructure",
     noTest
   );
@@ -349,7 +352,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Same as SlTwoRealFormStructure but forces a recompute. ",
     "SlTwoRealFormStructureForceRecompute{}(a_3)",
-    "Calculator::slTwoRealFormStructureForceRecompute",
+    "CalculatorLieTheory::slTwoRealFormStructureForceRecompute",
     "SlTwoRealFormStructureRecompute",
     // TODO(tmilev): change to an automatically-tested version when sufficiently
     // mature.
@@ -371,7 +374,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "g_{22}, g_{23}  ,\n"
     "g_{24}\n"
     ")",
-    "Calculator::isReductiveLieSubalgebra",
+    "CalculatorLieTheory::isReductiveLieSubalgebra",
     "IsReductiveLieSubalgebra",
     standardOptions
   );
@@ -390,7 +393,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "v_4 = (- 2, 2, 2);\n"
     "ConesIntersection{}((v_1, v_2), (v_3, v_4 ));\n"
     "ConesIntersection{}((v_1, v_2), (v_3, - v_4));",
-    "Calculator::conesIntersect",
+    "CalculatorFunctions::conesIntersect",
     "ConesIntersection",
     standardOptions
   );
@@ -413,7 +416,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n"
     "v_\\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n"
     "h_1g_{- 1}v_\\lambda",
-    "CalculatorFunctions::highestWeightVector",
+    "CalculatorLieTheory::highestWeightVector",
     "HeighestWeightVector",
     standardOptions
   );
@@ -436,7 +439,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "entries that are not non-negative integers "
     "in the positions in which the third argument has 1's. ",
     "PrintModule{}(G_2, (2, 0), (0, 0))",
-    "CalculatorFunctions::printGeneralizedVermaModule",
+    "CalculatorLieTheory::printGeneralizedVermaModule",
     "PrintModule",
     standardOptions
   );
@@ -468,8 +471,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Weyl dimension formula. First argument gives "
     "the type of the Weyl group of the simple "
     "Lie algebra in the form Type_Rank (e.g. E_6). "
-    "The second argument gives the highest weight in fundamental coordinates. "
-    ,
+    "The second argument gives the highest "
+    "weight in fundamental coordinates. ",
     "WeylDimFormula{}(G_2, (x,0));\n"
     "WeylDimFormula{}(B_3, (x,0,0));",
     "CalculatorFunctions::weylDimFormula",
@@ -480,7 +483,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "AnimateLittelmannPaths",
     CalculatorLieTheory::animateLittelmannPaths,
     "",
-    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. "
+    "Generates all Littelmann-Lakshmibai-Seshadri "
+    "paths, draws them and animates them. "
     "Presented first on the seminar in Charles University Prague. "
     "The first argument gives the type of the semisimple Lie algebra, "
     "the second gives the highest weight. ",
@@ -505,9 +509,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "to which we induce. The last argument "
     "gives the parabolic subalgebra with "
     "respect to whose Levi part we decompose.",
-    "DecomposeInducingRepGenVermaModule{}(B_3, (0, 1, 1), (1, 0, 0), (1, 0, 1))"
-    ,
-    "CalculatorFunctions::decomposeFDPartGeneralizedVermaModuleOverLeviPart",
+    "DecomposeInducingRepGenVermaModule{}"
+    "(B_3, (0, 1, 1), (1, 0, 0), (1, 0, 1))",
+    "CalculatorLieTheory"
+    "::decomposeFDPartGeneralizedVermaModuleOverLeviPart",
     "DecomposeInducingRepGenVermaModule",
     standardOptions
   );
@@ -654,7 +659,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintB3G2branchingTableCharsOnly",
     CalculatorLieTheory::printB3G2branchingTableCharsOnly,
     "",
-    "Creates a table of branching of finite dimensional B_3-modules over G_2. "
+    "Creates a table of branching of "
+    "finite dimensional B_3-modules over G_2. "
     "The argument of the function gives the "
     "maximum height of the B_3-weight. "
     "The second argument indicates the parabolic subalgebra of "
@@ -674,7 +680,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintB3G2branchingTable",
     CalculatorLieTheory::printB3G2branchingTable,
     "",
-    "Creates a table of branching of finite dimensional B_3-modules over G_2. "
+    "Creates a table of branching of finite "
+    "dimensional B_3-modules over G_2. "
     "The argument of the function gives the maximum height "
     "of the B_3-weight. The function works with arguments 0 or 1; "
     "values of 2 or more must be run off-line.",
@@ -691,7 +698,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Experimental, please don't use. Splits generic generalized "
     "Verma module tensor finite dimensional module. ",
     "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ",
-    "CalculatorFunctions::splitGenericGeneralizedVermaTensorFiniteDimensional",
+    "CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional",
     "SplitFDTensorGenericGeneralizedVerma",
     adminNoTestExperimental
   );
@@ -709,8 +716,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "The second argument gives the weight "
     "level to which the computation should be carried out",
     "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ",
-    "CalculatorFunctions::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel"
-    ,
+    "CalculatorLieTheory"
+    "::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel",
     "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
     adminNoTestExperimental
   );
@@ -745,8 +752,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "In addition to the first 3 arguments, this function "
     "accepts further optional arguments, "
     "customizing the notation of the final printout.",
-    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); "
-    ,
+    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}"
+    "(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
     "CalculatorLieTheory::writeGenVermaModAsDiffOperatorsGeneratorOrder",
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
     standardOptions
@@ -769,8 +776,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "the nil-order. Now this function sorts the "
     "elements of the nilradical in descending nil-order, "
     "that is, elements with higher nil-order come first.",
-    "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0, 0, 0), (0, 0, 1), x, \\partial, a); "
-    ,
+    "MapSemisimpleLieAlgebraInWeylAlgebra{}"
+    "(B_3, (0, 0, 0), (0, 0, 1), x, \\partial, a); ",
     "Calculator::writeGenVermaModAsDiffOperatorsNilOrderDescending",
     "MapSemisimpleLieAlgebraInWeylAlgebra",
     standardOptions
@@ -806,9 +813,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "operator part of the algorithm uses the "
     "nil-order given by the function "
     "MapSemisimpleLieAlgebraInWeylAlgebra.",
-    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); "
+    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}"
+    "(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
+    "CalculatorLieTheory::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending"
     ,
-    "Calculator::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending",
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
     standardOptions
   );
@@ -833,7 +841,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "of R-polynomials and KL-polynomials in RAM memory at "
     "all times, unlike the other more efficient implementations).",
     "KLcoeffs{}(B_3)",
-    "Calculator::kazhdanLuzstigCoeffificents",
+    "CalculatorLieTheory::kazhdanLuzstigCoeffificents",
     "KLcoeffs",
     standardOptions
   );
@@ -845,7 +853,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "First argument indicates simple type, second, third, ... arguments "
     "give the generating roots. ",
     "RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))",
-    "Calculator::rootSubsystem",
+    "CalculatorLieTheory::rootSubsystem",
     "RootSubsystem",
     standardOptions
   );
@@ -868,7 +876,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Same as printRootSubalgebras but forces recomputation. "
     "Use to recompute obsolete or interrupted output files.",
     "PrintRootSubalgebrasRecompute(b_3)",
-    "CalculatorFunctions::printRootSAsForceRecompute",
+    "CalculatorLieTheory::printRootSAsForceRecompute",
     "PrintRootSubalgebrasRecompute",
     adminNoTest
   );
@@ -880,7 +888,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6)."
     ,
     "PrintSlTwoSubalgebras(g_2)",
-    "CalculatorFunctions::printSltwos",
+    "CalculatorLieTheory::printSltwos",
     "PrintSlTwoSubalgebras",
     standardOptions
   );
@@ -915,7 +923,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "no problem handling this function up to "
     "E_6 but LaTeX crashes trying to process the output. </b>",
     "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",
-    "CalculatorFunctions::parabolicWeylGroupsBruhatGraph",
+    "CalculatorLieTheory::parabolicWeylGroupsBruhatGraph",
     "ParabolicsInfoBruhatGraph",
     standardOptions
   );
@@ -923,11 +931,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "TestMonomialBasisConjecture",
     CalculatorLieTheory::testMonomialBaseConjecture,
     "",
-    "Tests the monomial basis conjecture from a common work by Jackson and Milev paper. "
+    "Tests the monomial basis conjecture "
+    "from a common work by Jackson and Milev paper. "
     "First argument gives rank bound. "
     "Second argument gives dimension bound. ",
     "TestMonomialBasisConjecture{}(2, 50)",
-    "Calculator::testMonomialBaseConjecture",
+    "CalculatorLieTheory::testMonomialBaseConjecture",
     "TestMonomialBasisConjecture",
     adminNoTestExperimental
   );
@@ -939,7 +948,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "The first argument gives the semisimple Lie algebra, "
     "the next arguments give the way-points of the path.",
     "LSpath{}(G_2, (0,0), (2,1) )",
-    "Calculator::LSPath",
+    "CalculatorLieTheory::LSPath",
     "LSpath",
     standardOptions
   );
@@ -952,7 +961,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "If i is negative then the e_i root operator is defined to be "
     "the f_\\alpha operator.",
     "e_{{i}}= LROdefine_i; e_{- 1} e_{- 1} LSpath{}(G_2, (0,0), (2,1))",
-    "Calculator::littelmannOperator",
+    "CalculatorLieTheory::littelmannOperator",
     "LROdefine",
     experimental
   );
@@ -969,7 +978,9 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "the elements are taken from the predefined "
     "list of positive integers given by the second argument.",
     "PrintProductDistancesModN(65537, "
-    "(97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)"
+    "(97, 98, 99, 100, 101, 102, 103, 104, 105, 106, "
+    "107, 108, 109, 110, 111, 112, 113, 114, 115, "
+    "116, 117, 118, 119, 120, 121, 122)"
     ")",
     "CalculatorFunctions::findProductDistanceModN",
     "PrintProductDistancesModN",
@@ -979,12 +990,15 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SolveProductSumEquationOverSetModN",
     CalculatorFunctions::solveProductSumEquationOverSetModN,
     "",
-    "Tries to find one solution of the system a_1*a_2* ...= X mod N a_1+a_2+...=Y "
+    "Tries to find one solution of the system "
+    "a_1*a_2* ...= X mod N a_1+a_2+...=Y "
     "where the a_i's belong to a "
     "predefined set of positive numbers. ",
-    "SolveProductSumEquationOverSetModN(theMod =65537; theProduct =16628; theSum=1286; "
-    "theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) "
-    ,
+    "SolveProductSumEquationOverSetModN("
+    "theMod =65537; theProduct =16628; theSum=1286; "
+    "theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, "
+    "106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, "
+    "117, 118, 119, 120, 121, 122)) ",
     "CalculatorFunctions::solveProductSumEquationOverSetModN",
     "SolveProductSumEquationOverSetModN",
     adminNoTestInvisibleOffByDefault
@@ -997,7 +1011,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "to the most experimental, latest and greatest algorithm. "
     "Argument must be of type semisimple Lie subalgebras. ",
     "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))",
-    "CalculatorFunctions::computePairingTablesAndFKFTsubalgebras",
+    "CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras",
     "ComputeFKFT",
     adminNoTestExperimental
   );
@@ -1008,7 +1022,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes the semisimple subalgebras of a semisimple "
     "Lie algebra and creates a data structure containing them. ",
     "ComputeSemisimpleSubalgebras(A_2)",
-    "CalculatorFunctions::computeSemisimpleSubalgebras",
+    "CalculatorLieTheory::computeSemisimpleSubalgebras",
     "ComputeSemisimpleSubalgebras",
     invisibleNoTest
   );
@@ -1016,14 +1030,15 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CentralizerChains",
     CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras,
     "",
-    "This function is disabled by default (takes too long): you have to first call "
+    "This function is disabled by default "
+    "(takes too long): you have to first call "
     "TurnRulesOn(CentralizerChains). "
     "Please use this function only if running the calculator on "
     "your own machine; don't use it on a public server. "
-    "Creates a printout with centralizer chains of semisimple Lie subalgebras. "
-    ,
+    "Creates a printout with centralizer "
+    "chains of semisimple Lie subalgebras. ",
     "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))",
-    "CalculatorFunctions::getCentralizerChainsSemisimpleSubalgebras",
+    "CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras",
     "CentralizerChains",
     adminNoTest
   );
@@ -1031,10 +1046,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebras",
     CalculatorLieTheory::printSemisimpleSubalgebrasRegular,
     "",
-    "<b>This function is being developed and is not implemented fully yet.</b> "
+    "<b>This function is being developed "
+    "and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebras(B_3)",
-    "Calculator::printSemisimpleSubalgebrasRegular",
+    "CalculatorLieTheory::printSemisimpleSubalgebrasRegular",
     "PrintSemisimpleSubalgebras",
     standardOptions
   );
@@ -1045,7 +1061,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",
-    "Calculator::printSemisimpleSubalgebrasRecompute",
+    "CalculatorLieTheory::printSemisimpleSubalgebrasRecompute",
     "PrintSemisimpleSubalgebrasRecompute",
     adminNoTest
   );
@@ -1056,7 +1072,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
     "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
-    "Calculator::printSemisimpleSubalgebrasNoCentralizers",
+    "CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers",
     "PrintSemisimpleSubalgebrasNoCentralizers",
     adminNoTest
   );
@@ -1067,7 +1083,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "<b>This function is being developed and is not implemented fully yet.</b>"
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasFull{}(A_2)",
-    "Calculator::printSemisimpleSubalgebrasNilradicals",
+    "CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals",
     "PrintSemisimpleSubalgebrasFull",
     adminNoTest
   );
@@ -1075,8 +1091,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CanBeExtendedParabolicallyTo",
     CalculatorLieTheory::canBeExtendedParabolicallyTo,
     "",
-    "Finds whether a Dynkin type extends via the standard parabolic extension to another. "
-    ,
+    "Finds whether a Dynkin type extends via "
+    "the standard parabolic extension to another. ",
     "CanBeExtendedParabolicallyTo(A^3_1, A_5);"
     "CanBeExtendedParabolicallyTo(a_2, b_3);"
     "CanBeExtendedParabolicallyTo(g_2, b_3);"
@@ -1084,7 +1100,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "CanBeExtendedParabolicallyTo(b_3, a_10);"
     "CanBeExtendedParabolicallyTo(c_2, c_10);"
     "CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)",
-    "CalculatorFunctions::canBeExtendedParabolicallyTo",
+    "CalculatorLieTheory::canBeExtendedParabolicallyTo",
     "CanBeExtendedParabolicallyTo",
     standardOptions
   );
@@ -1092,7 +1108,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "EmbedSemisimpleInSemisimple",
     CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra,
     "",
-    "Tries to find all embeddings of the first semisimple type into the second. "
+    "Tries to find all embeddings of the "
+    "first semisimple type into the second. "
     "Records all intermediate subalgebras. ",
     "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);"
     "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
@@ -1104,9 +1121,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "LoadSemisimpleSubalgebras",
     CalculatorConversions::loadSemisimpleSubalgebras,
     "",
-    "<b>This function is being developed and is not implemented fully yet.</b>"
+    "<b>This function is being developed "
+    "and is not implemented fully yet.</b>"
     "Loads a semisimpleSubalgebra from expression. ",
-    "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
+    "LoadSemisimpleSubalgebras {}"
+    "(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
     "CalculatorConversions::loadSemisimpleSubalgebras",
     "LoadSemisimpleSubalgebras",
     adminNoTest
@@ -1115,7 +1134,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SltwoSubalgebra",
     CalculatorConversions::slTwoSubalgebraPrecomputed,
     "",
-    "<b>This function is being developed and is not implemented fully yet. </b>"
+    "<b>This function is being developed "
+    "and is not implemented fully yet. </b>"
     "Loads an sl(2) subalgebra from expression. ",
     "SltwoSubalgebra(\n"
     "B_{3},\n"
@@ -1138,7 +1158,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "the semisimple Lie algebra type, the second argument gives "
     "the highest weight in fundamental coordinates. ",
     "Freudenthal{}(B_3, (2,2,2))",
-    "Calculator::freudenthalFormula",
+    "CalculatorFunctions::freudenthalFormula",
     "Freudenthal",
     standardOptions
   );
@@ -1146,8 +1166,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Killing",
     CalculatorLieTheory::killingForm,
     "",
-    "Computes the Killing form product of two elements of semisimple Lie algebra. "
-    ,
+    "Computes the Killing form product of "
+    "two elements of semisimple Lie algebra. ",
     "h_{{i}}= CartanGenerator{}(F_1, i);"
     "KF{}({{i}},{{j}})=Killing{}(h_i, h_j);"
     "FunctionToMatrix(KF, 4, 4)",
@@ -1162,7 +1182,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes the full character and prints it to screen. "
     "Argument format same as the Freudenthal function. ",
     "FreudenthalFull{}(G_2, (2, 1))",
-    "Calculator::freudenthalFull",
+    "CalculatorFunctions::freudenthalFull",
     "FreudenthalFull",
     standardOptions
   );
@@ -1197,7 +1217,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(1, 2, 2, 1),"
     "(1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), "
     "(1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
-    "Calculator::perturbSplittingNormal",
+    "CalculatorFunctions::perturbSplittingNormal",
     "PerturbSplittingNormal",
     standardOptions
   );
@@ -1334,8 +1354,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes from scratch the irreducible representations "
     "and the character table of a Weyl group.",
     "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);",
-    "CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch"
-    ,
+    "CalculatorFunctionsWeylGroup"
+    "::weylGroupIrrepsAndCharTableComputeFromScratch",
     "WeylGroupIrrepsAndCharTableComputeFromScratch",
     adminNoTestExperimental
   );
@@ -1368,7 +1388,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Generates a Weyl outer orbit printout from simple coords. "
     "The outer orbit is the orbit "
-    "under the Weyl group extended with the outer automoprhisms of the Weyl group. "
+    "under the Weyl group extended with the "
+    "outer automoprhisms of the Weyl group. "
     "First argument = type. Second argument = weight in simple coords. "
     "The orbit size is cut off at 1921*2 elements. ",
     "WeylGroupOrbitOuterSimple{}(D_4, (1, 0, 0, 0))",
@@ -1381,7 +1402,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsWeylGroup::weylGroupOrbitFund,
     "",
     "Generates a Weyl orbit printout from fundamental coords. "
-    "First argument = type. Second argument = weight in fundamental coords. ",
+    "First argument = type. "
+    "Second argument = weight in fundamental coords. ",
     "WeylOrbitFundCoords{}(B_2, (y, 0));",
     "CalculatorFunctionsWeylGroup::weylGroupOrbitFund",
     "WeylOrbitFundCoords",
@@ -1449,8 +1471,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Checks whether the element is outer automorphism of a root system. "
     "First argument = type. "
-    "Second argument = matrix linear operator corresponding written in simple basis. "
-    ,
+    "Second argument = matrix linear "
+    "operator corresponding written in simple basis. ",
     "A = MakeMatrix"
     "((1, 0, 0, 0, 0, - 1),"
     "(0, 0, 0, 0, 1, - 2),"
@@ -1467,8 +1489,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylOuterRaiseToMaximallyDominant",
     CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant,
     "",
-    "Same as WeylRaiseToMaximallyDominant but uses outer Weyl group automorphisms as well."
-    ,
+    "Same as WeylRaiseToMaximallyDominant but "
+    "uses outer Weyl group automorphisms as well.",
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 0, 1));\n"
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 0, 1), (1, 0, 0, 0));\n"
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 1, 0));\n"
@@ -1481,8 +1503,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "GenerateFiniteMultiplicativelyClosedSet",
     CalculatorFunctions::generateMultiplicativelyClosedSet,
     "",
-    "The first argument gives upper_bound to the number of elements of the set. "
-    "Generates a finite multiplicatively closed set of at most upper_bound elements, "
+    "The first argument gives upper_bound "
+    "to the number of elements of the set. "
+    "Generates a finite multiplicatively "
+    "closed set of at most upper_bound elements, "
     "or returns error indicating the multiplicatively closed "
     "set is larger than the upper bound.",
     "s_1=MakeMatrix{}((- 1, 1, 0), (0, 1, 0), (0, 0, 1));\n"
@@ -1511,31 +1535,38 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Generates a vector space closed with respect to the Lie bracket "
     "from input of type elements of Weyl algebra or Lie algebra. "
-    "The first argument of the input is an upper bound for the dimension of the vector space. "
+    "The first argument of the input is an "
+    "upper bound for the dimension of the vector space. "
     "The remaining arguments must be differential operators. "
     "The output is a vector space basis printout. "
-    "Fails if the dimension of the vector space is larger than the upper bound."
-    ,
+    "Fails if the dimension of the vector "
+    "space is larger than the upper bound.",
     "\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i); "
-    "g_1 = (- x_{5} \\partial_{5}^{2} - x_{4} \\partial_{4} \\partial_{5}  - x_{3} \\partial_{3} \\partial_{5} "
-    "- x_{2} \\partial_{2} \\partial_{5} + x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\n"
+    "g_1 = (- x_{5} \\partial_{5}^{2} - x_{4} "
+    "\\partial_{4} \\partial_{5}  - x_{3} "
+    "\\partial_{3} \\partial_{5} "
+    "- x_{2} \\partial_{2} \\partial_{5} + x_{1} "
+    "\\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\n"
     "g_- 1 = x_5;\n"
     "g_2 = x_{5} \\partial_{4} - x_{2} \\partial_{1};\n"
     "g_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\n"
     "g_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\n"
     "g_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}"
+    "(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}"
+    "(50, g_1, g_2, g_-2, g_3, g_-3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}"
+    "(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
     "q_{{i}} = ChevalleyGenerator{}(F_4, i);\n"
     "s_2 = - q_{- 5} - q_{-6};\n"
     "s_1 = q_{20} + q_{19};\n"
     "s_- 1 = - q_{- 19} - q_{- 20};\n"
     "s_-2 = 2q_{6} + 2q_{5};\n"
-    "GenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);"
-    ,
-    "CalculatorFunctions::generateVectorSpaceClosedWithRespectToLieBracket",
+    "GenerateVectorSpaceClosedWithRespectToLieBracket"
+    "(52, s_1, s_2, s_- 1, s_-2);",
+    "CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket",
     "GenerateVectorSpaceClosedWithRespectToLieBracket",
     standardOptions
   );
@@ -1553,7 +1584,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupGetOuterAutoGenerators",
     CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint,
     "",
-    "Gets the generators of the outer automorphism group (the group generated by "
+    "Gets the generators of the outer "
+    "automorphism group (the group generated by "
     "the graph automorphisms of the Dynkin diagram.",
     "WeylGroupGetOuterAutoGenerators{}(2D_4)",
     "CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint",
@@ -1589,8 +1621,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Prints all modules induced from Specht modules. ",
     "HyperOctahedralIrreps(3)",
-    "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules"
-    ,
+    "CalculatorFunctionsWeylGroup"
+    "::hyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralIrreps",
     adminNoTestInvisibleExperimental
   );
@@ -1610,8 +1642,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Gets one hyperoctahedral representation from two partitions. ",
     "HyperOctahedralRepresentation((1, 1), (1))",
-    "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules"
-    ,
+    "CalculatorFunctionsWeylGroup"
+    "::hyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralRepresentation",
     adminNoTestInvisibleExperimental
   );
@@ -1622,8 +1654,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Prints the generator commutation relations of a hyperoctahedral group. ",
     "HyperOctahedralGeneratorPrint(3)",
-    "CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations"
-    ,
+    "CalculatorFunctionsWeylGroup"
+    "::hyperOctahedralPrintGeneratorCommutationRelations",
     "HyperOctahedralGeneratorPrint",
     adminNoTest
   );
@@ -1641,8 +1673,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "DynkinIndicesSlTwoSubalgebras",
     CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras,
     "",
-    "Fetches the absolute Dynkin indices of the sl(2) subalgebras of the input Dynkin type. "
-    "The indices of each simple component are computed by actually constructing "
+    "Fetches the absolute Dynkin indices of "
+    "the sl(2) subalgebras of the input Dynkin type. "
+    "The indices of each simple "
+    "component are computed by actually constructing "
     "the sl(2)-subalgebras; clearly this can be greatly optimized "
     "but we postpone that for a future version. ",
     "DynkinIndicesSlTwoSubalgebras(2A_2);\n "
@@ -1707,8 +1741,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny,
     this->opElementUEOverRF(),
     this->opElementUEOverRF(),
-    "Adds an element of UE (Universal Enveloping algebra) to an element of UE."
-    ,
+    "Adds an element of UE "
+    "(Universal Enveloping algebra) to an element of UE.",
     "g_{{{i}}} = ChevalleyGenerator{}(F_{1}, {{i}});\n"
     "h_{{{i}}} = CartanGenerator{}(F_{1}, {{i}});\n"
     "[g_{22}+g_{20}+g_{14},g_{- 14}+g_{-20}+g_{-22}]",
@@ -1735,8 +1769,10 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg,
     this->opCharSSAlgMod(),
     this->opCharSSAlgMod(),
-    "Multiplies two semisimple Lie algebra finite dimensional characters and decomposes using the "
-    "Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, "
+    "Multiplies two semisimple Lie algebra "
+    "finite dimensional characters and decomposes using the "
+    "Brauer-Klimyk formula, Humphreys J. "
+    "Introduction to Lie algebras and representation theory, "
     "page 142, exercise 9. ",
     "x = MakeCharacterLieAlg{}(G_2, (1,0));\n"
     "y = MakeCharacterLieAlg{}(G_2, (0,1));\n"
@@ -1792,7 +1828,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     this->opRational(),
     this->opElementUEOverRF(),
     "Multiplies rational number by an element universal enveloping algebra.",
-    "g_{{i}}= ChevalleyGenerator{}(F_1, i); h_{{i}}= CartanGenerator{}(F_1, i);\n"
+    "g_{{i}}= ChevalleyGenerator{}(F_1, i); "
+    "h_{{i}}= CartanGenerator{}(F_1, i);\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
     "CalculatorFunctionsBinaryOps::multiplyAnyByUE",
     "MultiplyRationalByUE",
@@ -1803,12 +1840,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping,
     this->opElementUEOverRF(),
     this->opElementUEOverRF(),
-    "Multiplies elment Universal enveloping by element universal enveloping algebra."
-    ,
+    "Multiplies elment Universal enveloping "
+    "by element universal enveloping algebra.",
     "g_{{i}}= ChevalleyGenerator{}(F_1, i);"
     "h_{{i}}= CartanGenerator{}(F_1, i) ;\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
-    "CalculatorFunctionsBinaryOps::multiplyAnyByUE",
+    "CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping",
     "MultiplyUEByUE",
     standardOptions
   );
@@ -1821,10 +1858,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "tensor product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
-    "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\nh_{{i}}= CartanGenerator{}(X, i);\n"
+    "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= CartanGenerator{}(X, i);\n"
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
-    "2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)"
-    ,
+    "2/5 v;\n(3/4 v)\\otimes v;\n"
+    "3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)",
     "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
     "MultiplyAnyByEltTensor",
     standardOptions
@@ -1853,7 +1891,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor,
     this->opRationalFraction(),
     this->opElementTensorGVM(),
-    "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. "
+    "Handles multiplying rational function number "
+    "by an element of tensor product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
     "X = G_2;\n"
@@ -1875,7 +1914,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "tensor product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
-    "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\nh_{{i}}= CartanGenerator{}(X, i);\n"
+    "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= CartanGenerator{}(X, i);\n"
     "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
     "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
@@ -1933,13 +1973,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     this->opElementUEOverRF(),
     this->opRational(),
     "Raises element of universal enveloping to integer power. "
-    "If the exponent is non-positive integer but the element of the UE is "
-    "a single generator with coefficient 1, the exponent will be carried out formally. "
-    ,
+    "If the exponent is non-positive integer "
+    "but the element of the UE is "
+    "a single generator with coefficient 1, "
+    "the exponent will be carried out formally. ",
     "g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i) ;"
     "\n (g_1+g_2)^2+ g_1^{1/2}",
-    "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction"
-    ,
+    "CalculatorFunctionsBinaryOps::"
+    "powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerElementUniversalEnvelopingBySmallInteger",
     standardOptions
   );
@@ -1950,12 +1991,15 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     this->opElementUEOverRF(),
     this->opPolynomialRational(),
     "Provided that an element of Universal Enveloping algebra is "
-    "a single generator (raised to arbitrary formal polynomial power) with coefficient 1, "
-    "raises (formally) the element of the UE to arbitrary polynomial power. ",
-    "g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i) ;\n"
+    "a single generator (raised to arbitrary "
+    "formal polynomial power) with coefficient 1, "
+    "raises (formally) the element of the "
+    "UE to arbitrary polynomial power. ",
+    "g_{{i}}= ChevalleyGenerator{}(G_2, i); "
+    "h_{{i}}= CartanGenerator{}(G_2, i) ;\n"
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
-    "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction"
-    ,
+    "CalculatorFunctionsBinaryOps::"
+    "powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerUEelementToPolyPower",
     standardOptions
   );
@@ -1965,13 +2009,15 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction,
     this->opElementUEOverRF(),
     this->opRationalFraction(),
-    "Provided that an element of Universal Enveloping algebra is a single generator "
+    "Provided that an element of Universal Enveloping "
+    "algebra is a single generator "
     "(raised to arbitrary formal RF power) with coefficient 1, raises "
     "(formally) the element of the UE to arbitrary RF power. ",
-    "g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i);\n "
+    "g_{{i}}= ChevalleyGenerator{}(G_2, i); "
+    "h_{{i}}= CartanGenerator{}(G_2, i);\n "
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
-    "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction"
-    ,
+    "CalculatorFunctionsBinaryOps::"
+    "powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",
     "PowerUEelementToRFPower",
     standardOptions
   );
@@ -2043,12 +2089,13 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "[]",
     CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA,
     "",
-    "Lie bracket of elements of Weyl algebras = differential operators with polynomial coefficients. "
-    ,
+    "Lie bracket of elements of Weyl algebras "
+    "= differential operators with polynomial coefficients. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i; \n"
     "[\\partial_1, x_1]; ",
-    "CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA",
+    "CalculatorFunctionsBinaryOps::"
+    "lieBracketRatPolyOrEWAWithRatPolyOrEWA",
     "LieBracketWeylAlgebraElements",
     standardOptions
   );
@@ -2061,7 +2108,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "g_{{i}}= ChevalleyGenerator{}(X,i);\n"
     "h_{{i}}= CartanGenerator{}(X,i);\n"
     "[g_1,g_{- 1}] ",
-    "CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE",
+    "CalculatorFunctionsBinaryOps::"
+    "lieBracketRatOrUEWithRatOrUE",
     "LieBracketSemisimpleLieAlgebras",
     standardOptions
   );
@@ -2090,7 +2138,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsWeylGroup::tensorWeylReps,
     this->opWeylGroupRep(),
     this->opWeylGroupRep(),
-    "Tensor product of two Weyl group reps. Does not decompose the tensor product. "
+    "Tensor product of two Weyl group reps. "
+    "Does not decompose the tensor product. "
     "If you want decomposition, use V*V instead. ",
     "V = WeylGroupNaturalRep{}(B_3); V \\otimes V; V * V",
     "CalculatorFunctionsWeylGroup::tensorWeylReps",

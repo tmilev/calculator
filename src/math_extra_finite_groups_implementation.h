@@ -55,8 +55,7 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(
   this->initializeGenerators();
   if (this->generators.size == 0) {
     global.fatal
-    <<
-    "Groups with zero generators are not allowed: "
+    << "Groups with zero generators are not allowed: "
     << "if you wanted to create a trivial group, "
     << " trivial groups are assumed to have a generator (the identity). "
     << global.fatal;
@@ -407,8 +406,7 @@ template <class elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::conjugacyClassCount() const {
   if (!this->flagCCRepresentativesComputed) {
     global.fatal
-    <<
-    "Requesting conjugacy class count but "
+    << "Requesting conjugacy class count but "
     << "conjugacy class representatives are not computed."
     << global.fatal;
   }
@@ -606,13 +604,11 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
         if (scalarProduct != 0) {
           global.fatal
           << "Error: the character table is not orthonormal: char number "
-          << i +
-          1
+          << i + 1
           << " = "
           << leftChar.toString()
           << " is not orthogonal to char number "
-          << j +
-          1
+          << j + 1
           << " = "
           << rightChar.toString()
           << ". <br>The entire char table is: "
@@ -624,8 +620,7 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
         if (scalarProduct != 1) {
           global.fatal
           << "Error: the character table is not orthonormal: char number "
-          << i +
-          1
+          << i + 1
           << " = "
           << leftChar.toString()
           << " is not of norm 1. "
@@ -779,12 +774,13 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
       for (int j = 0; j < this->unionGeneratorsCC.size; j ++) {
         if (report.tickAndWantReport()) {
           std::stringstream reportStream;
-          reportStream << "Exploring conjugacy class " << i + 1
+          reportStream
+          << "Exploring conjugacy class "
+          << i + 1
           << " out of "
           << this->conjugacyClasses.size
           << " generator "
-          << j +
-          1
+          << j + 1
           << " out of "
           << this->unionGeneratorsCC.size;
           report.report(reportStream.str());
@@ -1185,7 +1181,9 @@ bool WeylGroupData::generateOrbit(
       currentRoot = output[i];
       if (report.tickAndWantReport()) {
         std::stringstream reportStream;
-        reportStream << "So far found " << i + 1
+        reportStream
+        << "So far found "
+        << i + 1
         << " elements in the orbit(s) of the starting weight(s) "
         << weights.toString()
         << ". ";
@@ -1243,7 +1241,9 @@ void WeylGroupData::reflectMinusRhoSimple(
 template <class Coefficient>
 void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& vector) const {
   if (index < 0 || index >= this->cartanSymmetric.numberOfColumns) {
-    global.fatal << "Simple reflection with respect to index " << index + 1
+    global.fatal
+    << "Simple reflection with respect to index "
+    << index + 1
     << " in a Weyl group of rank "
     << this->getDimension()
     << global.fatal;
@@ -1384,8 +1384,7 @@ bool WeylGroupData::freudenthalFormula(
       if (outputDetails != nullptr) {
         *outputDetails =
         "The highest weight is not dominant and "
-        "I cannot apply the Freudenthal formula."
-        ;
+        "I cannot apply the Freudenthal formula.";
       }
       return false;
     }
@@ -1442,8 +1441,7 @@ bool WeylGroupData::freudenthalFormula(
             std::stringstream errorLog;
             errorLog
             << "This is an internal error check. "
-            <<
-            "If you see it, that means that the "
+            << "If you see it, that means that the "
             << "Freudenthal algorithm implementation is "
             << "wrong (because the author of the implementation "
             << "tried to write less code than what is suggested by LiE).";
@@ -1474,7 +1472,9 @@ bool WeylGroupData::freudenthalFormula(
     }
     currentAccum /= bufferCoefficient;
     std::stringstream out;
-    out << " Computed the multiplicities of " << k + 1
+    out
+    << " Computed the multiplicities of "
+    << k + 1
     << " out of "
     << outputDominantWeightsSimpleCoords.size
     << " dominant weights in the support.";
@@ -1573,10 +1573,8 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
       upperBoundDominantWeights > 0
     ) {
       out
-      <<
-      "<hr>The number of weights has exceeded "
-      << "the RAM memory limits, aborting the weight generation. "
-      ;
+      << "<hr>The number of weights has exceeded "
+      << "the RAM memory limits, aborting the weight generation. ";
       return false;
     }
   }
@@ -1820,8 +1818,7 @@ getClassFunctionMatrix(
             std::stringstream reportstream;
             reportstream
             << " Computing conjugacy class "
-            << currentCC.indicesEltsInOwner[i] +
-            1
+            << currentCC.indicesEltsInOwner[i] + 1
             << " (total num classes is "
             << numClasses
             << ").";
@@ -1831,9 +1828,9 @@ getClassFunctionMatrix(
       }
       if (report.tickAndWantReport()) {
         std::stringstream reportstream;
-        reportstream << "<br>Class function matrix of conjugacy class " << cci
-        +
-        1
+        reportstream
+        << "<br>Class function matrix of conjugacy class "
+        << cci + 1
         << " (total num classes is "
         << numClasses
         << ") computed to be: "
@@ -1924,7 +1921,9 @@ toString(FormatExpressions* format) const {
   for (int i = 0; i < rank; i ++) {
     if (i < this->generators.size) {
       std::stringstream tempStream;
-      tempStream << "s_" << i + 1
+      tempStream
+      << "s_"
+      << i + 1
       << "=MatrixRationals{}"
       << this->generators[i].toString(format)
       << "; \\\\\n";
@@ -2060,8 +2059,9 @@ getAllDominantWeightsHWFDIM(
   std::string& outputDetails
 ) {
   STACK_TRACE(
-  "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
-  "::getAllDominantWeightsHWFDIM");
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "::getAllDominantWeightsHWFDIM"
+  );
   std::stringstream out;
   this->checkInitialization();
   this->computeRootSubsystem();
@@ -2140,10 +2140,8 @@ getAllDominantWeightsHWFDIM(
     << "<hr>This message is generated either because the number of "
     << "weights has exceeded the hard-coded RAM memory limits, or because "
     << " a priori bound for the number of weights is WRONG. "
-    <<
-    "If the latter is the case, make sure "
-    << "to send an angry email to the author(s)."
-    ;
+    << "If the latter is the case, make sure "
+    << "to send an angry email to the author(s).";
   }
   outputDetails = out.str();
   return numTotalWeightsFound <= upperBoundDominantWeights;
@@ -2154,8 +2152,10 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 raiseToDominantWeightInner(
   Vector<Coefficient>& weight, int* sign, bool* stabilizerFound
 ) {
-  STACK_TRACE("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
-  "::raiseToDominantWeightInner");
+  STACK_TRACE(
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "::raiseToDominantWeightInner"
+  );
   if (sign != nullptr) {
     *sign = 1;
   }
@@ -2194,7 +2194,7 @@ generateOrbitReturnFalseIfTruncated(
 ) {
   STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
-  "::generateOrbitReturnFalseIfTruncated"
+    "::generateOrbitReturnFalseIfTruncated"
   );
   HashedList<Vector<Coefficient> > orbit;
   bool result = true;
@@ -2239,7 +2239,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
 ) {
   STACK_TRACE(
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
-  "::freudenthalFormulaIrrepIsWRTLeviPart"
+    "::freudenthalFormulaIrrepIsWRTLeviPart"
   );
   // double startTimer = global.getElapsedSeconds();
   this->computeRootSubsystem();
@@ -2280,10 +2280,8 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     errorLog
     << "Error: the number of dominant weights exceeded hard-coded limit of "
     << upperBoundFreudenthal
-    <<
-    ". Please check out whether LiE's implementation "
-    << "of the Freudenthal formula can do your computation."
-    ;
+    << ". Please check out whether LiE's implementation "
+    << "of the Freudenthal formula can do your computation.";
     outputDetails = errorLog.str();
     return false;
   }
@@ -2328,8 +2326,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
           errorLog
           << "This is an internal error check. If you see it, that means "
           << "that the Freudenthal algorithm implementation is "
-          <<
-          "wrong (because the author of the "
+          << "wrong (because the author of the "
           << "implementation was dumb enough to "
           << "try to write less code than what is "
           << "suggested by LiE).";
@@ -2360,7 +2357,9 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     }
     currentAccum /= bufferCoeff;
     std::stringstream out;
-    out << " Computed the multiplicities of " << k + 1
+    out
+    << " Computed the multiplicities of "
+    << k + 1
     << " out of "
     << outputDomWeightsSimpleCoordsLeviPart.size
     << " dominant weights in the support.";
@@ -2724,7 +2723,9 @@ computeIrreducibleRepresentationsTodorsVersion() {
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex = true;
     for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
-      reportStream << "<hr>irrep " << i + 1
+      reportStream
+      << "<hr>irrep "
+      << i + 1
       << "<br>"
       << this->irreps_grcam[i].toString(&tempFormat);
     }

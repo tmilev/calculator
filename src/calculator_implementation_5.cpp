@@ -175,15 +175,15 @@ int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
   ) {
     return currentIndex;
   }
-  // clean up carried out only when we have twice
+  // Clean up carried out only when we have twice
   // exceeded the triangle limit
   // this way clean up will be carried only after
   // we have generated at least maxNumTriangles since the last cleanup
   // (which leaves no more than maxNumTriangles alive).
   if (this->triangles.size != this->trianglesUsed.size) {
     global.fatal
-    <<
-    "this->triangles.size is not equal to this->trianglesUsed.size: the values are: "
+    << "this->triangles.size is not equal to "
+    << "this->trianglesUsed.size: the values are: "
     << this->triangles.size
     << " and "
     << this->trianglesUsed.size
@@ -532,8 +532,8 @@ bool MeshTriangles::computePoints(
       calculator
       << "Max number of triangles decreased from your input: "
       << input[5].toString()
-      <<
-      " to 20000. If you'd like to lift the restriction, modify code around: file: "
+      << " to 20000. If you'd like to lift "
+      << "the restriction, modify code around: file: "
       << __FILE__
       << " line: "
       << __LINE__
@@ -1146,9 +1146,8 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
     << "Your expression:<br>\\("
     << input[1].toString()
     << "\\)"
-    <<
-    "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>"
-    ;
+    << "<br><b style ='color:red'>"
+    << "contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
       if (!allowedFreeVars.contains(presentFreeVars[i])) {
@@ -1165,13 +1164,12 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
     << allowedFreeVars.toStringCommaDelimited()
     << ". ";
     out
-    <<
-    "<br>Beware of typos such as:<br>[wrong:] <span style ='color:red'>lnx, sqrt2</span>  "
-    <<
-    "<br>[correct:] <span style ='color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
-    <<
-    "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>"
-    ;
+    << "<br>Beware of typos such as:<br>[wrong:] "
+    << "<span style ='color:red'>lnx, sqrt2</span>  "
+    << "<br>[correct:] <span style ='color:green'>ln(x)</span> "
+    << "or <span style ='color:green'>ln x</span>, "
+    << "<span style ='color:green'>sqrt(2)</span> "
+    << "or <span style ='color:green'>sqrt 2</span>.<hr>";
     return output.assignValue(calculator, out.str());
   }
   return output.assignValue(calculator, out.str());
@@ -1302,9 +1300,8 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
     << "Your expression:<br>\\("
     << input[1].toString()
     << "\\)"
-    <<
-    "<br><b style ='color:red'>is required to contain the variables:</b><br><b>"
-    ;
+    << "<br><b style ='color:red'>"
+    << "is required to contain the variables:</b><br><b>";
     bool found = false;
     for (int i = 0; i < mandatoryFreeVars.size; i ++) {
       if (!presentFreeVars.contains(mandatoryFreeVars[i])) {
@@ -1327,9 +1324,8 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
     << "Your expression:<br>\\("
     << input[1].toString()
     << "\\)"
-    <<
-    "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>"
-    ;
+    << "<br><b style ='color:red'>"
+    << "contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
       if (!allowedFreeVars.contains(presentFreeVars[i])) {
@@ -1348,13 +1344,12 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
   }
   if (out.str() != "") {
     out
-    <<
-    "<br>Beware of typos such as:<br>[wrong:] <span style = 'color:red'>lnx, sqrt2</span>  "
-    <<
-    "<br>[correct:] <span style = 'color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
-    <<
-    "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>"
-    ;
+    << "<br>Beware of typos such as:<br>[wrong:] "
+    << "<span style = 'color:red'>lnx, sqrt2</span>  "
+    << "<br>[correct:] <span style = 'color:green'>ln(x)</span> "
+    << "or <span style ='color:green'>ln x</span>, "
+    << "<span style ='color:green'>sqrt(2)</span> "
+    << "or <span style ='color:green'>sqrt 2</span>.<hr>";
   }
   return output.assignValue(calculator, out.str());
 }

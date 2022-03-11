@@ -6440,8 +6440,7 @@ Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
   if (rootIndex >= this->rank) {
     global.fatal
     << "Attempt to get the squared length of simple root number "
-    << rootIndex +
-    1
+    << rootIndex + 1
     << ", however the root system if of rank "
     << this->rank
     << ". "
@@ -9190,7 +9189,9 @@ toString(std::string& output, bool displayElements) {
         this->externalAutomorphisms[i]
       );
       automorphismMatrix.transpose();
-      head2 << "a_{" << i + 1
+      head2
+      << "a_{"
+      << i + 1
       << "}&= &"
       << automorphismMatrix.toString(&latexFormat)
       << "\\\\";
@@ -13576,15 +13577,18 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
             break;
           }
           FormatExpressions tempFormat;
-          global.comments << "<hr>Error!!! Failed on chamber " << index + 1
+          global.comments
+          << "<hr>Error!!! Failed on chamber "
+          << index + 1
           << " and "
-          << i +
-          1;
+          << i + 1;
           global.comments
           << "<br>Evaluating at point "
           << affineInput.toString()
           << "<br>";
-          global.comments << "<br>Chamber " << index + 1
+          global.comments
+          << "<br>Chamber "
+          << index + 1
           << ": "
           << this->projectivizedComplex.refinedCones[index].toString(
             &tempFormat
@@ -13593,7 +13597,9 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
           << "<br>QP: "
           << this->quasiPolynomials[index].toString(true, false);
           global.comments << "<br>value: " << result.toString();
-          global.comments << "<br><br>Chamber " << i + 1
+          global.comments
+          << "<br><br>Chamber "
+          << i + 1
           << ": "
           << this->projectivizedComplex.refinedCones[i].toString(&tempFormat);
           global.comments
@@ -13864,7 +13870,9 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
       this->conesLargerDimension[i].lattice
     );
     std::stringstream tempStream;
-    tempStream << "intersecing lattice " << i + 1
+    tempStream
+    << "intersecing lattice "
+    << i + 1
     << " out of "
     << this->conesLargerDimension.size;
     report.report(tempStream.str());
@@ -13879,7 +13887,9 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
     (this->finalRougherLattice, roots2, roots);
     this->finalRepresentatives.addOnTopNoRepetition(roots);
     std::stringstream tempStream;
-    tempStream << "Computing representative " << i + 1
+    tempStream
+    << "Computing representative "
+    << i + 1
     << " out of "
     << this->conesLargerDimension.size;
     tempStream << "\nSo far " << this->finalRepresentatives.size << " found.";
@@ -13949,7 +13959,9 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
       this->complexStartingPerRepresentative[i].refinedCones, true
     );
     std::stringstream tempStream;
-    tempStream << "Processing representative " << i + 1
+    tempStream
+    << "Processing representative "
+    << i + 1
     << " out of "
     << this->finalRepresentatives.size;
     report.report(tempStream.str());
@@ -14030,7 +14042,9 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
       this->conesLargerDimension.size --;
       this->LPtoMaximizeLargerDim.size --;
       std::stringstream tempStream1, tempStream2, tempStream3;
-      tempStream1 << "Processing " << this->numProcessedNonParam + 1
+      tempStream1
+      << "Processing "
+      << this->numProcessedNonParam + 1
       << " out of "
       << this->numNonParaM;
       tempStream2 << "Remaining cones: " << this->conesLargerDimension.size;
@@ -14978,11 +14992,15 @@ void ConeCollection::initFromConeWalls(
       root.scaleNormalizeFirstNonZero();
       this->splittingNormals.addOnTopNoRepetition(root);
       std::stringstream out;
-      out << "Extracting walls from cone " << i + 1
+      out
+      << "Extracting walls from cone "
+      << i + 1
       << " out of "
       << this->nonRefinedCones.size
       << " total distinct chambers.";
-      out << "\nProcessed " << j + 1
+      out
+      << "\nProcessed "
+      << j + 1
       << " out of "
       << this->nonRefinedCones[i].normals.size
       << " walls of the current chamber.";

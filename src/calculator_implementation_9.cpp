@@ -134,8 +134,8 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
           !workingMatrix.elements[i][baseVariables.elements[i]].isEqualTo(1)
         ) {
           global.fatal
-          <<
-          "The base variable coefficient is required to be 1 at this point of code. "
+          << "The base variable coefficient is "
+          << "required to be 1 at this point of code. "
           << global.fatal;
         }
       }
@@ -353,7 +353,9 @@ bool CalculatorFunctions::conesIntersect(
   }
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
   for (int i = 0; i < coneNonStrictGens.size; i ++) {
-    out << "<br>v_{" << coneStrictGens.size + i + 1
+    out
+    << "<br>v_{"
+    << coneStrictGens.size + i + 1
     << "}="
     << coneNonStrictGens[i].toString()
     << ";";
@@ -396,12 +398,16 @@ bool CalculatorFunctions::conesIntersect(
     << outputSeparatingNormal.toString()
     << ". Indeed, ";
     for (int i = 0; i < coneStrictGens.size; i ++) {
-      out << "<br>\\langle v_{" << i + 1
+      out
+      << "<br>\\langle v_{"
+      << i + 1
       << "}, n\\rangle = "
       << outputSeparatingNormal.scalarEuclidean(coneStrictGens[i]).toString();
     }
     for (int i = 0; i < coneNonStrictGens.size; i ++) {
-      out << "<br>\\langle v_{" << i + 1 + coneStrictGens.size
+      out
+      << "<br>\\langle v_{"
+      << i + 1 + coneStrictGens.size
       << "}, n\\rangle = "
       << outputSeparatingNormal.scalarEuclidean(coneNonStrictGens[i]).toString(
       );

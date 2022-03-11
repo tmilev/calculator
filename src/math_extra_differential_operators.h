@@ -141,10 +141,12 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
       for (int j = i + 1; j < elementsConverted.size; j ++) {
         tempQDO = elementsConverted[i];
         std::stringstream reportStream;
-        reportStream << "Lie bracketing elements " << " of indices " << i + 1
+        reportStream
+        << "Lie bracketing elements "
+        << " of indices "
+        << i + 1
         << " and "
-        << j +
-        1
+        << j + 1
         << " out of "
         << elementsConverted.size
         << "<br> "

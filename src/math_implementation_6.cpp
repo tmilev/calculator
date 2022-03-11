@@ -1304,7 +1304,9 @@ std::string PolynomialUnivariateModularAsModulus::toStringImagesOfX() const {
   out << this->imageXToTheNth.toStringCommaDelimited();
   int degree = this->imageXToTheNth.size;
   for (int i = 0; i < this->imagesPowersOfX.size; i ++) {
-    out << "\nx^" << degree + i
+    out
+    << "\nx^"
+    << degree + i
     << " -> "
     << this->imagesPowersOfX[i].toStringCommaDelimited();
   }

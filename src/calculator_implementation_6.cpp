@@ -115,12 +115,12 @@ std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(
   } else {
     if (this->flagAllBuiltInAnswersOK) {
       out
-      <<
-      "<td style = 'min-width:60px'><b style = 'color:green'>Success</b></td>";
+      << "<td style = 'min-width:60px'><b style = 'color:green'>"
+      << "Success</b></td>";
     } else {
       out
-      <<
-      "<td style = 'min-width:60px'><b style = 'color:red'>Failure.</b></td>";
+      << "<td style = 'min-width:60px'><b style = 'color:red'>"
+      << "Failure.</b></td>";
       out << "<td style = 'min-width:400px'>";
       for (int i = 0; i < this->answers.size; i ++) {
         out << this->answers[i].builtInAnswer;
@@ -331,7 +331,9 @@ bool CalculatorHTML::Test::builtInMultiple(
   for (int i = 0; i < numberOfRepetitions; i ++) {
     randomSeeds[i] = inputRandomSeed + i;
     std::stringstream reportStream;
-    reportStream << "Testing problems, round " << i + 1
+    reportStream
+    << "Testing problems, round "
+    << i + 1
     << " out of "
     << numberOfRepetitions
     << ", starting random seed: "
@@ -345,12 +347,16 @@ bool CalculatorHTML::Test::builtInMultiple(
       )
     ) {
       if (comments != nullptr) {
-        *comments << "Failed run " << i + 1
+        *comments
+        << "Failed run "
+        << i + 1
         << " out of "
         << numberOfRepetitions
         << ". "
         << tester.toHTMLBuiltIn();
-        *comments << "Failed run " << i + 1
+        *comments
+        << "Failed run "
+        << i + 1
         << " out of "
         << numberOfRepetitions
         << ". "
@@ -1260,8 +1266,8 @@ bool CalculatorFunctionsCrypto::testRSASign(
   ) {
     return
     calculator
-    <<
-    "Failed to extract positive integers from the second and third argument. ";
+    << "Failed to extract positive integers "
+    << "from the second and third argument. ";
   }
   if (
     !key.computeFromTwoPrimes(
@@ -2348,9 +2354,8 @@ bool CalculatorFunctions::compareIntervalsNumerically(
   if (input.size() != 4) {
     return
     calculator
-    <<
-    "Comparing intervals numerically takes 3 arguments: two unions and precision. "
-    ;
+    << "Comparing intervals numerically takes "
+    << "3 arguments: two unions and precision. ";
   }
   double precision = 0;
   if (!input[3].evaluatesToDouble(&precision)) {
@@ -2778,8 +2783,8 @@ bool CalculatorFunctions::newtonsMethod(
     << ", the third argument requests "
     << numIterations
     << " iterations. However, "
-    << "the number of iterations is required to be a number between 1 and 50. "
-    ;
+    << "the number of iterations is required "
+    << "to be a number between 1 and 50. ";
     return output.assignError(calculator, errorStream.str());
   }
   MapList<
@@ -3075,8 +3080,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     << "Computing structure of subalgebra "
     << allTypes[i].toString()
     << " ("
-    << i +
-    1
+    << i + 1
     << " out of "
     << allTypes.size
     << ").";
@@ -3281,8 +3285,7 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
       << "found "
       << set.size
       << "elements so far, exploring element "
-      << i +
-      1;
+      << i + 1;
       reportStream << "<br>Evaluating: " << product.toString();
       report.report(reportStream.str());
       calculator.evaluateExpression(calculator, product, evaluatedProduct);

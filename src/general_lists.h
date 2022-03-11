@@ -866,8 +866,7 @@ public:
         << other[highIndex]
         << " of index "
         << highIndex
-        <<
-        " is strictly greater than itself "
+        << " is strictly greater than itself "
         << "which is not allowed for strict orders. "
         << "Maybe the programmer has given a "
         << "non-strict order instead of strict one by mistake? ";
@@ -2371,8 +2370,7 @@ void List<Object>::expandArrayOnTop(int increase) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "Memory allocation failure: failed to allocate "
-    << this->actualSize +
-    increase
+    << this->actualSize + increase
     << " objects. ";
     fatalCrash(commentsOnCrash.str());
   }

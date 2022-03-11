@@ -508,13 +508,17 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
     if (this->errorCode != 1) {
       if (this->errorCode == 0) {
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Attempt " << i + 1
+          *commentsOnFailure
+          << "Attempt "
+          << i + 1
           << ": SSL handshake not successful in a "
           << "controlled fashion (errorCode = 0). <br>";
         }
       } else {
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Attempt " << i + 1
+          *commentsOnFailure
+          << "Attempt "
+          << i + 1
           << ": SSL handshake not successful with a fatal error with "
           << "errorCode: "
           << this->errorCode
@@ -786,7 +790,9 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
           *commentsOnFailure
           << "OpenSSL handshake not successful with a fatal error. ";
         }
-        *commentsOnFailure << "Attempt " << i + 1
+        *commentsOnFailure
+        << "Attempt "
+        << i + 1
         << " out of "
         << maxNumHandshakeTries
         << " failed. ";

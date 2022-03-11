@@ -2728,7 +2728,9 @@ bool HardCodedWeylGroupData::loadOutputSubgroupsFromJSData(
       readerSubgroup.flagIsExtendedParabolic = false;
       readerSubgroup.flagIsParabolic = false;
     } else {
-      global.fatal << "Corrupt JSON data, entry number " << i + 1
+      global.fatal
+      << "Corrupt JSON data, entry number "
+      << i + 1
       << ": the group labels are: "
       << currentSGdata.listObjects[0].toString(nullptr)
       << global.fatal;

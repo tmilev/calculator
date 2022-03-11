@@ -505,10 +505,8 @@ splitOverLeviMonomialsEncodeHighestWeight(
     << "<hr>In the following weight visualization, "
     << "a yellow line is drawn if the corresponding weights are "
     << "simple reflections of one another, "
-    <<
-    "with respect to a simple root of "
-    << "the Levi part of the parabolic subalgebra. "
-    ;
+    << "with respect to a simple root of "
+    << "the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
       root =
       weylGroup.getSimpleCoordinatesFromFundamental(
@@ -546,10 +544,8 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     if (report != nullptr) {
       std::stringstream out;
       out
-      <<
-      "I have been instructed only to split modules "
-      << "that are irreducible over the ambient Lie algebra"
-      ;
+      << "I have been instructed only to split modules "
+      << "that are irreducible over the ambient Lie algebra";
       out
       << " Instead I got the character "
       << this->character.toString()
@@ -599,8 +595,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     )
   ) {
     out
-    <<
-    "The parabolic subalgebra you selected is "
+    << "The parabolic subalgebra you selected is "
     << "not a subalgebra of the ambient parabolic subalgebra. "
     << "The parabolic has root of Levi given by "
     << splittingParSel.toString()
@@ -938,8 +933,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     int index = this->moduleWeightsSimpleCoordinates.getIndex(hwCurrent);
     if (index == - 1) {
       out2
-      <<
-      "Error: could not generate all weights "
+      << "Error: could not generate all weights "
       << "in the weight support. Maybe they are too many? Allowed "
       << "# of weights is 10000";
       if (outputReport != nullptr) {
@@ -999,10 +993,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   if (isBad) {
     if (outputReport != nullptr) {
       out2
-      <<
-      "<br>Error: the Littelmann-path induced "
-      << "monomials do not give a monomial basis. "
-      ;
+      << "<br>Error: the Littelmann-path induced "
+      << "monomials do not give a monomial basis. ";
       *outputReport = out2.str();
     }
     return false;
@@ -1107,11 +1099,9 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
         << " out of "
         << this->generatingWordsGrouppedByWeight.size
         << " between indices "
-        << i +
-        1
+        << i + 1
         << " and "
-        << j +
-        1
+        << j + 1
         << " out of "
         << currentWordList.size;
         numScalarProducts ++;
@@ -1254,12 +1244,13 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
         << global.fatal;
       } else {
         std::stringstream tempStream;
-        tempStream << "tested index " << i + 1
+        tempStream
+        << "tested index "
+        << i + 1
         << " out of "
         << this->getOwner().getNumberOfGenerators()
         << ", "
-        << j +
-        1
+        << j + 1
         << " out of "
         << this->getOwner().getNumberOfGenerators();
         report.report(tempStream.str());
@@ -1422,13 +1413,11 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
       << "Computing action of "
       << generatorString
       << " on weight layer "
-      << i +
-      1
+      << i + 1
       << " out of "
       << this->generatingWordsGrouppedByWeight.size
       << ", word "
-      << j +
-      1
+      << j + 1
       << " out of "
       << currentWordList.size
       << "...";
@@ -1782,7 +1771,9 @@ const {
     this->generatingWordsGrouppedByWeight[k];
     for (int i = 0; i < currentList.size; i ++) {
       MonomialUniversalEnveloping<Coefficient>& currentElt = currentList[i];
-      out << "<br>monomial " << i + 1
+      out
+      << "<br>monomial "
+      << i + 1
       << ": "
       << currentElt.toString(&global.defaultFormat.getElement());
     }
@@ -2378,9 +2369,11 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
     currentMon.indexFDVector = this->indexFDVector;
     currentMon.owner = this->owner;
     std::stringstream reportStream;
-    reportStream << "reducing mon: " << currentMon.toString() << ", index" << j
-    +
-    1
+    reportStream
+    << "reducing mon: "
+    << currentMon.toString()
+    << ", index"
+    << j + 1
     << " out of "
     << elementUniversalEnveloping.size()
     << "...";
@@ -2449,8 +2442,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       << "accounting monomial "
       << currentMon.toString()
       << " of index "
-      << l +
-      1
+      << l + 1
       << " out of "
       << elementUniversalEnveloping.size()
       << " and letter index "

@@ -265,8 +265,8 @@ void LaTeXCrawler::buildFreecalc() {
       << buffer
       << "<br>This is the line immediately after the \\lect command. "
       << "It should begin with the string \"%DesiredLectureName: \""
-      <<
-      "(<-has space bar in the end). The name itself should not contain the characters . / or \\. "
+      << "(<-has space bar in the end). "
+      << "The name itself should not contain the characters . / or \\. "
       << "I am assigning an automatic file name. <br>";
     }
     lectureDesiredNames.addOnTop(desiredName);
@@ -278,9 +278,8 @@ void LaTeXCrawler::buildFreecalc() {
   report.report(reportStream.str());
   if (isLecture && isHomework) {
     this->displayResult
-    <<
-    "I was not able to determine whether the file is a homework or a lecture file. Aborting."
-    ;
+    << "I was not able to determine whether the "
+    << "file is a homework or a lecture file. Aborting.";
     return;
   }
   if (!isLecture && !isHomework) {
@@ -356,13 +355,13 @@ void LaTeXCrawler::buildFreecalc() {
   report.report(reportStream.str());
   if (isLecture) {
     this->displayResult
-    <<
-    "<table><tr><td>Lecture number</td><td>Lecture name</td><td>Lecture pdf</td>"
+    << "<table><tr><td>Lecture number</td>"
+    << "<td>Lecture name</td><td>Lecture pdf</td>"
     << "<td>Lecture handout pdf</td><td>Comments</td></tr>";
   } else {
     this->displayResult
-    <<
-    "<table><tr><td>Homework number</td><td>Homework name</td><td>Homework pdf</td>"
+    << "<table><tr><td>Homework number</td>"
+    << "<td>Homework name</td><td>Homework pdf</td>"
     << "<td>Homework handout pdf</td><td>Comments</td></tr>";
   }
   std::string lectureFileNameEnd;
@@ -434,7 +433,9 @@ void LaTeXCrawler::buildFreecalc() {
   int numLecturesToProcess = this->lectureNumbers.size;
   std::fstream workingFile;
   for (int i = 0; i < numLecturesToProcess; i ++) {
-    reportStream << "<br>Processing lecture " << i + 1
+    reportStream
+    << "<br>Processing lecture "
+    << i + 1
     << " out of "
     << this->lectureNumbers.size
     << ". ";
@@ -503,7 +504,9 @@ void LaTeXCrawler::buildFreecalc() {
     currentSysCommand =
     "mv " + fileNameWorkingCopyPDF + " " + pdfFileNameHandout.str();
     executedCommands << "<br>" << currentSysCommand;
-    reportStream << "<br>Lecture/Homework " << i + 1
+    reportStream
+    << "<br>Lecture/Homework "
+    << i + 1
     << " handout compiled, renaming file ... ";
     report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
@@ -552,7 +555,9 @@ void LaTeXCrawler::buildFreecalc() {
     currentSysCommand =
     "mv " + fileNameWorkingCopyPDF + " " + pdfFileNameNormal.str();
     executedCommands << "<br>" << currentSysCommand;
-    reportStream << "<br>Lecture " << i + 1
+    reportStream
+    << "<br>Lecture "
+    << i + 1
     << " regular slides compiled, renaming file ... ";
     report.report(reportStream.str());
     global.externalCommandNoOutput(currentSysCommand, true);
@@ -632,7 +637,9 @@ void LaTeXCrawler::buildFreecalc() {
       currentSysCommand =
       "mv " + fileNameWorkingCopyPDF + " " + pdfFileNameNormal.str();
       executedCommands << "<br>" << currentSysCommand;
-      reportStream << "<br>Slide " << i + 1
+      reportStream
+      << "<br>Slide "
+      << i + 1
       << ", run "
       << k
       << " compiled, renaming file ... ";
@@ -729,8 +736,8 @@ void LaTeXCrawler::crawlRecursive(
   // / Touch very carefully.
   if (this->baseFoldersCrawlableFilesPhysical.size == 0) {
     global.fatal
-    <<
-    "Error: this->baseFoldersCrawlableFilesPhysical is empty which is not allowed here. "
+    << "Error: this->baseFoldersCrawlableFilesPhysical "
+    << "is empty which is not allowed here. "
     << global.fatal;
   }
   std::string trimmedFileName =
@@ -1234,9 +1241,8 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
     << "\n%This file compiles with pdflatex --shell-escape\n";
     if (!this->flagHomeworkRatherThanSlides) {
       crawlingResult
-      <<
-      "\n%Comment out/in the [handout] line to get the slide in projector/handout mode.\n"
-      ;
+      << "\n%Comment out/in the [handout] "
+      << "line to get the slide in projector/handout mode.\n";
     } else {
       crawlingResult
       << "\n%Use \\togglefalse{answers} and "

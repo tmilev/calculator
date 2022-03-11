@@ -626,7 +626,9 @@ std::string VectorPartition::toStringPartitioningVectors() {
   STACK_TRACE("VectorPartition::toStringPartitioningVectors");
   std::stringstream out;
   for (int i = 0; i < this->partitioningRoots.size; i ++) {
-    out << "e_{" << i + 1
+    out
+    << "e_{"
+    << i + 1
     << "}="
     << this->partitioningRoots[i].toString()
     << "<br>";

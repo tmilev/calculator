@@ -1709,7 +1709,9 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out << "</tr>";
   this->kModulesgEpsCoords.setSize(this->modules.size);
   for (int i = 0; i < this->modules.size; i ++) {
-    out << "\n<tr><td>Module " << i + 1
+    out
+    << "\n<tr><td>Module "
+    << i + 1
     << "</td><td>"
     << this->modules[i].size
     << "</td>";
@@ -3864,7 +3866,9 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       << relativeRootSystem.toString();
     }
     std::stringstream out;
-    out << "Exploring Dynkin characteristics case " << cycleCounter + 1
+    out
+    << "Exploring Dynkin characteristics case "
+    << cycleCounter + 1
     << " out of "
     << numberOfCycles;
     report.report(out.str());
@@ -4023,7 +4027,9 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
       }
       if (report2.tickAndWantReport()) {
         std::stringstream out;
-        out << "Exploring extensions of subalgebra " << i + 1
+        out
+        << "Exploring extensions of subalgebra "
+        << i + 1
         << " out of "
         << this->subalgebras.size
         << ". Type current SA: "
@@ -4031,8 +4037,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
         << ". Possible standard parabolic extensions: "
         << reportString
         << ". Exploring extension by lowest weight vector of module "
-        << j +
-        1
+        << j + 1
         << " out of "
         << this->subalgebras[i].modules.size;
         report2.report(out.str());
@@ -4367,7 +4372,9 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
 
 std::string RootSubalgebras::toStringAlgebraLink(int index) {
   std::stringstream out;
-  out << "<a href = \"rootSubalgebra_" << index + 1
+  out
+  << "<a href = \"rootSubalgebra_"
+  << index + 1
   << ".html\">"
   << this->subalgebras[index].dynkinDiagram.toString()
   << "</a>";
@@ -4738,7 +4745,9 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
       );
       bufferSubalgebras[recursionDepth].computeDynkinDiagramKAndCentralizer();
       std::stringstream out;
-      out << "Included root " << k + 1
+      out
+      << "Included root "
+      << k + 1
       << " out of "
       << bufferSubalgebras[recursionDepth - 1].modules.size
       << " Total found SAs: "
@@ -4833,7 +4842,9 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
     }
     if (global.response.monitoringAllowed()) {
       std::stringstream out;
-      out << "Computing action of element " << i + 1
+      out
+      << "Computing action of element "
+      << i + 1
       << " out of "
       << subgroup.allElements.size;
       report.report(out.str());
@@ -5650,12 +5661,15 @@ int ConeRelation::rootsToScalarProductString(
         );
         if (!scalarProduct.isEqualToZero()) {
           coefficientString = scalarProduct.toString();
-          out << "$\\langle" << letterTypeLeft << "_" << i + 1
+          out
+          << "$\\langle"
+          << letterTypeLeft
+          << "_"
+          << i + 1
           << ", "
           << letterTypeRight
           << "_"
-          << j +
-          1
+          << j + 1
           << "\\rangle ="
           << coefficientString
           << "$, ";

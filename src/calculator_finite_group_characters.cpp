@@ -80,10 +80,11 @@ checkRepresentationIsMultiplicativelyClosed() {
       element.makeCanonical();
       int targetIndex = this->ownerGroup->elements.getIndex(element);
       if (!(matrix == this->elementImages[targetIndex])) {
-        global.fatal << "this is a programming error: element " << i + 1
+        global.fatal
+        << "this is a programming error: element "
+        << i + 1
         << " times element "
-        << j +
-        1
+        << j + 1
         << " is outside of the set, i.e.,  "
         << tempList[i].toString()
         << " * "
@@ -1075,7 +1076,9 @@ weylGroupOuterConjugacyClassesFromAllElements(
   std::stringstream out;
   out << "Weyl group generators. <br>";
   for (int i = 0; i < groupNoOuterAutos.generators.size; i ++) {
-    out << "Generator " << i + 1
+    out
+    << "Generator "
+    << i + 1
     << ": "
     << groupNoOuterAutos.generators[i].toString()
     << "<br>";
@@ -1245,11 +1248,15 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = false;
   for (int i = 0; i < groupGeneratedByMatrices.generators.size; i ++) {
-    outCommand << "<br>s_{" << i + 1
+    outCommand
+    << "<br>s_{"
+    << i + 1
     << "}=MatrixRationals"
     << groupGeneratedByMatrices.generators[i].toStringMatrixForm(&tempFormat)
     << ";";
-    out << "<br>s_" << i + 1
+    out
+    << "<br>s_"
+    << i + 1
     << " = "
     << HtmlRoutines::getMathNoDisplay(
       groupGeneratedByMatrices.generators[i].toStringMatrixForm(&tempFormat)
@@ -1617,8 +1624,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
       if (!currentSG.flagIsParabolic && currentSG.flagIsExtendedParabolic) {
         mainTableStream
         << "&${\\widehat{\\mathfrak{ p}}}_{"
-        << i - numParabolicClasses +
-        1
+        << i - numParabolicClasses + 1
         << "}$";
       }
     }
@@ -1776,7 +1782,9 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   out << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n"
   ;
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
-    out << "$" << i + 1
+    out
+    << "$"
+    << i + 1
     << "$ & "
     "$"
     << this->group.conjugacyClasses[i].representative.toString()

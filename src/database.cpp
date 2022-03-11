@@ -1175,7 +1175,9 @@ bool Database::User::sendActivationEmail(
   UserCalculator currentUser;
   bool result = true;
   for (int i = 0; i < emails.size; i ++) {
-    global << "Sending activation email, user " << i + 1
+    global
+    << "Sending activation email, user "
+    << i + 1
     << " out of "
     << emails.size
     << " ... ";

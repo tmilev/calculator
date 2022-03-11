@@ -27,8 +27,7 @@ bool MonomialPolynomial::substitution(
       << "Attempt to carry out a substitution in the monomial "
       << this->toString()
       << " which does have non-zero exponent of variable x_{"
-      << i +
-      1
+      << i + 1
       << "}; however, the input substitution has "
       << substitution.size
       << " variable images. More precisely, the input substitution is:  "
@@ -451,8 +450,7 @@ bool SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
         *commentsOnFailure
         << "I know how to compute Sylvester "
         << "matrix only for univariate polynomials. Polynomial number "
-        << i +
-        1
+        << i + 1
         << " has "
         << current.minimalNumberOfVariables()
         << " variables.";
@@ -626,7 +624,9 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
     const MonomialPolynomial& currentMon = (*this)[i];
     int numCycles = 0;
     if (!currentMon(0).isSmallInteger(&numCycles)) {
-      global.fatal << "Attempting to evaluate a polynomial whose " << i + 1
+      global.fatal
+      << "Attempting to evaluate a polynomial whose "
+      << i + 1
       << "^{th} variable is raised to the power "
       << currentMon(0).toString()
       << ". Raising variables to power is allowed "
@@ -1513,8 +1513,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
         subtrahends[i], &highlightedColor
       )
       << "\\\\\\cline{2-"
-      << this->allMonomials.size +
-      1
+      << this->allMonomials.size + 1
       << "}";
     }
   }
@@ -1628,8 +1627,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   out
   <<
   "<tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='"
-  << this->allMonomials.size +
-  1
+  << this->allMonomials.size + 1
   << "'><b>Quotient(s) </b></td>"
   << "</tr>";
   FormatExpressions& format = this->owner->format;
@@ -1650,8 +1648,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     out << "</td>";
     out
     << "<td style ='border-bottom:1px solid gray;' colspan ='"
-    << this->allMonomials.size +
-    1
+    << this->allMonomials.size + 1
     << "'>";
     out
     << HtmlRoutines::getMathNoDisplay(

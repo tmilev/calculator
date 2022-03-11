@@ -1388,7 +1388,10 @@ std::string ASNObject::toStringAllRecognizedObjectIds() {
     ASNObject& current = ASNObject::objectIdsToNames().values[i];
     const List<unsigned char>& currentId =
     ASNObject::objectIdsToNames().keys[i];
-    out << "<tr>" << "<td><small>" << i + 1
+    out
+    << "<tr>"
+    << "<td><small>"
+    << i + 1
     << "</small></td>"
     << "<td>"
     << Crypto::convertListUnsignedCharsToHexFormat(currentId, 50, false)

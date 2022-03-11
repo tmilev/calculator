@@ -3169,7 +3169,9 @@ bool FiniteGroup<elementSomeGroup>::checkInitializationConjugacyClasses() const 
     if (
       this->irreducibleRepresentations[i].character.data.isEqualToZero()
     ) {
-      global.fatal << "Irrep number " << i + 1
+      global.fatal
+      << "Irrep number "
+      << i + 1
       << " has zero character!"
       << global.fatal;
       return false;

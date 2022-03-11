@@ -380,8 +380,8 @@ bool CalculatorFunctions::nistEllipticCurveOrder(
   if (!input[1].isOfType(&inputString)) {
     return
     calculator
-    <<
-    "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
+    << "Function NISTEllipticCurveGenerator "
+    << "takes as input a string with an EC curve name. "
     << "Available curve names: secp256k1";
   }
   LargeIntegerUnsigned result;
@@ -410,8 +410,8 @@ bool CalculatorFunctions::nistEllipticCurveGenerator(
   if (!input[1].isOfType(&inputString)) {
     return
     calculator
-    <<
-    "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
+    << "Function NISTEllipticCurveGenerator "
+    << "takes as input a string with an EC curve name. "
     << "Available curve names: secp256k1";
   }
   ElementEllipticCurve<ElementZmodP> generator;
@@ -850,8 +850,8 @@ bool CalculatorFunctions::quoteToString(
   << "is applied to the non-atomic expression: "
   << input.toString()
   << ". "
-  <<
-  "This may be a bug with the function Calculator::parseFillDictionary. </b>";
+  << "This may be a bug with the function "
+  << "Calculator::parseFillDictionary. </b>";
   return output.assignValue(calculator, input.toString());
 }
 
@@ -945,9 +945,8 @@ bool CalculatorFunctionsBasic::factorial(
     return
     calculator
     << "Computing large factorials is disabled "
-    <<
-    "(can be changed in the source code by modifying CalculatorFunctions::factorial)."
-    ;
+    << "(can be changed in the source code "
+    << "by modifying CalculatorFunctions::factorial).";
   }
   Rational result;
   return output.assignValue(calculator, result.factorial(inputInt));
@@ -1253,9 +1252,8 @@ bool CalculatorFunctions::solveSerreLikeSystem(
       ;
     } else {
       out
-      <<
-      "However, I was unable to find such a solution: my heuristics are not good enough."
-      ;
+      << "However, I was unable to find such a solution: "
+      << "my heuristics are not good enough.";
     }
   }
   return output.assignValue(calculator, out.str());
@@ -2042,8 +2040,10 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
     << global.fatal;
   }
   this->printoutPartialFractionsLatex
-  <<
-  "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} "
+  << "\\documentclass{article}"
+  << "\\usepackage{longtable}"
+  << "\\usepackage{xcolor}"
+  << "\\usepackage{multicol} "
   << "\\begin{document}";
   this->prepareDenominatorFactors();
   if (!allFactorsAreOfDegree2orless) {
@@ -2180,9 +2180,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
   << HtmlRoutines::getMathNoDisplay("A_i")
   << "'s so that I have the equality of rational functions: ";
   this->printoutPartialFractionsLatex
-  <<
-  "We need to find $A_i$'s so that we have the following equality of rational functions. "
-  ;
+  << "We need to find $A_i$'s so that "
+  << "we have the following equality of rational functions. ";
   this->prepareNumerators();
   this->prepareFormatExpressions();
   this->printoutPartialFractionsHtml
@@ -2205,23 +2204,22 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
     0, univariateThatMustVanish
   );
   this->printoutPartialFractionsHtml
-  <<
-  "<br><br>After rearranging we get that the following polynomial must vanish: "
+  << "<br><br>After rearranging we get "
+  << "that the following polynomial must vanish: "
   << HtmlRoutines::getMathNoDisplay(
     univariateThatMustVanish.toString(&this->currentFormat)
   );
   this->printoutPartialFractionsLatex
-  <<
-  "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
-  <<
-  "we mean that the coefficients of the powers of $x$ must be equal to zero."
+  << "After rearranging we get that the "
+  << "following polynomial must vanish. Here, by ``vanish'' "
+  << "we mean that the coefficients of "
+  << "the powers of $x$ must be equal to zero."
   << "\\["
   << univariateThatMustVanish.toString(&this->currentFormat)
   << "\\]";
   this->printoutPartialFractionsHtml
-  <<
-  "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish."
-  ;
+  << "<br>Here, by ``vanish'', we mean that "
+  << "the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber>
   homogenousSystem,
   systemHomogeneousForLaTeX,
@@ -2328,8 +2326,8 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   ) {
     return
     calculator
-    <<
-    "CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals: "
+    << "CalculatorFunctions::"
+    << "functionSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString()
     << " to rational function. ";
@@ -2380,8 +2378,8 @@ bool CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm(
   ) {
     return
     calculator
-    <<
-    "CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm: "
+    << "CalculatorFunctions::"
+    << "splitToPartialFractionsOverAlgebraicRealsAlgorithm: "
     << "Failed to convert "
     << input[1].toString()
     << " to rational function. ";
@@ -2734,7 +2732,8 @@ bool CalculatorFunctionsDifferentiation::differentiateConstPower(
   }
   if (!input[1].isAtom()) {
     calculator
-    << "<hr>Warning: differentiating with respect to the non-atomic expression"
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression"
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -2778,7 +2777,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAPowerB(
   }
   if (!input[1].isAtom()) {
     calculator
-    << "<hr>Warning: differentiating with respect to the non-atomic expression"
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression "
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -2824,7 +2824,8 @@ bool CalculatorFunctionsDifferentiation::differentiateConstant(
   }
   if (!input[1].isAtom()) {
     calculator
-    << "<hr>Warning: differentiating with respect to the non-atomic expression"
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression"
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -2846,7 +2847,8 @@ bool CalculatorFunctionsDifferentiation::differentiateX(
   }
   if (!input[1].isAtom()) {
     calculator
-    << "<hr>Warning: differentiating with respect to the non-atomic expression"
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression"
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -2869,8 +2871,8 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
   }
   if (!input[1].isAtom()) {
     calculator
-    <<
-    "<hr>Warning: differentiating with respect to the non-atomic expression "
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression "
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -3121,7 +3123,7 @@ bool CalculatorFunctions::outerEqualEqual(
 bool CalculatorFunctions::associateAdivBdivCPowerD(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::outerAssociateAdivBdivCpowerD");
+  STACK_TRACE("CalculatorFunctions::associateAdivBdivCPowerD");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -3158,7 +3160,7 @@ bool CalculatorFunctions::associateAdivBdivCPowerD(
 bool CalculatorFunctions::divisionCancellations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::outerDivCancellations");
+  STACK_TRACE("CalculatorFunctions::divisionCancellations");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -3192,7 +3194,7 @@ bool CalculatorFunctions::divisionCancellations(
 bool CalculatorFunctions::associateDivisionDivision(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::outerAssociateDivisionDivision");
+  STACK_TRACE("CalculatorFunctions::associateDivisionDivision");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -3229,13 +3231,13 @@ bool CalculatorFunctionsDifferentiation::differentiateChainRule(
   }
   if (!input[1].isAtom()) {
     calculator
-    << "<hr>Warning: differentiating with respect to the non-atomic expression"
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression"
     << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& differentialOperatorVariable = input[1],
   argument = input[2];
-  // ////////////////////
   if (!argument.startsWith(- 1, 2)) {
     return false;
   }
@@ -3276,14 +3278,13 @@ bool CalculatorFunctionsDifferentiation::differentiateAplusB(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsDifferentiation::differentiateAplusB");
-  // ///////////////////
   if (input.size() != 3) {
     return false;
   }
   if (!input[1].isAtom()) {
     calculator
-    <<
-    "<hr>Warning: differentiating with respect to the non-atomic expression "
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression "
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -3318,13 +3319,13 @@ bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsDifferentiation::differentiateAtimesB");
-  // ////////////////////
   if (input.size() != 3) {
     return false;
   }
   if (!input[1].isAtom()) {
     calculator
-    << "<hr>Warning: differentiating with respect to the non-atomic expression"
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression"
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -3399,20 +3400,18 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
   STACK_TRACE(
     "CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative"
   );
-  // ////////////////////
   if (input.size() != 3) {
     return false;
   }
   if (!input[1].isAtom()) {
     calculator
-    <<
-    "<hr>Warning: differentiating with respect to the non-atomic expression "
+    << "<hr>Warning: differentiating "
+    << "with respect to the non-atomic expression "
     << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& differentialOperatorVariable = input[1],
   argument = input[2];
-  // ////////////////////
   // Quotient rule (commutative): (a/b^n)'= (a'b-n a b')/b^{n + 1}
   if (!argument.startsWith(calculator.opDivide(), 3)) {
     return false;
@@ -3506,20 +3505,18 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
   STACK_TRACE(
     "CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative"
   );
-  // ////////////////////
   if (input.size() != 3) {
     return false;
   }
   if (!input[1].isAtom()) {
     calculator
-    <<
-    "<hr>Warning: differentiating with respect to the non-atomic expression "
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression "
     << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& differentialOperatorVariable = input[1],
   argument = input[2];
-  // ////////////////////
   // Quotient rule (non-commutative): (a/b)'= (ab^{- 1})'=a' b - a b^{- 1} b'
   // b^{- 1}
   if (!argument.startsWith(calculator.opDivide(), 3)) {
@@ -3731,9 +3728,11 @@ bool CalculatorFunctions::sortTerms(
   sortedMonomials.quickSortDescending(nullptr, &summands);
   if (!orderNonCanonical) {
     if (monomials == sortedMonomials) {
-      // Possible when monomials repeat, for example 2x+x will have the monomial
+      // Possible when monomials repeat,
+      // for example 2x+x will have the monomial
       // x appear twice.
-      // Since sorting is not guaranteed to be stable at present, the two terms
+      // Since sorting is not guaranteed to
+      // be stable at present, the two terms
       // may have been swapped.
       return false;
     }
@@ -3775,8 +3774,8 @@ bool CalculatorFunctions::compareFunctionsNumerically(
   if (variables.size > 1) {
     return
     calculator
-    <<
-    "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
+    << "I cannot compare the functions as they appear "
+    << "to depend on more than one variable, namely, on: "
     << variables.toStringCommaDelimited();
   }
   double leftBoundary = 0;
@@ -3816,7 +3815,8 @@ bool CalculatorFunctions::compareFunctionsNumerically(
     return
     calculator
     << "Failed to evaluate your function to a number. "
-    << "The sampling interval may be outside of the domain of the function. ";
+    << "The sampling interval may be outside "
+    << "of the domain of the function. ";
   }
   double tolerance = 0.0001;
   if (input.size() > 6) {
@@ -3971,9 +3971,9 @@ bool CalculatorFunctions::compareExpressionsNumerically(
     return
     calculator
     << "Comparing functions takes as input at least 5 arguments "
-    <<
-    "- two functions to compare, precision, variable belonging to an interval and number of sampling points)."
-    ;
+    << "- two functions to compare, precision, "
+    << "variable belonging to an interval "
+    << "and number of sampling points).";
   }
   Expression functionExpression = input[1];
   functionExpression -= input[2];
@@ -3981,7 +3981,8 @@ bool CalculatorFunctions::compareExpressionsNumerically(
   if (!functionExpression.getFreeVariables(variables, true)) {
     return
     calculator
-    << "Was not able to extract the function argument of your function. ";
+    << "Was not able to extract the "
+    << "function argument of your function. ";
   }
   if (variables.size <= 0) {
     Expression zeroE;
@@ -4047,8 +4048,8 @@ bool CalculatorFunctions::compareExpressionsNumerically(
       } else {
         return
         calculator
-        <<
-        "Failed to extract a small integer for the number of sampling points from: "
+        << "Failed to extract a small integer "
+        << "for the number of sampling points from: "
         << input[i + 1].toString();
       }
       if (*numSamples.lastObject() > 1000) {
@@ -4084,9 +4085,8 @@ bool CalculatorFunctions::compareExpressionsNumerically(
       return
       calculator
       << boundaryVariables[i]
-      <<
-      " is an already known constant and cannot be used as a variable in this context. "
-      ;
+      << " is an already known constant and "
+      << "cannot be used as a variable in this context. ";
     } else {
       knownEs.addOnTop(boundaryVariables[i]);
     }
@@ -4139,9 +4139,9 @@ bool CalculatorFunctions::compareExpressionsNumerically(
       numFailedSamples ++;
       if ((numFailedSamples* 100) / totalSamples > 20) {
         calculator
-        <<
-        "Failed to evaluate at least one of the functions in more than 20% of the sampling points. "
-        ;
+        << "Failed to evaluate at least "
+        << "one of the functions in more than "
+        << "20% of the sampling points. ";
         return output.assignValue(calculator, 0);
       }
     }
@@ -4513,15 +4513,17 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
       if (pivotIndex != numberOfFoundPivots) {
         matrix.switchRows(numberOfFoundPivots, pivotIndex);
         outputMatrix.switchRows(numberOfFoundPivots, pivotIndex);
-        out << "<br>Swap row " << numberOfFoundPivots + 1
+        out
+        << "<br>Swap row "
+        << numberOfFoundPivots + 1
         << " and row "
-        << pivotIndex +
-        1
+        << pivotIndex + 1
         << ": ";
-        outLaTeX << "& Swap row " << numberOfFoundPivots + 1
+        outLaTeX
+        << "& Swap row "
+        << numberOfFoundPivots + 1
         << " and row "
-        << pivotIndex +
-        1
+        << pivotIndex + 1
         << ". ";
         extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMatrix);
@@ -4533,11 +4535,15 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
       tempElement = matrix(numberOfFoundPivots, i);
       tempElement.invert();
       if (tempElement != 1) {
-        out << "<br> multiply row number " << numberOfFoundPivots + 1
+        out
+        << "<br> multiply row number "
+        << numberOfFoundPivots + 1
         << " by "
         << tempElement.toString(&format)
         << ": ";
-        outLaTeX << "& multiply row number " << numberOfFoundPivots + 1
+        outLaTeX
+        << "& multiply row number "
+        << numberOfFoundPivots + 1
         << " by $"
         << tempElement.toString(&format)
         << "$. \\\\";
@@ -4570,18 +4576,20 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
               outLaTeX << ", ";
             }
             found = true;
-            out << " Row index " << numberOfFoundPivots + 1
+            out
+            << " Row index "
+            << numberOfFoundPivots + 1
             << " times "
             << tempElement.toString(&format)
             << " added to row index "
-            << j +
-            1;
-            outLaTeX << " Row index " << numberOfFoundPivots + 1
+            << j + 1;
+            outLaTeX
+            << " Row index "
+            << numberOfFoundPivots + 1
             << " times $"
             << tempElement.toString(&format)
             << "$ added to row index "
-            << j +
-            1
+            << j + 1
             << "\\\\";
           }
         }
@@ -4674,10 +4682,11 @@ bool CalculatorFunctions::invertMatrixVerbose(
       if (pivotIndex != numberOfFoundPivots) {
         matrix.switchRows(numberOfFoundPivots, pivotIndex);
         outputMatrix.switchRows(numberOfFoundPivots, pivotIndex);
-        out << "<br>switch row " << numberOfFoundPivots + 1
+        out
+        << "<br>switch row "
+        << numberOfFoundPivots + 1
         << " and row "
-        << pivotIndex +
-        1
+        << pivotIndex + 1
         << ": ";
         augmentedMatrix = matrix;
         augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
@@ -4688,7 +4697,9 @@ bool CalculatorFunctions::invertMatrixVerbose(
       tempElement = matrix.elements[numberOfFoundPivots][i];
       tempElement.invert();
       if (tempElement != 1) {
-        out << "<br> multiply row " << numberOfFoundPivots + 1
+        out
+        << "<br> multiply row "
+        << numberOfFoundPivots + 1
         << " by "
         << tempElement
         << ": ";
@@ -4717,12 +4728,13 @@ bool CalculatorFunctions::invertMatrixVerbose(
               out << ", ";
             }
             found = true;
-            out << " Row index " << numberOfFoundPivots + 1
+            out
+            << " Row index "
+            << numberOfFoundPivots + 1
             << " times "
             << tempElement
             << " added to row index "
-            << j +
-            1;
+            << j + 1;
           }
         }
       }
@@ -4799,7 +4811,8 @@ integrateRationalFunctionSplitToBuidingBlocks(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks"
+    "CalculatorFunctionsIntegration::"
+    "integrateRationalFunctionSplitToBuidingBlocks"
   );
   Expression functionExpression, variableExpression, integrationSetE;
   if (
@@ -5231,8 +5244,8 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
     !a.isEqualToOne() || !b.isConstantNumber() || !c.isConstantNumber()
   ) {
     calculator
-    <<
-    "<hr>Failed to evaluate to constant the coefficients of the block IIIb integral."
+    << "<hr>Failed to evaluate to constant the "
+    << "coefficients of the block IIIb integral."
     << "The coefficients are: "
     << a.toString()
     << ", "
@@ -5349,8 +5362,8 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
     !B.isConstantNumber()
   ) {
     calculator
-    <<
-    "<hr>Failed to evaluate to constant the coefficients of the block IIb integral."
+    << "<hr>Failed to evaluate to constant "
+    << "the coefficients of the block IIb integral."
     << "The coefficients are: "
     << a.toString()
     << ", "
@@ -5991,7 +6004,8 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
       currentIntegrandE.reset(calculator);
       currentIntegrandE.addChildAtomOnTop("Polynomialize");
       currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
-      currentIntegral.makeIntegral(calculator, integrationSet, currentIntegrandE, variableExpression);
+      currentIntegral.makeIntegral(calculator,
+      integrationSet, currentIntegrandE, variableExpression);
       outputCandidate += currentIntegral;
       continue;*/
     }
@@ -6116,8 +6130,8 @@ bool CalculatorFunctionsDifferentiation::differentiateSqrt(
   }
   if (!input[1].isAtom()) {
     calculator
-    <<
-    "<hr>Warning: differentiating with respect to the non-atomic expression "
+    << "<hr>Warning: differentiating with "
+    << "respect to the non-atomic expression "
     << input[1].toString()
     << " - possible user typo?";
   }
@@ -6157,7 +6171,10 @@ bool CalculatorFunctionsDifferentiation::differentiateWithRespectToXTimesAny(
 bool CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::diffdivDiffxToDifferentiation");
+  STACK_TRACE(
+    "CalculatorFunctionsDifferentiation::"
+    "diffdivDiffxToDifferentiation"
+  );
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -6300,9 +6317,8 @@ bool CalculatorFunctions::outerCommuteConstants(
 bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::outerDivideReplaceAdivBpowerItimesBpowerJ"
-  );
+  STACK_TRACE("CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ")
+  ;
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -6378,9 +6394,7 @@ bool Expression::splitProduct(
 bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::outerAtimesBpowerJplusEtcDivBpowerI"
-  );
+  STACK_TRACE("CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -6842,8 +6856,8 @@ bool CalculatorFunctionsListsAndSets::removeLastElement(
       << ". ";
     } else {
       out
-      <<
-      "Error: requesting to remove the last element of the zero-element list "
+      << "Error: requesting to remove the last "
+      << "element of the zero-element list "
       << input.toString()
       << ". ";
     }
@@ -7457,7 +7471,8 @@ bool CalculatorFunctionsPlot::plot2D(
     return
     output.assignError(
       calculator,
-      "Plotting coordinates takes at least three arguments: function, lower and upper bound. "
+      "Plotting coordinates takes at least "
+      "three arguments: function, lower and upper bound. "
     );
   }
   if (input.hasBoundVariables()) {
@@ -7624,7 +7639,8 @@ bool CalculatorFunctionsPlot::plot2D(
         << "perhaps your expression is not a function of x.";
       }
       calculator
-      << "<hr>I failed to evaluate your function in a number of points. ";
+      << "<hr>I failed to evaluate your "
+      << "function in a number of points. ";
     }
   }
   Expression functionSuffixNotationE;
@@ -7662,7 +7678,8 @@ bool CalculatorFunctionsPlot::plotPoint(
     return
     output.assignError(
       calculator,
-      "Plotting a point takes at least two arguments, location and color. "
+      "Plotting a point takes at least "
+      "two arguments, location and color. "
     );
   }
   PlotObject plot;
@@ -7688,7 +7705,9 @@ bool CalculatorFunctionsPlot::plotPoint(
         )
       ) {
         return
-        calculator << "Failed to extract coordinate " << i + 1
+        calculator
+        << "Failed to extract coordinate "
+        << i + 1
         << " from: "
         << plot.coordinateFunctionsE[i].toString();
       }
@@ -7723,7 +7742,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
     return
     output.assignError(
       calculator,
-      "Plotting coordinates takes the following arguments: lower function, "
+      "Plotting coordinates takes the "
+      "following arguments: lower function, "
       "upper function, lower and upper bound, delta x. "
     );
   }
@@ -7775,8 +7795,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   ) {
     return
     calculator
-    <<
-    "Couldn't convert bounds of drawing function to floating point numbers. ";
+    << "Couldn't convert bounds of drawing "
+    << "function to floating point numbers. ";
   }
   if (upperBound < lowerBound) {
     MathRoutines::swap(upperBound, lowerBound);
@@ -7801,7 +7821,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
     return
     output.assignError(
       calculator,
-      "More than 10000 intervals needed for the plot, this is not allowed."
+      "More than 10000 intervals "
+      "needed for the plot, this is not allowed."
     );
   }
   List<Rational> rValues;
@@ -7879,20 +7900,19 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
       bool useNegativePattern = (fValuesLower[i] > fValuesUpper[i]);
       if (k == 0 && useNegativePattern) {
         outTex
-        <<
-        "\\psline*[linecolor =\\fcColorNegativeAreaUnderGraph, linewidth = 0.1pt]"
-        ;
+        << "\\psline*[linecolor ="
+        << "\\fcColorNegativeAreaUnderGraph, linewidth = 0.1pt]";
         outHtml
-        <<
-        "<br>\\psline*[linecolor =\\fcColorNegativeAreaUnderGraph, linewidth = 0.1pt]"
-        ;
+        << "<br>\\psline*[linecolor ="
+        << "\\fcColorNegativeAreaUnderGraph, linewidth = 0.1pt]";
       }
       if (k == 0 && !useNegativePattern) {
         outTex
-        << "\\psline*[linecolor =\\fcColorAreaUnderGraph, linewidth = 0.1pt]";
+        << "\\psline*[linecolor ="
+        << "\\fcColorAreaUnderGraph, linewidth = 0.1pt]";
         outHtml
-        <<
-        "<br>\\psline*[linecolor =\\fcColorAreaUnderGraph, linewidth = 0.1pt]";
+        << "<br>\\psline*[linecolor ="
+        << "\\fcColorAreaUnderGraph, linewidth = 0.1pt]";
       }
       if (k > 0 && useNegativePattern) {
         outTex << "\\psline[linecolor =brown, linewidth = 0.1pt]";
@@ -7918,15 +7938,13 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
       << ")"
       << "("
       << std::fixed
-      << xValues[i] +
-      deltaWithSign
+      << xValues[i] + deltaWithSign
       << ", "
       << std::fixed
       << fValuesUpper[i]
       << ")("
       << std::fixed
-      << xValues[i] +
-      deltaWithSign
+      << xValues[i] + deltaWithSign
       << ", "
       << std::fixed
       << fValuesLower[i]
@@ -7954,15 +7972,13 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
       << ")"
       << "("
       << std::fixed
-      << xValues[i] +
-      deltaWithSign
+      << xValues[i] + deltaWithSign
       << ", "
       << std::fixed
       << fValuesUpper[i]
       << ")("
       << std::fixed
-      << xValues[i] +
-      deltaWithSign
+      << xValues[i] + deltaWithSign
       << ", "
       << std::fixed
       << fValuesLower[i]
@@ -8111,7 +8127,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     calculator
     << "Parametric curve plots take 3+ arguments. "
     << "The first argument gives "
-    << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2, f_3), "
+    << "the coordinate functions in the format "
+    << "(f_1, f_2) or (f_1, f_2, f_3), "
     << "the next two arguments stands for the variable range. ";
   }
   if (input.hasBoundVariables()) {
@@ -8121,8 +8138,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   if (!input[1].isSequenceNElements()) {
     return
     calculator
-    <<
-    "The first argument of parametric curve must be a sequence, instead I got: "
+    << "The first argument of parametric curve "
+    << "must be a sequence, instead I got: "
     << input[1].toString();
   }
   plot.dimension = input[1].size() - 1;
@@ -8404,9 +8421,8 @@ bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
   std::stringstream out;
   if (semisimpleLieAlgebra.getRank() > 8) {
     out
-    <<
-    "<b>This code is has been set to run up to ambient Lie algebra of rank 8. </b>"
-    ;
+    << "<b>This code is has been set to run "
+    << "up to ambient Lie algebra of rank 8. </b>";
     return output.assignValue(calculator, out.str());
   }
   SemisimpleSubalgebras& semisimpleSubalgebras =
@@ -8884,8 +8900,9 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
   if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
     return
     *(this->owner)
-    << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble."
-    << " This may be a programming error. ";
+    << "<hr>Recursion depth exceeded while "
+    << "evaluating innerEvaluateToDouble. "
+    << "This may be a programming error. ";
   }
   if (knownEs.contains(*this)) {
     if (whichDouble != nullptr) {
@@ -9189,9 +9206,8 @@ bool CalculatorFunctions::testIndicator(
     calculator
     << "The argument "
     << numRuns
-    <<
-    " of CalculatorFunctions::testIndicator larger than 200000, trimming down to 200000."
-    ;
+    << " of CalculatorFunctions::testIndicator "
+    << "larger than 200000, trimming down to 200000.";
     numRuns = 200000;
   }
   if (numRuns < 0) {
@@ -9222,7 +9238,9 @@ bool CalculatorFunctions::testIndicator(
   ProgressReport report;
   for (int i = 0; i < numRuns; i ++) {
     std::stringstream reportStream;
-    reportStream << " Running indicator test, " << i + 1
+    reportStream
+    << " Running indicator test, "
+    << i + 1
     << " out of "
     << numRuns
     << ".";
@@ -9365,9 +9383,8 @@ bool CalculatorFunctions::findProductDistanceModN(
   if (input.size() != 3) {
     return
     calculator
-    <<
-    "<hr>Product distance f-n takes as input 2 arguments, modulo and a list of integers"
-    ;
+    << "<hr>Product distance f-n takes "
+    << "as input 2 arguments, modulo and a list of integers. ";
   }
   const Expression& moduloExpression = input[1];
   const Expression& integersExpression = input[2];
@@ -9387,8 +9404,8 @@ bool CalculatorFunctions::findProductDistanceModN(
   if (inputSize > 10000000) {
     return
     calculator
-    <<
-    "<hr>I've been instructed to compute with moduli no larger than 10000000.";
+    << "<hr>I've been instructed to compute "
+    << "with moduli no larger than 10000000.";
   }
   List<int> integerList, integersReduced;
   if (!calculator.getVectorInt(integersExpression, integerList)) {
@@ -9454,7 +9471,9 @@ bool CalculatorFunctions::findProductDistanceModN(
           numberOfElementsNotAddedToStack ++;
           if (numberOfElementsNotAddedToStack % 50000 == 0) {
             std::stringstream out;
-            out << "While computing product distance, explored " << i + 1
+            out
+            << "While computing product distance, explored "
+            << i + 1
             << " out of "
             << indexStack.size
             << " indices. "
@@ -9480,7 +9499,9 @@ bool CalculatorFunctions::findProductDistanceModN(
       indexStack.addOnTop(currentIndex);
       if (indexStack.size % 10000 == 0) {
         std::stringstream out;
-        out << "While computing product distance, explored " << i + 1
+        out
+        << "While computing product distance, explored "
+        << i + 1
         << " out of "
         << indexStack.size
         << " indices. "
@@ -9497,9 +9518,8 @@ bool CalculatorFunctions::findProductDistanceModN(
     if (indexStack.size > 1000000000) {
       return
       calculator
-      <<
-      "While computing product distance, exceeded allowed stack size of 1000000000"
-      ;
+      << "While computing product distance, "
+      << "exceeded allowed stack size of 1000000000";
     }
   }
   std::stringstream out;
@@ -9541,8 +9561,8 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
   if (modulusSmall > 10000000) {
     return
     calculator
-    <<
-    "<hr>I've been instructed to compute with moduli no larger than 10000000.";
+    << "<hr>I've been instructed to compute "
+    << "with moduli no larger than 10000000.";
   }
   if (
     !CalculatorConversions::loadKey(
@@ -9708,7 +9728,9 @@ bool Calculator::Test::calculatorTestRun() {
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     std::stringstream reportStream;
     Calculator::Test::OneTest& currentTest = this->commands.values[i];
-    reportStream << "<br>Test progress: testing " << i + 1
+    reportStream
+    << "<br>Test progress: testing "
+    << i + 1
     << " out of "
     << this->commands.size()
     << ". ";
@@ -9764,10 +9786,10 @@ bool CalculatorFunctions::crash(
   global.fatal
   << "This is a test of the crashing mechanism. "
   << "A file report must have been written, unless running web assembly. "
-  <<
-  "The crash file report is not accessible through the calculator's webserver. "
-  <<
-  "It can be reached locally in the results/crashes folder of the calculator or, "
+  << "The crash file report is not "
+  << "accessible through the calculator's webserver. "
+  << "It can be reached locally in the "
+  << "results/crashes folder of the calculator or, "
   << "if running remotely, through an administrator ssh connection. "
   << global.fatal;
   return

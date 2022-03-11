@@ -25,8 +25,8 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   Coefficient scalar;
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal
-    <<
-    "Error: determinant computation: number of columns different from number of rows. "
+    << "Error: determinant computation: "
+    << "number of columns different from number of rows. "
     << global.fatal;
   }
   int dim = this->numberOfColumns;
@@ -303,8 +303,8 @@ template <class Coefficient>
 void MatrixTensor<Coefficient>::raiseToPower(int power) {
   if (power <= 0) {
     global.fatal
-    <<
-    "MatrixTensor::raiseToPower is currently implemented for positive integer power only. "
+    << "MatrixTensor::raiseToPower is currently "
+    << "implemented for positive integer power only. "
     << global.fatal;
   }
   MatrixTensor<Coefficient> id;
@@ -663,14 +663,15 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       *humanReadableReport
-      <<
-      "\n\n\n\n<table><tr><td style='border-bottom:3pt solid black;'>System status</td>"
-      <<
-      "<td style='border-bottom:3pt solid black;mid-width:100px;'>action</td></tr>"
-      ;
+      << "\n\n\n\n<table><tr>"
+      << "<td style='border-bottom:3pt solid black;'>"
+      << "System status</td>"
+      << "<td style='border-bottom:3pt solid black;mid-width:100px;'>"
+      << "action</td></tr>";
     } else {
       *humanReadableReport
-      << "\n\n\\begin{longtable}{cc} System status&Action \\\\\\hline\n";
+      << "\n\n\\begin{longtable}{cc} "
+      << "System status&Action \\\\\\hline\n";
     }
   }
   // Initialization done! Time to do actual work:
@@ -706,8 +707,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
           );
         }
         *humanReadableReport
-        <<
-        "</td><td style='border-bottom:1pt solid black;'><div style='display:inline-block;min-width:100px'>Selected pivot column "
+        << "</td><td style='border-bottom:1pt solid black;'>"
+        << "<div style='display:inline-block;min-width:100px'>"
+        << "Selected pivot column "
         << i +
         1
         << ". ";

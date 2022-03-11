@@ -1107,17 +1107,14 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   bool isFD = (g2inB3Data.inducing.cardinalitySelection == 0);
   if (isFD) {
     out
-    <<
-    "<table border =\"1\"><tr><td>$so(7)$-highest weight</td>"
+    << "<table border =\"1\"><tr><td>$so(7)$-highest weight</td>"
     << "<td>Decomposition over $G_2$</td>"
     << "<td>$G_2\\cap b$-eigenvectors </td></tr>";
     latexTable
-    <<
-    "\\begin{longtable}{|ccccl|} "
+    << "\\begin{longtable}{|ccccl|} "
     << "\\caption{\\label{tableB3fdsOverG2charsAndHWV} "
     << " Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
-    <<
-    "\\hline so(7)& dim. &$G_2$&dim.& "
+    << "\\hline so(7)& dim. &$G_2$&dim.& "
     << "$\\mathfrak b \\cap G_2$-singular vectors\\\\ \\hline"
     << "\\endhead \n<br>";
   } else {
@@ -1140,14 +1137,12 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     << HtmlRoutines::getMathNoDisplay("p'")
     << "</td><td>"
     << HtmlRoutines::getMathNoDisplay("p'\\cap b")
-    <<
-    "-eigenvectors</td><td>Casimir projector</td>"
+    << "-eigenvectors</td><td>Casimir projector</td>"
     << "<td>Extra multiplier</td><td>corresponding "
     << HtmlRoutines::getMathNoDisplay("G_2\\cap b")
     << "-eigenvectors</td><td>Shapovalov square</td></tr>";
     latexTable
-    <<
-    "\\begin{longtable}{|cccclll|} "
+    << "\\begin{longtable}{|cccclll|} "
     << "\\caption{\\label{tableB3fdsOverG2charsAndHWV"
     << g2inB3Data.inducing.toString()
     << "} "
@@ -1157,8 +1152,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     << g2inB3Data.smallParabolicSelection.toString()
     << "$-$\\mathfrak p'=\\mathfrak p\\cap G_2$}\\\\"
     << "\\hline $\\mathfrak p-inducing$& dim. &$\\mathfrak p' decomp. $&dim.&"
-    <<
-    " $\\mathfrak b \\cap \\mathfrak p'$-singular"
+    << " $\\mathfrak b \\cap \\mathfrak p'$-singular"
     << " vectors & Casimir projector "
     << "& Corresp. $\\mathfrak b \\cap G_2$-singular vectors  \\\\ \\hline"
     << "\\endhead \n<br>";
@@ -1172,8 +1166,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   rfOne.makeOne();
   latexTable2
   << "\\begin{longtable}{|rll|}\\caption"
-  <<
-  "{Values of $x_1$ for each $v_{\\lambda,i}$}"
+  << "{Values of $x_1$ for each $v_{\\lambda,i}$}"
   << "\\label{tableCriticalValuesvlambda}"
   << "\\endhead";
   for (int i = 0; i < highestWeights.size; i ++) {
@@ -1199,10 +1192,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
       << g2inB3Data.weightFundamentalCoordinates.toStringLetterFormat(
         "\\omega", &g2inB3Data.format
       )
-      <<
-      "$}\\\\vector& coefficient of $v_\\lambda$ "
-      << "in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline"
-      ;
+      << "$}\\\\vector& coefficient of $v_\\lambda$ "
+      << "in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     }
     for (
       int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); k
@@ -1471,10 +1462,8 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     latexTable
     << "\\begin{longtable}{|rl|} \\caption{\\label{tableB3fdsOverG2charsonly} "
     << "Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
-    <<
-    "\\hline$so(7)$-module & ~~~~~~ "
-    << "decomposition over $G_2$\\endhead \\hline\n<br>"
-    ;
+    << "\\hline$so(7)$-module & ~~~~~~ "
+    << "decomposition over $G_2$\\endhead \\hline\n<br>";
   } else {
     out
     << "Let "
@@ -1495,13 +1484,11 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     << "-module</td><td>Decomposition of inducing module over "
     << HtmlRoutines::getMathNoDisplay("p'")
     << "</td><td>Dimensions</td>"
-    <<
-    " <td>Highest weight <br> is sufficiently generic "
+    << " <td>Highest weight <br> is sufficiently generic "
     << "<br> if none of <br>the following vanish</td>"
     << "</tr>";
     latexTable
-    <<
-    "\\begin{longtable}{|p{2cm}l|} "
+    << "\\begin{longtable}{|p{2cm}l|} "
     << "\\caption{\\label{tableB3fdsOverG2charsonly"
     << g3InB3Data.inducing.toString()
     << "} "
@@ -1514,8 +1501,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     << "$\\mathfrak{p}"
     << "_{"
     << g3InB3Data.inducing.toString()
-    <<
-    "}$ and $\\bar{\\mathfrak {l}}$ is the reductive "
+    << "}$ and $\\bar{\\mathfrak {l}}$ is the reductive "
     << "Levi part of $\\bar{\\mathfrak {p}} _{"
     << g3InB3Data.smallParabolicSelection.toString()
     << "}$"
@@ -1922,7 +1908,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   output.assignError(
     calculator,
     "Function splitGenericGeneralizedVermaTensorFiniteDimensional "
-  "is expected to "
+    "is expected to "
     "have three arguments: SS algebra type, weight, weight. "
   );
   const Expression& leftE = input[1];
@@ -2153,19 +2139,15 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   }
   std::stringstream latexReport1;
   out
-  <<
-  "<br><table><tr><td>weight in fundamental coords</td>"
-  << "<td>Character</td></tr>"
-  ;
+  << "<br><table><tr><td>weight in fundamental coords</td>"
+  << "<td>Character</td></tr>";
   latexReport1
   << " \\begin{longtable}{rl}\\caption{\\label{table"
   << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "GenVermatimes7DimCentralCharacters} $"
   << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
-  <<
-  "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ "
-  << "$\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline"
-  ;
+  << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ "
+  << "$\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
   tempFormat.customPlusSign = "";
   tempFormat.chevalleyGGeneratorLetter = "\\bar{g}";
   tempFormat.chevalleyHGeneratorLetter = "\\bar{h}";
@@ -2212,16 +2194,12 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   finiteDimensionalModule.highestWeightVectorNotation = "v";
   generalizedModule.highestWeightVectorNotation = "w";
   out
-  <<
-  "Let w be the highest weight vector of the generalized "
+  << "Let w be the highest weight vector of the generalized "
   << "Verma component, and let v be the highest "
-  << "weight vector of the finite dimensional component"
-  ;
+  << "weight vector of the finite dimensional component";
   out
-  <<
-  "<br><table><tr><td>weight in fundamental coords</td>"
-  << "<td>Algebraic expression</td><td>Additional multiplier</td>"
-  ;
+  << "<br><table><tr><td>weight in fundamental coords</td>"
+  << "<td>Algebraic expression</td><td>Additional multiplier</td>";
   if (numberOfVariables == 1) {
     out << "<td>gcd polynomial coeffs</td>";
   }
@@ -2237,13 +2215,10 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "times7dim}Decomposition for the $"
   << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
-  <<
-  "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } "
+  << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } "
   << "\\\\ Weight & Projector applied to &"
-  <<
-  " Extra multiplier & Resulting "
-  << "$\\bar {\\mathfrak b}$-singular vector \\endhead\\hline"
-  ;
+  << " Extra multiplier & Resulting "
+  << "$\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   for (int i = 0; i < centralCharacters.size; i ++) {
     Vector<RationalFraction<Rational> > currentWeightSimpleCoords =
     semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental
@@ -2461,21 +2436,16 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
   << "<br>common Levi part of G_2 and B_3: "
   << g2B3Data.smallParabolicSelection.toString();
   out
-  <<
-  "<table border =\"1\"><tr><td>word</td>"
+  << "<table border =\"1\"><tr><td>word</td>"
   << "<td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
-  <<
-  "<td>G_2 simple coordinates</td><td>G2-fund. coords</td>"
-  << "<td>G2-dual coordinates</td><td>character</td></tr>"
-  ;
+  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td>"
+  << "<td>G2-dual coordinates</td><td>character</td></tr>";
   std::stringstream readyForLatexConsumptionTable1;
   readyForLatexConsumptionTable1
   << "\\hline\\multicolumn{3}{|c|}{Highest weight $ "
   << g2B3Data.weightFundamentalCoordinates.toStringLetterFormat("\\omega")
-  <<
-  "$}\\\\ weight fund. coord.& singular vector& weight proj. "
-  << "$\\bar h^*$ \\\\\\hline\n<br> "
-  ;
+  << "$}\\\\ weight fund. coord.& singular vector& weight proj. "
+  << "$\\bar h^*$ \\\\\\hline\n<br> ";
   for (int i = 0; i < g2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFraction<Rational> >& currentWeightSimpleB3coords =
     g2B3Data.outputWeightsSimpleCoords[i];
@@ -2521,10 +2491,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
   out << "<br>Ready for LaTeX consumption: ";
   out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";
   out
-  <<
-  "<table border =\"1\"><tr><td>weight</td>"
-  << "<td>the elt closed form</td><td>the elt</td></tr>"
-  ;
+  << "<table border =\"1\"><tr><td>weight</td>"
+  << "<td>the elt closed form</td><td>the elt</td></tr>";
   Vector<RationalFraction<Rational> > weightDifference;
   std::stringstream formulaStream1;
   for (int k = 0; k < g2B3Data.g2Weights.size; k ++) {
@@ -2828,9 +2796,8 @@ bool CalculatorLieTheory::adjointMatrix(
   if (!input[1].isOfType(&element)) {
     return
     calculator
-    <<
-    "<hr>Argument expected to be an element "
-    <<"of universal enveloping algebra.";
+    << "<hr>Argument expected to be an element "
+    << "of universal enveloping algebra.";
   }
   ExpressionContext context = input[1].getContext();
   SemisimpleLieAlgebra& owner = element.getOwner();
@@ -3588,8 +3555,7 @@ bool CartanInvolution::computeFromDiagram(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "Failed to extend images of simple "
+      << "Failed to extend images of simple "
       << "generators to a Cartan involution. ";
     }
     return false;
@@ -4772,8 +4738,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     );
     out
     << "<hr>"
-    <<
-    "The Hasse graph of the Weyl group of "
+    << "The Hasse graph of the Weyl group of "
     << "the Levi part follows. <a href=\""
     << fileHasse
     << ".tex\"> "
@@ -4788,8 +4753,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     out
     << "<hr> The coset graph of the Weyl group of the Levi part follows. "
     << "The cosets are right, i.e. a coset "
-    <<
-    " of the subgroup X is written in the form Xw, "
+    << " of the subgroup X is written in the form Xw, "
     << "where w is one of the elements below. "
     << "<a href=\""
     << fileCosetGraph
@@ -4803,8 +4767,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     << fileCosetGraph
     << ".png</iframe>";
     out
-    <<
-    "<b>The .png file might be bad if "
+    << "<b>The .png file might be bad if "
     << "LaTeX crashed while trying to process it; "
     << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
@@ -4942,7 +4905,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
     output.assignError(
       calculator,
       "Failed to generate Weyl subgroup of Levi part "
-     "(possibly too large? element limit is 1000)."
+      "(possibly too large? element limit is 1000)."
     );
   }
   highestWeightSimpleCoordinates =
@@ -5000,9 +4963,8 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
       global.fatal
       << "Something is wrong: "
       << "I am getting that an element of "
-      <<"the Weyl group of the Levi part of "
-      <<
-      "the parabolic does not lie in "
+      << "the Weyl group of the Levi part of "
+      << "the parabolic does not lie in "
       << "the ambient Weyl group, which is impossible. "
       << "There is a bug somewhere; crashing in accordance. "
       << global.fatal;
@@ -5230,13 +5192,10 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   std::stringstream out;
   if (lieAlgebra.getRank() > 6) {
     out
-    <<
-    "<b>This code is completely experimental "
-    <<"and has been set to run up to rank 6. "
-    <<
-    "As soon as the algorithms are mature enough, "
-    <<"higher ranks will be allowed. </b>"
-    ;
+    << "<b>This code is completely experimental "
+    << "and has been set to run up to rank 6. "
+    << "As soon as the algorithms are mature enough, "
+    << "higher ranks will be allowed. </b>";
     return output.assignValue(calculator, out.str());
   }
   SemisimpleSubalgebras& semisimpleSubalgebras =
@@ -5264,10 +5223,8 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   if (!global.userDefaultHasAdminRights()) {
     return
     calculator
-    <<
-    "Function computePairingTablesAndFKFTsubalgebras "
-    <<"requires administrative rights. "
-    ;
+    << "Function computePairingTablesAndFKFTsubalgebras "
+    << "requires administrative rights. ";
   }
   if (!input[1].isOfType<SemisimpleSubalgebras>()) {
     return
@@ -5308,10 +5265,8 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
   if (!input.isOfType<SemisimpleSubalgebras>()) {
     return
     calculator
-    <<
-    "<hr>Input of getCentralizerChains "
-    <<"must be of type semisimple subalgebras. "
-    ;
+    << "<hr>Input of getCentralizerChains "
+    << "must be of type semisimple subalgebras. ";
   }
   SemisimpleSubalgebras& subalgebras =
   input.getValueNonConst<SemisimpleSubalgebras>();
@@ -5671,7 +5626,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
     output.assignError(
       calculator,
       "Error: the function for drawing weight support "
-    "takes two arguments (type and highest weight)"
+      "takes two arguments (type and highest weight)"
     );
   }
   const Expression& typeNode = input[1];
@@ -5752,7 +5707,7 @@ bool CalculatorLieTheory::drawRootSystem(
       output.assignError(
         calculator,
         "Failed to convert second or third argument "
-      "to vector of desired dimension"
+        "to vector of desired dimension"
       );
     }
   }
@@ -6146,7 +6101,7 @@ bool CalculatorLieTheory::embedG2InB3(
     output.assignError(
       calculator,
       "Failed to convert argument to element "
-    "of the Universal enveloping algebra. "
+      "of the Universal enveloping algebra. "
     );
   }
   SemisimpleLieAlgebra& ownerSemisimple =
@@ -6156,7 +6111,7 @@ bool CalculatorLieTheory::embedG2InB3(
     output.assignError(
       calculator,
       "Error: embedding of G_2 in B_3 "
-    "takes elements of U(G_2) as arguments."
+      "takes elements of U(G_2) as arguments."
     );
   }
   HomomorphismSemisimpleLieAlgebra homomorphism;

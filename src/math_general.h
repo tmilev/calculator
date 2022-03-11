@@ -837,9 +837,8 @@ public:
   ) const {
     if (&standsOnTheLeft == &output) {
       global.fatal
-      <<
-      "In actMultiplyVectorRowOnTheRight: "
-      <<"output not allowed to equal input. "
+      << "In actMultiplyVectorRowOnTheRight: "
+      << "output not allowed to equal input. "
       << global.fatal;
     }
     if (this->numberOfRows != standsOnTheLeft.size) {
@@ -2009,7 +2008,7 @@ void Matrix<Element>::assignDirectSum(
   if (this == &m1 || this == &m2) {
     global.fatal
     << "In assignDirectSum: output not allowed "
-    <<"to equal any of the inputs. "
+    << "to equal any of the inputs. "
     << global.fatal;
   }
   this->resize(
@@ -3952,7 +3951,7 @@ bool LinearCombination<TemplateMonomial, Coefficient>::operator==(int x) const {
   }
   global.fatal
   << "This is either a programming error, "
-  <<"or an unforeseen use of operator==. "
+  << "or an unforeseen use of operator==. "
   << "If the second is the case, an audit/careful "
   << "proofreading of the code calling this function is needed; "
   << "I am crashing just in case. "
@@ -7868,9 +7867,8 @@ void PolynomialSubstitution<Coefficient>::getLinearSystemFromLinearPolynomials(
   );
   if (!mustBeTrue) {
     global.fatal
-    <<
-    "Function PolynomialSubstitution::"
-    <<"getLinearSystemFromLinearPolynomialsSystem "
+    << "Function PolynomialSubstitution::"
+    << "getLinearSystemFromLinearPolynomialsSystem "
     << "was called with non-linear inputs: "
     << this->toString()
     << "."

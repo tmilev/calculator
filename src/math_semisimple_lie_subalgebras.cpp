@@ -177,11 +177,10 @@ bool SemisimpleLieAlgebra::attemptFindingHEF(
       }
       if (system.flagSystemProvenToHaveSolution) {
         *logStream
-        <<
-        "<br><b>System proven to have solution, but I failed to find it.</b> "
-        <<
-        "Either the solution lies outside of the base field, or my heuristics are not good enough."
-        ;
+        << "<br><b>System proven to have solution, "
+        << "but I failed to find it.</b> "
+        << "Either the solution lies outside of the base field, "
+        << "or my heuristics are not good enough.";
       }
     }
     return false;
@@ -375,8 +374,8 @@ void SubalgebraSemisimpleLieAlgebra::computeCartanSubalgebra() {
       )
     ) {
       global.fatal
-      <<
-      "This shouldn't happen: could not found a new non-nilpotent element among: "
+      << "This shouldn't happen: could not found "
+      << "a new non-nilpotent element among: "
       << currentCentralizer.toStringCommaDelimited()
       << ". "
       << global.fatal;
@@ -565,8 +564,8 @@ void SemisimpleSubalgebras::checkFileWritePermissions() {
     )
   ) {
     global.fatal
-    <<
-    "<br>This may or may not be a programming error. I requested to create file "
+    << "<br>This may or may not be a programming error. "
+    << "I requested to create file "
     << this->virtualNameMainFile1
     << " which resolves to "
     << testFileFolderPhysical
@@ -575,8 +574,8 @@ void SemisimpleSubalgebras::checkFileWritePermissions() {
     << "1. Programming error. "
     << "2. The calculator has no write permission to the "
     << "folder in which the file is located. "
-    <<
-    "3. The folder does not exist for some reason lying outside of the calculator. "
+    << "3. The folder does not exist for some "
+    << "reason lying outside of the calculator. "
     << global.fatal;
   }
   FileOperations::openFileCreateIfNotPresentVirtual(
@@ -606,8 +605,8 @@ void SemisimpleSubalgebras::writeReportToFiles() {
 std::string SemisimpleSubalgebras::toStringHTML() {
   std::stringstream out;
   out
-  <<
-  "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
+  << "<html><title>Semisimple subalgebras of "
+  << "the semisimple Lie algebras: the subalgebras of "
   << this->owner->weylGroup.dynkinType.toString()
   << "</title>";
   out << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
@@ -685,14 +684,14 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
   << " fail(s) the centralizer condition.";
   if (totalBadParabolics > 0) {
     out
-    <<
-    "<br><span style='color:red'>Of the subalgebras satisfying the centralizer condition there are "
+    << "<br><span style='color:red'>Of the subalgebras "
+    << "satisfying the centralizer condition there are "
     << totalBadParabolics
-    <<
-    " pabolic subalgebra(s) that do not extend to parabolic subalgebra(s) of the ambient Lie algebra with Levi types A and C. "
-    <<
-    "For these subalgebras the PSZ construction is not proven to hold. </span>"
-    ;
+    << " pabolic subalgebra(s) that do not extend to "
+    << "parabolic subalgebra(s) of the ambient "
+    << "Lie algebra with Levi types A and C. "
+    << "For these subalgebras the PSZ construction "
+    << "is not proven to hold. </span>";
   } else {
     out
     << "<br><span style='color:blue'> In each of "
@@ -700,11 +699,10 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
     numFailingConeCondition -
     numNonCentralizerConditionWithConeCondition
     << " case(s) when the centralizer condition holds, "
-    <<
-    "the parabolic subalgebra in the centralizer with Levi types A and C extends "
-    <<
-    "to parabolic subalgebra of the ambient Lie algebra whose Levi types are A and C only. </span>"
-    ;
+    << "the parabolic subalgebra in the centralizer "
+    << "with Levi types A and C extends "
+    << "to parabolic subalgebra of the ambient "
+    << "Lie algebra whose Levi types are A and C only. </span>";
   }
   if (numFailingConeCondition > 0) {
     if (numNoLinfRelFound > 0) {
@@ -716,9 +714,8 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
       out
       << "<br><span style='color:blue'> In each of "
       << numFailingConeCondition
-      <<
-      " case(s) of intersecting cones, an L-infinite relation was found. </span>"
-      ;
+      << " case(s) of intersecting cones, an "
+      << "L-infinite relation was found. </span>";
     }
   }
   return out.str();
@@ -780,8 +777,8 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(
   out << "}\\\\\n<br>\n";
   out
   << "Type $\\mathfrak s$ & Centralizer &Decomp. $\\mathfrak g$ over "
-  <<
-  "$\\mathfrak s$ &Decomp. $\\mathfrak g$ over $\\mathfrak s\\oplus \\mathfrak h_c$"
+  << "$\\mathfrak s$ &Decomp. $\\mathfrak g$ "
+  << "over $\\mathfrak s\\oplus \\mathfrak h_c$"
   << "&\\#$\\mathfrak n_\\mathfrak l$& \\# cone failures\\\\\\hline\n<br>\n";
   DynkinType typeCentralizer;
   FormatExpressions characterFormat;
@@ -923,16 +920,15 @@ std::string SemisimpleSubalgebras::toString(
       out
       << " and "
       << candidatesNotRealizedNotProvenImpossible
-      <<
-      " semisimple subalgebra candidate(s) which were not realized (but not proven impossible)"
-      ;
+      << " semisimple subalgebra candidate(s) "
+      << "which were not realized (but not proven impossible)";
     }
     out << ". ";
   }
   out
   << "The subalgebras are ordered by rank, "
-  <<
-  "Dynkin indices of simple constituents and dimensions of simple constituents.<br>"
+  << "Dynkin indices of simple constituents "
+  << "and dimensions of simple constituents.<br>"
   << "The upper index indicates the Dynkin index, "
   << "the lower index indicates the rank of the subalgebra.<br>";
   out << this->toStringTableSubalgebraLinksTable(format) << "<hr>";
@@ -1906,7 +1902,8 @@ getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
   CandidateSemisimpleSubalgebra& subalgebraToBeModified
 ) {
   STACK_TRACE(
-    "SemisimpleSubalgebras::getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot"
+    "SemisimpleSubalgebras::"
+    "getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot"
   );
   subalgebraToBeModified.owner = this;
   Vector<Rational> result;
@@ -2023,7 +2020,8 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
 void CandidateSemisimpleSubalgebra::
 computeHsAndHsScaledToActByTwoFromComponents() {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computeHsAndHsScaledToActByTwoFromComponents"
+    "CandidateSemisimpleSubalgebra::"
+    "computeHsAndHsScaledToActByTwoFromComponents"
   );
   this->cartanElementsScaledToActByTwo.assignListList(
     this->cartanSubalgebrasByComponentScaledToActByTwo
@@ -2072,7 +2070,8 @@ bool SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra(
   CandidateSemisimpleSubalgebra& candidate
 ) {
   STACK_TRACE(
-    "SemisimpleSubalgebras::setUpParabolicInductionDataPrecomputedSubalgebra"
+    "SemisimpleSubalgebras::"
+    "setUpParabolicInductionDataPrecomputedSubalgebra"
   );
   int indexPrecomputed =
   this->subalgebras.getIndex(candidate.cartanElementsSubalgebra);
@@ -2103,7 +2102,8 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
   const List<int>& rootInjection
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra"
+    "CandidateSemisimpleSubalgebra::"
+    "createAndAddExtendBaseSubalgebra"
   );
   this->setUpInjectionHs(
     baseSubalgebra, newType, rootInjection, &newHRescaledToActByTwo
@@ -2172,8 +2172,8 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
         ()
       ) {
         global.fatal
-        <<
-        "This is not supposed to happen: different Dynkin types with equal toString outputs. "
+        << "This is not supposed to happen: "
+        << "different Dynkin types with equal toString outputs. "
         << global.fatal;
       }
     }
@@ -2184,7 +2184,8 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
 const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::
 getCurrentElement() {
   STACK_TRACE(
-    "OrbitIteratorRootActionWeylGroupAutomorphisms::getCurrentElement"
+    "OrbitIteratorRootActionWeylGroupAutomorphisms"
+    "::getCurrentElement"
   );
   if (this->flagOrbitIsBuffered) {
     return this->orbitBuffer[this->currentIndexInBuffer];
@@ -2230,8 +2231,8 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
   }
   if (!this->flagOrbitEnumeratedOnce && this->flagOrbitIsBuffered) {
     global.fatal
-    <<
-    "Orbit reported to be buffered but at the same time it hasn't been enumerated yet. "
+    << "Orbit reported to be buffered but at "
+    << "the same time it hasn't been enumerated yet. "
     << this->toString()
     << global.fatal;
   }
@@ -2241,7 +2242,8 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
 bool OrbitIteratorRootActionWeylGroupAutomorphisms::
 incrementReturnFalseIfPastLast() {
   STACK_TRACE(
-    "OrbitIteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast"
+    "OrbitIteratorRootActionWeylGroupAutomorphisms"
+    "::incrementReturnFalseIfPastLast"
   );
   this->checkConsistency();
   this->iterator.checkInitialization();
@@ -2689,7 +2691,8 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
 bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
 () {
   STACK_TRACE(
-    "SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits"
+    "SemisimpleSubalgebras::"
+    "centralizersComputedToHaveUnsuitableNilpotentOrbits"
   );
   int stackIndex = this->currentSubalgebraChain.size - 1;
   int typeIndex = this->currentNumberOfLargerTypesExplored[stackIndex];
@@ -2765,8 +2768,8 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
         << dynkinIndicesCentralizerComplementCurrentSummand.
         toStringCommaDelimited()
         << ". If the type was realizable, those would have to contain "
-        <<
-        "the absolute Dynkin indices of sl(2) subalgebras of the original summand. "
+        << "the absolute Dynkin indices of sl(2) "
+        << "subalgebras of the original summand. "
         << "However, that is not the case. "
         << "I can therefore conclude that the Dynkin type "
         << currentType.toString()
@@ -2834,7 +2837,8 @@ bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
 bool SemisimpleSubalgebras::
 centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
   STACK_TRACE(
-    "SemisimpleSubalgebras::centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits"
+    "SemisimpleSubalgebras::"
+    "centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits"
   );
   if (!this->baseSubalgebra().flagCentralizerTypeIsComputed) {
     return false;
@@ -2898,8 +2902,8 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
   << "I computed the latter complement summand has centralizer "
   << centralizerComplementNewSummandType.toString()
   << ". "
-  <<
-  "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
+  << "Then I computed the absolute Dynkin "
+  << "indices of the centralizer's sl(2)-subalgebras, namely:<br> "
   << dynkinIndicesTheyGotToFitIn.toStringCommaDelimited()
   << ". If the type was realizable, those would have to contain "
   << "the absolute Dynkin indices of sl(2) subalgebras "
@@ -2907,8 +2911,8 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
   << "I can therefore conclude that the Dynkin type "
   << currentType.toString()
   << " is not realizable. "
-  <<
-  "The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
+  << "The absolute Dynkin indices of the sl(2) subalgebras "
+  << "of the original summand I computed to be:<br> "
   << dynkinIndicesNewSummand.toStringCommaDelimited()
   << ". ";
   logFile << reportStream.str();
@@ -3020,8 +3024,8 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
         << ", type  "
         << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].
         toString()
-        <<
-        " cannot be realized: no appropriate module: desired weight of h element is: "
+        << " cannot be realized: no appropriate module: "
+        << "desired weight of h element is: "
         << weightHElementWeAreLookingFor.toString()
         << " but the highest weights of the base candidate are: "
         << this->baseSubalgebra().highestWeightsNonPrimal.toString();
@@ -3501,7 +3505,8 @@ bool CandidateSemisimpleSubalgebra::checkElementSemisimpleLieAlgebra(
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& toBeChecked
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::checkElementSemisimpleLieAlgebra"
+    "CandidateSemisimpleSubalgebra"
+    "::checkElementSemisimpleLieAlgebra"
   );
   for (int i = 0; i < toBeChecked.size(); i ++) {
     toBeChecked.coefficients[i].checkConsistency();
@@ -3889,18 +3894,18 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
     }
     if (!tempB) {
       global.fatal
-      <<
-      "Error: rankCentralizer is not a small integer. Detailed subalgebra printout: "
+      << "Error: rankCentralizer is not a small integer. "
+      << "Detailed subalgebra printout: "
       << this->toString(nullptr, false)
       << global.fatal;
     }
     if (rankCentralizer < 0) {
       global.fatal
-      <<
-      "Centralizer rank extracted as a negative number. The centralizer rank is: "
+      << "Centralizer rank extracted as a negative number. "
+      << "The centralizer rank is: "
       << this->centralizerRank.toString()
-      <<
-      ". This most probably means the centralizer was not computed correctly. "
+      << ". This most probably means the "
+      << "centralizer was not computed correctly. "
       << "Here's a full subalgebra printout"
       << this->toString(nullptr, false)
       << global.fatal;
@@ -4113,8 +4118,8 @@ bool CandidateSemisimpleSubalgebra::computeFromGenerators(
     ) {
       if (!allowNonPolynomialSystemFailure) {
         global.fatal
-        <<
-        "Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
+        << "Lie subalgebra dimension doesn't fit: "
+        << "dimension of generated subalgebra is "
         << this->basis.size
         << ", must be "
         << this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()
@@ -4232,7 +4237,8 @@ toStringElementSemisimpleLieAlgebraOrMatrix(
   const std::string& notationLetter
 ) const {
   STACK_TRACE(
-    "SemisimpleSubalgebras::WConjecture::toStringElementSemisimpleLieAlgebraOrMatrix"
+    "SemisimpleSubalgebras::WConjecture::"
+    "toStringElementSemisimpleLieAlgebraOrMatrix"
   );
   std::stringstream generatorForm, matrixFormStream;
   FormatExpressions format;
@@ -4458,9 +4464,8 @@ toStringWConjectureHolds() const {
       out << "<b style='color:green'>W-conjecture holds</b>";
     } else {
       out
-      <<
-      "<b style='color:blue'>[W,W]-condition holds</b> but the subalgebra is not small."
-      ;
+      << "<b style='color:blue'>[W,W]-condition holds</b>"
+      << " but the subalgebra is not small.";
     }
   } else {
     if (!this->flagWConjectureHolds) {
@@ -4535,9 +4540,9 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   out << "</div></div>";
   out
   << "\\(W=\\mathfrak p ^H \\cap (\\mathfrak p ^\\mathfrak s)^\\perp \\) "
-  <<
-  "= centralizer of H intersected with orthogonal complement of centralizer of the sl(2) intersected with p. <br>"
-  ;
+  << "= centralizer of H intersected with "
+  << "orthogonal complement of centralizer "
+  << "of the sl(2) intersected with p. <br>";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
   out
@@ -4553,8 +4558,8 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   if (this->triplesNotViolatingWConjecture.size > 0) {
     out
     << "<br>Lie brackets between the basis elements of \\(W\\) "
-    <<
-    "that <b style='color:green'>lie in \\(\\mathfrak k^{\\mathfrak s}\\)</b>. "
+    << "that <b style='color:green'>lie in "
+    << "\\(\\mathfrak k^{\\mathfrak s}\\)</b>. "
     << "All zero Lie brackets are omitted.<br>";
     out
     << this->toStringLieBracketTriples(this->triplesNotViolatingWConjecture);
@@ -4563,9 +4568,8 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   if (this->triplesViolatingWConjecture.size > 0) {
     out
     << "<br>Lie brackets between the basis elements of \\(W\\) "
-    <<
-    "that <b style='color:red'> do not lie in \\(\\mathfrak k^{\\mathfrak s}\\)</b>.<br>"
-    ;
+    << "that <b style='color:red'>"
+    << "do not lie in \\(\\mathfrak k^{\\mathfrak s}\\)</b>.<br>";
     out << this->toStringLieBracketTriples(this->triplesViolatingWConjecture);
   }
   return out.str();
@@ -4669,7 +4673,8 @@ void CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap(
   const CandidateSemisimpleSubalgebra& owner
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::WConjecture::computeAdEAsPolynomialMap"
+    "CandidateSemisimpleSubalgebra::WConjecture::"
+    "computeAdEAsPolynomialMap"
   );
   this->elementE = owner.positiveGenerators[0];
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
@@ -4809,8 +4814,8 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
           << "<br>This is a programming or mathematical error. Module "
           << this->modulesIsotypicallyMerged[i].toString()
           << " has elements of the ambient Cartan "
-          <<
-          "and elements outside of the ambient Cartan, which is not allowed. "
+          << "and elements outside of the ambient Cartan, "
+          << "which is not allowed. "
           << "<br>Here is a detailed subalgebra printout. "
           << global.fatal;
         }
@@ -4882,8 +4887,8 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
             << "This is a programming or mathematical error. "
             << "Given two isomorphic modules over "
             << "the semisimple subalgebra (i.e., same highest weights), "
-            <<
-            "and the same order of generation of weights, I got different order "
+            << "and the same order of generation of weights, "
+            << "I got different order "
             << "of the lower weights of the modules. "
             << "Something is very wrong. "
             << global.fatal;
@@ -4981,7 +4986,8 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
   List<int>& output
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule"
+    "CandidateSemisimpleSubalgebra::"
+    "computePairKWeightElementAndModule"
   );
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& rightModule =
   this->modulesIsotypicallyMerged[rightIndex];
@@ -5177,7 +5183,8 @@ computeKsl2TriplesGetOppositeElementsInOppositeModule(
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsInOppositeModule"
+    "CandidateSemisimpleSubalgebra::"
+    "computeKsl2TriplesGetOppositeElementsInOppositeModule"
   );
   outputElements.setSize(0);
   for (int i = 0; i < inputOppositeModule.size; i ++) {
@@ -5220,7 +5227,8 @@ void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll(
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll"
+    "CandidateSemisimpleSubalgebra::"
+    "computeKsl2TriplesGetOppositeElementsAll"
   );
   outputElements.setSize(0);
   for (int i = 0; i < this->modules.size; i ++) {
@@ -5238,8 +5246,8 @@ void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsAll(
             ).isEqualToZero()
           ) {
             global.fatal
-            <<
-            "Element this->modules[i][k][j] does not have the primal weight it is supposed to have. "
+            << "Element this->modules[i][k][j] does not have "
+            << "the primal weight it is supposed to have. "
             << global.fatal;
           }
         }
@@ -6076,9 +6084,8 @@ isPossibleNilradicalCarryOutSelectionImplications(
           tempS[tempS.size() - 1] != '.' || tempS[tempS.size() - 2] != '.'
         ) {
           *logStream
-          <<
-          "<br>... number of nilradicals found exceeds 100, I will no longer log the computations ..."
-          ;
+          << "<br>... number of nilradicals found exceeds 100, "
+          << "I will no longer log the computations ...";
         }
       }
     }
@@ -6124,8 +6131,8 @@ isPossibleNilradicalCarryOutSelectionImplications(
   if (logStream != nullptr) {
     if (oldSelection.getElement() != selection) {
       *logStream
-      <<
-      "<br>In order to be closed w.r.t. the Lie bracket, I extend the nilradical selection "
+      << "<br>In order to be closed w.r.t. the "
+      << "Lie bracket, I extend the nilradical selection "
       << this->toStringNilradicalSelection(oldSelection.getElement())
       << " to the following. "
       << this->toStringNilradicalSelection(selection);
@@ -6181,8 +6188,10 @@ extendNilradicalSelectionToMultFreeOverSemisimplePartSubalgebra(
 void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(
   List<int>& selection, std::stringstream* logStream
 ) {
-  STACK_TRACE("CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively")
-  ;
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::"
+    "enumerateNilradicalsRecursively"
+  );
   RecursionDepthCounter counter(
     &this->recursionDepthCounterForNilradicalGeneration
   );
@@ -6191,8 +6200,8 @@ void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(
     this->nilradicalPairingTable.size + 1
   ) {
     global.fatal
-    <<
-    "<br>oh no... something went very wrong! The nilradical generation recursion "
+    << "<br>oh no... something went very wrong! "
+    << "The nilradical generation recursion "
     << "depth cannot exceed the number of nilradicals! "
     << global.fatal;
   }
@@ -6241,7 +6250,8 @@ computePrimalModuleDecompositionHighestWeights(
   HashedList<Vector<Rational> >& outputHighestWeightsCoordinates
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightsOnly"
+    "CandidateSemisimpleSubalgebra::"
+    "computePrimalModuleDecompositionHighestWeightsOnly"
   );
   outputHighestWeightsCoordinates.clear();
   Vector<Rational> currentWeight, currentRootSpace;
@@ -6277,7 +6287,8 @@ computePrimalModuleDecompositionHighestWeights(
 void CandidateSemisimpleSubalgebra::
 computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors() {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors"
+    "CandidateSemisimpleSubalgebra::"
+    "computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors"
   );
   HashedList<Vector<Rational> > weightsCartanRestrictedDualCoords;
   this->computePrimalModuleDecompositionHighestWeights(
@@ -6313,7 +6324,8 @@ void CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates(
   const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
 ) const {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::getWeightProjectionFundamentalCoordinates"
+    "CandidateSemisimpleSubalgebra::"
+    "getWeightProjectionFundamentalCoordinates"
   );
   this->checkFullInitialization();
   output.setSize(this->cartanElementsSubalgebra.size);
@@ -6358,7 +6370,8 @@ getPrimalWeightProjectionFundamentalCoordinates(
 void CandidateSemisimpleSubalgebra::
 computePrimalModuleDecompositionHighestWeightsLastPart() {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightsLastPart"
+    "CandidateSemisimpleSubalgebra::"
+    "computePrimalModuleDecompositionHighestWeightsLastPart"
   );
   this->highestWeightsPrimalNonSorted.setSize(
     this->highestVectorsNonSorted.size
@@ -6577,7 +6590,8 @@ computePrimalModuleDecompositionHighestWeightVectors(
   HashedList<Vector<Rational> >& inputHighestWeights
 ) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeightVectors"
+    "CandidateSemisimpleSubalgebra::"
+    "computePrimalModuleDecompositionHighestWeightVectors"
   );
   this->checkConsistency();
   List<Matrix<AlgebraicNumber> > adjointActionsOfHs;
@@ -6636,8 +6650,8 @@ bool SemisimpleSubalgebras::checkConsistencyHs() const {
       this->subalgebras.values[i].cartanElementsSubalgebra
     ) {
       global.fatal
-      <<
-      "List this->hElementsOfSubalgebras does not match this->theSubalgebras. "
+      << "List this->hElementsOfSubalgebras "
+      << "does not match this->theSubalgebras. "
       << global.fatal;
     }
   }
@@ -6797,10 +6811,10 @@ bool CandidateSemisimpleSubalgebra::verifySolution(
   if (!this->checkGeneratorsBracketToHs()) {
     global.fatal
     << "I just solved the "
-    <<
-    "Serre-Like system governing the subalgebra embedding, but the Lie brackets of the "
-    <<
-    "resulting positive and negative generators are not what they should be. "
+    << "Serre-Like system governing the subalgebra embedding, "
+    << "but the Lie brackets of the "
+    << "resulting positive and negative "
+    << "generators are not what they should be. "
     << "Something has gone very wrong. "
     << global.fatal;
   }
@@ -7412,8 +7426,8 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   if (report0.tickAndWantReport()) {
     std::stringstream reportStream0;
     reportStream0
-    <<
-    "Finding sl(2)-subalgebras (and thus a full list of the nilpotent orbits) of "
+    << "Finding sl(2)-subalgebras (and thus a "
+    << "full list of the nilpotent orbits) of "
     << inputOwner.weylGroup.dynkinType.toString();
     report0.report(reportStream0.str());
   }
@@ -7597,8 +7611,8 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
         if (scalarProduct < 0) {
           global.fatal
           << "The candidate h elements "
-          <<
-          "of the semisimple subalgebra are supposed to be maximally dominant, "
+          << "of the semisimple subalgebra are "
+          << "supposed to be maximally dominant, "
           << "however the scalar product of the positive root "
           << currentPositiveRoot.toString()
           << " with the subalgebra root "
@@ -7776,7 +7790,8 @@ computeModuleDecompositionsitionOfMinimalContainingRegularSAs(
   SlTwoSubalgebras& owner
 ) {
   STACK_TRACE(
-    "SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegularSAs"
+    "SlTwoSubalgebra::"
+    "computeModuleDecompositionsitionOfMinimalContainingRegularSAs"
   );
   this->moduleDecompositionMinimalContainingRootSubalgebras.setSize(
     this->indicesMinimalContainingRootSubalgebras.size
@@ -7899,8 +7914,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
       << " with the simple root "
       << coordsInPreferredSimpleBasis[k].toString()
       << " is larger than "
-      << positiveRootsContainingRegularSubalgebra.size *
-      2
+      << positiveRootsContainingRegularSubalgebra.size * 2
       << ". The affected sl(2) subalgebra is "
       << this->toString()
       << ". "

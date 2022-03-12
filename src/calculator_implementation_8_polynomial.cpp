@@ -750,8 +750,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     out
     << "\\textbf{Divisor(s)} &"
     << "\\multicolumn{"
-    << this->allMonomials.size *
-    2
+    << this->allMonomials.size * 2
     << "}{c}{"
     << "\\alertNoH{"
     << this->uncoverAllMonsQuotients[0]
@@ -803,12 +802,12 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
       out << "\\hline";
     }
   }
-  out << " \\cline{2-" << this->allMonomials.size * 2 + 1
+  out
+  << " \\cline{2-"
+  << this->allMonomials.size * 2 + 1
   << "}"
   << " \\cline{2-"
-  << this->allMonomials.size *
-  2 +
-  1
+  << this->allMonomials.size * 2 + 1
   << "}";
   for (int i = 0; i < remainders.size; i ++) {
     if (i == 0) {
@@ -874,13 +873,9 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
       );
       out
       << "\\\\\\cline{"
-      << this->firstNonZeroIndicesPerIntermediateSubtracand[i] *
-      2 +
-      2
+      << this->firstNonZeroIndicesPerIntermediateSubtracand[i] * 2 + 2
       << "-"
-      << this->allMonomials.size *
-      2 +
-      1
+      << this->allMonomials.size * 2 + 1
       << "}";
       out << "}";
     }

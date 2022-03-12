@@ -99,8 +99,8 @@ bool TimeoutThread::HandleMaxComputationTime() {
   }
   std::stringstream out;
   out
-  <<
-  "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
+  << "<b>This is a safety time-out crash. "
+  << "You may have requested a computation that takes too long."
   << "</b> Your computation ran for ";
   if (this->elapsedComputationTimeInMilliseconds > 0) {
     out << this->elapsedComputationTimeInMilliseconds << " ms";

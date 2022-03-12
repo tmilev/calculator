@@ -1945,7 +1945,9 @@ CodeFormatter::CodeFormatter() {
   this->addOperatorOverride("==", andAndOr);
   this->addOperatorOverride("=", andAndOr);
   this->addOperatorOverride("*", andOrRelations);
-  this->addOperatorOverride("*", List<std::string>({"+", "-"}));
+  this->addOperatorOverride(
+    "*", List<std::string>({"+", "-", "<<"})
+  );
   // Example: List<A * may extend to List < A*B or to List<A*>.
   this->addOperatorOverride("*", List<std::string>({"<"}));
   this->addOperatorOverride(">=", andAndOr);

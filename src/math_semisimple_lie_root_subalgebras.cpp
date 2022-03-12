@@ -610,7 +610,9 @@ void RootSubalgebra::generateKModuleLieBracketTable(
       );
       if (report2.tickAndWantReport()) {
         std::stringstream out5;
-        out5 << "Computing pairing table: " << i * this->modules.size + j + 1
+        out5
+        << "Computing pairing table: "
+        << i * this->modules.size + j + 1
         << " out of "
         << numTotal;
         report2.report(out5.str());
@@ -5023,16 +5025,13 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
     if (simpleType == 'B') {
       out
       << " $ \\mathfrak{g}\\simeq \\mathrm{so("
-      << this->getOwnerWeyl().cartanSymmetric.numberOfRows *
-      2 +
-      1
+      << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2 + 1
       << ")}$";
     }
     if (simpleType == 'C') {
       out
       << " $\\mathfrak{g}\\simeq \\mathrm{sp("
-      << this->getOwnerWeyl().cartanSymmetric.numberOfRows *
-      2
+      << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2
       << ")}$";
     }
     out << "} \\\\\\hline";

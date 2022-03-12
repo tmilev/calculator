@@ -390,8 +390,8 @@ void WebWorker::sendAllBytesNoHeaders() {
     }
     if (numTimesRunWithoutSending > 3) {
       global
-      <<
-      "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
+      << "WebWorker::SendAllBytes failed: "
+      << "send function went through 3 cycles without "
       << "sending any bytes. "
       << Logger::endL;
       return;
@@ -831,9 +831,8 @@ bool WebWorker::loginProcedure(
     );
     if (tokenIsGood && !global.flagLoggedIn && comments != nullptr) {
       *comments
-      <<
-      "Your authentication is valid but I have problems with my database records. "
-      ;
+      << "Your authentication is valid but "
+      << "I have problems with my database records. ";
     }
   } else if (
     user.enteredAuthenticationToken != "" ||
@@ -1183,8 +1182,8 @@ std::string WebWorker::getHeaderSetCookie() {
     << global.cookiesToBeSent.keys[i]
     << "="
     << global.cookiesToBeSent.values[i]
-    <<
-    "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT;Secure;SameSite=Strict;";
+    << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT;"
+    << "Secure;SameSite=Strict;";
     if (i != global.cookiesToBeSent.size() - 1) {
       out << "\r\n";
     }
@@ -1582,8 +1581,8 @@ int WebWorker::processFileDoesntExist() {
     << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false)
     << "<br>However, I do not allow addresses that contain dots "
     << "(to avoid access to folders below the server). "
-    <<
-    "Therefore I have sanitized the address to a relative physical address: "
+    << "Therefore I have sanitized "
+    << "the address to a relative physical address: "
     << HtmlRoutines::convertStringToHtmlString(
       this->RelativePhysicalFileNamE, false
     )
@@ -1623,8 +1622,8 @@ int WebWorker::processFileCantOpen() {
     << "You requested virtual file: "
     << this->VirtualFileName
     << "However, I do not allow addresses that contain dots. "
-    <<
-    "Therefore I have sanitized the address to a relative physical address: "
+    << "Therefore I have sanitized "
+    << "the address to a relative physical address: "
     << this->RelativePhysicalFileNamE;
   }
   out
@@ -1908,9 +1907,9 @@ std::string WebWorker::getChangePasswordPagePartOne(
     global.getWebInput("email"), false
   );
   out
-  << "<input type =\"hidden\" id =\"activationToken\" value =\""
+  << "<input type ='hidden' id ='activationToken' value ='"
   << claimedActivationToken
-  << "\">";
+  << "'>";
   if (claimedActivationToken == "") {
     out << "Activation token is empty. ";
     return out.str();
@@ -1922,7 +1921,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
   std::string actualEmailActivationToken, usernameAssociatedWithToken;
   if (global.userDefault.email == claimedEmail) {
     out
-    << "\n<b style =\"color:green\">Email "
+    << "\n<b style ='color:green'>Email "
     << claimedEmail
     << " updated. </b>";
     return out.str();
@@ -1936,7 +1935,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
   QuerySet emailInfo;
   if (!Database::get().findOne(findEmail, emailInfo.value, &out)) {
     out
-    << "\n<b style =\"color:red\">"
+    << "\n<b style ='color:red'>"
     << "Failed to fetch email activation token for email: "
     << claimedEmail
     << " </b>";
@@ -1949,22 +1948,20 @@ std::string WebWorker::getChangePasswordPagePartOne(
   emailInfo.value[DatabaseStrings::labelActivationToken].stringValue;
   if (actualEmailActivationToken != claimedActivationToken) {
     out
-    <<
-    "\n<b style =\"color:red\">Bad activation token. Could not activate your email. </b>"
-    ;
+    << "\n<b style ='color:red'>Bad activation token. "
+    << "Could not activate your email. </b>";
     return out.str();
   }
   if (usernameAssociatedWithToken != global.userDefault.username) {
     out
-    <<
-    "\n<b style =\"color:red\">Activation token was issued for another user. </b>"
-    ;
+    << "\n<b style ='color:red'>"
+    << "Activation token was issued for another user. </b>";
     return out.str();
   }
   emailInfo.value[DatabaseStrings::labelActivationToken] = "";
   if (!Database::get().updateOne(findEmail, emailInfo, &out)) {
     out
-    << "\n<b style =\"color:red\">"
+    << "\n<b style ='color:red'>"
     << "Could not reset the activation token (database is down?). "
     << "</b>";
     return out.str();
@@ -1977,9 +1974,8 @@ std::string WebWorker::getChangePasswordPagePartOne(
   );
   if (!Database::get().updateOne(findUser, userInfo, &out)) {
     out
-    <<
-    "\n<b style =\"color:red\">Could not store your email (database is down?). </b>"
-    ;
+    << "\n<b style ='color:red'>"
+    << "Could not store your email (database is down?). </b>";
     return out.str();
   }
   global.userDefault.email = claimedEmail;
@@ -2000,9 +1996,8 @@ std::string WebWorker::getChangePasswordPagePartOne(
   } else {
     out
     << "<br>"
-    <<
-    "<b style =\"color:orange\">To fully activate your account, please choose a password.</b>"
-    ;
+    << "<b style ='color:orange'>"
+    << "To fully activate your account, please choose a password.</b>";
   }
   return out.str();
 }
@@ -2193,7 +2188,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
     )
   ) {
     out
-    << "<b style =\"color:red\">Couldn't find the recaptcha key in file: "
+    << "<b style ='color:red'>Couldn't find the recaptcha key in file: "
     << "certificates/recaptcha-public.txt</b>";
   } else {
     out
@@ -2622,10 +2617,10 @@ int WebWorker::processFolderOrFile() {
       this->VirtualFileName, false, 1000
     )
     << " <b style = 'color:red'>deemed unsafe</b>. "
-    <<
-    "Please note that folder names are not allowed to contain dots and file names "
-    <<
-    "are not allowed to start with dots. There may be additional restrictions "
+    << "Please note that folder names "
+    << "are not allowed to contain dots and file names "
+    << "are not allowed to start with dots. "
+    << "There may be additional restrictions "
     << "on file names added for security reasons.";
     result[WebAPI::result::error] = out.str();
     return global.response.writeResponse(result);
@@ -2999,8 +2994,8 @@ bool WebServer::createNewActiveWorker() {
   STACK_TRACE("WebServer::createNewActiveWorker");
   if (this->activeWorker != - 1) {
     global.fatal
-    <<
-    "Calling createNewActiveWorker requires the active worker index to be - 1."
+    << "Calling createNewActiveWorker "
+    << "requires the active worker index to be - 1."
     << global.fatal;
     return false;
   }
@@ -3080,8 +3075,8 @@ bool WebServer::createNewActiveWorker() {
   }
   global
   << Logger::green
-  <<
-  "Allocated new worker & plumbing data structures. Total worker data structures: "
+  << "Allocated new worker & plumbing data structures. "
+  << "Total worker data structures: "
   << this->allWorkers.size
   << ". "
   << Logger::endL;
@@ -3149,18 +3144,18 @@ std::string WebServer::toStringConnectionSummary() {
   << "Timeouts are excluded. ";
   out
   << "<br>"
-  <<
-  "<b>The following policies are quite strict and will be relaxed in the future.</b><br>"
+  << "<b>The following policies are quite "
+  << "strict and will be relaxed in the future.</b><br>"
   << this->maximumTotalUsedWorkers
   << " global maximum of simultaneous non-closed connections allowed. "
-  <<
-  "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
+  << "When the limit is exceeded, "
+  << "all connections except a randomly "
+  << "chosen one will be terminated. "
   << "<br>"
   << this->maximumNumberOfWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
-  <<
-  "When the limit is exceeded, all connections from that IP address are terminated. "
-  ;
+  << "When the limit is exceeded, "
+  << "all connections from that IP address are terminated. ";
   return out.str();
 }
 
@@ -3177,8 +3172,8 @@ std::string WebServer::toStringStatusForLogFile() {
   out
   << "<hr>Currently, there are "
   << numInUse
-  <<
-  " worker(s) in use. The peak number of worker(s)/concurrent connections was "
+  << " worker(s) in use. The peak number of "
+  << "worker(s)/concurrent connections was "
   << this->allWorkers.size
   << ". ";
   out
@@ -3886,8 +3881,9 @@ void SignalsInfrastructure::initializeSignals() {
   SignalFPE.sa_handler = &WebServer::fperror_sigaction;
   if (sigaction(SIGFPE, &SignalFPE, nullptr) == - 1) {
     global.fatal
-    <<
-    "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. "
+    << "Failed to register SIGFPE handler "
+    << "(fatal arithmetic error). "
+    << "Crashing to let you know. "
     << global.fatal;
   }
   // //////////////////
@@ -3927,8 +3923,9 @@ void SignalsInfrastructure::initializeSignals() {
   // reap all dead processes
   if (sigaction(SIGCHLD, &SignalChild, nullptr) == - 1) {
     global.fatal
-    <<
-    "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know."
+    << "Was not able to register SIGCHLD handler "
+    << "(reaping child processes). "
+    << "Crashing to let you know."
     << global.fatal;
   }
   //  sigemptyset(&sa.sa_mask);
@@ -3945,9 +3942,8 @@ void WebServer::writeVersionJSFile() {
   STACK_TRACE("WebServer::writeVersionJSFile");
   std::stringstream out;
   out
-  <<
-  "\"use strict\"; //This file is automatically generated, please do not modify.\n"
-  ;
+  << "\"use strict\"; "
+  << "//This file is automatically generated, please do not modify.\n";
   out << "var serverInformation = {\n  ";
   out << "  version:\"" << global.buildVersionSimple << "\",\n";
   out << "};\n";
@@ -4310,7 +4306,8 @@ int WebServer::run() {
     if (!this->createNewActiveWorker()) {
       global
       << Logger::purple
-      << " failed to create an active worker. System error string: "
+      << " failed to create an active worker. "
+      << "System error string: "
       << strerror(errno)
       << "\n"
       << Logger::red
@@ -4601,8 +4598,8 @@ void WebServer::figureOutOperatingSystem() {
   << supportedOSes.toStringCommaDelimited()
   << Logger::endL;
   global
-  <<
-  "Please post a request for support of your Linux flavor on our bug tracker: "
+  << "Please post a request for support of your "
+  << "Linux flavor on our bug tracker: "
   << Logger::endL
   << Logger::green
   << HtmlRoutines::gitRepository
@@ -4639,8 +4636,8 @@ void WebServer::checkSystemInstallationOpenSSL() {
   }
   if (sslInstallCommand != "") {
     global
-    <<
-    "You appear to be missing an openssl installation. Let me try to install that for you. "
+    << "You appear to be missing an openssl installation. "
+    << "Let me try to install that for you. "
     << Logger::green
     << "About to request sudo password for: "
     << sslInstallCommand
@@ -4756,15 +4753,15 @@ void WebServer::checkMongoDatabaseSetup() {
   global.externalCommandNoOutput("sudo make install", true);
   global.changeDirectory("../../bin");
   global
-  <<
-  "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
+  << "Need sudo access for command to configure "
+  << "linker to use local usr/local/lib path (needed by mongo): "
   << Logger::red
-  <<
-  "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/"
+  << "sudo cp ../external-source/usr_local_lib_for_mongo.conf "
+  << "/etc/ld.so.conf.d/"
   << Logger::endL;
   global.externalCommandNoOutput(
-    "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/"
-    ,
+    "sudo cp ../external-source/usr_local_lib_for_mongo.conf "
+    "/etc/ld.so.conf.d/",
     true
   );
   global
@@ -5503,8 +5500,8 @@ void GlobalVariables::configurationProcess() {
   ) {
     global
     << Logger::green
-    <<
-    "runServerOnEmptyCommandLine is set to true => Starting server with default configuration. "
+    << "runServerOnEmptyCommandLine is set to true => "
+    << "Starting server with default configuration. "
     << Logger::endL;
     global.flagRunningBuiltInWebServer = true;
     global.flagRunningConsoleRegular = false;
@@ -5692,9 +5689,8 @@ int WebServer::mainConsoleHelp() {
   std::cout << "run as server with custom computation timeout:\n";
   std::cout << "./calculator server 200\n";
   std::cout
-  <<
-  "run as server with custom timeout, custom base path and custom configuration file:\n"
-  ;
+  << "run as server with custom timeout, "
+  << "custom base path and custom configuration file:\n";
   std::cout
   << "./calculator "
   << MainFlags::server

@@ -173,8 +173,8 @@ void WebServerMonitor::monitor(
   << Logger::endL;
   global
   << Logger::red
-  <<
-  "Please beware that the server will restart and you will lose all computations "
+  << "Please beware that the server will "
+  << "restart and you will lose all computations "
   << "if "
   << maxNumPingFailures
   << " consecutive pings fail. "
@@ -243,8 +243,9 @@ void WebServerMonitor::stop() {
     true
   );
   fileStream
-  <<
-  "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
+  << "<b style ='color:red'>"
+  << "Unexpected server restart: server "
+  << "stopped responding (locked pipe?). Time: local: "
   << now.toStringLocal()
   << ", GM: "
   << now.toStringGM()
@@ -878,9 +879,8 @@ bool CalculatorFunctions::fetchWebPageGET(
   if (input.size() != 4) {
     return
     calculator
-    <<
-    "Fetching web page expects 3 arguments: server, service/port, and webpage. "
-    ;
+    << "Fetching web page expects 3 arguments: "
+    << "server, service/port, and webpage. ";
   }
   if (!input[1].isOfType(&webClient.serverToConnectTo)) {
     webClient.serverToConnectTo = input[1].toString();
@@ -925,9 +925,8 @@ bool CalculatorFunctions::fetchWebPagePOST(
   if (input.size() != 5) {
     return
     calculator
-    <<
-    "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. "
-    ;
+    << "Fetching web page expects 4 arguments: "
+    << "server, service/port, webpage and message to post. ";
   }
   if (!input[1].isOfType(&crawler.serverToConnectTo)) {
     crawler.serverToConnectTo = input[1].toString();
@@ -1179,7 +1178,7 @@ bool WebClient::verifyRecaptcha(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<b style =\"color:red\">"
+      << "<b style ='color:red'>"
       << "Failed to load recaptcha secret."
       << "</b>";
     }
@@ -1192,7 +1191,7 @@ bool WebClient::verifyRecaptcha(
   if (recaptchaURLencoded == "") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<b style =\"color:red\">Recaptcha appears to be missing. </b>";
+      << "<b style ='color:red'>Recaptcha appears to be missing. </b>";
     }
     return false;
   }
@@ -1239,7 +1238,7 @@ bool WebClient::verifyRecaptcha(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<br><b style =\"color:red\">"
+      << "<br><b style ='color:red'>"
       << "Could not verify your captcha solution. "
       << "</b>"
       << "The response from google was: "
@@ -1249,7 +1248,7 @@ bool WebClient::verifyRecaptcha(
   } else {
     if (commentsGeneralNONsensitive != nullptr) {
       *commentsGeneralNONsensitive
-      << "<br><b style =\"color:green\">"
+      << "<br><b style ='color:green'>"
       << "Your recaptcha answer appears to be valid. "
       << "</b>\n<br>\n";
     }
@@ -1425,8 +1424,8 @@ bool WebWorker::writeToBodyJSON(const JSData& result) {
       );
       std::stringstream outLinkApp;
       outLinkApp
-      <<
-      "You've reached the calculator's backend. The app can be accessed here: <a href = '"
+      << "You've reached the calculator's backend. "
+      << "The app can be accessed here: <a href = '"
       << sanitizedCalculatorApp
       << "'>app</a>";
       toWrite =

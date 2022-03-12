@@ -974,8 +974,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
       << "*"
       << degreeMinimialPolynomial
       << " = "
-      << startingDimension *
-      degreeMinimialPolynomial
+      << startingDimension * degreeMinimialPolynomial
       << " over the rationals. The calculator is hard-coded "
       << "to accept dimension over the rationals no larger than 10000 "
       << "- multiplication in such a field corresponds to a "

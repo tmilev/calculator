@@ -426,8 +426,8 @@ int Pipe::writeNoInterrupts(int fileDescriptor, const std::string& input) {
         if (numAttempts > 100) {
           global
           << Logger::red
-          <<
-          "Write operation interrupted, more than 100 times, this is not supposed to happen. "
+          << "Write operation interrupted, more than 100 times, "
+          << "this is not supposed to happen. "
           << Logger::endL;
           return - 1;
         }

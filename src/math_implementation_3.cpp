@@ -2877,8 +2877,7 @@ bool StringRoutines::Differ::computeDifference(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The product of the sizes of the two strings equals "
-      << leftSize *
-      rightSize
+      << leftSize * rightSize
       << " which exceeds the maximum allowed "
       << this->maximumMatrixSize;
     }

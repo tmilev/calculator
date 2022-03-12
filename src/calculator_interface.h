@@ -3258,10 +3258,12 @@ public:
   };
 
   void evaluate(const std::string& input);
-  // Attempts to interpret the input string as a high-school or calculus problem
+  // Attempts to interpret the input string as a
+  // high-school or calculus problem
   // and solve it.
   JSData solve(const std::string& input);
-  // For internal use only; will crash the calculator if the input has syntax
+  // For internal use only; will crash
+  // the calculator if the input has syntax
   // errors.
   Expression parseOrCrash(
     const std::string& input, bool stripCommandSequence

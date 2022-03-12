@@ -652,8 +652,9 @@ public:
   FormatExpressions formatTrigonometric;
   bool eulerFormToTrigonometry(
     Polynomial<AlgebraicNumber>& input,
+    Polynomial<AlgebraicNumber>& outputShifted,
     MonomialPolynomial& outputMonomialShift,
-    Expression& output,
+    LinearCombination<Expression, AlgebraicNumber>& output,
     std::stringstream* commentsOnFailure
   );
   void initialize(Calculator& inputOwner, const Expression& incoming);
@@ -890,11 +891,12 @@ bool TrigonometricReduction::computeEulerFormExpression(
   }
   MonomialPolynomial shift;
   Polynomial<AlgebraicNumber> converted;
+  Polynomial<AlgebraicNumber> shifted;
   this->eulerFormAlgebraicReduced.getNumerator(converted);
-  Expression numerator, denominator;
+  LinearCombination<Expression, AlgebraicNumber> numerator, denominator;
   if (
     !this->eulerFormToTrigonometry(
-      converted, shift, numerator, commentsOnFailure
+      converted, shifted, shift, numerator, commentsOnFailure
     )
   ) {
     return false;
@@ -902,13 +904,34 @@ bool TrigonometricReduction::computeEulerFormExpression(
   this->eulerFormAlgebraicReduced.getDenominator(converted);
   if (
     !this->eulerFormToTrigonometry(
-      converted, shift, denominator, commentsOnFailure
+      converted, shifted, shift, denominator, commentsOnFailure
     )
   ) {
     return false;
   }
+  AlgebraicNumber numeratorScale =
+  numerator.scaleNormalizeLeadingMonomial(nullptr);
+  AlgebraicNumber denominatorScale =
+  denominator.scaleNormalizeLeadingMonomial(nullptr);
+  AlgebraicNumber quotient = denominatorScale / numeratorScale;
+  numerator *= quotient;
+  if (!numerator.isEqualToZero()) {
+    if (!numerator.getLeadingCoefficient(nullptr).isRational()) {
+      numerator /=
+      this->owner->objectContainer.algebraicClosure.imaginaryUnit();
+      denominator /=
+      this->owner->objectContainer.algebraicClosure.imaginaryUnit();
+    }
+  }
+  global.comments << "DEBUG: numerator scale: " << numeratorScale.toString();
+  Expression numeratorExpression, denominatorExpression;
+  numeratorExpression.makeSum(*this->owner, numerator);
+  denominatorExpression.makeSum(*this->owner, denominator);
   this->fourierFractionForm.makeXOX(
-    *this->owner, this->owner->opDivide(), numerator, denominator
+    *this->owner,
+    this->owner->opDivide(),
+    numeratorExpression,
+    denominatorExpression
   );
   return true;
 }
@@ -954,49 +977,72 @@ void TrigonometricReduction::computeEulerFormExpressionPresentation() {
 
 bool TrigonometricReduction::eulerFormToTrigonometry(
   Polynomial<AlgebraicNumber>& input,
+  Polynomial<AlgebraicNumber>& outputShifted,
   MonomialPolynomial& outputMonomialShift,
-  Expression& output,
+  LinearCombination<Expression, AlgebraicNumber>& output,
   std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("TrigonometricReduction::eulerFormToTrigonometry");
   MonomialPolynomial maximumMonomial;
   MonomialPolynomial minimumMonomial;
   int numberOfVariables = input.minimalNumberOfVariables();
-  for (int i = 0; i < numberOfVariables; i ++) {
-    const MonomialPolynomial& current = input.monomials[i];
-    for (int j = 0; j < current.minimalNumberOfVariables(); j ++) {
-      Rational power =
-      MathRoutines::maximum(maximumMonomial[j], current[j]);
-      maximumMonomial.setVariable(j, power);
-      power = current[j];
-      if (i > 0) {
-        power = MathRoutines::minimum(minimumMonomial[j], power);
+  for (int j = 0; j < numberOfVariables; j ++) {
+    for (int i = 0; i < input.size(); i ++) {
+      const MonomialPolynomial& current = input.monomials[i];
+      if (i == 0) {
+        maximumMonomial.setVariable(j, current(j));
+        minimumMonomial.setVariable(j, current(j));
+        continue;
       }
+      Rational power =
+      MathRoutines::maximum(maximumMonomial(j), current(j));
+      maximumMonomial.setVariable(j, power);
+      power = MathRoutines::minimum(minimumMonomial(j), current(j));
       minimumMonomial.setVariable(j, power);
     }
   }
+  global.comments
+  << "DEBUG: max, min mons: "
+  << maximumMonomial.toString()
+  << ", min: "
+  << minimumMonomial.toString()
+  << "<br>";
   outputMonomialShift.makeOne();
   for (int i = 0; i < numberOfVariables; i ++) {
-    Rational difference = maximumMonomial[i] - minimumMonomial[i];
-    if (!difference.isEven()) {
+    Rational shift = (maximumMonomial(i) + minimumMonomial(i)) / 2;
+    if (!shift.isInteger()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
-        <<
-        "Difference between maximum and minimum monomials must have only even powers. "
-        ;
+        << "Quotient between maximum and minimum "
+        << "monomials must have only even powers. ";
       }
       return false;
     }
-    outputMonomialShift.setVariable(i, - difference / 2);
+    outputMonomialShift.setVariable(i, - shift);
   }
-  Polynomial<AlgebraicNumber> remainder = input;
-  int startingMonomialCount = remainder.size();
-  LinearCombination<Expression, AlgebraicNumber> result;
+  global.comments
+  << "<br>DEBUG: got to here! Input: "
+  << input.toString()
+  << "<br>";
+  outputShifted = input;
+  int startingMonomialCount = outputShifted.size();
+  output.makeZero();
+  outputShifted *= outputMonomialShift;
+  global.comments
+  << "DEBUG: shift: "
+  << outputMonomialShift.toString()
+  << "<br>";
+  global.comments
+  << "DEBUG: shifted: "
+  << outputShifted.toString(&this->formatAlgebraic)
+  << "<br>";
+  Polynomial<AlgebraicNumber> remainder = outputShifted;
   for (int i = 0; i < startingMonomialCount; i ++) {
+    global.comments << "DEBUG: got to here pt 3!";
     if (remainder.isEqualToZero()) {
       break;
     }
     MonomialPolynomial leading = remainder.getLeadingMonomial(nullptr);
-    leading *= outputMonomialShift;
     MonomialPolynomial opposite = leading;
     opposite.invert();
     LinearCombination<Expression, Rational> currentArgument;
@@ -1009,7 +1055,7 @@ bool TrigonometricReduction::eulerFormToTrigonometry(
         );
         term = coefficient * term;
       }
-      currentArgument.addMonomial(term, leading[j]);
+      currentArgument.addMonomial(term, leading(j));
     }
     Expression currentArgumentSummed;
     currentArgumentSummed.makeSum(*this->owner, currentArgument);
@@ -1018,22 +1064,35 @@ bool TrigonometricReduction::eulerFormToTrigonometry(
       *this->owner, this->owner->opSin(), currentArgumentSummed
     );
     Expression cosine;
-    sine.makeOX(
+    cosine.makeOX(
       *this->owner, this->owner->opCos(), currentArgumentSummed
     );
     AlgebraicNumber leadingCoefficient = remainder.getCoefficientOf(leading);
     AlgebraicNumber oppositeCoefficient = remainder.getCoefficientOf(opposite);
+    if (leading.isConstant()) {
+      Expression one;
+      one.assignValue(*this->owner, 1);
+      remainder.subtractMonomial(leading, leadingCoefficient);
+      output.addMonomial(one, leadingCoefficient);
+      continue;
+    }
     AlgebraicNumber sineCoefficient = leadingCoefficient - oppositeCoefficient;
     sineCoefficient *=
     this->owner->objectContainer.algebraicClosure.imaginaryUnit();
     AlgebraicNumber cosineCoefficient =
     leadingCoefficient + oppositeCoefficient;
-    result.addMonomial(cosine, cosineCoefficient);
-    result.addMonomial(sine, sineCoefficient);
+    output.addMonomial(cosine, cosineCoefficient);
+    output.addMonomial(sine, sineCoefficient);
+    global.comments
+    << "DEBUG: leading:, opposite: "
+    << leading
+    << " , "
+    << opposite
+    << "<br>";
     remainder.subtractMonomial(leading, leadingCoefficient);
     remainder.subtractMonomial(opposite, oppositeCoefficient);
   }
-  output.makeSum(*this->owner, result);
+  global.comments << "DEBUG: got to here AFTER!";
   return true;
 }
 
@@ -1084,7 +1143,8 @@ bool TrigonometricReduction::TrigonometricFunction::extractFrom(
 void TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous()
 {
   STACK_TRACE(
-    "TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous"
+    "TrigonometricReduction::"
+    "TrigonometricFunction::computeEulerFormAnonymous"
   );
   this->eulerForm.makeZero();
   Polynomial<AlgebraicNumber> plusSummand, minusSummand;
@@ -1124,6 +1184,11 @@ void TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous()
 
 void TrigonometricReduction::TrigonometricFunction::computeEulerFormExpression(
 ) {
+  STACK_TRACE(
+    "TrigonometricReduction::"
+    "TrigonometricFunction::"
+    "computeEulerFormExpression"
+  );
   Expression sum;
   Calculator& calculator = *this->owner->owner;
   sum.makeSum(calculator, this->arguments);

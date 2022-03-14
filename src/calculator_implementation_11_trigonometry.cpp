@@ -629,6 +629,7 @@ public:
   };
 
   static const int maximumArguments = 5;
+  static const int maximumTrigonometricPower = 20;
   Expression input;
   Calculator* owner;
   WithContext<RationalFraction<AlgebraicNumber> > inputFraction;
@@ -637,11 +638,6 @@ public:
   inputFractionSubstitutedAlgebraic;
   Expression eulerForm;
   Expression eulerFormAlgebraic;
-  Polynomial<AlgebraicNumber> eulerFormPhase1Numerator;
-  Polynomial<AlgebraicNumber> eulerFormPhase1Denominator;
-  Polynomial<AlgebraicNumber> eulerFormPhase2Numerator;
-  Polynomial<AlgebraicNumber> eulerFormPhase2Denominator;
-  Polynomial<AlgebraicNumber> eulerFormPhase2GreatestCommonDivisor;
   RationalFraction<AlgebraicNumber> eulerFormAlgebraicReduced;
   Expression fourierFractionForm;
   ExpressionContext variables;
@@ -650,11 +646,17 @@ public:
   MapList<Expression, Rational> trigonometricBaseScales;
   FormatExpressions formatAlgebraic;
   FormatExpressions formatTrigonometric;
-  bool eulerFormToTrigonometry(
+  bool eulerFormToTrigonometryFourierForm(
     Polynomial<AlgebraicNumber>& input,
     Polynomial<AlgebraicNumber>& outputShifted,
     MonomialPolynomial& outputMonomialShift,
     LinearCombination<Expression, AlgebraicNumber>& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool shiftPolynomial(
+    Polynomial<AlgebraicNumber>& input,
+    Polynomial<AlgebraicNumber>& outputShifted,
+    MonomialPolynomial& outputMonomialShift,
     std::stringstream* commentsOnFailure
   );
   void initialize(Calculator& inputOwner, const Expression& incoming);
@@ -664,11 +666,56 @@ public:
   void computeBaseScales();
   void prepareFormatting();
   void computeEulerFormArguments();
+  bool computeEulerFormReduced(std::stringstream* commentsOnFailure);
+  bool computeBaseTrigonometricForm(std::stringstream* commentsOnFailure);
   bool computeEulerFormExpression(std::stringstream* commentsOnFailure);
+  bool computeSineCosineForm(
+    const MonomialPolynomial& monomial,
+    Polynomial<AlgebraicNumber>& output,
+    int numberOfVariables,
+    std::stringstream* commentsOnFailure
+  );
+  bool getSineCosineFormVariableOfPower(
+    int letterIndex,
+    const Rational& power,
+    int numberOfVariables,
+    Polynomial<AlgebraicNumber>& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool computeTrigonometricForm(
+    Polynomial<AlgebraicNumber>& input,
+    LinearCombination<Expression, AlgebraicNumber>& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool trigonometricFormFromSineCosineMonomial(
+    const MonomialPolynomial& input,
+    int numberOfVariables,
+    Expression& output
+  );
+  bool sinePowerNAlgebraicForm(
+    int power,
+    int letterIndex,
+    Polynomial<AlgebraicNumber>& output,
+    std::stringstream* commentsOnFailure
+  );
+  void sineAlgebraicForm(
+    int letterIndex, Polynomial<AlgebraicNumber>& output
+  );
+  void cosineAlgebraicForm(
+    int letterIndex, Polynomial<AlgebraicNumber>& output
+  );
+  bool cosinePowerNAlgebraicForm(
+    int power,
+    int letterIndex,
+    Polynomial<AlgebraicNumber>& output,
+    std::stringstream* commentsOnFailure
+  );
   void computeEulerFormExpressionPresentation();
   std::string toString();
   std::string toStringTrigonometry();
   std::string toStringTrigonometricArguments();
+  AlgebraicClosureRationals* algebraicClosure();
+  Expression argumentTermIndex(int index);
 };
 
 bool CalculatorFunctionsTrigonometry::fourierFractionForm(
@@ -782,7 +829,13 @@ bool TrigonometricReduction::reduce(std::stringstream* commentsOnFailure) {
     }
     return true;
   }
+  if (!this->computeEulerFormReduced(commentsOnFailure)) {
+    return false;
+  }
   if (!this->computeEulerFormExpression(commentsOnFailure)) {
+    return false;
+  }
+  if (!this->computeBaseTrigonometricForm(commentsOnFailure)) {
     return false;
   }
   this->computeEulerFormExpressionPresentation();
@@ -869,10 +922,9 @@ void TrigonometricReduction::computeEulerFormArguments() {
   }
 }
 
-bool TrigonometricReduction::computeEulerFormExpression(
+bool TrigonometricReduction::computeEulerFormReduced(
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("TrigonometricReduction::computeEulerFormExpression");
   PolynomialSubstitution<AlgebraicNumber> substitution;
   for (Expression& expression : this->arguments.keys) {
     substitution.addOnTop(
@@ -889,13 +941,267 @@ bool TrigonometricReduction::computeEulerFormExpression(
   ) {
     return false;
   }
+  return true;
+}
+
+bool TrigonometricReduction::computeBaseTrigonometricForm(
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("TrigonometricReduction::computeBaseTrigonometricForm");
+  Polynomial<AlgebraicNumber> numerator, denominator;
+  this->eulerFormAlgebraicReduced.getNumerator(numerator);
+  this->eulerFormAlgebraicReduced.getDenominator(denominator);
+  MonomialPolynomial unused;
+  if (
+    !this->shiftPolynomial(numerator, numerator, unused, commentsOnFailure)
+  ) {
+    return false;
+  }
+  if (
+    !this->shiftPolynomial(
+      denominator, denominator, unused, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  LinearCombination<Expression, AlgebraicNumber>
+  numeratorExpression,
+  denominatorExpression;
+  if (
+    !this->computeTrigonometricForm(
+      numerator, numeratorExpression, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (
+    !this->computeTrigonometricForm(
+      denominator, denominatorExpression, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
+AlgebraicClosureRationals* TrigonometricReduction::algebraicClosure() {
+  return &this->owner->objectContainer.algebraicClosure;
+}
+
+bool TrigonometricReduction::sinePowerNAlgebraicForm(
+  int power,
+  int letterIndex,
+  Polynomial<AlgebraicNumber>& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (power > TrigonometricReduction::maximumTrigonometricPower) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Sine power is too large.";
+    }
+    return false;
+  }
+  this->sineAlgebraicForm(letterIndex, output);
+  output.raiseToPower(power, this->algebraicClosure()->one());
+  return true;
+}
+
+bool TrigonometricReduction::cosinePowerNAlgebraicForm(
+  int power,
+  int letterIndex,
+  Polynomial<AlgebraicNumber>& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (power > TrigonometricReduction::maximumTrigonometricPower) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Sine power is too large.";
+    }
+    return false;
+  }
+  this->cosineAlgebraicForm(letterIndex, output);
+  output.raiseToPower(power, this->algebraicClosure()->one());
+  return true;
+}
+
+void TrigonometricReduction::sineAlgebraicForm(
+  int letterIndex, Polynomial<AlgebraicNumber>& output
+) {
+  AlgebraicNumber coefficient;
+  coefficient.assignRational(Rational(1, 2), this->algebraicClosure());
+  coefficient /= this->algebraicClosure()->imaginaryUnit();
+  MonomialPolynomial monomial;
+  monomial.makeEi(letterIndex, 1);
+  output.addMonomial(monomial, coefficient);
+  coefficient *= - 1;
+  monomial.makeEi(letterIndex, - 1);
+  output.addMonomial(monomial, coefficient);
+}
+
+void TrigonometricReduction::cosineAlgebraicForm(
+  int letterIndex, Polynomial<AlgebraicNumber>& output
+) {
+  AlgebraicNumber coefficient;
+  coefficient.assignRational(Rational(1, 2), this->algebraicClosure());
+  MonomialPolynomial monomial;
+  monomial.makeEi(letterIndex, 1);
+  output.addMonomial(monomial, coefficient);
+  monomial.makeEi(letterIndex, - 1);
+  output.addMonomial(monomial, coefficient);
+}
+
+bool TrigonometricReduction::computeTrigonometricForm(
+  Polynomial<AlgebraicNumber>& input,
+  LinearCombination<Expression, AlgebraicNumber>& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("TrigonometricReduction::computeTrigonometricForm");
+  Polynomial<AlgebraicNumber> sineCosineForm, current;
+  int numberOfVariables = input.minimalNumberOfVariables();
+  for (int i = 0; i < input.size(); i ++) {
+    if (
+      !this->computeSineCosineForm(
+        input.monomials[i],
+        current,
+        numberOfVariables,
+        commentsOnFailure
+      )
+    ) {
+      return false;
+    }
+    sineCosineForm.addOtherTimesConst(current, input.coefficients[i]);
+  }
+  output.makeZero();
+  Expression currentExpression;
+  for (int i = 0; i < sineCosineForm.size(); i ++) {
+    this->trigonometricFormFromSineCosineMonomial(
+      sineCosineForm.monomials[i], numberOfVariables, currentExpression
+    );
+    output.addMonomial(currentExpression, sineCosineForm.coefficients[i]);
+  }
+  return true;
+}
+
+Expression TrigonometricReduction::argumentTermIndex(int index) {
+  Expression result;
+  this->trigonometricBaseScales.keys[index];
+  if (this->trigonometricBaseScales.values[index] != 1) {
+    Expression coefficient;
+    coefficient.assignValue(
+      *this->owner, this->trigonometricBaseScales.values[index]
+    );
+    result = coefficient * result;
+  }
+  return result;
+}
+
+bool TrigonometricReduction::trigonometricFormFromSineCosineMonomial(
+  const MonomialPolynomial& input,
+  int numberOfVariables,
+  Expression& output
+) {
+  List<Expression> multiplicands;
+  for (int i = 0; i < input.minimalNumberOfVariables(); i ++) {
+    int index = i;
+    if (index >= numberOfVariables) {
+      index -= numberOfVariables;
+    }
+    Expression argument = this->argumentTermIndex(index);
+    Expression trigonometricFunction;
+    if (i >= numberOfVariables) {
+      trigonometricFunction.makeOX(
+        *this->owner, this->owner->opSin(), argument
+      );
+    } else {
+      trigonometricFunction.makeOX(
+        *this->owner, this->owner->opCos(), argument
+      );
+    }
+    if (!input(i).isEqualToOne()) {
+      Expression exponent;
+      exponent.assignValue(*this->owner, input(i));
+      trigonometricFunction.makeXOX(
+        *this->owner,
+        this->owner->opPower(),
+        trigonometricFunction,
+        exponent
+      );
+    }
+    multiplicands.addOnTop(trigonometricFunction);
+  }
+  return output.makeProduct(*this->owner, multiplicands);
+}
+
+bool TrigonometricReduction::computeSineCosineForm(
+  const MonomialPolynomial& monomial,
+  Polynomial<AlgebraicNumber>& output,
+  int numberOfVariables,
+  std::stringstream* commentsOnFailure
+) {
+  output.makeConstant(this->algebraicClosure()->one());
+  Polynomial<AlgebraicNumber> multiplicand;
+  for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
+    if (
+      !this->getSineCosineFormVariableOfPower(
+        i,
+        monomial(i),
+        numberOfVariables,
+        multiplicand,
+        commentsOnFailure
+      )
+    ) {
+      return false;
+    }
+    output *= multiplicand;
+  }
+  return true;
+}
+
+bool TrigonometricReduction::getSineCosineFormVariableOfPower(
+  int letterIndex,
+  const Rational& power,
+  int numberOfVariables,
+  Polynomial<AlgebraicNumber>& output,
+  std::stringstream* commentsOnFailure
+) {
+  int powerInteger = 0;
+  if (!power.isSmallInteger(&powerInteger)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Power: "
+      << power.toString()
+      << " must be a small integer";
+    }
+    return false;
+  }
+  output.makeZero();
+  MonomialPolynomial cosineMonomial, sineMonomial;
+  cosineMonomial.makeEi(letterIndex);
+  sineMonomial.makeEi(numberOfVariables + letterIndex);
+  output.addMonomial(cosineMonomial, this->algebraicClosure()->one());
+  if (powerInteger > 0) {
+    output.addMonomial(
+      sineMonomial, this->algebraicClosure()->imaginaryUnit()
+    );
+  } else {
+    output.subtractMonomial(
+      sineMonomial, this->algebraicClosure()->imaginaryUnit()
+    );
+    powerInteger *= - 1;
+  }
+  output.raiseToPower(powerInteger, this->algebraicClosure()->one());
+  return true;
+}
+
+bool TrigonometricReduction::computeEulerFormExpression(
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("TrigonometricReduction::computeEulerFormExpression");
   MonomialPolynomial shift;
   Polynomial<AlgebraicNumber> converted;
   Polynomial<AlgebraicNumber> shifted;
   this->eulerFormAlgebraicReduced.getNumerator(converted);
   LinearCombination<Expression, AlgebraicNumber> numerator, denominator;
   if (
-    !this->eulerFormToTrigonometry(
+    !this->eulerFormToTrigonometryFourierForm(
       converted, shifted, shift, numerator, commentsOnFailure
     )
   ) {
@@ -903,7 +1209,7 @@ bool TrigonometricReduction::computeEulerFormExpression(
   }
   this->eulerFormAlgebraicReduced.getDenominator(converted);
   if (
-    !this->eulerFormToTrigonometry(
+    !this->eulerFormToTrigonometryFourierForm(
       converted, shifted, shift, denominator, commentsOnFailure
     )
   ) {
@@ -923,7 +1229,6 @@ bool TrigonometricReduction::computeEulerFormExpression(
       this->owner->objectContainer.algebraicClosure.imaginaryUnit();
     }
   }
-  global.comments << "DEBUG: numerator scale: " << numeratorScale.toString();
   Expression numeratorExpression, denominatorExpression;
   numeratorExpression.makeSum(*this->owner, numerator);
   denominatorExpression.makeSum(*this->owner, denominator);
@@ -975,14 +1280,13 @@ void TrigonometricReduction::computeEulerFormExpressionPresentation() {
   );
 }
 
-bool TrigonometricReduction::eulerFormToTrigonometry(
+bool TrigonometricReduction::shiftPolynomial(
   Polynomial<AlgebraicNumber>& input,
   Polynomial<AlgebraicNumber>& outputShifted,
   MonomialPolynomial& outputMonomialShift,
-  LinearCombination<Expression, AlgebraicNumber>& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("TrigonometricReduction::eulerFormToTrigonometry");
+  STACK_TRACE("TrigonometricReduction::shiftPolynomial");
   MonomialPolynomial maximumMonomial;
   MonomialPolynomial minimumMonomial;
   int numberOfVariables = input.minimalNumberOfVariables();
@@ -1001,12 +1305,6 @@ bool TrigonometricReduction::eulerFormToTrigonometry(
       minimumMonomial.setVariable(j, power);
     }
   }
-  global.comments
-  << "DEBUG: max, min mons: "
-  << maximumMonomial.toString()
-  << ", min: "
-  << minimumMonomial.toString()
-  << "<br>";
   outputMonomialShift.makeOne();
   for (int i = 0; i < numberOfVariables; i ++) {
     Rational shift = (maximumMonomial(i) + minimumMonomial(i)) / 2;
@@ -1020,25 +1318,31 @@ bool TrigonometricReduction::eulerFormToTrigonometry(
     }
     outputMonomialShift.setVariable(i, - shift);
   }
-  global.comments
-  << "<br>DEBUG: got to here! Input: "
-  << input.toString()
-  << "<br>";
   outputShifted = input;
+  outputShifted *= outputMonomialShift;
+  return true;
+}
+
+bool TrigonometricReduction::eulerFormToTrigonometryFourierForm(
+  Polynomial<AlgebraicNumber>& input,
+  Polynomial<AlgebraicNumber>& outputShifted,
+  MonomialPolynomial& outputMonomialShift,
+  LinearCombination<Expression, AlgebraicNumber>& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("TrigonometricReduction::eulerFormToTrigonometryFourierForm");
+  if (
+    !this->shiftPolynomial(
+      input, outputShifted, outputMonomialShift, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  int numberOfVariables = input.minimalNumberOfVariables();
   int startingMonomialCount = outputShifted.size();
   output.makeZero();
-  outputShifted *= outputMonomialShift;
-  global.comments
-  << "DEBUG: shift: "
-  << outputMonomialShift.toString()
-  << "<br>";
-  global.comments
-  << "DEBUG: shifted: "
-  << outputShifted.toString(&this->formatAlgebraic)
-  << "<br>";
   Polynomial<AlgebraicNumber> remainder = outputShifted;
   for (int i = 0; i < startingMonomialCount; i ++) {
-    global.comments << "DEBUG: got to here pt 3!";
     if (remainder.isEqualToZero()) {
       break;
     }
@@ -1047,14 +1351,7 @@ bool TrigonometricReduction::eulerFormToTrigonometry(
     opposite.invert();
     LinearCombination<Expression, Rational> currentArgument;
     for (int j = 0; j < numberOfVariables; j ++) {
-      Expression term = this->trigonometricBaseScales.keys[j];
-      if (this->trigonometricBaseScales.values[j] != 1) {
-        Expression coefficient;
-        coefficient.assignValue(
-          *this->owner, this->trigonometricBaseScales.values[j]
-        );
-        term = coefficient * term;
-      }
+      Expression term = this->argumentTermIndex(j);
       currentArgument.addMonomial(term, leading(j));
     }
     Expression currentArgumentSummed;
@@ -1083,16 +1380,9 @@ bool TrigonometricReduction::eulerFormToTrigonometry(
     leadingCoefficient + oppositeCoefficient;
     output.addMonomial(cosine, cosineCoefficient);
     output.addMonomial(sine, sineCoefficient);
-    global.comments
-    << "DEBUG: leading:, opposite: "
-    << leading
-    << " , "
-    << opposite
-    << "<br>";
     remainder.subtractMonomial(leading, leadingCoefficient);
     remainder.subtractMonomial(opposite, oppositeCoefficient);
   }
-  global.comments << "DEBUG: got to here AFTER!";
   return true;
 }
 

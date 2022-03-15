@@ -1104,6 +1104,10 @@
     "output":"-1"
   },
   {
+    "input":"A = cos(2x)/(cos^3 x - sin^3 x);\nFourierFractionForm A;\n",
+    "output":"(A=\\frac{\\cos{}\\left(2 x\\right)}{-{\\sin^{3}}{}x+{\\cos^{3}}{}x};\"<b>Starting expression.</b><br>\\\\(\\\\frac{\\\\cos{}\\\\left(2 x\\\\right) }{\\\\cos{}x^{3}-\\\\sin{}x^{3}}\\\\)<br>\\\\(\\\\begin{array}{clclcl}\\n\\\\cos{}x&\\\\to& cos(x)&=&\\\\frac{e^{\\\\sqrt{-1} x}+e^{-\\\\sqrt{-1} x}}{2}&=&\\\\frac{a }{2}+\\\\frac{a^{-1}}{2}\\\\\\\\\\n\\\\sin{}x&\\\\to& sin(x)&=&\\\\frac{e^{\\\\sqrt{-1} x}-e^{-\\\\sqrt{-1} x}}{2 \\\\sqrt{-1}}&=&-\\\\frac{\\\\sqrt{-1}}{2}a +\\\\frac{\\\\sqrt{-1}}{2}a^{-1}\\\\\\\\\\n\\\\cos{}\\\\left(2 x\\\\right)&\\\\to& cos(2 x)&=&\\\\frac{e^{\\\\sqrt{-1}\\\\cdot 2 x}+e^{-\\\\sqrt{-1}\\\\cdot 2 x}}{2}&=&\\\\frac{a^{2}}{2}+\\\\frac{a^{-2}}{2}\\\\\\\\\\n\\\\end{array}\\\\)<br><b>Base arguments</b>: {\\\"x\\\":\\\"2 elements: \\n1, 2\\\"}<br>Euler form:<br>\\\\(\\\\frac{\\\\frac{e^{\\\\sqrt{-1}\\\\cdot 2 x}+e^{-\\\\sqrt{-1}\\\\cdot 2 x}}{2}}{-\\\\left(\\\\frac{e^{\\\\sqrt{-1} x}-e^{-\\\\sqrt{-1} x}}{2 \\\\sqrt{-1}}\\\\right)^{3}+\\\\left(\\\\frac{e^{\\\\sqrt{-1} x}+e^{-\\\\sqrt{-1} x}}{2}\\\\right)^{3}}\\\\)<br>Euler form algebraic: <br>\\\\(\\\\frac{\\\\frac{1}{2} a^{2}+\\\\frac{1}{2} a^{-2}}{-\\\\left(-\\\\frac{\\\\sqrt{-1}}{2} a+\\\\frac{\\\\sqrt{-1}}{2} a^{-1}\\\\right)^{3}+\\\\left(\\\\frac{1}{2} a+\\\\frac{1}{2} a^{-1}\\\\right)^{3}}\\\\)<br>reduced:<br>\\\\(\\\\frac{\\\\left(2\\\\sqrt{-1}+2\\\\right)a^{3}+\\\\left(2\\\\sqrt{-1}-2\\\\right)a }{a^{4}+4\\\\sqrt{-1}a^{2}-1}\\\\)<br><b>Fourier fraction form:</b><br>\\\\(\\\\frac{2 \\\\cos{}x+2 \\\\sin{}x}{\\\\sin{}\\\\left(2 x\\\\right)+2}\\\\)<br><br>Base trigonometric form:<br>\\\\(\\\\frac{\\\\cos{}x+\\\\sin{}x}{1+\\\\left(\\\\cos{}x\\\\right)\\\\sin{}x}\\\\)\")"
+  },
+  {
     "input":"d/dx(sqrt(x));",
     "output":"\\frac{1}{2} x^{-\\frac{1}{2}}"
   },
@@ -2241,7 +2245,7 @@
   },
   {
     "input":"LispifyFull(e^x)",
-    "output":"\"(20 , 103 , 482 )\""
+    "output":"\"(20 , 103 , 483 )\""
   },
   {
     "input":"TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\nTestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",

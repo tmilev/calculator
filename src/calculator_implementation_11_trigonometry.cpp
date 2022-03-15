@@ -646,6 +646,9 @@ public:
   MapList<Expression, Rational> trigonometricBaseScales;
   FormatExpressions formatAlgebraic;
   FormatExpressions formatTrigonometric;
+  LinearCombination<Expression, AlgebraicNumber> numeratorBaseTrigonometric;
+  LinearCombination<Expression, AlgebraicNumber> denominatorBaseTrigonometric;
+  Expression baseTrigonometricForm;
   bool eulerFormToTrigonometryFourierForm(
     Polynomial<AlgebraicNumber>& input,
     Polynomial<AlgebraicNumber>& outputShifted,
@@ -669,6 +672,10 @@ public:
   bool computeEulerFormReduced(std::stringstream* commentsOnFailure);
   bool computeBaseTrigonometricForm(std::stringstream* commentsOnFailure);
   bool computeEulerFormExpression(std::stringstream* commentsOnFailure);
+  void normalizeNumeratorAndDenominator(
+    LinearCombination<Expression, AlgebraicNumber>& numerator,
+    LinearCombination<Expression, AlgebraicNumber>& denominator
+  );
   bool computeSineCosineForm(
     const MonomialPolynomial& monomial,
     Polynomial<AlgebraicNumber>& output,
@@ -758,6 +765,11 @@ std::string TrigonometricReduction::toString() {
   << "<br>\\("
   << this->fourierFractionForm.toString()
   << "\\)<br>";
+  out
+  << "<br>Base trigonometric form:<br>"
+  << "\\("
+  << this->baseTrigonometricForm.toString()
+  << "\\)";
   return out.str();
 }
 
@@ -944,6 +956,26 @@ bool TrigonometricReduction::computeEulerFormReduced(
   return true;
 }
 
+void TrigonometricReduction::normalizeNumeratorAndDenominator(
+  LinearCombination<Expression, AlgebraicNumber>& numerator,
+  LinearCombination<Expression, AlgebraicNumber>& denominator
+) {
+  AlgebraicNumber numeratorScale =
+  numerator.scaleNormalizeLeadingMonomial(nullptr);
+  AlgebraicNumber denominatorScale =
+  denominator.scaleNormalizeLeadingMonomial(nullptr);
+  AlgebraicNumber quotient = denominatorScale / numeratorScale;
+  numerator *= quotient;
+  if (!numerator.isEqualToZero()) {
+    if (!numerator.getLeadingCoefficient(nullptr).isRational()) {
+      numerator /=
+      this->owner->objectContainer.algebraicClosure.imaginaryUnit();
+      denominator /=
+      this->owner->objectContainer.algebraicClosure.imaginaryUnit();
+    }
+  }
+}
+
 bool TrigonometricReduction::computeBaseTrigonometricForm(
   std::stringstream* commentsOnFailure
 ) {
@@ -964,23 +996,41 @@ bool TrigonometricReduction::computeBaseTrigonometricForm(
   ) {
     return false;
   }
-  LinearCombination<Expression, AlgebraicNumber>
-  numeratorExpression,
-  denominatorExpression;
   if (
     !this->computeTrigonometricForm(
-      numerator, numeratorExpression, commentsOnFailure
+      numerator, this->numeratorBaseTrigonometric, commentsOnFailure
     )
   ) {
     return false;
   }
   if (
     !this->computeTrigonometricForm(
-      denominator, denominatorExpression, commentsOnFailure
+      denominator, this->denominatorBaseTrigonometric, commentsOnFailure
     )
   ) {
     return false;
   }
+  this->normalizeNumeratorAndDenominator(
+    this->numeratorBaseTrigonometric, this->denominatorBaseTrigonometric
+  );
+  Expression numeratorExpression;
+  numeratorExpression.makeSum(
+    *this->owner, this->numeratorBaseTrigonometric
+  );
+  if (denominator.isEqualToOne()) {
+    this->baseTrigonometricForm = numeratorExpression;
+    return true;
+  }
+  Expression denominatorExpression;
+  denominatorExpression.makeSum(
+    *this->owner, this->denominatorBaseTrigonometric
+  );
+  this->baseTrigonometricForm.makeXOX(
+    *this->owner,
+    this->owner->opDivide(),
+    numeratorExpression,
+    denominatorExpression
+  );
   return true;
 }
 
@@ -1081,8 +1131,8 @@ bool TrigonometricReduction::computeTrigonometricForm(
 }
 
 Expression TrigonometricReduction::argumentTermIndex(int index) {
-  Expression result;
-  this->trigonometricBaseScales.keys[index];
+  STACK_TRACE("TrigonometricReduction::argumentTermIndex");
+  Expression result = this->trigonometricBaseScales.keys[index];
   if (this->trigonometricBaseScales.values[index] != 1) {
     Expression coefficient;
     coefficient.assignValue(
@@ -1100,6 +1150,9 @@ bool TrigonometricReduction::trigonometricFormFromSineCosineMonomial(
 ) {
   List<Expression> multiplicands;
   for (int i = 0; i < input.minimalNumberOfVariables(); i ++) {
+    if (input(i).isEqualToZero()) {
+      continue;
+    }
     int index = i;
     if (index >= numberOfVariables) {
       index -= numberOfVariables;
@@ -1215,20 +1268,7 @@ bool TrigonometricReduction::computeEulerFormExpression(
   ) {
     return false;
   }
-  AlgebraicNumber numeratorScale =
-  numerator.scaleNormalizeLeadingMonomial(nullptr);
-  AlgebraicNumber denominatorScale =
-  denominator.scaleNormalizeLeadingMonomial(nullptr);
-  AlgebraicNumber quotient = denominatorScale / numeratorScale;
-  numerator *= quotient;
-  if (!numerator.isEqualToZero()) {
-    if (!numerator.getLeadingCoefficient(nullptr).isRational()) {
-      numerator /=
-      this->owner->objectContainer.algebraicClosure.imaginaryUnit();
-      denominator /=
-      this->owner->objectContainer.algebraicClosure.imaginaryUnit();
-    }
-  }
+  this->normalizeNumeratorAndDenominator(numerator, denominator);
   Expression numeratorExpression, denominatorExpression;
   numeratorExpression.makeSum(*this->owner, numerator);
   denominatorExpression.makeSum(*this->owner, denominator);

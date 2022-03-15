@@ -508,6 +508,16 @@ template < >
 unsigned int HashFunctions::hashFunction(const Selection& input);
 template <>
 unsigned int HashFunctions::hashFunction(const MonomialTensor<int, HashFunctions::hashFunction<int>> &input);
+template <>
+unsigned int HashFunctions::hashFunction(
+const Pair<
+MonomialTensor<int, HashFunctions::hashFunction<int> >,
+MonomialTensor<int, HashFunctions::hashFunction<int> >,
+HashFunctions::hashFunction<MonomialTensor<int, HashFunctions::hashFunction<int> >>,
+HashFunctions::hashFunction<MonomialTensor<int, HashFunctions::hashFunction<int> >>
+
+>& input );
+
 template <typename Object>
 class ListIterator {
 public:

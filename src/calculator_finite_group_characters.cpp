@@ -2420,15 +2420,13 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
     List<
       Pair<
         std::string,
-        List<Rational>,
-        HashFunctions::hashFunction<std::string>
+        List<Rational>
       >
     > tauSigPairs;
     finalSubGroups.reserve(allRootSubgroups.size);
     Pair<
       std::string,
-      List<Rational>,
-      HashFunctions::hashFunction<std::string>
+      List<Rational>
     > currentTauSig;
     for (int j = 0; j < 3; j ++) {
       List<SubgroupDataRootReflections>* currentSGs = nullptr;

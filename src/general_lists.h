@@ -126,9 +126,7 @@ class AffineCones;
 // (Matrices, Vectors, PolynomialSubstitution, etc.)
 template <
   class ObjectType1,
-  class ObjectType2,
-  unsigned int hashFunction1(const ObjectType1&) = ObjectType1::hashFunction,
-  unsigned int hashFunction2(const ObjectType2&) = ObjectType2::hashFunction
+  class ObjectType2
 >
 class Pair;
 template <class Object>
@@ -512,9 +510,7 @@ template <>
 unsigned int HashFunctions::hashFunction(
 const Pair<
 MonomialTensor<int, HashFunctions::hashFunction<int> >,
-MonomialTensor<int, HashFunctions::hashFunction<int> >,
-HashFunctions::hashFunction<MonomialTensor<int, HashFunctions::hashFunction<int> >>,
-HashFunctions::hashFunction<MonomialTensor<int, HashFunctions::hashFunction<int> >>
+MonomialTensor<int, HashFunctions::hashFunction<int> >
 
 >& input );
 
@@ -1247,14 +1243,12 @@ public:
 
 template <
   class ObjectType1,
-  class ObjectType2,
-  unsigned int hashFunction1(const ObjectType1&),
-  unsigned int hashFunction2(const ObjectType2&)
+  class ObjectType2
 >
 class Pair {
   friend std::ostream& operator<<(
     std::ostream& output,
-    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& pair
+    const Pair<ObjectType1, ObjectType2>& pair
   ) {
     output << "(" << pair.object1 << ", " << pair.object2 << ")";
     return output;
@@ -1266,31 +1260,31 @@ public:
   Pair(const ObjectType1& o1, const ObjectType2& o2): object1(o1), object2(o2)
   {}
   static unsigned int hashFunction(
-    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input
+    const Pair<ObjectType1, ObjectType2>& input
   ) {
     return
-    HashConstants::constant0 * hashFunction1(input.object1) +
-    HashConstants::constant1 * hashFunction2(input.object2);
+    HashConstants::constant0 * HashFunctions::hashFunction<ObjectType1>(input.object1) +
+    HashConstants::constant1 * HashFunctions::hashFunction<ObjectType2>(input.object2);
   }
   unsigned int hashFunction() const {
     return
-    Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::hashFunction(
+    Pair<ObjectType1, ObjectType2>::hashFunction(
       *this
     );
   }
   void operator=(
-    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other
+    const Pair<ObjectType1, ObjectType2>& other
   ) {
     this->object1 = other.object1;
     this->object2 = other.object2;
   }
   bool operator==(
-    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other
+    const Pair<ObjectType1, ObjectType2>& other
   ) const {
     return this->object1 == other.object1 && this->object2 == other.object2;
   }
   bool operator>(
-    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other
+    const Pair<ObjectType1, ObjectType2>& other
   ) {
     if (this->object1 > other.object1) {
       return true;
@@ -1308,9 +1302,6 @@ public:
   }
 };
 
-typedef Pair<
-  int, int, HashFunctions::hashFunction, HashFunctions::hashFunction
-> PairInts;
 template <
   class Object,
   class TemplateList,

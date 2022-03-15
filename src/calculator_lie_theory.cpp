@@ -18,9 +18,7 @@ template <>
 unsigned int HashFunctions::hashFunction(
 const Pair<
 MonomialTensor<int, HashFunctions::hashFunction<int> >,
-MonomialTensor<int, HashFunctions::hashFunction<int> >,
-HashFunctions::hashFunction<MonomialTensor<int, HashFunctions::hashFunction<int> >>,
-HashFunctions::hashFunction<MonomialTensor<int, HashFunctions::hashFunction<int> >>
+MonomialTensor<int, HashFunctions::hashFunction<int> >
 
 >& input ){return input.hashFunction();}
 

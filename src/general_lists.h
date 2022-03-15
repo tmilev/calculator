@@ -506,6 +506,8 @@ template < >
 unsigned int HashFunctions::hashFunction(const double& input);
 template < >
 unsigned int HashFunctions::hashFunction(const Selection& input);
+template <>
+unsigned int HashFunctions::hashFunction(const MonomialTensor<int, HashFunctions::hashFunction<int>> &input);
 template <typename Object>
 class ListIterator {
 public:

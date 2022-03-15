@@ -8,20 +8,22 @@
 #include "math_extra_weyl_algebras_implementation.h"
 #include "math_rational_function_implementation.h"
 
-template<>
-unsigned int HashFunctions::hashFunction(const MonomialTensor<int, HashFunctions::hashFunction<int>> &input){
+template < >
+unsigned int HashFunctions::hashFunction(
+  const MonomialTensor<int, HashFunctions::hashFunction<int> >& input
+) {
   return input.hashFunction();
 }
 
-
-template <>
+template < >
 unsigned int HashFunctions::hashFunction(
-const Pair<
-MonomialTensor<int, HashFunctions::hashFunction<int> >,
-MonomialTensor<int, HashFunctions::hashFunction<int> >
-
->& input ){return input.hashFunction();}
-
+  const Pair<
+    MonomialTensor<int, HashFunctions::hashFunction<int> >,
+    MonomialTensor<int, HashFunctions::hashFunction<int> >
+  >& input
+) {
+  return input.hashFunction();
+}
 
 MapList<
   std::string,

@@ -2417,17 +2417,9 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
     weyl.getSignSignatureParabolics(parabolicSubgroupS);
     weyl.getSignSignatureExtendedParabolics(extendedParabolicSubgroups);
     weyl.getSignSignatureAllRootSubsystems(allRootSubgroups);
-    List<
-      Pair<
-        std::string,
-        List<Rational>
-      >
-    > tauSigPairs;
+    List<Pair<std::string, List<Rational> > > tauSigPairs;
     finalSubGroups.reserve(allRootSubgroups.size);
-    Pair<
-      std::string,
-      List<Rational>
-    > currentTauSig;
+    Pair<std::string, List<Rational> > currentTauSig;
     for (int j = 0; j < 3; j ++) {
       List<SubgroupDataRootReflections>* currentSGs = nullptr;
       if (j == 0) {

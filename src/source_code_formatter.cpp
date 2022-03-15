@@ -2811,7 +2811,8 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.addChild(last);
     return this->removeLast(2);
   }
-  if ((
+  if (
+    fifthToLast.type != CodeFormatter::Element::Return && (
       fourthToLast.isTypeWordOrTypeExpression() ||
       fourthToLast.isIdentifierOrAtom()
     ) &&

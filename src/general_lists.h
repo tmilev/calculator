@@ -124,10 +124,7 @@ class AffineCones;
 
 // Hybrid classes that serve both memory-management and mathematical purposes
 // (Matrices, Vectors, PolynomialSubstitution, etc.)
-template <
-  class ObjectType1,
-  class ObjectType2
->
+template <class ObjectType1, class ObjectType2>
 class Pair;
 template <class Object>
 class ListIterator;
@@ -504,16 +501,17 @@ template < >
 unsigned int HashFunctions::hashFunction(const double& input);
 template < >
 unsigned int HashFunctions::hashFunction(const Selection& input);
-template <>
-unsigned int HashFunctions::hashFunction(const MonomialTensor<int, HashFunctions::hashFunction<int>> &input);
-template <>
+template < >
 unsigned int HashFunctions::hashFunction(
-const Pair<
-MonomialTensor<int, HashFunctions::hashFunction<int> >,
-MonomialTensor<int, HashFunctions::hashFunction<int> >
-
->& input );
-
+  const MonomialTensor<int, HashFunctions::hashFunction<int> >& input
+);
+template < >
+unsigned int HashFunctions::hashFunction(
+  const Pair<
+    MonomialTensor<int, HashFunctions::hashFunction<int> >,
+    MonomialTensor<int, HashFunctions::hashFunction<int> >
+  >& input
+);
 template <typename Object>
 class ListIterator {
 public:
@@ -1241,14 +1239,10 @@ public:
   }
 };
 
-template <
-  class ObjectType1,
-  class ObjectType2
->
+template <class ObjectType1, class ObjectType2>
 class Pair {
   friend std::ostream& operator<<(
-    std::ostream& output,
-    const Pair<ObjectType1, ObjectType2>& pair
+    std::ostream& output, const Pair<ObjectType1, ObjectType2>& pair
   ) {
     output << "(" << pair.object1 << ", " << pair.object2 << ")";
     return output;
@@ -1263,29 +1257,24 @@ public:
     const Pair<ObjectType1, ObjectType2>& input
   ) {
     return
-    HashConstants::constant0 * HashFunctions::hashFunction<ObjectType1>(input.object1) +
-    HashConstants::constant1 * HashFunctions::hashFunction<ObjectType2>(input.object2);
-  }
-  unsigned int hashFunction() const {
-    return
-    Pair<ObjectType1, ObjectType2>::hashFunction(
-      *this
+    HashConstants::constant0 * HashFunctions::hashFunction<ObjectType1>(
+      input.object1
+    ) +
+    HashConstants::constant1*HashFunctions::hashFunction<ObjectType2>(
+      input.object2
     );
   }
-  void operator=(
-    const Pair<ObjectType1, ObjectType2>& other
-  ) {
+  unsigned int hashFunction() const {
+    return Pair<ObjectType1, ObjectType2>::hashFunction(*this);
+  }
+  void operator=(const Pair<ObjectType1, ObjectType2>& other) {
     this->object1 = other.object1;
     this->object2 = other.object2;
   }
-  bool operator==(
-    const Pair<ObjectType1, ObjectType2>& other
-  ) const {
+  bool operator==(const Pair<ObjectType1, ObjectType2>& other) const {
     return this->object1 == other.object1 && this->object2 == other.object2;
   }
-  bool operator>(
-    const Pair<ObjectType1, ObjectType2>& other
-  ) {
+  bool operator>(const Pair<ObjectType1, ObjectType2>& other) {
     if (this->object1 > other.object1) {
       return true;
     }

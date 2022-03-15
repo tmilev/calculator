@@ -504,6 +504,8 @@ template < >
 unsigned int HashFunctions::hashFunction(const unsigned char& input);
 template < >
 unsigned int HashFunctions::hashFunction(const double& input);
+template < >
+unsigned int HashFunctions::hashFunction(const Selection& input);
 template <typename Object>
 class ListIterator {
 public:

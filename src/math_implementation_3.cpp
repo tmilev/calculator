@@ -3570,6 +3570,11 @@ unsigned int Selection::hashFunction() const {
   return result;
 }
 
+template <>
+unsigned int HashFunctions::hashFunction(const Selection& input){
+  return input.hashFunction();
+}
+
 // Format expression monomial orders for the toString() function follow.
 template < >
 List<

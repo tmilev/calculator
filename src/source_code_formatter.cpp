@@ -1777,6 +1777,10 @@ bool CodeFormatter::formatCPPDirectory(
   newFileNames.setExpectedSize(allFiles.size);
   oldFileNames.setExpectedSize(allFiles.size);
   for (int i = 0; i < allFiles.size; i ++) {
+    if (allFiles[i] == "temp.cpp") {
+      // This is a working file.
+      continue;
+    }
     if (allFileExtensions[i] == ".cpp" || allFileExtensions[i] == ".h") {
       oldFileNames.addOnTop(directory + allFiles[i]);
       newFileNames.addOnTop(newDirectory + allFiles[i]);

@@ -562,14 +562,14 @@ bool CalculatorConversions::extractPolynomialFromPower(
       content = inverted;
       return true;
     }
-    if (content.size() == 1 && acceptNonPositiveOrNonIntegerPowers){
+    if (content.size() == 1 && acceptNonPositiveOrNonIntegerPowers) {
       MonomialPolynomial monomial = content.monomials[0];
       inverted = content.coefficients[0];
       monomial.invert();
       inverted.invert();
       content.makeZero();
       content.addMonomial(monomial, inverted);
-      return  true;
+      return true;
     }
     return
     calculator
@@ -577,7 +577,6 @@ bool CalculatorConversions::extractPolynomialFromPower(
     << input.toString()
     << " because the exponent was negative. "
     << "Please make sure that this is not a typo. ";
-
   }
   output.content.raiseToPower(power, 1);
   return true;

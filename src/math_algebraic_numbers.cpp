@@ -301,6 +301,7 @@ void AlgebraicClosureRationals::assignDefaultBasisDisplayNames() {
 void AlgebraicClosureRationals::injectOldBases(
   const MatrixTensor<Rational>* injectionNullForIdentity
 ) {
+  STACK_TRACE("AlgebraicClosureRationals::injectOldBases");
   if (injectionNullForIdentity == nullptr) {
     return;
   }
@@ -314,6 +315,7 @@ void AlgebraicClosureRationals::injectOldBases(
 }
 
 void AlgebraicClosureRationals::appendAdditiveEiBasis() {
+  STACK_TRACE("AlgebraicClosureRationals::appendAdditiveEiBasis");
   this->basisInjections.setSize(this->basisInjections.size + 1);
   this->basisInjections.lastObject()->setSize(this->latestBasis.size);
   for (int i = 0; i < this->latestBasis.size; i ++) {
@@ -473,6 +475,14 @@ bool AlgebraicClosureRationals::reduceMe(
     << " has non-integral exponent, which should be "
     << "impossible in the current context. "
     << global.fatal;
+  }
+  if (smallestFactorDegree == 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Your minimal polynomial has a linear factor: "
+      << factorization.toStringResult();
+    }
+    return false;
   }
   projectionGeneratorCoordinates.makeZero();
   for (int i = 0; i < smallestFactorDegree; i ++) {
@@ -912,14 +922,15 @@ convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
   Polynomial<AlgebraicNumber>& output
 ) {
   STACK_TRACE(
-    "AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail"
+    "AlgebraicClosureRationals::"
+    "convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail"
   );
   int indexVariable = - 1;
   if (!input.isOneVariableNonConstantPolynomial(&indexVariable)) {
     global.fatal
     << "I am being asked convert to a one-variable polynomial a polynomial "
     << "depending on more than one variables. "
-    << "The input poly is: "
+    << "The input polynomial is: "
     << input.toString()
     << global.fatal;
   }
@@ -987,6 +998,13 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
       << ", line "
       << __LINE__
       << ".";
+    }
+    return false;
+  }
+  if (degreeMinimialPolynomial <= 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The degree of the minimal polynomial must be at least two.";
     }
     return false;
   }

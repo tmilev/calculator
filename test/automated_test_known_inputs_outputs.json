@@ -1060,8 +1060,8 @@
     "output":"(1;1;0;0;0)"
   },
   {
-    "input":"C = (c a + a b + b c + 1)^3;\nA = Polynomialize(C);\nB = MakeExpression(Polynomial(C));\nA - B",
-    "output":"(C=\\left(c a+b c+a b+1\\right)^{3};A=6 a^{2} b^{2} c^{2}+3 a^{3} b^{2} c+3 a^{3} b c^{2}+3 a^{2} b^{3} c+3 a^{2} b c^{3}+3 a b^{3} c^{2}+3 a b^{2} c^{3}+b^{3} c^{3}+3 b^{2} c^{2}+a^{3} c^{3}+a^{3} b^{3}+3 a^{2} c^{2}+3 a^{2} b^{2}+6 a^{2} b c+6 a b^{2} c+6 a b c^{2}+3 b c+3 a c+3 a b+1;B=6 a^{2} b^{2} c^{2}+3 a^{3} b^{2} c+3 a^{3} b c^{2}+3 a^{2} b^{3} c+3 a^{2} b c^{3}+3 a b^{3} c^{2}+3 a b^{2} c^{3}+b^{3} c^{3}+3 b^{2} c^{2}+a^{3} c^{3}+a^{3} b^{3}+3 a^{2} c^{2}+3 a^{2} b^{2}+6 a^{2} b c+6 a b^{2} c+6 a b c^{2}+3 b c+3 a c+3 a b+1;0)"
+    "input":"C = (c a + a b + b c + 1)^3;\nA = Polynomialize(C);\nB = MakeExpression(Polynomial(C));\nA - B;\nPolynomialize((a+a^-1+sqrt(-1))^2)",
+    "output":"(C=\\left(c a+b c+a b+1\\right)^{3};A=6 a^{2} b^{2} c^{2}+3 a^{3} b^{2} c+3 a^{3} b c^{2}+3 a^{2} b^{3} c+3 a^{2} b c^{3}+3 a b^{3} c^{2}+3 a b^{2} c^{3}+b^{3} c^{3}+3 b^{2} c^{2}+a^{3} c^{3}+a^{3} b^{3}+3 a^{2} c^{2}+3 a^{2} b^{2}+6 a^{2} b c+6 a b^{2} c+6 a b c^{2}+3 b c+3 a c+3 a b+1;B=6 a^{2} b^{2} c^{2}+3 a^{3} b^{2} c+3 a^{3} b c^{2}+3 a^{2} b^{3} c+3 a^{2} b c^{3}+3 a b^{3} c^{2}+3 a b^{2} c^{3}+b^{3} c^{3}+3 b^{2} c^{2}+a^{3} c^{3}+a^{3} b^{3}+3 a^{2} c^{2}+3 a^{2} b^{2}+6 a^{2} b c+6 a b^{2} c+6 a b c^{2}+3 b c+3 a c+3 a b+1;0;2\\sqrt{-1} a^{-1}+2\\sqrt{-1} a+a^{2}+a^{-2}+1)"
   },
   {
     "input":"IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}});\nIsAlgebraicRadical(\\sqrt{x});\nIsAlgebraicRadical(\\sqrt{\\pi + e + 1})",

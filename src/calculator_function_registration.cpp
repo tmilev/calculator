@@ -693,7 +693,8 @@ void Calculator::initializeFunctionsStandard() {
     "C = (c a + a b + b c + 1)^3;\n"
     "A = Polynomialize(C);\n"
     "B = MakeExpression(Polynomial(C));\n"
-    "A - B",
+    "A - B;\n"
+    "Polynomialize((a+a^-1+sqrt(-1))^2)",
     "CalculatorFunctions::polynomialize",
     "Polynomialize",
     innerStandard

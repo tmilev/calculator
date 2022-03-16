@@ -7579,16 +7579,25 @@ class MathNode {
     if (this.parent === null) {
       return;
     }
-    let previous = this.previousHorizontalSibling();
-    if (previous !== null) {
-      if (this.isEmptyAtom() ||
-          previous.type.type == knownTypes.rightDelimiter.type) {
-        previous.makeBaseWithExponent();
-        return;
-      }
+    if (this.positionCursorBeforeKeyEvents > 0) {
+      this.makeBaseDefaultWithExponentNoDelimiter();
+      return;
     }
-    if (this.type.type === knownTypes.rightDelimiter.type) {
-      this.makeBaseWithExponentRightDelimiter();
+    let previous = this.previousHorizontalSibling();
+    if (previous === null) {
+      this.makeBaseDefaultWithExponentNoDelimiter();
+      return;
+    }
+    if (previous.type.type === knownTypes.rightDelimiter.type) {
+      previous.makeBaseWithExponentRightDelimiter();
+      return;
+    }
+    if (previous.type.type === knownTypes.matrix.type) {
+      previous.makeBaseDefaultWithExponent();
+      return;
+    }
+    if (previous.isAtomEditable()) {
+      previous.makeBaseDefaultWithExponentNoDelimiter();
       return;
     }
     this.makeBaseDefaultWithExponentNoDelimiter();
@@ -7625,36 +7634,18 @@ class MathNode {
       this.makeBaseDefaultWithExponent();
       return;
     }
-    let content = this.textContentOrInitialContent();
-    let numberOfCharactersToSlice = 0;
-    for (let i = content.length - 1; i >= 0; i--) {
-      let current = content[i];
-      if (!latexConstants.isDigit(current)) {
-        break;
-      }
-      numberOfCharactersToSlice++;
-    }
-    if (numberOfCharactersToSlice === 0) {
-      numberOfCharactersToSlice = 1;
-    }
-    if (numberOfCharactersToSlice >= content.length) {
-      this.makeBaseDefaultWithExponent();
-      return;
-    }
-    let leftContent =
-        content.slice(0, content.length - numberOfCharactersToSlice);
-    let rightContent =
-        content.slice(content.length - numberOfCharactersToSlice);
-    let left = mathNodeFactory.atom(this.equationEditor, leftContent);
-    let right = mathNodeFactory.atom(this.equationEditor, rightContent);
+    let split = this.splitByCursor();
     let originalParent = this.parent;
     let originalIndexInParent = this.indexInParent;
-    const baseWithExponent =
-        mathNodeFactory.baseWithExponent(this.equationEditor, right, null);
-    baseWithExponent.children[1].children[0].children[0].desiredCursorPosition =
-        0;
-    originalParent.replaceChildAtPositionWithChildren(
-        originalIndexInParent, [left, baseWithExponent]);
+    let baseWithExponent =
+      mathNodeFactory.baseWithExponent(this.equationEditor, split[0], split[1]);
+    if (split[0] === null) {
+      baseWithExponent.children[0].appendChild(mathNodeFactory.atom(this.equationEditor, ''));
+      baseWithExponent.children[0].children[0].desiredCursorPosition = 0;
+    } else {
+      baseWithExponent.children[1].children[0].children[0].desiredCursorPosition = 0;
+    }
+    originalParent.replaceChildAtPosition(originalIndexInParent,  baseWithExponent);
     originalParent.ensureEditableAtoms();
     originalParent.updateDOM();
     originalParent.focusRestore();

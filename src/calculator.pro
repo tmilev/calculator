@@ -89,6 +89,7 @@ HEADERS += \
     system_functions_global_objects.h \
     transport_layer_security.h \
     web_assembly.h \
+    web_client.h \
     webserver.h \
     serialization_basic.h \
     general_strings.h \

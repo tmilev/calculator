@@ -19,6 +19,7 @@
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 #include "assert.h"
 #include "signals_infrastructure.h"
+#include "web_client.h"
 
 const std::string WebServer::Statististics::pingRequestsString = "pingRequests"
 ;
@@ -4156,9 +4157,15 @@ int WebServer::daemon() {
         << Logger::red
         << this->toStringLastErrorDescription()
         << Logger::endL;
+
       }
-      global << Logger::blue << "Sleeping for 2 seconds." << Logger::endL;
+      global << Logger::blue << "Sleeping for 1 seconds." << Logger::endL;
       global.fallAsleep(1000000);
+      global << "Pinging web server to reset sockets." << Logger::endL;
+      WebClient webCrawler;
+      webCrawler.initialize();
+      webCrawler.pingCalculatorStatus("not authenticated");
+      global<< Logger::green  << "Ping done." << Logger::endL;
     }
     global.fallAsleep(1000000);
   }

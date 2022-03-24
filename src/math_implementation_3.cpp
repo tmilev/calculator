@@ -3879,9 +3879,6 @@ bool OnePartialFractionDenominator::rootIsInFractionCone(
   if (root == nullptr) {
     return true;
   }
-  if (this->relevanceIsComputed) {
-    return !this->isIrrelevant;
-  }
   Cone cone;
   Vectors<Rational> roots;
   for (int i = 0; i < this->denominators.size(); i ++) {
@@ -3890,7 +3887,7 @@ bool OnePartialFractionDenominator::rootIsInFractionCone(
     );
   }
   cone.createFromVertices(roots);
-  return !this->isIrrelevant;
+  return cone.isInCone(*root);
 }
 
 void OnePartialFractionDenominator::prepareFraction(
@@ -4054,7 +4051,6 @@ void OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula(
       continue;
     }
     currentFraction = *this;
-    currentFraction.relevanceIsComputed = false;
     currentFraction.addMultiplicity(
       gainingNormalizedExponent, 1, elongationGainingMultiplicityIndex
     );
@@ -4097,7 +4093,6 @@ void OnePartialFractionDenominator::decomposeAMinusNB(
   PartialFractions& owner
 ) {
   OnePartialFractionDenominator currentFraction;
-  currentFraction.relevanceIsComputed = false;
   Polynomial<LargeInteger> aMinusNBetaPolynomial, commonPolynomial;
   this->getAlphaMinusNBetaPoly(
     owner, indexA, indexB, n, aMinusNBetaPolynomial
@@ -4274,8 +4269,6 @@ OnePartialFractionDenominator::OnePartialFractionDenominator(
 
 OnePartialFractionDenominator::OnePartialFractionDenominator() {
   this->owner = nullptr;
-  this->relevanceIsComputed = false;
-  this->isIrrelevant = false;
 }
 
 OnePartialFractionDenominator::~OnePartialFractionDenominator() {}
@@ -4295,8 +4288,6 @@ void OnePartialFractionDenominator::operator=(
 ) {
   this->owner = right.owner;
   this->denominators = right.denominators;
-  this->isIrrelevant = right.isIrrelevant;
-  this->relevanceIsComputed = right.relevanceIsComputed;
 }
 
 std::string PartialFractions::toLatex(FormatExpressions* format) const {
@@ -4327,6 +4318,14 @@ std::string PartialFractions::toLatex(FormatExpressions* format) const {
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
   std::stringstream out;
   out << "\\(" << this->toLatex(format) << "\\)";
+  for (int i = 0; i < this->chambers.refinedCones.size; i ++){
+    QuasiPolynomial& polynomial= this->allQuasiPolynomials[i];
+    const Cone& cone = this->chambers.refinedCones[i];
+    out << "<hr>Chamber " << i+1<< ".<br>";
+    out << cone.toHTML();
+    out << "<br>Vector partition function.<br>";
+    out << polynomial.toString(true, true);
+  }
   return out.str();
 }
 
@@ -5064,6 +5063,14 @@ void OnePartialFractionDenominatorComponent::getDenominatorExponents(
     for (int j = 0; j < this->multiplicities[i]; j ++) {
       output.addOnTop(normalizedVector * this->elongations[i]);
     }
+  }
+}
+void OnePartialFractionDenominatorComponent::getDenominatorExponentsWithoutMultiplicities(List<Vector<Rational> > &output) const
+{
+  output.clear();
+  Vector<Rational> normalizedVector = this->getNormalizedVector();
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+      output.addOnTop(normalizedVector * this->elongations[i]);
   }
 }
 
@@ -10907,6 +10914,7 @@ void QuasiPolynomial::makeFromPolynomialShiftAndLattice(
 }
 
 bool Lattice::reduceVector(Vector<Rational>& vector) const {
+  STACK_TRACE("Lattice::reduceVector");
   Vector<Rational> output;
   if (vector.size != this->getDimension()) {
     global.fatal << "Vector dimension not as expected. " << global.fatal;
@@ -10982,6 +10990,8 @@ void OnePartialFractionDenominator::getNormalizedSortedDenominatorExponents(
 void OnePartialFractionDenominator::getDenominatorExponents(
   Vectors<Rational>& output
 ) const {
+  STACK_TRACE("OnePartialFractionDenominator::getDenominatorExponents");
+  global.comments << "DEBUG: normalizedVectors: " << this->owner->normalizedVectors.toString();
   output.clear();
   for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
     const Vector<Rational>& current = this->owner->normalizedVectors[i];
@@ -10992,6 +11002,24 @@ void OnePartialFractionDenominator::getDenominatorExponents(
     this->denominators.getValueNoFail(current);
     List<Vector<Rational> > currentExponents;
     component.getDenominatorExponents(currentExponents);
+    output.addListOnTop(currentExponents);
+  }
+}
+
+void OnePartialFractionDenominator::getDenominatorExponentsWithoutMultiplicities(Vectors<Rational> &output) const
+{  STACK_TRACE("OnePartialFractionDenominator::"
+  "getDenominatorExponentsWithoutMultiplicities");
+  global.comments << "DEBUG: normalizedVectors: " << this->owner->normalizedVectors.toString();
+  output.clear();
+  for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
+    const Vector<Rational>& current = this->owner->normalizedVectors[i];
+    if (!this->denominators.contains(current)) {
+      continue;
+    }
+    const OnePartialFractionDenominatorComponent& component =
+    this->denominators.getValueNoFail(current);
+    List<Vector<Rational> > currentExponents;
+    component.getDenominatorExponentsWithoutMultiplicities(currentExponents);
     output.addListOnTop(currentExponents);
   }
 }
@@ -11037,14 +11065,25 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
   Polynomial<LargeInteger>& coefficient,
   QuasiPolynomial& output
 ) const {
+  STACK_TRACE("OnePartialFractionDenominator::getVectorPartitionFunction");
   QuasiPolynomial shiftedQuasiPolynomial;
   Vectors<Rational> normals;
   Vectors<Rational> latticeGenerators;
-  this->getDenominatorExponents(latticeGenerators);
+  this->getDenominatorExponentsWithoutMultiplicities(latticeGenerators);
+  if (latticeGenerators.size != this->owner->ambientDimension) {
+    global.fatal << "Unexpected: the number of denominators "
+    << latticeGenerators.size
+    << " without multiplicity should equal "
+    << " the dimension: "
+    <<  this->owner->ambientDimension
+    << global.fatal;
+  }
+  global.comments << "DEBUG: lattice generators: " << latticeGenerators.toString();
   Lattice lattice;
   lattice.makeFromRoots(latticeGenerators);
   Matrix<Rational> normalsMatrixForm;
   normalsMatrixForm.assignVectorsToRows(latticeGenerators);
+  global.comments << "DEBUG: about ot invert: "<< normalsMatrixForm.toString() << "<br>";
   normalsMatrixForm.invert();
   normals.assignMatrixColumns(normalsMatrixForm);
   output.makeZeroLatticeZn(owner.ambientDimension);
@@ -11062,19 +11101,34 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
 }
 
 void PartialFractions::computeAllVectorPartitionFunctions() {
+  STACK_TRACE("PartialFractions::computeAllVectorPartitionFunctions");
   Vectors<Rational> vectors;
   vectors.addListOnTop(this->normalizedVectors);
   this->chambers.initializeFromDirectionsAndRefine(vectors);
+  this->computeQuasipolynomials();
+}
+
+void PartialFractions::computeQuasipolynomials() {
+  STACK_TRACE("PartialFractions::computeQuasipolynomials");
+  this->allQuasiPolynomials.clear();
+  QuasiPolynomial current;
+  for (Cone& cone : this->chambers.refinedCones){
+Vector<Rational> internalPoint=   cone.getInternalPoint();
+this->computeOneVectorPartitionFunction(current, internalPoint);
+      this->allQuasiPolynomials.addOnTop(current);
+  }
+
 }
 
 bool PartialFractions::computeOneVectorPartitionFunction(
   QuasiPolynomial& output, Vector<Rational>& newIndicator
 ) {
+  STACK_TRACE("PartialFractions::computeOneVectorPartitionFunction");
   ProgressReport report;
   if (this->assureIndicatorRegularity(newIndicator)) {
     report.report("Indicator modified to regular");
   }
-  this->resetRelevanceIsComputed();
+  global.comments << "DEBUG: Got to here1. ";
   if (
     !this->checkForMinimalityDecompositionWithRespectToRoot(&newIndicator)
   ) {
@@ -11083,7 +11137,9 @@ bool PartialFractions::computeOneVectorPartitionFunction(
   this->totalFractionsWithAccountedVectorPartitionFunction = 0;
   output.makeZeroLatticeZn(this->ambientDimension);
   QuasiPolynomial summand;
+  global.comments << "DEBUG: Got to here 2. ";
   for (int i = 0; i < this->reduced.size(); i ++) {
+    global.comments << "DEBUG: Got to here : " << i+3;
     if (!this->reduced[i].rootIsInFractionCone(&newIndicator)) {
       continue;
     }
@@ -11125,13 +11181,20 @@ std::string PartialFractions::doFullComputationReturnLatexFileString(
   //  this->initFromRoots(chambersOld.directions);
   out
   <<
-  "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n"
+  "\\documentclass{article}"
+  << "\\usepackage{amsmath, amsfonts, amssymb}\n"
+  << "\\begin{document}\n"
   ;
   out
   <<
-  "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
+  "The vector partition funciton is the number of "
+<<  "ways you can represent a vector "
+  <<"$(x_1,\\dots, x_n)$ as a non-negative "
+  <<"integral linear combination of "
   <<
-  " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: "
+  " a given set of vectors. "
+  << "You requested the vector partition function "
+  << "with respect to the set of vectors: "
   ;
   global.fatal << global.fatal;
   //  out << this->chambersOld.directions.ElementToStringGeneric();
@@ -11510,7 +11573,8 @@ bool Lattice::substitutionHomogeneous(
   for (int i = 0; i <preimageBasis.size; i ++) {
     subModifiable = sub;
     currentBasisVector.assignVectorColumn(preimageBasis[i]);
-    if (subModifiable.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(subModifiable, currentBasisVector, oneSolution)) {
+    if (subModifiable.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
+      subModifiable, currentBasisVector, oneSolution)) {
       subModifiable = sub;
       subModifiable.fin
     }

@@ -1022,7 +1022,12 @@ bool CodeFormatter::Element::computeIndentationComment() {
   }
   if (this->previousAtom()->newLinesAfter > 0) {
     this->whiteSpaceBefore = this->indentationLevel;
-  } else if (this->parent != nullptr && this->parent->type != CodeFormatter::Element::TopLevel){
+  } else if (
+    this->parent != nullptr &&
+    this->parent->type != CodeFormatter::Element::TopLevel
+  ) {
+    this->leftMostAtomUnderMe()->whiteSpaceBefore = 1;
+  } else {
     this->leftMostAtomUnderMe()->whiteSpaceBefore = 1;
   }
   List<std::string> words;

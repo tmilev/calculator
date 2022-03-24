@@ -565,7 +565,8 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
         maxNumHandshakeTries = 1;
         break;
         // case SSL_ERROR_WANT_ASYNC:
-        // logOpenSSL << Logger::red << "Asynchronous engine is still processing
+        // logOpenSSL << Logger::red << "Asynchronous engine is still
+        // processing
         // data. <br>"
         //  << Logger::endL;
         //  break;
@@ -836,7 +837,8 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
         maxNumHandshakeTries = 1;
         break;
         // case SSL_ERROR_WANT_ASYNC:
-        // logOpenSSL << Logger::red << "Asynchronous engine is still processing
+        // logOpenSSL << Logger::red << "Asynchronous engine is still
+        // processing
         // data. "
         //  << Logger::endL;
         //  break;

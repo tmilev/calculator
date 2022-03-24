@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_finite_groups_implementation_ALREADY_INCLUDED
@@ -264,13 +265,15 @@ void SubgroupData<someGroup, elementSomeGroup>::initFromGroupAndGenerators(
   // (there shouldn't be any, but knowing I am one of the programmers...)
 }
 
-// A well chosen generating set for G can have the property that for interesting
+// A well chosen generating set for G can have the property that for
+// interesting
 // subgroups H,
 // the usual choice of word in G for h∈H will be translatable into letters of
 // H.
 // This is the case for, in particular, the parabolic subgroups of the complete
 // hyperoctahedral
-// groups in the generating set that tacks on to the symmetric groups a complete
+// groups in the generating set that tacks on to the symmetric groups a
+// complete
 // set of ℤ₂ generators
 template <class someGroup, class elementSomeGroup>
 void SubgroupData<someGroup, elementSomeGroup>::makeTranslatableWordsSubgroup(
@@ -743,7 +746,8 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
   // by multiplying the representatives by the each element of each conjugacy
   // class of the generators.
   // We prove this algorithm is guaranteed to generate all conjugacy classes.
-  // Let g be a generator, H a conjugacy class, and h \in H an arbitrary element
+  // Let g be a generator, H a conjugacy class, and h \in H an arbitrary
+  // element
   // of H.
   // Suppose gH intersects a conjugacy class F. We claim there exists a
   // generator g and an
@@ -752,7 +756,8 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
   // element x, and therefore x g x^{- 1} h =x(g x^{- 1} h x) x^{- 1}\in F,
   // which proves our claim.
   // The preceding considerations show that
-  // a representative of each conjugacy class containing an element from g H can
+  // a representative of each conjugacy class containing an element from g H
+  // can
   // be obtained
   // by applying the entire conjugacy class of g onto an arbitrary
   // representative of H.

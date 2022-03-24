@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
@@ -964,7 +965,8 @@ JSData PlotObject::toJSON() {
     result = this->toJSONDrawText();
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFillStart) {
     result = this->toJSONPlotFillStart();
-  } else if (correctedPlotType == "plotFillFinish") {    // The plot type carries all
+  } else if (correctedPlotType == "plotFillFinish") {    // The plot type carries
+    // all
     // information.
   } else if (correctedPlotType == "axesGrid") {    // The plot type carries all
     // information.
@@ -1124,10 +1126,10 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   << "\\newcommand{\\fcColorAreaUnderGraph}{cyan}"
   << lineSeparator
   << "\\newcommand{\\fcColorNegativeAreaUnderGraph}{orange}"
-  <<
-  "\\newcommand{\\fcAxesStandard}[4]{ \\psframe*[linecolor =white](! #1 #2)(! #3 0.1 add #4 01 add) "
-  <<
-  "\\psaxes[ticks = none, labels = none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
+  << "\\newcommand{\\fcAxesStandard}[4]{ "
+  << "\\psframe*[linecolor =white](! #1 #2)(! #3 0.1 add #4 01 add) "
+  << "\\psaxes[ticks = none, labels = none]"
+  << "{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
   << lineSeparator
   << " \\psset{xunit =1cm, yunit =1cm}";
   resultStream << lineSeparator;

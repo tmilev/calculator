@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_packed_vector_ALREADY_INCLUDED
@@ -176,7 +177,8 @@ void AnotherWeylGroup<scalar, templateVector>::applyReflectionList(
       x += this->unrationalCartanSymmetric.elements[i][j] * v[j];
     }
     // so, under ordinary circumstances, this is just out[i] -= x;
-    // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i] !∈
+    // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i]
+    // !∈
     // {1,2}
     // and scalar can't deal with division properly
     // fortunately this only happens in G₂
@@ -239,7 +241,8 @@ void AnotherWeylGroup<scalar, templateVector>::computeRho() {
     unrationalCartanSymmetric.initialize(
       cartanSymmetric.numberOfRows, cartanSymmetric.numberOfColumns
     );
-    // this->ucsm = malloc(cartanSymmetric.numberOfRows*sizeof(templateVector));
+    // this->ucsm =
+    // malloc(cartanSymmetric.numberOfRows*sizeof(templateVector));
     // for (int i = 0; i <cartanSymmetric.numberOfRows; i ++)
     //  this->ucsm[i].setSize(cartanSymmetric.numberOfColumns);
     for (int i = 0; i < this->cartanSymmetric.numberOfRows; i ++) {
@@ -448,7 +451,7 @@ void AnotherWeylGroup<scalar, templateVector>::getSignCharacter(
   }
 }
 
-// there are like 3 copies of this function with slightly different argument
+// There are multiple copies of this function with slightly different argument
 // types
 template <typename scalar, typename templateVector>
 Rational AnotherWeylGroup<scalar, templateVector>::getHermitianProduct(

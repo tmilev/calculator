@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -12,7 +13,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "crypto.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::splitCharacterOverReductiveSubalgebra(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, BranchingData&, GlobalVariables&)'
+#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
@@ -3225,7 +3226,6 @@ bool CalculatorFunctionsDifferentiation::differentiateChainRule(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsDifferentiation::differentiateChainRule");
-  // ///////////////////
   if (input.size() != 3) {
     return false;
   }
@@ -5107,7 +5107,8 @@ integrateRationalFunctionBuidingBlockIIaandIIIa(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaandIIIa"
+    "CalculatorFunctionsIntegration::"
+    "integrateRationalFunctionBuidingBlockIIaandIIIa"
   );
   Expression functionExpression, x;
   if (!input.isIndefiniteIntegralFdx(&x, &functionExpression)) {

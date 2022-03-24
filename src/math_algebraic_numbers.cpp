@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_basic_implementation.h"
@@ -856,9 +857,9 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
     return false;
   }
   Polynomial<AlgebraicNumber> algebraicNumberPolynomial;
-  this->
-  convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
-  (polynomial, algebraicNumberPolynomial);
+  this->convertPolynomialOneVariableToPolynomialFirstVariable(
+    polynomial, algebraicNumberPolynomial
+  );
   Polynomial<Rational> minimialPolynomial;
   minimialPolynomial.makeZero();
   Rational currentCF, linearTermCoefficientFDividedByTwo, constantTermShifted;
@@ -916,8 +917,7 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
 }
 
 void AlgebraicClosureRationals::
-convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
-(
+convertPolynomialOneVariableToPolynomialFirstVariable(
   const Polynomial<AlgebraicNumber>& input,
   Polynomial<AlgebraicNumber>& output
 ) {
@@ -955,9 +955,9 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
     return true;
   }
   Polynomial<AlgebraicNumber> minimialPolynomial;
-  this->
-  convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail
-  (polynomial, minimialPolynomial);
+  this->convertPolynomialOneVariableToPolynomialFirstVariable(
+    polynomial, minimialPolynomial
+  );
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
   AlgebraicNumber leadingCoefficient =

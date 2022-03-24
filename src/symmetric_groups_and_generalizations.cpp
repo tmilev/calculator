@@ -1437,7 +1437,8 @@ void HyperoctahedralGroupData::allSpechtModules() {
         GroupRepresentation<
           FiniteGroup<ElementHyperoctahedralGroupR2>, Rational
         > sm;
-        // global.Comments << "Computing representation {" << nps[npi] << "}, {"
+        // global.Comments << "Computing representation {" << nps[npi] << "},
+        // {"
         // << pps[ppi] << "}\n";
         this->spechtModuleOfPartititons(pps[ppi], nps[npi], sm);
         // sm.verifyRepresentation();

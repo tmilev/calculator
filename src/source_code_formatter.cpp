@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_file_operations_encodings.h"
@@ -1051,7 +1052,7 @@ bool CodeFormatter::Element::computeIndentationComment() {
   for (int i = 1; i < words.size; i ++) {
     int incomingLength =
     currentOffset + currentWord.size() + 1 + words[i].size();
-    if (incomingLength > maximumWidth) {
+    if (incomingLength >= maximumWidth) {
       if (currentWord != "//") {
         lines.addOnTop(currentWord);
       }

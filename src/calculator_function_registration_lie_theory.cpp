@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -354,7 +355,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "SlTwoRealFormStructureForceRecompute{}(a_3)",
     "CalculatorLieTheory::slTwoRealFormStructureForceRecompute",
     "SlTwoRealFormStructureRecompute",
-    // TODO(tmilev): change to an automatically-tested version when sufficiently
+    // TODO(tmilev): change to an automatically-tested version when
+    // sufficiently
     // mature.
     adminNoTest
   );

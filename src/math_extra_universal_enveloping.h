@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_universal_enveloping_ALREADY_INCLUDED
@@ -112,7 +113,8 @@ public:
   // Format of the order of the generators:
   // first come the negative roots, in increasing height, then the elements of
   // the Cartan subalgebra, then the positive roots, in increasing height
-  // The order of the positive roots is the same as the order in which roots are
+  // The order of the positive roots is the same as the order in which roots
+  // are
   // kept
   // in WeylGroup::RootSystem.
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in

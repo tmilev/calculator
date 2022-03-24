@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_vectors_ALREADY_INCLUDED
@@ -1551,7 +1552,8 @@ public:
   bool wallIsInternalInCone(AffineHyperplane<Rational>& killerCandidate);
   // The below function returns true if the system of homogeneous linear
   // inequalities Ax<=b
-  // has a solution, false otherwise, where A is a matrix and x and b are column
+  // has a solution, false otherwise, where A is a matrix and x and b are
+  // column
   // vectors.
   // bool systemLinearInequalitiesHasSolution
   // (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> &

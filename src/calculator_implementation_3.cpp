@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
@@ -53,7 +54,8 @@ isDominantWithRespectToGenerator<RationalFraction<Rational> >(
     << "If this is not a programming mistake, "
     << "you might want to consider introducing a substitution "
     << "evaluating the rational function, some sort of a monomial order, "
-    << "or some other method of deciding the \"sign\" of a rational function. "
+    << "or some other method of deciding the "
+    << "\"sign\" of a rational function. "
     << "Whether or not this is a mistake, I am crashing. "
     << global.fatal;
     return false;
@@ -106,7 +108,8 @@ bool WeylGroupData::isDominantWithRespectToGenerator<
     << "If this is not a programming mistake, "
     << "you might want to consider introducing a substitution "
     << "evaluating the rational function, some sort of a monomial order, "
-    << "or some other method of deciding the \"sign\" of a rational function. "
+    << "or some other method of deciding the "
+    << "\"sign\" of a rational function. "
     << "Whether or not this is a mistake, I am crashing.  "
     << global.fatal;
     return false;
@@ -143,8 +146,8 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   std::string& outputDetails
 ) {
   STACK_TRACE(
-    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::"
-    "getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra"
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra"
   );
   this->checkInitialization();
   std::stringstream out;

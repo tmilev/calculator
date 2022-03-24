@@ -1,13 +1,11 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_inner_functions.h"
-
-// ////////////////////////////////////
 #include "webserver.h"
 #include "system_functions_global_objects.h"
 
-// /////////////////////////////////
 bool CalculatorFunctionsCrypto::x509CertificateServer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

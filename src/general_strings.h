@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_strings_ALREADY_INCLUDED
@@ -83,7 +84,8 @@ public:
     static std::string escapeQuotesBackslashesNewLines(
       const std::string& input
     );
-    // Converts an arbitrary byte sequence to a string suited for json notation:
+    // Converts an arbitrary byte sequence to a string suited for json
+    // notation:
     // escapes quote, backslash, newline, and uses \u-notation to encode
     // utf-16-like two-byte sequences.
     static std::string stringToJSONStringEscaped(

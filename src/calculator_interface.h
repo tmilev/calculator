@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_calculator_interface_ALREADY_INCLUDED
@@ -57,9 +58,11 @@ private:
   // 2.1. A frozen expression is a list whose first entry is an atom equal to
   // Freeze.
   // 2.2. A sequence is a list whose first entry is an atom equal to Sequence.
-  // 2.3. A bound variable is a list with two atomic entries, the first of which
+  // 2.3. A bound variable is a list with two atomic entries, the first of
+  // which
   //      equals Bind.
-  // 2.4. An error is a list with two entries whose first entry is an atom equal
+  // 2.4. An error is a list with two entries whose first entry is an atom
+  // equal
   // to Error, and whose second entry is a string.
   // *Note that Calculator::opList() is required to equal zero for reasons of
   // program speed.
@@ -86,7 +89,8 @@ private:
   // 4. An expression is said to have context if it is a list of at least two
   // elements, the second element of which is a context.
   // 5. If an expression of built-in type has 3 children, the middle child
-  // must be a context. If an expression of built-in type has 2 children, we say
+  // must be a context. If an expression of built-in type has 2 children, we
+  // say
   // that the expression does not have context.
   // 6. Two expressions of built-in type with equal types and C++ identifiers,
   // one having a context that is empty, and the other having no context,
@@ -2132,7 +2136,8 @@ public:
     NamedRuleLocation,
     HashFunctions::hashFunction<std::string>
   > namedRules;
-  // Calculator functions have as arguments two expressions passed by reference,
+  // Calculator functions have as arguments two expressions passed by
+  // reference,
   // const Expression& input and Expression& output. Calculator functions
   // return bool. It is forbidden to pass the same object as input and output.
   // If a calculator function returns false this

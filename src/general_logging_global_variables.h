@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_general_logging_global_variables_ALREADY_INCLUDED
@@ -110,7 +111,8 @@ public:
 // All global objects are either
 // 1) fields of variable:  GlobalVariables& global
 // or
-// 2) are returned as results of static functions calls along the pattern below.
+// 2) are returned as results of static functions calls along the pattern
+// below.
 //
 // object& getObject() { static object result; result result; }
 //

@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
@@ -270,7 +271,8 @@ class AbstractSyntaxNotationOneSubsetDecoder {
   // 01 - application-specific type.
   // 10 - context specific type (interpret as you wish: it's not
   // self-explanatory and the standards do not give a proper definition).
-  // 11 - private type (interpret as you wish: it's not self-explanatory and the
+  // 11 - private type (interpret as you wish: it's not self-explanatory and
+  // the
   // standards do not give a proper definition).
 public:
   struct tags {

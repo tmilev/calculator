@@ -19,7 +19,8 @@ public:
     uint8_t stateBytes[Sha3::numberOfSpongeWords * 8];
   };
 
-  // 0..7--the next byte after the set one (starts from 0; 0--none are buffered)
+  // 0..7--the next byte after the set one (starts from 0; 0--none are
+  // buffered)
   int byteIndex;
   // 0..24--the next word to integrate input (starts from 0)
   signed wordIndex;

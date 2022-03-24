@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -46,7 +47,8 @@ Expression operator-(const Expression& left, const Expression& right) {
 
 // If you get a specialization after instantiation error:
 // the following template specialization funcitons must appear
-// here and nowhere else (discovered through extremely painful experimentation).
+// here and nowhere else (discovered through extremely painful
+// experimentation).
 template < >
 List<Expression>::Comparator* FormatExpressions::getMonomialOrder<Expression>()
 {

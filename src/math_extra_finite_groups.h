@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_finite_groups_ALREADY_INCLUDED
@@ -120,7 +121,8 @@ public:
 // 1. The finite group has a small number of conjugacy classes. Z/10000000Z is
 // not OK
 //
-// An uninitialized element is expected to be the identity element to the extend
+// An uninitialized element is expected to be the identity element to the
+// extend
 // possible.
 // Two uninitialized elements can be expected to multiply,
 // an an uninitialized element can multiply by an initialized element and where
@@ -129,8 +131,10 @@ public:
 // and the hashFunction need to know what the identity is representation
 // It should hash to 0 and sort first.
 //
-// Elements generally know of a faithful representation, which may by reducible,
-// especially over a group that isn't their entire group they want to belong to.
+// Elements generally know of a faithful representation, which may by
+// reducible,
+// especially over a group that isn't their entire group they want to belong
+// to.
 // That is the representation they give the characteristic polynomial for.
 // At present, however, ElementZ2N gives the charpoly for one of its
 // one-dimensional
@@ -222,7 +226,8 @@ public:
   Matrix<int> generatorCommutationRelations;
   List<List<int> > words;
   // <-The character polynomials in the ``standard representation''.
-  // The ``standard representation'' is specified by the elementSomeGroup class.
+  // The ``standard representation'' is specified by the elementSomeGroup
+  // class.
   // It is up to the user of the FiniteGroup template to define which
   // representation is
   // ``standard'' - this is not a serious restriction as one can always choose
@@ -300,7 +305,8 @@ public:
   // function will try to find.
   // Set maximumElements = - 1 for "unlimited" upper bound.
   // Historical note: this was from Thomas' second finite group class, and is
-  // as of 2015- 11 the only way to generate the words and conjugacy information
+  // as of 2015- 11 the only way to generate the words and conjugacy
+  // information
   void computeConjugacyClassesFromAllElements();
   void computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
     const List<List<int> >& ccIndices
@@ -670,7 +676,8 @@ class WeylGroupData {
     output << "Weyl group data of Dynkin type: " << data.dynkinType.toString();
     return output;
   }
-  // <- once created, WeylGroupData can't be moved: a pointer to it is stored in
+  // <- once created, WeylGroupData can't be moved: a pointer to it is stored
+  // in
   // FiniteGroup
 public:
   bool flagIrrepsAreComputed;
@@ -1598,7 +1605,8 @@ public:
   // Note: the group representation types compute the hash value from the
   // character,
   // in which the order of the conjugacy classes determines the value
-  // If you compare hash values from two groups which calculated their conjugacy
+  // If you compare hash values from two groups which calculated their
+  // conjugacy
   // classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as
   // expected.
@@ -1772,7 +1780,8 @@ public:
   // Note: The group representation types compute the hash value from the
   // character,
   // in which the order of the conjugacy classes determines the value.
-  // If you compare hash values from two groups which calculated their conjugacy
+  // If you compare hash values from two groups which calculated their
+  // conjugacy
   // classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as
   // expected.
@@ -2019,7 +2028,8 @@ std::string Coset<elementSomeGroup>::toString() const {
   return out.str();
 }
 
-// The long term plan for this class is to install FiniteGroup<elementSomeGroup>
+// The long term plan for this class is to install
+// FiniteGroup<elementSomeGroup>
 // as the only someGroup
 // also move most of the stuff here to GroupHomomorphism and then include a
 // GroupHomomorphism inclusionMap;
@@ -2836,10 +2846,12 @@ public:
     this->data = other.data;
     return *this;
   }
-  // UDPolynomial<Coefficient> operator+(const UDPolynomial<Coefficient>& right)
+  // UDPolynomial<Coefficient> operator+(const UDPolynomial<Coefficient>&
+  // right)
   // const;
   void operator+=(const PolynomialUnivariateDense<Coefficient>& right);
-  // UDPolynomial<Coefficient> operator-(const UDPolynomial<Coefficient>& right)
+  // UDPolynomial<Coefficient> operator-(const UDPolynomial<Coefficient>&
+  // right)
   // const;
   void operator-=(const PolynomialUnivariateDense<Coefficient>& right);
   PolynomialUnivariateDense<Coefficient> operator*(

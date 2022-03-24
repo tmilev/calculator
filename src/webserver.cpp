@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "webserver.h"
@@ -169,7 +170,8 @@ bool WebWorker::receiveAll() {
   1000;
   // The following formula ensures that all receive timeouts take 1 second less
   // than
-  // millisecondsReplyAfterComputation. This gives ample time (1 second) for the
+  // millisecondsReplyAfterComputation. This gives ample time (1 second) for
+  // the
   // calculator
   // to take reset the computation time counter. This prevents the
   // reply-after-computation
@@ -406,7 +408,8 @@ void SystemFunctions::segfaultSigaction[[noreturn]](
 ) {
   // <- This signal should never happen in
   // <- server, so even if racy, we take the risk of a hang.
-  // <- Racy-ness in child process does not bother us: hanged children are still
+  // <- Racy-ness in child process does not bother us: hanged children are
+  // still
   // fine.
   (void) signal;
   (void) arg;
@@ -787,7 +790,8 @@ bool WebWorker::loginProcedure(
   // this may need a security audit: the URLStringToNormal and getWebInput
   // functions may leave traces of (freed) memory
   // of the old password. Could only be used
-  // if the attacker has control of the server executable - which probably means
+  // if the attacker has control of the server executable - which probably
+  // means
   // we
   // already are in big trouble - so this really shouldn't be such a big deal.
   // ///////////////////////////////////////////
@@ -1277,7 +1281,8 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
   std::string computationResult;
   // 1. Warning: timing attacks on the speed of looking up file names
   // may be used to guess an old worker id.
-  // No need to worry as user computations should not contain any authentication
+  // No need to worry as user computations should not contain any
+  // authentication
   // or other critical information. User computations are considered
   // ultra-sensitive only because they are private, so there is no reason
   // to overdo the cryptographic protections beyond the common-sense one
@@ -3899,24 +3904,29 @@ void SignalsInfrastructure::initializeSignals() {
   // //////////////////
   // reap children
   // if (sigemptyset(&SignalChild.sa_mask) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let you
+  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
+  // you
   // know. " << global.fatal;
   // if (sigaddset(&SignalChild.sa_mask, SIGINT) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let you
+  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
+  // you
   // know. " << global.fatal;
   // //////////////////////////////
   // sigchld signal should automatically be blocked when calling the sigchld
   // handler.
   // Nevertheless, let's explicitly add it:
   // if (sigaddset(&SignalChild.sa_mask, SIGCHLD) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let you
+  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
+  // you
   // know. " << global.fatal;
   // //////////////////////////////
   // if (sigaddset(&SignalChild.sa_mask, SIGFPE) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let you
+  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
+  // you
   // know. " << global.fatal;
   // if (sigaddset(&SignalChild.sa_mask, SIGSEGV) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let you
+  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
+  // you
   // know. " << global.fatal;
   SignalChild.sa_flags = SA_NOCLDWAIT;
   SignalChild.sa_handler = &WebServer::signal_SIGCHLD_handler;
@@ -4201,7 +4211,8 @@ int WebServer::run() {
       global.logs.logType = GlobalVariables::LogData::type::serverMonitor;
       global.flagIsChildProcess = true;
       monitorWebServer(this->processIdServer, this->pingAuthentication);
-      // <-this attempts to connect to the server over the internet and restarts
+      // <-this attempts to connect to the server over the internet and
+      // restarts
       // if it can't.
       return 0;
     }

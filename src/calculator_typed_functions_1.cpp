@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -8,8 +9,8 @@
 #include "math_extra_universal_enveloping_implementation.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::makeOne(int)
-#include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::raiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
+#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_extra_finite_groups_implementation.h"
 #include "math_rational_function_implementation.h"
 
 bool CalculatorFunctionsBinaryOps::
@@ -17,7 +18,8 @@ addElementZModPOrRationalToElementZModPOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::addElementZModPOrRationalToElementZModPOrRational"
+    "CalculatorFunctionsBinaryOps::"
+    "addElementZModPOrRationalToElementZModPOrRational"
   );
   if (input.size() != 3) {
     return false;
@@ -178,7 +180,8 @@ divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational"
+    "CalculatorFunctionsBinaryOps::"
+    "divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -661,7 +664,8 @@ bool CalculatorFunctionsBinaryOps::
 multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra
 (Calculator& calculator, const Expression& input, Expression& output) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra"
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra"
   );
   if (input.size() != 3) {
     return false;
@@ -744,7 +748,8 @@ divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial"
+    "CalculatorFunctionsBinaryOps::"
+    "divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial"
   );
   if (
     !CalculatorFunctionsBinaryOps::divideTypeByType<
@@ -784,7 +789,8 @@ addRationalOrPolynomialOrRationalFunctionToRationalFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrRationalFunctionToRationalFunction"
+    "CalculatorFunctionsBinaryOps::"
+    "addRationalOrPolynomialOrRationalFunctionToRationalFunction"
   );
   if (
     CalculatorFunctionsBinaryOps::addTypeToType<RationalFraction<Rational> >(
@@ -807,7 +813,8 @@ bool CalculatorFunctionsBinaryOps::
 addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
 (Calculator& calculator, const Expression& input, Expression& output) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra"
+    "CalculatorFunctionsBinaryOps::"
+    "addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra"
   );
   return
   CalculatorFunctionsBinaryOps::addTypeToType<ElementWeylAlgebra<Rational> >(
@@ -1021,7 +1028,8 @@ bool CalculatorFunctionsBinaryOps::
 addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger
 (Calculator& calculator, const Expression& input, Expression& output) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger"
+    "CalculatorFunctionsBinaryOps::"
+    "addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger"
   );
   if (input.size() != 3) {
     return false;
@@ -1099,7 +1107,8 @@ addPolynomialModuloIntegerToPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::addPolynomialModuloIntegerToPolynomialModuloInteger"
+    "CalculatorFunctionsBinaryOps::"
+    "addPolynomialModuloIntegerToPolynomialModuloInteger"
   );
   if (input.size() != 3) {
     return false;
@@ -1229,7 +1238,8 @@ multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP"
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP"
   );
   if (input.size() != 3) {
     return false;
@@ -1361,8 +1371,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible(
     if (!baseRat.isSquare() || baseRat.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream
-      <<
-      "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+      << "Exponentiating non-square matrices "
+      << "or matrices with zero rows is not allowed. "
       << "Your matrix, "
       << baseRat.toString()
       << " is not square. ";
@@ -1401,8 +1411,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible(
     if (!baseAlg.isSquare() || baseAlg.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream
-      <<
-      "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+      << "Exponentiating non-square matrices "
+      << "or matrices with zero rows is not allowed. "
       << "Your matrix, "
       << baseAlg.toString()
       << " is not square. ";
@@ -1462,8 +1472,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
     if (!baseRational.isSquare() || baseRational.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream
-      <<
-      "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+      << "Exponentiating non-square matrices "
+      << "or matrices with zero rows is not allowed. "
       << "Your matrix, "
       << baseRational.toString()
       << " is not square. ";
@@ -1599,7 +1609,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
 bool CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger
 (Calculator& calculator, const Expression& input, Expression& output) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::powerAlgebraicNumberPolynomialBySmallInteger"
+    "CalculatorFunctionsBinaryOps::"
+    "powerAlgebraicNumberPolynomialBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
@@ -1709,7 +1720,8 @@ powerPolynomialModPModuloPolynomialModPBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::powerPolynomialModPModuloPolynomialModPBySmallInteger"
+    "CalculatorFunctionsBinaryOps::"
+    "powerPolynomialModPModuloPolynomialModPBySmallInteger"
   );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
@@ -1932,9 +1944,8 @@ bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
         << powerRational.toString()
         << ": the exponent is not a "
         << "small integer, the base is a monomial, however the monomial "
-        <<
-        "contains derivative and polynomial with respect to the same variable. "
-        ;
+        << "contains derivative and polynomial "
+        << "with respect to the same variable. ";
       }
     }
     finalOutput.makeZero();
@@ -2003,7 +2014,8 @@ powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction"
+    "CalculatorFunctionsBinaryOps::"
+    "powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction"
   );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
@@ -2899,7 +2911,8 @@ multiplyMatrixRationalOrRationalByMatrixRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyMatrixRationalOrRationalByMatrixRational"
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyMatrixRationalOrRationalByMatrixRational"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -2944,7 +2957,8 @@ multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction"
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -3014,7 +3028,8 @@ multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
 bool CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor
 (Calculator& calculator, const Expression& input, Expression& output) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor"
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyMatrixTensorOrRationalByMatrixTensor"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -3134,8 +3149,10 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE(
 bool CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded")
-  ;
+  STACK_TRACE(
+    "CalculatorFunctionsBinaryOps::"
+    "lieBracketJacobiIdentityIfNeeded"
+  );
   if (!input.startsWith(calculator.opLieBracket(), 3)) {
     return false;
   }
@@ -3270,9 +3287,8 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA(
     )
   ) {
     calculator
-    <<
-    "<hr>Failed with conversion to Element weyl algebra - possible programming error?"
-    ;
+    << "<hr>Failed with conversion to "
+    << "Element weyl algebra - possible programming error?";
     return false;
   }
   ElementWeylAlgebra<Rational> resultE = rightConverted.content;
@@ -3408,7 +3424,8 @@ addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic"
+    "CalculatorFunctionsBinaryOps::"
+    "addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -3547,7 +3564,8 @@ addMatrixRationalFractionsToMatrixRationalFractions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::addMatrixRationalFractionsToMatrixRationalFractions"
+    "CalculatorFunctionsBinaryOps::"
+    "addMatrixRationalFractionsToMatrixRationalFractions"
   );
   if (!input.isListNElements(3)) {
     return false;

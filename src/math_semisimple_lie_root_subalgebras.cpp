@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_implementation.h"
@@ -2209,7 +2210,8 @@ SemisimpleLieAlgebra& RootSubalgebra::getOwnerLieAlgebra() const {
 }
 
 bool RootSubalgebra::operator>(const RootSubalgebra& other) const {
-  // current implementation does not work as expected in types E_7 and for large
+  // current implementation does not work as expected in types E_7 and for
+  // large
   // D_n's
   if (this->dynkinType > other.dynkinType) {
     return true;
@@ -3345,12 +3347,14 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   // a_kg^\alpha_k, and
   // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
   // where the first \alpha's are ordered as in rootsInPlay.
-  // Those are ordered as follows. First come the simple roots of characteristic
+  // Those are ordered as follows. First come the simple roots of
+  // characteristic
   // 2,
   // and the last \alpha's are the members of SelectedExtraPositiveRoots
   // (i.e. root equal to the sum of one simple root
   // of characteristic 2 with a simple roots of characteristic 0).
-  // Then the first k variables of the polynomials below will be a_0, ..., a_k.,
+  // Then the first k variables of the polynomials below will be a_0, ...,
+  // a_k.,
   // and
   // the last k variables will be the b_i's
   // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2},
@@ -3643,7 +3647,8 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   AlgebraicClosureRationals* algebraicClosure
 ) {
   STACK_TRACE("RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition");
-  // reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems
+  // reference: Dynkin, semisimple Lie algebras of simple lie algebras,
+  // theorems
   // 10.1 - 10.4
   int relativeDimension = this->simpleRootsReductiveSubalgebra.size;
   if (relativeDimension == 0) {

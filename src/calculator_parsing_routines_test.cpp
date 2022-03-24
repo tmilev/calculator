@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -203,8 +204,9 @@ bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
     << global.fatal;
   }
   std::string mustEvaluateToOne =
-  "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 - 10^128 + 1"
-  ;
+  "10000000000000000000000000000000000000000000000"
+  "00000000000000000000000000000000000000000000000"
+  "00000000000000000000000000000000000 - 10^128 + 1";
   ownerInitialized.evaluate(mustEvaluateToOne);
   if (ownerInitialized.programExpression.toString() != "1") {
     std::cout << "Must crash!\n";

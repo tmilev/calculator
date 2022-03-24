@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -58,13 +59,15 @@ void Calculator::initializeAdminFunctions() {
 // 1) Functions that have mathematical names
 // starting with small letters (example: \\sin, logical operations, etc.)
 // Those typically start with a backslash.
-// 2) Exceptions (desired or otherwise) are made for functions that have already
+// 2) Exceptions (desired or otherwise) are made for functions that have
+// already
 // been assigned keywords starting with non-capital letter
 // and have been used too often.
 // IMPORTANT.
 // The order of registration of operation handlers for the same operation name
 // defines the order in which operation
-// handlers are called. Operations handlers registered first are executed first.
+// handlers are called. Operations handlers registered first are executed
+// first.
 // The order only matters for different handlers of the same operation.
 // This order is very important, as some of the
 // handlers will act properly only if the preceding ones have been carried

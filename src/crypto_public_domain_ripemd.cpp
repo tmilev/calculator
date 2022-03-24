@@ -103,9 +103,11 @@ public:
  * This is just 0123456789ABCDEFFEDCBA9876543210F0E1D2C3 in little-endian. */
 const uint32_t RIPEMD160Internal::initial_h[5] =
 {0x67452301u, 0xEFCDAB89u, 0x98BADCFEu, 0x10325476u, 0xC3D2E1F0u};
-/* Ordering of message words.  Based on the permutations rho(i) and pi(i), defined as follows:
+/* Ordering of message words.
+ * Based on the permutations rho(i) and pi(i), defined as follows:
  *
- *  rho(i) := { 7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8 }[i]  0 <= i <= 15
+ * rho(i) := { 7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8 }[i]
+ * 0 <= i <= 15
  *
  *  pi(i) := 9*i + 5 (mod 16)
  *

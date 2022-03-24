@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
@@ -232,7 +233,8 @@ public:
   void buildTransposition(int i, int j);
   void buildCycle(const List<int>& cycle);
   // Build operations leave the Permutation in a possibly not canonical state
-  // you must makeCanonical() after using them to get virtually anything to work
+  // you must makeCanonical() after using them to get virtually anything to
+  // work
   // properly.
   void addTransposition(int i, int j);
   void addCycle(const List<int>& cycle);
@@ -568,7 +570,8 @@ public:
     }
     this->validate();
   }
-  // an ElementZ2N is its own inverse.  When it comes time to template ElementZmN
+  // an ElementZ2N is its own inverse. When it comes time to template
+  // ElementZmN
   // with class ElementZ2N: public ElementZmN<2>, this will need to be replaced
   // with
   // x -> m - x

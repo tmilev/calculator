@@ -367,7 +367,8 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation
   // representations will be this->group->irreps
   // currently we have the difficulty with GroupRepresentation<WeylGroup,
   // Coefficient> vs
-  // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >, Coefficient>
+  // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >,
+  // Coefficient>
   if ((letters.size == 1) && (letters[0] == 'A')) {
     int rank = ranks[0];
     List<Partition> partitions;

@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_extra_lie_theory_extras_ALREADY_INCLUDED
@@ -77,14 +78,16 @@ struct BranchingData {
 class SemisimpleLieAlgebraOrdered {
 public:
   SemisimpleLieAlgebra* ownerSemisimpleLieAlgebra;
-  // the format of the order is arbitrary except for the following requirements:
+  // the format of the order is arbitrary except for the following
+  // requirements:
   // -All elements of the order must be either 1) nilpotent or 2) elements of
   // the Cartan
   // -Let the number of positive roots be N and the rank be K. Then the indices
   // N,..., N+K- 1 must
   //  correspond to the elements of the Cartan.
   List<ElementSemisimpleLieAlgebra<Rational> > elementOrder;
-  // The order of chevalley generators is as follows. First come negative roots,
+  // The order of chevalley generators is as follows. First come negative
+  // roots,
   // then elements of cartan, then positive Vectors<Rational>
   // The weights are in increasing order
   // The i^th column of the matrix gives the coordinates of the i^th Chevalley

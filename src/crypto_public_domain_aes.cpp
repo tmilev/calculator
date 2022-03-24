@@ -53,16 +53,17 @@ public:
   int keyLength;
   uint8_t RoundKey[maxKeyExpSize];
   uint8_t initializationVector[blockLength];
-  // The number of columns comprising a state in AES. This is a constant in AES.
+  // The number of columns comprising a state in AES. This is a constant in
+  // AES.
   // Value=4
   const static unsigned Nb = 4;
   unsigned Nk;
   // The number of 32 bit words in a key.
   unsigned Nr;
   // The number of rounds in AES cipher.
-  /*****************************************************************************/
-  /* Private variables:                                                        */
-  /*****************************************************************************/
+  /**************************************************************************/
+  /* Private variables:                                                     */
+  /**************************************************************************/
   // state - array holding the intermediate results during decryption.
   typedef uint8_t state_t[4][4];
   AESContext();
@@ -95,8 +96,8 @@ public:
   // Multiply is used to multiply numbers in the field GF(2^8)
   // Note: The last call to xtime() is unneeded, but often ends up generating a
   // smaller binary
-  //       The compiler seems to be able to vectorize the operation better this way.
-  //       See https://github.com/kokke/tiny-AES-c/pull/34
+  // The compiler seems to be able to vectorize the operation better this way.
+  // See https://github.com/kokke/tiny-AES-c/pull/34
   static inline uint8_t multiply(uint8_t x, uint8_t y) {
     return (((y& 1) * x) ^ ((y >> 1 & 1) * xtime(x)) ^ ((y >> 2 & 1) *
       xtime(xtime(x))
@@ -163,14 +164,16 @@ AESContext::AESContext() {
   this->setNumberOfBits(256);
 }
 
-// The lookup-tables are marked const so they can be placed in read-only storage
+// The lookup-tables are marked const so they can be placed in read-only
+// storage
 // instead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM -
 // This can be useful in (embedded) bootloader applications, where ROM is often
 // limited.
 const uint8_t AESContext::sbox[256] =
 {
-  // 0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
+    // 0     1    2      3     4    5     6     7
+  // 8     9     A      B    C     D     E     F
   0x63,
   0x7c,
   0x77,
@@ -693,13 +696,19 @@ const uint8_t AESContext::rsbox[256] =
 const uint8_t AESContext::rCon[11] =
 {0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
 /*
- * Jordan Goulder points out in PR #12 (https://github.com/kokke/tiny-AES-C/pull/12),
- * that you can remove most of the elements in the Rcon array, because they are unused.
+ * Jordan Goulder points out in PR #12
+ * (https://github.com/kokke/tiny-AES-C/pull/12),
+ * that you can remove most of the elements
+ * in the Rcon array, because they are unused.
  *
- * From Wikipedia's article on the Rijndael key schedule @ https://en.wikipedia.org/wiki/Rijndael_key_schedule#Rcon
+ * From Wikipedia's article on the Rijndael key schedule
+ * @ https://en.wikipedia.org/wiki/Rijndael_key_schedule#Rcon
  *
- * "Only the first some of these constants are actually used – up to rcon[10] for AES-128 (as 11 round keys are needed),
- *  up to rcon[8] for AES-192, up to rcon[7] for AES-256. rcon[0] is not used in AES algorithm."
+ * "Only the first some of these constants
+ * are actually used – up to rcon[10] for AES-128
+ * (as 11 round keys are needed),
+ * up to rcon[8] for AES-192, up to rcon[7] for AES-256.
+ * rcon[0] is not used in AES algorithm."
  */
 uint8_t AESContext::getSBoxValue(uint8_t num) {
   return AESContext::sbox[num];

@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "transport_layer_security.h"
@@ -36,7 +37,8 @@ bool TransportLayerSecurity::loadPEMPrivateKey(
 ) {
   std::string certificateContent, certificateContentStripped;
   static bool accessULTRASensitiveFoldersAllowed = true;
-  // Access to ultra sensitive folders is allowed only once, at the start of the
+  // Access to ultra sensitive folders is allowed only once, at the start of
+  // the
   // program.
   // No further attempts to load allowed.
   if (

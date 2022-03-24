@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #ifndef header_math_general_ALREADY_INCLUDED
@@ -500,7 +501,8 @@ public:
   );
   // "Lexicographic" order.
   // If computing with n variables, the "lexicographic order"
-  // coincides with the infinite-alphabet dictionary of all words with length n,
+  // coincides with the infinite-alphabet dictionary of all words with length
+  // n,
   // where
   // each letter is given by the variable exponent.
   // In other words, the lexicographic order for x^2 y^0 z^3 is the
@@ -618,7 +620,8 @@ std::ostream& operator<<(
 );
 template <typename Coefficient>
 class Matrix {
-  // friend std::iostream& operator<< <Coefficient>(std::iostream& output, const
+  // friend std::iostream& operator<< <Coefficient>(std::iostream& output,
+  // const
   // Matrix<Coefficient>& matrix);
   friend std::ostream& operator<<<Coefficient>(
     std::ostream& output, const Matrix<Coefficient>& matrix
@@ -5802,7 +5805,8 @@ public:
   // Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
   // Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
   // Then the substitution matrix is an n by m matrix,
-  // where the i^th row of the matrix gives the expression of x_i via the y_j's.
+  // where the i^th row of the matrix gives the expression of x_i via the
+  // y_j's.
   // In addition, we require that n>=m (otherwise, in general, we do not expect
   // to get a lattice).
   // For example, if we want to carry out the substitution

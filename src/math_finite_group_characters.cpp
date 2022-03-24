@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
@@ -965,7 +966,8 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   ) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->weylData->group.characterTable[i];
-    // global.Comments << "Restricting character: " << Xip.toString() << "<br>";
+    // global.Comments << "Restricting character: " << Xip.toString() <<
+    // "<br>";
     for (
       int j = 0; j < this->subgroupData.subgroupContent->conjugacyClasses.size;
       j ++

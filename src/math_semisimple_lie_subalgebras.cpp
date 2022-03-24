@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_implementation.h"
@@ -10008,14 +10009,16 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
       this->owner->owner->getRank()
     ) {
       // When this happens, one of two things holds.
-      // 1. We don't have the max containing semisimple container computed, say,
+      // 1. We don't have the max containing semisimple container computed,
+      // say,
       // this is a partial run
       // where not all semisimple algebras were found.
       // 2. This is a semisimple subalgebra that is not contained in another
       // larger proper semisimple subalgebra.
       // In this case, the centralizer of the present subalgebra must
       // necessarily be
-      // diagonal (inside the ambient Cartan). But as the rank computation above
+      // diagonal (inside the ambient Cartan). But as the rank computation
+      // above
       // shows, that is not
       // the case. We must have made a serious programming mistake.
       // We assume the best - that 1) holds.

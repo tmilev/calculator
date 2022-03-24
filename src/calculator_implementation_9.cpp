@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
@@ -20,8 +21,8 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
 ) {
   // this function return true if Ax = b >= 0 has a solution with x >= 0 and
   // records a solution x at outputPoint
-  // else returns false, where b is a given nonnegative column vector, A is an n
-  // by m matrix
+  // else returns false, where b is a given nonnegative column vector, A is an
+  // n by m matrix
   // and x is a column vector with m entries
   Matrix<Rational> workingMatrix;
   Vector<Rational> matX;

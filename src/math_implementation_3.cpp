@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_lists.h"
@@ -6530,7 +6531,8 @@ void DynkinSimpleType::getEpsilonMatrix(
   Rational negativeHalf(- 1, 2);
   if (weylLetter == 'E') {
     // Epsilon convention taken with slight modification from
-    // Humpreys, Introduction to Lie algebras and representation theory, page 65
+    // Humpreys, Introduction to Lie algebras and representation theory, page
+    // 65
     // first comes first root, then the sticky part, then string with the rest
     // of the roots.
     output.initialize(8, weylRank);
@@ -6701,7 +6703,8 @@ void DynkinSimpleType::grow(
   List<List<int> >* outputPermutationRoots
 ) const {
   STACK_TRACE("DynkinSimpleType::grow");
-  // Almost all simple types are grown from type A. Exceptions only for types F4
+  // Almost all simple types are grown from type A. Exceptions only for types
+  // F4
   // (grown from B_3),
   // E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
   output.setSize(0);

@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "general_list_references.h"
@@ -435,7 +436,8 @@ bool HtmlRoutines::accountOneInputPercentEncodedString(
   //        outputMap.GetValueCreateIfNotPresent(fieldName) != "")
   // { commentsOnFailure << "More than one value specified for input field " <<
   // fieldName << ": "
-  // << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName)
+  // << fieldValue << " and " <<
+  // outputMap.GetValueCreateIfNotPresent(fieldName)
   // << ". ";
   //      return false;
   //    }

@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general.h"
@@ -885,7 +886,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     // the long string is oriented with the end that is connected to the triple
     // node having
     // smaller index
-    // in type E similarly the longest string comes first oriented with the root
+    // in type E similarly the longest string comes first oriented with the
+    // root
     // that is
     // linked to the triple node having smaller index
     // then comes the second longest string (oriented in the same fashion)
@@ -961,7 +963,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       // <-last two vectors
       outputType.makeArbitrary('D', currentComponent.size, scale);
     } else {
-      // the second largest component has more than one element, hence we are in
+      // the second largest component has more than one element, hence we are
+      // in
       // type E_n.
       Rational scale =
       DynkinSimpleType::getDefaultLongRootLengthSquared('E') /
@@ -982,7 +985,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       ) {
         diagramWithoutTripleNode.simpleBasesConnectedComponents[1].
         reverseElements();
-        // <-the 2-root component has the first root perpendicular to the triple
+        // <-the 2-root component has the first root perpendicular to the
+        // triple
         // node
       }
       if (

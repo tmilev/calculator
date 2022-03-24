@@ -1,4 +1,5 @@
- // The current file is licensed under the license terms found in the main header
+ // The current file is licensed under the license terms found in the main
+// header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
@@ -33,7 +34,8 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Makes generator of a NIST curve. "
     "At present implemented for secp256k1 only. ",
     "g=EllipticCurveGeneratorNIST(\"secp256k1\");\n"
-    "g^3; g^115792089237316195423570985008687907852837564279074904382605163141518161494337"
+    "g^3; "
+    "g^115792089237316195423570985008687907852837564279074904382605163141518161494337"
     ,
     "CalculatorFunctions::nistEllipticCurveGenerator",
     "EllipticCurveGeneratorNIST",

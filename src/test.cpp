@@ -9,6 +9,7 @@
 #include "calculator_html_interpretation.h"
 #include "signals_infrastructure.h"
 #include "source_code_formatter.h"
+#include "math_general_implementation.h"
 
 class Test {
 public:
@@ -87,6 +88,7 @@ void Test::run() {
     Calculator::Examples::Test::all();
     ChevalleyGenerator::Test::all();
     PartialFractions::Test::all();
+    Matrix<Rational>::Test::all();
     global << Logger::green << "Basic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::crypto)) {

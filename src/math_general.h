@@ -885,7 +885,7 @@ public:
       << "Attempt to multiply a matrix with "
       << this->numberOfColumns
       << " columns with a vector(column) of "
-      << " dimension "
+      << "dimension "
       << input.size
       << ". "
       << global.fatal;
@@ -1245,14 +1245,14 @@ public:
   // If m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below
   // function corresponds to the linear operator
-  // from V1+W1 to V2+W2 (direct sum)
-  // this means you write the matrix m1 in
+  // from V1+W1 to V2+W2 (direct sum).
+  // This means you write the matrix m1 in
   // the upper left corner m2 in the lower
-  // right and everything else you fill with zeros
+  // right and everything else you fill with zeros.
   void assignDirectSum(
     Matrix<Coefficient>& m1, Matrix<Coefficient>& m2
   );
-  // if S and T are endomorphisms of V and W, build the matrix of S \otimes T
+  // If S and T are endomorphisms of V and W, build the matrix of S \otimes T
   // that acts on
   // V \otimes W with basis
   // (v1 \otimes w1, v1 \otimes w2, ..., v2 \otimes w1, v2 \otimes w2, ..., vn
@@ -1300,7 +1300,7 @@ public:
       << " ("
       << input.size
       << " coordinates) "
-      << " to row with index "
+      << "to row with index "
       << rowIndex
       << " in a matrix with "
       << this->numberOfRows
@@ -1411,7 +1411,7 @@ public:
     mustBeZero -= input;
     return mustBeZero.isEqualToZero();
   }
-  // returns true if the system has a solution, false otherwise
+  // Returns true if the system has a solution, false otherwise.
   bool rowEchelonFormToLinearSystemSolution(
     Selection& inputPivotPoints,
     Matrix<Coefficient>& inputRightHandSide,
@@ -1533,7 +1533,7 @@ public:
   );
   void scaleToIntegralForMinimalRationalHeightNoSignChange();
   void getMatrixIntegerWithDenominator(
-    Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen
+    Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDenominator
   );
   void lieBracketWith(const Matrix<Coefficient>& right);
   bool getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
@@ -1598,7 +1598,7 @@ public:
       }
     }
   }
-  // The following are for compatibility with the FiniteGroup class
+  // The following are for compatibility with the FiniteGroup class.
   void getCharacteristicPolynomialStandardRepresentation(
     Polynomial<Coefficient>& out
   ) {
@@ -1631,6 +1631,17 @@ public:
     }
     return true;
   }
+  class Test{
+  public:
+    static bool all();
+    static bool matrixIntegerWithDenominator();
+    static bool oneMatrixIntegerWithDenominator(const std::string& input, const std::string& expectedMatrix,
+    int expectedScale);
+    // Makes a matrix from a string such as
+    // ((2,3), (3,4), (4,5))
+    // Converted to matrix using the calculator MakeMatrix function.
+    static void matrixFromString(const std::string& inputString, Matrix<Rational>& output);
+  };
 };
 
 template <class Coefficient>
@@ -4795,7 +4806,7 @@ void Matrix<Coefficient>::getMatrixIntegerWithDenominator(
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
       product = this->elements[i][j] * outputDenominator;
-      outputMat(i, j) = product.getDenominator();
+      outputMat(i, j) = product.getNumerator();
     }
   }
 }

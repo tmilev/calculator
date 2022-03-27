@@ -10662,10 +10662,10 @@ void Lattice::intersectWithPreimageOfLattice(
   Vectors<Rational> resultNonKernelPart, result, roots;
   startingBasis.assignMatrixRows(this->basisRationalForm);
   linearMap.actOnVectorsColumn(startingBasis, imageStartingBasis);
-  Lattice ImageLattice;
-  ImageLattice.makeFromRoots(imageStartingBasis);
-  ImageLattice.intersectWith(other);
-  basisImageIntersection.assignMatrixRows(ImageLattice.basisRationalForm);
+  Lattice imageLattice;
+  imageLattice.makeFromRoots(imageStartingBasis);
+  imageLattice.intersectWith(other);
+  basisImageIntersection.assignMatrixRows(imageLattice.basisRationalForm);
   Vectors<Rational>
   tempBasisImageIntersection,
   tempImageStartingBasis,
@@ -10924,7 +10924,12 @@ bool Lattice::reduceVector(Vector<Rational>& vector) const {
   Vectors<Rational> basisRoots;
   basisRoots.assignMatrixRows(this->basisRationalForm);
   if (!vector.getCoordinatesInBasis(basisRoots, output)) {
-    global.fatal << "Failed to get coordinates in basis. " << global.fatal;
+    global.fatal << "Failed to get coordinates of: "
+    << vector.toString()
+
+    << " in basis: "
+    << basisRoots.toString()
+    << global.fatal;
     return false;
   }
   for (int i = 0; i < output.size; i ++) {
@@ -11089,7 +11094,7 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
     << global.fatal;
   }
   global.comments
-  << "DEBUG: lattice generators: "
+  << "DEBUG: lattice generators:<br> "
   << latticeGenerators.toString();
   Lattice lattice;
   lattice.makeFromRoots(latticeGenerators);
@@ -11098,7 +11103,8 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
   global.comments
   << "DEBUG: about ot invert: "
   << normalsMatrixForm.toString()
-  << "<br>";
+  << "<br>"
+  << lattice.toString();
   normalsMatrixForm.invert();
   normals.assignMatrixColumns(normalsMatrixForm);
   output.makeZeroLatticeZn(owner.ambientDimension);
@@ -15318,8 +15324,11 @@ bool ConeCollection::findMaxLFOverConeProjective(
 }
 
 void Lattice::reduce() {
+  STACK_TRACE("Lattice::reduce");
+  global.comments << "DEBUG: before elimination: <br>" << this->basis.toString();
   this->basis.gaussianEliminationEuclideanDomain();
-  int numRowsToTrim = 0;
+  global.comments << "DEBUG: Eliminated: <br>" << this->basis.toString();
+  int rowsToTrim = 0;
   for (int i = this->basis.numberOfRows - 1; i >= 0; i --) {
     bool foundNonZeroRow = false;
     for (int j = 0; j < this->basis.numberOfColumns; j ++) {
@@ -15331,10 +15340,10 @@ void Lattice::reduce() {
     if (foundNonZeroRow) {
       break;
     }
-    numRowsToTrim ++;
+    rowsToTrim ++;
   }
   this->basis.resize(
-    this->basis.numberOfRows - numRowsToTrim,
+    this->basis.numberOfRows - rowsToTrim,
     this->basis.numberOfColumns,
     true
   );
@@ -15406,7 +15415,10 @@ void Lattice::makeFromMatrix(const Matrix<Rational>& input) {
 void Lattice::makeFromRoots(const Vectors<Rational>& input) {
   Matrix<Rational> rescaled;
   rescaled.assignVectorsToRows(input);
+  global.comments << "<br>DEBUG: before rescaling: " << rescaled.toString() << "<br>";
   rescaled.getMatrixIntegerWithDenominator(this->basis, this->denominator);
+  global.comments << "<br>DEBUG: input roots: " << input.toString() << "<br>";
+  global.comments << "DEBUG: basis: before reduction: " << this->basis.toString() <<"<br>";
   this->reduce();
 }
 

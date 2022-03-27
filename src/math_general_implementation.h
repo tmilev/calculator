@@ -393,84 +393,84 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
     const Coefficient& left, const Coefficient& right
   )
 ) {
-  STACK_TRACE("Matrix_Element::gaussianEliminationEuclideanDomain");
+  STACK_TRACE("Matrix::gaussianEliminationEuclideanDomain");
   ProgressReport report(
     1, GlobalVariables::Response::ReportType::gaussianElimination
   );
   if (otherMatrix == this) {
     global.fatal
-    << "The Carbon copy in the Gaussian elimination "
+    << "The carbon copy in the Gaussian elimination "
     << "coincides with the matrix which we are row-reducing "
     << "(most probably this is a wrong pointer typo). "
     << global.fatal;
   }
-  int col = 0;
   Coefficient element;
+  int column = 0;
   int row = 0;
-  while (row < this->numberOfRows && col < this->numberOfColumns) {
+  while (row < this->numberOfRows && column < this->numberOfColumns) {
     int foundPivotRow = - 1;
     for (int i = row; i < this->numberOfRows; i ++) {
-      if (!this->elements[i][col].isEqualToZero()) {
+      if (!this->elements[i][column].isEqualToZero()) {
         foundPivotRow = i;
         break;
       }
     }
     if (foundPivotRow != - 1) {
       this->switchRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
-      if (this->elements[row][col].isNegative()) {
+      if (this->elements[row][column].isNegative()) {
         this->rowTimesScalarWithCarbonCopy(row, negativeOne, otherMatrix);
       }
-      int ExploringRow = row + 1;
-      while (ExploringRow < this->numberOfRows) {
+      int exploringRow = row + 1;
+      while (exploringRow < this->numberOfRows) {
         if (report.tickAndWantReport()) {
           std::stringstream out;
           out
           << "Pivotting on row of index "
           << row + 1
           << " with exploring row of index "
-          << ExploringRow + 1
+          << exploringRow + 1
           << "; total rows: "
           << this->numberOfRows;
           report.report(out.str());
         }
-        Coefficient & pivotElement = this->elements[row][col];
-        Coefficient& otherElt = this->elements[ExploringRow][col];
-        if (otherElt.isNegative()) {
+        Coefficient & pivotElement = this->elements[row][column];
+        Coefficient& otherElement = this->elements[exploringRow][column];
+        if (otherElement.isNegative()) {
           this->rowTimesScalarWithCarbonCopy(
-            ExploringRow, negativeOne, otherMatrix
+            exploringRow, negativeOne, otherMatrix
           );
         }
         bool isSmallerOrEqualTo = comparisonGEQFunction ==
         0 ?
-        pivotElement <= otherElt :
-        comparisonGEQFunction(otherElt, pivotElement);
+        pivotElement <= otherElement :
+        comparisonGEQFunction(otherElement, pivotElement);
         if (isSmallerOrEqualTo) {
-          element = otherElt;
+          element = otherElement;
           element /= pivotElement;
           element.assignFloor();
           this->subtractRowsWithCarbonCopy(
-            ExploringRow, row, 0, element, otherMatrix
+            exploringRow, row, 0, element, otherMatrix
           );
         }
-        if (this->elements[ExploringRow][col].isEqualToZero()) {
-          ExploringRow ++;
+        if (this->elements[exploringRow][column].isEqualToZero()) {
+          exploringRow ++;
         } else {
-          this->switchRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
+          this->switchRowsWithCarbonCopy(exploringRow, row, otherMatrix);
         }
       }
-      Coefficient& pivotElement = this->elements[row][col];
+      Coefficient& pivotElement = this->elements[row][column];
       for (int i = 0; i < row; i ++) {
-        element = this->elements[i][col];
+        element = this->elements[i][column];
         element /= pivotElement;
         element.assignFloor();
         this->subtractRowsWithCarbonCopy(i, row, 0, element, otherMatrix);
-        if (this->elements[i][col].isNegative()) {
+        if (this->elements[i][column].isNegative()) {
           this->addTwoRowsWithCarbonCopy(row, i, 0, ringUnit, otherMatrix);
         }
       }
       row ++;
     }
-    col ++;
+    column ++;
   }
 }
 

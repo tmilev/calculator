@@ -4157,7 +4157,6 @@ int WebServer::daemon() {
         << Logger::red
         << this->toStringLastErrorDescription()
         << Logger::endL;
-
       }
       global << Logger::blue << "Sleeping for 1 seconds." << Logger::endL;
       global.fallAsleep(1000000);
@@ -4165,7 +4164,7 @@ int WebServer::daemon() {
       WebClient webCrawler;
       webCrawler.initialize();
       webCrawler.pingCalculatorStatus("not authenticated");
-      global<< Logger::green  << "Ping done." << Logger::endL;
+      global << Logger::green << "Ping done." << Logger::endL;
     }
     global.fallAsleep(1000000);
   }

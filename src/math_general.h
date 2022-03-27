@@ -4511,7 +4511,9 @@ public:
   int getLeastCommonMultipleElongations() const;
   int getTotalMultiplicity() const;
   void getDenominatorExponents(List<Vector<Rational> >& output) const;
-  void getDenominatorExponentsWithoutMultiplicities(List<Vector<Rational> >& output) const;
+  void getDenominatorExponentsWithoutMultiplicities(
+    List<Vector<Rational> >& output
+  ) const;
   void invert();
   void initialize(
     PartialFractions& inputOwner, int inputNormalizedVectorIndex
@@ -6010,7 +6012,9 @@ public:
   // Returns the denominator exponents in the order implied by
   // the order of the normalized vectors.
   void getDenominatorExponents(Vectors<Rational>& output) const;
-  void getDenominatorExponentsWithoutMultiplicities(Vectors<Rational>& output) const;
+  void getDenominatorExponentsWithoutMultiplicities(
+    Vectors<Rational>& output
+  ) const;
   void getVectorPartitionFunction(
     PartialFractions& owner,
     Polynomial<LargeInteger>& coefficient,
@@ -6486,7 +6490,7 @@ public:
     QuasiPolynomial& output, Vector<Rational>& newIndicator
   );
   void computeAllVectorPartitionFunctions();
-  void  computeQuasipolynomials();
+  void computeQuasipolynomials();
   PartialFractions();
   bool checkForMinimalityDecompositionWithRespectToRoot(
     Vector<Rational>* root

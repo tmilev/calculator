@@ -2,9 +2,9 @@
 // header
 // file "calculator.h".
 // For additional information refer to the file "calculator.h".
-
 #ifndef header_web_client_ALREADY_INCLUDED
 #define header_web_client_ALREADY_INCLUDED
+
 #include "transport_layer_security.h"
 
 class WebClient {

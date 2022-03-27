@@ -1019,9 +1019,7 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
   delimiters.addOnTop('[');
   delimiters.addOnTop(']');
   List<std::string> inputStrings;
-  StringRoutines::stringSplitExcludeDelimiters(
-    input, delimiters, inputStrings
-  );
+  StringRoutines::splitExcludeDelimiters(input, delimiters, inputStrings);
   for (int i = 0; i < inputStrings.size; i ++) {
     std::string current =
     StringRoutines::stringTrimWhiteSpace(inputStrings[i]);
@@ -1074,9 +1072,7 @@ bool MathRoutines::parseListIntegers(
   delimiters.addOnTopNoRepetition('(');
   delimiters.addOnTopNoRepetition(')');
   List<std::string> numberStrings;
-  StringRoutines::stringSplitExcludeDelimiters(
-    input, delimiters, numberStrings
-  );
+  StringRoutines::splitExcludeDelimiters(input, delimiters, numberStrings);
   result.setSize(numberStrings.size);
   for (int i = 0; i < numberStrings.size; i ++) {
     LargeInteger integerValue;

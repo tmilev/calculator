@@ -24,6 +24,7 @@ public:
       CommentMultiline,
       CommentCollection,
       EndLine,
+      EndFile,
       Quote,
       SingleQuote,
       ConstKeyWord,

@@ -217,6 +217,8 @@ std::string CodeFormatter::Element::toStringType(
     return "ReturnedExpression";
   case CodeFormatter::Element::CommentCollection:
     return "CommentCollection";
+  case CodeFormatter::Element::EndFile:
+    return "EndFile";
   }
   return "????";
 }
@@ -1647,6 +1649,9 @@ bool CodeFormatter::Words::extractCodeElements(std::stringstream* comments) {
     }
   }
   this->addCurrentWord();
+  CodeFormatter::Element fileEnd;
+  fileEnd.type = CodeFormatter::Element::EndFile;
+  this->elements.addOnTop(fileEnd);
   return true;
 }
 
@@ -4340,6 +4345,10 @@ bool CodeFormatter::Processor::applyOneRule() {
       CodeFormatter::Element::Expression, thirdToLast, secondToLast
     );
     return this->removeBelowLast(1);
+  }
+  if (last.type == CodeFormatter::Element::EndFile) {
+    this->lastRuleName = "remove endFile";
+    return this->removeLast();
   }
   return false;
 }

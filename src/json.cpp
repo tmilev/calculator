@@ -180,7 +180,7 @@ bool JSData::hasCompositeKey(
   delimiters.addOnTop('[');
   delimiters.addOnTop(']');
   List<std::string> keys;
-  StringRoutines::stringSplitExcludeDelimiters(inputKeys, delimiters, keys);
+  StringRoutines::splitExcludeDelimiters(inputKeys, delimiters, keys);
   const JSData* currentData = this;
   if (keys.size == 0) {
     if (commentsOnFailure != nullptr) {

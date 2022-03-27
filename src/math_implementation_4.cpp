@@ -172,9 +172,8 @@ void GlobalVariables::Crasher::writeCrashFile() {
 std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
   std::stringstream out;
   out
-  <<
-  "A partial stack trace follows (function calls not explicitly logged not included)."
-  ;
+  << "A partial stack trace follows "
+  << "(function calls not explicitly logged not included).";
   out << "<table><tr>";
   for (
     int threadCounter = 0; threadCounter < global.customStackTrace.size;

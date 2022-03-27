@@ -41,7 +41,7 @@ bool TimeWrapper::assignMonthDayYear(
   delimiters.addOnTop('-');
   delimiters.addOnTop('.');
   List<std::string> output;
-  StringRoutines::stringSplitExcludeDelimiters(input, delimiters, output);
+  StringRoutines::splitExcludeDelimiters(input, delimiters, output);
   if (output.size < 3) {
     commentsOnFailure << "Failed to extract a M/D/Y date from: " << input;
     return false;

@@ -247,7 +247,8 @@ void WebClient::initialize() {
   STACK_TRACE("WebCrawler::initialize");
   this->flagDoUseGET = true;
   buffer.initializeFillInObject(50000, 0);
-  this->portOrService = global.configuration[Configuration::portHTTP].stringValue;
+  this->portOrService =
+  global.configuration[Configuration::portHTTP].stringValue;
   this->addressToConnectTo = "127.0.0.1";
 }
 

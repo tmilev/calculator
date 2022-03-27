@@ -32,7 +32,7 @@ public:
     List<std::string>& output
   );
   // Splits a string using a set of character delimiters.
-  static void stringSplitExcludeDelimiters(
+  static void splitExcludeDelimiters(
     const std::string& inputString,
     const List<char>& delimiters,
     List<std::string>& output

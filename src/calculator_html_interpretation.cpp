@@ -2034,12 +2034,10 @@ std::string WebAPIResponse::addTeachersSections() {
   delimiters.addOnTop(';');
   delimiters.addOnTop(static_cast<char>(160));
   // <-&nbsp
-  StringRoutines::stringSplitExcludeDelimiters(
+  StringRoutines::splitExcludeDelimiters(
     desiredSectionsOneString, delimiters, desiredSectionsList
   );
-  StringRoutines::stringSplitExcludeDelimiters(
-    desiredUsers, delimiters, teachers
-  );
+  StringRoutines::splitExcludeDelimiters(desiredUsers, delimiters, teachers);
   if (teachers.size == 0) {
     out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();

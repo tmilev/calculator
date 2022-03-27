@@ -575,43 +575,65 @@ bool PolynomialFactorizationCantorZassenhaus<
   return true;
 }
 
-template <>
-void Matrix<Rational>::Test::matrixFromString(const std::string& inputString, Matrix<Rational>& output){
+template < >
+void Matrix<Rational>::Test::matrixFromString(
+  const std::string& inputString, Matrix<Rational>& output
+) {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::educational);
-  calculator.evaluate( "MakeMatrix"+inputString);
+  calculator.evaluate("MakeMatrix" + inputString);
   Expression matrix = calculator.programExpression[1];
-bool mustBeTrue=  CalculatorConversions::functionGetMatrixNoComputation(calculator,  matrix,output);
-if (!mustBeTrue) {
-  global.fatal << "Failed to extract matrix from: " << inputString << global.fatal;
-}
+  bool mustBeTrue =
+  CalculatorConversions::functionGetMatrixNoComputation(
+    calculator, matrix, output
+  );
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failed to extract matrix from: "
+    << inputString
+    << global.fatal;
+  }
 }
 
-template <>
+template < >
 bool Matrix<Rational>::Test::oneMatrixIntegerWithDenominator(
-const std::string& input, const std::string& expectedMatrix, int expectedScale){
+  const std::string& input,
+  const std::string& expectedMatrix,
+  int expectedScale
+) {
   Matrix<Rational> matrix;
   Matrix<Rational>::Test::matrixFromString(input, matrix);
   Matrix<LargeInteger> result;
   LargeIntegerUnsigned denominator;
-
   matrix.getMatrixIntegerWithDenominator(result, denominator);
   std::string resultString = result.toStringPlainText();
-  if (resultString != expectedMatrix || !(denominator==expectedScale)) {
-    global.fatal << "While rescaling:\n" << matrix.toStringPlainText() << "\ngot:\n"
-    << resultString << "\nwith scale:\n" << denominator
-    << "\nbut expected:\n" << expectedMatrix << "\nwith scale:\n" << expectedScale<< global.fatal;
+  if (resultString != expectedMatrix || !(denominator == expectedScale)) {
+    global.fatal
+    << "While rescaling:\n"
+    << matrix.toStringPlainText()
+    << "\ngot:\n"
+    << resultString
+    << "\nwith scale:\n"
+    << denominator
+    << "\nbut expected:\n"
+    << expectedMatrix
+    << "\nwith scale:\n"
+    << expectedScale
+    << global.fatal;
   }
-  return  true;
-}
-template <>
-bool Matrix<Rational>::Test::matrixIntegerWithDenominator() {
-  oneMatrixIntegerWithDenominator("((-2/3,4),(0,-1/2))","[-4 24]\n[ 0 -3]", 6);
   return true;
 }
-template <>
+
+template < >
+bool Matrix<Rational>::Test::matrixIntegerWithDenominator() {
+  oneMatrixIntegerWithDenominator(
+    "((-2/3,4),(0,-1/2))", "[-4 24]\n[ 0 -3]", 6
+  );
+  return true;
+}
+
+template < >
 bool Matrix<Rational>::Test::all() {
   Matrix<Rational>::Test::matrixIntegerWithDenominator();
   return true;
 }
-

@@ -10924,9 +10924,9 @@ bool Lattice::reduceVector(Vector<Rational>& vector) const {
   Vectors<Rational> basisRoots;
   basisRoots.assignMatrixRows(this->basisRationalForm);
   if (!vector.getCoordinatesInBasis(basisRoots, output)) {
-    global.fatal << "Failed to get coordinates of: "
+    global.fatal
+    << "Failed to get coordinates of: "
     << vector.toString()
-
     << " in basis: "
     << basisRoots.toString()
     << global.fatal;
@@ -15325,7 +15325,9 @@ bool ConeCollection::findMaxLFOverConeProjective(
 
 void Lattice::reduce() {
   STACK_TRACE("Lattice::reduce");
-  global.comments << "DEBUG: before elimination: <br>" << this->basis.toString();
+  global.comments
+  << "DEBUG: before elimination: <br>"
+  << this->basis.toString();
   this->basis.gaussianEliminationEuclideanDomain();
   global.comments << "DEBUG: Eliminated: <br>" << this->basis.toString();
   int rowsToTrim = 0;
@@ -15415,10 +15417,16 @@ void Lattice::makeFromMatrix(const Matrix<Rational>& input) {
 void Lattice::makeFromRoots(const Vectors<Rational>& input) {
   Matrix<Rational> rescaled;
   rescaled.assignVectorsToRows(input);
-  global.comments << "<br>DEBUG: before rescaling: " << rescaled.toString() << "<br>";
+  global.comments
+  << "<br>DEBUG: before rescaling: "
+  << rescaled.toString()
+  << "<br>";
   rescaled.getMatrixIntegerWithDenominator(this->basis, this->denominator);
   global.comments << "<br>DEBUG: input roots: " << input.toString() << "<br>";
-  global.comments << "DEBUG: basis: before reduction: " << this->basis.toString() <<"<br>";
+  global.comments
+  << "DEBUG: basis: before reduction: "
+  << this->basis.toString()
+  << "<br>";
   this->reduce();
 }
 

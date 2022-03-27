@@ -1533,7 +1533,8 @@ public:
   );
   void scaleToIntegralForMinimalRationalHeightNoSignChange();
   void getMatrixIntegerWithDenominator(
-    Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDenominator
+    Matrix<LargeInteger>& outputMat,
+    LargeIntegerUnsigned& outputDenominator
   );
   void lieBracketWith(const Matrix<Coefficient>& right);
   bool getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
@@ -1631,16 +1632,21 @@ public:
     }
     return true;
   }
-  class Test{
+  class Test {
   public:
     static bool all();
     static bool matrixIntegerWithDenominator();
-    static bool oneMatrixIntegerWithDenominator(const std::string& input, const std::string& expectedMatrix,
-    int expectedScale);
+    static bool oneMatrixIntegerWithDenominator(
+      const std::string& input,
+      const std::string& expectedMatrix,
+      int expectedScale
+    );
     // Makes a matrix from a string such as
     // ((2,3), (3,4), (4,5))
     // Converted to matrix using the calculator MakeMatrix function.
-    static void matrixFromString(const std::string& inputString, Matrix<Rational>& output);
+    static void matrixFromString(
+      const std::string& inputString, Matrix<Rational>& output
+    );
   };
 };
 

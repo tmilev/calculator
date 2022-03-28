@@ -5902,12 +5902,7 @@ public:
   Lattice ambientLatticeReduced;
   Vectors<Rational> latticeShifts;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
-  std::string toString(bool useHtml, bool useLatex) {
-    return this->toString(useHtml, useLatex, nullptr);
-  }
-  std::string toString(
-    bool useHtml, bool useLatex, FormatExpressions* format
-  );
+  std::string toString(FormatExpressions* format = nullptr);
   Rational evaluate(const Vector<Rational>& input);
   void addLatticeShift(
     const Polynomial<Rational>& input,
@@ -7086,7 +7081,7 @@ public:
   ConeCollection projectivizedComplex;
   List<QuasiPolynomial> quasiPolynomials;
   int numberOfVariables;
-  std::string toString(bool useLatex, bool useHtml);
+  std::string toString(FormatExpressions* format = nullptr);
   void drawMe(
     DrawingVariables& drawingVariables,
     int numberOfLatticePointsPerDimension,

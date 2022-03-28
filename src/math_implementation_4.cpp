@@ -1893,7 +1893,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     << "\nChamber "
     << i + 1
     << ": the quasipolynomial is: "
-    << currentSum.toString(false, false);
+    << currentSum.toString();
     out
     << "\nThe chamber is: "
     << this->projectivizedChamber.refinedCones[i].toString(&format);
@@ -1963,8 +1963,9 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   << "<br>the argument translations: "
   << this->translationsProjectedBasisChanged.toString();
   out
-  <<
-  "<br>Element u_w: projection, multiplication by - 1, and basis change of so(7)-highest weight to G_2: "
+  << "<br>Element u_w: projection, "
+  << "multiplication by - 1, and basis "
+  << "change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
   startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
   drawOps.drawCoordSystemBuffer(drawOps, 2);
@@ -2021,7 +2022,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
     drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged
   );
   out << drawOps.getHTMLDiv(2, false);
-  out << accumulator.toString(false, true);
+  out << accumulator.toString();
   return out.str();
 }
 
@@ -2144,8 +2145,8 @@ GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
 bool GeneralizedVermaModuleCharacters::checkInitialization() const {
   if (this->weylLarger == nullptr || this->weylSmaller == nullptr) {
     global.fatal
-    <<
-    "Use of non-initialized Weyl group within generalized Verma module characters. "
+    << "Use of non-initialized Weyl group "
+    << "within generalized Verma module characters. "
     << global.fatal;
   }
   if (
@@ -2273,8 +2274,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << "\n\n\n\n\n\n";
   this->log << subgroup.toStringBruhatGraph();
   this->log
-  <<
-  "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
+  << "\nMatrix form of the elements of Weyl group "
+  << "of the Levi part of the parabolic ("
   << subgroup.allElements.size
   << " elements):\n";
   for (int i = 0; i < subgroup.allElements.size; i ++) {
@@ -2383,8 +2384,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << "$.";
   this->log
   << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
-  <<
-  "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
+  << "Argument of the vector partition function "
+  << "in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
   << tempVect.toString(&format)
   << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
   for (int i = 0; i < this->linearOperatorsExtended.size; i ++) {
@@ -2559,13 +2560,15 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   format.polynomialAlphabet[variableIndex] = "y_3";
   variableIndex ++;
   out
-  <<
-  "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
+  << "\\documentclass{article}"
+  << "\\usepackage{"
+  << "amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
   << "\n\\begin{document}\\tiny\n";
   out
   << "\n The chamber complex + multiplicities follow.\n\n\n"
-  <<
-  "\\begin{longtable}{cc}\\caption{multiplicities of generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
+  << "\\begin{longtable}{cc}"
+  << "\\caption{multiplicities of "
+  << "generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
   << " for $\\gop$ with Dynkin diagram";
   std::stringstream tempStream;
   tempStream << "(";
@@ -2616,9 +2619,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
       )
       << "&";
       out << "\\begin{tabular}{c}";
-      out
-      << currentMultiplicity.toString(false, true, &format)
-      << "\\end{tabular}\\\\\n";
+      out << currentMultiplicity.toString(&format) << "\\end{tabular}\\\\\n";
     } else {
       displayIndicesprojectivizedChambers.addOnTop(- 1);
     }
@@ -2627,8 +2628,8 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   numFoundChambers = 0;
   out << "\n\\begin{longtable}{cc} ";
   out
-  <<
-  "normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
+  << "normals& Multiplicity of module with highest "
+  << "weight $(x_1,x_2)$\\endhead\n";
   /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++) {
     root = this->projectivezedChambersSplitByMultFreeWalls.objects[i].getInternalPoint();
     bool found = false;
@@ -2872,7 +2873,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   this->linearOperatorsExtended[indexOperator];
   Vector<Rational>& translation =
   this->translationsProjectedBasisChanged[indexOperator];
-  // the goddamned sign in front of translation is now checked: it should be +
+  // Yhe sign in front of translation should be +
   // and not -
   Rational rationalConstant;
   startingNormal.scalarEuclidean(

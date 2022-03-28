@@ -4322,7 +4322,7 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
     out << "<hr>Chamber " << i + 1 << ".<br>";
     out << cone.toHTML();
     out << "<br>Vector partition function.<br>";
-    out << polynomial.toString(true, true);
+    out << "\\(" << polynomial.toString() << "\\)";
   }
   return out.str();
 }
@@ -10778,122 +10778,44 @@ void QuasiPolynomial::operator+=(const QuasiPolynomial& other) {
   }
 }
 
-std::string QuasiPolynomial::toString(
-  bool useHtml, bool useLatex, FormatExpressions* format
-) {
+std::string QuasiPolynomial::toString(FormatExpressions* format) {
   std::stringstream out;
   if (this->latticeShifts.size == 0) {
     return "0";
   }
-  if (useLatex && !useHtml) {
-    out << "\\begin{tabular}{c}";
-  }
-  if (useLatex && useHtml) {
-    out << "\\begin{array}{rcl}&&";
-  }
+  out << "\\begin{array}{rcl}&&";
   for (int i = 0; i < this->latticeShifts.size; i ++) {
-    if (useLatex) {
-      if (!useHtml) {
-        out << "$\\begin{array}{rcl}&&";
-      } else {
-        out << "<span class ='mathcalculator'>";
-      }
-    }
+    out << "\\begin{array}{rcl}&&";
     out << this->valueOnEachLatticeShift[i].toString(format);
-    if (useLatex) {
-      if (!useHtml) {
-        out << "\\end{array}$";
-      } else {
-        out << "</span>";
-      }
-    }
-    if (!useLatex) {
-      out << " over ";
-    } else {
-      if (useHtml) {
-        out << " \\mathrm{~over~}";
-      } else {
-        out << " over ";
-      }
-    }
+    out << "\\end{array}";
+    out << " \\mathrm{~over~}";
     if (!this->latticeShifts[i].isEqualToZero()) {
       out << this->latticeShifts[i].toString() << " + ";
     }
-    if (useLatex) {
-      if (!useHtml) {
-        out << "$\\Lambda$, \\\\\\hline\n ";
-      } else {
-        out << " \\Lambda";
-      }
-    } else {
-      out << "L ";
-    }
+    out << "\\Lambda$, \\\\\\hline\n ";
     if (this->latticeShifts.size > 1) {
-      if (useHtml & !useLatex) {
-        out << "<br>";
-      }
-      if (useLatex && !useHtml) {
-        out << "\\\\";
-      }
-      if (useLatex && useHtml) {
-        out << "\\\\&&";
-      }
-      out << "\n\n";
+      out << "\\\\&&";
     }
   }
   if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {
-    if (!useLatex) {
-      out << ", where L=< ";
-    }
-    if (useLatex && useHtml) {
-      out << ", \\mathrm{~where~} \\Lambda =<";
-    }
-    if (useLatex && !useHtml) {
-      out << " where $\\Lambda =\\left\\langle\\begin{array}{c}";
-    }
+    out << ", \\mathrm{~where~} \\Lambda \\leq ";
     Vectors<Rational> roots;
     roots.assignMatrixRows(this->ambientLatticeReduced.basisRationalForm);
     for (int i = 0; i < roots.size; i ++) {
       out << roots[i].toString();
       if (i != roots.size - 1) {
         out << ", ";
-        if (useLatex) {
-          out << "\\\\";
-        }
+        out << "\\\\";
       }
     }
-    if (!useLatex) {
-      out << " >";
-    }
-    if (useLatex && useHtml) {
-      out << " >";
-    }
-    if (useLatex && !useHtml) {
-      out << "\\end{array}\\right\\rangle$";
-    }
+    out << "\\end{array}\\right\\rangle$";
   } else {
-    if (useLatex) {
-      if (!useHtml) {
-        out
-        << ", where $\\Lambda =\\mathbb{Z}^{"
-        << this->minimalNumberOfVariables()
-        << "}$";
-      } else {
-        out
-        << ", \\mathrm{~where~} \\Lambda =\\mathbb{Z}^{"
-        << this->minimalNumberOfVariables()
-        << "}";
-      }
-    } else {
-      out << "Z^" << this->minimalNumberOfVariables();
-    }
+    out
+    << ", \\mathrm{~where~} \\Lambda =\\mathbb{Z}^{"
+    << this->minimalNumberOfVariables()
+    << "}";
   }
-  if (useLatex && !useHtml) {
-    out << "\\end{tabular}";
-  }
-  if (useLatex && useHtml) {
-    out << "\\end{array}";
-  }
+  out << "\\end{array}";
   return out.str();
 }
 
@@ -10998,9 +10920,6 @@ void OnePartialFractionDenominator::getDenominatorExponents(
   Vectors<Rational>& output
 ) const {
   STACK_TRACE("OnePartialFractionDenominator::getDenominatorExponents");
-  global.comments
-  << "DEBUG: normalizedVectors: "
-  << this->owner->normalizedVectors.toString();
   output.clear();
   for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
     const Vector<Rational>& current = this->owner->normalizedVectors[i];
@@ -11021,9 +10940,6 @@ getDenominatorExponentsWithoutMultiplicities(Vectors<Rational>& output) const {
     "OnePartialFractionDenominator::"
     "getDenominatorExponentsWithoutMultiplicities"
   );
-  global.comments
-  << "DEBUG: normalizedVectors: "
-  << this->owner->normalizedVectors.toString();
   output.clear();
   for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
     const Vector<Rational>& current = this->owner->normalizedVectors[i];
@@ -11093,18 +11009,10 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
     << this->owner->ambientDimension
     << global.fatal;
   }
-  global.comments
-  << "DEBUG: lattice generators:<br> "
-  << latticeGenerators.toString();
   Lattice lattice;
   lattice.makeFromRoots(latticeGenerators);
   Matrix<Rational> normalsMatrixForm;
   normalsMatrixForm.assignVectorsToRows(latticeGenerators);
-  global.comments
-  << "DEBUG: about ot invert: "
-  << normalsMatrixForm.toString()
-  << "<br>"
-  << lattice.toString();
   normalsMatrixForm.invert();
   normals.assignMatrixColumns(normalsMatrixForm);
   output.makeZeroLatticeZn(owner.ambientDimension);
@@ -11148,7 +11056,6 @@ bool PartialFractions::computeOneVectorPartitionFunction(
   if (this->assureIndicatorRegularity(newIndicator)) {
     report.report("Indicator modified to regular");
   }
-  global.comments << "DEBUG: Got to here1. ";
   if (
     !this->checkForMinimalityDecompositionWithRespectToRoot(&newIndicator)
   ) {
@@ -11157,9 +11064,7 @@ bool PartialFractions::computeOneVectorPartitionFunction(
   this->totalFractionsWithAccountedVectorPartitionFunction = 0;
   output.makeZeroLatticeZn(this->ambientDimension);
   QuasiPolynomial summand;
-  global.comments << "DEBUG: Got to here 2. ";
   for (int i = 0; i < this->reduced.size(); i ++) {
-    global.comments << "DEBUG: Got to here : " << i + 3;
     if (!this->reduced[i].rootIsInFractionCone(&newIndicator)) {
       continue;
     }
@@ -13515,27 +13420,17 @@ void PiecewiseQuasipolynomial::translateArgument(
   }
 }
 
-std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
+std::string PiecewiseQuasipolynomial::toString(FormatExpressions* format) {
   std::stringstream out;
-  FormatExpressions format;
   for (
     int i = 0; i < this->projectivizedComplex.refinedCones.size; i ++
   ) {
     const Cone& currentCone = this->projectivizedComplex.refinedCones[i];
     QuasiPolynomial& currentQuasiPolynomial = this->quasiPolynomials[i];
     out << "Chamber number " << i + 1;
-    if (useHtml) {
-      out << "<br>";
-    }
-    out << currentCone.toString(&format);
-    if (useHtml) {
-      out << "<br>";
-    }
+    out << currentCone.toString(format);
     out << "quasipolynomial: ";
-    out << currentQuasiPolynomial.toString(useHtml, useLatex);
-    if (useHtml) {
-      out << "<hr>";
-    }
+    out << currentQuasiPolynomial.toString();
   }
   return out.str();
 }
@@ -13656,69 +13551,70 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
   for (
     int i = 0; i < this->projectivizedComplex.refinedCones.size; i ++
   ) {
-    if (this->projectivizedComplex.refinedCones[i].isInCone(input)) {
-      Rational altResult = this->quasiPolynomials[i].evaluate(affineInput);
-      if (result != altResult) {
-        if ((false)) {
-          if (!firstFail) {
-            break;
-          }
-          FormatExpressions tempFormat;
+    if (
+      !this->projectivizedComplex.refinedCones[i].isInCone(input)
+    ) {
+      continue;
+    }
+    Rational altResult = this->quasiPolynomials[i].evaluate(affineInput);
+    if (result != altResult) {
+      if ((false)) {
+        if (!firstFail) {
+          break;
+        }
+        FormatExpressions tempFormat;
+        global.comments
+        << "<hr>Error!!! Failed on chamber "
+        << index + 1
+        << " and "
+        << i + 1;
+        global.comments
+        << "<br>Evaluating at point "
+        << affineInput.toString()
+        << "<br>";
+        global.comments
+        << "<br>Chamber "
+        << index + 1
+        << ": "
+        << this->projectivizedComplex.refinedCones[index].toString(
+          &tempFormat
+        );
+        global.comments
+        << "<br>QP: "
+        << this->quasiPolynomials[index].toString();
+        global.comments << "<br>value: " << result.toString();
+        global.comments
+        << "<br><br>Chamber "
+        << i + 1
+        << ": "
+        << this->projectivizedComplex.refinedCones[i].toString(&tempFormat);
+        global.comments << "<br>QP: " << this->quasiPolynomials[i].toString();
+        global.comments << "<br>value: " << altResult.toString();
+        if (firstFail) {
+          DrawingVariables tempDV;
           global.comments
-          << "<hr>Error!!! Failed on chamber "
-          << index + 1
-          << " and "
-          << i + 1;
-          global.comments
-          << "<br>Evaluating at point "
+          << "<br><b>Point of failure: "
           << affineInput.toString()
-          << "<br>";
-          global.comments
-          << "<br>Chamber "
-          << index + 1
-          << ": "
-          << this->projectivizedComplex.refinedCones[index].toString(
-            &tempFormat
+          << "</b>";
+          // this->drawMe(tempDV);
+          this->projectivizedComplex.drawMeLastCoordinateAffine(
+            true, tempDV, tempFormat
+          );
+          tempDV.operations.drawCircleAtVectorBufferRational(
+            affineInput, "black", 5
+          );
+          tempDV.operations.drawCircleAtVectorBufferRational(
+            affineInput, "black", 10
+          );
+          tempDV.operations.drawCircleAtVectorBufferRational(
+            affineInput, "red", 4
           );
           global.comments
-          << "<br>QP: "
-          << this->quasiPolynomials[index].toString(true, false);
-          global.comments << "<br>value: " << result.toString();
-          global.comments
-          << "<br><br>Chamber "
-          << i + 1
-          << ": "
-          << this->projectivizedComplex.refinedCones[i].toString(&tempFormat);
-          global.comments
-          << "<br>QP: "
-          << this->quasiPolynomials[i].toString(true, false);
-          global.comments << "<br>value: " << altResult.toString();
-          if (firstFail) {
-            DrawingVariables tempDV;
-            global.comments
-            << "<br><b>Point of failure: "
-            << affineInput.toString()
-            << "</b>";
-            // this->drawMe(tempDV);
-            this->projectivizedComplex.drawMeLastCoordinateAffine(
-              true, tempDV, tempFormat
-            );
-            tempDV.operations.drawCircleAtVectorBufferRational(
-              affineInput, "black", 5
-            );
-            tempDV.operations.drawCircleAtVectorBufferRational(
-              affineInput, "black", 10
-            );
-            tempDV.operations.drawCircleAtVectorBufferRational(
-              affineInput, "red", 4
-            );
-            global.comments
-            << tempDV.getHTMLDiv(
-              this->projectivizedComplex.getDimension() - 1, false
-            );
-          }
-          firstFail = false;
+          << tempDV.getHTMLDiv(
+            this->projectivizedComplex.getDimension() - 1, false
+          );
         }
+        firstFail = false;
       }
     }
   }
@@ -15325,11 +15221,7 @@ bool ConeCollection::findMaxLFOverConeProjective(
 
 void Lattice::reduce() {
   STACK_TRACE("Lattice::reduce");
-  global.comments
-  << "DEBUG: before elimination: <br>"
-  << this->basis.toString();
   this->basis.gaussianEliminationEuclideanDomain();
-  global.comments << "DEBUG: Eliminated: <br>" << this->basis.toString();
   int rowsToTrim = 0;
   for (int i = this->basis.numberOfRows - 1; i >= 0; i --) {
     bool foundNonZeroRow = false;
@@ -15417,16 +15309,7 @@ void Lattice::makeFromMatrix(const Matrix<Rational>& input) {
 void Lattice::makeFromRoots(const Vectors<Rational>& input) {
   Matrix<Rational> rescaled;
   rescaled.assignVectorsToRows(input);
-  global.comments
-  << "<br>DEBUG: before rescaling: "
-  << rescaled.toString()
-  << "<br>";
   rescaled.getMatrixIntegerWithDenominator(this->basis, this->denominator);
-  global.comments << "<br>DEBUG: input roots: " << input.toString() << "<br>";
-  global.comments
-  << "DEBUG: basis: before reduction: "
-  << this->basis.toString()
-  << "<br>";
   this->reduce();
 }
 

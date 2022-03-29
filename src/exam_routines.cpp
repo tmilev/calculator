@@ -901,9 +901,8 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   if (input.size() != 4) {
     return
     calculator
-    <<
-    "Expected 3 arguments: problem filename, answer id and randomSeed string. "
-    ;
+    << "Expected 3 arguments: "
+    << "problem filename, answer id and randomSeed string. ";
   }
   std::string oldProblem = global.getWebInput(WebAPI::problem::fileName);
   std::string testedProblem = input[1].toString();
@@ -1817,15 +1816,15 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
   if (desiredAnswerId == "") {
     inputOutput.interpretedCommand =
     "<b>Error: could not generate submit button: "
-    "the answer tag does not have a valid id. Please fix the problem template.</b>"
-    ;
+    "the answer tag does not have a valid id. "
+    "Please fix the problem template.</b>";
     return false;
   }
   int index = this->getAnswerIndex(desiredAnswerId);
   if (index == - 1) {
     global.fatal
-    <<
-    "This is not supposed to happen: problem has syntactic element with answerId: "
+    << "This is not supposed to happen: "
+    << "problem has syntactic element with answerId: "
     << desiredAnswerId
     << " but the answerId is missing from the list of known answer ids. "
     << this->problemData.toStringAvailableAnswerIds()
@@ -2490,9 +2489,8 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     this->storeRandomSeedCurrent(comments);
     if (comments != nullptr) {
       *comments
-      <<
-      "<b>Your random seed has been reset due to a finicky problem generation. </b>"
-      ;
+      << "<b>Your random seed has been reset "
+      << "due to a finicky problem generation. </b>";
     }
   }
   this->problemData.checkConsistency();
@@ -3604,14 +3602,15 @@ bool CalculatorHTML::extractAnswerIdsOnce(
         << "Auxilary answer element: "
         << element.toStringDebug()
         << " has no name and appears before the first answer tag. "
-        <<
-        "Auxilary answers apply the answer tag whose id is specified in the name "
+        << "Auxilary answers apply the "
+        << "answer tag whose id is specified in the name "
         << "tag of the auxilary answer. If the auxilary answer has no "
-        <<
-        "name tag, it is assumed to apply to the (nearest) answer tag above it. "
-        <<
-        "To fix the issue either place the auxilary element after the answer or "
-        << "specify the answer's id in the name tag of the auxilary element. ";
+        << "name tag, it is assumed "
+        << "to apply to the (nearest) answer tag above it. "
+        << "To fix the issue either place "
+        << "the auxilary element after the answer or "
+        << "specify the answer's id "
+        << "in the name tag of the auxilary element. ";
       }
       return false;
     }
@@ -3862,8 +3861,8 @@ bool CalculatorHTML::storeRandomSeedCurrent(
       *commentsOnFailure
       << "<b style = 'color:red'>"
       << "Error: failed to store problem in database. "
-      <<
-      "If you see this message, please take a screenshot and post a bug report in "
+      << "If you see this message, please "
+      << "take a screenshot and post a bug report in "
       << HtmlRoutines::getHtmlLinkToGithubRepository(
         "our source code repository"
       )
@@ -4031,7 +4030,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   );
   this->timeIntermediateComments.lastObject()->addOnTop("Time after execution")
   ;
-  // first command and first syntactic element are the random seed and are
+  // First command and first syntactic element are the random seed and are
   // ignored.
   interpreter.objectContainer.resetSliders();
   if (
@@ -4196,8 +4195,8 @@ std::string CalculatorHTML::toStringProblemScoreFull(
     ProblemData& problemData =
     this->currentUser.problemData.getValueCreateEmpty(fileName);
     if (!problemData.flagProblemWeightIsOK) {
-      out
-      << "<span style =\"color:orange\">No point weight assigned yet. </span>";
+      out << "<span style='color:orange'>No point weight assigned yet. </span>"
+      ;
       if (
         !problemData.adminData.getWeightFromCourse(
           this->currentUser.courseComputed, currentWeight
@@ -4227,7 +4226,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(
     } else if (problemData.totalNumSubmissions != 0) {
       if (problemData.numCorrectlyAnswered < problemData.answers.size()) {
         out
-        << "<b style =\"color:red\">"
+        << "<b style='color:red'>"
         << problemData.points
         << " out of "
         << currentWeight
@@ -4236,7 +4235,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(
         problemData.numCorrectlyAnswered == problemData.answers.size()
       ) {
         out
-        << "<b style =\"color:green\">"
+        << "<b style='color:green'>"
         << problemData.points
         << " out of "
         << currentWeight
@@ -4286,7 +4285,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(
       problemWeight << "?";
       if (currentWeightAsGivenByInstructor != "") {
         problemWeight
-        << "<span style =\"color:red\">"
+        << "<span style='color:red'>"
         << currentWeightAsGivenByInstructor
         << "(Error)</span>";
       }
@@ -4298,14 +4297,14 @@ std::string CalculatorHTML::toStringProblemScoreShort(
     if (!outputAlreadySolved) {
       if (!problemData.flagProblemWeightIsOK) {
         out
-        << "<b style =\"color:brown\">"
+        << "<b style='color:brown'>"
         << percentSolved
         << " out of "
         << problemWeight.str()
         << "</b>";
       } else {
         out
-        << "<b style =\"color:red\">"
+        << "<b style='color:red'>"
         << totalPoints
         << " out of "
         << problemWeight.str()
@@ -4313,10 +4312,10 @@ std::string CalculatorHTML::toStringProblemScoreShort(
       }
     } else {
       if (!problemData.flagProblemWeightIsOK) {
-        out << "<b style =\"color:green\">solved</b>";
+        out << "<b style='color:green'>solved</b>";
       } else {
         out
-        << "<b style =\"color:green\">"
+        << "<b style='color:green'>"
         << totalPoints
         << " out of "
         << problemWeight.str()
@@ -4324,14 +4323,14 @@ std::string CalculatorHTML::toStringProblemScoreShort(
       }
     }
   } else {
-    out << "<b style =\"color:brown\">need to solve</b>";
+    out << "<b style='color:brown'>need to solve</b>";
   }
   if (!showModifyButton) {
     return out.str();
   }
   std::stringstream finalOut;
   finalOut
-  << "<button class =\"accordionLike\" onclick=\"toggleProblemWeights();\">"
+  << "<button class='accordionLike' onclick='toggleProblemWeights();'>"
   << out.str()
   << "</button>";
   return finalOut.str();
@@ -5422,16 +5421,16 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
     this->displayVideoHandwrittenLink = "";
   } else {
     this->displayVideoHandwrittenLink =
-    "<a href=\"" +
+    "<a href='" +
     this->videoHandwritten +
-    "\" class =\"videoLink\" class =\"videoLink\" target =\"_blank\">Video <b>(H)</b></a>"
+    "' class='videoLink' class='videoLink' target='_blank'>Video <b>(H)</b></a>"
     ;
   }
   if (this->handwrittenSolution != "") {
     this->displayHandwrittenSolution =
-    "<a href=\"" +
+    "<a href='" +
     this->handwrittenSolution +
-    "\" class =\"slidesLink\">Handwritten solutions</a>";
+    "' class='slidesLink'>Handwritten solutions</a>";
   }
   this->computeSlides(owner);
   this->computeHomework(owner);

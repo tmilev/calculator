@@ -463,7 +463,8 @@ multiplyRationalOrPolynomialByWeightPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialByWeightPolynomial"
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyRationalOrPolynomialByWeightPolynomial"
   );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
@@ -708,7 +709,8 @@ multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction"
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyRationalOrPolynomialOrRationalFunctionByRationalFunction"
   );
   if (
     !CalculatorFunctionsBinaryOps::multiplyTypeByType<
@@ -969,10 +971,10 @@ multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(
     ) {
       std::stringstream out;
       out
-      <<
-      " The Littelmann root operator must have an index whose absolute value "
-      <<
-      "is between 1 and the rank of the ambient Lie algebra, instead I get index  "
+      << " The Littelmann root operator "
+      << "must have an index whose absolute value "
+      << "is between 1 and the rank "
+      << "of the ambient Lie algebra, instead I get index  "
       << littlemannRootOperator.generatorsIndices[i];
       return output.assignError(calculator, out.str());
     } else {
@@ -1146,7 +1148,8 @@ dividePolynomialModuloIntegerByPolynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::dividePolynomialModuloIntegerByPolynomialModuloInteger"
+    "CalculatorFunctionsBinaryOps::"
+    "dividePolynomialModuloIntegerByPolynomialModuloInteger"
   );
   if (input.size() != 3) {
     return false;
@@ -1511,7 +1514,8 @@ bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
       return
       output.assignError(
         calculator,
-        "Exponentiating non-square matrices or matrices with zero rows is not allowed."
+        "Exponentiating non-square matrices "
+        "or matrices with zero rows is not allowed."
       );
     }
     if (power <= 0) {

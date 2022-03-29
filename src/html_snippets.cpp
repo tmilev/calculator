@@ -154,7 +154,7 @@ std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
   std::stringstream out;
   std::string fileName =
   FileOperations::GetVirtualNameWithHash(fileNameVirtual);
-  out << "<link rel = \"stylesheet\" href= \"" << fileName << "\">\n";
+  out << "<link rel='stylesheet' href='" << fileName << "'>\n";
   return out.str();
 }
 
@@ -203,8 +203,8 @@ std::string HtmlRoutines::getCalculatorComputationAnchorSamePage(
   out
   << "<a href = '"
   << HtmlRoutines::getCalculatorComputationURL(inputNoEncoding)
-  <<
-  "' onclick = 'window.calculator.calculator.calculatorLinkClickHandler(this);'>"
+  << "' onclick="
+  << "'window.calculator.calculator.calculatorLinkClickHandler(this);'>"
   << HtmlRoutines::convertStringToHtmlString(inputNoEncoding, false)
   << "</a>";
   return out.str();

@@ -7,7 +7,7 @@
 bool CalculatorFunctionsTrigonometry::sin(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::sin");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::sin");
   if (input.size() != 2) {
     return false;
   }

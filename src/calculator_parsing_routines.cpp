@@ -2002,9 +2002,8 @@ std::string CalculatorParser::toStringIsCorrectAsciiCalculatorString(
     }
     out << "with byte values: " << hexCodes.toStringCommaDelimited() << ". ";
     out
-    <<
-    "Perhaps you copy+pasted from webpage/pdf file or are using non-English keyboard setup? "
-    ;
+    << "Perhaps you copy+pasted from webpage/pdf file "
+    << "or are using non-English keyboard setup? ";
   }
   return out.str();
 }
@@ -2462,8 +2461,8 @@ bool CalculatorParser::replaceSsSsXdotsXbySsXdotsX(int numberOfDots) {
   ];
   if (!left.data.startsWith(this->owner->opCommandSequence())) {
     global.fatal
-    <<
-    "replaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement."
+    << "replaceSsSsXdotsXbySsXdotsX called "
+    << "but left expression is not EndStatement."
     << global.fatal;
   }
   left.data.setExpectedSize(
@@ -3118,11 +3117,11 @@ bool CalculatorParser::extractExpressions(
         maxNumTimesOneRuleCanBeCalled
       ) {
         global.fatal
-        <<
-        "This may be a programming error: Calculator::applyOneRule called more than "
+        << "This may be a programming error: "
+        << "Calculator::applyOneRule called more than "
         << maxNumTimesOneRuleCanBeCalled
-        <<
-        " times without advancing to the next syntactic element in the syntactic soup. "
+        << " times without advancing to the "
+        << "next syntactic element in the syntactic soup. "
         << "If this is indeed an expression which requires that "
         << "many application of a single parsing rule, "
         << "then you should modify function Calculator::extractExpressions. "
@@ -3134,8 +3133,8 @@ bool CalculatorParser::extractExpressions(
   if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart
   ) {
     errorLog
-    <<
-    "Non-meaningful/empty input detected (spacebar, enter characters only?).";
+    << "Non-meaningful/empty input detected "
+    << "(spacebar, enter characters only?).";
   } else if ((*this->currentSyntacticStack).size ==
     this->numberOfEmptyTokensStart + 1
   ) {
@@ -3151,18 +3150,17 @@ bool CalculatorParser::extractExpressions(
       errorLog << "Syntax error with message: " << result.errorString;
     } else {
       errorLog
-      <<
-      "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>"
-      ;
+      << "Syntax error: your command "
+      << "simplifies to a single syntactic element "
+      << "but it is not an expression. <br>";
       errorLog
       << "It simplifies to:<br> "
       << this->toStringSyntacticStackHTMLTable(false, false);
     }
   } else {
     errorLog
-    <<
-    "Syntax error: your command does not simplify to a single syntactic element. <br>"
-    ;
+    << "Syntax error: your command "
+    << "does not simplify to a single syntactic element. <br>";
     errorLog
     << "Instead it simplifies to:<br> "
     << this->toStringSyntacticStackHTMLTable(false, false);
@@ -3345,8 +3343,8 @@ bool CalculatorParser::applyOneRule() {
   if (secondToLastS == "%" && lastS == "NumberColors") {
     if (!this->owner->flagUseNumberColors) {
       *this->owner
-      <<
-      "<span style ='color:blue'>Floating point numbers</span> are displayed in "
+      << "<span style ='color:blue'>Floating point numbers</span> "
+      << "are displayed in "
       << "<span style='color:blue'>blue</span>."
       << "<br><span style='color:red'>Algebraic numbers</span> "
       << "are displayed in <span style='color:red'>red</span>. "

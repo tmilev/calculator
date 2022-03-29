@@ -1975,14 +1975,14 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   invertedCartan.invert();
   Vectors<Rational> tempVertices;
   Vector<Rational> tMpRt;
-  tMpRt = this->ParabolicSelectionSmallerAlgebra;
+  tMpRt = this->parabolicSelectionSmallerAlgebra;
   for (
-    int i = 0; i < this->ParabolicSelectionSmallerAlgebra.numberOfElements; i
+    int i = 0; i < this->parabolicSelectionSmallerAlgebra.numberOfElements; i
     ++
   ) {
     invertedCartan.getVectorFromRow(i, root);
     tempVertices.addOnTop(root);
-    if (this->ParabolicSelectionSmallerAlgebra.selected[i]) {
+    if (this->parabolicSelectionSmallerAlgebra.selected[i]) {
       tempVertices.addOnTop(- root);
     }
   }
@@ -2075,7 +2075,7 @@ void GeneralizedVermaModuleCharacters::incrementComputation(
   Vector<Rational>& parabolicSel
 ) {
   std::stringstream out;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
+  this->parabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
   switch (this->computationPhase) {
   case 0:
     //      this->parser.hmm.MakeG2InB3(this->parser);
@@ -2231,13 +2231,13 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
   subgroup;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSelection;
+  this->parabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSelection;
   Matrix<Rational> DualCartanEmbedding;
   input.getMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   Vector<Rational> ParabolicEvaluationRootImage, root;
   ParabolicEvaluationRootImage =
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
-  this->ParabolicSelectionSmallerAlgebra.initialize(
+  this->parabolicLeviPartRootSpacesZeroStandsForSelected;
+  this->parabolicSelectionSmallerAlgebra.initialize(
     input.domainAlgebra().getRank()
   );
   for (int i = 0; i < input.domainAlgebra().getRank(); i ++) {
@@ -2245,7 +2245,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     if (
       ParabolicEvaluationRootImage.scalarEuclidean(root).isPositive()
     ) {
-      this->ParabolicSelectionSmallerAlgebra.addSelectionAppendNewIndex(i);
+      this->parabolicSelectionSmallerAlgebra.addSelectionAppendNewIndex(i);
     }
   }
   this->log
@@ -2253,12 +2253,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << DualCartanEmbedding.toString(&global.defaultFormat.getElement());
   this->log
   << "\nParabolic subalgebra large algebra: "
-  << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.toString();
-  root = this->ParabolicSelectionSmallerAlgebra;
+  << this->parabolicLeviPartRootSpacesZeroStandsForSelected.toString();
+  root = this->parabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << root.toString();
   subgroup.makeParabolicFromSelectionSimpleRoots(
     weylGroupCoDomain,
-    this->ParabolicLeviPartRootSpacesZeroStandsForSelected,
+    this->parabolicLeviPartRootSpacesZeroStandsForSelected,
     - 1
   );
   this->linearOperators.setSize(subgroup.allElements.size);
@@ -2343,11 +2343,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
   List<int> displayIndicesReflections;
   for (
-    int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.
+    int i = 0; i < this->parabolicLeviPartRootSpacesZeroStandsForSelected.
     numberOfElements; i ++
   ) {
     if (
-      !this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]
+      !this->parabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]
     ) {
       displayIndicesReflections.addOnTop(i + 1);
     }
@@ -2476,7 +2476,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   roots.size = 0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra =
-  this->ParabolicSelectionSmallerAlgebra;
+  this->parabolicSelectionSmallerAlgebra;
   for (int i = 0; i < invertedCartan.numberOfRows; i ++) {
     input.domainAlgebra().weylGroup.cartanSymmetric.getVectorFromRow(i, root);
     if (
@@ -2491,7 +2491,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "**********************\n\n\n";
   this->log
   << "\nthe smaller parabolic selection: "
-  << this->ParabolicSelectionSmallerAlgebra.toString();
+  << this->parabolicSelectionSmallerAlgebra.toString();
   this->log
   << "the Vectors<Rational> generating the chamber walls: "
   << roots.toString();
@@ -2573,11 +2573,11 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   std::stringstream tempStream;
   tempStream << "(";
   for (
-    int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.
+    int i = 0; i < this->parabolicLeviPartRootSpacesZeroStandsForSelected.
     numberOfElements; i ++
   ) {
     if (
-      this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]
+      this->parabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]
     ) {
       tempStream << "+";
     } else {
@@ -2585,7 +2585,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
     }
     if (
       i !=
-      this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements -
+      this->parabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements -
       1
     ) {
       tempStream << ",";
@@ -2695,31 +2695,31 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
   ConeLatticeAndShift currentCLS;
   Vector<Rational> latticePtoMax;
   for (int i = 0; i < this->multiplicities.size; i ++) {
-    if (!this->multiplicities[i].isEqualToZero()) {
-      currentCLS.projectivizedCone = this->projectivizedChamber.refinedCones[i]
-      ;
-      currentCLS.shift.makeZero(affineDimension);
-      currentCLS.lattice = ZnLattice;
-      bool tempBool =
-      this->multiplicities[i].valueOnEachLatticeShift[0].
-      getRootFromLinearPolynomialConstantTermLastVariable(latticePtoMax);
-      if (!tempBool) {
-        global.fatal << "This should not happen. " << global.fatal;
-      }
-      this->maximumComputation.conesLargerDimension.addOnTop(currentCLS);
-      this->maximumComputation.LPtoMaximizeLargerDim.addOnTop(latticePtoMax);
-      this->numberNonZeroMultiplicities ++;
-      std::stringstream out;
-      out
-      << "Initialized "
-      << i + 1
-      << " out of "
-      << this->maximumComputation.conesLargerDimension.size
-      << "; so far "
-      << this->numberNonZeroMultiplicities
-      << " non-zero multiplicities";
-      report.report(out.str());
+    if (this->multiplicities[i].isEqualToZero()) {
+      continue;
     }
+    currentCLS.projectivizedCone = this->projectivizedChamber.refinedCones[i];
+    currentCLS.shift.makeZero(affineDimension);
+    currentCLS.lattice = ZnLattice;
+    bool tempBool =
+    this->multiplicities[i].valueOnEachLatticeShift[0].
+    getRootFromLinearPolynomialConstantTermLastVariable(latticePtoMax);
+    if (!tempBool) {
+      global.fatal << "This should not happen. " << global.fatal;
+    }
+    this->maximumComputation.conesLargerDimension.addOnTop(currentCLS);
+    this->maximumComputation.LPtoMaximizeLargerDim.addOnTop(latticePtoMax);
+    this->numberNonZeroMultiplicities ++;
+    std::stringstream out;
+    out
+    << "Initialized "
+    << i + 1
+    << " out of "
+    << this->maximumComputation.conesLargerDimension.size
+    << "; so far "
+    << this->numberNonZeroMultiplicities
+    << " non-zero multiplicities";
+    report.report(out.str());
   }
 }
 
@@ -2779,7 +2779,7 @@ elementToStringMultiplicitiesReport() {
   }
   out << "\nNumber of inequalities: " << numInequalities;
   if (
-    this->ParabolicLeviPartRootSpacesZeroStandsForSelected.cardinalitySelection
+    this->parabolicLeviPartRootSpacesZeroStandsForSelected.cardinalitySelection
     !=
     0
   ) {
@@ -2873,8 +2873,8 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   this->linearOperatorsExtended[indexOperator];
   Vector<Rational>& translation =
   this->translationsProjectedBasisChanged[indexOperator];
-  // Yhe sign in front of translation should be +
-  // and not -
+  // The sign in front of translation should be +
+  // and not -.
   Rational rationalConstant;
   startingNormal.scalarEuclidean(
     this->nonIntegralOriginModificationBasisChanged + translation,

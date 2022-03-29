@@ -1111,8 +1111,8 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   << "\\usepackage{pst-math}\\usepackage{pst-plot}";
   resultStream
   << lineSeparator
-  <<
-  "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}"
+  << "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}"
+  << "\\rput[r](-0.1, #2){$y$}}"
   << lineSeparator;
   resultStream
   << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}"

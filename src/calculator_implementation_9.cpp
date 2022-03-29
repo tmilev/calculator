@@ -19,11 +19,11 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
   Matrix<Element>& matb,
   Vector<Element>* outputSolution
 ) {
-  // this function return true if Ax = b >= 0 has a solution with x >= 0 and
+  // This function return true if Ax = b >= 0 has a solution with x >= 0 and
   // records a solution x at outputPoint
   // else returns false, where b is a given nonnegative column vector, A is an
   // n by m matrix
-  // and x is a column vector with m entries
+  // and x is a column vector with m entries.
   Matrix<Rational> workingMatrix;
   Vector<Rational> matX;
   Selection baseVariables;

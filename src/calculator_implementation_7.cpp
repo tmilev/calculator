@@ -2866,7 +2866,6 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
   STACK_TRACE(
     "CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig"
   );
-  // ///////////////////
   if (input.size() != 3) {
     return false;
   }
@@ -2878,7 +2877,6 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     << " - possible user typo?";
   }
   const Expression& argument = input[2];
-  // ////////////////////
   if (argument.isOperationGiven(calculator.opSin())) {
     return output.makeAtom(calculator, calculator.opCos());
   }

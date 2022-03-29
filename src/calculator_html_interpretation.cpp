@@ -1354,7 +1354,7 @@ public:
   CalculatorHTML problem;
   AnswerCheckerNoProblem checker;
   JSData result;
-  int64_t startTimE;
+  int64_t startTime;
   int answerIndex;
   std::string storageReport;
   JSData submitAnswersJSON(
@@ -1373,14 +1373,14 @@ public:
 };
 
 AnswerChecker::AnswerChecker() {
-  this->startTimE = 0;
+  this->startTime = 0;
   this->answerIndex = - 1;
 }
 
 bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
   STACK_TRACE("AnswerChecker::prepareProblem");
   std::stringstream errorStream, comments;
-  this->startTimE = global.getElapsedMilliseconds();
+  this->startTime = global.getElapsedMilliseconds();
   this->problem.loadCurrentProblemItem(
     global.userRequestRequiresLoadingRealExamData(),
     inputRandomSeed,
@@ -1932,7 +1932,7 @@ void AnswerChecker::computeResultHTML() {
   this->result[WebAPI::result::resultHtml] =
   this->checker.verification + this->checker.errorSyntax + this->storageReport;
   this->result[WebAPI::result::millisecondsComputation] =
-  global.getElapsedMilliseconds() - this->startTimE;
+  global.getElapsedMilliseconds() - this->startTime;
   this->result[WebAPI::problem::forReal] = this->problem.flagIsForReal;
 }
 
@@ -2634,7 +2634,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     currentUser.loadFromJSON(users[i]);
     if (currentUser.courseInDB.find('%') != std::string::npos) {
       out
-      << "<b style = \"color:red\">Non-expected behavior: user: "
+      << "<b style='color:red'>Non-expected behavior: user: "
       << currentUser.username
       << "current course: "
       << currentUser.courseInDB
@@ -2659,7 +2659,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       isActivated = false;
       numActivatedUsers ++;
       oneTableLineStream
-      << "<td><span style ='color:red'>not activated</span></td>";
+      << "<td><span style='color:red'>not activated</span></td>";
       if (currentUser.actualActivationToken != "") {
         oneTableLineStream
         << "<td>"
@@ -3041,10 +3041,10 @@ public:
   List<LargeInteger> numStudentsSolvedEntireTopic;
   List<LargeInteger> numStudentsSolvedPartOfTopic;
   List<LargeInteger> numStudentsSolvedNothingInTopic;
-  bool ComputeScoresAndStats(std::stringstream& comments);
+  bool computeScoresAndStats(std::stringstream& comments);
 };
 
-bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
+bool UserScores::computeScoresAndStats(std::stringstream& comments) {
   STACK_TRACE("UserScores::ComputeScoresAndStats");
   if (!global.flagDatabaseCompiled) {
     return false;
@@ -3180,14 +3180,14 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
 }
 
 std::string WebAPIResponse::getScoresInCoursePage() {
-  STACK_TRACE("WebWorker::getScoresInCoursePage");
+  STACK_TRACE("WebAPIResponse::getScoresInCoursePage");
   if (!global.userDefaultHasAdminRights()) {
     return "Only admins are allowed to view student scores.";
   }
   std::stringstream out;
   out.precision(4);
   UserScores scores;
-  if (!scores.ComputeScoresAndStats(out)) {
+  if (!scores.computeScoresAndStats(out)) {
     return out.str();
   }
   out << "Section: " << scores.currentSection << ". ";
@@ -3239,7 +3239,7 @@ std::string WebAPIResponse::toStringUserScores() {
   std::stringstream out;
   out.precision(4);
   UserScores scores;
-  if (!scores.ComputeScoresAndStats(out)) {
+  if (!scores.computeScoresAndStats(out)) {
     return out.str();
   }
   out
@@ -3405,8 +3405,8 @@ std::string WebAPIResponse::toStringUserDetails(
   << "</span></li>"
   << "<li>To change course use "
   << "the select course link in the top panel.</li>"
-  <<
-  "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"
+  << "<li>List users with a comma/space bar"
+  << "/new line/tab/semicolumn separated list. </li>"
   << "<li>List default passwords with a similarly separated list.</li> "
   << "<li>If left blank, password(s) are not (re)set.</li> "
   << "<li>If the password entries "

@@ -167,8 +167,8 @@ public:
   // List<QuasiPolynomial> multiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
   int numberNonZeroMultiplicities;
-  Selection ParabolicLeviPartRootSpacesZeroStandsForSelected;
-  Selection ParabolicSelectionSmallerAlgebra;
+  Selection parabolicLeviPartRootSpacesZeroStandsForSelected;
+  Selection parabolicSelectionSmallerAlgebra;
   List<Rational> coefficients;
   Vectors<Rational> translations;
   Vectors<Rational> translationsProjectedBasisChanged;

@@ -245,8 +245,8 @@ char Crypto::getCharFrom6Bit(uint32_t input, bool useBase64URL) {
     }
   default:
     global.fatal
-    <<
-    "Requesting character from a purported 6 bit integer, which in fact has more significant bits. "
+    << "Requesting character from a purported 6-bit integer, "
+    << "which in fact has more significant bits. "
     << global.fatal;
     break;
   }
@@ -904,8 +904,8 @@ bool Crypto::convertBase64ToBitStream(
     *commentsGeneral
     << "<br>Base64: input corresponds modulo 8 to "
     << numBitsInStack
-    <<
-    " bits. Perhaps the input was not padded correctly with = signs. The input: "
+    << " bits. Perhaps the input was "
+    << "not padded correctly with = signs. The input: "
     << input;
   }
   return true;
@@ -2013,7 +2013,7 @@ void Crypto::computeSha2xx(
 ) {
   STACK_TRACE("Crypto::computeSha2xx");
   // Reference: wikipedia page on sha256.
-  // the Algorithm here is a direct implementation of the Wikipedia pseudocode.
+  // The algorithm here is a direct implementation of the Wikipedia pseudocode.
   uint32_t h0 = 0x6a09e667;
   uint32_t h1 = 0xbb67ae85;
   uint32_t h2 = 0x3c6ef372;
@@ -2175,7 +2175,7 @@ void Crypto::computeSha512(
 ) {
   STACK_TRACE("Crypto::computeSha512");
   // Reference: wikipedia page on sha2.
-  // the Algorithm here is a direct implementation of the Wikipedia pseudocode.
+  // The algorithm here is a direct implementation of the Wikipedia pseudocode.
   uint64_t h0 = 0x6a09e667f3bcc908;
   uint64_t h1 = 0xbb67ae8584caa73b;
   uint64_t h2 = 0x3c6ef372fe94f82b;
@@ -2489,8 +2489,8 @@ LargeIntegerUnsigned Crypto::rsaEncrypt(
   STACK_TRACE("Crypto::rsaEncrypt");
   if (modulus == 0 || exponent == 0) {
     global.fatal
-    <<
-    "The modulus and the exponent are not allowed to be zero while running RSA. "
+    << "The modulus and the exponent are "
+    << "not allowed to be zero while running RSA. "
     << "The modulus: "
     << modulus.toString()
     << "; the exponent: "

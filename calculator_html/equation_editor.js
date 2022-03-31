@@ -2254,7 +2254,7 @@ class LaTeXParser {
         return true;
       } else {
         this.lastRuleName = 'create whitespace';
-        let node = mathNodeFactory.atom(this.equationEditor, ' ');
+        let node = mathNodeFactory.atom(this.equationEditor, '');
         return this.replaceParsingStackTop(node, '', -1);
       }
     }

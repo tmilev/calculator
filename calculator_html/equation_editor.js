@@ -999,12 +999,16 @@ class MathNodeFactory {
     let rightDelimiter = null;
     if (columnStyle === '') {
       if (parenthesesStyle === '[' || parenthesesStyle === ']' ||
-          parenthesesStyle === '[]') {
+        parenthesesStyle === '[]') {
         leftDelimiter = this.leftDelimiter(equationEditor, '[', false);
         rightDelimiter = this.rightDelimiter(equationEditor, ']', false);
       } else if (parenthesesStyle === '(') {
         leftDelimiter = this.leftParenthesis(equationEditor, false);
         rightDelimiter = this.rightParenthesis(equationEditor, false);
+      } else if (parenthesesStyle === 'cases') { 
+        console.log("DEBUG left delimiter");
+        leftDelimiter = this.leftDelimiter(equationEditor, '{', false);
+        rightDelimiter = this.rightDelimiter(equationEditor, '');
       } else {
         leftDelimiter = this.leftDelimiter(equationEditor, '', false);
       }
@@ -1791,6 +1795,8 @@ class LaTeXConstants {
       'pmatrix': 'pmatrix',
       'bmatrix': 'bmatrix',
       'array': 'array',
+      'cases': 'cases',
+      'align': 'align',
     };
     /** @type {Object.<string, boolean>!} */
     this.matrixEnder = {
@@ -1798,6 +1804,8 @@ class LaTeXConstants {
       '\\end{matrix}': true,
       '\\end{bmatrix}': true,
       '\\end{array}': true,
+      '\\end{align}':true,
+      '\\end{cases}': true,
     };
     /** @type {Object.<string, boolean>!} */
     // The boolean indicates that the white space should be ignored.
@@ -2497,7 +2505,7 @@ class LaTeXParser {
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '(');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
-    if (last.syntacticRole === '\\begin{matrix}') {
+    if (last.syntacticRole === '\\begin{matrix}' || last.syntacticRole ==='\\begin{align}') {
       this.lastRuleName = 'begin matrix to matrix builder';
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
@@ -2505,6 +2513,11 @@ class LaTeXParser {
     if (last.syntacticRole === '\\begin{bmatrix}') {
       this.lastRuleName = 'begin bmatrix to matrix builder';
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '[');
+      return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
+    }
+    if (last.syntacticRole === '\\begin{cases}') {
+      this.lastRuleName = 'begin cases to matrix builder';
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'cases');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (fourthToLast.syntacticRole === '\\begin{array}' &&
@@ -2585,6 +2598,7 @@ class LaTeXParser {
           .applyStyleToMatrix(thirdToLast.node);
       // Mark the matrix as a regular expression.
       thirdToLast.syntacticRole = '';
+      this.lastRuleName = 'finalize matrix builder';
       return this.decreaseParsingStack(2);
     }
     if (secondToLast.syntacticRole === 'matrixBuilder' &&

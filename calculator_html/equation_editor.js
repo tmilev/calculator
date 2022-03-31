@@ -1009,11 +1009,11 @@ class MathNodeFactory {
         rightDelimiter = this.rightDelimiter(equationEditor, '');
       } else {
         leftDelimiter = this.leftDelimiter(equationEditor, '', false);
-        rightDelimiter = this.rightDelimiter(equationEditor, '');
+        rightDelimiter = this.rightDelimiter(equationEditor, '', false);
       }
     } else {
-      leftDelimiter = this.atom(equationEditor, '');
-      rightDelimiter = this.atom(equationEditor, '');
+      leftDelimiter = this.leftDelimiter(equationEditor, '', false);
+      rightDelimiter = this.rightDelimiter(equationEditor, '', false);
     }
     let parenthesesLayout = this.horizontalMath(equationEditor, leftDelimiter);
     parenthesesLayout.appendChild(matrixTable);

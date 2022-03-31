@@ -988,8 +988,8 @@ class MathNodeFactory {
       columns,
       /** @type {string} */
       columnStyle,
-      /** @type {string} */
-      parenthesesStyle,
+      /** @type{string} */
+      matrixEnvironment,
   ) {
     const matrixTable = new MathNode(equationEditor, knownTypes.matrixTable);
     for (let i = 0; i < rows; i++) {
@@ -998,19 +998,18 @@ class MathNodeFactory {
     let leftDelimiter = null;
     let rightDelimiter = null;
     if (columnStyle === '') {
-      if (parenthesesStyle === '[' || parenthesesStyle === ']' ||
-        parenthesesStyle === '[]') {
+      if (matrixEnvironment === 'bmatrix') {
         leftDelimiter = this.leftDelimiter(equationEditor, '[', false);
         rightDelimiter = this.rightDelimiter(equationEditor, ']', false);
-      } else if (parenthesesStyle === '(') {
+      } else if (matrixEnvironment === 'pmatrix' || matrixEnvironment == 'binom') {
         leftDelimiter = this.leftParenthesis(equationEditor, false);
         rightDelimiter = this.rightParenthesis(equationEditor, false);
-      } else if (parenthesesStyle === 'cases') { 
-        console.log("DEBUG left delimiter");
+      } else if (matrixEnvironment === 'cases') { 
         leftDelimiter = this.leftDelimiter(equationEditor, '{', false);
         rightDelimiter = this.rightDelimiter(equationEditor, '');
       } else {
         leftDelimiter = this.leftDelimiter(equationEditor, '', false);
+        rightDelimiter = this.rightDelimiter(equationEditor, '');
       }
     } else {
       leftDelimiter = this.atom(equationEditor, '');
@@ -1019,7 +1018,7 @@ class MathNodeFactory {
     let parenthesesLayout = this.horizontalMath(equationEditor, leftDelimiter);
     parenthesesLayout.appendChild(matrixTable);
     parenthesesLayout.appendChild(rightDelimiter);
-    let result = new MathNodeMatrix(equationEditor);
+    let result = new MathNodeMatrix(equationEditor, matrixEnvironment);
     result.latexExtraStyle = columnStyle;
     result.appendChild(parenthesesLayout);
     result.appendChildren(
@@ -2502,17 +2501,17 @@ class LaTeXParser {
     }
     if (last.syntacticRole === '\\begin{pmatrix}') {
       this.lastRuleName = 'begin pmatrix to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '(');
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'pmatrix');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
-    if (last.syntacticRole === '\\begin{matrix}' || last.syntacticRole ==='\\begin{align}') {
+    if (last.syntacticRole === '\\begin{matrix}' || last.syntacticRole === '\\begin{align}') {
       this.lastRuleName = 'begin matrix to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '');
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'align');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{bmatrix}') {
       this.lastRuleName = 'begin bmatrix to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', '[');
+      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'bmatrix');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{cases}') {
@@ -2533,7 +2532,7 @@ class LaTeXParser {
         last.isExpression()) {
       this.lastRuleName = 'begin array to matrix builder';
       let matrix = mathNodeFactory.matrix(
-          this.equationEditor, 1, 0, last.node.toLatex(), '');
+          this.equationEditor, 1, 0, last.node.toLatex(), 'array');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -2);
     }
     if (thirdToLast.syntacticRole === 'matrixBuilder' &&
@@ -2720,14 +2719,14 @@ class LaTeXParser {
     }
     if (thirdToLast.syntacticRole === '\\binom' &&
         secondToLast.isExpression() && last.isExpression()) {
-      let node = mathNodeFactory.matrix(this.equationEditor, 2, 1, '', '');
+      let node = mathNodeFactory.matrix(this.equationEditor, 2, 1, '', 'binom');
       node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
       node.getMatrixCell(1, 0).children[0].appendChild(last.node);
       return this.replaceParsingStackTop(node, '', -3);
     }
     if (thirdToLast.syntacticRole === '\\stackrel' &&
         secondToLast.isExpression() && last.isExpression()) {
-      let node = mathNodeFactory.matrix(this.equationEditor, 3, 1, '', '');
+      let node = mathNodeFactory.matrix(this.equationEditor, 3, 1, '', 'stackrel');
       node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
       node.getMatrixCell(1, 0).children[0].appendChild(last.node);
       node.getMatrixCell(2, 0).children[0].appendChild(
@@ -5929,9 +5928,13 @@ class MathNode {
         this.makeCancel();
         return new KeyHandlerResult(true, false);
       case '\\pmatrix':
+        this.makeMatrix(2, 2, 'pmatrix');
+        return new KeyHandlerResult(true, false);
       case '\\bmatrix':
+        this.makeMatrix(2, 2, 'bmatrix');
+        return new KeyHandlerResult(true, false);
       case '\\matrix':
-        this.makeMatrix(2, 2);
+        this.makeMatrix(2, 2, 'matrix');
         return new KeyHandlerResult(true, false);
       default:
         return new KeyHandlerResult(false, true);
@@ -6870,9 +6873,11 @@ class MathNode {
       rows,
       /** @type {number} */
       columns,
+      /** @type {string}*/
+      matrixEnvironment,
   ) {
     let split = this.splitByCursorEmptyAtoms();
-    this.makeMatrixFromSplit(rows, columns, split);
+    this.makeMatrixFromSplit(rows, columns, split, matrixEnvironment);
   }
 
   makeMatrixFromSplit(
@@ -6882,6 +6887,8 @@ class MathNode {
       columns,
       /** @type {Array.<MathNode!>!} */
       split,
+      /** @type {string}*/
+      matrixEnvironment,
   ) {
     // Find closest ancestor node that's of type horizontal math.
     if (!this.hasHorozintalMathParent()) {
@@ -6891,7 +6898,7 @@ class MathNode {
     }
     let parent = this.parent;
     let matrix =
-        mathNodeFactory.matrix(this.equationEditor, rows, columns, '', '');
+        mathNodeFactory.matrix(this.equationEditor, rows, columns, '', matrixEnvironment);
     parent.replaceChildAtPositionWithChildren(this.indexInParent, [
       split[0],
       matrix,
@@ -9852,9 +9859,12 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
 class MathNodeMatrix extends MathNode {
   constructor(
       /** @type {EquationEditor!} */
-      equationEditor,
+    equationEditor,
+    /** @type {string!} */
+    matrixEnvironment,
   ) {
     super(equationEditor, knownTypes.matrix);
+    this.matrixEnvironment = matrixEnvironment;
   }
 
   /** @return {LatexWithAnnotation!} */
@@ -9867,14 +9877,7 @@ class MathNodeMatrix extends MathNode {
     }
     let matrixContent = this.children[0].children[1];
     let result = [];
-    let leftDelimiterMark = this.children[0].children[0];
-    let matrixEnvironment = 'matrix';
-    if (leftDelimiterMark.extraData === '[') {
-      matrixEnvironment = 'bmatrix';
-    } else if (leftDelimiterMark.extraData === '(') {
-      matrixEnvironment = 'pmatrix';
-    }
-    result.push(`\\begin{${matrixEnvironment}}`);
+    result.push(`\\begin{${this.matrixEnvironment}}`);
     let rows = [];
     for (let i = 0; i < matrixContent.children.length; i++) {
       let matrixRow = matrixContent.children[i];
@@ -9886,7 +9889,7 @@ class MathNodeMatrix extends MathNode {
       rows.push(currentRowStrings.join('&'));
     }
     result.push(rows.join('\\\\'));
-    result.push(`\\end{${matrixEnvironment}}`);
+    result.push(`\\end{${this.matrixEnvironment}}`);
     return new LatexWithAnnotation(result.join(''));
   }
 
@@ -9978,7 +9981,7 @@ class MathNodeRowEntry extends MathNode {
     if (arrowType === arrowMotion.firstAtomDown) {
       let row = this.parent;
       let matrixTable = row.parent;
-      if (row.indexInParent < matrixTable.children.length) {
+      if (row.indexInParent+1 < matrixTable.children.length) {
         return new MathNodeWithCursorPosition(matrixTable.children[row.indexInParent+1].children[this.indexInParent], -1);
       }
     }
@@ -10977,15 +10980,30 @@ let buttonFactories = {
       '\\begin{bmatrix}\\cursor&&\\\\&&\\\\&&\\end{bmatrix}', false, '[3x3]',
       {'width': '100%'}, ''),
   'bmatrix1x3': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\cursor & & \\\\ \\end{bmatrix}', false, '[1x3]',
+      '\\begin{bmatrix}\\cursor \\\\~\\\\~ \\end{bmatrix}', false, '[1x3]',
       {'width': '100%'}, ''),
   'bmatrix1x2': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\cursor&\\end{bmatrix}', false, '[1x2]',
+      '\\begin{bmatrix}\\cursor \\\\~\\end{bmatrix}', false, '[1x2]',
       {'width': '100%'}, ''),
 
   'bmatrix2x1': new EquationEditorButtonFactory(
-      '\\begin{bmatrix}\\cursor&\\\\\\end{bmatrix}', false, '[2x1]',
-      {'width': '100%'}, ''),
+      '\\begin{bmatrix}\\cursor &~ \\end{bmatrix}', false, '[2x1]',
+      {'width': '100%'}, ''),      
+  'cases2x1': new EquationEditorButtonFactory(
+      '\\begin{cases}\\cursor \\\\~ \\end{cases}', false, '{2x1',
+      { 'width': '100%' }, ''),
+  'cases3x1': new EquationEditorButtonFactory(
+      '\\begin{cases}\\cursor\\\\ ~\\\\ ~\\end{cases}', false, '{3x1',
+      { 'width': '100%' }, ''),
+  'cases3x3': new EquationEditorButtonFactory(
+      '\\begin{cases}\\cursor&=&\\\\ &=& \\\\ &=&\\end{cases}', false, '{3x3',
+      { 'width': '100%' }, ''),
+  'array3x3': new EquationEditorButtonFactory(
+      '\\begin{array}{rcl}\\cursor&=&\\\\ &=& \\\\ &=&\\end{array}', false, '{3x3',
+      { 'width': '100%' }, ''),
+  'align3x3': new EquationEditorButtonFactory(
+      '\\begin{align}\\cursor&=&\\\\ &=& \\\\ &=&\\end{align}', false, 'al3x1',
+      { 'width': '100%' }, ''),
   'pi': new EquationEditorButtonFactory(
       '\\pi', false, '\u03C0', {'width': '100%'}, ''),
   'degrees': equationEditorButtonFactoryFromKeySequence(
@@ -11089,6 +11107,11 @@ class EquationEditorButtonPanel {
         buttonFactories['bmatrix1x3'],
         buttonFactories['bmatrix1x2'],
         buttonFactories['bmatrix2x1'],
+        buttonFactories['cases2x1'],
+        buttonFactories['cases3x1'],
+        buttonFactories['cases3x3'],
+        buttonFactories['array3x3'],
+        buttonFactories['align3x3'],
       ];
     }
   }

@@ -4316,13 +4316,15 @@ std::string PartialFractions::toLatex(FormatExpressions* format) const {
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
   std::stringstream out;
   out << "\\(" << this->toLatex(format) << "\\)";
+  FormatExpressions formatQuasipolynomial;
+  formatQuasipolynomial.flagUseFrac = true;
   for (int i = 0; i < this->chambers.refinedCones.size; i ++) {
     QuasiPolynomial& quasiPolynomial = this->allQuasiPolynomials[i];
     const Cone& cone = this->chambers.refinedCones[i];
     out << "<hr>Chamber " << i + 1 << ".<br>";
     out << cone.toHTML();
     out << "<br>Vector partition function.<br>";
-    out << "\\(" << quasiPolynomial.toString() << "\\)";
+    out << "\\(" << quasiPolynomial.toString(&formatQuasipolynomial) << "\\)";
   }
   return out.str();
 }
@@ -10783,18 +10785,16 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
   if (this->latticeShifts.size == 0) {
     return "0";
   }
-  out << "\\begin{array}{rcl}&&";
+  out << "\\begin{array}{l}";
   for (int i = 0; i < this->latticeShifts.size; i ++) {
-    out << "\\begin{array}{rcl}&&";
     out << this->valueOnEachLatticeShift[i].toString(format);
-    out << "\\end{array}";
     out << " \\text{~over~}";
     if (!this->latticeShifts[i].isEqualToZero()) {
       out << this->latticeShifts[i].toString() << " + ";
     }
     out << "\\Lambda, \\\\\\hline\n ";
-    if (this->latticeShifts.size > 1) {
-      out << "\\\\&&";
+    if (i != this->latticeShifts.size -1 ) {
+      out << "\\\\";
     }
   }
   if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {

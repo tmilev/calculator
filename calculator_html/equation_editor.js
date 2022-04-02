@@ -2255,7 +2255,7 @@ class LaTeXParser {
         return true;
       } else {
         this.lastRuleName = 'create whitespace';
-        let node = mathNodeFactory.atom(this.equationEditor, '');
+        let node = mathNodeFactory.atom(this.equationEditor, ' ');
         return this.replaceParsingStackTop(node, '', -1);
       }
     }
@@ -6120,6 +6120,11 @@ class MathNode {
       key,
   ) {
     if (this.type.type !== knownTypes.atom.type) {
+      return false;
+    }
+    if (this.element.textContent === ' ') {
+      // Single space bar textcontent does not appear to respect left-right arrow navigation.
+      // Tested in Chrome and Firefox.
       return false;
     }
     if (key === 'ArrowLeft') {

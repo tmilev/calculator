@@ -10788,7 +10788,7 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
     out << "\\begin{array}{rcl}&&";
     out << this->valueOnEachLatticeShift[i].toString(format);
     out << "\\end{array}";
-    out << " \\mathrm{~over~}";
+    out << " \\text{~over~}";
     if (!this->latticeShifts[i].isEqualToZero()) {
       out << this->latticeShifts[i].toString() << " + ";
     }

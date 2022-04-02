@@ -4317,12 +4317,12 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   std::stringstream out;
   out << "\\(" << this->toLatex(format) << "\\)";
   for (int i = 0; i < this->chambers.refinedCones.size; i ++) {
-    QuasiPolynomial& polynomial = this->allQuasiPolynomials[i];
+    QuasiPolynomial& quasiPolynomial = this->allQuasiPolynomials[i];
     const Cone& cone = this->chambers.refinedCones[i];
     out << "<hr>Chamber " << i + 1 << ".<br>";
     out << cone.toHTML();
     out << "<br>Vector partition function.<br>";
-    out << "\\(" << polynomial.toString() << "\\)";
+    out << "\\(" << quasiPolynomial.toString() << "\\)";
   }
   return out.str();
 }
@@ -10792,7 +10792,7 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
     if (!this->latticeShifts[i].isEqualToZero()) {
       out << this->latticeShifts[i].toString() << " + ";
     }
-    out << "\\Lambda$, \\\\\\hline\n ";
+    out << "\\Lambda, \\\\\\hline\n ";
     if (this->latticeShifts.size > 1) {
       out << "\\\\&&";
     }

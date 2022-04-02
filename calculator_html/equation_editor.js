@@ -1540,6 +1540,7 @@ class LaTeXConstants {
       'overline': '\\overline',
       'color': '\\color',
       'mathbf': '\\mathbf',
+      'hline': '\\hline',
     };
     /** @type {Object.<string, string>!} */
     this.latexBackslashOperators = {
@@ -2519,6 +2520,13 @@ class LaTeXParser {
       let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'cases');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
+    if (secondToLast.syntacticRole === 'matrixBuilder' && last.syntacticRole === '\\hline') {
+      this.lastRuleName = 'matrixBuilder hline';
+      /** @type{MathNodeMatrix} */
+      let builder = secondToLast.node;
+      builder.appendHorizontalAboveLastRow();
+      return this.decreaseParsingStack(1);
+    }
     if (fourthToLast.syntacticRole === '\\begin{array}' &&
         thirdToLast.syntacticRole === '{' && secondToLast.isExpression() &&
         last.syntacticRole === '|') {
@@ -2541,7 +2549,9 @@ class LaTeXParser {
       // copying it may cause unwanted quadratic complexity.
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, secondToLast.node);
-      thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
+      /** @type {MathNodeMatrix} */
+      let matrix = thirdToLast.node;
+      matrix.getLastMatrixRow().appendChild(incomingEntry);
       return this.decreaseParsingStack(2);
     }
     if (secondToLast.syntacticRole === 'matrixBuilder' &&
@@ -2550,8 +2560,10 @@ class LaTeXParser {
       // copying it may cause unwanted quadratic complexity.
       this.lastRuleName = 'matrix builder ampersand';
       let incomingEntry = mathNodeFactory.matrixRowEntry(
-          this.equationEditor, mathNodeFactory.atom(this.equationEditor, ''));
-      secondToLast.node.getLastMatrixRow().appendChild(incomingEntry);
+        this.equationEditor, mathNodeFactory.atom(this.equationEditor, ''));
+      /** @type {MathNodeMatrix} */
+      let matrix = secondToLast.node;
+      matrix.getLastMatrixRow().appendChild(incomingEntry);
       return this.decreaseParsingStack(1);
     }
     if (last.syntacticRole === '\\\\' && secondToLast.isExpression() &&
@@ -2559,7 +2571,9 @@ class LaTeXParser {
       // Modify thirdToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
       this.lastRuleName = 'matrix builder expression double backslash';
-      let lastRow = thirdToLast.node.getLastMatrixRow();
+      /** @type {MathNodeMatrix} */
+      let matrix = thirdToLast.node;
+      let lastRow = matrix.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, secondToLast.node);
       lastRow.appendChild(incomingEntry);
@@ -2572,7 +2586,9 @@ class LaTeXParser {
       // Modify secondToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
       this.lastRuleName = 'matrix builder double backslash';
-      let lastRow = secondToLast.node.getLastMatrixRow();
+      /** @type {MathNodeMatrix} */
+      let matrix = secondToLast.node;
+      let lastRow = matrix.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, mathNodeFactory.atom(this.equationEditor, ''));
       lastRow.appendChild(incomingEntry);
@@ -2588,13 +2604,15 @@ class LaTeXParser {
     if (thirdToLast.syntacticRole === 'matrixBuilder' &&
         secondToLast.isExpression() && last.isMatrixEnder()) {
       let incomingEntry = mathNodeFactory.matrixRowEntry(
-          this.equationEditor, secondToLast.node);
-      thirdToLast.node.getLastMatrixRow().appendChild(incomingEntry);
+        this.equationEditor, secondToLast.node);
+      /** @type {MathNodeMatrix} */
+      let matrix = thirdToLast.node;
+      matrix.getLastMatrixRow().appendChild(incomingEntry);
       // Normalize the matrix: ensure all rows have same number of columns, no
       // last empty row, etc.
-      thirdToLast.node.normalizeMatrix();
-      (new LatexColumnStyleIterator(thirdToLast.node.latexExtraStyle))
-          .applyStyleToMatrix(thirdToLast.node);
+      matrix.normalizeMatrix();
+      (new LatexColumnStyleIterator(matrix.latexExtraStyle))
+        .applyStyleToMatrix(matrix);
       // Mark the matrix as a regular expression.
       thirdToLast.syntacticRole = '';
       this.lastRuleName = 'finalize matrix builder';
@@ -2603,9 +2621,11 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === 'matrixBuilder' &&
         last.isMatrixEnder()) {
       this.lastRuleName = 'finish matrix';
+      /** @type {MathNodeMatrix} */
+      let matrix = secondToLast.node;
       // Normalize the matrix: ensure all rows have same number of columns, no
       // last empty row, etc.
-      secondToLast.node.normalizeMatrix();
+      matrix.normalizeMatrix();
       (new LatexColumnStyleIterator(secondToLast.node.latexExtraStyle))
           .applyStyleToMatrix(secondToLast.node);
       // Mark the matrix as a regular expression.
@@ -5412,6 +5432,7 @@ class MathNode {
       row.boundingBox = new BoundingBox();
       row.mergeVerticalComponentsBoundingBoxesHorizontallyAlignedElements();
       row.boundingBox.top = top;
+      row.boundingBox.width = rowWidth;
       top += row.boundingBox.height + betweenRows;
     }
     this.boundingBox.height = top - betweenRows;
@@ -8159,21 +8180,6 @@ class MathNode {
     return result;
   }
 
-  /**
-   * If the element is a matrix, fetches its last row.
-   * @return {MathNode?}
-   */
-  getLastMatrixRow() {
-    if (this.type.type !== knownTypes.matrix.type) {
-      return null;
-    }
-    let matrixTable = this.children[0].children[1];
-    if (matrixTable.children.length === 0) {
-      return null;
-    }
-    return matrixTable.children[matrixTable.children.length - 1];
-  }
-
   /** @return {MathNode?} */
   getMatrixCell(
       /** @type {number} */
@@ -8208,26 +8214,6 @@ class MathNode {
           Math.max(columnCount, matrixTable.children[i].children.length);
     }
     return columnCount;
-  }
-
-  /** Ensures that a matrix has rows with equal number of columns. */
-  normalizeMatrix() {
-    let matrixTable = this.children[0].children[1];
-    let columnCount = this.matrixColumnCount();
-    let numberOfRows = matrixTable.children.length;
-    // Last empty row is ignored. Previous empty rows are preserved.
-    if (matrixTable.children[numberOfRows - 1].children.length === 0) {
-      numberOfRows--;
-      matrixTable.removeChild(numberOfRows);
-    }
-    // Expand rows to the colum count.
-    for (let i = 0; i < matrixTable.children.length; i++) {
-      let child = matrixTable.children[i];
-      for (let j = child.children.length; j < columnCount; j++) {
-        child.appendChild(
-            mathNodeFactory.matrixRowEntry(this.equationEditor, null));
-      }
-    }
   }
 }
 
@@ -9905,6 +9891,57 @@ class MathNodeMatrix extends MathNode {
     parent.focusRestore();
     return true;
   }
+
+  /** Appends a horizontal line directly above the last row. */
+  appendHorizontalAboveLastRow() {
+    let rowContainer = this.children[0].children[1];
+    if (rowContainer.children.length === 0) {
+      return;
+    }
+    /** @type{MathNodeMatrixRow} */
+    let row = rowContainer.children[rowContainer.children.length - 1];
+    row.addTopBorder();
+  }
+
+  /**
+   * Fetches the last row of the matrix.
+   * @return {MathNode?}
+   */
+  getLastMatrixRow() {
+    let matrixTable = this.children[0].children[1];
+    if (matrixTable.children.length === 0) {
+      return null;
+    }
+    return matrixTable.children[matrixTable.children.length - 1];
+  }
+
+  /** Ensures that a matrix has rows with equal number of columns. */
+  normalizeMatrix() {
+    let matrixTable = this.children[0].children[1];
+    let columnCount = this.matrixColumnCount();
+    let numberOfRows = matrixTable.children.length;
+    // Last empty row is ignored. Previous empty rows are preserved.
+    /** @type{MathNodeMatrixRow} */
+    let lastRow = matrixTable.children[numberOfRows - 1];
+    if (lastRow.children.length === 0) {
+      if (numberOfRows > 1 && lastRow.topLineCount > 0) {
+        // We have a last row, that is empty, except for an \hline.
+        // This means that the table has a bottom border, which 
+        // we create by appending a bottom border on the row above.
+        matrixTable.children[numberOfRows - 2].addBottomBorder();
+      }
+      numberOfRows--;
+      matrixTable.removeChild(numberOfRows);
+    }
+    // Expand rows to the colum count.
+    for (let i = 0; i < matrixTable.children.length; i++) {
+      let child = matrixTable.children[i];
+      for (let j = child.children.length; j < columnCount; j++) {
+        child.appendChild(
+          mathNodeFactory.matrixRowEntry(this.equationEditor, null));
+      }
+    }
+  }
 }
 
 class MathNodeRadicalUnderBox extends MathNode {
@@ -9940,6 +9977,8 @@ class MathNodeMatrixRow extends MathNode {
       equationEditor,
   ) {
     super(equationEditor, knownTypes.matrixRow);
+    this.topLineCount = 0;
+    this.bottomLineCount = 0;
   }
 
   /**
@@ -9951,6 +9990,16 @@ class MathNodeMatrixRow extends MathNode {
       return this.parent.children[this.indexInParent - 1].applyBackspaceToTheRightAsLeftArrow();
     }
     return this.parent.parent.parent.applyBackspaceToTheLeftAsLeftArrow();
+  }
+
+  addTopBorder() {
+    this.topLineCount++;
+    this.type.borderTop = '1px solid black';
+  }
+
+  addBottomBorder() {
+    this.bottomLineCount++;
+    this.type.borderBottom = '1px solid black';
   }
 }
 

@@ -4115,19 +4115,12 @@ template <class Coefficient>
 void Polynomial<Coefficient>::makeLinearNoConstant(
   const Vector<Rational>& inputCoefficients
 ) {
+  STACK_TRACE("Polynomial::makeLinearNoConstant");
   this->makeZero();
-  MonomialPolynomial tempM;
+  MonomialPolynomial monomial;
   for (int i = 0; i < inputCoefficients.size; i ++) {
-    tempM.makeEi(i);
-    if (!inputCoefficients[i].isInteger()) {
-      global.fatal
-      << "This may or may not be a programming error: "
-      << "requesting a monomial with non-integer exponent. "
-      << "It appears this operation should be allowed, however "
-      << "this requires further consideration. I am crashing just in case. "
-      << global.fatal;
-    }
-    this->addMonomial(tempM, inputCoefficients[i].getNumerator());
+    monomial.makeEi(i);
+    this->addMonomial(monomial, inputCoefficients[i].getNumerator());
   }
 }
 
@@ -5967,20 +5960,19 @@ private:
   void findInitialPivot();
   bool rootIsInFractionCone(Vector<Rational>* root) const;
   friend class PartialFractions;
-  friend class partFractionPolynomialSubstitution;
 public:
   // The keys are the exponents vectors, rescaled so that the
   // coefficients have no greatest common divisor.
   // Given a key v, the values are all
-  // denominators of the form (1-x^{a_1 v})^{m_1} ... (1-x^{a_k v})^{m_k}
+  // denominators of the form (1-x^{a_1 v})^{m_1} ... (1-x^{a_k v})^{m_k}.
   MapList<Vector<Rational>, OnePartialFractionDenominatorComponent>
-  denominators;
+  denominatorsNoScale;
   PartialFractions* owner;
   friend std::ostream& operator<<(
     std::ostream& output, const OnePartialFractionDenominator& input
   ) {
     (void) input;
-    global.fatal << " Not implemented, please fix. " << global.fatal;
+    global.fatal << "Not implemented, please fix. " << global.fatal;
     return output;
   }
   bool removeRedundantShortRootsClassicalRootSystem(

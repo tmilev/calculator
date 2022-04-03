@@ -77,7 +77,8 @@ computeSubGroupFromGeneratingReflections(
   bool recomputeAmbientRho
 ) {
   STACK_TRACE(
-    "SubgroupWeylGroupAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "SubgroupWeylGroupAutomorphisms::"
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
   );
   this->checkInitialization();
   HashedList<Vector<Rational> > orbitRho;
@@ -590,8 +591,8 @@ bool VectorPartition::nudgePartition() {
   }
   if (indexFirstNonZero == - 1) {
     global.fatal
-    <<
-    "Error: an internal check has failed in VectorPartition::incrementReturnFalseIfPastLast."
+    << "Error: an internal check has failed in "
+    << "VectorPartition::incrementReturnFalseIfPastLast."
     << global.fatal;
   }
   if (indexFirstNonZero == 0) {

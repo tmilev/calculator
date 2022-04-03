@@ -474,7 +474,7 @@ std::string WebWorker::toStringMessageShort() const {
   << lineBreak
   << "\nRelative physical file/directory name:\n"
   << HtmlRoutines::convertStringToHtmlString(
-    this->RelativePhysicalFileNamE, true
+    this->relativePhysicalFileName, true
   );
   out
   << lineBreak
@@ -545,7 +545,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->addressComputed = "";
   this->addressGetOrPost = "";
   this->argumentComputed = "";
-  this->RelativePhysicalFileNamE = "";
+  this->relativePhysicalFileName = "";
   this->VirtualFileName = "";
   this->displayUserInput = "";
   this->messageHeaderStrings.setSize(0);
@@ -775,9 +775,8 @@ bool WebWorker::loginProcedure(
     global.flagLogInAttempted = true;
     if (global.userDebugFlagOn() && comments != nullptr) {
       *comments
-      <<
-      "Activation token entered: authentication token and google token ignored. "
-      ;
+      << "Activation token entered: "
+      << "authentication token and google token ignored. ";
     }
   }
   if (user.username != "") {
@@ -1476,14 +1475,14 @@ int WebWorker::processFolder() {
   this->setHeaderOKNoContentLength("");
   std::stringstream outPage, outError;
   outPage << "<html><body>";
-  if (this->RelativePhysicalFileNamE.size() > 0) {
+  if (this->relativePhysicalFileName.size() > 0) {
     if (
-      this->RelativePhysicalFileNamE[
-        this->RelativePhysicalFileNamE.size() - 1
+      this->relativePhysicalFileName[
+        this->relativePhysicalFileName.size() - 1
       ] !=
       '/'
     ) {
-      this->RelativePhysicalFileNamE.push_back('/');
+      this->relativePhysicalFileName.push_back('/');
     }
   }
   if (this->addressGetOrPost.size() > 0) {
@@ -1501,7 +1500,7 @@ int WebWorker::processFolder() {
     << "<br>However, I do not allow folder names that contain dots. "
     << "Therefore I have sanitized the main address to: "
     << HtmlRoutines::convertStringToHtmlString(
-      this->RelativePhysicalFileNamE, false
+      this->relativePhysicalFileName, false
     );
     outPage << sanitization.str();
     outError << sanitization.str();
@@ -1509,13 +1508,13 @@ int WebWorker::processFolder() {
   List<std::string> fileNames, fileTypes;
   if (
     !FileOperations::getFolderFileNamesUnsecure(
-      this->RelativePhysicalFileNamE, fileNames, &fileTypes
+      this->relativePhysicalFileName, fileNames, &fileTypes
     )
   ) {
     outError
     << "<b>Failed to open directory with physical address "
     << HtmlRoutines::convertStringToHtmlString(
-      this->RelativePhysicalFileNamE, false
+      this->relativePhysicalFileName, false
     )
     << " </b>";
     JSData result;
@@ -1590,7 +1589,7 @@ int WebWorker::processFileDoesntExist() {
     << "Therefore I have sanitized "
     << "the address to a relative physical address: "
     << HtmlRoutines::convertStringToHtmlString(
-      this->RelativePhysicalFileNamE, false
+      this->relativePhysicalFileName, false
     )
     << ".";
   }
@@ -1601,7 +1600,7 @@ int WebWorker::processFileDoesntExist() {
   << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, true)
   << "<br><b>Computed relative physical file name:</b> "
   << HtmlRoutines::convertStringToHtmlString(
-    this->RelativePhysicalFileNamE, true
+    this->relativePhysicalFileName, true
   );
   out
   << "<br><b>Request:</b> "
@@ -1630,7 +1629,7 @@ int WebWorker::processFileCantOpen() {
     << "However, I do not allow addresses that contain dots. "
     << "Therefore I have sanitized "
     << "the address to a relative physical address: "
-    << this->RelativePhysicalFileNamE;
+    << this->relativePhysicalFileName;
   }
   out
   << "File display name: "
@@ -1660,18 +1659,18 @@ int WebWorker::processFileTooLarge(long fileSize) {
 int WebWorker::processFile() {
   STACK_TRACE("WebWorker::processFile");
   if (
-    !FileOperations::fileExistsUnsecure(this->RelativePhysicalFileNamE)
+    !FileOperations::fileExistsUnsecure(this->relativePhysicalFileName)
   ) {
     return this->processFileDoesntExist();
   }
   std::string fileExtension =
-  FileOperations::getFileExtensionWithDot(this->RelativePhysicalFileNamE);
+  FileOperations::getFileExtensionWithDot(this->relativePhysicalFileName);
   bool isBinary = this->isFileExtensionOfBinaryFile(fileExtension);
   std::fstream fileStream;
   if (
     !FileOperations::openFileUnsecure(
       fileStream,
-      this->RelativePhysicalFileNamE,
+      this->relativePhysicalFileName,
       false,
       false,
       !isBinary
@@ -1752,7 +1751,7 @@ void WebWorker::reset() {
   global.flagUsingSSLinCurrentConnection = false;
   global.flagLoggedIn = false;
   global.userDefault.reset();
-  this->RelativePhysicalFileNamE = "";
+  this->relativePhysicalFileName = "";
   this->statistics.allReceives = 0;
   this->statistics.pingReceives = 0;
   this->numberOfConsecutiveNoReportsBeforeDisconnect = 0;
@@ -2360,7 +2359,8 @@ bool WebWorker::processRedirectAwayFromWWW() {
   std::stringstream out;
   out
   << "<html><body>Please remove the www. "
-  << "from the address, it creates issues with authentication services. " // Address
+  << "from the address, it creates issues with "
+  << "authentication services. " // Address
   // is quote-escaped to prevent content injection.
   << "Click <a href=\""
   << newAddressStream.str()
@@ -2398,7 +2398,8 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
       "HTTP/1.0 301 Moved Permanently", redirectStream.str()
     );
     outBody
-    << "<html><body>Address available through secure (SSL) connection only. " // The
+    << "<html><body>Address available through "
+    << "secure (SSL) connection only. " // The
     // newAddressStream is quote-escaped;
     // this should prevent content injection in the snippet below.
     << "Click <a href=\""
@@ -2606,7 +2607,7 @@ int WebWorker::processFolderOrFile() {
   if (
     !FileOperations::getPhysicalFileNameFromVirtual(
       this->VirtualFileName,
-      this->RelativePhysicalFileNamE,
+      this->relativePhysicalFileName,
       global.userDefaultHasAdminRights(),
       false,
       &commentsOnFailure
@@ -2631,7 +2632,7 @@ int WebWorker::processFolderOrFile() {
     result[WebAPI::result::error] = out.str();
     return global.response.writeResponse(result);
   }
-  if (FileOperations::isFolderUnsecure(this->RelativePhysicalFileNamE)) {
+  if (FileOperations::isFolderUnsecure(this->relativePhysicalFileName)) {
     return this->processFolder();
   }
   return this->processFile();

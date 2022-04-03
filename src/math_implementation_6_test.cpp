@@ -495,8 +495,10 @@ bool PolynomialFactorizationCantorZassenhaus<
   int currentDegree,
   const std::string& expected
 ) {
-  STACK_TRACE("PolynomialFactorizationFiniteFields::testOneStartingPolynomial")
-  ;
+  STACK_TRACE(
+    "PolynomialFactorizationFiniteFields::"
+    "testOneStartingPolynomial"
+  );
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   PolynomialUnivariateModular one;

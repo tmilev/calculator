@@ -75,8 +75,8 @@ public:
     RootSubalgebras& owners,
     int indexInOwner
   );
-  void FixRightHandSide(
-    RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots
+  void fixRightHandSide(
+    RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots
   );
   bool leftSortedBiggerThanOrEqualToRight(
     List<int>& left, List<int>& right

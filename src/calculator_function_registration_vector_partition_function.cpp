@@ -20,14 +20,14 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(0,1,1),\n"
     "(1,1,1)\n"
     ");\n"
-  "VectorPartitionFunction(\n"
-  "(1,0),"
-  "(0,1),"
-  "(1,1),"
-  "(1,2),"
-  "(1,3),"
-  "(2,3) "
-  ");",
+    "VectorPartitionFunction(\n"
+    "(1,0),"
+    "(0,1),"
+    "(1,1),"
+    "(1,2),"
+    "(1,3),"
+    "(2,3) "
+    ");",
     "CalculatorFunctionsVectorPartitionFunction"
     "::vectorPartitionFunctionFormula",
     "VectorPartitionFunction",

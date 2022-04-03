@@ -372,37 +372,37 @@ void RootSubalgebra::generatePossibleNilradicalsRecursive(
   RootSubalgebras& owner,
   int indexInOwner
 ) {
-  int& RecursionDepth = owner.RecursionDepthNilradicalsGeneration;
+  int& recursionDepth = owner.RecursionDepthNilradicalsGeneration;
   List<int>& counters = owner.CountersNilradicalsGeneration;
-  while (RecursionDepth > - 1) {
-    while (counters[RecursionDepth] < this->modules.size) {
+  while (recursionDepth > - 1) {
+    while (counters[recursionDepth] < this->modules.size) {
       if (
-        !impliedSelections[RecursionDepth].selected[
-          counters[RecursionDepth]
+        !impliedSelections[recursionDepth].selected[
+          counters[recursionDepth]
         ]
       ) {
         if (
           this->indexIsCompatibleWithPrevious(
-            counters[RecursionDepth],
-            RecursionDepth,
+            counters[recursionDepth],
+            recursionDepth,
             multTable,
             impliedSelections,
             oppositeKmods,
             owner
           )
         ) {
-          RecursionDepth ++;
-          counters[RecursionDepth] = counters[RecursionDepth - 1];
+          recursionDepth ++;
+          counters[recursionDepth] = counters[recursionDepth - 1];
         }
       }
-      counters[RecursionDepth] ++;
+      counters[recursionDepth] ++;
     }
     this->possibleNilradicalComputation(
-      impliedSelections[RecursionDepth], owner, indexInOwner
+      impliedSelections[recursionDepth], owner, indexInOwner
     );
-    RecursionDepth --;
-    if (RecursionDepth > - 1) {
-      counters[RecursionDepth] ++;
+    recursionDepth --;
+    if (recursionDepth > - 1) {
+      counters[recursionDepth] ++;
     }
   }
 }
@@ -593,8 +593,8 @@ void RootSubalgebra::generateKModuleLieBracketTable(
   int numTotal = this->modules.size * this->modules.size;
   std::stringstream out;
   out
-  <<
-  "Computing pairing table for the module decomposition of the root subalgebra of type "
+  << "Computing pairing table for the module "
+  << "decomposition of the root subalgebra of type "
   << this->dynkinDiagram.toString()
   << "\n<br>\nwith centralizer "
   << this->centralizerDiagram.toString();
@@ -925,8 +925,8 @@ void RootSubalgebra::computeKModules() {
     dimensionFinal != this->getOwnerLieAlgebra().getNumberOfGenerators()
   ) {
     global.fatal
-    <<
-    "Sum of k-module dimensions does not equal the dimension of the ambient Lie algebra. "
+    << "Sum of k-module dimensions does not "
+    << "equal the dimension of the ambient Lie algebra. "
     << global.fatal;
   }
 }
@@ -1137,7 +1137,7 @@ void RootSubalgebra::extractRelations(
   ConeRelation relation;
   relation.indexOwnerRootSubalgebra = indexInOwner;
   if (owner.flagLookingForMinimalRels) {
-    relation.FixRightHandSide(*this, nilradicalRoots);
+    relation.fixRightHandSide(*this, nilradicalRoots);
     relation.makeLookCivilized(*this);
     owner.minimalRelations.addRelationNoRepetition(relation, owner);
   }
@@ -1151,7 +1151,7 @@ void RootSubalgebra::extractRelations(
       relation, matrixA, matrixX, dimension, nilradicalRoots
     );
     this->makeGeneratingSingularVectors(relation, nilradicalRoots);
-    relation.FixRightHandSide(*this, nilradicalRoots);
+    relation.fixRightHandSide(*this, nilradicalRoots);
     relation.makeLookCivilized(*this);
     relation.computeRelationString(owner, true, true);
     if ((false)) {
@@ -1683,11 +1683,13 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
     useLatex, useHtml, false
   );
   out
-  <<
-  "<br>Number of outer autos with trivial action on orthogonal complement and extending to autos of ambient algebra: "
+  << "<br>Number of outer autos "
+  << "with trivial action on orthogonal complement "
+  << "and extending to autos of ambient algebra: "
   << this->outerSAautosExtendingToAmbientAutosGenerators.elements.size;
   out
-  << "<br>Number of outer autos with trivial action on orthogonal complement: "
+  << "<br>Number of outer autos with trivial "
+  << "action on orthogonal complement: "
   << this->outerSAautos.elements.size
   << ". ";
   out << "<br>\nC(k_{ss})_{ss}: " << this->centralizerDiagram.toString();
@@ -1703,9 +1705,9 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out << "<br>\n";
   out
   << "\ng/k k-submodules<table border =\"1\">\n<tr><th>id</th><th>size</th>"
-  <<
-  "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Module basis</th><th>Weights epsilon coords</th>"
-  ;
+  << "<th>b\\cap k-lowest weight</th>"
+  << "<th>b\\cap k-highest weight</th>"
+  << "<th>Module basis</th><th>Weights epsilon coords</th>";
   if (includeKEpsCoords) {
     out << "<th>epsilon coords wrt k</th>";
   }
@@ -2358,15 +2360,15 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   Permutation permComponentsCentralizer;
   List<int> tempList, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
-  List<List<List<int> > > CentralizerDiagramAutomorphisms;
+  List<List<List<int> > > centralizerDiagramAutomorphisms;
   domainRootSubalgebra.centralizerDiagram.getAutomorphisms(
-    CentralizerDiagramAutomorphisms
+    centralizerDiagramAutomorphisms
   );
   domainRootSubalgebra.centralizerDiagram.toString();
-  tempAutosCentralizer.initializePart1(CentralizerDiagramAutomorphisms.size);
-  for (int i = 0; i < CentralizerDiagramAutomorphisms.size; i ++) {
+  tempAutosCentralizer.initializePart1(centralizerDiagramAutomorphisms.size);
+  for (int i = 0; i < centralizerDiagramAutomorphisms.size; i ++) {
     tempAutosCentralizer.capacities[i] =
-    CentralizerDiagramAutomorphisms[i].size - 1;
+    centralizerDiagramAutomorphisms[i].size - 1;
   }
   tempList.setSize(
     domainRootSubalgebra.centralizerDiagram.sameTypeComponents.size
@@ -2412,7 +2414,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
         isoDomain,
         isoRange,
         tempPermutation2,
-        CentralizerDiagramAutomorphisms,
+        centralizerDiagramAutomorphisms,
         tempAutosCentralizer,
         rangeRootSubalgebra.centralizerDiagram
       );
@@ -2795,7 +2797,8 @@ void RootSubalgebra::
 computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
 {
   STACK_TRACE(
-    "RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators"
+    "RootSubalgebra::"
+    "computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators"
   );
   if (this->simpleRootsReductiveSubalgebra.size == 0) {
     return;
@@ -2898,8 +2901,8 @@ void RootSubalgebra::computeEssentials() {
   if (this->simpleRootsReductiveSubalgebra.size != 0) {
     if (this->dynkinType.toString() == "0") {
       global.fatal
-      <<
-      "Subalgebra dynkin type computed to be zero while the simple basis is: "
+      << "Subalgebra dynkin type computed "
+      << "to be zero while the simple basis is: "
       << this->simpleRootsReductiveSubalgebra.toString()
       << ". "
       << global.fatal;
@@ -3058,8 +3061,8 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     << ", centralizer type: "
     << this->centralizerDynkinType.toString()
     << ". Computing outer automorphisms that "
-    <<
-    "have zero action on centralizer and extend to ambient automorphisms... ";
+    << "have zero action on centralizer "
+    << "and extend to ambient automorphisms... ";
     report.report(reportStream.str());
   }
   return true;
@@ -3171,10 +3174,10 @@ std::string SlTwoSubalgebra::toStringTripleArbitrary(
   out
   << "Starting h, e, f triple. H is computed according to Dynkin, "
   << "and the coefficients of f are arbitrarily chosen. "
-  <<
-  "<br>More precisely, the chevalley generators participating in f are ordered in the order "
-  <<
-  "in which their roots appear, and the coefficients are chosen to be the increasing odd "
+  << "<br>More precisely, the chevalley generators "
+  << "participating in f are ordered in the order "
+  << "in which their roots appear, and the "
+  << "coefficients are chosen to be the increasing odd "
   << "numbers 1, 3, 5, ....<br>"
   << "This arbitrary (but well-defined) choice of "
   << "f guarantees that the computation is linear and fast. <br>\n";
@@ -3298,9 +3301,8 @@ std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(
 ) const {
   std::stringstream out;
   out
-  <<
-  "<br>The polynomial system that corresponds to finding the h, e, f triple:<br>\n"
-  ;
+  << "<br>The polynomial system that corresponds "
+  << "to finding the h, e, f triple:<br>\n";
   out
   << this->toStringPolynomialSystem(this->systemToSolve, format)
   << "\n<br>\n";
@@ -3942,8 +3944,8 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
       if (currentBasis.size != 0) {
         if (currentSubalgebra.dynkinType.toString() == "0") {
           global.fatal
-          <<
-          "Subalgebra dynkin type computed to be zero while currentBasis is "
+          << "Subalgebra dynkin type computed "
+          << "to be zero while currentBasis is "
           << currentBasis.toString()
           << " and simple basis k is: "
           << currentSubalgebra.simpleRootsReductiveSubalgebra.toString()
@@ -4103,8 +4105,8 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   if (this->flagPrintParabolicPseudoParabolicInfo) {
     if (report2.tickAndWantReport()) {
       reportStream
-      <<
-      "Computing which subalgebras are pseudo parabolic/parabolic/neither... ";
+      << "Computing which subalgebras are "
+      << "pseudo parabolic/parabolic/neither... ";
       report2.report(reportStream.str());
     }
     this->computeParabolicPseudoParabolicNeitherOrder();
@@ -4244,11 +4246,11 @@ void RootSubalgebras::toHTML(FormatExpressions* format) {
   );
   if (!FileOperations::fileExistsVirtual(myPathVirtual)) {
     global.fatal
-    <<
-    "This may or may not be a programming error. Failed to create virtual file "
+    << "This may or may not be a programming error. "
+    << "Failed to create virtual file "
     << myPathVirtual
-    <<
-    ". Possible explanations. 1. File permissions - can I write in that folder? "
+    << ". Possible explanations. "
+    << "1. File permissions - can I write in that folder? "
     << "2. Programming error (less likely). "
     << global.fatal;
   }
@@ -4304,16 +4306,14 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
   if (useLatex) {
     out
     << "\\begin{tabular}{ccccc}"
-    <<
-    "$\\mathfrak{k}_{ss}$& $C(k_{ss})_{ss}$ & $\\#W''$ &$\\#W'''$&$\\#(W'''\\rtimes W'')$\\\\\\hline"
-    ;
+    << "$\\mathfrak{k}_{ss}$& $C(k_{ss})_{ss}$ "
+    << "& $\\#W''$ &$\\#W'''$&$\\#(W'''\\rtimes W'')$\\\\\\hline";
   }
   if (useHtml) {
     out
     << "<br><table><tr><td>k_{ss}</td><td></td>"
-    <<
-    "<td>Weyl group of C(k_{ss})_{ss}</td><td>Outer automorphisms of C(k_{ss})_{ss}<td></tr>"
-    ;
+    << "<td>Weyl group of C(k_{ss})_{ss}</td>"
+    << "<td>Outer automorphisms of C(k_{ss})_{ss}<td></tr>";
   }
   Vectors<Rational> emptyRoots;
   emptyRoots.size = 0;
@@ -4393,8 +4393,8 @@ Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::getRootIMustBeWeight
 () const {
   if (this->isEqualToZero()) {
     global.fatal
-    <<
-    "Calling ElementSemisimpleLieAlgebra::getRootIMustBeWeight on a zero element is forbidden."
+    << "Calling ElementSemisimpleLieAlgebra::getRootIMustBeWeight "
+    << "on a zero element is forbidden."
     << global.fatal;
   }
   if (this->size() > 1) {
@@ -4425,8 +4425,8 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
   "k_{ss}=[k, k] - regular semisimple subalgebra in the sense of "
   "Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. "
   "k_{ss} is parametrized by a root subsytem of \\Delta(g). "
-  "C(k_{ss}) consists of root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h"
-  ;
+  "C(k_{ss}) consists of root spaces with roots strongly "
+  "orthogonal to \\Delta(k) and a part of the Cartan h";
   int col = 0;
   int row = 0;
   out
@@ -4436,9 +4436,8 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
   << this->subalgebras.size
   << " root subalgebras entries (= "
   << this->subalgebras.size - 2
-  <<
-  " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra).\n\n"
-  ;
+  << " larger than the Cartan subalgebra + "
+  << "the Cartan subalgebra + the full subalgebra).\n\n";
   out << "<table border =\"1\">\n <colgroup>";
   for (int i = 0; i < this->columnsPerTableLatex; i ++) {
     out << "<col width = \"180\">";
@@ -4491,9 +4490,9 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
       this->owner->weylGroup.loadGAPRootSystem(GAPPosRootSystem)
     ) {
       out
-      <<
-      " The roots needed to generate the root subsystems are listed below using the root indices in GAP. "
-      ;
+      << " The roots needed to generate the "
+      << "root subsystems are listed below "
+      << "using the root indices in GAP. ";
       for (
         int i = 0; i < this->subalgebrasOrderParabolicPseudoParabolicNeither.
         size; i ++
@@ -4543,8 +4542,8 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
       }
     }
     out
-    <<
-    "<hr>The roots needed to generate the root subsystems are listed below. ";
+    << "<hr>The roots needed to generate "
+    << "the root subsystems are listed below. ";
     for (
       int i = 0; i < this->subalgebrasOrderParabolicPseudoParabolicNeither.size
       ; i ++
@@ -4620,21 +4619,23 @@ std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(
   << this->subalgebras.size
   << " table entries (= "
   << this->subalgebras.size - 2
-  <<
-  " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra)."
+  << " larger than the Cartan subalgebra + "
+  << "the Cartan subalgebra + the full subalgebra)."
   << endline
-  <<
-  "Let $\\mathfrak g$ stand for the type of the regular subalgebra and $C(\\mathfrak g)$ for the type of the centralizer. "
-  <<
-  "Let $r$ stand for the rank of $\\mathfrak g$, let $r_c$ stand for the rank of the semisimple part of the centralizer, "
+  << "Let $\\mathfrak g$ stand for the type of "
+  << "the regular subalgebra and $C(\\mathfrak g)$ "
+  << "for the type of the centralizer. "
+  << "Let $r$ stand for the rank of $\\mathfrak g$, "
+  << "let $r_c$ stand for the rank of the "
+  << "semisimple part of the centralizer, "
   << "let $p$ stand for the number of positive roots of $\\mathfrak g$, "
-  <<
-  "let $q$ stand for the number of positive roots of the centralizer, and let $m$ stand for the number of "
+  << "let $q$ stand for the number of positive "
+  << "roots of the centralizer, and let $m$ stand for the number of "
   << "$A_1$ components (of all root lengths) of $\\mathfrak g$. ";
   out << "\\begin{longtable}{cccccccc}" << endline;
   out
-  <<
-  "$\\mathfrak g$ & $C(\\mathfrak g)$& $p$ & $q$&  $m$& $r$ & $c_r$ \\\\\\endhead"
+  << "$\\mathfrak g$ & $C(\\mathfrak g)$& $p$ "
+  << "& $q$&  $m$& $r$ & $c_r$ \\\\\\endhead"
   << endline;
   for (int i = 0; i < this->subalgebras.size; i ++) {
     RootSubalgebra& currentSubalgebra = this->subalgebras[i];
@@ -5006,20 +5007,20 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
   if (simpleType == 'B') {
     out
     << "$\\mathrm{so}(2n + 1)$ is realized as a matrix Lie algebra as "
-    <<
-    "$\\left\\{\\left(\\begin{array}{c|c|c}A&\\begin{array}{c}v_1\\\\ \\vdots \\\\ "
-    <<
-    "v_n\\end{array} &C= -C^T \\\\\\hline \\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& "
+    << "$\\left\\{\\left(\\begin{array}{c|c|c}A&"
+    << "\\begin{array}{c}v_1\\\\ \\vdots \\\\ "
+    << "v_n\\end{array} &C= -C^T \\\\\\hline "
+    << "\\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& "
     << "\\begin{array}{ccc}-v_n &\\dots&  -v_1\\end{array} "
-    <<
-    "\\\\\\hline D= -D^T&\\begin{array}{c}-w_n\\\\ \\vdots \\\\ -w_1\\end{array} "
+    << "\\\\\\hline D= -D^T&\\begin{array}{c}-w_n"
+    << "\\\\ \\vdots \\\\ -w_1\\end{array} "
     << "& -A^T\\end{array}\\right)\\right\\}$.\n\n";
   }
   if (simpleType == 'C') {
     out
     << "$\\mathrm{sp}(2n)$ is realized as a matrix Lie algebra "
-    <<
-    "as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}"
+    << "as $\\left\\{\\left(\\begin{array}{c|c}A"
+    << "& C \\\\\\hline D& -A^T\\end{array}"
     << "\\right)| C=C^T, D= D^T\\right\\}.$";
   }
   out
@@ -5738,28 +5739,28 @@ bool ConeRelation::isStrictlyWeaklyProhibiting(
   tempSubgroup.computeSubGroupFromGeneratingReflections(
     &roots, &tempSubgroup.externalAutomorphisms, 0, true
   );
-  Vectors<Rational> NilradicalIntersection, genSingHW;
+  Vectors<Rational> nilradicalIntersection, genSingHW;
   roots = tempSubgroup.rootSubsystem;
-  nilradicalRoots.intersectWith(roots, NilradicalIntersection);
+  nilradicalRoots.intersectWith(roots, nilradicalIntersection);
   for (int i = 0; i < owner.highestWeightsPrimalSimple.size; i ++) {
     if (
       !owner.nilradicalKModules.selected[i] &&
       roots.contains(owner.highestWeightsPrimalSimple[i]) &&
-      owner.isGeneratingSingularVectors(i, NilradicalIntersection)
+      owner.isGeneratingSingularVectors(i, nilradicalIntersection)
     ) {
       genSingHW.addOnTop(owner.highestWeightsPrimalSimple[i]);
     }
   }
   if (
     owner.coneConditionHolds(
-      owners, indexInOwner, NilradicalIntersection, genSingHW, false
+      owners, indexInOwner, nilradicalIntersection, genSingHW, false
     )
   ) {
     return false;
   }
   if (
     !owner.attemptTheTripleTrickWRTSubalgebra(
-      *this, genSingHW, NilradicalIntersection
+      *this, genSingHW, nilradicalIntersection
     )
   ) {
     return false;
@@ -5806,8 +5807,8 @@ void ConeRelation::makeLookCivilized(RootSubalgebra& owner) {
   this->computeDiagramRelationsAndK(owner);
 }
 
-void ConeRelation::FixRightHandSide(
-  RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots
+void ConeRelation::fixRightHandSide(
+  RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots
 ) {
   bool hasChanged = true;
   Vector<Rational> root;
@@ -5836,7 +5837,7 @@ void ConeRelation::FixRightHandSide(
             this->betaCoefficients.removeIndexSwapWithLast(remainingIndex);
             this->betas.removeIndexSwapWithLast(remainingIndex);
           }
-          if (!NilradicalRoots.contains(root)) {
+          if (!nilradicalRoots.contains(root)) {
             global.fatal
             << "Nilradical doesn't have required root. "
             << global.fatal;
@@ -6030,7 +6031,8 @@ void ConeRelations::getLatexHeaderAndFooter(
   );
   outputHeader.append("{ Relation / linked $\\mathfrak{k}$-components}");
   outputHeader.append(
-    " &$\\alpha_i$'s, $\\beta_i$'s generate & adding $\\mathfrak{k}$ generates&"
+    " &$\\alpha_i$'s, $\\beta_i$'s generate "
+    "& adding $\\mathfrak{k}$ generates&"
   );
   outputHeader.append("Non-zero scalar products\\\\");
   outputFooter.append("\\end{tabular}");

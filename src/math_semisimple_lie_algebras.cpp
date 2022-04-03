@@ -33,8 +33,8 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   << " stands for elements of the Cartan subalgebra, <br>"
   << "the letter "
   << HtmlRoutines::getMathNoDisplay(gLetter)
-  <<
-  " stands for the Chevalley (root space) generators of non-zero weight. <br>"
+  << " stands for the Chevalley (root space) "
+  << "generators of non-zero weight. <br>"
   << "The generator "
   << HtmlRoutines::getMathNoDisplay(hLetter + "_i")
   << " is the element of the Cartan subalgebra dual to the <br>"
@@ -99,8 +99,8 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
     return out.str();
   }
   out
-  <<
-  "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in "
+  << "<br><b> The Lie bracket table is too "
+  << "large to be rendered in LaTeX, displaying in "
   << "html format instead.</b> ";
   if (format != nullptr) {
     if (format->flagLatexDetailsInHtml) {
@@ -224,8 +224,8 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload() {
   out
   << "<body onload='" // <<
   // "window.calculator.equationEditor.typeset(document.body, null); "
-  <<
-  "window.calculator.dynamicJavascript.dynamicJavascript.bootstrapAllScripts(document.body);"
+  << "window.calculator.dynamicJavascript."
+  << "dynamicJavascript.bootstrapAllScripts(document.body);"
   << "window.calculator.lieAlgebras.bootstrap();"
   << "'>";
   return out.str();
@@ -272,10 +272,10 @@ std::string SemisimpleLieAlgebra::toHTML(
     );
     out
     << "A drawing of the root system in its corresponding Coxeter plane. "
-    <<
-    "A basis of the plane was computed as explained by the website of John Stembridge. "
-    <<
-    "<br>The darker red dots can be dragged with the mouse to rotate the picture."
+    << "A basis of the plane was computed "
+    << "as explained by the website of John Stembridge. "
+    << "<br>The darker red dots can be "
+    << "dragged with the mouse to rotate the picture."
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
     << drawingVariables.getHTMLDiv(this->weylGroup.getDimension(), true);
     out << this->weylGroup.toStringRootsAndRootReflections();
@@ -286,11 +286,10 @@ std::string SemisimpleLieAlgebra::toHTML(
       out << "Ready for LaTeX consumption version of the first three columns: "
       ;
       out
-      <<
-      "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
-      <<
-      "\\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n"
-      ;
+      << "<br>%Add to preamble: <br>"
+      << "\\usepackage{longtable} <br>%Add to body: <br>"
+      << "\\begin{longtable}{ccc}generator & root simple coord. "
+      << "& root $\\varepsilon$-notation \\\\\\hline<br>\n";
       Vector<Rational> root, root2;
       ElementSemisimpleLieAlgebra<Rational> element1;
       for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
@@ -345,10 +344,10 @@ std::string SemisimpleLieAlgebra::toHTML(
     root.toStringLetterFormat("\\varepsilon")
   );
   out
-  <<
-  "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 "
-  <<
-  "<br>with the j^th simple root times 2 divided by the root length squared,<br> "
+  << "<hr>The fundamental weights "
+  << "(the j^th fundamental weight has scalar product 1 "
+  << "<br>with the j^th simple root times "
+  << "2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";
   this->weylGroup.getEpsilonCoordinates(
     fundamentalWeights, fundamentalWeightsEpsForm
@@ -684,9 +683,8 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     out
     << " done in "
     << global.getElapsedSeconds() - startStructureConstantComputation
-    <<
-    " seconds.<br> Computing Lie bracket pairing (``multiplication'') table..."
-    ;
+    << " seconds.<br> Computing Lie bracket "
+    << "pairing (``multiplication'') table...";
     report.report(out.str());
     startMultTable = global.getElapsedSeconds();
   }
@@ -872,8 +870,8 @@ bool SemisimpleLieAlgebra::getMaxQForWhichBetaMinusQAlphaisARoot(
   if (alpha.isEqualToZero()) {
     global.fatal
     << "Calling function "
-    <<
-    "getMaxQForWhichBetaMinusQAlphaisARoot with zero value for alpha is not allowed. "
+    << "getMaxQForWhichBetaMinusQAlphaisARoot "
+    << "with zero value for alpha is not allowed. "
     << global.fatal;
   }
   bool foundRoot = false;
@@ -1003,8 +1001,8 @@ bool SemisimpleLieAlgebra::testForConsistency() {
         temp += g312;
         if (!temp.isEqualToZero()) {
           global.fatal
-          <<
-          "The computed structure constants are wrong: the Jacobi identity fails. "
+          << "The computed structure constants "
+          << "are wrong: the Jacobi identity fails. "
           << "More precisely, I get that "
           << "<br>["
           << g1.toString(&format)
@@ -1090,27 +1088,27 @@ bool SemisimpleLieAlgebra::getConstantOrHElement(
 }
 
 void SemisimpleLieAlgebra::makeChevalleyTestReport(
-  int i, int j, int k, int Total
+  int i, int j, int k, int total
 ) {
   if (!global.response.reportDesired()) {
     return;
   }
   std::stringstream out2, out3;
-  int x = i * Total * Total + j * Total + k + 1;
+  int x = i * total * total + j * total + k + 1;
   out2
   << "i: "
   << i + 1
   << " of "
-  << Total
+  << total
   << " j: "
   << j + 1
   << " of "
-  << Total
+  << total
   << " k: "
   << k + 1
   << " of "
-  << Total;
-  out3 << "Total progress: " << x << " out of " << (Total * Total * Total);
+  << total;
+  out3 << "Total progress: " << x << " out of " << (total * total * total);
   ProgressReport report;
   report.report(out2.str() + out3.str());
 }
@@ -1332,7 +1330,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
-    "HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleChevalleyGenerators"
+    "HomomorphismSemisimpleLieAlgebra::"
+    "computeHomomorphismFromImagesSimpleChevalleyGenerators"
   );
   (void) commentsOnFailure;
   this->domainAlgebra().computeChevalleyConstants();

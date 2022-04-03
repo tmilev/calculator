@@ -558,7 +558,7 @@ public:
     MatrixTensor<Coefficient>& output,
     ElementSemisimpleLieAlgebra<Coefficient>& e
   );
-  void makeChevalleyTestReport(int i, int j, int k, int Total);
+  void makeChevalleyTestReport(int i, int j, int k, int total);
   bool isInTheWeightSupport(
     Vector<Rational>& weight, Vector<Rational>& highestWeight
   );

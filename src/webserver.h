@@ -42,7 +42,7 @@ public:
   std::string addressComputed;
   std::string argumentComputed;
   std::string VirtualFileName;
-  std::string RelativePhysicalFileNamE;
+  std::string relativePhysicalFileName;
   std::string status;
   std::string pingMessage;
   bool flagInUse;

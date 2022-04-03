@@ -179,7 +179,7 @@ public:
     }
     return result;
   }
-  bool IsIntegral() {
+  bool isIntegral() {
     for (int i = 0; i < this->size; i ++) {
       if (!this->objects[i].isInteger()) {
         return false;
@@ -1145,6 +1145,14 @@ public:
       incoming.fromString(input[i]);
       this->addOnTop(incoming);
     }
+  }
+  bool areIntegral() {
+    for (Vector<Rational>& vector : *this) {
+      if (!vector.isIntegral()) {
+        return false;
+      }
+    }
+    return true;
   }
   class Test {
   public:

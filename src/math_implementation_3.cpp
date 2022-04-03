@@ -3740,10 +3740,10 @@ bool OnePartialFractionDenominator::reduceOnceTotalOrderMethod(
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   >& output
 ) {
-  for (int i = 0; i < this->denominators.size(); i ++) {
-    for (int j = 0; j < this->denominators.size(); j ++) {
-      int aIndex = this->denominators.values[i].normalizedVectorIndex;
-      int bIndex = this->denominators.values[j].normalizedVectorIndex;
+  for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
+    for (int j = 0; j < this->denominatorsNoScale.size(); j ++) {
+      int aIndex = this->denominatorsNoScale.values[i].normalizedVectorIndex;
+      int bIndex = this->denominatorsNoScale.values[j].normalizedVectorIndex;
       int aMinusBIndex =
       this->owner->tableAllowedAminusB.elements[aIndex][bIndex];
       int aMinus2BIndex =
@@ -3781,7 +3781,7 @@ bool OnePartialFractionDenominator::reduceOnce(
 ) {
   STACK_TRACE("OnePartialFractionDenominator::reduceOnce");
   this->checkInitialization();
-  if (this->denominators.size() <= this->owner->ambientDimension) {
+  if (this->denominatorsNoScale.size() <= this->owner->ambientDimension) {
     return false;
   }
   Vectors<Rational> allRootsSorted;
@@ -3804,13 +3804,13 @@ bool OnePartialFractionDenominator::reduceOnce(
 bool OnePartialFractionDenominator::operator>(
   const OnePartialFractionDenominator& other
 ) const {
-  if (this->denominators.keys > other.denominators.keys) {
+  if (this->denominatorsNoScale.keys > other.denominatorsNoScale.keys) {
     return true;
   }
-  if (other.denominators.keys > this->denominators.keys) {
+  if (other.denominatorsNoScale.keys > this->denominatorsNoScale.keys) {
     return false;
   }
-  return this->denominators.values > other.denominators.values;
+  return this->denominatorsNoScale.values > other.denominatorsNoScale.values;
 }
 
 void OnePartialFractionDenominator::computeOneCheckSum(
@@ -3819,8 +3819,8 @@ void OnePartialFractionDenominator::computeOneCheckSum(
   STACK_TRACE("OnePartialFraction::computeOneCheckSum");
   Rational multiplicand;
   output = 1;
-  for (int i = 0; i < this->denominators.size(); i ++) {
-    this->denominators.values[i].computeOneCheckSum(
+  for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
+    this->denominatorsNoScale.values[i].computeOneCheckSum(
       multiplicand, variableValues
     );
     output.multiplyBy(multiplicand);
@@ -3843,7 +3843,7 @@ std::string OnePartialFractionDenominator::toLatex(
 
 std::string OnePartialFractionDenominator::toString(FormatExpressions* format)
 const {
-  if (this->denominators.size() == 0) {
+  if (this->denominatorsNoScale.size() == 0) {
     return "1";
   }
   std::stringstream out;
@@ -3862,7 +3862,7 @@ std::string OnePartialFractionDenominator::toStringDenominatorOnly(
   this->getDenominatorsSorted(summandsSorted);
   for (int i = 0; i < summandsSorted.size(); i ++) {
     const OnePartialFractionDenominatorComponent& currentDenominator =
-    this->denominators.values[i];
+    this->denominatorsNoScale.values[i];
     std::string current = currentDenominator.toString(format);
     if (current != "1") {
       out << current;
@@ -3879,9 +3879,9 @@ bool OnePartialFractionDenominator::rootIsInFractionCone(
   }
   Cone cone;
   Vectors<Rational> roots;
-  for (int i = 0; i < this->denominators.size(); i ++) {
+  for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
     roots.addOnTop(
-      this->denominators.values[i].getNormalizedVector()
+      this->denominatorsNoScale.values[i].getNormalizedVector()
     );
   }
   cone.createFromVertices(roots);
@@ -3898,8 +3898,8 @@ void OnePartialFractionDenominator::prepareFraction(
   Polynomial<LargeInteger>& outputCommonCoefficient
 ) {
   output = *this;
-  int powerDropA = this->denominators.values[indexA].multiplicities[0];
-  int powerDropB = this->denominators.values[indexB].multiplicities[0];
+  int powerDropA = this->denominatorsNoScale.values[indexA].multiplicities[0];
+  int powerDropB = this->denominatorsNoScale.values[indexB].multiplicities[0];
   if (indexAIsNullified) {
     powerDropB = 0;
   } else {
@@ -3925,7 +3925,7 @@ getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner) {
     owner.getIndexDoubleOfARoot(owner.normalizedVectors[index]);
     if (rootIndex != - 1) {
       if (
-        this->denominators.values[rootIndex].multiplicities.size > 0
+        this->denominatorsNoScale.values[rootIndex].multiplicities.size > 0
       ) {
         result ++;
       }
@@ -3967,7 +3967,7 @@ void OnePartialFractionDenominator::getLinearRelationFromNormalized(
       continue;
     }
     output[i] /=
-    this->denominators.getValueNoFail(normalizedVectors[i]).
+    this->denominatorsNoScale.getValueNoFail(normalizedVectors[i]).
     getLargestElongation();
   }
 }
@@ -3992,7 +3992,7 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
   normalizedVectors[gainingMultiplicityIndexInLinearRelation];
   for (int i = 0; i < linearRelationBetweenNormalizedVectors.size; i ++) {
     const OnePartialFractionDenominatorComponent& beingReduced =
-    this->denominators.getValueNoFail(normalizedVectors[i]);
+    this->denominatorsNoScale.getValueNoFail(normalizedVectors[i]);
     reduced.setKeyValue(normalizedVectors[i], beingReduced);
   }
   Vector<Rational> linearRelation;
@@ -4095,8 +4095,8 @@ void OnePartialFractionDenominator::decomposeAMinusNB(
   this->getAlphaMinusNBetaPoly(
     owner, indexA, indexB, n, aMinusNBetaPolynomial
   );
-  int powerA = this->denominators.values[indexA].multiplicities[0];
-  int powerB = this->denominators.values[indexB].multiplicities[0];
+  int powerA = this->denominatorsNoScale.values[indexA].multiplicities[0];
+  int powerB = this->denominatorsNoScale.values[indexB].multiplicities[0];
   output.makeZero();
   this->prepareFraction(
     indexA,
@@ -4114,8 +4114,8 @@ void OnePartialFractionDenominator::decomposeAMinusNB(
     output.addMonomial(currentFraction, commonPolynomial);
     commonPolynomial /= binomialCoefficient;
     if (i > 1) {
-      currentFraction.denominators.values[indexAMinusNB].addMultiplicity(1, 1);
-      currentFraction.denominators.values[indexB].addMultiplicity(- 1, 1);
+      currentFraction.denominatorsNoScale.values[indexAMinusNB].addMultiplicity(1, 1);
+      currentFraction.denominatorsNoScale.values[indexB].addMultiplicity(- 1, 1);
       commonPolynomial *= aMinusNBetaPolynomial;
     }
   }
@@ -4136,10 +4136,10 @@ void OnePartialFractionDenominator::decomposeAMinusNB(
     commonPolynomial /= coefficient;
     if (i > 1) {
       currentFraction.addMultiplicity(
-        currentFraction.denominators.keys[indexAMinusNB], 1, 1
+        currentFraction.denominatorsNoScale.keys[indexAMinusNB], 1, 1
       );
       currentFraction.addMultiplicity(
-        currentFraction.denominators.keys[indexA], - 1, 1
+        currentFraction.denominatorsNoScale.keys[indexA], - 1, 1
       );
     }
   }
@@ -4149,7 +4149,7 @@ bool OnePartialFractionDenominator::decreasePowerOneFraction(
   int index, int increment
 ) {
   this->addMultiplicity(
-    this->denominators.keys[index], - increment, 1
+    this->denominatorsNoScale.keys[index], - increment, 1
   );
   return true;
 }
@@ -4206,6 +4206,7 @@ void OnePartialFractionDenominator::makePolynomialFromOneNormal(
   int multiplicities,
   Polynomial<Rational>& output
 ) {
+  STACK_TRACE("OnePartialFractionDenominator::makePolynomialFromOneNormal");
   output.makeOne();
   if (multiplicities == 1) {
     return;
@@ -4272,20 +4273,20 @@ OnePartialFractionDenominator::OnePartialFractionDenominator() {
 OnePartialFractionDenominator::~OnePartialFractionDenominator() {}
 
 unsigned int OnePartialFractionDenominator::hashFunction() const {
-  return this->denominators.hashFunction();
+  return this->denominatorsNoScale.hashFunction();
 }
 
 bool OnePartialFractionDenominator::operator==(
   const OnePartialFractionDenominator& right
 ) const {
-  return this->denominators == right.denominators;
+  return this->denominatorsNoScale == right.denominatorsNoScale;
 }
 
 void OnePartialFractionDenominator::operator=(
   const OnePartialFractionDenominator& right
 ) {
   this->owner = right.owner;
-  this->denominators = right.denominators;
+  this->denominatorsNoScale = right.denominatorsNoScale;
 }
 
 std::string PartialFractions::toLatex(FormatExpressions* format) const {
@@ -4444,7 +4445,7 @@ bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(
 ) {
   for (int i = 0; i < this->nonReduced.size(); i ++) {
     if (
-      this->nonReduced[i].denominators.size() <= this->ambientDimension
+      this->nonReduced[i].denominatorsNoScale.size() <= this->ambientDimension
     ) {
       continue;
     }
@@ -4466,19 +4467,19 @@ void OnePartialFractionDenominator::addMultiplicity(
     global.fatal << "Unrecognized normalized vector." << global.fatal;
   }
   OnePartialFractionDenominatorComponent* current = nullptr;
-  if (!this->denominators.contains(normalizedVector)) {
+  if (!this->denominatorsNoScale.contains(normalizedVector)) {
     OnePartialFractionDenominatorComponent incoming;
     incoming.initialize(
       *this->owner,
       this->owner->normalizedVectors.getIndex(normalizedVector)
     );
-    this->denominators.setKeyValue(normalizedVector, incoming);
+    this->denominatorsNoScale.setKeyValue(normalizedVector, incoming);
   }
   current =
-  &this->denominators.getValueCreateNoInitialization(normalizedVector);
+  &this->denominatorsNoScale.getValueCreateNoInitialization(normalizedVector);
   current->addMultiplicity(multiplicity, elongation);
   if (current->elongations.size == 0) {
-    this->denominators.removeKey(normalizedVector);
+    this->denominatorsNoScale.removeKey(normalizedVector);
   }
 }
 
@@ -10793,7 +10794,7 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
       out << this->latticeShifts[i].toString() << " + ";
     }
     out << "\\Lambda, \\\\\\hline\n ";
-    if (i != this->latticeShifts.size -1 ) {
+    if (i != this->latticeShifts.size - 1) {
       out << "\\\\";
     }
   }
@@ -10808,7 +10809,6 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
         out << "\\\\";
       }
     }
-    out << "\\end{array}\\right\\rangle$";
   } else {
     out
     << ", \\mathrm{~where~} \\Lambda =\\mathbb{Z}^{"
@@ -10898,7 +10898,7 @@ void OnePartialFractionDenominator::getDenominatorsSorted(
   for (int i = 0; i < normalizedExponents.size; i ++) {
     output.setKeyValue(
       normalizedExponents[i],
-      this->denominators.getValueNoFail(normalizedExponents[i])
+      this->denominatorsNoScale.getValueNoFail(normalizedExponents[i])
     );
   }
 }
@@ -10909,7 +10909,7 @@ void OnePartialFractionDenominator::getNormalizedSortedDenominatorExponents(
   output.clear();
   for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
     const Vector<Rational>& current = this->owner->normalizedVectors[i];
-    if (!this->denominators.contains(current)) {
+    if (!this->denominatorsNoScale.contains(current)) {
       continue;
     }
     output.addOnTop(current);
@@ -10923,11 +10923,11 @@ void OnePartialFractionDenominator::getDenominatorExponents(
   output.clear();
   for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
     const Vector<Rational>& current = this->owner->normalizedVectors[i];
-    if (!this->denominators.contains(current)) {
+    if (!this->denominatorsNoScale.contains(current)) {
       continue;
     }
     const OnePartialFractionDenominatorComponent& component =
-    this->denominators.getValueNoFail(current);
+    this->denominatorsNoScale.getValueNoFail(current);
     List<Vector<Rational> > currentExponents;
     component.getDenominatorExponents(currentExponents);
     output.addListOnTop(currentExponents);
@@ -10943,11 +10943,11 @@ getDenominatorExponentsWithoutMultiplicities(Vectors<Rational>& output) const {
   output.clear();
   for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
     const Vector<Rational>& current = this->owner->normalizedVectors[i];
-    if (!this->denominators.contains(current)) {
+    if (!this->denominatorsNoScale.contains(current)) {
       continue;
     }
     const OnePartialFractionDenominatorComponent& component =
-    this->denominators.getValueNoFail(current);
+    this->denominatorsNoScale.getValueNoFail(current);
     List<Vector<Rational> > currentExponents;
     component.getDenominatorExponentsWithoutMultiplicities(currentExponents);
     output.addListOnTop(currentExponents);
@@ -10962,18 +10962,24 @@ void OnePartialFractionDenominator::computePolynomialCorrespondingToOneMonomial
   Vectors<Rational>& normals,
   Lattice& lattice
 ) const {
+  STACK_TRACE(
+    "OnePartialFractionDenominator::"
+    "computePolynomialCorrespondingToOneMonomial"
+  );
   Polynomial<Rational> multiplicand;
   Polynomial<Rational> outputPolynomialPart;
   outputPolynomialPart.makeOne();
-  if (this->denominators.size() != this->owner->ambientDimension) {
+  if (this->denominatorsNoScale.size() != this->owner->ambientDimension) {
     global.fatal
     << "Attempt to extract quasipolynomial "
     << "from non-reduced fraction (too many vectors). "
     << global.fatal;
   }
   for (int i = 0; i < normals.size; i ++) {
+    Vector<Rational> vector = coneGenerators[i];
+    Rational::scaleNoSignChange(vector);
     const OnePartialFractionDenominatorComponent& current =
-    this->denominators.getValueNoFail(coneGenerators[i]);
+    this->denominatorsNoScale.getValueNoFail(vector);
     if (current.multiplicities.size != 1) {
       global.fatal
       << "Attempt to extract quasipolynomial "
@@ -11005,7 +11011,7 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
     << "Unexpected: the number of denominators "
     << latticeGenerators.size
     << " without multiplicity should equal "
-    << " the dimension: "
+    << "the dimension: "
     << this->owner->ambientDimension
     << global.fatal;
   }
@@ -11886,12 +11892,12 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
   }
   bool found = false;
   Vector<Rational> normalized;
-  for (int k = 0; k < toBeReduced.denominators.size(); k ++) {
+  for (int k = 0; k < toBeReduced.denominatorsNoScale.size(); k ++) {
     const OnePartialFractionDenominatorComponent& currentFraction =
-    toBeReduced.denominators.values[k];
+    toBeReduced.denominatorsNoScale.values[k];
     if (currentFraction.elongations.size > 1) {
       found = true;
-      normalized = toBeReduced.denominators.keys[k];
+      normalized = toBeReduced.denominatorsNoScale.keys[k];
       break;
     }
   }
@@ -11899,7 +11905,7 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
     return false;
   }
   const OnePartialFractionDenominatorComponent& currentFraction =
-  toBeReduced.denominators.getValueNoFail(normalized);
+  toBeReduced.denominatorsNoScale.getValueNoFail(normalized);
   Rational localStartCheckSum;
   Rational localEndCheckSum;
   Polynomial<LargeInteger> multiplicand;

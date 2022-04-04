@@ -6317,6 +6317,7 @@ public:
   std::string drawMeToHtmlLastCoordAffine(
     DrawingVariables& drawingVariables, FormatExpressions& format
   );
+  bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables);
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool initDrawVars,

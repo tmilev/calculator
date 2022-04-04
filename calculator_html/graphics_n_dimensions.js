@@ -1127,8 +1127,8 @@ function createGraphicsFromObject(input) {
   if (input.idSpanInformation === undefined || input.idSpanInformation === null) {
     throw ("idSpanInformation missing.");
   }
-  let theObject = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation, input.idHighlightInformation);
-  theObject.initFromObject(input);
+  let object = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation, input.idHighlightInformation);
+  object.initFromObject(input);
 }
 
 function testA4(idCanvas, idSpanInformation) {

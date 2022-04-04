@@ -6,6 +6,7 @@
 #include "math_general.h"
 #include "math_extra_drawing_variables.h"
 #include "crypto.h"
+#include "calculator_interface.h"
 
 std::string DrawingVariables::getHTMLDiv(int dimension, bool useSpanTag) {
   JSData data;
@@ -44,8 +45,8 @@ std::string DrawingVariables::getHTMLDiv(int dimension, bool useSpanTag) {
   << " id = '"
   << idCanvas
   << "'>Canvas not supported</canvas>\n<br>\n";
-  out << "<div id = '" << idHighlightInformation << "'></div>\n<br>\n";
-  out << "<span id = '" << idSpanInformation << "'></span>\n<br>\n";
+  out << "<div id='" << idHighlightInformation << "'></div>\n<br>\n";
+  out << "<span id='" << idSpanInformation << "'></span>\n<br>\n";
   if (useSpanTag) {
     out << HtmlRoutines::jsonContainer("graphicsNDimensional", data) << "\n";
   } else {

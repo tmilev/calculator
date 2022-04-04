@@ -279,6 +279,11 @@ public:
   static std::string fieldLabels;
 };
 
+// Represents graphics in the calculator.
+// There are two classes that do that: Plot and DrawingVariables.
+// DrawingVariables supports arbitrary dimension > 2, Plot supports only
+// dimensions 2 and 3. It will be nice to unify these two classes into a
+// single class; until then, please use transition functions.
 class DrawingVariables {
 public:
   typedef void(*DrawLineFunction)(

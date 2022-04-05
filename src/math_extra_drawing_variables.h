@@ -409,7 +409,7 @@ public:
   void drawTextBuffer(
     double X1, double Y1, const std::string& inputText, int color
   );
-  // if the LatexOutFile is zero then the procedure defaults to the screen
+  // If the LatexOutFile is zero then the procedure defaults to the screen.
   void drawLineBufferOld(
     double x1,
     double y1,

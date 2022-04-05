@@ -1626,8 +1626,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   )
   << "</td></tr>";
   out
-  <<
-  "<tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='"
+  << "<tr><td style ='border-right:1px solid black;'>"
+  << "<b>Divisor(s)</b></td><td colspan ='"
   << this->allMonomials.size + 1
   << "'><b>Quotient(s) </b></td>"
   << "</tr>";
@@ -1635,9 +1635,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   for (int i = 0; i < this->owner->basis.size; i ++) {
     out << "<tr>";
     out
-    <<
-    "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>"
-    ;
+    << "<td style ='border-right:1px solid black; "
+    << "border-bottom: 1px solid gray;'>";
     if (this->owner->format.flagUseLatex) {
       out
       << HtmlRoutines::getMathNoDisplay(

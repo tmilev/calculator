@@ -317,8 +317,8 @@ freudenthalEvalMeDominantWeightsOnly(
     ) {
       if (outputDetails != nullptr) {
         localErrors
-        <<
-        "Encountered error while evaluating freudenthal formula. Error details: "
+        << "Encountered error while evaluating "
+        << "Freudenthal formula. Error details: "
         << localDetail
         << "<br> Further computation detail: "
         << localDetails.str();
@@ -894,8 +894,8 @@ splitCharacterOverReductiveSubalgebra(
   }
   format.fundamentalWeightLetter = "\\psi";
   out
-  <<
-  "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
+  << "<br>Character w.r.t the Levi part "
+  << "of the parabolic of the small algebra: "
   << HtmlRoutines::getMathNoDisplay(output.toString(&format));
   if (report != nullptr) {
     DrawingVariables drawingVariables1;
@@ -1010,9 +1010,8 @@ bool SemisimpleLieAlgebra::getElementStandardRepresentation(
   if (!this->weylGroup.dynkinType.isSimple(&dynkinType, nullptr)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "getElementStandardRepresentation implemented only for simple Lie algebras."
-      ;
+      << "getElementStandardRepresentation "
+      << "implemented only for simple Lie algebras.";
     }
     return false;
   }
@@ -1092,7 +1091,8 @@ accumulateChevalleyGeneratorStandardRepresentationInTypeA(
   Matrix<Coefficient>& output
 ) {
   STACK_TRACE(
-    "SemisimpleLieAlgebra::accumulateChevalleyGeneratorStandardRepresentationInTypeA"
+    "SemisimpleLieAlgebra::"
+    "accumulateChevalleyGeneratorStandardRepresentationInTypeA"
   );
   if (element.isInCartan(nullptr)) {
     int index =
@@ -1106,8 +1106,8 @@ accumulateChevalleyGeneratorStandardRepresentationInTypeA(
   Vector<Rational> vector;
   if (!element.isInRootSpace(&vector)) {
     global.fatal
-    <<
-    "Chevalley generator is neither in a root space nor in the Cartan subalgebra. "
+    << "Chevalley generator is neither in a "
+    << "root space nor in the Cartan subalgebra. "
     << global.fatal;
   }
   int firstNonZeroIndex = 0;

@@ -985,8 +985,8 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
         ;
       } else {
         reportStream
-        <<
-        "not successful: computation is too large. In the process I transformed the "
+        << "not successful: computation is too large. "
+        << "In the process I transformed the "
         << "starting system to one with "
         << inputSystem.size
         << " elements.";
@@ -1338,8 +1338,8 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
         << " as it resulted in a system which has no solution. ";
       } else {
         reportStreamHeuristics
-        <<
-        " as it resulted in a system which exceeded the computation limits. ";
+        << " as it resulted in a system which "
+        << "exceeded the computation limits. ";
       }
       report3.report(reportStreamHeuristics.str());
     }
@@ -2265,7 +2265,8 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModulusImplementation
 >::handlePrimeDegreeSeparatedFactor(PolynomialImplementation& input) {
   STACK_TRACE(
-    "PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor"
+    "PolynomialFactorizationCantorZassenhaus::"
+    "handlePrimeDegreeSeparatedFactor"
   );
   this->checkInitialization();
   int linearTermsToTry = 500;

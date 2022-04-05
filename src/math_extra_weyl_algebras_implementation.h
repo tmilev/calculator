@@ -418,8 +418,8 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(
     ) {
       global.fatal
       << "Calling Fourier transoform "
-      <<
-      "on differential operator with non-integral exponents is not allowed. "
+      << "on differential operator with "
+      << "non-integral exponents is not allowed. "
       << global.fatal;
     }
     monomial.differentialPart = currentMon.polynomialPart;

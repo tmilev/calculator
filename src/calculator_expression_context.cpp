@@ -256,8 +256,8 @@ bool Expression::contextSetDifferentialOperatorVariable(
 ) {
   if (!this->isContext()) {
     global.fatal
-    <<
-    "Calling Expression::contextSetDifferentialOperatorVariable on a non-context expression. "
+    << "Calling Expression::contextSetDifferentialOperatorVariable "
+    << "on a non-context expression. "
     << global.fatal;
   }
   Expression diffVarsE, polyVarsE;
@@ -1052,8 +1052,7 @@ bool Expression::setContextAtLeastEqualTo(
   this->owner->comments
   << "Expression "
   << this->toString()
-  <<
-  " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. "
-  ;
+  << " is of built-in type but is not handled by "
+  << "Expression::setContextAtLeastEqualTo. ";
   return false;
 }

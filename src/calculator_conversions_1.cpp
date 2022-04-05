@@ -148,7 +148,8 @@ bool CalculatorConversions::convertWithoutComputation<
   WithContext<RationalFraction<AlgebraicNumber> >& output
 ) {
   STACK_TRACE(
-    "CalculatorConversions::convertWithoutComputation_RationalFraction_AlgebraicNumber"
+    "CalculatorConversions::"
+    "convertWithoutComputation_RationalFraction_AlgebraicNumber"
   );
   input.checkInitialization();
   AlgebraicClosureRationals* closure =
@@ -187,7 +188,8 @@ bool CalculatorConversions::convertWithoutComputation<
   WithContext<ElementWeylAlgebra<Rational> >& output
 ) {
   STACK_TRACE(
-    "CalculatorConversions::convertWithoutComputation_ElementWeylAlgebra_Rational"
+    "CalculatorConversions::"
+    "convertWithoutComputation_ElementWeylAlgebra_Rational"
   );
   (void) calculator;
   input.checkInitialization();
@@ -231,7 +233,8 @@ bool CalculatorConversions::convertWithoutComputation<
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >& output
 ) {
   STACK_TRACE(
-    "CalculatorConversions::convertWithoutComputation_ElementUniversalEnveloping_RationalFraction_Rational"
+    "CalculatorConversions::"
+    "convertWithoutComputation_ElementUniversalEnveloping_RationalFraction_Rational"
   );
   SemisimpleLieAlgebra* owner =
   input.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
@@ -261,7 +264,8 @@ bool CalculatorConversions::convertWithoutComputation<
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& output
 ) {
   STACK_TRACE(
-    "CalculatorConversions::convertWithoutComputation_ElementSemisimpleLieAlgebra_AlgebraicNumber"
+    "CalculatorConversions::"
+    "convertWithoutComputation_ElementSemisimpleLieAlgebra_AlgebraicNumber"
   );
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element
   ;
@@ -646,8 +650,8 @@ bool CalculatorConversions::functionDynkinSimpleType(
     return
     calculator
     << "<hr>Error while extracting Dynkin simple type: "
-    <<
-    "the type of a simple Lie algebra must be the letter A, B, C, D, E, F or G. "
+    << "the type of a simple Lie algebra "
+    << "must be the letter A, B, C, D, E, F or G. "
     << "Instead, it is "
     << typeName + ". Error encountered while processing "
     << input.toString();
@@ -912,7 +916,8 @@ expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
   Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorConversions::expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers"
+    "CalculatorConversions::"
+    "expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers"
   );
   LinearCombination<Expression, AlgebraicNumber> monomials;
   monomials.makeZero();
@@ -976,8 +981,8 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   if (elementE.isEqualToZero() || elementF.isEqualToZero()) {
     return
     calculator
-    <<
-    "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. e and f are: "
+    << "<hr>Failed to load sl(2) subalgebra: "
+    << "either e or f is equal to zero. e and f are: "
     << elementE.toString()
     << ", "
     << elementF.toString()
@@ -986,8 +991,8 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   if (elementE.getOwner() != elementF.getOwner()) {
     return
     calculator
-    <<
-    "<hr>Failed to load sl(2): E and F element of sl(2) have different owners. "
+    << "<hr>Failed to load sl(2): E and F "
+    << "element of sl(2) have different owners. "
     << "More precisely, the owner of e is "
     << elementE.getOwner()->toString()
     << " and the owner of f is "
@@ -1332,7 +1337,8 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   return
   output.assignError(
     calculator,
-    "Candidate subalgebra is not a stand-alone object and its Expression output should not be used. "
+    "Candidate subalgebra is not a stand-alone "
+    "object and its Expression output should not be used. "
   );
 }
 
@@ -1478,8 +1484,8 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     ) {
       return
       calculator
-      <<
-      "<hr>Error loading candidate subalgebra: failed to load candidate number "
+      << "<hr>Error loading candidate subalgebra: "
+      << "failed to load candidate number "
       << i
       << " extracted from expression: "
       << subalgebrasE[i].toString()
@@ -2020,8 +2026,8 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
     calculator
     << "<hr>Expression "
     << input.toString()
-    <<
-    " is not an element of universal enveloping, can't convert to expression";
+    << " is not an element of universal "
+    << "enveloping, can't convert to expression";
   }
   return
   CalculatorConversions::expressionFromElementUniversalEnveloping(

@@ -347,8 +347,8 @@ public:
   bool operator==(const MonomialUniversalEnvelopingOrdered& other) const {
     if (this->owner != other.owner) {
       global.fatal
-      <<
-      "Attempt to compare universal enveloping algebra monomials with different owners. "
+      << "Attempt to compare universal enveloping algebra "
+      << "monomials with different owners. "
       << global.fatal;
     }
     return

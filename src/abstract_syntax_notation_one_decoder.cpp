@@ -1461,8 +1461,8 @@ bool ASNObject::loadFromASN(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "ASNObject outer layer must be a one-element set, instead is of type: "
+      << "ASNObject outer layer must "
+      << "be a one-element set, instead is of type: "
       << input.getType()
       << " and has "
       << input.elements.size
@@ -2363,8 +2363,8 @@ bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "Algorithm identifier outer layer must be a sequence of two elements. ";
+      << "Algorithm identifier outer layer "
+      << "must be a sequence of two elements. ";
     }
     return false;
   }

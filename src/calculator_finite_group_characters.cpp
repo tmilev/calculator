@@ -35,8 +35,8 @@ checkInitializationFiniteDimensionalRepresentationComputation() const {
   if (this->elements.size == 0) {
     global.fatal
     << "Request to compute character hermitian product in a group whose "
-    <<
-    "conjugacy classes and/or elements have not been computed. The group reports to have "
+    << "conjugacy classes and/or elements have "
+    << "not been computed. The group reports to have "
     << this->conjugacyClassCount()
     << " conjugacy classes and "
     << this->elements.size
@@ -55,8 +55,8 @@ checkAllSimpleGeneratorsAreOK() const {
     if (this->generators[i].numberOfRows == 0) {
       global.fatal
       << "Working with a "
-      <<
-      "representation in which the action of the simple generators is not computed. "
+      << "representation in which the action "
+      << "of the simple generators is not computed. "
       << global.fatal;
       return false;
     }
@@ -100,7 +100,8 @@ template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 computeAllGeneratorImagesFromSimple() {
   STACK_TRACE(
-    "GroupRepresentationCarriesAllMatrices::computeAllGeneratorImagesFromSimple"
+    "GroupRepresentationCarriesAllMatrices::"
+    "computeAllGeneratorImagesFromSimple"
   );
   this->checkInitialization();
   this->ownerGroup->
@@ -140,7 +141,8 @@ template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 computeAllElementImages() {
   STACK_TRACE(
-    "GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple"
+    "GroupRepresentationCarriesAllMatrices::"
+    "ComputeAllGeneratorImagesFromSimple"
   );
   this->checkInitialization();
   this->ownerGroup->
@@ -191,8 +193,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
   }
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
     global.fatal
-    <<
-    "Attempting to multiply Weyl group reps whose characters have not been computed. "
+    << "Attempting to multiply Weyl group reps "
+    << "whose characters have not been computed. "
     << global.fatal;
   }
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> output;
@@ -235,8 +237,8 @@ void GroupRepresentation<somegroup, Coefficient>::operator*=(
   }
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
     global.fatal
-    <<
-    "Attempting to multiply Weyl group reps whose characters have not been computed. "
+    << "Attempting to multiply Weyl group reps "
+    << "whose characters have not been computed. "
     << global.fatal;
   }
   GroupRepresentation<somegroup, Coefficient> output;
@@ -649,13 +651,13 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     out << "The orbit has " << outputOrbit.size << " elements.";
   }
   latexReport
-  <<
-  "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. & Image fund. coordinates& Hw minus wt. \\\\\n<br>"
-  ;
+  << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}"
+  << "Element & Eps. coord. & "
+  << "Image fund. coordinates& Hw minus wt. \\\\\n<br>";
   out
-  <<
-  "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>Epsilon coords</td><td>Fundamental coords</td>"
-  ;
+  << "<table><tr> <td>Group element</td> "
+  << "<td>Image in simple coords</td> "
+  << "<td>Epsilon coords</td><td>Fundamental coords</td>";
   out << "</tr>";
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
@@ -804,8 +806,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     )
   ) {
     out
-    <<
-    "Failed to generate the entire orbit (maybe too large?), generated the first "
+    << "Failed to generate the entire orbit "
+    << "(maybe too large?), generated the first "
     << outputOrbit.size
     << " elements only.";
   } else {
@@ -1027,7 +1029,8 @@ weylGroupOuterConjugacyClassesFromAllElements(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements"
+    "CalculatorFunctionsWeylGroup::"
+    "weylGroupOuterConjugacyClassesFromAllElements"
   );
   if (
     !CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements(
@@ -1194,7 +1197,8 @@ weylGroupIrrepsAndCharTableComputeFromScratch(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch"
+    "CalculatorFunctionsWeylGroup::"
+    "weylGroupIrrepsAndCharTableComputeFromScratch"
   );
   if (
     !CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS(
@@ -1275,18 +1279,16 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
   bool success = groupGeneratedByMatrices.generateElements(10000);
   if (!success) {
     out
-    <<
-    "<br>Did not succeed to generate all elements of the group - the group is of size larger than 10000"
-    ;
+    << "<br>Did not succeed to generate all elements of "
+    << "the group - the group is of size larger than 10000";
   } else {
     out
     << "<br>The group generated by the outer automorphisms is of size "
     << groupGeneratedByMatrices.elements.size;
     if (groupGeneratedByMatrices.elements.size > 100) {
       out
-      <<
-      "<br>As the group has more than 100 elements, I shall abstain from printing them. "
-      ;
+      << "<br>As the group has more than 100 elements, "
+      << "I shall abstain from printing them. ";
     } else {
       out << "<table><tr><td>Element</td><td>Matrix</td></tr>";
       for (int i = 0; i < groupGeneratedByMatrices.elements.size; i ++) {
@@ -1528,9 +1530,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
       ].addOnTop(this->irrepsCarterLabels[i]);
     }
     mainTableStream
-    <<
-    "\n<br>\n\n<br>\nThe following families of representations share the same sign signature. "
-    ;
+    << "\n<br>\n\n<br>\nThe following families of "
+    << "representations share the same sign signature. ";
     for (int i = 0; i < irrepsPerSignature.size; i ++) {
       if (irrepsPerSignature[i].size > 1) {
         mainTableStream << "$(";
@@ -1557,9 +1558,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
       ].addOnTop(this->irrepsCarterLabels[i]);
     }
     mainTableStream
-    <<
-    "\n<br>\n\n<br>\nThe following families of representations share the same pseudo-sign signature. "
-    ;
+    << "\n<br>\n\n<br>\nThe following families of "
+    << "representations share the same pseudo-sign signature. ";
     for (int i = 0; i < irrepsPerSignature.size; i ++) {
       if (irrepsPerSignature[i].size > 1) {
         mainTableStream << "$(";
@@ -1601,8 +1601,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
     << "}\n<br>\n"
     << "\\caption{\\label{table:SignSignature"
     << HtmlRoutines::cleanUpForLaTeXLabelUse(this->dynkinType.toString())
-    <<
-    "}Multiplicity of the sign representation over the classes of root subgroups. "
+    << "}Multiplicity of the sign representation "
+    << "over the classes of root subgroups. "
     << "There are "
     << numParabolicClasses
     << " parabolic subgroup classes, "
@@ -1672,8 +1672,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
     out << "<table style =\"white-space: nowrap;\" border =\"1\">";
     Selection parSelrootsAreOuttaLevi;
     out
-    << "<tr><td>Irrep Label</td><td>Irreducible representation characters</td>"
-    ;
+    << "<tr><td>Irrep Label</td>"
+    << "<td>Irreducible representation characters</td>";
     if (
       inputSubgroups[0].flagIsParabolic ||
       inputSubgroups[0].flagIsExtendedParabolic
@@ -1734,12 +1734,13 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
     }
   }
   out
-  <<
-  "<br>A version of the table in ready for LaTeX consumption form follows.<br>\n<br>\n\n<br>\n\n<br>\n"
-  ;
+  << "<br>A version of the table in ready for "
+  << "LaTeX consumption form follows.<br>\n<br>\n\n<br>\n\n<br>\n";
   out
-  <<
-  "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{pdflscape}"
+  << "\\documentclass{article}"
+  << "\\usepackage{amssymb}"
+  << "\\usepackage{longtable}"
+  << "\\usepackage{pdflscape}"
   << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}"
   << "\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}"
   << " \\begin{document}\\begin{landscape}\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
@@ -1753,9 +1754,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   << "}"
   << "\\caption{\\label{tableIrrepChars"
   << this->dynkinType.toString()
-  <<
-  "}\\\\ Irreducible representation characters. Columns are labeled by conjugacy classes.} \\\\"
-  ;
+  << "}\\\\ Irreducible representation characters. "
+  << "Columns are labeled by conjugacy classes.} \\\\";
   out
   << "<br>\n  & \\multicolumn{"
   << this->group.characterTable[0].data.size
@@ -1800,8 +1800,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   out << "\\end{longtable}\n<br>\n";
   out << mainTableStream.str();
   out
-  <<
-  "}%arraystretch renewcommand scope\n<br\n>\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
+  << "}%arraystretch renewcommand scope\n"
+  << "<br\n>\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
   out << "\\end{landscape}\\end{document}";
   return out.str();
 }
@@ -1886,8 +1886,8 @@ bool KostkaNumber::initTableaux(std::stringstream* comments) {
     if (this->partition[i] < this->partition[i + 1]) {
       if (comments != nullptr) {
         *comments
-        <<
-        "Partition is supposed to be a non-decreasing sequence of integers, instead it is: "
+        << "Partition is supposed to be a "
+        << "non-decreasing sequence of integers, instead it is: "
         << this->partition;
       }
       return false;
@@ -2792,8 +2792,8 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
     if (weightIndex > tempV.size || weightIndex < 1) {
       std::stringstream errorStream;
       errorStream
-      <<
-      "The second argument of the MakeWeight function needs to be index of a weight between 1 and "
+      << "The second argument of the MakeWeight "
+      << "function needs to be index of a weight between 1 and "
       << tempV.size
       << ". However, the index is "
       << weightIndex
@@ -2851,23 +2851,23 @@ bool CalculatorFunctionsWeylGroup::testSpechtModules(
   if (!input.isSmallInteger(&symmetricGroupRank)) {
     return
     calculator
-    <<
-    "testSpechtModules called with input that is not a small integer, not performing any tests."
-    ;
+    << "testSpechtModules called with input "
+    << "that is not a small integer, not performing any tests.";
   }
   if (symmetricGroupRank < 1) {
     return
     calculator
-    <<
-    "testSpechtModules takes as input a small positive integer, instead the input I got was "
+    << "testSpechtModules takes as input a small "
+    << "positive integer, instead the input I got was "
     << symmetricGroupRank
     << ". ";
   }
   if (symmetricGroupRank > 6) {
     return
     calculator
-    <<
-    "For speed/memory reasons, testSpechtModules is currently restricted to take input no larger than 6. Your input was: "
+    << "For speed/memory reasons, testSpechtModules is "
+    << "currently restricted to take input no larger than 6. "
+    << "Your input was: "
     << symmetricGroupRank;
   }
   std::stringstream out;
@@ -2923,9 +2923,8 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   if (input.size() != 3) {
     return
     calculator
-    <<
-    "CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation needs two arguments"
-    ;
+    << "CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation "
+    << "needs two arguments";
   }
   if (
     !calculator.getVector(input[1], inputLeftRat) ||
@@ -3071,7 +3070,8 @@ hyperOctahedralAllModulesInducedFromSpechtModules(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules"
+    "CalculatorFunctionsWeylGroup::"
+    "hyperOctahedralAllModulesInducedFromSpechtModules"
   );
   if (input.size() != 2) {
     return false;
@@ -3099,7 +3099,8 @@ hyperOctahedralPrintGeneratorCommutationRelations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations"
+    "CalculatorFunctionsWeylGroup::"
+    "hyperOctahedralPrintGeneratorCommutationRelations"
   );
   if (input.size() != 2) {
     return false;

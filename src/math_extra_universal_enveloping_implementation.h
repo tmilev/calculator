@@ -1162,11 +1162,11 @@ getElementUniversalEnveloping(
   ElementUniversalEnveloping<Coefficient>& output,
   SemisimpleLieAlgebraOrdered& inputOwner
 ) {
-  ElementUniversalEnveloping<Coefficient> Accum;
+  ElementUniversalEnveloping<Coefficient> accumulator;
   ElementUniversalEnveloping<Coefficient> tempMon;
   int index;
   int degree = 0;
-  Accum.makeConstant(this->Coefficient, inputOwner);
+  accumulator.makeConstant(this->Coefficient, inputOwner);
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     if (this->powers[i].isSmallInteger(&degree)) {
       tempMon.assignElementLieAlgebra(
@@ -1176,7 +1176,7 @@ getElementUniversalEnveloping(
         this->Coefficient.GetZero()
       );
       tempMon.raiseToPower(degree);
-      Accum *= tempMon;
+      accumulator *= tempMon;
     } else {
       if (
         this->owner->elementOrder[this->generatorsIndices[i]].
@@ -1189,13 +1189,13 @@ getElementUniversalEnveloping(
           this->Coefficient.GetZero()
         );
         tempMon[0].powers[0] = this->powers[i];
-        Accum *= tempMon;
+        accumulator *= tempMon;
       } else {
         return false;
       }
     }
   }
-  output.operator=(Accum);
+  output.operator=(accumulator);
   return true;
 }
 
@@ -1421,8 +1421,8 @@ assignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
     ringZero.substitutionNthElementIsImageNthCoordinateSimpleBasis.size != 3
   ) {
     global.fatal
-    <<
-    "ringZero.substitutionNthElementIsImageNthCoordinateSimpleBasis.size is not equal to 3 as expected. "
+    << "ringZero.substitutionNthElementIsImageNthCoordinateSimpleBasis.size "
+    << "is not equal to 3 as expected. "
     << global.fatal;
   }
   this->substitutionNthElementIsImageNthCoordinateSimpleBasis =

@@ -1500,8 +1500,8 @@ void FiniteGroup<elementSomeGroup>::computeGeneratorCommutationRelations() {
           }
           global.comments
           << "^t does not equal e for all t < 1009. "
-          <<
-          "This usually happens if the specified expressions don't generate a group, "
+          << "This usually happens if the "
+          << "specified expressions don't generate a group, "
           << "let alone a finite group, but, if this was intentional, "
           << "lift the limit near "
           << __FILE__
@@ -1983,8 +1983,8 @@ bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
           << ", "
           << this->ownerGroup->generators[j];
           global.comments
-          << " are assigned matrices which fail to have commutation relations "
-          ;
+          << " are assigned matrices which "
+          << "fail to have commutation relations ";
           global.comments
           << this->ownerGroup->generatorCommutationRelations(i, j)
           << "\n";

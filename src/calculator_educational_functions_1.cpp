@@ -259,7 +259,8 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
   if (polynomial.content.minimalNumberOfVariables() == 2) {
     this->addAnnotationStep(
       calculator,
-      "This is an equation in two variables. Such equations are plots of curves. "
+      "This is an equation in two variables. "
+      "Such equations are plots of curves. "
     );
     return true;
   }
@@ -324,8 +325,10 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   Expression& output,
   CompareExpressions& comparison
 ) {
-  STACK_TRACE("CalculatorEducationalFunctions::compareExpressionsJSONInternal")
-  ;
+  STACK_TRACE(
+    "CalculatorEducationalFunctions::"
+    "compareExpressionsJSONInternal"
+  );
   if (input.size() != 3) {
     return false;
   }
@@ -561,9 +564,8 @@ JSData CompareExpressions::toJSON() const {
   } else {
     if (!this->flagAreEqualAsAnswers) {
       resultHTML
-      <<
-      "<b style='color:blue;font-size: x-large;'>&#x2713;</b> [more work needed]<br>"
-      ;
+      << "<b style='color:blue;font-size: x-large;'>&#x2713;</b>"
+      << " [more work needed]<br>";
     } else {
       resultHTML
       << "<b style='color:green;font-size: x-large;'>&#x2713;</b><br>";

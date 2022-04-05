@@ -175,8 +175,8 @@ bool Calculator::Examples::writeExamplesReadme() {
   std::string examples = this->getExamplesReadmeFragment();
   StringRoutines::replaceOnce(
     readmeTemplate,
-    "${content-inserted-by-calculator-in-Calculator::Examples::writeExamplesReadme}"
-    ,
+    "${content-inserted-by-calculator-in-Calculator::"
+    "Examples::writeExamplesReadme}",
     examples
   );
   return
@@ -535,8 +535,8 @@ bool Calculator::expressionMatchesPattern(
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (!(pattern.owner == this && input.owner == this)) {
     global.fatal
-    <<
-    "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
+    << "Either a pattern or an input has a wrongly "
+    << "initialized owner: the pattern is "
     << pattern.toString()
     << " and the input is "
     << input.toString()
@@ -608,13 +608,11 @@ bool Calculator::expressionMatchesPattern(
     matchedExpressions.keys.setSize(numMatchedExpressionsAtStart);
     for (int i = 1; i < pattern.size(); i ++) {
       if (
-        !(
-          this->expressionMatchesPattern(
-            pattern[i],
-            input[pattern.size() - i],
-            matchedExpressions,
-            commentsGeneral
-          )
+        !this->expressionMatchesPattern(
+          pattern[i],
+          input[pattern.size() - i],
+          matchedExpressions,
+          commentsGeneral
         )
       ) {
         return false;

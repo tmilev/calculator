@@ -791,12 +791,12 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
         *humanReadableReport
-        <<
-        "Eliminated the non-zero entries in the pivot column</div></td></tr>";
+        << "Eliminated the non-zero entries "
+        << "in the pivot column</div></td></tr>";
       } else {
         *humanReadableReport
-        << "Eliminated the non-zero entries in the pivot column. \\\\\\hline\n"
-        ;
+        << "Eliminated the non-zero entries "
+        << "in the pivot column. \\\\\\hline\n";
       }
     }
     numberOfPivots ++;

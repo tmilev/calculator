@@ -499,8 +499,8 @@ public:
     if (other.isEqualToZero()) {
       global.fatal
       << "Division by zero. "
-      <<
-      "Division by zero error are supposed to be handled at an earlier level. "
+      << "Division by zero error are supposed "
+      << "to be handled at an earlier level. "
       << global.fatal;
     }
     Vector<Coefficient> result;

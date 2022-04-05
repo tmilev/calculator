@@ -10803,10 +10803,10 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
   if (this->latticeShifts.size == 0) {
     return "0";
   }
-  out << "\\begin{array}{l}";
+  out << "\\begin{array}{l}\n";
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     out << this->valueOnEachLatticeShift[i].toString(format);
-    out << " \\text{~over~}";
+    out << "\\\\\n \\text{~over~}";
     if (!this->latticeShifts[i].isEqualToZero()) {
       out << this->latticeShifts[i].toString() << " + ";
     }
@@ -12205,7 +12205,7 @@ void DrawOperations::makeMeAStandardBasis(int dimension) {
     this->projectionsEiVectors[0][0] = 1;
     this->projectionsEiVectors[0][1] = 0;
     this->projectionsEiVectors[1][0] = 0;
-    this->projectionsEiVectors[1][1] = - 1;
+    this->projectionsEiVectors[1][1] = 1;
   }
   if (this->basisProjectionPlane.size < 1) {
     this->basisProjectionPlane.setSize(1);
@@ -12234,6 +12234,8 @@ void DrawOperations::makeMeAStandardBasis(int dimension) {
     modifyToOrthonormalNoShiftSecond(
       this->basisProjectionPlane[0], this->basisProjectionPlane[1]
     );
+  } else if (dimension == 2) {
+    this->basisProjectionPlane[1] *= - 1;
   }
   if (this->bilinearForm.numberOfRows != dimension) {
     this->bilinearForm.makeIdentityMatrix(dimension, 1, 0);
@@ -12447,24 +12449,24 @@ bool Cone::drawMeLastCoordinateAffine(
   for (int k = 0; k < this->normals.size; k ++) {
     for (int i = 0; i < verticesScaled.size; i ++) {
       if (
-        drawVertex[i] &&
-        this->normals[k].scalarEuclidean(this->vertices[i]).isEqualToZero()
+        !drawVertex[i] ||
+        !this->normals[k].scalarEuclidean(this->vertices[i]).isEqualToZero()
       ) {
-        for (int j = i + 1; j < verticesScaled.size; j ++) {
-          if (
-            drawVertex[j] &&
-            this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()
-          ) {
-            if (this->isHonest1DEdgeAffine(i, j)) {
-              drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-                verticesScaled[i],
-                verticesScaled[j],
-                chamberWallColor,
-                1
-              );
-            }
-          }
+        continue;
+      }
+      for (int j = i + 1; j < verticesScaled.size; j ++) {
+        if (
+          !drawVertex[j] ||
+          !this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()
+        ) {
+          continue;
         }
+        if (!this->isHonest1DEdgeAffine(i, j)) {
+          continue;
+        }
+        drawingVariables.drawLineBetweenTwoVectorsBufferRational(
+          verticesScaled[i], verticesScaled[j], chamberWallColor, 1
+        );
       }
     }
   }

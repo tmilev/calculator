@@ -901,8 +901,10 @@ getSpacedMonomialsWithHighlightLaTeX(
   int slidesToUncoverAllMons,
   bool useColumnSeparator
 ) {
-  STACK_TRACE("PolynomialDivisionReport::getSpacedMonomialsWithHighlightLaTeX")
-  ;
+  STACK_TRACE(
+    "PolynomialDivisionReport::"
+    "getSpacedMonomialsWithHighlightLaTeX"
+  );
   (void) slidesToUncoverAllMons;
   std::stringstream out;
   bool found = false;

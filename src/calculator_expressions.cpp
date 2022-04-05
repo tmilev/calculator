@@ -3981,8 +3981,8 @@ bool Expression::toStringEndStatement(
           );
         } else {
           currentInput =
-          "No matching starting expression - possible use of the Melt keyword."
-          ;
+          "No matching starting expression - "
+          "possible use of the Melt keyword.";
         }
       } else {
         currentInput = "...";
@@ -4067,8 +4067,8 @@ bool Expression::toStringPlus(
   }
   if (input.children.size < 3) {
     global.fatal
-    <<
-    "Plus operation takes at least 2 arguments, whereas this expression has "
+    << "Plus operation takes at least 2 arguments, "
+    << "whereas this expression has "
     << input.children.size - 1
     << " arguments. "
     << global.fatal;
@@ -4119,8 +4119,8 @@ bool Expression::toStringDirectSum(
   }
   if (input.children.size < 3) {
     global.fatal
-    <<
-    "Direct sum operation takes at least 2 arguments, whereas this expression has "
+    << "Direct sum operation takes at least 2 arguments, "
+    << "whereas this expression has "
     << input.children.size
     << " arguments. "
     << global.fatal;

@@ -1540,9 +1540,7 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
   SemisimpleLieAlgebra& ownerAlgebra,
   const Coefficient& ringUnit
 ) const {
-  STACK_TRACE(
-    "ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft"
-  );
+  STACK_TRACE("ElementTensorsGeneralizedVermas::multiplyOnTheLeft");
   if (&output == this) {
     global.fatal
     << "Output equals input, this is not supposed to happen. "
@@ -1604,8 +1602,7 @@ template <class Coefficient>
 void ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight(
   const ElementTensorsGeneralizedVermas<Coefficient>& right
 ) {
-  STACK_TRACE("ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight")
-  ;
+  STACK_TRACE("ElementTensorsGeneralizedVermas::tensorOnTheRight");
   if (right.isEqualToZero()) {
     this->makeZero();
     return;
@@ -1646,8 +1643,8 @@ const {
   << "<br>Parabolic selection: "
   << this->parabolicSelectionNonSelectedAreElementsLevi.toString();
   out
-  <<
-  "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
+  << "<br>Highest weight of Generalized "
+  << "Verma module in fundamental coordinates: "
   << this->highestWeightFundamentalCoordinatesBaseField.toString();
   out
   << "<br>In simple coordinates: "
@@ -1676,9 +1673,8 @@ const {
   << this->getDimension();
   out << "<br>A module basis follows.";
   out
-  <<
-  "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>"
-  ;
+  << "<table><tr><td>Monomial label</td>"
+  << "<td>Definition</td><td>Littelmann path string</td></tr>";
   ElementWeylGroup tempWelt;
   int wordCounter = 0;
   SimpleReflection aGen;
@@ -1933,7 +1929,8 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
   bool ascending
 ) {
   STACK_TRACE(
-    "ModuleSSalgebra_CoefficientType::getActionGeneralizedVermaModuleAsDifferentialOperator"
+    "ModuleSSalgebra_CoefficientType::"
+    "getActionGeneralizedVermaModuleAsDifferentialOperator"
   );
   List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
   List<int> indicesNilrad;
@@ -2013,8 +2010,8 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
       if (!tempP1.isEqualToZero()) {
         global.fatal
         << "This is a mathematical error! "
-        <<
-        "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
+        << "Something is very wrong with "
+        << "embedding semisimple Lie algebras in Weyl algebras. "
         << global.fatal;
       }
     }
@@ -2058,16 +2055,15 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   Vectors<Coefficient>* outputEigenSpace,
   std::stringstream* comments
 ) {
-  STACK_TRACE("ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg");
+  STACK_TRACE("ModuleSSalgebra::splitFDpartOverFKLeviRedSubalg");
   if (this->character.size() != 1) {
     if (comments != nullptr) {
       std::stringstream out;
       out
-      <<
-      "I have been instructed only to split modules that are irreducible over the ambient Lie algebra"
-      ;
+      << "I have been instructed only to split "
+      << "modules that are irreducible over the ambient Lie algebra. ";
       out
-      << " Instead I got the character "
+      << "Instead I got the character "
       << this->character.toString()
       << " ("
       << this->character.size()
@@ -2350,17 +2346,16 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
   const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping,
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
-  STACK_TRACE(
-    "MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft"
-  );
+  STACK_TRACE("MonomialGeneralizedVerma::"
+"multiplyMeByUEEltOnTheLeft");
   MonomialGeneralizedVerma<Coefficient> currentMon;
   output.makeZero();
   ElementSumGeneralizedVermas<Coefficient> buffer;
   ProgressReport report;
   if (!this->getOwner().owner->flagHasNilradicalOrder) {
     global.fatal
-    <<
-    "Calling generalized verma module simplification requires nilradical order on the generators. "
+    << "Calling generalized verma module "
+    << "simplification requires nilradical order on the generators. "
     << global.fatal;
   }
   for (int j = 0; j < elementUniversalEnveloping.size(); j ++) {

@@ -867,7 +867,8 @@ computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
   const List<List<int> >& ccIndices
 ) {
   STACK_TRACE(
-    "FiniteGroup::computeConjugacyClassesFromConjugacyClassIndicesInAllElements"
+    "FiniteGroup::"
+    "computeConjugacyClassesFromConjugacyClassIndicesInAllElements"
   );
   this->conjugacyClasses.setSize(ccIndices.size);
   for (int i = 0; i < ccIndices.size; i ++) {
@@ -1469,7 +1470,7 @@ bool WeylGroupData::freudenthalFormula(
       global.fatal
       << "This is a programming or a mathematical error. "
       << "I get that the denominator in the Freundenthal formula is zero. "
-      << " The highest weight is "
+      << "The highest weight is "
       << inputHWfundamentalCoords.toString()
       << ". The Weyl group details follow. "
       << this->toString()
@@ -1508,7 +1509,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
       << highestWeightSimpleCoords.toString()
       << " which equals "
       << highestWeightFundCoords.toString()
-      << "  in fundamental coordinates is not integral dominant.<br>";
+      << " in fundamental coordinates is not integral dominant.<br>";
       *outputDetails = out.str();
     }
     return false;
@@ -2029,7 +2030,10 @@ weylDimensionFormulaInnerSimpleCoords(
   const Vector<Coefficient>& weightInnerSimpleCoords,
   const Coefficient& ringUnit
 ) {
-  STACK_TRACE("SubgroupWeylGroupOLD::weylDimensionFormulaSimpleCoordinates");
+  STACK_TRACE(
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "::weylDimensionFormulaSimpleCoordinates"
+  );
   this->checkInitialization();
   Coefficient result, buffer;
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;
@@ -2144,7 +2148,7 @@ getAllDominantWeightsHWFDIM(
     out
     << "<hr>This message is generated either because the number of "
     << "weights has exceeded the hard-coded RAM memory limits, or because "
-    << " a priori bound for the number of weights is WRONG. "
+    << "a priori bound for the number of weights is WRONG. "
     << "If the latter is the case, make sure "
     << "to send an angry email to the author(s).";
   }
@@ -2530,8 +2534,8 @@ void SubgroupData<someGroup, elementSomeGroup>::computeCosets() {
 
 template <typename someGroup, typename elementSomeGroup>
 bool SubgroupData<someGroup, elementSomeGroup>::verifyCosets() {
-  // this returns true or crashes because if the cosets aren't cosets something
-  // is seriously wrong
+  // This returns true or crashes because if the cosets aren't cosets something
+  // is seriously wrong.
   computeCosets();
   for (int i = 0; i < this->subgroupContent->generators.size; i ++) {
     for (int cs = 0; cs < this->cosets.size; cs ++) {
@@ -2638,8 +2642,9 @@ computeIrreducibleRepresentationsTodorsVersion() {
   if (this->irreps_grcam.size == 0) {
     if (this->irreducibleRepresentations.size == 0) {
       global.fatal
-      <<
-      "Need an initial irrep.  check up the call chain and find out where it should be provided"
+      << "Need an initial irrep. "
+      << "Check up the call chain and find out "
+      << "where it should be provided."
       << global.fatal;
     }
     for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
@@ -2781,7 +2786,8 @@ getLargestDenominatorSimpleGenerators(
   LargeIntegerUnsigned& outputDenominator
 ) const {
   STACK_TRACE(
-    "GroupRepresentationCarriesAllMatrices::getLargestDenominatorSimpleGenerators"
+    "GroupRepresentationCarriesAllMatrices::"
+    "getLargestDenominatorSimpleGenerators"
   );
   outputLeastCommonMultiple = 1;
   outputDenominator = 1;

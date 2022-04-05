@@ -95,8 +95,8 @@ bool RationalFraction<Coefficient>::checkConsistency() const {
     ) {
       global.fatal
       << "A rational function is flagged as "
-      <<
-      "having non-constant denominator, but either the numerator or the denominator pointer is zero. "
+      << "having non-constant denominator, but "
+      << "either the numerator or the denominator pointer is zero. "
       << global.fatal;
       return false;
     }
@@ -377,8 +377,8 @@ void RationalFraction<Coefficient>::greatestCommonDivisor(
     << productBuffer.toString()
     << "<br>and that lcm(left, right) = "
     << leastCommonMultipleBuffer.toString()
-    <<
-    " <br>but at the same time right * left divided by lcm (left, right) equals<br>"
+    << " <br>but at the same time right * left "
+    << "divided by lcm (left, right) equals<br>"
     << output.toString()
     << "<br> with remainder "
     << remainderBuffer.toString()
@@ -1427,8 +1427,8 @@ bool RationalFraction<Coefficient>::substitution(
     return true;
   default:
     global.fatal
-    <<
-    "Default case not allowed in RationalFunction::substitution. Rational function: "
+    << "Default case not allowed in "
+    << "RationalFunction::substitution. Rational function: "
     << this->toString()
     << "."
     << global.fatal;

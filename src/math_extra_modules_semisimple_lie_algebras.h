@@ -596,8 +596,8 @@ public:
   ModuleSSalgebra<Coefficient>& getOwnerModule() const {
     if (this->size() <= 0) {
       global.fatal
-      <<
-      "Calling getOwnerModule() on a tensor element which has no monomials. "
+      << "Calling getOwnerModule() on a "
+      << "tensor element which has no monomials. "
       << "This is not allowed as the index of "
       << "the owner modules are stored in the monomials. "
       << global.fatal;

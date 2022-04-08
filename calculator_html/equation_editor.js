@@ -780,7 +780,7 @@ class MathNodeFactory {
   baseWithExponent(
       /** @type {EquationEditor!} */
       equationEditor,
-      /** @type {MathNode!} */
+      /** @type {MathNode?} */
       base,
       /** @type {MathNode?}*/
       exponent,
@@ -1007,7 +1007,7 @@ class MathNodeFactory {
         rightDelimiter = this.rightParenthesis(equationEditor, false);
       } else if (matrixEnvironment === 'cases') {
         leftDelimiter = this.leftDelimiter(equationEditor, '{', false);
-        rightDelimiter = this.rightDelimiter(equationEditor, '');
+        rightDelimiter = this.rightDelimiter(equationEditor, '', false);
       } else {
         leftDelimiter = this.leftDelimiter(equationEditor, '', false);
         rightDelimiter = this.rightDelimiter(equationEditor, '', false);
@@ -2530,8 +2530,8 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === 'matrixBuilder' &&
         last.syntacticRole === '\\hline') {
       this.lastRuleName = 'matrixBuilder hline';
-      /** @type{MathNodeMatrix} */
-      let builder = secondToLast.node;
+      /** @type{MathNodeMatrix!} */
+      let builder = /** @type{MathNodeMatrix!} */ (secondToLast.node);
       builder.appendHorizontalAboveLastRow();
       return this.decreaseParsingStack(1);
     }
@@ -2557,8 +2557,8 @@ class LaTeXParser {
       // copying it may cause unwanted quadratic complexity.
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, secondToLast.node);
-      /** @type {MathNodeMatrix} */
-      let matrix = thirdToLast.node;
+      /** @type {MathNodeMatrix!} */
+      let matrix = /** @type {MathNodeMatrix!} */ (thirdToLast.node);
       matrix.getLastMatrixRow().appendChild(incomingEntry);
       return this.decreaseParsingStack(2);
     }
@@ -2569,8 +2569,8 @@ class LaTeXParser {
       this.lastRuleName = 'matrix builder ampersand';
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, mathNodeFactory.atom(this.equationEditor, ''));
-      /** @type {MathNodeMatrix} */
-      let matrix = secondToLast.node;
+      /** @type {MathNodeMatrix!} */
+      let matrix = /** @type {MathNodeMatrix!} */ (secondToLast.node);
       matrix.getLastMatrixRow().appendChild(incomingEntry);
       return this.decreaseParsingStack(1);
     }
@@ -2579,8 +2579,8 @@ class LaTeXParser {
       // Modify thirdToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
       this.lastRuleName = 'matrix builder expression double backslash';
-      /** @type {MathNodeMatrix} */
-      let matrix = thirdToLast.node;
+      /** @type {MathNodeMatrix!} */
+      let matrix = /** @type {MathNodeMatrix!} */ (thirdToLast.node);
       let lastRow = matrix.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, secondToLast.node);
@@ -2594,8 +2594,8 @@ class LaTeXParser {
       // Modify secondToLast.node in place for performance reasons:
       // copying it may cause unwanted quadratic complexity.
       this.lastRuleName = 'matrix builder double backslash';
-      /** @type {MathNodeMatrix} */
-      let matrix = secondToLast.node;
+      /** @type {MathNodeMatrix!} */
+      let matrix = /** @type {MathNodeMatrix!} */ (secondToLast.node);
       let lastRow = matrix.getLastMatrixRow();
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, mathNodeFactory.atom(this.equationEditor, ''));
@@ -2613,8 +2613,8 @@ class LaTeXParser {
         secondToLast.isExpression() && last.isMatrixEnder()) {
       let incomingEntry = mathNodeFactory.matrixRowEntry(
           this.equationEditor, secondToLast.node);
-      /** @type {MathNodeMatrix} */
-      let matrix = thirdToLast.node;
+      /** @type {MathNodeMatrix!} */
+      let matrix = /** @type {MathNodeMatrix!} */ (thirdToLast.node);
       matrix.getLastMatrixRow().appendChild(incomingEntry);
       // Normalize the matrix: ensure all rows have same number of columns, no
       // last empty row, etc.
@@ -2629,8 +2629,8 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === 'matrixBuilder' &&
         last.isMatrixEnder()) {
       this.lastRuleName = 'finish matrix';
-      /** @type {MathNodeMatrix} */
-      let matrix = secondToLast.node;
+      /** @type {MathNodeMatrix!} */
+      let matrix = /** @type {MathNodeMatrix!} */ (secondToLast.node);
       // Normalize the matrix: ensure all rows have same number of columns, no
       // last empty row, etc.
       matrix.normalizeMatrix();
@@ -9924,8 +9924,9 @@ class MathNodeMatrix extends MathNode {
     if (rowContainer.children.length === 0) {
       return;
     }
-    /** @type{MathNodeMatrixRow} */
-    let row = rowContainer.children[rowContainer.children.length - 1];
+    /** @type{MathNodeMatrixRow!} */
+    let row = /** @type{MathNodeMatrixRow!} */ (
+        rowContainer.children[rowContainer.children.length - 1]);
     row.addTopBorder();
   }
 
@@ -9943,18 +9944,22 @@ class MathNodeMatrix extends MathNode {
 
   /** Ensures that a matrix has rows with equal number of columns. */
   normalizeMatrix() {
+    /** */
     let matrixTable = this.children[0].children[1];
     let columnCount = this.matrixColumnCount();
     let numberOfRows = matrixTable.children.length;
     // Last empty row is ignored. Previous empty rows are preserved.
-    /** @type{MathNodeMatrixRow} */
-    let lastRow = matrixTable.children[numberOfRows - 1];
+    /** @type{MathNodeMatrixRow!} */
+    let lastRow = /** @type{MathNodeMatrixRow!} */ (
+        matrixTable.children[numberOfRows - 1]);
     if (lastRow.children.length === 0) {
       if (numberOfRows > 1 && lastRow.topLineCount > 0) {
         // We have a last row, that is empty, except for an \hline.
         // This means that the table has a bottom border, which
         // we create by appending a bottom border on the row above.
-        matrixTable.children[numberOfRows - 2].addBottomBorder();
+        let row = /** @type{MathNodeMatrixRow!}*/ (
+            matrixTable.children[numberOfRows - 2]);
+        row.addBottomBorder();
       }
       numberOfRows--;
       matrixTable.removeChild(numberOfRows);
@@ -10003,6 +10008,7 @@ class MathNodeMatrixRow extends MathNode {
       equationEditor,
   ) {
     super(equationEditor, knownTypes.matrixRow);
+    /** @type{number}*/
     this.topLineCount = 0;
     this.bottomLineCount = 0;
   }

@@ -1001,10 +1001,11 @@ class MathNodeFactory {
       if (matrixEnvironment === 'bmatrix') {
         leftDelimiter = this.leftDelimiter(equationEditor, '[', false);
         rightDelimiter = this.rightDelimiter(equationEditor, ']', false);
-      } else if (matrixEnvironment === 'pmatrix' || matrixEnvironment == 'binom') {
+      } else if (
+          matrixEnvironment === 'pmatrix' || matrixEnvironment == 'binom') {
         leftDelimiter = this.leftParenthesis(equationEditor, false);
         rightDelimiter = this.rightParenthesis(equationEditor, false);
-      } else if (matrixEnvironment === 'cases') { 
+      } else if (matrixEnvironment === 'cases') {
         leftDelimiter = this.leftDelimiter(equationEditor, '{', false);
         rightDelimiter = this.rightDelimiter(equationEditor, '');
       } else {
@@ -1274,7 +1275,8 @@ class MathNodeWithCursorPosition {
       return new MathNodeWithCursorPosition(
           this.element, this.nextPositionInDirection(1));
     }
-    return new MathNodeWithCursorPosition(this.element.firstAtomToTheRight(), 0);
+    return new MathNodeWithCursorPosition(
+        this.element.firstAtomToTheRight(), 0);
   }
 
   /** @return {string} */
@@ -1804,7 +1806,7 @@ class LaTeXConstants {
       '\\end{matrix}': true,
       '\\end{bmatrix}': true,
       '\\end{array}': true,
-      '\\end{align}':true,
+      '\\end{align}': true,
       '\\end{cases}': true,
     };
     /** @type {Object.<string, boolean>!} */
@@ -2502,25 +2504,31 @@ class LaTeXParser {
     }
     if (last.syntacticRole === '\\begin{pmatrix}') {
       this.lastRuleName = 'begin pmatrix to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'pmatrix');
+      let matrix =
+          mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'pmatrix');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
-    if (last.syntacticRole === '\\begin{matrix}' || last.syntacticRole === '\\begin{align}') {
+    if (last.syntacticRole === '\\begin{matrix}' ||
+        last.syntacticRole === '\\begin{align}') {
       this.lastRuleName = 'begin matrix to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'align');
+      let matrix =
+          mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'align');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{bmatrix}') {
       this.lastRuleName = 'begin bmatrix to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'bmatrix');
+      let matrix =
+          mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'bmatrix');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{cases}') {
       this.lastRuleName = 'begin cases to matrix builder';
-      let matrix = mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'cases');
+      let matrix =
+          mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'cases');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
-    if (secondToLast.syntacticRole === 'matrixBuilder' && last.syntacticRole === '\\hline') {
+    if (secondToLast.syntacticRole === 'matrixBuilder' &&
+        last.syntacticRole === '\\hline') {
       this.lastRuleName = 'matrixBuilder hline';
       /** @type{MathNodeMatrix} */
       let builder = secondToLast.node;
@@ -2560,7 +2568,7 @@ class LaTeXParser {
       // copying it may cause unwanted quadratic complexity.
       this.lastRuleName = 'matrix builder ampersand';
       let incomingEntry = mathNodeFactory.matrixRowEntry(
-        this.equationEditor, mathNodeFactory.atom(this.equationEditor, ''));
+          this.equationEditor, mathNodeFactory.atom(this.equationEditor, ''));
       /** @type {MathNodeMatrix} */
       let matrix = secondToLast.node;
       matrix.getLastMatrixRow().appendChild(incomingEntry);
@@ -2604,7 +2612,7 @@ class LaTeXParser {
     if (thirdToLast.syntacticRole === 'matrixBuilder' &&
         secondToLast.isExpression() && last.isMatrixEnder()) {
       let incomingEntry = mathNodeFactory.matrixRowEntry(
-        this.equationEditor, secondToLast.node);
+          this.equationEditor, secondToLast.node);
       /** @type {MathNodeMatrix} */
       let matrix = thirdToLast.node;
       matrix.getLastMatrixRow().appendChild(incomingEntry);
@@ -2612,7 +2620,7 @@ class LaTeXParser {
       // last empty row, etc.
       matrix.normalizeMatrix();
       (new LatexColumnStyleIterator(matrix.latexExtraStyle))
-        .applyStyleToMatrix(matrix);
+          .applyStyleToMatrix(matrix);
       // Mark the matrix as a regular expression.
       thirdToLast.syntacticRole = '';
       this.lastRuleName = 'finalize matrix builder';
@@ -2746,7 +2754,8 @@ class LaTeXParser {
     }
     if (thirdToLast.syntacticRole === '\\stackrel' &&
         secondToLast.isExpression() && last.isExpression()) {
-      let node = mathNodeFactory.matrix(this.equationEditor, 3, 1, '', 'stackrel');
+      let node =
+          mathNodeFactory.matrix(this.equationEditor, 3, 1, '', 'stackrel');
       node.getMatrixCell(0, 0).children[0].appendChild(secondToLast.node);
       node.getMatrixCell(1, 0).children[0].appendChild(last.node);
       node.getMatrixCell(2, 0).children[0].appendChild(
@@ -5741,7 +5750,8 @@ class MathNode {
     if (key === '\\' && !shiftHeld) {
       this.equationEditor.backslashSequenceStarted = true;
       this.equationEditor.backslashSequence = '\\';
-      this.equationEditor.backslashPosition = this.positionCursorBeforeKeyEvents;
+      this.equationEditor.backslashPosition =
+          this.positionCursorBeforeKeyEvents;
       result.keyAccountedCarryOutDefaultEvent = true;
       return result;
     }
@@ -6123,8 +6133,8 @@ class MathNode {
       return false;
     }
     if (this.element.textContent === ' ') {
-      // Single space bar textcontent does not appear to respect left-right arrow navigation.
-      // Tested in Chrome and Firefox.
+      // Single space bar textcontent does not appear to respect left-right
+      // arrow navigation. Tested in Chrome and Firefox.
       return false;
     }
     if (key === 'ArrowLeft') {
@@ -6152,10 +6162,10 @@ class MathNode {
 
   /** @return {MathNodeWithCursorPosition!} */
   getAtomToFocusFromActionDefault(
-    /** @type {string} */ key,
-    /** @type {string} */ arrowType,
-) {
-  if (arrowType === arrowMotion.parentForward) {
+      /** @type {string} */ key,
+      /** @type {string} */ arrowType,
+  ) {
+    if (arrowType === arrowMotion.parentForward) {
       if (this.parent === null) {
         return new MathNodeWithCursorPosition(null, -1);
       }
@@ -6629,7 +6639,8 @@ class MathNode {
     if (this.equationEditor.hasSelection()) {
       return this.equationEditor.deleteSelection(null);
     }
-    if (this.positionCursorBeforeKeyEvents !== this.element.textContent.length ||
+    if (this.positionCursorBeforeKeyEvents !==
+            this.element.textContent.length ||
         this.type.type !== knownTypes.atom.type) {
       return new KeyHandlerResult(false, true);
     }
@@ -6923,8 +6934,8 @@ class MathNode {
       return;
     }
     let parent = this.parent;
-    let matrix =
-        mathNodeFactory.matrix(this.equationEditor, rows, columns, '', matrixEnvironment);
+    let matrix = mathNodeFactory.matrix(
+        this.equationEditor, rows, columns, '', matrixEnvironment);
     parent.replaceChildAtPositionWithChildren(this.indexInParent, [
       split[0],
       matrix,
@@ -7550,7 +7561,8 @@ class MathNode {
     const oldIndexInParent = this.indexInParent;
     let fraction = null;
     let childIndexToFocus = 1;
-    if (this.positionCursorBeforeKeyEvents === this.element.textContent.length) {
+    if (this.positionCursorBeforeKeyEvents ===
+        this.element.textContent.length) {
       fraction = mathNodeFactory.fraction(this.equationEditor, this, null);
     } else if (this.positionCursorBeforeKeyEvents === 0) {
       fraction = mathNodeFactory.fraction(this.equationEditor, null, this);
@@ -7684,15 +7696,20 @@ class MathNode {
     let split = this.splitByCursor();
     let originalParent = this.parent;
     let originalIndexInParent = this.indexInParent;
-    let baseWithExponent =
-      mathNodeFactory.baseWithExponent(this.equationEditor, split[0], split[1]);
+    let baseWithExponent = mathNodeFactory.baseWithExponent(
+        this.equationEditor, split[0], split[1]);
     if (split[0] === null) {
-      baseWithExponent.children[0].appendChild(mathNodeFactory.atom(this.equationEditor, ''));
+      baseWithExponent.children[0].appendChild(
+          mathNodeFactory.atom(this.equationEditor, ''));
       baseWithExponent.children[0].children[0].desiredCursorPosition = 0;
     } else {
-      baseWithExponent.children[1].children[0].children[0].desiredCursorPosition = 0;
+      baseWithExponent.children[1]
+          .children[0]
+          .children[0]
+          .desiredCursorPosition = 0;
     }
-    originalParent.replaceChildAtPosition(originalIndexInParent,  baseWithExponent);
+    originalParent.replaceChildAtPosition(
+        originalIndexInParent, baseWithExponent);
     originalParent.ensureEditableAtoms();
     originalParent.updateDOM();
     originalParent.focusRestore();
@@ -7746,8 +7763,10 @@ class MathNode {
     );
     const baseWithSubscript =
         mathNodeFactory.baseWithSubscript(this.equationEditor, base, null);
-    baseWithSubscript.children[1].children[0].children[0].desiredCursorPosition =
-        0;
+    baseWithSubscript.children[1]
+        .children[0]
+        .children[0]
+        .desiredCursorPosition = 0;
     originalParent.replaceChildRangeWithChildren(
         leftIndex, rightIndex, [baseWithSubscript]);
     originalParent.ensureEditableAtoms();
@@ -7761,8 +7780,10 @@ class MathNode {
     let originalIndexInParent = this.indexInParent;
     const baseWithSubscript =
         mathNodeFactory.baseWithSubscript(this.equationEditor, this, null);
-    baseWithSubscript.children[1].children[0].children[0].desiredCursorPosition =
-        0;
+    baseWithSubscript.children[1]
+        .children[0]
+        .children[0]
+        .desiredCursorPosition = 0;
     originalParent.replaceChildAtPosition(
         originalIndexInParent, baseWithSubscript);
     originalParent.ensureEditableAtoms();
@@ -9850,9 +9871,9 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
 class MathNodeMatrix extends MathNode {
   constructor(
       /** @type {EquationEditor!} */
-    equationEditor,
-    /** @type {string!} */
-    matrixEnvironment,
+      equationEditor,
+      /** @type {string!} */
+      matrixEnvironment,
   ) {
     super(equationEditor, knownTypes.matrix);
     this.matrixEnvironment = matrixEnvironment;
@@ -9931,7 +9952,7 @@ class MathNodeMatrix extends MathNode {
     if (lastRow.children.length === 0) {
       if (numberOfRows > 1 && lastRow.topLineCount > 0) {
         // We have a last row, that is empty, except for an \hline.
-        // This means that the table has a bottom border, which 
+        // This means that the table has a bottom border, which
         // we create by appending a bottom border on the row above.
         matrixTable.children[numberOfRows - 2].addBottomBorder();
       }
@@ -9943,7 +9964,7 @@ class MathNodeMatrix extends MathNode {
       let child = matrixTable.children[i];
       for (let j = child.children.length; j < columnCount; j++) {
         child.appendChild(
-          mathNodeFactory.matrixRowEntry(this.equationEditor, null));
+            mathNodeFactory.matrixRowEntry(this.equationEditor, null));
       }
     }
   }
@@ -9992,7 +10013,8 @@ class MathNodeMatrixRow extends MathNode {
    */
   applyBackspaceToTheLeft() {
     if (this.indexInParent > 0) {
-      return this.parent.children[this.indexInParent - 1].applyBackspaceToTheRightAsLeftArrow();
+      return this.parent.children[this.indexInParent - 1]
+          .applyBackspaceToTheRightAsLeftArrow();
     }
     return this.parent.parent.parent.applyBackspaceToTheLeftAsLeftArrow();
   }
@@ -10022,28 +10044,35 @@ class MathNodeRowEntry extends MathNode {
    */
   applyBackspaceToTheLeft() {
     if (this.indexInParent > 0) {
-      return this.parent.children[this.indexInParent - 1].applyBackspaceToTheRightAsLeftArrow();
+      return this.parent.children[this.indexInParent - 1]
+          .applyBackspaceToTheRightAsLeftArrow();
     }
     return this.parent.applyBackspaceToTheLeft();
   }
 
   /** @return {MathNodeWithCursorPosition!} */
   getAtomToFocusFromAction(
-    /** @type {string} */ key,
-    /** @type {string} */ arrowType,
+      /** @type {string} */ key,
+      /** @type {string} */ arrowType,
   ) {
     if (arrowType === arrowMotion.firstAtomDown) {
       let row = this.parent;
       let matrixTable = row.parent;
-      if (row.indexInParent+1 < matrixTable.children.length) {
-        return new MathNodeWithCursorPosition(matrixTable.children[row.indexInParent+1].children[this.indexInParent], -1);
+      if (row.indexInParent + 1 < matrixTable.children.length) {
+        return new MathNodeWithCursorPosition(
+            matrixTable.children[row.indexInParent + 1]
+                .children[this.indexInParent],
+            -1);
       }
     }
     if (arrowType === arrowMotion.firstAtomUp) {
       let row = this.parent;
       let matrixTable = row.parent;
       if (row.indexInParent > 0) {
-        return new MathNodeWithCursorPosition(matrixTable.children[row.indexInParent-1].children[this.indexInParent], 1);
+        return new MathNodeWithCursorPosition(
+            matrixTable.children[row.indexInParent - 1]
+                .children[this.indexInParent],
+            1);
       }
     }
     return this.getAtomToFocusFromActionDefault(key, arrowType);
@@ -11009,6 +11038,8 @@ let buttonFactories = {
       new EquationEditorButtonFactory('/', true, '/', {'width': '100%'}, ''),
   'exponent':
       new EquationEditorButtonFactory('^', true, '^', {'width': '100%'}, ''),
+  'times': new EquationEditorButtonFactory(
+      '\\times', true, '\u00D7', {'width': '100%'}, ''),
   'fraction': new EquationEditorButtonFactory(
       '\\frac{\\cursor}{}', false, '(\u2022)/(\u2022)', {'width': '100%'}, ''),
   'leftParenthesis':
@@ -11021,10 +11052,12 @@ let buttonFactories = {
       '\\int', false, '\u222B', {'width': '100%'}, ''),
   'sum': new EquationEditorButtonFactory(
       '\\sum', false, '\u03A3', {'width': '100%'}, ''),
-      'matrix2x2': new EquationEditorButtonFactory(
-        '\\begin{matrix}\\cursor&\\\\&\\end{matrix}', false, '2x2',
-        {'width': '100%'}, ''),
-    'pmatrix2x2': new EquationEditorButtonFactory(
+  'prod': new EquationEditorButtonFactory(
+      '\\prod', false, '\u03A0', {'width': '100%'}, ''),
+  'matrix2x2': new EquationEditorButtonFactory(
+      '\\begin{matrix}\\cursor&\\\\&\\end{matrix}', false, '2x2',
+      {'width': '100%'}, ''),
+  'pmatrix2x2': new EquationEditorButtonFactory(
       '\\begin{pmatrix}\\cursor&\\\\&\\end{pmatrix}', false, '(2x2)',
       {'width': '100%'}, ''),
   'bmatrix2x2': new EquationEditorButtonFactory(
@@ -11042,22 +11075,22 @@ let buttonFactories = {
 
   'bmatrix2x1': new EquationEditorButtonFactory(
       '\\begin{bmatrix}\\cursor &~ \\end{bmatrix}', false, '[2x1]',
-      {'width': '100%'}, ''),      
+      {'width': '100%'}, ''),
   'cases2x1': new EquationEditorButtonFactory(
       '\\begin{cases}\\cursor \\\\~ \\end{cases}', false, '{2x1',
-      { 'width': '100%' }, ''),
+      {'width': '100%'}, ''),
   'cases3x1': new EquationEditorButtonFactory(
       '\\begin{cases}\\cursor\\\\ ~\\\\ ~\\end{cases}', false, '{3x1',
-      { 'width': '100%' }, ''),
+      {'width': '100%'}, ''),
   'cases3x3': new EquationEditorButtonFactory(
       '\\begin{cases}\\cursor&=&\\\\ &=& \\\\ &=&\\end{cases}', false, '{3x3',
-      { 'width': '100%' }, ''),
+      {'width': '100%'}, ''),
   'array3x3': new EquationEditorButtonFactory(
-      '\\begin{array}{rcl}\\cursor&=&\\\\ &=& \\\\ &=&\\end{array}', false, '{3x3',
-      { 'width': '100%' }, ''),
+      '\\begin{array}{rcl}\\cursor&=&\\\\ &=& \\\\ &=&\\end{array}', false,
+      '{3x3', {'width': '100%'}, ''),
   'align3x3': new EquationEditorButtonFactory(
       '\\begin{align}\\cursor&=&\\\\ &=& \\\\ &=&\\end{align}', false, 'al3x1',
-      { 'width': '100%' }, ''),
+      {'width': '100%'}, ''),
   'pi': new EquationEditorButtonFactory(
       '\\pi', false, '\u03C0', {'width': '100%'}, ''),
   'degrees': equationEditorButtonFactoryFromKeySequence(
@@ -11070,6 +11103,12 @@ let buttonFactories = {
       '\\gamma', false, '\u03B3', {'width': '100%'}, ''),
   'underscore':
       new EquationEditorButtonFactory('_', true, '_', {'width': '100%'}, ''),
+  'binom': new EquationEditorButtonFactory(
+      '\\binom{\\cursor}{}', true, 'bin', {'width': '100%'}, ''),
+  'cup': new EquationEditorButtonFactory(
+      '\\cup', true, '\u222A', {'width': '100%'}, ''),
+  'cap': new EquationEditorButtonFactory(
+      '\\cap', true, '\u2229', {'width': '100%'}, ''),
   'limit': new EquationEditorButtonFactory(
       '\\lim_{\\cursor}', false, 'lim', {'width': '100%'}, ''),
 };
@@ -11124,7 +11163,7 @@ class EquationEditorButtonPanel {
         /** @type {HTMLButtonElement!} */ (options.expandButton);
     /** @type {number} */
     this.numberOfColumns = (options.numberOfColumns === undefined) ?
-        6 :
+        8 :
         /** @type {number} */ (options.numberOfColumns);
     /** @type {Array.<EquationEditorButtonFactory!>!}  */
     this.desiredButtons = [];
@@ -11142,6 +11181,7 @@ class EquationEditorButtonPanel {
         buttonFactories['product'],
         buttonFactories['divide'],
         buttonFactories['exponent'],
+        buttonFactories['times'],
         buttonFactories['fraction'],
         buttonFactories['leftParenthesis'],
         buttonFactories['rightParenthesis'],
@@ -11154,6 +11194,8 @@ class EquationEditorButtonPanel {
         buttonFactories['alpha'],
         buttonFactories['beta'],
         buttonFactories['underscore'],
+        buttonFactories['cup'],
+        buttonFactories['cap'],
         buttonFactories['matrix2x2'],
         buttonFactories['pmatrix2x2'],
         buttonFactories['bmatrix3x3'],

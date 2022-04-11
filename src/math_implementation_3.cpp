@@ -4330,7 +4330,7 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
     out << "<hr>Chamber " << i + 1 << ".<br>";
     out << cone.toHTML();
     out << "<br>Vector partition function.<br>";
-    out << "\\(" << quasiPolynomial.toString(&formatQuasipolynomial) << "\\)";
+    out << quasiPolynomial.toHTML(&formatQuasipolynomial);
   }
   return out.str();
 }
@@ -10831,6 +10831,41 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
     ;
   }
   out << "\\end{array}";
+  return out.str();
+}
+
+std::string QuasiPolynomial::toHTML(FormatExpressions* format) {
+  std::stringstream out;
+  if (this->latticeShifts.size == 0) {
+    return "0";
+  }
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    out << "\\(" << this->valueOnEachLatticeShift[i].toString(format) << "\\)";
+    out << " over ";
+    if (!this->latticeShifts[i].isEqualToZero()) {
+      out << this->latticeShifts[i].toString() << " + ";
+    }
+    out << "&Lambda;";
+    if (i != this->latticeShifts.size - 1) {
+      out << "<hr>";
+    }
+  }
+  if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {
+    out << "where " << "\\(" << "\\Lambda = \\langle";
+    Vectors<Rational> roots;
+    roots.assignMatrixRows(this->ambientLatticeReduced.basisRationalForm);
+    for (int i = 0; i < roots.size; i ++) {
+      out << roots[i].toString();
+      if (i != roots.size - 1) {
+        out << ", ";
+      }
+    }
+    out << "\\rangle";
+  } else {
+    out << "\\Lambda =\\mathbb{Z}^{" << this->minimalNumberOfVariables() << "}"
+    ;
+  }
+  out << "\\)";
   return out.str();
 }
 

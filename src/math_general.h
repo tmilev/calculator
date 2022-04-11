@@ -5896,6 +5896,7 @@ public:
   Vectors<Rational> latticeShifts;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string toString(FormatExpressions* format = nullptr);
+  std::string toHTML(FormatExpressions* format = nullptr);
   Rational evaluate(const Vector<Rational>& input);
   void addLatticeShift(
     const Polynomial<Rational>& input,

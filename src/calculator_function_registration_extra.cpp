@@ -339,7 +339,8 @@ void Calculator::initializeFunctionsExtra() {
     "commands to produce a single latex file. The function was "
     "originally designed for the purposes of the freecalc project "
     "as not been tested on any other projects, please use only for freecalc.",
-    "Crawl(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\")"
+    "Crawl(\"freecalc/homework/referenceallproblemsbycourse"
+  "/calculusimasterproblemsheet.tex\")"
     ,
     "CalculatorFunctions::crawlTexFile",
     "Crawl",
@@ -359,14 +360,22 @@ void Calculator::initializeFunctionsExtra() {
     "parallel to the calculator project folder "
     "(i.e, we have folders /vectorpartition and /freecalc next to one another). "
     "The folders are given relative to the /freecalc base.",
-    "BuildFreecalc(\"freecalc/lectures/referencelectures/precalculus.tex\");\n"
-    "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusi.tex\");\n"
-    "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusii.tex\");\n"
-    "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusiiimultivariable.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/precalculus.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusii.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiii.tex\");\n"
+    "BuildFreecalc(\"freecalc/lectures/referencelectures"
+  "/precalculus.tex\");\n"
+    "BuildFreecalc(\"freecalc/lectures/referencelectures"
+  "/calculusi.tex\");\n"
+    "BuildFreecalc(\"freecalc/lectures/referencelectures"
+  "/calculusii.tex\");\n"
+    "BuildFreecalc(\"freecalc/lectures/referencelectures"
+  "/calculusiiimultivariable.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
+  "/precalculus.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
+  "/calculusi.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
+  "/calculusii.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
+  "/calculusiii.tex\");\n"
     ,
     "CalculatorFunctions::buildFreecalc",
     "BuildFreecalc",
@@ -377,7 +386,8 @@ void Calculator::initializeFunctionsExtra() {
     CalculatorFunctionsFreecalc::buildFreecalcSingleSlides,
     "",
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
-    "BuildFreecalcWithSlides(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");"
+    "BuildFreecalcWithSlides"
+  "(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");"
     ,
     "CalculatorFunctions::BuildFreecalcWithSlides",
     "BuildFreecalcWithSlides",
@@ -517,7 +527,29 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Converts an url-encoded string to a normal string. "
     "All % signs are interpreted recursively "
     "as double, triple, ... url encoded strings and decoded accordingly.",
-    "URLKeyValuePairsDecode(\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dbasic%2dsubstitution%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html =weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dquotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Homework%2fPrecalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&\")"
+    "URLKeyValuePairsDecode("
+  "\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html"
+  "=weight%3d3%26deadlines%3d%26&Problems%2f"
+  "Limits%2dbasic%2dsubstitution%2d1.html"
+  "=weight%3d3%26deadlines%3d%26&Problems%2f"
+  "Limits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html"
+  "=weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2d"
+  "tends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html"
+  "=weight%3d1%26deadlines%3d%26&Problems%2f"
+  "Limits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2d"
+  "smaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2f"
+  "Limits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html"
+  " =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2d"
+  "to%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html "
+  "=weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dt"
+  "ends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html "
+  "=weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dt"
+  "ends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic"
+  " % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2f"
+  "Limits%2dx%2dtends%2dto%2dminus%2dinfinity%2d"
+  "quotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html "
+  "=weight%3d1%26deadlines%3d%26&Homework%2f"
+  "Precalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&\")"
     ,
     "CalculatorConversions::urlStringToNormalString",
     "URLKeyValuePairsDecode",
@@ -528,7 +560,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsEncoding::convertIntegerUnsignedToBase58,
     "",
     "Converts an unsigned integer to base58. ",
-    "theInt = ConvertHexToInteger(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
+    "theInt = ConvertHexToInteger"
+  "(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
     "ConvertIntegerToBase58(theInt)",
     "CalculatorFunctions::convertIntegerUnsignedToBase58",
     "ConvertIntegerToBase58",
@@ -552,10 +585,16 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "First argument = key. "
     "Second argument = text. "
     "Reference: NIST SP 800-38A.",
-    "text = ConvertHexToString \"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
-    "key = ConvertHexToString \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
+    "text = ConvertHexToString \""
+    "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c4"
+  "6a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710"
+  "\";\n"
+    "key = ConvertHexToString \""
+  "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
     "ConvertStringToHex AESCBCEncrypt(key, text);\n"
-    "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
+    "\""
+    "f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f2336"
+  "9a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
     ,
     "CalculatorFunctionsCrypto::aes_cbc_256_encrypt",
     "AESCBCEncrypt",
@@ -566,12 +605,19 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsCrypto::aes_cbc_256_decrypt,
     "",
     "AES decryption. First argument key, second argument - text. ",
-    "text = \"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
-    "key = \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
-    "cipherText = ConvertStringToHex AESCBCEncrypt(ConvertHexToString key, ConvertHexToString text);\n"
+    "text = \""
+    "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e513"
+    "0c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
+    "key = \""
+    "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
+    "cipherText = ConvertStringToHex "
+    "AESCBCEncrypt(ConvertHexToString key, ConvertHexToString text);\n"
     "cipherText;\n"
-    "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
-    "ConvertStringToHex AESCBCDecrypt(ConvertHexToString key, ConvertHexToString cipherText);\n"
+    "\""
+    "f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23"
+    "369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
+    "ConvertStringToHex AESCBCDecrypt(ConvertHexToString key, "
+  "ConvertHexToString cipherText);\n"
     "text",
     "CalculatorFunctionsCrypto::aes_cbc_256_decrypt",
     "AESCBCDecrypt",
@@ -584,7 +630,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Appends a sha 256 checksum to a string. "
     "More precisely, appends the first 4 bytes "
     "of sha256 of the string to the string. ",
-    "A= \"80aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751facf35411509701\";\n"
+    "A= \"80aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751f"
+  "acf35411509701\";\n"
     "B= ConvertHexToString(A);\n"
     "C= AppendDoubleSha256Check(B);\n"
     "D= ConvertStringToHex(C)",
@@ -597,7 +644,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsEncoding::convertHexToBase58,
     "",
     "Converts hex to base58. ",
-    "ConvertHexToBase58(\"03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");"
+    "ConvertHexToBase58(\""
+    "03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");"
     ,
     "CalculatorFunctions::convertHexToBase58",
     "ConvertHexToBase58",
@@ -610,10 +658,12 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Converts characters to bit stream and the bitstream to base64. "
     "The character to bit stream conversion is not fixed at the moment "
     "and may be system/compiler dependent. "
-    "I believe that the character to bit stream conversion should be standard for "
+    "I believe that the character to bit stream "
+  "conversion should be standard for "
     "the standard letters in the alphabet. "
     "Fancy UTF8 will probably be not read correctly from the CGI input, "
-    "and furthermore will not be converted in a standard fashion to bit stream. "
+    "and furthermore will not be converted in a "
+  "standard fashion to bit stream. "
     "The examples below are taken from Wikipedia. ",
     "CharToBase64(\"pleasure.\");\n"
     "CharToBase64(\"leasure.\");\n"
@@ -630,7 +680,9 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts base64 to string",
     "ConvertBase64ToString("
-    "\"k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\""
+    "\""
+    "k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4"
+    "XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\""
     ");",
     "CalculatorFunctions::convertBase64ToString",
     "ConvertBase64ToString",
@@ -652,7 +704,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsCrypto::testLoadPEMCertificates,
     "",
     "Tests the pem parsing functions. ",
-    "TestLoadPEMCertificate(ConvertBase64ToString(LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n"
+    "TestLoadPEMCertificate(ConvertBase64ToString("
+  "LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n"
     ,
     "CalculatorFunctionsCrypto::testLoadPEMCertificates",
     "TestLoadPEMCertificate",
@@ -663,7 +716,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsCrypto::testLoadPEMPrivateKey,
     "",
     "Tests the pem private key functions. ",
-    "TestLoadPEMPrivateKey(ConvertBase64ToString(LoadFileIntoString(\"test/private_key.base64\")));\n"
+    "TestLoadPEMPrivateKey(ConvertBase64ToString("
+  "LoadFileIntoString(\"test/private_key.base64\")));\n"
     ,
     "CalculatorFunctionsCrypto::testLoadPEMPrivateKey",
     "TestLoadPEMPrivateKey",
@@ -706,8 +760,10 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Tests decoding of abstract syntax one. ",
     "%HideLHS\n"
-    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n"
-    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/private_key.base64\")));\n"
+    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("
+  "\"test/certificate_self_signed.base64\")));\n"
+    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("
+  "\"test/private_key.base64\")));\n"
     ,
     "CalculatorFunctions::testASN1Decode",
     "TestASN1Decode",
@@ -761,11 +817,26 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Tries to verify a Json Web Token with "
     "respect to a given rsa modulus and exponent. "
-    "The reference JWT token was taken from: https://tools.ietf.org/html/rfc7515#page-38, "
+    "The reference JWT token was taken from: "
+  "https://tools.ietf.org/html/rfc7515#page-38, "
     "Appendix A.2.",
     "%HideLHS "
-    "token =\"eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XOiZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw\";\n"
-    "modulus = \"ofgWCuLjybRlzo0tZWJjNiuSfb4p4fAkd_wWJcyQoTbji9k0l8W26mPddxHmfHQp-Vaw-4qPCJrcS2mJPMEzP1Pt0Bm4d4QlL-yRT-SFd2lZS-pCgNMsD1W_YpRPEwOWvG6b32690r2jZ47soMZo9wGzjb_7OMg0LOL-bSf63kpaSHSXndS5z5rexMdbBYUsLA9e-KXBdQOS-UTo7WTBEMa2R2CapHg665xsmtdVMTBQY4uDZlxvb3qCo5ZwKh9kG4LT6_I5IhlJH7aGhyxXFvUK-DWNmoudF8NAco9_h9iaGNj8q2ethFkMLs91kzk2PAcDTW9gb54h4FRWyuXpoQ\";\n"
+    "token =\""
+    "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4"
+    "MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlf"
+    "Q.cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XO"
+    "iZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t"
+    "1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLI"
+    "ARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzD"
+    "wusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUT"
+    "I8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw\";\n"
+    "modulus = \"ofgWCuLjybRlzo0tZWJjNiuSfb4p4fAkd_wWJcyQoTbji"
+    "9k0l8W26mPddxHmfHQp-Vaw-4qPCJrcS2mJPMEzP1Pt0Bm4d4QlL-yRT-"
+    "SFd2lZS-pCgNMsD1W_YpRPEwOWvG6b32690r2jZ47soMZo9wGzjb_7OMg"
+    "0LOL-bSf63kpaSHSXndS5z5rexMdbBYUsLA9e-KXBdQOS-UTo7WTBEMa2"
+    "R2CapHg665xsmtdVMTBQY4uDZlxvb3qCo5ZwKh9kG4LT6_I5IhlJH7aGh"
+    "yxXFvUK-DWNmoudF8NAco9_h9iaGNj8q2ethFkMLs91kzk2PAcDTW9gb5"
+    "4h4FRWyuXpoQ\";\n"
     "exponent =\"AQAB\";\n"
     "JWTVerifyRSA256(token,modulus,exponent);",
     "CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256",
@@ -847,9 +918,11 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsCrypto::ripemd160OfString,
     "",
     "Ripemd160 hash function. See wikipedia page. ",
-    "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy dog\");\n"
+    "ConvertStringToHex Ripemd160("
+  "\"The quick brown fox jumps over the lazy dog\");\n"
     "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
-    "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy cog\");\n"
+    "ConvertStringToHex Ripemd160("
+  "\"The quick brown fox jumps over the lazy cog\");\n"
     "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
     "CalculatorFunctionsCrypto::ripemd160OfString",
     "Ripemd160",
@@ -867,9 +940,12 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "\"3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532\";\n"
     "ConvertStringToHex ShaThree256(\"testing\");\n"
     "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
-    "ConvertStringToHex ShaThree256\"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq\";\n"
+    "ConvertStringToHex ShaThree256\""
+    "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq\";\n"
     "\"41c0dba2a9d6240849100376a8235e2c82e1b9998a999e21db32dd97496d3376\";\n"
-    "ConvertStringToHex ShaThree256\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\";\n"
+    "ConvertStringToHex ShaThree256\""
+    "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmno"
+    "pjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\";\n"
     "\"916f6061fe879741ca6469b43971dfdb28b1a32dc36cb3254e812be27aad1d18\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
@@ -909,7 +985,9 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\n"
     "ConvertStringToHex Sha256(\"abc\");\n"
     "\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\";\n"
-    "ConvertStringToHex Sha256(\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\");\n"
+    "ConvertStringToHex Sha256(\"abcdefghbcdefghicdefghijdefghijkefghijklfgh"
+    "ijklmghijklmnhijklmnoijklmnopjklmnop"
+    "qklmnopqrlmnopqrsmnopqrstnopqrstu\");\n"
     "\"cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1\";\n",
     "CalculatorFunctionsCrypto::sha256OfString",
     "Sha256",
@@ -924,11 +1002,16 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Reference: Wikipedia. ",
     "%HideLHS\n"
     "ConvertStringToHex Sha512(\"\");\n"
-    "\"cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e\";\n"
+    "\"cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d"
+    "13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e\";\n"
     "ConvertStringToHex Sha512(\"abc\");\n"
-    "\"ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f\";\n"
-    "ConvertStringToHex Sha512(\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\");\n"
-    "\"8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909\";\n"
+    "\"ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a21929"
+    "92a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f\";\n"
+    "ConvertStringToHex Sha512(\"abcdefghbcdefghicdefghijdefghijkefghijklfgh"
+    "ijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstn"
+    "opqrstu\");\n"
+    "\"8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d2"
+    "89e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909\";\n"
     ,
     "CalculatorFunctionsCrypto::sha512",
     "Sha512",

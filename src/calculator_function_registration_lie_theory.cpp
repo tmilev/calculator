@@ -817,7 +817,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "MapSemisimpleLieAlgebraInWeylAlgebra.",
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}"
     "(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
-    "CalculatorLieTheory::writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending"
+    "CalculatorLieTheory::"
+  "writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending"
     ,
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
     standardOptions
@@ -864,7 +865,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::printRootSubalgebras,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
-    "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6)."
+    "The argument gives the type of the Lie algebra "
+  "in the form Type_Rank (e.g. E_6)."
     ,
     "PrintRootSubalgebras(E_6)",
     "CalculatorLieTheory::printRootSubalgebras",
@@ -887,7 +889,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::printSlTwos,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
-    "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6)."
+    "The argument gives the type of the Lie algebra "
+  "in the form Type_Rank (e.g. E_6)."
     ,
     "PrintSlTwoSubalgebras(g_2)",
     "CalculatorLieTheory::printSltwos",
@@ -1060,7 +1063,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebrasRecompute",
     CalculatorLieTheory::printSemisimpleSubalgebrasRecompute,
     "",
-    "<b>This function is being developed and is not implemented fully yet.</b> "
+    "<b>This function is being developed and is not implemented fully yet.</b>"
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",
     "CalculatorLieTheory::printSemisimpleSubalgebrasRecompute",
@@ -1071,7 +1074,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "PrintSemisimpleSubalgebrasNoCentralizers",
     CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers,
     "",
-    "<b>This function is being developed and is not implemented fully yet.</b> "
+    "<b>This function is being developed and is not implemented fully yet.</b>"
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
     "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
     "CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers",
@@ -1227,7 +1230,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "TestSpechtModules",
     CalculatorFunctionsWeylGroup::testSpechtModules,
     "",
-    "Tests all Specht modules of S_n, where n is the only argument taken by the function."
+    "Tests all Specht modules of S_n, where n is the "
+  "only argument taken by the function."
     ,
     "TestSpechtModules(4); ",
     "CalculatorFunctionsWeylGroup::testSpechtModules",
@@ -1273,7 +1277,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupClassicalSignMultiplicities{}(a_2);\n"
     "WeylGroupClassicalSignMultiplicities{}(a_3);\n"
     "WeylGroupClassicalSignMultiplicities{}(a_4);\n",
-    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers"
+    "CalculatorFunctionsWeylGroup::"
+  "signSignatureRootSubsystemsFromKostkaNumbers"
     ,
     "WeylGroupClassicalSignMultiplicities",
     standardOptions
@@ -1308,7 +1313,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes conjugacy classes, identifying classes that "
     "are conjugate using outer automorphisms. ",
     "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);",
-    "CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements"
+    "CalculatorFunctionsWeylGroup::"
+  "weylGroupOuterConjugacyClassesFromAllElements"
     ,
     "WeylGroupOuterConjugacyClassesFromAllElements",
     adminNoTestExperimental
@@ -1720,7 +1726,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
     "(3/4 v)\\otimes v-3/4 (v\\otimes v)",
     "CalculatorFunctionsBinaryOps::addElementTensorToElementTensor",
-    "AddElementTensorGeneralizedVermaModuleToElementTensorGeneralizedVermaModule"
+    "AddElementTensorGeneralizedVermaModule"
+  "ToElementTensorGeneralizedVermaModule"
     ,
     standardOptions
   );
@@ -1732,7 +1739,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Adds two weights. ",
     "\\lambda = Polynomial{}\\lambda; "
     "\\varepsilon_{{a}} = MakeWeight{}(B_3, a, epsilon); "
-    "(1 / 2 + \\lambda) \\varepsilon_1 + 1 / 2 \\varepsilon_2+ 1 / 2 \\varepsilon_3  "
+    "(1 / 2 + \\lambda) \\varepsilon_1 + 1 / 2 "
+  "\\varepsilon_2+ 1 / 2 \\varepsilon_3  "
     ,
     "CalculatorFunctionsBinaryOps::addWeightToWeight",
     "AddWeightLieAlgebraPolynomialToWeightLieAlgebraPolynomial",
@@ -1749,7 +1757,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "h_{{{i}}} = CartanGenerator{}(F_{1}, {{i}});\n"
     "[g_{22}+g_{20}+g_{14},g_{- 14}+g_{-20}+g_{-22}]",
     "CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny",
-    "AddElementUniversalEnvelopingRationalFunctionCoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients"
+    "AddElementUniversalEnvelopingRationalFunction"
+  "CoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients"
     ,
     standardOptions
   );
@@ -1921,7 +1930,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
     "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
-    "MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule"
+    "MultiplyElementUniversalEnvelopingRational"
+  "FunctionByElementTensorGeneralizedVermaModule"
     ,
     standardOptions
   );
@@ -1979,7 +1989,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "but the element of the UE is "
     "a single generator with coefficient 1, "
     "the exponent will be carried out formally. ",
-    "g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i) ;"
+    "g_{{i}}= ChevalleyGenerator{}(G_2, i); "
+  "h_{{i}}= CartanGenerator{}(G_2, i) ;"
     "\n (g_1+g_2)^2+ g_1^{1/2}",
     "CalculatorFunctionsBinaryOps::"
     "powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",

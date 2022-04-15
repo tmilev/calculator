@@ -1347,7 +1347,30 @@ bool CodeFormatter::Element::computeIndentationIfClause() {
 
 bool CodeFormatter::Element::computeIndentationCommand() {
   STACK_TRACE("CodeFormatter::Element::computeIndentationCommand");
-  this->computeIndentationBasic(0);
+  for (int i = 0; i < this->children.size; i ++) {
+    this->children[i].indentationLevel = this->indentationLevel;
+    this->children[i].computeIndentation();
+  }
+  if (this->children.size == 0) {
+  return true;
+  }
+  CodeFormatter::Element& last =*this->children.lastObject();
+    if (last.content != ";"){
+    return true;
+    }
+    if (last.whiteSpaceBefore != this->indentationLevel) {
+      return  true;
+    }
+    // We have a semicolon that is standing on a new line alone.
+    int oldMaximumLineLength =this->owner->maximumDesiredLineLength;
+    this->owner->maximumDesiredLineLength--;
+      for (int i = 0; i < this->children.size-1; i ++) {
+        this->children[i].indentationLevel = this->indentationLevel;
+        this->children[i].computeIndentation();
+      }
+      this->owner->maximumDesiredLineLength = oldMaximumLineLength;
+      last.whiteSpaceBefore = 0;
+last.computeIndentation();
   return true;
 }
 

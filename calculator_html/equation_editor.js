@@ -11093,7 +11093,7 @@ let buttonFactories = {
       {'width': '100%'}, ''),
   'array3x3': new EquationEditorButtonFactory(
       '\\begin{array}{rcl}\\cursor&=&\\\\ &=& \\\\ &=&\\end{array}', false,
-      '{3x3', {'width': '100%'}, ''),
+      '3x3', {'width': '100%'}, ''),
   'align3x3': new EquationEditorButtonFactory(
       '\\begin{align}\\cursor&=&\\\\ &=& \\\\ &=&\\end{align}', false, 'al3x1',
       {'width': '100%'}, ''),

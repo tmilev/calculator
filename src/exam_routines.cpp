@@ -727,7 +727,8 @@ std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(
   << "Problem: "
   << fileName
   << "\n" // <<
-  // "\n</span>";
+  // "\n</span>"
+  ;
   return out.str();
 }
 

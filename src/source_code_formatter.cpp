@@ -1372,7 +1372,13 @@ bool CodeFormatter::Element::computeIndentationCommand() {
   if (this->children.size > 1) {
     CodeFormatter::Element& secondToLast = *last.previousAtom();
     if (secondToLast.columnFinal < this->owner->maximumDesiredLineLength) {
-      secondToLast.newLinesAfter = 0;
+      if (
+        secondToLast.type != CodeFormatter::Element::CommentCollection &&
+        secondToLast.type != CodeFormatter::Element::Comment &&
+        secondToLast.type != CodeFormatter::Element::CommentMultiline
+      ) {
+        secondToLast.newLinesAfter = 0;
+      }
     }
   }
   last.whiteSpaceBefore = 0;

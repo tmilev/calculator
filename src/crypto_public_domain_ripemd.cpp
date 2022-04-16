@@ -450,8 +450,9 @@ void RIPEMD160Internal::ripemd160Process(
   unsigned long bytes_needed;
   /* We never leave a full buffer */
   if (self->bufpos >= 64) {
-    global.fatal << "Internal error in RIPEMD160 computation. " << global.fatal
-    ;
+    global.fatal
+    << "Internal error in RIPEMD160 computation. "
+    << global.fatal;
   }
   while (length > 0) {
     /* Figure out how many bytes we need to fill the internal buffer. */

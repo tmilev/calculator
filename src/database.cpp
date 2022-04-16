@@ -466,8 +466,9 @@ bool Database::initializeServer() {
 
 void GlobalVariables::initialize() {
   this->logs.worker.fileName =
-  "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/logCommon.html"
-  ;
+  "/LogFiles/logs/" +
+  GlobalVariables::getDateForLogFiles() +
+  "/logCommon.html";
   this->logs.server.fileName =
   "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/global.html";
   this->logs.serverMonitor.fileName =
@@ -1562,8 +1563,8 @@ bool UserCalculator::computeAndStoreActivationStats(
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "This shouldn't happen: both the username and the user id are empty. "
-      ;
+      <<
+      "This shouldn't happen: both the username and the user id are empty. ";
     }
     return false;
   }
@@ -1817,8 +1818,9 @@ bool UserCalculator::getActivationAddress(
   }
   this->actualActivationToken = this->getSelectedRowEntry("activationToken");
   if (this->actualActivationToken == "") {
-    comments << "Failed to fetch activation token for user: " << this->username
-    ;
+    comments
+    << "Failed to fetch activation token for user: "
+    << this->username;
     return false;
   }
   if (this->actualActivationToken == "activated") {
@@ -2119,7 +2121,8 @@ bool Database::User::loginNoDatabaseSupport(
   if (global.flagDatabaseCompiled) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
-      << "Database support is available, yet you requested no-database login. "
+      <<
+      "Database support is available, yet you requested no-database login. "
       <<
       "The command 'make -j10 noMongo=1' compiles the calculator without database support."
       ;
@@ -2227,8 +2230,9 @@ bool Database::User::loginViaDatabase(
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = UserCalculator::Roles::administator;
       if (!userWrapper.storeToDatabase(true, commentsOnFailure)) {
-        global << Logger::red << "Failed to store default's pass to database. "
-        ;
+        global
+        << Logger::red
+        << "Failed to store default's pass to database. ";
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Failed to store default's pass to database. ";
           global << commentsOnFailure->str();

@@ -1353,8 +1353,8 @@ void CharacterFunctions::exportCharTable(
   sizes.listObjects.setSize(G.conjugacyClassCount());
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
     sizes.listObjects[i].elementType = JSData::token::tokenLargeInteger;
-    sizes.listObjects[i].integerValue.getElement() = G.conjugacyClasses[i].size
-    ;
+    sizes.listObjects[i].integerValue.getElement() =
+    G.conjugacyClasses[i].size;
   }
   characters.elementType = JSData::token::tokenArray;
   characters.listObjects.setSize(G.characterTable.size);

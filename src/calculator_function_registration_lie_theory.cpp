@@ -818,8 +818,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}"
     "(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
     "CalculatorLieTheory::"
-  "writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending"
-    ,
+    "writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending",
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
     standardOptions
   );
@@ -866,8 +865,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra "
-  "in the form Type_Rank (e.g. E_6)."
-    ,
+    "in the form Type_Rank (e.g. E_6).",
     "PrintRootSubalgebras(E_6)",
     "CalculatorLieTheory::printRootSubalgebras",
     "PrintRootSubalgebras",
@@ -890,8 +888,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra "
-  "in the form Type_Rank (e.g. E_6)."
-    ,
+    "in the form Type_Rank (e.g. E_6).",
     "PrintSlTwoSubalgebras(g_2)",
     "CalculatorLieTheory::printSltwos",
     "PrintSlTwoSubalgebras",
@@ -1231,8 +1228,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorFunctionsWeylGroup::testSpechtModules,
     "",
     "Tests all Specht modules of S_n, where n is the "
-  "only argument taken by the function."
-    ,
+    "only argument taken by the function.",
     "TestSpechtModules(4); ",
     "CalculatorFunctionsWeylGroup::testSpechtModules",
     "TestSpechtModules",
@@ -1278,8 +1274,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "WeylGroupClassicalSignMultiplicities{}(a_3);\n"
     "WeylGroupClassicalSignMultiplicities{}(a_4);\n",
     "CalculatorFunctionsWeylGroup::"
-  "signSignatureRootSubsystemsFromKostkaNumbers"
-    ,
+    "signSignatureRootSubsystemsFromKostkaNumbers",
     "WeylGroupClassicalSignMultiplicities",
     standardOptions
   );
@@ -1314,8 +1309,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "are conjugate using outer automorphisms. ",
     "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);",
     "CalculatorFunctionsWeylGroup::"
-  "weylGroupOuterConjugacyClassesFromAllElements"
-    ,
+    "weylGroupOuterConjugacyClassesFromAllElements",
     "WeylGroupOuterConjugacyClassesFromAllElements",
     adminNoTestExperimental
   );
@@ -1727,8 +1721,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(3/4 v)\\otimes v-3/4 (v\\otimes v)",
     "CalculatorFunctionsBinaryOps::addElementTensorToElementTensor",
     "AddElementTensorGeneralizedVermaModule"
-  "ToElementTensorGeneralizedVermaModule"
-    ,
+    "ToElementTensorGeneralizedVermaModule",
     standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -1740,8 +1733,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "\\lambda = Polynomial{}\\lambda; "
     "\\varepsilon_{{a}} = MakeWeight{}(B_3, a, epsilon); "
     "(1 / 2 + \\lambda) \\varepsilon_1 + 1 / 2 "
-  "\\varepsilon_2+ 1 / 2 \\varepsilon_3  "
-    ,
+    "\\varepsilon_2+ 1 / 2 \\varepsilon_3  ",
     "CalculatorFunctionsBinaryOps::addWeightToWeight",
     "AddWeightLieAlgebraPolynomialToWeightLieAlgebraPolynomial",
     standardOptions
@@ -1758,8 +1750,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "[g_{22}+g_{20}+g_{14},g_{- 14}+g_{-20}+g_{-22}]",
     "CalculatorFunctionsBinaryOps::addUniversalEnvelopingAlgebraElementToAny",
     "AddElementUniversalEnvelopingRationalFunction"
-  "CoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients"
-    ,
+    "CoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients",
     standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -1931,8 +1922,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
     "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
     "MultiplyElementUniversalEnvelopingRational"
-  "FunctionByElementTensorGeneralizedVermaModule"
-    ,
+    "FunctionByElementTensorGeneralizedVermaModule",
     standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -1990,7 +1980,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "a single generator with coefficient 1, "
     "the exponent will be carried out formally. ",
     "g_{{i}}= ChevalleyGenerator{}(G_2, i); "
-  "h_{{i}}= CartanGenerator{}(G_2, i) ;"
+    "h_{{i}}= CartanGenerator{}(G_2, i) ;"
     "\n (g_1+g_2)^2+ g_1^{1/2}",
     "CalculatorFunctionsBinaryOps::"
     "powerElementUniversalEnvelopingByRationalOrPolynomialOrRationalFraction",

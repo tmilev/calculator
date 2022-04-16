@@ -1486,8 +1486,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
     int i = 0; i < pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs; i ++
   ) {
     for (
-      int j = i + 1; j < pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs
-      ; j ++
+      int j = i + 1; j < pseudoSignSig.size &&
+      !hasRepeatingPseudoParabolicSigs; j ++
     ) {
       if (pseudoSignSig[i] == pseudoSignSig[j]) {
         hasRepeatingPseudoParabolicSigs = true;
@@ -1780,8 +1780,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   << "\\caption{\\label{tableConjugacyClassTable"
   << HtmlRoutines::cleanUpForLaTeXLabelUse(this->dynkinType.toString())
   << "}}\\\\ ";
-  out << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n"
-  ;
+  out
+  << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n";
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     out
     << "$"
@@ -2711,8 +2711,9 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(
       currentRootSA.positiveRootsReductiveSubalgebra, *algebra.content
     );
     generator.generateMyOrbit(orbit);
-    out << "<hr>Root subsystem type " << currentRootSA.dynkinDiagram.toString()
-    ;
+    out
+    << "<hr>Root subsystem type "
+    << currentRootSA.dynkinDiagram.toString();
     out << ". Orbit has " << orbit.size << " element(s), here they are: ";
     for (int j = 0; j < orbit.size; j ++) {
       out << "<br>" << orbit[j].toString();
@@ -3233,8 +3234,8 @@ bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   input.getValueNonConst<
     GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
   >();
-  WeylGroupData* weylData = inputRepresentation.ownerGroup->generators[0].owner
-  ;
+  WeylGroupData* weylData =
+  inputRepresentation.ownerGroup->generators[0].owner;
   if (
     inputRepresentation.ownerGroup->irreducibleRepresentations.size <
     inputRepresentation.ownerGroup->conjugacyClassCount() &&

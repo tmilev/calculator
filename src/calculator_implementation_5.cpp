@@ -214,8 +214,9 @@ void MeshTriangles::subdivide(int triangleIndex) {
   STACK_TRACE("MeshTriangles::subdivide");
   List<Vector<double> > currentTriangle = this->triangles[triangleIndex];
   if (currentTriangle.size != 3) {
-    global.fatal << "Triangle in mesh with less than 3 sides! " << global.fatal
-    ;
+    global.fatal
+    << "Triangle in mesh with less than 3 sides! "
+    << global.fatal;
   }
   List<Vector<double> > insideTriange;
   insideTriange.setSize(3);

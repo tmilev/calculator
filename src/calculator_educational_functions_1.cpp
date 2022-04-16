@@ -545,8 +545,8 @@ JSData CompareExpressions::toJSON() const {
     this->errorEvaluation;
   }
   if (this->errorInAnswer != "") {
-    result[WebAPI::result::ComparisonData::errorInAnswer] = this->errorInAnswer
-    ;
+    result[WebAPI::result::ComparisonData::errorInAnswer] =
+    this->errorInAnswer;
   }
   result[WebAPI::result::ComparisonData::areEqual] = this->flagAreEqual;
   result[WebAPI::result::ComparisonData::areEqualAsAnswers] =

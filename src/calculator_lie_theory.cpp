@@ -1220,8 +1220,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
       int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); k
       ++
     ) {
-      CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempChar
-      ;
+      CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
+      tempChar;
       tempChar.addMonomial(
         g2inB3Data.smallCharacterFiniteDimensionalPart[k],
         g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[k]
@@ -2602,8 +2602,8 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   << g2B3Data.inducing.toString();
   std::string report;
   CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempChar;
-  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > startingChar
-  ;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
+  startingChar;
   Vector<RationalFraction<Rational> > simpleWeight;
   simpleWeight =
   g2B3Data.homomorphism.coDomainAlgebra().weylGroup.
@@ -3867,8 +3867,8 @@ void DynkinSimpleType::plotDn(
   lastAnCenter[0] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
   lastAnCenter[1] += sqrt2DividedBy2 * DynkinSimpleType::radiusOfRootCircle;
   output.drawSegment(lastAnCenter, topCenter);
-  lastAnCenter[1] -= sqrt2DividedBy2 * 2 * DynkinSimpleType::radiusOfRootCircle
-  ;
+  lastAnCenter[1] -=
+  sqrt2DividedBy2 * 2 * DynkinSimpleType::radiusOfRootCircle;
   output.drawSegment(lastAnCenter, bottomCenter);
   std::stringstream secondToLastRoot;
   secondToLastRoot << rank - 1;
@@ -5295,8 +5295,9 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
 bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras")
-  ;
+  STACK_TRACE(
+    "CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras"
+  );
   if (!input.isOfType<SemisimpleSubalgebras>()) {
     return
     calculator

@@ -561,8 +561,8 @@ public:
   ) const;
   Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup inverse() const;
-  bool hasDifferentConjugacyInvariantsFrom(const ElementWeylGroup& right) const
-  ;
+  bool hasDifferentConjugacyInvariantsFrom(const ElementWeylGroup& right)
+  const;
   void getCharacteristicPolynomialStandardRepresentation(
     Polynomial<Rational>& output
   ) const;
@@ -1836,8 +1836,8 @@ public:
   );
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   decomposeThomasVersion();
-  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> reduced() const
-  ;
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> reduced()
+  const;
   Coefficient getNumberOfComponents();
   void operator*=(
     const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
@@ -2588,8 +2588,8 @@ public:
   );
   void computeRootSubsystem();
   template <class Coefficient>
-  void actByNonSimpleElement(int index, Vector<Coefficient>& inputOutput) const
-  ;
+  void actByNonSimpleElement(int index, Vector<Coefficient>& inputOutput)
+  const;
   template <class Coefficient>
   void actByNonSimpleElement(
     int index,

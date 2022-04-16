@@ -288,8 +288,8 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
     &this->serverInfo
   );
   if (status != 0) {
-    this->lastTransactionErrors = "Could not find address: getaddrinfo error: "
-    ;
+    this->lastTransactionErrors =
+    "Could not find address: getaddrinfo error: ";
     this->lastTransactionErrors += gai_strerror(status);
     this->freeAddressInfo();
     return;
@@ -1206,8 +1206,9 @@ bool WebClient::verifyRecaptcha(
       << "</b>\n<br>\n";
     }
     if (commentsGeneralSensitive != nullptr) {
-      *commentsGeneralSensitive << "The response from google was: " << response
-      ;
+      *commentsGeneralSensitive
+      << "The response from google was: "
+      << response;
     }
   }
   return true;

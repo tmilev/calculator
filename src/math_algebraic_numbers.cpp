@@ -876,8 +876,8 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   }
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
-  minimialPolynomial /= minimialPolynomial.getLeadingCoefficient(monomialOrder)
-  ;
+  minimialPolynomial /=
+  minimialPolynomial.getLeadingCoefficient(monomialOrder);
   minimialPolynomial.getCoefficientInFrontOfLinearTermVariableIndex(
     0, linearTermCoefficientFDividedByTwo
   );

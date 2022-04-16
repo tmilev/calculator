@@ -1530,8 +1530,9 @@ public:
     int lastIndex = this->size - 1;
     Object* oTop = &this->objects[lastIndex];
     int hashIndexTop = this->getHash(*oTop);
-    this->hashBuckets[hashIndexTop].removeFirstOccurenceSwapWithLast(lastIndex)
-    ;
+    this->hashBuckets[hashIndexTop].removeFirstOccurenceSwapWithLast(
+      lastIndex
+    );
     this->hashBuckets[hashIndexTop].addOnTop(index);
     this->TemplateList::removeIndexSwapWithLast(index);
   }
@@ -1796,8 +1797,9 @@ public:
   }
   int getIndexNoFail(const Object& o) const {
     return
-    this->::HashTemplate<Object, List<Object>, hashFunction>::getIndexNoFail(o)
-    ;
+    this->::HashTemplate<Object, List<Object>, hashFunction>::getIndexNoFail(
+      o
+    );
   }
   int addNoRepetitionOrReturnIndexFirst(const Object& o) {
     return

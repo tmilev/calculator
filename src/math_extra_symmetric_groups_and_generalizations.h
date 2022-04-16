@@ -30,8 +30,9 @@ public:
   );
   bool checkConsistency() const {
     if (this->flagDeallocated) {
-      global.fatal << "Use of SparseSubspaceBasis after free. " << global.fatal
-      ;
+      global.fatal
+      << "Use of SparseSubspaceBasis after free. "
+      << global.fatal;
     }
     for (int i = 0; i < this->involvedMonomials.size; i ++) {
       this->involvedMonomials[i].checkConsistency();
@@ -143,8 +144,9 @@ public:
   void fillTableauOrdered(Tableau& out) const;
   void getAllStandardTableaux(List<Tableau>& out) const;
   template <typename scalar>
-  void spechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out) const
-  ;
+  void spechtModuleMatricesOfTranspositions1j(
+    List<Matrix<scalar> >& out
+  ) const;
   template <typename scalar>
   void spechtModuleMatricesOfTranspositionsjjplusone(
     List<Matrix<scalar> >& out
@@ -1614,8 +1616,8 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(
       int j = 0; j < this->irreducibleRepresentations[i].character.data.size; j
       ++
     ) {
-      values[i][j] = irreducibleRepresentations[i].character.data[j].toString()
-      ;
+      values[i][j] =
+      irreducibleRepresentations[i].character.data[j].toString();
       int vijcols = static_cast<int>(values[i][j].length());
       if (vijcols > columnsPerElement) {
         columnsPerElement = vijcols;

@@ -2260,8 +2260,8 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::toString(
   }
   int indexCharacterAtLastLineBreak = 0;
   for (int i = 0; i < this->size; i ++) {
-    MonomialUniversalEnvelopingOrdered<Coefficient>& current = this->objects[i]
-    ;
+    MonomialUniversalEnvelopingOrdered<Coefficient>& current =
+    this->objects[i];
     tempS = current.toString(PolyFormatLocal);
     if (i != 0) {
       if (tempS.size() > 0) {

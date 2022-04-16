@@ -1249,8 +1249,9 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   }
   if (!system.flagSystemProvenToHaveNoSolution) {
     if (system.flagSystemSolvedOverBaseField) {
-      out << "<br>One solution follows. " << system.toStringSerreLikeSolution()
-      ;
+      out
+      << "<br>One solution follows. "
+      << system.toStringSerreLikeSolution();
     } else {
       out
       << "However, I was unable to find such a solution: "
@@ -1578,8 +1579,9 @@ preparePartialFractionExpressionSummands() {
 }
 
 bool IntegralRationalFunctionComputation::integrateRationalFunction() {
-  STACK_TRACE("IntegralRationalFunctionComputation::integrateRationalFunction")
-  ;
+  STACK_TRACE(
+    "IntegralRationalFunctionComputation::integrateRationalFunction"
+  );
   this->checkConsistency();
   if (!this->computePartialFractionDecomposition()) {
     printoutIntegration
@@ -1931,8 +1933,9 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
 }
 
 void IntegralRationalFunctionComputation::prepareDenominatorFactors() {
-  STACK_TRACE("IntegralRationalFunctionComputation::prepareDenominatorFactors")
-  ;
+  STACK_TRACE(
+    "IntegralRationalFunctionComputation::prepareDenominatorFactors"
+  );
   this->printoutPartialFractionsHtml
   << "The rational function is: "
   << HtmlRoutines::getMathNoDisplay(
@@ -6316,8 +6319,9 @@ bool CalculatorFunctions::outerCommuteConstants(
 bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ")
-  ;
+  STACK_TRACE(
+    "CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ"
+  );
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -8390,8 +8394,9 @@ bool CalculatorFunctions::functionEvaluateToDouble(
 bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra")
-  ;
+  STACK_TRACE(
+    "CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra"
+  );
   if (input.size() != 3) {
     return
     output.assignError(
@@ -9976,8 +9981,9 @@ public:
     return out.str();
   }
   void computeCurrentEContributionToNextLayer() {
-    STACK_TRACE("ExpressionTreeDrawer::computeCurrentEContributionToNextLayer")
-    ;
+    STACK_TRACE(
+      "ExpressionTreeDrawer::computeCurrentEContributionToNextLayer"
+    );
     this->computeCurrentChildrenTruncated();
     this->nextLayer.addListOnTop(this->currentEchildrenTruncated);
     List<int> emptyArrows;
@@ -10018,8 +10024,9 @@ public:
     std::stringstream out;
     out << "<br>Index in current layer: " << this->indexInCurrentLayer;
     out << "<br>Index in displayed strings: " << this->indexCurrentChild;
-    out << "<br>Current layer: " << this->currentLayer.toStringCommaDelimited()
-    ;
+    out
+    << "<br>Current layer: "
+    << this->currentLayer.toStringCommaDelimited();
     out << "<br>Next layer: " << this->nextLayer.toStringCommaDelimited();
     out
     << "<br>Displayed strings: "

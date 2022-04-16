@@ -98,8 +98,9 @@ const {
     }
     const DynkinSimpleType& currentSimpleType = dynkinType[indexType];
     for (
-      int indexIsotypic = 0; indexIsotypic < dynkinType.coefficients[indexType]
-      ; indexIsotypic ++
+      int indexIsotypic = 0; indexIsotypic < dynkinType.coefficients[
+        indexType
+      ]; indexIsotypic ++
     ) {
       out << currentSimpleType.toStringNonTechnicalName(nullptr);
       if (indexIsotypic + 1 < dynkinType.coefficients[indexType]) {
@@ -636,15 +637,16 @@ void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat)
   this->owner->fileNames.displayFolderName("../../output/") +
   this->displayNameMainFile1NoPath;
   this->virtualNameMainFile1 =
-  this->owner->fileNames.virtualFolderName() + this->displayNameMainFile1NoPath
-  ;
+  this->owner->fileNames.virtualFolderName() +
+  this->displayNameMainFile1NoPath;
 }
 
 std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
   FormatExpressions* format
 ) const {
-  STACK_TRACE("SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML")
-  ;
+  STACK_TRACE(
+    "SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML"
+  );
   (void) format;
   // avoid unused parameter warning in a portable way
   if (!this->flagComputeNilradicals) {
@@ -1836,8 +1838,9 @@ bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   const DynkinType* targetType
 ) {
-  STACK_TRACE("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch")
-  ;
+  STACK_TRACE(
+    "SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch"
+  );
   this->resetComputations();
   this->initHookUpPointers(
     newOwner,
@@ -1987,8 +1990,9 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
     this->cartanSubalgebrasByComponentScaledToActByTwo.setSize(
       this->cartanSubalgebrasByComponentScaledToActByTwo.size + 1
     );
-    this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->setSize(1)
-    ;
+    this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->setSize(
+      1
+    );
     if (newHScaledToActByTwo != nullptr) {
       (*this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject())[0] =
       *newHScaledToActByTwo;
@@ -2009,8 +2013,8 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
       oldComponentHs[i];
     }
     if (newHScaledToActByTwo != nullptr) {
-      currentHsScaledToActByTwo[newIndexInNewComponent] = *newHScaledToActByTwo
-      ;
+      currentHsScaledToActByTwo[newIndexInNewComponent] =
+      *newHScaledToActByTwo;
     } else {
       currentHsScaledToActByTwo[newIndexInNewComponent].setSize(0);
     }
@@ -2054,8 +2058,8 @@ computeHsAndHsScaledToActByTwoFromComponents() {
     ++
   ) {
     for (
-      int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].size
-      ; j ++
+      int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].
+      size; j ++
     ) {
       counter ++;
       this->cartanElementsSubalgebra[counter] = (
@@ -4139,8 +4143,8 @@ bool CandidateSemisimpleSubalgebra::computeFromGenerators(
     this->positiveGenerators, this->highestVectorsNonSorted
   );
   this->computeCartanOfCentralizer();
-  this->computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors()
-  ;
+  this->computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors(
+  );
   return true;
 }
 
@@ -4337,8 +4341,8 @@ void SemisimpleSubalgebras::WConjecture::computeBeforeSubalgebras(
       &this->cartanInvolutionAmbient
     )
   ) {
-    global.comments << "I couldn't figure out the required Cartan involution. "
-    ;
+    global.comments
+    << "I couldn't figure out the required Cartan involution. ";
     return;
   }
   ProgressReport report;
@@ -4395,8 +4399,9 @@ bool CandidateSemisimpleSubalgebra::checkModuleDimensions() const {
 }
 
 void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
-  STACK_TRACE("CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent")
-  ;
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent"
+  );
   ElementSemisimpleLieAlgebra<AlgebraicNumber>
   currentElement,
   adActionElement,
@@ -5092,8 +5097,8 @@ void CandidateSemisimpleSubalgebra::computePairingTable() {
         i, j, this->nilradicalPairingTable[i][j]
       );
       if (j > i) {
-        this->nilradicalPairingTable[j][i] = this->nilradicalPairingTable[i][j]
-        ;
+        this->nilradicalPairingTable[j][i] =
+        this->nilradicalPairingTable[i][j];
       }
     }
   }
@@ -5684,8 +5689,8 @@ bool NilradicalCandidate::isStronglySingular(int moduleIndex) {
       !this->owner->primalSubalgebraModules.contains(i)
     ) {
       for (
-        int j = 0; j < this->owner->nilradicalPairingTable[moduleIndex][i].size
-        ; j ++
+        int j = 0; j < this->owner->nilradicalPairingTable[moduleIndex][i].
+        size; j ++
       ) {
         if (
           this->nilradicalSelection[
@@ -7234,8 +7239,8 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   bool useHtml = true;
   bool useLatex = false;
   virtualPath = this->owner->fileNames.virtualFolderName() + "sl2s/";
-  htmlPathServer = this->owner->fileNames.displayFolderName("../../") + "sl2s/"
-  ;
+  htmlPathServer =
+  this->owner->fileNames.displayFolderName("../../") + "sl2s/";
   if (virtualPath == "" || htmlPathServer == "") {
     // usePNG = false;
     useHtml = false;
@@ -9398,8 +9403,10 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
         for (
           int j = 0; j < currentNilradical.nilradicalSubset.size; j ++
         ) {
-          out << "$" << currentNilradical.nilradicalSubset[j].toString() << "$"
-          ;
+          out
+          << "$"
+          << currentNilradical.nilradicalSubset[j].toString()
+          << "$";
           out << " & ";
           if (j != currentNilradical.nilradicalSubset.size - 1) {
             out << " &";
@@ -9781,8 +9788,8 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
       out << simpleTypes[i].toString(&tempFormat) << ":";
     }
     for (
-      int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].size
-      ; j ++
+      int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].
+      size; j ++
     ) {
       out
       << this->cartanSubalgebrasByComponentScaledToActByTwo[i][j].toString()

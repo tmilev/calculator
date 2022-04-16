@@ -179,8 +179,7 @@ public:
     // The indentation level of the containing code block.
     int indentationLevel;
     int whiteSpaceBefore;
-    // The number of columns needed to display the previous
-    // code element.
+    // The number of columns needed to display the element.
     int columnFinal;
     int newLinesAfter;
     std::string toStringContentAndMetaData() const;
@@ -212,8 +211,8 @@ public:
     bool isExpressionOrAtom() const;
     bool isExpressionIdentifierOrAtom() const;
     bool isExpressionIdentifierAtomOrFunctionWithArguments() const;
-    bool isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses() const
-    ;
+    bool isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses()
+    const;
     bool isCommandListOrCommand() const;
     bool isParenthesesBlock() const;
     bool isCodeBlock() const;

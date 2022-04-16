@@ -67,8 +67,10 @@ bool TransportLayerSecurity::initSSLKeyFilesInternal(
 ) {
   STACK_TRACE("TransportLayerSecurity::initSSLKeyFilesInternal");
   this->openSSLData.initSSLKeyFilesSelfSignedCreateOnDemand();
-  global << Logger::purple << "Using self-signed certificate. " << Logger::endL
-  ;
+  global
+  << Logger::purple
+  << "Using self-signed certificate. "
+  << Logger::endL;
   if (!this->loadPEMCertificate(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load pem certificate. ";

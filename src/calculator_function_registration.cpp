@@ -5728,8 +5728,9 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
 void Calculator::initializeAtomsNonCacheable() {
   STACK_TRACE("Calculator::initializeAtomsNonCacheable");
   this->atomsThatMustNotBeCached.setExpectedSize(30);
-  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("RandomInteger")
-  ;
+  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew(
+    "RandomInteger"
+  );
   this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew(
     "SelectAtRandom"
   );
@@ -5748,8 +5749,9 @@ void Calculator::initializeAtomsNotGoodForChainRule() {
 
 void Calculator::initializeAtomsThatAllowCommutingOfArguments() {
   STACK_TRACE("Calculator::initializeAtomsThatAllowCommutingOfArguments");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.setExpectedSize(30)
-  ;
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.setExpectedSize(
+    30
+  );
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.
   addOnTopNoRepetitionMustBeNew("+");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.
@@ -5852,8 +5854,9 @@ void Calculator::initializeOperationsThatAreKnownFunctions() {
     "\\arccos"
   );
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\log");
-  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("LogBase")
-  ;
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew(
+    "LogBase"
+  );
 }
 
 void Calculator::addKnownDoubleConstant(

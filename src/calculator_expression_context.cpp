@@ -213,8 +213,10 @@ Expression ExpressionContext::getVariable(int variableIndex) const {
   if (variableIndex < 0 || variableIndex >= this->variables.size) {
     Expression errorE;
     std::stringstream out;
-    out << "Context does not have variable index " << variableIndex + 1 << ". "
-    ;
+    out
+    << "Context does not have variable index "
+    << variableIndex + 1
+    << ". ";
     return errorE.assignError(*this->owner, out.str());
   }
   return this->variables[variableIndex];

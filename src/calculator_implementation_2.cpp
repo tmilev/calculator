@@ -45,8 +45,8 @@ JSData Calculator::Examples::toJSONFunctionHandlers() {
       continue;
     }
     const std::string& operationName = operations.keys[i];
-    Calculator::OperationHandlers& handlers = operations.values[i].getElement()
-    ;
+    Calculator::OperationHandlers& handlers =
+    operations.values[i].getElement();
     output[operationName] = handlers.toJSON();
   }
   return output;
@@ -96,8 +96,8 @@ std::string Calculator::Examples::getExamplesReadmeFragment() {
       continue;
     }
     std::string atomEscaped = this->escape(operations.keys[i]);
-    Calculator::OperationHandlers& handlers = operations.values[i].getElement()
-    ;
+    Calculator::OperationHandlers& handlers =
+    operations.values[i].getElement();
     int totalHandlers =
     handlers.handlers.size + handlers.compositeHandlers.size;
     if (totalHandlers > 1) {

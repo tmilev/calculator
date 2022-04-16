@@ -189,8 +189,10 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
       << "</b></td>";
       break;
     }
-    out << "<td>" << global.threadData[threadCounter].toStringHtml() << "</td>"
-    ;
+    out
+    << "<td>"
+    << global.threadData[threadCounter].toStringHtml()
+    << "</td>";
   }
   out << "</tr> <tr>";
   for (
@@ -247,8 +249,10 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
       << " registered threads. ";
       break;
     }
-    out << "********************\r\nThread index " << threadCounter << ": \r\n"
-    ;
+    out
+    << "********************\r\nThread index "
+    << threadCounter
+    << ": \r\n";
     if (ThreadData::getCurrentThreadId() != threadCounter) {
       out << "Stack trace available only for current thread.\n";
       // <-to avoid coordinating threads
@@ -642,8 +646,8 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
     inputAbbreviated = this->userInputStringIfAvailable;
   }
   StringRoutines::stringTrimToLengthWithHash(inputAbbreviated, 150);
-  this->relativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html"
-  ;
+  this->relativePhysicalNameCrashReport =
+  "crash_" + inputAbbreviated + ".html";
 }
 
 UserCalculatorData::UserCalculatorData() {
@@ -2002,8 +2006,8 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
     this->linearOperators[i].actOnVectorColumn(
       highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]
     );
-    translationsProjectedFinal[i] += this->translationsProjectedBasisChanged[i]
-    ;
+    translationsProjectedFinal[i] +=
+    this->translationsProjectedBasisChanged[i];
     drawOps.drawCircleAtVectorBufferRational(
       - translationsProjectedFinal[i], "red", 3
     );
@@ -2855,8 +2859,8 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
     for (int i = 0; i < dimLargerAlgebra; i ++) {
       matrix.elements[i][j] -= matrixOperator.elements[j][i];
     }
-    matrix.elements[dimLargerAlgebra + dimSmallerAlgebra][j] = - translation[j]
-    ;
+    matrix.elements[dimLargerAlgebra + dimSmallerAlgebra][j] =
+    - translation[j];
   }
   matrix.getMatrixIntegerWithDenominator(outputMat, outputDen);
   outputSub.makeSubstitutionFromMatrixIntegerAndDenominator(
@@ -2913,8 +2917,8 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   for (
     int i = 0; i < this->smallerAlgebraChamber.refinedCones.size; i ++
   ) {
-    const Cone& currentAffineCone = this->smallerAlgebraChamber.refinedCones[i]
-    ;
+    const Cone& currentAffineCone =
+    this->smallerAlgebraChamber.refinedCones[i];
     roots.setSize(currentAffineCone.normals.size);
     for (int j = 0; j < currentAffineCone.normals.size; j ++) {
       this->transformToWeylProjective(
@@ -2970,8 +2974,8 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
       int i = 0; i < this->smallerAlgebraChamber.refinedCones.size; i ++
     ) {
       for (
-        int j = 0; j < this->smallerAlgebraChamber.refinedCones[i].normals.size
-        ; j ++
+        int j = 0; j < this->smallerAlgebraChamber.refinedCones[i].normals.
+        size; j ++
       ) {
         this->transformToWeylProjective(
           k,

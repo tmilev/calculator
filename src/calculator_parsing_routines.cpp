@@ -350,8 +350,9 @@ void CalculatorParser::initializeStringsThatSplitIfFollowedByDigit() {
   this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew(
     "\\frac"
   );
-  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\ln")
-  ;
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew(
+    "\\ln"
+  );
   this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew(
     "\\log"
   );
@@ -1515,8 +1516,8 @@ void CalculatorParser::parseFillDictionary(
       currentElement.controlIndex = this->conInteger();
       output.addOnTop(currentElement);
     } else {
-      currentElement.controlIndex = this->controlSequences.getIndex("Variable")
-      ;
+      currentElement.controlIndex =
+      this->controlSequences.getIndex("Variable");
       currentElement.data.makeAtom(
         *this->owner,
         this->owner->addOperationNoRepetitionOrReturnIndexFirst(current)
@@ -2346,8 +2347,8 @@ bool CalculatorParser::replaceUnderscoreEPowerEbyLimits() {
   ].controlIndex =
   this->conExpression();
   if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceUnderscoreEPowerEbyLimits]"
-    ;
+    this->lastRuleName =
+    "[Rule: Calculator::replaceUnderscoreEPowerEbyLimits]";
   }
   return this->decreaseStackSetCharacterRanges(3);
 }
@@ -2365,8 +2366,8 @@ bool CalculatorParser::replacePowerEUnderScoreEbyLimits() {
   ];
   MathRoutines::swap(bottom, top);
   if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replacePowerEUnderScoreEbyLimits]"
-    ;
+    this->lastRuleName =
+    "[Rule: Calculator::replacePowerEUnderScoreEbyLimits]";
   }
   return this->replaceUnderscoreEPowerEbyLimits();
 }

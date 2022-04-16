@@ -712,21 +712,22 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
     ] =
     input.coefficients[i];
   }
-  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots()
-  ;
+  int numPosRoots =
+  this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   Vector<Rational> tempH = input.getCartanPart();
   for (int i = 0; i < this->ownerSemisimpleLieAlgebra->getRank(); i ++) {
     coefficients[numPosRoots + i] = tempH[i];
   }
-  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(coefficients)
-  ;
+  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(
+    coefficients
+  );
 }
 
 int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(
   int generatorIndex
 ) {
-  int numPosRoots = this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots()
-  ;
+  int numPosRoots =
+  this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   int posRootsPlusRank =
   numPosRoots + this->ownerSemisimpleLieAlgebra->getRank();
   if (generatorIndex >= posRootsPlusRank) {
@@ -1236,8 +1237,10 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
     << this->elementMatrixToTensorString(highestWeightVectors[i], useHtml)
     << endMath
     << ", highest weight of ";
-    out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath
-    ;
+    out
+    << beginMath
+    << this->ElementModuleIndexToString(i, useHtml)
+    << endMath;
   }
   if (computePairingTable) {
     out << this->initPairingTable(useHtml);

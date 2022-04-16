@@ -2306,8 +2306,8 @@ bool PublicKeyRSA::loadFromJSON(
   }
   if (input.elementType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Can't load certificate: JSON not of type object. "
-      ;
+      *commentsOnFailure
+      << "Can't load certificate: JSON not of type object. ";
     }
     return false;
   }
@@ -2590,8 +2590,8 @@ bool JSONWebToken::verifyRSA256(
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(
       outputSha, shaUnsignedInteger
     );
-    RSAresultBase64 = Crypto::convertStringToBase64Standard(rsaResultBitstream)
-    ;
+    RSAresultBase64 =
+    Crypto::convertStringToBase64Standard(rsaResultBitstream);
     Crypto::convertStringToHex(rsaResultBitstream, RSAresultHex, 0, false);
     Crypto::convertStringToHex(
       rsaResultLast32bytes, RSAresultTrimmedHex, 0, false

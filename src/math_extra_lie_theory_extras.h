@@ -489,8 +489,8 @@ public:
     if (this->size != 1) {
       return false;
     }
-    MonomialUniversalEnvelopingOrdered<Coefficient>& tempMon = this->objects[0]
-    ;
+    MonomialUniversalEnvelopingOrdered<Coefficient>& tempMon =
+    this->objects[0];
     if (!tempMon.Coefficient.isEqualToOne()) {
       return false;
     }

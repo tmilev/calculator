@@ -44,8 +44,8 @@ void initializeGlobalObjects() {
   global.flagIsChildProcess = false;
   initializeTimer();
   global.pointerExternalCommandNoOutput = &externalCommandNoOutput;
-  global.pointerExternalCommandReturnOutput = &externalCommandReturnStandardOut
-  ;
+  global.pointerExternalCommandReturnOutput =
+  &externalCommandReturnStandardOut;
   global.pointerExternalCommandStream = &externalCommandStreamOutput;
   global.pointerCallChDir = &callChDirWrapper;
 }

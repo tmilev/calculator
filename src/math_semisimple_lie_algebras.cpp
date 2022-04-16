@@ -94,8 +94,10 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   htmlStream << "</table>";
   tableLateXStream << "\\end{array}";
   if (this->getNumberOfGenerators() < 22) {
-    out << "<div class='mathcalculator'>" << tableLateXStream.str() << "</div>"
-    ;
+    out
+    << "<div class='mathcalculator'>"
+    << tableLateXStream.str()
+    << "</div>";
     return out.str();
   }
   out
@@ -283,8 +285,8 @@ std::string SemisimpleLieAlgebra::toHTML(
     << " The resulting Lie bracket pairing table follows. <hr> "
     << this->toString(&global.defaultFormat.getElement());
     if (flagWriteLatexPlots) {
-      out << "Ready for LaTeX consumption version of the first three columns: "
-      ;
+      out
+      << "Ready for LaTeX consumption version of the first three columns: ";
       out
       << "<br>%Add to preamble: <br>"
       << "\\usepackage{longtable} <br>%Add to body: <br>"
@@ -408,8 +410,8 @@ std::string SemisimpleLieAlgebra::toHTML(
       tempM2 = tempM;
       tempM2.transpose();
       tempM2.multiplyOnTheRight(tempM);
-      tempM2 *= 2 / tempSimpleType.getEpsilonRealizationLongRootLengthSquared()
-      ;
+      tempM2 *= 2 /
+      tempSimpleType.getEpsilonRealizationLongRootLengthSquared();
       if (!(tempM2 == this->weylGroup.cartanSymmetric)) {
         global.fatal
         << "This is a (non-critical) programming error: "
@@ -841,8 +843,9 @@ void SemisimpleLieAlgebra::exploitTheCyclicTrick(int i, int j, int k) {
     << global.fatal;
   }
   if (!this->computedChevalleyConstants.elements[i][j]) {
-    global.fatal << "Bad structure constant computation order." << global.fatal
-    ;
+    global.fatal
+    << "Bad structure constant computation order."
+    << global.fatal;
   }
   Rational& chevalleyConstant = this->chevalleyConstants.elements[i][j];
   Rational scalarProduct = this->weylGroup.rootScalarCartanRoot(rootK, rootK);
@@ -1355,8 +1358,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
       - simpleRoot, this->domainAlgebra()
     );
     tempRange[index] = this->imagesPositiveSimpleChevalleyGenerators[i];
-    tempRange[indexNegative] = this->imagesNegativeSimpleChevalleyGenerators[i]
-    ;
+    tempRange[indexNegative] =
+    this->imagesNegativeSimpleChevalleyGenerators[i];
     nonComputed.removeSelection(index);
     nonComputed.removeSelection(indexNegative);
   }
@@ -1411,8 +1414,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
   int numberOfPositiveRoots = this->domainAlgebra().getNumberOfPositiveRoots();
   for (int i = 0; i < domainRank; i ++) {
     simpleRoot.makeEi(domainRank, i);
-    int leftIndex = this->domainAlgebra().getGeneratorIndexFromRoot(simpleRoot)
-    ;
+    int leftIndex =
+    this->domainAlgebra().getGeneratorIndexFromRoot(simpleRoot);
     int rightIndex =
     this->domainAlgebra().getGeneratorIndexFromRoot(- simpleRoot);
     this->domainAlgebra().lieBracket(
@@ -1451,8 +1454,9 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
   }
   Vector<Rational> root;
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
-    this->domainAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(root)
-    ;
+    this->domainAllChevalleyGenerators[i].toVectorNegativeRootSpacesFirst(
+      root
+    );
     linearSpaceMap.actOnVectorColumn(root, imageRoot);
     this->imagesAllChevalleyGenerators[i].
     assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
@@ -1962,8 +1966,8 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(
     this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
       this->universalEnvelopingGeneratorOrder[i] =
-      - i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5
-      ;
+      - i +
+      translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
     }
   }
 }

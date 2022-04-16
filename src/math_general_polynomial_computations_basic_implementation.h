@@ -807,8 +807,9 @@ template <class Coefficient>
 void Polynomial<Coefficient>::operator-=(
   const Polynomial<Coefficient>& other
 ) {
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator-=(other)
-  ;
+  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator-=(
+    other
+  );
 }
 
 template <class Coefficient>
@@ -850,21 +851,24 @@ void Polynomial<Coefficient>::operator/=(
 
 template <class Coefficient>
 void Polynomial<Coefficient>::operator/=(int other) {
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator/=(other)
-  ;
+  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator/=(
+    other
+  );
 }
 
 template <class Coefficient>
 void Polynomial<Coefficient>::operator/=(const Coefficient& other) {
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator/=(other)
-  ;
+  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator/=(
+    other
+  );
 }
 
 template <class Coefficient>
 template <class otherType>
 void Polynomial<Coefficient>::operator*=(const otherType& other) {
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator*=(other)
-  ;
+  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator*=(
+    other
+  );
 }
 
 template <class Coefficient>

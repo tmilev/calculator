@@ -242,8 +242,8 @@ public:
     bool computeRealForm,
     AlgebraicClosureRationals* algebraicClosure
   );
-  bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other) const
-  ;
+  bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other)
+  const;
   void
   computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators(
   );

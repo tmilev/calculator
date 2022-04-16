@@ -599,8 +599,8 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
   for (int i = 0; i < this->characterTable.size; i ++) {
     for (int j = i; j < this->characterTable.size; j ++) {
       ClassFunction<FiniteGroup, Rational>& leftChar = this->characterTable[i];
-      ClassFunction<FiniteGroup, Rational>& rightChar = this->characterTable[j]
-      ;
+      ClassFunction<FiniteGroup, Rational>& rightChar =
+      this->characterTable[j];
       Rational scalarProduct =
       this->getHermitianProduct(leftChar.data, rightChar.data);
       if (j != i) {
@@ -2091,8 +2091,8 @@ getAllDominantWeightsHWFDIM(
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
   int topHeightRootSystem =
-  this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort
-  ;
+  this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().
+  numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -2273,8 +2273,9 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     hwSimpleCoordsLeviPart
   );
   hwSimpleCoordsNilPart =
-  this->ambientWeyl->getSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart)
-  ;
+  this->ambientWeyl->getSimpleCoordinatesFromFundamental(
+    hwSimpleCoordsNilPart
+  );
   // /////////////////////////
   HashedList<Vector<Coefficient> > outputDomWeightsSimpleCoordsLeviPart;
   if (
@@ -2539,8 +2540,8 @@ bool SubgroupData<someGroup, elementSomeGroup>::verifyCosets() {
   computeCosets();
   for (int i = 0; i < this->subgroupContent->generators.size; i ++) {
     for (int cs = 0; cs < this->cosets.size; cs ++) {
-      auto g = cosets[cs].representative * this->subgroupContent->generators[i]
-      ;
+      auto g =
+      cosets[cs].representative * this->subgroupContent->generators[i];
       if (this->getCosetId(g) != cs) {
         global.fatal
         << "Error: element "
@@ -2918,8 +2919,8 @@ decomposeTodorsVersionRecursive(
       outputIrrepMults.addMonomial(
         this->ownerGroup->characterTable[ci], NumIrrepsOfType
       );
-      remainingCharacter -= appendOnlyIrrepsList[i].character * NumIrrepsOfType
-      ;
+      remainingCharacter -=
+      appendOnlyIrrepsList[i].character * NumIrrepsOfType;
       {
         std::stringstream reportStream;
         reportStream

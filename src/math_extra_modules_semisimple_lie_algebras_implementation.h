@@ -981,8 +981,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   Rational::totalSmallMultiplications - startingNumRationalOperations;
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
-    Matrix<Coefficient>& bilinearForm = this->bilinearFormsAtEachWeightLevel[k]
-    ;
+    Matrix<Coefficient>& bilinearForm =
+    this->bilinearFormsAtEachWeightLevel[k];
     Matrix<Coefficient>& bilinearFormInverted = this->bilinearFormsInverted[k];
     if (!bilinearForm.isNonNegativeAllEntries()) {
       this->flagConjectureBholds = false;
@@ -1576,8 +1576,9 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
   generator.makeOneGenerator(indexGenerator, ownerAlgebra, ringUnit);
   Coefficient currentCoeff;
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialTensorGeneralizedVermas<Coefficient>& currentMon = (*this)[i]
-    ;
+    const MonomialTensorGeneralizedVermas<Coefficient>& currentMon = (*this)[
+      i
+    ];
     accumMon.monomials.setSize(0);
     for (int j = 0; j < currentMon.monomials.size; j ++) {
       element.makeZero();
@@ -1758,8 +1759,8 @@ const {
   << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false);
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
-    Matrix<Coefficient>& bilinearForm = this->bilinearFormsAtEachWeightLevel[k]
-    ;
+    Matrix<Coefficient>& bilinearForm =
+    this->bilinearFormsAtEachWeightLevel[k];
     Matrix<Coefficient>& bilinearFormInverted = this->bilinearFormsInverted[k];
     out
     << "<hr>weight in simple coords: "

@@ -369,8 +369,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
   if (!problem.prepareCommands(&comments)) {
-    errorStream << "Something went wrong while interpreting the problem file. "
-    ;
+    errorStream
+    << "Something went wrong while interpreting the problem file. ";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       errorStream << comments.str();
     }
@@ -807,8 +807,10 @@ std::string BuilderApplication::getBrowserificationAssembled(
     ) {
       fileNameNoJS = this->jsFileNames[i];
     }
-    out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n"
-    ;
+    out
+    << "\""
+    << fileNameNoJS
+    << "\" : function(require, module, exports){\n";
     out << this->jsFileContents[i];
     out << "\n},\n";
   }
@@ -973,8 +975,8 @@ bool CourseList::load() {
     )
   ) {
     commentsOnFailure
-    << "Failed to fetch available courses from /coursesavailable/default.txt. "
-    ;
+    <<
+    "Failed to fetch available courses from /coursesavailable/default.txt. ";
     this->errorMessage = commentsOnFailure.str();
     return false;
   }
@@ -1725,8 +1727,8 @@ void AnswerCheckerNoProblem::prepareForEvaluation() {
     );
   }
   this->completedProblem = completedProblemStream.str();
-  this->completedProblemNoEnclosures = completedProblemStreamNoEnclosures.str()
-  ;
+  this->completedProblemNoEnclosures =
+  completedProblemStreamNoEnclosures.str();
 }
 
 bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
@@ -1904,8 +1906,8 @@ JSData AnswerChecker::submitAnswersJSON(
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
   bool errorsCheckingAnswer = false;
   if (timeSafetyBrake) {
-    global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000
-    ;
+    global.millisecondsMaxComputation =
+    global.getElapsedMilliseconds() + 20000;
     // + 20 sec
   }
   bool temporary = false;
@@ -2244,8 +2246,9 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
-      errorStream << "<hr>" << problem.problemData.toStringAvailableAnswerIds()
-      ;
+      errorStream
+      << "<hr>"
+      << problem.problemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::millisecondsComputation] =
     global.getElapsedMilliseconds() - startTimeInMilliseconds;
@@ -2418,8 +2421,8 @@ JSData WebAPIResponse::getAccountsPageJSON(
   (void) hostWebAddressWithPort;
   JSData output;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    output[WebAPI::result::error] = "Database disabled (cannot get accounts). "
-    ;
+    output[WebAPI::result::error] =
+    "Database disabled (cannot get accounts). ";
     return output;
   }
   if (
@@ -2427,8 +2430,8 @@ JSData WebAPIResponse::getAccountsPageJSON(
     !global.flagLoggedIn ||
     !global.flagUsingSSLinCurrentConnection
   ) {
-    output[WebAPI::result::error] = "Must be logged-in administrator over ssl."
-    ;
+    output[WebAPI::result::error] =
+    "Must be logged-in administrator over ssl.";
     return output;
   }
   std::stringstream commentsOnFailure;
@@ -2983,8 +2986,8 @@ void UserCalculator::computePointsEarned(
       if (currentP.answers.values[j].numCorrectSubmissions > 0) {
         currentP.numCorrectlyAnswered ++;
       }
-      currentP.totalNumSubmissions += currentP.answers.values[j].numSubmissions
-      ;
+      currentP.totalNumSubmissions +=
+      currentP.answers.values[j].numSubmissions;
     }
     if (currentP.flagProblemWeightIsOK) {
       int expectedNumberOfAnswers =
@@ -3173,8 +3176,8 @@ bool UserScores::computeScoresAndStats(std::stringstream& comments) {
         this->numStudentsSolvedNothingInTopic[j] ++;
       }
     }
-    *this->userScores.lastObject() = currentUserRecord.currentUser.pointsEarned
-    ;
+    *this->userScores.lastObject() =
+    currentUserRecord.currentUser.pointsEarned;
   }
   return true;
 }

@@ -1352,25 +1352,31 @@ bool CodeFormatter::Element::computeIndentationCommand() {
     this->children[i].computeIndentation();
   }
   if (this->children.size == 0) {
-  return true;
-  }
-  CodeFormatter::Element& last =*this->children.lastObject();
-    if (last.content != ";"){
     return true;
+  }
+  CodeFormatter::Element& last = *this->children.lastObject();
+  if (last.content != ";") {
+    return true;
+  }
+  if (last.whiteSpaceBefore != this->indentationLevel) {
+    return true;
+  }
+  // We have a semicolon that is standing on a new line alone.
+  int oldMaximumLineLength = this->owner->maximumDesiredLineLength;
+  this->owner->maximumDesiredLineLength --;
+  for (int i = 0; i < this->children.size - 1; i ++) {
+    this->children[i].indentationLevel = this->indentationLevel;
+    this->children[i].computeIndentation();
+  }
+  this->owner->maximumDesiredLineLength = oldMaximumLineLength;
+  if (this->children.size > 1) {
+    CodeFormatter::Element& secondToLast = *last.previousAtom();
+    if (secondToLast.columnFinal < this->owner->maximumDesiredLineLength) {
+      secondToLast.newLinesAfter = 0;
     }
-    if (last.whiteSpaceBefore != this->indentationLevel) {
-      return  true;
-    }
-    // We have a semicolon that is standing on a new line alone.
-    int oldMaximumLineLength =this->owner->maximumDesiredLineLength;
-    this->owner->maximumDesiredLineLength--;
-      for (int i = 0; i < this->children.size-1; i ++) {
-        this->children[i].indentationLevel = this->indentationLevel;
-        this->children[i].computeIndentation();
-      }
-      this->owner->maximumDesiredLineLength = oldMaximumLineLength;
-      last.whiteSpaceBefore = 0;
-last.computeIndentation();
+  }
+  last.whiteSpaceBefore = 0;
+  last.computeIndentation();
   return true;
 }
 

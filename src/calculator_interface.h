@@ -230,8 +230,8 @@ public:
   bool isListStartingWithAtom(int operation = - 1) const;
   bool isListOfTwoAtomsStartingWith(int operation) const;
   bool isFrozen() const;
-  bool isAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr) const
-  ;
+  bool isAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr)
+  const;
   bool isAtomWhoseExponentsAreInterpretedAsFunction(
     std::string* outputWhichAtom = nullptr
   ) const;
@@ -278,8 +278,8 @@ public:
   bool isKnownFunctionWithComplexRange(
     std::string* outputWhichOperation = nullptr
   ) const;
-  bool isArithmeticOperation(std::string* outputWhichOperation = nullptr) const
-  ;
+  bool isArithmeticOperation(std::string* outputWhichOperation = nullptr)
+  const;
   bool isCacheableExpression() const;
   bool isBuiltInScalar() const;
   bool isElementaryObject() const;
@@ -807,8 +807,8 @@ public:
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const;
-  bool toStringGeneral(std::stringstream& out, FormatExpressions* format) const
-  ;
+  bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
+  const;
   std::string toStringWithStartingExpression(
     FormatExpressions* format,
     Expression* startingExpression,
@@ -851,8 +851,8 @@ public:
   bool isIntegerFittingInInt(int* whichInteger = nullptr) const;
   bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isInteger(LargeInteger* whichInteger = nullptr) const;
-  bool isIntegerNonNegative(LargeIntegerUnsigned* whichInteger = nullptr) const
-  ;
+  bool isIntegerNonNegative(LargeIntegerUnsigned* whichInteger = nullptr)
+  const;
   bool isRational(Rational* whichRational = nullptr) const;
   bool isAlgebraicRadical() const;
   bool isConstantNumber() const;
@@ -2106,8 +2106,8 @@ public:
   HashedList<std::string> atomsNotAllowingChainRule;
   HashedList<std::string> builtInTypes;
   HashedList<std::string> arithmeticOperations;
-  HashedList<std::string> knownOperationsInterpretedAsFunctionsMultiplicatively
-  ;
+  HashedList<std::string>
+  knownOperationsInterpretedAsFunctionsMultiplicatively;
   HashedList<std::string> knownFunctionsWithComplexRange;
   HashedList<std::string> atomsThatFreezeArguments;
   HashedList<std::string> atomsWhoseExponentsAreInterpretedAsFunctions;

@@ -53,8 +53,8 @@ std::string Plot::Labels::canvasName = "canvasName";
 std::string Plot::Labels::controlsName = "controlsName";
 std::string Plot::Labels::messagesName = "messagesName";
 std::string Plot::Labels::graphicsType = "graphicsType";
-std::string Plot::Labels::graphicsThreeDimensional = "graphicsThreeDimensional"
-;
+std::string Plot::Labels::graphicsThreeDimensional =
+"graphicsThreeDimensional";
 std::string Plot::Labels::graphicsTwoDimensional = "graphicsTwoDimensional";
 std::string Plot::Labels::plotObjects = "plotObjects";
 bool Calculator::getListPolynomialVariableLabelsLexicographic(
@@ -155,8 +155,8 @@ hopefullyPermanent_HTTPS_WebAdressOfServerExecutable =
 "https://calculator-algebra.org/cgi-bin/calculator";
 std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
 "http://calculator-algebra.org/";
-std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder
-=
+std::string GlobalVariables::
+hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
 "https://calculator-algebra.org/";
 std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   const std::string& prefixFolder,

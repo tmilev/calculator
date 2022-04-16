@@ -1096,7 +1096,7 @@ x_i\partial_i-\partial_i x_i-[x_i, \partial_i]
 ```
 Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. 
 
-*\** [MultiplyElementWeylAlgebraByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::multiplyRatOrPolyOrEWAByRatOrPolyOrEWA}. 
+*\** [MultiplyElementWeylAlgebraByElementWeylAlgebra] {CalculatorFunctionsBinaryOps::multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cpartial_%7b%7bi%7d%7d%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial_i%2c%20x_i%29%3b%5cnx_%7b%7bi%7d%7d%3d%20Polynomial%7b%7dx_i%3b%5cna%20%3d%20x_1%20x_2%3b%5cnb%20%3d%20%5c%5cpartial_1%20%5c%5cpartial_2%3b%20a%20b%20-%20b%20a%20-%5ba%2cb%5d%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \partial_{{i}}= ElementWeylAlgebraDO{}(\partial_i, x_i);
@@ -4574,7 +4574,7 @@ ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101)
 Makes an elliptic curve from a cubic in normal form, generator letter and base point.
 
 *VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 VectorPartitionFunction(
 (1,0,0),
@@ -4584,6 +4584,8 @@ VectorPartitionFunction(
 (0,1,1),
 (1,1,1)
 );
+VectorPartitionFunction(
+(1,0),(0,1),(1,1),(1,2),(1,3),(2,3) );
 ```
 Work in progress. Vector partition function formula. 
 
@@ -5073,14 +5075,14 @@ PrintSemisimpleSubalgebras(B_3)
 ```
 PrintSemisimpleSubalgebrasRecompute(C_3)
 ```
-<b>This function is being developed and is not implemented fully yet.</b> Prints the semisimple subalgebras of a semisimple Lie algebra. 
+<b>This function is being developed and is not implemented fully yet.</b>Prints the semisimple subalgebras of a semisimple Lie algebra. 
 
 *PrintSemisimpleSubalgebrasNoCentralizers* [PrintSemisimpleSubalgebrasNoCentralizers] {CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintSemisimpleSubalgebrasNoCentralizers%28A_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintSemisimpleSubalgebrasNoCentralizers(A_3)
 ```
-<b>This function is being developed and is not implemented fully yet.</b> Prints the semisimple subalgebra candidates of a Lie algebra. 
+<b>This function is being developed and is not implemented fully yet.</b>Prints the semisimple subalgebra candidates of a Lie algebra. 
 
 *PrintSemisimpleSubalgebrasFull* [PrintSemisimpleSubalgebrasFull] {CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintSemisimpleSubalgebrasFull%7b%7d%28A_2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

@@ -1248,8 +1248,8 @@ bool SSLHelloExtension::processRenegotiateConnection(
     }
   }
   if (commentsOnError != nullptr) {
-    *commentsOnError << "Unexpected renegotiate connection extension content. "
-    ;
+    *commentsOnError
+    << "Unexpected renegotiate connection extension content. ";
   }
   return false;
 }
@@ -1542,8 +1542,8 @@ bool Serialization::readNByteLengthFollowedByBytes(
   }
   if (*resultLength + outputOffset > input.size) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Indicated byte sequence length exceeds input size. "
-      ;
+      *commentsOnError
+      << "Indicated byte sequence length exceeds input size. ";
     }
     return false;
   }
@@ -1794,7 +1794,8 @@ std::string SignatureAlgorithmSpecification::JSLabels::hash = "hash";
 std::string SignatureAlgorithmSpecification::JSLabels::hashName = "hashName";
 std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm =
 "signatureAlgorithm";
-std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName =
+std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName
+=
 "signatureAlgorithmName";
 std::string SignatureAlgorithmSpecification::JSLabels::valueHex = "valueHex";
 std::string SignatureAlgorithmSpecification::getSignatureAlgorithmName() {
@@ -1852,7 +1853,8 @@ JSData SignatureAlgorithmSpecification::toJSON() {
 
 std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher =
 "chosenCipher";
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName =
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName
+=
 "chosenCipherName";
 std::string TransportLayerSecurityServer::Session::JSLabels::
 incomingRandomBytes =

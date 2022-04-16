@@ -52,8 +52,8 @@ std::string WebAPI::result::ComparisonData::given = "given";
 std::string WebAPI::result::ComparisonData::desired = "desired";
 std::string WebAPI::result::ComparisonData::givenRaw = "givenRaw";
 std::string WebAPI::result::ComparisonData::desiredRaw = "desiredRaw";
-std::string WebAPI::result::ComparisonData::errorEvaluation = "errorEvaluation"
-;
+std::string WebAPI::result::ComparisonData::errorEvaluation =
+"errorEvaluation";
 std::string WebAPI::result::ComparisonData::errorInAnswer = "errorInAnswer";
 std::string WebAPI::problem::fileContent = "fileContent";
 std::string WebAPI::problem::title = "title";
@@ -182,8 +182,8 @@ std::string DatabaseStrings::labelDeadlinesSchema = "deadlineSchema";
 std::string DatabaseStrings::labelInstructor = "instructor";
 std::string DatabaseStrings::labelSemester = "semester";
 std::string DatabaseStrings::tableProblemWeights = "problemWeights";
-std::string DatabaseStrings::labelProblemWeightsSchema = "problemWeightsSchema"
-;
+std::string DatabaseStrings::labelProblemWeightsSchema =
+"problemWeightsSchema";
 std::string DatabaseStrings::labelProblemWeight = "weight";
 std::string DatabaseStrings::tableProblemInformation = "problemInformation";
 std::string DatabaseStrings::labelProblemTotalQuestions =

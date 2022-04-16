@@ -827,8 +827,8 @@ void PermutationGroupData::makeSymmetricGroup(int n) {
   this->flagIsSymmetricGroup = true;
   this->flagHasGenerators1j = true;
   this->group->computeConjugacyClassSizesAndRepresentativesByFormula =
-  PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation
-  ;
+  PermutationGroupData::
+  computeCCSizesAndRepresentativesByFormulaImplementation;
   this->group->areConjugateByFormula = PermutationR2::areConjugate;
   this->group->getSizeByFormula =
   PermutationGroupData::getSizeByFormulaImplementation;
@@ -844,8 +844,8 @@ void PermutationGroupData::makeSymmetricGroupGeneratorsjjPlus1(int n) {
   this->flagIsSymmetricGroup = true;
   this->flagHasGeneratorsjjPlus1 = true;
   this->group->computeConjugacyClassSizesAndRepresentativesByFormula =
-  PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation
-  ;
+  PermutationGroupData::
+  computeCCSizesAndRepresentativesByFormulaImplementation;
   this->group->areConjugateByFormula = PermutationR2::areConjugate;
   this->group->getSizeByFormula =
   PermutationGroupData::getSizeByFormulaImplementation;
@@ -864,8 +864,9 @@ LargeInteger PermutationGroupData::getSizeByFormulaImplementation(
 ) {
   PermutationGroupData* PD = static_cast<PermutationGroupData*>(G.specificDataPointer);
   if (!PD || !PD->flagIsSymmetricGroup) {
-    global.fatal << "This method should not have been called. " << global.fatal
-    ;
+    global.fatal
+    << "This method should not have been called. "
+    << global.fatal;
     // control reaches end of non-void function
     return - 1;
   }

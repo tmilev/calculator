@@ -300,8 +300,8 @@ bool CalculatorHTML::mergeOneProblemAdminData(
     );
   }
   ProblemDataAdministrative& currentProblem =
-  this->currentUser.problemData.getValueCreateEmpty(inputProblemName).adminData
-  ;
+  this->currentUser.problemData.getValueCreateEmpty(inputProblemName).
+  adminData;
   MapList<
     std::string,
     std::string,
@@ -727,8 +727,7 @@ std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(
   << "Problem: "
   << fileName
   << "\n" // <<
-  // "\n</span>"
-  ;
+  // "\n</span>";
   return out.str();
 }
 
@@ -1081,8 +1080,8 @@ std::string SyntacticElementHTML::toStringTagAndContent() const {
     return this->content;
   }
   std::stringstream out;
-  out << this->toStringOpenTag("") + this->content + this->toStringCloseTag("")
-  ;
+  out
+  << this->toStringOpenTag("") + this->content + this->toStringCloseTag("");
   return out.str();
 }
 
@@ -1618,8 +1617,8 @@ bool Answer::prepareAnswerHardCoded(
 ) {
   std::string stringCommandsBody = commandsBody.str();
   if (stringCommandsBody != "") {
-    commands << SyntacticElementHTML::cleanUpEncloseCommand(stringCommandsBody)
-    ;
+    commands
+    << SyntacticElementHTML::cleanUpEncloseCommand(stringCommandsBody);
     commandsNoEnclosures << commandsBodyNoEnclosures.str();
   }
   this->commandsBeforeAnswer = commands.str();
@@ -2523,8 +2522,10 @@ std::string CalculatorHTML::Parser::toStringParsingStack(
   for (
     int i = SyntacticElementHTML::parsingDummyElements; i < stack.size; i ++
   ) {
-    out << "<span style ='color:" << ((i % 2 == 0) ? "orange" : "blue") << "'>"
-    ;
+    out
+    << "<span style ='color:"
+    << ((i % 2 == 0) ? "orange" : "blue")
+    << "'>";
     std::string content = stack[i].toStringDebug();
     if (content.size() == 0) {
       content = "<b>empty</b>";
@@ -3796,8 +3797,8 @@ std::string CalculatorHTML::answerLabels::idButtonSubmit = "idButtonSubmit";
 std::string CalculatorHTML::answerLabels::idButtonInterpret =
 "idButtonInterpret";
 std::string CalculatorHTML::answerLabels::idButtonAnswer = "idButtonAnswer";
-std::string CalculatorHTML::answerLabels::idButtonSolution = "idButtonSolution"
-;
+std::string CalculatorHTML::answerLabels::idButtonSolution =
+"idButtonSolution";
 std::string CalculatorHTML::answerLabels::idVerificationSpan =
 "idVerificationSpan";
 std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
@@ -4028,8 +4029,9 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
     global.getElapsedSeconds() - startTime
   );
-  this->timeIntermediateComments.lastObject()->addOnTop("Time after execution")
-  ;
+  this->timeIntermediateComments.lastObject()->addOnTop(
+    "Time after execution"
+  );
   // First command and first syntactic element are the random seed and are
   // ignored.
   interpreter.objectContainer.resetSliders();
@@ -4195,8 +4197,8 @@ std::string CalculatorHTML::toStringProblemScoreFull(
     ProblemData& problemData =
     this->currentUser.problemData.getValueCreateEmpty(fileName);
     if (!problemData.flagProblemWeightIsOK) {
-      out << "<span style='color:orange'>No point weight assigned yet. </span>"
-      ;
+      out
+      << "<span style='color:orange'>No point weight assigned yet. </span>";
       if (
         !problemData.adminData.getWeightFromCourse(
           this->currentUser.courseComputed, currentWeight

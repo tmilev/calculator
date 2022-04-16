@@ -12,12 +12,14 @@ bool AlgebraicNumber::Test::all() {
 
 bool AlgebraicNumber::Test::constantValues() {
   if (AlgebraicNumber::oneStatic().toString() != "1") {
-    global.fatal << "Algebraic number 1 has unexpected value. " << global.fatal
-    ;
+    global.fatal
+    << "Algebraic number 1 has unexpected value. "
+    << global.fatal;
   }
   if (AlgebraicNumber::zeroStatic().toString() != "0") {
-    global.fatal << "Algebraic number 0 has unexpected value. " << global.fatal
-    ;
+    global.fatal
+    << "Algebraic number 0 has unexpected value. "
+    << global.fatal;
   }
   return true;
 }

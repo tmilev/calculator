@@ -2472,8 +2472,9 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   Permutation permComponents, permComponentsCentralizer;
   List<int> tempList, tempPermutation1, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutos, tempAutosCentralizer;
-  List<List<List<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms
-  ;
+  List<List<List<int> > >
+  DiagramAutomorphisms,
+  CentralizerDiagramAutomorphisms;
   this->dynkinDiagram.getAutomorphisms(DiagramAutomorphisms);
   this->centralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
   tempAutos.initializePart1(DiagramAutomorphisms.size);
@@ -2509,8 +2510,9 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   NumAutos = tempAutos.totalNumberSubsetsSmallInt();
   int tempI2 = permComponentsCentralizer.totalNumberSubsetsSmallInt();
   int NumAutosCentralizer = tempAutosCentralizer.totalNumberSubsetsSmallInt();
-  permComponents.getPermutationLthElementIsTheImageofLthIndex(tempPermutation1)
-  ;
+  permComponents.getPermutationLthElementIsTheImageofLthIndex(
+    tempPermutation1
+  );
   permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(
     tempPermutation2
   );
@@ -4545,8 +4547,8 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
     << "<hr>The roots needed to generate "
     << "the root subsystems are listed below. ";
     for (
-      int i = 0; i < this->subalgebrasOrderParabolicPseudoParabolicNeither.size
-      ; i ++
+      int i = 0; i < this->subalgebrasOrderParabolicPseudoParabolicNeither.
+      size; i ++
     ) {
       RootSubalgebra& currentSubalgebra =
       this->subalgebrasOrderParabolicPseudoParabolicNeither[i];

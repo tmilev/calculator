@@ -732,8 +732,10 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
           << this->toStringSystemLatex(carbonCopyMatrix, format)
           << "\\)";
         } else {
-          *humanReadableReport << "\\(" << this->toStringLatex(format) << "\\)"
-          ;
+          *humanReadableReport
+          << "\\("
+          << this->toStringLatex(format)
+          << "\\)";
         }
         *humanReadableReport << "& Selected pivot column " << i + 1 << ". ";
         if (numberOfPivots != pivotIndex) {

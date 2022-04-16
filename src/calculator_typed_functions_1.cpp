@@ -502,8 +502,9 @@ multiplyRationalOrPolynomialByWeightPolynomial(
 bool CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly")
-  ;
+  STACK_TRACE(
+    "CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly"
+  );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -624,8 +625,8 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
   inputConverted[1].checkConsistency();
   input[1].checkConsistency();
   input[2].checkConsistency();
-  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element
-  ;
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
+  element;
   if (
     !CalculatorConversions::convertWithoutComputation(
       calculator, inputConverted[1], element
@@ -1451,8 +1452,9 @@ bool CalculatorFunctionsBinaryOps::powerMatrixNumbersByLargeIntegerIfPossible(
 bool CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger")
-  ;
+  STACK_TRACE(
+    "CalculatorFunctionsBinaryOps::powerMatrixBuiltInBySmallInteger"
+  );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;

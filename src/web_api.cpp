@@ -332,8 +332,8 @@ bool WebAPIResponse::processChangePassword(
       DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail
     );
     if (Database::get().findOne(queryEmailTaken, notUsed, nullptr)) {
-      result[WebAPI::result::error] = "It appears the email is already taken. "
-      ;
+      result[WebAPI::result::error] =
+      "It appears the email is already taken. ";
       return global.response.writeResponse(result);
     }
   }

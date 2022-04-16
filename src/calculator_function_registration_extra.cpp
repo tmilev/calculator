@@ -12,8 +12,8 @@ void Calculator::initializeFunctionsExtra() {
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
   Function::Options innerAdminNoTest = Function::Options::adminNoTest();
-  Function::Options innerInvisibleNoTest = Function::Options::invisibleNoTest()
-  ;
+  Function::Options innerInvisibleNoTest =
+  Function::Options::invisibleNoTest();
   Function::Options innerInvisibleExperimentalNoTest =
   Function::Options::invisibleNoTest();
   Function::Options innerFreezesArguments =
@@ -340,8 +340,7 @@ void Calculator::initializeFunctionsExtra() {
     "originally designed for the purposes of the freecalc project "
     "as not been tested on any other projects, please use only for freecalc.",
     "Crawl(\"freecalc/homework/referenceallproblemsbycourse"
-  "/calculusimasterproblemsheet.tex\")"
-    ,
+    "/calculusimasterproblemsheet.tex\")",
     "CalculatorFunctions::crawlTexFile",
     "Crawl",
     Function::Options::administrativeTested()
@@ -361,22 +360,21 @@ void Calculator::initializeFunctionsExtra() {
     "(i.e, we have folders /vectorpartition and /freecalc next to one another). "
     "The folders are given relative to the /freecalc base.",
     "BuildFreecalc(\"freecalc/lectures/referencelectures"
-  "/precalculus.tex\");\n"
+    "/precalculus.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures"
-  "/calculusi.tex\");\n"
+    "/calculusi.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures"
-  "/calculusii.tex\");\n"
+    "/calculusii.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures"
-  "/calculusiiimultivariable.tex\");\n"
+    "/calculusiiimultivariable.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
-  "/precalculus.tex\");\n"
+    "/precalculus.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
-  "/calculusi.tex\");\n"
+    "/calculusi.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
-  "/calculusii.tex\");\n"
+    "/calculusii.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
-  "/calculusiii.tex\");\n"
-    ,
+    "/calculusiii.tex\");\n",
     "CalculatorFunctions::buildFreecalc",
     "BuildFreecalc",
     innerAdminNoTest
@@ -387,8 +385,7 @@ void Calculator::initializeFunctionsExtra() {
     "",
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
     "BuildFreecalcWithSlides"
-  "(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");"
-    ,
+    "(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");",
     "CalculatorFunctions::BuildFreecalcWithSlides",
     "BuildFreecalcWithSlides",
     innerAdminNoTest
@@ -528,29 +525,28 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "All % signs are interpreted recursively "
     "as double, triple, ... url encoded strings and decoded accordingly.",
     "URLKeyValuePairsDecode("
-  "\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html"
-  "=weight%3d3%26deadlines%3d%26&Problems%2f"
-  "Limits%2dbasic%2dsubstitution%2d1.html"
-  "=weight%3d3%26deadlines%3d%26&Problems%2f"
-  "Limits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html"
-  "=weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2d"
-  "tends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html"
-  "=weight%3d1%26deadlines%3d%26&Problems%2f"
-  "Limits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2d"
-  "smaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2f"
-  "Limits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html"
-  " =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2d"
-  "to%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html "
-  "=weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dt"
-  "ends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html "
-  "=weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dt"
-  "ends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic"
-  " % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2f"
-  "Limits%2dx%2dtends%2dto%2dminus%2dinfinity%2d"
-  "quotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html "
-  "=weight%3d1%26deadlines%3d%26&Homework%2f"
-  "Precalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&\")"
-    ,
+    "\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html"
+    "=weight%3d3%26deadlines%3d%26&Problems%2f"
+    "Limits%2dbasic%2dsubstitution%2d1.html"
+    "=weight%3d3%26deadlines%3d%26&Problems%2f"
+    "Limits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html"
+    "=weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2d"
+    "tends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html"
+    "=weight%3d1%26deadlines%3d%26&Problems%2f"
+    "Limits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2d"
+    "smaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2f"
+    "Limits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html"
+    " =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2d"
+    "to%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html "
+    "=weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dt"
+    "ends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html "
+    "=weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dt"
+    "ends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic"
+    " % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2f"
+    "Limits%2dx%2dtends%2dto%2dminus%2dinfinity%2d"
+    "quotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html "
+    "=weight%3d1%26deadlines%3d%26&Homework%2f"
+    "Precalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&\")",
     "CalculatorConversions::urlStringToNormalString",
     "URLKeyValuePairsDecode",
     innerStandard
@@ -561,7 +557,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts an unsigned integer to base58. ",
     "theInt = ConvertHexToInteger"
-  "(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
+    "(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
     "ConvertIntegerToBase58(theInt)",
     "CalculatorFunctions::convertIntegerUnsignedToBase58",
     "ConvertIntegerToBase58",
@@ -587,15 +583,14 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Reference: NIST SP 800-38A.",
     "text = ConvertHexToString \""
     "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c4"
-  "6a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710"
-  "\";\n"
+    "6a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710"
+    "\";\n"
     "key = ConvertHexToString \""
-  "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
+    "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
     "ConvertStringToHex AESCBCEncrypt(key, text);\n"
     "\""
     "f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f2336"
-  "9a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
-    ,
+    "9a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n",
     "CalculatorFunctionsCrypto::aes_cbc_256_encrypt",
     "AESCBCEncrypt",
     innerStandard
@@ -617,7 +612,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23"
     "369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
     "ConvertStringToHex AESCBCDecrypt(ConvertHexToString key, "
-  "ConvertHexToString cipherText);\n"
+    "ConvertHexToString cipherText);\n"
     "text",
     "CalculatorFunctionsCrypto::aes_cbc_256_decrypt",
     "AESCBCDecrypt",
@@ -631,7 +626,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "More precisely, appends the first 4 bytes "
     "of sha256 of the string to the string. ",
     "A= \"80aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751f"
-  "acf35411509701\";\n"
+    "acf35411509701\";\n"
     "B= ConvertHexToString(A);\n"
     "C= AppendDoubleSha256Check(B);\n"
     "D= ConvertStringToHex(C)",
@@ -645,8 +640,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts hex to base58. ",
     "ConvertHexToBase58(\""
-    "03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");"
-    ,
+    "03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");",
     "CalculatorFunctions::convertHexToBase58",
     "ConvertHexToBase58",
     innerStandard
@@ -659,11 +653,11 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "The character to bit stream conversion is not fixed at the moment "
     "and may be system/compiler dependent. "
     "I believe that the character to bit stream "
-  "conversion should be standard for "
+    "conversion should be standard for "
     "the standard letters in the alphabet. "
     "Fancy UTF8 will probably be not read correctly from the CGI input, "
     "and furthermore will not be converted in a "
-  "standard fashion to bit stream. "
+    "standard fashion to bit stream. "
     "The examples below are taken from Wikipedia. ",
     "CharToBase64(\"pleasure.\");\n"
     "CharToBase64(\"leasure.\");\n"
@@ -705,8 +699,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Tests the pem parsing functions. ",
     "TestLoadPEMCertificate(ConvertBase64ToString("
-  "LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n"
-    ,
+    "LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n",
     "CalculatorFunctionsCrypto::testLoadPEMCertificates",
     "TestLoadPEMCertificate",
     innerStandard
@@ -717,8 +710,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Tests the pem private key functions. ",
     "TestLoadPEMPrivateKey(ConvertBase64ToString("
-  "LoadFileIntoString(\"test/private_key.base64\")));\n"
-    ,
+    "LoadFileIntoString(\"test/private_key.base64\")));\n",
     "CalculatorFunctionsCrypto::testLoadPEMPrivateKey",
     "TestLoadPEMPrivateKey",
     innerStandard
@@ -761,10 +753,9 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Tests decoding of abstract syntax one. ",
     "%HideLHS\n"
     "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("
-  "\"test/certificate_self_signed.base64\")));\n"
+    "\"test/certificate_self_signed.base64\")));\n"
     "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("
-  "\"test/private_key.base64\")));\n"
-    ,
+    "\"test/private_key.base64\")));\n",
     "CalculatorFunctions::testASN1Decode",
     "TestASN1Decode",
     innerExperimental
@@ -818,7 +809,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Tries to verify a Json Web Token with "
     "respect to a given rsa modulus and exponent. "
     "The reference JWT token was taken from: "
-  "https://tools.ietf.org/html/rfc7515#page-38, "
+    "https://tools.ietf.org/html/rfc7515#page-38, "
     "Appendix A.2.",
     "%HideLHS "
     "token =\""
@@ -919,10 +910,10 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Ripemd160 hash function. See wikipedia page. ",
     "ConvertStringToHex Ripemd160("
-  "\"The quick brown fox jumps over the lazy dog\");\n"
+    "\"The quick brown fox jumps over the lazy dog\");\n"
     "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
     "ConvertStringToHex Ripemd160("
-  "\"The quick brown fox jumps over the lazy cog\");\n"
+    "\"The quick brown fox jumps over the lazy cog\");\n"
     "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
     "CalculatorFunctionsCrypto::ripemd160OfString",
     "Ripemd160",
@@ -1011,8 +1002,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "ijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstn"
     "opqrstu\");\n"
     "\"8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d2"
-    "89e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909\";\n"
-    ,
+    "89e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909\";\n",
     "CalculatorFunctionsCrypto::sha512",
     "Sha512",
     innerStandard

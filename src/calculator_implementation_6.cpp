@@ -247,8 +247,8 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   );
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
-    CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j]
-    ;
+    CalculatorHTML::Test::OneProblemTest::OneAnswer& current =
+    this->answers[j];
     current.answerId = problem.problemData.answers.values[j].answerId;
     current.answerIdWebAPI =
     WebAPI::problem::calculatorAnswerPrefix + current.answerId;
@@ -421,8 +421,12 @@ bool CalculatorHTML::Test::builtIn(
       << badSoFar
       << " bad files so far. </b><br>";
     }
-    reportStream << "File: " << i << " out of " << this->fileNames.size << ". "
-    ;
+    reportStream
+    << "File: "
+    << i
+    << " out of "
+    << this->fileNames.size
+    << ". ";
     reportStream
     << currentTest.fileName
     << ". Random seed: "

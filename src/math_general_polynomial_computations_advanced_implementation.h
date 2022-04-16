@@ -306,8 +306,8 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(
     out << "$";
   }
   if (numberOfVariables > 1) {
-    out << ". The implied lexicographic order runs in the opposite direction: "
-    ;
+    out
+    << ". The implied lexicographic order runs in the opposite direction: ";
     if (addDollars) {
       out << "$";
     }
@@ -367,8 +367,9 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
     this->quotients[index].addMonomial(quotientMonomial, quotientCoefficient);
   }
   if (this->flagDoLogDivision) {
-    this->divisionReport.getElement().intermediateSubtractands.addOnTop(buffer)
-    ;
+    this->divisionReport.getElement().intermediateSubtractands.addOnTop(
+      buffer
+    );
   }
   if (this->flagDoProgressReport && report != nullptr) {
     std::stringstream out;
@@ -981,8 +982,10 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
       std::stringstream reportStream;
       reportStream << "Transforming system to a groebner basis... ";
       if (success) {
-        reportStream << "done, basis has " << inputSystem.size << " elements. "
-        ;
+        reportStream
+        << "done, basis has "
+        << inputSystem.size
+        << " elements. ";
       } else {
         reportStream
         << "not successful: computation is too large. "

@@ -1004,8 +1004,8 @@ bool LaTeXCrawler::extractFileNames(
   "workingfile" + this->headerFileNameNoPathNoExtension + ".pdf";
   std::string firstSignificantSlideName = "";
   if (this->slideFileNamesVirtualWithPath.size >= 1) {
-    firstSignificantSlideName = this->slideFileNamesVirtualWithPath[0].fileName
-    ;
+    firstSignificantSlideName =
+    this->slideFileNamesVirtualWithPath[0].fileName;
   }
   for (int i = 1; i < this->slideFileNamesVirtualWithPath.size; i ++) {
     if (this->latexSnippets[i] == "") {

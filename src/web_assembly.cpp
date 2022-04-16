@@ -37,8 +37,9 @@ int WebAssembly::main(int argc, char** argv) {
   (void) argc;
   (void) argv;
   global.flagRunningWebAssembly = true;
-  std::cout << "Web assembly main function does nothing; exiting." << std::endl
-  ;
+  std::cout
+  << "Web assembly main function does nothing; exiting."
+  << std::endl;
   return 0;
 }
 

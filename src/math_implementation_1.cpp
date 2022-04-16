@@ -915,8 +915,9 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(
 }
 
 void BranchingData::initializePart1NoSubgroups() {
-  STACK_TRACE("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups")
-  ;
+  STACK_TRACE(
+    "BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups"
+  );
   this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl =
   &this->homomorphism.coDomainAlgebra().weylGroup;
   this->weylGroupFiniteDimensionalSmall.ambientWeyl =
@@ -1055,8 +1056,8 @@ void BranchingData::initializePart2NoSubgroups() {
     1000
   );
   this->weylGroupFiniteDimensional.computeRootSubsystem();
-  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeRootSubsystem()
-  ;
+  this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.computeRootSubsystem(
+  );
   this->weylGroupFiniteDimensionalSmall.computeRootSubsystem();
 }
 
@@ -1139,8 +1140,8 @@ getGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output) {
   Vector<int> indexShifts;
   indexShifts.setSize(this->simpleRootsInner.size);
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
-    indexShifts[i] = this->simpleRootsInner[i].getIndexFirstNonZeroCoordinate()
-    ;
+    indexShifts[i] =
+    this->simpleRootsInner[i].getIndexFirstNonZeroCoordinate();
   }
   for (int i = 0; i < this->allElements.size; i ++) {
     const

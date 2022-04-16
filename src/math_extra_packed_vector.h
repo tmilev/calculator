@@ -259,8 +259,9 @@ void AnotherWeylGroup<scalar, templateVector>::computeRho() {
     for (
       int j = 0; j < this->unrationalCartanSymmetric.numberOfColumns; j ++
     ) {
-      global.comments << this->unrationalCartanSymmetric.elements[i][j] << '\t'
-      ;
+      global.comments
+      << this->unrationalCartanSymmetric.elements[i][j]
+      << '\t';
     }
     global.comments << '\n';
   }

@@ -1075,8 +1075,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     );
     this->additionalHighlightRemainders[remainderIndex][monomialIndex] =
     currentSlideNumber;
-    this->additionalHighlightFinalRemainder[monomialIndex] = currentSlideNumber
-    ;
+    this->additionalHighlightFinalRemainder[monomialIndex] =
+    currentSlideNumber;
     this->uncoverMonsFinalRemainder[monomialIndex] = currentSlideNumber;
     currentSlideNumber ++;
   }
@@ -1797,8 +1797,9 @@ combineFractionsCommutativeWithInternalLibrary(
 bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial")
-  ;
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial"
+  );
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }

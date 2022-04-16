@@ -171,8 +171,8 @@ std::string HtmlRoutines::getCalculatorComputationURL(
   std::stringstream out;
   JSData request;
   request[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
-  request[DatabaseStrings::labelCurrentPage] = WebAPI::frontend::calculatorPage
-  ;
+  request[DatabaseStrings::labelCurrentPage] =
+  WebAPI::frontend::calculatorPage;
   out
   << "#"
   << HtmlRoutines::convertStringToURLString(

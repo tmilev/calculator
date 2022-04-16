@@ -133,8 +133,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::pointerIsBad(
   ASNElement& outputError
 ) {
   if (this->dataPointer >= this->rawData->size || this->dataPointer < 0) {
-    outputError.error = "Unexpected overflow error: data pointer is negative. "
-    ;
+    outputError.error =
+    "Unexpected overflow error: data pointer is negative. ";
     return true;
   }
   return false;
@@ -1057,8 +1057,10 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   << "<script "
   << WebAPI::result::scriptType
   << "='abstractSyntaxNotationAnnotate'>";
-  out << "[\"" << Crypto::convertListUnsignedCharsToHex(*this->rawData) << "\""
-  ;
+  out
+  << "[\""
+  << Crypto::convertListUnsignedCharsToHex(*this->rawData)
+  << "\"";
   out << ", ";
   out << this->decodedData->toString();
   out << ", ";
@@ -1216,14 +1218,14 @@ std::string ASNObject::names::countryName = "countryName";
 std::string ASNObject::names::stateOrProvinceName = "stateOrProvinceName";
 std::string ASNObject::names::localityName = "localityName";
 std::string ASNObject::names::organizationName = "organizationName";
-std::string ASNObject::names::organizationalUnitName = "organizationalUnitName"
-;
+std::string ASNObject::names::organizationalUnitName =
+"organizationalUnitName";
 std::string ASNObject::names::commonName = "commonName";
 std::string ASNObject::names::emailAddress = "emailAddress";
 std::string ASNObject::names::basicConstraints = "basicConstraints";
 std::string ASNObject::names::subjectKeyIdentifier = "subjectKeyIdentifier";
-std::string ASNObject::names::authorityKeyIdentifier = "authorityKeyIdentifier"
-;
+std::string ASNObject::names::authorityKeyIdentifier =
+"authorityKeyIdentifier";
 MapList<
   std::string, ASNObject, HashFunctions::hashFunction<std::string>
 >& ASNObject::namesToObjectIdsNonThreadSafe() {
@@ -1626,8 +1628,8 @@ void ASNElement::makeBitStringEmpty(
 
 void ASNElement::makeBitString(const List<unsigned char>& input) {
   this->reset();
-  this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03
-  ;
+  this->startByte =
+  AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
   this->tag = this->startByte;
   this->ASNAtom = input;
 }
@@ -2212,8 +2214,10 @@ bool X509Certificate::loadFromPEMFile(
 
 std::string TBSCertificateInfo::Organization::toString() {
   std::stringstream out;
-  out << "Country name: " << this->countryName.content.toString() << "\n<br>\n"
-  ;
+  out
+  << "Country name: "
+  << this->countryName.content.toString()
+  << "\n<br>\n";
   out << "Common name: " << this->commonName.content.toString() << "\n<br>\n";
   out
   << "Email address: "
@@ -2401,8 +2405,8 @@ bool TBSCertificateInfo::load(
   STACK_TRACE("TBSCertificateInfo::load");
   if (input.elements.size < 7) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Certificate ASN element needs at least 7 fields. "
-      ;
+      *commentsOnFailure
+      << "Certificate ASN element needs at least 7 fields. ";
     }
     return false;
   }

@@ -3427,8 +3427,9 @@ const {
   }
   if (this->isOfType<AlgebraicNumber>()) {
     return
-    this->getValue<AlgebraicNumber>().needsParenthesisForMultiplication(format)
-    ;
+    this->getValue<AlgebraicNumber>().needsParenthesisForMultiplication(
+      format
+    );
   }
   if (this->isAtom() || this->children.size == 0) {
     return false;

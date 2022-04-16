@@ -2817,8 +2817,9 @@ public:
       this->coefficients.flagDeallocated ||
       this->flagDeallocated
     ) {
-      global.fatal << "Use after free of monomial collection. " << global.fatal
-      ;
+      global.fatal
+      << "Use after free of monomial collection. "
+      << global.fatal;
     }
   }
   void checkConsistencyGrandMaster() const {
@@ -3126,8 +3127,9 @@ public:
     this->multiplyBy(other, *this, bufferPolynomial, bufferMonomial);
   }
   void operator*=(const Coefficient& other) {
-    this->::LinearCombination<TemplateMonomial, Coefficient>::operator*=(other)
-    ;
+    this->::LinearCombination<TemplateMonomial, Coefficient>::operator*=(
+      other
+    );
   }
   void raiseToPower(
     int d,
@@ -3365,10 +3367,10 @@ public:
     const Polynomial<Coefficient>& right
   );
   bool isEqualTo(const Polynomial<Coefficient>& p) const;
-  Polynomial<Coefficient> operator+(const Polynomial<Coefficient>& other) const
-  ;
-  Polynomial<Coefficient> operator-(const Polynomial<Coefficient>& other) const
-  ;
+  Polynomial<Coefficient> operator+(const Polynomial<Coefficient>& other)
+  const;
+  Polynomial<Coefficient> operator-(const Polynomial<Coefficient>& other)
+  const;
   void operator-=(int x);
   void operator-=(const Coefficient& other);
   void operator-=(const Polynomial<Coefficient>& other);
@@ -4666,11 +4668,11 @@ public:
   void operator*=(const Complex<Coefficient>& other) {
     Complex accumulator;
     accumulator.realPart =
-    this->realPart * other.realPart - this->imaginaryPart * other.imaginaryPart
-    ;
+    this->realPart *
+    other.realPart - this->imaginaryPart * other.imaginaryPart;
     accumulator.imaginaryPart =
-    this->realPart * other.imaginaryPart + this->imaginaryPart * other.realPart
-    ;
+    this->realPart * other.imaginaryPart +
+    this->imaginaryPart * other.realPart;
     this->operator=(accumulator);
   }
   void operator=(const Complex<Coefficient>& other) {
@@ -4707,8 +4709,8 @@ public:
   void invert() {
     Coefficient numerator;
     numerator =
-    this->realPart * this->realPart + this->imaginaryPart * this->imaginaryPart
-    ;
+    this->realPart * this->realPart +
+    this->imaginaryPart * this->imaginaryPart;
     this->realPart /= numerator;
     numerator *= - 1;
     this->imaginaryPart /= numerator;
@@ -6009,8 +6011,8 @@ public:
   int computeGainingMultiplicityIndexInLinearRelation(
     Vector<Rational>& linearRelation
   );
-  void getNormalizedSortedDenominatorExponents(Vectors<Rational>& output) const
-  ;
+  void getNormalizedSortedDenominatorExponents(Vectors<Rational>& output)
+  const;
   void getDenominatorsSorted(
     MapList<Vector<Rational>, OnePartialFractionDenominatorComponent>& output
   ) const;
@@ -6583,8 +6585,8 @@ public:
     static_cast<unsigned int>(input.letter) * 2 + static_cast<unsigned int>(
       input.rank
     ) +
-    HashConstants::constant0 * input.cartanSymmetricInverseScale.hashFunction()
-    ;
+    HashConstants::constant0 *
+    input.cartanSymmetricInverseScale.hashFunction();
   }
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
@@ -6603,8 +6605,9 @@ public:
   Rational getLongRootLengthSquared() const;
   Rational getRatioRootSquaredToFirstSquared(int rootIndex) const;
   static Rational getRatioLongRootToFirst(char inputWeylLetter, int inputRank);
-  static Rational getDynkinIndexParabolicallyInducingSubalgebra(char inputType)
-  ;
+  static Rational getDynkinIndexParabolicallyInducingSubalgebra(
+    char inputType
+  );
   bool canBeExtendedParabolicallyTo(const DynkinSimpleType& otherType) const;
   bool canBeExtendedParabolicallyOrIsEqualTo(
     const DynkinSimpleType& otherType
@@ -6892,8 +6895,8 @@ class ElementWeylAlgebra: public LinearCombination<
 public:
   unsigned int hashFunction() const {
     return
-    this->::LinearCombination<MonomialWeylAlgebra, Coefficient>::hashFunction()
-    ;
+    this->::LinearCombination<MonomialWeylAlgebra, Coefficient>::hashFunction(
+    );
   }
   static unsigned int hashFunction(const ElementWeylAlgebra& input) {
     return input.hashFunction();

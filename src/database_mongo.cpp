@@ -1337,8 +1337,8 @@ bool QuerySet::toJSONMongo(
     keyPrefix += ".";
   }
   for (int i = 0; i < converted.objects.size(); i ++) {
-    output[keyPrefix + converted.objects.keys[i]] = converted.objects.values[i]
-    ;
+    output[keyPrefix + converted.objects.keys[i]] =
+    converted.objects.values[i];
   }
   return true;
 }

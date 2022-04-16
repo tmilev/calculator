@@ -426,8 +426,9 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
   int maximumPowerToExpand,
   bool acceptNonPositiveOrNonIntegerPowers
 ) {
-  STACK_TRACE("CalculatorConversions::extractPolynomialSumDifferenceOrProduct")
-  ;
+  STACK_TRACE(
+    "CalculatorConversions::extractPolynomialSumDifferenceOrProduct"
+  );
   if (
     !input.isListStartingWithAtom(calculator.opTimes()) &&
     !input.isListStartingWithAtom(calculator.opPlus()) &&

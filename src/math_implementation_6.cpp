@@ -286,8 +286,8 @@ bool PolynomialFactorizationKronecker::oneFactor(
         isGood = false;
         break;
       }
-      currentPointContribution = valuesAtPoints[j] / valuesAtRemainingPoints[j]
-      ;
+      currentPointContribution = valuesAtPoints[j] /
+      valuesAtRemainingPoints[j];
       if (!currentPointContribution.isInteger()) {
         isGood = false;
         break;
@@ -1446,8 +1446,11 @@ std::string PolynomialModuloPolynomialModuloInteger::toString(
 ) const {
   (void) format;
   std::stringstream out;
-  out << this->value.toString() << " mod (" << this->modulus->toString() << ")"
-  ;
+  out
+  << this->value.toString()
+  << " mod ("
+  << this->modulus->toString()
+  << ")";
   return out.str();
 }
 

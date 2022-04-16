@@ -267,8 +267,8 @@ bool CalculatorConversions::convertWithoutComputation<
     "CalculatorConversions::"
     "convertWithoutComputation_ElementSemisimpleLieAlgebra_AlgebraicNumber"
   );
-  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > > element
-  ;
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
+  element;
   if (
     !CalculatorConversions::convertWithoutComputation(
       calculator, input, element
@@ -1302,11 +1302,13 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
         << ". ";
       }
       if (i % 2 == 1) {
-        outputSubalgebra.negativeGenerators.addOnTop(currentGeneratorAlgebraic)
-        ;
+        outputSubalgebra.negativeGenerators.addOnTop(
+          currentGeneratorAlgebraic
+        );
       } else {
-        outputSubalgebra.positiveGenerators.addOnTop(currentGeneratorAlgebraic)
-        ;
+        outputSubalgebra.positiveGenerators.addOnTop(
+          currentGeneratorAlgebraic
+        );
       }
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution = false;

@@ -1283,8 +1283,9 @@ bool TrigonometricReduction::computeEulerFormExpression(
 }
 
 void TrigonometricReduction::computeEulerFormExpressionPresentation() {
-  STACK_TRACE("TrigonometricReduction::computeEulerFormExpressionPresentation")
-  ;
+  STACK_TRACE(
+    "TrigonometricReduction::computeEulerFormExpressionPresentation"
+  );
   this->inputFractionSubstituted = this->inputFraction;
   this->inputFractionSubstitutedAlgebraic = this->inputFraction;
   List<Expression> eulerFormVariables;

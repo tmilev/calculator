@@ -36,8 +36,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "g=EllipticCurveGeneratorNIST(\"secp256k1\");\n"
     "g^3; "
     "g^11579208923731619542357098500868790785"
-  "2837564279074904382605163141518161494337"
-    ,
+    "2837564279074904382605163141518161494337",
     "CalculatorFunctions::nistEllipticCurveGenerator",
     "EllipticCurveGeneratorNIST",
     innerStandard
@@ -549,8 +548,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     ,
     "CalculatorFunctionsBinaryOps::"
     "addRationalOrPolynomialOrElementWeylAlgebra"
-  "ToRattionalOrPolynomialOrElementWeylAlgebra"
-    ,
+    "ToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddRationalToElementWeylAlgebra",
     innerStandard
   );
@@ -567,8 +565,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
     "CalculatorFunctionsBinaryOps::"
     "addRationalOrPolynomialOrElementWeylAlgebra"
-  "ToRattionalOrPolynomialOrElementWeylAlgebra"
-    ,
+    "ToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddPolynomialToElementWeylAlgebra",
     innerStandard
   );
@@ -585,8 +582,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
     "CalculatorFunctionsBinaryOps::"
     "addRationalOrPolynomialOrElementWeylAlgebra"
-  "ToRattionalOrPolynomialOrElementWeylAlgebra"
-    ,
+    "ToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddElementWeylAlgebraToPolynomial",
     innerStandard
   );
@@ -603,8 +599,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
     "CalculatorFunctionsBinaryOps::"
     "addRationalOrPolynomialOrElementWeylAlgebra"
-  "ToRattionalOrPolynomialOrElementWeylAlgebra"
-    ,
+    "ToRattionalOrPolynomialOrElementWeylAlgebra",
     "AddElementWeylAlgebraToElementWeylAlgebra",
     innerStandard
   );
@@ -623,8 +618,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "3\\partial_i",
     "CalculatorFunctionsBinaryOps::"
     "multiplyRationalOrPolynomialOrElementWeylAlgebraBy"
-  "RationalOrPolynomialOrElementWeylAlgebra"
-    ,
+    "RationalOrPolynomialOrElementWeylAlgebra",
     "MultiplyRationalByElementWeylAlgebra",
     innerStandard
   );
@@ -642,8 +636,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
     "CalculatorFunctionsBinaryOps::"
     "multiplyRationalOrPolynomialOrElementWeylAlgebraBy"
-  "RationalOrPolynomialOrElementWeylAlgebra"
-    ,
+    "RationalOrPolynomialOrElementWeylAlgebra",
     "MultiplyPolynomialByElementWeylAlgebra",
     innerStandard
   );
@@ -661,8 +654,8 @@ void Calculator::initializeFunctionsScientificBasic() {
     "a = x_1 x_2;\n"
     "b = \\partial_1 \\partial_2; a b - b a -[a,b] ",
     "CalculatorFunctionsBinaryOps::"
-  "multiplyRationalOrPolynomialOrElementWeylAlgebraBy"
-  "RationalOrPolynomialOrElementWeylAlgebra",
+    "multiplyRationalOrPolynomialOrElementWeylAlgebraBy"
+    "RationalOrPolynomialOrElementWeylAlgebra",
     "MultiplyElementWeylAlgebraByElementWeylAlgebra",
     innerStandard
   );
@@ -680,8 +673,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
     "CalculatorFunctionsBinaryOps::"
     "multiplyRationalOrPolynomialOrElementWeylAlgebraBy"
-  "RationalOrPolynomialOrElementWeylAlgebra"
-    ,
+    "RationalOrPolynomialOrElementWeylAlgebra",
     "MultiplyElementWeylAlgebraByPolynomial",
     innerStandard
   );

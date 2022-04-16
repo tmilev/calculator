@@ -1617,8 +1617,8 @@ void FileOperations::initializeFoldersNonSensitive() {
   // to compute the folder locations below.
   std::string HTMLCommonFolder =
   global.configuration[Configuration::HTMLCommon].stringValue;
-  List<List<std::string> >& links = FileOperations::folderVirtualLinksDefault()
-  ;
+  List<List<std::string> >& links =
+  FileOperations::folderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     std::string& key = links[i][0];
     std::string value = global.configuration.getValue(key).stringValue;
@@ -2638,8 +2638,10 @@ std::string StringRoutines::Differ::differenceHTML(
         leftOut << "<span class='spanStringDifferent'>" << leftS << "</span>";
       }
       if (rightS.size() > 0) {
-        rightOut << "<span class='spanStringDifferent'>" << rightS << "</span>"
-        ;
+        rightOut
+        << "<span class='spanStringDifferent'>"
+        << rightS
+        << "</span>";
       }
     }
   }
@@ -3075,8 +3077,9 @@ std::string StringRoutines::replaceAll(
 ) {
   std::stringstream out;
   if (subStringToReplace.size() == 0) {
-    global.fatal << "Not allowed to replace the empty string. " << global.fatal
-    ;
+    global.fatal
+    << "Not allowed to replace the empty string. "
+    << global.fatal;
   }
   for (unsigned i = 0; i < input.size(); i ++) {
     bool found = true;
@@ -3958,8 +3961,9 @@ void OnePartialFractionDenominator::getLinearRelationFromNormalized(
   Vector<Rational>& linearRelationBetweenNormalizedVectors,
   Vector<Rational>& output
 ) {
-  STACK_TRACE("OnePartialFractionDenominator::getLinearRelationFromNormalized")
-  ;
+  STACK_TRACE(
+    "OnePartialFractionDenominator::getLinearRelationFromNormalized"
+  );
   output = linearRelationBetweenNormalizedVectors;
   for (int i = 0; i < output.size; i ++) {
     if (output[i].isEqualToZero()) {
@@ -4991,8 +4995,9 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
     root.makeZero(this->ambientDimension);
   }
   if (!this->computeOneVectorPartitionFunction(output, root)) {
-    global.fatal << "Failed to get vector partition function. " << global.fatal
-    ;
+    global.fatal
+    << "Failed to get vector partition function. "
+    << global.fatal;
   }
 }
 
@@ -5384,8 +5389,9 @@ void SelectionWithMultiplicities::toString(std::string& output) {
 void SelectionWithMaxMultiplicity::initMaxMultiplicity(
   int numberOfElements, int maximulMultiplicity
 ) {
-  this->::SelectionWithMultiplicities::initWithMultiplicities(numberOfElements)
-  ;
+  this->::SelectionWithMultiplicities::initWithMultiplicities(
+    numberOfElements
+  );
   this->maximumMultiplicity = maximulMultiplicity;
 }
 
@@ -6911,8 +6917,9 @@ void DynkinSimpleType::getCoCartanSymmetric(Matrix<Rational>& output) const {
 }
 
 Rational DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale() const {
-  STACK_TRACE("DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale")
-  ;
+  STACK_TRACE(
+    "DynkinSimpleType::getPrincipalSlTwoCartanSymmetricInverseScale"
+  );
   // Reference: Panyushev, On the Dynkin index of a principal sl(2)-subalgebra,
   // Advances in Mathematics, 2008.
   Rational nonScaled = 0;
@@ -7969,8 +7976,8 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
   out << "<hr>Here is the c++ input code for the char table.";
   out << "<br>";
   FormatExpressions formatNoDynkinTypePlusesExponents;
-  formatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true
-  ;
+  formatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent =
+  true;
   out
   << "bool loadCharacterTable"
   << this->dynkinType.toString(&formatNoDynkinTypePlusesExponents)
@@ -8031,8 +8038,8 @@ std::string WeylGroupData::toStringCppConjugacyClasses(
   out << "<hr>Here is the c++ input code for the conjugacy class table.";
   out << "<br>";
   FormatExpressions formatNoDynkinTypePlusesExponents;
-  formatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true
-  ;
+  formatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent =
+  true;
   out
   << "bool loadConjugacyClasses"
   << this->dynkinType.toString(&formatNoDynkinTypePlusesExponents)
@@ -8082,8 +8089,10 @@ std::string WeylGroupData::toStringCppConjugacyClasses(
       out << "&nbsp;";
       // making sure index has width exactly 3 spaces
     }
-    out << "].size =" << this->group.conjugacyClasses[i].size.toString() << ";"
-    ;
+    out
+    << "].size ="
+    << this->group.conjugacyClasses[i].size.toString()
+    << ";";
   }
   out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.setSize(0);";
   for (int i = 0; i < this->ccCarterLabels.size; i ++) {
@@ -9628,8 +9637,10 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     << this->nextToExplore
     << "<br>\n Orbit of rho:<br>\n";
     for (int i = 0; i < this->size; i ++) {
-      out << this->objects[i].toString() << "   :  " << this->multiplicities[i]
-      ;
+      out
+      << this->objects[i].toString()
+      << "   :  "
+      << this->multiplicities[i];
       if (this->explored[i]) {
         out << " Explored<br>\n";
       } else {
@@ -9665,8 +9676,10 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     << "weight of highest weight \\lambda: "
     << "<br><table border =\"1\"><tr><td>Weyl elt.</td>";
     for (int i = 0; i < this->weylGroup->group.elements.size; i ++) {
-      out << "<td>" << this->weylGroup->group.elements[i].toString() << "</td>"
-      ;
+      out
+      << "<td>"
+      << this->weylGroup->group.elements[i].toString()
+      << "</td>";
     }
     out << "</tr>";
     for (int i = 0; i < this->weylGroup->group.elements.size; i ++) {
@@ -9842,13 +9855,13 @@ void KazhdanLusztigPolynomials::computeKLCoefficients() {
     for (
       int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++
     ) {
-      Polynomial<Rational>& currentPoly = this->kazhdanLuzstigPolynomials[i][j]
-      ;
+      Polynomial<Rational>& currentPoly =
+      this->kazhdanLuzstigPolynomials[i][j];
       this->kazhdanLuzstigCoefficients[i][j] = 0;
       if (this->indexGEQIndex(j, i)) {
         for (int k = 0; k < currentPoly.size(); k ++) {
-          this->kazhdanLuzstigCoefficients[i][j] += currentPoly.coefficients[k]
-          ;
+          this->kazhdanLuzstigCoefficients[i][j] +=
+          currentPoly.coefficients[k];
         }
       }
     }
@@ -10765,8 +10778,8 @@ void Lattice::intersectWith(const Lattice& other) {
       j ++
     ) {
       currentRoot +=
-      commonBasis[j] * thisCommonCoordsLattice.basisRationalForm.elements[i][j]
-      ;
+      commonBasis[j] *
+      thisCommonCoordsLattice.basisRationalForm.elements[i][j];
     }
   }
   this->makeFromRoots(resultBasis);
@@ -10827,8 +10840,10 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
     }
     out << "\\rangle";
   } else {
-    out << "\\Lambda =\\mathbb{Z}^{" << this->minimalNumberOfVariables() << "}"
-    ;
+    out
+    << "\\Lambda =\\mathbb{Z}^{"
+    << this->minimalNumberOfVariables()
+    << "}";
   }
   out << "\\end{array}";
   return out.str();
@@ -10862,8 +10877,10 @@ std::string QuasiPolynomial::toHTML(FormatExpressions* format) {
     }
     out << "\\rangle";
   } else {
-    out << "\\Lambda =\\mathbb{Z}^{" << this->minimalNumberOfVariables() << "}"
-    ;
+    out
+    << "\\Lambda =\\mathbb{Z}^{"
+    << this->minimalNumberOfVariables()
+    << "}";
   }
   out << "\\)";
   return out.str();
@@ -11668,8 +11685,9 @@ void Cone::intersectHyperplane(
   Vectors<Rational> basis;
   kernelComputer.getZeroEigenSpace(basis);
   if (basis.size != normal.size - 1) {
-    global.fatal << "Plane intersection: normals don't match. " << global.fatal
-    ;
+    global.fatal
+    << "Plane intersection: normals don't match. "
+    << global.fatal;
   }
   embedding.assignVectorsToRows(basis);
   embedding.transpose();
@@ -12038,8 +12056,8 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
     unitMovement;
     scalarProduct.assignFractionalValue();
     shiftedConstant = constOnRightHandSide + scalarProduct;
-    Vector<Rational>& currentMovement = movementInDirectionPerRepresentative[i]
-    ;
+    Vector<Rational>& currentMovement =
+    movementInDirectionPerRepresentative[i];
     currentMovement = affineHyperplane;
     *currentMovement.lastObject() = shiftedConstant;
   }
@@ -12876,8 +12894,8 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   Vector<double> newVectorE2;
   Vectors<double>& currentBasisPlane = this->basisProjectionPlane;
   newVectorE1 = currentBasisPlane[0] * FloatingPoint::cosFloating(angleChange);
-  newVectorE1 += currentBasisPlane[1] * FloatingPoint::sinFloating(angleChange)
-  ;
+  newVectorE1 +=
+  currentBasisPlane[1] * FloatingPoint::sinFloating(angleChange);
   newVectorE2 = currentBasisPlane[1] * FloatingPoint::cosFloating(angleChange);
   newVectorE2 +=
   currentBasisPlane[0] *(- FloatingPoint::sinFloating(angleChange));
@@ -13412,8 +13430,8 @@ void Cone::translateMeMyLastCoordinateAffinization(
   for (int i = 0; i < this->normals.size; i ++) {
     root = this->normals[i];
     root.size --;
-    (*this->normals[i].lastObject()) -= root.scalarEuclidean(translationVector)
-    ;
+    (*this->normals[i].lastObject()) -=
+    root.scalarEuclidean(translationVector);
   }
   root = translationVector;
   root.setSize(translationVector.size + 1);
@@ -13447,8 +13465,9 @@ void ConeCollection::refineMakeCommonRefinement(const ConeCollection& other) {
   Vectors<Rational> newWalls;
   Cone currentCone = this->convexHull;
   if (currentCone.makeConvexHullOfMeAnd(other.convexHull)) {
-    this->getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(newWalls)
-    ;
+    this->getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(
+      newWalls
+    );
     this->initialize();
     this->convexHull = currentCone;
     this->nonRefinedCones.addOnTop(currentCone);
@@ -15180,8 +15199,9 @@ std::string ConeCollection::toString() {
   out << "\nNormals of walls to refine by: ";
   out << roots.toString(&format);
   if (this->slicingDirections.size > 0) {
-    out << " Directions to slice along: " << this->slicingDirections.toString()
-    ;
+    out
+    << " Directions to slice along: "
+    << this->slicingDirections.toString();
   }
   out << "Non-refined cones follow.\n";
   for (int i = 0; i < this->nonRefinedCones.size; i ++) {
@@ -15207,8 +15227,9 @@ std::string ConeCollection::toHTML() {
   out << "<br>Normals of walls to refine by: ";
   out << roots.toString(&format);
   if (this->slicingDirections.size > 0) {
-    out << " Directions to slice along: " << this->slicingDirections.toString()
-    ;
+    out
+    << " Directions to slice along: "
+    << this->slicingDirections.toString();
   }
   for (int i = 0; i < this->refinedCones.size; i ++) {
     out << "<br>Chamber " << i + 1 << ":<br>";

@@ -21,8 +21,8 @@
 #include "signals_infrastructure.h"
 #include "web_client.h"
 
-const std::string WebServer::Statististics::pingRequestsString = "pingRequests"
-;
+const std::string WebServer::Statististics::pingRequestsString =
+"pingRequests";
 const std::string WebServer::Statististics::allRequestsString = "allRequests";
 WebServer& GlobalVariables::server() {
   static WebServer result;
@@ -247,8 +247,8 @@ bool WebWorker::receiveAll() {
   // <- needed else the length error check will pop.
   if (this->contentLength > 10000000) {
     this->checkConsistency();
-    error = "Content-length parsed to be more than 10 million bytes, aborting."
-    ;
+    error =
+    "Content-length parsed to be more than 10 million bytes, aborting.";
     global << this->error << Logger::endL;
     this->displayUserInput = this->error;
     return false;
@@ -414,8 +414,10 @@ void SystemFunctions::segfaultSigaction[[noreturn]](
   // fine.
   (void) signal;
   (void) arg;
-  global.fatal << "Caught segfault at address: " << si->si_addr << global.fatal
-  ;
+  global.fatal
+  << "Caught segfault at address: "
+  << si->si_addr
+  << global.fatal;
   exit(0);
 }
 
@@ -886,8 +888,8 @@ bool WebWorker::loginProcedure(
   }
   user.clearAuthenticationTokenAndPassword();
   if (shouldDisplayMessage) {
-    argumentProcessingFailureComments << "Invalid user and/or authentication. "
-    ;
+    argumentProcessingFailureComments
+    << "Invalid user and/or authentication. ";
   }
   arguments.setKeyValue(
     "password", "********************************************"
@@ -1573,8 +1575,10 @@ int WebWorker::processFileDoesntExist() {
   // Never return non-sanitized user input back to the user.
   std::stringstream out;
   out << "<html>" << "<body>";
-  out << "one page <a href = \"" << global.displayApplication << "\">app</a>. "
-  ;
+  out
+  << "one page <a href = \""
+  << global.displayApplication
+  << "\">app</a>. ";
   out
   << " Same app without browser cache: <a href = \""
   << global.displayNameExecutableAppNoCache
@@ -3229,8 +3233,8 @@ std::string WebServer::toStringStatusAll() {
       continue;
     }
     currentWorker.pipeWorkerToWorkerStatus.readOnceWithoutEmptying(false);
-    currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.getLastRead()
-    ;
+    currentWorker.status =
+    currentWorker.pipeWorkerToWorkerStatus.getLastRead();
   }
   out << "<hr>";
   out << "Connections: " << this->currentlyConnectedAddresses.toString();
@@ -4414,8 +4418,9 @@ int WebServer::run() {
       }
       int result = this->getActiveWorker().run();
       if (global.flagServerDetailedLog) {
-        global << "Detail: run finished, releasing resources. " << Logger::endL
-        ;
+        global
+        << "Detail: run finished, releasing resources. "
+        << Logger::endL;
       }
       this->releaseEverything();
       if (global.flagServerDetailedLog) {
@@ -4910,8 +4915,10 @@ bool ArgumentAnalyzer::setTest() {
 
 bool ArgumentAnalyzer::setPathExecutable() {
   if (this->currentIndex + 1 >= global.programArguments.size) {
-    global << Logger::red << "The executable path is missing. " << Logger::endL
-    ;
+    global
+    << Logger::red
+    << "The executable path is missing. "
+    << Logger::endL;
     return false;
   }
   this->currentIndex ++;
@@ -5584,8 +5591,8 @@ void GlobalVariables::configurationProcess() {
     global.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
   global.flagUseMathTags =
-  global.configuration[Configuration::useMathTags].isTrueRepresentationInJSON()
-  ;
+  global.configuration[Configuration::useMathTags].isTrueRepresentationInJSON(
+  );
   List<List<std::string> > folderVirtualLinksDefault =
   FileOperations::initializeFolderVirtualLinksDefaults();
   for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {

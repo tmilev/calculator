@@ -170,8 +170,8 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
   int topHeightRootSystem =
-  this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort
-  ;
+  this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().
+  numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -977,8 +977,10 @@ bool Calculator::Test::processResults() {
       currentLine << differ.differenceHTML("actual", "expected");
       currentLine << "</td>";
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
-      currentLineConsole << "Expected:\n" << currentTest.expectedResult << "\n"
-      ;
+      currentLineConsole
+      << "Expected:\n"
+      << currentTest.expectedResult
+      << "\n";
       isBad = true;
       this->inconsistencies ++;
     }

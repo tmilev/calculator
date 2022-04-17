@@ -1563,9 +1563,7 @@ int Calculator::addOperationNoRepetitionOrReturnIndexFirst(
   return result;
 }
 
-void Calculator::addBuiltInType(
-  const std::string& operationBuiltIn
-) {
+void Calculator::addBuiltInType(const std::string& operationBuiltIn) {
   this->addOperationNoRepetitionAllowed(operationBuiltIn);
   this->builtInTypes.all.addOnTop(operationBuiltIn);
 }

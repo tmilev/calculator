@@ -30,7 +30,10 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
       )
     );
   }
-  PartialFractions &result =calculator.objectContainer.vectorPartitionFunctions.getValueCreateEmpty(vectors);
+  PartialFractions& result =
+  calculator.objectContainer.vectorPartitionFunctions.getValueCreateEmpty(
+    vectors
+  );
   matrix.getVectorsFromRows(vectors);
   result.initializeAndSplit(vectors, &calculator.comments);
   result.computeAllVectorPartitionFunctions();

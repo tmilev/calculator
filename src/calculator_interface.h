@@ -2075,11 +2075,10 @@ public:
   // A built in object is atomic
   // from the standpoint of a calculator user.
   // The built in type is not allowed to be used as a function.
-  class BuiltInTypes{
+  class BuiltInTypes {
   public:
     Calculator* owner;
     HashedList<std::string> all;
-
     class Names {
     public:
       static std::string vectorPartitionFunction;
@@ -2095,17 +2094,15 @@ public:
     BuiltInTypes() {
       this->owner = nullptr;
     }
-
-
   };
+
   // A function is a predefined string that is to be attached to
   // a built-in function handler.
-
   class Functions {
   public:
     Calculator* owner;
-class Names{
-public:
+    class Names {
+    public:
       static std::string commandEnclosure;
       static std::string setInputBox;
       static std::string setRandomSeed;
@@ -2120,15 +2117,17 @@ public:
         static std::string sine;
         static std::string cosine;
       };
-};
-Functions(){this->owner= nullptr;}
-int vectorPartitionFunction() {
-  return
-  this->owner->operations.getIndexNoFail(
-    Calculator::Functions::Names::vectorPartitionFunction
-  );
-}
+    };
 
+    Functions() {
+      this->owner = nullptr;
+    }
+    int vectorPartitionFunction() {
+      return
+      this->owner->operations.getIndexNoFail(
+        Calculator::Functions::Names::vectorPartitionFunction
+      );
+    }
   };
 
   Calculator::BuiltInTypes builtInTypes;

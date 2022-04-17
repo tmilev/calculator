@@ -19,7 +19,8 @@
 // This file lists calculator functions and various hard-coded rules.
 // Hard-coded functions and operators.
 std::string Calculator::Functions::Names::setRandomSeed = "SetRandomSeed";
-std::string Calculator::Functions::Names::commandEnclosure = "CommandEnclosure";
+std::string Calculator::Functions::Names::commandEnclosure =
+"CommandEnclosure";
 std::string Calculator::Functions::Names::setInputBox = "SetInputBox";
 std::string Calculator::Functions::Names::sort = "Sort";
 std::string Calculator::Functions::Names::transpose = "Transpose";
@@ -30,12 +31,10 @@ std::string Calculator::Functions::Names::turnOnRules = "TurnOnRules";
 std::string Calculator::Functions::Names::turnOffRules = "TurnOffRules";
 std::string Calculator::Functions::Names::Trigonometry::sine = "\\sin";
 std::string Calculator::Functions::Names::Trigonometry::cosine = "\\cos";
-
 // Built-in types.
 std::string Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas =
 "ETGVM";
-std::string Calculator::BuiltInTypes::Names::vectorPartitionFunction =
-"VPF";
+std::string Calculator::BuiltInTypes::Names::vectorPartitionFunction = "VPF";
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
   adminDefault.dontTestAutomatically = true;
@@ -5706,7 +5705,9 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   this->addOperationNoRepetitionAllowed("Freeze");
   this->addOperationNoRepetitionAllowed("\\infty");
   this->addOperationNoRepetitionAllowed("\\phantom");
-  this->addOperationNoRepetitionAllowed(Calculator::Functions::Names::commandEnclosure);
+  this->addOperationNoRepetitionAllowed(
+    Calculator::Functions::Names::commandEnclosure
+  );
   this->addOperationNoRepetitionAllowed("MonomialPoly");
   this->addOperationNoRepetitionAllowed("Melt");
   this->addOperationNoRepetitionAllowed("Bind");

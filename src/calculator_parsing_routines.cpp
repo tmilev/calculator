@@ -560,9 +560,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addBuiltInType("string");
   this->addBuiltInType("JSON");
   this->addBuiltInType("ElementUEoverRF");
-  this->addBuiltInType(
-    "ElementSemisimpleLieAlgebraAlgebraicCoefficients"
-  );
+  this->addBuiltInType("ElementSemisimpleLieAlgebraAlgebraicCoefficients");
   this->addBuiltInType(
     Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas
   );
@@ -594,7 +592,6 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addBuiltInType("ellipticCurveElementsRational");
   this->addBuiltInType("ellipticCurveElementsZmodP");
   this->addBuiltInType("userInputTextBox");
-
   this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
   this->parser.initializeControlSequences();
   this->initializePredefinedStandardOperationsWithoutHandler();

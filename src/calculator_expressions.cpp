@@ -294,9 +294,8 @@ int Expression::getBuiltInType<
 }
 
 template < >
-int Expression::getBuiltInType<
-  ElementSemisimpleLieAlgebra<AlgebraicNumber>
->() const {
+int Expression::getBuiltInType<ElementSemisimpleLieAlgebra<AlgebraicNumber> >()
+const {
   this->checkInitialization();
   return this->owner->opElementSemisimpleLieAlgebraAlgebraicCoefficients();
 }
@@ -851,12 +850,14 @@ Expression::getValueNonConst() const {
 
 template < >
 ElementZmodP& Expression::getValueNonConst() const {
-  if (!this->isOfType<ElementZmodP>()){ global.fatal
-  << "Expression not of required type ElementZmodP. "
-  << "The expression equals "
-  << this->toString()
-  << "."
-  << global.fatal;}
+  if (!this->isOfType<ElementZmodP>()) {
+    global.fatal
+    << "Expression not of required type ElementZmodP. "
+    << "The expression equals "
+    << this->toString()
+    << "."
+    << global.fatal;
+  }
   return
   this->owner->objectContainer.elementsModP.getElement(
     this->getLastChild().data
@@ -865,10 +866,11 @@ ElementZmodP& Expression::getValueNonConst() const {
 
 template < >
 PartialFractions& Expression::getValueNonConst() const {
-  if (!this->isOfType<PartialFractions>()) {global.fatal
-  << "Expression not of required type PartialFractions. "
+  if (!this->isOfType<PartialFractions>()) {
+    global.fatal
+    << "Expression not of required type PartialFractions. "
     << this->toStringFull()
-  << global.fatal;
+    << global.fatal;
   }
   return
   this->owner->objectContainer.vectorPartitionFunctions.values[
@@ -2971,7 +2973,9 @@ bool Expression::toStringBuiltIn<
   (void) format;
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
-  out << Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas << "{}(";
+  out
+  << Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas
+  << "{}(";
   out
   << input.getValue<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
@@ -3216,8 +3220,7 @@ bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
   return true;
 }
 
-
-template <>
+template < >
 bool Expression::toStringBuiltIn<PartialFractions>(
   const Expression& input,
   std::stringstream& out,
@@ -3227,13 +3230,13 @@ bool Expression::toStringBuiltIn<PartialFractions>(
   (void) format;
   const PartialFractions& partialFractions =
   input.getValue<PartialFractions>();
-  out << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
+  out
+  << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
   << partialFractions.toHTML();
-  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML()
-  <<"</div>"
-  ;
+  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML() << "</div>";
   return true;
 }
+
 bool Expression::toStringData(
   std::stringstream& out, FormatExpressions* format
 ) const {
@@ -3638,12 +3641,11 @@ bool Expression::requiresNoMathTags() const {
   this->isOfType<std::string>() ||
   this->isOfType<JSData>() ||
   this->isOfType<SemisimpleSubalgebras>() ||
-
-
   this->isOfType<WeylGroupData>() ||
   this->isOfType<
     GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
-  >() || this->isOfType<PartialFractions>();
+  >() ||
+  this->isOfType<PartialFractions>();
 }
 
 bool Expression::toStringTimes(
@@ -4751,11 +4753,9 @@ std::string Expression::toStringWithStartingExpression(
       format->flagDontCollalpseProductsByUnits = false;
     }
     outTrue << "<tr>";
-    outTrue<< "<td class='cellCalculatorInput'>" << input << "</td>";
+    outTrue << "<td class='cellCalculatorInput'>" << input << "</td>";
     std::string output;
-    if (this->requiresNoMathTags() &&
-      isFinal
-    ) {
+    if (this->requiresNoMathTags() && isFinal) {
       output = out.str();
     } else {
       output =
@@ -4764,7 +4764,7 @@ std::string Expression::toStringWithStartingExpression(
       );
     }
     outTrue << "<td class='cellCalculatorResult'>" << output << "</td>";
-    outTrue<< "</tr>";
+    outTrue << "</tr>";
     if (outputJS != nullptr) {
       (*outputJS)["input"] = input;
       (*outputJS)["output"] = output;

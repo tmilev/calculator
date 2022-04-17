@@ -6099,10 +6099,6 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(
     this->opError(), Expression::toStringError
   );
-  this->addOneStringAtomHandler(
-    this->builtInTypes.vectorPartitionFunction(),
-    Expression::toStringVectorPartitionFunction
-  );
   this->addOneStringCompositeHandler(
     this->opMatrix(), Expression::toStringMatrix
   );
@@ -6153,6 +6149,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<AlgebraicNumber>();
   this->addOneBuiltInHandler<LittelmannPath>();
   this->addOneBuiltInHandler<ElementWeylAlgebra<Rational> >();
+  this->addOneBuiltInHandler<PartialFractions>();
 }
 
 void Calculator::initializeBuiltInsFreezeArguments() {

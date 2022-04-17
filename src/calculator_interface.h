@@ -304,7 +304,7 @@ public:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->startsWith(this->getTypeOperation<Type>())) {
+    if (!this->startsWith(this->getBuiltInType<Type>())) {
       return false;
     }
     if (this->children.size < 2 || !this->getLastChild().isAtom()) {
@@ -333,7 +333,7 @@ public:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->startsWith(this->getTypeOperation<Type>())) {
+    if (!this->startsWith(this->getBuiltInType<Type>())) {
       return false;
     }
     if (this->children.size < 2 || !this->getLastChild().isAtom()) {
@@ -354,7 +354,7 @@ public:
   template <class Type>
   Type& getValueNonConst() const;
   template <class Type>
-  int getTypeOperation() const;
+  int getBuiltInType() const;
   template <class Type>
   int addObjectReturnIndex(const Type& inputValue) const;
   // Please keep the Calculator as the first argument for all
@@ -786,11 +786,6 @@ public:
     FormatExpressions* format
   );
   static bool toStringEqualEqualEqual(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
-  );
-  static bool toStringVectorPartitionFunction(
     const Expression& input,
     std::stringstream& out,
     FormatExpressions* format
@@ -3840,7 +3835,7 @@ bool Expression::isMatrixOfType(
     return false;
   }
   if (
-    !(*this)[0][1].isOperationGiven(this->getTypeOperation<Type>())
+    !(*this)[0][1].isOperationGiven(this->getBuiltInType<Type>())
   ) {
     return false;
   }
@@ -3873,7 +3868,7 @@ bool Expression::isOfTypeWithContext(WithContext<Type>* whichElement) const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (!this->startsWith(this->getTypeOperation<Type>())) {
+  if (!this->startsWith(this->getBuiltInType<Type>())) {
     return false;
   }
   if (this->size() < 2 || !this->getLastChild().isAtom()) {
@@ -4030,7 +4025,7 @@ bool Expression::makeSum(
 }
 
 template < >
-int Expression::getTypeOperation<Rational>() const;
+int Expression::getBuiltInType<Rational>() const;
 template < >
 int Expression::addObjectReturnIndex(const Rational& inputValue) const;
 template <class Type>
@@ -4040,7 +4035,7 @@ bool Expression::assignValueWithContext(
   const ExpressionContext& context
 ) {
   this->reset(owner, 3);
-  this->addChildAtomOnTop(this->getTypeOperation<Type>());
+  this->addChildAtomOnTop(this->getBuiltInType<Type>());
   this->addChildOnTop(context.toExpression());
   this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
   this->checkConsistency();
@@ -4051,7 +4046,7 @@ template <class Type>
 bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
   Expression typeComputer;
   typeComputer.owner = &owner;
-  int currentType = typeComputer.getTypeOperation<Type>();
+  int currentType = typeComputer.getBuiltInType<Type>();
   if (
     currentType == owner.opEltZmodP() ||
     currentType == owner.opPolynomialRational() ||
@@ -4175,7 +4170,7 @@ template <class builtInType>
 void Calculator::addOneBuiltInHandler() {
   Expression typeConverter(*this);
   this->addOneStringHandler(
-    typeConverter.getTypeOperation<builtInType>(),
+    typeConverter.getBuiltInType<builtInType>(),
     Expression::toStringBuiltIn<builtInType>,
     this->toStringDataHandlers
   );

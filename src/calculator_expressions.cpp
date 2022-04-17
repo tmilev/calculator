@@ -55,57 +55,57 @@ List<Expression>::Comparator* FormatExpressions::getMonomialOrder<Expression>()
   return nullptr;
 }
 
-// Expression::getTypeOperation specializations follow
+// Expression::getBuiltInType specializations follow
 template < >
-int Expression::getTypeOperation<ElementEllipticCurve<Rational> >() const {
+int Expression::getBuiltInType<ElementEllipticCurve<Rational> >() const {
   this->checkInitialization();
   return this->owner->opEllipticCurveElementsRational();
 }
 
 template < >
-int Expression::getTypeOperation<ElementEllipticCurve<ElementZmodP> >() const {
+int Expression::getBuiltInType<ElementEllipticCurve<ElementZmodP> >() const {
   this->checkInitialization();
   return this->owner->opEllipticCurveElementsZmodP();
 }
 
 template < >
-int Expression::getTypeOperation<RationalFraction<Rational> >() const {
+int Expression::getBuiltInType<RationalFraction<Rational> >() const {
   this->checkInitialization();
   return this->owner->opRationalFraction();
 }
 
 template < >
-int Expression::getTypeOperation<RationalFraction<AlgebraicNumber> >() const {
+int Expression::getBuiltInType<RationalFraction<AlgebraicNumber> >() const {
   this->checkInitialization();
   return this->owner->opRationalFunctionAlgebraicCoefficients();
 }
 
 template < >
-int Expression::getTypeOperation<RationalFraction<ElementZmodP> >() const {
+int Expression::getBuiltInType<RationalFraction<ElementZmodP> >() const {
   this->checkInitialization();
   return this->owner->opRationalFunctionModuloInteger();
 }
 
 template < >
-int Expression::getTypeOperation<InputBox>() const {
+int Expression::getBuiltInType<InputBox>() const {
   this->checkInitialization();
   return this->owner->opUserInputTextBox();
 }
 
 template < >
-int Expression::getTypeOperation<Rational>() const {
+int Expression::getBuiltInType<Rational>() const {
   this->checkInitialization();
   return this->owner->opRational();
 }
 
 template < >
-int Expression::getTypeOperation<ElementHyperoctahedralGroupR2>() const {
+int Expression::getBuiltInType<ElementHyperoctahedralGroupR2>() const {
   this->checkInitialization();
   return this->owner->opElementHyperOctahedral();
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
 >() const {
   this->checkInitialization();
@@ -113,31 +113,31 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<JSData>() const {
+int Expression::getBuiltInType<JSData>() const {
   this->checkInitialization();
   return this->owner->opJSON();
 }
 
 template < >
-int Expression::getTypeOperation<std::string>() const {
+int Expression::getBuiltInType<std::string>() const {
   this->checkInitialization();
   return this->owner->opString();
 }
 
 template < >
-int Expression::getTypeOperation<AlgebraicNumber>() const {
+int Expression::getBuiltInType<AlgebraicNumber>() const {
   this->checkInitialization();
   return this->owner->opAlgebraicNumber();
 }
 
 template < >
-int Expression::getTypeOperation<ElementZmodP>() const {
+int Expression::getBuiltInType<ElementZmodP>() const {
   this->checkInitialization();
   return this->owner->opEltZmodP();
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   ElementUniversalEnveloping<RationalFraction<Rational> >
 >() const {
   this->checkInitialization();
@@ -145,86 +145,86 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<Weight<Rational> >() const {
+int Expression::getBuiltInType<Weight<Rational> >() const {
   this->checkInitialization();
   return this->owner->opWeightLieAlgebra();
 }
 
 template < >
-int Expression::getTypeOperation<Weight<Polynomial<Rational> > >() const {
+int Expression::getBuiltInType<Weight<Polynomial<Rational> > >() const {
   this->checkInitialization();
   return this->owner->opWeightLieAlgPoly();
 }
 
 template < >
-int Expression::getTypeOperation<MatrixTensor<Rational> >() const {
+int Expression::getBuiltInType<MatrixTensor<Rational> >() const {
   this->checkInitialization();
   return this->owner->opMatrixTensorRational();
 }
 
 template < >
-int Expression::getTypeOperation<int>() const {
+int Expression::getBuiltInType<int>() const {
   this->checkInitialization();
   return this->owner->opRational();
 }
 
 template < >
-int Expression::getTypeOperation<LargeIntegerUnsigned>() const {
+int Expression::getBuiltInType<LargeIntegerUnsigned>() const {
   this->checkInitialization();
   return this->owner->opRational();
 }
 
 template < >
-int Expression::getTypeOperation<double>() const {
+int Expression::getBuiltInType<double>() const {
   this->checkInitialization();
   return this->owner->opDouble();
 }
 
 template < >
-int Expression::getTypeOperation<Polynomial<Rational> >() const {
+int Expression::getBuiltInType<Polynomial<Rational> >() const {
   this->checkInitialization();
   return this->owner->opPolynomialRational();
 }
 
 template < >
-int Expression::getTypeOperation<Polynomial<AlgebraicNumber> >() const {
+int Expression::getBuiltInType<Polynomial<AlgebraicNumber> >() const {
   this->checkInitialization();
   return this->owner->opPolynomialAlgebraicNumbers();
 }
 
 template < >
-int Expression::getTypeOperation<Polynomial<ElementZmodP> >() const {
+int Expression::getBuiltInType<Polynomial<ElementZmodP> >() const {
   this->checkInitialization();
   return this->owner->opPolynomialModuloInteger();
 }
 
 template < >
-int Expression::getTypeOperation<PolynomialModuloPolynomial<ElementZmodP> >()
+int Expression::getBuiltInType<PolynomialModuloPolynomial<ElementZmodP> >()
 const {
   this->checkInitialization();
   return this->owner->opPolynomialModuloPolynomialModuloInteger();
 }
 
 template < >
-int Expression::getTypeOperation<ElementWeylAlgebra<Rational> >() const {
+int Expression::getBuiltInType<ElementWeylAlgebra<Rational> >() const {
   this->checkInitialization();
   return this->owner->opElementWeylAlgebra();
 }
 
 template < >
-int Expression::getTypeOperation<SemisimpleLieAlgebra*>() const {
+int Expression::getBuiltInType<SemisimpleLieAlgebra*>() const {
   this->checkInitialization();
   return this->owner->opSemisimpleLieAlgebra();
 }
 
 template < >
-int Expression::getTypeOperation<LittelmannPath>() const {
+int Expression::getBuiltInType<LittelmannPath>() const {
   this->checkInitialization();
   return this->owner->opLittelmannPath();
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   MonomialTensor<int, HashFunctions::hashFunction>
 >() const {
   this->checkInitialization();
@@ -232,7 +232,7 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
 >() const {
   this->checkInitialization();
@@ -240,7 +240,7 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   CharacterSemisimpleLieAlgebraModule<Rational>
 >() const {
   this->checkInitialization();
@@ -248,31 +248,31 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<Plot>() const {
+int Expression::getBuiltInType<Plot>() const {
   this->checkInitialization();
   return this->owner->opCalculusPlot();
 }
 
 template < >
-int Expression::getTypeOperation<PlotObject>() const {
+int Expression::getBuiltInType<PlotObject>() const {
   this->checkInitialization();
   return this->owner->opCalculusPlot();
 }
 
 template < >
-int Expression::getTypeOperation<SemisimpleSubalgebras>() const {
+int Expression::getBuiltInType<SemisimpleSubalgebras>() const {
   this->checkInitialization();
   return this->owner->opSemisimpleSubalgebras();
 }
 
 template < >
-int Expression::getTypeOperation<WeylGroupData>() const {
+int Expression::getBuiltInType<WeylGroupData>() const {
   this->checkInitialization();
   return this->owner->opWeylGroup();
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 >() const {
   this->checkInitialization();
@@ -280,13 +280,13 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<ElementWeylGroup>() const {
+int Expression::getBuiltInType<ElementWeylGroup>() const {
   this->checkInitialization();
   return this->owner->opWeylGroupElement();
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 >() const {
   this->checkInitialization();
@@ -294,7 +294,7 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<
+int Expression::getBuiltInType<
   ElementSemisimpleLieAlgebra<AlgebraicNumber>
 >() const {
   this->checkInitialization();
@@ -302,12 +302,12 @@ int Expression::getTypeOperation<
 }
 
 template < >
-int Expression::getTypeOperation<PartialFractions>() const {
+int Expression::getBuiltInType<PartialFractions>() const {
   this->checkInitialization();
   return this->owner->builtInTypes.vectorPartitionFunction();
 }
 
-// Expression::getTypeOperation specializations end.
+// Expression::getBuiltInType specializations end.
 // Expression::addObjectReturnIndex specializations follow
 template < >
 int Expression::addObjectReturnIndex(
@@ -3216,6 +3216,24 @@ bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
   return true;
 }
 
+
+template <>
+bool Expression::toStringBuiltIn<PartialFractions>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+) {
+  STACK_TRACE("Expression::toStringVectorPartitionFunction");
+  (void) format;
+  const PartialFractions& partialFractions =
+  input.getValue<PartialFractions>();
+  out << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
+  << partialFractions.toHTML();
+  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML()
+  <<"</div>"
+  ;
+  return true;
+}
 bool Expression::toStringData(
   std::stringstream& out, FormatExpressions* format
 ) const {
@@ -3620,10 +3638,12 @@ bool Expression::requiresNoMathTags() const {
   this->isOfType<std::string>() ||
   this->isOfType<JSData>() ||
   this->isOfType<SemisimpleSubalgebras>() ||
+
+
   this->isOfType<WeylGroupData>() ||
   this->isOfType<
     GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
-  >();
+  >() || this->isOfType<PartialFractions>();
 }
 
 bool Expression::toStringTimes(
@@ -4567,20 +4587,6 @@ bool Expression::toStringError(
   return true;
 }
 
-bool Expression::toStringVectorPartitionFunction(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format
-) {
-  STACK_TRACE("Expression::toStringVectorPartitionFunction");
-  (void) format;
-  const PartialFractions& partialFractions =
-  input.getValue<PartialFractions>();
-  out << partialFractions.toHTML();
-  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML();
-  return true;
-}
-
 bool Expression::toStringSumOrIntegral(
   const Expression& input,
   std::stringstream& out,
@@ -4720,7 +4726,7 @@ std::string Expression::toStringWithStartingExpression(
   JSData* outputJS
 ) const {
   std::stringstream outTrue;
-  std::string input, output;
+  std::string input;
   bool isFinal = true;
   MemorySaving<FormatExpressions> tempFormat;
   if (format == nullptr) {
@@ -4728,7 +4734,7 @@ std::string Expression::toStringWithStartingExpression(
     format->flagExpressionIsFinal = true;
   }
   isFinal = format->flagExpressionIsFinal;
-  outTrue << "<table class = 'tableCalculatorOutput'>";
+  outTrue << "<table class='tableCalculatorOutput'>";
   outTrue << "<tr><th>Input</th><th>Result</th></tr>";
   if (this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     outTrue << out.str();
@@ -4744,13 +4750,10 @@ std::string Expression::toStringWithStartingExpression(
     if (format != nullptr) {
       format->flagDontCollalpseProductsByUnits = false;
     }
-    outTrue << "<tr><td class = 'cellCalculatorInput'>" << input << "</td>";
-    if ((
-        this->isOfType<std::string>() ||
-        this->isOfType<Plot>() ||
-        this->isOfType<SemisimpleSubalgebras>() ||
-        this->isOfType<WeylGroupData>()
-      ) &&
+    outTrue << "<tr>";
+    outTrue<< "<td class='cellCalculatorInput'>" << input << "</td>";
+    std::string output;
+    if (this->requiresNoMathTags() &&
       isFinal
     ) {
       output = out.str();
@@ -4760,7 +4763,8 @@ std::string Expression::toStringWithStartingExpression(
         out.str(), Expression::maximumCharactersInLatexPrintout
       );
     }
-    outTrue << "<td class = 'cellCalculatorResult'>" << output << "</td></tr>";
+    outTrue << "<td class='cellCalculatorResult'>" << output << "</td>";
+    outTrue<< "</tr>";
     if (outputJS != nullptr) {
       (*outputJS)["input"] = input;
       (*outputJS)["output"] = output;

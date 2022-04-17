@@ -83,7 +83,8 @@ class GraphicsNDimensions {
      * @type {Object<string, Object<string, boolean> >}
      * Keys are indices of groups currently highlighted.
      * Values are arrays with indices
-     * within each group over which the mouse is located. */
+     * within each group over which the mouse is located. 
+     */
 
     this.currentHighlightIndices = {};
     this.flagAllowMovingCoordinateSystemFromArbitraryClick = true;
@@ -1055,14 +1056,14 @@ function addVectorTimesScalar(vector, other, scalar) {
 }
 
 function testA3(idCanvas, idSpanInformation) {
-  let theA3 = new GraphicsNDimensions(idCanvas, idSpanInformation);
-  theA3.dimension = 3;
-  theA3.bilinearForm = [
+  let a3 = new GraphicsNDimensions(idCanvas, idSpanInformation);
+  a3.dimension = 3;
+  a3.bilinearForm = [
     [2, -1, 0],
     [-1, 2, -1],
     [0, -1, 2]
   ];
-  theA3.screenBasis = [
+  a3.screenBasis = [
     [0.707107, 0.707107, 0],
     [0, 0.707107, 0.707107]
   ];
@@ -1106,18 +1107,18 @@ function testA3(idCanvas, idSpanInformation) {
     [[-1, -1, -1], [0, 0, -1]],
     [[0, 0, -1], [0, 1, 0]]
   ];
-  theA3.drawStandardEiBasis("red");
-  theA3.drawText([1, 0, 0], "(1, 0, 0)");
+  a3.drawStandardEiBasis("red");
+  a3.drawText([1, 0, 0], "(1, 0, 0)");
   for (let counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
-    theA3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
-    //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
-    //theA3.drawCircle(labeledVectors[counterLabel], "red");
+    a3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
+    //a3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
+    //a3.drawCircle(labeledVectors[counterLabel], "red");
   }
   for (let counterSegment = 0; counterSegment < segments.length; counterSegment++) {
-    theA3.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
+    a3.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
   }
-  theA3.graphicsUnit = 150;
-  theA3.drawAll();
+  a3.graphicsUnit = 150;
+  a3.drawAll();
 }
 
 function createGraphicsFromObject(input) {
@@ -1132,15 +1133,15 @@ function createGraphicsFromObject(input) {
 }
 
 function testA4(idCanvas, idSpanInformation) {
-  let theA4 = new GraphicsNDimensions(idCanvas, idSpanInformation);
-  theA4.dimension = 4;
-  theA4.bilinearForm = [
+  let a4 = new GraphicsNDimensions(idCanvas, idSpanInformation);
+  a4.dimension = 4;
+  a4.bilinearForm = [
     [2, -1, 0, 0],
     [-1, 2, -1, 0],
     [0, -1, 2, -1],
     [0, 0, -1, 2]
   ];
-  theA4.screenBasis = [
+  a4.screenBasis = [
     [-0.195, 0.316, 0.828, 0.632],
     [0.602, 0.973, 0.602, 0]
   ];
@@ -1166,13 +1167,13 @@ function testA4(idCanvas, idSpanInformation) {
   for (let counter = 0; counter < labeledVectors.length; counter++) {
     let minDistance = 10;
     for (let secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
-      let newDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
+      let newDistance = a4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (newDistance < minDistance && newDistance > 0) {
         minDistance = newDistance;
       }
     }
     for (let secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
-      let theDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
+      let theDistance = a4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (theDistance != minDistance) {
         continue;
       }
@@ -1180,17 +1181,15 @@ function testA4(idCanvas, idSpanInformation) {
     }
   }
 
-  theA4.drawStandardEiBasis("red");
+  a4.drawStandardEiBasis("red");
   for (let counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
-    theA4.drawLine([0, 0, 0, 0], labeledVectors[counterLabel], "green");
-    //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
-    //theA3.drawCircle(labeledVectors[counterLabel], "red");
+    a4.drawLine([0, 0, 0, 0], labeledVectors[counterLabel], "green");
   }
   for (let counterSegment = 0; counterSegment < segments.length; counterSegment++) {
-    theA4.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
+    a4.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
   }
-  theA4.graphicsUnit = 150;
-  theA4.drawAll();
+  a4.graphicsUnit = 150;
+  a4.drawAll();
 }
 
 var module;

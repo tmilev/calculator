@@ -12311,7 +12311,7 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
 
 std::string ConeCollection::drawMeToHtmlProjective(
   DrawingVariables& drawingVariables, FormatExpressions& format
-) {
+) const {
   STACK_TRACE("ConeCollection::drawMeToHtmlProjective");
   bool isGood = true;
   isGood = this->drawMeProjective(nullptr, true, drawingVariables, format);
@@ -12358,7 +12358,7 @@ bool ConeCollection::drawMeLastCoordinateAffine(
 
 bool ConeCollection::drawMeProjectiveInitialize(
   DrawingVariables& drawingVariables
-) {
+) const {
   Matrix<Rational> matrix;
   drawingVariables.operations.initialize();
   drawingVariables.operations.initDimensions(this->getDimension());
@@ -12388,7 +12388,7 @@ bool ConeCollection::drawMeProjective(
   bool initDrawVars,
   DrawingVariables& drawingVariables,
   FormatExpressions& format
-) {
+) const {
   STACK_TRACE("ConeCollection::drawMeProjective");
   // There's no non-technical reason to refuse drawing non-refined cones
   // perhaps this needs to be relaxed.
@@ -13155,7 +13155,7 @@ void ConeCollection::initializeFromAffineDirectionsAndRefine(
   this->initializeFromDirectionsAndRefine(projectivizedDirections);
 }
 
-int ConeCollection::getDimension() {
+int ConeCollection::getDimension() const {
   if (this->refinedCones.size > 0) {
     return this->refinedCones[0].getDimension();
   }
@@ -15216,7 +15216,7 @@ std::string ConeCollection::toString() {
   return out.str();
 }
 
-std::string ConeCollection::toHTML() {
+std::string ConeCollection::toHTML() const {
   std::stringstream out;
   DrawingVariables drawingVariables;
   FormatExpressions format;

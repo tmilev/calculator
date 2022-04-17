@@ -564,7 +564,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
     "ElementSemisimpleLieAlgebraAlgebraicCoefficients"
   );
   this->addOperationBuiltInType(
-    Calculator::Atoms::elementTensorsGeneralizedVermas
+    Calculator::Atoms::Names::elementTensorsGeneralizedVermas
   );
   this->addOperationBuiltInType("CharSSAlgMod");
   this->addOperationBuiltInType("SemisimpleLieAlg");

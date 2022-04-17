@@ -19,15 +19,14 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
   ) {
     return calculator << "Failed to extract matrix of rationals. ";
   }
+  if (calculator.objectContainer.vectorPartitionFunctions.contains(vectors)) {
+    return output.assignValue(calculator, calculator.objectContainer.vectorPartitionFunctions.getValueNoFail(vectors));
+  }
   matrix.getVectorsFromRows(vectors);
-  PartialFractions partialFractions;
-  partialFractions.initializeAndSplit(vectors, &calculator.comments);
-  partialFractions.computeAllVectorPartitionFunctions();
-  std::stringstream out;
-  out << partialFractions.toHTML();
-  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML();
-  output.assignValue(calculator, out.str());
-  return true;
+  PartialFractions result;
+  result.initializeAndSplit(vectors, &calculator.comments);
+  result.computeAllVectorPartitionFunctions();
+  return   output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(

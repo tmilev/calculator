@@ -8,7 +8,8 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
   STACK_TRACE("Calculator::initializeFunctionsVectorPartitionFunctions");
   Function::Options innerStandard = Function::Options::standard();
   this->addOperationHandler(
-    "VectorPartitionFunction",
+  Calculator::Atoms::Names::vectorPartitionFunction
+    ,
     CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula,
     "",
     "Work in progress. Vector partition function formula. ",

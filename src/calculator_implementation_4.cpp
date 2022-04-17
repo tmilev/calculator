@@ -27,6 +27,7 @@ Calculator::Calculator() {
   this->numberExpectedExpressionsAtInitialization = - 1;
   this->mode = Calculator::Mode::full;
   this->examples.owner = this;
+  this->atoms.owner = this;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -189,7 +190,7 @@ bool Calculator::recursionDepthExceededHandleRoughly(
   if (!this->flagMaxRecursionErrorEncountered) {
     *this
     << additionalErrorInfo
-    << "<span style =\"color:#FF0000\"><b> maximum recursion depth of "
+    << "<span style='color:#FF0000'><b> maximum recursion depth of "
     << this->maximumRecursionDepth
     << " exceeded. </b></span>"
     << "Aborting computation ASAP. ";
@@ -1964,7 +1965,7 @@ std::string Function::toStringSummary() const {
   out << this->toStringShort();
   if (this->calculatorIdentifier != "") {
     out
-    << "Rule name: <span style ='color:blue'>"
+    << "Rule name: <span style='color:blue'>"
     << this->calculatorIdentifier
     << "</span>. ";
   }
@@ -2687,6 +2688,7 @@ void ObjectContainer::reset() {
   this->ellipticCurveElementsRational.clear();
   this->canvasPlotCounter = 0;
   this->elementsOfSemisimpleLieAlgebrasWithAlgebraicCoefficients.clear();
+  this->vectorPartitionFunctions.clear();
   this->resetPlots();
   this->resetSliders();
 }

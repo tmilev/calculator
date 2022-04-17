@@ -301,6 +301,12 @@ int Expression::getTypeOperation<
   return this->owner->opElementSemisimpleLieAlgebraAlgebraicCoefficients();
 }
 
+template <>
+int Expression::getTypeOperation<PartialFractions> () const {
+  this->checkInitialization();
+  return this->owner->atoms.vectorPartitionFunction();
+}
+
 // Expression::getTypeOperation specializations end.
 // Expression::addObjectReturnIndex specializations follow
 template < >
@@ -566,7 +572,8 @@ const {
   ) {
     global.fatal
     <<
-    "Semisimple Lie algebra must be allocated directly in the object container. "
+    "Semisimple Lie algebra must be "
+    <<"allocated directly in the object container. "
     << global.fatal;
   }
   int index =
@@ -692,6 +699,14 @@ int Expression::addObjectReturnIndex(const ElementWeylGroup& inputValue) const {
   return
   this->owner->objectContainer.weylGroupElements.
   addNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template <>
+int Expression::addObjectReturnIndex(const PartialFractions& inputValue) const {
+  this->checkInitialization();
+
+  this->owner->objectContainer.vectorPartitionFunctions.setKeyValue(inputValue.originalVectors, inputValue);
+  return this->owner->objectContainer.vectorPartitionFunctions.getIndex(inputValue.originalVectors);
 }
 
 // Expression::addObjectReturnIndex specializations end
@@ -844,6 +859,16 @@ ElementZmodP& Expression::getValueNonConst() const {
     this->getLastChild().data
   );
 }
+
+template < >
+PartialFractions& Expression::getValueNonConst() const {
+  if (!this->isOfType<PartialFractions>()) global.fatal
+  << "Expression not of required type PartialFractions. "
+  << global.fatal;
+  return
+  this->owner->objectContainer.vectorPartitionFunctions.values[
+    this->getLastChild().data]
+;}
 
 template < >
 AlgebraicNumber& Expression::getValueNonConst() const {
@@ -2940,7 +2965,7 @@ bool Expression::toStringBuiltIn<
   (void) format;
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
-  out << Calculator::Atoms::elementTensorsGeneralizedVermas << "{}(";
+  out << Calculator::Atoms::Names::elementTensorsGeneralizedVermas << "{}(";
   out
   << input.getValue<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
@@ -4534,6 +4559,15 @@ bool Expression::toStringError(
   input.checkInitialization();
   out << "\\text{Error:~" << input[1].toString(format) << "}";
   return true;
+}
+
+bool Expression::toStringVectorPartitionFunction(const Expression &input, std::stringstream &out, FormatExpressions *format){
+  STACK_TRACE("Expression::toStringVectorPartitionFunction");
+  (void) format;
+const  PartialFractions& partialFractions = input.getValue<PartialFractions>();
+ out << partialFractions.toHTML();
+  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML();
+return true;
 }
 
 bool Expression::toStringSumOrIntegral(

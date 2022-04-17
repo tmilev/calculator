@@ -17,17 +17,19 @@
 #include "string_constants.h"
 
 // This file lists calculator functions and various hard-coded rules.
-std::string Calculator::Atoms::setRandomSeed = "SetRandomSeed";
-std::string Calculator::Atoms::commandEnclosure = "CommandEnclosure";
-std::string Calculator::Atoms::setInputBox = "SetInputBox";
-std::string Calculator::Atoms::sort = "Sort";
-std::string Calculator::Atoms::transpose = "Transpose";
-std::string Calculator::Atoms::approximations = "Approximations";
-std::string Calculator::Atoms::turnOnRules = "TurnOnRules";
-std::string Calculator::Atoms::turnOffRules = "TurnOffRules";
-std::string Calculator::Atoms::elementTensorsGeneralizedVermas = "ETGVM";
-std::string Calculator::Atoms::Trigonometry::sine = "\\sin";
-std::string Calculator::Atoms::Trigonometry::cosine = "\\cos";
+std::string Calculator::Atoms::Names::setRandomSeed = "SetRandomSeed";
+std::string Calculator::Atoms::Names::commandEnclosure = "CommandEnclosure";
+std::string Calculator::Atoms::Names::setInputBox = "SetInputBox";
+std::string Calculator::Atoms::Names::sort = "Sort";
+std::string Calculator::Atoms::Names::transpose = "Transpose";
+std::string Calculator::Atoms::Names::approximations = "Approximations";
+std::string Calculator::Atoms::Names::vectorPartitionFunction= "VectorPartitionFunction";
+
+std::string Calculator::Atoms::Names::turnOnRules = "TurnOnRules";
+std::string Calculator::Atoms::Names::turnOffRules = "TurnOffRules";
+std::string Calculator::Atoms::Names::elementTensorsGeneralizedVermas = "ETGVM";
+std::string Calculator::Atoms::Names::Trigonometry::sine = "\\sin";
+std::string Calculator::Atoms::Names::Trigonometry::cosine = "\\cos";
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
   adminDefault.dontTestAutomatically = true;
@@ -123,7 +125,7 @@ void Calculator::initializeFunctionsStandard() {
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
   this->addOperationHandler(
-    Calculator::Atoms::setRandomSeed,
+    Calculator::Atoms::Names::setRandomSeed,
     CalculatorFunctions::setRandomSeed,
     "",
     "Sets the random seed of the calculator to the given integer value",
@@ -131,7 +133,7 @@ void Calculator::initializeFunctionsStandard() {
     "RandomInteger(- 100, 100);\n"
     "RandomInteger(- 100, 100)",
     "CalculatorFunctions::setRandomSeed",
-    Calculator::Atoms::setRandomSeed,
+    Calculator::Atoms::Names::setRandomSeed,
     innerStandard
   );
   this->addOperationHandler(
@@ -193,7 +195,7 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::approximations,
+    Calculator::Atoms::Names::approximations,
     CalculatorFunctions::approximationsDummy,
     "",
     "A dummy handler, used to make the implementation of"
@@ -205,7 +207,7 @@ void Calculator::initializeFunctionsStandard() {
     "(TurnOffApproximations 0; ln(2));\n"
     "ln(2)",
     "CalculatorFunctions::approximationsDummy",
-    Calculator::Atoms::approximations,
+    Calculator::Atoms::Names::approximations,
     innerInvisible
   );
   this->addOperationHandler(
@@ -358,7 +360,7 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::setInputBox,
+    Calculator::Atoms::Names::setInputBox,
     CalculatorHtmlFunctions::setInputBox,
     "",
     "Sets value for input box that overrides "
@@ -366,7 +368,7 @@ void Calculator::initializeFunctionsStandard() {
     "SetInputBox(name = a, value = 3); "
     "MakeInputBox(name = a)",
     "CalculatorHtmlFunctions::setInputBox",
-    Calculator::Atoms::setInputBox,
+    Calculator::Atoms::Names::setInputBox,
     innerStandard
   );
   this->addOperationHandler(
@@ -2511,14 +2513,14 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::transpose,
+    Calculator::Atoms::Names::transpose,
     CalculatorFunctions::transpose,
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2);\n"
     "(1,2)^t",
     "CalculatorFunctions::transpose",
-    Calculator::Atoms::transpose,
+    Calculator::Atoms::Names::transpose,
     innerStandard
   );
   this->addOperationHandler(
@@ -2752,7 +2754,7 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::sort,
+    Calculator::Atoms::Names::sort,
     CalculatorFunctions::sort,
     "",
     "Sorts a sequence. ",
@@ -2761,7 +2763,7 @@ void Calculator::initializeFunctionsStandard() {
     "Sort((3,2,3,1));\n"
     "Sort{}((3,2,3,1));\n",
     "CalculatorFunctions::sort",
-    Calculator::Atoms::sort,
+    Calculator::Atoms::Names::sort,
     innerStandard
   );
   this->addOperationHandler(
@@ -6090,6 +6092,10 @@ void Calculator::initializeToStringHandlers() {
   );
   this->addOneStringAtomHandler(
     this->opError(), Expression::toStringError
+  );
+  this->addOneStringAtomHandler(
+  this->atoms.vectorPartitionFunction(),
+  Expression::toStringVectorPartitionFunction
   );
   this->addOneStringCompositeHandler(
     this->opMatrix(), Expression::toStringMatrix

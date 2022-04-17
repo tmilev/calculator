@@ -9843,12 +9843,12 @@ bool CalculatorFunctions::transpose(
   if (
     !input.isSequenceNElements() &&
     !input.isMatrix() &&
-    !input.startsWithGivenOperation(Calculator::Atoms::transpose)
+    !input.startsWithGivenOperation(Calculator::Atoms::Names::transpose)
   ) {
     return false;
   }
   Matrix<Expression> matrix;
-  if (input.startsWithGivenOperation(Calculator::Atoms::transpose)) {
+  if (input.startsWithGivenOperation(Calculator::Atoms::Names::transpose)) {
     calculator.getMatrixExpressionsFromArguments(input, matrix);
   } else {
     calculator.getMatrixExpressions(input, matrix);

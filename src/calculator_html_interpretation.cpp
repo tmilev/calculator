@@ -108,7 +108,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   std::stringstream answerCommands, answerCommandsNoEnclosures;
   answerCommands
-  << Calculator::Atoms::commandEnclosure
+  << Calculator::Atoms::Names::commandEnclosure
   << "{}("
   << answer.commandsBeforeAnswer
   << "); "
@@ -387,7 +387,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   interpreter.flagPlotNoControls = true;
   std::stringstream studentAnswerWithComments;
   studentAnswerWithComments
-  << Calculator::Atoms::commandEnclosure
+  << Calculator::Atoms::Names::commandEnclosure
   << "{}("
   << currentA.commandsCommentsBeforeInterpretation
   << ");"
@@ -428,14 +428,14 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   interpreterWithAdvice.flagPlotNoControls = true;
   std::stringstream calculatorInputStream, calculatorInputStreamNoEnclosures;
   calculatorInputStream
-  << Calculator::Atoms::commandEnclosure
+  << Calculator::Atoms::Names::commandEnclosure
   << "{}("
   << currentA.commandsBeforeAnswer
   << ");";
   calculatorInputStreamNoEnclosures
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   calculatorInputStream
-  << Calculator::Atoms::commandEnclosure
+  << Calculator::Atoms::Names::commandEnclosure
   << "{}("
   << currentA.answerId
   << " = "
@@ -454,7 +454,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   );
   if (hasCommentsBeforeSubmission) {
     calculatorInputStream
-    << Calculator::Atoms::commandEnclosure
+    << Calculator::Atoms::Names::commandEnclosure
     << "{}("
     << currentA.commandsCommentsBeforeSubmission
     << ");";
@@ -1682,14 +1682,14 @@ void AnswerCheckerNoProblem::prepareForEvaluation() {
   std::stringstream completedProblemStreamNoEnclosures;
   std::stringstream completedProblemStream;
   completedProblemStream
-  << Calculator::Atoms::commandEnclosure
+  << Calculator::Atoms::Names::commandEnclosure
   << "{}("
   << this->commandsBeforeAnswer
   << ");";
   completedProblemStreamNoEnclosures
   << this->commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   completedProblemStream
-  << Calculator::Atoms::commandEnclosure
+  << Calculator::Atoms::Names::commandEnclosure
   << "{}("
   << this->answerId
   << "= ("
@@ -1709,7 +1709,7 @@ void AnswerCheckerNoProblem::prepareForEvaluation() {
   );
   if (this->hasCommentsBeforeSubmission) {
     completedProblemStream
-    << Calculator::Atoms::commandEnclosure
+    << Calculator::Atoms::Names::commandEnclosure
     << "{}("
     << this->commandsCommentsBeforeSubmission
     << ");";
@@ -2279,7 +2279,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   answerCommandsNoEnclosure
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   answerCommands
-  << Calculator::Atoms::commandEnclosure
+  << Calculator::Atoms::Names::commandEnclosure
   << "{}("
   << currentA.commandAnswerOnGiveUp
   << ");";

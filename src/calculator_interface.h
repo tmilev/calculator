@@ -790,6 +790,10 @@ public:
     std::stringstream& out,
     FormatExpressions* format
   );
+  static bool toStringVectorPartitionFunction(    const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+);
   static bool toStringError(
     const Expression& input,
     std::stringstream& out,
@@ -1607,6 +1611,7 @@ public:
   ListReferences<HyperoctahedralGroupData> hyperOctahedralGroups;
   HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> >
   littelmannOperators;
+  MapReferences<List<Vector<Rational> >, PartialFractions> vectorPartitionFunctions;
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(
     const DynkinType& input
@@ -2065,7 +2070,9 @@ public:
 
   class Atoms {
   public:
-    static std::string commandEnclosure;
+    class Names {
+    public:
+      static std::string commandEnclosure;
     static std::string setInputBox;
     static std::string setRandomSeed;
     static std::string sort;
@@ -2074,12 +2081,22 @@ public:
     static std::string turnOnRules;
     static std::string turnOffRules;
     static std::string elementTensorsGeneralizedVermas;
+    static std::string vectorPartitionFunction;
     class Trigonometry {
     public:
       static std::string sine;
       static std::string cosine;
     };
+    } ;
+    Calculator* owner;
+    Atoms() {this->owner = nullptr;}
+    int vectorPartitionFunction() {
+      return this->owner->operations.getIndexNoFail(Calculator::Atoms::Names::vectorPartitionFunction);
+
+    }
   };
+
+  Calculator::Atoms atoms;
 
   // Initialization mode for the calculator.
   // Allows to avoid bootstrapping a number of
@@ -2407,7 +2424,7 @@ public:
   }
   int opCommandEnclosure() {
     return
-    this->operations.getIndexNoFail(Calculator::Atoms::commandEnclosure);
+    this->operations.getIndexNoFail(Calculator::Atoms::Names::commandEnclosure);
   }
   int opRulesOff() {
     return this->operations.getIndexNoFail("RulesOff");
@@ -2417,7 +2434,7 @@ public:
   }
   int opApproximations() {
     return
-    this->operations.getIndexNoFail(Calculator::Atoms::approximations);
+    this->operations.getIndexNoFail(Calculator::Atoms::Names::approximations);
   }
   int opCommandEnclosureStart() {
     return this->operations.getIndexNoFail("CommandEnclosureStart");
@@ -2605,7 +2622,7 @@ public:
   int opElementTensorGVM() {
     return
     this->operations.getIndexNoFail(
-      Calculator::Atoms::elementTensorsGeneralizedVermas
+      Calculator::Atoms::Names::elementTensorsGeneralizedVermas
     );
   }
   int opElementSemisimpleLieAlgebraAlgebraicCoefficients() {

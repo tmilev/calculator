@@ -6297,7 +6297,7 @@ public:
     Vector<Rational>& affinePoint, ConeCollection& output
   );
   void transformToWeylProjective();
-  int getDimension();
+  int getDimension() const;
   void addNonRefinedChamberOnTopNoRepetition(
     const Cone& newCone, List<Cone>& output
   );
@@ -6320,18 +6320,18 @@ public:
   std::string drawMeToHtmlLastCoordAffine(
     DrawingVariables& drawingVariables, FormatExpressions& format
   );
-  bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables);
+  bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool initDrawVars,
     DrawingVariables& drawingVariables,
     FormatExpressions& format
-  );
+  ) const;
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables, FormatExpressions& format
-  );
+  )const;
   std::string toString();
-  std::string toHTML();
+  std::string toHTML() const;
   int getLowestIndexRefinedChamberContaining(const Vector<Rational>& root)
   const;
   bool findMaxLFOverConeProjective(

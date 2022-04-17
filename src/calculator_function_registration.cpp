@@ -17,19 +17,25 @@
 #include "string_constants.h"
 
 // This file lists calculator functions and various hard-coded rules.
-std::string Calculator::Atoms::Names::setRandomSeed = "SetRandomSeed";
-std::string Calculator::Atoms::Names::commandEnclosure = "CommandEnclosure";
-std::string Calculator::Atoms::Names::setInputBox = "SetInputBox";
-std::string Calculator::Atoms::Names::sort = "Sort";
-std::string Calculator::Atoms::Names::transpose = "Transpose";
-std::string Calculator::Atoms::Names::approximations = "Approximations";
-std::string Calculator::Atoms::Names::vectorPartitionFunction= "VectorPartitionFunction";
+// Hard-coded functions and operators.
+std::string Calculator::Functions::Names::setRandomSeed = "SetRandomSeed";
+std::string Calculator::Functions::Names::commandEnclosure = "CommandEnclosure";
+std::string Calculator::Functions::Names::setInputBox = "SetInputBox";
+std::string Calculator::Functions::Names::sort = "Sort";
+std::string Calculator::Functions::Names::transpose = "Transpose";
+std::string Calculator::Functions::Names::approximations = "Approximations";
+std::string Calculator::Functions::Names::vectorPartitionFunction =
+"VectorPartitionFunction";
+std::string Calculator::Functions::Names::turnOnRules = "TurnOnRules";
+std::string Calculator::Functions::Names::turnOffRules = "TurnOffRules";
+std::string Calculator::Functions::Names::Trigonometry::sine = "\\sin";
+std::string Calculator::Functions::Names::Trigonometry::cosine = "\\cos";
 
-std::string Calculator::Atoms::Names::turnOnRules = "TurnOnRules";
-std::string Calculator::Atoms::Names::turnOffRules = "TurnOffRules";
-std::string Calculator::Atoms::Names::elementTensorsGeneralizedVermas = "ETGVM";
-std::string Calculator::Atoms::Names::Trigonometry::sine = "\\sin";
-std::string Calculator::Atoms::Names::Trigonometry::cosine = "\\cos";
+// Built-in types.
+std::string Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas =
+"ETGVM";
+std::string Calculator::BuiltInTypes::Names::vectorPartitionFunction =
+"VPF";
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
   adminDefault.dontTestAutomatically = true;
@@ -125,7 +131,7 @@ void Calculator::initializeFunctionsStandard() {
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
   this->addOperationHandler(
-    Calculator::Atoms::Names::setRandomSeed,
+    Calculator::Functions::Names::setRandomSeed,
     CalculatorFunctions::setRandomSeed,
     "",
     "Sets the random seed of the calculator to the given integer value",
@@ -133,7 +139,7 @@ void Calculator::initializeFunctionsStandard() {
     "RandomInteger(- 100, 100);\n"
     "RandomInteger(- 100, 100)",
     "CalculatorFunctions::setRandomSeed",
-    Calculator::Atoms::Names::setRandomSeed,
+    Calculator::Functions::Names::setRandomSeed,
     innerStandard
   );
   this->addOperationHandler(
@@ -195,7 +201,7 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::Names::approximations,
+    Calculator::Functions::Names::approximations,
     CalculatorFunctions::approximationsDummy,
     "",
     "A dummy handler, used to make the implementation of"
@@ -207,7 +213,7 @@ void Calculator::initializeFunctionsStandard() {
     "(TurnOffApproximations 0; ln(2));\n"
     "ln(2)",
     "CalculatorFunctions::approximationsDummy",
-    Calculator::Atoms::Names::approximations,
+    Calculator::Functions::Names::approximations,
     innerInvisible
   );
   this->addOperationHandler(
@@ -360,7 +366,7 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::Names::setInputBox,
+    Calculator::Functions::Names::setInputBox,
     CalculatorHtmlFunctions::setInputBox,
     "",
     "Sets value for input box that overrides "
@@ -368,7 +374,7 @@ void Calculator::initializeFunctionsStandard() {
     "SetInputBox(name = a, value = 3); "
     "MakeInputBox(name = a)",
     "CalculatorHtmlFunctions::setInputBox",
-    Calculator::Atoms::Names::setInputBox,
+    Calculator::Functions::Names::setInputBox,
     innerStandard
   );
   this->addOperationHandler(
@@ -2513,14 +2519,14 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::Names::transpose,
+    Calculator::Functions::Names::transpose,
     CalculatorFunctions::transpose,
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2);\n"
     "(1,2)^t",
     "CalculatorFunctions::transpose",
-    Calculator::Atoms::Names::transpose,
+    Calculator::Functions::Names::transpose,
     innerStandard
   );
   this->addOperationHandler(
@@ -2754,7 +2760,7 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Atoms::Names::sort,
+    Calculator::Functions::Names::sort,
     CalculatorFunctions::sort,
     "",
     "Sorts a sequence. ",
@@ -2763,7 +2769,7 @@ void Calculator::initializeFunctionsStandard() {
     "Sort((3,2,3,1));\n"
     "Sort{}((3,2,3,1));\n",
     "CalculatorFunctions::sort",
-    Calculator::Atoms::Names::sort,
+    Calculator::Functions::Names::sort,
     innerStandard
   );
   this->addOperationHandler(
@@ -5700,7 +5706,7 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   this->addOperationNoRepetitionAllowed("Freeze");
   this->addOperationNoRepetitionAllowed("\\infty");
   this->addOperationNoRepetitionAllowed("\\phantom");
-  this->addOperationNoRepetitionAllowed("CommandEnclosure");
+  this->addOperationNoRepetitionAllowed(Calculator::Functions::Names::commandEnclosure);
   this->addOperationNoRepetitionAllowed("MonomialPoly");
   this->addOperationNoRepetitionAllowed("Melt");
   this->addOperationNoRepetitionAllowed("Bind");
@@ -6094,8 +6100,8 @@ void Calculator::initializeToStringHandlers() {
     this->opError(), Expression::toStringError
   );
   this->addOneStringAtomHandler(
-  this->atoms.vectorPartitionFunction(),
-  Expression::toStringVectorPartitionFunction
+    this->builtInTypes.vectorPartitionFunction(),
+    Expression::toStringVectorPartitionFunction
   );
   this->addOneStringCompositeHandler(
     this->opMatrix(), Expression::toStringMatrix
@@ -6152,9 +6158,9 @@ void Calculator::initializeToStringHandlers() {
 void Calculator::initializeBuiltInsFreezeArguments() {
   STACK_TRACE("Calculator::initializeBuiltInsFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(
-    this->builtInTypes.size + 100
+    this->builtInTypes.all.size + 100
   );
-  this->atomsThatFreezeArguments.addListOnTop(this->builtInTypes);
+  this->atomsThatFreezeArguments.addListOnTop(this->builtInTypes.all);
 }
 
 void Calculator::initializeAtomsThatFreezeArguments() {

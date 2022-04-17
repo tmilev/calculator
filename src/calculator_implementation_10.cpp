@@ -19,14 +19,22 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
   ) {
     return calculator << "Failed to extract matrix of rationals. ";
   }
-  if (calculator.objectContainer.vectorPartitionFunctions.contains(vectors)) {
-    return output.assignValue(calculator, calculator.objectContainer.vectorPartitionFunctions.getValueNoFail(vectors));
+  if (
+    calculator.objectContainer.vectorPartitionFunctions.contains(vectors)
+  ) {
+    return
+    output.assignValue(
+      calculator,
+      calculator.objectContainer.vectorPartitionFunctions.getValueNoFail(
+        vectors
+      )
+    );
   }
   matrix.getVectorsFromRows(vectors);
   PartialFractions result;
   result.initializeAndSplit(vectors, &calculator.comments);
   result.computeAllVectorPartitionFunctions();
-  return   output.assignValue(calculator, result);
+  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(

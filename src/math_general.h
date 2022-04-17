@@ -6329,7 +6329,7 @@ public:
   ) const;
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables, FormatExpressions& format
-  )const;
+  ) const;
   std::string toString();
   std::string toHTML() const;
   int getLowestIndexRefinedChamberContaining(const Vector<Rational>& root)

@@ -790,10 +790,11 @@ public:
     std::stringstream& out,
     FormatExpressions* format
   );
-  static bool toStringVectorPartitionFunction(    const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format
-);
+  static bool toStringVectorPartitionFunction(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format
+  );
   static bool toStringError(
     const Expression& input,
     std::stringstream& out,
@@ -1611,7 +1612,8 @@ public:
   ListReferences<HyperoctahedralGroupData> hyperOctahedralGroups;
   HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> >
   littelmannOperators;
-  MapReferences<List<Vector<Rational> >, PartialFractions> vectorPartitionFunctions;
+  MapReferences<List<Vector<Rational> >, PartialFractions>
+  vectorPartitionFunctions;
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(
     const DynkinType& input
@@ -2068,36 +2070,74 @@ public:
     std::string toStringRuleStatusUser();
   };
 
-  class Atoms {
+  // The built-in type of an object is an string identifier
+  // used internally to indicate the type of a built-in object.
+  // A built-in object is one that has an internal C++ data structure that
+  // represents the entire object.
+  // The Expression object records the type string and an integer that
+  // represents the position of the object in a global array held in
+  // calculator.objectContainer.
+  // A built in object is atomic
+  // from the standpoint of a calculator user.
+  // The built in type is not allowed to be used as a function.
+  class BuiltInTypes{
   public:
+    Calculator* owner;
+    HashedList<std::string> all;
+
     class Names {
     public:
-      static std::string commandEnclosure;
-    static std::string setInputBox;
-    static std::string setRandomSeed;
-    static std::string sort;
-    static std::string transpose;
-    static std::string approximations;
-    static std::string turnOnRules;
-    static std::string turnOffRules;
-    static std::string elementTensorsGeneralizedVermas;
-    static std::string vectorPartitionFunction;
-    class Trigonometry {
-    public:
-      static std::string sine;
-      static std::string cosine;
+      static std::string vectorPartitionFunction;
+      static std::string elementTensorsGeneralizedVermas;
     };
-    } ;
-    Calculator* owner;
-    Atoms() {this->owner = nullptr;}
-    int vectorPartitionFunction() {
-      return this->owner->operations.getIndexNoFail(Calculator::Atoms::Names::vectorPartitionFunction);
 
+    int vectorPartitionFunction() {
+      return
+      this->owner->operations.getIndexNoFail(
+        Calculator::BuiltInTypes::Names::vectorPartitionFunction
+      );
     }
+    BuiltInTypes() {
+      this->owner = nullptr;
+    }
+
+
+  };
+  // A function is a predefined string that is to be attached to
+  // a built-in function handler.
+
+  class Functions {
+  public:
+    Calculator* owner;
+class Names{
+public:
+      static std::string commandEnclosure;
+      static std::string setInputBox;
+      static std::string setRandomSeed;
+      static std::string sort;
+      static std::string transpose;
+      static std::string approximations;
+      static std::string turnOnRules;
+      static std::string turnOffRules;
+      static std::string vectorPartitionFunction;
+      class Trigonometry {
+      public:
+        static std::string sine;
+        static std::string cosine;
+      };
+};
+Functions(){this->owner= nullptr;}
+int vectorPartitionFunction() {
+  return
+  this->owner->operations.getIndexNoFail(
+    Calculator::Functions::Names::vectorPartitionFunction
+  );
+}
+
   };
 
-  Calculator::Atoms atoms;
-
+  Calculator::BuiltInTypes builtInTypes;
+  Calculator::BuiltInTypes builtInFunctions;
   // Initialization mode for the calculator.
   // Allows to avoid bootstrapping a number of
   // functions/operations.
@@ -2121,7 +2161,6 @@ public:
   > operations;
   HashedList<std::string> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string> atomsNotAllowingChainRule;
-  HashedList<std::string> builtInTypes;
   HashedList<std::string> arithmeticOperations;
   HashedList<std::string>
   knownOperationsInterpretedAsFunctionsMultiplicatively;
@@ -2367,7 +2406,7 @@ public:
     return this->operations.keys;
   }
   const HashedList<std::string>& getBuiltInTypes() {
-    return this->builtInTypes;
+    return this->builtInTypes.all;
   }
   const List<Function>* getOperationHandlers(int operation);
   const List<Function>* getOperationCompositeHandlers(int operation);
@@ -2424,7 +2463,9 @@ public:
   }
   int opCommandEnclosure() {
     return
-    this->operations.getIndexNoFail(Calculator::Atoms::Names::commandEnclosure);
+    this->operations.getIndexNoFail(
+      Calculator::Functions::Names::commandEnclosure
+    );
   }
   int opRulesOff() {
     return this->operations.getIndexNoFail("RulesOff");
@@ -2434,7 +2475,9 @@ public:
   }
   int opApproximations() {
     return
-    this->operations.getIndexNoFail(Calculator::Atoms::Names::approximations);
+    this->operations.getIndexNoFail(
+      Calculator::Functions::Names::approximations
+    );
   }
   int opCommandEnclosureStart() {
     return this->operations.getIndexNoFail("CommandEnclosureStart");
@@ -2622,7 +2665,7 @@ public:
   int opElementTensorGVM() {
     return
     this->operations.getIndexNoFail(
-      Calculator::Atoms::Names::elementTensorsGeneralizedVermas
+      Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas
     );
   }
   int opElementSemisimpleLieAlgebraAlgebraicCoefficients() {
@@ -3084,7 +3127,7 @@ public:
     const std::string& operationName
   );
   void addOperationNoRepetitionAllowed(const std::string& operation);
-  void addOperationBuiltInType(const std::string& operationBuiltIn);
+  void addBuiltInType(const std::string& operationBuiltIn);
   void addKnownDoubleConstant(
     const std::string& constantName, double value
   );

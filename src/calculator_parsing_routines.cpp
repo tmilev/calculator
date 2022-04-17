@@ -448,7 +448,7 @@ void Calculator::reset() {
   this->objectContainer.reset();
   // this->logEvaluationSteps.setSize(0);
   this->operations.clear();
-  this->builtInTypes.clear();
+  this->builtInTypes.all.clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.clear();
   this->atomsThatFreezeArguments.clear();
   this->atomsNotInterpretedAsFunctions.clear();
@@ -496,7 +496,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->mode = desiredMode;
   this->operations.setExpectedSize(1000);
   this->namedRules.setExpectedSize(500);
-  this->builtInTypes.setExpectedSize(50);
+  this->builtInTypes.all.setExpectedSize(50);
   this->formatVisibleStrings.flagExpressionIsFinal = true;
   // Operation List is the very first operation.
   // It signifies a non-atomic expression.
@@ -546,51 +546,55 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addOperationNoRepetitionAllowed("\\lim");
   this->addOperationNoRepetitionAllowed("LogBase");
   this->addOperationNoRepetitionAllowed("\\int");
-  this->addOperationBuiltInType("Rational");
-  this->addOperationBuiltInType("EltZmodP");
-  this->addOperationBuiltInType("Double");
-  this->addOperationBuiltInType("AlgebraicNumber");
-  this->addOperationBuiltInType("PolynomialRational");
-  this->addOperationBuiltInType("PolynomialOverANs");
-  this->addOperationBuiltInType("PolynomialModuloInteger");
-  this->addOperationBuiltInType("PolynomialModuloPolynomialModuloInteger");
-  this->addOperationBuiltInType("RationalFunction");
-  this->addOperationBuiltInType("RationalFunctionAlgebraicCoefficients");
-  this->addOperationBuiltInType("RationalFunctionModuloInteger");
-  this->addOperationBuiltInType("string");
-  this->addOperationBuiltInType("JSON");
-  this->addOperationBuiltInType("ElementUEoverRF");
-  this->addOperationBuiltInType(
+  this->addBuiltInType("Rational");
+  this->addBuiltInType("EltZmodP");
+  this->addBuiltInType("Double");
+  this->addBuiltInType("AlgebraicNumber");
+  this->addBuiltInType("PolynomialRational");
+  this->addBuiltInType("PolynomialOverANs");
+  this->addBuiltInType("PolynomialModuloInteger");
+  this->addBuiltInType("PolynomialModuloPolynomialModuloInteger");
+  this->addBuiltInType("RationalFunction");
+  this->addBuiltInType("RationalFunctionAlgebraicCoefficients");
+  this->addBuiltInType("RationalFunctionModuloInteger");
+  this->addBuiltInType("string");
+  this->addBuiltInType("JSON");
+  this->addBuiltInType("ElementUEoverRF");
+  this->addBuiltInType(
     "ElementSemisimpleLieAlgebraAlgebraicCoefficients"
   );
-  this->addOperationBuiltInType(
-    Calculator::Atoms::Names::elementTensorsGeneralizedVermas
+  this->addBuiltInType(
+    Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas
   );
-  this->addOperationBuiltInType("CharSSAlgMod");
-  this->addOperationBuiltInType("SemisimpleLieAlg");
-  this->addOperationBuiltInType("LittelmannPath");
-  this->addOperationBuiltInType("LRO");
-  this->addOperationBuiltInType("MatrixRational");
-  this->addOperationBuiltInType("MatrixDouble");
-  this->addOperationBuiltInType("MatrixAlgebraic");
-  this->addOperationBuiltInType("MatrixTensorRational");
-  this->addOperationBuiltInType("MatrixRF");
-  this->addOperationBuiltInType("MatrixPolynomialRational");
-  this->addOperationBuiltInType("CalculusPlot");
-  this->addOperationBuiltInType("SemisimpleSubalgebras");
-  this->addOperationBuiltInType("CandidateSSsubalgebra");
-  this->addOperationBuiltInType("WeylGroup");
-  this->addOperationBuiltInType("ElementWeylGroup");
-  this->addOperationBuiltInType("HyperoctahedralGroupRepresentation");
-  this->addOperationBuiltInType("ElementHyperoctahedral");
-  this->addOperationBuiltInType("WeylGroupRep");
-  this->addOperationBuiltInType("WeylGroupVirtualRep");
-  this->addOperationBuiltInType("ElementWeylAlgebra");
-  this->addOperationBuiltInType("weightLieAlg");
-  this->addOperationBuiltInType("weightLieAlgPoly");
-  this->addOperationBuiltInType("ellipticCurveElementsRational");
-  this->addOperationBuiltInType("ellipticCurveElementsZmodP");
-  this->addOperationBuiltInType("userInputTextBox");
+  this->addBuiltInType(
+    Calculator::BuiltInTypes::Names::vectorPartitionFunction
+  );
+  this->addBuiltInType("CharSSAlgMod");
+  this->addBuiltInType("SemisimpleLieAlg");
+  this->addBuiltInType("LittelmannPath");
+  this->addBuiltInType("LRO");
+  this->addBuiltInType("MatrixRational");
+  this->addBuiltInType("MatrixDouble");
+  this->addBuiltInType("MatrixAlgebraic");
+  this->addBuiltInType("MatrixTensorRational");
+  this->addBuiltInType("MatrixRF");
+  this->addBuiltInType("MatrixPolynomialRational");
+  this->addBuiltInType("CalculusPlot");
+  this->addBuiltInType("SemisimpleSubalgebras");
+  this->addBuiltInType("CandidateSSsubalgebra");
+  this->addBuiltInType("WeylGroup");
+  this->addBuiltInType("ElementWeylGroup");
+  this->addBuiltInType("HyperoctahedralGroupRepresentation");
+  this->addBuiltInType("ElementHyperoctahedral");
+  this->addBuiltInType("WeylGroupRep");
+  this->addBuiltInType("WeylGroupVirtualRep");
+  this->addBuiltInType("ElementWeylAlgebra");
+  this->addBuiltInType("weightLieAlg");
+  this->addBuiltInType("weightLieAlgPoly");
+  this->addBuiltInType("ellipticCurveElementsRational");
+  this->addBuiltInType("ellipticCurveElementsZmodP");
+  this->addBuiltInType("userInputTextBox");
+
   this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
   this->parser.initializeControlSequences();
   this->initializePredefinedStandardOperationsWithoutHandler();

@@ -301,10 +301,10 @@ int Expression::getTypeOperation<
   return this->owner->opElementSemisimpleLieAlgebraAlgebraicCoefficients();
 }
 
-template <>
-int Expression::getTypeOperation<PartialFractions> () const {
+template < >
+int Expression::getTypeOperation<PartialFractions>() const {
   this->checkInitialization();
-  return this->owner->atoms.vectorPartitionFunction();
+  return this->owner->builtInTypes.vectorPartitionFunction();
 }
 
 // Expression::getTypeOperation specializations end.
@@ -571,9 +571,8 @@ const {
     )
   ) {
     global.fatal
-    <<
-    "Semisimple Lie algebra must be "
-    <<"allocated directly in the object container. "
+    << "Semisimple Lie algebra must be "
+    << "allocated directly in the object container. "
     << global.fatal;
   }
   int index =
@@ -701,12 +700,16 @@ int Expression::addObjectReturnIndex(const ElementWeylGroup& inputValue) const {
   addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
-template <>
+template < >
 int Expression::addObjectReturnIndex(const PartialFractions& inputValue) const {
   this->checkInitialization();
-
-  this->owner->objectContainer.vectorPartitionFunctions.setKeyValue(inputValue.originalVectors, inputValue);
-  return this->owner->objectContainer.vectorPartitionFunctions.getIndex(inputValue.originalVectors);
+  this->owner->objectContainer.vectorPartitionFunctions.setKeyValue(
+    inputValue.originalVectors, inputValue
+  );
+  return
+  this->owner->objectContainer.vectorPartitionFunctions.getIndex(
+    inputValue.originalVectors
+  );
 }
 
 // Expression::addObjectReturnIndex specializations end
@@ -848,12 +851,12 @@ Expression::getValueNonConst() const {
 
 template < >
 ElementZmodP& Expression::getValueNonConst() const {
-  if (!this->isOfType<ElementZmodP>()) global.fatal
+  if (!this->isOfType<ElementZmodP>()){ global.fatal
   << "Expression not of required type ElementZmodP. "
   << "The expression equals "
   << this->toString()
   << "."
-  << global.fatal;
+  << global.fatal;}
   return
   this->owner->objectContainer.elementsModP.getElement(
     this->getLastChild().data
@@ -862,13 +865,16 @@ ElementZmodP& Expression::getValueNonConst() const {
 
 template < >
 PartialFractions& Expression::getValueNonConst() const {
-  if (!this->isOfType<PartialFractions>()) global.fatal
+  if (!this->isOfType<PartialFractions>()) {global.fatal
   << "Expression not of required type PartialFractions. "
+    << this->toStringFull()
   << global.fatal;
+  }
   return
   this->owner->objectContainer.vectorPartitionFunctions.values[
-    this->getLastChild().data]
-;}
+    this->getLastChild().data
+  ];
+}
 
 template < >
 AlgebraicNumber& Expression::getValueNonConst() const {
@@ -2965,7 +2971,7 @@ bool Expression::toStringBuiltIn<
   (void) format;
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
-  out << Calculator::Atoms::Names::elementTensorsGeneralizedVermas << "{}(";
+  out << Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas << "{}(";
   out
   << input.getValue<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
@@ -4561,13 +4567,18 @@ bool Expression::toStringError(
   return true;
 }
 
-bool Expression::toStringVectorPartitionFunction(const Expression &input, std::stringstream &out, FormatExpressions *format){
+bool Expression::toStringVectorPartitionFunction(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+) {
   STACK_TRACE("Expression::toStringVectorPartitionFunction");
   (void) format;
-const  PartialFractions& partialFractions = input.getValue<PartialFractions>();
- out << partialFractions.toHTML();
+  const PartialFractions& partialFractions =
+  input.getValue<PartialFractions>();
+  out << partialFractions.toHTML();
   out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML();
-return true;
+  return true;
 }
 
 bool Expression::toStringSumOrIntegral(

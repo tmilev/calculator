@@ -1347,7 +1347,7 @@ std::string CalculatorHTML::prepareUserInputBoxes() {
     ) {
       if (inputNonAnswerReader != "" && arguments.values[i] != "") {
         out
-        << Calculator::Atoms::Names::setInputBox
+        << Calculator::Functions::Names::setInputBox
         << "(name = "
         << inputNonAnswerReader
         << ", value = "
@@ -1363,9 +1363,9 @@ std::string CalculatorHTML::prepareUserInputBoxes() {
 
 std::string CalculatorHTML::getProblemHeaderEnclosure() {
   std::stringstream out;
-  out << Calculator::Atoms::Names::commandEnclosure << "{}(";
+  out << Calculator::Functions::Names::commandEnclosure << "{}(";
   out
-  << Calculator::Atoms::Names::setRandomSeed
+  << Calculator::Functions::Names::setRandomSeed
   << "{}("
   << this->problemData.randomSeed
   << "); ";
@@ -1377,7 +1377,7 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
 std::string CalculatorHTML::getProblemHeaderWithoutEnclosure() {
   std::stringstream out;
   out
-  << Calculator::Atoms::Names::setRandomSeed
+  << Calculator::Functions::Names::setRandomSeed
   << " {}("
   << this->problemData.randomSeed
   << "); ";
@@ -1532,7 +1532,7 @@ bool CalculatorHTML::exrtactSolutionCommands(
     current.commandIndex = numCommandsSoFar;
     numCommandsSoFar ++;
     streamCommands
-    << Calculator::Atoms::Names::commandEnclosure
+    << Calculator::Functions::Names::commandEnclosure
     << "{}("
     << current.commandCleaned()
     << "); ";
@@ -1595,7 +1595,7 @@ bool Answer::prepareAnswerStandard(
   std::string stringCommandsBody = commandsBody.str();
   if (stringCommandsBody != "") {
     commands
-    << Calculator::Atoms::Names::commandEnclosure
+    << Calculator::Functions::Names::commandEnclosure
     << "{}("
     << stringCommandsBody
     << ");\n";
@@ -3682,7 +3682,7 @@ std::string SyntacticElementHTML::cleanUpEncloseCommand(
   const std::string& inputCommand
 ) {
   return
-  Calculator::Atoms::Names::commandEnclosure +
+  Calculator::Functions::Names::commandEnclosure +
   "{}( " +
   SyntacticElementHTML::cleanUpCommandString(inputCommand) +
   " );";

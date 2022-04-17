@@ -721,7 +721,9 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
 
 bool Calculator::approximationsBanned() {
   Function& approximationsDummyHandler =
-  this->getFunctionHandlerFromNamedRule(Calculator::Atoms::Names::approximations);
+  this->getFunctionHandlerFromNamedRule(
+    Calculator::Functions::Names::approximations
+  );
   return approximationsDummyHandler.options.disabledByUser;
 }
 

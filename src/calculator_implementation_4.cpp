@@ -27,7 +27,8 @@ Calculator::Calculator() {
   this->numberExpectedExpressionsAtInitialization = - 1;
   this->mode = Calculator::Mode::full;
   this->examples.owner = this;
-  this->atoms.owner = this;
+  this->builtInTypes.owner = this;
+  this->builtInFunctions.owner = this;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -1562,11 +1563,11 @@ int Calculator::addOperationNoRepetitionOrReturnIndexFirst(
   return result;
 }
 
-void Calculator::addOperationBuiltInType(
+void Calculator::addBuiltInType(
   const std::string& operationBuiltIn
 ) {
   this->addOperationNoRepetitionAllowed(operationBuiltIn);
-  this->builtInTypes.addOnTop(operationBuiltIn);
+  this->builtInTypes.all.addOnTop(operationBuiltIn);
 }
 
 void Calculator::addOperationNoRepetitionAllowed(

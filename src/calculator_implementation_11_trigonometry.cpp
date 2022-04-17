@@ -1442,18 +1442,18 @@ bool TrigonometricReduction::TrigonometricFunction::extractFrom(
   std::string trigonometricFunction;
   if (
     trigonometricExpression.startsWithGivenOperation(
-      Calculator::Atoms::Names::Trigonometry::sine
+      Calculator::Functions::Names::Trigonometry::sine
     )
   ) {
-    trigonometricFunction = Calculator::Atoms::Names::Trigonometry::sine;
+    trigonometricFunction = Calculator::Functions::Names::Trigonometry::sine;
     this->isSine = true;
   }
   if (
     trigonometricExpression.startsWithGivenOperation(
-      Calculator::Atoms::Names::Trigonometry::cosine
+      Calculator::Functions::Names::Trigonometry::cosine
     )
   ) {
-    trigonometricFunction = Calculator::Atoms::Names::Trigonometry::cosine;
+    trigonometricFunction = Calculator::Functions::Names::Trigonometry::cosine;
     this->isSine = false;
   }
   if (trigonometricFunction == "") {

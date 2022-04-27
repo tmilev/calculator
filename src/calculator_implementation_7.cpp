@@ -6622,7 +6622,7 @@ bool CalculatorFunctions::lispifyFull(
   if (input.size() != 2) {
     return false;
   }
-  return output.assignValue(calculator, input[1].toStringFull());
+  return output.assignValue(calculator, input[1].toStringFullWithHints(false));
 }
 
 bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(

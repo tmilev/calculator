@@ -3332,6 +3332,37 @@ std::string Expression::toStringFull() const {
   return out.str();
 }
 
+std::string Expression::toStringFullWithHints(bool isBuiltInObjectIndex) const {
+  std::stringstream out;
+  if (this->isAtom()) {
+    if (this->owner == nullptr || isBuiltInObjectIndex) {
+      out << this->data ;
+    } else {
+      if (this->data < this->owner->operations.size()) {
+        out << this->owner->operations.keys[this->data];
+      } else {
+        out << "?" << this->data ;
+      }
+
+    }
+    out << " ";
+  }
+  bool builtIn = this->isBuiltInType();
+  if (this->children.size > 0) {
+    out << "(";
+    for (int i = 0; i < this->children.size; i ++) {
+      const Expression& child = (*this)[i];
+      bool childIsInBuiltIn = builtIn && i==this->children.size-1 ;
+      out << child.toStringFullWithHints(childIsInBuiltIn);
+      if (i != this->children.size - 1) {
+        out << ", ";
+      }
+    }
+    out << ")";
+  }
+  return out.str();
+}
+
 bool Expression::needsParenthesisForBaseOfExponent() const {
   if (this->owner == nullptr) {
     return false;

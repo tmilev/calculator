@@ -511,6 +511,7 @@ public:
   ) const;
   std::string toStringSemiFull() const;
   std::string toStringFull() const;
+  std::string toStringFullWithHints(bool isBuiltInObjectIndex) const;
   std::string toStringAllSlidersInExpression() const;
   std::string toUTF8String(FormatExpressions* format = nullptr) const;
   template <class builtIn>

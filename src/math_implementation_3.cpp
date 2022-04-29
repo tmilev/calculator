@@ -12398,13 +12398,14 @@ bool ConeCollection::drawMeProjectiveInitialize(
   if (this->getDimension() == 2) {
     return true;
   }
-if (!  this->convexHull.getInternalPoint(root)) {
-global.comments << "Failed to get internal point of convex hull: " << this->convexHull.toString();
-return  false;
-}
+  if (!this->convexHull.getInternalPoint(root)) {
+    global.comments
+    << "Failed to get internal point of convex hull: "
+    << this->convexHull.toString();
+    return false;
+  }
   matrix.assignVectorRow(root);
   matrix.getZeroEigenSpace(roots);
-  global.comments << "DEBUG: got to here: roots: " << roots.toString() << ". Root: " << root.toString();
   for (int i = 0; i < 2; i ++) {
     for (int j = 0; j < this->getDimension(); j ++) {
       drawingVariables.operations.basisProjectionPlane[i][j] =
@@ -14910,7 +14911,7 @@ bool Cone::getInternalPoint(Vector<Rational>& output) const {
     return false;
   }
   this->vertices.sum(output, this->vertices[0].size);
-  return  true;
+  return true;
 }
 
 bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {

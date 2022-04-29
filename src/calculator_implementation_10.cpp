@@ -36,16 +36,8 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
     vectors
   );
   result.initializeAndSplit(vectors, &calculator.comments);
-  global.comments << "DEBUG: init and split: " << result.originalVectors.toString()
-  << ", hull: " << result.chambers.convexHull.toString() << "<hr>";
   result.computeAllVectorPartitionFunctions();
-  global.comments << "DEBUG: compute all: " << result.originalVectors.toString()
-  << ", hull: " << result.chambers.convexHull.toString() << "<hr>";
-   output.assignValue(calculator, result);
-   global.comments << "DEBUG: after assign: " << output.getValue<PartialFractions>().chambers.convexHull.toString() ;
-   global.comments << "DEBUG: after assign: " << output.getValue<PartialFractions>().originalVectors.toString() << "<hr>";
-
-   return true;
+  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(

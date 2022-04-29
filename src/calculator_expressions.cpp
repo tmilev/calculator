@@ -702,10 +702,15 @@ int Expression::addObjectReturnIndex(const ElementWeylGroup& inputValue) const {
 template < >
 int Expression::addObjectReturnIndex(const PartialFractions& inputValue) const {
   this->checkInitialization();
-  if (!this->owner->objectContainer.vectorPartitionFunctions.contains(inputValue.originalVectors)) {
-    global.fatal << "Partial fractions can only be allocated "
-    <<"manually in the object container. "    << global.fatal;
-
+  if (
+    !this->owner->objectContainer.vectorPartitionFunctions.contains(
+      inputValue.originalVectors
+    )
+  ) {
+    global.fatal
+    << "Partial fractions can only be allocated "
+    << "manually in the object container. "
+    << global.fatal;
   }
   return
   this->owner->objectContainer.vectorPartitionFunctions.getIndex(

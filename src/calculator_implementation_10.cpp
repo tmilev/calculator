@@ -60,3 +60,27 @@ bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
   out << chambers.toHTML();
   return output.assignValue(calculator, out.str());
 }
+
+bool CalculatorFunctionsVectorPartitionFunction::
+applyVectorPartitionFunctionFormula(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "applyVectorPartitionFunctionFormula"
+  );
+  Vector<Rational> vector;
+  if (
+    !calculator.getVectorFromFunctionArguments(input, vector, nullptr, - 1)
+  ) {
+    return false;
+  }
+  WithContext<PartialFractions> element;
+  if (!input[0].isOfTypeWithContext(&element)) {
+    return false;
+  }
+  PartialFractions partialFractions = element.content;
+  Rational result;
+  partialFractions.evaluateVectorPartitionFunction(vector, result);
+  return output.assignValue(calculator, result);
+}

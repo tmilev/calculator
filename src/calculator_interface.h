@@ -1141,6 +1141,10 @@ public:
   List<int> parentsThatBanHandler;
   class Options {
   public:
+    // When flagIsCompositeHandler set, the operation OP applies
+    // to expressions of the form ((OP ...), argument1, ...).
+    // When flagIsCompositeHandler is not set, the operation OP applies
+    // to expressions of the form (OP, argument1, ...)
     bool flagIsCompositeHandler;
     bool flagIsInner;
     bool flagMayActOnBoundVars;

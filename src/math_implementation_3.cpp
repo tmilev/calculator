@@ -11123,6 +11123,31 @@ void PartialFractions::computeQuasipolynomials() {
   }
 }
 
+void PartialFractions::evaluateVectorPartitionFunction(
+  const Vector<Rational>& input, Rational& output
+) {
+  STACK_TRACE("PartialFractions::evaluate");
+  if (this->chambers.refinedCones.size == 0) {
+    global.fatal
+    << "Please compute the partial fraction decomposition first."
+    << global.fatal;
+  }
+  int coneIndex = 0;
+  for (; coneIndex < this->chambers.refinedCones.size; coneIndex ++) {
+    const Cone& cone = this->chambers.refinedCones[coneIndex];
+    if (cone.isInCone(input)) {
+      break;
+    }
+  }
+  if (coneIndex >= this->chambers.refinedCones.size) {
+    // No cone contains the input.
+    output = 0;
+    return;
+  }
+  QuasiPolynomial quasiPolynomial = this->allQuasiPolynomials[coneIndex];
+  output = quasiPolynomial.evaluate(input);
+}
+
 bool PartialFractions::computeOneVectorPartitionFunction(
   QuasiPolynomial& output, Vector<Rational>& newIndicator
 ) {

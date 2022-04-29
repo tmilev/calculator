@@ -6493,6 +6493,9 @@ public:
     >& input,
     Rational& output
   );
+  void evaluateVectorPartitionFunction(
+    const Vector<Rational>& input, Rational& output
+  );
   void prepareIndicatorVariables();
   bool computeOneVectorPartitionFunction(
     QuasiPolynomial& output, Vector<Rational>& newIndicator

@@ -12,6 +12,9 @@ public:
   static bool vectorPartitionFunctionFormula(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool applyVectorPartitionFunctionFormula(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool coneDecomposition(
     Calculator& calculator, const Expression& input, Expression& output
   );

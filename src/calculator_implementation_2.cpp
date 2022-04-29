@@ -392,20 +392,18 @@ bool Calculator::outerStandardCompositeHandler(
   }
   for (int i = 0; i < handlers->size; i ++) {
     Function& currentHandler = (*handlers)[i];
-    if (currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
-      if (
-        currentHandler.apply(
-          calculator,
-          input,
-          output,
-          opIndexParentIfAvailable,
-          outputHandler
-        )
-      ) {
-        calculator.logFunctionWithTime(currentHandler, start);
-        return true;
-      }
+    if (!currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
+      continue;
     }
+    if (
+      !currentHandler.apply(
+        calculator, input, output, opIndexParentIfAvailable, outputHandler
+      )
+    ) {
+      continue;
+    }
+    calculator.logFunctionWithTime(currentHandler, start);
+    return true;
   }
   return false;
 }

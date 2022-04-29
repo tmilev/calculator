@@ -7,6 +7,7 @@
 void Calculator::initializeFunctionsVectorPartitionFunctions() {
   STACK_TRACE("Calculator::initializeFunctionsVectorPartitionFunctions");
   Function::Options innerStandard = Function::Options::standard();
+  Function::Options composite = Function::Options::compositeStandard();
   this->addOperationHandler(
     Calculator::Functions::Names::vectorPartitionFunction,
     CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula,
@@ -50,5 +51,24 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "CalculatorFunctionsVectorPartitionFunction::coneDecomposition",
     "ConeDecomposition",
     innerStandard
+  );
+  this->addOperationHandler(
+    Calculator::BuiltInTypes::Names::vectorPartitionFunction,
+    CalculatorFunctionsVectorPartitionFunction::
+    applyVectorPartitionFunctionFormula,
+    "",
+    "Applies the vector partition function formula. ",
+    "f=VectorPartitionFunction(\n"
+    "(1,0),"
+    "(0,1),"
+    "(1,1),"
+    "(1,2),"
+    "(1,3),"
+    "(2,3) "
+    "); f{}(4,5)",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::applyVectorPartitionFunctionFormula",
+    "ApplyVectorPartitionFunction",
+    composite
   );
 }

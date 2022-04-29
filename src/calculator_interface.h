@@ -822,6 +822,14 @@ public:
     JSData* outputJS,
     FormatExpressions* format
   ) const;
+  bool toStringEndStatementOneRow(
+    std::stringstream& out,
+    Expression* startingExpression,
+    JSData* outputJS,
+    int index,
+    bool isFinal,
+    FormatExpressions& format
+  ) const;
   bool requiresNoMathTags() const;
   static unsigned int hashFunction(const Expression& input);
   unsigned int hashFunction() const;

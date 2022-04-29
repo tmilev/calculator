@@ -4013,6 +4013,75 @@ bool Expression::toStringGeneral(
   return true;
 }
 
+bool Expression::toStringEndStatementOneRow(
+  std::stringstream& out,
+  Expression* startingExpression,
+  JSData* outputJS,
+  int index,
+  bool isFinal,
+  FormatExpressions& format
+) const {
+  std::string currentInput, currentOutput;
+  const Expression currentE = (*this)[index];
+  out << "<tr><td class='cellCalculatorInput'>";
+  if (!this->owner->flagHideLHS) {
+    if (index < (*startingExpression).size()) {
+      format.flagDontCollalpseProductsByUnits = true;
+      currentInput =
+      HtmlRoutines::getMathNoDisplay((*startingExpression)[index].toString(
+          &format
+        )
+      );
+    } else {
+      currentInput =
+      "No matching starting expression - "
+      "possible use of the Melt keyword.";
+    }
+  } else {
+    currentInput = "...";
+  }
+  out << currentInput;
+  if (outputJS != nullptr) {
+    (*outputJS)["input"][index - 1] = currentInput;
+  }
+  if (index != this->size() - 1) {
+    out << ";";
+  }
+  out << "</td><td class='cellCalculatorResult'>";
+  if (currentE.isOfType<std::string>() && isFinal) {
+    currentOutput =
+    StringRoutines::Conversions::stringToCalculatorDisplay(
+      currentE.getValue<std::string>()
+    );
+  } else if (currentE.requiresNoMathTags() && isFinal) {
+    format.flagDontCollalpseProductsByUnits = false;
+    currentOutput = currentE.toString(&format);
+  } else {
+    format.flagDontCollalpseProductsByUnits = false;
+    std::string childString = currentE.toString(&format);
+    if (StringRoutines::stringContains(childString, "\\(")) {
+      // The string contains the math tag \(. We assume the childString
+      // has embedded descriptive latex strings. We should not generate math
+      // tags; the expression is either too complicated to be formatted
+      // correctly,
+      // or the childString has already got all it's tags.
+      currentOutput = childString;
+    } else {
+      currentOutput =
+      HtmlRoutines::getMathNoDisplay(
+        childString, Expression::maximumCharactersInLatexPrintout
+      );
+    }
+  }
+  currentOutput += currentE.toStringAllSlidersInExpression();
+  if (outputJS != nullptr) {
+    (*outputJS)["output"][index - 1] = currentOutput;
+  }
+  out << currentOutput;
+  out << "</td></tr>";
+  return true;
+}
+
 bool Expression::toStringEndStatement(
   std::stringstream& out,
   Expression* startingExpression,
@@ -4046,7 +4115,7 @@ bool Expression::toStringEndStatement(
   if (createSingleTable) {
     out << "<table class='tableCalculatorOutput'>";
   }
-  std::string currentInput, currentOutput;
+  std::string currentOutput;
   if (outputJS != nullptr) {
     (*outputJS)["input"].elementType = JSData::token::tokenArray;
     (*outputJS)["output"].elementType = JSData::token::tokenArray;
@@ -4054,53 +4123,9 @@ bool Expression::toStringEndStatement(
   for (int i = 1; i < this->size(); i ++) {
     const Expression currentE = (*this)[i];
     if (createTable) {
-      out << "<tr><td class='cellCalculatorInput'>";
-      if (!this->owner->flagHideLHS) {
-        if (i < (*startingExpression).size()) {
-          format->flagDontCollalpseProductsByUnits = true;
-          currentInput =
-          HtmlRoutines::getMathNoDisplay((*startingExpression)[i].toString(
-              format
-            )
-          );
-        } else {
-          currentInput =
-          "No matching starting expression - "
-          "possible use of the Melt keyword.";
-        }
-      } else {
-        currentInput = "...";
-      }
-      out << currentInput;
-      if (outputJS != nullptr) {
-        (*outputJS)["input"][i - 1] = currentInput;
-      }
-      if (i != this->size() - 1) {
-        out << ";";
-      }
-      out << "</td><td class='cellCalculatorResult'>";
-      if ((*this)[i].isOfType<std::string>() && isFinal) {
-        currentOutput =
-        StringRoutines::Conversions::stringToCalculatorDisplay(
-          currentE.getValue<std::string>()
-        );
-      } else if (currentE.requiresNoMathTags() && isFinal) {
-        format->flagDontCollalpseProductsByUnits = false;
-        currentOutput = currentE.toString(format);
-      } else {
-        format->flagDontCollalpseProductsByUnits = false;
-        currentOutput =
-        HtmlRoutines::getMathNoDisplay(
-          currentE.toString(format),
-          Expression::maximumCharactersInLatexPrintout
-        );
-      }
-      currentOutput += currentE.toStringAllSlidersInExpression();
-      if (outputJS != nullptr) {
-        (*outputJS)["output"][i - 1] = currentOutput;
-      }
-      out << currentOutput;
-      out << "</td></tr>";
+      this->toStringEndStatementOneRow(
+        out, startingExpression, outputJS, i, isFinal, *format
+      );
     } else {
       bool addLatexDelimiter = !currentE.isOfType<JSData>();
       std::stringstream outWithDelimiter;

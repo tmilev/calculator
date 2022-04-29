@@ -6215,7 +6215,7 @@ public:
   bool createFromNormals(Vectors<Rational>& inputNormals);
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
-  void getInternalPoint(Vector<Rational>& output) const;
+  bool getInternalPoint(Vector<Rational>& output) const;
   Vector<Rational> getInternalPoint() const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const Cone& input);

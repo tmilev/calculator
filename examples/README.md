@@ -2209,6 +2209,14 @@ If x is a constant, replaces x{}({{anything}})=x;
 ```
 If x is a constant, replaces x{}({{anything}})=x; 
 
+*VPF* (_composite_) [ApplyVectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::applyVectorPartitionFunctionFormula}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%3dVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3b%20f%7b%7d%284%2c5%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+f=VectorPartitionFunction(
+(1,0),(0,1),(1,1),(1,2),(1,3),(2,3) ); f{}(4,5)
+```
+Applies the vector partition function formula. 
+
 *ElementWeylAlgebra* (_composite_) [EWAactOnPoly] {CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20ElementWeylAlgebraPoly%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5c%5cpartial%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5cn%5c%5cpartial%7b%7d%28x%29%3b%20%5c%5cpartial%5e%7b2%7d%7b%7d%28x%5e3%2bx%5e2%29%3b%20x%7b%7d%28x%5e2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

@@ -9,6 +9,7 @@
 #include "calculator_interface.h"
 
 std::string DrawingVariables::getHTMLDiv(int dimension, bool useSpanTag) {
+  STACK_TRACE("DrawingVariables::getHTMLDiv");
   JSData data;
   data["widthHTML"] = this->defaultHtmlWidth;
   data["heightHTML"] = this->defaultHtmlHeight;

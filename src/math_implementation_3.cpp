@@ -4324,6 +4324,7 @@ std::string PartialFractions::toLatex(FormatExpressions* format) const {
 }
 
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
+  STACK_TRACE("PartialFractions::toHTML");
   std::stringstream out;
   out << "\\(" << this->toLatex(format) << "\\)";
   FormatExpressions formatQuasipolynomial;
@@ -12384,6 +12385,7 @@ bool ConeCollection::drawMeLastCoordinateAffine(
 bool ConeCollection::drawMeProjectiveInitialize(
   DrawingVariables& drawingVariables
 ) const {
+  STACK_TRACE("ConeCollection::drawMeProjectiveInitialize");
   Matrix<Rational> matrix;
   drawingVariables.operations.initialize();
   drawingVariables.operations.initDimensions(this->getDimension());
@@ -12396,9 +12398,13 @@ bool ConeCollection::drawMeProjectiveInitialize(
   if (this->getDimension() == 2) {
     return true;
   }
-  this->convexHull.getInternalPoint(root);
+if (!  this->convexHull.getInternalPoint(root)) {
+global.comments << "Failed to get internal point of convex hull: " << this->convexHull.toString();
+return  false;
+}
   matrix.assignVectorRow(root);
   matrix.getZeroEigenSpace(roots);
+  global.comments << "DEBUG: got to here: roots: " << roots.toString() << ". Root: " << root.toString();
   for (int i = 0; i < 2; i ++) {
     for (int j = 0; j < this->getDimension(); j ++) {
       drawingVariables.operations.basisProjectionPlane[i][j] =
@@ -12587,6 +12593,7 @@ bool Cone::drawMeProjective(
   DrawingVariables& drawingVariables,
   FormatExpressions& format
 ) const {
+  STACK_TRACE("Cone::drawMeProjective");
   (void) format;
   Vector<Rational> zeroRoot;
   Vector<Rational> coordinateCenter;
@@ -14898,11 +14905,12 @@ Vector<Rational> Cone::getInternalPoint() const {
   return result;
 }
 
-void Cone::getInternalPoint(Vector<Rational>& output) const {
+bool Cone::getInternalPoint(Vector<Rational>& output) const {
   if (this->vertices.size <= 0) {
-    return;
+    return false;
   }
   this->vertices.sum(output, this->vertices[0].size);
+  return  true;
 }
 
 bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
@@ -15133,6 +15141,7 @@ bool ConeCollection::checkIsRefinedOrCrash() const {
 }
 
 std::string Cone::toHTML() const {
+  STACK_TRACE("Cone::toHTML");
   std::stringstream out;
   bool lastVarIsConstant = false;
   if (this->flagIsTheZeroCone) {
@@ -15242,6 +15251,7 @@ std::string ConeCollection::toString() {
 }
 
 std::string ConeCollection::toHTML() const {
+  STACK_TRACE("ConeCollection::toHTML");
   std::stringstream out;
   DrawingVariables drawingVariables;
   FormatExpressions format;

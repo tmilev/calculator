@@ -702,9 +702,11 @@ int Expression::addObjectReturnIndex(const ElementWeylGroup& inputValue) const {
 template < >
 int Expression::addObjectReturnIndex(const PartialFractions& inputValue) const {
   this->checkInitialization();
-  this->owner->objectContainer.vectorPartitionFunctions.setKeyValue(
-    inputValue.originalVectors, inputValue
-  );
+  if (!this->owner->objectContainer.vectorPartitionFunctions.contains(inputValue.originalVectors)) {
+    global.fatal << "Partial fractions can only be allocated "
+    <<"manually in the object container. "    << global.fatal;
+
+  }
   return
   this->owner->objectContainer.vectorPartitionFunctions.getIndex(
     inputValue.originalVectors
@@ -866,6 +868,7 @@ ElementZmodP& Expression::getValueNonConst() const {
 
 template < >
 PartialFractions& Expression::getValueNonConst() const {
+  STACK_TRACE("Expression::getValueNonConst");
   if (!this->isOfType<PartialFractions>()) {
     global.fatal
     << "Expression not of required type PartialFractions. "
@@ -3226,7 +3229,7 @@ bool Expression::toStringBuiltIn<PartialFractions>(
   std::stringstream& out,
   FormatExpressions* format
 ) {
-  STACK_TRACE("Expression::toStringVectorPartitionFunction");
+  STACK_TRACE("Expression::toStringBuiltIn_PartialFractions");
   (void) format;
   const PartialFractions& partialFractions =
   input.getValue<PartialFractions>();

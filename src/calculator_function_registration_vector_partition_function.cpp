@@ -57,6 +57,9 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     CalculatorFunctionsVectorPartitionFunction::
     applyVectorPartitionFunctionFormula,
     "",
+    "<b>WORK IN PROGRESS</b>. "
+    "The value of f{}(4,5) computed below is not accurate. "
+    "Will hopefully be fixed in the coming weeks. "
     "Applies the vector partition function formula. ",
     "f=VectorPartitionFunction(\n"
     "(1,0),"
@@ -65,7 +68,8 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(1,2),"
     "(1,3),"
     "(2,3) "
-    "); f{}(4,5)",
+    ");\n"
+    "f{}(4,5)",
     "CalculatorFunctionsVectorPartitionFunction"
     "::applyVectorPartitionFunctionFormula",
     "ApplyVectorPartitionFunction",

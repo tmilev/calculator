@@ -11125,9 +11125,9 @@ void PartialFractions::computeQuasipolynomials() {
 }
 
 void PartialFractions::evaluateVectorPartitionFunction(
-  const Vector<Rational>& input, Rational& output
+  const Vector<Rational>& input, Rational& output, std::stringstream* comments
 ) {
-  STACK_TRACE("PartialFractions::evaluate");
+  STACK_TRACE("PartialFractions::evaluateVectorPartitionFunction");
   if (this->chambers.refinedCones.size == 0) {
     global.fatal
     << "Please compute the partial fraction decomposition first."
@@ -11145,8 +11145,12 @@ void PartialFractions::evaluateVectorPartitionFunction(
     output = 0;
     return;
   }
-  QuasiPolynomial quasiPolynomial = this->allQuasiPolynomials[coneIndex];
-  output = quasiPolynomial.evaluate(input);
+  if (comments != nullptr){
+    *comments << "Vector: " << input.toString() << " is in chamber " << coneIndex+1
+    << this->chambers.refinedCones[coneIndex].toHTML() << "<br>";
+  }
+  QuasiPolynomial& quasiPolynomial = this->allQuasiPolynomials[coneIndex];
+  output = quasiPolynomial.evaluate(input, comments);
 }
 
 bool PartialFractions::computeOneVectorPartitionFunction(
@@ -13631,24 +13635,30 @@ void PiecewiseQuasipolynomial::drawMe(
     );
     drawingVariables.drawTextAtVectorBufferRational(
       latticePointsFinal[i],
-      this->evaluateInputProjectivized(latticePointsFinal[i]).toString(),
+      this->evaluateInputProjectivized(latticePointsFinal[i], nullptr).toString(),
       latticePointColors[i]
     );
   }
 }
 
-Rational QuasiPolynomial::evaluate(const Vector<Rational>& input) {
+Rational QuasiPolynomial::evaluate(const Vector<Rational>& input, std::stringstream* comments) {
   Vector<Rational> testLatticeBelonging;
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     testLatticeBelonging = this->latticeShifts[i] - input;
     if (this->ambientLatticeReduced.isInLattice(testLatticeBelonging)) {
+      if (comments != nullptr) {
+        *comments << "Lattice shift: " << this->latticeShifts[i] << " contains: "
+        << input.toString() << ", ambient lattice: " << this->ambientLatticeReduced.toString()
+        << "<br>Quasipolynomial on shift: "
+        <<"\\(" << this->valueOnEachLatticeShift[i].toString() << "\\)";
+      }
       return this->valueOnEachLatticeShift[i].evaluate(input);
     }
   }
   return 0;
 }
 
-Rational PiecewiseQuasipolynomial::evaluate(const Vector<Rational>& input) {
+Rational PiecewiseQuasipolynomial::evaluate(const Vector<Rational>& input, std::stringstream* comments) {
   if (input.size != this->projectivizedComplex.getDimension() - 1) {
     global.fatal
     << "Input size does not equal the "
@@ -13658,11 +13668,11 @@ Rational PiecewiseQuasipolynomial::evaluate(const Vector<Rational>& input) {
   Vector<Rational> ProjectivizedInput = input;
   ProjectivizedInput.setSize(input.size + 1);
   *ProjectivizedInput.lastObject() = 1;
-  return this->evaluateInputProjectivized(ProjectivizedInput);
+  return this->evaluateInputProjectivized(ProjectivizedInput,comments);
 }
 
 Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
-  const Vector<Rational>& input
+  const Vector<Rational>& input, std::stringstream* comments
 ) {
   Rational result;
   if (input.size != this->projectivizedComplex.getDimension()) {
@@ -13677,7 +13687,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
   if (index == - 1) {
     return 0;
   }
-  result = this->quasiPolynomials[index].evaluate(affineInput);
+  result = this->quasiPolynomials[index].evaluate(affineInput,comments);
   // The following for loop is for self-check purposes only.
   // Comment it out as soon as
   // the code has been tested sufficiently.
@@ -13690,7 +13700,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
     ) {
       continue;
     }
-    Rational altResult = this->quasiPolynomials[i].evaluate(affineInput);
+    Rational altResult = this->quasiPolynomials[i].evaluate(affineInput, comments);
     if (result != altResult) {
       if ((false)) {
         if (!firstFail) {

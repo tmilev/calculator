@@ -39,6 +39,7 @@ class TypeSetter {
       extraAttributes: extraAttributes,
       svgOnly: false,
       svgAndDOM: false,
+      copyButton: true,
     },
     );
   }

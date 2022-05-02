@@ -81,6 +81,6 @@ applyVectorPartitionFunctionFormula(
   }
   PartialFractions partialFractions = element.content;
   Rational result;
-  partialFractions.evaluateVectorPartitionFunction(vector, result);
+  partialFractions.evaluateVectorPartitionFunction(vector, result, &calculator.comments);
   return output.assignValue(calculator, result);
 }

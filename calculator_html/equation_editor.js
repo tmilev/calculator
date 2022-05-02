@@ -1307,6 +1307,8 @@ function mathFromElement(
     callback,
     /** @type {HTMLElement?} */
     containerSVG,
+    /** @type {boolean} */
+    copyButton,
 ) {
   let content = container.textContent;
   if (content === null) {
@@ -1314,7 +1316,7 @@ function mathFromElement(
   }
   return mathFromLatex(
       container, content, editable, sanitizeLatexSource, removeDisplayStyle,
-      callback, containerSVG);
+      callback, containerSVG, copyButton);
 }
 
 /** @return {EquationEditor!} Returns typeset math.*/
@@ -1333,6 +1335,8 @@ function mathFromLatex(
     callback,
     /** @type {HTMLElement?} */
     containerSVG,
+    /** @type {boolean} */
+    copyButton,
 ) {
   let lineBreakWidthString = container.getAttribute('lineBreakWidth');
   let lineBreakWidth = 0;
@@ -1346,6 +1350,7 @@ function mathFromLatex(
         removeDisplayStyle: removeDisplayStyle,
         logTiming: true,
         lineBreakWidth: lineBreakWidth,
+        copyButton: copyButton,
       }),
       containerSVG);
   result.writeLatex(latex);
@@ -2827,6 +2832,7 @@ class EquationEditorOptions {
        * editHandler: (Function?|null|undefined),
        * lineBreakWidth: (number|undefined),
        * logTiming: (boolean|undefined)
+       * copyButton: (boolean|undefined)
        * }}
        */
       options,
@@ -2845,6 +2851,8 @@ class EquationEditorOptions {
     this.logTiming = options.logTiming;
     /** @type {number} */
     this.lineBreakWidth = 0;
+    /** @type {boolean} */
+    this.copyButton = options.copyButton;
     if (options.lineBreakWidth !== null ||
         options.lineBreakWidth !== undefined) {
       this.lineBreakWidth = /** @type {number} */ (options.lineBreakWidth);
@@ -2877,8 +2885,11 @@ class EquationEditorOptions {
     if (this.logTiming === undefined) {
       this.logTiming = false;
     }
+    if (this.copyButton === undefined) {
+      this.copyButton = false;
+    }
     /** @type {boolean} */
-    this.showLatexOnDoubleClick = !this.editable;
+    this.showLatexOnDoubleClick = !this.editable && !this.copyButton;
   }
 }
 
@@ -3066,6 +3077,47 @@ class FocusInformation {
   }
 }
 
+class CopyButton { 
+  constructor(
+    /** @type {EquationEditor?} */
+    equationEditor,
+  ) {
+    /**@type{EquationEditor} */
+    this.equationEditor = equationEditor;  
+    /** @type {HTMLElement|null} */
+    this.button = null;
+    /** @type {HTMLElement|null} */
+    this.container = null;
+  }
+
+  initialize() {
+    this.container = document.createElement("span");
+    this.button = document.createElement("button");
+    this.container.style.fontSize = '6px';
+    this.button.style.fontSize = "6px";
+    this.container.appendChild(this.button);
+    this.button.addEventListener("click", () => {
+      this.copy();
+    });
+    this.button.textContent = "\uf4cb";
+    this.button.style.cursor = "pointer";
+    this.container.style.position = "absolute";
+    this.container.style.left = "100%";
+    this.equationEditor.container.appendChild(this.container);    
+  }
+  copy() {
+    this.equationEditor.copyToClipboard();
+    this.equationEditor.container.style.transition = 'all 1s';
+    this.equationEditor.container.style.backgroundColor = 'lightgreen';
+    setTimeout(() => {
+      this.equationEditor.container.style.backgroundColor = '';
+      setTimeout(() => {
+        this.equationEditor.container.style.transition = '';
+      }, 1000);
+    }, 1000);
+  }
+}
+
 class EquationEditor {
   constructor(
       /** @type {HTMLElement!} */
@@ -3173,6 +3225,9 @@ class EquationEditor {
     /** @type {MathNode?} */
     this.eventCatcher = null;
     this.prepareEventCatcher();
+    /** @type{CopyButton|null} */
+    this.copyButton = null;
+    this.prepareCopyButton();
   }
 
   initializeContainer(
@@ -3268,7 +3323,9 @@ class EquationEditor {
     return new KeyHandlerResult(true, true);
   }
 
-  /** Executes a copy-to-clipboard operation. */
+  /** Executes a copy-to-clipboard operation. 
+   * @return {string}
+   */
   copyToClipboard() {
     let toBeCopied = '';
     if (this.selectionEndExpanded.element === null ||
@@ -3305,6 +3362,7 @@ class EquationEditor {
     this.lastCopied = toBeCopied;
     navigator.clipboard.writeText(toBeCopied);
     this.writeDebugInfo(null);
+    return toBeCopied;
   }
 
   /** Computes the height of a white-space text in a DOM. */
@@ -3320,6 +3378,15 @@ class EquationEditor {
     this.standardAtomHeight = boundingBox.height;
     this.container.removeChild(this.eventCatcher.element);
     this.eventCatcher.element = null;
+  }
+
+  /** Prepares a stand-alone copy button that copies the formula. */
+  prepareCopyButton() {
+    if (!this.options.copyButton) {
+      return;
+    }
+    this.copyButtonContainer = new CopyButton(this);
+    this.copyButtonContainer.initialize();    
   }
 
   /** Initializes the event catcher. */
@@ -10568,6 +10635,7 @@ class MathTagCoverter {
        * svgOnly: (boolean|undefined),
        * svgAndDOM: (boolean|undefined),
        * logTiming: (boolean|undefined),
+       * copyButton: (boolean|undefined),
        * extraAttributes: (Object.<string, string>!|undefined)}|undefined}
        */
       // sanitizeLatexSource: whether to convert the original latex to parsed
@@ -10631,6 +10699,11 @@ class MathTagCoverter {
     /** @type {number} */
     this.typesetTotal = 0;
     let style = options.style;
+    /** @type {boolean} */
+    this.copyButton = false;
+    if (options.copyButton === true) {
+      this.copyButton = true;
+    }
     if (style === null) {
       style = {fontFamily: 'Times New Roman', display: 'inline-block'};
     }
@@ -10638,7 +10711,6 @@ class MathTagCoverter {
     for (let label in style) {
       styleComputer.style[label] = style[label];
     }
-
     this.style = {
       fontFamily: styleComputer.style.fontFamily,
       display: styleComputer.style.display,
@@ -10834,6 +10906,7 @@ class MathTagCoverter {
           this.removeDisplayStyle,
           callback,
           elementSVG,
+          this.copyButton,
       );
       if (this.svgOnly) {
         console.log('svgOnly not implemented yet.');
@@ -11078,7 +11151,6 @@ let buttonFactories = {
   'bmatrix1x2': new EquationEditorButtonFactory(
       '\\begin{bmatrix}\\cursor \\\\~\\end{bmatrix}', false, '[1x2]',
       {'width': '100%'}, ''),
-
   'bmatrix2x1': new EquationEditorButtonFactory(
       '\\begin{bmatrix}\\cursor &~ \\end{bmatrix}', false, '[2x1]',
       {'width': '100%'}, ''),

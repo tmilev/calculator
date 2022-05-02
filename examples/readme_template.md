@@ -2,9 +2,9 @@
 
 The calculator is a substitution engine and does not distinguish between "operators" and "regular functions" except for the different syntax with which these are entered. For example, the expressions "a+b" and "add(a,b)" are equivalent. 
 
-Every operator/function in the calculator corresponds to one or more internal function, which we call handlers. For example, the function/operator "a+b" can be handled by more than 40 different handlers. Each handler either substitutes the expression "a+b" with a new one, or leaves it intact. If multiple handlers are available, the first applicable one is used. The order of the handlers is the same as the order in the documentation below.
+Calculator functions come in two flavors: user-defined expression substitutions and built-in functions. Every built in function/operator corresponds to one or more internal C++ functions ("handlers"). For example, the function/operator "a+b" can be handled by more than 40 different such functions. Each handler either substitutes the expression "a+b" with a new one, or leaves it intact. When multiple handlers are available, the first applicable one is used (here, applicable = actually changes the expression). The order in which the handlers are applied is the same as the order in the documentation below.
 
-The users can dynamically add their own substitution rules to the built-in handlers. Users can also turn on and off any of the built-in handlers.
+In addition to the built-in functions, the users can dynamically add their own substitution rules. Users can also turn on and off any of the built-in handlers.
 
 
 ## Detecting "infinite" substutions.

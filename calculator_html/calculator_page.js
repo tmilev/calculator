@@ -348,7 +348,6 @@ class Calculator {
     }
     buffer.write(`</table>`);
     buffer.write(`</td><td><div class="containerComments">`);
-    buffer.write("<small>Double-click formulas: get LaTeX. Double-click back: hide. </small>");
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
       let content = performance[pathnames.urlFields.result.comments];
@@ -442,7 +441,7 @@ class Calculator {
     this.flagTypeset = false;
     this.typeset((
       /**@type{equationEditor.EquationEditor} */
-      editor, unused,
+      editor
     ) => {
       this.resizePanel(editor, constructedPanels);
     });

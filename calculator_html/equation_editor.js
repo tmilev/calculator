@@ -3096,6 +3096,14 @@ class CopyButton {
     this.container.style.fontSize = '6px';
     this.button.style.fontSize = "6px";
     this.container.appendChild(this.button);
+    this.button.style.opacity = '0';
+    this.button.style.transition = 'all 1s';
+    this.equationEditor.container.addEventListener('mouseover', () => {
+      this.button.style.opacity = '1';
+    });
+    this.equationEditor.container.addEventListener('mouseleave', () => {
+      this.button.style.opacity = '0';
+    });
     this.button.addEventListener("click", () => {
       this.copy();
     });
@@ -3105,6 +3113,7 @@ class CopyButton {
     this.container.style.left = "100%";
     this.equationEditor.container.appendChild(this.container);    
   }
+
   copy() {
     this.equationEditor.copyToClipboard();
     this.equationEditor.container.style.transition = 'all 1s';

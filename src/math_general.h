@@ -6409,7 +6409,8 @@ public:
   int totalFractionsWithAccountedVectorPartitionFunction;
   int numberOfRunsReduceMonomialByMonomial;
   int numberOfProcessedForVPFMonomialsTotal;
-  Rational startCheckSum;
+  Rational checkSumStart;
+  Rational checkSumLast;
   bool flagDiscardingFractions;
   bool flagInitialized;
   int limitSplittingSteps;

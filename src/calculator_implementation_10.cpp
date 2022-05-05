@@ -80,6 +80,9 @@ applyVectorPartitionFunctionFormula(
     return false;
   }
   PartialFractions partialFractions = element.content;
+  if (partialFractions.ambientDimension != vector.size) {
+    return false;
+  }
   Rational result;
   partialFractions.evaluateVectorPartitionFunction(
     vector, result, &calculator.comments

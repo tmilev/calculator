@@ -4326,6 +4326,7 @@ std::string PartialFractions::toLatex(FormatExpressions* format) const {
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
   STACK_TRACE("PartialFractions::toHTML");
   std::stringstream out;
+  out << "Original vectors: " << this->originalVectors.toString() << "<br>";
   out << "\\(" << this->toLatex(format) << "\\)";
   FormatExpressions formatQuasipolynomial;
   formatQuasipolynomial.flagUseFrac = true;
@@ -4337,6 +4338,11 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
     out << "<br>Vector partition function.<br>";
     out << quasiPolynomial.toHTML(&formatQuasipolynomial);
   }
+  out
+  << "<br>Checksum start: "
+  << this->checkSumStart
+  << ", last: "
+  << this->checkSumLast;
   return out.str();
 }
 
@@ -4388,7 +4394,7 @@ void PartialFractions::prepareCheckSums() {
   if (!this->flagUsingCheckSum) {
     return;
   }
-  this->computeCheckSum(this->startCheckSum);
+  this->computeCheckSum(this->checkSumStart);
 }
 
 void PartialFractions::compareCheckSums() {
@@ -4396,14 +4402,13 @@ void PartialFractions::compareCheckSums() {
   if (!this->flagUsingCheckSum || this->flagDiscardingFractions) {
     return;
   }
-  Rational checkSum;
-  this->computeCheckSum(checkSum);
-  if (!this->startCheckSum.isEqualTo(checkSum)) {
+  this->computeCheckSum(this->checkSumLast);
+  if (!this->checkSumStart.isEqualTo(checkSumLast)) {
     global.fatal
     << "Checksums are different: starting: "
-    << this->startCheckSum.toString()
+    << this->checkSumStart.toString()
     << "; current: "
-    << checkSum.toString()
+    << this->checkSumLast.toString()
     << ". Current fractions: "
     << this->toString(nullptr)
     << global.fatal;

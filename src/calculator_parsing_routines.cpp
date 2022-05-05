@@ -2055,17 +2055,19 @@ bool CalculatorParser::replaceSequenceUXEYBySequenceZY(int controlIndex) {
 }
 
 bool CalculatorParser::replaceYXBySequenceX(int controlIndex) {
+  this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 1);
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceYXBySequenceX]";
   }
-  return this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 1);
+  return true;
 }
 
 bool CalculatorParser::replaceYBySequenceY(int controlIndex) {
+  this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 0);
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceYBySequenceY]";
   }
-  return this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 0);
+  return true;
 }
 
 bool CalculatorParser::replaceXXYBySequenceY(int controlIndex) {
@@ -2077,11 +2079,12 @@ bool CalculatorParser::replaceXXYBySequenceY(int controlIndex) {
 }
 
 bool CalculatorParser::replaceXXYXBySequenceYX(int controlIndex) {
+  this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 1);
+  this->replaceXXYXByYX();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceXXYXBySequenceYX]";
   }
-  this->replaceYXdotsXBySequenceYXdotsX(controlIndex, 1);
-  return this->replaceXXYXByYX();
+  return true;
 }
 
 bool CalculatorParser::replaceSequenceXEBySequence(int controlIndex) {
@@ -4228,7 +4231,9 @@ bool CalculatorParser::applyOneRule() {
   ) {
     return this->replaceSequenceUXEYBySequenceZY(this->conSequence());
   }
-  if ((thirdToLastS != "[" || this->owner->flagUseBracketsForIntervals) &&
+  if ((fourthToLastS != "MakeSequence" || thirdToLastS != "{}") && (
+      thirdToLastS != "[" || this->owner->flagUseBracketsForIntervals
+    ) &&
     secondToLastS == "Expression" &&
     lastS == ","
   ) {

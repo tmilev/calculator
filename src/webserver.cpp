@@ -3146,13 +3146,11 @@ std::string WebServer::toStringConnectionSummary() {
   << this->statistics.allConnections - this->statistics.pingConnections
   << " http connections, "
   << this->statistics.pingConnections
-  << " pings connection, "
+  << " ping connections, "
   << " with "
   << this->statistics.allRequests - this->statistics.pingRequests
-  << " http requests, "
-  << this->statistics.pingRequests
-  << " ping requests. "
-  << "Timeouts are excluded. ";
+  << " non-ping http requests. "
+  << "Timed-out connections are excluded. ";
   out
   << "<br>"
   << "<b>The following policies are quite "

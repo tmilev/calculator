@@ -5899,7 +5899,9 @@ public:
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string toString(FormatExpressions* format = nullptr);
   std::string toHTML(FormatExpressions* format = nullptr);
-  Rational evaluate(const Vector<Rational>& input, std::stringstream *comments);
+  Rational evaluate(
+    const Vector<Rational>& input, std::stringstream* comments
+  );
   void addLatticeShift(
     const Polynomial<Rational>& input,
     const Vector<Rational>& inputShift
@@ -6493,8 +6495,11 @@ public:
     >& input,
     Rational& output
   );
-  void evaluateVectorPartitionFunction(const Vector<Rational>& input, Rational& output
-  , std::stringstream *comments);
+  void evaluateVectorPartitionFunction(
+    const Vector<Rational>& input,
+    Rational& output,
+    std::stringstream* comments
+  );
   void prepareIndicatorVariables();
   bool computeOneVectorPartitionFunction(
     QuasiPolynomial& output, Vector<Rational>& newIndicator
@@ -7099,8 +7104,12 @@ public:
   void makeCommonRefinement(const ConeCollection& other);
   void translateArgument(Vector<Rational>& translateToBeAddedToArgument);
   bool makeVPF(Vectors<Rational>& roots, std::string& outputstring);
-  Rational evaluate(const Vector<Rational>& point, std::stringstream *comments);
-  Rational evaluateInputProjectivized(const Vector<Rational>& point, std::stringstream *comments);
+  Rational evaluate(
+    const Vector<Rational>& point, std::stringstream* comments
+  );
+  Rational evaluateInputProjectivized(
+    const Vector<Rational>& point, std::stringstream* comments
+  );
   void makeZero(int numberOfVariables) {
     this->numberOfVariables = numberOfVariables;
     this->projectivizedComplex.initialize();

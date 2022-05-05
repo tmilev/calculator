@@ -139,6 +139,7 @@ class StandardResponses {
   isNotLoggedInResponse(responseObjectParsed) {
     return responseObjectParsed["status"] === "not logged in";
   }
+  
   /**
    * @returns{boolean} Whether the response indicates that the user logged in.
    * Please note that if this returns false, the user may still be logged in - perhaps the backend 

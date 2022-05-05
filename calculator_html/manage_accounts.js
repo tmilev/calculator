@@ -49,6 +49,10 @@ function updateAccountsPageCallback(input, notUsed) {
   let parsedUserInfo = null;
   try {
     parsedUserInfo = miscellaneous.jsonUnescapeParse(input);
+    if (pathnames.standardResponses.isNotLoggedInResponse(parsedUserInfo)) {
+      outputComponentStudents.innerHTML = "<b style='color:red'>Not logged in</b>";
+      return;
+    }
     let admins = parsedUserInfo["admins"];
     let students = parsedUserInfo["students"];
     if (parsedUserInfo.error !== undefined && parsedUserInfo.error !== "") {

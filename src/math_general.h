@@ -2339,6 +2339,7 @@ public:
   std::string getPolynomialLetter(int index) const;
   FormatExpressions();
   static FormatExpressions* defaultFormat();
+  void makeAlphabetXYZUW();
 };
 
 class MonomialWeylAlgebra {
@@ -2462,6 +2463,13 @@ public:
     return this->size() > 1;
   }
   std::string toString(FormatExpressions* format = nullptr) const;
+  // Same as toString but uses a default alphabet "x", "y", ...
+  // for the first few variables.
+  std::string toStringPretty() const {
+    FormatExpressions format;
+    format.makeAlphabetXYZUW();
+    return this->toString(&format);
+  }
   int size() const {
     return this->monomials.size;
   }
@@ -5976,8 +5984,7 @@ public:
   friend std::ostream& operator<<(
     std::ostream& output, const OnePartialFractionDenominator& input
   ) {
-    (void) input;
-    global.fatal << "Not implemented, please fix. " << global.fatal;
+    output << input.toString();
     return output;
   }
   bool removeRedundantShortRootsClassicalRootSystem(

@@ -3676,6 +3676,17 @@ FormatExpressions::getMonomialOrder<
   return nullptr;
 }
 
+void FormatExpressions::makeAlphabetXYZUW() {
+  if (this->polynomialAlphabet.size > 0) {
+    return;
+  }
+  this->polynomialAlphabet.addOnTop("x");
+  this->polynomialAlphabet.addOnTop("y");
+  this->polynomialAlphabet.addOnTop("z");
+  this->polynomialAlphabet.addOnTop("u");
+  this->polynomialAlphabet.addOnTop("w");
+}
+
 FormatExpressions* FormatExpressions::defaultFormat() {
   static FormatExpressions result;
   if (result.polynomialAlphabet.size == 0) {
@@ -3850,6 +3861,11 @@ std::string OnePartialFractionDenominator::toString(FormatExpressions* format)
 const {
   if (this->denominatorsNoScale.size() == 0) {
     return "1";
+  }
+  MemorySaving<FormatExpressions> backupFormat;
+  if (format == nullptr) {
+    format = &backupFormat.getElement();
+    format->makeAlphabetXYZUW();
   }
   std::stringstream out;
   out << "/(";
@@ -4894,14 +4910,19 @@ void PartialFractions::removeRedundantShortRoots(
     this->reducedWithElongationRedundancies.popMonomial(
       0, denominator, coefficient
     );
+    global.comments << "DEBUG: before redo: " << denominator.toString() << ", coeff: " << coefficient.toStringPretty() << "<br>";
     bool needsMoreReduction =
     this->reduceOnceRedundantShortRoots(denominator, summand, indicator);
     if (needsMoreReduction) {
       summand *= coefficient;
       this->reducedWithElongationRedundancies += summand;
+      global.comments << "DEBUG: still need redo: " << summand.toStringPretty() << ", coeff: "
+      << coefficient .toStringPretty()<< "<br>";
     } else {
       this->reduced.addMonomial(denominator, coefficient);
     }
+    int remove;
+    this->compareCheckSums();
   }
 }
 

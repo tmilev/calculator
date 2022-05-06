@@ -332,14 +332,14 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
   if (input.size() != 3) {
     return false;
   }
+  comparison.given = input[1];
+  comparison.desired = input[2];
   if (comparison.givenString == "") {
     comparison.givenString = comparison.given.toString();
   }
   if (comparison.desiredString == "") {
     comparison.desiredString = comparison.desired.toString();
   }
-  comparison.given = input[1];
-  comparison.desired = input[2];
   if (
     !comparison.desired.getFreeVariables(
       comparison.freeVariablesDesired, false

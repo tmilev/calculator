@@ -3058,6 +3058,23 @@ public:
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetDimNonMandatory = - 1
   ) {
+    if (this->getVectorFromFunctionArgumentsInternal(input, output, inputOutputStartingContext, targetDimNonMandatory)){
+      return true;
+    }
+    if (input.size() !=2 || input.isSequenceNElements() || input.isMatrix()) {
+      return false;
+    }
+    return getVectorFromFunctionArgumentsInternal(input[1], output, inputOutputStartingContext, targetDimNonMandatory);
+
+  }
+
+  template <class Type>
+  bool getVectorFromFunctionArgumentsInternal(
+    const Expression& input,
+    Vector<Type>& output,
+    ExpressionContext* inputOutputStartingContext = nullptr,
+    int targetDimNonMandatory = - 1
+  ) {
     STACK_TRACE("Calculator::getVectorFromFunctionArguments");
     input.checkInitialization();
     Expression sequence = input;
@@ -3744,6 +3761,16 @@ public:
     );
   }
   template <class Type>
+  static bool functionGetMatrixInternal(
+    Calculator& calculator,
+    const Expression& input,
+    Matrix<Type>& outputMatrix,
+    bool convertWithComputation,
+    ExpressionContext* inputOutputStartingContext = nullptr,
+    int targetNumberOfColumnsNonMandatory = - 1,
+    std::stringstream* commentsOnError = nullptr
+  );
+  template <class Type>
   static bool functionGetMatrix(
     Calculator& calculator,
     const Expression& input,
@@ -3907,7 +3934,29 @@ bool CalculatorConversions::functionGetMatrix(
   int targetNumberOfColumnsNonMandatory,
   std::stringstream* commentsOnError
 ) {
-  STACK_TRACE("CalculatorConversions::functionGetMatrix");
+  if (CalculatorConversions::functionGetMatrixInternal(calculator, input, outputMatrix,convertWithComputation,inputOutputStartingContext,targetNumberOfColumnsNonMandatory,commentsOnError)) {
+    return true;
+  }
+  if (input.size() != 2 ||     input.isSequenceNElements() ||
+  input.isMatrix() ||
+  input.isIntervalRealLine()){
+    return false;
+  }
+  return CalculatorConversions::functionGetMatrixInternal(calculator, input[1], outputMatrix, convertWithComputation, inputOutputStartingContext, targetNumberOfColumnsNonMandatory, commentsOnError);
+
+}
+
+template <class Type>
+bool CalculatorConversions::functionGetMatrixInternal(
+  Calculator& calculator,
+  const Expression& input,
+  Matrix<Type>& outputMatrix,
+  bool convertWithComputation,
+  ExpressionContext* inputOutputStartingContext,
+  int targetNumberOfColumnsNonMandatory,
+  std::stringstream* commentsOnError
+) {
+  STACK_TRACE("CalculatorConversions::functionGetMatrixInternal");
   Matrix<Expression> matrixExpressions;
   Matrix<WithContext<Type> > outputCandidate;
   Expression transformer = input;

@@ -4247,18 +4247,8 @@ void OnePartialFractionDenominator::makePolynomialFromOneNormal(
   Polynomial<Rational> nextMultiplicand;
   // Example 1: 1/(1-x^2)^2.
   // multiplicities should be equal to 2.
-  global.comments
-  << "DEBUG: and the multis: "
-  << multiplicities
-  << ", normal: "
-  << normal.toString()
-  << "<br>";
   for (int j = 0; j < multiplicities - 1; j ++) {
     nextMultiplicand.makeLinearNoConstant(normal);
-    global.comments
-    << "DEBUG: next mulsi so far: "
-    << nextMultiplicand.toString()
-    << "<br>";
     constantTerm.assignNumeratorAndDenominator(- 1, j + 1);
     constantTerm.multiplyBy(scalarProduct);
     constantTerm += 1;
@@ -4267,11 +4257,7 @@ void OnePartialFractionDenominator::makePolynomialFromOneNormal(
     nextMultiplicand *= scalar;
     nextMultiplicand.addConstant(constantTerm);
     // Example 1: nextMultiplicand should equal:
-    //
-    global.comments
-    << "DEBUG: next multiplicand: "
-    << nextMultiplicand.toString()
-    << "<br>";
+    // 1/2x
     output *= nextMultiplicand;
   }
 }
@@ -4749,6 +4735,12 @@ void PartialFractions::makeProgressVPFcomputation() {
   report.report(out2.str());
 }
 
+Rational PartialFractions::computeCheckSumFromLinearCombination(const LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> > &input){
+  Rational result = 0;
+  this->accumulateCheckSum(input, result);
+  return result;
+}
+
 void PartialFractions::accumulateCheckSum(
   const LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
@@ -4770,6 +4762,7 @@ void PartialFractions::accumulateCheckSum(
     output += currentCheckSum;
   }
 }
+
 
 void PartialFractions::computeCheckSum(Rational& output) {
   STACK_TRACE("PartialFractions::computeCheckSum");
@@ -4913,38 +4906,24 @@ void PartialFractions::removeRedundantShortRoots(
 ) {
   STACK_TRACE("PartialFractions::removeRedundantShortRoots");
   Rational startCheckSum;
-  OnePartialFractionDenominator denominator;
   Polynomial<LargeInteger> coefficient;
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > summand;
+  OnePartialFractionDenominator denominator;
+  OnePartialFractionDenominator transformedDenominator;
+  Polynomial<LargeInteger> transformedCoefficient;
   while (this->reducedWithElongationRedundancies.size() > 0) {
     this->reducedWithElongationRedundancies.popMonomial(
       0, denominator, coefficient
     );
-    global.comments
-    << "DEBUG: before redo: "
-    << denominator.toString()
-    << ", coeff: "
-    << coefficient.toStringPretty()
-    << "<br>";
     bool needsMoreReduction =
-    this->reduceOnceRedundantShortRoots(denominator, summand, indicator);
+    this->reduceOnceRedundantShortRoots(denominator, transformedDenominator, transformedCoefficient, indicator);
     if (needsMoreReduction) {
-      summand *= coefficient;
-      this->reducedWithElongationRedundancies += summand;
-      global.comments
-      << "DEBUG: still need redo: "
-      << summand.toStringPretty()
-      << ", coeff: "
-      << coefficient.toStringPretty()
-      << "<br>";
+      transformedCoefficient *= coefficient;
+      this->reducedWithElongationRedundancies .addMonomial(transformedDenominator, transformedCoefficient);
     } else {
       this->reduced.addMonomial(denominator, coefficient);
     }
-    int remove;
-    this->compareCheckSums();
   }
+  this->compareCheckSums();
 }
 
 void PartialFractions::removeRedundantShortRootsClassicalRootSystem(
@@ -11121,14 +11100,9 @@ void OnePartialFractionDenominator::computePolynomialCorrespondingToOneMonomial
       << "from non-reduced fraction (too many multiplicities). "
       << global.fatal;
     }
-    global.comments << "DEBUG: current normal: " << normals[i] << "<br>";
     this->makePolynomialFromOneNormal(
       normals[i], monomial, current.multiplicities[0], multiplicand
     );
-    global.comments
-    << "DEBUG: xtracted multiplicand: "
-    << multiplicand.toString()
-    << "<br>";
     outputPolynomialPart *= multiplicand;
   }
   outputQuasipolynomial.makeFromPolynomialShiftAndLattice(
@@ -11178,12 +11152,6 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
       normals,
       lattice
     );
-    global.comments
-    << "DEBUG: Contribution of coefficient: "
-    << coefficient.toString()
-    << " = "
-    << shiftedQuasiPolynomial.toString()
-    << "<br>";
     shiftedQuasiPolynomial *= coefficient.coefficients[i];
     output += shiftedQuasiPolynomial;
   }
@@ -12071,13 +12039,11 @@ Vector<Rational> OnePartialFractionDenominatorComponent::getCheckSumRoot(
 
 bool PartialFractions::reduceOnceRedundantShortRoots(
   const OnePartialFractionDenominator& toBeReduced,
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output,
+OnePartialFractionDenominator& outputFraction,Polynomial<LargeInteger>& outputCoefficient,
   Vector<Rational>* indicator
 ) {
-  STACK_TRACE("PartialFractions::reducePartiallyRedundantShortRoots");
-  output.makeZero();
+  STACK_TRACE("PartialFractions::reduceOnceRedundantShortRoots");
+  outputCoefficient.makeZero();
   if (!toBeReduced.rootIsInFractionCone(indicator)) {
     return false;
   }
@@ -12100,12 +12066,10 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
   Rational localStartCheckSum;
   Rational localEndCheckSum;
   Polynomial<LargeInteger> multiplicand;
-  Polynomial<LargeInteger> currentCoefficient;
   int leastCommonMultipleElongations =
   currentFraction.getLeastCommonMultipleElongations();
-  currentCoefficient.makeOne();
-  OnePartialFractionDenominator uniformized;
-  uniformized = toBeReduced;
+  outputCoefficient.makeOne();
+  outputFraction = toBeReduced;
   for (int i = 0; i < currentFraction.elongations.size; i ++) {
     int elongationValue = currentFraction.elongations[i];
     if (elongationValue == leastCommonMultipleElongations) {
@@ -12116,14 +12080,13 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
     toBeReduced.getNElongationPolynomial(numSummands, exponent, multiplicand);
     int multiplicityChange = currentFraction.multiplicities[i];
     multiplicand.raiseToPower(multiplicityChange, 1);
-    currentCoefficient *= multiplicand;
-    uniformized.addMultiplicity(
+    outputCoefficient *= multiplicand;
+    outputFraction.addMultiplicity(
       normalized, multiplicityChange, leastCommonMultipleElongations
     );
-    uniformized.addMultiplicity(
+    outputFraction.addMultiplicity(
       normalized, - multiplicityChange, elongationValue
     );
-    output.addMonomial(uniformized, currentCoefficient);
   }
   return true;
 }

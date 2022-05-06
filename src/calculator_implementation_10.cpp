@@ -17,7 +17,7 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
       calculator, input, matrix, false
     )
   ) {
-    return calculator << "Failed to extract matrix of rationals. ";
+    return calculator << "Failed to extract matrix of rationals from: " << input.toString();
   }
   if (
     calculator.objectContainer.vectorPartitionFunctions.contains(vectors)

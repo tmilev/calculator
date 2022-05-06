@@ -6477,11 +6477,8 @@ public:
   void removeRedundantShortRoots(Vector<Rational>* indicator);
   // Reduces redundant short roots if present.
   // Returns true if redundant short roots were found, false otherwise.
-  bool reduceOnceRedundantShortRoots(
-    const OnePartialFractionDenominator& toBeReduced,
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output,
+  bool reduceOnceRedundantShortRoots(const OnePartialFractionDenominator& toBeReduced, OnePartialFractionDenominator &outputFraction,
+    Polynomial<LargeInteger> &outputCoefficient,
     Vector<Rational>* indicator
   );
   bool split(Vector<Rational>* indicator);
@@ -6497,6 +6494,10 @@ public:
     const Vector<Rational>& weights
   );
   void computeCheckSum(Rational& output);
+  Rational computeCheckSumFromLinearCombination(    const LinearCombination<
+  OnePartialFractionDenominator, Polynomial<LargeInteger>
+>& input
+);
   void accumulateCheckSum(
     const LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>

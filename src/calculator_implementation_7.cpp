@@ -8533,12 +8533,15 @@ bool CalculatorFunctions::allVectorPartitions(
   if (!partition.initialize(inputVectors, partition.goalVector)) {
     return calculator << "<hr>Failed to initialize vector partition object";
   }
-  std::stringstream out;
+  std::stringstream outFinal;
   int numFound = 0;
   ProgressReport report;
-  out << partition.toStringPartitioningVectors();
+  outFinal << partition.toStringPartitioningVectors();
+  std::stringstream outVectors;
+  int count = 0;
   while (partition.incrementReturnFalseIfPastLast()) {
-    out
+    count++;
+    outVectors
     << "<br>"
     << partition.toStringOnePartition(partition.currentPartition);
     numFound ++;
@@ -8554,7 +8557,8 @@ bool CalculatorFunctions::allVectorPartitions(
       report.report(reportStream.str());
     }
   }
-  return output.assignValue(calculator, out.str());
+  outFinal << count << " partition(s) total." << outVectors.str();
+  return output.assignValue(calculator, outFinal.str());
 }
 
 template <class Coefficient>

@@ -118,18 +118,18 @@ bool Polynomial<Rational>::Test::factorizationKronecker() {
     "(1/2x+1/3)(-3/5x+1)", "-1/30(3x -5)(3x +2)"
   );
   Polynomial<Rational>::Test::oneFactorizationKronecker(
-    "(x^2+3x+1)(-3x+1)", "-(3x -1)(x^{2}+3x +1)"
+    "(x^2+3x+1)(-3x+1)", "-(3x -1)(x^2+3x +1)"
   );
   Polynomial<Rational>::Test::oneFactorizationKronecker(
-    "(-3x^3-3x-5)(5x^3+x-7)", "-(3x^{3}+3x +5)(5x^{3}+x -7)"
+    "(-3x^3-3x-5)(5x^3+x-7)", "-(3x^3+3x +5)(5x^3+x -7)"
   );
   Polynomial<Rational>::Test::oneFactorizationKronecker(
     "(-3x^4+7x^3+2x^2-3x-5)(-1/2x^3+x^2+x-7)",
-    "1/2(x^{3}-2x^{2}-2x +14)(3x^{4}-7x^{3}-2x^{2}+3x +5)"
+    "1/2(x^3-2x^2-2x +14)(3x^4-7x^3-2x^2+3x +5)"
   );
   Polynomial<Rational>::Test::oneFactorizationKronecker(
     "10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x+1",
-    "(10x^{7}+3x^{6}+5x^{5}-2x^{4}-x^{3}+x^{2}-4x +1)"
+    "(10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x +1)"
   );
   return true;
 }
@@ -184,7 +184,7 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(
 
 template < >
 bool Polynomial<Rational>::Test::fromStringTest() {
-  std::string expected = "y^{2}+x -y -1";
+  std::string expected = "y^2+x -y -1";
   std::string input = "x^2-1-x+b";
   Polynomial<Rational> underTest = Polynomial<Rational>::Test::fromString(
     input
@@ -258,7 +258,7 @@ fromStringCommonContext(const List<std::string>& input) {
 
 template < >
 bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
-  std::string expected = "x , y^{2}+y ";
+  std::string expected = "x , y^2+y ";
   std::string inputFirst = "x";
   std::string inputSecond = "y^{2}+y";
   List<Polynomial<Rational> > underTest =
@@ -318,17 +318,13 @@ bool Polynomial<Rational>::Test::leastCommonMultiple() {
   this->oneLeastCommonMultiple(
     "(x^2y + 3 x + z y^2 - 1 + 7x^3)(x^3 + 5x y z + x y - z - 2)",
     "(x^2y + 3 x + z y^2 - 1 + 7x^3)(x^3 + x y z - 3y^2)",
-    "7x^{9}+x^{8}y +42x^{7}y z +7x^{6}y^{2}z +35x^{5}y^{2}z^{2}"
-    "+11x^{4}y^{3}z^{2}+5x^{2}y^{4}z^{3}+7x^{7}y -20x^{6}y^{2}"
-    "-3x^{5}y^{3}+7x^{5}y^{2}z -103x^{4}y^{3}z -18x^{3}y^{4}z "
-    "+x^{2}y^{4}z^{2}-15x y^{5}z^{2}+3x^{7}-7x^{6}z "
-    "+17x^{5}y z -21x^{4}y^{3}-7x^{4}y z^{2}-3x^{3}y^{4}"
-    "+13x^{3}y^{2}z^{2}-3x y^{5}z -x y^{3}z^{3}-15x^{6}"
-    "+x^{5}y -9x^{4}y^{2}-20x^{4}y z +20x^{3}y^{2}z -42x^{2}y^{3}z "
-    "-5x^{2}y^{2}z^{2}-2x y^{3}z^{2}+3y^{4}z^{2}-x^{4}y -3x^{4}z "
-    "+45x^{3}y^{2}-3x^{2}y^{3}-x^{2}y^{2}z -3x^{2}y z^{2}+15x y^{3}z "
-    "+6y^{4}z -6x^{4}+x^{3}z -6x^{2}y z +3x y^{3}+9x y^{2}z "
-    "+x y z^{2}+2x^{3}+18x y^{2}+2x y z -3y^{2}z -6y^{2}"
+    "7x^9+x^8y +42x^7y z +7x^6y^2z +35x^5y^2z^2+11x^4y^3z^2+5x^2y^4z^3+7x^7y "
+    "-20x^6y^2-3x^5y^3+7x^5y^2z -103x^4y^3z -18x^3y^4z +x^2y^4z^2-15x "
+    "y^5z^2+3x^7-7x^6z +17x^5y z -21x^4y^3-7x^4y z^2-3x^3y^4+13x^3y^2z^2-"
+    "3x y^5z -x y^3z^3-15x^6+x^5y -9x^4y^2-20x^4y z +20x^3y^2z -42x^2y^3z -"
+    "5x^2y^2z^2-2x y^3z^2+3y^4z^2-x^4y -3x^4z +45x^3y^2-3x^2y^3-x^2y^2z"
+    " -3x^2y z^2+15x y^3z +6y^4z -6x^4+x^3z -6x^2y z"
+    " +3x y^3+9x y^2z +x y z^2+2x^3+18x y^2+2x y z -3y^2z -6y^2"
   );
   return true;
 }
@@ -367,8 +363,7 @@ bool Polynomial<Rational>::Test::differential() {
   this->oneDifferential("1", "0");
   this->oneDifferential("x+y+z+1", "dx +dy +dz ");
   this->oneDifferential(
-    "x^2y^3z^5 + x",
-    "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx "
+    "x^2y^3z^5 + x", "5x^2y^3z^4dz +3x^2y^2z^5dy +2x y^3z^5dx +dx "
   );
   return true;
 }
@@ -478,16 +473,16 @@ bool PartialFractions::Test::splitTwoDimensional() {
   testCase.test();
   testCase.vectors = {"(1, 0)", "(0, 1)", "(1, 1)", "(2, 2)",};
   testCase.expected =
-  "\\left(-x_{1}^{2}x_{2}^{-3}-2x_{1} x_{2}^{-3}-x_{2}^{-3}\\right)"
-  "/((1-x^{2})^{3} (1-x y ) )+\\left(-x_{1}^{2}-x_{1}^{2}x_{2}^{-1}-"
+  "\\left(-x_{1}^2x_{2}^{-3}-2x_{1} x_{2}^{-3}-x_{2}^{-3}\\right)"
+  "/((1-x^2)^{3} (1-x y ) )+\\left(-x_{1}^2-x_{1}^2x_{2}^{-1}-"
   "x_{1} -2x_{1} x_{2}^{-1}-x_{1} x_{2}^{-2}-x_{2}^{-1}-x_{2}^{-2}\\right)"
-  "/((1-x^{2})^{2} (1-x^{2}y^{2})^{2} )+\\left(x_{1}^{2}x_{2}^{-3}+2x_{1} "
-  "x_{2}^{-3}+x_{2}^{-3}\\right)/((1-x^{2})^{3} (1-y ) )";
+  "/((1-x^2)^{2} (1-x^2y^2)^{2} )+\\left(x_{1}^2x_{2}^{-3}+2x_{1} "
+  "x_{2}^{-3}+x_{2}^{-3}\\right)/((1-x^2)^{3} (1-y ) )";
   testCase.test();
   testCase.vectors = {"(1, 0)", "(1, 1)", "(1, 1)", "(1, 2)",};
   testCase.expected =
-  "\\left(x_{1}^{2}x_{2}^{2}+2x_{1} x_{2} +1\\right)/((1-x )^{3} "
-  "(1-x y^{2}) )+\\left(-x_{1}^{2}x_{2} -x_{1} \\right)/((1-x )^{3} "
+  "\\left(x_{1}^2x_{2}^2+2x_{1} x_{2} +1\\right)/((1-x )^{3} "
+  "(1-x y^2) )+\\left(-x_{1}^2x_{2} -x_{1} \\right)/((1-x )^{3} "
   "(1-x y ) )-x_{1} /((1-x )^{2} (1-x y )^{2} )";
   testCase.test();
   return true;

@@ -4247,11 +4247,18 @@ void OnePartialFractionDenominator::makePolynomialFromOneNormal(
   Polynomial<Rational> nextMultiplicand;
   // Example 1: 1/(1-x^2)^2.
   // multiplicities should be equal to 2.
-  global.comments << "DEBUG: and the multis: " << multiplicities << ", normal: "
-  << normal.toString() << "<br>";
+  global.comments
+  << "DEBUG: and the multis: "
+  << multiplicities
+  << ", normal: "
+  << normal.toString()
+  << "<br>";
   for (int j = 0; j < multiplicities - 1; j ++) {
     nextMultiplicand.makeLinearNoConstant(normal);
-    global.comments << "DEBUG: next mulsi so far: " << nextMultiplicand.toString() << "<br>";
+    global.comments
+    << "DEBUG: next mulsi so far: "
+    << nextMultiplicand.toString()
+    << "<br>";
     constantTerm.assignNumeratorAndDenominator(- 1, j + 1);
     constantTerm.multiplyBy(scalarProduct);
     constantTerm += 1;
@@ -4261,7 +4268,10 @@ void OnePartialFractionDenominator::makePolynomialFromOneNormal(
     nextMultiplicand.addConstant(constantTerm);
     // Example 1: nextMultiplicand should equal:
     //
-    global.comments << "DEBUG: next multiplicand: " << nextMultiplicand.toString() << "<br>";
+    global.comments
+    << "DEBUG: next multiplicand: "
+    << nextMultiplicand.toString()
+    << "<br>";
     output *= nextMultiplicand;
   }
 }
@@ -4486,7 +4496,9 @@ bool PartialFractions::splitPartial() {
 bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(
   Vector<Rational>* root
 ) {
-  STACK_TRACE("PartialFractions::checkForMinimalityDecompositionWithRespectToRoot");
+  STACK_TRACE(
+    "PartialFractions::checkForMinimalityDecompositionWithRespectToRoot"
+  );
   for (int i = 0; i < this->nonReduced.size(); i ++) {
     if (
       this->nonReduced[i].denominatorsNoScale.size() <= this->ambientDimension
@@ -4910,14 +4922,23 @@ void PartialFractions::removeRedundantShortRoots(
     this->reducedWithElongationRedundancies.popMonomial(
       0, denominator, coefficient
     );
-    global.comments << "DEBUG: before redo: " << denominator.toString() << ", coeff: " << coefficient.toStringPretty() << "<br>";
+    global.comments
+    << "DEBUG: before redo: "
+    << denominator.toString()
+    << ", coeff: "
+    << coefficient.toStringPretty()
+    << "<br>";
     bool needsMoreReduction =
     this->reduceOnceRedundantShortRoots(denominator, summand, indicator);
     if (needsMoreReduction) {
       summand *= coefficient;
       this->reducedWithElongationRedundancies += summand;
-      global.comments << "DEBUG: still need redo: " << summand.toStringPretty() << ", coeff: "
-      << coefficient .toStringPretty()<< "<br>";
+      global.comments
+      << "DEBUG: still need redo: "
+      << summand.toStringPretty()
+      << ", coeff: "
+      << coefficient.toStringPretty()
+      << "<br>";
     } else {
       this->reduced.addMonomial(denominator, coefficient);
     }
@@ -11104,8 +11125,10 @@ void OnePartialFractionDenominator::computePolynomialCorrespondingToOneMonomial
     this->makePolynomialFromOneNormal(
       normals[i], monomial, current.multiplicities[0], multiplicand
     );
-    global.comments << "DEBUG: xtracted multiplicand: " << multiplicand.toString() << "<br>";
-
+    global.comments
+    << "DEBUG: xtracted multiplicand: "
+    << multiplicand.toString()
+    << "<br>";
     outputPolynomialPart *= multiplicand;
   }
   outputQuasipolynomial.makeFromPolynomialShiftAndLattice(
@@ -11155,8 +11178,12 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
       normals,
       lattice
     );
-    global.comments << "DEBUG: Contribution of coefficient: " << coefficient.toString()
-    << " = " << shiftedQuasiPolynomial.toString() << "<br>";
+    global.comments
+    << "DEBUG: Contribution of coefficient: "
+    << coefficient.toString()
+    << " = "
+    << shiftedQuasiPolynomial.toString()
+    << "<br>";
     shiftedQuasiPolynomial *= coefficient.coefficients[i];
     output += shiftedQuasiPolynomial;
   }

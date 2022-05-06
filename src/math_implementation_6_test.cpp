@@ -10,30 +10,30 @@ bool PolynomialFactorizationFiniteFields::Test::all() {
   PolynomialFactorizationFiniteFields::Test::test(
     "1176 x^14-7224x^13-10506x^12-7434x^11+1247x^10+6085x^9+6195x^8"
     "+2607x^7+11577x^6+32x^5+7265x^4-2841x^3-1794x^2-1320x-2880",
-    "(14x^{7}-103x^{6}-76x^{4}+19x^{3}+18x^{2}+9x +24)"
-    "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+    "(14x^7-103x^6-76x^4+19x^3+18x^2+9x +24)"
+    "(84x^7+102x^6-75x^4-23x^3+19x^2-10x -120)"
   );
   PolynomialFactorizationFiniteFields::Test::test("x+1", "(x +1)");
-  PolynomialFactorizationFiniteFields::Test::test("x^2+1", "(x^{2}+1)");
+  PolynomialFactorizationFiniteFields::Test::test("x^2+1", "(x^2+1)");
   PolynomialFactorizationFiniteFields::Test::test("x^2-1", "(x -1)(x +1)");
   PolynomialFactorizationFiniteFields::Test::test("x^2+2x+1", "(x +1)(x +1)");
   PolynomialFactorizationFiniteFields::Test::test(
     "4507104x^15+7359384x^14+1298256x^13-5390778x^12-1915130x^11+2884723x^10"
     "+321265x^9-7734159x^8-2806758x^7+1609059x^6-90547x^5-1699161x^4"
     "+23910x^3-1608x^2-302400x+138240",
-    "(76x^{4}+19x^{3}-18x^{2}-9x +24)"
-    "(706x^{4}+119x^{3}-18x^{2}+91x -48)"
-    "(84x^{7}+102x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+    "(76x^4+19x^3-18x^2-9x +24)"
+    "(706x^4+119x^3-18x^2+91x -48)"
+    "(84x^7+102x^6-75x^4-23x^3+19x^2-10x -120)"
   );
   PolynomialFactorizationFiniteFields::Test::test(
     "109x^13+9x^12+100x^11-98x^10+x^8 -84x^7+12x^6-75x^4-23x^3+19x^2-10x-120",
-    "(109x^{13}+9x^{12}+100x^{11}-98x^{10}+x^{8}"
-    "-84x^{7}+12x^{6}-75x^{4}-23x^{3}+19x^{2}-10x -120)"
+    "(109x^{13}+9x^{12}+100x^{11}-98x^{10}"
+    "+x^8-84x^7+12x^6-75x^4-23x^3+19x^2-10x -120)"
   );
   // The input is (2x^2+3x+4)^3
   PolynomialFactorizationFiniteFields::Test::test(
     "8 x^{6}+36 x^{5}+102 x^{4}+171 x^{3}+204 x^{2}+144 x+64",
-    "(2x^{2}+3x +4)(2x^{2}+3x +4)(2x^{2}+3x +4)"
+    "(2x^2+3x +4)(2x^2+3x +4)(2x^2+3x +4)"
   );
   PolynomialFactorizationFiniteFields::Test::test(
     "x^{6}", "(x )(x )(x )(x )(x )(x )"
@@ -135,10 +135,10 @@ bool PolynomialUnivariateModular::Test::greatestCommonDivisor() {
 
 bool PolynomialUnivariateModular::Test::division() {
   PolynomialUnivariateModular::Test::testOneDivision(
-    5, "x^3-1", "x-1", "x^{2}+x +1 (mod 5)", "0 (mod 5)"
+    5, "x^3-1", "x-1", "x^2+x +1 (mod 5)", "0 (mod 5)"
   );
   PolynomialUnivariateModular::Test::testOneDivision(
-    5, "x^3-1", "x", "x^{2} (mod 5)", "4 (mod 5)"
+    5, "x^3-1", "x", "x^2 (mod 5)", "4 (mod 5)"
   );
   return true;
 }
@@ -338,14 +338,14 @@ bool PolynomialModuloPolynomialModuloInteger::Test::product() {
     "x +4",
     "x +4",
     "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1",
-    "x^{2}+3x +1 (mod 5)"
+    "x^2+3x +1 (mod 5)"
   );
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
     5,
     "x^3",
     "x^3",
     "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1",
-    "2x^{4}+3x^{3}+3x^{2}+2x +4 (mod 5)"
+    "2x^4+3x^3+3x^2+2x +4 (mod 5)"
   );
   return true;
 }
@@ -400,7 +400,7 @@ bool PolynomialConversions::Test::all() {
 }
 
 bool PolynomialConversions::Test::univariateModularToDense() {
-  oneUnivariateModularToDense(5, "x^2+3x-1", "x^{2}+3x +4(mod 5)");
+  oneUnivariateModularToDense(5, "x^2+3x-1", "x^2+3x +4(mod 5)");
   return true;
 }
 
@@ -541,8 +541,8 @@ bool PolynomialFactorizationCantorZassenhaus<
   Test::testOneStartingPolynomial(3, 1, 2, "x +1 (mod 3)");
   Test::testOneStartingPolynomial(3, 2, 2, "x +2 (mod 3)");
   Test::testOneStartingPolynomial(3, 2, 3, "x +2 (mod 3)");
-  Test::testOneStartingPolynomial(3, 3, 3, "x^{2}+1 (mod 3)");
-  Test::testOneStartingPolynomial(3, 4, 3, "x^{2}+2 (mod 3)");
+  Test::testOneStartingPolynomial(3, 3, 3, "x^2+1 (mod 3)");
+  Test::testOneStartingPolynomial(3, 4, 3, "x^2+2 (mod 3)");
   Test::testOneStartingPolynomial(3, 5, 3, "x +1 (mod 3)");
   Test::testOneStartingPolynomial(3, 3, 2, "x +1 (mod 3)");
   Test::testOneStartingPolynomial(3, 7, 2, "x +1 (mod 3)");
@@ -556,23 +556,23 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialUnivariateModularAsModulus
 >::Test::all() {
   Test::constructStartingPolynomial();
-  Test::testOnce(11, "x^3+3x+7", "(x +10)(x^{2}+x +4)");
+  Test::testOnce(11, "x^3+3x+7", "(x +10)(x^2+x +4)");
   Test::testOnce(
-    5, "x^{6}+3 x^{4}+2 x^{3}+2 x^{2}+3 x+1", "(x^{3}+x +1)(x^{3}+2x +1)"
+    5, "x^{6}+3 x^{4}+2 x^{3}+2 x^{2}+3 x+1", "(x^3+x +1)(x^3+2x +1)"
   );
   Test::testOnce(
     17,
     "x^{6}+2 x^{5}+3 x^{4}+16 x^{3}+10 x^{2}+15 x+8",
-    "(x^{3}+3x +5)(x^{3}+2x^{2}+5)"
+    "(x^3+3x +5)(x^3+2x^2+5)"
   );
   Test::testOnce(
     11,
     "10x^{14}+3x^{13}+10x^{12}+2x^{11}+4x^{10}"
     "+2x^{9}+2x^{8}+5x^{6}+10x^{5}+5x^{4}+8x^{3}+10x^{2}+2",
-    "10(x +4)(x^{2}+5x +2)"
-    "(x^{2}+6x +2)"
-    "(x^{4}+7x^{3}+3x^{2}+4x +1)"
-    "(x^{5}+8x^{4}+2x^{3}+x^{2}+5x +4)"
+    "10(x +4)(x^2+5x +2)"
+    "(x^2+6x +2)"
+    "(x^4+7x^3+3x^2+4x +1)"
+    "(x^5+8x^4+2x^3+x^2+5x +4)"
   );
   return true;
 }

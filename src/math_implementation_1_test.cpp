@@ -460,7 +460,7 @@ template < >
 bool RationalFraction<Rational>::Test::fromStringTest() {
   STACK_TRACE("RationalFunction::Test::fromString");
   std::string input = "(a^2+7b)/(2+d*c)";
-  std::string expected = "(x_{1}^{2}+7x_{2} )/(x_{3} x_{4} +2)";
+  std::string expected = "(x_{1}^2+7x_{2} )/(x_{3} x_{4} +2)";
   RationalFraction<Rational> underTest =
   RationalFraction<Rational>::Test::fromString(input);
   if (underTest.toString() != expected) {

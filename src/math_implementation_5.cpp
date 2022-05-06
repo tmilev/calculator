@@ -1733,7 +1733,12 @@ const {
     if (this->monomialBody[i] == 1) {
       out << " ";
     } else {
-      out << "^{" << this->monomialBody[i] << "}";
+      std::string exponentString = this->monomialBody[i].toString();
+      if (exponentString.size() == 1) {
+        out << "^" << exponentString;
+      } else {
+        out << "^{" << exponentString << "}";
+      }
     }
   }
   return out.str();

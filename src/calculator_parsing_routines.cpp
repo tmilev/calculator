@@ -1712,12 +1712,12 @@ bool CalculatorParser::isNonBoundVariableInContext(int inputOperation) {
   return this->nonBoundVariablesInContext.contains(inputOperation);
 }
 
-bool CalculatorParser::setLastRuleName(const std::string &ruleName) {
-  if (!this->flagLogSyntaxRules){
+bool CalculatorParser::setLastRuleName(const std::string& ruleName) {
+  if (!this->flagLogSyntaxRules) {
     return true;
   }
   this->lastRuleName = ruleName;
-  return  true;
+  return true;
 }
 
 bool CalculatorParser::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {

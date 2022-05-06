@@ -4586,7 +4586,7 @@ ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101)
 Makes an elliptic curve from a cubic in normal form, generator letter and base point.
 
 *VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3bVectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3b%25VectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 VectorPartitionFunction(
 (1,0,0),
@@ -4597,7 +4597,7 @@ VectorPartitionFunction(
 (1,1,1)
 );
 VectorPartitionFunction(
-(1,0),(0,1),(1,1),(1,2),(1,3),(2,3) );VectorPartitionFunction(
+(1,0),(0,1),(1,1),(1,2),(1,3),(2,3) );%VectorPartitionFunction(
 Sequence{}1,Sequence{}2,Sequence{}3,Sequence{}4)
 ```
 Work in progress. Vector partition function formula. 

@@ -28,7 +28,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(1,2),"
     "(1,3),"
     "(2,3) "
-    ");VectorPartitionFunction(\n"
+    ");%VectorPartitionFunction(\n"
     "Sequence{}1,"
     "Sequence{}2,"
     "Sequence{}3,"

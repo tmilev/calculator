@@ -73,10 +73,10 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(1,3),"
     "(2,3) "
     ");\n"
-    "f{}(4,5);\n"
-    "g=VectorPartitionFunction(Sequence{}1,Sequence{}2,Sequence{}3);\n"
-    "g{}(10);\n"
-    "g{}(1,2)",
+    "%f{}(4,5);\n"
+    "%g=VectorPartitionFunction(Sequence{}1,Sequence{}2,Sequence{}3);\n"
+    "%g{}(10);\n"
+    "%g{}(1,2)",
     "CalculatorFunctionsVectorPartitionFunction"
     "::applyVectorPartitionFunctionFormula",
     "ApplyVectorPartitionFunction",

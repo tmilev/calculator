@@ -1712,6 +1712,14 @@ bool CalculatorParser::isNonBoundVariableInContext(int inputOperation) {
   return this->nonBoundVariablesInContext.contains(inputOperation);
 }
 
+bool CalculatorParser::setLastRuleName(const std::string &ruleName) {
+  if (!this->flagLogSyntaxRules){
+    return true;
+  }
+  this->lastRuleName = ruleName;
+  return  true;
+}
+
 bool CalculatorParser::replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs) {
   SyntacticElement& element = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
@@ -2445,9 +2453,6 @@ bool CalculatorParser::replaceEXdotsXbySsXdotsX(int numberOfDots) {
   newExpr.addChildOnTop(left.data);
   left.data = newExpr;
   left.controlIndex = this->conSequenceStatements();
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceEXdotsXbySsXdotsX]";
-  }
   return true;
 }
 
@@ -2634,9 +2639,6 @@ bool CalculatorParser::replaceEXEXBy_OofEE_X(int operation) {
     ).size -
     2
   ];
-  if (this->flagLogSyntaxRules) {
-    this->lastRuleName = "[Rule: Calculator::replaceEOEXByEX]";
-  }
   Expression newExpr;
   newExpr.reset(*this->owner, 3);
   newExpr.addChildAtomOnTop(operation);
@@ -2829,6 +2831,7 @@ bool CalculatorParser::isSeparatorFromTheLeftForDefinition(
   input == "(" ||
   input == ";" ||
   input == "," ||
+  input == "%" ||
   input == "SequenceStatements" ||
   input == " " ||
   input == "or" ||
@@ -4043,7 +4046,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastS == "Expression" &&
     this->isSeparatorFromTheRightForDefinition(lastS)
   ) {
-    return this->replaceEOEXByEX();
+    this->replaceEOEXByEX();
+    return this->setLastRuleName("Expression=Expression");
   }
   if (
     this->isSeparatorFromTheLeftForDefinition(fifthToLastS) &&
@@ -4367,13 +4371,16 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastS == "SequenceStatements" &&
     secondToLastS == "Expression" && (lastS == ")" || lastS == "}")
   ) {
-    return this->replaceEXdotsXbySsXdotsX(1);
+    this->replaceEXdotsXbySsXdotsX(1);
+    return this->setLastRuleName("Commands;Expression)");
   }
   if (secondToLastS == "Expression" && lastS == ";") {
-    return this->replaceEXdotsXBySs(1);
+    this->replaceEXdotsXBySs(1);
+    return this->setLastRuleName("Expression;");
   }
   if (secondToLastS == "Expression" && lastS == "EndProgram") {
-    return this->replaceEXdotsXbySsXdotsX(1);
+    this->replaceEXdotsXbySsXdotsX(1);
+    return this->setLastRuleName("Expression EndProgram");
   }
   if ((thirdToLastS == "(" || thirdToLastS == "{") &&
     secondToLastS == "SequenceStatements" && (lastS == ")" || lastS == "}")

@@ -20,6 +20,7 @@ bool WebAPIResponse::Test::solveJSON() {
   global.calculator().getElement().initialize(
     Calculator::Mode::educational
   );
+  global.comments.resetComments();
   global.setWebInput(WebAPI::request::calculatorInput, "1+1");
   JSData result = response.solveJSON();
   std::string expected =

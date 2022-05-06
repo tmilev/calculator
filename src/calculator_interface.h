@@ -1733,6 +1733,9 @@ private:
   }
   bool canBeRegardedAsDifferentialForm(const SyntacticElement& input);
   bool canBeRegardedAsDifferentialForm(const std::string& input);
+  // Sets the last rule name if flagLogSyntaxRules is set.
+  // Always returns true [used to shorten the body of applyOneRule()].
+  bool setLastRuleName(const std::string& ruleName);
   bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numberOfXs);
   bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs);
   bool replaceEXXEXEBy_CofEEE(int controlIndex);

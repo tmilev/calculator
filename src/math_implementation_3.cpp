@@ -4228,17 +4228,25 @@ void OnePartialFractionDenominator::makePolynomialFromOneNormal(
   Rational scalarProduct;
   scalarProduct = normal.scalarEuclidean(shiftRationalVector);
   Rational constantTerm;
-  Polynomial<Rational> nextSummand;
+  Polynomial<Rational> nextMultiplicand;
+  // Example 1: 1/(1-x^2)^2.
+  // multiplicities should be equal to 2.
+  global.comments << "DEBUG: and the multis: " << multiplicities << ", normal: "
+  << normal.toString() << "<br>";
   for (int j = 0; j < multiplicities - 1; j ++) {
-    nextSummand.makeLinearNoConstant(normal);
+    nextMultiplicand.makeLinearNoConstant(normal);
+    global.comments << "DEBUG: next mulsi so far: " << nextMultiplicand.toString() << "<br>";
     constantTerm.assignNumeratorAndDenominator(- 1, j + 1);
     constantTerm.multiplyBy(scalarProduct);
     constantTerm += 1;
     Rational scalar;
     scalar.assignNumeratorAndDenominator(1, j + 1);
-    nextSummand *= scalar;
-    nextSummand.addConstant(constantTerm);
-    output *= nextSummand;
+    nextMultiplicand *= scalar;
+    nextMultiplicand.addConstant(constantTerm);
+    // Example 1: nextMultiplicand should equal:
+    //
+    global.comments << "DEBUG: next multiplicand: " << nextMultiplicand.toString() << "<br>";
+    output *= nextMultiplicand;
   }
 }
 
@@ -4380,6 +4388,10 @@ std::string PartialFractions::toString(FormatExpressions* format) const {
 bool PartialFractions::assureIndicatorRegularity(
   Vector<Rational>& indicator
 ) {
+  STACK_TRACE("PartialFractions::assureIndicatorRegularity");
+  if (this->ambientDimension <= 1) {
+    return true;
+  }
   Vectors<Rational> roots;
   roots = this->normalizedVectors;
   if (indicator.isEqualToZero()) {
@@ -4458,6 +4470,7 @@ bool PartialFractions::splitPartial() {
 bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(
   Vector<Rational>* root
 ) {
+  STACK_TRACE("PartialFractions::checkForMinimalityDecompositionWithRespectToRoot");
   for (int i = 0; i < this->nonReduced.size(); i ++) {
     if (
       this->nonReduced[i].denominatorsNoScale.size() <= this->ambientDimension
@@ -11050,6 +11063,11 @@ void OnePartialFractionDenominator::computePolynomialCorrespondingToOneMonomial
     << "from non-reduced fraction (too many vectors). "
     << global.fatal;
   }
+  // Example 1. 1/(1-x^2)^2
+  // Content of normals: 1/2
+  //
+  // Example 2. 1/((1-x)^2(1-y))
+  // Content of normals: (1,0) and (0,1).
   for (int i = 0; i < normals.size; i ++) {
     Vector<Rational> vector = coneGenerators[i];
     Rational::scaleNoSignChange(vector);
@@ -11061,9 +11079,12 @@ void OnePartialFractionDenominator::computePolynomialCorrespondingToOneMonomial
       << "from non-reduced fraction (too many multiplicities). "
       << global.fatal;
     }
+    global.comments << "DEBUG: current normal: " << normals[i] << "<br>";
     this->makePolynomialFromOneNormal(
       normals[i], monomial, current.multiplicities[0], multiplicand
     );
+    global.comments << "DEBUG: xtracted multiplicand: " << multiplicand.toString() << "<br>";
+
     outputPolynomialPart *= multiplicand;
   }
   outputQuasipolynomial.makeFromPolynomialShiftAndLattice(
@@ -11090,11 +11111,19 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
     << this->owner->ambientDimension
     << global.fatal;
   }
+  // Example 1. We have the partial fraction
+  // 1/(1-x^2)^2 = (1+x^2+x^4+...)(1+x+x^2+...)
+  // Example 2. We have the partial fraction:
+  // 1/((1-x)^2(1-y)
   Lattice lattice;
   lattice.makeFromRoots(latticeGenerators);
   Matrix<Rational> normalsMatrixForm;
   normalsMatrixForm.assignVectorsToRows(latticeGenerators);
+  // Example 1. The matrix before inversion: (2).
+  // Example 2. The matrix before inversion: the 2x2 identity.
   normalsMatrixForm.invert();
+  // Example 1. The matrix after inversion: (1/2).
+  // Example 2. The matrix after inversion: the 2x2 identity.
   normals.assignMatrixColumns(normalsMatrixForm);
   output.makeZeroLatticeZn(owner.ambientDimension);
   for (int i = 0; i < coefficient.size(); i ++) {
@@ -11105,6 +11134,8 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
       normals,
       lattice
     );
+    global.comments << "DEBUG: Contribution of coefficient: " << coefficient.toString()
+    << " = " << shiftedQuasiPolynomial.toString() << "<br>";
     shiftedQuasiPolynomial *= coefficient.coefficients[i];
     output += shiftedQuasiPolynomial;
   }

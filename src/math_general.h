@@ -4122,7 +4122,7 @@ void Polynomial<Coefficient>::makeLinearNoConstant(
   MonomialPolynomial monomial;
   for (int i = 0; i < inputCoefficients.size; i ++) {
     monomial.makeEi(i);
-    this->addMonomial(monomial, inputCoefficients[i].getNumerator());
+    this->addMonomial(monomial, inputCoefficients[i]);
   }
 }
 

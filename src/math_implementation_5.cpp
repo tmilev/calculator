@@ -545,98 +545,85 @@ bool VectorPartition::initialize(
       return false;
     }
   }
-  this->partitioningRoots = inputPartitioningRoots;
-  if (this->partitioningRoots.size == 0) {
+  this->partitioningVectors = inputPartitioningRoots;
+  if (this->partitioningVectors.size == 0) {
     return false;
   }
-  if (this->goalVector.isEqualToZero()) {
+  if (this->partitioningVectors[0].size != inputRoot.size) {
     return false;
   }
-  this->goalVector = inputRoot;
+  if (this->targetSum.isEqualToZero()) {
+    return false;
+  }
+  this->targetSum = inputRoot;
   this->currentPartition.initializeFillInObject(
-    this->partitioningRoots.size, 0
+    this->partitioningVectors.size, 0
   );
-  this->currentPartitionSum.makeZero(this->goalVector.size);
+  this->currentPartitionSum.makeZero(this->targetSum.size);
   return true;
 }
 
-Vector<Rational> VectorPartition::getPartitionSum() {
-  Vector<Rational> result;
-  result.makeZero(this->goalVector.size);
-  for (int i = 0; i < this->currentPartition.size; i ++) {
-    result += this->partitioningRoots[i] * this->currentPartition[i];
-  }
-  return result;
+void VectorPartition::addIndex(int index, int quantity) {
+  this->currentPartition[index] += quantity;
+  this->currentPartitionSum += this->partitioningVectors[index] * quantity;
 }
 
-void VectorPartition::beefUpPartition() {
-  STACK_TRACE("VectorPartition::beefUpPartition");
-  Vector<Rational> remainder = this->goalVector - this->currentPartitionSum;
-  while ((remainder - *this->partitioningRoots.lastObject()).isPositiveOrZero()
-  ) {
-    (*this->currentPartition.lastObject()) ++;
-    this->currentPartitionSum += *(this->partitioningRoots.lastObject());
-    remainder -= *this->partitioningRoots.lastObject();
-  }
-}
-
-bool VectorPartition::nudgePartition() {
-  STACK_TRACE("VectorPartition::nudgePartition");
-  int indexFirstNonZero = - 1;
-  for (int i = this->currentPartition.size - 1; i >= 0; i --) {
-    if (this->currentPartition[i] != 0) {
-      indexFirstNonZero = i;
-      break;
+bool VectorPartition::addOne() {
+  STACK_TRACE("VectorPartition::addOne");
+  for (int i = this->numberOfVectors() - 1; i >= 0; i --) {
+    if (this->addOneAtIndex(i)) {
+      return true;
     }
   }
-  if (indexFirstNonZero == - 1) {
-    global.fatal
-    << "Error: an internal check has failed in "
-    << "VectorPartition::incrementReturnFalseIfPastLast."
-    << global.fatal;
+  return false;
+}
+
+bool VectorPartition::addOneAtIndex(int atIndex) {
+  STACK_TRACE("VectorPartition::addOneAtIndex");
+  this->addIndex(atIndex, 1);
+  if (!this->currentPartitionSumExceedsGoal()) {
+    return true;
   }
-  if (indexFirstNonZero == 0) {
-    return false;
-  }
-  this->currentPartition[indexFirstNonZero - 1] ++;
-  this->currentPartitionSum += this->partitioningRoots[indexFirstNonZero - 1];
-  this->currentPartitionSum -=
-  this->partitioningRoots[indexFirstNonZero] *
-  this->currentPartition[indexFirstNonZero];
-  this->currentPartition[indexFirstNonZero] = 0;
-  return true;
+  this->addIndex(atIndex, - this->currentPartition[atIndex]);
+  return false;
 }
 
 bool VectorPartition::incrementReturnFalseIfPastLast() {
   STACK_TRACE("VectorPartition::incrementReturnFalseIfPastLast");
-  if (this->currentPartitionSum == this->goalVector) {
-    this->nudgePartition();
-  }
   while (true) {
-    this->beefUpPartition();
-    if (this->currentPartitionSum == this->goalVector) {
-      return true;
-    }
-    if (!this->nudgePartition()) {
+    if (!this->addOne()) {
       return false;
     }
+    if (this->currentPartitionSum == this->targetSum) {
+      return true;
+    }
   }
-  // return false;
+}
+
+bool VectorPartition::currentPartitionSumExceedsGoal() const {
+  STACK_TRACE("VectorPartition::currentPartitionSumExceedsGoal");
+  int dimension = this->getDimension();
+  for (int i = 0; i < dimension; i ++) {
+    if (this->targetSum[i] < this->currentPartitionSum[i]) {
+      return true;
+    }
+  }
+  return false;
 }
 
 std::string VectorPartition::toStringPartitioningVectors() {
   STACK_TRACE("VectorPartition::toStringPartitioningVectors");
   std::stringstream out;
-  for (int i = 0; i < this->partitioningRoots.size; i ++) {
+  for (int i = 0; i < this->partitioningVectors.size; i ++) {
     out
     << "e_{"
     << i + 1
     << "}="
-    << this->partitioningRoots[i].toString()
+    << this->partitioningVectors[i].toString()
     << "<br>";
   }
   out << "<hr>";
-  out << "Looking for partitions of: " << this->goalVector.toString();
+  out << "Looking for partitions of: " << this->targetSum.toString();
   out << "<hr>";
   return out.str();
 }
@@ -652,7 +639,7 @@ std::string VectorPartition::toStringOnePartition(
 std::string VectorPartition::toStringAllPartitions(bool useHtml) {
   STACK_TRACE("VectorPartition::toString");
   std::stringstream out;
-  out << this->goalVector.toString() << "\n\n";
+  out << this->targetSum.toString() << "\n\n";
   if (useHtml) {
     out << "<br>";
   }

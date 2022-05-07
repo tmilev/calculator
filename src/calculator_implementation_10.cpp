@@ -17,7 +17,10 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
       calculator, input, matrix, false
     )
   ) {
-    return calculator << "Failed to extract matrix of rationals from: " << input.toString();
+    return
+    calculator
+    << "Failed to extract matrix of rationals from: "
+    << input.toString();
   }
   if (
     calculator.objectContainer.vectorPartitionFunctions.contains(vectors)
@@ -73,7 +76,7 @@ applyVectorPartitionFunctionFormula(
   if (
     !calculator.getVectorFromFunctionArguments(input, vector, nullptr, - 1)
   ) {
-    return false;
+    return calculator << "Failed to extract vector from: " << input.toString();
   }
   WithContext<PartialFractions> element;
   if (!input[0].isOfTypeWithContext(&element)) {
@@ -81,7 +84,13 @@ applyVectorPartitionFunctionFormula(
   }
   PartialFractions partialFractions = element.content;
   if (partialFractions.ambientDimension != vector.size) {
-    return false;
+    return
+    calculator
+    << "Vector dimension: "
+    << vector.size
+    << " not equal to the partial fraction dimension: "
+    << partialFractions.ambientDimension
+    << ".";
   }
   Rational result;
   partialFractions.evaluateVectorPartitionFunction(

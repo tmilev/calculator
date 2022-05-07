@@ -4735,7 +4735,11 @@ void PartialFractions::makeProgressVPFcomputation() {
   report.report(out2.str());
 }
 
-Rational PartialFractions::computeCheckSumFromLinearCombination(const LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> > &input){
+Rational PartialFractions::computeCheckSumFromLinearCombination(
+  const LinearCombination<
+    OnePartialFractionDenominator, Polynomial<LargeInteger>
+  >& input
+) {
   Rational result = 0;
   this->accumulateCheckSum(input, result);
   return result;
@@ -4762,7 +4766,6 @@ void PartialFractions::accumulateCheckSum(
     output += currentCheckSum;
   }
 }
-
 
 void PartialFractions::computeCheckSum(Rational& output) {
   STACK_TRACE("PartialFractions::computeCheckSum");
@@ -4915,10 +4918,14 @@ void PartialFractions::removeRedundantShortRoots(
       0, denominator, coefficient
     );
     bool needsMoreReduction =
-    this->reduceOnceRedundantShortRoots(denominator, transformedDenominator, transformedCoefficient, indicator);
+    this->reduceOnceRedundantShortRoots(
+      denominator, transformedDenominator, transformedCoefficient, indicator
+    );
     if (needsMoreReduction) {
       transformedCoefficient *= coefficient;
-      this->reducedWithElongationRedundancies .addMonomial(transformedDenominator, transformedCoefficient);
+      this->reducedWithElongationRedundancies.addMonomial(
+        transformedDenominator, transformedCoefficient
+      );
     } else {
       this->reduced.addMonomial(denominator, coefficient);
     }
@@ -12039,7 +12046,8 @@ Vector<Rational> OnePartialFractionDenominatorComponent::getCheckSumRoot(
 
 bool PartialFractions::reduceOnceRedundantShortRoots(
   const OnePartialFractionDenominator& toBeReduced,
-OnePartialFractionDenominator& outputFraction,Polynomial<LargeInteger>& outputCoefficient,
+  OnePartialFractionDenominator& outputFraction,
+  Polynomial<LargeInteger>& outputCoefficient,
   Vector<Rational>* indicator
 ) {
   STACK_TRACE("PartialFractions::reduceOnceRedundantShortRoots");

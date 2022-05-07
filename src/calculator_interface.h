@@ -3058,16 +3058,23 @@ public:
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetDimNonMandatory = - 1
   ) {
-    if (this->getVectorFromFunctionArgumentsInternal(input, output, inputOutputStartingContext, targetDimNonMandatory)){
+    if (
+      this->getVectorFromFunctionArgumentsInternal(
+        input, output, inputOutputStartingContext, targetDimNonMandatory
+      )
+    ) {
       return true;
     }
-    if (input.size() !=2 || input.isSequenceNElements() || input.isMatrix()) {
+    if (
+      input.size() != 2 || input.isSequenceNElements() || input.isMatrix()
+    ) {
       return false;
     }
-    return getVectorFromFunctionArgumentsInternal(input[1], output, inputOutputStartingContext, targetDimNonMandatory);
-
+    return
+    getVectorFromFunctionArgumentsInternal(
+      input[1], output, inputOutputStartingContext, targetDimNonMandatory
+    );
   }
-
   template <class Type>
   bool getVectorFromFunctionArgumentsInternal(
     const Expression& input,
@@ -3934,16 +3941,37 @@ bool CalculatorConversions::functionGetMatrix(
   int targetNumberOfColumnsNonMandatory,
   std::stringstream* commentsOnError
 ) {
-  if (CalculatorConversions::functionGetMatrixInternal(calculator, input, outputMatrix,convertWithComputation,inputOutputStartingContext,targetNumberOfColumnsNonMandatory,commentsOnError)) {
+  if (
+    CalculatorConversions::functionGetMatrixInternal(
+      calculator,
+      input,
+      outputMatrix,
+      convertWithComputation,
+      inputOutputStartingContext,
+      targetNumberOfColumnsNonMandatory,
+      commentsOnError
+    )
+  ) {
     return true;
   }
-  if (input.size() != 2 ||     input.isSequenceNElements() ||
-  input.isMatrix() ||
-  input.isIntervalRealLine()){
+  if (
+    input.size() != 2 ||
+    input.isSequenceNElements() ||
+    input.isMatrix() ||
+    input.isIntervalRealLine()
+  ) {
     return false;
   }
-  return CalculatorConversions::functionGetMatrixInternal(calculator, input[1], outputMatrix, convertWithComputation, inputOutputStartingContext, targetNumberOfColumnsNonMandatory, commentsOnError);
-
+  return
+  CalculatorConversions::functionGetMatrixInternal(
+    calculator,
+    input[1],
+    outputMatrix,
+    convertWithComputation,
+    inputOutputStartingContext,
+    targetNumberOfColumnsNonMandatory,
+    commentsOnError
+  );
 }
 
 template <class Type>

@@ -8497,7 +8497,7 @@ bool CalculatorFunctions::allVectorPartitions(
   VectorPartition partition;
   const Expression& vectorExpression = input[1];
   const Expression& partitioningVectorsExpression = input[2];
-  if (!calculator.getVector(vectorExpression, partition.goalVector)) {
+  if (!calculator.getVector(vectorExpression, partition.targetSum)) {
     return
     calculator
     << "<hr>Failed to extract vector from "
@@ -8511,7 +8511,7 @@ bool CalculatorFunctions::allVectorPartitions(
       vectorsMatForm,
       false,
       nullptr,
-      partition.goalVector.size
+      partition.targetSum.size
     )
   ) {
     return
@@ -8530,7 +8530,7 @@ bool CalculatorFunctions::allVectorPartitions(
       << " is non-positive";
     }
   }
-  if (!partition.initialize(inputVectors, partition.goalVector)) {
+  if (!partition.initialize(inputVectors, partition.targetSum)) {
     return calculator << "<hr>Failed to initialize vector partition object";
   }
   std::stringstream outFinal;
@@ -8540,7 +8540,7 @@ bool CalculatorFunctions::allVectorPartitions(
   std::stringstream outVectors;
   int count = 0;
   while (partition.incrementReturnFalseIfPastLast()) {
-    count++;
+    count ++;
     outVectors
     << "<br>"
     << partition.toStringOnePartition(partition.currentPartition);
@@ -8551,7 +8551,7 @@ bool CalculatorFunctions::allVectorPartitions(
       << "Found "
       << numFound
       << " partitions of "
-      << partition.goalVector.toString()
+      << partition.targetSum.toString()
       << "<br>Current partition: "
       << partition.currentPartition;
       report.report(reportStream.str());
@@ -9636,11 +9636,11 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
     oneDimensionalVectors[i].makeZero(1);
     oneDimensionalVectors[i][0] = integerList[i];
   }
-  vectorPartition.goalVector.makeZero(1);
-  vectorPartition.goalVector[0] = integerSum;
+  vectorPartition.targetSum.makeZero(1);
+  vectorPartition.targetSum[0] = integerSum;
   if (
     !vectorPartition.initialize(
-      oneDimensionalVectors, vectorPartition.goalVector
+      oneDimensionalVectors, vectorPartition.targetSum
     )
   ) {
     return calculator << "Failed to initialize the computation. ";

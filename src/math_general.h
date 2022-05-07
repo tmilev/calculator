@@ -6477,8 +6477,10 @@ public:
   void removeRedundantShortRoots(Vector<Rational>* indicator);
   // Reduces redundant short roots if present.
   // Returns true if redundant short roots were found, false otherwise.
-  bool reduceOnceRedundantShortRoots(const OnePartialFractionDenominator& toBeReduced, OnePartialFractionDenominator &outputFraction,
-    Polynomial<LargeInteger> &outputCoefficient,
+  bool reduceOnceRedundantShortRoots(
+    const OnePartialFractionDenominator& toBeReduced,
+    OnePartialFractionDenominator& outputFraction,
+    Polynomial<LargeInteger>& outputCoefficient,
     Vector<Rational>* indicator
   );
   bool split(Vector<Rational>* indicator);
@@ -6494,10 +6496,11 @@ public:
     const Vector<Rational>& weights
   );
   void computeCheckSum(Rational& output);
-  Rational computeCheckSumFromLinearCombination(    const LinearCombination<
-  OnePartialFractionDenominator, Polynomial<LargeInteger>
->& input
-);
+  Rational computeCheckSumFromLinearCombination(
+    const LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >& input
+  );
   void accumulateCheckSum(
     const LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>
@@ -6875,25 +6878,30 @@ public:
 
 class VectorPartition {
 public:
-  Vectors<Rational> partitioningRoots;
-  Vector<Rational> goalVector;
+  Vectors<Rational> partitioningVectors;
+  Vector<Rational> targetSum;
   List<int> currentPartition;
   Vector<Rational> currentPartitionSum;
+  // Partitions stores all generated partitions, when
+  // flagStoreAllPartitions is set.
   // Format: each element of partitions gives an array whose entries give
-  // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements,
+  // the multiplicity of the weights. In other words,
+  // if partitioningRoots has 2 elements,
   // then partitions[0]
   // would have 2 elements: the first giving the multiplicity of
   // PartitioningRoots[0]
   // and the second - the multiplicity of
   // PartitioningRoots[1]
   List<List<int> > partitions;
+  // Whether or not to use the partitions array.
   bool flagStoreAllPartitions;
   VectorPartition() {
     this->flagStoreAllPartitions = false;
   }
-  Vector<Rational> getPartitionSum();
-  void beefUpPartition();
-  bool nudgePartition();
+  bool currentPartitionSumExceedsGoal() const;
+  bool addOneAtIndex(int atIndex);
+  bool addOne();
+  void addIndex(int index, int quantity);
   std::string toStringPartitioningVectors();
   std::string toStringOnePartition(const List<int>& currentPartition);
   std::string toStringAllPartitions(bool useHtml);
@@ -6902,6 +6910,12 @@ public:
     const Vector<Rational>& inputRoot
   );
   bool incrementReturnFalseIfPastLast();
+  int numberOfVectors() const {
+    return this->partitioningVectors.size;
+  }
+  int getDimension() const {
+    return this->targetSum.size;
+  }
 };
 
 template <class Coefficient>

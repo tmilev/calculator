@@ -227,8 +227,20 @@ void Calculator::initializeFunctionsScientificBasic() {
     "(first argument) using a given list of "
     "vectors (second argument). All partitioning "
     "vectors should have positive coordinates. ",
-    "AllVectorPartitions((10, 11), "
-    "((1,2 ), (2, 3), (4, 5), (2, 1), (3, 2), (5, 4))) ",
+    "AllVectorPartitions((10, 11),("
+    "(1,2),"
+    "(2,3),"
+    "(4,5),"
+    "(2,1),"
+    "(3,2),"
+    "(5,4)));\n"
+    "AllVectorPartitions((4,5),((1,0),(0,1),(1,1),(1,2),(1,3),(2,3)));\n"
+    "AllVectorPartitions(20,"
+    "(Sequence{}1,"
+    "Sequence{}2,"
+    "Sequence{}3,"
+    "Sequence{}4,"
+    "Sequence{}5));",
     "CalculatorFunctions::allVectorPartitions",
     "AllVectorPartitions",
     innerStandard

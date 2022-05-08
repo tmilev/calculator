@@ -4459,9 +4459,11 @@ AllPartitions(10)
 Prints all partitions of a positive number into a sum of positive integers. 
 
 *AllVectorPartitions* [AllVectorPartitions] {CalculatorFunctions::allVectorPartitions}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AllVectorPartitions%28%2810%2c%2011%29%2c%20%28%281%2c2%20%29%2c%20%282%2c%203%29%2c%20%284%2c%205%29%2c%20%282%2c%201%29%2c%20%283%2c%202%29%2c%20%285%2c%204%29%29%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22AllVectorPartitions%28%2810%2c%2011%29%2c%28%281%2c2%29%2c%282%2c3%29%2c%284%2c5%29%2c%282%2c1%29%2c%283%2c2%29%2c%285%2c4%29%29%29%3b%5cnAllVectorPartitions%28%284%2c5%29%2c%28%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%29%29%3b%5cnAllVectorPartitions%2820%2c%28Sequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%2cSequence%7b%7d5%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-AllVectorPartitions((10, 11), ((1,2 ), (2, 3), (4, 5), (2, 1), (3, 2), (5, 4))) 
+AllVectorPartitions((10, 11),((1,2),(2,3),(4,5),(2,1),(3,2),(5,4)));
+AllVectorPartitions((4,5),((1,0),(0,1),(1,1),(1,2),(1,3),(2,3)));
+AllVectorPartitions(20,(Sequence{}1,Sequence{}2,Sequence{}3,Sequence{}4,Sequence{}5));
 ```
 Prints all partitions of the vector (first argument) using a given list of vectors (second argument). All partitioning vectors should have positive coordinates. 
 

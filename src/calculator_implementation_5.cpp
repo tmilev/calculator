@@ -2045,79 +2045,93 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   if (argument == 1) {
     return output.assignValue(calculator, 0);
   }
-  Expression newBaseE, newArgE;
-  newBaseE.assignValue(calculator, base);
-  newArgE.assignValue(calculator, argument);
+  Expression newBaseExpression, newArgumentExpression;
+  newBaseExpression.assignValue(calculator, base);
+  newArgumentExpression.assignValue(calculator, argument);
   if (base < 1) {
     base.invert();
-    newBaseE.assignValue(calculator, base);
+    newBaseExpression.assignValue(calculator, base);
     output.makeXOX(
-      calculator, calculator.opLogBase(), newBaseE, newArgE
+      calculator,
+      calculator.opLogBase(),
+      newBaseExpression,
+      newArgumentExpression
     );
     output *= - 1;
     return true;
   }
   if (argument < 1) {
     argument.invert();
-    newArgE.assignValue(calculator, argument);
+    newArgumentExpression.assignValue(calculator, argument);
     output.makeXOX(
-      calculator, calculator.opLogBase(), newBaseE, newArgE
+      calculator,
+      calculator.opLogBase(),
+      newBaseExpression,
+      newArgumentExpression
     );
     output *= - 1;
     return true;
   }
-  LargeInteger baseInt, argNum;
-  if (!base.isInteger(&baseInt)) {
+  LargeInteger baseInteger, argumentNumerator;
+  if (!base.isInteger(&baseInteger)) {
     return false;
   }
   LargeInteger simplerBase;
   int simplerPower = - 1;
   bool isPower = false;
-  if (baseInt.tryIsPower(isPower, simplerBase, simplerPower)) {
+  if (baseInteger.tryIsPower(isPower, simplerBase, simplerPower)) {
     if (isPower) {
-      newBaseE.assignValue(calculator, Rational(simplerBase));
+      newBaseExpression.assignValue(calculator, Rational(simplerBase));
       output.makeXOX(
-        calculator, calculator.opLogBase(), newBaseE, newArgE
+        calculator,
+        calculator.opLogBase(),
+        newBaseExpression,
+        newArgumentExpression
       );
       output /= simplerPower;
       return true;
     }
   }
-  argNum = argument.getNumerator();
-  LargeInteger argDen = argument.getDenominator();
-  double doubleBase = baseInt.getDoubleValue();
-  double doubleArgNum = argNum.getDoubleValue();
+  argumentNumerator = argument.getNumerator();
+  LargeInteger argumentDenominator = argument.getDenominator();
+  double doubleBase = baseInteger.getDoubleValue();
+  double doubleArgumentNumerator = argumentNumerator.getDoubleValue();
   if (
-    FloatingPoint::logFloating(doubleArgNum) /
+    FloatingPoint::logFloating(doubleArgumentNumerator) /
     FloatingPoint::logFloating(doubleBase) >
     1000
   ) {
     return false;
   }
-  int intPart = 0;
+  int integerPart = 0;
   bool changed = false;
-  while (argNum % baseInt == 0) {
-    intPart ++;
-    argNum /= baseInt;
+  while (argumentNumerator % baseInteger == 0) {
+    integerPart ++;
+    argumentNumerator /= baseInteger;
     changed = true;
   }
-  while (argDen % baseInt == 0) {
-    intPart --;
-    argDen /= baseInt;
+  while (argumentDenominator % baseInteger == 0) {
+    integerPart --;
+    argumentDenominator /= baseInteger;
     changed = true;
   }
   if (!changed) {
     return false;
   }
-  argument = argNum;
-  argument /= argDen;
-  newBaseE.assignValue(calculator, base);
-  newArgE.assignValue(calculator, argument);
-  output.makeXOX(calculator, calculator.opLogBase(), newBaseE, newArgE);
-  if (intPart == 0) {
+  argument = argumentNumerator;
+  argument /= argumentDenominator;
+  newBaseExpression.assignValue(calculator, base);
+  newArgumentExpression.assignValue(calculator, argument);
+  output.makeXOX(
+    calculator,
+    calculator.opLogBase(),
+    newBaseExpression,
+    newArgumentExpression
+  );
+  if (integerPart == 0) {
     return true;
   }
-  output += intPart;
+  output += integerPart;
   return true;
 }
 

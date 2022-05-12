@@ -867,10 +867,10 @@ public:
   bool isConstantNumber() const;
   bool isPositiveNumber() const;
   bool evaluatesToDoubleInRange(
-    const std::string& varName,
+    const std::string& variableName,
     double lowBound,
     double highBound,
-    int numPoints,
+    int numberOfPoints,
     double* outputYmin = nullptr,
     double* outputYmax = nullptr,
     Vectors<double>* outputPoints = nullptr

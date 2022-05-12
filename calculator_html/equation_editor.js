@@ -1491,6 +1491,8 @@ class LaTeXConstants {
       // Full-width plus sign, wider and taller plus sign.
       '\uFF0B': '+',
       '+': '+',
+      ';': ';',
+      ':': ':',
       // \pm
       '\u00B1': '\u00B1',
       // Mathematical minus, a wider dash.
@@ -5994,6 +5996,8 @@ class MathNode {
       case '/':
         this.makeFractionNumerator();
         return new KeyHandlerResult(true, false);
+      case ';':
+      case ':':
       case '*':
       case '+':
       case '-':

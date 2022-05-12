@@ -7511,12 +7511,12 @@ bool CalculatorFunctionsPlot::plot2D(
   } else {
     plotObject.numSegmentsE.assignValue(calculator, 500);
   }
-  int numIntervals = - 1;
-  if (!plotObject.numSegmentsE.isSmallInteger(&numIntervals)) {
-    numIntervals = 500;
+  int numberOfIntervals = - 1;
+  if (!plotObject.numSegmentsE.isSmallInteger(&numberOfIntervals)) {
+    numberOfIntervals = 500;
   }
-  if (numIntervals < 2) {
-    numIntervals = 2;
+  if (numberOfIntervals < 2) {
+    numberOfIntervals = 2;
   }
   bool leftIsDouble =
   plotObject.leftPoint.evaluatesToDouble(&plotObject.xLow);
@@ -7625,7 +7625,7 @@ bool CalculatorFunctionsPlot::plot2D(
         variableString,
         plotObject.xLow,
         plotObject.xHigh,
-        numIntervals,
+        numberOfIntervals,
         &plotObject.yLow,
         &plotObject.yHigh,
         &pointsDouble
@@ -8777,22 +8777,22 @@ bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
 }
 
 bool Expression::evaluatesToDoubleInRange(
-  const std::string& varName,
+  const std::string& variableName,
   double lowBound,
   double highBound,
-  int numIntervals,
+  int numberOfPoints,
   double* outputYmin,
   double* outputYmax,
   Vectors<double>* outputPoints
 ) const {
   STACK_TRACE("Expression::evaluatesToDoubleInRange");
-  if (numIntervals < 1 || this->owner == nullptr) {
+  if (numberOfPoints < 1 || this->owner == nullptr) {
     return false;
   }
   HashedList<Expression> knownEs = this->owner->knownDoubleConstants;
   List<double> knownValues = this->owner->knownDoubleConstantValues;
   Expression variableExpression;
-  variableExpression.makeAtom(*this->owner, varName);
+  variableExpression.makeAtom(*this->owner, variableName);
   if (knownEs.contains(variableExpression)) {
     return
     *(this->owner)
@@ -8800,15 +8800,15 @@ bool Expression::evaluatesToDoubleInRange(
   }
   knownEs.addOnTop(variableExpression);
   knownValues.addOnTop(0);
-  int numPoints = numIntervals + 1;
-  double delta = (highBound - lowBound) / (numIntervals);
+  int numPoints = numberOfPoints + 1;
+  double delta = (highBound - lowBound) / (numberOfPoints);
   *knownValues.lastObject() = lowBound;
   double currentValue = 0;
   if (outputPoints != nullptr) {
     outputPoints->setSize(numPoints);
   }
   bool result = true;
-  int numFailedEvaluations = 0;
+  int numberOfFailedEvaluations = 0;
   for (int i = 0; i < numPoints; i ++) {
     if (i == numPoints - 1) {
       *knownValues.lastObject() = highBound;
@@ -8819,18 +8819,18 @@ bool Expression::evaluatesToDoubleInRange(
         knownEs, knownValues, &currentValue
       )
     ) {
-      numFailedEvaluations ++;
-      if (numFailedEvaluations < 5) {
+      numberOfFailedEvaluations ++;
+      if (numberOfFailedEvaluations < 5) {
         *(this->owner)
         << "<br>Failed to evaluate "
         << this->toString()
         << " at "
-        << varName
+        << variableName
         << "="
         << *knownValues.lastObject()
         << ". ";
       }
-      if (numFailedEvaluations == 5) {
+      if (numberOfFailedEvaluations == 5) {
         *(this->owner) << "<br>...";
       }
       result = false;
@@ -8863,10 +8863,10 @@ bool Expression::evaluatesToDoubleInRange(
       }
     }
   }
-  if (numFailedEvaluations >= 5) {
+  if (numberOfFailedEvaluations >= 5) {
     (*this->owner)
     << "<br>"
-    << numFailedEvaluations
+    << numberOfFailedEvaluations
     << " evaluations total failed. ";
   }
   return result;

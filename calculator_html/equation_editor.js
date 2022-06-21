@@ -1463,6 +1463,7 @@ class LaTeXConstants {
       '\u2192': '0.3em',
       '>': '0.3em',
       '<': '0.3em',
+      'mod': '0.5em',
       // neq
       '\u2260': '0.3em',
       // ellipsis dots
@@ -1594,6 +1595,7 @@ class LaTeXConstants {
       'in': '\u2208',
       'cap': '\u2229',
       'cup': '\u222A',
+      'mod': 'mod',
     };
     /** @type {Object.<string, string>!} */
     this.latexBackslashOperatorsBackslashed = {};

@@ -352,8 +352,11 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   return output.makeSequence(calculator, &quotients);
 }
 
-bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
-  Calculator& calculator, const Expression& input, Expression& output
+bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool includeComments
 ) {
   STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
@@ -378,6 +381,9 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
     )
   ) {
     return output.assignValue(calculator, comments.str());
+  }
+  if (includeComments) {
+    calculator.comments << comments.str();
   }
   List<Expression> resultSequence;
   Expression constantFactor;

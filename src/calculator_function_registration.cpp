@@ -2967,6 +2967,20 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
+    "FactorUnivariatePolynomialOverRationalsDetailed",
+    CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsDetailed,
+    "",
+    "Same as FactorUnivariatePolynomialOverRationals but "
+    "prints out a summary of internal computations.",
+    "%HideLHS\n"
+    "FactorUnivariatePolynomialOverRationalsDetailed{}("
+    "325x^{2}-38x-312"
+    ");\n",
+    "CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsDetailed",
+    "FactorUnivariatePolynomialOverRationalsDetailed",
+    innerStandard
+  );
+  this->addOperationHandler(
     "FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields",
     CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields,
     "",

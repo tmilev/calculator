@@ -642,17 +642,24 @@ void PolynomialFactorizationFiniteFields::henselLift(
   SylvesterMatrix<ElementZmodP>::sylvesterMatrixProduct(
     this->factorsOverPrime, this->sylvesterMatrix, comments
   );
-  if (comments != nullptr) {
-    *comments
-    << "Sylvester matrix: "
-    << this->sylvesterMatrix.toString(&this->format);
-  }
   this->sylvesterMatrixInverted = this->sylvesterMatrix;
   bool mustBeTrue = this->sylvesterMatrixInverted.invert();
   if (!mustBeTrue) {
     global.fatal
     << "Sylvester product matrix is supposed to be invertible. "
     << global.fatal;
+  }
+  if (comments != nullptr) {
+    this->format.flagSuppressModP = true;
+    this->format.makeAlphabetXYZUW();
+    *comments
+    << "Sylvester matrix: "
+    << "\\("
+    << this->sylvesterMatrix.toStringLatex(&this->format)
+    << "\\)"
+    << ", inverted: \\("
+    << this->sylvesterMatrixInverted.toStringLatex(&this->format)
+    << "\\)";
   }
   this->factorsLifted = this->factorsOverPrime;
   this->modulusHenselLift = this->oneModular.modulus;
@@ -683,8 +690,14 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     << "Modulus: "
     << this->modulusHenselLift
     << ". "
-    << "Lifted factors without correction: "
-    << this->factorsLifted.toStringCommaDelimited(&this->format);
+    << "Lifted factors without correction: \\(";
+    for (int i = 0; i < this->factorsLifted.size; i ++) {
+      *comments << this->factorsLifted[i].toString(&this->format);
+      if (i != this->factorsLifted.size - 1) {
+        *comments << ", ";
+      }
+    }
+    *comments << "\\).";
   }
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
     this->current, this->desiredLift, this->modulusHenselLift
@@ -702,15 +715,26 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   }
   if (comments != nullptr) {
     *comments
-    << "<br>Lifted product without correction: "
-    << newProduct.toString(&this->format);
+    << "<br>Lifted product without correction: \\("
+    << newProduct.toString(&this->format)
+    << "\\mod "
+    << this->modulusHenselLift
+    << "\\)";
   }
   newProduct -= this->desiredLift;
   if (comments != nullptr) {
-    *comments << "<br>Desired lift: " << desiredLift.toString(&this->format);
     *comments
-    << "<br>To be corrected: "
-    << newProduct.toString(&this->format);
+    << "<br>Desired lift: \\("
+    << desiredLift.toString(&this->format)
+    << " \\mod "
+    << this->modulusHenselLift
+    << " \\)";
+    *comments
+    << "<br>To be corrected: \\("
+    << newProduct.toString(&this->format)
+    << "\\mod "
+    << this->modulusHenselLift
+    << "\\)";
   }
   Vector<ElementZmodP> coefficientsCorrection;
   coefficientsCorrection.makeZero(

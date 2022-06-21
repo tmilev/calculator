@@ -41,7 +41,26 @@ public:
   );
   static bool factorPolynomialFiniteFields(
     Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
+      calculator, input, output, false
+    );
+  }
+  static bool factorPolynomialFiniteFieldsWithComments(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool includeComments
   );
+  static bool factorPolynomialFiniteFieldsDetailed(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
+      calculator, input, output, true
+    );
+  }
   static bool factorPolynomialKronecker(
     Calculator& calculator, const Expression& input, Expression& output
   );

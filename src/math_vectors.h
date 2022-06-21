@@ -533,6 +533,11 @@ public:
   bool isGreaterThanLexicographic(const Vector<Coefficient>& other) const {
     return this->::List<Coefficient>::operator>(other);
   }
+  // Compares two vectors in graded colexicographic order.
+  // In other words, we compare the vectors by the of their coordinates.
+  // When these are equal, we break ties by finding the
+  // largest index where the two vectors are different and declaring that
+  // the larger of the two coordinates gives the larger vector.
   bool operator>(const Vector<Coefficient>& other) const {
     if (this->size != other.size) {
       global.fatal
@@ -543,7 +548,8 @@ public:
       << ". "
       << global.fatal;
     }
-    Coefficient c1 = 0, c2 = 0;
+    Coefficient c1 = 0;
+    Coefficient c2 = 0;
     for (int i = 0; i < this->size; i ++) {
       c1 += this->objects[i];
       c2 += other.objects[i];

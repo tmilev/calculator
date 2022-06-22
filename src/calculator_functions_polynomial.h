@@ -18,6 +18,12 @@ public:
   static bool polynomialDivisionQuotient(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  template<class Coefficient>
+  static bool polynomialDivisionVerbosePart2(  Calculator& calculator,
+  List<Polynomial<Coefficient> >& input ,
+ExpressionContext& context,
+  Expression& output,
+  List<MonomialPolynomial>::Comparator* monomialOrder);
   static bool polynomialDivisionVerbose(
     Calculator& calculator,
     const Expression& input,

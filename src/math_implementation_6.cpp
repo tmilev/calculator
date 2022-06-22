@@ -536,8 +536,11 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   STACK_TRACE(
     "PolynomialFactorizationFiniteFields::oneFactorFromModularization"
   );
+  this->format.flagSuppressModP = true;
   int64_t startCantorZassenhaus = global.getElapsedMilliseconds();
   PolynomialFactorizationUnivariate<ElementZmodP> factorizationModular;
+  factorizationModular.format.flagSuppressModP = true;
+  factorizationModular.format.makeAlphabetXYZUW();
   PolynomialFactorizationCantorZassenhaus<
     PolynomialModuloPolynomialModuloInteger,
     PolynomialUnivariateModular,
@@ -561,7 +564,6 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   this->millisecondsCantorZassenhaus =
   global.getElapsedMilliseconds() - startCantorZassenhaus;
   this->factorsOverPrime = factorizationModular.reduced;
-  this->format.flagSuppressModP = true;
   //  this->computeCoefficientBoundsElementary();
   this->computeCoefficientBoundsGelfond();
   int64_t startHenselLift = global.getElapsedMilliseconds();

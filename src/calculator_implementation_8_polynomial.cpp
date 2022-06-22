@@ -103,38 +103,30 @@ polynomialDivisionVerboseLexicographicOpposite(
   );
 }
 
-bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
+
+template<class Coefficient>
+bool CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
   Calculator& calculator,
-  const Expression& input,
+  List<Polynomial<Coefficient> >& input ,
+ExpressionContext& context,
   Expression& output,
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
-  STACK_TRACE("Calculator::polynomialDivisionVerbose");
-  ExpressionContext context(calculator);
-  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (
-    !calculator.getListPolynomialVariableLabelsLexicographic(
-      input, polynomialsRational, context
-    )
-  ) {
-    return
-    output.assignError(calculator, "Failed to extract list of polynomials. ");
-  }
   GroebnerBasisComputation<AlgebraicNumber> computation;
   computation.flagDoLogDivision = true;
   computation.flagStoreQuotients = true;
   computation.polynomialOrder.monomialOrder = *monomialOrder;
-  for (int i = 1; i < polynomialsRational.size; i ++) {
-    if (polynomialsRational[i].isEqualToZero()) {
+  for (int i = 1; i < input.size; i ++) {
+    if (input[i].isEqualToZero()) {
       return output.assignError(calculator, "Division by zero.");
     }
-    computation.addBasisElementNoReduction(polynomialsRational[i]);
+    computation.addBasisElementNoReduction(input[i]);
   }
   if (monomialOrder != nullptr) {
     computation.polynomialOrder.monomialOrder = *monomialOrder;
   }
   computation.remainderDivisionByBasis(
-    polynomialsRational[0], computation.remainderDivision, - 1
+    input[0], computation.remainderDivision, - 1
   );
   context.getFormat(computation.format);
   computation.format.flagUseLatex = true;
@@ -152,6 +144,28 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   out << latexOutput.str();
   return output.assignValue(calculator, out.str());
 }
+
+bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  List<MonomialPolynomial>::Comparator* monomialOrder
+) {
+  STACK_TRACE("CalculatorFunctionsPolynomial::polynomialDivisionVerbose");
+  ExpressionContext context(calculator);
+  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
+  if (
+    calculator.getListPolynomialVariableLabelsLexicographic(
+      input, polynomialsRational, context
+    )
+  ) {
+    return    CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
+    calculator, polynomialsRational, context, output, monomialOrder);
+  }
+  return
+  output.assignError(calculator, "Failed to extract list of polynomials. ");
+}
+
 
 bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   Calculator& calculator, const Expression& input, Expression& output

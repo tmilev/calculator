@@ -986,7 +986,12 @@ class MathNodeFactory {
       rows,
       /** @type {number} */
       columns,
-      /** @type {string} */
+      /** For the environment \begin{array}{rcl}a&=&b\end{array}, 
+       * columnStyle contains the 
+       * rcl 
+       * column spec string 
+       * @type {string} 
+       */
       columnStyle,
       /** @type{string} */
       matrixEnvironment,
@@ -1565,6 +1570,7 @@ class LaTeXConstants {
       'dots': '\u2026',
       'vdots': '\u22EE',
       'approx': '~',
+      'equiv':'\u2261',
       'subset': '\u2282',
       'supset': '\u2283',
       'setminus': '\\',
@@ -8256,8 +8262,14 @@ class MathNode {
     if (options !== null && options.useCursorCommand) {
       positionCursor = this.desiredCursorPosition;
     }
+    let content = this.contentIfAtomic();
+    if (this.type.type === knownTypes.atomImmutable.type) {
+      if (content in latexConstants.latexBackslashOperators) {
+        return new LatexWithAnnotation(`\\${content}`);
+      }
+    }
     let result = latexConstants.convertUtf16ToLatex(
-        this.contentIfAtomic(),
+        content,
         positionCursor,
     );
     return result;
@@ -9972,6 +9984,11 @@ class MathNodeMatrix extends MathNode {
     let matrixContent = this.children[0].children[1];
     let result = [];
     result.push(`\\begin{${this.matrixEnvironment}}`);
+    if (this.matrixEnvironment === 'array') {
+      result.push("{");
+      result.push(this.latexExtraStyle);
+      result.push("}");
+    }
     let rows = [];
     for (let i = 0; i < matrixContent.children.length; i++) {
       let matrixRow = matrixContent.children[i];

@@ -802,6 +802,9 @@ public:
   static bool compositeElementWeylAlgebraActOnPolynomial(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool convertPolynomialModulotIntegerToInteger(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool compositeConstTimesAnyActOn(
     Calculator& calculator, const Expression& input, Expression& output
   );

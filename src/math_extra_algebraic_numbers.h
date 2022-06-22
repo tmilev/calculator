@@ -498,14 +498,18 @@ public:
   List<Polynomial<ElementZmodP> > factorsOverPrime;
   List<Polynomial<ElementZmodP> > factorsLifted;
   Polynomial<ElementZmodP> desiredLift;
+  Polynomial<ElementZmodP> desiredLiftWithoutRescaling;
   Matrix<ElementZmodP> sylvesterMatrix;
   Matrix<ElementZmodP> sylvesterMatrixInverted;
+  List<std::string> latexExplainers;
+  List<std::string> factorNames;
   int64_t millisecondsCantorZassenhaus;
   int64_t millisecondsSquareFree;
   int64_t millisecondsLift;
   int64_t millisecondsFactorizationFromLift;
   int64_t millisecondsTotal;
   int numberOfRunsOfFactor;
+  std::string toLatexLiftedFactors();
   bool factorizationFromHenselLift(
     std::stringstream* comments, std::stringstream* commentsOnFailure
   );
@@ -515,7 +519,9 @@ public:
   bool tryFactor(SelectionFixedRank& selection);
   void henselLift(std::stringstream* comments);
   void henselLiftOnce(
-    const LargeIntegerUnsigned& oldModulus, std::stringstream* comments
+    const LargeIntegerUnsigned& oldModulus,
+    int stepCount,
+    std::stringstream* comments
   );
   // Same as factor.
   // The name oneFactor is

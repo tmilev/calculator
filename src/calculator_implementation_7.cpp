@@ -10574,3 +10574,27 @@ bool CalculatorFunctions::selectAtRandom(
   output = input[randomIndex];
   return true;
 }
+
+bool CalculatorFunctions::convertPolynomialModulotIntegerToInteger(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::convertPolynomialModulotIntegerToInteger");
+  if (input.size() < 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  WithContext<Polynomial<ElementZmodP> > polynomial;
+  if (!argument.isOfTypeWithContext(&polynomial)) {
+    return false;
+  }
+  if (polynomial.content.isEqualToZero()) {
+    return output.assignValue(calculator, Rational::zero());
+  }
+  ElementZmodP zero = polynomial.content.coefficients[0].zero();
+  WithContext<Polynomial<Rational> > result;
+  result.context = polynomial.context;
+  zero.convertPolynomialModularToPolynomialIntegral(
+    polynomial.content, result.content, true
+  );
+  return output.assignWithContext(calculator, result);
+}

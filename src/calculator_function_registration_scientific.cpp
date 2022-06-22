@@ -781,4 +781,16 @@ void Calculator::initializeFunctionsScientificBasic() {
     "EWAactOnPoly",
     compositeStandard
   );
+  this->addOperationHandler(
+    "ConvertPolynomialModPToInteger",
+    CalculatorFunctions::convertPolynomialModulotIntegerToInteger,
+    "",
+    "Converts polynomial  ",
+    "A = 100x-55;\n"
+    "B = PolynomialModP(A, 101);\n"
+    "ConvertPolynomialModPToInteger B",
+    "CalculatorFunctions::convertPolynomialModulotIntegerToInteger",
+    "ConvertPolynomialModPToInteger",
+    innerStandard
+  );
 }

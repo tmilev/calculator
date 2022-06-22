@@ -567,6 +567,9 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   int64_t startHenselLift = global.getElapsedMilliseconds();
   this->henselLift(comments);
   this->millisecondsLift = global.getElapsedMilliseconds() - startHenselLift;
+  if (comments != nullptr) {
+    *comments << "Hensel lift took: " << this->millisecondsLift << "ms. ";
+  }
   int64_t startFactorizationFromHenselLift = global.getElapsedMilliseconds();
   bool result = this->factorizationFromHenselLift(comments, commentsOnFailure);
   this->millisecondsFactorizationFromLift =
@@ -660,23 +663,120 @@ void PolynomialFactorizationFiniteFields::henselLift(
     << ", inverted: \\("
     << this->sylvesterMatrixInverted.toStringLatex(&this->format)
     << "\\)";
+    this->factorNames.clear();
+    std::stringstream factorStream;
+    for (int i = 0; i < this->factorsOverPrime.size; i ++) {
+      if (i < 5) {
+        std::string letterString;
+        letterString.push_back('a' + static_cast<char>(i));
+        this->factorNames.addOnTop(letterString);
+      } else {
+        std::stringstream out;
+        out << "{a_{" << i + 1 << "}}";
+        this->factorNames.addOnTop(out.str());
+      }
+      factorStream
+      << "\\left("
+      << this->factorsOverPrime[i].toString(&this->format)
+      << "\\right)";
+    }
+    *comments
+    << "\\(\\begin{array}{rcll}"
+    << "f_1&\\equiv&"
+    << factorStream.str()
+    << "& \\mod "
+    << this->oneModular.modulus
+    << "\\\\";
+    for (int i = 0; i < this->factorsOverPrime.size; i ++) {
+      *comments
+      << this->factorNames[i]
+      << "_1"
+      << "&\\equiv&"
+      << this->factorsOverPrime[i].toString(&this->format)
+      << "& \\mod "
+      << this->oneModular.modulus
+      << "\\\\\n";
+    }
+    *comments << "\\end{array}\\)";
+    *comments << "<hr>";
   }
   this->factorsLifted = this->factorsOverPrime;
   this->modulusHenselLift = this->oneModular.modulus;
   if (this->coefficientBound <= this->modulusHenselLift) {
     this->coefficientBound = this->modulusHenselLift + 1;
   }
+  int liftStep = 1;
   while (this->modulusHenselLift < this->coefficientBound) {
     LargeIntegerUnsigned oldModulus = this->modulusHenselLift;
     this->modulusHenselLift *= this->oneModular.modulus;
-    this->henselLiftOnce(oldModulus, comments);
+    liftStep ++;
+    this->henselLiftOnce(oldModulus, liftStep, comments);
   }
 }
 
+std::string PolynomialFactorizationFiniteFields::toLatexLiftedFactors() {
+  std::stringstream out;
+  out << "\\(";
+  for (int i = 0; i < this->factorsLifted.size; i ++) {
+    out << this->factorsLifted[i].toString(&this->format);
+    if (i != this->factorsLifted.size - 1) {
+      out << ", ";
+    }
+  }
+  out << "\\)";
+  return out.str();
+}
+
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
-  const LargeIntegerUnsigned& oldModulus, std::stringstream* comments
+  const LargeIntegerUnsigned& oldModulus,
+  int stepCount,
+  std::stringstream* comments
 ) {
   STACK_TRACE("PolynomialFactorizationFiniteFields::henselLiftOnce");
+  std::stringstream explainer;
+  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
+    this->current,
+    this->desiredLiftWithoutRescaling,
+    this->modulusHenselLift
+  );
+  this->desiredLift = this->desiredLiftWithoutRescaling;
+  this->scaleProductLift =
+  this->desiredLift.scaleNormalizeLeadingMonomial(
+    &MonomialPolynomial::orderDefault()
+  );
+  if (comments != nullptr) {
+    explainer << "\\(\\begin{array}{rcllllll}";
+    bool rescalingNeeded =
+    !this->desiredLiftWithoutRescaling.isEqualTo(this->desiredLift);
+    if (rescalingNeeded) {
+      explainer
+      << "h_{"
+      << stepCount
+      << "}&\\equiv&"
+      << this->desiredLiftWithoutRescaling.toString(&this->format)
+      << "&&&&"
+      << "\\mod "
+      << this->modulusHenselLift
+      << "\\\\";
+    }
+    explainer << "f_{" << stepCount << "}";
+    if (rescalingNeeded) {
+      explainer
+      << "=\\frac{h_{"
+      << stepCount
+      << "}}{"
+      << this->desiredLiftWithoutRescaling.getLeadingCoefficient(nullptr).
+      toString(&this->format)
+      << "}";
+    }
+    explainer
+    << "&\\equiv&"
+    << this->desiredLift.toString(&this->format)
+    << "&&&&"
+    << "\\mod "
+    << this->modulusHenselLift
+    << "\\\\";
+  }
   for (int i = 0; i < this->factorsLifted.size; i ++) {
     ElementZmodP::convertLiftPolynomialModular(
       this->factorsLifted[i],
@@ -684,28 +784,6 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
       this->modulusHenselLift
     );
   }
-  if (comments != nullptr) {
-    *comments
-    << "<hr>"
-    << "Modulus: "
-    << this->modulusHenselLift
-    << ". "
-    << "Lifted factors without correction: \\(";
-    for (int i = 0; i < this->factorsLifted.size; i ++) {
-      *comments << this->factorsLifted[i].toString(&this->format);
-      if (i != this->factorsLifted.size - 1) {
-        *comments << ", ";
-      }
-    }
-    *comments << "\\).";
-  }
-  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
-    this->current, this->desiredLift, this->modulusHenselLift
-  );
-  this->scaleProductLift =
-  this->desiredLift.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
   Polynomial<ElementZmodP> newProduct;
   ElementZmodP one;
   one.makeOne(this->modulusHenselLift);
@@ -715,14 +793,64 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   }
   if (comments != nullptr) {
     *comments
-    << "<br>Lifted product without correction: \\("
+    << "<br>Product without correction: \\("
     << newProduct.toString(&this->format)
     << "\\mod "
     << this->modulusHenselLift
     << "\\)";
   }
-  newProduct -= this->desiredLift;
+  Polynomial<ElementZmodP> correction = this->desiredLift;
+  correction -= newProduct;
+  Polynomial<ElementZmodP> correctionOverPrime;
+  for (int i = 0; i < correction.size(); i ++) {
+    ElementZmodP rescaledCoefficient = this->oneModular.zero();
+    rescaledCoefficient.value = correction.coefficients[i].value / oldModulus;
+    correctionOverPrime.addMonomial(
+      correction.monomials[i], rescaledCoefficient
+    );
+  }
   if (comments != nullptr) {
+    explainer
+    << "g_{"
+    << stepCount
+    << "}&\\equiv&f_{"
+    << stepCount
+    << "}-"
+    << "f_{"
+    << stepCount - 1
+    << "}&="
+    << this->desiredLift.toString(&this->format)
+    << "-";
+    for (int i = 0; i < this->factorsLifted.size; i ++) {
+      explainer
+      << "\\left("
+      << this->factorsLifted[i].toString(&this->format)
+      << "\\right)";
+    }
+    explainer
+    << "&\\equiv&"
+    << correction.toString(&this->format)
+    << "&\\mod "
+    << this->modulusHenselLift
+    << "\\\\";
+    explainer
+    << "\\frac{g_{"
+    << stepCount
+    << "}}{"
+    << oldModulus
+    << "}"
+    << "&\\equiv&"
+    << correctionOverPrime.toString(&this->format)
+    << "&&&&\\mod "
+    << this->oneModular.modulus
+    << "\\\\\n";
+;
+    *comments
+    << "Modulus: "
+    << this->modulusHenselLift
+    << ". "
+    << "Lifted factors without correction: "
+    << this->toLatexLiftedFactors();
     *comments
     << "<br>Desired lift: \\("
     << desiredLift.toString(&this->format)
@@ -730,10 +858,18 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     << this->modulusHenselLift
     << " \\)";
     *comments
-    << "<br>To be corrected: \\("
-    << newProduct.toString(&this->format)
+    << "<br>Desired lift - non-corrected: \\("
+    << correction.toString(&this->format)
     << "\\mod "
     << this->modulusHenselLift
+    << "\\)";
+    *comments
+    << "<br>(Desired lift - non-corrected)/"
+    << oldModulus
+    << ": \\("
+    << correctionOverPrime.toString(&this->format)
+    << "\\mod "
+    << this->oneModular.modulus
     << "\\)";
   }
   Vector<ElementZmodP> coefficientsCorrection;
@@ -741,48 +877,100 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     this->sylvesterMatrixInverted.numberOfColumns,
     this->oneModular.zero()
   );
-  ElementZmodP minusOne;
-  minusOne.makeMinusOne(this->oneModular.modulus);
-  for (int i = 0; i < newProduct.size(); i ++) {
+  for (int i = 0; i < correctionOverPrime.size(); i ++) {
     int index =
     this->sylvesterMatrixInverted.numberOfColumns -
-    newProduct.monomials[i].totalDegreeInt() -
+    correctionOverPrime.monomials[i].totalDegreeInt() -
     1;
-    coefficientsCorrection[index].value = newProduct.coefficients[i].value /
-    oldModulus;
-    coefficientsCorrection[index] *= minusOne;
+    coefficientsCorrection[index] = correctionOverPrime.coefficients[i];
   }
-  if (comments != nullptr) {
-    *comments
-    << "<br>Z-vector: "
-    << coefficientsCorrection.toString(&this->format);
-  }
+  Vector<ElementZmodP> solution;
   this->sylvesterMatrixInverted.actOnVectorColumn(
-    coefficientsCorrection, this->oneModular.zero()
+    coefficientsCorrection, solution, this->oneModular.zero()
   );
   if (comments != nullptr) {
+    Matrix<ElementZmodP> transposedCorrection;
+    Matrix<ElementZmodP> transposedSolution;
+    transposedCorrection.assignVectorColumn(coefficientsCorrection);
+    transposedSolution.assignVectorColumn(solution);
     *comments
-    << "<br>solution vector: "
-    << coefficientsCorrection.toString(&this->format);
+    << "<br>Lift coefficients: \\("
+    << this->sylvesterMatrixInverted.toStringLatex(&this->format)
+    << transposedCorrection.toStringLatex(&this->format)
+    << "="
+    << transposedSolution.toStringLatex(&this->format)
+    << "\\)";
+    explainer
+    << "S^{-1}\\cdot \\frac{g_{"
+    << stepCount
+    << "}}{"
+    << oldModulus
+    << "}&=&"
+    << this->sylvesterMatrixInverted.toStringLatex(&this->format)
+    << transposedCorrection.toStringLatex(&this->format)
+    << "&&\\equiv&"
+    << transposedSolution.toStringLatex(&this->format)
+    << "&\\mod "
+    << this->oneModular.modulus
+    << "\\\\\n";
   }
   int offset = 0;
+  List<Polynomial<ElementZmodP> > allCorrections;
+  List<Polynomial<ElementZmodP> > oldFactors;
   for (int i = 0; i < this->factorsLifted.size; i ++) {
+    if (comments != nullptr) {
+      Polynomial<ElementZmodP> zero;
+      allCorrections.addOnTop(zero);
+      oldFactors.addOnTop(this->factorsLifted[i]);
+    }
     int summandsCurrentFactor = this->factorsLifted[i].totalDegreeInt();
     for (int j = 0; j < summandsCurrentFactor; j ++) {
       ElementZmodP incoming;
       incoming.modulus = this->modulusHenselLift;
       int index = offset + summandsCurrentFactor - 1 - j;
-      incoming.value = coefficientsCorrection[index].value * oldModulus;
-      this->factorsLifted[i].addMonomial(
-        MonomialPolynomial(0, j), incoming
-      );
+      incoming.value = solution[index].value * oldModulus;
+      MonomialPolynomial monomial(0, j);
+      this->factorsLifted[i].addMonomial(monomial, incoming);
+      if (comments != nullptr) {
+        allCorrections[i].addMonomial(monomial, solution[index]);
+      }
     }
     offset += summandsCurrentFactor;
   }
   if (comments != nullptr) {
-    *comments
-    << "<br>Lifted factors, modulus: "
-    << this->factorsLifted.toStringCommaDelimited(&this->format);
+    *comments << "<br>Lifted factors: \\(\\begin{array}{rclll}";
+    for (int i = 0; i < allCorrections.size; i ++) {
+      *comments
+      << this->factorsLifted[i].toString(&this->format)
+      << "&=&\\left("
+      << oldFactors[i].toString(&this->format)
+      << "\\right) &+ "
+      << oldModulus
+      << "\\cdot \\left("
+      << allCorrections[i].toString(&this->format)
+      << "\\right)"
+      << "&"
+      << "\\mod "
+      << this->modulusHenselLift
+      << "\\\\";
+      explainer
+      << this->factorNames[i]
+      << "_{"
+      << stepCount
+      << "}"
+      << "&\\equiv&"
+      << oldFactors[i].toString(&this->format)
+      << "&+"
+      << oldModulus
+      << "\\cdot\\left("
+      << allCorrections[i].toString(&this->format)
+      << "\\right)&\\equiv&"
+      << this->factorsLifted[i].toString(&this->format)
+      << "&\\mod "
+      << this->modulusHenselLift
+      << "\\\\\n";
+    }
+    *comments << "\\end{array}\\)";
   }
   Polynomial<ElementZmodP> productLift;
   productLift.makeConstant(one);
@@ -796,6 +984,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   }
   productLift /= this->scaleProductLift;
   if (comments != nullptr) {
+    explainer << "\\end{array} \\)";
     *comments
     << "<br>Lifted product, corrected: "
     << productLift.toString(&this->format);
@@ -806,7 +995,10 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     *comments
     << "<br>Lifted product, over Z: "
     << negativesIncluded.toString(&this->format)
+    << "<br>"
+    << explainer.str()
     << "<hr>";
+    this->latexExplainers.addOnTop(explainer.str());
   }
 }
 

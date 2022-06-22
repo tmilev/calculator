@@ -1,0 +1,18 @@
+F= ((2^101+3^30) x + 2^99+7^30+3)((2^100+3^31-4) x + 2^100+7^29-1);
+
+M=5^88;
+FactorUnivariatePolynomialOverRationalsDetailed(F);
+
+C= 3213876088517982378070044454832611609600218716222701623311919;
+a=x + 5018955281133163909890971477176569556248445440724618734961815;
+b=x + 27802729904771666433942097294515736463292086400511967042588228;
+
+A=PolynomialModP(C a, M);
+B=PolynomialModP(C b, M);
+
+V=(
+FactorUnivariatePolynomialOverRationals
+ ConvertPolynomialModPToInteger(A))_2;
+W=(FactorUnivariatePolynomialOverRationals ConvertPolynomialModPToInteger(B))_2;
+
+V*W - F

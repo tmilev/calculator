@@ -103,12 +103,11 @@ polynomialDivisionVerboseLexicographicOpposite(
   );
 }
 
-
-template<class Coefficient>
+template <class Coefficient>
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
   Calculator& calculator,
-  List<Polynomial<Coefficient> >& input ,
-ExpressionContext& context,
+  List<Polynomial<Coefficient> >& input,
+  ExpressionContext& context,
   Expression& output,
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
@@ -159,13 +158,14 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
       input, polynomialsRational, context
     )
   ) {
-    return    CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
-    calculator, polynomialsRational, context, output, monomialOrder);
+    return
+    CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
+      calculator, polynomialsRational, context, output, monomialOrder
+    );
   }
   return
   output.assignError(calculator, "Failed to extract list of polynomials. ");
 }
-
 
 bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   Calculator& calculator, const Expression& input, Expression& output

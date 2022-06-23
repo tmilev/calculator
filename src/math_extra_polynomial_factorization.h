@@ -147,6 +147,7 @@ public:
   );
   bool checkInitialization() const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringFull(FormatExpressions* format = nullptr) const;
   std::string toStringImagesOfX() const;
   class Test {
   public:
@@ -164,12 +165,15 @@ class PolynomialModuloPolynomialModuloInteger {
     std::ostream& output,
     const PolynomialModuloPolynomialModuloInteger& input
   ) {
-    output << input.toString();
+    output << input.toStringFull();
     return output;
   }
+  PolynomialUnivariateModularAsModulus* modulusContainer;
 public:
-  PolynomialUnivariateModularAsModulus* modulus;
   PolynomialUnivariateModular value;
+  PolynomialUnivariateModularAsModulus* modulus() {
+    return this->modulusContainer;
+  }
   void makeFromModulusAndValue(
     PolynomialUnivariateModularAsModulus* inputModulus,
     const Polynomial<ElementZmodP>& inputValue
@@ -186,6 +190,7 @@ public:
     this->value = inputValue;
   }
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringFull(FormatExpressions* format = nullptr) const;
   void reduce();
   bool checkInitialization() const;
   class Test {
@@ -212,7 +217,12 @@ class PolynomialModuloPolynomial {
     return output;
   }
 public:
-  Polynomial<Coefficient> modulus;
+  // The modulus of the polynomial.
+  Polynomial<Coefficient> modulusContainer;
+  // Other implementations of PolynomialModuloPolynomial share their modulus
+  // object;
+  // in this class, is a pointer, which is only allowed to point to
+  // modulusContainer.
   Polynomial<Coefficient> value;
   void reduce();
   void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
@@ -240,6 +250,9 @@ public:
   }
   bool checkInitialization() const {
     return true;
+  }
+  Polynomial<Coefficient>* modulus() {
+    return &this->modulusContainer;
   }
 };
 
@@ -269,13 +282,13 @@ template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator*=(
   const PolynomialModuloPolynomial& other
 ) {
-  if (other.modulus != this->modulus) {
+  if (other.modulusContainer != this->modulusContainer) {
     global.fatal
     << "Not allowed to multiply quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
-    << this->modulus
+    << this->modulusContainer
     << ", "
-    << other.modulus
+    << other.modulusContainer
     << global.fatal;
   }
   this->value *= other.value;
@@ -286,13 +299,13 @@ template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator+=(
   const PolynomialModuloPolynomial& other
 ) {
-  if (other.modulus != this->modulus) {
+  if (other.modulusContainer != this->modulusContainer) {
     global.fatal
     << "Not allowed to add quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
-    << this->modulus
+    << this->modulusContainer
     << ", "
-    << other.modulus
+    << other.modulusContainer
     << global.fatal;
   }
   this->value += other.value;
@@ -319,13 +332,13 @@ template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator-=(
   const PolynomialModuloPolynomial& other
 ) {
-  if (other.modulus != this->modulus) {
+  if (other.modulusContainer != this->modulusContainer) {
     global.fatal
     << "Not allowed to subtract quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
-    << this->modulus
+    << this->modulusContainer
     << ", "
-    << other.modulus
+    << other.modulusContainer
     << global.fatal;
   }
   this->value -= other.value;
@@ -336,14 +349,16 @@ template <class Coefficient>
 unsigned int PolynomialModuloPolynomial<Coefficient>::hashFunction() const {
   return
   this->value.hashFunction() * HashConstants::constant0 +
-  this->modulus.hashFunction() * HashConstants::constant1;
+  this->modulusContainer.hashFunction() * HashConstants::constant1;
 }
 
 template <class Coefficient>
 bool PolynomialModuloPolynomial<Coefficient>::operator==(
   const PolynomialModuloPolynomial<Coefficient>& other
 ) const {
-  return this->modulus == other.modulus && this->value == other.value;
+  return
+  this->modulusContainer == other.modulusContainer &&
+  this->value == other.value;
 }
 
 template <class Coefficient>
@@ -361,7 +376,7 @@ std::string PolynomialModuloPolynomial<Coefficient>::toString(
   out
   << this->value.toString(format)
   << "(mod ("
-  << this->modulus.toString(format)
+  << this->modulusContainer.toString(format)
   << "))";
   return out.str();
 }
@@ -370,8 +385,9 @@ template <class Coefficient>
 PolynomialModuloPolynomial<Coefficient> PolynomialModuloPolynomial<Coefficient>
 ::one() {
   PolynomialModuloPolynomial<Coefficient> result;
-  result.modulus = this->modulus;
-  result.value.makeConstant(this->modulus.coefficients[0].one());
+  result.value.makeConstant(
+    this->modulusContainer.coefficients[0].one()
+  );
   return result;
 }
 
@@ -384,7 +400,7 @@ template <class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::reduce() {
   Polynomial<Coefficient> unusedQuotient;
   this->value.divideBy(
-    this->modulus,
+    this->modulusContainer,
     unusedQuotient,
     this->value,
     &MonomialPolynomial::orderDefault()
@@ -399,7 +415,7 @@ void PolynomialModuloPolynomial<Coefficient>::makeFromModulusAndValue(
   if (inputModulus == nullptr) {
     global.fatal << "Null modulus not allowed. " << global.fatal;
   }
-  this->modulus = *inputModulus;
+  this->modulusContainer = *inputModulus;
   this->value = inputValue;
 }
 

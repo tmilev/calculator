@@ -1050,7 +1050,7 @@ addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInte
   PolynomialModuloPolynomial<ElementZmodP> right =
   inputContextsMerged[2].getValue<PolynomialModuloPolynomial<ElementZmodP> >();
   if (!left.isEqualToZero() && !right.isEqualToZero()) {
-    if (left.modulus != right.modulus) {
+    if (left.modulusContainer != right.modulusContainer) {
       return
       calculator
       << "Attempt to add polynomial quotients with different moduli. ";
@@ -1260,7 +1260,7 @@ multiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(
   inputContextsMerged[1].getValue<PolynomialModuloPolynomial<ElementZmodP> >();
   PolynomialModuloPolynomial<ElementZmodP> right =
   inputContextsMerged[2].getValue<PolynomialModuloPolynomial<ElementZmodP> >();
-  if (left.modulus != right.modulus) {
+  if (left.modulusContainer != right.modulusContainer) {
     return
     calculator
     << "Attempt to multiply polynomial quotients with different moduli. ";
@@ -3873,7 +3873,7 @@ bool CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP(
     << ".";
   }
   PolynomialModuloPolynomial<ElementZmodP> result;
-  result.modulus = right.content;
+  result.modulusContainer = right.content;
   result.value = left.content;
   result.reduce();
   return output.assignValueWithContext(calculator, result, right.context);

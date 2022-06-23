@@ -2496,6 +2496,8 @@ bool PolynomialFactorizationCantorZassenhaus<
       << i + 1
       << "} - 1}{2}} = "
       << this->one.toStringPolynomial(converted, &this->output->format)
+      << "\\mod "
+      << currentPolynomial.modulus()->toString(&this->output->format)
       << "\\)";
     }
     if (

@@ -2783,17 +2783,17 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
   ElementZmodP sample;
   formatLocal.flagSuppressModP = true;
-  if (!element.modulus.isEqualToZero()) {
-    sample = element.modulus.coefficients[0];
+  if (!element.modulusContainer.isEqualToZero()) {
+    sample = element.modulusContainer.coefficients[0];
     out
     << sample.toStringPolynomial(element.value, &formatLocal)
     << " mod "
-    << sample.toStringPolynomial(element.modulus, &formatLocal);
+    << sample.toStringPolynomial(element.modulusContainer, &formatLocal);
   } else {
     out
     << element.value.toString(&formatLocal)
     << " mod "
-    << element.modulus.toString(&formatLocal);
+    << element.modulusContainer.toString(&formatLocal);
   }
   return true;
 }

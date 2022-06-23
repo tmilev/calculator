@@ -1376,9 +1376,9 @@ const {
   std::stringstream out;
   out
   << converter.toString(format)
-  << " (mod "
+  << " \\mod "
   << this->modulusData->modulus
-  << ")";
+  << "";
   return out.str();
 }
 
@@ -1513,10 +1513,16 @@ void PolynomialUnivariateModularAsModulus::computeFromModulus() {
   }
 }
 
-std::string PolynomialUnivariateModularAsModulus::toString(
+std::string PolynomialUnivariateModularAsModulus::toStringFull(
   FormatExpressions* format
 ) const {
   return this->modulus.toString(format) + this->toStringImagesOfX();
+}
+
+std::string PolynomialUnivariateModularAsModulus::toString(
+  FormatExpressions* format
+) const {
+  return this->modulus.toString(format);
 }
 
 std::string PolynomialUnivariateModularAsModulus::toStringImagesOfX() const {
@@ -1584,8 +1590,8 @@ void PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue(
     "PolynomialModuloPolynomialModuloInteger::makeFromModulusAndValue"
   );
   inputModulus->checkInitialization();
-  this->modulus = inputModulus;
-  this->value.modulusData = this->modulus->modulus.modulusData;
+  this->modulusContainer = inputModulus;
+  this->value.modulusData = this->modulusContainer->modulus.modulusData;
   this->value = inputValue;
   this->reduce();
   this->checkInitialization();
@@ -1621,16 +1627,16 @@ void PolynomialModuloPolynomialModuloInteger::operator*=(
 }
 
 void PolynomialModuloPolynomialModuloInteger::reduce() {
-  int totalModulusDegree = this->modulus->modulus.totalDegreeInt();
+  int totalModulusDegree = this->modulus()->modulus.totalDegreeInt();
   if (this->value.totalDegreeInt() >= totalModulusDegree * 2) {
     global.fatal
     << "Reduction of polynomial of too-large degree: "
     << this->value.toString()
     << " mod: "
-    << this->modulus->modulus.toString()
+    << this->modulus()->modulus.toString()
     << global.fatal;
   }
-  List<List<int> >& reductions = this->modulus->imagesPowersOfX;
+  List<List<int> >& reductions = this->modulus()->imagesPowersOfX;
   for (
     int i = totalModulusDegree; i < this->value.coefficients.size; i ++
   ) {
@@ -1649,12 +1655,12 @@ bool PolynomialModuloPolynomialModuloInteger::isEqualToZero() const {
 }
 
 bool PolynomialModuloPolynomialModuloInteger::checkInitialization() const {
-  if (this->modulus == nullptr) {
+  if (this->modulusContainer == nullptr) {
     global.fatal
     << "Uninitialized PolynomialModuloPolynomialModuloInteger. "
     << global.fatal;
   }
-  this->modulus->checkInitialization();
+  this->modulusContainer->checkInitialization();
   this->value.checkInitialization();
   return true;
 }
@@ -1662,12 +1668,17 @@ bool PolynomialModuloPolynomialModuloInteger::checkInitialization() const {
 std::string PolynomialModuloPolynomialModuloInteger::toString(
   FormatExpressions* format
 ) const {
-  (void) format;
+  return this->toStringFull(format);
+}
+
+std::string PolynomialModuloPolynomialModuloInteger::toStringFull(
+  FormatExpressions* format
+) const {
   std::stringstream out;
   out
-  << this->value.toString()
-  << " mod ("
-  << this->modulus->toString()
+  << this->value.toString(format)
+  << " \\mod ("
+  << this->modulusContainer->toString(format)
   << ")";
   return out.str();
 }

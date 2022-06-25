@@ -20,7 +20,8 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<Polynomial<AlgebraicNumber> >& output
+  WithContext<Polynomial<AlgebraicNumber> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   STACK_TRACE("CalculatorConversions::convertWithoutComputation");
   (void) calculator;
@@ -45,6 +46,10 @@ bool CalculatorConversions::convertWithoutComputation<
     output.context = polynomialRational.context;
     return true;
   }
+  if (outputConversionByOtherMeansNotDesired!= nullptr)
+{  if (input.isOfType<Polynomial<ElementZmodP>>()){
+ *outputConversionByOtherMeansNotDesired   =true;
+  }}
   return input.isOfTypeWithContext(&output);
 }
 
@@ -52,7 +57,8 @@ template < >
 bool CalculatorConversions::convertWithoutComputation<Polynomial<Rational> >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<Polynomial<Rational> >& output
+  WithContext<Polynomial<Rational> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   STACK_TRACE("CalculatorConversions::convertWithoutComputation");
   (void) calculator;
@@ -74,6 +80,11 @@ bool CalculatorConversions::convertWithoutComputation<Polynomial<Rational> >(
     // An element of a Weyl algebra that is not a polynomial.
     return false;
   }
+  if (outputConversionByOtherMeansNotDesired!= nullptr){
+  if (input.isOfType<Polynomial<ElementZmodP>> () || input.isOfType<Polynomial<ElementZmodP>>()){
+   *outputConversionByOtherMeansNotDesired = true;
+  }
+  }
   return input.isOfTypeWithContext(&output);
 }
 
@@ -83,9 +94,11 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<Polynomial<ElementZmodP> >& output
+  WithContext<Polynomial<ElementZmodP> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   (void) calculator;
+ (void) outputConversionByOtherMeansNotDesired;
   return input.isOfTypeWithContext(&output);
 }
 
@@ -95,9 +108,11 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<PolynomialModuloPolynomial<ElementZmodP> >& output
+  WithContext<PolynomialModuloPolynomial<ElementZmodP> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   (void) calculator;
+  (void)outputConversionByOtherMeansNotDesired;
   return input.isOfTypeWithContext(&output);
 }
 
@@ -107,10 +122,12 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<RationalFraction<Rational> >& output
+  WithContext<RationalFraction<Rational> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   STACK_TRACE("CalculatorConversions::convertWithoutComputation");
   (void) calculator;
+  (void)outputConversionByOtherMeansNotDesired;
   input.checkInitialization();
   WithContext<Rational> rational;
   if (input.isOfTypeWithContext(&rational)) {
@@ -145,12 +162,14 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<RationalFraction<AlgebraicNumber> >& output
+  WithContext<RationalFraction<AlgebraicNumber> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   STACK_TRACE(
     "CalculatorConversions::"
     "convertWithoutComputation_RationalFraction_AlgebraicNumber"
-  );
+  );  (void)outputConversionByOtherMeansNotDesired;
+
   input.checkInitialization();
   AlgebraicClosureRationals* closure =
   &calculator.objectContainer.algebraicClosure;
@@ -185,13 +204,15 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<ElementWeylAlgebra<Rational> >& output
+  WithContext<ElementWeylAlgebra<Rational> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   STACK_TRACE(
     "CalculatorConversions::"
     "convertWithoutComputation_ElementWeylAlgebra_Rational"
   );
-  (void) calculator;
+  (void) calculator;  (void)outputConversionByOtherMeansNotDesired;
+
   input.checkInitialization();
   WithContext<Rational> rational;
   if (input.isOfTypeWithContext(&rational)) {
@@ -217,9 +238,11 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<Weight<Polynomial<Rational> > >& output
+  WithContext<Weight<Polynomial<Rational> > >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
-  (void) calculator;
+  (void) calculator;  (void)outputConversionByOtherMeansNotDesired;
+
   input.checkInitialization();
   return input.isOfTypeWithContext(&output);
 }
@@ -230,12 +253,14 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >& output
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   STACK_TRACE(
     "CalculatorConversions::"
     "convertWithoutComputation_ElementUniversalEnveloping_RationalFraction_Rational"
-  );
+  );  (void)outputConversionByOtherMeansNotDesired;
+
   SemisimpleLieAlgebra* owner =
   input.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
   if (owner == nullptr) {
@@ -261,12 +286,14 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& output
+  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
   STACK_TRACE(
     "CalculatorConversions::"
     "convertWithoutComputation_ElementSemisimpleLieAlgebra_AlgebraicNumber"
-  );
+  );  (void)outputConversionByOtherMeansNotDesired;
+
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
   element;
   if (
@@ -294,9 +321,11 @@ bool CalculatorConversions::convertWithoutComputation<
   const Expression& input,
   WithContext<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
-  >& output
+  >& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
-  (void) calculator;
+  (void) calculator;  (void)outputConversionByOtherMeansNotDesired;
+
   return input.isOfTypeWithContext(&output);
 }
 
@@ -304,9 +333,11 @@ template < >
 bool CalculatorConversions::convertWithoutComputation<Rational>(
   Calculator& calculator,
   const Expression& input,
-  WithContext<Rational>& output
+  WithContext<Rational>& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
-  (void) calculator;
+  (void) calculator;  (void)outputConversionByOtherMeansNotDesired;
+
   return input.isOfTypeWithContext(&output);
 }
 
@@ -314,9 +345,11 @@ template < >
 bool CalculatorConversions::convertWithoutComputation<ElementZmodP>(
   Calculator& calculator,
   const Expression& input,
-  WithContext<ElementZmodP>& output
+  WithContext<ElementZmodP>& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
-  (void) calculator;
+  (void) calculator;  (void)outputConversionByOtherMeansNotDesired;
+
   return input.isOfTypeWithContext(&output);
 }
 
@@ -324,9 +357,11 @@ template < >
 bool CalculatorConversions::convertWithoutComputation<AlgebraicNumber>(
   Calculator& calculator,
   const Expression& input,
-  WithContext<AlgebraicNumber>& output
+  WithContext<AlgebraicNumber>& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
-  STACK_TRACE("CalculatorConversions::convertWithoutComputation");
+  STACK_TRACE("CalculatorConversions::convertWithoutComputation");  (void)outputConversionByOtherMeansNotDesired;
+
   WithContext<Rational> rational;
   if (input.isOfTypeWithContext(&rational)) {
     output.context = rational.context;
@@ -341,9 +376,11 @@ template < >
 bool CalculatorConversions::convertWithoutComputation<double>(
   Calculator& calculator,
   const Expression& input,
-  WithContext<double>& output
+  WithContext<double>& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
-  (void) calculator;
+  (void) calculator;  (void)outputConversionByOtherMeansNotDesired;
+
   return input.isOfTypeWithContext(&output);
 }
 
@@ -351,16 +388,18 @@ template < >
 bool CalculatorConversions::convertWithoutComputation<std::string>(
   Calculator& calculator,
   const Expression& input,
-  WithContext<std::string>& output
+  WithContext<std::string>& output,
+bool* outputConversionByOtherMeansNotDesired
 ) {
-  (void) calculator;
+  (void) calculator;  (void)outputConversionByOtherMeansNotDesired;
+
   return input.isOfTypeWithContext(&output);
 }
 
 // end Expression::convertWithoutComputation specializations.
 // start Expression::convert specializations.
 template < >
-bool CalculatorConversions::convert(
+bool CalculatorConversions::convert<Polynomial<Rational>>(
   Calculator& calculator,
   const Expression& input,
   WithContext<Polynomial<Rational> >& output
@@ -372,7 +411,18 @@ bool CalculatorConversions::convert(
 }
 
 template < >
-bool CalculatorConversions::convert(
+bool CalculatorConversions::convert<Polynomial<ElementZmodP>>(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<ElementZmodP> >& output
+) {
+  return CalculatorConversions::convertWithoutComputation(calculator, input, output, nullptr);
+}
+
+
+
+template < >
+bool CalculatorConversions::convert<Rational>(
   Calculator& calculator,
   const Expression& input,
   WithContext<Rational>& output
@@ -382,7 +432,7 @@ bool CalculatorConversions::convert(
 }
 
 template < >
-bool CalculatorConversions::convert(
+bool CalculatorConversions::convert<AlgebraicNumber>(
   Calculator& calculator,
   const Expression& input,
   WithContext<AlgebraicNumber>& output
@@ -392,7 +442,7 @@ bool CalculatorConversions::convert(
 }
 
 template < >
-bool CalculatorConversions::convert(
+bool CalculatorConversions::convert<double>(
   Calculator& calculator,
   const Expression& input,
   WithContext<double>& output

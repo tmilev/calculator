@@ -85,7 +85,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
     variables.addOnTop(contextStart.getVariable(i));
   }
   variables.quickSortAscending();
-  PolynomialSubstitution<AlgebraicNumber> substitution;
+  /*PolynomialSubstitution<AlgebraicNumber> substitution;
   substitution.setSize(numberOfVariables);
   const AlgebraicNumber& one = this->objectContainer.algebraicClosure.one();
   for (int i = 0; i < substitution.size; i ++) {
@@ -95,7 +95,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   for (int i = 0; i < output.size; i ++) {
     Polynomial<AlgebraicNumber>& currentP = output[i];
     currentP.substitution(substitution, one);
-  }
+  }*/
   return outputContext.setVariables(variables);
 }
 

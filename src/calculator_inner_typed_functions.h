@@ -603,12 +603,16 @@ bool CalculatorConversions::functionPolynomial(
     << " exceeded while trying to evaluate polynomial "
     << "expression (i.e. your polynomial expression is too large).";
   }
+  bool noConversionDesired = false;
   if (
     CalculatorConversions::convertWithoutComputation(
-      calculator, input, output
+      calculator, input, output, &noConversionDesired
     )
   ) {
     return true;
+  }
+  if (noConversionDesired){
+    return false;
   }
   WithContext<Polynomial<Coefficient> > converted, candidate;
   if (

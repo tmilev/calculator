@@ -3750,11 +3750,22 @@ public:
     const Expression& input,
     WithContext<Type>& output
   );
+  // Determines whether the input can be converted to the
+  // output type using internal C++ conversions (rather than
+  // explicit Expression computations).
+  // If conversion between the two types is not desired
+  // by either C++ or Expression computations, this
+  // will be recorded in
+  // outputConversionByOtherMeansNotDesired (if provided).
+  // Example when a conversion is not desired:
+  // conversion from polynomial with modular coefficients and
+  // a polynomial with algebraic coefficients.
   template <class Type>
   static bool convertWithoutComputation(
     Calculator& calculator,
     const Expression& input,
-    WithContext<Type>& output
+    WithContext<Type>& output,
+    bool* outputConversionByOtherMeansNotDesired = nullptr
   );
   template <class Type>
   static bool functionGetMatrixNoComputation(

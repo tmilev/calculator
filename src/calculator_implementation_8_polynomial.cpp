@@ -111,7 +111,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
   Expression& output,
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
-  GroebnerBasisComputation<AlgebraicNumber> computation;
+  GroebnerBasisComputation<Coefficient> computation;
   context.getFormat(computation.format);
   computation.format.flagUseLatex = true;
   computation.format.flagUseFrac = true;
@@ -151,16 +151,28 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
   STACK_TRACE("CalculatorFunctionsPolynomial::polynomialDivisionVerbose");
-  ExpressionContext context(calculator);
+  ExpressionContext contextAlgebraic(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (
     calculator.getListPolynomialVariableLabelsLexicographic(
-      input, polynomialsRational, context
+      input, polynomialsRational, contextAlgebraic
     )
   ) {
     return
     CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
-      calculator, polynomialsRational, context, output, monomialOrder
+      calculator, polynomialsRational, contextAlgebraic, output, monomialOrder
+    );
+  }
+  Vector<Polynomial<ElementZmodP> > polynomialsModP;
+  ExpressionContext contextModular(calculator);
+  if (
+    calculator.getVectorFromFunctionArguments(
+      input, polynomialsModP, &contextModular
+    )
+  ) {
+    return
+    CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
+      calculator, polynomialsModP, contextModular, output, monomialOrder
     );
   }
   return
@@ -236,7 +248,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
 bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::factorPolynomialModPrime");
+  STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialModPrime");
   if (input.size() != 2 && input.size() != 3) {
     return
     calculator
@@ -323,7 +335,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
 bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::polynomialDivisionQuotient");
+  STACK_TRACE("CalculatorFunctionsPolynomial::polynomialDivisionQuotient");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (

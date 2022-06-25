@@ -210,10 +210,9 @@ public:
 template <class Coefficient>
 class PolynomialModuloPolynomial {
   friend std::ostream& operator<<(
-    std::ostream& output, const PolynomialModuloPolynomial& unused
+    std::ostream& output, const PolynomialModuloPolynomial& input
   ) {
-    (void) unused;
-    output << "A polynomial modulo polynomial.";
+    output << input.toString();
     return output;
   }
 public:
@@ -388,6 +387,7 @@ PolynomialModuloPolynomial<Coefficient> PolynomialModuloPolynomial<Coefficient>
   result.value.makeConstant(
     this->modulusContainer.coefficients[0].one()
   );
+  result.modulusContainer = this->modulusContainer;
   return result;
 }
 

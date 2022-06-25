@@ -5077,9 +5077,9 @@ void Calculator::initializeFunctionsStandard() {
     "a^(7^4 );\n"
     "a^(7^5 );\n"
     "r = a^( (7^6 - 1) /2);\n"
-    "s = PolynomialModP(Value Value r - 1, 7);\n"
-    "t = PolynomialModP(Value Value r, 7);\n"
-    "u = PolynomialModP(Value Value r + 1, 7);\n"
+    "s = PolynomialModP( r - 1, 7);\n"
+    "t = PolynomialModP(r, 7);\n"
+    "u = PolynomialModP(r + 1, 7);\n"
     "GCDPoly(s, modulo);\n"
     "GCDPoly(t, modulo);\n"
     "GCDPoly(u, modulo);",

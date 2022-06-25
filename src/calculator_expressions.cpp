@@ -2722,11 +2722,13 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
   formatLocal.flagUseFrac = true;
   if (!polynomial.isEqualToZero()) {
     out
+    <<"PolynomialModP{}("
     << polynomial.coefficients[0].toStringPolynomial(
       polynomial, &formatLocal
-    );
+    )
+    << ", " << polynomial.coefficients[0].modulus << ")";
   } else {
-    out << "PolynomialModP(0)";
+    out << "c0)";
   }
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
@@ -2786,9 +2788,16 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   if (!element.modulusContainer.isEqualToZero()) {
     sample = element.modulusContainer.coefficients[0];
     out
+    << "PolynomialModP{}("
     << sample.toStringPolynomial(element.value, &formatLocal)
-    << " mod "
-    << sample.toStringPolynomial(element.modulusContainer, &formatLocal);
+    << ", "
+    << sample.modulus << ")"
+    << " \\mod "
+    << "PolynomialModP{}("
+    << sample.toStringPolynomial(element.modulusContainer, &formatLocal)
+    << ", "
+    << sample.modulus << ")"
+    ;
   } else {
     out
     << element.value.toString(&formatLocal)

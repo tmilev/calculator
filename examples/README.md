@@ -1673,7 +1673,7 @@ a^20
 Raises polynomial modulo an integer to a small integer power. 
 
 *^* [PowerPolynomialModPModuloPolynomialModPBySmallInteger] {CalculatorFunctionsBinaryOps::powerPolynomialModPModuloPolynomialModPBySmallInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22p%20%3d%20x%5e2%20%2b%203x%20%2b%201%3b%5cnq%20%3d%20x%5e3%20%2bx%5e2%20%2b%203%20x%20%2b%205%3b%5cnmodulusComposite%20%3d%20p%20%2a%20q%3b%5cnmodulo%20%3d%20PolynomialModP%28modulusComposite%2c%207%29%3b%5cna%20%3d%20PolynomialModP%7b%7d%28x%2b2%2c%207%29%20mod%20modulo%3b%5cna%5e%287%20%20%29%3b%5cna%5e%2849%29%3b%5cna%5e%287%5e3%20%29%3b%5cna%5e%287%5e4%20%29%3b%5cna%5e%287%5e5%20%29%3b%5cnr%20%3d%20a%5e%28%20%287%5e6%20-%201%29%20%2f2%29%3b%5cns%20%3d%20PolynomialModP%28Value%20Value%20r%20-%201%2c%207%29%3b%5cnt%20%3d%20PolynomialModP%28Value%20Value%20r%2c%207%29%3b%5cnu%20%3d%20PolynomialModP%28Value%20Value%20r%20%2b%201%2c%207%29%3b%5cnGCDPoly%28s%2c%20modulo%29%3b%5cnGCDPoly%28t%2c%20modulo%29%3b%5cnGCDPoly%28u%2c%20modulo%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22p%20%3d%20x%5e2%20%2b%203x%20%2b%201%3b%5cnq%20%3d%20x%5e3%20%2bx%5e2%20%2b%203%20x%20%2b%205%3b%5cnmodulusComposite%20%3d%20p%20%2a%20q%3b%5cnmodulo%20%3d%20PolynomialModP%28modulusComposite%2c%207%29%3b%5cna%20%3d%20PolynomialModP%7b%7d%28x%2b2%2c%207%29%20mod%20modulo%3b%5cna%5e%287%20%20%29%3b%5cna%5e%2849%29%3b%5cna%5e%287%5e3%20%29%3b%5cna%5e%287%5e4%20%29%3b%5cna%5e%287%5e5%20%29%3b%5cnr%20%3d%20a%5e%28%20%287%5e6%20-%201%29%20%2f2%29%3b%5cns%20%3d%20PolynomialModP%28%20r%20-%201%2c%207%29%3b%5cnt%20%3d%20PolynomialModP%28r%2c%207%29%3b%5cnu%20%3d%20PolynomialModP%28r%20%2b%201%2c%207%29%3b%5cnGCDPoly%28s%2c%20modulo%29%3b%5cnGCDPoly%28t%2c%20modulo%29%3b%5cnGCDPoly%28u%2c%20modulo%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 p = x^2 + 3x + 1;
 q = x^3 +x^2 + 3 x + 5;
@@ -1686,9 +1686,9 @@ a^(7^3 );
 a^(7^4 );
 a^(7^5 );
 r = a^( (7^6 - 1) /2);
-s = PolynomialModP(Value Value r - 1, 7);
-t = PolynomialModP(Value Value r, 7);
-u = PolynomialModP(Value Value r + 1, 7);
+s = PolynomialModP( r - 1, 7);
+t = PolynomialModP(r, 7);
+u = PolynomialModP(r + 1, 7);
 GCDPoly(s, modulo);
 GCDPoly(t, modulo);
 GCDPoly(u, modulo);
@@ -3054,11 +3054,12 @@ PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1);
 ```
 String that presents the division of a polynomial by a set of polynomials. Uses the graded reverse lexicographic order. More precisely, compares monomials by total degree. Ties are broken by comparing powers right to left. First **smaller** power on the right is declared the winner ('larger').For example,  x^2 y^3 > x y^4, x^11 > y^10. 
 
-*PolyDivStringLex* [PolyDivStringLex] {CalculatorFunctionsPolynomial::polynomialDivisionVerboseLex}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringLex%7b%7d%28x%5e7%20%2b%206%20x%20y%20%2b%205x%20y%5e8%20%2b%20y%5e5%2c%20x%5e2%20%2b%202%2c%20y%5e3%20-%201%29%3b%5cnPolyDivStringLex%7b%7d%28x%5e7%20%2b%20%5c%5csqrt%7b2%7d%20x%20%2b%201%2c%20%5c%5csqrt%7b3%7dx%5e2%20%2b%202x%20%2b%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PolyDivStringLex* [PolyDivStringLex] {CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringLex%7b%7d%28x%5e7%20%2b%206%20x%20y%20%2b%205x%20y%5e8%20%2b%20y%5e5%2c%20x%5e2%20%2b%202%2c%20y%5e3%20-%201%29%3b%5cnPolyDivStringLex%7b%7d%28x%5e7%20%2b%20%5c%5csqrt%7b2%7d%20x%20%2b%201%2c%20%5c%5csqrt%7b3%7dx%5e2%20%2b%202x%20%2b%201%29%3b%5cnPolyDivStringLex%7b%7d%28PolynomialModP%28x%5e5%2b2x%5e3%2bx%5e2%2b2%2c7%29%2cPolynomialModP%28x%5e2%2c%207%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);
-PolyDivStringLex{}(x^7 + \sqrt{2} x + 1, \sqrt{3}x^2 + 2x + 1)
+PolyDivStringLex{}(x^7 + \sqrt{2} x + 1, \sqrt{3}x^2 + 2x + 1);
+PolyDivStringLex{}(PolynomialModP(x^5+2x^3+x^2+2,7),PolynomialModP(x^2, 7));
 ```
 Prints a string representing division of a polynomial by a set of polynomials using the lexicographic order on the monomial exponents. For example, x^2 y^4 > x y^1000 > x y^2.Please do note that the lexicographic order is not related to the lexicographic order on the words 'expansions' (x^2y^3->xxyyy) of the monomials. 
 
@@ -3694,6 +3695,15 @@ FactorUnivariatePolynomialOverRationals{}(182903 x^{11}+101813 x^{10}-68963 x^{9
 
 ```
 Factors a one variable polynomial over the rationals using finite field methods. At the time of writing, the method used is probabilistic but with high chance of success, and pretty fast. 
+
+*FactorUnivariatePolynomialOverRationalsDetailed* [FactorUnivariatePolynomialOverRationalsDetailed] {CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsDetailed}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%5cnFactorUnivariatePolynomialOverRationalsDetailed%7b%7d%28325x%5e%7b2%7d-38x-312%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+%HideLHS
+FactorUnivariatePolynomialOverRationalsDetailed{}(325x^{2}-38x-312);
+
+```
+Same as FactorUnivariatePolynomialOverRationals but prints out a summary of internal computations.
 
 *FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields* [FactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields] {CalculatorFunctionsPolynomial::factorPolynomialKroneckerThenFiniteFields}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%5cnFactorUnivariatePolynomialOverRationalsKroneckerThenFiniteFields%7b%7d%28%5cn169%20x%5e%7b11%7d-312%20x%5e%7b10%7d%2b430%20x%5e%7b9%7d-524%20x%5e%7b8%7d%2b595%20x%5e%7b7%7d-644%20x%5e%7b6%7d%2b581%20x%5e%7b5%7d-440%20x%5e%7b4%7d%2b318%20x%5e%7b3%7d-214%20x%5e%7b2%7d%2b127%20x-56%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4589,6 +4599,15 @@ Transforms to a reduced Groebner basis relative to the graded lexicographic orde
 ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);ElementEllipticCurveNormalForm(y^2 = x^3 - x + 1, x = 3, y = 5)
 ```
 Makes an elliptic curve from a cubic in normal form, generator letter and base point.
+
+*ConvertPolynomialModPToInteger* [ConvertPolynomialModPToInteger] {CalculatorFunctions::convertPolynomialModulotIntegerToInteger}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20100x-55%3b%5cnB%20%3d%20PolynomialModP%28A%2c%20101%29%3b%5cnConvertPolynomialModPToInteger%20B%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+A = 100x-55;
+B = PolynomialModP(A, 101);
+ConvertPolynomialModPToInteger B
+```
+Converts polynomial  
 
 *VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3bVectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

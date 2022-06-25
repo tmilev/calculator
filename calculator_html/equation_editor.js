@@ -8267,7 +8267,7 @@ class MathNode {
     let content = this.contentIfAtomic();
     if (this.type.type === knownTypes.atomImmutable.type) {
       if (content in latexConstants.latexBackslashOperators) {
-        return new LatexWithAnnotation(`\\${content}`);
+        return new LatexWithAnnotation(`\\${content} `);
       }
     }
     let result = latexConstants.convertUtf16ToLatex(

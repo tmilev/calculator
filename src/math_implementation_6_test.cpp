@@ -128,24 +128,26 @@ bool PolynomialUnivariateModular::Test::all() {
 
 bool PolynomialUnivariateModular::Test::greatestCommonDivisor() {
   PolynomialUnivariateModular::Test::testOneGreatestCommonDivisor(
-    5, "x^2-1", "x^3-1", "x +4 (mod 5)"
+    5, "x^2-1", "x^3-1", "x +4 \\mod 5"
   );
   return true;
 }
 
 bool PolynomialUnivariateModular::Test::division() {
+  STACK_TRACE("PolynomialUnivariateModular::Test::division");
   PolynomialUnivariateModular::Test::testOneDivision(
-    5, "x^3-1", "x-1", "x^2+x +1 (mod 5)", "0 (mod 5)"
+    5, "x^3-1", "x-1", "x^2+x +1 \\mod 5", "0 \\mod 5"
   );
   PolynomialUnivariateModular::Test::testOneDivision(
-    5, "x^3-1", "x", "x^2 (mod 5)", "4 (mod 5)"
+    5, "x^3-1", "x", "x^2 \\mod 5", "4 \\mod 5"
   );
   return true;
 }
 
 bool PolynomialUnivariateModular::Test::derivative() {
+  STACK_TRACE("PolynomialUnivariateModular::Test::derivative");
   PolynomialUnivariateModular::Test::testOneDerivative(
-    3, "x^2-1", "2x  (mod 3)"
+    3, "x^2-1", "2x  \\mod 3"
   );
   return true;
 }
@@ -190,6 +192,7 @@ bool PolynomialUnivariateModular::Test::testOneDivision(
   const std::string& expectedQuotient,
   const std::string& expectedRemainder
 ) {
+  STACK_TRACE("PolynomialUnivariateModular::Test::testOneDivision");
   IntegerModulusSmall modulus;
   modulus.initializeModulusData(modulusData);
   PolynomialUnivariateModular dividendPolynomial =
@@ -226,6 +229,7 @@ bool PolynomialUnivariateModular::Test::testOneDerivative(
   const std::string& toBeDifferentiated,
   const std::string& expected
 ) {
+  STACK_TRACE("PolynomialUnivariateModular::Test::testOneDerivative");
   IntegerModulusSmall modulus;
   modulus.initializeModulusData(modulusData);
   PolynomialUnivariateModular input =
@@ -330,22 +334,23 @@ bool PolynomialModuloPolynomialModuloInteger::Test::all() {
 }
 
 bool PolynomialModuloPolynomialModuloInteger::Test::product() {
+  STACK_TRACE("PolynomialModuloPolynomialModuloInteger::Test::product");
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
-    5, "x^2", "x^3", "x^2+2x+3", "4x +3 (mod 5)"
+    5, "x^2", "x^3", "x^2+2x+3", "4x +3 \\mod 5"
   );
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
     5,
     "x +4",
     "x +4",
     "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1",
-    "x^2+3x +1 (mod 5)"
+    "x^2+3x +1 \\mod 5"
   );
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
     5,
     "x^3",
     "x^3",
     "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1",
-    "2x^4+3x^3+3x^2+2x +4 (mod 5)"
+    "2x^4+3x^3+3x^2+2x +4 \\mod 5"
   );
   return true;
 }
@@ -357,6 +362,7 @@ bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
   const std::string& modulusPolynomial,
   const std::string& expected
 ) {
+  STACK_TRACE("PolynomialModuloPolynomialModuloInteger::Test::testOneProduct");
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   Polynomial<ElementZmodP> leftPolynomial =
@@ -537,15 +543,17 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialUnivariateModular,
   PolynomialUnivariateModularAsModulus
 >::Test::constructStartingPolynomial() {
-  Test::testOneStartingPolynomial(3, 0, 2, "x  (mod 3)");
-  Test::testOneStartingPolynomial(3, 1, 2, "x +1 (mod 3)");
-  Test::testOneStartingPolynomial(3, 2, 2, "x +2 (mod 3)");
-  Test::testOneStartingPolynomial(3, 2, 3, "x +2 (mod 3)");
-  Test::testOneStartingPolynomial(3, 3, 3, "x^2+1 (mod 3)");
-  Test::testOneStartingPolynomial(3, 4, 3, "x^2+2 (mod 3)");
-  Test::testOneStartingPolynomial(3, 5, 3, "x +1 (mod 3)");
-  Test::testOneStartingPolynomial(3, 3, 2, "x +1 (mod 3)");
-  Test::testOneStartingPolynomial(3, 7, 2, "x +1 (mod 3)");
+  STACK_TRACE("PolynomialFactorizationCantorZassenhaus::"
+  "Test::constructStartingPolynomial");
+  Test::testOneStartingPolynomial(3, 0, 2, "x  \\mod 3");
+  Test::testOneStartingPolynomial(3, 1, 2, "x +1 \\mod 3");
+  Test::testOneStartingPolynomial(3, 2, 2, "x +2 \\mod 3");
+  Test::testOneStartingPolynomial(3, 2, 3, "x +2 \\mod 3");
+  Test::testOneStartingPolynomial(3, 3, 3, "x^2+1 \\mod 3");
+  Test::testOneStartingPolynomial(3, 4, 3, "x^2+2 \\mod 3");
+  Test::testOneStartingPolynomial(3, 5, 3, "x +1 \\mod 3");
+  Test::testOneStartingPolynomial(3, 3, 2, "x +1 \\mod 3");
+  Test::testOneStartingPolynomial(3, 7, 2, "x +1 \\mod 3");
   return true;
 }
 

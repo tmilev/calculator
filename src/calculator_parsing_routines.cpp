@@ -187,6 +187,7 @@ void CalculatorParser::initializeControlSequences() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\choose");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\frac");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\cdot");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\mod");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("_");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("(");
   this->controlSequences.addOnTopNoRepetitionMustBeNew(")");
@@ -3792,10 +3793,11 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     secondToLastS == "Expression" &&
-    thirdToLastS == "mod" &&
-    fourthToLastS == "Expression"
+   ( thirdToLastS == "mod" || thirdToLastS == "\\mod") &&
+    fourthToLastS == "Expression" && this->allowsTimesInPreceding(lastS)
   ) {
-    return this->replaceEOEXByEX();
+    this->lastRuleName = "[Rule: Calculator::replaceEOEXByEX]";
+    return this->replaceEXEXBy_OofEE_X(this->owner->opMod());
   }
   if (
     secondToLastS == "Expression" &&

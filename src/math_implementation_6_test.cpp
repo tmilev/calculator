@@ -543,8 +543,10 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialUnivariateModular,
   PolynomialUnivariateModularAsModulus
 >::Test::constructStartingPolynomial() {
-  STACK_TRACE("PolynomialFactorizationCantorZassenhaus::"
-  "Test::constructStartingPolynomial");
+  STACK_TRACE(
+    "PolynomialFactorizationCantorZassenhaus::"
+    "Test::constructStartingPolynomial"
+  );
   Test::testOneStartingPolynomial(3, 0, 2, "x  \\mod 3");
   Test::testOneStartingPolynomial(3, 1, 2, "x +1 \\mod 3");
   Test::testOneStartingPolynomial(3, 2, 2, "x +2 \\mod 3");

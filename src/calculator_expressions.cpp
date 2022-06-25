@@ -2724,8 +2724,7 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
     out
     << polynomial.coefficients[0].toStringPolynomialCalculator(
       polynomial, &formatLocal
-    )
-;
+    );
   } else {
     out << "0";
   }
@@ -2789,8 +2788,9 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
     out
     << sample.toStringPolynomialCalculator(element.value, &formatLocal)
     << " \\mod "
-    << sample.toStringPolynomialCalculator(element.modulusContainer, &formatLocal)
-    ;
+    << sample.toStringPolynomialCalculator(
+      element.modulusContainer, &formatLocal
+    );
   } else {
     out
     << element.value.toString(&formatLocal)
@@ -2889,7 +2889,8 @@ bool Expression::toStringBuiltIn<RationalFraction<ElementZmodP> >(
     );
   } else {
     Polynomial<ElementZmodP> zero;
-    out << data.constantValue.toStringPolynomialCalculator(zero, &formatLocal);
+    out
+    << data.constantValue.toStringPolynomialCalculator(zero, &formatLocal);
   }
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";

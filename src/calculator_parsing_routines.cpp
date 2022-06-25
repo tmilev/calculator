@@ -3792,9 +3792,11 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceOEXByEX();
   }
   if (
-    secondToLastS == "Expression" &&
-   ( thirdToLastS == "mod" || thirdToLastS == "\\mod") &&
-    fourthToLastS == "Expression" && this->allowsTimesInPreceding(lastS)
+    secondToLastS == "Expression" && (
+      thirdToLastS == "mod" || thirdToLastS == "\\mod"
+    ) &&
+    fourthToLastS == "Expression" &&
+    this->allowsTimesInPreceding(lastS)
   ) {
     this->lastRuleName = "[Rule: Calculator::replaceEOEXByEX]";
     return this->replaceEXEXBy_OofEE_X(this->owner->opMod());

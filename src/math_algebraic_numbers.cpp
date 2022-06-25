@@ -1930,7 +1930,7 @@ std::string ElementZmodP::toStringPolynomialCalculator(
   std::stringstream out;
   out << "PolynomialModP{}(";
   out << input.toString(format);
-    out << ", " << this->modulus << ")";
+  out << ", " << this->modulus << ")";
   return out.str();
 }
 

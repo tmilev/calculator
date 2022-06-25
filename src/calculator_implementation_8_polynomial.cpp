@@ -80,7 +80,9 @@ polynomialDivisionVerboseGradedReverseLexicographic(
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic");
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic"
+  );
   List<MonomialPolynomial>::Comparator order(
     MonomialPolynomial::greaterThan_leftLargerWins
   );
@@ -160,7 +162,11 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   ) {
     return
     CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
-      calculator, polynomialsRational, contextAlgebraic, output, monomialOrder
+      calculator,
+      polynomialsRational,
+      contextAlgebraic,
+      output,
+      monomialOrder
     );
   }
   Vector<Polynomial<ElementZmodP> > polynomialsModP;

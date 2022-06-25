@@ -611,7 +611,7 @@ bool CalculatorConversions::functionPolynomial(
   ) {
     return true;
   }
-  if (noConversionDesired){
+  if (noConversionDesired) {
     return false;
   }
   WithContext<Polynomial<Coefficient> > converted, candidate;

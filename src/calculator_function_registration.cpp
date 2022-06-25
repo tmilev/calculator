@@ -1699,7 +1699,7 @@ void Calculator::initializeFunctionsStandard() {
     "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);\n"
     "PolyDivStringLex{}(x^7 + \\sqrt{2} x + 1, \\sqrt{3}x^2 + 2x + 1);\n"
     "PolyDivStringLex{}(PolynomialModP(x^5+2x^3+x^2+2,7),"
-  "PolynomialModP(x^2, 7));",
+    "PolynomialModP(x^2, 7));",
     "CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic",
     "PolyDivStringLex",
     innerStandard

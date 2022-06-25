@@ -1438,7 +1438,7 @@ getPolynomialStringSpacedMonomialsLaTeX(
 
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
-  STACK_TRACE("GroebnerBasisComputation::getDivisionStringLaTeX");
+  STACK_TRACE("PolynomialDivisionReport::getDivisionStringLaTeX");
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;
@@ -1455,8 +1455,6 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   for (int i = 0; i < subtrahends.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(subtrahends[i].monomials);
   }
-  // List<std::string> basisColorStyles;
-  // basisColorStyles.setSize(this->basis.size);
   this->allMonomials.quickSortDescending(
     &this->owner->polynomialOrder.monomialOrder
   );
@@ -1593,7 +1591,7 @@ bool PolynomialDivisionReport<Coefficient>::checkInitialization() {
 
 template <class Coefficient>
 std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
-  STACK_TRACE("GroebnerBasisComputation::getDivisionStringHtml");
+  STACK_TRACE("PolynomialDivisionReport::getDivisionStringHtml");
   this->checkInitialization();
   std::stringstream out;
   List<Polynomial<Coefficient> >& remainders = this->intermediateRemainders;

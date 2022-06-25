@@ -3685,6 +3685,8 @@ class EquationEditor {
     let latexWithAnnotation = this.rootNode.toLatexWithAnnotation(null);
     let result = [];
     result.push(document.createTextNode(`Latex: ${latexWithAnnotation.latex}`));
+    let backslashEscaped = latexWithAnnotation.latex.split('\\').join('\\\\');
+    result.push(document.createTextNode(`Latex, backslash-escaped: ${backslashEscaped}`));
     result.push(document.createElement('br'));
     result.push(document.createTextNode(
         `URL-encoded: ${encodeURIComponent(latexWithAnnotation.latex)}`));

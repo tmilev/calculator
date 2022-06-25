@@ -80,7 +80,7 @@ polynomialDivisionVerboseGradedReverseLexicographic(
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::polynomialDivisionVerboseLexicographic");
+  STACK_TRACE("CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic");
   List<MonomialPolynomial>::Comparator order(
     MonomialPolynomial::greaterThan_leftLargerWins
   );
@@ -112,6 +112,9 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
   List<MonomialPolynomial>::Comparator* monomialOrder
 ) {
   GroebnerBasisComputation<AlgebraicNumber> computation;
+  context.getFormat(computation.format);
+  computation.format.flagUseLatex = true;
+  computation.format.flagUseFrac = true;
   computation.flagDoLogDivision = true;
   computation.flagStoreQuotients = true;
   computation.polynomialOrder.monomialOrder = *monomialOrder;
@@ -127,9 +130,6 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
   computation.remainderDivisionByBasis(
     input[0], computation.remainderDivision, - 1
   );
-  context.getFormat(computation.format);
-  computation.format.flagUseLatex = true;
-  computation.format.flagUseFrac = true;
   std::stringstream latexOutput;
   latexOutput
   << "<br>In latex: <br>"
@@ -170,7 +170,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
 bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::polynomialDivisionSlidesGrLex");
+  STACK_TRACE("CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex");
   ExpressionContext context(calculator);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (

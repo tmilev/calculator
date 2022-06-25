@@ -273,7 +273,11 @@ int GroebnerBasisComputation<Coefficient>::minimalNumberOfVariables() const {
   int result = 0;
   for (int i = 0; i < this->basis.size; i ++) {
     Polynomial<Coefficient>& current = this->basis[i].element;
-    MathRoutines::maximum(current.minimalNumberOfVariables(), result);
+result=    MathRoutines::maximum(current.minimalNumberOfVariables(), result);
+  }
+  for (int i = 0; i < this->basisCandidates.size; i ++) {
+    Polynomial<Coefficient>& current = this->basisCandidates[i];
+    result=    MathRoutines::maximum(current.minimalNumberOfVariables(), result);
   }
   return result;
 }

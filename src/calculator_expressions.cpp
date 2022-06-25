@@ -2722,13 +2722,12 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
   formatLocal.flagUseFrac = true;
   if (!polynomial.isEqualToZero()) {
     out
-    <<"PolynomialModP{}("
-    << polynomial.coefficients[0].toStringPolynomial(
+    << polynomial.coefficients[0].toStringPolynomialCalculator(
       polynomial, &formatLocal
     )
-    << ", " << polynomial.coefficients[0].modulus << ")";
+;
   } else {
-    out << "c0)";
+    out << "0";
   }
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
@@ -2788,15 +2787,9 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   if (!element.modulusContainer.isEqualToZero()) {
     sample = element.modulusContainer.coefficients[0];
     out
-    << "PolynomialModP{}("
-    << sample.toStringPolynomial(element.value, &formatLocal)
-    << ", "
-    << sample.modulus << ")"
+    << sample.toStringPolynomialCalculator(element.value, &formatLocal)
     << " \\mod "
-    << "PolynomialModP{}("
-    << sample.toStringPolynomial(element.modulusContainer, &formatLocal)
-    << ", "
-    << sample.modulus << ")"
+    << sample.toStringPolynomialCalculator(element.modulusContainer, &formatLocal)
     ;
   } else {
     out
@@ -2876,11 +2869,11 @@ bool Expression::toStringBuiltIn<RationalFraction<ElementZmodP> >(
     data.numerator.getElementConst().coefficients[0];
     out
     << "\\frac{"
-    << constantSample.toStringPolynomial(
+    << constantSample.toStringPolynomialCalculator(
       data.numerator.getElementConst(), &formatLocal
     )
     << "} {"
-    << constantSample.toStringPolynomial(
+    << constantSample.toStringPolynomialCalculator(
       data.denominator.getElementConst(), &formatLocal
     )
     << "}";
@@ -2891,12 +2884,12 @@ bool Expression::toStringBuiltIn<RationalFraction<ElementZmodP> >(
     ElementZmodP constantSample =
     data.numerator.getElementConst().coefficients[0];
     out
-    << constantSample.toStringPolynomial(
+    << constantSample.toStringPolynomialCalculator(
       data.numerator.getElementConst(), &formatLocal
     );
   } else {
     Polynomial<ElementZmodP> zero;
-    out << data.constantValue.toStringPolynomial(zero, &formatLocal);
+    out << data.constantValue.toStringPolynomialCalculator(zero, &formatLocal);
   }
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";

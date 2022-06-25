@@ -1910,7 +1910,7 @@ std::string ElementZmodP::toStringModP(const LargeIntegerUnsigned& modulus) {
   return out.str();
 }
 
-std::string ElementZmodP::toStringPolynomial(
+std::string ElementZmodP::toStringPolynomiaL(
   const Polynomial<ElementZmodP>& input, FormatExpressions* format
 ) const {
   std::stringstream out;
@@ -1920,13 +1920,17 @@ std::string ElementZmodP::toStringPolynomial(
       suppressMod = true;
     }
   }
-  if (!suppressMod) {
-    out << "PolynomialModP{}(";
-  }
+  out << input.toString(format) << "\\mod " << this->modulus.toString();
+  return out.str();
+}
+
+std::string ElementZmodP::toStringPolynomialCalculator(
+  const Polynomial<ElementZmodP>& input, FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << "PolynomialModP{}(";
   out << input.toString(format);
-  if (!suppressMod) {
     out << ", " << this->modulus << ")";
-  }
   return out.str();
 }
 

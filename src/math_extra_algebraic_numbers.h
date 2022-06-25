@@ -384,7 +384,10 @@ public:
   // Format a polynomial with modular coefficients.
   // The modulo information will not be repeated for all coefficients, but will
   // be put at the end of the expression.
-  std::string toStringPolynomial(
+  std::string toStringPolynomiaL(
+    const Polynomial<ElementZmodP>& input, FormatExpressions* format
+  ) const;
+  std::string toStringPolynomialCalculator(
     const Polynomial<ElementZmodP>& input, FormatExpressions* format
   ) const;
   ElementZmodP zero() const;

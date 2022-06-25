@@ -2252,7 +2252,7 @@ bool PolynomialFactorizationCantorZassenhaus<
     PolynomialConversions::convertToPolynomial(divisor, divisorConverted);
     *comments
     << "Found divisor \\("
-    << this->one.toStringPolynomial(
+    << this->one.toStringPolynomiaL(
       divisorConverted, &this->output->format
     )
     << "\\) by taking gcd with \\("
@@ -2501,7 +2501,7 @@ bool PolynomialFactorizationCantorZassenhaus<
       << "^{"
       << i + 1
       << "} - 1}{2}} = "
-      << this->one.toStringPolynomial(converted, &this->output->format)
+      << this->one.toStringPolynomiaL(converted, &this->output->format)
       << "\\mod "
       << currentPolynomial.modulus()->toString(&this->output->format)
       << "\\)";

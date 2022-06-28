@@ -9984,6 +9984,11 @@ class MathNodeMatrix extends MathNode {
       return new LatexWithAnnotation('[(null)]');
     }
     let matrixContent = this.children[0].children[1];
+    if (this.isBinom()) {
+      let first = matrixContent.children[0].children[0].toLatexWithAnnotation(options).latex;
+      let second = matrixContent.children[1].children[0].toLatexWithAnnotation(options).latex;
+      return new LatexWithAnnotation(`\\binom{${first}}{${second}}`);
+    } 
     let result = [];
     result.push(`\\begin{${this.matrixEnvironment}}`);
     if (this.matrixEnvironment === 'array') {
@@ -10004,6 +10009,17 @@ class MathNodeMatrix extends MathNode {
     result.push(rows.join('\\\\'));
     result.push(`\\end{${this.matrixEnvironment}}`);
     return new LatexWithAnnotation(result.join(''));
+  }
+
+  isBinom() {
+    if (this.matrixEnvironment !== 'binom') {
+      return false;
+    }
+    let matrixContent = this.children[0].children[1];
+    if (matrixContent.children.length !== 2) {
+      return false;
+    }
+    return matrixContent.children[0].children.length === 1 && matrixContent.children[1].children.length === 1;
   }
 
   /**

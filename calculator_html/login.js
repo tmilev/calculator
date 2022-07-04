@@ -52,7 +52,6 @@ function logout() {
   document.getElementById("inputPassword").value = "";
   document.getElementById(ids.domElements.problemPageContentContainer).innerHTML = "";
   document.getElementById(ids.domElements.divCurrentCourseBody).innerHTML = "";
-  logoutGoogle();
   logoutPartTwo();
 }
 
@@ -78,7 +77,6 @@ function loginTry() {
     callback: loginWithServerCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
-  initGoogleLogin();
 }
 
 function toggleAccountPanels() {
@@ -190,49 +188,21 @@ function loginWithServerCallback(incomingString, result) {
 }
 
 function onGoogleSignIn(googleUser) {
-  let theToken = googleUser.getAuthResponse().id_token;
-  let thePage = window.calculator.mainPage;
-  thePage.user.googleToken = theToken;
-  thePage.storage.variables.user.name.setAndStore("");
-  thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
-  thePage.showProfilePicture();
+  let token = googleUser.credential;
+  let page = window.calculator.mainPage;
+  page.user.googleToken = token;
+  page.storage.variables.user.name.setAndStore("");
+  page.user.googleProfile = window.calculator.jwt.decode(token);
+  page.showProfilePicture();
   showLogoutButton();
   let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
-  theURL += `googleToken=${theToken}&`;
+  theURL += `googleToken=${token}&`;
   submitRequests.submitGET({
     url: theURL,
     callback: loginWithServerCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
-}
-
-function initGoogleLogin() {
-  if (typeof (gapi) === "undefined") {
-    return;
-  }
-  let thePage = window.calculator.mainPage;
-  if (thePage.pages.login.initialized === true) {
-    return;
-  }
-  try {
-    gapi.load('auth2', function () {
-      //auth2Google =
-      gapi.auth2.init({
-        client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
-        // Scopes to request in addition to 'profile' and 'email'
-        //scope: 'additional_scope'
-      });
-      gapi.signin2.render('divGoogleLoginButton', {
-        scope: 'profile email',
-        prompt: "select_account",
-        onsuccess: onGoogleSignIn,
-        onfailure: null
-      });
-    });
-  } catch (e) {
-    console.log("Failed to execute google auth service.");
-  }
 }
 
 function showLoginCalculatorButtons() {
@@ -277,15 +247,6 @@ function hideLogoutButton() {
   }
 }
 
-function logoutGoogle() {
-  let thePage = window.calculator.mainPage;
-  thePage.storage.variables.user.googleToken.setAndStore("");
-  thePage.user.googleProfile = {};
-  if (gapi !== undefined && gapi !== null) {
-    gapi.auth2.getAuthInstance().signOut();
-  }
-}
-
 function getQueryVariable(variable) {
   let query = window.location.search.substring(1);
   let vars = query.split('&');
@@ -310,9 +271,9 @@ module.exports = {
   resetPagesNeedingReload,
   reloadPage,
   init,
-  logoutGoogle,
   logout,
   loginTry,
   setAdminPanels,
   loginCalculator,
+  onGoogleSignIn,
 };

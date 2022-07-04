@@ -34,11 +34,13 @@
         console.log(`Failed to parse your url hash ${currentHash} obtained from ${window.location.hash}. ${e}`);
       }
     }
+    function googleSignIn(googleUser){
+      window.calculator.login.onGoogleSignIn(googleUser);
+    }
   </script>
   <script type="text/javascript" src="/html-common/ace/src-min/ace.js" charset="utf-8"
     onerror="errorLoadingScript(this);"></script>
   <script src="/html-common/ace/src-min/ext-language_tools.js" onerror="errorLoadingScript(this);"></script>
-  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
   <!--DO NOT modify the following script, **including quotes**; it is searched+replaced with a cached version.-->
   <script type='text/javascript' src='/calculator_html/javascript_all_in_one.js'></script>
   <!--DO NOT modify the following css link, **including quotes**; it is searched+replaced with a cached version.-->
@@ -79,7 +81,10 @@
           <!--divCenteredItem-->
           <div class="divCenteredItem">
             <b>Google login:</b>
-            <div id="divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
+            <script src="https://accounts.google.com/gsi/client" async defer></script>
+            <div id="g_id_onload" data-client_id="538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com" data-callback="googleSignIn">
+            </div>
+            <div class="g_id_signin" data-type="standard">Google unavailable (did page fully load? Internet?).</div>
           </div>
           <!--divCenteredItem-->
           <div class="divCenteredItem">

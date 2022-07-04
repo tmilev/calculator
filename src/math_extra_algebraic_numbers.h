@@ -553,7 +553,8 @@ public:
   ) {
     return this->factorWithTiming(comments, commentsOnFailure);
   }
-  // Factors the polynomial fully.
+  // Factors the polynomial fully; same as factor but in addition
+  // records factorization speed information.
   bool factorWithTiming(
     std::stringstream* comments, std::stringstream* commentsOnFailure
   );

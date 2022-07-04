@@ -142,6 +142,9 @@ class RequestWithProgress {
     this.xhr.onload = () => {
       this.responseStandard();
     }
+    this.xhr.onerror = (e) => { 
+      this.errorStandard(e);
+    }
   }
 
   sendGET() {
@@ -173,6 +176,17 @@ class RequestWithProgress {
     this.startTime = new Date().getTime();
     this.panel.setPanelLabel(`<b style = "color:orange">Sent</b>`)
     this.panel.setPanelContent(this.additionalDetails + this.details);
+  }
+
+  errorStandard(
+    /**@type{ProgressEvent} */e,
+  ) {
+    if (this.progress === null || this.progress === undefined) {
+      console.log(e);
+      return;
+    }
+    let panelLabel = `<b style='color:red'>Connection error</b>`;
+    this.panel.setPanelLabel(panelLabel);
   }
 
   responseStandard() {
@@ -233,7 +247,7 @@ function submitGET(
   /** @type {{url: string, callback: Function, progress: string, result: HTMLElement|string, panelOptions:{dontCollapsePanel:boolean, width:number}}}*/
   inputObject,
 ) {
-  let theAddress = correctAddress(inputObject.url);
+  let address = correctAddress(inputObject.url);
   let progress = inputObject.progress;
   let result = inputObject.result;
   let callback = inputObject.callback;
@@ -241,7 +255,7 @@ function submitGET(
   if (inputObject.panelOptions !== undefined) {
     panelOptions = inputObject.panelOptions;
   }
-  let request = new RequestWithProgress(theAddress, result, false, progress, callback, panelOptions);
+  let request = new RequestWithProgress(address, result, false, progress, callback, panelOptions);
   request.sendGET();
 }
 

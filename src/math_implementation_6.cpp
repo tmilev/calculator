@@ -564,7 +564,6 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   this->millisecondsCantorZassenhaus =
   global.getElapsedMilliseconds() - startCantorZassenhaus;
   this->factorsOverPrime = factorizationModular.reduced;
-  //  this->computeCoefficientBoundsElementary();
   this->computeCoefficientBoundsGelfond();
   int64_t startHenselLift = global.getElapsedMilliseconds();
   this->henselLift(comments);

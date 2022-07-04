@@ -43,6 +43,29 @@ bool PolynomialFactorizationFiniteFields::Test::all() {
   PolynomialFactorizationFiniteFields::Test::test("4", "4");
   PolynomialFactorizationFiniteFields::Test::test("4x+1", "(4x +1)");
   PolynomialFactorizationFiniteFields::Test::test("4x+2", "2(2x +1)");
+  // The Gelfond bound should be 2^{3-1}*5*(3+1)
+  PolynomialFactorizationFiniteFields::Test::gelfondBound("2x^3-2x-5", "80");
+  return true;
+}
+
+bool PolynomialFactorizationFiniteFields::Test::gelfondBound(
+  const std::string& inputPolynomial, const std::string& desiredBound
+) {
+  STACK_TRACE("PolynomialFactorizationFiniteFields::Test::gelfondBound");
+  PolynomialFactorizationFiniteFields algorithm;
+  algorithm.current = Polynomial<Rational>::Test::fromString(inputPolynomial);
+  algorithm.degree = algorithm.current.totalDegreeInt();
+  algorithm.computeCoefficientBoundsGelfond();
+  if (algorithm.coefficientBound.toString() != desiredBound) {
+    global.fatal
+    << "While computing coefficient bounds for the factors of:\n"
+    << inputPolynomial
+    << "\ngot bound:\n"
+    << algorithm.coefficientBound.toString()
+    << "\nexpected:\n"
+    << desiredBound
+    << global.fatal;
+  }
   return true;
 }
 

@@ -634,10 +634,10 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond() {
   }
   this->coefficientBound = 2;
   MathRoutines::raiseToPower(
-    this->coefficientBound, this->degree, LargeInteger(1)
+    this->coefficientBound, this->degree - 1, LargeInteger(1)
   );
   this->coefficientBound *= this->largestCoefficient;
-  this->coefficientBound *= this->degree;
+  this->coefficientBound *= this->degree + 1;
 }
 
 void PolynomialFactorizationFiniteFields::henselLift(

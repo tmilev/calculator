@@ -1914,12 +1914,6 @@ std::string ElementZmodP::toStringPolynomiaL(
   const Polynomial<ElementZmodP>& input, FormatExpressions* format
 ) const {
   std::stringstream out;
-  bool suppressMod = false;
-  if (format != nullptr) {
-    if (format->flagSuppressModP) {
-      suppressMod = true;
-    }
-  }
   out << input.toString(format) << "\\mod " << this->modulus.toString();
   return out.str();
 }

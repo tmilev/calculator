@@ -263,7 +263,7 @@ bool CalculatorConversions::convertWithoutComputation<
 ) {
   STACK_TRACE(
     "CalculatorConversions::"
-    "convertWithoutComputation_ElementUniversalEnveloping_RationalFraction_Rational"
+    "convertWithoutComputation_ElementUniversalEnveloping"
   );
   (void) outputConversionByOtherMeansNotDesired;
   SemisimpleLieAlgebra* owner =
@@ -296,7 +296,7 @@ bool CalculatorConversions::convertWithoutComputation<
 ) {
   STACK_TRACE(
     "CalculatorConversions::"
-    "convertWithoutComputation_ElementSemisimpleLieAlgebra_AlgebraicNumber"
+    "convertWithoutComputation_ElementSemisimpleLieAlgebra"
   );
   (void) outputConversionByOtherMeansNotDesired;
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
@@ -603,7 +603,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
 bool CalculatorConversions::semisimpleLieAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::semisimpleLieAlgebra");
+  STACK_TRACE("CalculatorConversions::semisimpleLieAlgebra");
   if (input.size() != 2) {
     return calculator << "Semisimple Lie algebra expects a single argument. ";
   }
@@ -617,7 +617,7 @@ bool CalculatorConversions::semisimpleLieAlgebra(
 bool CalculatorConversions::loadWeylGroup(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::loadWeylGroup");
+  STACK_TRACE("CalculatorConversions::loadWeylGroup");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return false;
@@ -649,7 +649,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
   const Expression& input,
   DynkinSimpleType& outputMon
 ) {
-  STACK_TRACE("CalculatorBuiltInTypeConversions::functionDynkinSimpleType");
+  STACK_TRACE("CalculatorConversions::functionDynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
   if (input.startsWith(calculator.opUnderscore(), 3)) {
     rankE = input[2];
@@ -783,7 +783,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
 bool CalculatorConversions::dynkinType(
   Calculator& calculator, const Expression& input, DynkinType& output
 ) {
-  STACK_TRACE("Calculator::dynkinType");
+  STACK_TRACE("CalculatorConversions::dynkinType");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (input.size() != 2) {
     return calculator << "Dynkin type takes as input one argument. ";
@@ -838,7 +838,9 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
   Expression& output,
   WithContext<SemisimpleLieAlgebra*>& outputPointer
 ) {
-  STACK_TRACE("Calculator::functionSemisimpleLieAlgebraFromDynkinType");
+  STACK_TRACE(
+    "CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType"
+  );
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   DynkinType dynkinType;
   outputPointer.content = nullptr;
@@ -1747,7 +1749,8 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients
   SemisimpleLieAlgebra& owner
 ) {
   STACK_TRACE(
-    "CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients"
+    "CalculatorConversions::"
+    "loadElementSemisimpleLieAlgebraRationalCoefficients"
   );
   ElementSemisimpleLieAlgebra<AlgebraicNumber> outputAlgebraic;
   if (
@@ -2129,7 +2132,7 @@ bool CalculatorConversions::functionMatrixRational(
 bool CalculatorConversions::matrixRationalTensorForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::matrixRationalTensorForm");
+  STACK_TRACE("CalculatorConversions::matrixRationalTensorForm");
   if (!CalculatorConversions::makeMatrix(calculator, input, output)) {
     return calculator << "Failed to extract matrix of rationals. ";
   }
@@ -2149,7 +2152,7 @@ bool CalculatorConversions::matrixRationalTensorForm(
 bool CalculatorConversions::functionMatrixRationalTensorForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::functionMatrixRationalTensorForm");
+  STACK_TRACE("CalculatorConversions::functionMatrixRationalTensorForm");
   Matrix<Rational> matrixRational;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(

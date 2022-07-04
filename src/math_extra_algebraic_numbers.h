@@ -566,10 +566,32 @@ public:
   );
   // An elementary method for computing coefficient
   // bounds of the individual factors.
+  // To be replaced by the next method.
+  // I was trying to find proof for the Gelfond's inequality below,
+  // and was using the present function as a fallback
+  // until I am sure the Gelfond inequality holds.
   void computeCoefficientBoundsElementary();
   // A method for computing tighter coefficient bounds.
-  // Drop in replacement for the previous method, but I
-  // am having difficulty establishing at 100% its correctness.
+  // Drop in replacement for the previous method.
+  // Reference (discovered recently; please read carefully and
+  // make sure it's correct):
+  // K. Mahler, On some inequalities for polynomials
+  // in several variables, Journal London Mathematical Society 37,
+  // 1962, pages 341-344.
+  // Notation: \prod f_i = f, polynomials in one variable
+  // (the article allows multivariable polynomials as well).
+  // Let H_i = absolute value of largest coefficient of f_i.
+  // Let H = absolute value of largest coefficient of f.
+  // Then inequality (II), taken for one-variable polynomials, becomes:
+  // \prod H_i <= 2^{\deg f-1} sqrt(n+1) H
+  // Each of the H_i's can be 1, so in the worst case scenario, the
+  // inequality becomes
+  // H_i <= 2^{\deg f-1} sqrt(n+1) H.
+  // To avoid computing with square roots,
+  // we strengthen the inequality by
+  // H_i < 2^{\deg f-1} (n+1) H.
+  // In view of the preceding discussion,
+  // the function below returns the quantity 2^{\deg f-1} (n+1) H.
   void computeCoefficientBoundsGelfond();
   bool oneFactorFromModularization(
     std::stringstream* comments, std::stringstream* commentsOnFailure
@@ -591,6 +613,10 @@ public:
     static bool all();
     static bool test(
       const std::string& toFactor, const std::string& desiredResult
+    );
+    static bool gelfondBound(
+      const std::string& inputPolynomial,
+      const std::string& desiredBound
     );
   };
 };

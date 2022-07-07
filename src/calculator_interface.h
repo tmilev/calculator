@@ -1115,6 +1115,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string toString() const;
+  Expression toExpression();
 };
 
 class Function {
@@ -3134,11 +3135,6 @@ public:
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetDimensionNonMandatory = - 1
   );
-  bool getListPolynomialVariableLabelsLexicographic(
-    const Expression& input,
-    Vector<Polynomial<AlgebraicNumber> >& output,
-    ExpressionContext& outputContext
-  );
   template <class Coefficient>
   bool getTypeWeight(
     Calculator& calculator,
@@ -3797,6 +3793,13 @@ public:
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetNumberOfColumnsNonMandatory = - 1,
     std::stringstream* commentsOnError = nullptr
+  );
+  template <class Type>
+  static bool getListPolynomialVariableLabelsLexicographic(
+    Calculator& calculator,
+    const Expression& input,
+    Vector<Polynomial<Type> >& output,
+    ExpressionContext& outputContext
   );
 };
 
@@ -4601,6 +4604,37 @@ bool WithContext<BuiltIn>::mergeContexts(
   return
   leftOutput.extendContext(resultContext, commentsOnFailure) &&
   rightOutput.extendContext(resultContext, commentsOnFailure);
+}
+
+template <class Type>
+bool CalculatorConversions::getListPolynomialVariableLabelsLexicographic(
+  Calculator& calculator,
+  const Expression& input,
+  Vector<Polynomial<Type> >& output,
+  ExpressionContext& outputContext
+) {
+  STACK_TRACE(
+    "CalculatorConversions::getListPolynomialVariableLabelsLexicographic"
+  );
+  ExpressionContext contextStart(calculator);
+  if (
+    !calculator.getVectorFromFunctionArguments(
+      input, output, &contextStart, 0
+    )
+  ) {
+    return false;
+  }
+  if (output.size < 2) {
+    return false;
+  }
+  int numberOfVariables = contextStart.numberOfVariables();
+  HashedList<Expression> variables;
+  variables.setExpectedSize(numberOfVariables);
+  for (int i = 0; i < numberOfVariables; i ++) {
+    variables.addOnTop(contextStart.getVariable(i));
+  }
+  variables.quickSortAscending();
+  return outputContext.setVariables(variables);
 }
 
 #endif // header_calculator_interface_ALREADY_INCLUDED

@@ -1620,13 +1620,30 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "PolyDivRemainder",
-    CalculatorFunctionsPolynomial::polynomialDivisionRemainder,
+    CalculatorFunctionsPolynomial::polynomialDivisionRemainderAlgebraic,
     "",
     "Returns the remainder after taking quotient of a "
     "polynomial divided by a set of polynomials "
     "using the default monomial order (lexicographic).",
     "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y);",
-    "CalculatorFunctionsPolynomial::polynomialDivisionRemainder",
+    "CalculatorFunctionsPolynomial::polynomialDivisionRemainderAlgebraic",
+    "PolyDivRemainderAlgebraic",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PolyDivRemainder",
+    CalculatorFunctionsPolynomial::polynomialDivisionRemainderBuiltIn<
+      ElementZmodP
+    >,
+    "",
+    "Returns the remainder after taking quotient of a "
+    "polynomial divided by a set of polynomials "
+    "using the default monomial order (lexicographic). "
+    "Uses modular arithmetic.",
+    "a=PolynomialModP( x^{4}+x^{3}+6x^{2}+x+5,3);\n"
+    "b=PolynomialModP( 2x^3+2x+2,3);\n"
+    "c=PolyDivRemainder(a,b);",
+    "CalculatorFunctionsPolynomial::polynomialDivisionRemainderBuiltIn",
     "PolyDivRemainder",
     innerStandard
   );
@@ -1640,18 +1657,6 @@ void Calculator::initializeFunctionsStandard() {
     "PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;",
     "CalculatorFunctionsPolynomial::polynomialDivisionQuotient",
     "PolyDivQuotient",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "PolyDivSlidesGrLex",
-    CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex,
-    "",
-    "Creates a slide with the polynomial disivion algorithm. "
-    "First element = starting slide number.",
-    "PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2);\n"
-    "PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
-    "CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex",
-    "PolyDivSlidesGrLex",
     innerStandard
   );
   this->addOperationHandler(
@@ -3275,8 +3280,8 @@ void Calculator::initializeFunctionsStandard() {
     "b mod p;\n"
     "a+b",
     "CalculatorFunctionsBinaryOps::"
-    "addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger"
-    ,
+    "addPolynomialModuloPolynomialModuloInteger"
+    "ToPolynomialModuloPolynomialModuloInteger",
     "AddPolynomialModPolynomialModPToPolynomialModPolynomialModP",
     innerStandard
   );

@@ -292,6 +292,34 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
   this->addOperationHandler(
+    "PolyDivSlidesGrLex",
+    CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex<
+      AlgebraicNumber
+    >,
+    "",
+    "Creates a slide with the polynomial disivion algorithm. "
+    "First element = starting slide number.",
+    "PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2);\n"
+    "PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
+    "CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex",
+    "PolyDivSlidesGrLex",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PolyDivSlidesGrLex",
+    CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex<ElementZmodP>,
+    "",
+    "Creates a slide with the polynomial disivion algorithm. "
+    "First element = starting slide number. "
+    "Uses modular arithmetic",
+    "a=PolynomialModP( x^{4}+x^{3}+6x^{2}+x+5,3);\n"
+    "b=PolynomialModP( 2x^3+2x+2,3);\n"
+    "PolyDivSlidesGrLex(5,a,b)",
+    "CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex",
+    "PolyDivSlidesGrLexModular",
+    innerStandard
+  );
+  this->addOperationHandler(
     "IsNilpotent",
     CalculatorFunctions::isNilpotent,
     "",

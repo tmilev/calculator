@@ -57,48 +57,6 @@ std::string Plot::Labels::graphicsThreeDimensional =
 "graphicsThreeDimensional";
 std::string Plot::Labels::graphicsTwoDimensional = "graphicsTwoDimensional";
 std::string Plot::Labels::plotObjects = "plotObjects";
-bool Calculator::getListPolynomialVariableLabelsLexicographic(
-  const Expression& input,
-  Vector<Polynomial<AlgebraicNumber> >& output,
-  ExpressionContext& outputContext
-) {
-  STACK_TRACE("Calculator::getListPolynomialVariableLabelsLexicographic");
-  ExpressionContext contextStart(*this);
-  if (
-    !this->getVectorFromFunctionArguments(
-      input,
-      output,
-      &contextStart,
-      0 // ,
-      // CalculatorConversions::functionPolynomial<AlgebraicNumber>
-    )
-  ) {
-    return false;
-  }
-  if (output.size < 2) {
-    return false;
-  }
-  int numberOfVariables = contextStart.numberOfVariables();
-  HashedList<Expression> variables;
-  variables.setExpectedSize(numberOfVariables);
-  for (int i = 0; i < numberOfVariables; i ++) {
-    variables.addOnTop(contextStart.getVariable(i));
-  }
-  variables.quickSortAscending();
-  /*PolynomialSubstitution<AlgebraicNumber> substitution;
-  substitution.setSize(numberOfVariables);
-  const AlgebraicNumber& one = this->objectContainer.algebraicClosure.one();
-  for (int i = 0; i < substitution.size; i ++) {
-    int currentIndex = variables.getIndex(contextStart.getVariable(i));
-    substitution[i].makeMonomial(currentIndex, 1, one);
-  }
-  for (int i = 0; i < output.size; i ++) {
-    Polynomial<AlgebraicNumber>& currentP = output[i];
-    currentP.substitution(substitution, one);
-  }*/
-  return outputContext.setVariables(variables);
-}
-
 bool DynkinSimpleType::hasPrecomputedSubalgebras() const {
   if (this->letter == 'F') {
     return true;

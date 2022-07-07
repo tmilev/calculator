@@ -3018,12 +3018,23 @@ Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))
 ```
 Constructs the one-variable polynomial of minimal degree that passes through the points. Points are given in the form ((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))
 
-*PolyDivRemainder* [PolyDivRemainder] {CalculatorFunctionsPolynomial::polynomialDivisionRemainder}. 
+Operator or function PolyDivRemainder is overloaded with 2 total handlers.
+
+*PolyDivRemainder* [PolyDivRemainderAlgebraic] {CalculatorFunctionsPolynomial::polynomialDivisionRemainderAlgebraic}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivRemainder%7b%7d%28x%5e7%2b6x%20y%2b5x%20y%5e8%2by%5e5%2c%20x%20%2by%5e2-%201%2c%20y%5e3-x%20y%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y);
 ```
 Returns the remainder after taking quotient of a polynomial divided by a set of polynomials using the default monomial order (lexicographic).
+
+*PolyDivRemainder* [PolyDivRemainder] {CalculatorFunctionsPolynomial::polynomialDivisionRemainderBuiltIn}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3dPolynomialModP%28%20x%5e%7b4%7d%2bx%5e%7b3%7d%2b6x%5e%7b2%7d%2bx%2b5%2c3%29%3b%5cnb%3dPolynomialModP%28%202x%5e3%2b2x%2b2%2c3%29%3b%5cnc%3dPolyDivRemainder%28a%2cb%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+a=PolynomialModP( x^{4}+x^{3}+6x^{2}+x+5,3);
+b=PolynomialModP( 2x^3+2x+2,3);
+c=PolyDivRemainder(a,b);
+```
+Returns the remainder after taking quotient of a polynomial divided by a set of polynomials using the default monomial order (lexicographic). Uses modular arithmetic.
 
 *PolyDivQuotient* [PolyDivQuotient] {CalculatorFunctionsPolynomial::polynomialDivisionQuotient}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivQuotient%7b%7d%28x%5e7%2b6x%20y%2b5x%20y%5e8%2by%5e5%2c%20x%20%2by%5e2-%201%2c%20y%5e3-x%20y%29%20%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -3031,14 +3042,6 @@ Returns the remainder after taking quotient of a polynomial divided by a set of 
 PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;
 ```
 Returns the quotients of a polynomial divided by a set of polynomials using the default monomial order (lexicographic).
-
-*PolyDivSlidesGrLex* [PolyDivSlidesGrLex] {CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivSlidesGrLex%7b%7d%281%2c%20x%5e3%20%2b%20x%20%2b%2010%2c%20x%20%2b2%29%3b%5cnPolyDivSlidesGrLex%7b%7d%281%2cx%20%2b%20y%20%2b%2010%2c%20x%20%2b%201%2c%20y%20-%201%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
-```
-PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2);
-PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) 
-```
-Creates a slide with the polynomial disivion algorithm. First element = starting slide number.
 
 *PolyDivStringGrLex* [PolyDivStringGrLex] {CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringGrLex%7b%7d%28x%5e7%2b6x%20y%2b5x%20y%5e8%2by%5e5%2c%20x%5e2%2b2%2c%20y%5e3-%201%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4503,6 +4506,25 @@ Computes a Kostka number. First argument = partition given as a tuple a_1, ..., 
 PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); 
 ```
 Prints all vectors of grade level d with n coordinates lying in Z_{>= 0}. Function meant for debugging purposes. First argument = dimension, second argument =grading level. 
+
+Operator or function PolyDivSlidesGrLex is overloaded with 2 total handlers.
+
+*PolyDivSlidesGrLex* [PolyDivSlidesGrLex] {CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivSlidesGrLex%7b%7d%281%2c%20x%5e3%20%2b%20x%20%2b%2010%2c%20x%20%2b2%29%3b%5cnPolyDivSlidesGrLex%7b%7d%281%2cx%20%2b%20y%20%2b%2010%2c%20x%20%2b%201%2c%20y%20-%201%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2);
+PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) 
+```
+Creates a slide with the polynomial disivion algorithm. First element = starting slide number.
+
+*PolyDivSlidesGrLex* [PolyDivSlidesGrLexModular] {CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3dPolynomialModP%28%20x%5e%7b4%7d%2bx%5e%7b3%7d%2b6x%5e%7b2%7d%2bx%2b5%2c3%29%3b%5cnb%3dPolynomialModP%28%202x%5e3%2b2x%2b2%2c3%29%3b%5cnPolyDivSlidesGrLex%285%2ca%2cb%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+a=PolynomialModP( x^{4}+x^{3}+6x^{2}+x+5,3);
+b=PolynomialModP( 2x^3+2x+2,3);
+PolyDivSlidesGrLex(5,a,b)
+```
+Creates a slide with the polynomial disivion algorithm. First element = starting slide number. Uses modular arithmetic
 
 *IsNilpotent* [IsNilpotent] {CalculatorFunctions::isNilpotent}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22isNilpotent%7b%7d%28%280%2c%201%29%2c%20%280%2c%200%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

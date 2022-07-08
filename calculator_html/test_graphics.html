@@ -117,6 +117,26 @@
     canvas3.setViewWindow([- 1, - 19], [1, 5]);
     canvas3.drawFunction(testFunctionPlot2, "minusInfinity", "infinity", 100, 'red', 4);
     canvas3.redraw();
+    let canvas4 = new CanvasTwoD(
+      document.getElementById('cFour'), null, null,
+    );
+    canvas4.initialize();
+    canvas4.drawEscapeMap(
+      (x, y) => {
+        let xzSquared = x * x - y * y;
+        let yzSquared = 2 * x * y;
+        return x - xzSquared / (xzSquared * xzSquared + yzSquared * yzSquared);
+      },
+      (x, y) => {
+        let xzSquared = x * x - y * y;
+        let yzSquared = 2 * x * y;
+        return y + yzSquared / (xzSquared * xzSquared + yzSquared * yzSquared);
+      }
+    );
+    canvas4.drawGrid();
+    canvas4.drawCoordinateAxes();
+    canvas4.setViewWindow([- 1, - 19], [1, 5]);
+    canvas4.redraw();
   }
 
   function testPictureThreeD() {
@@ -164,6 +184,8 @@
     tag.</canvas><br>
   <span id="cThreeControls"></span>
   <!--span id="cThreeMessages"></span-->
+  <canvas width="400" height="400" style="border:solid 1px" id="cFour">Your browser does not support the HTML5 canvas
+    tag.</canvas><br>
 
   <br>
   <canvas width="600" height="400" style="border:solid 1px" id="canvasThreeD">Your browser does not support the HTML5

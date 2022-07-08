@@ -998,8 +998,6 @@ class PlotTwoD {
       // If not careful with rounding errors,
       // you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
       // resulting in serious visual glitches.
-      // Note: the remarks above were discovered the painful way (trial and
-      // error).
       y = this.functionPlotted(x);
       if (!isFinite(y)) {
         console.log(
@@ -1088,6 +1086,82 @@ class TextPlotTwoD {
     surface.beginPath();
     this.drawNoFinish(canvas, true);
     surface.stroke();
+  }
+}
+
+class EscapeMap { 
+  /**
+   * @param {!function(number, number):number} functionX.
+   * @param {!function(number, number):number} functionY.
+   */
+  constructor(functionX, functionY) {
+    this.functionX = functionX;
+    this.functionY = functionY; 
+  }
+
+  /** Required to satisfy interface.
+   * @param {!Array.<!Array.<number>>} unused output bounding box.
+   */
+  accountBoundingBox(unused) { }
+  
+  /**
+   * Same as draw but required to satisfy interface.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} unused unused.
+   */
+  drawNoFinish(canvas, unused) {
+    this.draw(canvas);
+  }
+
+  /** Iterates a map in math coordinates.
+   * @param {number} x
+   * @param {number} y
+   */
+  iterateMap(x, y) {
+    let result = [x, y];
+    for (let i = 0; i < 10; i++) {
+      let xNext = this.functionX(result[0], result[1]);
+      let yNext = this.functionY(result[0], result[1]);
+      result[0] = xNext;
+      result[1] = yNext;
+    }
+    return result;
+  }
+
+  /** Computes an escape color triple.
+   * @param {number} x
+   * @param {number} y
+   */
+  escapeColor(x, y) {
+    let result = this.iterateMap(x, y);
+
+    let distance = Math.floor(Math.abs(result[0] - x) + Math.abs(result[1] - y));
+    if (distance > 255) {
+      distance = 255;
+    }
+    return [distance, distance, distance];
+  }
+
+  /**
+   * Draws the object onto the given canvas.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   */
+  draw(canvas) {
+    let surface = canvas.surface;
+    const imageData = surface.createImageData(canvas.width, canvas.height);
+    for (let j = 0; j < canvas.width; j++) {
+      for (let i = 0; i < canvas.height; i++) {
+        let coordinates = canvas.coordsScreenAbsoluteToMathScreen(j, i);
+        let escapeColor = this.escapeColor(coordinates[0], coordinates[1]);
+        imageData.data[j * canvas.width * 4 + i * 4 + 0] = escapeColor[0];
+        imageData.data[j * canvas.width * 4 + i * 4 + 1] = escapeColor[1];
+        imageData.data[j * canvas.width * 4 + i * 4 + 2] = escapeColor[2];
+        imageData.data[j * canvas.width * 4 + i * 4 + 3] = 255;
+      }
+    }
+    surface.putImageData(imageData, 0, 0);
   }
 }
 
@@ -1576,6 +1650,20 @@ class CanvasTwoD {
         inputLineWidth);
     this.drawObjects.push(newPlot);
   }
+
+  /**
+   * Plots an escape map [Julia set].
+   *
+   * @param{function(number, number):number} functionX the x-coordinate of the 
+   * map we are iterating
+   * @param{function(number, number):number} functionY the y-coordinate of the 
+   * map we are iterating
+   */
+  drawEscapeMap(functionX, functionY) {
+    let newPlot = new EscapeMap(functionX, functionY);
+    this.drawObjects.push(newPlot);
+  }
+
 
   /**
    * Draws a parametric curve on the canvas

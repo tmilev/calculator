@@ -515,7 +515,8 @@ void PlotObject::makeEscapeMap(
   const std::string& variableX,
   const Expression& functionY,
   const std::string& javascriptY,
-  const std::string& variableY
+  const std::string& variableY,
+  const List<std::string>& parametersInPlayJS
 ) {
   this->coordinateFunctionsJS.addOnTop(javascriptX);
   this->coordinateFunctionsJS.addOnTop(javascriptY);
@@ -524,6 +525,7 @@ void PlotObject::makeEscapeMap(
   this->variablesInPlayJS.addOnTop(variableX);
   this->variablesInPlayJS.addOnTop(variableY);
   this->plotType = PlotObject::PlotTypes::escapeMap;
+  this->parametersInPlayJS = parametersInPlayJS;
 }
 
 void Plot::drawCoordinateAxes() {
@@ -555,11 +557,18 @@ void Plot::drawEscapeMap(
   const std::string& variableX,
   Expression& functionY,
   const std::string& javascriptY,
-  const std::string& variableY
+  const std::string& variableY,
+  List<std::string>& parametersInPlayJS
 ) {
   PlotObject plot;
   plot.makeEscapeMap(
-    functionX, javascriptX, variableX, functionY, javascriptY, variableY
+    functionX,
+    javascriptX,
+    variableX,
+    functionY,
+    javascriptY,
+    variableY,
+    parametersInPlayJS
   );
   this->addPlotOnTop(plot);
 }

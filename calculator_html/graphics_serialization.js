@@ -31,7 +31,11 @@ class GraphicsSerialization {
     };
   }
 
-  /**@returns {CanvasTwoD|CanvasThreeD|null} */
+  /** 
+   * Constructs a canvas from JSON.
+   *  
+   * @returns {CanvasTwoD|CanvasThreeD|null} 
+   */
   fromJSON(
     input,
     /**@type{HTMLCanvasElement} */
@@ -54,7 +58,31 @@ class GraphicsSerialization {
     }
   }
 
-  /**@returns {CanvasTwoD} */
+  /** Redraws the canvas, without re-creating it. */
+  redrawFromJSON(
+    /**@type{CanvasTwoD|CanvasThreeD}*/
+    canvas,
+    input,
+    /**@type{Object.<string,HTMLElement>} */
+    sliders,
+  ) {
+    canvas.clear();
+    let graphicsType = input["graphicsType"];
+    switch (graphicsType) {
+      case "twoDimensional":
+        return this.plotTwoDimensionalGraphics(canvas, input, sliders);
+      case "threeDimensional":
+        return this.plotThreeDimensionalGraphics(canvas, input, sliders);
+      default:
+        throw `Unknown graphics type ${graphicsType}.`;
+    }
+  }
+
+  /** 
+   * Creates two-dimensional graphics.
+   * 
+   * @return {CanvasTwoD} 
+   */
   twoDimensionalGraphics(
     input,
     /**@type{HTMLCanvasElement}*/
@@ -66,20 +94,16 @@ class GraphicsSerialization {
     /**@type{Object.<string,HTMLElement>} */
     sliders,
   ) {
-    let plotObjects = input["plotObjects"];
-    if (!Array.isArray(plotObjects)) {
-      throw `Plot objects not an array.`;
-    }
     let canvas = new CanvasTwoD(canvasElement, controls, messages);
     canvas.initialize();
-    for (let i = 0; i < plotObjects.length; i++) {
-      this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders);
-    }
-    canvas.redraw();
-    return canvas;
+    return this.plotTwoDimensionalGraphics(canvas, input, sliders);
   }
 
-  /**@returns{CanvasThreeD} */
+  /**
+   * Creates three-dimensional graphics.
+   * 
+   * @returns{CanvasThreeD} 
+   */
   threeDimensionalGraphics(
     input,
     /**@type{HTMLCanvasElement}*/
@@ -91,12 +115,50 @@ class GraphicsSerialization {
     /**@type{Object.<string,HTMLElement>} */
     sliders,
   ) {
+    let canvas = new CanvasThreeD(canvasElement, controls, messages);
+    canvas.initialize();
+    return this.plotThreeDimensionalGraphics(canvas, input, sliders);
+  }
+
+  /** 
+   * Plots two dimensional graphics on an already created graphics object.
+   * 
+   * @returns {CanvasTwoD} 
+   */
+  plotTwoDimensionalGraphics(
+    /** @type{CanvasTwoD}*/
+    canvas,
+    input,
+    /**@type{Object.<string,HTMLElement>} */
+    sliders,
+  ){
     let plotObjects = input["plotObjects"];
     if (!Array.isArray(plotObjects)) {
       throw `Plot objects not an array.`;
     }
-    let canvas = new CanvasThreeD(canvasElement, controls, messages,);
-    canvas.initialize();
+    for (let i = 0; i < plotObjects.length; i++) {
+      this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders);
+    }
+    canvas.redraw();
+    return canvas;
+  }
+
+  /** 
+   * Plots three dimensional graphics on an already created graphics object.
+   * 
+   * @return{CanvasThreeD}
+   */
+  plotThreeDimensionalGraphics(
+    /**@type{CanvasThreeD}*/
+    canvas,
+    input,
+    /**@type{Object.<string,HTMLElement>} */
+    sliders,
+  ) {
+    let plotObjects = input["plotObjects"];
+    if (!Array.isArray(plotObjects)) {
+      throw `Plot objects not an array.`;
+    }
     for (let i = 0; i < plotObjects.length; i++) {
       this.oneThreeDimensionalObject(plotObjects[i], canvas, sliders);
     }
@@ -104,7 +166,7 @@ class GraphicsSerialization {
       canvas.setBoundingBoxAsDefaultViewWindow();
     }
     canvas.redraw();
-    return canvas;
+    return canvas;    
   }
 
   oneTwoDimensionalObject(
@@ -222,7 +284,11 @@ class GraphicsSerialization {
     }
   }
 
-  /**@returns {Object.<string,string>} */
+  /** 
+   * Extracts sliders.
+   * 
+   * @return {Object.<string,string>} 
+   */
   getSliderValuesFromInput(
     /**@type{Object.<string,HTMLInputElement>} */
     sliders,
@@ -231,7 +297,11 @@ class GraphicsSerialization {
     return this.getSliderValues(sliders, plot[this.labels.parameters]);
   }
 
-  /**@returns {Object.<string,string>} */
+  /** 
+   * Constructs slider.
+   * 
+   * @returns {Object.<string,string>} 
+   */
   getSliderValues(
     /**@type{Object.<string,HTMLInputElement>} */
     sliders,
@@ -308,7 +378,11 @@ class GraphicsSerialization {
     }
   }
 
-  /**@return{number} */
+  /** 
+   * Extracts a number from javascript.
+   * 
+   * @return{number} 
+   */
   interpretStringToNumber(
     /**@type{string} */
     input,
@@ -319,7 +393,11 @@ class GraphicsSerialization {
     return Function(`"use strict"; ${extraJavascript} return (${input});`)();
   }
 
-  /**@return{number[]} */
+  /** 
+   * Interprets a list of strings from javascript.
+   * 
+   * @return{number[]} 
+   */
   interpretListStringsAsNumbers(
     /**@type{string[]} */
     input,
@@ -333,7 +411,11 @@ class GraphicsSerialization {
     return result;
   }
 
-  /**@return{number[][]} */
+  /** 
+   * Interprets a list of list of strings from javascript.
+   * 
+   * @return{number[][]} 
+   */
   interpretListListStringsAsNumbers(
     /**@type{string[][]} */
     input,

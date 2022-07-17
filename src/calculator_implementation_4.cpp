@@ -377,7 +377,7 @@ bool CalculatorBasics::tensorProductStandard(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
-  STACK_TRACE("Calculator::tensorProductStandard");
+  STACK_TRACE("CalculatorBasics::tensorProductStandard");
   if (
     CalculatorBasics::distribute(
       calculator,
@@ -403,7 +403,7 @@ bool CalculatorBasics::tensorProductStandard(
 bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::multiplyAtoXtimesAtoYequalsAtoXplusY");
+  STACK_TRACE("CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -611,7 +611,7 @@ bool CalculatorBasics::associate(
 bool CalculatorBasics::standardIsDenotedBy(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::standardIsDenotedBy");
+  STACK_TRACE("CalculatorBasics::standardIsDenotedBy");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opIsDenotedBy(), 3)) {
     return false;
@@ -653,7 +653,7 @@ bool CalculatorBasics::standardIsDenotedBy(
 bool CalculatorBasics::multiplyByOne(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::multiplyByOne");
+  STACK_TRACE("CalculatorBasics::multiplyByOne");
   if (
     !input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3
   ) {
@@ -713,7 +713,7 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
 bool CalculatorBasics::timesToFunctionApplication(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::timesToFunctionApplication");
+  STACK_TRACE("CalculatorBasics::timesToFunctionApplication");
   if (!input.startsWith(calculator.opTimes())) {
     return false;
   }
@@ -851,7 +851,7 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
   int multiplicativeOperation,
   bool constantsOnly
 ) {
-  STACK_TRACE("Calculator::rightDistributeBracketIsOnTheRight");
+  STACK_TRACE("CalculatorBasics::rightDistributeBracketIsOnTheRight");
   if (additiveOperation == - 1) {
     additiveOperation = calculator.opPlus();
   }
@@ -1090,7 +1090,7 @@ bool Calculator::functionCollectSummandsCombine(
 bool CalculatorBasics::associateExponentExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::associateExponentExponent");
+  STACK_TRACE("CalculatorBasics::associateExponentExponent");
   int opPower = calculator.opPower();
   if (!input.startsWith(opPower, 3)) {
     return false;
@@ -1261,6 +1261,20 @@ void Expression::operator+=(const Expression& other) {
     << "Error: adding expressions with different owners. "
     << global.fatal;
   }
+  if (other.isEqualToZero()) {
+    return;
+  }
+  if (this->isEqualToZero()) {
+    *this = other;
+    return;
+  }Rational leftRational;
+  Rational rightRational;
+  if (this->isRational(&leftRational) && other.isRational(&rightRational)){
+    leftRational+= rightRational;
+    this->assignValue(*this->owner, leftRational);
+    return;
+  }
+
   Expression resultE;
   resultE.makeXOX(
     *this->owner, this->owner->opPlus(), *this, other
@@ -1293,6 +1307,13 @@ void Expression::operator-=(const Expression& other) {
     << "Error: attempt to add expressions with different owners. "
     << global.fatal;
   }
+  if (other.isEqualToZero()){
+    return;
+  }
+  if (this->isEqualToZero()) {
+    this->makeOX(*this->owner, this->owner->opMinus(), other);
+    return;
+  }
   Expression resultE;
   resultE.makeXOX(
     *this->owner, this->owner->opMinus(), *this, other
@@ -1300,11 +1321,11 @@ void Expression::operator-=(const Expression& other) {
   *this = resultE;
 }
 
-Expression Expression::operator*(const Expression& other) {
+Expression Expression::operator*(const Expression& right) {
   STACK_TRACE("Expression::operator*");
   Expression result;
   result = *this;
-  result *= other;
+  result *= right;
   return result;
 }
 
@@ -1354,8 +1375,7 @@ Expression Expression::operator/(int other) {
 }
 
 Expression Expression::operator+(const Expression& other) {
-  Expression result;
-  result = *this;
+  Expression result = *this;
   result += other;
   return result;
 }
@@ -1400,11 +1420,7 @@ void Expression::operator/=(const Expression& other) {
     << "Error: dividing expressions with different owners. "
     << global.fatal;
   }
-  Expression resultE;
-  resultE.makeXOX(
-    *this->owner, this->owner->opDivide(), *this, other
-  );
-  *this = resultE;
+  this->makeQuotientReduce(*this->owner, *this, other);
 }
 
 void Expression::operator*=(const Expression& other) {
@@ -1432,18 +1448,31 @@ void Expression::operator*=(const Expression& other) {
     << "Error: adding expressions with different owners. "
     << global.fatal;
   }
+  if (other.isEqualToZero() || this->isEqualToZero()) {
+    *this = this->owner->expressionZero();
+    return;
+  }
+  if (this->isEqualToOne()) {
+    *this = other;
+    return;
+  }
+  if (other.isEqualToOne()) {
+    return;
+  }
+  Rational leftRational;
+  Rational rightRational;
+  if (
+    this->isRational(&leftRational) && other.isRational(&rightRational)
+  ) {
+    leftRational *= rightRational;
+    this->assignValue(*this->owner, leftRational);
+    return;
+  }
   Expression resultE;
   resultE.makeXOX(
     *this->owner, this->owner->opTimes(), *this, other
   );
   *this = resultE;
-}
-
-bool Expression::operator==(const Expression& other) const {
-  if (this->owner != other.owner) {
-    return false;
-  }
-  return this->data == other.data && this->children == other.children;
 }
 
 bool Expression::isEqualToMathematically(const Expression& other) const {
@@ -2468,7 +2497,7 @@ std::string Calculator::toString() {
 std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   bool includeLispifiedExpressions, bool ignoreCommandEnclosures
 ) {
-  STACK_TRACE("Calculator::toStringSyntacticStackHTMLTable");
+  STACK_TRACE("CalculatorParser::toStringSyntacticStackHTMLTable");
   std::stringstream out;
   if ((*this->currentSyntacticStack).size < this->numberOfEmptyTokensStart
   ) {
@@ -2784,7 +2813,7 @@ bool Expression::mergeContextsMyAruments(
 bool CalculatorBasics::meltBrackets(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::outerMeltBrackets");
+  STACK_TRACE("CalculatorBasics::outerMeltBrackets");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opCommandSequence())) {
     return false;

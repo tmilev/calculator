@@ -31,7 +31,7 @@ Calculator::Examples::Examples() {
 }
 
 JSData Calculator::Examples::toJSONFunctionHandlers() {
-  STACK_TRACE("Calculator::toJSONFunctionHandlers");
+  STACK_TRACE("Calculator::Examples::toJSONFunctionHandlers");
   JSData output;
   output.elementType = JSData::token::tokenObject;
   MapReferences<
@@ -83,7 +83,7 @@ std::string Calculator::Examples::escape(const std::string& atom) {
 }
 
 std::string Calculator::Examples::getExamplesReadmeFragment() {
-  STACK_TRACE("Calculator::getExamplesReadmeFragment");
+  STACK_TRACE("Calculator::Examples::getExamplesReadmeFragment");
   std::stringstream out;
   MapReferences<
     std::string,

@@ -827,7 +827,9 @@ void Calculator::initializeFunctionsScientificBasic() {
     "",
     "Plots the escape map (Julia set) of the complex dynamics of the function."
     ,
-    "PlotEscapeMap(z+1/z)",
+    "PlotEscapeMap(0.5z^2+0.5);\n"
+    "a=MakeInputBox(name=a,value=1);\n"
+    "PlotEscapeMap(1/a (z^2+1));",
     "CalculatorFunctionsComplexDynamics::plotEscapeMap",
     "PlotEscapeMap",
     innerStandard

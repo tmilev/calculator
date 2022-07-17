@@ -1512,7 +1512,7 @@ bool CalculatorFunctions::powerExponentToLog(
 bool CalculatorFunctions::distributeExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::distributeExponent");
+  STACK_TRACE("CalculatorFunctions::distributeExponent");
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -1556,7 +1556,7 @@ bool CalculatorFunctions::distributeExponent(
 bool CalculatorFunctions::sqrt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::sqrt");
+  STACK_TRACE("CalculatorFunctions::sqrt");
   if (input.size() != 3) {
     return false;
   }

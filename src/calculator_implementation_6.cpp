@@ -2537,7 +2537,7 @@ bool CalculatorFunctions::orIdentical(
 bool CalculatorFunctions::distributeSqrt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::distributeSqrt");
+  STACK_TRACE("CalculatorFunctions::distributeSqrt");
   if (!input.startsWith(calculator.opSqrt(), 3)) {
     return false;
   }
@@ -3499,7 +3499,7 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
 bool CalculatorFunctions::suffixNotationForPostScript(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::suffixNotationForPostScript");
+  STACK_TRACE("CalculatorFunctions::suffixNotationForPostScript");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (*counter.counter == calculator.maximumRecursionDepth - 2) {
     return output.assignValue(calculator, std::string("..."));
@@ -3837,7 +3837,7 @@ bool StringRoutines::isLatinLetterOrDigitSequence(const std::string& input) {
 bool CalculatorFunctions::jacobiSymbol(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::jacobiSymbol");
+  STACK_TRACE("CalculatorFunctions::jacobiSymbol");
   global.fatal << "Function not implemented yet." << global.fatal;
   (void) calculator;
   (void) output;

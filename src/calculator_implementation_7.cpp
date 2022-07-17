@@ -1154,7 +1154,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   bool useUpperLimit,
   bool startWithAlgebraicClosure
 ) {
-  STACK_TRACE("Calculator::solveSerreLikeSystem");
+  STACK_TRACE("CalculatorFunctions::solveSerreLikeSystem");
   Vector<Polynomial<Rational> > polynomialsRational;
   ExpressionContext context(calculator);
   bool useArguments =
@@ -3689,7 +3689,7 @@ bool CalculatorFunctions::Test::checkSorting(
 bool CalculatorFunctions::addTerms(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::addTerms");
+  STACK_TRACE("CalculatorFunctions::addTerms");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(calculator.opPlus())) {
     return false;
@@ -3712,7 +3712,7 @@ bool CalculatorFunctions::addTerms(
 bool CalculatorFunctions::sortTerms(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::sortTerms");
+  STACK_TRACE("CalculatorFunctions::sortTerms");
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(calculator.opPlus())) {
     return false;
@@ -4450,7 +4450,7 @@ bool CalculatorFunctions::rationalFunctionSubstitution(
 bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::invertMatrixVerbose");
+  STACK_TRACE("CalculatorFunctions::invertMatrixVerbose");
   Matrix<RationalFraction<Rational> > matrix, outputMatrix, extendedMatrix;
   Expression converted;
   if (
@@ -9843,7 +9843,7 @@ bool CalculatorFunctions::crashByVectorOutOfBounds(
 bool CalculatorFunctions::transpose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::transpose");
+  STACK_TRACE("CalculatorFunctions::transpose");
   if (
     !input.isSequenceNElements() &&
     !input.isMatrix() &&

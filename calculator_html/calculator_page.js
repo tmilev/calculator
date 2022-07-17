@@ -26,9 +26,9 @@ class AtomHandler {
 
   fromObject(
     input,
-    /**@type {number}*/
+    /** @type {number} */
     index,
-    /**@type {number}*/
+    /** @type {number} */
     totalRules,
   ) {
     this.index = index;
@@ -102,9 +102,9 @@ class Calculator {
     this.lastSubmittedInput = "";
     this.numberOfCalculatorPanels = 0;
     processMonitoring.monitor.ownerCalculator = this;
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.flagTypeset = false;
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.initialized = false;
     this.editor = new calculatorPageEditor.CalculatorEquationEditor((event) => {
       this.submitCalculatorInputOnEnter(event);
@@ -382,9 +382,6 @@ class Calculator {
     /**@type{Function} */
     typeSetCallback,
   ) {
-    // if (storage.storage.variables.currentPage.getValue() !== "calculator") {
-    //  return;
-    //}
     if (this.flagTypeset === true) {
       return;
     }

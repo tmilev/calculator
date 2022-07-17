@@ -443,6 +443,11 @@ public:
   bool makeProductReduceOnes(
     Calculator& owner, const List<Expression>& multiplicands
   );
+  bool makeQuotientReduce(
+    Calculator& owner,
+    const Expression& numerator,
+    const Expression& denominator
+  );
   int getNumberOfColumns() const;
   bool makeSequenceCommands(
     Calculator& owner,
@@ -1441,7 +1446,8 @@ public:
     const std::string& variableX,
     const Expression& functionY,
     const std::string& javascriptY,
-    const std::string& variableY
+    const std::string& variableY,
+    const List<std::string>& parametersInPlayJS
   );
   PlotObject();
   bool operator==(const PlotObject& other) const;
@@ -1530,7 +1536,8 @@ public:
     const std::string& variableX,
     Expression& functionY,
     const std::string& javascriptY,
-    const std::string& variableY
+    const std::string& variableY,
+    List<std::string>& parametersInPlayJS
   );
   void drawCoordinateAxes();
   void drawGrid();
@@ -1558,8 +1565,14 @@ public:
   Expression min;
   Expression max;
   Expression step;
+  bool operator==(const InputBox& other) const {
+    return this->name == other.name;
+  }
   std::string getSliderName() const;
   std::string getUserInputBox() const;
+  static unsigned int hashFunction(const InputBox& input) {
+    return HashFunctions::hashFunction(input.name);
+  }
 };
 
 class ObjectContainer {

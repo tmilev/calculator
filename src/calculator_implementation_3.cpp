@@ -757,7 +757,7 @@ bool Calculator::Test::processOneTest(JSData& input) {
 }
 
 bool Calculator::Test::loadTestStrings(std::stringstream* commentsOnFailure) {
-  STACK_TRACE("Calculator::loadTestStrings");
+  STACK_TRACE("Calculator::Test::loadTestStrings");
   if (
     !FileOperations::fileExistsVirtual(
       WebAPI::calculator::testFileNameVirtual, false, false, nullptr
@@ -817,7 +817,7 @@ std::string Calculator::writeFileToOutputFolderReturnLink(
 bool Calculator::Test::writeTestStrings(
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Calculator::writeTestStrings");
+  STACK_TRACE("Calculator::Test::writeTestStrings");
   JSData result;
   result.elementType = JSData::token::tokenArray;
   result.listObjects.setSize(this->commands.size());

@@ -211,7 +211,7 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
 bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::attemptExtendingEtoHEFwithHinCartan");
+  STACK_TRACE("CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan");
   if (input.size() != 3) {
     return
     output.assignError(
@@ -265,7 +265,7 @@ bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(
 bool CalculatorFunctions::zModP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::zModP");
+  STACK_TRACE("CalculatorFunctions::zModP");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -301,7 +301,7 @@ bool CalculatorFunctions::zModP(
 bool CalculatorFunctions::conesIntersect(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::conesIntersect");
+  STACK_TRACE("CalculatorFunctions::conesIntersect");
   if (!input.isListNElements(3)) {
     return
     calculator
@@ -420,7 +420,7 @@ bool CalculatorFunctions::conesIntersect(
 bool CalculatorFunctions::reverseOrderRecursively(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::reverseOrderRecursively");
+  STACK_TRACE("CalculatorFunctions::reverseOrderRecursively");
   if (input.size() < 2) {
     return false;
   }
@@ -462,7 +462,7 @@ bool Calculator::functionReverseOrderRecursively(
 bool CalculatorFunctions::reverseOrder(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::reverseOrder");
+  STACK_TRACE("CalculatorFunctions::reverseOrder");
   if (!input.isSuitableForRecursion()) {
     output = input;
     return true;
@@ -505,7 +505,7 @@ bool CalculatorFunctions::notFunction(
 bool CalculatorFunctions::printZnEnumeration(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::printZnEnumeration");
+  STACK_TRACE("CalculatorFunctions::printZnEnumeration");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -542,7 +542,7 @@ void Vector<Rational>::perturbNormalRelativeToVectorsInGeneralPosition(
 bool CalculatorFunctions::perturbSplittingNormal(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::perturbSplittingNormal");
+  STACK_TRACE("CalculatorFunctions::perturbSplittingNormal");
   std::stringstream out;
   if (input.size() != 4) {
     out
@@ -624,7 +624,7 @@ bool CalculatorFunctions::perturbSplittingNormal(
 bool CalculatorFunctions::printAllVectorPartitions(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::printAllVectorPartitions");
+  STACK_TRACE("CalculatorFunctions::printAllVectorPartitions");
   RecursionDepthCounter recursion(&calculator.recursionDepth);
   if (input.size() != 3) {
     return
@@ -712,7 +712,7 @@ bool CalculatorFunctions::printAllVectorPartitions(
 bool CalculatorFunctions::interpolatePolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::interpolatePolynomial");
+  STACK_TRACE("CalculatorFunctions::interpolatePolynomial");
   if (input.size() < 2) {
     return false;
   }
@@ -769,7 +769,7 @@ bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
   Expression& output,
   bool assignPoly
 ) {
-  STACK_TRACE("Calculator::elementWeylAlgebraOrPolynomial");
+  STACK_TRACE("CalculatorFunctions::elementWeylAlgebraOrPolynomial");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -818,7 +818,7 @@ bool CalculatorBasics::extractBaseMultiplication(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
-  STACK_TRACE("Calculator::extractBaseMultiplication");
+  STACK_TRACE("CalculatorBasics::extractBaseMultiplication");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }

@@ -114,14 +114,7 @@ class ElementWithScripts {
     for (let label in this.sliders) {
       let current = this.sliders[label];
       current.addEventListener("input", () => {
-        // reconstruct the entire graphics.
-        canvas = graphicsSerialization.fromJSON(
-          graphics,
-          canvas.canvasContainer,
-          controls[0],
-          null,
-          this.sliders,
-        );
+        graphicsSerialization.redrawFromJSON(canvas, graphics, this.sliders);
       });
     }
   }

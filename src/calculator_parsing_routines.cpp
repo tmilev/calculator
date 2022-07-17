@@ -289,7 +289,7 @@ bool CalculatorParser::parseAndExtractExpressions(
   List<SyntacticElement>& outputSyntacticStack,
   std::string* outputSyntacticErrors
 ) {
-  STACK_TRACE("Calculator::parseAndExtractExpressions");
+  STACK_TRACE("CalculatorParser::parseAndExtractExpressions");
   this->currentSyntacticStack = &outputSyntacticStack;
   this->currrentSyntacticSoup = &outputAllSyntacticElements;
   this->parseFillDictionary(input);
@@ -300,7 +300,7 @@ bool CalculatorParser::parseAndExtractExpressions(
 }
 
 std::string CalculatorParser::toStringSyntacticStackHTMLSimple() {
-  STACK_TRACE("Calculator::toStringSyntacticStackHTMLSimple");
+  STACK_TRACE("CalculatorParser::toStringSyntacticStackHTMLSimple");
   if (this->currentSyntacticStack->size == 0) {
     global.fatal << "Unexpected empty syntactic stack." << global.fatal;
   }
@@ -1374,7 +1374,7 @@ bool CalculatorParser::isInterpretedAsEmptySpace(unsigned char input) {
 }
 
 void CalculatorParser::initializePredefinedWordSplits() {
-  STACK_TRACE("Calculator::initializePredefinedWordSplits");
+  STACK_TRACE("CalculatorParser::initializePredefinedWordSplits");
   List<std::string> splitVariables = List<std::string>({"x", "y"});
   this->predefinedWordSplits.setKeyValue(
     "xy", List<std::string>({"x", "y"})
@@ -1401,7 +1401,7 @@ void CalculatorParser::initializePredefinedWordSplits() {
 }
 
 void CalculatorParser::parseFillDictionary(const std::string& input) {
-  STACK_TRACE("Calculator::parseFillDictionary");
+  STACK_TRACE("CalculatorParser::parseFillDictionary");
   this->parseFillDictionary(input, *this->currrentSyntacticSoup);
   SyntacticElement currentElement;
   currentElement.data.reset(*this->owner);
@@ -1485,7 +1485,7 @@ bool CalculatorParser::parseEmbedInCommandSequence(
 void CalculatorParser::parseFillDictionary(
   const std::string& input, List<SyntacticElement>& output
 ) {
-  STACK_TRACE("Calculator::parseFillDictionary");
+  STACK_TRACE("CalculatorParser::parseFillDictionary");
   std::string current;
   output.reserve(static_cast<signed>(input.size()));
   output.setSize(0);
@@ -2210,7 +2210,9 @@ bool CalculatorParser::replaceEOXbyEX() {
 }
 
 bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
-  STACK_TRACE("Calculator::replaceVbyVdotsVAccordingToPredefinedWordSplits");
+  STACK_TRACE(
+    "CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits"
+  );
   SyntacticElement& currentElement = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
@@ -3066,7 +3068,7 @@ bool CalculatorParser::allowsDivideInPreceding(const std::string& lookAhead) {
 bool CalculatorParser::extractExpressions(
   Expression& outputExpression, std::string* outputErrors
 ) {
-  STACK_TRACE("Calculator::extractExpressions");
+  STACK_TRACE("CalculatorParser::extractExpressions");
   // std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->currentSyntacticStack).reserve((*this->currrentSyntacticSoup).size +
@@ -3135,7 +3137,7 @@ bool CalculatorParser::extractExpressions(
       ) {
         global.fatal
         << "This may be a programming error: "
-        << "Calculator::applyOneRule called more than "
+        << "CalculatorParser::applyOneRule called more than "
         << maxNumTimesOneRuleCanBeCalled
         << " times without advancing to the "
         << "next syntactic element in the syntactic soup. "

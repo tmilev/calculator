@@ -5820,6 +5820,11 @@ bool Expression::isBuiltInType(int* outputWhichType) const {
 bool Expression::makeExponentReduce(
   Calculator& owner, const Expression& base, int power
 ) {
+  if (base.owner == nullptr) {
+    global.fatal
+    << "Making exponent with non-initialized base."
+    << global.fatal;
+  }
   if (power == 1) {
     *this = base;
     return true;
@@ -5852,6 +5857,42 @@ bool Expression::makeProductReduceOnes(
   return this->makeProduct(owner, multiplicandsWithoutOnes);
 }
 
+bool Expression::makeQuotientReduce(
+  Calculator& owner,
+  const Expression& numerator,
+  const Expression& denominator
+) {
+  if (numerator.owner == nullptr || denominator.owner == nullptr) {
+    global.fatal
+    << "Cannot construct quotient from non-initialized expressions."
+    << global.fatal;
+  }
+  if (denominator.isEqualToZero()) {
+    global.fatal
+    <<
+    "Use of Expression::makeQuotientReduce "
+    <<"is not allowed with zero denominators."
+    << global.fatal;
+  }
+  if (denominator.isEqualToOne()) {
+    *this = numerator;
+    return true;
+  }
+  if (numerator.isEqualToZero()) {
+    *this = owner.expressionZero();
+    return  true;
+  }
+  Rational numeratorRational;
+  Rational denominatorRational;
+  if (
+    numerator.isRational(&numeratorRational) &&
+    denominator.isRational(&denominatorRational)
+  ) {
+    return this->assignValue(owner, numeratorRational / denominatorRational);
+  }
+  return this->makeXOX(owner, owner.opDivide(), numerator, denominator);
+}
+
 bool Expression::makeProduct(
   Calculator& owner, const List<Expression>& multiplicands
 ) {
@@ -5865,10 +5906,24 @@ bool Expression::makeSum(
   Calculator& owner, const List<Expression>& summands
 ) {
   STACK_TRACE("Expression::makeSum");
-  if (summands.size == 0) {
+  List<Expression> summandsWithoutZeroes;
+  Rational rationalSum;
+  Rational current;
+
+  for (int i = 0; i < summands.size; i ++){
+    if (summands[i].isRational(&current)) {
+      rationalSum+=current;
+      continue;
+    }
+    summandsWithoutZeroes.addOnTop(summands[i]);
+  }
+  if (!rationalSum.isEqualToZero()){
+    summandsWithoutZeroes.insertAtIndexShiftElementsUp( owner.expressionRational(rationalSum),0);
+  }
+  if (summandsWithoutZeroes.size == 0) {
     return this->assignValue(owner, 0);
   }
-  return this->makeXOXOdotsOX(owner, owner.opPlus(), summands);
+  return this->makeXOXOdotsOX(owner, owner.opPlus(), summandsWithoutZeroes);
 }
 
 bool Expression::makeOXdotsX(
@@ -6018,6 +6073,13 @@ bool Expression::operator==(int other) const {
 
 bool Expression::operator==(const std::string& other) const {
   return this->isOperationGiven(other);
+}
+
+bool Expression::operator==(const Expression& other) const {
+  if (this->owner != other.owner) {
+    return false;
+  }
+  return this->data == other.data && this->children == other.children;
 }
 
 std::string Expression::toUTF8String(FormatExpressions* format) const {

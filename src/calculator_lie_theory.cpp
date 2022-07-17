@@ -420,7 +420,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
   SemisimpleLieAlgebra* owner,
   bool Verbose
 ) {
-  STACK_TRACE("Calculator::highestWeightVectorCommon");
+  STACK_TRACE("CalculatorLieTheory::highestWeightVectorCommon");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   RationalFraction<Rational> RFOne, RFZero;
   RFOne.makeOne();
@@ -489,7 +489,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
 bool CalculatorLieTheory::animateLittelmannPaths(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::animateLittelmannPaths");
+  STACK_TRACE("CalculatorLieTheory::animateLittelmannPaths");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return output.assignError(calculator, "This function takes 2 arguments");
@@ -535,7 +535,7 @@ bool CalculatorLieTheory::animateLittelmannPaths(
 bool CalculatorLieTheory::splitFDpartB3overG2inner(
   Calculator& calculator, BranchingData& g2B3Data, Expression& output
 ) {
-  STACK_TRACE("Calculator::splitFDpartB3overG2inner");
+  STACK_TRACE("CalculatorLieTheory::splitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFraction<Rational> > modulusCopy;
   modulusCopy.makeFromHW(
     g2B3Data.homomorphism.coDomainAlgebra(),
@@ -731,7 +731,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
 bool CalculatorLieTheory::testMonomialBaseConjecture(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::testMonomialBaseConjecture");
+  STACK_TRACE("CalculatorLieTheory::testMonomialBaseConjecture");
   RecursionDepthCounter recursion(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return
@@ -928,7 +928,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
 bool CalculatorLieTheory::littelmannOperator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::littelmannOperator");
+  STACK_TRACE("CalculatorLieTheory::littelmannOperator");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   if (input.hasBoundVariables()) {
     return false;
@@ -958,7 +958,7 @@ bool CalculatorLieTheory::LSPath(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter recutionIncrementer(&calculator.recursionDepth);
-  STACK_TRACE("Calculator::LSPath");
+  STACK_TRACE("CalculatorLieTheory::LSPath");
   if (input.size() < 3) {
     return
     output.assignError(calculator, "LSPath needs at least two arguments.");
@@ -999,7 +999,7 @@ bool CalculatorLieTheory::LSPath(
 bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::kazhdanLuzstigCoeffificents");
+  STACK_TRACE("CalculatorLieTheory::kazhdanLuzstigCoeffificents");
   if (input.size() != 2) {
     return
     calculator
@@ -1435,7 +1435,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
 bool CalculatorLieTheory::printB3G2branchingTable(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::printB3G2branchingTable");
+  STACK_TRACE("CalculatorLieTheory::printB3G2branchingTable");
   Vectors<RationalFraction<Rational> > highestWeights;
   BranchingData g2B3Data;
   ExpressionContext context(calculator);
@@ -1458,7 +1458,7 @@ bool CalculatorLieTheory::printB3G2branchingTable(
 bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::printB3G2branchingTableCharsOnly");
+  STACK_TRACE("CalculatorLieTheory::printB3G2branchingTableCharsOnly");
   BranchingData g3InB3Data;
   ExpressionContext context(calculator);
   Vectors<RationalFraction<Rational> > highestWeights;
@@ -1838,7 +1838,7 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
 bool CalculatorLieTheory::killingForm(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::killingForm");
+  STACK_TRACE("CalculatorLieTheory::killingForm");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -2397,7 +2397,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(
   BranchingData& g2InB3Data,
   ExpressionContext& context
 ) {
-  STACK_TRACE("Calculator::printB3G2branchingTableCommon");
+  STACK_TRACE("CalculatorLieTheory::printB3G2branchingTableCommon");
   Vector<RationalFraction<Rational> > highestWeightRationalFraction;
   SelectionWithMaxMultiplicity highestWeightEnumerator;
   int desiredHeight = 0;
@@ -6103,7 +6103,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
 bool CalculatorLieTheory::casimir(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::casimir");
+  STACK_TRACE("CalculatorLieTheory::casimir");
   if (input.size() != 2) {
     return calculator << "Casimir function expects a single input. ";
   }
@@ -6174,7 +6174,9 @@ bool CalculatorLieTheory::embedG2InB3(
 bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Calculator::characterSemisimpleLieAlgebraFiniteDimensional");
+  STACK_TRACE(
+    "CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional"
+  );
   Vector<Rational> highestWeight;
   Selection parSel;
   WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
@@ -6403,7 +6405,9 @@ bool CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(
   bool verbose,
   bool writeToHD
 ) {
-  STACK_TRACE("Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra");
+  STACK_TRACE(
+    "CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra"
+  );
   if (input.size() != 2) {
     return calculator << "Print semisimple Lie algebras expects 1 argument. ";
   }

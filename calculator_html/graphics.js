@@ -1097,6 +1097,8 @@ class EscapeMap {
   constructor(functionX, functionY) {
     this.functionX = functionX;
     this.functionY = functionY; 
+    this.lastImageData = null;
+    this.ignoreNextComputation = false;
   }
 
   /** Required to satisfy interface.
@@ -1138,8 +1140,10 @@ class EscapeMap {
     let x = x0;
     let y = y0;
     for (let i = 0; i < 32; i ++) {
-      x = this.functionX(x, y);
-      y = this.functionY(x, y);
+      let newX = this.functionX(x, y);
+      let newY = this.functionY(x, y);
+      x = newX;
+      y = newY;
       let deltaX = x - x0;
       let deltaY = y - y0;
       let rho = deltaX * deltaX + deltaY * deltaY; 
@@ -1188,20 +1192,67 @@ class EscapeMap {
    * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
+    if (this.ignoreNextComputation && this.lastImageData === null) {
+      this.ignoreNextComputation = false;
+      surface.putImageData(this.lastImageData, 0, 0);
+      return;
+    }
     let surface = canvas.surface;
-    const imageData = surface.createImageData(canvas.width, canvas.height);
+    this.lastImageData = surface.createImageData(canvas.width, canvas.height);
     for (let j = 0; j < canvas.width; j++) {
       for (let i = 0; i < canvas.height; i++) {
         let coordinates = canvas.coordsScreenToMathScreen([j, i]);
         coordinates = canvas.coordinatesMathScreenToMath(coordinates);
         let escapeColor = this.escapeColor(coordinates[0], coordinates[1]);
-        imageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColor[0];
-        imageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColor[1];
-        imageData.data[i * canvas.width * 4 + j * 4 + 2] = escapeColor[2];
-        imageData.data[i * canvas.width * 4 + j * 4 + 3] = 255;
+        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColor[0];
+        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColor[1];
+        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 2] = escapeColor[2];
+        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 3] = 255;
       }
     }
-    surface.putImageData(imageData, 0, 0);
+    surface.putImageData(this.lastImageData, 0, 0);
+  }
+
+  /**
+   * Plots the orbit of a single point. 
+   * The input is in screen coordinates.
+   * 
+   * @param {CanvasTwoD} canvas
+   * @param {number} x
+   * @param {number} y
+   */
+  mouseMove(canvas, x, y) {
+    if (this.lastImageData === null) {
+      return;
+    }
+    this.ignoreNextComputation = true;
+    canvas.redraw();
+    let surface = canvas.surface;
+    let coordinates = canvas.coordsScreenAbsoluteToMathScreen(x, y);
+    coordinates = canvas.coordinatesMathScreenToMath(coordinates);
+    x = coordinates[0];
+    y = coordinates[1];
+    let points = [canvas.coordinatesMathToScreen([x,y])];
+    for (let i = 0; i < 32; i++) {
+      x = this.functionX(x, y);
+      y = this.functionY(x, y);
+      let coordinates = canvas.coordinatesMathToScreen([x, y]);
+      if (isNaN(coordinates[0]) || isNaN(coordinates[1])) {
+        break;
+      }
+      if (Math.abs(coordinates[0]) > 1000 || Math.abs(coordinates[1]) > 1000) {
+        break;
+      } 
+      points.push(coordinates);
+    } 
+    surface.beginPath();
+    surface.strokeStyle = "red";
+    surface.lineWidth = 3;
+    surface.moveTo(points[0][0], points[0][1]);
+    for (let i = 1; i < points.length ; i++) {
+      surface.lineTo(points[i][0], points[i][1]);      
+    }
+    surface.stroke();
   }
 }
 
@@ -1702,8 +1753,12 @@ class CanvasTwoD {
   drawEscapeMap(functionX, functionY) {
     let newPlot = new EscapeMap(functionX, functionY);
     this.drawObjects.push(newPlot);
+    this.canvasContainer.addEventListener('mousemove', (e) => {
+      let x = e.clientX;
+      let y = e.clientY;
+      newPlot.mouseMove(this, x, y);
+    }, true)
   }
-
 
   /**
    * Draws a parametric curve on the canvas
@@ -2031,8 +2086,6 @@ class CanvasTwoD {
       this.scale = 1;
     }
     let intermediateScreenPos = this.coordsMathScreenToScreen(mathScreenPos);
-    // console.log("start screen: "+[screenX, screenY]);
-    // console.log("intermed. screen: "+ intermediateScreenPos);
     this.centerX = this.centerX + screenPos[0] - intermediateScreenPos[0];
     this.centerY = this.centerY + screenPos[1] - intermediateScreenPos[1];
     this.redraw();

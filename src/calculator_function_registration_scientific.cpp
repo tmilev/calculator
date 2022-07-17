@@ -823,7 +823,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
 
   this->addOperationHandler("PlotEscapeMap",CalculatorFunctionsComplexDynamics::plotEscapeMap,
-  "","Plots the escape","PlotEscapeMap(z+1/z)", "CalculatorFunctionsComplexDynamics::plotEscapeMap",
+  "","Plots the escape map (Julia set) of the complex dynamics of the function.","PlotEscapeMap(z+1/z)", "CalculatorFunctionsComplexDynamics::plotEscapeMap",
   "PlotEscapeMap",
   innerStandard
   );

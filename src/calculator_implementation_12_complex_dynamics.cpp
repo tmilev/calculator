@@ -76,8 +76,6 @@ out << "<br>Function:<br>"
 << "\\)";
 out << "<br>";
 out << escapeMap.getPlotHtml2d(calculator);
-global.comments << "<br>DEBUG: " <<
-realPartJavascript << ", " << imaginaryPartJavascript<< "<br>";
 return output.assignValue(calculator, out.str());
 
 }
@@ -86,12 +84,10 @@ bool RealAndImaginaryPartExtractor::extract(const Expression &input){
   STACK_TRACE("RealAndImaginaryPartExtractor::extract");
   this->original = input;
   HashedList<Expression> variables;
-  global.comments << "DEBUG: got here 0";
   input.getFreeVariables(variables, true);
   if (variables.size != 1){
     return  false;
   }
-  global.comments << "DEBUG: got here ";
   this->variable = variables[0];
  this->realPartVariable=  this->owner->getNewAtom("x");
   this->imaginaryPartVariable=this->owner->getNewAtom("y");
@@ -112,7 +108,6 @@ bool RealAndImaginaryPartExtractor::extractRecursive(const Expression &input, Ex
  if (input.startsWith(this->owner->opTimes(), 3)){
    return this->extractFromProduct(input[1], input[2],outputRealPart,outputImaginaryPart);
  }
- global.comments << "DEBUG: here I am!";
   Rational constant;
   if (input.isOfType(&constant)){
     outputRealPart=input;

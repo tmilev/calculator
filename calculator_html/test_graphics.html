@@ -123,14 +123,10 @@
     canvas4.initialize();
     canvas4.drawEscapeMap(
       (x, y) => {
-        let xzSquared = x * x - y * y;
-        let yzSquared = 2 * x * y;
-        return x - xzSquared / (xzSquared * xzSquared + yzSquared * yzSquared);
+        return x * x - y * y;
       },
       (x, y) => {
-        let xzSquared = x * x - y * y;
-        let yzSquared = 2 * x * y;
-        return y + yzSquared / (xzSquared * xzSquared + yzSquared * yzSquared);
+        return 2 * x * y;
       }
     );
     canvas4.drawGrid();

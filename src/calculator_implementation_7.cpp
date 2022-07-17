@@ -7360,8 +7360,9 @@ bool CalculatorFunctionsPlot::plotViewRectangle(
     << input[2].toString();
   }
   Plot emptyPlot;
-  emptyPlot.setViewWindow(lowerLeft[0], lowerLeft[1], upperRight[0], upperRight[1]);
-
+  emptyPlot.setViewWindow(
+    lowerLeft[0], lowerLeft[1], upperRight[0], upperRight[1]
+  );
   emptyPlot.desiredHtmlHeightInPixels = 100;
   emptyPlot.desiredHtmlWidthInPixels = 100;
   return output.assignValue(calculator, emptyPlot);

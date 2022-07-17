@@ -732,13 +732,13 @@ Expression Calculator::getNewBoundVariable() {
   return result;
 }
 
-Expression Calculator::getNewAtom(const std::string &preferredName) {
-  if (preferredName != ""){
-  if (!this->operations.contains(preferredName)) {
-    Expression result;
-    result.makeAtom(*this, preferredName);
-    return result;
-  }
+Expression Calculator::getNewAtom(const std::string& preferredName) {
+  if (preferredName != "") {
+    if (!this->operations.contains(preferredName)) {
+      Expression result;
+      result.makeAtom(*this, preferredName);
+      return result;
+    }
   }
   std::string atomPrefix;
   std::string candidate;

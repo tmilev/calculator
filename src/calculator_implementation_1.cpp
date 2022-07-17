@@ -41,7 +41,7 @@ std::string PlotObject::Labels::text = "text";
 std::string PlotObject::Labels::arguments = "arguments";
 std::string PlotObject::Labels::parameters = "parameters";
 std::string PlotObject::Labels::viewWindow = "viewWindow";
-std::string PlotObject::PlotTypes::escapeMap= "escapeMap";
+std::string PlotObject::PlotTypes::escapeMap = "escapeMap";
 std::string PlotObject::PlotTypes::parametricCurve = "parametricCurve";
 std::string PlotObject::PlotTypes::plotFunction = "plotFunction";
 std::string PlotObject::PlotTypes::points = "points";
@@ -192,14 +192,10 @@ void Plot::operator+=(const Plot& other) {
     this->highX = other.highX;
   }
   if (other.priorityViewRectangle == this->priorityViewRectangle) {
-    this->highY =
-    MathRoutines::maximum(this->highY, other.highY);
-    this->lowY =
-    MathRoutines::minimum(this->lowY, other.lowY);
-    this->highX =
-    MathRoutines::maximum(this->highX, other.highX);
-    this->lowX =
-    MathRoutines::minimum(this->lowX, other.lowX);
+    this->highY = MathRoutines::maximum(this->highY, other.highY);
+    this->lowY = MathRoutines::minimum(this->lowY, other.lowY);
+    this->highX = MathRoutines::maximum(this->highX, other.highX);
+    this->lowX = MathRoutines::minimum(this->lowX, other.lowX);
   }
   this->plotObjects.addListOnTop(other.plotObjects);
   if (other.priorityWindow > this->priorityWindow) {
@@ -235,10 +231,7 @@ bool Plot::operator==(const Plot& other) const {
       this->highY - other.highY
     ) ==
     0.0
-  ) && ((this->lowY - other.lowY) == 0.0) && ((
-      this->lowX - other.lowX
-    ) ==
-    0.0
+  ) && ((this->lowY - other.lowY) == 0.0) && ((this->lowX - other.lowX) == 0.0
   ) && ((this->highX - other.highX) == 0.0) &&
   this->plotObjects == other.plotObjects &&
   this->parameterNames == other.parameterNames &&
@@ -395,16 +388,13 @@ void Plot::computeAxesAndBoundingBox() {
   this->highY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->lowX =
-    MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
+    this->lowX = MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
     this->highX =
     MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
     this->lowY =
     MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
     this->highY =
-    MathRoutines::maximum(
-      this->plotObjects[k].yHigh, this->highY
-    );
+    MathRoutines::maximum(this->plotObjects[k].yHigh, this->highY);
     for (
       int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
     ) {
@@ -412,14 +402,10 @@ void Plot::computeAxesAndBoundingBox() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->lowX =
-      MathRoutines::minimum(this->lowX, currentPoint[0]);
-      this->highX =
-      MathRoutines::maximum(this->highX, currentPoint[0]);
-      this->lowY =
-      MathRoutines::minimum(currentPoint[1], this->lowY);
-      this->highY =
-      MathRoutines::maximum(currentPoint[1], this->highY);
+      this->lowX = MathRoutines::minimum(this->lowX, currentPoint[0]);
+      this->highX = MathRoutines::maximum(this->highX, currentPoint[0]);
+      this->lowY = MathRoutines::minimum(currentPoint[1], this->lowY);
+      this->highY = MathRoutines::maximum(currentPoint[1], this->highY);
     }
   }
 }
@@ -432,16 +418,13 @@ void Plot::computeAxesAndBoundingBox3d() {
   this->highY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->lowX =
-    MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
+    this->lowX = MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
     this->highX =
     MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
     this->lowY =
     MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
     this->highY =
-    MathRoutines::maximum(
-      this->plotObjects[k].yHigh, this->highY
-    );
+    MathRoutines::maximum(this->plotObjects[k].yHigh, this->highY);
     for (
       int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
     ) {
@@ -449,14 +432,10 @@ void Plot::computeAxesAndBoundingBox3d() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->lowX =
-      MathRoutines::minimum(this->lowX, currentPoint[0]);
-      this->highX =
-      MathRoutines::maximum(this->highX, currentPoint[0]);
-      this->lowY =
-      MathRoutines::minimum(currentPoint[1], this->lowY);
-      this->highY =
-      MathRoutines::maximum(currentPoint[1], this->highY);
+      this->lowX = MathRoutines::minimum(this->lowX, currentPoint[0]);
+      this->highX = MathRoutines::maximum(this->highX, currentPoint[0]);
+      this->lowY = MathRoutines::minimum(currentPoint[1], this->lowY);
+      this->highY = MathRoutines::maximum(currentPoint[1], this->highY);
     }
   }
 }
@@ -531,17 +510,15 @@ void PlotObject::makeCircle(
 }
 
 void PlotObject::makeEscapeMap(
-const Expression &functionX,
-const std::string& javascriptX,
-const std::string& variableX,
-const Expression &functionY,
-const std::string& javascriptY,
-const std::string& variableY
-
-){
+  const Expression& functionX,
+  const std::string& javascriptX,
+  const std::string& variableX,
+  const Expression& functionY,
+  const std::string& javascriptY,
+  const std::string& variableY
+) {
   this->coordinateFunctionsJS.addOnTop(javascriptX);
   this->coordinateFunctionsJS.addOnTop(javascriptY);
-
   this->coordinateFunctionsE.addOnTop(functionX);
   this->coordinateFunctionsE.addOnTop(functionY);
   this->variablesInPlayJS.addOnTop(variableX);
@@ -549,19 +526,21 @@ const std::string& variableY
   this->plotType = PlotObject::PlotTypes::escapeMap;
 }
 
-void Plot::drawCoordinateAxes(){
-  this->flagIncludeCoordinateSystem=true;
+void Plot::drawCoordinateAxes() {
+  this->flagIncludeCoordinateSystem = true;
 }
-void Plot::drawGrid(){
+
+void Plot::drawGrid() {
   PlotObject plot;
   plot.plotType = "axesGrid";
   plot.dimension = 2;
   this->addPlotOnTop(plot);
   this->dimension = 2;
-
 }
 
-void Plot::setViewWindow(double inputLowX, double inputLowY, double inputHighX, double inputHighY){
+void Plot::setViewWindow(
+  double inputLowX, double inputLowY, double inputHighX, double inputHighY
+) {
   this->dimension = 2;
   this->lowX = inputLowX;
   this->lowY = inputLowY;
@@ -570,11 +549,18 @@ void Plot::setViewWindow(double inputLowX, double inputLowY, double inputHighX, 
   this->priorityViewRectangle = 1;
 }
 
-void Plot::drawEscapeMap(Expression &functionX, const std::string& javascriptX,
-const std::string &variableX,  Expression &functionY, const std::string& javascriptY,
-const std::string&variableY) {
+void Plot::drawEscapeMap(
+  Expression& functionX,
+  const std::string& javascriptX,
+  const std::string& variableX,
+  Expression& functionY,
+  const std::string& javascriptY,
+  const std::string& variableY
+) {
   PlotObject plot;
-  plot.makeEscapeMap(functionX,javascriptX, variableX,functionY, javascriptY,  variableY);
+  plot.makeEscapeMap(
+    functionX, javascriptX, variableX, functionY, javascriptY, variableY
+  );
   this->addPlotOnTop(plot);
 }
 
@@ -741,7 +727,6 @@ void PlotObject::writeCoordinateFunctions(JSData& output) {
     coordinates[i] = "return " + this->coordinateFunctionsJS[i] + ";";
   }
   output[PlotObject::Labels::coordinateFunctions] = coordinates;
-
 }
 
 JSData PlotObject::toJSONParametricCurve() {
@@ -759,11 +744,11 @@ JSData PlotObject::toJSONParametricCurve() {
   return result;
 }
 
-JSData PlotObject::toJSONEscapeMap(){
+JSData PlotObject::toJSONEscapeMap() {
   STACK_TRACE("PlotObject::toJSONEscapeMap");
   JSData result;
   this->writeCoordinateFunctions(result);
-  return  result;
+  return result;
 }
 
 JSData PlotObject::toJSONSurfaceImmersion() {
@@ -977,8 +962,9 @@ JSData PlotObject::toJSON() {
     result = this->toJSON2dDrawFunction();
   } else if (correctedPlotType == "plotDirectionField") {
     result = this->toJSONDirectionFieldInTwoDimensions();
-  } else if (correctedPlotType == PlotObject::PlotTypes::escapeMap){
-  result=this->toJSONEscapeMap(); } else if (correctedPlotType == PlotObject::PlotTypes::points) {
+  } else if (correctedPlotType == PlotObject::PlotTypes::escapeMap) {
+    result = this->toJSONEscapeMap();
+  } else if (correctedPlotType == PlotObject::PlotTypes::points) {
     result = this->toJSONPoints();
   } else if (correctedPlotType == "label") {
     result = this->toJSONDrawText();

@@ -464,9 +464,7 @@ public:
     Calculator& owner, List<Expression>* inputSequence = nullptr
   );
   bool makeExponentReduce(
-    Calculator& owner,
-    const Expression& base,
-    int power
+    Calculator& owner, const Expression& base, int power
   );
   bool makeXOX(
     Calculator& owner,
@@ -1437,7 +1435,14 @@ public:
   void makeLabel(
     const Vector<double>& position, const std::string& label
   );
-  void makeEscapeMap(const Expression& functionX, const std::string &javascriptX, const std::string &variableX, const Expression& functionY, const std::string &javascriptY, const std::string&variableY);
+  void makeEscapeMap(
+    const Expression& functionX,
+    const std::string& javascriptX,
+    const std::string& variableX,
+    const Expression& functionY,
+    const std::string& javascriptY,
+    const std::string& variableY
+  );
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
@@ -1494,7 +1499,9 @@ public:
   int priorityCanvasName;
   // same as priorityViewWindow but with respect to canvas names.
   void setCanvasName(const std::string& inputName);
-  void setViewWindow(double inputLowX, double inputLowY, double inputHighX, double inputHighY );
+  void setViewWindow(
+    double inputLowX, double inputLowY, double inputHighX, double inputHighY
+  );
   std::string getCanvasName() const;
   std::string toStringDebug();
   std::string getPlotHtml(Calculator& owner);
@@ -1517,17 +1524,16 @@ public:
     const std::string& color,
     bool filled
   );
-  void drawEscapeMap(Expression& functionX, const std::string &javascriptX,
-  const std::string &variableX,
-  Expression& functionY
-
-  , const std::string &javascriptY,
-  const std::string &variableY
+  void drawEscapeMap(
+    Expression& functionX,
+    const std::string& javascriptX,
+    const std::string& variableX,
+    Expression& functionY,
+    const std::string& javascriptY,
+    const std::string& variableY
   );
-  void drawCoordinateAxes(
-  );
-  void drawGrid(
-  );
+  void drawCoordinateAxes();
+  void drawGrid();
   List<PlotObject>& getPlots();
   void clearPlotObjects();
   void setExpectedPlotObjects(int expectedSize);
@@ -2385,7 +2391,7 @@ public:
   std::string toString();
   JSData toJSONPerformance();
   Expression getNewBoundVariable();
-  Expression getNewAtom(const std::string& preferredName="");
+  Expression getNewAtom(const std::string& preferredName = "");
   void computeAutoCompleteKeyWords();
   void writeAutoCompleteKeyWordsToFile();
   std::string toStringOutputAndSpecials();

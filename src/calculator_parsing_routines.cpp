@@ -2229,20 +2229,20 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
   this->predefinedWordSplits.getValueCreateEmpty(currentVar);
   SyntacticElement newElt;
   this->popTopSyntacticStack();
-  if (!this->flagEncounteredSplit){
+  if (!this->flagEncounteredSplit) {
     this->flagEncounteredSplit = true;
-  *(this->owner)
-  << "Predefined symbol replacement: replacing "
-  << currentVar
-  << " with the sequence of symbols "
-  << split.toStringCommaDelimited()
-  << ". If you do not want such replacements to take "
-  << "place you should add the %DontUsePredefinedWordSplits option "
-  << "at the start of your input. "
-  << "The predefined symbol replacements are used to guard "
-  << "the user from accidental typos such as confusing "
-  << "x y (the product of x and y) with xy "
-  << "(a single variable whose name contains the letters x and y). ";
+    *(this->owner)
+    << "Predefined symbol replacement: replacing "
+    << currentVar
+    << " with the sequence of symbols "
+    << split.toStringCommaDelimited()
+    << ". If you do not want such replacements to take "
+    << "place you should add the %DontUsePredefinedWordSplits option "
+    << "at the start of your input. "
+    << "The predefined symbol replacements are used to guard "
+    << "the user from accidental typos such as confusing "
+    << "x y (the product of x and y) with xy "
+    << "(a single variable whose name contains the letters x and y). ";
   }
   for (int i = 0; i < split.size; i ++) {
     newElt.data.makeAtom(

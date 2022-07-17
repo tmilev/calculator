@@ -234,7 +234,6 @@ public:
   static bool functionMakeJavascriptExpression(
     Calculator& calculator, const Expression& input, Expression& output
   );
-
   static bool drawExpressionGraphWithOptions(
     Calculator& calculator,
     const Expression& input,
@@ -568,13 +567,11 @@ public:
   );
 };
 
-class CalculatorFunctionsComplexDynamics{
+class CalculatorFunctionsComplexDynamics {
 public:
   static bool plotEscapeMap(
     Calculator& calculator, const Expression& input, Expression& output
   );
-
-
 };
 
 class CalculatorFunctions {

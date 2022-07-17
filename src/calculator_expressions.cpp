@@ -5817,10 +5817,32 @@ bool Expression::isBuiltInType(int* outputWhichType) const {
   return true;
 }
 
+bool Expression::makeExponentReduce(Calculator &owner, const Expression &base, int power){
+  if (power == 1) {
+    *this=base;
+    return true;
+  }
+  if (power==0){
+    *this=owner.expressionOne();
+    return true;
+  }
+ return this->makeXOX(owner, owner.opPower(),base, owner.expressionRational(power));
+}
+
 bool Expression::makeProduct(
   Calculator& owner, const Expression& left, const Expression& right
 ) {
   return this->makeXOX(owner, owner.opTimes(), left, right);
+}
+
+bool Expression::makeProductReduceOnes(Calculator &owner, const List<Expression> &multiplicands){
+  List<Expression> multiplicandsWithoutOnes;
+  for (int i =0; i < multiplicands.size; i ++){
+    if (!multiplicands[i].isEqualToOne()){
+      multiplicandsWithoutOnes.addOnTop(multiplicands[i]);
+    }
+  }
+  return this->makeProduct(owner, multiplicandsWithoutOnes);
 }
 
 bool Expression::makeProduct(

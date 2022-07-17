@@ -125,6 +125,7 @@ bool CalculatorParser::replaceIntegerDotIntegerByE() {
 void CalculatorParser::reset() {
   this->numberOfEmptyTokensStart = 9;
   this->flagLogSyntaxRules = false;
+  this->flagEncounteredSplit = false;
   this->controlSequences.clear();
   this->syntacticSoup.setSize(0);
   this->syntacticStack.setSize(0);
@@ -1374,17 +1375,21 @@ bool CalculatorParser::isInterpretedAsEmptySpace(unsigned char input) {
 
 void CalculatorParser::initializePredefinedWordSplits() {
   STACK_TRACE("Calculator::initializePredefinedWordSplits");
-  List<std::string> splitVariables;
-  splitVariables.addOnTop("x");
-  splitVariables.addOnTop("y");
+  List<std::string> splitVariables = List<std::string>({"x", "y"});
   this->predefinedWordSplits.setKeyValue(
     "xy", List<std::string>({"x", "y"})
   );
   this->predefinedWordSplits.setKeyValue(
-    "xdx", List<std::string>({"x", "dx"})
+    "yx", List<std::string>({"y", "x"})
   );
   this->predefinedWordSplits.setKeyValue(
-    "yx", List<std::string>({"y", "x"})
+    "ab", List<std::string>({"a", "b"})
+  );
+  this->predefinedWordSplits.setKeyValue(
+    "ba", List<std::string>({"b", "a"})
+  );
+  this->predefinedWordSplits.setKeyValue(
+    "xdx", List<std::string>({"x", "dx"})
   );
   this->addTrigonometricSplit("int", splitVariables);
   this->addTrigonometricSplit("sin", splitVariables);
@@ -2224,6 +2229,8 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
   this->predefinedWordSplits.getValueCreateEmpty(currentVar);
   SyntacticElement newElt;
   this->popTopSyntacticStack();
+  if (!this->flagEncounteredSplit){
+    this->flagEncounteredSplit = true;
   *(this->owner)
   << "Predefined symbol replacement: replacing "
   << currentVar
@@ -2236,6 +2243,7 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
   << "the user from accidental typos such as confusing "
   << "x y (the product of x and y) with xy "
   << "(a single variable whose name contains the letters x and y). ";
+  }
   for (int i = 0; i < split.size; i ++) {
     newElt.data.makeAtom(
       *this->owner,

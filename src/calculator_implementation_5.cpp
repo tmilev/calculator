@@ -1361,9 +1361,8 @@ bool CalculatorFunctionsPlot::plotGrid(
 ) {
   STACK_TRACE("CalculatorFunctions::plotGrid");
   (void) input;
-  PlotObject plot;
-  plot.plotType = "axesGrid";
-  plot.dimension = 2;
+  Plot plot;
+  plot.drawGrid();
   return output.assignValue(calculator, plot);
 }
 
@@ -2171,23 +2170,23 @@ std::string InputBox::getUserInputBox() const {
   return out.str();
 }
 
-bool CalculatorFunctions::makeJavascriptExpression(
+bool CalculatorFunctionsPlot::makeJavascriptExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::makeJavascriptExpression");
+  STACK_TRACE("CalculatorFunctionsPlot::makeJavascriptExpression");
   if (input.size() != 2) {
     return false;
   }
   return
-  CalculatorFunctions::functionMakeJavascriptExpression(
+  CalculatorFunctionsPlot::functionMakeJavascriptExpression(
     calculator, input[1], output
   );
 }
 
-bool CalculatorFunctions::functionMakeJavascriptExpression(
+bool CalculatorFunctionsPlot::functionMakeJavascriptExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::functionMakeJavascriptExpression");
+  STACK_TRACE("CalculatorFunctionsPlot::functionMakeJavascriptExpression");
   RecursionDepthCounter counter(&calculator.recursionDepth);
   if (calculator.recursionDepthExceededHandleRoughly()) {
     return false;
@@ -2263,7 +2262,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     out << "[";
     for (int i = 1; i < input.size(); i ++) {
       if (
-        !CalculatorFunctions::functionMakeJavascriptExpression(
+        !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
           calculator, input[i], operation
         )
       ) {
@@ -2287,7 +2286,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     std::string* currentString = &opString;
     for (int i = 0; i < input.size(); i ++) {
       if (
-        !CalculatorFunctions::functionMakeJavascriptExpression(
+        !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
           calculator, input[i], *currentE
         )
       ) {
@@ -2529,7 +2528,7 @@ bool CalculatorFunctionsPlot::plotSurface(
   for (int i = 1; i < plot.manifoldImmersion.size(); i ++) {
     plot.coordinateFunctionsE[i - 1] = plot.manifoldImmersion[i];
     bool isGood =
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plot.coordinateFunctionsE[i - 1], jsConverter
     );
     if (isGood) {
@@ -2558,7 +2557,7 @@ bool CalculatorFunctionsPlot::plotSurface(
       }
       for (int j = 0; j < 2; j ++) {
         bool isGood =
-        CalculatorFunctions::functionMakeJavascriptExpression(
+        CalculatorFunctionsPlot::functionMakeJavascriptExpression(
           calculator, input[i][2][j + 1], jsConverter
         );
         if (isGood) {
@@ -2608,7 +2607,7 @@ bool CalculatorFunctionsPlot::plotSurface(
       Expression expressionToConvert =
       keys.getValueCreateEmpty(keysToConvert.keys[i]);
       bool isGood =
-      CalculatorFunctions::functionMakeJavascriptExpression(
+      CalculatorFunctionsPlot::functionMakeJavascriptExpression(
         calculator, expressionToConvert, jsConverter
       );
       if (isGood) {

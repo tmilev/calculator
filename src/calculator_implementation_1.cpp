@@ -41,6 +41,7 @@ std::string PlotObject::Labels::text = "text";
 std::string PlotObject::Labels::arguments = "arguments";
 std::string PlotObject::Labels::parameters = "parameters";
 std::string PlotObject::Labels::viewWindow = "viewWindow";
+std::string PlotObject::PlotTypes::escapeMap= "escapeMap";
 std::string PlotObject::PlotTypes::parametricCurve = "parametricCurve";
 std::string PlotObject::PlotTypes::plotFunction = "plotFunction";
 std::string PlotObject::PlotTypes::points = "points";
@@ -185,20 +186,20 @@ void Plot::operator+=(const Plot& other) {
     this->dimension = other.dimension;
   }
   if (other.priorityViewRectangle > this->priorityViewRectangle) {
-    this->highBoundY = other.highBoundY;
-    this->lowBoundY = other.lowBoundY;
-    this->lowerBoundAxes = other.lowerBoundAxes;
-    this->upperBoundAxes = other.upperBoundAxes;
+    this->highY = other.highY;
+    this->lowY = other.lowY;
+    this->lowX = other.lowX;
+    this->highX = other.highX;
   }
   if (other.priorityViewRectangle == this->priorityViewRectangle) {
-    this->highBoundY =
-    MathRoutines::maximum(this->highBoundY, other.highBoundY);
-    this->lowBoundY =
-    MathRoutines::minimum(this->lowBoundY, other.lowBoundY);
-    this->upperBoundAxes =
-    MathRoutines::maximum(this->upperBoundAxes, other.upperBoundAxes);
-    this->lowerBoundAxes =
-    MathRoutines::minimum(this->lowerBoundAxes, other.lowerBoundAxes);
+    this->highY =
+    MathRoutines::maximum(this->highY, other.highY);
+    this->lowY =
+    MathRoutines::minimum(this->lowY, other.lowY);
+    this->highX =
+    MathRoutines::maximum(this->highX, other.highX);
+    this->lowX =
+    MathRoutines::minimum(this->lowX, other.lowX);
   }
   this->plotObjects.addListOnTop(other.plotObjects);
   if (other.priorityWindow > this->priorityWindow) {
@@ -231,14 +232,14 @@ bool Plot::operator==(const Plot& other) const {
   this->priorityViewRectangle == other.priorityViewRectangle &&
   this->desiredHtmlHeightInPixels == other.desiredHtmlHeightInPixels &&
   this->desiredHtmlWidthInPixels == other.desiredHtmlWidthInPixels && ((
-      this->highBoundY - other.highBoundY
+      this->highY - other.highY
     ) ==
     0.0
-  ) && ((this->lowBoundY - other.lowBoundY) == 0.0) && ((
-      this->lowerBoundAxes - other.lowerBoundAxes
+  ) && ((this->lowY - other.lowY) == 0.0) && ((
+      this->lowX - other.lowX
     ) ==
     0.0
-  ) && ((this->upperBoundAxes - other.upperBoundAxes) == 0.0) &&
+  ) && ((this->highX - other.highX) == 0.0) &&
   this->plotObjects == other.plotObjects &&
   this->parameterNames == other.parameterNames &&
   this->parameterNamesJS == other.parameterNamesJS &&
@@ -369,10 +370,10 @@ std::string PlotObject::getPlotStringFromFunctionStringAndRanges(
 }
 
 Plot::Plot() {
-  this->lowerBoundAxes = - 0.5;
-  this->upperBoundAxes = 1;
-  this->lowBoundY = - 0.5;
-  this->highBoundY = 0.5;
+  this->lowX = - 0.5;
+  this->highX = 1;
+  this->lowY = - 0.5;
+  this->highY = 0.5;
   this->flagIncludeExtraHtmlDescriptions = true;
   this->desiredHtmlHeightInPixels = 350;
   this->desiredHtmlWidthInPixels = 350;
@@ -388,21 +389,21 @@ Plot::Plot() {
 
 void Plot::computeAxesAndBoundingBox() {
   STACK_TRACE("Plot::computeAxesAndBoundingBox");
-  this->lowerBoundAxes = - 0.5;
-  this->upperBoundAxes = 1.1;
-  this->lowBoundY = - 0.5;
-  this->highBoundY = 1.1;
+  this->lowX = - 0.5;
+  this->highX = 1.1;
+  this->lowY = - 0.5;
+  this->highY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->lowerBoundAxes =
-    MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
-    this->upperBoundAxes =
-    MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
-    this->lowBoundY =
-    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
-    this->highBoundY =
+    this->lowX =
+    MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
+    this->highX =
+    MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
+    this->lowY =
+    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
+    this->highY =
     MathRoutines::maximum(
-      this->plotObjects[k].yHigh, this->highBoundY
+      this->plotObjects[k].yHigh, this->highY
     );
     for (
       int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
@@ -411,35 +412,35 @@ void Plot::computeAxesAndBoundingBox() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->lowerBoundAxes =
-      MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
-      this->upperBoundAxes =
-      MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
-      this->lowBoundY =
-      MathRoutines::minimum(currentPoint[1], this->lowBoundY);
-      this->highBoundY =
-      MathRoutines::maximum(currentPoint[1], this->highBoundY);
+      this->lowX =
+      MathRoutines::minimum(this->lowX, currentPoint[0]);
+      this->highX =
+      MathRoutines::maximum(this->highX, currentPoint[0]);
+      this->lowY =
+      MathRoutines::minimum(currentPoint[1], this->lowY);
+      this->highY =
+      MathRoutines::maximum(currentPoint[1], this->highY);
     }
   }
 }
 
 void Plot::computeAxesAndBoundingBox3d() {
   STACK_TRACE("Plot::computeAxesAndBoundingBox3d");
-  this->lowerBoundAxes = - 0.5;
-  this->upperBoundAxes = 1.1;
-  this->lowBoundY = - 0.5;
-  this->highBoundY = 1.1;
+  this->lowX = - 0.5;
+  this->highX = 1.1;
+  this->lowY = - 0.5;
+  this->highY = 1.1;
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
-    this->lowerBoundAxes =
-    MathRoutines::minimum(this->plotObjects[k].xLow, lowerBoundAxes);
-    this->upperBoundAxes =
-    MathRoutines::maximum(this->plotObjects[k].xHigh, upperBoundAxes);
-    this->lowBoundY =
-    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowBoundY);
-    this->highBoundY =
+    this->lowX =
+    MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
+    this->highX =
+    MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
+    this->lowY =
+    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
+    this->highY =
     MathRoutines::maximum(
-      this->plotObjects[k].yHigh, this->highBoundY
+      this->plotObjects[k].yHigh, this->highY
     );
     for (
       int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
@@ -448,14 +449,14 @@ void Plot::computeAxesAndBoundingBox3d() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->lowerBoundAxes =
-      MathRoutines::minimum(this->lowerBoundAxes, currentPoint[0]);
-      this->upperBoundAxes =
-      MathRoutines::maximum(this->upperBoundAxes, currentPoint[0]);
-      this->lowBoundY =
-      MathRoutines::minimum(currentPoint[1], this->lowBoundY);
-      this->highBoundY =
-      MathRoutines::maximum(currentPoint[1], this->highBoundY);
+      this->lowX =
+      MathRoutines::minimum(this->lowX, currentPoint[0]);
+      this->highX =
+      MathRoutines::maximum(this->highX, currentPoint[0]);
+      this->lowY =
+      MathRoutines::minimum(currentPoint[1], this->lowY);
+      this->highY =
+      MathRoutines::maximum(currentPoint[1], this->highY);
     }
   }
 }
@@ -527,6 +528,54 @@ void PlotObject::makeCircle(
   center[1].toString() + "+" + radiusString + "*Math.sin(t)";
   this->colorJS = color;
   this->plotType = PlotObject::PlotTypes::parametricCurve;
+}
+
+void PlotObject::makeEscapeMap(
+const Expression &functionX,
+const std::string& javascriptX,
+const std::string& variableX,
+const Expression &functionY,
+const std::string& javascriptY,
+const std::string& variableY
+
+){
+  this->coordinateFunctionsJS.addOnTop(javascriptX);
+  this->coordinateFunctionsJS.addOnTop(javascriptY);
+
+  this->coordinateFunctionsE.addOnTop(functionX);
+  this->coordinateFunctionsE.addOnTop(functionY);
+  this->variablesInPlayJS.addOnTop(variableX);
+  this->variablesInPlayJS.addOnTop(variableY);
+  this->plotType = PlotObject::PlotTypes::escapeMap;
+}
+
+void Plot::drawCoordinateAxes(){
+  this->flagIncludeCoordinateSystem=true;
+}
+void Plot::drawGrid(){
+  PlotObject plot;
+  plot.plotType = "axesGrid";
+  plot.dimension = 2;
+  this->addPlotOnTop(plot);
+  this->dimension = 2;
+
+}
+
+void Plot::setViewWindow(double inputLowX, double inputLowY, double inputHighX, double inputHighY){
+  this->dimension = 2;
+  this->lowX = inputLowX;
+  this->lowY = inputLowY;
+  this->highX = inputHighX;
+  this->highY = inputHighY;
+  this->priorityViewRectangle = 1;
+}
+
+void Plot::drawEscapeMap(Expression &functionX, const std::string& javascriptX,
+const std::string &variableX,  Expression &functionY, const std::string& javascriptY,
+const std::string&variableY) {
+  PlotObject plot;
+  plot.makeEscapeMap(functionX,javascriptX, variableX,functionY, javascriptY,  variableY);
+  this->addPlotOnTop(plot);
 }
 
 void Plot::drawCircle(
@@ -671,7 +720,7 @@ std::string Plot::toStringDebug() {
 }
 
 std::string PlotObject::toStringDebug() {
-  STACK_TRACE("PlotSurfaceIn3d::toStringDebug");
+  STACK_TRACE("PlotObject::toStringDebug");
   std::stringstream out;
   out << "colorUV: " << this->colorUV << "<br>";
   out << "colorVU: " << this->colorVU << "<br>";
@@ -684,17 +733,21 @@ std::string PlotObject::toStringDebug() {
   return out.str();
 }
 
-JSData PlotObject::toJSONParametricCurve() {
-  STACK_TRACE("PlotSurfaceIn3d::toJSONCurveImmersionIn3d");
-  JSData result;
-  this->writeVariables(result);
+void PlotObject::writeCoordinateFunctions(JSData& output) {
+  this->writeVariables(output);
   List<std::string> coordinates;
   coordinates.setSize(this->coordinateFunctionsJS.size);
   for (int i = 0; i < this->coordinateFunctionsJS.size; i ++) {
     coordinates[i] = "return " + this->coordinateFunctionsJS[i] + ";";
   }
-  result[PlotObject::Labels::coordinateFunctions] = coordinates;
-  std::stringstream curveInstStream;
+  output[PlotObject::Labels::coordinateFunctions] = coordinates;
+
+}
+
+JSData PlotObject::toJSONParametricCurve() {
+  STACK_TRACE("PlotObject::toJSONParametricCurve");
+  JSData result;
+  this->writeCoordinateFunctions(result);
   result[PlotObject::Labels::variableRange][0] = this->paramLowJS;
   result[PlotObject::Labels::variableRange][1] = this->paramHighJS;
   if (this->numberOfSegmentsJS.size > 0) {
@@ -704,6 +757,13 @@ JSData PlotObject::toJSONParametricCurve() {
   }
   this->writeColorLineWidth(result);
   return result;
+}
+
+JSData PlotObject::toJSONEscapeMap(){
+  STACK_TRACE("PlotObject::toJSONEscapeMap");
+  JSData result;
+  this->writeCoordinateFunctions(result);
+  return  result;
 }
 
 JSData PlotObject::toJSONSurfaceImmersion() {
@@ -811,7 +871,7 @@ void PlotObject::writeLineWidth(JSData& output) {
 }
 
 JSData PlotObject::toJSON2dDrawFunction() {
-  STACK_TRACE("PlotSurfaceIn3d::toJSON2dDrawFunction");
+  STACK_TRACE("PlotObject::toJSON2dDrawFunction");
   JSData result;
   result[PlotObject::Labels::functionLabel] = this->coordinateFunction(0);
   result[PlotObject::Labels::left] = this->leftPtJS;
@@ -826,7 +886,7 @@ JSData PlotObject::manifoldImmersionFunctionsJS() {
 }
 
 JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
-  STACK_TRACE("PlotSurfaceIn3d::toJSONDirectionFieldInTwoDimensions");
+  STACK_TRACE("PlotObject::toJSONDirectionFieldInTwoDimensions");
   JSData result;
   result[PlotObject::Labels::manifoldImmersion] =
   this->manifoldImmersionFunctionsJS();
@@ -917,7 +977,8 @@ JSData PlotObject::toJSON() {
     result = this->toJSON2dDrawFunction();
   } else if (correctedPlotType == "plotDirectionField") {
     result = this->toJSONDirectionFieldInTwoDimensions();
-  } else if (correctedPlotType == PlotObject::PlotTypes::points) {
+  } else if (correctedPlotType == PlotObject::PlotTypes::escapeMap){
+  result=this->toJSONEscapeMap(); } else if (correctedPlotType == PlotObject::PlotTypes::points) {
     result = this->toJSONPoints();
   } else if (correctedPlotType == "label") {
     result = this->toJSONDrawText();
@@ -981,10 +1042,10 @@ JSData Plot::getSetViewWindow() {
   result[PlotObject::Labels::plotType] = "setViewWindow";
   JSData lowLeft = JSData::makeEmptyArray();
   JSData topRight = JSData::makeEmptyArray();
-  lowLeft[0] = this->lowerBoundAxes * 1.10;
-  lowLeft[1] = this->lowBoundY * 1.10;
-  topRight[0] = this->upperBoundAxes * 1.10;
-  topRight[1] = this->highBoundY * 1.10;
+  lowLeft[0] = this->lowX * 1.10;
+  lowLeft[1] = this->lowY * 1.10;
+  topRight[0] = this->highX * 1.10;
+  topRight[1] = this->highY * 1.10;
   JSData window = JSData::makeEmptyArray();
   window[0] = lowLeft;
   window[1] = topRight;
@@ -1093,24 +1154,24 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   resultStream << lineSeparator;
   resultStream
   << "\\begin{pspicture}("
-  << FloatingPoint::doubleToString(lowerBoundAxes - 0.4)
+  << FloatingPoint::doubleToString(lowX - 0.4)
   << ", "
-  << FloatingPoint::doubleToString(lowBoundY - 0.4)
+  << FloatingPoint::doubleToString(lowY - 0.4)
   << ")("
-  << FloatingPoint::doubleToString(upperBoundAxes + 0.4)
+  << FloatingPoint::doubleToString(highX + 0.4)
   << ","
-  << FloatingPoint::doubleToString(highBoundY + 0.5)
+  << FloatingPoint::doubleToString(highY + 0.5)
   << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
   resultStream
   << " \\fcAxesStandard{"
-  << FloatingPoint::doubleToString(lowerBoundAxes - 0.15)
+  << FloatingPoint::doubleToString(lowX - 0.15)
   << "}{"
-  << FloatingPoint::doubleToString(lowBoundY - 0.15)
+  << FloatingPoint::doubleToString(lowY - 0.15)
   << "}{"
-  << FloatingPoint::doubleToString(upperBoundAxes + 0.15)
+  << FloatingPoint::doubleToString(highX + 0.15)
   << "}{"
-  << FloatingPoint::doubleToString(highBoundY + 0.15)
+  << FloatingPoint::doubleToString(highY + 0.15)
   << "}"
   << lineSeparator;
   for (int i = 0; i < this->plotObjects.size; i ++) {

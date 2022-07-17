@@ -440,6 +440,9 @@ public:
   bool makeProduct(
     Calculator& owner, const Expression& left, const Expression& right
   );
+  bool makeProductReduceOnes(
+    Calculator& owner, const List<Expression>& multiplicands
+  );
   int getNumberOfColumns() const;
   bool makeSequenceCommands(
     Calculator& owner,
@@ -459,6 +462,11 @@ public:
   bool makeMatrix(Matrix<Expression>* inputMatrix, Calculator& owner);
   bool makeSequence(
     Calculator& owner, List<Expression>* inputSequence = nullptr
+  );
+  bool makeExponentReduce(
+    Calculator& owner,
+    const Expression& base,
+    int power
   );
   bool makeXOX(
     Calculator& owner,
@@ -1325,6 +1333,7 @@ public:
     static std::string plotFillStart;
     static std::string plotFillFinish;
     static std::string pathFilled;
+    static std::string escapeMap;
     static std::string label;
   };
 
@@ -1390,6 +1399,8 @@ public:
   JSData toJSONSurfaceImmersion();
   // Plot a parametric curve. Works both in 2d and 3d.
   JSData toJSONParametricCurve();
+  void writeCoordinateFunctions(JSData& output);
+  JSData toJSONEscapeMap();
   std::string toStringDebug();
   void computeYBounds();
   std::string getPlotStringFromFunctionStringAndRanges(
@@ -1426,6 +1437,7 @@ public:
   void makeLabel(
     const Vector<double>& position, const std::string& label
   );
+  void makeEscapeMap(const Expression& functionX, const std::string &javascriptX, const std::string &variableX, const Expression& functionY, const std::string &javascriptY, const std::string&variableY);
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
@@ -1459,10 +1471,10 @@ public:
 
   HashedList<std::string, HashFunctions::hashFunction> parameterNames;
   HashedList<std::string, HashFunctions::hashFunction> parameterNamesJS;
-  double lowerBoundAxes;
-  double upperBoundAxes;
-  double lowBoundY;
-  double highBoundY;
+  double lowX;
+  double highX;
+  double lowY;
+  double highY;
   int desiredHtmlHeightInPixels;
   int desiredHtmlWidthInPixels;
   int defaultLineColor;
@@ -1473,16 +1485,16 @@ public:
   int dimension;
   int priorityViewRectangle;
   // 0 or less: compute the view Window. If this quantity is greater than zero,
-  int priorityWindow;
-  // 0 or less: compute the view Window. If this quantity is greater than zero,
   // the user-given bounding box will overwrite any computations.
   // When adding two plots with positive viewing window priorities, the window
   // with the larger priority is used.
   // If the priorities are equal, the windows are combined to the smallest
   // window that fits both.
+  int priorityWindow;
   int priorityCanvasName;
   // same as priorityViewWindow but with respect to canvas names.
   void setCanvasName(const std::string& inputName);
+  void setViewWindow(double inputLowX, double inputLowY, double inputHighX, double inputHighY );
   std::string getCanvasName() const;
   std::string toStringDebug();
   std::string getPlotHtml(Calculator& owner);
@@ -1504,6 +1516,17 @@ public:
     const Rational& radius,
     const std::string& color,
     bool filled
+  );
+  void drawEscapeMap(Expression& functionX, const std::string &javascriptX,
+  const std::string &variableX,
+  Expression& functionY
+
+  , const std::string &javascriptY,
+  const std::string &variableY
+  );
+  void drawCoordinateAxes(
+  );
+  void drawGrid(
   );
   List<PlotObject>& getPlots();
   void clearPlotObjects();
@@ -1657,6 +1680,7 @@ private:
   int numberOfEmptyTokensStart;
   int counterInSyntacticSoup;
   bool flagLogSyntaxRules;
+  bool flagEncounteredSplit;
   List<SyntacticElement> syntacticSoup;
   List<SyntacticElement> syntacticStack;
   List<SyntacticElement>* currrentSyntacticSoup;
@@ -2361,7 +2385,7 @@ public:
   std::string toString();
   JSData toJSONPerformance();
   Expression getNewBoundVariable();
-  Expression getNewAtom();
+  Expression getNewAtom(const std::string& preferredName="");
   void computeAutoCompleteKeyWords();
   void writeAutoCompleteKeyWordsToFile();
   std::string toStringOutputAndSpecials();

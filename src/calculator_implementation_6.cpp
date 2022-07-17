@@ -936,7 +936,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   Expression jsConverterE;
   if (input.size() >= 6) {
     if (
-      CalculatorFunctions::functionMakeJavascriptExpression(
+      CalculatorFunctionsPlot::functionMakeJavascriptExpression(
         calculator, input[5], jsConverterE
       )
     ) {
@@ -949,7 +949,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
     }
   }
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plotObject.manifoldImmersion, jsConverterE
     )
   ) {
@@ -995,7 +995,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.numberOfSegmentsJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
     if (
-      !CalculatorFunctions::functionMakeJavascriptExpression(
+      !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
         calculator, input[4][i + 1], jsConverterE
       )
     ) {

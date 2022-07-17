@@ -129,6 +129,7 @@ class GraphicsSerialization {
     let variableArguments = plot[this.labels.arguments];
     let variableRanges = plot[this.labels.variableRanges];
     let manifoldImmersion = plot[this.labels.manifoldImmersion];
+    let coordinateFunctions = plot[this.labels.coordinateFunctions];
     let parameterValues = null;
     switch (plotType) {
       case "plotFunction":
@@ -176,16 +177,16 @@ class GraphicsSerialization {
         return;
       case "parametricCurve":
         parameterValues = this.getSliderValuesFromInput(sliders, plot);
-        let coordinateFunctions = [
+        let coordinateFunctionArray = [
           this.functionFromBodyAndArguments(
-            plot.coordinateFunctions[0], variableArguments, parameterValues,
+            coordinateFunctions[0], variableArguments, parameterValues,
           ),
           this.functionFromBodyAndArguments(
-            plot.coordinateFunctions[1], variableArguments, parameterValues,
+            coordinateFunctions[1], variableArguments, parameterValues,
           ),
         ];
         canvas.drawCurve(
-          coordinateFunctions,
+          coordinateFunctionArray,
           this.interpretStringToNumber(variableRanges[0], parameterValues),
           this.interpretStringToNumber(variableRanges[1], parameterValues),
           numberOfSegments, color, lineWidth,
@@ -203,6 +204,18 @@ class GraphicsSerialization {
         return;
       case "label":
         canvas.drawText(onePoint, text, color);
+        return;
+      case "escapeMap":
+        parameterValues = this.getSliderValuesFromInput(sliders, plot);
+        let functionX =
+           this.functionFromBodyAndArguments(
+            coordinateFunctions[0], variableArguments, parameterValues,
+          );
+        let functionY =
+          this.functionFromBodyAndArguments(
+            coordinateFunctions[1], variableArguments, parameterValues,
+          );
+        canvas.drawEscapeMap(functionX, functionY);
         return;
       default:
         throw `Unknown plot type: ${plotType}.`;

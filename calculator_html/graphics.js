@@ -1114,33 +1114,72 @@ class EscapeMap {
     this.draw(canvas);
   }
 
-  /** Iterates a map in math coordinates.
+  /** 
+   * Returns the number of iterations of a map 
+   * 
+   * f:{(x,y)} \to {(x,y)} 
+   * 
+   * needed to map a starting point (x,y) to 
+   * infinity.
+   * 
+   * Here, map iteration is meant in the mathematical sense.
+   * For example, iterating f 4 times amounts to computing:
+   * 
+   * f^4(x,y) = f(f(f(f(x,y))))
+   *  
+   * We declare a point to have escaped to infinity after n iterations 
+   * if the magnitude of |f^{n}(x,y)|^2 is 50 times larger than the magniute |x,y|^2 
+   * and the magnitue |x,y|^2 is larger than 50.
+   * 
    * @param {number} x
    * @param {number} y
    */
-  iterateMap(x, y) {
-    let result = [x, y];
-    for (let i = 0; i < 10; i++) {
-      let xNext = this.functionX(result[0], result[1]);
-      let yNext = this.functionY(result[0], result[1]);
-      result[0] = xNext;
-      result[1] = yNext;
+  iterateMap(x0, y0) {
+    let x = x0;
+    let y = y0;
+    for (let i = 0; i < 32; i ++) {
+      x = this.functionX(x, y);
+      y = this.functionY(x, y);
+      let deltaX = x - x0;
+      let deltaY = y - y0;
+      let rho = deltaX * deltaX + deltaY * deltaY; 
+      if (isNaN(rho)) {
+        return 32 - i;
+      }
+      if (rho > 100) {
+        return 32 - i;
+      }
     }
-    return result;
+    return 0;
+  }
+  
+  /**
+   * Converts a number from 1 to 33 to a color.
+   * 
+   * @param {number} input a number from 1 to 33.
+   */
+  mapEscapeCountToColor(input) {
+    if (input == 0) {
+      return [31, 31, 31];
+    }
+    let brightnessBlue = Math.min(input, 14);
+    let brightnessGreen = Math.max(0, Math.min(input - 14, 14));
+    let brightnessRed = Math.max(0, Math.min(input - 28, 10));
+    return [
+      31 + 28 * brightnessRed,
+      31 + 28 * brightnessGreen,
+      31 + 28 * brightnessBlue,
+    ];
   }
 
-  /** Computes an escape color triple.
+  /** 
+   * Computes an escape color triple.
    * @param {number} x
    * @param {number} y
    */
   escapeColor(x, y) {
-    let result = this.iterateMap(x, y);
-
-    let distance = Math.floor(Math.abs(result[0] - x) + Math.abs(result[1] - y));
-    if (distance > 255) {
-      distance = 255;
-    }
-    return [distance, distance, distance];
+    let escapeSteps = this.iterateMap(x, y);
+    return this.mapEscapeCountToColor(escapeSteps);
   }
 
   /**
@@ -1153,12 +1192,13 @@ class EscapeMap {
     const imageData = surface.createImageData(canvas.width, canvas.height);
     for (let j = 0; j < canvas.width; j++) {
       for (let i = 0; i < canvas.height; i++) {
-        let coordinates = canvas.coordsScreenAbsoluteToMathScreen(j, i);
+        let coordinates = canvas.coordsScreenToMathScreen([j, i]);
+        coordinates = canvas.coordinatesMathScreenToMath(coordinates);
         let escapeColor = this.escapeColor(coordinates[0], coordinates[1]);
-        imageData.data[j * canvas.width * 4 + i * 4 + 0] = escapeColor[0];
-        imageData.data[j * canvas.width * 4 + i * 4 + 1] = escapeColor[1];
-        imageData.data[j * canvas.width * 4 + i * 4 + 2] = escapeColor[2];
-        imageData.data[j * canvas.width * 4 + i * 4 + 3] = 255;
+        imageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColor[0];
+        imageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColor[1];
+        imageData.data[i * canvas.width * 4 + j * 4 + 2] = escapeColor[2];
+        imageData.data[i * canvas.width * 4 + j * 4 + 3] = 255;
       }
     }
     surface.putImageData(imageData, 0, 0);

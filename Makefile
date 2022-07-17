@@ -159,6 +159,7 @@ SOURCES_RELATIVE_PATH=\
     calculator_implementation_9.cpp \
     calculator_implementation_10.cpp \
     calculator_implementation_11_trigonometry.cpp \
+    calculator_implementation_12_complex_dynamics.cpp \
     calculator_javascript_graphics.cpp \
     calculator_latex_routines.cpp \
     calculator_parsing_routines.cpp \

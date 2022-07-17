@@ -7360,12 +7360,8 @@ bool CalculatorFunctionsPlot::plotViewRectangle(
     << input[2].toString();
   }
   Plot emptyPlot;
-  emptyPlot.dimension = 2;
-  emptyPlot.lowerBoundAxes = lowerLeft[0];
-  emptyPlot.lowBoundY = lowerLeft[1];
-  emptyPlot.upperBoundAxes = upperRight[0];
-  emptyPlot.highBoundY = upperRight[1];
-  emptyPlot.priorityViewRectangle = 1;
+  emptyPlot.setViewWindow(lowerLeft[0], lowerLeft[1], upperRight[0], upperRight[1]);
+
   emptyPlot.desiredHtmlHeightInPixels = 100;
   emptyPlot.desiredHtmlWidthInPixels = 100;
   return output.assignValue(calculator, emptyPlot);
@@ -7569,7 +7565,7 @@ bool CalculatorFunctionsPlot::plot2D(
   Expression jsConverterE;
   plotObject.plotType = PlotObject::PlotTypes::plotFunction;
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plotObject.coordinateFunctionsE[0], jsConverterE
     )
   ) {
@@ -7581,7 +7577,7 @@ bool CalculatorFunctionsPlot::plot2D(
     plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plotObject.leftPoint, jsConverterE
     )
   ) {
@@ -7593,7 +7589,7 @@ bool CalculatorFunctionsPlot::plot2D(
     plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plotObject.rightPoint, jsConverterE
     )
   ) {
@@ -7607,7 +7603,7 @@ bool CalculatorFunctionsPlot::plot2D(
   plotObject.numberOfSegmentsJS.setSize(1);
   plotObject.numberOfSegmentsJS[0] = "200";
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plotObject.numSegmentsE, jsConverterE
     )
   ) {
@@ -7706,7 +7702,7 @@ bool CalculatorFunctionsPlot::plotPoint(
   for (int i = 0; i < plot.points.numberOfRows; i ++) {
     for (int j = 0; j < plot.points.numberOfColumns; j ++) {
       if (
-        !CalculatorFunctions::functionMakeJavascriptExpression(
+        !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
           calculator, plot.points(i, j), jsConverterE
         )
       ) {
@@ -8281,7 +8277,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.coordinateFunctionsJS.setSize(plot.dimension);
   for (int i = 0; i < plot.dimension; i ++) {
     if (
-      CalculatorFunctions::functionMakeJavascriptExpression(
+      CalculatorFunctionsPlot::functionMakeJavascriptExpression(
         calculator, plot.coordinateFunctionsE[i], converterE
       )
     ) {
@@ -8297,7 +8293,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.numberOfSegmentsJS.setSize(1);
   plot.numberOfSegmentsJS[0] = "200";
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plot.numSegmentsE, converterE
     )
   ) {
@@ -8307,7 +8303,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     calculator << "Failed to convert: " << plot.numSegmentsE << " to js. ";
   }
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plot.paramLowE, converterE
     )
   ) {
@@ -8317,7 +8313,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     calculator << "Failed to convert: " << plot.paramLowE << " to js. ";
   }
   if (
-    CalculatorFunctions::functionMakeJavascriptExpression(
+    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
       calculator, plot.paramHighE, converterE
     )
   ) {
@@ -8371,7 +8367,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
 bool CalculatorFunctions::evaluateToDouble(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Expression::evaluateToDouble");
+  STACK_TRACE("CalculatorFunctions::evaluateToDouble");
   if (input.size() != 2) {
     // one argument expected.
     return false;
@@ -8386,7 +8382,7 @@ bool CalculatorFunctions::evaluateToDouble(
 bool CalculatorFunctions::functionEvaluateToDouble(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("Expression::functionEvaluateToDouble");
+  STACK_TRACE("CalculatorFunctions::functionEvaluateToDouble");
   double value = 0;
   if (!input.evaluatesToDouble(&value)) {
     return false;
@@ -10575,7 +10571,7 @@ bool CalculatorFunctions::selectAtRandom(
   return true;
 }
 
-bool CalculatorFunctions::convertPolynomialModulotIntegerToInteger(
+bool CalculatorFunctions::convertPolynomialModularToPolynomialRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctions::convertPolynomialModulotIntegerToInteger");

@@ -162,7 +162,7 @@ void Calculator::initializeFunctionsExtra() {
     "Draws the internal tree structure of an expression. "
     "Does not unfold built-in types.",
     "PlotExpressionTree(e^x)",
-    "CalculatorFunctions::drawExpressionGraph",
+    "CalculatorFunctionsPlot::drawExpressionGraph",
     "PlotExpressionTree",
     innerStandard
   );
@@ -175,7 +175,7 @@ void Calculator::initializeFunctionsExtra() {
     "PlotExpressionTreeFull(1);\n"
     "PlotExpressionTree(1 + 1);\n"
     "PlotExpressionTree(Freeze{}(1 + 1));",
-    "CalculatorFunctions::drawExpressionGraphFull",
+    "CalculatorFunctionsPlot::drawExpressionGraphFull",
     "PlotExpressionTreeFull",
     innerStandard
   );
@@ -211,7 +211,7 @@ void Calculator::initializeFunctionsExtra() {
     "Output must be identical to input. ",
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\n"
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",
-    "CalculatorFunctions::base64ToCharToBase64Test",
+    "CalculatorFunctionsEncoding::base64ToCharToBase64Test",
     "TestBase64",
     innerStandard
   );
@@ -238,7 +238,7 @@ void Calculator::initializeFunctionsExtra() {
     "backslashes and quotes.",
     "TestJSON(\"{a:1, b: false,}\");\n"
     "TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
-    "CalculatorFunctions::testJSON",
+    "CalculatorFunctionsEncoding::testJSON",
     "TestJSON",
     innerStandard
   );
@@ -248,7 +248,7 @@ void Calculator::initializeFunctionsExtra() {
     "",
     "Format cpp code. ",
     "FormatCPPCode{}(\"src/source_code_formatter.cpp\")",
-    "Calculator::formatCPPSourceCode",
+    "CalculatorFunctions::formatCPPSourceCode",
     "FormatCPPCode",
     innerInvisibleExperimentalNoTest
   );
@@ -259,7 +259,7 @@ void Calculator::initializeFunctionsExtra() {
     "Format cpp code, debug version "
     "that shows the code formatter internals.",
     "FormatCPPCodeDebug{}(\"src/source_code_formatter.cpp\")",
-    "Calculator::formatCPPSourceCodeDebug",
+    "CalculatorFunctions::formatCPPSourceCodeDebug",
     "FormatCPPCodeDebug",
     innerInvisibleExperimentalNoTest
   );
@@ -269,7 +269,7 @@ void Calculator::initializeFunctionsExtra() {
     "",
     "Format cpp directory. ",
     "FormatCPPDirectory{}(\"src/\")",
-    "Calculator::formatCPPDirectory",
+    "CalculatorFunctions::formatCPPDirectory",
     "FormatCPPDirectory",
     innerInvisibleNoTest
   );
@@ -341,7 +341,7 @@ void Calculator::initializeFunctionsExtra() {
     "as not been tested on any other projects, please use only for freecalc.",
     "Crawl(\"freecalc/homework/referenceallproblemsbycourse"
     "/calculusimasterproblemsheet.tex\")",
-    "CalculatorFunctions::crawlTexFile",
+    "CalculatorFunctionsFreecalc::crawlTexFile",
     "Crawl",
     Function::Options::administrativeTested()
   );
@@ -375,7 +375,7 @@ void Calculator::initializeFunctionsExtra() {
     "/calculusii.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse"
     "/calculusiii.tex\");\n",
-    "CalculatorFunctions::buildFreecalc",
+    "CalculatorFunctionsFreecalc::buildFreecalc",
     "BuildFreecalc",
     innerAdminNoTest
   );
@@ -386,7 +386,7 @@ void Calculator::initializeFunctionsExtra() {
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
     "BuildFreecalcWithSlides"
     "(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");",
-    "CalculatorFunctions::BuildFreecalcWithSlides",
+    "CalculatorFunctionsFreecalc::BuildFreecalcWithSlides",
     "BuildFreecalcWithSlides",
     innerAdminNoTest
   );
@@ -399,7 +399,7 @@ void Calculator::initializeFunctionsExtra() {
     "Use the topic number as input, or "
     "0 for the current topic. ",
     "BuildSlidesInTopicList (0);",
-    "CalculatorFunctions::buildFreecalcSlidesOnTopic",
+    "CalculatorFunctionsFreecalc::buildFreecalcSlidesOnTopic",
     "BuildSlidesInTopicList",
     innerAdminNoTest
   );
@@ -416,12 +416,12 @@ void Calculator::initializeFunctionsExtra() {
   );
   this->addOperationHandler(
     "MakeJavascriptExpression",
-    CalculatorFunctions::makeJavascriptExpression,
+    CalculatorFunctionsPlot::makeJavascriptExpression,
     "",
     "Attempts to construct a javascript translation of the input. "
     "If not successful leaves the expression unchanged.",
     "MakeJavascriptExpression(a(b+c))",
-    "Calculator::makeJavascriptExpression",
+    "CalculatorFunctionsPlot::makeJavascriptExpression",
     "MakeJavascriptExpression",
     innerStandard
   );
@@ -452,7 +452,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts base64 string to hexadecimal string. ",
     "ConvertBase64ToHex(\"AQAB\");",
-    "CalculatorFunctions::convertBase64ToHex",
+    "CalculatorFunctionsEncoding::convertBase64ToHex",
     "ConvertBase64ToHex",
     innerStandard
   );
@@ -462,7 +462,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts a bitstream (not necessarily UTF-8 encoded) to hex. ",
     "ConvertStringToHex(Sha256(Sha256(\"hello\")));",
-    "CalculatorFunctions::convertStringToHex",
+    "CalculatorFunctionsEncoding::convertStringToHex",
     "ConvertStringToHex",
     innerStandard
   );
@@ -472,7 +472,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts a hex string to an integer. ",
     "ConvertHexToInteger(Base64ToHex(\"AQAB\"));",
-    "CalculatorFunctions::hexToInteger",
+    "CalculatorFunctionsEncoding::hexToInteger",
     "ConvertHexToInteger",
     innerStandard
   );
@@ -482,7 +482,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts an integer to hex string. ",
     "ConvertIntegerToHex(65537);",
-    "CalculatorFunctions::integerToHex",
+    "CalculatorFunctionsEncoding::integerToHex",
     "ConvertIntegerToHex",
     innerStandard
   );
@@ -492,7 +492,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts a hex string to a string. ",
     "ConvertHexToString(\"3031300d060960864801650304020105000420\");",
-    "CalculatorFunctions::hexToString",
+    "CalculatorFunctionsEncoding::hexToString",
     "ConvertHexToString",
     innerStandard
   );
@@ -503,7 +503,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Converts an url-encoded string to a normal string. ",
     "URLStringToNormalString"
     "(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")",
-    "CalculatorConversions::urlStringToNormalString",
+    "CalculatorFunctions::urlStringToNormalString",
     "URLStringToNormalString",
     innerStandard
   );
@@ -513,7 +513,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts a normal string to a url-encoded one. ",
     "ConvertStringToURL(\"+ %\")",
-    "CalculatorConversions::stringToURL",
+    "CalculatorFunctions::stringToURL",
     "ConvertStringToURL",
     innerStandard
   );
@@ -547,7 +547,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "quotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html "
     "=weight%3d1%26deadlines%3d%26&Homework%2f"
     "Precalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&\")",
-    "CalculatorConversions::urlStringToNormalString",
+    "CalculatorFunctions::urlStringToNormalString",
     "URLKeyValuePairsDecode",
     innerStandard
   );
@@ -559,7 +559,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "theInt = ConvertHexToInteger"
     "(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
     "ConvertIntegerToBase58(theInt)",
-    "CalculatorFunctions::convertIntegerUnsignedToBase58",
+    "CalculatorFunctionsEncoding::convertIntegerUnsignedToBase58",
     "ConvertIntegerToBase58",
     innerStandard
   );
@@ -569,7 +569,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Converts Base58 to hex. ",
     "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");",
-    "CalculatorFunctions::convertBase58ToHex",
+    "CalculatorFunctionsEncoding::convertBase58ToHex",
     "ConvertBase58ToHex",
     innerStandard
   );
@@ -630,7 +630,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "B= ConvertHexToString(A);\n"
     "C= AppendDoubleSha256Check(B);\n"
     "D= ConvertStringToHex(C)",
-    "CalculatorFunctions::appendDoubleSha256Check",
+    "CalculatorFunctionsCrypto::appendDoubleSha256Check",
     "AppendDoubleSha256Check",
     innerStandard
   );
@@ -641,7 +641,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "Converts hex to base58. ",
     "ConvertHexToBase58(\""
     "03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");",
-    "CalculatorFunctions::convertHexToBase58",
+    "CalculatorFunctionsEncoding::convertHexToBase58",
     "ConvertHexToBase58",
     innerStandard
   );
@@ -664,7 +664,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "CharToBase64(\"easure.\");\n"
     "CharToBase64(\"asure.\");\n"
     "CharToBase64(\"sure.\");\n",
-    "CalculatorFunctions::charToBase64",
+    "CalculatorFunctionsEncoding::charToBase64",
     "CharToBase64",
     innerStandard
   );
@@ -678,7 +678,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4"
     "XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\""
     ");",
-    "CalculatorFunctions::convertBase64ToString",
+    "CalculatorFunctionsEncoding::convertBase64ToString",
     "ConvertBase64ToString",
     innerStandard
   );
@@ -756,7 +756,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "\"test/certificate_self_signed.base64\")));\n"
     "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("
     "\"test/private_key.base64\")));\n",
-    "CalculatorFunctions::testASN1Decode",
+    "CalculatorFunctionsCrypto::testASN1Decode",
     "TestASN1Decode",
     innerExperimental
   );
@@ -766,7 +766,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "",
     "Returns the base 64 encoding of the X509 certificate of this server. ",
     "X509CertificateServerBase64 0; ",
-    "CalculatorFunctions::X509CertificateServerBase64",
+    "CalculatorFunctionsCrypto::X509CertificateServerBase64",
     "X509CertificateServerBase64",
     innerNoTest
   );
@@ -778,7 +778,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "%HideLHS\n"
     "X509CertificateDecode ConvertBase64ToString\n"
     "LoadFileIntoString(\"test/certificate_self_signed.pem\")",
-    "CalculatorFunctions::x509CertificateDecode",
+    "CalculatorFunctionsCrypto::x509CertificateDecode",
     "X509CertificateDecode",
     innerStandard
   );
@@ -843,7 +843,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "The examples below are taken from Wikipedia. ",
     "Sha1(\"The quick brown fox jumps over the lazy dog\");\n"
     "Sha1(\"The quick brown fox jumps over the lazy cog\");",
-    "CalculatorFunctions::sha1OfString",
+    "CalculatorFunctionsCrypto::sha1OfString",
     "Sha1",
     innerStandard
   );
@@ -878,7 +878,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "619744890606270245172389068191436591061733904616135797"
     "438741188808884326847918800555526459128765065042606467"
     "292598531117932066982164093023)",
-    "CalculatorFunctions::testRSASign",
+    "CalculatorFunctionsCrypto::testRSASign",
     "TestRSASign",
     innerStandard
   );

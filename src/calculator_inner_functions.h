@@ -228,6 +228,13 @@ public:
   static bool plot2DWithBars(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool makeJavascriptExpression(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool functionMakeJavascriptExpression(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+
   static bool drawExpressionGraphWithOptions(
     Calculator& calculator,
     const Expression& input,
@@ -561,6 +568,15 @@ public:
   );
 };
 
+class CalculatorFunctionsComplexDynamics{
+public:
+  static bool plotEscapeMap(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+
+
+};
+
 class CalculatorFunctions {
 public:
   static bool leftIntervalGreaterThanRight(
@@ -802,7 +818,7 @@ public:
   static bool compositeElementWeylAlgebraActOnPolynomial(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool convertPolynomialModulotIntegerToInteger(
+  static bool convertPolynomialModularToPolynomialRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool compositeConstTimesAnyActOn(
@@ -1008,12 +1024,6 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool cardanoFormula(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool makeJavascriptExpression(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool functionMakeJavascriptExpression(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool contains(

@@ -810,15 +810,21 @@ void Calculator::initializeFunctionsScientificBasic() {
     compositeStandard
   );
   this->addOperationHandler(
-    "ConvertPolynomialModPToInteger",
-    CalculatorFunctions::convertPolynomialModulotIntegerToInteger,
+    "ConvertPolynomialModularToPolynomialRational",
+    CalculatorFunctions::convertPolynomialModularToPolynomialRational,
     "",
     "Converts polynomial  ",
     "A = 100x-55;\n"
     "B = PolynomialModP(A, 101);\n"
     "ConvertPolynomialModPToInteger B",
-    "CalculatorFunctions::convertPolynomialModulotIntegerToInteger",
-    "ConvertPolynomialModPToInteger",
+    "CalculatorFunctions::convertPolynomialModularToPolynomialRational",
+    "ConvertPolynomialModularToPolynomialRational",
     innerStandard
+  );
+
+  this->addOperationHandler("PlotEscapeMap",CalculatorFunctionsComplexDynamics::plotEscapeMap,
+  "","Plots the escape","PlotEscapeMap(z+1/z)", "CalculatorFunctionsComplexDynamics::plotEscapeMap",
+  "PlotEscapeMap",
+  innerStandard
   );
 }

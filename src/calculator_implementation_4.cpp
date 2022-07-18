@@ -1267,14 +1267,16 @@ void Expression::operator+=(const Expression& other) {
   if (this->isEqualToZero()) {
     *this = other;
     return;
-  }Rational leftRational;
+  }
+  Rational leftRational;
   Rational rightRational;
-  if (this->isRational(&leftRational) && other.isRational(&rightRational)){
-    leftRational+= rightRational;
+  if (
+    this->isRational(&leftRational) && other.isRational(&rightRational)
+  ) {
+    leftRational += rightRational;
     this->assignValue(*this->owner, leftRational);
     return;
   }
-
   Expression resultE;
   resultE.makeXOX(
     *this->owner, this->owner->opPlus(), *this, other
@@ -1307,7 +1309,7 @@ void Expression::operator-=(const Expression& other) {
     << "Error: attempt to add expressions with different owners. "
     << global.fatal;
   }
-  if (other.isEqualToZero()){
+  if (other.isEqualToZero()) {
     return;
   }
   if (this->isEqualToZero()) {

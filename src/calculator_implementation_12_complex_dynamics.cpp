@@ -410,7 +410,6 @@ bool RealAndImaginaryPartExtractor::extractFromProduct(
   ) {
     return false;
   }
-
   outputRealPart =
   leftRealPart * rightRealPart - leftImaginaryPart * rightImaginaryPart;
   outputImaginaryPart =

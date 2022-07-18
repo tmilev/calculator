@@ -2399,9 +2399,12 @@ Standard if function. Takes 3 arguments. If first argument is true (equal to 1) 
 Converts element of Z mod p to an integer between 0 and p - 1. 
 
 *MakeInputBox* [MakeInputBox] {CalculatorHtmlFunctions::userInputBox}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeInputBox%28name%20%3d%20a%2c%20value%20%3d%203%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeInputBox%28name%20%3d%20a%2c%20value%20%3d%203%29%3b%5cnMakeInputBox%28name%20%3d%20b%2c%20value%20%3d%203%2c%20min%20%3d%201%2c%20max%20%3d%2011%29%3b%5cnMakeInputBox%28name%20%3d%20a%2c%20value%20%3d%205%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 MakeInputBox(name = a, value = 3);
+MakeInputBox(name = b, value = 3, min = 1, max = 11);
+MakeInputBox(name = a, value = 5);
+
 ```
 Creates an user input text box. 
 
@@ -3978,70 +3981,70 @@ RemoveLast{}();
 ```
 Returns a list with the last element removed, provided the argument has no bound variables. If the expression has bound variables does nothing.
 
-*ConvertBase64ToHex* [ConvertBase64ToHex] {CalculatorFunctions::convertBase64ToHex}. 
+*ConvertBase64ToHex* [ConvertBase64ToHex] {CalculatorFunctionsEncoding::convertBase64ToHex}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertBase64ToHex%28%5c%22AQAB%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertBase64ToHex("AQAB");
 ```
 Converts base64 string to hexadecimal string. 
 
-*ConvertStringToHex* [ConvertStringToHex] {CalculatorFunctions::convertStringToHex}. 
+*ConvertStringToHex* [ConvertStringToHex] {CalculatorFunctionsEncoding::convertStringToHex}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertStringToHex%28Sha256%28Sha256%28%5c%22hello%5c%22%29%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertStringToHex(Sha256(Sha256("hello")));
 ```
 Converts a bitstream (not necessarily UTF-8 encoded) to hex. 
 
-*ConvertHexToInteger* [ConvertHexToInteger] {CalculatorFunctions::hexToInteger}. 
+*ConvertHexToInteger* [ConvertHexToInteger] {CalculatorFunctionsEncoding::hexToInteger}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertHexToInteger%28Base64ToHex%28%5c%22AQAB%5c%22%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertHexToInteger(Base64ToHex("AQAB"));
 ```
 Converts a hex string to an integer. 
 
-*ConvertIntegerToHex* [ConvertIntegerToHex] {CalculatorFunctions::integerToHex}. 
+*ConvertIntegerToHex* [ConvertIntegerToHex] {CalculatorFunctionsEncoding::integerToHex}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertIntegerToHex%2865537%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertIntegerToHex(65537);
 ```
 Converts an integer to hex string. 
 
-*ConvertHexToString* [ConvertHexToString] {CalculatorFunctions::hexToString}. 
+*ConvertHexToString* [ConvertHexToString] {CalculatorFunctionsEncoding::hexToString}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertHexToString%28%5c%223031300d060960864801650304020105000420%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertHexToString("3031300d060960864801650304020105000420");
 ```
 Converts a hex string to a string. 
 
-*URLStringToNormalString* [URLStringToNormalString] {CalculatorConversions::urlStringToNormalString}. 
+*URLStringToNormalString* [URLStringToNormalString] {CalculatorFunctions::urlStringToNormalString}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22URLStringToNormalString%28%5c%22randomSeed%253d92742048%2526submissionsAlgebraAnswer%253%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 URLStringToNormalString("randomSeed%3d92742048%26submissionsAlgebraAnswer%3")
 ```
 Converts an url-encoded string to a normal string. 
 
-*ConvertStringToURL* [ConvertStringToURL] {CalculatorConversions::stringToURL}. 
+*ConvertStringToURL* [ConvertStringToURL] {CalculatorFunctions::stringToURL}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertStringToURL%28%5c%22%2b%20%25%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertStringToURL("+ %")
 ```
 Converts a normal string to a url-encoded one. 
 
-*URLKeyValuePairsDecode* [URLKeyValuePairsDecode] {CalculatorConversions::urlStringToNormalString}. 
+*URLKeyValuePairsDecode* [URLKeyValuePairsDecode] {CalculatorFunctions::urlStringToNormalString}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22URLKeyValuePairsDecode%28%5c%22Problems%252fFunctions%252dcomposing%252dfractional%252dlinear%252d1.html%3dweight%253d3%2526deadlines%253d%2526%26Problems%252fLimits%252dbasic%252dsubstitution%252d1.html%3dweight%253d3%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dinfinity%252dRF%252dequal%252ddeg%252d1.html%3dweight%253d2%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dminus%252dinfinity%252dRF%252dequal%252ddeg%252d1.html%3dweight%253d1%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dpm%252dinfinity%252dRF%252dnum%252ddeg%252dsmaller%252d1.html%20%3dweight%253d1%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dinfinity%252dRF%252ddeg%252dden%252dsmaller%252d1.html%20%3dweight%253d1%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dminus%252dinfinity%252dRF%252ddeg%252dden%252dsmaller%252d1.html%20%3dweight%253d5%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dminus%252dinfinity%252dRF%252ddeg%252dden%252dsmaller%252d2.html%20%3dweight%253d6%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dpm%252dinfinity%252dquotient%252dradical%252deven%252dpower%252dbasic%20%25%202d1.html%20%3dweight%253d1%2526deadlines%253d%2526%26Problems%252fLimits%252dx%252dtends%252dto%252dminus%252dinfinity%252dquotient%252dradical%252dodd%252dpower%252dbasic%20%25%202d1.html%20%3dweight%253d1%2526deadlines%253d%2526%26Homework%252fPrecalculus%252dPrerequisites%252dUMB%252d1.html%20%3d%20deadlines%253d%2526%26%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 URLKeyValuePairsDecode("Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dbasic%2dsubstitution%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html =weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dquotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Homework%2fPrecalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&")
 ```
 Converts an url-encoded string to a normal string. All % signs are interpreted recursively as double, triple, ... url encoded strings and decoded accordingly.
 
-*ConvertIntegerToBase58* [ConvertIntegerToBase58] {CalculatorFunctions::convertIntegerUnsignedToBase58}. 
+*ConvertIntegerToBase58* [ConvertIntegerToBase58] {CalculatorFunctionsEncoding::convertIntegerUnsignedToBase58}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22theInt%20%3d%20ConvertHexToInteger%28ConvertBase58ToHex%28%5c%221Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK%5c%22%29%29%3bConvertIntegerToBase58%28theInt%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 theInt = ConvertHexToInteger(ConvertBase58ToHex("1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK"));ConvertIntegerToBase58(theInt)
 ```
 Converts an unsigned integer to base58. 
 
-*ConvertBase58ToHex* [ConvertBase58ToHex] {CalculatorFunctions::convertBase58ToHex}. 
+*ConvertBase58ToHex* [ConvertBase58ToHex] {CalculatorFunctionsEncoding::convertBase58ToHex}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertBase58ToHex%28%5c%221Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertBase58ToHex("1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK");
@@ -4072,7 +4075,7 @@ text
 ```
 AES decryption. First argument key, second argument - text. 
 
-*AppendDoubleSha256Check* [AppendDoubleSha256Check] {CalculatorFunctions::appendDoubleSha256Check}. 
+*AppendDoubleSha256Check* [AppendDoubleSha256Check] {CalculatorFunctionsCrypto::appendDoubleSha256Check}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%3d%20%5c%2280aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751facf35411509701%5c%22%3b%5cnB%3d%20ConvertHexToString%28A%29%3b%5cnC%3d%20AppendDoubleSha256Check%28B%29%3b%5cnD%3d%20ConvertStringToHex%28C%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A= "80aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751facf35411509701";
@@ -4082,14 +4085,14 @@ D= ConvertStringToHex(C)
 ```
 Appends a sha 256 checksum to a string. More precisely, appends the first 4 bytes of sha256 of the string to the string. 
 
-*ConvertHexToBase58* [ConvertHexToBase58] {CalculatorFunctions::convertHexToBase58}. 
+*ConvertHexToBase58* [ConvertHexToBase58] {CalculatorFunctionsEncoding::convertHexToBase58}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertHexToBase58%28%5c%2203aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertHexToBase58("03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f");
 ```
 Converts hex to base58. 
 
-*CharToBase64* [CharToBase64] {CalculatorFunctions::charToBase64}. 
+*CharToBase64* [CharToBase64] {CalculatorFunctionsEncoding::charToBase64}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22CharToBase64%28%5c%22pleasure.%5c%22%29%3b%5cnCharToBase64%28%5c%22leasure.%5c%22%29%3b%5cnCharToBase64%28%5c%22easure.%5c%22%29%3b%5cnCharToBase64%28%5c%22asure.%5c%22%29%3b%5cnCharToBase64%28%5c%22sure.%5c%22%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 CharToBase64("pleasure.");
@@ -4101,7 +4104,7 @@ CharToBase64("sure.");
 ```
 Converts characters to bit stream and the bitstream to base64. The character to bit stream conversion is not fixed at the moment and may be system/compiler dependent. I believe that the character to bit stream conversion should be standard for the standard letters in the alphabet. Fancy UTF8 will probably be not read correctly from the CGI input, and furthermore will not be converted in a standard fashion to bit stream. The examples below are taken from Wikipedia. 
 
-*ConvertBase64ToString* [ConvertBase64ToString] {CalculatorFunctions::convertBase64ToString}. 
+*ConvertBase64ToString* [ConvertBase64ToString] {CalculatorFunctionsEncoding::convertBase64ToString}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConvertBase64ToString%28%5c%22k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConvertBase64ToString("k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9");
@@ -4154,7 +4157,7 @@ LoadFileIntoString("test/message_client_ssl_0.hex")
 ```
 Decodes a client hello. 
 
-*TestASN1Decode* [TestASN1Decode] {CalculatorFunctions::testASN1Decode}. 
+*TestASN1Decode* [TestASN1Decode] {CalculatorFunctionsCrypto::testASN1Decode}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%5cnTestASN1Decode%28ConvertBase64ToString%28LoadFileIntoString%28%5c%22test%2fcertificate_self_signed.base64%5c%22%29%29%29%3b%5cnTestASN1Decode%28ConvertBase64ToString%28LoadFileIntoString%28%5c%22test%2fprivate_key.base64%5c%22%29%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %HideLHS
@@ -4164,14 +4167,14 @@ TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("test/private_key.base64
 ```
 Tests decoding of abstract syntax one. 
 
-*X509CertificateServerBase64* [X509CertificateServerBase64] {CalculatorFunctions::X509CertificateServerBase64}. 
+*X509CertificateServerBase64* [X509CertificateServerBase64] {CalculatorFunctionsCrypto::X509CertificateServerBase64}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X509CertificateServerBase64%200%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X509CertificateServerBase64 0; 
 ```
 Returns the base 64 encoding of the X509 certificate of this server. 
 
-*X509CertificateDecode* [X509CertificateDecode] {CalculatorFunctions::x509CertificateDecode}. 
+*X509CertificateDecode* [X509CertificateDecode] {CalculatorFunctionsCrypto::x509CertificateDecode}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%5cnX509CertificateDecode%20ConvertBase64ToString%5cnLoadFileIntoString%28%5c%22test%2fcertificate_self_signed.pem%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %HideLHS
@@ -4204,7 +4207,7 @@ JWTVerifyRSA256(token,modulus,exponent);
 ```
 Tries to verify a Json Web Token with respect to a given rsa modulus and exponent. The reference JWT token was taken from: https://tools.ietf.org/html/rfc7515#page-38, Appendix A.2.
 
-*Sha1* [Sha1] {CalculatorFunctions::sha1OfString}. 
+*Sha1* [Sha1] {CalculatorFunctionsCrypto::sha1OfString}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Sha1%28%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog%5c%22%29%3b%5cnSha1%28%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20cog%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Sha1("The quick brown fox jumps over the lazy dog");
@@ -4219,7 +4222,7 @@ Sha224("");
 ```
 Converts characters to a sequence of bits and computes the sha224 hash value of those bits. Reference: Wikipedia. 
 
-*TestRSASign* [TestRSASign] {CalculatorFunctions::testRSASign}. 
+*TestRSASign* [TestRSASign] {CalculatorFunctionsCrypto::testRSASign}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TestRSASign%28%5c%22asdf%5c%22%2c%20426783863749219482096610996314660012394857818566077035178241209143920182457158933390658353396537264757052464334913365120085767481521352901499860151171619220023060480464866565560676440226021303%2c%20352815577859200421265693524055335110516168016791939066619744890606270245172389068191436591061733904616135797438741188808884326847918800555526459128765065042606467292598531117932066982164093023%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TestRSASign("asdf", 426783863749219482096610996314660012394857818566077035178241209143920182457158933390658353396537264757052464334913365120085767481521352901499860151171619220023060480464866565560676440226021303, 352815577859200421265693524055335110516168016791939066619744890606270245172389068191436591061733904616135797438741188808884326847918800555526459128765065042606467292598531117932066982164093023)
@@ -4622,14 +4625,22 @@ ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101)
 ```
 Makes an elliptic curve from a cubic in normal form, generator letter and base point.
 
-*ConvertPolynomialModPToInteger* [ConvertPolynomialModPToInteger] {CalculatorFunctions::convertPolynomialModulotIntegerToInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20100x-55%3b%5cnB%20%3d%20PolynomialModP%28A%2c%20101%29%3b%5cnConvertPolynomialModPToInteger%20B%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*ConvertPolynomialModularToPolynomialRational* [ConvertPolynomialModularToPolynomialRational] {CalculatorFunctions::convertPolynomialModularToPolynomialRational}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20100x-55%3b%5cnB%20%3d%20PolynomialModP%28A%2c%20101%29%3b%5cnConvertPolynomialModularToPolynomialRational%20B%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A = 100x-55;
 B = PolynomialModP(A, 101);
-ConvertPolynomialModPToInteger B
+ConvertPolynomialModularToPolynomialRational B
 ```
 Converts polynomial  
+
+*PlotEscapeMap* [PlotEscapeMap] {CalculatorFunctionsComplexDynamics::plotEscapeMap}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3dMakeInputBox%28name%3da%2cvalue%3d4%29%3b%5cnPlotEscapeMap%282%2fa%20%28z%5e2%2bz%2b1%2fz%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+a=MakeInputBox(name=a,value=4);
+PlotEscapeMap(2/a (z^2+z+1/z));
+```
+Plots the escape map (Julia set) of the complex dynamics of the function.
 
 *VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3bVectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -5582,14 +5593,14 @@ CrashVectorOutOfBounds(0)
 ```
 Crashes the calculator by attempting to use data out-of-bounds in a std::vector.
 
-*PlotExpressionTree* [PlotExpressionTree] {CalculatorFunctions::drawExpressionGraph}. 
+*PlotExpressionTree* [PlotExpressionTree] {CalculatorFunctionsPlot::drawExpressionGraph}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28e%5ex%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotExpressionTree(e^x)
 ```
 Draws the internal tree structure of an expression. Does not unfold built-in types.
 
-*PlotExpressionTreeFull* [PlotExpressionTreeFull] {CalculatorFunctions::drawExpressionGraphFull}. 
+*PlotExpressionTreeFull* [PlotExpressionTreeFull] {CalculatorFunctionsPlot::drawExpressionGraphFull}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTreeFull%281%29%3b%5cnPlotExpressionTree%281%20%2b%201%29%3b%5cnPlotExpressionTree%28Freeze%7b%7d%281%20%2b%201%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotExpressionTreeFull(1);
@@ -5612,7 +5623,7 @@ LispifyFull(e^x)
 ```
 Shows the complete internal tree structure of an expression (replacing the expression with a string).
 
-*TestBase64* [TestBase64] {CalculatorFunctions::base64ToCharToBase64Test}. 
+*TestBase64* [TestBase64] {CalculatorFunctionsEncoding::base64ToCharToBase64Test}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TestBase64%28%5c%22TheQuickBrownFoxJumpsOverTheLazyDog%3d%5c%22%29%3b%5cnTestBase64%28%5c%22TheQuickBrownFoxJumpsOverTheLazyDog%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TestBase64("TheQuickBrownFoxJumpsOverTheLazyDog=");
@@ -5627,7 +5638,7 @@ StringDifference("XMJYAUZ","MZJAWXU")
 ```
 Computes the difference between two strings, provided that the strings are small enough. The algorithm consumes O(leftStringSize * rightStringSize) RAM. For more information, see https://en.wikipedia.org/wiki/Longest_common_subsequence_problem.
 
-*TestJSON* [TestJSON] {CalculatorFunctions::testJSON}. 
+*TestJSON* [TestJSON] {CalculatorFunctionsEncoding::testJSON}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TestJSON%28%5c%22%7ba%3a1%2c%20b%3a%20false%2c%7d%5c%22%29%3b%5cnTestJSON%28%5c%22%7b%5c%5c%5c%22a%5c%5c%5c%22%3a%5c%5c%5c%22%5c%5c%5c%5c%5c%5c%5c%22%5c%5c%5c%22%7d%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TestJSON("{a:1, b: false,}");
@@ -5635,21 +5646,21 @@ TestJSON("{\"a\":\"\\\"\"}");
 ```
 Tests the JSON parsing mechanism. Input: json string, use backslash escapes for backslashes and quotes.
 
-*FormatCPPCode* [FormatCPPCode] {Calculator::formatCPPSourceCode}. (invisible) 
+*FormatCPPCode* [FormatCPPCode] {CalculatorFunctions::formatCPPSourceCode}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPCode%7b%7d%28%5c%22src%2fsource_code_formatter.cpp%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FormatCPPCode{}("src/source_code_formatter.cpp")
 ```
 Format cpp code. 
 
-*FormatCPPCodeDebug* [FormatCPPCodeDebug] {Calculator::formatCPPSourceCodeDebug}. (invisible) 
+*FormatCPPCodeDebug* [FormatCPPCodeDebug] {CalculatorFunctions::formatCPPSourceCodeDebug}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPCodeDebug%7b%7d%28%5c%22src%2fsource_code_formatter.cpp%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FormatCPPCodeDebug{}("src/source_code_formatter.cpp")
 ```
 Format cpp code, debug version that shows the code formatter internals.
 
-*FormatCPPDirectory* [FormatCPPDirectory] {Calculator::formatCPPDirectory}. (invisible) 
+*FormatCPPDirectory* [FormatCPPDirectory] {CalculatorFunctions::formatCPPDirectory}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FormatCPPDirectory%7b%7d%28%5c%22src%2f%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 FormatCPPDirectory{}("src/")
@@ -5686,14 +5697,14 @@ c = d; PrintRuleStack{}0;
 ```
 Prints the current rule stack
 
-*Crawl* [Crawl] {CalculatorFunctions::crawlTexFile}. (admin only) 
+*Crawl* [Crawl] {CalculatorFunctionsFreecalc::crawlTexFile}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Crawl%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusimasterproblemsheet.tex%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Crawl("freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex")
 ```
 Crawls a latex file collecting all local style files and all \input commands to produce a single latex file. The function was originally designed for the purposes of the freecalc project as not been tested on any other projects, please use only for freecalc.
 
-*BuildFreecalc* [BuildFreecalc] {CalculatorFunctions::buildFreecalc}. (admin only) 
+*BuildFreecalc* [BuildFreecalc] {CalculatorFunctionsFreecalc::buildFreecalc}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fprecalculus.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fcalculusi.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fcalculusii.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2flectures%2freferencelectures%2fcalculusiiimultivariable.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fprecalculus.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusi.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusii.tex%5c%22%29%3b%5cnBuildFreecalc%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusiii.tex%5c%22%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 BuildFreecalc("freecalc/lectures/referencelectures/precalculus.tex");
@@ -5708,14 +5719,14 @@ BuildFreecalc("freecalc/homework/referenceallproblemsbycourse/calculusiii.tex");
 ```
 Builds the freecalc lecture pdfs. This function performs file operations and is allowed only to logged-in administrator accounts. Takes as arguments the lecture folder (within the freecalc project) and the file name. The function assumes the freecalc project is installed in a folder called freecalc, parallel to the calculator project folder (i.e, we have folders /vectorpartition and /freecalc next to one another). The folders are given relative to the /freecalc base.
 
-*BuildFreecalcWithSlides* [BuildFreecalcWithSlides] {CalculatorFunctions::BuildFreecalcWithSlides}. (admin only) 
+*BuildFreecalcWithSlides* [BuildFreecalcWithSlides] {CalculatorFunctionsFreecalc::BuildFreecalcWithSlides}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BuildFreecalcWithSlides%28%5c%22freecalc%2fhomework%2freferenceallproblemsbycourse%2fcalculusi.tex%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 BuildFreecalcWithSlides("freecalc/homework/referenceallproblemsbycourse/calculusi.tex");
 ```
 Same as BuildFreeCalc but attempts to also build individual slides. 
 
-*BuildSlidesInTopicList* [BuildSlidesInTopicList] {CalculatorFunctions::buildFreecalcSlidesOnTopic}. (admin only) 
+*BuildSlidesInTopicList* [BuildSlidesInTopicList] {CalculatorFunctionsFreecalc::buildFreecalcSlidesOnTopic}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22BuildSlidesInTopicList%20%280%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 BuildSlidesInTopicList (0);
@@ -5729,7 +5740,7 @@ suffixNotationForPostScript{}((1/3 + a + b) * c)
 ```
 Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.
 
-*MakeJavascriptExpression* [MakeJavascriptExpression] {Calculator::makeJavascriptExpression}. 
+*MakeJavascriptExpression* [MakeJavascriptExpression] {CalculatorFunctionsPlot::makeJavascriptExpression}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeJavascriptExpression%28a%28b%2bc%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 MakeJavascriptExpression(a(b+c))

@@ -5869,9 +5869,8 @@ bool Expression::makeQuotientReduce(
   }
   if (denominator.isEqualToZero()) {
     global.fatal
-    <<
-    "Use of Expression::makeQuotientReduce "
-    <<"is not allowed with zero denominators."
+    << "Use of Expression::makeQuotientReduce "
+    << "is not allowed with zero denominators."
     << global.fatal;
   }
   if (denominator.isEqualToOne()) {
@@ -5880,7 +5879,7 @@ bool Expression::makeQuotientReduce(
   }
   if (numerator.isEqualToZero()) {
     *this = owner.expressionZero();
-    return  true;
+    return true;
   }
   Rational numeratorRational;
   Rational denominatorRational;
@@ -5907,23 +5906,25 @@ bool Expression::makeSum(
 ) {
   STACK_TRACE("Expression::makeSum");
   List<Expression> summandsWithoutZeroes;
-  Rational rationalSum;
+  Rational rationalSum = 0;
   Rational current;
-
-  for (int i = 0; i < summands.size; i ++){
+  for (int i = 0; i < summands.size; i ++) {
     if (summands[i].isRational(&current)) {
-      rationalSum+=current;
+      rationalSum += current;
       continue;
     }
     summandsWithoutZeroes.addOnTop(summands[i]);
   }
-  if (!rationalSum.isEqualToZero()){
-    summandsWithoutZeroes.insertAtIndexShiftElementsUp( owner.expressionRational(rationalSum),0);
+  if (!rationalSum.isEqualToZero()) {
+    summandsWithoutZeroes.insertAtIndexShiftElementsUp(
+      owner.expressionRational(rationalSum), 0
+    );
   }
   if (summandsWithoutZeroes.size == 0) {
     return this->assignValue(owner, 0);
   }
-  return this->makeXOXOdotsOX(owner, owner.opPlus(), summandsWithoutZeroes);
+  return
+  this->makeXOXOdotsOX(owner, owner.opPlus(), summandsWithoutZeroes);
 }
 
 bool Expression::makeOXdotsX(

@@ -1098,6 +1098,47 @@ class EscapeMap {
     this.functionY = functionY; 
     this.lastImageData = null;
     this.ignoreNextComputation = true;
+    // The i^th position in this array gives the color
+    // of a pixel that takes 33 - i steps to escape to infinity.
+    // In other words, points with colors appearing earlier
+    // take longer to escape to infinity.
+    this.colorMap = [
+      [31, 31, 60],
+      [31, 31, 90],
+      [31, 31, 120],
+      [31, 31, 150],
+      [31, 31, 180],
+      [31, 31, 210],
+      [31, 31, 219],
+      [31, 31, 228],
+      [31, 31, 237],
+      [31, 31, 246],
+      [31, 31, 255],
+      //
+      [31, 60, 31],
+      [31, 90, 31],
+      [31, 120, 31],
+      [31, 150, 31],
+      [31, 180, 31],
+      [31, 210, 31],
+      [31, 219, 31],
+      [31, 228, 31],
+      [31, 237, 31],
+      [31, 246, 31],
+      [31, 255, 31],
+      //
+      [60,  255, 255],
+      [90,  255, 255],
+      [120, 255, 255],
+      [150, 255, 255],
+      [180, 255, 255],
+      [210, 255, 255],
+      [219, 255, 255],
+      [228, 255, 255],
+      [237, 255, 255],
+      [246, 255, 255],
+      [255, 255, 255],
+    ];
   }
 
   /** 
@@ -1122,7 +1163,8 @@ class EscapeMap {
    * f:{(x,y)} \to {(x,y)} 
    * 
    * needed to map a starting point (x,y) to 
-   * infinity.
+   * infinity (maximum 32), or 0 if the point does not escape 
+   * to infinity in 32 steps.
    * 
    * Here, map iteration is meant in the mathematical sense.
    * For example, iterating f 4 times amounts to computing:
@@ -1139,7 +1181,7 @@ class EscapeMap {
   iterateMap(x0, y0) {
     let x = x0;
     let y = y0;
-    for (let i = 0; i < 32; i ++) {
+    for (let i = 1; i < 34; i ++) {
       let newX = this.functionX(x, y);
       let newY = this.functionY(x, y);
       x = newX;
@@ -1148,32 +1190,28 @@ class EscapeMap {
       let deltaY = y - y0;
       let rho = deltaX * deltaX + deltaY * deltaY; 
       if (isNaN(rho)) {
-        return 32 - i;
+        return i;
       }
       if (rho > 10000) {
-        return 32 - i;
+        return i;
       }
     }
     return 0;
   }
   
   /**
-   * Converts a number from 1 to 33 to a color.
+   * Converts a number from 0 to 33 to a color.
    * 
-   * @param {number} input a number from 1 to 33.
+   * The number records the number of steps required for a point
+   * to escape to infinity or 0 if the point doesn't escape.
+   * 
+   * @param {number} input a number from 0 to 33.
    */
   mapEscapeCountToColor(input) {
     if (input == 0) {
       return [31, 31, 31];
     }
-    let brightnessBlue = Math.min(input, 14);
-    let brightnessGreen = Math.max(0, Math.min(input - 14, 14));
-    let brightnessRed = Math.max(0, Math.min(input - 28, 10));
-    return [
-      31 + 28 * brightnessRed,
-      31 + 28 * brightnessGreen,
-      31 + 28 * brightnessBlue,
-    ];
+    return this.colorMap[33 - input];
   }
 
   /** 

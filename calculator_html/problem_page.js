@@ -769,8 +769,11 @@ class Problem {
       answer.writeToElement(answerElement, this.outputElement);
     }
     initializeButtons.initializeAccordionButtons();
-    dynamicJavascript.typeset(this.outputElement)
-    dynamicJavascript.bootstrapAllScripts(this.outputElement);
+    let elementWithScripts = dynamicJavascript.bootstrapAllScripts(this.outputElement);
+    dynamicJavascript.typeset(
+      this.outputElement, {}, (editor, element) => {
+        elementWithScripts.bootstrapFormInputs(editor, element);
+      });
   }
 
   hasInstructorRightsNotViewingAsStudent() {

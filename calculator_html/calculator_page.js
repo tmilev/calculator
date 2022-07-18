@@ -436,13 +436,16 @@ class Calculator {
       constructedPanels[next.containerId] = next;
     }
     this.flagTypeset = false;
+    let elementWithScripts = dynamicJavascript.bootstrapAllScripts(this.getOutputElement());
     this.typeset((
-      /**@type{equationEditor.EquationEditor} */
-      editor
+      /** @type{equationEditor.EquationEditor} */
+      editor,
+      /** @type{HTMLElement} */
+      output,
     ) => {
+      elementWithScripts.bootstrapFormInputs(editor, output);
       this.resizePanel(editor, constructedPanels);
     });
-    dynamicJavascript.bootstrapAllScripts(this.getOutputElement());
   }
 
   getOutputElement() {

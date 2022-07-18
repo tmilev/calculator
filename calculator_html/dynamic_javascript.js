@@ -7,6 +7,55 @@ const EquationEditor = require("./equation_editor").EquationEditor;
 const MathNode = require("./equation_editor").MathNode;
 const knownTypes = require("./equation_editor").knownTypes;
 
+class OneGraphicWithSliders {
+  constructor(
+    /** @type{ElementWithScripts} */
+    owner,
+    /** @type{string} */
+    serialization
+  ) {
+    this.owner = owner;
+    this.serialization = serialization;
+    this.graphics = null;
+    /** @type{Canvas|CanvasTwoD|null} */
+    this.canvas = null;
+    this.usedSliders = {};
+  }
+
+  /** 
+   * Computes the graphics.
+   */
+  computeFromSerialization() {
+    this.graphics = JSON.parse(this.serialization);
+    let canvasName = this.graphics[pathnames.urlFields.result.canvasName];
+    let controlsName = this.graphics[pathnames.urlFields.result.controlsName];
+    let canvases = this.owner.element.querySelectorAll(`[name="${canvasName}"]`);
+    let controls = this.owner.element.querySelectorAll(`[name="${controlsName}"]`);
+    if (canvases.length < 1) {
+      throw "Unexpected missing canvas.";
+    }
+
+    this.canvas = graphicsSerialization.fromJSON(
+      this.graphics,
+      canvases[0],
+      controls[0],
+      null,
+      this.owner.sliders,
+      this.usedSliders,
+    );
+    for (let label in this.usedSliders) {
+      let current = this.owner.sliders[label];
+      current.addEventListener("input", () => {
+        this.redraw();
+      });
+    }    
+  }
+
+  redraw() { 
+    graphicsSerialization.redrawFromJSON(this.canvas, this.graphics, this.owner.sliders);
+  }
+}
+
 class ElementWithScripts {
   constructor() {
     this.scriptContents = {
@@ -78,6 +127,18 @@ class ElementWithScripts {
     this.bootstrapGraphicsNDimensional();
   }
 
+  /** 
+   * Bootstraps all form inputs in typeset math.
+   * 
+   * @param {EquationEditor} editor the equation editor object 
+   * @param {HTMLElement} output the ambient html element in which the 
+   */
+  bootstrapFormInputs(
+    editor, output,
+  ) {
+
+  }
+
   bootstrapGraphics3d() {
     let annotations = this.scriptContents["graphics3d"];
     for (let i = 0; i < annotations.length; i++) {
@@ -93,30 +154,11 @@ class ElementWithScripts {
   }
 
   bootstrapOneGraphic(
-    /**@type{string} */
+    /** @type{string} */
     content,
   ) {
-    let graphics = JSON.parse(content);
-    let canvasName = graphics[pathnames.urlFields.result.canvasName];
-    let controlsName = graphics[pathnames.urlFields.result.controlsName];
-    let canvases = this.element.querySelectorAll(`[name="${canvasName}"]`);
-    let controls = this.element.querySelectorAll(`[name="${controlsName}"]`);
-    if (canvases.length < 1) {
-      throw "Unexpected missing canvas.";
-    }
-    let canvas = graphicsSerialization.fromJSON(
-      graphics,
-      canvases[0],
-      controls[0],
-      null,
-      this.sliders,
-    );
-    for (let label in this.sliders) {
-      let current = this.sliders[label];
-      current.addEventListener("input", () => {
-        graphicsSerialization.redrawFromJSON(canvas, graphics, this.sliders);
-      });
-    }
+    let oneGraphic = new OneGraphicWithSliders(this, content);
+    oneGraphic.computeFromSerialization();
   }
 
   bootstrapGraphicsNDimensional() {
@@ -203,7 +245,6 @@ class DynamicJavascript {
         display: "inline-block"
       },
       (editor) => {
-        this.bootstrapSlider(editor, output);
         if (typeSetCallback !== null && typeSetCallback !== undefined) {
           typeSetCallback(editor, output);
         }
@@ -213,12 +254,19 @@ class DynamicJavascript {
     this.flagTypeset = true;
   }
 
+  /** 
+   * Boostraps all scripts in a given html element and returns a handle
+   * to the bootstrap element.
+   * 
+   * @return{ElementWithScripts}
+   */
   bootstrapAllScripts(
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     element,
   ) {
     let elementWithScripts = new ElementWithScripts();
     elementWithScripts.bootstrapAllScripts(element);
+    return elementWithScripts;
   }
 
   bootstrapSlider(

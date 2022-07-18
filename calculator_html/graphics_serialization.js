@@ -46,13 +46,18 @@ class GraphicsSerialization {
     messages,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
+    if (outputUsedSliders === null || outputUsedSliders === undefined) {
+      throw "Missing output sliders";
+    }
     let graphicsType = input["graphicsType"];
     switch (graphicsType) {
       case "twoDimensional":
-        return this.twoDimensionalGraphics(input, canvas, controls, messages, sliders);
+        return this.twoDimensionalGraphics(input, canvas, controls, messages, sliders, outputUsedSliders);
       case "threeDimensional":
-        return this.threeDimensionalGraphics(input, canvas, controls, messages, sliders);
+        return this.threeDimensionalGraphics(input, canvas, controls, messages, sliders, outputUsedSliders);
       default:
         throw `Unknown graphics type ${graphicsType}.`;
     }
@@ -70,9 +75,9 @@ class GraphicsSerialization {
     let graphicsType = input["graphicsType"];
     switch (graphicsType) {
       case "twoDimensional":
-        return this.plotTwoDimensionalGraphics(canvas, input, sliders);
+        return this.plotTwoDimensionalGraphics(canvas, input, sliders, {});
       case "threeDimensional":
-        return this.plotThreeDimensionalGraphics(canvas, input, sliders);
+        return this.plotThreeDimensionalGraphics(canvas, input, sliders, {});
       default:
         throw `Unknown graphics type ${graphicsType}.`;
     }
@@ -93,10 +98,12 @@ class GraphicsSerialization {
     messages,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
     let canvas = new CanvasTwoD(canvasElement, controls, messages);
     canvas.initialize();
-    return this.plotTwoDimensionalGraphics(canvas, input, sliders);
+    return this.plotTwoDimensionalGraphics(canvas, input, sliders, outputUsedSliders);
   }
 
   /**
@@ -114,10 +121,12 @@ class GraphicsSerialization {
     messages,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
     let canvas = new CanvasThreeD(canvasElement, controls, messages);
     canvas.initialize();
-    return this.plotThreeDimensionalGraphics(canvas, input, sliders);
+    return this.plotThreeDimensionalGraphics(canvas, input, sliders, outputUsedSliders);
   }
 
   /** 
@@ -131,13 +140,15 @@ class GraphicsSerialization {
     input,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
-  ){
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
+  ) {
     let plotObjects = input["plotObjects"];
     if (!Array.isArray(plotObjects)) {
       throw `Plot objects not an array.`;
     }
     for (let i = 0; i < plotObjects.length; i++) {
-      this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders);
+      this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders, outputUsedSliders);
     }
     canvas.redraw();
     return canvas;
@@ -154,13 +165,15 @@ class GraphicsSerialization {
     input,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
     let plotObjects = input["plotObjects"];
     if (!Array.isArray(plotObjects)) {
       throw `Plot objects not an array.`;
     }
     for (let i = 0; i < plotObjects.length; i++) {
-      this.oneThreeDimensionalObject(plotObjects[i], canvas, sliders);
+      this.oneThreeDimensionalObject(plotObjects[i], canvas, sliders, outputUsedSliders);
     }
     if (input["setBoundingBoxAsDefaultViewWindow"]) {
       canvas.setBoundingBoxAsDefaultViewWindow();
@@ -169,12 +182,28 @@ class GraphicsSerialization {
     return canvas;    
   }
 
+  accountUsedParameters(
+    /** @type{Object.<string,string>|null} */
+    parameters,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
+  ) { 
+    if (parameters === null) {
+      return;
+    }
+    for (let label in parameters){
+      outputUsedSliders[label] = label;
+    }
+  }
+
   oneTwoDimensionalObject(
     plot,
     /**@type{CanvasTwoD} */
     canvas,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
     let plotType = plot[this.labels.plotType];
     let functionObject = plot[this.labels.functionLabel];
@@ -195,8 +224,8 @@ class GraphicsSerialization {
     let parameterValues = null;
     switch (plotType) {
       case "plotFunction":
-        let functionConstructed = this.functionFromObject(functionObject, sliders);
-        parameterValues = this.getSliderValuesFromInput(sliders, functionObject);
+        let functionConstructed = this.functionFromObject(functionObject, sliders, outputUsedSliders);
+        parameterValues = this.getSliderValuesFromInput(sliders, functionObject, outputUsedSliders);
         canvas.drawFunction(
           functionConstructed,
           this.interpretStringToNumber(left, parameterValues),
@@ -225,7 +254,7 @@ class GraphicsSerialization {
         canvas.computeViewWindow();
         return;
       case "plotDirectionField":
-        let immersion = this.functionFromObject(manifoldImmersion, sliders);
+        let immersion = this.functionFromObject(manifoldImmersion, sliders, outputUsedSliders);
         canvas.drawVectorField(
           immersion,
           true,
@@ -238,7 +267,7 @@ class GraphicsSerialization {
         );
         return;
       case "parametricCurve":
-        parameterValues = this.getSliderValuesFromInput(sliders, plot);
+        parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         let coordinateFunctionArray = [
           this.functionFromBodyAndArguments(
             coordinateFunctions[0], variableArguments, parameterValues,
@@ -255,7 +284,7 @@ class GraphicsSerialization {
         );
         return;
       case "points":
-        parameterValues = this.getSliderValuesFromInput(sliders, plot);
+        parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         canvas.drawPoints(this.interpretListListStringsAsNumbers(points, parameterValues), color);
         return;
       case "pathFilled":
@@ -268,7 +297,7 @@ class GraphicsSerialization {
         canvas.drawText(onePoint, text, color);
         return;
       case "escapeMap":
-        parameterValues = this.getSliderValuesFromInput(sliders, plot);
+        parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         let functionX =
            this.functionFromBodyAndArguments(
             coordinateFunctions[0], variableArguments, parameterValues,
@@ -293,8 +322,12 @@ class GraphicsSerialization {
     /**@type{Object.<string,HTMLInputElement>} */
     sliders,
     plot,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
-    return this.getSliderValues(sliders, plot[this.labels.parameters]);
+    let result = this.getSliderValues(sliders, plot[this.labels.parameters]);
+    this.accountUsedParameters(result, outputUsedSliders);
+    return result;
   }
 
   /** 
@@ -326,6 +359,8 @@ class GraphicsSerialization {
     canvas,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
     let plotType = plot[this.labels.plotType];
     let variableRanges = plot[this.labels.variableRanges];
@@ -351,7 +386,7 @@ class GraphicsSerialization {
         canvas.screenBasisUserDefault = plot["projectionScreen"];
         return;
       case "surface":
-        let parameterValues = this.getSliderValuesFromInput(sliders, plot);
+        let parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         let convertedRanges = [[
           this.interpretStringToNumber(variableRanges[0][0], parameterValues),
           this.interpretStringToNumber(variableRanges[0][1], parameterValues),
@@ -433,12 +468,18 @@ class GraphicsSerialization {
     input,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
+    /**@type{Object.<string,string>} */
+    outputUsedSliders,
   ) {
+    if (outputUsedSliders === null || outputUsedSliders === undefined) {
+      throw "Missing output sliders";
+    }
     /**@type{string[]} */
     let inputArguments = input[this.labels.arguments];
     /**@type{string[]} */
     let body = input[this.labels.body];
     let parameterValues = this.getSliderValues(sliders, input[this.labels.parameters]);
+    this.accountUsedParameters(parameterValues, outputUsedSliders);
     return this.functionFromBodyAndArguments(body, inputArguments, parameterValues);
   }
 
@@ -463,21 +504,73 @@ class GraphicsSerialization {
   ) {
     body = this.getParametersJavascript(parameterValues) + body;
     if (inputArguments.length === 1) {
-      return Function(inputArguments[0], body);
+      return Function(
+        inputArguments[0],
+        body,
+      );
     } else if (inputArguments.length === 2) {
-      return Function(inputArguments[0], inputArguments[1], body);
+      return Function(
+        inputArguments[0],
+        inputArguments[1],
+        body,
+      );
     } else if (inputArguments.length === 3) {
-      return Function(inputArguments[0], inputArguments[1], inputArguments[2], body);
+      return Function(
+        inputArguments[0],
+        inputArguments[1],
+        inputArguments[2],
+        body,
+      );
     } else if (inputArguments.length === 4) {
-      return Function(inputArguments[0], inputArguments[1], inputArguments[3], body);
+      return Function(
+        inputArguments[0],
+        inputArguments[1],
+        inputArguments[2],
+        inputArguments[3],
+        body,
+      );
     } else if (inputArguments.length === 5) {
-      return Function(inputArguments[0], inputArguments[1], inputArguments[3], inputArguments[4], body);
+      return Function(
+        inputArguments[0],
+        inputArguments[1],
+        inputArguments[2],
+        inputArguments[3],
+        inputArguments[4],
+        body,
+      );
     } else if (inputArguments.length === 6) {
-      return Function(inputArguments[0], inputArguments[1], inputArguments[3], inputArguments[4], inputArguments[5], body);
+      return Function(
+        inputArguments[0],
+        inputArguments[1],
+        inputArguments[2],
+        inputArguments[3],
+        inputArguments[4],
+        inputArguments[5],
+        body,
+      );
     } else if (inputArguments.length === 7) {
-      return Function(inputArguments[0], inputArguments[1], inputArguments[3], inputArguments[4], inputArguments[5], inputArguments[6], body);
+      return Function(
+        inputArguments[0],
+        inputArguments[1],
+        inputArguments[2],
+        inputArguments[3],
+        inputArguments[4],
+        inputArguments[5],
+        inputArguments[6],
+        body,
+      );
     } else if (inputArguments.length === 8) {
-      return Function(inputArguments[0], inputArguments[1], inputArguments[3], inputArguments[4], inputArguments[5], inputArguments[6], inputArguments[7], body);
+      return Function(
+        inputArguments[0],
+        inputArguments[1],
+        inputArguments[2],
+        inputArguments[3],
+        inputArguments[4],
+        inputArguments[5],
+        inputArguments[6],
+        inputArguments[7],
+        body,
+      );
     }
     return null;
   }

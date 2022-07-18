@@ -1100,7 +1100,8 @@ class EscapeMap {
     this.ignoreNextComputation = true;
   }
 
-  /** Required to satisfy interface.
+  /** 
+   * Required to satisfy interface.
    * @param {!Array.<!Array.<number>>} unused output bounding box.
    */
   accountBoundingBox(unused) { }
@@ -1149,7 +1150,7 @@ class EscapeMap {
       if (isNaN(rho)) {
         return 32 - i;
       }
-      if (rho > 100) {
+      if (rho > 10000) {
         return 32 - i;
       }
     }
@@ -1229,13 +1230,15 @@ class EscapeMap {
     let surface = canvas.surface;
     let coordinates = canvas.coordsScreenAbsoluteToMathScreen(x, y);
     coordinates = canvas.coordinatesMathScreenToMath(coordinates);
-    x = coordinates[0];
-    y = coordinates[1];
-    let points = [canvas.coordinatesMathToScreen([x,y])];
+    let xPrevious = coordinates[0];
+    let yPrevious = coordinates[1];
+    let points = [canvas.coordinatesMathToScreen([xPrevious, yPrevious])];
     for (let i = 0; i < 32; i++) {
-      x = this.functionX(x, y);
-      y = this.functionY(x, y);
-      let coordinates = canvas.coordinatesMathToScreen([x, y]);
+      let xNext = this.functionX(xPrevious, yPrevious);
+      let yNext = this.functionY(xPrevious, yPrevious);
+      xPrevious = xNext;
+      yPrevious = yNext;
+      let coordinates = canvas.coordinatesMathToScreen([xPrevious, yPrevious]);
       if (isNaN(coordinates[0]) || isNaN(coordinates[1])) {
         break;
       }
@@ -1248,10 +1251,16 @@ class EscapeMap {
     surface.strokeStyle = "red";
     surface.lineWidth = 3;
     surface.moveTo(points[0][0], points[0][1]);
-    for (let i = 1; i < points.length ; i++) {
-      surface.lineTo(points[i][0], points[i][1]);      
+    for (let i = 1; i < points.length; i++) {
+      surface.lineTo(points[i][0], points[i][1]);
     }
     surface.stroke();
+    surface.strokeStyle = "green";
+    for (let i = 0; i < points.length; i++) {
+      surface.beginPath();
+      surface.arc(points[i][0], points[i][1], 3, 0, Math.PI * 2);
+      surface.stroke();
+    }
   }
 }
 

@@ -359,7 +359,9 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorHtmlFunctions::userInputBox,
     "",
     "Creates an user input text box. ",
-    "MakeInputBox(name = a, value = 3);",
+    "MakeInputBox(name = a, value = 3);\n"
+    "MakeInputBox(name = b, value = 3, min = 1, max = 11);\n"
+    "MakeInputBox(name = a, value = 5);\n",
     "CalculatorHtmlFunctions::userInputBox",
     "MakeInputBox",
     innerStandard

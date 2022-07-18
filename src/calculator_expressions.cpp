@@ -3664,14 +3664,14 @@ std::string Expression::toStringAllSlidersInExpression() const {
       out << "max='" << reader << "' ";
     }
     if (box.step.evaluatesToDouble(&reader)) {
-      out << "step ='" << reader << "' ";
+      out << "step='" << reader << "' ";
     }
     if (box.value.evaluatesToDouble(&reader)) {
       out << "value='" << reader << "' ";
     } else {
       out << "value='1' ";
     }
-    out << "></input>";
+    out << " class='sliderStandard'></input>";
   }
   return out.str();
 }

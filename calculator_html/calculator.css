@@ -1682,3 +1682,7 @@ button.buttonSolve:hover {
 #spanCalculatorMainOutput {
   height: 80%;
 }
+
+.sliderStandard {
+  margin-left: 20px;
+}

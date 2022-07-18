@@ -43,12 +43,6 @@ class OneGraphicWithSliders {
       this.owner.sliders,
       this.usedSliders,
     );
-    for (let label in this.usedSliders) {
-      let current = this.owner.sliders[label];
-      current.addEventListener("input", () => {
-        this.owner.updateSlidersAndFormInputs(label, current.value);
-      });
-    }    
   }
 
   redraw() { 
@@ -129,6 +123,16 @@ class ElementWithScripts {
     this.bootstrapDisplaySSLRecord();
     this.bootstrapDisplayTransportLayerSecurity();
     this.bootstrapGraphicsNDimensional();
+    this.bootstrapSliders();
+  }
+
+  bootstrapSliders() { 
+    for (let label in this.sliders) {
+      let current = this.sliders[label];
+      current.addEventListener("input", () => {
+        this.updateSlidersAndFormInputs(label, current.value);
+      });
+    }    
   }
 
   bootstrapGraphics3d() {

@@ -3410,11 +3410,11 @@ class EquationEditor {
 
   /** Initializes the event catcher. */
   prepareEventCatcher() {
+    this.eventCatcher = new MathNode(this, knownTypes.eventCatcher);
+    this.computeStandardAtomHeight();
     if (!this.options.editable) {
       return;
     }
-    this.eventCatcher = new MathNode(this, knownTypes.eventCatcher);
-    this.computeStandardAtomHeight();
     this.eventCatcher.createDOMElementIfMissing();
     this.container.appendChild(this.eventCatcher.element);
     this.eventCatcher.element.style.position = 'absolute';
@@ -9291,7 +9291,7 @@ class MathNodeFormInput extends MathNode {
     if (this.boundingBox.height === 0) {
       this.boundingBox.height = 20;
     }
-    this.boundingBox.width = this.value.length * this.boundingBox.height;
+    this.boundingBox.width = this.value.length * this.boundingBox.height / 2;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 }

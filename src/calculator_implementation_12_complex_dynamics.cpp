@@ -106,7 +106,7 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     extractor.parametersJS
   );
   escapeMap.drawGrid();
-  escapeMap.setViewWindow(- 4, - 4, 4, 4);
+  //escapeMap.setViewWindow(- 4, - 4, 4, 4);
   std::stringstream out;
   out
   << "Variable:<br>"

@@ -1098,6 +1098,7 @@ class EscapeMap {
     this.functionY = functionY; 
     this.lastImageData = null;
     this.ignoreNextComputation = true;
+    this.boundingBoxEntries = [];
     // The i^th position in this array gives the color
     // of a pixel that takes 33 - i steps to escape to infinity.
     // In other words, points with colors appearing earlier
@@ -1145,7 +1146,35 @@ class EscapeMap {
    * Required to satisfy interface.
    * @param {!Array.<!Array.<number>>} unused output bounding box.
    */
-  accountBoundingBox(unused) { }
+  accountBoundingBox(box) {
+    if (this.boundingBoxEntries.length == 0) {
+      this.computeBoundingBox();
+    }
+    for (let i = 0; i < this.boundingBoxEntries.length; i++) {
+      accountBoundingBox(this.boundingBoxEntries[i], box);
+    }
+  }
+
+  /** @return {Array.<number>} */
+  scaleToFindEscapingPoints(x, y) {
+    for (let i = 0; i < 15; i++) {
+      if (this.iterateMap(x, y) > 0) {
+        break;
+      }
+      x *= 1.5;
+      y *= 1.5;
+    }
+    return [x, y];
+  }
+
+  computeBoundingBox() {
+    for (let i = 0; i < 16; i++) {
+      let angle = 2 * Math.PI / (i + 1) + 0.1;
+      let x = 1.1 * Math.cos(angle);
+      let y = 1.1 * Math.sin(angle);
+      this.boundingBoxEntries.push(this.scaleToFindEscapingPoints(x, y));
+    }
+  }
   
   /**
    * Same as draw but required to satisfy interface.
@@ -1192,7 +1221,7 @@ class EscapeMap {
       if (isNaN(rho)) {
         return i;
       }
-      if (rho > 10000) {
+      if (rho > 1000000) {
         return i;
       }
     }

@@ -8239,7 +8239,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     ) {
       calculator
       << "Failed to extract suffix notation from argument "
-      << plot.coordinateFunctionsE[i].toString();
+      << plot.coordinateFunctionsE[i].toString()
+      << ". ";
       isGoodLatexWise = false;
       break;
     }
@@ -8273,17 +8274,20 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     plot.plotString = outLatex.str();
     plot.plotStringWithHtml = outHtml.str();
   }
-  Expression converterE;
+  JavascriptExtractor extractor(calculator);
   plot.plotType = PlotObject::PlotTypes::parametricCurve;
   plot.coordinateFunctionsJS.setSize(plot.dimension);
   for (int i = 0; i < plot.dimension; i ++) {
     if (
-      CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-        calculator, plot.coordinateFunctionsE[i], converterE
+      extractor.extractJavascript(
+        plot.coordinateFunctionsE[i], &calculator.comments
       )
     ) {
-      plot.coordinateFunctionsJS[i] = converterE.toString();
+      plot.coordinateFunctionsJS[i] = extractor.result;
     } else {
+      global.comments
+      << "DEBUG: here I am!!!: coord fun: "
+      << plot.coordinateFunctionsE[i];
       plot.plotType = "parametricCurvePrecomputed";
       calculator
       << "Failed to convert: "
@@ -8294,31 +8298,25 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.numberOfSegmentsJS.setSize(1);
   plot.numberOfSegmentsJS[0] = "200";
   if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plot.numSegmentsE, converterE
-    )
+    extractor.extractJavascript(plot.numSegmentsE, &calculator.comments)
   ) {
-    plot.numberOfSegmentsJS[0] = converterE.toString();
+    plot.numberOfSegmentsJS[0] = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputMakeBoxed";
     calculator << "Failed to convert: " << plot.numSegmentsE << " to js. ";
   }
   if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plot.paramLowE, converterE
-    )
+    extractor.extractJavascript(plot.paramLowE, &calculator.comments)
   ) {
-    plot.paramLowJS = converterE.toString();
+    plot.paramLowJS = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputed";
     calculator << "Failed to convert: " << plot.paramLowE << " to js. ";
   }
   if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plot.paramHighE, converterE
-    )
+    extractor.extractJavascript(plot.paramHighE, &calculator.comments)
   ) {
-    plot.paramHighJS = converterE.toString();
+    plot.paramHighJS = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputed";
     calculator << "Failed to convert: " << plot.paramHighE << " to js. ";
@@ -8350,18 +8348,27 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     ) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    plot.pointsDouble.setSize(xCoordinates.size);
+    plot.pointsDouble.setExpectedSize(xCoordinates.size);
     for (int i = 0; i < xCoordinates.size; i ++) {
-      plot.pointsDouble[i].setSize(2);
-      plot.pointsDouble[i][0] = xCoordinates[i][1];
-      plot.pointsDouble[i][1] = yCoordinates[i][1];
+      if (
+        FloatingPoint::isNaN(xCoordinates[i][1]) ||
+        FloatingPoint::isNaN(yCoordinates[i][1])
+      ) {
+        continue;
+      }
+      plot.pointsDouble[i] = List<double>({
+          xCoordinates[i][1], yCoordinates[i][1]
+        }
+      );
     }
   }
   input.hasInputBoxVariables(
     &plot.parametersInPlay, &plot.parametersInPlayJS
   );
+  plot.parameterLetter = extractor.parameterLetter;
   Plot outputPlot;
   outputPlot += plot;
+  global.comments << "DEBUG: got plot!!!! Plot: " << plot.toJSON();
   return output.assignValue(calculator, outputPlot);
 }
 

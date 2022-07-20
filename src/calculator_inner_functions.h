@@ -258,6 +258,38 @@ public:
   }
 };
 
+class JavascriptExtractor {
+private:
+  bool extractJavascriptRecursive(
+    const Expression& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool extractFromAtom(const Expression& input, std::string& output);
+  bool extractFromSequence(
+    const Expression& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool extractFromBinaryOrUnary(
+    const Expression& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+public:
+  Calculator* owner;
+  Expression startingExpression;
+  std::string result;
+  int recursionDepth;
+  HashedList<std::string> parametersOnGraph;
+  std::string parameterLetter;
+  std::string parameterOnGraphString;
+  JavascriptExtractor(Calculator& inputOwner);
+  bool extractJavascript(
+    const Expression& input, std::stringstream* commentsOnFailure
+  );
+};
+
 class CalculatorFunctionsTrigonometry {
 public:
   static bool sin(

@@ -70,6 +70,10 @@ public:
     }
     return this->values[index];
   }
+  // Returns a value with a given key, or,
+  // if the map doesn't have the key, writes
+  // the given initial value into the map
+  // and then returns it.
   Value& getValueCreate(const Key& input, const Value& initialValue) {
     int index = this->keys.getIndex(input);
     if (index == - 1) {

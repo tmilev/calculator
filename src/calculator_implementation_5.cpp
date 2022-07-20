@@ -2187,63 +2187,271 @@ bool CalculatorFunctionsPlot::functionMakeJavascriptExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsPlot::functionMakeJavascriptExpression");
-  RecursionDepthCounter counter(&calculator.recursionDepth);
-  if (calculator.recursionDepthExceededHandleRoughly()) {
+  JavascriptExtractor extractor(calculator);
+  if (!extractor.extractJavascript(input, &calculator.comments)) {
+    return
+    calculator
+    << "<br>In functionMakeJavascriptExpression: "
+    << "failed to extract javascript from: "
+    << input.toString()
+    << ". ";
+  }
+  output = extractor.result;
+  global.comments << "<br>DEBUG: result: " << extractor.result;
+  return true;
+}
+
+JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
+  this->owner = &inputOwner;
+  this->recursionDepth = 0;
+}
+
+bool JavascriptExtractor::extractJavascript(
+  const Expression& input, std::stringstream* commentsOnFailure
+) {
+  this->startingExpression = input;
+  if (this->parameterLetter == "") {
+    Expression parameterAtom = this->owner->getNewAtom("p");
+    this->parameterLetter = parameterAtom.toString();
+  }
+  if (this->parameterOnGraphString == "") {
+    Expression parameterOnGraphAtom = this->owner->getNewAtom("q");
+    this->parameterOnGraphString = parameterOnGraphAtom.toString();
+  }
+  return
+  this->extractJavascriptRecursive(input, this->result, commentsOnFailure);
+}
+
+bool JavascriptExtractor::extractFromAtom(
+  const Expression& input, std::string& output
+) {
+  std::string atomString;
+  if (!input.isOperation(&atomString)) {
     return false;
   }
-  std::string atomString;
-  if (input == calculator.expressionMinusInfinity()) {
-    return output.assignValue<std::string>(calculator, "\"minusInfinity\"");
+  if (input.isOperationGiven(this->owner->opE())) {
+    output = " 2.718281828 ";
+    return true;
   }
-  if (input == calculator.expressionInfinity()) {
-    return output.assignValue<std::string>(calculator, "\"infinity\"");
+  if (input.isOperationGiven(this->owner->opPi())) {
+    output = " 3.141592654 ";
+    return true;
   }
-  if (input.isOperation(&atomString)) {
-    if (input.isOperationGiven(calculator.opE())) {
-      return output.assignValue<std::string>(calculator, " 2.718281828 ");
-    }
-    if (input.isOperationGiven(calculator.opPi())) {
-      return output.assignValue<std::string>(calculator, " 3.141592654 ");
-    }
-    if (input.data >= calculator.numberOfPredefinedAtoms) {
-      return
-      output.assignValue(
-        calculator, HtmlRoutines::getJavascriptVariable(atomString)
-      );
-    }
+  if (input.data >= this->owner->numberOfPredefinedAtoms) {
+    // User-defined atoms need to be corrected for safety.
+    output = HtmlRoutines::getJavascriptVariable(atomString);
+    return true;
+  }
+  if (
+    atomString == "+" ||
+    atomString == "*" ||
+    atomString == "/" ||
+    atomString == "-"
+  ) {
+    output = atomString;
+    return true;
+  }
+  if (this->parametersOnGraph.contains(atomString)) {
+    std::stringstream out;
+    out
+    << this->parameterOnGraphString
+    << "["
+    << this->parametersOnGraph.getIndex(atomString)
+    << "]";
+    output = out.str();
+    return true;
+  }
+  output = atomString;
+  return true;
+}
+
+bool JavascriptExtractor::extractFromSequence(
+  const Expression& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  std::string expression;
+  std::stringstream out;
+  out << "[";
+  for (int i = 1; i < input.size(); i ++) {
     if (
-      atomString == "+" ||
-      atomString == "*" ||
-      atomString == "/" ||
-      atomString == "-"
+      !this->extractJavascriptRecursive(
+        input[i], expression, commentsOnFailure
+      )
     ) {
-      return output.assignValue(calculator, atomString);
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "<br>Extractor failed to extract element in sequence from: "
+        << input[i]
+        << ". ";
+      }
+      return false;
     }
-    return output.assignValue(calculator, atomString);
+    out << expression;
+    if (i != input.size() - 1) {
+      out << ", ";
+    }
+  }
+  out << "]";
+  output = out.str();
+  return true;
+}
+
+bool JavascriptExtractor::extractFromBinaryOrUnary(
+  const Expression& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (input.size() != 3 && input.size() != 2) {
+    return false;
+  }
+  std::string opString;
+  std::string leftString;
+  std::string rightString;
+  if (
+    !this->extractJavascriptRecursive(
+      input[0], opString, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (
+    !this->extractJavascriptRecursive(
+      input[1], leftString, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "<br>Extractor failed to extract first argument from: "
+      << input[1]
+      << ". ";
+    }
+    return false;
+  }
+  if (input.size() == 3) {
+    if (
+      !this->extractJavascriptRecursive(
+        input[2], rightString, commentsOnFailure
+      )
+    ) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "<br>Extractor failed to extract second argument from: "
+        << input[1]
+        << ". ";
+      }
+      return false;
+    }
+  }
+  std::stringstream out;
+  if (input.size() == 3) {
+    if (
+      opString == "+" || opString == "-" || opString == "/" || opString == "*"
+    ) {
+      out << "(" << leftString << " " << opString << " " << rightString << ")";
+      output = out.str();
+      return true;
+    }
+    if (opString == "\\sqrt") {
+      out << "Math.pow(" << rightString << ", 1/" << leftString << ")";
+      output = out.str();
+      return true;
+    }
+    if (opString == "^") {
+      out << "Math.pow(" << leftString << ", " << rightString << ")";
+      output = out.str();
+      return true;
+    }
+    if (opString == "LogBase") {
+      out
+      << "Math.log("
+      << rightString
+      << ") / Math.log("
+      << leftString
+      << ")";
+      output = out.str();
+      return true;
+    }
+  }
+  std::string functionName = "";
+  if (
+    opString == "\\sin" ||
+    opString == "\\cos" ||
+    opString == "\\log" ||
+    opString == "\\tan" ||
+    opString == "\\cot"
+  ) {
+    functionName = opString.substr(1);
+  }
+  if (opString == "\\arccos") {
+    functionName = "acos";
+  }
+  if (opString == "\\arcsin") {
+    functionName = "asin";
+  }
+  if (opString == "\\arctan") {
+    functionName = "atan";
+  }
+  if (functionName != "") {
+    out << "(Math." << functionName << "( " << leftString << "))";
+    output = out.str();
+    return true;
+  }
+  if (opString == "|") {
+    out << "(Math.abs( " << leftString << "))";
+    output = out.str();
+    return true;
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "<br>Extractor failed to extract javascript from: "
+    << input
+    << ".";
+  }
+  return false;
+}
+
+bool JavascriptExtractor::extractJavascriptRecursive(
+  const Expression& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  RecursionDepthCounter counter(&this->recursionDepth);
+  if (this->recursionDepth > this->owner->maximumRecursionDepth) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Javascript extractor: recursion too deep.";
+    }
+    return false;
+  }
+  if (input == this->owner->expressionMinusInfinity()) {
+    output = "\"minusInfinity\"";
+    return true;
+  }
+  if (input == this->owner->expressionInfinity()) {
+    output = "\"infinity\"";
+    return true;
+  }
+  if (input.isOperation()) {
+    return this->extractFromAtom(input, output);
   }
   std::stringstream out;
   InputBox box;
   if (input.isOfType(&box)) {
-    std::string name = box.getSliderName();
-    out << name << " ";
-    return output.assignValue(calculator, out.str());
+    global.comments
+    << "DEBUG: map: "
+    << this->owner->objectContainer.userInputTextBoxesWithValues.toStringHtml(
+    );
+    int boxIndex =
+    this->owner->objectContainer.userInputTextBoxesWithValues.getIndexNoFail(
+      box.name
+    );
+    out << this->parameterLetter << "[" << boxIndex << "]";
+    output = out.str();
+    return true;
   }
   out.precision(7);
-  bool hasDoubleValue = false;
-  double doubleValue = - 1;
-  if (input.isOfType<Rational>()) {
-    hasDoubleValue = true;
-    doubleValue = input.getValue<Rational>().getDoubleValue();
-  }
-  if (input.isOfType<AlgebraicNumber>()) {
-    hasDoubleValue =
-    input.getValue<AlgebraicNumber>().evaluatesToDouble(&doubleValue);
-  }
-  if (input.isOfType<double>()) {
-    hasDoubleValue = true;
-    doubleValue = input.getValue<double>();
-  }
-  if (hasDoubleValue) {
+  double doubleValue = 0;
+  if (input.evaluatesToDouble(&doubleValue)) {
     std::string doubleString = FloatingPoint::doubleToString(doubleValue);
     if (doubleString.size() > 0) {
       if (doubleString[0] == '-') {
@@ -2252,144 +2460,17 @@ bool CalculatorFunctionsPlot::functionMakeJavascriptExpression(
         out << " " << doubleString;
       }
     }
-    return output.assignValue(calculator, out.str());
+    output = out.str();
+    return true;
   }
   Expression operation, leftE, rightE;
   if (
-    input.startsWith(calculator.opSequence()) ||
-    input.startsWith(calculator.opIntervalOpen())
+    input.startsWith(this->owner->opSequence()) ||
+    input.startsWith(this->owner->opIntervalOpen())
   ) {
-    out << "[";
-    for (int i = 1; i < input.size(); i ++) {
-      if (
-        !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-          calculator, input[i], operation
-        )
-      ) {
-        return
-        output.assignValue(
-          calculator, "(Failed to convert " + input[i].toString() + ")"
-        );
-      }
-      out << operation.toString();
-      if (i != input.size() - 1) {
-        out << ", ";
-      }
-    }
-    out << "]";
-    return output.assignValue(calculator, out.str());
+    return this->extractFromSequence(input, output, commentsOnFailure);
   }
-  std::string opString, leftString, rightString;
-  std::stringstream logStream;
-  if (input.size() == 3 || input.size() == 2) {
-    Expression* currentE = &operation;
-    std::string* currentString = &opString;
-    for (int i = 0; i < input.size(); i ++) {
-      if (
-        !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-          calculator, input[i], *currentE
-        )
-      ) {
-        return
-        output.assignValue(
-          calculator, "(Failed to convert " + input[i].toString() + ")"
-        );
-      }
-      if (!currentE->isOfType(currentString)) {
-        return
-        output.assignValue(
-          calculator, "(Failed to convert " + input[i].toString() + ")"
-        );
-      }
-      logStream
-      << "Converted: "
-      << input[i].toString()
-      << " to: "
-      << *currentString
-      << ". ";
-      if (i == 0) {
-        currentE = &leftE;
-        currentString = &leftString;
-      }
-      if (i == 1) {
-        currentE = &rightE;
-        currentString = &rightString;
-      }
-    }
-    if (input.size() == 3) {
-      if (
-        opString == "+" ||
-        opString == "-" ||
-        opString == "/" ||
-        opString == "*"
-      ) {
-        out
-        << "("
-        << leftString
-        << " "
-        << opString
-        << " "
-        << rightString
-        << ")";
-        return output.assignValue(calculator, out.str());
-      }
-      if (opString == "\\sqrt") {
-        out << "Math.pow(" << rightString << ", 1/" << leftString << ")";
-        return output.assignValue(calculator, out.str());
-      }
-      if (opString == "^") {
-        out << "Math.pow(" << leftString << ", " << rightString << ")";
-        return output.assignValue(calculator, out.str());
-      }
-      if (opString == "LogBase") {
-        out
-        << "Math.log("
-        << rightString
-        << ") / Math.log("
-        << leftString
-        << ")";
-        return output.assignValue(calculator, out.str());
-      }
-    }
-    if (input.size() == 2) {
-      std::string functionName = "";
-      if (
-        opString == "\\sin" ||
-        opString == "\\cos" ||
-        opString == "\\log" ||
-        opString == "\\tan" ||
-        opString == "\\cot"
-      ) {
-        functionName = opString.substr(1);
-      }
-      if (opString == "\\arccos") {
-        functionName = "acos";
-      }
-      if (opString == "\\arcsin") {
-        functionName = "asin";
-      }
-      if (opString == "\\arctan") {
-        functionName = "atan";
-      }
-      if (functionName != "") {
-        out << "(Math." << functionName << "( " << leftString << "))";
-        return output.assignValue(calculator, out.str());
-      }
-    }
-    if (input.size() == 2) {
-      if (opString == "|") {
-        out << "(Math.abs( " << leftString << "))";
-        return output.assignValue(calculator, out.str());
-      }
-    }
-  }
-  out
-  << "(Failed to make expression from "
-  << input.toString()
-  << ". "
-  << logStream.str()
-  << ")";
-  return output.assignValue(calculator, out.str());
+  return this->extractFromBinaryOrUnary(input, output, commentsOnFailure);
 }
 
 bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(

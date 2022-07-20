@@ -40,6 +40,8 @@ std::string PlotObject::Labels::body = "body";
 std::string PlotObject::Labels::text = "text";
 std::string PlotObject::Labels::arguments = "arguments";
 std::string PlotObject::Labels::parameters = "parameters";
+std::string PlotObject::Labels::parameterLetter = "parameterLetter";
+std::string PlotObject::Labels::parametersOnTheGraph = "parametersOnTheGraph";
 std::string PlotObject::Labels::viewWindow = "viewWindow";
 std::string PlotObject::PlotTypes::escapeMap = "escapeMap";
 std::string PlotObject::PlotTypes::parametricCurve = "parametricCurve";
@@ -516,7 +518,10 @@ void PlotObject::makeEscapeMap(
   const Expression& functionY,
   const std::string& javascriptY,
   const std::string& variableY,
-  const List<std::string>& parametersInPlayJS
+  const List<std::string>& parametersInPlayJS,
+  const MapList<
+    std::string, List<double>, HashFunctions::hashFunction
+  >& parametersOnTheGraph
 ) {
   this->coordinateFunctionsJS.addOnTop(javascriptX);
   this->coordinateFunctionsJS.addOnTop(javascriptY);
@@ -526,6 +531,7 @@ void PlotObject::makeEscapeMap(
   this->variablesInPlayJS.addOnTop(variableY);
   this->plotType = PlotObject::PlotTypes::escapeMap;
   this->parametersInPlayJS = parametersInPlayJS;
+  this->complexParametersOnTheGraph = parametersOnTheGraph;
 }
 
 void Plot::drawCoordinateAxes() {
@@ -558,7 +564,10 @@ void Plot::drawEscapeMap(
   Expression& functionY,
   const std::string& javascriptY,
   const std::string& variableY,
-  List<std::string>& parametersInPlayJS
+  List<std::string>& parametersInPlayJS,
+  const MapList<
+    std::string, List<double>, HashFunctions::hashFunction
+  >& parametersOnTheGraph
 ) {
   PlotObject plot;
   plot.makeEscapeMap(
@@ -568,7 +577,8 @@ void Plot::drawEscapeMap(
     functionY,
     javascriptY,
     variableY,
-    parametersInPlayJS
+    parametersInPlayJS,
+    parametersOnTheGraph
   );
   this->addPlotOnTop(plot);
 }
@@ -749,6 +759,20 @@ JSData PlotObject::toJSONParametricCurve() {
   } else {
     result[PlotObject::Labels::numberOfSegments] = 100;
   }
+  JSData parametersOnTheGraphJSON;
+  parametersOnTheGraphJSON.makeEmptyArray();
+  for (int i = 0; i < this->complexParametersOnTheGraph.size(); i ++) {
+    JSData variable;
+    JSData variableValue;
+    std::string parameterName = this->complexParametersOnTheGraph.keys[i];
+    variableValue[parameterName + "realPart"] =
+    this->complexParametersOnTheGraph.values[i][0];
+    variableValue[parameterName + "imaginaryPart"] =
+    this->complexParametersOnTheGraph.values[i][1];
+    variable[parameterName] = variableValue;
+    parametersOnTheGraphJSON.listObjects.addOnTop(variable);
+  }
+  result[PlotObject::Labels::parametersOnTheGraph] = parametersOnTheGraphJSON;
   this->writeColorLineWidth(result);
   return result;
 }
@@ -819,6 +843,7 @@ void PlotObject::writeVariables(JSData& output) {
     HtmlRoutines::getJavascriptVariable(this->parametersInPlayJS[i]);
   }
   output[PlotObject::Labels::parameters] = parameters;
+  output[PlotObject::Labels::parameterLetter] = this->parameterLetter;
 }
 
 JSData PlotObject::functionFromString(const std::string& input) {
@@ -1111,6 +1136,17 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     plotObjects[plotObjects.listObjects.size] = this->getComputeViewWindow();
   }
   result[Plot::Labels::plotObjects] = plotObjects;
+  List<std::string> inputBoxes;
+  for (
+    int i = 0; i < owner.objectContainer.userInputTextBoxesWithValues.size(); i
+    ++
+  ) {
+    inputBoxes.addOnTop(
+      owner.objectContainer.userInputTextBoxesWithValues.values[i].
+      getSliderName()
+    );
+  }
+  result[PlotObject::Labels::parameters] = inputBoxes;
   out << HtmlRoutines::scriptFromJSON("graphics", result);
   return out.str();
 }

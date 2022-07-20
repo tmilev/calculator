@@ -944,8 +944,9 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
     } else {
       return
       calculator
-      << "Failed to extract javascript from "
-      << input[5].toString();
+      << "<br>Failed to extract javascript from "
+      << input[5].toString()
+      << ". ";
     }
   }
   if (
@@ -957,8 +958,9 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   } else {
     return
     calculator
-    << "Failed to extract javascript from "
-    << input[1].toString();
+    << "<br>Failed to extract javascript from "
+    << input[1].toString()
+    << ". ";
   }
   plotObject.manifoldImmersion.getFreeVariables(
     plotObject.variablesInPlay, true

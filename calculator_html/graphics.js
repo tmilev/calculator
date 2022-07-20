@@ -551,10 +551,11 @@ class CurveTwoD {
    * curve.
    * @param{string} inputColor the color of the curve.
    * @param{number} inputLineWidth the width of the line.
+   * @param{string} letter used for external parameters given by sliders.
    */
   constructor(
       inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
-      inputColor, inputLineWidth) {
+      inputColor, inputLineWidth, parameterLetter) {
     /** @type{!Array.<!Function>}*/
     this.coordinateFunctions = inputCoordinateFunctions;
     /** @type{number} */
@@ -575,17 +576,18 @@ class CurveTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {!CanvasTwoD} canvas the canvas.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
     let argumentT = this.leftPt;
-    let x = this.coordinateFunctions[0](argumentT);
-    let y = this.coordinateFunctions[1](argumentT);
+    let x = this.coordinateFunctions[0](argumentT, canvas.parameterValues);
+    let y = this.coordinateFunctions[1](argumentT, canvas.parameterValues);
     accountBoundingBox([x, y], inputOutputBox);
     for (let i = 0; i < this.numSegments; i++) {
       let ratio = i / (this.numSegments - 1);
       argumentT = this.leftPt * (1 - ratio) + this.rightPt * ratio;
-      x = this.coordinateFunctions[0](argumentT);
-      y = this.coordinateFunctions[1](argumentT);
+      x = this.coordinateFunctions[0](argumentT, canvas.parameterValues);
+      y = this.coordinateFunctions[1](argumentT, canvas.parameterValues);
       accountBoundingBox([x, y], inputOutputBox);
     }
   }
@@ -614,8 +616,8 @@ class CurveTwoD {
     surface.strokeStyle = colorRGBToString(this.color);
     surface.fillStyle = colorRGBToString(this.color);
     let argumentT = this.leftPt;
-    let x = this.coordinateFunctions[0](argumentT);
-    let y = this.coordinateFunctions[1](argumentT);
+    let x = this.coordinateFunctions[0](argumentT, canvas.parameterValues);
+    let y = this.coordinateFunctions[1](argumentT, canvas.parameterValues);
     let coordinates = canvas.coordinatesMathToScreen([x, y]);
     let alreadyMoved = false;
     if (startByMoving) {
@@ -634,8 +636,8 @@ class CurveTwoD {
       // resulting in serious visual glitches.
       // Note: the remarks above were discovered the painful way (trial and
       // error).
-      x = this.coordinateFunctions[0](argumentT);
-      y = this.coordinateFunctions[1](argumentT);
+      x = this.coordinateFunctions[0](argumentT, canvas.parameterValues);
+      y = this.coordinateFunctions[1](argumentT, canvas.parameterValues);
       if (!isFinite(y) || !isFinite(x)) {
         console.log(
             `Failed to evaluate: ${this.coordinateFunctions} at x = ${x}`);
@@ -690,8 +692,9 @@ class PathTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
     for (let i = 0; i < this.path.length; i++) {
       accountBoundingBox(this.path[i], inputOutputBox);
     }
@@ -770,8 +773,9 @@ class CoordinateAxesTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
     accountBoundingBox([0, 1], inputOutputBox);
     accountBoundingBox([1, 0], inputOutputBox);
   }
@@ -829,7 +833,7 @@ class AxesGrid {
    *
    * @param {!Array.<!Array.<number>>} unused output bounding box.
    */
-  accountBoundingBox(unused) {}
+  accountBoundingBox(unused, unused2) {}
 
   /**
    * Draws the object onto the given canvas.
@@ -943,8 +947,9 @@ class PlotTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
     for (let i = 0; i < this.numberOfSegments; i++) {
       let ratio = i / (this.numberOfSegments - 1);
       let x = this.leftPoint * (1 - ratio) + this.rightPoint * ratio;
@@ -1055,8 +1060,9 @@ class TextPlotTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
     accountBoundingBox(this.location, inputOutputBox);
   }
 
@@ -1145,8 +1151,9 @@ class EscapeMap {
   /** 
    * Required to satisfy interface.
    * @param {!Array.<!Array.<number>>} unused output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(box) {
+  accountBoundingBox(box, canvas) {
     if (this.boundingBoxEntries.length == 0) {
       this.computeBoundingBox();
     }
@@ -1390,8 +1397,9 @@ class VectorFieldTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
     accountBoundingBox(this.lowLeft, inputOutputBox);
     accountBoundingBox(this.highRight, inputOutputBox);
   }
@@ -1468,8 +1476,9 @@ class SegmentTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
     accountBoundingBox(this.leftPt, inputOutputBox);
     accountBoundingBox(this.rightPt, inputOutputBox);
   }
@@ -1530,8 +1539,9 @@ class PlotFillTwoD {
    * Enlarges a bounding box in-place to ensure it encloses the object.
    *
    * @param {!Array.<!Array.<number>>} unused output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(unused) {}
+  accountBoundingBox(unused, canvas) {}
 
   /**
    * Same as draw but used to satisfy an interface.
@@ -1584,8 +1594,9 @@ class PlotFillFinishTwoD {
   /**
    * Unused.
    * @param {!Array.<!Array.<number>>} unused used.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(unused) {}
+  accountBoundingBox(unused, canvas) {}
 
   /**
    * Unused.
@@ -1680,8 +1691,12 @@ class CanvasTwoD {
     this.flagShowPerformance = true;
     this.flagShowAxesTicks = false;
     this.flagShowGrid = false;
-    /**@type{!Array.<function(number, number)>} */
+    /** @type{!Array.<function(number, number)>} */
     this.additionalMouseMoveListeners = [];
+    /** @type{!Array.<number>} */
+    this.parameterValues = [];
+    /** @type{!Array.<string>} */
+    this.parameterNames = [];
   }
 
   /**
@@ -1889,7 +1904,7 @@ class CanvasTwoD {
       if (this.drawObjects[i].accountBoundingBox === undefined) {
         continue;
       }
-      this.drawObjects[i].accountBoundingBox(this.boundingBoxMath);
+      this.drawObjects[i].accountBoundingBox(this.boundingBoxMath, this);
     }
     vectorTimesScalar(this.boundingBoxMath[0], 1.05);
     vectorTimesScalar(this.boundingBoxMath[1], 1.05);
@@ -2720,6 +2735,10 @@ class Canvas {
     this.flagRoundContours = false;
     this.flagRoundPatches = true;
     this.flagDebugLabelPatches = false;
+    /** @type{!Array.<number>} */
+    this.parameterValues = [];
+    /** @type{!Array.<string>} */
+    this.parameterNames = [];
   }
 
   /**

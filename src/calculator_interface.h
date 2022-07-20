@@ -1325,6 +1325,8 @@ public:
     static std::string text;
     static std::string arguments;
     static std::string parameters;
+    static std::string parameterLetter;
+    static std::string parametersOnTheGraph;
   };
 
   struct PlotTypes {
@@ -1378,6 +1380,7 @@ public:
   HashedList<Expression> variablesInPlay;
   List<std::string> variablesInPlayJS;
   List<List<std::string> > variableRangesJS;
+  std::string parameterLetter;
   Expression leftPoint;
   Expression rightPoint;
   Expression paramLowE;
@@ -1390,6 +1393,8 @@ public:
   // - a parameter. Then the frontend may display an input box
   // that allows to dynamically change b.
   HashedList<std::string, HashFunctions::hashFunction> parametersInPlay;
+  MapList<std::string, List<double>, HashFunctions::hashFunction>
+  complexParametersOnTheGraph;
   // The name of the parameter with hash bytes appended to
   // guarantee the variable will not collide with any programmer-defined
   // variables.
@@ -1447,7 +1452,10 @@ public:
     const Expression& functionY,
     const std::string& javascriptY,
     const std::string& variableY,
-    const List<std::string>& parametersInPlayJS
+    const List<std::string>& parametersInPlayJS,
+    const MapList<
+      std::string, List<double>, HashFunctions::hashFunction
+    >& parametersOnTheGraph
   );
   PlotObject();
   bool operator==(const PlotObject& other) const;
@@ -1537,7 +1545,10 @@ public:
     Expression& functionY,
     const std::string& javascriptY,
     const std::string& variableY,
-    List<std::string>& parametersInPlayJS
+    List<std::string>& parametersInPlayJS,
+    const MapList<
+      std::string, List<double>, HashFunctions::hashFunction
+    >& parametersOnTheGraph
   );
   void drawCoordinateAxes();
   void drawGrid();

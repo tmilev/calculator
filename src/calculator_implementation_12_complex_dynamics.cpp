@@ -7,6 +7,8 @@
 class RealAndImaginaryPartExtractor {
   Calculator* owner;
   Expression original;
+  Expression parameterToRealPart(const Expression& parameter);
+  Expression parameterToImaginaryPart(const Expression& parameter);
 public:
   Expression variable;
   Expression imaginaryPartVariable;
@@ -15,6 +17,7 @@ public:
   Expression imaginaryPart;
   HashedList<InputBox> parameters;
   List<std::string> parametersJS;
+  MapList<Expression, List<double> > parametersOnTheGraph;
   bool encounteredNonConvertible;
   RealAndImaginaryPartExtractor(Calculator* inputOwner) {
     this->owner = inputOwner;
@@ -22,6 +25,12 @@ public:
   }
   void computeParameters();
   bool extract(
+    const Expression& input, std::stringstream* commentsOnFailure
+  );
+  bool extractParameters(
+    const Expression& input, std::stringstream* commentsOnFailure
+  );
+  bool extractOneParameter(
     const Expression& input, std::stringstream* commentsOnFailure
   );
   bool extractRecursive(
@@ -58,6 +67,8 @@ public:
     Expression& outputImaginaryPart,
     std::stringstream* commentsOnFailure
   );
+  MapList<std::string, List<double>, HashFunctions::hashFunction>
+  getParametersOnTheGraph();
 };
 
 bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
@@ -68,6 +79,12 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     return false;
   }
   RealAndImaginaryPartExtractor extractor(&calculator);
+  if (!extractor.extractParameters(input, &calculator.comments)) {
+    return false;
+  }
+  global.comments
+  << "DEBUG: Got parametersr: "
+  << extractor.parametersOnTheGraph.toStringHtml();
   if (!extractor.extract(input[1], &calculator.comments)) {
     return false;
   }
@@ -103,10 +120,10 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     extractor.imaginaryPart,
     javascriptY,
     extractor.imaginaryPartVariable.toString(),
-    extractor.parametersJS
+    extractor.parametersJS,
+    extractor.getParametersOnTheGraph()
   );
   escapeMap.drawGrid();
-  //escapeMap.setViewWindow(- 4, - 4, 4, 4);
   std::stringstream out;
   out
   << "Variable:<br>"
@@ -132,6 +149,74 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
   return output.assignValue(calculator, out.str());
 }
 
+bool RealAndImaginaryPartExtractor::extractParameters(
+  const Expression& input, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("RealAndImaginaryPartExtractor::extractParameters");
+  for (int i = 2; i < input.size(); i ++) {
+    if (!this->extractOneParameter(input[i], commentsOnFailure)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool RealAndImaginaryPartExtractor::extractOneParameter(
+  const Expression& input, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("RealAndImaginaryPartExtractor::extractOneParameter");
+  if (!input.startsWith(this->owner->opDefine(), 3)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to extract parameter from: "
+      << input.toString();
+    }
+    return false;
+  }
+  const Expression& argument = input[1];
+  std::string atomName;
+  if (!argument.isAtomUserDefined(&atomName)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Found non-atom as parameter, "
+      << "please use an argument of the form atom=constant: "
+      << input.toString();
+    }
+    return false;
+  }
+  if (!StringRoutines::isLatinLetterSequence(atomName)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Parameter "
+      << atomName
+      << " must be a sequence of latin letters without spaces. ";
+    }
+    return false;
+  }
+  Expression i;
+  i.makeAtom(*this->owner, "i");
+  HashedList<Expression> setI;
+  setI.addOnTop(i);
+  double valueWithIOne = 0;
+  double valueWithINegativeOne = 0;
+  if (
+    !input[2].evaluatesToDoubleUnderSubstitutions(
+      setI, List<double>({1}), &valueWithIOne
+    ) ||
+    !input[2].evaluatesToDoubleUnderSubstitutions(
+      setI, List<double>({- 1}), &valueWithINegativeOne
+    )
+  ) {
+    return false;
+  }
+  double realPart = (valueWithIOne + valueWithINegativeOne) / 2;
+  double imaginaryPart = (valueWithIOne - valueWithINegativeOne) / 2;
+  this->parametersOnTheGraph.setKeyValue(
+    argument, List<double>({realPart, imaginaryPart})
+  );
+  return true;
+}
+
 bool RealAndImaginaryPartExtractor::extract(
   const Expression& input, std::stringstream* commentsOnFailure
 ) {
@@ -142,6 +227,11 @@ bool RealAndImaginaryPartExtractor::extract(
   Expression i;
   i.makeAtom(*this->owner, "i");
   variables.removeFirstOccurenceSwapWithLast(i);
+  for (int j = 0; j < this->parametersOnTheGraph.size(); j ++) {
+    variables.removeFirstOccurenceSwapWithLast(
+      this->parametersOnTheGraph.keys[j]
+    );
+  }
   if (variables.size != 1) {
     return false;
   }
@@ -237,6 +327,11 @@ bool RealAndImaginaryPartExtractor::extractRecursive(
     outputImaginaryPart = this->imaginaryPartVariable;
     return true;
   }
+  if (this->parametersOnTheGraph.contains(input)) {
+    outputRealPart = this->parameterToRealPart(input);
+    outputImaginaryPart = this->parameterToImaginaryPart(input);
+    return true;
+  }
   if (!this->encounteredNonConvertible && commentsOnFailure != nullptr) {
     this->encounteredNonConvertible = true;
     *commentsOnFailure
@@ -244,6 +339,26 @@ bool RealAndImaginaryPartExtractor::extractRecursive(
     << input.toString();
   }
   return false;
+}
+
+Expression RealAndImaginaryPartExtractor::parameterToRealPart(
+  const Expression& parameter
+) {
+  std::string parameterName;
+  parameter.isAtomUserDefined(&parameterName);
+  Expression result;
+  result.makeAtom(*this->owner, parameterName + "realPart");
+  return result;
+}
+
+Expression RealAndImaginaryPartExtractor::parameterToImaginaryPart(
+  const Expression& parameter
+) {
+  std::string parameterName;
+  parameter.isAtomUserDefined(&parameterName);
+  Expression result;
+  result.makeAtom(*this->owner, parameterName + "imaginaryPart");
+  return result;
 }
 
 bool RealAndImaginaryPartExtractor::extractFromDivision(
@@ -415,4 +530,17 @@ bool RealAndImaginaryPartExtractor::extractFromProduct(
   outputImaginaryPart =
   leftImaginaryPart * rightRealPart + leftRealPart * rightImaginaryPart;
   return true;
+}
+
+MapList<std::string, List<double>, HashFunctions::hashFunction>
+RealAndImaginaryPartExtractor::getParametersOnTheGraph() {
+  MapList<std::string, List<double>, HashFunctions::hashFunction> result;
+  for (int i = 0; i < this->parametersOnTheGraph.size(); i ++) {
+    std::string parameterName;
+    this->parametersOnTheGraph.keys[i].isAtomUserDefined(&parameterName);
+    result.setKeyValue(
+      parameterName, this->parametersOnTheGraph.values[i]
+    );
+  }
+  return result;
 }

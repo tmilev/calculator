@@ -21,6 +21,7 @@ class GraphicsSerialization {
       body: "body",
       arguments: "arguments",
       parameters: "parameters",
+      parameterLetter: "parameterLetter",
       points: "points",
       onePoint: "point",
       text: "text",
@@ -138,7 +139,7 @@ class GraphicsSerialization {
     /** @type{CanvasTwoD}*/
     canvas,
     input,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders,
     /**@type{Object.<string,string>} */
     outputUsedSliders,
@@ -150,8 +151,28 @@ class GraphicsSerialization {
     for (let i = 0; i < plotObjects.length; i++) {
       this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders, outputUsedSliders);
     }
+    this.writeParameters(input[this.labels.parameters], canvas, sliders);
     canvas.redraw();
     return canvas;
+  }
+
+  writeParameters(
+    /** @type{Array.<string>}*/
+    parameterNames,
+    /** @type{CanvasTwoD|CanvasThreeD} */
+    canvas,
+    /** @type{Object.<string,HTMLElement>} */
+    sliders,
+  ) {
+    canvas.parameterNames = parameterNames;
+    for (let i = 0; i < parameterNames.length; i++) {
+      let parameterName = parameterNames[i];
+      if (parameterName in sliders) {
+        canvas.parameterValues[i] = parseFloat(sliders[parameterName].value);
+      } else {
+        throw `Parameter value ${parameterName} not found.`;
+      }
+    }
   }
 
   /** 
@@ -225,7 +246,6 @@ class GraphicsSerialization {
     switch (plotType) {
       case "plotFunction":
         let functionConstructed = this.functionFromObject(functionObject, sliders, outputUsedSliders);
-        parameterValues = this.getSliderValuesFromInput(sliders, functionObject, outputUsedSliders);
         canvas.drawFunction(
           functionConstructed,
           this.interpretStringToNumber(left, parameterValues),
@@ -267,13 +287,12 @@ class GraphicsSerialization {
         );
         return;
       case "parametricCurve":
-        parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         let coordinateFunctionArray = [
           this.functionFromBodyAndArguments(
-            coordinateFunctions[0], variableArguments, parameterValues,
+            coordinateFunctions[0], this.getArguments(plot),
           ),
           this.functionFromBodyAndArguments(
-            coordinateFunctions[1], variableArguments, parameterValues,
+            coordinateFunctions[1], this.getArguments(plot),
           ),
         ];
         canvas.drawCurve(
@@ -284,7 +303,6 @@ class GraphicsSerialization {
         );
         return;
       case "points":
-        parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         canvas.drawPoints(this.interpretListListStringsAsNumbers(points, parameterValues), color);
         return;
       case "pathFilled":
@@ -297,7 +315,6 @@ class GraphicsSerialization {
         canvas.drawText(onePoint, text, color);
         return;
       case "escapeMap":
-        parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         let functionX =
            this.functionFromBodyAndArguments(
             coordinateFunctions[0], variableArguments, parameterValues,
@@ -311,46 +328,6 @@ class GraphicsSerialization {
       default:
         throw `Unknown plot type: ${plotType}.`;
     }
-  }
-
-  /** 
-   * Extracts sliders.
-   * 
-   * @return {Object.<string,string>} 
-   */
-  getSliderValuesFromInput(
-    /**@type{Object.<string,HTMLInputElement>} */
-    sliders,
-    plot,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
-  ) {
-    let result = this.getSliderValues(sliders, plot[this.labels.parameters]);
-    this.accountUsedParameters(result, outputUsedSliders);
-    return result;
-  }
-
-  /** 
-   * Constructs slider.
-   * 
-   * @returns {Object.<string,string>} 
-   */
-  getSliderValues(
-    /**@type{Object.<string,HTMLInputElement>} */
-    sliders,
-    /**@type{string[]} */
-    parameters,
-  ) {
-    let parameterValues = {};
-    for (let i = 0; i < parameters.length; i++) {
-      let parameterName = parameters[i];
-      if (parameterName in sliders) {
-        parameterValues[parameterName] = sliders[parameterName].value;
-      } else {
-        throw `Parameter value ${parameterName} not found.`;
-      }
-    }
-    return parameterValues;
   }
 
   oneThreeDimensionalObject(
@@ -386,7 +363,6 @@ class GraphicsSerialization {
         canvas.screenBasisUserDefault = plot["projectionScreen"];
         return;
       case "surface":
-        let parameterValues = this.getSliderValuesFromInput(sliders, plot, outputUsedSliders);
         let convertedRanges = [[
           this.interpretStringToNumber(variableRanges[0][0], parameterValues),
           this.interpretStringToNumber(variableRanges[0][1], parameterValues),
@@ -424,8 +400,7 @@ class GraphicsSerialization {
     /**@type{Object<string, string>} */
     parameterValues,
   ) {
-    let extraJavascript = this.getParametersJavascript(parameterValues);
-    return Function(`"use strict"; ${extraJavascript} return (${input});`)();
+    return Function(`"use strict"; return (${input});`)();
   }
 
   /** 
@@ -474,35 +449,32 @@ class GraphicsSerialization {
     if (outputUsedSliders === null || outputUsedSliders === undefined) {
       throw "Missing output sliders";
     }
-    /**@type{string[]} */
-    let inputArguments = input[this.labels.arguments];
-    /**@type{string[]} */
+    /** @type{string} */
     let body = input[this.labels.body];
-    let parameterValues = this.getSliderValues(sliders, input[this.labels.parameters]);
-    this.accountUsedParameters(parameterValues, outputUsedSliders);
-    return this.functionFromBodyAndArguments(body, inputArguments, parameterValues);
+    return this.functionFromBodyAndArguments(body, this.getArguments(input));
   }
 
-  getParametersJavascript(
-    /**@type{Object<string, string>} */
-    parameterValues,
-  ) {
-    let parametersJavascript = [];
-    for (let label in parameterValues) {
-      parametersJavascript.push(`let ${label}=${parameterValues[label]};`);
+  /** 
+   * Gets argument list from function specification. 
+   * 
+   * @return {Array.<string>} 
+   */
+  getArguments(input) {
+    /** @type{string[]} */
+    let result = input[this.labels.arguments].slice();
+    let parameterLetter = input[this.labels.parameterLetter];
+    if (parameterLetter !== "" && parameterLetter !== undefined) {
+      result.push(parameterLetter);
     }
-    return parametersJavascript.join("");
+    return result;
   }
 
   functionFromBodyAndArguments(
-    /**@type{string} */
+    /** @type{string} */
     body,
-    /**@type{string[]} */
-    inputArguments,
-    /**@type{Object<string, string>} */
-    parameterValues,
+    /** @type{string[]} */
+    inputArguments
   ) {
-    body = this.getParametersJavascript(parameterValues) + body;
     if (inputArguments.length === 1) {
       return Function(
         inputArguments[0],

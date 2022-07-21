@@ -558,7 +558,7 @@ bool CalculatorFunctionsPlot::plotImplicitFunctionFull(
   Expression& output,
   bool showGrid
 ) {
-  STACK_TRACE("CalculatorFunctions::plotImplicitFunctionFull");
+  STACK_TRACE("CalculatorFunctionsPlot::plotImplicitFunctionFull");
   MeshTriangles mesh;
   if (!mesh.computePoints(calculator, input, showGrid)) {
     return false;
@@ -1359,7 +1359,7 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
 bool CalculatorFunctionsPlot::plotGrid(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::plotGrid");
+  STACK_TRACE("CalculatorFunctionsPlot::plotGrid");
   (void) input;
   Plot plot;
   plot.drawGrid();
@@ -1369,7 +1369,7 @@ bool CalculatorFunctionsPlot::plotGrid(
 bool CalculatorFunctionsPlot::plotRemoveCoordinateAxes(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::plotRemoveCoordinateAxes");
+  STACK_TRACE("CalculatorFunctionsPlot::plotRemoveCoordinateAxes");
   (void) input;
   Plot plotFinal;
   plotFinal.dimension = 2;
@@ -1380,7 +1380,7 @@ bool CalculatorFunctionsPlot::plotRemoveCoordinateAxes(
 bool CalculatorFunctionsPlot::plotLabel(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::plotLabel");
+  STACK_TRACE("CalculatorFunctionsPlot::plotLabel");
   if (input.size() != 3) {
     return false;
   }
@@ -1400,7 +1400,7 @@ bool CalculatorFunctionsPlot::plotLabel(
 bool CalculatorFunctionsPlot::plotRectangle(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::plotRectangle");
+  STACK_TRACE("CalculatorFunctionsPlot::plotRectangle");
   if (input.size() != 3) {
     return false;
   }
@@ -1715,7 +1715,7 @@ bool CalculatorFunctionsBasic::round(
 bool CalculatorFunctionsPlot::plotPath(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::plotPath");
+  STACK_TRACE("CalculatorFunctionsPlot::plotPath");
   if (input.size() < 3) {
     return false;
   }
@@ -2014,7 +2014,7 @@ bool CalculatorFunctionsBasic::logarithmBaseNaturalToLn(
 bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::logarithmBaseSimpleCases");
+  STACK_TRACE("CalculatorFunctionsBasic::logarithmBaseSimpleCases");
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }
@@ -2177,33 +2177,25 @@ bool CalculatorFunctionsPlot::makeJavascriptExpression(
   if (input.size() != 2) {
     return false;
   }
-  return
-  CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-    calculator, input[1], output
-  );
-}
-
-bool CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  STACK_TRACE("CalculatorFunctionsPlot::functionMakeJavascriptExpression");
   JavascriptExtractor extractor(calculator);
-  if (!extractor.extractJavascript(input, &calculator.comments)) {
-    return
-    calculator
-    << "<br>In functionMakeJavascriptExpression: "
-    << "failed to extract javascript from: "
-    << input.toString()
-    << ". ";
-  }
-  output = extractor.result;
-  global.comments << "<br>DEBUG: result: " << extractor.result;
-  return true;
+if(!  extractor.extractJavascript(input[1], &calculator.comments)){
+  return false;}
+return output.assignValue(calculator, extractor.result);
 }
 
 JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
   this->owner = &inputOwner;
   this->recursionDepth = 0;
+}
+
+bool JavascriptExtractor::extract(
+  const Expression& input, std::string&output, std::stringstream* commentsOnFailure
+) {
+  if (!this->extractJavascript(input, commentsOnFailure)){
+    return false;
+  }
+  output=this->result;
+  return true;
 }
 
 bool JavascriptExtractor::extractJavascript(
@@ -2437,10 +2429,6 @@ bool JavascriptExtractor::extractJavascriptRecursive(
   std::stringstream out;
   InputBox box;
   if (input.isOfType(&box)) {
-    global.comments
-    << "DEBUG: map: "
-    << this->owner->objectContainer.userInputTextBoxesWithValues.toStringHtml(
-    );
     int boxIndex =
     this->owner->objectContainer.userInputTextBoxesWithValues.getIndexNoFail(
       box.name
@@ -2605,27 +2593,20 @@ bool CalculatorFunctionsPlot::plotSurface(
     plot.variableRangesJS[i].setSize(2);
     plot.variablesInPlayJS[i] = plot.variablesInPlay[i].toString();
   }
-  Expression jsConverter;
+  JavascriptExtractor extractor(calculator);
   for (int i = 1; i < plot.manifoldImmersion.size(); i ++) {
     plot.coordinateFunctionsE[i - 1] = plot.manifoldImmersion[i];
-    bool isGood =
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plot.coordinateFunctionsE[i - 1], jsConverter
-    );
-    if (isGood) {
-      isGood =
-      jsConverter.isOfType<std::string>(
-        &plot.coordinateFunctionsJS[i - 1]
-      );
-    }
-    if (!isGood) {
-      return
-      calculator
-      << "Failed to convert "
-      << plot.coordinateFunctionsE[i - 1].toString()
-      << " to a javascript expression. ";
-    }
+  if(!extractor.extractJavascript(plot.coordinateFunctionsE[i - 1], &calculator.comments)){
+    return
+    calculator
+    << "Failed to convert "
+    << plot.coordinateFunctionsE[i - 1].toString()
+    << " to a javascript expression. ";
   }
+
+        plot.coordinateFunctionsJS[i - 1]= extractor.result;
+  }
+  plot.parameterLetter = extractor.parameterLetter;
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].startsWith(calculator.opIn(), 3)) {
       int index = plot.variablesInPlay.getIndex(input[i][1]);
@@ -2637,23 +2618,14 @@ bool CalculatorFunctionsPlot::plotSurface(
         continue;
       }
       for (int j = 0; j < 2; j ++) {
-        bool isGood =
-        CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-          calculator, input[i][2][j + 1], jsConverter
-        );
-        if (isGood) {
-          isGood =
-          jsConverter.isOfType<std::string>(
-            &plot.variableRangesJS[index][j]
-          );
-        }
-        if (!isGood) {
+        if (!extractor.extractJavascript(input[i][2][j + 1], &calculator.comments)){
           return
           calculator
           << "Failed to convert "
           << input[i][2][j + 1].toString()
           << " to a javascript expression. ";
         }
+        plot.variableRangesJS[index][j]=extractor.result;
       }
     }
   }
@@ -2687,21 +2659,14 @@ bool CalculatorFunctionsPlot::plotSurface(
       }
       Expression expressionToConvert =
       keys.getValueCreateEmpty(keysToConvert.keys[i]);
-      bool isGood =
-      CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-        calculator, expressionToConvert, jsConverter
-      );
-      if (isGood) {
-        isGood =
-        jsConverter.isOfType<std::string>(&keysToConvert.values[i]);
-      }
-      if (!isGood) {
+      if (! extractor.extractJavascript(expressionToConvert, &calculator.comments)){
         return
         calculator
         << "Failed to convert "
         << expressionToConvert.toString()
         << " to a javascript expression. ";
       }
+      keysToConvert.values[i]=extractor.result;
     }
     plot.numberOfSegmentsJS.setSize(2);
     if (keysToConvert.getValueCreateEmpty("numSegments1") != "") {

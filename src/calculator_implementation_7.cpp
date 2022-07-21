@@ -7563,38 +7563,30 @@ bool CalculatorFunctionsPlot::plot2D(
   plotObject.variablesInPlayJS.setSize(plotObject.variablesInPlay.size);
   plotObject.variablesInPlayJS[0] = plotObject.variablesInPlay[0].toString();
   std::string variableString = plotObject.variablesInPlayJS[0];
-  Expression jsConverterE;
   plotObject.plotType = PlotObject::PlotTypes::plotFunction;
+  JavascriptExtractor extractor(calculator);
   if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plotObject.coordinateFunctionsE[0], jsConverterE
-    )
+  extractor.extractJavascript(plotObject.coordinateFunctionsE[0], &calculator.comments)
   ) {
-    plotObject.coordinateFunctionsJS[0] = jsConverterE.toString();
+    plotObject.coordinateFunctionsJS[0] = extractor.result;
     plotObject.coordinateFunctionsE[0].hasInputBoxVariables(
       &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
-  if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plotObject.leftPoint, jsConverterE
-    )
+  if (extractor.extractJavascript(plotObject.leftPoint, &calculator.comments)
   ) {
-    plotObject.leftPtJS = jsConverterE.toString();
+    plotObject.leftPtJS = extractor.result;
     plotObject.leftPoint.hasInputBoxVariables(
       &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
-  if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plotObject.rightPoint, jsConverterE
-    )
+  if (extractor.extractJavascript(plotObject.rightPoint, &calculator.comments)
   ) {
-    plotObject.rightPtJS = jsConverterE.toString();
+    plotObject.rightPtJS = extractor.result;
     plotObject.rightPoint.hasInputBoxVariables(
       &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
@@ -7603,12 +7595,9 @@ bool CalculatorFunctionsPlot::plot2D(
   }
   plotObject.numberOfSegmentsJS.setSize(1);
   plotObject.numberOfSegmentsJS[0] = "200";
-  if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plotObject.numSegmentsE, jsConverterE
-    )
+  if (extractor.extractJavascript(plotObject.numSegmentsE, &calculator.comments)
   ) {
-    plotObject.numberOfSegmentsJS[0] = jsConverterE.toString();
+    plotObject.numberOfSegmentsJS[0] = extractor.result;
     plotObject.numSegmentsE.hasInputBoxVariables(
       &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
     );
@@ -7700,13 +7689,10 @@ bool CalculatorFunctionsPlot::plotPoint(
   plot.pointsJS.initialize(
     plot.points.numberOfRows, plot.points.numberOfColumns
   );
+  JavascriptExtractor extractor(calculator);
   for (int i = 0; i < plot.points.numberOfRows; i ++) {
     for (int j = 0; j < plot.points.numberOfColumns; j ++) {
-      if (
-        !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-          calculator, plot.points(i, j), jsConverterE
-        )
-      ) {
+      if (!extractor.extract(plot.points(i, j), plot.pointsJS(i, j), &calculator.comments)){
         return
         calculator
         << "Failed to extract coordinate "
@@ -7714,10 +7700,10 @@ bool CalculatorFunctionsPlot::plotPoint(
         << " from: "
         << plot.coordinateFunctionsE[i].toString();
       }
-      plot.pointsJS(i, j) = jsConverterE.toString();
       plot.points(i, j).hasInputBoxVariables(
         &plot.parametersInPlay, &plot.parametersInPlayJS
       );
+      plot.parameterLetter = extractor.parameterLetter;
     }
   }
   plot.dimension = plot.dimension;
@@ -7854,7 +7840,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
       rValues.addOnTop(i);
     }
   }
-  double yMax = - 0.5, yMin = 0.5;
+  double yMax = - 0.5;
+  double yMin = 0.5;
   for (double i = lowerBound; i <= upperBound; i += deltaNoSign) {
     for (int j = 0; j < 2; j ++) {
       if (deltaWithSign < 0 && (i - lowerBound == 0.0)) {
@@ -7896,6 +7883,11 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
       yMin = MathRoutines::minimum(yMin, finalResultDouble);
       yMax = MathRoutines::maximum(yMax, finalResultDouble);
     }
+  }
+  Plot plotFinal;
+  for (int i =0; i < xValues.size; i ++){
+    plotFinal.drawRectangle(xValues[i], fValuesLower[i], deltaNoSign,fValuesUpper[i]-fValuesLower[i] , "cyan");
+
   }
   std::stringstream outTex, outHtml;
   for (int k = 0; k < 2; k ++) {
@@ -8028,7 +8020,6 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   plot.yLow = yMin;
   plot.yHigh = yMax;
   plot.coordinateFunctionsE.addOnTop(input[1]);
-  Plot plotFinal;
   plotFinal += plot;
   plotFinal += outputPlot;
   return output.assignValue(calculator, plotFinal);
@@ -8108,6 +8099,14 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended(
   ) {
     return false;
   }
+  Expression plotXYEvaluated;
+ if (! calculator.evaluateExpression(calculator, plotXYE, plotXYEvaluated)){
+   return false;
+
+ }
+ if (!plotXYEvaluated.isOfType<Plot>()){
+   return false;
+ }
   if (
     !calculator.callCalculatorFunction(
       CalculatorFunctionsPlot::plot2D, input, plotRthetaE
@@ -8115,10 +8114,12 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended(
   ) {
     return false;
   }
+std::string result =
+  plotXYEvaluated.getValueNonConst<Plot>().getPlotHtml(calculator);
+result+=plotRthetaE.getValueNonConst<Plot>().getPlotHtml(calculator);
+
   return
-  output.makeXOX(
-    calculator, calculator.opSequence(), plotXYE, plotRthetaE
-  );
+  output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsPlot::plotParametricCurve(
@@ -8279,15 +8280,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.coordinateFunctionsJS.setSize(plot.dimension);
   for (int i = 0; i < plot.dimension; i ++) {
     if (
-      extractor.extractJavascript(
-        plot.coordinateFunctionsE[i], &calculator.comments
-      )
-    ) {
-      plot.coordinateFunctionsJS[i] = extractor.result;
-    } else {
-      global.comments
-      << "DEBUG: here I am!!!: coord fun: "
-      << plot.coordinateFunctionsE[i];
+      !extractor.extract(
+        plot.coordinateFunctionsE[i],plot.coordinateFunctionsJS[i], &calculator.comments)){
       plot.plotType = "parametricCurvePrecomputed";
       calculator
       << "Failed to convert: "
@@ -8348,14 +8342,9 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     ) {
       calculator << "<hr>Failed to evaluate curve function. ";
     }
-    plot.pointsDouble.setExpectedSize(xCoordinates.size);
+    plot.pointsDouble.setSize(xCoordinates.size);
     for (int i = 0; i < xCoordinates.size; i ++) {
-      if (
-        FloatingPoint::isNaN(xCoordinates[i][1]) ||
-        FloatingPoint::isNaN(yCoordinates[i][1])
-      ) {
-        continue;
-      }
+
       plot.pointsDouble[i] = List<double>({
           xCoordinates[i][1], yCoordinates[i][1]
         }
@@ -8368,7 +8357,6 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.parameterLetter = extractor.parameterLetter;
   Plot outputPlot;
   outputPlot += plot;
-  global.comments << "DEBUG: got plot!!!! Plot: " << plot.toJSON();
   return output.assignValue(calculator, outputPlot);
 }
 

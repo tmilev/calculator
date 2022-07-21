@@ -82,35 +82,19 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
   if (!extractor.extractParameters(input, &calculator.comments)) {
     return false;
   }
-  global.comments
-  << "DEBUG: Got parametersr: "
-  << extractor.parametersOnTheGraph.toStringHtml();
   if (!extractor.extract(input[1], &calculator.comments)) {
     return false;
   }
-  Expression realPartJavascript;
-  Expression imaginaryPartJavascript;
-  CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-    calculator, extractor.realPart, realPartJavascript
-  );
-  CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-    calculator, extractor.imaginaryPart, imaginaryPartJavascript
-  );
-  std::string javascriptX;
-  std::string javascriptY;
-  if (
-    !realPartJavascript.isOfType(&javascriptX) ||
-    !imaginaryPartJavascript.isOfType(&javascriptY)
-  ) {
-    return
-    calculator
-    << "Failed to extract javascript from the real part: "
-    << extractor.realPart
-    << " and/or the imaginary part: "
-    << extractor.imaginaryPart
-    << ".";
+  JavascriptExtractor extractorJavascriptReal(calculator);
+  JavascriptExtractor extractorJavascriptImaginary(calculator);
+  if (!extractorJavascriptReal.extractJavascript(extractor.realPart, &calculator.comments) ||
+  !extractorJavascriptImaginary.extractJavascript(extractor.imaginaryPart, &calculator.comments)){
     return false;
   }
+
+
+  std::string javascriptX=extractorJavascriptReal.result ;
+  std::string javascriptY= extractorJavascriptImaginary.result;
   Plot escapeMap;
   escapeMap.dimension = 2;
   escapeMap.drawEscapeMap(

@@ -1298,7 +1298,15 @@ private:
   void writeColor(JSData& output);
   void writeLineWidth(JSData& output);
   void writeColorFilled(JSData& output);
+  // Variables are quantities that change internally in the canvas,
+  // for example a parameter t of a parametric curve.
   void writeVariables(JSData& output);
+  // Parameters are quantities that change
+  // "externally" to the canvas such as
+  // a value governed by an html slider
+  // or a value that has changed due to a mouse event on
+  // the canvas.
+  void writeParameters(JSData& output);
   JSData functionFromString(const std::string& input);
 public:
   struct Labels {
@@ -1336,6 +1344,7 @@ public:
     static std::string segment;
     static std::string points;
     static std::string plotFillStart;
+    static std::string axesGrid;
     static std::string plotFillFinish;
     static std::string pathFilled;
     static std::string escapeMap;
@@ -1457,6 +1466,7 @@ public:
       std::string, List<double>, HashFunctions::hashFunction
     >& parametersOnTheGraph
   );
+void  makeRectangle(double xLowLeft, double yLowLeft, double width, double height, const std::string &color);
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
@@ -1522,6 +1532,7 @@ public:
   void computeCanvasNameIfNecessary(int& canvasCounter);
   std::string getPlotHtml3d(Calculator& owner);
   std::string getPlotHtml2d(Calculator& owner);
+  void writeParameters(JSData& output, Calculator &owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);
   bool isOKVector(const Vector<double>& input);
   void addPlotOnTop(PlotObject& input);
@@ -1552,6 +1563,9 @@ public:
   );
   void drawCoordinateAxes();
   void drawGrid();
+  void drawPlotFillStart();
+  void drawPlotFillFinish();
+  void drawRectangle(double xLowLeft, double yLowLeft, double width, double height,  const std::string& color);
   List<PlotObject>& getPlots();
   void clearPlotObjects();
   void setExpectedPlotObjects(int expectedSize);

@@ -1,4 +1,6 @@
 const graphicsSerialization = require("./graphics_serialization").graphicsSerialization;
+const CanvasTwoD = require("./graphics").CanvasTwoD;
+const CanvasThreeD = require("./graphics").Canvas;
 const crypto = require("./crypto");
 const graphicsNDimensions = require("./graphics_n_dimensions");
 const pathnames = require("./pathnames");
@@ -17,9 +19,8 @@ class OneGraphicWithSliders {
     this.owner = owner;
     this.serialization = serialization;
     this.graphics = null;
-    /** @type{Canvas|CanvasTwoD|null} */
+    /** @type{CanvasThreeD|CanvasTwoD|null} */
     this.canvas = null;
-    this.usedSliders = {};
   }
 
   /** 
@@ -34,14 +35,12 @@ class OneGraphicWithSliders {
     if (canvases.length < 1) {
       throw "Unexpected missing canvas.";
     }
-
     this.canvas = graphicsSerialization.fromJSON(
       this.graphics,
       canvases[0],
       controls[0],
       null,
       this.owner.sliders,
-      this.usedSliders,
     );
   }
 
@@ -276,9 +275,11 @@ class ElementWithScripts {
     slider.value = value;
     for (let i = 0; i < this.graphicsWithSliders.length; i++) {
       let graphic = this.graphicsWithSliders[i];
-      if (name in graphic.usedSliders) { 
+      if (name in graphic.canvas.parameterNames) {
+        let index = graphic.canvas.parameterNames[name];
+        graphic.canvas.parameterValues[index] = parseFloat(value);
         graphic.redraw();
-      }      
+      }
     }
   }
 }
@@ -288,11 +289,11 @@ class DynamicJavascript {
   }
 
   typeset(
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     output,
-    /**@type{Object<string, string>} */
+    /** @type{Object<string, string>} */
     extraAttributes,
-    /**@type{Function|null} */
+    /** @type{Function|null} */
     typeSetCallback,
   ) {
     if (extraAttributes === undefined || extraAttributes === null) {

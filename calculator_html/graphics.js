@@ -1695,8 +1695,8 @@ class CanvasTwoD {
     this.additionalMouseMoveListeners = [];
     /** @type{!Array.<number>} */
     this.parameterValues = [];
-    /** @type{!Array.<string>} */
-    this.parameterNames = [];
+    /** @type{!Object.<string, number>} */
+    this.parameterNames = {};
   }
 
   /**
@@ -2737,8 +2737,8 @@ class Canvas {
     this.flagDebugLabelPatches = false;
     /** @type{!Array.<number>} */
     this.parameterValues = [];
-    /** @type{!Array.<string>} */
-    this.parameterNames = [];
+    /** @type{!Object.<string, number>} */
+    this.parameterNames = {};
   }
 
   /**
@@ -4675,9 +4675,9 @@ class Canvas {
       for (let j = 0; j < numVsegments; j++) {
         let currentU = surface.uvBox[0][0] + i * deltaU;
         let currentV = surface.uvBox[1][0] + j * deltaV;
-        let base = surface.xyzFun(currentU, currentV);
-        let v1 = surface.xyzFun(currentU + deltaU, currentV);
-        let v2 = surface.xyzFun(currentU, currentV + deltaV);
+        let base = surface.xyzFun(currentU, currentV, this.parameterValues);
+        let v1 = surface.xyzFun(currentU + deltaU, currentV, this.parameterValues);
+        let v2 = surface.xyzFun(currentU, currentV + deltaV, this.parameterValues);
         let edge1 = vectorMinusVector(v1, base);
         let edge2 = vectorMinusVector(v2, base);
         let incomingPatch = new Patch(
@@ -4686,7 +4686,7 @@ class Canvas {
         incomingPatch.traversalOrder = [1, 1, 1, 1];
         incomingPatch.index = allPatches.length;
         incomingPatch.internalPoint =
-            surface.xyzFun(currentU + deltaU / 2, currentV + deltaV / 2);
+          surface.xyzFun(currentU + deltaU / 2, currentV + deltaV / 2, this.parameterValues);
         allPatches.push(incomingPatch);
       }
     }
@@ -4698,7 +4698,7 @@ class Canvas {
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
           let currentV =
               surface.uvBox[1][0] + (j + k / numSegmentsPerContour) * deltaV;
-          contourPoints[k] = surface.xyzFun(currentU, currentV);
+          contourPoints[k] = surface.xyzFun(currentU, currentV, this.parameterValues);
         }
         let incomingContour = new Contour(
             contourPoints, surface.colors.colorContour, surface.contourWidth);
@@ -4727,7 +4727,7 @@ class Canvas {
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
           let currentU =
               surface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
-          contourPoints[k] = surface.xyzFun(currentU, currentV);
+          contourPoints[k] = surface.xyzFun(currentU, currentV, this.parameterValues);
         }
         let incomingContour = new Contour(
             contourPoints, surface.colors.colorContour, surface.contourWidth);

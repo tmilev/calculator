@@ -869,7 +869,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   Expression& output,
   bool vectorsAreNormalized
 ) {
-  STACK_TRACE("CalculatorFunctions::plotDirectionOrVectorField");
+  STACK_TRACE("CalculatorFunctionsPlot::plotDirectionOrVectorField");
   (void) vectorsAreNormalized;
   if (input.size() < 5) {
     return
@@ -934,28 +934,18 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.variableRangesJS[1][1] = upRightStrings[1];
   plotObject.manifoldImmersion = input[1];
   Expression jsConverterE;
+  JavascriptExtractor extractor(calculator);
   if (input.size() >= 6) {
-    if (
-      CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-        calculator, input[5], jsConverterE
-      )
-    ) {
-      plotObject.defaultLengthJS = jsConverterE.toString();
-    } else {
+    if (!extractor.extract(input[5], plotObject.defaultLengthJS, &calculator.comments)){
       return
       calculator
       << "<br>Failed to extract javascript from "
       << input[5].toString()
       << ". ";
+
     }
   }
-  if (
-    CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-      calculator, plotObject.manifoldImmersion, jsConverterE
-    )
-  ) {
-    plotObject.manifoldImmersionJS = jsConverterE.toString();
-  } else {
+  if (!extractor.extract(plotObject.manifoldImmersion, plotObject.manifoldImmersionJS, &calculator.comments)){
     return
     calculator
     << "<br>Failed to extract javascript from "
@@ -996,18 +986,13 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   }
   plotObject.numberOfSegmentsJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
-    if (
-      !CalculatorFunctionsPlot::functionMakeJavascriptExpression(
-        calculator, input[4][i + 1], jsConverterE
-      )
-    ) {
-      return
+    if (!extractor.extract(input[4][i + 1], plotObject.numberOfSegmentsJS[i], &calculator.comments))
+{      return
       calculator
       << "Failed to convert "
       << input[4][i + 1].toString()
       << " to javascript. ";
     }
-    plotObject.numberOfSegmentsJS[i] = jsConverterE.toString();
   }
   input.hasInputBoxVariables(
     &plotObject.parametersInPlay, &plotObject.parametersInPlayJS

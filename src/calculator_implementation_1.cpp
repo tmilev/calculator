@@ -52,6 +52,7 @@ std::string PlotObject::PlotTypes::plotFillStart = "plotFillStart";
 std::string PlotObject::PlotTypes::plotFillFinish = "plotFillFinish";
 std::string PlotObject::PlotTypes::pathFilled = "pathFilled";
 std::string PlotObject::PlotTypes::label = "label";
+std::string PlotObject::PlotTypes::axesGrid = "axesGrid";
 std::string Plot::Labels::canvasName = "canvasName";
 std::string Plot::Labels::controlsName = "controlsName";
 std::string Plot::Labels::messagesName = "messagesName";
@@ -464,6 +465,25 @@ void PlotObject::makeLabel(
   this->makeLabel(position.getVectorDouble(), label);
 }
 
+void PlotObject::makeRectangle(double xLowLeft, double yLowLeft, double width, double height, const std::string &color){
+this->plotType = PlotObject::PlotTypes::pathFilled;
+  Vector<double> current;
+  current.addOnTop(xLowLeft);
+  current.addOnTop(yLowLeft);
+  this->pointsDouble.addOnTop(current);
+  current[0]+= width;
+  this->pointsDouble.addOnTop(current);
+  current[1]+= height;
+  this->pointsDouble.addOnTop(current);
+  current[0]-= width;
+  this->pointsDouble.addOnTop(current);
+  current[1]-= height;
+  this->pointsDouble.addOnTop(current);
+  this->colorFillJS = color;
+
+
+}
+
 void PlotObject::makeLabel(
   const Vector<double>& position, const std::string& label
 ) {
@@ -540,10 +560,31 @@ void Plot::drawCoordinateAxes() {
 
 void Plot::drawGrid() {
   PlotObject plot;
-  plot.plotType = "axesGrid";
+  plot.plotType = PlotObject::PlotTypes::axesGrid;
   plot.dimension = 2;
   this->addPlotOnTop(plot);
   this->dimension = 2;
+}
+
+void Plot::drawPlotFillStart() {
+PlotObject plot;
+plot.plotType = PlotObject::PlotTypes::plotFillStart;
+this->addPlotOnTop(plot);
+this->dimension = 2;
+}
+
+void Plot::drawPlotFillFinish() {
+  PlotObject plot;
+  plot.plotType = PlotObject::PlotTypes::plotFillFinish;
+  this->addPlotOnTop(plot);
+  this->dimension = 2;
+}
+
+void Plot::drawRectangle(double xLowLeft, double yLowLeft, double width, double height, const std::string &color){
+  PlotObject plot;
+  plot.makeRectangle(xLowLeft, yLowLeft, width, height, color);
+  this->addPlotOnTop(plot);
+
 }
 
 void Plot::setViewWindow(
@@ -696,6 +737,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   result["showPerformance"] = owner.flagPlotNoControls;
   result["setBoundingBoxAsDefaultViewWindow"] = true;
   result[Plot::Labels::graphicsType] = "threeDimensional";
+  this->writeParameters(result, owner);
   std::string script = HtmlRoutines::scriptFromJSON("graphics3d", result);
   out << script;
   owner.objectContainer.graphicsScripts.setKeyValue(
@@ -829,6 +871,16 @@ std::string Plot::getPlotHtml(Calculator& owner) {
   }
 }
 
+void PlotObject::writeParameters(JSData &output) {
+  JSData parameters = JSData::makeEmptyArray();
+  for (int i = 0; i < this->parametersInPlayJS.size; i ++) {
+    parameters[i] =
+    HtmlRoutines::getJavascriptVariable(this->parametersInPlayJS[i]);
+  }
+  output[PlotObject::Labels::parameters] = parameters;
+  output[PlotObject::Labels::parameterLetter] = this->parameterLetter;
+}
+
 void PlotObject::writeVariables(JSData& output) {
   STACK_TRACE("PlotObject::writeVariables");
   JSData arguments = JSData::makeEmptyArray();
@@ -837,13 +889,8 @@ void PlotObject::writeVariables(JSData& output) {
     HtmlRoutines::getJavascriptVariable(this->variablesInPlayJS[i]);
   }
   output[PlotObject::Labels::arguments] = arguments;
-  JSData parameters = JSData::makeEmptyArray();
-  for (int i = 0; i < this->parametersInPlayJS.size; i ++) {
-    parameters[i] =
-    HtmlRoutines::getJavascriptVariable(this->parametersInPlayJS[i]);
-  }
-  output[PlotObject::Labels::parameters] = parameters;
-  output[PlotObject::Labels::parameterLetter] = this->parameterLetter;
+  this->writeParameters(output);
+
 }
 
 JSData PlotObject::functionFromString(const std::string& input) {
@@ -1136,6 +1183,12 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     plotObjects[plotObjects.listObjects.size] = this->getComputeViewWindow();
   }
   result[Plot::Labels::plotObjects] = plotObjects;
+ this->writeParameters(result, owner);
+  out << HtmlRoutines::scriptFromJSON("graphics", result);
+  return out.str();
+}
+
+void Plot::writeParameters(JSData &output, Calculator& owner){
   List<std::string> inputBoxes;
   for (
     int i = 0; i < owner.objectContainer.userInputTextBoxesWithValues.size(); i
@@ -1146,9 +1199,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
       getSliderName()
     );
   }
-  result[PlotObject::Labels::parameters] = inputBoxes;
-  out << HtmlRoutines::scriptFromJSON("graphics", result);
-  return out.str();
+  output[PlotObject::Labels::parameters] = inputBoxes;
 }
 
 std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {

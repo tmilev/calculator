@@ -47,18 +47,13 @@ class GraphicsSerialization {
     messages,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
   ) {
-    if (outputUsedSliders === null || outputUsedSliders === undefined) {
-      throw "Missing output sliders";
-    }
     let graphicsType = input["graphicsType"];
     switch (graphicsType) {
       case "twoDimensional":
-        return this.twoDimensionalGraphics(input, canvas, controls, messages, sliders, outputUsedSliders);
+        return this.twoDimensionalGraphics(input, canvas, controls, messages, sliders);
       case "threeDimensional":
-        return this.threeDimensionalGraphics(input, canvas, controls, messages, sliders, outputUsedSliders);
+        return this.threeDimensionalGraphics(input, canvas, controls, messages, sliders);
       default:
         throw `Unknown graphics type ${graphicsType}.`;
     }
@@ -99,12 +94,10 @@ class GraphicsSerialization {
     messages,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
   ) {
     let canvas = new CanvasTwoD(canvasElement, controls, messages);
     canvas.initialize();
-    return this.plotTwoDimensionalGraphics(canvas, input, sliders, outputUsedSliders);
+    return this.plotTwoDimensionalGraphics(canvas, input, sliders);
   }
 
   /**
@@ -121,13 +114,11 @@ class GraphicsSerialization {
     /**@type{HTMLElement} */
     messages,
     /**@type{Object.<string,HTMLElement>} */
-    sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
+    sliders
   ) {
     let canvas = new CanvasThreeD(canvasElement, controls, messages);
     canvas.initialize();
-    return this.plotThreeDimensionalGraphics(canvas, input, sliders, outputUsedSliders);
+    return this.plotThreeDimensionalGraphics(canvas, input, sliders);
   }
 
   /** 
@@ -141,17 +132,15 @@ class GraphicsSerialization {
     input,
     /** @type{Object.<string,HTMLElement>} */
     sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
   ) {
     let plotObjects = input["plotObjects"];
     if (!Array.isArray(plotObjects)) {
       throw `Plot objects not an array.`;
     }
-    for (let i = 0; i < plotObjects.length; i++) {
-      this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders, outputUsedSliders);
-    }
     this.writeParameters(input[this.labels.parameters], canvas, sliders);
+    for (let i = 0; i < plotObjects.length; i++) {
+      this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders);
+    }
     canvas.redraw();
     return canvas;
   }
@@ -164,9 +153,9 @@ class GraphicsSerialization {
     /** @type{Object.<string,HTMLElement>} */
     sliders,
   ) {
-    canvas.parameterNames = parameterNames;
     for (let i = 0; i < parameterNames.length; i++) {
       let parameterName = parameterNames[i];
+      canvas.parameterNames[parameterName] = i;
       if (parameterName in sliders) {
         canvas.parameterValues[i] = parseFloat(sliders[parameterName].value);
       } else {
@@ -186,15 +175,14 @@ class GraphicsSerialization {
     input,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
   ) {
     let plotObjects = input["plotObjects"];
     if (!Array.isArray(plotObjects)) {
       throw `Plot objects not an array.`;
     }
+    this.writeParameters(input[this.labels.parameters], canvas, sliders);
     for (let i = 0; i < plotObjects.length; i++) {
-      this.oneThreeDimensionalObject(plotObjects[i], canvas, sliders, outputUsedSliders);
+      this.oneThreeDimensionalObject(plotObjects[i], canvas, sliders);
     }
     if (input["setBoundingBoxAsDefaultViewWindow"]) {
       canvas.setBoundingBoxAsDefaultViewWindow();
@@ -203,28 +191,12 @@ class GraphicsSerialization {
     return canvas;    
   }
 
-  accountUsedParameters(
-    /** @type{Object.<string,string>|null} */
-    parameters,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
-  ) { 
-    if (parameters === null) {
-      return;
-    }
-    for (let label in parameters){
-      outputUsedSliders[label] = label;
-    }
-  }
-
   oneTwoDimensionalObject(
     plot,
     /**@type{CanvasTwoD} */
     canvas,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
   ) {
     let plotType = plot[this.labels.plotType];
     let functionObject = plot[this.labels.functionLabel];
@@ -238,21 +210,24 @@ class GraphicsSerialization {
     let onePoint = plot[this.labels.onePoint];
     let text = plot[this.labels.text];
     let viewWindow = plot[this.labels.viewWindow];
-    let variableArguments = plot[this.labels.arguments];
+    let variableAndParameterNames = this.getArguments(plot);
+
+    let parameterNames = this.getParameters(plot); 
+    let parameterValues = canvas.parameterValues;
+
     let variableRanges = plot[this.labels.variableRanges];
     let manifoldImmersion = plot[this.labels.manifoldImmersion];
     let coordinateFunctions = plot[this.labels.coordinateFunctions];
-    let parameterValues = null;
     switch (plotType) {
       case "plotFunction":
-        let functionConstructed = this.functionFromObject(functionObject, sliders, outputUsedSliders);
+        let functionConstructed = this.functionFromObject(functionObject, sliders);
         canvas.drawFunction(
           functionConstructed,
-          this.interpretStringToNumber(left, parameterValues),
-          this.interpretStringToNumber(right, parameterValues),
-          this.interpretStringToNumber(numberOfSegments, parameterValues),
+          this.interpretStringToNumber(left, parameterNames, parameterValues),
+          this.interpretStringToNumber(right, parameterNames, parameterValues),
+          this.interpretStringToNumber(numberOfSegments, parameterNames, parameterValues),
           color,
-          this.interpretStringToNumber(lineWidth, parameterValues),
+          this.interpretStringToNumber(lineWidth, parameterNames, parameterValues),
         );
         return;
       case "plotFillStart":
@@ -274,7 +249,7 @@ class GraphicsSerialization {
         canvas.computeViewWindow();
         return;
       case "plotDirectionField":
-        let immersion = this.functionFromObject(manifoldImmersion, sliders, outputUsedSliders);
+        let immersion = this.functionFromObject(manifoldImmersion, sliders);
         canvas.drawVectorField(
           immersion,
           true,
@@ -297,13 +272,19 @@ class GraphicsSerialization {
         ];
         canvas.drawCurve(
           coordinateFunctionArray,
-          this.interpretStringToNumber(variableRanges[0], parameterValues),
-          this.interpretStringToNumber(variableRanges[1], parameterValues),
-          numberOfSegments, color, lineWidth,
+          this.interpretStringToNumber(variableRanges[0], variableAndParameterNames, parameterValues),
+          this.interpretStringToNumber(variableRanges[1], variableAndParameterNames, parameterValues),
+          numberOfSegments,
+          color,
+          lineWidth,
         );
         return;
       case "points":
-        canvas.drawPoints(this.interpretListListStringsAsNumbers(points, parameterValues), color);
+        canvas.drawPoints(
+          this.interpretListListStringsAsNumbers(
+            points, parameterNames, parameterValues,
+          ), color
+        );
         return;
       case "pathFilled":
         canvas.drawPathFilled(points, color, colorFill);
@@ -317,11 +298,11 @@ class GraphicsSerialization {
       case "escapeMap":
         let functionX =
            this.functionFromBodyAndArguments(
-            coordinateFunctions[0], variableArguments, parameterValues,
+             coordinateFunctions[0], variableAndParameterNames,
           );
         let functionY =
           this.functionFromBodyAndArguments(
-            coordinateFunctions[1], variableArguments, parameterValues,
+            coordinateFunctions[1], variableAndParameterNames,
           );
         canvas.drawEscapeMap(functionX, functionY);
         return;
@@ -335,15 +316,12 @@ class GraphicsSerialization {
     /**@type{CanvasThreeD} */
     canvas,
     /**@type{Object.<string,HTMLElement>} */
-    sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
+    sliders
   ) {
     let plotType = plot[this.labels.plotType];
     let variableRanges = plot[this.labels.variableRanges];
     let numberOfSegments = plot[this.labels.numberOfSegments];
     let coordinateFunctions = plot[this.labels.coordinateFunctions];
-    let inputArguments = plot[this.labels.arguments];
     let colorFront = plot[this.labels.colorFront];
     let colorBack = plot[this.labels.colorBack];
     let colorContour = plot[this.labels.colorContour];
@@ -352,6 +330,10 @@ class GraphicsSerialization {
     let lineWidth = plot[this.labels.lineWidth];
     let point = plot["point"];
     let text = plot["text"];
+    let variableNames = this.getArguments(plot);
+    let parameterNames = this.getParameters(plot);
+    let parameterValues = canvas.parameterValues;
+
     switch (plotType) {
       case "segment":
         canvas.drawLine(points[0], points[1], color, lineWidth);
@@ -364,18 +346,18 @@ class GraphicsSerialization {
         return;
       case "surface":
         let convertedRanges = [[
-          this.interpretStringToNumber(variableRanges[0][0], parameterValues),
-          this.interpretStringToNumber(variableRanges[0][1], parameterValues),
+          this.interpretStringToNumber(variableRanges[0][0], parameterNames, parameterValues),
+          this.interpretStringToNumber(variableRanges[0][1], parameterNames, parameterValues),
         ], [
-          this.interpretStringToNumber(variableRanges[1][0], parameterValues),
-          this.interpretStringToNumber(variableRanges[1][1], parameterValues),
+          this.interpretStringToNumber(variableRanges[1][0], parameterNames, parameterValues),
+          this.interpretStringToNumber(variableRanges[1][1], parameterNames, parameterValues),
         ]];
         let convertedSegments = [
-          this.interpretStringToNumber(numberOfSegments[0], parameterValues),
-          this.interpretStringToNumber(numberOfSegments[1], parameterValues),
+          this.interpretStringToNumber(numberOfSegments[0], parameterNames, parameterValues),
+          this.interpretStringToNumber(numberOfSegments[1], parameterNames, parameterValues),
         ];
         canvas.drawSurfaceCreate(
-          this.functionFromBodyAndArguments(coordinateFunctions, inputArguments, parameterValues),
+          this.functionFromBodyAndArguments(coordinateFunctions, variableNames, parameterValues),
           convertedRanges,
           convertedSegments,
           colorFront,
@@ -395,12 +377,15 @@ class GraphicsSerialization {
    * @return{number} 
    */
   interpretStringToNumber(
-    /**@type{string} */
+    /** @type{string} */
     input,
-    /**@type{Object<string, string>} */
+    /** @type{string[]} */
+    inputArguments,
+    /** @type{Array.<number>} */
     parameterValues,
   ) {
-    return Function(`"use strict"; return (${input});`)();
+    let definingFunction = this.functionFromBodyAndArguments(`"use strict"; return (${input});`, inputArguments); 
+    return definingFunction(parameterValues);
   }
 
   /** 
@@ -409,14 +394,16 @@ class GraphicsSerialization {
    * @return{number[]} 
    */
   interpretListStringsAsNumbers(
-    /**@type{string[]} */
+    /** @type{string[]} */
     input,
-    /**@type{Object<string, string>} */
+    /** @type{string[]} */
+    inputArguments,
+    /** @type{Array.<number>} */
     parameterValues,
   ) {
     let result = [];
     for (let i = 0; i < input.length; i++) {
-      result.push(this.interpretStringToNumber(input[i], parameterValues));
+      result.push(this.interpretStringToNumber(input[i], inputArguments, parameterValues));
     }
     return result;
   }
@@ -429,12 +416,14 @@ class GraphicsSerialization {
   interpretListListStringsAsNumbers(
     /**@type{string[][]} */
     input,
-    /**@type{Object<string, string>} */
+    /** @type{string[]} */
+    inputArguments,
+    /** @type{Array.<number>} */
     parameterValues,
   ) {
     let result = [];
     for (let i = 0; i < input.length; i++) {
-      result.push(this.interpretListStringsAsNumbers(input[i], parameterValues));
+      result.push(this.interpretListStringsAsNumbers(input[i], inputArguments, parameterValues));
     }
     return result;
   }
@@ -443,12 +432,7 @@ class GraphicsSerialization {
     input,
     /**@type{Object.<string,HTMLElement>} */
     sliders,
-    /**@type{Object.<string,string>} */
-    outputUsedSliders,
   ) {
-    if (outputUsedSliders === null || outputUsedSliders === undefined) {
-      throw "Missing output sliders";
-    }
     /** @type{string} */
     let body = input[this.labels.body];
     return this.functionFromBodyAndArguments(body, this.getArguments(input));
@@ -461,7 +445,21 @@ class GraphicsSerialization {
    */
   getArguments(input) {
     /** @type{string[]} */
-    let result = input[this.labels.arguments].slice();
+    let result = [];
+    if (this.labels.arguments in input) {
+      result = result.concat(input[this.labels.arguments].slice());
+    }
+    return result.concat(this.getParameters(input));
+  }
+
+  /**
+   * Gets parameter list from function specification. 
+   * 
+   * @return {Array.<string>} 
+   */
+  getParameters(input) {
+    /** @type{string[]} */
+    let result = [];
     let parameterLetter = input[this.labels.parameterLetter];
     if (parameterLetter !== "" && parameterLetter !== undefined) {
       result.push(parameterLetter);
@@ -475,6 +473,16 @@ class GraphicsSerialization {
     /** @type{string[]} */
     inputArguments
   ) {
+    if (inputArguments.length === 0) {
+      // Create a fake parameter so we can always call the function
+      // with one parameter. If the inputArguments is empty,
+      // then the body should have no mentions of any variable
+      // and "p" is simply an unused argument.
+      return Function(
+        "p",
+        body,
+      );
+    }
     if (inputArguments.length === 1) {
       return Function(
         inputArguments[0],

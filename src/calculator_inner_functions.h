@@ -231,9 +231,6 @@ public:
   static bool makeJavascriptExpression(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool functionMakeJavascriptExpression(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
   static bool drawExpressionGraphWithOptions(
     Calculator& calculator,
     const Expression& input,
@@ -287,6 +284,9 @@ public:
   JavascriptExtractor(Calculator& inputOwner);
   bool extractJavascript(
     const Expression& input, std::stringstream* commentsOnFailure
+  );
+  bool extract(
+    const Expression& input,std::string& output, std::stringstream* commentsOnFailure
   );
 };
 

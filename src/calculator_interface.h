@@ -1335,6 +1335,7 @@ public:
     static std::string parameters;
     static std::string parameterLetter;
     static std::string parametersOnTheGraph;
+    static std::string parametersOnTheGraphLetter;
   };
 
   struct PlotTypes {
@@ -1390,6 +1391,7 @@ public:
   List<std::string> variablesInPlayJS;
   List<List<std::string> > variableRangesJS;
   std::string parameterLetter;
+  std::string parametersOnTheGraphLetter;
   Expression leftPoint;
   Expression rightPoint;
   Expression paramLowE;
@@ -1402,8 +1404,8 @@ public:
   // - a parameter. Then the frontend may display an input box
   // that allows to dynamically change b.
   HashedList<std::string, HashFunctions::hashFunction> parametersInPlay;
-  MapList<std::string, List<double>, HashFunctions::hashFunction>
-  complexParametersOnTheGraph;
+  MapList<std::string, double, HashFunctions::hashFunction>
+  parametersOnTheGraph;
   // The name of the parameter with hash bytes appended to
   // guarantee the variable will not collide with any programmer-defined
   // variables.
@@ -1463,9 +1465,9 @@ public:
     const std::string& variableY,
     const std::string& inputParameterLetter,
     const List<std::string>& parametersInPlayJS,
-    const MapList<
-      std::string, List<double>, HashFunctions::hashFunction
-    >& parametersOnTheGraph
+    const MapList<std::string, double, HashFunctions::hashFunction>&
+    inputParametersOnTheGraph,
+    const std::string& inputParametersOnTheGraphLetter
   );
   void makeRectangle(
     double xLowLeft,
@@ -1565,9 +1567,9 @@ public:
     const std::string& variableY,
     const std::string& parameterLetter,
     List<std::string>& parametersInPlayJS,
-    const MapList<
-      std::string, List<double>, HashFunctions::hashFunction
-    >& parametersOnTheGraph
+    const MapList<std::string, double, HashFunctions::hashFunction>&
+    parametersOnTheGraph,
+    const std::string& parametersOnTheGraphLetter
   );
   void drawCoordinateAxes();
   void drawGrid();

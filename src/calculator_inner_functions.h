@@ -278,9 +278,12 @@ public:
   Expression startingExpression;
   std::string result;
   int recursionDepth;
-  HashedList<std::string> parametersOnGraph;
+  // Parameters on the graph.
+  std::string parametersOnTheGraphLetter;
+  MapList<std::string, double, HashFunctions::hashFunction>
+  parametersOnTheGraph;
+  // Parameters in sliders.
   std::string parameterLetter;
-  std::string parameterOnGraphString;
   HashedList<std::string> parameterNames;
   HashedList<std::string> parameterNamesJS;
   JavascriptExtractor(Calculator& inputOwner);

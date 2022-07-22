@@ -22,6 +22,8 @@ class GraphicsSerialization {
       arguments: "arguments",
       parameters: "parameters",
       parameterLetter: "parameterLetter",
+      parametersOnTheGraphLetter: "parametersOnTheGraphLetter",
+      parametersOnTheGraph: "parametersOnTheGraph",
       points: "points",
       onePoint: "point",
       text: "text",
@@ -306,7 +308,7 @@ class GraphicsSerialization {
           this.functionFromBodyAndArguments(
             coordinateFunctions[1], variableAndParameterNames,
           );
-        canvas.drawEscapeMap(functionX, functionY);
+        canvas.drawEscapeMap(functionX, functionY, plot[this.labels.parametersOnTheGraph]);
         return;
       default:
         throw `Unknown plot type: ${plotType}.`;
@@ -459,7 +461,26 @@ class GraphicsSerialization {
     if (this.labels.arguments in input) {
       result = result.concat(input[this.labels.arguments].slice());
     }
-    return result.concat(this.getParameters(input));
+    return result.concat(
+      this.getParameters(input)
+    ).concat(
+      this.getParametersOnGraph(input)
+    );
+  }
+
+  /**
+   * Gets parameters on graph list from function specification. 
+   * 
+   * @return {Array.<string>} 
+   */
+  getParametersOnGraph(input) {
+    /** @type{string[]} */
+    let result = [];
+    let parametersOnTheGraphLetter = input[this.labels.parametersOnTheGraphLetter];
+    if (parametersOnTheGraphLetter !== "" && parametersOnTheGraphLetter !== undefined) {
+      result.push(parametersOnTheGraphLetter);
+    }
+    return result;
   }
 
   /**

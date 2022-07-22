@@ -5,31 +5,12 @@
 #include "calculator_inner_functions.h"
 
 class RealAndImaginaryPartExtractor {
+  static std::string realPartSuffix;
+  static std::string imaginaryPartSuffix;
   Calculator* owner;
   Expression original;
   Expression parameterToRealPart(const Expression& parameter);
   Expression parameterToImaginaryPart(const Expression& parameter);
-public:
-  Expression variable;
-  Expression imaginaryPartVariable;
-  Expression realPartVariable;
-  Expression realPart;
-  Expression imaginaryPart;
-  HashedList<InputBox> parameters;
-  List<std::string> parametersJS;
-  MapList<Expression, List<double> > parametersOnTheGraph;
-  bool encounteredNonConvertible;
-  RealAndImaginaryPartExtractor(Calculator* inputOwner) {
-    this->owner = inputOwner;
-    this->encounteredNonConvertible = false;
-  }
-  void computeParameters();
-  bool extract(
-    const Expression& input, std::stringstream* commentsOnFailure
-  );
-  bool extractParameters(
-    const Expression& input, std::stringstream* commentsOnFailure
-  );
   bool extractOneParameter(
     const Expression& input, std::stringstream* commentsOnFailure
   );
@@ -67,10 +48,34 @@ public:
     Expression& outputImaginaryPart,
     std::stringstream* commentsOnFailure
   );
-  MapList<std::string, List<double>, HashFunctions::hashFunction>
+public:
+  Expression variable;
+  Expression imaginaryPartVariable;
+  Expression realPartVariable;
+  Expression realPart;
+  Expression imaginaryPart;
+  HashedList<InputBox> parameters;
+  List<std::string> parametersJS;
+  MapList<Expression, List<double> > parametersOnTheGraph;
+  bool encounteredNonConvertible;
+  RealAndImaginaryPartExtractor(Calculator* inputOwner) {
+    this->owner = inputOwner;
+    this->encounteredNonConvertible = false;
+  }
+  void computeParameters();
+  bool extractParameters(
+    const Expression& input, std::stringstream* commentsOnFailure
+  );
+  bool extract(
+    const Expression& input, std::stringstream* commentsOnFailure
+  );
+  MapList<std::string, double, HashFunctions::hashFunction>
   getParametersOnTheGraph();
 };
 
+std::string RealAndImaginaryPartExtractor::realPartSuffix = "realPart";
+std::string RealAndImaginaryPartExtractor::imaginaryPartSuffix =
+"imaginaryPart";
 bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -86,6 +91,8 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     return false;
   }
   JavascriptExtractor extractorJavascript(calculator);
+  extractorJavascript.parametersOnTheGraph =
+  extractor.getParametersOnTheGraph();
   if (
     !extractorJavascript.extractJavascript(
       extractor.realPart, &calculator.comments
@@ -113,7 +120,8 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     extractor.imaginaryPartVariable.toString(),
     extractorJavascript.parameterLetter,
     extractor.parametersJS,
-    extractor.getParametersOnTheGraph()
+    extractor.getParametersOnTheGraph(),
+    extractorJavascript.parametersOnTheGraphLetter
   );
   escapeMap.drawGrid();
   std::stringstream out;
@@ -524,14 +532,19 @@ bool RealAndImaginaryPartExtractor::extractFromProduct(
   return true;
 }
 
-MapList<std::string, List<double>, HashFunctions::hashFunction>
+MapList<std::string, double, HashFunctions::hashFunction>
 RealAndImaginaryPartExtractor::getParametersOnTheGraph() {
-  MapList<std::string, List<double>, HashFunctions::hashFunction> result;
+  MapList<std::string, double, HashFunctions::hashFunction> result;
   for (int i = 0; i < this->parametersOnTheGraph.size(); i ++) {
     std::string parameterName;
     this->parametersOnTheGraph.keys[i].isAtomUserDefined(&parameterName);
     result.setKeyValue(
-      parameterName, this->parametersOnTheGraph.values[i]
+      parameterName + RealAndImaginaryPartExtractor::realPartSuffix,
+      this->parametersOnTheGraph.values[i][0]
+    );
+    result.setKeyValue(
+      parameterName + RealAndImaginaryPartExtractor::imaginaryPartSuffix,
+      this->parametersOnTheGraph.values[i][1]
     );
   }
   return result;

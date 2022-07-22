@@ -42,6 +42,8 @@ std::string PlotObject::Labels::arguments = "arguments";
 std::string PlotObject::Labels::parameters = "parameters";
 std::string PlotObject::Labels::parameterLetter = "parameterLetter";
 std::string PlotObject::Labels::parametersOnTheGraph = "parametersOnTheGraph";
+std::string PlotObject::Labels::parametersOnTheGraphLetter =
+"parametersOnTheGraphLetter";
 std::string PlotObject::Labels::viewWindow = "viewWindow";
 std::string PlotObject::PlotTypes::escapeMap = "escapeMap";
 std::string PlotObject::PlotTypes::parametricCurve = "parametricCurve";
@@ -544,9 +546,9 @@ void PlotObject::makeEscapeMap(
   const std::string& variableY,
   const std::string& inputParameterLetter,
   const List<std::string>& parametersInPlayJS,
-  const MapList<
-    std::string, List<double>, HashFunctions::hashFunction
-  >& parametersOnTheGraph
+  const MapList<std::string, double, HashFunctions::hashFunction>&
+  inputParametersOnTheGraph,
+  const std::string& inputParametersOnTheGraphLetter
 ) {
   this->coordinateFunctionsJS.addOnTop(javascriptX);
   this->coordinateFunctionsJS.addOnTop(javascriptY);
@@ -556,8 +558,9 @@ void PlotObject::makeEscapeMap(
   this->variablesInPlayJS.addOnTop(variableY);
   this->plotType = PlotObject::PlotTypes::escapeMap;
   this->parametersInPlayJS = parametersInPlayJS;
-  this->complexParametersOnTheGraph = parametersOnTheGraph;
+  this->parametersOnTheGraph = inputParametersOnTheGraph;
   this->parameterLetter = inputParameterLetter;
+  this->parametersOnTheGraphLetter = inputParametersOnTheGraphLetter;
 }
 
 void Plot::drawCoordinateAxes() {
@@ -618,9 +621,9 @@ void Plot::drawEscapeMap(
   const std::string& variableY,
   const std::string& parameterLetter,
   List<std::string>& parametersInPlayJS,
-  const MapList<
-    std::string, List<double>, HashFunctions::hashFunction
-  >& parametersOnTheGraph
+  const MapList<std::string, double, HashFunctions::hashFunction>&
+  parametersOnTheGraph,
+  const std::string& parametersOnTheGraphLetter
 ) {
   PlotObject plot;
   plot.makeEscapeMap(
@@ -632,7 +635,8 @@ void Plot::drawEscapeMap(
     variableY,
     parameterLetter,
     parametersInPlayJS,
-    parametersOnTheGraph
+    parametersOnTheGraph,
+    parametersOnTheGraphLetter
   );
   this->addPlotOnTop(plot);
 }
@@ -816,16 +820,11 @@ JSData PlotObject::toJSONParametricCurve() {
   }
   JSData parametersOnTheGraphJSON;
   parametersOnTheGraphJSON.makeEmptyArray();
-  for (int i = 0; i < this->complexParametersOnTheGraph.size(); i ++) {
-    JSData variable;
+  for (int i = 0; i < this->parametersOnTheGraph.size(); i ++) {
     JSData variableValue;
-    std::string parameterName = this->complexParametersOnTheGraph.keys[i];
-    variableValue[parameterName + "realPart"] =
-    this->complexParametersOnTheGraph.values[i][0];
-    variableValue[parameterName + "imaginaryPart"] =
-    this->complexParametersOnTheGraph.values[i][1];
-    variable[parameterName] = variableValue;
-    parametersOnTheGraphJSON.listObjects.addOnTop(variable);
+    std::string parameterName = this->parametersOnTheGraph.keys[i];
+    variableValue[parameterName] = this->parametersOnTheGraph.values[i];
+    parametersOnTheGraphJSON.listObjects.addOnTop(variableValue);
   }
   result[PlotObject::Labels::parametersOnTheGraph] = parametersOnTheGraphJSON;
   this->writeColorLineWidth(result);
@@ -892,6 +891,19 @@ void PlotObject::writeParameters(JSData& output) {
   }
   output[PlotObject::Labels::parameters] = parameters;
   output[PlotObject::Labels::parameterLetter] = this->parameterLetter;
+  if (
+    this->parametersOnTheGraphLetter != "" &&
+    this->parametersOnTheGraph.size() > 0
+  ) {
+    output[PlotObject::Labels::parametersOnTheGraphLetter] =
+    this->parametersOnTheGraphLetter;
+    JSData parametersOnTheGraph;
+    parametersOnTheGraph.makeEmptyArray();
+    for (int i = 0; i < this->parametersOnTheGraph.size(); i ++) {
+      parametersOnTheGraph[i] = this->parametersOnTheGraph.values[i];
+    }
+    output[PlotObject::Labels::parametersOnTheGraph] = parametersOnTheGraph;
+  }
 }
 
 void PlotObject::writeVariables(JSData& output) {

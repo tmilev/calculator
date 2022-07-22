@@ -1136,13 +1136,15 @@ class EscapeMap {
   /**
    * @param {!function(number, number):number} functionX.
    * @param {!function(number, number):number} functionY.
+   * @param {Array.<number>} parametersOnTheGraphValues parameters on the graph.
    */
-  constructor(functionX, functionY) {
+  constructor(functionX, functionY, parametersOnTheGraphValues) {
     this.functionX = functionX;
     this.functionY = functionY; 
     this.lastImageData = null;
     this.ignoreNextComputation = true;
     this.boundingBoxEntries = [];
+    this.parametersOnTheGraphValues = parametersOnTheGraphValues.slice();
     // The i^th position in this array gives the color
     // of a pixel that takes 33 - i steps to escape to infinity.
     // In other words, points with colors appearing earlier
@@ -1201,9 +1203,9 @@ class EscapeMap {
   }
 
   /** @return {Array.<number>} */
-  scaleToFindEscapingPoints(x, y, p) {
+  scaleToFindEscapingPoints(x, y, p, q) {
     for (let i = 0; i < 15; i++) {
-      if (this.iterateMap(x, y, p) > 0) {
+      if (this.iterateMap(x, y, p, q) > 0) {
         break;
       }
       x *= 1.5;
@@ -1211,6 +1213,7 @@ class EscapeMap {
     }
     return [x, y];
   }
+  
   /** 
    * Computes a bounding box  
    * 
@@ -1221,7 +1224,11 @@ class EscapeMap {
       let angle = 2 * Math.PI / (i + 1) + 0.1;
       let x = 1.1 * Math.cos(angle);
       let y = 1.1 * Math.sin(angle);
-      this.boundingBoxEntries.push(this.scaleToFindEscapingPoints(x, y, canvas.parameterValues));
+      this.boundingBoxEntries.push(
+        this.scaleToFindEscapingPoints(
+          x, y, canvas.parameterValues, this.parametersOnTheGraphValues
+        )
+      );
     }
   }
   
@@ -1256,13 +1263,14 @@ class EscapeMap {
    * @param {number} x
    * @param {number} y
    * @param {Array.<number>} p extra parameters, user controllable through UI elements such as sliders.
+   * @param {Array.<number>} q extra parameters, user controllable through the canvas.
    */
-  iterateMap(x0, y0, p) {
+  iterateMap(x0, y0, p, q) {
     let x = x0;
     let y = y0;
     for (let i = 1; i < 34; i ++) {
-      let newX = this.functionX(x, y, p);
-      let newY = this.functionY(x, y, p);
+      let newX = this.functionX(x, y, p, q);
+      let newY = this.functionY(x, y, p, q);
       x = newX;
       y = newY;
       let deltaX = x - x0;
@@ -1298,9 +1306,10 @@ class EscapeMap {
    * @param {number} x
    * @param {number} y
    * @param {Array.<number>} p extra parameters, user controllable through UI elements such as sliders.
+   * @param {Array.<number>} q extra parameters, user controllable through the canvas.
    */
-  escapeColor(x, y, p) {
-    let escapeSteps = this.iterateMap(x, y, p);
+  escapeColor(x, y, p, q) {
+    let escapeSteps = this.iterateMap(x, y, p, q);
     return this.mapEscapeCountToColor(escapeSteps);
   }
 
@@ -1317,11 +1326,13 @@ class EscapeMap {
       return;
     }
     this.lastImageData = surface.createImageData(canvas.width, canvas.height);
+    let p = canvas.parameterValues;
+    let q = this.parametersOnTheGraphValues;
     for (let j = 0; j < canvas.width; j++) {
       for (let i = 0; i < canvas.height; i++) {
         let coordinates = canvas.coordsScreenToMathScreen([j, i]);
         coordinates = canvas.coordinatesMathScreenToMath(coordinates);
-        let escapeColor = this.escapeColor(coordinates[0], coordinates[1], canvas.parameterValues);
+        let escapeColor = this.escapeColor(coordinates[0], coordinates[1], p, q);
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColor[0];
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColor[1];
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 2] = escapeColor[2];
@@ -1351,9 +1362,11 @@ class EscapeMap {
     let xPrevious = coordinates[0];
     let yPrevious = coordinates[1];
     let points = [canvas.coordinatesMathToScreen([xPrevious, yPrevious])];
+    let p = canvas.parameterValues;
+    let q = this.parametersOnTheGraphValues;
     for (let i = 0; i < 32; i++) {
-      let xNext = this.functionX(xPrevious, yPrevious, canvas.parameterValues);
-      let yNext = this.functionY(xPrevious, yPrevious, canvas.parameterValues);
+      let xNext = this.functionX(xPrevious, yPrevious, p, q);
+      let yNext = this.functionY(xPrevious, yPrevious, p, q);
       xPrevious = xNext;
       yPrevious = yNext;
       let coordinates = canvas.coordinatesMathToScreen([xPrevious, yPrevious]);
@@ -1905,9 +1918,10 @@ class CanvasTwoD {
    * map we are iterating
    * @param{function(number, number):number} functionY the y-coordinate of the 
    * map we are iterating
+   * @param{Array.<number>} parameterValues
    */
-  drawEscapeMap(functionX, functionY) {
-    let newPlot = new EscapeMap(functionX, functionY);
+  drawEscapeMap(functionX, functionY, parameterValues) {
+    let newPlot = new EscapeMap(functionX, functionY, parameterValues);
     this.drawObjects.push(newPlot);
     this.additionalMouseMoveListeners.push((x,y) => {
       newPlot.mouseMove(this, x, y);

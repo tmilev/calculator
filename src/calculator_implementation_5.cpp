@@ -2192,6 +2192,9 @@ JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
 void JavascriptExtractor::writeParameterNames(PlotObject& output) {
   output.parametersInPlay = this->parameterNames;
   output.parametersInPlayJS = this->parameterNamesJS;
+  output.parameterLetter = this->parameterLetter;
+  output.parametersOnTheGraph = this->parametersOnTheGraph;
+  output.parametersOnTheGraphLetter = this->parametersOnTheGraphLetter;
 }
 
 bool JavascriptExtractor::extract(
@@ -2214,9 +2217,9 @@ bool JavascriptExtractor::extractJavascript(
     Expression parameterAtom = this->owner->getNewAtom("p");
     this->parameterLetter = parameterAtom.toString();
   }
-  if (this->parameterOnGraphString == "") {
+  if (this->parametersOnTheGraphLetter == "") {
     Expression parameterOnGraphAtom = this->owner->getNewAtom("q");
-    this->parameterOnGraphString = parameterOnGraphAtom.toString();
+    this->parametersOnTheGraphLetter = parameterOnGraphAtom.toString();
   }
   return
   this->extractJavascriptRecursive(input, this->result, commentsOnFailure);
@@ -2237,6 +2240,16 @@ bool JavascriptExtractor::extractFromAtom(
     output = " 3.141592654 ";
     return true;
   }
+  if (this->parametersOnTheGraph.contains(atomString)) {
+    std::stringstream out;
+    out
+    << this->parametersOnTheGraphLetter
+    << "["
+    << this->parametersOnTheGraph.getIndex(atomString)
+    << "]";
+    output = out.str();
+    return true;
+  }
   if (input.data >= this->owner->numberOfPredefinedAtoms) {
     // User-defined atoms need to be corrected for safety.
     output = HtmlRoutines::getJavascriptVariable(atomString);
@@ -2249,16 +2262,6 @@ bool JavascriptExtractor::extractFromAtom(
     atomString == "-"
   ) {
     output = atomString;
-    return true;
-  }
-  if (this->parametersOnGraph.contains(atomString)) {
-    std::stringstream out;
-    out
-    << this->parameterOnGraphString
-    << "["
-    << this->parametersOnGraph.getIndex(atomString)
-    << "]";
-    output = out.str();
     return true;
   }
   output = atomString;
@@ -2358,6 +2361,11 @@ bool JavascriptExtractor::extractFromBinaryOrUnary(
       return true;
     }
     if (opString == "^") {
+      if (rightString == "2") {
+        out << "(" << leftString << " * " << leftString << ")";
+        output = out.str();
+        return true;
+      }
       out << "Math.pow(" << leftString << ", " << rightString << ")";
       output = out.str();
       return true;

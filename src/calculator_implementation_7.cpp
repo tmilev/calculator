@@ -7569,27 +7569,18 @@ bool CalculatorFunctionsPlot::plot2D(
   extractor.extractJavascript(plotObject.coordinateFunctionsE[0], &calculator.comments)
   ) {
     plotObject.coordinateFunctionsJS[0] = extractor.result;
-    plotObject.coordinateFunctionsE[0].hasInputBoxVariables(
-      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
-    );
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (extractor.extractJavascript(plotObject.leftPoint, &calculator.comments)
   ) {
     plotObject.leftPtJS = extractor.result;
-    plotObject.leftPoint.hasInputBoxVariables(
-      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
-    );
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
   if (extractor.extractJavascript(plotObject.rightPoint, &calculator.comments)
   ) {
     plotObject.rightPtJS = extractor.result;
-    plotObject.rightPoint.hasInputBoxVariables(
-      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
-    );
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
@@ -7598,9 +7589,6 @@ bool CalculatorFunctionsPlot::plot2D(
   if (extractor.extractJavascript(plotObject.numSegmentsE, &calculator.comments)
   ) {
     plotObject.numberOfSegmentsJS[0] = extractor.result;
-    plotObject.numSegmentsE.hasInputBoxVariables(
-      &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
-    );
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
@@ -7658,6 +7646,7 @@ bool CalculatorFunctionsPlot::plot2D(
     );
     plotObject.plotStringWithHtml = plotObject.plotString;
   }
+  extractor.writeParameterNames(plotObject);
   plot += plotObject;
   return output.assignValue(calculator, plot);
 }
@@ -7700,12 +7689,10 @@ bool CalculatorFunctionsPlot::plotPoint(
         << " from: "
         << plot.coordinateFunctionsE[i].toString();
       }
-      plot.points(i, j).hasInputBoxVariables(
-        &plot.parametersInPlay, &plot.parametersInPlayJS
-      );
       plot.parameterLetter = extractor.parameterLetter;
     }
   }
+  extractor.writeParameterNames(plot);
   plot.dimension = plot.dimension;
   plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
   if (input[2].isOfType<std::string>()) {
@@ -8351,9 +8338,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       );
     }
   }
-  input.hasInputBoxVariables(
-    &plot.parametersInPlay, &plot.parametersInPlayJS
-  );
+  extractor.writeParameterNames(plot);
   plot.parameterLetter = extractor.parameterLetter;
   Plot outputPlot;
   outputPlot += plot;

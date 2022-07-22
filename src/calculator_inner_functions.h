@@ -281,6 +281,8 @@ public:
   HashedList<std::string> parametersOnGraph;
   std::string parameterLetter;
   std::string parameterOnGraphString;
+  HashedList<std::string> parameterNames;
+  HashedList<std::string> parameterNamesJS;
   JavascriptExtractor(Calculator& inputOwner);
   bool extractJavascript(
     const Expression& input, std::stringstream* commentsOnFailure
@@ -288,6 +290,7 @@ public:
   bool extract(
     const Expression& input,std::string& output, std::stringstream* commentsOnFailure
   );
+  void writeParameterNames(PlotObject& output);
 };
 
 class CalculatorFunctionsTrigonometry {

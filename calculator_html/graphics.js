@@ -545,9 +545,9 @@ class CurveTwoD {
   /**
    * @param{!Array.<function(number):number>} inputCoordinateFunctions a pair of
    * coordinate functions.
-   * @param{number} inputLeftPt lower bound for the parameter.
-   * @param{number} inputRightPt higher bound for the parameter.
-   * @param{number} inputNumSegments number of segments used to approximate the
+   * @param{number|function(number):number} inputLeftPt lower bound for the parameter.
+   * @param{number|function(number):number} inputRightPt higher bound for the parameter.
+   * @param{number|function(number):number} inputNumSegments number of segments used to approximate the
    * curve.
    * @param{string} inputColor the color of the curve.
    * @param{number} inputLineWidth the width of the line.
@@ -555,21 +555,38 @@ class CurveTwoD {
    */
   constructor(
       inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
-      inputColor, inputLineWidth, parameterLetter) {
+      inputColor, inputLineWidth) {
     /** @type{!Array.<!Function>}*/
     this.coordinateFunctions = inputCoordinateFunctions;
+    /** @type{number|function(number):number}  */
+    this.leftPointComputer = inputLeftPt;
+    /** @type{number|function(number):number}  */
+    this.rightPointComputer = inputRightPt;
+    /** @type{number|function(number):number}  */
+    this.numberOfSegmentsComputer = inputNumSegments;    
     /** @type{number} */
-    this.leftPt = inputLeftPt;
+    this.leftPt = 0;
     /** @type{number} */
-    this.rightPt = inputRightPt;
+    this.rightPt = 0;
+    /** @type{number} */
+    this.numSegments = 0;
     /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
-    /** @type{number} */
-    this.numSegments = inputNumSegments;
     /** @type{number} */
     this.lineWidth = inputLineWidth;
     /** @type{string} */
     this.type = 'curve';
+  }
+
+  /** 
+   * Updates the endpoints and segment counts.
+   * 
+   * @param {!CanvasTwoD} canvas the canvas.
+   */
+  updateBoundaries(canvas) {
+    this.leftPt = canvas.evaluateNumberOrParameter(this.leftPointComputer);
+    this.rightPt = canvas.evaluateNumberOrParameter(this.rightPointComputer);
+    this.numSegments = canvas.evaluateNumberOrParameter(this.numberOfSegmentsComputer);
   }
 
   /**
@@ -579,6 +596,7 @@ class CurveTwoD {
    * @param {!CanvasTwoD} canvas the canvas.
    */
   accountBoundingBox(inputOutputBox, canvas) {
+    this.updateBoundaries(canvas);
     let argumentT = this.leftPt;
     let x = this.coordinateFunctions[0](argumentT, canvas.parameterValues);
     let y = this.coordinateFunctions[1](argumentT, canvas.parameterValues);
@@ -612,6 +630,7 @@ class CurveTwoD {
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
+    this.updateBoundaries(canvas);
     let surface = canvas.surface;
     surface.strokeStyle = colorRGBToString(this.color);
     surface.fillStyle = colorRGBToString(this.color);
@@ -1699,6 +1718,26 @@ class CanvasTwoD {
     this.parameterNames = {};
   }
 
+  /** 
+   * If the input is a number, bounces it back, 
+   * else if the input is a function, evaluates it.  
+   * 
+   * Use it to parametrize a quantity such as a point on the graph
+   * or the number of segments in a plot, for the purpose of external
+   * update (say, the value of the parameter is liked to a slider).
+   * 
+   * @param {number|function(Array.<number>):number} input the input parameter
+   * @param {Array.<number>} parameters parameters external to the graph.
+   * 
+   * @return {number}
+   */
+  evaluateNumberOrParameter(input) {
+    if (typeof input === "number") {
+      return input;
+    }
+    return input(this.parameterValues);
+  }
+
   /**
    * Draws points on the canvas.
    *
@@ -1854,9 +1893,9 @@ class CanvasTwoD {
    * Draws a parametric curve on the canvas
    * @param{!Array.<function(number):number>} inputCoordinateFunctions a pair
    * of coordinate functions.
-   * @param{number} inputLeftPt lower bound for the parameter.
-   * @param{number} inputRightPt higher bound for the parameter.
-   * @param{number} inputNumSegments number of segments used to approximate the
+   * @param{number|function(number):number} inputLeftPt lower bound for the parameter.
+   * @param{number|function(number):number} inputRightPt higher bound for the parameter.
+   * @param{number|function(number):number} inputNumSegments number of segments used to approximate the
    * curve.
    * @param{string} inputColor the color of the curve.
    * @param{number} inputLineWidth the width of the line.
@@ -2446,9 +2485,9 @@ class Surface {
    * @param {function(number,number):!Array.<number>} inputXYZFunction a
    *     two-variable function that returns a the [x,y,z]-coordinates [f(u,v),
    *     h(u,v), g(u,v)].
-   * @param{!Array.<!Array.<number>>} inputUVBox u,v-variable ranges, format:
+   * @param{!Array.<!Array.<number|function(Array.<number>):number>>} inputUVBox u,v-variable ranges, format:
    * [[uMin, uMax], [vMin, vMax]].
-   * @param {!Array.<number>} inputPatchDimensions the pair of numbers.
+   * @param {!Array.<number|function(Array.<number>):number>} inputPatchDimensions the pair of numbers.
    * [uPatchCount, vPathCount], where we subdivide the UV-rectangle in
    * uPatchCount times uPatchCount rectangles.
    * @param{string} colorFront color of the front of the patch.
@@ -2466,20 +2505,44 @@ class Surface {
       inputContourWidth,
   ) {
     this.xyzFun = inputXYZFunction;
-    this.uvBox = inputUVBox;
-    this.patchDimensions = inputPatchDimensions;
+    /** @type{Array.<!Array.<number>>} */
+    this.uvBox = [[0,0], [0,0]];
+    /** @type{!Array.<number>} */
+    this.patchDimensions = [0, 0];
+    /** @type {!Array.< !Array.< number | function (Array.<number>): number >>} */
+    this.uvBoxComputer = inputUVBox;
+    /** @type {!Array.<number|function(Array.<number>):number>} */
+    this.patchComputer = inputPatchDimensions;
     this.colors = {
       colorContour: colorContour,
       colorUV: colorToHex(colorBack),
       colorVU: colorToHex(colorFront),
     };
     this.contourWidth = inputContourWidth;
-    this.deltaU =
-        (this.uvBox[0][1] - this.uvBox[0][0]) / this.patchDimensions[0];
-    this.deltaV =
-        (this.uvBox[1][1] - this.uvBox[1][0]) / this.patchDimensions[1];
+    this.deltaU = 0;
+    this.deltaV = 0;
     this.numSamplesUSegment = 10;
     this.numSamplesVSegment = 10;
+  }
+
+  /** 
+   * Computes deltaU and deltaV.
+   * 
+   * @param {Canvas} canvas the owner canvas
+   */
+  updateParameters(canvas) {
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        this.uvBox[i][j] = canvas.evaluateNumberOrParameter(
+          this.uvBoxComputer[i][j]
+        );
+      }
+      this.patchDimensions[i] = canvas.evaluateNumberOrParameter(this.patchComputer[i]);
+    }
+    this.deltaU =
+      (this.uvBox[0][1] - this.uvBox[0][0]) / this.patchDimensions[0];
+    this.deltaV =
+      (this.uvBox[1][1] - this.uvBox[1][0]) / this.patchDimensions[1];
   }
 }
 
@@ -4627,9 +4690,9 @@ class Canvas {
    * @param {function(number,number):!Array.<number>} inputXYZFunction a
    *     two-variable function that returns a the [x,y,z]-coordinates [f(u,v),
    *     h(u,v), g(u,v)].
-   * @param{!Array.<!Array.<number>>} inputUVBox u,v-variable ranges, format:
+   * @param{!Array.<!Array.<number|function(Array.<number>):number>>} inputUVBox u,v-variable ranges, format:
    * [[uMin, uMax], [vMin, vMax]].
-   * @param {!Array.<number>} inputPatchDimensions the pair of numbers.
+   * @param {!Array.<number|function(Array.<number>):number>} inputPatchDimensions the pair of numbers.
    * [uPatchCount, vPathCount], where we subdivide the UV-rectangle in
    * uPatchCount times uPatchCount rectangles.
    * @param{string} colorFront color of the front of the patch.
@@ -4657,6 +4720,26 @@ class Canvas {
         ));
   }
 
+  /** 
+   * If the input is a number, bounces it back, 
+   * else if the input is a function, evaluates it.  
+   * 
+   * Use it to parametrize a quantity such as a point on the graph
+   * or the number of segments in a plot, for the purpose of external
+   * update (say, the value of the parameter is liked to a slider).
+   * 
+   * @param {number|function(Array.<number>):number} input the input parameter
+   * @param {Array.<number>} parameters parameters external to the graph.
+   * 
+   * @return {number}
+   */
+  evaluateNumberOrParameter(input) {
+    if (typeof input === "number") {
+      return input;
+    }
+    return input(this.parameterValues);
+  }
+
   /**
    * Same as drawSurfaceCreate but assumes the user of the function allocated
    * the Surface object themselves.
@@ -4664,6 +4747,7 @@ class Canvas {
    * @param {!Surface} surface the surface.
    */
   drawSurface(surface) {
+    surface.updateParameters(this);
     let numUsegments = surface.patchDimensions[0];
     let numVsegments = surface.patchDimensions[1];
     let allPatches = this.all3dObjects.allPatches;
@@ -4697,7 +4781,7 @@ class Canvas {
         let currentU = surface.uvBox[0][0] + i * deltaU;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
           let currentV =
-              surface.uvBox[1][0] + (j + k / numSegmentsPerContour) * deltaV;
+            surface.uvBox[1][0] + (j + k / numSegmentsPerContour) * deltaV;
           contourPoints[k] = surface.xyzFun(currentU, currentV, this.parameterValues);
         }
         let incomingContour = new Contour(
@@ -4725,8 +4809,7 @@ class Canvas {
       for (let j = 0; j < numVsegments + 1; j++) {
         let currentV = surface.uvBox[1][0] + j * deltaV;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
-          let currentU =
-              surface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
+          let currentU =surface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
           contourPoints[k] = surface.xyzFun(currentU, currentV, this.parameterValues);
         }
         let incomingContour = new Contour(

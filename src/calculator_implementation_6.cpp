@@ -994,9 +994,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
       << " to javascript. ";
     }
   }
-  input.hasInputBoxVariables(
-    &plotObject.parametersInPlay, &plotObject.parametersInPlayJS
-  );
+  extractor.writeParameterNames(plotObject);
   plot.addPlotOnTop(plotObject);
   return output.assignValue(calculator, plot);
 }

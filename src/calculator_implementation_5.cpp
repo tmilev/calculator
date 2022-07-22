@@ -2188,6 +2188,11 @@ JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
   this->recursionDepth = 0;
 }
 
+void JavascriptExtractor::writeParameterNames(PlotObject &output) {
+  output.parametersInPlay = this->parameterNames;
+  output.parametersInPlayJS = this->parameterNamesJS;
+}
+
 bool JavascriptExtractor::extract(
   const Expression& input, std::string&output, std::stringstream* commentsOnFailure
 ) {
@@ -2435,6 +2440,8 @@ bool JavascriptExtractor::extractJavascriptRecursive(
     );
     out << this->parameterLetter << "[" << boxIndex << "]";
     output = out.str();
+    this->parameterNames.addOnTopNoRepetition( box.name);
+    this->parameterNamesJS .addOnTopNoRepetition( box.getSliderName());
     return true;
   }
   out.precision(7);
@@ -2694,9 +2701,7 @@ bool CalculatorFunctionsPlot::plotSurface(
   }
   plot.plotType = "surface";
   plot.dimension = plot.coordinateFunctionsE.size;
-  input.hasInputBoxVariables(
-    &plot.parametersInPlay, &plot.parametersInPlayJS
-  );
+  extractor.writeParameterNames(plot);
   Plot result;
   result += plot;
   return output.assignValue(calculator, result);

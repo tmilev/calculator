@@ -91,8 +91,6 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
   !extractorJavascriptImaginary.extractJavascript(extractor.imaginaryPart, &calculator.comments)){
     return false;
   }
-
-
   std::string javascriptX=extractorJavascriptReal.result ;
   std::string javascriptY= extractorJavascriptImaginary.result;
   Plot escapeMap;
@@ -107,6 +105,7 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     extractor.parametersJS,
     extractor.getParametersOnTheGraph()
   );
+
   escapeMap.drawGrid();
   std::stringstream out;
   out

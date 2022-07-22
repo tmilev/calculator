@@ -67,13 +67,15 @@ class GraphicsSerialization {
     /**@type{Object.<string,HTMLElement>} */
     sliders,
   ) {
-    canvas.clear();
     let graphicsType = input["graphicsType"];
     switch (graphicsType) {
       case "twoDimensional":
-        return this.plotTwoDimensionalGraphics(canvas, input, sliders, {});
+        canvas.redraw();
+        return;
       case "threeDimensional":
-        return this.plotThreeDimensionalGraphics(canvas, input, sliders, {});
+        canvas.clear();
+        this.plotThreeDimensionalGraphics(canvas, input, sliders, {});
+        return;
       default:
         throw `Unknown graphics type ${graphicsType}.`;
     }
@@ -274,7 +276,7 @@ class GraphicsSerialization {
           coordinateFunctionArray,
           this.interpretStringToNumber(variableRanges[0], variableAndParameterNames, parameterValues),
           this.interpretStringToNumber(variableRanges[1], variableAndParameterNames, parameterValues),
-          numberOfSegments,
+          this.interpretStringToNumber(numberOfSegments, variableAndParameterNames, parameterValues),
           color,
           lineWidth,
         );
@@ -372,20 +374,28 @@ class GraphicsSerialization {
   }
 
   /** 
-   * Extracts a number from javascript.
+   * Extracts a number from javascript, or a function that
+   * generates a number. The use case for a function is a 
+   * graphics parameter that is tied to a slider or 
+   * another user-controlled element.
    * 
-   * @return{number} 
+   * @return{number|function(Array.<number>):number} 
    */
   interpretStringToNumber(
     /** @type{string} */
     input,
     /** @type{string[]} */
-    inputArguments,
+    inputParameters,
     /** @type{Array.<number>} */
     parameterValues,
   ) {
-    let definingFunction = this.functionFromBodyAndArguments(`"use strict"; return (${input});`, inputArguments); 
-    return definingFunction(parameterValues);
+    let definingFunction = this.functionFromBodyAndArguments(
+      `"use strict"; return (${input});`, inputParameters,
+    ); 
+    if (inputParameters.length === 0) {
+      return definingFunction(parameterValues);      
+    }
+    return definingFunction;
   }
 
   /** 

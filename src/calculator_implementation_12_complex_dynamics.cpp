@@ -85,14 +85,23 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
   if (!extractor.extract(input[1], &calculator.comments)) {
     return false;
   }
-  JavascriptExtractor extractorJavascriptReal(calculator);
-  JavascriptExtractor extractorJavascriptImaginary(calculator);
-  if (!extractorJavascriptReal.extractJavascript(extractor.realPart, &calculator.comments) ||
-  !extractorJavascriptImaginary.extractJavascript(extractor.imaginaryPart, &calculator.comments)){
+  JavascriptExtractor extractorJavascript(calculator);
+  if (
+    !extractorJavascript.extractJavascript(
+      extractor.realPart, &calculator.comments
+    )
+  ) {
     return false;
   }
-  std::string javascriptX=extractorJavascriptReal.result ;
-  std::string javascriptY= extractorJavascriptImaginary.result;
+  std::string javascriptX = extractorJavascript.result;
+  if (
+    !extractorJavascript.extractJavascript(
+      extractor.imaginaryPart, &calculator.comments
+    )
+  ) {
+    return false;
+  }
+  std::string javascriptY = extractorJavascript.result;
   Plot escapeMap;
   escapeMap.dimension = 2;
   escapeMap.drawEscapeMap(
@@ -102,10 +111,10 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     extractor.imaginaryPart,
     javascriptY,
     extractor.imaginaryPartVariable.toString(),
+    extractorJavascript.parameterLetter,
     extractor.parametersJS,
     extractor.getParametersOnTheGraph()
   );
-
   escapeMap.drawGrid();
   std::stringstream out;
   out

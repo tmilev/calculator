@@ -936,16 +936,25 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   Expression jsConverterE;
   JavascriptExtractor extractor(calculator);
   if (input.size() >= 6) {
-    if (!extractor.extract(input[5], plotObject.defaultLengthJS, &calculator.comments)){
+    if (
+      !extractor.extract(
+        input[5], plotObject.defaultLengthJS, &calculator.comments
+      )
+    ) {
       return
       calculator
       << "<br>Failed to extract javascript from "
       << input[5].toString()
       << ". ";
-
     }
   }
-  if (!extractor.extract(plotObject.manifoldImmersion, plotObject.manifoldImmersionJS, &calculator.comments)){
+  if (
+    !extractor.extract(
+      plotObject.manifoldImmersion,
+      plotObject.manifoldImmersionJS,
+      &calculator.comments
+    )
+  ) {
     return
     calculator
     << "<br>Failed to extract javascript from "
@@ -986,8 +995,14 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   }
   plotObject.numberOfSegmentsJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
-    if (!extractor.extract(input[4][i + 1], plotObject.numberOfSegmentsJS[i], &calculator.comments))
-{      return
+    if (
+      !extractor.extract(
+        input[4][i + 1],
+        plotObject.numberOfSegmentsJS[i],
+        &calculator.comments
+      )
+    ) {
+      return
       calculator
       << "Failed to convert "
       << input[4][i + 1].toString()

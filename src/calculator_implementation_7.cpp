@@ -7566,19 +7566,27 @@ bool CalculatorFunctionsPlot::plot2D(
   plotObject.plotType = PlotObject::PlotTypes::plotFunction;
   JavascriptExtractor extractor(calculator);
   if (
-  extractor.extractJavascript(plotObject.coordinateFunctionsE[0], &calculator.comments)
+    extractor.extractJavascript(
+      plotObject.coordinateFunctionsE[0], &calculator.comments
+    )
   ) {
     plotObject.coordinateFunctionsJS[0] = extractor.result;
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
-  if (extractor.extractJavascript(plotObject.leftPoint, &calculator.comments)
+  if (
+    extractor.extractJavascript(
+      plotObject.leftPoint, &calculator.comments
+    )
   ) {
     plotObject.leftPtJS = extractor.result;
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
-  if (extractor.extractJavascript(plotObject.rightPoint, &calculator.comments)
+  if (
+    extractor.extractJavascript(
+      plotObject.rightPoint, &calculator.comments
+    )
   ) {
     plotObject.rightPtJS = extractor.result;
   } else {
@@ -7586,7 +7594,10 @@ bool CalculatorFunctionsPlot::plot2D(
   }
   plotObject.numberOfSegmentsJS.setSize(1);
   plotObject.numberOfSegmentsJS[0] = "200";
-  if (extractor.extractJavascript(plotObject.numSegmentsE, &calculator.comments)
+  if (
+    extractor.extractJavascript(
+      plotObject.numSegmentsE, &calculator.comments
+    )
   ) {
     plotObject.numberOfSegmentsJS[0] = extractor.result;
   } else {
@@ -7681,7 +7692,13 @@ bool CalculatorFunctionsPlot::plotPoint(
   JavascriptExtractor extractor(calculator);
   for (int i = 0; i < plot.points.numberOfRows; i ++) {
     for (int j = 0; j < plot.points.numberOfColumns; j ++) {
-      if (!extractor.extract(plot.points(i, j), plot.pointsJS(i, j), &calculator.comments)){
+      if (
+        !extractor.extract(
+          plot.points(i, j),
+          plot.pointsJS(i, j),
+          &calculator.comments
+        )
+      ) {
         return
         calculator
         << "Failed to extract coordinate "
@@ -7872,9 +7889,14 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
     }
   }
   Plot plotFinal;
-  for (int i =0; i < xValues.size; i ++){
-    plotFinal.drawRectangle(xValues[i], fValuesLower[i], deltaNoSign,fValuesUpper[i]-fValuesLower[i] , "cyan");
-
+  for (int i = 0; i < xValues.size; i ++) {
+    plotFinal.drawRectangle(
+      xValues[i],
+      fValuesLower[i],
+      deltaNoSign,
+      fValuesUpper[i] - fValuesLower[i],
+      "cyan"
+    );
   }
   std::stringstream outTex, outHtml;
   for (int k = 0; k < 2; k ++) {
@@ -8087,13 +8109,14 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended(
     return false;
   }
   Expression plotXYEvaluated;
- if (! calculator.evaluateExpression(calculator, plotXYE, plotXYEvaluated)){
-   return false;
-
- }
- if (!plotXYEvaluated.isOfType<Plot>()){
-   return false;
- }
+  if (
+    !calculator.evaluateExpression(calculator, plotXYE, plotXYEvaluated)
+  ) {
+    return false;
+  }
+  if (!plotXYEvaluated.isOfType<Plot>()) {
+    return false;
+  }
   if (
     !calculator.callCalculatorFunction(
       CalculatorFunctionsPlot::plot2D, input, plotRthetaE
@@ -8101,12 +8124,10 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended(
   ) {
     return false;
   }
-std::string result =
+  std::string result =
   plotXYEvaluated.getValueNonConst<Plot>().getPlotHtml(calculator);
-result+=plotRthetaE.getValueNonConst<Plot>().getPlotHtml(calculator);
-
-  return
-  output.assignValue(calculator, result);
+  result += plotRthetaE.getValueNonConst<Plot>().getPlotHtml(calculator);
+  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsPlot::plotParametricCurve(
@@ -8268,7 +8289,11 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   for (int i = 0; i < plot.dimension; i ++) {
     if (
       !extractor.extract(
-        plot.coordinateFunctionsE[i],plot.coordinateFunctionsJS[i], &calculator.comments)){
+        plot.coordinateFunctionsE[i],
+        plot.coordinateFunctionsJS[i],
+        &calculator.comments
+      )
+    ) {
       plot.plotType = "parametricCurvePrecomputed";
       calculator
       << "Failed to convert: "
@@ -8331,7 +8356,6 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     }
     plot.pointsDouble.setSize(xCoordinates.size);
     for (int i = 0; i < xCoordinates.size; i ++) {
-
       plot.pointsDouble[i] = List<double>({
           xCoordinates[i][1], yCoordinates[i][1]
         }

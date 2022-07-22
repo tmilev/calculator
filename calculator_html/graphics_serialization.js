@@ -421,7 +421,7 @@ class GraphicsSerialization {
   /** 
    * Interprets a list of list of strings from javascript.
    * 
-   * @return{number[][]} 
+   * @return{Array.<Array.<number|function(Array.<number>):number>>} 
    */
   interpretListListStringsAsNumbers(
     /**@type{string[][]} */

@@ -465,23 +465,27 @@ void PlotObject::makeLabel(
   this->makeLabel(position.getVectorDouble(), label);
 }
 
-void PlotObject::makeRectangle(double xLowLeft, double yLowLeft, double width, double height, const std::string &color){
-this->plotType = PlotObject::PlotTypes::pathFilled;
+void PlotObject::makeRectangle(
+  double xLowLeft,
+  double yLowLeft,
+  double width,
+  double height,
+  const std::string& color
+) {
+  this->plotType = PlotObject::PlotTypes::pathFilled;
   Vector<double> current;
   current.addOnTop(xLowLeft);
   current.addOnTop(yLowLeft);
   this->pointsDouble.addOnTop(current);
-  current[0]+= width;
+  current[0] += width;
   this->pointsDouble.addOnTop(current);
-  current[1]+= height;
+  current[1] += height;
   this->pointsDouble.addOnTop(current);
-  current[0]-= width;
+  current[0] -= width;
   this->pointsDouble.addOnTop(current);
-  current[1]-= height;
+  current[1] -= height;
   this->pointsDouble.addOnTop(current);
   this->colorFillJS = color;
-
-
 }
 
 void PlotObject::makeLabel(
@@ -538,6 +542,7 @@ void PlotObject::makeEscapeMap(
   const Expression& functionY,
   const std::string& javascriptY,
   const std::string& variableY,
+  const std::string& inputParameterLetter,
   const List<std::string>& parametersInPlayJS,
   const MapList<
     std::string, List<double>, HashFunctions::hashFunction
@@ -552,6 +557,7 @@ void PlotObject::makeEscapeMap(
   this->plotType = PlotObject::PlotTypes::escapeMap;
   this->parametersInPlayJS = parametersInPlayJS;
   this->complexParametersOnTheGraph = parametersOnTheGraph;
+  this->parameterLetter = inputParameterLetter;
 }
 
 void Plot::drawCoordinateAxes() {
@@ -567,10 +573,10 @@ void Plot::drawGrid() {
 }
 
 void Plot::drawPlotFillStart() {
-PlotObject plot;
-plot.plotType = PlotObject::PlotTypes::plotFillStart;
-this->addPlotOnTop(plot);
-this->dimension = 2;
+  PlotObject plot;
+  plot.plotType = PlotObject::PlotTypes::plotFillStart;
+  this->addPlotOnTop(plot);
+  this->dimension = 2;
 }
 
 void Plot::drawPlotFillFinish() {
@@ -580,11 +586,16 @@ void Plot::drawPlotFillFinish() {
   this->dimension = 2;
 }
 
-void Plot::drawRectangle(double xLowLeft, double yLowLeft, double width, double height, const std::string &color){
+void Plot::drawRectangle(
+  double xLowLeft,
+  double yLowLeft,
+  double width,
+  double height,
+  const std::string& color
+) {
   PlotObject plot;
   plot.makeRectangle(xLowLeft, yLowLeft, width, height, color);
   this->addPlotOnTop(plot);
-
 }
 
 void Plot::setViewWindow(
@@ -605,6 +616,7 @@ void Plot::drawEscapeMap(
   Expression& functionY,
   const std::string& javascriptY,
   const std::string& variableY,
+  const std::string& parameterLetter,
   List<std::string>& parametersInPlayJS,
   const MapList<
     std::string, List<double>, HashFunctions::hashFunction
@@ -618,6 +630,7 @@ void Plot::drawEscapeMap(
     functionY,
     javascriptY,
     variableY,
+    parameterLetter,
     parametersInPlayJS,
     parametersOnTheGraph
   );
@@ -871,7 +884,7 @@ std::string Plot::getPlotHtml(Calculator& owner) {
   }
 }
 
-void PlotObject::writeParameters(JSData &output) {
+void PlotObject::writeParameters(JSData& output) {
   JSData parameters = JSData::makeEmptyArray();
   for (int i = 0; i < this->parametersInPlayJS.size; i ++) {
     parameters[i] =
@@ -890,7 +903,6 @@ void PlotObject::writeVariables(JSData& output) {
   }
   output[PlotObject::Labels::arguments] = arguments;
   this->writeParameters(output);
-
 }
 
 JSData PlotObject::functionFromString(const std::string& input) {
@@ -1183,12 +1195,12 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     plotObjects[plotObjects.listObjects.size] = this->getComputeViewWindow();
   }
   result[Plot::Labels::plotObjects] = plotObjects;
- this->writeParameters(result, owner);
+  this->writeParameters(result, owner);
   out << HtmlRoutines::scriptFromJSON("graphics", result);
   return out.str();
 }
 
-void Plot::writeParameters(JSData &output, Calculator& owner){
+void Plot::writeParameters(JSData& output, Calculator& owner) {
   List<std::string> inputBoxes;
   for (
     int i = 0; i < owner.objectContainer.userInputTextBoxesWithValues.size(); i

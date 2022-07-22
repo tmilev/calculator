@@ -288,7 +288,9 @@ public:
     const Expression& input, std::stringstream* commentsOnFailure
   );
   bool extract(
-    const Expression& input,std::string& output, std::stringstream* commentsOnFailure
+    const Expression& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
   );
   void writeParameterNames(PlotObject& output);
 };

@@ -2178,9 +2178,10 @@ bool CalculatorFunctionsPlot::makeJavascriptExpression(
     return false;
   }
   JavascriptExtractor extractor(calculator);
-if(!  extractor.extractJavascript(input[1], &calculator.comments)){
-  return false;}
-return output.assignValue(calculator, extractor.result);
+  if (!extractor.extractJavascript(input[1], &calculator.comments)) {
+    return false;
+  }
+  return output.assignValue(calculator, extractor.result);
 }
 
 JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
@@ -2188,18 +2189,20 @@ JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
   this->recursionDepth = 0;
 }
 
-void JavascriptExtractor::writeParameterNames(PlotObject &output) {
+void JavascriptExtractor::writeParameterNames(PlotObject& output) {
   output.parametersInPlay = this->parameterNames;
   output.parametersInPlayJS = this->parameterNamesJS;
 }
 
 bool JavascriptExtractor::extract(
-  const Expression& input, std::string&output, std::stringstream* commentsOnFailure
+  const Expression& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
 ) {
-  if (!this->extractJavascript(input, commentsOnFailure)){
+  if (!this->extractJavascript(input, commentsOnFailure)) {
     return false;
   }
-  output=this->result;
+  output = this->result;
   return true;
 }
 
@@ -2440,8 +2443,8 @@ bool JavascriptExtractor::extractJavascriptRecursive(
     );
     out << this->parameterLetter << "[" << boxIndex << "]";
     output = out.str();
-    this->parameterNames.addOnTopNoRepetition( box.name);
-    this->parameterNamesJS .addOnTopNoRepetition( box.getSliderName());
+    this->parameterNames.addOnTopNoRepetition(box.name);
+    this->parameterNamesJS.addOnTopNoRepetition(box.getSliderName());
     return true;
   }
   out.precision(7);
@@ -2603,15 +2606,18 @@ bool CalculatorFunctionsPlot::plotSurface(
   JavascriptExtractor extractor(calculator);
   for (int i = 1; i < plot.manifoldImmersion.size(); i ++) {
     plot.coordinateFunctionsE[i - 1] = plot.manifoldImmersion[i];
-  if(!extractor.extractJavascript(plot.coordinateFunctionsE[i - 1], &calculator.comments)){
-    return
-    calculator
-    << "Failed to convert "
-    << plot.coordinateFunctionsE[i - 1].toString()
-    << " to a javascript expression. ";
-  }
-
-        plot.coordinateFunctionsJS[i - 1]= extractor.result;
+    if (
+      !extractor.extractJavascript(
+        plot.coordinateFunctionsE[i - 1], &calculator.comments
+      )
+    ) {
+      return
+      calculator
+      << "Failed to convert "
+      << plot.coordinateFunctionsE[i - 1].toString()
+      << " to a javascript expression. ";
+    }
+    plot.coordinateFunctionsJS[i - 1] = extractor.result;
   }
   plot.parameterLetter = extractor.parameterLetter;
   for (int i = 1; i < input.size(); i ++) {
@@ -2625,14 +2631,18 @@ bool CalculatorFunctionsPlot::plotSurface(
         continue;
       }
       for (int j = 0; j < 2; j ++) {
-        if (!extractor.extractJavascript(input[i][2][j + 1], &calculator.comments)){
+        if (
+          !extractor.extractJavascript(
+            input[i][2][j + 1], &calculator.comments
+          )
+        ) {
           return
           calculator
           << "Failed to convert "
           << input[i][2][j + 1].toString()
           << " to a javascript expression. ";
         }
-        plot.variableRangesJS[index][j]=extractor.result;
+        plot.variableRangesJS[index][j] = extractor.result;
       }
     }
   }
@@ -2666,14 +2676,18 @@ bool CalculatorFunctionsPlot::plotSurface(
       }
       Expression expressionToConvert =
       keys.getValueCreateEmpty(keysToConvert.keys[i]);
-      if (! extractor.extractJavascript(expressionToConvert, &calculator.comments)){
+      if (
+        !extractor.extractJavascript(
+          expressionToConvert, &calculator.comments
+        )
+      ) {
         return
         calculator
         << "Failed to convert "
         << expressionToConvert.toString()
         << " to a javascript expression. ";
       }
-      keysToConvert.values[i]=extractor.result;
+      keysToConvert.values[i] = extractor.result;
     }
     plot.numberOfSegmentsJS.setSize(2);
     if (keysToConvert.getValueCreateEmpty("numSegments1") != "") {

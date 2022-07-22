@@ -1461,12 +1461,19 @@ public:
     const Expression& functionY,
     const std::string& javascriptY,
     const std::string& variableY,
+    const std::string& inputParameterLetter,
     const List<std::string>& parametersInPlayJS,
     const MapList<
       std::string, List<double>, HashFunctions::hashFunction
     >& parametersOnTheGraph
   );
-void  makeRectangle(double xLowLeft, double yLowLeft, double width, double height, const std::string &color);
+  void makeRectangle(
+    double xLowLeft,
+    double yLowLeft,
+    double width,
+    double height,
+    const std::string& color
+  );
   PlotObject();
   bool operator==(const PlotObject& other) const;
 };
@@ -1532,7 +1539,7 @@ public:
   void computeCanvasNameIfNecessary(int& canvasCounter);
   std::string getPlotHtml3d(Calculator& owner);
   std::string getPlotHtml2d(Calculator& owner);
-  void writeParameters(JSData& output, Calculator &owner);
+  void writeParameters(JSData& output, Calculator& owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);
   bool isOKVector(const Vector<double>& input);
   void addPlotOnTop(PlotObject& input);
@@ -1556,6 +1563,7 @@ public:
     Expression& functionY,
     const std::string& javascriptY,
     const std::string& variableY,
+    const std::string& parameterLetter,
     List<std::string>& parametersInPlayJS,
     const MapList<
       std::string, List<double>, HashFunctions::hashFunction
@@ -1565,7 +1573,13 @@ public:
   void drawGrid();
   void drawPlotFillStart();
   void drawPlotFillFinish();
-  void drawRectangle(double xLowLeft, double yLowLeft, double width, double height,  const std::string& color);
+  void drawRectangle(
+    double xLowLeft,
+    double yLowLeft,
+    double width,
+    double height,
+    const std::string& color
+  );
   List<PlotObject>& getPlots();
   void clearPlotObjects();
   void setExpectedPlotObjects(int expectedSize);

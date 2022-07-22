@@ -479,17 +479,34 @@ function infinityType(input) {
 /** A set of points in two dimensions. */
 class PointsTwoD {
   /**
-   * @param {!Array.<!Array.<number>>} inputPoints the points.
+   * @param {Array.<Array.<number|function(Array.<number>):number>>} inputPoints the points.
    * @param {string} inputColor desired point color.
    */
   constructor(
       inputPoints,
       inputColor,
   ) {
-    this.location = inputPoints.slice();
+    this.pointsComputer = inputPoints;
+    this.location = [];
     /** @type{!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'points';
+  }
+
+  /** 
+   * Updates the point coordinates.
+   * 
+   * @param {CanvasTwoD} canvas the canvas.
+   */
+  updatePoints(canvas) { 
+    this.location = [];
+    for (let i = 0; i < this.pointsComputer.length; i++){
+      let point = []
+      for (let j = 0; j < this.pointsComputer[i].length; j++){
+        point.push(canvas.evaluateNumberOrParameter(this.pointsComputer[i][j]));
+      }
+      this.location.push(point);
+    }    
   }
 
   /**
@@ -497,7 +514,8 @@ class PointsTwoD {
    *
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
-  accountBoundingBox(inputOutputBox) {
+  accountBoundingBox(inputOutputBox, canvas) {
+    this.updatePoints(canvas);
     for (let i = 0; i < this.location.length; i++) {
       accountBoundingBox(this.location[i], inputOutputBox);
     }
@@ -509,6 +527,7 @@ class PointsTwoD {
    * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
+    this.updatePoints(canvas);
     let surface = canvas.surface;
     for (let i = 0; i < this.location.length; i++) {
       surface.beginPath();
@@ -1170,11 +1189,11 @@ class EscapeMap {
   /** 
    * Required to satisfy interface.
    * @param {!Array.<!Array.<number>>} unused output bounding box.
-   * @param {CanvasTwoD} canvas output bounding box.
+   * @param {CanvasTwoD} canvas  owning the plot
    */
   accountBoundingBox(box, canvas) {
     if (this.boundingBoxEntries.length == 0) {
-      this.computeBoundingBox();
+      this.computeBoundingBox(canvas);
     }
     for (let i = 0; i < this.boundingBoxEntries.length; i++) {
       accountBoundingBox(this.boundingBoxEntries[i], box);
@@ -1182,9 +1201,9 @@ class EscapeMap {
   }
 
   /** @return {Array.<number>} */
-  scaleToFindEscapingPoints(x, y) {
+  scaleToFindEscapingPoints(x, y, p) {
     for (let i = 0; i < 15; i++) {
-      if (this.iterateMap(x, y) > 0) {
+      if (this.iterateMap(x, y, p) > 0) {
         break;
       }
       x *= 1.5;
@@ -1192,13 +1211,17 @@ class EscapeMap {
     }
     return [x, y];
   }
-
-  computeBoundingBox() {
+  /** 
+   * Computes a bounding box  
+   * 
+   * @param {CanvasTwoD} canvas owning the plot
+   */
+  computeBoundingBox(canvas) {
     for (let i = 0; i < 16; i++) {
       let angle = 2 * Math.PI / (i + 1) + 0.1;
       let x = 1.1 * Math.cos(angle);
       let y = 1.1 * Math.sin(angle);
-      this.boundingBoxEntries.push(this.scaleToFindEscapingPoints(x, y));
+      this.boundingBoxEntries.push(this.scaleToFindEscapingPoints(x, y, canvas.parameterValues));
     }
   }
   
@@ -1232,13 +1255,14 @@ class EscapeMap {
    * 
    * @param {number} x
    * @param {number} y
+   * @param {Array.<number>} p extra parameters, user controllable through UI elements such as sliders.
    */
-  iterateMap(x0, y0) {
+  iterateMap(x0, y0, p) {
     let x = x0;
     let y = y0;
     for (let i = 1; i < 34; i ++) {
-      let newX = this.functionX(x, y);
-      let newY = this.functionY(x, y);
+      let newX = this.functionX(x, y, p);
+      let newY = this.functionY(x, y, p);
       x = newX;
       y = newY;
       let deltaX = x - x0;
@@ -1273,9 +1297,10 @@ class EscapeMap {
    * Computes an escape color triple.
    * @param {number} x
    * @param {number} y
+   * @param {Array.<number>} p extra parameters, user controllable through UI elements such as sliders.
    */
-  escapeColor(x, y) {
-    let escapeSteps = this.iterateMap(x, y);
+  escapeColor(x, y, p) {
+    let escapeSteps = this.iterateMap(x, y, p);
     return this.mapEscapeCountToColor(escapeSteps);
   }
 
@@ -1296,7 +1321,7 @@ class EscapeMap {
       for (let i = 0; i < canvas.height; i++) {
         let coordinates = canvas.coordsScreenToMathScreen([j, i]);
         coordinates = canvas.coordinatesMathScreenToMath(coordinates);
-        let escapeColor = this.escapeColor(coordinates[0], coordinates[1]);
+        let escapeColor = this.escapeColor(coordinates[0], coordinates[1], canvas.parameterValues);
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColor[0];
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColor[1];
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 2] = escapeColor[2];
@@ -1327,8 +1352,8 @@ class EscapeMap {
     let yPrevious = coordinates[1];
     let points = [canvas.coordinatesMathToScreen([xPrevious, yPrevious])];
     for (let i = 0; i < 32; i++) {
-      let xNext = this.functionX(xPrevious, yPrevious);
-      let yNext = this.functionY(xPrevious, yPrevious);
+      let xNext = this.functionX(xPrevious, yPrevious, canvas.parameterValues);
+      let yNext = this.functionY(xPrevious, yPrevious, canvas.parameterValues);
       xPrevious = xNext;
       yPrevious = yNext;
       let coordinates = canvas.coordinatesMathToScreen([xPrevious, yPrevious]);
@@ -1741,7 +1766,7 @@ class CanvasTwoD {
   /**
    * Draws points on the canvas.
    *
-   * @param {!Array.<!Array.<number>>} inputPoints the points to plot.
+   * @param {Array.<Array.<number|function(Array.<number>):number>>} inputPoints the points to plot.
    * @param {string} inputColor input color.
    */
   drawPoints(inputPoints, inputColor) {

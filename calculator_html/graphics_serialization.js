@@ -276,9 +276,15 @@ class GraphicsSerialization {
         ];
         canvas.drawCurve(
           coordinateFunctionArray,
-          this.interpretStringToNumber(variableRanges[0], variableAndParameterNames, parameterValues),
-          this.interpretStringToNumber(variableRanges[1], variableAndParameterNames, parameterValues),
-          this.interpretStringToNumber(numberOfSegments, variableAndParameterNames, parameterValues),
+          this.interpretStringToNumber(
+            variableRanges[0], variableAndParameterNames, parameterValues,
+          ),
+          this.interpretStringToNumber(
+            variableRanges[1], variableAndParameterNames, parameterValues,
+          ),
+          this.interpretStringToNumber(
+            numberOfSegments, variableAndParameterNames, parameterValues,
+          ),
           color,
           lineWidth,
         );
@@ -308,7 +314,12 @@ class GraphicsSerialization {
           this.functionFromBodyAndArguments(
             coordinateFunctions[1], variableAndParameterNames,
           );
-        canvas.drawEscapeMap(functionX, functionY, plot[this.labels.parametersOnTheGraph]);
+        canvas.drawEscapeMap(
+          functionX,
+          functionY,
+          plot[this.labels.parametersOnTheGraph],
+          false
+        );
         return;
       default:
         throw `Unknown plot type: ${plotType}.`;
@@ -435,7 +446,13 @@ class GraphicsSerialization {
   ) {
     let result = [];
     for (let i = 0; i < input.length; i++) {
-      result.push(this.interpretListStringsAsNumbers(input[i], inputArguments, parameterValues));
+      result.push(
+        this.interpretListStringsAsNumbers(
+          input[i],
+          inputArguments,
+          parameterValues,
+        )
+      );
     }
     return result;
   }
@@ -477,7 +494,10 @@ class GraphicsSerialization {
     /** @type{string[]} */
     let result = [];
     let parametersOnTheGraphLetter = input[this.labels.parametersOnTheGraphLetter];
-    if (parametersOnTheGraphLetter !== "" && parametersOnTheGraphLetter !== undefined) {
+    if (
+      parametersOnTheGraphLetter !== "" &&
+      parametersOnTheGraphLetter !== undefined
+    ) {
       result.push(parametersOnTheGraphLetter);
     }
     return result;

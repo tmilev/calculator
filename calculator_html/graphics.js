@@ -1132,19 +1132,98 @@ class TextPlotTwoD {
   }
 }
 
+class SelectablePointTwoD{
+  /**
+   * @param {number} x coordinate.
+   * @param {number} y coordinate.
+   * @param {string} color
+   */
+  constructor(inputX, inputY, color) { 
+    this.xComputer = inputX;
+    this.yComputer = inputY;
+    this.x = 0;
+    this.y = 0;
+    this.color = colorToRGB(color);
+  }
+
+  /** 
+   * Required to satisfy interface.
+   * @param {!Array.<!Array.<number>>} unused output bounding box.
+   * @param {CanvasTwoD} canvas  owning the plot
+   */
+  accountBoundingBox(box, canvas) {
+    accountBoundingBox([this.x, this.y], box);
+  }
+  /**
+   * Same as draw but required to satisfy interface.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} unused unused.
+   */
+  drawNoFinish(canvas, unused) {
+    this.draw(canvas);
+  }
+
+  /**
+   * Draws the point
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   */
+  draw(canvas) {
+    let surface = canvas.surface;
+    surface.beginPath();
+    surface.strokeStyle = colorRGBToString(this.color);
+    surface.fillStyle = colorRGBToString(this.color);
+    let coordinates = canvas.coordinatesMathToScreen([this.x, this.y]);
+    surface.arc(coordinates[0], coordinates[1], 4, 0, Math.PI * 2);
+    surface.fill();  
+  }
+}
+
 class EscapeMap { 
   /**
+   * Plots an escape map. 
+   * In Julia set mode, the x,y-coordinates of the canvas are used 
+   * to give a starting point. The selectable point(s) govern the parameters
+   * of the map, if any.
+   * 
+   * In Mandelbrot mode, the x,y-coordinates of the canvas are used to 
+   * initialize the first two parameters of the map. 
+   * The selectable point is used to give the starting point of the escape map.
+   * The use of the Mandelbrot mode requires exactly one parameter on the graph.
+   * 
    * @param {!function(number, number):number} functionX.
    * @param {!function(number, number):number} functionY.
-   * @param {Array.<number>} parametersOnTheGraphValues parameters on the graph.
+   * @param {Array.<number>} parametersOnTheGraph  parameters on the graph 
+   * that will be made into a clickable points that can be dragged around
+   * @param {boolean} mandelbrotMode whether to draw in Mandelbrot mode 
+   * 
    */
-  constructor(functionX, functionY, parametersOnTheGraphValues) {
+  constructor(functionX, functionY, parametersOnTheGraph, mandelbrotMode) {
     this.functionX = functionX;
     this.functionY = functionY; 
     this.lastImageData = null;
     this.ignoreNextComputation = true;
     this.boundingBoxEntries = [];
-    this.parametersOnTheGraphValues = parametersOnTheGraphValues.slice();
+    /**@type {Array.<number>} */
+    this.parametersOnTheGraph = parametersOnTheGraph.slice();
+    /** Whether to draw the Mandelbrot set or the Julia set.
+     * The Julia set is the escape map of the (x,y) coordinate with parameters 
+     * p_1, p_2, ...
+     * The Mandelbrot set is the escape map of (0,0) 
+     * with the set starting point 
+     * where the x,y-coordinates give the value of the parameters
+     */
+    this.mandelbrotMode = mandelbrotMode;
+    if (this.parametersOnTheGraph.length !== 2) {
+      this.mandelbrotMode = false;
+    }
+    /** 
+     * @type{Array.<number>} indicesOfSelectablePoints indices int the 
+     * drawObject of selectable points
+     * that govern parameters of the graph.
+     */
+    this.indicesOfSelectablePoints = [];
     // The i^th position in this array gives the color
     // of a pixel that takes 33 - i steps to escape to infinity.
     // In other words, points with colors appearing earlier
@@ -1187,6 +1266,18 @@ class EscapeMap {
       [255, 255, 255],
     ];
   }
+  /** 
+    * @param { CanvasTwoD } canvas  owning the plot
+    */
+  updateParameters(canvas) { 
+    for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
+      let index = this.indicesOfSelectablePoints[i];
+      /** @type{SelectablePointTwoD} */
+      let point = canvas.drawObjects[index];
+      this.parametersOnTheGraph[2 * i] = point.x;
+      this.parametersOnTheGraph[2 * i + 1] = point.y;
+    }
+  }
 
   /** 
    * Required to satisfy interface.
@@ -1194,6 +1285,7 @@ class EscapeMap {
    * @param {CanvasTwoD} canvas  owning the plot
    */
   accountBoundingBox(box, canvas) {
+    this.updateParameters(canvas);
     if (this.boundingBoxEntries.length == 0) {
       this.computeBoundingBox(canvas);
     }
@@ -1226,7 +1318,7 @@ class EscapeMap {
       let y = 1.1 * Math.sin(angle);
       this.boundingBoxEntries.push(
         this.scaleToFindEscapingPoints(
-          x, y, canvas.parameterValues, this.parametersOnTheGraphValues
+          x, y, canvas.parameterValues, this.parametersOnTheGraph,
         )
       );
     }
@@ -1307,6 +1399,8 @@ class EscapeMap {
    * @param {number} y
    * @param {Array.<number>} p extra parameters, user controllable through UI elements such as sliders.
    * @param {Array.<number>} q extra parameters, user controllable through the canvas.
+   * 
+   * @return {Array.<number>}
    */
   escapeColor(x, y, p, q) {
     let escapeSteps = this.iterateMap(x, y, p, q);
@@ -1319,6 +1413,7 @@ class EscapeMap {
    * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
+    this.updateParameters(canvas);
     let surface = canvas.surface;
     if (this.ignoreNextComputation > 0 && this.lastImageData !== null) {
       this.ignoreNextComputation = false;
@@ -1326,16 +1421,26 @@ class EscapeMap {
       return;
     }
     this.lastImageData = surface.createImageData(canvas.width, canvas.height);
-    let p = canvas.parameterValues;
-    let q = this.parametersOnTheGraphValues;
+    let p = canvas.parameterValues.slice();
+    let q = this.parametersOnTheGraph.slice();
+    let x = 0;
+    let y = 0;
     for (let j = 0; j < canvas.width; j++) {
       for (let i = 0; i < canvas.height; i++) {
         let coordinates = canvas.coordsScreenToMathScreen([j, i]);
         coordinates = canvas.coordinatesMathScreenToMath(coordinates);
-        let escapeColor = this.escapeColor(coordinates[0], coordinates[1], p, q);
-        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColor[0];
-        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColor[1];
-        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 2] = escapeColor[2];
+        x = coordinates[0];
+        y = coordinates[1];
+        if (this.mandelbrotMode) {
+          q[0] = x;
+          q[1] = y;
+          x = this.parametersOnTheGraph[0];
+          y = this.parametersOnTheGraph[1]; 
+        } 
+        let escapeColorTriple = this.escapeColor(x, y, p, q);
+        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColorTriple[0];
+        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColorTriple[1];
+        this.lastImageData.data[i * canvas.width * 4 + j * 4 + 2] = escapeColorTriple[2];
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 3] = 255;
       }
     }
@@ -1351,6 +1456,7 @@ class EscapeMap {
    * @param {number} y
    */
   mouseMove(canvas, x, y) {
+    this.updateParameters(canvas);
     if (this.lastImageData === null) {
       return;
     }
@@ -1361,9 +1467,16 @@ class EscapeMap {
     coordinates = canvas.coordinatesMathScreenToMath(coordinates);
     let xPrevious = coordinates[0];
     let yPrevious = coordinates[1];
+    let p = canvas.parameterValues.slice();
+    let q = this.parametersOnTheGraph.slice();
+    if (this.mandelbrotMode) {
+      q[0] = xPrevious;
+      q[1] = yPrevious;
+      xPrevious = this.parametersOnTheGraph[0];
+      yPrevious = this.parametersOnTheGraph[1];
+    }
+
     let points = [canvas.coordinatesMathToScreen([xPrevious, yPrevious])];
-    let p = canvas.parameterValues;
-    let q = this.parametersOnTheGraphValues;
     for (let i = 0; i < 32; i++) {
       let xNext = this.functionX(xPrevious, yPrevious, p, q);
       let yNext = this.functionY(xPrevious, yPrevious, p, q);
@@ -1697,6 +1810,7 @@ class CanvasTwoD {
      *   drawNoFinish: function(!CanvasTwoD, boolean),
      *   accountBoundingBox:function(!Array.<!Array.<number>>),
      *   type: string
+     * }}
      */
     this.drawObjects = [];
 
@@ -1740,7 +1854,15 @@ class CanvasTwoD {
     this.textPatchInfo = '';
     this.textErrors = '';
     this.textPerformance = '';
+    /** @type {string|number} */
     this.selectedElement = '';
+    /** 
+     * @type {Array.<number>} The indices in the drawObjects array 
+     * that record the locations of the selectable points.
+     * The selectable points are points on the graph that can be moved
+     * with the mouse. 
+     */
+    this.indicesOfSelectablePoints = [];
     this.redrawStart = 0;
     this.redrawFinish = 0;
     this.redrawTime = 0;
@@ -1918,11 +2040,25 @@ class CanvasTwoD {
    * map we are iterating
    * @param{function(number, number):number} functionY the y-coordinate of the 
    * map we are iterating
-   * @param{Array.<number>} parameterValues
+   * @param{Array.<number>} parametersOnTheGraph parameters on the graph 
+   * that will be made into a clickable points that can be dragged around
    */
-  drawEscapeMap(functionX, functionY, parameterValues) {
-    let newPlot = new EscapeMap(functionX, functionY, parameterValues);
-    this.drawObjects.push(newPlot);
+  drawEscapeMap(
+    functionX, functionY, parametersOnTheGraph, mandelbrotMode,
+  ) {
+    if (parametersOnTheGraph === undefined) {
+      throw "Missing parameters on the graph";
+    }
+    let newPlot = new EscapeMap(functionX, functionY, parametersOnTheGraph, mandelbrotMode);
+    this.drawObjects.push(newPlot);    
+    for (let i = 0; i + 1 < parametersOnTheGraph.length; i += 2) {
+      let selectablePoint = new SelectablePointTwoD(
+        parametersOnTheGraph[i], parametersOnTheGraph[i + 1], "red",
+      );
+      this.indicesOfSelectablePoints.push(this.drawObjects.length);
+      newPlot.indicesOfSelectablePoints.push(this.drawObjects.length);
+      this.drawObjects.push(selectablePoint);
+    }
     this.additionalMouseMoveListeners.push((x,y) => {
       newPlot.mouseMove(this, x, y);
     });
@@ -2285,17 +2421,34 @@ class CanvasTwoD {
    * @param {number} screenX absolute screen x coordinates.
    * @param {number} screenY absolute screen y coordinates.
    */
-  mouseMoveDefault(screenX, screenY){
+  mouseMoveDefault(screenX, screenY) {
     if (this.selectedElement === '') {
       return;
     }
     this.mousePosition =
-        this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+      this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+    if (this.selectedElement === 'origin') {
+      this.mouseMovePan();
+    }
+    if (typeof this.selectedElement === 'number') {
+      this.mouseMoveSelectedPoint();
+    }
+  }
+
+  mouseMovePan() {
     if (this.selectedElement === 'origin') {
       this.panAfterCursor();
-    }
+    } 
     this.redrawFinish = new Date().getTime();
     this.redrawTime = this.redrawFinish - this.redrawStart;
+  }
+
+  mouseMoveSelectedPoint() {
+    /** @type{SelectablePointTwoD} */
+    let point = this.drawObjects[this.selectedElement];
+    point.x = this.mousePosition[0];
+    point.y = this.mousePosition[1];
+    this.redraw();
   }
 
   /**
@@ -2325,7 +2478,7 @@ class CanvasTwoD {
         ((leftXY[0] - rightXY[0]) * (leftXY[0] - rightXY[0]) +
          (leftXY[1] - rightXY[1]) * (leftXY[1] - rightXY[1])) *
         this.scale;
-    return squaredDistance < 1000;
+    return squaredDistance < 1;
   }
 
   /**
@@ -2341,6 +2494,18 @@ class CanvasTwoD {
         this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     this.mousePosition = [];
     this.selectedElement = 'origin';
+    for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
+      let index = this.indicesOfSelectablePoints[i];
+      /** @type{SelectablePointTwoD} */
+      let currentPoint = this.drawObjects[index];
+      if (this.pointsWithinClickTolerance(
+        [currentPoint.x, currentPoint.y], this.clickedPosition,
+      )) {
+        this.selectedElement = index;
+        break;
+      }
+    }
+    
     if (this.flagShowPerformance) {
       this.logStatus();
     }

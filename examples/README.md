@@ -4634,13 +4634,23 @@ ConvertPolynomialModularToPolynomialRational B
 ```
 Converts polynomial  
 
-*PlotEscapeMap* [PlotEscapeMap] {CalculatorFunctionsComplexDynamics::plotEscapeMap}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%3dMakeInputBox%28name%3da%2cvalue%3d4%29%3b%5cnPlotEscapeMap%282%2fa%20%28z%5e2%2bz%2b1%2fz%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PlotMandelbrotSet* [PlotMandelbrotSet] {CalculatorFunctionsComplexDynamics::plotMandelbrotSet}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotMandelbrotSet%28z%5e2%2bC%2c%20C%3d0%29%3b%5cnPlotMandelbrotSet%28z%5e3%2bC%2c%20C%3d0%29%3b%5cnPlotMandelbrotSet%28%20z%5e2%2bz%2bC%2c%20C%3d0%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-a=MakeInputBox(name=a,value=4);
-PlotEscapeMap(2/a (z^2+z+1/z));
+PlotMandelbrotSet(z^2+C, C=0);
+PlotMandelbrotSet(z^3+C, C=0);
+PlotMandelbrotSet( z^2+z+C, C=0);
+
 ```
-Plots the escape map (Julia set) of the complex dynamics of the function.
+Plots the Mandelbrot set of a complex function. The first argument is the map we are iterating. The second argument is which of the letters of your function is the parameter that is governed by the (x,y) position of the picture, together with the initial value to set for it. For classical Mandelbrot set, the first argument should be z^2+C. The second argument should be C=0. The map works as follows. Start with a given value of the complex parameter C. The value of the parameter is given by the x,y-coordinate of the plotting surface.Now, iterate the map: f(...f(C)). If the point escapes to infinity, color the point with a colorthat matches the escape speed. Else, color the point black. You are not limited to the function z^2+C only. Feel free to try other functions as well.
+
+*PlotJuliaSet* [PlotJuliaSet] {CalculatorFunctionsComplexDynamics::plotJuliaSet}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotJuliaSet%28%20z%5e2%2b0.7i%2bC%2c%20C%3d0%29%3b%5cnPlotJuliaSet%281%2f%28b%29%28z%5e2%2bz%2b1%2fz%2b1%2fz%5e2%29%2c%20b%3d3%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+PlotJuliaSet( z^2+0.7i+C, C=0);
+PlotJuliaSet(1/(b)(z^2+z+1/z+1/z^2), b=3);
+```
+Plots the Julia set of a complex function. The first argument is the map we are iterating. The remaining parameters are complex parameters of the formula. The complex parameters can be adjusted dynamically using the drag and drop.To compute the plot: we start with the x,y-coordinate of the plotting surface and the number x+iy. Now, iterate the map: f(...f(x+iy)). If the point escapes to infinity, color the point with a colorthat matches the escape speed. Else, color the point black. You are not limited to the function z^2+C only. Feel free to try other functions as well.
 
 *VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3bVectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

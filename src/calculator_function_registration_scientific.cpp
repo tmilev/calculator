@@ -822,15 +822,54 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
   this->addOperationHandler(
-    "PlotEscapeMap",
-    CalculatorFunctionsComplexDynamics::plotEscapeMap,
+    "PlotMandelbrotSet",
+    CalculatorFunctionsComplexDynamics::plotMandelbrotSet,
     "",
-    "Plots the escape map (Julia set) of "
-    "the complex dynamics of the function.",
-    "a=MakeInputBox(name=a,value=10);\n"
-    "PlotEscapeMap(2/a (z^2+z+1+1/z+1/z^2+C), C=0);",
-    "CalculatorFunctionsComplexDynamics::plotEscapeMap",
-    "PlotEscapeMap",
+    "Plots the Mandelbrot set of a complex function. "
+    "The first argument is the map we are iterating. "
+    "The second argument is which of the letters of your function is the "
+    "parameter that is governed by the (x,y) position of the picture, "
+    "together with the initial value to set for it. "
+    "For classical Mandelbrot set, the first argument should be z^2+C. "
+    "The second argument should be C=0. "
+    "The map works as follows. "
+    "Start with a given value of the complex parameter C. "
+    "The value of the parameter is given by the x,y-coordinate of "
+    "the plotting surface."
+    "Now, iterate the map: f(...f(C)). "
+    "If the point escapes to infinity, color the point with a color"
+    "that matches the escape speed. "
+    "Else, color the point black. "
+    "You are not limited to the function z^2+C only. "
+    "Feel free to try other functions as well.",
+    "PlotMandelbrotSet(z^2+C, C=0);\n"
+    "PlotMandelbrotSet(z^3+C, C=0);\n"
+    "PlotMandelbrotSet( z^2+z+C, C=0);\n",
+    "CalculatorFunctionsComplexDynamics::plotMandelbrotSet",
+    "PlotMandelbrotSet",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PlotJuliaSet",
+    CalculatorFunctionsComplexDynamics::plotJuliaSet,
+    "",
+    "Plots the Julia set of a complex function. "
+    "The first argument is the map we are iterating. "
+    "The remaining parameters are complex parameters of the formula. "
+    "The complex parameters can be adjusted dynamically using the "
+    "drag and drop."
+    "To compute the plot: we start with the x,y-coordinate of "
+    "the plotting surface and the number x+iy. "
+    "Now, iterate the map: f(...f(x+iy)). "
+    "If the point escapes to infinity, color the point with a color"
+    "that matches the escape speed. "
+    "Else, color the point black. "
+    "You are not limited to the function z^2+C only. "
+    "Feel free to try other functions as well.",
+    "PlotJuliaSet( z^2+0.7i+C, C=0);\n"
+    "PlotJuliaSet(1/(b)(z^2+z+1/z+1/z^2), b=3);",
+    "CalculatorFunctionsComplexDynamics::plotJuliaSet",
+    "PlotJuliaSet",
     innerStandard
   );
 }

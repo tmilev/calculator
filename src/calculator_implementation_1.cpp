@@ -38,6 +38,7 @@ std::string PlotObject::Labels::defaultLength = "defaultLength";
 std::string PlotObject::Labels::plotType = "plotType";
 std::string PlotObject::Labels::body = "body";
 std::string PlotObject::Labels::text = "text";
+std::string PlotObject::Labels::mandelbrotMode = "mandelbrotMode";
 std::string PlotObject::Labels::arguments = "arguments";
 std::string PlotObject::Labels::parameters = "parameters";
 std::string PlotObject::Labels::parameterLetter = "parameterLetter";
@@ -110,6 +111,14 @@ bool DynkinSimpleType::hasPrecomputedSubalgebras() const {
 // - that would be an evil site prompting me for password.
 // So, only in this very special circumstance,
 // we can only rely on a hard-coded web address.
+// TODO(tmilev): move the address initialization into
+// the configuration file. I left the bool fixThis variable
+// so I can get a compiler warning to remind me of the todo.
+bool unused() {
+  bool fixThis;
+  return fixThis;
+}
+
 std::string GlobalVariables::hopefullyPermanentWebAdress =
 "https://calculator-algebra.org";
 std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable =
@@ -548,7 +557,8 @@ void PlotObject::makeEscapeMap(
   const List<std::string>& parametersInPlayJS,
   const MapList<std::string, double, HashFunctions::hashFunction>&
   inputParametersOnTheGraph,
-  const std::string& inputParametersOnTheGraphLetter
+  const std::string& inputParametersOnTheGraphLetter,
+  bool mandelbrotMode
 ) {
   this->coordinateFunctionsJS.addOnTop(javascriptX);
   this->coordinateFunctionsJS.addOnTop(javascriptY);
@@ -561,6 +571,9 @@ void PlotObject::makeEscapeMap(
   this->parametersOnTheGraph = inputParametersOnTheGraph;
   this->parameterLetter = inputParameterLetter;
   this->parametersOnTheGraphLetter = inputParametersOnTheGraphLetter;
+  this->extraFlags.setKeyValue(
+    PlotObject::Labels::mandelbrotMode, mandelbrotMode
+  );
 }
 
 void Plot::drawCoordinateAxes() {
@@ -623,7 +636,8 @@ void Plot::drawEscapeMap(
   List<std::string>& parametersInPlayJS,
   const MapList<std::string, double, HashFunctions::hashFunction>&
   parametersOnTheGraph,
-  const std::string& parametersOnTheGraphLetter
+  const std::string& parametersOnTheGraphLetter,
+  bool mandelbrotMode
 ) {
   PlotObject plot;
   plot.makeEscapeMap(
@@ -636,7 +650,8 @@ void Plot::drawEscapeMap(
     parameterLetter,
     parametersInPlayJS,
     parametersOnTheGraph,
-    parametersOnTheGraphLetter
+    parametersOnTheGraphLetter,
+    mandelbrotMode
   );
   this->addPlotOnTop(plot);
 }
@@ -835,6 +850,8 @@ JSData PlotObject::toJSONEscapeMap() {
   STACK_TRACE("PlotObject::toJSONEscapeMap");
   JSData result;
   this->writeCoordinateFunctions(result);
+  result[PlotObject::Labels::mandelbrotMode] =
+  this->extraFlags.getValueNoFail(PlotObject::Labels::mandelbrotMode);
   return result;
 }
 

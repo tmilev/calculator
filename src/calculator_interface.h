@@ -1318,6 +1318,7 @@ public:
     static std::string left;
     static std::string right;
     static std::string numberOfSegments;
+    static std::string mandelbrotMode;
     static std::string color;
     static std::string colorFront;
     static std::string colorBack;
@@ -1414,6 +1415,7 @@ public:
   std::string rightPtJS;
   std::string paramLowJS;
   std::string paramHighJS;
+  MapList<std::string, bool, HashFunctions::hashFunction> extraFlags;
   // //////////////
   JSData toJSONSurfaceImmersion();
   // Plot a parametric curve. Works both in 2d and 3d.
@@ -1467,7 +1469,8 @@ public:
     const List<std::string>& parametersInPlayJS,
     const MapList<std::string, double, HashFunctions::hashFunction>&
     inputParametersOnTheGraph,
-    const std::string& inputParametersOnTheGraphLetter
+    const std::string& inputParametersOnTheGraphLetter,
+    bool mandelbrotMode
   );
   void makeRectangle(
     double xLowLeft,
@@ -1569,7 +1572,8 @@ public:
     List<std::string>& parametersInPlayJS,
     const MapList<std::string, double, HashFunctions::hashFunction>&
     parametersOnTheGraph,
-    const std::string& parametersOnTheGraphLetter
+    const std::string& parametersOnTheGraphLetter,
+    bool mandelbrotMode
   );
   void drawCoordinateAxes();
   void drawGrid();

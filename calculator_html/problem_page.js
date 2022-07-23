@@ -769,9 +769,17 @@ class Problem {
       answer.writeToElement(answerElement, this.outputElement);
     }
     initializeButtons.initializeAccordionButtons();
-    let elementWithScripts = dynamicJavascript.bootstrapAllScripts(this.outputElement);
+    let elementWithScripts = null;
+    try {
+      elementWithScripts = dynamicJavascript.bootstrapAllScripts(this.outputElement);
+    } catch (e) {
+      console.log(e);
+    }
     dynamicJavascript.typeset(
       this.outputElement, {}, (editor, element) => {
+        if (elementWithScripts === null) {
+          return;
+        }
         elementWithScripts.bootstrapFormInputs(editor, element);
       });
   }

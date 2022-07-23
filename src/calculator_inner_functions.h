@@ -610,6 +610,15 @@ public:
 class CalculatorFunctionsComplexDynamics {
 public:
   static bool plotEscapeMap(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool mandelbrotMode
+  );
+  static bool plotJuliaSet(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool plotMandelbrotSet(
     Calculator& calculator, const Expression& input, Expression& output
   );
 };

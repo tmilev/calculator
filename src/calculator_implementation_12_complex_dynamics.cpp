@@ -76,8 +76,31 @@ public:
 std::string RealAndImaginaryPartExtractor::realPartSuffix = "realPart";
 std::string RealAndImaginaryPartExtractor::imaginaryPartSuffix =
 "imaginaryPart";
-bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
+bool CalculatorFunctionsComplexDynamics::plotMandelbrotSet(
   Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsComplexDynamics::plotMandelbrotSet");
+  return
+  CalculatorFunctionsComplexDynamics::plotEscapeMap(
+    calculator, input, output, true
+  );
+}
+
+bool CalculatorFunctionsComplexDynamics::plotJuliaSet(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsComplexDynamics::plotJuliaSet");
+  return
+  CalculatorFunctionsComplexDynamics::plotEscapeMap(
+    calculator, input, output, false
+  );
+}
+
+bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool mandelbrotMode
 ) {
   STACK_TRACE("CalculatorFunctionsComplexDynamics::plotEscapeMap");
   if (input.size() < 2) {
@@ -121,7 +144,8 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
     extractorJavascript.parameterLetter,
     extractor.parametersJS,
     extractor.getParametersOnTheGraph(),
-    extractorJavascript.parametersOnTheGraphLetter
+    extractorJavascript.parametersOnTheGraphLetter,
+    mandelbrotMode
   );
   escapeMap.drawGrid();
   std::stringstream out;
@@ -311,7 +335,7 @@ bool RealAndImaginaryPartExtractor::extractRecursive(
     return true;
   }
   if (input == "i") {
-    outputRealPart = input;
+    outputRealPart = this->owner->expressionZero();
     outputImaginaryPart = this->owner->expressionOne();
     return true;
   }

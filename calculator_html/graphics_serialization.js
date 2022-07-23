@@ -24,6 +24,7 @@ class GraphicsSerialization {
       parameterLetter: "parameterLetter",
       parametersOnTheGraphLetter: "parametersOnTheGraphLetter",
       parametersOnTheGraph: "parametersOnTheGraph",
+      mandelbrotMode: "mandelbrotMode",
       points: "points",
       onePoint: "point",
       text: "text",
@@ -222,6 +223,10 @@ class GraphicsSerialization {
     let variableRanges = plot[this.labels.variableRanges];
     let manifoldImmersion = plot[this.labels.manifoldImmersion];
     let coordinateFunctions = plot[this.labels.coordinateFunctions];
+    let parametersOnTheGraph = plot[this.labels.parametersOnTheGraph];
+    if (parametersOnTheGraph === undefined) {
+      parametersOnTheGraph = [];
+    }
     switch (plotType) {
       case "plotFunction":
         let functionConstructed = this.functionFromObject(functionObject, sliders);
@@ -317,8 +322,8 @@ class GraphicsSerialization {
         canvas.drawEscapeMap(
           functionX,
           functionY,
-          plot[this.labels.parametersOnTheGraph],
-          false
+          parametersOnTheGraph,
+          plot[this.labels.mandelbrotMode],
         );
         return;
       default:

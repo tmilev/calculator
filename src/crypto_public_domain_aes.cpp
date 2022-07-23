@@ -47,7 +47,7 @@ public:
   bool flagUseCBC;
   bool flagUseECB;
   bool flagUseCTR;
-  int numBits;
+  int numberOfBits;
   // NumBits can be 256, 192 or 128.
   int keyExpSize;
   int keyLength;
@@ -122,9 +122,11 @@ public:
 };
 
 void AESContext::setNumberOfBits(int inputNumBits) {
-  this->numBits = inputNumBits;
+  this->numberOfBits = inputNumBits;
   if (
-    this->numBits != 256 && this->numBits != 192 && this->numBits != 128
+    this->numberOfBits != 256 &&
+    this->numberOfBits != 192 &&
+    this->numberOfBits != 128
   ) {
     global.fatal
     << "Bad number of bits: "
@@ -132,7 +134,7 @@ void AESContext::setNumberOfBits(int inputNumBits) {
     << " for AES cipher. Allowed inputs: 256, 192, 128. "
     << global.fatal;
   }
-  if (this->numBits == 256) {
+  if (this->numberOfBits == 256) {
     this->keyExpSize = 240;
     this->keyLength = 32;
     this->Nk = 8;
@@ -140,13 +142,13 @@ void AESContext::setNumberOfBits(int inputNumBits) {
     this->Nr = 14;
     // The number of rounds in AES cipher.
   }
-  if (this->numBits == 192) {
+  if (this->numberOfBits == 192) {
     this->keyExpSize = 208;
     this->keyLength = 24;
     this->Nk = 6;
     this->Nr = 12;
   }
-  if (this->numBits == 128) {
+  if (this->numberOfBits == 128) {
     this->keyExpSize = 176;
     this->keyLength = 16;
     this->Nk = 4;
@@ -756,7 +758,7 @@ void AESContext::keyExpansion(uint8_t* RoundKey, const uint8_t* Key) {
       tempa[3] = getSBoxValue(tempa[3]);
       tempa[0] = tempa[0] ^ rCon[i / Nk];
     }
-    if (this->numBits == 256) {
+    if (this->numberOfBits == 256) {
       if (i % Nk == 4) {
         tempa[0] = getSBoxValue(tempa[0]);
         tempa[1] = getSBoxValue(tempa[1]);

@@ -1139,10 +1139,8 @@ class SelectablePointTwoD{
    * @param {string} color
    */
   constructor(inputX, inputY, color) { 
-    this.xComputer = inputX;
-    this.yComputer = inputY;
-    this.x = 0;
-    this.y = 0;
+    this.x = inputX;
+    this.y = inputY;
     this.color = colorToRGB(color);
   }
 
@@ -1300,10 +1298,19 @@ class EscapeMap {
       if (this.iterateMap(x, y, p, q) > 0) {
         break;
       }
-      x *= 1.5;
-      y *= 1.5;
+      if (this.mandelbrotMode) {
+        q[0] *= 1.5;
+        q[1] *= 1.5;
+      } else {
+        x *= 1.5;
+        y *= 1.5;
+      }
     }
-    return [x, y];
+    if (this.mandelbrotMode) {
+      return [q[0], q[1]];
+    } else {
+      return [x, y];
+    }
   }
   
   /** 
@@ -1312,14 +1319,22 @@ class EscapeMap {
    * @param {CanvasTwoD} canvas owning the plot
    */
   computeBoundingBox(canvas) {
+    this.updateParameters(canvas);
+    let p = canvas.parameterValues.slice();
+    let q = this.parametersOnTheGraph.slice();
     for (let i = 0; i < 16; i++) {
-      let angle = 2 * Math.PI / (i + 1) + 0.1;
+      let angle = 1 / 8 * Math.PI * (i + 1);
       let x = 1.1 * Math.cos(angle);
       let y = 1.1 * Math.sin(angle);
+      if (this.mandelbrotMode) {
+        q[0] = x;
+        q[1] = y;
+        x = this.parametersOnTheGraph[0];
+        y = this.parametersOnTheGraph[1];
+      } 
+      let point = this.scaleToFindEscapingPoints(x, y, p, q);
       this.boundingBoxEntries.push(
-        this.scaleToFindEscapingPoints(
-          x, y, canvas.parameterValues, this.parametersOnTheGraph,
-        )
+        point,   
       );
     }
   }

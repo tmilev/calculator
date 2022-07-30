@@ -104,7 +104,6 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   << "SSL is available but CERTIFICATE files are missing."
   << Logger::endL;
   global
-  << Logger::green
   << "Let me try to create those files for you."
   << Logger::endL;
   std::stringstream command;
@@ -148,11 +147,15 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   << "calculator directory. "
   << "Please enter the requested information; you can fill "
   << "it in with bogus data if you so desire. "
+  << Logger::purple
+  << "Please use at least a single character for the name, else "
+  << "the certificate won't generated. "
+  << Logger::green
   << "The data you fill in will be visible in the `Security` "
   << "tab your web browser. Leaving the fields totally empty may "
   << "case security warning in your browser. "
   << Logger::endL;
-  global << Logger::green << command.str() << Logger::endL;
+  global << Logger::yellow << command.str() << Logger::endL;
   global.externalCommandNoOutput(command.str(), true);
   return true;
 }

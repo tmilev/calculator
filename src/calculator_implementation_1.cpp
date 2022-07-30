@@ -121,16 +121,9 @@ bool unused() {
 
 std::string GlobalVariables::hopefullyPermanentWebAdress =
 "https://calculator-algebra.org";
-std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable =
-"http://calculator-algebra.org/cgi-bin/calculator";
 std::string GlobalVariables::
 hopefullyPermanent_HTTPS_WebAdressOfServerExecutable =
 "https://calculator-algebra.org/cgi-bin/calculator";
-std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
-"http://calculator-algebra.org/";
-std::string GlobalVariables::
-hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
-"https://calculator-algebra.org/";
 std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   const std::string& prefixFolder,
   const DynkinType& dynkinType,

@@ -379,10 +379,7 @@ public:
   JSData timeStats;
   List<List<std::string> > databaseModifiableFields;
   static std::string hopefullyPermanentWebAdress;
-  static std::string hopefullyPermanentWebAdressOfServerExecutable;
   static std::string hopefullyPermanent_HTTPS_WebAdressOfServerExecutable;
-  static std::string hopefullyPermanent_HTTPS_WebAdressJavascriptFolder;
-  static std::string hopefullyPermanentWebAdressOfServerOutputFolder;
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
   std::string relativePhysicalNameCrashReport;

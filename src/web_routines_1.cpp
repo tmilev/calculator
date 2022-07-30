@@ -1234,10 +1234,9 @@ bool WebAPIResponse::processForgotLogin() {
   WebClient webClient;
   out
   << "<br><b> "
-  << "Please excuse our verbose technical messages.</b>"
-  << "<br><b>We are still testing our system; "
-  << "we will remove the technical garbage as soon as we are done. "
-  << "</b><br>\n";
+  << "Please excuse our verbose technical messages: "
+  << "at least we tell you what we are doing!</b>"
+  << "<br>\n";
   if (!webClient.verifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
     return global.response.writeResponse(result, false);

@@ -111,12 +111,16 @@ endif
 ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
   sslLocation=found
 endif
+ifneq ($(wildcard /lib/x86_64-linux-gnu/libssl3.so),)#location of ssl in Debian GNU/Linux rodete
+  sslLocation=found
+endif
+
 ifneq ($(sslLocation),)
   CFLAGS+=-DMACRO_use_open_ssl 
   LIBRARIES_INCLUDED_AT_THE_END+=-lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
 $(info [1;32mOpenssl found.[0m) 
 else
-$(info [1;31mNOT FOUND: Openssl.[0m I will attempt to install it once the calculator is compiled.) 
+$(info [1;31mNOT FOUND: Openssl.[0m Login+database won't run.) 
 endif
 endif
 ########################

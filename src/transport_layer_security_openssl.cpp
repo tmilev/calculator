@@ -7,6 +7,9 @@
 
 #ifdef MACRO_use_open_ssl
 
+// To install openssl:
+// 1. Debian rodete: 
+// sudo apt-get install libssl-dev
 #include <openssl/rsa.h>
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
@@ -136,7 +139,18 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
   }
   global
-  << "About to generate key files with the following command. "
+  << Logger::green
+  << "I am generating a local ssl certificate so you "
+  << "can run your calculator over https. "
+  << "The certificate will only be used by the calculator itself. "
+  << "The certificate and its prive keys are located in the "
+  << "certificates/ subfolder of your "
+  << "calculator directory. "
+  << "Please enter the requested information; you can fill "
+  << "it in with bogus data if you so desire. "
+  << "The data you fill in will be visible in the `Security` "
+  << "tab your web browser. Leaving the fields totally empty may "
+  << "case security warning in your browser. "
   << Logger::endL;
   global << Logger::green << command.str() << Logger::endL;
   global.externalCommandNoOutput(command.str(), true);

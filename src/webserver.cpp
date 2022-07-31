@@ -5575,7 +5575,11 @@ void GlobalVariables::configurationProcess() {
     global.configuration[Configuration::gitRepository] =
     HtmlRoutines::gitRepository;
   }
-  if (!global.configuration[Configuration::webAddress].isString(&global.webAdress)) {
+  if (
+    !global.configuration[Configuration::webAddress].isString(
+      &global.webAdress
+    )
+  ) {
     global.configuration[Configuration::webAddress] = global.webAdress;
   }
   if (global.configuration[Configuration::portHTTP].stringValue == "") {

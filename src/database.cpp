@@ -1501,13 +1501,22 @@ bool UserCalculator::computeAndStoreActivationStats(
     return false;
   }
   STACK_TRACE("UserCalculator::computeAndStoreActivationStats");
-  std::string activationAddress =
-  this->getActivationAddressFromActivationToken(
-    this->actualActivationToken,
-    global.hostWithPort,
-    this->username,
-    this->email
-  );
+  std::string activationAddress;
+  if (
+    !this->getActivationAddressFromActivationToken(
+      this->actualActivationToken,
+      global.hostWithPort,
+      this->username,
+      this->email,
+      activationAddress
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Server web address not set in configuration.json. ";
+    }
+    return false;
+  }
   QueryExact findEmail(
     DatabaseStrings::tableEmailInfo,
     DatabaseStrings::labelEmail,
@@ -1801,9 +1810,7 @@ bool UserCalculator::getActivationAbsoluteAddress(
   STACK_TRACE("UserCalculator::getActivationAbsoluteAddress");
   return
   this->getActivationAddress(
-    output,
-    global.webAdress + "/cgi-bin/calculator",
-    comments
+    output, global.webAdress + "/cgi-bin/calculator", comments
   );
 }
 
@@ -1827,14 +1834,14 @@ bool UserCalculator::getActivationAddress(
     comments << "Account of user: " << this->username << "already activated";
     return false;
   }
-  output =
+  return
   this->getActivationAddressFromActivationToken(
     this->actualActivationToken,
     calculatorBase,
     this->username,
-    this->email
+    this->email,
+    output
   );
-  return true;
 }
 
 bool EmailRoutines::sendEmailWithMailGun(
@@ -2288,11 +2295,12 @@ bool UserCalculator::storeToDatabase(
   return Database::get().updateOne(findUser, setUser, commentsOnFailure);
 }
 
-std::string UserCalculator::getActivationAddressFromActivationToken(
+bool UserCalculator::getActivationAddressFromActivationToken(
   const std::string& activationToken,
   const std::string& calculatorBase,
   const std::string& inputUserNameUnsafe,
-  const std::string& inputEmailUnsafe
+  const std::string& inputEmailUnsafe,
+  std::string& output
 ) {
   STACK_TRACE("UserCalculator::getActivationAddressFromActivationToken");
   std::stringstream out;
@@ -2302,8 +2310,10 @@ std::string UserCalculator::getActivationAddressFromActivationToken(
     StringRoutines::stringBeginsWith(calculatorBase, "https://localhost")
   ) {
     out << calculatorBase;
-  } else {
+  } else if (global.webAdress != "") {
     out << global.webAdress;
+  } else {
+    return false;
   }
   JSData jsonData;
   jsonData[DatabaseStrings::labelActivationToken] = activationToken;
@@ -2319,5 +2329,6 @@ std::string UserCalculator::getActivationAddressFromActivationToken(
   << HtmlRoutines::convertStringToURLString(
     jsonData.toString(nullptr), false
   );
-  return out.str();
+  output = out.str();
+  return true;
 }

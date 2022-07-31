@@ -103,9 +103,7 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   << Logger::red
   << "SSL is available but CERTIFICATE files are missing."
   << Logger::endL;
-  global
-  << "Let me try to create those files for you."
-  << Logger::endL;
+  global << "Let me try to create those files for you." << Logger::endL;
   std::stringstream command;
   std::string certificatePhysicalName, keyPhysicalName;
   FileOperations::getPhysicalFileNameFromVirtual(

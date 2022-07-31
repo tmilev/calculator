@@ -338,11 +338,12 @@ public:
     const std::string& calculatorBase,
     std::stringstream& comments
   );
-  static std::string getActivationAddressFromActivationToken(
+  static bool getActivationAddressFromActivationToken(
     const std::string& activationToken,
     const std::string& calculatorBase,
     const std::string& inputUserNameUnsafe,
-    const std::string& inputEmailUnsafe
+    const std::string& inputEmailUnsafe,
+    std::string& output
   );
   bool computeAndStoreActivationEmailAndTokens(
     std::stringstream* commentsOnFailure,

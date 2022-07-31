@@ -64,9 +64,7 @@ std::string Plot::Labels::graphicsThreeDimensional =
 "graphicsThreeDimensional";
 std::string Plot::Labels::graphicsTwoDimensional = "graphicsTwoDimensional";
 std::string Plot::Labels::plotObjects = "plotObjects";
-
 std::string GlobalVariables::webAdress = "";
-
 bool DynkinSimpleType::hasPrecomputedSubalgebras() const {
   if (this->letter == 'F') {
     return true;

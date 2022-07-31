@@ -2663,48 +2663,64 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       numActivatedUsers ++;
       oneTableLineStream
       << "<td><span style='color:red'>not activated</span></td>";
+      std::string activationLink;
       if (currentUser.actualActivationToken != "") {
-        oneTableLineStream
-        << "<td>"
-        << "<a href=\""
-        << UserCalculator::getActivationAddressFromActivationToken(
-          currentUser.actualActivationToken,
-          hostWebAddressWithPort,
-          currentUser.username,
-          currentUser.email
-        )
-        << "\"> (Re)activate account and change password</a>"
-        << "</td>";
+        oneTableLineStream << "<td>";
+        if (
+          UserCalculator::getActivationAddressFromActivationToken(
+            currentUser.actualActivationToken,
+            hostWebAddressWithPort,
+            currentUser.username,
+            currentUser.email,
+            activationLink
+          )
+        ) {
+          oneTableLineStream
+          << "<a href=\""
+          << activationLink
+          << "\"> (Re)activate account and change password</a>";
+        } else {
+          oneTableLineStream
+          << "The server does not know its web address, "
+          << "please set it through file configuration.json";
+        }
+        oneTableLineStream << "</td>";
       }
       oneTableLineStream << "<td>";
-      oneTableLineStream
-      << "<a href='mailto:"
-      << currentUser.email
-      << "?subject =Math 140 Homework account activation&";
-      oneTableLineStream << "body =";
-      std::stringstream emailBody;
-      emailBody
-      << "Dear user,\n you have not activated "
-      << "your homework server account yet. \n"
-      << "To activate your account and set "
-      << "your password please use the link: "
-      << HtmlRoutines::convertStringToURLString("\n\n", false)
-      << HtmlRoutines::convertStringToURLString(
-        UserCalculator::getActivationAddressFromActivationToken(
+      if (
+        !UserCalculator::getActivationAddressFromActivationToken(
           currentUser.actualActivationToken,
           hostWebAddressWithPort,
           currentUser.username,
-          currentUser.email
-        ),
-        false
-      )
-      << HtmlRoutines::convertStringToURLString("\n\n", false)
-      << " Once you activate your account, you can log in safely here: \n"
-      << HtmlRoutines::convertStringToURLString("\n\n", false)
-      << webAddress
-      << HtmlRoutines::convertStringToURLString("\n\n", false)
-      << "Best regards, \ncalculator-algebra.org.";
-      oneTableLineStream << emailBody.str() << "'>Send email manually.</a> ";
+          currentUser.email,
+          activationLink
+        )
+      ) {
+        oneTableLineStream
+        << "The server does not know its web address, "
+        << "please set it through file configuraiton.json";
+      } else {
+        oneTableLineStream
+        << "<a href='mailto:"
+        << currentUser.email
+        << "?subject =Math 140 Homework account activation&";
+        oneTableLineStream << "body =";
+        std::stringstream emailBody;
+        emailBody
+        << "Dear user,\n you have not activated "
+        << "your homework server account yet. \n"
+        << "To activate your account and set "
+        << "your password please use the link: "
+        << HtmlRoutines::convertStringToURLString("\n\n", false)
+        << HtmlRoutines::convertStringToURLString(activationLink, false)
+        << HtmlRoutines::convertStringToURLString("\n\n", false)
+        << " Once you activate your account, you can log in safely here: \n"
+        << HtmlRoutines::convertStringToURLString("\n\n", false)
+        << webAddress
+        << HtmlRoutines::convertStringToURLString("\n\n", false)
+        << "Best regards, \ncalculator-algebra.org.";
+        oneTableLineStream << emailBody.str() << "'>Send email manually.</a> ";
+      }
       oneTableLineStream << "</td>";
     } else if (currentUser.actualActivationToken == "error") {
       oneTableLineStream << "<td>error</td><td></td>";

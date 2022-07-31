@@ -245,3 +245,4 @@ std::string Configuration::laTeXMaterials = "LaTeX-materials/";
 std::string Configuration::slidesVideo = "slides-video/";
 std::string Configuration::freecalc = "freecalc/";
 std::string Configuration::useMathTags = "useMathTags";
+std::string Configuration::webAddress = "webAddress";

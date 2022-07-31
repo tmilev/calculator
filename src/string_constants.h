@@ -247,6 +247,7 @@ public:
   static std::string slidesVideo;
   static std::string freecalc;
   static std::string useMathTags;
+  static std::string webAddress;
 };
 
 class DatabaseStrings {

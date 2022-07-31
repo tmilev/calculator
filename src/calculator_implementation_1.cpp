@@ -64,6 +64,9 @@ std::string Plot::Labels::graphicsThreeDimensional =
 "graphicsThreeDimensional";
 std::string Plot::Labels::graphicsTwoDimensional = "graphicsTwoDimensional";
 std::string Plot::Labels::plotObjects = "plotObjects";
+
+std::string GlobalVariables::webAdress = "";
+
 bool DynkinSimpleType::hasPrecomputedSubalgebras() const {
   if (this->letter == 'F') {
     return true;
@@ -89,41 +92,6 @@ bool DynkinSimpleType::hasPrecomputedSubalgebras() const {
   return false;
 }
 
-// WARNING
-// Do not use the following web addresses to identify the server,
-// EXCEPT in special circumstances described below.
-// Instead, to get the web address of the
-// calculator server,
-// please use global.hostNoPort.
-// That address is extracted from the
-// incoming message headers
-// and is how our server is seen from the outside world.
-// HOWEVER,
-// the incoming message headers may be forged.
-// In most cases, this is not a problem
-// as the forgery will
-// affect negatively only the forgerer.
-// HOWEVER,
-// we CANNOT rely on the headers when sending
-// activation emails, as an attacker could claim my email,
-// forge his headers, and send me activation email which would
-// wrongly link to the host given in his forged headers
-// - that would be an evil site prompting me for password.
-// So, only in this very special circumstance,
-// we can only rely on a hard-coded web address.
-// TODO(tmilev): move the address initialization into
-// the configuration file. I left the bool fixThis variable
-// so I can get a compiler warning to remind me of the todo.
-bool unused() {
-  bool fixThis;
-  return fixThis;
-}
-
-std::string GlobalVariables::hopefullyPermanentWebAdress =
-"https://calculator-algebra.org";
-std::string GlobalVariables::
-hopefullyPermanent_HTTPS_WebAdressOfServerExecutable =
-"https://calculator-algebra.org/cgi-bin/calculator";
 std::string Calculator::toStringSemismipleLieAlgebraLinksFromHardDrive(
   const std::string& prefixFolder,
   const DynkinType& dynkinType,

@@ -1802,7 +1802,7 @@ bool UserCalculator::getActivationAbsoluteAddress(
   return
   this->getActivationAddress(
     output,
-    global.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable,
+    global.webAdress + "/cgi-bin/calculator",
     comments
   );
 }
@@ -2303,7 +2303,7 @@ std::string UserCalculator::getActivationAddressFromActivationToken(
   ) {
     out << calculatorBase;
   } else {
-    out << global.hopefullyPermanentWebAdress;
+    out << global.webAdress;
   }
   JSData jsonData;
   jsonData[DatabaseStrings::labelActivationToken] = activationToken;

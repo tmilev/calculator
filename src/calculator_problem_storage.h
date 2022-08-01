@@ -249,6 +249,31 @@ public:
 
 class EmailRoutines {
 public:
+  // Preconfigured web address of the present server.
+  // Do not use the following web addresses to identify the server,
+  // EXCEPT in special circumstances described below.
+  // Instead, to get the web address of the
+  // calculator server,
+  // please use global.hostNoPort.
+  // That address is extracted from the
+  // incoming message headers
+  // and is how our server is seen from the outside world.
+  // HOWEVER,
+  // the incoming message headers may be forged.
+  // In most cases, this is not a problem
+  // as the forgery will
+  // affect negatively only the forgerer.
+  // HOWEVER,
+  // we CANNOT rely on the headers when sending
+  // activation emails, as an attacker could claim my email,
+  // forge his headers, and send me activation email which would
+  // wrongly link to the host given in his forged headers
+  // - that would be an evil site prompting me for password.
+  // So, only in this very special circumstance,
+  // we can only rely on a preconfigured web address.
+  // For example, this could be "https://calculator-algebra.org".
+  static std::string webAdress;
+  static std::string sendEmailFrom;
   std::string subject;
   std::string ccEmail;
   std::string toEmail;

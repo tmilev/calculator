@@ -10,6 +10,8 @@
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 
+std::string EmailRoutines::webAdress = "";
+std::string EmailRoutines::sendEmailFrom = "";
 bool Database::User::setPassword(
   const std::string& inputUsername,
   const std::string& inputNewPassword,
@@ -1470,10 +1472,10 @@ bool UserCalculator::computeAndStoreActivationToken(
     !Database::get().updateOne(findUserQuery, updateUser, commentsOnFailure)
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Setting activation token failed.";
+      *commentsOnFailure << "Setting activation token failed. ";
     }
     this->actualActivationToken = "";
-    return false;
+      return false;
   }
   return true;
 }
@@ -1494,13 +1496,16 @@ bool UserCalculator::computeAndStoreActivationStats(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  if (!global.flagDatabaseCompiled) {
+  STACK_TRACE("UserCalculator::computeAndStoreActivationStats");
+  if (
+    !global.flagDatabaseCompiled &&
+    !global.flagDisableDatabaseLogEveryoneAsAdmin
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Compiled without database support. ";
     }
     return false;
   }
-  STACK_TRACE("UserCalculator::computeAndStoreActivationStats");
   std::string activationAddress;
   if (
     !this->getActivationAddressFromActivationToken(
@@ -1523,7 +1528,14 @@ bool UserCalculator::computeAndStoreActivationStats(
     this->email
   );
   JSData emailStat;
-  Database::get().findOne(findEmail, emailStat, commentsOnFailure);
+  if (
+    !Database::get().findOne(findEmail, emailStat, commentsOnFailure)
+  ) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Unexpected: could not find email info. ";
+      }
+      return false;
+  }
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime =
   emailStat[DatabaseStrings::labelLastActivationEmailTime].stringValue;
@@ -1584,10 +1596,10 @@ bool UserCalculator::computeAndStoreActivationStats(
       findQueryInUsers, updateUser, commentsOnFailure
     )
   ) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
-    }
-    return false;
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
+      }
+      return false;
   }
   QuerySet emailStatQuery;
   emailStatQuery.value[DatabaseStrings::labelLastActivationEmailTime] =
@@ -1601,17 +1613,22 @@ bool UserCalculator::computeAndStoreActivationStats(
   if (
     !Database::get().updateOne(findEmail, emailStatQuery, commentsOnFailure)
   ) {
-    return false;
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Unexpected failure to update email stats. ";
+      }
+      return false;
   }
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
   std::stringstream emailBody;
   emailBody
   << "Dear user,"
   << "\n\nto confirm your email change at our website "
-  << global.hostWithPort
+  << EmailRoutines::webAdress
   << ", please follow the activation link below.\n\n "
   << activationAddress
-  << "\n\nSincerely, \nthe calculator-algebra.org team";
+  << "\n\nSincerely, \nthe "
+  << EmailRoutines::webAdress
+  << " team";
   this->activationEmail = emailBody.str();
   return true;
 }
@@ -1688,9 +1705,8 @@ bool Database::User::addUsersFromEmails(
       << " emails and "
       << passwords.size
       << " passwords. "
-      <<
-      "If you want to enter usernames without password, you need to leave the password input box empty. "
-      ;
+      << "If you want to enter usernames without password, "
+      << "you need to leave the password input box empty. ";
       return false;
     }
   }
@@ -1812,7 +1828,7 @@ bool UserCalculator::getActivationAbsoluteAddress(
   STACK_TRACE("UserCalculator::getActivationAbsoluteAddress");
   return
   this->getActivationAddress(
-    output, global.webAdress + "/cgi-bin/calculator", comments
+    output, EmailRoutines::webAdress + "/cgi-bin/calculator", comments
   );
 }
 
@@ -1852,7 +1868,15 @@ bool EmailRoutines::sendEmailWithMailGun(
   std::stringstream* commentsGeneralSensitive
 ) {
   STACK_TRACE("EmailRoutines::sendEmailWithMailGun");
-  std::string mailGunKey, hostnameToSendEmailFrom;
+  if (this->sendEmailFrom == "") {
+    if (commentsGeneral != nullptr) {
+      *commentsGeneral
+      << "Can't send emails: "
+      << "please set the sendEmailFrom field in configuration.json. ";
+    }
+    return false;
+  }
+  std::string mailGunKey;
   if (
     !FileOperations::
     loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
@@ -1872,55 +1896,25 @@ bool EmailRoutines::sendEmailWithMailGun(
     }
     return false;
   }
-  if (
-    !FileOperations::
-    loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
-      "certificates/mailgun-hostname.txt",
-      hostnameToSendEmailFrom,
-      true,
-      true,
-      nullptr
-    )
-  ) {
-    hostnameToSendEmailFrom = global.hostNoPort;
-    if (global.userDefaultHasAdminRights() && commentsGeneral != nullptr) {
-      *commentsGeneral
-      << "Did not find the mailgun hostname file: "
-      << "certificates/mailgun-hostname.txt. Using the "
-      << "domain name: "
-      << hostnameToSendEmailFrom
-      << " instead. ";
-    }
-  } else {
-    hostnameToSendEmailFrom =
-    StringRoutines::stringTrimWhiteSpace(hostnameToSendEmailFrom);
-    if (global.userDefaultHasAdminRights() && commentsGeneral != nullptr) {
-      *commentsGeneral
-      << "Hostname loaded: "
-      << HtmlRoutines::convertStringToURLString(
-        hostnameToSendEmailFrom, false
-      );
-    }
-  }
   if (mailGunKey.size() > 0) {
     mailGunKey.resize(mailGunKey.size() - 1);
   }
   global
   << "Sending email via "
   << "https://api.mailgun.net/v3/mail2."
-  << hostnameToSendEmailFrom
+  << EmailRoutines::sendEmailFrom
   << "/messages "
   << Logger::endL;
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey << "' ";
   commandToExecute
   << "https://api.mailgun.net/v3/mail2."
-  << hostnameToSendEmailFrom
+  << EmailRoutines::sendEmailFrom
   << "/messages ";
   commandToExecute
   << "-F from='Automated Email "
   << "<noreply@mail2."
-  << hostnameToSendEmailFrom
+  << EmailRoutines::sendEmailFrom
   << ">' ";
   if (this->toEmail == "") {
     if (commentsOnFailure != nullptr) {
@@ -2313,8 +2307,8 @@ bool UserCalculator::getActivationAddressFromActivationToken(
     StringRoutines::stringBeginsWith(calculatorBase, "https://localhost")
   ) {
     out << calculatorBase;
-  } else if (global.webAdress != "") {
-    out << global.webAdress;
+  } else if (EmailRoutines::webAdress != "") {
+    out << EmailRoutines::webAdress;
   } else {
     return false;
   }

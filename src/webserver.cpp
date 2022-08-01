@@ -20,6 +20,7 @@
 #include "assert.h"
 #include "signals_infrastructure.h"
 #include "web_client.h"
+#include "calculator_problem_storage.h"
 
 const std::string WebServer::Statististics::pingRequestsString =
 "pingRequests";
@@ -2039,7 +2040,7 @@ bool WebWorker::doSetEmail(
       commentsOnFailure, commentsGeneralNonSensitive
     )
   ) {
-    return false;
+      return false;
   }
   email.emailContent = userCopy.activationEmail;
   email.subject = userCopy.activationEmailSubject;
@@ -5574,10 +5575,18 @@ void GlobalVariables::configurationProcess() {
   }
   if (
     !global.configuration[Configuration::webAddress].isString(
-      &global.webAdress
+      &EmailRoutines::webAdress
     )
   ) {
-    global.configuration[Configuration::webAddress] = global.webAdress;
+    global.configuration[Configuration::webAddress] = EmailRoutines::webAdress;
+  }
+  if (
+    !global.configuration[Configuration::sendEmailFrom].isString(
+      &EmailRoutines::sendEmailFrom
+    )
+  ) {
+    global.configuration[Configuration::sendEmailFrom] =
+    EmailRoutines::sendEmailFrom;
   }
   if (global.configuration[Configuration::portHTTP].stringValue == "") {
     global.configuration[Configuration::portHTTP] = "8155";

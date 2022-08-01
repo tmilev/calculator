@@ -256,6 +256,11 @@ public:
   // is 100% read/overwritten on each database
   // read/store operation.
   bool flagDatabaseCompiled;
+  // A flag that triggers debug messages during login.
+  // This will reveal secrets to end users and cannot run in production.
+  // The flag can only be used with fallback database.
+  // It will automatically be turned off if using the regular database.
+  bool flagDebugLoginProcess;
   bool flagDisableDatabaseLogEveryoneAsAdmin;
   // When this is set, the calculator will spin a separate
   // process that will periodically ping the main calculator
@@ -378,30 +383,6 @@ public:
   JSData configurationCommandLine;
   JSData timeStats;
   List<List<std::string> > databaseModifiableFields;
-  // Preconfigured web address of the present server. 
-  // Do not use the following web addresses to identify the server,
-  // EXCEPT in special circumstances described below.
-  // Instead, to get the web address of the
-  // calculator server,
-  // please use global.hostNoPort.
-  // That address is extracted from the
-  // incoming message headers
-  // and is how our server is seen from the outside world.
-  // HOWEVER,
-  // the incoming message headers may be forged.
-  // In most cases, this is not a problem
-  // as the forgery will
-  // affect negatively only the forgerer.
-  // HOWEVER,
-  // we CANNOT rely on the headers when sending
-  // activation emails, as an attacker could claim my email,
-  // forge his headers, and send me activation email which would
-  // wrongly link to the host given in his forged headers
-  // - that would be an evil site prompting me for password.
-  // So, only in this very special circumstance,
-  // we can only rely on a preconfigured web address.
-  // For example, this could be "https://calculator-algebra.org".
-  static std::string webAdress;
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
   std::string relativePhysicalNameCrashReport;

@@ -248,6 +248,7 @@ public:
   static std::string freecalc;
   static std::string useMathTags;
   static std::string webAddress;
+  static std::string sendEmailFrom;
 };
 
 class DatabaseStrings {

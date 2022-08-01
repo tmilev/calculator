@@ -1246,26 +1246,21 @@ bool WebAPIResponse::processForgotLogin() {
     << user.email
     << " in our records. ";
     result[WebAPI::result::comments] = out.str();
-    if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
       return global.response.writeResponse(result, false);
-    }
-    out << " Everyone's admin: continuing. ";
   }
   if (!user.loadFromDatabase(&out, &out)) {
     out << "Failed to fetch user info for email: " << user.email << ". ";
     result[WebAPI::result::comments] = out.str();
-    if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
       return global.response.writeResponse(result, false);
-    }
-    out << " Everyone's admin: continuing. ";
   }
   out << "Your email is on record. ";
   if (!global.userDefaultHasAdminRights()) {
     this->owner->doSetEmail(user, &out, &out, nullptr);
   } else {
+    out << "Setting email as admin. ";
     this->owner->doSetEmail(user, &out, &out, &out);
   }
-  out << "<br>Response time: " << global.getElapsedSeconds() << " second(s). ";
+  out << "Response time: " << global.getElapsedSeconds() << " second(s). ";
   result[WebAPI::result::comments] = out.str();
   return global.response.writeResponse(result, false);
 }
@@ -1337,7 +1332,6 @@ JSData WebWorker::getSignUpRequestResult() {
     << user.email
     << ") is available.";
   }
-  if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (!user.storeToDatabase(false, &errorStream)) {
       errorStream << "Failed to store error stream. ";
       result[WebAPI::result::error] = errorStream.str();
@@ -1345,10 +1339,6 @@ JSData WebWorker::getSignUpRequestResult() {
       result[WebAPI::result::resultLabel] = outputStream.str();
       return result;
     }
-  } else {
-    generalCommentsStream
-    << "Everyone's admin, no database: your username was not stored. ";
-  }
   std::stringstream* adminOutputStream = nullptr;
   if (global.userDefaultHasAdminRights()) {
     adminOutputStream = &generalCommentsStream;

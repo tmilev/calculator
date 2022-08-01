@@ -1112,7 +1112,15 @@ bool WebClient::verifyRecaptcha(
   std::stringstream* commentsGeneralNONsensitive,
   std::stringstream* commentsGeneralSensitive
 ) {
-  STACK_TRACE("WebCrawler::VerifyRecaptcha");
+  STACK_TRACE("WebClient::VerifyRecaptcha");
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (commentsGeneralNONsensitive != nullptr) {
+      *commentsGeneralNONsensitive
+      << "Everyone's logged in as admin: "
+      << "not verifying your recaptcha. ";
+    }
+    return true;
+  }
   std::stringstream messageToSendStream;
   std::string secret;
   std::stringstream notUsed;
@@ -1130,10 +1138,7 @@ bool WebClient::verifyRecaptcha(
     )
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "<b style ='color:red'>"
-      << "Failed to load recaptcha secret."
-      << "</b>";
+      *commentsOnFailure << "Failed to load recaptcha secret.";
     }
     return false;
   }
@@ -1191,9 +1196,7 @@ bool WebClient::verifyRecaptcha(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<br><b style ='color:red'>"
       << "Could not verify your captcha solution. "
-      << "</b>"
       << "The response from google was: "
       << response;
     }
@@ -1201,9 +1204,7 @@ bool WebClient::verifyRecaptcha(
   } else {
     if (commentsGeneralNONsensitive != nullptr) {
       *commentsGeneralNONsensitive
-      << "<br><b style ='color:green'>"
-      << "Your recaptcha answer appears to be valid. "
-      << "</b>\n<br>\n";
+      << "Your recaptcha answer appears to be valid. ";
     }
     if (commentsGeneralSensitive != nullptr) {
       *commentsGeneralSensitive
@@ -1218,7 +1219,10 @@ bool WebAPIResponse::processForgotLogin() {
   STACK_TRACE("WebAPIResponse::processForgotLogin");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  if (!global.flagDatabaseCompiled) {
+  if (
+    !global.flagDatabaseCompiled &&
+    !global.flagDisableDatabaseLogEveryoneAsAdmin
+  ) {
     result[WebAPI::result::error] = "Error: database not running. ";
     return global.response.writeResponse(result, false);
   }
@@ -1232,46 +1236,36 @@ bool WebAPIResponse::processForgotLogin() {
     global.getWebInput("email"), false
   );
   WebClient webClient;
-  out
-  << "<br><b> "
-  << "Please excuse our verbose technical messages: "
-  << "at least we tell you what we are doing!</b>"
-  << "<br>\n";
   if (!webClient.verifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
   if (!user.exists(&out)) {
     out
-    << "<br><b style ='color:red'>"
     << "We failed to find your email: "
     << user.email
-    << " in our records. "
-    << "</b>";
+    << " in our records. ";
     result[WebAPI::result::comments] = out.str();
-    return global.response.writeResponse(result, false);
+    if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
+      return global.response.writeResponse(result, false);
+    }
+    out << " Everyone's admin: continuing. ";
   }
   if (!user.loadFromDatabase(&out, &out)) {
-    out
-    << "<br><b style='color:red'>"
-    << "Failed to fetch user info for email: "
-    << user.email
-    << "</b>";
+    out << "Failed to fetch user info for email: " << user.email << ". ";
     result[WebAPI::result::comments] = out.str();
-    return global.response.writeResponse(result, false);
+    if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
+      return global.response.writeResponse(result, false);
+    }
+    out << " Everyone's admin: continuing. ";
   }
-  out << "<b style ='color:green'>" << "Your email is on record. " << "</b>";
+  out << "Your email is on record. ";
   if (!global.userDefaultHasAdminRights()) {
     this->owner->doSetEmail(user, &out, &out, nullptr);
   } else {
     this->owner->doSetEmail(user, &out, &out, &out);
   }
-  out
-  << "<br>Response time: "
-  << global.getElapsedSeconds()
-  << " second(s); "
-  << global.getElapsedSeconds()
-  << " second(s) spent creating account. ";
+  out << "<br>Response time: " << global.getElapsedSeconds() << " second(s). ";
   result[WebAPI::result::comments] = out.str();
   return global.response.writeResponse(result, false);
 }
@@ -1280,9 +1274,17 @@ JSData WebWorker::getSignUpRequestResult() {
   STACK_TRACE("WebWorker::getSignUpRequestResult");
   JSData result;
   std::stringstream errorStream;
-  if (!global.flagDatabaseCompiled) {
-    result["error"] = "Database not available (cannot sign up). ";
+  if (
+    !global.flagDatabaseCompiled &&
+    !global.flagDisableDatabaseLogEveryoneAsAdmin
+  ) {
+    result[WebAPI::result::error] =
+    "Database not available (cannot sign up). ";
     return result;
+  }
+  std::stringstream generalCommentsStream;
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    generalCommentsStream << "Database disabled, this is a dry run. ";
   }
   Database::get().user.logoutViaDatabase();
   UserCalculator user;
@@ -1294,29 +1296,26 @@ JSData WebWorker::getSignUpRequestResult() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("email"), false
   );
-  std::stringstream generalCommentsStream;
   std::stringstream outputStream;
-  generalCommentsStream
-  << "<b>Please excuse our technical messages, they will be removed soon.</b>";
   WebClient webClient;
   if (
     !webClient.verifyRecaptcha(
       &errorStream, &generalCommentsStream, nullptr
     )
   ) {
-    result["error"] = errorStream.str();
+    result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
   if (user.username == "") {
     errorStream << "Empty username not allowed. ";
-    result["error"] = errorStream.str();
+    result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
   if (!EmailRoutines::isOKEmail(user.email, &generalCommentsStream)) {
     errorStream << "Your email address does not appear to be valid. ";
-    result["error"] = errorStream.str();
+    result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
@@ -1327,35 +1326,37 @@ JSData WebWorker::getSignUpRequestResult() {
     << ") or the email ("
     << user.email
     << ") you requested is already taken.";
-    result["error"] = errorStream.str();
+    result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   } else {
     outputStream
-    << "<b style ='color:green'>"
     << "Username ("
     << user.username
     << ") with email ("
     << user.email
-    << ") is available. </b>";
+    << ") is available.";
   }
-  if (!user.storeToDatabase(false, &errorStream)) {
-    errorStream << "Failed to store error stream. ";
-    result["error"] = errorStream.str();
-    result[WebAPI::result::comments] = generalCommentsStream.str();
-    result[WebAPI::result::resultLabel] = outputStream.str();
-    return result;
+  if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (!user.storeToDatabase(false, &errorStream)) {
+      errorStream << "Failed to store error stream. ";
+      result[WebAPI::result::error] = errorStream.str();
+      result[WebAPI::result::comments] = generalCommentsStream.str();
+      result[WebAPI::result::resultLabel] = outputStream.str();
+      return result;
+    }
+  } else {
+    generalCommentsStream
+    << "Everyone's admin, no database: your username was not stored. ";
   }
   std::stringstream* adminOutputStream = nullptr;
   if (global.userDefaultHasAdminRights()) {
     adminOutputStream = &generalCommentsStream;
   }
-  // int fixThis;
-  // adminOutputStream = &generalCommentsStream;
   this->doSetEmail(
     user, &errorStream, &generalCommentsStream, adminOutputStream
   );
-  result["error"] = errorStream.str();
+  result[WebAPI::result::error] = errorStream.str();
   result[WebAPI::result::comments] = generalCommentsStream.str();
   result[WebAPI::result::resultHtml] = outputStream.str();
   return result;

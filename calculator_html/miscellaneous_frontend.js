@@ -84,7 +84,7 @@ function htmlFromCommentsAndErrors(input) {
   return resultHTML;
 }
 
-/**@returns{HTMLElement[]} */
+/** @returns{HTMLElement[]} */
 function htmlElementsFromCommentsAndErrors(input) {
   let extraTags = [
     pathnames.urlFields.result.comments,

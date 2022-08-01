@@ -20,6 +20,7 @@ const themes = require("./themes");
 const solver = require("./solve");
 const solve = require("./solve");
 const solveSocratic = require("./solve_socratic");
+const forgotPassword = require("./forgot_password");
 const compareExpressions = require("./compare_expressions").compareExpressions;
 const compareExpressionsSocratic = require("./compare_expressions_socratic").compareExpressionsSocratic;
 const storage = require("./storage").storage;
@@ -170,7 +171,9 @@ class Page {
         name: "forgotLogin",
         id: "divForgotLogin",
         container: null,
-        selectFunction: null,
+        selectFunction: () => {
+          forgotPassword.forgotLogin.forgotLoginPage();
+        },
       },
       about: {
         name: "about",
@@ -232,6 +235,18 @@ class Page {
     this.storage = storage;
     this.initializeStorageCallbacks();
     this.flagProblemPageOnly = false;
+    this.initializeLoginPage();
+  }
+
+  initializeLoginPage() {
+    let forgotLogin = document.getElementById(ids.domElements.pages.login.buttonForgotLogin);
+    forgotLogin.addEventListener("click", () => {
+      this.selectPage(this.pages.forgotLogin.name);
+    });
+    let sendRecoveryEmail = document.getElementById(ids.domElements.pages.forgotLogin.buttonSendRecoveryEmail);
+    sendRecoveryEmail.addEventListener("click", () => {
+      forgotPassword.forgotLogin.submitForgotPassword();
+    });
   }
 
   initializeStorageCallbacks() {

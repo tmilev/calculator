@@ -1534,7 +1534,9 @@ bool UserCalculator::computeAndStoreActivationStats(
     numActivationsThisEmail.assignString(emailCountForThisEmail);
   }
   numActivationsThisEmail ++;
-  TimeWrapper now, lastActivationOnThisEmail, lastActivationOnThisAccount;
+  TimeWrapper now;
+  TimeWrapper lastActivationOnThisEmail;
+  TimeWrapper lastActivationOnThisAccount;
   now.assignLocalTime();
   if (lastEmailTime != "") {
     lastActivationOnThisEmail.operator=(lastEmailTime);
@@ -1543,19 +1545,19 @@ bool UserCalculator::computeAndStoreActivationStats(
     );
     if (commentsGeneral != nullptr) {
       *commentsGeneral
-      << "<br>Last activation on this email, GM time: "
+      << "Last activation on this email, GM time: "
       << lastActivationOnThisEmail.toStringGM()
-      << ".\n"
-      << "<br>Last activation on this account, GM time: "
+      << ". "
+      << "Last activation on this account, GM time: "
       << lastActivationOnThisEmail.toStringGM()
-      << ".\n";
+      << ". ";
     }
   }
   if (commentsGeneral != nullptr) {
     *commentsGeneral
-    << "<br>Total activations (attempted on) this email: "
+    << "Total activations (attempted on) this email: "
     << numActivationsThisEmail.toString()
-    << ".\n<br>\n";
+    << ".";
   }
   QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
   QuerySet updateUser;
@@ -1572,8 +1574,8 @@ bool UserCalculator::computeAndStoreActivationStats(
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "This shouldn't happen: both the username and the user id are empty. ";
+      << "This shouldn't happen: "
+      << "both the username and the user id are empty. ";
     }
     return false;
   }
@@ -1864,9 +1866,9 @@ bool EmailRoutines::sendEmailWithMailGun(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Could not find mailgun key. "
-      << "The key must be located in file: "
-      << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
-      << "The file must be uploaded manually to the server. ";
+      << "The key must be located in file: \n"
+      << "certificates/mailgun-api.txt\n"
+      << " The file must be uploaded manually to the server. ";
     }
     return false;
   }
@@ -1883,8 +1885,8 @@ bool EmailRoutines::sendEmailWithMailGun(
     hostnameToSendEmailFrom = global.hostNoPort;
     if (global.userDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral
-      <<
-      "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
+      << "Did not find the mailgun hostname file: "
+      << "certificates/mailgun-hostname.txt. Using the "
       << "domain name: "
       << hostnameToSendEmailFrom
       << " instead. ";
@@ -1951,6 +1953,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   << "\"";
   std::string commandResult =
   global.externalCommandReturnOutput(commandToExecute.str());
+  global << commandResult << Logger::endL;
   if (commentsGeneralSensitive != nullptr) {
     *commentsGeneralSensitive
     << "Command: "

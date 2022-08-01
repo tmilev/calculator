@@ -40,15 +40,15 @@ function reloadPage(reason, time) {
 
 var oldUserRole;
 function logout() {
-  let thePage = window.calculator.mainPage;
-  thePage.storage.variables.user.name.setAndStore("");
-  thePage.storage.variables.user.authenticationToken.setAndStore("");
-  thePage.storage.variables.user.role.setAndStore("");
+  let page = window.calculator.mainPage;
+  page.storage.variables.user.name.setAndStore("");
+  page.storage.variables.user.authenticationToken.setAndStore("");
+  page.storage.variables.user.role.setAndStore("");
   hideLogoutButton();
-  thePage.user.hideProfilePicture();
-  thePage.user.flagLoggedIn = false;
-  thePage.user.sectionsTaught = [];
-  thePage.pages.problemPage.flagLoaded = false;
+  page.user.hideProfilePicture();
+  page.user.flagLoggedIn = false;
+  page.user.sectionsTaught = [];
+  page.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById(ids.domElements.problemPageContentContainer).innerHTML = "";
   document.getElementById(ids.domElements.divCurrentCourseBody).innerHTML = "";
@@ -56,7 +56,7 @@ function logout() {
 }
 
 function logoutPartTwo() {
-  var thePage = window.calculator.mainPage;
+  var page = window.calculator.mainPage;
   if (oldUserRole === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
   } else {
@@ -67,7 +67,7 @@ function logoutPartTwo() {
     showLoginCalculatorButtons();
     toggleAccountPanels();
     setAdminPanels();
-    thePage.selectPage(thePage.pages.login.name);
+    page.selectPage(page.pages.login.name);
   }
 }
 
@@ -80,10 +80,10 @@ function loginTry() {
 }
 
 function toggleAccountPanels() {
-  let thePage = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   let accountPanels = document.getElementsByClassName("divAccountPanel");
   for (let counterPanels = 0; counterPanels < accountPanels.length; counterPanels++) {
-    if (thePage.user.flagLoggedIn === true) {
+    if (page.user.flagLoggedIn === true) {
       accountPanels[counterPanels].classList.remove("divInvisible");
       accountPanels[counterPanels].classList.add("divVisible");
     } else {
@@ -94,10 +94,10 @@ function toggleAccountPanels() {
 }
 
 function setAdminPanels() {
-  let thePage = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   let adminPanels = document.getElementsByClassName("divAdminPanel");
-  let currentRole = thePage.user.getRole();
-  let studentView = thePage.studentView();
+  let currentRole = page.user.getRole();
+  let studentView = page.studentView();
   for (let counterPanels = 0; counterPanels < adminPanels.length; counterPanels++) {
     if (currentRole === "admin" && !studentView) {
       adminPanels[counterPanels].classList.remove("divInvisible");
@@ -125,7 +125,7 @@ function resetPagesNeedingReload() {
 
 function loginWithServerCallback(incomingString, result) {
   document.getElementById("spanLoginStatus").innerHTML = "";
-  let thePage = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   let success = false;
   let loginErrorMessage = "";
   let parsedAuthentication = JSON.parse(incomingString);
@@ -142,7 +142,7 @@ function loginWithServerCallback(incomingString, result) {
     parsedAuthentication[pathnames.urlFields.userRole] = "admin";
     loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
     success = true;
-    thePage.user.flagDatabaseInactiveEveryoneIsAdmin = true;
+    page.user.flagDatabaseInactiveEveryoneIsAdmin = true;
   }
   if (
     parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== "true" &&
@@ -163,7 +163,7 @@ function loginWithServerCallback(incomingString, result) {
   let loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
   loginExtraInfo.innerHTML = loginInfo;
   if (success) {
-    thePage.user.makeFromUserInfo(parsedAuthentication);
+    page.user.makeFromUserInfo(parsedAuthentication);
     toggleAccountPanels();
     setAdminPanels();
     hideLoginCalculatorButtons();
@@ -177,10 +177,10 @@ function loginWithServerCallback(incomingString, result) {
     if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
       document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
     }
-    thePage.storage.variables.user.authenticationToken.setAndStore("");
-    thePage.storage.variables.user.name.setAndStore("");
-    thePage.storage.variables.user.role.setAndStore("");
-    thePage.user.flagLoggedIn = false;
+    page.storage.variables.user.authenticationToken.setAndStore("");
+    page.storage.variables.user.name.setAndStore("");
+    page.storage.variables.user.role.setAndStore("");
+    page.user.flagLoggedIn = false;
     showLoginCalculatorButtons();
     toggleAccountPanels();
     setAdminPanels();
@@ -215,10 +215,10 @@ function showLoginCalculatorButtons() {
 }
 
 function hideLoginCalculatorButtons() {
-  let thePage = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.remove("divVisible");
   document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.add("divInvisible");
-  document.getElementById(ids.domElements.pages.login.userNameReport).innerHTML = thePage.storage.variables.user.name.value;
+  document.getElementById(ids.domElements.pages.login.userNameReport).innerHTML = page.storage.variables.user.name.value;
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divInvisible");
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divVisible");
   document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.remove("divInvisible");

@@ -87,7 +87,14 @@ let domElements = {
     },
     login: {
       divLoginCalculatorPanel: "divLoginCalculatorPanel",
-      userNameReport: "divLoginPanelUsernameReport"
+      userNameReport: "divLoginPanelUsernameReport",
+      signUpResultReport: "signUpResultReport",
+      signUpResult: "signUpResult",
+      buttonForgotLogin: "buttonForgotLogin",
+    },
+    forgotLogin: {
+      buttonSendRecoveryEmail: "buttonSendRecoveryEmail",
+      forgotLoginResultReport: "forgotLoginResultReport",
     },
   },
   applicationIdentifiers: {

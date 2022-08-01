@@ -70,8 +70,7 @@
             <!--password input form-->
             <button class="buttonSelectPage" onclick="window.calculator.login.loginCalculator();">Login</button><br>
             <button class="buttonSignUp" onclick="window.calculator.mainPage.selectPage('signUp');">Sign up</button><br>
-            <button class="buttonSignUp" onclick="window.calculator.forgotLogin.forgotLoginPage();">Forgot
-              login</button><br>
+            <button class="buttonSignUp" id="buttonForgotLogin">Forgot login</button><br>
           </div>
           <!--divLoginCalculatorPanel-->
           <div class="divCenteredItem">
@@ -132,6 +131,7 @@
       </table>
       <div id="recaptchaSignUp"></div>
       <button onclick="window.calculator.signUp.submitSignUpInfo();">Sign up</button>
+      <br>
       <span id="signUpResultReport"></span>
       <br>
       <span id="signUpResult"></span>
@@ -145,7 +145,7 @@
         </tr>
       </table>
       <div id="recaptchaForgotPassword"></div>
-      <button onclick="window.calculator.forgotLogin.submitForgotPassword();">Send recovery email</button><span
+      <button id="buttonSendRecoveryEmail">Send recovery email</button><span
         id="forgotLoginResultReport"></span>
       <br>
       <span id="forgotLoginResult"></span>

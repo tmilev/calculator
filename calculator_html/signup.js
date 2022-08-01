@@ -2,12 +2,11 @@
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
-
-var recaptchaIdForSignUp = null;
+const miscallaneous = require("./miscellaneous_frontend");
 
 function getRecaptchaId() {
-  var localRecaptcha = '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql';
-  var calculatorRecaptcha = "6LcgwR8UAAAAALQq02qZShfA1ZUZvZKRNWJ2CPPf";
+  let localRecaptcha = '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql';
+  let calculatorRecaptcha = "6LcgwR8UAAAAALQq02qZShfA1ZUZvZKRNWJ2CPPf";
   if (
     window.location.hostname == "localhost" ||
     window.location.hostname == "127.0.0.1"
@@ -26,12 +25,11 @@ function getRecaptchaId() {
 
 class SignUp {
   constructor() {
-
+    this.recaptchaIdForSignUp = null;
   }
   signUp() {
-
-    if (recaptchaIdForSignUp === null) {
-      recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", { 'sitekey': getRecaptchaId() });
+    if (this.recaptchaIdForSignUp === null) {
+      this.recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", { 'sitekey': getRecaptchaId() });
     }
   }
 
@@ -41,49 +39,40 @@ class SignUp {
 
   submitSignUpInfo() {
     if (grecaptcha === undefined || grecaptcha === null) {
-      document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
+      document.getElementById('signUpResult').innerHTML = "<b style ='color:red'>The google captcha script appears to be missing (no Internet?). </b>";
       return false;
     }
     var desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
     var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
-    var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
-    theURL += `email=${desiredEmailEncoded}&`;
-    var theToken = grecaptcha.getResponse(recaptchaIdForSignUp);
-    if (theToken === '' || theToken === null) {
-      document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";
+    var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
+    url += `email=${desiredEmailEncoded}&`;
+    var token = grecaptcha.getResponse(this.recaptchaIdForSignUp);
+    if (token === '' || token === null) {
+      document.getElementById('signUpResult').innerHTML = "<b style ='color:red'>Please don't forget to solve the captcha. </b>";
       return false;
     }
-    recaptchaIdForSignUp = null;
-    theURL += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(theToken)}&`;
+    this.recaptchaIdForSignUp = null;
+    url += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
     submitRequests.submitGET({
-      url: theURL,
+      url: url,
       callback: callbackSignUp,
-      result: "signUpResultReport",
       progress: ids.domElements.spanProgressReportGeneral
     });
   }
 
 }
 
-function callbackSignUp(input, output) {
-  if (typeof output === "string") {
-    output = document.getElementById(output);
-  }
+function callbackSignUp(input) {
+  let outputStatus = document.getElementById(ids.domElements.pages.login.signUpResultReport);
+  let output = document.getElementById(ids.domElements.pages.login.signUpResult);
   try {
-    var inputParsed = JSON.parse(decodeURIComponent(input));
-    var result = "";
+    let inputParsed = JSON.parse(decodeURIComponent(input));
+    miscallaneous.writeHtmlElementsFromCommentsAndErrors(inputParsed, outputStatus);
     if (inputParsed.result !== undefined) {
-      result += `${inputParsed.result}<hr>`;
+      output.textContent = inputParsed.result;
     }
-    if (inputParsed.error !== "") {
-      result += `<span style = 'color:red; font-weight:bold;'>${inputParsed.error}</span>`;
-    }
-    if (inputParsed.comments !== "") {
-      result += `<hr>${inputParsed.comments}`;
-    }
-    output.innerHTML = result;
   } catch (e) {
-    output.innerHTML = `Result: ${input}. Error: ${e}. ${input}`;
+    output.textContent = `Result: ${input}. Error: ${e}.`;
   }
 }
 

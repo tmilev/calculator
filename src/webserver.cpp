@@ -2022,12 +2022,9 @@ bool WebWorker::doSetEmail(
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
-  if (!global.flagDatabaseCompiled) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "doSetEmail: project compiled without database support. ";
-    }
-    return false;
+  if (!global.flagDatabaseCompiled && commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "doSetEmail: project compiled without database support. ";
   }
   EmailRoutines email;
   email.toEmail = inputOutputUser.email;
@@ -2047,7 +2044,7 @@ bool WebWorker::doSetEmail(
   email.emailContent = userCopy.activationEmail;
   email.subject = userCopy.activationEmailSubject;
   if (commentsGeneralNonSensitive != nullptr) {
-    *commentsGeneralNonSensitive << "<br><b>Sending email... </b>";
+    *commentsGeneralNonSensitive << "Sending email... ";
   }
   email.sendEmailWithMailGun(
     commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive
@@ -2088,7 +2085,7 @@ JSData WebWorker::setEmail(const std::string& input) {
   if (global.userDefaultHasAdminRights()) {
     out << "<hr><b>Administrator view only. </b>" << debugStream.str();
   }
-  out << "<br>Response time: " << global.getElapsedSeconds() << " second(s).";
+  out << "Response time: " << global.getElapsedSeconds() << " second(s).";
   result[WebAPI::result::comments] = out.str();
   return result;
 }

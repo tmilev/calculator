@@ -299,14 +299,6 @@ bool Database::findOneWithOptions(
   std::stringstream* commentsGeneralNonSensitive
 ) {
   STACK_TRACE("Database::findOneWithOptions");
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Database::findOneWithOptions failed. "
-      << DatabaseStrings::errorDatabaseDisableD;
-    }
-    return false;
-  }
   (void) commentsGeneralNonSensitive;
   if (global.flagDatabaseCompiled) {
     return
@@ -317,15 +309,18 @@ bool Database::findOneWithOptions(
       commentsOnFailure,
       commentsGeneralNonSensitive
     );
+  } else {
+  // We are using the fallback database
+    if (options.toJSON().objects.size() > 0) {
+      *commentsOnFailure
+      << "Project compiled without mongoDB support, "
+      << "so I am using a fallback database. "
+      << "Non-empty query options are not supported: "
+      << options.toJSON();
+      return false;
+    }
+    return  Database::fallBack.findOne(query, output, commentsOnFailure);
   }
-  (void) output;
-  (void) options;
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure
-    <<
-    "Database::findOneWithOptions: project compiled without mongoDB support. ";
-  }
-  return false;
 }
 
 bool Database::findOne(
@@ -1497,15 +1492,6 @@ bool UserCalculator::computeAndStoreActivationStats(
   std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("UserCalculator::computeAndStoreActivationStats");
-  if (
-    !global.flagDatabaseCompiled &&
-    !global.flagDisableDatabaseLogEveryoneAsAdmin
-  ) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Compiled without database support. ";
-    }
-    return false;
-  }
   std::string activationAddress;
   if (
     !this->getActivationAddressFromActivationToken(
@@ -1531,10 +1517,9 @@ bool UserCalculator::computeAndStoreActivationStats(
   if (
     !Database::get().findOne(findEmail, emailStat, commentsOnFailure)
   ) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Unexpected: could not find email info. ";
+      if (commentsGeneral != nullptr) {
+        *commentsGeneral << "Email not on record. ";
       }
-      return false;
   }
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime =
@@ -1626,7 +1611,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   << EmailRoutines::webAdress
   << ", please follow the activation link below.\n\n "
   << activationAddress
-  << "\n\nSincerely, \nthe "
+  << " \n\nSincerely, \nthe "
   << EmailRoutines::webAdress
   << " team";
   this->activationEmail = emailBody.str();
@@ -1949,24 +1934,16 @@ bool EmailRoutines::sendEmailWithMailGun(
   global.externalCommandReturnOutput(commandToExecute.str());
   global << commandResult << Logger::endL;
   if (commentsGeneralSensitive != nullptr) {
-    *commentsGeneralSensitive
-    << "Command: "
-    << HtmlRoutines::convertStringToHtmlString(
-      commandToExecute.str(), true
-    );
     bool isBad = false;
     if (commandResult.find("Forbidden") != std::string::npos) {
       isBad = true;
     }
-    *commentsGeneralSensitive << "<br>Result:<br>";
+    *commentsGeneralSensitive << "Result: ";
     if (isBad) {
-      *commentsGeneralSensitive << "<b style ='color:red'>";
+      *commentsGeneralSensitive << "[PROBLEMS ENCOUNTERED]: ";
     }
     *commentsGeneralSensitive
     << HtmlRoutines::convertStringToHtmlString(commandResult, true);
-    if (isBad) {
-      *commentsGeneralSensitive << "</b>";
-    }
   }
   return true;
 }

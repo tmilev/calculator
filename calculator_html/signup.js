@@ -20,16 +20,27 @@ function getRecaptchaId() {
     return calculatorRecaptcha;
   }
   throw (`Recaptcha not supported for your hostname: ${window.location.hostname}. Post an issue on our project's github if you need this feature. `)
-  return "";
 }
+
+// Ensure that grecaptcha is at least undefined.
+var grecaptcha;
 
 class SignUp {
   constructor() {
     this.recaptchaIdForSignUp = null;
   }
   signUp() {
+    if (grecaptcha === null || grecaptcha === undefined) {
+      document.getElementById(
+        ids.domElements.pages.signUp.recaptchaSignUp
+      ).innerHTML = "<b style='color:red'>Missing google (re)captcha: no Internet?</b>";
+      return;
+    }
     if (this.recaptchaIdForSignUp === null) {
-      this.recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", { 'sitekey': getRecaptchaId() });
+      this.recaptchaIdForSignUp = grecaptcha.render(
+        ids.domElements.pages.signUp.recaptchaSignUp, {
+        'sitekey': getRecaptchaId()
+      });
     }
   }
 
@@ -38,19 +49,33 @@ class SignUp {
   }
 
   submitSignUpInfo() {
+    let debugLogin = window.calculator.mainPage.user.debugLoginIsOn();
+    let token = "";
     if (grecaptcha === undefined || grecaptcha === null) {
-      document.getElementById('signUpResult').innerHTML = "<b style ='color:red'>The google captcha script appears to be missing (no Internet?). </b>";
-      return false;
+      document.getElementById(
+        ids.domElements.pages.signUp.signUpResult
+      ).innerHTML = "<b style ='color:red'>Missing google (re)captcha: no Internet?</b>";
+      if (!debugLogin) {
+        return false;
+      }
+    } else {
+      token = grecaptcha.getResponse(this.recaptchaIdForSignUp);
     }
-    var desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
-    var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
-    var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
+    let desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
+    let desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
+    let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
     url += `email=${desiredEmailEncoded}&`;
-    var token = grecaptcha.getResponse(this.recaptchaIdForSignUp);
     if (token === '' || token === null) {
-      document.getElementById('signUpResult').innerHTML = "<b style ='color:red'>Please don't forget to solve the captcha. </b>";
-      return false;
-    }
+      if (!debugLogin) {
+        document.getElementById(
+          ids.domElements.pages.signUp.signUpResult
+        ).innerHTML = "<b style ='color:red'>Please don't forget to solve the captcha. </b>";
+        return false;
+      } 
+      document.getElementById(
+        ids.domElements.pages.signUp.signUpResult
+      ).innerHTML = "<b style='color:red'>Debug login: recaptcha ignored.</b>";
+    } 
     this.recaptchaIdForSignUp = null;
     url += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
     submitRequests.submitGET({
@@ -76,7 +101,7 @@ function callbackSignUp(input) {
   }
 }
 
-var signUp = new SignUp();
+let signUp = new SignUp();
 
 module.exports = {
   getRecaptchaId,

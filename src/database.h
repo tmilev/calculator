@@ -139,7 +139,7 @@ public:
   public:
     Database* owner;
     MutexProcess access;
-    HashedList<std::string> knownCollectionS;
+    HashedList<std::string> knownCollections;
     HashedList<std::string> knownIndices;
     JSData reader;
     bool flagDatabaseRead;

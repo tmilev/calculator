@@ -14,6 +14,7 @@ const urlFields = {
     toggleMonitoring: "toggleMonitoring",
     userInfoJSON: "userInfoJSON",
     loginDisabledEveryoneIsAdmin: "loginDisabledEveryoneIsAdmin",
+    debugLogin: "debugLogin",
     useFallbackDatabase: "useFallbackDatabase",
     httpsSupport: "httpsSupport",
     indicator: "indicator",

@@ -260,7 +260,7 @@ public:
   // This will reveal secrets to end users and cannot run in production.
   // The flag can only be used with fallback database.
   // It will automatically be turned off if using the regular database.
-  bool flagDebugLoginProcess;
+  bool flagDebugLogin;
   bool flagDisableDatabaseLogEveryoneAsAdmin;
   // When this is set, the calculator will spin a separate
   // process that will periodically ping the main calculator

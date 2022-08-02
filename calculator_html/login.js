@@ -145,6 +145,13 @@ function loginWithServerCallback(incomingString, result) {
     page.user.flagDatabaseInactiveEveryoneIsAdmin = true;
   }
   if (
+    parsedAuthentication[pathnames.urlFields.requests.debugLogin] === "true" ||
+    parsedAuthentication[pathnames.urlFields.requests.debugLogin] === true
+  ) {
+    page.user.debugLogin = true;    
+    loginInfo += "<b style='color:red'>Debugging login</b>";
+  }
+  if (
     parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== "true" &&
     parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== true
   ) {
@@ -160,8 +167,8 @@ function loginWithServerCallback(incomingString, result) {
     let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
     databaseInfo.innerHTML = "<b style='color:red'>Fallback database.</b>";
   }
-  let loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
-  loginExtraInfo.innerHTML = loginInfo;
+  let loginInfoComponent = document.getElementById(ids.domElements.divLoginPanelInfo);
+  loginInfoComponent.innerHTML = loginInfo;
   if (success) {
     page.user.makeFromUserInfo(parsedAuthentication);
     toggleAccountPanels();
@@ -210,8 +217,6 @@ function showLoginCalculatorButtons() {
   document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.add("divVisible");
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divVisible");
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divInvisible");
-  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.remove("divVisible");
-  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.add("divInvisible");
 }
 
 function hideLoginCalculatorButtons() {
@@ -221,8 +226,6 @@ function hideLoginCalculatorButtons() {
   document.getElementById(ids.domElements.pages.login.userNameReport).innerHTML = page.storage.variables.user.name.value;
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divInvisible");
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divVisible");
-  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.remove("divInvisible");
-  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.add("divVisible");
 }
 
 function showLogoutButton() {

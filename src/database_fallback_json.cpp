@@ -135,7 +135,7 @@ bool Database::FallBack::findOne(
 
 std::string Database::FallBack::toStringIndices() const {
   std::stringstream out;
-  out << this->indices.size() << " indices total.\n";
+  out << this->indices.size() << " indices total. ";
   int maxIndexedToDisplay = 3;
   for (int i = 0; i < this->indices.size(); i ++) {
     const MapList<
@@ -161,7 +161,7 @@ std::string Database::FallBack::toStringIndices() const {
     if (numberToDisplay < currentLocation.size()) {
       out << ", ...";
     }
-    out << "]\n";
+    out << "] ";
   }
   out << "Known indices: " << this->knownIndices.toStringCommaDelimited();
   return out.str();
@@ -240,7 +240,7 @@ bool Database::FallBack::hasCollection(
   const std::string& collection, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::FallBack::hasCollection");
-  if (Database::FallBack::knownCollectionS.contains(collection)) {
+  if (Database::FallBack::knownCollections.contains(collection)) {
     this->reader[collection].elementType = JSData::token::tokenArray;
     return true;
   }
@@ -253,7 +253,7 @@ bool Database::FallBack::hasCollection(
     << collection
     << " not found. "
     << "Known collections: "
-    << this->knownCollectionS.toStringCommaDelimited()
+    << this->knownCollections.toStringCommaDelimited()
     << ". ";
   }
   return false;
@@ -266,11 +266,17 @@ Database::FallBack::FallBack() {
 
 void Database::FallBack::initialize() {
   this->access.createMe("databaseFallback", false);
-  this->knownIndices.addOnTop({
-      DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
+  this->knownIndices.addListOnTop({
+  DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername,
+  DatabaseStrings::tableUsers + "." + DatabaseStrings::labelEmail,
+  DatabaseStrings::tableEmailInfo + "." + DatabaseStrings::labelEmail,
+
     }
   );
-  this->knownCollectionS.addOnTop({DatabaseStrings::tableUsers});
+  this->knownCollections.addListOnTop({
+  DatabaseStrings::tableUsers,
+  DatabaseStrings::tableEmailInfo,
+  });
 }
 
 void Database::FallBack::createHashIndex(

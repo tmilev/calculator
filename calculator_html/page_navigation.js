@@ -35,11 +35,20 @@ class User {
     this.deadlineSchema = "";
     this.sectionComputed = "";
     this.flagDatabaseInactiveEveryoneIsAdmin = false;
+    this.debugLoginProcess = false;
   }
 
   isLoggedIn() {
     return this.flagLoggedIn;
   }
+
+  debugLoginIsOn() {
+    return (
+      this.flagDatabaseInactiveEveryoneIsAdmin === true ||
+      this.debugLogin === true
+    );
+  }
+
 
   getRole() {
     return mainPage().storage.variables.user.role.getValue();

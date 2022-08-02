@@ -115,6 +115,7 @@ public:
     static std::string crashReport;
     static std::string millisecondsComputation;
     static std::string loginDisabledEveryoneIsAdmin;
+    static std::string debugLogin;
     static std::string useFallbackDatabase;
     static std::string httpsSupport;
     static std::string scriptType;
@@ -220,6 +221,7 @@ public:
   static std::string serverAutoMonitor;
   static std::string monitorPingTime;
   static std::string disableDatabaseLogEveryoneAsAdmin;
+  static std::string debugLogin;
   static std::string serverDetailedLog;
   static std::string gitRepository;
   static std::string portHTTP;

@@ -1057,6 +1057,7 @@ void WebAPIResponse::getJSDataUserInfo(
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] =
   global.flagDisableDatabaseLogEveryoneAsAdmin;
+  outputAppend[WebAPI::result::debugLogin] = global.flagDebugLogin;
   outputAppend[WebAPI::result::useFallbackDatabase] =
   !global.flagDatabaseCompiled;
   outputAppend[WebAPI::result::httpsSupport] = global.flagSSLAvailable;

@@ -1113,10 +1113,10 @@ bool WebClient::verifyRecaptcha(
   std::stringstream* commentsGeneralSensitive
 ) {
   STACK_TRACE("WebClient::VerifyRecaptcha");
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.flagDebugLogin) {
     if (commentsGeneralNONsensitive != nullptr) {
       *commentsGeneralNONsensitive
-      << "Everyone's logged in as admin: "
+      << "Debugging your login: "
       << "not verifying your recaptcha. ";
     }
     return true;
@@ -1219,13 +1219,6 @@ bool WebAPIResponse::processForgotLogin() {
   STACK_TRACE("WebAPIResponse::processForgotLogin");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  if (
-    !global.flagDatabaseCompiled &&
-    !global.flagDisableDatabaseLogEveryoneAsAdmin
-  ) {
-    result[WebAPI::result::error] = "Error: database not running. ";
-    return global.response.writeResponse(result, false);
-  }
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
     Database::get().user.logoutViaDatabase();
@@ -1254,11 +1247,12 @@ bool WebAPIResponse::processForgotLogin() {
       return global.response.writeResponse(result, false);
   }
   out << "Your email is on record. ";
-  if (!global.userDefaultHasAdminRights()) {
-    this->owner->doSetEmail(user, &out, &out, nullptr);
-  } else {
-    out << "Setting email as admin. ";
+  global.comments << "DEBUG: flagdebuglogin: " << global.flagDebugLogin;
+  if (global.flagDebugLogin){
+    out << "Setting email with debug information. ";
     this->owner->doSetEmail(user, &out, &out, &out);
+  }else{
+      this->owner->doSetEmail(user, &out, &out, nullptr);
   }
   out << "Response time: " << global.getElapsedSeconds() << " second(s). ";
   result[WebAPI::result::comments] = out.str();
@@ -1269,18 +1263,7 @@ JSData WebWorker::getSignUpRequestResult() {
   STACK_TRACE("WebWorker::getSignUpRequestResult");
   JSData result;
   std::stringstream errorStream;
-  if (
-    !global.flagDatabaseCompiled &&
-    !global.flagDisableDatabaseLogEveryoneAsAdmin
-  ) {
-    result[WebAPI::result::error] =
-    "Database not available (cannot sign up). ";
-    return result;
-  }
   std::stringstream generalCommentsStream;
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    generalCommentsStream << "Database disabled, this is a dry run. ";
-  }
   Database::get().user.logoutViaDatabase();
   UserCalculator user;
   user.username =
@@ -1340,9 +1323,10 @@ JSData WebWorker::getSignUpRequestResult() {
       return result;
     }
   std::stringstream* adminOutputStream = nullptr;
-  if (global.userDefaultHasAdminRights()) {
+  if (global.flagDebugLogin) {
     adminOutputStream = &generalCommentsStream;
   }
+
   this->doSetEmail(
     user, &errorStream, &generalCommentsStream, adminOutputStream
   );

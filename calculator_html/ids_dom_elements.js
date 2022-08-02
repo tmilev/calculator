@@ -95,6 +95,11 @@ let domElements = {
     forgotLogin: {
       buttonSendRecoveryEmail: "buttonSendRecoveryEmail",
       forgotLoginResultReport: "forgotLoginResultReport",
+      forgotLoginResult: "forgotLoginResult",
+    },
+    signUp: {
+      signUpResult: "signUpResult",
+      recaptchaSignUp: "recaptchaSignUp",
     },
   },
   applicationIdentifiers: {
@@ -146,7 +151,7 @@ let domElements = {
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",
   divMathjaxProblematicRender: "divMathjaxProblematicRender",
-  divLoginPanelExtraInfo: "divLoginPanelExtraInfo",
+  divLoginPanelInfo: "divLoginPanelInfo",
   divLoginPanelDatabaseInfo: "divLoginPanelDatabaseInfo",
   courseEditPanel: "divCurrentCourseEditPanel",
   classSpanDeadlineContainer: "spanDeadlineContainer",

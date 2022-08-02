@@ -11,35 +11,52 @@ function callbackForgotLogin(input, output) {
   output.innerHTML = input;
 }
 
+// Ensure grecaptcha is defined.
+var grecaptcha;
+
 class ForgotLogin {
   constructor() {
     this.recaptchaIdForForgotLogin = null;
   }
 
   forgotLoginPage() {
+    if (grecaptcha === undefined || grecaptcha === null) {
+      document.getElementById(
+        ids.domElements.pages.forgotLogin.forgotLoginResult
+      ).innerHTML = "<b style ='color:red'>The google captcha script appears to be missing (no Internet?). </b>";
+      return;
+    }
     if (this.recaptchaIdForForgotLogin === null) {
       this.recaptchaIdForForgotLogin = grecaptcha.render("recaptchaForgotPassword", { sitekey: signUp.getRecaptchaId() });
     }
   }
 
   submitForgotPassword() {
-    let page = window.calculator.mainPage;
-    if (grecaptcha === undefined || grecaptcha === null) {
-      document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
-      return false;
-    }
+    let debugLogin = window.calculator.mainPage.user.debugLoginIsOn();
     let desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForForgotLogin').value);
     let url = "";
     url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.forgotLogin}&`
     url += `${pathnames.urlFields.email}=${desiredEmailEncoded}&`;
-    let token = grecaptcha.getResponse(this.recaptchaIdForForgotLogin);
+    let token = "";
+    if (grecaptcha === undefined || grecaptcha === null) {
+      document.getElementById(
+        ids.domElements.pages.forgotLogin.forgotLoginResult
+      ).innerHTML = "<b style ='color:red'>The google captcha script appears to be missing (no Internet?). </b>";
+      if (!debugLogin) {
+        return false;
+      }
+    } else {
+      token = grecaptcha.getResponse(this.recaptchaIdForForgotLogin);
+    }
     
     if (token === '' || token === null) {
-      if (page.user.flagDatabaseInactiveEveryoneIsAdmin === true) {
+      if (debugLogin) {
         let reportElement = document.getElementById(ids.domElements.pages.forgotLogin.forgotLoginResultReport);
-        reportElement.innerHTML = "<b>Everyone's admin: ignore recaptcha</b>";
+        reportElement.innerHTML = "<b style='color:blue'>Debug login: recaptcha ignored.</b>";
       } else {
-        document.getElementById('forgotLoginResult').innerHTML = "<b style ='color:red'>Please don't forget to solve the captcha. </b>";
+        document.getElementById(
+          ids.domElements.pages.forgotLogin.forgotLoginResult
+        ).innerHTML = "<b style ='color:red'>Please don't forget to solve the captcha.</b>";
         return false;
       }
     }

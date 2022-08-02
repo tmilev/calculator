@@ -2023,8 +2023,8 @@ bool WebWorker::doSetEmail(
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
-  if (!global.flagDatabaseCompiled && commentsOnFailure != nullptr) {
-    *commentsOnFailure
+  if (!global.flagDatabaseCompiled && commentsGeneralNonSensitive != nullptr) {
+    *commentsGeneralNonSensitive
     << "doSetEmail: project compiled without database support. ";
   }
   EmailRoutines email;
@@ -2040,6 +2040,9 @@ bool WebWorker::doSetEmail(
       commentsOnFailure, commentsGeneralNonSensitive
     )
   ) {
+    if (commentsOnFailure != nullptr){
+    *commentsOnFailure << "Failed to compute and store your activation email. ";
+    }
       return false;
   }
   email.emailContent = userCopy.activationEmail;
@@ -2051,9 +2054,9 @@ bool WebWorker::doSetEmail(
     commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive
   );
   if (commentsGeneralSensitive != nullptr) {
-    if (global.userDefaultHasAdminRights()) {
+    if (global.flagDebugLogin) {
       *commentsGeneralSensitive
-      << "<hr>Content of sent email (administrator view only):<br>"
+      << "Content of sent email (debug login): "
       << HtmlRoutines::convertStringToHtmlString(email.emailContent, true);
     }
   } else {
@@ -2061,6 +2064,7 @@ bool WebWorker::doSetEmail(
       *commentsGeneralNonSensitive << "Email content not displayed. ";
     }
   }
+  global.comments << "DEBUG: got to here!";
   userCopy.clearAuthenticationTokenAndPassword();
   userCopy.actualActivationToken = "";
   inputOutputUser = userCopy;
@@ -2079,12 +2083,12 @@ JSData WebWorker::setEmail(const std::string& input) {
   std::stringstream out, debugStream;
   global.userDefault.email = input;
   std::stringstream* adminOutputStream = nullptr;
-  if (global.userDefaultHasAdminRights()) {
+  if (global.flagDebugLogin) {
     adminOutputStream = &out;
   }
   this->doSetEmail(global.userDefault, &out, &out, adminOutputStream);
-  if (global.userDefaultHasAdminRights()) {
-    out << "<hr><b>Administrator view only. </b>" << debugStream.str();
+  if (global.flagDebugLogin) {
+    out << "Debug login information. " << debugStream.str();
   }
   out << "Response time: " << global.getElapsedSeconds() << " second(s).";
   result[WebAPI::result::comments] = out.str();
@@ -5409,6 +5413,24 @@ void GlobalVariables::configurationProcess() {
   global.flagServerDetailedLog =
   global.configuration[Configuration::serverDetailedLog].
   isTrueRepresentationInJSON();
+  global.flagDebugLogin= global.configuration[Configuration::debugLogin].isTrueRepresentationInJSON();
+  if (global.flagDebugLogin){
+    global.flagDatabaseCompiled = false;
+    global
+    << Logger::purple
+    << "************************"
+    << Logger::endL
+    << Logger::red
+    << "WARNING: debug login is on. "
+    << Logger::green
+    << "This can only run with fallback database. "
+    << "I am turning off regular database right away."
+    << Logger::endL
+    << Logger::purple
+    << "************************"
+    << Logger::endL;
+  }
+
   global.flagDisableDatabaseLogEveryoneAsAdmin =
   global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
   isTrueRepresentationInJSON();

@@ -27,6 +27,7 @@ public:
     static std::string setProblemWeight;
     static std::string setProblemDeadline;
     static std::string changePassword;
+    static std::string changePasswordPage;
     static std::string examplesJSON;
     static std::string activateAccountJSON;
     static std::string calculatorHTML;

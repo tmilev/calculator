@@ -101,6 +101,9 @@ let domElements = {
       signUpResult: "signUpResult",
       recaptchaSignUp: "recaptchaSignUp",
     },
+    activateAccount: {
+      buttonChangePassword: "buttonChangePassword",
+    },
   },
   applicationIdentifiers: {
     default: "divDefaultApplication",

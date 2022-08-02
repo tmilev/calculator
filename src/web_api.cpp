@@ -285,10 +285,6 @@ bool WebAPIResponse::processChangePassword(
   (void) reasonForNoAuthentication;
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  if (!global.flagDatabaseCompiled) {
-    result[WebAPI::result::error] = "Database not compiled";
-    return global.response.writeResponse(result, false);
-  }
   UserCalculatorData& user = global.userDefault;
   user.enteredAuthenticationToken = "";
   if (!global.flagUsingSSLinCurrentConnection) {
@@ -373,7 +369,7 @@ bool WebAPIResponse::processChangePassword(
     return global.response.writeResponse(result);
   }
   std::stringstream out;
-  out << "<b style = 'color:green'>Password change successful. </b>";
+  out << "Password change successful.";
   if (global.getWebInput("doReload") != "false") {
     out
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"

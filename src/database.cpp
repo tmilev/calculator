@@ -18,11 +18,7 @@ bool Database::User::setPassword(
   std::string& outputAuthenticationToken,
   std::stringstream& comments
 ) {
-  if (!global.flagDatabaseCompiled) {
-    comments << "Database not present. ";
-    return false;
-  }
-  STACK_TRACE("DatabaseRoutinesGlobalFunctions::setPassword");
+  STACK_TRACE("Database::User::setPassword");
   if (!global.flagLoggedIn) {
     comments << "Changing passwords allowed for logged-in users only. ";
     return false;
@@ -39,11 +35,7 @@ bool Database::User::setPassword(
 bool Database::User::userExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
-  if (!global.flagDatabaseCompiled) {
-    comments << "No database available.";
-    return false;
-  }
-  STACK_TRACE("DatabaseRoutinesGlobalFunctions::userExists");
+  STACK_TRACE("Database::User::userExists");
   if (!global.flagLoggedIn) {
     return false;
   }
@@ -62,10 +54,10 @@ bool Database::User::userExists(
 }
 
 bool Database::User::userDefaultHasInstructorRights() {
-  STACK_TRACE(
-    "DatabaseRoutinesGlobalFunctions::userDefaultHasInstructorRights"
-  );
-  if (global.userDefaultHasAdminRights()) return true;
+  STACK_TRACE("Database::User::userDefaultHasInstructorRights");
+  if (global.userDefaultHasAdminRights()) {
+    return true;
+  }
   if (!global.flagDatabaseCompiled) {
     return true;
   }
@@ -79,10 +71,7 @@ bool Database::User::userDefaultHasInstructorRights() {
 }
 
 bool Database::User::logoutViaDatabase() {
-  if (!global.flagDatabaseCompiled) {
-    return true;
-  }
-  STACK_TRACE("DatabaseRoutinesGlobalFunctions::logoutViaDatabase");
+  STACK_TRACE("Database::User::logoutViaDatabase");
   if (!global.flagLoggedIn) {
     return true;
   }
@@ -310,7 +299,7 @@ bool Database::findOneWithOptions(
       commentsGeneralNonSensitive
     );
   } else {
-  // We are using the fallback database
+    // We are using the fallback database
     if (options.toJSON().objects.size() > 0) {
       *commentsOnFailure
       << "Project compiled without mongoDB support, "
@@ -319,7 +308,7 @@ bool Database::findOneWithOptions(
       << options.toJSON();
       return false;
     }
-    return  Database::fallBack.findOne(query, output, commentsOnFailure);
+    return Database::fallBack.findOne(query, output, commentsOnFailure);
   }
 }
 
@@ -1470,7 +1459,7 @@ bool UserCalculator::computeAndStoreActivationToken(
       *commentsOnFailure << "Setting activation token failed. ";
     }
     this->actualActivationToken = "";
-      return false;
+    return false;
   }
   return true;
 }
@@ -1517,9 +1506,9 @@ bool UserCalculator::computeAndStoreActivationStats(
   if (
     !Database::get().findOne(findEmail, emailStat, commentsOnFailure)
   ) {
-      if (commentsGeneral != nullptr) {
-        *commentsGeneral << "Email not on record. ";
-      }
+    if (commentsGeneral != nullptr) {
+      *commentsGeneral << "Email not on record. ";
+    }
   }
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime =
@@ -1581,10 +1570,10 @@ bool UserCalculator::computeAndStoreActivationStats(
       findQueryInUsers, updateUser, commentsOnFailure
     )
   ) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
-      }
-      return false;
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
+    }
+    return false;
   }
   QuerySet emailStatQuery;
   emailStatQuery.value[DatabaseStrings::labelLastActivationEmailTime] =
@@ -1598,10 +1587,10 @@ bool UserCalculator::computeAndStoreActivationStats(
   if (
     !Database::get().updateOne(findEmail, emailStatQuery, commentsOnFailure)
   ) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Unexpected failure to update email stats. ";
-      }
-      return false;
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Unexpected failure to update email stats. ";
+    }
+    return false;
   }
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
   std::stringstream emailBody;
@@ -2138,10 +2127,10 @@ bool Database::User::loginNoDatabaseSupport(
 bool Database::User::loginViaDatabase(
   UserCalculatorData& user, std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("DatabaseRoutinesGlobalFunctions::loginViaDatabase");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return Database::User::loginNoDatabaseSupport(user, commentsOnFailure);
   }
-  STACK_TRACE("DatabaseRoutinesGlobalFunctions::loginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(user);
   if (userWrapper.authenticate(commentsOnFailure)) {
@@ -2163,7 +2152,7 @@ bool Database::User::loginViaDatabase(
   if (userWrapper.enteredActivationToken != "") {
     if (
       global.requestType == WebAPI::request::changePassword ||
-      global.requestType == "changePasswordPage" ||
+      global.requestType == WebAPI::request::changePasswordPage ||
       global.requestType == WebAPI::request::activateAccountJSON
     ) {
       if (

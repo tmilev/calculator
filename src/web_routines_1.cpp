@@ -1239,20 +1239,19 @@ bool WebAPIResponse::processForgotLogin() {
     << user.email
     << " in our records. ";
     result[WebAPI::result::comments] = out.str();
-      return global.response.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   if (!user.loadFromDatabase(&out, &out)) {
     out << "Failed to fetch user info for email: " << user.email << ". ";
     result[WebAPI::result::comments] = out.str();
-      return global.response.writeResponse(result, false);
+    return global.response.writeResponse(result, false);
   }
   out << "Your email is on record. ";
-  global.comments << "DEBUG: flagdebuglogin: " << global.flagDebugLogin;
-  if (global.flagDebugLogin){
+  if (global.flagDebugLogin) {
     out << "Setting email with debug information. ";
     this->owner->doSetEmail(user, &out, &out, &out);
-  }else{
-      this->owner->doSetEmail(user, &out, &out, nullptr);
+  } else {
+    this->owner->doSetEmail(user, &out, &out, nullptr);
   }
   out << "Response time: " << global.getElapsedSeconds() << " second(s). ";
   result[WebAPI::result::comments] = out.str();
@@ -1315,18 +1314,17 @@ JSData WebWorker::getSignUpRequestResult() {
     << user.email
     << ") is available.";
   }
-    if (!user.storeToDatabase(false, &errorStream)) {
-      errorStream << "Failed to store error stream. ";
-      result[WebAPI::result::error] = errorStream.str();
-      result[WebAPI::result::comments] = generalCommentsStream.str();
-      result[WebAPI::result::resultLabel] = outputStream.str();
-      return result;
-    }
+  if (!user.storeToDatabase(false, &errorStream)) {
+    errorStream << "Failed to store error stream. ";
+    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::result::comments] = generalCommentsStream.str();
+    result[WebAPI::result::resultLabel] = outputStream.str();
+    return result;
+  }
   std::stringstream* adminOutputStream = nullptr;
   if (global.flagDebugLogin) {
     adminOutputStream = &generalCommentsStream;
   }
-
   this->doSetEmail(
     user, &errorStream, &generalCommentsStream, adminOutputStream
   );

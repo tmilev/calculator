@@ -34,7 +34,7 @@ std::string WebAPI::result::crashReport = "crashReport";
 std::string WebAPI::result::millisecondsComputation = "timeComputation";
 std::string WebAPI::result::loginDisabledEveryoneIsAdmin =
 "loginDisabledEveryoneIsAdmin";
-std::string WebAPI::result::debugLogin= "debugLogin";
+std::string WebAPI::result::debugLogin = "debugLogin";
 std::string WebAPI::result::useFallbackDatabase = "useFallbackDatabase";
 std::string WebAPI::result::httpsSupport = "httpsSupport";
 std::string WebAPI::result::solution = "solution";
@@ -98,6 +98,7 @@ std::string WebAPI::request::requestAPI = "request";
 std::string WebAPI::request::setProblemWeight = "setProblemWeight";
 std::string WebAPI::request::setProblemDeadline = "setProblemDeadline";
 std::string WebAPI::request::changePassword = "changePassword";
+std::string WebAPI::request::changePasswordPage = "changePasswordPage";
 std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
 std::string WebAPI::request::debugFlag = "debugFlag";
 std::string WebAPI::request::serverStatusJSON = "serverStatusJSON";
@@ -219,9 +220,7 @@ std::string Configuration::builtInTLSAvailable = "builtInTLSAvailable";
 std::string Configuration::serverAutoMonitor = "serverAutoMonitor";
 std::string Configuration::disableDatabaseLogEveryoneAsAdmin =
 "disableDatabaseLogEveryoneAsAdmin";
-std::string Configuration::debugLogin=
-"debugLogin";
-
+std::string Configuration::debugLogin = "debugLogin";
 std::string Configuration::serverDetailedLog = "serverDetailedLog";
 std::string Configuration::gitRepository = "gitRepository";
 std::string Configuration::dontUseOpenSSL = "dontUseOpenSSL";

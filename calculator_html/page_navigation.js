@@ -238,6 +238,7 @@ class Page {
       },
     };
     this.defaultPage = "calculator";
+    this.currentPage = "";
     if (document.getElementById(ids.domElements.applicationIdentifiers.compareExpressions)) {
       this.defaultPage = "compareExpressions";
     }
@@ -245,6 +246,7 @@ class Page {
     this.initializeStorageCallbacks();
     this.flagProblemPageOnly = false;
     this.initializeLoginPage();
+    this.initializeAccountButtons();
   }
 
   initializeLoginPage() {
@@ -255,6 +257,14 @@ class Page {
     let sendRecoveryEmail = document.getElementById(ids.domElements.pages.forgotLogin.buttonSendRecoveryEmail);
     sendRecoveryEmail.addEventListener("click", () => {
       forgotPassword.forgotLogin.submitForgotPassword();
+    });
+  }
+
+  initializeAccountButtons() {
+    document.getElementById(
+      ids.domElements.pages.activateAccount.buttonChangePassword
+    ).addEventListener("click", () => {
+      activateAccount.accountActivator.submitActivateAccountRequest();
     });
   }
 
@@ -533,6 +543,11 @@ class Page {
     if (!(inputPage in this.pages)) {
       inputPage = this.defaultPage;
     }
+    if (inputPage === this.currentPage) {
+      return;
+    }
+    this.currentPage = inputPage;
+
     this.storage.variables.currentPage.setAndStore(inputPage);
     if (this.flagProblemPageOnly) {
       this.selectPageFunction(inputPage);

@@ -789,15 +789,12 @@ bool WebWorker::loginProcedure(
     user.flagEnteredAuthenticationToken = true;
     global.flagLogInAttempted = true;
   }
-  // ///////////////////////////////////////////
-  // this may need a security audit: the URLStringToNormal and getWebInput
+  // The URLStringToNormal and getWebInput
   // functions may leave traces of (freed) memory
   // of the old password. Could only be used
   // if the attacker has control of the server executable - which probably
-  // means
-  // we
-  // already are in big trouble - so this really shouldn't be such a big deal.
-  // ///////////////////////////////////////////
+  // means we already are in big trouble - so this really shouldn't be
+  // such a big deal.
   if (
     !user.flagEnteredPassword &&
     !user.flagEnteredAuthenticationToken &&
@@ -2040,10 +2037,11 @@ bool WebWorker::doSetEmail(
       commentsOnFailure, commentsGeneralNonSensitive
     )
   ) {
-    if (commentsOnFailure != nullptr){
-    *commentsOnFailure << "Failed to compute and store your activation email. ";
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to compute and store your activation email. ";
     }
-      return false;
+    return false;
   }
   email.emailContent = userCopy.activationEmail;
   email.subject = userCopy.activationEmailSubject;
@@ -2064,7 +2062,6 @@ bool WebWorker::doSetEmail(
       *commentsGeneralNonSensitive << "Email content not displayed. ";
     }
   }
-  global.comments << "DEBUG: got to here!";
   userCopy.clearAuthenticationTokenAndPassword();
   userCopy.actualActivationToken = "";
   inputOutputUser = userCopy;
@@ -5413,8 +5410,9 @@ void GlobalVariables::configurationProcess() {
   global.flagServerDetailedLog =
   global.configuration[Configuration::serverDetailedLog].
   isTrueRepresentationInJSON();
-  global.flagDebugLogin= global.configuration[Configuration::debugLogin].isTrueRepresentationInJSON();
-  if (global.flagDebugLogin){
+  global.flagDebugLogin =
+  global.configuration[Configuration::debugLogin].isTrueRepresentationInJSON();
+  if (global.flagDebugLogin) {
     global.flagDatabaseCompiled = false;
     global
     << Logger::purple
@@ -5430,7 +5428,6 @@ void GlobalVariables::configurationProcess() {
     << "************************"
     << Logger::endL;
   }
-
   global.flagDisableDatabaseLogEveryoneAsAdmin =
   global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
   isTrueRepresentationInJSON();

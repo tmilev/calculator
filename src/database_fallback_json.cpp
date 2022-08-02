@@ -267,16 +267,16 @@ Database::FallBack::FallBack() {
 void Database::FallBack::initialize() {
   this->access.createMe("databaseFallback", false);
   this->knownIndices.addListOnTop({
-  DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername,
-  DatabaseStrings::tableUsers + "." + DatabaseStrings::labelEmail,
-  DatabaseStrings::tableEmailInfo + "." + DatabaseStrings::labelEmail,
+      DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername,
+      DatabaseStrings::tableUsers + "." + DatabaseStrings::labelEmail,
+      DatabaseStrings::tableEmailInfo + "." + DatabaseStrings::labelEmail,
 
     }
   );
   this->knownCollections.addListOnTop({
-  DatabaseStrings::tableUsers,
-  DatabaseStrings::tableEmailInfo,
-  });
+      DatabaseStrings::tableUsers, DatabaseStrings::tableEmailInfo,
+    }
+  );
 }
 
 void Database::FallBack::createHashIndex(

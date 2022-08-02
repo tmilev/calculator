@@ -199,7 +199,7 @@ function unescapeInequalitiesAmpersands(input) {
 
 /**@returns{Object} */
 function jsonUnescapeParse(
-  /**@type{string} */
+  /** @type{string} */
   input,
 ) {
   let unescaped = unescapeInequalitiesAmpersands(input);

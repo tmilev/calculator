@@ -2,51 +2,79 @@
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const submitRequests = require("./submit_requests");
+const miscellaneous = require("./miscellaneous_frontend");
 const signUp = require('./signup');
 
 function callbackForgotLogin(input, output) {
   if (typeof output === "string") {
     output = document.getElementById(output);
   }
-  output.innerHTML = input;
+  try {
+    let parsed = miscellaneous.jsonUnescapeParse(input);
+    miscellaneous.writeHtmlFromCommentsAndErrors(parsed, output)
+  } catch (e) {
+    output.textContent = e + " Received input: " +input;
+    
+  }
 }
-
-// Ensure grecaptcha is defined.
-var grecaptcha;
 
 class ForgotLogin {
   constructor() {
     this.recaptchaIdForForgotLogin = null;
+    this.grecaptcha = null;
+  }
+
+  initialize() {
+    if (this.grecaptcha !== null && this.grecaptcha !== undefined) {
+      return;
+    }
+    if (window.calculator.grecaptcha !== null && window.calculator.grecaptcha !== undefined) {
+      this.grecaptcha = window.calculator.grecaptcha;
+    }
+  }
+
+  writeDebugLoginStatus() {
+    let recaptchaElement = document.getElementById(
+      ids.domElements.pages.forgotLogin.forgotLoginResult
+    );
+    if (this.grecaptcha === undefined || this.grecaptcha === null) {
+      recaptchaElement.innerHTML = "<b style ='color:red'>The google captcha script appears to be missing: no Internet?</b>";
+      return;
+    }
+    if (window.calculator.mainPage.user.debugLoginIsOn()) {
+      recaptchaElement.innerHTML = "<b style='color:blue'>Debugging login, recaptcha is off.</b>";      
+    }    
   }
 
   forgotLoginPage() {
-    if (grecaptcha === undefined || grecaptcha === null) {
-      document.getElementById(
-        ids.domElements.pages.forgotLogin.forgotLoginResult
-      ).innerHTML = "<b style ='color:red'>The google captcha script appears to be missing (no Internet?). </b>";
+    this.initialize();
+    this.writeDebugLoginStatus();
+    if (this.grecaptcha === null || this.grecaptcha === undefined) {
       return;
     }
-    if (this.recaptchaIdForForgotLogin === null) {
-      this.recaptchaIdForForgotLogin = grecaptcha.render("recaptchaForgotPassword", { sitekey: signUp.getRecaptchaId() });
+    if (this.recaptchaIdForForgotLogin === null && !this.debugLogin()) {
+      this.recaptchaIdForForgotLogin = this.grecaptcha.render("recaptchaForgotPassword", { sitekey: signUp.getRecaptchaId() });
     }
   }
 
+  debugLogin() { 
+    return window.calculator.mainPage.user.debugLoginIsOn();
+  }
+
   submitForgotPassword() {
-    let debugLogin = window.calculator.mainPage.user.debugLoginIsOn();
+    let debugLogin = this.debugLogin();
     let desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForForgotLogin').value);
     let url = "";
     url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.forgotLogin}&`
     url += `${pathnames.urlFields.email}=${desiredEmailEncoded}&`;
     let token = "";
-    if (grecaptcha === undefined || grecaptcha === null) {
-      document.getElementById(
-        ids.domElements.pages.forgotLogin.forgotLoginResult
-      ).innerHTML = "<b style ='color:red'>The google captcha script appears to be missing (no Internet?). </b>";
+    if (this.grecaptcha === undefined || this.grecaptcha === null) {
+      this.writeDebugLoginStatus();
       if (!debugLogin) {
         return false;
       }
-    } else {
-      token = grecaptcha.getResponse(this.recaptchaIdForForgotLogin);
+    } else if (!debugLogin) {
+      token = this.grecaptcha.getResponse(this.recaptchaIdForForgotLogin);
     }
     
     if (token === '' || token === null) {

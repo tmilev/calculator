@@ -418,7 +418,6 @@ bool WebAPIResponse::processCompute() {
   global.response.disallowReport();
   JSData result;
   result = calculator.toJSONOutputAndSpecials();
-  result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   global.response.writeResponse(result, false);
   global.flagComputationComplete = true;
   return true;
@@ -569,6 +568,7 @@ bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
 bool WebAPIResponse::processLoginUserInfo(const std::string& comments) {
   STACK_TRACE("WebAPIResponse::processLoginUserInfo");
   this->owner->setHeaderOKNoContentLength("");
+  global.comments << "DEBUG: here I am";
   return
   global.response.writeResponse(
     WebAPIResponse::getJSONUserInfo(comments), false

@@ -76,8 +76,8 @@ function loadGlobals() {
   calculator.processMonitoring = require("./process_monitoring");
   calculator.pageNavigation = require("./page_navigation");
   calculator.equationEditor = require("./equation_editor");
-  //initialize everything not initilized while loading:
   calculator.crypto = require("./crypto");
+  // External dependencies:
   require("./external/build/output-min");
   let pageModule = require("./page_navigation");
   calculator.mainPage = new pageModule.Page();

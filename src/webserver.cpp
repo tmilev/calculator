@@ -467,8 +467,8 @@ std::string WebWorker::toStringMessageShort() const {
   << HtmlRoutines::convertStringToHtmlString(this->addressComputed, true);
   out
   << lineBreak
-  << "\nArgument computed:\n"
-  << HtmlRoutines::convertStringToHtmlString(this->argumentComputed, true);
+  << "\nArgument from URL:\n"
+  << HtmlRoutines::convertStringToHtmlString(this->argumentFomURL, true);
   out
   << lineBreak
   << "\nVirtual file/directory name:\n"
@@ -547,7 +547,8 @@ void WebWorker::resetConnection() {
 void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->addressComputed = "";
   this->addressGetOrPost = "";
-  this->argumentComputed = "";
+  this->argumentFomURL = "";
+  this->argumentFomMessageBody = "";
   this->relativePhysicalFileName = "";
   this->VirtualFileName = "";
   this->displayUserInput = "";
@@ -1152,7 +1153,7 @@ void WebWorker::extractAddressParts() {
   for (unsigned i = 0; i < this->addressGetOrPost.size(); i ++) {
     if (this->addressGetOrPost[i] == '?') {
       this->addressComputed = this->addressGetOrPost.substr(0, i);
-      this->argumentComputed =
+      this->argumentFomURL =
       this->addressGetOrPost.substr(i + 1, std::string::npos);
       found = true;
       break;
@@ -1162,7 +1163,7 @@ void WebWorker::extractAddressParts() {
     this->addressComputed = this->addressGetOrPost;
   }
   if (this->messageBody != "") {
-    this->argumentComputed = this->messageBody;
+    this->argumentFomMessageBody = this->messageBody;
   }
 }
 
@@ -1292,7 +1293,7 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
     this->parent->allWorkers[indexOther].writingReportFile.lock();
   }
   bool success =
-  FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  FileOperations::loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
     "results/" + workerId, computationResult, true, true, &commentsOnError
   );
   if (indexOther >= 0) {
@@ -1949,8 +1950,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
     return out.str();
   }
   usernameAssociatedWithToken =
-  emailInfo.value[DatabaseStrings::labelUsernameAssociatedWithToken].
-  stringValue;
+  emailInfo.value[DatabaseStrings::labelUsername].stringValue;
   actualEmailActivationToken =
   emailInfo.value[DatabaseStrings::labelActivationToken].stringValue;
   if (actualEmailActivationToken != claimedActivationToken) {
@@ -2048,6 +2048,7 @@ bool WebWorker::doSetEmail(
   if (commentsGeneralNonSensitive != nullptr) {
     *commentsGeneralNonSensitive << "Sending email... ";
   }
+  bool success =
   email.sendEmailWithMailGun(
     commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive
   );
@@ -2057,15 +2058,13 @@ bool WebWorker::doSetEmail(
       << "Content of sent email (debug login): "
       << HtmlRoutines::convertStringToHtmlString(email.emailContent, true);
     }
-  } else {
-    if (commentsGeneralNonSensitive != nullptr) {
-      *commentsGeneralNonSensitive << "Email content not displayed. ";
-    }
+  } else if (commentsGeneralNonSensitive != nullptr) {
+    *commentsGeneralNonSensitive << "Email content not displayed. ";
   }
   userCopy.clearAuthenticationTokenAndPassword();
   userCopy.actualActivationToken = "";
   inputOutputUser = userCopy;
-  return true;
+  return success;
 }
 
 JSData WebWorker::setEmail(const std::string& input) {
@@ -2080,10 +2079,17 @@ JSData WebWorker::setEmail(const std::string& input) {
   std::stringstream out, debugStream;
   global.userDefault.email = input;
   std::stringstream* adminOutputStream = nullptr;
+  std::stringstream errorStream;
   if (global.flagDebugLogin) {
-    adminOutputStream = &out;
+    adminOutputStream = &errorStream;
   }
-  this->doSetEmail(global.userDefault, &out, &out, adminOutputStream);
+  if (
+    !this->doSetEmail(
+      global.userDefault, &errorStream, &out, adminOutputStream
+    )
+  ) {
+    result[WebAPI::result::error] = errorStream.str();
+  }
   if (global.flagDebugLogin) {
     out << "Debug login information. " << debugStream.str();
   }
@@ -2187,7 +2193,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
   std::string recaptchaPublic;
   if (
     !FileOperations::
-    loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
       "certificates/recaptcha-public.txt",
       recaptchaPublic,
       true,
@@ -2209,7 +2215,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
 
 bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   STACK_TRACE("WebWorker::correctRequestsBEFORELoginReturnFalseIfModified");
-  bool stateNotModified = true;
+  bool modified = false;
   if (!global.flagSSLAvailable) {
     if (
       this->addressComputed == global.displayNameExecutable &&
@@ -2217,15 +2223,15 @@ bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
     ) {
       this->addressComputed = global.displayNameExecutable;
       global.requestType = "calculator";
-      stateNotModified = false;
+      modified = true;
     }
   }
   if (this->addressComputed == "/" || this->addressComputed == "") {
     this->addressComputed = global.displayApplication;
     global.requestType = WebAPI::app;
-    stateNotModified = false;
+    modified =true;
   }
-  return stateNotModified;
+  return !modified;
 }
 
 bool WebWorker::redirectIfNeeded(
@@ -2254,18 +2260,20 @@ bool WebWorker::redirectIfNeeded(
   }
   for (int i = 0; i < global.webArguments.size(); i ++) {
     if (
-      global.webArguments.keys[i] != "password" &&
-      global.webArguments.keys[i] != "request" &&
-      global.webArguments.keys[i] != "googleToken" &&
-      global.webArguments.keys[i] != "G_AUTHUSER_H" &&
-      global.webArguments.keys[i] != "activationToken"
+      global.webArguments.keys[i] == "password" ||
+      global.webArguments.keys[i] == "request" ||
+      global.webArguments.keys[i] == "googleToken" ||
+      global.webArguments.keys[i] == "G_AUTHUSER_H" ||
+      global.webArguments.keys[i] == "activationToken"
     ) {
+      continue;
+    }
       redirectedAddress
       << global.webArguments.keys[i]
       << "="
       << global.webArguments.values[i]
       << "&";
-    }
+
   }
   if (argumentProcessingFailureComments.str() != "") {
     redirectedAddress
@@ -2467,10 +2475,13 @@ int WebWorker::serveClient() {
   this->flagArgumentsAreOK = true;
   if (
     !this->extractArgumentsFromMessage(
-      this->argumentComputed, argumentProcessingFailureComments
+      this->argumentFomURL, argumentProcessingFailureComments
     )
   ) {
     this->flagArgumentsAreOK = false;
+  }
+  if (!this->extractArgumentsFromMessage(this->argumentFomMessageBody, argumentProcessingFailureComments)){
+    this->flagArgumentsAreOK=false;
   }
   if (
     !this->extractArgumentsFromCookies(argumentProcessingFailureComments)
@@ -2480,7 +2491,11 @@ int WebWorker::serveClient() {
   global.requestType = "";
   if (this->addressComputed == global.displayNameExecutable) {
     global.requestType = global.getWebInput("request");
+    argumentProcessingFailureComments << "DEBUG: here i am: " << global.requestType ;
   }
+  argumentProcessingFailureComments << "DEBUG: addr computed: " << this->addressComputed
+  << " display name: " << global.displayNameExecutable;
+  argumentProcessingFailureComments << "DEBUG: before request type immediate: " << global.requestType;
   std::stringstream comments;
   comments << "Address, request computed: ";
   if (this->addressComputed != "") {
@@ -2501,6 +2516,7 @@ int WebWorker::serveClient() {
   if (!isNotModified) {
     comments << this->toStringAddressRequest() << ": modified before login. ";
   }
+  argumentProcessingFailureComments << "DEBUG: before litltle dance: " << global.requestType;
   if (
     global.server().addressStartsInterpretedAsCalculatorRequest.contains(
       this->addressComputed
@@ -2524,6 +2540,7 @@ int WebWorker::serveClient() {
     this->response.processPing();
     return 0;
   }
+  argumentProcessingFailureComments << "DEBUG: before requries login global.requestType: " << global.requestType;
   user.flagMustLogin =
   this->parent->requiresLogin(global.requestType, this->addressComputed);
   if (!user.flagMustLogin) {

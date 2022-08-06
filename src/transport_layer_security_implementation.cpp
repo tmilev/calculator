@@ -15,7 +15,7 @@ bool TransportLayerSecurity::loadPEMCertificate(
   std::string certificateContent;
   if (
     !FileOperations::
-    loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
       this->certificateSelfSignedVirtual(),
       certificateContent,
       true,
@@ -43,7 +43,7 @@ bool TransportLayerSecurity::loadPEMPrivateKey(
   // No further attempts to load allowed.
   if (
     !FileOperations::
-    loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
       this->keySelfSignedVirtual(),
       certificateContent,
       true,

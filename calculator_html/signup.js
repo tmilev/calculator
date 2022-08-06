@@ -22,44 +22,58 @@ function getRecaptchaId() {
   throw (`Recaptcha not supported for your hostname: ${window.location.hostname}. Post an issue on our project's github if you need this feature. `)
 }
 
-// Ensure that grecaptcha is at least undefined.
-var grecaptcha;
-
 class SignUp {
   constructor() {
     this.recaptchaIdForSignUp = null;
+    this.grecaptcha = null;
   }
+
   signUp() {
-    if (grecaptcha === null || grecaptcha === undefined) {
-      document.getElementById(
-        ids.domElements.pages.signUp.recaptchaSignUp
-      ).innerHTML = "<b style='color:red'>Missing google (re)captcha: no Internet?</b>";
-      return;
-    }
+    this.initialize();
+    this.writeDebugLoginStatus();
     if (this.recaptchaIdForSignUp === null) {
-      this.recaptchaIdForSignUp = grecaptcha.render(
+      this.recaptchaIdForSignUp = this.grecaptcha.render(
         ids.domElements.pages.signUp.recaptchaSignUp, {
         'sitekey': getRecaptchaId()
       });
     }
   }
 
-  resetRecaptchaOnLoad() {
-    grecaptcha.reset();
+  initialize() {
+    if (this.grecaptcha !== null && this.grecaptcha !== undefined) {
+      // Already initialized.
+      return;
+    }
+    if (window.calculator.grecaptcha !== null && window.calculator.grecaptcha !== undefined) {
+      this.grecaptcha = window.calculator.grecaptcha;
+    }
+  }
+
+  writeDebugLoginStatus() {
+    let recaptchaElement = document.getElementById(
+      ids.domElements.pages.signUp.recaptchaSignUp
+    );
+    if (this.grecaptcha === null || this.grecaptcha === undefined) {
+      recaptchaElement.innerHTML = "<b style='color:red'>Missing google (re)captcha: no Internet?</b>";
+      return;
+    }
+    if (window.calculator.mainPage.user.debugLoginIsOn()) {
+      recaptchaElement.innerHTML = "<b style='color:blue'>Debugging login, recaptcha is off.</b>";
+      return;
+    }
   }
 
   submitSignUpInfo() {
     let debugLogin = window.calculator.mainPage.user.debugLoginIsOn();
+
     let token = "";
-    if (grecaptcha === undefined || grecaptcha === null) {
-      document.getElementById(
-        ids.domElements.pages.signUp.signUpResult
-      ).innerHTML = "<b style ='color:red'>Missing google (re)captcha: no Internet?</b>";
+    if (this.grecaptcha === undefined || this.grecaptcha === null) {
+      this.writeDebugLoginStatus();
       if (!debugLogin) {
         return false;
       }
     } else {
-      token = grecaptcha.getResponse(this.recaptchaIdForSignUp);
+      token = this.grecaptcha.getResponse(this.recaptchaIdForSignUp);
     }
     let desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
     let desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);

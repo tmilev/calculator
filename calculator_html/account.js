@@ -11,7 +11,7 @@ function submitChangePassRequestCallback(result, outputComponent) {
   document.getElementById("inputOldPasswordInAccount").value = "";
   document.getElementById("inputNewPasswordInAccount").value = "";
   document.getElementById("inputReenteredPasswordInAccount").value = "";
-  login.loginCalculator();
+  login.authenticator.loginCalculator();
 }
 
 function submitChangePassRequest() {

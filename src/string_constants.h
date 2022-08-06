@@ -275,7 +275,6 @@ public:
   static std::string tableEmailInfo;
   static std::string labelLastActivationEmailTime;
   static std::string labelNumActivationEmails;
-  static std::string labelUsernameAssociatedWithToken;
   // course info column names
   static std::string labelCurrentCourses;
   static std::string labelSection;
@@ -310,7 +309,7 @@ public:
   static std::string labelCalculatorRequest;
   static std::string labelCalculatorInput;
   // errors
-  static std::string errorDatabaseDisableD;
+  static std::string errorDatabaseDisabled;
 };
 
 #endif // header_string_constants_ALREADY_INCLUDED

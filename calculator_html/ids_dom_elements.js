@@ -91,6 +91,9 @@ let domElements = {
       signUpResultReport: "signUpResultReport",
       signUpResult: "signUpResult",
       buttonForgotLogin: "buttonForgotLogin",
+      buttonLogin: "buttonLogin",
+      inputPassword: "inputPassword",
+      inputUsername: "inputUsername",
     },
     forgotLogin: {
       buttonSendRecoveryEmail: "buttonSendRecoveryEmail",

@@ -95,11 +95,19 @@ function htmlElementsFromCommentsAndErrors(input) {
   let result = [];
   for (let i = 0; i < extraTags.length; i++) {
     let current = input[extraTags[i]];
-    if (current === undefined || current === null || current === "") {
+    if (
+      current === undefined ||
+      current === null ||
+      current === ""
+    ) {
       continue;
     }
     let incoming = document.createElement("div");
-    incoming.textContent = current;
+    if (extraTags[i] === pathnames.urlFields.result.crashReport) {
+      incoming.innerHTML = current; 
+    } else {
+      incoming.textContent = current;
+    }
     if (extraTags[i] === pathnames.urlFields.result.error) {
       let errorTag = document.createElement("b");
       errorTag.style.color = "red";

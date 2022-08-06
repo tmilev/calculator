@@ -38,6 +38,7 @@ public:
     const List<std::string>& nestedLabels
   );
   JSData toJSON() const;
+  std::string toString() const;
   bool isEmpty() const;
 };
 

@@ -174,7 +174,9 @@ class Page {
         name: "signUp",
         id: "divSignUpPage",
         container: null,
-        selectFunction: signUp.signUp.bind(signUp),
+        selectFunction: () => {
+          signUp.signUp();
+        } 
       },
       forgotLogin: {
         name: "forgotLogin",
@@ -250,6 +252,7 @@ class Page {
   }
 
   initializeLoginPage() {
+    login.authenticator.initialize();
     let forgotLogin = document.getElementById(ids.domElements.pages.login.buttonForgotLogin);
     forgotLogin.addEventListener("click", () => {
       this.selectPage(this.pages.forgotLogin.name);

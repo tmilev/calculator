@@ -116,6 +116,16 @@ bool QueryExact::isEmpty() const {
   return false;
 }
 
+std::string QueryExact::toString() const {
+  std::stringstream out;
+  out
+  << "collection: "
+  << this->collection
+  << ", query: "
+  << this->toJSON().toString();
+  return out.str();
+}
+
 JSData QueryExact::toJSON() const {
   JSData result;
   JSData encodedKeys;
@@ -363,7 +373,7 @@ bool Database::findOneFromSome(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Database::findOneFromSome failed. "
-      << DatabaseStrings::errorDatabaseDisableD;
+      << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
   }
@@ -736,7 +746,7 @@ bool UserCalculator::loadFromDatabase(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  STACK_TRACE("UserCalculator::FetchOneUserRow");
+  STACK_TRACE("UserCalculator::loadFromDatabase");
   (void) commentsGeneral;
   double startTime = global.getElapsedSeconds();
   if (
@@ -1010,16 +1020,21 @@ bool UserCalculator::authenticate(std::stringstream* commentsOnFailure) {
   STACK_TRACE("UserCalculator::authenticate");
   std::stringstream secondCommentsStream;
   if (!this->loadFromDatabase(&secondCommentsStream)) {
-    if (commentsOnFailure != nullptr && this->shouldCommentOnMissingUser()) {
-      *commentsOnFailure << "User " << this->username << " does not exist. ";
-      *commentsOnFailure << this->firstLoginMessage();
+    if (commentsOnFailure != nullptr) {
+      if (this->shouldCommentOnMissingUser()) {
+        *commentsOnFailure << "User " << this->username << " does not exist. ";
+        *commentsOnFailure << this->firstLoginMessage();
+      }
+      if (global.flagDebugLogin) {
+        *commentsOnFailure << secondCommentsStream.str();
+      }
     }
     return false;
   }
   if (this->authenticateWithToken(&secondCommentsStream)) {
     return true;
   }
-  bool result = this->authenticateWithUserNameAndPass(commentsOnFailure);
+  bool result = this->authenticateWithPassword(commentsOnFailure);
   if (this->enteredPassword != "") {
     this->resetAuthenticationToken(commentsOnFailure);
   }
@@ -1028,10 +1043,10 @@ bool UserCalculator::authenticate(std::stringstream* commentsOnFailure) {
   return result;
 }
 
-bool UserCalculator::authenticateWithUserNameAndPass(
+bool UserCalculator::authenticateWithPassword(
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("UserCalculator::authenticate");
+  STACK_TRACE("UserCalculator::authenticateWithPassword");
   (void) commentsOnFailure;
   this->computeHashedSaltedPassword();
   // TODO(tmilev): timing attacks on the comparison may be used to guess the
@@ -1481,19 +1496,27 @@ bool UserCalculator::computeAndStoreActivationStats(
   std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("UserCalculator::computeAndStoreActivationStats");
+  if (EmailRoutines::webAdress == "") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The web address is missing: "
+      << "the administrator of this instance of the calculator needs to "
+      << "set up entry webAddress in file configuraiton/configuration.json. ";
+    }
+    return false;
+  }
   std::string activationAddress;
   if (
     !this->getActivationAddressFromActivationToken(
       this->actualActivationToken,
-      global.hostWithPort,
       this->username,
       this->email,
-      activationAddress
+      activationAddress,
+      nullptr
     )
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Server web address not set in configuration.json. ";
+      *commentsOnFailure << "Failed to compute your activation url. ";
     }
     return false;
   }
@@ -1507,7 +1530,8 @@ bool UserCalculator::computeAndStoreActivationStats(
     !Database::get().findOne(findEmail, emailStat, commentsOnFailure)
   ) {
     if (commentsGeneral != nullptr) {
-      *commentsGeneral << "Email not on record. ";
+      *commentsGeneral
+      << "No recorded previous attempts to activate this email. ";
     }
   }
   std::string lastEmailTime, emailCountForThisEmail;
@@ -1543,7 +1567,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     *commentsGeneral
     << "Total activations (attempted on) this email: "
     << numActivationsThisEmail.toString()
-    << ".";
+    << ". ";
   }
   QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
   QuerySet updateUser;
@@ -1582,8 +1606,8 @@ bool UserCalculator::computeAndStoreActivationStats(
   numActivationsThisEmail.toString();
   emailStatQuery.value[DatabaseStrings::labelActivationToken] =
   this->actualActivationToken;
-  emailStatQuery.value[DatabaseStrings::labelUsernameAssociatedWithToken] =
-  this->username;
+  emailStatQuery.value[DatabaseStrings::labelUsername] = this->username;
+  emailStatQuery.value[DatabaseStrings::labelEmail] = this->email;
   if (
     !Database::get().updateOne(findEmail, emailStatQuery, commentsOnFailure)
   ) {
@@ -1593,6 +1617,15 @@ bool UserCalculator::computeAndStoreActivationStats(
     return false;
   }
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
+  if (global.flagDebugLogin && !global.flagDatabaseCompiled) {
+    global.comments
+    << "Activation link displayed for debugging purposes. Database is off. "
+    << "<a href='"
+    << activationAddress
+    << "'>"
+    << activationAddress
+    << "</a>";
+  }
   std::stringstream emailBody;
   emailBody
   << "Dear user,"
@@ -1607,7 +1640,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   return true;
 }
 
-List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() {
+List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() const {
   List<QueryExact> result;
   if (this->username != "") {
     QueryExact findByUsername(
@@ -1796,20 +1829,8 @@ bool Database::User::addUsersFromEmails(
   return result;
 }
 
-bool UserCalculator::getActivationAbsoluteAddress(
-  std::string& output, std::stringstream& comments
-) {
-  STACK_TRACE("UserCalculator::getActivationAbsoluteAddress");
-  return
-  this->getActivationAddress(
-    output, EmailRoutines::webAdress + "/cgi-bin/calculator", comments
-  );
-}
-
 bool UserCalculator::getActivationAddress(
-  std::string& output,
-  const std::string& calculatorBase,
-  std::stringstream& comments
+  std::string& output, std::stringstream& comments
 ) {
   STACK_TRACE("UserCalculator::getActivationAddress");
   if (!this->loadFromDatabase(&comments, &comments)) {
@@ -1829,10 +1850,10 @@ bool UserCalculator::getActivationAddress(
   return
   this->getActivationAddressFromActivationToken(
     this->actualActivationToken,
-    calculatorBase,
     this->username,
     this->email,
-    output
+    output,
+    nullptr
   );
 }
 
@@ -1843,17 +1864,18 @@ bool EmailRoutines::sendEmailWithMailGun(
 ) {
   STACK_TRACE("EmailRoutines::sendEmailWithMailGun");
   if (this->sendEmailFrom == "") {
-    if (commentsGeneral != nullptr) {
-      *commentsGeneral
-      << "Can't send emails: "
-      << "please set the sendEmailFrom field in configuration.json. ";
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Emails have not been setup on this instance of the calculator. "
+      << "The website admin needs to set field: "
+      << "sendEmailFrom inside file configuration/configuration.json. ";
     }
     return false;
   }
   std::string mailGunKey;
   if (
     !FileOperations::
-    loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
       "certificates/mailgun-api.txt",
       mailGunKey,
       true,
@@ -1882,7 +1904,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey << "' ";
   commandToExecute
-  << "https://api.mailgun.net/v3/mail2."
+  << "https://api.mailgun.net/v3/"
   << EmailRoutines::sendEmailFrom
   << "/messages ";
   commandToExecute
@@ -1919,22 +1941,41 @@ bool EmailRoutines::sendEmailWithMailGun(
     this->emailContent
   )
   << "\"";
+  if (global.flagDebugLogin) {
+    if (commentsGeneral != nullptr) {
+      *commentsGeneral
+      << "Since this is a login debug; "
+      << "I am not sending your activation email. "
+      << "The command for sending is: "
+      << commandToExecute.str();
+    }
+    return true;
+  }
   std::string commandResult =
   global.externalCommandReturnOutput(commandToExecute.str());
   global << commandResult << Logger::endL;
+  bool success = commandResult.find("Forbidden") == std::string::npos;
+  if (!success && commentsOnFailure != nullptr) {
+    int start =
+    MathRoutines::maximum(
+      0, static_cast<int>(mailGunKey.size() - 17)
+    );
+    std::string apiKey = mailGunKey.substr(start);
+    *commentsOnFailure
+    << "Failed to send your email from our automated account: "
+    << EmailRoutines::sendEmailFrom
+    << ". This is an error in our web site's email setup. "
+    << "If you can, please take a screenshot and file us a bug report! "
+    << "Mailgun api key: "
+    << apiKey
+    << ". ";
+  }
   if (commentsGeneralSensitive != nullptr) {
-    bool isBad = false;
-    if (commandResult.find("Forbidden") != std::string::npos) {
-      isBad = true;
-    }
     *commentsGeneralSensitive << "Result: ";
-    if (isBad) {
-      *commentsGeneralSensitive << "[PROBLEMS ENCOUNTERED]: ";
-    }
     *commentsGeneralSensitive
     << HtmlRoutines::convertStringToHtmlString(commandResult, true);
   }
-  return true;
+  return success;
 }
 
 List<bool> EmailRoutines::recognizedEmailCharacters;
@@ -2260,23 +2301,28 @@ bool UserCalculator::storeToDatabase(
 
 bool UserCalculator::getActivationAddressFromActivationToken(
   const std::string& activationToken,
-  const std::string& calculatorBase,
   const std::string& inputUserNameUnsafe,
   const std::string& inputEmailUnsafe,
-  std::string& output
+  std::string& output,
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("UserCalculator::getActivationAddressFromActivationToken");
   std::stringstream out;
-  if (StringRoutines::stringBeginsWith(calculatorBase, "localhost")) {
-    out << "https://" << calculatorBase;
-  } else if (
-    StringRoutines::stringBeginsWith(calculatorBase, "https://localhost")
-  ) {
-    out << calculatorBase;
-  } else if (EmailRoutines::webAdress != "") {
-    out << EmailRoutines::webAdress;
-  } else {
+  std::string address = EmailRoutines::webAdress;
+  if (address == "") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Can't get activationi url: "
+      << "the administrator of this instance of the calculator needs to "
+      << "set up entry webAddress in file configuraiton/configuration.json. ";
+    }
     return false;
+  }
+  if (
+    !StringRoutines::stringBeginsWith(address, "https://") &&
+    !StringRoutines::stringBeginsWith(address, "http://")
+  ) {
+    address = "https://" + address;
   }
   JSData jsonData;
   jsonData[DatabaseStrings::labelActivationToken] = activationToken;
@@ -2287,6 +2333,7 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   jsonData[DatabaseStrings::labelCurrentPage] =
   DatabaseStrings::labelPageActivateAccount;
   out
+  << address
   << global.displayApplication
   << "#"
   << HtmlRoutines::convertStringToURLString(

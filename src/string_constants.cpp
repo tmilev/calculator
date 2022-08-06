@@ -195,8 +195,6 @@ std::string DatabaseStrings::tableEmailInfo = "emailInfo";
 std::string DatabaseStrings::labelLastActivationEmailTime =
 "lastActivationEmailTime";
 std::string DatabaseStrings::labelNumActivationEmails = "numActivationEmails";
-std::string DatabaseStrings::labelUsernameAssociatedWithToken =
-"usernameAssociatedWithToken";
 std::string DatabaseStrings::tableDeleted = "deleted";
 std::string DatabaseStrings::anyFielD = "${any}";
 std::string DatabaseStrings::objectSelectoR = "${number}";
@@ -210,7 +208,7 @@ std::string DatabaseStrings::labelCalculatorRequest = "calculatorRequest";
 std::string DatabaseStrings::labelCalculatorInput = "calculatorInput";
 std::string DatabaseStrings::labelPageAccount = "account";
 std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
-std::string DatabaseStrings::errorDatabaseDisableD =
+std::string DatabaseStrings::errorDatabaseDisabled =
 "Database disabled explicitly by server configuration. ";
 std::string Configuration::processMonitoringBanned = "processMonitoringBanned";
 std::string Configuration::monitorPingTime = "monitorPingTime";

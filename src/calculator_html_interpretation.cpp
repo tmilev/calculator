@@ -2670,10 +2670,10 @@ std::string WebAPIResponse::toStringUserDetailsTable(
         if (
           UserCalculator::getActivationAddressFromActivationToken(
             currentUser.actualActivationToken,
-            hostWebAddressWithPort,
             currentUser.username,
             currentUser.email,
-            activationLink
+            activationLink,
+            nullptr
           )
         ) {
           oneTableLineStream
@@ -2691,10 +2691,10 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       if (
         !UserCalculator::getActivationAddressFromActivationToken(
           currentUser.actualActivationToken,
-          hostWebAddressWithPort,
           currentUser.username,
           currentUser.email,
-          activationLink
+          activationLink,
+          nullptr
         )
       ) {
         oneTableLineStream
@@ -2704,8 +2704,8 @@ std::string WebAPIResponse::toStringUserDetailsTable(
         oneTableLineStream
         << "<a href='mailto:"
         << currentUser.email
-        << "?subject =Math 140 Homework account activation&";
-        oneTableLineStream << "body =";
+        << "?subject=Math homework account activation&";
+        oneTableLineStream << "body=";
         std::stringstream emailBody;
         emailBody
         << "Dear user,\n you have not activated "

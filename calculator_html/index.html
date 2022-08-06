@@ -37,6 +37,13 @@
     function googleSignIn(googleUser){
       window.calculator.login.onGoogleSignIn(googleUser);
     }
+    var grecaptcha;
+    function googleRecaptchaCallback(){
+      if (window.calculator === undefined) {
+        window.calculator = {};
+      }
+      window.calculator.grecaptcha = grecaptcha;
+    }
   </script>
   <script type="text/javascript" src="/html-common/ace/src-min/ace.js" charset="utf-8"
     onerror="errorLoadingScript(this);"></script>
@@ -46,7 +53,6 @@
   <!--DO NOT modify the following css link, **including quotes**; it is searched+replaced with a cached version.-->
   <link type='text/css' rel='stylesheet' href='/calculator_html/calculator.css'>
 
-  <script src='https://www.google.com/recaptcha/api.js'></script>
   <title>Calculator</title>
 </head>
 
@@ -64,11 +70,10 @@
               <!--pasword input form, avoid password not in form warning-->
               <input class="textInputUsername" type="text" id="inputUsername" name="username" placeholder="username"
                 required><br>
-              <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password"
-                onkeypress="if (event.keyCode === 13) window.calculator.login.loginCalculator();" autocomplete="on"><br>
+              <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password" autocomplete="on"><br>
             </form>
             <!--password input form-->
-            <button class="buttonSelectPage" onclick="window.calculator.login.loginCalculator();">Login</button><br>
+            <button class="buttonSelectPage" id="buttonLogin">Login</button><br>
             <button class="buttonSignUp" onclick="window.calculator.mainPage.selectPage('signUp');">Sign up</button><br>
             <button class="buttonSignUp" id="buttonForgotLogin">Forgot login</button><br>
           </div>
@@ -129,6 +134,8 @@
           <td><input type="text" id="emailForSignUp" placeholder="email"></td>
         </tr>
       </table>
+  <script src='https://www.google.com/recaptcha/api.js?onload=googleRecaptchaCallback&render=explicit' async
+    defer></script>
       <div id="recaptchaSignUp"></div>
       <button onclick="window.calculator.signUp.submitSignUpInfo();">Sign up</button>
       <br>

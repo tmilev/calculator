@@ -1129,7 +1129,7 @@ bool WebClient::verifyRecaptcha(
   }
   if (
     !FileOperations::
-    loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
       "certificates/recaptcha-secret.txt",
       secret,
       true,
@@ -1247,11 +1247,20 @@ bool WebAPIResponse::processForgotLogin() {
     return global.response.writeResponse(result, false);
   }
   out << "Your email is on record. ";
+  std::stringstream commentsOnError;
+  bool success = false;
   if (global.flagDebugLogin) {
     out << "Setting email with debug information. ";
-    this->owner->doSetEmail(user, &out, &out, &out);
+    success =
+    this->owner->doSetEmail(
+      user, &commentsOnError, &out, &commentsOnError
+    );
   } else {
-    this->owner->doSetEmail(user, &out, &out, nullptr);
+    success =
+    this->owner->doSetEmail(user, &commentsOnError, &out, nullptr);
+  }
+  if (!success) {
+    result[WebAPI::result::error] = commentsOnError.str();
   }
   out << "Response time: " << global.getElapsedSeconds() << " second(s). ";
   result[WebAPI::result::comments] = out.str();

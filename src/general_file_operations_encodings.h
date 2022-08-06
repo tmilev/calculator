@@ -104,7 +104,7 @@ public:
   // The available tokens are only relayed to the party that initiated the
   // computation.
   // They available tokens can only be browsed with an ssh admin connection.
-  static bool loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  static bool loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
     const std::string& fileName,
     std::string& output,
     bool accessSensitiveFolders,

@@ -3,18 +3,141 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 
-function loginCalculator() {
-  let password = document.getElementById("inputPassword").value;
-  document.getElementById("inputPassword").value = "";
-  let username = document.getElementById("inputUsername").value;
-  let url = "";
-  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
-  url += `password=${password}&username=${username}&`;
-  submitRequests.submitGET({
-    url: url,
-    callback: loginWithServerCallback,
-    progress: ids.domElements.spanProgressReportGeneral
-  });
+class Authenticator {
+  constructor() {
+    this.flagInitialized = false;
+  }
+  
+  initialize() {
+    if (this.flagInitialized === true) {
+      return;
+    } 
+    this.flagInitialized = true;
+    document.getElementById(
+      ids.domElements.pages.login.buttonLogin
+    ).addEventListener("click", () => {
+      this.loginCalculator();
+    });
+    this.passwordInput().addEventListener("click", (/** @type {KeyboardEvent} */ e) => {
+      this.handlePasswordInputKeyPress(e);
+    });
+  }
+
+  handlePasswordInputKeyPress(/** @type {KeyboardEvent} */ e) {
+    if (e.key !== "Enter") {
+      return;
+    }
+    this.loginCalculator();
+  }
+
+  passwordInput() {
+    return document.getElementById(
+      ids.domElements.pages.login.inputPassword
+    );
+  }
+  usernameInput() {
+    return document.getElementById(
+      ids.domElements.pages.login.inputUsername
+    );
+  }
+
+  loginCalculator() {
+    this.initialize();
+    let password = this.passwordInput().value;
+    this.passwordInput().value = "";
+    let username = this.usernameInput().value;
+    let url = "";
+    url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
+    let parameters = `password=${password}&username=${username}&email=${username}`;
+    submitRequests.submitPOST({
+      url: url,
+      parameters: parameters,
+      callback: (
+        /** @type{string}*/
+        input,
+        output,
+      ) => {
+        this.loginWithServerCallback(input, output);
+      },
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
+
+  loginWithServerCallback(
+    /** @type{string}*/
+    incomingString,
+    output,
+  ) {
+    document.getElementById("spanLoginStatus").innerHTML = "";
+    let page = window.calculator.mainPage;
+    let success = false;
+    let loginErrorMessage = "";
+    let parsedAuthentication = JSON.parse(incomingString);
+    resetPagesNeedingReload();
+    if (pathnames.standardResponses.isLoggedInResponse(parsedAuthentication)) {
+      success = true;
+    }
+    let loginInfo = "";
+    if (
+      parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" ||
+      parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === true
+    ) {
+      parsedAuthentication[pathnames.urlFields.username] = "anonymous";
+      parsedAuthentication[pathnames.urlFields.userRole] = "admin";
+      loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
+      success = true;
+      page.user.flagDatabaseInactiveEveryoneIsAdmin = true;
+    }
+    if (
+      parsedAuthentication[pathnames.urlFields.requests.debugLogin] === "true" ||
+      parsedAuthentication[pathnames.urlFields.requests.debugLogin] === true
+    ) {
+      page.user.debugLogin = true;
+      loginInfo += "<b style='color:red'>Debugging login</b>";
+    }
+    if (
+      parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== "true" &&
+      parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== true
+    ) {
+      if (loginInfo !== "") {
+        loginInfo += "<br>";
+      }
+      loginInfo += "<b style='color:red'>Https off.</b>";
+    }
+    if (
+      parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === "true" ||
+      parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
+    ) {
+      let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
+      databaseInfo.innerHTML = "<b style='color:red'>Fallback database.</b>";
+    }
+    let loginInfoComponent = document.getElementById(ids.domElements.divLoginPanelInfo);
+    loginInfoComponent.innerHTML = loginInfo;
+    if (success) {
+      page.user.makeFromUserInfo(parsedAuthentication);
+      toggleAccountPanels();
+      setAdminPanels();
+      hideLoginCalculatorButtons();
+      showLogoutButton();
+    } else if (pathnames.standardResponses.isNotLoggedInResponse(parsedAuthentication)) {
+      if (parsedAuthentication["error"] !== undefined) {
+        loginErrorMessage = parsedAuthentication["error"];
+      }
+    }
+    if (!success) {
+      if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
+        document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
+      }
+      page.storage.variables.user.authenticationToken.setAndStore("");
+      page.storage.variables.user.name.setAndStore("");
+      page.storage.variables.user.role.setAndStore("");
+      page.user.flagLoggedIn = false;
+      showLoginCalculatorButtons();
+      toggleAccountPanels();
+      setAdminPanels();
+    }
+    
+  }
 }
 
 function doReload() {
@@ -124,74 +247,7 @@ function resetPagesNeedingReload() {
 }
 
 function loginWithServerCallback(incomingString, result) {
-  document.getElementById("spanLoginStatus").innerHTML = "";
-  let page = window.calculator.mainPage;
-  let success = false;
-  let loginErrorMessage = "";
-  let parsedAuthentication = JSON.parse(incomingString);
-  resetPagesNeedingReload();
-  if (pathnames.standardResponses.isLoggedInResponse(parsedAuthentication)) {
-    success = true;
-  }
-  let loginInfo = "";
-  if (
-    parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" ||
-    parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === true
-  ) {
-    parsedAuthentication[pathnames.urlFields.username] = "anonymous";
-    parsedAuthentication[pathnames.urlFields.userRole] = "admin";
-    loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
-    success = true;
-    page.user.flagDatabaseInactiveEveryoneIsAdmin = true;
-  }
-  if (
-    parsedAuthentication[pathnames.urlFields.requests.debugLogin] === "true" ||
-    parsedAuthentication[pathnames.urlFields.requests.debugLogin] === true
-  ) {
-    page.user.debugLogin = true;    
-    loginInfo += "<b style='color:red'>Debugging login</b>";
-  }
-  if (
-    parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== "true" &&
-    parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== true
-  ) {
-    if (loginInfo !== "") {
-      loginInfo += "<br>";
-    }
-    loginInfo += "<b style='color:red'>Https off.</b>";
-  }
-  if (
-    parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === "true" ||
-    parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
-  ) {
-    let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
-    databaseInfo.innerHTML = "<b style='color:red'>Fallback database.</b>";
-  }
-  let loginInfoComponent = document.getElementById(ids.domElements.divLoginPanelInfo);
-  loginInfoComponent.innerHTML = loginInfo;
-  if (success) {
-    page.user.makeFromUserInfo(parsedAuthentication);
-    toggleAccountPanels();
-    setAdminPanels();
-    hideLoginCalculatorButtons();
-    showLogoutButton();
-  } else if (pathnames.standardResponses.isNotLoggedInResponse(parsedAuthentication)) {
-    if (parsedAuthentication["error"] !== undefined) {
-      loginErrorMessage = parsedAuthentication["error"];
-    }
-  }
-  if (!success) {
-    if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
-      document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
-    }
-    page.storage.variables.user.authenticationToken.setAndStore("");
-    page.storage.variables.user.name.setAndStore("");
-    page.storage.variables.user.role.setAndStore("");
-    page.user.flagLoggedIn = false;
-    showLoginCalculatorButtons();
-    toggleAccountPanels();
-    setAdminPanels();
-  }
+  authenticator.loginWithServerCallback(incomingString);
 }
 
 function onGoogleSignIn(googleUser) {
@@ -270,6 +326,8 @@ function init() {
   }
 }
 
+let authenticator = new Authenticator();
+
 module.exports = {
   resetPagesNeedingReload,
   reloadPage,
@@ -277,6 +335,6 @@ module.exports = {
   logout,
   loginTry,
   setAdminPanels,
-  loginCalculator,
   onGoogleSignIn,
+  authenticator,
 };

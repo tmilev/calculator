@@ -1230,9 +1230,6 @@ public:
   static bool fetchKnownPublicKeys(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool sendEmailWithMailGun(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
   static bool elementEllipticCurveNormalForm(
     Calculator& calculator, const Expression& input, Expression& output
   );

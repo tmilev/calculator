@@ -1366,13 +1366,13 @@ bool FileOperations::loadFileToStringVirtual(
   std::stringstream* commentsOnFailure
 ) {
   return
-  FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  FileOperations::loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
     fileName, output, accessSensitiveFolders, false, commentsOnFailure
   );
 }
 
 bool FileOperations::
-loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
   const std::string& fileName,
   std::string& output,
   bool accessSensitiveFolders,

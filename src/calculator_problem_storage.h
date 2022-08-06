@@ -286,6 +286,36 @@ public:
   static bool isOKEmail(
     const std::string& input, std::stringstream* commentsOnError
   );
+  // Sends email with the mailgun api.
+  // Required setup.
+  // 1) Get an account with mailgun.
+  // 2) Get a domain to send email from.
+  // 3) Add the domain into configuration/configuration.json
+  // in a format similar to:
+  // {
+  // ...
+  // "sendEmailFrom": "mail2.the_domain_name_of_your_calculator_instance.org",
+  // ...
+  // }
+  // 4) Create a file called
+  // certificates/mailgun-api.txt
+  // (in folder certificates/).
+  // 5) Paste your secret mailgun api key
+  // into that file.
+  // You get the key from your mailgun registration.
+  // The key needs to be installed in your server manually
+  // (or through a secure orchestration service)
+  // as it is a secret that allows anyone who has it
+  // to send emails from your domain.
+  // 6. As of writing, you also need to have curl installed on the same machine
+  // as your server. We need curl to send the authorization key.
+  //
+  // Reason: as of writing,
+  // the calculator does not implement the full
+  // http(s) protocol - we only implement the large chunk of it needed
+  // to run our complicated math workflow.
+  // If you have a hard time installing curl, drop us a feature request
+  // to remove the curl dependency.
   bool sendEmailWithMailGun(
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral,
@@ -338,7 +368,7 @@ public:
     std::string& outputUnsafe,
     std::stringstream* failureComments = nullptr
   );
-  bool authenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);
+  bool authenticateWithPassword(std::stringstream* commentsOnFailure);
   bool authenticateWithToken(std::stringstream* commentsOnFailure);
   bool authenticate(std::stringstream* commentsOnFailure);
   std::string firstLoginMessage();
@@ -355,20 +385,15 @@ public:
   static bool isAcceptableCharDatabaseInput(char character);
   bool computeAndStoreActivationToken(std::stringstream* commentsOnFailure);
   void computeHashedSaltedPassword();
-  bool getActivationAbsoluteAddress(
-    std::string& output, std::stringstream& comments
-  );
   bool getActivationAddress(
-    std::string& output,
-    const std::string& calculatorBase,
-    std::stringstream& comments
+    std::string& output, std::stringstream& comments
   );
   static bool getActivationAddressFromActivationToken(
     const std::string& activationToken,
-    const std::string& calculatorBase,
     const std::string& inputUserNameUnsafe,
     const std::string& inputEmailUnsafe,
-    std::string& output
+    std::string& output,
+    std::stringstream* commentsOnFailure
   );
   bool computeAndStoreActivationEmailAndTokens(
     std::stringstream* commentsOnFailure,

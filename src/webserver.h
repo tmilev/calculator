@@ -40,7 +40,11 @@ public:
   std::string addressGetOrPost;
   std::string lastHeadMessage;
   std::string addressComputed;
-  std::string argumentComputed;
+  // Query parameters coming from the url:
+  // the strings that come after the ? in the address.
+  std::string argumentFomURL;
+  // Query parameters given in the message body.
+  std::string argumentFomMessageBody;
   std::string VirtualFileName;
   std::string relativePhysicalFileName;
   std::string status;

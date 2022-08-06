@@ -76,9 +76,16 @@ public:
   void reset();
   void clearPasswordFromMemory();
   void clearAuthenticationTokenAndPassword();
+  // Creates a string that describes the user.
+  // Will reveal password hashes, so this should never be shown in
+  // production.
   std::string toStringUnsecure();
+  // Reveals the username and password, but does not show any
+  // password hashes.
+  std::string toStringSecure();
   std::string toStringCourseInfo();
-  List<QueryExact> getFindMeFromUserNameQuery();
+  List<QueryExact> getFindMeFromUserNameQuery() const;
+  std::string toStringFindQueries() const;
 };
 
 #endif // header_general_database_system_independent_ALREADY_INCLUDED

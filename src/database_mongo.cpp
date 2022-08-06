@@ -798,7 +798,7 @@ bool Database::findFromJSONWithOptions(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Database::findFromJSONWithOptions fail. "
-      << DatabaseStrings::errorDatabaseDisableD;
+      << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
   }
@@ -1373,10 +1373,23 @@ bool Database::Mongo::updateOne(
   return true;
 }
 
+std::string UserCalculatorData::toStringFindQueries() const {
+  List<QueryExact> queries = getFindMeFromUserNameQuery();
+  std::stringstream out;
+  out << "Queries to try: ";
+  for (int i = 0; i < queries.size; i ++) {
+    out << queries[i].toString();
+    if (i != queries.size - 1) {
+      out << ", ";
+    }
+  }
+  return out.str();
+}
+
 bool Database::User::loadUserInformation(
   UserCalculatorData& output, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Database::loadUserInformation");
+  STACK_TRACE("Database::User::loadUserInformation");
   if (output.username == "" && output.email == "") {
     return false;
   }
@@ -1386,6 +1399,9 @@ bool Database::User::loadUserInformation(
       output.getFindMeFromUserNameQuery(), userEntry, commentsOnFailure
     )
   ) {
+    if (global.flagDebugLogin && commentsOnFailure != nullptr) {
+      *commentsOnFailure << output.toStringFindQueries() << "<br>" << output.toStringSecure() << "<br>";
+    }
     return false;
   }
   return output.loadFromJSON(userEntry);

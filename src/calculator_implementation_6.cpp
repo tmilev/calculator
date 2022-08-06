@@ -1362,38 +1362,6 @@ bool CalculatorFunctionsCrypto::RSAEncrypt(
   return output.assignValue(calculator, Rational(result));
 }
 
-bool CalculatorFunctions::sendEmailWithMailGun(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  STACK_TRACE("CalculatorFunctions::sendEmailWithMailGun");
-  if (!global.userDefaultHasAdminRights()) {
-    return calculator << "Sending mail available to logged-in admins only. ";
-  }
-  std::stringstream out;
-  if (global.flagDatabaseCompiled) {
-    if (input.size() != 4) {
-      return calculator << "Send email requires three arguments. ";
-    }
-    EmailRoutines email;
-    if (
-      !input[1].isOfType(&email.toEmail) ||
-      !input[2].isOfType(&email.emailContent) ||
-      !input[3].isOfType(&email.subject)
-    ) {
-      return
-      calculator
-      << "Arguments of "
-      << input.toString()
-      << "expected to be strings (enclose in \"\" please). ";
-    }
-    email.sendEmailWithMailGun(&out, &out, &out);
-  } else {
-    (void) input;
-    out << "Error: database not running. ";
-  }
-  return output.assignValue(calculator, out.str());
-}
-
 bool CalculatorFunctions::isSquare(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

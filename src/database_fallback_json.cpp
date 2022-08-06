@@ -30,6 +30,7 @@ bool Database::FallBack::findOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("Database::FallBack::findOneFromSome");
   for (int i = 0; i < findOrQueries.size; i ++) {
     if (this->findOne(findOrQueries[i], output, commentsOnFailure)) {
       return true;
@@ -48,7 +49,7 @@ bool Database::FallBack::updateOne(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Database::FallBack::updateOne failed. "
-      << DatabaseStrings::errorDatabaseDisableD;
+      << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
   }

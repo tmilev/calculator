@@ -716,9 +716,11 @@ std::string UserCalculatorData::toStringCourseInfo() {
   << "Course name:\n"
   << this->courseComputed
   << "\n<br>Deadline schema:\n"
-  << this->deadlines.toString(nullptr) << ". "
+  << this->deadlines.toString(nullptr)
+  << ". "
   << "\n<hr>Problem weight schema:\n"
-  << this->problemWeights.toString(nullptr) << ". ";
+  << this->problemWeights.toString(nullptr)
+  << ". ";
   return out.str();
 }
 
@@ -727,9 +729,11 @@ std::string UserCalculatorData::toStringSecure() {
   std::stringstream out;
   out
   << "User: [["
-  << this->username << "]]"
-  << ", email: [[" << this->email << "]]"
-;
+  << this->username
+  << "]]"
+  << ", email: [["
+  << this->email
+  << "]]";
   return out.str();
 }
 

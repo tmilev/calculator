@@ -1948,8 +1948,10 @@ bool EmailRoutines::sendEmailWithMailGun(
       *commentsGeneral
       << "Since this is a login debug, "
       << "I am not sending your activation email. ";
-      global.comments << "<br><b>Email command:</b><br>"
-      << commandToExecute.str() << "<br>";
+      global.comments
+      << "<br><b>Email command:</b><br>"
+      << commandToExecute.str()
+      << "<br>";
     }
     return true;
   }

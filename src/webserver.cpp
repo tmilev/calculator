@@ -730,8 +730,9 @@ bool WebWorker::loginProcedure(
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(DatabaseStrings::labelUsername), true
   );
-  user.email = HtmlRoutines::convertURLStringToNormal(
-  global.getWebInput(DatabaseStrings::labelEmail), true
+  user.email =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(DatabaseStrings::labelEmail), true
   );
   if (user.username.find('%') != std::string::npos) {
     argumentProcessingFailureComments
@@ -853,8 +854,7 @@ bool WebWorker::loginProcedure(
     );
   }
   global.cookiesToBeSent.setKeyValue(
-  DatabaseStrings::labelUsername
-    ,
+    DatabaseStrings::labelUsername,
     HtmlRoutines::convertStringToURLString(user.username, false) // <-User name
     // must be stored in URL-encoded fashion, NO PLUSES.
   );
@@ -2233,7 +2233,7 @@ bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   if (this->addressComputed == "/" || this->addressComputed == "") {
     this->addressComputed = global.displayApplication;
     global.requestType = WebAPI::app;
-    modified =true;
+    modified = true;
   }
   return !modified;
 }
@@ -2272,12 +2272,11 @@ bool WebWorker::redirectIfNeeded(
     ) {
       continue;
     }
-      redirectedAddress
-      << global.webArguments.keys[i]
-      << "="
-      << global.webArguments.values[i]
-      << "&";
-
+    redirectedAddress
+    << global.webArguments.keys[i]
+    << "="
+    << global.webArguments.values[i]
+    << "&";
   }
   if (argumentProcessingFailureComments.str() != "") {
     redirectedAddress
@@ -2484,8 +2483,12 @@ int WebWorker::serveClient() {
   ) {
     this->flagArgumentsAreOK = false;
   }
-  if (!this->extractArgumentsFromMessage(this->argumentFomMessageBody, argumentProcessingFailureComments)){
-    this->flagArgumentsAreOK=false;
+  if (
+    !this->extractArgumentsFromMessage(
+      this->argumentFomMessageBody, argumentProcessingFailureComments
+    )
+  ) {
+    this->flagArgumentsAreOK = false;
   }
   if (
     !this->extractArgumentsFromCookies(argumentProcessingFailureComments)

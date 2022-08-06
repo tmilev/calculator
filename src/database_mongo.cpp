@@ -1386,7 +1386,9 @@ std::string UserCalculatorData::toStringFindQueries() const {
   return out.str();
 }
 
-bool Database::User::loadUserInformation(UserCalculatorData& output, std::stringstream* commentsOnFailure) {
+bool Database::User::loadUserInformation(
+  UserCalculatorData& output, std::stringstream* commentsOnFailure
+) {
   STACK_TRACE("Database::User::loadUserInformation");
   if (output.username == "" && output.email == "") {
     return false;
@@ -1398,9 +1400,11 @@ bool Database::User::loadUserInformation(UserCalculatorData& output, std::string
     )
   ) {
     if (global.flagDebugLogin) {
-      global.comments << output.toStringFindQueries()  << output.toStringSecure();
+      global.comments
+      << output.toStringFindQueries()
+      << output.toStringSecure();
     }
-    if (commentsOnFailure != nullptr){
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find username/email. ";
     }
     return false;

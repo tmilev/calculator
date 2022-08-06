@@ -217,6 +217,7 @@ public:
   void extractAddressParts();
   void sanitizeVirtualFileName();
   int serveClient();
+  std::string toStringAddressAndRequest();
 };
 
 class WebServer {

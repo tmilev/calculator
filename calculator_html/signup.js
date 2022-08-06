@@ -30,12 +30,14 @@ class SignUp {
 
   signUp() {
     this.initialize();
-    this.writeDebugLoginStatus();
-    if (this.recaptchaIdForSignUp === null) {
-      this.recaptchaIdForSignUp = this.grecaptcha.render(
-        ids.domElements.pages.signUp.recaptchaSignUp, {
-        'sitekey': getRecaptchaId()
-      });
+    this.writeDebugLoginStatus("");
+    if (this.grecaptcha !== null && this.grecaptcha !== undefined) {
+      if (this.recaptchaIdForSignUp === null) {
+        this.recaptchaIdForSignUp = this.grecaptcha.render(
+          ids.domElements.pages.signUp.recaptchaSignUp, {
+          'sitekey': getRecaptchaId()
+        });
+      }
     }
   }
 
@@ -49,12 +51,16 @@ class SignUp {
     }
   }
 
-  writeDebugLoginStatus() {
+  writeDebugLoginStatus(
+    /** @type{string} */
+    extraMessage
+  ) {
     let recaptchaElement = document.getElementById(
-      ids.domElements.pages.signUp.recaptchaSignUp
+      ids.domElements.pages.signUp.signUpResultReport
     );
     if (this.grecaptcha === null || this.grecaptcha === undefined) {
-      recaptchaElement.innerHTML = "<b style='color:red'>Missing google (re)captcha: no Internet?</b>";
+      recaptchaElement.innerHTML = `<b style='color:red'>Missing google (re)captcha: no Internet?</b> ` +
+        `<b style='color:orange'>${extraMessage}</b>`;
       return;
     }
     if (window.calculator.mainPage.user.debugLoginIsOn()) {
@@ -68,7 +74,7 @@ class SignUp {
 
     let token = "";
     if (this.grecaptcha === undefined || this.grecaptcha === null) {
-      this.writeDebugLoginStatus();
+      this.writeDebugLoginStatus("Can't submit.");
       if (!debugLogin) {
         return false;
       }
@@ -94,24 +100,26 @@ class SignUp {
     url += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
     submitRequests.submitGET({
       url: url,
-      callback: callbackSignUp,
+      callback: (input) => {
+        this.callbackSignUp(input);
+      },
       progress: ids.domElements.spanProgressReportGeneral
     });
   }
 
-}
-
-function callbackSignUp(input) {
-  let outputStatus = document.getElementById(ids.domElements.pages.login.signUpResultReport);
-  let output = document.getElementById(ids.domElements.pages.login.signUpResult);
-  try {
-    let inputParsed = JSON.parse(decodeURIComponent(input));
-    miscallaneous.writeHtmlElementsFromCommentsAndErrors(inputParsed, outputStatus);
-    if (inputParsed.result !== undefined) {
-      output.textContent = inputParsed.result;
+  callbackSignUp(input) {
+    let outputStatus = document.getElementById(ids.domElements.pages.login.signUpResultReport);
+    let output = document.getElementById(ids.domElements.pages.login.signUpResult);
+    try {
+      let inputParsed = miscallaneous.jsonUnescapeParse(input);
+      miscallaneous.writeHtmlFromCommentsAndErrors(inputParsed, outputStatus);
+      let resultHtml = inputParsed[pathnames.urlFields.result.resultHtml];
+      if (resultHtml !== undefined) {
+        output.innerHTML = resultHtml;
+      }
+    } catch (e) {
+      output.textContent = `Result: ${input}. Error: ${e}.`;
     }
-  } catch (e) {
-    output.textContent = `Result: ${input}. Error: ${e}.`;
   }
 }
 

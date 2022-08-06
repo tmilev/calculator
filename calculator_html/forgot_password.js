@@ -33,27 +33,34 @@ class ForgotLogin {
     }
   }
 
-  writeDebugLoginStatus() {
+  writeDebugLoginStatus(
+    /** @type{string} */ extraMessage
+  ) {
     let recaptchaElement = document.getElementById(
       ids.domElements.pages.forgotLogin.forgotLoginResult
     );
+    if (window.calculator.mainPage.user.debugLoginIsOn()) {
+      recaptchaElement.innerHTML = "<b style='color:blue'>Debugging login, recaptcha is off.</b>";
+      return;
+    }    
     if (this.grecaptcha === undefined || this.grecaptcha === null) {
-      recaptchaElement.innerHTML = "<b style ='color:red'>The google captcha script appears to be missing: no Internet?</b>";
+      recaptchaElement.innerHTML = `<b style='color:red'>Missing google (re)captcha: no Internet?</b> `+
+        `<b style='color:orange'>${extraMessage}</b>`;
       return;
     }
-    if (window.calculator.mainPage.user.debugLoginIsOn()) {
-      recaptchaElement.innerHTML = "<b style='color:blue'>Debugging login, recaptcha is off.</b>";      
-    }    
   }
 
   forgotLoginPage() {
     this.initialize();
-    this.writeDebugLoginStatus();
+    this.writeDebugLoginStatus("");
     if (this.grecaptcha === null || this.grecaptcha === undefined) {
       return;
     }
     if (this.recaptchaIdForForgotLogin === null && !this.debugLogin()) {
-      this.recaptchaIdForForgotLogin = this.grecaptcha.render("recaptchaForgotPassword", { sitekey: signUp.getRecaptchaId() });
+      this.recaptchaIdForForgotLogin = this.grecaptcha.render(
+        "recaptchaForgotPassword", {
+        sitekey: signUp.getRecaptchaId()
+      });
     }
   }
 
@@ -69,7 +76,7 @@ class ForgotLogin {
     url += `${pathnames.urlFields.email}=${desiredEmailEncoded}&`;
     let token = "";
     if (this.grecaptcha === undefined || this.grecaptcha === null) {
-      this.writeDebugLoginStatus();
+      this.writeDebugLoginStatus("Can't submit.");
       if (!debugLogin) {
         return false;
       }

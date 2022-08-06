@@ -467,7 +467,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
   this->displayNameExecutable =
   "/cgi-bin/" + this->physicalNameExecutableNoPath;
   this->displayApplication = "/" + WebAPI::app;
-  this->displayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
+  this->displayApplicationNoCache = "/" + WebAPI::appNoCache;
   this->initOutputReportAndCrashFileNames("", "");
 }
 
@@ -593,7 +593,7 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(
       currentName == "googleToken" ||
       currentName == "G_AUTHUSER_H" ||
       currentName == "mjx.menu" ||
-      currentName == "username" ||
+      currentName == DatabaseStrings::labelUsername ||
       currentName == "authenticationToken"
     ) {
       continue;

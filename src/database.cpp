@@ -748,6 +748,7 @@ bool UserCalculator::loadFromDatabase(
 ) {
   STACK_TRACE("UserCalculator::loadFromDatabase");
   (void) commentsGeneral;
+  (void) commentsOnFailure;
   double startTime = global.getElapsedSeconds();
   if (
     !Database::get().user.loadUserInformation(*this, commentsOnFailure)
@@ -1565,7 +1566,8 @@ bool UserCalculator::computeAndStoreActivationStats(
   }
   if (commentsGeneral != nullptr) {
     *commentsGeneral
-    << "Total activations (attempted on) this email: "
+    << "Total activations (attempted on) this email, "
+    << "including the present one: "
     << numActivationsThisEmail.toString()
     << ". ";
   }
@@ -1944,10 +1946,10 @@ bool EmailRoutines::sendEmailWithMailGun(
   if (global.flagDebugLogin) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
-      << "Since this is a login debug; "
-      << "I am not sending your activation email. "
-      << "The command for sending is: "
-      << commandToExecute.str();
+      << "Since this is a login debug, "
+      << "I am not sending your activation email. ";
+      global.comments << "<br><b>Email command:</b><br>"
+      << commandToExecute.str() << "<br>";
     }
     return true;
   }
@@ -2332,6 +2334,16 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   jsonData[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   jsonData[DatabaseStrings::labelCurrentPage] =
   DatabaseStrings::labelPageActivateAccount;
+  std::string application = global.displayApplication;
+  if (global.flagDebugLogin) {
+    // Use appNoCache for the link makes life easier when developing locally
+    // as clicking on the link will lead you to aggressively cached
+    // frontend. To get a new version of your frontend, you
+    // will then have to change the url to global.displayApplicationNoCache
+    // or reboot the backend, but most importantly, you may fail
+    // to notice you are using a stale cache version.
+    application = global.displayApplicationNoCache;
+  }
   out
   << address
   << global.displayApplication

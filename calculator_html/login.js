@@ -2,6 +2,7 @@
 const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
+const miscellaneous = require("./miscellaneous_frontend");
 
 class Authenticator {
   constructor() {
@@ -18,7 +19,10 @@ class Authenticator {
     ).addEventListener("click", () => {
       this.loginCalculator();
     });
-    this.passwordInput().addEventListener("click", (/** @type {KeyboardEvent} */ e) => {
+    this.passwordInput().addEventListener(
+      "keydown", (
+        /** @type {KeyboardEvent} */ e
+      ) => {
       this.handlePasswordInputKeyPress(e);
     });
   }
@@ -45,7 +49,7 @@ class Authenticator {
     this.initialize();
     let password = this.passwordInput().value;
     this.passwordInput().value = "";
-    let username = this.usernameInput().value;
+    let username = encodeURIComponent(this.usernameInput().value);
     let url = "";
     url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
     let parameters = `password=${password}&username=${username}&email=${username}`;
@@ -68,7 +72,8 @@ class Authenticator {
     incomingString,
     output,
   ) {
-    document.getElementById("spanLoginStatus").innerHTML = "";
+    let spanLoginStatus = document.getElementById(ids.domElements.pages.login.spanLoginStatus);
+    spanLoginStatus.innerHTML = "";
     let page = window.calculator.mainPage;
     let success = false;
     let loginErrorMessage = "";
@@ -120,13 +125,24 @@ class Authenticator {
       hideLoginCalculatorButtons();
       showLogoutButton();
     } else if (pathnames.standardResponses.isNotLoggedInResponse(parsedAuthentication)) {
-      if (parsedAuthentication["error"] !== undefined) {
-        loginErrorMessage = parsedAuthentication["error"];
+      if (parsedAuthentication[
+        pathnames.urlFields.result.error
+      ] !== undefined) {
+        loginErrorMessage = decodeURIComponent(
+          parsedAuthentication[pathnames.urlFields.result.error]
+        );
+        parsedAuthentication[pathnames.urlFields.result.error] = "";
       }
     }
     if (!success) {
+      if (page.user.debugLoginIsOn()) {
+        let spanLoginExtra = document.getElementById(
+          ids.domElements.pages.login.spanLoginStatusExtra
+        );
+        miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsedAuthentication, spanLoginExtra);
+      }
       if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
-        document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
+        spanLoginStatus.innerHTML = loginErrorMessage;
       }
       page.storage.variables.user.authenticationToken.setAndStore("");
       page.storage.variables.user.name.setAndStore("");
@@ -136,7 +152,6 @@ class Authenticator {
       toggleAccountPanels();
       setAdminPanels();
     }
-    
   }
 }
 

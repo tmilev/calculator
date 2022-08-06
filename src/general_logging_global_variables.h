@@ -401,7 +401,7 @@ public:
   // The app display name in the web browser,
   // displayApplication ="/app";
   std::string displayApplication;
-  std::string displayNameExecutableAppNoCache;
+  std::string displayApplicationNoCache;
   std::string IPAdressCaller;
   bool flagUseMathTags;
   MemorySaving<DynkinDiagramRootSubalgebra> dynGetEpsCoords;

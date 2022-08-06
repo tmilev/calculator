@@ -73,7 +73,7 @@ std::string CalculatorHTML::toStringLinkFromProblem(
   std::stringstream out;
   out
   << "<a href='"
-  << global.displayNameExecutableAppNoCache
+  << global.displayApplicationNoCache
   << "#"
   << request.toString()
   << "'>"

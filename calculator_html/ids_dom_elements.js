@@ -94,6 +94,8 @@ let domElements = {
       buttonLogin: "buttonLogin",
       inputPassword: "inputPassword",
       inputUsername: "inputUsername",
+      spanLoginStatus: "spanLoginStatus",
+      spanLoginStatusExtra: "spanLoginStatusExtra",
     },
     forgotLogin: {
       buttonSendRecoveryEmail: "buttonSendRecoveryEmail",
@@ -102,6 +104,7 @@ let domElements = {
     },
     signUp: {
       signUpResult: "signUpResult",
+      signUpResultReport: "signUpResultReport",
       recaptchaSignUp: "recaptchaSignUp",
     },
     activateAccount: {

@@ -129,9 +129,8 @@ public:
       int& outputNumNewUsers,
       int& outputNumUpdatedUsers
     );
-    bool loadUserInformation(
-      UserCalculatorData& output, std::stringstream* commentsOnFailure
-    );
+    bool loadUserInformation(UserCalculatorData& output
+    , std::stringstream *commentsOnFailure);
     User();
   };
 

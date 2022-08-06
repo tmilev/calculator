@@ -1305,7 +1305,7 @@ JSData WebWorker::getSignUpRequestResult() {
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
-  if (user.exists(&generalCommentsStream)) {
+  if (user.exists(nullptr)) {
     errorStream
     << "Either the username ("
     << user.username

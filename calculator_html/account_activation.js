@@ -90,6 +90,9 @@ class AccountActivator{
     document.getElementById(ids.domElements.inputPassword).value = document.getElementById(
       ids.domElements.inputNewPasswordInActivationAccount
     ).value;
+    document.getElementById(
+      ids.domElements.pages.login.inputUsername
+    ).value = document.getElementById(ids.domElements.spanUserIdInAccountsPage).textContent;
     document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value = "";
     document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value = "";
     if (wipeOffActivationToken === true) {

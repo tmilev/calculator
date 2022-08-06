@@ -728,7 +728,10 @@ bool WebWorker::loginProcedure(
   UserCalculatorData& user = global.userDefault;
   user.username =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("username"), true
+    global.getWebInput(DatabaseStrings::labelUsername), true
+  );
+  user.email = HtmlRoutines::convertURLStringToNormal(
+  global.getWebInput(DatabaseStrings::labelEmail), true
   );
   if (user.username.find('%') != std::string::npos) {
     argumentProcessingFailureComments
@@ -850,7 +853,8 @@ bool WebWorker::loginProcedure(
     );
   }
   global.cookiesToBeSent.setKeyValue(
-    "username",
+  DatabaseStrings::labelUsername
+    ,
     HtmlRoutines::convertStringToURLString(user.username, false) // <-User name
     // must be stored in URL-encoded fashion, NO PLUSES.
   );
@@ -1580,7 +1584,7 @@ int WebWorker::processFileDoesntExist() {
   << "\">app</a>. ";
   out
   << " Same app without browser cache: <a href = \""
-  << global.displayNameExecutableAppNoCache
+  << global.displayApplicationNoCache
   << "\">app no cache</a>.<hr>";
   out << "<b>File does not exist.</b>";
   if (this->flagFileNameSanitized) {
@@ -2491,32 +2495,12 @@ int WebWorker::serveClient() {
   global.requestType = "";
   if (this->addressComputed == global.displayNameExecutable) {
     global.requestType = global.getWebInput("request");
-    argumentProcessingFailureComments << "DEBUG: here i am: " << global.requestType ;
   }
-  argumentProcessingFailureComments << "DEBUG: addr computed: " << this->addressComputed
-  << " display name: " << global.displayNameExecutable;
-  argumentProcessingFailureComments << "DEBUG: before request type immediate: " << global.requestType;
   std::stringstream comments;
-  comments << "Address, request computed: ";
-  if (this->addressComputed != "") {
-    comments
-    << HtmlRoutines::convertStringToHtmlString(this->addressComputed, false);
-  } else {
-    comments << "[empty]";
-  }
-  comments << ", ";
-  if (global.requestType != "") {
-    comments
-    << HtmlRoutines::convertStringToHtmlString(global.requestType, false);
-  } else {
-    comments << "[empty]";
-  }
-  comments << ". ";
   bool isNotModified = this->correctRequestsBEFORELoginReturnFalseIfModified();
   if (!isNotModified) {
     comments << this->toStringAddressRequest() << ": modified before login. ";
   }
-  argumentProcessingFailureComments << "DEBUG: before litltle dance: " << global.requestType;
   if (
     global.server().addressStartsInterpretedAsCalculatorRequest.contains(
       this->addressComputed
@@ -2540,12 +2524,8 @@ int WebWorker::serveClient() {
     this->response.processPing();
     return 0;
   }
-  argumentProcessingFailureComments << "DEBUG: before requries login global.requestType: " << global.requestType;
   user.flagMustLogin =
   this->parent->requiresLogin(global.requestType, this->addressComputed);
-  if (!user.flagMustLogin) {
-    comments << "Login not needed. ";
-  }
   if (this->requireSSL() && !global.flagUsingSSLinCurrentConnection) {
     return this->processLoginNeededOverUnsecureConnection();
   }
@@ -2585,7 +2565,7 @@ int WebWorker::serveClient() {
     argumentProcessingFailureComments << comments.str();
     global.cookiesToBeSent.setKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "") {
-      global.setWebInput("authenticationToken", "");
+      global.setWebInput(DatabaseStrings::labelActivationToken, "");
     }
     return
     this->response.processLoginUserInfo(
@@ -2598,15 +2578,6 @@ int WebWorker::serveClient() {
     )
   ) {
     global.setWebInput("error", argumentProcessingFailureComments.str());
-  }
-  if (global.userDefaultHasAdminRights() && global.flagLoggedIn) {
-    if (global.getWebInput("spoofHostName") != "") {
-      global.hostNoPort =
-      HtmlRoutines::convertURLStringToNormal(
-        global.getWebInput("spoofHostName"), false
-      );
-      global.cookiesToBeSent.setKeyValue("spoofHostName", global.hostNoPort);
-    }
   }
   if (
     this->response.serveResponseFalseIfUnrecognized(

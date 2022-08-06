@@ -568,7 +568,6 @@ bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
 bool WebAPIResponse::processLoginUserInfo(const std::string& comments) {
   STACK_TRACE("WebAPIResponse::processLoginUserInfo");
   this->owner->setHeaderOKNoContentLength("");
-  global.comments << "DEBUG: here I am";
   return
   global.response.writeResponse(
     WebAPIResponse::getJSONUserInfo(comments), false

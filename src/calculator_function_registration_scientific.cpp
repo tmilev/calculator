@@ -452,7 +452,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
   this->addOperationHandler(
-    "GroebnerLexUpperLimit",
+    "GroebnerLex",
     CalculatorFunctionsPolynomial::groebnerLexicographic,
     "",
     "Transforms to a reduced Groebner basis using the "
@@ -522,10 +522,10 @@ void Calculator::initializeFunctionsScientificBasic() {
     "but the division is carried with "
     "the modified state of the main bucket. <br>\n"
     "3. Return changedMainBucket.  <br><b>End of algorithm description.</b>",
-    "GroebnerLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );\n"
-    "GroebnerLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
+    "GroebnerLex{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );\n"
+    "GroebnerLex{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
     "Calculator::groebnerLex",
-    "GroebnerLexUpperLimit",
+    "GroebnerLex",
     innerStandard
   );
   this->addOperationHandler(
@@ -539,19 +539,19 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
   this->addOperationHandler(
-    "GroebnerLexOppositeUpperLimit",
+    "GroebnerLexOpposite",
     CalculatorFunctionsPolynomial::groebnerLexicographicOpposite,
     "",
-    "Same as GroebnerLexUpperLimit but "
+    "Same as GroebnerLex but "
     "uses reverse order on the variables (z<x).",
-    "GroebnerLexOppositeUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
+    "GroebnerLexOpposite{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
     "\nGroebnerRevLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
     "Calculator::groebnerLexicographicOpposite",
-    "GroebnerLexOppositeUpperLimit",
+    "GroebnerLexOpposite",
     innerStandard
   );
   this->addOperationHandler(
-    "GroebnerGrLexUpperLimit",
+    "GroebnerGrLex",
     CalculatorFunctionsPolynomial::groebnerGradedLexicographic,
     "",
     "Transforms to a reduced Groebner basis relative to the graded "
@@ -568,11 +568,11 @@ void Calculator::initializeFunctionsScientificBasic() {
     "The resulting printout will let your know whether "
     "the upper limit was hit or not. "
     "For a description of the algorithm used see "
-    "the description of function GroebnerLexUpperLimit.",
-    "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );\n "
-    "GroebnerGrLexUpperLimit{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )",
+    "the description of function GroebnerLex.",
+    "GroebnerGrLex{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );\n "
+    "GroebnerGrLex{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )",
     "CalculatorFunctionsPolynomial::groebnerGrLex",
-    "GroebnerGrLexUpperLimit",
+    "GroebnerGrLex",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(

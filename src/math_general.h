@@ -3846,7 +3846,7 @@ public:
   );
   GroebnerBasisComputation();
   int minimalNumberOfVariables() const;
-  std::string toStringLetterOrder(bool addDollars) const;
+  std::string toStringLetterOrder() const;
   std::string toStringPolynomialBasisStatus();
   static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
     int variableIndex, List<Polynomial<Coefficient> >& input

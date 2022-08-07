@@ -944,9 +944,8 @@ bool CalculatorFunctionsPolynomial::groebner(
       }
     }
   }
-  List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
+  List<Polynomial<AlgebraicNumber> > outputGroebner;
   outputGroebner = inputVector;
-  outputGroebner2 = inputVector;
   if (order == MonomialPolynomial::Order::gradedLexicographic) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
@@ -972,15 +971,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   bool success =
   groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
-  out << groebnerComputation.toStringLetterOrder(false);
-  out << "Letter/expression order: ";
-  int numberOfVariables = context.numberOfVariables();
-  for (int i = 0; i < numberOfVariables; i ++) {
-    out << context.getVariable(i).toString();
-    if (i != numberOfVariables - 1) {
-      out << "&lt;";
-    }
-  }
+  out << groebnerComputation.toStringLetterOrder();
   out << "<br>Starting basis (" << inputVector.size << " elements): ";
   for (int i = 0; i < inputVector.size; i ++) {
     out
@@ -1022,7 +1013,7 @@ bool CalculatorFunctionsPolynomial::groebner(
     << "<br>An intermediate non-Groebner basis containing total "
     << groebnerComputation.basis.size
     << " basis elements: ";
-    out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
+    out << "<br>GroebnerLex{}(10000, <br>";
     for (int i = 0; i < groebnerComputation.basis.size; i ++) {
       out
       << groebnerComputation.basis[i].element.toString(
@@ -1034,7 +1025,17 @@ bool CalculatorFunctionsPolynomial::groebner(
     }
     out << ");";
   }
-  return output.assignValue(calculator, out.str());
+  calculator << out.str();
+  List<Expression> elements;
+  for (int i = 0; i < groebnerComputation.basis.size; i++){
+    WithContext<Polynomial<AlgebraicNumber> > element;
+    element.context = context;
+    element.content = groebnerComputation.basis[i].element;
+    Expression converted;
+    element.toExpression(calculator, converted);
+    elements.addOnTop(converted);
+  }
+  return output.makeSequence(calculator, &elements);
 }
 
 bool CalculatorFunctionsPolynomial::

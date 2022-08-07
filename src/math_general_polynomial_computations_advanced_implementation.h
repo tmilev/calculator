@@ -182,7 +182,8 @@ toStringPolynomialBasisStatus() {
   out
   << "There are "
   << this->basisCandidates.size
-  << " candidates left to adjoin. <br>The current polynomial basis has "
+  << " candidates left to adjoin. "
+  << "<br>The current polynomial basis has "
   << this->basis.size
   << " elements. "
   << "<br>Number of polynomial divisions: "
@@ -285,48 +286,26 @@ int GroebnerBasisComputation<Coefficient>::minimalNumberOfVariables() const {
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(
-  bool addDollars
-) const {
+std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder() const {
   STACK_TRACE("GroebnerBasisComputation::toStringLetterOrder");
   std::stringstream out;
   int numberOfVariables = this->minimalNumberOfVariables();
   List<MonomialPolynomial> variables;
-  out << "Variable name(s), ascending order: ";
+  out << "Variable name(s). Listed in lexicographic order. ";
   variables.setSize(numberOfVariables);
   for (int i = 0; i < variables.size; i ++) {
     variables[i].makeEi(i, 1);
   }
   variables.quickSortAscending(&this->polynomialOrder.monomialOrder);
   FormatExpressions tempFormat = this->format;
-  if (addDollars) {
-    out << "$";
-  }
-  for (int i = 0; i < numberOfVariables; i ++) {
+  out << "\\(";
+  for (int i = numberOfVariables-1; i >=0; i --) {
     out << variables[i].toString(&tempFormat);
-    if (i != numberOfVariables - 1) {
-      out << ", ";
+    if (i != 0) {
+      out << " > ";
     }
   }
-  if (addDollars) {
-    out << "$";
-  }
-  if (numberOfVariables > 1) {
-    out
-    << ". The implied lexicographic order runs in the opposite direction: ";
-    if (addDollars) {
-      out << "$";
-    }
-    for (int i = 0; i < numberOfVariables; i ++) {
-      out << variables[i].toString(&tempFormat);
-      if (i != numberOfVariables - 1) {
-        out << " > ";
-      }
-    }
-    if (addDollars) {
-      out << "$";
-    }
-  }
+    out << "\\). ";
   return out.str();
 }
 

@@ -1126,8 +1126,13 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string toString() const;
-  Expression toExpression();
+  void toExpression(Calculator &calculator, Expression& output);
 };
+
+template<>
+void WithContext<Polynomial<AlgebraicNumber> >::toExpression(Calculator& calculator, Expression& output);
+template<>
+void WithContext<Polynomial<Rational> >::toExpression(Calculator& calculator, Expression& output);
 
 class Function {
 private:
@@ -4501,6 +4506,8 @@ bool Expression::makeMatrix(
   );
 }
 
+
+
 template <class Coefficient>
 bool CalculatorConversions::expressionFromPolynomial(
   Calculator& calculator,
@@ -4555,6 +4562,8 @@ bool CalculatorConversions::expressionFromPolynomial(
   }
   return output.makeSum(calculator, terms);
 }
+
+
 
 template <class Coefficient>
 bool CalculatorConversions::expressionFromRationalFraction(
@@ -4693,6 +4702,8 @@ bool WithContext<BuiltIn>::mergeContexts(
   leftOutput.extendContext(resultContext, commentsOnFailure) &&
   rightOutput.extendContext(resultContext, commentsOnFailure);
 }
+
+
 
 template <class Type>
 bool CalculatorConversions::getListPolynomialVariableLabelsLexicographic(

@@ -1459,8 +1459,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
     &this->owner->polynomialOrder.monomialOrder
   );
   this->owner->format.flagUseLatex = true;
-  out << this->owner->toStringLetterOrder(true);
-  out << remainders.size << " division steps total.";
+  out << this->owner->toStringLetterOrder();
+  out << remainders.size << " division steps total. ";
   out << "\\renewcommand{\\arraystretch}{1.2}";
   out << "\\begin{longtable}{|c";
   for (int i = 0; i < this->allMonomials.size; i ++) {
@@ -1610,12 +1610,10 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
       this->allMonomials.addOnTopNoRepetition(subtrahends[i].monomials);
     }
   }
-  // List<std::string> basisColorStyles;
-  // basisColorStyles.setSize(this->basis.size);
   this->allMonomials.quickSortDescending(
     &this->owner->polynomialOrder.monomialOrder
   );
-  out << this->owner->toStringLetterOrder(false);
+  out << this->owner->toStringLetterOrder();
   out << "<br>";
   out << remainders.size << " division steps total.<br>";
   out << "<table style ='white-space: nowrap; border:1px solid black;'>";

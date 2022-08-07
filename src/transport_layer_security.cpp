@@ -179,7 +179,7 @@ bool TransportLayerSecurity::sslWriteLoop(
 void TransportLayerSecurityOpenSSL::setSocketAddToStack(
   int socketFileDescriptor
 ) {
-  STACK_TRACE("TransportLayerSecurity::setSocketAddToStack");
+  STACK_TRACE("TransportLayerSecurityOpenSSL::setSocketAddToStack");
   this->socketStack.addOnTop(socketFileDescriptor);
   this->doSetSocket(socketFileDescriptor);
 }
@@ -194,7 +194,7 @@ void TransportLayerSecurity::removeLastSocket() {
 }
 
 void TransportLayerSecurityOpenSSL::removeLastSocket() {
-  STACK_TRACE("TransportLayerSecurity::removeLastSocket");
+  STACK_TRACE("TransportLayerSecurityOpenSSL::removeLastSocket");
   if (this->socketStack.size > 0) {
     int lastSocket = this->socketStack.popLastObject();
     close(lastSocket);
@@ -738,7 +738,9 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLContent::writeNamedCurveAndPublicKey");
+  STACK_TRACE(
+    "TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey"
+  );
   Serialization::WriterOneByteInteger curveName(
     SSLContent::namedCurve, output, annotations, "named curve"
   );
@@ -843,7 +845,7 @@ void SSLContent::writeBytesHandshakeClientHello(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLHello::writeBytesHandshakeClientHello");
+  STACK_TRACE("SSLContent::writeBytesHandshakeClientHello");
   if (this->contentType != SSLContent::tokens::clientHello) {
     global.fatal
     << "Not allowed to serialize non client-hello content as client hello. "
@@ -879,7 +881,7 @@ void SSLContent::writeBytesIncomingRandomAndSessionId(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLHello::writeBytesIncomingRandomAndSessionId");
+  STACK_TRACE("SSLContent::writeBytesIncomingRandomAndSessionId");
   Serialization::writeBytesAnnotated(
     this->owner->owner->session.incomingRandomBytes,
     output,
@@ -895,7 +897,7 @@ void SSLContent::writeBytesMyRandomAndSessionId(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLHello::writeBytesMyRandomAndSessionId");
+  STACK_TRACE("SSLContent::writeBytesMyRandomAndSessionId");
   Serialization::writeBytesAnnotated(
     this->getMyRandomBytes(), output, annotations, "server random"
   );
@@ -908,7 +910,7 @@ void SSLContent::writeBytesSupportedCiphers(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLHello::writeBytesSupportedCiphers");
+  STACK_TRACE("SSLContent::writeBytesSupportedCiphers");
   List<CipherSuiteSpecification>& ciphers =
   this->owner->owner->session.incomingCiphers;
   Serialization::WriterTwoByteInteger cipherNumberWriter(
@@ -924,7 +926,7 @@ void SSLContent::writeBytesSupportedCiphers(
 bool SSLContent::decodeSupportedCiphers(
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("SSLHello::decodeSupportedCiphers");
+  STACK_TRACE("SSLContent::decodeSupportedCiphers");
   if (
     !Serialization::readTwoByteInt(
       this->owner->incomingBytes,
@@ -990,7 +992,7 @@ void SSLContent::writeBytesExtensionsOnly(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLHello::writeBytesExtensionsOnly");
+  STACK_TRACE("SSLContent::writeBytesExtensionsOnly");
   Serialization::LengthWriterTwoBytes extensionsLength(
     output, annotations, "extensions"
   );
@@ -1000,7 +1002,7 @@ void SSLContent::writeBytesExtensionsOnly(
 }
 
 bool SSLContent::decode(std::stringstream* commentsOnFailure) {
-  STACK_TRACE("SSLHello::decode");
+  STACK_TRACE("SSLContent::decode");
   if (this->owner->incomingBytes.size == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty message. ";
@@ -1109,7 +1111,7 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
 }
 
 bool SSLContent::decodeExtensions(std::stringstream* commentsOnFailure) {
-  STACK_TRACE("SSLHello::decodeExtensions");
+  STACK_TRACE("SSLContent::decodeExtensions");
   if (
     this->owner->offsetDecoded + 2 >= this->owner->incomingBytes.size
   ) {
@@ -1340,9 +1342,8 @@ bool SSLHelloExtension::processSignatureAlgorithms(
   if (session.incomingAlgorithmSpecifications.size == 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError
-      <<
-      "Failed to recognize any hash / algorithm pair supported by the client. "
-      ;
+      << "Failed to recognize any "
+      << "hash / algorithm pair supported by the client. ";
     }
     return false;
   }
@@ -1368,7 +1369,7 @@ bool SSLHelloExtension::processMe(std::stringstream* commentsOnError) {
 }
 
 bool SSLContent::processExtensions(std::stringstream* commentsOnFailure) {
-  STACK_TRACE("SSLHello::processExtensions");
+  STACK_TRACE("SSLContent::processExtensions");
   for (int i = 0; i < this->extensions.size; i ++) {
     if (!this->extensions[i].processMe(commentsOnFailure)) {
       return false;
@@ -1639,7 +1640,8 @@ void Serialization::writeNByteUnsigned(
   }
   if (input > 0) {
     global.fatal
-    << "Input has more significant digits than the number of bytes allow. "
+    << "Input has more significant "
+    << "digits than the number of bytes allow. "
     << global.fatal;
   }
   inputOutputOffset += byteCountOfLength;
@@ -2398,7 +2400,7 @@ bool TransportLayerSecurity::handShakeIAmClientNoSocketCleanup(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  STACK_TRACE("WebServer::handShakeIAmClientNoSocketCleanup");
+  STACK_TRACE("TransportLayerSecurity::handShakeIAmClientNoSocketCleanup");
   this->openSSLData.checkCanInitializeToClient();
   this->initializeNonThreadSafeOnFirstCall(false);
   this->openSSLData.checkCanInitializeToClient();

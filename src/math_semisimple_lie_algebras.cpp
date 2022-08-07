@@ -517,7 +517,7 @@ const {
 }
 
 std::string SemisimpleLieAlgebra::FileNames::virtualFolderName() const {
-  STACK_TRACE("SemisimpleSubalgebras::toStringVirtualFolderName");
+  STACK_TRACE("SemisimpleLieAlgebra::FileNames::virtualFolderName");
   this->owner->checkConsistency();
   return this->owner->weylGroup.dynkinType.toStringVirtualNameFolder();
 }
@@ -928,7 +928,7 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
   this->weylGroup.rootSystem.getIndex(delta + minusEpsilon);
   int indexGammaMinusEpsilon =
   this->weylGroup.rootSystem.getIndex(gamma + minusEpsilon);
-  Rational FirstSummand, SecondSummand;
+  Rational firstSummand, secondSummand;
   if (indexDeltaMinusEpsilon != - 1) {
     if (
       !this->computedChevalleyConstants.elements[indexGamma][
@@ -940,11 +940,11 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
       << "Structure constants must be computed at this point. "
       << global.fatal;
     }
-    FirstSummand =
+    firstSummand =
     this->chevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon] *
     this->chevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else {
-    FirstSummand.makeZero();
+    firstSummand.makeZero();
   }
   if (indexGammaMinusEpsilon != - 1) {
     if (
@@ -957,16 +957,16 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
       << "Structure constants must be computed at this point. "
       << global.fatal;
     }
-    SecondSummand =
+    secondSummand =
     this->chevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon] *
     this->chevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else {
-    SecondSummand.makeZero();
+    secondSummand.makeZero();
   }
   this->chevalleyConstants.elements[indexMinusEpsilon][indexMinusZeta] = (
     this->weylGroup.rootScalarCartanRoot(eta, eta) /
     this->weylGroup.rootScalarCartanRoot(minusZeta, minusZeta)
-  ) *(FirstSummand + SecondSummand) /
+  ) *(firstSummand + secondSummand) /
   this->chevalleyConstants.elements[indexGamma][indexDelta];
   this->computedChevalleyConstants.elements[indexMinusEpsilon][indexMinusZeta]
   =

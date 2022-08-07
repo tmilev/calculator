@@ -473,10 +473,10 @@ public:
   List<int> numNilradicalsBySA;
   int indexCurrentSubalgebraNilradicalsGeneration;
   int numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration;
-  List<int> CountersNilradicalsGeneration;
+  List<int> countersNilradicalsGeneration;
   List<int> numberOfConeConditionHoldsBySemisimplePart;
   List<RootSubalgebra> subalgebrasOrderParabolicPseudoParabolicNeither;
-  int RecursionDepthNilradicalsGeneration;
+  int recursionDepthNilradicalsGeneration;
   int numberOfSubalgebrasProcessed;
   int numberOfConeConditionFailures;
   int subalgebrasCounted;

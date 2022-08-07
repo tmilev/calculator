@@ -40,7 +40,7 @@ Vector<Rational> WeylGroupData::applyReflectionList(
 void WeylGroupData::getSimpleReflectionMatrix(
   int indexSimpleRoot, Matrix<Rational>& output
 ) const {
-  STACK_TRACE("WeylGroup::getSimpleReflectionMatrix");
+  STACK_TRACE("WeylGroupData::getSimpleReflectionMatrix");
   int rank = this->getDimension();
   output.makeIdentityMatrix(rank, Rational::one(), Rational::zero());
   for (int j = 0; j < rank; j ++) {
@@ -69,7 +69,7 @@ ElementWeylGroup WeylGroupData::simpleConjugation(
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeSquaresCCReps() {
-  STACK_TRACE("WeylGroup::computeSquares");
+  STACK_TRACE("FiniteGroup::computeSquaresCCReps");
   if (!this->flagCCsComputed) {
     this->computeConjugacyClassesFromAllElements();
   }
@@ -84,7 +84,7 @@ void FiniteGroup<elementSomeGroup>::computeSquaresCCReps() {
 }
 
 void WeylGroupData::computeInitialIrreducibleRepresentations() {
-  STACK_TRACE("WeylGroup::computeInitialIrreducibleRepresentations");
+  STACK_TRACE("WeylGroupData::computeInitialIrreducibleRepresentations");
   if (!this->group.flagCCsComputed) {
     this->group.computeConjugacyClassesFromAllElements();
   }
@@ -352,7 +352,7 @@ template <typename somegroup, typename Coefficient>
 List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
 GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 decomposeThomasVersion() {
-  STACK_TRACE("WeylGroupRepresentation::decomposeThomasVersion");
+  STACK_TRACE("GroupRepresentationCarriesAllMatrices::decomposeThomasVersion");
   Matrix<Coefficient> splittingOperatorMatrix;
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
@@ -1111,8 +1111,8 @@ void SubgroupDataRootReflections::makeFromRoots(
   diagram.getDynkinType(verificationType);
   if (this->dynkinType != verificationType) {
     global.fatal
-    <<
-    "Two different comptuations of the Dynkin type a set of roots did not coincide. "
+    << "Two different comptuations of the "
+    << "Dynkin type a set of roots did not coincide. "
     << global.fatal;
   }
   this->initializeGenerators();
@@ -1148,7 +1148,7 @@ areConjugate_OLD_Deprecated_Version_By_Todor(
 void WeylGroupData::getSignSignatureAllRootSubsystems(
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {
-  STACK_TRACE("WeylGroup::getSignSignatureAllRootSubsystems");
+  STACK_TRACE("WeylGroupData::getSignSignatureAllRootSubsystems");
   RootSubalgebras rootSubalgebras;
   SemisimpleLieAlgebra semisimpleLieAlgebra;
   semisimpleLieAlgebra.weylGroup.makeFromDynkinType(this->dynkinType);
@@ -1167,7 +1167,7 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(
 void WeylGroupData::getSignSignatureParabolics(
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {
-  STACK_TRACE("WeylGroup::getSignSignatureParabolics");
+  STACK_TRACE("WeylGroupData::getSignSignatureParabolics");
   //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
@@ -1201,7 +1201,7 @@ void WeylGroupData::getSignSignatureParabolics(
 void WeylGroupData::getSignSignatureExtendedParabolics(
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {
-  STACK_TRACE("WeylGroup::getSignSignatureExtendedParabolics");
+  STACK_TRACE("WeylGroupData::getSignSignatureExtendedParabolics");
   //  this->computeIrreducibleRepresentationsThomasVersion();
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
@@ -1244,7 +1244,7 @@ void WeylGroupData::getSignSignatureRootSubgroups(
   List<SubgroupDataRootReflections>& outputSubgroups,
   const List<Vectors<Rational> >& rootsGeneratingReflections
 ) {
-  STACK_TRACE("WeylGroup::getSignSignatureRootSubgroups");
+  STACK_TRACE("WeylGroupData::getSignSignatureRootSubgroups");
   this->computeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->group);
@@ -1428,8 +1428,8 @@ void CharacterFunctions::getTauSignaturesFromSubgroup(
     }
     if (notFound) {
       global.fatal
-      <<
-      "Something went very wrong: couldn't find preimage of conjugacy class of subgroup. "
+      << "Something went very wrong: couldn't "
+      << "find preimage of conjugacy class of subgroup. "
       << global.fatal;
     }
   }

@@ -29,7 +29,7 @@ void GraphOLD::addDiEdge(int v1, int v2) {
   global.fatal << "attempting to add an edge beyond max_edges" << global.fatal;
 }
 
-// methods that can only be called once can have long names
+// Methods that can only be called once can have long names.
 List<List<int> > GraphOLD::destructivelyGetConnectedComponents() {
   List<List<int> > outerl;
   for (int i = 0; i < this->vertices * this->max_edges; i ++) {

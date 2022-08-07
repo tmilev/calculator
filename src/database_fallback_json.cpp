@@ -44,7 +44,7 @@ bool Database::FallBack::updateOne(
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseFallback::updateOneFromQueryString");
+  STACK_TRACE("Database::FallBack::updateOneFromQueryString");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure

@@ -46,8 +46,8 @@ bool AlgebraicNumber::Test::hashFunction() {
   if (hashOfOne != squareRootOfTwoPlusOne.hashFunction()) {
     global.fatal
     << "The hash functions of 1+sqrt(2) and 1 do not coincide "
-    <<
-    "They are expected to coincide with the current implementation of the hash function. "
+    << "They are expected to coincide with the "
+    << "current implementation of the hash function. "
     << global.fatal;
   }
   return true;

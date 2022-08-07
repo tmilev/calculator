@@ -897,7 +897,7 @@ std::string CalculatorHTML::toStringProblemInfo(
 bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::interpretProblemGiveUp");
+  STACK_TRACE("CalculatorHtmlFunctions::interpretProblemGiveUp");
   if (input.size() != 4) {
     return
     calculator
@@ -933,7 +933,7 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
 bool CalculatorHtmlFunctions::interpretProblem(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::interpretProblem");
+  STACK_TRACE("CalculatorHtmlFunctions::interpretProblem");
   CalculatorHTML problem;
   if (!input.isOfType<std::string>(&problem.parser.inputHtml)) {
     return
@@ -3765,7 +3765,7 @@ std::string SyntacticElementHTML::cleanUpCommandString(
 bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::extractCalculatorExpressionFromHtml");
+  STACK_TRACE("CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml");
   if (input.size() != 2) {
     return false;
   }

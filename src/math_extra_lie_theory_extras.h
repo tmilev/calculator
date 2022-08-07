@@ -156,7 +156,7 @@ public:
   Matrix<Rational> preferredBasisChangE;
   Matrix<Rational> preferredBasisChangeInversE;
   Vectors<Rational> preferredBasis;
-  Cone PreimageWeylChamberLargerAlgebra;
+  Cone preimageWeylChamberLargerAlgebra;
   Cone weylChamberSmallerAlgebra;
   Cone preimageWeylChamberSmallerAlgebra;
   Lattice extendedIntegralLatticeMatrixForm;

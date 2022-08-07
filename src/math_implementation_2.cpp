@@ -52,11 +52,11 @@ void LargeIntegerUnsigned::assignString(const std::string& input) {
       << "called on the string "
       << input
       << " which does not consist entirely of digits. "
-      <<
-      "Please note that LargeIntUnsigned::assignString is a no-fail function, intended for "
+      << "Please note that LargeIntUnsigned::assignString "
+      << "is a no-fail function, intended for "
       << "internal use only. If you want to parse arbitrary unsafe "
-      <<
-      "expressions coming from the user, please use the big gun (a.k.a. Calculator). "
+      << "expressions coming from the user, "
+      << "please use the big gun (a.k.a. Calculator). "
       << global.fatal;
     }
     this->operator+=(static_cast<unsigned>(whichDigit));
@@ -738,8 +738,8 @@ void LargeIntegerUnsigned::dividePositive(
       divisorLeadingDigitPlusSlack ++;
       if (divisorLeadingDigitPlusSlack > divisorLeadingDigit + 1) {
         global.fatal
-        <<
-        "Bad division algorithm: could not figure out currentQuotientDigit for more than 2 runs. "
+        << "Bad division algorithm: could not figure "
+        << "out currentQuotientDigit for more than 2 runs. "
         << global.fatal;
       }
     }

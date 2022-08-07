@@ -2129,7 +2129,7 @@ bool CalculatorFunctionsIntervals::unionUnionIntervals(
 bool CalculatorFunctionsIntervals::unionIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::unionIntervals");
+  STACK_TRACE("CalculatorFunctionsIntervals::unionIntervals");
   if (input.size() != 3) {
     return false;
   }

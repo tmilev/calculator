@@ -372,8 +372,8 @@ void RootSubalgebra::generatePossibleNilradicalsRecursive(
   RootSubalgebras& owner,
   int indexInOwner
 ) {
-  int& recursionDepth = owner.RecursionDepthNilradicalsGeneration;
-  List<int>& counters = owner.CountersNilradicalsGeneration;
+  int& recursionDepth = owner.recursionDepthNilradicalsGeneration;
+  List<int>& counters = owner.countersNilradicalsGeneration;
   while (recursionDepth > - 1) {
     while (counters[recursionDepth] < this->modules.size) {
       if (
@@ -2260,7 +2260,7 @@ void RootSubalgebra::generatePossibleNilradicals(
   StartingNilradicalsNoRepetition.reserve(numCycles);
   Selection tempSel, ParabolicsGenerator;
   if (!owner.flagNilradicalComputationInitialized) {
-    owner.CountersNilradicalsGeneration.setSize(this->modules.size + 1);
+    owner.countersNilradicalsGeneration.setSize(this->modules.size + 1);
   }
   if (owner.flagStoringNilradicals) {
     owner.storedNilradicals[indexInOwner].size = 0;
@@ -2297,8 +2297,8 @@ void RootSubalgebra::generatePossibleNilradicals(
         impliedSelections[0] = (
           StartingNilradicalsNoRepetition[parabolicsCounter]
         );
-        owner.RecursionDepthNilradicalsGeneration = 0;
-        owner.CountersNilradicalsGeneration[0] = this->centralizerRoots.size;
+        owner.recursionDepthNilradicalsGeneration = 0;
+        owner.countersNilradicalsGeneration[0] = this->centralizerRoots.size;
       }
       this->generatePossibleNilradicalsRecursive(
         this->pairingTable,
@@ -2311,8 +2311,8 @@ void RootSubalgebra::generatePossibleNilradicals(
   } else {
     this->flagFirstRoundCounting = false;
     impliedSelections[0].initialize(this->modules.size);
-    owner.RecursionDepthNilradicalsGeneration = 0;
-    owner.CountersNilradicalsGeneration[0] = 0;
+    owner.recursionDepthNilradicalsGeneration = 0;
+    owner.countersNilradicalsGeneration[0] = 0;
     this->generatePossibleNilradicalsRecursive(
       this->pairingTable,
       impliedSelections,

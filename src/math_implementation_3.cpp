@@ -483,8 +483,8 @@ void HtmlRoutines::elementToStringTooltip(
 
 std::string HtmlRoutines::getStyleButtonLikeHtml() {
   return
-  " style='background:none; border:0; text-decoration:underline; color:blue; cursor:pointer' "
-  ;
+  " style='background:none; border:0; "
+  "text-decoration:underline; color:blue; cursor:pointer' ";
 }
 
 std::string HtmlRoutines::convertStringEscapeQuotesAndBackslashes(
@@ -1421,9 +1421,8 @@ bool FileOperations::loadFileToStringUnsecure(
       *commentsOnFailure
       << "The requested file "
       << HtmlRoutines::convertStringToHtmlString(fileNameUnsecure, false)
-      <<
-      " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). "
-      ;
+      << " exists but I failed to open it in "
+      << "text mode (perhaps not a valid ASCII/UTF8 file). ";
     }
     return false;
   }
@@ -1761,7 +1760,9 @@ bool FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
   bool openAsBinary,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FileOperations::openFileVirtualCustomizedWriteOnly");
+  STACK_TRACE(
+    "FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded"
+  );
   std::string computedFileName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
@@ -1897,10 +1898,10 @@ bool FileOperations::openFileUnsecureReadOnly(
   return file.is_open();
 }
 
-std::string FileOperations::GetVirtualNameWithHash(
+std::string FileOperations::getVirtualNameWithHash(
   const std::string& inputFileName
 ) {
-  STACK_TRACE("FileOperations::GetVirtualNameWithHash");
+  STACK_TRACE("FileOperations::getVirtualNameWithHash");
   std::string result = inputFileName;
   std::string fileNameEnd;
   for (
@@ -3192,8 +3193,8 @@ int MathRoutines::parity(int n) {
 int MathRoutines::factorial(int n) {
   if (n < 0) {
     global.fatal
-    <<
-    "We do not have factorials of negative integers here. You wanted factorial of: "
+    << "We do not have factorials of negative "
+    << "integers here. You wanted factorial of: "
     << n
     << ". If you are interested in the Gamma function, "
     << "you may want to use a different data structure rather than int. "
@@ -3960,7 +3961,8 @@ computeGainingMultiplicityIndexInLinearRelation(
   Vector<Rational>& linearRelation
 ) {
   STACK_TRACE(
-    "OnePartialFractionDenominator::computeGainingMultiplicityIndexInLinearRelation"
+    "OnePartialFractionDenominator::"
+    "computeGainingMultiplicityIndexInLinearRelation"
   );
   for (int i = 0; i < linearRelation.size; i ++) {
     if (linearRelation[i].isEqualToZero()) {
@@ -4528,7 +4530,7 @@ void OnePartialFractionDenominator::addMultiplicity(
 bool OnePartialFractionDenominator::initializeFromPartialFractions(
   PartialFractions& owner
 ) {
-  STACK_TRACE("OnePartialFraction::initializeFromVectors");
+  STACK_TRACE("OnePartialFractionDenominator::initializeFromVectors");
   *this = owner.initialPartialFraction;
   return true;
 }
@@ -5198,7 +5200,7 @@ void OnePartialFractionDenominatorComponent::getMonomial(
 void OnePartialFractionDenominatorComponent::computeOneCheckSum(
   Rational& output, const Vector<Rational>& variableValues
 ) {
-  STACK_TRACE("OnePartialFractionDenominator::computeOneCheckSum");
+  STACK_TRACE("OnePartialFractionDenominatorComponent::computeOneCheckSum");
   output = 1;
   MonomialPolynomial monomial;
   Rational scalar;
@@ -5588,13 +5590,14 @@ int SelectionWithDifferentMaxMultiplicities::totalNumberSubsetsSmallInt() {
     if (result < 0) {
       global.fatal
       << "I was asked to enumerate "
-      <<
-      "all subsets of a multi-set, however the number of subsets is larger than  "
+      << "all subsets of a multi-set, however "
+      << "the number of subsets is larger than  "
       << "the maximum value allowed for int on the system "
       << "(on a 32 bit machine that is around 2 billion). "
-      << "This can be fixed, however I do not have time at the moment. If you "
-      <<
-      "encounter this error, write me an email and I will take the time to fix this issue. "
+      << "This can be fixed, however I do "
+      << "not have time at the moment. If you "
+      << "encounter this error, write me an email "
+      << "and I will take the time to fix this issue. "
       << global.fatal;
     }
   }
@@ -5734,7 +5737,7 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
 void DynkinType::getOuterAutosGeneratorsActOnVectorColumn(
   List<MatrixTensor<Rational> >& output
 ) {
-  STACK_TRACE("DynkinType::GetOuterAutosGenerators");
+  STACK_TRACE("DynkinType::getOuterAutosGeneratorsActOnVectorColumn");
   this->sortDynkinTypes();
   List<MatrixTensor<Rational> > intermediateGenerators;
   MatrixTensor<Rational> matrixFinal, matrixToGo;
@@ -6066,8 +6069,8 @@ int DynkinType::getNumberOfSimpleComponentsOfGivenRank(int desiredRank) const {
   int output = 0;
   if (!result.isSmallInteger(&output)) {
     global.fatal
-    <<
-    "Dynkin type has a number of simple components which is not a small integer. "
+    << "Dynkin type has a number of simple "
+    << "components which is not a small integer. "
     << global.fatal;
   }
   return output;
@@ -6081,8 +6084,8 @@ int DynkinType::getNumberOfSimpleComponents() const {
   int output = 0;
   if (!result.isSmallInteger(&output)) {
     global.fatal
-    <<
-    "Dynkin type has a number of simple components which is not a small integer. "
+    << "Dynkin type has a number of simple "
+    << "components which is not a small integer. "
     << global.fatal;
   }
   return output;
@@ -6200,7 +6203,10 @@ void DynkinType::getCoCartanSymmetric(Matrix<Rational>& output) const {
 void DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder(
   Matrix<Rational>& output
 ) const {
-  STACK_TRACE("DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder");
+  STACK_TRACE(
+    "DynkinType::"
+    "getCartanSymmetricDefaultLengthKeepComponentOrder"
+  );
   output.initialize(0, 0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
@@ -6244,8 +6250,8 @@ int DynkinType::getCoxeterEdgeWeight(int v, int w) {
     }
   }
   global.fatal
-  <<
-  "If you would like an edge weight of a non-crystallographic Coxeter graph, replace the code near "
+  << "If you would like an edge weight of a "
+  << "non-crystallographic Coxeter graph, replace the code near "
   << __FILE__
   << ":"
   << __LINE__
@@ -6307,8 +6313,8 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
   }
   global.fatal
   << "Calling "
-  <<
-  "DynkinSimpleType::getLongRootLengthSquared on a non-initialized simple type. "
+  << "DynkinSimpleType::getLongRootLengthSquared "
+  << "on a non-initialized simple type. "
   << global.fatal;
   return - 1;
 }
@@ -6368,8 +6374,6 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
       format->ambientCartanSymmetricInverseScale;
       Rational dynkinIndex = ambientType.getLongRootLengthSquared() /
       this->getLongRootLengthSquared();
-      //      (this->CartanSymmetricInverseScale/this->getDefaultLongRootLengthSquared())/
-      //      (ambientType.CartanSymmetricInverseScale/ambientType.getDefaultLongRootLengthSquared());
       out << letter;
       if (!supressDynkinIndexOne || dynkinIndex != 1) {
         if (usePlusesAndExponents) {
@@ -6548,8 +6552,8 @@ Rational DynkinSimpleType::getDefaultRootLengthSquared(int rootIndex) const {
   default:
     global.fatal
     << "Calling "
-    <<
-    "DynkinSimpleType::getDefaultRootLengthSquared on the non-initialized Dynkin type "
+    << "DynkinSimpleType::getDefaultRootLengthSquared "
+    << "on the non-initialized Dynkin type "
     << this->toString()
     << global.fatal;
     return - 1;
@@ -7234,7 +7238,8 @@ std::string
 ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
 ::toString(FormatExpressions* format) const {
   STACK_TRACE(
-    "ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString"
+    "ElementSubgroupWeylGroupAutomorphisms"
+    "GeneratedByRootReflectionsAndAutomorphisms::toString"
   );
   (void) format;
   if (this->generatorsLastAppliedFirst.size == 0) {
@@ -7424,7 +7429,7 @@ bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
 
 std::string ElementWeylGroup::toStringInvariants(FormatExpressions* format)
 const {
-  STACK_TRACE("ElementWeylGroup::getCycleStructure");
+  STACK_TRACE("ElementWeylGroup::toStringInvariants");
   (void) format;
   VectorSparse<Rational> cycleStructure;
   this->getCycleStructure(cycleStructure);
@@ -7923,7 +7928,7 @@ void WeylGroupData::actOnRootByGroupElement(
 void WeylGroupData::getCoCartanSymmetric(
   const Matrix<Rational>& input, Matrix<Rational>& output
 ) {
-  STACK_TRACE("DynkinType::getCoCartanSymmetric");
+  STACK_TRACE("WeylGroupData::getCoCartanSymmetric");
   if (&input == &output) {
     Matrix<Rational> inputCopy = input;
     WeylGroupData::getCoCartanSymmetric(inputCopy, output);
@@ -8606,7 +8611,10 @@ LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& weight) {
 bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(
   const MatrixTensor<Rational>& matrix
 ) {
-  STACK_TRACE("WeylGroup::IsElementGroupOrOuterAuto");
+  STACK_TRACE(
+    "WeylGroupAutomorphisms::"
+    "isElementWeylGroupOrOuterAutomorphisms"
+  );
   this->computeOuterAutomorphisms();
   Vector<Rational> rhoImage;
   matrix.actOnVectorColumn(this->weylGroup->rho, rhoImage);
@@ -8993,7 +9001,7 @@ Rational WeylGroupData::getLongestRootLengthSquared() const {
 bool WeylGroupData::isElementWeylGroup(
   const MatrixTensor<Rational>& matrix
 ) {
-  STACK_TRACE("WeylGroup::isElementWeylGroup");
+  STACK_TRACE("WeylGroupData::isElementWeylGroup");
   Vector<Rational> rhoImage;
   matrix.actOnVectorColumn(this->rho, rhoImage);
   ElementWeylGroup elementCandidate;
@@ -10353,7 +10361,7 @@ void WeylGroupData::transformToSimpleBasisGenerators(
   Vectors<Rational>& generators,
   const HashedList<Vector<Rational> >& inputRootSystem
 ) {
-  STACK_TRACE("WeylGroup::transformToSimpleBasisGenerators");
+  STACK_TRACE("WeylGroupData::transformToSimpleBasisGenerators");
   for (int i = 0; i < generators.size; i ++) {
     if (!generators[i].isPositiveOrZero()) {
       generators[i].negate();
@@ -10436,7 +10444,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
     return;
   }
   STACK_TRACE(
-    "WeylGroup::"
+    "WeylGroupData::"
     "transformToSimpleBasisGeneratorsArbitraryCoordinates"
   );
   Vector<Rational> hElement;
@@ -10513,7 +10521,7 @@ void WeylGroupData::computeExtremeRootInTheSameKMod(
   Vector<Rational>& output,
   bool lookingForHighest
 ) {
-  STACK_TRACE("WeylGroup::computeExtremeRootInTheSameKMod");
+  STACK_TRACE("WeylGroupData::computeExtremeRootInTheSameKMod");
   output = inputRoot;
   Vector<Rational> root;
   bool FoundHigher = true;
@@ -11865,7 +11873,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(
 }
 
 std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
-  STACK_TRACE("HtmlRoutines::ToHtmlTableFromJSON");
+  STACK_TRACE("HtmlRoutines::toHtmlTableRowsFromJSON");
   if (input.elementType == JSData::token::tokenObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
@@ -13442,7 +13450,8 @@ bool PiecewiseQuasipolynomial::makeVPF(
   // partialFractions.chambersOld.AmbientDimension = roots[0].size;
   // partialFractions.chambersOld.directions = roots;
   // partialFractions.chambersOld.SliceEuclideanSpace(false);
-  // partialFractions.chambers.AssignCombinatorialChamberComplex(partialFractions.chambersOld);
+  // partialFractions.chambers.
+  // AssignCombinatorialChamberComplex(partialFractions.chambersOld);
   this->quasiPolynomials.setSize(
     partialFractions.chambers.refinedCones.size
   );
@@ -14890,8 +14899,8 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
   }
   Matrix<Rational> matrixX;
   Selection tempSelX;
-  int DesiredRank = this->vertices.getRankElementSpan(&matrixX, &tempSelX);
-  if (DesiredRank > 1) {
+  int desiredRank = this->vertices.getRankElementSpan(&matrixX, &tempSelX);
+  if (desiredRank > 1) {
     for (int i = 0; i < this->normals.size; i ++) {
       Vector<Rational>& currentNormal = this->normals[i];
       verticesOnWall.size = 0;
@@ -14905,7 +14914,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
           if (rank < verticesOnWall.size) {
             verticesOnWall.removeLastObject();
           } else {
-            if (rank == DesiredRank - 1) {
+            if (rank == desiredRank - 1) {
               wallIsGood = true;
               break;
             }

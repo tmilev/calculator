@@ -210,9 +210,8 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
     ListReferences<StackInfo>& currentInfo =
     global.customStackTrace[threadCounter];
     out
-    <<
-    "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>"
-    ;
+    << "<td><table><tr><td>file</td><td>line</td>"
+    << "<td>function name (if known)</td></tr>";
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out
       << "<tr><td>"
@@ -327,7 +326,7 @@ std::string GlobalVariables::toStringThreadData(bool useHTML) {
 
 std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML)
 {
-  STACK_TRACE("GlobalVariables::ToStringProgressReportHtmlWithThreadData");
+  STACK_TRACE("GlobalVariables::toStringProgressReportWithThreadData");
   std::stringstream out;
   out << global.toStringThreadData(useHTML);
   out << global.toStringProgressReportNoThreadData(useHTML);
@@ -394,9 +393,8 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
       reportStream
       << "\nSoft limit: "
       << global.millisecondsMaxComputation / 2
-      <<
-      " ms [computation error if limit exceeded, triggered between calculator/atomic functions]."
-      ;
+      << " ms [computation error if limit exceeded, "
+      << "triggered between calculator/atomic functions].";
     }
   }
   return reportStream.str();
@@ -1474,32 +1472,32 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
     this->simpleComponentTypes.size
   ) {
     global.fatal
-    <<
-    "Number of simple connected components does not match the number of types. "
+    << "Number of simple connected components "
+    << "does not match the number of types. "
     << global.fatal;
   }
   for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
-    int Rank = this->simpleBasesConnectedComponents[i].size;
+    int rank = this->simpleBasesConnectedComponents[i].size;
     if (this->simpleComponentTypes[i].letter == 'A') {
-      result += Rank *(Rank + 1);
+      result += rank *(rank + 1);
     }
     if (
       this->simpleComponentTypes[i].letter == 'B' ||
       this->simpleComponentTypes[i].letter == 'C'
     ) {
-      result += Rank * Rank * 2;
+      result += rank * rank * 2;
     }
     if (this->simpleComponentTypes[i].letter == 'D') {
-      result += Rank *(Rank - 1) * 2;
+      result += rank *(rank - 1) * 2;
     }
     if (this->simpleComponentTypes[i].letter == 'E') {
-      if (Rank == 6) {
+      if (rank == 6) {
         result += 72;
       }
-      if (Rank == 7) {
+      if (rank == 7) {
         result += 126;
       }
-      if (Rank == 8) {
+      if (rank == 8) {
         result += 240;
       }
     }
@@ -1689,7 +1687,7 @@ void Permutation::getPermutationLthElementIsTheImageofLthIndex(
 bool WeylGroupData::areMaximallyDominantGroupInner(
   List<Vector<Rational> >& weights
 ) {
-  STACK_TRACE("WeylGroup::areMaximallyDominantGroupInner");
+  STACK_TRACE("WeylGroupData::areMaximallyDominantGroupInner");
   for (int i = 0; i < weights.size; i ++) {
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       if (
@@ -1733,7 +1731,7 @@ bool WeylGroupAutomorphisms::checkInitialization() const {
 bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(
   List<Vector<Rational> >& weights
 ) {
-  STACK_TRACE("WeylGroup::areMaximallyDominantGroupOuter");
+  STACK_TRACE("WeylGroupAutomorphisms::areMaximallyDominantGroupOuter");
   this->checkInitialization();
   MemorySaving<Vectors<Rational> > weightsCopy;
   Vector<Rational> zeroWeight;
@@ -2479,27 +2477,27 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->preimageWeylChamberSmallerAlgebra.normals =
   this->weylChamberSmallerAlgebra.normals;
   for (
-    int i = 0; i < this->PreimageWeylChamberLargerAlgebra.normals.size; i ++
+    int i = 0; i < this->preimageWeylChamberLargerAlgebra.normals.size; i ++
   ) {
     root.makeZero(
       input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
     );
     for (int j = 0; j < input.coDomainAlgebra().getRank(); j ++) {
       root[j + input.domainAlgebra().getRank()] =
-      this->PreimageWeylChamberLargerAlgebra.normals[i][j];
+      this->preimageWeylChamberLargerAlgebra.normals[i][j];
     }
-    this->PreimageWeylChamberLargerAlgebra.normals[i] = root;
+    this->preimageWeylChamberLargerAlgebra.normals[i] = root;
   }
   invertedCartan = input.domainAlgebra().weylGroup.cartanSymmetric;
   invertedCartan.invert();
   roots.size = 0;
-  Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
-  ParabolicEvaluationRootSmallerAlgebra =
+  Vector<Rational> parabolicEvaluationRootSmallerAlgebra;
+  parabolicEvaluationRootSmallerAlgebra =
   this->parabolicSelectionSmallerAlgebra;
   for (int i = 0; i < invertedCartan.numberOfRows; i ++) {
     input.domainAlgebra().weylGroup.cartanSymmetric.getVectorFromRow(i, root);
     if (
-      root.scalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero
+      root.scalarEuclidean(parabolicEvaluationRootSmallerAlgebra).isEqualToZero
       ()
     ) {
       roots.setSize(roots.size + 1);
@@ -2549,14 +2547,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1,
     input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank()
   );
-  this->PreimageWeylChamberLargerAlgebra.normals.addOnTop(root);
+  this->preimageWeylChamberLargerAlgebra.normals.addOnTop(root);
   this->log
   << "\nPreimage Weyl chamber smaller algebra: "
   << this->preimageWeylChamberSmallerAlgebra.toString(&format)
   << "\n";
   this->log
   << "\nPreimage Weyl chamber larger algebra: "
-  << this->PreimageWeylChamberLargerAlgebra.toString(&format)
+  << this->preimageWeylChamberLargerAlgebra.toString(&format)
   << "\n";
   // global.indicatorVariables.StatusString1NeedsRefresh = true;
   // global.indicatorVariables.StatusString1= this->log.str();
@@ -2940,7 +2938,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
         0, currentAffineCone.normals[j], roots[j]
       );
     }
-    roots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.normals);
+    roots.addListOnTop(this->preimageWeylChamberLargerAlgebra.normals);
     report.report(roots.toString());
     currentProjectiveCone.createFromNormals(roots);
     projectivizedChamberFinal.refinedCones.addOnTop(currentProjectiveCone);

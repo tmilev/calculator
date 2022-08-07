@@ -169,7 +169,7 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  static std::string GetVirtualNameWithHash(
+  static std::string getVirtualNameWithHash(
     const std::string& inputFileName
   );
   static bool getPhysicalFileNameFromVirtual(

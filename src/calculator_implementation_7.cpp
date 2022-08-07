@@ -201,7 +201,7 @@ bool CalculatorFunctionsCrypto::sha256OfString(
 bool CalculatorFunctionsCrypto::sha512(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::sha512");
+  STACK_TRACE("CalculatorFunctionsCrypto::sha512");
   if (input.size() != 2) {
     return false;
   }
@@ -2548,7 +2548,7 @@ bool CalculatorFunctions::formatCPPSourceCodeInternal(
   Expression& output,
   bool logDebugData
 ) {
-  STACK_TRACE("CalculatorFunctions::formatCPPSourceCode");
+  STACK_TRACE("CalculatorFunctions::formatCPPSourceCodeInternal");
   if (!global.userDefaultHasAdminRights()) {
     return
     calculator
@@ -4317,7 +4317,7 @@ bool CalculatorFunctionsDifferentiation::atomToDifferential(
 bool CalculatorFunctionsDifferentiation::interpretAsDifferential(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::interpretAsDifferential");
+  STACK_TRACE("CalculatorFunctionsDifferentiation::interpretAsDifferential");
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -4450,7 +4450,7 @@ bool CalculatorFunctions::rationalFunctionSubstitution(
 bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::invertMatrixVerbose");
+  STACK_TRACE("CalculatorFunctions::invertMatrixRationalFractionsVerbose");
   Matrix<RationalFraction<Rational> > matrix, outputMatrix, extendedMatrix;
   Expression converted;
   if (
@@ -5041,7 +5041,10 @@ bool CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
   Expression& outputCoeffLinTerm,
   Expression& outputConstTerm
 ) {
-  STACK_TRACE("CalculatorFunctions::extractQuadraticCoeffsWRTvariable");
+  STACK_TRACE(
+    "CalculatorFunctions::"
+    "extractQuadraticCoefficientsWithRespectToVariable"
+  );
   VectorSparse<Expression> coefficients;
   if (quadratic.owner == nullptr) {
     return false;
@@ -6219,7 +6222,7 @@ bool CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation(
 bool CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::ddivDxToDifferentiation");
+  STACK_TRACE("CalculatorFunctionsDifferentiation::ddivDxToDifferentiation");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -6672,7 +6675,9 @@ bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
 bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::characteristicPolynomialMatrix");
+  STACK_TRACE(
+    "CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix"
+  );
   if (input.size() != 2) {
     return false;
   }
@@ -7035,7 +7040,7 @@ bool CalculatorFunctions::invertMatrix(
 bool CalculatorFunctions::differentialEquationsEulersMethod(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::dFQsEulersMethod");
+  STACK_TRACE("CalculatorFunctions::differentialEquationsEulersMethod");
   if (input.size() != 7) {
     return calculator << "Euler method function takes 6 arguments";
   }

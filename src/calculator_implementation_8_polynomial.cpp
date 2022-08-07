@@ -1043,7 +1043,8 @@ combineFractionsCommutativeWithInternalLibrary(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary"
+    "CalculatorFunctionsPolynomial::"
+    "combineFractionsCommutativeWithInternalLibrary"
   );
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;

@@ -614,7 +614,7 @@ void BuilderApplication::initializeTags(bool appendBuildHash) {
   std::string virtualJavascriptFileName = WebAPI::request::onePageJS;
   if (appendBuildHash) {
     virtualJavascriptFileName =
-    FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
+    FileOperations::getVirtualNameWithHash(WebAPI::request::onePageJS);
   }
   this->allInOneJavascriptTagDesired =
   "<script src='" +
@@ -627,7 +627,7 @@ void BuilderApplication::initializeTags(bool appendBuildHash) {
   std::string virtualCSSFileName = WebAPI::request::calculatorCSS;
   if (appendBuildHash) {
     virtualCSSFileName =
-    FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorCSS);
+    FileOperations::getVirtualNameWithHash(WebAPI::request::calculatorCSS);
   }
   this->calculatorCSSTagDesired =
   "<link type='text/css' rel='stylesheet' href='" +

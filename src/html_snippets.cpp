@@ -79,7 +79,7 @@ const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   std::stringstream out;
   out
   << "<script type =\"text/javascript\" src =\""
-  << FileOperations::GetVirtualNameWithHash("/html-common/ace/src-min/ace.js")
+  << FileOperations::getVirtualNameWithHash("/html-common/ace/src-min/ace.js")
   << "\" charset =\"utf-8\"></script>";
   out
   << HtmlRoutines::getJavascriptAddScriptTags(
@@ -144,7 +144,7 @@ std::string HtmlRoutines::getJavascriptLink(
   STACK_TRACE("HtmlRoutines::getJavascriptLink");
   std::stringstream out;
   std::string fileName =
-  FileOperations::GetVirtualNameWithHash(fileNameVirtual);
+  FileOperations::getVirtualNameWithHash(fileNameVirtual);
   out << "<script src =\"" << fileName << "\"></script>\n";
   return out.str();
 }
@@ -153,7 +153,7 @@ std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
   STACK_TRACE("HtmlRoutines::getCSSLink");
   std::stringstream out;
   std::string fileName =
-  FileOperations::GetVirtualNameWithHash(fileNameVirtual);
+  FileOperations::getVirtualNameWithHash(fileNameVirtual);
   out << "<link rel='stylesheet' href='" << fileName << "'>\n";
   return out.str();
 }

@@ -5051,9 +5051,9 @@ void WebServer::initializeMainHashes() {
   FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().
   addOnTopNoRepetitionMustBeNew(WebAPI::request::calculatorHTML);
   WebAPI::request::onePageJSWithHash =
-  FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
+  FileOperations::getVirtualNameWithHash(WebAPI::request::onePageJS);
   WebAPI::request::calculatorWorkerJSWithHash =
-  FileOperations::GetVirtualNameWithHash(
+  FileOperations::getVirtualNameWithHash(
     WebAPI::request::calculatorWorkerJS
   );
 }

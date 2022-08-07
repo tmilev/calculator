@@ -39,7 +39,7 @@ void ElementWeylGroup::makeFromReadableReflections(
 void WeylGroupData::computeOrLoadCharacterTable(
   std::stringstream* reportStream
 ) {
-  STACK_TRACE("WeylGroup::computeOrLoadCharacterTable");
+  STACK_TRACE("WeylGroupData::computeOrLoadCharacterTable");
   if (this->flagCharTableIsComputed) {
     return;
   }
@@ -384,7 +384,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_7(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"
+    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, "
+    "7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -406,7 +407,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_7(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, 4, 5, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"
+    "[ 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, "
+    "4, 5, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -504,7 +506,9 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_7(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
+    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, "
+    "2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, "
+    "3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -526,7 +530,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_7(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
+    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, "
+    "5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -544,7 +549,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_7(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"
+    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, "
+    "2, 4, 5, 6, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -578,7 +584,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_7(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, 4, 5, 3, 1, 3, 4, 5, 2, 4, 3, 1]"
+    "[ 7, 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, 4, 5, "
+    "3, 1, 3, 4, 5, 2, 4, 3, 1]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -831,7 +838,12 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 8, 7, 8, 6, 7, 8, 5, 6, 7, 8, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 8, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
+    "[ 8, 7, 8, 6, 7, 8, 5, 6, 7, 8, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, "
+    "8, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, "
+    "2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, "
+    "4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, "
+    "3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, "
+    "3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -845,13 +857,16 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"
+    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, "
+    "4, 5, 6, 3, 4, 5, 2, 4, 3 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 8, 7, 6, 7, 5, 6, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 2, 4, 5, 3, 1 ]"
+    "[ 8, 7, 6, 7, 5, 6, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 6, 7, 8, 2, "
+    "4, 5, 6, 3, 4, 5, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, "
+    "2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 2, 4, 5, 3, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -865,31 +880,39 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
+    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, "
+    "5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, "
+    "4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 8, 7, 8, 6, 7, 5, 6, 7, 4, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1 ]"
+    "[ 8, 7, 8, 6, 7, 5, 6, 7, 4, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, "
+    "3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, "
+    "3, 4, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, "
+    "2, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 5, 6, 4, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2 ]"
+    "[ 5, 6, 4, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, "
+    "2, 4, 5, 6, 7, 3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 6, 5, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1, 3 ]"
+    "[ 6, 5, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, "
+    "4, 1, 3 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7 ]"
+    "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6, 8, 7, 6, 5, 4, 2, 3, "
+    "1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -899,7 +922,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 2, 4, 2, 5, 4, 2, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"
+    "[ 2, 4, 2, 5, 4, 2, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, "
+    "6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -909,7 +933,9 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
+    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, "
+    "2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, "
+    "2, 6, 5, 4, 3, 1, 7, 8, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -927,7 +953,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8 ]"
+    "[ 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 3, "
+    "4, 2, 1, 3, 4, 5, 6, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -941,19 +968,23 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 3, 4, 3, 5, 4, 3, 6, 5, 4, 3, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 7, 6, 5, 4, 2 ]"
+    "[ 3, 4, 3, 5, 4, 3, 6, 5, 4, 3, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, "
+    "2, 6, 5, 4, 3, 7, 6, 5, 4, 2 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 5, 6, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4 ]"
+    "[ 7, 5, 6, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 1, 3, 4, 5, 6, 7, "
+    "8, 2, 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, "
+    "3, 4 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 8, 7, 6, 7, 5, 4, 5, 6, 2, 4, 3, 4, 5, 6, 7, 1, 3, 4, 5, 6, 2, 4, 5, 3 ]"
+    "[ 8, 7, 6, 7, 5, 4, 5, 6, 2, 4, 3, 4, 5, 6, 7, 1, 3, 4, 5, 6, "
+    "2, 4, 5, 3 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -967,7 +998,9 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 5, 4, 2, 3, 1, 4, 3, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7 ]"
+    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 5, 4, 2, 3, 1, 4, 3, 6, 5, 4, 2, "
+    "3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, "
+    "6, 7, 8, 7 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -991,7 +1024,9 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 4, 3, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"
+    "[ 4, 3, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, "
+    "3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, "
+    "3, 1, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1039,7 +1074,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 2, 4, 2, 5, 4, 2, 3, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"
+    "[ 2, 4, 2, 5, 4, 2, 3, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, "
+    "4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1053,7 +1089,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 3, 4, 3, 1, 5, 4, 2, 3, 4, 5, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 7, 6 ]"
+    "[ 1, 3, 4, 3, 1, 5, 4, 2, 3, 4, 5, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, "
+    "4, 2, 6, 5, 7, 6 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1079,13 +1116,15 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 3, 1, 4, 5, 4, 3, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
+    "[ 1, 3, 1, 4, 5, 4, 3, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 7, 6, 5, 4, "
+    "2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 2, 3, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 8, 7 ]"
+    "[ 1, 2, 3, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 5, 6, 5, 4, 2, 3, 4, "
+    "5, 6, 8, 7 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1101,7 +1140,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 3, 1, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
+    "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 3, 1, 6, 5, 4, 2, 3, "
+    "4, 5, 6, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1123,7 +1163,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 3, 4, 2, 3, 5, 4, 2, 3, 4, 6, 5, 4, 2, 3, 7, 6, 5, 4, 2, 3, 1, 4, 5, 6, 7, 8 ]"
+    "[ 3, 4, 2, 3, 5, 4, 2, 3, 4, 6, 5, 4, 2, 3, 7, 6, 5, 4, 2, 3, "
+    "1, 4, 5, 6, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1141,7 +1182,9 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
+    "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, "
+    "5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, "
+    "4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1159,7 +1202,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
+    "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, "
+    "7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1173,7 +1217,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 2, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 3, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 6, 7 ]"
+    "[ 2, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 3, 5, 6, 5, 4, 2, 3, 4, 5, 6, "
+    "7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 6, 7 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1193,13 +1238,15 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 5, 6, 7 ]"
+    "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, "
+    "5, 4, 2, 3, 1, 4, 5, 6, 7 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 8, 5, 6, 4, 5, 6, 3, 4, 5, 6, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1 ]"
+    "[ 8, 5, 6, 4, 5, 6, 3, 4, 5, 6, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, "
+    "2, 1 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1229,7 +1276,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   conjugacyClass.representative.makeFromReadableReflections(
     output,
     false,
-    "[ 1, 2, 3, 1, 4, 2, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 6, 5, 4, 2, 3, 4, 5, 6, 7 ]"
+    "[ 1, 2, 3, 1, 4, 2, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 6, 5, 4, 2, 3, "
+    "4, 5, 6, 7 ]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
@@ -1689,103 +1737,128 @@ bool HardCodedWeylGroupData::loadCharTableF1_4(WeylGroupData& output) {
   ClassFunction<FiniteGroup<ElementWeylGroup>, Rational> currentCF;
   currentCF.G = &outputG;
   currentCF.data.fromString(
-    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 ]"
+    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  "
+    "1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1 ]"
+    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  "
+    "1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, - 1, - 1, - 1, - 1, - 1,  1,  1,  1,  1,  1, - 1, - 1, - 1, - 1 ]"
+    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, - 1, - 1, - 1, - 1, "
+    "- 1,  1,  1,  1,  1,  1, - 1, - 1, - 1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,  1,  1,  1,  1 ]"
+    "[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, - 1, - 1, - 1, - 1, "
+    "- 1, - 1, - 1, - 1, - 1, - 1,  1,  1,  1,  1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  2,  2,  2,  2,  2,  2, - 1, - 1, - 1, - 1, - 1,  2,  2, - 1, - 1,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
+    "[  2,  2,  2,  2,  2,  2, - 1, - 1, - 1, - 1, - 1,  2,  2, - 1, - 1,  "
+    "2,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  2,  2,  2,  2,  2,  2, - 1, - 1, - 1, - 1, - 1, -2, -2,  1,  1, -2,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
+    "[  2,  2,  2,  2,  2,  2, - 1, - 1, - 1, - 1, - 1, -2, -2,  1,  1, "
+    "-2,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  2,  2,  2, - 1, - 1,  2,  2,  2, - 1, - 1, - 1,  0,  0,  0,  0,  0, -2, -2,  1,  1, -2,  0,  0,  0,  0 ]"
+    "[  2,  2,  2, - 1, - 1,  2,  2,  2, - 1, - 1, - 1,  0,  0,  0,  0,  "
+    "0, -2, -2,  1,  1, -2,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  4,  4,  4, -2, -2,  4, -2, -2,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
+    "[  4,  4,  4, -2, -2,  4, -2, -2,  1,  1,  1,  0,  0,  0,  0,  0,  0,  "
+    "0,  0,  0,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0,  3,  3,  0,  0, - 1,  3,  3,  0,  0, - 1,  1,  1,  1, - 1 ]"
+    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0,  3,  3,  0,  0, - 1,  3,  "
+    "3,  0,  0, - 1,  1,  1,  1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  2,  2,  2, - 1, - 1,  2,  2,  2, - 1, - 1, - 1,  0,  0,  0,  0,  0,  2,  2, - 1, - 1,  2,  0,  0,  0,  0 ]"
+    "[  2,  2,  2, - 1, - 1,  2,  2,  2, - 1, - 1, - 1,  0,  0,  0,  0,  0,  "
+    "2,  2, - 1, - 1,  2,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0,  3,  3,  0,  0, - 1, -3, -3,  0,  0,  1, - 1, - 1, - 1,  1 ]"
+    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0,  3,  3,  0,  0, - 1, -3, "
+    "-3,  0,  0,  1, - 1, - 1, - 1,  1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0, -3, -3,  0,  0,  1,  3,  3,  0,  0, - 1, - 1, - 1, - 1,  1 ]"
+    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0, -3, -3,  0,  0,  1,  3,  "
+    "3,  0,  0, - 1, - 1, - 1, - 1,  1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0, -3, -3,  0,  0,  1, -3, -3,  0,  0,  1,  1,  1,  1, - 1 ]"
+    "[  9,  9,  1,  0,  0, -3,  0,  0,  0,  0,  0, -3, -3,  0,  0,  1, -3, "
+    "-3,  0,  0,  1,  1,  1,  1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  6,  6, -2,  0,  0,  2,  0,  0,  3,  3, - 1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2, -2, -2,  0 ]"
+    "[  6,  6, -2,  0,  0,  2,  0,  0,  3,  3, - 1,  0,  0,  0,  0,  0,  0,  "
+    "0,  0,  0,  0,  2, -2, -2,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  6,  6, -2,  0,  0,  2,  0,  0,  3,  3, - 1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -2,  2,  2,  0 ]"
+    "[  6,  6, -2,  0,  0,  2,  0,  0,  3,  3, - 1,  0,  0,  0,  0,  0,  "
+    "0,  0,  0,  0,  0, -2,  2,  2,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 12, 12, -4,  0,  0,  4,  0,  0, -3, -3,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
+    "[ 12, 12, -4,  0,  0,  4,  0,  0, -3, -3,  1,  0,  0,  0,  0,  0,  "
+    "0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0,  2, -2, - 1,  1,  0,  2, -2, - 1,  1,  0,  0,  2, -2,  0 ]"
+    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0,  2, -2, - 1,  1,  "
+    "0,  2, -2, - 1,  1,  0,  0,  2, -2,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0,  2, -2, - 1,  1,  0, -2,  2,  1, - 1,  0,  0, -2,  2,  0 ]"
+    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0,  2, -2, - 1,  1,  "
+    "0, -2,  2,  1, - 1,  0,  0, -2,  2,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0, -2,  2,  1, - 1,  0,  2, -2, - 1,  1,  0,  0, -2,  2,  0 ]"
+    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0, -2,  2,  1, - 1,  "
+    "0,  2, -2, - 1,  1,  0,  0, -2,  2,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0, -2,  2,  1, - 1,  0, -2,  2,  1, - 1,  0,  0,  2, -2,  0 ]"
+    "[  4, -4,  0,  1, - 1,  0,  1, - 1, -2,  2,  0, -2,  2,  1, - 1,  "
+    "0, -2,  2,  1, - 1,  0,  0,  2, -2,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  8, -8,  0,  2, -2,  0, - 1,  1,  2, -2,  0,  4, -4,  1, - 1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
+    "[  8, -8,  0,  2, -2,  0, - 1,  1,  2, -2,  0,  4, -4,  1, - 1,  "
+    "0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  8, -8,  0,  2, -2,  0, - 1,  1,  2, -2,  0, -4,  4, - 1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
+    "[  8, -8,  0,  2, -2,  0, - 1,  1,  2, -2,  0, -4,  4, - 1,  1,  "
+    "0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  8, -8,  0, - 1,  1,  0,  2, -2,  2, -2,  0,  0,  0,  0,  0,  0,  4, -4,  1, - 1,  0,  0,  0,  0,  0 ]"
+    "[  8, -8,  0, - 1,  1,  0,  2, -2,  2, -2,  0,  0,  0,  0,  0,  "
+    "0,  4, -4,  1, - 1,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[  8, -8,  0, - 1,  1,  0,  2, -2,  2, -2,  0,  0,  0,  0,  0,  0, -4,  4, - 1,  1,  0,  0,  0,  0,  0 ]"
+    "[  8, -8,  0, - 1,  1,  0,  2, -2,  2, -2,  0,  0,  0,  0,  0,  "
+    "0, -4,  4, - 1,  1,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 16, - 16, 0, -2,  2,  0, -2,  2, -2,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
+    "[ 16, - 16, 0, -2,  2,  0, -2,  2, -2,  2,  0,  0,  0,  0,  0,  "
+    "0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   output.irrepsCarterLabels.setSize(0);
@@ -1824,243 +1897,424 @@ bool HardCodedWeylGroupData::loadCharTableE1_7(WeylGroupData& output) {
   ClassFunction<FiniteGroup<ElementWeylGroup>, Rational> currentCF;
   currentCF.G = &outputG;
   currentCF.data.fromString(
-    "[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]"
+    "[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "
+    "1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "
+    "1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, "
+    "1, 1, 1, 1, 1, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1 ]"
+    "[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "
+    "1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, - 1, - 1, - 1, "
+    "- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, "
+    "- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, "
+    "- 1, - 1, - 1, - 1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 7, -5, - 1, 3, - 1, 4, -2, 1, 3, 1, -3, - 1, 1, 2, -2, 2, 2, 0, 1, - 1, - 1,0, - 1, 1, 1, 0, -2, 0, 0, - 1, 7, -5, - 1, 3, - 1, 4, -2, 1, 3, 1, -3, - 1, 1, 2, -2, 2, 2, 0, 1, - 1, - 1, 0, - 1, 1, 1, 0, -2, 0, 0, - 1 ]"
+    "[ 7, -5, - 1, 3, - 1, 4, -2, 1, 3, 1, -3, - 1, 1, 2, -2, 2, 2, "
+    "0, 1, - 1, - 1,0, - 1, 1, 1, 0, -2, 0, 0, - 1, 7, -5, "
+    "- 1, 3, - 1, 4, -2, 1, 3, 1, -3, - 1, 1, 2, -2, 2, 2, "
+    "0, 1, - 1, - 1, 0, - 1, 1, 1, 0, -2, 0, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 7, -5, - 1, 3, - 1, 4, -2, 1, 3, 1, -3, - 1, 1, 2, -2, 2, 2, 0, 1, - 1, - 1,      0, - 1, 1, 1, 0, -2, 0, 0, - 1, -7, 5, 1, -3, 1, -4, 2, - 1, -3, - 1, 3, 1,- 1, -2, 2, -2, -2, 0, - 1, 1, 1, 0, 1, - 1, - 1, 0, 2, 0, 0, 1 ]"
+    "[ 7, -5, - 1, 3, - 1, 4, -2, 1, 3, 1, -3, - 1, 1, 2, -2, 2, "
+    "2, 0, 1, - 1, - 1,      0, - 1, 1, 1, 0, -2, 0, 0, - 1, "
+    "-7, 5, 1, -3, 1, -4, 2, - 1, -3, - 1, 3, 1,- 1, -2, 2, -2, -2, "
+    "0, - 1, 1, 1, 0, 1, - 1, - 1, 0, 2, 0, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 15, -5, 7, 3, - 1, 0, -3, 3, - 1, -3, 1, 3, 1, 0, -2, -2, 1, 0, 1, 1, - 1,1, 1, - 1, 0, 0, 0, -2, - 1, 0, 15, -5, 7, 3, - 1, 0, -3, 3, - 1, -3, 1, 3,1, 0, -2, -2, 1, 0, 1, 1, - 1, 1, 1, - 1, 0, 0, 0, -2, - 1, 0 ]"
+    "[ 15, -5, 7, 3, - 1, 0, -3, 3, - 1, -3, 1, 3, 1, 0, -2, -2, 1, "
+    "0, 1, 1, - 1,1, 1, - 1, 0, 0, 0, -2, - 1, 0, 15, -5, 7, 3, - 1, "
+    "0, -3, 3, - 1, -3, 1, 3,1, 0, -2, -2, 1, 0, 1, 1, - 1, 1, 1, "
+    "- 1, 0, 0, 0, -2, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 15, -5, 7, 3, - 1, 0, -3, 3, - 1, -3, 1, 3, 1, 0, -2, -2, 1, 0, 1, 1, - 1,1, 1, - 1, 0, 0, 0, -2, - 1, 0, - 15, 5, -7, -3, 1, 0, 3, -3, 1, 3, - 1,-3, - 1, 0, 2, 2, - 1, 0, - 1, - 1, 1, - 1, - 1, 1, 0, 0, 0, 2, 1, 0 ]"
+    "[ 15, -5, 7, 3, - 1, 0, -3, 3, - 1, -3, 1, 3, 1, 0, -2, -2, 1, "
+    "0, 1, 1, - 1,1, 1, - 1, 0, 0, 0, -2, - 1, 0, - 15, 5, -7, -3, 1, "
+    "0, 3, -3, 1, 3, - 1,-3, - 1, 0, 2, 2, - 1, 0, - 1, - 1, 1, - 1, "
+    "- 1, 1, 0, 0, 0, 2, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 21, 9, -3, 1, -3, 6, 3, 0, 5, - 1, 3, 1, - 1, 1, 0, 0, 3, -2, 0, 0, 0, 0,- 1, 1, 0, - 1, 2, 0, - 1, 1, 21, 9, -3, 1, -3, 6, 3, 0, 5, - 1, 3, 1, - 1,1, 0, 0, 3, -2, 0, 0, 0, 0, - 1, 1, 0, - 1, 2, 0, - 1, 1 ]"
+    "[ 21, 9, -3, 1, -3, 6, 3, 0, 5, - 1, 3, 1, - 1, 1, 0, 0, 3, -2, "
+    "0, 0, 0, 0,- 1, 1, 0, - 1, 2, 0, - 1, 1, 21, 9, -3, 1, -3, 6, 3, 0, "
+    "5, - 1, 3, 1, - 1,1, 0, 0, 3, -2, 0, 0, 0, 0, - 1, 1, 0, - 1, "
+    "2, 0, - 1, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 21, 9, -3, 1, -3, 6, 3, 0, 5, - 1, 3, 1, - 1, 1, 0, 0, 3, -2, 0, 0, 0, 0,- 1, 1, 0, - 1, 2, 0, - 1, 1, -21, -9, 3, - 1, 3, -6, -3, 0, -5, 1, -3, - 1,1, - 1, 0, 0, -3, 2, 0, 0, 0, 0, 1, - 1, 0, 1, -2, 0, 1, - 1 ]"
+    "[ 21, 9, -3, 1, -3, 6, 3, 0, 5, - 1, 3, 1, - 1, 1, 0, 0, 3, -2, 0, "
+    "0, 0, 0,- 1, 1, 0, - 1, 2, 0, - 1, 1, -21, -9, 3, - 1, 3, -6, -3, 0, "
+    "-5, 1, -3, - 1,1, - 1, 0, 0, -3, 2, 0, 0, 0, 0, 1, - 1, 0, 1, -2, "
+    "0, 1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 21, - 11, 5, 5, -3, 6, 3, 0, 1, -3, -3, 1, 1, 1, -2, 2, - 1, 2, -2, 2, 0,0, - 1, - 1, 0, - 1, 0, 0, 1, 1, 21, - 11, 5, 5, -3, 6, 3, 0, 1, -3, -3, 1,1, 1, -2, 2, - 1, 2, -2, 2, 0, 0, - 1, - 1, 0, - 1, 0, 0, 1, 1 ]"
+    "[ 21, - 11, 5, 5, -3, 6, 3, 0, 1, -3, -3, 1, 1, 1, -2, 2, - 1, 2, "
+    "-2, 2, 0,0, - 1, - 1, 0, - 1, 0, 0, 1, 1, 21, - 11, 5, 5, -3, 6, 3, "
+    "0, 1, -3, -3, 1,1, 1, -2, 2, - 1, 2, -2, 2, 0, 0, - 1, - 1, 0, "
+    "- 1, 0, 0, 1, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 21, - 11, 5, 5, -3, 6, 3, 0, 1, -3, -3, 1, 1, 1, -2, 2, - 1, 2, -2, 2, 0,0, - 1, - 1, 0, - 1, 0, 0, 1, 1, -21, 11, -5, -5, 3, -6, -3, 0, - 1, 3, 3,- 1, - 1, - 1, 2, -2, 1, -2, 2, -2, 0, 0, 1, 1, 0, 1, 0, 0, - 1, - 1 ]"
+    "[ 21, - 11, 5, 5, -3, 6, 3, 0, 1, -3, -3, 1, 1, 1, -2, 2, - 1, 2, "
+    "-2, 2, 0,0, - 1, - 1, 0, - 1, 0, 0, 1, 1, -21, 11, -5, -5, 3, -6, "
+    "-3, 0, - 1, 3, 3,- 1, - 1, - 1, 2, -2, 1, -2, 2, -2, 0, 0, 1, 1, "
+    "0, 1, 0, 0, - 1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 27, 15, 3, 7, 3, 9, 0, 0, 3, 1, 5, - 1, 1, 2, 3, 3, 0, 1, 0, 0, 0, - 1, 1,- 1, 0, 0, 1, - 1, 0, - 1, 27, 15, 3, 7, 3, 9, 0, 0, 3, 1, 5, - 1, 1, 2, 3, 3, 0, 1, 0, 0, 0, - 1, 1, - 1, 0, 0, 1, - 1, 0, - 1 ]"
+    "[ 27, 15, 3, 7, 3, 9, 0, 0, 3, 1, 5, - 1, 1, 2, 3, 3, 0, 1, 0, 0, "
+    "0, - 1, 1,- 1, 0, 0, 1, - 1, 0, - 1, 27, 15, 3, 7, 3, 9, 0, 0, "
+    "3, 1, 5, - 1, 1, 2, 3, 3, 0, 1, 0, 0, 0, - 1, 1, - 1, 0, 0, 1, "
+    "- 1, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 27, 15, 3, 7, 3, 9, 0, 0, 3, 1, 5, - 1, 1, 2, 3, 3, 0, 1, 0, 0, 0, - 1, 1,- 1, 0, 0, 1, - 1, 0, - 1, -27, - 15, -3, -7, -3, -9, 0, 0, -3, - 1, -5, 1,- 1, -2, -3, -3, 0, - 1, 0, 0, 0, 1, - 1, 1, 0, 0, - 1, 1, 0, 1 ]"
+    "[ 27, 15, 3, 7, 3, 9, 0, 0, 3, 1, 5, - 1, 1, 2, 3, 3, 0, 1, 0, "
+    "0, 0, - 1, 1,- 1, 0, 0, 1, - 1, 0, - 1, -27, - 15, -3, -7, -3, -9, "
+    "0, 0, -3, - 1, -5, 1,- 1, -2, -3, -3, 0, - 1, 0, 0, 0, 1, - 1, 1, 0, "
+    "0, - 1, 1, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 35, -5, 3, -5, 3, 5, - 1, 2, 7, - 1, - 1, - 1, - 1, 0, 1, -3, 3, 1, -2, 0, 0,0, 1, 1, - 1, 0, - 1, - 1, 1, 0, 35, -5, 3, -5, 3, 5, - 1, 2, 7, - 1, - 1,- 1, - 1, 0, 1, -3, 3, 1, -2, 0, 0, 0, 1, 1, - 1, 0, - 1, - 1, 1, 0 ]"
+    "[ 35, -5, 3, -5, 3, 5, - 1, 2, 7, - 1, - 1, - 1, - 1, 0, 1, -3, "
+    "3, 1, -2, 0, 0,0, 1, 1, - 1, 0, - 1, - 1, 1, 0, 35, -5, 3, -5, "
+    "3, 5, - 1, 2, 7, - 1, - 1,- 1, - 1, 0, 1, -3, 3, 1, -2, 0, 0, 0, "
+    "1, 1, - 1, 0, - 1, - 1, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 35, -5, 3, -5, 3, 5, - 1, 2, 7, - 1, - 1, - 1, - 1, 0, 1, -3, 3, 1, -2, 0, 0,0, 1, 1, - 1, 0, - 1, - 1, 1, 0, -35, 5, -3, 5, -3, -5, 1, -2, -7, 1, 1,1, 1, 0, - 1, 3, -3, - 1, 2, 0, 0, 0, - 1, - 1, 1, 0, 1, 1, - 1, 0 ]"
+    "[ 35, -5, 3, -5, 3, 5, - 1, 2, 7, - 1, - 1, - 1, - 1, 0, 1, -3, "
+    "3, 1, -2, 0, 0,0, 1, 1, - 1, 0, - 1, - 1, 1, 0, -35, 5, -3, 5, "
+    "-3, -5, 1, -2, -7, 1, 1,1, 1, 0, - 1, 3, -3, - 1, 2, 0, 0, 0, "
+    "- 1, - 1, 1, 0, 1, 1, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 35, 15, 11, 7, 3, 5, - 1, 2, - 1, 5, 1, 3, 1, 0, 3, - 1, - 1, 1, 0, 2, 0, 0, - 1, 1, - 1, 0, - 1, 1, - 1, 0, 35, 15, 11, 7, 3, 5, - 1, 2, - 1, 5, 1, 3, 1,      0, 3, - 1, - 1, 1, 0, 2, 0, 0, - 1, 1, - 1, 0, - 1, 1, - 1, 0 ]"
+    "[ 35, 15, 11, 7, 3, 5, - 1, 2, - 1, 5, 1, 3, 1, 0, 3, - 1, - 1, "
+    "1, 0, 2, 0, 0, - 1, 1, - 1, 0, - 1, 1, - 1, 0, 35, 15, 11, 7, 3, "
+    "5, - 1, 2, - 1, 5, 1, 3, 1,      0, 3, - 1, - 1, 1, 0, 2, 0, 0, "
+    "- 1, 1, - 1, 0, - 1, 1, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 35, 15, 11, 7, 3, 5, - 1, 2, - 1, 5, 1, 3, 1, 0, 3, - 1, - 1, 1, 0, 2, 0, 0, - 1, 1, - 1, 0, - 1, 1, - 1, 0, -35, - 15, - 11, -7, -3, -5, 1, -2, 1, -5,      - 1, -3, - 1, 0, -3, 1, 1, - 1, 0, -2, 0, 0, 1, - 1, 1, 0, 1, - 1, 1, 0 ]"
+    "[ 35, 15, 11, 7, 3, 5, - 1, 2, - 1, 5, 1, 3, 1, 0, 3, - 1, "
+    "- 1, 1, 0, 2, 0, 0, - 1, 1, - 1, 0, - 1, 1, - 1, 0, -35, - 15, "
+    "- 11, -7, -3, -5, 1, -2, 1, -5,      - 1, -3, - 1, 0, -3, 1, 1, "
+    "- 1, 0, -2, 0, 0, 1, - 1, 1, 0, 1, - 1, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 56, -24, -8, 8, 0, 11, 2, 2, 0, 4, -4, 0, 0, 1, -3, 1, -2, - 1, 0, -2, 0, 0, 0, 0, - 1, 1, 1, - 1, 0, 1, 56, -24, -8, 8, 0, 11, 2, 2, 0, 4, -4, 0,      0, 1, -3, 1, -2, - 1, 0, -2, 0, 0, 0, 0, - 1, 1, 1, - 1, 0, 1 ]"
+    "[ 56, -24, -8, 8, 0, 11, 2, 2, 0, 4, -4, 0, 0, 1, -3, 1, -2, "
+    "- 1, 0, -2, 0, 0, 0, 0, - 1, 1, 1, - 1, 0, 1, 56, -24, -8, 8, "
+    "0, 11, 2, 2, 0, 4, -4, 0,      0, 1, -3, 1, -2, - 1, 0, -2, 0, "
+    "0, 0, 0, - 1, 1, 1, - 1, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 56, -24, -8, 8, 0, 11, 2, 2, 0, 4, -4, 0, 0, 1, -3, 1, -2, - 1, 0, -2, 0, 0, 0, 0, - 1, 1, 1, - 1, 0, 1, -56, 24, 8, -8, 0, - 11, -2, -2, 0, -4, 4,      0, 0, - 1, 3, - 1, 2, 1, 0, 2, 0, 0, 0, 0, 1, - 1, - 1, 1, 0, - 1 ]"
+    "[ 56, -24, -8, 8, 0, 11, 2, 2, 0, 4, -4, 0, 0, 1, -3, 1, -2, "
+    "- 1, 0, -2, 0, 0, 0, 0, - 1, 1, 1, - 1, 0, 1, -56, 24, 8, -8, 0, "
+    "- 11, -2, -2, 0, -4, 4,      0, 0, - 1, 3, - 1, 2, 1, 0, 2, 0, 0, "
+    "0, 0, 1, - 1, - 1, 1, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 70, - 10, - 10, 6, -2, -5, 7, 1, 2, 2, 2, 2, -2, 0, - 1, - 1, - 1, 3, - 1, - 1, 1, 0, 0, 0, 1, 0, - 1, - 1, - 1, 0, 70, - 10, - 10, 6, -2, -5, 7, 1, 2, 2,2, 2, -2, 0, - 1, - 1, - 1, 3, - 1, - 1, 1, 0, 0, 0, 1, 0, - 1, - 1, - 1, 0 ]"
+    "[ 70, - 10, - 10, 6, -2, -5, 7, 1, 2, 2, 2, 2, -2, 0, - 1, - 1, "
+    "- 1, 3, - 1, - 1, 1, 0, 0, 0, 1, 0, - 1, - 1, - 1, 0, 70, - 10, "
+    "- 10, 6, -2, -5, 7, 1, 2, 2,2, 2, -2, 0, - 1, - 1, - 1, 3, - 1, "
+    "- 1, 1, 0, 0, 0, 1, 0, - 1, - 1, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 70, - 10, - 10, 6, -2, -5, 7, 1, 2, 2, 2, 2, -2, 0, - 1, - 1, - 1, 3, - 1, - 1, 1, 0, 0, 0, 1, 0, - 1, - 1, - 1, 0, -70, 10, 10, -6, 2, 5, -7, - 1, -2, -2, -2, -2, 2, 0, 1, 1, 1, -3, 1, 1, - 1, 0, 0, 0, - 1, 0, 1, 1, 1, 0 ]"
+    "[ 70, - 10, - 10, 6, -2, -5, 7, 1, 2, 2, 2, 2, -2, 0, - 1, - 1, "
+    "- 1, 3, - 1, - 1, 1, 0, 0, 0, 1, 0, - 1, - 1, - 1, 0, -70, 10, 10, "
+    "-6, 2, 5, -7, - 1, -2, -2, -2, -2, 2, 0, 1, 1, 1, -3, 1, 1, - 1, 0, "
+    "0, 0, - 1, 0, 1, 1, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 84, 4, 20, 4, 4, -6, 3, 3, 4, 0, 0, 4, 0, - 1, -2, 2, - 1, -2, 1, - 1, 1, 0, 0, 0, 0, - 1, 0, 0, 1, - 1, 84, 4, 20, 4, 4, -6, 3, 3, 4, 0, 0, 4, 0, - 1,     -2, 2, - 1, -2, 1, - 1, 1, 0, 0, 0, 0, - 1, 0, 0, 1, - 1 ]"
+    "[ 84, 4, 20, 4, 4, -6, 3, 3, 4, 0, 0, 4, 0, - 1, -2, 2, - 1, -2, "
+    "1, - 1, 1, 0, 0, 0, 0, - 1, 0, 0, 1, - 1, 84, 4, 20, 4, 4, -6, 3, 3, "
+    "4, 0, 0, 4, 0, - 1,     -2, 2, - 1, -2, 1, - 1, 1, 0, 0, 0, 0, - 1, "
+    "0, 0, 1, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 84, 4, 20, 4, 4, -6, 3, 3, 4, 0, 0, 4, 0, - 1, -2, 2, - 1, -2, 1, - 1, 1, 0,      0, 0, 0, - 1, 0, 0, 1, - 1, -84, -4, -20, -4, -4, 6, -3, -3, -4, 0, 0,      -4, 0, 1, 2, -2, 1, 2, - 1, 1, - 1, 0, 0, 0, 0, 1, 0, 0, - 1, 1 ]"
+    "[ 84, 4, 20, 4, 4, -6, 3, 3, 4, 0, 0, 4, 0, - 1, -2, 2, - 1, -2, 1, "
+    "- 1, 1, 0,      0, 0, 0, - 1, 0, 0, 1, - 1, -84, -4, -20, -4, -4, 6, "
+    "-3, -3, -4, 0, 0,      -4, 0, 1, 2, -2, 1, 2, - 1, 1, - 1, 0, 0, 0, "
+    "0, 1, 0, 0, - 1, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 105, -35, 1, 5, 1, 15, -3, -3, 5, - 1, -5, 1, - 1, 0, 1, 1, 1, - 1, 1, 1, 1,      0, 1, - 1, 0, 0, - 1, 1, - 1, 0, 105, -35, 1, 5, 1, 15, -3, -3, 5, - 1, -5,      1, - 1, 0, 1, 1, 1, - 1, 1, 1, 1, 0, 1, - 1, 0, 0, - 1, 1, - 1, 0 ]"
+    "[ 105, -35, 1, 5, 1, 15, -3, -3, 5, - 1, -5, 1, - 1, 0, 1, 1, 1, "
+    "- 1, 1, 1, 1,      0, 1, - 1, 0, 0, - 1, 1, - 1, 0, 105, -35, 1, 5, "
+    "1, 15, -3, -3, 5, - 1, -5,      1, - 1, 0, 1, 1, 1, - 1, 1, 1, 1, 0, "
+    "1, - 1, 0, 0, - 1, 1, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 105, -35, 1, 5, 1, 15, -3, -3, 5, - 1, -5, 1, - 1, 0, 1, 1, 1, - 1, 1, 1, 1,      0, 1, - 1, 0, 0, - 1, 1, - 1, 0, - 105, 35, - 1, -5, - 1, - 15, 3, 3, -5, 1,      5, - 1, 1, 0, - 1, - 1, - 1, 1, - 1, - 1, - 1, 0, - 1, 1, 0, 0, 1, - 1, 1, 0 ]"
+    "[ 105, -35, 1, 5, 1, 15, -3, -3, 5, - 1, -5, 1, - 1, 0, 1, 1, 1, "
+    "- 1, 1, 1, 1,      0, 1, - 1, 0, 0, - 1, 1, - 1, 0, - 105, 35, "
+    "- 1, -5, - 1, - 15, 3, 3, -5, 1,      5, - 1, 1, 0, - 1, - 1, "
+    "- 1, 1, - 1, - 1, - 1, 0, - 1, 1, 0, 0, 1, - 1, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 105, 25, -7, 9, 1, 0, 6, 3, -3, -3, -3, -3, 1, 0, 4, -4, 2, 0, 1, - 1, 1,      0, - 1, - 1, 0, 0, 0, 0, 0, 0, 105, 25, -7, 9, 1, 0, 6, 3, -3, -3, -3,      -3, 1, 0, 4, -4, 2, 0, 1, - 1, 1, 0, - 1, - 1, 0, 0, 0, 0, 0, 0 ]"
+    "[ 105, 25, -7, 9, 1, 0, 6, 3, -3, -3, -3, -3, 1, 0, 4, -4, 2, 0, "
+    "1, - 1, 1,      0, - 1, - 1, 0, 0, 0, 0, 0, 0, 105, 25, -7, 9, "
+    "1, 0, 6, 3, -3, -3, -3,      -3, 1, 0, 4, -4, 2, 0, 1, - 1, 1, "
+    "0, - 1, - 1, 0, 0, 0, 0, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 105, 25, -7, 9, 1, 0, 6, 3, -3, -3, -3, -3, 1, 0, 4, -4, 2, 0, 1, - 1, 1,      0, - 1, - 1, 0, 0, 0, 0, 0, 0, - 105, -25, 7, -9, - 1, 0, -6, -3, 3, 3, 3,      3, - 1, 0, -4, 4, -2, 0, - 1, 1, - 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 ]"
+    "[ 105, 25, -7, 9, 1, 0, 6, 3, -3, -3, -3, -3, 1, 0, 4, -4, 2, 0, "
+    "1, - 1, 1,      0, - 1, - 1, 0, 0, 0, 0, 0, 0, - 105, -25, 7, -9, "
+    "- 1, 0, -6, -3, 3, 3, 3,      3, - 1, 0, -4, 4, -2, 0, - 1, 1, "
+    "- 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 105, 5, 17, -3, -7, 0, 6, 3, -3, 3, - 1, 1, - 1, 0, 2, 2, 2, 0, - 1, - 1, - 1,      0, 1, - 1, 0, 0, 0, 2, 0, 0, 105, 5, 17, -3, -7, 0, 6, 3, -3, 3, - 1, 1,      - 1, 0, 2, 2, 2, 0, - 1, - 1, - 1, 0, 1, - 1, 0, 0, 0, 2, 0, 0 ]"
+    "[ 105, 5, 17, -3, -7, 0, 6, 3, -3, 3, - 1, 1, - 1, 0, 2, 2, 2, "
+    "0, - 1, - 1, - 1,      0, 1, - 1, 0, 0, 0, 2, 0, 0, 105, 5, 17, "
+    "-3, -7, 0, 6, 3, -3, 3, - 1, 1,      - 1, 0, 2, 2, 2, 0, - 1, - 1, "
+    "- 1, 0, 1, - 1, 0, 0, 0, 2, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 105, 5, 17, -3, -7, 0, 6, 3, -3, 3, - 1, 1, - 1, 0, 2, 2, 2, 0, - 1, - 1, - 1,      0, 1, - 1, 0, 0, 0, 2, 0, 0, - 105, -5, - 17, 3, 7, 0, -6, -3, 3, -3, 1,      - 1, 1, 0, -2, -2, -2, 0, 1, 1, 1, 0, - 1, 1, 0, 0, 0, -2, 0, 0 ]"
+    "[ 105, 5, 17, -3, -7, 0, 6, 3, -3, 3, - 1, 1, - 1, 0, 2, 2, 2, 0, "
+    "- 1, - 1, - 1,      0, 1, - 1, 0, 0, 0, 2, 0, 0, - 105, -5, - 17, "
+    "3, 7, 0, -6, -3, 3, -3, 1,      - 1, 1, 0, -2, -2, -2, 0, 1, 1, "
+    "1, 0, - 1, 1, 0, 0, 0, -2, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 120, 40, -8, 8, 0, 15, -6, 0, 0, -4, 4, 0, 0, 0, 1, 1, -2, - 1, -2, -2, 0,      1, 0, 0, 0, 0, - 1, 1, 0, 0, 120, 40, -8, 8, 0, 15, -6, 0, 0, -4, 4, 0,      0, 0, 1, 1, -2, - 1, -2, -2, 0, 1, 0, 0, 0, 0, - 1, 1, 0, 0 ]"
+    "[ 120, 40, -8, 8, 0, 15, -6, 0, 0, -4, 4, 0, 0, 0, 1, 1, -2, - 1, "
+    "-2, -2, 0,      1, 0, 0, 0, 0, - 1, 1, 0, 0, 120, 40, -8, 8, 0, 15, "
+    "-6, 0, 0, -4, 4, 0,      0, 0, 1, 1, -2, - 1, -2, -2, 0, 1, 0, 0, "
+    "0, 0, - 1, 1, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 120, 40, -8, 8, 0, 15, -6, 0, 0, -4, 4, 0, 0, 0, 1, 1, -2, - 1, -2, -2, 0,      1, 0, 0, 0, 0, - 1, 1, 0, 0, - 120, -40, 8, -8, 0, - 15, 6, 0, 0, 4, -4,      0, 0, 0, - 1, - 1, 2, 1, 2, 2, 0, - 1, 0, 0, 0, 0, 1, - 1, 0, 0 ]"
+    "[ 120, 40, -8, 8, 0, 15, -6, 0, 0, -4, 4, 0, 0, 0, 1, 1, -2, - 1, "
+    "-2, -2, 0,      1, 0, 0, 0, 0, - 1, 1, 0, 0, - 120, -40, 8, -8, 0, "
+    "- 15, 6, 0, 0, 4, -4,      0, 0, 0, - 1, - 1, 2, 1, 2, 2, 0, - 1, "
+    "0, 0, 0, 0, 1, - 1, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 168, 40, 8, 8, 8, 6, 6, -3, 0, 0, 0, 0, 0, -2, -2, 2, 2, 2, 1, - 1, - 1, 0,      0, 0, 0, 0, 0, 0, 0, 1, 168, 40, 8, 8, 8, 6, 6, -3, 0, 0, 0, 0, 0, -2,      -2, 2, 2, 2, 1, - 1, - 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 ]"
+    "[ 168, 40, 8, 8, 8, 6, 6, -3, 0, 0, 0, 0, 0, -2, -2, 2, 2, 2, 1, "
+    "- 1, - 1, 0,      0, 0, 0, 0, 0, 0, 0, 1, 168, 40, 8, 8, 8, 6, 6, "
+    "-3, 0, 0, 0, 0, 0, -2,      -2, 2, 2, 2, 1, - 1, - 1, 0, 0, 0, 0, "
+    "0, 0, 0, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 168, 40, 8, 8, 8, 6, 6, -3, 0, 0, 0, 0, 0, -2, -2, 2, 2, 2, 1, - 1, - 1, 0,      0, 0, 0, 0, 0, 0, 0, 1, - 168, -40, -8, -8, -8, -6, -6, 3, 0, 0, 0, 0,      0, 2, 2, -2, -2, -2, - 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, - 1 ]"
+    "[ 168, 40, 8, 8, 8, 6, 6, -3, 0, 0, 0, 0, 0, -2, -2, 2, 2, 2, 1, "
+    "- 1, - 1, 0,      0, 0, 0, 0, 0, 0, 0, 1, - 168, -40, -8, -8, -8, "
+    "-6, -6, 3, 0, 0, 0, 0,      0, 2, 2, -2, -2, -2, - 1, 1, 1, 0, 0, "
+    "0, 0, 0, 0, 0, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 189, 21, -3, - 11, -3, 9, 0, 0, 9, 1, 1, 1, 1, - 1, -3, -3, 0, 1, 0, 0, 0,      0, - 1, - 1, 0, 1, 1, 1, 0, - 1, 189, 21, -3, - 11, -3, 9, 0, 0, 9, 1, 1,      1, 1, - 1, -3, -3, 0, 1, 0, 0, 0, 0, - 1, - 1, 0, 1, 1, 1, 0, - 1 ]"
+    "[ 189, 21, -3, - 11, -3, 9, 0, 0, 9, 1, 1, 1, 1, - 1, -3, -3, 0, "
+    "1, 0, 0, 0,      0, - 1, - 1, 0, 1, 1, 1, 0, - 1, 189, 21, -3, - 11, "
+    "-3, 9, 0, 0, 9, 1, 1,      1, 1, - 1, -3, -3, 0, 1, 0, 0, 0, 0, - 1, "
+    "- 1, 0, 1, 1, 1, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 189, 21, -3, - 11, -3, 9, 0, 0, 9, 1, 1, 1, 1, - 1, -3, -3, 0, 1, 0, 0, 0,      0, - 1, - 1, 0, 1, 1, 1, 0, - 1, - 189, -21, 3, 11, 3, -9, 0, 0, -9, - 1,      - 1, - 1, - 1, 1, 3, 3, 0, - 1, 0, 0, 0, 0, 1, 1, 0, - 1, - 1, - 1, 0, 1 ]"
+    "[ 189, 21, -3, - 11, -3, 9, 0, 0, 9, 1, 1, 1, 1, - 1, -3, -3, 0, "
+    "1, 0, 0, 0,      0, - 1, - 1, 0, 1, 1, 1, 0, - 1, - 189, -21, "
+    "3, 11, 3, -9, 0, 0, -9, - 1,      - 1, - 1, - 1, 1, 3, 3, 0, "
+    "- 1, 0, 0, 0, 0, 1, 1, 0, - 1, - 1, - 1, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 189, -51, -3, 13, -3, 9, 0, 0, -3, 1, 1, -3, 1, - 1, -3, -3, 0, 1, 0, 0,      0, 0, 1, 1, 0, - 1, 1, 1, 0, - 1, 189, -51, -3, 13, -3, 9, 0, 0, -3, 1,      1, -3, 1, - 1, -3, -3, 0, 1, 0, 0, 0, 0, 1, 1, 0, - 1, 1, 1, 0, - 1 ]"
+    "[ 189, -51, -3, 13, -3, 9, 0, 0, -3, 1, 1, -3, 1, - 1, -3, -3, 0, "
+    "1, 0, 0,      0, 0, 1, 1, 0, - 1, 1, 1, 0, - 1, 189, -51, -3, 13, "
+    "-3, 9, 0, 0, -3, 1,      1, -3, 1, - 1, -3, -3, 0, 1, 0, 0, 0, 0, "
+    "1, 1, 0, - 1, 1, 1, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 189, -51, -3, 13, -3, 9, 0, 0, -3, 1, 1, -3, 1, - 1, -3, -3, 0, 1, 0, 0,      0, 0, 1, 1, 0, - 1, 1, 1, 0, - 1, - 189, 51, 3, - 13, 3, -9, 0, 0, 3, - 1,      - 1, 3, - 1, 1, 3, 3, 0, - 1, 0, 0, 0, 0, - 1, - 1, 0, 1, - 1, - 1, 0, 1 ]"
+    "[ 189, -51, -3, 13, -3, 9, 0, 0, -3, 1, 1, -3, 1, - 1, -3, -3, 0, "
+    "1, 0, 0,      0, 0, 1, 1, 0, - 1, 1, 1, 0, - 1, - 189, 51, 3, - 13, "
+    "3, -9, 0, 0, 3, - 1,      - 1, 3, - 1, 1, 3, 3, 0, - 1, 0, 0, 0, 0, "
+    "- 1, - 1, 0, 1, - 1, - 1, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 189, -39, 21, 1, -3, 9, 0, 0, -3, -5, - 1, 1, - 1, - 1, 3, 3, 0, 1, 0, 0, 0,      0, - 1, 1, 0, 1, 1, - 1, 0, - 1, 189, -39, 21, 1, -3, 9, 0, 0, -3, -5, - 1,      1, - 1, - 1, 3, 3, 0, 1, 0, 0, 0, 0, - 1, 1, 0, 1, 1, - 1, 0, - 1 ]"
+    "[ 189, -39, 21, 1, -3, 9, 0, 0, -3, -5, - 1, 1, - 1, - 1, 3, 3, 0, "
+    "1, 0, 0, 0,      0, - 1, 1, 0, 1, 1, - 1, 0, - 1, 189, -39, 21, 1, -3, "
+    "9, 0, 0, -3, -5, - 1,      1, - 1, - 1, 3, 3, 0, 1, 0, 0, 0, 0, - 1, "
+    "1, 0, 1, 1, - 1, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 189, -39, 21, 1, -3, 9, 0, 0, -3, -5, - 1, 1, - 1, - 1, 3, 3, 0, 1, 0, 0, 0,      0, - 1, 1, 0, 1, 1, - 1, 0, - 1, - 189, 39, -21, - 1, 3, -9, 0, 0, 3, 5, 1,      - 1, 1, 1, -3, -3, 0, - 1, 0, 0, 0, 0, 1, - 1, 0, - 1, - 1, 1, 0, 1 ]"
+    "[ 189, -39, 21, 1, -3, 9, 0, 0, -3, -5, - 1, 1, - 1, - 1, 3, 3, 0, "
+    "1, 0, 0, 0,      0, - 1, 1, 0, 1, 1, - 1, 0, - 1, - 189, 39, "
+    "-21, - 1, 3, -9, 0, 0, 3, 5, 1,      - 1, 1, 1, -3, -3, 0, - 1, "
+    "0, 0, 0, 0, 1, - 1, 0, - 1, - 1, 1, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 210, 50, 2, 2, -6, 15, 3, 0, -2, 2, 2, -2, -2, 0, - 1, - 1, - 1, - 1, 2, 2,      0, 0, 0, 0, 0, 0, - 1, - 1, 1, 0, 210, 50, 2, 2, -6, 15, 3, 0, -2, 2, 2,      -2, -2, 0, - 1, - 1, - 1, - 1, 2, 2, 0, 0, 0, 0, 0, 0, - 1, - 1, 1, 0 ]"
+    "[ 210, 50, 2, 2, -6, 15, 3, 0, -2, 2, 2, -2, -2, 0, - 1, - 1, "
+    "- 1, - 1, 2, 2,      0, 0, 0, 0, 0, 0, - 1, - 1, 1, 0, 210, 50, "
+    "2, 2, -6, 15, 3, 0, -2, 2, 2,      -2, -2, 0, - 1, - 1, - 1, "
+    "- 1, 2, 2, 0, 0, 0, 0, 0, 0, - 1, - 1, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 210, 50, 2, 2, -6, 15, 3, 0, -2, 2, 2, -2, -2, 0, - 1, - 1, - 1, - 1, 2, 2,      0, 0, 0, 0, 0, 0, - 1, - 1, 1, 0, -210, -50, -2, -2, 6, - 15, -3, 0, 2,      -2, -2, 2, 2, 0, 1, 1, 1, 1, -2, -2, 0, 0, 0, 0, 0, 0, 1, 1, - 1, 0 ]"
+    "[ 210, 50, 2, 2, -6, 15, 3, 0, -2, 2, 2, -2, -2, 0, - 1, - 1, "
+    "- 1, - 1, 2, 2,      0, 0, 0, 0, 0, 0, - 1, - 1, 1, 0, -210, -50, "
+    "-2, -2, 6, - 15, -3, 0, 2,      -2, -2, 2, 2, 0, 1, 1, 1, 1, -2, "
+    "-2, 0, 0, 0, 0, 0, 0, 1, 1, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 210, 10, - 14, 10, 2, - 15, -6, 3, 6, -2, -2, -2, -2, 0, 1, 1, -2, 1, 1, 1,      - 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 210, 10, - 14, 10, 2, - 15, -6, 3, 6, -2,      -2, -2, -2, 0, 1, 1, -2, 1, 1, 1, - 1, 0, 0, 0, 0, 0, 1, 1, 0, 0 ]"
+    "[ 210, 10, - 14, 10, 2, - 15, -6, 3, 6, -2, -2, -2, -2, 0, 1, "
+    "1, -2, 1, 1, 1,      - 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 210, "
+    "10, - 14, 10, 2, - 15, -6, 3, 6, -2,      -2, -2, -2, 0, 1, "
+    "1, -2, 1, 1, 1, - 1, 0, 0, 0, 0, 0, 1, 1, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 210, 10, - 14, 10, 2, - 15, -6, 3, 6, -2, -2, -2, -2, 0, 1, 1, -2, 1, 1, 1,      - 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, -210, - 10, 14, - 10, -2, 15, 6, -3, -6,      2, 2, 2, 2, 0, - 1, - 1, 2, - 1, - 1, - 1, 1, 0, 0, 0, 0, 0, - 1, - 1, 0, 0 ]"
+    "[ 210, 10, - 14, 10, 2, - 15, -6, 3, 6, -2, -2, -2, -2, 0, 1, 1, "
+    "-2, 1, 1, 1,      - 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, -210, - 10, 14, "
+    "- 10, -2, 15, 6, -3, -6,      2, 2, 2, 2, 0, - 1, - 1, 2, - 1, - 1, "
+    "- 1, 1, 0, 0, 0, 0, 0, - 1, - 1, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 216, -24, 24, 8, 0, -9, 0, 0, 0, -4, 4, 0, 0, 1, -3, -3, 0, - 1, 0, 0, 0,      - 1, 0, 0, 0, 1, - 1, 1, 0, 1, 216, -24, 24, 8, 0, -9, 0, 0, 0, -4, 4, 0,0, 1, -3, -3, 0, - 1, 0, 0, 0, - 1, 0, 0, 0, 1, - 1, 1, 0, 1 ]"
+    "[ 216, -24, 24, 8, 0, -9, 0, 0, 0, -4, 4, 0, 0, 1, -3, -3, 0, "
+    "- 1, 0, 0, 0,      - 1, 0, 0, 0, 1, - 1, 1, 0, 1, 216, -24, 24, "
+    "8, 0, -9, 0, 0, 0, -4, 4, 0,0, 1, -3, -3, 0, - 1, 0, 0, 0, - 1, "
+    "0, 0, 0, 1, - 1, 1, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 216, -24, 24, 8, 0, -9, 0, 0, 0, -4, 4, 0, 0, 1, -3, -3, 0, - 1, 0, 0, 0,      - 1, 0, 0, 0, 1, - 1, 1, 0, 1, -216, 24, -24, -8, 0, 9, 0, 0, 0, 4, -4,      0, 0, - 1, 3, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, - 1, 1, - 1, 0, - 1 ]"
+    "[ 216, -24, 24, 8, 0, -9, 0, 0, 0, -4, 4, 0, 0, 1, -3, -3, 0, "
+    "- 1, 0, 0, 0,      - 1, 0, 0, 0, 1, - 1, 1, 0, 1, -216, 24, "
+    "-24, -8, 0, 9, 0, 0, 0, 4, -4,      0, 0, - 1, 3, 3, 0, 1, 0, "
+    "0, 0, 1, 0, 0, 0, - 1, 1, - 1, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 280, -40, -8, -8, 8, 10, 10, 1, 0, 0, 0, 0, 0, 0, 2, -2, -2, -2, - 1, 1,      - 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 280, -40, -8, -8, 8, 10, 10, 1, 0, 0, 0,      0, 0, 0, 2, -2, -2, -2, - 1, 1, - 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 ]"
+    "[ 280, -40, -8, -8, 8, 10, 10, 1, 0, 0, 0, 0, 0, 0, 2, -2, -2, "
+    "-2, - 1, 1,      - 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 280, -40, -8, "
+    "-8, 8, 10, 10, 1, 0, 0, 0,      0, 0, 0, 2, -2, -2, -2, - 1, 1, "
+    "- 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 280, -40, -8, -8, 8, 10, 10, 1, 0, 0, 0, 0, 0, 0, 2, -2, -2, -2, - 1, 1,      - 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, -280, 40, 8, 8, -8, - 10, - 10, - 1, 0, 0,      0, 0, 0, 0, -2, 2, 2, 2, 1, - 1, 1, 0, 0, 0, - 1, 0, 0, 0, 0, 0 ]"
+    "[ 280, -40, -8, -8, 8, 10, 10, 1, 0, 0, 0, 0, 0, 0, 2, -2, -2, "
+    "-2, - 1, 1,      - 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, -280, 40, 8, 8, "
+    "-8, - 10, - 10, - 1, 0, 0,      0, 0, 0, 0, -2, 2, 2, 2, 1, - 1, 1, "
+    "0, 0, 0, - 1, 0, 0, 0, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 280, 40, 24, 8, 0, -5, -8, -2, 0, 4, -4, 0, 0, 0, 1, -3, 0, - 1, -2, 0, 0,      0, 0, 0, 1, 0, 1, - 1, 0, 0, 280, 40, 24, 8, 0, -5, -8, -2, 0, 4, -4, 0,      0, 0, 1, -3, 0, - 1, -2, 0, 0, 0, 0, 0, 1, 0, 1, - 1, 0, 0 ]"
+    "[ 280, 40, 24, 8, 0, -5, -8, -2, 0, 4, -4, 0, 0, 0, 1, -3, 0, "
+    "- 1, -2, 0, 0,      0, 0, 0, 1, 0, 1, - 1, 0, 0, 280, 40, 24, 8, "
+    "0, -5, -8, -2, 0, 4, -4, 0,      0, 0, 1, -3, 0, - 1, -2, 0, 0, "
+    "0, 0, 0, 1, 0, 1, - 1, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 280, 40, 24, 8, 0, -5, -8, -2, 0, 4, -4, 0, 0, 0, 1, -3, 0, - 1, -2, 0, 0,      0, 0, 0, 1, 0, 1, - 1, 0, 0, -280, -40, -24, -8, 0, 5, 8, 2, 0, -4, 4,      0, 0, 0, - 1, 3, 0, 1, 2, 0, 0, 0, 0, 0, - 1, 0, - 1, 1, 0, 0 ]"
+    "[ 280, 40, 24, 8, 0, -5, -8, -2, 0, 4, -4, 0, 0, 0, 1, -3, 0, "
+    "- 1, -2, 0, 0,      0, 0, 0, 1, 0, 1, - 1, 0, 0, -280, -40, -24, "
+    "-8, 0, 5, 8, 2, 0, -4, 4,      0, 0, 0, - 1, 3, 0, 1, 2, 0, 0, 0, "
+    "0, 0, - 1, 0, - 1, 1, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 315, -45, -21, 3, 3, 0, -9, 0, -5, 3, 3, 3, - 1, 0, 0, 0, 3, 0, 0, 0, 0,      0, - 1, - 1, 0, 0, 0, 0, 1, 0, 315, -45, -21, 3, 3, 0, -9, 0, -5, 3, 3,      3, - 1, 0, 0, 0, 3, 0, 0, 0, 0, 0, - 1, - 1, 0, 0, 0, 0, 1, 0 ]"
+    "[ 315, -45, -21, 3, 3, 0, -9, 0, -5, 3, 3, 3, - 1, 0, 0, 0, 3, "
+    "0, 0, 0, 0,      0, - 1, - 1, 0, 0, 0, 0, 1, 0, 315, -45, -21, 3, "
+    "3, 0, -9, 0, -5, 3, 3,      3, - 1, 0, 0, 0, 3, 0, 0, 0, 0, 0, "
+    "- 1, - 1, 0, 0, 0, 0, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 315, -45, -21, 3, 3, 0, -9, 0, -5, 3, 3, 3, - 1, 0, 0, 0, 3, 0, 0, 0, 0,      0, - 1, - 1, 0, 0, 0, 0, 1, 0, -315, 45, 21, -3, -3, 0, 9, 0, 5, -3, -3,      -3, 1, 0, 0, 0, -3, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, - 1, 0 ]"
+    "[ 315, -45, -21, 3, 3, 0, -9, 0, -5, 3, 3, 3, - 1, 0, 0, 0, 3, "
+    "0, 0, 0, 0,      0, - 1, - 1, 0, 0, 0, 0, 1, 0, -315, 45, 21, -3, "
+    "-3, 0, 9, 0, 5, -3, -3,      -3, 1, 0, 0, 0, -3, 0, 0, 0, 0, 0, 1, "
+    "1, 0, 0, 0, 0, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 336, - 16, 16, - 16, 0, 6, -6, 0, 0, 0, 0, 0, 0, 1, 2, -2, -2, 2, 2, -2, 0,      0, 0, 0, 0, - 1, 0, 0, 0, 1, 336, - 16, 16, - 16, 0, 6, -6, 0, 0, 0, 0, 0,      0, 1, 2, -2, -2, 2, 2, -2, 0, 0, 0, 0, 0, - 1, 0, 0, 0, 1 ]"
+    "[ 336, - 16, 16, - 16, 0, 6, -6, 0, 0, 0, 0, 0, 0, 1, 2, -2, -2, "
+    "2, 2, -2, 0,      0, 0, 0, 0, - 1, 0, 0, 0, 1, 336, - 16, 16, - 16, "
+    "0, 6, -6, 0, 0, 0, 0, 0,      0, 1, 2, -2, -2, 2, 2, -2, 0, 0, 0, 0, "
+    "0, - 1, 0, 0, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 336, - 16, 16, - 16, 0, 6, -6, 0, 0, 0, 0, 0, 0, 1, 2, -2, -2, 2, 2, -2, 0,      0, 0, 0, 0, - 1, 0, 0, 0, 1, -336, 16, - 16, 16, 0, -6, 6, 0, 0, 0, 0, 0,      0, - 1, -2, 2, 2, -2, -2, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, - 1 ]"
+    "[ 336, - 16, 16, - 16, 0, 6, -6, 0, 0, 0, 0, 0, 0, 1, 2, -2, -2, "
+    "2, 2, -2, 0,      0, 0, 0, 0, - 1, 0, 0, 0, 1, -336, 16, - 16, "
+    "16, 0, -6, 6, 0, 0, 0, 0, 0,      0, - 1, -2, 2, 2, -2, -2, 2, 0, "
+    "0, 0, 0, 0, 1, 0, 0, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 378, -30, -6, 2, -6, -9, 0, 0, 6, 2, 2, -2, 2, -2, 3, 3, 0, - 1, 0, 0, 0,      0, 0, 0, 0, 0, - 1, - 1, 0, 1, 378, -30, -6, 2, -6, -9, 0, 0, 6, 2, 2,      -2, 2, -2, 3, 3, 0, - 1, 0, 0, 0, 0, 0, 0, 0, 0, - 1, - 1, 0, 1 ]"
+    "[ 378, -30, -6, 2, -6, -9, 0, 0, 6, 2, 2, -2, 2, -2, 3, 3, 0, "
+    "- 1, 0, 0, 0,      0, 0, 0, 0, 0, - 1, - 1, 0, 1, 378, -30, -6, "
+    "2, -6, -9, 0, 0, 6, 2, 2,      -2, 2, -2, 3, 3, 0, - 1, 0, 0, 0, "
+    "0, 0, 0, 0, 0, - 1, - 1, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 378, -30, -6, 2, -6, -9, 0, 0, 6, 2, 2, -2, 2, -2, 3, 3, 0, - 1, 0, 0, 0,      0, 0, 0, 0, 0, - 1, - 1, 0, 1, -378, 30, 6, -2, 6, 9, 0, 0, -6, -2, -2,      2, -2, 2, -3, -3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, - 1 ]"
+    "[ 378, -30, -6, 2, -6, -9, 0, 0, 6, 2, 2, -2, 2, -2, 3, 3, 0, "
+    "- 1, 0, 0, 0,      0, 0, 0, 0, 0, - 1, - 1, 0, 1, -378, 30, 6, -2, "
+    "6, 9, 0, 0, -6, -2, -2,      2, -2, 2, -3, -3, 0, 1, 0, 0, 0, 0, 0, "
+    "0, 0, 0, 1, 1, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 405, 45, -27, -3, -3, 0, 0, 0, -3, -3, -3, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0,      - 1, 1, 1, 0, 0, 0, 0, 0, 0, 405, 45, -27, -3, -3, 0, 0, 0, -3, -3, -3,      5, 1, 0, 0, 0, 0, 0, 0, 0, 0, - 1, 1, 1, 0, 0, 0, 0, 0, 0 ]"
+    "[ 405, 45, -27, -3, -3, 0, 0, 0, -3, -3, -3, 5, 1, 0, 0, 0, 0, 0, "
+    "0, 0, 0,      - 1, 1, 1, 0, 0, 0, 0, 0, 0, 405, 45, -27, -3, -3, 0, "
+    "0, 0, -3, -3, -3,      5, 1, 0, 0, 0, 0, 0, 0, 0, 0, - 1, 1, 1, 0, "
+    "0, 0, 0, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 405, 45, -27, -3, -3, 0, 0, 0, -3, -3, -3, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0,      - 1, 1, 1, 0, 0, 0, 0, 0, 0, -405, -45, 27, 3, 3, 0, 0, 0, 3, 3, 3, -5,      - 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, - 1, - 1, 0, 0, 0, 0, 0, 0 ]"
+    "[ 405, 45, -27, -3, -3, 0, 0, 0, -3, -3, -3, 5, 1, 0, 0, 0, 0, 0, "
+    "0, 0, 0,      - 1, 1, 1, 0, 0, 0, 0, 0, 0, -405, -45, 27, 3, 3, 0, "
+    "0, 0, 3, 3, 3, -5,      - 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, - 1, - 1, "
+    "0, 0, 0, 0, 0, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 420, 20, 4, - 12, 4, 0, -3, 3, -4, 0, 0, -4, 0, 0, -4, 4, 1, 0, - 1, 1, 1,      0, 0, 0, 0, 0, 0, 0, - 1, 0, 420, 20, 4, - 12, 4, 0, -3, 3, -4, 0, 0, -4,      0, 0, -4, 4, 1, 0, - 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, - 1, 0 ]"
+    "[ 420, 20, 4, - 12, 4, 0, -3, 3, -4, 0, 0, -4, 0, 0, -4, 4, 1, 0, "
+    "- 1, 1, 1,      0, 0, 0, 0, 0, 0, 0, - 1, 0, 420, 20, 4, - 12, 4, 0, "
+    "-3, 3, -4, 0, 0, -4,      0, 0, -4, 4, 1, 0, - 1, 1, 1, 0, 0, 0, 0, 0, "
+    "0, 0, - 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 420, 20, 4, - 12, 4, 0, -3, 3, -4, 0, 0, -4, 0, 0, -4, 4, 1, 0, - 1, 1, 1,      0, 0, 0, 0, 0, 0, 0, - 1, 0, -420, -20, -4, 12, -4, 0, 3, -3, 4, 0, 0,      4, 0, 0, 4, -4, - 1, 0, 1, - 1, - 1, 0, 0, 0, 0, 0, 0, 0, 1, 0 ]"
+    "[ 420, 20, 4, - 12, 4, 0, -3, 3, -4, 0, 0, -4, 0, 0, -4, 4, 1, 0, "
+    "- 1, 1, 1,      0, 0, 0, 0, 0, 0, 0, - 1, 0, -420, -20, -4, 12, -4, "
+    "0, 3, -3, 4, 0, 0,      4, 0, 0, 4, -4, - 1, 0, 1, - 1, - 1, 0, 0, 0, "
+    "0, 0, 0, 0, 1, 0 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0,      0, - 1, 0, 0, 0, 0, - 1, 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2,      0, 0, 0, 0, 0, 0, 0, 1, 0, 0, - 1, 0, 0, 0, 0, - 1 ]"
+    "[ 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, "
+    "0, 0, 1, 0,      0, - 1, 0, 0, 0, 0, - 1, 512, 0, 0, 0, 0, - 16, 8, "
+    "-4, 0, 0, 0, 0, 0, 2,      0, 0, 0, 0, 0, 0, 0, 1, 0, 0, - 1, 0, 0, "
+    "0, 0, - 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   currentCF.data.fromString(
-    "[ 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0,      0, - 1, 0, 0, 0, 0, - 1, -512, 0, 0, 0, 0, 16, -8, 4, 0, 0, 0, 0, 0, -2,      0, 0, 0, 0, 0, 0, 0, - 1, 0, 0, 1, 0, 0, 0, 0, 1 ]"
+    "[ 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, "
+    "0, 0, 0, 1, 0,      0, - 1, 0, 0, 0, 0, - 1, -512, 0, 0, 0, 0, "
+    "16, -8, 4, 0, 0, 0, 0, 0, -2,      0, 0, 0, 0, 0, 0, 0, - 1, 0, "
+    "0, 1, 0, 0, 0, 0, 1 ]"
   );
   outputG.characterTable.addOnTop(currentCF);
   output.irrepsCarterLabels.setSize(0);

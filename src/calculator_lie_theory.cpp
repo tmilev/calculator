@@ -5062,7 +5062,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
 bool CalculatorLieTheory::constructCartanSubalgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::constructCartanSubalgebra");
+  STACK_TRACE("CalculatorLieTheory::constructCartanSubalgebra");
   SubalgebraSemisimpleLieAlgebra subalgebra;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
   for (int i = 1; i < input.size(); i ++) {
@@ -5337,7 +5337,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
 bool CalculatorLieTheory::getPrincipalSl2Index(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::getPrincipalSl2Index");
+  STACK_TRACE("CalculatorLieTheory::getPrincipalSl2Index");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return
@@ -5355,7 +5355,7 @@ bool CalculatorLieTheory::getPrincipalSl2Index(
 bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras");
+  STACK_TRACE("CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras");
   DynkinType dynkinType;
   if (!CalculatorConversions::dynkinType(calculator, input, dynkinType)) {
     return

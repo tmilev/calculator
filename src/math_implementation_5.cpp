@@ -637,7 +637,7 @@ std::string VectorPartition::toStringOnePartition(
 }
 
 std::string VectorPartition::toStringAllPartitions(bool useHtml) {
-  STACK_TRACE("VectorPartition::toString");
+  STACK_TRACE("VectorPartition::toStringAllPartitions");
   std::stringstream out;
   out << this->targetSum.toString() << "\n\n";
   if (useHtml) {

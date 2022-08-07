@@ -85,7 +85,9 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
 }
 
 bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand");
+  STACK_TRACE(
+    "TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand"
+  );
   if (!global.flagSSLAvailable) {
     return false;
   }
@@ -480,7 +482,7 @@ void TransportLayerSecurityOpenSSL::clearErrorQueue(
 }
 
 void TransportLayerSecurityOpenSSL::doSetSocket(int socketFileDescriptor) {
-  STACK_TRACE("TransportLayerSecurity::doSetSocket");
+  STACK_TRACE("TransportLayerSecurityOpenSSL::doSetSocket");
   (void) socketFileDescriptor;
 #ifdef MACRO_use_open_ssl
   int result = 0;
@@ -661,9 +663,8 @@ bool TransportLayerSecurityOpenSSL::inspectCertificates(
     if (tempCharPtr == nullptr) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
-        <<
-        "X509_NAME_oneline return null; this is not supposed to happen. <br>\n"
-        ;
+        << "X509_NAME_oneline return null; "
+        << "this is not supposed to happen. <br>\n";
       }
       return false;
     }
@@ -684,9 +685,8 @@ bool TransportLayerSecurityOpenSSL::inspectCertificates(
     if (tempCharPtr == nullptr) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
-        <<
-        "X509_NAME_oneline return null; this is not supposed to happen. <br>\n"
-        ;
+        << "X509_NAME_oneline return null; "
+        << "this is not supposed to happen. <br>\n";
       }
       return false;
     }
@@ -839,8 +839,8 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
       case SSL_ERROR_WANT_ACCEPT:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
-          <<
-          " During handshake negotiations: repeat needed (not implemented). ";
+          << " During handshake negotiations: "
+          << "repeat needed (not implemented). ";
         }
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:

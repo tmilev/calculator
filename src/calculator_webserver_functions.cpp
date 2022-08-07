@@ -9,7 +9,7 @@
 bool CalculatorFunctionsCrypto::x509CertificateServer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::x509CertificateServer");
+  STACK_TRACE("CalculatorFunctionsCrypto::x509CertificateServer");
   (void) input;
   std::string result =
   Crypto::convertListUnsignedCharsToBase64(
@@ -22,7 +22,7 @@ bool CalculatorFunctionsCrypto::x509CertificateServer(
 bool CalculatorFunctionsCrypto::x509CertificateDecode(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::x509CertificateDecode");
+  STACK_TRACE("CalculatorFunctionsCrypto::x509CertificateDecode");
   std::string binary;
   if (!input[1].isOfType(&binary)) {
     return output.assignError(calculator, "Input is not a string. ");

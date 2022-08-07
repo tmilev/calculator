@@ -18,7 +18,12 @@ bool CalculatorHtmlFunctions::userInputBox(
   > arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
-      calculator, input, arguments, &calculator.comments
+      calculator,
+      input,
+      arguments,
+      false,
+      nullptr,
+      &calculator.comments
     )
   ) {
     return false;
@@ -116,7 +121,12 @@ bool CalculatorHtmlFunctions::setInputBox(
   > arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
-      calculator, input, arguments, &calculator.comments
+      calculator,
+      input,
+      arguments,
+      false,
+      nullptr,
+      &calculator.comments
     )
   ) {
     return false;
@@ -169,7 +179,7 @@ std::string CalculatorHtmlFunctions::getUserInputBoxName(
   > arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
-      calculator, box, arguments
+      calculator, box, arguments, false, nullptr, nullptr
     )
   ) {
     return "corrupt-box";

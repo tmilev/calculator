@@ -1075,6 +1075,7 @@ public:
   ) const;
   bool operator==(const ExpressionContext& other) const;
   bool hasAtomicUserDefinedVariables() const;
+  bool hasVariable(const Expression& input);
   int numberOfVariables() const;
   Expression toExpression() const;
   bool fromExpression(const Expression& input);
@@ -1092,9 +1093,6 @@ public:
 
 template <class BuiltIn>
 class WithContext {
-  bool extendContext(
-    ExpressionContext& newContext, std::stringstream* commentsOnFailure
-  );
   bool extendContextTrivially(
     ExpressionContext& newContext, std::stringstream* commentsOnFailure
   ) {
@@ -1127,6 +1125,16 @@ public:
   );
   std::string toString() const;
   void toExpression(Calculator& calculator, Expression& output);
+  // Transforms the content ands sets the new context.
+  // Do not call directly
+  // unless you can guarantee that the newContext is suitable:
+  // it's variables must be a superset of the old context's variables.
+  // As of writing, these are the only requirements that the
+  // newContext should satisfy. Should these requirements increase,
+  // it's the caller's responsibility to satisfy them.
+  bool extendContext(
+    ExpressionContext& newContext, std::stringstream* commentsOnFailure
+  );
 };
 
 template < >
@@ -2487,6 +2495,9 @@ public:
   Examples examples;
   // The purpose of the operator below is to save on typing
   // when returning false with a comment.
+  // In other words, instead of doing:
+  // calculator << "Some error message."; return false;
+  // we can just do: return calculator << "Some error message";
   operator bool() const {
     return false;
   }
@@ -3725,20 +3736,27 @@ public:
   static bool loadKeysFromStatementList(
     Calculator& calculator,
     const Expression& input,
-    MapList<
-      std::string,
-      Expression,
-      HashFunctions::hashFunction<std::string>
-    >& output,
-    std::stringstream* commentsOnFailure = nullptr,
-    bool allowFailure = false
+    MapList<std::string, Expression>& output,
+    bool allowFailure,
+    List<Expression>* outputNotAKeyValuePair,
+    std::stringstream* commentsOnFailure
   );
+  // Extract keys form a list of equalities. For example,
+  // given input such as
+  // (a = 1, b=2),
+  // this function will extract the map {a:1, b:2}.
+  // If you don't set allowFailure,
+  // then input such as
+  // (a=1,b=2, c)
+  // will fail. If you set allowFailure=true,
+  // the input above will ignore c and return the map {a:1, b:2}.
   static bool loadKeysFromStatementList(
     Calculator& calculator,
     const Expression& input,
     MapList<Expression, Expression>& output,
-    std::stringstream* commentsOnFailure = nullptr,
-    bool allowFailure = false
+    bool allowFailure,
+    List<Expression>* outputNotAKeyValuePair,
+    std::stringstream* commentsOnFailure
   );
   static bool storeSemisimpleSubalgebras(
     Calculator& calculator,

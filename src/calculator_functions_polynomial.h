@@ -180,35 +180,11 @@ public:
       MonomialPolynomial::Order::lexicographic
     );
   }
-  static bool groebnerLexicographicOpposite(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return
-    CalculatorFunctionsPolynomial::groebner(
-      calculator,
-      input,
-      output,
-      MonomialPolynomial::Order::lexicographicOpposite
-    );
-  }
-  static bool groebnerModZpLexicographic(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return
-    CalculatorFunctionsPolynomial::groebner(
-      calculator,
-      input,
-      output,
-      MonomialPolynomial::Order::lexicographic,
-      true
-    );
-  }
   static bool groebner(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int order,
-    bool useModZp = false
+    int order
   );
   static bool divideExpressionsAsIfPolynomial(
     Calculator& calculator, const Expression& input, Expression& output

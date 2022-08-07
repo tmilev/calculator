@@ -290,7 +290,9 @@ bool Expression::contextSetDifferentialOperatorVariable(
   }
   return true;
 }
-
+bool ExpressionContext::hasVariable(const Expression &input) {
+  return this->variables.contains(input);
+}
 bool ExpressionContext::fromExpressionOneContext(const Expression& input) {
   if (input.startsWith(this->owner->opPolynomialVariables())) {
     return this->fromExpressionPolynomialVariables(input);

@@ -1127,8 +1127,9 @@ bool CalculatorConversions::loadKeysFromStatementList(
     Expression,
     HashFunctions::hashFunction<std::string>
   >& output,
-  std::stringstream* commentsOnFailure,
-  bool allowFailure
+  bool allowFailure,
+  List<Expression>* outputNotAKeyValuePair,
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("CalculatorConversions::loadKeysFromStatementList");
   MapList<Expression, Expression> outputExpressionFormat;
@@ -1137,8 +1138,9 @@ bool CalculatorConversions::loadKeysFromStatementList(
       calculator,
       input,
       outputExpressionFormat,
-      commentsOnFailure,
-      allowFailure
+      allowFailure,
+      outputNotAKeyValuePair,
+      commentsOnFailure
     )
   ) {
     return false;
@@ -1160,15 +1162,20 @@ bool CalculatorConversions::loadKeysFromStatementList(
   Calculator& calculator,
   const Expression& input,
   MapList<Expression, Expression>& output,
-  std::stringstream* commentsOnFailure,
-  bool allowFailure
+  bool allowFailure,
+  List<Expression>* outputNotAKeyValuePair,
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("CalculatorConversions::loadKeysFromStatementList");
   output.clear();
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].startsWith(calculator.opDefine(), 3)) {
       output.setKeyValue(input[i][1], input[i][2]);
-    } else if (!allowFailure) {
+    } else if (allowFailure) {
+      if (outputNotAKeyValuePair != nullptr) {
+        outputNotAKeyValuePair->addOnTop(input[i]);
+      }
+    } else {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "Could not extract key-value pair from: "

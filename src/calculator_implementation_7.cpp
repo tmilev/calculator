@@ -7293,7 +7293,7 @@ bool CalculatorFunctionsPlot::plotViewWindow(
     > map;
     if (
       !CalculatorConversions::loadKeysFromStatementList(
-        calculator, input, map, nullptr, false
+        calculator, input, map, false, nullptr, nullptr
       )
     ) {
       isGood = false;

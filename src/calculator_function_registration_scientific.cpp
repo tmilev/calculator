@@ -458,13 +458,21 @@ void Calculator::initializeFunctionsScientificBasic() {
     "Transforms to a reduced Groebner basis using the "
     "lexicographic order. The lexicographic order is "
     "inherited from the comparison of the underlying expressions. "
-    "<b>The first argument gives an upper bound to "
-    "the number of polynomial operations allowed.</b> "
-    "A non-positive number signifies no upper limit, "
-    "however please do not use (this is a public "
-    "web server and multiple instances of a large computation "
-    "might hog it up). The resulting printout will "
+    "The upper limit for polynomial computations is by default:"
+    "10000. You can change that to, say, 100, "
+    "by adding upperLimit=100 to the list of arguments. "
+    "If you set upperLimit = -1 or another negative, this will run "
+    "the algorithm with no computation upper limits. "
+    "Please do not do run with upperLimit=-1 on our public "
+    "web server since multiple instances of a large computation "
+    "might hog it up. The resulting printout will "
     "let your know whether the upper limit was hit or not. "
+    "If you want to customize the order of variables, add an argument such "
+    "as order=(y,x), to signify that the "
+    "variable y is stronger than variable x. "
+  "The result comes out frozen to prevent the calculator "
+  "from reordering the outputs. Unfreeze it with the "
+  "Thaw command (see the examples)"
     "<br>"
     "<b>Description of the algorithm.</b> "
     "Let f_1 and f_2 be two polynomials. Following Cox, Little, O'Shea, "
@@ -522,10 +530,30 @@ void Calculator::initializeFunctionsScientificBasic() {
     "but the division is carried with "
     "the modified state of the main bucket. <br>\n"
     "3. Return changedMainBucket.  <br><b>End of algorithm description.</b>",
-    "GroebnerLex{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );\n"
-    "GroebnerLex{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
+    "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=10000 );\n"
+    "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=5  );\n"
+  "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\n"
+  "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n"
+  "Thaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));",
     "Calculator::groebnerLex",
     "GroebnerLex",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "GroebnerGrLex",
+    CalculatorFunctionsPolynomial::groebnerGradedLexicographic,
+    "",
+    "Transforms to a reduced Groebner basis relative to the graded "
+    "lexicographic order. In the graded lexicographic order, "
+    "monomials are first compared by total degree, "
+    "then by lexicographic order. The lexicographic order "
+    "is inherited from the comparison of the underlying expressions. "
+    "All other function setup is as in GroebnberLex. "
+,
+    "GroebnerGrLex{}( a^2+b^2+ 1, x-a^4, y-b^4,upperLimit=10000 );\n "
+    "GroebnerGrLex{}(a^2+b^2+ 1, x-a^4, y-b^4, upperLimit=5 )",
+    "CalculatorFunctionsPolynomial::groebnerGradedLexicographic",
+    "GroebnerGrLex",
     innerStandard
   );
   this->addOperationHandler(
@@ -538,43 +566,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "PolynomialRelationsUpperLimit",
     innerStandard
   );
-  this->addOperationHandler(
-    "GroebnerLexOpposite",
-    CalculatorFunctionsPolynomial::groebnerLexicographicOpposite,
-    "",
-    "Same as GroebnerLex but "
-    "uses reverse order on the variables (z<x).",
-    "GroebnerLexOpposite{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
-    "\nGroebnerRevLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    "Calculator::groebnerLexicographicOpposite",
-    "GroebnerLexOpposite",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "GroebnerGrLex",
-    CalculatorFunctionsPolynomial::groebnerGradedLexicographic,
-    "",
-    "Transforms to a reduced Groebner basis relative to the graded "
-    "lexicographic order. In the graded lexicographic order, "
-    "monomials are first compared by total degree, "
-    "then by lexicographic order. The lexicographic order "
-    "is inherited from the comparison of the underlying expressions. "
-    "<b>The first argument gives an upper bound "
-    "to the number of polynomial operations allowed.</b> "
-    "A non-positive number signifies no upper limit, "
-    "however please do not use (this is a public "
-    "web server and multiple instances of a large "
-    "computation might hog it up). "
-    "The resulting printout will let your know whether "
-    "the upper limit was hit or not. "
-    "For a description of the algorithm used see "
-    "the description of function GroebnerLex.",
-    "GroebnerGrLex{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );\n "
-    "GroebnerGrLex{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )",
-    "CalculatorFunctionsPolynomial::groebnerGrLex",
-    "GroebnerGrLex",
-    innerStandard
-  );
+
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::

@@ -2661,7 +2661,7 @@ bool CalculatorFunctionsPlot::plotSurface(
   > keys;
   if (
     CalculatorConversions::loadKeysFromStatementList(
-      calculator, input, keys, &calculator.comments, true
+      calculator, input, keys, true, nullptr, &calculator.comments
     )
   ) {
     if (keys.contains("color1")) {

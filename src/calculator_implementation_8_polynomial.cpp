@@ -858,103 +858,140 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
   );
 }
 
-bool CalculatorFunctionsPolynomial::groebner(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  int order,
-  bool useModZp
-) {
-  STACK_TRACE("CalculatorFunctionsPolynomial::groebner");
+class GroebnerComputationCalculator {
+private:
+  Calculator* owner;
+  const Expression* input;
+  int order;
   Vector<Polynomial<Rational> > inputVector;
-  Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
-  ExpressionContext context(calculator);
-  if (input.size() < 3) {
-    return
-    output.assignError(calculator, "Function takes at least two arguments. ");
+  // Comptutation context:
+  // contains all involved variables, in ascending order
+  // with respect to calculator sorting.
+  ExpressionContext extractedContext;
+  // Comptutation context:
+  // contains all involved variables, but in possibly
+  // different order specified by the
+  // order
+  // argument.
+  ExpressionContext desiredContext;
+  int upperBound;
+public:
+  Expression output;
+  GroebnerComputationCalculator(
+    Calculator& inputOwner,
+    const Expression& inputExpression,
+    int inputOrder
+  );
+  bool initializeComputation();
+  bool compute();
+};
+
+GroebnerComputationCalculator::GroebnerComputationCalculator(
+  Calculator& inputOwner, const Expression& inputExpression, int inputOrder
+) {
+  this->owner = &inputOwner;
+  this->input = &inputExpression;
+  this->order = inputOrder;
+  this->upperBound = 10000;
+}
+
+bool GroebnerComputationCalculator::initializeComputation() {
+  if (input->size() < 3) {
+    return *this->owner << "Function takes at least two arguments. ";
   }
-  const Expression& numComputationsE = input[1];
-  Rational upperBound = 0;
-  if (!numComputationsE.isOfType(&upperBound)) {
-    return
-    output.assignError(
-      calculator,
-      "Failed to convert the first argument of "
-      "the expression to rational number. "
-    );
-  }
-  if (upperBound > 1000000) {
-    return
-    output.assignError(
-      calculator,
-      "Error: your upper limit of polynomial "
-      "operations exceeds 1000000, which is too large. "
-      "You may use negative or zero number "
-      "give no computation bound. "
-    );
-  }
-  int upperBoundComputations = int(upperBound.getDoubleValue());
-  output.reset(calculator);
-  output.checkInitialization();
-  for (int i = 1; i < input.size(); i ++) {
-    output.addChildOnTop(input[i]);
-  }
-  int modulus = 0;
-  if (useModZp) {
-    if (!output[1].isSmallInteger(&modulus)) {
+  this->desiredContext.initialize(*this->owner);
+  MapList<std::string, Expression> configuration;
+  List<Expression> polynomials;
+  CalculatorConversions::loadKeysFromStatementList(
+    *this->owner,
+    *this->input,
+    configuration,
+    true,
+    &polynomials,
+    nullptr
+  );
+  if (configuration.contains("upperLimit")) {
+    Expression upperLimit = configuration.getValueNoFail("upperLimit");
+    if (!upperLimit.isIntegerFittingInInt(&this->upperBound)) {
       return
-      output.assignError(
-        calculator,
-        "Error: failed to extract modulo from the second argument. "
-      );
-    }
-    if (!MathRoutines::isPrimeSimple(modulus)) {
-      return output.assignError(calculator, "Error: modulus not prime. ");
+      *this->owner
+      << "Failed to extract upperLimit from: "
+      << upperLimit
+      << ". ";
     }
   }
+  if (configuration.contains("order")) {
+    Expression order = configuration.getValueNoFail("order");
+    if (!order.isSequenceNElements()) {
+      return *this->owner << "Failed to extract a sequence of elements from: " << order << ".";
+    }
+    for (int i = 1; i < order.size(); i ++){
+    this->desiredContext.addVariable(order[i]);
+      }
+  }
+  if (this->upperBound > 1000000) {
+    return
+    *this->owner
+    << "Error: your upper limit of polynomial "
+    << "operations exceeds 1000000, which is too large. "
+    << "You may use negative or zero number "
+    << "give no computation bound. ";
+  }
+  Expression argumentExtractor;
+  argumentExtractor.makeSequence(*this->owner, &polynomials);
+  this->extractedContext.initialize(*this->owner);
   if (
-    !calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
-      output,
-      inputVector,
-      &context,
-      - 1 // ,
-      // CalculatorConversions::functionPolynomial<Rational>
+    !this->owner->getVectorFromFunctionArguments<Polynomial<Rational> >(
+      argumentExtractor,
+      this->inputVector,
+      &this->extractedContext,
+      - 1
     )
   ) {
-    return
-    output.assignError(calculator, "Failed to extract polynomial expressions");
+    return *this->owner << "Failed to extract polynomial expressions";
+  }  
+  for (int i = 0; i< this->extractedContext.numberOfVariables(); i++) {
+     Expression variable = this->extractedContext.getVariable(i);
+    if (
+    this->desiredContext.hasVariable(variable)){continue;}
+    this->desiredContext.addVariable(variable);
   }
-  for (int i = 0; i < inputVector.size; i ++) {
-    inputVector[i].scaleNormalizeLeadingMonomial(
+  for (int i = 0; i < this->inputVector.size; i ++) {
+    WithContext<Polynomial<Rational> > converter;
+    converter.context = this->extractedContext;
+    converter.content = this->inputVector[i];
+    if (!    converter.extendContext(this->desiredContext, nullptr)) {
+      global.fatal << "Unexpected failure to set context of " << converter.toString()
+      << " to " << this->desiredContext.toString() << "." << global.fatal;
+    }
+    this->inputVector[i] = converter.content;
+  }
+  return true;
+}
+
+bool GroebnerComputationCalculator::compute() {
+  if (!this->initializeComputation()) {
+    return false;
+  }
+  for (int i = 0; i < this->inputVector.size; i ++) {
+    this->inputVector[i].scaleNormalizeLeadingMonomial(
       &MonomialPolynomial::orderDefault()
     );
   }
   GroebnerBasisComputation<AlgebraicNumber> groebnerComputation;
-  context.getFormat(groebnerComputation.format);
-  context.getFormat(global.defaultFormat.getElement());
-  if (useModZp) {
-    ElementZmodP element;
-    element.makeMinusOne(static_cast<unsigned>(modulus));
-    inputVectorZmodP.setSize(inputVector.size);
-    for (int i = 0; i < inputVector.size; i ++) {
-      inputVectorZmodP[i].makeZero();
-      for (int j = 0; j < inputVector[i].size(); j ++) {
-        element = inputVector[i].coefficients[j];
-        inputVectorZmodP[i].addMonomial(inputVector[i][j], element);
-      }
-    }
-  }
+  this->desiredContext.getFormat(groebnerComputation.format);
+  this->desiredContext.getFormat(global.defaultFormat.getElement());
   List<Polynomial<AlgebraicNumber> > outputGroebner;
   outputGroebner = inputVector;
-  if (order == MonomialPolynomial::Order::gradedLexicographic) {
+  if (this->order == MonomialPolynomial::Order::gradedLexicographic) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
     );
-  } else if (order == MonomialPolynomial::Order::gradedReverseLexicographic) {
+  } else if (this->order == MonomialPolynomial::Order::gradedReverseLexicographic) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
     );
-  } else if (order == MonomialPolynomial::Order::lexicographicOpposite) {
+  } else if (this->order == MonomialPolynomial::Order::lexicographicOpposite) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_rightLargerWins
     );
@@ -967,7 +1004,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   }
   groebnerComputation.format.monomialOrder =
   groebnerComputation.polynomialOrder.monomialOrder;
-  groebnerComputation.maximumMonomialOperations = upperBoundComputations;
+  groebnerComputation.maximumMonomialOperations = this->upperBound;
   bool success =
   groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
@@ -1007,7 +1044,7 @@ bool CalculatorFunctionsPolynomial::groebner(
     out
     << "<br>Minimal Groebner basis not computed: "
     << "exceeded the user-given limit of "
-    << upperBoundComputations
+    << this->upperBound
     << " polynomial operations. ";
     out
     << "<br>An intermediate non-Groebner basis containing total "
@@ -1025,17 +1062,32 @@ bool CalculatorFunctionsPolynomial::groebner(
     }
     out << ");";
   }
-  calculator << out.str();
+  *this->owner << out.str();
   List<Expression> elements;
-  for (int i = 0; i < groebnerComputation.basis.size; i ++) {
+  for (int i = 0; i < outputGroebner.size; i ++) {
     WithContext<Polynomial<AlgebraicNumber> > element;
-    element.context = context;
-    element.content = groebnerComputation.basis[i].element;
+    element.context = this->desiredContext;
+    element.content = outputGroebner[i];
     Expression converted;
-    element.toExpression(calculator, converted);
+    element.toExpression(*this->owner, converted);
     elements.addOnTop(converted);
   }
-  return output.makeSequence(calculator, &elements);
+  return output.makeSequence(*this->owner, &elements);
+}
+
+bool CalculatorFunctionsPolynomial::groebner(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  int order
+) {
+  STACK_TRACE("CalculatorFunctionsPolynomial::groebner");
+  GroebnerComputationCalculator computation(calculator, input, order);
+  if (!computation.compute()) {
+    return false;
+  }
+  output.makeOX(calculator, calculator.opFreeze(), computation.output);
+  return true;
 }
 
 bool CalculatorFunctionsPolynomial::

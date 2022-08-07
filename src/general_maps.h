@@ -159,14 +159,14 @@ public:
 template <
   class key,
   class value,
-  unsigned int hashFunction(const key&) = key::hashFunction
+  unsigned int hashFunction(const key&) = HashFunctions::hashFunction<key>
 >
 using MapReferences =
 MapTemplate<ListReferences<value>, key, value, hashFunction>;
 template <
   class key,
   class value,
-  unsigned int hashFunction(const key&) = key::hashFunction
+  unsigned int hashFunction(const key&) = HashFunctions::hashFunction<key>
 >
 using MapList =
 MapTemplate<List<value>, key, value, hashFunction>;

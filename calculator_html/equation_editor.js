@@ -1499,6 +1499,8 @@ class LaTeXConstants {
       '+': '+',
       ';': ';',
       ':': ':',
+      ',': ',',
+      '.': '.',
       // \pm
       '\u00B1': '\u00B1',
       // Mathematical minus, a wider dash.
@@ -6014,6 +6016,8 @@ class MathNode {
       case '=':
       case '>':
       case '<':
+      case ',':
+      case '.':
         this.makeHorizontalOperatorCorrectInput(key);
         return new KeyHandlerResult(true, false);
       case '^':

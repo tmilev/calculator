@@ -299,13 +299,13 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder() const {
   variables.quickSortAscending(&this->polynomialOrder.monomialOrder);
   FormatExpressions tempFormat = this->format;
   out << "\\(";
-  for (int i = numberOfVariables-1; i >=0; i --) {
+  for (int i = numberOfVariables - 1; i >= 0; i --) {
     out << variables[i].toString(&tempFormat);
     if (i != 0) {
       out << " > ";
     }
   }
-    out << "\\). ";
+  out << "\\). ";
   return out.str();
 }
 

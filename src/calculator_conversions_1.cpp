@@ -13,25 +13,26 @@
 #include "math_rational_function_implementation.h"
 #include "calculator_lie_theory.h"
 
-
 // Start WithContext specializations.
-
-template<>
-void WithContext<Polynomial<Rational> >::toExpression(Calculator& calculator, Expression& output) {
+template < >
+void WithContext<Polynomial<Rational> >::toExpression(
+  Calculator& calculator, Expression& output
+) {
   CalculatorConversions::expressionFromPolynomial<Rational>(
-  calculator, this->content, output,
-  &this->context);
+    calculator, this->content, output, &this->context
+  );
 }
 
-template<>
-void WithContext<Polynomial<AlgebraicNumber> >::toExpression(Calculator& calculator, Expression& output) {
+template < >
+void WithContext<Polynomial<AlgebraicNumber> >::toExpression(
+  Calculator& calculator, Expression& output
+) {
   CalculatorConversions::expressionFromPolynomial<AlgebraicNumber>(
-  calculator, this->content, output,
-  &this->context);
+    calculator, this->content, output, &this->context
+  );
 }
 
 // End WithContext specializations.
-
 // start CalculatorConversions::convertWithoutComputation specializations.
 template < >
 bool CalculatorConversions::convertWithoutComputation<

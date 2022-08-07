@@ -971,7 +971,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   bool success =
   groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
-  out << groebnerComputation.toStringLetterOrder();
+  out << "<hr>" << groebnerComputation.toStringLetterOrder();
   out << "<br>Starting basis (" << inputVector.size << " elements): ";
   for (int i = 0; i < inputVector.size; i ++) {
     out
@@ -1027,7 +1027,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   }
   calculator << out.str();
   List<Expression> elements;
-  for (int i = 0; i < groebnerComputation.basis.size; i++){
+  for (int i = 0; i < groebnerComputation.basis.size; i ++) {
     WithContext<Polynomial<AlgebraicNumber> > element;
     element.context = context;
     element.content = groebnerComputation.basis[i].element;

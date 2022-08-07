@@ -4569,11 +4569,11 @@ x^2+ 1, y x z - 1, z^2 x +y - 1, w u)
 ```
 Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic but the first argument gives upper limits to the number of polynomial computations that can be carried out, and the second argument gives upper limit to the number of monomial computations. 
 
-*GroebnerLexUpperLimit* [GroebnerLexUpperLimit] {Calculator::groebnerLex}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GroebnerLexUpperLimit%7b%7d%2810000%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%5cnGroebnerLexUpperLimit%7b%7d%285%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*GroebnerLex* [GroebnerLex] {Calculator::groebnerLex}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GroebnerLex%7b%7d%2810000%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%5cnGroebnerLex%7b%7d%285%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GroebnerLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );
-GroebnerLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );
+GroebnerLex{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );
+GroebnerLex{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );
 ```
 Transforms to a reduced Groebner basis using the lexicographic order. The lexicographic order is inherited from the comparison of the underlying expressions. <b>The first argument gives an upper bound to the number of polynomial operations allowed.</b> A non-positive number signifies no upper limit, however please do not use (this is a public web server and multiple instances of a large computation might hog it up). The resulting printout will let your know whether the upper limit was hit or not. <br><b>Description of the algorithm.</b> Let f_1 and f_2 be two polynomials. Following Cox, Little, O'Shea, "Ideals, Varieties, Algorithms", page 81, denote by S(f_1, f_2) the symmetric difference of f_1 and f_2. More precisely, let x^{\gamma_1} be the leading monomial of f_1 and x^{\gamma_2} be the leading monomial of f_2, with leading coefficients c_1 and c_2. Then define S(f_1, f_2)= c_2* f_1* lcm (x^\gamma_1, \gamma_2) / x^\gamma_1 - c_1* f_2 *lcm (x^\gamma_1, x^\gamma_2)/x^\gamma_2. Here lcm stands for least common multiple of monomials, defined in the obvious way. <br>
 1. Allocate two buckets of polynomials - one "main" bucket and additional bucket. At any given moment in the algorithm, the union of main bucket and the additional bucket should give a basis of the ideal. <br>
@@ -4602,21 +4602,21 @@ PolynomialRelationsUpperLimit{}(10000, s^2+c^2+ 1, s^4, c^4 );
 ```
 Finds the relations between the polynomials.
 
-*GroebnerLexOppositeUpperLimit* [GroebnerLexOppositeUpperLimit] {Calculator::groebnerLexicographicOpposite}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GroebnerLexOppositeUpperLimit%7b%7d%2810000%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%5cnGroebnerRevLexUpperLimit%7b%7d%285%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*GroebnerLexOpposite* [GroebnerLexOpposite] {Calculator::groebnerLexicographicOpposite}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GroebnerLexOpposite%7b%7d%2810000%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%5cnGroebnerRevLexUpperLimit%7b%7d%285%2c%20s%5e2%2bc%5e2%2b%201%2c%20a-s%5e4%2c%20b-c%5e4%20%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GroebnerLexOppositeUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );
+GroebnerLexOpposite{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );
 GroebnerRevLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );
 ```
-Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).
+Same as GroebnerLex but uses reverse order on the variables (z<x).
 
-*GroebnerGrLexUpperLimit* [GroebnerGrLexUpperLimit] {CalculatorFunctionsPolynomial::groebnerGrLex}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GroebnerGrLexUpperLimit%7b%7d%2810000%2c%20a%5e2%2bb%5e2%2b%201%2c%20x-a%5e4%2c%20y-b%5e4%20%29%3b%5cn%20GroebnerGrLexUpperLimit%7b%7d%285%2c%20a%5e2%2bb%5e2%2b%201%2c%20x-a%5e4%2c%20y-b%5e4%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*GroebnerGrLex* [GroebnerGrLex] {CalculatorFunctionsPolynomial::groebnerGrLex}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GroebnerGrLex%7b%7d%2810000%2c%20a%5e2%2bb%5e2%2b%201%2c%20x-a%5e4%2c%20y-b%5e4%20%29%3b%5cn%20GroebnerGrLex%7b%7d%285%2c%20a%5e2%2bb%5e2%2b%201%2c%20x-a%5e4%2c%20y-b%5e4%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-GroebnerGrLexUpperLimit{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );
- GroebnerGrLexUpperLimit{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )
+GroebnerGrLex{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );
+ GroebnerGrLex{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )
 ```
-Transforms to a reduced Groebner basis relative to the graded lexicographic order. In the graded lexicographic order, monomials are first compared by total degree, then by lexicographic order. The lexicographic order is inherited from the comparison of the underlying expressions. <b>The first argument gives an upper bound to the number of polynomial operations allowed.</b> A non-positive number signifies no upper limit, however please do not use (this is a public web server and multiple instances of a large computation might hog it up). The resulting printout will let your know whether the upper limit was hit or not. For a description of the algorithm used see the description of function GroebnerLexUpperLimit.
+Transforms to a reduced Groebner basis relative to the graded lexicographic order. In the graded lexicographic order, monomials are first compared by total degree, then by lexicographic order. The lexicographic order is inherited from the comparison of the underlying expressions. <b>The first argument gives an upper bound to the number of polynomial operations allowed.</b> A non-positive number signifies no upper limit, however please do not use (this is a public web server and multiple instances of a large computation might hog it up). The resulting printout will let your know whether the upper limit was hit or not. For a description of the algorithm used see the description of function GroebnerLex.
 
 *ElementEllipticCurveNormalForm* [ElementEllipticCurveNormalForm] {CalculatorFunctions::elementEllipticCurveNormalForm}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20%2b%20x%20%2b%207%2c%20x%20%3d%203%20mod%20101%2c%20y%20%3d%2021%20mod%20101%29%3bElementEllipticCurveNormalForm%28y%5e2%20%3d%20x%5e3%20-%20x%20%2b%201%2c%20x%20%3d%203%2c%20y%20%3d%205%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

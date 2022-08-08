@@ -923,11 +923,15 @@ bool GroebnerComputationCalculator::initializeComputation() {
   if (configuration.contains("order")) {
     Expression order = configuration.getValueNoFail("order");
     if (!order.isSequenceNElements()) {
-      return *this->owner << "Failed to extract a sequence of elements from: " << order << ".";
+      return
+      *this->owner
+      << "Failed to extract a sequence of elements from: "
+      << order
+      << ".";
     }
-    for (int i = 1; i < order.size(); i ++){
-    this->desiredContext.addVariable(order[i]);
-      }
+    for (int i = 1; i < order.size(); i ++) {
+      this->desiredContext.addVariable(order[i]);
+    }
   }
   if (this->upperBound > 1000000) {
     return
@@ -949,20 +953,26 @@ bool GroebnerComputationCalculator::initializeComputation() {
     )
   ) {
     return *this->owner << "Failed to extract polynomial expressions";
-  }  
-  for (int i = 0; i< this->extractedContext.numberOfVariables(); i++) {
-     Expression variable = this->extractedContext.getVariable(i);
-    if (
-    this->desiredContext.hasVariable(variable)){continue;}
+  }
+  for (int i = 0; i < this->extractedContext.numberOfVariables(); i ++) {
+    Expression variable = this->extractedContext.getVariable(i);
+    if (this->desiredContext.hasVariable(variable)) {
+      continue;
+    }
     this->desiredContext.addVariable(variable);
   }
   for (int i = 0; i < this->inputVector.size; i ++) {
     WithContext<Polynomial<Rational> > converter;
     converter.context = this->extractedContext;
     converter.content = this->inputVector[i];
-    if (!    converter.extendContext(this->desiredContext, nullptr)) {
-      global.fatal << "Unexpected failure to set context of " << converter.toString()
-      << " to " << this->desiredContext.toString() << "." << global.fatal;
+    if (!converter.extendContext(this->desiredContext, nullptr)) {
+      global.fatal
+      << "Unexpected failure to set context of "
+      << converter.toString()
+      << " to "
+      << this->desiredContext.toString()
+      << "."
+      << global.fatal;
     }
     this->inputVector[i] = converter.content;
   }
@@ -987,11 +997,15 @@ bool GroebnerComputationCalculator::compute() {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
     );
-  } else if (this->order == MonomialPolynomial::Order::gradedReverseLexicographic) {
+  } else if (
+    this->order == MonomialPolynomial::Order::gradedReverseLexicographic
+  ) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
     );
-  } else if (this->order == MonomialPolynomial::Order::lexicographicOpposite) {
+  } else if (
+    this->order == MonomialPolynomial::Order::lexicographicOpposite
+  ) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_rightLargerWins
     );

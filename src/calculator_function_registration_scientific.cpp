@@ -470,9 +470,9 @@ void Calculator::initializeFunctionsScientificBasic() {
     "If you want to customize the order of variables, add an argument such "
     "as order=(y,x), to signify that the "
     "variable y is stronger than variable x. "
-  "The result comes out frozen to prevent the calculator "
-  "from reordering the outputs. Unfreeze it with the "
-  "Thaw command (see the examples)"
+    "The result comes out frozen to prevent the calculator "
+    "from reordering the outputs. Unfreeze it with the "
+    "Thaw command (see the examples)"
     "<br>"
     "<b>Description of the algorithm.</b> "
     "Let f_1 and f_2 be two polynomials. Following Cox, Little, O'Shea, "
@@ -532,9 +532,9 @@ void Calculator::initializeFunctionsScientificBasic() {
     "3. Return changedMainBucket.  <br><b>End of algorithm description.</b>",
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=10000 );\n"
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=5  );\n"
-  "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\n"
-  "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n"
-  "Thaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));",
+    "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\n"
+    "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n"
+    "Thaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));",
     "Calculator::groebnerLex",
     "GroebnerLex",
     innerStandard
@@ -548,8 +548,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "monomials are first compared by total degree, "
     "then by lexicographic order. The lexicographic order "
     "is inherited from the comparison of the underlying expressions. "
-    "All other function setup is as in GroebnberLex. "
-,
+    "All other function setup is as in GroebnberLex. ",
     "GroebnerGrLex{}( a^2+b^2+ 1, x-a^4, y-b^4,upperLimit=10000 );\n "
     "GroebnerGrLex{}(a^2+b^2+ 1, x-a^4, y-b^4, upperLimit=5 )",
     "CalculatorFunctionsPolynomial::groebnerGradedLexicographic",
@@ -566,7 +565,6 @@ void Calculator::initializeFunctionsScientificBasic() {
     "PolynomialRelationsUpperLimit",
     innerStandard
   );
-
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::

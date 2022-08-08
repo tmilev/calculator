@@ -1920,20 +1920,16 @@
     "output":"\"<br>The context vars:<br>Context. Variables: u, w, x, y, z. <br>The polynomials: (x^2+1, x y z -1, x z^2+y -1, u w )<br>Total number of polynomial computations: 136<br>System proven to have solution. <br>One solution follows.  u  = 0; w  = 0; x  = e_{4}-e_{3}; y  = e_{2}; z  = -e_{3}+e_{2};\""
   },
   {
-    "input":"GroebnerLex{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );\nGroebnerLex{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    "output":"(\\left(s^{2}+c^{2}+1, -s^{4}-2 s^{2}+b-1, -s^{4}+a\\right);\\left(-c^{4}+b, -s^{4}+a\\right))"
+    "input":"GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=10000 );\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=5  );\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\nThaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));",
+    "output":"(Freeze{}\\left(\\left(c^{2}+s^{2}+1, b-s^{4}-2 s^{2}-1, a-s^{4}\\right)\\right);Freeze{}\\left(\\left(b-c^{4}, a-s^{4}, s^{2}+c^{2}+1\\right)\\right);Freeze{}\\left(\\left(b^{2}-2 b a-2 b+a^{2}-2 a+1, 2 c^{2}+b-a+1, 2 s^{2}-b+a+1\\right)\\right);Freeze{}\\left(\\left(c^{2}+s^{2}+1, b-s^{4}-2 s^{2}-1, a-s^{4}\\right)\\right);\\left(s^{2}+c^{2}+1, -s^{4}-2 s^{2}+b-1, -s^{4}+a\\right))"
+  },
+  {
+    "input":"GroebnerGrLex{}( a^2+b^2+ 1, x-a^4, y-b^4,upperLimit=10000 );\n GroebnerGrLex{}(a^2+b^2+ 1, x-a^4, y-b^4, upperLimit=5 )",
+    "output":"(Freeze{}\\left(\\left(x^{2}-2 x y+y^{2}-2 x-2 y+1, 2 b^{2}-x+y+1, 2 a^{2}+x-y+1\\right)\\right);Freeze{}\\left(\\left(b^{4}-y, a^{4}-x, b^{2}+a^{2}+1\\right)\\right))"
   },
   {
     "input":"PolynomialRelationsUpperLimit{}(10000, s^2+c^2+ 1, s^4, c^4 );",
     "output":"\"Polynomials:<br>a =c^2+s^2+1<br>b =s^4<br>d =c^4<br>Relations: <br>a^4-4a^3-2a^2b -2a^2d +6a^2+4a b +4a d +b^2-2b d +d^2-4a -2b -2d +1\""
-  },
-  {
-    "input":"GroebnerLexOpposite{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );\nGroebnerRevLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    "output":"(\\left(b^{2}+a^{2}-2 a b-2 b-2 a+1, 2 c^{2}+b-a+1, 2 s^{2}-b+a+1\\right);GroebnerRevLexUpperLimit{}\\left(5, s^{2}+c^{2}+1, -s^{4}+a, -c^{4}+b\\right))"
-  },
-  {
-    "input":"GroebnerGrLex{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );\n GroebnerGrLex{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )",
-    "output":"(\\left(y^{2}+x^{2}-2 x y-2 y-2 x+1, 2 b^{2}+y-x+1, 2 a^{2}-y+x+1\\right);\\left(b^{4}-y, a^{4}-x\\right))"
   },
   {
     "input":"ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);ElementEllipticCurveNormalForm(y^2 = x^3 - x + 1, x = 3, y = 5)",

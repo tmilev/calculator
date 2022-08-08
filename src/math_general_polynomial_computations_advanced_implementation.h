@@ -15,7 +15,7 @@ wrapUpGroebnerOnExceedingComputationLimit(
   List<Polynomial<Coefficient> >& output
 ) {
   this->getBasis(output);
-  for (int i = 0; i < this->basisCandidates.size; i ++){
+  for (int i = 0; i < this->basisCandidates.size; i ++) {
     output.addOnTop(this->basisCandidates[i]);
   }
   return false;

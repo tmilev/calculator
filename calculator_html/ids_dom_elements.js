@@ -46,6 +46,9 @@ let domElements = {
       equationEditorFontSizeSlider: "equationEditorFontSizeSlider",
       inputMain: "mainInputID",
       buttonGoCalculatorPage: "buttonGoCalculatorPage",
+      spanComputationLink: "spanComputationLink",
+      anchorComputationLink: "anchorComputationLink",
+      buttonCopyLatexLink: "buttonCopyLatexLink",
       monitoring: {
         progressTimer: "idProgressReportTimer",
         spanStatus: "spanMonitoringStatus",

@@ -2454,7 +2454,7 @@ public:
   std::string outputCommentsString;
   ObjectContainer objectContainer;
   std::string javaScriptDisplayingIndicator;
-  int numOutputFileS;
+  int numberOfOutputFiles;
   std::string userLabel;
   // List<std::string> logEvaluationSteps;
   std::stringstream comments;

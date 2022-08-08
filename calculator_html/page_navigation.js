@@ -49,7 +49,6 @@ class User {
     );
   }
 
-
   getRole() {
     return mainPage().storage.variables.user.role.getValue();
   }
@@ -72,12 +71,12 @@ class User {
   }
 
   makeFromUserInfo(inputData) {
-    let thePage = window.calculator.mainPage;
+    let page = window.calculator.mainPage;
     // Please note: the authentication token is silently set through the cookie headers.
     // Please do not take explicit action as
     // inputdata.authenticationToken may not contain the authentication token.
-    // not ok: thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
-    thePage.storage.variables.user.name.setAndStore(inputData.username);
+    // not ok: page.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
+    page.storage.variables.user.name.setAndStore(inputData.username);
     mainPage().storage.variables.user.role.setAndStore(inputData.userRole);
     this.flagLoggedIn = true;
     this.sectionsTaught = inputData.sectionsTaught;
@@ -85,8 +84,8 @@ class User {
     this.sectionInDB = inputData.studentSection;
     this.sectionComputed = inputData.studentSection;
     this.deadlineSchema = inputData.deadlineSchema;
-    document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.variables.user.name.value;
-    document.getElementById(ids.domElements.inputUsername).value = thePage.storage.variables.user.name.value;
+    document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = page.storage.variables.user.name.value;
+    document.getElementById(ids.domElements.inputUsername).value = page.storage.variables.user.name.value;
   }
 }
 
@@ -253,11 +252,15 @@ class Page {
 
   initializeLoginPage() {
     login.authenticator.initialize();
-    let forgotLogin = document.getElementById(ids.domElements.pages.login.buttonForgotLogin);
+    let forgotLogin = document.getElementById(
+      ids.domElements.pages.login.buttonForgotLogin
+    );
     forgotLogin.addEventListener("click", () => {
       this.selectPage(this.pages.forgotLogin.name);
     });
-    let sendRecoveryEmail = document.getElementById(ids.domElements.pages.forgotLogin.buttonSendRecoveryEmail);
+    let sendRecoveryEmail = document.getElementById(
+      ids.domElements.pages.forgotLogin.buttonSendRecoveryEmail
+    );
     sendRecoveryEmail.addEventListener("click", () => {
       forgotPassword.forgotLogin.submitForgotPassword();
     });

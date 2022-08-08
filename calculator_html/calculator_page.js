@@ -200,13 +200,56 @@ class Calculator {
     }
     this.initialized = true;
     this.editor.initialize();
-    let buttonGo = document.getElementById(ids.domElements.pages.calculator.buttonGoCalculatorPage);
+    let buttonGo = document.getElementById(
+      ids.domElements.pages.calculator.buttonGoCalculatorPage
+    );
     if (buttonGo === null) {
       return;
     }
     buttonGo.addEventListener('click', () => {
       this.submitComputation();
     });
+    let buttonLinkLatex = document.getElementById(
+      ids.domElements.pages.calculator.buttonCopyLatexLink
+    );
+    buttonLinkLatex.addEventListener('click', () => {
+      this.prepareLatexLink();
+    });
+  }
+
+  latexLink(
+    /** @type{string} */
+    input
+  ) {
+    let result = [];
+    result.push("\\href{");
+    let toBeEscaped = "%\\_{}#";
+    let toBeEscapedMap = {};
+    for (let i = 0; i < toBeEscaped.length; i++) {
+      toBeEscapedMap[toBeEscaped[i]] = true;      
+    }
+    for (let i = 0; i < input.length; i++){
+      let current = input[i];
+      if (current in toBeEscapedMap) {
+        result.push("\\" + current);
+        continue;
+      }
+      result.push(current);
+    }
+    result.push("}{your computation}");
+    return result.join("");
+  }
+
+  prepareLatexLink() {
+    let anchor = document.getElementById(
+      ids.domElements.pages.calculator.anchorComputationLink
+    );
+    let latexLink = this.latexLink(anchor.href);
+    navigator.clipboard.writeText(latexLink);
+    anchor.style.backgroundColor = "lightgreen";
+    setTimeout(() => {
+      anchor.style.backgroundColor = "";
+    }, 1000);
   }
 
   selectCalculatorPage() {
@@ -519,7 +562,15 @@ class Calculator {
     let urlCopy = Object.assign({}, thePage.storage.urlObject);
     urlCopy.inputFocus = true;
     let stringifiedHash = thePage.storage.getPercentEncodedURL(urlCopy);
-    document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
+    let anchor = document.getElementById(
+      ids.domElements.pages.calculator.anchorComputationLink
+    );
+    anchor.href = `#${stringifiedHash}`;
+    anchor.textContent = "Link to your input";
+    let latexCopyButton = document.getElementById(
+      ids.domElements.pages.calculator.buttonCopyLatexLink
+    );
+    latexCopyButton.style.visibility = "";
     setTimeout(() => {
       this.helpCalculator();
     }, 0);

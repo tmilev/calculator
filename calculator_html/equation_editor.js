@@ -3119,7 +3119,7 @@ class CopyButton {
     this.button.addEventListener("click", () => {
       this.copy();
     });
-    this.button.textContent = "\uf4cb";
+    this.button.textContent = "\uD83D\uDCCB";
     this.button.style.cursor = "pointer";
     this.container.style.position = "absolute";
     this.container.style.left = "100%";

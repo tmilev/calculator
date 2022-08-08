@@ -18,7 +18,7 @@
 
 Calculator::Calculator() {
   this->parser.initialize(this);
-  this->numOutputFileS = 0;
+  this->numberOfOutputFiles = 0;
   this->flagHideLHS = false;
   this->flagUseHtml = true;
   this->flagWriteLatexPlots = true;
@@ -110,7 +110,7 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
     *outputFileNameNoExtension =
     global.displayPathOutputFolder + fileName.str();
   }
-  this->numOutputFileS ++;
+  this->numberOfOutputFiles ++;
   return out.str();
 }
 

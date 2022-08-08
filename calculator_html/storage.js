@@ -309,7 +309,9 @@ class StorageCalculator {
           name: "calculatorInput",
           nameURL: "calculatorInput",
           associatedDOMId: ids.domElements.pages.calculator.inputMain,
-          showInURLByDefault: true,
+          showInURLOnPages: {
+            calculator: true,
+          },
         }),
         request: new StorageVariable({
           name: "calculatorRequest",
@@ -321,17 +323,11 @@ class StorageCalculator {
           nameLocalStorage: "monitoring",
           nameURL: "monitoring",
           nameCookie: "monitoring",
-          showInURLOnPages: {
-            "calculator": true,
-          },
         }),
         useWebAssembly: new StorageVariable({
           name: "useWebAssembly",
           nameURL: "useWebAssembly",
           nameLocalStorage: "useWebAssembly",
-          showInURLOnPages: {
-            "calculator": true,
-          },
         }),
       },
       user: {

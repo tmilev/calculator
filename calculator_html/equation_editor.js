@@ -986,11 +986,12 @@ class MathNodeFactory {
       rows,
       /** @type {number} */
       columns,
-      /** For the environment \begin{array}{rcl}a&=&b\end{array}, 
-       * columnStyle contains the 
-       * rcl 
-       * column spec string 
-       * @type {string} 
+      /**
+       * For the environment \begin{array}{rcl}a&=&b\end{array},
+       * columnStyle contains the
+       * rcl
+       * column spec string
+       * @type {string}
        */
       columnStyle,
       /** @type{string} */
@@ -1572,7 +1573,7 @@ class LaTeXConstants {
       'dots': '\u2026',
       'vdots': '\u22EE',
       'approx': '~',
-      'equiv':'\u2261',
+      'equiv': '\u2261',
       'subset': '\u2282',
       'supset': '\u2283',
       'setminus': '\\',
@@ -2843,7 +2844,7 @@ class EquationEditorOptions {
        * latexInput: (HTMLInputElement?|null|undefined),
        * editHandler: (Function?|null|undefined),
        * lineBreakWidth: (number|undefined),
-       * logTiming: (boolean|undefined)
+       * logTiming: (boolean|undefined),
        * copyButton: (boolean|undefined)
        * }}
        */
@@ -2864,7 +2865,7 @@ class EquationEditorOptions {
     /** @type {number} */
     this.lineBreakWidth = 0;
     /** @type {boolean} */
-    this.copyButton = options.copyButton;
+    this.copyButton = false;
     if (options.lineBreakWidth !== null ||
         options.lineBreakWidth !== undefined) {
       this.lineBreakWidth = /** @type {number} */ (options.lineBreakWidth);
@@ -2897,8 +2898,8 @@ class EquationEditorOptions {
     if (this.logTiming === undefined) {
       this.logTiming = false;
     }
-    if (this.copyButton === undefined) {
-      this.copyButton = false;
+    if (this.copyButton === true) {
+      this.copyButton = true;
     }
     /** @type {boolean} */
     this.showLatexOnDoubleClick = !this.editable && !this.copyButton;
@@ -3089,24 +3090,26 @@ class FocusInformation {
   }
 }
 
-class CopyButton { 
+class CopyButton {
   constructor(
-    /** @type {EquationEditor?} */
-    equationEditor,
+      /** @type {EquationEditor?} */
+      equationEditor,
   ) {
-    /**@type{EquationEditor} */
-    this.equationEditor = equationEditor;  
-    /** @type {HTMLElement|null} */
+    /**@type{EquationEditor?} */
+    this.equationEditor = equationEditor;
+    /** @type {HTMLElement?} */
     this.button = null;
-    /** @type {HTMLElement|null} */
+    /** @type {HTMLElement?} */
     this.container = null;
   }
 
+  /** Initializes the copy button. Call to create the button. */
   initialize() {
-    this.container = document.createElement("span");
-    this.button = document.createElement("button");
+    this.container =
+        /** @type {HTMLElement!}*/ (document.createElement('span'));
+    this.button = /** @type {HTMLElement!}*/ (document.createElement('button'));
     this.container.style.fontSize = '6px';
-    this.button.style.fontSize = "6px";
+    this.button.style.fontSize = '6px';
     this.container.appendChild(this.button);
     this.button.style.opacity = '0';
     this.button.style.transition = 'all 1s';
@@ -3116,16 +3119,20 @@ class CopyButton {
     this.equationEditor.container.addEventListener('mouseleave', () => {
       this.button.style.opacity = '0';
     });
-    this.button.addEventListener("click", () => {
+    this.button.addEventListener('click', () => {
       this.copy();
     });
-    this.button.textContent = "\uD83D\uDCCB";
-    this.button.style.cursor = "pointer";
-    this.container.style.position = "absolute";
-    this.container.style.left = "100%";
-    this.equationEditor.container.appendChild(this.container);    
+    this.button.textContent = '\uD83D\uDCCB';
+    this.button.style.cursor = 'pointer';
+    this.container.style.position = 'absolute';
+    this.container.style.left = '100%';
+    this.equationEditor.container.appendChild(this.container);
   }
 
+  /**
+   * Copies the latex of the equationEditor to the clipboard. Equivalent to
+   * select+all and doing ctrl+c.
+   */
   copy() {
     this.equationEditor.copyToClipboard();
     this.equationEditor.container.style.transition = 'all 1s';
@@ -3246,8 +3253,8 @@ class EquationEditor {
     /** @type {MathNode?} */
     this.eventCatcher = null;
     this.prepareEventCatcher();
-    /** @type{CopyButton|null} */
-    this.copyButton = null;
+    /** @type{CopyButton?} */
+    this.copyButtonContainer = null;
     this.prepareCopyButton();
   }
 
@@ -3344,7 +3351,8 @@ class EquationEditor {
     return new KeyHandlerResult(true, true);
   }
 
-  /** Executes a copy-to-clipboard operation. 
+  /**
+   * Executes a copy-to-clipboard operation.
    * @return {string}
    */
   copyToClipboard() {
@@ -3407,7 +3415,7 @@ class EquationEditor {
       return;
     }
     this.copyButtonContainer = new CopyButton(this);
-    this.copyButtonContainer.initialize();    
+    this.copyButtonContainer.initialize();
   }
 
   /** Initializes the event catcher. */
@@ -3688,7 +3696,8 @@ class EquationEditor {
     let result = [];
     result.push(document.createTextNode(`Latex: ${latexWithAnnotation.latex}`));
     let backslashEscaped = latexWithAnnotation.latex.split('\\').join('\\\\');
-    result.push(document.createTextNode(`Latex, backslash-escaped: ${backslashEscaped}`));
+    result.push(document.createTextNode(
+        `Latex, backslash-escaped: ${backslashEscaped}`));
     result.push(document.createElement('br'));
     result.push(document.createTextNode(
         `URL-encoded: ${encodeURIComponent(latexWithAnnotation.latex)}`));
@@ -9972,7 +9981,7 @@ class MathNodeMatrix extends MathNode {
   constructor(
       /** @type {EquationEditor!} */
       equationEditor,
-      /** @type {string!} */
+      /** @type {string} */
       matrixEnvironment,
   ) {
     super(equationEditor, knownTypes.matrix);
@@ -9989,16 +9998,22 @@ class MathNodeMatrix extends MathNode {
     }
     let matrixContent = this.children[0].children[1];
     if (this.isBinom()) {
-      let first = matrixContent.children[0].children[0].toLatexWithAnnotation(options).latex;
-      let second = matrixContent.children[1].children[0].toLatexWithAnnotation(options).latex;
+      let first = matrixContent.children[0]
+                      .children[0]
+                      .toLatexWithAnnotation(options)
+                      .latex;
+      let second = matrixContent.children[1]
+                       .children[0]
+                       .toLatexWithAnnotation(options)
+                       .latex;
       return new LatexWithAnnotation(`\\binom{${first}}{${second}}`);
-    } 
+    }
     let result = [];
     result.push(`\\begin{${this.matrixEnvironment}}`);
     if (this.matrixEnvironment === 'array') {
-      result.push("{");
+      result.push('{');
       result.push(this.latexExtraStyle);
-      result.push("}");
+      result.push('}');
     }
     let rows = [];
     for (let i = 0; i < matrixContent.children.length; i++) {
@@ -10015,6 +10030,12 @@ class MathNodeMatrix extends MathNode {
     return new LatexWithAnnotation(result.join(''));
   }
 
+  /**
+   * Returns whether  the matrix is actually used to record a \binom{a}{b}
+   * element.
+   *
+   * @return{boolean}
+   */
   isBinom() {
     if (this.matrixEnvironment !== 'binom') {
       return false;
@@ -10023,7 +10044,8 @@ class MathNodeMatrix extends MathNode {
     if (matrixContent.children.length !== 2) {
       return false;
     }
-    return matrixContent.children[0].children.length === 1 && matrixContent.children[1].children.length === 1;
+    return matrixContent.children[0].children.length === 1 &&
+        matrixContent.children[1].children.length === 1;
   }
 
   /**
@@ -10146,11 +10168,13 @@ class MathNodeMatrixRow extends MathNode {
     return this.parent.parent.parent.applyBackspaceToTheLeftAsLeftArrow();
   }
 
+  /** Adds a border to the top edge of the matrix row. */
   addTopBorder() {
     this.topLineCount++;
     this.type.borderTop = '1px solid black';
   }
 
+  /** Adds a border to the bottom edge of the matrix row. */
   addBottomBorder() {
     this.bottomLineCount++;
     this.type.borderBottom = '1px solid black';

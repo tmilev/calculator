@@ -2898,7 +2898,7 @@ class EquationEditorOptions {
     if (this.logTiming === undefined) {
       this.logTiming = false;
     }
-    if (this.copyButton === true) {
+    if (options.copyButton === true) {
       this.copyButton = true;
     }
     /** @type {boolean} */

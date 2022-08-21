@@ -329,6 +329,11 @@ class StorageCalculator {
           nameURL: "useWebAssembly",
           nameLocalStorage: "useWebAssembly",
         }),
+        hideEquationEditor: new StorageVariable({
+          name: "hideEquationEditor",
+          nameURL: "hideEquationEditor",
+          nameLocalStorage: "hideEquationEditor",
+        }),
       },
       user: {
         activationToken: new StorageVariable({

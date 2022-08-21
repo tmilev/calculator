@@ -24,7 +24,7 @@ class CalculatorEquationEditor {
       idEquationEditorElement: "mainInputEditorField",
       problemId: "",
       idPureLatex: ids.domElements.pages.calculator.inputMain,
-      idButtonContainer: 'mainInputEditorFieldButtons',
+      idButtonContainer: ids.domElements.pages.calculator.divEquationEditorButtons,
       flagCalculatorPanel: true,
       valueChangeHandler: () => {
         this.equationEditorChangeCallback();

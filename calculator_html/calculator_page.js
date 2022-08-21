@@ -167,6 +167,34 @@ class Calculator {
     }
   }
 
+  toggleEquationEditor() {
+    let hideEditor = storage.storage.variables.calculator.hideEquationEditor.isTrue();
+    hideEditor = !hideEditor;
+    storage.storage.variables.calculator.hideEquationEditor.setAndStore(hideEditor);
+    this.doToggleEditor(hideEditor)
+  }
+
+  doToggleEditor(/** @type{boolean} */ hideEditor) {
+    let editor = document.getElementById(
+      ids.domElements.pages.calculator.divEquationEditor
+    );
+    let editorButtons = document.getElementById(
+      ids.domElements.pages.calculator.divEquationEditorButtons
+    );
+    let button = document.getElementById(
+      ids.domElements.pages.calculator.buttonToggleEquations
+    );
+    if (hideEditor) {
+      editor.style.display = 'none';
+      editorButtons.style.display = 'none';
+      button.textContent = '\u25B8';
+    } else {
+      editor.style.display = '';
+      editorButtons.style.display = '';
+      button.textContent = '\u25BE';
+    }
+  }
+ 
   toggleExamples(
     /**@type{HTMLElement} */
     button,
@@ -200,6 +228,8 @@ class Calculator {
     }
     this.initialized = true;
     this.editor.initialize();
+    this.initializeToggleExamples();
+    this.initializeToggleEditor();
     let buttonGo = document.getElementById(
       ids.domElements.pages.calculator.buttonGoCalculatorPage
     );
@@ -215,6 +245,32 @@ class Calculator {
     buttonLinkLatex.addEventListener('click', () => {
       this.prepareLatexLink();
     });
+  }
+
+  initializeToggleExamples() {
+    let buttonExamples = document.getElementById(
+      ids.domElements.pages.calculator.buttonCalculatorExamples
+    );
+    if (buttonExamples === null) {
+      return;
+    }
+    buttonExamples.addEventListener('click', () => {
+      this.toggleExamples(buttonExamples);
+    });
+  }
+
+  initializeToggleEditor() {
+    let buttonToggleEditor = document.getElementById(
+      ids.domElements.pages.calculator.buttonToggleEquations
+    );
+    if (buttonToggleEditor === null) {
+      return;
+    }
+    buttonToggleEditor.addEventListener('click', () => {
+      this.toggleEquationEditor();
+    });
+    let hideEditor = storage.storage.variables.calculator.hideEquationEditor.isTrue();
+    this.doToggleEditor(hideEditor);
   }
 
   latexLink(

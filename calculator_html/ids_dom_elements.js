@@ -55,6 +55,10 @@ let domElements = {
         buttonPauseToggle: "buttonPauseToggle",
       },
       progress: "calculatorInputProgress",
+      buttonCalculatorExamples: "buttonCalculatorExamples",
+      buttonToggleEquations: "buttonToggleEquations",
+      divEquationEditor: "divEquationEditor",
+      divEquationEditorButtons: "divEquationEditorButtons",
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",
@@ -135,6 +139,9 @@ let domElements = {
     monitoring: "sliderMonitoring",
     sliderWebAssembly: "sliderWebAssembly",
     spanWebAssemblyStatus: "spanWebAssemblyStatus",
+  },
+  menu: {
+    buttonToggleTheMainMenu: "buttonToggleTheMainMenu",
   },
   calculatorExamples: "divCalculatorExamples",
   spanCalculatorMainOutput: "spanCalculatorMainOutput",

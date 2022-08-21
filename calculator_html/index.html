@@ -148,7 +148,7 @@
     <div id="divForgotLogin" class="divPage">
       <table>
         <tr>
-          <td> Email:</td>
+          <td>Email:</td>
           <td><input type="text" id="emailForForgotLogin" placeholder="email"></td>
         </tr>
       </table>
@@ -206,17 +206,16 @@
                   <a id="anchorComputationLink" style="transition: all 1s;"></a>
                 </span>
               </td>
-              <td>
-                <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
-                  id="mainInputEditorField"></div>
-                <br>
-                <input id="equationEditorFontSizeSlider" type="range" min="8" max="100" value="48"><br>
-                <span id="calculatorEditorComments" style="white-space:nowrap">Equation assistant</span>
-                <br>
-                <span id="calculatorEditorDebug"> </span>
+              <td><button id="buttonToggleEquations" class="buttonToggleTopics"></button></td>
+              <td><div id="divEquationEditor" style="display:inline-block">
+                  <input id="equationEditorFontSizeSlider" type="range" min="8" max="100" value="48"><br>
+                  <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top" id="mainInputEditorField"></div>
+                  <br>
+                  <span id="calculatorEditorDebug"> </span>                    
+                </div>
               </td>
               <td>
-                <div class="mqButtonPanel" style="vertical-align:top" id="mainInputEditorFieldButtons"
+                <div class="mqButtonPanel" style="vertical-align:top" id="divEquationEditorButtons"
                   buttons="algebra, logarithms, integrals, matrices"></div>
               </td>
               <td>
@@ -255,7 +254,7 @@
         <!--tableCalculatorAndOutput-->
       </div>
       <div id="divCalculatorExamplesContainer">
-        <button onclick="window.calculator.calculator.toggleExamples(this)" class="buttonToggleTopics">&#9656;</button>
+        <button id="buttonCalculatorExamples" class="buttonToggleTopics">&#9656;</button>
         Examples
         <span id="spanProgressCalculatorExamples"></span>
         <div id="divCalculatorExamples">
@@ -691,10 +690,7 @@
     </div>
     <div id="divTheMainMenuPanel" class="divTheMainMenu">
       <div class="divLoginPanel">
-        <button id="buttonToggleTheMainMenu" onclick="window.calculator.panels.toggleMenu(this);"
-          class="buttonToggleTopics">
-          &#9660;
-        </button>
+        <button id="buttonToggleTheMainMenu" class="buttonToggleTopics">&#9660;</button>
         <div id="divProfilePicture" class="divProfilePictureContainerExpanded divInvisible"></div>
         <div id="divLoginPanelUsernameReport" class="divInvisible divSmall" style="margin: 4px"></div>
         <div id="divLoginPanelDatabaseInfo" class="divSmall" style="margin: 4px"></div>

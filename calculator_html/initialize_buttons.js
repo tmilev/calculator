@@ -79,6 +79,12 @@ function initializeAccordionButtons() {
 
 function initializeButtons() {
   initializeAccordionButtons();
+  let buttonToggleMainMenu = document.getElementById(
+    ids.domElements.menu.buttonToggleTheMainMenu
+  );
+  buttonToggleMainMenu.addEventListener('click', () => {
+    panels.toggleMenu();
+  });
 }
 
 class ButtonCollection {

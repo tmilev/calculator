@@ -59,6 +59,9 @@ let domElements = {
       buttonToggleEquations: "buttonToggleEquations",
       divEquationEditor: "divEquationEditor",
       divEquationEditorButtons: "divEquationEditorButtons",
+      divAutocompleteSpan: "idAutocompleteSpan",
+      inputAutocompleteList: "inputAutocompleteList",
+      divAutocompleteHints: "idAutocompleteHints", 
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",

@@ -1,6 +1,6 @@
 "use strict";
 const InputPanelData = require("./initialize_buttons").InputPanelData;
-const autocomplete = require("./autocomplete");
+const autocompleter = require("./autocomplete").autocompleter;
 const initializeButtons = require("./initialize_buttons");
 const ids = require("./ids_dom_elements");
 const processMonitoring = require("./process_monitoring");
@@ -44,20 +44,20 @@ class CalculatorEquationEditor {
       this.keyPressHandler(e);
     });
     inputMain.addEventListener("keyup", (e) => {
-      autocomplete.suggestWord();
+      autocompleter.suggestWord();
       this.writeIntoEquationEditor();
     });
     inputMain.addEventListener("keydown", (e) => {
-      autocomplete.suggestWord();
+      autocompleter.suggestWord();
       this.writeIntoEquationEditor();
-      autocomplete.arrowAction(e);
+      autocompleter.arrowAction(e);
     });
     inputMain.addEventListener("mouseup", (e) => {
-      autocomplete.suggestWord();
+      autocompleter.suggestWord();
       this.writeIntoEquationEditor();
     });
     inputMain.addEventListener("input", (e) => {
-      autocomplete.suggestWord();
+      autocompleter.suggestWord();
       this.writeIntoEquationEditor();
     });
     this.slider.addEventListener("change", () => {

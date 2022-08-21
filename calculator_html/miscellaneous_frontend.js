@@ -2,8 +2,8 @@
 let pathnames = require("./pathnames");
 
 function switchMenu(
-  /**@type{string|HTMLElement} */
-  object,
+  /** @type{string|HTMLElement} */
+  object
 ) {
   if (typeof object === "string") {
     object = document.getElementById(object);

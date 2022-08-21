@@ -22,6 +22,11 @@ class AtomHandler {
     this.totalRules = 0;
     this.administrative = false;
     this.experimental = false;
+    this.shown = false;
+    /** @type{HTMLElement|null} */
+    this.panel = null;
+    /** @type{HTMLElement|null} */
+    this.button = null;
   }
 
   fromObject(
@@ -56,39 +61,98 @@ class AtomHandler {
     }
   }
 
-  toString(
+  toHTMLInfoButton() {
+    this.button = document.createElement("button");
+    this.button.textContent = 'info\u25C2';
+    this.button.className = 'accordionLikeIndividual';
+    this.button.addEventListener('click', () => {
+      this.togglePanel();
+    });
+    return this.button;
+  }
+
+  togglePanel() {
+    this.shown = !this.shown;
+    if (this.shown) {
+      this.panel.classList.remove("hiddenClass");
+      this.button.textContent = "info\u25BE";
+    } else {
+      this.panel.classList.add("hiddenClass");
+      this.button.textContent = 'info\u25C2';
+    }
+  }
+
+  /** @return{HTMLElement} */
+  toHTMLInfo() { 
+    let result = document.createElement("div");
+    let countElement = document.createElement("span");
+    countElement.textContent = `(${this.index + 1} out of ${this.totalRules})`;
+    result.appendChild(countElement);
+    result.appendChild(document.createElement("br"));
+    if (this.composite) {
+      let extraInfo = document.createElement("span");
+      extraInfo.className = "calculatorCompositeAtom";
+      extraInfo.textContent = "(composite) ";
+      result.appendChild(extraInfo);
+    }
+    if (this.administrative) {
+      let element = document.createElement("b");
+      element.textContent = "(administrative)";
+      result.appendChild(element);
+    }
+    if (this.experimental) {
+      let element = document.createElement("b");
+      element.textContent = "(experimental)";
+      result.appendChild(element);      
+    }
+    let infoElement = document.createElement("span");
+    infoElement.textContent = this.description;
+    infoElement.className = "calculatorExamplePanel";
+    result.appendChild(infoElement);
+    let example = document.createElement("b");
+    example.textContent = "Example:";
+    result.append(example);
+    result.append(document.createElement("br"));
+    let exampleElement = document.createElement("span");
+    exampleElement.textContent = `${this.example}`;
+    exampleElement.className = "calculatorExampleInfo";
+    result.appendChild(exampleElement);
+    let handlerLabel = document.createElement("b");
+    handlerLabel.textContent = "Handler:";
+    result.appendChild(handlerLabel);
+    result.appendChild(document.createElement("br"));
+    let handlerName = document.createTextNode(`${this.ruleName}`);
+    result.appendChild(handlerName);
+    result.className = "calculatorExamplePanel";
+    result.classList.add("hiddenClass");
+    return result;
+  }
+  
+  /** @return{HTMLElement} */
+  toHTML(
     /**@type {Calculator}*/
     calculator,
   ) {
-    let resultString = "";
-    resultString += `<calculatorAtom>${this.atom}</calculatorAtom>`;
-    if (this.composite) {
-      resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+    let result = document.createElement("div");
+    let atomElement = document.createElement("span");
+    atomElement.textContent = this.atom;
+    atomElement.className = "calculatorAtom";
+    result.appendChild(atomElement);
+    if (this.totalRules > 1) {
+      let countElement = document.createElement("span");
+      countElement.textContent = `(${this.index + 1})`;
+      result.appendChild(countElement);
     }
-    resultString += ` (${this.index + 1} out of ${this.totalRules})`;
-    let currentId = "example_";
-    if (this.composite) {
-      currentId += "t_";
-    } else {
-      currentId += "f_";
-    }
-    let encodedAtom = encodeURIComponent(this.atom);
-    currentId += `${encodedAtom}_${this.index}_${this.totalRules}`;
-    resultString += `<button class='accordionLikeIndividual' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</button>`;
-    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">`;
-    if (this.administrative) {
-      resultString += "<b>(administrative)</b> ";
-    }
-    if (this.experimental) {
-      resultString += "<b>(experimental)</b> ";
-    }
-    resultString += this.description;
-    resultString += `<br><b>Example:</b>`;
-    resultString += `<br>${this.example}</calculatorExampleInfo>`;
+    this.panel = this.toHTMLInfo();
+    result.appendChild(this.toHTMLInfoButton());
+    result.appendChild(this.panel);
+    let anchor = document.createElement("a");
+    anchor.className = "linkInfo";
     let link = calculator.getComputationLink(this.example);
-    resultString += `<a href = '#${link}' class = "linkInfo">Example</a>`;
-    resultString += ` [${this.ruleName}]`;
-    return resultString;
+    anchor.href = "#" + link;
+    anchor.textContent = "Example";
+    result.appendChild(anchor);
+    return result;
   }
 }
 
@@ -111,40 +175,44 @@ class Calculator {
     });
   }
 
+  /** @return{HTMLElement} */
   processOneFunctionAtom(handlers) {
-    let resultStrings = [];
+    let result = document.createElement("div");
     for (let i = 0; i < handlers.length; i++) {
       let handler = new AtomHandler();
       handler.fromObject(handlers[i], i, handlers.length);
       if (handler.visible) {
-        resultStrings.push("<br>");
-        resultStrings.push(handler.toString(this));
+        result.appendChild(handler.toHTML(this));
       }
     }
-    return resultStrings.join("");
+    return result;
   }
 
   processExamples(inputJSONtext) {
     try {
       this.examples = miscellaneousFrontend.jsonUnescapeParse(inputJSONtext);
-      let examplesString = "";
+      
       let atomsSorted = Object.keys(this.examples).slice().sort();
       let numHandlers = 0;
+      let allElements = [];
       for (let i = 0; i < atomsSorted.length; i++) {
         let atom = atomsSorted[i];
         let currentExamples = this.examples[atom];
-        examplesString += this.processOneFunctionAtom(currentExamples.regular);
-        examplesString += this.processOneFunctionAtom(currentExamples.composite);
+        allElements.push(this.processOneFunctionAtom(currentExamples.regular));
+        allElements.push(this.processOneFunctionAtom(currentExamples.composite));
         numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
       }
-      let resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
-      resultString += examplesString;
-      document.getElementById(ids.domElements.calculatorExamples).innerHTML = resultString;
-      let calculatorElement = document.getElementById(ids.domElements.divCalculatorMainInputOutput);
-      calculatorElement.style.maxWidth = "70%";
+      let handlerReport = document.createElement("span");
+      handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
+      let output = document.getElementById(ids.domElements.calculatorExamples);
+      output.appendChild(handlerReport);
+      for (let i = 0; i < allElements.length; i++) {
+        output.appendChild(allElements[i]); 
+      }      
     } catch (e) {
       console.log(`Bad json: ${e}\n Input JSON follows.`);
       console.log(inputJSONtext);
+      throw e;
     }
   }
 
@@ -163,7 +231,7 @@ class Calculator {
     if (element.classList.contains("hiddenClass")) {
       calculatorElement.style.maxWidth = "100%";
     } else {
-      calculatorElement.style.maxWidth = "70%";
+      calculatorElement.style.maxWidth = "80%";
     }
   }
 

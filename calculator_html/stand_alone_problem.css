@@ -1539,6 +1539,10 @@ div.containerComments {
   width: 30%;
 }
 
+td.cellComments {
+  vertical-align: top;
+}
+
 span.hexContainerStandard {
   font-family: 'Courier New', Courier, monospace;
   word-break: break-all;

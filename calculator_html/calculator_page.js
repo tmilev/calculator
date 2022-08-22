@@ -469,7 +469,7 @@ class Calculator {
     if (inputParsed.result === undefined) {
       return;
     }
-    buffer.write(`<table><tr><td>`);
+    buffer.write(`<table class='tableCalculatorOutput'><tr><td>`);
     if (inputParsed.syntaxErrors !== undefined) {
       buffer.write(inputParsed.syntaxErrors);
     }
@@ -514,7 +514,7 @@ class Calculator {
       buffer.write(`</tr>`);
     }
     buffer.write(`</table>`);
-    buffer.write(`</td><td><div class="containerComments">`);
+    buffer.write(`</td><td class='cellComments' style='vertical-align: top'><div class="containerComments">`);
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
       let content = performance[pathnames.urlFields.result.comments];

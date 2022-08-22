@@ -1688,6 +1688,18 @@ button.buttonSolve:hover {
   border-radius: 3px;
 }
 
+#divCalculatorMainInput {
+  height: 25%;
+  overflow: auto;
+}
+
+#divCalculator
+
+#divCalculatorMainOutput {
+  height: 75%;
+  overflow: auto;
+}
+
 #spanCalculatorMainOutput {
   height: 80%;
 }

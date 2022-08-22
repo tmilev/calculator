@@ -1693,17 +1693,29 @@ button.buttonSolve:hover {
   overflow: auto;
 }
 
-#divCalculator
-
 #divCalculatorMainOutput {
   height: 75%;
   overflow: auto;
 }
 
-#spanCalculatorMainOutput {
-  height: 80%;
+#divCalculatorMainOutput {
+  vertical-align: top;
 }
 
 .sliderStandard {
   margin-left: 20px;
+}
+
+table.longDivisionTable {
+  vertical-align: bottom;
+  white-space: nowrap;
+  border: 1px solid black;
+}
+
+table.longDivisionTable {
+  vertical-align: bottom;
+}
+
+td.longDivisionTable {
+  vertical-align: bottom;
 }

@@ -624,7 +624,9 @@ class Calculator {
   }
 
   getOutputElement() {
-    return document.getElementById(ids.domElements.spanCalculatorMainOutput);
+    return document.getElementById(
+      ids.domElements.pages.calculator.divCalculatorMainOutput,
+    );
   }
 
   defaultOnLoadInjectScriptsAndProcessLaTeX(input, output) {

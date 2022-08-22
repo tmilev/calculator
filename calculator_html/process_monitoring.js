@@ -121,7 +121,9 @@ class Monitor {
       this.ownerCalculator.panels.length = 0;
       let buffer = new BufferCalculator();
       this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panels);
-      let resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+      let resultComponent = document.getElementById(
+        ids.domElements.pages.calculator.divCalculatorMainOutput
+      );
       resultComponent.innerHTML = buffer.toString();
       this.ownerCalculator.afterWriteOutput();
     }

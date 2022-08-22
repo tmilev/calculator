@@ -1599,7 +1599,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   this->owner->format.monomialOrder =
   this->owner->polynomialOrder.monomialOrder;
   std::string underlineStyle =
-  " style ='white-space: nowrap; border-bottom:1px solid black;'";
+  " style ='white-space: nowrap; "
+  "border-bottom:1px solid black; vertical-align:bottom'";
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(
     this->startingPolynomial.monomials
@@ -1616,8 +1617,8 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   out << this->owner->toStringLetterOrder();
   out << "<br>";
   out << remainders.size << " division steps total.<br>";
-  out << "<table style ='white-space: nowrap; border:1px solid black;'>";
-  out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
+  out << "<table className='longDivisionTable'>";
+  out << "<tr><td><b>Remainder:</b></td>";
   out
   << this->getPolynomialStringSpacedMonomialsHtml(
     this->owner->remainderDivision,
@@ -1626,7 +1627,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   )
   << "</td></tr>";
   out
-  << "<tr><td style ='border-right:1px solid black;'>"
+  << "<tr><td style ='border-right:1px solid black; vertical-align: bottom'>"
   << "<b>Divisor(s)</b></td><td colspan ='"
   << this->allMonomials.size + 1
   << "'><b>Quotient(s) </b></td>"
@@ -1635,7 +1636,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   for (int i = 0; i < this->owner->basis.size; i ++) {
     out << "<tr>";
     out
-    << "<td style ='border-right:1px solid black; "
+    << "<td style ='border-right:1px solid black; vertical-align: bottom; "
     << "border-bottom: 1px solid gray;'>";
     if (this->owner->format.flagUseLatex) {
       out
@@ -1674,7 +1675,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     out
     << "<tr><td></td>"
     << this->getPolynomialStringSpacedMonomialsHtml(
-      remainders[i], "", &this->intermediateHighlightedMons[i]
+      remainders[i], " style='vertical-align: bottom'", &this->intermediateHighlightedMons[i]
     )
     << "</tr>";
     if (i < subtrahends.size) {

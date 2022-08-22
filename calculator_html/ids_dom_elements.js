@@ -62,6 +62,7 @@ let domElements = {
       divAutocompleteSpan: "idAutocompleteSpan",
       inputAutocompleteList: "inputAutocompleteList",
       divAutocompleteHints: "idAutocompleteHints", 
+      divCalculatorMainOutput: "divCalculatorMainOutput",
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",
@@ -147,7 +148,6 @@ let domElements = {
     buttonToggleTheMainMenu: "buttonToggleTheMainMenu",
   },
   calculatorExamples: "divCalculatorExamples",
-  spanCalculatorMainOutput: "spanCalculatorMainOutput",
   spanProgressReportGeneral: "spanProgressReportGeneral",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanUserIdInAccountsPage: "spanUserIdInAccountsPage",

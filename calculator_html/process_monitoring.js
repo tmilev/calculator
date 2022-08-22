@@ -2,7 +2,6 @@
 const pathnames = require("./pathnames");
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
-const BufferCalculator = require("./buffer").BufferCalculator;
 const miscellaneous = require("./miscellaneous_frontend");
 
 class Monitor {
@@ -119,16 +118,7 @@ class Monitor {
 
     if (doUpdateCalculatorPage) {
       this.ownerCalculator.panels.length = 0;
-      let buffer = new BufferCalculator();
-      this.ownerCalculator.writeResult(
-        buffer,
-        this.ownerCalculator.parsedComputation,
-        this.ownerCalculator.panels,
-      );
-      let resultComponent = document.getElementById(
-        ids.domElements.pages.calculator.divCalculatorMainOutput
-      );
-      resultComponent.innerHTML = buffer.toString();
+      this.ownerCalculator.writeResultAndUpdateElement();
       this.ownerCalculator.afterWriteOutput();
     }
   }

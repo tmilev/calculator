@@ -552,6 +552,7 @@ span.studentScoresWrapper {
 }
 
 .PanelExpandable {
+  max-width: 100%;
   transition: all 2s;
   overflow: auto;
   word-wrap: break-word;
@@ -610,10 +611,22 @@ a.linkProgressReport {
   vertical-align: top;
 }
 
+.tableCalculatorOutput td {
+  vertical-align: top;
+}
+
 table.tableCalculatorOutput {
   border-collapse: collapse;
   word-break: break-all;
   box-shadow: var(--box-shadow-tableCalculatorOutputs)
+}
+
+table.tableCalculatorOutputAndResults {
+  display: inline-table;
+}
+
+.tableCalculatorOutputAndResults td {
+  vertical-align: top;
 }
 
 td.cellCalculatorInput {

@@ -122,8 +122,11 @@ class PanelExpandableData {
   constructor(
     /** @type {string} */
     content,
-    /** @type {string} */
-    id,
+    /** 
+     * Id of the desired container element, if known, leave empty if you don't have an id. 
+     * @type {HTMLElement|string} 
+     */
+    container,
     /** @type {number} */
     minimalCharacterLengthForPanel,
     /** @type {boolean} */
@@ -134,7 +137,7 @@ class PanelExpandableData {
     allowFullExpand,
   ) {
     this.content = content;
-    this.id = id;
+    this.container = container;
     this.minimalCharacterLengthForPanel = minimalCharacterLengthForPanel;
     this.startHidden = startHidden;
     this.allowFullExpand = allowFullExpand;
@@ -302,21 +305,22 @@ function makePanelFromData(
     doCreatePanel = true;
   }
   if (doCreatePanel) {
-    let inputPanel = new PanelExpandable(data.id);
+    let inputPanel = new PanelExpandable(data.container);
     inputPanel.initialize(data.startHidden, data.allowFullExpand);
     inputPanel.setPanelContent(data.content);
     inputPanel.setPanelLabel(data.label);
     return inputPanel;
   } else {
-    let element = document.getElementById(data.id);
-    if (element != null) {
+    let element = data.container;
+    if (typeof element === "string") {
+      element = document.getElementById(element);
+    }
+    if (element !== null) {
       element.innerHTML = data.content;
     }
     return null;
   }
 }
-
-let numberOfButtonToggleProgressReport = 0;
 
 if (window.calculator === undefined) {
   window.calculator = {};

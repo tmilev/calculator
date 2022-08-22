@@ -55,8 +55,9 @@ class StorageVariable {
 
   /**@returns{string} */
   loadMe(hashParsed) {
-    let candidate = "";
-    if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
+    /** @type{string|null} */
+    let candidate = null;
+    if ((Storage !== undefined || localStorage !== undefined) && this.nameLocalStorage !== "") {
       let incoming = localStorage.getItem(this.nameLocalStorage);
       if (incoming !== "" && incoming !== null && incoming !== undefined) {
         candidate = incoming;
@@ -77,6 +78,9 @@ class StorageVariable {
           }
         }
       }
+    }
+    if (candidate === null) {
+      return "";
     }
     this.setAndStore(candidate, false, true);
     return candidate;

@@ -2,15 +2,14 @@
 const miscellaneous = require("./miscellaneous_frontend");
 const modifiableDatabaseData = require('./modifiable_database_fields').modifiableDatabaseData;
 const panels = require('./panels');
-const BufferCalculator = require('./buffer').BufferCalculator;
 
-var modifiableFields = {};
-for (var i = 0; i < modifiableDatabaseData.modifiableFields.length; i++) {
-  var incomingLabel = modifiableDatabaseData.modifiableFields[i].join("");
+let modifiableFields = {};
+for (let i = 0; i < modifiableDatabaseData.modifiableFields.length; i++) {
+  let incomingLabel = modifiableDatabaseData.modifiableFields[i].join("");
   modifiableFields[incomingLabel] = true;
 }
 
-var transformersStandard = {
+let transformersStandard = {
   shortener: {
     transformer: miscellaneous.shortenString.bind(null, 4),
   },

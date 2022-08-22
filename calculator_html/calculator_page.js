@@ -3,7 +3,6 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
-const BufferCalculator = require("./buffer").BufferCalculator;
 const panels = require("./panels");
 const processMonitoring = require("./process_monitoring");
 const storage = require("./storage");
@@ -161,6 +160,8 @@ class Calculator {
     this.parsedComputation = {};
     /** @type {panels.PanelExpandableData[]}*/
     this.panels = [];
+    /** @type{HTMLElement|null} */
+    this.outputElement = null;
     this.examples = null;
     this.submissionCalculatorCounter = 0;
     this.lastSubmittedInput = "";
@@ -392,7 +393,7 @@ class Calculator {
     storage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
   }
 
-  /**@returns {String} */
+  /** @return {String} */
   getComputationLink(input) {
     let theURL = {
       currentPage: "calculator",
@@ -403,95 +404,128 @@ class Calculator {
     return stringifiedHash;
   }
 
-  writeErrorsAndCrashes(
-    /**@type {BufferCalculator} */
-    buffer,
+  /** @return{HTMLElement} */
+  writeErrorsCrashesComments(
     inputParsed,
   ) {
+    let result = document.createElement("span");
+    if (inputParsed.commentsGlobal !== "" && inputParsed.commentsGlobal !== undefined) {
+      let comments = document.createElement("div");
+      comments.innerHTML = inputParsed.commentsGlobal;
+      result.appendChild(comments);
+    }
+    if (inputParsed.result === undefined && inputParsed.comments !== undefined) {
+      let comments = document.createElement("div");
+      comments.innerHTML = inputParsed.comments;
+      result.appendChild(comments);
+    }
     if (
       inputParsed.error !== undefined &&
       inputParsed.error !== null &&
       inputParsed.error !== ""
     ) {
-      buffer.write("<b style ='color:red'>Error.</b>");
-      buffer.write(inputParsed.error);
+      let element = document.createElement("b");
+      element.style.color = "red";
+      element.textContent = "Error. ";
+      result.appendChild(element);
+      result.appendChild(document.createTextNode(inputParsed.error));
     }
     if (
       inputParsed.badInput !== undefined &&
       inputParsed.badInput !== null &&
       inputParsed.badInput !== ""
     ) {
-      buffer.write(inputParsed.badInput);
+      let badInput = document.createElement("div");
+      badInput.innerHTML = inputParsed.badInput;
+      result.appendChild(badInput);
     }
     if (
       inputParsed.crashReport !== undefined &&
       inputParsed.crashReport !== null &&
       inputParsed.crashReport !== ""
     ) {
-      buffer.write(inputParsed.crashReport);
+      let crash = document.createElement("div");
+      crash.innerHTML = inputParsed.crashReport;
+      result.appendChild(crash);
     }
+    return result;
   }
 
-  printDebugInformation(
-    /**@type{string} */
-    input,
-    /**@type{string} */
-    output,
-  ) {
-    // console.log(`Input string: ${input}, converted to hex: ${miscellaneousFrontend.toHex(input)}`);
-    // console.log(`Output string: ${output}, converted to hex: ${miscellaneousFrontend.toHex(output)}`);
-  }
-
+  /** @return{HTMLElement} */
   writeResult(
-    /**@type {BufferCalculator} */
-    buffer,
     inputParsed,
     /** @type {panels.PanelExpandableData[]} */
     panelData,
   ) {
-    if (inputParsed.commentsGlobal !== "" && inputParsed.commentsGlobal !== undefined) {
-      buffer.write(inputParsed.commentsGlobal);
-    }
-    if (inputParsed.result === undefined && inputParsed.comments !== undefined) {
-      buffer.write(inputParsed.comments);
-    }
-    this.writeErrorsAndCrashes(buffer, inputParsed);
+    let result = document.createElement("div");
+    result.style.width = "100%";
+    result.style.height = "100%";
+    result.appendChild(this.writeErrorsCrashesComments(inputParsed));
     if (inputParsed.timeOut === true) {
       if (inputParsed.timeOutComments !== undefined) {
-        buffer.write(inputParsed.timeOutComments);
+        let comment = document.createElement("div");
+        comment.innerHTML = inputParsed.timeOutComments;
+        result.append(comment);
       }
       processMonitoring.monitor.start(inputParsed.workerId);
-      return;
+      return result;
     }
     if (inputParsed.result === undefined && inputParsed.resultHtml !== undefined) {
-      buffer.write(inputParsed.resultHtml);
+      // If both resultHTML and result are specified, resultHTML must be a fallback, 
+      // so we ignore it.
+      let resultHTML = document.createElement("div");
+      resultHTML.innerHTML = inputParsed.resultHtml;
+      result.appendChild(resultHTML);
     }
     if (inputParsed.result === undefined) {
-      return;
+      return result;
     }
-    buffer.write(`<table class='tableCalculatorOutput'><tr><td>`);
+    let fullResultTable = document.createElement("table");
+    fullResultTable.className = 'tableCalculatorOutputAndResults';
+    let mainRow = fullResultTable.insertRow();
+    let resultCell = mainRow.insertCell();
     if (inputParsed.syntaxErrors !== undefined) {
-      buffer.write(inputParsed.syntaxErrors);
+      let element = document.createElement("div");
+      element.innerHTML = inputParsed.syntaxErrors;
+      resultCell.appendChild(element);
     }
-    buffer.write(`<table class='tableCalculatorOutput'><tr><th>Input</th><th>Output</th></tr>`);
+    let inputOutputTable = document.createElement("table");
+    resultCell.appendChild(inputOutputTable);
+    inputOutputTable.className = 'tableCalculatorOutput';
+    let headerRow = inputOutputTable.insertRow();
+    let inputLabelCell = document.createElement("th");
+    inputLabelCell.textContent = "Input";
+    headerRow.appendChild(inputLabelCell);
+    let outputLabelCell = document.createElement("th");
+    outputLabelCell.textContent = "Output";
+    headerRow.appendChild(outputLabelCell);
     if (typeof inputParsed.result.input === "string") {
       inputParsed.result.input = [inputParsed.result.input];
     }
     if (typeof inputParsed.result.output === "string") {
       inputParsed.result.output = [inputParsed.result.output];
     }
-    let numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
-    for (let i = 0; i < numEntries; i++) {
+    let totalEntries = Math.max(
+      inputParsed.result.input.length,
+      inputParsed.result.output.length,
+    );
+    for (let i = 0; i < totalEntries; i++) {
       this.numberOfCalculatorPanels++;
-      let inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
-      let outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
       let currentInput = inputParsed.result.input[i];
       let currentOutput = inputParsed.result.output[i];
-      this.printDebugInformation(currentInput, currentOutput);
+      let currentRow = inputOutputTable.insertRow();
+      let inputCell = currentRow.insertCell();
+      let outputCell = currentRow.insertCell();
+      inputCell.className = 'cellCalculatorInput';
+      outputCell.className = 'cellCalculatorResult';
+      let input = document.createElement("div");
+      let output = document.createElement("div");
+      inputCell.append(input);
+      outputCell.append(output);
       if (i < inputParsed.result.input.length) {
         panelData.push(new panels.PanelExpandableData(
           currentInput,
-          inputPanelId,
+          input,
           150,
           false,
           "",
@@ -501,48 +535,51 @@ class Calculator {
       if (i < inputParsed.result.output.length) {
         panelData.push(new panels.PanelExpandableData(
           currentOutput,
-          outputPanelId,
+          output,
           150,
           false,
           "",
           true,
         ));
       }
-      buffer.write(`<tr>`);
-      buffer.write(`<td class='cellCalculatorInput'><div id='${inputPanelId}'></div></td>`);
-      buffer.write(`<td class='cellCalculatorResult'><div id='${outputPanelId}'></div></td>`);
-      buffer.write(`</tr>`);
     }
-    buffer.write(`</table>`);
-    buffer.write(`</td><td class='cellComments' style='vertical-align: top'><div class="containerComments">`);
+    let commentsCell = mainRow.insertCell();
+    commentsCell.style.verticalAlign = 'top';
+    commentsCell.style.width = "100%";
+    let commentsContainer = document.createElement("div");
+    commentsContainer.className = "containerComments";
+    commentsCell.appendChild(commentsContainer);
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
       let content = performance[pathnames.urlFields.result.comments];
       let label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
-      buffer.write(`<div id='${ids.domElements.divPerformance}'></div>`);
+      let performanceDetails = document.createElement("div");
+      commentsContainer.appendChild(performanceDetails);
       panelData.push(new panels.PanelExpandableData(
         content,
-        ids.domElements.divPerformance,
+        performanceDetails,
         0,
         true,
         label,
       ));
-      buffer.write("<br>");
     }
     if (inputParsed.comments !== undefined) {
-      buffer.write(inputParsed.comments);
+      let comments = document.createElement("div");
+      comments.innerHTML = inputParsed.comments;
+      commentsContainer.appendChild(comments);
     }
-    buffer.write(`</div></td>`);
     let mainPage = window.calculator.mainPage;
     if (mainPage.storage.variables.flagDebug.isTrue() && inputParsed.debug !== undefined) {
-      buffer.write(`<td>`);
-      buffer.write(inputParsed.debug);
-      buffer.write(`</td>`);
+      let cell = mainRow.insertCell();
+      cell.innerHTML = inputParsed.debug;
     }
-    buffer.write(`</tr></table>`);
+    result.appendChild(fullResultTable);
     if (inputParsed.parsingLog !== undefined) {
-      buffer.write(inputParsed.parsingLog);
+      let element = document.createElement("div");
+      element.innerHTML = inputParsed.parsingLog;
+      result.appendChild(element);
     }
+    return result;
   }
 
   typeset(
@@ -629,23 +666,26 @@ class Calculator {
     );
   }
 
+  writeResultAndUpdateElement() {
+    this.panels = [];
+    let result = this.writeResult(this.parsedComputation, this.panels);
+    this.getOutputElement().textContent = '';
+    this.getOutputElement().appendChild(result);
+  }
+
   defaultOnLoadInjectScriptsAndProcessLaTeX(input, output) {
-    let inputHtml = null;
     this.panels.length = 0;
     try {
       this.parsedComputation = miscellaneousFrontend.jsonUnescapeParse(input);
-      let buffer = new BufferCalculator();
       let progressReportTimer = document.getElementById(
         ids.domElements.pages.calculator.monitoring.progressTimer,
       );
       progressReportTimer.innerHTML = "";
-      this.writeResult(buffer, this.parsedComputation, this.panels);
-      inputHtml = buffer.toString();
+      this.writeResultAndUpdateElement();
     } catch (e) {
       inputHtml = input + "<br>" + e;
       console.log("Error processing calculator output: " + e);
     }
-    this.getOutputElement().innerHTML = inputHtml;
     this.afterWriteOutput();
   }
 

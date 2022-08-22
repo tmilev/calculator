@@ -613,15 +613,17 @@ a.linkProgressReport {
   max-height: 100px;
 }
 
-.tableCalculatorInputs {
+.tableCalculatorOutputAndComments {
   display: inline-table;
 }
 
-.tableCalculatorInputs td {
+.tableCalculatorOutputAndComments td {
   vertical-align: top;
 }
 
 table.tableCalculatorOutput {
+  width: 100%;
+  height: 100%;
   border-collapse: collapse;
   word-break: break-all;
   box-shadow: var(--box-shadow-tableCalculatorOutputs)

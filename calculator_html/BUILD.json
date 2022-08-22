@@ -6,7 +6,6 @@
   "/calculator_html/styles.js",
   "/calculator_html/modifiable_database_fields.js",
   "/calculator_html/json_to_html.js",
-  "/calculator_html/buffer.js",
   "/calculator_html/date_picker.js",
   "/calculator_html/math_typeset.js",
   "/calculator_html/miscellaneous_frontend.js",

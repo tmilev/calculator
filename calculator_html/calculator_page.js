@@ -155,6 +155,70 @@ class AtomHandler {
   }
 }
 
+class Splitter {
+  constructor() {
+    /** @type {HTMLElement} */
+    this.element = document.getElementById(
+      ids.domElements.pages.calculator.divCalculatorSplitter
+    );
+    this.parentElement = document.getElementById(
+      ids.domElements.pages.calculator.divCalculatorMainInputOutput
+    );
+    this.resizing = false;
+  }
+
+  initialize() {
+    this.element.addEventListener('mousedown', (mouseEvent) => {
+      this.onMouseDown(mouseEvent);
+    });    
+    this.parentElement.addEventListener('mousemove', (mouseEvent) => {
+      this.onMouseMove(mouseEvent);
+    });
+    this.parentElement.addEventListener('mouseup', (mouseEvent) => {
+      this.onMouseUp(mouseEvent);
+    });
+  }
+
+  getXY(mouseEvent) {
+    return {
+      x: mouseEvent.clientX,
+      y: mouseEvent.clientY,
+    }
+  }
+
+  onMouseDown(mouseEvent) {
+    this.resizing = true;
+    mouseEvent.stopPropagation();
+  }
+
+  onMouseUp(mouseEvent) {
+    this.resizing = false;
+    mouseEvent.stopPropagation();
+  }
+
+  onMouseMove(mouseEvent) {
+    if (!this.resizing) {
+      return;
+    }
+    let xy = this.getXY(mouseEvent);
+    let y = xy.y;
+    if (y < 100) {
+      y = 100;
+    }
+    this.setHeight(y - 10);
+    storage.storage.variables.calculator.splitterInputOutput.setAndStore(
+      y - 10, false, false
+    );
+  }
+
+  setHeight(y) {
+    let mainOutput = document.getElementById(
+      ids.domElements.pages.calculator.divCalculatorMainInput
+    );
+    mainOutput.style.height = y;
+  }
+}
+
 class Calculator {
   constructor() {
     this.parsedComputation = {};
@@ -174,6 +238,7 @@ class Calculator {
     this.editor = new calculatorPageEditor.CalculatorEquationEditor((event) => {
       this.submitCalculatorInputOnEnter(event);
     });
+    this.splitter = new Splitter();
   }
 
   /** @return{HTMLElement} */
@@ -234,6 +299,13 @@ class Calculator {
     } else {
       calculatorElement.style.maxWidth = "80%";
     }
+  }
+
+  changeSplitterInputOutput(
+    /** @type{string} */
+    value,
+  ) {
+    this.splitter.setHeight(value);    
   }
 
   toggleEquationEditor() {
@@ -299,6 +371,7 @@ class Calculator {
     this.editor.initialize();
     this.initializeToggleExamples();
     this.initializeToggleEditor();
+    this.splitter.initialize();
     let buttonGo = document.getElementById(
       ids.domElements.pages.calculator.buttonGoCalculatorPage
     );

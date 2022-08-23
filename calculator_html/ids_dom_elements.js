@@ -63,6 +63,9 @@ let domElements = {
       inputAutocompleteList: "inputAutocompleteList",
       divAutocompleteHints: "idAutocompleteHints", 
       divCalculatorMainOutput: "divCalculatorMainOutput",
+      divCalculatorMainInput: "divCalculatorMainInput",
+      divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
+      divCalculatorSplitter: "divCalculatorSplitter",
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",

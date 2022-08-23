@@ -269,11 +269,13 @@ const knownTypes = {
     'minWidth': '4px',
     'verticalAlign': 'text-bottom',
     'overflow': 'hidden',
+    'boxSizing': 'border-box',
   }),
   // An input element: rather than being a contentEditable div,
   // this is a text-only input box.
   formInput: new MathNodeType({
     'type': 'formInput',
+    'boxSizing': 'border-box',
   }),
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
@@ -284,6 +286,7 @@ const knownTypes = {
     'textAlign': 'center',
     'width': 'auto',
     'height': 'auto',
+    'boxSizing': 'border-box',
   }),
   eventCatcher: new MathNodeType({
     'type': 'eventCatcher',

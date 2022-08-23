@@ -317,6 +317,11 @@ class StorageCalculator {
             calculator: true,
           },
         }),
+        splitterInputOutput: new StorageVariable({
+          name: "splitterInputOutput",
+          nameURL: "splitterInputOutput",
+          nameLocalStorage: "splitterInputOutput",
+        }),
         request: new StorageVariable({
           name: "calculatorRequest",
           nameURL: "calculatorRequest",

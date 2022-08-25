@@ -56,7 +56,7 @@ bool Database::Mongo::initialize() {
     return true;
   }
   global << Logger::blue << "Initializing mongoDB. " << Logger::endL;
-  if (!global.flagServerforkedIntoWorker) {
+  if (!global.flagServerForkedIntoWorker) {
     global.fatal
     << "MongoDB not allowed to run before server fork. "
     << global.fatal;

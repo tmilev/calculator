@@ -819,7 +819,7 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
   // percentEncode(base64Encode(raw_bytes)).
   // The current version stores without % encoding:
   // base64Encode(raw_bytes).
-  // Since the password hash is 32 bytes its base64 encoding ends in =
+  // Since the password hash is 32 bytes, its base64 encoding ends in =
   // which in turn means passwords stored by older version of the calculator
   // have wrong endings.
   this->actualHashedSaltedPassword =

@@ -66,7 +66,7 @@ bool MutexRecursiveWrapper::initializeIfNeeded() {
   if (this->flagInitialized) {
     return true;
   }
-  if (!global.flagServerforkedIntoWorker) {
+  if (!global.flagServerForkedIntoWorker) {
     return false;
   }
   this->mutexImplementation = new std::mutex;

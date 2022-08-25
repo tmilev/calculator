@@ -279,7 +279,7 @@ public:
   std::string hostNoPort;
   bool flagRequestComingLocally;
   // internal infrastructure flags
-  bool flagServerforkedIntoWorker;
+  bool flagServerForkedIntoWorker;
   bool flagNotAllocated;
   // Used for cryptographic purposes.
   // Initialized once, securely, in the

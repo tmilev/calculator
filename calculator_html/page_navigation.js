@@ -462,7 +462,8 @@ class Page {
       if (currentProblem === undefined) {
         continue;
       }
-      currentDeadlineSpan.innerHTML = currentProblem.toStringDeadlinePanel();
+      currentDeadlineSpan.textContent = "";
+      currentDeadlineSpan.appendChild(currentProblem.toHTMLDeadlinePanel());
     }
   }
 

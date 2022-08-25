@@ -203,8 +203,7 @@ JSData CalculatorHTML::toJSONDeadlines(
   >& inputProblemInfo
 ) {
   STACK_TRACE("CalculatorHTML::toJSONDeadlines");
-  JSData output;
-  output.elementType = JSData::token::tokenObject;
+  JSData deadlines;
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem =
     inputProblemInfo.values[i].adminData;
@@ -230,8 +229,10 @@ JSData CalculatorHTML::toJSONDeadlines(
       currentProblemJSON[DatabaseStrings::labelDeadlines][currentSection] =
       currentDeadline;
     }
-    output[currentProblemName] = currentProblemJSON;
+    deadlines[currentProblemName] = currentProblemJSON;
   }
+  JSData output;
+  output[DatabaseStrings::labelDeadlines] = deadlines;
   return output;
 }
 
@@ -353,7 +354,7 @@ bool CalculatorHTML::mergeOneProblemAdminData(
 bool CalculatorHTML::mergeProblemWeightAndStore(
   std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseRoutines::MergeProblemInfoInDatabase");
+  STACK_TRACE("CalculatorHTML::mergeProblemWeightAndStore");
   JSData problemJSON;
   if (!problemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -382,7 +383,7 @@ bool CalculatorHTML::mergeProblemWeightAndStore(
 bool CalculatorHTML::mergeProblemDeadlineAndStore(
   std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseRoutines::mergeProblemDeadlineAndStore");
+  STACK_TRACE("CalculatorHTML::mergeProblemDeadlineAndStore");
   JSData problemJSON;
   if (!problemJSON.parse(incomingProblemInfo, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -416,7 +417,7 @@ bool CalculatorHTML::storeProblemWeights(
   >& toStore,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseRoutines::StoreProblemDatabaseInfo");
+  STACK_TRACE("CalculatorHTML::storeProblemWeights");
   QueryExact weightFinder;
   weightFinder.collection = DatabaseStrings::tableProblemWeights;
   weightFinder.setLabelValue(
@@ -448,7 +449,7 @@ bool CalculatorHTML::storeProblemDeadlines(
   >& toStore,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseRoutines::StoreProblemDatabaseInfo");
+  STACK_TRACE("CalculatorHTML::storeProblemDeadlines");
   QueryExact deadlineSchema;
   deadlineSchema.collection = DatabaseStrings::tableDeadlines;
   deadlineSchema.setLabelValue(
@@ -477,7 +478,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   }
   if (
     this->currentUser.problemDataJSON.objects.size() != 0 ||
-    this->currentUser.problemDataStrinG == ""
+    this->currentUser.problemDataString == ""
   ) {
     if (
       !this->currentUser.interpretDatabaseProblemDataJSON(
@@ -490,7 +491,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   } else {
     if (
       !this->currentUser.interpretDatabaseProblemData(
-        this->currentUser.problemDataStrinG, comments
+        this->currentUser.problemDataString, comments
       )
     ) {
       comments << "Failed to interpret user's problem saved data. ";
@@ -547,7 +548,6 @@ bool CalculatorHTML::loadMe(
     }
     return false;
   }
-  (void) doLoadDatabase;
   if (
     !FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
       this->fileName, this->parser.inputHtml, commentsOnFailure
@@ -593,7 +593,7 @@ std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
   const std::string& desiredRandomSeed,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
+  STACK_TRACE("CalculatorHTML::loadAndInterpretCurrentProblemItemJSON");
   double startTime = global.getElapsedSeconds();
   this->loadCurrentProblemItem(
     needToLoadDatabaseMayIgnore, desiredRandomSeed, commentsOnFailure
@@ -867,7 +867,7 @@ std::string CalculatorHTML::toStringLinkFromFileName(
 std::string CalculatorHTML::toStringProblemInfo(
   const std::string& fileName, const std::string& stringToDisplay
 ) {
-  STACK_TRACE("CalculatorHTML::toStringLinksFromFileName");
+  STACK_TRACE("CalculatorHTML::toStringProblemInfo");
   std::stringstream out;
   out << this->toStringLinkFromFileName(fileName);
   out << this->toStringProblemScoreFull(fileName);
@@ -1327,7 +1327,7 @@ bool SyntacticElementHTML::isAnswerElement(std::string* desiredAnswerId) {
 }
 
 std::string CalculatorHTML::prepareUserInputBoxes() {
-  STACK_TRACE("CalculatorHTML::PrepareInterpreter");
+  STACK_TRACE("CalculatorHTML::prepareUserInputBoxes");
   if (this->flagIsForReal) {
     return "";
   }
@@ -2060,7 +2060,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
     if (returnEmptyStringIfNoDeadline) {
       return "";
     }
-    out << "<span style =\"color:orange\">No deadline yet</span>";
+    out << "<span style='color:orange'>No deadline yet</span>";
     return out.str();
   }
   if (!global.flagDatabaseCompiled) {
@@ -2073,7 +2073,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   // program it better).
   std::stringstream badDateStream;
   if (!deadline.assignMonthDayYear(currentDeadline, badDateStream)) {
-    out << "<span style =\"color:red\">" << badDateStream.str() << "</span>";
+    out << "<span style='color:red'>" << badDateStream.str() << "</span>";
   }
   //  out << "deadline.date: " << deadline.time.tm_mday;
   now.assignLocalTime();
@@ -2114,20 +2114,20 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
     hoursTillDeadlineStream << "[passed].";
   }
   if (deadlineHasPassed && !problemAlreadySolved) {
-    out << "<span style =\"color:blue\">" << currentDeadline << "</span> ";
-    out << "<b style =\"red\">[passed].</b>";
+    out << "<span style='color:blue'>" << currentDeadline << "</span> ";
+    out << "<b style='red'>[passed].</b>";
   } else {
     if (problemAlreadySolved && !isSection) {
-      out << "<span style =\"color:green\">" << currentDeadline << "</span> ";
+      out << "<span style='color:green'>" << currentDeadline << "</span> ";
     } else if (deadlineIsNear && !isSection) {
-      out << "<span style =\"color:red\">" << currentDeadline << "</span> ";
+      out << "<span style='color:red'>" << currentDeadline << "</span> ";
     } else {
-      out << "<span style =\"color:brown\">" << currentDeadline << "</span> ";
+      out << "<span style='color:brown'>" << currentDeadline << "</span> ";
     }
     out << hoursTillDeadlineStream.str();
   }
   return
-  // "[<span style =\"color:green\"><b>disabled</b> </span>] "+
+  // "[<b style='color:green'>disabled </b>] "+
   out.str();
 }
 
@@ -2165,7 +2165,7 @@ std::string CalculatorHTML::toStringDeadline(
   bool returnEmptyStringIfNoDeadline,
   bool isSection
 ) {
-  STACK_TRACE("CalculatorHTML::ToStringDeadlineWithModifyButton");
+  STACK_TRACE("CalculatorHTML::toStringDeadline");
   (void) topicID;
   (void) problemAlreadySolved;
   (void) returnEmptyStringIfNoDeadline;
@@ -2205,21 +2205,21 @@ std::string CalculatorHTML::toStringDeadline(
 
 void CalculatorHTML::computeDeadlinesAllSections(TopicElement& inputOutput) {
   STACK_TRACE("CalculatorHTML::computeDeadlinesAllSections");
-  inputOutput.deadlinesPerSectioN.initializeFillInObject(
+  inputOutput.deadlinesPerSection.initializeFillInObject(
     this->databaseStudentSections.size, ""
   );
   inputOutput.deadlinesAreInherited.initializeFillInObject(
     this->databaseStudentSections.size, false
   );
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
-    inputOutput.deadlinesPerSectioN[i] =
+    inputOutput.deadlinesPerSection[i] =
     this->getDeadline(
       inputOutput.id,
       this->databaseStudentSections[i],
       inputOutput.deadlinesAreInherited[i]
     );
     if (inputOutput.deadlinesAreInherited[i]) {
-      inputOutput.deadlinesPerSectioN[i] = "";
+      inputOutput.deadlinesPerSection[i] = "";
     }
   }
 }
@@ -2228,16 +2228,16 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(
   TopicElement& inputOutput
 ) {
   STACK_TRACE("CalculatorHTML::computeDeadlinesAllSectionsNoInheritance");
-  inputOutput.deadlinesPerSectioN.initializeFillInObject(
+  inputOutput.deadlinesPerSection.initializeFillInObject(
     this->databaseStudentSections.size, ""
   );
+  ProblemDataAdministrative& currentProblem =
+  this->currentUser.problemData.getValueCreateNoInitialization(
+    inputOutput.id
+  ).adminData;
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
-    ProblemDataAdministrative& currentProb =
-    this->currentUser.problemData.getValueCreateNoInitialization(
-      inputOutput.id
-    ).adminData;
-    inputOutput.deadlinesPerSectioN[i] =
-    currentProb.deadlinesPerSection.getValueCreateEmpty(
+    inputOutput.deadlinesPerSection[i] =
+    currentProblem.deadlinesPerSection.getValueCreateEmpty(
       this->databaseStudentSections[i]
     );
   }
@@ -2514,7 +2514,7 @@ bool CalculatorHTML::Parser::isSplittingChar(const std::string& input) {
 std::string CalculatorHTML::Parser::toStringParsingStack(
   List<SyntacticElementHTML>& stack
 ) {
-  STACK_TRACE("CalculatorHTML::toStringParsingStack");
+  STACK_TRACE("CalculatorHTML::Parser::toStringParsingStack");
   std::stringstream out;
   out
   << "#Non-dummy elts: "
@@ -2545,7 +2545,7 @@ int CalculatorHTML::getAnswerIndex(const std::string& desiredAnswerId) {
 bool CalculatorHTML::Parser::canBeMerged(
   const SyntacticElementHTML& left, const SyntacticElementHTML& right
 ) {
-  STACK_TRACE("SyntacticElementHTML::canBeMerged");
+  STACK_TRACE("CalculatorHTML::Parser::canBeMerged");
   if (left.syntacticRole != "" || right.syntacticRole != "") {
     return false;
   }
@@ -2559,7 +2559,7 @@ bool CalculatorHTML::Parser::canBeMerged(
 }
 
 void TopicElementParser::initializeElementTypes() {
-  STACK_TRACE("CalculatorHTML::initializeElementTypes");
+  STACK_TRACE("TopicElementParser::initializeElementTypes");
   // Please note: the static_cast<int> below is needed with the present gcc
   // compiler version.
   // Without it, you should get linker errors.
@@ -3691,7 +3691,7 @@ std::string SyntacticElementHTML::cleanUpEncloseCommand(
 std::string SyntacticElementHTML::cleanUpCommandString(
   const std::string& inputCommand
 ) {
-  STACK_TRACE("CalculatorHTML::cleanUpCommandString");
+  STACK_TRACE("SyntacticElementHTML::cleanUpCommandString");
   if (inputCommand == "") {
     return "";
   }
@@ -4364,7 +4364,7 @@ TopicElementParser::TopicElementParser() {
 }
 
 void TopicElementParser::addTopic(TopicElement& inputElt, int index) {
-  STACK_TRACE("TopicElement::addTopic");
+  STACK_TRACE("TopicElementParser::addTopic");
   if (this->topics.contains(inputElt.id)) {
     std::stringstream out;
     out
@@ -4645,7 +4645,7 @@ void TopicElementParser::insertTopicBundle(
 void TopicElementParser::loadTopicBundleFile(
   TopicElementParser::TopicLine& input
 ) {
-  STACK_TRACE("TopicElement::loadTopicBundleFile");
+  STACK_TRACE("TopicElementParser::loadTopicBundleFile");
   std::string fileName = input.contentTrimmedWhiteSpace;
   if (this->loadedTopicBundleFiles.contains(fileName)) {
     return;
@@ -4956,7 +4956,7 @@ void TopicElementParser::computeTopicHierarchy() {
 }
 
 void TopicElementParser::computeTopicHierarchyPartOne() {
-  STACK_TRACE("computeTopicHierarchyPartOne");
+  STACK_TRACE("TopicElementParser::computeTopicHierarchyPartOne");
   List<int> parentChain;
   List<int> parentTypes;
   for (int i = 0; i < this->topics.size(); i ++) {
@@ -5117,7 +5117,8 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
 JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   STACK_TRACE("CalculatorHTML::toStringTopicListJSON");
   std::stringstream out;
-  JSData output, topicBundleFiles;
+  JSData output;
+  JSData topicBundleFiles;
   if (!this->loadAndParseTopicList(out)) {
     output[WebAPI::result::error] = out.str();
     return output;
@@ -5129,9 +5130,9 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   output["topicBundleFile"] = topicBundleFiles;
   output["children"].elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->topics.topics.size(); i ++) {
-    TopicElement& currentElt = this->topics.topics.values[i];
-    if (currentElt.type == TopicElement::types::chapter) {
-      output["children"].listObjects.addOnTop(currentElt.toJSON(*this));
+    TopicElement& current = this->topics.topics.values[i];
+    if (current.type == TopicElement::types::chapter) {
+      output["children"].listObjects.addOnTop(current.toJSON(*this));
     }
   }
   if (global.userDefaultIsDebuggingAdmin()) {
@@ -5412,9 +5413,9 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
     this->displayVideoLink = "";
   } else {
     this->displayVideoLink =
-    "<a href=\"" +
+    "<a href='" +
     this->video +
-    "\" class ='videoLink' class = 'videoLink' target = '_blank'>Video</a>";
+    "' class ='videoLink' class = 'videoLink' target = '_blank'>Video</a>";
   }
   if (
     this->videoHandwritten == "" ||
@@ -5426,7 +5427,8 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
     this->displayVideoHandwrittenLink =
     "<a href='" +
     this->videoHandwritten +
-    "' class='videoLink' class='videoLink' target='_blank'>Video <b>(H)</b></a>"
+    "' class='videoLink' class='videoLink' target='_blank'>"+
+    "Video <b>(H)</b></a>"
     ;
   }
   if (this->handwrittenSolution != "") {
@@ -5530,7 +5532,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   if (this->queryHomework != "") {
     output[WebAPI::request::slides::queryHomework] = this->queryHomework;
   }
-  output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
+  output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSection;
   if (!global.userDefaultHasProblemComposingRights()) {
     std::string deadline = owner.getDeadlineNoInheritance(this->id);
     output[WebAPI::problem::deadlineSingle] = deadline;

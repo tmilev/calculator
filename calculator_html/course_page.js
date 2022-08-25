@@ -33,16 +33,21 @@ function modifyDeadlines(incomingId) {
 
 let problemWeightsVisible = false;
 
-function toggleDeadline(deadlineId, panelId, button) {
-  let thePanel = document.getElementById(deadlineId);
+function toggleDeadline(
+  /** @type {HTMLElement} */
+  deadline,
+  panelId,
+  /** @type {HTMLElement} */
+  button,
+) {
   let theProblem = problemPage.allProblems.getProblemById(panelId);
-  if (thePanel.style.maxHeight === '200px') {
-    thePanel.style.opacity = '0';
-    thePanel.style.maxHeight = '0';
+  if (deadline.style.maxHeight === '200px') {
+    deadline.style.opacity = '0';
+    deadline.style.maxHeight = '0';
     button.innerHTML = `${theProblem.toStringDeadline()} &#9666;`;
   } else {
-    thePanel.style.opacity = '1';
-    thePanel.style.maxHeight = '200px';
+    deadline.style.opacity = '1';
+    deadline.style.maxHeight = '200px';
     button.innerHTML = `${theProblem.toStringDeadline()} &#9660;`;
   }
 }
@@ -81,9 +86,9 @@ function afterLoadCoursePage(incoming, result) {
     }
   }
   typeset.typesetter.typesetSoft(coursePage, "");
-  let theTopics = document.getElementsByTagName("topicList");
+  let topics = document.getElementsByTagName("topicList");
   problemPage.writeEditCoursePagePanel();
-  if (theTopics.length === 0) {
+  if (topics.length === 0) {
     return;
   }
   loadTopicList(problemPage.processLoadedTopicsWriteToCoursePage);
@@ -114,8 +119,8 @@ let lastLoadedCourse = {
 };
 
 function selectCurrentCoursePage() {
-  let thePage = window.calculator.mainPage;
-  let storageVariables = thePage.storage.variables;
+  let page = window.calculator.mainPage;
+  let storageVariables = page.storage.variables;
   let incomingCourse = storageVariables.currentCourse.courseHome.getValue();
   let incomingTopicList = storageVariables.currentCourse.topicList.getValue();
   if (
@@ -124,14 +129,18 @@ function selectCurrentCoursePage() {
     incomingCourse === undefined
   ) {
     let courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
-    let temporarySelectCourseId = "buttonTemporarySelectCourse";
-    let courseBodyHTML = `<button id = '${temporarySelectCourseId}' `;
-    courseBodyHTML += `class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" `;
-    courseBodyHTML += `onclick = "window.calculator.mainPage.selectPage('selectCourse')">Please select course</button>`;
-    courseBody.innerHTML = courseBodyHTML;
+    let button = document.createElement("button");
+    button.classList.add("buttonSelectPage", "buttonSlowTransition", "buttonFlash");
+    button.style.width = "150px";
+    button.textContent = "Please select course";
+    button.addEventListener("click", () => { 
+      page.selectPage('selectCourse');
+    });
     setTimeout(() => {
-      document.getElementById(temporarySelectCourseId).classList.remove("buttonFlash");
+      button.classList.remove("buttonFlash");
     }, 0);
+    courseBody.textContent = "";
+    courseBody.appendChild(button);
     return;
   }
   if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
@@ -141,7 +150,7 @@ function selectCurrentCoursePage() {
   lastLoadedCourse.courseHome = incomingCourse;
   lastLoadedCourse.topicList = incomingTopicList;
   let topicRequest = "templateJSONNoLogin";
-  if (thePage.user.flagLoggedIn) {
+  if (page.user.flagLoggedIn) {
     topicRequest = "templateJSON";
   }
   let theURL = "";

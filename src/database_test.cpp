@@ -14,23 +14,42 @@ Database::Test::~Test() {
 }
 
 void Database::Test::setUp() {
-  global.flagServerforkedIntoWorker = true;
+  global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "calculatortest";
   Database::FallBack::databaseFilename = "test/test_database.json";
 }
 
 void Database::Test::tearDown() {
-  global.flagServerforkedIntoWorker = false;
+  global.flagServerForkedIntoWorker = false;
   DatabaseStrings::databaseName = "calculator";
 }
 
 bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
+  Database::Test::basicsMongoOrFallback();
+  Database::Test::basicsFallback();
+  return true;
+}
+
+bool Database::Test::basicsMongoOrFallback() {
+  STACK_TRACE("Database::Test::basicsMongoOrFallback");
   Database::Test tester;
   tester.deleteDatabase();
   tester.adminAccountCreation();
   return true;
 }
+
+bool Database::Test::basicsFallback() {
+  STACK_TRACE("Database::Test::basicsFallback");
+  StateMaintainer<bool> maintainer(global.flagDatabaseCompiled);
+  global.flagDatabaseCompiled = false;
+  Database::Test tester;
+  tester.deleteDatabase();
+  tester.adminAccountCreation();
+  global << "DEBUG: got to here!!!";
+  return true;
+}
+
 
 bool Database::Test::deleteDatabase() {
   std::stringstream commentsOnFailure;

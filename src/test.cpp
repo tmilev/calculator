@@ -26,6 +26,7 @@ public:
     static const std::string calculator;
     static const std::string polynomial;
     static const std::string basic;
+    static const std::string courses;
   };
 
   HashedList<std::string> inputs;
@@ -53,6 +54,7 @@ int mainFormat() {
 const std::string Test::Suites::all = "all";
 const std::string Test::Suites::database = "database";
 const std::string Test::Suites::problems = "problems";
+const std::string Test::Suites::courses = "courses";
 const std::string Test::Suites::crypto = "crypto";
 const std::string Test::Suites::topicLists = "topicLists";
 const std::string Test::Suites::topiclists = "topiclists";
@@ -121,6 +123,10 @@ void Test::run() {
     this->shouldTest(Test::Suites::topiclists)
   ) {
     TopicElementParser::Test::all();
+  }
+  if (  this->shouldTest(Test::Suites::courses)
+){ Course::Test::all();
+
   }
   if (this->shouldTest(Test::Suites::calculator)) {
     Calculator::Examples::Test::all();

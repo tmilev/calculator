@@ -410,11 +410,13 @@ public:
   bool deleteDatabase(std::stringstream* commentsOnFailure);
   class Test {
   public:
-    void setUp();
+    static void setUp();
     static bool all();
+    static bool basicsMongoOrFallback();
+    static bool basicsFallback();
     bool deleteDatabase();
     bool adminAccountCreation();
-    void tearDown();
+    static void tearDown();
     Test();
     ~Test();
   };

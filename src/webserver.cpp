@@ -4460,7 +4460,7 @@ bool WebWorker::runInitialize() {
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   MutexProcess::currentProcessName = processNameStream.str();
-  global.flagServerforkedIntoWorker = true;
+  global.flagServerForkedIntoWorker = true;
   createTimerThread();
   // check web worker indices are initialized properly:
   global.server().getActiveWorker();

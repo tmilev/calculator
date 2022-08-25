@@ -172,7 +172,7 @@ GlobalVariables::GlobalVariables() {
   this->pointerExternalCommandNoOutput = nullptr;
   this->pointerExternalCommandStream = nullptr;
   this->pointerCallChDir = nullptr;
-  this->flagServerforkedIntoWorker = false;
+  this->flagServerForkedIntoWorker = false;
   this->flagComputationComplete = false;
   this->flagComputationFinishedAllOutputSentClosing = false;
   this->flagRunningConsoleTest = false;

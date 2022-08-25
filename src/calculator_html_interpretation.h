@@ -137,7 +137,7 @@ public:
   // <- For problems the id is the problem file name. For all other topic
   // elements the id is the title of the element.
   List<std::string> idsDeadlines;
-  List<std::string> deadlinesPerSectioN;
+  List<std::string> deadlinesPerSection;
   List<std::string> deadlinesPerSectionFormatted;
   List<bool> deadlinesAreInherited;
   std::string idBase64;
@@ -678,6 +678,11 @@ public:
   std::string courseTopicsWithFolder();
   std::string toString() const;
   JSData toJSON() const;
+  class Test{
+  public:
+    static bool all();
+    static bool setDeadlines();
+  };
 };
 
 class CourseList {

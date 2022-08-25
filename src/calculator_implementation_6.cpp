@@ -48,7 +48,6 @@ std::string CalculatorHTML::toStringLinkFromProblem(
   return out.str();
 }
 
-
 bool CalculatorFunctions::testTopicListProblems(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

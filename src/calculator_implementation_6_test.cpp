@@ -594,29 +594,34 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
 }
 
 bool Course::Test::all() {
+  STACK_TRACE("Course::Test::all");
+  global << "Testing course setup. " << Logger::endL;
   Course::Test::setDeadlines();
-return true;
+  return true;
 }
 
-bool Course::Test::setDeadlines(){
+bool Course::Test::setDeadlines() {
   StateMaintainer<bool> maintainer(global.flagDatabaseCompiled);
-  global.flagDatabaseCompiled =false;
+  global.flagDatabaseCompiled = false;
   Database::Test::setUp();
   Database::Test tester;
   tester.deleteDatabase();
   tester.adminAccountCreation();
-
-  global.setWebInput(WebAPI::frontend::problemFileName, "test/problems/sample1.html");
-  global.setWebInput(WebAPI::problem::courseHome, "test/test.html");
-  global.setWebInput(WebAPI::problem::topicList, "test/topiclists/test.txt");
-
-
-  global.setWebInput("mainInput",
-  HtmlRoutines::convertStringToURLString(
-  "{\"test/problems/sample1\":{\"deadlines\":{\"1\":\"2022-08-16\"}}}", false
-  )
+  global.setWebInput(
+    WebAPI::frontend::problemFileName, "test/problems/sample1.html"
   );
-WebAPIResponse::setProblemDeadline();
-Database::Test::tearDown();
-return true;
+  global.setWebInput(WebAPI::problem::courseHome, "test/test.html");
+  global.setWebInput(
+    WebAPI::problem::topicList, "test/topiclists/test.txt"
+  );
+  global.setWebInput(
+    "mainInput",
+    HtmlRoutines::convertStringToURLString(
+      "{\"test/problems/sample1\":{\"deadlines\":{\"1\":\"2022-08-16\"}}}",
+      false
+    )
+  );
+  WebAPIResponse::setProblemDeadline();
+  Database::Test::tearDown();
+  return true;
 }

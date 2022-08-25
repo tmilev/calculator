@@ -678,7 +678,7 @@ public:
   std::string courseTopicsWithFolder();
   std::string toString() const;
   JSData toJSON() const;
-  class Test{
+  class Test {
   public:
     static bool all();
     static bool setDeadlines();

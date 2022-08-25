@@ -33,6 +33,10 @@ bool Database::Test::all() {
 
 bool Database::Test::basicsMongoOrFallback() {
   STACK_TRACE("Database::Test::basicsMongoOrFallback");
+  global
+  << "Testing default database. "
+  << Database::toString()
+  << Logger::endL;
   Database::Test tester;
   tester.deleteDatabase();
   tester.adminAccountCreation();
@@ -43,13 +47,15 @@ bool Database::Test::basicsFallback() {
   STACK_TRACE("Database::Test::basicsFallback");
   StateMaintainer<bool> maintainer(global.flagDatabaseCompiled);
   global.flagDatabaseCompiled = false;
+  global
+  << "Testing fallback database. "
+  << Database::toString()
+  << Logger::endL;
   Database::Test tester;
   tester.deleteDatabase();
   tester.adminAccountCreation();
-  global << "DEBUG: got to here!!!";
   return true;
 }
-
 
 bool Database::Test::deleteDatabase() {
   std::stringstream commentsOnFailure;
@@ -65,6 +71,7 @@ bool Database::Test::deleteDatabase() {
 
 bool Database::Test::adminAccountCreation() {
   STACK_TRACE("Database::Test::adminAccountCreation");
+  Database::get().initializeServer();
   UserCalculatorData userData;
   userData.username = WebAPI::userDefaultAdmin;
   userData.enteredPassword = "111";

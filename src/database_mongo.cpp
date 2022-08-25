@@ -30,6 +30,16 @@ Database& Database::get() {
   return result;
 }
 
+std::string Database::toString() {
+  std::stringstream out;
+  if (global.flagDatabaseCompiled) {
+    out << "Current DB is: MongoDB. ";
+  } else {
+    out << "Current DB is: Fallback. ";
+  }
+  return out.str();
+}
+
 Database::~Database() {}
 
 Database::Database() {
@@ -51,6 +61,7 @@ bool Database::checkInitialization() {
 }
 
 bool Database::Mongo::initialize() {
+  STACK_TRACE("Database::Mongo::initialize");
 #ifdef MACRO_use_MongoDB
   if (this->flagInitialized) {
     return true;

@@ -66,7 +66,9 @@ const std::string Test::Suites::API = "api";
 void Test::run() {
   STACK_TRACE("Test::run");
   global
-  << "Testing: "
+  << "Testing "
+  << this->inputs.size
+  << " test cases: "
   << this->inputs.toStringCommaDelimited()
   << " ..."
   << Logger::endL;
@@ -124,9 +126,8 @@ void Test::run() {
   ) {
     TopicElementParser::Test::all();
   }
-  if (  this->shouldTest(Test::Suites::courses)
-){ Course::Test::all();
-
+  if (this->shouldTest(Test::Suites::courses)) {
+    Course::Test::all();
   }
   if (this->shouldTest(Test::Suites::calculator)) {
     Calculator::Examples::Test::all();

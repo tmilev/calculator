@@ -79,6 +79,7 @@ public:
   void createHashIndex(
     const std::string& collectionName, const std::string& key
   );
+  static std::string toString();
   class User {
   public:
     Database* owner;

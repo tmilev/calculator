@@ -1675,7 +1675,9 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     out
     << "<tr><td></td>"
     << this->getPolynomialStringSpacedMonomialsHtml(
-      remainders[i], " style='vertical-align: bottom'", &this->intermediateHighlightedMons[i]
+      remainders[i],
+      " style='vertical-align: bottom'",
+      &this->intermediateHighlightedMons[i]
     )
     << "</tr>";
     if (i < subtrahends.size) {

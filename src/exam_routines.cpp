@@ -5427,9 +5427,8 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
     this->displayVideoHandwrittenLink =
     "<a href='" +
     this->videoHandwritten +
-    "' class='videoLink' class='videoLink' target='_blank'>"+
-    "Video <b>(H)</b></a>"
-    ;
+    "' class='videoLink' class='videoLink' target='_blank'>" +
+    "Video <b>(H)</b></a>";
   }
   if (this->handwrittenSolution != "") {
     this->displayHandwrittenSolution =

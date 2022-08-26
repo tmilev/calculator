@@ -1,9 +1,0 @@
-Chapter: First
-Section: Section 1 
-Topic: Topic
-
-Title: Sample 1.
-Problem: test/problems/default/sample1.html
-
-Title: Sample 2.
-Problem: test/problems/default/sample2.html

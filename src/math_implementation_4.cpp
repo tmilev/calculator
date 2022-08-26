@@ -577,7 +577,7 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(
     const std::string& currentName = this->webArguments.keys[i];
     if (
       currentName == "request" ||
-      currentName == "password" ||
+      currentName == DatabaseStrings::labelPassword||
       currentName == WebAPI::problem::fileName ||
       currentName == WebAPI::problem::courseHome ||
       currentName == WebAPI::problem::topicList ||

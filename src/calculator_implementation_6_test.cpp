@@ -601,12 +601,16 @@ bool Course::Test::all() {
 }
 
 bool Course::Test::setDeadlines() {
+  STACK_TRACE("Course::Test::setDeadlines");
   StateMaintainer<bool> maintainer(global.flagDatabaseCompiled);
   global.flagDatabaseCompiled = false;
   Database::Test::setUp();
   Database::Test tester;
   tester.deleteDatabase();
+
+  global << "DEBUG: got to here pt 2" << Logger::endL;
   tester.adminAccountCreation();
+  global << "DEBUG: got to here pt 3" << Logger::endL;
   global.setWebInput(
     WebAPI::frontend::problemFileName, "test/problems/sample1.html"
   );
@@ -621,7 +625,33 @@ bool Course::Test::setDeadlines() {
       false
     )
   );
-  WebAPIResponse::setProblemDeadline();
-  Database::Test::tearDown();
+  global.setWebInput(DatabaseStrings::labelUsername, WebAPI::userDefaultAdmin);
+  global.flagLoggedIn = true;
+  global.userDefault.userRole = UserCalculatorData::Roles::administator;
+  global << "DEBUG: got to here pt 2" << Logger::endL;
+std::string deadlineResult=  WebAPIResponse::setProblemDeadline();
+global << "DEBUG: got to here pt 1" << Logger::endL;
+
+if (!StringRoutines::stringContains( deadlineResult, "Modified")){
+
+global.fatal << "Expected: string that contains 'Modified'. Got: "
+<< deadlineResult << Logger::endL;
+}
+global.setWebInput(
+  "mainInput",
+  HtmlRoutines::convertStringToURLString(
+    "{\"test/problems/sample1\":{\"deadlines\":{\"2\":\"2023-01-01\"}},"
+" \"test/problems/sample2\":{\"deadlines\":{\"2\":\"2023-01-01\"}}}",
+    false
+  )
+);
+deadlineResult=  WebAPIResponse::setProblemDeadline();
+if (!StringRoutines::stringContains( deadlineResult, "Modified")){
+
+global.fatal << "Expected: string that contains 'Modified'. Got: "
+<< deadlineResult << Logger::endL;
+}
+
+Database::Test::tearDown();
   return true;
 }

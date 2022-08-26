@@ -14,6 +14,12 @@
 
 #include <linux/random.h> // <- GRND_NONBLOCK defined here.
 
+void Crypto::Random::initializeRandomBytesForTesting() {
+  List<unsigned char>& output = global.randomBytesCurrent;
+  output.initializeFillInObject(global.numberOfRandomBytes, 0);
+
+}
+
 void Crypto::Random::initializeRandomBytes() {
   static bool alreadyRan = false;
   if (alreadyRan) {

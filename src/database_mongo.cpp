@@ -1401,6 +1401,9 @@ bool Database::User::loadUserInformation(
   UserCalculatorData& output, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::User::loadUserInformation");
+  global << "DEBUG: about to load from db: " << output.toJSON() << Logger::endL;
+  global << "DEBUG: db full at start: " << Database::get().fallBack.databaseContent.toString() << Logger::endL;
+
   if (output.username == "" && output.email == "") {
     return false;
   }
@@ -1410,6 +1413,7 @@ bool Database::User::loadUserInformation(
       output.getFindMeFromUserNameQuery(), userEntry, nullptr
     )
   ) {
+    global << "DEBUG: could not login: " << userEntry.toString()<< Logger::endL;
     if (global.flagDebugLogin) {
       global.comments
       << output.toStringFindQueries()
@@ -1420,6 +1424,9 @@ bool Database::User::loadUserInformation(
     }
     return false;
   }
+  global << "DEBUG: GOt DB JSON: " << userEntry.toString() << Logger::endL;
+  global << "DEBUG: DB full: " << Database::get().fallBack.databaseContent.toString()<< Logger::endL;
+
   return output.loadFromJSON(userEntry);
 }
 

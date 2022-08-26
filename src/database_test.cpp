@@ -4,6 +4,9 @@
 // For additional information refer to the file "calculator.h".
 #include "database.h"
 #include "string_constants.h"
+#include "crypto.h"
+
+std::string Database::Test::adminPassword = "111";
 
 Database::Test::Test() {
   this->setUp();
@@ -17,11 +20,13 @@ void Database::Test::setUp() {
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "calculatortest";
   Database::FallBack::databaseFilename = "test/test_database.json";
+  Database::get().initializeServer();
+  Database::get().initializeWorker();
 }
 
 void Database::Test::tearDown() {
   global.flagServerForkedIntoWorker = false;
-  DatabaseStrings::databaseName = "calculator";
+  DatabaseStrings::databaseName = "calculatortest";
 }
 
 bool Database::Test::all() {
@@ -72,15 +77,17 @@ bool Database::Test::deleteDatabase() {
 bool Database::Test::adminAccountCreation() {
   STACK_TRACE("Database::Test::adminAccountCreation");
   Database::get().initializeServer();
+  Crypto::Random::initializeRandomBytesForTesting();
   UserCalculatorData userData;
   userData.username = WebAPI::userDefaultAdmin;
-  userData.enteredPassword = "111";
+  userData.enteredPassword = Database::Test::adminPassword;
   std::stringstream commentsOnFailure;
   if (
     !Database::get().user.loginViaDatabase(userData, &commentsOnFailure)
   ) {
     global.fatal
     << "Failed to login as administrator on an empty database. "
+    << commentsOnFailure.str()
     << global.fatal;
   }
   return true;

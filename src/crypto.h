@@ -459,6 +459,7 @@ public:
   class Random {
   public:
     static void initializeRandomBytes();
+    static void initializeRandomBytesForTesting();
     // Every call of this function acquires additional randomness from the
     // system's timer.
     static void getRandomBytesSecureInternal(

@@ -206,9 +206,6 @@ std::string WebAPIResponse::setProblemWeight() {
 
 std::string WebAPIResponse::setProblemDeadline() {
   STACK_TRACE("WebAPIReponse::setProblemDeadline");
-  if (!global.flagDatabaseCompiled) {
-    return "Cannot modify problem weights (no database available)";
-  }
   if (!global.userDefaultHasAdminRights()) {
     return "<b>Only admins may set problem weights.</b>";
   }

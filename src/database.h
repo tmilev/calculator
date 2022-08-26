@@ -10,6 +10,9 @@
 #include "general_database_system_independent.h"
 #include "multiprocessing.h"
 
+class UserCalculator;
+
+
 class QueryExact {
 public:
   std::string collection;
@@ -63,7 +66,9 @@ public:
   void makeProjection(const List<std::string>& fields);
 };
 
+
 class Database {
+
 public:
   bool flagInitializedServer;
   bool flagInitializedWorker;
@@ -81,6 +86,10 @@ public:
   );
   static std::string toString();
   class User {
+  private:
+    bool firstLoginOfAdmin(UserCalculatorData& incoming, UserCalculator &userInDatabase, std::stringstream* commentsOnFailure
+    );
+
   public:
     Database* owner;
     bool logoutViaDatabase();
@@ -138,13 +147,14 @@ public:
 
   User user;
   class FallBack {
+  private:
+    bool initialized;
   public:
     Database* owner;
     MutexProcess access;
     HashedList<std::string> knownCollections;
     HashedList<std::string> knownIndices;
-    JSData reader;
-    bool flagDatabaseRead;
+    JSData databaseContent;
     static std::string databaseFilename;
     class Index {
     public:
@@ -208,6 +218,7 @@ public:
     bool storeDatabase(std::stringstream* commentsOnFailure);
     bool readDatabase(std::stringstream* commentsOnFailure);
     bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
+    bool indexDatabase(std::stringstream* commentsOnFailure);
     void indexOneRecord(
       const JSData& entry, int32_t row, const std::string& collection
     );
@@ -411,6 +422,7 @@ public:
   bool deleteDatabase(std::stringstream* commentsOnFailure);
   class Test {
   public:
+    static std::string adminPassword;
     static void setUp();
     static bool all();
     static bool basicsMongoOrFallback();

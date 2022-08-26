@@ -11,7 +11,8 @@ std::string Database::FallBack::databaseFilename =
 bool Database::FallBack::deleteDatabase(
   std::stringstream* commentsOnFailure
 ) {
-  this->reader.reset(JSData::token::tokenObject);
+  this->databaseContent.reset(JSData::token::tokenObject);
+  this->indexDatabase(commentsOnFailure);
   if (
     !FileOperations::writeFileVirual(
       Database::FallBack::databaseFilename, "{}", commentsOnFailure
@@ -92,13 +93,14 @@ bool Database::FallBack::updateOneNolocks(
     }
     return false;
   }
+  global << "DEBUG: got to here. Nested labels: " << dataToMerge.nestedLabels.toStringCommaDelimited() << Logger::endL;
   if (index == - 1) {
-    index = this->reader[findQuery.collection].listObjects.size;
+    index = this->databaseContent[findQuery.collection].listObjects.size;
     JSData incoming;
     incoming.elementType = JSData::token::tokenObject;
-    this->reader[findQuery.collection].listObjects.addOnTop(incoming);
+    this->databaseContent[findQuery.collection].listObjects.addOnTop(incoming);
   }
-  JSData* modified = &(this->reader[findQuery.collection][index]);
+  JSData* modified = &(this->databaseContent[findQuery.collection][index]);
   for (int i = 0; i < dataToMerge.nestedLabels.size; i ++) {
     modified = &((*modified)[dataToMerge.nestedLabels[i]]);
   }
@@ -116,9 +118,12 @@ bool Database::FallBack::findOne(
 ) {
   STACK_TRACE("Database::FallBack::findOne");
   MutexProcesslockGuard guardDB(this->access);
+  global << "DEBUG: about to read and index DB. " << Logger::endL;
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     return false;
   }
+  global << "DEBUG: full DB: " << this->databaseContent.toString()
+  << ". Indices: " << this->toStringIndices()  << Logger::endL;
   int index = - 1;
   if (
     !this->findIndexOneNolocksMinusOneNotFound(
@@ -130,7 +135,7 @@ bool Database::FallBack::findOne(
   if (index < 0) {
     return false;
   }
-  output = this->reader[query.collection][index];
+  output = this->databaseContent[query.collection][index];
   return true;
 }
 
@@ -196,7 +201,7 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     }
     return false;
   }
-  Database::FallBack::Index& currentIndex = indices.getValueCreateEmpty(key);
+  Database::FallBack::Index& currentIndex = this->indices.getValueCreateEmpty(key);
   if (query.value.elementType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound
@@ -233,7 +238,7 @@ bool Database::FallBack::fetchCollectionNames(
     return false;
   }
   output.setSize(0);
-  output.addListOnTop(this->reader.objects.keys);
+  output.addListOnTop(this->databaseContent.objects.keys);
   return true;
 }
 
@@ -242,10 +247,10 @@ bool Database::FallBack::hasCollection(
 ) {
   STACK_TRACE("Database::FallBack::hasCollection");
   if (Database::FallBack::knownCollections.contains(collection)) {
-    this->reader[collection].elementType = JSData::token::tokenArray;
+    this->databaseContent[collection].elementType = JSData::token::tokenArray;
     return true;
   }
-  if (this->reader.hasKey(collection)) {
+  if (this->databaseContent.hasKey(collection)) {
     return true;
   }
   if (commentsOnFailure != nullptr) {
@@ -262,20 +267,25 @@ bool Database::FallBack::hasCollection(
 
 Database::FallBack::FallBack() {
   this->owner = nullptr;
-  this->flagDatabaseRead = false;
+  this->initialized = false;
 }
 
 void Database::FallBack::initialize() {
+  if (this->initialized) {
+    return;
+  }
+  this->initialized = true;
   this->access.createMe("databaseFallback", false);
   this->knownIndices.addListOnTop({
       DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername,
       DatabaseStrings::tableUsers + "." + DatabaseStrings::labelEmail,
-      DatabaseStrings::tableEmailInfo + "." + DatabaseStrings::labelEmail,
+  DatabaseStrings::tableEmailInfo + "." + DatabaseStrings::labelEmail,
+  DatabaseStrings::tableDeadlines + "." + DatabaseStrings::labelDeadlinesSchema,
 
     }
   );
   this->knownCollections.addListOnTop({
-      DatabaseStrings::tableUsers, DatabaseStrings::tableEmailInfo,
+      DatabaseStrings::tableUsers, DatabaseStrings::tableEmailInfo,DatabaseStrings::tableDeadlines, DatabaseStrings::tableProblemWeights, DatabaseStrings::tableProblemInformation
     }
   );
 }
@@ -307,12 +317,18 @@ bool Database::FallBack::readAndIndexDatabase(
   if (!this->readDatabase(commentsOnFailure)) {
     return false;
   }
+return this->indexDatabase(commentsOnFailure);
+}
+bool Database::FallBack::indexDatabase(std::stringstream *commentsOnFailure){
+  STACK_TRACE("Database::FallBack::indexDatabase");
+  (void) commentsOnFailure;
+  this->indices.clear();
   for (int i = 0; i < this->knownIndices.size; i ++) {
     this->indices.getValueCreateEmpty(this->knownIndices[i]);
   }
-  for (int i = 0; i < this->reader.objects.size(); i ++) {
-    std::string collection = this->reader.objects.keys[i];
-    JSData& currentCollection = this->reader.objects.values[i];
+  for (int i = 0; i < this->databaseContent.objects.size(); i ++) {
+    std::string collection = this->databaseContent.objects.keys[i];
+    JSData& currentCollection = this->databaseContent.objects.values[i];
     for (int i = 0; i < currentCollection.listObjects.size; i ++) {
       this->indexOneRecord(
         currentCollection.listObjects[i], i, collection
@@ -349,10 +365,12 @@ void Database::FallBack::indexOneRecord(
 }
 
 bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
-  return
-  FileOperations::writeFileVirualWithPermissions(
+ if(! this->indexDatabase(commentsOnFailure)){
+ return false;
+ }
+ return  FileOperations::writeFileVirualWithPermissions(
     Database::FallBack::databaseFilename,
-    this->reader.toString(nullptr),
+    this->databaseContent.toString(nullptr),
     true,
     commentsOnFailure
   );
@@ -383,7 +401,7 @@ bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
       << Logger::green
       << "Fallback database file does not exist. Creating ..."
       << Logger::endL;
-      this->reader.elementType = JSData::token::tokenObject;
+      this->databaseContent.elementType = JSData::token::tokenObject;
       return true;
     }
     return false;
@@ -393,5 +411,5 @@ bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
   << Logger::blue
   << database.size()
   << Logger::endL;
-  return this->reader.parse(database, commentsOnFailure);
+  return this->databaseContent.parse(database, commentsOnFailure);
 }

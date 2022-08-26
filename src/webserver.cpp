@@ -753,7 +753,7 @@ bool WebWorker::loginProcedure(
   user.enteredPassword =
   HtmlRoutines::convertStringToURLString(
     HtmlRoutines::convertURLStringToNormal(
-      global.getWebInput("password"), true
+      global.getWebInput(DatabaseStrings::labelPassword), true
     ),
     false
   );
@@ -895,7 +895,7 @@ bool WebWorker::loginProcedure(
     << "Invalid user and/or authentication. ";
   }
   arguments.setKeyValue(
-    "password", "********************************************"
+    DatabaseStrings::labelPassword, "********************************************"
   );
   return true;
 }
@@ -2264,7 +2264,7 @@ bool WebWorker::redirectIfNeeded(
   }
   for (int i = 0; i < global.webArguments.size(); i ++) {
     if (
-      global.webArguments.keys[i] == "password" ||
+      global.webArguments.keys[i] == DatabaseStrings::labelPassword ||
       global.webArguments.keys[i] == "request" ||
       global.webArguments.keys[i] == "googleToken" ||
       global.webArguments.keys[i] == "G_AUTHUSER_H" ||

@@ -153,18 +153,6 @@ public:
     output << element.toString();
     return output;
   }
-  friend Expression operator*(
-    const Expression& left, const Expression& right
-  );
-  friend Expression operator/(
-    const Expression& left, const Expression& right
-  );
-  friend Expression operator+(
-    const Expression& left, const Expression& right
-  );
-  friend Expression operator-(
-    const Expression& left, const Expression& right
-  );
   void reset(Calculator& newBoss, int numExpectedChildren = 0) {
     this->owner = &newBoss;
     this->data = 0;
@@ -953,14 +941,15 @@ public:
   void operator/=(const Expression& other);
   void operator+=(const Expression& other);
   void operator-=(const Expression& other);
-  Expression operator+(int other);
-  Expression operator-(int other);
-  Expression operator*(int other);
-  Expression operator/(int other);
-  Expression operator+(const Expression& other);
-  Expression operator-(const Expression& other);
-  Expression operator*(const Expression& other);
-  Expression operator/(const Expression& other);
+  Expression operator+(int other)const;
+  friend Expression operator*(int left, const Expression& right);
+  Expression operator-(int other)const;
+  Expression operator*(int other)const;
+  Expression operator/(int other)const;
+  Expression operator+(const Expression& other)const;
+  Expression operator-(const Expression& other)const;
+  Expression operator*(const Expression& other)const;
+  Expression operator/(const Expression& other)const;
   void operator*=(const Expression& other);
   // Rational getConstantTerm() const;
   bool isEqualToMathematically(const Expression& other) const;

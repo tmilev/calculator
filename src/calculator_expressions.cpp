@@ -16,35 +16,6 @@
 #include "math_rational_function_implementation.h"
 #include "string_constants.h"
 
-Expression operator*(const Expression& left, const Expression& right) {
-  STACK_TRACE("operator*(Expression, Expression)");
-  left.checkInitialization();
-  Expression result;
-  result.makeXOX(*left.owner, left.owner->opTimes(), left, right);
-  return result;
-}
-
-Expression operator/(const Expression& left, const Expression& right) {
-  left.checkInitialization();
-  Expression result;
-  result.makeXOX(*left.owner, left.owner->opDivide(), left, right);
-  return result;
-}
-
-Expression operator+(const Expression& left, const Expression& right) {
-  left.checkInitialization();
-  Expression result;
-  result.makeXOX(*left.owner, left.owner->opPlus(), left, right);
-  return result;
-}
-
-Expression operator-(const Expression& left, const Expression& right) {
-  left.checkInitialization();
-  Expression result;
-  result.makeXOX(*left.owner, left.owner->opMinus(), left, right);
-  return result;
-}
-
 // If you get a specialization after instantiation error:
 // the following template specialization funcitons must appear
 // here and nowhere else (discovered through extremely painful
@@ -1435,20 +1406,6 @@ unsigned int Expression::hashFunction() const {
   return this->children.hashFunction();
 }
 
-const Expression& Expression::operator[](int n) const {
-  this->checkInitialization();
-  int childIndex = this->children[n];
-  if (childIndex < 0) {
-    global.fatal
-    << "<hr>The child of position "
-    << n
-    << " out of "
-    << this->children.size - 1
-    << " is not contained in the expression container. "
-    << global.fatal;
-  }
-  return this->owner->allChildExpressions[childIndex];
-}
 
 Expression Expression::zero() {
   if (this->owner == nullptr) {
@@ -6163,4 +6120,357 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
     return out.str();
   }
   return this->toString(format);
+}
+
+Expression operator*(int other, const Expression& right) {
+  STACK_TRACE("Expression::operator*");
+  if (right.owner == nullptr) {
+    global.fatal << "Subtracting non-initialized expression from integer not allowed."
+    << global.fatal;
+
+  }
+  global << "Got to here!" << Logger::endL;
+  Expression result;
+  result.makeXOX(*right.owner, right.owner->opTimes(), right.owner->expressionRational(other), right);
+  return result;
+}
+
+
+Expression Expression::operator*(const Expression& right) const {
+  STACK_TRACE("Expression::operator*");
+  Expression result;
+  result = *this;
+  result *= right;
+  return result;
+}
+
+Expression Expression::operator*(int other)const {
+  STACK_TRACE("Expression::operator*");
+  Expression result;
+  if (this->owner == nullptr) {
+    // Perhaps we should allow the code below for convenience: really
+    // hard to judge if the convenience is worth it, or whether it will cause
+    // hard-to-detect bugs.
+    // Rational resultRat = this->data;
+    // resultRat*= other;
+    // if (resultRat.isSmallInteger(&result.data))
+    //  return result;
+    global.fatal
+    << "Multiplying non-initialized expression with data: "
+    << this->data
+    << " by integer "
+    << other
+    << " is not allowed. "
+    << global.fatal;
+  }
+  Expression otherE;
+  otherE.assignValue(*this->owner, other);
+  result = *this;
+  result *= otherE;
+  return result;
+}
+
+
+Expression Expression::operator-(int other)const {
+  STACK_TRACE("Expression::operator-");
+  Expression result;
+  if (this->owner == nullptr) {
+    global.fatal
+    << "Subtracting integer from non-initialized expression with data: "
+    << this->data
+    << " data of subtrahend: "
+    << other
+    << " is not allowed. "
+    << global.fatal;
+  }
+  Expression otherE;
+  otherE.assignValue(*this->owner, other);
+  result = *this;
+  result -= otherE;
+  return result;
+}
+
+Expression Expression::operator/(int other) const{
+  STACK_TRACE("Expression::operator/");
+  Expression result;
+  if (this->owner == nullptr) {
+    global.fatal
+    << "Multiplying non-initialized expression with data: "
+    << this->data
+    << " by integer "
+    << other
+    << " is not allowed. "
+    << global.fatal;
+  }
+  Expression otherE;
+  otherE.assignValue(*this->owner, other);
+  result = *this;
+  result /= otherE;
+  return result;
+}
+
+Expression Expression::operator+(const Expression& other)const {
+  Expression result = *this;
+  result += other;
+  return result;
+}
+
+Expression Expression::operator-(const Expression& other) const{
+  Expression result;
+  result = *this;
+  result -= other;
+  return result;
+}
+
+Expression Expression::operator/(const Expression& other)const {
+  STACK_TRACE("Expression::operator/");
+  Expression result;
+  result = *this;
+  result /= other;
+  return result;
+}
+
+void Expression::operator/=(const Expression& other) {
+  STACK_TRACE("Expression::operator/=");
+  if (this->owner == nullptr && other.owner == nullptr) {
+    this->data /= other.data;
+    if (this->data != 1 && this->data != 0) {
+      global.fatal
+      << "Attempting to divide non-initialized expressions. "
+      << global.fatal;
+    }
+    return;
+  }
+  if (other.owner == nullptr) {
+    Expression otherCopy;
+    otherCopy.assignValue(*this->owner, other.data);
+    (*this) /= otherCopy;
+    return;
+  }
+  if (this->owner == nullptr) {
+    this->assignValue(*other.owner, this->data);
+  }
+  if (this->owner != other.owner) {
+    global.fatal
+    << "Error: dividing expressions with different owners. "
+    << global.fatal;
+  }
+  this->makeQuotientReduce(*this->owner, *this, other);
+}
+
+void Expression::operator*=(const Expression& other) {
+  STACK_TRACE("Expression::operator*=");
+  if (this->owner == nullptr && other.owner == nullptr) {
+    this->data *= other.data;
+    if (this->data != 1 && this->data != 0) {
+      global.fatal
+      << "Attempting to add non-initialized expressions. "
+      << global.fatal;
+    }
+    return;
+  }
+  if (other.owner == nullptr) {
+    Expression otherCopy;
+    otherCopy.assignValue(*this->owner, other.data);
+    (*this) *= otherCopy;
+    return;
+  }
+  if (this->owner == nullptr) {
+    this->assignValue(*other.owner, this->data);
+  }
+  if (this->owner != other.owner) {
+    global.fatal
+    << "Error: adding expressions with different owners. "
+    << global.fatal;
+  }
+  if (other.isEqualToZero() || this->isEqualToZero()) {
+    *this = this->owner->expressionZero();
+    return;
+  }
+  if (this->isEqualToOne()) {
+    *this = other;
+    return;
+  }
+  if (other.isEqualToOne()) {
+    return;
+  }
+  Rational leftRational;
+  Rational rightRational;
+  if (
+    this->isRational(&leftRational) && other.isRational(&rightRational)
+  ) {
+    leftRational *= rightRational;
+    this->assignValue(*this->owner, leftRational);
+    return;
+  }
+  Expression resultE;
+  resultE.makeXOX(
+    *this->owner, this->owner->opTimes(), *this, other
+  );
+  *this = resultE;
+}
+
+bool Expression::isEqualToMathematically(const Expression& other) const {
+  STACK_TRACE("Expression::isEqualToMathematically");
+  if (this->owner == nullptr && other.owner == nullptr) {
+    return this->data == other.data;
+  }
+  if (this->owner == nullptr) {
+    return false;
+  }
+  if (*this == other) {
+    return true;
+  }
+  Rational rational, rationalTwo;
+  AlgebraicNumber algebraicNumber;
+  if (this->isOfType(&rational) && other.isOfType(&rationalTwo)) {
+    return rational == rationalTwo;
+  }
+  if (this->isOfType(&rational) && other.isOfType(&algebraicNumber)) {
+    return algebraicNumber == rational;
+  }
+  if (other.isOfType(&rational) && this->isOfType(&algebraicNumber)) {
+    return algebraicNumber == rational;
+  }
+  double leftD = - 1, rightD = - 1;
+  if (
+    this->evaluatesToDouble(&leftD) && other.evaluatesToDouble(&rightD)
+  ) {
+    return (leftD - rightD == 0.0);
+  }
+  Expression differenceE = *this;
+  differenceE -= other;
+  Expression differenceEsimplified;
+  if (
+    !this->owner->evaluateExpression(
+      *this->owner, differenceE, differenceEsimplified
+    )
+  ) {
+    return false;
+  }
+  if (differenceEsimplified.isEqualToZero()) {
+    return true;
+  }
+  if (differenceEsimplified.isSequenceNElements()) {
+    for (int i = 1; i < differenceEsimplified.size(); i ++) {
+      if (!differenceEsimplified[i].isEqualToZero()) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (this->size() != other.size()) {
+    return false;
+  }
+  if (this->size() == 0) {
+    return this->data == other.data;
+  }
+  for (int i = 0; i < this->size(); i ++) {
+    if (!(*this)[i].isEqualToMathematically(other[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void Expression::operator+=(const Expression& other) {
+  STACK_TRACE("Expression::operator+=");
+  if (this->owner == nullptr && other.owner == nullptr) {
+    this->data += other.data;
+    if (this->data != 1 && this->data != 0) {
+      global.fatal
+      << "Attempting to add non-initialized expressions"
+      << global.fatal;
+    }
+    return;
+  }
+  if (other.owner == nullptr) {
+    Expression otherCopy;
+    otherCopy.assignValue(*this->owner, other.data);
+    *this += otherCopy;
+    return;
+  }
+  if (this->owner == nullptr) {
+    this->assignValue(*other.owner, this->data);
+  }
+  if (this->owner != other.owner) {
+    global.fatal
+    << "Error: adding expressions with different owners. "
+    << global.fatal;
+  }
+  if (other.isEqualToZero()) {
+    return;
+  }
+  if (this->isEqualToZero()) {
+    *this = other;
+    return;
+  }
+  Rational leftRational;
+  Rational rightRational;
+  if (
+    this->isRational(&leftRational) && other.isRational(&rightRational)
+  ) {
+    leftRational += rightRational;
+    this->assignValue(*this->owner, leftRational);
+    return;
+  }
+  Expression resultE;
+  resultE.makeXOX(
+    *this->owner, this->owner->opPlus(), *this, other
+  );
+  *this = resultE;
+}
+
+void Expression::operator-=(const Expression& other) {
+  STACK_TRACE("Expression::operator+=");
+  if (this->owner == nullptr && other.owner == nullptr) {
+    this->data -= other.data;
+    if (this->data != 1 && this->data != 0) {
+      global.fatal
+      << "Attempt to subtract non-initialized expressions. "
+      << global.fatal;
+    }
+    return;
+  }
+  if (other.owner == nullptr) {
+    Expression otherCopy;
+    otherCopy.assignValue(*this->owner, other.data);
+    (*this) -= otherCopy;
+    return;
+  }
+  if (this->owner == nullptr) {
+    this->assignValue(*other.owner, this->data);
+  }
+  if (this->owner != other.owner) {
+    global.fatal
+    << "Error: attempt to add expressions with different owners. "
+    << global.fatal;
+  }
+  if (other.isEqualToZero()) {
+    return;
+  }
+  if (this->isEqualToZero()) {
+    this->makeOX(*this->owner, this->owner->opMinus(), other);
+    return;
+  }
+  Expression resultE;
+  resultE.makeXOX(
+    *this->owner, this->owner->opMinus(), *this, other
+  );
+  *this = resultE;
+}
+
+const Expression& Expression::operator[](int n) const {
+  this->checkInitialization();
+  int childIndex = this->children[n];
+  if (childIndex < 0) {
+    global.fatal
+    << "<hr>The child of position "
+    << n
+    << " out of "
+    << this->children.size - 1
+    << " is not contained in the expression container. "
+    << global.fatal;
+  }
+  return this->owner->allChildExpressions[childIndex];
 }

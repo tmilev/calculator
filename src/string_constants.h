@@ -63,6 +63,9 @@ public:
     static std::string compareExpressionsGiven;
     static std::string compareExpressionsDesired;
     static std::string submitAnswerHardcoded;
+    static std::string teachersAndSections;
+    static std::string teachers;
+    static std::string sections;
     struct slides {
     public:
       static std::string source;
@@ -89,6 +92,7 @@ public:
     static std::string signUp;
     static std::string addUsers;
     static std::string addEmails;
+    static std::string setTeacher;
     static std::string userList;
     static std::string passwordList;
   };

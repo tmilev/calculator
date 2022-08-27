@@ -157,10 +157,6 @@ public:
   static JSData getAccountsPageJSON(
     const std::string& hostWebAddressWithPort
   );
-  static std::string getAccountsPageBody(
-    const std::string& hostWebAddressWithPort
-  );
-  static std::string toStringAssignSection();
   static std::string toStringUserDetails(
     bool adminsOnly,
     List<JSData>& users,

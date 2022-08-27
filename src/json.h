@@ -61,6 +61,24 @@ public:
   void operator=(const double other);
   void operator=(const std::string& other);
   void operator=(const char* other);
+  void operator=(const JSData& other);
+  void operator=(const List<JSData>& other);
+  void operator=(const List<int>& other);
+  void operator=(const List<unsigned char>& other);
+  template <typename any>
+  void operator=(const List<any>& other) {
+    this->reset();
+    this->elementType = JSData::token::tokenArray;
+    this->listObjects.setSize(other.size);
+    for (int i = 0; i < other.size; i ++) {
+      this->listObjects[i] = other[i];
+    }
+  }
+  void operator=(const LargeInteger& input);
+  template <typename Coefficient>
+  void operator=(const Vector<Coefficient>& other);
+  template <typename Coefficient>
+  void operator=(const Matrix<Coefficient>& other);
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
   JSData getValue(const std::string& key);
@@ -104,24 +122,6 @@ public:
   ~JSData();
   JSData(const JSData& other);
   bool isEqualTo(const std::string& other);
-  void operator=(const JSData& other);
-  void operator=(const List<JSData>& other);
-  void operator=(const List<int>& other);
-  void operator=(const List<unsigned char>& other);
-  template <typename any>
-  void operator=(const List<any>& other) {
-    this->reset();
-    this->elementType = JSData::token::tokenArray;
-    this->listObjects.setSize(other.size);
-    for (int i = 0; i < other.size; i ++) {
-      this->listObjects[i] = other[i];
-    }
-  }
-  void operator=(const LargeInteger& input);
-  template <typename Coefficient>
-  void operator=(const Vector<Coefficient>& other);
-  template <typename Coefficient>
-  void operator=(const Matrix<Coefficient>& other);
   bool isNullOrUndefined();
   bool isIntegerFittingInInt(int* whichInteger);
   bool isTrueRepresentationInJSON();

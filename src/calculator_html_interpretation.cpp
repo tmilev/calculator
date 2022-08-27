@@ -209,6 +209,9 @@ std::string WebAPIResponse::setProblemDeadline() {
   if (!global.userDefaultHasAdminRights()) {
     return "<b>Only admins may set problem weights.</b>";
   }
+  if (global.userDefault.deadlineSchema == "") {
+    return "Empty deadline shema not allowed.";
+  }
   CalculatorHTML problem;
   std::string inputProblemInfo =
   HtmlRoutines::convertURLStringToNormal(
@@ -1980,16 +1983,24 @@ JSData WebAPIResponse::submitAnswersJSON(
 std::string WebAPIResponse::addTeachersSections() {
   STACK_TRACE("WebAPIReponse::addTeachersSections");
   std::stringstream out;
-  if (
-    !global.userDefaultHasAdminRights() ||
-    !global.flagUsingSSLinCurrentConnection
-  ) {
-    out << "<b>Only admins may assign sections to teachers.</b>";
+  if (!global.flagLoggedIn || global.userDefault.username == "") {
+    out
+    << "To set teachers you must first log in. Username: ["
+    << global.userDefault.username
+    << "].";
+    return out.str();
+  }
+  if (!global.flagUsingSSLinCurrentConnection) {
+    out << "Setting teachers only allowed over a secure connection.";
+    return out.str();
+  }
+  if (!global.userDefaultHasAdminRights()) {
+    out << "Only admins may assign sections to teachers.";
     return out.str();
   }
   std::string input =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("teachersAndSections"), false
+    global.getWebInput(WebAPI::request::teachersAndSections), false
   );
   JSData inputParsed;
   if (!inputParsed.parse(input, false, &out)) {
@@ -1997,32 +2008,36 @@ std::string WebAPIResponse::addTeachersSections() {
     return out.str();
   }
   if (
-    inputParsed["teachers"].elementType != JSData::token::tokenString
+    inputParsed[WebAPI::request::teachers].elementType !=
+    JSData::token::tokenString
   ) {
     out
     << "<b style='color:red'>Failed to extract key "
-    << "'teachers' from your input. </b>";
+    << WebAPI::request::teachers
+    << " from your input. </b>";
     return out.str();
   }
   if (
-    inputParsed["students"].elementType != JSData::token::tokenString
+    inputParsed[WebAPI::request::sections].elementType !=
+    JSData::token::tokenString
   ) {
     out
     << "<b style='color:red'>Failed to find key "
-    << "'students' in your input. </b>";
+    << WebAPI::request::sections
+    << " in your input. </b>";
     return out.str();
-  }
-  if (!global.flagDatabaseCompiled) {
-    return "<b>no database present.</b>";
   }
   std::string desiredUsers =
   HtmlRoutines::convertURLStringToNormal(
-    inputParsed["teachers"].stringValue, false
+    inputParsed[WebAPI::request::teachers].stringValue, false
   );
   std::string desiredSectionsOneString =
   HtmlRoutines::convertURLStringToNormal(
-    inputParsed["students"].stringValue, false
+    inputParsed[WebAPI::request::sections].stringValue, false
   );
+  if (desiredUsers == "") {
+    return "Empty user list not allowed.";
+  }
   List<std::string> desiredSectionsList;
   List<std::string> teachers;
   List<char> delimiters;
@@ -2484,79 +2499,6 @@ JSData WebAPIResponse::getAccountsPageJSON(
   return output;
 }
 
-std::string WebAPIResponse::getAccountsPageBody(
-  const std::string& hostWebAddressWithPort
-) {
-  STACK_TRACE("WebAPIReponse::getAccountsPageBody");
-  (void) hostWebAddressWithPort;
-  if (!global.flagDatabaseCompiled) {
-    return "Database not available. ";
-  }
-  std::stringstream out;
-  if (
-    !global.userDefaultHasAdminRights() ||
-    !global.flagLoggedIn ||
-    !global.flagUsingSSLinCurrentConnection
-  ) {
-    out
-    << "Browsing accounts allowed only for "
-    << "logged-in admins over ssl connection.";
-    return out.str();
-  }
-  std::stringstream commentsOnFailure;
-  JSData findStudents;
-  JSData findAdmins;
-  List<JSData> students;
-  List<JSData> admins;
-  long long totalStudents;
-  findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
-  findAdmins[DatabaseStrings::labelUserRole] =
-  UserCalculator::Roles::administator;
-  if (
-    !Database::get().findFromJSON(
-      DatabaseStrings::tableUsers,
-      findStudents,
-      students,
-      - 1,
-      &totalStudents,
-      &commentsOnFailure
-    )
-  ) {
-    out
-    << "<b>Failed to load user info.</b> Comments: "
-    << commentsOnFailure.str();
-    return out.str();
-  }
-  if (
-    !Database::get().findFromJSON(
-      DatabaseStrings::tableUsers,
-      findAdmins,
-      admins,
-      - 1,
-      nullptr,
-      &commentsOnFailure
-    )
-  ) {
-    out
-    << "<b>Failed to load user info.</b> Comments: "
-    << commentsOnFailure.str();
-    return out.str();
-  }
-  out << "<hr>";
-  out << WebAPIResponse::toStringAssignSection();
-  out << "<hr>";
-  out
-  << WebAPIResponse::toStringUserDetails(
-    true, admins, hostWebAddressWithPort
-  );
-  out << "<hr>";
-  out
-  << WebAPIResponse::toStringUserDetails(
-    false, students, hostWebAddressWithPort
-  );
-  return out.str();
-}
-
 std::string WebAPIResponse::getScoresPage() {
   STACK_TRACE("WebWorker::getScoresPage");
   std::stringstream out;
@@ -2817,44 +2759,6 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     << " have not activated their accounts. </span>";
   }
   out << tableStream.str() << preFilledLoginLinks.str();
-  return out.str();
-}
-
-std::string WebAPIResponse::toStringAssignSection() {
-  STACK_TRACE("WebAPIReponse::toStringAssignSection");
-  std::stringstream out;
-  std::string idAddressTextarea = "inputSetTeacher";
-  std::string idExtraTextarea = "inputSections";
-  std::string idOutput = "idOutputSections";
-  out << "assign section(s) to teacher(s)<br> ";
-  out << "<textarea width =\"500px\" ";
-  out << "id =\"" << idAddressTextarea << "\"";
-  out << "placeholder =\"email or user list, comma, space or ; separated\">";
-  out << "</textarea>";
-  out << "<textarea width =\"500px\" ";
-  out << "id =\"" << idExtraTextarea << "\" ";
-  out << "placeholder =\"list of sections\">";
-  out << "</textarea>";
-  out << "<br>";
-  out
-  << "<button class =\"normalButton\" onclick=\"submitStringAsMainInput("
-  << "'teachers ='+ "
-  << "encodeURIComponent(document.getElementById('"
-  << idAddressTextarea
-  << "').value)"
-  << " + '&sections =' + "
-  << "encodeURIComponent(document.getElementById('"
-  << idExtraTextarea
-  << "').value),"
-  << "'"
-  << idOutput
-  << "',"
-  << " 'setTeacher', null, '"
-  << idOutput
-  << "'"
-  << " )\"> Set teacher</button> ";
-  out << "<br><span id =\"" << idOutput << "\">\n";
-  out << "</span>";
   return out.str();
 }
 

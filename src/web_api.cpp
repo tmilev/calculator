@@ -80,7 +80,9 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     global.flagLoggedIn
   ) {
     return this->processAddUserEmails();
-  } else if (global.requestType == "setTeacher" && global.flagLoggedIn) {
+  } else if (
+    global.requestType == WebAPI::request::setTeacher && global.flagLoggedIn
+  ) {
     return this->processAssignTeacherToSection();
   } else if ((
       global.requestType == WebAPI::request::submitAnswers ||

@@ -48,6 +48,28 @@ void JSData::operator=(const JSData& other) {
   this->objects = other.objects;
 }
 
+void JSData::operator=(const List<unsigned char>& other) {
+  this->elementType = JSData::token::tokenString;
+  this->stringValue = other.toStringConcatenate();
+  this->listObjects.setSize(0);
+;
+  this->objects.clear();
+}
+
+void JSData::operator=(const List<JSData>& other) {
+  this->elementType = JSData::token::tokenArray;
+  this->listObjects.setSize(other.size);
+  for (int i = 0; i < other.size; i ++) {
+    this->listObjects[i] = other[i];
+  }
+  this->objects.clear();
+}
+
+void JSData::operator=(int64_t input) {
+  this->elementType = JSData::token::tokenLargeInteger;
+  this->integerValue.getElement().assignInt64(input);
+}
+
 JSData& JSData::operator[](int i) {
   this->elementType = JSData::token::tokenArray;
   if (this->listObjects.size < i + 1) {
@@ -261,28 +283,6 @@ void JSData::setKeyValue(const std::string& key, const JSData& value) {
 JSData& JSData::operator[](const std::string& key) {
   this->elementType = JSData::token::tokenObject;
   return this->objects.getValueCreateEmpty(key);
-}
-
-void JSData::operator=(const List<unsigned char>& other) {
-  this->elementType = JSData::token::tokenString;
-  this->stringValue = other.toStringConcatenate();
-  this->listObjects.setSize(0);
-;
-  this->objects.clear();
-}
-
-void JSData::operator=(const List<JSData>& other) {
-  this->elementType = JSData::token::tokenArray;
-  this->listObjects.setSize(other.size);
-  for (int i = 0; i < other.size; i ++) {
-    this->listObjects[i] = other[i];
-  }
-  this->objects.clear();
-}
-
-void JSData::operator=(int64_t input) {
-  this->elementType = JSData::token::tokenLargeInteger;
-  this->integerValue.getElement().assignInt64(input);
 }
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {

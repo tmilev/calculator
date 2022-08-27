@@ -12,9 +12,29 @@
 
 class UserCalculator;
 
+// Stores a query for an item.
+// A typical item would be stored allong the lines of:
+// {
+//   "collection1": [
+//     {keyId:"id1", {key1: "XX", key2: "YY"}},
+//     {keyId:"id2", {key1: "XX", key2: "ZZ"}},
+//   ]
+// }
+// Example 1.
+// Item {keyId:"id1", {key1: "XX", key2: "YY"}} is selected with:
+// collection = "collection1"
+// nestedLabels = ["keyId"]
+// value = "id1"
+//
+// Example 2.
+// Item {keyId:"id1", {key1: "XX", key2: "YY"}} can also be selected with:
+// collection = "collection1"
+// nestedLabels = ["keyId", "key2"]
+// value = "YY"
 class QueryExact {
 public:
   std::string collection;
+  // Labels, stored in non-encoded form.
   List<std::string> nestedLabels;
   JSData value;
   QueryExact();
@@ -39,6 +59,13 @@ public:
   static std::string getLabelFromNestedLabels(
     const List<std::string>& nestedLabels
   );
+  // Returns a combination of the labels and value into JSON format,
+  // ignoring the collection name.
+  // In the example of
+  // nestedLabels = ["keyId"]
+  // value = "id1",
+  // this will return {"keyId": "id1"}
+  JSData toJSONCombineLabelsAndValue() const;
   JSData toJSON() const;
   std::string toString() const;
   bool isEmpty() const;

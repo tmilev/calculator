@@ -608,6 +608,37 @@ bool Course::Test::setDeadlines() {
   Database::Test tester;
   tester.deleteDatabase();
   tester.adminAccountCreation();
+  StateMaintainer<bool> maintainLogin(global.flagLoggedIn);
+  StateMaintainer<bool> maintainSSLFlag(
+    global.flagUsingSSLinCurrentConnection
+  );
+  StateMaintainer<UserCalculatorData> maintainUserRole(global.userDefault);
+  StateMaintainer<
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    >
+  > maintainWebArguments(global.webArguments);
+  global.flagLoggedIn = true;
+  global.userDefault.userRole = UserCalculatorData::Roles::administator;
+  global.userDefault.username = WebAPI::userDefaultAdmin;
+  global.flagUsingSSLinCurrentConnection = true;
+  global.userDefault.computeCourseInformation();
+  global.webArguments.setKeyValue(
+    WebAPI::request::teachersAndSections,
+    "{\"teachers\":\"default\",\"sections\":\"1,2\"}&"
+  );
+  std::string result = WebAPIResponse::addTeachersSections();
+  std::string wanted = "Assigned";
+  if (!StringRoutines::stringContains(result, wanted)) {
+    global.fatal
+    << "Adding teachers resulted in: "
+    << result
+    << ", expected to contain: "
+    << wanted
+    << global.fatal;
+  }
   global.setWebInput(
     WebAPI::frontend::problemFileName, "test/problems/sample1.html"
   );
@@ -625,29 +656,48 @@ bool Course::Test::setDeadlines() {
   global.setWebInput(
     DatabaseStrings::labelUsername, WebAPI::userDefaultAdmin
   );
-  global.flagLoggedIn = true;
-  global.userDefault.userRole = UserCalculatorData::Roles::administator;
   std::string deadlineResult = WebAPIResponse::setProblemDeadline();
   if (!StringRoutines::stringContains(deadlineResult, "Modified")) {
     global.fatal
     << "Expected: string that contains 'Modified'. Got: "
     << deadlineResult
-    << Logger::endL;
+    << global.fatal;
   }
   global.setWebInput(
     "mainInput",
     HtmlRoutines::convertStringToURLString(
-      "{\"test/problems/sample1\":{\"deadlines\":{\"2\":\"2023-01-01\"}},"
-      " \"test/problems/sample2\":{\"deadlines\":{\"2\":\"2023-01-01\"}}}",
+      "{\"test/problems/sample1\":{\"deadlines\":{\"1\":\"2000-00-00\",\"2\":\"2023-01-01\"}}}"
+      ,
       false
     )
   );
-  deadlineResult = WebAPIResponse::setProblemDeadline();
+  WebAPIResponse::setProblemDeadline();
+  wanted = "2000-00-00";
+  result =
+  Database::get().fallBack.databaseContent["deadlines"][0]["deadlines"][
+    "test%2fproblems%2fsample1"
+  ]["deadlines"]["1"].stringValue;
+  if (result != wanted) {
+    global.fatal
+    << "Unexpected deadline: got: "
+    << result
+    << ", wanted: "
+    << wanted
+    << global.fatal;
+  }
+  global.setWebInput(
+    "mainInput",
+    HtmlRoutines::convertStringToURLString(
+      "{\"test/problems/sample2\":{\"deadlines\":{\"2\":\"2023-01-01\"}}}",
+      false
+    )
+  );
+  WebAPIResponse::setProblemDeadline();
   if (!StringRoutines::stringContains(deadlineResult, "Modified")) {
     global.fatal
     << "Expected: string that contains 'Modified'. Got: "
     << deadlineResult
-    << Logger::endL;
+    << global.fatal;
   }
   Database::Test::tearDown();
   return true;

@@ -110,10 +110,13 @@ function getTeachersStudents() {
   let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
   let inputSections = document.getElementById('inputSections').value;
   let inputTeachers = document.getElementById('inputSetTeacher').value;
-  let teachersAndSections = {
-    teachers: encodeURIComponent(inputTeachers),
-    students: encodeURIComponent(inputSections)
-  }
+  let teachersAndSections = {};
+  teachersAndSections[
+    pathnames.urlFields.requests.teachers
+  ] = encodeURIComponent(inputTeachers);
+  teachersAndSections[
+    pathnames.urlFields.requests.sections
+  ] = encodeURIComponent(inputSections);
   theURL += `${pathnames.urlFields.teachersAndSections}=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
   submitRequests.submitGET({
     url: theURL,

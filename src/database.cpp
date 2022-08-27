@@ -126,6 +126,24 @@ std::string QueryExact::toString() const {
   return out.str();
 }
 
+JSData QueryExact::toJSONCombineLabelsAndValue() const {
+  JSData result;
+  JSData* current = &result;
+  JSData unknown;
+  std::string label;
+  for (int i = 0; i < this->nestedLabels.size - 1; i ++) {
+    label = Database::convertStringToMongoKeyString(this->nestedLabels[i]);
+    (*current)[label] = unknown;
+    current = &((*current)[label]);
+  }
+  label =
+  Database::convertStringToMongoKeyString(
+    *this->nestedLabels.lastObject()
+  );
+  (*current)[label] = this->value;
+  return result;
+}
+
 JSData QueryExact::toJSON() const {
   JSData result;
   JSData encodedKeys;
@@ -896,6 +914,8 @@ bool UserCalculatorData::computeCourseInformation() {
     // <- warning, the user may not be
     // fully logged-in yet so global.userDefaultHasAdminRights()
     // does not work right.
+    // TODO(tmilev): fix this by computing course information later when
+    // needed.
     this->sectionComputed =
     HtmlRoutines::convertURLStringToNormal(
       global.getWebInput("studentSection"), false
@@ -998,7 +1018,7 @@ bool UserCalculator::shouldCommentOnMissingUser() {
     return true;
   }
   return
-  this->username == "default" ||
+  this->username == WebAPI::userDefaultAdmin ||
   this->username == "admin" ||
   this->username == "guest" ||
   this->username == "student" ||

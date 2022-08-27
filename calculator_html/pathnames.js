@@ -32,6 +32,8 @@ const urlFields = {
     setProblemWeight: "setProblemWeight",
     setProblemDeadline: "setProblemDeadline",
     setTeacher: "setTeacher",
+    teachers: "teachers",
+    sections: "sections",
     database: "database",
     serverStatusJSON: "serverStatusJSON",
     workerId: "workerId",

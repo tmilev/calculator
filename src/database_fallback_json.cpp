@@ -45,7 +45,7 @@ bool Database::FallBack::updateOne(
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Database::FallBack::updateOneFromQueryString");
+  STACK_TRACE("Database::FallBack::updateOne");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -95,17 +95,16 @@ bool Database::FallBack::updateOneNolocks(
   }
   if (index == - 1) {
     index = this->databaseContent[findQuery.collection].listObjects.size;
-    JSData incoming;
-    incoming.elementType = JSData::token::tokenObject;
+    JSData incoming = findQuery.toJSONCombineLabelsAndValue();
     this->databaseContent[findQuery.collection].listObjects.addOnTop(incoming);
   }
-  JSData* modified =
-  &(this->databaseContent[findQuery.collection][index]);
   const MapReferences<
     std::string, JSData, HashFunctions::hashFunction<std::string>
   >& objects =
   dataToMerge.value.objects;
   for (const std::string& key : objects.keys) {
+    JSData* modified =
+    &(this->databaseContent[findQuery.collection][index]);
     List<std::string> extraLabels;
     StringRoutines::splitExcludeDelimiter(key, '.', extraLabels);
     List<std::string> labels = dataToMerge.nestedLabels;
@@ -130,6 +129,7 @@ bool Database::FallBack::updateOneEntry(
   const JSData& value,
   std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("Database::FallBack::updateOneEntry");
   (void) commentsOnFailure;
   JSData* output = &modified;
   for (int i = 0; i < labels.size - 1; i ++) {

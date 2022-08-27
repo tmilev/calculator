@@ -173,6 +173,7 @@ public:
   );
   class Test {
   public:
+    static bool scoredQuiz(bool useFallbackDatabase);
     static bool all();
     static bool solveJSON();
     static bool compareExpressions();

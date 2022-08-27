@@ -9,6 +9,8 @@
 #include "calculator.h"
 
 bool WebAPIResponse::Test::all() {
+  WebAPIResponse::Test::scoredQuiz(true);
+  WebAPIResponse::Test::scoredQuiz(false);
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
   return true;
@@ -130,6 +132,8 @@ std::string OneComparison::toString() const {
 }
 
 bool OneComparison::compare(bool hideDesiredAnswer) {
+  STACK_TRACE("OneComparison::compare");
+
   WebAPIResponse response;
   global.calculator().freeMemory();
   global.calculator().getElement().initialize(
@@ -191,6 +195,7 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
 }
 
 bool WebAPIResponse::Test::compareExpressions() {
+  STACK_TRACE("WebAPIResponse::Test::compareExpressions");
   std::string comparisonJSON;
   std::stringstream commentsOnFailure;
   if (
@@ -217,5 +222,13 @@ bool WebAPIResponse::Test::compareExpressions() {
     OneComparisonSet example;
     example.compareAll(comparison.listObjects[i]);
   }
+  return true;
+}
+
+bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase){
+  STACK_TRACE("WebAPIResponse::Test::scoredQuiz");
+  StateMaintainer<UserCalculatorData> maintainUser(global.userDefault);
+
+
   return true;
 }

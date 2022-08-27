@@ -25,8 +25,8 @@ function callbackFetchProblemData(
     let problemDataRaw = inputParsed.rows[0].problemDataJSON;
     for (let label in problemDataRaw) {
       let incomingProblem = {
-        problemName: label,
-        problemInfo: problemDataRaw[label],
+        name: label,
+        problemInformation: problemDataRaw[label],
       }
       problemData.push(incomingProblem)
     }

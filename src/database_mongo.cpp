@@ -161,7 +161,7 @@ public:
   bool flagfindOneOnly;
   MongoQuery();
   ~MongoQuery();
-  bool FindMultiple(
+  bool findMultiple(
     List<JSData>& output,
     const JSData& inputOptions,
     std::stringstream* commentsOnFailure,
@@ -174,9 +174,9 @@ public:
     std::stringstream* commentsGeneralNonSensitive
   );
   bool updateOneWithOptions(std::stringstream* commentsOnFailure);
-  bool RemoveOne(std::stringstream* commentsOnFailure);
+  bool removeOne(std::stringstream* commentsOnFailure);
   bool updateOne(std::stringstream* commentsOnFailure, bool doUpsert);
-  bool InsertOne(
+  bool insertOne(
     const JSData& incoming, std::stringstream* commentsOnFailure
   );
   bool updateOneNoOptions(std::stringstream* commentsOnFailure);
@@ -229,8 +229,8 @@ MongoQuery::~MongoQuery() {
   }
 }
 
-bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
-  STACK_TRACE("MongoQuery::RemoveOne");
+bool MongoQuery::removeOne(std::stringstream* commentsOnFailure) {
+  STACK_TRACE("MongoQuery::removeOne");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -269,13 +269,6 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
     << Logger::endL;
     return false;
   }
-  // char* bufferOutpurStringFormat = 0;
-  // bufferOutpurStringFormat =
-  // bson_as_canonical_extended_json(this->updateResult, NULL);
-  // std::string updateResultString(bufferOutpurStringFormat);
-  // bson_free(bufferOutpurStringFormat);
-  // global << Logger::red << "Update result: " << updateResultString <<
-  // Logger::endL;
   return true;
 }
 
@@ -292,10 +285,10 @@ std::string MongoQuery::toStringDebug() {
   return out.str();
 }
 
-bool MongoQuery::InsertOne(
+bool MongoQuery::insertOne(
   const JSData& incoming, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("MongoQuery::InsertOne");
+  STACK_TRACE("MongoQuery::insertOne");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -344,13 +337,6 @@ bool MongoQuery::InsertOne(
     << Logger::endL;
     return false;
   }
-  // char* bufferOutpurStringFormat = 0;
-  // bufferOutpurStringFormat =
-  // bson_as_canonical_extended_json(this->updateResult, NULL);
-  // std::string updateResultString(bufferOutpurStringFormat);
-  // bson_free(bufferOutpurStringFormat);
-  // global << Logger::red << "Update result: " << updateResultString <<
-  // Logger::endL;
   return true;
 }
 
@@ -428,13 +414,6 @@ bool MongoQuery::updateOne(
     << Logger::endL;
     return false;
   }
-  // char* bufferOutpurStringFormat = 0;
-  // bufferOutpurStringFormat =
-  // bson_as_canonical_extended_json(this->updateResult, NULL);
-  // std::string updateResultString(bufferOutpurStringFormat);
-  // bson_free(bufferOutpurStringFormat);
-  // global << Logger::red << "Update result: " << updateResultString <<
-  // Logger::endL;
   return true;
 }
 
@@ -454,7 +433,7 @@ bool MongoQuery::findOne(
 ) {
   List<JSData> outputsMultiple;
   if (
-    !this->FindMultiple(
+    !this->findMultiple(
       outputsMultiple,
       inputOptions,
       commentsOnFailure,
@@ -470,13 +449,13 @@ bool MongoQuery::findOne(
   return true;
 }
 
-bool MongoQuery::FindMultiple(
+bool MongoQuery::findMultiple(
   List<JSData>& output,
   const JSData& inputOptions,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
-  STACK_TRACE("MongoQuery::FindMultiple");
+  STACK_TRACE("MongoQuery::findMultiple");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -661,7 +640,7 @@ void Database::Mongo::createHashIndex(
   (void) collectionName;
   (void) key;
 #ifdef MACRO_use_MongoDB
-  STACK_TRACE("DatabaseRoutinesGlobalFunctionsMongo::createHashIndex");
+  STACK_TRACE("Database::Mongo::createHashIndex");
   MongoQuery query;
   std::stringstream command;
   command
@@ -827,7 +806,7 @@ bool Database::findFromJSONWithOptions(
   << options.toJSON().toString()
   << Logger::endL;
   bool result =
-  query.FindMultiple(
+  query.findMultiple(
     output,
     options.toJSON(),
     commentsOnFailure,
@@ -929,7 +908,7 @@ bool Database::Mongo::findOneWithOptions(
   mongoQuery.findQuery = query.toJSON().toString();
   mongoQuery.maxOutputItems = 1;
   List<JSData> outputList;
-  mongoQuery.FindMultiple(
+  mongoQuery.findMultiple(
     outputList,
     options.toJSON(),
     commentsOnFailure,
@@ -1138,14 +1117,14 @@ bool Database::deleteOneEntryById(
   deletedEntry["deleted"] = foundItem;
   queryInsertIntoDeletedTable.collectionName = DatabaseStrings::tableDeleted;
   if (
-    !queryInsertIntoDeletedTable.InsertOne(deletedEntry, commentsOnFailure)
+    !queryInsertIntoDeletedTable.insertOne(deletedEntry, commentsOnFailure)
   ) {
     return false;
   }
   MongoQuery query;
   query.findQuery = findQuery.toJSON().toString(nullptr);
   query.collectionName = findQuery.collection;
-  return query.RemoveOne(commentsOnFailure);
+  return query.removeOne(commentsOnFailure);
 #else
   (void) findQuery;
   if (commentsOnFailure != nullptr) {
@@ -1186,7 +1165,7 @@ bool Database::deleteOneEntryUnsetUnsecure(
   queryBackUp.collectionName = DatabaseStrings::tableDeleted;
   JSData backUp;
   backUp["deleted"] = foundItem;
-  if (!queryBackUp.InsertOne(backUp, commentsOnFailure)) {
+  if (!queryBackUp.insertOne(backUp, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to insert backup: "
@@ -1219,7 +1198,7 @@ bool Database::Mongo::updateOneFromQueryString(
   const std::string& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Database::updateOneFromQueryString");
+  STACK_TRACE("Database::Mongo::updateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.findQuery = findQuery;
@@ -1292,8 +1271,36 @@ QuerySet::QuerySet() {
   this->value.elementType = JSData::token::tokenObject;
 }
 
-QuerySet::QuerySet(const JSData& inputValue) {
-  this->value = inputValue;
+void QuerySet::makeFromRecursive(
+  const JSData& input, QuerySet& current, QuerySet& output
+) {
+  if (input.objects.size() == 0 && input.listObjects.size == 0) {
+    std::string key =
+    QueryExact::getLabelFromNestedLabels(current.nestedLabels);
+    output.value.setKeyValue(key, input);
+    return;
+  }
+  for (const std::string& key : input.objects.keys) {
+    current.nestedLabels.addOnTop(key);
+    QuerySet::makeFromRecursive(
+      input.objects.getValueNoFail(key), current, output
+    );
+    current.nestedLabels.removeLastObject();
+  }
+  for (int i = 0; i < input.listObjects.size; i ++) {
+    std::stringstream out;
+    out << i;
+    current.nestedLabels.addOnTop(out.str());
+    QuerySet::makeFromRecursive(input.listObjects[i], current, output);
+    current.nestedLabels.removeLastObject();
+  }
+}
+
+QuerySet QuerySet::makeFrom(const JSData& inputValue) {
+  QuerySet result;
+  QuerySet working;
+  QuerySet::makeFromRecursive(inputValue, working, result);
+  return result;
 }
 
 std::string QuerySet::toStringDebug() const {
@@ -1321,21 +1328,7 @@ bool QuerySet::toJSONSetMongo(
 bool QuerySet::toJSONMongo(
   JSData& output, std::stringstream* commentsOnFailure
 ) const {
-  JSData converted;
-  if (
-    !Database::convertJSONToJSONMongo(
-      this->value, converted, commentsOnFailure
-    )
-  ) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Failed to convert: "
-      << this->value.toString(nullptr)
-      << " to JSON. ";
-    }
-    return false;
-  }
-  if (converted.elementType != JSData::token::tokenObject) {
+  if (this->value.elementType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Query is not converted to an object. ";
     }
@@ -1347,9 +1340,9 @@ bool QuerySet::toJSONMongo(
   if (keyPrefix != "") {
     keyPrefix += ".";
   }
-  for (int i = 0; i < converted.objects.size(); i ++) {
-    output[keyPrefix + converted.objects.keys[i]] =
-    converted.objects.values[i];
+  for (int i = 0; i < this->value.objects.size(); i ++) {
+    output[keyPrefix + this->value.objects.keys[i]] =
+    this->value.objects.values[i];
   }
   return true;
 }
@@ -1359,7 +1352,7 @@ bool Database::Mongo::updateOne(
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Database::updateOneFromJSON");
+  STACK_TRACE("Database::Mongo::updateOne");
   JSData updateQueryJSON;
   if (!updateQuery.toJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;
@@ -1401,9 +1394,6 @@ bool Database::User::loadUserInformation(
   UserCalculatorData& output, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::User::loadUserInformation");
-  global << "DEBUG: about to load from db: " << output.toJSON() << Logger::endL;
-  global << "DEBUG: db full at start: " << Database::get().fallBack.databaseContent.toString() << Logger::endL;
-
   if (output.username == "" && output.email == "") {
     return false;
   }
@@ -1413,7 +1403,6 @@ bool Database::User::loadUserInformation(
       output.getFindMeFromUserNameQuery(), userEntry, nullptr
     )
   ) {
-    global << "DEBUG: could not login: " << userEntry.toString()<< Logger::endL;
     if (global.flagDebugLogin) {
       global.comments
       << output.toStringFindQueries()
@@ -1424,9 +1413,6 @@ bool Database::User::loadUserInformation(
     }
     return false;
   }
-  global << "DEBUG: GOt DB JSON: " << userEntry.toString() << Logger::endL;
-  global << "DEBUG: DB full: " << Database::get().fallBack.databaseContent.toString()<< Logger::endL;
-
   return output.loadFromJSON(userEntry);
 }
 
@@ -1489,14 +1475,14 @@ bool Database::Mongo::fetchCollectionNames(
 #endif
 }
 
-bool Database::FetchTable(
+bool Database::fetchTable(
   const std::string& tableName,
   List<std::string>& outputLabels,
   List<List<std::string> >& outputRows,
   long long* totalItems,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Database::FetchTable");
+  STACK_TRACE("Database::fetchTable");
   JSData findQuery;
   findQuery.elementType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
@@ -1683,7 +1669,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
 std::string Database::toHtmlDatabaseCollection(
   const std::string& currentTable
 ) {
-  STACK_TRACE("Database::ToStringDatabaseCollection");
+  STACK_TRACE("Database::toHtmlDatabaseCollection");
   std::stringstream out;
   if (currentTable == "") {
     List<std::string> collectionNames;
@@ -1708,7 +1694,7 @@ std::string Database::toHtmlDatabaseCollection(
   List<List<std::string> > rows;
   long long totalItems = - 1;
   if (
-    !Database::FetchTable(currentTable, labels, rows, &totalItems, &out)
+    !Database::fetchTable(currentTable, labels, rows, &totalItems, &out)
   ) {
     return out.str();
   }

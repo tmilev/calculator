@@ -406,7 +406,6 @@ bool Database::initializeWorker() {
   if (global.flagDatabaseCompiled) {
     this->mongoDB.initialize();
   }
-
   this->createHashIndex(
     DatabaseStrings::tableUsers, DatabaseStrings::labelUsername
   );
@@ -433,11 +432,8 @@ bool Database::initializeWorker() {
     DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername
   );
   this->flagInitializedWorker = true;
-
   return true;
 }
-
-
 
 bool Database::initializeServer() {
   STACK_TRACE("Database::initializeServer");
@@ -754,17 +750,11 @@ bool UserCalculator::loadFromDatabase(
   (void) commentsGeneral;
   (void) commentsOnFailure;
   double startTime = global.getElapsedSeconds();
-  global << "DEBUG: before load!!: " << this->username << Logger::endL;
   if (
     !Database::get().user.loadUserInformation(*this, commentsOnFailure)
   ) {
-    global << "DEBUG: can't load user info." << Logger::endL;
-    if (commentsOnFailure != nullptr) {
-      global << "DEBUG: comments on failure: " << commentsOnFailure->str() << Logger::endL;
-    }
     return false;
   }
-  global << "DEBUG: AFTER load OK!!: " << this->username << Logger::endL;
   this->computeCourseInformation();
   if (this->deadlineSchema != "") {
     QueryExact findDeadlines(
@@ -1042,7 +1032,6 @@ bool UserCalculator::authenticate(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  global << "DEBUG: loaded from db: " << this->toString() << Logger::endL;
   if (this->authenticateWithToken(&secondCommentsStream)) {
     return true;
   }
@@ -1817,7 +1806,9 @@ bool Database::User::addUsersFromEmails(
       }
       JSData activatedJSON;
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-      this->owner->updateOneFromSome(findUser, activatedJSON, &comments);
+      this->owner->updateOneFromSome(
+        findUser, QuerySet::makeFrom(activatedJSON), &comments
+      );
       if (currentUser.email != "") {
         currentUser.computeAndStoreActivationStats(&comments, &comments);
       }
@@ -2187,18 +2178,12 @@ bool Database::User::loginViaDatabase(
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return Database::User::loginNoDatabaseSupport(user, commentsOnFailure);
   }
-  global<< "DEBUG: got to here loginViaDatabase1! Input user: " << user.username << Logger::endL;
-
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(user);
-  global<< "DEBUG: USER before auth:" << userWrapper.username << Logger::endL;
   if (userWrapper.authenticate(commentsOnFailure)) {
-    global<< "DEBUG: Login success!:" << userWrapper.username << Logger::endL;
     user = userWrapper;
     return true;
   }
-  global<< "DEBUG: cant authenticate. user in db user:" << userWrapper.username << Logger::endL;
-  global<< "DEBUG: cant authenticate. user:" << user.username << Logger::endL;
   if (
     userWrapper.enteredAuthenticationToken != "" &&
     userWrapper.enteredAuthenticationToken != "0" &&
@@ -2245,58 +2230,47 @@ bool Database::User::loginViaDatabase(
       }
     }
   }
-  return this->firstLoginOfAdmin(user,userWrapper, commentsOnFailure);
+  return this->firstLoginOfAdmin(user, userWrapper, commentsOnFailure);
 }
 
-bool Database::User::firstLoginOfAdmin(UserCalculatorData& incoming, UserCalculator& userInDatabase, std::stringstream* commentsOnFailure
-){
+bool Database::User::firstLoginOfAdmin(
+  UserCalculatorData& incoming,
+  UserCalculator& userInDatabase,
+  std::stringstream* commentsOnFailure
+) {
   STACK_TRACE("Database::User::firstLoginOfAdmin");
-  global<< "DEBUG: got to here firstLoginOfAdmin! incoming: " << incoming.username
-  << "user in db: " << userInDatabase.username << Logger::endL;
-  if (
-    userInDatabase.username != WebAPI::userDefaultAdmin)
-  {
-    global<< "DEBUG: userInDatabase not admin but: " << userInDatabase.username << " admin: " << WebAPI::userDefaultAdmin << Logger::endL;
-
-    return false;}
-  if (
-    userInDatabase.enteredPassword == ""
-  ) {
+  if (userInDatabase.username != WebAPI::userDefaultAdmin) {
     return false;
   }
-    if (userInDatabase.exists(nullptr)) {
-      global<< "DEBUG: admin exists already!" << Logger::endL;
-
+  if (userInDatabase.enteredPassword == "") {
     return false;
+  }
+  if (userInDatabase.exists(nullptr)) {
+    return false;
+  }
+  // We have admin login.
+  // The admin user does not exist in the database.
+  // This is the first login, so let's set the admin account.
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "<b>First login of user default "
+    << "(= default administator account): setting password.</b> ";
+  }
+  global
+  << Logger::yellow
+  << "First login of user default: setting password."
+  << Logger::endL;
+  userInDatabase.actualActivationToken = "activated";
+  userInDatabase.userRole = UserCalculator::Roles::administator;
+  if (!userInDatabase.storeToDatabase(true, commentsOnFailure)) {
+    global << Logger::red << "Failed to store default's pass to database. ";
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to store default's pass to database. ";
+      global << commentsOnFailure->str();
     }
-    // We have admin login.
-    // The admin user does not exist in the database.
-    // This is the first login, so let's set the admin account.
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure
-        << "<b>First login of user default "
-        << "(= default administator account): setting password.</b> ";
-      }
-      global
-      << Logger::yellow
-      << "First login of user default: setting password."
-      << Logger::endL;
-      userInDatabase.actualActivationToken = "activated";
-      userInDatabase.userRole = UserCalculator::Roles::administator;
-      if (!userInDatabase.storeToDatabase(true, commentsOnFailure)) {
-        global
-        << Logger::red
-        << "Failed to store default's pass to database. ";
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Failed to store default's pass to database. ";
-          global << commentsOnFailure->str();
-        }
-      }
-      incoming = userInDatabase;
-      global << "DEBUG: Full database: " << Database::get().fallBack.databaseContent.toString() << Logger::endL;
-      return true;
-
-
+  }
+  incoming = userInDatabase;
+  return true;
 }
 
 void UserCalculator::computeHashedSaltedPassword() {
@@ -2339,7 +2313,10 @@ bool UserCalculator::storeToDatabase(
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->toJSON();
-  return Database::get().updateOne(findUser, setUser, commentsOnFailure);
+  return
+  Database::get().updateOne(
+    findUser, QuerySet::makeFrom(setUser), commentsOnFailure
+  );
 }
 
 bool UserCalculator::getActivationAddressFromActivationToken(

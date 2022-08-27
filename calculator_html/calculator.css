@@ -537,7 +537,7 @@ span.panelDeadlines {
   max-height: 0;
   margin-top: 0px;
   margin-bottom: 0px;
-  overflow: hidden;
+  overflow: auto;
   transition: 1s linear;
   opacity: 0;
 }

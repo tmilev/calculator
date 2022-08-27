@@ -7,7 +7,6 @@
 #include "crypto.h"
 
 std::string Database::Test::adminPassword = "111";
-
 Database::Test::Test() {
   this->setUp();
 }

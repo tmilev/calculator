@@ -2944,18 +2944,20 @@ int ProblemData::getExpectedNumberOfAnswers(
   << this->knownNumberOfAnswersFromHD
   << Logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
-  JSData newDBentry;
   QueryExact findEntry(
     DatabaseStrings::tableProblemInformation,
     DatabaseStrings::labelProblemFileName,
     problemName
   );
+  JSData newDBentry;
   newDBentry[DatabaseStrings::labelProblemFileName] = problemName;
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] =
   stringConverter.str();
-  Database::get().updateOne(findEntry, newDBentry, &commentsOnFailure);
+  Database::get().updateOne(
+    findEntry, QuerySet::makeFrom(newDBentry), &commentsOnFailure
+  );
   return this->knownNumberOfAnswersFromHD;
 }
 

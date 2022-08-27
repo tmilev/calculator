@@ -354,15 +354,17 @@ bool WebAPIResponse::processChangePassword(
     result[WebAPI::result::error] = commentsOnFailure.str();
     return global.response.writeResponse(result);
   }
-  JSData setQuery;
   QueryExact findQuery(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     user.username
   );
+  JSData setQuery;
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
   if (
-    !Database::get().updateOne(findQuery, setQuery, &commentsOnFailure)
+    !Database::get().updateOne(
+      findQuery, QuerySet::makeFrom(setQuery), &commentsOnFailure
+    )
   ) {
     result[WebAPI::result::error] =
     "Failed to set activationToken: " + commentsOnFailure.str();

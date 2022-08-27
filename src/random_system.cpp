@@ -17,7 +17,6 @@
 void Crypto::Random::initializeRandomBytesForTesting() {
   List<unsigned char>& output = global.randomBytesCurrent;
   output.initializeFillInObject(global.numberOfRandomBytes, 0);
-
 }
 
 void Crypto::Random::initializeRandomBytes() {

@@ -93,21 +93,49 @@ bool Database::FallBack::updateOneNolocks(
     }
     return false;
   }
-  global << "DEBUG: got to here. Nested labels: " << dataToMerge.nestedLabels.toStringCommaDelimited() << Logger::endL;
   if (index == - 1) {
     index = this->databaseContent[findQuery.collection].listObjects.size;
     JSData incoming;
     incoming.elementType = JSData::token::tokenObject;
     this->databaseContent[findQuery.collection].listObjects.addOnTop(incoming);
   }
-  JSData* modified = &(this->databaseContent[findQuery.collection][index]);
-  for (int i = 0; i < dataToMerge.nestedLabels.size; i ++) {
-    modified = &((*modified)[dataToMerge.nestedLabels[i]]);
+  JSData* modified =
+  &(this->databaseContent[findQuery.collection][index]);
+  const MapReferences<
+    std::string, JSData, HashFunctions::hashFunction<std::string>
+  >& objects =
+  dataToMerge.value.objects;
+  for (const std::string& key : objects.keys) {
+    List<std::string> extraLabels;
+    StringRoutines::splitExcludeDelimiter(key, '.', extraLabels);
+    List<std::string> labels = dataToMerge.nestedLabels;
+    labels.addListOnTop(extraLabels);
+    if (
+      !this->updateOneEntry(
+        *modified,
+        labels,
+        objects.getValueNoFail(key),
+        commentsOnFailure
+      )
+    ) {
+      return false;
+    }
   }
-  for (int i = 0; i < dataToMerge.value.objects.size(); i ++) {
-    (*modified)[dataToMerge.value.objects.keys[i]] =
-    dataToMerge.value.objects.values[i];
+  return true;
+}
+
+bool Database::FallBack::updateOneEntry(
+  JSData& modified,
+  const List<std::string>& labels,
+  const JSData& value,
+  std::stringstream* commentsOnFailure
+) {
+  (void) commentsOnFailure;
+  JSData* output = &modified;
+  for (int i = 0; i < labels.size - 1; i ++) {
+    output = &((*output)[labels[i]]);
   }
+  output->setKeyValue(labels[labels.size - 1], value);
   return true;
 }
 
@@ -118,12 +146,9 @@ bool Database::FallBack::findOne(
 ) {
   STACK_TRACE("Database::FallBack::findOne");
   MutexProcesslockGuard guardDB(this->access);
-  global << "DEBUG: about to read and index DB. " << Logger::endL;
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     return false;
   }
-  global << "DEBUG: full DB: " << this->databaseContent.toString()
-  << ". Indices: " << this->toStringIndices()  << Logger::endL;
   int index = - 1;
   if (
     !this->findIndexOneNolocksMinusOneNotFound(
@@ -201,7 +226,8 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     }
     return false;
   }
-  Database::FallBack::Index& currentIndex = this->indices.getValueCreateEmpty(key);
+  Database::FallBack::Index& currentIndex =
+  this->indices.getValueCreateEmpty(key);
   if (query.value.elementType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound
@@ -279,13 +305,19 @@ void Database::FallBack::initialize() {
   this->knownIndices.addListOnTop({
       DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername,
       DatabaseStrings::tableUsers + "." + DatabaseStrings::labelEmail,
-  DatabaseStrings::tableEmailInfo + "." + DatabaseStrings::labelEmail,
-  DatabaseStrings::tableDeadlines + "." + DatabaseStrings::labelDeadlinesSchema,
+      DatabaseStrings::tableEmailInfo + "." + DatabaseStrings::labelEmail,
+      DatabaseStrings::tableDeadlines +
+      "." +
+      DatabaseStrings::labelDeadlinesSchema,
 
     }
   );
   this->knownCollections.addListOnTop({
-      DatabaseStrings::tableUsers, DatabaseStrings::tableEmailInfo,DatabaseStrings::tableDeadlines, DatabaseStrings::tableProblemWeights, DatabaseStrings::tableProblemInformation
+      DatabaseStrings::tableUsers,
+      DatabaseStrings::tableEmailInfo,
+      DatabaseStrings::tableDeadlines,
+      DatabaseStrings::tableProblemWeights,
+      DatabaseStrings::tableProblemInformation
     }
   );
 }
@@ -317,9 +349,10 @@ bool Database::FallBack::readAndIndexDatabase(
   if (!this->readDatabase(commentsOnFailure)) {
     return false;
   }
-return this->indexDatabase(commentsOnFailure);
+  return this->indexDatabase(commentsOnFailure);
 }
-bool Database::FallBack::indexDatabase(std::stringstream *commentsOnFailure){
+
+bool Database::FallBack::indexDatabase(std::stringstream* commentsOnFailure) {
   STACK_TRACE("Database::FallBack::indexDatabase");
   (void) commentsOnFailure;
   this->indices.clear();
@@ -365,10 +398,11 @@ void Database::FallBack::indexOneRecord(
 }
 
 bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
- if(! this->indexDatabase(commentsOnFailure)){
- return false;
- }
- return  FileOperations::writeFileVirualWithPermissions(
+  if (!this->indexDatabase(commentsOnFailure)) {
+    return false;
+  }
+  return
+  FileOperations::writeFileVirualWithPermissions(
     Database::FallBack::databaseFilename,
     this->databaseContent.toString(nullptr),
     true,

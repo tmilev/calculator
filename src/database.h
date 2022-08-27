@@ -12,7 +12,6 @@
 
 class UserCalculator;
 
-
 class QueryExact {
 public:
   std::string collection;
@@ -46,11 +45,17 @@ public:
 };
 
 class QuerySet {
+private:
+  static void makeFromRecursive(
+    const JSData& input, QuerySet& current, QuerySet& output
+  );
 public:
+  // Nested labels, %-encoding.
   List<std::string> nestedLabels;
+  // Key-value pairs to be set. All keys of this collection must be %-encoded.
   JSData value;
   QuerySet();
-  QuerySet(const JSData& inputValue);
+  static QuerySet makeFrom(const JSData& inputValue);
   bool toJSONMongo(JSData& output, std::stringstream* commentsOnFailure) const;
   bool toJSONSetMongo(
     JSData& output, std::stringstream* commentsOnFailure
@@ -66,9 +71,7 @@ public:
   void makeProjection(const List<std::string>& fields);
 };
 
-
 class Database {
-
 public:
   bool flagInitializedServer;
   bool flagInitializedWorker;
@@ -87,9 +90,11 @@ public:
   static std::string toString();
   class User {
   private:
-    bool firstLoginOfAdmin(UserCalculatorData& incoming, UserCalculator &userInDatabase, std::stringstream* commentsOnFailure
+    bool firstLoginOfAdmin(
+      UserCalculatorData& incoming,
+      UserCalculator& userInDatabase,
+      std::stringstream* commentsOnFailure
     );
-
   public:
     Database* owner;
     bool logoutViaDatabase();
@@ -149,6 +154,17 @@ public:
   class FallBack {
   private:
     bool initialized;
+    bool updateOneNolocks(
+      const QueryExact& findQuery,
+      const QuerySet& updateQuery,
+      std::stringstream* commentsOnFailure = nullptr
+    );
+    bool updateOneEntry(
+      JSData& modified,
+      const List<std::string>& labels,
+      const JSData& value,
+      std::stringstream* commentsOnFailure = nullptr
+    );
   public:
     Database* owner;
     MutexProcess access;
@@ -199,11 +215,6 @@ public:
       const QueryExact& query,
       int& output,
       std::stringstream* commentsOnNotFound
-    );
-    bool updateOneNolocks(
-      const QueryExact& findQuery,
-      const QuerySet& updateQuery,
-      std::stringstream* commentsOnFailure = nullptr
     );
     bool fetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
@@ -357,7 +368,7 @@ public:
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
-  static bool FetchTable(
+  static bool fetchTable(
     const std::string& tableName,
     List<std::string>& outputLabels,
     List<List<std::string> >& outputRows,

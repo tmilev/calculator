@@ -895,7 +895,8 @@ bool WebWorker::loginProcedure(
     << "Invalid user and/or authentication. ";
   }
   arguments.setKeyValue(
-    DatabaseStrings::labelPassword, "********************************************"
+    DatabaseStrings::labelPassword,
+    "********************************************"
   );
   return true;
 }
@@ -1943,7 +1944,6 @@ std::string WebWorker::getChangePasswordPagePartOne(
     DatabaseStrings::labelEmail,
     claimedEmail
   );
-  JSData userInfo;
   QuerySet emailInfo;
   if (!Database::get().findOne(findEmail, emailInfo.value, &out)) {
     out
@@ -1977,13 +1977,18 @@ std::string WebWorker::getChangePasswordPagePartOne(
     << "</b>";
     return out.str();
   }
-  userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   QueryExact findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     global.userDefault.username
   );
-  if (!Database::get().updateOne(findUser, userInfo, &out)) {
+  JSData userInfo;
+  userInfo[DatabaseStrings::labelEmail] = claimedEmail;
+  if (
+    !Database::get().updateOne(
+      findUser, QuerySet::makeFrom(userInfo), &out
+    )
+  ) {
     out
     << "\n<b style ='color:red'>"
     << "Could not store your email (database is down?). </b>";

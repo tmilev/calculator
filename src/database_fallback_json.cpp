@@ -40,6 +40,22 @@ bool Database::FallBack::findOneFromSome(
   return false;
 }
 
+bool Database::FallBack::updateOneFromSome(
+  const List<QueryExact>& findOrQueries,
+  const QuerySet& updateQuery,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::FallBack::updateOneFromSome");
+  JSData unusedOutput;
+  for (const QueryExact& query : findOrQueries) {
+    if (!this->findOne(query, unusedOutput, commentsOnFailure)) {
+      continue;
+    }
+    return this->updateOne(query, updateQuery, commentsOnFailure);
+  }
+  return false;
+}
+
 bool Database::FallBack::updateOne(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,
@@ -105,10 +121,8 @@ bool Database::FallBack::updateOneNolocks(
   for (const std::string& key : objects.keys) {
     JSData* modified =
     &(this->databaseContent[findQuery.collection][index]);
-    List<std::string> extraLabels;
-    StringRoutines::splitExcludeDelimiter(key, '.', extraLabels);
-    List<std::string> labels = dataToMerge.nestedLabels;
-    labels.addListOnTop(extraLabels);
+    List<std::string> labels;
+    StringRoutines::splitExcludeDelimiter(key, '.', labels);
     if (
       !this->updateOneEntry(
         *modified,

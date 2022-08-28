@@ -245,7 +245,6 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
 ) {
   STACK_TRACE("CalculatorHTML::toQuerySetProblemWeights");
   QuerySet output;
-  output.nestedLabels.addOnTop(DatabaseStrings::labelProblemWeight);
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem =
     inputProblemInfo.values[i].adminData;
@@ -272,7 +271,11 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
     }
     JSData currentWeight;
     currentWeight[DatabaseStrings::labelProblemWeight] = currentProblemJSON;
-    output.value[currentProblemName] = currentWeight;
+    std::string key =
+    QueryExact::getLabelFromNestedLabels(
+      DatabaseStrings::labelProblemWeight, currentProblemName
+    );
+    output.value[key] = currentWeight;
   }
   return output;
 }
@@ -5084,6 +5087,10 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
     return true;
   }
   if (this->topicListContent == "") {
+    if (this->topicListFileName == "") {
+      comments << "No topic list provided. ";
+      return false;
+    }
     if (
       !FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
         this->topicListFileName, this->topicListContent, &comments

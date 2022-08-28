@@ -16,26 +16,38 @@ class UserCalculator;
 // A typical item would be stored allong the lines of:
 // {
 //   "collection1": [
-//     {keyId:"id1", {key1: "XX", key2: "YY"}},
-//     {keyId:"id2", {key1: "XX", key2: "ZZ"}},
+//     {
+//       keyId:"id1", value1: {
+//         key1: "XX", key2: "YY", "nasty%2fencoded%2fkey": "AA"
+//       }
+//     },
+//     {keyId:"id2", value1: {key1: "XX", key2: "ZZ"}},
 //   ]
 // }
 // Example 1.
-// Item {keyId:"id1", {key1: "XX", key2: "YY"}} is selected with:
+// Item {keyId:"id1", value1: {key1: "XX", key2: "YY"}} is selected with:
 // collection = "collection1"
 // nestedLabels = ["keyId"]
 // value = "id1"
 //
 // Example 2.
-// Item {keyId:"id1", {key1: "XX", key2: "YY"}} can also be selected with:
+// Item {keyId:"id1", value1: {key1: "XX", key2: "YY"}} can also be selected
+// with:
 // collection = "collection1"
-// nestedLabels = ["keyId", "key2"]
+// nestedLabels = ["value1", "key2"]
 // value = "YY"
+//
+// Important. All keys in our database are expected to not contain a dot,
+// as that conflicts with MongoDB's syntax for selection of sub-JSON.
+// To ensure that, all keys in our database are assumed to be %-encoded.
+// Final values [leaf nodes when representing our JSON as a tree]
+// in our database are allowed to contain dots and need not be %-encoded.
 class QueryExact {
 public:
   std::string collection;
   // Labels, stored in non-encoded form.
   List<std::string> nestedLabels;
+  // Exact values we are looking for. All keys must be %-encoded.
   JSData value;
   QueryExact();
   QueryExact(
@@ -59,6 +71,9 @@ public:
   static std::string getLabelFromNestedLabels(
     const List<std::string>& nestedLabels
   );
+  static std::string getLabelFromNestedLabels(
+    const std::string& first, const std::string& second
+  );
   // Returns a combination of the labels and value into JSON format,
   // ignoring the collection name.
   // In the example of
@@ -71,23 +86,46 @@ public:
   bool isEmpty() const;
 };
 
+// Stores a recipe for updating an item.
+// A typical item would be stored allong the lines of:
+// {
+//   "collection1": [
+//     {
+//       keyId:"id1", value1: {
+//         key1: "XX", key2: "YY", "nasty%2fencoded%2fkey": "AA"
+//       }
+//     },
+//     {keyId:"id2", value1: {key1: "XX", key2: "ZZ"}},
+//   ]
+// }
 class QuerySet {
 private:
   static void makeFromRecursive(
-    const JSData& input, QuerySet& current, QuerySet& output
+    const JSData& input,
+    List<std::string>& nestedLabels,
+    QuerySet& output
   );
 public:
-  // Nested labels, %-encoding.
-  List<std::string> nestedLabels;
-  // Key-value pairs to be set. All keys of this collection must be %-encoded.
+  // Key-value pairs to be set.
+  // 1. All keys that contain dots are regarded as sub-field selectors.
+  // The query:
+  // nestedLabels=[]
+  // value = {"key1.value1": "XXY"}
+  // will set the value1.key1 sub-key of an item.
+  // 2. All keys of this json that do not contain
+  // dots are expected to be %-encoded.
   JSData value;
   QuerySet();
   static QuerySet makeFrom(const JSData& inputValue);
-  bool toJSONMongo(JSData& output, std::stringstream* commentsOnFailure) const;
   bool toJSONSetMongo(
     JSData& output, std::stringstream* commentsOnFailure
   ) const;
   std::string toStringDebug() const;
+  class Test {
+  public:
+    static bool all();
+    static bool basics(bool useFallbackDatabase);
+  };
 };
 
 class QueryResultOptions {
@@ -226,6 +264,11 @@ public:
     bool deleteDatabase(std::stringstream* commentsOnFailure);
     bool updateOne(
       const QueryExact& findQuery,
+      const QuerySet& updateQuery,
+      std::stringstream* commentsOnFailure = nullptr
+    );
+    bool updateOneFromSome(
+      const List<QueryExact>& findOrQueries,
       const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
@@ -466,6 +509,7 @@ public:
     static bool all();
     static bool basics(bool useFallbackDatabase);
     bool deleteDatabase();
+    void initializeForDatabaseOperations();
     bool createAdminAccount();
     Test(bool useFallbackDatabase);
   };

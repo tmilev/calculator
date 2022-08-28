@@ -51,10 +51,15 @@ bool Database::Test::deleteDatabase() {
   return true;
 }
 
-bool Database::Test::createAdminAccount() {
-  STACK_TRACE("Database::Test::createAdminAccount");
+void Database::Test::initializeForDatabaseOperations() {
+  STACK_TRACE("Database::Test::initializeForDatabaseOperations");
   Database::get().initializeServer();
   Crypto::Random::initializeRandomBytesForTesting();
+}
+
+bool Database::Test::createAdminAccount() {
+  STACK_TRACE("Database::Test::createAdminAccount");
+  this->initializeForDatabaseOperations();
   UserCalculatorData userData;
   userData.username = WebAPI::userDefaultAdmin;
   userData.enteredPassword = Database::Test::adminPassword;
@@ -65,6 +70,64 @@ bool Database::Test::createAdminAccount() {
     global.fatal
     << "Failed to login as administrator on an empty database. "
     << commentsOnFailure.str()
+    << global.fatal;
+  }
+  return true;
+}
+
+bool QuerySet::Test::all() {
+  QuerySet::Test::basics(true);
+  QuerySet::Test::basics(false);
+  return true;
+}
+
+bool QuerySet::Test::basics(bool useFallbackDatabase) {
+  Database::Test tester(useFallbackDatabase);
+  tester.deleteDatabase();
+  tester.initializeForDatabaseOperations();
+  QueryExact find;
+  find.collection = DatabaseStrings::tableUsers;
+  find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
+  find.value = "ttt";
+  QuerySet updater;
+  updater.value.parse(
+    "{" +
+    DatabaseStrings::labelUsername +
+    ":\"ttt\", " +
+    QueryExact::getLabelFromNestedLabels(
+      List<std::string>({"a", "b", "c"})
+    ) +
+    ": \"123\"",
+    true
+  );
+  std::stringstream comments;
+  if (!Database::get().updateOne(find, updater, &comments)) {
+    global.fatal
+    << "Failed to update using finder:\n"
+    << find.toString()
+    << "\nupdater:\n"
+    << updater.toStringDebug()
+    << "\ncomments:\n"
+    << comments.str()
+    << global.fatal;
+  }
+  JSData found;
+  if (!Database::get().findOne(find, found, &comments)) {
+    global.fatal
+    << "Failed to find updated:\n"
+    << find.toString()
+    << "\ncomments:\n"
+    << comments.str()
+    << global.fatal;
+  }
+  std::string expected =
+  "{\"username\":\"ttt\",\"a\":{\"b\":{\"c\":\"123\"}}}";
+  if (expected != found.toString()) {
+    global.fatal
+    << "Expected does not match found. Found:\n"
+    << found.toString()
+    << "\nExpected:\n"
+    << expected
     << global.fatal;
   }
   return true;

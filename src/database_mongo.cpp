@@ -908,6 +908,7 @@ bool Database::Mongo::findOneWithOptions(
   mongoQuery.findQuery = query.toJSON().toString();
   mongoQuery.maxOutputItems = 1;
   List<JSData> outputList;
+  global << "DEBUG: about to find: " << query.toString() << Logger::endL;
   mongoQuery.findMultiple(
     outputList,
     options.toJSON(),
@@ -1227,10 +1228,10 @@ bool Database::updateOneFromSome(
       findOrQueries, updateQuery, commentsOnFailure
     );
   }
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database::updateOneFromSome not implemented yet. ";
-  }
-  return false;
+  return
+  this->fallBack.updateOneFromSome(
+    findOrQueries, updateQuery, commentsOnFailure
+  );
 }
 
 bool Database::Mongo::updateOneFromSome(
@@ -1272,34 +1273,37 @@ QuerySet::QuerySet() {
 }
 
 void QuerySet::makeFromRecursive(
-  const JSData& input, QuerySet& current, QuerySet& output
+  const JSData& input,
+  List<std::string>& nestedLabels,
+  QuerySet& output
 ) {
   if (input.objects.size() == 0 && input.listObjects.size == 0) {
-    std::string key =
-    QueryExact::getLabelFromNestedLabels(current.nestedLabels);
+    std::string key = QueryExact::getLabelFromNestedLabels(nestedLabels);
     output.value.setKeyValue(key, input);
     return;
   }
   for (const std::string& key : input.objects.keys) {
-    current.nestedLabels.addOnTop(key);
+    nestedLabels.addOnTop(key);
     QuerySet::makeFromRecursive(
-      input.objects.getValueNoFail(key), current, output
+      input.objects.getValueNoFail(key), nestedLabels, output
     );
-    current.nestedLabels.removeLastObject();
+    nestedLabels.removeLastObject();
   }
   for (int i = 0; i < input.listObjects.size; i ++) {
     std::stringstream out;
     out << i;
-    current.nestedLabels.addOnTop(out.str());
-    QuerySet::makeFromRecursive(input.listObjects[i], current, output);
-    current.nestedLabels.removeLastObject();
+    nestedLabels.addOnTop(out.str());
+    QuerySet::makeFromRecursive(
+      input.listObjects[i], nestedLabels, output
+    );
+    nestedLabels.removeLastObject();
   }
 }
 
 QuerySet QuerySet::makeFrom(const JSData& inputValue) {
   QuerySet result;
-  QuerySet working;
-  QuerySet::makeFromRecursive(inputValue, working, result);
+  List<std::string> nestedLabels;
+  QuerySet::makeFromRecursive(inputValue, nestedLabels, result);
   return result;
 }
 
@@ -1316,34 +1320,9 @@ std::string QuerySet::toStringDebug() const {
 bool QuerySet::toJSONSetMongo(
   JSData& output, std::stringstream* commentsOnFailure
 ) const {
-  JSData data;
-  if (!this->toJSONMongo(data, commentsOnFailure)) {
-    return false;
-  }
+  (void) commentsOnFailure;
   output.reset(JSData::token::token::tokenObject);
-  output["$set"] = data;
-  return true;
-}
-
-bool QuerySet::toJSONMongo(
-  JSData& output, std::stringstream* commentsOnFailure
-) const {
-  if (this->value.elementType != JSData::token::tokenObject) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Query is not converted to an object. ";
-    }
-    return false;
-  }
-  output.reset(JSData::token::tokenObject);
-  std::string keyPrefix =
-  QueryExact::getLabelFromNestedLabels(this->nestedLabels);
-  if (keyPrefix != "") {
-    keyPrefix += ".";
-  }
-  for (int i = 0; i < this->value.objects.size(); i ++) {
-    output[keyPrefix + this->value.objects.keys[i]] =
-    this->value.objects.values[i];
-  }
+  output["$set"] = this->value;
   return true;
 }
 

@@ -229,10 +229,15 @@ bool WebAPIResponse::Test::compareExpressions() {
 
 bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   STACK_TRACE("WebAPIResponse::Test::scoredQuiz");
+  global
+  << "Test scored quiz. "
+  << Logger::blue
+  << Database::toString()
+  << Logger::endL;
   Course::Test::Setup setup(useFallbackDatabase);
   setup.deleteDatabaseSetupAll();
-  global.webArguments[WebAPI::problem::fileName] =
-  "test/problems/sample1.html";
+  std::string sample = "test/problems/sample1.html";
+  global.webArguments[WebAPI::problem::fileName] = sample;
   global.requestType = WebAPI::frontend::scoredQuiz;
   JSData resultFirst = WebAPIResponse::getExamPageJSON();
   JSData resultSecond = WebAPIResponse::getExamPageJSON();
@@ -256,10 +261,29 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
     << resultFirst.toString()
     << global.fatal;
   }
-  global
-  << "Test scored quiz. "
-  << Logger::blue
-  << Database::toString()
-  << Logger::endL;
+  JSData problemRecord;
+  QueryExact userQuery;
+  userQuery.collection = DatabaseStrings::tableUsers;
+  userQuery.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
+  userQuery.value = WebAPI::userDefaultAdmin;
+  JSData recordedProblem;
+  std::stringstream comments;
+  if (
+    !Database::get().findOne(userQuery, recordedProblem, &comments)
+  ) {
+    global.fatal << "Failed to find admin user. " << global.fatal;
+  }
+  std::string samplePercentEncoded =
+  HtmlRoutines::convertStringToURLString(sample, false);
+  std::string randomSeed =
+  recordedProblem[DatabaseStrings::labelProblemDataJSON][samplePercentEncoded][
+    "randomSeed"
+  ].stringValue;
+  if (randomSeed == "") {
+    global.fatal
+    << "Expected non-empty random seed in problem record:\n"
+    << recordedProblem.toString()
+    << global.fatal;
+  }
   return true;
 }

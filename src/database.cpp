@@ -161,6 +161,15 @@ JSData QueryExact::toJSON() const {
 }
 
 std::string QueryExact::getLabelFromNestedLabels(
+  const std::string& first, const std::string& second
+) {
+  return
+  QueryExact::getLabelFromNestedLabels(
+    List<std::string>({first, second})
+  );
+}
+
+std::string QueryExact::getLabelFromNestedLabels(
   const List<std::string>& nestedLabels
 ) {
   std::stringstream out;
@@ -205,6 +214,11 @@ bool Database::convertJSONToJSONMongo(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
+  if (&input == &output) {
+    JSData inputCopy = input;
+    return
+    Database::convertJSONToJSONMongo(inputCopy, output, commentsOnFailure);
+  }
   return
   Database::convertJSONToJSONEncodeKeys(
     input, output, 0, true, commentsOnFailure
@@ -1701,8 +1715,12 @@ bool UserCalculator::storeProblemData(
   }
   const ProblemData& problem = this->problemData.getValueNoFail(fileName);
   QuerySet update;
-  update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
+  std::string key =
+  QueryExact::getLabelFromNestedLabels(
+    DatabaseStrings::labelProblemDataJSON, fileName
+  );
   update.value[fileName] = problem.storeJSON();
+  Database::convertJSONToJSONMongo(update.value, update.value);
   return
   Database::get().updateOneFromSome(
     this->getFindMeFromUserNameQuery(), update, commentsOnFailure

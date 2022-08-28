@@ -1236,9 +1236,6 @@ bool CalculatorBasics::minus(
   return true;
 }
 
-
-
-
 SemisimpleLieAlgebra* Expression::
 getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const {
   STACK_TRACE(

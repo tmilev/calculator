@@ -682,6 +682,24 @@ public:
   public:
     static bool all();
     static bool setDeadlines();
+    class Setup {
+      StateMaintainer<bool> maintainLogin;
+      StateMaintainer<bool> maintainerDatabase;
+      StateMaintainer<bool> maintainSSLFlag;
+      StateMaintainer<UserCalculatorData> maintainUserRole;
+      StateMaintainer<
+        MapList<
+          std::string,
+          std::string,
+          HashFunctions::hashFunction<std::string>
+        >
+      > maintainWebArguments;
+      StateMaintainer<std::string> maintainRequestType;
+    public:
+      Database::Test databaseTester;
+      Setup(bool useFallbackDatabase);
+      bool deleteDatabaseSetupAll();
+    };
   };
 };
 

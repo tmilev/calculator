@@ -79,6 +79,8 @@ public:
   void operator=(const Vector<Coefficient>& other);
   template <typename Coefficient>
   void operator=(const Matrix<Coefficient>& other);
+  bool operator==(const JSData& other) const;
+  bool operator!=(const JSData& other) const;
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
   JSData getValue(const std::string& key);
@@ -169,7 +171,6 @@ public:
     const std::string& input,
     std::stringstream* commentsOnFailure
   );
-  bool operator==(const JSData& other) const;
   bool parse(
     const std::string& json,
     bool relaxedInput = false,

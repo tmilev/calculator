@@ -1116,6 +1116,10 @@ bool JSData::operator==(const JSData& other) const {
   return this->toString() == other.toString();
 }
 
+bool JSData::operator!=(const JSData& other) const {
+  return !(*this == other);
+}
+
 std::ostream& operator<<(std::ostream& out, const JSData& data) {
   return data.intoStream(out, nullptr);
 }

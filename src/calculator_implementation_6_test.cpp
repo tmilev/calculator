@@ -600,30 +600,22 @@ bool Course::Test::all() {
   return true;
 }
 
-bool Course::Test::setDeadlines() {
-  STACK_TRACE("Course::Test::setDeadlines");
-  StateMaintainer<bool> maintainer(global.flagDatabaseCompiled);
-  global.flagDatabaseCompiled = false;
-  Database::Test::setUp();
-  Database::Test tester;
-  tester.deleteDatabase();
-  tester.adminAccountCreation();
-  StateMaintainer<bool> maintainLogin(global.flagLoggedIn);
-  StateMaintainer<bool> maintainSSLFlag(
-    global.flagUsingSSLinCurrentConnection
-  );
-  StateMaintainer<UserCalculatorData> maintainUserRole(global.userDefault);
-  StateMaintainer<
-    MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    >
-  > maintainWebArguments(global.webArguments);
+Course::Test::Setup::Setup(bool useFallbackDatabase):
+databaseTester(useFallbackDatabase) {
+  this->maintainLogin.initialize(global.flagLoggedIn);
+  this->maintainSSLFlag.initialize(global.flagUsingSSLinCurrentConnection);
+  this->maintainUserRole.initialize(global.userDefault);
+  this->maintainWebArguments.initialize(global.webArguments);
+  this->maintainRequestType.initialize(global.requestType);
   global.flagLoggedIn = true;
   global.userDefault.userRole = UserCalculatorData::Roles::administator;
   global.userDefault.username = WebAPI::userDefaultAdmin;
   global.flagUsingSSLinCurrentConnection = true;
+}
+
+bool Course::Test::Setup::deleteDatabaseSetupAll() {
+  this->databaseTester.deleteDatabase();
+  this->databaseTester.createAdminAccount();
   global.userDefault.computeCourseInformation();
   global.webArguments.setKeyValue(
     WebAPI::request::teachersAndSections,
@@ -639,6 +631,13 @@ bool Course::Test::setDeadlines() {
     << wanted
     << global.fatal;
   }
+  return true;
+}
+
+bool Course::Test::setDeadlines() {
+  STACK_TRACE("Course::Test::setDeadlines");
+  Course::Test::Setup setup(false);
+  setup.deleteDatabaseSetupAll();
   global.setWebInput(
     WebAPI::frontend::problemFileName, "test/problems/sample1.html"
   );
@@ -672,8 +671,8 @@ bool Course::Test::setDeadlines() {
     )
   );
   WebAPIResponse::setProblemDeadline();
-  wanted = "2000-00-00";
-  result =
+  std::string wanted = "2000-00-00";
+  std::string result =
   Database::get().fallBack.databaseContent["deadlines"][0]["deadlines"][
     "test%2fproblems%2fsample1"
   ]["deadlines"]["1"].stringValue;
@@ -699,6 +698,5 @@ bool Course::Test::setDeadlines() {
     << deadlineResult
     << global.fatal;
   }
-  Database::Test::tearDown();
   return true;
 }

@@ -555,7 +555,7 @@ bool GlobalVariables::userRequestRequiresLoadingRealExamData() {
   return
   this->flagLoggedIn && (
     this->requestType == "scoredQuiz" ||
-    this->requestType == "scoredQuizJSON" ||
+    this->requestType == WebAPI::frontend::scoredQuiz ||
     this->requestType == "submitAnswers" ||
     this->requestType == "submitAnswersPreview"
   );

@@ -7,15 +7,12 @@
 #include "crypto.h"
 
 std::string Database::Test::adminPassword = "111";
-Database::Test::Test() {
-  this->setUp();
-}
-
-Database::Test::~Test() {
-  this->tearDown();
-}
-
-void Database::Test::setUp() {
+Database::Test::Test(bool useFallbackDatabase) {
+  this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
+  this->maintainerDatabase.initialize(global.flagDatabaseCompiled);
+  if (useFallbackDatabase) {
+    global.flagDatabaseCompiled = false;
+  }
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "calculatortest";
   Database::FallBack::databaseFilename = "test/test_database.json";
@@ -23,41 +20,22 @@ void Database::Test::setUp() {
   Database::get().initializeWorker();
 }
 
-void Database::Test::tearDown() {
-  global.flagServerForkedIntoWorker = false;
-  DatabaseStrings::databaseName = "calculatortest";
-}
-
 bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
-  Database::Test::basicsMongoOrFallback();
-  Database::Test::basicsFallback();
+  Database::Test::basics(false);
+  Database::Test::basics(true);
   return true;
 }
 
-bool Database::Test::basicsMongoOrFallback() {
-  STACK_TRACE("Database::Test::basicsMongoOrFallback");
+bool Database::Test::basics(bool useFallbackDatabase) {
+  STACK_TRACE("Database::Test::basics");
   global
   << "Testing default database. "
   << Database::toString()
   << Logger::endL;
-  Database::Test tester;
+  Database::Test tester(useFallbackDatabase);
   tester.deleteDatabase();
-  tester.adminAccountCreation();
-  return true;
-}
-
-bool Database::Test::basicsFallback() {
-  STACK_TRACE("Database::Test::basicsFallback");
-  StateMaintainer<bool> maintainer(global.flagDatabaseCompiled);
-  global.flagDatabaseCompiled = false;
-  global
-  << "Testing fallback database. "
-  << Database::toString()
-  << Logger::endL;
-  Database::Test tester;
-  tester.deleteDatabase();
-  tester.adminAccountCreation();
+  tester.createAdminAccount();
   return true;
 }
 
@@ -73,8 +51,8 @@ bool Database::Test::deleteDatabase() {
   return true;
 }
 
-bool Database::Test::adminAccountCreation() {
-  STACK_TRACE("Database::Test::adminAccountCreation");
+bool Database::Test::createAdminAccount() {
+  STACK_TRACE("Database::Test::createAdminAccount");
   Database::get().initializeServer();
   Crypto::Random::initializeRandomBytesForTesting();
   UserCalculatorData userData;

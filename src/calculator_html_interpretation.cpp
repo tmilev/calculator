@@ -1180,7 +1180,9 @@ JSData WebAPIResponse::getExamPageJSON() {
   STACK_TRACE("WebAPIReponse::getExamPageJSON");
   std::stringstream out;
   JSData output;
-  if (!global.flagLoggedIn && global.requestType == "scoredQuizJSON") {
+  if (
+    !global.flagLoggedIn && global.requestType == WebAPI::frontend::scoredQuiz
+  ) {
     output[WebAPI::result::error] = "Scored quiz requires login";
     return output;
   }

@@ -460,16 +460,14 @@ public:
   bool deleteDatabase(std::stringstream* commentsOnFailure);
   class Test {
   public:
+    StateMaintainer<bool> maintainServerForkFlag;
+    StateMaintainer<bool> maintainerDatabase;
     static std::string adminPassword;
-    static void setUp();
     static bool all();
-    static bool basicsMongoOrFallback();
-    static bool basicsFallback();
+    static bool basics(bool useFallbackDatabase);
     bool deleteDatabase();
-    bool adminAccountCreation();
-    static void tearDown();
-    Test();
-    ~Test();
+    bool createAdminAccount();
+    Test(bool useFallbackDatabase);
   };
 
   Database();

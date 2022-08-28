@@ -7,10 +7,13 @@
 #include "general_logging_global_variables.h"
 #include "string_constants.h"
 #include "calculator.h"
+#include "database.h"
+#include "calculator_html_interpretation.h"
 
 bool WebAPIResponse::Test::all() {
-  WebAPIResponse::Test::scoredQuiz(true);
+  StateMaintainer<std::string> databaseName(DatabaseStrings::databaseName);
   WebAPIResponse::Test::scoredQuiz(false);
+  WebAPIResponse::Test::scoredQuiz(true);
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
   return true;
@@ -133,7 +136,6 @@ std::string OneComparison::toString() const {
 
 bool OneComparison::compare(bool hideDesiredAnswer) {
   STACK_TRACE("OneComparison::compare");
-
   WebAPIResponse response;
   global.calculator().freeMemory();
   global.calculator().getElement().initialize(
@@ -225,10 +227,39 @@ bool WebAPIResponse::Test::compareExpressions() {
   return true;
 }
 
-bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase){
+bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   STACK_TRACE("WebAPIResponse::Test::scoredQuiz");
-  StateMaintainer<UserCalculatorData> maintainUser(global.userDefault);
-
-
+  Course::Test::Setup setup(useFallbackDatabase);
+  setup.deleteDatabaseSetupAll();
+  global.webArguments[WebAPI::problem::fileName] =
+  "test/problems/sample1.html";
+  global.requestType = WebAPI::frontend::scoredQuiz;
+  JSData resultFirst = WebAPIResponse::getExamPageJSON();
+  JSData resultSecond = WebAPIResponse::getExamPageJSON();
+  if (resultFirst != resultSecond) {
+    global.fatal
+    << "Two consecutive scored quiz requests "
+    << "resulted in two different problems. First:\n"
+    << resultFirst
+    << "\nSecond:\n"
+    << resultSecond
+    << global.fatal;
+  }
+  if (
+    !StringRoutines::stringContains(
+      resultFirst.toString(), "mathematical"
+    )
+  ) {
+    global.fatal
+    << "Test problem expected to contain the string "
+    << "'mathematical'. Instead it was:\n"
+    << resultFirst.toString()
+    << global.fatal;
+  }
+  global
+  << "Test scored quiz. "
+  << Logger::blue
+  << Database::toString()
+  << Logger::endL;
   return true;
 }

@@ -131,7 +131,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     global.requestType == "exercise" ||
     global.requestType == "exerciseNoLogin" ||
     global.requestType == "exerciseJSON" ||
-    global.requestType == "scoredQuizJSON"
+    global.requestType == WebAPI::frontend::scoredQuiz
   ) {
     return this->processExamPageJSON();
   } else if (

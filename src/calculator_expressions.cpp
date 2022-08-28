@@ -1406,7 +1406,6 @@ unsigned int Expression::hashFunction() const {
   return this->children.hashFunction();
 }
 
-
 Expression Expression::zero() {
   if (this->owner == nullptr) {
     return Expression::zeroStatic();
@@ -6125,16 +6124,20 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
 Expression operator*(int other, const Expression& right) {
   STACK_TRACE("Expression::operator*");
   if (right.owner == nullptr) {
-    global.fatal << "Subtracting non-initialized expression from integer not allowed."
+    global.fatal
+    << "Subtracting non-initialized expression from integer not allowed."
     << global.fatal;
-
   }
   global << "Got to here!" << Logger::endL;
   Expression result;
-  result.makeXOX(*right.owner, right.owner->opTimes(), right.owner->expressionRational(other), right);
+  result.makeXOX(
+    *right.owner,
+    right.owner->opTimes(),
+    right.owner->expressionRational(other),
+    right
+  );
   return result;
 }
-
 
 Expression Expression::operator*(const Expression& right) const {
   STACK_TRACE("Expression::operator*");
@@ -6144,7 +6147,7 @@ Expression Expression::operator*(const Expression& right) const {
   return result;
 }
 
-Expression Expression::operator*(int other)const {
+Expression Expression::operator*(int other) const {
   STACK_TRACE("Expression::operator*");
   Expression result;
   if (this->owner == nullptr) {
@@ -6170,8 +6173,7 @@ Expression Expression::operator*(int other)const {
   return result;
 }
 
-
-Expression Expression::operator-(int other)const {
+Expression Expression::operator-(int other) const {
   STACK_TRACE("Expression::operator-");
   Expression result;
   if (this->owner == nullptr) {
@@ -6190,7 +6192,7 @@ Expression Expression::operator-(int other)const {
   return result;
 }
 
-Expression Expression::operator/(int other) const{
+Expression Expression::operator/(int other) const {
   STACK_TRACE("Expression::operator/");
   Expression result;
   if (this->owner == nullptr) {
@@ -6209,20 +6211,20 @@ Expression Expression::operator/(int other) const{
   return result;
 }
 
-Expression Expression::operator+(const Expression& other)const {
+Expression Expression::operator+(const Expression& other) const {
   Expression result = *this;
   result += other;
   return result;
 }
 
-Expression Expression::operator-(const Expression& other) const{
+Expression Expression::operator-(const Expression& other) const {
   Expression result;
   result = *this;
   result -= other;
   return result;
 }
 
-Expression Expression::operator/(const Expression& other)const {
+Expression Expression::operator/(const Expression& other) const {
   STACK_TRACE("Expression::operator/");
   Expression result;
   result = *this;

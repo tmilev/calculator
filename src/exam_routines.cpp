@@ -1874,7 +1874,7 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
   int numSubmissions = currentA.numSubmissions;
   if (
     global.requestType == "scoredQuiz" ||
-    global.requestType == "scoredQuizJSON"
+    global.requestType == WebAPI::frontend::scoredQuiz
   ) {
     if (numCorrectSubmissions > 0) {
       verifyStream

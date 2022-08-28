@@ -120,12 +120,12 @@ bool UnivariateEquation::solve(Calculator& calculator) {
     Expression discriminant;
     Expression bSquared;
     bSquared.makeExponentReduce(calculator, b, 2);
-    discriminant = bSquared - 4*a * c ;
+    discriminant = bSquared - 4 * a * c;
     Expression sqrtDiscriminant;
     sqrtDiscriminant.makeSqrt(calculator, discriminant, 2);
-    currentRoot = ((- 1)*b  - sqrtDiscriminant) / (2*a);
+    currentRoot = ((- 1) * b - sqrtDiscriminant) / (2* a);
     this->solutions.addOnTop(currentRoot);
-    currentRoot = ((- 1)*b  + sqrtDiscriminant) / (2*a);
+    currentRoot = ((- 1) * b + sqrtDiscriminant) / (2* a);
     this->solutions.addOnTop(currentRoot);
     return true;
   }

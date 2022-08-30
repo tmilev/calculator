@@ -125,6 +125,9 @@ public:
   public:
     static bool all();
     static bool basics(bool useFallbackDatabase);
+    static void updateNoFail(QueryExact& find, QuerySet updater);
+    static void findNoFail(QueryExact& find, JSData& result);
+    static void matchKeyValue( const JSData& mustContain, const JSData& mustBeContained );
   };
 };
 

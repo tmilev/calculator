@@ -169,12 +169,18 @@ bool Database::FallBack::findOne(
       query, index, commentsOnFailure
     )
   ) {
+    global.fatal << "DEBUG: failed to find index!!!" << global.fatal;
     return false;
   }
   if (index < 0) {
+    global << "DEBUG: couldn't find: " << query.toString() << " in indices: " << this->toStringIndices() << Logger::endL;
     return false;
   }
+  global << "DEBUG: good NEWS! index: " << index << Logger::endL;
+  global << "DEBUG: good NEWS! data: " << this->databaseContent[query.collection][index] << Logger::endL;
+  global << "DEBUG: good NEWS! collection: " << this->databaseContent[query.collection] << Logger::endL;
   output = this->databaseContent[query.collection][index];
+  global << "DEBUG: good NEWS! output: " << output << Logger::endL;
   return true;
 }
 
@@ -229,6 +235,7 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     return false;
   }
   std::string key = query.getCollectionAndLabel();
+  global << "DEBUG: Looking up key: " << key << " in indices: " << this->toStringIndices() << Logger::endL;
   if (!this->indices.contains(key)) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound
@@ -415,6 +422,7 @@ bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
   if (!this->indexDatabase(commentsOnFailure)) {
     return false;
   }
+  global << "DEBUG: database index: " << this->toStringIndices();
   return
   FileOperations::writeFileVirualWithPermissions(
     Database::FallBack::databaseFilename,

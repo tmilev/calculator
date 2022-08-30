@@ -619,7 +619,7 @@ bool Course::Test::Setup::deleteDatabaseSetupAll() {
   global.userDefault.computeCourseInformation();
   global.webArguments.setKeyValue(
     WebAPI::request::teachersAndSections,
-    "{\"teachers\":\"default\",\"sections\":\"1,2\"}&"
+    "{\"teachers\":\"default\",\"sections\":\"1,2\"}"
   );
   std::string result = WebAPIResponse::addTeachersSections();
   std::string wanted = "Assigned";

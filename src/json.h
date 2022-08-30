@@ -143,9 +143,8 @@ public:
   };
 
   std::string toString(const JSData::PrintOptions* options = nullptr) const;
-  template <typename somestream>
-  somestream& intoStream(
-    somestream& out, const JSData::PrintOptions* optionsIncoming
+  std::stringstream& intoStream(
+    std::stringstream& out, const JSData::PrintOptions* optionsIncoming
   ) const;
   bool tokenizePrependOneDummyElement(
     const std::string& input,
@@ -171,6 +170,7 @@ public:
     const std::string& input,
     std::stringstream* commentsOnFailure
   );
+  void parseNoFail(const std::string& json, bool relaxedInput = false);
   bool parse(
     const std::string& json,
     bool relaxedInput = false,

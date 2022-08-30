@@ -682,12 +682,27 @@ bool JSData::mergeInMe(
   return true;
 }
 
+void JSData::parseNoFail(const std::string& json, bool relaxedInput) {
+  STACK_TRACE("JSData::parseNoFail");
+  std::stringstream commentsOnFailure;
+  bool mustBeTrue = this->parse(json, relaxedInput, &commentsOnFailure);
+  if (!mustBeTrue) {
+    global.fatal
+    << "Parsing failed on input: "
+    << json
+    << " which does not allow failure. "
+    << commentsOnFailure.str()
+    << global.fatal;
+  }
+  return;
+}
+
 bool JSData::parse(
   const std::string& json,
   bool relaxedInput,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("JSData::readstring");
+  STACK_TRACE("JSData::parse");
   this->reset();
   List<JSData> inputTokens;
   if (
@@ -852,9 +867,8 @@ const JSData::PrintOptions& JSData::PrintOptions::HTML() {
   return result;
 }
 
-template <typename somestream>
-somestream& JSData::intoStream(
-  somestream& out, const JSData::PrintOptions* optionsIncoming
+std::stringstream& JSData::intoStream(
+  std::stringstream& out, const JSData::PrintOptions* optionsIncoming
 ) const {
   std::string whiteSpaceOuter = "";
   std::string whiteSpaceInner = "";
@@ -943,7 +957,7 @@ somestream& JSData::intoStream(
         out << "," << newLine;
       }
     }
-    out << newLine << whiteSpaceOuter << '}';
+    out << newLine << whiteSpaceOuter << "}";
     return out;
   case JSData::token::tokenOpenBrace:
     if (options.useHTML) {
@@ -1121,5 +1135,5 @@ bool JSData::operator!=(const JSData& other) const {
 }
 
 std::ostream& operator<<(std::ostream& out, const JSData& data) {
-  return data.intoStream(out, nullptr);
+  return out << data.toString();
 }

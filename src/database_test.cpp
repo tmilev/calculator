@@ -76,30 +76,12 @@ bool Database::Test::createAdminAccount() {
 }
 
 bool QuerySet::Test::all() {
-  QuerySet::Test::basics(true);
   QuerySet::Test::basics(false);
+  QuerySet::Test::basics(true);
   return true;
 }
 
-bool QuerySet::Test::basics(bool useFallbackDatabase) {
-  Database::Test tester(useFallbackDatabase);
-  tester.deleteDatabase();
-  tester.initializeForDatabaseOperations();
-  QueryExact find;
-  find.collection = DatabaseStrings::tableUsers;
-  find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
-  find.value = "ttt";
-  QuerySet updater;
-  updater.value.parse(
-    "{" +
-    DatabaseStrings::labelUsername +
-    ":\"ttt\", " +
-    QueryExact::getLabelFromNestedLabels(
-      List<std::string>({"a", "b", "c"})
-    ) +
-    ": \"123\"",
-    true
-  );
+void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater){
   std::stringstream comments;
   if (!Database::get().updateOne(find, updater, &comments)) {
     global.fatal
@@ -111,8 +93,11 @@ bool QuerySet::Test::basics(bool useFallbackDatabase) {
     << comments.str()
     << global.fatal;
   }
-  JSData found;
-  if (!Database::get().findOne(find, found, &comments)) {
+}
+
+void QuerySet::Test::findNoFail(QueryExact &find, JSData &result){
+  std::stringstream comments;
+  if (!Database::get().findOne(find, result, &comments)) {
     global.fatal
     << "Failed to find updated:\n"
     << find.toString()
@@ -120,15 +105,80 @@ bool QuerySet::Test::basics(bool useFallbackDatabase) {
     << comments.str()
     << global.fatal;
   }
-  std::string expected =
-  "{\"username\":\"ttt\",\"a\":{\"b\":{\"c\":\"123\"}}}";
-  if (expected != found.toString()) {
-    global.fatal
-    << "Expected does not match found. Found:\n"
-    << found.toString()
-    << "\nExpected:\n"
-    << expected
-    << global.fatal;
+}
+
+void QuerySet::Test::matchKeyValue(const JSData &mustContain, const JSData &mustBeContained){
+  JSData empty;
+  for (int i = 0; i < mustBeContained.objects.size(); i ++) {
+    std::string key = mustBeContained.objects.keys[i];
+    JSData contained = mustContain.objects.getValue(key, empty) ;
+    JSData expected = mustBeContained.objects.getValue(key, empty);
+    if (contained!= expected) {
+      global.fatal
+      << "Found key: "
+      << key
+      << "\nwith value:\n"
+      << contained
+      << "\nExpected:\n"
+      << expected
+      << "\nFull JSON actually found:\n"
+      << mustContain
+      << "\nFull JSON expected:\n"
+      << mustBeContained
+      << global.fatal;
+    }
   }
+}
+
+bool QuerySet::Test::basics(bool useFallbackDatabase) {
+  Database::Test tester(useFallbackDatabase);
+  tester.deleteDatabase();
+  tester.initializeForDatabaseOperations();
+  QueryExact find;
+  find.collection = DatabaseStrings::tableUsers;
+  find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
+  find.value = "ttt";
+  QuerySet updater;
+  JSData found;
+  updater.value.parseNoFail(
+    "{" +
+    DatabaseStrings::labelUsername +
+    ":\"ttt\", " +
+    QueryExact::getLabelFromNestedLabels(
+      List<std::string>({"a", "b", "c"})
+    ) +
+    ": \"123\"}",
+    true
+  );
+  QuerySet::Test::updateNoFail(find, updater);
+  QuerySet::Test::findNoFail(find, found);
+  global << "DEBUG: found: " << found << Logger::endL;
+
+
+  JSData expected;
+  expected.parseNoFail("{username:\"ttt\",a:{b:{c:\"123\"}}}", true);
+  QuerySet::Test::matchKeyValue(found, expected);
+
+  global << "DEBUG: got to here!!!"<<Logger::endL;
+  updater.value.parseNoFail(
+    "{" +
+    DatabaseStrings::labelUsername +
+    ":\"ttt\", " +
+    QueryExact::getLabelFromNestedLabels(
+      List<std::string>({"$set", "a.b", "$set.a.b"})
+    ) +
+    ": \"123\"}",
+    true
+  );
+  QuerySet::Test::updateNoFail(find, updater);
+  QuerySet::Test::findNoFail(find, found);
+  expected.parseNoFail(
+  "{"
+  "username:\"ttt\",a:{b:{c:\"123\"}}, "
+  "\"$set\": {\"a.b\":{\"$set.a.b\":\"123\"}}"
+  "}"
+  , true);
+  QuerySet::Test::matchKeyValue(found, expected);
+  global << "DEBUG: SUCCCESSSSSS!!!!!!!!!!!!!" << Logger::endL;
   return true;
 }

@@ -348,6 +348,7 @@ bool Database::findOneWithOptions(
       << "so I am using a fallback database. "
       << "Non-empty query options are not supported: "
       << options.toJSON();
+      global << "DEBUG: AAAAAAA!!!!!!!!!" <<Logger::endL;
       return false;
     }
     return Database::fallBack.findOne(query, output, commentsOnFailure);

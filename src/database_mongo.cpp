@@ -908,7 +908,6 @@ bool Database::Mongo::findOneWithOptions(
   mongoQuery.findQuery = query.toJSON().toString();
   mongoQuery.maxOutputItems = 1;
   List<JSData> outputList;
-  global << "DEBUG: about to find: " << query.toString() << Logger::endL;
   mongoQuery.findMultiple(
     outputList,
     options.toJSON(),
@@ -1336,11 +1335,12 @@ bool Database::Mongo::updateOne(
   if (!updateQuery.toJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;
   }
+  std::string updateQueryString = updateQueryJSON.toString(nullptr);
   if (
     !Database::Mongo::updateOneFromQueryString(
       findQuery.collection,
       findQuery.toJSON().toString(nullptr),
-      updateQueryJSON.toString(nullptr),
+      updateQueryString,
       commentsOnFailure
     )
   ) {

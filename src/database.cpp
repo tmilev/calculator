@@ -188,10 +188,16 @@ std::string QueryExact::getLabel() const {
   return this->getLabelFromNestedLabels(this->nestedLabels);
 }
 
-std::string QueryExact::getCollectionAndLabel() const {
+bool QueryExact::getMongoKeyValue(
+  std::string& outputKey, std::string& outputValue
+) const {
   std::stringstream out;
+  if (this->nestedLabels.size == 0) {
+    return false;
+  }
   out << this->collection << "." << this->getLabel();
-  return out.str();
+  outputKey = out.str();
+  return this->value.isString(&outputValue);
 }
 
 void QueryExact::setLabelsValue(
@@ -230,6 +236,11 @@ bool Database::convertJSONMongoToJSON(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
+  if (&input == &output) {
+    JSData inputCopy = input;
+    return
+    Database::convertJSONMongoToJSON(inputCopy, output, commentsOnFailure);
+  }
   return
   Database::convertJSONToJSONEncodeKeys(
     input, output, 0, false, commentsOnFailure
@@ -348,7 +359,6 @@ bool Database::findOneWithOptions(
       << "so I am using a fallback database. "
       << "Non-empty query options are not supported: "
       << options.toJSON();
-      global << "DEBUG: AAAAAAA!!!!!!!!!" <<Logger::endL;
       return false;
     }
     return Database::fallBack.findOne(query, output, commentsOnFailure);
@@ -1720,8 +1730,7 @@ bool UserCalculator::storeProblemData(
   QueryExact::getLabelFromNestedLabels(
     DatabaseStrings::labelProblemDataJSON, fileName
   );
-  update.value[fileName] = problem.storeJSON();
-  Database::convertJSONToJSONMongo(update.value, update.value);
+  update.value[key] = problem.storeJSON();
   return
   Database::get().updateOneFromSome(
     this->getFindMeFromUserNameQuery(), update, commentsOnFailure

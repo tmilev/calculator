@@ -81,7 +81,7 @@ bool QuerySet::Test::all() {
   return true;
 }
 
-void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater){
+void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater) {
   std::stringstream comments;
   if (!Database::get().updateOne(find, updater, &comments)) {
     global.fatal
@@ -95,7 +95,7 @@ void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater){
   }
 }
 
-void QuerySet::Test::findNoFail(QueryExact &find, JSData &result){
+void QuerySet::Test::findNoFail(QueryExact& find, JSData& result) {
   std::stringstream comments;
   if (!Database::get().findOne(find, result, &comments)) {
     global.fatal
@@ -107,13 +107,15 @@ void QuerySet::Test::findNoFail(QueryExact &find, JSData &result){
   }
 }
 
-void QuerySet::Test::matchKeyValue(const JSData &mustContain, const JSData &mustBeContained){
+void QuerySet::Test::matchKeyValue(
+  const JSData& mustContain, const JSData& mustBeContained
+) {
   JSData empty;
   for (int i = 0; i < mustBeContained.objects.size(); i ++) {
     std::string key = mustBeContained.objects.keys[i];
-    JSData contained = mustContain.objects.getValue(key, empty) ;
+    JSData contained = mustContain.objects.getValue(key, empty);
     JSData expected = mustBeContained.objects.getValue(key, empty);
-    if (contained!= expected) {
+    if (contained != expected) {
       global.fatal
       << "Found key: "
       << key
@@ -152,14 +154,9 @@ bool QuerySet::Test::basics(bool useFallbackDatabase) {
   );
   QuerySet::Test::updateNoFail(find, updater);
   QuerySet::Test::findNoFail(find, found);
-  global << "DEBUG: found: " << found << Logger::endL;
-
-
   JSData expected;
   expected.parseNoFail("{username:\"ttt\",a:{b:{c:\"123\"}}}", true);
   QuerySet::Test::matchKeyValue(found, expected);
-
-  global << "DEBUG: got to here!!!"<<Logger::endL;
   updater.value.parseNoFail(
     "{" +
     DatabaseStrings::labelUsername +
@@ -173,12 +170,12 @@ bool QuerySet::Test::basics(bool useFallbackDatabase) {
   QuerySet::Test::updateNoFail(find, updater);
   QuerySet::Test::findNoFail(find, found);
   expected.parseNoFail(
-  "{"
-  "username:\"ttt\",a:{b:{c:\"123\"}}, "
-  "\"$set\": {\"a.b\":{\"$set.a.b\":\"123\"}}"
-  "}"
-  , true);
+    "{"
+    "username:\"ttt\",a:{b:{c:\"123\"}}, "
+    "\"$set\": {\"a.b\":{\"$set.a.b\":\"123\"}}"
+    "}",
+    true
+  );
   QuerySet::Test::matchKeyValue(found, expected);
-  global << "DEBUG: SUCCCESSSSSS!!!!!!!!!!!!!" << Logger::endL;
   return true;
 }

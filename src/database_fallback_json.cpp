@@ -169,19 +169,13 @@ bool Database::FallBack::findOne(
       query, index, commentsOnFailure
     )
   ) {
-    global.fatal << "DEBUG: failed to find index!!!" << global.fatal;
     return false;
   }
   if (index < 0) {
-    global << "DEBUG: couldn't find: " << query.toString() << " in indices: " << this->toStringIndices() << Logger::endL;
     return false;
   }
-  global << "DEBUG: good NEWS! index: " << index << Logger::endL;
-  global << "DEBUG: good NEWS! data: " << this->databaseContent[query.collection][index] << Logger::endL;
-  global << "DEBUG: good NEWS! collection: " << this->databaseContent[query.collection] << Logger::endL;
   output = this->databaseContent[query.collection][index];
-  global << "DEBUG: good NEWS! output: " << output << Logger::endL;
-  return true;
+  return Database::convertJSONMongoToJSON(output, output, commentsOnFailure);
 }
 
 std::string Database::FallBack::toStringIndices() const {
@@ -234,8 +228,14 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
     }
     return false;
   }
-  std::string key = query.getCollectionAndLabel();
-  global << "DEBUG: Looking up key: " << key << " in indices: " << this->toStringIndices() << Logger::endL;
+  std::string key;
+  std::string value;
+  if (!query.getMongoKeyValue(key, value)) {
+    if (commentsOnNotFound != nullptr) {
+      *commentsOnNotFound << "Failed to extract key-value pair from query. ";
+    }
+    return false;
+  }
   if (!this->indices.contains(key)) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound
@@ -249,15 +249,7 @@ bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
   }
   Database::FallBack::Index& currentIndex =
   this->indices.getValueCreateEmpty(key);
-  if (query.value.elementType != JSData::token::tokenString) {
-    if (commentsOnNotFound != nullptr) {
-      *commentsOnNotFound
-      << "At the moment, only string value queries are supported.";
-    }
-    return false;
-  }
-  int currentLocationIndex =
-  currentIndex.locations.getIndex(query.value.stringValue);
+  int currentLocationIndex = currentIndex.locations.getIndex(value);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound
@@ -422,7 +414,6 @@ bool Database::FallBack::storeDatabase(std::stringstream* commentsOnFailure) {
   if (!this->indexDatabase(commentsOnFailure)) {
     return false;
   }
-  global << "DEBUG: database index: " << this->toStringIndices();
   return
   FileOperations::writeFileVirualWithPermissions(
     Database::FallBack::databaseFilename,

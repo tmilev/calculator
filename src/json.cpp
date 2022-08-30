@@ -333,7 +333,7 @@ JSData JSData::makeEmptyArray() {
   return result;
 }
 
-bool JSData::isString(std::string* whichString) {
+bool JSData::isString(std::string* whichString) const {
   if (this->elementType != JSData::token::tokenString) {
     return false;
   }

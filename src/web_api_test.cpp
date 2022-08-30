@@ -273,12 +273,9 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   ) {
     global.fatal << "Failed to find admin user. " << global.fatal;
   }
-  std::string samplePercentEncoded =
-  HtmlRoutines::convertStringToURLString(sample, false);
   std::string randomSeed =
-  recordedProblem[DatabaseStrings::labelProblemDataJSON][samplePercentEncoded][
-    "randomSeed"
-  ].stringValue;
+  recordedProblem[DatabaseStrings::labelProblemDataJSON][sample]["randomSeed"].
+  stringValue;
   if (randomSeed == "") {
     global.fatal
     << "Expected non-empty random seed in problem record:\n"

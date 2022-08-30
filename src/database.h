@@ -66,7 +66,9 @@ public:
   void setLabelsValue(
     const List<std::string>& labels, const std::string& desiredValue
   );
-  std::string getCollectionAndLabel() const;
+  bool getMongoKeyValue(
+    std::string& outputKey, std::string& outputValue
+  ) const;
   std::string getLabel() const;
   static std::string getLabelFromNestedLabels(
     const List<std::string>& nestedLabels
@@ -127,7 +129,9 @@ public:
     static bool basics(bool useFallbackDatabase);
     static void updateNoFail(QueryExact& find, QuerySet updater);
     static void findNoFail(QueryExact& find, JSData& result);
-    static void matchKeyValue( const JSData& mustContain, const JSData& mustBeContained );
+    static void matchKeyValue(
+      const JSData& mustContain, const JSData& mustBeContained
+    );
   };
 };
 

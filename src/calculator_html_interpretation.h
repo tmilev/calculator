@@ -681,7 +681,7 @@ public:
   class Test {
   public:
     static bool all();
-    static bool setDeadlines();
+    static bool setDeadlines(bool useFallback);
     class Setup {
       StateMaintainer<bool> maintainLogin;
       StateMaintainer<bool> maintainerDatabase;

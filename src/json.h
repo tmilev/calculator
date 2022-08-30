@@ -128,7 +128,7 @@ public:
   bool isIntegerFittingInInt(int* whichInteger);
   bool isTrueRepresentationInJSON();
   bool isListOfStrings(List<std::string>* whichStrings);
-  bool isString(std::string* whichString);
+  bool isString(std::string* whichString) const;
   // parsing
   bool isValidElement();
   void reset(char inputType = JSData::token::tokenUndefined);

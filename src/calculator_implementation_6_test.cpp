@@ -596,7 +596,8 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
 bool Course::Test::all() {
   STACK_TRACE("Course::Test::all");
   global << "Testing course setup. " << Logger::endL;
-  Course::Test::setDeadlines();
+  Course::Test::setDeadlines(true);
+  Course::Test::setDeadlines(false);
   return true;
 }
 
@@ -634,10 +635,9 @@ bool Course::Test::Setup::deleteDatabaseSetupAll() {
   return true;
 }
 
-bool Course::Test::setDeadlines() {
+bool Course::Test::setDeadlines(bool useFallback) {
   STACK_TRACE("Course::Test::setDeadlines");
-  Course::Test::Setup setup(false);
-  setup.deleteDatabaseSetupAll();
+  Course::Test::Setup setup(useFallback);
   global.setWebInput(
     WebAPI::frontend::problemFileName, "test/problems/sample1.html"
   );
@@ -645,16 +645,19 @@ bool Course::Test::setDeadlines() {
   global.setWebInput(
     WebAPI::problem::topicList, "test/topiclists/test.txt"
   );
+  global.setWebInput(WebAPI::problem::courseHome, "COURSE");
   global.setWebInput(
     "mainInput",
     HtmlRoutines::convertStringToURLString(
-      "{\"test/problems/sample1\":{\"deadlines\":{\"1\":\"2022-08-16\"}}}",
+      "{\"test/problems/sample1.html\":"
+      "{\"deadlines\":{\"1\":\"2022-08-16\"}}}",
       false
     )
   );
   global.setWebInput(
     DatabaseStrings::labelUsername, WebAPI::userDefaultAdmin
   );
+  setup.deleteDatabaseSetupAll();
   std::string deadlineResult = WebAPIResponse::setProblemDeadline();
   if (!StringRoutines::stringContains(deadlineResult, "Modified")) {
     global.fatal
@@ -665,29 +668,38 @@ bool Course::Test::setDeadlines() {
   global.setWebInput(
     "mainInput",
     HtmlRoutines::convertStringToURLString(
-      "{\"test/problems/sample1\":{\"deadlines\":{\"1\":\"2000-00-00\",\"2\":\"2023-01-01\"}}}"
-      ,
+      "{\"test/problems/sample1.html\":"
+      "{\"deadlines\":{\"1\":\"2000-00-00\",\"2\":\"2023-01-01\"}}}",
       false
     )
   );
   WebAPIResponse::setProblemDeadline();
   std::string wanted = "2000-00-00";
+  QueryExact finder;
+  finder.collection = DatabaseStrings::tableDeadlines;
+  finder.nestedLabels.addOnTop(DatabaseStrings::labelDeadlinesSchema);
+  finder.value = "deadlinesdefaultCOURSE";
+  JSData resultData;
+  QuerySet::Test::findNoFail(finder, resultData);
   std::string result =
-  Database::get().fallBack.databaseContent["deadlines"][0]["deadlines"][
-    "test%2fproblems%2fsample1"
-  ]["deadlines"]["1"].stringValue;
+  resultData[DatabaseStrings::labelDeadlines]["test/problems/sample1.html"][
+    DatabaseStrings::labelDeadlines
+  ]["1"].stringValue;
   if (result != wanted) {
     global.fatal
     << "Unexpected deadline: got: "
     << result
     << ", wanted: "
     << wanted
+    << ". Query result: "
+    << resultData
     << global.fatal;
   }
   global.setWebInput(
     "mainInput",
     HtmlRoutines::convertStringToURLString(
-      "{\"test/problems/sample2\":{\"deadlines\":{\"2\":\"2023-01-01\"}}}",
+      "{\"test/problems/sample2.html\":{\"deadlines\":{\"2\":\"2023-01-01\"}}}"
+      ,
       false
     )
   );

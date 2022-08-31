@@ -135,15 +135,17 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
   let page = window.calculator.mainPage;
   page.storage.variables.currentCourse.problemFileName.setAndStore(decodeURIComponent(problemIdURLed));
   page.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
-  let theProblem = getCurrentProblem();
-  theProblem.flagForReal = false;
+  let problem = getCurrentProblem();
+  problem.flagForReal = false;
   if (
     exerciseType === pathnames.urlFields.scoredQuizJSON &&
     !page.user.flagDatabaseInactiveEveryoneIsAdmin
   ) {
-    theProblem.flagForReal = true;
+    problem.flagForReal = true;
   }
   page.pages.problemPage.flagLoaded = false;
+  // This will force a page reload.
+  page.currentPage = "";  
   page.selectPage(page.pages.problemPage.name);
 }
 

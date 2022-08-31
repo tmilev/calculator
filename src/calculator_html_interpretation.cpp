@@ -1512,7 +1512,7 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     return true;
   }
   ProblemData& currentProblemData = this->problem.problemData;
-  Answer& currentA = currentProblemData.answers.values[this->answerIndex];
+  Answer& currentAnswer = currentProblemData.answers.values[this->answerIndex];
   UserCalculator& user = this->problem.currentUser;
   user.::UserCalculatorData::operator=(global.userDefault);
   bool deadLinePassed = false;
@@ -1566,15 +1566,15 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     << "Deadline passed, attempt not recorded."
     << "</b>";
   } else {
-    currentA.numSubmissions ++;
+    currentAnswer.numSubmissions ++;
     if (answerIsCorrect) {
-      currentA.numCorrectSubmissions ++;
-      if (currentA.firstCorrectAnswerClean == "") {
-        currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
+      currentAnswer.numCorrectSubmissions ++;
+      if (currentAnswer.firstCorrectAnswerClean == "") {
+        currentAnswer.firstCorrectAnswerClean = currentAnswer.currentAnswerClean;
       } else {
         out
         << "[first correct answer: "
-        << currentA.firstCorrectAnswerClean
+        << currentAnswer.firstCorrectAnswerClean
         << "]";
       }
     }
@@ -1591,10 +1591,10 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   } else {
     out
     << "So far "
-    << currentA.numCorrectSubmissions
+    << currentAnswer.numCorrectSubmissions
     << " correct and "
-    << currentA.numSubmissions - currentA.numCorrectSubmissions
-    << " incorrect submissions.";
+    << currentAnswer.numSubmissions - currentAnswer.numCorrectSubmissions
+    << " incorrect submissions. ";
   }
   if (hasDeadline) {
     if (secondsTillDeadline < 0) {

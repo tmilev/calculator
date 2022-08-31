@@ -6128,7 +6128,6 @@ Expression operator*(int other, const Expression& right) {
     << "Subtracting non-initialized expression from integer not allowed."
     << global.fatal;
   }
-  global << "Got to here!" << Logger::endL;
   Expression result;
   result.makeXOX(
     *right.owner,

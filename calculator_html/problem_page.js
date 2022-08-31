@@ -666,7 +666,7 @@ class Problem {
     return document.createTextNode(this.title + " ");
   }
 
-  /**@returns{HTMLElement[]} */
+  /** @returns{HTMLElement[]} */
   getHTMLSubSection() {
     let result = [];
     let nextElement = document.createElement("div");
@@ -870,10 +870,13 @@ class Problem {
     return page.hasInstructorRightsNotViewingAsStudent();
   }
 
-  toStringDeadline() {
+  /** @return{HTMLElement} */
+  toHTMLDeadlineElement() {
     let page = window.calculator.mainPage;
+    let result = document.createElement("span");
     if (page.hasInstructorRightsNotViewingAsStudent()) {
-      return "Deadlines";
+      result.textContent = "Deadlines";
+      return result;
     }
     if (page.user.hasInstructorRights() && page.studentView()) {
       let sectionIndex = page.storage.variables.currentSectionComputed.getValue();
@@ -882,37 +885,46 @@ class Problem {
     if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
       if (this.parentIdURLed !== null && this.parentIdURLed !== undefined && this.parentIdURLed !== "") {
         let parentProblem = allProblems.getProblemById(this.parentIdURLed);
-        let inheritedResult = parentProblem.toStringDeadline();
-        if (inheritedResult !== "") {
-          if (!inheritedResult.endsWith("[inherited]")) {
-            inheritedResult += " [inherited]";
+        let inheritedResult = parentProblem.toHTMLDeadlineElement();
+        if (inheritedResult.textContent !== "") {
+          if (!inheritedResult.textContent.contains("[inherited]")) {
+            inheritedResult.appendChild(document.createTextNode(" [inherited]"));
           }
         }
         return inheritedResult;
       }
-      return "";
+      return result;
     }
     this.deadline = new Date(this.deadlineString);
     let remainingInHours = (this.deadline - (new Date())) / 1000 / 60 / 60;
     remainingInHours += 24;
-    let resultString = "";
     if (this.isSolvedForSure()) {
-      resultString += "<b style='color:green'>" + this.deadline.toLocaleDateString() + "</b>";
-      return resultString;
+      let deadline = document.createElement("b");
+      deadline.textContent = this.deadline.toLocaleDateString()
+      deadline.style.color = "green";
+      result.appendChild(deadline);
+      return result;
     }
     if (remainingInHours < 48 && remainingInHours >= 0) {
-      resultString += "<b style='color:red'>" + this.deadline.toLocaleDateString();
-      resultString += `, ~${remainingInHours.toFixed(1)} hrs left</b>`;
-      return resultString;
+      let deadline = document.createElement("b");
+      deadline.style.color = "red";
+      deadline.textContent = `${this.deadline.toLocaleDateString()}, ~${remainingInHours.toFixed(1)} hrs left`;
+      result.appendChild(deadline)
+      return result;
     }
     if (remainingInHours < 0) {
-      resultString += "<b style='color:red'>" + this.deadline.toLocaleDateString() + "</b>";
-      resultString += "<b>[passed]</b>";
-      return resultString;
+      let deadline = document.createElement("b");
+      deadline.style.color = "red";
+      deadline.textContent = this.deadline.toLocaleDateString();
+      result.appendChild(deadline);
+      let passed = document.createElement("b");
+      passed.textContent = "[passed]";
+      result.appendChild(passed);
+      return result;
     }
-    resultString += "<b>" + this.deadline.toLocaleDateString() + "</b>";
-    return resultString;
-    //  this.deadlines[];
+    let deadline = document.createElement("b");
+    result.appendChild(deadline);
+    return result;
   }
 
   /** @return{HTMLElement} */
@@ -929,7 +941,7 @@ class Problem {
     let result = document.createElement("span");
     result.textContent = "";
     if (!page.user.hasInstructorRights() || page.studentView()) {
-      result.textContent = this.toStringDeadline();
+      result.appendChild(this.toHTMLDeadlineElement());
       return result;
     }
     if (this.type === "Problem" && this.fileName === "") {
@@ -937,7 +949,9 @@ class Problem {
     }
     let button = document.createElement("button");
     button.className = "accordionLike";
-    button.textContent = this.toStringDeadline() + "\u25C2";
+    button.textContent = "";
+    button.appendChild(this.toHTMLDeadlineElement());
+    button.appendChild(document.createTextNode(" \u25C2"))
     result.append(button);
     let panelDeadlines = document.createElement("span");
     panelDeadlines.className = "panelDeadlines";
@@ -1017,7 +1031,7 @@ class Problem {
     });
   }
 
-  /**@returns{HTMLElement[]} */
+  /** @returns{HTMLElement[]} */
   getProblemWeightContent(inputRow) {
     let page = window.calculator.mainPage;
     if (this.type !== "Problem" || this.fileName === "") {
@@ -1074,6 +1088,10 @@ class Problem {
       } else {
         result += ` = ? pts`;
       }
+    }
+    let page = window.calculator.mainPage;
+    if (page.user.hasInstructorRights() && !page.studentView() && result === "") {
+      result = "modify";
     }
     return `<b style = "color:${color}">${result}</b>`;
   }

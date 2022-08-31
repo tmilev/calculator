@@ -204,34 +204,23 @@ void Partition::testAllSpechtModules(int n) {
     fac *= i;
   }
   for (int i = 0; i < partitions.size; i ++) {
-    // std::cout << partitions[i] << "\n";
     global.comments
     << partitions[i]
     << "\n";
-    // std::cout << "got to here\n";
     List<Matrix<Rational> > repgens;
-    // std::cout << "got to here2\n";
     partitions[i].spechtModuleMatricesOfTranspositionsjjplusone(repgens);
-    // std::cout << "got to here3\n";
     for (int ri = 0; ri < repgens.size; ri ++) {
-      // std::cout << "got to here4\n";
       global.comments
       << repgens[ri].toStringPlainText();
-      // std::cout << "got to here5\n";
       Rational det = repgens[ri].getDeterminant();
       global.comments << " determinant is " << det << "\n\n";
       if ((det != 1) && (det != - 1)) {
         global.fatal << "invalid determinant" << global.fatal;
       }
     }
-    std::cout << "got to here7\n";
     FiniteGroup<Matrix<Rational> > outg;
-    std::cout << "got to here8\n";
     outg.generators = repgens;
-    std::cout << "got to here9\n";
     outg.computeConjugacyClassSizesAndRepresentatives();
-    std::cout << "got to here10\n";
-    std::cout << "got to here11\n";
     if (outg.elements.size != 0) {
       if ((fac % outg.elements.size) != 0) {
         global.fatal << "invalid elements count" << global.fatal;

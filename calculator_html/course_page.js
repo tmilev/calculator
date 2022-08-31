@@ -40,15 +40,20 @@ function toggleDeadline(
   /** @type {HTMLElement} */
   button,
 ) {
-  let theProblem = problemPage.allProblems.getProblemById(panelId);
+  let problem = problemPage.allProblems.getProblemById(panelId);
   if (deadline.style.maxHeight === '200px') {
     deadline.style.opacity = '0';
     deadline.style.maxHeight = '0';
-    button.innerHTML = `${theProblem.toStringDeadline()} &#9666;`;
+    button.textContent = "";
+    button.appendChild(problem.toHTMLDeadlineElement());
+    let arrowLeft = document.createTextNode(" \u25C2");
+    button.appendChild(arrowLeft);
   } else {
     deadline.style.opacity = '1';
     deadline.style.maxHeight = '200px';
-    button.innerHTML = `${theProblem.toStringDeadline()} &#9660;`;
+    button.textContent = "";
+    button.appendChild(problem.toHTMLDeadlineElement())
+    button.appendChild(document.createTextNode(" \u25BE"));
   }
 }
 

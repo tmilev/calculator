@@ -8,8 +8,23 @@
  * Normally, require is a variable that contains a reference to  
  * the Browserifier.require function below.
  * However, this variable has no use in the present script
- * which defines the require function, and so the calculator 
- * hijacks it to submit the script wrappers.
+ * which defines the require function for the commonJS modules.
+ * Therefore, the variable is free for our calculator to use for other 
+ * purposes. Indeed, our calculator hijacks the require function 
+ * it to inject the content of all of our commonJS modules.
+ * It does so by declaring require to be an 
+ * object with keys equal to the file names and values equal to
+ * the contents of each file, wrapped in a 
+ * function(require, module) { 
+ * // content of the script goes here.
+ * }
+ * For example, require could contain:
+ * var require = {
+ *   "./app": function(require, module) {
+ *   // content of the app.js file here. 
+ *   },
+ *   // ... and so on for the remaining files.
+ * }
  * 
  * The values of the object are the 
  * function(require, module, export) { *** } 

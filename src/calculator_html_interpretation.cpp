@@ -668,6 +668,7 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
 bool BuilderApplication::fileNameAllowedToBeMissing(
   const std::string& input
 ) {
+  // External dependency. The calculator must be capable of running without it.
   if (input == "/calculator_html/external/build/output-min.js") {
     return true;
   }

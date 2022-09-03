@@ -343,6 +343,7 @@ class Problem {
     if (pathnames.standardResponses.isNotLoggedInResponse(problemData)) {
       this.title = "";
       this.decodedProblem = "Not logged in. Please select practice mode or login.";
+      this.flagForReal = true;
       this.answerPanels = [];
     } else {
       this.initializeBasic(problemData);
@@ -497,6 +498,7 @@ class Problem {
     }
     return result;
   }
+
   /**@returns {HTMLElement} */
   getNextProblemButton(
     /** @type{ProblemNavigationHints} */
@@ -529,25 +531,30 @@ class Problem {
     /** @type{ProblemNavigationHints} */
     hints
   ) {
+    let previousLink = document.createElement("a");
+    let enabled = true;
     if (
       this.previousProblemId === null ||
       this.previousProblemId === "" ||
       this.previousProblemId === undefined
     ) {
-      return document.createTextNode("");
+      enabled = false;
     }
-    let previousProblem = allProblems.getProblemById(this.previousProblemId);
-    let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
-    let previousLink = document.createElement("a");
     previousLink.className = hints.linkType;
-    previousLink.href = `#${previousURL}`;
-    previousLink.addEventListener(
-      "click",
-      () => {
-        selectCurrentProblem(this.previousProblemId, hints.defaultRequest);
-      }
-    );
     previousLink.innerHTML = "&#8592;";
+    if (enabled) {
+      let previousProblem = allProblems.getProblemById(this.previousProblemId);
+      let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
+      previousLink.href = `#${previousURL}`;
+      previousLink.addEventListener(
+        "click",
+        () => {
+          selectCurrentProblem(this.previousProblemId, hints.defaultRequest);
+        }
+      );
+    } else {
+      previousLink.style.visibility = "hidden";
+    }
     return previousLink;
   }
 
@@ -563,13 +570,13 @@ class Problem {
     return result;
   }
 
-  /**@returns {HTMLElement[]} */
+  /** @returns {HTMLElement[]} */
   getProblemNavigationContent() {
     let page = window.calculator.mainPage;
     let result = [];
     let hints = this.getProblemNavigationHints();
     result.push(this.getPreviousProblemButton(hints));
-    if (this.flagForReal && page.user.flagLoggedIn) {
+    if (this.flagForReal) {
       let practiceURL = this.getAppAnchorRequestFileCourseTopics(false, false);
       let practiceTag = document.createElement("a");
       practiceTag.className = "problemLinkPractice";

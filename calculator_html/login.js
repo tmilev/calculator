@@ -297,11 +297,11 @@ function onGoogleSignIn(googleUser) {
   page.user.googleProfile = window.calculator.jwt.decode(token);
   page.showProfilePicture();
   showLogoutButton();
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
-  theURL += `googleToken=${token}&`;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
+  url += `googleToken=${token}&`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     callback: loginWithServerCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });

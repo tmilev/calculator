@@ -1513,7 +1513,8 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     return true;
   }
   ProblemData& currentProblemData = this->problem.problemData;
-  Answer& currentAnswer = currentProblemData.answers.values[this->answerIndex];
+  Answer& currentAnswer =
+  currentProblemData.answers.values[this->answerIndex];
   UserCalculator& user = this->problem.currentUser;
   user.::UserCalculatorData::operator=(global.userDefault);
   bool deadLinePassed = false;
@@ -1571,7 +1572,8 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     if (answerIsCorrect) {
       currentAnswer.numCorrectSubmissions ++;
       if (currentAnswer.firstCorrectAnswerClean == "") {
-        currentAnswer.firstCorrectAnswerClean = currentAnswer.currentAnswerClean;
+        currentAnswer.firstCorrectAnswerClean =
+        currentAnswer.currentAnswerClean;
       } else {
         out
         << "[first correct answer: "

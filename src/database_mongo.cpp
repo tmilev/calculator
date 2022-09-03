@@ -1563,6 +1563,7 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
     result["error"] = out.str();
     return result;
   }
+  Database::correctData(rowsJSON);
   JSData rows;
   rows.elementType = JSData::token::tokenArray;
   rows.listObjects = rowsJSON;
@@ -1572,6 +1573,48 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
   result["rows"] = rows;
   result["totalRows"] = static_cast<int>(totalItems);
   return result;
+}
+
+void Database::correctData(List<JSData>& toBeCorrected) {
+  for (int i = 0; i < toBeCorrected.size; i ++) {
+    correctData(toBeCorrected[i]);
+  }
+}
+
+void Database::correctData(JSData& row) {
+  Database::correctDataFromLabels(
+    row, List<std::string>({"_id", "$oid"})
+  );
+  Database::correctDataFromLabels(row, DatabaseStrings::labelEmail);
+  Database::correctDataFromLabels(
+    row, DatabaseStrings::labelAuthenticationToken
+  );
+  Database::correctDataFromLabels(row, DatabaseStrings::labelPassword);
+}
+
+void Database::correctDataFromLabels(
+  JSData& row, const std::string& oneLabel
+) {
+  Database::correctDataFromLabels(
+    row, List<std::string>({oneLabel})
+  );
+}
+
+void Database::correctDataFromLabels(
+  JSData& row, const List<std::string>& labels
+) {
+  JSData* toBeModified = &row;
+  for (int i = 0; i < labels.size; i ++) {
+    if (!toBeModified->hasKey(labels[i])) {
+      return;
+    }
+    toBeModified = &((*toBeModified)[labels[i]]);
+  }
+  std::string value;
+  if (!toBeModified->isString(&value)) {
+    return;
+  }
+  (*toBeModified) = StringRoutines::shortenInsertDots(value, 8);
 }
 
 JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
@@ -1625,6 +1668,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
     result["error"] = out.str();
     return result;
   }
+  Database::correctData(rowsJSON);
   if (rowsJSON.size == 0) {
     result = Database::toJSONDatabaseCollection("");
     if (flagDebuggingAdmin) {

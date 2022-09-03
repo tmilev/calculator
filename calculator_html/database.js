@@ -12,7 +12,9 @@ class DatabasePage {
     
   }
   initialize() {
-    let tableButtons = document.getElementById(ids.domElements.pages.database.buttonTables);
+    let tableButtons = document.getElementById(
+      ids.domElements.pages.database.buttonTables
+    );
     tableButtons.addEventListener('click', () => {
       updateDatabasePageResetCurrentTable();   
     });     
@@ -62,14 +64,14 @@ function fetchProblemData(
   output,
 ) {
   //let labels = JSON.parse(labelsString);
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-  theURL += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?`;
+  url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
+  url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
   let labelsString = JSON.stringify(labels);
-  theURL += `${pathnames.urlFields.database.labels}=${labelsString}&`;
+  url += `${pathnames.urlFields.database.labels}=${labelsString}&`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     progress: ids.domElements.spanProgressReportGeneral,
     callback: (input, _) => {
       callbackFetchProblemData(input, output);
@@ -78,29 +80,26 @@ function fetchProblemData(
 }
 
 function deleteDatabaseItemCallback(
-  /**@type {JSONToHTML} */
-  transformer,
-  deletedItem,
-  labels,
-  input,
-  output,
+  deletedItem
 ) {
   document.getElementById(deletedItem).remove();
 }
 
 function deleteDatabaseItem(
-  /**@type {JSONToHTML} */
-  transformer,
+  _,
   input,
   labels,
 ) {
   let finalSelector = {
     fields: labels
   };
-  let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
+  let item = encodeURIComponent(JSON.stringify(finalSelector));
+  let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=databaseDeleteOneEntry&item=${item}`;
   submitRequests.submitGET({
-    url: theURL,
-    callback: deleteDatabaseItemCallback.bind(null, transformer, input, labels),
+    url: url,
+    callback: () => {
+      deleteDatabaseItemCallback(input);
+    },
     progress: ids.domElements.spanProgressReportGeneral
   });
 }
@@ -140,6 +139,7 @@ function updateDatabasePageCallback(incoming, unused) {
   let parsed = miscellaneous.jsonUnescapeParse(incoming);
   let output = document.getElementById(ids.domElements.divDatabaseOutput);
   output.textContent = "";
+  miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsed, output);
   if (
     parsed.error !== undefined &&
     parsed.error != null &&
@@ -154,8 +154,12 @@ function updateDatabasePageCallback(incoming, unused) {
     document.getElementById(
       ids.domElements.spanDatabaseComments
     ).innerHTML = `${parsed.rows.length} out of ${parsed.totalRows} rows displayed.<br> `;
-    output.textContent = "";
-    output.appendChild(transformer.getTableFromObject(parsed.rows, optionsDatabase, { table: labels[0] }));
+    output.appendChild(
+      transformer.getTableFromObject(
+        parsed.rows, optionsDatabase, {
+        table: labels[0]
+      })
+    );
   } else {
     let table = document.createElement("table");
     for (let i = 0; i < parsed.collections.length; i++) {
@@ -181,19 +185,19 @@ function updateDatabasePageResetCurrentTable() {
 }
 
 function updateDatabasePage() {
-  let thePage = window.calculator.mainPage;
-  if (!thePage.isLoggedIn()) {
+  let page = window.calculator.mainPage;
+  if (!page.isLoggedIn()) {
     document.getElementById(ids.domElements.divDatabaseOutput).innerHTML = "<b>Not logged-in.</b>";
     return;
   }
-  let labels = thePage.storage.variables.database.labels.getValue();
-  let theUrl = "";
-  theUrl += `${pathnames.urls.calculatorAPI}?`;
-  theUrl += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-  theUrl += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
-  theUrl += `${pathnames.urlFields.database.labels}=${labels}&`;
+  let labels = page.storage.variables.database.labels.getValue();
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?`;
+  url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
+  url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
+  url += `${pathnames.urlFields.database.labels}=${labels}&`;
   submitRequests.submitGET({
-    url: theUrl,
+    url: url,
     progress: ids.domElements.spanProgressReportGeneral,
     callback: updateDatabasePageCallback,
   });

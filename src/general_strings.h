@@ -150,7 +150,7 @@ public:
     const std::string& subStringToReplace,
     const std::string& replaceWith
   );
-  static std::string stringShortenInsertDots(
+  static std::string shortenInsertDots(
     const std::string& inputString, int maxNumChars
   );
   static bool isASCIICharacterVisible(char input);

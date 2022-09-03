@@ -11,7 +11,9 @@ for (let i = 0; i < modifiableDatabaseData.modifiableFields.length; i++) {
 
 let transformersStandard = {
   shortener: {
-    transformer: miscellaneous.shortenString.bind(null, 4),
+    transformer: (input) => {
+      return miscellaneous.shortenString(4, input);
+    },
   },
 };
 
@@ -27,7 +29,12 @@ function writeJSONtoDOMComponent(
   let transformer = new JSONToHTML();
   let copy = miscellaneous.deepCopy(inputObject);
 
-  domComponent.appendChild(transformer.getTableFromObject(copy, null, { forceRowLayout: true }));
+  domComponent.appendChild(
+    transformer.getTableFromObject(
+      copy, null, {
+      forceRowLayout: true
+    })
+  );
 }
 
 class Statistics {

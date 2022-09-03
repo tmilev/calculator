@@ -566,25 +566,25 @@ JSData WebWorker::getDatabaseJSON() {
     "Only logged-in admins can access database. ";
     return result;
   }
-  if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    std::string operation =
-    global.getWebInput(WebAPI::databaseParameters::operation);
-    std::string labels =
-    HtmlRoutines::convertURLStringToNormal(
-      global.getWebInput(WebAPI::databaseParameters::labels), false
-    );
-    if (operation == WebAPI::databaseParameters::fetch) {
-      result = Database::get().toJSONDatabaseFetch(labels);
-    } else {
-      result[WebAPI::result::error] =
-      "Uknown database operation: " + operation + ". ";
-    }
-    if (global.userDebugFlagOn()) {
-      result["databaseOperation"] = operation;
-      result["databaseLabels"] = labels;
-    }
-  } else {
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     result["error"] = "Database not available (cannot get database info). ";
+    return result;
+  }
+  std::string operation =
+  global.getWebInput(WebAPI::databaseParameters::operation);
+  std::string labels =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::databaseParameters::labels), false
+  );
+  if (operation == WebAPI::databaseParameters::fetch) {
+    result = Database::get().toJSONDatabaseFetch(labels);
+  } else {
+    result[WebAPI::result::error] =
+    "Uknown database operation: " + operation + ". ";
+  }
+  if (global.userDebugFlagOn()) {
+    result["databaseOperation"] = operation;
+    result["databaseLabels"] = labels;
   }
   return result;
 }

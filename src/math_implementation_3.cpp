@@ -2901,7 +2901,7 @@ bool StringRoutines::isASCIICharacterVisible(char input) {
   return input >= 32 && input <= 126;
 }
 
-std::string StringRoutines::stringShortenInsertDots(
+std::string StringRoutines::shortenInsertDots(
   const std::string& inputString, int maxNumChars
 ) {
   if (inputString.size() <= static_cast<unsigned>(maxNumChars)) {

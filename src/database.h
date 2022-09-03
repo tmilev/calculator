@@ -465,6 +465,15 @@ public:
   );
   std::string toHtmlDatabaseCollection(const std::string& currentTable);
   static JSData toJSONFetchItem(const List<std::string>& labelStrings);
+  // Redacts object ids and hashes.
+  static void correctData(JSData& row);
+  static void correctData(List<JSData>& toBeCorrected);
+  static void correctDataFromLabels(
+    JSData& row, const List<std::string>& labels
+  );
+  static void correctDataFromLabels(
+    JSData& row, const std::string& oneLabel
+  );
   JSData toJSONDatabaseCollection(const std::string& currentTable);
   JSData toJSONDatabaseFetch(const std::string& incomingLabels);
   static bool getLabels(

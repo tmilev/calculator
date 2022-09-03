@@ -204,14 +204,11 @@ void Partition::testAllSpechtModules(int n) {
     fac *= i;
   }
   for (int i = 0; i < partitions.size; i ++) {
-    global.comments
-    << partitions[i]
-    << "\n";
+    global.comments << partitions[i] << "\n";
     List<Matrix<Rational> > repgens;
     partitions[i].spechtModuleMatricesOfTranspositionsjjplusone(repgens);
     for (int ri = 0; ri < repgens.size; ri ++) {
-      global.comments
-      << repgens[ri].toStringPlainText();
+      global.comments << repgens[ri].toStringPlainText();
       Rational det = repgens[ri].getDeterminant();
       global.comments << " determinant is " << det << "\n\n";
       if ((det != 1) && (det != - 1)) {

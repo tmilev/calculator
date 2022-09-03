@@ -975,9 +975,7 @@ void Calculator::EvaluateLoop::reportChildEvaluation(
     ) {
       ruleStream
       << "<br>"
-      << StringRoutines::stringShortenInsertDots(
-        output[j].toString(), 100
-      );
+      << StringRoutines::shortenInsertDots(output[j].toString(), 100);
       ruleCount ++;
     }
   }
@@ -992,7 +990,7 @@ void Calculator::EvaluateLoop::reportChildEvaluation(
   << "Evaluating at recursion depth "
   << this->owner->recursionDepth
   << ":<br><b>"
-  << StringRoutines::stringShortenInsertDots(
+  << StringRoutines::shortenInsertDots(
     output[childIndex].toString(), 100
   )
   << "</b>";

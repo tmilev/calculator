@@ -513,7 +513,7 @@ bool PipePrimitive::handleFailedWriteReturnFalse(
   << "Failed write: "
   << toBeSent.size()
   << " bytes ["
-  << StringRoutines::stringShortenInsertDots(toBeSent, 200)
+  << StringRoutines::shortenInsertDots(toBeSent, 200)
   << "] onto: "
   << this->toString()
   << numBadAttempts

@@ -170,29 +170,45 @@ class GraphicsNDimensions {
   }
 
   initInfo() {
-    let infoHTML = "";
-    infoHTML += "<div style = 'height:300px; overflow-y: scroll;'>";
+    let info = document.createElement("div");
+    info.style.height = "300px";
+    info.style.overflowY = "scroll";
     for (let i = 0; i < 2; i++) {
       this.idsBasis[i] = [];
       for (let j = 0; j < this.dimension; j++) {
         this.idsBasis[i][j] = `${this.idCanvas}textEbasis_${i}_${j}`;
-        infoHTML += `<textarea rows = "1" cols = "2" id = "${this.idsBasis[i][j]}"></textarea>`;
+        let textArea = document.createElement("textarea");
+        textArea.rows = 1;
+        textArea.cols = 2;
+        textArea.id = this.idsBasis[i][j];
+        info.appendChild(textArea)
       }
-      infoHTML += "<br>";
+      info.appendChild(document.createElement("br"));
     }
-    infoHTML += `<button onclick = "window.calculator.graphicsNDimensions.startProjectionPlaneUser('${this.idCanvas}')">`;
-    infoHTML += `Change to basis</button><br>`;
-    //infoHTML += `<button onclick = "snapShotLaTeX('${this.idCanvas}')>LaTeX snapshot</button>`;
-    infoHTML += `<span id = '${this.idCanvas}snapShotLateXspan'></span>\n`;
-    infoHTML += `<div id = '${this.idPlaneInfo}' class = 'panel'></div>`;
-    infoHTML += `</div>`;
+    let button = document.createElement("button");
+    button.textContent = "Change to basis";
+    button.addEventListener("click", () => { 
+      window.calculator.graphicsNDimensions.startProjectionPlaneUser(this.idCanvas);
+    });
+    info.appendChild(button);
+    info.appendChild(document.createElement("br"));
+    let snapShotLaTeX = document.createElement("span");
+    snapShotLaTeX.id = `${this.idCanvas}snapShotLateXspan`;
+    info.appendChild(snapShotLaTeX);
+    let planeInfo = document.createElement("div");
+    planeInfo.id = this.idPlaneInfo;
+    planeInfo.className = "panel";
+    info.appendChild(planeInfo);
     if (this.PanelExpandable === null) {
-      document.getElementById(this.idInfo).innerHTML = infoHTML;
+      let element = document.getElementById(this.idInfo);
+      element.textContent = "";
+      element.appendChild(info);
     } else {
       this.panelInfo = new this.PanelExpandable(this.idInfo);
       this.panelInfo.initialize(true);
-      this.panelInfo.setPanelContent(infoHTML);
+      this.panelInfo.setPanelContent(info);
     }
+
   }
 
   snapShotLaTeX() {

@@ -242,11 +242,6 @@ class JSONToHTML {
     return table;
   }
 
-  // Obsoleted code snippet. Keeping for reference.
-  getDeleteButtonFromLabels(theLabels, selector, containerLabel) {
-    return `<button onclick = 'window.calculator.database.deleteDatabaseItem("${containerLabel}", ${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
-  }
-
   transformObjectToRows(input) {
     let result = [];
     for (let labelRow in input) {

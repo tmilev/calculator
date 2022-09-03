@@ -138,48 +138,55 @@ function callbackClone(input, output) {
   }
   let inputParsed = JSON.parse(input);
   let errorFound = false;
-  let result = "";
+  output.textContent = "";
   if (inputParsed.error !== undefined && inputParsed.error !== "" && inputParsed !== null) {
     errorFound = true;
-    result += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`;
+    let errorMessage = document.createElement("b");
+    errorMessage.style.color = "red";
+    errorMessage.textContent = "Error."; 
+    output.appendChild(document.createTextNode(` ${inputParsed.error})`));
   }
   if (inputParsed.comments !== undefined && inputParsed.comments !== "") {
-    result += inputParsed.comments;
+    output.appendChild(document.createTextNode(inputParsed.comments));
   }
   if (!errorFound) {
-    result += `<button class = 'buttonStandard' `;
-    result += `onclick = "window.calculator.mainPage.pages.problemPage.flagLoaded=false; window.calculator.mainPage.selectPage('problemPage')"`;
-    result += `>Force-reload problem</button>`;
+    let button = document.createElement("button");
+    button.textContent = "Force-reload problem"; 
+    button.className = "buttonStandard";
+    button.addEventListener("click", () => { 
+      window.calculator.mainPage.pages.problemPage.flagLoaded = false;
+      window.calculator.mainPage.selectPage('problemPage');
+    });
+    output.appendChild(button);
   }
-  output.innerHTML = result;
 }
 
 function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   let newFileName = document.getElementById(idCloneInput).value;
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.clonePage}`;
-  theURL += `&${pathnames.urlFields.problem.fileNameTarget}=${newFileName}`;
-  theURL += `&${pathnames.urlFields.problem.fileName}=${fileName}&`;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?`;
+  url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.clonePage}`;
+  url += `&${pathnames.urlFields.problem.fileNameTarget}=${newFileName}`;
+  url += `&${pathnames.urlFields.problem.fileName}=${fileName}&`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     result: idSpanClonePageReport,
     callback: callbackClone
   });
 }
 
 function storeEditedPage() {
-  let thePage = window.calculator.mainPage;
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?`;
+  let page = window.calculator.mainPage;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?`;
   let queryParameters = "";
   queryParameters += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.modifyPage}`;
   let content = encodeURIComponent(editorAce.getValue());
   queryParameters += `&${pathnames.urlFields.requests.fileContent}=${content}`;
-  queryParameters += `&${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
-  thePage.pages.problemPage.flagLoaded = false;
+  queryParameters += `&${pathnames.urlFields.problem.fileName}=${page.storage.variables.editor.currentlyEditedPage.getValue()}`;
+  page.pages.problemPage.flagLoaded = false;
   submitRequests.submitPOST({
-    url: theURL,
+    url: url,
     parameters: queryParameters,
     result: ids.domElements.spanSubmitEditPageReport,
   });
@@ -274,8 +281,8 @@ function getNavigationEditButton(problemId, contentHTML) {
 function writeNextPreviousEditButton(
   currentlyEditedPage,
 ) {
-  let thePage = window.calculator.mainPage;
-  let problem = thePage.getProblemByIdOrNull(currentlyEditedPage);
+  let page = window.calculator.mainPage;
+  let problem = page.getProblemByIdOrNull(currentlyEditedPage);
   if (problem === null) {
     return;
   }
@@ -297,9 +304,9 @@ function selectEditPage(
   /** @type{boolean} Whether online edit is allowed. */
   withInstructorRights,
 ) {
-  let thePage = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   if (withInstructorRights === undefined) {
-    withInstructorRights = thePage.hasInstructorRightsNotViewingAsStudent();
+    withInstructorRights = page.hasInstructorRightsNotViewingAsStudent();
   }
   let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
   if (withInstructorRights) {
@@ -307,7 +314,7 @@ function selectEditPage(
   } else {
     saveButton.disabled = true;
   }
-  let storageVariables = thePage.storage.variables;
+  let storageVariables = page.storage.variables;
   let fileNameSources = [
     storageVariables.editor.currentlyEditedPage,
     storageVariables.currentCourse.problemFileName,
@@ -332,9 +339,9 @@ function selectEditPage(
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
   storageVariables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
-  if (!thePage.flagProblemPageOnly) {
-    if (thePage.storage.variables.currentPage.getValue() !== thePage.pages.editPage.name) {
-      thePage.selectPage(thePage.pages.editPage.name);
+  if (!page.flagProblemPageOnly) {
+    if (page.storage.variables.currentPage.getValue() !== page.pages.editPage.name) {
+      page.selectPage(page.pages.editPage.name);
       return;
     }
   }
@@ -343,10 +350,10 @@ function selectEditPage(
   theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
-  theURL += `${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
+  let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
+  url += `${pathnames.urlFields.problem.fileName}=${page.storage.variables.editor.currentlyEditedPage.getValue()}`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     callback: function (input) {
       selectEditPageCallback(input, withInstructorRights);
     },

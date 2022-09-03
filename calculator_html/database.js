@@ -20,7 +20,9 @@ class DatabasePage {
 }
 
 function clickDatabaseTable(currentCollection) {
-  window.calculator.mainPage.storage.variables.database.labels.setAndStore(JSON.stringify(currentCollection));
+  window.calculator.mainPage.storage.variables.database.labels.setAndStore(
+    JSON.stringify(currentCollection)
+  );
   updateDatabasePage();
 }
 

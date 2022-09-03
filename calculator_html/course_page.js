@@ -7,7 +7,7 @@ const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 
 function modifyDeadlines(incomingId) {
-  let thePage = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   let nameDatePicker = `datePicker${incomingId}`;
   let theDates = document.getElementsByName(nameDatePicker);
   let jsonToSubmit = {};
@@ -17,7 +17,7 @@ function modifyDeadlines(incomingId) {
   };
 
   for (let counterDates = 0; counterDates < theDates.length; counterDates++) {
-    let currentSection = thePage.user.sectionsTaught[counterDates];
+    let currentSection = page.user.sectionsTaught[counterDates];
     jsonToSubmit[idDecoded].deadlines[currentSection] = theDates[counterDates].value;
   }
   let theURL = "";
@@ -100,13 +100,13 @@ function afterLoadCoursePage(incoming, result) {
 }
 
 function loadTopicList(callback) {
-  let thePage = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   let topicListRequest = "topicListJSONNoLogin";
-  if (thePage.isLoggedIn()) {
+  if (page.isLoggedIn()) {
     topicListRequest = "topicListJSON";
   }
-  let topicName = thePage.storage.variables.currentCourse.topicList.getValue();
-  let courseHome = thePage.storage.variables.currentCourse.courseHome.getValue();
+  let topicName = page.storage.variables.currentCourse.topicList.getValue();
+  let courseHome = page.storage.variables.currentCourse.courseHome.getValue();
   let theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&`;
   theURL += `${pathnames.urlFields.problem.topicList}=${topicName}&`;

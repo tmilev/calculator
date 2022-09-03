@@ -213,10 +213,19 @@ function logoutPartTwo() {
   if (oldUserRole === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
   } else {
-    var loginStatus = "";
-    loginStatus += `<b><a href='#' onclick = "window.calculator.login.reloadPage('<b>User requested reload. </b>', 0);">Reload page</a>`;
-    loginStatus += ` for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
-    document.getElementById("spanLoginStatus").innerHTML = loginStatus;
+    let loginStatus = document.getElementById("spanLoginStatus");
+    let boldComponent = document.createElement("b");
+    let anchor = document.createElement("a");
+    boldComponent.appendChild(anchor);
+    anchor.href = '#';
+    anchor.addEventListener('click', () => {
+      reloadPage('<b>User requested reload. </b>', 0);
+    });
+    anchor.textContent = "Reload page";
+    let textNode = document.createElement("span");
+    textNode.innerHTML = ` for complete logout (when <span style='color:red'>using public computer</span>).`;
+    loginStatus.appendChild(boldComponent);
+    loginStatus.appendChild(textNode);
     showLoginCalculatorButtons();
     toggleAccountPanels();
     setAdminPanels();

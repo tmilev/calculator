@@ -525,27 +525,38 @@ class Page {
     slider.checked = studentView;
 
     let spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
-    let radioHTML = "";
+    let radioPanel = document.getElementById(
+      ids.domElements.spanStudentViewSectionSelectPanel
+    );
+    radioPanel.textContent = '';
     if (studentView) {
       spanView.innerHTML = "Student view";
       for (let counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections++) {
-        radioHTML += `<br><label class = "containerRadioButton">`;
-        radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections}); " `;
+        radioPanel.appendChild(document.createElement("br"));
+        let label = document.createElement("label");
+        label.className = "containerRadioButton";
+        radioPanel.appendChild(label);
+        let input = document.createElement("input")
+        input.type = "radio";
+        input.name = "radioSection";
+        input.addEventListener("change", () => { 
+          this.sectionSelect(counterSections);
+        });
+        radioPanel.appendChild(input);
+
         let counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
         if (counterSections === counterFromStorage) {
-          radioHTML += "checked = 'true'";
+          input.checked = true;
         }
-        radioHTML += `>`;
-        radioHTML += `<span class='radioMark'></span>`;
-        radioHTML += this.user.sectionsTaught[counterSections];
-        radioHTML += `</label>`
+        let radioMarkSpan = document.createElement("radioMark");
+        radioMarkSpan.textContent = this.user.sectionsTaught[counterSections];
+        radioPanel.appendChild(radioMarkSpan)
       }
     } else {
       spanView.innerHTML = "Admin view";
     }
     login.resetPagesNeedingReload();
     login.setAdminPanels();
-    document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
   }
 
   removeOneScript(scriptId) {

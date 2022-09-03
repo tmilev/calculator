@@ -12,7 +12,7 @@ for (let i = 0; i < modifiableDatabaseData.modifiableFields.length; i++) {
 let transformersStandard = {
   shortener: {
     transformer: (input) => {
-      return miscellaneous.shortenString(4, input);
+      return miscellaneous.shortenString(30, input);
     },
   },
 };

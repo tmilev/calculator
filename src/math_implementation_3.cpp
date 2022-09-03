@@ -2913,9 +2913,9 @@ std::string StringRoutines::shortenInsertDots(
   numCharsBeginEnd * 2;
   out
   << inputString.substr(0, static_cast<unsigned>(numCharsBeginEnd))
-  << "... ("
+  << "..omit_"
   << numCharsOmitted
-  << " characters omitted)..."
+  << ".."
   << inputString.substr(
     static_cast<unsigned>(
       static_cast<signed>(inputString.size()) - numCharsBeginEnd

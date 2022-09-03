@@ -124,7 +124,6 @@ let optionsDatabase = {
     "users.${number}.activationToken": jsonToHtml.transformersStandard.shortener,
     "users.${number}.authenticationToken": jsonToHtml.transformersStandard.shortener,
     "users.${number}.password": jsonToHtml.transformersStandard.shortener,
-    "users.${number}._id": jsonToHtml.transformersStandard.shortener,
   },
 };
 

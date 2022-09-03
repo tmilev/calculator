@@ -58,23 +58,23 @@ function toggleDeadline(
 }
 
 function toggleProblemWeights() {
-  let theWeights = document.getElementsByClassName('panelProblemWeights');
-  let theButtons = document.getElementsByClassName('accordionLikeProblemWeight');
-  for (let i = 0; i < theWeights.length; i++) {
+  let weights = document.getElementsByClassName('panelProblemWeights');
+  let buttons = document.getElementsByClassName('accordionLikeProblemWeight');
+  for (let i = 0; i < weights.length; i++) {
     if (!problemWeightsVisible) {
-      theWeights[i].style.opacity = '1';
-      theWeights[i].style.maxHeight = '200px';
+      weights[i].style.opacity = '1';
+      weights[i].style.maxHeight = '200px';
     } else {
-      theWeights[i].style.opacity = '0';
-      theWeights[i].style.maxHeight = '0';
+      weights[i].style.opacity = '0';
+      weights[i].style.maxHeight = '0';
     }
   }
-  for (let i = 0; i < theButtons.length; i++) {
-    let currentProblem = problemPage.allProblems.getProblemById(theButtons[i].name);
+  for (let i = 0; i < buttons.length; i++) {
+    let currentProblem = problemPage.allProblems.getProblemById(buttons[i].name);
     if (!problemWeightsVisible) {
-      theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9660;`;
+      buttons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9660;`;
     } else {
-      theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9666;`;
+      buttons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9666;`;
     }
   }
   problemWeightsVisible = !problemWeightsVisible;

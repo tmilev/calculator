@@ -243,12 +243,10 @@ class Problem {
     this.scriptIds = null;
     this.type = problemData.type;
     this.problemNumberString = problemData.problemNumberString;
-    this.idButtonPoints = `modifyPoints${this.problemId}`;
     this.idTextareaPoints = `points${this.problemId}`;
     this.idModifyReportDeadline = `deadlines${this.problemId}`;
     this.idDeadlinePanel = `deadlinesPanel${this.problemId}`;
     this.idDeadlineContainer = `${ids.stringResources.prefixDeadlineContainer}${this.problemId}`;
-    this.idModifyReportPoints = `report${this.problemId}`;
     this.correctlyAnswered = problemData.correctlyAnswered;
     this.totalQuestions = problemData.totalQuestions;
     this.deadlines = [];
@@ -1004,26 +1002,42 @@ class Problem {
     return result;
   }
 
+  /** @return{HTMLElement} */
   toHTMLWeights() {
-    let result = "";
-    result += "<span class='panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
-    result += `Pts: <textarea class='textareaStudentPoints' rows='1' cols='2' id='${this.idTextareaPoints}'>`;
+    let result = document.createElement("span");
+    result.className = "panelProblemWeights";
+    result.style.opacity = 1;
+    result.style.maxHeight = "200px";
+    result.appendChild(document.createTextNode("Pts: "));
+    let textArea = document.createElement("textarea");
+    textArea.className = "textareaStudentPoints";
+    textArea.rows = 1;
+    textArea.cols = 2;
     if (this.weight !== undefined && this.weight !== null) {
-      result += this.weight;
+      textArea.textContent = this.weight;
     }
-    result += "</textarea>";
-    result += `<button id = '${this.idButtonPoints}' onclick = "window.calculator.problemPage.modifyWeight('${this.problemId}')">Modify</button><br>`;
-    result += `<span id = '${this.idModifyReportPoints}'></span>`;
-    result += "</span>";
+    result.appendChild(textArea);
+    let button = document.createElement("button");
+    let reportSpan = document.createElement("span");
+    button.addEventListener("click", () => { 
+      this.modifyWeight(textArea, reportSpan);
+    });
+    button.textContent = "Modify";
+    result.appendChild(button);
+    result.appendChild(document.createElement("br"));
+    result.appendChild(reportSpan);
     return result;
   }
 
-  modifyWeight() {
-    let problemWeightTextareaId = `points${this.problemId}`;
-    let incomingPoints = document.getElementById(problemWeightTextareaId).value;
+  modifyWeight(
+    /** @type {HTMLTextAreaElement} */
+    textArea,
+    /** @type {HTMLElement} */
+    reportSpan,
+  ) {
+    let incomingPoints = textArea.value;
     let modifyObject = {};
     let idDecoded = decodeURIComponent(this.problemId);
-    //let problemModifyWeightReport = `report${id}`;
     modifyObject[idDecoded] = {
       weight: incomingPoints
     };
@@ -1034,12 +1048,12 @@ class Problem {
     submitRequests.submitGET({
       url: theURL,
       progress: ids.domElements.spanProgressReportGeneral,
-      result: this.idModifyReportPoints,
+      result: reportSpan,
     });
   }
 
   /** @returns{HTMLElement[]} */
-  getProblemWeightContent(inputRow) {
+  getProblemWeightContent() {
     let page = window.calculator.mainPage;
     if (this.type !== "Problem" || this.fileName === "") {
       return [];
@@ -1049,11 +1063,17 @@ class Problem {
       content.innerHTML = this.toStringProblemWeight();
       return [content];
     }
-    let pointsString = "";
-    pointsString += `<button class = 'accordionLikeProblemWeight' onclick = "window.calculator.coursePage.toggleProblemWeights()" `;
-    pointsString += `name = "${this.problemId}">${this.toStringProblemWeight()} &#9666;</button>`;
-    let problemWeightString = this.toHTMLWeights();
-    content.innerHTML = `${pointsString}<br> ${problemWeightString}`;
+
+    let button = document.createElement("button");
+    button.className = "accordionLikeProblemWeight";
+    button.innerHTML = `${this.toStringProblemWeight()} &#9666`;
+    button.name = this.problemId;
+    button.addEventListener("click", () => { 
+      window.calculator.coursePage.toggleProblemWeights();
+    });
+    content.appendChild(button);
+    content.appendChild(document.createElement("br"));
+    content.appendChild(this.toHTMLWeights());
     return [content];
   }
 

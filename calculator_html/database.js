@@ -137,35 +137,41 @@ function updateDatabasePageCallback(incoming, unused) {
   } catch (e) {
     labels = [""];
   }
-  let theParsed = miscellaneous.jsonUnescapeParse(incoming);
+  let parsed = miscellaneous.jsonUnescapeParse(incoming);
   let output = document.getElementById(ids.domElements.divDatabaseOutput);
   output.textContent = "";
   if (
-    theParsed.error !== undefined &&
-    theParsed.error != null &&
-    theParsed.error != ""
+    parsed.error !== undefined &&
+    parsed.error != null &&
+    parsed.error != ""
   ) {
     output.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
-  } else if ("rows" in theParsed) {
+  } else if ("rows" in parsed) {
     let transformer = new jsonToHtml.JSONToHTML();
-    for (let i = 0; i < theParsed.rows.length; i++) {
-      theParsed.rows[i]["problemDataJSON"] = "";
+    for (let i = 0; i < parsed.rows.length; i++) {
+      parsed.rows[i]["problemDataJSON"] = "";
     }
-    document.getElementById(ids.domElements.spanDatabaseComments).innerHTML = `${theParsed.rows.length} out of ${theParsed.totalRows} rows displayed.<br> `;
+    document.getElementById(
+      ids.domElements.spanDatabaseComments
+    ).innerHTML = `${parsed.rows.length} out of ${parsed.totalRows} rows displayed.<br> `;
     output.textContent = "";
-    output.appendChild(transformer.getTableFromObject(theParsed.rows, optionsDatabase, { table: labels[0] }));
+    output.appendChild(transformer.getTableFromObject(parsed.rows, optionsDatabase, { table: labels[0] }));
   } else {
-    for (let counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection++) {
-      let currentCollection = theParsed.collections[counterCollection];
-      let linkHTML = "";
+    let table = document.createElement("table");
+    for (let i = 0; i < parsed.collections.length; i++) {
+      let currentCollection = parsed.collections[i];
+      let anchor = document.createElement("a");
+      anchor.textContent = currentCollection;
       let urlObjectIncoming = miscellaneous.deepCopy(storage.storage.urlObject);
       urlObjectIncoming.databaseLabels = currentCollection;
-      linkHTML += `<a href = '#${JSON.stringify(urlObjectIncoming)}' onclick = 'window.calculator.database.clickDatabaseTable(["${currentCollection}"]);'>`;
-      linkHTML += `${currentCollection}</a>`;
-      theParsed.collections[counterCollection] = linkHTML;
+      anchor.href = `#${JSON.stringify(urlObjectIncoming)}`;
+      anchor.addEventListener("click", () => { 
+        clickDatabaseTable([currentCollection]);
+      });
+      table.insertRow().insertCell().appendChild(anchor);
     }
-    let transformer = new jsonToHtml.JSONToHTML();
-    output.appendChild(transformer.getTableFromObject(theParsed.collections));
+    table.className = "tableJSON";
+    output.appendChild(table);
   }
 }
 

@@ -7,6 +7,18 @@ const miscellaneous = require("./miscellaneous_frontend");
 const panels = require('./panels');
 const storage = require('./storage');
 
+class DatabasePage {
+  constructor() {
+    
+  }
+  initialize() {
+    let tableButtons = document.getElementById(ids.domElements.pages.database.buttonTables);
+    tableButtons.addEventListener('click', () => {
+      updateDatabasePageResetCurrentTable();   
+    });     
+  }
+}
+
 function clickDatabaseTable(currentCollection) {
   window.calculator.mainPage.storage.variables.database.labels.setAndStore(JSON.stringify(currentCollection));
   updateDatabasePage();
@@ -179,7 +191,11 @@ function updateDatabasePage() {
   });
 }
 
+let databasePage = new DatabasePage();
+databasePage.initialize();
+
 module.exports = {
+  databasePage,
   transformersDatabase,
   optionsDatabase,
   updateDatabasePage,

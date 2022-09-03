@@ -35,6 +35,8 @@ let domElements = {
     themes: {
       div: "divThemes",
       button: "buttonThemes",
+      radioThemeDefault: "radioThemeDefault",
+      radioThemeExperimental: "radioThemeExperimental",
     },
     editPage: {
       div: "divEditPage",
@@ -110,6 +112,8 @@ let domElements = {
       inputUsername: "inputUsername",
       spanLoginStatus: "spanLoginStatus",
       spanLoginStatusExtra: "spanLoginStatusExtra",
+      buttonSignUp: "buttonSignUp",
+      linkLogout: "linkLogout",
     },
     forgotLogin: {
       buttonSendRecoveryEmail: "buttonSendRecoveryEmail",
@@ -120,9 +124,13 @@ let domElements = {
       signUpResult: "signUpResult",
       signUpResultReport: "signUpResultReport",
       recaptchaSignUp: "recaptchaSignUp",
+      buttonSignUpStart: "buttonSignUpStart",
     },
     activateAccount: {
       buttonChangePassword: "buttonChangePassword",
+    },
+    database: {
+      buttonTables: "buttonTables",
     },
   },
   applicationIdentifiers: {

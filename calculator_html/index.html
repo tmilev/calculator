@@ -74,13 +74,12 @@
             </form>
             <!--password input form-->
             <button class="buttonSelectPage" id="buttonLogin">Login</button><br>
-            <button class="buttonSignUp" onclick="window.calculator.mainPage.selectPage('signUp');">Sign up</button><br>
+            <button class="buttonSignUp" id="buttonSignUp">Sign up</button><br>
             <button class="buttonSignUp" id="buttonForgotLogin">Forgot login</button><br>
           </div>
           <!--divLoginCalculatorPanel-->
           <div class="divCenteredItem">
-            <a href="#" onclick="window.calculator.login.logout();"
-              class="linkLogoutInactive linkStandardButtonLike">Log out</a>
+            <a href="#" id="linkLogout" class="linkLogoutInactive linkStandardButtonLike">Log out</a>
           </div>
           <!--divCenteredItem-->
           <div class="divCenteredItem">
@@ -138,7 +137,7 @@
   <script src='https://www.google.com/recaptcha/api.js?onload=googleRecaptchaCallback&render=explicit' async
     defer></script>
       <div id="recaptchaSignUp"></div>
-      <button onclick="window.calculator.signUp.submitSignUpInfo();">Sign up</button>
+      <button id="buttonSignUpStart">Sign up</button>
       <br>
       <span id="signUpResultReport"></span>
       <br>
@@ -501,21 +500,18 @@
     </div>
 
     <div id="divDatabase" class="divPage">
-      <button class="buttonStandard"
-        onclick="window.calculator.database.updateDatabasePageResetCurrentTable();">Tables</button><span
+      <button class="buttonStandard" id = "buttonTables">Tables</button><span
         id="spanDatabaseComments"></span>
       <div id="divDatabaseOutput"> </div>
     </div>
     <div id="divThemes" class="divPage">
       <label class="containerRadioButton">
         Default
-        <input type="radio" checked="checked" name="theme" id="radioThemeDefault"
-          onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
+        <input type="radio" checked="checked" name="theme" id="radioThemeDefault"></input>
         <span class="radioMark"></span>
       </label>
       <label class="containerRadioButton">Experimental
-        <input type="radio" name="theme" id="radioThemeExperimental"
-          onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
+        <input type="radio" name="theme" id="radioThemeExperimental"></input>
         <span class="radioMark"></span>
       </label>
     </div>

@@ -25,6 +25,16 @@ class Authenticator {
       ) => {
       this.handlePasswordInputKeyPress(e);
     });
+    document.getElementById(
+      ids.domElements.pages.login.buttonSignUp
+    ).addEventListener('click', () => {
+      window.calculator.mainPage.selectPage('signUp');
+    });
+    document.getElementById(
+      ids.domElements.pages.login.linkLogout
+    ).addEventListener('click', () => {
+      logout();
+    });
   }
 
   handlePasswordInputKeyPress(/** @type {KeyboardEvent} */ e) {

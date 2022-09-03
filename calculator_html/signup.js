@@ -26,6 +26,7 @@ class SignUp {
   constructor() {
     this.recaptchaIdForSignUp = null;
     this.grecaptcha = null;
+    this.buttonsInitialized = false;
   }
 
   signUp() {
@@ -49,6 +50,19 @@ class SignUp {
     if (window.calculator.grecaptcha !== null && window.calculator.grecaptcha !== undefined) {
       this.grecaptcha = window.calculator.grecaptcha;
     }
+    this.initializeButtons();
+  }
+
+  initializeButtons() {
+    if (this.buttonsInitialized === true) {
+      return;
+    }  
+    this.initializedButtons = true;
+    document.getElementById(
+      ids.domElements.pages.signUp.buttonSignUpStart
+    ).addEventListener('click', () => {
+      this.submitSignUpInfo();
+    });
   }
 
   writeDebugLoginStatus(
@@ -124,6 +138,7 @@ class SignUp {
 }
 
 let signUp = new SignUp();
+signUp.initialize();
 
 module.exports = {
   getRecaptchaId,

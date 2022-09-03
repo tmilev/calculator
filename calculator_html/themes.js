@@ -27,6 +27,16 @@ class Theme {
       "--box-shadow-buttonAnswer": "5px 5px 5px grey",
       "--box-shadow-buttonMQ": "3px 3px 3px grey",
     };
+    document.getElementById(
+      ids.domElements.pages.themes.radioThemeDefault
+    ).addEventListener("click", () => {
+      this.setFromRadioButton();
+    });
+    document.getElementById(
+      ids.domElements.pages.themes.radioThemeExperimental
+    ).addEventListener("click", () => {
+      this.setFromRadioButton();
+    });
   }
 
   setFromRadioButton() {

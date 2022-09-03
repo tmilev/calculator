@@ -47,7 +47,10 @@ class SignUp {
       // Already initialized.
       return;
     }
-    if (window.calculator.grecaptcha !== null && window.calculator.grecaptcha !== undefined) {
+    if (
+      window.calculator.grecaptcha !== null &&
+      window.calculator.grecaptcha !== undefined
+    ) {
       this.grecaptcha = window.calculator.grecaptcha;
     }
     this.initializeButtons();

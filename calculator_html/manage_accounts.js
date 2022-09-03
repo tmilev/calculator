@@ -4,6 +4,42 @@ const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const miscellaneous = require("./miscellaneous_frontend");
 
+class ManageAccountsPage {
+  initialize() {
+    document.getElementById(
+      ids.domElements.pages.manageAccounts.buttonSetTeacher
+    ).addEventListener('click', () => {
+      getTeachersStudents();
+    });
+    document.getElementById(
+      ids.domElements.pages.manageAccounts.buttonAddUsersTeachers
+    ).addEventListener('click', () => {
+      addEmailsOrUsers(
+        'inputAddUsersadmin',
+        '',
+        'idOutputAdmins',
+        'admin',
+        'inputAddExtraInfoAdmin',
+        'inputAddDefaultPasswordsAdmin',
+        'addUsers'
+      );
+    });
+    document.getElementById(
+      ids.domElements.pages.manageAccounts.buttonAddUsersStudent
+    ).addEventListener('click', () => {
+      addEmailsOrUsers(
+        'inputAddUsersStudent',
+        '',
+        'idOutputStudents',
+        'student',
+        'inputAddExtraInfostudent',
+        'inputAddDefaultPasswordsStudent',
+        'addUsers'
+      );
+    });    
+  }
+}
+
 function getAccountsTable(inputAccounts) {
   let result = "";
   result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th><th>Course</th><th>Section</th><th>Semester</th></tr>";
@@ -138,7 +174,11 @@ function updateAccountsPage() {
 
 }
 
+let manageAccountsPage = new ManageAccountsPage();
+manageAccountsPage.initialize();
+
 module.exports = {
+  manageAccountsPage,
   addEmailsOrUsers,
   updateAccountsPage,
   getTeachersStudents

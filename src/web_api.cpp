@@ -295,7 +295,7 @@ bool WebAPIResponse::processChangePassword(
   }
   if (!global.flagLoggedIn) {
     result[WebAPI::result::error] =
-    "Please enter (old) password. " + reasonForNoAuthentication;
+    "Please enter (old) password [correctly]. " + reasonForNoAuthentication;
     return global.response.writeResponse(result);
   }
   std::string newPassword =

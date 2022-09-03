@@ -547,8 +547,7 @@
         </table>
         <!--Password change table-->
       </form>
-      <button class="buttonStandard" onclick="window.calculator.account.submitChangePassRequest()">Change
-        password</button>
+      <button class="buttonStandard" id="buttonChangePasswordFromAccountPage">Change password</button>
       <table>
         <tr>
           <td>Current email:</td>
@@ -561,8 +560,7 @@
           </td>
         </tr>
       </table>
-      <button class="buttonStandard" onclick="window.calculator.account.submitChangePassRequest()"
-        id="buttonChangeEmail">Change email</button>
+      <button class="buttonStandard" id="buttonChangeEmail">Change email</button>
       <br>
       <span id="spanVerification"></span>
       <hr>
@@ -615,8 +613,7 @@
           placeholder="email or user list, comma, space or ; separated"></textarea>
         <textarea width="500px" id="inputSections" placeholder="list of sections"></textarea>
         <br>
-        <button class="buttonNormal" onclick="window.calculator.manageAccounts.getTeachersStudents()"> Set
-          teacher</button>
+        <button class="buttonNormal" id="buttonSetTeacher"> Set teacher</button>
         <br><span id="idOutputSections"></span>
         <br>
         <ul>
@@ -633,11 +630,10 @@
         </ul>
         <textarea width="500px" id="inputAddUsersadmin"
           placeholder="admin list, comma, space or ; separated"></textarea>
-        <textarea width="500px" id="inputAddDefaultPasswordsadmin" placeholder="default passwords"></textarea>
-        <textarea width="500px" id="inputAddExtraInfoadmin" placeholder="section/class #"></textarea>
+        <textarea width="500px" id="inputAddDefaultPasswordsAdmin" placeholder="default passwords"></textarea>
+        <textarea width="500px" id="inputAddExtraInfoAdmin" placeholder="section/class #"></textarea>
         <br>
-        <button class="buttonNormal"
-          onclick="window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersadmin', '', 'idOutputAdmins', 'admin', 'inputAddExtraInfoadmin', 'inputAddDefaultPasswordsadmin', 'addUsers' )">
+        <button class="buttonNormal" id="buttonAddUsersTeachers">
           Add users</button>
         <br>
         <span id="idOutputAdmins"></span>
@@ -654,13 +650,12 @@
             added
             users, the operation will fail (no users will be added).</li>
         </ul>
-        <textarea width="500px" id="inputAddUsersstudent"
+        <textarea width="500px" id="inputAddUsersStudent"
           placeholder="user list, comma, space or ; separated"></textarea>
-        <textarea width="500px" id="inputAddDefaultPasswordsstudent" placeholder="default passwords"></textarea>
+        <textarea width="500px" id="inputAddDefaultPasswordsStudent" placeholder="default passwords"></textarea>
         <textarea width="500px" id="inputAddExtraInfostudent" placeholder="section/class #"></textarea>
         <br>
-        <button class="normalButton"
-          onclick="window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersstudent', '', 'idOutputStudents', 'student', 'inputAddExtraInfostudent', 'inputAddDefaultPasswordsstudent', 'addUsers' )">
+        <button class="normalButton" id="buttonAddUsersStudent">
           Add users</button>
         <br>
         <span id="idOutputStudents"></span>
@@ -678,7 +673,7 @@
         <div id="divLoginPanelUsernameReport" class="divInvisible divSmall" style="margin: 4px"></div>
         <div id="divLoginPanelDatabaseInfo" class="divSmall" style="margin: 4px"></div>
         <div id="divLoginPanelInfo" class="divSmall" style="margin: 4px"></div>
-        <a href="#" onclick="window.calculator.login.logout();" class="linkLogoutInactive linkStandardButtonLike">Log
+        <a href="#" id="linkLogoutTop" class="linkLogoutInactive linkStandardButtonLike">Log
           out</a>
       </div>
       <div><button class="buttonSelectPage" id="buttonLoginPage">Login</button></div>
@@ -727,7 +722,7 @@
         <div>
           <!--div containing debug flag-->
           <label class="switch">
-            <input id="sliderDebugFlag" type="checkbox" onchange="window.calculator.mainPage.setSwitchDebug();">
+            <input id="sliderDebugFlag" type="checkbox">
             <span class="slider round"></span>
           </label><span id="spanDebugFlagToggleReport">-</span>
         </div>
@@ -735,7 +730,7 @@
       </div>
       <div>
         <label class="switch">
-          <input id="sliderStudentView" type="checkbox" onchange="window.calculator.mainPage.setSwitchStudentView();">
+          <input id="sliderStudentView" type="checkbox">
           <span class="slider round"></span>
         </label><span id="spanStudentViewToggleReport">-</span>
       </div>

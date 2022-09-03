@@ -5,6 +5,21 @@ const pathnames = require("./pathnames");
 const login = require('./login');
 const miscellaneous = require("./miscellaneous_frontend");
 
+class AccountPage {
+  initialize() {
+    document.getElementById(
+      ids.domElements.pages.account.buttonChangePasswordFromAccountPage
+    ).addEventListener('click', () => {
+      submitChangePassRequest();
+    });
+    document.getElementById(
+      ids.domElements.pages.account.buttonChangeEmail
+    ).addEventListener('click', () => {
+      submitChangePassRequest();
+    });
+  }
+}
+
 function submitChangePassRequestCallback(result, outputComponent) {
   outputComponent = document.getElementById("spanVerification").innerHTML = miscellaneous.jsonParseGetHtmlStandard(result);
   document.getElementById("inputPassword").value = document.getElementById("inputNewPasswordInAccount").value;
@@ -54,7 +69,11 @@ function updateAccountPage() {
   spanExtraInfo.innerHTML = extraInfo;
 }
 
+let accountPage = new AccountPage();
+accountPage.initialize();
+
 module.exports = {
+  accountPage,
   updateAccountPage,
   submitChangePassRequest
 };

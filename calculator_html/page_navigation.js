@@ -397,7 +397,7 @@ class Page {
     this.initializeCalculatorPagePartTwo();
   }
 
-  /**@type {boolean} */
+  /** @type {boolean} */
   loginAttemptDesired() {
     if (this.storage.variables.currentPage.getValue() === this.pages.activateAccount.name) {
       return false;
@@ -447,6 +447,16 @@ class Page {
   initializeCalculatorPagePartTwo() {
     initializeButtons.initializeButtons();
     mathTypeSet.typesetter.typesetSoft(ids.domElements.divMathjaxProblematicRender);
+    document.getElementById(
+      ids.domElements.sliderDebugFlag
+    ).addEventListener('change', () => {
+      this.setSwitchDebug();
+    });
+    document.getElementById(
+      ids.domElements.sliderStudentView
+    ).addEventListener('change', () => {
+      this.setSwitchStudentView();
+    });
   }
 
   sectionSelect(sectionNumber) {

@@ -35,6 +35,11 @@ class Authenticator {
     ).addEventListener('click', () => {
       logout();
     });
+    document.getElementById(
+      ids.domElements.pages.login.linkLogoutTop
+    ).addEventListener('click', () => {
+      logout();
+    });   
   }
 
   handlePasswordInputKeyPress(/** @type {KeyboardEvent} */ e) {

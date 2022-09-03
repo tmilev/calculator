@@ -114,6 +114,7 @@ let domElements = {
       spanLoginStatusExtra: "spanLoginStatusExtra",
       buttonSignUp: "buttonSignUp",
       linkLogout: "linkLogout",
+      linkLogoutTop: "linkLogoutTop",
     },
     forgotLogin: {
       buttonSendRecoveryEmail: "buttonSendRecoveryEmail",
@@ -128,6 +129,15 @@ let domElements = {
     },
     activateAccount: {
       buttonChangePassword: "buttonChangePassword",
+    },
+    account: {
+      buttonChangePasswordFromAccountPage: "buttonChangePasswordFromAccountPage",
+      buttonChangeEmail: "buttonChangeEmail",
+    },
+    manageAccounts: {
+      buttonSetTeacher: "buttonSetTeacher",
+      buttonAddUsersTeachers: "buttonAddUsersTeachers",
+      buttonAddUsersStudent: "buttonAddUsersStudent",
     },
     database: {
       buttonTables: "buttonTables",

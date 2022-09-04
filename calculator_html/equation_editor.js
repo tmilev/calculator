@@ -7679,22 +7679,67 @@ class MathNode {
     const oldIndexInParent = this.indexInParent;
     let fraction = null;
     let childIndexToFocus = 1;
-    if (this.positionCursorBeforeKeyEvents ===
-        this.element.textContent.length) {
-      fraction = mathNodeFactory.fraction(this.equationEditor, this, null);
-    } else if (this.positionCursorBeforeKeyEvents === 0) {
-      fraction = mathNodeFactory.fraction(this.equationEditor, null, this);
+    if (
+      this.positionCursorBeforeKeyEvents === 0 &&
+      this.element.textContent.length > 0
+    ) {
       childIndexToFocus = 0;
+    } 
+    let split = this.splitByCursor();
+
+    let previous = this.previousHorizontalSibling();
+    let next = this.nextHorizontalSibling();
+    let leftWhiteSpace = mathNodeFactory.atom(this.equationEditor, '');
+    let rightWhiteSpace = mathNodeFactory.atom(this.equationEditor, '');
+    if (
+      split[0] === null &&
+      previous !== null &&
+      previous.type.type === knownTypes.rightDelimiter.type
+    ) {
+      let rightIndex = oldIndexInParent - 1;
+      let leftIndex = oldParent.findIndexMatchingDelimiter(rightIndex);
+      let slice = oldParent.children.slice(leftIndex, rightIndex + 1);
+      let numerator = mathNodeFactory.horizontalMathFromArray(
+        this.equationEditor, slice
+      );
+      numerator.ensureEditableAtoms();
+      numerator.normalizeHorizontalMath();
+      fraction = mathNodeFactory.fraction(
+        this.equationEditor, numerator, split[1]
+      );
+      oldParent.replaceChildRangeWithChildren(
+        leftIndex, rightIndex + 1, [
+        leftWhiteSpace, fraction, rightWhiteSpace
+      ]);
+      childIndexToFocus = 1;
+    } else if (
+      split[1] === null && 
+      next !== null &&
+      next.type.type === knownTypes.leftDelimiter.type
+    ) {
+      let leftIndex = oldIndexInParent + 1;
+      let rightIndex = oldParent.findIndexMatchingDelimiter(leftIndex);
+      let slice = oldParent.children.slice(leftIndex, rightIndex + 1);
+      let denominator = mathNodeFactory.horizontalMathFromArray(this.equationEditor, slice);
+      denominator.ensureEditableAtoms();
+      denominator.normalizeHorizontalMath();
+      fraction = mathNodeFactory.fraction(
+        this.equationEditor, split[0], denominator
+      );
+      oldParent.replaceChildRangeWithChildren(
+        oldIndexInParent, rightIndex, [
+        leftWhiteSpace, fraction, rightWhiteSpace
+      ]);
+      childIndexToFocus = 1;
     } else {
-      let split = this.splitByCursor();
       fraction =
-          mathNodeFactory.fraction(this.equationEditor, split[0], split[1]);
-    }
-    oldParent.replaceChildAtPosition(
+        mathNodeFactory.fraction(this.equationEditor, split[0], split[1]);
+      oldParent.replaceChildAtPosition(
         oldIndexInParent, mathNodeFactory.atom(this.equationEditor, ''));
-    oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
-    oldParent.insertChildAtPosition(
+      oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
+      oldParent.insertChildAtPosition(
         oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ''));
+    }
     fraction.parent.updateDOM();
     fraction.children[childIndexToFocus].focus(-1);
   }

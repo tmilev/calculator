@@ -30,13 +30,36 @@
     editor.resizingEditorFont = false;
   }
   var editor = null;
+  function handleEnter(editor, shiftKeyPressed) {
+    let debug = document.getElementById("debug");
+    debug.textContent = "";
+    let enterClicked = document.createElement("b");
+    enterClicked.textContent = "Enter pressed. ";
+    enterClicked.style.color = "green";
+    debug.appendChild(enterClicked);
+    debug.appendChild(document.createTextNode(editor.rootNode.toLatex()));
+  }
+
   function createEditor() {
     const options = new EquationEditorOptions({
       // Can you edit the math or is it static math?
       editable: true,
+      // An input element in plain text linked to the equation editor.
+      // Will show the formula latex.
+      // Modification of the input will modify the editor
+      // and the other way round.
       latexInput: document.getElementById("latex-input-test"),
+      // A container to display debug info, 
+      // if you omit this no info will be generated.
       debugLogContainer: document.getElementById("debug"),
-      copyButton: true
+      // Should I generate a copy button at the corner of the editor?
+      copyButton: true,
+      // Extra key handler to be executed after the regular
+      // equation editor handers.
+      /** @type{Object<string, Function>} */
+      extraKeyHandlers: {
+        "Enter": handleEnter,
+      },
     });
     let svgContainer = document.getElementById("svgContainer");
     editor = new EquationEditor(document.getElementById('editor'), options, svgContainer);

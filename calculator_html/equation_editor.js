@@ -2848,7 +2848,8 @@ class EquationEditorOptions {
        * editHandler: (Function?|null|undefined),
        * lineBreakWidth: (number|undefined),
        * logTiming: (boolean|undefined),
-       * copyButton: (boolean|undefined)
+       * copyButton: (boolean|undefined),
+       * extraKeyHandlers: Object<string, function (EquationEditor, boolean)>
        * }}
        */
       options,
@@ -2906,6 +2907,13 @@ class EquationEditorOptions {
     }
     /** @type {boolean} */
     this.showLatexOnDoubleClick = !this.editable && !this.copyButton;
+    /** @type {Object<string, function(EquationEditor,boolean)>|undefined} */
+    this.extraKeyHandlers = {};
+    if (options.extraKeyHandlers !== undefined && options.extraKeyHandlers !== null) {
+      for (let label in options.extraKeyHandlers) {
+        this.extraKeyHandlers[label] = options.extraKeyHandlers[label];
+      }
+    }
   }
 }
 
@@ -5832,6 +5840,10 @@ class MathNode {
           new MathNodeWithCursorPosition(null, -1);
       this.equationEditor.selectionEnd =
           new MathNodeWithCursorPosition(null, -1);
+    }
+    let keyHandlers = this.equationEditor.options.extraKeyHandlers;
+    if (event.key in keyHandlers) {
+      keyHandlers[event.key](this.equationEditor, event.shiftKey);
     }
   }
 

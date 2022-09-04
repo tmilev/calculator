@@ -84,8 +84,12 @@ class User {
     this.sectionInDB = inputData.studentSection;
     this.sectionComputed = inputData.studentSection;
     this.deadlineSchema = inputData.deadlineSchema;
-    document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = page.storage.variables.user.name.value;
-    document.getElementById(ids.domElements.inputUsername).value = page.storage.variables.user.name.value;
+    document.getElementById(
+      ids.domElements.spanUserIdInAccountsPage
+    ).innerHTML = page.storage.variables.user.name.value;
+    document.getElementById(
+      ids.domElements.inputUsername
+    ).value = page.storage.variables.user.name.value;
   }
 }
 

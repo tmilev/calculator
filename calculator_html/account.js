@@ -20,8 +20,8 @@ class AccountPage {
   }
 }
 
-function submitChangePassRequestCallback(result, outputComponent) {
-  outputComponent = document.getElementById("spanVerification").innerHTML = miscellaneous.jsonParseGetHtmlStandard(result);
+function submitChangePassRequestCallback(result) {
+  document.getElementById("spanVerification").innerHTML = miscellaneous.jsonParseGetHtmlStandard(result);
   document.getElementById("inputPassword").value = document.getElementById("inputNewPasswordInAccount").value;
   document.getElementById("inputOldPasswordInAccount").value = "";
   document.getElementById("inputNewPasswordInAccount").value = "";
@@ -34,39 +34,64 @@ function submitChangePassRequest() {
   let inputNewPassword = document.getElementById("inputNewPasswordInAccount");
   let inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
   let inputEmail = document.getElementById("inputEmail");
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.changePassword}&`;
-  theURL += `${pathnames.urlFields.password}=${encodeURIComponent(inputOldPassword.value)}&`;
-  theURL += `${pathnames.urlFields.newPassword}=${encodeURIComponent(inputNewPassword.value)}&`;
-  theURL += `${pathnames.urlFields.reenteredPassword}=${encodeURIComponent(inputReenteredPassword.value)}&`;
-  theURL += `${pathnames.urlFields.email}=${encodeURIComponent(inputEmail.value)}&`;
-  theURL += "doReload=false&"
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.changePassword}&`;
+  url += `${pathnames.urlFields.password}=${encodeURIComponent(inputOldPassword.value)}&`;
+  url += `${pathnames.urlFields.newPassword}=${encodeURIComponent(inputNewPassword.value)}&`;
+  url += `${pathnames.urlFields.reenteredPassword}=${encodeURIComponent(inputReenteredPassword.value)}&`;
+  url += `${pathnames.urlFields.email}=${encodeURIComponent(inputEmail.value)}&`;
+  url += "doReload=false&"
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     callback: submitChangePassRequestCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
 }
 
 function updateAccountPage() {
-  let thePage = window.calculator.mainPage;
-  let usernameInput = document.getElementById("spanUserIdInAccountsPage");
+  let page = window.calculator.mainPage;
+  let usernameInput = document.getElementById(
+    ids.domElements.spanUserIdInAccountsPage
+  );
   let emailSpan = document.getElementById(ids.domElements.spanOldEmail);
-  usernameInput.innerHTML = thePage.storage.variables.user.name.getValue();
-  emailSpan.innerHTML = thePage.storage.variables.user.email.getValue();
+  usernameInput.innerHTML = page.storage.variables.user.name.getValue();
+  emailSpan.innerHTML = page.storage.variables.user.email.getValue();
   let spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
-  let extraInfo = "";
-  extraInfo += "<table>";
-  extraInfo += `<tr><td>Role: </td><td>${thePage.user.getRole()}</td><tr>`;
-  if (thePage.user.sectionsTaught.length > 0 && !thePage.studentView()) {
-    extraInfo += `<tr><td>Sections taught: </td><td>${thePage.user.sectionsTaught.join(", ")}</td><tr>`;
+  let table = document.createElement("table");
+  let resultCell = document.createElement("th");
+  resultCell.textContent = "Role:";
+  let row = table.insertRow();
+  row.appendChild(resultCell);
+  resultCell = document.createElement("th");
+  resultCell.textContent = page.user.getRole();
+  if (page.user.sectionsTaught.length > 0 && !page.studentView()) {
+    row = table.insertRow();
+    row.insertCell().appendChild(
+      document.createTextNode(
+        "Sections taught: "
+      )
+    );
+    row.insertCell().appendChild(
+      document.createTextNode(
+        page.user.sectionsTaught.join(", ")
+      )
+    );
   }
-  extraInfo += `<tr><td>Instructor: </td><td>${thePage.user.instructor}</td><tr>`;
-  extraInfo += `<tr><td>Section in database: </td><td>${thePage.user.sectionInDB}</td><tr>`;
-  extraInfo += `<tr><td>Section computed: </td><td>${thePage.user.sectionComputed}</td></tr>`;
-  extraInfo += `<tr><td>Deadline schema: </td><td>${thePage.user.deadlineSchema}</td><tr>`;
-  extraInfo += "</table>";
-  spanExtraInfo.innerHTML = extraInfo;
+  function insertRow(first, second) {
+    row = table.insertRow();
+    row.insertCell().appendChild(
+      document.createTextNode(first)
+    );
+    row.insertCell().appendChild(
+      document.createTextNode(second)
+    );
+  }
+  insertRow("Instructor: ", page.user.instructor);
+  insertRow("Section in database: ", page.user.sectionInDB);
+  insertRow("Section computed: ", page.user.sectionComputed);
+  insertRow("Deadline schema: ", page.user.deadlineSchema);
+  spanExtraInfo.textContent = "";
+  spanExtraInfo.appendChild(table);
 }
 
 let accountPage = new AccountPage();

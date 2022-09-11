@@ -1,7 +1,3 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
 #include "general_lists.h"
 #include "math_general_implementation.h"
 #include "math_general.h"
@@ -1692,10 +1688,8 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
   if (this->flagIsTheZeroCone) {
     return point.isEqualToZero();
   }
-  Rational scalarProduct;
-  for (int i = 0; i < this->normals.size; i ++) {
-    scalarProduct = point.scalarEuclidean(this->normals[i]);
-    if (scalarProduct.isNegative()) {
+  for (const Wall& wall : this->walls) {
+    if (!wall.isInClosedHalfSpace(point)) {
       return false;
     }
   }

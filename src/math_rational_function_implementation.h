@@ -1,7 +1,4 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
+
 #ifndef header_math_rational_function_implementation_ALREADY_INCLUDED
 #define header_math_rational_function_implementation_ALREADY_INCLUDED
 
@@ -9,7 +6,7 @@
 
 template <class Coefficient>
 bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
-  STACK_TRACE("RationalFunction::convertToType");
+  STACK_TRACE("RationalFraction::convertToType");
   if (inputExpressionType < this->expressionType) {
     return false;
   }
@@ -37,7 +34,7 @@ bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::invert() {
-  STACK_TRACE("RationalFunction::invert");
+  STACK_TRACE("RationalFraction::invert");
   if (!this->checkConsistency()) {
     global.fatal << "Inconsistent rational function. " << global.fatal;
   }
@@ -812,7 +809,7 @@ void RationalFraction<Coefficient>::reduceRationalFraction() {
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::simplify() {
-  STACK_TRACE("RationalFunction::simplify");
+  STACK_TRACE("RationalFraction::simplify");
   this->reduceRationalFraction();
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
@@ -1081,7 +1078,7 @@ template <class Coefficient>
 void RationalFraction<Coefficient>::addHonestRationalFunction(
   const RationalFraction<Coefficient>& other
 ) {
-  STACK_TRACE("RationalFunction::addHonestRationalFunction");
+  STACK_TRACE("RationalFraction::addHonestRationalFunction");
   Coefficient proportionalityCoefficient;
   if (
     !this->denominator.getElement().isProportionalTo(
@@ -1394,7 +1391,7 @@ bool RationalFraction<Coefficient>::substitution(
   const Coefficient& one,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("RationalFunction::substitution");
+  STACK_TRACE("RationalFraction::substitution");
   switch (this->expressionType) {
   case RationalFraction::typeConstant:
     return true;
@@ -1428,7 +1425,7 @@ bool RationalFraction<Coefficient>::substitution(
   default:
     global.fatal
     << "Default case not allowed in "
-    << "RationalFunction::substitution. Rational function: "
+    << "RationalFraction::substitution. Rational function: "
     << this->toString()
     << "."
     << global.fatal;

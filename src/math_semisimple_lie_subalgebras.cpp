@@ -1,7 +1,3 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
 #include "math_general_implementation.h"
 #include "math_extra_semisimple_lie_subalgebras.h"
 #include "math_subsets_selections.h"
@@ -5936,7 +5932,7 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   const Vectors<Rational>& nonStrictConeNonPositiveScalar,
   const List<Vector<Rational> >& vectorsToBeInGeneralPosition
 ) {
-  STACK_TRACE("Vectors::PerturbSplittingNormal");
+  STACK_TRACE("Vectors::perturbNormalRelativeToVectorsInGeneralPosition");
   for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
     if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
       global.fatal
@@ -5960,12 +5956,15 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   for (int i = 0; i < vectorsToBeInGeneralPosition.size; i ++) {
     if (this->scalarEuclidean(vectorsToBeInGeneralPosition[i]) == 0) {
       bool foundModifier = false;
-      for (int j = 0; j < cone.normals.size; j ++) {
+      for (int j = 0; j < cone.walls.size; j ++) {
         if (
-          cone.normals[j].scalarEuclidean(vectorsToBeInGeneralPosition[i]) != 0
+          cone.walls[j].normal.scalarEuclidean(
+            vectorsToBeInGeneralPosition[i]
+          ) !=
+          0
         ) {
           foundModifier = true;
-          currentModifier = cone.normals[j];
+          currentModifier = cone.walls[j].normal;
           break;
         }
       }

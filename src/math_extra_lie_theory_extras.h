@@ -1,7 +1,4 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
+
 #ifndef header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 #define header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 
@@ -9,9 +6,8 @@
 #include "math_rational_function.h"
 #include "math_extra_modules_semisimple_lie_algebras.h"
 
-// #include "math_extra_universal_enveloping.h"
-// the following data is isolated in a struct because it is
-// way too large a lump to pass separately
+// The following data is isolated in a struct because it is
+// way too large a lump to pass separately.
 struct BranchingData {
   HomomorphismSemisimpleLieAlgebra homomorphism;
   FormatExpressions format;

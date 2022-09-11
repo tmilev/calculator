@@ -1,7 +1,4 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
+
 #ifndef header_math_general_ALREADY_INCLUDED
 #define header_math_general_ALREADY_INCLUDED
 
@@ -5987,12 +5984,6 @@ public:
     output << input.toString();
     return output;
   }
-  bool removeRedundantShortRootsClassicalRootSystem(
-    PartialFractions& owner,
-    Vector<Rational>* indicator,
-    Polynomial<LargeInteger>& buffer1,
-    int dimension
-  );
   void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQuasipolynomial,
     const MonomialPolynomial& monomial,
@@ -6148,9 +6139,36 @@ public:
   bool operator>(const OnePartialFractionDenominator& other) const;
 };
 
+// Wall of a cone: contains the normal of the wall as
+// well as the id(s) of the cones on the other side of the wall.
+// The number of ids on the other side of the wall can be:
+// 1) zero if the cone is on the outside of cone complex;
+// 2) 1 if the cone complex is normal (every wall is exactly between
+// two chambers)
+// 3) 2 or more if the cone complex is not normal, in which case
+// we are likely trying to normalize it and are in the middle of computations.
+class Wall {
+  friend std::ostream& operator<<(std::ostream& output, const Wall& wall) {
+    output << wall.toString();
+    return output;
+  }
+public:
+  Vector<Rational> normal;
+  List<int> neighbors;
+  bool operator==(const Wall& other) const;
+  bool operator>(const Wall& other) const;
+  bool operator!=(const Wall& other) const;
+  // Is the input point on the "inside" half-space of my wall or on the wall?
+  bool isInClosedHalfSpace(const Vector<Rational>& point) const;
+  // Is the input point on the "inside" half-space of my wall without
+  // being on the wall?
+  bool isInOpenHalfSpace(const Vector<Rational>& point) const;
+  std::string toString() const;
+};
+
 class Cone {
   void computeVerticesFromNormalsNoFakeVertices();
-  bool eliminateFakeNormalsUsingVertices(int numAddedFakeWalls);
+  bool eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls);
   friend std::ostream& operator<<(std::ostream& output, const Cone& cone) {
     output << cone.toString();
     return output;
@@ -6158,7 +6176,8 @@ class Cone {
 public:
   bool flagIsTheZeroCone;
   Vectors<Rational> vertices;
-  Vectors<Rational> normals;
+  List<Wall> walls;
+  int id;
   int lowestIndexNotCheckedForChopping;
   int lowestIndexNotCheckedForSlicingInDirection;
   void transformToWeylProjective(ConeCollection& owner);
@@ -6216,27 +6235,42 @@ public:
   // indicates a mathematical promise (not checked for performance reasons)
   // that the projective cone, when made affine, is finite.
   bool createFromNormals(
-    Vectors<Rational>& inputNormals, bool hasEnoughProjectiveVertices
+    const Vectors<Rational>& inputNormals,
+    const List<List<int> >& inputNeighbors,
+    bool hasEnoughProjectiveVertices
   );
-  // returns false if the cone is non-proper, i.e. when either
-  // 1) the cone is empty or is of smaller dimension than it should be
-  // 2) the resulting cone is the entire space
-  bool createFromNormals(Vectors<Rational>& inputNormals);
+  // Returns false if the cone is non-proper, i.e. when either
+  // 1) the cone is empty or is of smaller dimension than the dimension of the
+  // ambient space
+  // 2) the resulting cone is the entire space.
+  bool createFromNormals(
+    const Vectors<Rational>& inputNormals,
+    const List<List<int> >& inputNeighbors
+  );
+  bool createFromWalls(
+    const List<Wall>& inputWalls, bool hasEnoughProjectiveVertices
+  );
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
   bool getInternalPoint(Vector<Rational>& output) const;
   Vector<Rational> getInternalPoint() const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const Cone& input);
+  bool haveCommonVertex(
+    const Vector<Rational>& normal1, const Vector<Rational>& normal2
+  );
   bool produceNormalFromTwoNormalsAndSlicingDirection(
     const Vector<Rational>& slicingDirection,
-    Vector<Rational>& normal1,
-    Vector<Rational>& normal2,
+    const Vector<Rational>& normal1,
+    const Vector<Rational>& normal2,
     Vector<Rational>& output
-  );
+  ) const;
   void operator=(const Cone& other);
   Cone(const Cone& other);
   Cone();
+  Cone(int inputId);
+  Vectors<Rational> getAllNormals() const;
+  List<List<int> > getAllNeighbors() const;
   void intersectHyperplane(
     Vector<Rational>& normal, Cone& outputConeLowerDimension
   );
@@ -6281,27 +6315,34 @@ public:
 
 // A collection of cones associated with a given vector partition function.
 class ConeCollection {
+private:
+  static void addCone(MapList<int, Cone> map, const Cone& cone);
 public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
   HashedList<Vector<Rational> > splittingNormals;
   Vectors<Rational> slicingDirections;
   Cone convexHull;
-  HashedList<Cone> nonRefinedCones;
-  HashedList<Cone> refinedCones;
-  // Returns false if the cone is refined,
-  // otherwise slices the cone.
-  bool refineOneStep(Cone& toBeRefined, List<Cone>& output);
+  MapList<int, Cone> nonRefinedCones;
+  MapList<int, Cone> refinedCones;
+  int conesCreated;
+  void makeAllConesNonRefined();
   // Returns false if the cone is refined relative to the splitting normals,
   // otherwise slices the cone.
-  bool refineByNormals(Cone& toBeRefined, List<Cone>& output);
+  bool refineOneByNormals(Cone& toBeRefined, List<Cone>& output);
   // Returns false if the cone is refined relative to the splitting directions,
   // otherwise slices the cone.
-  bool refineByDirections(Cone& toBeRefined, List<Cone>& output);
-  void refine();
+  void refineOneByOneDirection(
+    Cone& toBeRefined,
+    const Vector<Rational>& direction,
+    List<Cone>& output
+  );
+  void refineByDirections();
+  void refineByOneDirection(const Vector<Rational>& direction);
+  void refineByNormals();
   void refineMakeCommonRefinement(const ConeCollection& other);
   void sort();
-  void refineAndSort();
+  void refineByDirectionsAndSort();
   void makeAffineAndTransformToProjectiveDimensionPlusOne(
     Vector<Rational>& affinePoint, ConeCollection& output
   );
@@ -6353,6 +6394,8 @@ public:
     Vectors<Rational>& inputLFsLastCoordConst,
     List<int>& outputMaximumOverEeachSubChamber
   );
+  void addNonRefinedCone(const Cone& cone);
+  void addRefinedCone(const Cone& cone);
   // Creates a cone collection from a set of walls.
   // hasEnoughProjectiveVertices is a mathematical promise that
   // the input is of finite size when made affine.
@@ -6371,6 +6414,15 @@ public:
     const Cone& toBeSliced,
     bool weAreChopping,
     const Vector<Rational>& killerNormal,
+    List<Cone>& output
+  );
+  // Returns true if a chamber is split so that
+  // each chamber has unique exit wall with respect
+  // to the given direction, and returns false
+  // if the chamber already has that property.
+  bool splitChamberByDirection(
+    const Cone& toBeSliced,
+    const Vector<Rational>& direction,
     List<Cone>& output
   );
   void getNewVerticesAppend(
@@ -6451,11 +6503,6 @@ public:
   int getIndexDoubleOfARoot(const Vector<Rational>& root);
   void computeTable(int dimension);
   void prepareCheckSums();
-  std::string doFullComputationReturnLatexFileString(
-    Vectors<Rational>& toBePartitioned,
-    FormatExpressions& format,
-    std::string* outputHtml
-  );
   bool argumentsAllowed(
     Vectors<Rational>& arguments, std::string& outputWhatWentWrong
   );
@@ -6471,9 +6518,6 @@ public:
     Vectors<Rational>& input, std::stringstream* commentsOnFailure
   );
   void run(Vectors<Rational>& input);
-  void removeRedundantShortRootsClassicalRootSystem(
-    Vector<Rational>* indicator
-  );
   void removeRedundantShortRoots(Vector<Rational>* indicator);
   // Reduces redundant short roots if present.
   // Returns true if redundant short roots were found, false otherwise.
@@ -7093,7 +7137,6 @@ public:
     Vector<Rational>& startingShift
   );
   void findExtremaParametricStep1();
-  void findExtremaParametricStep2TrimChamberForMultOne();
   void findExtremaParametricStep3();
   void findExtremaParametricStep4();
   void findExtremaParametricStep5();

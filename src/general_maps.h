@@ -1,13 +1,12 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
+
 #ifndef header_general_maps_ALREADY_INCLUDED
 #define header_general_maps_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "general_list_references.h"
 
+// A key-value container (map) that preserves the order of
+// insertion of the input keys.
 template <
   class ListType,
   class Key,
@@ -41,6 +40,10 @@ public:
     if (index == - 1) {
       return;
     }
+    this->removeIndex(index);
+  }
+  // Removes the key-value pair at position index.
+  void removeIndex(int index) {
     this->keys.removeIndexSwapWithLast(index);
     this->values.removeIndexSwapWithLast(index);
   }

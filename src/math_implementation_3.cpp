@@ -1,7 +1,3 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
 #include "general_lists.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
@@ -4352,9 +4348,9 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   out << "\\(" << this->toLatex(format) << "\\)";
   FormatExpressions formatQuasipolynomial;
   formatQuasipolynomial.flagUseFrac = true;
-  for (int i = 0; i < this->chambers.refinedCones.size; i ++) {
+  for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
     QuasiPolynomial& quasiPolynomial = this->allQuasiPolynomials[i];
-    const Cone& cone = this->chambers.refinedCones[i];
+    const Cone& cone = this->chambers.refinedCones.values[i];
     out << "<hr>Chamber " << i + 1 << ".<br>";
     out << cone.toHTML();
     out << "<br>Vector partition function.<br>";
@@ -4933,32 +4929,6 @@ void PartialFractions::removeRedundantShortRoots(
     }
   }
   this->compareCheckSums();
-}
-
-void PartialFractions::removeRedundantShortRootsClassicalRootSystem(
-  Vector<Rational>* indicator
-) {
-  (void) indicator;
-  /*PartFraction tempFrac;
-  Polynomial<LargeInt> buffer;
-  for (int i = 0; i < this->size; i ++) {
-    tempFrac.assign(this->objects[i]);
-    if (tempFrac.removeRedundantShortRootsClassicalRootSystem(*this, Indicator, buffer, this->AmbientDimension)) {
-      this->objects[i].Coefficient.makeZero(this->AmbientDimension);
-      this->AddAlreadyReduced(tempFrac, Indicator);
-    }
-    if (this->flagMakingProgressReport) {
-      std::stringstream out;
-      out << "Elongating denominator " << i + 1 << " out of " << this->size;
-      global.indicatorVariables.ProgressReportStrings[3] = out.str();
-      global.FeedIndicatorWindow(global.indicatorVariables);
-    }
-  }
-  for (int i = 0; i < this->size; i ++)
-    if (this->objects[i].Coefficient.isEqualToZero()) {
-      this->popIndexHashChooseSwapByLowestNonProcessedAndAccount(i, Indicator);
-      i --;
-    }*/
 }
 
 bool PartialFractions::isHigherThanWithRespectToWeight(
@@ -7307,7 +7277,7 @@ void ElementWeylGroup::conjugationAction(
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other) {
   if (this->owner != other.owner) {
     global.fatal
-    << "Attemptto "
+    << "Attempt to "
     << "multiply elements belonging to different Weyl groups. "
     << global.fatal;
   }
@@ -7702,7 +7672,7 @@ void WeylGroupData::getTrivialRepresentation(
     FiniteGroup<ElementWeylGroup>, Rational
   >& output
 ) {
-  STACK_TRACE("WeylGroup::getTrivialRepresentation");
+  STACK_TRACE("WeylGroupData::getTrivialRepresentation");
   this->group.checkInitializationConjugacyClasses();
   output.initialize(this->group);
   output.basis.makeEiBasis(1);
@@ -7719,7 +7689,7 @@ void WeylGroupData::getSignRepresentation(
     FiniteGroup<ElementWeylGroup>, Rational
   >& output
 ) {
-  STACK_TRACE("WeylGroup::getSignRepresentation");
+  STACK_TRACE("WeylGroupData::getSignRepresentation");
   this->group.checkInitializationConjugacyClasses();
   output.initialize(this->group);
   output.basis.makeEiBasis(1);
@@ -7737,7 +7707,7 @@ void WeylGroupData::getStandardRepresentation(
     FiniteGroup<ElementWeylGroup>, Rational
   >& output
 ) {
-  STACK_TRACE("WeylGroup::getStandardRepresentation");
+  STACK_TRACE("WeylGroupData::getStandardRepresentation");
   this->group.checkInitializationConjugacyClasses();
   output.initialize(this->group);
   output.basis.makeEiBasis(this->getDimension());
@@ -8018,7 +7988,7 @@ void WeylGroupData::computeRootsOfBorel(Vectors<Rational>& output) {
 }
 
 std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
-  STACK_TRACE("WeylGroup::toStringCppConjugacyClasses");
+  STACK_TRACE("WeylGroup::toStringCppCharTable");
   (void) format;
   // portable way to avoid non-used parameter warning.
   if (!this->flagCharTableIsComputed) {
@@ -10933,7 +10903,7 @@ std::string QuasiPolynomial::toHTML(FormatExpressions* format) {
     out << "\\rangle";
   } else {
     out
-    << "\\Lambda =\\mathbb{Z}^{"
+    << "where \\(\\Lambda =\\mathbb{Z}^{"
     << this->minimalNumberOfVariables()
     << "}";
   }
@@ -11184,7 +11154,7 @@ void PartialFractions::computeQuasipolynomials() {
   STACK_TRACE("PartialFractions::computeQuasipolynomials");
   this->allQuasiPolynomials.clear();
   QuasiPolynomial current;
-  for (Cone& cone : this->chambers.refinedCones) {
+  for (Cone& cone : this->chambers.refinedCones.values) {
     Vector<Rational> internalPoint = cone.getInternalPoint();
     this->computeOneVectorPartitionFunction(current, internalPoint);
     this->allQuasiPolynomials.addOnTop(current);
@@ -11197,19 +11167,19 @@ void PartialFractions::evaluateVectorPartitionFunction(
   std::stringstream* comments
 ) {
   STACK_TRACE("PartialFractions::evaluateVectorPartitionFunction");
-  if (this->chambers.refinedCones.size == 0) {
+  if (this->chambers.refinedCones.size() == 0) {
     global.fatal
     << "Please compute the partial fraction decomposition first."
     << global.fatal;
   }
   int coneIndex = 0;
-  for (; coneIndex < this->chambers.refinedCones.size; coneIndex ++) {
+  for (; coneIndex < this->chambers.refinedCones.size(); coneIndex ++) {
     const Cone& cone = this->chambers.refinedCones[coneIndex];
     if (cone.isInCone(input)) {
       break;
     }
   }
-  if (coneIndex >= this->chambers.refinedCones.size) {
+  if (coneIndex >= this->chambers.refinedCones.size()) {
     // No cone contains the input.
     output = 0;
     return;
@@ -11255,90 +11225,6 @@ bool PartialFractions::computeOneVectorPartitionFunction(
     this->makeProgressVPFcomputation();
   }
   return true;
-}
-
-std::string PartialFractions::doFullComputationReturnLatexFileString(
-  Vectors<Rational>& toBePartitioned,
-  FormatExpressions& format,
-  std::string* outputHtml
-) {
-  std::string whatWentWrong;
-  global.fatal << "Not implemented yet. " << global.fatal;
-  //  this->chambersOld.directions = toBePartitioned;
-  this->ambientDimension = toBePartitioned.getDimension();
-  //  this->chambersOld.AmbientDimension = toBePartitioned.getDimension();
-  // this->chambers.ReadFromDefaultFile();
-  std::stringstream out;
-  std::stringstream outHtml;
-  global.fatal << global.fatal;
-  //  this->chambersOld.SliceEuclideanSpace(false);
-  //  this->chambersOld.quickSortAscending();
-  //  this->chambersOld.LabelChamberIndicesProperly();
-  //  this->chambers.AssignCombinatorialChamberComplex(this->chambersOld);
-  //  this->chambersOld.drawOutput(global.drawingVariables, root, 0);
-  DrawingVariables drawingVariables;
-  this->chambers.drawMeProjective(nullptr, true, drawingVariables, format);
-  outHtml << drawingVariables.getHTMLDiv(this->ambientDimension, false);
-  Vector<Rational> root;
-  root.makeZero(this->ambientDimension);
-  global.fatal << "not implemented yet" << global.fatal;
-  //  this->initFromRoots(chambersOld.directions);
-  out
-  << "\\documentclass{article}"
-  << "\\usepackage{amsmath, amsfonts, amssymb}\n"
-  << "\\begin{document}\n";
-  out
-  << "The vector partition funciton is the number of "
-  << "ways you can represent a vector "
-  << "$(x_1,\\dots, x_n)$ as a non-negative "
-  << "integral linear combination of "
-  << " a given set of vectors. "
-  << "You requested the vector partition function "
-  << "with respect to the set of vectors: ";
-  global.fatal << global.fatal;
-  //  out << this->chambersOld.directions.ElementToStringGeneric();
-  out
-  << "\n\n The corresponding generating function is: "
-  << this->toString(&format)
-  << "= (after splitting acording to algorithm)";
-  this->split(nullptr);
-  out << this->toString(&format);
-  global.fatal << global.fatal;
-  // out << "Therefore the vector partition function is given by " <<
-  // this->chambersOld.GetNumNonZeroPointers()
-  // << " quasipolynomials depending on which set of linear inequalities is
-  // satisfied (each such set we call ``Chamber'').";
-  // outHtml << "There are " << this->chambersOld.size << " systems of linear
-  // inequalities "
-  // << " such that on each such system of inequalities the vector partition
-  // function is quasi-polynomial. "
-  // << " A full list of the systems of inequalities (\"chambers\") and the
-  // corresponding quasi-polynomials follows.<hr> ";
-  QuasiPolynomial tempQP;
-  std::string tempS;
-  Vector<Rational> tempIndicator;
-  global.fatal << global.fatal;
-  /*for (int i = 0; i < this->chambersOld.size; i ++)
-    if (this->chambersOld[i] != 0) {
-      Cone& currentChamber = this->chambers[i];
-      tempIndicator = currentChamber.getInternalPoint();
-      this->getVectorPartitionFunction(tempQP, tempIndicator);
-      out << "\n\n" << currentChamber.toString(true, false, true, false, format);
-      out << "\n\nQuasipolynomial: " << tempQP.toString(false, true, format);
-      outHtml << "<hr>Chamber: " << currentChamber.toString(false, true, true, false, format);
-      bool useHtml = false;
-      if (tempQP.valueOnEachLatticeShift.size >0)
-        if (tempQP.valueOnEachLatticeShift[0].size<30)
-          useHtml = true;
-      outHtml << "<br>Quasi-polynomial: " <<
-      HtmlRoutines::GetHtmlMathDivFromLatexFormulA(tempQP.toString(useHtml, true, format));
-    }
-    */
-  out << "\\end{document}";
-  if (outputHtml != nullptr) {
-    *outputHtml = outHtml.str();
-  }
-  return out.str();
 }
 
 void QuasiPolynomial::addLatticeShift(
@@ -11738,6 +11624,30 @@ void QuasiPolynomial::operator*=(const Rational& scalar) {
   }
 }
 
+bool Wall::operator==(const Wall& other) const {
+  return this->normal == other.normal;
+}
+
+bool Wall::operator!=(const Wall& other) const {
+  return this->normal != other.normal;
+}
+
+bool Wall::operator>(const Wall& other) const {
+  return this->normal > other.normal;
+}
+
+bool Wall::isInClosedHalfSpace(const Vector<Rational>& point) const {
+  return !this->normal.scalarEuclidean(point).isNegative();
+}
+
+bool Wall::isInOpenHalfSpace(const Vector<Rational>& point) const {
+  return this->normal.scalarEuclidean(point).isPositive();
+}
+
+std::string Wall::toString() const {
+  return "Wall: " + this->normal.toString();
+}
+
 Cone::Cone(const Cone& other) {
   this->operator=(other);
 }
@@ -11746,27 +11656,35 @@ Cone::Cone() {
   this->lowestIndexNotCheckedForSlicingInDirection = 0;
   this->lowestIndexNotCheckedForChopping = 0;
   this->flagIsTheZeroCone = true;
-  // this->flagHasSufficientlyManyVertices = true;
+  this->id = - 1;
+}
+
+Cone::Cone(int inputId) {
+  this->lowestIndexNotCheckedForSlicingInDirection = 0;
+  this->lowestIndexNotCheckedForChopping = 0;
+  this->flagIsTheZeroCone = true;
+  this->id = inputId;
 }
 
 bool Cone::operator>(const Cone& other) const {
-  return this->normals > other.normals;
+  return this->walls > other.walls;
 }
 
 bool Cone::operator==(const Cone& other) const {
   return
   this->flagIsTheZeroCone == other.flagIsTheZeroCone &&
-  this->normals == other.normals;
+  this->walls == other.walls;
 }
 
 void Cone::operator=(const Cone& other) {
   this->flagIsTheZeroCone = other.flagIsTheZeroCone;
   this->vertices = other.vertices;
-  this->normals = other.normals;
+  this->walls = other.walls;
   this->lowestIndexNotCheckedForSlicingInDirection =
   other.lowestIndexNotCheckedForSlicingInDirection;
   this->lowestIndexNotCheckedForChopping =
   other.lowestIndexNotCheckedForChopping;
+  this->id = other.id;
 }
 
 unsigned int Cone::hashFunction() const {
@@ -11775,6 +11693,22 @@ unsigned int Cone::hashFunction() const {
 
 unsigned int Cone::hashFunction(const Cone& input) {
   return input.hashFunction();
+}
+
+List<List<int> > Cone::getAllNeighbors() const {
+  List<List<int> > result;
+  for (const Wall& wall : this->walls) {
+    result.addOnTop(wall.neighbors);
+  }
+  return result;
+}
+
+Vectors<Rational> Cone::getAllNormals() const {
+  Vectors<Rational> result;
+  for (const Wall& wall : this->walls) {
+    result.addOnTop(wall.normal);
+  }
+  return result;
 }
 
 void Cone::intersectHyperplane(
@@ -11803,10 +11737,16 @@ void Cone::intersectHyperplane(
   projection.assignVectorsToRows(convertedCoordinates);
   projection.transpose();
   projection.resize(dimension - 1, dimension, false);
-  Vectors<Rational> newNormals = this->normals;
+  Vectors<Rational> newNormals = this->getAllNormals();
   projection.actOnVectorsColumn(newNormals, Rational::zero());
-  bool tempBool = outputConeLowerDimension.createFromNormals(newNormals);
-  if (tempBool) {
+  List<Wall> inputWalls;
+  for (int i = 0; i < newNormals.size; i ++) {
+    Wall incoming;
+    incoming.normal = newNormals[i];
+    incoming.neighbors = this->walls[i].neighbors;
+  }
+  bool tempBool = outputConeLowerDimension.createFromWalls(inputWalls, false);
+  if (!tempBool) {
     global.fatal << "Create from normals failed. " << global.fatal;
   }
 }
@@ -12437,7 +12377,7 @@ bool ConeCollection::drawMeLastCoordinateAffine(
   drawingVariables.drawCoordSystemBuffer(
     drawingVariables, this->getDimension() - 1
   );
-  for (int i = 0; i < this->refinedCones.size; i ++) {
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
     if (
       !this->refinedCones[i].drawMeLastCoordinateAffine(
         initializeDrawingVariables, drawingVariables, format
@@ -12506,9 +12446,9 @@ bool ConeCollection::drawMeProjective(
   if (initDrawVars) {
     this->drawMeProjectiveInitialize(drawingVariables);
   }
-  for (int i = 0; i < this->refinedCones.size; i ++) {
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
     if (
-      !this->refinedCones[i].drawMeProjective(
+      !this->refinedCones.values[i].drawMeProjective(
         coordCenterTranslation, false, drawingVariables, format
       )
     ) {
@@ -12519,7 +12459,7 @@ bool ConeCollection::drawMeProjective(
 }
 
 bool Cone::isEntireSpace() {
-  return this->normals.size == 0 && this->flagIsTheZeroCone;
+  return this->walls.size == 0 && this->flagIsTheZeroCone;
 }
 
 bool Cone::isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
@@ -12605,18 +12545,20 @@ bool Cone::drawMeLastCoordinateAffine(
       foundBadVertex = true;
     }
   }
-  for (int k = 0; k < this->normals.size; k ++) {
+  for (int k = 0; k < this->walls.size; k ++) {
     for (int i = 0; i < verticesScaled.size; i ++) {
       if (
         !drawVertex[i] ||
-        !this->normals[k].scalarEuclidean(this->vertices[i]).isEqualToZero()
+        !this->walls[k].normal.scalarEuclidean(this->vertices[i]).isEqualToZero
+        ()
       ) {
         continue;
       }
       for (int j = i + 1; j < verticesScaled.size; j ++) {
         if (
           !drawVertex[j] ||
-          !this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()
+          !this->walls[k].normal.scalarEuclidean(this->vertices[j]).
+          isEqualToZero()
         ) {
           continue;
         }
@@ -12638,7 +12580,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
   if (this->flagIsTheZeroCone) {
     return "The cone is empty. ";
   }
-  if (this->normals.size < 1) {
+  if (this->walls.size < 1) {
     return "The cone is the entire space";
   }
   if (this->vertices.size < 1) {
@@ -12711,16 +12653,18 @@ bool Cone::drawMeProjective(
       1
     );
   }
-  for (int k = 0; k < this->normals.size; k ++) {
+  for (int k = 0; k < this->walls.size; k ++) {
     for (int i = 0; i < this->vertices.size; i ++) {
       if (
-        !this->normals[k].scalarEuclidean(this->vertices[i]).isEqualToZero()
+        !this->walls[k].normal.scalarEuclidean(this->vertices[i]).isEqualToZero
+        ()
       ) {
         continue;
       }
       for (int j = i + 1; j < this->vertices.size; j ++) {
         if (
-          !this->normals[k].scalarEuclidean(this->vertices[j]).isEqualToZero()
+          !this->walls[k].normal.scalarEuclidean(this->vertices[j]).
+          isEqualToZero()
         ) {
           continue;
         }
@@ -12745,7 +12689,7 @@ std::string Cone::drawMeToHtmlProjective(
   if (this->flagIsTheZeroCone) {
     return "The cone is the zero cone (i.e. contains only the origin).";
   }
-  if (this->normals.size <= 0) {
+  if (this->walls.size <= 0) {
     return "The cone is the entire space.";
   }
   std::stringstream out;
@@ -13263,11 +13207,11 @@ void ConeCollection::initializeFromAffineDirectionsAndRefine(
 }
 
 int ConeCollection::getDimension() const {
-  if (this->refinedCones.size > 0) {
-    return this->refinedCones[0].getDimension();
+  if (this->refinedCones.size() > 0) {
+    return this->refinedCones.values[0].getDimension();
   }
-  if (this->nonRefinedCones.size > 0) {
-    return this->nonRefinedCones[0].getDimension();
+  if (this->nonRefinedCones.size() > 0) {
+    return this->nonRefinedCones.values[0].getDimension();
   }
   return - 1;
 }
@@ -13275,8 +13219,8 @@ int ConeCollection::getDimension() const {
 int ConeCollection::getLowestIndexRefinedChamberContaining(
   const Vector<Rational>& root
 ) const {
-  for (int i = 0; i < this->refinedCones.size; i ++) {
-    if (this->refinedCones[i].isInCone(root)) {
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
+    if (this->refinedCones.values[i].isInCone(root)) {
       return i;
     }
   }
@@ -13294,18 +13238,20 @@ void ConeCollection::makeAffineAndTransformToProjectiveDimensionPlusOne(
   this->checkIsRefinedOrCrash();
   output.initialize();
   Cone incoming;
-  Vectors<Rational> newNormals;
   int affineDimension = affinePoint.size;
-  for (int i = 0; i < this->refinedCones.size; i ++) {
-    const Cone& refined = this->refinedCones[i];
-    newNormals.setSize(refined.normals.size + 1);
-    for (int j = 0; j < refined.normals.size; j ++) {
-      newNormals[j] = refined.normals[j].getProjectivizedNormal(affinePoint);
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
+    const Cone& refined = this->refinedCones.values[i];
+    List<Wall> newNormals;
+    Wall wall;
+    for (int j = 0; j < refined.walls.size; j ++) {
+      wall.normal =
+      refined.walls[j].normal.getProjectivizedNormal(affinePoint);
+      wall.neighbors = refined.walls[j].neighbors;
     }
-    newNormals.lastObject()->makeEi(affineDimension + 1, affineDimension);
-    incoming.createFromNormals(newNormals);
+    wall.normal.makeEi(affineDimension + 1, affineDimension);
+    incoming.createFromWalls(newNormals, false);
     output.convexHull.makeConvexHullOfMeAnd(incoming);
-    output.refinedCones.addOnTop(incoming);
+    output.addRefinedCone(incoming);
   }
 }
 
@@ -13376,8 +13322,8 @@ bool Cone::getLatticePointsInCone(
   outputPoints.reserve(numCycles);
   outputPoints.size = 0;
   Vector<Rational> candidatePoint;
-  Vectors<Rational> LatticeBasis;
-  LatticeBasis.assignMatrixRows(lattice.basisRationalForm);
+  Vectors<Rational> latticeBasis;
+  latticeBasis.assignMatrixRows(lattice.basisRationalForm);
   for (int i = 0; i < numCycles; i ++, boundingBox.incrementSubset()) {
     candidatePoint = actualShift;
     if (shiftAllPointsBy != nullptr) {
@@ -13385,7 +13331,7 @@ bool Cone::getLatticePointsInCone(
     }
     for (int j = 0; j < boundingBox.multiplicities.size; j ++) {
       candidatePoint +=
-      LatticeBasis[j] *(
+      latticeBasis[j] *(
         boundingBox.multiplicities[j] - upperBoundPointsInEachDim
       );
     }
@@ -13415,11 +13361,11 @@ void PiecewiseQuasipolynomial::operator+=(
 ) {
   this->makeCommonRefinement(other);
   for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size; i ++
+    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
   ) {
     int index =
     other.projectivizedComplex.getLowestIndexRefinedChamberContaining(
-      this->projectivizedComplex.refinedCones[i].getInternalPoint()
+      this->projectivizedComplex.refinedCones.values[i].getInternalPoint()
     );
     if (index != - 1) {
       this->quasiPolynomials[i] += other.quasiPolynomials[index];
@@ -13453,11 +13399,11 @@ bool PiecewiseQuasipolynomial::makeVPF(
   // partialFractions.chambers.
   // AssignCombinatorialChamberComplex(partialFractions.chambersOld);
   this->quasiPolynomials.setSize(
-    partialFractions.chambers.refinedCones.size
+    partialFractions.chambers.refinedCones.size()
   );
   Vector<Rational> indicator;
   for (
-    int i = 0; i < partialFractions.chambers.refinedCones.size; i ++
+    int i = 0; i < partialFractions.chambers.refinedCones.size(); i ++
   ) {
     indicator = partialFractions.chambers.refinedCones[i].getInternalPoint();
     partialFractions.computeOneVectorPartitionFunction(
@@ -13512,10 +13458,10 @@ bool Cone::isHonest1DEdgeAffine(
   const Vector<Rational>& vertex1, const Vector<Rational>& vertex2
 ) const {
   int numberOfCommonWalls = 0;
-  for (int i = 0; i < this->normals.size; i ++) {
+  for (int i = 0; i < this->walls.size; i ++) {
     if (
-      vertex1.scalarEuclidean(this->normals[i]).isEqualToZero() &&
-      vertex2.scalarEuclidean(this->normals[i]).isEqualToZero()
+      vertex1.scalarEuclidean(this->walls[i].normal).isEqualToZero() &&
+      vertex2.scalarEuclidean(this->walls[i].normal).isEqualToZero()
     ) {
       numberOfCommonWalls ++;
       if (numberOfCommonWalls == this->getDimension() - 2) {
@@ -13535,10 +13481,10 @@ void Cone::translateMeMyLastCoordinateAffinization(
     << global.fatal;
   }
   Vector<Rational> root;
-  for (int i = 0; i < this->normals.size; i ++) {
-    root = this->normals[i];
-    root.size --;
-    (*this->normals[i].lastObject()) -=
+  for (int i = 0; i < this->walls.size; i ++) {
+    root = this->walls[i].normal;
+    root.removeLastObject();
+    *this->walls[i].normal.lastObject() -=
     root.scalarEuclidean(translationVector);
   }
   root = translationVector;
@@ -13559,9 +13505,11 @@ getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(
 ) const {
   HashedList<Vector<Rational> > outputHashed;
   Vector<Rational> root;
-  for (int i = 0; i < this->nonRefinedCones.size; i ++) {
-    for (int j = 0; j < this->nonRefinedCones[i].normals.size; j ++) {
-      root = this->nonRefinedCones[i].normals[j];
+  for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
+    for (
+      int j = 0; j < this->nonRefinedCones.values[i].walls.size; j ++
+    ) {
+      root = this->nonRefinedCones.values[i].walls[j].normal;
       root.scaleNormalizeFirstNonZero();
       outputHashed.addOnTopNoRepetition(root);
     }
@@ -13578,13 +13526,13 @@ void ConeCollection::refineMakeCommonRefinement(const ConeCollection& other) {
     );
     this->initialize();
     this->convexHull = currentCone;
-    this->nonRefinedCones.addOnTop(currentCone);
+    this->nonRefinedCones.setKeyValue(currentCone.id, currentCone);
     this->convexHull.makeConvexHullOfMeAnd(currentCone);
     this->splittingNormals.addOnTopNoRepetition(newWalls);
   }
   other.getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(newWalls);
   this->splittingNormals.addOnTopNoRepetition(newWalls);
-  this->refine();
+  this->refineByNormals();
 }
 
 void ConeCollection::translateMeMyLastCoordinateAffinization(
@@ -13596,10 +13544,10 @@ void ConeCollection::translateMeMyLastCoordinateAffinization(
   myCopy = *this;
   this->initialize();
   Cone currentCone;
-  for (int i = 0; i < myCopy.refinedCones.size; i ++) {
+  for (int i = 0; i < myCopy.refinedCones.size(); i ++) {
     currentCone = myCopy.refinedCones[i];
     currentCone.translateMeMyLastCoordinateAffinization(translationVector);
-    this->refinedCones.addOnTop(currentCone);
+    this->refinedCones.setKeyValue(currentCone.id, currentCone);
     this->convexHull.makeConvexHullOfMeAnd(currentCone);
   }
   Vector<Rational> normalNoAffinePart, newNormal;
@@ -13632,7 +13580,7 @@ void PiecewiseQuasipolynomial::translateArgument(
 std::string PiecewiseQuasipolynomial::toString(FormatExpressions* format) {
   std::stringstream out;
   for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size; i ++
+    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
   ) {
     const Cone& currentCone = this->projectivizedComplex.refinedCones[i];
     QuasiPolynomial& currentQuasiPolynomial = this->quasiPolynomials[i];
@@ -13660,7 +13608,7 @@ void PiecewiseQuasipolynomial::drawMe(
   }
   const std::string zeroColor = "gray";
   for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size; i ++
+    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
   ) {
     std::string chamberWallColor = "black";
     bool isZeroChamber = this->quasiPolynomials[i].isEqualToZero();
@@ -13776,7 +13724,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
   // the code has been tested sufficiently.
   bool firstFail = true;
   for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size; i ++
+    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
   ) {
     if (
       !this->projectivizedComplex.refinedCones[i].isInCone(input)
@@ -13856,10 +13804,10 @@ void PiecewiseQuasipolynomial::makeCommonRefinement(
   ConeCollection oldComplex = this->projectivizedComplex;
   this->projectivizedComplex.refineMakeCommonRefinement(other);
   this->quasiPolynomials.setSize(
-    this->projectivizedComplex.refinedCones.size
+    this->projectivizedComplex.refinedCones.size()
   );
   for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size; i ++
+    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
   ) {
     int oldIndex =
     oldComplex.getLowestIndexRefinedChamberContaining(
@@ -13904,8 +13852,15 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
 }
 
 void Cone::changeBasis(Matrix<Rational>& linearMap) {
-  linearMap.actOnVectorsColumn(this->normals);
-  this->createFromNormals(this->normals);
+  List<Wall> newWalls;
+  for (const Wall& wall : this->walls) {
+    Wall transformedWall;
+    transformedWall.normal = wall.normal;
+    transformedWall.neighbors = wall.neighbors;
+    linearMap.actOnVectorColumn(transformedWall.normal);
+  }
+  this->walls.clear();
+  this->createFromWalls(newWalls, false);
 }
 
 void Cone::transformToWeylProjective(ConeCollection& owner) {
@@ -14117,7 +14072,8 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
       root = this->finalRepresentatives[i];
       this->conesLargerDimension[j].lattice.reduceVector(root);
       if (root == this->conesLargerDimension[j].shift) {
-        this->complexStartingPerRepresentative[i].refinedCones.addOnTop(
+        this->complexStartingPerRepresentative[i].refinedCones.setKeyValue(
+          this->conesLargerDimension[j].projectivizedCone.id,
           this->conesLargerDimension[j].projectivizedCone
         );
         this->startingLPtoMaximize[i].addOnTop(
@@ -14128,36 +14084,6 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
   }
 }
 
-/*void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep2TrimChamberForMultOne
-    () {
-  Cone trimmedCone;
-  Vectors<Rational> roots;
-  Vector<Rational> multFreeWall;
-  int startingNumCones = this->conesLargerDim.size;
-  int numKilledCones = 0;
-  for (int i = 0; i < this->conesLargerDim.size; i ++) {
-    trimmedCone.normals = this->conesLargerDim[i].projectivizedCone.normals;
-    multFreeWall = this->LPtoMaximizeLargerDim[i];
-    multFreeWall.negate();
-    *multFreeWall.lastObject() +=1;
-    trimmedCone.normals.addOnTop(multFreeWall);
-    trimmedCone.createFromNormals(trimmedCone.normals);
-    if (!trimmedCone.flagIsTheZeroCone)
-      this->conesLargerDim[i].projectivizedCone = trimmedCone;
-    else {
-      this->conesLargerDim.removeIndexSwapWithLast(i);
-      this->LPtoMaximizeLargerDim.removeIndexSwapWithLast(i);
-      i --;
-      numKilledCones++;
-    }
-    std::stringstream tempStream;
-    tempStream << "Processed " << i +numKilledCones << " out of " << startingNumCones;
-    tempStream << "\nKilled " << numKilledCones << " cones so far";
-    global.indicatorVariables.ProgressReportStrings[2] = tempStream.str();
-    global.makeReport();
-  }
-}
-*/
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
   this->complexRefinedPerRepresentative.setSize(
     this->finalRepresentatives.size
@@ -14167,7 +14093,8 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
   for (int i = 0; i < this->finalRepresentatives.size; i ++) {
     ConeCollection& currentComplex = this->complexRefinedPerRepresentative[i];
     currentComplex.initFromConeWalls(
-      this->complexStartingPerRepresentative[i].refinedCones, true
+      this->complexStartingPerRepresentative[i].refinedCones.values,
+      true
     );
     std::stringstream tempStream;
     tempStream
@@ -14176,12 +14103,12 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
     << " out of "
     << this->finalRepresentatives.size;
     report.report(tempStream.str());
-    currentComplex.refine();
-    this->maximaCandidates[i].setSize(currentComplex.refinedCones.size);
-    for (int j = 0; j < currentComplex.refinedCones.size; j ++) {
+    currentComplex.refineByNormals();
+    this->maximaCandidates[i].setSize(currentComplex.refinedCones.size());
+    for (int j = 0; j < currentComplex.refinedCones.size(); j ++) {
       for (
         int k = 0; k < this->complexStartingPerRepresentative[k].refinedCones.
-        size; k ++
+        size(); k ++
       ) {
         if (
           this->complexStartingPerRepresentative[i].refinedCones[k].isInCone(
@@ -14204,10 +14131,10 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep5() {
   );
   for (int i = 0; i < 1; i ++) {
     this->finalMaximaChambers[i].setSize(
-      this->complexRefinedPerRepresentative[i].refinedCones.size
+      this->complexRefinedPerRepresentative[i].refinedCones.size()
     );
     this->finalRepresentatives[i].setSize(
-      this->complexRefinedPerRepresentative[i].refinedCones.size
+      this->complexRefinedPerRepresentative[i].refinedCones.size()
     );
     for (int j = 0; j < 1; j ++) {
       const Cone& currentCone =
@@ -14295,14 +14222,16 @@ findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
   preferredNormal.shiftToTheLeftOnePosition();
   preferredNormal /= - firstCoord;
   ConeLatticeAndShift tempCLS;
-  Vectors<Rational> newNormals = this->projectivizedCone.normals;
+  Vectors<Rational> newNormals = this->projectivizedCone.getAllNormals();
   Rational firstCoordNewNormal;
   for (int i = 0; i < newNormals.size; i ++) {
     firstCoordNewNormal = newNormals[i][0];
     newNormals[i].shiftToTheLeftOnePosition();
     newNormals[i] += preferredNormal * firstCoordNewNormal;
   }
-  tempCLS.projectivizedCone.createFromNormals(newNormals);
+  tempCLS.projectivizedCone.createFromNormals(
+    newNormals, this->projectivizedCone.getAllNeighbors()
+  );
   tempCLS.shift = this->shift;
   tempCLS.shift.shiftToTheLeftOnePosition();
   this->lattice.applyLinearMap(projectionLatticeLevel, tempCLS.lattice);
@@ -14367,7 +14296,9 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   }
   ConeCollection complexBeforeProjection;
   complexBeforeProjection.initialize();
-  complexBeforeProjection.refinedCones.addOnTop(this->projectivizedCone);
+  complexBeforeProjection.refinedCones.setKeyValue(
+    this->projectivizedCone.id, this->projectivizedCone
+  );
   complexBeforeProjection.convexHull.makeConvexHullOfMeAnd(
     this->projectivizedCone
   );
@@ -14376,12 +14307,11 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   }
   complexBeforeProjection.slicingDirections.addOnTop(direction);
   complexBeforeProjection.slicingDirections.addOnTop(- direction);
-  complexBeforeProjection.refine();
-  Vector<Rational>
-  root,
-  extraEquation,
-  exitNormalAffine,
-  enteringNormalAffine;
+  complexBeforeProjection.refineByDirections();
+  Wall wall;
+  Vector<Rational> extraEquation;
+  Vector<Rational> exitNormalAffine;
+  Vector<Rational> enteringNormalAffine;
   Vector<Rational> exitNormalLatticeLevel, exitNormalShiftedAffineProjected;
   Vector<Rational> directionSmallerDim, directionSmallerDimOnLattice;
   Vector<Rational> shiftReduced = this->shift;
@@ -14390,18 +14320,20 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   Lattice exitRougherLattice;
   ConeLatticeAndShift tempCLS;
   directionSmallerDim.makeEi(dimensionProjectivized - 1, 0);
-  Vectors<Rational> newNormals;
-  for (int i = 0; i < complexBeforeProjection.refinedCones.size; i ++) {
+  List<Wall> newWalls;
+  for (
+    int i = 0; i < complexBeforeProjection.refinedCones.size(); i ++
+  ) {
     const Cone& currentCone = complexBeforeProjection.refinedCones[i];
     int numberOfNonPerpendicularWalls = 0;
-    newNormals.size = 0;
+    newWalls.size = 0;
     bool foundEnteringNormal = false;
     bool foundExitNormal = false;
-    for (int j = 0; j < currentCone.normals.size; j ++) {
-      Vector<Rational>& currentNormal = currentCone.normals[j];
+    for (int j = 0; j < currentCone.walls.size; j ++) {
+      Vector<Rational>& currentNormal = currentCone.walls[j].normal;
       if (currentNormal[0].isEqualToZero()) {
-        root = currentNormal.getshiftToTheLeftOnePositionition();
-        newNormals.addOnTop(root);
+        wall.normal = currentNormal.getshiftToTheLeftOnePositionition();
+        newWalls.addOnTop(wall);
       } else {
         numberOfNonPerpendicularWalls ++;
         if (numberOfNonPerpendicularWalls >= 3) {
@@ -14458,11 +14390,11 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     << "<br>The shifted lattice representatives: "
     << exitRepresentatives.toString()
     << "<br>exitNormalsShiftedAffineProjected";
-    if (newNormals.size <= 0) {
+    if (newWalls.size <= 0) {
       global.fatal << "New normals missing. " << global.fatal;
     }
     for (int j = 0; j < exitRepresentatives.size; j ++) {
-      tempCLS.projectivizedCone.normals = newNormals;
+      tempCLS.projectivizedCone.walls = newWalls;
       exitNormalShiftedAffineProjected =
       exitNormalAffine.getshiftToTheLeftOnePositionition();
       *exitNormalShiftedAffineProjected.lastObject() =
@@ -14479,17 +14411,21 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
         << "extra equation: "
         << extraEquation.toString()
         << ", ";
-        tempCLS.projectivizedCone.normals.addOnTop(extraEquation);
+        Wall extraWall;
+        extraWall.normal = extraEquation;
+        tempCLS.projectivizedCone.walls.addOnTop(extraWall);
       }
-      root = lpToMaximizeAffine.getshiftToTheLeftOnePositionition();
-      root -= exitNormalShiftedAffineProjected * lpToMaximizeAffine[0] /
+      wall.normal = lpToMaximizeAffine.getshiftToTheLeftOnePositionition();
+      wall.normal -= exitNormalShiftedAffineProjected * lpToMaximizeAffine[0] /
       exitNormalAffine[0];
-      outputAppendLPToMaximizeAffine.addOnTop(root);
-      if (tempCLS.projectivizedCone.normals.size <= 0) {
+      outputAppendLPToMaximizeAffine.addOnTop(wall.normal);
+      if (tempCLS.projectivizedCone.walls.size <= 0) {
         global.fatal << "Projectivized cone has no normals. " << global.fatal;
       }
-      Vectors<Rational> roots = tempCLS.projectivizedCone.normals;
-      tempCLS.projectivizedCone.createFromNormals(roots);
+      Vectors<Rational> roots = tempCLS.projectivizedCone.getAllNormals();
+      tempCLS.projectivizedCone.createFromNormals(
+        roots, tempCLS.projectivizedCone.getAllNeighbors()
+      );
       if (!tempCLS.projectivizedCone.flagIsTheZeroCone) {
         projectionLatticeLevel.actOnVectorColumn(
           exitRepresentatives[j], tempCLS.shift
@@ -14519,10 +14455,10 @@ void ConeCollection::getNewVerticesAppend(
   int dimensionMinusTwo = normalSlicingPlane.size - 2;
   int dimension = normalSlicingPlane.size;
   LargeInteger numberOfCycles =
-  MathRoutines::nChooseK(toBeSplit.normals.size, dimensionMinusTwo);
+  MathRoutines::nChooseK(toBeSplit.walls.size, dimensionMinusTwo);
   Selection selection;
   Selection nonPivotPoints;
-  selection.initialize(toBeSplit.normals.size);
+  selection.initialize(toBeSplit.walls.size);
   Matrix<Rational> toBeEliminated;
   toBeEliminated.initialize(dimensionMinusTwo + 1, dimension);
   Vector<Rational> root;
@@ -14531,7 +14467,7 @@ void ConeCollection::getNewVerticesAppend(
     // , indexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
     for (int j = 0; j < dimensionMinusTwo; j ++) {
       Vector<Rational>& currentNormal =
-      toBeSplit.normals[selection.elements[j]];
+      toBeSplit.walls[selection.elements[j]].normal;
       for (int k = 0; k < dimension; k ++) {
         toBeEliminated.elements[j][k] = currentNormal[k];
       }
@@ -14557,6 +14493,14 @@ void ConeCollection::getNewVerticesAppend(
   }
 }
 
+bool ConeCollection::splitChamberByDirection(
+  const Cone& toBeSliced,
+  const Vector<Rational>& direction,
+  List<Cone>& output
+) {
+  global.fatal << "Not implemented yet. " << global.fatal;
+}
+
 bool ConeCollection::splitChamber(
   const Cone& toBeSliced,
   bool weAreChopping,
@@ -14564,10 +14508,12 @@ bool ConeCollection::splitChamber(
   List<Cone>& output
 ) {
   STACK_TRACE("ConeCollection::splitChamber");
-  Cone newPlusCone;
-  Cone newMinusCone;
+  Cone newPlusCone(this->conesCreated);
+  this->conesCreated ++;
+  Cone newMinusCone(this->conesCreated);
+  this->conesCreated ++;
   bool needToRecomputeVertices = (
-    toBeSliced.normals.getRankElementSpan() < this->getDimension()
+    toBeSliced.getAllNormals().getRankElementSpan() < this->getDimension()
   );
   newPlusCone.lowestIndexNotCheckedForSlicingInDirection =
   toBeSliced.lowestIndexNotCheckedForSlicingInDirection;
@@ -14583,10 +14529,6 @@ bool ConeCollection::splitChamber(
     newPlusCone.lowestIndexNotCheckedForChopping ++;
     newMinusCone.lowestIndexNotCheckedForChopping ++;
   }
-  newPlusCone.vertices.size = 0;
-  newPlusCone.normals.size = 0;
-  newMinusCone.vertices.size = 0;
-  newMinusCone.normals.size = 0;
   HashedList<Vector<Rational> > zeroVertices;
   Rational scalarProduct;
   for (int i = 0; i < toBeSliced.vertices.size; i ++) {
@@ -14605,29 +14547,29 @@ bool ConeCollection::splitChamber(
     return false;
   }
   this->getNewVerticesAppend(toBeSliced, killerNormal, zeroVertices);
-  for (int i = 0; i < toBeSliced.normals.size; i ++) {
-    if (
-      newPlusCone.vertices.hasAnElementPerpendicularTo(
-        toBeSliced.normals[i]
-      )
-    ) {
-      newPlusCone.normals.addOnTop(toBeSliced.normals[i]);
+  for (int i = 0; i < toBeSliced.walls.size; i ++) {
+    Wall wall;
+    wall.normal = toBeSliced.walls[i].normal;
+    wall.neighbors = toBeSliced.walls[i].neighbors;
+    if (newPlusCone.vertices.hasAnElementPerpendicularTo(wall.normal)) {
+      newPlusCone.walls.addOnTop(wall);
     }
-    if (
-      newMinusCone.vertices.hasAnElementPerpendicularTo(
-        toBeSliced.normals[i]
-      )
-    ) {
-      newMinusCone.normals.addOnTop(toBeSliced.normals[i]);
+    if (newMinusCone.vertices.hasAnElementPerpendicularTo(wall.normal)) {
+      newMinusCone.walls.addOnTop(wall);
     }
   }
-  newPlusCone.normals.addOnTop(killerNormal);
-  newMinusCone.normals.addOnTop(- killerNormal);
+  Wall wall;
+  wall.normal = killerNormal;
+  wall.neighbors.addOnTop(newMinusCone.id);
+  newPlusCone.walls.addOnTop(wall);
+  wall.normal.negate();
+  wall.neighbors[0] = newPlusCone.id;
+  newMinusCone.walls.addOnTop(wall);
   newPlusCone.vertices.addListOnTop(zeroVertices);
   newMinusCone.vertices.addListOnTop(zeroVertices);
   if (needToRecomputeVertices) {
-    newPlusCone.createFromNormals(newPlusCone.normals);
-    newMinusCone.createFromNormals(newMinusCone.normals);
+    newPlusCone.createFromWalls(newPlusCone.walls, false);
+    newMinusCone.createFromWalls(newMinusCone.walls, false);
   }
   output.addOnTop(newPlusCone);
   output.addOnTop(newMinusCone);
@@ -14657,26 +14599,19 @@ void ConeCollection::addNonRefinedChamberOnTopNoRepetition(
 ) {
   Cone coneSorted;
   coneSorted = newCone;
-  coneSorted.normals.quickSortAscending();
+  coneSorted.walls.quickSortAscending();
   this->convexHull.makeConvexHullOfMeAnd(coneSorted);
   output.addOnTop(newCone);
 }
 
-bool ConeCollection::refineOneStep(Cone& toBeRefined, List<Cone>& output) {
-  STACK_TRACE("ConeCollection::refineOneStep");
-  if (this->refineByNormals(toBeRefined, output)) {
-    return true;
-  }
-  if (this->refineByDirections(toBeRefined, output)) {
-    return true;
-  }
-  return false;
-}
-
-bool ConeCollection::refineByNormals(
+bool ConeCollection::refineOneByNormals(
   Cone& toBeRefined, List<Cone>& output
 ) {
   STACK_TRACE("ConeCollection::refineByNormals");
+  global.comments
+  << "DEBUG: refine by "
+  << this->splittingNormals.size
+  << " normals.";
   output.clear();
   for (
     ; toBeRefined.lowestIndexNotCheckedForChopping < this->splittingNormals.
@@ -14696,53 +14631,44 @@ bool ConeCollection::refineByNormals(
   return false;
 }
 
-bool ConeCollection::refineByDirections(
-  Cone& toBeRefined, List<Cone>& output
+void ConeCollection::refineOneByOneDirection(
+  Cone& toBeRefined,
+  const Vector<Rational>& direction,
+  List<Cone>& output
 ) {
-  STACK_TRACE("ConeCollection::refineByDirections");
+  STACK_TRACE("ConeCollection::refineOneByOneDirection");
   output.clear();
-  Vector<Rational> currentNewWall;
-  for (
-    ; toBeRefined.lowestIndexNotCheckedForSlicingInDirection < this->
-    slicingDirections.size; toBeRefined.
-    lowestIndexNotCheckedForSlicingInDirection ++
-  ) {
-    const Vector<Rational>& firstSlicingDirection =
-    this->slicingDirections[
-      toBeRefined.lowestIndexNotCheckedForSlicingInDirection
-    ];
-    for (int i = 0; i < toBeRefined.normals.size; i ++) {
-      if (
-        firstSlicingDirection.scalarEuclidean(toBeRefined.normals[i]).
-        isPositive()
-      ) {
-        for (int j = i + 1; j < toBeRefined.normals.size; j ++) {
-          if (
-            firstSlicingDirection.scalarEuclidean(toBeRefined.normals[j]).
-            isPositive()
-          ) {
-            if (
-              toBeRefined.produceNormalFromTwoNormalsAndSlicingDirection(
-                firstSlicingDirection,
-                toBeRefined.normals[i],
-                toBeRefined.normals[j],
-                currentNewWall
-              )
-            ) {
-              if (
-                this->splitChamber(
-                  toBeRefined, false, currentNewWall, output
-                )
-              ) {
-                return true;
-              }
-            }
-          }
-        }
-      }
+  List<Vector<Rational> > exitWalls;
+  for (int i = 0; i < toBeRefined.walls.size; i ++) {
+    const Vector<Rational>& normal = toBeRefined.walls[i].normal;
+    if (!direction.scalarEuclidean(direction).isPositive()) {
+      continue;
     }
+    exitWalls.addOnTop(normal);
   }
-  return false;
+  if (exitWalls.size == 0) {
+    global.comments << "Unexpected: number of exit walls is zero. ";
+  }
+  if (exitWalls.size <= 1) {
+    // The chamber is already refined;
+    this->addRefinedCone(toBeRefined);
+    return;
+  }
+  global.fatal << "Not implemented yet." << global.fatal;
+  /*    for (int j = 0; j < toBeRefined.walls.size; j ++) {
+      if (
+        !toBeRefined.produceNormalFromTwoNormalsAndSlicingDirection(
+          direction,
+          toBeRefined.walls[i].normal,
+          toBeRefined.walls[j].normal,
+          candidateWall
+        )
+      ) {
+        continue;
+      }
+      allCandidates.addOnTop(candidateWall);
+    }
+*/
 }
 
 void ConeCollection::initializeFromDirectionsAndRefine(
@@ -14752,39 +14678,81 @@ void ConeCollection::initializeFromDirectionsAndRefine(
   this->initialize();
   Cone startingCone;
   startingCone.createFromVertices(inputVectors);
-  this->nonRefinedCones.addOnTop(startingCone);
+  this->nonRefinedCones.setKeyValue(startingCone.id, startingCone);
   this->convexHull.makeConvexHullOfMeAnd(startingCone);
   this->slicingDirections.addListOnTop(inputVectors);
-  this->refine();
+  this->refineByDirections();
 }
 
 void ConeCollection::sort() {
-  this->refinedCones.quickSortAscending();
+  List<Cone> sortedValues = this->refinedCones.values;
+  sortedValues.quickSortAscending();
+  this->refinedCones.clear();
+  for (int i = 0; i < sortedValues.size; i ++) {
+    this->refinedCones.setKeyValue(
+      sortedValues[i].id, sortedValues[i]
+    );
+  }
 }
 
-void ConeCollection::refineAndSort() {
-  this->refine();
+void ConeCollection::refineByDirectionsAndSort() {
+  this->refineByDirections();
   this->sort();
 }
 
-void ConeCollection::refine() {
+void ConeCollection::refineByDirections() {
+  STACK_TRACE("ConeCollection::refineByDirections");
+  for (const Vector<Rational>& direction : this->slicingDirections) {
+    this->makeAllConesNonRefined();
+    this->refineByOneDirection(direction);
+  }
+}
+
+void ConeCollection::makeAllConesNonRefined() {
+  STACK_TRACE("ConeCollection::makeAllConesNonRefined");
+  for (int i = this->refinedCones.size() - 1; i >= 0; i --) {
+    const Cone& cone = refinedCones.values[i];
+    this->addNonRefinedCone(cone);
+    refinedCones.removeIndex(i);
+  }
+}
+
+void ConeCollection::refineByOneDirection(
+  const Vector<Rational>& direction
+) {
+  STACK_TRACE("ConeCollection::refineByOneDirection");
+  List<Cone> subdivided;
+  for (int i = this->nonRefinedCones.size() - 1; i >= 0; i --) {
+    Cone toBeRefined = this->nonRefinedCones.values[i];
+    this->nonRefinedCones.removeIndex(i);
+    this->refineOneByOneDirection(toBeRefined, direction, subdivided);
+  }
+}
+
+void ConeCollection::refineByNormals() {
   STACK_TRACE("ConeCollection::refine");
   ProgressReport report;
   List<Cone> incoming;
-  while (this->nonRefinedCones.size > 0) {
-    Cone toBeReduced = this->nonRefinedCones.popLastObject();
-    bool isAlreadyRefined = !this->refineOneStep(toBeReduced, incoming);
+  while (this->nonRefinedCones.size() > 0) {
+    int indexLast = this->nonRefinedCones.size() - 1;
+    Cone toBeReduced = this->nonRefinedCones.values[indexLast];
+    this->nonRefinedCones.removeKey(
+      this->nonRefinedCones.keys[indexLast]
+    );
+    bool isAlreadyRefined = !this->refineOneByNormals(toBeReduced, incoming);
     if (isAlreadyRefined) {
-      this->refinedCones.addOnTop(toBeReduced);
+      this->refinedCones.setKeyValue(toBeReduced.id, toBeReduced);
     } else {
-      this->nonRefinedCones.addListOnTop(incoming);
+      for (const Cone& cone : incoming) {
+        this->nonRefinedCones.setKeyValue(cone.id, cone);
+      }
     }
     std::stringstream out;
     out
     << "Refined "
-    << this->refinedCones.size
+    << this->refinedCones.size()
     << " cones; remaining non-refined: "
-    << this->nonRefinedCones.size;
+    << this->nonRefinedCones.size();
     report.report(out.str());
   }
 }
@@ -14793,22 +14761,22 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
   this->vertices.size = 0;
   Selection selection;
   Selection nonPivotPoints;
-  for (int i = 0; i < this->normals.size; i ++) {
-    Cone::scaleNormalizeByPositive(this->normals[i]);
+  for (int i = 0; i < this->walls.size; i ++) {
+    Cone::scaleNormalizeByPositive(this->walls[i].normal);
   }
-  int dimension = this->normals[0].size;
-  selection.initialize(this->normals.size);
+  int dimension = this->walls[0].normal.size;
+  selection.initialize(this->walls.size);
   LargeInteger numCycles =
   selection.getNumberOfCombinationsFixedCardinality(dimension - 1);
   if (dimension == 1) {
     numCycles = 0;
     bool foundNegative = false;
     bool foundPositive = false;
-    for (int i = 0; i < this->normals.size; i ++) {
-      if (this->normals[i].isPositiveOrZero()) {
+    for (int i = 0; i < this->walls.size; i ++) {
+      if (this->walls[i].normal.isPositiveOrZero()) {
         foundPositive = true;
       }
-      if (this->normals[i].isNegativeOrZero()) {
+      if (this->walls[i].normal.isNegativeOrZero()) {
         foundNegative = true;
       }
     }
@@ -14829,7 +14797,7 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
     selection.incrementSelectionFixedCardinality(dimension - 1);
     for (int j = 0; j < selection.cardinalitySelection; j ++) {
       for (int k = 0; k < dimension; k ++) {
-        matrix.elements[j][k] = this->normals[selection.elements[j]][k];
+        matrix.elements[j][k] = this->walls[selection.elements[j]].normal[k];
       }
     }
     matrix.gaussianEliminationByRows(nullptr, &nonPivotPoints);
@@ -14848,24 +14816,24 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
   }
 }
 
-bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
+bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
   if (this->vertices.size == 0) {
     this->flagIsTheZeroCone = true;
-    this->normals.setSize(0);
+    this->walls.setSize(0);
     return false;
   }
   Vectors<Rational> verticesOnWall;
-  if (numAddedFakeWalls != 0) {
-    // we modify the normals so that they lie in the subspace spanned by the
-    // vertices
-    Matrix<Rational> matrix,
-    matNormals,
-    gramMatrixInverted;
+  if (numberOfAddedFakeWalls != 0) {
+    // We modify the normals so that they lie in the subspace spanned by the
+    // vertices.
+    Matrix<Rational> matrix;
+    Matrix<Rational> matNormals;
+    Matrix<Rational> gramMatrixInverted;
     matrix.assignVectorsToRows(this->vertices);
-    Vectors<Rational> NormalsToSubspace;
-    matrix.getZeroEigenSpaceModifyMe(NormalsToSubspace);
-    if (NormalsToSubspace.size > 0) {
-      matNormals.assignVectorsToRows(NormalsToSubspace);
+    Vectors<Rational> normalsToSubspace;
+    matrix.getZeroEigenSpaceModifyMe(normalsToSubspace);
+    if (normalsToSubspace.size > 0) {
+      matNormals.assignVectorsToRows(normalsToSubspace);
       // global.Comments << "<br>normals to the subspace spanned by the
       // vertices: " << NormalsToSubspace.toString();
       gramMatrixInverted = matNormals;
@@ -14873,27 +14841,28 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       gramMatrixInverted.multiplyOnTheLeft(matNormals);
       gramMatrixInverted.invert();
       Vector<Rational> root;
-      for (int i = 0; i < this->normals.size; i ++) {
-        matNormals.actOnVectorColumn(this->normals[i], root);
+      for (int i = 0; i < this->walls.size; i ++) {
+        matNormals.actOnVectorColumn(this->walls[i].normal, root);
         gramMatrixInverted.actOnVectorColumn(root);
         for (int j = 0; j < root.size; j ++) {
-          this->normals[i] -= NormalsToSubspace[j] * root[j];
+          this->walls[i].normal -= normalsToSubspace[j] * root[j];
         }
-        Cone::scaleNormalizeByPositive(this->normals[i]);
-        if (this->normals[i].isEqualToZero()) {
-          this->normals.removeIndexSwapWithLast(i);
+        Cone::scaleNormalizeByPositive(this->walls[i].normal);
+        if (this->walls[i].normal.isEqualToZero()) {
+          this->walls.removeIndexSwapWithLast(i);
           i --;
         }
       }
       // All normals should now lie in the subspace spanned by the vertices
       // add the walls needed to go down to the subspace.
-      this->normals.reserve(
-        this->normals.size + 2 * NormalsToSubspace.size
-      );
-      for (int i = 0; i < NormalsToSubspace.size; i ++) {
-        Cone::scaleNormalizeByPositive(NormalsToSubspace[i]);
-        this->normals.addOnTop(NormalsToSubspace[i]);
-        this->normals.addOnTop(- NormalsToSubspace[i]);
+      this->walls.reserve(this->walls.size + 2 * normalsToSubspace.size);
+      for (int i = 0; i < normalsToSubspace.size; i ++) {
+        Cone::scaleNormalizeByPositive(normalsToSubspace[i]);
+        Wall wall;
+        wall.normal = normalsToSubspace[i];
+        this->walls.addOnTop(wall);
+        wall.normal = - normalsToSubspace[i];
+        this->walls.addOnTop(wall);
       }
     }
   }
@@ -14901,8 +14870,8 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
   Selection tempSelX;
   int desiredRank = this->vertices.getRankElementSpan(&matrixX, &tempSelX);
   if (desiredRank > 1) {
-    for (int i = 0; i < this->normals.size; i ++) {
-      Vector<Rational>& currentNormal = this->normals[i];
+    for (int i = 0; i < this->walls.size; i ++) {
+      Vector<Rational>& currentNormal = this->walls[i].normal;
       verticesOnWall.size = 0;
       bool wallIsGood = false;
       for (int j = 0; j < this->vertices.size; j ++) {
@@ -14922,61 +14891,73 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
         }
       }
       if (!wallIsGood) {
-        this->normals.removeIndexSwapWithLast(i);
+        this->walls.removeIndexSwapWithLast(i);
         i --;
       }
     }
   }
   // Eliminate identical normals.
-  this->normals.quickSortAscending();
+  this->walls.quickSortAscending();
   int currentUniqueElementIndex = 0;
-  for (int i = 1; i < this->normals.size; i ++) {
-    if (this->normals[currentUniqueElementIndex] != this->normals[i]) {
+  for (int i = 1; i < this->walls.size; i ++) {
+    if (this->walls[currentUniqueElementIndex] != this->walls[i]) {
       currentUniqueElementIndex ++;
-      this->normals.swapTwoIndices(currentUniqueElementIndex, i);
+      this->walls.swapTwoIndices(currentUniqueElementIndex, i);
     }
   }
-  if (this->normals.size > 0) {
-    this->normals.setSize(currentUniqueElementIndex + 1);
+  if (this->walls.size > 0) {
+    this->walls.setSize(currentUniqueElementIndex + 1);
   }
   for (int i = 0; i < this->vertices.size; i ++) {
-    if (
-      this->normals.hasAnElementWithNegativeScalarProduct(
-        this->vertices[i]
-      )
-    ) {
+    if (!this->isInCone(this->vertices[i])) {
       global.fatal << "Negative scalar products not allowed. " << global.fatal;
     }
   }
-  for (int i = 0; i < this->normals.size; i ++) {
+  for (int i = 0; i < this->walls.size; i ++) {
     if (
       !this->vertices.hasAnElementWithPositiveScalarProduct(
-        this->normals[i]
+        this->walls[i].normal
       )
     ) {
       return false;
     }
   }
-  return numAddedFakeWalls == 0;
+  return numberOfAddedFakeWalls == 0;
+}
+
+bool Cone::haveCommonVertex(
+  const Vector<Rational>& normal1, const Vector<Rational>& normal2
+) {
+  for (const Vector<Rational>& vertex : this->vertices) {
+    if (
+      normal1.scalarEuclidean(vertex).isEqualToZero() &&
+      normal2.scalarEuclidean(vertex).isEqualToZero()
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool Cone::produceNormalFromTwoNormalsAndSlicingDirection(
   const Vector<Rational>& slicingDirection,
-  Vector<Rational>& normal1,
-  Vector<Rational>& normal2,
+  const Vector<Rational>& normal1,
+  const Vector<Rational>& normal2,
   Vector<Rational>& output
-) {
-  // We are looking for a normal n of the form n = t1 * normal1 + t2 * normal2
-  // such that <t1 * normal1 + t2 * normal2, slicingDirection> = 0
-  Rational normal1ScalarDirection =
+) const {
+  // We are looking for a normal n of the form
+  // n = t1 * normal1 + t2 * normal2
+  // such that
+  // <n, slicingDirection> =
+  // <t1 * normal1 + t2 * normal2, slicingDirection> = 0
+  Rational product1 =
   normal1.scalarEuclidean(slicingDirection);
-  if (normal1ScalarDirection.isEqualToZero()) {
-    output = normal1;
+  Rational product2 = normal2.scalarEuclidean(slicingDirection);
+  if (!product1.isPositive() || !product2.isPositive()) {
     return false;
   }
-  // from now on we assume t2=1;
-  Rational t1 = - normal2.scalarEuclidean(slicingDirection) /
-  normal1ScalarDirection;
+  // From now on we assume t2 = 1;
+  Rational t1 = - normal2.scalarEuclidean(slicingDirection) / product1;
   output = normal2;
   output += normal1 * t1;
   Cone::scaleNormalizeByPositive(output);
@@ -15013,12 +14994,12 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   this->lowestIndexNotCheckedForSlicingInDirection = 0;
   this->flagIsTheZeroCone = false;
   if (inputVertices.size <= 0) {
-    this->normals.size = 0;
+    this->walls.clear();
     this->vertices.size = 0;
     this->flagIsTheZeroCone = true;
     return false;
   }
-  this->normals.size = 0;
+  this->walls.clear();
   Matrix<Rational> matrix;
   Selection wallGeneratorSelection;
   int rankVerticesSpan =
@@ -15030,8 +15011,11 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
     matrix.assignVectorsToRows(inputVertices);
     matrix.getZeroEigenSpace(extraVertices);
     for (int i = 0; i < extraVertices.size; i ++) {
-      this->normals.addOnTop(extraVertices[i]);
-      this->normals.addOnTop(- extraVertices[i]);
+      Wall wall;
+      wall.normal = extraVertices[i];
+      this->walls.addOnTop(wall);
+      wall.normal.negate();
+      this->walls.addOnTop(wall);
     }
   }
   LargeInteger numberOfCandidates =
@@ -15065,64 +15049,87 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
         normalCandidate.negate();
       }
       if (!(hasNegative && hasPositive)) {
-        this->normals.addOnTopNoRepetition(normalCandidate);
+        Wall wall;
+        wall.normal = normalCandidate;
+        this->walls.addOnTopNoRepetition(wall);
       }
     }
     extraVertices.size = dimension - rankVerticesSpan;
   }
-  return this->createFromNormals(this->normals);
-}
-
-bool Cone::createFromNormals(Vectors<Rational>& inputNormals) {
-  return this->createFromNormals(inputNormals, false);
-}
-
-int Cone::getDimension() const {
-  if (this->normals.size == 0) {
-    return 0;
-  }
-  return this->normals[0].size;
+  return this->createFromWalls(this->walls, false);
 }
 
 bool Cone::createFromNormals(
-  Vectors<Rational>& inputNormals, bool hasEnoughProjectiveVertices
+  const Vectors<Rational>& inputNormals,
+  const List<List<int> >& inputNeighbors
 ) {
-  STACK_TRACE("Cone::createFromNormals");
+  return this->createFromNormals(inputNormals, inputNeighbors, false);
+}
+
+bool Cone::createFromNormals(
+  const Vectors<Rational>& inputNormals,
+  const List<List<int> >& inputNeighbors,
+  bool hasEnoughProjectiveVertices
+) {
+  List<Wall> inputWalls;
+  for (int i = 0; i < inputNormals.size; i ++) {
+    Wall incoming;
+    incoming.normal = inputNormals[i];
+    incoming.neighbors = inputNeighbors[i];
+    inputWalls.addOnTop(incoming);
+  }
+  return this->createFromWalls(inputWalls, hasEnoughProjectiveVertices);
+}
+
+int Cone::getDimension() const {
+  if (this->walls.size == 0) {
+    return 0;
+  }
+  return this->walls[0].normal.size;
+}
+
+bool Cone::createFromWalls(
+  const List<Wall>& inputWalls, bool hasEnoughProjectiveVertices
+) {
+  STACK_TRACE("Cone::createFromWalls");
   this->flagIsTheZeroCone = false;
   this->lowestIndexNotCheckedForChopping = 0;
   this->lowestIndexNotCheckedForSlicingInDirection = 0;
   int dimension = 1;
-  if (inputNormals.size > 0) {
-    dimension = inputNormals[0].size;
+  if (inputWalls.size > 0) {
+    dimension = inputWalls[0].normal.size;
   }
-  this->normals = inputNormals;
-  for (int i = 0; i < this->normals.size; i ++) {
-    if (this->normals[i].isEqualToZero()) {
-      this->normals.removeIndexSwapWithLast(i);
+  this->walls = inputWalls;
+  for (int i = 0; i < this->walls.size; i ++) {
+    if (this->walls[i].normal.isEqualToZero()) {
+      this->walls.removeIndexSwapWithLast(i);
       i --;
     }
   }
-  int numAddedFakeWalls = 0;
+  int fakeWallCount = 0;
   Matrix<Rational> matrix;
   Selection selection;
   if (!hasEnoughProjectiveVertices) {
     for (
       int i = 0; i < dimension &&
-      this->normals.getRankElementSpan(&matrix, &selection) < dimension; i ++
+      this->getAllNormals().getRankElementSpan(&matrix, &selection) <
+      dimension; i ++
     ) {
-      Vector<Rational> root;
-      root.makeEi(dimension, i);
+      Wall fakeWall;
+      fakeWall.normal.makeEi(dimension, i);
       if (
-        !this->normals.linearSpanContainsVector(root, matrix, selection)
+        !this->getAllNormals().linearSpanContainsVector(
+          fakeWall.normal, matrix, selection
+        )
       ) {
-        numAddedFakeWalls ++;
-        this->normals.addOnTop(root);
+        fakeWallCount ++;
+        this->walls.addOnTop(fakeWall);
       }
     }
   }
   this->computeVerticesFromNormalsNoFakeVertices();
-  if (numAddedFakeWalls > 0) {
-    this->normals.setSize(this->normals.size - numAddedFakeWalls);
+  if (fakeWallCount > 0) {
+    this->walls.setSize(this->walls.size - fakeWallCount);
     Vector<Rational> root;
     int originalSize = this->vertices.size;
     for (int i = 0; i < originalSize; i ++) {
@@ -15132,7 +15139,7 @@ bool Cone::createFromNormals(
       }
     }
   }
-  return this->eliminateFakeNormalsUsingVertices(numAddedFakeWalls);
+  return this->eliminateFakeNormalsUsingVertices(fakeWallCount);
 }
 
 void ConeCollection::operator=(const ConeCollection& other) {
@@ -15142,11 +15149,13 @@ void ConeCollection::operator=(const ConeCollection& other) {
   this->slicingDirections = other.slicingDirections;
   this->flagIsRefined = other.flagIsRefined;
   this->flagChambersHaveTooFewVertices = other.flagChambersHaveTooFewVertices;
+  this->conesCreated = other.conesCreated;
 }
 
 ConeCollection::ConeCollection() {
   this->flagChambersHaveTooFewVertices = false;
   this->flagIsRefined = false;
+  this->conesCreated = 0;
 }
 
 ConeCollection::ConeCollection(const ConeCollection& other) {
@@ -15158,25 +15167,13 @@ void ConeCollection::initialize() {
   this->slicingDirections.size = 0;
   this->refinedCones.clear();
   this->nonRefinedCones.clear();
-  this->convexHull.normals.size = 0;
+  this->convexHull.walls.clear();
   this->convexHull.vertices.size = 0;
   this->convexHull.flagIsTheZeroCone = true;
 }
 
 void ConeCollection::initFromConeWalls(
   List<Cone>& normalsOfCones, bool hasEnoughProjectiveVertices
-) {
-  List<Vectors<Rational> > roots;
-  roots.setSize(normalsOfCones.size);
-  for (int i = 0; i < normalsOfCones.size; i ++) {
-    roots[i] = normalsOfCones[i].normals;
-  }
-  this->initFromConeWalls(roots, hasEnoughProjectiveVertices);
-}
-
-void ConeCollection::initFromConeWalls(
-  List<Vectors<Rational> >& normalsOfCones,
-  bool hasEnoughProjectiveVertices
 ) {
   STACK_TRACE("ConeCollection::initFromConeWalls");
   Cone startingCone;
@@ -15186,11 +15183,11 @@ void ConeCollection::initFromConeWalls(
   report.report(normalsOfCones.toString());
   for (int i = 0; i < normalsOfCones.size; i ++) {
     if (
-      startingCone.createFromNormals(
-        normalsOfCones[i], hasEnoughProjectiveVertices
+      startingCone.createFromWalls(
+        normalsOfCones[i].walls, hasEnoughProjectiveVertices
       )
     ) {
-      this->nonRefinedCones.addOnTop(startingCone);
+      this->addNonRefinedCone(startingCone);
     }
     std::stringstream out;
     out << "Initializing cone " << i + 1 << " out of " << normalsOfCones.size;
@@ -15198,9 +15195,11 @@ void ConeCollection::initFromConeWalls(
   }
   Vector<Rational> root;
   this->splittingNormals.clear();
-  for (int i = 0; i < this->nonRefinedCones.size; i ++) {
-    for (int j = 0; j < this->nonRefinedCones[i].normals.size; j ++) {
-      root = this->nonRefinedCones[i].normals[j];
+  for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
+    for (
+      int j = 0; j < this->nonRefinedCones.values[i].walls.size; j ++
+    ) {
+      root = this->nonRefinedCones[i].walls[j].normal;
       root.scaleNormalizeFirstNonZero();
       this->splittingNormals.addOnTopNoRepetition(root);
       std::stringstream out;
@@ -15208,13 +15207,13 @@ void ConeCollection::initFromConeWalls(
       << "Extracting walls from cone "
       << i + 1
       << " out of "
-      << this->nonRefinedCones.size
+      << this->nonRefinedCones.size()
       << " total distinct chambers.";
       out
       << "\nProcessed "
       << j + 1
       << " out of "
-      << this->nonRefinedCones[i].normals.size
+      << this->nonRefinedCones.values[i].walls.size
       << " walls of the current chamber.";
       out
       << "\nTotal # of distinct walls found: "
@@ -15227,7 +15226,7 @@ void ConeCollection::initFromConeWalls(
 
 bool ConeCollection::checkIsRefinedOrCrash() const {
   STACK_TRACE("ConeCollection::checkIsRefinedOrCrash");
-  if (this->nonRefinedCones.size > 0) {
+  if (this->nonRefinedCones.size() > 0) {
     global.fatal
     << "Non-refined cones not allowed by this function."
     << global.fatal;
@@ -15241,7 +15240,7 @@ std::string Cone::toHTML() const {
   bool lastVarIsConstant = false;
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
-  } else if (this->normals.size == 0) {
+  } else if (this->walls.size == 0) {
     out << "The cone is the entire space";
   }
   out
@@ -15257,7 +15256,7 @@ std::string Cone::toHTML() const {
   out << "<br>";
   out << "\\(";
   FormatExpressions format;
-  out << this->normals.toLatexInequalities(lastVarIsConstant, format);
+  out << this->getAllNormals().toLatexInequalities(lastVarIsConstant, format);
   out << "\\)";
   out << "<br>Projectivized vertices: " << this->vertices.toString();
   if (this->vertices.size > 0) {
@@ -15274,7 +15273,7 @@ std::string Cone::toString(FormatExpressions* format) const {
   bool lastVarIsConstant = false;
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
-  } else if (this->normals.size == 0) {
+  } else if (this->walls.size == 0) {
     out << "The cone is the entire space";
   }
   if (!PrepareMathReport) {
@@ -15304,7 +15303,8 @@ std::string Cone::toString(FormatExpressions* format) const {
   if (format == nullptr) {
     format = &tempF;
   }
-  out << this->normals.toLatexInequalities(lastVarIsConstant, *format);
+  out
+  << this->getAllNormals().toLatexInequalities(lastVarIsConstant, *format);
   if (useLatex) {
     out << "\\]";
   }
@@ -15321,8 +15321,8 @@ std::string Cone::toString(FormatExpressions* format) const {
 std::string ConeCollection::toString() {
   std::stringstream out;
   FormatExpressions format;
-  out << "Non-refined chambers: " << this->nonRefinedCones.size;
-  out << "\nRefined chamber: " << this->refinedCones.size;
+  out << "Non-refined chambers: " << this->nonRefinedCones.size();
+  out << "\nRefined chamber: " << this->refinedCones.size();
   Vectors<Rational> roots;
   roots = this->splittingNormals;
   out << "\nNormals of walls to refine by: ";
@@ -15333,12 +15333,12 @@ std::string ConeCollection::toString() {
     << this->slicingDirections.toString();
   }
   out << "Non-refined cones follow.\n";
-  for (int i = 0; i < this->nonRefinedCones.size; i ++) {
+  for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
     out << "\nChamber " << i + 1 << ":\n";
     out << this->nonRefinedCones[i].toString(&format) << "\n";
   }
   out << "Refined cones follow.\n";
-  for (int i = 0; i < this->refinedCones.size; i ++) {
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
     out << "\nChamber " << i + 1 << ":\n";
     out << this->refinedCones[i].toString(&format) << "\n";
   }
@@ -15351,7 +15351,7 @@ std::string ConeCollection::toHTML() const {
   DrawingVariables drawingVariables;
   FormatExpressions format;
   out << this->drawMeToHtmlProjective(drawingVariables, format);
-  out << "Refined chamber count: " << this->refinedCones.size;
+  out << "Refined chamber count: " << this->refinedCones.size();
   Vectors<Rational> roots;
   roots = this->splittingNormals;
   out << "<br>Normals of walls to refine by: ";
@@ -15361,14 +15361,14 @@ std::string ConeCollection::toHTML() const {
     << " Directions to slice along: "
     << this->slicingDirections.toString();
   }
-  for (int i = 0; i < this->refinedCones.size; i ++) {
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
     out << "<br>Chamber " << i + 1 << ":<br>";
-    out << this->refinedCones[i].toHTML() << "\n\n\n";
+    out << this->refinedCones.values[i].toHTML() << "\n\n\n";
   }
-  out << "<hr>Non-refined chamber count: " << this->nonRefinedCones.size;
-  for (int i = 0; i < this->nonRefinedCones.size; i ++) {
+  out << "<hr>Non-refined chamber count: " << this->nonRefinedCones.size();
+  for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
     out << "<br>Chamber " << i + 1 << ":<br>";
-    out << this->nonRefinedCones[i].toHTML() << "<br>";
+    out << this->nonRefinedCones.values[i].toHTML() << "<br>";
   }
   return out.str();
 }
@@ -15379,10 +15379,10 @@ bool ConeCollection::findMaxLFOverConeProjective(
   List<int>& outputMaximumOverEeachSubChamber
 ) {
   Vectors<Rational> HyperPlanesCorrespondingToLF;
-  if (input.normals.size < 1 || inputLinearPolynomials.size < 1) {
+  if (input.walls.size < 1 || inputLinearPolynomials.size < 1) {
     return false;
   }
-  int dimension = input.normals[0].size;
+  int dimension = input.walls[0].normal.size;
   HyperPlanesCorrespondingToLF.setSize(inputLinearPolynomials.size);
   for (int i = 0; i < inputLinearPolynomials.size; i ++) {
     Polynomial<Rational>& currentPoly = inputLinearPolynomials[i];
@@ -15411,13 +15411,33 @@ bool ConeCollection::findMaxLFOverConeProjective(
   );
 }
 
+void ConeCollection::addCone(MapList<int, Cone> map, const Cone& cone) {
+  if (cone.id == - 1) {
+    global.fatal
+    << "Adding a non-initialized cone not allowed. "
+    << global.fatal;
+  }
+  if (map.contains(cone.id)) {
+    global.fatal << "Not allowed to add a cone twice. " << global.fatal;
+  }
+  map.setKeyValue(cone.id, cone);
+}
+
+void ConeCollection::addRefinedCone(const Cone& cone) {
+  this->addCone(this->refinedCones, cone);
+}
+
+void ConeCollection::addNonRefinedCone(const Cone& cone) {
+  this->addCone(this->nonRefinedCones, cone);
+}
+
 bool ConeCollection::findMaxLFOverConeProjective(
   const Cone& input,
   Vectors<Rational>& inputLFsLastCoordConst,
   List<int>& outputMaximumOverEeachSubChamber
 ) {
   this->initialize();
-  this->nonRefinedCones.addOnTop(input);
+  this->addNonRefinedCone(input);
   this->convexHull.makeConvexHullOfMeAnd(input);
   Vector<Rational> root;
   for (int i = 0; i < inputLFsLastCoordConst.size; i ++) {
@@ -15430,11 +15450,11 @@ bool ConeCollection::findMaxLFOverConeProjective(
     }
   }
   global.comments << this->toHTML();
-  this->refine();
-  outputMaximumOverEeachSubChamber.setSize(this->refinedCones.size);
+  this->refineByNormals();
+  outputMaximumOverEeachSubChamber.setSize(this->refinedCones.size());
   Rational maximumScalarProduct = 0;
-  for (int i = 0; i < this->refinedCones.size; i ++) {
-    this->refinedCones[i].getInternalPoint(root);
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
+    this->refinedCones.values[i].getInternalPoint(root);
     bool isInitialized = false;
     for (int j = 0; j < inputLFsLastCoordConst.size; j ++) {
       if (

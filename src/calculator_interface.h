@@ -1,12 +1,7 @@
-// The current file is licensed under the license terms found in the main
-// header
-// file "calculator.h".
-// For additional information refer to the file "calculator.h".
+
 #ifndef header_calculator_interface_ALREADY_INCLUDED
 #define header_calculator_interface_ALREADY_INCLUDED
 
-// the following include contains all the c++ math routines used in the
-// calculator.
 #include "math_general.h"
 #include "math_extra_finite_groups.h"
 #include "math_extra_graph.h"

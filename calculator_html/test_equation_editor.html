@@ -60,6 +60,12 @@
       extraKeyHandlers: {
         "Enter": handleEnter,
       },
+      highlightStyle: {
+        // Custom background color for the active box containing the cursor.
+        backgroundColor: "#f8f0f0",
+        // Custom outline for the active box containing the cursor.
+        outline: "1px dashed black",
+      },
     });
     let svgContainer = document.getElementById("svgContainer");
     editor = new EquationEditor(document.getElementById('editor'), options, svgContainer);
@@ -67,8 +73,7 @@
       // The editor to go with the button panel.
       editor,
       // Render the button panel here.
-      document.getElementById('panel'),
-      {
+      document.getElementById('panel'), {
         collapseButton: document.getElementById('collapse'),
         expandButton: document.getElementById('expand'),
       },

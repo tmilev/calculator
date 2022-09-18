@@ -1591,6 +1591,7 @@ class LaTeXConstants {
       'swarrow': '\u2199',
       'perp': '\u27C2',
       'pm': '\u00B1',
+      'div': '\u00F7',
       'det': 'det',
       'geq': '\u2265',
       'sin': 'sin',
@@ -2850,6 +2851,10 @@ class EquationEditorOptions {
        * logTiming: (boolean|undefined),
        * copyButton: (boolean|undefined),
        * extraKeyHandlers: Object<string, function (EquationEditor, boolean)>
+       * highlightStyle: ({
+       *   backgroundColor: string,
+       *   outline: string,
+       * }|null|undefined)
        * }}
        */
       options,
@@ -2905,6 +2910,15 @@ class EquationEditorOptions {
     if (options.copyButton === true) {
       this.copyButton = true;
     }
+    this.highlightStyle = {
+      backgroundColor: '#f0f0f0',
+      outline: '',
+    };
+    if (options.highlightStyle !== undefined && options.highlightStyle !== null) {
+      this.highlightStyle.backgroundColor = options.highlightStyle.backgroundColor;
+      this.highlightStyle.outline = options.highlightStyle.outline;
+    }
+
     /** @type {boolean} */
     this.showLatexOnDoubleClick = !this.editable && !this.copyButton;
     /** @type {Object<string, function(EquationEditor,boolean)>|undefined} */
@@ -4945,11 +4959,11 @@ class MathNode {
     }
     if (this.type.borderBottomLeftRadius !== '') {
       this.element.style.borderBottomLeftRadius =
-          this.type.borderBottomLeftRadius;
+        this.type.borderBottomLeftRadius;
     }
     if (this.type.borderBottomRightRadius !== '') {
       this.element.style.borderBottomRightRadius =
-          this.type.borderBottomRightRadius;
+        this.type.borderBottomRightRadius;
     }
     if (this.type.borderTop !== '') {
       this.element.style.borderTop = this.type.borderTop;
@@ -5127,7 +5141,9 @@ class MathNode {
 
   /** Focuses the DOM element. */
   focusElement() {
-    this.element.style.background = '#f0f0f0';
+    let highlightStyle = this.equationEditor.options.highlightStyle;
+    this.element.style.background = highlightStyle.backgroundColor ;
+    this.element.style.outline = highlightStyle.outline;
     this.focused = true;
     this.equationEditor.hasFocusDOM = true;
   }
@@ -5148,7 +5164,8 @@ class MathNode {
     if (this.element === null) {
       return;
     }
-    this.element.style.background = '';
+    this.element.style.outline = knownTypes[this.type.type].outline;
+    this.element.style.backgroundColor = ''; 
   }
 
   /** Blurs the DOM element and all children DOM elements. */

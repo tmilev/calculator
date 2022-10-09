@@ -79,7 +79,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool
-  addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger
+  addPolynomialModuloPolynomialModuloIntegerToAnother
   (Calculator& calculator, const Expression& input, Expression& output);
   static bool addAlgebraicNumberToAlgebraicNumber(
     Calculator& calculator, const Expression& input, Expression& output

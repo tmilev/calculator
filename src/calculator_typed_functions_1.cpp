@@ -1024,11 +1024,11 @@ bool CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(
 }
 
 bool CalculatorFunctionsBinaryOps::
-addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger
+addPolynomialModuloPolynomialModuloIntegerToAnother
 (Calculator& calculator, const Expression& input, Expression& output) {
   STACK_TRACE(
     "CalculatorFunctionsBinaryOps::"
-    "addPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger"
+    "addPolynomialModuloPolynomialModuloIntegerToAnother"
   );
   if (input.size() != 3) {
     return false;

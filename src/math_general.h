@@ -6167,7 +6167,8 @@ public:
 };
 
 class Cone {
-  void computeVerticesFromNormalsNoFakeVertices();
+  void computeVerticesFromNormals();
+  void computeVerticesOneDimension();
   bool eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls);
   friend std::ostream& operator<<(std::ostream& output, const Cone& cone) {
     output << cone.toString();
@@ -6178,8 +6179,7 @@ public:
   Vectors<Rational> vertices;
   List<Wall> walls;
   int id;
-  int lowestIndexNotCheckedForChopping;
-  int lowestIndexNotCheckedForSlicingInDirection;
+  int lowestSlicingIndex;
   void transformToWeylProjective(ConeCollection& owner);
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables, FormatExpressions& format
@@ -6250,6 +6250,15 @@ public:
   bool createFromWalls(
     const List<Wall>& inputWalls, bool hasEnoughProjectiveVertices
   );
+  // If the chamber contains lines - i.e., does not have
+  // "enough projective vertices", this function will
+  // add fake walls to the chamber, so as to generate
+  // extra points in the chamber.
+  // These extra fake walls are removed later.
+  // Returns the number of added fake walls.
+  int addFakeWalls();
+  void removeFakeWalls(int fakeWallCount);
+  bool hasMultipleNeighborWall() const;
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
   bool getInternalPoint(Vector<Rational>& output) const;
@@ -6259,10 +6268,10 @@ public:
   bool haveCommonVertex(
     const Vector<Rational>& normal1, const Vector<Rational>& normal2
   );
-  bool produceNormalFromTwoNormalsAndSlicingDirection(
+  bool produceNormalSeparatingWallsInDirection(
     const Vector<Rational>& slicingDirection,
-    const Vector<Rational>& normal1,
-    const Vector<Rational>& normal2,
+    const Vector<Rational>& base,
+    const Vector<Rational>& otherWall,
     Vector<Rational>& output
   ) const;
   void operator=(const Cone& other);
@@ -6270,6 +6279,15 @@ public:
   Cone();
   Cone(int inputId);
   Vectors<Rational> getAllNormals() const;
+  template <class TemplateList>
+  void getNormalsOfWallsContainingPoint(const Vector<Rational>& point, TemplateList& output) const {
+    output.clear();
+    for (const Wall& wall: this->walls){
+      if (wall.normal.scalarEuclidean(point).isEqualToZero()){
+        output.addOnTop(wall.normal);
+      }
+    }
+  }
   List<List<int> > getAllNeighbors() const;
   void intersectHyperplane(
     Vector<Rational>& normal, Cone& outputConeLowerDimension
@@ -6284,6 +6302,18 @@ public:
     QuasiPolynomial& inputLQP,
     List<Cone>& outputConesOverEachLatticeShift
   );
+  template <class ListTemplate>
+  void getAllVerticesPerpendicularTo(const Vector<Rational>& normal, ListTemplate& output)const{
+    output.clear();
+    for (const Vector<Rational>& vertex: this->vertices){
+      if (vertex.scalarEuclidean(normal).isEqualToZero()){
+        output.addOnTop(vertex);
+      }
+    }
+
+
+  }
+  Wall& getWallWithNormalNoFail(const Vector<Rational>& desiredNormal);
   bool operator>(const Cone& other) const;
   bool operator==(const Cone& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
@@ -6325,32 +6355,38 @@ public:
   Cone convexHull;
   MapList<int, Cone> nonRefinedCones;
   MapList<int, Cone> refinedCones;
+  MapList<int, Cone> conesWithIrregularWalls;
   int conesCreated;
   void makeAllConesNonRefined();
+  void refineByDirectionsAndSort();
+  void refineByDirections();
+  void refineByOneDirection(const Vector<Rational>& direction);
   // Returns false if the cone is refined relative to the splitting normals,
   // otherwise slices the cone.
   bool refineOneByNormals(Cone& toBeRefined, List<Cone>& output);
-  // Returns false if the cone is refined relative to the splitting directions,
-  // otherwise slices the cone.
+  // Returns true if a chamber is split so that
+  // each chamber has unique exit wall with respect
+  // to the given direction, and returns false
+  // if the chamber already has that property.
   void refineOneByOneDirection(
     Cone& toBeRefined,
-    const Vector<Rational>& direction,
-    List<Cone>& output
+    const Vector<Rational>& direction
   );
-  void refineByDirections();
-  void refineByOneDirection(const Vector<Rational>& direction);
+  void refineAllConesWithWallsWithMultipleNeighbors();
+  void attachNeighbbors(Cone& candidate,
+  int idReplacedCone, MapList<int, Cone> &allCandidates);
+void  replaceConeAdjacentToWall(Cone& candidate, const Wall& wall, int idReplacedCone, MapList<int, Cone>& newCones);
+  void constructSubstituteChambers(
+    List<Cone>& candidates, List<Cone>& output
+  );
   void refineByNormals();
   void refineMakeCommonRefinement(const ConeCollection& other);
   void sort();
-  void refineByDirectionsAndSort();
   void makeAffineAndTransformToProjectiveDimensionPlusOne(
     Vector<Rational>& affinePoint, ConeCollection& output
   );
   void transformToWeylProjective();
   int getDimension() const;
-  void addNonRefinedChamberOnTopNoRepetition(
-    const Cone& newCone, List<Cone>& output
-  );
   void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(
     Vectors<Rational>& output
   ) const;
@@ -6370,6 +6406,7 @@ public:
   std::string drawMeToHtmlLastCoordAffine(
     DrawingVariables& drawingVariables, FormatExpressions& format
   );
+  Cone* getConeById(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
@@ -6394,6 +6431,7 @@ public:
     Vectors<Rational>& inputLFsLastCoordConst,
     List<int>& outputMaximumOverEeachSubChamber
   );
+  void processNeighborsOfNewlyAddedCone(const Cone& cone);
   void addNonRefinedCone(const Cone& cone);
   void addRefinedCone(const Cone& cone);
   // Creates a cone collection from a set of walls.
@@ -6412,19 +6450,11 @@ public:
   // and writes the result in the output variable.
   bool splitChamber(
     const Cone& toBeSliced,
-    bool weAreChopping,
     const Vector<Rational>& killerNormal,
-    List<Cone>& output
+  int nextSlicingIndex
   );
-  // Returns true if a chamber is split so that
-  // each chamber has unique exit wall with respect
-  // to the given direction, and returns false
-  // if the chamber already has that property.
-  bool splitChamberByDirection(
-    const Cone& toBeSliced,
-    const Vector<Rational>& direction,
-    List<Cone>& output
-  );
+  void splitConeByMultipleNeighbors(Cone& input);
+  void splitConeByMultipleNeighbors(const Cone& input, const Wall& wall);
   void getNewVerticesAppend(
     const Cone& toBeSplit,
     const Vector<Rational>& normalSlicingPlane,
@@ -6930,12 +6960,12 @@ public:
   // flagStoreAllPartitions is set.
   // Format: each element of partitions gives an array whose entries give
   // the multiplicity of the weights. In other words,
-  // if partitioningRoots has 2 elements,
+  // if partitioningVectors has 2 elements,
   // then partitions[0]
   // would have 2 elements: the first giving the multiplicity of
-  // PartitioningRoots[0]
+  // partitioningVectors[0]
   // and the second - the multiplicity of
-  // PartitioningRoots[1]
+  // partitioningVectors[1].
   List<List<int> > partitions;
   // Whether or not to use the partitions array.
   bool flagStoreAllPartitions;

@@ -821,7 +821,7 @@ public:
   ~Rational() {
     this->freeExtended();
   }
-  // the below must be called only with positive arguments!
+  // The following must be called only with positive arguments!
   static inline int greatestCommonDivisor(int a, int b) {
     MacroIncrementCounter(Rational::totalSmallGreatestCommonDivisors);
     return MathRoutines::greatestCommonDivisor(a, b);

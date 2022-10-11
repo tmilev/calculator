@@ -14572,9 +14572,56 @@ bool ConeCollection::splitChamber(
     newPlusCone.createFromWalls(newPlusCone.walls, false);
     newMinusCone.createFromWalls(newMinusCone.walls, false);
   }
+  this->removeFakeNeighbors(newPlusCone);
+  this->removeFakeNeighbors(newMinusCone);
+  this->removeFromNeighbors(toBeSliced);
   this->addNonRefinedCone(newPlusCone);
   this->addNonRefinedCone(newMinusCone);
   return true;
+}
+
+void ConeCollection::removeFakeNeighbors(Cone& cone) {
+  STACK_TRACE("ConeCollection::removeFakeNeighbors");
+  for (Wall& wall : cone.walls) {
+    this->removeFakeNeighborsAlongWall(cone, wall);
+  }
+}
+
+void ConeCollection::removeFakeNeighborsAlongWall(Cone& cone, Wall& wall) {
+  STACK_TRACE("ConeCollection::removeFakeNeighborsAlongWall");
+  for (int i = wall.neighbors.size - 1; i >= 0; i --) {
+    int neighborId = wall.neighbors[i];
+    Cone* neighbor = this->getConeById(neighborId);
+    if (neighbor == nullptr) {
+      // The neighbor is not added to the cone collection.
+      // This neighbor is the other cone generated while splitting the chamber.
+      continue;
+    }
+    List<Vector<Rational> > vertices;
+    List<Vector<Rational> > neighborVertices;
+    List<Vector<Rational> > commonVertices;
+    cone.getAllVerticesPerpendicularTo(wall.normal, vertices);
+    neighbor->getAllVerticesPerpendicularTo(wall.normal, neighborVertices);
+    if (vertices.size != neighborVertices.size) {
+      continue;
+    }
+    vertices.intersectWith(neighborVertices, commonVertices);
+    if (commonVertices.size == vertices.size) {
+      wall.neighbors.removeIndexShiftDown(i);
+    }
+  }
+}
+
+void ConeCollection::removeFromNeighbors(const Cone& cone) {
+  for (const Wall& wall : cone.walls) {
+    for (int id : wall.neighbors) {
+      Cone* neighbor = this->getConeById(id);
+      if (neighbor == nullptr) {
+        continue;
+      }
+      neighbor->removeNeighbor(cone.id);
+    }
+  }
 }
 
 bool Cone::makeConvexHullOfMeAnd(const Cone& other) {
@@ -14619,20 +14666,16 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
   int mustDecrease =
   this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
   while (this->conesWithIrregularWalls.size() > 0) {
-    global.comments
-    << "<hr>DEBUG: before irregular removal: "
-    << this->toStringConeIds()
-    << "<br>";
-    global.comments << "<BR> full complex: " << this->toHTML();
+    global.comments << "DEBUG: cone collection: " << this->toHTML();
     int index = this->conesWithIrregularWalls.size() - 1;
     Cone cone = this->conesWithIrregularWalls.values[index];
     this->conesWithIrregularWalls.removeIndex(index);
     this->splitConeByMultipleNeighbors(cone);
     int nextMustDecrease =
     this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
-    if (mustDecrease >= nextMustDecrease) {
+    if (mustDecrease <= nextMustDecrease) {
       global.fatal
-      << "Irregular walls less the cones created did not decrease. "
+      << "Irregular cones less the cones created did not decrease. "
       << global.fatal;
     }
     mustDecrease = nextMustDecrease;
@@ -14643,7 +14686,6 @@ void ConeCollection::splitConeByMultipleNeighbors(Cone& input) {
   STACK_TRACE("ConeCollection::splitConeByMultipleNeighbors");
   for (const Wall& wall : input.walls) {
     if (wall.neighbors.size > 1) {
-      global.comments << "<br>DEBUG: About to split: " << input.toString();
       this->splitConeByMultipleNeighbors(input, wall);
       return;
     }
@@ -14671,16 +14713,9 @@ void ConeCollection::splitConeByMultipleNeighbors(
       neighborVertex, candidateSlicers
     );
     for (Vector<Rational>& slicer : candidateSlicers) {
-      global.comments
-      << "DEBUG: about to split chamber: "
-      << input.toString()
-      << " by "
-      << slicer
-      << "<br>";
       if (this->splitChamber(input, slicer, - 1)) {
         return;
       }
-      global.comments << "DEBUG: split fail. ";
     }
   }
 }
@@ -14878,21 +14913,9 @@ void ConeCollection::refineByOneDirection(
   STACK_TRACE("ConeCollection::refineByOneDirection");
   List<Cone> subdivided;
   while (this->nonRefinedCones.size() > 0) {
-    global.comments
-    << "<hr>DEBUG: ids before main work starts: "
-    << this->toStringConeIds()
-    << "<br>";
     Cone toBeRefined = *this->nonRefinedCones.values.lastObject();
     this->nonRefinedCones.removeIndex(this->nonRefinedCones.size() - 1);
-    global.comments
-    << "<br>DEBUG: ids before refine: "
-    << this->toStringConeIds()
-    << "<br>";
     this->refineOneByOneDirection(toBeRefined, direction);
-    global.comments
-    << "<br>DEBUG: ids before neighbor stuff: "
-    << this->toStringConeIds()
-    << "<br>";
     this->refineAllConesWithWallsWithMultipleNeighbors();
   }
 }
@@ -15334,6 +15357,16 @@ bool Cone::hasMultipleNeighborWall() const {
   return false;
 }
 
+void Cone::removeNeighbor(int neighborId) {
+  for (Wall& wall : this->walls) {
+    for (int i = wall.neighbors.size - 1; i >= 0; i --) {
+      if (wall.neighbors[i] == neighborId) {
+        wall.neighbors.removeIndexShiftDown(i);
+      }
+    }
+  }
+}
+
 void Cone::removeFakeWalls(int fakeWallCount) {
   if (fakeWallCount <= 0) {
     return;
@@ -15446,6 +15479,7 @@ std::string Cone::toHTML() const {
   STACK_TRACE("Cone::toHTML");
   std::stringstream out;
   bool lastVarIsConstant = false;
+  out << "Id: " << this->id << "<br>";
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
   } else if (this->walls.size == 0) {

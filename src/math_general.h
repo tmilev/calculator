@@ -6258,6 +6258,7 @@ public:
   // Returns the number of added fake walls.
   int addFakeWalls();
   void removeFakeWalls(int fakeWallCount);
+  void removeNeighbor(int neighborId);
   bool hasMultipleNeighborWall() const;
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
@@ -6465,6 +6466,9 @@ public:
     const Vector<Rational>& killerNormal,
     int nextSlicingIndex
   );
+  void removeFakeNeighbors(Cone& cone);
+  void removeFakeNeighborsAlongWall(Cone& cone, Wall& wall);
+  void removeFromNeighbors(const Cone& cone);
   void splitConeByMultipleNeighbors(Cone& input);
   void splitConeByMultipleNeighbors(const Cone& input, const Wall& wall);
   void getNewVerticesAppend(

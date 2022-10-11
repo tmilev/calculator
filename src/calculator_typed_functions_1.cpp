@@ -1024,8 +1024,9 @@ bool CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(
 }
 
 bool CalculatorFunctionsBinaryOps::
-addPolynomialModuloPolynomialModuloIntegerToAnother
-(Calculator& calculator, const Expression& input, Expression& output) {
+addPolynomialModuloPolynomialModuloIntegerToAnother(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   STACK_TRACE(
     "CalculatorFunctionsBinaryOps::"
     "addPolynomialModuloPolynomialModuloIntegerToAnother"

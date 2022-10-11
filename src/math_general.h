@@ -6280,10 +6280,12 @@ public:
   Cone(int inputId);
   Vectors<Rational> getAllNormals() const;
   template <class TemplateList>
-  void getNormalsOfWallsContainingPoint(const Vector<Rational>& point, TemplateList& output) const {
+  void getNormalsOfWallsContainingPoint(
+    const Vector<Rational>& point, TemplateList& output
+  ) const {
     output.clear();
-    for (const Wall& wall: this->walls){
-      if (wall.normal.scalarEuclidean(point).isEqualToZero()){
+    for (const Wall& wall : this->walls) {
+      if (wall.normal.scalarEuclidean(point).isEqualToZero()) {
         output.addOnTop(wall.normal);
       }
     }
@@ -6303,15 +6305,15 @@ public:
     List<Cone>& outputConesOverEachLatticeShift
   );
   template <class ListTemplate>
-  void getAllVerticesPerpendicularTo(const Vector<Rational>& normal, ListTemplate& output)const{
+  void getAllVerticesPerpendicularTo(
+    const Vector<Rational>& normal, ListTemplate& output
+  ) const {
     output.clear();
-    for (const Vector<Rational>& vertex: this->vertices){
-      if (vertex.scalarEuclidean(normal).isEqualToZero()){
+    for (const Vector<Rational>& vertex : this->vertices) {
+      if (vertex.scalarEuclidean(normal).isEqualToZero()) {
         output.addOnTop(vertex);
       }
     }
-
-
   }
   Wall& getWallWithNormalNoFail(const Vector<Rational>& desiredNormal);
   bool operator>(const Cone& other) const;
@@ -6346,7 +6348,7 @@ public:
 // A collection of cones associated with a given vector partition function.
 class ConeCollection {
 private:
-  static void addCone(MapList<int, Cone> map, const Cone& cone);
+  static void addCone(MapList<int, Cone>& map, const Cone& cone);
 public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
@@ -6369,13 +6371,20 @@ public:
   // to the given direction, and returns false
   // if the chamber already has that property.
   void refineOneByOneDirection(
-    Cone& toBeRefined,
-    const Vector<Rational>& direction
+    Cone& toBeRefined, const Vector<Rational>& direction
   );
   void refineAllConesWithWallsWithMultipleNeighbors();
-  void attachNeighbbors(Cone& candidate,
-  int idReplacedCone, MapList<int, Cone> &allCandidates);
-void  replaceConeAdjacentToWall(Cone& candidate, const Wall& wall, int idReplacedCone, MapList<int, Cone>& newCones);
+  void attachNeighbbors(
+    Cone& candidate,
+    int idReplacedCone,
+    MapList<int, Cone>& allCandidates
+  );
+  void replaceConeAdjacentToWall(
+    Cone& candidate,
+    const Wall& wall,
+    int idReplacedCone,
+    MapList<int, Cone>& newCones
+  );
   void constructSubstituteChambers(
     List<Cone>& candidates, List<Cone>& output
   );
@@ -6417,8 +6426,11 @@ void  replaceConeAdjacentToWall(Cone& candidate, const Wall& wall, int idReplace
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables, FormatExpressions& format
   ) const;
-  std::string toString();
+  std::string toString() const;
+  std::string toStringConeCount() const;
+  std::string toStringConeIds() const;
   std::string toHTML() const;
+  std::string toHTMLWithoutGraphics() const;
   int getLowestIndexRefinedChamberContaining(const Vector<Rational>& root)
   const;
   bool findMaxLFOverConeProjective(
@@ -6451,7 +6463,7 @@ void  replaceConeAdjacentToWall(Cone& candidate, const Wall& wall, int idReplace
   bool splitChamber(
     const Cone& toBeSliced,
     const Vector<Rational>& killerNormal,
-  int nextSlicingIndex
+    int nextSlicingIndex
   );
   void splitConeByMultipleNeighbors(Cone& input);
   void splitConeByMultipleNeighbors(const Cone& input, const Wall& wall);

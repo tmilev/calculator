@@ -448,37 +448,6 @@ public:
   }
 };
 
-template <class Object>
-std::ostream& operator<<(
-  std::ostream& output, const List<Object>& input
-) {
-  output << input.size << " elements: \n";
-  for (int i = 0; i < input.size; i ++) {
-    output << input[i];
-    if (i != input.size - 1) {
-      output << ", ";
-    }
-  }
-  return output;
-}
-
-template <class Object>
-std::iostream& operator>>(
-  std::iostream& input, List<Object>& outputList
-) {
-  std::string tempS;
-  int reader = 0;
-  input >> tempS >> reader;
-  if (tempS != "size:") {
-    fatalCrash("Failed reading list from stream. ");
-  }
-  outputList.setSize(reader);
-  for (int i = 0; i < outputList.size; i ++) {
-    input >> outputList[i];
-  }
-  return input;
-}
-
 class HashFunctions {
 public:
   template <class Object>
@@ -537,12 +506,19 @@ public:
 // Lists are used in the implementation of mutexes.
 template <class Object>
 class List {
-  friend std::ostream& operator<<<Object>(
+  friend std::ostream& operator<<(
     std::ostream& output, const List<Object>& input
-  );
-  friend std::iostream& operator>><Object>(
-    std::iostream& input, List<Object>& inputList
-  );
+  ) {
+    output << "[";
+    for (int i = 0; i < input.size; i ++) {
+      output << input[i];
+      if (i != input.size - 1) {
+        output << ", ";
+      }
+    }
+    output << "]";
+    return output;
+  }
 public:
   class Comparator {
   public:

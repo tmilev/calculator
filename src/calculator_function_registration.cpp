@@ -555,8 +555,7 @@ void Calculator::initializeFunctionsStandard() {
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions"
     "(Polynomialize, sin ((x + 1)^3))",
     "CalculatorFunctions::"
-  "applyToSubexpressionsRecurseThroughCalculusFunctions"
-    ,
+    "applyToSubexpressionsRecurseThroughCalculusFunctions",
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions",
     innerStandard
   );
@@ -662,8 +661,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Creates a polynomial expression with algebraic number coefficients. ",
     "PolynomialAlgebraicNumbers{}"
-  "((x + \\sqrt{2})^2 (\\sqrt{3}x - \\sqrt{5}));"
-    ,
+    "((x + \\sqrt{2})^2 (\\sqrt{3}x - \\sqrt{5}));",
     "CalculatorConversions::getPolynomial",
     "PolynomialAlgebraicNumbers",
     innerStandard
@@ -1034,8 +1032,7 @@ void Calculator::initializeFunctionsStandard() {
     "Integrates building blocks IIa and IIIa.",
     "\\int (\\frac{3x + 2}{x^2 + x + 1}) dx ",
     "CalculatorFunctionsIntegration::"
-  "integrateRationalFunctionBuidingBlockIIaandIIIa"
-    ,
+    "integrateRationalFunctionBuidingBlockIIaandIIIa",
     "IntegrateBlockIIaIIIa",
     innerStandard
   );
@@ -1611,7 +1608,7 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctions::interpolatePolynomial,
     "",
     "Constructs the one-variable polynomial "
-  "of minimal degree that passes through "
+    "of minimal degree that passes through "
     "the points. Points are given in the form "
     "((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))",
     "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3));\n"
@@ -1726,7 +1723,7 @@ void Calculator::initializeFunctionsStandard() {
     "words 'expansions' (x^2y^3->xxyyy) of the monomials. ",
     "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1) ;",
     "CalculatorFunctionsPolynomial::"
-  "polynomialDivisionVerboseLexicographicOpposite",
+    "polynomialDivisionVerboseLexicographicOpposite",
     "PolyDivStringLexRev",
     innerStandard
   );
@@ -2091,8 +2088,7 @@ void Calculator::initializeFunctionsStandard() {
     "Here, the word ``variables'' is to be thought of as "
     "``free variables'' but the possibility for small distinctions is "
     "reserved (to allow dealing with named constants, "
-  "reserved keywords, etc.). "
-    ,
+    "reserved keywords, etc.). ",
     "GetVariablesExcludeNamedConstants{}"
     "(e^x + x +5 +\\arctan x + x *y +x^y+x^{y^z});\n"
     "GetVariablesIncludeNamedConstants{}"
@@ -3272,8 +3268,7 @@ void Calculator::initializeFunctionsStandard() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::
-    addPolynomialModuloPolynomialModuloIntegerToAnother
-    ,
+    addPolynomialModuloPolynomialModuloIntegerToAnother,
     this->opPolynomialModuloPolynomialModuloInteger(),
     this->opPolynomialModuloPolynomialModuloInteger(),
     "Adds polynomials modulo integers. ",

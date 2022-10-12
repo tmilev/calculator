@@ -7378,7 +7378,8 @@ bool CalculatorFunctionsPlot::plotFill(
   }
   const Expression& plotExpression = input[1];
   const Expression& colorE = input[2];
-  Plot outputPlot, startPlot;
+  Plot outputPlot;
+  Plot startPlot;
   outputPlot.dimension = 2;
   PlotObject filledPlot;
   if (!plotExpression.isOfType<Plot>(&startPlot)) {
@@ -7412,7 +7413,9 @@ bool CalculatorFunctionsPlot::plotFill(
   outputPlot += startPlot;
   filledPlot.plotType = "plotFillFinish";
   outputPlot += filledPlot;
-  return output.assignValue(calculator, outputPlot);
+
+   output.assignValue(calculator, outputPlot);
+   return true;
 }
 
 bool CalculatorFunctionsPlot::isPlot(

@@ -733,11 +733,11 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
 }
 
 void Plot::setCanvasName(const std::string& input) {
-  this->canvasNamE = StringRoutines::convertStringToJavascriptVariable(input);
+  this->canvasName = StringRoutines::convertStringToJavascriptVariable(input);
 }
 
 std::string Plot::getCanvasName() const {
-  return this->canvasNamE;
+  return this->canvasName;
 }
 
 std::string Plot::toStringDebug() {
@@ -1079,6 +1079,10 @@ JSData PlotObject::toJSONPoints() {
 
 void Plot::computeCanvasNameIfNecessary(int& canvasCounter) {
   if (this->getCanvasName() != "") {
+
+    global.comments << "DEBUG: canvas name counter: " << canvasCounter << " already has a canvas name." 
+    << this->toStringDebug()
+    << "<br>" ;
     return;
   }
   canvasCounter ++;
@@ -1119,7 +1123,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   STACK_TRACE("Plot::getPlotHtml2d");
   owner.flagHasGraphics = true;
   if (this->flagDivAlreadyDisplayed) {
-    return "[plot alredy displayed]";
+    return "[plot already displayed]";
   }
   this->flagDivAlreadyDisplayed = true;
   this->computeCanvasNameIfNecessary(

@@ -1493,7 +1493,7 @@ class Plot {
     return output;
   }
 private:
-  std::string canvasNamE;
+  std::string canvasName;
   static JSData getCoordinateSystem();
   static JSData getComputeViewWindow();
   JSData getSetViewWindow();

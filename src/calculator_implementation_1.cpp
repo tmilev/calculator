@@ -1079,10 +1079,6 @@ JSData PlotObject::toJSONPoints() {
 
 void Plot::computeCanvasNameIfNecessary(int& canvasCounter) {
   if (this->getCanvasName() != "") {
-
-    global.comments << "DEBUG: canvas name counter: " << canvasCounter << " already has a canvas name." 
-    << this->toStringDebug()
-    << "<br>" ;
     return;
   }
   canvasCounter ++;

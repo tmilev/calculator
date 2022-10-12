@@ -14666,7 +14666,6 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
   int mustDecrease =
   this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
   while (this->conesWithIrregularWalls.size() > 0) {
-    global.comments << "DEBUG: cone collection: " << this->toHTML();
     int index = this->conesWithIrregularWalls.size() - 1;
     Cone cone = this->conesWithIrregularWalls.values[index];
     this->conesWithIrregularWalls.removeIndex(index);

@@ -32,6 +32,19 @@
 // List. Whenever in doubt, use ListReferences.
 template <class Object>
 class ListReferences {
+  friend std::ostream& operator<<(
+    std::ostream& output, const ListReferences<Object>& input
+  ) {
+    output << "[";
+    for (int i = 0; i < input.size; i ++) {
+      output << input[i];
+      if (i != input.size - 1) {
+        output << ", ";
+      }
+    }
+    output << "]";
+    return output;
+  }
 public:
   bool flagDeallocated;
   List<Object*> references;
@@ -172,6 +185,11 @@ public:
   ~ListReferences() {
     this->flagDeallocated = true;
     this->killAllElements();
+  }
+  std::string toString() const {
+    std::stringstream out;
+    out << *this;
+    return out.str();
   }
 };
 

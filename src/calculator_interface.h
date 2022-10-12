@@ -1485,11 +1485,8 @@ public:
 
 // The following class is meant to use to draw plots for calculus students.
 class Plot {
-  friend std::ostream& operator<<(
-    std::ostream& output, const Plot& unused
-  ) {
-    (void) unused;
-    output << "A Plot.";
+  friend std::ostream& operator<<(std::ostream& output, const Plot& plot) {
+    output << "Plot[canvasName: " << plot.canvasName << "]";
     return output;
   }
 private:
@@ -4241,7 +4238,8 @@ bool Expression::assignValueWithContext(
   this->reset(owner, 3);
   this->addChildAtomOnTop(this->getBuiltInType<Type>());
   this->addChildOnTop(context.toExpression());
-  this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
+  int objectIndex = this->addObjectReturnIndex(inputValue);
+  this->addChildAtomOnTop(objectIndex);
   this->checkConsistency();
   return true;
 }
@@ -4317,8 +4315,8 @@ bool Calculator::getTypeWeight(
   if (input.size() != 3) {
     return
     calculator
-    <<
-    "Function typeHighestWeightParabolic is expected to have two arguments: "
+    << "Function typeHighestWeightParabolic "
+    << "is expected to have two arguments: "
     << "Semisimple algebra type, highest weight in simple coordinates. ";
   }
   const Expression& leftE = input[1];

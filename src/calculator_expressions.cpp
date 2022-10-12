@@ -607,10 +607,18 @@ int Expression::addObjectReturnIndex(const LittelmannPath& inputValue) const {
 template < >
 int Expression::addObjectReturnIndex(const Plot& inputValue) const {
   this->checkInitialization();
-  return
+  if (inputValue.getCanvasName() == "") {
+    Plot copy = inputValue;
+    copy.computeCanvasNameIfNecessary(
+      this->owner->objectContainer.canvasPlotCounter
+    );
+    return this->addObjectReturnIndex(copy);
+  }
+  int result =
   this->owner->objectContainer.allPlots.addNoRepetitionOrReturnIndexFirst(
     inputValue
   );
+  return result;
 }
 
 template < >
@@ -1510,9 +1518,9 @@ bool Expression::setChild(int childIndexInMe, int childIndexInBoss) {
 
 bool Expression::addChildAtomOnTop(int operationIndex) {
   this->checkInitialization();
-  Expression tempE;
-  tempE.makeAtom(*this->owner, operationIndex);
-  return this->addChildOnTop(tempE);
+  Expression dataAtom;
+  dataAtom.makeAtom(*this->owner, operationIndex);
+  return this->addChildOnTop(dataAtom);
 }
 
 bool Expression::addChildAtomOnTop(const std::string& operationString) {

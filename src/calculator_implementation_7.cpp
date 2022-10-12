@@ -7413,9 +7413,8 @@ bool CalculatorFunctionsPlot::plotFill(
   outputPlot += startPlot;
   filledPlot.plotType = "plotFillFinish";
   outputPlot += filledPlot;
-
-   output.assignValue(calculator, outputPlot);
-   return true;
+  output.assignValue(calculator, outputPlot);
+  return true;
 }
 
 bool CalculatorFunctionsPlot::isPlot(

@@ -3069,7 +3069,7 @@ PolyDivStringLex{}(PolynomialModP(x^5+2x^3+x^2+2,7),PolynomialModP(x^2, 7));
 ```
 Prints a string representing division of a polynomial by a set of polynomials using the lexicographic order on the monomial exponents. For example, x^2 y^4 > x y^1000 > x y^2.Please do note that the lexicographic order is not related to the lexicographic order on the words 'expansions' (x^2y^3->xxyyy) of the monomials. 
 
-*PolyDivStringLexRev* [PolyDivStringLexRev] {CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexRev}. 
+*PolyDivStringLexRev* [PolyDivStringLexRev] {CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographicOpposite}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PolyDivStringLexRev%7b%7d%28x%5e7%20%2b%206x%20y%20%2b%205x%20y%5e8%20%2b%20y%5e5%2c%20x%5e2%20%2b%202%2c%20y%5e3%20-%201%29%20%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1) ;

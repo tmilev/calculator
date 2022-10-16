@@ -2612,12 +2612,13 @@ std::string StringRoutines::Differ::differenceHTML(
   if (!this->computeDifference(&commentsOnFailure)) {
     commentsOnFailure
     << "<b style='color:red'>Failed to compute string difference.</b><br>";
+    return
     this->differenceHTMLPartTwo(
       commentsOnFailure.str(),
       labelLeft,
       labelRight,
-      this->left,
-      this->right
+      StringRoutines::shortenInsertDots(this->left, 10000),
+      StringRoutines::shortenInsertDots(this->right, 10000)
     );
   }
   for (int i = 0; i < this->leftResult.size; i ++) {
@@ -2868,18 +2869,19 @@ bool StringRoutines::Differ::computeDifference(
   LargeInteger leftSize;
   // Warning: putting this in the line above may cause ambiguous conversions,
   // depending on your compiler.
-  leftSize = left.size();
+  leftSize = this->left.size();
   // Warning: putting this in the line above may cause ambiguous conversions,
   // depending on your compiler.
   LargeInteger rightSize;
-  rightSize = right.size();
+  rightSize = this->right.size();
   if (leftSize * rightSize > this->maximumMatrixSize) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The product of the sizes of the two strings equals "
       << leftSize * rightSize
       << " which exceeds the maximum allowed "
-      << this->maximumMatrixSize;
+      << this->maximumMatrixSize
+      << ". ";
     }
     return false;
   }
@@ -11174,7 +11176,7 @@ void PartialFractions::evaluateVectorPartitionFunction(
   }
   int coneIndex = 0;
   for (; coneIndex < this->chambers.refinedCones.size(); coneIndex ++) {
-    const Cone& cone = this->chambers.refinedCones[coneIndex];
+    const Cone& cone = this->chambers.refinedCones.values[coneIndex];
     if (cone.isInCone(input)) {
       break;
     }

@@ -2912,7 +2912,7 @@ class EquationEditorOptions {
     }
     this.highlightStyle = {
       backgroundColor: '#f0f0f0',
-      outline: '',
+      outline: '1px dashed black',
     };
     if (options.highlightStyle !== undefined && options.highlightStyle !== null) {
       this.highlightStyle.backgroundColor = options.highlightStyle.backgroundColor;

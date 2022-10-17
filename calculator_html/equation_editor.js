@@ -3187,6 +3187,12 @@ class EquationEditor {
     if (this.containerSVG === undefined) {
       this.containerSVG = null;
     }
+    /** @type{HTMLCanvasElement?} */
+    this.canvasContainer = null;
+    /** @type{CanvasRenderingContext2D?} */
+    this.canvasTwoDContext = null;
+    /** @type{Array.<number>} */
+    this.canvasPosition = [0, 0]; 
     /** @type {EquationEditorOptions!} */
     this.options = new EquationEditorOptions({
       editable: true,
@@ -3530,6 +3536,30 @@ class EquationEditor {
     }
   }
 
+  drawOnCanvas() {
+    if (this.canvasContainer === null && this.canvasTwoDContext === null) {
+      return;
+    }
+    if (this.canvasTwoDContext === null) {
+      this.canvasTwoDContext = this.canvasContainer.getContext("2d");
+    }
+    if (this.canvasContainer !== null) {
+      // We own the canvas container and so we're responsible for wiping it clean.
+      let box = this.canvasContainer.getBoundingClientRect();
+      this.canvasTwoDContext.clearRect(
+        0,
+        0,
+        box.width, 
+        box.height,
+      );
+    }
+    this.rootNode.drawOnCanvas(this.canvasTwoDContext, new BoundingBox());
+    if (this.canvasContainer !== null) {
+      // We own the canvas container, therefore we are responsible for finishing the drawing.
+      this.canvasTwoDContext.stroke();
+    }
+  }
+
   /**
    * Writes parsing debug information to a DOM component.
    *
@@ -3664,6 +3694,7 @@ class EquationEditor {
     this.updateDOM();
     this.updateAlignment();
     this.writeSVG();
+    this.drawOnCanvas();
     this.writeDebugInfo(parser);
     this.container.setAttribute('latexsource', latex);
     if (this.containerSVG !== null) {
@@ -5841,6 +5872,7 @@ class MathNode {
       this.equationEditor.writeLatexToInput(true);
       this.equationEditor.writeDebugInfo(null);
       this.equationEditor.writeSVG();
+      this.equationEditor.drawOnCanvas();
       if (this.equationEditor.options.editHandler !== null) {
         this.equationEditor.options.editHandler(this.equationEditor, this);
       }
@@ -8427,6 +8459,56 @@ class MathNode {
     }
     return columnCount;
   }
+
+  drawOnCanvasBase(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let shiftedBoundingBox = this.boundingBoxForChildren(boundingBoxFromParent);
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].drawOnCanvas(canvas, shiftedBoundingBox);
+    }
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    if (this.children.length === 0) {
+      console.log("Nodes without children are supposed to override this method. ", this.toString());
+      return;
+    }
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+  }
+
+  drawOnCanvasAtomic(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let left = boundingBoxFromParent.left + this.boundingBox.left;
+    let top = boundingBoxFromParent.top + this.boundingBox.top;
+    canvas.textBaseline = "top";
+    let fontSize =
+      this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
+    let fontFamily = this.equationEditor.getFontFamily();
+    if (fontSize !== 0) {
+      canvas.font = `${fontSize}px ${fontFamily}`;
+    }    
+    canvas.fillText(
+      this.contentIfAtomic(),
+      left,
+      top,
+      this.boundingBox.width,
+    );
+    canvas.stroke();
+  }
+
 }
 
 class ScalableVectorGraphicsBase {
@@ -8608,6 +8690,15 @@ class MathNodeAtom extends MathNode {
   ) {
     this.toScalableVectorGraphicsAtomic(container, boundingBoxFromParent);
   }
+
+  drawOnCanvas(
+     /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,    
+  ) {
+    this.drawOnCanvasAtomic(canvas, boundingBoxFromParent);
+  }
 }
 
 class MathNodeAtomImmutable extends MathNode {
@@ -8647,6 +8738,15 @@ class MathNodeAtomImmutable extends MathNode {
       boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsAtomic(container, boundingBoxFromParent);
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasAtomic(canvas, boundingBoxFromParent);
   }
 }
 
@@ -9038,19 +9138,38 @@ class MathNodeRoot extends MathNode {
     }
   }
 
+  /** @return {BoundingBox} */
+  prepareBoundingBox(
+     /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {  
+    let boundingBox = new BoundingBox();
+    boundingBox.top = boundingBoxFromParent.top;
+    boundingBox.left = boundingBoxFromParent.left;
+    let fontSizeString = window.getComputedStyle(this.element, null)
+      .getPropertyValue('font-size');
+    boundingBox.fontSizeInPixels = parseInt(fontSizeString, 10);
+    return boundingBox;
+  }
+
   toScalableVectorGraphics(
       /** @type {SVGSVGElement!} */
       container,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
   ) {
-    let boundingBox = new BoundingBox();
-    boundingBox.top = boundingBoxFromParent.top;
-    boundingBox.left = boundingBoxFromParent.left;
-    let fontSizeString = window.getComputedStyle(this.element, null)
-                             .getPropertyValue('font-size');
-    boundingBox.fontSizeInPixels = parseInt(fontSizeString, 10);
+    let boundingBox = this.prepareBoundingBox(boundingBoxFromParent);
     this.children[0].toScalableVectorGraphics(container, boundingBox);
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let boundingBox = this.prepareBoundingBox(boundingBoxFromParent);
+    this.children[0].drawOnCanvas(canvas, boundingBox);
   }
 }
 

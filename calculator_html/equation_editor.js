@@ -2850,11 +2850,10 @@ class EquationEditorOptions {
        * lineBreakWidth: (number|undefined),
        * logTiming: (boolean|undefined),
        * copyButton: (boolean|undefined),
-       * extraKeyHandlers: Object<string, function (EquationEditor, boolean)>
-       * highlightStyle: ({
-       *   backgroundColor: string,
-       *   outline: string,
-       * }|null|undefined)
+       * extraKeyHandlers: (?Object<string, function (!EquationEditor,
+       * boolean)>|null|undefined), highlightStyle: ({ backgroundColor:
+       * (string|undefined|null), outline:
+       * (string|undefined|null)}|null|undefined),
        * }}
        */
       options,
@@ -2910,20 +2909,31 @@ class EquationEditorOptions {
     if (options.copyButton === true) {
       this.copyButton = true;
     }
+    /** @type{{backgroundColor:string, outline: string}} */
     this.highlightStyle = {
       backgroundColor: '#f0f0f0',
       outline: '1px dashed black',
     };
-    if (options.highlightStyle !== undefined && options.highlightStyle !== null) {
-      this.highlightStyle.backgroundColor = options.highlightStyle.backgroundColor;
-      this.highlightStyle.outline = options.highlightStyle.outline;
+    if (options.highlightStyle !== undefined &&
+        options.highlightStyle !== null) {
+      if (this.highlightStyle.backgroundColor !== null &&
+          this.highlightStyle.backgroundColor !== undefined) {
+        this.highlightStyle.backgroundColor =
+            /** @type{string} */ (options.highlightStyle.backgroundColor);
+      }
+      if (this.highlightStyle.outline !== null &&
+          this.highlightStyle.outline !== undefined) {
+        this.highlightStyle.outline =
+            /** @type{string} */ (options.highlightStyle.outline);
+      }
     }
 
     /** @type {boolean} */
     this.showLatexOnDoubleClick = !this.editable && !this.copyButton;
-    /** @type {Object<string, function(EquationEditor,boolean)>|undefined} */
+    /** @type {?Object<string, function(!EquationEditor,boolean)>} */
     this.extraKeyHandlers = {};
-    if (options.extraKeyHandlers !== undefined && options.extraKeyHandlers !== null) {
+    if (options.extraKeyHandlers !== undefined &&
+        options.extraKeyHandlers !== null) {
       for (let label in options.extraKeyHandlers) {
         this.extraKeyHandlers[label] = options.extraKeyHandlers[label];
       }
@@ -3191,8 +3201,8 @@ class EquationEditor {
     this.canvasContainer = null;
     /** @type{CanvasRenderingContext2D?} */
     this.canvasTwoDContext = null;
-    /** @type{Array.<number>} */
-    this.canvasPosition = [0, 0]; 
+    /** @type{!Array.<number>} */
+    this.canvasPosition = [0, 0];
     /** @type {EquationEditorOptions!} */
     this.options = new EquationEditorOptions({
       editable: true,
@@ -3536,26 +3546,30 @@ class EquationEditor {
     }
   }
 
+  /** Draws the math node on a canvas. */
   drawOnCanvas() {
     if (this.canvasContainer === null && this.canvasTwoDContext === null) {
       return;
     }
     if (this.canvasTwoDContext === null) {
-      this.canvasTwoDContext = this.canvasContainer.getContext("2d");
+      this.canvasTwoDContext = /** @type{CanvasRenderingContext2D!}*/ (
+          this.canvasContainer.getContext('2d'));
     }
     if (this.canvasContainer !== null) {
-      // We own the canvas container and so we're responsible for wiping it clean.
+      // We own the canvas container and so we're responsible for wiping it
+      // clean.
       let box = this.canvasContainer.getBoundingClientRect();
       this.canvasTwoDContext.clearRect(
-        0,
-        0,
-        box.width, 
-        box.height,
+          0,
+          0,
+          box.width,
+          box.height,
       );
     }
     this.rootNode.drawOnCanvas(this.canvasTwoDContext, new BoundingBox());
     if (this.canvasContainer !== null) {
-      // We own the canvas container, therefore we are responsible for finishing the drawing.
+      // We own the canvas container, therefore we are responsible for finishing
+      // the drawing.
       this.canvasTwoDContext.stroke();
     }
   }
@@ -4990,11 +5004,11 @@ class MathNode {
     }
     if (this.type.borderBottomLeftRadius !== '') {
       this.element.style.borderBottomLeftRadius =
-        this.type.borderBottomLeftRadius;
+          this.type.borderBottomLeftRadius;
     }
     if (this.type.borderBottomRightRadius !== '') {
       this.element.style.borderBottomRightRadius =
-        this.type.borderBottomRightRadius;
+          this.type.borderBottomRightRadius;
     }
     if (this.type.borderTop !== '') {
       this.element.style.borderTop = this.type.borderTop;
@@ -5173,7 +5187,7 @@ class MathNode {
   /** Focuses the DOM element. */
   focusElement() {
     let highlightStyle = this.equationEditor.options.highlightStyle;
-    this.element.style.background = highlightStyle.backgroundColor ;
+    this.element.style.background = highlightStyle.backgroundColor;
     this.element.style.outline = highlightStyle.outline;
     this.focused = true;
     this.equationEditor.hasFocusDOM = true;
@@ -5196,7 +5210,7 @@ class MathNode {
       return;
     }
     this.element.style.outline = knownTypes[this.type.type].outline;
-    this.element.style.backgroundColor = ''; 
+    this.element.style.backgroundColor = '';
   }
 
   /** Blurs the DOM element and all children DOM elements. */
@@ -7728,66 +7742,55 @@ class MathNode {
     const oldIndexInParent = this.indexInParent;
     let fraction = null;
     let childIndexToFocus = 1;
-    if (
-      this.positionCursorBeforeKeyEvents === 0 &&
-      this.element.textContent.length > 0
-    ) {
+    if (this.positionCursorBeforeKeyEvents === 0 &&
+        this.element.textContent.length > 0) {
       childIndexToFocus = 0;
-    } 
+    }
     let split = this.splitByCursor();
 
     let previous = this.previousHorizontalSibling();
     let next = this.nextHorizontalSibling();
     let leftWhiteSpace = mathNodeFactory.atom(this.equationEditor, '');
     let rightWhiteSpace = mathNodeFactory.atom(this.equationEditor, '');
-    if (
-      split[0] === null &&
-      previous !== null &&
-      previous.type.type === knownTypes.rightDelimiter.type
-    ) {
+    if (split[0] === null && previous !== null &&
+        previous.type.type === knownTypes.rightDelimiter.type) {
       let rightIndex = oldIndexInParent - 1;
       let leftIndex = oldParent.findIndexMatchingDelimiter(rightIndex);
       let slice = oldParent.children.slice(leftIndex, rightIndex + 1);
-      let numerator = mathNodeFactory.horizontalMathFromArray(
-        this.equationEditor, slice
-      );
+      let numerator =
+          mathNodeFactory.horizontalMathFromArray(this.equationEditor, slice);
       numerator.ensureEditableAtoms();
       numerator.normalizeHorizontalMath();
-      fraction = mathNodeFactory.fraction(
-        this.equationEditor, numerator, split[1]
-      );
+      fraction =
+          mathNodeFactory.fraction(this.equationEditor, numerator, split[1]);
       oldParent.replaceChildRangeWithChildren(
-        leftIndex, rightIndex + 1, [
-        leftWhiteSpace, fraction, rightWhiteSpace
-      ]);
+          leftIndex, rightIndex + 1,
+          [leftWhiteSpace, fraction, rightWhiteSpace]);
       childIndexToFocus = 1;
     } else if (
-      split[1] === null && 
-      next !== null &&
-      next.type.type === knownTypes.leftDelimiter.type
-    ) {
+        split[1] === null && next !== null &&
+        next.type.type === knownTypes.leftDelimiter.type) {
       let leftIndex = oldIndexInParent + 1;
       let rightIndex = oldParent.findIndexMatchingDelimiter(leftIndex);
       let slice = oldParent.children.slice(leftIndex, rightIndex + 1);
-      let denominator = mathNodeFactory.horizontalMathFromArray(this.equationEditor, slice);
+      let denominator =
+          mathNodeFactory.horizontalMathFromArray(this.equationEditor, slice);
       denominator.ensureEditableAtoms();
       denominator.normalizeHorizontalMath();
-      fraction = mathNodeFactory.fraction(
-        this.equationEditor, split[0], denominator
-      );
+      fraction =
+          mathNodeFactory.fraction(this.equationEditor, split[0], denominator);
       oldParent.replaceChildRangeWithChildren(
-        oldIndexInParent, rightIndex, [
-        leftWhiteSpace, fraction, rightWhiteSpace
-      ]);
+          oldIndexInParent, rightIndex,
+          [leftWhiteSpace, fraction, rightWhiteSpace]);
       childIndexToFocus = 1;
     } else {
       fraction =
-        mathNodeFactory.fraction(this.equationEditor, split[0], split[1]);
+          mathNodeFactory.fraction(this.equationEditor, split[0], split[1]);
       oldParent.replaceChildAtPosition(
-        oldIndexInParent, mathNodeFactory.atom(this.equationEditor, ''));
+          oldIndexInParent, mathNodeFactory.atom(this.equationEditor, ''));
       oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
       oldParent.insertChildAtPosition(
-        oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ''));
+          oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ''));
     }
     fraction.parent.updateDOM();
     fraction.children[childIndexToFocus].focus(-1);
@@ -8461,10 +8464,10 @@ class MathNode {
   }
 
   drawOnCanvasBase(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type{CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let shiftedBoundingBox = this.boundingBoxForChildren(boundingBoxFromParent);
     for (let i = 0; i < this.children.length; i++) {
@@ -8473,42 +8476,43 @@ class MathNode {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type{CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     if (this.children.length === 0) {
-      console.log("Nodes without children are supposed to override this method. ", this.toString());
+      console.log(
+          'Nodes without children are supposed to override this method. ',
+          this.toString());
       return;
     }
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
   }
 
   drawOnCanvasAtomic(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type{CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let left = boundingBoxFromParent.left + this.boundingBox.left;
     let top = boundingBoxFromParent.top + this.boundingBox.top;
-    canvas.textBaseline = "top";
+    canvas.textBaseline = 'top';
     let fontSize =
-      this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
+        this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     let fontFamily = this.equationEditor.getFontFamily();
     if (fontSize !== 0) {
       canvas.font = `${fontSize}px ${fontFamily}`;
-    }    
+    }
     canvas.fillText(
-      this.contentIfAtomic(),
-      left,
-      top,
-      this.boundingBox.width,
+        this.contentIfAtomic(),
+        left,
+        top,
+        this.boundingBox.width,
     );
     canvas.stroke();
   }
-
 }
 
 class ScalableVectorGraphicsBase {
@@ -8692,10 +8696,10 @@ class MathNodeAtom extends MathNode {
   }
 
   drawOnCanvas(
-     /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,    
+      /** @type{CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasAtomic(canvas, boundingBoxFromParent);
   }
@@ -8741,10 +8745,10 @@ class MathNodeAtomImmutable extends MathNode {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type{CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasAtomic(canvas, boundingBoxFromParent);
   }
@@ -9138,16 +9142,16 @@ class MathNodeRoot extends MathNode {
     }
   }
 
-  /** @return {BoundingBox} */
+  /** @return {BoundingBox!} */
   prepareBoundingBox(
-     /** @type {BoundingBox!} */
-    boundingBoxFromParent,
-  ) {  
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
+  ) {
     let boundingBox = new BoundingBox();
     boundingBox.top = boundingBoxFromParent.top;
     boundingBox.left = boundingBoxFromParent.left;
     let fontSizeString = window.getComputedStyle(this.element, null)
-      .getPropertyValue('font-size');
+                             .getPropertyValue('font-size');
     boundingBox.fontSizeInPixels = parseInt(fontSizeString, 10);
     return boundingBox;
   }
@@ -9163,10 +9167,10 @@ class MathNodeRoot extends MathNode {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type{CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let boundingBox = this.prepareBoundingBox(boundingBoxFromParent);
     this.children[0].drawOnCanvas(canvas, boundingBox);
@@ -11697,3 +11701,4 @@ module.exports = {
   MathNode,
   knownTypes,
 };
+

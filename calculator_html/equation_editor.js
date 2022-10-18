@@ -5565,7 +5565,8 @@ class MathNode {
       let verticalBar = this.children[i];
       verticalBar.boundingBox.height = this.boundingBox.height;
       verticalBar.boundingBox.width = 1;
-      let columnIndex = verticalBar.extraData.columnIndex;
+      let extraData = /** @type{VerticalBarData} */ (verticalBar.extraData);
+      let columnIndex = extraData.columnIndex;
       let offset = table.boundingBox.getColumnOffset(columnIndex);
       verticalBar.boundingBox.left = offset;
     }
@@ -10907,7 +10908,7 @@ class MathTagCoverter {
   constructor(
       /**
        * @type {{
-       * style: (Object.<string,string>!|undefined),
+       * style: (Object.<string,string>!|undefined|null),
        * sanitizeLatexSource: (boolean|undefined),
        * removeDisplayStyle: (boolean|undefined),
        * svgOnly: (boolean|undefined),
@@ -10925,8 +10926,18 @@ class MathTagCoverter {
       options,
   ) {
     if (options === null || options === undefined) {
-      options = {};
+      options = {
+        sanitizeLatexSource: false,
+        removeDisplayStyle: false,
+        logTiming: false,
+        extraAttributes: {},
+        svgAndDOM: false,
+        svgOnly: false,
+        style: null,
+        copyButton: false,
+      };
     }
+
     /** @type {boolean} */
     this.sanitizeLatexSource =
         /** @type {boolean} */ (options.sanitizeLatexSource);

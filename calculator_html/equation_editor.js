@@ -8492,14 +8492,15 @@ class MathNode {
     boundingBoxFromParent,
   ) {
     let left = boundingBoxFromParent.left + this.boundingBox.left;
-    let top = boundingBoxFromParent.top + this.boundingBox.top;
-    canvas.textBaseline = "top";
+    let top = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight;
+    canvas.textBaseline = "middle";
     let fontSize =
       this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     let fontFamily = this.equationEditor.getFontFamily();
     if (fontSize !== 0) {
       canvas.font = `${fontSize}px ${fontFamily}`;
-    }    
+    }
+    canvas.beginPath();
     canvas.fillText(
       this.contentIfAtomic(),
       left,
@@ -8508,7 +8509,6 @@ class MathNode {
     );
     canvas.stroke();
   }
-
 }
 
 class ScalableVectorGraphicsBase {
@@ -8787,23 +8787,51 @@ class MathNodeFraction extends MathNode {
       boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let fractionLine = this.horizontalLineFromBoundingBoxParent(boundingBoxFromParent);
     let result = new ScalableVectorGraphicsLine();
-    result.setX1(boundingBoxFromParent.left + this.boundingBox.left);
-    result.setX2(
-        boundingBoxFromParent.left + this.boundingBox.left +
-        this.boundingBox.width + this.extraWidth / 2);
-    result.setY1(
-        boundingBoxFromParent.top + this.boundingBox.top +
-        this.boundingBox.fractionLineHeight);
-    result.setY2(
-        boundingBoxFromParent.top + this.boundingBox.top +
-        this.boundingBox.fractionLineHeight);
+    result.setX1(fractionLine[0][0]);
+    result.setX2(fractionLine[1][0]);
+    result.setY1(fractionLine[0][1]);
+    result.setY2(fractionLine[1][1]);
     let color = this.type.colorText;
     if (color === '') {
       color = 'black';
     }
     result.setStroke(color);
     container.appendChild(result.element);
+  }
+
+  /** @return {number[][]} */
+  horizontalLineFromBoundingBoxParent(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    return [
+      [
+        boundingBoxFromParent.left + this.boundingBox.left,
+        boundingBoxFromParent.top + this.boundingBox.top +
+        this.boundingBox.fractionLineHeight      
+      ], [
+        boundingBoxFromParent.left + this.boundingBox.left +
+        this.boundingBox.width + this.extraWidth / 2,
+        boundingBoxFromParent.top + this.boundingBox.top +
+        this.boundingBox.fractionLineHeight
+      ]
+    ];    
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let fractionLine = this.horizontalLineFromBoundingBoxParent(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.moveTo(fractionLine[0][0], fractionLine[0][1] - this.extraSpaceBetweenNumeratorAndDenominator);
+    canvas.lineTo(fractionLine[1][0], fractionLine[1][1] - this.extraSpaceBetweenNumeratorAndDenominator);
+    canvas.stroke();
   }
 
   /** @return {LatexWithAnnotation!} */

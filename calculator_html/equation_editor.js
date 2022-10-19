@@ -5209,7 +5209,7 @@ class MathNode {
     if (this.element === null) {
       return;
     }
-    this.element.style.outline = knownTypes[this.type.type].outline;
+    this.element.style.outline = this.type.outline;
     this.element.style.backgroundColor = '';
   }
 
@@ -5565,7 +5565,7 @@ class MathNode {
       let verticalBar = this.children[i];
       verticalBar.boundingBox.height = this.boundingBox.height;
       verticalBar.boundingBox.width = 1;
-      let extraData = /** @type{VerticalBarData} */ (verticalBar.extraData);
+      let extraData = /** @type{VerticalBarData!} */ (verticalBar.extraData);
       let columnIndex = extraData.columnIndex;
       let offset = table.boundingBox.getColumnOffset(columnIndex);
       verticalBar.boundingBox.left = offset;

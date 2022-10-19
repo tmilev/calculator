@@ -8484,7 +8484,6 @@ class MathNode {
     boundingBoxFromParent,
   ) {
     if (this.children.length === 0) {
-      console.log("Nodes without children are supposed to override this method. ", this.toString());
       return;
     }
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
@@ -9449,6 +9448,42 @@ class MathNodeSqrt extends MathNode {
         underTheRadical.boundingBox.needsMiddleAlignment;
   }
 
+  computeCoordinates(
+     /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let sqrtSign = this.children[1];
+    let decoration = sqrtSign.children[0];
+    let leftStroke = sqrtSign.children[1];
+    let rightStroke = sqrtSign.children[2];
+    let overline = this.children[2];
+    let sqrtTop = boundingBoxFromParent.top + this.boundingBox.top +
+      sqrtSign.boundingBox.top;
+    let sqrtLeft = boundingBoxFromParent.left + this.boundingBox.left +
+      sqrtSign.boundingBox.left;
+    let bottom =
+      sqrtTop + leftStroke.boundingBox.top + leftStroke.boundingBox.height;
+    let midX = sqrtLeft + rightStroke.boundingBox.left;
+    let decorationY = sqrtTop + decoration.boundingBox.top;
+    let decorationLeft = sqrtLeft + decoration.boundingBox.left;
+    let decorationRight = decorationLeft + decoration.boundingBox.width;
+    let topY = sqrtTop + rightStroke.boundingBox.top;
+    let rightX = boundingBoxFromParent.left + this.boundingBox.left +
+      overline.boundingBox.left;
+    let overlineRight = boundingBoxFromParent.left + this.boundingBox.left +
+      overline.boundingBox.left + overline.boundingBox.width;
+    return {
+      bottom: bottom,
+      midX: midX,
+      decorationY: decorationY,
+      decorationLeft: decorationLeft,
+      decorationRight: decorationRight,
+      topY: topY,
+      rightX: rightX,
+      overlineRight: overlineRight,
+    };
+  }
+
   toScalableVectorGraphics(
       /** @type {SVGSVGElement!} */
       container,
@@ -9456,33 +9491,14 @@ class MathNodeSqrt extends MathNode {
       boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let c = this.computeCoordinates(boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
-    let sqrtSign = this.children[1];
-    let decoration = sqrtSign.children[0];
-    let leftStroke = sqrtSign.children[1];
-    let rightStroke = sqrtSign.children[2];
-    let overline = this.children[2];
-    let sqrtTop = boundingBoxFromParent.top + this.boundingBox.top +
-        sqrtSign.boundingBox.top;
-    let sqrtLeft = boundingBoxFromParent.left + this.boundingBox.left +
-        sqrtSign.boundingBox.left;
-    let bottom =
-        sqrtTop + leftStroke.boundingBox.top + leftStroke.boundingBox.height;
-    let midX = sqrtLeft + rightStroke.boundingBox.left;
-    let decorationY = sqrtTop + decoration.boundingBox.top;
-    let decorationLeft = sqrtLeft + decoration.boundingBox.left;
-    let decorationRight = decorationLeft + decoration.boundingBox.width;
-    let topY = sqrtTop + rightStroke.boundingBox.top;
-    let rightX = boundingBoxFromParent.left + this.boundingBox.left +
-        overline.boundingBox.left;
-    let overlineRight = boundingBoxFromParent.left + this.boundingBox.left +
-        overline.boundingBox.left + overline.boundingBox.width;
-    let path = `M ${decorationLeft} ${decorationY} L ${decorationRight} ${
-        decorationY} `;
-    path += `L ${decorationRight} ${decorationY} `;
-    path += `L ${midX} ${bottom} `;
-    path += `L ${rightX} ${topY} `;
-    path += `L ${overlineRight} ${topY} `;
+  
+    let path = `M ${c.decorationLeft} ${c.decorationY} L ${c.decorationRight} ${
+        c.decorationY} `;
+    path += `L ${c.midX} ${c.bottom} `;
+    path += `L ${c.rightX} ${c.topY} `;
+    path += `L ${c.overlineRight} ${c.topY} `;
     result.setPathString(path);
     let color = this.type.colorText;
     if (color === '') {
@@ -9491,6 +9507,23 @@ class MathNodeSqrt extends MathNode {
     result.setStrokeColor(color);
     result.setFillColor('none');
     container.appendChild(result.element);
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.moveTo(c.decorationLeft, c.decorationY);
+    canvas.lineTo(c.decorationRight, c.decorationY);
+    canvas.lineTo(c.midX, c.bottom);
+    canvas.lineTo(c.rightX, c.topY);
+    canvas.lineTo(c.overlineRight, c.topY);
+    canvas.stroke();
   }
 
   /**

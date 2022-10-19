@@ -4048,6 +4048,21 @@ class EquationEditor {
 
   /**
    * @return {KeyHandlerResult!} whether the default should be prevented.
+   */
+  deleteFullSelection() { 
+    // Delete the root node.
+    this.rootNode.removeAllChildren();
+    this.rootNode.appendChild(mathNodeFactory.horizontalMath(this, null));
+    this.resetSelectionLeaveRangesIntact();
+    this.updateDOM();
+    this.rootNode.focus(0);
+    this.writeLatexToInput(true);
+    this.writeDebugInfo(null);
+    return new KeyHandlerResult(true, true);
+  }
+
+  /**
+   * @return {KeyHandlerResult!} whether the default should be prevented.
    *
    * @param {string|null} keyOrLatex A Latex snippet, latin character,
    *     whitespace or digit to replace the selection.
@@ -4065,22 +4080,12 @@ class EquationEditor {
     let expanded =
         this.selectionStartExpanded.element.beefUpToHorizontalParent();
     if (expanded.type.type === knownTypes.root.type) {
-      // Delete the root node.
-      this.rootNode.removeAllChildren();
-      this.rootNode.appendChild(mathNodeFactory.horizontalMath(this, null));
-      this.resetSelectionLeaveRangesIntact();
-      this.updateDOM();
-      this.rootNode.focus(0);
-      this.writeLatexToInput(true);
-      this.writeDebugInfo(null);
-      return new KeyHandlerResult(true, true);
+      return this.deleteFullSelection();
     }
     let horizontalOwner = expanded.parent;
     let parent = horizontalOwner.parent;
     if (parent === null) {
-      console.log('Unexpected horizontal math element without parent.');
-      this.resetSelectionLeaveRangesIntact();
-      return new KeyHandlerResult(false, false);
+      return this.deleteFullSelection();
     }
     let splitBySelection = this.splitAtomsBySelection();
     if (splitBySelection === null) {

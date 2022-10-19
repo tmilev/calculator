@@ -9986,21 +9986,25 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     this.toScalableVectorGraphicsParenthesis(container, boundingBoxFromParent);
   }
 
-  // Same as toScalableVectorGraphics but easier to code search.
-  toScalableVectorGraphicsParenthesis(
-      /** @type {SVGSVGElement!} */
-      container,
-      /** @type {BoundingBox!} */
-      boundingBoxFromParent,
+  /** @return{{
+   * x: number,
+   * startY: number,
+   * endY: number,
+   * rx: number,
+   * rxInner:number,
+   * ry: number,
+   * degrees: number,
+   * }} */
+  computeArcs(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
   ) {
-    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
-    let result = new ScalableVectorGraphicsPath();
     let extraShift = this.parenthesisThickness + 1;
     if (!this.left) {
       extraShift *= -1;
     }
     let x = boundingBoxFromParent.left + this.boundingBox.left +
-        this.horizontalShift() + extraShift;
+      this.horizontalShift() + extraShift;
     if (!this.left) {
       x += this.boundingBox.width;
     }
@@ -10017,7 +10021,33 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
       rxInner = rx / 2;
     }
     let ry = this.boundingBox.height / 2;
+    return {
+      x: x,
+      startY: startY,
+      endY: endY,
+      rx: rx,
+      rxInner:rxInner,
+      ry: ry,
+    };
+  }
+
+  // Same as toScalableVectorGraphics but easier to code search.
+  toScalableVectorGraphicsParenthesis(
+      /** @type {SVGSVGElement!} */
+      container,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = new ScalableVectorGraphicsPath();
+    let arcs = this.computeArcs(boundingBoxFromParent);
+    let x = arcs.x;
+    let startY = arcs.startY;
+    let endY = arcs.endY;
+    let rx = arcs.rx;
+    let ry = arcs.ry;
     let degrees = 180;
+    let rxInner = arcs.rxInner;
 
     let moveBottom = `M ${x} ${startY}`;  // move to point.
     let arcOuter = `A ${rx} ${ry} ${degrees} 1 1 ${x} ${endY}`;
@@ -10031,6 +10061,27 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     result.setStrokeColor('none');
     result.setFillColor(color);
     container.appendChild(result.element);
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let arcs = this.computeArcs(boundingBoxFromParent);
+    let x = arcs.x;
+    let startY = arcs.startY;
+    let endY = arcs.endY;
+    let rx = arcs.rx;
+    let ry = arcs.ry;
+    let rxInner = arcs.rxInner;
+    let middle = (startY + endY) / 2;
+    canvas.beginPath();
+    canvas.ellipse(x, middle, rx, ry, 0, Math.PI * 3 / 2, Math.PI / 2, this.left);
+    canvas.ellipse(x, middle, rxInner, ry, 0, Math.PI / 2, 3 * Math.PI / 2, !this.left);
+    canvas.fill();
   }
 }
 

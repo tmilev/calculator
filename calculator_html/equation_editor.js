@@ -10175,7 +10175,8 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     this.toScalableVectorGraphicsParenthesis(container, boundingBoxFromParent);
   }
 
-  /** @return{{
+  /** 
+   * @return{{
    * x: number,
    * startY: number,
    * endY: number,
@@ -10435,34 +10436,183 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     //canvas.moveTo(c.xEnd, c.yLow);
     if (this.left) {
       canvas.ellipse(
-        c.xEnd + c.radius,
-        c.yLow + c.radius,
-        c.radius, c.radius,
+        c.xMiddle + c.radius,
+        c.yLow - c.radius,
+        c.radius,
+        c.radius,
         0,
         Math.PI / 2,
         Math.PI,
         false,
       );
-    } else {
+      canvas.lineTo(c.xMiddle, c.yMiddle + c.radius);
       canvas.ellipse(
-        c.xEnd + c.radius,
-        c.yLow + c.radius,
-        c.radius, c.radius,
+        c.xMiddle - c.radius,
+        c.yMiddle + c.radius,
+        c.radius,
+        c.radius,
+        0,
+        0,
+        - Math.PI / 2,
+        true,
+      );
+      canvas.ellipse(
+        c.xMiddle - c.radius,
+        c.yMiddle - c.radius,
+        c.radius,
+        c.radius,
         0,
         Math.PI / 2,
+        0,
+        true,
+      );
+      canvas.lineTo(c.xMiddle, c.yHigh + c.radius);
+      canvas.ellipse(
+        c.xMiddle + c.radius,
+        c.yHigh + c.radius,
+        c.radius,
+        c.radius,
+        0,
+        Math.PI,
+        3 * Math.PI / 2,
+        false,
+      );
+      canvas.ellipse(
+        c.xMiddle + c.radius,
+        c.yHigh + c.radius,
+        c.radius - this.parenthesisThickness,
+        c.radius,
+        0,
+        3 * Math.PI / 2,
         Math.PI,
         true,
       );
+      canvas.lineTo(c.xMiddle + this.parenthesisThickness, c.yMiddle - c.radius);
+      canvas.ellipse(
+        c.xMiddle - c.radius + this.parenthesisThickness,
+        c.yMiddle - c.radius,
+        c.radius,
+        c.radius,
+        0,
+        0,
+        Math.PI / 2,
+        false,
+      );
+      canvas.ellipse(
+        c.xMiddle - c.radius + this.parenthesisThickness,
+        c.yMiddle + c.radius,
+        c.radius,
+        c.radius,
+        0,
+        3 * Math.PI / 2,
+        2 * Math.PI,
+        false,
+      );
+      canvas.lineTo(c.xMiddle + this.parenthesisThickness, c.yLow - c.radius);
+      canvas.ellipse(
+        c.xMiddle + c.radius,
+        c.yLow - c.radius,
+        c.radius - this.parenthesisThickness,
+        c.radius,
+        0,
+        Math.PI,
+        Math.PI / 2,
+        true,
+      );
+    } else {
+      canvas.ellipse(
+        c.xMiddle - c.radius,
+        c.yLow - c.radius,
+        c.radius,
+        c.radius,
+        0,
+        Math.PI / 2,
+        0,
+        true,
+      );
+      canvas.lineTo(c.xMiddle, c.yMiddle + c.radius);
+      canvas.ellipse(
+        c.xMiddle + c.radius,
+        c.yMiddle + c.radius,
+        c.radius,
+        c.radius,
+        0,
+        Math.PI,
+        3 * Math.PI / 2,
+        false,
+      );
+      canvas.ellipse(
+        c.xMiddle + c.radius,
+        c.yMiddle - c.radius,
+        c.radius,
+        c.radius,
+        0,
+        Math.PI / 2,
+        Math.PI,
+        false,
+      );
+      canvas.lineTo(c.xMiddle, c.yHigh + c.radius);
+      canvas.ellipse(
+        c.xMiddle - c.radius,
+        c.yHigh + c.radius,
+        c.radius,
+        c.radius,
+        0,
+        0,
+        - Math.PI / 2,
+        true,
+      );
+      canvas.ellipse(
+        c.xMiddle - c.radius,
+        c.yHigh + c.radius,
+        c.radius - this.parenthesisThickness,
+        c.radius,
+        0,
+        - Math.PI / 2,
+        0,
+        false,
+      );
+      canvas.lineTo(c.xMiddle - this.parenthesisThickness, c.yMiddle - c.radius);
+      canvas.ellipse(
+        c.xMiddle + c.radius - this.parenthesisThickness,
+        c.yMiddle - c.radius,
+        c.radius,
+        c.radius,
+        0,
+        Math.PI,
+        Math.PI / 2,
+        true,
+      );
+      canvas.ellipse(
+        c.xMiddle + c.radius - this.parenthesisThickness,
+        c.yMiddle + c.radius,
+        c.radius,
+        c.radius,
+        0,
+        3 * Math.PI / 2,
+         Math.PI,
+        true,
+      );
+      canvas.lineTo(c.xMiddle - this.parenthesisThickness, c.yLow - c.radius);
+      canvas.ellipse(
+        c.xMiddle - c.radius,
+        c.yLow - c.radius,
+        c.radius - this.parenthesisThickness,
+        c.radius,
+        0,
+        0,
+        Math.PI / 2,
+        false,
+      );
     }
-    canvas.moveTo(c.xMiddle, c.yLow);
-    canvas.lineTo(c.xMiddle, c.yMiddle + c.radius);
     canvas.fill();
-    canvas.stroke();
   }
 
-  /** @return{{
-   * radius: number, 
-   * xEnd: number, 
+  /** 
+   * @return{{
+   * radius: number,
+   * xLeft: number,
+   * xEnd: number,
    * xMiddle: number,
    * yLow: number,
    * yMiddle: number,
@@ -10503,6 +10653,7 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
       radius: radius,
       xEnd: xEnd,
       xMiddle: xMiddle,
+      xLeft: leftShift,
       yLow: yLow,
       yMiddle: yMiddle,
       yHigh: yHigh,

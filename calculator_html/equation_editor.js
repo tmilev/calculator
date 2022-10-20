@@ -10390,6 +10390,92 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
+    let c = this.computeCoordinates(boundingBoxFromParent);
+
+    let path = `M ${c.xEnd} ${c.yLow} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${c.xMiddle} ${
+        c.yLow - c.radius} `;
+    path += `L ${c.xMiddle} ${c.yMiddle + c.radius} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${c.xStickyPart} ${
+        c.yMiddle} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${c.xMiddle} ${
+        c.yMiddle - c.radius} `;
+    path += `L ${c.xMiddle} ${c.yHigh + c.radius} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${c.xEnd} ${c.yHigh} `;
+
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${
+      c.xMiddle + c.thicknessShift} ${c.yHigh + c.radius} `;
+    path += `L ${c.xMiddle + c.thicknessShift} ${c.yMiddle - c.radius} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${
+      c.xStickyPart + c.thicknessShift} ${c.yMiddle} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${
+      c.xMiddle + c.thicknessShift} ${c.yMiddle + c.radius} `;
+    path += `L ${c.xMiddle + c.thicknessShift} ${c.yLow - c.radius} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${c.xEnd} ${c.yLow} `;
+
+    result.setPathString(path);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor('none');
+    result.setFillColor(color);
+    container.appendChild(result.element);
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    //canvas.moveTo(c.xEnd, c.yLow);
+    if (this.left) {
+      canvas.ellipse(
+        c.xEnd + c.radius,
+        c.yLow + c.radius,
+        c.radius, c.radius,
+        0,
+        Math.PI / 2,
+        Math.PI,
+        false,
+      );
+    } else {
+      canvas.ellipse(
+        c.xEnd + c.radius,
+        c.yLow + c.radius,
+        c.radius, c.radius,
+        0,
+        Math.PI / 2,
+        Math.PI,
+        true,
+      );
+    }
+    canvas.moveTo(c.xMiddle, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yMiddle + c.radius);
+    canvas.fill();
+    canvas.stroke();
+  }
+
+  /** @return{{
+   * radius: number, 
+   * xEnd: number, 
+   * xMiddle: number,
+   * yLow: number,
+   * yMiddle: number,
+   * yHigh: number,
+   * arcChoiceBottom: number,
+   * arcChoiceOther: number,
+   * xStickyPart: number,
+   * thicknessShift: number
+   * }} */
+  computeCoordinates(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
     let radius = this.radius();
     let leftShift = boundingBoxFromParent.left + this.boundingBox.left;
     let xMiddle = leftShift + radius;
@@ -10409,40 +10495,22 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
       arcChoiceBottom = 1;
       arcChoiceOther = 0;
     }
-
-    let path = `M ${xEnd} ${yLow} `;
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${xMiddle} ${
-        yLow - radius} `;
-    path += `L ${xMiddle} ${yMiddle + radius} `;
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${xStickyPart} ${
-        yMiddle} `;
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${xMiddle} ${
-        yMiddle - radius} `;
-    path += `L ${xMiddle} ${yHigh + radius} `;
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${xEnd} ${yHigh} `;
-
     let thicknessShift = this.parenthesisThickness;
     if (!this.left) {
       thicknessShift *= -1;
     }
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${
-        xMiddle + thicknessShift} ${yHigh + radius} `;
-    path += `L ${xMiddle + thicknessShift} ${yMiddle - radius} `;
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${
-        xStickyPart + thicknessShift} ${yMiddle} `;
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceBottom} ${
-        xMiddle + thicknessShift} ${yMiddle + radius} `;
-    path += `L ${xMiddle + thicknessShift} ${yLow - radius} `;
-    path += `A ${radius} ${radius} 0 0 ${arcChoiceOther} ${xEnd} ${yLow} `;
-
-    result.setPathString(path);
-    let color = this.type.colorText;
-    if (color === '') {
-      color = 'black';
-    }
-    result.setStrokeColor('none');
-    result.setFillColor(color);
-    container.appendChild(result.element);
+    return {
+      radius: radius,
+      xEnd: xEnd,
+      xMiddle: xMiddle,
+      yLow: yLow,
+      yMiddle: yMiddle,
+      yHigh: yHigh,
+      arcChoiceBottom: arcChoiceBottom,
+      arcChoiceOther: arcChoiceOther,
+      xStickyPart: xStickyPart,
+      thicknessShift: thicknessShift,
+    };
   }
 }
 

@@ -8640,17 +8640,24 @@ class ScalableVectorGraphicsPath extends ScalableVectorGraphicsBase {
     super(/** @type {SVGSVGElement!} */ (
         document.createElementNS('http://www.w3.org/2000/svg', 'path')));
   }
+
   setPathString(
       /** @type {string} */
       path,
   ) {
     this.element.setAttribute('d', path);
   }
+
   setStrokeColor(/** @type {string} */ color) {
     this.element.setAttribute('stroke', color);
   }
+
   setFillColor(/** @type {string} */ color) {
     this.element.setAttribute('fill', color);
+  }
+
+  setLineWidth(/** @type {number} */ width) {
+    this.element.setAttribute('stroke-width', width);
   }
 }
 
@@ -9838,6 +9845,58 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
     this.boundingBox.width = Math.max(heightToEnclose / 6, 3);
     this.element.style.borderWidth = `${this.parenthesisThickness}px`;
   }
+
+  toScalableVectorGraphics(
+    /** @type {SVGSVGElement!} */
+    container,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = new ScalableVectorGraphicsPath();
+    let c = this.computeCoordinates(boundingBoxFromParent);
+    let command = `M ${c.x} ${c.yLow} L ${c.x} ${c.yHigh}`;
+    result.setPathString(command);
+    result.setLineWidth(this.parenthesisThickness);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor(color);
+    result.setFillColor('none');
+    container.appendChild(result.element);
+  }
+
+  /** @return{{x: number, yLow: number, yHigh: number}} */
+  computeCoordinates(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let x = boundingBoxFromParent.left + this.boundingBox.left;
+    let yHigh = boundingBoxFromParent.top + this.boundingBox.top;
+    let yLow = yHigh + this.boundingBox.height - this.parenthesisThickness;
+    yHigh += this.parenthesisThickness;
+    return {
+      x: x,
+      yLow: yLow,
+      yHigh: yHigh,
+    };
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.lineWidth = this.parenthesisThickness;
+    canvas.moveTo(c.x, c.yLow);
+    canvas.lineTo(c.x, c.yHigh);
+    canvas.stroke();
+  }
 }
 
 class MathNodeSquareBrackets extends MathNodeDelimiterMark {
@@ -9885,6 +9944,25 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${
+      c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
+    result.setPathString(command);
+    result.setLineWidth(this.parenthesisThickness);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor(color);
+    result.setFillColor('none');
+    container.appendChild(result.element);
+  }
+
+  /** @return{{xStart: number, xMiddle: number, yHigh: number, yLow: number}} */
+  computeBracketCoordinates(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
     let xStart = boundingBoxFromParent.left + this.boundingBox.left;
     let xMiddle = boundingBoxFromParent.left + this.boundingBox.left;
     if (this.left) {
@@ -9895,17 +9973,28 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
     let yHigh = boundingBoxFromParent.top + this.boundingBox.top;
     let yLow = yHigh + this.boundingBox.height - this.parenthesisThickness;
     yHigh += this.parenthesisThickness;
+    return {
+      xStart: xStart,
+      xMiddle: xMiddle,
+      yHigh: yHigh,
+      yLow: yLow,
+    };
+  }
 
-    let command = `M ${xStart} ${yLow} L ${xMiddle} ${yLow} L ${xMiddle} ${
-        yHigh} L ${xStart} ${yHigh}`;  // move to point.
-    result.setPathString(command);
-    let color = this.type.colorText;
-    if (color === '') {
-      color = 'black';
-    }
-    result.setStrokeColor(color);
-    result.setFillColor('none');
-    container.appendChild(result.element);
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.moveTo(c.xStart, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yHigh);
+    canvas.lineTo(c.xStart, c.yHigh);
+    canvas.stroke();
   }
 }
 
@@ -9957,6 +10046,69 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
     this.boundingBox.width =
         Math.max(width + 2 * margin + 2 * this.parenthesisThickness, 3);
     this.element.style.borderWidth = `${this.parenthesisThickness}px`;
+  }
+
+  toScalableVectorGraphics(
+    /** @type {SVGSVGElement!} */
+    container,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = new ScalableVectorGraphicsPath();
+    let c = this.computeCoordinates(boundingBoxFromParent);
+    let command = `M ${c.xEnd} ${c.yLow} L ${c.xMiddle} ${c.yMiddle} L ${c.xEnd} ${c.yHigh}`;
+    result.setPathString(command);
+    result.setLineWidth(this.parenthesisThickness);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor(color);
+    result.setFillColor('none');
+    container.appendChild(result.element);
+  }
+
+  /** @return{{xEnd: number, xMiddle: number, yLow: number, yMiddle: number, yHigh: number}} */
+  computeCoordinates(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let scale = 1.1;
+    let width = this.boundingBox.height / scale / 6;
+    let xMiddle = boundingBoxFromParent.left + this.boundingBox.left ;
+    let xEnd = boundingBoxFromParent.left + this.boundingBox.left + width;
+    if (!this.left) {
+      let swapper = xMiddle;
+      xMiddle = xEnd;
+      xEnd = swapper;
+    }
+    let yHigh = boundingBoxFromParent.top + this.boundingBox.top;
+    let yLow = yHigh + this.boundingBox.height - this.parenthesisThickness;
+    yHigh += this.parenthesisThickness;
+    return {
+      xEnd: xEnd,
+      xMiddle: xMiddle,
+      yLow: yLow,
+      yHigh: yHigh,
+      yMiddle: (yHigh + yLow) / 2
+    };
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.lineWidth = this.parenthesisThickness;
+    canvas.moveTo(c.xEnd, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yMiddle);
+    canvas.lineTo(c.xEnd, c.yHigh);
+    canvas.stroke();
   }
 }
 

@@ -455,7 +455,7 @@ const knownTypes = {
   }),
   radicalExponentBox: new MathNodeType({
     'type': 'radicalExponentBox',
-    'fontSizeRatio': 0.75,
+    'fontSizeRatio': 0.65,
   }),
   radicalUnderBox: new MathNodeType({
     'type': 'radicalUnderBox',

@@ -1132,6 +1132,57 @@ class TextPlotTwoD {
   }
 }
 
+/** A text label in two dimensions. */
+class LatexPlotTwoD {
+  /**
+   * @param {!Array.<number>} inputLocation location of the text.
+   * @param {string} inputLatex text to draw.
+   */
+  constructor(inputLocation, inputLatex) {
+    /** @type{!Array.<number>} */
+    this.location = inputLocation;
+    /** @type{string} */
+    this.text = inputLatex;
+    this.type = 'plotLatex';
+  }
+
+  /**
+   * Enlarges a bounding box in-place to ensure it encloses the object.
+   *
+   * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
+   */
+  accountBoundingBox(inputOutputBox, canvas) {
+    accountBoundingBox(this.location, inputOutputBox);
+  }
+
+  /**
+   * Same as draw but does not complete the stroke command; use for plot fills.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   * @param {boolean} startByMoving whether to move to the initial point without
+   * drawing a line. Ignored.
+   */
+  drawNoFinish(canvas, startByMoving) {
+    let coordinates = canvas.coordinatesMathToScreen(this.location);
+    if (canvas.latexPlotFunction !== null) {
+      canvas.latexPlotFunction( coordinates, this.text);
+    }
+  }
+
+  /**
+   * Draws the object onto the given canvas.
+   *
+   * @param {!CanvasTwoD} canvas the canvas.
+   */
+  draw(canvas) {
+    let surface = canvas.surface;
+    surface.beginPath();
+    this.drawNoFinish(canvas, true);
+    surface.stroke();
+  }
+}
+
 class SelectablePointTwoD{
   /**
    * @param {number} x coordinate.
@@ -1816,9 +1867,11 @@ class CanvasTwoD {
   /**
    * @param {!HTMLCanvasElement} inputCanvas the canvas on which to plot.
    * @param {?HTMLElement} controls generate input controls here.
-   * @param {?HTMLElement|null} messages generae debug messages here.
+   * @param {?HTMLElement|null} generate debug messages here.
+   * @param {?function(number[], string)|null} a plot 
+   * function that can draw latex at a location.
    */
-  constructor(inputCanvas, controls, messages) {
+  constructor(inputCanvas, controls, messages, latexPlotFunction) {
     /**
      * @type {!Array.<{
      *   draw: function(!CanvasTwoD),
@@ -1834,6 +1887,13 @@ class CanvasTwoD {
     this.canvasContainer = inputCanvas;
 
     this.canvasId = null;
+
+    /** @type{function(number[], string)|null} */
+    this.latexPlotFunction = null;
+    if (latexPlotFunction !== null && latexPlotFunction !== undefined) {
+      this.latexPlotFunction = latexPlotFunction;
+    }
+
     this.screenBasisOrthonormal = [];
     /** @type{?HTMLElement} */
     this.spanMessages = messages;
@@ -2112,6 +2172,17 @@ class CanvasTwoD {
   }
 
   /**
+   * Draws latex on the canvas, if a latex render is available.
+   *
+   * @param {!Array.<number>} inputLocation location of the text.
+   * @param {string} inputLatex text to draw.
+   */
+  drawLatex(inputLocation, inputLatex) {
+    let newPlot = new LatexPlotTwoD(inputLocation, inputLatex);
+    this.drawObjects.push(newPlot);
+  }
+
+  /**
    * Starts a plot fill sequence. All objects drawn after this command and
    * before the next plotFillStart() command will be filled.
    *
@@ -2279,7 +2350,6 @@ class CanvasTwoD {
     button.addEventListener('click', () => {
       this.resetView();
     });
-    this.spanControls.textContent = '';
     this.spanControls.appendChild(button);
   }
 

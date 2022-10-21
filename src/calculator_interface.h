@@ -1351,6 +1351,7 @@ public:
     static std::string pathFilled;
     static std::string escapeMap;
     static std::string label;
+    static std::string latex;
   };
 
   std::string plotString;
@@ -1457,6 +1458,9 @@ public:
   );
   void makeLabel(
     const Vector<double>& position, const std::string& label
+  );
+  void makeLatex(
+    const Vector<double>& position, const std::string& latex
   );
   void makeEscapeMap(
     const Expression& functionX,

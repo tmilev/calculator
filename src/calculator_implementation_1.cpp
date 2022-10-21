@@ -51,6 +51,7 @@ std::string PlotObject::PlotTypes::plotFillStart = "plotFillStart";
 std::string PlotObject::PlotTypes::plotFillFinish = "plotFillFinish";
 std::string PlotObject::PlotTypes::pathFilled = "pathFilled";
 std::string PlotObject::PlotTypes::label = "label";
+std::string PlotObject::PlotTypes::latex = "latex";
 std::string PlotObject::PlotTypes::axesGrid = "axesGrid";
 std::string Plot::Labels::canvasName = "canvasName";
 std::string Plot::Labels::controlsName = "controlsName";
@@ -461,6 +462,15 @@ void PlotObject::makeLabel(
   this->pointsDouble.addOnTop(position);
   this->colorJS = "black";
   this->plotType = PlotObject::PlotTypes::label;
+}
+void PlotObject::makeLatex(
+  const Vector<double>& position, const std::string& label
+) {
+  this->dimension = position.size;
+  this->plotString = label;
+  this->pointsDouble.addOnTop(position);
+  this->colorJS = "black";
+  this->plotType = PlotObject::PlotTypes::latex;
 }
 
 void PlotObject::makePlotFillStart() {
@@ -1042,14 +1052,16 @@ JSData PlotObject::toJSON() {
     result = this->toJSONEscapeMap();
   } else if (correctedPlotType == PlotObject::PlotTypes::points) {
     result = this->toJSONPoints();
-  } else if (correctedPlotType == "label") {
+  } else if (correctedPlotType == PlotObject::PlotTypes::label) {
+    result = this->toJSONDrawText();
+  } else if (correctedPlotType == PlotObject::PlotTypes::latex) {
     result = this->toJSONDrawText();
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFillStart) {
     result = this->toJSONPlotFillStart();
-  } else if (correctedPlotType == "plotFillFinish") {    // The plot type carries
+  } else if (correctedPlotType == PlotObject::PlotTypes::plotFillFinish) {    // The plot type carries
     // all
     // information.
-  } else if (correctedPlotType == "axesGrid") {    // The plot type carries all
+  } else if (correctedPlotType == PlotObject::PlotTypes::axesGrid) {    // The plot type carries all
     // information.
   } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled) {
     result = this->toJSONDrawPathFilled();

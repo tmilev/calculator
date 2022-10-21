@@ -1391,6 +1391,24 @@ bool CalculatorFunctionsPlot::plotLabel(
   PlotObject plot;
   plot.makeLabel(labelPosition, label);
   return output.assignValue(calculator, plot);
+}bool CalculatorFunctionsPlot::plotLatex(
+Calculator& calculator, const Expression& input, Expression& output
+) {
+STACK_TRACE("CalculatorFunctionsPlot::plotLatex");
+if (input.size() != 3) {
+  return false;
+}
+Vector<double> labelPosition;
+if (!calculator.getVectorDoubles(input[1], labelPosition, - 1)) {
+  return false;
+}
+std::string label;
+if (!input[2].isOfType<std::string>(&label)) {
+  label = input[2].toString();
+}
+PlotObject plot;
+plot.makeLatex(labelPosition, label);
+return output.assignValue(calculator, plot);
 }
 
 bool CalculatorFunctionsPlot::plotRectangle(

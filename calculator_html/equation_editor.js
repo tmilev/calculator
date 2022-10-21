@@ -3197,7 +3197,7 @@ class EquationEditor {
       this.containerSVG = null;
     }
     /** @type{HTMLCanvasElement?} */
-    this.canvasContainer = null;
+    this.containerCanvas = null;
     /** @type{CanvasRenderingContext2D?} */
     this.canvasTwoDContext = null;
     /** @type{!Array.<number>} */
@@ -3544,20 +3544,27 @@ class EquationEditor {
       this.containerSVG.style.verticalAlign = 'text-bottom';
     }
   }
-
   /** Draws the math node on a canvas. */
   drawOnCanvas() {
-    if (this.canvasContainer === null && this.canvasTwoDContext === null) {
+    this.drawOnCanvasAtLocation([0, 0]);
+  }
+
+  /** Draws the math node on a canvas. */
+  drawOnCanvasAtLocation(
+    /** @type{number[]} */
+    location,
+  ) {
+    if (this.containerCanvas === null && this.canvasTwoDContext === null) {
       return;
     }
     if (this.canvasTwoDContext === null) {
       this.canvasTwoDContext = /** @type{CanvasRenderingContext2D!}*/ (
-          this.canvasContainer.getContext('2d'));
+          this.containerCanvas.getContext('2d'));
     }
-    if (this.canvasContainer !== null) {
+    if (this.containerCanvas !== null) {
       // We own the canvas container and so we're responsible for wiping it
       // clean.
-      let box = this.canvasContainer.getBoundingClientRect();
+      let box = this.containerCanvas.getBoundingClientRect();
       this.canvasTwoDContext.clearRect(
           0,
           0,
@@ -3565,8 +3572,11 @@ class EquationEditor {
           box.height,
       );
     }
-    this.rootNode.drawOnCanvas(this.canvasTwoDContext, new BoundingBox());
-    if (this.canvasContainer !== null) {
+    let boundingBox = new BoundingBox();
+    boundingBox.left = location[0];
+    boundingBox.top = location[1];
+    this.rootNode.drawOnCanvas(this.canvasTwoDContext, boundingBox);
+    if (this.containerCanvas !== null) {
       // We own the canvas container, therefore we are responsible for finishing
       // the drawing.
       this.canvasTwoDContext.stroke();
@@ -3707,7 +3717,9 @@ class EquationEditor {
     this.updateDOM();
     this.updateAlignment();
     this.writeSVG();
-    this.drawOnCanvas();
+    if (this.containerCanvas !== null) {
+      this.drawOnCanvas();
+    }
     this.writeDebugInfo(parser);
     this.container.setAttribute('latexsource', latex);
     if (this.containerSVG !== null) {
@@ -9311,7 +9323,8 @@ class MathNodeCancel extends MathNode {
     container.appendChild(result.element);
   }
 
-  /** @return {{
+  /** 
+   * @return {{
    * leftX: number,
    * leftY: number,
    * rightX: number,

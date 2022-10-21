@@ -1,5 +1,7 @@
 "use strict";
 
+const EquationEditor = require("./equation_editor");
+
 const CanvasTwoD = require("./graphics").CanvasTwoD;
 const CanvasThreeD = require("./graphics").Canvas;
 
@@ -91,7 +93,7 @@ class GraphicsSerialization {
    */
   twoDimensionalGraphics(
     input,
-    /**@type{HTMLCanvasElement}*/
+    /**@type{HTMLCanvasElement} */
     canvasElement,
     /**@type{HTMLElement} */
     controls,
@@ -100,8 +102,40 @@ class GraphicsSerialization {
     /**@type{Object.<string,HTMLElement>} */
     sliders,
   ) {
-    let canvas = new CanvasTwoD(canvasElement, controls, messages);
+    let drawCanvas = null;
+    /** @type{EquationEditor.EquationEditor|null} */
+    let equationEditor = null;
+    if (controls !== null && controls !== undefined) {
+      controls.textContent = '';
+      let editorContainer = document.createElement("span");
+      equationEditor = new EquationEditor.EquationEditor(
+        editorContainer,
+        new EquationEditor.EquationEditorOptions({
+          editable: false
+        }),
+      );
+      editorContainer.style.display = "inline-block";
+      editorContainer.style.maxHeight = "0";
+      editorContainer.style.maxWidth = "0";
+      editorContainer.style.width = "0";
+      editorContainer.style.height = "0";
+      editorContainer.style.overflow = "clip";
+      controls.appendChild(editorContainer);
+      drawCanvas = (
+        /** @type{number[]} */
+        textLocation,
+        /** @type{string} */
+        latex,
+      ) => {
+        equationEditor.writeLatex(latex);
+        equationEditor.drawOnCanvasAtLocation(textLocation);
+      };
+    }
+    let canvas = new CanvasTwoD(canvasElement, controls, messages, drawCanvas);
     canvas.initialize();
+    if (equationEditor !== null) {
+      equationEditor.canvasTwoDContext = canvas.surface;
+    } 
     return this.plotTwoDimensionalGraphics(canvas, input, sliders);
   }
 
@@ -325,6 +359,9 @@ class GraphicsSerialization {
           parametersOnTheGraph,
           plot[this.labels.mandelbrotMode],
         );
+        return;
+      case "latex":
+        canvas.drawLatex(onePoint, text);
         return;
       default:
         throw `Unknown plot type: ${plotType}.`;

@@ -210,6 +210,10 @@ public:
   static bool plotLabel(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool plotLatex(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+
   static bool plotSetId(
     Calculator& calculator, const Expression& input, Expression& output
   );

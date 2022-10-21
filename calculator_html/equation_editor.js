@@ -659,7 +659,6 @@ class MathNodeFactory {
     let underTheCancel = new MathNodeCancelUnderBox(equationEditor);
     underTheCancel.appendChild(horizontal);
     underTheCancel.normalizeHorizontalMath();
-    underTheCancel.ensureEditableAtoms();
     result.appendChild(cancelSign);
     result.appendChild(underTheCancel);
     return result;
@@ -8633,6 +8632,10 @@ class ScalableVectorGraphicsLine extends ScalableVectorGraphicsBase {
   setStroke(/** @type {string} */ color) {
     this.element.setAttribute('stroke', color);
   }
+
+  setLineWidth(/** @type {number} */ width) {
+    this.element.setAttribute('stroke-width', width);
+  }
 }
 
 class ScalableVectorGraphicsPath extends ScalableVectorGraphicsBase {
@@ -9293,24 +9296,59 @@ class MathNodeCancel extends MathNode {
       boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
-    let leftX = boundingBoxFromParent.left + this.boundingBox.left;
-    let leftY = boundingBoxFromParent.top + this.boundingBox.top +
-        this.boundingBox.height;
-    let rightX = boundingBoxFromParent.left + this.boundingBox.left +
-        this.boundingBox.width;
-    let rightY = boundingBoxFromParent.top + this.boundingBox.top;
-
+    let c = this.computeCoordinates(boundingBoxFromParent);
     let result = new ScalableVectorGraphicsLine();
-    result.setX1(leftX);
-    result.setY1(leftY);
-    result.setX2(rightX);
-    result.setY2(rightY);
+    result.setX1(c.leftX);
+    result.setY1(c.leftY);
+    result.setX2(c.rightX);
+    result.setY2(c.rightY);
+    result.setLineWidth(2);
     let color = this.type.colorText;
     if (color === '') {
       color = 'black';
     }
     result.setStroke(color);
     container.appendChild(result.element);
+  }
+
+  /** @return {{
+   * leftX: number,
+   * leftY: number,
+   * rightX: number,
+   * rightY: number
+   * }} 
+   */
+  computeCoordinates(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let leftX = boundingBoxFromParent.left + this.boundingBox.left;
+    let leftY = boundingBoxFromParent.top + this.boundingBox.top +
+      this.boundingBox.height;
+    let rightX = boundingBoxFromParent.left + this.boundingBox.left +
+      this.boundingBox.width;
+    let rightY = boundingBoxFromParent.top + this.boundingBox.top;
+    return {
+      leftX: leftX,
+      leftY: leftY,
+      rightX: rightX,
+      rightY: rightY,
+    };
+  }
+
+  drawOnCanvas(
+    /** @type{CanvasRenderingContext2D} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.lineWidth = 2;
+    canvas.moveTo(c.leftX, c.leftY);
+    canvas.lineTo(c.rightX, c.rightY);
+    canvas.stroke();
   }
 }
 

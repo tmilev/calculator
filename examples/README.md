@@ -3331,6 +3331,13 @@ PlotLabel{}((1,1), "(1,1)")
 ```
 Plots a label at a given position. Arguments format: PlotLabel((Xcoord, Ycoord), "Label"). 
 
+*PlotLatex* [PlotLatex] {CalculatorFunctionsPlot::plotLatex}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotLatex%7b%7d%28%281%2f2%2c%5c%5csqrt%7b3%7d%2f2%29%2c%20%5c%22%5c%5cfrac%7b%5c%5csqrt%7b3%7d%7d%7b2%7d%5c%22%29%2bPlotPoint%7b%7d%28%281%2f2%2c%5c%5csqrt%7b3%7d%2f2%29%2c%20blue%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+PlotLatex{}((1/2,\sqrt{3}/2), "\frac{\sqrt{3}}{2}")+PlotPoint{}((1/2,\sqrt{3}/2), blue)
+```
+Plots a latex label at a given position. Arguments format: PlotLatex((Xcoord, Ycoord), "label"). 
+
 *PlotViewRectangle* [PlotViewRectangle] {CalculatorFunctionsPlot::PlotViewRectangle}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Plot2D%7b%7d%281%2fx%2c%20-30%2c%2030%2c%20%5c%22red%5c%22%29%20%2b%20PlotViewRectangle%28%28-5%2c-5%29%2c%20%285%2c5%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

@@ -2214,19 +2214,20 @@ void Calculator::initializeFunctionsStandard() {
     "CalculatorFunctionsPlot::plotLabel",
     "PlotLabel",
     innerStandard
-  );  this->addOperationHandler(
-  "PlotLatex",
-  CalculatorFunctionsPlot::plotLatex,
-  "",
-  "Plots a latex label at a given position. "
-  "Arguments format: "
-  "PlotLatex((Xcoord, Ycoord), \"label\"). ",
-  "PlotLatex{}((1/2,\\sqrt{3}/2), \"\\frac{\\sqrt{3}}{2}\")+"
-  "PlotPoint{}((1/2,\\sqrt{3}/2), blue)",
-  "CalculatorFunctionsPlot::plotLatex",
-  "PlotLatex",
-  innerStandard
-);
+  );
+  this->addOperationHandler(
+    "PlotLatex",
+    CalculatorFunctionsPlot::plotLatex,
+    "",
+    "Plots a latex label at a given position. "
+    "Arguments format: "
+    "PlotLatex((Xcoord, Ycoord), \"label\"). ",
+    "PlotLatex{}((1/2,\\sqrt{3}/2), \"\\frac{\\sqrt{3}}{2}\")+"
+    "PlotPoint{}((1/2,\\sqrt{3}/2), blue)",
+    "CalculatorFunctionsPlot::plotLatex",
+    "PlotLatex",
+    innerStandard
+  );
   this->addOperationHandler(
     "PlotViewRectangle",
     CalculatorFunctionsPlot::plotViewRectangle,

@@ -463,6 +463,7 @@ void PlotObject::makeLabel(
   this->colorJS = "black";
   this->plotType = PlotObject::PlotTypes::label;
 }
+
 void PlotObject::makeLatex(
   const Vector<double>& position, const std::string& label
 ) {
@@ -1058,10 +1059,12 @@ JSData PlotObject::toJSON() {
     result = this->toJSONDrawText();
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFillStart) {
     result = this->toJSONPlotFillStart();
-  } else if (correctedPlotType == PlotObject::PlotTypes::plotFillFinish) {    // The plot type carries
+  } else if (correctedPlotType == PlotObject::PlotTypes::plotFillFinish) {    // The
+    // plot type carries
     // all
     // information.
-  } else if (correctedPlotType == PlotObject::PlotTypes::axesGrid) {    // The plot type carries all
+  } else if (correctedPlotType == PlotObject::PlotTypes::axesGrid) {    // The plot
+    // type carries all
     // information.
   } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled) {
     result = this->toJSONDrawPathFilled();

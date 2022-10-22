@@ -12327,19 +12327,19 @@ void DrawOperations::makeMeAStandardBasis(int dimension) {
       this->basisProjectionPlane[0], this->basisProjectionPlane[1]
     );
   } else if (dimension == 3) {
-    // <-if not needed but good for documentation purposes
-    this->basisProjectionPlane[0][0] =
-    0.6;
+    this->basisProjectionPlane[0][0] = 0.6;
     this->basisProjectionPlane[0][1] = 0.4;
     this->basisProjectionPlane[0][2] = 0;
     this->basisProjectionPlane[1][0] = - 0.4;
     this->basisProjectionPlane[1][1] = 0.6;
     this->basisProjectionPlane[1][2] = 1;
-    modifyToOrthonormalNoShiftSecond(
+    this->modifyToOrthonormalNoShiftSecond(
       this->basisProjectionPlane[0], this->basisProjectionPlane[1]
     );
   } else if (dimension == 2) {
-    this->basisProjectionPlane[1] *= - 1;
+    // <-if not needed but good for documentation purposes
+    this->basisProjectionPlane[1] *=
+    - 1;
   }
   if (this->bilinearForm.numberOfRows != dimension) {
     this->bilinearForm.makeIdentityMatrix(dimension, 1, 0);
@@ -12438,6 +12438,10 @@ bool ConeCollection::drawMeProjectiveInitialize(
       roots[i][j].getDoubleValue();
     }
   }
+  drawingVariables.operations.modifyToOrthonormalNoShiftSecond(
+    drawingVariables.operations.basisProjectionPlane[0],
+    drawingVariables.operations.basisProjectionPlane[1]
+  );
   return true;
 }
 

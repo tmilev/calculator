@@ -11,6 +11,26 @@
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 #include "math_extra_differential_operators.h"
 
+std::string DrawOperations::typeCircleAtVector = "circleAtVector";
+std::string DrawOperations::typePath = "path";
+std::string DrawOperations::typeSegment = "segment";
+std::string DrawOperations::typeSegment2DFixed = "segment2DFixed";
+std::string DrawOperations::typeTextAtVector = "text";
+std::string DrawOperations::typeText2DFixed = "text2DFixed";
+std::string DrawOperations::typeFilledShape = "filledShape";
+std::string DrawOperations::typeHighlightGroup = "highlightGroup";
+std::string DrawOperations::fieldColor = "color";
+std::string DrawOperations::fieldOperation = "operation";
+std::string DrawOperations::fieldPoints = "points";
+std::string DrawOperations::fieldLocation = "location";
+std::string DrawOperations::fieldRadius = "radius";
+std::string DrawOperations::fieldPenStyle = "penStyle";
+std::string DrawOperations::fieldText = "text";
+std::string DrawOperations::fieldLabels = "labels";
+std::string DrawOperations::fieldLineWidth = "lineWidth";
+std::string DrawOperations::fieldFrameId = "frameId";
+std::string DrawOperations::fieldFrameIndex = "frameIndex";
+
 std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   if (this->isConstant()) {
     return "1";
@@ -156,26 +176,6 @@ computeSubGroupFromGeneratingReflections(
   }
   return true;
 }
-
-std::string DrawOperations::typeCircleAtVector = "circleAtVector";
-std::string DrawOperations::typePath = "path";
-std::string DrawOperations::typeSegment = "segment";
-std::string DrawOperations::typeSegment2DFixed = "segment2DFixed";
-std::string DrawOperations::typeTextAtVector = "text";
-std::string DrawOperations::typeText2DFixed = "text2DFixed";
-std::string DrawOperations::typeFilledShape = "filledShape";
-std::string DrawOperations::typeHighlightGroup = "highlightGroup";
-std::string DrawOperations::fieldColor = "color";
-std::string DrawOperations::fieldOperation = "operation";
-std::string DrawOperations::fieldPoints = "points";
-std::string DrawOperations::fieldLocation = "location";
-std::string DrawOperations::fieldRadius = "radius";
-std::string DrawOperations::fieldPenStyle = "penStyle";
-std::string DrawOperations::fieldText = "text";
-std::string DrawOperations::fieldLabels = "labels";
-std::string DrawOperations::fieldLineWidth = "lineWidth";
-std::string DrawOperations::fieldFrameId = "frameId";
-std::string DrawOperations::fieldFrameIndex = "frameIndex";
 
 void DrawOperations::drawCircleAtVectorBufferRational(
   const Vector<Rational>& input,

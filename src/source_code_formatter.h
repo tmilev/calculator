@@ -432,7 +432,7 @@ private:
   bool isTypeKeyWord(const std::string& input);
   bool isControlKeyWord(const std::string& input);
   bool isWhiteSpace(const std::string& input);
-  bool writeFormatedCode(std::stringstream* comments);
+  bool writeFormattedCode(std::stringstream* comments);
   bool computeState(int maximumElementsToProcess);
   bool addAndAccount(const std::string& incoming);
   bool decreaseStack(int numberToPop);

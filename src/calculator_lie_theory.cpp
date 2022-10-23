@@ -4733,7 +4733,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
   subgroup.findQuotientRepresentatives(2000);
   out
   << "<br>Number elements of the coset: "
-  << subgroup.RepresentativesQuotientAmbientOrder.size;
+  << subgroup.representativesQuotientAmbientOrder.size;
   out
   << "<br>Number of elements of the Weyl group of the Levi part: "
   << subgroup.allElements.size;
@@ -4814,10 +4814,10 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     << "<td>weight fund. coords</td></tr>";
     format.fundamentalWeightLetter = "\\omega";
     for (
-      int i = 0; i < subgroup.RepresentativesQuotientAmbientOrder.size; i ++
+      int i = 0; i < subgroup.representativesQuotientAmbientOrder.size; i ++
     ) {
       ElementWeylGroup& current =
-      subgroup.RepresentativesQuotientAmbientOrder[i];
+      subgroup.representativesQuotientAmbientOrder[i];
       out
       << "<tr><td>"
       << (
@@ -4832,7 +4832,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
         RationalFraction<Rational>::zeroRational()
       );
       semisimpleLieAlgebra.weylGroup.actOnRhoModified(
-        subgroup.RepresentativesQuotientAmbientOrder[i],
+        subgroup.representativesQuotientAmbientOrder[i],
         highestWeightSimpleCoordinates
       );
       out

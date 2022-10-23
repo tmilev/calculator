@@ -41,6 +41,8 @@ testFileWritePermissionsSSsas.txt
 *.gz
 results/*
 
+temp/
+
 .vscode
 
 src/calculator.pro.user*

@@ -168,8 +168,8 @@ int AlgebraicClosureRationals::getIndexFromRadicalSelection(
 ) {
   if (selection.numberOfElements > 30) {
     global.fatal
-    <<
-    "The algebraic extension is too large to be handled by the current data structures. "
+    << "The algebraic extension is too large "
+    << "to be handled by the current data structures. "
     << global.fatal;
   }
   int result = 0;
@@ -185,12 +185,12 @@ int AlgebraicClosureRationals::getIndexFromRadicalSelection(
 bool AlgebraicClosureRationals::mergeRadicals(
   const List<LargeInteger>& radicals
 ) {
-  STACK_TRACE("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
+  STACK_TRACE("AlgebraicClosureRationals::mergeRadicals");
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     global.fatal
     << "AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
-    <<
-    "with at least one of two arguments that is not a quadratic radical extension of the rationals. "
+    << "with at least one of two arguments that is "
+    << "not a quadratic radical extension of the rationals. "
     << global.fatal;
   }
   // refine factors:
@@ -325,8 +325,8 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
 ) {
   STACK_TRACE("AlgebraicClosureRationals::chooseGeneratingElement");
   SelectionPositiveIntegers selection;
-  int DimensionOverRationals = this->latestBasis.size;
-  selection.initialize(DimensionOverRationals);
+  int dimensionOverRationals = this->latestBasis.size;
+  selection.initialize(dimensionOverRationals);
   this->generatingElementPowersBasis.setSize(0);
   Vector<Rational> currentVect;
   this->generatingElement.owner = this;
@@ -335,8 +335,8 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
   if (this->basisInjections.size > 1) {
     int indexToSkipFirst =
     this->basisInjections[this->basisInjections.size - 2].size - 1;
-    if (indexToSkipFirst < DimensionOverRationals) {
-      selection.integers.makeEi(DimensionOverRationals, indexToSkipFirst);
+    if (indexToSkipFirst < dimensionOverRationals) {
+      selection.integers.makeEi(dimensionOverRationals, indexToSkipFirst);
     }
   }
   for (
@@ -374,10 +374,10 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       this->generatingElement, this->generatingElementTensorForm
     );
     this->generatingElementTensorForm.getMatrix(
-      this->generatingElementMatrixForm, DimensionOverRationals
+      this->generatingElementMatrixForm, dimensionOverRationals
     );
     this->generatingElementPowersBasis.setSize(0);
-    currentVect.makeEi(DimensionOverRationals, 0);
+    currentVect.makeEi(dimensionOverRationals, 0);
     this->generatingElementPowersBasis.addOnTop(currentVect);
     do {
       this->generatingElementMatrixForm.actOnVectorColumn(
@@ -394,7 +394,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
         break;
       }
     } while (true);
-    if (this->generatingElementPowersBasis.size == DimensionOverRationals) {
+    if (this->generatingElementPowersBasis.size == dimensionOverRationals) {
       break;
     }
   }

@@ -2473,7 +2473,7 @@ public:
     ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
   > allElements;
   // WeylGroupData ElementS;
-  List<ElementWeylGroup> RepresentativesQuotientAmbientOrder;
+  List<ElementWeylGroup> representativesQuotientAmbientOrder;
   Vectors<Rational> simpleRootsInner;
   // Each element of the group is a list of inner and outer generators.
   // The inner generators are reflections with

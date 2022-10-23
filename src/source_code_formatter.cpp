@@ -1306,6 +1306,11 @@ bool CodeFormatter::Element::containsNewLineAfterRecursively() {
       return true;
     }
   }
+  /*
+  if (this->type == CodeFormatter::Element::Type::Comment ||
+  this->type == CodeFormatter::Element::Type::CommentMultiline){
+    return false;
+  }*/
   return this->newLinesAfter > 0;
 }
 
@@ -1714,7 +1719,7 @@ bool CodeFormatter::initializeFileNames(
   const std::string& outputOnFail,
   std::stringstream* comments
 ) {
-  STACK_TRACE("SourceCodeFormatter::initializeFileNames");
+  STACK_TRACE("CodeFormatter::initializeFileNames");
   this->inputFileName = fileName;
   if (
     !FileOperations::loadFileToStringVirtual(
@@ -1757,7 +1762,7 @@ bool CodeFormatter::isIdentifierWord(const std::string& input) {
 }
 
 std::string CodeFormatter::toStringLinks() {
-  STACK_TRACE("SourceCodeFormatter::toStringLinks");
+  STACK_TRACE("CodeFormatter::toStringLinks");
   std::stringstream out;
   bool parsingFailed = !this->parsingSucceeded();
   if (parsingFailed) {
@@ -1791,7 +1796,7 @@ bool CodeFormatter::formatCPPDirectory(
   bool inPlace,
   std::stringstream* comments
 ) {
-  STACK_TRACE("SourceCodeFormatter::formatCPPDirectory");
+  STACK_TRACE("CodeFormatter::formatCPPDirectory");
   std::string directory = inputDirectory;
   if (directory == "") {
     if (comments != nullptr) {
@@ -1873,7 +1878,7 @@ bool CodeFormatter::formatCPPSourceCode(
   std::stringstream* comments,
   bool logDebugInfo
 ) {
-  STACK_TRACE("SourceCodeFormatter::formatCPPSourceCode");
+  STACK_TRACE("CodeFormatter::formatCPPSourceCode");
   if (
     !this->initializeFileNames(
       inputFileName, output, outputOnFail, comments
@@ -1911,7 +1916,7 @@ bool CodeFormatter::formatCPPSourceCode(
     << this->processor.code.toStringHTMLTree();
   }
   this->transformedContent = out.str();
-  if (!this->writeFormatedCode(comments)) {
+  if (!this->writeFormattedCode(comments)) {
     return false;
   }
   if (comments != nullptr) {
@@ -4823,8 +4828,8 @@ bool CodeFormatter::isWhiteSpace(const std::string& input) {
   return input == "\n" || input == "\t" || input == " " || input == "\r";
 }
 
-bool CodeFormatter::writeFormatedCode(std::stringstream* comments) {
-  STACK_TRACE("SourceCodeFormatter::writeFormatedCode");
+bool CodeFormatter::writeFormattedCode(std::stringstream* comments) {
+  STACK_TRACE("CodeFormatter::writeFormattedCode");
   std::string filenameOut = this->outputFileName;
   if (!this->parsingSucceeded()) {
     filenameOut = this->outputOnFailFileName;

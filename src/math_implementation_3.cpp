@@ -8760,12 +8760,12 @@ void WeylGroupData::drawRootSystem(
     for (int j = 0; j < dimension; j ++) {
       root[j] = this->rootSystem[i][j].getDoubleValue();
     }
-    double Length1 =
+    double length1 =
     this->rootScalarCartanRoot(root, output.basisProjectionPlane[0]);
-    double Length2 =
+    double length2 =
     this->rootScalarCartanRoot(root, output.basisProjectionPlane[1]);
     lengths[i] =
-    FloatingPoint::sqrtFloating(Length1 * Length1 + Length2 * Length2);
+    FloatingPoint::sqrtFloating(length1 * length1 + length2 * length2);
   }
   for (int i = 0; i < rootSystemSorted.size; i ++) {
     for (int j = i; j < rootSystemSorted.size; j ++) {
@@ -9085,7 +9085,7 @@ toStringFromLayersAndArrows(
         out << this->allElements[layers[i][j]].toString(nullptr);
       } else {
         out
-        << this->RepresentativesQuotientAmbientOrder[layers[i][j]].toString();
+        << this->representativesQuotientAmbientOrder[layers[i][j]].toString();
       }
       int currentOffset = j + currentRowOffset;
       if (layers[i].size % 2 == 0) {
@@ -9349,20 +9349,20 @@ toStringCosetGraph() {
   List<List<List<int> > > arrows;
   List<List<int> > layers;
   Vector<Rational> root;
-  layers.reserve(this->RepresentativesQuotientAmbientOrder.size);
+  layers.reserve(this->representativesQuotientAmbientOrder.size);
   int GraphWidth = 1;
   int oldLayerElementLength = - 1;
   for (
-    int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++
+    int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++
   ) {
     if (
-      this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.
+      this->representativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.
       size !=
       oldLayerElementLength
     ) {
       layers.setSize(layers.size + 1);
       oldLayerElementLength =
-      this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.
+      this->representativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.
       size;
     }
     layers.lastObject()->addOnTop(i);
@@ -9370,12 +9370,12 @@ toStringCosetGraph() {
     MathRoutines::maximum(GraphWidth, layers.lastObject()->size);
   }
   for (
-    int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++
+    int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++
   ) {
     root = this->ambientWeyl->rho;
     this->ambientWeyl->actOnRootByGroupElement(
       this->ambientWeyl->group.elements.getIndex(
-        this->RepresentativesQuotientAmbientOrder[i]
+        this->representativesQuotientAmbientOrder[i]
       ),
       root,
       false,
@@ -9387,18 +9387,18 @@ toStringCosetGraph() {
     arrows[i].setSize(layers[i].size);
     for (int j = 0; j < layers[i].size; j ++) {
       for (
-        int k = 0; k < this->RepresentativesQuotientAmbientOrder.size; k ++
+        int k = 0; k < this->representativesQuotientAmbientOrder.size; k ++
       ) {
         if (
           this->ambientWeyl->leftIsHigherInBruhatOrderThanRight(
-            this->RepresentativesQuotientAmbientOrder[k],
-            this->RepresentativesQuotientAmbientOrder[layers[i][j]]
+            this->representativesQuotientAmbientOrder[k],
+            this->representativesQuotientAmbientOrder[layers[i][j]]
           )
         ) {
           if (
-            this->RepresentativesQuotientAmbientOrder[layers[i][j]].
+            this->representativesQuotientAmbientOrder[layers[i][j]].
             generatorsLastAppliedFirst.size ==
-            this->RepresentativesQuotientAmbientOrder[k].
+            this->representativesQuotientAmbientOrder[k].
             generatorsLastAppliedFirst.size -
             1
           ) {
@@ -9420,8 +9420,8 @@ findQuotientRepresentatives(int upperLimit) {
   this->checkInitialization();
   this->ambientWeyl->group.computeAllElements(upperLimit);
   Vector<Rational> image1;
-  this->RepresentativesQuotientAmbientOrder.size = 0;
-  this->RepresentativesQuotientAmbientOrder.reserve(
+  this->representativesQuotientAmbientOrder.size = 0;
+  this->representativesQuotientAmbientOrder.reserve(
     this->ambientWeyl->group.elements.size
   );
   for (int i = 0; i < this->ambientWeyl->group.elements.size; i ++) {
@@ -9439,7 +9439,7 @@ findQuotientRepresentatives(int upperLimit) {
       }
     }
     if (isGood) {
-      this->RepresentativesQuotientAmbientOrder.addOnTop(
+      this->representativesQuotientAmbientOrder.addOnTop(
         this->ambientWeyl->group.elements[i]
       );
     }
@@ -12337,7 +12337,7 @@ void DrawOperations::makeMeAStandardBasis(int dimension) {
       this->basisProjectionPlane[0], this->basisProjectionPlane[1]
     );
   } else if (dimension == 2) {
-    // <-if not needed but good for documentation purposes
+    // <-if not needed but good for documentation purposes.
     this->basisProjectionPlane[1] *=
     - 1;
   }
@@ -12747,10 +12747,6 @@ void DrawOperations::initDimensions(int dimension) {
   this->projectionsEiVectors.setSizeMakeMatrix(dimension, 2);
   this->basisProjectionPlane.makeEiBasis(dimension);
   this->basisProjectionPlane.size = 2;
-  /*  for (int i = 0; i < tempBasis[1].size; i ++)
-    tempBasis[1][i] =2*i + 1;
-  for (int i = 0; i < tempBasis[0].size; i ++)
-    tempBasis[0][i] =3*i +2;*/
   this->modifyToOrthonormalNoShiftSecond(
     this->basisProjectionPlane[1], this->basisProjectionPlane[0]
   );
@@ -14863,7 +14859,7 @@ void ConeCollection::sort() {
 }
 
 void ConeCollection::refineByNormals() {
-  STACK_TRACE("ConeCollection::refine");
+  STACK_TRACE("ConeCollection::refineByNormals");
   ProgressReport report;
   List<Cone> incoming;
   while (this->nonRefinedCones.size() > 0) {
@@ -14939,7 +14935,7 @@ Cone* ConeCollection::getConeById(int id) {
 }
 
 void ConeCollection::processNeighborsOfNewlyAddedCone(const Cone& cone) {
-  STACK_TRACE("ConeCollection::addConeProcessNeighbors");
+  STACK_TRACE("ConeCollection::processNeighborsOfNewlyAddedCone");
   bool hasMultiNeighborWall = false;
   for (const Wall& wall : cone.walls) {
     hasMultiNeighborWall = hasMultiNeighborWall || wall.neighbors.size > 1;

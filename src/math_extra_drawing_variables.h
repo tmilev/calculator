@@ -71,7 +71,7 @@ public:
   void initDimensions(int dimension);
   int getDimensionFirstDimensionDependentOperation();
   int getDimensionFromBilinearForm();
-  void getCoordsDrawingComputeAll(
+  void getCoordinatesDrawingComputeAll(
     Vector<double>& input, double& x1, double& y1
   ) {
     x1 =
@@ -85,7 +85,7 @@ public:
     x1 = x1 * this->graphicsUnit + this->centerX;
     y1 = y1 * this->graphicsUnit + this->centerY;
   }
-  void getCoordsForDrawingProjectionsComputed(
+  void getCoordinatesForDrawingProjectionsComputed(
     Vector<double>& input, double& x1, double& y1
   ) {
     x1 = 0;
@@ -97,7 +97,7 @@ public:
     x1 = x1 * this->graphicsUnit + this->centerX;
     y1 = y1 * this->graphicsUnit + this->centerY;
   }
-  void getCoordsForDrawingProjectionsComputed(
+  void getCoordinatesForDrawingProjectionsComputed(
     Vector<double>& input1,
     Vector<double>& input2,
     double& x1,

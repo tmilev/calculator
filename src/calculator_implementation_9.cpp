@@ -535,6 +535,7 @@ void Vector<Rational>::perturbNormalRelativeToVectorsInGeneralPosition(
   const Vectors<Rational>& nonStrictConeNonPositiveScalar,
   const List<Vector<Rational> >& vectorsToBeInGeneralPosition
 );
+
 bool CalculatorFunctions::perturbSplittingNormal(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

@@ -8043,6 +8043,7 @@ std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
 "In turn, the highest weight is a positive integer "
 "multiple of the fundamental highest weight \\(\\psi\\). "
 "\\(V_{k\\psi}\\) is \\(k + 1\\)-dimensional. ";
+
 std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
   STACK_TRACE("SlTwoSubalgebras::toStringSummary");
   std::stringstream out;

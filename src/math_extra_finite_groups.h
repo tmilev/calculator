@@ -2637,6 +2637,7 @@ template <typename Coefficient>
 std::ostream& operator<<(
   std::ostream& out, const ElementWeylGroupRing<Coefficient> g
 );
+
 template <typename Coefficient>
 void ElementWeylGroupRing<Coefficient>::makeEi(WeylGroupData* GG, int i) {
   ElementWeylGroup monomial;

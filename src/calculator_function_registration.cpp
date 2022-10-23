@@ -31,6 +31,7 @@ std::string Calculator::Functions::Names::Trigonometry::cosine = "\\cos";
 std::string Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas =
 "ETGVM";
 std::string Calculator::BuiltInTypes::Names::vectorPartitionFunction = "VPF";
+
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
   adminDefault.dontTestAutomatically = true;

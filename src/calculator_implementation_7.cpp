@@ -396,6 +396,7 @@ template < >
 bool ElementEllipticCurve<ElementZmodP>::makeGeneratorNISTCurve(
   const std::string& input, std::stringstream* commentsOnFailure
 );
+
 bool CalculatorFunctions::nistEllipticCurveGenerator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

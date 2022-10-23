@@ -8,6 +8,7 @@
 
 std::string EmailRoutines::webAdress = "";
 std::string EmailRoutines::sendEmailFrom = "";
+
 bool Database::User::setPassword(
   const std::string& inputUsername,
   const std::string& inputNewPassword,
@@ -2029,6 +2030,7 @@ bool EmailRoutines::sendEmailWithMailGun(
 }
 
 List<bool> EmailRoutines::recognizedEmailCharacters;
+
 List<bool>& EmailRoutines::getRecognizedEmailChars() {
   if (recognizedEmailCharacters.size == 0) {
     recognizedEmailCharacters.initializeFillInObject(256, false);

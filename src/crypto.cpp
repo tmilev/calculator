@@ -2000,6 +2000,7 @@ void Crypto::computeSha256(
 
 List<uint32_t> Crypto::kArraySha2xx;
 List<uint64_t> Crypto::kArraySha512;
+
 void Crypto::computeSha2xx(
   const List<unsigned char>& input,
   List<uint32_t>& output,
@@ -2346,6 +2347,7 @@ bool PublicKeyRSA::loadFromModulusAndExponentStrings(
 }
 
 List<PublicKeyRSA> Crypto::knownCertificates;
+
 bool Crypto::loadOneKnownCertificate(
   const std::string& input,
   std::stringstream* commentsOnFailure,

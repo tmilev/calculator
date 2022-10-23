@@ -15,6 +15,7 @@ public:
 
 timeval SytemFunctionsGlobal::computationStartGlobal;
 timeval SytemFunctionsGlobal::lastTimeMeasure;
+
 int64_t GlobalVariables::getElapsedMilliseconds() {
   gettimeofday(&SytemFunctionsGlobal::lastTimeMeasure, nullptr);
   return (

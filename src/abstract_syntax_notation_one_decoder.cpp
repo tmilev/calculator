@@ -10,6 +10,7 @@
 // particular tag.
 // Appears to be a compiler/linker bug (?).
 const unsigned char AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05 = 5;
+
 bool ASNElement::hasCostructedStartByte() const {
   int sixthBit = this->startByte / 32;
   sixthBit %= 2;
@@ -620,6 +621,7 @@ std::string ASNElement::JSLabels::type = "type";
 std::string ASNElement::JSLabels::interpretation = "interpretation";
 std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
 std::string ASNElement::JSLabels::comment = "comment";
+
 int ASNElement::getLengthLengthEncoding() {
   List<unsigned char> lengthEncoding;
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
@@ -1220,6 +1222,7 @@ std::string ASNObject::names::basicConstraints = "basicConstraints";
 std::string ASNObject::names::subjectKeyIdentifier = "subjectKeyIdentifier";
 std::string ASNObject::names::authorityKeyIdentifier =
 "authorityKeyIdentifier";
+
 MapList<
   std::string, ASNObject, HashFunctions::hashFunction<std::string>
 >& ASNObject::namesToObjectIdsNonThreadSafe() {

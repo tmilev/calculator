@@ -1869,6 +1869,7 @@ template <class Base>
 std::iostream& operator<<(
   std::iostream& output, const Complex<Base>& input
 );
+
 template <typename Element>
 std::iostream& operator<<(
   std::iostream& output, const Matrix<Element>& matrix

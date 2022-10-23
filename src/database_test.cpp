@@ -3,6 +3,7 @@
 #include "crypto.h"
 
 std::string Database::Test::adminPassword = "111";
+
 Database::Test::Test(bool useFallbackDatabase) {
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
   this->maintainerDatabase.initialize(global.flagDatabaseCompiled);

@@ -39,6 +39,7 @@ calculatorClasses;
 HashedList<std::string, HashFunctions::hashFunction> CalculatorHTML::Parser::
 calculatorClassesAnswerFields;
 int SyntacticElementHTML::parsingDummyElements = 8;
+
 CalculatorHTML::CalculatorHTML() {
   this->numberOfInterpretationAttempts = 0;
   this->numberOfAnswerIdsMathquilled = 0;
@@ -3797,6 +3798,7 @@ std::string CalculatorHTML::answerLabels::idButtonSolution =
 std::string CalculatorHTML::answerLabels::idVerificationSpan =
 "idVerificationSpan";
 std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
+
 JSData CalculatorHTML::getEditorBoxesHTML() {
   STACK_TRACE("CalculatorHTML::getEditorBoxesHTML");
   JSData output;
@@ -5149,6 +5151,7 @@ void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
 }
 
 int TopicElement::scoreButtonCounter = 0;
+
 bool CalculatorHTML::computeTopicListAndPointsEarned(
   std::stringstream& commentsOnFailure
 ) {

@@ -51,6 +51,7 @@ unsigned long long int Rational::totalLargeMultiplications = 0;
 unsigned long long int Rational::totalSmallAdditions = 0;
 unsigned long long int Rational::totalSmallGreatestCommonDivisors = 0;
 unsigned long long int Rational::totalSmallMultiplications = 0;
+
 template < >
 List<OnePartialFractionDenominator>::Comparator* FormatExpressions::
 getMonomialOrder<OnePartialFractionDenominator>() {
@@ -376,6 +377,7 @@ int HtmlRoutines::numRegularLines = 0;
 int HtmlRoutines::numDottedLines = 0;
 int HtmlRoutines::shiftY = - 200;
 int HtmlRoutines::scale = 100;
+
 std::string HtmlRoutines::cleanUpForLaTeXLabelUse(
   const std::string& inputString
 ) {
@@ -1070,6 +1072,7 @@ bool FileOperations::isFileNameWithoutDotsAndSlashes(
 }
 
 List<bool> FileOperations::safeFileCharacters;
+
 List<bool>& FileOperations::getSafeFileChars() {
   if (FileOperations::safeFileCharacters.size == 0) {
     FileOperations::safeFileCharacters.initializeFillInObject(256, false);
@@ -12854,7 +12857,7 @@ void DrawOperations::click(double x, double y) {
   for (int i = 0; i < dimension; i ++) {
     double Xbasis = 0;
     double Ybasis = 0;
-    this->getCoordsDrawingComputeAll(
+    this->getCoordinatesDrawingComputeAll(
       this->basisToDrawCirclesAt[i], Xbasis, Ybasis
     );
     if (this->areWithinClickTolerance(x, y, Xbasis, Ybasis)) {
@@ -12942,7 +12945,7 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   double selectedRootLength =
   this->bilinearForm.scalarProduct(selectedRoot, selectedRoot);
   double oldX, oldY;
-  this->getCoordsDrawingComputeAll(selectedRoot, oldX, oldY);
+  this->getCoordinatesDrawingComputeAll(selectedRoot, oldX, oldY);
   oldX = (oldX - bufferCenterX) / bufferGraphicsUnit;
   oldY = (oldY - bufferCenterY) / bufferGraphicsUnit;
   double oldAngle = getAngleFromXandY(oldX, oldY);

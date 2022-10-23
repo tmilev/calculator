@@ -4747,6 +4747,7 @@ template < >
 bool Complex<double>::flagEqualityIsApproximate;
 template < >
 double Complex<double>::equalityPrecision;
+
 template <class Coefficient>
 bool Complex<Coefficient>::isEqualToZero() const {
   if (!Complex<Coefficient>::flagEqualityIsApproximate) {

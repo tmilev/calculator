@@ -6,6 +6,7 @@
 #include "webserver.h"
 
 std::string MutexProcess::currentProcessName = "S: ";
+
 void MutexProcess::release(int& descriptor) {
   if (descriptor == - 1) {
     return;
@@ -47,6 +48,7 @@ void PipePrimitive::release() {
 }
 
 std::string MutexProcess::lockContent = "!";
+
 void MutexProcess::release() {
   this->lockPipe.release();
   this->name = "";

@@ -192,6 +192,7 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);
+
 template <typename Coefficient>
 void JSData::operator=(const Vector<Coefficient>& other) {
   for (int i = 0; i < other.size; i ++) {

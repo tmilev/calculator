@@ -18,6 +18,7 @@ FormatExpressions::getMonomialOrder<
 
 template < >
 WeylGroupData& Expression::getValueNonConst() const;
+
 bool WeylGroupData::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of WeylGroup. " << global.fatal;
@@ -2449,6 +2450,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystems(
 template < >
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::
 getValueNonConst() const;
+
 bool CalculatorFunctionsWeylGroup::decomposeWeylRep(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

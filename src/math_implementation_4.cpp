@@ -11,6 +11,7 @@ std::string UserCalculatorData::Roles::administator = "admin";
 std::string UserCalculatorData::Roles::student = "student";
 std::string UserCalculatorData::Roles::instructor = "instructor";
 std::string UserCalculatorData::Roles::teacher = "teacher";
+
 void fatalCrash(const std::string& input) {
   global.fatal << input << global.fatal;
 }

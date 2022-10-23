@@ -72,6 +72,7 @@ public:
 std::string RealAndImaginaryPartExtractor::realPartSuffix = "realPart";
 std::string RealAndImaginaryPartExtractor::imaginaryPartSuffix =
 "imaginaryPart";
+
 bool CalculatorFunctionsComplexDynamics::plotMandelbrotSet(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

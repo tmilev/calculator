@@ -3,6 +3,7 @@
 
 extern CryptoPublicDomain bootStrapCrypto;
 CryptoPublicDomain bootStrapCrypto;
+
 CryptoPublicDomain::CryptoPublicDomain() {
   Crypto::externalCrypto().computeRIPEMD160 =
   CryptoPublicDomain::computeRIPEMD160;

@@ -150,6 +150,7 @@ const signed Sha3::powersOfA[24] =
   6,
   1
 };
+
 void Sha3::theta() {
   uint64_t columnXORed[5];
   for (int i = 0; i < 5; i ++) {

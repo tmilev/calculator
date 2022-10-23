@@ -244,6 +244,7 @@ List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
 );
 HashedList<std::string> Calculator::ExpressionHistoryEnumerator::
 ruleIgnoreListHashList;
+
 void Calculator::ExpressionHistoryEnumerator::toStepsCleanUp(
   List<Calculator::ExpressionHistoryEnumerator::Step>& raw,
   List<Calculator::ExpressionHistoryEnumerator::Step>& outputSteps

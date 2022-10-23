@@ -4,6 +4,7 @@
 
 std::string Database::FallBack::databaseFilename =
 "database_fallback/database.json";
+
 bool Database::FallBack::deleteDatabase(
   std::stringstream* commentsOnFailure
 ) {

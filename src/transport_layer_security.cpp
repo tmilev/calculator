@@ -21,6 +21,7 @@
 const std::string TransportLayerSecurity::certificateSelfSigned = "cert.pem";
 const std::string TransportLayerSecurity::keySelfSigneD = "key.pem";
 const std::string TransportLayerSecurity::certificateFolder = "certificates/";
+
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
   this->flagInitializedPrivateKey = false;
@@ -420,6 +421,7 @@ errorsOnOutput =
 "errorsOnOutput";
 std::string TransportLayerSecurityServer::JSLabels::spoofer = "spoofer";
 std::string TransportLayerSecurityServer::JSLabels::session = "session";
+
 JSData TransportLayerSecurityServer::toJSON() {
   JSData result;
   if (this->spoofer.flagDoSpoof) {
@@ -600,6 +602,7 @@ std::string SSLContent::JSLabels::renegotiate = "renegotiate";
 std::string SSLContent::JSLabels::OCSPrequest = "OCSPrequest";
 std::string SSLContent::JSLabels::signedCertificateTimestampRequest =
 "signedCertificateTimestampRequest";
+
 JSData SSLContent::toJSON() const {
   STACK_TRACE("SSLHello::toJSON");
   JSData result;
@@ -1732,6 +1735,7 @@ std::string Serialization::JSLabels::length = "length";
 std::string Serialization::JSLabels::offset = "offset";
 std::string Serialization::JSLabels::label = "label";
 std::string Serialization::JSLabels::serialization = "serialization";
+
 std::string Serialization::Marker::toString() const {
   std::stringstream out;
   out
@@ -1768,6 +1772,7 @@ std::string SSLRecord::toHtml(int id) {
 std::string SSLRecord::JSLabels::type = "type";
 std::string SSLRecord::JSLabels::content = "content";
 std::string SSLRecord::JSLabels::session = "session";
+
 JSData SSLRecord::toJSON() {
   STACK_TRACE("SSLRecord::toJSON");
   JSData result;
@@ -1793,6 +1798,7 @@ std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName
 =
 "signatureAlgorithmName";
 std::string SignatureAlgorithmSpecification::JSLabels::valueHex = "valueHex";
+
 std::string SignatureAlgorithmSpecification::getSignatureAlgorithmName() {
   switch (this->signatureAlgorithm) {
   case SignatureAlgorithmSpecification::SignatureAlgorithm::anonymous:
@@ -1875,6 +1881,7 @@ std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName
 "ellipticCurveName";
 std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign =
 "bytesToSign";
+
 JSData TransportLayerSecurityServer::Session::toJSON() {
   JSData result;
   result.elementType = JSData::token::tokenArray;

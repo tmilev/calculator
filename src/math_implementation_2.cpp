@@ -32,6 +32,7 @@ const unsigned int HashConstants::primeConstants[HashConstants::size] =
   13933,
   14759
 };
+
 void LargeIntegerUnsigned::assignString(const std::string& input) {
   if (input.size() < 10) {
     unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));
@@ -2394,6 +2395,7 @@ void Rational::simplify() {
 
 template < >
 bool Polynomial<Rational>::isConstant(Rational* whichConstant) const;
+
 void Rational::operator=(const Polynomial<Rational>& other) {
   if (!other.isConstant(this)) {
     global.fatal

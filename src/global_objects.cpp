@@ -5,6 +5,7 @@
 #include "general_time_date.h"
 
 GlobalVariables global;
+
 std::string GlobalVariables::getDateForLogFiles() {
   static std::string tempDate;
   if (tempDate != "") {

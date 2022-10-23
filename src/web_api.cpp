@@ -10,6 +10,7 @@
 
 std::string WebAPIResponse::youHaveReachedTheBackend =
 "You've reached the calculator's backend. ";
+
 WebAPIResponse::WebAPIResponse() {
   this->owner = nullptr;
 }

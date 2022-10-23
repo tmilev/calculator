@@ -21,6 +21,7 @@ MapList<
 
 std::string HtmlRoutines::gitRepository =
 "https://github.com/tmilev/calculator";
+
 std::string HtmlRoutines::getJavascriptVariable(
   const std::string& variableName
 ) {

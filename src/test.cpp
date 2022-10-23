@@ -59,6 +59,7 @@ const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
 const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::API = "api";
+
 void Test::run() {
   STACK_TRACE("Test::run");
   global

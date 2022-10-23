@@ -24,6 +24,7 @@ std::string TransportLayerSecurityOpenSSL::errors::errorWantRead =
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 const SSL_METHOD* TransportLayerSecurityOpenSSL::methodGlobal = nullptr;
 SSL_CTX* TransportLayerSecurityOpenSSL::contextGlobal;
+
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
   this->peer_certificate = nullptr;
   this->owner = nullptr;

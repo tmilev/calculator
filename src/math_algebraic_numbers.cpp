@@ -5,6 +5,7 @@
 #include "math_general_implementation.h"
 
 const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
+
 std::string MonomialVector::toString(FormatExpressions* format) const {
   if (format != nullptr) {
     if (

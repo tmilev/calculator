@@ -200,6 +200,7 @@ const uint32_t RIPEMD160Internal::KR[5] =
   /* Round 4: floor(2**30 * cubert(7)) */
   0x00000000u /* Round 5: 0 */
 };
+
 void RIPEMD160Internal::ripemd160Initialize(Ripemd160State* self) {
   memcpy(
     self->h,

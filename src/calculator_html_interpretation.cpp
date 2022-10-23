@@ -2176,6 +2176,7 @@ std::string WebAPIResponse::addUserEmails(
 const std::string CalculatorHTML::bugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along "
 "with a short explanation to the administrator of the web site. ";
+
 JSData WebAPIResponse::getAnswerOnGiveUp() {
   return
   WebAPIResponse::getAnswerOnGiveUp(

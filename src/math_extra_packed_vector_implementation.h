@@ -7,6 +7,7 @@
 
 template <typename scalar>
 const int PackedVector<scalar>::size;
+
 template <typename scalar>
 PackedVector<scalar> PackedVector<scalar>::operator+(
   const PackedVector<scalar>& w

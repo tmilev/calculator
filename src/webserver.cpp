@@ -21,6 +21,7 @@
 const std::string WebServer::Statististics::pingRequestsString =
 "pingRequests";
 const std::string WebServer::Statististics::allRequestsString = "allRequests";
+
 WebServer& GlobalVariables::server() {
   static WebServer result;
   return result;
@@ -401,6 +402,7 @@ void WebWorker::sendAllBytesNoHeaders() {
 }
 
 const int WebServer::maxNumPendingConnections = 1000000;
+
 void SystemFunctions::segfaultSigaction[[noreturn]](
   int signal, siginfo_t* si, void* arg
 ) {
@@ -3940,6 +3942,7 @@ void SignalsInfrastructure::initializeSignals() {
 extern void monitorWebServer(
   int pidServer, const std::string& pingAuthentication
 );
+
 void WebServer::writeVersionJSFile() {
   STACK_TRACE("WebServer::writeVersionJSFile");
   std::stringstream out;
@@ -4572,6 +4575,7 @@ void WebServer::release(int& descriptor) {
 
 extern int mainFormat();
 extern int mainTest(List<std::string>& remainingArgs);
+
 void WebServer::figureOutOperatingSystem() {
   STACK_TRACE("WebServer::figureOutOperatingSystem");
   if (global.operatingSystem != "") {
@@ -5238,6 +5242,7 @@ void WebServer::initializeMainAll() {
 }
 
 extern int mainTest(List<std::string>& remainingArgs);
+
 void WebServer::turnProcessMonitoringOn() {
   STACK_TRACE("WebServer::turnProcessMonitoringOn");
   global.response.flagBanProcessMonitoring = false;

@@ -30,6 +30,7 @@ MapList<
   VoganDiagram::DiagramType,
   HashFunctions::hashFunction<std::string>
 > VoganDiagram::mapStringToType;
+
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   Calculator& calculator,
   const Expression& input,
@@ -5251,6 +5252,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
 
 template < >
 SemisimpleSubalgebras& Expression::getValueNonConst() const;
+
 bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

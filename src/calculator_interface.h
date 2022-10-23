@@ -3969,6 +3969,7 @@ bool CalculatorConversions::convert(
   const Expression& input,
   WithContext<Polynomial<Rational> >& output
 );
+
 template <class Coefficient>
 bool CalculatorConversions::functionExpressionFromPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
@@ -4233,6 +4234,7 @@ template < >
 int Expression::getBuiltInType<Rational>() const;
 template < >
 int Expression::addObjectReturnIndex(const Rational& inputValue) const;
+
 template <class Type>
 bool Expression::assignValueWithContext(
   Calculator& owner,

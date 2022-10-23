@@ -1300,12 +1300,9 @@ void CodeFormatter::Element::resetWhitespaceRecursively() {
   }
 }
 
-bool CodeFormatter::Element::containsNewLineAfterExcludingComments()
-{
+bool CodeFormatter::Element::containsNewLineAfterExcludingComments() {
   for (int i = 0; i < this->children.size; i ++) {
-    if (
-      this->children[i].containsNewLineAfterExcludingComments()
-    ) {
+    if (this->children[i].containsNewLineAfterExcludingComments()) {
       return true;
     }
   }
@@ -1484,6 +1481,14 @@ bool CodeFormatter::Element::shouldAddExtraLineInTopLevel(
     this->isOfTypeOrCommandOfType(
       CodeFormatter::Element::FunctionDefinition
     )
+  ) {
+    return true;
+  }
+  if (
+    next.isOfTypeOrCommandOfType(
+      CodeFormatter::Element::FunctionDefinition
+    ) &&
+    !this->isComment()
   ) {
     return true;
   }

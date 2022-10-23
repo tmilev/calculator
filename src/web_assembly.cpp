@@ -29,6 +29,7 @@ extern "C" {
     return buffer;
   }
 }
+
 int WebAssembly::main(int argc, char** argv) {
   (void) argc;
   (void) argv;

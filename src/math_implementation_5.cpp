@@ -176,6 +176,7 @@ std::string DrawOperations::fieldLabels = "labels";
 std::string DrawOperations::fieldLineWidth = "lineWidth";
 std::string DrawOperations::fieldFrameId = "frameId";
 std::string DrawOperations::fieldFrameIndex = "frameIndex";
+
 void DrawOperations::drawCircleAtVectorBufferRational(
   const Vector<Rational>& input,
   const std::string& color,

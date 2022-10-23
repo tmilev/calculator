@@ -10,6 +10,7 @@ template < >
 bool CalculatorConversions::getPolynomial<Rational>(
   Calculator& calculator, const Expression& input, Expression& output
 );
+
 bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

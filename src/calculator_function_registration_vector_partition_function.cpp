@@ -48,7 +48,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(0,1,1),\n"
     "(1,1,1)\n"
     ");\n"
-    "ConeDecomposition(\n"
+    /*    "ConeDecomposition(\n"
     "(1,0,0,0),"
     "(0,1,0,0),"
     "(0,0,1,0),"
@@ -59,7 +59,8 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(1,1,1,0),"
     "(0,1,1,1),"
     "(1,1,1,1)"
-    ");\n",
+    ");\n"*/
+    ,
     "CalculatorFunctionsVectorPartitionFunction::coneDecomposition",
     "ConeDecomposition",
     innerStandard

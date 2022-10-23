@@ -214,8 +214,7 @@ bool JSData::hasCompositeKey(
   }
   for (int i = 0; i < keys.size; i ++) {
     // will not work for integer indices larger than 9
-    int digit =
-    - 1;
+    int digit = - 1;
     if (MathRoutines::isDigit(keys[i], &digit)) {
       if (currentData->elementType != JSData::token::tokenArray) {
         if (commentsOnFailure != nullptr) {

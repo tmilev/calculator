@@ -652,8 +652,7 @@ bool CipherSuiteSpecification::computeName() {
   if (!this->owner->cipherSuiteNames.contains(this->id)) {
     // GREASE = deliberately invalid cipher suite code.
     // [Generate Random Extensions and Sustain Extensibility]
-    this->name =
-    "unknown/GREASE";
+    this->name = "unknown/GREASE";
     return false;
   }
   this->name = this->owner->cipherSuiteNames.getValueNoFail(this->id);
@@ -1304,9 +1303,7 @@ SignatureAlgorithmSpecification::SignatureAlgorithmSpecification() {
 
 void SignatureAlgorithmSpecification::processValue() {
   // Works for all RSA and ECDSA-based algorithms:
-  this->hash =
-  this->value /
-  256;
+  this->hash = this->value / 256;
   this->signatureAlgorithm = this->value % 256;
 }
 
@@ -2010,8 +2007,7 @@ bool SSLRecord::decode(std::stringstream* commentsOnFailure) {
   this->recordType = this->incomingBytes[this->offsetDecoded];
   this->offsetDecoded ++;
   if (
-    this->recordType !=
-    SSLRecord::tokens::handshake // &&
+    this->recordType != SSLRecord::tokens::handshake // &&
     //    this->recordType != SSLRecord::tokens::alert &&
     //    this->recordType != SSLRecord::tokens::applicationData &&
     //    this->recordType != SSLRecord::tokens::changeCipherSpec

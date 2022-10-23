@@ -676,8 +676,7 @@ bool Pipe::checkConsistency() {
 Pipe::~Pipe() {
   // Pipes are not allowed to release resources in the destructor:
   // a pipe's destructor is called when expanding List<Pipe>.
-  this->flagDeallocated =
-  true;
+  this->flagDeallocated = true;
 }
 
 Pipe::Pipe() {
@@ -793,8 +792,7 @@ void Logger::reset() {
   this->flagTagColorHtmlOpened = false;
   this->flagTagColorConsoleOpened = false;
   this->flagStopWritingToFile = false;
-  this->maximumLogSize =
-  // 10000
+  this->maximumLogSize = // 10000
   50000000;
   if (this->fileName == "") {
     this->flagStopWritingToFile = true;

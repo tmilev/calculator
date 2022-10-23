@@ -891,8 +891,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
     //     element2*= rational;
     //     *this+= element2;
     // The ninja formula alternative implementation:
-    const Vector<Rational>& root =
-    weylGroup.rootSystem[i];
+    const Vector<Rational>& root = weylGroup.rootSystem[i];
     element2.makeOneGeneratorCoefficientOne(- root, inputOwner);
     element1.makeOneGeneratorCoefficientOne(root, inputOwner);
     element2 *= element1;

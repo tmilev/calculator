@@ -978,8 +978,7 @@ void AESContext::xOrWithIv(uint8_t* buf, uint8_t* Iv) {
   uint8_t i;
   for (i = 0; i < AESContext::blockLength; ++ i) {
     // The block in AES is always 128-bit no matter the key size
-    buf[i] ^=
-    Iv[i];
+    buf[i] ^= Iv[i];
   }
 }
 

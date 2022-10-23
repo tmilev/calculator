@@ -707,8 +707,7 @@ std::string StringRoutines::convertStringToJavascriptVariable(
 
 std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
   std::stringstream out;
-  if (input >=
-2097152 // = 2^21-1
+  if (input >= 2097152 // = 2^21-1
   ) {
     // Invalid code point.
     // A unicode code point must be smaller than 2^21.
@@ -726,8 +725,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     out << output;
     return out.str();
   }
-  if (input <
-2048 // = 2^11, encoding fits in b_110?????, b_10??????
+  if (input < 2048 // = 2^11, encoding fits in b_110?????, b_10??????
   ) {
     unsigned char high = input >> 6;
     high += 128 + 64;
@@ -738,8 +736,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     return out.str();
   }
   if (
-    input <
-    65536 // = 2^16, encoding fits in b_1110????, b_10??????, b_10??????
+    input < 65536 // = 2^16, encoding fits in b_1110????, b_10??????, b_10??????
   ) {
     unsigned char high = input >> 12;
     high += 128 + 64 + 32;
@@ -6610,14 +6607,12 @@ void DynkinSimpleType::getEpsilonMatrix(
     output(4, 5) = - 1;
     if (weylRank > 6) {
       // 7th simple root: e_5-e_6
-      output(4, 6) =
-      1;
+      output(4, 6) = 1;
       output(5, 6) = - 1;
     }
     if (weylRank > 7) {
       // 8th simple root: e_6-e_7
-      output(5, 7) =
-      1;
+      output(5, 7) = 1;
       output(6, 7) = - 1;
     }
   }
@@ -12338,8 +12333,7 @@ void DrawOperations::makeMeAStandardBasis(int dimension) {
     );
   } else if (dimension == 2) {
     // <-if not needed but good for documentation purposes.
-    this->basisProjectionPlane[1] *=
-    - 1;
+    this->basisProjectionPlane[1] *= - 1;
   }
   if (this->bilinearForm.numberOfRows != dimension) {
     this->bilinearForm.makeIdentityMatrix(dimension, 1, 0);
@@ -13122,8 +13116,7 @@ public:
       // avoid this->value / 0;
       // If the user attempts to divide by zero,
       // I want a regular division by zero exception to be generated.
-      result.value =
-      this->value / (other.value - other.value);
+      result.value = this->value / (other.value - other.value);
       return result;
     }
     result.value /= other.value;
@@ -15159,8 +15152,7 @@ bool Cone::produceNormalSeparatingWallsInDirection(
   // normal1   = (1,0)
   // normal2   = (-5,1)
   // direction = (4,1).
-  Rational product1 =
-  base.scalarEuclidean(slicingDirection);
+  Rational product1 = base.scalarEuclidean(slicingDirection);
   // In the example, product1 = 4.
   Rational product2 = otherWall.scalarEuclidean(slicingDirection);
   // In the example product2 = -19.

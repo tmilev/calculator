@@ -4088,8 +4088,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
     !this->flagSystemSolved && this->flagUsedInducingSubalgebraRealization
   ) {
     // bool seedHadNoSolution = this->flagSystemProvedToHaveNoSolution;
-    this->flagUsedInducingSubalgebraRealization =
-    false;
+    this->flagUsedInducingSubalgebraRealization = false;
     bool result =
     this->computeSystemPart2(
       attemptToChooseCentalizer, allowNonPolynomialSystemFailure
@@ -9679,11 +9678,7 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
     characterFormat = this->characterFormat.getElementConst();
   }
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
-    out
-    << "<td><b>"
-    << "W_{"
-    << i + 1
-    << "}" // << "=" <<
+    out << "<td><b>" << "W_{" << i + 1 << "}" // << "=" <<
     // this->primalChar[i].toString(&characterFormat)
     << "</b></td>";
   }

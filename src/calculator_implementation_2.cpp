@@ -334,10 +334,7 @@ const List<Function>* Calculator::getOperationCompositeHandlers(int operation)
     // TODO(tmilev): document why we are so harsh
     // in the crash message.
     // [note: I no longer remember the orginal rationale, if any].
-    global.fatal
-    << "Corrupt atom index: "
-    << operation
-    << global.fatal;
+    global.fatal << "Corrupt atom index: " << operation << global.fatal;
   }
   if (this->operations.values[operation].isZeroPointer()) {
     return nullptr;
@@ -352,10 +349,7 @@ const List<Function>* Calculator::getOperationHandlers(int operation) {
     // TODO(tmilev): document why we are so harsh
     // in the crash message.
     // [note: I no longer remember the original rationale, if any].
-    global.fatal
-    << "Corrupt atom index: "
-    << operation
-    << global.fatal;
+    global.fatal << "Corrupt atom index: " << operation << global.fatal;
   }
   if (this->operations.values[operation].isZeroPointer()) {
     return nullptr;

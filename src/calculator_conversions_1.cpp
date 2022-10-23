@@ -56,8 +56,7 @@ bool CalculatorConversions::convertWithoutComputation<
   WithContext<Polynomial<Rational> > polynomialRational;
   if (input.isOfTypeWithContext(&polynomialRational)) {
     // Converts types.
-    output.content =
-    polynomialRational.content;
+    output.content = polynomialRational.content;
     output.context = polynomialRational.context;
     return true;
   }
@@ -89,8 +88,7 @@ bool CalculatorConversions::convertWithoutComputation<Polynomial<Rational> >(
   if (input.isOfTypeWithContext(&elementWeylAlgebra)) {
     if (elementWeylAlgebra.content.isPolynomial(&output.content)) {
       // An element of a weyl algebra that happens to be a polynomial.
-      output.context =
-      elementWeylAlgebra.context;
+      output.context = elementWeylAlgebra.context;
       return true;
     }
     // An element of a Weyl algebra that is not a polynomial.

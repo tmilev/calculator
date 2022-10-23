@@ -1820,8 +1820,7 @@ WebWorker::~WebWorker() {
   // Workers are not allowed to release resources in the destructor:
   // a Worker's destructor is called when expanding List<WebWorker>.
   // global << " web worker destructor called. " << Logger::endL;
-  this->flagDeallocated =
-  true;
+  this->flagDeallocated = true;
 }
 
 std::string WebWorker::headerFromFileExtension(
@@ -2804,8 +2803,7 @@ bool WebServer::checkConsistency() {
   if (this->flagDeallocated) {
     // The web server is global, if deallocated this is likely
     // a crash outside of main(). We therefore abstain from using logging.
-    std::cout << "Use after free of WebServer."
-    << std::endl;
+    std::cout << "Use after free of WebServer." << std::endl;
     std::exit(2);
   }
   return true;
@@ -2895,8 +2893,7 @@ void WebServer::reapChildren() {
   // Please avoid allocating RAM memory outside of the stack.
   // Do not use anything that is not thread-safe here.
   // In particular, do not use any loggers.
-  int waitResult =
-  0;
+  int waitResult = 0;
   int exitFlags = WNOHANG | WEXITED;
   this->checkConsistency();
   do {
@@ -4386,8 +4383,7 @@ int WebServer::run() {
     this->getActiveWorker().ProcessPID = incomingPID;
     if (this->getActiveWorker().ProcessPID == 0) {
       // this is the child (worker) process
-      global.flagIsChildProcess =
-      true;
+      global.flagIsChildProcess = true;
       if (global.flagServerDetailedLog) {
         global
         << Logger::green

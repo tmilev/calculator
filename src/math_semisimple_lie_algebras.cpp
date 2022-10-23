@@ -890,8 +890,7 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
   int indexEta
 ) {
   // using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
-  const Vector<Rational>& gamma =
-  this->weylGroup.rootSystem[indexGamma];
+  const Vector<Rational>& gamma = this->weylGroup.rootSystem[indexGamma];
   const Vector<Rational>& delta = this->weylGroup.rootSystem[indexDelta];
   const Vector<Rational>& minusEpsilon =
   this->weylGroup.rootSystem[indexMinusEpsilon];

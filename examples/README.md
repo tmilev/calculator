@@ -4672,7 +4672,7 @@ Sequence{}1,Sequence{}2,Sequence{}3,Sequence{}4)
 Work in progress. Vector partition function formula. 
 
 *ConeDecomposition* [ConeDecomposition] {CalculatorFunctionsVectorPartitionFunction::coneDecomposition}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecomposition%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecomposition%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConeDecomposition(
 (1,0,0),
@@ -4682,6 +4682,7 @@ ConeDecomposition(
 (0,1,1),
 (1,1,1)
 );
+
 ```
 Work in progress. 
 Cone decomposition related to a vector partition function. 

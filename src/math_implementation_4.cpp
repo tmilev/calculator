@@ -949,8 +949,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       // <- components are sorted by length, therefore the second and third
       // component are of length 1,
       // therefore we have type D_n
-      Rational scale =
-      DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
+      Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
       tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       currentComponent.addListOnTop(
         diagramWithoutTripleNode.simpleBasesConnectedComponents[0]
@@ -978,8 +977,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       // the second largest component has more than one element, hence we are
       // in
       // type E_n.
-      Rational scale =
-      DynkinSimpleType::getDefaultLongRootLengthSquared('E') /
+      Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') /
       tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       if (
         diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2
@@ -1408,8 +1406,7 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(
   if (currentStrinG.letter == 'D') {
     if (currentComponent.size == 4) {
       // the automorphism group of the Dynkin Diagram is S3
-      permutation[1] =
-      2;
+      permutation[1] = 2;
       permutation[2] = 3;
       permutation[3] = 1;
       output.addOnTop(permutation);
@@ -2810,8 +2807,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
 ) {
   // Reminder: the very last variable comes from the projectivization and
   // contributes to the translation only!
-  int numNonParams =
-  nonParameters.size;
+  int numNonParams = nonParameters.size;
   output.initialize(
     numberOfParameters + numNonParams - 1, numberOfParameters - 1
   );

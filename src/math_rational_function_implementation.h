@@ -1167,8 +1167,7 @@ void RationalFraction<Coefficient>::operator=(
     // Coefficients of types such as ElementZModP may have
     // their zero constants not known at compile time.
     // We therefore initialize a zero constant here.
-    this->constantValue =
-    other.coefficients[0].zero();
+    this->constantValue = other.coefficients[0].zero();
   }
   this->reduceMemory();
 }

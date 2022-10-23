@@ -3661,9 +3661,7 @@ bool Expression::toStringTimes(
   if (input[1].isOperationGiven(input.owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
-    out << "\\sqrt{"
-    << secondE
-    << "}";
+    out << "\\sqrt{" << secondE << "}";
     return true;
   }
   std::string firstE = input[1].toString(format);
@@ -3842,8 +3840,7 @@ bool Expression::toStringDivide(
     } else {
       // Compilers will complain at certain optimization levels about
       // maintain not being initialized.
-      maintain.toMaintain =
-      nullptr;
+      maintain.toMaintain = nullptr;
       maintain.contentAtStart = false;
     }
     std::string firstE = input[1].toString(format);

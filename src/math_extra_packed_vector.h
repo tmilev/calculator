@@ -167,8 +167,7 @@ void AnotherWeylGroup<scalar, templateVector>::applyReflectionList(
 ) const {
   for (int ii = simpleReflections.size - 1; ii >= 0; ii --) {
     // this->simpleReflection(simpleReflections[i],v);
-    int i =
-    simpleReflections[ii];
+    int i = simpleReflections[ii];
     scalar x = 0;
     for (int j = 0; j < this->rank; j ++) {
       x += this->unrationalCartanSymmetric.elements[i][j] * v[j];

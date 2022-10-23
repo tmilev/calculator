@@ -151,7 +151,7 @@ public:
     bool computeIndentationQuote();
     void formatDefault(std::stringstream& out);
     void formatContent(std::stringstream& out);
-    bool containsNewLineAfterRecursively();
+    bool containsNewLineAfterExcludingComments();
     void resetWhitespaceRecursively();
     int offsetFromPrevious();
     int minimalSizeWithSpacebars();

@@ -351,8 +351,7 @@ public:
     Vector<Coefficient>& point, Vector<Coefficient>& normal
   ) {
     // the extra dimension is going to be the last dimension
-    int newDimension =
-    normal.size + 1;
+    int newDimension = normal.size + 1;
     this->setSize(newDimension);
     this->RootScalarEuclideanRoot(
       normal, point, this->objects[newDimension - 1]
@@ -1457,8 +1456,7 @@ Vector<Coefficient> AffineHyperplane<Coefficient>::projectOnMe(
 ) const {
   // output = input + x * normal  and <input + x * normal, normal> = 0 =>
   // x = -<input, normal> / <normal, normal>
-  Coefficient normalCoefficient =
-  - input.scalarEuclidean(this->normal) /
+  Coefficient normalCoefficient = - input.scalarEuclidean(this->normal) /
   this->normal.scalarEuclidean(this->normal);
   Vector<Coefficient> output;
   output = input + this->normal * normalCoefficient;

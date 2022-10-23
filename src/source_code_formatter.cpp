@@ -843,7 +843,7 @@ void CodeFormatter::Element::breakExpression() {
 
 bool CodeFormatter::Element::computeIndentationReturnedExpression() {
   this->computeIndentationBasic(0);
-  bool shouldBreak = this->containsNewLineAfterRecursively();
+  bool shouldBreak = this->containsNewLineAfterExcludingComments();
   if (
     !shouldBreak &&
     this->rightMostAtomUnderMe()->columnFinal + 1 >=
@@ -973,7 +973,7 @@ bool CodeFormatter::Element::computeIndentationFunctionDeclaration() {
     }
   }
   this->computeIndentationBasic(0);
-  if (!this->containsNewLineAfterRecursively()) {
+  if (!this->containsNewLineAfterExcludingComments()) {
     return true;
   }
   this->resetWhitespaceRecursively();
@@ -1093,7 +1093,7 @@ bool CodeFormatter::Element::computeIndentationCurlyBraceCommaDelimitedList() {
   if (this->children.size < 3) {
     return true;
   }
-  if (!this->containsNewLineAfterRecursively()) {
+  if (!this->containsNewLineAfterExcludingComments()) {
     return true;
   }
   this->resetWhitespaceRecursively();
@@ -1300,17 +1300,21 @@ void CodeFormatter::Element::resetWhitespaceRecursively() {
   }
 }
 
-bool CodeFormatter::Element::containsNewLineAfterRecursively() {
+bool CodeFormatter::Element::containsNewLineAfterExcludingComments()
+{
   for (int i = 0; i < this->children.size; i ++) {
-    if (this->children[i].containsNewLineAfterRecursively()) {
+    if (
+      this->children[i].containsNewLineAfterExcludingComments()
+    ) {
       return true;
     }
   }
-  /*
-  if (this->type == CodeFormatter::Element::Type::Comment ||
-  this->type == CodeFormatter::Element::Type::CommentMultiline){
+  if (
+    this->type == CodeFormatter::Element::Type::Comment ||
+    this->type == CodeFormatter::Element::Type::CommentMultiline
+  ) {
     return false;
-  }*/
+  }
   return this->newLinesAfter > 0;
 }
 
@@ -1420,7 +1424,7 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
 
 bool CodeFormatter::Element::computeIndentationExpression() {
   this->computeIndentationBasic(0);
-  if (!this->containsNewLineAfterRecursively()) {
+  if (!this->containsNewLineAfterExcludingComments()) {
     return true;
   }
   this->breakExpression();
@@ -2725,8 +2729,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.type == CodeFormatter::Element::ClassDeclaration
   ) {
     // Must come before object declaration.
-    this->lastRuleName =
-    "templateClause classDeclaration";
+    this->lastRuleName = "templateClause classDeclaration";
     thirdToLast.makeFrom2(
       CodeFormatter::Element::ClassDeclaration, thirdToLast, secondToLast
     );
@@ -2759,8 +2762,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     last.type == CodeFormatter::Element::SemiColon
   ) {
     // Must come after template clause+class declaration.
-    this->lastRuleName =
-    "object declaration ;";
+    this->lastRuleName = "object declaration ;";
     secondToLast.makeFrom2(
       CodeFormatter::Element::Command, secondToLast, last
     );
@@ -3725,8 +3727,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   ) {
     // Must come before rule
     // expression oeprator expression Lookahead X.
-    this->lastRuleName =
-    "expression operator expression Lookahead XX";
+    this->lastRuleName = "expression operator expression Lookahead XX";
     fifthToLast.type = CodeFormatter::Element::Operator;
     sixthToLast.makeFrom3(
       CodeFormatter::Element::Expression,
@@ -3744,8 +3745,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     )
   ) {
     // Must come before rule expression operator expression.
-    this->lastRuleName =
-    "type and ampersand or star";
+    this->lastRuleName = "type and ampersand or star";
     fourthToLast.makeFrom2(
       CodeFormatter::Element::TypeExpression, fourthToLast, thirdToLast
     );
@@ -3776,8 +3776,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   ) {
     // Must come before rule
     // expression operator expression Lookahead.
-    this->lastRuleName =
-    "expression operator expression Lookahead X";
+    this->lastRuleName = "expression operator expression Lookahead X";
     fourthToLast.type = CodeFormatter::Element::Operator;
     fifthToLast.makeFrom3(
       CodeFormatter::Element::Expression,
@@ -3796,8 +3795,7 @@ bool CodeFormatter::Processor::applyOneRule() {
   ) {
     // This rule must come after the rule
     // expression operator expression Lookahead X
-    this->lastRuleName =
-    "expression operator expression";
+    this->lastRuleName = "expression operator expression";
     // Operators such as < and > may need to have their type
     // set to Operator.
     thirdToLast.type = CodeFormatter::Element::Operator;
@@ -4113,8 +4111,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.isParenthesesBlock()
   ) {
     // Must come before expression and semicolon.
-    this->lastRuleName =
-    "type_identifier + parentheses block X";
+    this->lastRuleName = "type_identifier + parentheses block X";
     thirdToLast.makeFrom2(
       CodeFormatter::Element::FunctionDeclaration,
       thirdToLast,
@@ -4956,8 +4953,7 @@ void CodeFormatter::applyNewLineExceptions(
       left.columnFinal + 1 < this->maximumDesiredLineLength
     ) {
       // Exception: formatting of ({ sequence.
-      left.newLinesAfter =
-      0;
+      left.newLinesAfter = 0;
       right.whiteSpaceBefore = 0;
       return;
     }

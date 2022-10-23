@@ -1207,8 +1207,7 @@ public:
       // We zero the underlying buffer:
       // this->data[i] may be out of bounds if
       // the actual size does not equal the size.
-      this->data.objects[i] =
-      0;
+      this->data.objects[i] = 0;
     }
   }
 };

@@ -721,12 +721,7 @@ std::string CalculatorHTML::toStringCalculatorProblemSourceFromFileName(
   STACK_TRACE("CalculatorHTML::toStringCalculatorProblemSourceFromFileName");
   std::stringstream out;
   out // << "<span class =\"calculatorExamProblem\">\n"
-  << "Title: "
-  << fileName
-  << "\n"
-  << "Problem: "
-  << fileName
-  << "\n" // <<
+  << "Title: " << fileName << "\n" << "Problem: " << fileName << "\n" // <<
   // "\n</span>"
   ;
   return out.str();
@@ -2126,8 +2121,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
     }
     out << hoursTillDeadlineStream.str();
   }
-  return
-  // "[<b style='color:green'>disabled </b>] "+
+  return // "[<b style='color:green'>disabled </b>] "+
   out.str();
 }
 

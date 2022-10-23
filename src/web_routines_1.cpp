@@ -310,14 +310,16 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
-      struct sockaddr_in* ipv4 =
-      reinterpret_cast<struct sockaddr_in*>(p->ai_addr);
+      struct sockaddr_in* ipv4 = reinterpret_cast<struct sockaddr_in*>(
+        p->ai_addr
+      );
       adress = &(ipv4->sin_addr);
       reportStream << "IPv4: ";
     } else {
       // IPv6
-      struct sockaddr_in6* ipv6 =
-      reinterpret_cast<struct sockaddr_in6*>(p->ai_addr);
+      struct sockaddr_in6* ipv6 = reinterpret_cast<struct sockaddr_in6*>(
+        p->ai_addr
+      );
       adress = &(ipv6->sin6_addr);
       reportStream << "IPv6: ";
     }
@@ -502,16 +504,18 @@ void WebClient::fetchWebPage(
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
-      struct sockaddr_in* ipv4 =
-      reinterpret_cast<struct sockaddr_in*>(p->ai_addr);
+      struct sockaddr_in* ipv4 = reinterpret_cast<struct sockaddr_in*>(
+        p->ai_addr
+      );
       address = &(ipv4->sin_addr);
       if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv4: ";
       }
     } else {
       // IPv6
-      struct sockaddr_in6* ipv6 =
-      reinterpret_cast<struct sockaddr_in6*>(p->ai_addr);
+      struct sockaddr_in6* ipv6 = reinterpret_cast<struct sockaddr_in6*>(
+        p->ai_addr
+      );
       address = &(ipv6->sin6_addr);
       if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv6: ";

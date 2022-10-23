@@ -19,8 +19,7 @@ void RootSubalgebra::getCoxeterPlane(
   Vector<double>& outputBasis1, Vector<double>& outputBasis2
 ) {
   // this->computeRho(true);
-  int dimension =
-  this->getAmbientWeyl().getDimension();
+  int dimension = this->getAmbientWeyl().getDimension();
   if (dimension < 2) {
     return;
   }

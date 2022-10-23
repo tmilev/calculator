@@ -1589,9 +1589,7 @@ void Crypto::computeSha1(
         k = 0x8F1BBCDC;
       } else {
         // 60<= j
-        f = b xor
-        c xor
-        d;
+        f = b xor c xor d;
         k = 0xCA62C1D6;
       }
       temp =

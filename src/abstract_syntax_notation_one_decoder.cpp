@@ -85,15 +85,13 @@ decodeLengthIncrementDataPointerNoCheck(ASNElement& output) {
   unsigned char currentByte = (*this->rawData)[this->dataPointer];
   if (currentByte < 128) {
     // 128 = 0x80
-    output.lengthPromised =
-    currentByte;
+    output.lengthPromised = currentByte;
     this->dataPointer ++;
     return true;
   }
   if (currentByte == 128) {
     // 128 = 0x80 signals varible-length encoding
-    output.lengthPromised =
-    - 1;
+    output.lengthPromised = - 1;
     this->dataPointer ++;
     return true;
   }

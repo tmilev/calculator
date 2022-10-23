@@ -352,8 +352,7 @@ private:
 public:
   struct Order {
     // Lexicographic order, see documentation below.
-    static const int lexicographic =
-    0;
+    static const int lexicographic = 0;
     // Lexicographic with opposite letter order.
     static const int lexicographicOpposite = 1;
     // Graded lexicographic order, ties resolved with lexicographic order.

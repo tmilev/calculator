@@ -11664,6 +11664,24 @@ Cone::Cone(int inputId) {
   this->id = inputId;
 }
 
+bool Cone::checkConsistencyFull(const ConeCollection &owner) const{
+  STACK_TRACE("Cone::checkConsistencyFull");
+  if (!owner.containsId(this->id) ){
+    global.fatal << "Cone of id: " << this->id << " not contained in its owner. " << global.fatal;
+  }
+  for (const Wall& wall: this->walls){
+    for (int neighbor: wall.neighbors){
+      if (!owner.containsId(neighbor)){
+        global.fatal << "Cone of id: " << this->id << " has non-existent neighbors. "
+        << "Non-existent neighbor: " << neighbor << " adjacent through wall: "
+        <<wall << ". All walls of the chamber: " << this->walls <<global.fatal;
+      }
+    }
+  }
+
+  return true;
+}
+
 bool Cone::operator>(const Cone& other) const {
   return this->walls > other.walls;
 }
@@ -14589,7 +14607,7 @@ void ConeCollection::removeFakeNeighborsAlongWall(Cone& cone, Wall& wall) {
   STACK_TRACE("ConeCollection::removeFakeNeighborsAlongWall");
   for (int i = wall.neighbors.size - 1; i >= 0; i --) {
     int neighborId = wall.neighbors[i];
-    Cone* neighbor = this->getConeById(neighborId);
+    Cone* neighbor = this->getConeByIdNonConst(neighborId);
     if (neighbor == nullptr) {
       // The neighbor is not added to the cone collection.
       // This neighbor is the other cone generated while splitting the chamber.
@@ -14613,7 +14631,7 @@ void ConeCollection::removeFakeNeighborsAlongWall(Cone& cone, Wall& wall) {
 void ConeCollection::removeFromNeighbors(const Cone& cone) {
   for (const Wall& wall : cone.walls) {
     for (int id : wall.neighbors) {
-      Cone* neighbor = this->getConeById(id);
+      Cone* neighbor = this->getConeByIdNonConst(id);
       if (neighbor == nullptr) {
         continue;
       }
@@ -14696,7 +14714,7 @@ void ConeCollection::splitConeByMultipleNeighbors(
   STACK_TRACE("ConeCollection::splitConeByMultipleNeighbors");
   Wall wallWithReducedNeighborCount = wall;
   int neighborIndex = wallWithReducedNeighborCount.neighbors.popLastObject();
-  Cone& neighbor = *this->getConeById(neighborIndex);
+  Cone& neighbor = *this->getConeByIdNonConst(neighborIndex);
   HashedList<Vector<Rational> > inputVertices;
   input.getAllVerticesPerpendicularTo(wall.normal, inputVertices);
   List<Vector<Rational> > neighborVertices;
@@ -14778,6 +14796,8 @@ void ConeCollection::refineOneByOneDirection(
   for (Cone& cone : candidates.values) {
     this->processNeighborsOfNewlyAddedCone(cone);
   }
+  global.comments << "<hr>DEBUG: checking consistency.";
+  this->checkConsistencyFull();
 }
 
 void ConeCollection::attachNeighbbors(
@@ -14801,7 +14821,7 @@ void ConeCollection::replaceConeAdjacentToWall(
 ) {
   STACK_TRACE("ConeCollection::replaceConeAdjacentToWall");
   for (int idNeighbor : wall.neighbors) {
-    Cone* neighbor = this->getConeById(idNeighbor);
+    Cone* neighbor = this->getConeByIdNonConst(idNeighbor);
     if (neighbor == nullptr) {
       if (!newCones.contains(idNeighbor)) {
         global.fatal
@@ -14917,7 +14937,11 @@ void ConeCollection::refineByOneDirection(
   }
 }
 
-Cone* ConeCollection::getConeById(int id) {
+bool ConeCollection::containsId(int id)const {
+  return this->getConeById(id)==nullptr;
+}
+
+Cone* ConeCollection::getConeByIdNonConst(int id){
   if (this->refinedCones.contains(id)) {
     return &this->refinedCones.getValueCreateNoInitialization(id);
   }
@@ -14926,6 +14950,20 @@ Cone* ConeCollection::getConeById(int id) {
   }
   if (this->conesWithIrregularWalls.contains(id)) {
     return &this->conesWithIrregularWalls.getValueCreateNoInitialization(id);
+  }
+  return nullptr;
+
+}
+
+const Cone* ConeCollection::getConeById(int id)const {
+  if (this->refinedCones.contains(id)) {
+    return &this->refinedCones.getValueNoFail(id);
+  }
+  if (this->nonRefinedCones.contains(id)) {
+    return &this->nonRefinedCones.getValueNoFail(id);
+  }
+  if (this->conesWithIrregularWalls.contains(id)) {
+    return &this->conesWithIrregularWalls.getValueNoFail(id);
   }
   return nullptr;
 }
@@ -15398,6 +15436,22 @@ ConeCollection::ConeCollection(const ConeCollection& other) {
   this->operator=(other);
 }
 
+bool ConeCollection::checkConsistencyFull()const{
+  STACK_TRACE("ConeCollection::checkConsistencyFull");
+  this->checkConsistencyOneCollection(this->refinedCones);
+  this->checkConsistencyOneCollection(this->nonRefinedCones);
+  this->checkConsistencyOneCollection(this->conesWithIrregularWalls);
+  return true;
+}
+
+bool ConeCollection::checkConsistencyOneCollection(const MapList<int, Cone> &collection) const{
+STACK_TRACE("ConeCollection::checkConsistencyOneCollection");
+  for (const Cone& cone: collection.values){
+  cone.checkConsistencyFull(*this);
+}
+return true;
+}
+
 void ConeCollection::initialize() {
   this->conesCreated = 0;
   this->splittingNormals.clear();
@@ -15467,6 +15521,12 @@ bool ConeCollection::checkIsRefinedOrCrash() const {
     global.fatal
     << "Non-refined cones not allowed by this function."
     << global.fatal;
+  }
+  if (this->conesWithIrregularWalls.size()>0) {
+    global.fatal
+    << "Cones with irregular walls not allowed by this function."
+    << global.fatal;
+
   }
   return true;
 }

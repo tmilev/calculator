@@ -6316,6 +6316,7 @@ public:
       }
     }
   }
+  bool checkConsistencyFull(const ConeCollection& owner)const;
   Wall& getWallWithNormalNoFail(const Vector<Rational>& desiredNormal);
   bool operator>(const Cone& other) const;
   bool operator==(const Cone& other) const;
@@ -6416,7 +6417,9 @@ public:
   std::string drawMeToHtmlLastCoordAffine(
     DrawingVariables& drawingVariables, FormatExpressions& format
   );
-  Cone* getConeById(int id);
+  bool containsId(int id) const;
+  const Cone *getConeById(int id) const;
+  Cone *getConeByIdNonConst(int id) ;
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
@@ -6481,6 +6484,10 @@ public:
   ConeCollection();
   void operator=(const ConeCollection& other);
   bool checkIsRefinedOrCrash() const;
+  // Checks the consistency of the cone collection.
+  // Runs slow; avoid calling multiple times.
+  bool checkConsistencyFull() const;
+  bool checkConsistencyOneCollection(const MapList<int, Cone>& collection) const;
 };
 
 class PartialFractions {

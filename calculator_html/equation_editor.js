@@ -1009,10 +1009,12 @@ class MathNodeFactory {
       if (matrixEnvironment === 'bmatrix') {
         leftDelimiter = this.leftDelimiter(equationEditor, '[', false);
         rightDelimiter = this.rightDelimiter(equationEditor, ']', false);
-      } else if (
-          matrixEnvironment === 'pmatrix' || matrixEnvironment == 'binom') {
+      } else if (matrixEnvironment === 'pmatrix' || matrixEnvironment == 'binom') {
         leftDelimiter = this.leftParenthesis(equationEditor, false);
         rightDelimiter = this.rightParenthesis(equationEditor, false);
+      } else if (matrixEnvironment == 'vmatrix') {
+        leftDelimiter = this.leftDelimiter(equationEditor, '|', false);
+        rightDelimiter = this.rightDelimiter(equationEditor, '|', false);
       } else if (matrixEnvironment === 'cases') {
         leftDelimiter = this.leftDelimiter(equationEditor, '{', false);
         rightDelimiter = this.rightDelimiter(equationEditor, '', false);
@@ -1817,6 +1819,7 @@ class LaTeXConstants {
       'matrix': 'matrix',
       'pmatrix': 'pmatrix',
       'bmatrix': 'bmatrix',
+      'vmatrix': 'vmatrix',
       'array': 'array',
       'cases': 'cases',
       'align': 'align',
@@ -1826,6 +1829,7 @@ class LaTeXConstants {
       '\\end{pmatrix}': true,
       '\\end{matrix}': true,
       '\\end{bmatrix}': true,
+      '\\end{vmatrix}': true,
       '\\end{array}': true,
       '\\end{align}': true,
       '\\end{cases}': true,
@@ -1854,6 +1858,7 @@ class LaTeXConstants {
       '\\rangle': true,
       '\\matrix': true,
       '\\pmatrix': true,
+      '\\vmatrix': true,
       '\\bmatrix': true,
       '\\cancel': true,
       '\\sqrt': true,
@@ -2540,6 +2545,12 @@ class LaTeXParser {
       this.lastRuleName = 'begin bmatrix to matrix builder';
       let matrix =
           mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'bmatrix');
+      return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
+    }
+    if (last.syntacticRole === '\\begin{vmatrix}') {
+      this.lastRuleName = 'begin vmatrix to matrix builder';
+      let matrix =
+          mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'vmatrix');
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{cases}') {
@@ -6161,6 +6172,9 @@ class MathNode {
         return new KeyHandlerResult(true, false);
       case '\\bmatrix':
         this.makeMatrix(2, 2, 'bmatrix');
+        return new KeyHandlerResult(true, false);
+      case '\\vmatrix':
+        this.makeMatrix(2, 2, 'vmatrix');
         return new KeyHandlerResult(true, false);
       case '\\matrix':
         this.makeMatrix(2, 2, 'matrix');
@@ -11990,6 +12004,12 @@ let buttonFactories = {
   'cases3x3': new EquationEditorButtonFactory(
       '\\begin{cases}\\cursor&=&\\\\ &=& \\\\ &=&\\end{cases}', false, '{3x3',
       {'width': '100%'}, ''),
+  'det3x3': new EquationEditorButtonFactory(
+      '\\begin{vmatrix}\\cursor&&\\\\ && \\\\ &&\\end{vmatrix}', false, '|3x3|',
+      {'width': '100%'}, ''),
+  'det2x2': new EquationEditorButtonFactory(
+      '\\begin{vmatrix}\\cursor&\\\\ &\\end{vmatrix}', false, '|2x2|',
+      {'width': '100%'}, ''),
   'array3x3': new EquationEditorButtonFactory(
       '\\begin{array}{rcl}\\cursor&=&\\\\ &=& \\\\ &=&\\end{array}', false,
       '3x3', {'width': '100%'}, ''),
@@ -12108,8 +12128,8 @@ class EquationEditorButtonPanel {
         buttonFactories['bmatrix1x3'],
         buttonFactories['bmatrix1x2'],
         buttonFactories['bmatrix2x1'],
-        buttonFactories['cases2x1'],
-        buttonFactories['cases3x1'],
+        buttonFactories['det2x2'],
+        buttonFactories['det3x3'],
         buttonFactories['cases3x3'],
         buttonFactories['array3x3'],
         buttonFactories['align3x3'],

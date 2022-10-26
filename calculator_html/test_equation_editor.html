@@ -70,7 +70,7 @@
     });
     let svgContainer = document.getElementById("svgContainer");
     editor = new EquationEditor(document.getElementById('editor'), options, svgContainer);
-    editor.canvasContainer = document.getElementById("canvasContainer");
+    editor.containerCanvas = document.getElementById("canvasContainer");
     let panel = new EquationEditorButtonPanel(
       // The editor to go with the button panel.
       editor,

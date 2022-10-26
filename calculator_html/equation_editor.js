@@ -996,7 +996,7 @@ class MathNodeFactory {
        * @type {string}
        */
       columnStyle,
-      /** @type{string} */
+      /** @type {string} */
       matrixEnvironment,
   ) {
     const matrixTable = new MathNode(equationEditor, knownTypes.matrixTable);
@@ -1009,7 +1009,8 @@ class MathNodeFactory {
       if (matrixEnvironment === 'bmatrix') {
         leftDelimiter = this.leftDelimiter(equationEditor, '[', false);
         rightDelimiter = this.rightDelimiter(equationEditor, ']', false);
-      } else if (matrixEnvironment === 'pmatrix' || matrixEnvironment == 'binom') {
+      } else if (
+          matrixEnvironment === 'pmatrix' || matrixEnvironment == 'binom') {
         leftDelimiter = this.leftParenthesis(equationEditor, false);
         rightDelimiter = this.rightParenthesis(equationEditor, false);
       } else if (matrixEnvironment == 'vmatrix') {
@@ -2562,8 +2563,8 @@ class LaTeXParser {
     if (secondToLast.syntacticRole === 'matrixBuilder' &&
         last.syntacticRole === '\\hline') {
       this.lastRuleName = 'matrixBuilder hline';
-      /** @type{MathNodeMatrix!} */
-      let builder = /** @type{MathNodeMatrix!} */ (secondToLast.node);
+      /** @type {MathNodeMatrix!} */
+      let builder = /** @type {MathNodeMatrix!} */ (secondToLast.node);
       builder.appendHorizontalAboveLastRow();
       return this.decreaseParsingStack(1);
     }
@@ -2919,7 +2920,7 @@ class EquationEditorOptions {
     if (options.copyButton === true) {
       this.copyButton = true;
     }
-    /** @type{{backgroundColor:string, outline: string}} */
+    /** @type {{backgroundColor:string, outline: string}} */
     this.highlightStyle = {
       backgroundColor: '#f0f0f0',
       outline: '1px dashed black',
@@ -2929,12 +2930,12 @@ class EquationEditorOptions {
       if (this.highlightStyle.backgroundColor !== null &&
           this.highlightStyle.backgroundColor !== undefined) {
         this.highlightStyle.backgroundColor =
-            /** @type{string} */ (options.highlightStyle.backgroundColor);
+            /** @type {string} */ (options.highlightStyle.backgroundColor);
       }
       if (this.highlightStyle.outline !== null &&
           this.highlightStyle.outline !== undefined) {
         this.highlightStyle.outline =
-            /** @type{string} */ (options.highlightStyle.outline);
+            /** @type {string} */ (options.highlightStyle.outline);
       }
     }
 
@@ -3140,7 +3141,7 @@ class CopyButton {
       /** @type {EquationEditor?} */
       equationEditor,
   ) {
-    /**@type{EquationEditor?} */
+    /**@type {EquationEditor?} */
     this.equationEditor = equationEditor;
     /** @type {HTMLElement?} */
     this.button = null;
@@ -3207,11 +3208,11 @@ class EquationEditor {
     if (this.containerSVG === undefined) {
       this.containerSVG = null;
     }
-    /** @type{HTMLCanvasElement?} */
+    /** @type {HTMLCanvasElement?} */
     this.containerCanvas = null;
-    /** @type{CanvasRenderingContext2D?} */
+    /** @type {CanvasRenderingContext2D?} */
     this.canvasTwoDContext = null;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.canvasPosition = [0, 0];
     /** @type {EquationEditorOptions!} */
     this.options = new EquationEditorOptions({
@@ -3304,7 +3305,7 @@ class EquationEditor {
     /** @type {MathNode?} */
     this.eventCatcher = null;
     this.prepareEventCatcher();
-    /** @type{CopyButton?} */
+    /** @type {CopyButton?} */
     this.copyButtonContainer = null;
     this.prepareCopyButton();
   }
@@ -3370,7 +3371,7 @@ class EquationEditor {
       return;
     }
     this.redoBuffer.push(this.latexLastEditWithCursor);
-    let element = /** @type{string} */ (this.history.pop());
+    let element = /** @type {string} */ (this.history.pop());
 
     this.writeLatex(element);
     this.latexLastEditWithCursor = element;
@@ -3562,14 +3563,14 @@ class EquationEditor {
 
   /** Draws the math node on a canvas. */
   drawOnCanvasAtLocation(
-    /** @type{number[]} */
-    location,
+      /** @type {!Array.<number>} */
+      location,
   ) {
     if (this.containerCanvas === null && this.canvasTwoDContext === null) {
       return;
     }
     if (this.canvasTwoDContext === null) {
-      this.canvasTwoDContext = /** @type{CanvasRenderingContext2D!}*/ (
+      this.canvasTwoDContext = /** @type {CanvasRenderingContext2D!}*/ (
           this.containerCanvas.getContext('2d'));
     }
     if (this.containerCanvas !== null) {
@@ -4085,7 +4086,7 @@ class EquationEditor {
   /**
    * @return {KeyHandlerResult!} whether the default should be prevented.
    */
-  deleteFullSelection() { 
+  deleteFullSelection() {
     // Delete the root node.
     this.rootNode.removeAllChildren();
     this.rootNode.appendChild(mathNodeFactory.horizontalMath(this, null));
@@ -5592,7 +5593,7 @@ class MathNode {
       let verticalBar = this.children[i];
       verticalBar.boundingBox.height = this.boundingBox.height;
       verticalBar.boundingBox.width = 1;
-      let extraData = /** @type{VerticalBarData!} */ (verticalBar.extraData);
+      let extraData = /** @type {VerticalBarData!} */ (verticalBar.extraData);
       let columnIndex = extraData.columnIndex;
       let offset = table.boundingBox.getColumnOffset(columnIndex);
       verticalBar.boundingBox.left = offset;
@@ -8495,7 +8496,7 @@ class MathNode {
   }
 
   drawOnCanvasBase(
-      /** @type{CanvasRenderingContext2D!} */
+      /** @type {CanvasRenderingContext2D!} */
       canvas,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -8507,7 +8508,7 @@ class MathNode {
   }
 
   drawOnCanvas(
-      /** @type{CanvasRenderingContext2D!} */
+      /** @type {CanvasRenderingContext2D!} */
       canvas,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -8519,14 +8520,15 @@ class MathNode {
   }
 
   drawOnCanvasAtomic(
-      /** @type{CanvasRenderingContext2D!} */
+      /** @type {CanvasRenderingContext2D!} */
       canvas,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
   ) {
     let left = boundingBoxFromParent.left + this.boundingBox.left;
-    let top = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.fractionLineHeight;
-    canvas.textBaseline = "middle";
+    let top = boundingBoxFromParent.top + this.boundingBox.top +
+        this.boundingBox.fractionLineHeight;
+    canvas.textBaseline = 'middle';
     let fontSize =
         this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     let fontFamily = this.equationEditor.getFontFamily();
@@ -8736,7 +8738,7 @@ class MathNodeAtom extends MathNode {
   }
 
   drawOnCanvas(
-      /** @type{CanvasRenderingContext2D!} */
+      /** @type {CanvasRenderingContext2D!} */
       canvas,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -8785,7 +8787,7 @@ class MathNodeAtomImmutable extends MathNode {
   }
 
   drawOnCanvas(
-      /** @type{CanvasRenderingContext2D!} */
+      /** @type {CanvasRenderingContext2D!} */
       canvas,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -8831,7 +8833,8 @@ class MathNodeFraction extends MathNode {
       boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
-    let fractionLine = this.horizontalLineFromBoundingBoxParent(boundingBoxFromParent);
+    let fractionLine =
+        this.horizontalLineFromBoundingBoxParent(boundingBoxFromParent);
     let result = new ScalableVectorGraphicsLine();
     result.setX1(fractionLine[0][0]);
     result.setX2(fractionLine[1][0]);
@@ -8845,36 +8848,42 @@ class MathNodeFraction extends MathNode {
     container.appendChild(result.element);
   }
 
-  /** @return {number[][]} */
+  /** @return {!Array.<!Array.<number>>} */
   horizontalLineFromBoundingBoxParent(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     return [
       [
         boundingBoxFromParent.left + this.boundingBox.left,
         boundingBoxFromParent.top + this.boundingBox.top +
-        this.boundingBox.fractionLineHeight      
-      ], [
+            this.boundingBox.fractionLineHeight
+      ],
+      [
         boundingBoxFromParent.left + this.boundingBox.left +
-        this.boundingBox.width + this.extraWidth / 2,
+            this.boundingBox.width + this.extraWidth / 2,
         boundingBoxFromParent.top + this.boundingBox.top +
-        this.boundingBox.fractionLineHeight
+            this.boundingBox.fractionLineHeight
       ]
-    ];    
+    ];
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
-    let fractionLine = this.horizontalLineFromBoundingBoxParent(boundingBoxFromParent);
+    let fractionLine =
+        this.horizontalLineFromBoundingBoxParent(boundingBoxFromParent);
     canvas.beginPath();
-    canvas.moveTo(fractionLine[0][0], fractionLine[0][1] - this.extraSpaceBetweenNumeratorAndDenominator);
-    canvas.lineTo(fractionLine[1][0], fractionLine[1][1] - this.extraSpaceBetweenNumeratorAndDenominator);
+    canvas.moveTo(
+        fractionLine[0][0],
+        fractionLine[0][1] - this.extraSpaceBetweenNumeratorAndDenominator);
+    canvas.lineTo(
+        fractionLine[1][0],
+        fractionLine[1][1] - this.extraSpaceBetweenNumeratorAndDenominator);
     canvas.stroke();
   }
 
@@ -9235,7 +9244,7 @@ class MathNodeRoot extends MathNode {
   }
 
   drawOnCanvas(
-      /** @type{CanvasRenderingContext2D!} */
+      /** @type {CanvasRenderingContext2D!} */
       canvas,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -9337,23 +9346,23 @@ class MathNodeCancel extends MathNode {
     container.appendChild(result.element);
   }
 
-  /** 
+  /**
    * @return {{
    * leftX: number,
    * leftY: number,
    * rightX: number,
    * rightY: number
-   * }} 
+   * }}
    */
   computeCoordinates(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let leftX = boundingBoxFromParent.left + this.boundingBox.left;
     let leftY = boundingBoxFromParent.top + this.boundingBox.top +
-      this.boundingBox.height;
+        this.boundingBox.height;
     let rightX = boundingBoxFromParent.left + this.boundingBox.left +
-      this.boundingBox.width;
+        this.boundingBox.width;
     let rightY = boundingBoxFromParent.top + this.boundingBox.top;
     return {
       leftX: leftX,
@@ -9364,10 +9373,10 @@ class MathNodeCancel extends MathNode {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeCoordinates(boundingBoxFromParent);
@@ -9524,9 +9533,22 @@ class MathNodeSqrt extends MathNode {
         underTheRadical.boundingBox.needsMiddleAlignment;
   }
 
+  /**
+   * Computes the svg and canvas coordinates of the bounding box.
+   * @return {{
+   * bottom: number,
+   * midX: number,
+   * decorationY: number,
+   * decorationLeft: number,
+   * decorationRight: number,
+   * topY: number,
+   * rightX: number,
+   * overlineRight: number,
+   * }}
+   */
   computeCoordinates(
-     /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let sqrtSign = this.children[1];
     let decoration = sqrtSign.children[0];
@@ -9534,20 +9556,20 @@ class MathNodeSqrt extends MathNode {
     let rightStroke = sqrtSign.children[2];
     let overline = this.children[2];
     let sqrtTop = boundingBoxFromParent.top + this.boundingBox.top +
-      sqrtSign.boundingBox.top;
+        sqrtSign.boundingBox.top;
     let sqrtLeft = boundingBoxFromParent.left + this.boundingBox.left +
-      sqrtSign.boundingBox.left;
+        sqrtSign.boundingBox.left;
     let bottom =
-      sqrtTop + leftStroke.boundingBox.top + leftStroke.boundingBox.height;
+        sqrtTop + leftStroke.boundingBox.top + leftStroke.boundingBox.height;
     let midX = sqrtLeft + rightStroke.boundingBox.left;
     let decorationY = sqrtTop + decoration.boundingBox.top;
     let decorationLeft = sqrtLeft + decoration.boundingBox.left;
     let decorationRight = decorationLeft + decoration.boundingBox.width;
     let topY = sqrtTop + rightStroke.boundingBox.top;
     let rightX = boundingBoxFromParent.left + this.boundingBox.left +
-      overline.boundingBox.left;
+        overline.boundingBox.left;
     let overlineRight = boundingBoxFromParent.left + this.boundingBox.left +
-      overline.boundingBox.left + overline.boundingBox.width;
+        overline.boundingBox.left + overline.boundingBox.width;
     return {
       bottom: bottom,
       midX: midX,
@@ -9569,7 +9591,7 @@ class MathNodeSqrt extends MathNode {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let c = this.computeCoordinates(boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
-  
+
     let path = `M ${c.decorationLeft} ${c.decorationY} L ${c.decorationRight} ${
         c.decorationY} `;
     path += `L ${c.midX} ${c.bottom} `;
@@ -9585,11 +9607,12 @@ class MathNodeSqrt extends MathNode {
     container.appendChild(result.element);
   }
 
+  /** Plots the element on a canvas. */
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeCoordinates(boundingBoxFromParent);
@@ -9912,10 +9935,10 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
   }
 
   toScalableVectorGraphics(
-    /** @type {SVGSVGElement!} */
-    container,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {SVGSVGElement!} */
+      container,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
@@ -9934,8 +9957,8 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
 
   /** @return{{x: number, yLow: number, yHigh: number}} */
   computeCoordinates(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let x = boundingBoxFromParent.left + this.boundingBox.left;
     let yHigh = boundingBoxFromParent.top + this.boundingBox.top;
@@ -9949,10 +9972,10 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeCoordinates(boundingBoxFromParent);
@@ -10010,8 +10033,8 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
-    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${
-      c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
+    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${
+        c.xMiddle} ${c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
     result.setPathString(command);
     result.setLineWidth(this.parenthesisThickness);
     let color = this.type.colorText;
@@ -10025,8 +10048,8 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
 
   /** @return{{xStart: number, xMiddle: number, yHigh: number, yLow: number}} */
   computeBracketCoordinates(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let xStart = boundingBoxFromParent.left + this.boundingBox.left;
     let xMiddle = boundingBoxFromParent.left + this.boundingBox.left;
@@ -10047,10 +10070,10 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
@@ -10114,15 +10137,16 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
   }
 
   toScalableVectorGraphics(
-    /** @type {SVGSVGElement!} */
-    container,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {SVGSVGElement!} */
+      container,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
     let c = this.computeCoordinates(boundingBoxFromParent);
-    let command = `M ${c.xEnd} ${c.yLow} L ${c.xMiddle} ${c.yMiddle} L ${c.xEnd} ${c.yHigh}`;
+    let command = `M ${c.xEnd} ${c.yLow} L ${c.xMiddle} ${c.yMiddle} L ${
+        c.xEnd} ${c.yHigh}`;
     result.setPathString(command);
     result.setLineWidth(this.parenthesisThickness);
     let color = this.type.colorText;
@@ -10134,14 +10158,17 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
     container.appendChild(result.element);
   }
 
-  /** @return{{xEnd: number, xMiddle: number, yLow: number, yMiddle: number, yHigh: number}} */
+  /**
+   * @return{{xEnd: number, xMiddle: number, yLow: number, yMiddle: number,
+   * yHigh: number}}
+   */
   computeCoordinates(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let scale = 1.1;
     let width = this.boundingBox.height / scale / 6;
-    let xMiddle = boundingBoxFromParent.left + this.boundingBox.left ;
+    let xMiddle = boundingBoxFromParent.left + this.boundingBox.left;
     let xEnd = boundingBoxFromParent.left + this.boundingBox.left + width;
     if (!this.left) {
       let swapper = xMiddle;
@@ -10161,10 +10188,10 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeCoordinates(boundingBoxFromParent);
@@ -10240,7 +10267,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     this.toScalableVectorGraphicsParenthesis(container, boundingBoxFromParent);
   }
 
-  /** 
+  /**
    * @return{{
    * x: number,
    * startY: number,
@@ -10248,18 +10275,18 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
    * rx: number,
    * rxInner:number,
    * ry: number,
-   * degrees: number,
-   * }} */
+   * }}
+   */
   computeArcs(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let extraShift = this.parenthesisThickness + 1;
     if (!this.left) {
       extraShift *= -1;
     }
     let x = boundingBoxFromParent.left + this.boundingBox.left +
-      this.horizontalShift() + extraShift;
+        this.horizontalShift() + extraShift;
     if (!this.left) {
       x += this.boundingBox.width;
     }
@@ -10281,7 +10308,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
       startY: startY,
       endY: endY,
       rx: rx,
-      rxInner:rxInner,
+      rxInner: rxInner,
       ry: ry,
     };
   }
@@ -10319,10 +10346,10 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let arcs = this.computeArcs(boundingBoxFromParent);
@@ -10334,8 +10361,10 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     let rxInner = arcs.rxInner;
     let middle = (startY + endY) / 2;
     canvas.beginPath();
-    canvas.ellipse(x, middle, rx, ry, 0, Math.PI * 3 / 2, Math.PI / 2, this.left);
-    canvas.ellipse(x, middle, rxInner, ry, 0, Math.PI / 2, 3 * Math.PI / 2, !this.left);
+    canvas.ellipse(
+        x, middle, rx, ry, 0, Math.PI * 3 / 2, Math.PI / 2, this.left);
+    canvas.ellipse(
+        x, middle, rxInner, ry, 0, Math.PI / 2, 3 * Math.PI / 2, !this.left);
     canvas.fill();
   }
 }
@@ -10462,22 +10491,24 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${c.xMiddle} ${
         c.yLow - c.radius} `;
     path += `L ${c.xMiddle} ${c.yMiddle + c.radius} `;
-    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${c.xStickyPart} ${
-        c.yMiddle} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${
+        c.xStickyPart} ${c.yMiddle} `;
     path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${c.xMiddle} ${
         c.yMiddle - c.radius} `;
     path += `L ${c.xMiddle} ${c.yHigh + c.radius} `;
-    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${c.xEnd} ${c.yHigh} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${c.xEnd} ${
+        c.yHigh} `;
 
     path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${
-      c.xMiddle + c.thicknessShift} ${c.yHigh + c.radius} `;
+        c.xMiddle + c.thicknessShift} ${c.yHigh + c.radius} `;
     path += `L ${c.xMiddle + c.thicknessShift} ${c.yMiddle - c.radius} `;
     path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${
-      c.xStickyPart + c.thicknessShift} ${c.yMiddle} `;
+        c.xStickyPart + c.thicknessShift} ${c.yMiddle} `;
     path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceBottom} ${
-      c.xMiddle + c.thicknessShift} ${c.yMiddle + c.radius} `;
+        c.xMiddle + c.thicknessShift} ${c.yMiddle + c.radius} `;
     path += `L ${c.xMiddle + c.thicknessShift} ${c.yLow - c.radius} `;
-    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${c.xEnd} ${c.yLow} `;
+    path += `A ${c.radius} ${c.radius} 0 0 ${c.arcChoiceOther} ${c.xEnd} ${
+        c.yLow} `;
 
     result.setPathString(path);
     let color = this.type.colorText;
@@ -10490,190 +10521,192 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
   }
 
   drawOnCanvas(
-    /** @type{CanvasRenderingContext2D} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeCoordinates(boundingBoxFromParent);
     canvas.beginPath();
-    //canvas.moveTo(c.xEnd, c.yLow);
+    // canvas.moveTo(c.xEnd, c.yLow);
     if (this.left) {
       canvas.ellipse(
-        c.xMiddle + c.radius,
-        c.yLow - c.radius,
-        c.radius,
-        c.radius,
-        0,
-        Math.PI / 2,
-        Math.PI,
-        false,
+          c.xMiddle + c.radius,
+          c.yLow - c.radius,
+          c.radius,
+          c.radius,
+          0,
+          Math.PI / 2,
+          Math.PI,
+          false,
       );
       canvas.lineTo(c.xMiddle, c.yMiddle + c.radius);
       canvas.ellipse(
-        c.xMiddle - c.radius,
-        c.yMiddle + c.radius,
-        c.radius,
-        c.radius,
-        0,
-        0,
-        - Math.PI / 2,
-        true,
+          c.xMiddle - c.radius,
+          c.yMiddle + c.radius,
+          c.radius,
+          c.radius,
+          0,
+          0,
+          -Math.PI / 2,
+          true,
       );
       canvas.ellipse(
-        c.xMiddle - c.radius,
-        c.yMiddle - c.radius,
-        c.radius,
-        c.radius,
-        0,
-        Math.PI / 2,
-        0,
-        true,
+          c.xMiddle - c.radius,
+          c.yMiddle - c.radius,
+          c.radius,
+          c.radius,
+          0,
+          Math.PI / 2,
+          0,
+          true,
       );
       canvas.lineTo(c.xMiddle, c.yHigh + c.radius);
       canvas.ellipse(
-        c.xMiddle + c.radius,
-        c.yHigh + c.radius,
-        c.radius,
-        c.radius,
-        0,
-        Math.PI,
-        3 * Math.PI / 2,
-        false,
+          c.xMiddle + c.radius,
+          c.yHigh + c.radius,
+          c.radius,
+          c.radius,
+          0,
+          Math.PI,
+          3 * Math.PI / 2,
+          false,
       );
       canvas.ellipse(
-        c.xMiddle + c.radius,
-        c.yHigh + c.radius,
-        c.radius - this.parenthesisThickness,
-        c.radius,
-        0,
-        3 * Math.PI / 2,
-        Math.PI,
-        true,
+          c.xMiddle + c.radius,
+          c.yHigh + c.radius,
+          c.radius - this.parenthesisThickness,
+          c.radius,
+          0,
+          3 * Math.PI / 2,
+          Math.PI,
+          true,
       );
-      canvas.lineTo(c.xMiddle + this.parenthesisThickness, c.yMiddle - c.radius);
+      canvas.lineTo(
+          c.xMiddle + this.parenthesisThickness, c.yMiddle - c.radius);
       canvas.ellipse(
-        c.xMiddle - c.radius + this.parenthesisThickness,
-        c.yMiddle - c.radius,
-        c.radius,
-        c.radius,
-        0,
-        0,
-        Math.PI / 2,
-        false,
+          c.xMiddle - c.radius + this.parenthesisThickness,
+          c.yMiddle - c.radius,
+          c.radius,
+          c.radius,
+          0,
+          0,
+          Math.PI / 2,
+          false,
       );
       canvas.ellipse(
-        c.xMiddle - c.radius + this.parenthesisThickness,
-        c.yMiddle + c.radius,
-        c.radius,
-        c.radius,
-        0,
-        3 * Math.PI / 2,
-        2 * Math.PI,
-        false,
+          c.xMiddle - c.radius + this.parenthesisThickness,
+          c.yMiddle + c.radius,
+          c.radius,
+          c.radius,
+          0,
+          3 * Math.PI / 2,
+          2 * Math.PI,
+          false,
       );
       canvas.lineTo(c.xMiddle + this.parenthesisThickness, c.yLow - c.radius);
       canvas.ellipse(
-        c.xMiddle + c.radius,
-        c.yLow - c.radius,
-        c.radius - this.parenthesisThickness,
-        c.radius,
-        0,
-        Math.PI,
-        Math.PI / 2,
-        true,
+          c.xMiddle + c.radius,
+          c.yLow - c.radius,
+          c.radius - this.parenthesisThickness,
+          c.radius,
+          0,
+          Math.PI,
+          Math.PI / 2,
+          true,
       );
     } else {
       canvas.ellipse(
-        c.xMiddle - c.radius,
-        c.yLow - c.radius,
-        c.radius,
-        c.radius,
-        0,
-        Math.PI / 2,
-        0,
-        true,
+          c.xMiddle - c.radius,
+          c.yLow - c.radius,
+          c.radius,
+          c.radius,
+          0,
+          Math.PI / 2,
+          0,
+          true,
       );
       canvas.lineTo(c.xMiddle, c.yMiddle + c.radius);
       canvas.ellipse(
-        c.xMiddle + c.radius,
-        c.yMiddle + c.radius,
-        c.radius,
-        c.radius,
-        0,
-        Math.PI,
-        3 * Math.PI / 2,
-        false,
+          c.xMiddle + c.radius,
+          c.yMiddle + c.radius,
+          c.radius,
+          c.radius,
+          0,
+          Math.PI,
+          3 * Math.PI / 2,
+          false,
       );
       canvas.ellipse(
-        c.xMiddle + c.radius,
-        c.yMiddle - c.radius,
-        c.radius,
-        c.radius,
-        0,
-        Math.PI / 2,
-        Math.PI,
-        false,
+          c.xMiddle + c.radius,
+          c.yMiddle - c.radius,
+          c.radius,
+          c.radius,
+          0,
+          Math.PI / 2,
+          Math.PI,
+          false,
       );
       canvas.lineTo(c.xMiddle, c.yHigh + c.radius);
       canvas.ellipse(
-        c.xMiddle - c.radius,
-        c.yHigh + c.radius,
-        c.radius,
-        c.radius,
-        0,
-        0,
-        - Math.PI / 2,
-        true,
+          c.xMiddle - c.radius,
+          c.yHigh + c.radius,
+          c.radius,
+          c.radius,
+          0,
+          0,
+          -Math.PI / 2,
+          true,
       );
       canvas.ellipse(
-        c.xMiddle - c.radius,
-        c.yHigh + c.radius,
-        c.radius - this.parenthesisThickness,
-        c.radius,
-        0,
-        - Math.PI / 2,
-        0,
-        false,
+          c.xMiddle - c.radius,
+          c.yHigh + c.radius,
+          c.radius - this.parenthesisThickness,
+          c.radius,
+          0,
+          -Math.PI / 2,
+          0,
+          false,
       );
-      canvas.lineTo(c.xMiddle - this.parenthesisThickness, c.yMiddle - c.radius);
+      canvas.lineTo(
+          c.xMiddle - this.parenthesisThickness, c.yMiddle - c.radius);
       canvas.ellipse(
-        c.xMiddle + c.radius - this.parenthesisThickness,
-        c.yMiddle - c.radius,
-        c.radius,
-        c.radius,
-        0,
-        Math.PI,
-        Math.PI / 2,
-        true,
+          c.xMiddle + c.radius - this.parenthesisThickness,
+          c.yMiddle - c.radius,
+          c.radius,
+          c.radius,
+          0,
+          Math.PI,
+          Math.PI / 2,
+          true,
       );
       canvas.ellipse(
-        c.xMiddle + c.radius - this.parenthesisThickness,
-        c.yMiddle + c.radius,
-        c.radius,
-        c.radius,
-        0,
-        3 * Math.PI / 2,
-         Math.PI,
-        true,
+          c.xMiddle + c.radius - this.parenthesisThickness,
+          c.yMiddle + c.radius,
+          c.radius,
+          c.radius,
+          0,
+          3 * Math.PI / 2,
+          Math.PI,
+          true,
       );
       canvas.lineTo(c.xMiddle - this.parenthesisThickness, c.yLow - c.radius);
       canvas.ellipse(
-        c.xMiddle - c.radius,
-        c.yLow - c.radius,
-        c.radius - this.parenthesisThickness,
-        c.radius,
-        0,
-        0,
-        Math.PI / 2,
-        false,
+          c.xMiddle - c.radius,
+          c.yLow - c.radius,
+          c.radius - this.parenthesisThickness,
+          c.radius,
+          0,
+          0,
+          Math.PI / 2,
+          false,
       );
     }
     canvas.fill();
   }
 
-  /** 
+  /**
    * @return{{
    * radius: number,
    * xLeft: number,
@@ -10686,10 +10719,11 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
    * arcChoiceOther: number,
    * xStickyPart: number,
    * thicknessShift: number
-   * }} */
+   * }}
+   */
   computeCoordinates(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let radius = this.radius();
     let leftShift = boundingBoxFromParent.left + this.boundingBox.left;
@@ -10820,8 +10854,8 @@ class MathNodeMatrix extends MathNode {
     if (rowContainer.children.length === 0) {
       return;
     }
-    /** @type{MathNodeMatrixRow!} */
-    let row = /** @type{MathNodeMatrixRow!} */ (
+    /** @type {MathNodeMatrixRow!} */
+    let row = /** @type {MathNodeMatrixRow!} */ (
         rowContainer.children[rowContainer.children.length - 1]);
     row.addTopBorder();
   }
@@ -10845,15 +10879,15 @@ class MathNodeMatrix extends MathNode {
     let columnCount = this.matrixColumnCount();
     let numberOfRows = matrixTable.children.length;
     // Last empty row is ignored. Previous empty rows are preserved.
-    /** @type{MathNodeMatrixRow!} */
-    let lastRow = /** @type{MathNodeMatrixRow!} */ (
+    /** @type {MathNodeMatrixRow!} */
+    let lastRow = /** @type {MathNodeMatrixRow!} */ (
         matrixTable.children[numberOfRows - 1]);
     if (lastRow.children.length === 0) {
       if (numberOfRows > 1 && lastRow.topLineCount > 0) {
         // We have a last row, that is empty, except for an \hline.
         // This means that the table has a bottom border, which
         // we create by appending a bottom border on the row above.
-        let row = /** @type{MathNodeMatrixRow!}*/ (
+        let row = /** @type {MathNodeMatrixRow!}*/ (
             matrixTable.children[numberOfRows - 2]);
         row.addBottomBorder();
       }
@@ -10904,7 +10938,7 @@ class MathNodeMatrixRow extends MathNode {
       equationEditor,
   ) {
     super(equationEditor, knownTypes.matrixRow);
-    /** @type{number}*/
+    /** @type {number}*/
     this.topLineCount = 0;
     this.bottomLineCount = 0;
   }

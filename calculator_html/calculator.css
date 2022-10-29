@@ -1589,6 +1589,8 @@ div.hexContainerStandardWidth {
   word-break: break-all;
   max-height:1000px;
   max-width: 1000px;
+  width: 1000px;
+  height: 2000px;
   padding: 0px;
   font-family: 'Courier New', Courier, monospace;
 }

@@ -11664,21 +11664,32 @@ Cone::Cone(int inputId) {
   this->id = inputId;
 }
 
-bool Cone::checkConsistencyFull(const ConeCollection &owner) const{
+bool Cone::checkConsistencyFull(const ConeCollection& owner) const {
   STACK_TRACE("Cone::checkConsistencyFull");
-  if (!owner.containsId(this->id) ){
-    global.fatal << "Cone of id: " << this->id << " not contained in its owner. " << global.fatal;
+  if (!owner.containsId(this->id)) {
+    global.fatal
+    << "Cone of id: "
+    << this->id
+    << " not contained in its owner. "
+    << global.fatal;
   }
-  for (const Wall& wall: this->walls){
-    for (int neighbor: wall.neighbors){
-      if (!owner.containsId(neighbor)){
-        global.fatal << "Cone of id: " << this->id << " has non-existent neighbors. "
-        << "Non-existent neighbor: " << neighbor << " adjacent through wall: "
-        <<wall << ". All walls of the chamber: " << this->walls <<global.fatal;
+  for (const Wall& wall : this->walls) {
+    for (int neighbor : wall.neighbors) {
+      if (!owner.containsId(neighbor)) {
+        global.fatal
+        << "Cone of id: "
+        << this->id
+        << " has non-existent neighbors. "
+        << "Non-existent neighbor: "
+        << neighbor
+        << " adjacent through wall: "
+        << wall
+        << ". All walls of the chamber: "
+        << this->walls
+        << global.fatal;
       }
     }
   }
-
   return true;
 }
 
@@ -14682,10 +14693,12 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
   int mustDecrease =
   this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
   while (this->conesWithIrregularWalls.size() > 0) {
+    this->checkConsistencyFull();
     int index = this->conesWithIrregularWalls.size() - 1;
     Cone cone = this->conesWithIrregularWalls.values[index];
     this->conesWithIrregularWalls.removeIndex(index);
     this->splitConeByMultipleNeighbors(cone);
+    this->checkConsistencyFull();
     int nextMustDecrease =
     this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
     if (mustDecrease <= nextMustDecrease) {
@@ -14796,7 +14809,6 @@ void ConeCollection::refineOneByOneDirection(
   for (Cone& cone : candidates.values) {
     this->processNeighborsOfNewlyAddedCone(cone);
   }
-  global.comments << "<hr>DEBUG: checking consistency.";
   this->checkConsistencyFull();
 }
 
@@ -14937,11 +14949,11 @@ void ConeCollection::refineByOneDirection(
   }
 }
 
-bool ConeCollection::containsId(int id)const {
-  return this->getConeById(id)==nullptr;
+bool ConeCollection::containsId(int id) const {
+  return this->getConeById(id) != nullptr;
 }
 
-Cone* ConeCollection::getConeByIdNonConst(int id){
+Cone* ConeCollection::getConeByIdNonConst(int id) {
   if (this->refinedCones.contains(id)) {
     return &this->refinedCones.getValueCreateNoInitialization(id);
   }
@@ -14952,10 +14964,9 @@ Cone* ConeCollection::getConeByIdNonConst(int id){
     return &this->conesWithIrregularWalls.getValueCreateNoInitialization(id);
   }
   return nullptr;
-
 }
 
-const Cone* ConeCollection::getConeById(int id)const {
+const Cone* ConeCollection::getConeById(int id) const {
   if (this->refinedCones.contains(id)) {
     return &this->refinedCones.getValueNoFail(id);
   }
@@ -15436,20 +15447,28 @@ ConeCollection::ConeCollection(const ConeCollection& other) {
   this->operator=(other);
 }
 
-bool ConeCollection::checkConsistencyFull()const{
-  STACK_TRACE("ConeCollection::checkConsistencyFull");
+bool ConeCollection::checkConsistencyFullWithoutDebugMessage() const {
+  STACK_TRACE("ConeCollection::checkConsistencyFullWithoutDebugMessage");
   this->checkConsistencyOneCollection(this->refinedCones);
   this->checkConsistencyOneCollection(this->nonRefinedCones);
   this->checkConsistencyOneCollection(this->conesWithIrregularWalls);
   return true;
 }
 
-bool ConeCollection::checkConsistencyOneCollection(const MapList<int, Cone> &collection) const{
-STACK_TRACE("ConeCollection::checkConsistencyOneCollection");
-  for (const Cone& cone: collection.values){
-  cone.checkConsistencyFull(*this);
+bool ConeCollection::checkConsistencyFull() const {
+  STACK_TRACE("ConeCollection::checkConsistencyFull");
+  global.comments << "<br>Checking full consistency.";
+  return this->checkConsistencyFullWithoutDebugMessage();
 }
-return true;
+
+bool ConeCollection::checkConsistencyOneCollection(
+  const MapList<int, Cone>& collection
+) const {
+  STACK_TRACE("ConeCollection::checkConsistencyOneCollection");
+  for (const Cone& cone : collection.values) {
+    cone.checkConsistencyFull(*this);
+  }
+  return true;
 }
 
 void ConeCollection::initialize() {
@@ -15522,11 +15541,10 @@ bool ConeCollection::checkIsRefinedOrCrash() const {
     << "Non-refined cones not allowed by this function."
     << global.fatal;
   }
-  if (this->conesWithIrregularWalls.size()>0) {
+  if (this->conesWithIrregularWalls.size() > 0) {
     global.fatal
     << "Cones with irregular walls not allowed by this function."
     << global.fatal;
-
   }
   return true;
 }

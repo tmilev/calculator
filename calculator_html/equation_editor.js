@@ -1230,7 +1230,10 @@ class MathNodeWithCursorPosition {
     return new MathNodeWithCursorPosition(next, -1);
   }
 
-  /** @return {MathNodeWithCursorPosition!} */
+  /** 
+   * Computes a balanced right neighbor. 
+   * @return {MathNodeWithCursorPosition!} 
+   */
   rightHorizontalNeighborBalanced(
       /** @type {boolean} */
       shrinking,
@@ -1624,6 +1627,7 @@ class LaTeXConstants {
       'sum': '\u2211',
       'int': '\u222B',
     };
+
     /** @type {Object.<string, string>!} */
     this.operatorWithSuperAndSubscriptBackslashed = {};
     for (let operator in this.operatorWithSuperAndSubscript) {
@@ -7320,6 +7324,15 @@ class MathNode {
         leftDelimiter, rightDelimiter, positionOperator, isLeft, isAmbiguous);
   }
 
+  isDelimiterBalancingBreaker(
+    /** @type {MathNode} */
+    child,
+  ) {
+    return child.type.type === knownTypes.operatorStandalone.type ||
+      child.type.type === knownTypes.operatorWithSubscript.type ||
+      child.type.type === knownTypes.operatorWithSuperAndSubscript.type;
+  }
+
   /** @return {number} */
   findIndexToInsertRightDelimiter(
       /** @type {number} */
@@ -7328,7 +7341,7 @@ class MathNode {
     if (indexToInserLeftDelimiter >= this.children.length) {
       return this.children.length;
     }
-    let openDelimiters = 0;
+      let openDelimiters = 0;
     for (let i = indexToInserLeftDelimiter; i < this.children.length; i++) {
       let child = this.children[i];
       if (child.type.type === knownTypes.rightDelimiter.type) {
@@ -7337,6 +7350,12 @@ class MathNode {
         openDelimiters++;
       }
       if (openDelimiters < 0) {
+        return i;
+      }
+      if (
+        openDelimiters === 0 &&
+        this.isDelimiterBalancingBreaker(child)
+      ) {
         return i;
       }
     }
@@ -7357,6 +7376,12 @@ class MathNode {
         openDelimiters--;
       }
       if (openDelimiters < 0) {
+        return i + 1;
+      }
+      if (
+        openDelimiters === 0 &&
+        this.isDelimiterBalancingBreaker(child)
+      ) {
         return i + 1;
       }
     }
@@ -7493,6 +7518,33 @@ class MathNode {
     return [leftNode, rightNode];
   }
 
+  adjustIsLeft(
+    /** @type {boolean} */
+    isLeft,
+    /** @type {number} */
+    oldIndexInParent,
+    /** @type {MathNode} */
+    parent,
+  ) {
+    for (let i = oldIndexInParent; i >= 0; i--) {
+      let child = parent.children[i];
+      if (child.type.type === knownTypes.leftDelimiter.type &&
+        child.initialContent === '|' && !child.implied) {
+        isLeft = true;
+      }
+    }
+    if (isLeft) {
+      if (oldIndexInParent + 1 < parent.children.length) {
+        let child = parent.children[oldIndexInParent + 1];
+        if (child.type.type === knownTypes.rightDelimiter.type &&
+          child.implied === true) {
+          isLeft = false;
+        }
+      }
+    }
+    return isLeft;
+  }
+
   doMakeDelimiterCommon(
       /** @type {string} */
       leftDelimiterString,
@@ -7530,22 +7582,9 @@ class MathNode {
     let indexLeftDelimiter = -1;
     let indexRightDelimiter = -1;
     if (isAmbiguous) {
-      for (let i = oldIndexInParent; i >= 0; i--) {
-        let child = parent.children[i];
-        if (child.type.type === knownTypes.leftDelimiter.type &&
-            child.initialContent === '|' && !child.implied) {
-          isLeft = true;
-        }
-      }
-      if (isLeft) {
-        if (oldIndexInParent + 1 < parent.children.length) {
-          let child = parent.children[oldIndexInParent + 1];
-          if (child.type.type === knownTypes.rightDelimiter.type &&
-              child.implied === true) {
-            isLeft = false;
-          }
-        }
-      }
+      isLeft = this.adjustIsLeft(
+        isLeft, oldIndexInParent, parent,
+      );
     }
     if (isLeft) {
       if (positionOperator === 1) {
@@ -7617,6 +7656,15 @@ class MathNode {
         return false;
       }
     }
+    for (let i = delimiterIndex; i < this.children.length; i++) {
+      let child = this.children[i];
+      if (child.type.type === knownTypes.rightDelimiter.type) {
+        return false;
+      }
+      if (child.type.type === knownTypes.leftDelimiter.type && child.implied) {
+        return this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
+      }
+    }
     return false;
   }
 
@@ -7644,6 +7692,15 @@ class MathNode {
               delimiterString, delimiterIndex, i);
         }
         return false;
+      }
+    }
+    for (let i = delimiterIndex - 1; i >= 0; i--) {
+      let child = this.children[i];
+      if (child.type.type === knownTypes.leftDelimiter.type) {
+        return false;
+      }
+      if (child.type.type === knownTypes.rightDelimiter.type && child.implied) {
+        return this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
       }
     }
     return false;

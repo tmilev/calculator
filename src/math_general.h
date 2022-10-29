@@ -6316,7 +6316,7 @@ public:
       }
     }
   }
-  bool checkConsistencyFull(const ConeCollection& owner)const;
+  bool checkConsistencyFull(const ConeCollection& owner) const;
   Wall& getWallWithNormalNoFail(const Vector<Rational>& desiredNormal);
   bool operator>(const Cone& other) const;
   bool operator==(const Cone& other) const;
@@ -6351,6 +6351,7 @@ public:
 class ConeCollection {
 private:
   static void addCone(MapList<int, Cone>& map, const Cone& cone);
+  bool checkConsistencyFullWithoutDebugMessage() const;
 public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
@@ -6418,8 +6419,8 @@ public:
     DrawingVariables& drawingVariables, FormatExpressions& format
   );
   bool containsId(int id) const;
-  const Cone *getConeById(int id) const;
-  Cone *getConeByIdNonConst(int id) ;
+  const Cone* getConeById(int id) const;
+  Cone* getConeByIdNonConst(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
@@ -6486,8 +6487,14 @@ public:
   bool checkIsRefinedOrCrash() const;
   // Checks the consistency of the cone collection.
   // Runs slow; avoid calling multiple times.
+  // Will produce a global message to prevent you from
+  // accidentally calling this too often.
+  // Use checkConsistencyFullWithoutDebugMessage
+  // to perform the check without leaving a log message
+  // however with the caveat that you can blow up performance.
   bool checkConsistencyFull() const;
-  bool checkConsistencyOneCollection(const MapList<int, Cone>& collection) const;
+  bool checkConsistencyOneCollection(const MapList<int, Cone>& collection)
+  const;
 };
 
 class PartialFractions {

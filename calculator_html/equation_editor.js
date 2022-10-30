@@ -5305,7 +5305,11 @@ class MathNode {
     return result;
   }
 
-  /** @return {string} */
+  /** 
+   * Returns the content if the element is atomic or 
+   * the empty string otherwise. 
+   * @return {string} 
+   */
   contentIfAtomic() {
     if (!this.isAtomic()) {
       return '';
@@ -7338,10 +7342,7 @@ class MathNode {
       /** @type {number} */
       indexToInserLeftDelimiter,
   ) {
-    if (indexToInserLeftDelimiter >= this.children.length) {
-      return this.children.length;
-    }
-      let openDelimiters = 0;
+    let openDelimiters = 0;
     for (let i = indexToInserLeftDelimiter; i < this.children.length; i++) {
       let child = this.children[i];
       if (child.type.type === knownTypes.rightDelimiter.type) {
@@ -7587,15 +7588,10 @@ class MathNode {
       );
     }
     if (isLeft) {
-      if (positionOperator === 1) {
-        indexLeftDelimiter = oldIndexInParent + 1;
-      } else if (positionOperator === 0) {
-        indexLeftDelimiter = oldIndexInParent + 1;
-      } else {
-        indexLeftDelimiter = oldIndexInParent;
-      }
-      if (parent.replaceImpliedLeftDelimiter(
-              leftDelimiterString, indexLeftDelimiter)) {
+      indexLeftDelimiter = parent.replaceImpliedLeftDelimiter(
+        leftDelimiterString, oldIndexInParent, positionOperator,
+      );
+      if (indexLeftDelimiter === -1) {
         return;
       }
       indexRightDelimiter =
@@ -7627,18 +7623,36 @@ class MathNode {
     }
   }
 
-  /** @return {boolean} */
+  /** 
+   * Returns -1 if an implied delimiter was found and 
+   * replaced. If no implied delimiter was found, 
+   * returns the index where the new left delimiter
+   * should be placed.
+   * 
+   * @return {number} 
+   */
   replaceImpliedLeftDelimiter(
-      /** @type {string} */
-      delimiterString,
-      /** @type {number} */
-      delimiterIndex,
+    /** @type {string} */
+    delimiterString,
+    /** @type {number} */
+    indexInParent,
+    /** @type {number} */
+    positionOperator,
   ) {
+    let delimiterIndex = -1;
+    let atomicContent = this.children[indexInParent].contentIfAtomic(); 
+    if (positionOperator === 1 && atomicContent.length > 0) {
+      delimiterIndex = indexInParent + 1;
+    } else if (positionOperator === 0 && atomicContent.length > 0) {
+      delimiterIndex = indexInParent + 1;
+    } else {
+      delimiterIndex = indexInParent;
+    }
     let openDelimiters = 0;
     if (delimiterIndex >= this.children.length) {
       delimiterIndex = this.children.length - 1;
     }
-    for (let i = delimiterIndex; i >= 0; i--) {
+    for (let i = indexInParent; i >= 0; i--) {
       let child = this.children[i];
       if (child.type.type === knownTypes.rightDelimiter.type) {
         openDelimiters++;
@@ -7650,25 +7664,34 @@ class MathNode {
           continue;
         }
         if (child.implied) {
-          return this.moveDelimiterMarkExplicit(
-              delimiterString, delimiterIndex, i);
+          this.moveDelimiterMarkExplicit(
+            delimiterString, delimiterIndex, i);
+          return -1;
         }
-        return false;
+        break;
       }
     }
-    for (let i = delimiterIndex; i < this.children.length; i++) {
+    for (let i = indexInParent; i < this.children.length; i++) {
       let child = this.children[i];
       if (child.type.type === knownTypes.rightDelimiter.type) {
-        return false;
+        return delimiterIndex;
       }
       if (child.type.type === knownTypes.leftDelimiter.type && child.implied) {
-        return this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
+        this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
+        return -1;
       }
     }
-    return false;
+    return delimiterIndex;
   }
 
-  /** @return {boolean} */
+  /**    
+   * Returns -1 if an implied delimiter was found and
+   * replaced. If no implied delimiter was found, 
+   * returns the index where the new left delimiter
+   * should be placed.   
+   *  
+   * @return {number} 
+   */
   replaceImpliedRightDelimiter(
       /** @type {string} */
       delimiterString,

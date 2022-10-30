@@ -7591,21 +7591,16 @@ class MathNode {
       indexLeftDelimiter = parent.replaceImpliedLeftDelimiter(
         leftDelimiterString, oldIndexInParent, positionOperator,
       );
-      if (indexLeftDelimiter === -1) {
+      if (indexLeftDelimiter === - 1) {
         return;
       }
       indexRightDelimiter =
           parent.findIndexToInsertRightDelimiter(indexLeftDelimiter);
     } else {
-      if (positionOperator === 1) {
-        indexRightDelimiter = oldIndexInParent + 1;
-      } else if (positionOperator === 0) {
-        indexRightDelimiter = oldIndexInParent + 1;
-      } else {
-        indexRightDelimiter = oldIndexInParent;
-      }
-      if (parent.replaceImpliedRightDelimiter(
-              rightDelimiterString, indexRightDelimiter)) {
+      indexRightDelimiter =
+        parent.replaceImpliedRightDelimiter(
+          rightDelimiterString, this.indexInParent, positionOperator);
+      if (indexRightDelimiter === - 1) {
         return;
       }
       indexLeftDelimiter =
@@ -7649,9 +7644,6 @@ class MathNode {
       delimiterIndex = indexInParent;
     }
     let openDelimiters = 0;
-    if (delimiterIndex >= this.children.length) {
-      delimiterIndex = this.children.length - 1;
-    }
     for (let i = indexInParent; i >= 0; i--) {
       let child = this.children[i];
       if (child.type.type === knownTypes.rightDelimiter.type) {
@@ -7693,13 +7685,24 @@ class MathNode {
    * @return {number} 
    */
   replaceImpliedRightDelimiter(
-      /** @type {string} */
-      delimiterString,
-      /** @type {number} */
-      delimiterIndex,
+    /** @type {string} */
+    delimiterString,
+    /** @type {number} */
+    indexInParent,
+    /** @type {number} */
+    positionOperator,
   ) {
+    let delimiterIndex = -1;
+    let content = this.children[indexInParent].contentIfAtomic();
+    if (positionOperator === 1 && content.length > 0) {
+      delimiterIndex = indexInParent + 1;
+    } else if (positionOperator === 0 && content.length > 0) {
+      delimiterIndex = indexInParent + 1;
+    } else {
+      delimiterIndex = indexInParent;
+    }
     let openDelimiters = 0;
-    for (let i = delimiterIndex; i < this.children.length; i++) {
+    for (let i = indexInParent; i < this.children.length; i++) {
       let child = this.children[i];
       if (child.type.type === knownTypes.leftDelimiter.type) {
         openDelimiters++;
@@ -7711,22 +7714,24 @@ class MathNode {
           continue;
         }
         if (child.implied) {
-          return this.moveDelimiterMarkExplicit(
-              delimiterString, delimiterIndex, i);
+          this.moveDelimiterMarkExplicit(
+            delimiterString, delimiterIndex, i);
+          return - 1;
         }
-        return false;
+        break;
       }
     }
-    for (let i = delimiterIndex - 1; i >= 0; i--) {
+    for (let i = indexInParent - 1; i >= 0; i--) {
       let child = this.children[i];
       if (child.type.type === knownTypes.leftDelimiter.type) {
-        return false;
+        return delimiterIndex;
       }
       if (child.type.type === knownTypes.rightDelimiter.type && child.implied) {
-        return this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
+        this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
+        return - 1;
       }
     }
-    return false;
+    return delimiterIndex;
   }
 
   /** @return {boolean} */

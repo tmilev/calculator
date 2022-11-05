@@ -10046,6 +10046,9 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
       boundingBoxFromParent,
   ) {
     let x = boundingBoxFromParent.left + this.boundingBox.left;
+    if (!this.left) {
+      x += this.boundingBox.width;
+    }
     let yHigh = boundingBoxFromParent.top + this.boundingBox.top;
     let yLow = yHigh + this.boundingBox.height - this.parenthesisThickness;
     yHigh += this.parenthesisThickness;

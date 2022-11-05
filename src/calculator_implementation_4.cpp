@@ -625,7 +625,6 @@ bool CalculatorBasics::standardIsDenotedBy(
   calculator.objectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
   output.setChildAtomValue(0, calculator.opDefine());
-  // //
   if (
     withNotation.isOfType<
       ElementTensorsGeneralizedVermas<RationalFraction<Rational> >

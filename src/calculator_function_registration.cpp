@@ -5927,7 +5927,7 @@ void CalculatorParser::addTrigonometricSplit(
   const std::string& trigonometricFunction,
   const List<std::string>& variables
 ) {
-  STACK_TRACE("Calculator::addTrigonometricSplit");
+  STACK_TRACE("CalculatorParser::addTrigonometricSplit");
   List<std::string> split;
   for (int i = 0; i < variables.size; i ++) {
     const std::string& variable = variables[i];

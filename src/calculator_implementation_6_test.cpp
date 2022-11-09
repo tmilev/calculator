@@ -428,8 +428,31 @@ bool CalculatorHTML::Test::builtIn(
   return result;
 }
 
+bool TopicElementParser::Test::hasEducationalMaterials() {
+  std::string unused;
+  std::stringstream comments;
+  return
+  FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
+    "/coursesavailable/default.txt", unused, &comments
+  );
+}
+
+void TopicElementParser::Test::logMessageNoEducationalMaterials() {
+  global << Logger::red << "***************" << Logger::endL;
+  global << Logger::red << "WARNING: topic files are absent." << Logger::endL;
+  global
+  << Logger::red
+  << "EDUCATIONAL MATERIALS TEST SKIPPED."
+  << Logger::endL;
+  global << Logger::red << "***************" << Logger::endL;
+}
+
 bool TopicElementParser::Test::all() {
   std::stringstream comments;
+  if (!TopicElementParser::Test::hasEducationalMaterials()) {
+    TopicElementParser::Test::logMessageNoEducationalMaterials();
+    return true;
+  }
   TopicElementParser::Test::defaultTopicListsOKCrashOnFailure();
   TopicElementParser::Test::defaultPdfsOKCrashOnFailure();
   return true;

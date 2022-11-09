@@ -77,6 +77,8 @@ public:
   public:
     std::stringstream comments;
     static bool all();
+    static void logMessageNoEducationalMaterials();
+    static bool hasEducationalMaterials();
     static bool defaultTopicListsOKCrashOnFailure();
     static bool defaultPdfsOKCrashOnFailure();
     bool defaultPdfsOK(int& whichTopic);

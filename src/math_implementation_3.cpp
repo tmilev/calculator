@@ -863,6 +863,14 @@ std::string StringRoutines::Conversions::escapeJavascriptLike(
   return out.str();
 }
 
+std::string StringRoutines::join(const List<std::string>& input) {
+  std::stringstream out;
+  for (const std::string& current : input) {
+    out << current;
+  }
+  return out.str();
+}
+
 std::string HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(
   const std::string& input
 ) {
@@ -11648,10 +11656,6 @@ std::string Wall::toString() const {
   return "Wall: " + this->normal.toString();
 }
 
-Cone::Cone(const Cone& other) {
-  this->operator=(other);
-}
-
 Cone::Cone() {
   this->flagIsTheZeroCone = true;
   this->lowestSlicingIndex = 0;
@@ -11686,6 +11690,8 @@ bool Cone::checkConsistencyFull(const ConeCollection& owner) const {
         << wall
         << ". All walls of the chamber: "
         << this->walls
+        << owner.toHTMLHistory()
+        << owner.toHTMLWithoutGraphics()
         << global.fatal;
       }
     }
@@ -11701,14 +11707,6 @@ bool Cone::operator==(const Cone& other) const {
   return
   this->flagIsTheZeroCone == other.flagIsTheZeroCone &&
   this->walls == other.walls;
-}
-
-void Cone::operator=(const Cone& other) {
-  this->flagIsTheZeroCone = other.flagIsTheZeroCone;
-  this->vertices = other.vertices;
-  this->walls = other.walls;
-  this->lowestSlicingIndex = other.lowestSlicingIndex;
-  this->id = other.id;
 }
 
 unsigned int Cone::hashFunction() const {
@@ -14699,6 +14697,11 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
     this->conesWithIrregularWalls.removeIndex(index);
     this->splitConeByMultipleNeighbors(cone);
     this->checkConsistencyFull();
+    global.comments
+    <<
+    "<br>DEBUG: cone history from refineAllConesWithWallsWithMultipleNeighbors!!!!"
+    ;
+    this->addHistoryPoint();
     int nextMustDecrease =
     this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
     if (mustDecrease <= nextMustDecrease) {
@@ -14769,6 +14772,10 @@ void ConeCollection::refineOneByOneDirection(
   }
   if (exitWalls.size == 1) {
     // The chamber is already refined;
+    global.comments
+    << "<br>DEBUG: Chamber "
+    << toBeRefined.id
+    << " already refined.";
     this->addRefinedCone(toBeRefined);
     return;
   }
@@ -14809,7 +14816,28 @@ void ConeCollection::refineOneByOneDirection(
   for (Cone& cone : candidates.values) {
     this->processNeighborsOfNewlyAddedCone(cone);
   }
+  global.comments << "<br>DEBUG: cone history from splitter!!!!";
+  this->addHistoryPoint();
   this->checkConsistencyFull();
+}
+
+void ConeCollection::addHistoryPoint() {
+  if (!this->flagRecordSlicingHistory) {
+    return;
+  }
+  static const int maximumHistorySize = 100;
+  if (this->historyHTML.size >= maximumHistorySize) {
+    if (this->historyHTML.size == maximumHistorySize) {
+      std::stringstream comment;
+      comment
+      << "Not recording further history: maximum of "
+      << maximumHistorySize
+      << " steps recorded.";
+      this->historyHTML.addOnTop(comment.str());
+    }
+    return;
+  }
+  this->historyHTML.addOnTop(this->toHTMLGraphicsOnly());
 }
 
 void ConeCollection::attachNeighbbors(
@@ -15427,24 +15455,12 @@ void Cone::removeFakeWalls(int fakeWallCount) {
   }
 }
 
-void ConeCollection::operator=(const ConeCollection& other) {
-  this->refinedCones = other.refinedCones;
-  this->nonRefinedCones = other.nonRefinedCones;
-  this->splittingNormals = other.splittingNormals;
-  this->slicingDirections = other.slicingDirections;
-  this->flagIsRefined = other.flagIsRefined;
-  this->flagChambersHaveTooFewVertices = other.flagChambersHaveTooFewVertices;
-  this->conesCreated = other.conesCreated;
-}
-
 ConeCollection::ConeCollection() {
   this->flagChambersHaveTooFewVertices = false;
   this->flagIsRefined = false;
   this->conesCreated = 0;
-}
-
-ConeCollection::ConeCollection(const ConeCollection& other) {
-  this->operator=(other);
+  global.comments << "DEBUG: turn slicing history on.<br>";
+  this->flagRecordSlicingHistory = true;
 }
 
 bool ConeCollection::checkConsistencyFullWithoutDebugMessage() const {
@@ -15697,12 +15713,20 @@ std::string ConeCollection::toString() const {
   return out.str();
 }
 
+std::string ConeCollection::toHTMLHistory() const {
+  return StringRoutines::join(this->historyHTML);
+}
+
+std::string ConeCollection::toHTMLGraphicsOnly() const {
+  DrawingVariables drawingVariables;
+  FormatExpressions format;
+  return this->drawMeToHtmlProjective(drawingVariables, format);
+}
+
 std::string ConeCollection::toHTML() const {
   STACK_TRACE("ConeCollection::toHTML");
   std::stringstream out;
-  DrawingVariables drawingVariables;
-  FormatExpressions format;
-  out << this->drawMeToHtmlProjective(drawingVariables, format);
+  out << this->toHTMLGraphicsOnly();
   out << this->toHTMLWithoutGraphics();
   return out.str();
 }

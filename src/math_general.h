@@ -6275,8 +6275,6 @@ public:
     const Vector<Rational>& otherWall,
     Vector<Rational>& output
   ) const;
-  void operator=(const Cone& other);
-  Cone(const Cone& other);
   Cone();
   Cone(int inputId);
   Vectors<Rational> getAllNormals() const;
@@ -6355,6 +6353,7 @@ private:
 public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
+  bool flagRecordSlicingHistory;
   HashedList<Vector<Rational> > splittingNormals;
   Vectors<Rational> slicingDirections;
   Cone convexHull;
@@ -6362,6 +6361,8 @@ public:
   MapList<int, Cone> refinedCones;
   MapList<int, Cone> conesWithIrregularWalls;
   int conesCreated;
+  List<std::string> historyHTML;
+  void addHistoryPoint();
   void makeAllConesNonRefined();
   void refineByDirectionsAndSort();
   void refineByDirections();
@@ -6434,8 +6435,15 @@ public:
   std::string toString() const;
   std::string toStringConeCount() const;
   std::string toStringConeIds() const;
+  // Returns an html canvas drawing of the cones plus detailed decription.
   std::string toHTML() const;
+  // Returns the detailed cone description without the graphics.
   std::string toHTMLWithoutGraphics() const;
+  // Returns the graphics of all the cones without description.
+  std::string toHTMLGraphicsOnly() const;
+  // Returns a sequence of html canvas drawings of the various stages of
+  // slicing.
+  std::string toHTMLHistory() const;
   int getLowestIndexRefinedChamberContaining(const Vector<Rational>& root)
   const;
   bool findMaxLFOverConeProjective(
@@ -6481,9 +6489,7 @@ public:
     HashedList<Vector<Rational> >& outputVertices
   );
   void initialize();
-  ConeCollection(const ConeCollection& other);
   ConeCollection();
-  void operator=(const ConeCollection& other);
   bool checkIsRefinedOrCrash() const;
   // Checks the consistency of the cone collection.
   // Runs slow; avoid calling multiple times.

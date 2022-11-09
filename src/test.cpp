@@ -100,9 +100,11 @@ void Test::run() {
     Crypto::Test::all();
     X509Certificate::Test::all();
     SSLRecord::Test::all();
+    global << Logger::green << "Crypto tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::API)) {
     WebAPIResponse::Test::all();
+    global << Logger::green << "API tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::polynomial)) {
     PolynomialUnivariateModularAsModulus::Test::all();
@@ -117,12 +119,14 @@ void Test::run() {
     Polynomial<Rational>::Test::all();
     PolynomialUnivariateModular::Test::all();
     PolynomialFactorizationFiniteFields::Test::all();
+    global << Logger::green << "Polynomial tests completed." << Logger::endL;
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||
     this->shouldTest(Test::Suites::topiclists)
   ) {
     TopicElementParser::Test::all();
+    global << Logger::green << "Topic tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::courses)) {
     Course::Test::all();

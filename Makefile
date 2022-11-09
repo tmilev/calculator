@@ -262,7 +262,7 @@ all: bin_calculator
 bin_calculator: $(OBJECTS)
 	$(compiler) $(LDFLAGS) $(OBJECTS) -o $(TARGET) $(LIBRARIES_INCLUDED_AT_THE_END)
 
-test: calculator
+test: bin_calculator
 	time ./calculator test
 
 $(OBJECT_FILE_OUTPUT)%.o:src/%.cpp

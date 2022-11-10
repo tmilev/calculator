@@ -589,7 +589,7 @@ public:
   static bool crawlTexFile(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  class Test{
+  class Test {
   public:
     static void all();
     static void crawl();

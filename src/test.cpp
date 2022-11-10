@@ -131,7 +131,7 @@ void Test::run() {
     TopicElementParser::Test::all();
     global << Logger::green << "Topic tests completed." << Logger::endL;
   }
-  if (this->shouldTest(Test::Suites::freecalc) ){
+  if (this->shouldTest(Test::Suites::freecalc)) {
     CalculatorFunctionsFreecalc::Test::all();
     global << Logger::green << "Freecalc tests completed." << Logger::endL;
   }

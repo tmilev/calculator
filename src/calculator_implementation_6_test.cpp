@@ -601,6 +601,13 @@ bool CalculatorHTML::Test::parsingTest() {
 }
 
 bool CalculatorHTML::Test::builtInCrashOnFailure() {
+  if (!TopicElementParser::Test::hasEducationalMaterials()) {
+    global
+    << Logger::red
+    << "Educational materials NOT FOUND. Problem tests skipped. "
+    << Logger::endL;
+    return true;
+  }
   std::stringstream comments;
   if (
     !CalculatorHTML::Test::builtInMultiple(0, 0, 0, 3, &comments)
@@ -659,7 +666,8 @@ bool Course::Test::setDeadlines(bool useFallback) {
   STACK_TRACE("Course::Test::setDeadlines");
   Course::Test::Setup setup(useFallback);
   global.setWebInput(
-    WebAPI::frontend::problemFileName, "test/problems/interval_notation_1.html"
+    WebAPI::frontend::problemFileName,
+    "test/problems/interval_notation_1.html"
   );
   global.setWebInput(WebAPI::problem::courseHome, "test/test.html");
   global.setWebInput(
@@ -702,9 +710,9 @@ bool Course::Test::setDeadlines(bool useFallback) {
   JSData resultData;
   QuerySet::Test::findNoFail(finder, resultData);
   std::string result =
-  resultData[DatabaseStrings::labelDeadlines]["test/problems/interval_notation_1.html"][
-    DatabaseStrings::labelDeadlines
-  ]["1"].stringValue;
+  resultData[DatabaseStrings::labelDeadlines][
+    "test/problems/interval_notation_1.html"
+  ][DatabaseStrings::labelDeadlines]["1"].stringValue;
   if (result != wanted) {
     global.fatal
     << "Unexpected deadline: got: "
@@ -733,35 +741,49 @@ bool Course::Test::setDeadlines(bool useFallback) {
   return true;
 }
 
-void CalculatorFunctionsFreecalc::Test::all(){
+void CalculatorFunctionsFreecalc::Test::all() {
   std::string unused;
-  if (!FileOperations::loadFileToStringVirtual("freecalc/homework/referenceallproblemsbycourse"
-  "/calculusimasterproblemsheet.tex",unused, true, nullptr)){
+  if (
+    !FileOperations::loadFileToStringVirtual(
+      "freecalc/homework/referenceallproblemsbycourse"
+      "/calculusimasterproblemsheet.tex",
+      unused,
+      true,
+      nullptr
+    )
+  ) {
     global << Logger::red << "*****************" << Logger::endL;
-    global  << "Freecalc tests skipped: "<<  Logger::red << "free calc not found." << Logger::endL;
+    global
+    << "Freecalc tests skipped: "
+    << Logger::red
+    << "free calc not found."
+    << Logger::endL;
     global << Logger::red << "*****************" << Logger::endL;
     return;
   }
   CalculatorFunctionsFreecalc::Test::crawl();
 }
 
-void CalculatorFunctionsFreecalc::Test::crawl(){
+void CalculatorFunctionsFreecalc::Test::crawl() {
   StateMaintainer<bool> maintainer;
-  maintainer.initialize(
-    global.flagDisableDatabaseLogEveryoneAsAdmin
-  );
-    global.flagDisableDatabaseLogEveryoneAsAdmin = true;
+  maintainer.initialize(global.flagDisableDatabaseLogEveryoneAsAdmin);
+  global.flagDisableDatabaseLogEveryoneAsAdmin = true;
   Calculator calculator;
   calculator.initialize(Calculator::Mode::full);
   calculator.evaluate(
-  "Crawl(\"freecalc/homework/referenceallproblemsbycourse"
-  "/calculusimasterproblemsheet.tex\")"
+    "Crawl(\"freecalc/homework/referenceallproblemsbycourse"
+    "/calculusimasterproblemsheet.tex\")"
   );
   std::string result = calculator.programExpression.toString();
-  std::string expected = "Output file: "
+  std::string expected =
+  "Output file: "
   "<a href=\"/output/latexOutput.tex\">latexOutput.tex</a>";
   if (result != expected) {
-    global.fatal << "While crawling freecalc, got:\n" << result
-    << "\nexpected:\n" << expected << global.fatal;
+    global.fatal
+    << "While crawling freecalc, got:\n"
+    << result
+    << "\nexpected:\n"
+    << expected
+    << global.fatal;
   }
 }

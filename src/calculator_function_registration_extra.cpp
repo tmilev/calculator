@@ -7,7 +7,8 @@ void Calculator::initializeFunctionsExtra() {
   STACK_TRACE("Calculator::initializeFunctionsExtra");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
-  Function::Options innerAdminNoTest = Function::Options::administrativeNotTested();
+  Function::Options innerAdminNoTest =
+  Function::Options::administrativeNotTested();
   Function::Options innerInvisibleNoTest =
   Function::Options::invisibleNoTest();
   Function::Options innerInvisibleExperimentalNoTest =
@@ -436,7 +437,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
   STACK_TRACE("Calculator::initializeFunctionsCryptoAndEncoding");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
-  Function::Options innerAdminNoTest = Function::Options::administrativeNotTested();
+  Function::Options innerAdminNoTest =
+  Function::Options::administrativeNotTested();
   Function::Options innerNoTestExperimental =
   Function::Options::innerNoTestExperimental();
   Function::Options innerExperimental = Function::Options::experimental();

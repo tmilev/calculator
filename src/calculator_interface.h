@@ -1189,7 +1189,7 @@ public:
     bool adminOnly;
     void reset();
     static Options adminNoTestInvisibleExperimental();
-    static Options adminNoTest();
+    static Options administrativeNotTested();
     static Options innerInvisible();
     static Options standard();
     static Options compositeStandard();

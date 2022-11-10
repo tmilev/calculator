@@ -232,7 +232,7 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   << Logger::endL;
   Course::Test::Setup setup(useFallbackDatabase);
   setup.deleteDatabaseSetupAll();
-  std::string sample = "test/problems/sample1.html";
+  std::string sample = "test/problems/interval_notation_1.html";
   global.webArguments[WebAPI::problem::fileName] = sample;
   global.requestType = WebAPI::frontend::scoredQuiz;
   JSData resultFirst = WebAPIResponse::getExamPageJSON();

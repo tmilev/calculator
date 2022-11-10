@@ -5539,25 +5539,25 @@ GrowDynkinType(g^35_2+B^30_2, e_6);
 This is a calculator testing function. Grows a Dynkin type inside an ambient Dynkin type. 
 
 *LoadFileIntoString* [LoadFileIntoString] {CalculatorConversions::loadFileIntoString}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LoadFileIntoString%28%5c%22test%2fcertificate_self_signed.base64%5c%22%29%3b%5cnLoadFileIntoString%28%5c%22problems%2fdefault%2fFunctions-composing-fractional-linear-1.html%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LoadFileIntoString%28%5c%22test%2fcertificate_self_signed.base64%5c%22%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 LoadFileIntoString("test/certificate_self_signed.base64");
-LoadFileIntoString("problems/default/Functions-composing-fractional-linear-1.html")
+
 ```
 Loads a file into a string. The file must be given its relative file name displayed when browsing the web server. There are two exceptions. 1) The file can be located in a folder in the project base that is otherwise not visible by the webserver **provided that** the folder is white-listed via the FileOperations class within the C++ source. Example: folder problems/ is white-listed. To access this file simply start your file name with the foldername. Do not start the folder name with the / character.2) The file can be located in a folder in a level parallel to the project base - such folders are outside of the project folder - **provided that** the folder is white listed in the C++ code. 
 
 *InterpretProblem* [InterpretProblem] {CalculatorHtmlFunctions::interpretProblem}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22InterpretProblem%28LoadFileIntoString%28%5c%22problems%2fdefault%2fFunctions-composing-fractional-linear-1.html%5c%22%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22InterpretProblem%28LoadFileIntoString%28%5c%22test%2fproblems%2ffunctions_composing_fractional_linear_1.html%5c%22%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-InterpretProblem(LoadFileIntoString("problems/default/Functions-composing-fractional-linear-1.html"))
+InterpretProblem(LoadFileIntoString("test/problems/functions_composing_fractional_linear_1.html"))
 ```
 Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands. 
 
 *ProblemGiveUp* [ProblemGiveUp] {CalculatorHtmlFunctions::interpretProblemGiveUp}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ProblemGiveUp%28%5cn%5c%22problems%2fFunctions-composing-fractional-linear-1.html%5c%22%2c%5cn%5c%22AlgebraAnswer%5c%22%2c%5cn%5c%22123%5c%22%5cn%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ProblemGiveUp%28%5cn%5c%22test%2fproblems%2ffunctions_composing_fractional_linear_1.html%5c%22%2c%5cn%5c%22AlgebraAnswer%5c%22%2c%5cn%5c%22123%5c%22%5cn%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ProblemGiveUp(
-"problems/Functions-composing-fractional-linear-1.html",
+"test/problems/functions_composing_fractional_linear_1.html",
 "AlgebraAnswer",
 "123"
 )
@@ -5565,9 +5565,9 @@ ProblemGiveUp(
 Gives the predefined answer to a problem. First argument must be a string with the problem. The second argument must be the id of the answer. Third argument must be the random seed integer.
 
 *ExtractCalculatorExpressionFromHtml* [ExtractCalculatorExpressionFromHtml] {CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExtractCalculatorExpressionFromHtml%28LoadFileIntoString%28%5c%22problems%2fdefault%2fFunctions-composing-fractional-linear-1.html%5c%22%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ExtractCalculatorExpressionFromHtml%28LoadFileIntoString%28%5c%22test%2fproblems%2ffunctions_composing_fractional_linear_1.html%5c%22%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-ExtractCalculatorExpressionFromHtml(LoadFileIntoString("problems/default/Functions-composing-fractional-linear-1.html"))
+ExtractCalculatorExpressionFromHtml(LoadFileIntoString("test/problems/functions_composing_fractional_linear_1.html"))
 ```
 Reads html and extracts embedded calculator commands. Content enclosed in spans with appropriate class names is interpreted; all other content is copied without any change. At the moment of writing, the planned span class names are: "calculator", "calculatorHidden", "calculatorAnswer".
 

@@ -1596,7 +1596,7 @@ Function::Options Function::Options::invisibleNoTest() {
   return result;
 }
 
-Function::Options Function::Options::adminNoTest() {
+Function::Options Function::Options::administrativeNotTested() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;

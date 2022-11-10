@@ -7,7 +7,7 @@ void Calculator::initializeFunctionsExtra() {
   STACK_TRACE("Calculator::initializeFunctionsExtra");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
-  Function::Options innerAdminNoTest = Function::Options::adminNoTest();
+  Function::Options innerAdminNoTest = Function::Options::administrativeNotTested();
   Function::Options innerInvisibleNoTest =
   Function::Options::invisibleNoTest();
   Function::Options innerInvisibleExperimentalNoTest =
@@ -38,9 +38,7 @@ void Calculator::initializeFunctionsExtra() {
     "- such folders are outside of "
     "the project folder - **provided that** "
     "the folder is white listed in the C++ code. ",
-    "LoadFileIntoString(\"test/certificate_self_signed.base64\");\n"
-    "LoadFileIntoString"
-    "(\"problems/default/Functions-composing-fractional-linear-1.html\")",
+    "LoadFileIntoString(\"test/certificate_self_signed.base64\");\n",
     "CalculatorConversions::loadFileIntoString",
     "LoadFileIntoString",
     innerStandard
@@ -52,10 +50,10 @@ void Calculator::initializeFunctionsExtra() {
     "Does as ExtractCalculatorExpressionFromHtml but in "
     "addition interprets the calculator commands. ",
     "InterpretProblem(LoadFileIntoString("
-    "\"problems/default/Functions-composing-fractional-linear-1.html\"))",
+    "\"test/problems/functions_composing_fractional_linear_1.html\"))",
     "CalculatorHtmlFunctions::interpretProblem",
     "InterpretProblem",
-    innerNoTest
+    innerStandard
   );
   this->addOperationHandler(
     "ProblemGiveUp",
@@ -66,7 +64,7 @@ void Calculator::initializeFunctionsExtra() {
     "The second argument must be the id of the answer. "
     "Third argument must be the random seed integer.",
     "ProblemGiveUp(\n"
-    "\"problems/Functions-composing-fractional-linear-1.html\",\n"
+    "\"test/problems/functions_composing_fractional_linear_1.html\",\n"
     "\"AlgebraAnswer\",\n"
     "\"123\"\n"
     ")",
@@ -86,7 +84,7 @@ void Calculator::initializeFunctionsExtra() {
     "the planned span class names are: \"calculator\", "
     "\"calculatorHidden\", \"calculatorAnswer\".",
     "ExtractCalculatorExpressionFromHtml(LoadFileIntoString("
-    "\"problems/default/Functions-composing-fractional-linear-1.html\"))",
+    "\"test/problems/functions_composing_fractional_linear_1.html\"))",
     "CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml",
     "ExtractCalculatorExpressionFromHtml",
     innerStandard
@@ -339,7 +337,7 @@ void Calculator::initializeFunctionsExtra() {
     "/calculusimasterproblemsheet.tex\")",
     "CalculatorFunctionsFreecalc::crawlTexFile",
     "Crawl",
-    Function::Options::administrativeTested()
+    Function::Options::administrativeNotTested()
   );
   this->addOperationHandler(
     "BuildFreecalc",
@@ -438,7 +436,7 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
   STACK_TRACE("Calculator::initializeFunctionsCryptoAndEncoding");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options innerNoTest = Function::Options::innerNoTest();
-  Function::Options innerAdminNoTest = Function::Options::adminNoTest();
+  Function::Options innerAdminNoTest = Function::Options::administrativeNotTested();
   Function::Options innerNoTestExperimental =
   Function::Options::innerNoTestExperimental();
   Function::Options innerExperimental = Function::Options::experimental();

@@ -6,6 +6,7 @@
 #include "signals_infrastructure.h"
 #include "source_code_formatter.h"
 #include "math_general_implementation.h"
+#include "calculator_inner_functions.h"
 
 class Test {
 public:
@@ -19,6 +20,7 @@ public:
     static const std::string crypto;
     static const std::string topicLists;
     static const std::string topiclists;
+    static const std::string freecalc;
     static const std::string calculator;
     static const std::string polynomial;
     static const std::string basic;
@@ -52,6 +54,7 @@ const std::string Test::Suites::database = "database";
 const std::string Test::Suites::problems = "problems";
 const std::string Test::Suites::courses = "courses";
 const std::string Test::Suites::crypto = "crypto";
+const std::string Test::Suites::freecalc = "freecalc";
 const std::string Test::Suites::topicLists = "topicLists";
 const std::string Test::Suites::topiclists = "topiclists";
 const std::string Test::Suites::calculator = "calculator";
@@ -127,6 +130,10 @@ void Test::run() {
   ) {
     TopicElementParser::Test::all();
     global << Logger::green << "Topic tests completed." << Logger::endL;
+  }
+  if (this->shouldTest(Test::Suites::freecalc) ){
+    CalculatorFunctionsFreecalc::Test::all();
+    global << Logger::green << "Freecalc tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::courses)) {
     Course::Test::all();

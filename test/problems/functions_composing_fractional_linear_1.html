@@ -1,0 +1,58 @@
+Compute the composite functions \((f\circ g)(x)\). Simplify your answer to a single fraction. 
+
+Make sure to indicate the domain of the composite function. 
+
+<calculatorHidden>
+af= RandomInteger((-5,-1), (1,5));
+bf= RandomInteger((-5,-1), (1,5));
+cf= RandomInteger((-5,-1), (1,5));
+df= RandomInteger((-5,-1), (1,5));
+1/(af*df-bf*cf) ;  
+ag= RandomInteger((-5,-1), (1,5));
+bg= RandomInteger((-5,-1), (1,5));
+cg= RandomInteger((-5,-1), (1,5));
+dg= RandomInteger((-5,-1), (1,5));
+1/(ag*dg-bg*cg) ;  
+</calculatorHidden>
+<br>
+<calculator>
+\displaystyle
+f{}({{x}})= \frac{af x +bf}{cf x +df};
+</calculator>.
+<br>
+<calculator>
+\displaystyle
+g{}({{x}})= \frac{ag x +bg}{cg x +dg};
+</calculator>.
+<br>
+<answerCalculatorHighlight>Answer: \( (f \circ g)(x)=\)</answerCalculatorHighlight> 
+<calculatorAnswer id="AlgebraAnswer" buttons="algebra">
+(AlgebraAnswer-f{}(g{}(x))==0);
+</calculatorAnswer>
+<calculatorCommentsBeforeSubmission>
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+</calculatorCommentsBeforeSubmission>
+<calculatorAnswerOnGiveUp>
+f{}g{}x
+</calculatorAnswerOnGiveUp>
+<br>
+The domain of \(f\circ g\) is:
+<br>
+<answerCalculatorHighlight>\(x\neq\)</answerCalculatorHighlight>
+<calculatorAnswer id="DomainAnswer" buttons="algebra">
+Thaw(if (
+df cg +cf ag==0,DomainAnswer== -dg/cg, 
+Freeze{}( (DomainAnswer==(
+Sequence{}(-dg/cg) \sqcup Sequence{}(-(df dg+cf bg)/(df cg 
++cf ag)))) 
+or 
+((DomainAnswer== (Sequence{}(-(df dg+cf bg)/(df cg 
++cf ag)) \sqcup Sequence{}(-dg/cg))))
+)))
+</calculatorAnswer>
+<calculatorAnswerOnGiveUp>
+if (not (df cg + cf ag==0), Sequence{}(-dg/cg) \sqcup Sequence{}(-(df dg+cf bg)/(if (df cg + cf ag==0, 1, df cg 
++cf ag))), -dg/cg)
+</calculatorAnswerOnGiveUp>
+<br> 
+If there is more than value outside of the domain, separate the values by commas. 

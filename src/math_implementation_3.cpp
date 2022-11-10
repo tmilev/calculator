@@ -14697,10 +14697,6 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
     this->conesWithIrregularWalls.removeIndex(index);
     this->splitConeByMultipleNeighbors(cone);
     this->checkConsistencyFull();
-    global.comments
-    <<
-    "<br>DEBUG: cone history from refineAllConesWithWallsWithMultipleNeighbors!!!!"
-    ;
     this->addHistoryPoint();
     int nextMustDecrease =
     this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
@@ -14772,10 +14768,6 @@ void ConeCollection::refineOneByOneDirection(
   }
   if (exitWalls.size == 1) {
     // The chamber is already refined;
-    global.comments
-    << "<br>DEBUG: Chamber "
-    << toBeRefined.id
-    << " already refined.";
     this->addRefinedCone(toBeRefined);
     return;
   }
@@ -14816,7 +14808,6 @@ void ConeCollection::refineOneByOneDirection(
   for (Cone& cone : candidates.values) {
     this->processNeighborsOfNewlyAddedCone(cone);
   }
-  global.comments << "<br>DEBUG: cone history from splitter!!!!";
   this->addHistoryPoint();
   this->checkConsistencyFull();
 }
@@ -15459,7 +15450,6 @@ ConeCollection::ConeCollection() {
   this->flagChambersHaveTooFewVertices = false;
   this->flagIsRefined = false;
   this->conesCreated = 0;
-  global.comments << "DEBUG: turn slicing history on.<br>";
   this->flagRecordSlicingHistory = true;
 }
 
@@ -15473,7 +15463,7 @@ bool ConeCollection::checkConsistencyFullWithoutDebugMessage() const {
 
 bool ConeCollection::checkConsistencyFull() const {
   STACK_TRACE("ConeCollection::checkConsistencyFull");
-  global.comments << "<br>Checking full consistency.";
+  // global.comments << "<br>DEBUG: Checking full consistency.";
   return this->checkConsistencyFullWithoutDebugMessage();
 }
 

@@ -9392,6 +9392,7 @@ bool CalculatorFunctionsFreecalc::buildFreecalc(
   return output.assignValue(calculator, crawler.displayResult.str());
 }
 
+
 bool CalculatorFunctions::findProductDistanceModN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

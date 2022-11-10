@@ -10,7 +10,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   Function::Options standardOptions = Function::Options::standard();
   Function::Options noTest = Function::Options::innerNoTest();
   Function::Options invisible = Function::Options::innerInvisible();
-  Function::Options adminNoTest = Function::Options::adminNoTest();
+  Function::Options adminNoTest = Function::Options::administrativeNotTested();
   Function::Options invisibleExperimental =
   Function::Options::innerInvisibleExperimental();
   Function::Options adminNoTestExperimental =

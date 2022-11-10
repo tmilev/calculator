@@ -738,17 +738,21 @@ bool CodeFormatter::Element::computeIndentationInParentheses() {
   this->children[0].indentationLevel = this->indentationLevel;
   this->children[0].computeIndentation();
   int middleSize = this->children[1].minimalSizeWithSpacebars();
+  this->children[1].indentationLevel =
+  this->indentationLevel + this->owner->tabLength;
   if (
     this->children[0].rightMostAtomUnderMe()->columnFinal + middleSize + 1 >
     this->owner->maximumDesiredLineLength
   ) {
     this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
-    this->children[1].indentationLevel =
-    this->indentationLevel + this->owner->tabLength;
     this->children[1].computeIndentation();
     this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
   } else {
     this->children[1].computeIndentation();
+    if (this->children[1].containsNewLineAfterExcludingComments()) {
+      this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
+      this->children[1].computeIndentation();
+    }
   }
   this->children[2].indentationLevel = this->indentationLevel;
   this->children[2].computeIndentation();
@@ -1320,6 +1324,17 @@ bool CodeFormatter::Element::computeIndentationQuote() {
     CodeFormatter::Element& child = this->children[i];
     if (i != this->children.size - 1) {
       child.newLinesAfter = 1;
+    }
+    if (i > 0) {
+      CodeFormatter::Element* next = this->nextAtom();
+      if (
+        next != nullptr && (
+          next->type == CodeFormatter::Element::Type::RightParenthesis ||
+          next->type == CodeFormatter::Element::Type::Quote
+        )
+      ) {
+        child.newLinesAfter = 1;
+      }
     }
     child.indentationLevel = this->indentationLevel;
     child.computeIndentation();

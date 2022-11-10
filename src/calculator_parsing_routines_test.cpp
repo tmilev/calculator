@@ -86,9 +86,11 @@ bool Calculator::Test::loopDetectionEverExpanding() {
 bool Calculator::Test::loopDetectionCycle() {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::educational);
-  calculator.evaluate("TurnOffRules(CheckAutoEquality);\n"
-"x=x;\n"
-"x");
+  calculator.evaluate(
+    "TurnOffRules(CheckAutoEquality);\n"
+    "x=x;\n"
+    "x"
+  );
   if (!calculator.flagAbortComputationASAP) {
     global.fatal
     << "Simple infinite loop did not generate error as expected. Result: "

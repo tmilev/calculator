@@ -2344,8 +2344,10 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
   const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping,
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
-  STACK_TRACE("MonomialGeneralizedVerma::"
-"multiplyMeByUEEltOnTheLeft");
+  STACK_TRACE(
+    "MonomialGeneralizedVerma::"
+    "multiplyMeByUEEltOnTheLeft"
+  );
   MonomialGeneralizedVerma<Coefficient> currentMon;
   output.makeZero();
   ElementSumGeneralizedVermas<Coefficient> buffer;

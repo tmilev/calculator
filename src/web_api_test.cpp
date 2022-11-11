@@ -231,12 +231,18 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   << Database::toString()
   << Logger::endL;
   Course::Test::Setup setup(useFallbackDatabase);
+  global << "DEBUG: about to del DB"<< Logger::endL;
   setup.deleteDatabaseSetupAll();
+  global << "DEBUG: del DB DONE"<< Logger::endL;
+
   std::string sample = "test/problems/interval_notation_1.html";
   global.webArguments[WebAPI::problem::fileName] = sample;
   global.requestType = WebAPI::frontend::scoredQuiz;
+  std::string databaseBeforeFirstRun = Database::get().fallBack.databaseContent.toString();
   JSData resultFirst = WebAPIResponse::getExamPageJSON();
+  std::string databaseAfterFirstRun = Database::get().fallBack.databaseContent.toString();
   JSData resultSecond = WebAPIResponse::getExamPageJSON();
+  std::string afterSecondRun = Database::get().fallBack.databaseContent.toString();
   if (resultFirst != resultSecond) {
     global.fatal
     << "Two consecutive scored quiz requests "
@@ -244,6 +250,12 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
     << resultFirst
     << "\nSecond:\n"
     << resultSecond
+    << "Database before start:\n"
+    << databaseBeforeFirstRun
+    << "\nDatabase before second run:\n"
+    << databaseAfterFirstRun
+    << "\nDatabase after second run:\n"
+    << afterSecondRun
     << global.fatal;
   }
   if (

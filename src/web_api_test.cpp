@@ -231,9 +231,7 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   << Database::toString()
   << Logger::endL;
   Course::Test::Setup setup(useFallbackDatabase);
-  global << "DEBUG: about to del DB"<< Logger::endL;
   setup.deleteDatabaseSetupAll();
-  global << "DEBUG: del DB DONE"<< Logger::endL;
 
   std::string sample = "test/problems/interval_notation_1.html";
   global.webArguments[WebAPI::problem::fileName] = sample;

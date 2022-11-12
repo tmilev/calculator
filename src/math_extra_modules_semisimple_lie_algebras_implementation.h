@@ -521,7 +521,7 @@ splitOverLeviMonomialsEncodeHighestWeight(
     }
     out
     << "<hr>"
-    << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false,true);
+    << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false, true);
     *report = out.str();
   }
   return true;
@@ -1753,7 +1753,7 @@ const {
   );
   out
   << " A picture of the weight support follows. "
-  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false,true);
+  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false, true);
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
     Matrix<Coefficient>& bilinearForm =

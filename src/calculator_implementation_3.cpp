@@ -19,7 +19,10 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 isDominantWithRespectToGenerator<RationalFraction<Rational> >(
   const Vector<RationalFraction<Rational> >& weight, int generatorIndex
 ) {
-  STACK_TRACE("SubgroupWeylGroupOLD::isDominantWithRespectToGenerator");
+  STACK_TRACE(
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "::isDominantWithRespectToGenerator"
+  );
   this->checkInitialization();
   Vector<RationalFraction<Rational> > tempVect;
   RationalFraction<Rational> tempRF;
@@ -310,9 +313,9 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
-  out << animated.getHTMLDiv(this->owner->getDimension(), false,true);
+  out << animated.getHTMLDiv(this->owner->getDimension(), false, true);
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
-  out << collapsed.getHTMLDiv(this->owner->getDimension(), false,true);
+  out << collapsed.getHTMLDiv(this->owner->getDimension(), false, true);
   out
   << "Littelmann paths in simple coordinates "
   << "given in the order in which they are generated ("
@@ -371,8 +374,10 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   }
   out << "</table>";
   out
-  << "<table><td>corresponding element of U(g)</td><td>is adapted</td>"
-  << "<td>path</td><td>e operators with non-zero action.</td>";
+  << "<table><td>corresponding element of U(g)</td>"
+  << "<td>is adapted</td>"
+  << "<td>path</td>"
+  << "<td>e operators with non-zero action.</td>";
   for (int i = 0; i < generators.size; i ++) {
     tempPath = orbit[i];
     tempMon = generators[i];

@@ -304,9 +304,10 @@ void DrawOperations::drawTextAtVectorBufferRational(
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawTextAtVectorBufferDouble(const Vector<double>& input,
+void DrawOperations::drawTextAtVectorBufferDouble(
+  const Vector<double>& input,
   const std::string& inputText,
-  const std::string &color,
+  const std::string& color,
   int fontSize,
   int textStyle
 ) {

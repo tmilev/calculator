@@ -370,7 +370,9 @@ public:
   DrawOperations operations;
   int getActualPenStyleFromFlagsAnd(int inputPenStyle);
   int getActualTextStyleFromFlagsAnd(int inputTextStyle);
-  std::string getHTMLDiv(int dimension, bool useSpanTag, bool generateInfoPanels);
+  std::string getHTMLDiv(
+    int dimension, bool useSpanTag, bool generateInfoPanels
+  );
   void drawString(
     DrawElementInputOutput& drawData,
     const std::string& input,
@@ -466,7 +468,7 @@ public:
   void drawTextAtVectorBufferDouble(
     const Vector<double>& point,
     const std::string& inputText,
-  const std::string& color,
+    const std::string& color,
     int textStyle
   );
   void drawCircleAtVectorBufferRational(

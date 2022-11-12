@@ -5516,7 +5516,7 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
 bool CalculatorLieTheory::casimirWithRespectToLevi(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorLieTheory::casimir");
+  STACK_TRACE("CalculatorLieTheory::casimirWithRespectToLevi");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return false;
@@ -5707,7 +5707,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   character.drawMeWithMultiplicities(report, drawingVariables, 10000);
   out
   << report
-  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true,true);
+  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true, true);
   return output.assignValue(calculator, out.str());
 }
 
@@ -5761,7 +5761,8 @@ bool CalculatorLieTheory::drawRootSystem(
     drawingVariables.flagFillUserDefinedProjection = true;
     drawingVariables.fillUserDefinedProjection = preferredProjectionPlane;
   }
-  out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true,true);
+  out
+  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true, true);
   return output.assignValue(calculator, out.str());
 }
 

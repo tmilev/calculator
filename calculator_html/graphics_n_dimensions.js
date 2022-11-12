@@ -397,6 +397,10 @@ class GraphicsNDimensions {
     if (this.canvas == null || this.canvas == undefined) {
       this.init();
     }
+    if (this.dimension === -1) {
+      console.log("Not drawing: received negative dimension.");
+      return;
+    }
     this.computeProjectionsEiBasis();
     this.computeProjectionsSpecialVectors();
     this.canvas.clearRect(0, 0, this.widthHTML, this.heightHTML);
@@ -452,7 +456,11 @@ class GraphicsNDimensions {
 
   init() {
     this.initInfo();
-    if (this.bilinearForm.length != this.dimension) {
+    if (this.dimension === -1) {
+      console.log("Negative dimension received, not plotting.");
+      return;
+    }
+    if (this.bilinearForm.length !== this.dimension ) {
       this.makeStandardBilinearForm(this.dimension);
     }
     if (this.basisCircles.length === 0) {
@@ -1142,9 +1150,9 @@ function createGraphicsFromObject(input) {
   if (input.idCanvas === undefined || input.idCanvas === null) {
     throw ("idCanvas missing.");
   }
-  let spanInformationId = null;
-  if (input.idSpanInformation === undefined || input.idSpanInformation === null) {
-    spanInformationId = input.spanInformationId;
+  let spanInformationId = input.idSpanInformation;
+  if (spanInformationId == undefined ) {
+    spanInformationId = null;
   }
   let object = new GraphicsNDimensions(input.idCanvas, spanInformationId, input.idHighlightInformation);
   object.initFromObject(input);

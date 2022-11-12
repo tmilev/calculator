@@ -6175,17 +6175,23 @@ class Cone {
     return output;
   }
   // Helper method for hasCommonIrregularWall.
-  bool twoPlanesSeparateUs(Cone& neighborCandidate, const Vector<Rational>& normalOfWall);
+  bool twoPlanesSeparateUs(
+    Cone& neighborCandidate, const Vector<Rational>& normalOfWall
+  );
   // Helper method for hasCommonIrregularWall.
   bool isSeparatingPlane(Cone& neighborCandidate, const Wall& wall);
-
-  bool hasNormal(const Vector<Rational> &normalOfWall)const;
 public:
+  class Payload {
+  public:
+    int lowestSlicingIndex;
+    Payload();
+  };
+
   bool flagIsTheZeroCone;
   Vectors<Rational> vertices;
   List<Wall> walls;
   int id;
-  int lowestSlicingIndex;
+  Cone::Payload payload;
   void transformToWeylProjective(ConeCollection& owner);
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables, FormatExpressions& format
@@ -6276,6 +6282,7 @@ public:
   bool haveCommonVertex(
     const Vector<Rational>& normal1, const Vector<Rational>& normal2
   );
+  bool hasNormal(const Vector<Rational>& normalOfWall) const;
   bool produceNormalSeparatingWallsInDirection(
     const Vector<Rational>& slicingDirection,
     const Vector<Rational>& base,
@@ -6297,7 +6304,7 @@ public:
     }
   }
   List<List<int> > getAllNeighbors() const;
-void getAllNeighbors(HashedList<int>& output) const;
+  void getAllNeighbors(HashedList<int>& output) const;
   void intersectHyperplane(
     Vector<Rational>& normal, Cone& outputConeLowerDimension
   );
@@ -6329,16 +6336,17 @@ void getAllNeighbors(HashedList<int>& output) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringNeighbors() const;
   std::string toHTML() const;
-
   // Determines whether the two Cones have a common irregular wall.
   // Assumptions made before this computation.
   // 1) Both cones have sufficiently many projective vertices.
   // 2) Both this cone and the candidate have all their vertices computed.
-  // 3) This cone has a wall with the given normal, and the other neighbor has a
+  // 3) This cone has a wall with the given normal, and the other neighbor has
+  // a
   // wall with the opposite normal.
-
-  bool hasCommonIrregularWall(Cone& neighborCandidate, Vector<Rational>& normalOfWall);
-
+  bool hasCommonPossiblyIrregularWall(
+    Cone& neighborCandidate, Vector<Rational>& normalOfWall
+  );
+  void addOneConeIfAdjacentToWall(Wall& wall, Cone& candidateNeighbor);
 };
 
 class ConeLatticeAndShift {
@@ -6398,15 +6406,27 @@ public:
   );
   void refineAllConesWithWallsWithMultipleNeighbors();
   void attachNeighbbors(
-    Cone& candidate,
-    int idReplacedCone,
-    MapList<int, Cone>& allCandidates
+    const Cone& toBeReplaced, MapList<int, Cone>& allCandidates
+  );
+  void attachNeighbbors(
+    const Cone& toBeReplaced, const List<Cone*>& newCones
   );
   void replaceConeAdjacentToWall(
-    Cone& candidate,
+    const Cone& toBeReplaced,
     const Wall& wall,
+    const List<Cone*>& newCones
+  );
+  void replaceConeInNeighbor(
+    Cone& neighbor,
+    const Vector<Rational>& wallNormal,
     int idReplacedCone,
-    MapList<int, Cone>& newCones
+    const List<Cone*>& newCones
+  );
+  void addAllMutualNeighborsIfAdjacent(
+    Cone& original, Wall& wallInOriginal, const List<Cone*>& incoming
+  );
+  void addMutualNeighborsIfAdjacent(
+    Cone& original, Wall& wallInOriginal, Cone& incoming
   );
   void constructSubstituteChambers(
     List<Cone>& candidates, List<Cone>& output
@@ -6449,7 +6469,9 @@ public:
     FormatExpressions& format
   ) const;
   std::string drawMeToHtmlProjective(
-    DrawingVariables& drawingVariables, FormatExpressions& format, bool generateControls
+    DrawingVariables& drawingVariables,
+    FormatExpressions& format,
+    bool generateControls
   ) const;
   std::string toString() const;
   std::string toStringConeCount() const;
@@ -6461,7 +6483,7 @@ public:
   // Returns the detailed cone description without the graphics.
   std::string toHTMLWithoutGraphics() const;
   // Returns the graphics of all the cones without description.
-  std::string toHTMLGraphicsOnly() const;
+  std::string toHTMLGraphicsOnly(bool includePanels) const;
   // Returns a sequence of html canvas drawings of the various stages of
   // slicing.
   std::string toHTMLHistory() const;
@@ -6499,9 +6521,7 @@ public:
     const Vector<Rational>& killerNormal,
     int nextSlicingIndex
   );
-  void removeFakeNeighbors(Cone& cone);
-  void removeFakeNeighborsAlongWall(Cone& cone, Wall& wall);
-  void removeFromNeighbors(const Cone& cone);
+  void removeIdFromNeighbors(const Cone& cone);
   void splitConeByMultipleNeighbors(Cone& input);
   void splitConeByMultipleNeighbors(Cone& input, Wall& wall);
   void getNewVerticesAppend(

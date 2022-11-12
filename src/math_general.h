@@ -6174,6 +6174,12 @@ class Cone {
     output << cone.toString();
     return output;
   }
+  // Helper method for hasCommonIrregularWall.
+  bool twoPlanesSeparateUs(Cone& neighborCandidate, const Vector<Rational>& normalOfWall);
+  // Helper method for hasCommonIrregularWall.
+  bool isSeparatingPlane(Cone& neighborCandidate, const Wall& wall);
+
+  bool hasNormal(const Vector<Rational> &normalOfWall)const;
 public:
   bool flagIsTheZeroCone;
   Vectors<Rational> vertices;
@@ -6262,8 +6268,9 @@ public:
   bool hasMultipleNeighborWall() const;
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
-  bool getInternalPoint(Vector<Rational>& output) const;
-  Vector<Rational> getInternalPoint() const;
+  bool internalPoint(Vector<Rational>& output) const;
+  Vector<Rational> internalPoint() const;
+  Vector<Rational> internalPointNormal() const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const Cone& input);
   bool haveCommonVertex(
@@ -6290,6 +6297,7 @@ public:
     }
   }
   List<List<int> > getAllNeighbors() const;
+void getAllNeighbors(HashedList<int>& output) const;
   void intersectHyperplane(
     Vector<Rational>& normal, Cone& outputConeLowerDimension
   );
@@ -6319,7 +6327,18 @@ public:
   bool operator>(const Cone& other) const;
   bool operator==(const Cone& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringNeighbors() const;
   std::string toHTML() const;
+
+  // Determines whether the two Cones have a common irregular wall.
+  // Assumptions made before this computation.
+  // 1) Both cones have sufficiently many projective vertices.
+  // 2) Both this cone and the candidate have all their vertices computed.
+  // 3) This cone has a wall with the given normal, and the other neighbor has a
+  // wall with the opposite normal.
+
+  bool hasCommonIrregularWall(Cone& neighborCandidate, Vector<Rational>& normalOfWall);
+
 };
 
 class ConeLatticeAndShift {
@@ -6430,11 +6449,13 @@ public:
     FormatExpressions& format
   ) const;
   std::string drawMeToHtmlProjective(
-    DrawingVariables& drawingVariables, FormatExpressions& format
+    DrawingVariables& drawingVariables, FormatExpressions& format, bool generateControls
   ) const;
   std::string toString() const;
   std::string toStringConeCount() const;
   std::string toStringConeIds() const;
+  std::string toStringNeighborGraph() const;
+  std::string toStringNeighborGraph(const MapList<int, Cone>& cones) const;
   // Returns an html canvas drawing of the cones plus detailed decription.
   std::string toHTML() const;
   // Returns the detailed cone description without the graphics.
@@ -6482,7 +6503,7 @@ public:
   void removeFakeNeighborsAlongWall(Cone& cone, Wall& wall);
   void removeFromNeighbors(const Cone& cone);
   void splitConeByMultipleNeighbors(Cone& input);
-  void splitConeByMultipleNeighbors(const Cone& input, const Wall& wall);
+  void splitConeByMultipleNeighbors(Cone& input, Wall& wall);
   void getNewVerticesAppend(
     const Cone& toBeSplit,
     const Vector<Rational>& normalSlicingPlane,

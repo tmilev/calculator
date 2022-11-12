@@ -304,14 +304,13 @@ void DrawOperations::drawTextAtVectorBufferRational(
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawTextAtVectorBufferDouble(
-  const Vector<double>& input,
+void DrawOperations::drawTextAtVectorBufferDouble(const Vector<double>& input,
   const std::string& inputText,
-  int ColorIndex,
+  const std::string &color,
   int fontSize,
   int textStyle
 ) {
-  (void) ColorIndex;
+  (void) color;
   (void) fontSize;
   (void) textStyle;
   JSData operation;

@@ -4,7 +4,7 @@
 #include "crypto.h"
 #include "calculator_interface.h"
 
-std::string DrawingVariables::getHTMLDiv(int dimension, bool useSpanTag) {
+std::string DrawingVariables::getHTMLDiv(int dimension, bool useSpanTag, bool generateInfoPanels) {
   STACK_TRACE("DrawingVariables::getHTMLDiv");
   JSData data;
   data["widthHTML"] = this->defaultHtmlWidth;
@@ -22,14 +22,17 @@ std::string DrawingVariables::getHTMLDiv(int dimension, bool useSpanTag) {
   Crypto::convertStringToHex(
     Crypto::computeSha256(data.toString()), 0, false
   );
-  std::string idCanvas = "idCanvasNDimensionalGraphics" + graphicsId;
   std::string idHighlightInformation =
   "idHighlightInfoNDimensionalGraphics" + graphicsId;
   std::string idSpanInformation =
   "idCanvasInfoNDimensionalGraphics" + graphicsId;
-  data["idCanvas"] = idCanvas;
+
+if (generateInfoPanels){
   data["idSpanInformation"] = idSpanInformation;
   data["idHighlightInformation"] = idHighlightInformation;
+}
+  std::string idCanvas = "idCanvasNDimensionalGraphics" + graphicsId;
+  data["idCanvas"] = idCanvas;
   std::stringstream out;
   std::string graphicsVar = "drawGraphics" + graphicsId;
   out
@@ -42,8 +45,10 @@ std::string DrawingVariables::getHTMLDiv(int dimension, bool useSpanTag) {
   << " id = '"
   << idCanvas
   << "'>Canvas not supported</canvas>\n<br>\n";
+  if (generateInfoPanels) {
   out << "<div id='" << idHighlightInformation << "'></div>\n<br>\n";
   out << "<span id='" << idSpanInformation << "'></span>\n<br>\n";
+  }
   if (useSpanTag) {
     out << HtmlRoutines::jsonContainer("graphicsNDimensional", data) << "\n";
   } else {

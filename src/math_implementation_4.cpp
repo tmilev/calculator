@@ -1871,7 +1871,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     for (int k = 0; k < this->linearOperators.size; k ++) {
       this->getProjection(
         k,
-        this->projectivizedChamber.refinedCones[i].getInternalPoint(),
+        this->projectivizedChamber.refinedCones[i].internalPoint(),
         root
       );
       root -= this->nonIntegralOriginModificationBasisChanged;
@@ -2032,7 +2032,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   accumulator.drawMe(
     drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged
   );
-  out << drawOps.getHTMLDiv(2, false);
+  out << drawOps.getHTMLDiv(2, false, true);
   out << accumulator.toString();
   return out.str();
 }
@@ -2964,7 +2964,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
       int j = 0; j < this->preimageWeylChamberSmallerAlgebra.walls.size; j ++
     ) {
       if (
-        currentCone.getInternalPoint().scalarEuclidean(
+        currentCone.internalPoint().scalarEuclidean(
           this->preimageWeylChamberSmallerAlgebra.walls[j].normal
         ).isNegative()
       ) {

@@ -5707,7 +5707,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   character.drawMeWithMultiplicities(report, drawingVariables, 10000);
   out
   << report
-  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
+  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true,true);
   return output.assignValue(calculator, out.str());
 }
 
@@ -5761,7 +5761,7 @@ bool CalculatorLieTheory::drawRootSystem(
     drawingVariables.flagFillUserDefinedProjection = true;
     drawingVariables.fillUserDefinedProjection = preferredProjectionPlane;
   }
-  out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
+  out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true,true);
   return output.assignValue(calculator, out.str());
 }
 
@@ -5909,7 +5909,7 @@ bool CalculatorLieTheory::drawWeightSupport(
   character.drawMeNoMultiplicities(report, drawingVariables, 10000);
   out
   << report
-  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
+  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true, true);
   out << "<br>A table with the weights of the character follows. <br>";
   out << character.toStringFullCharacterWeightsTable();
   return output.assignValue(calculator, out.str());

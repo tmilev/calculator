@@ -2373,11 +2373,11 @@ void DrawingVariables::drawTextAtVectorBufferRational(
 void DrawingVariables::drawTextAtVectorBufferDouble(
   const Vector<double>& point,
   const std::string& inputText,
-  int textColor,
+const std::string& color,
   int textStyle
 ) {
   this->operations.drawTextAtVectorBufferDouble(
-    point, inputText, textColor, this->fontSizeNormal, textStyle
+    point, inputText, color, this->fontSizeNormal, textStyle
   );
 }
 
@@ -11163,7 +11163,7 @@ void PartialFractions::computeQuasipolynomials() {
   this->allQuasiPolynomials.clear();
   QuasiPolynomial current;
   for (Cone& cone : this->chambers.refinedCones.values) {
-    Vector<Rational> internalPoint = cone.getInternalPoint();
+    Vector<Rational> internalPoint = cone.internalPoint();
     this->computeOneVectorPartitionFunction(current, internalPoint);
     this->allQuasiPolynomials.addOnTop(current);
   }
@@ -11690,6 +11690,11 @@ bool Cone::checkConsistencyFull(const ConeCollection& owner) const {
         << wall
         << ". All walls of the chamber: "
         << this->walls
+        << ".<br>All cone ids: "
+        <<  owner.toStringConeIds()
+        << "<br>"
+        << owner.toHTMLGraphicsOnly()
+        <<"<br>"
         << owner.toHTMLHistory()
         << owner.toHTMLWithoutGraphics()
         << global.fatal;
@@ -12376,7 +12381,7 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
   bool isBad = false;
   isBad = this->drawMeLastCoordinateAffine(true, drawingVariables, format);
   std::stringstream out;
-  out << drawingVariables.getHTMLDiv(this->getDimension() - 1, false);
+  out << drawingVariables.getHTMLDiv(this->getDimension() - 1, false,true);
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -12384,14 +12389,13 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
   return out.str();
 }
 
-std::string ConeCollection::drawMeToHtmlProjective(
-  DrawingVariables& drawingVariables, FormatExpressions& format
-) const {
+std::string ConeCollection::drawMeToHtmlProjective(DrawingVariables& drawingVariables, FormatExpressions& format
+, bool generateControls) const {
   STACK_TRACE("ConeCollection::drawMeToHtmlProjective");
   bool isGood = true;
   isGood = this->drawMeProjective(nullptr, true, drawingVariables, format);
   std::stringstream out;
-  out << drawingVariables.getHTMLDiv(this->getDimension(), false);
+  out << drawingVariables.getHTMLDiv(this->getDimension(), false, generateControls);
   if (!isGood) {
     out << "<hr>" << "Found cones which I cannot draw.<hr>";
     out << this->toString();
@@ -12423,10 +12427,10 @@ bool ConeCollection::drawMeLastCoordinateAffine(
     }
     std::stringstream tempStream;
     tempStream << i + 1;
-    Vector<Rational> root = this->nonRefinedCones[i].getInternalPoint();
-    root.makeAffineUsingLastCoordinate();
+    Vector<Rational> point = this->nonRefinedCones[i].internalPoint();
+    point.makeAffineUsingLastCoordinate();
     drawingVariables.drawTextAtVectorBufferRational(
-      root, tempStream.str(), "black"
+      point, tempStream.str(), "black"
     );
   }
   return result;
@@ -12444,17 +12448,17 @@ bool ConeCollection::drawMeProjectiveInitialize(
     drawingVariables, this->getDimension()
   );
   Vectors<Rational> roots;
-  Vector<Rational> root;
+  Vector<Rational> point;
   if (this->getDimension() == 2) {
     return true;
   }
-  if (!this->convexHull.getInternalPoint(root)) {
+  if (!this->convexHull.internalPoint(point)) {
     global.comments
     << "Failed to get internal point of convex hull: "
     << this->convexHull.toString();
     return false;
   }
-  matrix.assignVectorRow(root);
+  matrix.assignVectorRow(point);
   matrix.getZeroEigenSpace(roots);
   for (int i = 0; i < 2; i ++) {
     for (int j = 0; j < this->getDimension(); j ++) {
@@ -12640,7 +12644,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
-    out << drawingVariables.getHTMLDiv(this->getDimension() - 1, false);
+    out << drawingVariables.getHTMLDiv(this->getDimension() - 1, false,true);
   }
   out << "<br>" << this->toString(&format);
   return out.str();
@@ -12689,11 +12693,11 @@ bool Cone::drawMeProjective(
   }
   std::stringstream out;
   out << this->id;
-  Vector<Rational> internalPoint;
-  this->getInternalPoint(internalPoint);
-  internalPoint /= internalPoint.sumCoordinates();
+  Vector<Rational> point=
+  this->internalPointNormal();
+  point /= point.sumCoordinates();
   drawingVariables.drawTextAtVectorBufferRational(
-    internalPoint, out.str(), "black"
+    point, out.str(), "black"
   );
   for (int i = 0; i < this->vertices.size; i ++) {
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
@@ -12754,7 +12758,7 @@ std::string Cone::drawMeToHtmlProjective(
   drawingVariables.drawCoordSystemBuffer(
     drawingVariables, this->getDimension()
   );
-  out << drawingVariables.getHTMLDiv(this->getDimension(), false);
+  out << drawingVariables.getHTMLDiv(this->getDimension(), false, true);
   out << "<br>" << this->toString(&format);
   return out.str();
 }
@@ -13410,7 +13414,7 @@ void PiecewiseQuasipolynomial::operator+=(
   ) {
     int index =
     other.projectivizedComplex.getLowestIndexRefinedChamberContaining(
-      this->projectivizedComplex.refinedCones.values[i].getInternalPoint()
+      this->projectivizedComplex.refinedCones.values[i].internalPoint()
     );
     if (index != - 1) {
       this->quasiPolynomials[i] += other.quasiPolynomials[index];
@@ -13450,7 +13454,7 @@ bool PiecewiseQuasipolynomial::makeVPF(
   for (
     int i = 0; i < partialFractions.chambers.refinedCones.size(); i ++
   ) {
-    indicator = partialFractions.chambers.refinedCones[i].getInternalPoint();
+    indicator = partialFractions.chambers.refinedCones[i].internalPoint();
     partialFractions.computeOneVectorPartitionFunction(
       this->quasiPolynomials[i], indicator
     );
@@ -13476,7 +13480,7 @@ bool Lattice::getInternalPointInConeForSomeFundamentalDomain(
   Vector<Rational>& output, Cone& coneContainingOutputPoint
 ) {
   Vector<Rational> coordinatesInBasis;
-  coneContainingOutputPoint.getInternalPoint(output);
+  coneContainingOutputPoint.internalPoint(output);
   Vectors<Rational> basisRoots;
   basisRoots.assignMatrixRows(this->basisRationalForm);
   if (!output.getCoordinatesInBasis(basisRoots, coordinatesInBasis)) {
@@ -13666,7 +13670,7 @@ void PiecewiseQuasipolynomial::drawMe(
     std::stringstream tempStream;
     tempStream << i + 1;
     Vector<Rational> root =
-    this->projectivizedComplex.refinedCones[i].getInternalPoint();
+    this->projectivizedComplex.refinedCones[i].internalPoint();
     root.makeAffineUsingLastCoordinate();
     for (
       int j = 0; j < this->quasiPolynomials[i].latticeShifts.size; j ++
@@ -13832,7 +13836,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
           );
           global.comments
           << tempDV.getHTMLDiv(
-            this->projectivizedComplex.getDimension() - 1, false
+            this->projectivizedComplex.getDimension() - 1, false, true
           );
         }
         firstFail = false;
@@ -13856,7 +13860,7 @@ void PiecewiseQuasipolynomial::makeCommonRefinement(
   ) {
     int oldIndex =
     oldComplex.getLowestIndexRefinedChamberContaining(
-      this->projectivizedComplex.refinedCones[i].getInternalPoint()
+      this->projectivizedComplex.refinedCones[i].internalPoint()
     );
     if (oldIndex != - 1) {
       this->quasiPolynomials[i] = oldQuasiPolynomials[oldIndex];
@@ -14157,7 +14161,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
       ) {
         if (
           this->complexStartingPerRepresentative[i].refinedCones[k].isInCone(
-            currentComplex.refinedCones[j].getInternalPoint()
+            currentComplex.refinedCones[j].internalPoint()
           )
         ) {
           this->maximaCandidates[i][j].addOnTopNoRepetition(
@@ -14509,7 +14513,6 @@ void ConeCollection::getNewVerticesAppend(
   Vector<Rational> root;
   for (int i = 0; i < numberOfCycles; i ++) {
     selection.incrementSelectionFixedCardinality(dimensionMinusTwo);
-    // , indexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
     for (int j = 0; j < dimensionMinusTwo; j ++) {
       Vector<Rational>& currentNormal =
       toBeSplit.walls[selection.elements[j]].normal;
@@ -14572,6 +14575,9 @@ bool ConeCollection::splitChamber(
   if (newPlusCone.vertices.size == 0 || newMinusCone.vertices.size == 0) {
     return false;
   }
+  global.comments << "<br>DEBUG: about to slice id: " << toBeSliced.id << " along "
+  << killerNormal.toString() << " to make cones: " << newPlusCone.id << " and "
+  << newMinusCone.id;
   this->getNewVerticesAppend(toBeSliced, killerNormal, zeroVertices);
   for (int i = 0; i < toBeSliced.walls.size; i ++) {
     Wall wall;
@@ -14619,27 +14625,75 @@ void ConeCollection::removeFakeNeighborsAlongWall(Cone& cone, Wall& wall) {
     Cone* neighbor = this->getConeByIdNonConst(neighborId);
     if (neighbor == nullptr) {
       // The neighbor is not added to the cone collection.
-      // This neighbor is the other cone generated while splitting the chamber.
+      // The neighbor was generated from the splitting of the same chamber
+      // as the present cone.
       continue;
     }
-    List<Vector<Rational> > vertices;
-    List<Vector<Rational> > neighborVertices;
-    List<Vector<Rational> > commonVertices;
-    cone.getAllVerticesPerpendicularTo(wall.normal, vertices);
-    neighbor->getAllVerticesPerpendicularTo(wall.normal, neighborVertices);
-    if (vertices.size != neighborVertices.size) {
+    if (cone.hasCommonIrregularWall(*neighbor, wall.normal)){
       continue;
     }
-    vertices.intersectWith(neighborVertices, commonVertices);
-    if (commonVertices.size == vertices.size) {
+    global.comments << " <br>DEBUG: cone " << cone.id << " HAS FAKE neighbi! : " << neighbor->id;
       wall.neighbors.removeIndexShiftDown(i);
-    }
   }
 }
 
+bool Cone::hasNormal(const Vector<Rational> &normalOfWall) const{
+  for (const Wall& wall: this->walls){
+    if (normalOfWall == wall.normal){
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Cone::hasCommonIrregularWall(Cone &neighborCandidate, Vector<Rational> &normalOfWall){
+  if (!this->hasNormal(normalOfWall)||!neighborCandidate.hasNormal(-normalOfWall)) {
+    global.fatal << "Cones must both have the given normal. " << global.fatal;
+  }
+  if (this->twoPlanesSeparateUs(neighborCandidate, normalOfWall)) {
+    return false;
+  }
+  if (neighborCandidate.twoPlanesSeparateUs(*this, - normalOfWall)){
+    return false;
+  }
+  return true;
+}
+
+bool Cone::twoPlanesSeparateUs(Cone &neighborCandidate, const Vector<Rational> &normalOfWall){
+  for (const Vector<Rational>& vertex : this->vertices){
+    for (const Wall& wall : this->walls){
+      if (wall.normal == normalOfWall){
+        // This is the original wall that separates the two cones.
+        continue;
+      }
+      if (!wall.normal.scalarEuclidean(vertex).isEqualToZero()){
+        continue;
+      }
+
+      if (this->isSeparatingPlane(neighborCandidate, wall)){
+        return true;
+      }
+    }
+  }return false;
+}
+
+bool Cone::isSeparatingPlane(Cone &neighborCandidate, const Wall &wall){
+  for (const Vector<Rational> & otherVertex: neighborCandidate.vertices){
+if(    wall.isInOpenHalfSpace(otherVertex)){
+  return false;
+}
+  }
+  global.comments << "<br> DEBUG: WALL: " << wall.toString() << " separates: " << this->id
+  << " and " << neighborCandidate.id;
+  return true;
+
+}
+
 void ConeCollection::removeFromNeighbors(const Cone& cone) {
+  global.comments << "<br>Remove from neighbors: " << cone.id << " with neighbors: " << cone.toStringNeighbors();
   for (const Wall& wall : cone.walls) {
     for (int id : wall.neighbors) {
+      global.comments << "<br>DEBUG: remove " << cone.id << " form neighbor: " << id;
       Cone* neighbor = this->getConeByIdNonConst(id);
       if (neighbor == nullptr) {
         continue;
@@ -14711,7 +14765,7 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
 
 void ConeCollection::splitConeByMultipleNeighbors(Cone& input) {
   STACK_TRACE("ConeCollection::splitConeByMultipleNeighbors");
-  for (const Wall& wall : input.walls) {
+  for (Wall& wall : input.walls) {
     if (wall.neighbors.size > 1) {
       this->splitConeByMultipleNeighbors(input, wall);
       return;
@@ -14720,20 +14774,21 @@ void ConeCollection::splitConeByMultipleNeighbors(Cone& input) {
   this->addNonRefinedCone(input);
 }
 
-void ConeCollection::splitConeByMultipleNeighbors(
-  const Cone& input, const Wall& wall
+void ConeCollection::splitConeByMultipleNeighbors(Cone &input, Wall &normalOfWall
 ) {
   STACK_TRACE("ConeCollection::splitConeByMultipleNeighbors");
-  Wall wallWithReducedNeighborCount = wall;
+  Wall wallWithReducedNeighborCount = normalOfWall;
   int neighborIndex = wallWithReducedNeighborCount.neighbors.popLastObject();
   Cone& neighbor = *this->getConeByIdNonConst(neighborIndex);
-  HashedList<Vector<Rational> > inputVertices;
-  input.getAllVerticesPerpendicularTo(wall.normal, inputVertices);
+  global.comments << "<br>DEBUG: Splitting cone " << input.id << " along wall: " << normalOfWall.toString()
+  << " with neighbor: " << neighbor.id;
+  HashedList<Vector<Rational> > verticesBelongingToWall;
+  input.getAllVerticesPerpendicularTo(normalOfWall.normal, verticesBelongingToWall);
   List<Vector<Rational> > neighborVertices;
-  neighbor.getAllVerticesPerpendicularTo(wall.normal, neighborVertices);
+  neighbor.getAllVerticesPerpendicularTo(normalOfWall.normal, neighborVertices);
   Vectors<Rational> candidateSlicers;
   for (Vector<Rational>& neighborVertex : neighbor.vertices) {
-    if (inputVertices.contains(neighborVertex)) {
+    if (verticesBelongingToWall.contains(neighborVertex)) {
       continue;
     }
     neighbor.getNormalsOfWallsContainingPoint(
@@ -14745,6 +14800,14 @@ void ConeCollection::splitConeByMultipleNeighbors(
       }
     }
   }
+  // We have two chambers that have
+  // a common wall plane, but
+  // are not honest neighbors along that plane, as
+  // region they touch along is of not of the maximum possible dimensino n-1
+  // (empty intersection is possible too).
+  normalOfWall.neighbors = wallWithReducedNeighborCount.neighbors;
+  neighbor. removeNeighbor(input.id);
+  this->addNonRefinedCone(input);
 }
 
 void ConeCollection::refineOneByOneDirection(
@@ -14771,6 +14834,9 @@ void ConeCollection::refineOneByOneDirection(
     this->addRefinedCone(toBeRefined);
     return;
   }
+  global.comments << "<br>DEBUG: before BEFORE suspect. Chopping up id: " << toBeRefined.id << " with neighbis: "
+  << toBeRefined.toStringNeighbors();
+
   MapList<int, Cone> candidates;
   int firstIndex = this->conesCreated;
   for (int i = 0; i < exitWalls.size; i ++) {
@@ -14802,14 +14868,34 @@ void ConeCollection::refineOneByOneDirection(
   for (Cone& candidate : candidates.values) {
     this->attachNeighbbors(candidate, toBeRefined.id, candidates);
   }
+  global.comments << "<br>DEBUG: before remove from neighbi: " << toBeRefined.id
+  << " all idS: "
+  << this->toStringNeighborGraph();
+  this->removeFromNeighbors(toBeRefined);
+  global.comments << "<br>DEBUG: AFTER remove from neighbi: "
+  << this->toStringNeighborGraph();
+
+
+
   for (Cone& cone : candidates.values) {
+    global.comments << "<br>DEBUG: add cone: " << cone.id << " with neighbors: " << cone.toStringNeighbors();
+
+    this->removeFakeNeighbors(cone);
     this->addNonRefinedCone(cone);
   }
+  global.comments << "<br>DEBUG: after ids added, before check: " << candidates.keys;
+  this->checkConsistencyFull();
+  global.comments << "<br>DEBUG: after check: " << candidates.keys;
+
   for (Cone& cone : candidates.values) {
     this->processNeighborsOfNewlyAddedCone(cone);
   }
+  global.comments << "<br>DEBUG: HERE I AM ";
   this->addHistoryPoint();
   this->checkConsistencyFull();
+  global.comments << "<br>DEBUG: HERE I AM 2";
+  this->checkConsistencyFull();
+  global.comments << "<br>DEBUG: HERE I AM 3";
 }
 
 void ConeCollection::addHistoryPoint() {
@@ -14828,7 +14914,9 @@ void ConeCollection::addHistoryPoint() {
     }
     return;
   }
-  this->historyHTML.addOnTop(this->toHTMLGraphicsOnly());
+  std::stringstream out;
+  out << "<hr>" << this->toStringNeighborGraph() << "<br>" << this->toHTMLGraphicsOnly();
+  this->historyHTML.addOnTop(out.str());
 }
 
 void ConeCollection::attachNeighbbors(
@@ -14961,10 +15049,18 @@ void ConeCollection::refineByOneDirection(
   STACK_TRACE("ConeCollection::refineByOneDirection");
   List<Cone> subdivided;
   while (this->nonRefinedCones.size() > 0) {
+
+    global.comments << "<hr>DEBUG: BEFORE refine: " << this->toStringNeighborGraph();
     Cone toBeRefined = *this->nonRefinedCones.values.lastObject();
     this->nonRefinedCones.removeIndex(this->nonRefinedCones.size() - 1);
     this->refineOneByOneDirection(toBeRefined, direction);
+    global.comments << "<br>DEBUG: AFTER refine: " << this->toStringNeighborGraph() << "<hr>";
+    this->checkConsistencyFull();
+    global.comments << "<br>DEBUG: got to after refine by one direction.";
     this->refineAllConesWithWallsWithMultipleNeighbors();
+    global.comments << "<br>DEBUG: got to before after multi neighbor stuff.";
+    this->checkConsistencyFull();
+    global.comments << "<br>DEBUG: got to after multi neighbor stuff.";
   }
 }
 
@@ -15252,16 +15348,32 @@ void Cone::scaleNormalizeByPositive(Vector<Rational>& toScale) {
   }
 }
 
-Vector<Rational> Cone::getInternalPoint() const {
+Vector<Rational> Cone::internalPointNormal() const {
+  Vector<Rational> output;
+  output.makeZero(this->getDimension());
+  if (this->vertices.size==0){
+    return  output;
+  }
+  for (Vector<Rational> vertex: this->vertices){
+    vertex /= vertex.sumCoordinates();
+    output += vertex;
+  }
+    output /= this->vertices.size;
+
+  return output;
+}
+
+Vector<Rational> Cone::internalPoint() const {
   Vector<Rational> result;
-  this->getInternalPoint(result);
+  this->internalPoint(result);
   return result;
 }
 
-bool Cone::getInternalPoint(Vector<Rational>& output) const {
+bool Cone::internalPoint(Vector<Rational>& output) const {
   if (this->vertices.size <= 0) {
     return false;
   }
+
   this->vertices.sum(output, this->vertices[0].size);
   return true;
 }
@@ -15463,7 +15575,12 @@ bool ConeCollection::checkConsistencyFullWithoutDebugMessage() const {
 
 bool ConeCollection::checkConsistencyFull() const {
   STACK_TRACE("ConeCollection::checkConsistencyFull");
-  // global.comments << "<br>DEBUG: Checking full consistency.";
+  // Deliberately issue a noisy comment to alert against
+  // accidentally calling this function.
+  // If you really want to perform this expensive check (should be done
+  // at most a few times per algorithm run), then run
+  // checkConsistencyFullWithoutDebugMessage instead.
+  global.comments << "<br>Checking full consistency.";
   return this->checkConsistencyFullWithoutDebugMessage();
 }
 
@@ -15580,12 +15697,27 @@ std::string Cone::toHTML() const {
   out << "\\)";
   out << "<br>Projectivized vertices: " << this->vertices.toString();
   if (this->vertices.size > 0) {
-    out << "<br>Internal point: " << this->getInternalPoint().toString();
+    out << "<br>Internal point: " << this->internalPoint().toString();
   }
   out << "<br>Neighbors: ";
   for (int i = 0; i < this->walls.size; i ++) {
     out << "<br>Along wall " << i + 1 << ": " << this->walls[i].neighbors;
   }
+  return out.str();
+}
+
+void Cone::getAllNeighbors(HashedList<int>& output)const{
+  output.clear();
+  for (const Wall& wall : this->walls){
+    output.addOnTopNoRepetition(wall.neighbors);
+  }
+}
+
+std::string Cone::toStringNeighbors() const{
+  HashedList<int> neighbors;
+  this->getAllNeighbors(neighbors);
+  std::stringstream out;
+  out << neighbors;
   return out.str();
 }
 
@@ -15638,9 +15770,28 @@ std::string Cone::toString(FormatExpressions* format) const {
     out << "<br>";
   }
   if (this->vertices.size > 0) {
-    out << "\nInternal point: " << this->getInternalPoint().toString();
+    out << "\nInternal point: " << this->internalPoint().toString();
   }
   return out.str();
+}
+
+std::string ConeCollection::toStringNeighborGraph(const MapList<int, Cone> &map) const {
+  std::stringstream out;
+  for (const Cone& cone: map.values){
+    out << "<br>id " << cone.id << ": " << cone.toStringNeighbors();
+  }
+  return out.str();
+}
+
+std::string ConeCollection::toStringNeighborGraph() const {
+  std::stringstream out;
+  out << "Refined:";
+  out << this->toStringNeighborGraph(this->refinedCones);
+  out << "<br>Non-refined:";
+  out << this->toStringNeighborGraph(this->nonRefinedCones);
+  out << "<br>Irregular:";
+  out << this->toStringNeighborGraph(this->conesWithIrregularWalls);
+    return out.str();
 }
 
 std::string ConeCollection::toStringConeIds() const {
@@ -15704,13 +15855,16 @@ std::string ConeCollection::toString() const {
 }
 
 std::string ConeCollection::toHTMLHistory() const {
-  return StringRoutines::join(this->historyHTML);
+  List<std::string> historyInReverse;
+  historyInReverse = this->historyHTML;
+  historyInReverse.reverseElements();
+  return StringRoutines::join(historyInReverse);
 }
 
 std::string ConeCollection::toHTMLGraphicsOnly() const {
   DrawingVariables drawingVariables;
   FormatExpressions format;
-  return this->drawMeToHtmlProjective(drawingVariables, format);
+  return this->drawMeToHtmlProjective(drawingVariables, format, false);
 }
 
 std::string ConeCollection::toHTML() const {
@@ -15841,7 +15995,7 @@ bool ConeCollection::findMaxLFOverConeProjective(
   outputMaximumOverEeachSubChamber.setSize(this->refinedCones.size());
   Rational maximumScalarProduct = 0;
   for (int i = 0; i < this->refinedCones.size(); i ++) {
-    this->refinedCones.values[i].getInternalPoint(root);
+    this->refinedCones.values[i].internalPoint(root);
     bool isInitialized = false;
     for (int j = 0; j < inputLFsLastCoordConst.size; j ++) {
       if (

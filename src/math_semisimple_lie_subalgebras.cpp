@@ -8653,7 +8653,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
     );
   }
   drawingVariables.operations.basisProjectionPlane.makeEiBasis(primalRank);
-  out << drawingVariables.getHTMLDiv(primalRank, true);
+  out << drawingVariables.getHTMLDiv(primalRank, true, true);
   return out.str();
 }
 

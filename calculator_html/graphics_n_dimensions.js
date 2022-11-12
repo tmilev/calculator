@@ -187,7 +187,7 @@ class GraphicsNDimensions {
     }
     let button = document.createElement("button");
     button.textContent = "Change to basis";
-    button.addEventListener("click", () => { 
+    button.addEventListener("click", () => {
       window.calculator.graphicsNDimensions.startProjectionPlaneUser(this.idCanvas);
     });
     info.appendChild(button);
@@ -199,16 +199,17 @@ class GraphicsNDimensions {
     planeInfo.id = this.idPlaneInfo;
     planeInfo.className = "panel";
     info.appendChild(planeInfo);
-    if (this.PanelExpandable === null) {
-      let element = document.getElementById(this.idInfo);
-      element.textContent = "";
-      element.appendChild(info);
-    } else {
-      this.panelInfo = new this.PanelExpandable(this.idInfo);
-      this.panelInfo.initialize(true);
-      this.panelInfo.setPanelContent(info);
+    let element = document.getElementById(this.idInfo);
+    if (element !== null) {
+      if (this.PanelExpandable === null) {
+        element.textContent = "";
+        element.appendChild(info);
+      } else {
+        this.panelInfo = new this.PanelExpandable(this.idInfo);
+        this.panelInfo.initialize(true);
+        this.panelInfo.setPanelContent(info);
+      }
     }
-
   }
 
   snapShotLaTeX() {
@@ -1141,10 +1142,11 @@ function createGraphicsFromObject(input) {
   if (input.idCanvas === undefined || input.idCanvas === null) {
     throw ("idCanvas missing.");
   }
+  let spanInformationId = null;
   if (input.idSpanInformation === undefined || input.idSpanInformation === null) {
-    throw ("idSpanInformation missing.");
+    spanInformationId = input.spanInformationId;
   }
-  let object = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation, input.idHighlightInformation);
+  let object = new GraphicsNDimensions(input.idCanvas, spanInformationId, input.idHighlightInformation);
   object.initFromObject(input);
 }
 

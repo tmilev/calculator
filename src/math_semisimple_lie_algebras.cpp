@@ -275,7 +275,7 @@ std::string SemisimpleLieAlgebra::toHTML(
     << "<br>The darker red dots can be "
     << "dragged with the mouse to rotate the picture."
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
-    << drawingVariables.getHTMLDiv(this->weylGroup.getDimension(), true);
+    << drawingVariables.getHTMLDiv(this->weylGroup.getDimension(), true,true);
     out << this->weylGroup.toStringRootsAndRootReflections();
     out
     << " The resulting Lie bracket pairing table follows. <hr> "

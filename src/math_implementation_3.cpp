@@ -8801,8 +8801,7 @@ void WeylGroupData::drawRootSystem(
   if (drawWeylChamber) {
     Cone weylChamber;
     this->getWeylChamber(weylChamber);
-    FormatExpressions tempFormat;
-    weylChamber.drawMeProjective(nullptr, false, outputDV, tempFormat);
+    weylChamber.drawMeProjective(outputDV);
   }
   output.centerX = 300;
   output.centerY = 300;
@@ -11658,6 +11657,7 @@ std::string Wall::toString() const {
 
 Cone::Payload::Payload() {
   this->lowestSlicingIndex = 0;
+  this->visited = false;
 }
 
 Cone::Cone() {
@@ -12408,13 +12408,11 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
 }
 
 std::string ConeCollection::drawMeToHtmlProjective(
-  DrawingVariables& drawingVariables,
-  FormatExpressions& format,
-  bool generateControls
+  DrawingVariables& drawingVariables, bool generateControls
 ) const {
   STACK_TRACE("ConeCollection::drawMeToHtmlProjective");
   bool isGood = true;
-  isGood = this->drawMeProjective(nullptr, true, drawingVariables, format);
+  isGood = this->drawMeProjective(drawingVariables);
   std::stringstream out;
   out
   << drawingVariables.getHTMLDiv(
@@ -12497,20 +12495,13 @@ bool ConeCollection::drawMeProjectiveInitialize(
   return true;
 }
 
-bool ConeCollection::drawMeProjective(
-  Vector<Rational>* coordCenterTranslation,
-  bool initDrawVars,
-  DrawingVariables& drawingVariables,
-  FormatExpressions& format
-) const {
+bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const {
   STACK_TRACE("ConeCollection::drawMeProjective");
   bool result = true;
   if (this->getDimension() <= 1) {
     return false;
   }
-  if (initDrawVars) {
-    this->drawMeProjectiveInitialize(drawingVariables);
-  }
+  this->drawMeProjectiveInitialize(drawingVariables);
   List<const List<Cone>*> coneCollectionsToPlot = List<const List<Cone>*>({
       &this->refinedCones.values,
       &this->nonRefinedCones.values,
@@ -12519,10 +12510,12 @@ bool ConeCollection::drawMeProjective(
   );
   for (const List<Cone> * collection : coneCollectionsToPlot) {
     for (Cone& cone : *collection) {
-      result = result &&
-      cone.drawMeProjective(
-        coordCenterTranslation, false, drawingVariables, format
-      );
+      result = result && cone.drawMeProjectiveVertices(drawingVariables);
+    }
+  }
+  for (const List<Cone> * collection : coneCollectionsToPlot) {
+    for (Cone& cone : *collection) {
+      result = result && cone.drawMeProjectiveSlice(drawingVariables);
     }
   }
   return result;
@@ -12675,47 +12668,34 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
   return out.str();
 }
 
-bool Cone::drawMeProjective(
-  Vector<Rational>* coordCenterTranslation,
-  bool initTheDrawVars,
-  DrawingVariables& drawingVariables,
-  FormatExpressions& format
-) const {
+bool Cone::drawMeProjective(DrawingVariables& drawingVariables) const {
   STACK_TRACE("Cone::drawMeProjective");
-  (void) format;
-  Vector<Rational> zeroRoot;
-  Vector<Rational> coordinateCenter;
-  zeroRoot.makeZero(this->getDimension());
-  if (coordCenterTranslation == nullptr) {
-    coordinateCenter = zeroRoot;
-  } else {
-    coordinateCenter = *coordCenterTranslation;
-  }
-  Vectors<Rational> verticesScaled = this->vertices;
-  for (int i = 0; i < verticesScaled.size; i ++) {
+  this->drawMeProjectiveVertices(drawingVariables);
+  return this->drawMeProjectiveSlice(drawingVariables);
+}
+
+void Cone::computeRescaledVerticesForDrawing(Vectors<Rational>& output) const {
+  output = this->vertices;
+  for (int i = 0; i < output.size; i ++) {
     Rational sumAbsoluteValuesCoordinates = 0;
     for (int j = 0; j < this->getDimension(); j ++) {
-      sumAbsoluteValuesCoordinates += (
-        verticesScaled[i][j].isPositive()
-      ) ?
-      verticesScaled[i][j] :
-      - verticesScaled[i][j];
+      sumAbsoluteValuesCoordinates += (output[i][j].isPositive()) ?
+      output[i][j] :
+      - output[i][j];
     }
     if (sumAbsoluteValuesCoordinates.isEqualToZero()) {
       global.fatal << "Zero vector not allowed. " << global.fatal;
     }
-    verticesScaled[i] /= sumAbsoluteValuesCoordinates;
+    output[i] /= sumAbsoluteValuesCoordinates;
   }
+}
+
+bool Cone::drawMeProjectiveVertices(DrawingVariables& drawingVariables) const {
+  Vector<Rational> zeroRoot;
+  zeroRoot.makeZero(this->getDimension());
+  Vectors<Rational> verticesScaled;
+  this->computeRescaledVerticesForDrawing(verticesScaled);
   Vector<Rational> root;
-  if (initTheDrawVars) {
-    drawingVariables.operations.makeMeAStandardBasis(this->getDimension());
-    for (int i = 0; i < this->getDimension(); i ++) {
-      root.makeEi(this->getDimension(), i);
-      drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-        zeroRoot + coordinateCenter, root + coordinateCenter, "gray", 1
-      );
-    }
-  }
   std::stringstream out;
   out << this->id;
   Vector<Rational> point = this->internalPointNormal();
@@ -12725,12 +12705,15 @@ bool Cone::drawMeProjective(
   );
   for (int i = 0; i < this->vertices.size; i ++) {
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot + coordinateCenter,
-      verticesScaled[i] * 5 + coordinateCenter,
-      "lightblue",
-      1
+      zeroRoot, verticesScaled[i] * 5, "lightblue", 1
     );
   }
+  return true;
+}
+
+bool Cone::drawMeProjectiveSlice(DrawingVariables& drawingVariables) const {
+  Vectors<Rational> verticesScaled;
+  this->computeRescaledVerticesForDrawing(verticesScaled);
   for (int k = 0; k < this->walls.size; k ++) {
     for (int i = 0; i < this->vertices.size; i ++) {
       if (
@@ -12750,10 +12733,7 @@ bool Cone::drawMeProjective(
           continue;
         }
         drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-          verticesScaled[i] + coordinateCenter,
-          verticesScaled[j] + coordinateCenter,
-          "black",
-          1
+          verticesScaled[i], verticesScaled[j], "black", 1
         );
       }
     }
@@ -12778,7 +12758,7 @@ std::string Cone::drawMeToHtmlProjective(
     return out.str();
   }
   drawingVariables.operations.makeMeAStandardBasis(this->getDimension());
-  this->drawMeProjective(nullptr, true, drawingVariables, format);
+  this->drawMeProjective(drawingVariables);
   drawingVariables.drawCoordSystemBuffer(
     drawingVariables, this->getDimension()
   );
@@ -14814,7 +14794,21 @@ void ConeCollection::splitConeByMultipleNeighbors(
   this->addNonRefinedCone(input);
 }
 
-void ConeCollection::refineOneByOneDirection(
+bool ConeCollection::isSpannedByDirections(
+  const Vector<Rational>& planeNormal
+) {
+  STACK_TRACE("ConeCollection::isSpannedByDirections");
+  Vectors<Rational> directionsPerpendicularToNormal;
+  for (Vector<Rational>& direction : this->slicingDirections) {
+    if (planeNormal.scalarEuclidean(direction).isEqualToZero()) {
+      directionsPerpendicularToNormal.addOnTop(direction);
+    }
+  }
+  int rankSpan = directionsPerpendicularToNormal.getRankElementSpan();
+  return rankSpan == this->getDimension() - 1;
+}
+
+bool ConeCollection::refineOneByOneDirection(
   Cone& toBeRefined, const Vector<Rational>& direction
 ) {
   STACK_TRACE("ConeCollection::refineOneByOneDirection");
@@ -14836,7 +14830,7 @@ void ConeCollection::refineOneByOneDirection(
   if (exitWalls.size == 1) {
     // The chamber is already refined;
     this->addRefinedCone(toBeRefined);
-    return;
+    return true;
   }
   MapList<int, Cone> candidates;
   int firstIndex = this->conesCreated;
@@ -14882,6 +14876,7 @@ void ConeCollection::refineOneByOneDirection(
   }
   this->addHistoryPoint();
   this->checkConsistencyFull();
+  return true;
 }
 
 void ConeCollection::addHistoryPoint() {
@@ -15071,9 +15066,10 @@ void ConeCollection::refineByDirections() {
 void ConeCollection::makeAllConesNonRefined() {
   STACK_TRACE("ConeCollection::makeAllConesNonRefined");
   for (int i = this->refinedCones.size() - 1; i >= 0; i --) {
-    const Cone& cone = refinedCones.values[i];
+    Cone& cone = this->refinedCones.values[i];
+    cone.payload.visited = false;
     this->addNonRefinedCone(cone);
-    refinedCones.removeIndex(i);
+    this->refinedCones.removeIndex(i);
   }
 }
 
@@ -15083,12 +15079,16 @@ void ConeCollection::refineByOneDirection(
   STACK_TRACE("ConeCollection::refineByOneDirection");
   List<Cone> subdivided;
   while (this->nonRefinedCones.size() > 0) {
-    Cone toBeRefined = *this->nonRefinedCones.values.lastObject();
-    this->nonRefinedCones.removeIndex(this->nonRefinedCones.size() - 1);
-    this->refineOneByOneDirection(toBeRefined, direction);
-    this->checkConsistencyFull();
-    this->refineAllConesWithWallsWithMultipleNeighbors();
-    this->checkConsistencyFull();
+    for (int i = this->nonRefinedCones.size() - 1; i >= 0; i --) {
+      Cone toBeRefined = this->nonRefinedCones.values[i];
+      this->nonRefinedCones.removeIndex(i);
+      if (!this->refineOneByOneDirection(toBeRefined, direction)) {
+        continue;
+      }
+      this->checkConsistencyFull();
+      this->refineAllConesWithWallsWithMultipleNeighbors();
+      this->checkConsistencyFull();
+    }
   }
 }
 
@@ -15589,6 +15589,7 @@ ConeCollection::ConeCollection() {
   this->flagIsRefined = false;
   this->conesCreated = 0;
   this->flagRecordSlicingHistory = true;
+  this->flagAllowNonSpannedPlanes = false;
 }
 
 bool ConeCollection::checkConsistencyFullWithoutDebugMessage() const {
@@ -15894,8 +15895,7 @@ std::string ConeCollection::toHTMLHistory() const {
 std::string ConeCollection::toHTMLGraphicsOnly(bool includePanels) const {
   DrawingVariables drawingVariables;
   FormatExpressions format;
-  return
-  this->drawMeToHtmlProjective(drawingVariables, format, includePanels);
+  return this->drawMeToHtmlProjective(drawingVariables, includePanels);
 }
 
 std::string ConeCollection::toHTML() const {
@@ -15989,8 +15989,9 @@ void ConeCollection::addCone(MapList<int, Cone>& map, const Cone& cone) {
   map.setKeyValue(cone.id, cone);
 }
 
-void ConeCollection::addRefinedCone(const Cone& cone) {
+void ConeCollection::addRefinedCone(Cone& cone) {
   STACK_TRACE("ConeCollection::addRefinedCone");
+  cone.payload.visited = true;
   this->addCone(this->refinedCones, cone);
 }
 

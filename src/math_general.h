@@ -6180,10 +6180,12 @@ class Cone {
   );
   // Helper method for hasCommonIrregularWall.
   bool isSeparatingPlane(Cone& neighborCandidate, const Wall& wall);
+  void computeRescaledVerticesForDrawing(Vectors<Rational>& output) const;
 public:
   class Payload {
   public:
     int lowestSlicingIndex;
+    bool visited;
     Payload();
   };
 
@@ -6223,12 +6225,9 @@ public:
     FormatExpressions& format,
     const std::string& chamberWallColor = nullptr
   ) const;
-  bool drawMeProjective(
-    Vector<Rational>* coordCenterTranslation,
-    bool initTheDrawVars,
-    DrawingVariables& drawingVariables,
-    FormatExpressions& format
-  ) const;
+  bool drawMeProjective(DrawingVariables& drawingVariables) const;
+  bool drawMeProjectiveVertices(DrawingVariables& drawingVariables) const;
+  bool drawMeProjectiveSlice(DrawingVariables& drawingVariables) const;
   bool isInCone(const Vector<Rational>& point) const;
   bool isInCone(const Vectors<Rational>& vertices) const;
   bool getLatticePointsInCone(
@@ -6381,6 +6380,9 @@ public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
   bool flagRecordSlicingHistory;
+  // Governs whether slicing with planes that are not spanned
+  // by n-1 directions is allowed.
+  bool flagAllowNonSpannedPlanes;
   HashedList<Vector<Rational> > splittingNormals;
   Vectors<Rational> slicingDirections;
   Cone convexHull;
@@ -6390,6 +6392,9 @@ public:
   int conesCreated;
   List<std::string> historyHTML;
   void addHistoryPoint();
+  // Returns false if the plane with the given normal
+  // passes through directions that span the entire plane.
+  bool isSpannedByDirections(const Vector<Rational>& planeNormal);
   void makeAllConesNonRefined();
   void refineByDirectionsAndSort();
   void refineByDirections();
@@ -6399,9 +6404,11 @@ public:
   bool refineOneByNormals(Cone& toBeRefined, List<Cone>& output);
   // Returns true if a chamber is split so that
   // each chamber has unique exit wall with respect
-  // to the given direction, and returns false
-  // if the chamber already has that property.
-  void refineOneByOneDirection(
+  // to the given direction, or if it already has
+  // has that property. Returns false if the chamber
+  // cannot be split to have exit walls due to the
+  // exit wall neighbors not being visited.
+  bool refineOneByOneDirection(
     Cone& toBeRefined, const Vector<Rational>& direction
   );
   void refineAllConesWithWallsWithMultipleNeighbors();
@@ -6462,16 +6469,9 @@ public:
   const Cone* getConeById(int id) const;
   Cone* getConeByIdNonConst(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
-  bool drawMeProjective(
-    Vector<Rational>* coordCenterTranslation,
-    bool initDrawVars,
-    DrawingVariables& drawingVariables,
-    FormatExpressions& format
-  ) const;
+  bool drawMeProjective(DrawingVariables& drawingVariables) const;
   std::string drawMeToHtmlProjective(
-    DrawingVariables& drawingVariables,
-    FormatExpressions& format,
-    bool generateControls
+    DrawingVariables& drawingVariables, bool generateControls
   ) const;
   std::string toString() const;
   std::string toStringConeCount() const;
@@ -6501,7 +6501,7 @@ public:
   );
   void processNeighborsOfNewlyAddedCone(const Cone& cone);
   void addNonRefinedCone(const Cone& cone);
-  void addRefinedCone(const Cone& cone);
+  void addRefinedCone(Cone& cone);
   // Creates a cone collection from a set of walls.
   // hasEnoughProjectiveVertices is a mathematical promise that
   // the input is of finite size when made affine.

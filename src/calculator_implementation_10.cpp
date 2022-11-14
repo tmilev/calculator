@@ -39,9 +39,8 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
+bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(Calculator& calculator, const Expression& input, Expression& output
+, bool flagUseSpannedSlices) {
   STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::coneDecomposition");
   Vectors<Rational> vectors;
   Matrix<Rational> matrix;
@@ -54,6 +53,7 @@ bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
   }
   matrix.getVectorsFromRows(vectors);
   ConeCollection chambers;
+  chambers.flagUseSpannedSlices = flagUseSpannedSlices;
   chambers.initializeFromDirectionsAndRefine(vectors);
   std::stringstream out;
   out << chambers.toHTML();

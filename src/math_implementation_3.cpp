@@ -14808,22 +14808,52 @@ bool ConeCollection::isSpannedByDirections(
   return rankSpan == this->getDimension() - 1;
 }
 
-bool ConeCollection::refineOneByOneDirection(
-  Cone& toBeRefined, const Vector<Rational>& direction
-) {
-  STACK_TRACE("ConeCollection::refineOneByOneDirection");
+bool ConeCollection::allExitWallsAreVisited(
+Cone& toBeRefined,const Vector<Rational>& direction, List<Wall> &outputExitWalls){
+  outputExitWalls.clear();
+  for (const Wall& wall : toBeRefined.walls) {
+    if (!direction.scalarEuclidean(wall.normal).isPositive()) {
+      continue;
+    }
+    for (int id : wall.neighbors){
+      Cone& neighbor =  this->getConeByIdNonConstNoFail(id);
+      if (!neighbor.payload.visited) {
+
+        return  false;
+      }
+    }
+    outputExitWalls.addOnTop(wall);
+  }
+  return true;
+}
+
+
+bool ConeCollection::refineOneByOneDirectionSpannedSlices(Cone &toBeRefined, const Vector<Rational> &direction){
+
+}
+bool ConeCollection::refineOneByOneDirection(Cone &toBeRefined, const Vector<Rational> &direction){
+STACK_TRACE("ConeCollection::refineOneByOneDirection");
+ if (this->flagUseSpannedSlices){
+return this->refineOneByOneDirectionSpannedSlices(toBeRefined, direction);
+ }else{
+ return this->refineOneByOneDirectionArbitrarySlices(toBeRefined, direction);
+ }
+}
+
+bool ConeCollection::refineOneByOneDirectionArbitrarySlices(Cone &toBeRefined, const Vector<Rational> &direction)
+{
+  STACK_TRACE("ConeCollection::refineOneByOneDirectionArbitrarySlices");
   if (toBeRefined.id < 0) {
     global.fatal
     << "Refining non-initialized cone not allowed. "
     << global.fatal;
   }
   List<Wall> exitWalls;
-  for (const Wall& wall : toBeRefined.walls) {
-    if (!direction.scalarEuclidean(wall.normal).isPositive()) {
-      continue;
-    }
-    exitWalls.addOnTop(wall);
+  if (!this->allExitWallsAreVisited(toBeRefined, direction, exitWalls)) {
+    this->addNonRefinedCone(toBeRefined);
+    return false;
   }
+
   if (exitWalls.size <= 0) {
     global.comments << "Unexpected: number of exit walls is zero. ";
   }
@@ -15094,6 +15124,14 @@ void ConeCollection::refineByOneDirection(
 
 bool ConeCollection::containsId(int id) const {
   return this->getConeById(id) != nullptr;
+}
+
+Cone &ConeCollection::getConeByIdNonConstNoFail(int id) {
+  Cone* result = this->getConeByIdNonConst(id);
+  if (result == nullptr) {
+    global.fatal << "Id " << id << " not found when it should be. " << global.fatal;
+  }
+  return *result;
 }
 
 Cone* ConeCollection::getConeByIdNonConst(int id) {
@@ -15589,7 +15627,7 @@ ConeCollection::ConeCollection() {
   this->flagIsRefined = false;
   this->conesCreated = 0;
   this->flagRecordSlicingHistory = true;
-  this->flagAllowNonSpannedPlanes = false;
+  this->flagUseSpannedSlices = false;
 }
 
 bool ConeCollection::checkConsistencyFullWithoutDebugMessage() const {

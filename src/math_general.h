@@ -6382,7 +6382,7 @@ public:
   bool flagRecordSlicingHistory;
   // Governs whether slicing with planes that are not spanned
   // by n-1 directions is allowed.
-  bool flagAllowNonSpannedPlanes;
+  bool flagUseSpannedSlices;
   HashedList<Vector<Rational> > splittingNormals;
   Vectors<Rational> slicingDirections;
   Cone convexHull;
@@ -6411,7 +6411,17 @@ public:
   bool refineOneByOneDirection(
     Cone& toBeRefined, const Vector<Rational>& direction
   );
+  // Implementation of refineOneByOneDirection when only using spanned slices.
+  bool refineOneByOneDirectionSpannedSlices(
+    Cone& toBeRefined, const Vector<Rational>& direction
+  );
+  // Implementation of refineOneByOneDirection with arbitrary slices.
+  bool refineOneByOneDirectionArbitrarySlices(
+    Cone& toBeRefined, const Vector<Rational>& direction
+  );
   void refineAllConesWithWallsWithMultipleNeighbors();
+  bool allExitWallsAreVisited(
+  Cone& toBeRefined,const Vector<Rational>& direction, List<Wall> &outputExitWalls);
   void attachNeighbbors(
     const Cone& toBeReplaced, MapList<int, Cone>& allCandidates
   );
@@ -6468,6 +6478,7 @@ public:
   bool containsId(int id) const;
   const Cone* getConeById(int id) const;
   Cone* getConeByIdNonConst(int id);
+  Cone& getConeByIdNonConstNoFail(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(DrawingVariables& drawingVariables) const;
   std::string drawMeToHtmlProjective(

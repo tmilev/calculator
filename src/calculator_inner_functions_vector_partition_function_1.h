@@ -13,8 +13,18 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool coneDecomposition(
-    Calculator& calculator, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output, bool flagUseSpannedSlices
   );
+  static bool coneDecompositionSpannedSlices(
+    Calculator& calculator, const Expression& input, Expression& output
+  ){
+    return CalculatorFunctionsVectorPartitionFunction::coneDecomposition(calculator, input, output, true);
+  }
+  static bool coneDecompositionArbitrarySlices(
+    Calculator& calculator, const Expression& input, Expression& output
+  ){
+    return CalculatorFunctionsVectorPartitionFunction::coneDecomposition(calculator, input, output, false);
+  }
 };
 
 #endif // header_calculator_inner_functions_vector_partition_function_1_ALREADY_INCLUDED

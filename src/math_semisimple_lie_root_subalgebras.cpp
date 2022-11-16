@@ -1155,7 +1155,7 @@ void RootSubalgebra::extractRelations(
         tempSel.initialize(kSingular.size);
         LargeInteger tempNum = MathRoutines::nChooseK(kSingular.size, 2);
         for (int i = 0; i < tempNum; i ++) {
-          tempSel.incrementSelectionFixedCardinality(2);
+          tempSel.incrementSelectionFixedCardinalityReturnFalseIfPastLast(2);
           relation.alphas.setSize(2);
           relation.alphaCoefficients.setSize(2);
           relation.betas.size = 0;
@@ -2596,9 +2596,8 @@ void RootSubalgebra::doKRootsEnumerationRecursively(int indexEnumeration) {
   Selection& selection = this->kEnumerations[indexEnumeration];
   selection.initialize(selection.numberOfElements);
   for (int i = 0; i < numberOfIterations; i ++) {
-    this->kEnumerations[indexEnumeration].incrementSelectionFixedCardinality(
-      rank
-    );
+    this->kEnumerations[indexEnumeration].
+    incrementSelectionFixedCardinalityReturnFalseIfPastLast(rank);
     if (indexEnumeration < this->positiveRootsKConnectedComponents.size - 1) {
       this->doKRootsEnumerationRecursively(indexEnumeration + 1);
     } else {
@@ -4813,7 +4812,7 @@ void RootSubalgebras::generateKintersectBOuterIsos(
 ) {
   Selection fullSel;
   fullSel.initialize(rootSubalgebra.simpleBasisCentralizerRoots.size);
-  fullSel.incrementSelectionFixedCardinality(
+  fullSel.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
     rootSubalgebra.simpleBasisCentralizerRoots.size
   );
   this->computeNormalizerOfCentralizerIntersectNilradical(

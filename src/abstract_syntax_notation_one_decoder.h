@@ -173,7 +173,7 @@ public:
     static std::string sha384;
     static std::string sha512;
     static std::string sha256WithRSAEncryption;
-    static std::string RSAEncryption;
+    static std::string rsaEncryption;
     static std::string subjectKeyIdentifier;
     static std::string authorityKeyIdentifier;
     static std::string basicConstraints;

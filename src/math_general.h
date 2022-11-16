@@ -6186,6 +6186,7 @@ public:
   public:
     int lowestSlicingIndex;
     bool visited;
+    Selection directions;
     Payload();
   };
 
@@ -6398,7 +6399,17 @@ public:
   void makeAllConesNonRefined();
   void refineByDirectionsAndSort();
   void refineByDirections();
-  void refineByOneDirection(const Vector<Rational>& direction);
+  void refineByOneDirection(int directionIndex);
+  // Implementation of refineOneByOneDirection when only using spanned slices.
+  void refineByOneDirectionSpannedSlices(int directionIndex);
+  void refineOneByOneDirectionSpannedSlices(
+    Cone& toBeSliced, int directionIndex
+  );
+  void markNonRefinedOneDirectionSpannedSlices(int directionIndex);
+  // Implementation of refineOneByOneDirection with arbitrary slices.
+  void refineByOneDirectionArbitrarySlices(
+    const Vector<Rational>& direction
+  );
   // Returns false if the cone is refined relative to the splitting normals,
   // otherwise slices the cone.
   bool refineOneByNormals(Cone& toBeRefined, List<Cone>& output);
@@ -6411,17 +6422,12 @@ public:
   bool refineOneByOneDirection(
     Cone& toBeRefined, const Vector<Rational>& direction
   );
-  // Implementation of refineOneByOneDirection when only using spanned slices.
-  bool refineOneByOneDirectionSpannedSlices(
-    Cone& toBeRefined, const Vector<Rational>& direction
-  );
-  // Implementation of refineOneByOneDirection with arbitrary slices.
-  bool refineOneByOneDirectionArbitrarySlices(
-    Cone& toBeRefined, const Vector<Rational>& direction
-  );
   void refineAllConesWithWallsWithMultipleNeighbors();
   bool allExitWallsAreVisited(
-  Cone& toBeRefined,const Vector<Rational>& direction, List<Wall> &outputExitWalls);
+    Cone& toBeRefined,
+    const Vector<Rational>& direction,
+    List<Wall>& outputExitWalls
+  );
   void attachNeighbbors(
     const Cone& toBeReplaced, MapList<int, Cone>& allCandidates
   );
@@ -6528,9 +6534,7 @@ public:
   // If that is the case, slices the chamber
   // and writes the result in the output variable.
   bool splitChamber(
-    const Cone& toBeSliced,
-    const Vector<Rational>& killerNormal,
-    int nextSlicingIndex
+    const Cone& toBeSliced, const Vector<Rational>& killerNormal
   );
   void removeIdFromNeighbors(const Cone& cone);
   void splitConeByMultipleNeighbors(Cone& input);

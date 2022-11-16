@@ -205,7 +205,7 @@ std::string ExpressionContext::toString() const {
 }
 
 Expression ExpressionContext::getVariable(int variableIndex) const {
-  STACK_TRACE("Expression::getVariable");
+  STACK_TRACE("ExpressionContext::getVariable");
   if (variableIndex < 0 || variableIndex >= this->variables.size) {
     Expression errorE;
     std::stringstream out;
@@ -329,7 +329,7 @@ bool ExpressionContext::fromExpression(const Expression& input) {
 bool ExpressionContext::fromExpressionPolynomialVariables(
   const Expression& input
 ) {
-  STACK_TRACE("Expression::fromExpressionPolynomialVariables");
+  STACK_TRACE("ExpressionContext::fromExpressionPolynomialVariables");
   for (int i = 1; i < input.size(); i ++) {
     this->variables.addOnTop(input[i]);
   }
@@ -339,7 +339,9 @@ bool ExpressionContext::fromExpressionPolynomialVariables(
 bool ExpressionContext::fromExpressionDifferentialOperatorVariables(
   const Expression& input
 ) {
-  STACK_TRACE("Expression::fromExpressionDifferentialOperatorVariables");
+  STACK_TRACE(
+    "ExpressionContext::fromExpressionDifferentialOperatorVariables"
+  );
   for (int i = 1; i < input.size(); i ++) {
     this->differentialOperatorVariables.addOnTop(input[i]);
   }
@@ -349,7 +351,7 @@ bool ExpressionContext::fromExpressionDifferentialOperatorVariables(
 bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
   const Expression& input
 ) {
-  STACK_TRACE("Expression::fromExpressionSemisimpleLieAlgebra");
+  STACK_TRACE("ExpressionContext::fromExpressionSemisimpleLieAlgebra");
   if (input.size() != 2) {
     return
     *this->owner
@@ -361,7 +363,7 @@ bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
 }
 
 bool ExpressionContext::fromExpressionDefaultModulus(const Expression& input) {
-  STACK_TRACE("Expression::fromExpressionSemisimpleLieAlgebra");
+  STACK_TRACE("ExpressionContext::fromExpressionDefaultModulus");
   if (input.size() != 2) {
     return *this->owner << "Corrupt modulus " << input.toString();
   }
@@ -515,7 +517,7 @@ bool ExpressionContext::mergeDifferentialOperators(
 bool ExpressionContext::mergeContexts(
   const ExpressionContext& other, ExpressionContext& outputContext
 ) {
-  STACK_TRACE("Expression::mergeContexts");
+  STACK_TRACE("ExpressionContext::mergeContexts");
   if (this == &outputContext || &other == &outputContext) {
     ExpressionContext leftCopy = *this;
     ExpressionContext rightCopy = other;

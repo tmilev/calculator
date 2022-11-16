@@ -5555,7 +5555,8 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
     for (
       int j = 0; j < numberOfCycles;
       j ++,
-      this->nilradicalSubselection.incrementSelectionFixedCardinality(i)
+      this->nilradicalSubselection.
+      incrementSelectionFixedCardinalityReturnFalseIfPastLast(i)
     ) {
       if (
         this->isCommutingSelectionNilradicalElements(
@@ -5638,7 +5639,8 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
     for (
       int j = 0; j < numberOfCycles;
       j ++,
-      this->nilradicalSubselection.incrementSelectionFixedCardinality(i)
+      this->nilradicalSubselection.
+      incrementSelectionFixedCardinalityReturnFalseIfPastLast(i)
     ) {
       std::stringstream out;
       out

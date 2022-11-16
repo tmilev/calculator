@@ -137,7 +137,7 @@ computeAllGeneratorImagesFromSimple() {
 }
 
 // This method uses auto everywhere, and a lot of copying data in order to use
-// auto
+// auto.
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 computeAllElementImages() {
@@ -178,7 +178,7 @@ template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
   const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
 ) {
-  STACK_TRACE("WeylGroupRepresentation::operator*=");
+  STACK_TRACE("GroupRepresentationCarriesAllMatrices::operator*=");
   // lazy programmers handling://////
   if (&other == this) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> otherCopy;
@@ -297,7 +297,7 @@ decomposeTodorsVersion(
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
   appendOnlyGRCAMSList
 ) {
-  STACK_TRACE("WeylGroupRepresentation::decomposeTodorsVersion");
+  STACK_TRACE("GroupRepresentationCarriesAllMatrices::decomposeTodorsVersion");
   this->checkInitialization();
   this->ownerGroup->
   checkInitializationFiniteDimensionalRepresentationComputation();
@@ -1423,7 +1423,7 @@ std::string WeylGroupData::toStringIrreducibleRepresentationLabel(
 std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   const List<SubgroupDataRootReflections>& inputSubgroups
 ) {
-  STACK_TRACE("WeylGroup::toStringSignSignatureRootSubsystem");
+  STACK_TRACE("WeylGroupData::toStringSignSignatureRootSubsystem");
   if (inputSubgroups.size == 0) {
     return "";
   }
@@ -2248,7 +2248,8 @@ bool SelectionFixedRankDifferentMaxMultiplicities::firstIncrement() {
 bool SelectionFixedRankDifferentMaxMultiplicities::
 incrementReturnFalseIfPastLast() {
   STACK_TRACE(
-    "SelectionFixedRankDifferentMaxMultiplicities::incrementReturnFalseIfPastLast"
+    "SelectionFixedRankDifferentMaxMultiplicities::"
+    "incrementReturnFalseIfPastLast"
   );
   if (this->rank < 0) {
     return false;
@@ -2342,7 +2343,10 @@ bool CalculatorFunctionsWeylGroup::allSelectionsFixedRank(
 
 bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers
 (Calculator& calculator, const Expression& input, Expression& output) {
-  STACK_TRACE("CalculatorFunctionsWeylGroup::signSignatureRootSubsystems");
+  STACK_TRACE(
+    "CalculatorFunctionsWeylGroup::"
+    "signSignatureRootSubsystemsFromKostkaNumbers"
+  );
   std::stringstream out;
   if (!CalculatorConversions::loadWeylGroup(calculator, input, output)) {
     return false;
@@ -2621,7 +2625,7 @@ MonomialMacdonald::~MonomialMacdonald() {
 void MonomialMacdonald::generateMyOrbit(
   HashedList<MonomialMacdonald>& output
 ) {
-  STACK_TRACE("MonomialMacdonald::GenerateMyOrbit");
+  STACK_TRACE("MonomialMacdonald::generateMyOrbit");
   output.clear();
   output.addOnTop(*this);
   MonomialMacdonald currentMon;

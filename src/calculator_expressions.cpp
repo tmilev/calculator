@@ -747,8 +747,8 @@ template < >
 PolynomialModuloPolynomial<ElementZmodP>& Expression::getValueNonConst() const {
   if (!this->isOfType<PolynomialModuloPolynomial<ElementZmodP> >()) {
     global.fatal
-    <<
-    "Expression not of required type Polynomial mod Polynomial mod integer. "
+    << "Expression not of required type "
+    << "Polynomial mod Polynomial mod integer. "
     << "The expression equals "
     << this->toString()
     << "."
@@ -3527,7 +3527,7 @@ bool CalculatorBasics::flattenCommandEnclosuresOneLayer(
 bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::functionFlattenCommandEnclosuresOneLayer");
+  STACK_TRACE("CalculatorBasics::functionFlattenCommandEnclosuresOneLayer");
   if (input.startsWith(calculator.opCommandEnclosure())) {
     if (input.size() <= 1) {
       return false;
@@ -6424,7 +6424,7 @@ void Expression::operator+=(const Expression& other) {
 }
 
 void Expression::operator-=(const Expression& other) {
-  STACK_TRACE("Expression::operator+=");
+  STACK_TRACE("Expression::operator-=");
   if (this->owner == nullptr && other.owner == nullptr) {
     this->data -= other.data;
     if (this->data != 1 && this->data != 0) {

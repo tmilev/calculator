@@ -40,7 +40,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "",
     "Work in progress. \n"
     "Cone decomposition related to a vector partition function. "
-  "Uses only slicing plances spanned by n-1 vectors. ",
+    "Uses only slicing plances spanned by n-1 vectors. ",
     "ConeDecomposition(\n"
     "(1,0,0),\n"
     "(0,1,0),\n"
@@ -63,17 +63,19 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     ");\n"*/
     ,
     "CalculatorFunctionsVectorPartitionFunction::"
-  "coneDecompositionSpannedSlices",
+    "coneDecompositionSpannedSlices",
     "ConeDecomposition",
     innerStandard
   );
   this->addOperationHandler(
     "ConeDecompositionArbitrarySlices",
-    CalculatorFunctionsVectorPartitionFunction::coneDecompositionArbitrarySlices,
+    CalculatorFunctionsVectorPartitionFunction::
+    coneDecompositionArbitrarySlices,
     "",
     "Work in progress. \n"
     "Cone decomposition related to a vector partition function. "
-  "Unlike ConeDecomposition, this decomposition uses arbitrary combinatorial chamber walls.",
+    "Unlike ConeDecomposition, this decomposition uses arbitrary combinatorial chamber walls."
+    ,
     "ConeDecompositionArbitrarySlices(\n"
     "(1,0,0),\n"
     "(0,1,0),\n"
@@ -96,7 +98,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     ");\n"*/
     ,
     "CalculatorFunctionsVectorPartitionFunction::"
-  "coneDecompositionSpannedSlices",
+    "coneDecompositionSpannedSlices",
     "ConeDecomposition",
     innerStandard
   );

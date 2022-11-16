@@ -473,7 +473,7 @@ void CompareExpressions::compare(
 }
 
 void CompareExpressions::comparePartTwo(Calculator& calculator) {
-  STACK_TRACE("Calculator::compareExpressions");
+  STACK_TRACE("CompareExpressions::comparePartTwo");
   calculator.statistics.initialize();
   if (
     !calculator.parser.parseNoEmbeddingInCommand(

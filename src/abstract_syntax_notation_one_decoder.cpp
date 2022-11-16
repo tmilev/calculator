@@ -10,6 +10,20 @@
 // particular tag.
 // Appears to be a compiler/linker bug (?).
 const unsigned char AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05 = 5;
+std::string ASNElement::JSLabels::body = "body";
+std::string ASNElement::JSLabels::children = "children";
+std::string ASNElement::JSLabels::error = "error";
+std::string ASNElement::JSLabels::isConstructed = "isConstructed";
+std::string ASNElement::JSLabels::lengthEncoding = "lengthEncoding";
+std::string ASNElement::JSLabels::lengthPromised = "lengthPromised";
+std::string ASNElement::JSLabels::offsetLastRead = "offsetLastRead";
+std::string ASNElement::JSLabels::offsetLastWrite = "offsetLastWrite";
+std::string ASNElement::JSLabels::startByteOriginal = "startByteOriginal";
+std::string ASNElement::JSLabels::tag = "tag";
+std::string ASNElement::JSLabels::type = "type";
+std::string ASNElement::JSLabels::interpretation = "interpretation";
+std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
+std::string ASNElement::JSLabels::comment = "comment";
 
 bool ASNElement::hasCostructedStartByte() const {
   int sixthBit = this->startByte / 32;
@@ -607,21 +621,6 @@ JSData ASNElement::toJSON() const {
   return result;
 }
 
-std::string ASNElement::JSLabels::body = "body";
-std::string ASNElement::JSLabels::children = "children";
-std::string ASNElement::JSLabels::error = "error";
-std::string ASNElement::JSLabels::isConstructed = "isConstructed";
-std::string ASNElement::JSLabels::lengthEncoding = "lengthEncoding";
-std::string ASNElement::JSLabels::lengthPromised = "lengthPromised";
-std::string ASNElement::JSLabels::offsetLastRead = "offsetLastRead";
-std::string ASNElement::JSLabels::offsetLastWrite = "offsetLastWrite";
-std::string ASNElement::JSLabels::startByteOriginal = "startByteOriginal";
-std::string ASNElement::JSLabels::tag = "tag";
-std::string ASNElement::JSLabels::type = "type";
-std::string ASNElement::JSLabels::interpretation = "interpretation";
-std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
-std::string ASNElement::JSLabels::comment = "comment";
-
 int ASNElement::getLengthLengthEncoding() {
   List<unsigned char> lengthEncoding;
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
@@ -1209,7 +1208,7 @@ std::string ASNObject::names::sha384 = "sha384";
 std::string ASNObject::names::sha512 = "sha512";
 std::string ASNObject::names::sha256WithRSAEncryption =
 "sha256WithRSAEncryption";
-std::string ASNObject::names::RSAEncryption = "RSAEncryption";
+std::string ASNObject::names::rsaEncryption = "RSAEncryption";
 std::string ASNObject::names::countryName = "countryName";
 std::string ASNObject::names::stateOrProvinceName = "stateOrProvinceName";
 std::string ASNObject::names::localityName = "localityName";
@@ -1266,7 +1265,7 @@ MapList<
   );
   ASNObject::initializeAddSample(
     container,
-    ASNObject::names::RSAEncryption,
+    ASNObject::names::rsaEncryption,
     "2a864886f70d010101",
     AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
   );
@@ -1644,7 +1643,7 @@ void TBSCertificateInfo::computeASNSignature(ASNElement& output) {
   output.comment = "signature";
   output[0].makeSequence(2);
   output[0][0].makeObjectId(
-    ASNObject::objectIdFromNameNoFail(ASNObject::names::RSAEncryption)
+    ASNObject::objectIdFromNameNoFail(ASNObject::names::rsaEncryption)
   );
   output[0][1].makeNull();
   output[1].makeBitStringEmpty(false, false, false);
@@ -2319,7 +2318,7 @@ bool TBSCertificateInfo::Organization::loadFields(
   >& fields,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("TBSCertificateInfo::loadFields");
+  STACK_TRACE("TBSCertificateInfo::Organization::loadFields");
   int numberOfLoadedFields = 0;
   numberOfLoadedFields +=
   this->commonName.loadField(fields, ASNObject::names::commonName);

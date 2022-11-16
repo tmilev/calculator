@@ -1,6 +1,16 @@
 #include "calculator_interface.h"
 #include "string_constants.h"
 
+List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
+    "IntegralOperatorFromProduct",
+    "InterpretAsDifferential",
+    "CommuteConstants",
+    "MultiplyByOne"
+  }
+);
+HashedList<std::string> Calculator::ExpressionHistoryEnumerator::
+ruleIgnoreListHashList;
+
 void Calculator::ExpressionHistoryEnumerator::initializeComputation() {
   STACK_TRACE("ExpressionHistoryEnumerator::initializeComputation");
   this->output.setSize(0);
@@ -78,7 +88,9 @@ bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
   int numberOfChildren,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("ExpressionHistoryEnumerator::processChildrenTransformations");
+  STACK_TRACE(
+    "Calculator::ExpressionHistoryEnumerator::processChildrenTransformations"
+  );
   if (numberOfChildren <= 0) {
     return true;
   }
@@ -184,7 +196,7 @@ bool Calculator::ExpressionHistoryEnumerator::processTransformation(
 }
 
 std::string Calculator::ExpressionHistoryEnumerator::toStringDebug() {
-  STACK_TRACE("ExpressionHistoryEnumerator::toStringDebug");
+  STACK_TRACE("Calculator::ExpressionHistoryEnumerator::toStringDebug");
   std::stringstream out;
   out << "<b>History</b><br>" << this->history.toStringTreeHtml(- 1) << "<hr>";
   out << "" << this->history.toStringSemiFull() << "<hr>";
@@ -234,16 +246,6 @@ void Calculator::ExpressionHistoryEnumerator::toStepsWithMerge(
     outputSteps.addOnTop(current);
   }
 }
-
-List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
-    "IntegralOperatorFromProduct",
-    "InterpretAsDifferential",
-    "CommuteConstants",
-    "MultiplyByOne"
-  }
-);
-HashedList<std::string> Calculator::ExpressionHistoryEnumerator::
-ruleIgnoreListHashList;
 
 void Calculator::ExpressionHistoryEnumerator::toStepsCleanUp(
   List<Calculator::ExpressionHistoryEnumerator::Step>& raw,

@@ -63,7 +63,9 @@ public:
   void shrinkMaxSize();
   void makeSubSelection(Selection& selection, Selection& subSelection);
   void initSelectionFixedCardinality(int card);
-  void incrementSelectionFixedCardinality(int cardinality);
+  bool incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+    int cardinality
+  );
   void invertSelection() {
     for (int i = 0; i < this->numberOfElements; i ++) {
       this->selected[i] = !this->selected[i];
@@ -302,7 +304,7 @@ public:
     this->selection.initialize(inputNumberOfItems);
     this->desiredSubsetSize = inputDesiredSubsetSize;
     if (this->desiredSubsetSize > 0) {
-      this->selection.incrementSelectionFixedCardinality(
+      this->selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
         this->desiredSubsetSize
       );
     }
@@ -311,15 +313,10 @@ public:
     return this->selection.toString();
   }
   bool incrementReturnFalseIfPastLast() {
-    this->selection.incrementSelectionFixedCardinality(
+    return
+    this->selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
       this->desiredSubsetSize
     );
-    for (int i = 0; i < this->desiredSubsetSize; i ++) {
-      if (!this->selection.selected[i]) {
-        return true;
-      }
-    }
-    return false;
   }
 };
 

@@ -13,17 +13,26 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool coneDecomposition(
-    Calculator& calculator, const Expression& input, Expression& output, bool flagUseSpannedSlices
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool flagUseSpannedSlices
   );
   static bool coneDecompositionSpannedSlices(
     Calculator& calculator, const Expression& input, Expression& output
-  ){
-    return CalculatorFunctionsVectorPartitionFunction::coneDecomposition(calculator, input, output, true);
+  ) {
+    return
+    CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
+      calculator, input, output, true
+    );
   }
   static bool coneDecompositionArbitrarySlices(
     Calculator& calculator, const Expression& input, Expression& output
-  ){
-    return CalculatorFunctionsVectorPartitionFunction::coneDecomposition(calculator, input, output, false);
+  ) {
+    return
+    CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
+      calculator, input, output, false
+    );
   }
 };
 

@@ -950,7 +950,8 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraRationals(
   Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorConversions::storeElementSemisimpleLieAlgebraRational"
+    "CalculatorConversions::"
+    "expressionFromElementSemisimpleLieAlgebraRationals"
   );
   LinearCombination<Expression, Rational> monomials;
   monomials.makeZero();
@@ -2367,7 +2368,7 @@ bool CalculatorConversions::makeElementHyperOctahedral(
 bool CalculatorConversions::polynomialModuloInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::polynomialModuloInteger");
+  STACK_TRACE("CalculatorConversions::polynomialModuloInteger");
   if (input.size() != 3) {
     return
     calculator

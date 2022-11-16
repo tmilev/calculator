@@ -3475,10 +3475,12 @@ void Selection::initSelectionFixedCardinality(int card) {
   this->cardinalitySelection = card;
 }
 
-void Selection::incrementSelectionFixedCardinality(int cardinality) {
+bool Selection::incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+  int cardinality
+) {
   // Example of the order of generation of all combinations
   // when cardinality = 2 and maximumSize = 5. The second column indicates the
-  // state of the array at the point in code marked with *** below.
+  // state of the array at the point in code marked with (*) below.
   // 11000 (10000) indexLastZeroWithOneBefore: 2
   // numberOfOnesAfterLastZeroWithOneBefore: 0
   // 10100 (10000) indexLastZeroWithOneBefore: 3
@@ -3499,14 +3501,15 @@ void Selection::incrementSelectionFixedCardinality(int cardinality) {
   // numberOfOnesAfterLastZeroWithOneBefore: 1
   // 00011
   if (cardinality > this->numberOfElements) {
-    return;
+    return false;
   }
   if (this->cardinalitySelection != cardinality) {
     this->initSelectionFixedCardinality(cardinality);
-    return;
+    return true;
   }
   if (cardinality == this->numberOfElements || cardinality == 0) {
-    return;
+    // We've reached the last combination.
+    return false;
   }
   int indexLastZeroWithOneBefore = - 1;
   int numberOfOnesAfterLastZeroWithOneBefore = 0;
@@ -3522,13 +3525,15 @@ void Selection::incrementSelectionFixedCardinality(int cardinality) {
     }
   }
   if (indexLastZeroWithOneBefore == 0) {
+    // We've reached the last combination.
+    // Go back to the first combination and return false.
     this->initSelectionFixedCardinality(cardinality);
-    return;
+    return false;
   }
   for (int i = 0; i < numberOfOnesAfterLastZeroWithOneBefore + 1; i ++) {
     this->selected[this->elements[this->cardinalitySelection - i - 1]] = false;
   }
-  // ***At this point in time the second column is recorded.
+  // (*) See the comments above for more explanations.
   for (int i = 0; i < numberOfOnesAfterLastZeroWithOneBefore + 1; i ++) {
     this->selected[i + indexLastZeroWithOneBefore] = true;
     this->elements[
@@ -3537,6 +3542,7 @@ void Selection::incrementSelectionFixedCardinality(int cardinality) {
     ] =
     i + indexLastZeroWithOneBefore;
   }
+  return true;
 }
 
 void Selection::computeIndicesFromSelection() {
@@ -12544,7 +12550,9 @@ bool Cone::isRegularToBasis(
   Vector<Rational> candidate;
   Rational scalarProduct;
   for (int i = 0; i < x; i ++) {
-    wallSelection.incrementSelectionFixedCardinality(dimension - 1);
+    wallSelection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+      dimension - 1
+    );
     if (
       basis.computeNormalFromSelection(
         candidate, wallSelection, bufferMat, dimension
@@ -14519,7 +14527,9 @@ void ConeCollection::getNewVerticesAppend(
   toBeEliminated.initialize(dimensionMinusTwo + 1, dimension);
   Vector<Rational> root;
   for (int i = 0; i < numberOfCycles; i ++) {
-    selection.incrementSelectionFixedCardinality(dimensionMinusTwo);
+    selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+      dimensionMinusTwo
+    );
     for (int j = 0; j < dimensionMinusTwo; j ++) {
       Vector<Rational>& currentNormal =
       toBeSplit.walls[selection.elements[j]].normal;
@@ -14549,9 +14559,7 @@ void ConeCollection::getNewVerticesAppend(
 }
 
 bool ConeCollection::splitChamber(
-  const Cone& toBeSliced,
-  const Vector<Rational>& killerNormal,
-  int nextSlicingIndex
+  const Cone& toBeSliced, const Vector<Rational>& killerNormal
 ) {
   STACK_TRACE("ConeCollection::splitChamber");
   Cone newPlusCone(this->conesCreated);
@@ -14561,8 +14569,10 @@ bool ConeCollection::splitChamber(
   bool needToRecomputeVertices = (
     toBeSliced.getAllNormals().getRankElementSpan() < this->getDimension()
   );
-  newPlusCone.payload.lowestSlicingIndex = nextSlicingIndex;
-  newMinusCone.payload.lowestSlicingIndex = nextSlicingIndex;
+  newPlusCone.payload.lowestSlicingIndex =
+  toBeSliced.payload.lowestSlicingIndex;
+  newMinusCone.payload.lowestSlicingIndex =
+  toBeSliced.payload.lowestSlicingIndex;
   newPlusCone.flagIsTheZeroCone = false;
   newMinusCone.flagIsTheZeroCone = false;
   HashedList<Vector<Rational> > zeroVertices;
@@ -14707,12 +14717,10 @@ bool ConeCollection::refineOneByNormals(
 ) {
   STACK_TRACE("ConeCollection::refineByNormals");
   output.clear();
-  for (
-    int i = toBeRefined.payload.lowestSlicingIndex; i < this->splittingNormals.
-    size; i ++
-  ) {
+  int& counter = toBeRefined.payload.lowestSlicingIndex;
+  for (; counter < this->splittingNormals.size; counter ++) {
     if (
-      this->splitChamber(toBeRefined, this->splittingNormals[i], i + 1)
+      this->splitChamber(toBeRefined, this->splittingNormals[counter])
     ) {
       return true;
     }
@@ -14779,7 +14787,7 @@ void ConeCollection::splitConeByMultipleNeighbors(
       neighborVertex, candidateSlicers
     );
     for (Vector<Rational>& slicer : candidateSlicers) {
-      if (this->splitChamber(input, slicer, - 1)) {
+      if (this->splitChamber(input, slicer)) {
         return;
       }
     }
@@ -14809,53 +14817,37 @@ bool ConeCollection::isSpannedByDirections(
 }
 
 bool ConeCollection::allExitWallsAreVisited(
-Cone& toBeRefined,const Vector<Rational>& direction, List<Wall> &outputExitWalls){
+  Cone& toBeRefined,
+  const Vector<Rational>& direction,
+  List<Wall>& outputExitWalls
+) {
   outputExitWalls.clear();
   for (const Wall& wall : toBeRefined.walls) {
     if (!direction.scalarEuclidean(wall.normal).isPositive()) {
       continue;
     }
-    for (int id : wall.neighbors){
-      Cone& neighbor =  this->getConeByIdNonConstNoFail(id);
+    for (int id : wall.neighbors) {
+      Cone& neighbor = this->getConeByIdNonConstNoFail(id);
       if (!neighbor.payload.visited) {
-
-        return  false;
+        return false;
       }
     }
     outputExitWalls.addOnTop(wall);
   }
+  if (outputExitWalls.size <= 0) {
+    global.comments << "Unexpected: number of exit walls is zero. ";
+  }
   return true;
 }
 
-
-bool ConeCollection::refineOneByOneDirectionSpannedSlices(Cone &toBeRefined, const Vector<Rational> &direction){
-
-}
-bool ConeCollection::refineOneByOneDirection(Cone &toBeRefined, const Vector<Rational> &direction){
-STACK_TRACE("ConeCollection::refineOneByOneDirection");
- if (this->flagUseSpannedSlices){
-return this->refineOneByOneDirectionSpannedSlices(toBeRefined, direction);
- }else{
- return this->refineOneByOneDirectionArbitrarySlices(toBeRefined, direction);
- }
-}
-
-bool ConeCollection::refineOneByOneDirectionArbitrarySlices(Cone &toBeRefined, const Vector<Rational> &direction)
-{
-  STACK_TRACE("ConeCollection::refineOneByOneDirectionArbitrarySlices");
-  if (toBeRefined.id < 0) {
-    global.fatal
-    << "Refining non-initialized cone not allowed. "
-    << global.fatal;
-  }
+bool ConeCollection::refineOneByOneDirection(
+  Cone& toBeRefined, const Vector<Rational>& direction
+) {
+  STACK_TRACE("ConeCollection::refineOneByOneDirection");
   List<Wall> exitWalls;
   if (!this->allExitWallsAreVisited(toBeRefined, direction, exitWalls)) {
     this->addNonRefinedCone(toBeRefined);
     return false;
-  }
-
-  if (exitWalls.size <= 0) {
-    global.comments << "Unexpected: number of exit walls is zero. ";
   }
   if (exitWalls.size == 1) {
     // The chamber is already refined;
@@ -15087,9 +15079,9 @@ void ConeCollection::refineByDirectionsAndSort() {
 
 void ConeCollection::refineByDirections() {
   STACK_TRACE("ConeCollection::refineByDirections");
-  for (const Vector<Rational>& direction : this->slicingDirections) {
+  for (int i = 0; i < this->slicingDirections.size; i ++) {
     this->makeAllConesNonRefined();
-    this->refineByOneDirection(direction);
+    this->refineByOneDirection(i);
   }
 }
 
@@ -15103,11 +15095,85 @@ void ConeCollection::makeAllConesNonRefined() {
   }
 }
 
-void ConeCollection::refineByOneDirection(
+void ConeCollection::refineByOneDirection(int directionIndex) {
+  if (this->flagUseSpannedSlices) {
+    this->refineByOneDirectionSpannedSlices(directionIndex);
+  } else {
+    this->refineByOneDirectionArbitrarySlices(
+      this->slicingDirections[directionIndex]
+    );
+  }
+}
+
+void ConeCollection::refineByOneDirectionSpannedSlices(int directionIndex) {
+  STACK_TRACE("ConeCollection::refineByOneDirectionSpannedSlices");
+  this->markNonRefinedOneDirectionSpannedSlices(directionIndex);
+  while (this->nonRefinedCones.size() > 0) {
+    int index = this->nonRefinedCones.size() - 1;
+    Cone cone = this->nonRefinedCones.values[index];
+    this->nonRefinedCones.removeIndex(index);
+    this->refineOneByOneDirectionSpannedSlices(cone, directionIndex);
+    this->refineAllConesWithWallsWithMultipleNeighbors();
+  }
+}
+
+void ConeCollection::refineOneByOneDirectionSpannedSlices(
+  Cone& toBeSliced, int directionIndex
+) {
+  STACK_TRACE("ConeCollection::refineOneByOneDirectionSpannedSlices");
+  const Vector<Rational>& direction = this->slicingDirections[directionIndex];
+  if (!toBeSliced.isInCone(direction)) {
+    // The starting vertex is not in the cone.
+    return;
+  }
+  if (
+    !toBeSliced.payload.directions.
+    incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+      this->getDimension() - 2
+    )
+  ) {
+    this->addRefinedCone(toBeSliced);
+    return;
+  }
+  Vectors<Rational> verticesFormingWall;
+  verticesFormingWall.addOnTop(direction);
+  for (int i : toBeSliced.payload.directions.elements) {
+    verticesFormingWall.addOnTop(this->slicingDirections[i]);
+  }
+  Vectors<Rational> normalCandidate;
+  verticesFormingWall.getOrthogonalComplement(normalCandidate);
+  if (normalCandidate.size != 1) {
+    // The vertices are linearly dependent and do not form a wall.
+    return;
+  }
+  if (!this->splitChamber(toBeSliced, normalCandidate[0])) {
+    this->addRefinedCone(toBeSliced);
+  }
+}
+
+void ConeCollection::markNonRefinedOneDirectionSpannedSlices(
+  int directionIndex
+) {
+  STACK_TRACE("ConeCollection::markNonRefinedOneDirectionSpannedSlices");
+  const Vector<Rational>& direction = this->slicingDirections[directionIndex];
+  for (int i = this->refinedCones.size() - 1; i >= 0; i --) {
+    Cone& cone = this->refinedCones.values[i];
+    if (cone.isInCone(direction)) {
+      this->nonRefinedCones.setKeyValue(cone.id, cone);
+      this->refinedCones.removeIndex(i);
+      cone.payload.directions.initialize(directionIndex + 1);
+    } else {
+      cone.payload.directions.initialize(0);
+    }
+  }
+}
+
+void ConeCollection::refineByOneDirectionArbitrarySlices(
   const Vector<Rational>& direction
 ) {
-  STACK_TRACE("ConeCollection::refineByOneDirection");
+  STACK_TRACE("ConeCollection::refineByOneDirectionArbitrarySlices");
   List<Cone> subdivided;
+  int refinementAttempts = 0;
   while (this->nonRefinedCones.size() > 0) {
     for (int i = this->nonRefinedCones.size() - 1; i >= 0; i --) {
       Cone toBeRefined = this->nonRefinedCones.values[i];
@@ -15118,6 +15184,14 @@ void ConeCollection::refineByOneDirection(
       this->checkConsistencyFull();
       this->refineAllConesWithWallsWithMultipleNeighbors();
       this->checkConsistencyFull();
+      refinementAttempts ++;
+      if (refinementAttempts > 2000) {
+        global.fatal
+        << "DEBUG: Too many refine attempts. "
+        << this->toHTMLGraphicsOnly(false)
+        << this->toHTMLHistory()
+        << global.fatal;
+      }
     }
   }
 }
@@ -15126,10 +15200,14 @@ bool ConeCollection::containsId(int id) const {
   return this->getConeById(id) != nullptr;
 }
 
-Cone &ConeCollection::getConeByIdNonConstNoFail(int id) {
+Cone& ConeCollection::getConeByIdNonConstNoFail(int id) {
   Cone* result = this->getConeByIdNonConst(id);
   if (result == nullptr) {
-    global.fatal << "Id " << id << " not found when it should be. " << global.fatal;
+    global.fatal
+    << "Id "
+    << id
+    << " not found when it should be. "
+    << global.fatal;
   }
   return *result;
 }
@@ -15221,7 +15299,9 @@ void Cone::computeVerticesFromNormals() {
   Vector<Rational> root;
   matrix.initialize(dimension - 1, dimension);
   for (int i = 0; i < numCycles; i ++) {
-    selection.incrementSelectionFixedCardinality(dimension - 1);
+    selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+      dimension - 1
+    );
     for (int j = 0; j < selection.cardinalitySelection; j ++) {
       for (int k = 0; k < dimension; k ++) {
         matrix.elements[j][k] = this->walls[selection.elements[j]].normal[k];
@@ -15476,7 +15556,9 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   selection.initialize(inputVertices.size);
   Vector<Rational> normalCandidate;
   for (int i = 0; i < numberOfCandidates; i ++) {
-    selection.incrementSelectionFixedCardinality(rankVerticesSpan - 1);
+    selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+      rankVerticesSpan - 1
+    );
     for (int j = 0; j < selection.cardinalitySelection; j ++) {
       extraVertices.addOnTop(inputVertices[selection.elements[j]]);
     }

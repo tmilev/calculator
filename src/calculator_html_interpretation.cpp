@@ -5,6 +5,10 @@
 #include "string_constants.h"
 #include "calculator_educational_functions_1.h"
 
+const std::string CalculatorHTML::bugsGenericMessage =
+"Please take a screenshot, copy the link address and send those along "
+"with a short explanation to the administrator of the web site. ";
+
 JSData WebAPIResponse::getProblemSolutionJSON() {
   STACK_TRACE("WebAPIReponse::getProblemSolutionJSON");
   if (!global.userDefaultHasAdminRights()) {
@@ -2173,10 +2177,6 @@ std::string WebAPIResponse::addUserEmails(
   return out.str();
 }
 
-const std::string CalculatorHTML::bugsGenericMessage =
-"Please take a screenshot, copy the link address and send those along "
-"with a short explanation to the administrator of the web site. ";
-
 JSData WebAPIResponse::getAnswerOnGiveUp() {
   return
   WebAPIResponse::getAnswerOnGiveUp(
@@ -2190,7 +2190,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   bool* answerGenerationSuccess,
   bool doIncludeTimeStats
 ) {
-  STACK_TRACE("CalculatorHTML::getAnswerOnGiveUp");
+  STACK_TRACE("WebAPIResponse::getAnswerOnGiveUp");
   GlobalVariables::Response::StateMaintainer maintain(global.response);
   if (!global.userDefaultHasAdminRights()) {
     global.response.disallowReport();
@@ -2502,7 +2502,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
 }
 
 std::string WebAPIResponse::getScoresPage() {
-  STACK_TRACE("WebWorker::getScoresPage");
+  STACK_TRACE("WebAPIResponse::getScoresPage");
   std::stringstream out;
   CalculatorHTML page;
   page.loadDatabaseInfo(out);
@@ -2970,7 +2970,7 @@ public:
 };
 
 bool UserScores::computeScoresAndStats(std::stringstream& comments) {
-  STACK_TRACE("UserScores::ComputeScoresAndStats");
+  STACK_TRACE("UserScores::computeScoresAndStats");
   if (!global.flagDatabaseCompiled) {
     return false;
   }

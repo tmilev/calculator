@@ -62,7 +62,7 @@ public:
   }
   void shrinkMaxSize();
   void makeSubSelection(Selection& selection, Selection& subSelection);
-  void initSelectionFixedCardinality(int card);
+  void initSelectionFixedCardinality(int cardinality);
   bool incrementSelectionFixedCardinalityReturnFalseIfPastLast(
     int cardinality
   );
@@ -105,6 +105,7 @@ public:
   cardinalitySelection(0) {
     *this = other;
   }
+  bool checkInitialization()const;
   class Test {
   public:
     static bool all();

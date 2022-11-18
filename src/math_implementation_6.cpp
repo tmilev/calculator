@@ -76,9 +76,9 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   ) {
     return false;
   }
-  Vector<Rational> tempV;
-  Rational val;
-  tempV.setSize(1);
+  Vector<Rational> vector;
+  Rational value;
+  vector.setSize(1);
   List<int> divisorsH, divisorsS;
   LargeInteger hT, lT;
   hT = highestCoefficient.getNumerator();
@@ -90,13 +90,13 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   }
   for (int i = 0; i < divisorsH.size; i ++) {
     for (int j = 0; j < divisorsS.size; j ++) {
-      tempV[0].assignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
-      val = myCopy.evaluate(tempV);
-      if (val == 0) {
+      vector[0].assignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
+      value = myCopy.evaluate(vector);
+      if (value == 0) {
         Polynomial<Rational> divisor, remainder;
-        divisor.makeDegreeOne(1, 0, 1, - tempV[0]);
+        divisor.makeDegreeOne(1, 0, 1, - vector[0]);
         myCopy.divideBy(divisor, myCopy, remainder, monomialOrder);
-        output.addOnTop(tempV[0]);
+        output.addOnTop(vector[0]);
         List<Rational> tempList;
         bool result = myCopy.findOneVariableRationalRoots(tempList);
         output.addListOnTop(tempList);

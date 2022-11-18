@@ -3450,9 +3450,9 @@ void Selection::expandMaxSize() {
 }
 
 std::string Selection::toString() const {
-  Vector<Rational> root;
-  root = *this;
-  return root.toString();
+  Vector<Rational> vector;
+  vector = *this;
+  return vector.toString();
 }
 
 void Selection::incrementSelection() {
@@ -3466,18 +3466,31 @@ void Selection::incrementSelection() {
   this->computeIndicesFromSelection();
 }
 
-void Selection::initSelectionFixedCardinality(int card) {
+void Selection::initSelectionFixedCardinality(int cardinality) {
   this->initialize(this->numberOfElements);
-  for (int i = 0; i < card; i ++) {
+  this->elements.setSize(cardinality);
+  for (int i = 0; i < cardinality; i ++) {
     this->selected[i] = true;
     this->elements[i] = i;
   }
-  this->cardinalitySelection = card;
+  this->cardinalitySelection = cardinality;
+}
+
+bool Selection::checkInitialization() const{
+  if (this->numberOfElements < 0) {
+    global.fatal<< "Number of elements not allowed to be negative. "
+    << global.fatal;
+  }
+  return true;
 }
 
 bool Selection::incrementSelectionFixedCardinalityReturnFalseIfPastLast(
   int cardinality
 ) {
+  this->checkInitialization();
+  if (cardinality < 0) {
+    global.fatal << "Negative cardinality not allowed." << global.fatal;
+  }
   // Example of the order of generation of all combinations
   // when cardinality = 2 and maximumSize = 5. The second column indicates the
   // state of the array at the point in code marked with (*) below.
@@ -3542,6 +3555,7 @@ bool Selection::incrementSelectionFixedCardinalityReturnFalseIfPastLast(
     ] =
     i + indexLastZeroWithOneBefore;
   }
+  this->elements.setSize(this->cardinalitySelection);
   return true;
 }
 
@@ -11662,8 +11676,9 @@ std::string Wall::toString() const {
 }
 
 Cone::Payload::Payload() {
-  this->lowestSlicingIndex = 0;
+  this->lowestSlicingIndex = -1;
   this->visited = false;
+
 }
 
 Cone::Cone() {
@@ -12704,13 +12719,6 @@ bool Cone::drawMeProjectiveVertices(DrawingVariables& drawingVariables) const {
   Vectors<Rational> verticesScaled;
   this->computeRescaledVerticesForDrawing(verticesScaled);
   Vector<Rational> root;
-  std::stringstream out;
-  out << this->id;
-  Vector<Rational> point = this->internalPointNormal();
-  point /= point.sumCoordinates();
-  drawingVariables.drawTextAtVectorBufferRational(
-    point, out.str(), "black"
-  );
   for (int i = 0; i < this->vertices.size; i ++) {
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
       zeroRoot, verticesScaled[i] * 5, "lightblue", 1
@@ -12746,6 +12754,14 @@ bool Cone::drawMeProjectiveSlice(DrawingVariables& drawingVariables) const {
       }
     }
   }
+  std::stringstream out;
+  out << this->id;
+  Vector<Rational> point = this->internalPointNormal();
+  point /= point.sumCoordinates();
+  drawingVariables.drawTextAtVectorBufferRational(
+    point, out.str(), "red"
+  );
+
   return true;
 }
 
@@ -14569,10 +14585,10 @@ bool ConeCollection::splitChamber(
   bool needToRecomputeVertices = (
     toBeSliced.getAllNormals().getRankElementSpan() < this->getDimension()
   );
-  newPlusCone.payload.lowestSlicingIndex =
-  toBeSliced.payload.lowestSlicingIndex;
-  newMinusCone.payload.lowestSlicingIndex =
-  toBeSliced.payload.lowestSlicingIndex;
+  newPlusCone.payload.directions =
+  toBeSliced.payload.directions;
+  newMinusCone.payload .directions=
+  toBeSliced.payload.directions;
   newPlusCone.flagIsTheZeroCone = false;
   newMinusCone.flagIsTheZeroCone = false;
   HashedList<Vector<Rational> > zeroVertices;
@@ -14621,6 +14637,8 @@ bool ConeCollection::splitChamber(
   );
   this->addNonRefinedCone(newPlusCone);
   this->addNonRefinedCone(newMinusCone);
+  this->processNeighborsOfNewlyAddedCone(newPlusCone);
+  this->processNeighborsOfNewlyAddedCone(newMinusCone);
   return true;
 }
 
@@ -14840,10 +14858,10 @@ bool ConeCollection::allExitWallsAreVisited(
   return true;
 }
 
-bool ConeCollection::refineOneByOneDirection(
+bool ConeCollection::refineOneByOneDirectionArbitrarySlices(
   Cone& toBeRefined, const Vector<Rational>& direction
 ) {
-  STACK_TRACE("ConeCollection::refineOneByOneDirection");
+  STACK_TRACE("ConeCollection::refineOneByOneDirectionArbitrarySlices");
   List<Wall> exitWalls;
   if (!this->allExitWallsAreVisited(toBeRefined, direction, exitWalls)) {
     this->addNonRefinedCone(toBeRefined);
@@ -15080,18 +15098,21 @@ void ConeCollection::refineByDirectionsAndSort() {
 void ConeCollection::refineByDirections() {
   STACK_TRACE("ConeCollection::refineByDirections");
   for (int i = 0; i < this->slicingDirections.size; i ++) {
-    this->makeAllConesNonRefined();
+    this->markAllConesNonRefined(i);
     this->refineByOneDirection(i);
   }
 }
 
-void ConeCollection::makeAllConesNonRefined() {
-  STACK_TRACE("ConeCollection::makeAllConesNonRefined");
+void ConeCollection::markAllConesNonRefined(int directionIndex) {
+  STACK_TRACE("ConeCollection::markAllConesNonRefined");
   for (int i = this->refinedCones.size() - 1; i >= 0; i --) {
-    Cone& cone = this->refinedCones.values[i];
-    cone.payload.visited = false;
-    this->addNonRefinedCone(cone);
+    this->addNonRefinedCone(this->refinedCones.values[i]);
     this->refinedCones.removeIndex(i);
+  }
+  for (Cone& cone: this->nonRefinedCones.values){
+    cone.payload.visited = false;
+    cone.payload.directions.initialize(directionIndex);
+    cone.payload.lowestSlicingIndex = directionIndex-1;
   }
 }
 
@@ -15107,14 +15128,36 @@ void ConeCollection::refineByOneDirection(int directionIndex) {
 
 void ConeCollection::refineByOneDirectionSpannedSlices(int directionIndex) {
   STACK_TRACE("ConeCollection::refineByOneDirectionSpannedSlices");
-  this->markNonRefinedOneDirectionSpannedSlices(directionIndex);
   while (this->nonRefinedCones.size() > 0) {
     int index = this->nonRefinedCones.size() - 1;
     Cone cone = this->nonRefinedCones.values[index];
     this->nonRefinedCones.removeIndex(index);
     this->refineOneByOneDirectionSpannedSlices(cone, directionIndex);
+
     this->refineAllConesWithWallsWithMultipleNeighbors();
   }
+}
+
+bool ConeCollection::isAddmissibleConeSlice(Cone& toBeSliced, const Vector<Rational> &sliceNormal, int directionIndex
+){
+  STACK_TRACE("ConeCollection::isAddmissibleConeSlice");
+  const Vector<Rational>& direction = this->slicingDirections[directionIndex];
+  for (int i = 0; i < directionIndex; i ++){
+    const Vector<Rational>& vertex= this->slicingDirections[i];
+    if (!sliceNormal.scalarEuclidean(vertex).isEqualToZero()) {
+      continue;
+    }
+    for (const Wall& wall : toBeSliced.walls){
+
+      if (vertex.scalarEuclidean(wall.normal).isNonPositive()
+      &&
+      direction.scalarEuclidean(wall.normal).isPositive()
+      ){
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void ConeCollection::refineOneByOneDirectionSpannedSlices(
@@ -15122,21 +15165,24 @@ void ConeCollection::refineOneByOneDirectionSpannedSlices(
 ) {
   STACK_TRACE("ConeCollection::refineOneByOneDirectionSpannedSlices");
   const Vector<Rational>& direction = this->slicingDirections[directionIndex];
-  if (!toBeSliced.isInCone(direction)) {
-    // The starting vertex is not in the cone.
-    return;
+  if (toBeSliced.payload.directions.numberOfElements  <0) {
+    global.fatal << "Uninitialized selection. " << this->toHTMLGraphicsOnly(false) << this->toHTMLHistory()
+    << global.fatal;
   }
+
   if (
     !toBeSliced.payload.directions.
     incrementSelectionFixedCardinalityReturnFalseIfPastLast(
-      this->getDimension() - 2
+      toBeSliced.getDimension() - 2
     )
   ) {
     this->addRefinedCone(toBeSliced);
     return;
   }
+
   Vectors<Rational> verticesFormingWall;
   verticesFormingWall.addOnTop(direction);
+
   for (int i : toBeSliced.payload.directions.elements) {
     verticesFormingWall.addOnTop(this->slicingDirections[i]);
   }
@@ -15144,28 +15190,18 @@ void ConeCollection::refineOneByOneDirectionSpannedSlices(
   verticesFormingWall.getOrthogonalComplement(normalCandidate);
   if (normalCandidate.size != 1) {
     // The vertices are linearly dependent and do not form a wall.
+    this->addCone(this->nonRefinedCones, toBeSliced);
+    return;
+  }
+  if (!this->isAddmissibleConeSlice(toBeSliced, normalCandidate[0], directionIndex)){
+    this->addCone(this->nonRefinedCones, toBeSliced);
     return;
   }
   if (!this->splitChamber(toBeSliced, normalCandidate[0])) {
-    this->addRefinedCone(toBeSliced);
+    this->addCone(this->nonRefinedCones, toBeSliced);
+    return;
   }
-}
-
-void ConeCollection::markNonRefinedOneDirectionSpannedSlices(
-  int directionIndex
-) {
-  STACK_TRACE("ConeCollection::markNonRefinedOneDirectionSpannedSlices");
-  const Vector<Rational>& direction = this->slicingDirections[directionIndex];
-  for (int i = this->refinedCones.size() - 1; i >= 0; i --) {
-    Cone& cone = this->refinedCones.values[i];
-    if (cone.isInCone(direction)) {
-      this->nonRefinedCones.setKeyValue(cone.id, cone);
-      this->refinedCones.removeIndex(i);
-      cone.payload.directions.initialize(directionIndex + 1);
-    } else {
-      cone.payload.directions.initialize(0);
-    }
-  }
+  this->addHistoryPoint();
 }
 
 void ConeCollection::refineByOneDirectionArbitrarySlices(
@@ -15173,25 +15209,16 @@ void ConeCollection::refineByOneDirectionArbitrarySlices(
 ) {
   STACK_TRACE("ConeCollection::refineByOneDirectionArbitrarySlices");
   List<Cone> subdivided;
-  int refinementAttempts = 0;
   while (this->nonRefinedCones.size() > 0) {
     for (int i = this->nonRefinedCones.size() - 1; i >= 0; i --) {
       Cone toBeRefined = this->nonRefinedCones.values[i];
       this->nonRefinedCones.removeIndex(i);
-      if (!this->refineOneByOneDirection(toBeRefined, direction)) {
+      if (!this->refineOneByOneDirectionArbitrarySlices(toBeRefined, direction)) {
         continue;
       }
       this->checkConsistencyFull();
       this->refineAllConesWithWallsWithMultipleNeighbors();
       this->checkConsistencyFull();
-      refinementAttempts ++;
-      if (refinementAttempts > 2000) {
-        global.fatal
-        << "DEBUG: Too many refine attempts. "
-        << this->toHTMLGraphicsOnly(false)
-        << this->toHTMLHistory()
-        << global.fatal;
-      }
     }
   }
 }
@@ -16096,7 +16123,7 @@ bool ConeCollection::findMaxLFOverConeProjective(
   );
 }
 
-void ConeCollection::addCone(MapList<int, Cone>& map, const Cone& cone) {
+void ConeCollection::     addCone(MapList<int, Cone>& map, const Cone& cone) {
   if (cone.id == - 1) {
     global.fatal
     << "Adding a non-initialized cone not allowed.\nCone:\n"

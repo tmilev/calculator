@@ -35,8 +35,40 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     innerStandard
   );
   this->addOperationHandler(
+    "ConeDecompositionWithHistory",
+    CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlicesWithHistory,
+    "",
+    "Same as ConeDecomposition but shows the history "
+  "of which slices were made to get the decomposition.",
+    "ConeDecomposition(\n"
+    "(1,0,0),\n"
+    "(0,1,0),\n"
+    "(0,0,1),\n"
+    "(1,1,0),\n"
+    "(0,1,1),\n"
+    "(1,1,1)\n"
+    ");\n"
+    /*    "ConeDecomposition(\n"
+    "(1,0,0,0),"
+    "(0,1,0,0),"
+    "(0,0,1,0),"
+    "(0,0,0,1),"
+    "(1,1,0,0),"
+    "(0,1,1,0),"
+    "(0,0,1,1),"
+    "(1,1,1,0),"
+    "(0,1,1,1),"
+    "(1,1,1,1)"
+    ");\n"*/
+    ,
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "coneDecompositionSpannedSlicesNoHistory",
     "ConeDecomposition",
-    CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlices,
+    innerStandard
+  );
+  this->addOperationHandler(
+    "ConeDecomposition",
+    CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlicesNoHistory,
     "",
     "Work in progress. \n"
     "Cone decomposition related to a vector partition function. "
@@ -63,7 +95,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     ");\n"*/
     ,
     "CalculatorFunctionsVectorPartitionFunction::"
-    "coneDecompositionSpannedSlices",
+    "coneDecompositionSpannedSlicesNoHistory",
     "ConeDecomposition",
     innerStandard
   );

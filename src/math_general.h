@@ -6396,7 +6396,7 @@ public:
   // Returns false if the plane with the given normal
   // passes through directions that span the entire plane.
   bool isSpannedByDirections(const Vector<Rational>& planeNormal);
-  void makeAllConesNonRefined();
+  void markAllConesNonRefined(int directionIndex);
   void refineByDirectionsAndSort();
   void refineByDirections();
   void refineByOneDirection(int directionIndex);
@@ -6405,11 +6405,11 @@ public:
   void refineOneByOneDirectionSpannedSlices(
     Cone& toBeSliced, int directionIndex
   );
-  void markNonRefinedOneDirectionSpannedSlices(int directionIndex);
   // Implementation of refineOneByOneDirection with arbitrary slices.
   void refineByOneDirectionArbitrarySlices(
     const Vector<Rational>& direction
   );
+  bool isAddmissibleConeSlice(Cone& toBeSliced, const Vector<Rational>& sliceNormal, int directionIndex);
   // Returns false if the cone is refined relative to the splitting normals,
   // otherwise slices the cone.
   bool refineOneByNormals(Cone& toBeRefined, List<Cone>& output);
@@ -6419,7 +6419,7 @@ public:
   // has that property. Returns false if the chamber
   // cannot be split to have exit walls due to the
   // exit wall neighbors not being visited.
-  bool refineOneByOneDirection(
+  bool refineOneByOneDirectionArbitrarySlices(
     Cone& toBeRefined, const Vector<Rational>& direction
   );
   void refineAllConesWithWallsWithMultipleNeighbors();

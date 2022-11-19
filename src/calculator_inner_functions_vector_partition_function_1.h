@@ -17,7 +17,7 @@ public:
     const Expression& input,
     Expression& output,
     bool flagUseSpannedSlices,
-  bool flagIncludeHistory
+    bool flagIncludeHistory
   );
   static bool coneDecompositionSpannedSlicesNoHistory(
     Calculator& calculator, const Expression& input, Expression& output

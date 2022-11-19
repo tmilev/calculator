@@ -105,7 +105,7 @@ public:
   cardinalitySelection(0) {
     *this = other;
   }
-  bool checkInitialization()const;
+  bool checkInitialization() const;
   class Test {
   public:
     static bool all();

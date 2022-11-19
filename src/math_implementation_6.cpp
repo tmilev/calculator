@@ -90,7 +90,9 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   }
   for (int i = 0; i < divisorsH.size; i ++) {
     for (int j = 0; j < divisorsS.size; j ++) {
-      vector[0].assignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
+      vector[0].assignNumeratorAndDenominator(
+        divisorsS[j], divisorsH[i]
+      );
       value = myCopy.evaluate(vector);
       if (value == 0) {
         Polynomial<Rational> divisor, remainder;

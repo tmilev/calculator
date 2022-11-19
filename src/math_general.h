@@ -6402,14 +6402,20 @@ public:
   void refineByOneDirection(int directionIndex);
   // Implementation of refineOneByOneDirection when only using spanned slices.
   void refineByOneDirectionSpannedSlices(int directionIndex);
-  void refineOneByOneDirectionSpannedSlices(
-    Cone& toBeSliced, int directionIndex
+  bool refineOneByOneDirectionSpannedSlices(
+    Cone& toBeSliced, List<Wall>& exitWalls, int directionIndex
   );
-  // Implementation of refineOneByOneDirection with arbitrary slices.
-  void refineByOneDirectionArbitrarySlices(
-    const Vector<Rational>& direction
+  bool computeSplittingNormal(
+    Cone& toBeSliced,
+    List<Wall>& exitWalls,
+    int directionIndex,
+    Vector<Rational>& normal
   );
-  bool isAddmissibleConeSlice(Cone& toBeSliced, const Vector<Rational>& sliceNormal, int directionIndex);
+  bool isAddmissibleConeSplit(
+    const Vector<Rational>& sliceNormal,
+    const Vector<Rational>& wall1,
+    const Vector<Rational>& wall2
+  );
   // Returns false if the cone is refined relative to the splitting normals,
   // otherwise slices the cone.
   bool refineOneByNormals(Cone& toBeRefined, List<Cone>& output);
@@ -6419,8 +6425,11 @@ public:
   // has that property. Returns false if the chamber
   // cannot be split to have exit walls due to the
   // exit wall neighbors not being visited.
+  bool refineOneByOneDirection(Cone& toBeRefined, int directionIndex);
   bool refineOneByOneDirectionArbitrarySlices(
-    Cone& toBeRefined, const Vector<Rational>& direction
+    Cone& toBeRefined,
+    List<Wall>& exitWalls,
+    const Vector<Rational>& direction
   );
   void refineAllConesWithWallsWithMultipleNeighbors();
   bool allExitWallsAreVisited(
@@ -6534,7 +6543,7 @@ public:
   // If that is the case, slices the chamber
   // and writes the result in the output variable.
   bool splitChamber(
-    const Cone& toBeSliced, const Vector<Rational>& killerNormal
+    const Cone& toBeSliced, const Vector<Rational>& normal
   );
   void removeIdFromNeighbors(const Cone& cone);
   void splitConeByMultipleNeighbors(Cone& input);

@@ -416,6 +416,9 @@ public:
   static void computeSha3_256(
     const std::string& input, List<unsigned char>& output
   );
+  static void computeSha3_256(
+    const List<unsigned char>& input, List<unsigned char>& output
+  );
   static void convertListUint32ToLargeIntegerUnsignedLittleEndian(
     List<uint32_t>& input, LargeIntegerUnsigned& output
   );

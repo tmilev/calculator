@@ -11681,6 +11681,16 @@ Cone::Payload::Payload() {
   this->visited = false;
 }
 
+void Cone::Payload::incrementHashOfContainingSimplices(char input) {
+  this->hashOfContainingSimplices.addOnTop(input);
+  if (this->hashOfContainingSimplices.size > 31) {
+    Crypto::computeSha3_256(
+      this->hashOfContainingSimplices, this->hashOfContainingSimplices
+    );
+    this->hashOfContainingSimplices.setSize(16);
+  }
+}
+
 Cone::Cone() {
   this->flagIsTheZeroCone = true;
   this->id = - 1;
@@ -14583,6 +14593,32 @@ void ConeCollection::getNewVerticesAppend(
   }
 }
 
+bool ConeCollection::splitVerticesByNormal(
+  const Cone& toBeSliced,
+  const Vector<Rational>& normal,
+  Vectors<Rational>& outputPlusVertices,
+  Vectors<Rational>& outputMinusVertices,
+  HashedList<Vector<Rational> >& outputZeroVertices
+) {
+  Rational scalarProduct;
+  for (int i = 0; i < toBeSliced.vertices.size; i ++) {
+    normal.scalarEuclidean(toBeSliced.vertices[i], scalarProduct);
+    if (scalarProduct.isPositive()) {
+      outputPlusVertices.addOnTop(toBeSliced.vertices[i]);
+    }
+    if (scalarProduct.isEqualToZero()) {
+      outputZeroVertices.addOnTopNoRepetition(toBeSliced.vertices[i]);
+    }
+    if (scalarProduct.isNegative()) {
+      outputMinusVertices.addOnTop(toBeSliced.vertices[i]);
+    }
+  }
+  if (outputPlusVertices.size == 0 || outputMinusVertices.size == 0) {
+    return false;
+  }
+  return true;
+}
+
 bool ConeCollection::splitChamber(
   const Cone& toBeSliced, const Vector<Rational>& normal
 ) {
@@ -14594,25 +14630,18 @@ bool ConeCollection::splitChamber(
   bool needToRecomputeVertices = (
     toBeSliced.getAllNormals().getRankElementSpan() < this->getDimension()
   );
-  newPlusCone.payload.directions = toBeSliced.payload.directions;
-  newMinusCone.payload.directions = toBeSliced.payload.directions;
   newPlusCone.flagIsTheZeroCone = false;
   newMinusCone.flagIsTheZeroCone = false;
   HashedList<Vector<Rational> > zeroVertices;
-  Rational scalarProduct;
-  for (int i = 0; i < toBeSliced.vertices.size; i ++) {
-    normal.scalarEuclidean(toBeSliced.vertices[i], scalarProduct);
-    if (scalarProduct.isPositive()) {
-      newPlusCone.vertices.addOnTop(toBeSliced.vertices[i]);
-    }
-    if (scalarProduct.isEqualToZero()) {
-      zeroVertices.addOnTopNoRepetition(toBeSliced.vertices[i]);
-    }
-    if (scalarProduct.isNegative()) {
-      newMinusCone.vertices.addOnTop(toBeSliced.vertices[i]);
-    }
-  }
-  if (newPlusCone.vertices.size == 0 || newMinusCone.vertices.size == 0) {
+  if (
+    !this->splitVerticesByNormal(
+      toBeSliced,
+      normal,
+      newPlusCone.vertices,
+      newMinusCone.vertices,
+      zeroVertices
+    )
+  ) {
     return false;
   }
   this->getNewVerticesAppend(toBeSliced, normal, zeroVertices);
@@ -14812,7 +14841,7 @@ void ConeCollection::splitConeByMultipleNeighbors(Cone& input, Wall& wall) {
   // We have two chambers that have
   // a common wall plane, but
   // are not honest neighbors along that plane, as
-  // region they touch along is of not of the maximum possible dimensino n-1
+  // region they touch along is of not of the maximum possible dimension n-1
   // (empty intersection is possible too).
   wall.neighbors = wallWithReducedNeighborCount.neighbors;
   neighbor.removeNeighbor(input.id);
@@ -15120,6 +15149,147 @@ void ConeCollection::refineByDirections() {
     this->markAllConesNonRefined(i);
     this->refineByOneDirection(i);
   }
+  if (this->flagUseSpannedSlices) {
+    // We want only spanned slices,
+    // By our strategy for splitting cones,
+    // each pair of neighbors are
+    // separated by a plane that is
+    // spanned by n-1=this->getDimension()-1
+    // of the original vectors.
+    // However, the wall (the subset of the plane that
+    // actually separates the neighbors)
+    // may not be a subset of a wall of
+    // of a cone formed by taking all non-negative linear
+    // combinations of this->getDimension()
+    // of the original vectors. Example:
+    // ConeDecomposition((1,0,0),(0,1,0),(0,0,1),(1,1,1));
+    // will generate 4 combinatorial chambers, rather than 3.
+    // 2 of the 4 chambers will be separated by a plane that
+    // is cutting off one side of the 4 original cones.
+    // Howerver, the section of the plane that separates the
+    // two neighbors lies outside of both of the 4 original cones that
+    // are cut off by that plane.
+    this->mergeChambers();
+  }
+}
+
+void ConeCollection::mergeChambers() {
+  STACK_TRACE("ConeCollection::mergeChambers");
+  Selection selection;
+  selection.initialize(this->slicingDirections.size);
+  int dimension = this->getDimension();
+  MapList<List<unsigned char>, HashedList<int> > container1;
+  MapList<List<unsigned char>, HashedList<int> > container2;
+  MapList<List<unsigned char>, HashedList<int> >* currentConeFamilies =
+  &container1;
+  MapList<List<unsigned char>, HashedList<int> >* nextConeFamilies =
+  &container2;
+  currentConeFamilies->setKeyValue(
+    List<unsigned char>(), HashedList<int>()
+  );
+  for (Cone& cone : this->refinedCones.values) {
+    cone.payload.hashOfContainingSimplices.clear();
+    currentConeFamilies->getValueCreateNoInitialization(
+      cone.payload.hashOfContainingSimplices
+    ).addOnTop(cone.id);
+  }
+  while (
+    selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
+      dimension
+    )
+  ) {
+    Cone cone;
+    this->slicingDirections.subSelection(selection, cone.vertices);
+    if (!cone.createFromVertices(cone.vertices)) {
+      continue;
+    }
+    this->accountOneDirectionSimplex(
+      cone, *currentConeFamilies, *nextConeFamilies
+    );
+    MathRoutines::swap(currentConeFamilies, nextConeFamilies);
+    nextConeFamilies->clear();
+    if (currentConeFamilies->size() == 0) {
+      break;
+    }
+  }
+  for (HashedList<int>& family : currentConeFamilies->values) {
+    this->mergeOneChamberFamily(family);
+  }
+}
+
+void ConeCollection::mergeOneChamberFamily(HashedList<int>& family) {
+  MapList<Vector<Rational>, Wall> newWalls;
+  HashedList<Vector<Rational> > mergedWalls;
+  for (int id : family) {
+    Cone& cone = *this->getConeByIdNonConst(id);
+    for (Wall& oldWall : cone.walls) {
+      Vector<Rational> normal = oldWall.normal;
+      Vector<Rational> minusNormal = - normal;
+      if (
+        newWalls.contains(minusNormal) || mergedWalls.contains(normal)
+      ) {
+        mergedWalls.addOnTopNoRepetition(normal);
+        mergedWalls.addOnTop(minusNormal);
+        newWalls.removeKey(normal);
+        newWalls.removeKey(minusNormal);
+      } else {
+        if (!newWalls.contains(normal)) {
+          newWalls.setKeyValue(normal, oldWall);
+        } else {
+          newWalls.getValueCreateNoInitialization(normal).neighbors.
+          addListOnTop(oldWall.neighbors);
+        }
+      }
+    }
+  }
+  this->conesCreated ++;
+  Cone result(this->conesCreated);
+  if (!result.createFromWalls(newWalls.values, true)) {
+    global.fatal << "Unexpected failure to create cone. " << global.fatal;
+  }
+  if (result.walls.size != newWalls.size()) {
+    // Most articles I've read imply that the combinatorial chambers must be
+    // complex.
+    // However, I don't recall reading a proof of that.
+    // Is this actually possible?
+    global.comments << "<br>Found non-convex combinatorial chamber!";
+    return;
+  }
+  this->addRefinedCone(result);
+  for (int id : family) {
+    Cone& cone = *this->getConeByIdNonConst(id);
+    this->attachNeighbbors(cone, List<Cone*>({&result}));
+    this->refinedCones.removeKey(id);
+  }
+  this->addHistoryPoint();
+}
+
+void ConeCollection::accountOneDirectionSimplex(
+  Cone& directionSimplex,
+  MapList<List<unsigned char>, HashedList<int> >& currentConeFamilies,
+  MapList<List<unsigned char>, HashedList<int> >& nextConeFamilies
+) {
+  for (HashedList<int>& ids : currentConeFamilies.values) {
+    for (int id : ids) {
+      Cone& cone = this->refinedCones.getValueNoFailNonConst(id);
+      if (directionSimplex.isInCone(cone.internalPointCached())) {
+        cone.payload.incrementHashOfContainingSimplices(1);
+      } else {
+        cone.payload.incrementHashOfContainingSimplices(0);
+      }
+      HashedList<int>& newFamily =
+      nextConeFamilies.getValueCreate(
+        cone.payload.hashOfContainingSimplices, HashedList<int>()
+      );
+      newFamily.addOnTop(id);
+    }
+  }
+  for (int i = nextConeFamilies.size() - 1; i >= 0; i --) {
+    HashedList<int>& value = nextConeFamilies.values[i];
+    if (value.size == 1) {
+      nextConeFamilies.removeIndex(i);
+    }
+  }
 }
 
 void ConeCollection::markAllConesNonRefined(int directionIndex) {
@@ -15130,7 +15300,6 @@ void ConeCollection::markAllConesNonRefined(int directionIndex) {
   }
   for (Cone& cone : this->nonRefinedCones.values) {
     cone.payload.visited = false;
-    cone.payload.directions.initialize(directionIndex);
     cone.payload.lowestSlicingIndex = directionIndex - 1;
   }
 }
@@ -15140,6 +15309,9 @@ bool ConeCollection::isAddmissibleConeSplit(
   const Vector<Rational>& wall1,
   const Vector<Rational>& wall2
 ) {
+  if (sliceNormal.size == 2) {
+    return true;
+  }
   Vectors<Rational> vertices;
   bool hasVertexInWedge = false;
   bool hasVertexInOppositeWedge = false;
@@ -15555,6 +15727,13 @@ Vector<Rational> Cone::internalPointNormal() const {
   }
   output /= this->vertices.size;
   return output;
+}
+
+Vector<Rational>& Cone::internalPointCached() {
+  if (this->payload.internalPoint.size == 0) {
+    this->internalPoint(this->payload.internalPoint);
+  }
+  return this->payload.internalPoint;
 }
 
 Vector<Rational> Cone::internalPoint() const {

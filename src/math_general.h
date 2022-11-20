@@ -6186,8 +6186,10 @@ public:
   public:
     int lowestSlicingIndex;
     bool visited;
-    Selection directions;
+    Vector<Rational> internalPoint;
+    List<unsigned char> hashOfContainingSimplices;
     Payload();
+    void incrementHashOfContainingSimplices(char input);
   };
 
   bool flagIsTheZeroCone;
@@ -6275,6 +6277,7 @@ public:
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
   bool internalPoint(Vector<Rational>& output) const;
+  Vector<Rational>& internalPointCached();
   Vector<Rational> internalPoint() const;
   Vector<Rational> internalPointNormal() const;
   unsigned int hashFunction() const;
@@ -6404,6 +6407,13 @@ public:
   void refineByOneDirectionSpannedSlices(int directionIndex);
   bool refineOneByOneDirectionSpannedSlices(
     Cone& toBeSliced, List<Wall>& exitWalls, int directionIndex
+  );
+  void mergeChambers();
+  void mergeOneChamberFamily(HashedList<int>& family);
+  void accountOneDirectionSimplex(
+    Cone& directionSimplex,
+    MapList<List<unsigned char>, HashedList<int> >& currentConeFamilies,
+    MapList<List<unsigned char>, HashedList<int> >& nextConeFamilies
   );
   bool computeSplittingNormal(
     Cone& toBeSliced,
@@ -6544,6 +6554,13 @@ public:
   // and writes the result in the output variable.
   bool splitChamber(
     const Cone& toBeSliced, const Vector<Rational>& normal
+  );
+  bool splitVerticesByNormal(
+    const Cone& toBeSliced,
+    const Vector<Rational>& normal,
+    Vectors<Rational>& outputPlusCone,
+    Vectors<Rational>& outputMinusCone,
+    HashedList<Vector<Rational> >& outputZeroVertices
   );
   void removeIdFromNeighbors(const Cone& cone);
   void splitConeByMultipleNeighbors(Cone& input);

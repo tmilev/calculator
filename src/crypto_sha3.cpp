@@ -31,7 +31,7 @@ public:
   std::string getResultString();
   void initialize();
   void update(const std::string& input);
-  void update(List<unsigned char>& input);
+  void update(const List<unsigned char>& input);
   void finalize();
   Sha3();
   void transform();
@@ -261,7 +261,7 @@ std::string Sha3::toStringState() {
   return out.str();
 }
 
-void Sha3::update(List<unsigned char>& input) {
+void Sha3::update(const List<unsigned char>& input) {
   for (int i = 0; i < input.size; i ++) {
     int bitsToPad = this->byteIndex * 8;
     this->saved += (static_cast<uint64_t>(input[i]) << bitsToPad);
@@ -381,6 +381,14 @@ void Crypto::computeKeccak3_256(
 
 void Crypto::computeSha3_256(
   const std::string& input, List<unsigned char>& output
+) {
+  List<unsigned char> inputChar;
+  inputChar = input;
+  return Crypto::computeSha3_256(inputChar, output);
+}
+
+void Crypto::computeSha3_256(
+  const List<unsigned char>& input, List<unsigned char>& output
 ) {
   Sha3 hasher;
   hasher.flagUseKeccak = false;

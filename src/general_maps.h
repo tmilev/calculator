@@ -48,6 +48,9 @@ public:
     this->values.removeIndexSwapWithLast(index);
   }
   const Value& getValueNoFail(const Key& input) const {
+    return this->getValueNoFailNonConst(input);
+  }
+  Value& getValueNoFailNonConst(const Key& input) const {
     int index = this->keys.getIndex(input);
     if (index == - 1) {
       fatalCrash(

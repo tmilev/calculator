@@ -1406,7 +1406,7 @@ void WebWorker::writeAfterTimeoutCarbonCopy(
   FileOperations::cleanUpForFileNameUse(fileNameCarbonCopy) + ".json";
   std::stringstream commentsOnError;
   bool success =
-  FileOperations::writeFileVirual(
+  FileOperations::writeFileVirtual(
     extraFilename, input.toString(nullptr), &commentsOnError
   );
   if (!success) {

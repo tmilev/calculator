@@ -448,7 +448,7 @@ void SemisimpleLieAlgebra::writeHTML(
   outFile << "</div>";
   outFile << "</body>";
   outFile << "</html>";
-  FileOperations::writeFileVirual(
+  FileOperations::writeFileVirtual(
     this->fileNames.virtualFileNameWithPathStructureConstants(),
     outFile.str(),
     &outFile

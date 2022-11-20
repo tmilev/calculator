@@ -830,7 +830,7 @@ bool Calculator::Test::writeTestStrings(
     result.listObjects[i] = nextEntry;
   }
   return
-  FileOperations::writeFileVirual(
+  FileOperations::writeFileVirtual(
     WebAPI::calculator::testFileNameVirtual,
     result.toString(&JSData::PrintOptions::newLine()),
     commentsOnFailure

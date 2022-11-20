@@ -592,7 +592,7 @@ void SemisimpleSubalgebras::writeReportToFiles() {
   this->currentFormat.flagUseLatex = true;
   std::stringstream out;
   if (
-    !FileOperations::writeFileVirual(
+    !FileOperations::writeFileVirtual(
       this->virtualNameMainFile1, this->toStringHTML(), &out
     )
   ) {
@@ -1020,7 +1020,7 @@ void SemisimpleSubalgebras::writeSubalgebraToFile(
     << currentSubalgebra.toStringNilradicals(format)
     << "\n</body></html>";
     if (
-      !FileOperations::writeFileVirual(
+      !FileOperations::writeFileVirtual(
         fileName,
         outputFileFiniteTypeNilradicals.str(),
         &commentsOnError
@@ -1037,7 +1037,7 @@ void SemisimpleSubalgebras::writeSubalgebraToFile(
   }
   out << "\n</body></html>\n ";
   if (
-    !FileOperations::writeFileVirual(
+    !FileOperations::writeFileVirtual(
       fileName, out.str(), &commentsOnError
     )
   ) {
@@ -1246,10 +1246,10 @@ std::string SemisimpleSubalgebras::toStringPart3(
   << "<body>"
   << this->toStringProgressReport(format)
   << "</body></html>";
-  FileOperations::writeFileVirual(
+  FileOperations::writeFileVirtual(
     sl2SubalgebraReports, fileSl2Content.str(), nullptr
   );
-  FileOperations::writeFileVirual(
+  FileOperations::writeFileVirtual(
     loadSubalgebrasFile, fileLoadContent.str(), nullptr
   );
   return out.str();
@@ -1810,7 +1810,7 @@ bool SemisimpleSubalgebras::writeFilesRealForms(
   this->owner->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
   this->slTwoSubalgebras.writeHTML(nullptr);
   return
-  FileOperations::writeFileVirual(fileName, content.str(), outputStream);
+  FileOperations::writeFileVirtual(fileName, content.str(), outputStream);
 }
 
 bool SemisimpleSubalgebras::checkIsEmpty() const {
@@ -8345,7 +8345,7 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   out << "</html>";
   std::stringstream commentsOnError;
   if (
-    !FileOperations::writeFileVirual(
+    !FileOperations::writeFileVirtual(
       virtualFileName, out.str(), &commentsOnError
     )
   ) {

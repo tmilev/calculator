@@ -51,9 +51,13 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  static bool writeFileVirual(
+  static bool writeFileVirtual(
     const std::string& fileNameVirtual,
     const std::string& fileContent,
+    std::stringstream* commentsOnError
+  );
+  static bool deleteFileVirtual(
+    const std::string& fileNameVirtual,
     std::stringstream* commentsOnError
   );
   static bool writeFileVirualWithPermissions(

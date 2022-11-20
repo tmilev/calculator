@@ -3,6 +3,7 @@
 #define header_math_rational_function_implementation_ALREADY_INCLUDED
 
 #include "math_rational_function.h"
+#include "progress_report.h"
 
 template <class Coefficient>
 bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {

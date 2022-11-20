@@ -176,7 +176,7 @@ bool Calculator::Examples::writeExamplesReadme() {
     examples
   );
   return
-  FileOperations::writeFileVirual(
+  FileOperations::writeFileVirtual(
     "examples/README.md", readmeTemplate, nullptr
   );
 }

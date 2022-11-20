@@ -427,7 +427,7 @@ class GraphicsNDimensions {
   makeStandardBilinearForm() {
     this.bilinearForm = new Array(this.dimension);
     for (let i = 0; i < this.bilinearForm.length; i++) {
-      this.bilinearForm[i] = newArray(this.dimension);
+      this.bilinearForm[i] = new Array(this.dimension);
       this.bilinearForm[i].fill(0, 0, this.dimension);
       this.bilinearForm[i][i] = 1;
     }

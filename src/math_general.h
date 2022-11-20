@@ -17,6 +17,7 @@ class WeylGroupData;
 class AlgebraicClosureRationals;
 template <class Coefficient>
 class MatrixTensor;
+class ProgressReport;
 
 // We are wrapping the math.h c++ functions for portability reasons
 // (if for some reason we want to change from math.h to a better floating point
@@ -6403,7 +6404,6 @@ public:
   };
 
   Statistics statistics;
-  ProgressReport report;
   static const int maximumCones = 1000;
   void addHistoryPoint();
   // Returns false if the plane with the given normal
@@ -6411,8 +6411,9 @@ public:
   bool isSpannedByDirections(const Vector<Rational>& planeNormal);
   void markAllConesNonRefined(int directionIndex);
   void refineByDirectionsAndSort();
-  void refineByDirections();
-  void refineByOneDirection(int directionIndex);
+  void refineByDirections(ProgressReport* report);
+  void refineByOneDirection(int directionIndex, ProgressReport* report);
+  void reportStats(ProgressReport* report);
   std::string toStringRefineStats();
   // Implementation of refineOneByOneDirection when only using spanned slices.
   void refineByOneDirectionSpannedSlices(int directionIndex);
@@ -6452,7 +6453,7 @@ public:
     List<Wall>& exitWalls,
     const Vector<Rational>& direction
   );
-  void refineAllConesWithWallsWithMultipleNeighbors();
+  void refineAllConesWithWallsWithMultipleNeighbors(ProgressReport* report);
   bool allExitWallsAreVisited(
     Cone& toBeRefined,
     const Vector<Rational>& direction,

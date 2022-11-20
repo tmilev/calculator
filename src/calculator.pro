@@ -49,6 +49,7 @@ HEADERS += \
     general_test.h \
     general_time_date.h \
     math_extra_polynomial_factorization.h \
+    progress_report.h \
     signals_infrastructure.h \
     web_api.h \
     json.h \

@@ -90,6 +90,16 @@ public:
   }
   void removeIndexSwapWithLast(int index) {
     // This is not thread-safe
+    if (index >= this->size) {
+      std::stringstream errorStream;
+      errorStream
+      << "Attempt to remove index "
+      << index
+      << " in reference list with "
+      << this->size
+      << " elements.";
+      fatalCrash(errorStream.str());
+    }
     this->killElementIndex(index);
     this->references[index] = this->references[this->size - 1];
     this->references[this->size - 1] = 0;
@@ -235,6 +245,11 @@ void ListReferences<Object>::killAllElements() {
 
 template <class Object>
 void ListReferences<Object>::addOnTop(const Object& o) {
+  if (this->size < 0) {
+    std::stringstream out;
+    out << "Negative list size not allowed: " << this->size;
+    fatalCrash(out.str());
+  }
   this->setSize(this->size + 1);
   (*this)[this->size - 1] = o;
 }

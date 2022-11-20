@@ -240,7 +240,7 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
     << "<body><div style='overflow:auto;height:100%'>"
     << test.reportHtml
     << "</div></body></html>";
-    FileOperations::writeFileVirual(
+    FileOperations::writeFileVirtual(
       "output/crash_test.html", crashFile.str(), &crashFileWriteReport
     );
     global.fatal

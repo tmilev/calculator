@@ -302,6 +302,11 @@ public:
       << " elements, which does not make sense. "
       << global.fatal;
     }
+    if (inputDesiredSubsetSize > inputNumberOfItems) {
+      global.fatal
+      << "Subset size not allowed to exceed the number of elements. "
+      << global.fatal;
+    }
     this->selection.initialize(inputNumberOfItems);
     this->desiredSubsetSize = inputDesiredSubsetSize;
     if (this->desiredSubsetSize > 0) {

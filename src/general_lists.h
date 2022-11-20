@@ -1815,37 +1815,6 @@ public:
   }
 };
 
-class ProgressReport {
-private:
-  void initialize();
-public:
-  int currentLevel;
-  int threadIndex;
-  int ticks;
-  int ticksPerReport;
-  // Constant GlobalVariables::Response::ReportType
-  int reportType;
-  bool flagInitialized;
-  std::string name;
-  // Call tickAndWantReport before generating report.
-  // If a report is not wanted, it is wise to not generate one:
-  // the string operations required to generate some progress reports
-  // are expected to cost more than the mathematical computations
-  // they are reporting.
-  void report(const std::string& stringToReport);
-  bool tickAndWantReport();
-  ProgressReport(const std::string& inputName = "") {
-    this->name = inputName;
-    this->initialize();
-  }
-  ProgressReport(int inputTicksPerReport, int inputReportType) {
-    this->initialize();
-    this->ticksPerReport = inputTicksPerReport;
-    this->reportType = inputReportType;
-  }
-  ~ProgressReport();
-};
-
 // Do not use for cryptographic purposes.
 // Intended use:
 // generate random numbers for mathematical problems/education.

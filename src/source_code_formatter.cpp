@@ -4852,7 +4852,7 @@ bool CodeFormatter::writeFormattedCode(std::stringstream* comments) {
     filenameOut = this->outputOnFailFileName;
   }
   if (
-    !FileOperations::writeFileVirual(
+    !FileOperations::writeFileVirtual(
       filenameOut, this->transformedContent, comments
     )
   ) {

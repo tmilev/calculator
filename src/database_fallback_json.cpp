@@ -11,7 +11,7 @@ bool Database::FallBack::deleteDatabase(
   this->databaseContent.reset(JSData::token::tokenObject);
   this->indexDatabase(commentsOnFailure);
   if (
-    !FileOperations::writeFileVirual(
+    !FileOperations::writeFileVirtual(
       Database::FallBack::databaseFilename, "{}", commentsOnFailure
     )
   ) {

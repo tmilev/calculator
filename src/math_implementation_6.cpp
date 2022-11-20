@@ -1062,8 +1062,8 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
   // global.comments << "And the factors are: " <<
   // this->factorsLifted.toStringCommaDelimited();
   int maximumSubsetsToTry = this->factorsLifted.size / 2;
-  LargeInteger twoPowerN = 2;
-  twoPowerN.raiseToPower(maximumSubsetsToTry);
+  LargeInteger twoToThePowerOfN = 2;
+  twoToThePowerOfN.raiseToPower(maximumSubsetsToTry);
   for (int i = 1; i <= maximumSubsetsToTry; i ++) {
     selection.setNumberOfItemsAndDesiredSubsetSize(
       i, this->factorsLifted.size
@@ -1076,7 +1076,7 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
           << "The maximum allowed Hensel lift combinations is: "
           << this->maximumFactorsLiftedTries
           << ". Total possibilities: "
-          << twoPowerN;
+          << twoToThePowerOfN;
         }
         return false;
       }

@@ -3037,7 +3037,7 @@ public:
     int lastIndexNotTested;
     int inconsistencies;
     int unknown;
-    // see Function::Options::
+    // see Function::Options
     int noTestSkips;
     Calculator* owner;
     std::string reportHtml;

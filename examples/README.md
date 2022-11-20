@@ -2210,7 +2210,7 @@ If x is a constant, replaces x{}({{anything}})=x;
 If x is a constant, replaces x{}({{anything}})=x; 
 
 *VPF* (_composite_) [ApplyVectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::applyVectorPartitionFunctionFormula}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22vectors%20%3d%20%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3b%5cnf%3dVectorPartitionFunction%7b%7d%20%28vectors%29%3b%5cntarget%20%3d%20%284%2c5%29%3b%5cnAllVectorPartitions%20%28target%2c%20vectors%29%3b%5cnf%7b%7dtarget%3b%5cng%3dVectorPartitionFunction%28Sequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%29%3b%5cng%7b%7d%2810%29%3b%5cnAllg%7b%7d%281%2c2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22vectors%20%3d%20%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3b%5cnf%3dVectorPartitionFunction%7b%7d%20%28vectors%29%3b%5cntarget%20%3d%20%284%2c5%29%3b%5cnAllVectorPartitions%20%28target%2c%20vectors%29%3b%5cnf%7b%7dtarget%3b%5cng%3dVectorPartitionFunction%28Sequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%29%3b%5cng%7b%7d%2810%29%3b%5cnAllVectorPartitions%28Sequence%7b%7d10%2c%20%28Sequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 vectors = (
 (1,0),(0,1),(1,1),(1,2),(1,3),(2,3) );
@@ -2220,7 +2220,7 @@ AllVectorPartitions (target, vectors);
 f{}target;
 g=VectorPartitionFunction(Sequence{}1,Sequence{}2,Sequence{}3);
 g{}(10);
-Allg{}(1,2)
+AllVectorPartitions(Sequence{}10, (Sequence{}1,Sequence{}2,Sequence{}3))
 ```
 <b>WORK IN PROGRESS</b>. The value of f{}(4,5) computed below is not accurate. Will hopefully be fixed in the coming weeks. Applies the vector partition function formula. 
 
@@ -4671,7 +4671,22 @@ Sequence{}1,Sequence{}2,Sequence{}3,Sequence{}4)
 ```
 Work in progress. Vector partition function formula. 
 
-*ConeDecomposition* [ConeDecomposition] {CalculatorFunctionsVectorPartitionFunction::coneDecomposition}. 
+*ConeDecompositionWithHistory* [ConeDecompositionWithHistory] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlicesWithHistory}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecompositionWithHistory%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+ConeDecompositionWithHistory(
+(1,0,0),
+(0,1,0),
+(0,0,1),
+(1,1,0),
+(0,1,1),
+(1,1,1)
+);
+
+```
+Same as ConeDecomposition but shows the history of which slices were made to get the decomposition.
+
+*ConeDecomposition* [ConeDecomposition] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlicesNoHistory}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecomposition%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConeDecomposition(
@@ -4685,7 +4700,23 @@ ConeDecomposition(
 
 ```
 Work in progress. 
-Cone decomposition related to a vector partition function. 
+Cone decomposition related to a vector partition function. Uses only slicing plances spanned by n-1 vectors. 
+
+*ConeDecompositionArbitrarySlices* [ConeDecompositionArbitrarySlices] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionArbitrarySlices}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecompositionArbitrarySlices%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+ConeDecompositionArbitrarySlices(
+(1,0,0),
+(0,1,0),
+(0,0,1),
+(1,1,0),
+(0,1,1),
+(1,1,1)
+);
+
+```
+Work in progress. 
+Cone decomposition related to a vector partition function. Unlike ConeDecomposition, this decomposition uses arbitrary combinatorial chamber walls.
 
 *SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::semisimpleLieAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)

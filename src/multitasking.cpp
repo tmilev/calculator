@@ -3,6 +3,7 @@
 #include "system_functions_global_objects.h"
 #include <assert.h>
 #include <mutex>
+#include "progress_report.h"
 
 void GlobalStatistics::checkPointerCounters() {
   if (
@@ -150,6 +151,7 @@ ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
   newThreadData.index = threadData.size;
   threadData.addOnTop(newThreadData);
   global.allThreads.setSize(threadData.size);
+  MutexlockGuard guard(ProgressReport::reportMutex);
   global.customStackTrace.reserve(2);
   global.progressReportStrings.reserve(2);
   global.customStackTrace.setSize(threadData.size);

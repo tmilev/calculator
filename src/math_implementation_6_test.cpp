@@ -3,6 +3,7 @@
 #include "calculator.h"
 
 bool PolynomialFactorizationFiniteFields::Test::all() {
+  STACK_TRACE("PolynomialFactorizationFiniteFields::Test::all");
   PolynomialFactorizationFiniteFields::Test::test(
     "1176 x^14-7224x^13-10506x^12-7434x^11+1247x^10+6085x^9+6195x^8"
     "+2607x^7+11577x^6+32x^5+7265x^4-2841x^3-1794x^2-1320x-2880",
@@ -76,10 +77,12 @@ bool PolynomialFactorizationFiniteFields::Test::test(
 }
 
 bool PolynomialFactorizationFiniteFields::Test::TestCase::run() {
+  STACK_TRACE("PolynomialFactorizationFiniteFields::Test::TestCase::run");
   this->parser.initialize();
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
   std::stringstream comments;
+  global.userInputStringIfAvailable = this->toBeFactored;
   Polynomial<Rational> input = this->parser.fromString(this->toBeFactored);
   int64_t start = global.getElapsedMilliseconds();
   if (!factorization.factor(input, algorithm, &comments, &comments)) {

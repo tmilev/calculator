@@ -3065,7 +3065,6 @@ bool CalculatorParser::extractExpressions(
   Expression& outputExpression, std::string* outputErrors
 ) {
   STACK_TRACE("CalculatorParser::extractExpressions");
-  // std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->currentSyntacticStack).reserve((*this->currrentSyntacticSoup).size +
     this->numberOfEmptyTokensStart

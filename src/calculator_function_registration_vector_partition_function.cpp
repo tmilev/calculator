@@ -41,30 +41,17 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "",
     "Same as ConeDecomposition but shows the history "
     "of which slices were made to get the decomposition.",
-    "ConeDecomposition(\n"
+    "ConeDecompositionWithHistory(\n"
     "(1,0,0),\n"
     "(0,1,0),\n"
     "(0,0,1),\n"
     "(1,1,0),\n"
     "(0,1,1),\n"
     "(1,1,1)\n"
-    ");\n"
-    /*    "ConeDecomposition(\n"
-    "(1,0,0,0),"
-    "(0,1,0,0),"
-    "(0,0,1,0),"
-    "(0,0,0,1),"
-    "(1,1,0,0),"
-    "(0,1,1,0),"
-    "(0,0,1,1),"
-    "(1,1,1,0),"
-    "(0,1,1,1),"
-    "(1,1,1,1)"
-    ");\n"*/
-    ,
+    ");\n",
     "CalculatorFunctionsVectorPartitionFunction::"
-    "coneDecompositionSpannedSlicesNoHistory",
-    "ConeDecomposition",
+    "coneDecompositionSpannedSlicesWithHistory",
+    "ConeDecompositionWithHistory",
     innerStandard
   );
   this->addOperationHandler(
@@ -82,20 +69,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(1,1,0),\n"
     "(0,1,1),\n"
     "(1,1,1)\n"
-    ");\n"
-    /*    "ConeDecomposition(\n"
-    "(1,0,0,0),"
-    "(0,1,0,0),"
-    "(0,0,1,0),"
-    "(0,0,0,1),"
-    "(1,1,0,0),"
-    "(0,1,1,0),"
-    "(0,0,1,1),"
-    "(1,1,1,0),"
-    "(0,1,1,1),"
-    "(1,1,1,1)"
-    ");\n"*/
-    ,
+    ");\n",
     "CalculatorFunctionsVectorPartitionFunction::"
     "coneDecompositionSpannedSlicesNoHistory",
     "ConeDecomposition",
@@ -117,23 +91,10 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(1,1,0),\n"
     "(0,1,1),\n"
     "(1,1,1)\n"
-    ");\n"
-    /*    "ConeDecompositionArbitrarySlices(\n"
-    "(1,0,0,0),"
-    "(0,1,0,0),"
-    "(0,0,1,0),"
-    "(0,0,0,1),"
-    "(1,1,0,0),"
-    "(0,1,1,0),"
-    "(0,0,1,1),"
-    "(1,1,1,0),"
-    "(0,1,1,1),"
-    "(1,1,1,1)"
-    ");\n"*/
-    ,
+    ");\n",
     "CalculatorFunctionsVectorPartitionFunction::"
-    "coneDecompositionSpannedSlices",
-    "ConeDecomposition",
+    "coneDecompositionArbitrarySlices",
+    "ConeDecompositionArbitrarySlices",
     innerStandard
   );
   this->addOperationHandler(
@@ -159,8 +120,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "f{}target;\n"
     "g=VectorPartitionFunction(Sequence{}1,Sequence{}2,Sequence{}3);\n"
     "g{}(10);\n"
-    "All"
-    "g{}(1,2)",
+    "AllVectorPartitions(Sequence{}10, (Sequence{}1,Sequence{}2,Sequence{}3))",
     "CalculatorFunctionsVectorPartitionFunction"
     "::applyVectorPartitionFunctionFormula",
     "ApplyVectorPartitionFunction",

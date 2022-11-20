@@ -358,9 +358,9 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
       if (this->progressReportStrings[threadIndex][i] != "") {
         if (useHTML) {
           reportStream
-          << "\n<div id = \"divProgressReport"
+          << "\n<div id ='divProgressReport"
           << i
-          << "\">"
+          << "'>"
           << this->progressReportStrings[threadIndex][i]
           << "\n</div>\n<hr>";
         } else {

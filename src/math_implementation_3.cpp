@@ -20,6 +20,7 @@
 long long GlobalStatistics::cgiLimitRAMuseNumPointersInList = 2000000000;
 #endif
 
+MutexRecursiveWrapper ProgressReport::reportMutex;
 bool GlobalStatistics::flagUngracefulExitInitiated = false;
 long long GlobalStatistics::globalPointerCounter = 0;
 long long GlobalStatistics::pointerCounterPeakRamUse = 0;
@@ -233,6 +234,7 @@ void ProgressReport::report(const std::string& stringToReport) {
 }
 
 void ProgressReport::initialize() {
+  STACK_TRACE("ProgressReport::initialize");
   this->flagInitialized = false;
   if (!global.response.monitoringAllowed()) {
     return;
@@ -245,11 +247,28 @@ void ProgressReport::initialize() {
   if (this->threadIndex == - 1) {
     return;
   }
+  MutexlockGuard guard(this->reportMutex);
+  (void) guard;
   this->flagInitialized = true;
-  this->currentLevel = global.progressReportStrings[this->threadIndex].size;
-  global.progressReportStrings[this->threadIndex].addOnTop(
-    std::string("")
-  );
+  ListReferences<std::string>& currentThreadReports =
+  global.progressReportStrings[this->threadIndex];
+  this->currentLevel = currentThreadReports.size;
+  if (this->currentLevel < 0) {
+    std::stringstream out;
+    out
+    << "Unexpected negative size of progress strings: "
+    << currentThreadReports.size
+    << " read as: "
+    << this->currentLevel
+    << "All progress report strings: "
+    << global.progressReportStrings
+    << " Current thread reports deallocated: "
+    << currentThreadReports.flagDeallocated
+    << ". Thread index: "
+    << this->threadIndex;
+    fatalCrash(out.str());
+  }
+  currentThreadReports.addOnTop(std::string(""));
   this->ticks = 0;
   this->ticksPerReport = 1;
   this->reportType = GlobalVariables::Response::ReportType::general;
@@ -269,7 +288,14 @@ ProgressReport::~ProgressReport() {
   if (global.fatal.flagCrashInitiated) {
     return;
   }
-  global.progressReportStrings[this->threadIndex].size --;
+  ListReferences<std::string>& current =
+  global.progressReportStrings[this->threadIndex];
+  if (current.size <= 0) {
+    std::stringstream errorStream;
+    errorStream << "Corrupt progress report. ";
+    fatalCrash(errorStream.str());
+  }
+  current.size --;
 }
 
 RegisterFunctionCall::RegisterFunctionCall(
@@ -1277,7 +1303,7 @@ bool FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
   );
 }
 
-bool FileOperations::writeFileVirual(
+bool FileOperations::writeFileVirtual(
   const std::string& fileNameVirtual,
   const std::string& fileContent,
   std::stringstream* commentsOnError
@@ -1344,7 +1370,7 @@ std::string FileOperations::writeFileReturnHTMLLink(
   STACK_TRACE("Calculator::writeFileReturnHTMLLink");
   std::stringstream commentsOnError;
   bool success =
-  FileOperations::writeFileVirual(
+  FileOperations::writeFileVirtual(
     fileNameVirtual, fileContent, &commentsOnError
   );
   if (!success) {
@@ -2052,6 +2078,27 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
   FileOperations::getPhysicalFileNameFromVirtual(
     inputCopy, output, false, false, commentsOnFailure
   );
+}
+
+bool FileOperations::deleteFileVirtual(
+  const std::string& fileNameVirtual, std::stringstream* commentsOnError
+) {
+  std::string fileName;
+  if (
+    !FileOperations::getPhysicalFileNameFromVirtual(
+      fileNameVirtual, fileName, false, false, commentsOnError
+    )
+  ) {
+    return false;
+  }
+  int result = remove(fileName.c_str());
+  if (result != 0) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Failed to erase file: " << fileName;
+    }
+    return false;
+  }
+  return true;
 }
 
 bool FileOperations::getPhysicalFileNameFromVirtual(
@@ -3562,9 +3609,10 @@ bool Selection::incrementSelectionFixedCardinalityReturnFalseIfPastLast(
 
 void Selection::computeIndicesFromSelection() {
   this->cardinalitySelection = 0;
+  this->elements.clear();
   for (int i = 0; i < this->numberOfElements; i ++) {
     if (this->selected[i]) {
-      this->elements[cardinalitySelection] = i;
+      this->elements.addOnTop(i);
       this->cardinalitySelection ++;
     }
   }
@@ -14426,7 +14474,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   }
   complexBeforeProjection.slicingDirections.addOnTop(direction);
   complexBeforeProjection.slicingDirections.addOnTop(- direction);
-  complexBeforeProjection.refineByDirections();
+  complexBeforeProjection.refineByDirections(&report);
   Wall wall;
   Vector<Rational> extraEquation;
   Vector<Rational> exitNormalAffine;
@@ -14802,15 +14850,15 @@ bool ConeCollection::refineOneByNormals(
   return false;
 }
 
-void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
+void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors(
+  ProgressReport* report
+) {
   STACK_TRACE("ConeCollection::refineAllConesWithWallsWithMultipleNeighbors");
   List<Cone> split;
   int mustDecrease =
   this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
   while (this->conesWithIrregularWalls.size() > 0) {
-    if (this->report.tickAndWantReport()) {
-      this->report.report(this->toStringRefineStats());
-    }
+    this->reportStats(report);
     int index = this->conesWithIrregularWalls.size() - 1;
     Cone cone = this->conesWithIrregularWalls.values[index];
     this->conesWithIrregularWalls.removeIndex(index);
@@ -14981,12 +15029,11 @@ bool ConeCollection::refineOneByOneDirectionArbitrarySlices(
   for (Cone& cone : candidates.values) {
     this->addNonRefinedCone(cone);
   }
-  this->checkConsistencyFull();
   for (Cone& cone : candidates.values) {
     this->processNeighborsOfNewlyAddedCone(cone);
   }
   this->addHistoryPoint();
-  this->checkConsistencyFull();
+  this->checkConsistencyFullWithoutDebugMessage();
   return true;
 }
 
@@ -15112,6 +15159,7 @@ void ConeCollection::initializeFromDirectionsAndRefine(
   Vectors<Rational>& inputVectors
 ) {
   STACK_TRACE("ConeCollection::initializeFromDirectionsAndRefine");
+  ProgressReport report;
   this->initialize();
   Cone startingCone(0);
   this->conesCreated ++;
@@ -15119,7 +15167,7 @@ void ConeCollection::initializeFromDirectionsAndRefine(
   this->nonRefinedCones.setKeyValue(startingCone.id, startingCone);
   this->convexHull.makeConvexHullOfMeAnd(startingCone);
   this->slicingDirections.addListOnTop(inputVectors);
-  this->refineByDirections();
+  this->refineByDirections(&report);
 }
 
 void ConeCollection::sort() {
@@ -15162,15 +15210,16 @@ void ConeCollection::refineByNormals() {
 }
 
 void ConeCollection::refineByDirectionsAndSort() {
-  this->refineByDirections();
+  ProgressReport report;
+  this->refineByDirections(&report);
   this->sort();
 }
 
-void ConeCollection::refineByDirections() {
+void ConeCollection::refineByDirections(ProgressReport* report) {
   STACK_TRACE("ConeCollection::refineByDirections");
   for (int i = 0; i < this->slicingDirections.size; i ++) {
     this->markAllConesNonRefined(i);
-    this->refineByOneDirection(i);
+    this->refineByOneDirection(i, report);
   }
   if (this->flagUseSpannedSlices) {
     // We want only spanned slices,
@@ -15459,7 +15508,19 @@ std::string ConeCollection::toStringRefineStats() {
   return out.str();
 }
 
-void ConeCollection::refineByOneDirection(int directionIndex) {
+void ConeCollection::reportStats(ProgressReport* report) {
+  if (report == nullptr) {
+    return;
+  }
+  if (!report->tickAndWantReport()) {
+    return;
+  }
+  report->report(this->toStringRefineStats());
+}
+
+void ConeCollection::refineByOneDirection(
+  int directionIndex, ProgressReport* report
+) {
   STACK_TRACE("ConeCollection::refineByOneDirection");
   this->statistics.currentDirectionIndex = directionIndex;
   List<Cone> subdivided;
@@ -15469,15 +15530,11 @@ void ConeCollection::refineByOneDirection(int directionIndex) {
       this->nonRefinedCones.removeIndex(i);
       if (!this->refineOneByOneDirection(toBeRefined, directionIndex)) {
         this->statistics.totalSplitFailuresDueToVisitOrder ++;
-        if (report.tickAndWantReport()) {
-          this->report.report(this->toStringRefineStats());
-        }
+        this->reportStats(report);
         continue;
       }
-      if (this->report.tickAndWantReport()) {
-        this->report.report(this->toStringRefineStats());
-      }
-      this->refineAllConesWithWallsWithMultipleNeighbors();
+      this->reportStats(report);
+      this->refineAllConesWithWallsWithMultipleNeighbors(report);
     }
   }
   this->checkConsistencyFullWithoutDebugMessage();

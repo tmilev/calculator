@@ -12445,6 +12445,14 @@ std::string ConeCollection::drawMeToHtmlProjective(
   bool isGood = true;
   isGood = this->drawMeProjective(drawingVariables);
   std::stringstream out;
+  if (this->refinedCones.size() > this->maximumCones) {
+    out
+    << "I have "
+    << this->refinedCones.size()
+    << " refined cones, more than the maximum of "
+    << this->maximumCones
+    << " allowed for drawing. I am omitting most of the graphics. ";
+  }
   out
   << drawingVariables.getHTMLDiv(
     this->getDimension(), false, generateControls
@@ -12526,19 +12534,20 @@ bool ConeCollection::drawMeProjectiveInitialize(
   return true;
 }
 
-bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const {
-  STACK_TRACE("ConeCollection::drawMeProjective");
+bool ConeCollection::drawProjectiveChambers(
+  DrawingVariables& drawingVariables
+) const {
   bool result = true;
-  if (this->getDimension() <= 1) {
-    return false;
-  }
-  this->drawMeProjectiveInitialize(drawingVariables);
   List<const List<Cone>*> coneCollectionsToPlot = List<const List<Cone>*>({
       &this->refinedCones.values,
       &this->nonRefinedCones.values,
       &this->conesWithIrregularWalls.values
     }
   );
+  if (this->refinedCones.size() > this->maximumCones) {
+    // Too many cones to draw;
+    return true;
+  }
   for (const List<Cone> * collection : coneCollectionsToPlot) {
     for (Cone& cone : *collection) {
       result = result && cone.drawMeProjectiveVertices(drawingVariables);
@@ -12549,6 +12558,17 @@ bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const 
       result = result && cone.drawMeProjectiveSlice(drawingVariables);
     }
   }
+  return result;
+}
+
+bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const {
+  STACK_TRACE("ConeCollection::drawMeProjective");
+  bool result = true;
+  if (this->getDimension() <= 1) {
+    return false;
+  }
+  this->drawMeProjectiveInitialize(drawingVariables);
+  result = result && this->drawProjectiveChambers(drawingVariables);
   for (Vector<Rational> vertex : this->slicingDirections) {
     vertex /= vertex.sumCoordinates();
     drawingVariables.drawCircleAtVector(vertex, "blue", 3);
@@ -14788,6 +14808,9 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors() {
   int mustDecrease =
   this->conesWithIrregularWalls.size() - 2 * this->conesCreated;
   while (this->conesWithIrregularWalls.size() > 0) {
+    if (this->report.tickAndWantReport()) {
+      this->report.report(this->toStringRefineStats());
+    }
     int index = this->conesWithIrregularWalls.size() - 1;
     Cone cone = this->conesWithIrregularWalls.values[index];
     this->conesWithIrregularWalls.removeIndex(index);
@@ -15193,11 +15216,21 @@ void ConeCollection::mergeChambers() {
       cone.payload.hashOfContainingSimplices
     ).addOnTop(cone.id);
   }
+  LargeInteger total =
+  selection.getNumberOfCombinationsFixedCardinality(dimension);
+  LargeInteger count;
+  ProgressReport report("simplexCones");
   while (
     selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
       dimension
     )
   ) {
+    count ++;
+    if (report.tickAndWantReport()) {
+      std::stringstream out;
+      out << "Processed " << count << " selections out of " << total;
+      report.report(out.str());
+    }
     Cone cone;
     this->slicingDirections.subSelection(selection, cone.vertices);
     if (!cone.createFromVertices(cone.vertices)) {
@@ -15401,15 +15434,48 @@ bool ConeCollection::refineOneByOneDirectionSpannedSlices(
   return true;
 }
 
+ConeCollection::Statistics::Statistics() {
+  this->totalSplitFailuresDueToVisitOrder = 0;
+}
+
+std::string ConeCollection::toStringRefineStats() {
+  std::stringstream out;
+  out
+  << "Processing direction "
+  << this->statistics.currentDirectionIndex + 1
+  << " out of "
+  << this->slicingDirections.size;
+  out
+  << "<br>"
+  << "Refined cones: "
+  << this->refinedCones.size()
+  << ". Non-refined cones: "
+  << this->nonRefinedCones.size()
+  << ". Irregular cones: "
+  << this->conesWithIrregularWalls.size();
+  out
+  << "<br>Out-of-order split misses: "
+  << this->statistics.totalSplitFailuresDueToVisitOrder;
+  return out.str();
+}
+
 void ConeCollection::refineByOneDirection(int directionIndex) {
   STACK_TRACE("ConeCollection::refineByOneDirection");
+  this->statistics.currentDirectionIndex = directionIndex;
   List<Cone> subdivided;
   while (this->nonRefinedCones.size() > 0) {
     for (int i = this->nonRefinedCones.size() - 1; i >= 0; i --) {
       Cone toBeRefined = this->nonRefinedCones.values[i];
       this->nonRefinedCones.removeIndex(i);
       if (!this->refineOneByOneDirection(toBeRefined, directionIndex)) {
+        this->statistics.totalSplitFailuresDueToVisitOrder ++;
+        if (report.tickAndWantReport()) {
+          this->report.report(this->toStringRefineStats());
+        }
         continue;
+      }
+      if (this->report.tickAndWantReport()) {
+        this->report.report(this->toStringRefineStats());
       }
       this->refineAllConesWithWallsWithMultipleNeighbors();
     }

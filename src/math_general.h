@@ -6395,6 +6395,16 @@ public:
   MapList<int, Cone> conesWithIrregularWalls;
   int conesCreated;
   List<std::string> historyHTML;
+  class Statistics {
+  public:
+    int totalSplitFailuresDueToVisitOrder;
+    int currentDirectionIndex;
+    Statistics();
+  };
+
+  Statistics statistics;
+  ProgressReport report;
+  static const int maximumCones = 1000;
   void addHistoryPoint();
   // Returns false if the plane with the given normal
   // passes through directions that span the entire plane.
@@ -6403,6 +6413,7 @@ public:
   void refineByDirectionsAndSort();
   void refineByDirections();
   void refineByOneDirection(int directionIndex);
+  std::string toStringRefineStats();
   // Implementation of refineOneByOneDirection when only using spanned slices.
   void refineByOneDirectionSpannedSlices(int directionIndex);
   bool refineOneByOneDirectionSpannedSlices(
@@ -6506,6 +6517,7 @@ public:
   Cone& getConeByIdNonConstNoFail(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(DrawingVariables& drawingVariables) const;
+  bool drawProjectiveChambers(DrawingVariables& drawingVariables) const;
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables, bool generateControls
   ) const;

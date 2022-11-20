@@ -1013,7 +1013,8 @@ bool Calculator::Test::processResults() {
     << "say, the expected results have changed since the last test run, "
     << "erase file: "
     << WebAPI::calculator::testFileNameVirtual
-    << " and rerun the present test to store the expected results. ";
+    << " and rerun the present test to store the expected results. "
+    << "Alternatively, run: ./calculator test update";
     out
     << "<table class = 'tableCalculatorOutput'>"
     << badCommands.str()

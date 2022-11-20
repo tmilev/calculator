@@ -201,6 +201,7 @@ void Test::initialize(List<std::string>& inputArguments) {
   this->inputs = inputArguments;
   if (this->inputs.contains(Test::update)) {
     this->flagUpdateABTests = true;
+    this->inputs.removeFirstOccurenceSwapWithLast(Test::update);
   } else {
     this->flagUpdateABTests = false;
   }

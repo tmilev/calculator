@@ -84,14 +84,15 @@ ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),) #location of mongoC in Ubun
   mongoLocation=/usr/local/lib
 endif
 ifneq ($(mongoLocation),)
+  CFLAGS+=-I/usr/include/libmongoc-1.0
+  CFLAGS+=-I/usr/include/libbson-1.0
   CFLAGS+=-I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
-  CFLAGS+=-I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0
   CFLAGS+=-DMACRO_use_MongoDB
 #  LDFLAGS+= -L/usr/local/lib
   LIBRARIES_INCLUDED_AT_THE_END+=-L/$(mongoLocation) -lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
 else
-$(info [1;31mNOT FOUND: Mongo.[0m The calculator will run without a database and proper login.) 
+$(info [1;31mNOT FOUND: Mongo.[0m The calculator will run using a fallback database.)
 endif
 endif
 

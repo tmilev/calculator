@@ -3132,6 +3132,12 @@ std::string WebServer::toStringConnectionSummary() {
     timeRunning / 1000, false, false
   )
   << " web server uptime. ";
+  double connectionsPerDay = static_cast<double>(
+    this->statistics.allConnections - this->statistics.pingConnections
+  ) / (double(timeRunning) / 1000) *
+  60 *
+  60 *
+  24;
   out
   << this->statistics.allConnections - this->statistics.pingConnections
   << " http connections, "
@@ -3140,6 +3146,9 @@ std::string WebServer::toStringConnectionSummary() {
   << " with "
   << this->statistics.allRequests - this->statistics.pingRequests
   << " non-ping http requests. "
+  << "(~"
+  << FloatingPoint::doubleToString(connectionsPerDay, 0)
+  << " connections per day). "
   << "Timed-out connections are excluded. ";
   out
   << "<br>"
@@ -4338,7 +4347,7 @@ int WebServer::run() {
     this->getActiveWorker().millisecondsServerAtWorkerStart;
     this->getActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect;
     // <- measured right after select()
-    // <-cannot set earlier as the active worker may change after recycling.
+    // <- cannot set earlier as the active worker may change after recycling.
     this->statistics.allConnections ++;
     this->getActiveWorker().connectionID = this->statistics.allConnections;
     this->getActiveWorker().userAddress.content = listener.userAddress;

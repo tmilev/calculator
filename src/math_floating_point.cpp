@@ -10,8 +10,12 @@ double FloatingPoint::sinFloating(double argument) {
 }
 
 std::string FloatingPoint::doubleToString(double input) {
+  return FloatingPoint::doubleToString(input, 8);
+}
+
+std::string FloatingPoint::doubleToString(double input, int precision) {
   std::stringstream out;
-  out.precision(8);
+  out.precision(precision);
   out << std::fixed << input;
   std::string result = out.str();
   bool hasDot = false;

@@ -39,6 +39,7 @@ public:
   static bool isNaN(const double& argument);
   static double floorFloating(double argument);
   static std::string doubleToString(double input);
+  static std::string doubleToString(double input, int precision);
 };
 
 class ChevalleyGenerator {

@@ -1230,9 +1230,9 @@ class MathNodeWithCursorPosition {
     return new MathNodeWithCursorPosition(next, -1);
   }
 
-  /** 
-   * Computes a balanced right neighbor. 
-   * @return {MathNodeWithCursorPosition!} 
+  /**
+   * Computes a balanced right neighbor.
+   * @return {MathNodeWithCursorPosition!}
    */
   rightHorizontalNeighborBalanced(
       /** @type {boolean} */
@@ -1589,7 +1589,9 @@ class LaTeXConstants {
       'gt': '>',
       'sqcup': '\u2294',
       'to': '\u2192',
+      'rightarrow': '\u2192',
       'mapsto': '\u21A6',
+      'leftarrow': '\u2190',
       'nwarrow': '\u2196',
       'nearrow': '\u2197',
       'searrow': '\u2198',
@@ -5305,10 +5307,10 @@ class MathNode {
     return result;
   }
 
-  /** 
-   * Returns the content if the element is atomic or 
-   * the empty string otherwise. 
-   * @return {string} 
+  /**
+   * Returns the content if the element is atomic or
+   * the empty string otherwise.
+   * @return {string}
    */
   contentIfAtomic() {
     if (!this.isAtomic()) {
@@ -7328,13 +7330,18 @@ class MathNode {
         leftDelimiter, rightDelimiter, positionOperator, isLeft, isAmbiguous);
   }
 
+  /**
+   * Returns whether the given math node is a parentheses balancing breaker
+   * when trying to auto-balance parentheses.
+   * @return {boolean}
+   */
   isDelimiterBalancingBreaker(
-    /** @type {MathNode} */
-    child,
+      /** @type {MathNode!} */
+      child,
   ) {
     return child.type.type === knownTypes.operatorStandalone.type ||
-      child.type.type === knownTypes.operatorWithSubscript.type ||
-      child.type.type === knownTypes.operatorWithSuperAndSubscript.type;
+        child.type.type === knownTypes.operatorWithSubscript.type ||
+        child.type.type === knownTypes.operatorWithSuperAndSubscript.type;
   }
 
   /** @return {number} */
@@ -7353,10 +7360,7 @@ class MathNode {
       if (openDelimiters < 0) {
         return i;
       }
-      if (
-        openDelimiters === 0 &&
-        this.isDelimiterBalancingBreaker(child)
-      ) {
+      if (openDelimiters === 0 && this.isDelimiterBalancingBreaker(child)) {
         return i;
       }
     }
@@ -7379,10 +7383,7 @@ class MathNode {
       if (openDelimiters < 0) {
         return i + 1;
       }
-      if (
-        openDelimiters === 0 &&
-        this.isDelimiterBalancingBreaker(child)
-      ) {
+      if (openDelimiters === 0 && this.isDelimiterBalancingBreaker(child)) {
         return i + 1;
       }
     }
@@ -7519,18 +7520,23 @@ class MathNode {
     return [leftNode, rightNode];
   }
 
+  /**
+   * Returns whether the given delimiter - possibly ambiguous or implied -
+   * should be regarded as left.
+   * @return {boolean}
+   */
   adjustIsLeft(
-    /** @type {boolean} */
-    isLeft,
-    /** @type {number} */
-    oldIndexInParent,
-    /** @type {MathNode} */
-    parent,
+      /** @type {boolean} */
+      isLeft,
+      /** @type {number} */
+      oldIndexInParent,
+      /** @type {MathNode!} */
+      parent,
   ) {
     for (let i = oldIndexInParent; i >= 0; i--) {
       let child = parent.children[i];
       if (child.type.type === knownTypes.leftDelimiter.type &&
-        child.initialContent === '|' && !child.implied) {
+          child.initialContent === '|' && !child.implied) {
         isLeft = true;
       }
     }
@@ -7538,7 +7544,7 @@ class MathNode {
       if (oldIndexInParent + 1 < parent.children.length) {
         let child = parent.children[oldIndexInParent + 1];
         if (child.type.type === knownTypes.rightDelimiter.type &&
-          child.implied === true) {
+            child.implied === true) {
           isLeft = false;
         }
       }
@@ -7584,23 +7590,26 @@ class MathNode {
     let indexRightDelimiter = -1;
     if (isAmbiguous) {
       isLeft = this.adjustIsLeft(
-        isLeft, oldIndexInParent, parent,
+          isLeft,
+          oldIndexInParent,
+          parent,
       );
     }
     if (isLeft) {
       indexLeftDelimiter = parent.replaceImpliedLeftDelimiter(
-        leftDelimiterString, oldIndexInParent, positionOperator,
+          leftDelimiterString,
+          oldIndexInParent,
+          positionOperator,
       );
-      if (indexLeftDelimiter === - 1) {
+      if (indexLeftDelimiter === -1) {
         return;
       }
       indexRightDelimiter =
           parent.findIndexToInsertRightDelimiter(indexLeftDelimiter);
     } else {
-      indexRightDelimiter =
-        parent.replaceImpliedRightDelimiter(
+      indexRightDelimiter = parent.replaceImpliedRightDelimiter(
           rightDelimiterString, this.indexInParent, positionOperator);
-      if (indexRightDelimiter === - 1) {
+      if (indexRightDelimiter === -1) {
         return;
       }
       indexLeftDelimiter =
@@ -7618,24 +7627,24 @@ class MathNode {
     }
   }
 
-  /** 
-   * Returns -1 if an implied delimiter was found and 
-   * replaced. If no implied delimiter was found, 
+  /**
+   * Returns -1 if an implied delimiter was found and
+   * replaced. If no implied delimiter was found,
    * returns the index where the new left delimiter
    * should be placed.
-   * 
-   * @return {number} 
+   *
+   * @return {number}
    */
   replaceImpliedLeftDelimiter(
-    /** @type {string} */
-    delimiterString,
-    /** @type {number} */
-    indexInParent,
-    /** @type {number} */
-    positionOperator,
+      /** @type {string} */
+      delimiterString,
+      /** @type {number} */
+      indexInParent,
+      /** @type {number} */
+      positionOperator,
   ) {
     let delimiterIndex = -1;
-    let atomicContent = this.children[indexInParent].contentIfAtomic(); 
+    let atomicContent = this.children[indexInParent].contentIfAtomic();
     if (positionOperator === 1 && atomicContent.length > 0) {
       delimiterIndex = indexInParent + 1;
     } else if (positionOperator === 0 && atomicContent.length > 0) {
@@ -7656,8 +7665,7 @@ class MathNode {
           continue;
         }
         if (child.implied) {
-          this.moveDelimiterMarkExplicit(
-            delimiterString, delimiterIndex, i);
+          this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
           return -1;
         }
         break;
@@ -7676,21 +7684,21 @@ class MathNode {
     return delimiterIndex;
   }
 
-  /**    
+  /**
    * Returns -1 if an implied delimiter was found and
-   * replaced. If no implied delimiter was found, 
+   * replaced. If no implied delimiter was found,
    * returns the index where the new left delimiter
-   * should be placed.   
-   *  
-   * @return {number} 
+   * should be placed.
+   *
+   * @return {number}
    */
   replaceImpliedRightDelimiter(
-    /** @type {string} */
-    delimiterString,
-    /** @type {number} */
-    indexInParent,
-    /** @type {number} */
-    positionOperator,
+      /** @type {string} */
+      delimiterString,
+      /** @type {number} */
+      indexInParent,
+      /** @type {number} */
+      positionOperator,
   ) {
     let delimiterIndex = -1;
     let content = this.children[indexInParent].contentIfAtomic();
@@ -7714,9 +7722,8 @@ class MathNode {
           continue;
         }
         if (child.implied) {
-          this.moveDelimiterMarkExplicit(
-            delimiterString, delimiterIndex, i);
-          return - 1;
+          this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
+          return -1;
         }
         break;
       }
@@ -7728,7 +7735,7 @@ class MathNode {
       }
       if (child.type.type === knownTypes.rightDelimiter.type && child.implied) {
         this.moveDelimiterMarkExplicit(delimiterString, delimiterIndex, i);
-        return - 1;
+        return -1;
       }
     }
     return delimiterIndex;
@@ -12392,4 +12399,3 @@ module.exports = {
   MathNode,
   knownTypes,
 };
-

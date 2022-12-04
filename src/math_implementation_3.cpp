@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include "math_extra_modules_semisimple_lie_algebras.h"
 #include "crypto.h"
+#include "math_vector_partition_functions.h"
 
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.
@@ -11720,6 +11721,17 @@ bool Wall::isInOpenHalfSpace(const Vector<Rational>& point) const {
   return this->normal.scalarEuclidean(point).isPositive();
 }
 
+bool Wall::hasAtLeastOnePointInOpenHalfSpace(
+  const List<Vector<Rational> >& points
+) const {
+  for (Vector<Rational>& point : points) {
+    if (this->isInOpenHalfSpace(point)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 std::string Wall::toString() const {
   return "Wall: " + this->normal.toString();
 }
@@ -14893,29 +14905,31 @@ void ConeCollection::splitConeByMultipleNeighbors(Cone& input, Wall& wall) {
   Cone& neighbor = *this->getConeByIdNonConst(neighborIndex);
   HashedList<Vector<Rational> > verticesBelongingToWall;
   input.getAllVerticesPerpendicularTo(wall.normal, verticesBelongingToWall);
-  List<Vector<Rational> > neighborVertices;
+  Vectors<Rational> neighborVertices;
   neighbor.getAllVerticesPerpendicularTo(wall.normal, neighborVertices);
-  Vectors<Rational> candidateSlicers;
-  for (Vector<Rational>& neighborVertex : neighbor.vertices) {
-    if (verticesBelongingToWall.contains(neighborVertex)) {
+  for (Wall& slicer : neighbor.walls) {
+    if (slicer.normal == - wall.normal) {
       continue;
     }
-    neighbor.getNormalsOfWallsContainingPoint(
-      neighborVertex, candidateSlicers
-    );
-    for (Vector<Rational>& slicer : candidateSlicers) {
-      if (this->splitChamber(input, slicer)) {
-        return;
-      }
+    if (!neighborVertices.hasAnElementPerpendicularTo(slicer.normal)) {
+      // The candidate slicing wall has no common vertex with the current wall.
+      continue;
+    }
+    if (!slicer.hasAtLeastOnePointInOpenHalfSpace(input.vertices)) {
+      // Both the original wall normal and the slicer normal separate the two
+      // chambers.
+      // The two chambers are not honest neighbors, as the
+      // region they touch along is of not of the maximum possible dimension
+      // n-1
+      // (empty intersection is possible too).
+      wall.neighbors = wallWithReducedNeighborCount.neighbors;
+      neighbor.removeNeighbor(input.id);
+      this->addNonRefinedCone(input);
+    }
+    if (this->splitChamber(input, slicer.normal)) {
+      return;
     }
   }
-  // We have two chambers that have
-  // a common wall plane, but
-  // are not honest neighbors along that plane, as
-  // region they touch along is of not of the maximum possible dimension n-1
-  // (empty intersection is possible too).
-  wall.neighbors = wallWithReducedNeighborCount.neighbors;
-  neighbor.removeNeighbor(input.id);
   this->addNonRefinedCone(input);
 }
 
@@ -15331,7 +15345,7 @@ void ConeCollection::mergeOneChamberFamily(HashedList<int>& family) {
   }
   if (result.walls.size != newWalls.size()) {
     // Most articles I've read imply that the combinatorial chambers must be
-    // complex.
+    // convex.
     // However, I don't recall reading a proof of that.
     // Is this actually possible?
     global.comments << "<br>Found non-convex combinatorial chamber!";

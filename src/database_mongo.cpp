@@ -1421,9 +1421,6 @@ bool Database::Mongo::fetchCollectionNames(
 #ifdef MACRO_use_MongoDB
   bson_t opts = BSON_INITIALIZER;
   bson_error_t error;
-  mongoc_database_get_collection_names_with_opts(
-    static_cast<mongoc_database_t*>(this->database), &opts, &error
-  );
   char** collectionChars =
   mongoc_database_get_collection_names_with_opts(
     static_cast<mongoc_database_t*>(this->database), &opts, &error

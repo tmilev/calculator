@@ -5,6 +5,7 @@
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_rational_function.h"
 #include "math_extra_modules_semisimple_lie_algebras.h"
+#include "math_vector_partition_functions.h"
 
 // The following data is isolated in a struct because it is
 // way too large a lump to pass separately.

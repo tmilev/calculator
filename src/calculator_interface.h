@@ -1709,7 +1709,7 @@ public:
   ListReferences<HyperoctahedralGroupData> hyperOctahedralGroups;
   HashedListReferences<MonomialTensor<int, HashFunctions::hashFunction> >
   littelmannOperators;
-  MapReferences<List<Vector<Rational> >, PartialFractions>
+  MapReferences<List<Vector<Rational> >, VectorPartitionFunction>
   vectorPartitionFunctions;
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(
@@ -2218,6 +2218,7 @@ public:
       static std::string turnOnRules;
       static std::string turnOffRules;
       static std::string vectorPartitionFunction;
+      static std::string vectorPartitionFunctionElementary;
       class Trigonometry {
       public:
         static std::string sine;

@@ -71,7 +71,6 @@ public:
   bool checkInitialization() const;
 };
 
-
 // Suppose the initial vectors are v_1, ..., v_n.
 // For every vector v=(a_1, ..., a_k), define
 // x^{v} as the monomial x_1^{a_1} ... x_n^{a_k}.
@@ -257,8 +256,6 @@ public:
   bool operator>(const OnePartialFractionDenominator& other) const;
 };
 
-
-
 class PartialFractions {
   bool splitPartial();
   void initializeCommon();
@@ -406,5 +403,20 @@ public:
   };
 };
 
-class VectorPartitionFunction{};
+class VectorPartitionFunctionElementary {
+public:
+  bool flagInitialized;
+  List<Vector<Rational> > originalVectors;
+  VectorPartitionFunctionElementary();
+  std::string toHTML() const;
+};
+
+class VectorPartitionFunction {
+public:
+  PartialFractions fractions;
+  VectorPartitionFunctionElementary elementaryMethod;
+  void initializeVectors(List<Vector<Rational> >& inputVectors);
+  std::string toHTML() const;
+};
+
 #endif // header_math_vector_partition_functions_ALREADY_INCLUDED

@@ -24,7 +24,8 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(1,2),"
     "(1,3),"
     "(2,3) "
-    ");VectorPartitionFunction(\n"
+    ");\n"
+    "VectorPartitionFunction(\n"
     "Sequence{}1,"
     "Sequence{}2,"
     "Sequence{}3,"
@@ -32,6 +33,22 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "CalculatorFunctionsVectorPartitionFunction"
     "::vectorPartitionFunctionFormula",
     "VectorPartitionFunction",
+    innerStandard
+  );
+  this->addOperationHandler(
+    Calculator::Functions::Names::vectorPartitionFunctionElementary,
+    CalculatorFunctionsVectorPartitionFunction::
+    vectorPartitionFunctionFormulaElementary,
+    "",
+    "Work in progress. Vector partition function formula, elementary method. ",
+    "VectorPartitionFunctionElementary(\n"
+    "(1,1),\n"
+    "(1,0),\n"
+    "(0,1)\n"
+    ");",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::vectorPartitionFunctionFormulaElementary",
+    "VectorPartitionFunctionElementary",
     innerStandard
   );
   this->addOperationHandler(

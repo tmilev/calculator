@@ -23,6 +23,8 @@ std::string Calculator::Functions::Names::transpose = "Transpose";
 std::string Calculator::Functions::Names::approximations = "Approximations";
 std::string Calculator::Functions::Names::vectorPartitionFunction =
 "VectorPartitionFunction";
+std::string Calculator::Functions::Names::vectorPartitionFunctionElementary =
+"VectorPartitionFunctionElementary";
 std::string Calculator::Functions::Names::turnOnRules = "TurnOnRules";
 std::string Calculator::Functions::Names::turnOffRules = "TurnOffRules";
 std::string Calculator::Functions::Names::Trigonometry::sine = "\\sin";
@@ -6184,7 +6186,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<AlgebraicNumber>();
   this->addOneBuiltInHandler<LittelmannPath>();
   this->addOneBuiltInHandler<ElementWeylAlgebra<Rational> >();
-  this->addOneBuiltInHandler<PartialFractions>();
+  this->addOneBuiltInHandler<VectorPartitionFunction>();
 }
 
 void Calculator::initializeBuiltInsFreezeArguments() {

@@ -4421,6 +4421,40 @@ std::string PartialFractions::toLatex(FormatExpressions* format) const {
   return out.str();
 }
 
+VectorPartitionFunctionElementary::VectorPartitionFunctionElementary() {
+  this->flagInitialized = false;
+}
+
+std::string VectorPartitionFunctionElementary::toHTML() const {
+  if (!this->flagInitialized) {
+    return "";
+  }
+  std::stringstream out;
+  out << "Vector partition function of " << this->originalVectors;
+  return out.str();
+}
+
+void VectorPartitionFunction::initializeVectors(
+  List<Vector<Rational> >& inputVectors
+) {
+  this->elementaryMethod.originalVectors = inputVectors;
+  this->fractions.originalVectors = inputVectors;
+}
+
+std::string VectorPartitionFunction::toHTML() const {
+  std::stringstream out;
+  if (this->fractions.flagInitialized) {
+    out
+    << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
+    << fractions.toHTML();
+    out << "<br>Chambers:<br>" << fractions.chambers.toHTML() << "</div>";
+  }
+  if (this->elementaryMethod.flagInitialized) {
+    out << this->elementaryMethod.toHTML();
+  }
+  return out.str();
+}
+
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
   STACK_TRACE("PartialFractions::toHTML");
   std::stringstream out;

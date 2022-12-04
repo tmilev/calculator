@@ -268,7 +268,7 @@ const {
 }
 
 template < >
-int Expression::getBuiltInType<PartialFractions>() const {
+int Expression::getBuiltInType<VectorPartitionFunction>() const {
   this->checkInitialization();
   return this->owner->builtInTypes.vectorPartitionFunction();
 }
@@ -675,11 +675,13 @@ int Expression::addObjectReturnIndex(const ElementWeylGroup& inputValue) const {
 }
 
 template < >
-int Expression::addObjectReturnIndex(const PartialFractions& inputValue) const {
+int Expression::addObjectReturnIndex(
+  const VectorPartitionFunction& inputValue
+) const {
   this->checkInitialization();
   if (
     !this->owner->objectContainer.vectorPartitionFunctions.contains(
-      inputValue.originalVectors
+      inputValue.fractions.originalVectors
     )
   ) {
     global.fatal
@@ -689,7 +691,7 @@ int Expression::addObjectReturnIndex(const PartialFractions& inputValue) const {
   }
   return
   this->owner->objectContainer.vectorPartitionFunctions.getIndex(
-    inputValue.originalVectors
+    inputValue.fractions.originalVectors
   );
 }
 
@@ -847,9 +849,9 @@ ElementZmodP& Expression::getValueNonConst() const {
 }
 
 template < >
-PartialFractions& Expression::getValueNonConst() const {
+VectorPartitionFunction& Expression::getValueNonConst() const {
   STACK_TRACE("Expression::getValueNonConst");
-  if (!this->isOfType<PartialFractions>()) {
+  if (!this->isOfType<VectorPartitionFunction>()) {
     global.fatal
     << "Expression not of required type PartialFractions. "
     << this->toStringFull()
@@ -3192,19 +3194,16 @@ bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
 }
 
 template < >
-bool Expression::toStringBuiltIn<PartialFractions>(
+bool Expression::toStringBuiltIn<VectorPartitionFunction>(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* format
 ) {
   STACK_TRACE("Expression::toStringBuiltIn_PartialFractions");
   (void) format;
-  const PartialFractions& partialFractions =
-  input.getValue<PartialFractions>();
-  out
-  << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
-  << partialFractions.toHTML();
-  out << "<br>Chambers:<br>" << partialFractions.chambers.toHTML() << "</div>";
+  const VectorPartitionFunction& vectorPartitionFunction =
+  input.getValue<VectorPartitionFunction>();
+  out << vectorPartitionFunction.toHTML();
   return true;
 }
 
@@ -3646,7 +3645,7 @@ bool Expression::requiresNoMathTags() const {
   this->isOfType<
     GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
   >() ||
-  this->isOfType<PartialFractions>();
+  this->isOfType<VectorPartitionFunction>();
 }
 
 bool Expression::toStringTimes(

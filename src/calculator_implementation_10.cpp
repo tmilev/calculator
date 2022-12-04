@@ -1,5 +1,46 @@
 #include "calculator_inner_functions_vector_partition_function_1.h"
 
+bool CalculatorFunctionsVectorPartitionFunction::
+vectorPartitionFunctionFormulaElementary(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "vectorPartitionFunctionFormulaElementary"
+  );
+  Vectors<Rational> vectors;
+  Matrix<Rational> matrix;
+  if (
+    !CalculatorConversions::functionGetMatrix(
+      calculator, input, matrix, false
+    )
+  ) {
+    return
+    calculator
+    << "Failed to extract matrix of rationals from: "
+    << input.toString();
+  }
+  if (
+    calculator.objectContainer.vectorPartitionFunctions.contains(vectors)
+  ) {
+    return
+    output.assignValue(
+      calculator,
+      calculator.objectContainer.vectorPartitionFunctions.getValueNoFail(
+        vectors
+      )
+    );
+  }
+  matrix.getVectorsFromRows(vectors);
+  VectorPartitionFunction& result =
+  calculator.objectContainer.vectorPartitionFunctions.getValueCreateEmpty(
+    vectors
+  );
+  result.initializeVectors(vectors);
+  result.elementaryMethod.flagInitialized = true;
+  return output.assignValue(calculator, result);
+}
+
 bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
 (Calculator& calculator, const Expression& input, Expression& output) {
   STACK_TRACE(
@@ -30,12 +71,12 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
     );
   }
   matrix.getVectorsFromRows(vectors);
-  PartialFractions& result =
+  VectorPartitionFunction& result =
   calculator.objectContainer.vectorPartitionFunctions.getValueCreateEmpty(
     vectors
   );
-  result.initializeAndSplit(vectors, &calculator.comments);
-  result.computeAllVectorPartitionFunctions();
+  result.fractions.initializeAndSplit(vectors, &calculator.comments);
+  result.fractions.computeAllVectorPartitionFunctions();
   return output.assignValue(calculator, result);
 }
 
@@ -82,11 +123,11 @@ applyVectorPartitionFunctionFormula(
   ) {
     return calculator << "Failed to extract vector from: " << input.toString();
   }
-  WithContext<PartialFractions> element;
+  WithContext<VectorPartitionFunction> element;
   if (!input[0].isOfTypeWithContext(&element)) {
     return false;
   }
-  PartialFractions partialFractions = element.content;
+  PartialFractions partialFractions = element.content.fractions;
   if (partialFractions.ambientDimension != vector.size) {
     return
     calculator

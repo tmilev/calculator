@@ -4491,7 +4491,6 @@ void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(
   }
 }
 
-
 class LaTeXProcedures {
 public:
   static const int ScaleFactor = 40;
@@ -6352,7 +6351,6 @@ public:
   bool checkConsistencyOneCollection(const MapList<int, Cone>& collection)
   const;
 };
-
 
 class DynkinSimpleType {
   friend std::ostream& operator<<(

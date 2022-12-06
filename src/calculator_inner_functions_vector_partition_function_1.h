@@ -46,6 +46,10 @@ public:
       calculator, input, output, false, false
     );
   }
+  // Returns the Bernoulli sum / Faulhaber formula: the sum \sum_{i=0}^n i^p.
+  static bool bernoulliSum(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
 };
 
 #endif // header_calculator_inner_functions_vector_partition_function_1_ALREADY_INCLUDED

@@ -38,6 +38,7 @@ vectorPartitionFunctionFormulaElementary(
   );
   result.initializeVectors(vectors);
   result.elementaryMethod.flagInitialized = true;
+  result.elementaryMethod.compute();
   return output.assignValue(calculator, result);
 }
 
@@ -142,4 +143,36 @@ applyVectorPartitionFunctionFormula(
     vector, result, &calculator.comments
   );
   return output.assignValue(calculator, result);
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::bernoulliSum(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::bernouliSum");
+  if (input.size() != 3) {
+    return false;
+  }
+  int power = 0;
+  if (!input[1].isSmallInteger(&power)) {
+    return
+    calculator
+    << "First argument of "
+    << input
+    << " is not a small integer.";
+  }
+  if (power < 0) {
+    return calculator << "First argument of " << input << " is negative. ";
+  }
+  if (power > 300) {
+    return
+    calculator
+    << "The maximum power allowed is 300, yours is: "
+    << power
+    << ". ";
+  }
+  BernoulliSumComputer computer;
+  WithContext<Polynomial<Rational> > result;
+  result.context.addVariable(input[2]);
+  computer.getBernoulliSum(power, result.content);
+  return result.toExpression(calculator, output);
 }

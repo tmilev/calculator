@@ -403,12 +403,28 @@ public:
   };
 };
 
+class BernoulliSumComputer {
+public:
+  List<Rational> bernoulliPlusNumbers;
+  // Reference: https://en.wikipedia.org/wiki/Bernoulli_number
+  // We the m^th bernoulli plus number B^+_m, m>= 0 to be:
+  // B^+_m = 1-\sum_{k=0}^{m-1} m \choose k B^+_k/(m-k+1)
+  void getNthBernoulliPlusNumber(int index, Rational& output);
+  void getBernoulliSum(int power, Polynomial<Rational>& output);
+};
+
 class VectorPartitionFunctionElementary {
 public:
   bool flagInitialized;
   List<Vector<Rational> > originalVectors;
+  ConeCollection collection;
+  BernoulliSumComputer bernoulliSumComputer;
   VectorPartitionFunctionElementary();
   std::string toHTML() const;
+  void compute();
+  void computeQuasiPolynomials(int directionIndex);
+  void computeFirstQuasiPolynomial(int directionIndex);
+  bool computeOneQuasiPolynomial(Cone& cone, int directionIndex);
 };
 
 class VectorPartitionFunction {

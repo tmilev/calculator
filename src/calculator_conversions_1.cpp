@@ -10,21 +10,23 @@
 
 // Start WithContext specializations.
 template < >
-void WithContext<Polynomial<Rational> >::toExpression(
+bool WithContext<Polynomial<Rational> >::toExpression(
   Calculator& calculator, Expression& output
 ) {
   CalculatorConversions::expressionFromPolynomial<Rational>(
     calculator, this->content, output, &this->context
   );
+  return true;
 }
 
 template < >
-void WithContext<Polynomial<AlgebraicNumber> >::toExpression(
+bool WithContext<Polynomial<AlgebraicNumber> >::toExpression(
   Calculator& calculator, Expression& output
 ) {
   CalculatorConversions::expressionFromPolynomial<AlgebraicNumber>(
     calculator, this->content, output, &this->context
   );
+  return true;
 }
 
 // End WithContext specializations.

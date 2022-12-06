@@ -5821,7 +5821,7 @@ public:
   bool readFromFile(std::fstream& input);
   void makeZn(int dimension);
   void refineByOtherLattice(const Lattice& other);
-  void makeFromRoots(const Vectors<Rational>& input);
+  void makeFromRoots(const List<Vector<Rational> >& input);
   Lattice() {}
   Lattice(const Lattice& other) {
     this->operator=(other);
@@ -5943,6 +5943,7 @@ public:
     bool visited;
     Vector<Rational> internalPoint;
     List<unsigned char> hashOfContainingSimplices;
+    QuasiPolynomial polynomial;
     Payload();
     void incrementHashOfContainingSimplices(char input);
   };
@@ -6259,6 +6260,9 @@ public:
     Vector<Rational>& translationVector
   );
   void initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
+  void initializeFromDirections(
+    const List<Vector<Rational> >& inputVectors
+  );
   void initializeFromAffineDirectionsAndRefine(
     Vectors<Rational>& inputDirections,
     Vectors<Rational>& inputAffinePoints

@@ -4431,7 +4431,94 @@ std::string VectorPartitionFunctionElementary::toHTML() const {
   }
   std::stringstream out;
   out << "Vector partition function of " << this->originalVectors;
+  out << this->collection.toHTMLGraphicsOnly(false);
+  for (Cone& cone : this->collection.refinedCones.values) {
+    out << "<hr>";
+    out << "Cone: " << cone.id << ".<br>";
+    out << "Quasipolynomial: " << cone.payload.polynomial.toHTML();
+  }
   return out.str();
+}
+
+void VectorPartitionFunctionElementary::compute() {
+  STACK_TRACE("VectorPartitionFunctionElementary::compute");
+  ProgressReport report;
+  this->collection.initializeFromDirections(this->originalVectors);
+  for (int i = 0; i < this->originalVectors.size; i ++) {
+    this->collection.markAllConesNonRefined(i);
+    this->collection.refineByOneDirection(i, &report);
+    this->computeQuasiPolynomials(i);
+  }
+}
+
+void VectorPartitionFunctionElementary::computeQuasiPolynomials(
+  int directionIndex
+) {
+  STACK_TRACE("VectorPartitionFunctionElementary::computeQuasiPolynomials");
+  this->collection.markAllConesNonRefined(directionIndex);
+  while (this->collection.nonRefinedCones.size() > 0) {
+    this->computeFirstQuasiPolynomial(directionIndex);
+  }
+}
+
+void VectorPartitionFunctionElementary::computeFirstQuasiPolynomial(
+  int directionIndex
+) {
+  for (int i = 0; i < this->collection.nonRefinedCones.size(); i ++) {
+    Cone& cone = this->collection.nonRefinedCones.values[i];
+    if (this->computeOneQuasiPolynomial(cone, directionIndex)) {
+      this->collection.refinedCones.setKeyValue(cone.id, cone);
+      this->collection.nonRefinedCones.removeIndex(i);
+      return;
+    }
+  }
+  if (this->collection.nonRefinedCones.size() != 0) {
+    global.fatal
+    << "Cone collection is expected to have "
+    << "a cone with all exit walls visited."
+    << global.fatal;
+  }
+}
+
+bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
+  Cone& cone, int directionIndex
+) {
+  Vector<Rational> direction = this->originalVectors[directionIndex];
+  List<Wall> exitWalls;
+  if (
+    !this->collection.allExitWallsAreVisited(cone, direction, exitWalls)
+  ) {
+    return false;
+  }
+  if (exitWalls.size > 1) {
+    global.fatal
+    << "At this point of code, a maximum of 1 exit walls is expected."
+    << global.fatal;
+  }
+  cone.payload.visited = true;
+  if (directionIndex == this->collection.getDimension() - 1) {
+    Cone baseCone;
+    List<Vector<Rational> > firstDirections;
+    this->originalVectors.slice(
+      0, this->collection.getDimension(), firstDirections
+    );
+    baseCone.createFromVertices(firstDirections);
+    if (!baseCone.isInCone(cone.internalPoint())) {
+      return true;
+    }
+    Lattice lattice;
+    lattice.makeFromRoots(firstDirections);
+    cone.payload.polynomial.makeZeroOverLattice(lattice);
+    Polynomial<Rational> one;
+    one.makeOne();
+    Vector<Rational> zeroVector;
+    zeroVector.makeZero(this->collection.getDimension());
+    cone.payload.polynomial.addLatticeShift(one, zeroVector);
+    return true;
+  }
+  QuasiPolynomial discreteIntegrand = cone.payload.polynomial;
+  //  discreteIntegrand.substitution()
+  return true;
 }
 
 void VectorPartitionFunction::initializeVectors(
@@ -11002,7 +11089,7 @@ std::string QuasiPolynomial::toHTML(FormatExpressions* format) {
     }
   }
   if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {
-    out << "where " << "\\(" << "\\Lambda = \\langle";
+    out << " where " << "\\(" << "\\Lambda = \\langle";
     Vectors<Rational> roots;
     roots.assignMatrixRows(this->ambientLatticeReduced.basisRationalForm);
     for (int i = 0; i < roots.size; i ++) {
@@ -11014,7 +11101,7 @@ std::string QuasiPolynomial::toHTML(FormatExpressions* format) {
     out << "\\rangle";
   } else {
     out
-    << "where \\(\\Lambda =\\mathbb{Z}^{"
+    << " where \\(\\Lambda =\\mathbb{Z}^{"
     << this->minimalNumberOfVariables()
     << "}";
   }
@@ -15203,18 +15290,26 @@ void ConeCollection::addMutualNeighborsIfAdjacent(
   wallInIncoming.neighbors.addOnTop(original.id);
 }
 
+void ConeCollection::initializeFromDirections(
+  const List<Vector<Rational> >& inputVectors
+) {
+  STACK_TRACE("ConeCollection::initializeFromDirections");
+  this->initialize();
+  Cone startingCone(0);
+  this->conesCreated ++;
+  Vectors<Rational> input = inputVectors;
+  startingCone.createFromVertices(input);
+  this->nonRefinedCones.setKeyValue(startingCone.id, startingCone);
+  this->convexHull.makeConvexHullOfMeAnd(startingCone);
+  this->slicingDirections.addListOnTop(inputVectors);
+}
+
 void ConeCollection::initializeFromDirectionsAndRefine(
   Vectors<Rational>& inputVectors
 ) {
   STACK_TRACE("ConeCollection::initializeFromDirectionsAndRefine");
+  this->initializeFromDirections(inputVectors);
   ProgressReport report;
-  this->initialize();
-  Cone startingCone(0);
-  this->conesCreated ++;
-  startingCone.createFromVertices(inputVectors);
-  this->nonRefinedCones.setKeyValue(startingCone.id, startingCone);
-  this->convexHull.makeConvexHullOfMeAnd(startingCone);
-  this->slicingDirections.addListOnTop(inputVectors);
   this->refineByDirections(&report);
 }
 
@@ -16462,12 +16557,12 @@ bool ConeCollection::findMaxLFOverConeProjective(
   List<Polynomial<Rational> >& inputLinearPolynomials,
   List<int>& outputMaximumOverEeachSubChamber
 ) {
-  Vectors<Rational> HyperPlanesCorrespondingToLF;
+  Vectors<Rational> hyperPlanesCorrespondingToLF;
   if (input.walls.size < 1 || inputLinearPolynomials.size < 1) {
     return false;
   }
   int dimension = input.walls[0].normal.size;
-  HyperPlanesCorrespondingToLF.setSize(inputLinearPolynomials.size);
+  hyperPlanesCorrespondingToLF.setSize(inputLinearPolynomials.size);
   for (int i = 0; i < inputLinearPolynomials.size; i ++) {
     Polynomial<Rational>& currentPoly = inputLinearPolynomials[i];
     if (currentPoly.totalDegree() != 1) {
@@ -16478,7 +16573,7 @@ bool ConeCollection::findMaxLFOverConeProjective(
       << dimension;
       return false;
     }
-    Vector<Rational>& newWall = HyperPlanesCorrespondingToLF[i];
+    Vector<Rational>& newWall = hyperPlanesCorrespondingToLF[i];
     newWall.makeZero(dimension);
     for (int j = 0; j < currentPoly.size(); j ++) {
       for (int k = 0; k < dimension; k ++) {
@@ -16491,7 +16586,7 @@ bool ConeCollection::findMaxLFOverConeProjective(
   }
   return
   this->findMaxLFOverConeProjective(
-    input, HyperPlanesCorrespondingToLF, outputMaximumOverEeachSubChamber
+    input, hyperPlanesCorrespondingToLF, outputMaximumOverEeachSubChamber
   );
 }
 
@@ -16650,7 +16745,7 @@ void Lattice::makeFromMatrix(const Matrix<Rational>& input) {
   this->reduce();
 }
 
-void Lattice::makeFromRoots(const Vectors<Rational>& input) {
+void Lattice::makeFromRoots(const List<Vector<Rational> >& input) {
   Matrix<Rational> rescaled;
   rescaled.assignVectorsToRows(input);
   rescaled.getMatrixIntegerWithDenominator(this->basis, this->denominator);
@@ -16670,4 +16765,46 @@ std::string Lattice::toString() const {
   }
   out << ">";
   return out.str();
+}
+
+void BernoulliSumComputer::getBernoulliSum(
+  int power, Polynomial<Rational>& output
+) {
+  output.makeZero();
+  ProgressReport report;
+  std::stringstream out;
+  out << "Computing Bernoulli sums of powers: " << power << ".";
+  report.report(out.str());
+  for (int i = 0; i <= power; i ++) {
+    Rational coefficient;
+    this->getNthBernoulliPlusNumber(i, coefficient);
+    coefficient *= Rational::nChooseK(power + 1, i);
+    output.addMonomial(MonomialPolynomial(0, power + 1 - i), coefficient);
+  }
+  output /= power + 1;
+}
+
+void BernoulliSumComputer::getNthBernoulliPlusNumber(
+  int index, Rational& output
+) {
+  if (index < this->bernoulliPlusNumbers.size) {
+    // The number already computed.
+    output = this->bernoulliPlusNumbers[index];
+    return;
+  }
+  // Compute the numbers from small to large to ensure we don't get a deep
+  // recursion.
+  ProgressReport report;
+  std::stringstream out;
+  out << "Computing Bernoulli-plus number index: " << index << ".";
+  report.report(out.str());
+  output = 1;
+  for (int i = 0; i < index; i ++) {
+    Rational summand;
+    this->getNthBernoulliPlusNumber(i, summand);
+    summand *= Rational::nChooseK(index, i);
+    summand /= (index - i + 1);
+    output -= summand;
+  }
+  this->bernoulliPlusNumbers.addOnTop(output);
 }

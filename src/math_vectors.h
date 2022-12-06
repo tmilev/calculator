@@ -1156,6 +1156,9 @@ public:
     }
     return true;
   }
+  Vectors() {}
+  Vectors(const List<Vector<Coefficient> >& other):
+  List<Vector<Coefficient> >(other) {}
   class Test {
   public:
     static bool all();

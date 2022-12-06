@@ -119,9 +119,6 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     CalculatorFunctionsVectorPartitionFunction::
     applyVectorPartitionFunctionFormula,
     "",
-    "<b>WORK IN PROGRESS</b>. "
-    "The value of f{}(4,5) computed below is not accurate. "
-    "Will hopefully be fixed in the coming weeks. "
     "Applies the vector partition function formula. ",
     "vectors = (\n"
     "(1,0),"
@@ -142,5 +139,24 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "::applyVectorPartitionFunctionFormula",
     "ApplyVectorPartitionFunction",
     composite
+  );
+  this->addOperationHandler(
+    "BernoulliSum",
+    CalculatorFunctionsVectorPartitionFunction::bernoulliSum,
+    "",
+    "Returns the Bernoulli sum formula / Faulhaber's formula, "
+    "for the sum of the powers of 1^k+2^k+...+n^k as a polynomial of n of k+1'st degree. "
+    ,
+    "p=3;\n"
+    "N=100;\n"
+    "B=BernoulliSum(p,n);\n"
+    "f{}0= 0;\n"
+    "f{}{{n}} = n^p+f{}(n-1);\n"
+    "f{}N;\n"
+    "(n=N;B)_2;\n",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::bernouliSum",
+    "BernoulliSum",
+    innerStandard
   );
 }

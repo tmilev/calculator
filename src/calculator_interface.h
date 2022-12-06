@@ -1108,7 +1108,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string toString() const;
-  void toExpression(Calculator& calculator, Expression& output);
+  bool toExpression(Calculator& calculator, Expression& output);
   // Transforms the content ands sets the new context.
   // Do not call directly
   // unless you can guarantee that the newContext is suitable:
@@ -1122,11 +1122,11 @@ public:
 };
 
 template < >
-void WithContext<Polynomial<AlgebraicNumber> >::toExpression(
+bool WithContext<Polynomial<AlgebraicNumber> >::toExpression(
   Calculator& calculator, Expression& output
 );
 template < >
-void WithContext<Polynomial<Rational> >::toExpression(
+bool WithContext<Polynomial<Rational> >::toExpression(
   Calculator& calculator, Expression& output
 );
 class Function {

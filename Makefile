@@ -205,6 +205,7 @@ SOURCES_RELATIVE_PATH=\
     math_implementation_5_test.cpp \
     math_implementation_6_test.cpp \
     math_lattices.cpp \
+    math_vector_partition_functions.cpp \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \

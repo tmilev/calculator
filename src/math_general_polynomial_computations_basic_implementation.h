@@ -1692,6 +1692,29 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
 }
 
 template <class Coefficient>
+void Polynomial<Coefficient>::getCoefficientPolynomialOfXPowerK(int variableIndex, int variablePower, Polynomial<Coefficient> &output)
+{
+  if (this == &output)
+  {
+    Polynomial<Coefficient> myCopy = *this;
+    return myCopy.getCoefficientPolynomialOfXPowerK(variableIndex, variablePower, output);
+  }
+  output.makeZero();
+
+  for (int i = 0; i < this->size(); i++)
+  {
+    const MonomialPolynomial &monomial = this->monomials[i];
+    if (monomial(variableIndex) != variablePower)
+    {
+      continue;
+    }
+    MonomialPolynomial monomialCopy = monomial;
+    monomialCopy.setVariable(variableIndex, 0);
+    output.addMonomial(monomialCopy, this->coefficients[i]);
+  }
+}
+
+template <class Coefficient>
 void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
   Selection& nonCoefficientVariables,
   Polynomial<Polynomial<Coefficient> >& output

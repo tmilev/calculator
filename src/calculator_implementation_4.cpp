@@ -2410,6 +2410,7 @@ void ObjectContainer::reset() {
   this->canvasPlotCounter = 0;
   this->elementsOfSemisimpleLieAlgebrasWithAlgebraicCoefficients.clear();
   this->vectorPartitionFunctions.clear();
+  this->lattices.clear();
   this->resetPlots();
   this->resetSliders();
 }

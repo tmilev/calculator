@@ -861,9 +861,14 @@ public:
   void computeQuasiPolynomials(int directionIndex);
   void computeFirstQuasiPolynomial(int directionIndex);
   bool computeOneQuasiPolynomial(Cone& cone, int directionIndex);
-  bool computeOneQuasiPolynomialSingleExitWall(
-    Cone& cone, int directionIndex, Vector<Rational>& exitWall
-  );
+  void computeOneQuasiPolynomialExitWallWithoutNeighbor(
+      Cone &cone, const Vector<Rational> &direction, const Vector<Rational> &exitWall);
+  void computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
+      const QuasiPolynomial &toBeIntegrated, int shift, int scale,
+      QuasiPolynomial &outputAccumulator, const Vector<Rational> &direction, const Vector<Rational> &exitWall);
+  void computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
+      const QuasiPolynomial &toBeIntegrated, int shift, int scale, PolynomialSubstitution<Rational> &substitution, int latticeShiftIndex,
+      QuasiPolynomial &outputAccumulator, const Vector<Rational> &direction, const Vector<Rational> &exitWall);
 };
 
 class VectorPartitionFunction {

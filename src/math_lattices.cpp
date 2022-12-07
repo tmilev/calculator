@@ -843,6 +843,11 @@ bool Lattice::substitutionHomogeneous(
   return false;
 }
 
+unsigned int Lattice::hashFunction(const Lattice &input)
+{
+  return input.basisRationalForm.hashFunction();
+}
+
 void Lattice::scaleNormalizeByPositive(Vector<Rational>& toScale) {
   int firstIndex = toScale.getIndexFirstNonZeroCoordinate();
   if (firstIndex < 0) {

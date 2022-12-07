@@ -121,7 +121,9 @@ public:
     Vectors<Rational>& output
   ) const;
   std::string toString() const;
-  bool operator==(const Lattice& other) {
+  static unsigned int hashFunction(const Lattice &input);
+  bool operator==(const Lattice &other)
+  {
     return this->basisRationalForm == other.basisRationalForm;
   }
   void operator=(const Lattice& other) {

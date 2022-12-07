@@ -3295,9 +3295,13 @@ public:
     Selection& nonCoefficientVariables,
     Polynomial<Polynomial<Coefficient> >& output
   ) const;
+
   void getPolynomialUnivariateWithPolynomialCoefficients(
     int variableIndex, Polynomial<Polynomial<Coefficient> >& output
   ) const;
+  // Returns the polynomial coefficient in front of the variable x_{variableIndex}^variablePower.
+  void getCoefficientPolynomialOfXPowerK(int variableIndex, int variablePower, Polynomial<Coefficient> &output);
+
   // Multivariable polynomial division with remainder.
   // Can be done using the multi-divisor polynomial division algorithm
   // in GroebnerBasisComputation by passing a single basis element.

@@ -1711,7 +1711,8 @@ public:
   littelmannOperators;
   MapReferences<List<Vector<Rational> >, VectorPartitionFunction>
   vectorPartitionFunctions;
-  WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
+  HashedListReferences<Lattice> lattices;
+  WeylGroupData &getWeylGroupDataCreateIfNotPresent(const DynkinType &input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(
     const DynkinType& input
   );

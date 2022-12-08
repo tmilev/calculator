@@ -205,7 +205,8 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   const Vector<Rational>& exitWall
 ) {
   STACK_TRACE(
-    "VectorPartitionFunctionElementary::computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift"
+    "VectorPartitionFunctionElementary::"
+    "computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift"
   );
   Polynomial<Rational> value =
   toBeIntegrated.valueOnEachLatticeShift[latticeShiftIndex];

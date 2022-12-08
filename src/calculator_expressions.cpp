@@ -3228,7 +3228,10 @@ bool Expression::toStringBuiltIn<Lattice>(
   STACK_TRACE("Expression::toStringBuiltIn_Lattice");
   (void) format;
   const Lattice& lattice = input.getValue<Lattice>();
-  out << Calculator::Functions::Names::lattice << "{}" << lattice.toString();
+  out
+  << Calculator::Functions::Names::lattice
+  << "{}"
+  << lattice.toStringParentheses();
   return true;
 }
 
@@ -3241,6 +3244,7 @@ bool Expression::toStringBuiltIn<
   FormatExpressions* format
 ) {
   input.checkInitialization();
+  (void) format;
   out
   << input.owner->builtInName<ElementSemisimpleLieAlgebra<AlgebraicNumber> >();
   return true;
@@ -3255,6 +3259,7 @@ bool Expression::toStringBuiltIn<
   FormatExpressions* format
 ) {
   input.checkInitialization();
+  (void) format;
   out
   << input.owner->builtInName<
     MonomialTensor<int, HashFunctions::hashFunction<int> >
@@ -3269,6 +3274,7 @@ bool Expression::toStringBuiltIn<Weight<Rational> >(
   FormatExpressions* format
 ) {
   input.checkInitialization();
+  (void) format;
   out << input.owner->builtInName<Weight<Rational> >();
   return true;
 }

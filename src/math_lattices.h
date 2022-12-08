@@ -93,6 +93,10 @@ public:
   bool substitutionHomogeneous(
     const Matrix<Rational>& substitution, Lattice& resultIsSubsetOf
   );
+  void subLatticeWithIntegralScalarProducts(
+    const Vector<Rational>& mustHaveIntegerScalarProductWith,
+    Lattice& output
+  ) const;
   void reduce();
   void intersectWithLinearSubspaceSpannedBy(
     const Vectors<Rational>& subspaceBasis
@@ -120,6 +124,7 @@ public:
     Vectors<Rational>& output
   ) const;
   std::string toString() const;
+  std::string toStringParentheses() const;
   static unsigned int hashFunction(const Lattice& input);
   bool operator==(const Lattice& other) const;
   void operator=(const Lattice& other) {

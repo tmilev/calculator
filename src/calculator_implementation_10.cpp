@@ -201,5 +201,40 @@ bool CalculatorFunctionsVectorPartitionFunction::
 subLatticeWithIntegralScalarProducts(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  global.fatal << "IMPLEMENT please" << global.fatal;
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "subLatticeWithIntegralScalarProducts"
+  );
+  if (input.size() != 3) {
+    return
+    calculator
+    << "subLatticeWithIntegralScalarProducts expects 2 inputs, "
+    "lattice and vector.";
+  }
+  Vector<Rational> shift;
+  Lattice lattice;
+  if (!input[1].isOfType(&lattice)) {
+    return
+    calculator
+    << "First argument of subLatticeWithIntegralScalarProducts "
+    "expected to be a lattice.";
+  }
+  if (!calculator.getVector(input[2], shift)) {
+    return
+    calculator
+    << "Second argument of subLatticeWithIntegralScalarProducts "
+    "expected to be a vector.";
+  }
+  if (shift.size != lattice.getDimension()) {
+    return
+    calculator
+    << "Lattice is in dimensino "
+    << lattice.getDimension()
+    << " but the shift has "
+    << shift.size
+    << " coordinates. ";
+  }
+  Lattice result;
+  lattice.subLatticeWithIntegralScalarProducts(shift, result);
+  return output.assignValue(calculator, result);
 }

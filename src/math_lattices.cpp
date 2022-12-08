@@ -963,6 +963,13 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   }
 }
 
+void Lattice::subLatticeWithIntegralScalarProducts(
+  const Vector<Rational>& mustHaveIntegerScalarProductWith,
+  Lattice& output
+) const {
+  global.fatal << "IMPLEMENT PLEASe" << global.fatal;
+}
+
 void Lattice::reduce() {
   STACK_TRACE("Lattice::reduce");
   this->basis.gaussianEliminationEuclideanDomain();
@@ -1059,7 +1066,13 @@ void Lattice::makeFromRoots(const List<Vector<Rational> >& input) {
 
 std::string Lattice::toString() const {
   std::stringstream out;
-  out << "L=<";
+  out << "L=<" << this->toStringParentheses() << ">";
+  return out.str();
+}
+
+std::string Lattice::toStringParentheses() const {
+  std::stringstream out;
+  out << "(";
   Vectors<Rational> roots;
   roots.assignMatrixRows(this->basisRationalForm);
   for (int i = 0; i < this->basisRationalForm.numberOfRows; i ++) {
@@ -1068,6 +1081,6 @@ std::string Lattice::toString() const {
       out << ",";
     }
   }
-  out << ">";
+  out << ")";
   return out.str();
 }

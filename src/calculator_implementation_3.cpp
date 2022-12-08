@@ -616,7 +616,7 @@ bool Expression::assignMatrixExpressions(
     matrixType.addChildAtomOnTop(owner.opDouble());
     break;
   case typeAlgebraic:
-    matrixType.addChildAtomOnTop(owner.opAlgebraicNumber());
+    matrixType.addChildAtomOnTop(owner.builtInCode<AlgebraicNumber>());
     break;
   case typePolynomialRational:
     matrixType.addChildAtomOnTop(owner.opPolynomialRational());

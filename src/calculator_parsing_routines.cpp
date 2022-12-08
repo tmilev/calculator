@@ -446,7 +446,7 @@ void Calculator::reset() {
   this->objectContainer.reset();
   // this->logEvaluationSteps.setSize(0);
   this->operations.clear();
-  this->builtInTypes.all.clear();
+  this->allBuiltInTypes.clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.clear();
   this->atomsThatFreezeArguments.clear();
   this->atomsNotInterpretedAsFunctions.clear();
@@ -494,7 +494,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->mode = desiredMode;
   this->operations.setExpectedSize(1000);
   this->namedRules.setExpectedSize(500);
-  this->builtInTypes.all.setExpectedSize(50);
+  this->allBuiltInTypes.setExpectedSize(50);
   this->formatVisibleStrings.flagExpressionIsFinal = true;
   // Operation List is the very first operation.
   // It signifies a non-atomic expression.
@@ -544,52 +544,49 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addOperationNoRepetitionAllowed("\\lim");
   this->addOperationNoRepetitionAllowed("LogBase");
   this->addOperationNoRepetitionAllowed("\\int");
-  this->addBuiltInType("Rational");
-  this->addBuiltInType("EltZmodP");
-  this->addBuiltInType("Double");
-  this->addBuiltInType("AlgebraicNumber");
-  this->addBuiltInType("PolynomialRational");
-  this->addBuiltInType("PolynomialOverANs");
-  this->addBuiltInType("PolynomialModuloInteger");
-  this->addBuiltInType("PolynomialModuloPolynomialModuloInteger");
-  this->addBuiltInType("RationalFunction");
-  this->addBuiltInType("RationalFunctionAlgebraicCoefficients");
-  this->addBuiltInType("RationalFunctionModuloInteger");
-  this->addBuiltInType("string");
-  this->addBuiltInType("JSON");
-  this->addBuiltInType("ElementUEoverRF");
-  this->addBuiltInType("ElementSemisimpleLieAlgebraAlgebraicCoefficients");
-  this->addBuiltInType(
-    Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas
-  );
-  this->addBuiltInType(
-    Calculator::BuiltInTypes::Names::vectorPartitionFunction
-  );
-  this->addBuiltInType("CharSSAlgMod");
-  this->addBuiltInType("SemisimpleLieAlg");
-  this->addBuiltInType("LittelmannPath");
-  this->addBuiltInType("LRO");
-  this->addBuiltInType("MatrixRational");
-  this->addBuiltInType("MatrixDouble");
-  this->addBuiltInType("MatrixAlgebraic");
-  this->addBuiltInType("MatrixTensorRational");
-  this->addBuiltInType("MatrixRF");
-  this->addBuiltInType("MatrixPolynomialRational");
-  this->addBuiltInType("CalculusPlot");
-  this->addBuiltInType("SemisimpleSubalgebras");
-  this->addBuiltInType("CandidateSSsubalgebra");
-  this->addBuiltInType("WeylGroup");
-  this->addBuiltInType("ElementWeylGroup");
-  this->addBuiltInType("HyperoctahedralGroupRepresentation");
-  this->addBuiltInType("ElementHyperoctahedral");
-  this->addBuiltInType("WeylGroupRep");
-  this->addBuiltInType("WeylGroupVirtualRep");
-  this->addBuiltInType("ElementWeylAlgebra");
-  this->addBuiltInType("weightLieAlg");
-  this->addBuiltInType("weightLieAlgPoly");
-  this->addBuiltInType("ellipticCurveElementsRational");
-  this->addBuiltInType("ellipticCurveElementsZmodP");
-  this->addBuiltInType("userInputTextBox");
+  this->addBuiltInType<Rational>();
+  this->addBuiltInType<ElementZmodP>();
+  this->addBuiltInType<double>();
+  this->addBuiltInType<AlgebraicNumber>();
+  this->addBuiltInType<Polynomial<Rational>>();
+  this->addBuiltInType<Polynomial<AlgebraicNumber>>();
+  this->addBuiltInType<Polynomial<ElementZmodP>>();
+  this->addBuiltInType<PolynomialModuloPolynomial<ElementZmodP>>();
+  this->addBuiltInType<RationalFraction<Rational>>();
+  this->addBuiltInType<RationalFraction<AlgebraicNumber>>();
+  this->addBuiltInType<RationalFraction<ElementZmodP>>();
+  this->addBuiltInType<std::string>();
+  this->addBuiltInType<JSData>();
+  this->addBuiltInType<
+      ElementUniversalEnveloping<RationalFraction<Rational>>>();
+  this->addBuiltInType<ElementSemisimpleLieAlgebra<AlgebraicNumber>>();
+  this->addBuiltInType<
+      ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>();
+  this->addBuiltInType<VectorPartitionFunction>();
+  this->addBuiltInType<
+      CharacterSemisimpleLieAlgebraModule<Rational>>();
+  this->addBuiltInType<SemisimpleLieAlgebra *>();
+  this->addBuiltInType<LittelmannPath>();
+  this->addBuiltInType<
+      MonomialTensor<int, HashFunctions::hashFunction>>();
+  this->addBuiltInType<MatrixTensor<Rational>>();
+  this->addBuiltInType<Plot>();
+  this->addBuiltInType<SemisimpleSubalgebras>();
+  this->addBuiltInType<WeylGroupData>();
+  this->addBuiltInType<ElementWeylGroup>();
+  this->addBuiltInType<
+      GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>>();
+  this->addBuiltInType<ElementHyperoctahedralGroupR2>();
+  this->addBuiltInType<
+      GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
+  this->addBuiltInType<
+      VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
+  this->addBuiltInType<ElementWeylAlgebra<Rational>>();
+  this->addBuiltInType<Weight<Rational>>();
+  this->addBuiltInType<Weight<Polynomial<Rational>>>();
+  this->addBuiltInType<ElementEllipticCurve<Rational>>();
+  this->addBuiltInType<ElementEllipticCurve<ElementZmodP>>();
+  this->addBuiltInType<InputBox>();
   this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
   this->parser.initializeControlSequences();
   this->initializePredefinedStandardOperationsWithoutHandler();

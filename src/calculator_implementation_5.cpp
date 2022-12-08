@@ -1388,8 +1388,10 @@ bool CalculatorFunctionsPlot::plotLabel(
   if (!input[2].isOfType<std::string>(&label)) {
     label = input[2].toString();
   }
-  PlotObject plot;
-  plot.makeLabel(labelPosition, label);
+  PlotObject plotObject;
+  plotObject.makeLabel(labelPosition, label);
+  Plot plot;
+  plot += plotObject;
   return output.assignValue(calculator, plot);
 }
 

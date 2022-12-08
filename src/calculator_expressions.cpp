@@ -22,258 +22,257 @@ List<Expression>::Comparator* FormatExpressions::getMonomialOrder<Expression>()
   return nullptr;
 }
 
-// Expression::getBuiltInType specializations follow
-template < >
-int Expression::getBuiltInType<ElementEllipticCurve<Rational> >() const {
-  this->checkInitialization();
-  return this->owner->opEllipticCurveElementsRational();
+// Calculator::builtInName specializations follow
+template <>
+std::string Calculator::builtInName<ElementEllipticCurve<Rational>>()
+{
+  return "ellipticCurveElementsRational";
 }
 
-template < >
-int Expression::getBuiltInType<ElementEllipticCurve<ElementZmodP> >() const {
-  this->checkInitialization();
-  return this->owner->opEllipticCurveElementsZmodP();
+template <>
+std::string Calculator::builtInName<ElementEllipticCurve<ElementZmodP>>()
+{
+  return "ellipticCurveElementsZmodP";
 }
 
-template < >
-int Expression::getBuiltInType<RationalFraction<Rational> >() const {
-  this->checkInitialization();
-  return this->owner->opRationalFraction();
+template <>
+std::string Calculator::builtInName<RationalFraction<Rational>>()
+{
+  return "RationalFunction";
 }
 
-template < >
-int Expression::getBuiltInType<RationalFraction<AlgebraicNumber> >() const {
-  this->checkInitialization();
-  return this->owner->opRationalFunctionAlgebraicCoefficients();
+template <>
+std::string Calculator::builtInName<RationalFraction<AlgebraicNumber>>()
+{
+  return "RationalFunctionAlgebraicCoefficients";
 }
 
-template < >
-int Expression::getBuiltInType<RationalFraction<ElementZmodP> >() const {
-  this->checkInitialization();
-  return this->owner->opRationalFunctionModuloInteger();
+template <>
+std::string Calculator::builtInName<RationalFraction<ElementZmodP>>()
+{
+  return "RationalFunctionModuloInteger";
 }
 
-template < >
-int Expression::getBuiltInType<InputBox>() const {
-  this->checkInitialization();
-  return this->owner->opUserInputTextBox();
+template <>
+std::string Calculator::builtInName<InputBox>()
+{
+  return "userInputTextBox";
 }
 
-template < >
-int Expression::getBuiltInType<Rational>() const {
-  this->checkInitialization();
-  return this->owner->opRational();
+template <>
+std::string Calculator::builtInName<Rational>()
+{
+  return "Rational";
 }
 
-template < >
-int Expression::getBuiltInType<ElementHyperoctahedralGroupR2>() const {
-  this->checkInitialization();
-  return this->owner->opElementHyperOctahedral();
+template <>
+std::string Calculator::builtInName<ElementHyperoctahedralGroupR2>()
+{
+  return "ElementHyperoctahedral";
 }
 
-template < >
-int Expression::getBuiltInType<
-  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
->() const {
-  this->checkInitialization();
-  return this->owner->opHyperoctahedralGroupRep();
+template <>
+std::string Calculator::builtInName<
+    GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>>()
+{
+  return "HyperoctahedralGroupRepresentation";
 }
 
-template < >
-int Expression::getBuiltInType<JSData>() const {
-  this->checkInitialization();
-  return this->owner->opJSON();
+template <>
+std::string Calculator::builtInName<JSData>()
+{
+  return "JSON";
 }
 
-template < >
-int Expression::getBuiltInType<std::string>() const {
-  this->checkInitialization();
-  return this->owner->opString();
+template <>
+std::string Calculator::builtInName<std::string>()
+{
+  return "string";
 }
 
-template < >
-int Expression::getBuiltInType<AlgebraicNumber>() const {
-  this->checkInitialization();
-  return this->owner->opAlgebraicNumber();
+template <>
+std::string Calculator::builtInName<AlgebraicNumber>()
+{
+  return "AlgebraicNumber";
 }
 
-template < >
-int Expression::getBuiltInType<ElementZmodP>() const {
-  this->checkInitialization();
-  return this->owner->opEltZmodP();
+template <>
+std::string Calculator::builtInName<ElementZmodP>()
+{
+  return "EltZmodP";
 }
 
-template < >
-int Expression::getBuiltInType<
-  ElementUniversalEnveloping<RationalFraction<Rational> >
->() const {
-  this->checkInitialization();
-  return this->owner->opElementUEOverRF();
+template <>
+std::string Calculator::builtInName<
+    ElementUniversalEnveloping<RationalFraction<Rational>>>()
+{
+  return "ElementUEoverRF";
 }
 
-template < >
-int Expression::getBuiltInType<Weight<Rational> >() const {
-  this->checkInitialization();
-  return this->owner->opWeightLieAlgebra();
+template <>
+std::string Calculator::builtInName<Weight<Rational>>()
+{
+  return "weightLieAlg";
 }
 
-template < >
-int Expression::getBuiltInType<Weight<Polynomial<Rational> > >() const {
-  this->checkInitialization();
-  return this->owner->opWeightLieAlgPoly();
+template <>
+std::string Calculator::builtInName<Weight<Polynomial<Rational>>>()
+{
+  return "weightLieAlgPoly";
 }
 
-template < >
-int Expression::getBuiltInType<MatrixTensor<Rational> >() const {
-  this->checkInitialization();
-  return this->owner->opMatrixTensorRational();
+template <>
+std::string Calculator::builtInName<MatrixTensor<Rational>>()
+{
+  return "MatrixTensorRational";
 }
 
-template < >
-int Expression::getBuiltInType<int>() const {
-  this->checkInitialization();
-  return this->owner->opRational();
+template <>
+std::string Calculator::builtInName<int>()
+{
+  return Calculator::builtInName<Rational>();
 }
 
-template < >
-int Expression::getBuiltInType<LargeIntegerUnsigned>() const {
-  this->checkInitialization();
-  return this->owner->opRational();
+template <>
+std::string Calculator::builtInName<LargeIntegerUnsigned>()
+{
+  return Calculator::builtInName<Rational>();
 }
 
-template < >
-int Expression::getBuiltInType<double>() const {
-  this->checkInitialization();
-  return this->owner->opDouble();
+template <>
+std::string Calculator::builtInName<double>()
+{
+  return "Double";
 }
 
-template < >
-int Expression::getBuiltInType<Polynomial<Rational> >() const {
-  this->checkInitialization();
-  return this->owner->opPolynomialRational();
+template <>
+std::string Calculator::builtInName<Polynomial<Rational>>()
+{
+  return "PolynomialRational";
 }
 
-template < >
-int Expression::getBuiltInType<Polynomial<AlgebraicNumber> >() const {
-  this->checkInitialization();
-  return this->owner->opPolynomialAlgebraicNumbers();
+template <>
+std::string Calculator::builtInName<Polynomial<AlgebraicNumber>>()
+{
+  return "PolynomialOverANs";
 }
 
-template < >
-int Expression::getBuiltInType<Polynomial<ElementZmodP> >() const {
-  this->checkInitialization();
-  return this->owner->opPolynomialModuloInteger();
+template <>
+std::string Calculator::builtInName<Polynomial<ElementZmodP>>()
+{
+  return "PolynomialModuloInteger";
 }
 
-template < >
-int Expression::getBuiltInType<PolynomialModuloPolynomial<ElementZmodP> >()
-const {
-  this->checkInitialization();
-  return this->owner->opPolynomialModuloPolynomialModuloInteger();
+template <>
+std::string Calculator::builtInName<PolynomialModuloPolynomial<ElementZmodP>>()
+
+{
+  return "PolynomialModuloPolynomialModuloInteger";
 }
 
-template < >
-int Expression::getBuiltInType<ElementWeylAlgebra<Rational> >() const {
-  this->checkInitialization();
-  return this->owner->opElementWeylAlgebra();
+template <>
+std::string Calculator::builtInName<ElementWeylAlgebra<Rational>>()
+{
+  return "ElementWeylAlgebra";
 }
 
-template < >
-int Expression::getBuiltInType<SemisimpleLieAlgebra*>() const {
-  this->checkInitialization();
-  return this->owner->opSemisimpleLieAlgebra();
+template <>
+std::string Calculator::builtInName<SemisimpleLieAlgebra *>()
+{
+  return "SemisimpleLieAlg";
 }
 
-template < >
-int Expression::getBuiltInType<LittelmannPath>() const {
-  this->checkInitialization();
-  return this->owner->opLittelmannPath();
+template <>
+std::string Calculator::builtInName<LittelmannPath>()
+{
+  return "LittelmannPath";
 }
 
-template < >
-int Expression::getBuiltInType<
-  MonomialTensor<int, HashFunctions::hashFunction>
->() const {
-  this->checkInitialization();
-  return this->owner->opLRO();
+template <>
+std::string Calculator::builtInName<
+    MonomialTensor<int, HashFunctions::hashFunction>>()
+{
+  return "LRO";
 }
 
-template < >
-int Expression::getBuiltInType<
-  ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
->() const {
-  this->checkInitialization();
-  return this->owner->opElementTensorGVM();
+template <>
+std::string Calculator::builtInName<
+    ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>()
+{
+  return "ETGVM";
 }
 
-template < >
-int Expression::getBuiltInType<
-  CharacterSemisimpleLieAlgebraModule<Rational>
->() const {
-  this->checkInitialization();
-  return this->owner->opCharSSAlgMod();
+template <>
+std::string Calculator::builtInName<
+    CharacterSemisimpleLieAlgebraModule<Rational>>()
+{
+  return "CharSSAlgMod";
 }
 
-template < >
-int Expression::getBuiltInType<Plot>() const {
-  this->checkInitialization();
-  return this->owner->opCalculusPlot();
+template <>
+std::string Calculator::builtInName<Plot>()
+{
+  return "CalculusPlot";
 }
 
-template < >
-int Expression::getBuiltInType<PlotObject>() const {
-  this->checkInitialization();
-  return this->owner->opCalculusPlot();
+template <>
+std::string Calculator::builtInName<PlotObject>()
+{
+  return Calculator::builtInName<Plot>();
 }
 
-template < >
-int Expression::getBuiltInType<SemisimpleSubalgebras>() const {
-  this->checkInitialization();
-  return this->owner->opSemisimpleSubalgebras();
+template <>
+std::string Calculator::builtInName<SemisimpleSubalgebras>()
+{
+  return "SemisimpleSubalgebras";
 }
 
-template < >
-int Expression::getBuiltInType<WeylGroupData>() const {
-  this->checkInitialization();
-  return this->owner->opWeylGroup();
+template <>
+std::string Calculator::builtInName<WeylGroupData>()
+{
+  return "WeylGroup";
 }
 
-template < >
-int Expression::getBuiltInType<
-  GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
->() const {
-  this->checkInitialization();
-  return this->owner->opWeylGroupRep();
+template <>
+std::string Calculator::builtInName<
+    GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>()
+{
+  return "WeylGroupRep";
 }
 
-template < >
-int Expression::getBuiltInType<ElementWeylGroup>() const {
-  this->checkInitialization();
-  return this->owner->opWeylGroupElement();
+template <>
+std::string Calculator::builtInName<ElementWeylGroup>()
+{
+  return "ElementWeylGroup";
 }
 
-template < >
-int Expression::getBuiltInType<
-  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
->() const {
-  this->checkInitialization();
-  return this->owner->opWeylGroupVirtualRep();
+template <>
+std::string Calculator::builtInName<
+    VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>()
+{
+  return "WeylGroupVirtualRep";
 }
 
-template < >
-int Expression::getBuiltInType<ElementSemisimpleLieAlgebra<AlgebraicNumber> >()
-const {
-  this->checkInitialization();
-  return this->owner->opElementSemisimpleLieAlgebraAlgebraicCoefficients();
+template <>
+std::string Calculator::builtInName<ElementSemisimpleLieAlgebra<AlgebraicNumber>>()
+
+{
+  return "ElementSemisimpleLieAlgebraAlgebraicCoefficients";
 }
 
-template < >
-int Expression::getBuiltInType<VectorPartitionFunction>() const {
-  this->checkInitialization();
-  return this->owner->builtInTypes.vectorPartitionFunction();
+template <>
+std::string Calculator::builtInName<VectorPartitionFunction>()
+{
+  return "VPF";
 }
 
-// Expression::getBuiltInType specializations end.
+template <>
+std::string Calculator::builtInName<Lattice>()
+{
+  return "Lattice";
+}
+
+// Calculator::builtInName specializations end.
 // Expression::addObjectReturnIndex specializations follow
 template < >
 int Expression::addObjectReturnIndex(
@@ -693,6 +692,14 @@ int Expression::addObjectReturnIndex(
   this->owner->objectContainer.vectorPartitionFunctions.getIndex(
     inputValue.fractions.originalVectors
   );
+}
+
+template <>
+int Expression::addObjectReturnIndex(
+    const Lattice &inputValue) const
+{
+  this->checkInitialization();
+  return this->owner->objectContainer.lattices.addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 // Expression::addObjectReturnIndex specializations end
@@ -2947,8 +2954,9 @@ bool Expression::toStringBuiltIn<
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
   out
-  << Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas
-  << "{}(";
+      << input.owner->builtInName<
+             ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>()
+      << "{}(";
   out
   << input.getValue<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
@@ -5753,7 +5761,8 @@ bool Expression::isBuiltInType(std::string* outputWhichOperation) const {
   if (!(*this)[0].isOperation(&tempS)) {
     return false;
   }
-  if (this->owner->getBuiltInTypes().contains(tempS)) {
+  if (this->owner->allBuiltInTypes.contains(tempS))
+  {
     if (outputWhichOperation != nullptr) {
       *outputWhichOperation = tempS;
     }

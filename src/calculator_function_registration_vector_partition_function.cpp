@@ -115,48 +115,69 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::BuiltInTypes::Names::vectorPartitionFunction,
-    CalculatorFunctionsVectorPartitionFunction::
-    applyVectorPartitionFunctionFormula,
-    "",
-    "Applies the vector partition function formula. ",
-    "vectors = (\n"
-    "(1,0),"
-    "(0,1),"
-    "(1,1),"
-    "(1,2),"
-    "(1,3),"
-    "(2,3) "
-    ");\n"
-    "f=VectorPartitionFunction{} (vectors);\n"
-    "target = (4,5);\n"
-    "AllVectorPartitions (target, vectors);\n"
-    "f{}target;\n"
-    "g=VectorPartitionFunction(Sequence{}1,Sequence{}2,Sequence{}3);\n"
-    "g{}(10);\n"
-    "AllVectorPartitions(Sequence{}10, (Sequence{}1,Sequence{}2,Sequence{}3))",
-    "CalculatorFunctionsVectorPartitionFunction"
-    "::applyVectorPartitionFunctionFormula",
-    "ApplyVectorPartitionFunction",
-    composite
-  );
+      this->builtInName<VectorPartitionFunction>(),
+      CalculatorFunctionsVectorPartitionFunction::
+          applyVectorPartitionFunctionFormula,
+      "",
+      "Applies the vector partition function formula. ",
+      "vectors = (\n"
+      "(1,0),"
+      "(0,1),"
+      "(1,1),"
+      "(1,2),"
+      "(1,3),"
+      "(2,3) "
+      ");\n"
+      "f=VectorPartitionFunction{} (vectors);\n"
+      "target = (4,5);\n"
+      "AllVectorPartitions (target, vectors);\n"
+      "f{}target;\n"
+      "g=VectorPartitionFunction(Sequence{}1,Sequence{}2,Sequence{}3);\n"
+      "g{}(10);\n"
+      "AllVectorPartitions(Sequence{}10, (Sequence{}1,Sequence{}2,Sequence{}3))",
+      "CalculatorFunctionsVectorPartitionFunction"
+      "::applyVectorPartitionFunctionFormula",
+      "ApplyVectorPartitionFunction",
+      composite);
   this->addOperationHandler(
-    "BernoulliSum",
-    CalculatorFunctionsVectorPartitionFunction::bernoulliSum,
-    "",
-    "Returns the Bernoulli sum formula / Faulhaber's formula, "
-    "for the sum of the powers of 1^k+2^k+...+n^k as a polynomial of n of k+1'st degree. "
-    ,
-    "p=3;\n"
-    "N=100;\n"
-    "B=BernoulliSum(p,n);\n"
-    "f{}0= 0;\n"
-    "f{}{{n}} = n^p+f{}(n-1);\n"
-    "f{}N;\n"
-    "(n=N;B)_2;\n",
-    "CalculatorFunctionsVectorPartitionFunction"
-    "::bernouliSum",
-    "BernoulliSum",
-    innerStandard
-  );
+      "BernoulliSum",
+      CalculatorFunctionsVectorPartitionFunction::bernoulliSum,
+      "",
+      "Returns the Bernoulli sum formula / Faulhaber's formula, "
+      "for the sum of the powers of 1^k+2^k+...+n^k as a polynomial of n of k+1'st degree. ",
+      "p=3;\n"
+      "N=100;\n"
+      "B=BernoulliSum(p,n);\n"
+      "f{}0= 0;\n"
+      "f{}{{n}} = n^p+f{}(n-1);\n"
+      "f{}N;\n"
+      "(n=N;B)_2;\n",
+      "CalculatorFunctionsVectorPartitionFunction"
+      "::bernouliSum",
+      "BernoulliSum",
+      innerStandard);
+
+  this->addOperationHandler(
+      "Lattice",
+      CalculatorFunctionsVectorPartitionFunction::lattice,
+      "",
+      "Generates a built-in lattice from the given input vectors. ",
+      "l = Lattice((1,2,3), (2,2,2), (3,3,9));\n",
+      "CalculatorFunctionsVectorPartitionFunction"
+      "::lattice",
+      "Lattice",
+      innerStandard);
+
+  this->addOperationHandler(
+      "SubLatticeWithIntegralScalarProducts",
+      CalculatorFunctionsVectorPartitionFunction::subLatticeWithIntegralScalarProducts,
+      "",
+      "Given a lattice L and a vector v, generates the sub-lattice W "
+      "of vectors w in L for which the scalar product of w and v is integer. ",
+      "l = Lattice((1,2,3), (2,2,2), (3,3,9));\n"
+      "SubLatticeWithIntegralScalarProducts((1/2,1/3,1/7), l);",
+      "CalculatorFunctionsVectorPartitionFunction"
+      "::subLatticeWithIntegralScalarProducts",
+      "SubLatticeWithIntegralScalarProducts",
+      innerStandard);
 }

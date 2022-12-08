@@ -843,6 +843,11 @@ bool Lattice::substitutionHomogeneous(
   return false;
 }
 
+bool Lattice::operator==(const Lattice &other) const
+{
+  return this->basisRationalForm == other.basisRationalForm;
+}
+
 unsigned int Lattice::hashFunction(const Lattice &input)
 {
   return input.basisRationalForm.hashFunction();

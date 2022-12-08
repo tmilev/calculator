@@ -784,17 +784,16 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
   this->addOperationHandler(
-    "ElementWeylAlgebra",
-    CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial,
-    "",
-    "Differential operation acting on a polynomial. ",
-    "x = ElementWeylAlgebraPoly{}(\\partial, x);"
-    "\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
-    "\\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)",
-    "CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial",
-    "EWAactOnPoly",
-    compositeStandard
-  );
+      this->builtInName<ElementWeylAlgebra<Rational>>(),
+      CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial,
+      "",
+      "Differential operation acting on a polynomial. ",
+      "x = ElementWeylAlgebraPoly{}(\\partial, x);"
+      "\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
+      "\\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)",
+      "CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial",
+      "EWAactOnPoly",
+      compositeStandard);
   this->addOperationHandler(
     "ConvertPolynomialModularToPolynomialRational",
     CalculatorFunctions::convertPolynomialModularToPolynomialRational,

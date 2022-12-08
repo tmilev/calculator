@@ -122,10 +122,7 @@ public:
   ) const;
   std::string toString() const;
   static unsigned int hashFunction(const Lattice &input);
-  bool operator==(const Lattice &other)
-  {
-    return this->basisRationalForm == other.basisRationalForm;
-  }
+  bool operator==(const Lattice &other) const;
   void operator=(const Lattice& other) {
     this->basis = other.basis;
     this->denominator = other.denominator;

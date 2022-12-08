@@ -176,3 +176,27 @@ bool CalculatorFunctionsVectorPartitionFunction::bernoulliSum(
   computer.getBernoulliSum(power, result.content);
   return result.toExpression(calculator, output);
 }
+
+bool CalculatorFunctionsVectorPartitionFunction::lattice(
+    Calculator &calculator, const Expression &input, Expression &output)
+{
+  STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::lattice");
+  Matrix<Rational> matrix;
+  if (
+      !CalculatorConversions::functionGetMatrix(
+          calculator, input, matrix, false))
+  {
+    return calculator
+           << "Failed to extract matrix of rationals from: "
+           << input.toString();
+  }
+  Lattice lattice;
+  lattice.makeFromMatrix(matrix);
+  return output.assignValue(calculator, lattice);
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::subLatticeWithIntegralScalarProducts(
+    Calculator &calculator, const Expression &input, Expression &output)
+{
+  global.fatal << "IMPLEMENT please" << global.fatal;
+}

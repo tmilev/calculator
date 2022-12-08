@@ -2172,37 +2172,6 @@ public:
     std::string toStringRuleStatusUser();
   };
 
-  // The built-in type of an object is an string identifier
-  // used internally to indicate the type of a built-in object.
-  // A built-in object is one that has an internal C++ data structure that
-  // represents the entire object.
-  // The Expression object records the type string and an integer that
-  // represents the position of the object in a global array held in
-  // calculator.objectContainer.
-  // A built in object is atomic
-  // from the standpoint of a calculator user.
-  // The built in type is not allowed to be used as a function.
-  class BuiltInTypes {
-  public:
-    Calculator* owner;
-    HashedList<std::string> all;
-    class Names {
-    public:
-      static std::string vectorPartitionFunction;
-      static std::string elementTensorsGeneralizedVermas;
-    };
-
-    int vectorPartitionFunction() {
-      return
-      this->owner->operations.getIndexNoFail(
-        Calculator::BuiltInTypes::Names::vectorPartitionFunction
-      );
-    }
-    BuiltInTypes() {
-      this->owner = nullptr;
-    }
-  };
-
   // A function is a predefined string that is to be attached to
   // a built-in function handler.
   class Functions {
@@ -2220,7 +2189,9 @@ public:
       static std::string turnOffRules;
       static std::string vectorPartitionFunction;
       static std::string vectorPartitionFunctionElementary;
-      class Trigonometry {
+      static std::string lattice;
+      class Trigonometry
+      {
       public:
         static std::string sine;
         static std::string cosine;
@@ -2230,16 +2201,8 @@ public:
     Functions() {
       this->owner = nullptr;
     }
-    int vectorPartitionFunction() {
-      return
-      this->owner->operations.getIndexNoFail(
-        Calculator::Functions::Names::vectorPartitionFunction
-      );
-    }
   };
 
-  Calculator::BuiltInTypes builtInTypes;
-  Calculator::BuiltInTypes builtInFunctions;
   // Initialization mode for the calculator.
   // Allows to avoid bootstrapping a number of
   // functions/operations.
@@ -2434,6 +2397,7 @@ public:
   HashedListReferences<Expression> allChildExpressions;
   List<unsigned int> allChildExpressionHashes;
   List<std::string> evaluationErrors;
+  HashedList<std::string> allBuiltInTypes;
   // std::string inputStringRawestOfTheRaw;
   std::string inputString;
   std::string outputString;
@@ -2447,6 +2411,25 @@ public:
   std::stringstream comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
+
+  // The built-in type of an object is an string identifier
+  // used internally to indicate the type of a built-in object.
+  // A built-in object is one that has an internal C++ data structure that
+  // represents the entire object.
+  // The Expression object records the type string and an integer that
+  // represents the position of the object in a global array held in
+  // calculator.objectContainer.
+  // A built in object is atomic
+  // from the standpoint of a calculator user.
+  // The built in type is not allowed to be used as a function.
+  template <class Type>
+  static std::string builtInName();
+  template <class Type>
+  int builtInCode()
+  {
+    return this->operations.getIndexNoFail(this->builtInName<Type>());
+  }
+
   bool approximationsBanned();
   std::string toStringRuleStatusUser();
   std::string toString();
@@ -2510,9 +2493,6 @@ public:
   const HashedList<std::string, HashFunctions::hashFunction>& getOperations() {
     return this->operations.keys;
   }
-  const HashedList<std::string>& getBuiltInTypes() {
-    return this->builtInTypes.all;
-  }
   const List<Function>* getOperationHandlers(int operation);
   const List<Function>* getOperationCompositeHandlers(int operation);
   Expression expressionInteger(int input);
@@ -2552,11 +2532,7 @@ public:
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool accountRule(
-    const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
-  );
-  int opEltZmodP() {
-    return this->operations.getIndexNoFail("EltZmodP");
-  }
+      const Expression &ruleE, StateMaintainerCalculator &ruleStackMaintainer);
   int opIsDenotedBy() {
     return this->operations.getIndexNoFail("=:");
   }
@@ -2632,11 +2608,8 @@ public:
   int opLessThan() {
     return this->operations.getIndexNoFail("<");
   }
-  int opWeightLieAlgebra() {
-    return this->operations.getIndexNoFail("weightLieAlg");
-  }
   int opWeightLieAlgPoly() {
-    return this->operations.getIndexNoFail("weightLieAlgPoly");
+    return this->builtInCode<Weight<Polynomial<Rational>>>();
   }
   int opError() {
     return this->operations.getIndexNoFail("Error");
@@ -2646,9 +2619,6 @@ public:
   }
   int opMonomialPoly() {
     return this->operations.getIndexNoFail("MonomialPoly");
-  }
-  int opCalculusPlot() {
-    return this->operations.getIndexNoFail("CalculusPlot");
   }
   int opMatrix() {
     return this->operations.getIndexNoFail("Matrix");
@@ -2684,48 +2654,40 @@ public:
     return this->operations.getIndexNoFail("Melt");
   }
   int opRational() {
-    return this->operations.getIndexNoFail("Rational");
-  }
-  int opElementHyperOctahedral() {
-    return this->operations.getIndexNoFail("ElementHyperoctahedral");
+    return this->builtInCode<Rational>();
   }
   int opDouble() {
-    return this->operations.getIndexNoFail("Double");
+    return this->builtInCode<double>();
   }
-  int opAlgebraicNumber() {
-    return this->operations.getIndexNoFail("AlgebraicNumber");
-  }
-  int opElementWeylAlgebra() {
-    return this->operations.getIndexNoFail("ElementWeylAlgebra");
+
+  int opElementWeylAlgebra()
+  {
+    return this->builtInCode<ElementWeylAlgebra<Rational>>();
   }
   int opPolynomialRational() {
-    return this->operations.getIndexNoFail("PolynomialRational");
+
+    return this->builtInCode<Polynomial<Rational>>();
   }
   int opPolynomialModuloInteger() {
-    return this->operations.getIndexNoFail("PolynomialModuloInteger");
+    return this->builtInCode<Polynomial<ElementZmodP>>();
   }
   int opPolynomialAlgebraicNumbers() {
-    return this->operations.getIndexNoFail("PolynomialOverANs");
+    return this->builtInCode<Polynomial<AlgebraicNumber>>();
   }
   int opPolynomialModuloPolynomialModuloInteger() {
-    return
-    this->operations.getIndexNoFail("PolynomialModuloPolynomialModuloInteger");
+    return this->builtInCode<PolynomialModuloPolynomial<ElementZmodP>>();
   }
   int opEllipticCurveElementsRational() {
-    return this->operations.getIndexNoFail("ellipticCurveElementsRational");
+    return this->builtInCode<ElementEllipticCurve<Rational>>();
   }
   int opEllipticCurveElementsZmodP() {
-    return this->operations.getIndexNoFail("ellipticCurveElementsZmodP");
+    return this->builtInCode<ElementEllipticCurve<ElementZmodP>>();
   }
   int opRationalFraction() {
-    return this->operations.getIndexNoFail("RationalFunction");
+    return this->builtInCode<RationalFraction<Rational>>();
   }
   int opRationalFunctionAlgebraicCoefficients() {
-    return
-    this->operations.getIndexNoFail("RationalFunctionAlgebraicCoefficients");
-  }
-  int opRationalFunctionModuloInteger() {
-    return this->operations.getIndexNoFail("RationalFunctionModuloInteger");
+    return this->builtInCode<RationalFraction<AlgebraicNumber>>();
   }
   int opDifferentiate() {
     return this->operations.getIndexNoFail("Differentiate");
@@ -2743,53 +2705,28 @@ public:
     return this->operations.getIndexNoFail("|");
   }
   int opMatrixTensorRational() {
-    return this->operations.getIndexNoFail("MatrixTensorRational");
+    return this->builtInCode<MatrixTensor<Rational>>();
   }
   int opWeylGroupRep() {
-    return this->operations.getIndexNoFail("WeylGroupRep");
+    return this->builtInCode<
+        GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
   }
   int opFreeze() {
     return this->operations.getIndexNoFail("Freeze");
   }
-  int opString() {
-    return this->operations.getIndexNoFail("string");
-  }
-  int opJSON() {
-    return this->operations.getIndexNoFail("JSON");
-  }
   int opElementUEOverRF() {
-    return this->operations.getIndexNoFail("ElementUEoverRF");
-  }
-  int opHyperoctahedralGroupRep() {
-    return
-    this->operations.getIndexNoFail("HyperoctahedralGroupRepresentation");
+    return this->builtInCode<ElementUniversalEnveloping<RationalFraction<Rational>>>();
   }
   int opWeylGroupVirtualRep() {
-    return this->operations.getIndexNoFail("WeylGroupVirtualRep");
+    return this->builtInCode<
+        VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
   }
   int opElementTensorGVM() {
-    return
-    this->operations.getIndexNoFail(
-      Calculator::BuiltInTypes::Names::elementTensorsGeneralizedVermas
-    );
+    return this->builtInCode<ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>();
   }
-  int opElementSemisimpleLieAlgebraAlgebraicCoefficients() {
-    return
-    this->operations.getIndexNoFail(
-      "ElementSemisimpleLieAlgebraAlgebraicCoefficients"
-    );
-  }
-  int opCharSSAlgMod() {
-    return this->operations.getIndexNoFail("CharSSAlgMod");
-  }
+
   int opSemisimpleLieAlgebra() {
-    return this->operations.getIndexNoFail("SemisimpleLieAlg");
-  }
-  int opSemisimpleSubalgebras() {
-    return this->operations.getIndexNoFail("SemisimpleSubalgebras");
-  }
-  int opCandidateSSsubalgebra() {
-    return this->operations.getIndexNoFail("CandidateSSsubalgebra");
+    return this->builtInCode<SemisimpleLieAlgebra *>();
   }
   int opInfinity() {
     return this->operations.getIndexNoFail("\\infty");
@@ -2860,15 +2797,6 @@ public:
   int opCsc() {
     return this->operations.getIndexNoFail("\\csc");
   }
-  int opLittelmannPath() {
-    return this->operations.getIndexNoFail("LittelmannPath");
-  }
-  int opLRO() {
-    return this->operations.getIndexNoFail("LRO");
-  }
-  int opWeylGroup() {
-    return this->operations.getIndexNoFail("WeylGroup");
-  }
   int opUnion() {
     return this->operations.getIndexNoFail("\\cup");
   }
@@ -2883,9 +2811,6 @@ public:
   }
   int opContext() {
     return this->operations.getIndexNoFail("Context");
-  }
-  int opWeylGroupElement() {
-    return this->operations.getIndexNoFail("ElementWeylGroup");
   }
   int opCommandSequence() {
     return this->operations.getIndexNoFail(";");
@@ -2916,9 +2841,6 @@ public:
   }
   int opDirectSum() {
     return this->operations.getIndexNoFail("\\oplus");
-  }
-  int opUserInputTextBox() {
-    return this->operations.getIndexNoFail("userInputTextBox");
   }
   int opMod() {
     return this->operations.getIndexNoFail("mod");
@@ -3251,7 +3173,15 @@ public:
     const std::string& operationName
   );
   void addOperationNoRepetitionAllowed(const std::string& operation);
-  void addBuiltInType(const std::string& operationBuiltIn);
+  template <class Type>
+  void addOneBuiltInHandler();
+  template <class Type>
+  void addBuiltInType()
+  {
+    std::string name = this->builtInName<Type>();
+    this->addOperationNoRepetitionAllowed(name);
+    this->allBuiltInTypes.addOnTop(name);
+  }
   void addKnownDoubleConstant(
     const std::string& constantName, double value
   );
@@ -3281,10 +3211,7 @@ public:
     int atom, Expression::ToStringHandler handler
   );
   void addOneStringCompositeHandler(
-    int atom, Expression::ToStringHandler handler
-  );
-  template <class builtInType>
-  void addOneBuiltInHandler();
+      int atom, Expression::ToStringHandler handler);
   void addOneStringHandler(
     int atom,
     Expression::ToStringHandler handler,
@@ -4232,11 +4159,6 @@ bool Expression::makeSum(
   this->makeOXdotsX(calculator, calculator.opPlus(), summandsWithCoeff);
 }
 
-template < >
-int Expression::getBuiltInType<Rational>() const;
-template < >
-int Expression::addObjectReturnIndex(const Rational& inputValue) const;
-
 template <class Type>
 bool Expression::assignValueWithContext(
   Calculator& owner,
@@ -4258,14 +4180,14 @@ bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
   typeComputer.owner = &owner;
   int currentType = typeComputer.getBuiltInType<Type>();
   if (
-    currentType == owner.opEltZmodP() ||
-    currentType == owner.opPolynomialRational() ||
-    currentType == owner.opRationalFraction() ||
-    currentType == owner.opElementTensorGVM() ||
-    currentType == owner.opElementUEOverRF() ||
-    currentType == owner.opElementWeylAlgebra() ||
-    currentType == owner.opWeightLieAlgPoly()
-  ) {
+      currentType == owner.builtInCode<ElementZmodP>() ||
+      currentType == owner.opPolynomialRational() ||
+      currentType == owner.opRationalFraction() ||
+      currentType == owner.opElementTensorGVM() ||
+      currentType == owner.opElementUEOverRF() ||
+      currentType == owner.opElementWeylAlgebra() ||
+      currentType == owner.opWeightLieAlgPoly())
+  {
     global.fatal
     << "Assigning value WITHOUT CONTEXT to data type "
     << owner.getOperations()[currentType]
@@ -4739,6 +4661,13 @@ bool CalculatorConversions::getListPolynomialVariableLabelsLexicographic(
   }
   variables.quickSortAscending();
   return outputContext.setVariables(variables);
+}
+
+template <class Type>
+int Expression::getBuiltInType() const
+{
+  this->checkConsistency();
+  return this->owner->builtInCode<Type>();
 }
 
 #endif // header_calculator_interface_ALREADY_INCLUDED

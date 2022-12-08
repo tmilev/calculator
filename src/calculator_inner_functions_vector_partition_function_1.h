@@ -48,8 +48,11 @@ public:
   }
   // Returns the Bernoulli sum / Faulhaber formula: the sum \sum_{i=0}^n i^p.
   static bool bernoulliSum(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
+      Calculator &calculator, const Expression &input, Expression &output);
+  static bool lattice(
+      Calculator &calculator, const Expression &input, Expression &output);
+  static bool subLatticeWithIntegralScalarProducts(
+      Calculator &calculator, const Expression &input, Expression &output);
 };
 
 #endif // header_calculator_inner_functions_vector_partition_function_1_ALREADY_INCLUDED

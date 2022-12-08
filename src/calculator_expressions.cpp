@@ -1359,20 +1359,31 @@ bool Expression::checkConsistency() const {
   }
   if (this->isBuiltInType()) {
     if (this->children.size != 3) {
+      if (this->children.size > 0)
+      {
+        int childData = (*this)[0].data;
+
+        if (childData != 0 && childData < this->owner->operations.size())
+        {
+          global.fatal << "Name corresponding to built-in code: " << childData << " equals: "
+                       << this->owner->operations.keys[childData] << "\n<br>\n";
+        }
+      }
       global.fatal
-      <<
-      "At the moment of writing, an expression of built-in type must have 3 "
-      << "children: type, context, and index in Calculator. The expression is "
-      << this->toStringFull()
-      << global.fatal;
+          << "At the moment of writing, "
+          << "an expression of built-in type must have 3 "
+          << "children: type, context, and index in Calculator. The raw expression is: "
+          << "The present expression has: " << this->size() << " children. "
+          << this->toStringFullWithHints(false)
+          << global.fatal;
     }
     const Expression& mustBeTheContext = (*this)[1];
     if (!mustBeTheContext.startsWith(this->owner->opContext())) {
       global.fatal
-      <<
-      "The second child of a built-in type must be a context. It is instead "
-      << mustBeTheContext.toStringFull()
-      << global.fatal;
+          << "The second child of a built-in type "
+          << "must be a context. It is instead "
+          << mustBeTheContext.toStringFull()
+          << global.fatal;
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
       bool isGood = false;

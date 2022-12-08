@@ -313,7 +313,8 @@ public:
   template <class Type>
   bool isOfType(Type* whichElement) const {
     STACK_TRACE("Expression::isOfType");
-    if (this->owner == nullptr) {
+    if (this->owner == nullptr)
+    {
       return false;
     }
     if (!this->startsWith(this->getBuiltInType<Type>())) {
@@ -4176,9 +4177,7 @@ bool Expression::assignValueWithContext(
 
 template <class Type>
 bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
-  Expression typeComputer;
-  typeComputer.owner = &owner;
-  int currentType = typeComputer.getBuiltInType<Type>();
+  int currentType = owner.builtInCode<Type>();
   if (
       currentType == owner.builtInCode<ElementZmodP>() ||
       currentType == owner.opPolynomialRational() ||
@@ -4666,7 +4665,7 @@ bool CalculatorConversions::getListPolynomialVariableLabelsLexicographic(
 template <class Type>
 int Expression::getBuiltInType() const
 {
-  this->checkConsistency();
+  this->checkInitialization();
   return this->owner->builtInCode<Type>();
 }
 

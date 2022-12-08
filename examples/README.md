@@ -2222,7 +2222,7 @@ g=VectorPartitionFunction(Sequence{}1,Sequence{}2,Sequence{}3);
 g{}(10);
 AllVectorPartitions(Sequence{}10, (Sequence{}1,Sequence{}2,Sequence{}3))
 ```
-<b>WORK IN PROGRESS</b>. The value of f{}(4,5) computed below is not accurate. Will hopefully be fixed in the coming weeks. Applies the vector partition function formula. 
+Applies the vector partition function formula. 
 
 *ElementWeylAlgebra* (_composite_) [EWAactOnPoly] {CalculatorFunctions::compositeElementWeylAlgebraActOnPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20ElementWeylAlgebraPoly%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5c%5cpartial%20%3d%20ElementWeylAlgebraDO%7b%7d%28%5c%5cpartial%2c%20x%29%3b%5cn%5c%5cpartial%7b%7d%28x%29%3b%20%5c%5cpartial%5e%7b2%7d%7b%7d%28x%5e3%2bx%5e2%29%3b%20x%7b%7d%28x%5e2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4655,7 +4655,7 @@ PlotJuliaSet(1/(b)(z^2+z+1/z+1/z^2), b=3);
 Plots the Julia set of a complex function. The first argument is the map we are iterating. The remaining parameters are complex parameters of the formula. The complex parameters can be adjusted dynamically using the drag and drop.To compute the plot: we start with the x,y-coordinate of the plotting surface and the number x+iy. Now, iterate the map: f(...f(x+iy)). If the point escapes to infinity, color the point with a colorthat matches the escape speed. Else, color the point black. You are not limited to the function z^2+C only. Feel free to try other functions as well.
 
 *VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3bVectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3b%5cnVectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 VectorPartitionFunction(
 (1,0,0),
@@ -4666,10 +4666,22 @@ VectorPartitionFunction(
 (1,1,1)
 );
 VectorPartitionFunction(
-(1,0),(0,1),(1,1),(1,2),(1,3),(2,3) );VectorPartitionFunction(
+(1,0),(0,1),(1,1),(1,2),(1,3),(2,3) );
+VectorPartitionFunction(
 Sequence{}1,Sequence{}2,Sequence{}3,Sequence{}4)
 ```
 Work in progress. Vector partition function formula. 
+
+*VectorPartitionFunctionElementary* [VectorPartitionFunctionElementary] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormulaElementary}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunctionElementary%28%5cn%281%2c1%29%2c%5cn%281%2c0%29%2c%5cn%280%2c1%29%5cn%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+VectorPartitionFunctionElementary(
+(1,1),
+(1,0),
+(0,1)
+);
+```
+Work in progress. Vector partition function formula, elementary method. 
 
 *ConeDecompositionWithHistory* [ConeDecompositionWithHistory] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlicesWithHistory}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecompositionWithHistory%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4717,6 +4729,36 @@ ConeDecompositionArbitrarySlices(
 ```
 Work in progress. 
 Cone decomposition related to a vector partition function. Unlike ConeDecomposition, this decomposition uses arbitrary combinatorial chamber walls.
+
+*BernoulliSum* [BernoulliSum] {CalculatorFunctionsVectorPartitionFunction::bernouliSum}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22p%3d3%3b%5cnN%3d100%3b%5cnB%3dBernoulliSum%28p%2cn%29%3b%5cnf%7b%7d0%3d%200%3b%5cnf%7b%7d%7b%7bn%7d%7d%20%3d%20n%5ep%2bf%7b%7d%28n-1%29%3b%5cnf%7b%7dN%3b%5cn%28n%3dN%3bB%29_2%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+p=3;
+N=100;
+B=BernoulliSum(p,n);
+f{}0= 0;
+f{}{{n}} = n^p+f{}(n-1);
+f{}N;
+(n=N;B)_2;
+
+```
+Returns the Bernoulli sum formula / Faulhaber's formula, for the sum of the powers of 1^k+2^k+...+n^k as a polynomial of n of k+1'st degree. 
+
+*Lattice* [Lattice] {CalculatorFunctionsVectorPartitionFunction::lattice}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22l%20%3d%20Lattice%28%281%2c2%2c3%29%2c%20%282%2c2%2c2%29%2c%20%283%2c3%2c9%29%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+l = Lattice((1,2,3), (2,2,2), (3,3,9));
+
+```
+Generates a built-in lattice from the given input vectors. 
+
+*SubLatticeWithIntegralScalarProducts* [SubLatticeWithIntegralScalarProducts] {CalculatorFunctionsVectorPartitionFunction::subLatticeWithIntegralScalarProducts}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22l%20%3d%20Lattice%28%281%2c2%2c3%29%2c%20%282%2c2%2c2%29%2c%20%283%2c3%2c9%29%29%3b%5cnSubLatticeWithIntegralScalarProducts%28%281%2f2%2c1%2f3%2c1%2f7%29%2c%20l%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+l = Lattice((1,2,3), (2,2,2), (3,3,9));
+SubLatticeWithIntegralScalarProducts((1/2,1/3,1/7), l);
+```
+Given a lattice L and a vector v, generates the sub-lattice W of vectors w in L for which the scalar product of w and v is integer. 
 
 *SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::semisimpleLieAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)

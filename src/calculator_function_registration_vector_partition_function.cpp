@@ -184,4 +184,18 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "SubLatticeWithIntegralScalarProducts",
     innerStandard
   );
+  this->addOperationHandler(
+    "DualLattice",
+    CalculatorFunctionsVectorPartitionFunction::dualLattice,
+    "",
+    "Computes the dual lattice of a given lattice. "
+    "The dual of the lattice is the lattice of vectors with "
+    "integral scalar products with the given vectors. ",
+    "l = Lattice((1,2,3), (2,2,2), (3,3,9));\n"
+    "DualLattice(l)",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::subLatticeWithIntegralScalarProducts",
+    "DualLattice",
+    innerStandard
+  );
 }

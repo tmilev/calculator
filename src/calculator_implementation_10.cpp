@@ -209,21 +209,21 @@ subLatticeWithIntegralScalarProducts(
     return
     calculator
     << "subLatticeWithIntegralScalarProducts expects 2 inputs, "
-    "lattice and vector.";
+    << "lattice and vector.";
   }
   Vector<Rational> shift;
   Lattice lattice;
-  if (!input[1].isOfType(&lattice)) {
-    return
-    calculator
-    << "First argument of subLatticeWithIntegralScalarProducts "
-    "expected to be a lattice.";
-  }
-  if (!calculator.getVector(input[2], shift)) {
+  if (!input[2].isOfType(&lattice)) {
     return
     calculator
     << "Second argument of subLatticeWithIntegralScalarProducts "
-    "expected to be a vector.";
+    << "expected to be a lattice.";
+  }
+  if (!calculator.getVector(input[1], shift)) {
+    return
+    calculator
+    << "First argument of subLatticeWithIntegralScalarProducts "
+    << "expected to be a vector.";
   }
   if (shift.size != lattice.getDimension()) {
     return
@@ -237,4 +237,22 @@ subLatticeWithIntegralScalarProducts(
   Lattice result;
   lattice.subLatticeWithIntegralScalarProducts(shift, result);
   return output.assignValue(calculator, result);
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::dualLattice(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::dualLattice");
+  if (input.size() != 2) {
+    return false;
+  }
+  Lattice lattice;
+  if (!input[1].isOfType(&lattice)) {
+    return false;
+  }
+  Lattice dual;
+  if (!lattice.getDualLattice(dual)) {
+    return calculator << "Couldn't compute the dual lattice. ";
+  }
+  return output.assignValue(calculator, dual);
 }

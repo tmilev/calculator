@@ -387,9 +387,9 @@ Rational QuasiPolynomial::evaluate(
   return 0;
 }
 
-void Lattice::getDualLattice(Lattice& output) const {
+bool Lattice::getDualLattice(Lattice& output) const {
   if (this->getRank() != this->getDimension()) {
-    return;
+    return false;
   }
   Matrix<Rational> dualMatrix;
   dualMatrix = this->basisRationalForm;
@@ -399,6 +399,7 @@ void Lattice::getDualLattice(Lattice& output) const {
     output.basis, output.denominator
   );
   output.reduce();
+  return true;
 }
 
 bool Lattice::findOnePreimageInLatticeOf(
@@ -967,8 +968,13 @@ void Lattice::subLatticeWithIntegralScalarProducts(
   const Vector<Rational>& mustHaveIntegerScalarProductWith,
   Lattice& output
 ) const {
-  global.fatal << "IMPLEMENT PLEASe" << global.fatal;
-}
+  this->getDualLattice(output);
+  Matrix<Rational> lastRow;
+  lastRow.assignVectorRow(mustHaveIntegerScalarProductWith);
+  output.basisRationalForm.appendMatrixToTheBottom(lastRow);
+  output.makeFromMatrix(output.basisRationalForm);
+  output.getDualLattice(output);
+ }
 
 void Lattice::reduce() {
   STACK_TRACE("Lattice::reduce");

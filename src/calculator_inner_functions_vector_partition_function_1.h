@@ -53,6 +53,9 @@ public:
   static bool lattice(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool dualLattice(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool subLatticeWithIntegralScalarProducts(
     Calculator& calculator, const Expression& input, Expression& output
   );

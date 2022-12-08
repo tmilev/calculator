@@ -55,7 +55,7 @@ public:
   );
   void applyLinearMap(Matrix<Rational>& linearMap, Lattice& output);
   void intersectWithBothOfMaximalRank(const Lattice& other);
-  void getDualLattice(Lattice& output) const;
+  bool getDualLattice(Lattice& output) const;
   bool isInLattice(const Vector<Rational>& vector) const {
     Vector<Rational> tempVect = vector;
     if (!this->reduceVector(tempVect)) {

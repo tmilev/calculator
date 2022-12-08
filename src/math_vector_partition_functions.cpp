@@ -179,6 +179,9 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
     substitution[i] -= direction[i] * shift;
   }
   Lattice rougherLattice;
+  Vector<Rational> exitWallRescaled  = exitWall;
+  exitWallRescaled /= direction.scalarEuclidean(exitWall);
+  toBeIntegrated.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(exitWallRescaled, rougherLattice);
   for (int i = 0; i < toBeIntegrated.latticeShifts.size; i ++) {
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
       toBeIntegrated,
@@ -219,13 +222,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
     value.getCoefficientPolynomialOfXPowerK(
       dimension, i, coefficientInFrontOfPower
     );
-    global.comments << "<br>DEBUG: and the poly coeff is:  " << value;
     this->bernoulliSumComputer.getBernoulliSum(i, bernoulliSum);
-    global.comments
-    << "<br>DEBUG: bernoullisum degree :  "
-    << i
-    << ": "
-    << bernoulliSum.toStringPretty();
   }
   global << "DEBUG: continue work here. ";
 }

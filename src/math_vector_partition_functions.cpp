@@ -3,45 +3,38 @@
 #include "math_general_polynomial_computations_basic_implementation.h"
 
 void VectorPartitionFunction::initializeVectors(
-    List<Vector<Rational>> &inputVectors)
-{
+  List<Vector<Rational> >& inputVectors
+) {
   this->elementaryMethod.originalVectors = inputVectors;
   this->fractions.originalVectors = inputVectors;
 }
 
-std::string VectorPartitionFunction::toHTML() const
-{
+std::string VectorPartitionFunction::toHTML() const {
   std::stringstream out;
-  if (this->fractions.flagInitialized)
-  {
+  if (this->fractions.flagInitialized) {
     out
-        << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
-        << fractions.toHTML();
+    << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
+    << fractions.toHTML();
     out << "<br>Chambers:<br>" << fractions.chambers.toHTML() << "</div>";
   }
-  if (this->elementaryMethod.flagInitialized)
-  {
+  if (this->elementaryMethod.flagInitialized) {
     out << this->elementaryMethod.toHTML();
   }
   return out.str();
 }
 
-VectorPartitionFunctionElementary::VectorPartitionFunctionElementary()
-{
+VectorPartitionFunctionElementary::VectorPartitionFunctionElementary() {
   this->flagInitialized = false;
 }
 
-std::string VectorPartitionFunctionElementary::toHTML() const
-{
-  if (!this->flagInitialized)
-  {
+std::string VectorPartitionFunctionElementary::toHTML() const {
+  if (!this->flagInitialized) {
     return "";
   }
   std::stringstream out;
   out << "Vector partition function of " << this->originalVectors;
   out << this->collection.toHTMLGraphicsOnly(false);
-  for (Cone &cone : this->collection.refinedCones.values)
-  {
+  for (Cone& cone : this->collection.refinedCones.values) {
     out << "<hr>";
     out << "Cone: " << cone.id << ".<br>";
     out << "Quasipolynomial: " << cone.payload.polynomial.toHTML();
@@ -49,13 +42,11 @@ std::string VectorPartitionFunctionElementary::toHTML() const
   return out.str();
 }
 
-void VectorPartitionFunctionElementary::compute()
-{
+void VectorPartitionFunctionElementary::compute() {
   STACK_TRACE("VectorPartitionFunctionElementary::compute");
   ProgressReport report;
   this->collection.initializeFromDirections(this->originalVectors);
-  for (int i = 0; i < this->originalVectors.size; i++)
-  {
+  for (int i = 0; i < this->originalVectors.size; i ++) {
     this->collection.markAllConesNonRefined(i);
     this->collection.refineByOneDirection(i, &report);
     this->computeQuasiPolynomials(i);
@@ -63,64 +54,58 @@ void VectorPartitionFunctionElementary::compute()
 }
 
 void VectorPartitionFunctionElementary::computeQuasiPolynomials(
-    int directionIndex)
-{
+  int directionIndex
+) {
   STACK_TRACE("VectorPartitionFunctionElementary::computeQuasiPolynomials");
   this->collection.markAllConesNonRefined(directionIndex);
-  while (this->collection.nonRefinedCones.size() > 0)
-  {
+  while (this->collection.nonRefinedCones.size() > 0) {
     this->computeFirstQuasiPolynomial(directionIndex);
   }
 }
 
 void VectorPartitionFunctionElementary::computeFirstQuasiPolynomial(
-    int directionIndex)
-{
-  for (int i = 0; i < this->collection.nonRefinedCones.size(); i++)
-  {
-    Cone &cone = this->collection.nonRefinedCones.values[i];
-    if (this->computeOneQuasiPolynomial(cone, directionIndex))
-    {
+  int directionIndex
+) {
+  for (int i = 0; i < this->collection.nonRefinedCones.size(); i ++) {
+    Cone& cone = this->collection.nonRefinedCones.values[i];
+    if (this->computeOneQuasiPolynomial(cone, directionIndex)) {
       this->collection.refinedCones.setKeyValue(cone.id, cone);
       this->collection.nonRefinedCones.removeIndex(i);
       return;
     }
   }
-  if (this->collection.nonRefinedCones.size() != 0)
-  {
+  if (this->collection.nonRefinedCones.size() != 0) {
     global.fatal
-        << "Cone collection is expected to have "
-        << "a cone with all exit walls visited."
-        << global.fatal;
+    << "Cone collection is expected to have "
+    << "a cone with all exit walls visited."
+    << global.fatal;
   }
 }
 
 bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
-    Cone &cone, int directionIndex)
-{
+  Cone& cone, int directionIndex
+) {
   Vector<Rational> direction = this->originalVectors[directionIndex];
   List<Wall> exitWalls;
   if (
-      !this->collection.allExitWallsAreVisited(cone, direction, exitWalls))
-  {
+    !this->collection.allExitWallsAreVisited(cone, direction, exitWalls)
+  ) {
     return false;
   }
-  if (exitWalls.size > 1)
-  {
+  if (exitWalls.size > 1) {
     global.fatal
-        << "At this point of code, a maximum of 1 exit walls is expected."
-        << global.fatal;
+    << "At this point of code, a maximum of 1 exit walls is expected."
+    << global.fatal;
   }
   cone.payload.visited = true;
-  if (directionIndex == this->collection.getDimension() - 1)
-  {
+  if (directionIndex == this->collection.getDimension() - 1) {
     Cone baseCone;
-    List<Vector<Rational>> firstDirections;
+    List<Vector<Rational> > firstDirections;
     this->originalVectors.slice(
-        0, this->collection.getDimension(), firstDirections);
+      0, this->collection.getDimension(), firstDirections
+    );
     baseCone.createFromVertices(firstDirections);
-    if (!baseCone.isInCone(cone.internalPoint()))
-    {
+    if (!baseCone.isInCone(cone.internalPoint())) {
       return true;
     }
     Lattice lattice;
@@ -134,89 +119,125 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
     return true;
   }
   QuasiPolynomial discreteIntegrand = cone.payload.polynomial;
-  global.comments << "DEBUG: mathematically incorrect workign version. Please fix. <br>";
-  this->computeOneQuasiPolynomialExitWallWithoutNeighbor(cone, direction, exitWalls[0].normal);
+  global.comments
+  << "DEBUG: mathematically incorrect workign version. Please fix. <br>";
+  this->computeOneQuasiPolynomialExitWallWithoutNeighbor(
+    cone, direction, exitWalls[0].normal
+  );
   return true;
 }
 
-void VectorPartitionFunctionElementary::computeOneQuasiPolynomialExitWallWithoutNeighbor(
-    Cone &cone, const Vector<Rational> &direction, const Vector<Rational> &exitWall)
-{
-  STACK_TRACE("VectorPartitionFunctionElementary::"
-              "computeOneQuasiPolynomialExitWallWithoutNeighbor");
+void VectorPartitionFunctionElementary::
+computeOneQuasiPolynomialExitWallWithoutNeighbor(
+  Cone& cone,
+  const Vector<Rational>& direction,
+  const Vector<Rational>& exitWall
+) {
+  STACK_TRACE(
+    "VectorPartitionFunctionElementary::"
+    "computeOneQuasiPolynomialExitWallWithoutNeighbor"
+  );
   QuasiPolynomial toBeIntegrated = cone.payload.polynomial;
   int scale = 1;
-  while (true)
-  {
+  while (true) {
     Vector<Rational> rescaled = direction;
     rescaled *= scale;
-    if (toBeIntegrated.ambientLatticeReduced.isInLattice(rescaled))
-    {
+    if (toBeIntegrated.ambientLatticeReduced.isInLattice(rescaled)) {
       break;
     }
-    scale++;
+    scale ++;
   }
   QuasiPolynomial output;
-  for (int i = 0; i < scale; i++)
-  {
-    this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(toBeIntegrated, i, scale, output, direction, exitWall);
+  for (int i = 0; i < scale; i ++) {
+    this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
+      toBeIntegrated, i, scale, output, direction, exitWall
+    );
   }
 }
 
-void VectorPartitionFunctionElementary::computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
-    const QuasiPolynomial &toBeIntegrated, int shift, int scale,
-    QuasiPolynomial &outputAccumulator, const Vector<Rational> &direction, const Vector<Rational> &exitWall)
-{
-  STACK_TRACE("VectorPartitionFunctionElementary::"
-              "computeOneQuasiPolynomialExitWallWithoutNeighborOneScale");
+void VectorPartitionFunctionElementary::
+computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
+  const QuasiPolynomial& toBeIntegrated,
+  int shift,
+  int scale,
+  QuasiPolynomial& outputAccumulator,
+  const Vector<Rational>& direction,
+  const Vector<Rational>& exitWall
+) {
+  STACK_TRACE(
+    "VectorPartitionFunctionElementary::"
+    "computeOneQuasiPolynomialExitWallWithoutNeighborOneScale"
+  );
   int dimension = this->collection.getDimension();
   PolynomialSubstitution<Rational> substitution;
   substitution.setSize(dimension);
-  for (int i = 0; i < dimension; i++)
-  {
+  for (int i = 0; i < dimension; i ++) {
     substitution[i].makeMonomial(i, 1, 1);
-    substitution[i].subtractMonomial(MonomialPolynomial(dimension + 1), direction[i] * scale);
+    substitution[i].subtractMonomial(
+      MonomialPolynomial(dimension + 1), direction[i] * scale
+    );
     substitution[i] -= direction[i] * shift;
   }
   Lattice rougherLattice;
-
-  for (int i = 0; i < toBeIntegrated.latticeShifts.size; i++)
-  {
-    this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(toBeIntegrated, shift, scale, substitution, i, outputAccumulator, direction, exitWall);
+  for (int i = 0; i < toBeIntegrated.latticeShifts.size; i ++) {
+    this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
+      toBeIntegrated,
+      shift,
+      scale,
+      substitution,
+      i,
+      outputAccumulator,
+      direction,
+      exitWall
+    );
   }
 }
 
-void VectorPartitionFunctionElementary::computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-    const QuasiPolynomial &toBeIntegrated, int shift, int scale, PolynomialSubstitution<Rational> &substitution, int latticeShiftIndex,
-    QuasiPolynomial &outputAccumulator, const Vector<Rational> &direction, const Vector<Rational> &exitWall)
-{
-  STACK_TRACE("VectorPartitionFunctionElementary::computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift");
-  Polynomial<Rational> value = toBeIntegrated.valueOnEachLatticeShift[latticeShiftIndex];
+void VectorPartitionFunctionElementary::
+computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
+  const QuasiPolynomial& toBeIntegrated,
+  int shift,
+  int scale,
+  PolynomialSubstitution<Rational>& substitution,
+  int latticeShiftIndex,
+  QuasiPolynomial& outputAccumulator,
+  const Vector<Rational>& direction,
+  const Vector<Rational>& exitWall
+) {
+  STACK_TRACE(
+    "VectorPartitionFunctionElementary::computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift"
+  );
+  Polynomial<Rational> value =
+  toBeIntegrated.valueOnEachLatticeShift[latticeShiftIndex];
   int startingDegree = value.totalDegreeInt();
-  value.substitution(substitution, 1);
+  value.substitute(substitution, 1);
   int dimension = this->collection.getDimension();
   Polynomial<Rational> coefficientInFrontOfPower;
   Polynomial<Rational> bernoulliSum;
-  for (int i = 0; i <= startingDegree; i++)
-  {
-    value.getCoefficientPolynomialOfXPowerK(dimension, i, coefficientInFrontOfPower);
+  for (int i = 0; i <= startingDegree; i ++) {
+    value.getCoefficientPolynomialOfXPowerK(
+      dimension, i, coefficientInFrontOfPower
+    );
     global.comments << "<br>DEBUG: and the poly coeff is:  " << value;
     this->bernoulliSumComputer.getBernoulliSum(i, bernoulliSum);
-    global.comments << "<br>DEBUG: bernoullisum degree :  " << i << ": " << bernoulliSum.toStringPretty();
+    global.comments
+    << "<br>DEBUG: bernoullisum degree :  "
+    << i
+    << ": "
+    << bernoulliSum.toStringPretty();
   }
   global << "DEBUG: continue work here. ";
 }
 
 void BernoulliSumComputer::getBernoulliSum(
-    int power, Polynomial<Rational> &output)
-{
+  int power, Polynomial<Rational>& output
+) {
   output.makeZero();
   ProgressReport report;
   std::stringstream out;
   out << "Computing Bernoulli sums of powers: " << power << ".";
   report.report(out.str());
-  for (int i = 0; i <= power; i++)
-  {
+  for (int i = 0; i <= power; i ++) {
     Rational coefficient;
     this->getNthBernoulliPlusNumber(i, coefficient);
     coefficient *= Rational::nChooseK(power + 1, i);
@@ -226,10 +247,9 @@ void BernoulliSumComputer::getBernoulliSum(
 }
 
 void BernoulliSumComputer::getNthBernoulliPlusNumber(
-    int index, Rational &output)
-{
-  if (index < this->bernoulliPlusNumbers.size)
-  {
+  int index, Rational& output
+) {
+  if (index < this->bernoulliPlusNumbers.size) {
     // The number already computed.
     output = this->bernoulliPlusNumbers[index];
     return;
@@ -241,8 +261,7 @@ void BernoulliSumComputer::getNthBernoulliPlusNumber(
   out << "Computing Bernoulli-plus number index: " << index << ".";
   report.report(out.str());
   output = 1;
-  for (int i = 0; i < index; i++)
-  {
+  for (int i = 0; i < index; i ++) {
     Rational summand;
     this->getNthBernoulliPlusNumber(i, summand);
     summand *= Rational::nChooseK(index, i);

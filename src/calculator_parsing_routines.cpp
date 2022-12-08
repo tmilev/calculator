@@ -548,45 +548,51 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->addBuiltInType<ElementZmodP>();
   this->addBuiltInType<double>();
   this->addBuiltInType<AlgebraicNumber>();
-  this->addBuiltInType<Polynomial<Rational>>();
-  this->addBuiltInType<Polynomial<AlgebraicNumber>>();
-  this->addBuiltInType<Polynomial<ElementZmodP>>();
-  this->addBuiltInType<PolynomialModuloPolynomial<ElementZmodP>>();
-  this->addBuiltInType<RationalFraction<Rational>>();
-  this->addBuiltInType<RationalFraction<AlgebraicNumber>>();
-  this->addBuiltInType<RationalFraction<ElementZmodP>>();
+  this->addBuiltInType<Polynomial<Rational> >();
+  this->addBuiltInType<Polynomial<AlgebraicNumber> >();
+  this->addBuiltInType<Polynomial<ElementZmodP> >();
+  this->addBuiltInType<PolynomialModuloPolynomial<ElementZmodP> >();
+  this->addBuiltInType<RationalFraction<Rational> >();
+  this->addBuiltInType<RationalFraction<AlgebraicNumber> >();
+  this->addBuiltInType<RationalFraction<ElementZmodP> >();
   this->addBuiltInType<std::string>();
   this->addBuiltInType<JSData>();
   this->addBuiltInType<
-      ElementUniversalEnveloping<RationalFraction<Rational>>>();
-  this->addBuiltInType<ElementSemisimpleLieAlgebra<AlgebraicNumber>>();
+    ElementUniversalEnveloping<RationalFraction<Rational> >
+  >();
+  this->addBuiltInType<ElementSemisimpleLieAlgebra<AlgebraicNumber> >();
   this->addBuiltInType<
-      ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>();
+    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+  >();
   this->addBuiltInType<VectorPartitionFunction>();
-  this->addBuiltInType<
-      CharacterSemisimpleLieAlgebraModule<Rational>>();
-  this->addBuiltInType<SemisimpleLieAlgebra *>();
+  this->addBuiltInType<CharacterSemisimpleLieAlgebraModule<Rational> >();
+  this->addBuiltInType<SemisimpleLieAlgebra*>();
   this->addBuiltInType<LittelmannPath>();
-  this->addBuiltInType<
-      MonomialTensor<int, HashFunctions::hashFunction>>();
-  this->addBuiltInType<MatrixTensor<Rational>>();
+  this->addBuiltInType<MonomialTensor<int, HashFunctions::hashFunction> >();
+  this->addBuiltInType<MatrixTensor<Rational> >();
   this->addBuiltInType<Plot>();
   this->addBuiltInType<SemisimpleSubalgebras>();
   this->addBuiltInType<WeylGroupData>();
   this->addBuiltInType<ElementWeylGroup>();
   this->addBuiltInType<
-      GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>>();
+    GroupRepresentation<
+      FiniteGroup<ElementHyperoctahedralGroupR2>, Rational
+    >
+  >();
   this->addBuiltInType<ElementHyperoctahedralGroupR2>();
   this->addBuiltInType<
-      GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
+    GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+  >();
   this->addBuiltInType<
-      VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
-  this->addBuiltInType<ElementWeylAlgebra<Rational>>();
-  this->addBuiltInType<Weight<Rational>>();
-  this->addBuiltInType<Weight<Polynomial<Rational>>>();
-  this->addBuiltInType<ElementEllipticCurve<Rational>>();
-  this->addBuiltInType<ElementEllipticCurve<ElementZmodP>>();
+    VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+  >();
+  this->addBuiltInType<ElementWeylAlgebra<Rational> >();
+  this->addBuiltInType<Weight<Rational> >();
+  this->addBuiltInType<Weight<Polynomial<Rational> > >();
+  this->addBuiltInType<ElementEllipticCurve<Rational> >();
+  this->addBuiltInType<ElementEllipticCurve<ElementZmodP> >();
   this->addBuiltInType<InputBox>();
+  this->addBuiltInType<Lattice>();
   this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
   this->parser.initializeControlSequences();
   this->initializePredefinedStandardOperationsWithoutHandler();

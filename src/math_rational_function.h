@@ -44,11 +44,11 @@ public:
   static RationalFraction zero();
   static RationalFraction zeroStatic();
   int minimalNumberOfVariables() const;
-  bool substitution(
+  bool substitute(
     const PolynomialSubstitution<Rational>& substitution,
     const Coefficient& one
   );
-  bool substitution(
+  bool substitute(
     const PolynomialSubstitution<Coefficient>& substitution,
     const Coefficient& one,
     std::stringstream* commentsOnFailure

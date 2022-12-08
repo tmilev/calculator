@@ -125,7 +125,6 @@ void Calculator::initializeFunctionsStandard() {
   Function::Options compositeStandard = Function::Options::compositeStandard();
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
-
   this->addOperationHandler(
     Calculator::Functions::Names::setRandomSeed,
     CalculatorFunctions::setRandomSeed,
@@ -3191,15 +3190,16 @@ void Calculator::initializeFunctionsStandard() {
     outerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addStringToString,
-      this->builtInCode<std::string>(),
-      this->builtInCode<std::string>(),
-      "Concatenates strings. ",
-      "\"hello \"+ \"world\"",
-      "CalculatorFunctionsBinaryOps::addStringToString",
-      "AddStrings",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addStringToString,
+    this->builtInCode<std::string>(),
+    this->builtInCode<std::string>(),
+    "Concatenates strings. ",
+    "\"hello \"+ \"world\"",
+    "CalculatorFunctionsBinaryOps::addStringToString",
+    "AddStrings",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::addRationalToRational,
@@ -3212,41 +3212,44 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::
-          addElementZModPOrRationalToElementZModPOrRational,
-      this->opRational(),
-      this->builtInCode<ElementZmodP>(),
-      "Adds elements of Z_p. ",
-      "(2 mod 7) + 3",
-      "CalculatorFunctionsBinaryOps::"
-      "addElementZModPOrRationalToElementZModPOrRational",
-      "AddRationalToElementZmodP",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::
+    addElementZModPOrRationalToElementZModPOrRational,
+    this->opRational(),
+    this->builtInCode<ElementZmodP>(),
+    "Adds elements of Z_p. ",
+    "(2 mod 7) + 3",
+    "CalculatorFunctionsBinaryOps::"
+    "addElementZModPOrRationalToElementZModPOrRational",
+    "AddRationalToElementZmodP",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::
-          addElementZModPOrRationalToElementZModPOrRational,
-      this->builtInCode<ElementZmodP>(),
-      this->opRational(),
-      "Adds elements of Z_p. ",
-      "(2 mod 7) + 3",
-      "CalculatorFunctionsBinaryOps::"
-      "addElementZModPOrRationalToElementZModPOrRational",
-      "AddElementZmodPToRational",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::
+    addElementZModPOrRationalToElementZModPOrRational,
+    this->builtInCode<ElementZmodP>(),
+    this->opRational(),
+    "Adds elements of Z_p. ",
+    "(2 mod 7) + 3",
+    "CalculatorFunctionsBinaryOps::"
+    "addElementZModPOrRationalToElementZModPOrRational",
+    "AddElementZmodPToRational",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::
-          addElementZModPOrRationalToElementZModPOrRational,
-      this->builtInCode<ElementZmodP>(),
-      this->builtInCode<ElementZmodP>(),
-      "Adds elements of Z_p. ",
-      "(2 mod 7) + 3",
-      "CalculatorFunctionsBinaryOps::"
-      "addElementZModPOrRationalToElementZModPOrRational",
-      "AddElementZmodPToElementZmodP",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::
+    addElementZModPOrRationalToElementZModPOrRational,
+    this->builtInCode<ElementZmodP>(),
+    this->builtInCode<ElementZmodP>(),
+    "Adds elements of Z_p. ",
+    "(2 mod 7) + 3",
+    "CalculatorFunctionsBinaryOps::"
+    "addElementZModPOrRationalToElementZModPOrRational",
+    "AddElementZmodPToElementZmodP",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::
@@ -3295,35 +3298,38 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
-      this->builtInCode<AlgebraicNumber>(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Adds two algebraic numbers. ",
-      "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}",
-      "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
-      "AddAlgebraicNumberToAlgebraicNumber",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
+    this->builtInCode<AlgebraicNumber>(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Adds two algebraic numbers. ",
+    "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}",
+    "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
+    "AddAlgebraicNumberToAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opRational(),
-      "Adds algebraic number to rational. ",
-      "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})",
-      "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
-      "AddAlgebraicNumberToRational",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opRational(),
+    "Adds algebraic number to rational. ",
+    "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})",
+    "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
+    "AddAlgebraicNumberToRational",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
-      this->opRational(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Adds rational to algebraic number. ",
-      "1/(1+\\sqrt {2}+\\sqrt{}6)",
-      "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
-      "AddRationalToAlgebraicNumber",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber,
+    this->opRational(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Adds rational to algebraic number. ",
+    "1/(1+\\sqrt {2}+\\sqrt{}6)",
+    "CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber",
+    "AddRationalToAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational,
@@ -3338,15 +3344,16 @@ void Calculator::initializeFunctionsStandard() {
   );
   // must come before outer plus:
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addPlotToPlot,
-      this->builtInCode<Plot>(),
-      this->builtInCode<Plot>(),
-      "Superimposes two plots. ",
-      "Plot2D{}(sin{}(x), -5, 5) + Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
-      "CalculatorFunctionsBinaryOps::addPlotToPlot",
-      "AddPlots",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addPlotToPlot,
+    this->builtInCode<Plot>(),
+    this->builtInCode<Plot>(),
+    "Superimposes two plots. ",
+    "Plot2D{}(sin{}(x), -5, 5) + Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
+    "CalculatorFunctionsBinaryOps::addPlotToPlot",
+    "AddPlots",
+    innerStandard
+  );
   this->addOperationHandler(
     "ScaleToLeadingUnit",
     CalculatorFunctions::scaleToLeadingUnit,
@@ -3486,29 +3493,31 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opPolynomialAlgebraicNumbers(),
-      "Adds a polynomial over the algebraic numbers "
-      "to a polynomial over the algebraic numbers. ",
-      "PolynomialAlgebraicNumbers(\\sqrt{12}) + "
-      "PolynomialAlgebraicNumbers(\\sqrt{3}x)",
-      "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
-      "AddAlgebraicNumberToPolynomialOverAlgebraicNumbers",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opPolynomialAlgebraicNumbers(),
+    "Adds a polynomial over the algebraic numbers "
+    "to a polynomial over the algebraic numbers. ",
+    "PolynomialAlgebraicNumbers(\\sqrt{12}) + "
+    "PolynomialAlgebraicNumbers(\\sqrt{3}x)",
+    "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
+    "AddAlgebraicNumberToPolynomialOverAlgebraicNumbers",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
-      this->opPolynomialAlgebraicNumbers(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Adds a polynomial over the algebraic numbers "
-      "to a polynomial over the algebraic numbers. ",
-      "PolynomialAlgebraicNumbers(\\sqrt{12}x) +"
-      "PolynomialAlgebraicNumbers(-\\sqrt{3})",
-      "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
-      "AddPolynomialOverAlgebraicNumbersToAlgebraicNumber",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
+    this->opPolynomialAlgebraicNumbers(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Adds a polynomial over the algebraic numbers "
+    "to a polynomial over the algebraic numbers. ",
+    "PolynomialAlgebraicNumbers(\\sqrt{12}x) +"
+    "PolynomialAlgebraicNumbers(-\\sqrt{3})",
+    "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
+    "AddPolynomialOverAlgebraicNumbersToAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
@@ -3534,16 +3543,17 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
-      this->opPolynomialRational(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Adds a polynomial over the algebraic numbers "
-      "to a polynomial over the algebraic numbers. ",
-      "PolynomialAlgebraicNumbers(x) +\\sqrt{2}",
-      "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
-      "AddPolynomialToAlgebraicNumber",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
+    this->opPolynomialRational(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Adds a polynomial over the algebraic numbers "
+    "to a polynomial over the algebraic numbers. ",
+    "PolynomialAlgebraicNumbers(x) +\\sqrt{2}",
+    "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
+    "AddPolynomialToAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
@@ -3569,16 +3579,17 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "+",
-      CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opPolynomialRational(),
-      "Adds a polynomial over the algebraic numbers "
-      "to a polynomial over the algebraic numbers. ",
-      "\\sqrt{2}+PolynomialAlgebraicNumbers(x)",
-      "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
-      "AddAlgebraicNumberToPolynomial",
-      innerStandard);
+    "+",
+    CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opPolynomialRational(),
+    "Adds a polynomial over the algebraic numbers "
+    "to a polynomial over the algebraic numbers. ",
+    "\\sqrt{2}+PolynomialAlgebraicNumbers(x)",
+    "CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial",
+    "AddAlgebraicNumberToPolynomial",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::
@@ -3831,45 +3842,49 @@ void Calculator::initializeFunctionsStandard() {
     outerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat,
-      this->opRational(),
-      this->builtInCode<ElementZmodP>(),
-      "Multiplies elements of Z_p. ",
-      "(2 mod 7) * 3",
-      "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat",
-      "MultiplyRationalByElementZmodP",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat,
+    this->opRational(),
+    this->builtInCode<ElementZmodP>(),
+    "Multiplies elements of Z_p. ",
+    "(2 mod 7) * 3",
+    "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat",
+    "MultiplyRationalByElementZmodP",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat,
-      this->builtInCode<ElementZmodP>(),
-      this->builtInCode<ElementZmodP>(),
-      "Multiplies elements of Z_p. ",
-      "(2 mod 7) * 3",
-      "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat",
-      "MultiplyElementZmodPByElementZModP",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat,
+    this->builtInCode<ElementZmodP>(),
+    this->builtInCode<ElementZmodP>(),
+    "Multiplies elements of Z_p. ",
+    "(2 mod 7) * 3",
+    "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat",
+    "MultiplyElementZmodPByElementZModP",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber,
-      this->builtInCode<AlgebraicNumber>(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Multiplies two algebraic numbers. ",
-      "\\sqrt{}2(\\sqrt {2}* \\sqrt {3} +\\sqrt{}2)",
-      "CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber",
-      "MultiplyAlgebraicNumberByAlgebraicNumber",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber,
+    this->builtInCode<AlgebraicNumber>(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Multiplies two algebraic numbers. ",
+    "\\sqrt{}2(\\sqrt {2}* \\sqrt {3} +\\sqrt{}2)",
+    "CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber",
+    "MultiplyAlgebraicNumberByAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber,
-      this->opRational(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Multiplies two algebraic number by rational. ",
-      "2(\\sqrt {2}+\\sqrt{}3)",
-      "CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber",
-      "MultiplyRationalByAlgebraicNumber",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber,
+    this->opRational(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Multiplies two algebraic number by rational. ",
+    "2(\\sqrt {2}+\\sqrt{}3)",
+    "CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber",
+    "MultiplyRationalByAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::multiplyRationalByRational,
@@ -4033,29 +4048,31 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::
-          multiplyNumberOrPolynomialByNumberOrPolynomial,
-      this->opPolynomialAlgebraicNumbers(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Multiplies two polynomials over the algebraic numbers. ",
-      "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*\\sqrt{6};",
-      "CalculatorFunctionsBinaryOps::"
-      "multiplyNumberOrPolynomialByNumberOrPolynomial",
-      "MultiplyPolynomialAlgebraicNumbersByAlgebraicNumber",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::
+    multiplyNumberOrPolynomialByNumberOrPolynomial,
+    this->opPolynomialAlgebraicNumbers(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Multiplies two polynomials over the algebraic numbers. ",
+    "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*\\sqrt{6};",
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyNumberOrPolynomialByNumberOrPolynomial",
+    "MultiplyPolynomialAlgebraicNumbersByAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::
-          multiplyNumberOrPolynomialByNumberOrPolynomial,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opPolynomialAlgebraicNumbers(),
-      "Multiplies two polynomials over the algebraic numbers. ",
-      "\\sqrt{6}*PolynomialAlgebraicNumbers{}(\\sqrt{3}x);",
-      "CalculatorFunctionsBinaryOps::"
-      "multiplyNumberOrPolynomialByNumberOrPolynomial",
-      "MultiplyAlgebraicNumberByPolynomialAlgebraicNumbers",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::
+    multiplyNumberOrPolynomialByNumberOrPolynomial,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opPolynomialAlgebraicNumbers(),
+    "Multiplies two polynomials over the algebraic numbers. ",
+    "\\sqrt{6}*PolynomialAlgebraicNumbers{}(\\sqrt{3}x);",
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyNumberOrPolynomialByNumberOrPolynomial",
+    "MultiplyAlgebraicNumberByPolynomialAlgebraicNumbers",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::
@@ -4070,29 +4087,31 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::
-          multiplyNumberOrPolynomialByNumberOrPolynomial,
-      this->opPolynomialRational(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Multiplies two polynomials over the algebraic numbers. ",
-      "Polynomial{}(x)*\\sqrt{2};",
-      "CalculatorFunctionsBinaryOps::"
-      "multiplyNumberOrPolynomialByNumberOrPolynomial",
-      "MultiplyPolynomialByAlgebraicNumber",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::
+    multiplyNumberOrPolynomialByNumberOrPolynomial,
+    this->opPolynomialRational(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Multiplies two polynomials over the algebraic numbers. ",
+    "Polynomial{}(x)*\\sqrt{2};",
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyNumberOrPolynomialByNumberOrPolynomial",
+    "MultiplyPolynomialByAlgebraicNumber",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::
-          multiplyNumberOrPolynomialByNumberOrPolynomial,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opPolynomialRational(),
-      "Multiplies two polynomials over the algebraic numbers. ",
-      "\\sqrt{3} * PolynomialAlgebraicNumbers{}(x);",
-      "CalculatorFunctionsBinaryOps::"
-      "multiplyNumberOrPolynomialByNumberOrPolynomial",
-      "MultiplyAlgebraicNumberByPolynomial",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::
+    multiplyNumberOrPolynomialByNumberOrPolynomial,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opPolynomialRational(),
+    "Multiplies two polynomials over the algebraic numbers. ",
+    "\\sqrt{3} * PolynomialAlgebraicNumbers{}(x);",
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyNumberOrPolynomialByNumberOrPolynomial",
+    "MultiplyAlgebraicNumberByPolynomial",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor,
@@ -4387,16 +4406,17 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opSequence(),
-      "Multiplies a double number on left "
-      "and a sequence on the right.scalar.",
-      "(1 ,2)- DoubleValue{} 1 (2,3)",
-      "CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence",
-      "MultiplyAlgebraicNumberBySequence",
-      innerStandard);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opSequence(),
+    "Multiplies a double number on left "
+    "and a sequence on the right.scalar.",
+    "(1 ,2)- DoubleValue{} 1 (2,3)",
+    "CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence",
+    "MultiplyAlgebraicNumberBySequence",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence,
@@ -4514,15 +4534,16 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "/",
-      CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat,
-      this->builtInCode<ElementZmodP>(),
-      this->builtInCode<ElementZmodP>(),
-      "Divides elements of Z/pZ. ",
-      "(2 mod  7) / (3 mod 7)",
-      "CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat",
-      "DivideElementZmodPByElementZModP",
-      innerStandard);
+    "/",
+    CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat,
+    this->builtInCode<ElementZmodP>(),
+    this->builtInCode<ElementZmodP>(),
+    "Divides elements of Z/pZ. ",
+    "(2 mod  7) / (3 mod 7)",
+    "CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat",
+    "DivideElementZmodPByElementZModP",
+    innerStandard
+  );
   this->addOperationHandler(
     "/",
     CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation,
@@ -4548,41 +4569,44 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "/",
-      CalculatorFunctionsBinaryOps::
-          divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
-      this->builtInCode<AlgebraicNumber>(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Divides algebraic numbers. ",
-      "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)",
-      "CalculatorFunctionsBinaryOps::"
-      "divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational",
-      "DivideAlgebraicByAlgebraic",
-      innerStandard);
+    "/",
+    CalculatorFunctionsBinaryOps::
+    divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
+    this->builtInCode<AlgebraicNumber>(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Divides algebraic numbers. ",
+    "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)",
+    "CalculatorFunctionsBinaryOps::"
+    "divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational",
+    "DivideAlgebraicByAlgebraic",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "/",
-      CalculatorFunctionsBinaryOps::
-          divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
-      this->opRational(),
-      this->builtInCode<AlgebraicNumber>(),
-      "Divides rational by algebraic number. ",
-      "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)",
-      "CalculatorFunctionsBinaryOps::"
-      "divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational",
-      "DivideRationalByAlgebraic",
-      innerStandard);
+    "/",
+    CalculatorFunctionsBinaryOps::
+    divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
+    this->opRational(),
+    this->builtInCode<AlgebraicNumber>(),
+    "Divides rational by algebraic number. ",
+    "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)",
+    "CalculatorFunctionsBinaryOps::"
+    "divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational",
+    "DivideRationalByAlgebraic",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "/",
-      CalculatorFunctionsBinaryOps::
-          divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opRational(),
-      "Divides algebraic number by rational. ",
-      "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5",
-      "CalculatorFunctionsBinaryOps::"
-      "divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational",
-      "DivideAlgebraicByRational",
-      innerStandard);
+    "/",
+    CalculatorFunctionsBinaryOps::
+    divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opRational(),
+    "Divides algebraic number by rational. ",
+    "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5",
+    "CalculatorFunctionsBinaryOps::"
+    "divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational",
+    "DivideAlgebraicByRational",
+    innerStandard
+  );
   this->addOperationHandler(
     "/",
     CalculatorFunctions::divideByNumber,
@@ -5082,33 +5106,35 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "^",
-      CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opRational(),
-      "Raises algebraic number to small integer or half-integer power. ",
-      "a = 3/2;\n"
-      "b = - 15/2;\n"
-      "c = 33/4;\n"
-      "x = (-b+\\sqrt{}(b^2-4a c))/(2a);\n"
-      "B= c+a x^{2}+b x;",
-      "CalculatorFunctionsBinaryOps::"
-      "powerAlgebraicNumberBySmallInteger",
-      "PowerAlgebraicNumberBySmallInteger",
-      innerStandard);
+    "^",
+    CalculatorFunctionsBinaryOps::powerAlgebraicNumberBySmallInteger,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opRational(),
+    "Raises algebraic number to small integer or half-integer power. ",
+    "a = 3/2;\n"
+    "b = - 15/2;\n"
+    "c = 33/4;\n"
+    "x = (-b+\\sqrt{}(b^2-4a c))/(2a);\n"
+    "B= c+a x^{2}+b x;",
+    "CalculatorFunctionsBinaryOps::"
+    "powerAlgebraicNumberBySmallInteger",
+    "PowerAlgebraicNumberBySmallInteger",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "^",
-      CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault,
-      this->builtInCode<AlgebraicNumber>(),
-      this->opRational(),
-      "Takes the radical of an algebraic number, "
-      "if the algebraic number is a positive number"
-      "that whose radical lies in the underlying algebraic closure.",
-      "\\sqrt{3+2\\sqrt[2]{2}};\n"
-      "(7-5\\sqrt{2})^{7/3}",
-      "CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault",
-      "RadicalAlgebraicNumberPositiveDefault",
-      innerStandard);
+    "^",
+    CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault,
+    this->builtInCode<AlgebraicNumber>(),
+    this->opRational(),
+    "Takes the radical of an algebraic number, "
+    "if the algebraic number is a positive number"
+    "that whose radical lies in the underlying algebraic closure.",
+    "\\sqrt{3+2\\sqrt[2]{2}};\n"
+    "(7-5\\sqrt{2})^{7/3}",
+    "CalculatorFunctionsBinaryOps::radicalAlgebraicNumberPositiveDefault",
+    "RadicalAlgebraicNumberPositiveDefault",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational,
@@ -6110,60 +6136,13 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringCompositeHandler(
     this->opMatrix(), Expression::toStringMatrix
   );
-  // To add a new type here, you need to define
-  // Expression::toStringBuiltIn<your_new_type>
-  this->addOneBuiltInHandler<std::string>();
-  this->addOneBuiltInHandler<JSData>();
-  this->addOneBuiltInHandler<Rational>();
-  this->addOneBuiltInHandler<ElementEllipticCurve<Rational> >();
-  this->addOneBuiltInHandler<ElementEllipticCurve<ElementZmodP> >();
-  this->addOneBuiltInHandler<ElementZmodP>();
-  this->addOneBuiltInHandler<InputBox>();
-  this->addOneBuiltInHandler<
-    GroupRepresentation<
-      FiniteGroup<ElementHyperoctahedralGroupR2>, Rational
-    >
-  >();
-  this->addOneBuiltInHandler<ElementHyperoctahedralGroupR2>();
-  this->addOneBuiltInHandler<Polynomial<Rational> >();
-  this->addOneBuiltInHandler<Polynomial<ElementZmodP> >();
-  this->addOneBuiltInHandler<Polynomial<AlgebraicNumber> >();
-  this->addOneBuiltInHandler<PolynomialModuloPolynomial<ElementZmodP> >();
-  this->addOneBuiltInHandler<AlgebraicNumber>();
-  this->addOneBuiltInHandler<RationalFraction<Rational> >();
-  this->addOneBuiltInHandler<RationalFraction<AlgebraicNumber> >();
-  this->addOneBuiltInHandler<RationalFraction<ElementZmodP> >();
-  this->addOneBuiltInHandler<Weight<Polynomial<Rational> > >();
-  this->addOneBuiltInHandler<SemisimpleLieAlgebra*>();
-  this->addOneBuiltInHandler<
-    ElementUniversalEnveloping<RationalFraction<Rational> >
-  >();
-  this->addOneBuiltInHandler<MatrixTensor<Rational> >();
-  this->addOneBuiltInHandler<
-    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
-  >();
-  this->addOneBuiltInHandler<Plot>();
-  this->addOneBuiltInHandler<WeylGroupData>();
-  this->addOneBuiltInHandler<ElementWeylGroup>();
-  this->addOneBuiltInHandler<
-    GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
-  >();
-  this->addOneBuiltInHandler<
-    VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
-  >();
-  this->addOneBuiltInHandler<CharacterSemisimpleLieAlgebraModule<Rational> >();
-  this->addOneBuiltInHandler<SemisimpleSubalgebras>();
-  this->addOneBuiltInHandler<double>();
-  this->addOneBuiltInHandler<AlgebraicNumber>();
-  this->addOneBuiltInHandler<LittelmannPath>();
-  this->addOneBuiltInHandler<ElementWeylAlgebra<Rational> >();
-  this->addOneBuiltInHandler<VectorPartitionFunction>();
 }
 
 void Calculator::initializeBuiltInsFreezeArguments() {
   STACK_TRACE("Calculator::initializeBuiltInsFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(
-      this->allBuiltInTypes.size + 100);
+    this->allBuiltInTypes.size + 100
+  );
   this->atomsThatFreezeArguments.addListOnTop(this->allBuiltInTypes);
 }
 

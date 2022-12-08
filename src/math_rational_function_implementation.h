@@ -1378,15 +1378,15 @@ void RationalFraction<Coefficient>::reduceRationalFunctionToPolynomial() {
 }
 
 template <class Coefficient>
-bool RationalFraction<Coefficient>::substitution(
+bool RationalFraction<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& substitution,
   const Coefficient& one
 ) {
-  return this->substitution(substitution, one, nullptr);
+  return this->substitute(substitution, one, nullptr);
 }
 
 template <class Coefficient>
-bool RationalFraction<Coefficient>::substitution(
+bool RationalFraction<Coefficient>::substitute(
   const PolynomialSubstitution<Coefficient>& substitution,
   const Coefficient& one,
   std::stringstream* commentsOnFailure
@@ -1397,7 +1397,7 @@ bool RationalFraction<Coefficient>::substitution(
     return true;
   case RationalFraction::typePolynomial:
     if (
-      !this->numerator.getElement().substitution(substitution, one)
+      !this->numerator.getElement().substitute(substitution, one)
     ) {
       return false;
     }
@@ -1405,12 +1405,12 @@ bool RationalFraction<Coefficient>::substitution(
     return true;
   case RationalFraction::typeRationalFraction:
     if (
-      !this->numerator.getElement().substitution(substitution, one)
+      !this->numerator.getElement().substitute(substitution, one)
     ) {
       return false;
     }
     if (
-      !this->denominator.getElement().substitution(substitution, one)
+      !this->denominator.getElement().substitute(substitution, one)
     ) {
       return false;
     }

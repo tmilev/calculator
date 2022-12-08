@@ -704,7 +704,7 @@ extendContext(
   this->context.polynomialSubstitutionNoFailure(
     newContext, substitution, Rational::one()
   );
-  this->content.substitution(substitution);
+  this->content.substitute(substitution);
   this->context = newContext;
   return true;
 }
@@ -718,7 +718,7 @@ bool WithContext<Polynomial<Rational> >::extendContext(
   this->context.polynomialSubstitutionNoFailure(
     newContext, substitution, Rational::one()
   );
-  if (!this->content.substitution(substitution, Rational::one())) {
+  if (!this->content.substitute(substitution, Rational::one())) {
     return false;
   }
   this->context = newContext;
@@ -736,7 +736,7 @@ bool WithContext<Polynomial<ElementZmodP> >::extendContext(
     this->context.polynomialSubstitutionNoFailure(
       newContext, substitution, one
     );
-    if (!this->content.substitution(substitution, one)) {
+    if (!this->content.substitute(substitution, one)) {
       return false;
     }
   }
@@ -755,7 +755,7 @@ bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
     substitution,
     this->context.owner->objectContainer.algebraicClosure.one()
   );
-  if (!this->content.substitution(substitution, Rational::one())) {
+  if (!this->content.substitute(substitution, Rational::one())) {
     return false;
   }
   this->context = newContext;
@@ -775,7 +775,7 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
     substitutionDifferentialOperatorPart
   );
   if (
-    !this->content.substitution(
+    !this->content.substitute(
       substitutionPolynomialPart, substitutionDifferentialOperatorPart
     )
   ) {
@@ -804,7 +804,7 @@ bool WithContext<RationalFraction<Rational> >::extendContext(
     newContext, substitution, Rational::one()
   );
   if (
-    !this->content.substitution(
+    !this->content.substitute(
       substitution, Rational::one(), commentsOnFailure
     )
   ) {
@@ -834,7 +834,7 @@ bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
     newContext, substitution, closure.one()
   );
   if (
-    !this->content.substitution(
+    !this->content.substitute(
       substitution, closure.one(), commentsOnFailure
     )
   ) {
@@ -863,7 +863,7 @@ bool WithContext<
   this->context.polynomialSubstitutionNoFailure(
     newContext, substitution, Rational::one()
   );
-  this->content.substitution(
+  this->content.substitute(
     substitution,
     this->context.owner->objectContainer.categoryOModules
   );
@@ -883,7 +883,7 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
   for (
     int i = 0; i < this->content.weightFundamentalCoordinates.size; i ++
   ) {
-    this->content.weightFundamentalCoordinates[i].substitution(
+    this->content.weightFundamentalCoordinates[i].substitute(
       substitution, Rational::one()
     );
   }
@@ -1036,7 +1036,7 @@ bool Expression::setContextAtLeastEqualTo(
     for (int i = 0; i < newMatrix.numberOfRows; i ++) {
       for (int j = 0; j < newMatrix.numberOfColumns; j ++) {
         if (
-          !newMatrix(i, j).substitution(
+          !newMatrix(i, j).substitute(
             substitution, Rational::one(), commentsOnFailure
           )
         ) {

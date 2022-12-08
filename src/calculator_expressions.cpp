@@ -23,253 +23,222 @@ List<Expression>::Comparator* FormatExpressions::getMonomialOrder<Expression>()
 }
 
 // Calculator::builtInName specializations follow
-template <>
-std::string Calculator::builtInName<ElementEllipticCurve<Rational>>()
-{
+template < >
+std::string Calculator::builtInName<ElementEllipticCurve<Rational> >() {
   return "ellipticCurveElementsRational";
 }
 
-template <>
-std::string Calculator::builtInName<ElementEllipticCurve<ElementZmodP>>()
-{
+template < >
+std::string Calculator::builtInName<ElementEllipticCurve<ElementZmodP> >() {
   return "ellipticCurveElementsZmodP";
 }
 
-template <>
-std::string Calculator::builtInName<RationalFraction<Rational>>()
-{
+template < >
+std::string Calculator::builtInName<RationalFraction<Rational> >() {
   return "RationalFunction";
 }
 
-template <>
-std::string Calculator::builtInName<RationalFraction<AlgebraicNumber>>()
-{
+template < >
+std::string Calculator::builtInName<RationalFraction<AlgebraicNumber> >() {
   return "RationalFunctionAlgebraicCoefficients";
 }
 
-template <>
-std::string Calculator::builtInName<RationalFraction<ElementZmodP>>()
-{
+template < >
+std::string Calculator::builtInName<RationalFraction<ElementZmodP> >() {
   return "RationalFunctionModuloInteger";
 }
 
-template <>
-std::string Calculator::builtInName<InputBox>()
-{
+template < >
+std::string Calculator::builtInName<InputBox>() {
   return "userInputTextBox";
 }
 
-template <>
-std::string Calculator::builtInName<Rational>()
-{
+template < >
+std::string Calculator::builtInName<Rational>() {
   return "Rational";
 }
 
-template <>
-std::string Calculator::builtInName<ElementHyperoctahedralGroupR2>()
-{
+template < >
+std::string Calculator::builtInName<ElementHyperoctahedralGroupR2>() {
   return "ElementHyperoctahedral";
 }
 
-template <>
+template < >
 std::string Calculator::builtInName<
-    GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>>()
-{
+  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
+>() {
   return "HyperoctahedralGroupRepresentation";
 }
 
-template <>
-std::string Calculator::builtInName<JSData>()
-{
+template < >
+std::string Calculator::builtInName<JSData>() {
   return "JSON";
 }
 
-template <>
-std::string Calculator::builtInName<std::string>()
-{
+template < >
+std::string Calculator::builtInName<std::string>() {
   return "string";
 }
 
-template <>
-std::string Calculator::builtInName<AlgebraicNumber>()
-{
+template < >
+std::string Calculator::builtInName<AlgebraicNumber>() {
   return "AlgebraicNumber";
 }
 
-template <>
-std::string Calculator::builtInName<ElementZmodP>()
-{
+template < >
+std::string Calculator::builtInName<ElementZmodP>() {
   return "EltZmodP";
 }
 
-template <>
+template < >
 std::string Calculator::builtInName<
-    ElementUniversalEnveloping<RationalFraction<Rational>>>()
-{
+  ElementUniversalEnveloping<RationalFraction<Rational> >
+>() {
   return "ElementUEoverRF";
 }
 
-template <>
-std::string Calculator::builtInName<Weight<Rational>>()
-{
+template < >
+std::string Calculator::builtInName<Weight<Rational> >() {
   return "weightLieAlg";
 }
 
-template <>
-std::string Calculator::builtInName<Weight<Polynomial<Rational>>>()
-{
+template < >
+std::string Calculator::builtInName<Weight<Polynomial<Rational> > >() {
   return "weightLieAlgPoly";
 }
 
-template <>
-std::string Calculator::builtInName<MatrixTensor<Rational>>()
-{
+template < >
+std::string Calculator::builtInName<MatrixTensor<Rational> >() {
   return "MatrixTensorRational";
 }
 
-template <>
-std::string Calculator::builtInName<int>()
-{
+template < >
+std::string Calculator::builtInName<int>() {
   return Calculator::builtInName<Rational>();
 }
 
-template <>
-std::string Calculator::builtInName<LargeIntegerUnsigned>()
-{
+template < >
+std::string Calculator::builtInName<LargeIntegerUnsigned>() {
   return Calculator::builtInName<Rational>();
 }
 
-template <>
-std::string Calculator::builtInName<double>()
-{
+template < >
+std::string Calculator::builtInName<double>() {
   return "Double";
 }
 
-template <>
-std::string Calculator::builtInName<Polynomial<Rational>>()
-{
+template < >
+std::string Calculator::builtInName<Polynomial<Rational> >() {
   return "PolynomialRational";
 }
 
-template <>
-std::string Calculator::builtInName<Polynomial<AlgebraicNumber>>()
-{
+template < >
+std::string Calculator::builtInName<Polynomial<AlgebraicNumber> >() {
   return "PolynomialOverANs";
 }
 
-template <>
-std::string Calculator::builtInName<Polynomial<ElementZmodP>>()
-{
+template < >
+std::string Calculator::builtInName<Polynomial<ElementZmodP> >() {
   return "PolynomialModuloInteger";
 }
 
-template <>
-std::string Calculator::builtInName<PolynomialModuloPolynomial<ElementZmodP>>()
-
-{
+template < >
+std::string Calculator::builtInName<
+  PolynomialModuloPolynomial<ElementZmodP>
+>() {
   return "PolynomialModuloPolynomialModuloInteger";
 }
 
-template <>
-std::string Calculator::builtInName<ElementWeylAlgebra<Rational>>()
-{
+template < >
+std::string Calculator::builtInName<ElementWeylAlgebra<Rational> >() {
   return "ElementWeylAlgebra";
 }
 
-template <>
-std::string Calculator::builtInName<SemisimpleLieAlgebra *>()
-{
+template < >
+std::string Calculator::builtInName<SemisimpleLieAlgebra*>() {
   return "SemisimpleLieAlg";
 }
 
-template <>
-std::string Calculator::builtInName<LittelmannPath>()
-{
+template < >
+std::string Calculator::builtInName<LittelmannPath>() {
   return "LittelmannPath";
 }
 
-template <>
+template < >
 std::string Calculator::builtInName<
-    MonomialTensor<int, HashFunctions::hashFunction>>()
-{
+  MonomialTensor<int, HashFunctions::hashFunction>
+>() {
   return "LRO";
 }
 
-template <>
+template < >
 std::string Calculator::builtInName<
-    ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>()
-{
+  ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+>() {
   return "ETGVM";
 }
 
-template <>
+template < >
 std::string Calculator::builtInName<
-    CharacterSemisimpleLieAlgebraModule<Rational>>()
-{
+  CharacterSemisimpleLieAlgebraModule<Rational>
+>() {
   return "CharSSAlgMod";
 }
 
-template <>
-std::string Calculator::builtInName<Plot>()
-{
+template < >
+std::string Calculator::builtInName<Plot>() {
   return "CalculusPlot";
 }
 
-template <>
-std::string Calculator::builtInName<PlotObject>()
-{
+template < >
+std::string Calculator::builtInName<PlotObject>() {
   return Calculator::builtInName<Plot>();
 }
 
-template <>
-std::string Calculator::builtInName<SemisimpleSubalgebras>()
-{
+template < >
+std::string Calculator::builtInName<SemisimpleSubalgebras>() {
   return "SemisimpleSubalgebras";
 }
 
-template <>
-std::string Calculator::builtInName<WeylGroupData>()
-{
+template < >
+std::string Calculator::builtInName<WeylGroupData>() {
   return "WeylGroup";
 }
 
-template <>
+template < >
 std::string Calculator::builtInName<
-    GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>()
-{
+  GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+>() {
   return "WeylGroupRep";
 }
 
-template <>
-std::string Calculator::builtInName<ElementWeylGroup>()
-{
+template < >
+std::string Calculator::builtInName<ElementWeylGroup>() {
   return "ElementWeylGroup";
 }
 
-template <>
+template < >
 std::string Calculator::builtInName<
-    VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>()
-{
+  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+>() {
   return "WeylGroupVirtualRep";
 }
 
-template <>
-std::string Calculator::builtInName<ElementSemisimpleLieAlgebra<AlgebraicNumber>>()
-
-{
+template < >
+std::string Calculator::builtInName<
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>
+>() {
   return "ElementSemisimpleLieAlgebraAlgebraicCoefficients";
 }
 
-template <>
-std::string Calculator::builtInName<VectorPartitionFunction>()
-{
+template < >
+std::string Calculator::builtInName<VectorPartitionFunction>() {
   return "VPF";
 }
 
-template <>
-std::string Calculator::builtInName<Lattice>()
-{
-  return "Lattice";
+template < >
+std::string Calculator::builtInName<Lattice>() {
+  return "LatticeType";
 }
 
 // Calculator::builtInName specializations end.
@@ -694,12 +663,13 @@ int Expression::addObjectReturnIndex(
   );
 }
 
-template <>
-int Expression::addObjectReturnIndex(
-    const Lattice &inputValue) const
-{
+template < >
+int Expression::addObjectReturnIndex(const Lattice& inputValue) const {
   this->checkInitialization();
-  return this->owner->objectContainer.lattices.addNoRepetitionOrReturnIndexFirst(inputValue);
+  return
+  this->owner->objectContainer.lattices.addNoRepetitionOrReturnIndexFirst(
+    inputValue
+  );
 }
 
 // Expression::addObjectReturnIndex specializations end
@@ -1307,6 +1277,22 @@ const {
   );
 }
 
+template < >
+Lattice& Expression::getValueNonConst() const {
+  if (!this->isOfType<Lattice>()) {
+    global.fatal
+    << "Expression not of required type "
+    << "Lattice. The expression equals "
+    << this->toString()
+    << "."
+    << global.fatal;
+  }
+  return
+  this->owner->objectContainer.lattices.getElement(
+    this->getLastChild().data
+  );
+}
+
 // end Expression::getValueNonConst specializations.
 bool Expression::isMatrix(
   int* outputNumberOfRows, int* outputNumberOfColumns
@@ -1359,31 +1345,37 @@ bool Expression::checkConsistency() const {
   }
   if (this->isBuiltInType()) {
     if (this->children.size != 3) {
-      if (this->children.size > 0)
-      {
+      if (this->children.size > 0) {
         int childData = (*this)[0].data;
-
-        if (childData != 0 && childData < this->owner->operations.size())
-        {
-          global.fatal << "Name corresponding to built-in code: " << childData << " equals: "
-                       << this->owner->operations.keys[childData] << "\n<br>\n";
+        if (
+          childData != 0 && childData < this->owner->operations.size()
+        ) {
+          global.fatal
+          << "Name corresponding to built-in code: "
+          << childData
+          << " equals: "
+          << this->owner->operations.keys[childData]
+          << "\n<br>\n";
         }
       }
       global.fatal
-          << "At the moment of writing, "
-          << "an expression of built-in type must have 3 "
-          << "children: type, context, and index in Calculator. The raw expression is: "
-          << "The present expression has: " << this->size() << " children. "
-          << this->toStringFullWithHints(false)
-          << global.fatal;
+      << "At the moment of writing, "
+      << "an expression of built-in type must have 3 "
+      <<
+      "children: type, context, and index in Calculator. The raw expression is: "
+      << "The present expression has: "
+      << this->size()
+      << " children. "
+      << this->toStringFullWithHints(false)
+      << global.fatal;
     }
     const Expression& mustBeTheContext = (*this)[1];
     if (!mustBeTheContext.startsWith(this->owner->opContext())) {
       global.fatal
-          << "The second child of a built-in type "
-          << "must be a context. It is instead "
-          << mustBeTheContext.toStringFull()
-          << global.fatal;
+      << "The second child of a built-in type "
+      << "must be a context. It is instead "
+      << mustBeTheContext.toStringFull()
+      << global.fatal;
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
       bool isGood = false;
@@ -2965,9 +2957,10 @@ bool Expression::toStringBuiltIn<
   FormatExpressions localFormat;
   input.getContext().getFormat(localFormat);
   out
-      << input.owner->builtInName<
-             ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>()
-      << "{}(";
+  << input.owner->builtInName<
+    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+  >()
+  << "{}(";
   out
   << input.getValue<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
@@ -3218,11 +3211,65 @@ bool Expression::toStringBuiltIn<VectorPartitionFunction>(
   std::stringstream& out,
   FormatExpressions* format
 ) {
-  STACK_TRACE("Expression::toStringBuiltIn_PartialFractions");
+  STACK_TRACE("Expression::toStringBuiltIn_VectorPartitionFunction");
   (void) format;
   const VectorPartitionFunction& vectorPartitionFunction =
   input.getValue<VectorPartitionFunction>();
   out << vectorPartitionFunction.toHTML();
+  return true;
+}
+
+template < >
+bool Expression::toStringBuiltIn<Lattice>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+) {
+  STACK_TRACE("Expression::toStringBuiltIn_Lattice");
+  (void) format;
+  const Lattice& lattice = input.getValue<Lattice>();
+  out << Calculator::Functions::Names::lattice << "{}" << lattice.toString();
+  return true;
+}
+
+template < >
+bool Expression::toStringBuiltIn<
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+) {
+  input.checkInitialization();
+  out
+  << input.owner->builtInName<ElementSemisimpleLieAlgebra<AlgebraicNumber> >();
+  return true;
+}
+
+template < >
+bool Expression::toStringBuiltIn<
+  MonomialTensor<int, HashFunctions::hashFunction<int> >
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+) {
+  input.checkInitialization();
+  out
+  << input.owner->builtInName<
+    MonomialTensor<int, HashFunctions::hashFunction<int> >
+  >();
+  return true;
+}
+
+template < >
+bool Expression::toStringBuiltIn<Weight<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+) {
+  input.checkInitialization();
+  out << input.owner->builtInName<Weight<Rational> >();
   return true;
 }
 
@@ -5772,8 +5819,7 @@ bool Expression::isBuiltInType(std::string* outputWhichOperation) const {
   if (!(*this)[0].isOperation(&tempS)) {
     return false;
   }
-  if (this->owner->allBuiltInTypes.contains(tempS))
-  {
+  if (this->owner->allBuiltInTypes.contains(tempS)) {
     if (outputWhichOperation != nullptr) {
       *outputWhichOperation = tempS;
     }

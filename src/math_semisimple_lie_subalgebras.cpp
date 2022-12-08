@@ -192,9 +192,9 @@ bool SemisimpleLieAlgebra::attemptFindingHEF(
   system.getSubstitutionFromPartialSolutionSerreLikeSystem(
     solutionSubstitution
   );
-  inputOutputF.substitutionCoefficients(solutionSubstitution);
-  inputOutputH.substitutionCoefficients(solutionSubstitution);
-  inputOutputE.substitutionCoefficients(solutionSubstitution);
+  inputOutputF.substituteInCoefficients(solutionSubstitution);
+  inputOutputH.substituteInCoefficients(solutionSubstitution);
+  inputOutputE.substituteInCoefficients(solutionSubstitution);
   if (logStream != nullptr) {
     *logStream
     << "<br>H = "
@@ -6805,8 +6805,8 @@ bool CandidateSemisimpleSubalgebra::verifySolution(
   for (int i = 0; i < this->unknownNegativeGenerators.size; i ++) {
     currentNegative = this->unknownNegativeGenerators[i];
     currentPositive = this->unknownPositiveGenerators[i];
-    currentNegative.substitutionCoefficients(substitution);
-    currentPositive.substitutionCoefficients(substitution);
+    currentNegative.substituteInCoefficients(substitution);
+    currentPositive.substituteInCoefficients(substitution);
     this->negativeGenerators[i] = currentNegative;
     // <-implicit type conversion here, will crash if currentNegElt has
     // non-const coefficients

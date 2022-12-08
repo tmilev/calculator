@@ -7,6 +7,7 @@
 #include "math_extra_differential_operators.h"
 #include "math_rational_function.h"
 #include "math_extra_universal_enveloping_implementation.h"
+#include "progress_report.h"
 
 template <class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
@@ -145,16 +146,16 @@ highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
 }
 
 template <class Coefficient>
-void ModuleSSalgebra<Coefficient>::substitution(
+void ModuleSSalgebra<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& variableImages
 ) {
   for (int i = 0; i < this->actionsGeneratorsMatrix.size; i ++) {
-    this->actionsGeneratorsMatrix[i].substitution(variableImages);
+    this->actionsGeneratorsMatrix[i].substitute(variableImages);
   }
   for (int i = 0; i < this->actionsGenerators.size; i ++) {
     for (int j = 0; j < this->actionsGenerators[i].size; j ++) {
       for (int k = 0; k < this->actionsGenerators[i][j].size; k ++) {
-        this->actionsGenerators[i][j][k].substitution(variableImages);
+        this->actionsGenerators[i][j][k].substitute(variableImages);
       }
     }
   }
@@ -162,7 +163,7 @@ void ModuleSSalgebra<Coefficient>::substitution(
   oldGeneratingWordsNonReduced = this->generatingWordsNonReduced;
   this->generatingWordsNonReduced.clear();
   for (int i = 0; i < oldGeneratingWordsNonReduced.size; i ++) {
-    oldGeneratingWordsNonReduced[i].substitution(variableImages);
+    oldGeneratingWordsNonReduced[i].substitute(variableImages);
     this->generatingWordsNonReduced.addOnTop(
       oldGeneratingWordsNonReduced[i]
     );
@@ -171,23 +172,23 @@ void ModuleSSalgebra<Coefficient>::substitution(
     for (
       int j = 0; j < this->generatingWordsGrouppedByWeight[i].size; j ++
     ) {
-      this->generatingWordsGrouppedByWeight[i][j].substitution(variableImages);
+      this->generatingWordsGrouppedByWeight[i][j].substitute(variableImages);
     }
   }
   for (int i = 0; i < this->bilinearFormsAtEachWeightLevel.size; i ++) {
-    this->bilinearFormsAtEachWeightLevel[i].substitution(variableImages);
-    this->bilinearFormsInverted[i].substitution(variableImages);
+    this->bilinearFormsAtEachWeightLevel[i].substitute(variableImages);
+    this->bilinearFormsInverted[i].substitute(variableImages);
   }
   for (
     int i = 0; i < this->highestWeightDualCoordinatesBaseField.size; i ++
   ) {
-    this->highestWeightDualCoordinatesBaseField[i].substitution(
+    this->highestWeightDualCoordinatesBaseField[i].substitute(
       variableImages, Rational::one(), nullptr
     );
-    this->highestWeightFundamentalCoordinatesBaseField[i].substitution(
+    this->highestWeightFundamentalCoordinatesBaseField[i].substitute(
       variableImages, Rational::one(), nullptr
     );
-    this->highestWeightSimpleCoordinatesBaseField[i].substitution(
+    this->highestWeightSimpleCoordinatesBaseField[i].substitute(
       variableImages, Rational::one(), nullptr
     );
   }
@@ -1443,7 +1444,7 @@ void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
 }
 
 template <class Coefficient>
-void ElementTensorsGeneralizedVermas<Coefficient>::substitution(
+void ElementTensorsGeneralizedVermas<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& substitution,
   ListReferences<ModuleSSalgebra<Coefficient> >& modules
 ) {
@@ -1453,9 +1454,9 @@ void ElementTensorsGeneralizedVermas<Coefficient>::substitution(
   Coefficient tempCF;
   for (int i = 0; i < this->size(); i ++) {
     currentMon = (*this)[i];
-    currentMon.substitution(substitution, modules);
+    currentMon.substitute(substitution, modules);
     tempCF = this->coefficients[i];
-    tempCF.substitution(substitution, 1, nullptr);
+    tempCF.substitute(substitution, 1, nullptr);
     output.addMonomial(currentMon, tempCF);
   }
   *this = output;
@@ -2319,14 +2320,14 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(
 }
 
 template <class Coefficient>
-void MonomialGeneralizedVerma<Coefficient>::substitution(
+void MonomialGeneralizedVerma<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& substitution,
   ListReferences<ModuleSSalgebra<Coefficient> >& modules
 ) {
-  this->monomialCoefficientOne.substitution(substitution);
+  this->monomialCoefficientOne.substitute(substitution);
   ModuleSSalgebra<Coefficient> newOwner;
   newOwner = *this->owner;
-  newOwner.substitution(substitution);
+  newOwner.substitute(substitution);
   int newModIndex = modules.addNoRepetitionOrReturnIndexFirst(newOwner);
   this->owner = &modules[newModIndex];
 }

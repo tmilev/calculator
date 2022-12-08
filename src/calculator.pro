@@ -49,6 +49,7 @@ HEADERS += \
     general_test.h \
     general_time_date.h \
     math_extra_polynomial_factorization.h \
+    math_lattices.h \
     math_vector_partition_functions.h \
     progress_report.h \
     signals_infrastructure.h \
@@ -166,9 +167,11 @@ SOURCES += \
     math_implementation_5_test.cpp \
     math_implementation_6.cpp \
     math_implementation_6_test.cpp \
+    math_lattices.cpp \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
+    math_vector_partition_functions.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
     random.cpp \
@@ -177,6 +180,7 @@ SOURCES += \
     string_constants.cpp \
     symmetric_groups_and_generalizations.cpp \
     system_functions.cpp \
+    temp.cpp \
     test.cpp \
     transport_layer_security.cpp \
     transport_layer_security_implementation.cpp \

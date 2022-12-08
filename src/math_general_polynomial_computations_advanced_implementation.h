@@ -719,7 +719,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
           outputSub.makeIdentitySubstitution(numberOfVariables);
           outputSub[oneVarIndex].makeConstant(coefficient);
           // check our work:
-          tempP.substitution(outputSub, 1);
+          tempP.substitute(outputSub, 1);
           if (!tempP.isEqualToZero()) {
             global.fatal
             << "I was solving the polynomial equation "
@@ -809,7 +809,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
   if (substitution == tempP) {
     return;
   }
-  substitution.substitution(finalSubstitution, 1);
+  substitution.substitute(finalSubstitution, 1);
   bool changed = false;
   for (int i = 0; i < substitution.size(); i ++) {
     for (
@@ -835,7 +835,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
     }
   }
   if (changed) {
-    substitution.substitution(finalSubstitution, 1);
+    substitution.substitute(finalSubstitution, 1);
   }
   Coefficient mustBeConstant;
   if (!substitution.isConstant(&mustBeConstant)) {
@@ -1012,7 +1012,7 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
       }
       this->impliedSubstitutions.addOnTop(substitution);
       for (int i = 0; i < inputSystem.size; i ++) {
-        inputSystem[i].substitution(substitution, 1);
+        inputSystem[i].substitute(substitution, 1);
       }
     }
   }
@@ -1154,7 +1154,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
     variableIndex, aValueToTryOnPreferredVariable
   );
   for (int i = 0; i < inputSystem.size; i ++) {
-    inputSystem[i].substitution(substitution, 1);
+    inputSystem[i].substitute(substitution, 1);
   }
   heuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
   this->numberOfSerreSystemComputations +=
@@ -1226,7 +1226,7 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     oneCase.setSerreLikeSolutionIndex(i, 0);
     inputSystem = inputSystemCopy;
     for (int i = 0; i < inputSystem.size; i ++) {
-      inputSystem[i].substitution(substitution, 1);
+      inputSystem[i].substitute(substitution, 1);
     }
     oneCase.solveSerreLikeSystemRecursively(inputSystem);
     this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);
@@ -1445,7 +1445,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->getSubstitutionFromPartialSolutionSerreLikeSystem(substitution);
     workingSystem = inputSystem;
     for (int i = 0; i < workingSystem.size; i ++) {
-      workingSystem[i].substitution(substitution, 1);
+      workingSystem[i].substitute(substitution, 1);
       if (!workingSystem[i].isEqualToZero()) {
         global.fatal
         << "<br>"

@@ -21,7 +21,7 @@ void QuasiPolynomial::addLatticeShift(
   }
 }
 
-void QuasiPolynomial::substitution(
+void QuasiPolynomial::substitute(
   const Matrix<Rational>& mapFromNewSpaceToOldSpace,
   const Lattice& ambientLatticeNewSpace,
   QuasiPolynomial& output
@@ -72,7 +72,7 @@ void QuasiPolynomial::substitution(
   Polynomial<Rational> tempP;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
-    bool tempB = tempP.substitution(substitution, Rational::one());
+    bool tempB = tempP.substitute(substitution, Rational::one());
     if (!tempB) {
       global.fatal
       << "Substitution "
@@ -90,7 +90,7 @@ void QuasiPolynomial::substitution(
   }
 }
 
-void QuasiPolynomial::substitution(
+void QuasiPolynomial::substitute(
   const Vector<Rational>& inputTranslationSubtractedFromArgument,
   QuasiPolynomial& output
 ) {
@@ -111,7 +111,7 @@ void QuasiPolynomial::substitution(
   output.ambientLatticeReduced = this->ambientLatticeReduced;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
-    bool tempB = tempP.substitution(substitution, Rational::one());
+    bool tempB = tempP.substitute(substitution, Rational::one());
     if (!tempB) {
       global.fatal
       << "Substitution "
@@ -128,15 +128,15 @@ void QuasiPolynomial::substitution(
   }
 }
 
-void QuasiPolynomial::substitution(
+void QuasiPolynomial::substitute(
   const Matrix<Rational>& mapFromNewSpaceToOldSpace,
   const Vector<Rational>& inputTranslationSubtractedFromArgument,
   const Lattice& ambientLatticeNewSpace,
   QuasiPolynomial& output
 ) {
   QuasiPolynomial tempQP;
-  this->substitution(inputTranslationSubtractedFromArgument, tempQP);
-  tempQP.substitution(
+  this->substitute(inputTranslationSubtractedFromArgument, tempQP);
+  tempQP.substitute(
     mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output
   );
 }
@@ -185,7 +185,7 @@ bool QuasiPolynomial::substitutionFewerVariables(
     ) {
       root.assignMatrixDetectRowOrColumn(shiftImage);
       tempP = this->valueOnEachLatticeShift[i];
-      bool tempB = tempP.substitution(substitution, Rational::one());
+      bool tempB = tempP.substitute(substitution, Rational::one());
       if (!tempB) {
         global.fatal
         << "Substitution "
@@ -594,8 +594,7 @@ bool Lattice::getAllRepresentatives(
 }
 
 bool Lattice::
-getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
-(
+getClosestPointInDirectionOfNormalToAffineWallMovingIntegralStepsInDirection(
   Vector<Rational>& startingPoint,
   Vector<Rational>& affineHyperplane,
   Vector<Rational>& direction,
@@ -843,13 +842,11 @@ bool Lattice::substitutionHomogeneous(
   return false;
 }
 
-bool Lattice::operator==(const Lattice &other) const
-{
+bool Lattice::operator==(const Lattice& other) const {
   return this->basisRationalForm == other.basisRationalForm;
 }
 
-unsigned int Lattice::hashFunction(const Lattice &input)
-{
+unsigned int Lattice::hashFunction(const Lattice& input) {
   return input.basisRationalForm.hashFunction();
 }
 

@@ -67,7 +67,7 @@ public:
     const Coefficient& ringZero = 0
   );
   void setNumberOfVariables(int newNumberOfVariables);
-  void substitution(const PolynomialSubstitution<Rational>& substitution);
+  void substitute(const PolynomialSubstitution<Rational>& substitution);
   unsigned int hashFunction() const {
     return this->::MonomialTensor<Coefficient>::hashFunction();
   }
@@ -340,12 +340,12 @@ public:
     }
     return (*this)[0].generatorsIndices.size == 1;
   }
-  void substitutionCoefficients(
+  void substituteInCoefficients(
     PolynomialSubstitution<Rational>& polynomialSubstitution,
     const Coefficient& ringUnit,
     const Coefficient& ringZero
   );
-  void substitution(
+  void substitute(
     const PolynomialSubstitution<Rational>& polynomialSubstitution
   );
   void makeCasimir(SemisimpleLieAlgebra& inputOwner);

@@ -4422,7 +4422,6 @@ std::string PartialFractions::toLatex(FormatExpressions* format) const {
   return out.str();
 }
 
-
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
   STACK_TRACE("PartialFractions::toHTML");
   std::stringstream out;
@@ -12833,7 +12832,7 @@ void PiecewiseQuasipolynomial::translateArgument(
   );
   QuasiPolynomial currentContribution;
   for (int i = 0; i < this->quasiPolynomials.size; i ++) {
-    this->quasiPolynomials[i].substitution(
+    this->quasiPolynomials[i].substitute(
       - translateToBeAddedToArgument, currentContribution
     );
     this->quasiPolynomials[i] = currentContribution;
@@ -13607,7 +13606,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     for (int j = 0; j < exitRepresentatives.size; j ++) {
       exitRepresentatives[j] += shiftReduced;
       Lattice::
-      getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
+      getClosestPointInDirectionOfNormalToAffineWallMovingIntegralStepsInDirection
       (
         exitRepresentatives[j],
         exitNormalAffine,
@@ -15587,4 +15586,3 @@ bool ConeCollection::findMaxLFOverConeProjective(
   }
   return true;
 }
-

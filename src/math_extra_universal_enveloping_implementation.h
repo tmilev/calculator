@@ -749,7 +749,7 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::substitution(
+void ElementUniversalEnveloping<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& polynomialSubstitution
 ) {
   ElementUniversalEnveloping<Coefficient> output;
@@ -758,20 +758,20 @@ void ElementUniversalEnveloping<Coefficient>::substitution(
   Coefficient tempCF;
   for (int i = 0; i < this->size(); i ++) {
     monomial = (*this)[i];
-    monomial.substitution(polynomialSubstitution);
+    monomial.substitute(polynomialSubstitution);
     tempCF = this->coefficients[i];
-    tempCF.substitution(polynomialSubstitution, 1, nullptr);
+    tempCF.substitute(polynomialSubstitution, 1, nullptr);
     output.addMonomial(monomial, tempCF);
   }
   *this = output;
 }
 
 template <class Coefficient>
-void MonomialUniversalEnveloping<Coefficient>::substitution(
+void MonomialUniversalEnveloping<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& substitution
 ) {
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
-    this->powers[i].substitution(substitution, 1, nullptr);
+    this->powers[i].substitute(substitution, 1, nullptr);
   }
   this->simplifyEqualConsecutiveGenerators(0);
 }
@@ -926,7 +926,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::substitutionCoefficients(
+void ElementUniversalEnveloping<Coefficient>::substituteInCoefficients(
   PolynomialSubstitution<Rational>& polynomialSubstitution,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
@@ -937,7 +937,7 @@ void ElementUniversalEnveloping<Coefficient>::substitutionCoefficients(
   Coefficient tempCF;
   for (int i = 0; i < this->size; i ++) {
     currentMon = this->objects[i];
-    this->coefficients[i].substitution(polynomialSubstitution);
+    this->coefficients[i].substitute(polynomialSubstitution);
     endResult.addMonomial(currentMon, tempCF);
   }
   endResult.simplify(ringUnit, ringZero);
@@ -1271,7 +1271,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::substitutionCoefficients(
   if (substitution.size < 1) {
     return;
   }
-  this->Coefficient.substitution(substitution);
+  this->coefficient.substitute(substitution);
 }
 
 template <class Coefficient>

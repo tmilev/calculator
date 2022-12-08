@@ -477,7 +477,7 @@ public:
     return true;
   }
   template <class Coefficient>
-  bool substitution(
+  bool substitute(
     const List<Polynomial<Coefficient> >& substitution,
     Polynomial<Coefficient>& output,
     const Coefficient& one
@@ -1017,7 +1017,7 @@ public:
       }
     }
   }
-  void substitution(const PolynomialSubstitution<Rational>& substitution);
+  void substitute(const PolynomialSubstitution<Rational>& substitution);
   Coefficient scalarProduct(
     const Vector<Coefficient>& left, const Vector<Coefficient>& right
   ) {
@@ -2753,14 +2753,14 @@ public:
     }
   }
   template <class baseType>
-  void substitutionCoefficients(
+  void substituteInCoefficients(
     const List<Polynomial<baseType> >& substitution
   ) {
-    STACK_TRACE("Polynomial::substitutionCoefficients");
+    STACK_TRACE("Polynomial::substituteInCoefficients");
     Coefficient newCoefficient;
     for (int i = 0; i < this->size(); i ++) {
       newCoefficient = this->coefficients[i];
-      newCoefficient.substitution(substitution, 1);
+      newCoefficient.substitute(substitution, 1);
       if (newCoefficient.isEqualToZero()) {
         this->popMonomial(i);
         i --;
@@ -3295,13 +3295,14 @@ public:
     Selection& nonCoefficientVariables,
     Polynomial<Polynomial<Coefficient> >& output
   ) const;
-
   void getPolynomialUnivariateWithPolynomialCoefficients(
     int variableIndex, Polynomial<Polynomial<Coefficient> >& output
   ) const;
-  // Returns the polynomial coefficient in front of the variable x_{variableIndex}^variablePower.
-  void getCoefficientPolynomialOfXPowerK(int variableIndex, int variablePower, Polynomial<Coefficient> &output);
-
+  // Returns the polynomial coefficient in front of the variable
+  // x_{variableIndex}^variablePower.
+  void getCoefficientPolynomialOfXPowerK(
+    int variableIndex, int variablePower, Polynomial<Coefficient>& output
+  );
   // Multivariable polynomial division with remainder.
   // Can be done using the multi-divisor polynomial division algorithm
   // in GroebnerBasisComputation by passing a single basis element.
@@ -3324,7 +3325,7 @@ public:
   void scaleToPositiveMonomialExponents(
     MonomialPolynomial& outputIWasMultipliedBy
   );
-  bool substitution(
+  bool substitute(
     const List<Polynomial<Coefficient> >& substitution,
     const Coefficient& one
   );
@@ -6149,7 +6150,7 @@ public:
     const ElementWeylAlgebra& standsOnTheRight
   );
   void lieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
-  bool substitution(
+  bool substitute(
     const PolynomialSubstitution<Rational>& substitutionPolynomialPart,
     const PolynomialSubstitution<Rational>& substitutionDifferentialPart
   );
@@ -6493,13 +6494,13 @@ public:
       }
     }
   }
-  void substitution(const PolynomialSubstitution<Rational>& substitution) {
+  void substitute(const PolynomialSubstitution<Rational>& substitution) {
     MatrixTensor<Coefficient> thisCopy = *this;
     this->makeZero();
     Coefficient coefficient;
     for (int i = 0; i < thisCopy.size(); i ++) {
       coefficient = thisCopy.coefficients[i];
-      coefficient.substitution(substitution, Rational::one());
+      coefficient.substitute(substitution, Rational::one());
       this->addMonomial(thisCopy[i], coefficient);
     }
   }
@@ -6951,12 +6952,12 @@ public:
 };
 
 template <class Coefficient>
-void Matrix<Coefficient>::substitution(
+void Matrix<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& substitution
 ) {
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      this->elements[i][j].substitution(substitution, 1);
+      this->elements[i][j].substitute(substitution, 1);
     }
   }
 }

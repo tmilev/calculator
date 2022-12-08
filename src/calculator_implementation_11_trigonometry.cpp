@@ -942,7 +942,7 @@ bool TrigonometricReduction::computeEulerFormReduced(
   }
   this->eulerFormAlgebraicReduced = this->inputFraction.content;
   if (
-    !this->eulerFormAlgebraicReduced.substitution(
+    !this->eulerFormAlgebraicReduced.substitute(
       substitution,
       this->owner->objectContainer.algebraicClosure.one(),
       commentsOnFailure

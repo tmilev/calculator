@@ -2276,7 +2276,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
       int k = 0; k < this->denominatorFactorsAlgebraicWithMultiplicities.
       coefficients[i]; k ++
     ) {
-      this->numerators[i][k].substitution(
+      this->numerators[i][k].substitute(
         substitution,
         this->owner->objectContainer.algebraicClosure.one()
       );

@@ -313,8 +313,7 @@ public:
   template <class Type>
   bool isOfType(Type* whichElement) const {
     STACK_TRACE("Expression::isOfType");
-    if (this->owner == nullptr)
-    {
+    if (this->owner == nullptr) {
       return false;
     }
     if (!this->startsWith(this->getBuiltInType<Type>())) {
@@ -509,7 +508,7 @@ public:
   std::string toStringFullWithHints(bool isBuiltInObjectIndex) const;
   std::string toStringAllSlidersInExpression() const;
   std::string toUTF8String(FormatExpressions* format = nullptr) const;
-  template <class builtIn>
+  template <class Type>
   static bool toStringBuiltIn(
     const Expression& input,
     std::stringstream& out,
@@ -1713,7 +1712,7 @@ public:
   MapReferences<List<Vector<Rational> >, VectorPartitionFunction>
   vectorPartitionFunctions;
   HashedListReferences<Lattice> lattices;
-  WeylGroupData &getWeylGroupDataCreateIfNotPresent(const DynkinType &input);
+  WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(
     const DynkinType& input
   );
@@ -2191,8 +2190,7 @@ public:
       static std::string vectorPartitionFunction;
       static std::string vectorPartitionFunctionElementary;
       static std::string lattice;
-      class Trigonometry
-      {
+      class Trigonometry {
       public:
         static std::string sine;
         static std::string cosine;
@@ -2412,7 +2410,6 @@ public:
   std::stringstream comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
-
   // The built-in type of an object is an string identifier
   // used internally to indicate the type of a built-in object.
   // A built-in object is one that has an internal C++ data structure that
@@ -2426,11 +2423,9 @@ public:
   template <class Type>
   static std::string builtInName();
   template <class Type>
-  int builtInCode()
-  {
+  int builtInCode() {
     return this->operations.getIndexNoFail(this->builtInName<Type>());
   }
-
   bool approximationsBanned();
   std::string toStringRuleStatusUser();
   std::string toString();
@@ -2533,7 +2528,8 @@ public:
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool accountRule(
-      const Expression &ruleE, StateMaintainerCalculator &ruleStackMaintainer);
+    const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
+  );
   int opIsDenotedBy() {
     return this->operations.getIndexNoFail("=:");
   }
@@ -2610,7 +2606,7 @@ public:
     return this->operations.getIndexNoFail("<");
   }
   int opWeightLieAlgPoly() {
-    return this->builtInCode<Weight<Polynomial<Rational>>>();
+    return this->builtInCode<Weight<Polynomial<Rational> > >();
   }
   int opError() {
     return this->operations.getIndexNoFail("Error");
@@ -2660,35 +2656,32 @@ public:
   int opDouble() {
     return this->builtInCode<double>();
   }
-
-  int opElementWeylAlgebra()
-  {
-    return this->builtInCode<ElementWeylAlgebra<Rational>>();
+  int opElementWeylAlgebra() {
+    return this->builtInCode<ElementWeylAlgebra<Rational> >();
   }
   int opPolynomialRational() {
-
-    return this->builtInCode<Polynomial<Rational>>();
+    return this->builtInCode<Polynomial<Rational> >();
   }
   int opPolynomialModuloInteger() {
-    return this->builtInCode<Polynomial<ElementZmodP>>();
+    return this->builtInCode<Polynomial<ElementZmodP> >();
   }
   int opPolynomialAlgebraicNumbers() {
-    return this->builtInCode<Polynomial<AlgebraicNumber>>();
+    return this->builtInCode<Polynomial<AlgebraicNumber> >();
   }
   int opPolynomialModuloPolynomialModuloInteger() {
-    return this->builtInCode<PolynomialModuloPolynomial<ElementZmodP>>();
+    return this->builtInCode<PolynomialModuloPolynomial<ElementZmodP> >();
   }
   int opEllipticCurveElementsRational() {
-    return this->builtInCode<ElementEllipticCurve<Rational>>();
+    return this->builtInCode<ElementEllipticCurve<Rational> >();
   }
   int opEllipticCurveElementsZmodP() {
-    return this->builtInCode<ElementEllipticCurve<ElementZmodP>>();
+    return this->builtInCode<ElementEllipticCurve<ElementZmodP> >();
   }
   int opRationalFraction() {
-    return this->builtInCode<RationalFraction<Rational>>();
+    return this->builtInCode<RationalFraction<Rational> >();
   }
   int opRationalFunctionAlgebraicCoefficients() {
-    return this->builtInCode<RationalFraction<AlgebraicNumber>>();
+    return this->builtInCode<RationalFraction<AlgebraicNumber> >();
   }
   int opDifferentiate() {
     return this->operations.getIndexNoFail("Differentiate");
@@ -2706,28 +2699,37 @@ public:
     return this->operations.getIndexNoFail("|");
   }
   int opMatrixTensorRational() {
-    return this->builtInCode<MatrixTensor<Rational>>();
+    return this->builtInCode<MatrixTensor<Rational> >();
   }
   int opWeylGroupRep() {
-    return this->builtInCode<
-        GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
+    return
+    this->builtInCode<
+      GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+    >();
   }
   int opFreeze() {
     return this->operations.getIndexNoFail("Freeze");
   }
   int opElementUEOverRF() {
-    return this->builtInCode<ElementUniversalEnveloping<RationalFraction<Rational>>>();
+    return
+    this->builtInCode<
+      ElementUniversalEnveloping<RationalFraction<Rational> >
+    >();
   }
   int opWeylGroupVirtualRep() {
-    return this->builtInCode<
-        VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>>();
+    return
+    this->builtInCode<
+      VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+    >();
   }
   int opElementTensorGVM() {
-    return this->builtInCode<ElementTensorsGeneralizedVermas<RationalFraction<Rational>>>();
+    return
+    this->builtInCode<
+      ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+    >();
   }
-
   int opSemisimpleLieAlgebra() {
-    return this->builtInCode<SemisimpleLieAlgebra *>();
+    return this->builtInCode<SemisimpleLieAlgebra*>();
   }
   int opInfinity() {
     return this->operations.getIndexNoFail("\\infty");
@@ -3177,11 +3179,11 @@ public:
   template <class Type>
   void addOneBuiltInHandler();
   template <class Type>
-  void addBuiltInType()
-  {
+  void addBuiltInType() {
     std::string name = this->builtInName<Type>();
     this->addOperationNoRepetitionAllowed(name);
     this->allBuiltInTypes.addOnTop(name);
+    this->addOneBuiltInHandler<Type>();
   }
   void addKnownDoubleConstant(
     const std::string& constantName, double value
@@ -3212,7 +3214,8 @@ public:
     int atom, Expression::ToStringHandler handler
   );
   void addOneStringCompositeHandler(
-      int atom, Expression::ToStringHandler handler);
+    int atom, Expression::ToStringHandler handler
+  );
   void addOneStringHandler(
     int atom,
     Expression::ToStringHandler handler,
@@ -4179,14 +4182,14 @@ template <class Type>
 bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
   int currentType = owner.builtInCode<Type>();
   if (
-      currentType == owner.builtInCode<ElementZmodP>() ||
-      currentType == owner.opPolynomialRational() ||
-      currentType == owner.opRationalFraction() ||
-      currentType == owner.opElementTensorGVM() ||
-      currentType == owner.opElementUEOverRF() ||
-      currentType == owner.opElementWeylAlgebra() ||
-      currentType == owner.opWeightLieAlgPoly())
-  {
+    currentType == owner.builtInCode<ElementZmodP>() ||
+    currentType == owner.opPolynomialRational() ||
+    currentType == owner.opRationalFraction() ||
+    currentType == owner.opElementTensorGVM() ||
+    currentType == owner.opElementUEOverRF() ||
+    currentType == owner.opElementWeylAlgebra() ||
+    currentType == owner.opWeightLieAlgPoly()
+  ) {
     global.fatal
     << "Assigning value WITHOUT CONTEXT to data type "
     << owner.getOperations()[currentType]
@@ -4297,12 +4300,12 @@ bool Calculator::getTypeWeight(
   return true;
 }
 
-template <class builtInType>
+template <class Type>
 void Calculator::addOneBuiltInHandler() {
   Expression typeConverter(*this);
   this->addOneStringHandler(
-    typeConverter.getBuiltInType<builtInType>(),
-    Expression::toStringBuiltIn<builtInType>,
+    typeConverter.getBuiltInType<Type>(),
+    Expression::toStringBuiltIn<Type>,
     this->toStringDataHandlers
   );
 }
@@ -4663,10 +4666,27 @@ bool CalculatorConversions::getListPolynomialVariableLabelsLexicographic(
 }
 
 template <class Type>
-int Expression::getBuiltInType() const
-{
+int Expression::getBuiltInType() const {
   this->checkInitialization();
   return this->owner->builtInCode<Type>();
+}
+
+template <class Type>
+bool Expression::toStringBuiltIn(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format
+) {
+  STACK_TRACE("Expression::toStringBuiltIn");
+  (void) out;
+  (void) format;
+  global.fatal
+  << "Please implement toStringBuiltIn[YourType] "
+  << "in file calculator_expressions.cpp. "
+  << "Type: "
+  << input.owner->builtInName<Type>()
+  << global.fatal;
+  return true;
 }
 
 #endif // header_calculator_interface_ALREADY_INCLUDED

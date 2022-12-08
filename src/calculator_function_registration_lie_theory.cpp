@@ -1750,60 +1750,62 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct,
-      this->builtInCode<ElementHyperoctahedralGroupR2>(),
-      this->builtInCode<ElementHyperoctahedralGroupR2>(),
-      "Multiplies two elements of hyperoctahedral groups. ",
-      "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0); "
-      "t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0); "
-      "s * t * s * t",
-      "CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct",
-      "MultiplyElementHyperOctahedralByElementHyperOctahedral",
-      experimentalNoTest);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct,
+    this->builtInCode<ElementHyperoctahedralGroupR2>(),
+    this->builtInCode<ElementHyperoctahedralGroupR2>(),
+    "Multiplies two elements of hyperoctahedral groups. ",
+    "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0); "
+    "t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0); "
+    "s * t * s * t",
+    "CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct",
+    "MultiplyElementHyperOctahedralByElementHyperOctahedral",
+    experimentalNoTest
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg,
-      this->builtInCode<
-          CharacterSemisimpleLieAlgebraModule<Rational>>(),
-      this->builtInCode<
-          CharacterSemisimpleLieAlgebraModule<Rational>>(),
-      "Multiplies two semisimple Lie algebra "
-      "finite dimensional characters and decomposes using the "
-      "Brauer-Klimyk formula, Humphreys J. "
-      "Introduction to Lie algebras and representation theory, "
-      "page 142, exercise 9. ",
-      "x = MakeCharacterLieAlg{}(G_2, (1,0));\n"
-      "y = MakeCharacterLieAlg{}(G_2, (0,1));\n"
-      "x * y",
-      "CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg",
-      "MultiplyCharacterSemisimpleLieAlgebraModuleBy",
-      standardOptions);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg,
+    this->builtInCode<CharacterSemisimpleLieAlgebraModule<Rational> >(),
+    this->builtInCode<CharacterSemisimpleLieAlgebraModule<Rational> >(),
+    "Multiplies two semisimple Lie algebra "
+    "finite dimensional characters and decomposes using the "
+    "Brauer-Klimyk formula, Humphreys J. "
+    "Introduction to Lie algebras and representation theory, "
+    "page 142, exercise 9. ",
+    "x = MakeCharacterLieAlg{}(G_2, (1,0));\n"
+    "y = MakeCharacterLieAlg{}(G_2, (0,1));\n"
+    "x * y",
+    "CalculatorFunctionsBinaryOps::multiplyCharSSLieAlgByCharSSLieAlg",
+    "MultiplyCharacterSemisimpleLieAlgebraModuleBy",
+    standardOptions
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt,
-      this->builtInCode<ElementWeylGroup>(),
-      this->builtInCode<ElementWeylGroup>(),
-      "Multiplies two Weyl group elements if possible. ",
-      "x = MakeElementWeylGroup{}(A_2, 1); x*x",
-      "CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt",
-      "MultiplyWeylGroupElementByWeylGroupElement",
-      standardOptions);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt,
+    this->builtInCode<ElementWeylGroup>(),
+    this->builtInCode<ElementWeylGroup>(),
+    "Multiplies two Weyl group elements if possible. ",
+    "x = MakeElementWeylGroup{}(A_2, 1); x*x",
+    "CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt",
+    "MultiplyWeylGroupElementByWeylGroupElement",
+    standardOptions
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "^",
-      CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger,
-      this->builtInCode<ElementWeylGroup>(),
-      this->opRational(),
-      "Exponentiates element of a Weyl group to an integer power. ",
-      "a = MakeElementWeylGroup{}(f_4, 1);\n"
-      "b = MakeElementWeylGroup{}(f_4, 2);\n"
-      "c = MakeElementWeylGroup{}(f_4, 3);\n"
-      "d = MakeElementWeylGroup{}(f_4, 4);\n"
-      "x = a b c d  b a;\n"
-      "x^1000001",
-      "CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger",
-      "PowerWeylGroupElementByInteger",
-      standardOptions);
+    "^",
+    CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger,
+    this->builtInCode<ElementWeylGroup>(),
+    this->opRational(),
+    "Exponentiates element of a Weyl group to an integer power. ",
+    "a = MakeElementWeylGroup{}(f_4, 1);\n"
+    "b = MakeElementWeylGroup{}(f_4, 2);\n"
+    "c = MakeElementWeylGroup{}(f_4, 3);\n"
+    "d = MakeElementWeylGroup{}(f_4, 4);\n"
+    "x = a b c d  b a;\n"
+    "x^1000001",
+    "CalculatorFunctionsBinaryOps::powerWeylGroupElementByInteger",
+    "PowerWeylGroupElementByInteger",
+    standardOptions
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps,
@@ -1920,19 +1922,20 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
-      "*",
-      CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly,
-      this->builtInCode<ElementWeylGroup>(),
-      this->opWeightLieAlgPoly(),
-      "Element of Weyl group action on a weight. ",
-      "s_{{a}}=MakeElementWeylGroup(B_3, a);\n"
-      "\\varepsilon_{{a}} = MakeWeight{}(B_3, a, epsilon);\n"
-      "x = Polynomial{}x;\n"
-      "\\mu = x\\varepsilon_1;\n"
-      "s_1s_2s_3s_2s_1 \\mu",
-      "CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly",
-      "MultiplyWeylGroupElementByWeightLieAlgebraPolynomial",
-      standardOptions);
+    "*",
+    CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly,
+    this->builtInCode<ElementWeylGroup>(),
+    this->opWeightLieAlgPoly(),
+    "Element of Weyl group action on a weight. ",
+    "s_{{a}}=MakeElementWeylGroup(B_3, a);\n"
+    "\\varepsilon_{{a}} = MakeWeight{}(B_3, a, epsilon);\n"
+    "x = Polynomial{}x;\n"
+    "\\mu = x\\varepsilon_1;\n"
+    "s_1s_2s_3s_2s_1 \\mu",
+    "CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly",
+    "MultiplyWeylGroupElementByWeightLieAlgebraPolynomial",
+    standardOptions
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::

@@ -348,11 +348,11 @@ getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
 }
 
 template <class Coefficient>
-bool ElementWeylAlgebra<Coefficient>::substitution(
+bool ElementWeylAlgebra<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& substitutionPolynomialPart,
   const PolynomialSubstitution<Rational>& substitutionDifferentialPart
 ) {
-  STACK_TRACE("ElementWeylAlgebra::substitution");
+  STACK_TRACE("ElementWeylAlgebra::substitute");
   Polynomial<Rational> differentialOperatorPart, polyPart;
   MonomialWeylAlgebra monomial;
   ElementWeylAlgebra output;
@@ -361,14 +361,14 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
     if (
-      !currentMon.polynomialPart.substitution(
+      !currentMon.polynomialPart.substitute(
         substitutionPolynomialPart, polyPart, Rational::one()
       )
     ) {
       return false;
     }
     if (
-      !currentMon.differentialPart.substitution(
+      !currentMon.differentialPart.substitute(
         substitutionDifferentialPart,
         differentialOperatorPart,
         Rational::one()

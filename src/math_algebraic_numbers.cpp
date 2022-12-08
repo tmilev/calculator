@@ -895,7 +895,7 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   PolynomialSubstitution<AlgebraicNumber> checkSub;
   checkSub.setSize(1);
   checkSub[0].makeConstant(outputRoot);
-  algebraicNumberPolynomial.substitution(checkSub, this->one());
+  algebraicNumberPolynomial.substitute(checkSub, this->one());
   if (!algebraicNumberPolynomial.isEqualToZero()) {
     global.fatal
     << "The number z = "
@@ -935,7 +935,7 @@ convertPolynomialOneVariableToPolynomialFirstVariable(
   substitution.makeIdentitySubstitution(indexVariable + 1);
   substitution[indexVariable].makeMonomial(0, 1, 1);
   output = input;
-  output.substitution(substitution, this->one());
+  output.substitute(substitution, this->one());
 }
 
 bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
@@ -1102,7 +1102,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   substitution[0].makeConstant(outputRoot);
   Polynomial<AlgebraicNumber> substitutedMinimalPolynomial;
   substitutedMinimalPolynomial = minimialPolynomial;
-  substitutedMinimalPolynomial.substitution(substitution, this->one());
+  substitutedMinimalPolynomial.substitute(substitution, this->one());
   if (!substitutedMinimalPolynomial.isEqualToZero()) {
     global.fatal
     << "The number z = "

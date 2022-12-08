@@ -5,12 +5,12 @@
 #include "math_general.h"
 
 template <class Coefficient>
-bool MonomialPolynomial::substitution(
+bool MonomialPolynomial::substitute(
   const List<Polynomial<Coefficient> >& substitution,
   Polynomial<Coefficient>& output,
   const Coefficient& one
 ) const {
-  STACK_TRACE("MonomialPolynomial::substitution");
+  STACK_TRACE("MonomialPolynomial::substitute");
   output.makeConstant(one);
   if (this->isConstant()) {
     return true;
@@ -187,15 +187,15 @@ Rational Polynomial<Coefficient>::totalDegree() const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::substitution(
+bool Polynomial<Coefficient>::substitute(
   const List<Polynomial<Coefficient> >& substitution,
   const Coefficient& one
 ) {
-  STACK_TRACE("Polynomial::substitution");
+  STACK_TRACE("Polynomial::substitute");
   Polynomial<Coefficient> sum, monomialContribution;
   for (int i = 0; i < this->size(); i ++) {
     if (
-      !(*this)[i].substitution(substitution, monomialContribution, one)
+      !(*this)[i].substitute(substitution, monomialContribution, one)
     ) {
       return false;
     }
@@ -1692,20 +1692,20 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::getCoefficientPolynomialOfXPowerK(int variableIndex, int variablePower, Polynomial<Coefficient> &output)
-{
-  if (this == &output)
-  {
+void Polynomial<Coefficient>::getCoefficientPolynomialOfXPowerK(
+  int variableIndex, int variablePower, Polynomial<Coefficient>& output
+) {
+  if (this == &output) {
     Polynomial<Coefficient> myCopy = *this;
-    return myCopy.getCoefficientPolynomialOfXPowerK(variableIndex, variablePower, output);
+    return
+    myCopy.getCoefficientPolynomialOfXPowerK(
+      variableIndex, variablePower, output
+    );
   }
   output.makeZero();
-
-  for (int i = 0; i < this->size(); i++)
-  {
-    const MonomialPolynomial &monomial = this->monomials[i];
-    if (monomial(variableIndex) != variablePower)
-    {
+  for (int i = 0; i < this->size(); i ++) {
+    const MonomialPolynomial& monomial = this->monomials[i];
+    if (monomial(variableIndex) != variablePower) {
       continue;
     }
     MonomialPolynomial monomialCopy = monomial;

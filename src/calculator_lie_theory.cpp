@@ -1695,15 +1695,16 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
     }
   }
   if (
-      !CalculatorLieTheory::highestWeightVectorCommon(
-          calculator,
-          output,
-          highestWeightFundamentalCoordinates,
-          selectionParSel,
-          semisimpleLieAlgebra.context,
-          semisimpleLieAlgebra.content,
-          false))
-  {
+    !CalculatorLieTheory::highestWeightVectorCommon(
+      calculator,
+      output,
+      highestWeightFundamentalCoordinates,
+      selectionParSel,
+      semisimpleLieAlgebra.context,
+      semisimpleLieAlgebra.content,
+      false
+    )
+  ) {
     return
     output.assignError(
       calculator, "Failed to create Generalized Verma module"
@@ -1911,13 +1912,15 @@ bool CalculatorLieTheory::highestWeightVector(
       return true;
     }
   }
-  return CalculatorLieTheory::highestWeightVectorCommon(
-      calculator,
-      output,
-      highestWeightFundamentalCoordinates,
-      parabolicSelection,
-      semisimpleLieAlgebra.context,
-      semisimpleLieAlgebra.content);
+  return
+  CalculatorLieTheory::highestWeightVectorCommon(
+    calculator,
+    output,
+    highestWeightFundamentalCoordinates,
+    parabolicSelection,
+    semisimpleLieAlgebra.context,
+    semisimpleLieAlgebra.content
+  );
 }
 
 bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(

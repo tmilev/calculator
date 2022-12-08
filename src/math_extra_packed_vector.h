@@ -102,9 +102,9 @@ template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::makeArbitrarySimple(
   char letter, int number
 ) {
-  DynkinType D;
-  D.makeSimpleType(letter, number);
-  D.getCartanSymmetric(this->cartanSymmetric);
+  DynkinType d;
+  d.makeSimpleType(letter, number);
+  d.getCartanSymmetric(this->cartanSymmetric);
 }
 
 template <typename scalar, typename templateVector>

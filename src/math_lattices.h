@@ -31,8 +31,7 @@ public:
     Vector<Rational>& inputLine, Vector<Rational>& outputGenerator
   );
   static bool
-  getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
-  (
+  getClosestPointInDirectionOfNormalToAffineWallMovingIntegralStepsInDirection(
     Vector<Rational>& startingPoint,
     Vector<Rational>& affineHyperplane,
     Vector<Rational>& direction,
@@ -121,8 +120,8 @@ public:
     Vectors<Rational>& output
   ) const;
   std::string toString() const;
-  static unsigned int hashFunction(const Lattice &input);
-  bool operator==(const Lattice &other) const;
+  static unsigned int hashFunction(const Lattice& input);
+  bool operator==(const Lattice& other) const;
   void operator=(const Lattice& other) {
     this->basis = other.basis;
     this->denominator = other.denominator;
@@ -169,18 +168,18 @@ public:
   bool isEqualToZero() const {
     return this->valueOnEachLatticeShift.size == 0;
   }
-  void substitution(
+  void substitute(
     const Matrix<Rational>& mapFromNewSpaceToOldSpace,
     const Vector<Rational>& inputTranslationSubtractedFromArgument,
     const Lattice& ambientLatticeNewSpace,
     QuasiPolynomial& output
   );
-  void substitution(
+  void substitute(
     const Matrix<Rational>& mapFromNewSpaceToOldSpace,
     const Lattice& ambientLatticeNewSpace,
     QuasiPolynomial& output
   );
-  void substitution(
+  void substitute(
     const Vector<Rational>& inputTranslationSubtractedFromArgument,
     QuasiPolynomial& output
   );

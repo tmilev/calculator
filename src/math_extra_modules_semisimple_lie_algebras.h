@@ -50,7 +50,7 @@ public:
       goalNumberOfVariables
     );
   }
-  void substitution(
+  void substitute(
     const PolynomialSubstitution<Rational>& substitution,
     ListReferences<ModuleSSalgebra<Coefficient> >& modules
   );
@@ -191,12 +191,12 @@ public:
       this->monomials[i].setNumberOfVariables(goalNumberOfVariables);
     }
   }
-  void substitution(
+  void substitute(
     const PolynomialSubstitution<Rational>& substitution,
     ListReferences<ModuleSSalgebra<Coefficient> >& modules
   ) {
     for (int i = 0; i < this->monomials.size; i ++) {
-      this->monomials[i].substitution(substitution, modules);
+      this->monomials[i].substitute(substitution, modules);
     }
   }
   std::string toString(
@@ -371,7 +371,7 @@ public:
     MonomialTensor<int, HashFunctions::hashFunction>& monomial
   );
   void getFDchar(CharacterSemisimpleLieAlgebraModule<Coefficient>& output);
-  void substitution(const PolynomialSubstitution<Rational>& variableImages);
+  void substitute(const PolynomialSubstitution<Rational>& variableImages);
   MatrixTensor<Coefficient>& getActionGeneratorIndex(int generatorIndex);
   MatrixTensor<Coefficient>& getActionSimpleGeneratorIndex(int generatorIndex);
   int minimalNumberOfVariables() {
@@ -578,7 +578,7 @@ public:
   void makeHighestWeightVector(
     ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit
   );
-  void substitution(
+  void substitute(
     const PolynomialSubstitution<Rational>& substitution,
     ListReferences<ModuleSSalgebra<Coefficient> >& modules
   );

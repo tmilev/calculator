@@ -3434,8 +3434,8 @@ bool SlTwoSubalgebra::attemptRealizingKostantSekiguchi() {
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eSolved, fSolved;
   eSolved = this->eKostantSekiguchiUnknown;
   fSolved = this->fKostantSekiguchiUnknown;
-  eSolved.substitutionCoefficients(solution);
-  fSolved.substitutionCoefficients(solution);
+  eSolved.substituteInCoefficients(solution);
+  fSolved.substituteInCoefficients(solution);
   this->eKostantSekiguchi = eSolved;
   this->fKostantSekiguchi = fSolved;
   return true;

@@ -882,7 +882,8 @@ public:
     int latticeShiftIndex,
     QuasiPolynomial& outputAccumulator,
     const Vector<Rational>& direction,
-    const Vector<Rational>& exitWall
+    const Vector<Rational>& exitWall,
+    Lattice& rougherLattice
   );
 };
 

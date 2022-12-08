@@ -974,7 +974,7 @@ void Lattice::subLatticeWithIntegralScalarProducts(
   output.basisRationalForm.appendMatrixToTheBottom(lastRow);
   output.makeFromMatrix(output.basisRationalForm);
   output.getDualLattice(output);
- }
+}
 
 void Lattice::reduce() {
   STACK_TRACE("Lattice::reduce");

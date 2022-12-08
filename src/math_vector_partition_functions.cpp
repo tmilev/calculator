@@ -179,9 +179,11 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
     substitution[i] -= direction[i] * shift;
   }
   Lattice rougherLattice;
-  Vector<Rational> exitWallRescaled  = exitWall;
+  Vector<Rational> exitWallRescaled = exitWall;
   exitWallRescaled /= direction.scalarEuclidean(exitWall);
-  toBeIntegrated.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(exitWallRescaled, rougherLattice);
+  toBeIntegrated.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
+    exitWallRescaled, rougherLattice
+  );
   for (int i = 0; i < toBeIntegrated.latticeShifts.size; i ++) {
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
       toBeIntegrated,
@@ -191,7 +193,8 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
       i,
       outputAccumulator,
       direction,
-      exitWall
+      exitWall,
+      rougherLattice
     );
   }
 }
@@ -205,7 +208,8 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   int latticeShiftIndex,
   QuasiPolynomial& outputAccumulator,
   const Vector<Rational>& direction,
-  const Vector<Rational>& exitWall
+  const Vector<Rational>& exitWall,
+  Lattice& rougherLattice
 ) {
   STACK_TRACE(
     "VectorPartitionFunctionElementary::"

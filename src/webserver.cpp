@@ -5774,7 +5774,7 @@ int WebServer::mainCommandLine() {
       }
     }
   } else {
-    global << "Input: " << Logger::yellow;
+    global << "Input: " << Logger::endL;
     std::cin >> calculator.inputString;
   }
   calculator.flagUseHtml = false;
@@ -5799,16 +5799,21 @@ int WebServer::mainCommandLine() {
   global << calculator.outputString;
   outputFile << calculator.outputString;
   global
-  << "\nTotal running time: "
-  << Logger::blue
-  << global.getElapsedMilliseconds()
-  << " ms. "
-  << Logger::endL
-  << "Output written in: "
-  << Logger::green
-  << outputFileName
-  << Logger::endL
-  << "\n";
+      << "Total running time: "
+      << Logger::blue
+      << global.getElapsedMilliseconds()
+      << " ms. "
+      << Logger::endL
+      << "Output written in: "
+      << Logger::green
+      << outputFileName
+      << Logger::endL;
+  global << Logger::red << "To run the calculator as a web server, run:" << Logger::endL
+         << Logger::green << "calculator server" << Logger::endL
+         << "or:" << Logger::endL
+         << Logger::green << "calculator daemon" << Logger::endL
+         << "if you'd like the server to auto-monitor and restart itself when down.";
+
   return 0;
 }
 

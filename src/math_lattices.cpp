@@ -5,6 +5,7 @@ void QuasiPolynomial::addLatticeShift(
   const Polynomial<Rational>& input,
   const Vector<Rational>& inputShift
 ) {
+  STACK_TRACE("QuasiPolynomial::addLatticeShift");
   Vector<Rational> shift = inputShift;
   this->ambientLatticeReduced.reduceVector(shift);
   int index = this->latticeShifts.getIndex(shift);

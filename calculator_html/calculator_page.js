@@ -133,10 +133,12 @@ class AtomHandler {
     calculator,
   ) {
     let result = document.createElement("div");
-    let atomElement = document.createElement("span");
-    atomElement.textContent = this.atom;
-    atomElement.className = "calculatorAtom";
-    result.appendChild(atomElement);
+    let anchor = document.createElement("a");
+    anchor.className = "linkInfo";
+    let link = calculator.getComputationLink(this.example);
+    anchor.href = "#" + link;
+    anchor.textContent = this.atom;
+    result.appendChild(anchor);
     if (this.totalRules > 1) {
       let countElement = document.createElement("span");
       countElement.textContent = `(${this.index + 1})`;
@@ -145,12 +147,6 @@ class AtomHandler {
     this.panel = this.toHTMLInfo();
     result.appendChild(this.toHTMLInfoButton());
     result.appendChild(this.panel);
-    let anchor = document.createElement("a");
-    anchor.className = "linkInfo";
-    let link = calculator.getComputationLink(this.example);
-    anchor.href = "#" + link;
-    anchor.textContent = "Example";
-    result.appendChild(anchor);
     return result;
   }
 }

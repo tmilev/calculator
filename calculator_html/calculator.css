@@ -25,11 +25,6 @@ span.calculatorExampleInfo {
   white-space: pre-line;
 }
 
-span.calculatorAtom {
-  font-weight: bold;
-  color: red;
-}
-
 span.calculatorCompositeAtom {
   color:green;
 }
@@ -1015,6 +1010,12 @@ a.linkLogoutActive {
 a.linkInfo {
   margin-left: 10px;
   margin-right: 10px;
+  font-weight: bold;
+  color: red;
+}
+
+a.linkInfo:visited{
+  color: purple;
 }
 
 button.buttonNavigationStandard {

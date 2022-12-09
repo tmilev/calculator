@@ -861,10 +861,12 @@ public:
   void computeQuasiPolynomials(int directionIndex);
   void computeFirstQuasiPolynomial(int directionIndex);
   bool computeOneQuasiPolynomial(Cone& cone, int directionIndex);
-  void computeOneQuasiPolynomialExitWallWithoutNeighbor(
+  void getExitCones(Cone& start, List<int>& output);
+  void accumulateQuasiPolynomialExitWall(
     Cone& cone,
     const Vector<Rational>& direction,
-    const Vector<Rational>& exitWall
+    const Vector<Rational>& exitWall,QuasiPolynomial& output
+
   );
   void computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
     const QuasiPolynomial& toBeIntegrated,

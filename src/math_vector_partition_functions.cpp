@@ -98,6 +98,9 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
     << global.fatal;
   }
   cone.payload.visited = true;
+  if (directionIndex < this->collection.getDimension() - 1) {
+    return true;
+  }
   if (directionIndex == this->collection.getDimension() - 1) {
     Cone baseCone;
     List<Vector<Rational> > firstDirections;
@@ -105,12 +108,12 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
       0, this->collection.getDimension(), firstDirections
     );
     baseCone.createFromVertices(firstDirections);
-    if (!baseCone.isInCone(cone.internalPoint())) {
-      return true;
-    }
     Lattice lattice;
     lattice.makeFromRoots(firstDirections);
     cone.payload.polynomial.makeZeroOverLattice(lattice);
+    if (!baseCone.isInCone(cone.internalPoint())) {
+      return true;
+    }
     Polynomial<Rational> one;
     one.makeOne();
     Vector<Rational> zeroVector;
@@ -178,23 +181,27 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
     );
     substitution[i] -= direction[i] * shift;
   }
-  Lattice rougherLattice;
+  Lattice latticeFromWallDistance;
   Vector<Rational> exitWallRescaled = exitWall;
   exitWallRescaled /= direction.scalarEuclidean(exitWall);
+  exitWallRescaled /= scale;
+  Rational rationalShift = shift;
+  rationalShift /= scale;
   toBeIntegrated.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
-    exitWallRescaled, rougherLattice
+    exitWallRescaled, latticeFromWallDistance
   );
   for (int i = 0; i < toBeIntegrated.latticeShifts.size; i ++) {
+    Vector<Rational> latticeShift = toBeIntegrated.latticeShifts[i];
+    latticeShift += direction * shift;
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
       toBeIntegrated,
-      shift,
-      scale,
+      rationalShift,
       substitution,
-      i,
+      latticeShift,
+      toBeIntegrated.valueOnEachLatticeShift[i],
       outputAccumulator,
-      direction,
       exitWall,
-      rougherLattice
+      latticeFromWallDistance
     );
   }
 }
@@ -202,12 +209,11 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
 void VectorPartitionFunctionElementary::
 computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   const QuasiPolynomial& toBeIntegrated,
-  int shift,
-  int scale,
+  const Rational& rationalShift,
   PolynomialSubstitution<Rational>& substitution,
-  int latticeShiftIndex,
+  const Vector<Rational>& latticeShift,
+  const Polynomial<Rational>& valueOnLatticeShift,
   QuasiPolynomial& outputAccumulator,
-  const Vector<Rational>& direction,
   const Vector<Rational>& exitWall,
   Lattice& rougherLattice
 ) {
@@ -215,20 +221,39 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
     "VectorPartitionFunctionElementary::"
     "computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift"
   );
-  Polynomial<Rational> value =
-  toBeIntegrated.valueOnEachLatticeShift[latticeShiftIndex];
+  Polynomial<Rational> value = valueOnLatticeShift;
   int startingDegree = value.totalDegreeInt();
   value.substitute(substitution, 1);
-  int dimension = this->collection.getDimension();
+  Vectors<Rational> representatives;
+  toBeIntegrated.ambientLatticeReduced.getAllRepresentatives(
+    rougherLattice, representatives
+  );
+  Polynomial<Rational> linearFunction;
   Polynomial<Rational> coefficientInFrontOfPower;
-  Polynomial<Rational> bernoulliSum;
-  for (int i = 0; i <= startingDegree; i ++) {
-    value.getCoefficientPolynomialOfXPowerK(
-      dimension, i, coefficientInFrontOfPower
+  Polynomial<Rational> summand;
+  PolynomialSubstitution<Rational> bernoulliSubstitution;
+  bernoulliSubstitution.setSize(1);
+  for (Vector<Rational>& representative : representatives) {
+    if (!rougherLattice.isInLattice(representative - latticeShift)) {
+      continue;
+    }
+    Vector<Rational> vector = exitWall;
+    vector.addOnTop((
+        exitWall.scalarEuclidean(representative) + rationalShift
+      ).fractionalValue()
     );
-    this->bernoulliSumComputer.getBernoulliSum(i, bernoulliSum);
+    bernoulliSubstitution[0].makeLinearWithConstantTerm(vector);
+    int dimension = this->collection.getDimension();
+    for (int i = 0; i <= startingDegree; i ++) {
+      value.getCoefficientPolynomialOfXPowerK(
+        dimension, i, coefficientInFrontOfPower
+      );
+      this->bernoulliSumComputer.getBernoulliSum(i, summand);
+      summand.substitute(bernoulliSubstitution, 1);
+      summand *= coefficientInFrontOfPower;
+      outputAccumulator.addLatticeShift(summand, representative);
+    }
   }
-  global << "DEBUG: continue work here. ";
 }
 
 void BernoulliSumComputer::getBernoulliSum(

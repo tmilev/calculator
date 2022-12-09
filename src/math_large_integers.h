@@ -584,6 +584,7 @@ public:
   static Rational one();
   static Rational oneStatic();
   void assignFractionalValue();
+  Rational fractionalValue() const;
   void assignFloor() {
     Rational result = *this;
     result.assignFractionalValue();

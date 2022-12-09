@@ -876,12 +876,11 @@ public:
   );
   void computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
     const QuasiPolynomial& toBeIntegrated,
-    int shift,
-    int scale,
+    const Rational& rationalShift,
     PolynomialSubstitution<Rational>& substitution,
-    int latticeShiftIndex,
+    const Vector<Rational>& latticeShift,
+    const Polynomial<Rational>& valueOnLatticeShift,
     QuasiPolynomial& outputAccumulator,
-    const Vector<Rational>& direction,
     const Vector<Rational>& exitWall,
     Lattice& rougherLattice
   );

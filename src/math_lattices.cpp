@@ -670,7 +670,15 @@ bool Lattice::reduceVector(Vector<Rational>& vector) const {
   STACK_TRACE("Lattice::reduceVector");
   Vector<Rational> output;
   if (vector.size != this->getDimension()) {
-    global.fatal << "Vector dimension not as expected. " << global.fatal;
+    global.fatal
+    << "Expected dimension: "
+    << this->getDimension()
+    << ", got: "
+    << vector.size
+    << ", vector: "
+    << vector.toString()
+    << ". "
+    << global.fatal;
   }
   Vectors<Rational> basisRoots;
   basisRoots.assignMatrixRows(this->basisRationalForm);

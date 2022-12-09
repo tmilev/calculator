@@ -57,6 +57,7 @@ public:
   void intersectWithBothOfMaximalRank(const Lattice& other);
   bool getDualLattice(Lattice& output) const;
   bool isInLattice(const Vector<Rational>& vector) const {
+    STACK_TRACE("Lattice::isInLattice");
     Vector<Rational> tempVect = vector;
     if (!this->reduceVector(tempVect)) {
       return false;

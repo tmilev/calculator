@@ -1578,19 +1578,20 @@ void Calculator::evaluateCommands() {
     global.defaultFormat.getElement().flagExpressionIsFinal = true;
     if (global.programArguments.size > 1) {
       out
-          << "Input:\n"
-          << startingExpression.toString(&global.defaultFormat.getElement())
-          << std::endl;
+      << "Input:\n"
+      << startingExpression.toString(&global.defaultFormat.getElement())
+      << std::endl;
     }
     global.defaultFormat.getElement().flagExpressionIsFinal = true;
     this->objectContainer.resetSliders();
     out
-        << Logger::consoleNormal()
-        << "Output:\n"
-        << this->programExpression.toString(
-               &global.defaultFormat.getElement())
-        << Logger::consoleNormal()
-        << std::endl;
+    << Logger::consoleNormal()
+    << "Output:\n"
+    << this->programExpression.toString(
+      &global.defaultFormat.getElement()
+    )
+    << Logger::consoleNormal()
+    << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
     std::string badCharactersString =
     this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);

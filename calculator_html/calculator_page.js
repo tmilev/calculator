@@ -218,7 +218,7 @@ class Splitter {
 class Calculator {
   constructor() {
     this.parsedComputation = {};
-    /** @type {panels.PanelExpandableData[]}*/
+    /** @type {panels.PanelExpandableData[]} */
     this.panels = [];
     /** @type{HTMLElement|null} */
     this.outputElement = null;
@@ -226,6 +226,7 @@ class Calculator {
     this.submissionCalculatorCounter = 0;
     this.lastSubmittedInput = "";
     this.numberOfCalculatorPanels = 0;
+    this.flagExamplesWantedShown = false;
     processMonitoring.monitor.ownerCalculator = this;
     /** @type{boolean} */
     this.flagTypeset = false;
@@ -332,15 +333,15 @@ class Calculator {
     }
   }
  
-  toggleExamples(
-    /**@type{HTMLElement} */
+  setExamples(
+    /** @type{HTMLElement} */
     button,
   ) {
     let examples = document.getElementById(ids.domElements.calculatorExamples);
-    let url = "";
-    url += pathnames.urls.calculatorAPI;
-    url += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
-    if (examples.innerHTML.length < 300) {
+    if (examples.innerHTML.length < 300 && this.flagExamplesWantedShown) {
+      let url = "";
+      url += pathnames.urls.calculatorAPI;
+      url += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
       submitRequests.submitGET({
         url: url,
         callback: (input) => {
@@ -348,14 +349,13 @@ class Calculator {
         },
         progress: "spanProgressCalculatorExamples"
       });
-      button.innerHTML = "&#9660;";
     } else {
       this.adjustCalculatorPageSize();
-      if (!examples.classList.contains("hiddenClass")) {
-        button.innerHTML = "&#9660;";
-      } else {
-        button.innerHTML = "&#9656;";
-      }
+    }
+    if (this.flagExamplesWantedShown) {
+      button.innerHTML = "&#9660;";
+    } else {
+      button.innerHTML = "&#9656;";
     }
   }
 
@@ -392,8 +392,14 @@ class Calculator {
     if (buttonExamples === null) {
       return;
     }
+    this.flagExamplesWantedShown = storage.storage.variables.calculator.examplesWantedShown.isTrue();
+    if (this.flagExamplesWantedShown) {
+      this.setExamples(buttonExamples);
+    }
     buttonExamples.addEventListener('click', () => {
-      this.toggleExamples(buttonExamples);
+      this.flagExamplesWantedShown = !this.flagExamplesWantedShown;
+      storage.storage.variables.calculator.examplesWantedShown.setAndStore(this.flagExamplesWantedShown, true, false);
+      this.setExamples(buttonExamples);
     });
   }
 

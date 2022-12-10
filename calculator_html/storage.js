@@ -5,7 +5,19 @@ const configuration = require("./configuration");
 
 class StorageVariable {
   constructor(
-    /**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, showInURLOnPages: Object, callbackOnValueChange: function}} */
+    /** @type @{{
+     * name: string, 
+     * nameURL: string, 
+     * nameCookie: string, 
+     * nameLocalStorage: string, 
+     * associatedDOMId: string, 
+     * type: string, 
+     * secure: string, 
+     * showInURLByDefault: boolean, 
+     * showInURLOnPages: Object, 
+     * callbackOnValueChange: function,
+     * defaultValue: boolean,
+     * }} */
     inputs
   ) {
     this.value = "";
@@ -17,6 +29,7 @@ class StorageVariable {
     this.type = "string";
     this.secure = true;
     this.showInURLByDefault = false;
+    this.defaultValue = "";
     /**@type {Function|null} */
     this.callbackOnValueChange = null;
     /**@type {Function|null} */
@@ -31,6 +44,7 @@ class StorageVariable {
       "callbackOnValueChange",
       "showInURLByDefault",
       "showInURLOnPages",
+      "defaultValue",
     ];
     for (let counterLabel = 0; counterLabel < labelsToRead.length; counterLabel++) {
       let currentLabel = labelsToRead[counterLabel];
@@ -343,6 +357,15 @@ class StorageCalculator {
           nameURL: "hideEquationEditor",
           nameLocalStorage: "hideEquationEditor",
         }),
+        examplesWantedShown: new StorageVariable({
+          name: "examplesWantedShown",
+          nameURL: "examplesWantedShown",
+          nameLocalStorage: "examplesWantedShown",
+          defaultValue: "false",
+          showInURLOnPages: {
+            calculator: true,
+          },
+        }),
       },
       user: {
         activationToken: new StorageVariable({
@@ -480,10 +503,16 @@ class StorageCalculator {
       if (currentStorage.showInURLByDefault === true) {
         shouldShow = true;
       }
-      if (currentStorage.showInURLOnPages !== null && currentStorage.showInURLOnPages !== undefined) {
+      if (
+        currentStorage.showInURLOnPages !== null &&
+        currentStorage.showInURLOnPages !== undefined
+      ) {
         if (storage.variables.currentPage.value in currentStorage.showInURLOnPages) {
           shouldShow = true;
         }
+      }
+      if (currentStorage.value === currentStorage.defaultValue) {
+        shouldShow = false;
       }
       if (!shouldShow) {
         return null;

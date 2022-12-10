@@ -121,8 +121,10 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
     cone.payload.polynomial.addLatticeShift(one, zeroVector);
     return true;
   }
-  QuasiPolynomial discreteIntegrand = cone.payload.polynomial;
   QuasiPolynomial output;
+  this->sumQuasiPolynomialOverCone(
+    cone, direction, exitWalls[0].normal, output
+  );
   List<int> exitCones;
   this->getExitConesAfterStart(cone, direction, exitCones);
   List<Wall> exitWallsNeighbor;

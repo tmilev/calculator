@@ -245,11 +245,23 @@ void QuasiPolynomial::makeRougherLattice(const Lattice& latticeToRoughenBy) {
 
 void QuasiPolynomial::operator+=(const QuasiPolynomial& other) {
   this->makeRougherLattice(other.ambientLatticeReduced);
-  QuasiPolynomial tempQP = other;
-  tempQP.makeRougherLattice(this->ambientLatticeReduced);
-  for (int i = 0; i < tempQP.latticeShifts.size; i ++) {
+  QuasiPolynomial summand = other;
+  summand.makeRougherLattice(this->ambientLatticeReduced);
+  for (int i = 0; i < summand.latticeShifts.size; i ++) {
     this->addLatticeShift(
-      tempQP.valueOnEachLatticeShift[i], tempQP.latticeShifts[i]
+      summand.valueOnEachLatticeShift[i], summand.latticeShifts[i]
+    );
+  }
+}
+
+void QuasiPolynomial::operator-=(const QuasiPolynomial& other) {
+  this->makeRougherLattice(other.ambientLatticeReduced);
+  QuasiPolynomial summand = other;
+  summand.makeRougherLattice(this->ambientLatticeReduced);
+  for (int i = 0; i < summand.latticeShifts.size; i ++) {
+    this->addLatticeShift(
+      summand.valueOnEachLatticeShift[i] *(- 1),
+      summand.latticeShifts[i]
     );
   }
 }

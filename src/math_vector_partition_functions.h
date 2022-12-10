@@ -861,11 +861,26 @@ public:
   void computeQuasiPolynomials(int directionIndex);
   void computeFirstQuasiPolynomial(int directionIndex);
   bool computeOneQuasiPolynomial(Cone& cone, int directionIndex);
-  void getExitCones(
+  void getExitConesAfterStart(
     Cone& start, Vector<Rational>& direction, List<int>& output
   );
-  void accumulateQuasiPolynomialExitWall(
+  void sumQuasiPolynomialOverCone(
     Cone& cone,
+    const Vector<Rational>& direction,
+    const Vector<Rational>& exitWall,
+    QuasiPolynomial& output
+  );
+  void addSingleNeighborContribution(
+    Cone& cone,
+    const Vector<Rational>& direction,
+    const Vector<Rational>& entranceWall,
+    const Vector<Rational>& exitWall,
+    QuasiPolynomial& outputAccumulator
+  );
+  void computeSingleNeighborSingleShiftContribution(
+    const Polynomial<Rational>& toBeSubstituted,
+    const Vector<Rational>& shift,
+    const Lattice& ambientLattice,
     const Vector<Rational>& direction,
     const Vector<Rational>& exitWall,
     QuasiPolynomial& output

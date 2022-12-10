@@ -199,6 +199,7 @@ public:
     QuasiPolynomial& output
   ) const;
   void operator+=(const QuasiPolynomial& other);
+  void operator-=(const QuasiPolynomial& other);
   QuasiPolynomial() {}
   QuasiPolynomial(const QuasiPolynomial& other) {
     this->operator=(other);

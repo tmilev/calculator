@@ -123,35 +123,58 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   }
   QuasiPolynomial discreteIntegrand = cone.payload.polynomial;
   List<int> exitCones;
-  this->getExitCones(cone, exitCones);
+  this->getExitCones(cone, direction, exitCones);
   QuasiPolynomial output;
   output.ambientLatticeReduced = cone.payload.polynomial.ambientLatticeReduced;
-  for (int i : exitCones){
-Cone& next    =this->collection.getConeByIdNonConstNoFail(i);
-this->collection.allExitWallsAreVisited(next, direction, exitWalls);
-if (exitWalls.size != 1) {
-global.fatal << "Single expected wall expected here. "<< global.fatal;
-}
+  for (int i : exitCones) {
+    Cone& next = this->collection.getConeByIdNonConstNoFail(i);
+    this->collection.allExitWallsAreVisited(next, direction, exitWalls);
+    if (exitWalls.size != 1) {
+      global.fatal << "Single expected wall expected here. " << global.fatal;
+    }
     this->accumulateQuasiPolynomialExitWall(
       next, direction, exitWalls[0].normal, output
     );
-
   }
   global.comments
   << "DEBUG: mathematically incorrect workign version. Please fix. <br>";
   return true;
 }
 
-void VectorPartitionFunctionElementary::getExitCones(Cone &start, List<int> &output){
-  global.fatal << "IMPLEMENT" << global.fatal;
+void VectorPartitionFunctionElementary::getExitCones(
+  Cone& start, Vector<Rational>& direction, List<int>& output
+) {
+  output.clear();
+  Cone* next = &start;
+  List<Wall> exitWalls;
+  while (next != nullptr) {
+    output.addOnTop(next->id);
+    if (
+      !this->collection.allExitWallsAreVisited(*next, direction, exitWalls)
+    ) {
+      global.fatal
+      << "Expected all exit walls to be visited. "
+      << global.fatal;
+    }
+    if (exitWalls.size > 1) {
+      global.fatal << "Expected single exit wall. " << global.fatal;
+    }
+    const Wall& wall = exitWalls[0];
+    if (wall.neighbors.size > 1) {
+      global.fatal << "Multiple neighbors along exit wall. " << global.fatal;
+    }
+    if (wall.neighbors.size == 0) {
+      return;
+    }
+    next = &this->collection.getConeByIdNonConstNoFail(wall.neighbors[0]);
+  }
 }
 
-void VectorPartitionFunctionElementary::
-accumulateQuasiPolynomialExitWall(
+void VectorPartitionFunctionElementary::accumulateQuasiPolynomialExitWall(
   Cone& cone,
   const Vector<Rational>& direction,
   const Vector<Rational>& exitWall,
-QuasiPolynomial& output
+  QuasiPolynomial& output
 ) {
   STACK_TRACE(
     "VectorPartitionFunctionElementary::"

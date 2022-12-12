@@ -24,14 +24,17 @@ class Cone {
   void computeRescaledVerticesForDrawing(Vectors<Rational>& output) const;
 public:
   class Payload {
+    QuasiPolynomial polynomial;
   public:
+    QuasiPolynomial previousPolynomial;
     int lowestSlicingIndex;
     bool visited;
     Vector<Rational> internalPoint;
     List<unsigned char> hashOfContainingSimplices;
-    QuasiPolynomial polynomial;
     Payload();
     void incrementHashOfContainingSimplices(char input);
+    void setPolynomial(QuasiPolynomial& input);
+    QuasiPolynomial& getPolynomial();
   };
 
   bool flagIsTheZeroCone;
@@ -846,7 +849,17 @@ public:
   // We the m^th bernoulli plus number B^+_m, m>= 0 to be:
   // B^+_m = 1-\sum_{k=0}^{m-1} m \choose k B^+_k/(m-k+1)
   void getNthBernoulliPlusNumber(int index, Rational& output);
-  void getBernoulliSum(int power, Polynomial<Rational>& output);
+  // We define the n^th bernoulli sum to be
+  // B_n(X) = \sum_{t=1}^X t^n.
+  void getBernoulliSumStartingAtOne(int power, Polynomial<Rational>& output);
+  // Same as the previous sum but starts at t=0.
+  // C_n(X) = \sum_{t=0}^X t^n.
+  // The two functions produce the same output, i.e., C_n(X)= B_n(X)
+  // except for n=0 where
+  // C_0(X) = X+1
+  // but
+  // B_0(X) = X.
+  void getBernoulliSumStartingAtZero(int power, Polynomial<Rational>& output);
 };
 
 class VectorPartitionFunctionElementary {
@@ -861,13 +874,20 @@ public:
   void computeQuasiPolynomials(int directionIndex);
   void computeFirstQuasiPolynomial(int directionIndex);
   bool computeOneQuasiPolynomial(Cone& cone, int directionIndex);
+  bool computeStartingQuasipolynomial(Cone& cone, int directionIndex);
   void getExitConesAfterStart(
     Cone& start, Vector<Rational>& direction, List<int>& output
   );
-  void sumQuasiPolynomialOverCone(
-    Cone& cone,
+  void sumZeroQuasiPolynomialFromWall(
+  const Vector<Rational>& direction,
+  const Wall &exitWall,
+  Cone& neighbor,
+  QuasiPolynomial& output
+
+  );
+  void sumQuasiPolynomialOverCone(Cone& cone,
     const Vector<Rational>& direction,
-    const Vector<Rational>& exitWall,
+    const Wall &exitWall,
     QuasiPolynomial& output
   );
   void addSingleNeighborContribution(

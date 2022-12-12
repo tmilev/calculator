@@ -487,6 +487,21 @@ void Lattice::intersectWithPreimageOfLattice(
   this->makeFromRoots(result);
 }
 
+int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(const Vector<Rational> &input){
+  int scale = 1;
+  while (true) {
+    Vector<Rational> rescaled = input;
+    rescaled *= scale;
+    if (this->isInLattice(rescaled)) {
+      return scale;
+    }
+    scale ++;
+  }
+  global.fatal << "The scale does not fit in integer. "
+  << "Please improve the implementation to take care of this. " << global.fatal;
+  return -1;
+}
+
 void Lattice::intersectWith(const Lattice& other) {
   Vectors<Rational> commonBasis, otherBasis, startBasis;
   startBasis.assignMatrixRows(this->basisRationalForm);

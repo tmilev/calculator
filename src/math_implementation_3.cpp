@@ -10880,6 +10880,15 @@ Cone::Payload::Payload() {
   this->visited = false;
 }
 
+void Cone::Payload::setPolynomial(QuasiPolynomial &input){
+  this->previousPolynomial = this->polynomial;
+  this->polynomial = input;
+}
+
+QuasiPolynomial& Cone::Payload::getPolynomial(){
+  return this->polynomial;
+}
+
 void Cone::Payload::incrementHashOfContainingSimplices(char input) {
   this->hashOfContainingSimplices.addOnTop(input);
   if (this->hashOfContainingSimplices.size > 31) {
@@ -14009,6 +14018,7 @@ bool ConeCollection::allExitWallsAreVisited(
   const Vector<Rational>& direction,
   List<Wall>& outputExitWalls
 ) {
+  STACK_TRACE("ConeCollection::allExitWallsAreVisited");
   outputExitWalls.clear();
   for (const Wall& wall : toBeRefined.walls) {
     if (!direction.scalarEuclidean(wall.normal).isPositive()) {

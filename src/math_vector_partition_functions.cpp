@@ -37,7 +37,7 @@ std::string VectorPartitionFunctionElementary::toHTML() const {
   for (Cone& cone : this->collection.refinedCones.values) {
     out << "<hr>";
     out << "Cone: " << cone.id << ".<br>";
-    out << "Quasipolynomial: " << cone.payload.polynomial.toHTML();
+    out << "Quasipolynomial: " << cone.payload.getPolynomial().toHTML();
   }
   return out.str();
 }
@@ -82,10 +82,39 @@ void VectorPartitionFunctionElementary::computeFirstQuasiPolynomial(
   }
 }
 
+bool VectorPartitionFunctionElementary::computeStartingQuasipolynomial(Cone &cone, int directionIndex){
+  STACK_TRACE("VectorPartitionFunctionElementary::"
+  "computeStartingQuasipolynomial");
+  Cone baseCone;
+  List<Vector<Rational> > firstDirections;
+  this->originalVectors.slice(
+    0, this->collection.getDimension(), firstDirections
+  );
+  baseCone.createFromVertices(firstDirections);
+  QuasiPolynomial output;
+  if (!baseCone.isInCone(cone.internalPoint())) {
+    output.ambientLatticeReduced.makeZn(this->collection.getDimension());
+    cone.payload.setPolynomial(output);
+    return true;
+  }
+output.ambientLatticeReduced.makeFromRoots(firstDirections);
+
+  Polynomial<Rational> one;
+  one.makeOne();
+  Vector<Rational> zeroVector;
+  zeroVector.makeZero(this->collection.getDimension());
+  output.addLatticeShift(one, zeroVector);
+  cone.payload.setPolynomial(output);
+  global.comments << "<br>DEBUG: computed " << cone.id << " vpf as: " << cone.payload.getPolynomial().toHTML();
+  return true;
+}
+
 bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   Cone& cone, int directionIndex
 ) {
+  STACK_TRACE("VectorPartitionFunctionElementary::computeOneQuasiPolynomial");
   Vector<Rational> direction = this->originalVectors[directionIndex];
+
   List<Wall> exitWalls;
   if (
     !this->collection.allExitWallsAreVisited(cone, direction, exitWalls)
@@ -102,29 +131,14 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
     return true;
   }
   if (directionIndex == this->collection.getDimension() - 1) {
-    Cone baseCone;
-    List<Vector<Rational> > firstDirections;
-    this->originalVectors.slice(
-      0, this->collection.getDimension(), firstDirections
-    );
-    baseCone.createFromVertices(firstDirections);
-    Lattice lattice;
-    lattice.makeFromRoots(firstDirections);
-    cone.payload.polynomial.makeZeroOverLattice(lattice);
-    if (!baseCone.isInCone(cone.internalPoint())) {
-      return true;
-    }
-    Polynomial<Rational> one;
-    one.makeOne();
-    Vector<Rational> zeroVector;
-    zeroVector.makeZero(this->collection.getDimension());
-    cone.payload.polynomial.addLatticeShift(one, zeroVector);
-    return true;
+return this->computeStartingQuasipolynomial(cone, directionIndex);
   }
   QuasiPolynomial output;
   this->sumQuasiPolynomialOverCone(
-    cone, direction, exitWalls[0].normal, output
+    cone, direction, exitWalls[0], output
   );
+  global.comments << "<br>DEBUG: output before neighbis: "
+  << output.toHTML();
   List<int> exitCones;
   this->getExitConesAfterStart(cone, direction, exitCones);
   List<Wall> exitWallsNeighbor;
@@ -137,13 +151,14 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
       global.fatal << "Single expected wall expected here. " << global.fatal;
     }
     Vector<Rational> exitWallNeighbor = exitWallsNeighbor[0].normal;
+    global.comments << "<br>DEBUG: handling neighbor: " << i;
     this->addSingleNeighborContribution(
       next, direction, exitWalls[0].normal, exitWallNeighbor, output
     );
   }
-  cone.payload.polynomial = output;
-  global.comments
-  << "DEBUG: mathematically incorrect workign version. Please fix. <br>";
+  cone.payload.setPolynomial( output);
+  global.comments << "<br>DEBUG: computed " << cone.id << " vpf as: " << cone.payload.getPolynomial().toHTML();
+
   return true;
 }
 
@@ -189,7 +204,7 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
     "VectorPartitionFunctionElementary::"
     "addSingleNeighborContribution"
   );
-  const QuasiPolynomial& toBeSubstituted = cone.payload.polynomial;
+  const QuasiPolynomial& toBeSubstituted = cone.payload.getPolynomial();
   Vector<Rational> exitWallRescaled = exitWall;
   exitWallRescaled /= direction.scalarEuclidean(exitWall);
   Vector<Rational> entranceWallRescaled = entranceWall;
@@ -205,6 +220,8 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
       entranceWallRescaled,
       summand
     );
+    global.comments << "<br>DEBUG: entrance wall: " << entranceWallRescaled
+    << " contribution: " << summand.toHTML();
     outputAccumulator += summand;
     this->computeSingleNeighborSingleShiftContribution(
       toBeSubstituted.valueOnEachLatticeShift[i],
@@ -214,6 +231,8 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
       exitWallRescaled,
       summand
     );
+    global.comments << "<br>DEBUG: exit wall: " << exitWall
+    << " negative contribution: " << summand.toHTML();
     outputAccumulator -= summand;
   }
 }
@@ -261,30 +280,39 @@ computeSingleNeighborSingleShiftContribution(
   }
 }
 
+void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall(
+const Vector<Rational> &direction, const Wall &exitWall, Cone &neighbor, QuasiPolynomial &output){
+  STACK_TRACE("VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall");
+  QuasiPolynomial pivotValue = neighbor.payload.previousPolynomial;
+  int scale = pivotValue.ambientLatticeReduced.getMinimalIntegerScalarSendingVectorIntoLattice(direction);
+
+  Lattice rougherLattice;
+
+  output.makeZeroLatticeZn(this->collection.getDimension());
+
+}
+
 void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
   Cone& cone,
   const Vector<Rational>& direction,
-  const Vector<Rational>& exitWall,
+  const Wall& exitWall,
   QuasiPolynomial& output
 ) {
   STACK_TRACE(
     "VectorPartitionFunctionElementary::"
     "accumulateQuasiPolynomialExitWallWithoutNeighbor"
   );
-  output.ambientLatticeReduced = cone.payload.polynomial.ambientLatticeReduced;
-  QuasiPolynomial toBeIntegrated = cone.payload.polynomial;
-  int scale = 1;
-  while (true) {
-    Vector<Rational> rescaled = direction;
-    rescaled *= scale;
-    if (toBeIntegrated.ambientLatticeReduced.isInLattice(rescaled)) {
-      break;
-    }
-    scale ++;
+  QuasiPolynomial toBeIntegrated = cone.payload.getPolynomial();
+  if (toBeIntegrated.isEqualToZero()) {
+    Cone& neighbor = this->collection.getConeByIdNonConstNoFail(exitWall.neighbors[0]);
+  this->sumZeroQuasiPolynomialFromWall( direction,exitWall, neighbor, output);
+return;
   }
+  output.makeZeroOverLattice( toBeIntegrated.ambientLatticeReduced);
+  int scale = toBeIntegrated.ambientLatticeReduced.getMinimalIntegerScalarSendingVectorIntoLattice(direction);
   for (int i = 0; i < scale; i ++) {
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
-      toBeIntegrated, i, scale, output, direction, exitWall
+      toBeIntegrated, i, scale, output, direction, exitWall.normal
     );
   }
 }
@@ -377,7 +405,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
       value.getCoefficientPolynomialOfXPowerK(
         dimension, i, coefficientInFrontOfPower
       );
-      this->bernoulliSumComputer.getBernoulliSum(i, summand);
+      this->bernoulliSumComputer.getBernoulliSumStartingAtZero(i, summand);
       summand.substitute(bernoulliSubstitution, 1);
       summand *= coefficientInFrontOfPower;
       outputAccumulator.addLatticeShift(summand, representative);
@@ -385,9 +413,8 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   }
 }
 
-void BernoulliSumComputer::getBernoulliSum(
-  int power, Polynomial<Rational>& output
-) {
+void BernoulliSumComputer::getBernoulliSumStartingAtOne(int power, Polynomial<Rational> &output)
+ {
   output.makeZero();
   ProgressReport report;
   std::stringstream out;
@@ -400,6 +427,13 @@ void BernoulliSumComputer::getBernoulliSum(
     output.addMonomial(MonomialPolynomial(0, power + 1 - i), coefficient);
   }
   output /= power + 1;
+}
+
+void BernoulliSumComputer::getBernoulliSumStartingAtZero(int power, Polynomial<Rational> &output){
+  this->getBernoulliSumStartingAtOne(power, output);
+  if (power ==0){
+    output+=1;
+  }
 }
 
 void BernoulliSumComputer::getNthBernoulliPlusNumber(

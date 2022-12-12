@@ -474,8 +474,8 @@ class Calculator {
       currentPage: "calculator",
       calculatorInput: input,
     };
-    let thePage = window.calculator.mainPage;
-    let stringifiedHash = thePage.storage.getPercentEncodedURL(theURL);
+    let page = window.calculator.mainPage;
+    let stringifiedHash = page.storage.getPercentEncodedURL(theURL);
     return stringifiedHash;
   }
 
@@ -798,11 +798,11 @@ class Calculator {
 
   submitComputationToBackend(input) {
     //<- this function is called by a callback trigerred when calling
-    //thePage.storage.variables.calculator.input.setAndStore(...)
-    let thePage = window.calculator.mainPage;
-    let urlCopy = Object.assign({}, thePage.storage.urlObject);
+    // page.storage.variables.calculator.input.setAndStore(...)
+    let page = window.calculator.mainPage;
+    let urlCopy = Object.assign({}, page.storage.urlObject);
     urlCopy.inputFocus = true;
-    let stringifiedHash = thePage.storage.getPercentEncodedURL(urlCopy);
+    let stringifiedHash = page.storage.getPercentEncodedURL(urlCopy);
     let anchor = document.getElementById(
       ids.domElements.pages.calculator.anchorComputationLink
     );
@@ -829,13 +829,13 @@ class Calculator {
 
   getQueryStringSubmitStringAsMainInput(theString, requestType) {
     let inputParams = '';
-    let thePage = window.calculator.mainPage;
+    let page = window.calculator.mainPage;
     inputParams += `${pathnames.urlFields.request}=${requestType}&`;
     inputParams += `${pathnames.urlFields.requests.calculatorInput}=${encodeURIComponent(theString)}&`;
-    if (thePage.storage.variables.flagDebug.isTrue()) {
+    if (page.storage.variables.flagDebug.isTrue()) {
       inputParams += `${pathnames.urlFields.debugFlag}=true&`;
     }
-    if (thePage.storage.variables.calculator.monitoring.value === "false") {
+    if (page.storage.variables.calculator.monitoring.value === "false") {
       inputParams += `${pathnames.urlFields.requests.monitoring}=false&`;
     } else {
       inputParams += `${pathnames.urlFields.requests.monitoring}=true&`;

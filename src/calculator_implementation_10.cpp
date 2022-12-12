@@ -173,7 +173,7 @@ bool CalculatorFunctionsVectorPartitionFunction::bernoulliSum(
   BernoulliSumComputer computer;
   WithContext<Polynomial<Rational> > result;
   result.context.addVariable(input[2]);
-  computer.getBernoulliSum(power, result.content);
+  computer.getBernoulliSumStartingAtOne(power, result.content);
   return result.toExpression(calculator, output);
 }
 

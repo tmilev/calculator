@@ -18,6 +18,8 @@ public:
   int getRank() const {
     return this->basis.numberOfRows;
   }
+
+  int getMinimalIntegerScalarSendingVectorIntoLattice(const Vector<Rational> &input);
   void intersectWith(const Lattice& other);
   bool findOnePreimageInLatticeOf(
     const Matrix<Rational>& linearMap,

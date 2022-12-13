@@ -851,7 +851,9 @@ public:
   void getNthBernoulliPlusNumber(int index, Rational& output);
   // We define the n^th bernoulli sum to be
   // B_n(X) = \sum_{t=1}^X t^n.
-  void getBernoulliSumStartingAtOne(int power, Polynomial<Rational>& output);
+  void getBernoulliSumStartingAtOne(
+    int power, Polynomial<Rational>& output
+  );
   // Same as the previous sum but starts at t=0.
   // C_n(X) = \sum_{t=0}^X t^n.
   // The two functions produce the same output, i.e., C_n(X)= B_n(X)
@@ -859,7 +861,9 @@ public:
   // C_0(X) = X+1
   // but
   // B_0(X) = X.
-  void getBernoulliSumStartingAtZero(int power, Polynomial<Rational>& output);
+  void getBernoulliSumStartingAtZero(
+    int power, Polynomial<Rational>& output
+  );
 };
 
 class VectorPartitionFunctionElementary {
@@ -874,30 +878,31 @@ public:
   void computeQuasiPolynomials(int directionIndex);
   void computeFirstQuasiPolynomial(int directionIndex);
   bool computeOneQuasiPolynomial(Cone& cone, int directionIndex);
-  bool computeStartingQuasipolynomial(Cone &cone);
+  bool computeStartingQuasipolynomial(Cone& cone);
   void getExitConesAfterStart(
     Cone& start, Vector<Rational>& direction, List<int>& output
   );
   void sumZeroQuasiPolynomialFromWall(
-  const Vector<Rational>& direction,
-  const Wall &exitWall,
-  Cone& neighbor,
-  QuasiPolynomial& output
-
+    const Vector<Rational>& direction,
+    const Wall& exitWall,
+    Cone& neighbor,
+    QuasiPolynomial& output
   );
   void sumZeroQuasiPolynomialFromWallOnce(
-      const Vector<Rational> &neighborShift,
-      const Lattice &neighborLattice,
-      const Polynomial<Rational> &pivotValue,
-      const Vector<Rational> &representative,
-      const Vector<Rational> &direction,
-      const Vector<Rational> &normalRescaled,
-      QuasiPolynomial &output);
-
-  void sumQuasiPolynomialOverCone(Cone &cone,
-                                  const Vector<Rational> &direction,
-                                  const Wall &exitWall,
-                                  QuasiPolynomial &output);
+    const Vector<Rational>& neighborShift,
+    const Lattice& neighborLattice,
+    const Polynomial<Rational>& pivotValue,
+    const Vector<Rational>& representative,
+    const Vector<Rational>& direction,
+    const Vector<Rational>& normalRescaled,
+    QuasiPolynomial& output
+  );
+  void sumQuasiPolynomialOverCone(
+    Cone& cone,
+    const Vector<Rational>& direction,
+    const Wall& exitWall,
+    QuasiPolynomial& output
+  );
   void addSingleNeighborContribution(
     Cone& cone,
     const Vector<Rational>& direction,
@@ -922,14 +927,15 @@ public:
     const Vector<Rational>& exitWall
   );
   void computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-      const QuasiPolynomial &toBeIntegrated,
-      const Rational &rationalShift,
-      PolynomialSubstitution<Rational> &substitution,
-      const Vector<Rational> &latticeShift,
-      const Polynomial<Rational> &valueOnLatticeShift,
-      QuasiPolynomial &outputAccumulator,
-      const Vector<Rational> &exitWallRescaled,
-      Lattice &rougherLattice);
+    const QuasiPolynomial& toBeIntegrated,
+    const Rational& rationalShift,
+    PolynomialSubstitution<Rational>& substitution,
+    const Vector<Rational>& latticeShift,
+    const Polynomial<Rational>& valueOnLatticeShift,
+    QuasiPolynomial& outputAccumulator,
+    const Vector<Rational>& exitWallRescaled,
+    Lattice& rougherLattice
+  );
 };
 
 class VectorPartitionFunction {

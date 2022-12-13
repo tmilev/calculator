@@ -10880,12 +10880,12 @@ Cone::Payload::Payload() {
   this->visited = false;
 }
 
-void Cone::Payload::setPolynomial(QuasiPolynomial &input){
+void Cone::Payload::setPolynomial(QuasiPolynomial& input) {
   this->previousPolynomial = this->polynomial;
   this->polynomial = input;
 }
 
-QuasiPolynomial& Cone::Payload::getPolynomial(){
+QuasiPolynomial& Cone::Payload::getPolynomial() {
   return this->polynomial;
 }
 
@@ -14079,7 +14079,7 @@ bool ConeCollection::refineOneByOneDirectionArbitrarySlices(
   for (int i = 0; i < exitWalls.size; i ++) {
     Cone current(this->conesCreated);
     current.payload = toBeRefined.payload;
-    this->conesCreated++;
+    this->conesCreated ++;
     Wall exitWallWithoutNeighbors;
     exitWallWithoutNeighbors.normal = exitWalls[i].normal;
     current.walls.addOnTop(exitWallWithoutNeighbors);

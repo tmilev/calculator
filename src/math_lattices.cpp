@@ -266,8 +266,7 @@ void QuasiPolynomial::operator-=(const QuasiPolynomial& other) {
   }
 }
 
-std::string QuasiPolynomial::toString(FormatExpressions *format) const
-{
+std::string QuasiPolynomial::toString(FormatExpressions* format) const {
   std::stringstream out;
   if (this->latticeShifts.size == 0) {
     return "0";
@@ -305,8 +304,7 @@ std::string QuasiPolynomial::toString(FormatExpressions *format) const
   return out.str();
 }
 
-std::string QuasiPolynomial::toHTML(FormatExpressions *format) const
-{
+std::string QuasiPolynomial::toHTML(FormatExpressions* format) const {
   std::stringstream out;
   if (this->latticeShifts.size == 0) {
     return "0";
@@ -323,7 +321,7 @@ std::string QuasiPolynomial::toHTML(FormatExpressions *format) const
     }
   }
   if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {
-    out << " where " << "\\(" << "\\Lambda = \\langle";
+    out << "<br>where " << "\\(" << "\\Lambda = \\langle";
     Vectors<Rational> roots;
     roots.assignMatrixRows(this->ambientLatticeReduced.basisRationalForm);
     for (int i = 0; i < roots.size; i ++) {
@@ -335,7 +333,7 @@ std::string QuasiPolynomial::toHTML(FormatExpressions *format) const
     out << "\\rangle";
   } else {
     out
-    << " where \\(\\Lambda =\\mathbb{Z}^{"
+    << "<br>where \\(\\Lambda =\\mathbb{Z}^{"
     << this->minimalNumberOfVariables()
     << "}";
   }
@@ -489,7 +487,9 @@ void Lattice::intersectWithPreimageOfLattice(
   this->makeFromRoots(result);
 }
 
-int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(const Vector<Rational> &input){
+int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(
+  const Vector<Rational>& input
+) {
   int scale = 1;
   while (true) {
     Vector<Rational> rescaled = input;
@@ -499,9 +499,11 @@ int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(const Vector<Ration
     }
     scale ++;
   }
-  global.fatal << "The scale does not fit in integer. "
-  << "Please improve the implementation to take care of this. " << global.fatal;
-  return -1;
+  global.fatal
+  << "The scale does not fit in integer. "
+  << "Please improve the implementation to take care of this. "
+  << global.fatal;
+  return - 1;
 }
 
 void Lattice::intersectWith(const Lattice& other) {

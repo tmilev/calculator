@@ -37,7 +37,7 @@ std::string VectorPartitionFunctionElementary::toHTML() const {
   for (Cone& cone : this->collection.refinedCones.values) {
     out << "<hr>";
     out << "Cone: " << cone.id << ".<br>";
-    out << "Quasipolynomial: " << cone.payload.getPolynomial().toHTML();
+    out << "Quasipolynomial:<br>" << cone.payload.getPolynomial().toHTML();
   }
   return out.str();
 }
@@ -82,10 +82,13 @@ void VectorPartitionFunctionElementary::computeFirstQuasiPolynomial(
   }
 }
 
-bool VectorPartitionFunctionElementary::computeStartingQuasipolynomial(Cone &cone)
-{
-  STACK_TRACE("VectorPartitionFunctionElementary::"
-  "computeStartingQuasipolynomial");
+bool VectorPartitionFunctionElementary::computeStartingQuasipolynomial(
+  Cone& cone
+) {
+  STACK_TRACE(
+    "VectorPartitionFunctionElementary::"
+    "computeStartingQuasipolynomial"
+  );
   Cone baseCone;
   List<Vector<Rational> > firstDirections;
   this->originalVectors.slice(
@@ -98,15 +101,18 @@ bool VectorPartitionFunctionElementary::computeStartingQuasipolynomial(Cone &con
     cone.payload.setPolynomial(output);
     return true;
   }
-output.ambientLatticeReduced.makeFromRoots(firstDirections);
-
+  output.ambientLatticeReduced.makeFromRoots(firstDirections);
   Polynomial<Rational> one;
   one.makeOne();
   Vector<Rational> zeroVector;
   zeroVector.makeZero(this->collection.getDimension());
   output.addLatticeShift(one, zeroVector);
   cone.payload.setPolynomial(output);
-  global.comments << "<br>DEBUG: computed " << cone.id << " vpf as: " << cone.payload.getPolynomial().toHTML();
+  global.comments
+  << "<br>DEBUG: computed "
+  << cone.id
+  << " vpf as: "
+  << cone.payload.getPolynomial().toHTML();
   return true;
 }
 
@@ -115,7 +121,6 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
 ) {
   STACK_TRACE("VectorPartitionFunctionElementary::computeOneQuasiPolynomial");
   Vector<Rational> direction = this->originalVectors[directionIndex];
-
   List<Wall> exitWalls;
   if (
     !this->collection.allExitWallsAreVisited(cone, direction, exitWalls)
@@ -135,11 +140,8 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
     return this->computeStartingQuasipolynomial(cone);
   }
   QuasiPolynomial output;
-  this->sumQuasiPolynomialOverCone(
-    cone, direction, exitWalls[0], output
-  );
-  global.comments << "<br>DEBUG: output before neighbis: "
-  << output.toHTML();
+  this->sumQuasiPolynomialOverCone(cone, direction, exitWalls[0], output);
+  global.comments << "<br>DEBUG: output before neighbis: " << output.toHTML();
   List<int> exitCones;
   this->getExitConesAfterStart(cone, direction, exitCones);
   List<Wall> exitWallsNeighbor;
@@ -157,9 +159,12 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
       next, direction, exitWalls[0].normal, exitWallNeighbor, output
     );
   }
-  cone.payload.setPolynomial( output);
-  global.comments << "<br>DEBUG: computed " << cone.id << " vpf as: " << cone.payload.getPolynomial().toHTML();
-
+  cone.payload.setPolynomial(output);
+  global.comments
+  << "<br>DEBUG: computed "
+  << cone.id
+  << " vpf as: "
+  << cone.payload.getPolynomial().toHTML();
   return true;
 }
 
@@ -221,8 +226,11 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
       entranceWallRescaled,
       summand
     );
-    global.comments << "<br>DEBUG: entrance wall: " << entranceWallRescaled
-    << " contribution: " << summand.toHTML();
+    global.comments
+    << "<br>DEBUG: entrance wall: "
+    << entranceWallRescaled
+    << " contribution: "
+    << summand.toHTML();
     outputAccumulator += summand;
     this->computeSingleNeighborSingleShiftContribution(
       toBeSubstituted.valueOnEachLatticeShift[i],
@@ -232,8 +240,11 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
       exitWallRescaled,
       summand
     );
-    global.comments << "<br>DEBUG: exit wall: " << exitWall
-    << " negative contribution: " << summand.toHTML();
+    global.comments
+    << "<br>DEBUG: exit wall: "
+    << exitWall
+    << " negative contribution: "
+    << summand.toHTML();
     outputAccumulator -= summand;
   }
 }
@@ -282,53 +293,65 @@ computeSingleNeighborSingleShiftContribution(
 }
 
 void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall(
-const Vector<Rational> &direction, const Wall &exitWall, Cone &neighbor, QuasiPolynomial &output){
-  STACK_TRACE("VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall");
+  const Vector<Rational>& direction,
+  const Wall& exitWall,
+  Cone& neighbor,
+  QuasiPolynomial& output
+) {
+  STACK_TRACE(
+    "VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall"
+  );
   global.comments << "<br>DEBUG: insdie sumZeroQuasiPolynomialFromWall";
   QuasiPolynomial pivotValue = neighbor.payload.previousPolynomial;
   global.comments << "<br>DEBUG: neighbi payload: " << pivotValue.toHTML();
-  int modulus = pivotValue.ambientLatticeReduced.getMinimalIntegerScalarSendingVectorIntoLattice(direction);
-
+  int modulus =
+  pivotValue.ambientLatticeReduced.
+  getMinimalIntegerScalarSendingVectorIntoLattice(direction);
   Lattice zN;
   zN.makeZn(this->collection.getDimension());
   Lattice rougherLattice;
   Lattice intermediateLattice;
   Vector<Rational> normalRescaled = exitWall.normal;
   normalRescaled /= direction.scalarEuclidean(normalRescaled);
-  pivotValue.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(normalRescaled, intermediateLattice);
-  pivotValue.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(normalRescaled / modulus, rougherLattice);
+  pivotValue.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
+    normalRescaled, intermediateLattice
+  );
+  pivotValue.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
+    normalRescaled / modulus, rougherLattice
+  );
   Vectors<Rational> representatives;
-
   zN.getAllRepresentatives(rougherLattice, representatives);
   output.makeZeroOverLattice(rougherLattice);
-  for (Vector<Rational> &representative : representatives)
-  {
-    if (!intermediateLattice.isInLattice(representative))
-    {
+  for (Vector<Rational>& representative : representatives) {
+    if (!intermediateLattice.isInLattice(representative)) {
       continue;
     }
-    for (int i = 0; i < pivotValue.latticeShifts.size; i++)
-    {
-      this->sumZeroQuasiPolynomialFromWallOnce(pivotValue.latticeShifts[i], pivotValue.ambientLatticeReduced, pivotValue.valueOnEachLatticeShift[i], representative, direction, normalRescaled, output);
+    for (int i = 0; i < pivotValue.latticeShifts.size; i ++) {
+      this->sumZeroQuasiPolynomialFromWallOnce(
+        pivotValue.latticeShifts[i],
+        pivotValue.ambientLatticeReduced,
+        pivotValue.valueOnEachLatticeShift[i],
+        representative,
+        direction,
+        normalRescaled,
+        output
+      );
     }
   }
 }
 
 void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWallOnce(
-    const Vector<Rational> &neighborShift,
-    const Lattice &neighborLattice,
-    const Polynomial<Rational> &pivotValue,
-    const Vector<Rational> &representative,
-    const Vector<Rational> &direction,
-    const Vector<Rational> &normalRescaled,
-    QuasiPolynomial &output
-
-)
-{
+  const Vector<Rational>& neighborShift,
+  const Lattice& neighborLattice,
+  const Polynomial<Rational>& pivotValue,
+  const Vector<Rational>& representative,
+  const Vector<Rational>& direction,
+  const Vector<Rational>& normalRescaled,
+  QuasiPolynomial& output
+) {
   Vector<Rational> sum = neighborShift;
   sum += direction * representative.scalarEuclidean(normalRescaled);
-  if (!neighborLattice.isInLattice(sum))
-  {
+  if (!neighborLattice.isInLattice(sum)) {
     return;
   }
   PolynomialSubstitution<Rational> substitution;
@@ -336,12 +359,10 @@ void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWallOnce(
   substitution.setSize(dimension);
   Polynomial<Rational> linearFunction;
   linearFunction.makeLinearNoConstant(normalRescaled);
-  for (int i = 0; i < dimension; i++)
-  {
+  for (int i = 0; i < dimension; i ++) {
     substitution[i].makeMonomial(i, 1, 1);
     substitution[i] -= linearFunction * direction[i];
   }
-
   Polynomial<Rational> substituted = pivotValue;
   substituted.substitute(substitution, 1);
   output.addLatticeShift(substituted, representative);
@@ -359,23 +380,41 @@ void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
   );
   QuasiPolynomial toBeIntegrated = cone.payload.getPolynomial();
   if (toBeIntegrated.isEqualToZero()) {
-    if (exitWall.neighbors.size == 0)
-    {
-      global.comments << "<br>Cone of id: " << cone.id << " has no neighbors along: " << exitWall.toString();
-      global.comments << "<br>All walls: " << cone.walls.toStringCommaDelimited();
+    if (exitWall.neighbors.size == 0) {
+      global.comments
+      << "<br>Cone of id: "
+      << cone.id
+      << " has no neighbors along: "
+      << exitWall.toString();
+      global.comments
+      << "<br>All walls: "
+      << cone.walls.toStringCommaDelimited();
       global.comments << "<br>Direction: " << direction.toString();
-
-      global.comments << "<br>To be integrated: " << cone.payload.getPolynomial().toHTML() << " over " << cone.payload.getPolynomial().ambientLatticeReduced.toString();
-      global.comments << "<br>" << this->collection.toStringNeighborGraph() << "<br>";
+      global.comments
+      << "<br>To be integrated: "
+      << cone.payload.getPolynomial().toHTML()
+      << " over "
+      << cone.payload.getPolynomial().ambientLatticeReduced.toString();
+      global.comments
+      << "<br>"
+      << this->collection.toStringNeighborGraph()
+      << "<br>";
       global.comments << this->collection.toHTMLGraphicsOnly(false);
-      global.fatal << "Not expected: no neighbors along wall. " << global.fatal;
+      global.fatal
+      << "Not expected: no neighbors along wall. "
+      << global.fatal;
     }
-    Cone& neighbor = this->collection.getConeByIdNonConstNoFail(exitWall.neighbors[0]);
-  this->sumZeroQuasiPolynomialFromWall( direction,exitWall, neighbor, output);
-return;
+    Cone & neighbor =
+    this->collection.getConeByIdNonConstNoFail(exitWall.neighbors[0]);
+    this->sumZeroQuasiPolynomialFromWall(
+      direction, exitWall, neighbor, output
+    );
+    return;
   }
-  output.makeZeroOverLattice( toBeIntegrated.ambientLatticeReduced);
-  int scale = toBeIntegrated.ambientLatticeReduced.getMinimalIntegerScalarSendingVectorIntoLattice(direction);
+  output.makeZeroOverLattice(toBeIntegrated.ambientLatticeReduced);
+  int scale =
+  toBeIntegrated.ambientLatticeReduced.
+  getMinimalIntegerScalarSendingVectorIntoLattice(direction);
   for (int i = 0; i < scale; i ++) {
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
       toBeIntegrated, i, scale, output, direction, exitWall.normal
@@ -396,8 +435,17 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
     "VectorPartitionFunctionElementary::"
     "computeOneQuasiPolynomialExitWallWithoutNeighborOneScale"
   );
-  global.comments << "<hr>DEBUG: integrating " << toBeIntegrated.toHTML()
-                  << " with shfit: " << shift << ", scale: " << scale << ", direction: " << direction.toString() << ", exit wall: " << exitWall.toString();
+  global.comments
+  << "<hr>DEBUG: integrating "
+  << toBeIntegrated.toHTML()
+  << " with shfit: "
+  << shift
+  << ", scale: "
+  << scale
+  << ", direction: "
+  << direction.toString()
+  << ", exit wall: "
+  << exitWall.toString();
   int dimension = this->collection.getDimension();
   PolynomialSubstitution<Rational> substitution;
   substitution.setSize(dimension);
@@ -419,34 +467,34 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
   );
   QuasiPolynomial contribution;
   contribution.makeZeroOverLattice(latticeFromWallDistance);
-  for (int i = 0; i < toBeIntegrated.latticeShifts.size; i++)
-  {
+  for (int i = 0; i < toBeIntegrated.latticeShifts.size; i ++) {
     Vector<Rational> latticeShift = toBeIntegrated.latticeShifts[i];
     latticeShift += direction * shift;
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-        toBeIntegrated,
-        rationalShift,
-        substitution,
-        latticeShift,
-        toBeIntegrated.valueOnEachLatticeShift[i],
-        contribution,
-        exitWallRescaled,
-        latticeFromWallDistance);
+      toBeIntegrated,
+      rationalShift,
+      substitution,
+      latticeShift,
+      toBeIntegrated.valueOnEachLatticeShift[i],
+      contribution,
+      exitWallRescaled,
+      latticeFromWallDistance
+    );
   }
   outputAccumulator += contribution;
 }
 
 void VectorPartitionFunctionElementary::
-    computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-        const QuasiPolynomial &toBeIntegrated,
-        const Rational &rationalShift,
-        PolynomialSubstitution<Rational> &substitution,
-        const Vector<Rational> &latticeShift,
-        const Polynomial<Rational> &valueOnLatticeShift,
-        QuasiPolynomial &outputAccumulator,
-        const Vector<Rational> &exitWallRescaled,
-        Lattice &rougherLattice)
-{
+computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
+  const QuasiPolynomial& toBeIntegrated,
+  const Rational& rationalShift,
+  PolynomialSubstitution<Rational>& substitution,
+  const Vector<Rational>& latticeShift,
+  const Polynomial<Rational>& valueOnLatticeShift,
+  QuasiPolynomial& outputAccumulator,
+  const Vector<Rational>& exitWallRescaled,
+  Lattice& rougherLattice
+) {
   STACK_TRACE(
     "VectorPartitionFunctionElementary::"
     "computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift"
@@ -455,22 +503,36 @@ void VectorPartitionFunctionElementary::
   int startingDegree = value.totalDegreeInt();
   value.substitute(substitution, 1);
   Vectors<Rational> representatives;
-  toBeIntegrated.ambientLatticeReduced.getAllRepresentatives(
-    rougherLattice, representatives
-  );
+  Lattice zN;
+  zN.makeZn(this->collection.getDimension());
+  zN.getAllRepresentatives(rougherLattice, representatives);
+  global.comments
+  << "<br>DEBUG: All representatives: "
+  << representatives
+  << ", rouger lattice: "
+  << rougherLattice.toString();
   Polynomial<Rational> linearFunction;
   Polynomial<Rational> coefficientInFrontOfPower;
   Polynomial<Rational> summand;
   PolynomialSubstitution<Rational> bernoulliSubstitution;
   bernoulliSubstitution.setSize(1);
   for (Vector<Rational>& representative : representatives) {
-    if (!rougherLattice.isInLattice(representative - latticeShift)) {
+    if (
+      !toBeIntegrated.ambientLatticeReduced.isInLattice(
+        representative - latticeShift
+      )
+    ) {
       continue;
     }
     bernoulliSubstitution[0].makeLinearNoConstant(exitWallRescaled);
-    bernoulliSubstitution[0] -= (exitWallRescaled.scalarEuclidean(representative) + rationalShift).fractionalValue();
-    global.comments << "<br>DEBUG: Bernoulli substitution: " << bernoulliSubstitution.toString()
-                    << " from exit wall: " << exitWallRescaled;
+    bernoulliSubstitution[0] -= (
+      exitWallRescaled.scalarEuclidean(representative) + rationalShift
+    ).fractionalValue();
+    global.comments
+    << "<br>DEBUG: Bernoulli substitution: "
+    << bernoulliSubstitution.toString()
+    << " from exit wall: "
+    << exitWallRescaled;
     int dimension = this->collection.getDimension();
     for (int i = 0; i <= startingDegree; i ++) {
       value.getCoefficientPolynomialOfXPowerK(
@@ -484,8 +546,9 @@ void VectorPartitionFunctionElementary::
   }
 }
 
-void BernoulliSumComputer::getBernoulliSumStartingAtOne(int power, Polynomial<Rational> &output)
- {
+void BernoulliSumComputer::getBernoulliSumStartingAtOne(
+  int power, Polynomial<Rational>& output
+) {
   output.makeZero();
   ProgressReport report;
   std::stringstream out;
@@ -500,10 +563,12 @@ void BernoulliSumComputer::getBernoulliSumStartingAtOne(int power, Polynomial<Ra
   output /= power + 1;
 }
 
-void BernoulliSumComputer::getBernoulliSumStartingAtZero(int power, Polynomial<Rational> &output){
+void BernoulliSumComputer::getBernoulliSumStartingAtZero(
+  int power, Polynomial<Rational>& output
+) {
   this->getBernoulliSumStartingAtOne(power, output);
-  if (power ==0){
-    output+=1;
+  if (power == 0) {
+    output += 1;
   }
 }
 

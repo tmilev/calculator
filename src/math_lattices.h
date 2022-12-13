@@ -18,8 +18,9 @@ public:
   int getRank() const {
     return this->basis.numberOfRows;
   }
-
-  int getMinimalIntegerScalarSendingVectorIntoLattice(const Vector<Rational> &input);
+  int getMinimalIntegerScalarSendingVectorIntoLattice(
+    const Vector<Rational>& input
+  );
   void intersectWith(const Lattice& other);
   bool findOnePreimageInLatticeOf(
     const Matrix<Rational>& linearMap,
@@ -156,8 +157,8 @@ public:
   Lattice ambientLatticeReduced;
   Vectors<Rational> latticeShifts;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
-  std::string toString(FormatExpressions *format = nullptr) const;
-  std::string toHTML(FormatExpressions *format = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toHTML(FormatExpressions* format = nullptr) const;
   Rational evaluate(
     const Vector<Rational>& input, std::stringstream* comments
   );

@@ -13790,6 +13790,8 @@ bool ConeCollection::splitChamber(
   ) {
     return false;
   }
+  newPlusCone.payload = toBeSliced.payload;
+  newMinusCone.payload = toBeSliced.payload;
   this->getNewVerticesAppend(toBeSliced, normal, zeroVertices);
   for (int i = 0; i < toBeSliced.walls.size; i ++) {
     Wall wall;
@@ -14076,7 +14078,8 @@ bool ConeCollection::refineOneByOneDirectionArbitrarySlices(
   int firstIndex = this->conesCreated;
   for (int i = 0; i < exitWalls.size; i ++) {
     Cone current(this->conesCreated);
-    this->conesCreated ++;
+    current.payload = toBeRefined.payload;
+    this->conesCreated++;
     Wall exitWallWithoutNeighbors;
     exitWallWithoutNeighbors.normal = exitWalls[i].normal;
     current.walls.addOnTop(exitWallWithoutNeighbors);

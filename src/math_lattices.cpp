@@ -266,7 +266,8 @@ void QuasiPolynomial::operator-=(const QuasiPolynomial& other) {
   }
 }
 
-std::string QuasiPolynomial::toString(FormatExpressions* format) {
+std::string QuasiPolynomial::toString(FormatExpressions *format) const
+{
   std::stringstream out;
   if (this->latticeShifts.size == 0) {
     return "0";
@@ -304,7 +305,8 @@ std::string QuasiPolynomial::toString(FormatExpressions* format) {
   return out.str();
 }
 
-std::string QuasiPolynomial::toHTML(FormatExpressions* format) {
+std::string QuasiPolynomial::toHTML(FormatExpressions *format) const
+{
   std::stringstream out;
   if (this->latticeShifts.size == 0) {
     return "0";

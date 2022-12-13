@@ -156,8 +156,8 @@ public:
   Lattice ambientLatticeReduced;
   Vectors<Rational> latticeShifts;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
-  std::string toString(FormatExpressions* format = nullptr);
-  std::string toHTML(FormatExpressions* format = nullptr);
+  std::string toString(FormatExpressions *format = nullptr) const;
+  std::string toHTML(FormatExpressions *format = nullptr) const;
   Rational evaluate(
     const Vector<Rational>& input, std::stringstream* comments
   );

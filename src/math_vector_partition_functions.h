@@ -874,7 +874,7 @@ public:
   void computeQuasiPolynomials(int directionIndex);
   void computeFirstQuasiPolynomial(int directionIndex);
   bool computeOneQuasiPolynomial(Cone& cone, int directionIndex);
-  bool computeStartingQuasipolynomial(Cone& cone, int directionIndex);
+  bool computeStartingQuasipolynomial(Cone &cone);
   void getExitConesAfterStart(
     Cone& start, Vector<Rational>& direction, List<int>& output
   );
@@ -885,11 +885,19 @@ public:
   QuasiPolynomial& output
 
   );
-  void sumQuasiPolynomialOverCone(Cone& cone,
-    const Vector<Rational>& direction,
-    const Wall &exitWall,
-    QuasiPolynomial& output
-  );
+  void sumZeroQuasiPolynomialFromWallOnce(
+      const Vector<Rational> &neighborShift,
+      const Lattice &neighborLattice,
+      const Polynomial<Rational> &pivotValue,
+      const Vector<Rational> &representative,
+      const Vector<Rational> &direction,
+      const Vector<Rational> &normalRescaled,
+      QuasiPolynomial &output);
+
+  void sumQuasiPolynomialOverCone(Cone &cone,
+                                  const Vector<Rational> &direction,
+                                  const Wall &exitWall,
+                                  QuasiPolynomial &output);
   void addSingleNeighborContribution(
     Cone& cone,
     const Vector<Rational>& direction,
@@ -914,15 +922,14 @@ public:
     const Vector<Rational>& exitWall
   );
   void computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-    const QuasiPolynomial& toBeIntegrated,
-    const Rational& rationalShift,
-    PolynomialSubstitution<Rational>& substitution,
-    const Vector<Rational>& latticeShift,
-    const Polynomial<Rational>& valueOnLatticeShift,
-    QuasiPolynomial& outputAccumulator,
-    const Vector<Rational>& exitWall,
-    Lattice& rougherLattice
-  );
+      const QuasiPolynomial &toBeIntegrated,
+      const Rational &rationalShift,
+      PolynomialSubstitution<Rational> &substitution,
+      const Vector<Rational> &latticeShift,
+      const Polynomial<Rational> &valueOnLatticeShift,
+      QuasiPolynomial &outputAccumulator,
+      const Vector<Rational> &exitWallRescaled,
+      Lattice &rougherLattice);
 };
 
 class VectorPartitionFunction {

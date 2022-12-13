@@ -417,7 +417,10 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
   toBeIntegrated.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
     exitWallRescaled, latticeFromWallDistance
   );
-  for (int i = 0; i < toBeIntegrated.latticeShifts.size; i ++) {
+  QuasiPolynomial contribution;
+  contribution.makeZeroOverLattice(latticeFromWallDistance);
+  for (int i = 0; i < toBeIntegrated.latticeShifts.size; i++)
+  {
     Vector<Rational> latticeShift = toBeIntegrated.latticeShifts[i];
     latticeShift += direction * shift;
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
@@ -426,10 +429,11 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
         substitution,
         latticeShift,
         toBeIntegrated.valueOnEachLatticeShift[i],
-        outputAccumulator,
+        contribution,
         exitWallRescaled,
         latticeFromWallDistance);
   }
+  outputAccumulator += contribution;
 }
 
 void VectorPartitionFunctionElementary::

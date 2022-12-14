@@ -129,7 +129,7 @@ class AtomHandler {
   
   /** @return{HTMLElement} */
   toHTML(
-    /**@type {Calculator}*/
+    /** @type {Calculator} */
     calculator,
   ) {
     let result = document.createElement("div");
@@ -138,15 +138,15 @@ class AtomHandler {
     let link = calculator.getComputationLink(this.example);
     anchor.href = "#" + link;
     anchor.textContent = this.atom;
+    this.panel = this.toHTMLInfo();
+    result.appendChild(this.toHTMLInfoButton());
+    result.appendChild(this.panel);
     result.appendChild(anchor);
     if (this.totalRules > 1) {
       let countElement = document.createElement("span");
       countElement.textContent = `(${this.index + 1})`;
       result.appendChild(countElement);
     }
-    this.panel = this.toHTMLInfo();
-    result.appendChild(this.toHTMLInfoButton());
-    result.appendChild(this.panel);
     return result;
   }
 }
@@ -290,7 +290,9 @@ class Calculator {
   adjustCalculatorPageSize() {
     miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
     let element = document.getElementById(ids.domElements.calculatorExamples);
-    let calculatorElement = document.getElementById(ids.domElements.divCalculatorMainInputOutput);
+    let calculatorElement = document.getElementById(
+      ids.domElements.divCalculatorMainInputOutput
+    );
     if (element.classList.contains("hiddenClass")) {
       calculatorElement.style.maxWidth = "100%";
     } else {
@@ -308,7 +310,9 @@ class Calculator {
   toggleEquationEditor() {
     let hideEditor = storage.storage.variables.calculator.hideEquationEditor.isTrue();
     hideEditor = !hideEditor;
-    storage.storage.variables.calculator.hideEquationEditor.setAndStore(hideEditor);
+    storage.storage.variables.calculator.hideEquationEditor.setAndStore(
+      hideEditor
+    );
     this.doToggleEditor(hideEditor)
   }
 
@@ -337,8 +341,13 @@ class Calculator {
     /** @type{HTMLElement} */
     button,
   ) {
-    let examples = document.getElementById(ids.domElements.calculatorExamples);
-    if (examples.innerHTML.length < 300 && this.flagExamplesWantedShown) {
+    let examples = document.getElementById(
+      ids.domElements.calculatorExamples
+    );
+    if (
+      examples.innerHTML.length < 300 &&
+      this.flagExamplesWantedShown
+    ) {
       let url = "";
       url += pathnames.urls.calculatorAPI;
       url += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
@@ -398,7 +407,9 @@ class Calculator {
     }
     buttonExamples.addEventListener('click', () => {
       this.flagExamplesWantedShown = !this.flagExamplesWantedShown;
-      storage.storage.variables.calculator.examplesWantedShown.setAndStore(this.flagExamplesWantedShown, true, false);
+      storage.storage.variables.calculator.examplesWantedShown.setAndStore(
+        this.flagExamplesWantedShown, true, false,
+      );
       this.setExamples(buttonExamples);
     });
   }
@@ -459,23 +470,27 @@ class Calculator {
 
   submitComputation() {
     processMonitoring.monitor.clearTimeout();
-    let calculatorInput = document.getElementById(ids.domElements.pages.calculator.inputMain).value;
+    let calculatorInput = document.getElementById(
+      ids.domElements.pages.calculator.inputMain
+    ).value;
     if (calculatorInput === this.lastSubmittedInput) {
       return;
     }
     this.lastSubmittedInput = calculatorInput;
     // submitComputationPartTwo is called by a callback in the function below:
-    storage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
+    storage.storage.variables.calculator.input.setAndStore(
+      this.lastSubmittedInput
+    );
   }
 
   /** @return {String} */
   getComputationLink(input) {
-    let theURL = {
+    let url = {
       currentPage: "calculator",
       calculatorInput: input,
     };
     let page = window.calculator.mainPage;
-    let stringifiedHash = page.storage.getPercentEncodedURL(theURL);
+    let stringifiedHash = page.storage.getPercentEncodedURL(url);
     return stringifiedHash;
   }
 
@@ -484,12 +499,18 @@ class Calculator {
     inputParsed,
   ) {
     let result = document.createElement("span");
-    if (inputParsed.commentsGlobal !== "" && inputParsed.commentsGlobal !== undefined) {
+    if (
+      inputParsed.commentsGlobal !== "" &&
+      inputParsed.commentsGlobal !== undefined
+    ) {
       let comments = document.createElement("div");
       comments.innerHTML = inputParsed.commentsGlobal;
       result.appendChild(comments);
     }
-    if (inputParsed.result === undefined && inputParsed.comments !== undefined) {
+    if (
+      inputParsed.result === undefined &&
+      inputParsed.comments !== undefined
+    ) {
       let comments = document.createElement("div");
       comments.innerHTML = inputParsed.comments;
       result.appendChild(comments);
@@ -545,8 +566,12 @@ class Calculator {
       processMonitoring.monitor.start(inputParsed.workerId);
       return result;
     }
-    if (inputParsed.result === undefined && inputParsed.resultHtml !== undefined) {
-      // If both resultHTML and result are specified, resultHTML must be a fallback, 
+    if (
+      inputParsed.result === undefined &&
+      inputParsed.resultHtml !== undefined
+    ) {
+      // If both resultHTML and result are specified,
+      // resultHTML must be a fallback, 
       // so we ignore it.
       let resultHTML = document.createElement("div");
       resultHTML.innerHTML = inputParsed.resultHtml;
@@ -644,7 +669,10 @@ class Calculator {
       commentsContainer.appendChild(comments);
     }
     let mainPage = window.calculator.mainPage;
-    if (mainPage.storage.variables.flagDebug.isTrue() && inputParsed.debug !== undefined) {
+    if (
+      mainPage.storage.variables.flagDebug.isTrue() &&
+      inputParsed.debug !== undefined
+    ) {
       let cell = mainRow.insertCell();
       cell.innerHTML = inputParsed.debug;
     }
@@ -673,7 +701,7 @@ class Calculator {
   }
 
   resizePanel(
-    /**@type{equationEditor.EquationEditor} */
+    /** @type{equationEditor.EquationEditor} */
     editor,
     constructedPanels,
   ) {
@@ -693,7 +721,7 @@ class Calculator {
     if (!(parent.id in constructedPanels)) {
       return;
     }
-    /**@type{panels.PanelExpandable} */
+    /** @type{panels.PanelExpandable} */
     let panel = constructedPanels[parent.id];
     panel.computeOriginalDimensions();
     if (panel.originalWidth > 1500) {
@@ -717,7 +745,9 @@ class Calculator {
     this.flagTypeset = false;
     let elementWithScripts = null;
     try {
-      elementWithScripts = dynamicJavascript.bootstrapAllScripts(this.getOutputElement());
+      elementWithScripts = dynamicJavascript.bootstrapAllScripts(
+        this.getOutputElement()
+      );
     } catch (e) {
       console.log(e);
     }
@@ -816,7 +846,9 @@ class Calculator {
       this.helpCalculator();
     }, 0);
     let url = pathnames.urls.calculatorAPI;
-    let parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);
+    let parameters = this.getQueryStringSubmitStringAsMainInput(
+      input, pathnames.urlFields.calculatorCompute
+    );
     submitRequests.submitPOST({
       url: url,
       parameters: parameters,
@@ -827,11 +859,11 @@ class Calculator {
     });
   }
 
-  getQueryStringSubmitStringAsMainInput(theString, requestType) {
+  getQueryStringSubmitStringAsMainInput(inputString, requestType) {
     let inputParams = '';
     let page = window.calculator.mainPage;
     inputParams += `${pathnames.urlFields.request}=${requestType}&`;
-    inputParams += `${pathnames.urlFields.requests.calculatorInput}=${encodeURIComponent(theString)}&`;
+    inputParams += `${pathnames.urlFields.requests.calculatorInput}=${encodeURIComponent(inputString)}&`;
     if (page.storage.variables.flagDebug.isTrue()) {
       inputParams += `${pathnames.urlFields.debugFlag}=true&`;
     }
@@ -843,9 +875,15 @@ class Calculator {
     return inputParams;
   }
 
-  submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
-    let inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
-    this.submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
+  submitStringAsMainInput(
+    inputString, idOutput, requestType, onLoadFunction, idStatus,
+  ) {
+    let inputParams = this.getQueryStringSubmitStringAsMainInput(
+      inputString, requestType,
+    );
+    this.submitStringCalculatorArgument(
+      inputParams, idOutput, onLoadFunction, idStatus,
+    );
   }
 }
 

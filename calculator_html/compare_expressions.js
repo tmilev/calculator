@@ -18,13 +18,21 @@ class CompareExpressions {
     /**@type{InputPanelData|null} */
     this.desiredPanel = null;
     /**@type{HTMLElement} */
-    this.resultUserFriendly = document.getElementById(ids.domElements.pages.compareExpressions.resultUserFriendly);
+    this.resultUserFriendly = document.getElementById(
+      ids.domElements.pages.compareExpressions.resultUserFriendly
+    );
     /**@type{HTMLElement} */
-    this.resultBoxRaw = document.getElementById(ids.domElements.pages.compareExpressions.resultRaw);
+    this.resultBoxRaw = document.getElementById(
+      ids.domElements.pages.compareExpressions.resultRaw
+    );
     /**@type{HTMLElement} */
-    this.resultBoxFormatted = document.getElementById(ids.domElements.pages.compareExpressions.resultFormatted);
+    this.resultBoxFormatted = document.getElementById(
+      ids.domElements.pages.compareExpressions.resultFormatted
+    );
     /**@type{HTMLElement} */
-    this.calculatorLink = document.getElementById(ids.domElements.pages.compareExpressions.calculatorLink);
+    this.calculatorLink = document.getElementById(
+      ids.domElements.pages.compareExpressions.calculatorLink
+    );
     /**@type{string} */
     this.givenData = "";
     /**@type{string} */
@@ -35,7 +43,9 @@ class CompareExpressions {
     if (this.initialized) {
       return;
     }
-    let button = document.getElementById(ids.domElements.pages.compareExpressions.buttonCompare);
+    let button = document.getElementById(
+      ids.domElements.pages.compareExpressions.buttonCompare
+    );
     if (button === null) {
       return;
     }
@@ -77,9 +87,13 @@ class CompareExpressions {
   }
 
   storeData() {
-    let givenContainer = document.getElementById(ids.domElements.pages.compareExpressions.givenRawInput);
+    let givenContainer = document.getElementById(
+      ids.domElements.pages.compareExpressions.givenRawInput
+    );
     this.givenData = givenContainer.value;
-    let desiredContainer = document.getElementById(ids.domElements.pages.compareExpressions.desiredRawInput);
+    let desiredContainer = document.getElementById(
+      ids.domElements.pages.compareExpressions.desiredRawInput
+    );
     this.desiredData = desiredContainer.value;
   }
 
@@ -93,7 +107,9 @@ class CompareExpressions {
   doCompare() {
     let debug = storage.variables.flagDebug.isTrue();
     submit.submitGET({
-      url: pathnames.addresses.compareExpressions(this.givenData, this.desiredData, debug),
+      url: pathnames.addresses.compareExpressions(
+        this.givenData, this.desiredData, debug
+      ),
       callback: (input) => {
         this.writeResult(input);
       },
@@ -110,12 +126,16 @@ class CompareExpressions {
   ) {
     try {
       let result = miscellaneous.jsonUnescapeParse(input);
-      let resultHTML = answerProcessing.answerProcessing.htmlUserFriendlyResult(result);
+      let resultHTML = answerProcessing.answerProcessing.htmlUserFriendlyResult(
+        result
+      );
       this.resultUserFriendly.innerHTML = resultHTML;
       this.writeCalculatorLink();
       this.resultBoxRaw.textContent = JSON.stringify(result);
       this.resultBoxFormatted.textContent = "";
-      jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);
+      jsonToHtml.writeJSONtoDOMComponent(
+        result, this.resultBoxFormatted
+      );
       equationEditor.typeset(this.resultBoxFormatted);
     } catch (e) {
       this.resultBoxRaw.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;

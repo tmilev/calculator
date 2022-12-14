@@ -607,16 +607,19 @@ a.linkProgressReport {
 }
 
 .tableCalculatorOutput td {
+  height: 100%;
   vertical-align: top;
 }
 
 table.tableCalculatorOutput {
+  height: 100%;
   border-collapse: collapse;
   word-break: break-all;
   box-shadow: var(--box-shadow-tableCalculatorOutputs)
 }
 
 table.tableCalculatorOutputAndResults {
+  height: 100%;
   display: inline-table;
 }
 

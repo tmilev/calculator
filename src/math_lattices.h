@@ -20,7 +20,7 @@ public:
   }
   int getMinimalIntegerScalarSendingVectorIntoLattice(
     const Vector<Rational>& input
-  );
+  ) const;
   void intersectWith(const Lattice& other);
   bool findOnePreimageInLatticeOf(
     const Matrix<Rational>& linearMap,
@@ -192,11 +192,30 @@ public:
     const Vector<Rational>& inputTranslationSubtractedFromArgument,
     QuasiPolynomial& output
   );
-  void substituteFloorOfLinearFunction(
+  // The transformation Q(v) -> Q(v- Floor(<b,v>+c)d).
+  // Here, v are the variables of the quasipolynomial.
+  // b is the scalarProductBy vector.
+  // c is the shift constant.
+  // d is the direction vector.
+  // This kind of substitution is the main tool for elementary
+  // computation with vector partition functions.
+  void substituteShiftByFloorOfLinearFunction(
     const Vector<Rational>& scalarProductBy,
     const Rational& shift,
+    const Vector<Rational>& direction,
     QuasiPolynomial& output
-  );
+  ) const;
+  void substituteShiftByFloorOfLinearFunctionOnce(
+    const Vector<Rational>& scalarProductBy,
+    const Rational& shift,
+    const Vector<Rational>& direction,
+    const Polynomial<Rational>& startingValueOnLattice,
+    const Vector<Rational>& startingLatticeShift,
+    const Vector<Rational>& representativeIntermediate,
+    const Vector<Rational>& representativeRougher,
+    const Lattice& latticeIntermediate,
+    QuasiPolynomial& output
+  ) const;
   bool substitutionFewerVariables(
     const PolynomialSubstitution<Rational>& substitution,
     QuasiPolynomial& output

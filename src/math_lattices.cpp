@@ -142,6 +142,126 @@ void QuasiPolynomial::substitute(
   );
 }
 
+void QuasiPolynomial::substituteShiftByFloorOfLinearFunction(
+  const Vector<Rational>& scalarProductBy,
+  const Rational& shift,
+  const Vector<Rational>& direction,
+  QuasiPolynomial& output
+) const {
+  STACK_TRACE("QuasiPolynomial::substituteShiftByFloorOfLinearFunction");
+  if (
+    this->ambientLatticeReduced.getDimension() != scalarProductBy.size
+  ) {
+    global.fatal
+    << "The lattice of the quasipolynomial must be of full rank. "
+    << global.fatal;
+  }
+  if (!this->ambientLatticeReduced.denominator.isEqualToOne()) {
+    global.fatal
+    << "The starting lattice is not integral. "
+    << "Mathematically, this function requires a natural fine lattice "
+    << "that contains the ambient lattice of the quasipolynomial. "
+    <<
+    "To make the inputs of the function simpler, we restrict it to the case "
+    << "of integral lattice."
+    << global.fatal;
+  }
+  Lattice roughest;
+  Lattice intermediate;
+  int scale =
+  this->ambientLatticeReduced.getMinimalIntegerScalarSendingVectorIntoLattice(
+    direction
+  );
+  this->ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
+    scalarProductBy / scale, roughest
+  );
+  this->ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
+    scalarProductBy, intermediate
+  );
+  Vectors<Rational> quotientByIntermediateRepresentatives;
+  Vectors<Rational> quotientByRoughestRepresentatives;
+  Lattice zN;
+  zN.makeZn(scalarProductBy.size);
+  zN.getAllRepresentatives(roughest, quotientByRoughestRepresentatives);
+  zN.getAllRepresentatives(
+    intermediate, quotientByIntermediateRepresentatives
+  );
+  output.makeZeroOverLattice(roughest);
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    for (
+      Vector<Rational>& representativeIntermediateQuotient :
+      quotientByIntermediateRepresentatives
+    ) {
+      for (
+        Vector<Rational>& representativeRoughestQuotient :
+        quotientByRoughestRepresentatives
+      ) {
+        this->substituteShiftByFloorOfLinearFunctionOnce(
+          scalarProductBy,
+          shift,
+          direction,
+          this->valueOnEachLatticeShift[i],
+          this->latticeShifts[i],
+          representativeIntermediateQuotient,
+          representativeRoughestQuotient,
+          intermediate,
+          output
+        );
+      }
+    }
+  }
+}
+
+void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
+  const Vector<Rational>& scalarProductBy,
+  const Rational& shift,
+  const Vector<Rational>& direction,
+  const Polynomial<Rational>& startingValueOnLattice,
+  const Vector<Rational>& startingLatticeShift,
+  const Vector<Rational>& representativeIntermediate,
+  const Vector<Rational>& representativeRougher,
+  const Lattice& latticeIntermediate,
+  QuasiPolynomial& output
+) const {
+  STACK_TRACE("QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce");
+  if (
+    !latticeIntermediate.isInLattice(
+      representativeIntermediate - representativeRougher
+    )
+  ) {
+    return;
+  }
+  Vector<Rational> mustBeInStartingLattice = representativeRougher;
+  mustBeInStartingLattice -= startingLatticeShift;
+  Rational scalarProductIntermediate =
+  scalarProductBy.scalarEuclidean(representativeIntermediate);
+  Rational floorPart = (scalarProductIntermediate + shift);
+  floorPart.assignFloor();
+  Rational shiftContribution = scalarProductIntermediate - floorPart;
+  mustBeInStartingLattice +=
+  direction *(
+    shiftContribution -
+    scalarProductBy.scalarEuclidean(representativeIntermediate)
+  );
+  if (!this->ambientLatticeReduced.isInLattice(mustBeInStartingLattice)) {
+    return;
+  }
+  PolynomialSubstitution<Rational> substitution;
+  int dimension = scalarProductBy.size;
+  substitution.setSize(dimension);
+  Polynomial<Rational> linearFunction;
+  for (int i = 0; i < dimension; i ++) {
+    Polynomial<Rational>& current = substitution[i];
+    current.makeMonomial(i, 1, 1);
+    linearFunction.makeLinearNoConstant(scalarProductBy);
+    linearFunction -= shiftContribution * direction[i];
+    current -= linearFunction;
+  }
+  Polynomial<Rational> substituted = startingValueOnLattice;
+  substituted.substitute(substitution, 1);
+  output.addLatticeShift(substituted, representativeRougher);
+}
+
 bool QuasiPolynomial::substitutionFewerVariables(
   const PolynomialSubstitution<Rational>& substitution,
   QuasiPolynomial& output
@@ -317,7 +437,7 @@ std::string QuasiPolynomial::toHTML(FormatExpressions* format) const {
     }
     out << "&Lambda;";
     if (i != this->latticeShifts.size - 1) {
-      out << "<hr>";
+      out << "<br>";
     }
   }
   if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {
@@ -489,7 +609,7 @@ void Lattice::intersectWithPreimageOfLattice(
 
 int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(
   const Vector<Rational>& input
-) {
+) const {
   int scale = 1;
   while (true) {
     Vector<Rational> rescaled = input;

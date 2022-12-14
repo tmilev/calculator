@@ -207,14 +207,18 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
   entranceWallRescaled /= direction.scalarEuclidean(entranceWall);
   QuasiPolynomial summand;
   QuasiPolynomial subtracand;
+  global.comments << "<br>DEBUG: toBeSubstituted: " << toBeSubstituted.toHTML();
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-    entranceWallRescaled, 1, direction, summand
-  );
+      entranceWallRescaled, 1, direction, summand);
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
     exitWallRescaled, 1, direction, subtracand
   );
+  global.comments << "<br>DEBUG: output before: " << subtracand.toHTML();
+  global.comments << "<br>DEBUG: add: entrance wall: " << entranceWall << ", output: <br>" << summand.toHTML();
+  global.comments << "<br>DEBUG: subtract: exit wall: " << exitWall << ", direction: " << direction << ", output:<br> " << subtracand.toHTML();
   outputAccumulator += summand;
   outputAccumulator -= subtracand;
+  global.comments << "<br>DEBUG: output after: " << outputAccumulator.toHTML();
 }
 
 void VectorPartitionFunctionElementary::

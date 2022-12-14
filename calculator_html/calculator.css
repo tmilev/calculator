@@ -1655,7 +1655,7 @@ span.abstractSyntaxOneContent:hover {
   text-align: center;
   padding: 5px 0;
   border-radius: 6px;
-   /* Position the tooltip text - see examples below! */
+  /* Position the tooltip text - see examples below! */
   position: absolute;
   top: 40px;
   left: 0px;
@@ -1715,9 +1715,6 @@ button.buttonSolve:hover {
 #divCalculatorMainOutput {
   height: 75%;
   overflow: auto;
-}
-
-#divCalculatorMainOutput {
   vertical-align: top;
 }
 

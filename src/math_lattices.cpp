@@ -142,6 +142,49 @@ void QuasiPolynomial::substitute(
   );
 }
 
+void QuasiPolynomial::assignPolynomialOfFloorOfLinearFunction(
+  const Polynomial<Rational>& univariateInput,
+  const Vector<Rational>& scalarProductBy,
+  const Rational& constantTerm,
+  const Lattice& lattice,
+  const Vector<Rational>& latticeShift
+) {
+  STACK_TRACE("QuasiPolynomial::assignPolynomialOfFloorOfLinearFunction");
+  int dimension = scalarProductBy.size;
+  if (dimension != lattice.getDimension()) {
+    global.fatal
+    << "The lattice must live in space of "
+    << "dimension equal to the number of variables. "
+    << global.fatal;
+  }
+  lattice.subLatticeWithIntegralScalarProducts(
+    scalarProductBy, this->ambientLatticeReduced
+  );
+  this->makeZeroOverLattice(this->ambientLatticeReduced);
+  Lattice zN;
+  zN.makeZn(dimension);
+  Vectors<Rational> representatives;
+  zN.getAllRepresentatives(this->ambientLatticeReduced, representatives);
+  PolynomialSubstitution<Rational> substitution;
+  substitution.setSize(1);
+  Polynomial<Rational> summand;
+  for (Vector<Rational>& representative : representatives) {
+    if (
+      !this->ambientLatticeReduced.isInLattice(representative - latticeShift)
+    ) {
+      continue;
+    }
+    Rational scalarProduct = representative.scalarEuclidean(scalarProductBy);
+    Rational subtracand =
+    scalarProduct -(scalarProduct + constantTerm).floor();
+    substitution[0].makeLinearNoConstant(scalarProductBy);
+    substitution[0] -= subtracand;
+    summand = univariateInput;
+    summand.substitute(substitution, 1);
+    this->addLatticeShift(summand, representative);
+  }
+}
+
 void QuasiPolynomial::substituteShiftByFloorOfLinearFunction(
   const Vector<Rational>& scalarProductBy,
   const Rational& shift,
@@ -479,7 +522,7 @@ void QuasiPolynomial::makeFromPolynomialShiftAndLattice(
   this->valueOnEachLatticeShift[0] = inputPoly;
 }
 
-void QuasiPolynomial::makeZeroOverLattice(Lattice& lattice) {
+void QuasiPolynomial::makeZeroOverLattice(const Lattice& lattice) {
   this->ambientLatticeReduced = lattice;
   this->latticeShifts.size = 0;
   this->valueOnEachLatticeShift.size = 0;

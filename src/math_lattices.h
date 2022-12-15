@@ -173,7 +173,7 @@ public:
     const Lattice& lattice
   );
   void makeZeroLatticeZn(int dimension);
-  void makeZeroOverLattice(Lattice& lattice);
+  void makeZeroOverLattice(const Lattice& lattice);
   bool isEqualToZero() const {
     return this->valueOnEachLatticeShift.size == 0;
   }
@@ -192,11 +192,27 @@ public:
     const Vector<Rational>& inputTranslationSubtractedFromArgument,
     QuasiPolynomial& output
   );
+  // The transformation f(t)  -> i_{delta + Lambda} (v) f(Floor(<b,v>+c))
+  // Here, v are the variables of the quasipolynomial.
+  // f -> univariateInput, must be univariate.
+  // v -> scalarProductBy.
+  // c -> constantTerm.
+  // Lambda -> lattice.
+  // delta -> latticeShift
+  // this will hold the result of the computation.
+  void assignPolynomialOfFloorOfLinearFunction(
+    const Polynomial<Rational>& univariateInput,
+    const Vector<Rational>& scalarProductBy,
+    const Rational& constantTerm,
+    const Lattice& lattice,
+    const Vector<Rational>& latticeShift
+  );
   // The transformation Q(v) -> Q(v- Floor(<b,v>+c)d).
   // Here, v are the variables of the quasipolynomial.
-  // b is the scalarProductBy vector.
-  // c is the shift constant.
-  // d is the direction vector.
+  // b -> scalarProductBy.
+  // c -> shift.
+  // d -> direction.
+  // this -> the original input.
   // This kind of substitution is the main tool for elementary
   // computation with vector partition functions.
   void substituteShiftByFloorOfLinearFunction(

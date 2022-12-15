@@ -207,15 +207,28 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
   entranceWallRescaled /= direction.scalarEuclidean(entranceWall);
   QuasiPolynomial summand;
   QuasiPolynomial subtracand;
-  global.comments << "<br>DEBUG: toBeSubstituted: " << toBeSubstituted.toHTML();
+  global.comments
+  << "<br>DEBUG: toBeSubstituted: "
+  << toBeSubstituted.toHTML();
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-      entranceWallRescaled, 1, direction, summand);
+    entranceWallRescaled, 1, direction, summand
+  );
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
     exitWallRescaled, 1, direction, subtracand
   );
   global.comments << "<br>DEBUG: output before: " << subtracand.toHTML();
-  global.comments << "<br>DEBUG: add: entrance wall: " << entranceWall << ", output: <br>" << summand.toHTML();
-  global.comments << "<br>DEBUG: subtract: exit wall: " << exitWall << ", direction: " << direction << ", output:<br> " << subtracand.toHTML();
+  global.comments
+  << "<br>DEBUG: add: entrance wall: "
+  << entranceWall
+  << ", output: <br>"
+  << summand.toHTML();
+  global.comments
+  << "<br>DEBUG: subtract: exit wall: "
+  << exitWall
+  << ", direction: "
+  << direction
+  << ", output:<br> "
+  << subtracand.toHTML();
   outputAccumulator += summand;
   outputAccumulator -= subtracand;
   global.comments << "<br>DEBUG: output after: " << outputAccumulator.toHTML();
@@ -405,29 +418,23 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
     );
     substitution[i] -= direction[i] * shift;
   }
-  Lattice latticeFromWallDistance;
   Vector<Rational> exitWallRescaled = exitWall;
   exitWallRescaled /= direction.scalarEuclidean(exitWall);
   exitWallRescaled /= scale;
-  Rational rationalShift = shift;
+  Rational rationalShift = - shift;
   rationalShift /= scale;
-  toBeIntegrated.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
-    exitWallRescaled, latticeFromWallDistance
-  );
   QuasiPolynomial contribution;
-  contribution.makeZeroOverLattice(latticeFromWallDistance);
   for (int i = 0; i < toBeIntegrated.latticeShifts.size; i ++) {
     Vector<Rational> latticeShift = toBeIntegrated.latticeShifts[i];
     latticeShift += direction * shift;
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-      toBeIntegrated,
-      rationalShift,
-      substitution,
-      latticeShift,
       toBeIntegrated.valueOnEachLatticeShift[i],
-      contribution,
+      substitution,
       exitWallRescaled,
-      latticeFromWallDistance
+      rationalShift,
+      toBeIntegrated.ambientLatticeReduced,
+      latticeShift,
+      contribution
     );
   }
   outputAccumulator += contribution;
@@ -435,53 +442,40 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
 
 void VectorPartitionFunctionElementary::
 computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-  const QuasiPolynomial& toBeIntegrated,
-  const Rational& rationalShift,
-  PolynomialSubstitution<Rational>& substitution,
-  const Vector<Rational>& latticeShift,
-  const Polynomial<Rational>& valueOnLatticeShift,
-  QuasiPolynomial& outputAccumulator,
-  const Vector<Rational>& exitWallRescaled,
-  Lattice& rougherLattice
+  const Polynomial<Rational>& toBeIntegrated,
+  const PolynomialSubstitution<Rational>& substitution,
+  const Vector<Rational>& scalarProductBy,
+  const Rational& additionalConstantTerm,
+  const Lattice& startingLattice,
+  const Vector<Rational>& startingShift,
+  QuasiPolynomial& output
 ) {
   STACK_TRACE(
     "VectorPartitionFunctionElementary::"
     "computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift"
   );
-  Polynomial<Rational> value = valueOnLatticeShift;
-  int startingDegree = value.totalDegreeInt();
-  value.substitute(substitution, 1);
-  Vectors<Rational> representatives;
-  Lattice zN;
-  zN.makeZn(this->collection.getDimension());
-  zN.getAllRepresentatives(rougherLattice, representatives);
-  Polynomial<Rational> linearFunction;
+  Polynomial<Rational> substituted;
+  substituted = toBeIntegrated;
+  substituted.substitute(substitution, 1);
+  int startingDegree = toBeIntegrated.totalDegreeInt();
+  int dimension = scalarProductBy.size;
   Polynomial<Rational> coefficientInFrontOfPower;
-  Polynomial<Rational> summand;
-  PolynomialSubstitution<Rational> bernoulliSubstitution;
-  bernoulliSubstitution.setSize(1);
-  for (Vector<Rational>& representative : representatives) {
-    if (
-      !toBeIntegrated.ambientLatticeReduced.isInLattice(
-        representative - latticeShift
-      )
-    ) {
-      continue;
-    }
-    bernoulliSubstitution[0].makeLinearNoConstant(exitWallRescaled);
-    bernoulliSubstitution[0] -= (
-      exitWallRescaled.scalarEuclidean(representative) + rationalShift
-    ).fractionalValue();
-    int dimension = this->collection.getDimension();
-    for (int i = 0; i <= startingDegree; i ++) {
-      value.getCoefficientPolynomialOfXPowerK(
-        dimension, i, coefficientInFrontOfPower
-      );
-      this->bernoulliSumComputer.getBernoulliSumStartingAtZero(i, summand);
-      summand.substitute(bernoulliSubstitution, 1);
-      summand *= coefficientInFrontOfPower;
-      outputAccumulator.addLatticeShift(summand, representative);
-    }
+  Polynomial<Rational> bernoulliSum;
+  QuasiPolynomial bernoulliSumSubstituted;
+  output.makeZeroOverLattice(startingLattice);
+  for (int i = 0; i <= startingDegree; i ++) {
+    substituted.getCoefficientPolynomialOfXPowerK(
+      dimension, i, coefficientInFrontOfPower
+    );
+    this->bernoulliSumComputer.getBernoulliSumStartingAtZero(i, bernoulliSum);
+    bernoulliSumSubstituted.assignPolynomialOfFloorOfLinearFunction(
+      bernoulliSum,
+      scalarProductBy,
+      additionalConstantTerm,
+      startingLattice,
+      startingShift
+    );
+    output += bernoulliSumSubstituted;
   }
 }
 

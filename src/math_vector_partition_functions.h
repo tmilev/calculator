@@ -927,14 +927,13 @@ public:
     const Vector<Rational>& exitWall
   );
   void computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
-    const QuasiPolynomial& toBeIntegrated,
-    const Rational& rationalShift,
-    PolynomialSubstitution<Rational>& substitution,
-    const Vector<Rational>& latticeShift,
-    const Polynomial<Rational>& valueOnLatticeShift,
-    QuasiPolynomial& outputAccumulator,
-    const Vector<Rational>& exitWallRescaled,
-    Lattice& rougherLattice
+    const Polynomial<Rational>& toBeIntegrated,
+    const PolynomialSubstitution<Rational>& substitution,
+    const Vector<Rational>& scalarProductBy,
+    const Rational& additionalConstantTerm,
+    const Lattice& startingLattice,
+    const Vector<Rational>& startingShift,
+    QuasiPolynomial& output
   );
 };
 

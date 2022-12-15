@@ -1902,6 +1902,12 @@ void Rational::assign(const Rational& r) {
   this->extended->denominator = r.extended->denominator;
 }
 
+Rational Rational::floor() const {
+  Rational result = *this;
+  result.assignFloor();
+  return result;
+}
+
 Rational Rational::fractionalValue() const {
   Rational result = *this;
   result.assignFractionalValue();

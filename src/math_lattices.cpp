@@ -1183,9 +1183,7 @@ void Lattice::subLatticeScalarProductTimesDirectionInLattice(
   global.comments << "<br>DEBUG: Scale: " << scale;
   output.basisRationalForm *= scale;
   output.makeFromMatrix(output.basisRationalForm);
-  global.comments
-  << "<br>DEBUG: Sublattice rescaled: "
-  << output.toString();
+  global.comments << "<br>DEBUG: Sublattice rescaled: " << output.toString();
   output.intersectWith(*this);
 }
 

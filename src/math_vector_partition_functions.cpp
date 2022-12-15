@@ -299,27 +299,32 @@ void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall(
     normalRescaled / modulus, rougherLattice
   );
   Vectors<Rational> representatives;
+  Vectors<Rational> intermediateRepresentatives;
   zN.getAllRepresentatives(rougherLattice, representatives);
+  zN.getAllRepresentatives(intermediateLattice, intermediateRepresentatives);
   output.makeZeroOverLattice(rougherLattice);
   global.comments
   << "<br>DEBUG: representatives: "
   << representatives
   << "<br>Intermediate lattice: "
   << intermediateLattice.toString();
-  for (Vector<Rational>& representative : representatives) {
-    if (!intermediateLattice.isInLattice(representative)) {
-      continue;
-    }
-    for (int i = 0; i < pivotValue.latticeShifts.size; i ++) {
-      this->sumZeroQuasiPolynomialFromWallOnce(
-        pivotValue.latticeShifts[i],
-        pivotValue.ambientLatticeReduced,
-        pivotValue.valueOnEachLatticeShift[i],
-        representative,
-        direction,
-        normalRescaled,
-        output
-      );
+  for (Vector<Rational>& intermediate : intermediateRepresentatives) {
+    for (Vector<Rational>& representative : representatives) {
+      if (!intermediateLattice.isInLattice(intermediate - representative)) {
+        continue;
+      }
+      global.comments << "<br>DEBUG: in lattice!: " << representative;
+      for (int i = 0; i < pivotValue.latticeShifts.size; i ++) {
+        this->sumZeroQuasiPolynomialFromWallOnce(
+          pivotValue.latticeShifts[i],
+          pivotValue.ambientLatticeReduced,
+          pivotValue.valueOnEachLatticeShift[i],
+          representative,
+          direction,
+          normalRescaled,
+          output
+        );
+      }
     }
   }
 }

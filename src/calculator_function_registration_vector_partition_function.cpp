@@ -171,6 +171,27 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     innerStandard
   );
   this->addOperationHandler(
+    "SubLatticeScalarProductTimesDirectionInLattice",
+    CalculatorFunctionsVectorPartitionFunction::
+    subLatticeScalarProductTimesDirectionInLattice,
+    "",
+    "We are given a lattices L and T, "
+    "a vector v and d. We are looking for the lattice X "
+    "given by: X= {a\\in L: &lt; a, v&gt; d \\in T }. "
+    "This function is a useful tool when computing with vector "
+    "partition functions. "
+    "First argument: L. Second argument: T. Both must be lattices. "
+    "Third argument: v. Fourth argument: d. "
+    "of vectors w in L for which the scalar product of w and v is integer. ",
+    "L = Lattice((2,0), (0,3));\n"
+    "T=Lattice((7,0),(0,9));\n"
+    "SubLatticeScalarProductTimesDirectionInLattice(L, T, (1,2), (2,3));",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::subLatticeScalarProductTimesDirectionInLattice",
+    "SubLatticeScalarProductTimesDirectionInLattice",
+    innerStandard
+  );
+  this->addOperationHandler(
     "SubLatticeWithIntegralScalarProducts",
     CalculatorFunctionsVectorPartitionFunction::
     subLatticeWithIntegralScalarProducts,

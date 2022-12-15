@@ -134,10 +134,8 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   if (directionIndex == this->collection.getDimension() - 1) {
     return this->computeStartingQuasipolynomial(cone);
   }
-  global.comments << "<hr>DEBUG: computing cone id: " << cone.id;
   QuasiPolynomial output;
   this->sumQuasiPolynomialOverCone(cone, direction, exitWalls[0], output);
-  global.comments << "<br>DEBUG: base cone contrib: " << output.toHTML();
   List<int> exitCones;
   this->getExitConesAfterStart(cone, direction, exitCones);
   List<Wall> exitWallsNeighbor;
@@ -207,31 +205,29 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
   entranceWallRescaled /= direction.scalarEuclidean(entranceWall);
   QuasiPolynomial summand;
   QuasiPolynomial subtracand;
-  global.comments
-  << "<br>DEBUG: toBeSubstituted: "
-  << toBeSubstituted.toHTML();
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
     entranceWallRescaled, 1, direction, summand
   );
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
     exitWallRescaled, 1, direction, subtracand
   );
-  global.comments << "<br>DEBUG: output before: " << subtracand.toHTML();
+  global.comments << "<br>DEBUG: tobesubbed:<br>" << toBeSubstituted.toHTML();
+  global.comments
+  << "<br>DEBUG: output before:<br>"
+  << outputAccumulator.toHTML();
   global.comments
   << "<br>DEBUG: add: entrance wall: "
   << entranceWall
-  << ", output: <br>"
+  << ": <br>"
   << summand.toHTML();
   global.comments
   << "<br>DEBUG: subtract: exit wall: "
   << exitWall
-  << ", direction: "
-  << direction
-  << ", output:<br> "
+  << ":<br> "
   << subtracand.toHTML();
   outputAccumulator += summand;
   outputAccumulator -= subtracand;
-  global.comments << "<br>DEBUG: output after: " << outputAccumulator.toHTML();
+  global.comments << "<br>DEBUG: output: " << outputAccumulator.toHTML();
 }
 
 void VectorPartitionFunctionElementary::

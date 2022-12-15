@@ -209,22 +209,18 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunction(
     << "of integral lattice."
     << global.fatal;
   }
+  Lattice zN;
   Lattice roughest;
   Lattice intermediate;
-  int scale =
-  this->ambientLatticeReduced.getMinimalIntegerScalarSendingVectorIntoLattice(
-    direction
-  );
-  this->ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
-    scalarProductBy / scale, roughest
-  );
+  zN.makeZn(scalarProductBy.size);
   this->ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
     scalarProductBy, intermediate
   );
+  zN.subLatticeScalarProductTimesDirectionInLattice(
+    scalarProductBy, direction, this->ambientLatticeReduced, roughest
+  );
   Vectors<Rational> quotientByIntermediateRepresentatives;
   Vectors<Rational> quotientByRoughestRepresentatives;
-  Lattice zN;
-  zN.makeZn(scalarProductBy.size);
   zN.getAllRepresentatives(roughest, quotientByRoughestRepresentatives);
   zN.getAllRepresentatives(
     intermediate, quotientByIntermediateRepresentatives
@@ -1165,6 +1161,32 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
     currentMovement = affineHyperplane;
     *currentMovement.lastObject() = shiftedConstant;
   }
+}
+
+void Lattice::subLatticeScalarProductTimesDirectionInLattice(
+  const Vector<Rational>& scalarProductWith,
+  const Vector<Rational>& direction,
+  const Lattice& target,
+  Lattice& output
+) const {
+  Vectors<Rational> basis;
+  basis.assignMatrixRows(target.basisRationalForm);
+  Vector<Rational> coordinates;
+  direction.getCoordinatesInBasis(basis, coordinates);
+  global.comments << "<br>DEBUG: coordinates: " << coordinates.toString();
+  Rational scale;
+  scale = Rational::scaleNoSignChange(coordinates);
+  this->subLatticeWithIntegralScalarProducts(scalarProductWith, output);
+  global.comments
+  << "<br>DEBUG: Sublattice with integral scalar products: "
+  << output.toString();
+  global.comments << "<br>DEBUG: Scale: " << scale;
+  output.basisRationalForm *= scale;
+  output.makeFromMatrix(output.basisRationalForm);
+  global.comments
+  << "<br>DEBUG: Sublattice rescaled: "
+  << output.toString();
+  output.intersectWith(*this);
 }
 
 void Lattice::subLatticeWithIntegralScalarProducts(

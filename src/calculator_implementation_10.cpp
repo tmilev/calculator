@@ -239,6 +239,57 @@ subLatticeWithIntegralScalarProducts(
   return output.assignValue(calculator, result);
 }
 
+bool CalculatorFunctionsVectorPartitionFunction::
+subLatticeScalarProductTimesDirectionInLattice(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "subLatticeWithIntegralScalarProducts"
+  );
+  if (input.size() != 5) {
+    return
+    calculator
+    << "subLatticeWithIntegralScalarProducts expects 4 inputs: "
+    << "lattice, lattice, vector and vector.";
+  }
+  Vector<Rational> scalarProductWith;
+  Vector<Rational> direction;
+  Lattice lattice;
+  Lattice target;
+  if (!input[1].isOfType(&lattice)) {
+    return calculator << "Couldn't get lattice from: " << input[1] << ".";
+  }
+  if (!input[2].isOfType(&target)) {
+    return calculator << "Couldn't get lattice from: " << input[2] << ".";
+  }
+  if (!calculator.getVector(input[3], scalarProductWith)) {
+    return calculator << "Couldn't get vector from: " << input[3] << ".";
+  }
+  if (!calculator.getVector(input[4], direction)) {
+    return calculator << "Couldn't get vector from: " << input[4] << ".";
+  }
+  int dimension = scalarProductWith.size;
+  if (
+    !lattice.basisRationalForm.isSquare() ||
+    !target.basisRationalForm.isSquare()
+  ) {
+    return calculator << "Need full rank lattices. ";
+  }
+  if (
+    direction.size != dimension ||
+    lattice.getDimension() != dimension ||
+    target.getDimension() != dimension
+  ) {
+    return calculator << "Dimensions don't match.";
+  }
+  Lattice result;
+  lattice.subLatticeScalarProductTimesDirectionInLattice(
+    scalarProductWith, direction, target, result
+  );
+  return output.assignValue(calculator, result);
+}
+
 bool CalculatorFunctionsVectorPartitionFunction::dualLattice(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

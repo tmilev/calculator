@@ -101,6 +101,20 @@ public:
     const Vector<Rational>& mustHaveIntegerScalarProductWith,
     Lattice& output
   ) const;
+  // Returns the sub-lattice of vectors:
+  // { v \in L | <b,v>d \in M}
+  // where
+  // v is the bound variable that enumerates the set,
+  // L -> this,
+  // b -> scalarProductWith,
+  // d -> direction
+  // M -> target
+  void subLatticeScalarProductTimesDirectionInLattice(
+    const Vector<Rational>& scalarProductWith,
+    const Vector<Rational>& direction,
+    const Lattice& target,
+    Lattice& output
+  ) const;
   void reduce();
   void intersectWithLinearSubspaceSpannedBy(
     const Vectors<Rational>& subspaceBasis

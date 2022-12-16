@@ -862,7 +862,7 @@ class MathNodeFactory {
 
   /**
    * @return {MathNodeAbsoluteValue!|MathNodeAngleBrackets!|
-   * MathNodeCurlyBrace!|MathNodeParenthesis!|MathNodeSquareBrackets!}
+   * MathNodeCurlyBrace!|MathNodeParenthesis!|MathNodeSquareBrackets!|MathNodeFloor}
    */
   delimiterMark(
       /** @type {EquationEditor!} */
@@ -897,6 +897,10 @@ class MathNodeFactory {
           result.appendChild(
               new MathNode(equationEditor, knownTypes.verticalLineRightMargin));
         }
+        break;
+      case 'lfloor':
+      case 'rfloor':
+        result = new MathNodeFloor(equationEditor, left);
         break;
       case '[':
       case ']':
@@ -1559,6 +1563,8 @@ class LaTeXConstants {
       'mathbb': '\\mathbb',
       'langle': '\\langle',
       'rangle': '\\rangle',
+      'lfloor': '\\lfloor',
+      'rfloor': '\\rfloor',
       '{': '\\{',
       'binom': '\\binom',
       'stackrel': '\\stackrel',
@@ -1780,6 +1786,8 @@ class LaTeXConstants {
     this.leftDelimiters = {
       '\\left.': '',
       '\\langle': '\u27E8',
+      '\\lfloor': 'lfloor',
+      '\\lceil': '\u2308',
       '(': '(',
       '[': '[',
       '|': '|',
@@ -1793,6 +1801,8 @@ class LaTeXConstants {
     this.rightDelimiters = {
       '\\right.': '',
       '\\rangle': '\u27E9',
+      '\\rfloor': 'rfloor',
+      '\\rceil': '\u2309',
       ')': ')',
       '|': '|',
       ']': ']',
@@ -1802,6 +1812,8 @@ class LaTeXConstants {
     this.leftRightDelimiterPair = {
       '\\langle': '\\rangle',
       '\u27E8': '\u27E9',  // langle, rangle
+      '\\lfloor': '\\rfloor',
+      '\\lceil': '\\rceil',
       '[': ']',
       '(': ')',
       '{': '}',
@@ -1811,6 +1823,8 @@ class LaTeXConstants {
     this.rightLeftDelimiterPair = {
       '\\rangle': '\\langle',
       '\u27E9': '\u27E8',  // rangle, langle
+      '\\rfloor': '\\lfloor',
+      '\\rceil': '\\lceil',
       ']': '[',
       ')': '(',
       '}': '{',
@@ -1863,6 +1877,10 @@ class LaTeXConstants {
     this.recognizedCommandsKeyInput = {
       '\\langle': true,
       '\\rangle': true,
+      '\\lfloor': true,
+      '\\rfloor': true,
+      '\\lceil': true,
+      '\\rceil': true,
       '\\matrix': true,
       '\\pmatrix': true,
       '\\vmatrix': true,
@@ -10082,7 +10100,7 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
   }
 }
 
-class MathNodeSquareBrackets extends MathNodeDelimiterMark {
+class MathNodeSquareBracketsLike extends MathNodeDelimiterMark {
   constructor(
       /** @type {EquationEditor!} */
       equationEditor,
@@ -10093,7 +10111,7 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
     this.left = left;
   }
 
-  verticallyStretch(
+  verticallyStretchBase(
       /** @type {number} */
       heightToEnclose,
       /** @type {number} */
@@ -10111,11 +10129,6 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
       this.boundingBox.left = shift;
     } else {
       this.boundingBox.left = -shift;
-    }
-    if (this.element !== null) {
-      this.element.style.borderTop = `solid`;
-      this.element.style.borderBottom = `solid`;
-      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
     }
   }
 
@@ -10177,6 +10190,128 @@ class MathNodeSquareBrackets extends MathNodeDelimiterMark {
     canvas.lineTo(c.xMiddle, c.yLow);
     canvas.lineTo(c.xMiddle, c.yHigh);
     canvas.lineTo(c.xStart, c.yHigh);
+    canvas.stroke();
+  }
+}
+
+class MathNodeSquareBrackets extends MathNodeSquareBracketsLike {
+  constructor(
+    /** @type {EquationEditor!} */
+    equationEditor,
+    /** @type {boolean} */
+    left,
+  ) {
+    super(equationEditor, left);
+  }
+
+  verticallyStretch(
+    /** @type {number} */
+    heightToEnclose,
+    /** @type {number} */
+    fractionLineHeightEnclosed,
+  ) {
+    this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
+    if (this.element !== null) {
+      this.element.style.borderTop = `solid`;
+      this.element.style.borderBottom = `solid`;
+      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
+    }
+  }
+
+  toScalableVectorGraphics(
+    /** @type {SVGSVGElement!} */
+    container,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = new ScalableVectorGraphicsPath();
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
+    result.setPathString(command);
+    result.setLineWidth(this.parenthesisThickness);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor(color);
+    result.setFillColor('none');
+    container.appendChild(result.element);
+  }
+
+  drawOnCanvas(
+    /** @type {CanvasRenderingContext2D!} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.moveTo(c.xStart, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yHigh);
+    canvas.lineTo(c.xStart, c.yHigh);
+    canvas.stroke();
+  }
+}
+
+class MathNodeFloor extends MathNodeSquareBracketsLike {
+  constructor(
+    /** @type {EquationEditor!} */
+    equationEditor,
+    /** @type {boolean} */
+    left,
+  ) {
+    super(equationEditor, left);
+  }
+
+  verticallyStretch(
+    /** @type {number} */
+    heightToEnclose,
+    /** @type {number} */
+    fractionLineHeightEnclosed,
+  ) {
+    this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
+    if (this.element !== null) {
+      this.element.style.borderBottom = `solid`;
+      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
+    }
+  }
+
+  toScalableVectorGraphics(
+    /** @type {SVGSVGElement!} */
+    container,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = new ScalableVectorGraphicsPath();
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${c.yHigh}`;  // move to point.
+    result.setPathString(command);
+    result.setLineWidth(this.parenthesisThickness);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor(color);
+    result.setFillColor('none');
+    container.appendChild(result.element);
+  }
+
+  drawOnCanvas(
+    /** @type {CanvasRenderingContext2D!} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.moveTo(c.xStart, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yHigh);
     canvas.stroke();
   }
 }

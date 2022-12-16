@@ -226,6 +226,12 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunction(
     intermediate, quotientByIntermediateRepresentatives
   );
   output.makeZeroOverLattice(roughest);
+  global.comments << "DEBUG: compute: \\(Q(\\alpha-\\lfloor\\langle"
+  << scalarProductBy<< ", \\alpha \\rangle +"
+  << shift
+  << "\\rfloor"
+  << direction <<
+  ")\\)";
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     for (
       Vector<Rational>& representativeIntermediateQuotient :
@@ -298,10 +304,7 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
     current -= linearFunction;
   }
   Polynomial<Rational> substituted = startingValueOnLattice;
-  global.comments << "<br>DEBUG: Substitution: " << substitution.toString();
-  global.comments << "<br>DEBUG: into poly: " << substituted.toString();
   substituted.substitute(substitution, 1);
-  global.comments << "<br>DEBUG: to get: " << substituted.toString();
   output.addLatticeShift(substituted, representativeRougher);
 }
 
@@ -1177,17 +1180,11 @@ void Lattice::subLatticeScalarProductTimesDirectionInLattice(
   basis.assignMatrixRows(target.basisRationalForm);
   Vector<Rational> coordinates;
   direction.getCoordinatesInBasis(basis, coordinates);
-  global.comments << "<br>DEBUG: coordinates: " << coordinates.toString();
   Rational scale;
   scale = Rational::scaleNoSignChange(coordinates);
   this->subLatticeWithIntegralScalarProducts(scalarProductWith, output);
-  global.comments
-  << "<br>DEBUG: Sublattice with integral scalar products: "
-  << output.toString();
-  global.comments << "<br>DEBUG: Scale: " << scale;
   output.basisRationalForm *= scale;
   output.makeFromMatrix(output.basisRationalForm);
-  global.comments << "<br>DEBUG: Sublattice rescaled: " << output.toString();
   output.intersectWith(*this);
 }
 

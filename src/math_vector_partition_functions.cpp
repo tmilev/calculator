@@ -206,11 +206,9 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
   QuasiPolynomial summand;
   QuasiPolynomial subtracand;
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-    entranceWallRescaled, 1, direction, summand
-  );
+      entranceWallRescaled, 1, direction, summand);
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-    exitWallRescaled, 1, direction, subtracand
-  );
+      exitWallRescaled, 1, direction, subtracand);
   global.comments << "<br>DEBUG: tobesubbed:<br>" << toBeSubstituted.toHTML();
   global.comments
   << "<br>DEBUG: output before:<br>"

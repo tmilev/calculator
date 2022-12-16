@@ -293,11 +293,15 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
     Polynomial<Rational>& current = substitution[i];
     current.makeMonomial(i, 1, 1);
     linearFunction.makeLinearNoConstant(scalarProductBy);
-    linearFunction -= shiftContribution * direction[i];
+    linearFunction -= shiftContribution;
+    linearFunction *= direction[i];
     current -= linearFunction;
   }
   Polynomial<Rational> substituted = startingValueOnLattice;
+  global.comments << "<br>DEBUG: Substitution: " << substitution.toString();
+  global.comments << "<br>DEBUG: into poly: " << substituted.toString();
   substituted.substitute(substitution, 1);
+  global.comments << "<br>DEBUG: to get: " << substituted.toString();
   output.addLatticeShift(substituted, representativeRougher);
 }
 

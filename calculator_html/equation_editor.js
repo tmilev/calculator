@@ -201,6 +201,7 @@ const defaultFractionScale = 0.9;
 /**
  * @type {{
  * root:MathNodeType!,
+ * baseline: MathNodeType!,
  * atom:MathNodeType!,
  * formInput:MathNodeType!,
  * atomImmutable:MathNodeType!,
@@ -258,6 +259,12 @@ const knownTypes = {
     'margin': '2px',
     'cursor': 'text',
     'minWidth': '30px',
+    'overflow':'visible',
+  }),
+  baseline: new MathNodeType({
+    'type': 'baseline',
+//    'overflow': 'visible',
+    
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
@@ -631,6 +638,7 @@ class MathNodeFactory {
   ) {
     const result = new MathNodeRoot(equationEditor);
     result.appendChild(this.horizontalMath(equationEditor, null));
+    result.appendChild(new MathNodeBaselineAligner(equationEditor));
     return result;
   }
 
@@ -4219,7 +4227,7 @@ class EquationEditor {
         !this.options.editable) {
       this.container.style.verticalAlign = 'middle';
     } else {
-      this.container.style.verticalAlign = 'sub';
+      this.container.style.verticalAlign = 'baseline';
     }
   }
 
@@ -4994,10 +5002,9 @@ class MathNode {
     }
     if (this.type.type === knownTypes.formInput.type) {
       this.element =
-          /** @type {HTMLElement!}*/ (document.createElement('input'));
+          /** @type {HTMLElement!} */ (document.createElement('input'));
     } else {
-      this.element = /** @type {HTMLElement!}*/ (document.createElement('div'));
-      // this.element = document.createTextNode("");
+      this.element = /** @type {HTMLElement!} */ (document.createElement('div'));
     }
     if ((this.type.type === knownTypes.eventCatcher.type ||
          this.type.type === knownTypes.atom.type) &&
@@ -9371,6 +9378,20 @@ class MathNodeRoot extends MathNode {
   ) {
     let boundingBox = this.prepareBoundingBox(boundingBoxFromParent);
     this.children[0].drawOnCanvas(canvas, boundingBox);
+  }
+}
+
+/** 
+ * An invisible box appended at the end of the root node. 
+ * Used for baseline alignment. 
+ */
+class MathNodeBaselineAligner extends MathNode { 
+  constructor(
+    /** @type {EquationEditor!} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.baseline);
+    this.initialContent = '\u200A';
   }
 }
 

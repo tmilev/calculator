@@ -1342,12 +1342,11 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
     global.fatal << "Dimension mismatch. " << global.fatal;
   }
   int dimension = this->getDimension();
-  LargeIntegerUnsigned oldDen = this->denominator;
+  LargeIntegerUnsigned oldDenominator = this->denominator;
   LargeIntegerUnsigned::leastCommonMultiple(
-    other.denominator, oldDen, this->denominator
-  );
+      other.denominator, oldDenominator, this->denominator);
   LargeIntegerUnsigned scaleThis, scaleOther;
-  scaleThis = this->denominator / oldDen;
+  scaleThis = this->denominator / oldDenominator;
   scaleOther = this->denominator / other.denominator;
   int oldNumRows = this->basis.numberOfRows;
   LargeInteger scale;

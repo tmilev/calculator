@@ -833,6 +833,15 @@ Polynomial<Coefficient> Polynomial<Coefficient>::operator*(
 }
 
 template <class Coefficient>
+Polynomial<Coefficient> Polynomial<Coefficient>::operator*(
+  const Polynomial<Coefficient>& other
+) const {
+  Polynomial<Coefficient> result = *this;
+  result *= other;
+  return result;
+}
+
+template <class Coefficient>
 Polynomial<Coefficient> Polynomial<Coefficient>::operator%(
   const Polynomial<Coefficient>& other
 ) {

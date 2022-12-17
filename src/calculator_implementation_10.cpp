@@ -38,6 +38,7 @@ vectorPartitionFunctionFormulaElementary(
   );
   result.initializeVectors(vectors);
   result.elementaryMethod.flagInitialized = true;
+  result.elementaryMethod.comments.flagGenerateComments = true;
   result.elementaryMethod.compute();
   return output.assignValue(calculator, result);
 }

@@ -33,7 +33,23 @@ std::string VectorPartitionFunctionElementary::toHTML() const {
   }
   std::stringstream out;
   out << "Vector partition function of " << this->originalVectors;
-  out << this->collection.toHTMLGraphicsOnly(false);
+  out << "<br>Total " << this->comments.totalSteps << " computational steps. ";
+  if (
+    this->comments.flagGenerateComments &&
+    this->comments.totalSteps > this->comments.maximumStepsToRecord
+  ) {
+    out
+    << "<br>Only the first"
+    << this->comments.maximumStepsToRecord
+    << " are shown. ";
+  }
+  out << StringRoutines::join(this->comments.comments, "<br>");
+  if (
+    !this->comments.flagGenerateComments ||
+    this->comments.totalSteps > this->comments.maximumStepsToRecord
+  ) {
+    out << this->collection.toHTMLGraphicsOnly(false);
+  }
   for (Cone& cone : this->collection.refinedCones.values) {
     out << "<hr>";
     out << "Cone: " << cone.id << ".<br>";
@@ -46,10 +62,15 @@ void VectorPartitionFunctionElementary::compute() {
   STACK_TRACE("VectorPartitionFunctionElementary::compute");
   ProgressReport report;
   this->collection.initializeFromDirections(this->originalVectors);
+  this->comments.initialize(this);
   for (int i = 0; i < this->originalVectors.size; i ++) {
     this->collection.markAllConesNonRefined(i);
     this->collection.refineByOneDirection(i, &report);
+    if (i >= this->collection.getDimension() - 1) {
+      this->comments.addGraphicsIfAllowed();
+    }
     this->computeQuasiPolynomials(i);
+    this->comments.comments.addOnTop("<hr><hr>");
   }
 }
 
@@ -66,6 +87,9 @@ void VectorPartitionFunctionElementary::computeQuasiPolynomials(
 void VectorPartitionFunctionElementary::computeFirstQuasiPolynomial(
   int directionIndex
 ) {
+  STACK_TRACE(
+    "VectorPartitionFunctionElementary::computeFirstQuasiPolynomial"
+  );
   for (int i = 0; i < this->collection.nonRefinedCones.size(); i ++) {
     Cone& cone = this->collection.nonRefinedCones.values[i];
     if (this->computeOneQuasiPolynomial(cone, directionIndex)) {
@@ -99,6 +123,13 @@ bool VectorPartitionFunctionElementary::computeStartingQuasipolynomial(
   if (!baseCone.isInCone(cone.internalPoint())) {
     output.ambientLatticeReduced.makeZn(this->collection.getDimension());
     cone.payload.setPolynomial(output);
+    if (this->comments.shouldComment()) {
+      this->comments.comments.addOnTop(((std::string) "Zero quasipolynomial: "
+        ) +
+        "the cone is outside of the span of " +
+        firstDirections.toString()
+      );
+    }
     return true;
   }
   output.ambientLatticeReduced.makeFromRoots(firstDirections);
@@ -108,6 +139,11 @@ bool VectorPartitionFunctionElementary::computeStartingQuasipolynomial(
   zeroVector.makeZero(this->collection.getDimension());
   output.addLatticeShift(one, zeroVector);
   cone.payload.setPolynomial(output);
+  if (this->comments.shouldComment()) {
+    std::stringstream report;
+    report << "Initial quasipolynomial value equals 1. " << output.toHTML();
+    this->comments.comments.addOnTop(report.str());
+  }
   return true;
 }
 
@@ -130,6 +166,12 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   cone.payload.visited = true;
   if (directionIndex < this->collection.getDimension() - 1) {
     return true;
+  }
+  this->comments.totalSteps ++;
+  if (this->comments.shouldComment()) {
+    std::stringstream commentStream;
+    commentStream << "Cone id: " << cone.id << ".";
+    this->comments.comments.addOnTop(commentStream.str());
   }
   if (directionIndex == this->collection.getDimension() - 1) {
     return this->computeStartingQuasipolynomial(cone);
@@ -206,26 +248,21 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
   QuasiPolynomial summand;
   QuasiPolynomial subtracand;
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-      entranceWallRescaled, 1, direction, summand);
+    entranceWallRescaled,
+    1,
+    direction,
+    summand,
+    this->comments.commentsPointer()
+  );
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-      exitWallRescaled, 1, direction, subtracand);
-  global.comments << "<br>DEBUG: tobesubbed:<br>" << toBeSubstituted.toHTML();
-  global.comments
-  << "<br>DEBUG: output before:<br>"
-  << outputAccumulator.toHTML();
-  global.comments
-  << "<br>DEBUG: add: entrance wall: "
-  << entranceWall
-  << ": <br>"
-  << summand.toHTML();
-  global.comments
-  << "<br>DEBUG: subtract: exit wall: "
-  << exitWall
-  << ":<br> "
-  << subtracand.toHTML();
+    exitWallRescaled,
+    1,
+    direction,
+    subtracand,
+    this->comments.commentsPointer()
+  );
   outputAccumulator += summand;
   outputAccumulator -= subtracand;
-  global.comments << "<br>DEBUG: output: " << outputAccumulator.toHTML();
 }
 
 void VectorPartitionFunctionElementary::
@@ -239,7 +276,7 @@ computeSingleNeighborSingleShiftContribution(
 ) {
   STACK_TRACE(
     "VectorPartitionFunctionElementary::"
-    "addSingleNeighborSingleShiftContribution"
+    "computeSingleNeighborSingleShiftContribution"
   );
   Lattice rougherLattice;
   ambientLattice.subLatticeWithIntegralScalarProducts(
@@ -281,82 +318,32 @@ void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall(
     "VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall"
   );
   QuasiPolynomial pivotValue = neighbor.payload.previousPolynomial;
-  int modulus =
-  pivotValue.ambientLatticeReduced.
-  getMinimalIntegerScalarSendingVectorIntoLattice(direction);
-  Lattice zN;
-  zN.makeZn(this->collection.getDimension());
-  Lattice rougherLattice;
-  Lattice intermediateLattice;
   Vector<Rational> normalRescaled = exitWall.normal;
   normalRescaled /= direction.scalarEuclidean(normalRescaled);
-  pivotValue.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
-    normalRescaled, intermediateLattice
+  pivotValue.substituteShiftByFloorOfLinearFunction(
+    normalRescaled,
+    0,
+    direction,
+    output,
+    this->comments.commentsPointer()
   );
-  pivotValue.ambientLatticeReduced.subLatticeWithIntegralScalarProducts(
-    normalRescaled / modulus, rougherLattice
-  );
-  Vectors<Rational> representatives;
-  Vectors<Rational> intermediateRepresentatives;
-  zN.getAllRepresentatives(rougherLattice, representatives);
-  zN.getAllRepresentatives(intermediateLattice, intermediateRepresentatives);
-  output.makeZeroOverLattice(rougherLattice);
-  global.comments
-  << "<br>DEBUG: representatives: "
-  << representatives
-  << "<br>Intermediate lattice: "
-  << intermediateLattice.toString();
-  for (Vector<Rational>& intermediate : intermediateRepresentatives) {
-    for (Vector<Rational>& representative : representatives) {
-      if (!intermediateLattice.isInLattice(intermediate - representative)) {
-        continue;
-      }
-      global.comments << "<br>DEBUG: in lattice!: " << representative;
-      for (int i = 0; i < pivotValue.latticeShifts.size; i ++) {
-        this->sumZeroQuasiPolynomialFromWallOnce(
-          pivotValue.latticeShifts[i],
-          pivotValue.ambientLatticeReduced,
-          pivotValue.valueOnEachLatticeShift[i],
-          representative,
-          direction,
-          normalRescaled,
-          output
-        );
-      }
-    }
-  }
-}
-
-void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWallOnce(
-  const Vector<Rational>& neighborShift,
-  const Lattice& neighborLattice,
-  const Polynomial<Rational>& pivotValue,
-  const Vector<Rational>& representative,
-  const Vector<Rational>& direction,
-  const Vector<Rational>& normalRescaled,
-  QuasiPolynomial& output
-) {
-  STACK_TRACE(
-    "VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWallOnce"
-  );
-  Vector<Rational> sum = representative;
-  sum -= neighborShift;
-  sum -= direction * representative.scalarEuclidean(normalRescaled);
-  if (!neighborLattice.isInLattice(sum)) {
-    return;
-  }
-  PolynomialSubstitution<Rational> substitution;
   int dimension = this->collection.getDimension();
-  substitution.setSize(dimension);
-  Polynomial<Rational> linearFunction;
-  linearFunction.makeLinearNoConstant(normalRescaled);
-  for (int i = 0; i < dimension; i ++) {
-    substitution[i].makeMonomial(i, 1, 1);
-    substitution[i] -= linearFunction * direction[i];
+  QuasiPolynomial indicatorIntegral;
+  Lattice zN;
+  zN.makeZn(dimension);
+  Lattice integral;
+  zN.subLatticeWithIntegralScalarProducts(normalRescaled, integral);
+  indicatorIntegral.makeZeroOverLattice(integral);
+  Polynomial<Rational> one;
+  one.makeOne();
+  Vector<Rational> zeroVector;
+  zeroVector.makeZero(dimension);
+  indicatorIntegral.addLatticeShift(one, zeroVector);
+  output *= indicatorIntegral;
+  if (this->comments.shouldComment()) {
+    this->comments.comments.addOnTop("Induced starting value: ");
+    this->comments.comments.addOnTop(output.toHTML());
   }
-  Polynomial<Rational> substituted = pivotValue;
-  substituted.substitute(substitution, 1);
-  output.addLatticeShift(substituted, representative);
 }
 
 void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
@@ -367,7 +354,7 @@ void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
 ) {
   STACK_TRACE(
     "VectorPartitionFunctionElementary::"
-    "accumulateQuasiPolynomialExitWallWithoutNeighbor"
+    "sumQuasiPolynomialOverCone"
   );
   QuasiPolynomial toBeIntegrated = cone.payload.getPolynomial();
   if (toBeIntegrated.isEqualToZero()) {
@@ -476,6 +463,49 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
     );
     output += bernoulliSumSubstituted;
   }
+}
+
+void VectorPartitionFunctionElementary::Comments::initialize(
+  VectorPartitionFunctionElementary* inputOwner
+) {
+  this->owner = inputOwner;
+}
+
+void VectorPartitionFunctionElementary::Comments::addGraphicsIfAllowed() {
+  int largestId = this->owner->collection.largestConeId();
+  if (largestId == this->largestIdWithGeneratedGraphics) {
+    return;
+  }
+  this->largestIdWithGeneratedGraphics = largestId;
+  this->comments.addOnTop(
+    this->owner->collection.toHTMLGraphicsOnly(false)
+  );
+}
+
+List<std::string>* VectorPartitionFunctionElementary::Comments::commentsPointer
+() {
+  if (!this->shouldComment()) {
+    return nullptr;
+  }
+  return &this->comments;
+}
+
+bool VectorPartitionFunctionElementary::Comments::shouldComment() const {
+  if (!this->flagGenerateComments) {
+    return false;
+  }
+  if (this->totalSteps >= this->maximumStepsToRecord) {
+    return false;
+  }
+  return true;
+}
+
+VectorPartitionFunctionElementary::Comments::Comments() {
+  this->owner = nullptr;
+  this->maximumStepsToRecord = 10;
+  this->totalSteps = 0;
+  this->flagGenerateComments = false;
+  this->largestIdWithGeneratedGraphics = - 1;
 }
 
 void BernoulliSumComputer::getBernoulliSumStartingAtOne(

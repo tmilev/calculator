@@ -52,7 +52,9 @@ public:
   static std::string convertByteToHex(unsigned char byte);
   static bool isLatinLetterSequence(const std::string& input);
   static bool isLatinLetterOrDigitSequence(const std::string& input);
-  static std::string join(const List<std::string>& input);
+  static std::string join(
+    const List<std::string>& input, const std::string& separator = ""
+  );
   class Conversions {
   public:
     // Converts an arbitrary string (byte sequence) to a list of unicode code

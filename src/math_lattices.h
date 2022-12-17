@@ -233,7 +233,8 @@ public:
     const Vector<Rational>& scalarProductBy,
     const Rational& shift,
     const Vector<Rational>& direction,
-    QuasiPolynomial& output
+    QuasiPolynomial& output,
+    List<std::string>* comments
   ) const;
   void substituteShiftByFloorOfLinearFunctionOnce(
     const Vector<Rational>& scalarProductBy,
@@ -241,10 +242,12 @@ public:
     const Vector<Rational>& direction,
     const Polynomial<Rational>& startingValueOnLattice,
     const Vector<Rational>& startingLatticeShift,
-    const Vector<Rational>& representativeIntermediate,
-    const Vector<Rational>& representativeRougher,
-    const Lattice& latticeIntermediate,
-    QuasiPolynomial& output
+    const Vector<Rational>& representativeScalarProductInZ,
+    const Lattice& scalarProductInZ,
+    const Vector<Rational>& representativeScalarProductTimesDirectionInLambda,
+    const Lattice& scalarProductTimesDirectionInLambda,
+    QuasiPolynomial& outputAccumulator,
+    List<std::string>* comments
   ) const;
   bool substitutionFewerVariables(
     const PolynomialSubstitution<Rational>& substitution,
@@ -257,6 +260,8 @@ public:
     this->operator=(other);
   }
   void operator*=(const Rational& scalar);
+  void operator*=(const Polynomial<Rational>& other);
+  void operator*=(const QuasiPolynomial& other);
   void operator=(const QuasiPolynomial& other) {
     this->ambientLatticeReduced = other.ambientLatticeReduced;
     this->latticeShifts = other.latticeShifts;

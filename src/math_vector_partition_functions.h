@@ -443,6 +443,8 @@ public:
   bool checkConsistencyFull() const;
   bool checkConsistencyOneCollection(const MapList<int, Cone>& collection)
   const;
+  // The largest cone id in the collection.
+  int largestConeId();
 };
 
 // This class holds a partial fraction denominator
@@ -868,10 +870,32 @@ public:
 
 class VectorPartitionFunctionElementary {
 public:
+  class Comments {
+  public:
+    // A flag to dictate whether comments should be generated.
+    bool flagGenerateComments;
+    int totalSteps;
+    // Do not generate comments once this constant is exceeded.
+    int maximumStepsToRecord;
+    int largestIdWithGeneratedGraphics;
+    VectorPartitionFunctionElementary* owner;
+    List<std::string> comments;
+    void initialize(VectorPartitionFunctionElementary* inputOwner);
+    void addGraphicsIfAllowed();
+    bool shouldComment() const;
+    List<std::string>* commentsPointer();
+    Comments();
+  };
+
   bool flagInitialized;
+  // The largest cone id for which we have generated graphcs.
+  // We store this in order to not repeat graphics prinouts that look the same.
   List<Vector<Rational> > originalVectors;
   ConeCollection collection;
   BernoulliSumComputer bernoulliSumComputer;
+  // Contains a list of computation comments. Once the number of cones
+  // becomes too large, no more comments will be logged.
+  VectorPartitionFunctionElementary::Comments comments;
   VectorPartitionFunctionElementary();
   std::string toHTML() const;
   void compute();
@@ -886,15 +910,6 @@ public:
     const Vector<Rational>& direction,
     const Wall& exitWall,
     Cone& neighbor,
-    QuasiPolynomial& output
-  );
-  void sumZeroQuasiPolynomialFromWallOnce(
-    const Vector<Rational>& neighborShift,
-    const Lattice& neighborLattice,
-    const Polynomial<Rational>& pivotValue,
-    const Vector<Rational>& representative,
-    const Vector<Rational>& direction,
-    const Vector<Rational>& normalRescaled,
     QuasiPolynomial& output
   );
   void sumQuasiPolynomialOverCone(

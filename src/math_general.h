@@ -3388,6 +3388,8 @@ public:
   void operator*=(const MonomialPolynomial& other);
   void operator*=(const Polynomial<Coefficient>& other);
   Polynomial<Coefficient> operator*(const Coefficient& other) const;
+  Polynomial<Coefficient> operator*(const Polynomial<Coefficient>& other)
+  const;
   Polynomial<Coefficient> operator%(const Polynomial<Coefficient>& other);
   void operator/=(const Polynomial<Coefficient>& other);
   void operator/=(int other);

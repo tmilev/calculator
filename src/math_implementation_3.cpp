@@ -891,10 +891,15 @@ std::string StringRoutines::Conversions::escapeJavascriptLike(
   return out.str();
 }
 
-std::string StringRoutines::join(const List<std::string>& input) {
+std::string StringRoutines::join(
+  const List<std::string>& input, const std::string& separator
+) {
   std::stringstream out;
-  for (const std::string& current : input) {
-    out << current;
+  for (int i = 0; i < input.size; i ++) {
+    out << input[i];
+    if (i != input.size - 1) {
+      out << separator;
+    }
   }
   return out.str();
 }
@@ -15492,6 +15497,20 @@ std::string ConeCollection::toHTMLWithoutGraphics() const {
     out << this->conesWithIrregularWalls.values[i].toHTML() << "<br>";
   }
   return out.str();
+}
+
+int ConeCollection::largestConeId() {
+  int result = - 1;
+  for (int i : this->refinedCones.keys) {
+    result = MathRoutines::maximum(i, result);
+  }
+  for (int i : this->nonRefinedCones.keys) {
+    result = MathRoutines::maximum(i, result);
+  }
+  for (int i : this->conesWithIrregularWalls.keys) {
+    result = MathRoutines::maximum(i, result);
+  }
+  return result;
 }
 
 bool ConeCollection::findMaxLFOverConeProjective(

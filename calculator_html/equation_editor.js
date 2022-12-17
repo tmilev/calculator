@@ -874,6 +874,16 @@ class MathNodeFactory {
       /** @type {boolean} */
       implied,
   ) {
+    switch (content) {
+      case '\u27E9':
+        // utf16 version of \\rangle
+        content = '\\rangle';
+        break;
+      case '\u27E8':
+        // utf16 version of \\langle
+        content = '\\langle';
+        break;
+    }
     let result = null;
     switch (content) {
       case '|':
@@ -881,10 +891,6 @@ class MathNodeFactory {
         break;
       case '\\rangle':
       case '\\langle':
-      // utf16 version of \\rangle
-      case '\u27E9':
-      // utf16 version of \\langle
-      case '\u27E8':
         result = new MathNodeAngleBrackets(equationEditor, left);
         if (left) {
           result.appendChild(
@@ -898,8 +904,12 @@ class MathNodeFactory {
               new MathNode(equationEditor, knownTypes.verticalLineRightMargin));
         }
         break;
-      case 'lfloor':
-      case 'rfloor':
+      case '\\lceil':
+      case '\\rceil':
+        result = new MathNodeCeiling(equationEditor, left);
+        break;
+      case '\\lfloor':
+      case '\\rfloor':
         result = new MathNodeFloor(equationEditor, left);
         break;
       case '[':
@@ -1565,6 +1575,8 @@ class LaTeXConstants {
       'rangle': '\\rangle',
       'lfloor': '\\lfloor',
       'rfloor': '\\rfloor',
+      'lceil': '\\lceil',
+      'rceil': '\\rceil',
       '{': '\\{',
       'binom': '\\binom',
       'stackrel': '\\stackrel',
@@ -1785,9 +1797,9 @@ class LaTeXConstants {
     /** @type {Object.<string, string>!} */
     this.leftDelimiters = {
       '\\left.': '',
-      '\\langle': '\u27E8',
-      '\\lfloor': 'lfloor',
-      '\\lceil': '\u2308',
+      '\\langle': '\\langle',
+      '\\lfloor': '\\lfloor',
+      '\\lceil': '\\lceil',
       '(': '(',
       '[': '[',
       '|': '|',
@@ -1800,9 +1812,9 @@ class LaTeXConstants {
     /** @type {Object.<string, string>!} */
     this.rightDelimiters = {
       '\\right.': '',
-      '\\rangle': '\u27E9',
-      '\\rfloor': 'rfloor',
-      '\\rceil': '\u2309',
+      '\\rangle': '\\rangle',
+      '\\rfloor': '\\rfloor',
+      '\\rceil': '\\rceil',
       ')': ')',
       '|': '|',
       ']': ']',
@@ -1811,7 +1823,6 @@ class LaTeXConstants {
     /** @type {Object.<string, string>!} */
     this.leftRightDelimiterPair = {
       '\\langle': '\\rangle',
-      '\u27E8': '\u27E9',  // langle, rangle
       '\\lfloor': '\\rfloor',
       '\\lceil': '\\rceil',
       '[': ']',
@@ -1822,7 +1833,6 @@ class LaTeXConstants {
     /** @type {Object.<string, string>!} */
     this.rightLeftDelimiterPair = {
       '\\rangle': '\\langle',
-      '\u27E9': '\u27E8',  // rangle, langle
       '\\rfloor': '\\lfloor',
       '\\rceil': '\\lceil',
       ']': '[',
@@ -10312,6 +10322,66 @@ class MathNodeFloor extends MathNodeSquareBracketsLike {
     canvas.moveTo(c.xStart, c.yLow);
     canvas.lineTo(c.xMiddle, c.yLow);
     canvas.lineTo(c.xMiddle, c.yHigh);
+    canvas.stroke();
+  }
+}
+
+class MathNodeCeiling extends MathNodeSquareBracketsLike {
+  constructor(
+    /** @type {EquationEditor!} */
+    equationEditor,
+    /** @type {boolean} */
+    left,
+  ) {
+    super(equationEditor, left);
+  }
+
+  verticallyStretch(
+    /** @type {number} */
+    heightToEnclose,
+    /** @type {number} */
+    fractionLineHeightEnclosed,
+  ) {
+    this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
+    if (this.element !== null) {
+      this.element.style.borderTop = `solid`;
+      this.element.style.borderWidth = `${this.parenthesisThickness}px`;
+    }
+  }
+
+  toScalableVectorGraphics(
+    /** @type {SVGSVGElement!} */
+    container,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = new ScalableVectorGraphicsPath();
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    let command = `M ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
+    result.setPathString(command);
+    result.setLineWidth(this.parenthesisThickness);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor(color);
+    result.setFillColor('none');
+    container.appendChild(result.element);
+  }
+
+  drawOnCanvas(
+    /** @type {CanvasRenderingContext2D!} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let c = this.computeBracketCoordinates(boundingBoxFromParent);
+    canvas.beginPath();
+    canvas.moveTo(c.xMiddle, c.yLow);
+    canvas.lineTo(c.xMiddle, c.yHigh);
+    canvas.lineTo(c.xStart, c.yHigh);
     canvas.stroke();
   }
 }

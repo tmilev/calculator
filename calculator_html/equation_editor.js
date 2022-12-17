@@ -201,7 +201,6 @@ const defaultFractionScale = 0.9;
 /**
  * @type {{
  * root:MathNodeType!,
- * baseline: MathNodeType!,
  * atom:MathNodeType!,
  * formInput:MathNodeType!,
  * atomImmutable:MathNodeType!,
@@ -260,11 +259,6 @@ const knownTypes = {
     'cursor': 'text',
     'minWidth': '30px',
     'overflow':'visible',
-  }),
-  baseline: new MathNodeType({
-    'type': 'baseline',
-//    'overflow': 'visible',
-    
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
@@ -638,7 +632,6 @@ class MathNodeFactory {
   ) {
     const result = new MathNodeRoot(equationEditor);
     result.appendChild(this.horizontalMath(equationEditor, null));
-    result.appendChild(new MathNodeBaselineAligner(equationEditor));
     return result;
   }
 
@@ -4227,7 +4220,7 @@ class EquationEditor {
         !this.options.editable) {
       this.container.style.verticalAlign = 'middle';
     } else {
-      this.container.style.verticalAlign = 'baseline';
+      this.container.style.verticalAlign = 'sub';
     }
   }
 
@@ -4875,9 +4868,9 @@ class BoundingBox {
     /** @type {number} */
     // In a_b the following measures the width of b.
     this.subScriptWidth = 0;
-    /** @type {string}*/
+    /** @type {string} */
     this.transform = '';
-    /** @type {string}*/
+    /** @type {string} */
     this.transformOrigin = '';
     /** @type {number} */
     this.heightBeforeTransform = -1;
@@ -5385,7 +5378,13 @@ class MathNode {
         this.type.type === knownTypes.atomImmutable.type ||
         this.type.type === knownTypes.sqrtSign.type);
   }
-
+  /** @return {boolean} */
+  isAtomOrAtomImmutable() {
+    return (
+      this.type.type === knownTypes.atom.type ||
+      this.type.type === knownTypes.atomImmutable.type);
+  }
+  
   /** @return {boolean} */
   isDelimiter() {
     return (
@@ -5546,6 +5545,27 @@ class MathNode {
     brace.boundingBox.top = superscript.boundingBox.height;
     base.boundingBox.top =
         superscript.boundingBox.height + brace.boundingBox.height;
+  }
+
+  /** @return {BoundingBox?} */
+  findBaselineBox(
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    let box = new BoundingBox();
+    box.top = boundingBoxFromParent.top + this.boundingBox.top;
+    box.height = this.boundingBox.height;
+    if (this.isAtomOrAtomImmutable() && this.boundingBox.width !== 0 && this.contentIfAtomic() !== '') {
+      box.width = this.boundingBox.width;
+      return box;
+    }
+    for (let i = 0; i < this.children.length; i++) {
+      let result = this.children[i].findBaselineBox(box);
+      if (result !== null) {
+        return result;
+      }
+    }
+    return null;
   }
 
   /**
@@ -9260,6 +9280,9 @@ class MathNodeHorizontalMath extends MathNode {
     }
     this.boundingBox.height = this.boundingBox.lineHeight * (row + 1);
     this.boundingBox.width = finalWidth;
+    if (hasMoreThanOneLine) {
+      this.boundingBox.needsMiddleAlignment = true;
+    }
     if (!hasMoreThanOneLine) {
       this.boundingBox.lineHeight = -1;
     }
@@ -9325,8 +9348,11 @@ class MathNodeRoot extends MathNode {
   computeDimensions() {
     this.computeDimensionsStandard();
     this.boundingBox.lineHeight = this.children[0].boundingBox.lineHeight;
-    if (!this.boundingBox.needsMiddleAlignment ||
-        this.equationEditor.options.editable) {
+    if (this.equationEditor.options.editable) {
+      return;
+    }
+    if (!this.boundingBox.needsMiddleAlignment) {
+      this.computeDimensionsBaselineAlignment();
       return;
     }
     let lineHeight = this.boundingBox.height;
@@ -9344,6 +9370,19 @@ class MathNodeRoot extends MathNode {
       this.boundingBox.height +=
           this.boundingBox.fractionLineHeight * 2 - lineHeight;
     }
+  }
+
+  /** 
+   * Computes the dimensions of the bounding box
+   * when the expression does not need middle alignment
+   * (no fraction lines).
+   */
+  computeDimensionsBaselineAlignment() {
+    let box = this.findBaselineBox(new BoundingBox());
+    if (box === null) {
+      return;
+    }
+    this.boundingBox.top = this.boundingBox.height - (box.top + box.height);
   }
 
   /** @return {BoundingBox!} */
@@ -9378,20 +9417,6 @@ class MathNodeRoot extends MathNode {
   ) {
     let boundingBox = this.prepareBoundingBox(boundingBoxFromParent);
     this.children[0].drawOnCanvas(canvas, boundingBox);
-  }
-}
-
-/** 
- * An invisible box appended at the end of the root node. 
- * Used for baseline alignment. 
- */
-class MathNodeBaselineAligner extends MathNode { 
-  constructor(
-    /** @type {EquationEditor!} */
-    equationEditor,
-  ) {
-    super(equationEditor, knownTypes.baseline);
-    this.initialContent = '\u200A';
   }
 }
 

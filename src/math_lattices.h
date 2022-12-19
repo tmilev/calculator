@@ -89,14 +89,6 @@ public:
   bool substitutionHomogeneous(
     const PolynomialSubstitution<Rational>& substitution
   );
-  // The following function follows the same convention
-  // as the preceding except that we allow n < m. However,
-  // in order to assure that the preimage of the lattice is a lattice,
-  // we provide as input an ambient lattice
-  // in the new vector space of dimension m.
-  bool substitutionHomogeneous(
-    const Matrix<Rational>& substitution, Lattice& resultIsSubsetOf
-  );
   void subLatticeWithIntegralScalarProducts(
     const Vector<Rational>& mustHaveIntegerScalarProductWith,
     Lattice& output

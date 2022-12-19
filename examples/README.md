@@ -4752,6 +4752,15 @@ l = Lattice((1,2,3), (2,2,2), (3,3,9));
 ```
 Generates a built-in lattice from the given input vectors. 
 
+*SubLatticeScalarProductTimesDirectionInLattice* [SubLatticeScalarProductTimesDirectionInLattice] {CalculatorFunctionsVectorPartitionFunction::subLatticeScalarProductTimesDirectionInLattice}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22L%20%3d%20Lattice%28%282%2c0%29%2c%20%280%2c3%29%29%3b%5cnT%3dLattice%28%287%2c0%29%2c%280%2c9%29%29%3b%5cnSubLatticeScalarProductTimesDirectionInLattice%28L%2c%20T%2c%20%281%2c2%29%2c%20%282%2c3%29%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+L = Lattice((2,0), (0,3));
+T=Lattice((7,0),(0,9));
+SubLatticeScalarProductTimesDirectionInLattice(L, T, (1,2), (2,3));
+```
+We are given a lattices L and T, a vector v and d. We are looking for the lattice X given by: X= {a\in L: &lt; a, v&gt; d \in T }. This function is a useful tool when computing with vector partition functions. First argument: L. Second argument: T. Both must be lattices. Third argument: v. Fourth argument: d. of vectors w in L for which the scalar product of w and v is integer. 
+
 *SubLatticeWithIntegralScalarProducts* [SubLatticeWithIntegralScalarProducts] {CalculatorFunctionsVectorPartitionFunction::subLatticeWithIntegralScalarProducts}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22l%20%3d%20Lattice%28%281%2c2%2c3%29%2c%20%282%2c2%2c2%29%2c%20%283%2c3%2c9%29%29%3b%5cnSubLatticeWithIntegralScalarProducts%28%281%2f2%2c1%2f3%2c1%2f7%29%2c%20l%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
@@ -4759,6 +4768,14 @@ l = Lattice((1,2,3), (2,2,2), (3,3,9));
 SubLatticeWithIntegralScalarProducts((1/2,1/3,1/7), l);
 ```
 Given a lattice L and a vector v, generates the sub-lattice W of vectors w in L for which the scalar product of w and v is integer. 
+
+*DualLattice* [DualLattice] {CalculatorFunctionsVectorPartitionFunction::subLatticeWithIntegralScalarProducts}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22l%20%3d%20Lattice%28%281%2c2%2c3%29%2c%20%282%2c2%2c2%29%2c%20%283%2c3%2c9%29%29%3b%5cnDualLattice%28l%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+l = Lattice((1,2,3), (2,2,2), (3,3,9));
+DualLattice(l)
+```
+Computes the dual lattice of a given lattice. The dual of the lattice is the lattice of vectors with integral scalar products with the given vectors. 
 
 *SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::semisimpleLieAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)

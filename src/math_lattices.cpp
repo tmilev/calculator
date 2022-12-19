@@ -96,7 +96,7 @@ void QuasiPolynomial::substitute(
   const Vector<Rational>& inputTranslationSubtractedFromArgument,
   QuasiPolynomial& output
 ) {
-  STACK_TRACE("QuasiPolynomial::substitution");
+  STACK_TRACE("QuasiPolynomial::substitute");
   // format of the translation. If the starting quasipolynomial was P(y_1, ...,
   // y_n),
   // and the translation has coordinates (t_1, ..., t_n),
@@ -344,14 +344,15 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
     << "+"
     << outputAccumulator.ambientLatticeReduced.toString()
     << "\\)"
-    << " with lattice shift: "
-    << startingLatticeShift
+    << " with lattice shift: \\("
+    << startingLatticeShift.toString()
+    << "\\)"
     << "<br>";
     substitutionStream
     << "\\("
     << substitution.toString()
     << startingValueOnLattice.toString()
-    << "\\mapsto"
+    << "\\mapsto "
     << substituted.toString()
     << "\\)";
     comments->addOnTop(substitutionStream.str());
@@ -1116,27 +1117,6 @@ void Lattice::intersectWithLinearSubspaceGivenByNormals(
   }
 }
 
-bool Lattice::substitutionHomogeneous(
-  const Matrix<Rational>& substitution, Lattice& resultIsSubsetOf
-) {
-  (void) substitution;
-  (void) resultIsSubsetOf;
-  global.fatal << "Not implemented yet. " << global.fatal;
-  /*Vectors<Rational> preimageBasis;
-  preimageBasis.assignMatrixRows(this->basisRationalForm);
-  Matrix<Rational>  subModifiable, currentBasisVector, oneSolution;
-  for (int i = 0; i <preimageBasis.size; i ++) {
-    subModifiable = sub;
-    currentBasisVector.assignVectorColumn(preimageBasis[i]);
-    if (subModifiable.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
-      subModifiable, currentBasisVector, oneSolution)) {
-      subModifiable = sub;
-      subModifiable.fin
-    }
-  }*/
-  return false;
-}
-
 bool Lattice::operator==(const Lattice& other) const {
   return this->basisRationalForm == other.basisRationalForm;
 }
@@ -1219,7 +1199,8 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   Rational constOnRightHandSide = - *affineHyperplane.lastObject();
   Vectors<Rational> basis;
   basis.assignMatrixRows(this->basisRationalForm);
-  Lattice hyperplaneLatticeNoShift, directionLattice;
+  Lattice hyperplaneLatticeNoShift;
+  Lattice directionLattice;
   // , normalProjectionLattice, trueProjectionLattice;
   Vectors<Rational> roots;
   // Vector<Rational> root;
@@ -1273,7 +1254,6 @@ void Lattice::subLatticeScalarProductTimesDirectionInLattice(
   this->subLatticeWithIntegralScalarProducts(scalarProductWith, output);
   output.basisRationalForm *= scale;
   output.makeFromMatrix(output.basisRationalForm);
-  output.intersectWith(*this);
 }
 
 void Lattice::subLatticeWithIntegralScalarProducts(
@@ -1383,7 +1363,7 @@ void Lattice::makeFromRoots(const List<Vector<Rational> >& input) {
 
 std::string Lattice::toString() const {
   std::stringstream out;
-  out << "L=<" << this->toStringParentheses() << ">";
+  out << "\\langle" << this->toStringParentheses() << "\\rangle";
   return out.str();
 }
 

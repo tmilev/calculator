@@ -2128,20 +2128,20 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
   ) {
     return false;
   }
-  int N = this->numeratorShort * otherNumerator;
-  int D = this->denominatorShort * otherDenominator;
-  if (N == 0) {
+  int n = this->numeratorShort * otherNumerator;
+  int d = this->denominatorShort * otherDenominator;
+  if (n == 0) {
     this->numeratorShort = 0;
     this->denominatorShort = 1;
   } else {
-    int tempGCD = 0;
-    if (N > 0) {
-      tempGCD = Rational::greatestCommonDivisor(N, D);
+    int divisor = 0;
+    if (n > 0) {
+      divisor = Rational::greatestCommonDivisor(n, d);
     } else {
-      tempGCD = Rational::greatestCommonDivisor(- N, D);
+      divisor = Rational::greatestCommonDivisor(- n, d);
     }
-    this->numeratorShort = N / static_cast<signed int>(tempGCD);
-    this->denominatorShort = D / tempGCD;
+    this->numeratorShort = n / static_cast<signed int>(divisor);
+    this->denominatorShort = d / divisor;
   }
   MacroIncrementCounter(Rational::totalSmallMultiplications);
   return true;
@@ -2151,20 +2151,24 @@ Rational Rational::scaleNoSignChange(List<Rational>& inputOutput) {
   if (inputOutput.size == 0) {
     return 1;
   }
-  LargeIntegerUnsigned denominatorLCM = inputOutput[0].getDenominator();
-  LargeIntegerUnsigned numeratorGCD = inputOutput[0].getNumerator().value;
+  LargeIntegerUnsigned denominatorLeastCommonMultiple =
+  inputOutput[0].getDenominator();
+  LargeIntegerUnsigned numeratorGreatestCommonDivisor =
+  inputOutput[0].getNumerator().value;
   for (int i = 1; i < inputOutput.size; i ++) {
     LargeIntegerUnsigned::leastCommonMultiple(
-      denominatorLCM, inputOutput[i].getDenominator(), denominatorLCM
+      denominatorLeastCommonMultiple,
+      inputOutput[i].getDenominator(),
+      denominatorLeastCommonMultiple
     );
     LargeIntegerUnsigned::greatestCommonDivisor(
-      numeratorGCD,
+      numeratorGreatestCommonDivisor,
       inputOutput[i].getNumerator().value,
-      numeratorGCD
+      numeratorGreatestCommonDivisor
     );
   }
-  Rational result = denominatorLCM;
-  result /= numeratorGCD;
+  Rational result = denominatorLeastCommonMultiple;
+  result /= numeratorGreatestCommonDivisor;
   for (int i = 0; i < inputOutput.size; i ++) {
     inputOutput[i] *= result;
   }

@@ -1324,7 +1324,8 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   int dimension = this->getDimension();
   LargeIntegerUnsigned oldDenominator = this->denominator;
   LargeIntegerUnsigned::leastCommonMultiple(
-      other.denominator, oldDenominator, this->denominator);
+    other.denominator, oldDenominator, this->denominator
+  );
   LargeIntegerUnsigned scaleThis, scaleOther;
   scaleThis = this->denominator / oldDenominator;
   scaleOther = this->denominator / other.denominator;

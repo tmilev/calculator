@@ -339,6 +339,12 @@ void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall(
   Vector<Rational> zeroVector;
   zeroVector.makeZero(dimension);
   indicatorIntegral.addLatticeShift(one, zeroVector);
+  if (this->comments.shouldComment()) {
+    this->comments.comments.addOnTop("About to multiply: ");
+    this->comments.comments.addOnTop(output.toHTML());
+    this->comments.comments.addOnTop("by the indicator: ");
+    this->comments.comments.addOnTop(indicatorIntegral.toHTML());
+  }
   output *= indicatorIntegral;
   if (this->comments.shouldComment()) {
     this->comments.comments.addOnTop("Induced starting value: ");

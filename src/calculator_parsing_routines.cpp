@@ -3646,7 +3646,7 @@ bool CalculatorParser::applyOneRule() {
   if (thirdToLastS == "Integer" && secondToLastS == "." && lastS == "Integer") {
     return this->replaceIntegerDotIntegerByE();
   }
-  // there is an ambiguity on how should function application be associated
+  // There is an ambiguity on how should function application be associated.
   // Which is better: x{}y{}z = x{} (y{}z), or x{}y{}z = (x{}y){}z ?
   // In our implementation, we choose x{}y{}z= x{} (y{}z). Although this is
   // slightly harder to implement,
@@ -4268,6 +4268,13 @@ bool CalculatorParser::applyOneRule() {
     secondToLastS == "Expression"
   ) {
     return this->replaceXXYXBySequenceYX(this->conExpression());
+  }
+  if (
+    thirdToLastS == "Sequence" &&
+    secondToLastS == "," && (lastS == ")" || lastS == "}" || lastS == "]")
+  ) {
+    this->lastRuleName = "replace xy by y";
+    return this->replaceXYByY();
   }
   if (
     fifthToLastS == "Expression" &&

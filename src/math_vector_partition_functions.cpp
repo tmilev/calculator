@@ -308,14 +308,14 @@ computeSingleNeighborSingleShiftContribution(
   }
 }
 
-void VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall(
+void VectorPartitionFunctionElementary::induceQuasiPolynomialFromWall(
   const Vector<Rational>& direction,
   const Wall& exitWall,
   Cone& neighbor,
   QuasiPolynomial& output
 ) {
   STACK_TRACE(
-    "VectorPartitionFunctionElementary::sumZeroQuasiPolynomialFromWall"
+    "VectorPartitionFunctionElementary::induceQuasiPolynomialFromWall"
   );
   QuasiPolynomial pivotValue = neighbor.payload.previousPolynomial;
   Vector<Rational> normalRescaled = exitWall.normal;
@@ -371,7 +371,7 @@ void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
     }
     Cone & neighbor =
     this->collection.getConeByIdNonConstNoFail(exitWall.neighbors[0]);
-    this->sumZeroQuasiPolynomialFromWall(
+    this->induceQuasiPolynomialFromWall(
       direction, exitWall, neighbor, output
     );
     return;

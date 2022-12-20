@@ -906,7 +906,7 @@ public:
   void getExitConesAfterStart(
     Cone& start, Vector<Rational>& direction, List<int>& output
   );
-  void sumZeroQuasiPolynomialFromWall(
+  void induceQuasiPolynomialFromWall(
     const Vector<Rational>& direction,
     const Wall& exitWall,
     Cone& neighbor,

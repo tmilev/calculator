@@ -287,9 +287,7 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
   List<std::string>* comments
 ) const {
   STACK_TRACE("QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce");
-  Vector<Rational> shiftVector =
-  representativeScalarProductTimesDirectionInLambda;
-  shiftVector -= startingLatticeShift;
+  Vector<Rational> shiftVector = startingLatticeShift;
   Rational scalarProductIntermediate =
   scalarProductBy.scalarEuclidean(representativeScalarProductInZ);
   Rational floorPart = (scalarProductIntermediate + shift);
@@ -297,10 +295,10 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
   Rational shiftContribution = scalarProductIntermediate - floorPart;
   shiftVector +=
   direction *(
-    shiftContribution -
     scalarProductBy.scalarEuclidean(
       representativeScalarProductTimesDirectionInLambda
-    )
+    ) -
+    shiftContribution
   );
   QuasiPolynomial indicator1;
   QuasiPolynomial indicator2;

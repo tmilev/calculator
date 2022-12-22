@@ -14318,7 +14318,7 @@ void ConeCollection::refineByDirections(ProgressReport* report) {
     this->markAllConesNonRefined(i);
     this->refineByOneDirection(i, report);
   }
-  if (this->flagUseSpannedSlices) {
+  if (this->flagAmalgamateChambers) {
     // We want only spanned slices,
     // By our strategy for splitting cones,
     // each pair of neighbors are
@@ -15151,6 +15151,7 @@ ConeCollection::ConeCollection() {
   this->conesCreated = 0;
   this->flagRecordSlicingHistory = true;
   this->flagUseSpannedSlices = false;
+  this->flagAmalgamateChambers = false;
 }
 
 bool ConeCollection::checkConsistencyFullWithoutDebugMessage() const {

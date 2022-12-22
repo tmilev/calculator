@@ -232,6 +232,7 @@ public:
   // Governs whether slicing with planes that are not spanned
   // by n-1 directions is allowed.
   bool flagUseSpannedSlices;
+  bool flagAmalgamateChambers;
   HashedList<Vector<Rational> > splittingNormals;
   Vectors<Rational> slicingDirections;
   Cone convexHull;

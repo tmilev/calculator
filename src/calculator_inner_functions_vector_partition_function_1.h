@@ -15,19 +15,27 @@ public:
   static bool applyVectorPartitionFunctionFormula(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool coneDecomposition(
-    Calculator& calculator,
+  static bool coneDecomposition(Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool flagUseSpannedSlices,
     bool flagIncludeHistory
-  );
+  , bool flagAmalgamateChambers);
+  static bool getVectorsForConeDecomposition(Calculator &calculator, const Expression& input, Vectors<Rational>& output);
   static bool coneDecompositionSpannedSlicesNoHistory(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return
     CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
-      calculator, input, output, true, false
+      calculator, input, output, true, false, true
+    );
+  }
+  static bool coneDecompositionSpannedSlicesNoHistoryNoAmalgamation(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
+      calculator, input, output, true, false, false
     );
   }
   static bool coneDecompositionSpannedSlicesWithHistory(
@@ -35,7 +43,7 @@ public:
   ) {
     return
     CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
-      calculator, input, output, true, true
+      calculator, input, output, true, true, true
     );
   }
   static bool coneDecompositionArbitrarySlices(
@@ -43,7 +51,7 @@ public:
   ) {
     return
     CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
-      calculator, input, output, false, false
+      calculator, input, output, false, false, false
     );
   }
   // Returns the Bernoulli sum / Faulhaber formula: the sum \sum_{i=0}^n i^p.

@@ -216,13 +216,13 @@ void VectorPartitionFunctionElementary::getExitConesAfterStart(
       global.fatal << "Expected single exit wall. " << global.fatal;
     }
     const Wall& wall = exitWalls[0];
-    if (wall.neighbors.size > 1) {
+    if (wall.neighborS.size > 1) {
       global.fatal << "Multiple neighbors along exit wall. " << global.fatal;
     }
-    if (wall.neighbors.size == 0) {
+    if (wall.neighborS.size == 0) {
       return;
     }
-    next = &this->collection.getConeByIdNonConstNoFail(wall.neighbors[0]);
+    next = &this->collection.getConeByIdNonConstNoFail(wall.neighborS[0]);
     if (next != nullptr) {
       output.addOnTop(next->id);
     }
@@ -364,13 +364,13 @@ void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
   );
   QuasiPolynomial toBeIntegrated = cone.payload.getPolynomial();
   if (toBeIntegrated.isEqualToZero()) {
-    if (exitWall.neighbors.size == 0) {
+    if (exitWall.neighborS.size == 0) {
       global.fatal
       << "Not expected: no neighbors along wall. "
       << global.fatal;
     }
     Cone & neighbor =
-    this->collection.getConeByIdNonConstNoFail(exitWall.neighbors[0]);
+    this->collection.getConeByIdNonConstNoFail(exitWall.neighborS[0]);
     this->induceQuasiPolynomialFromWall(
       direction, exitWall, neighbor, output
     );

@@ -79,12 +79,11 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "Work in progress. \n"
     "Cone decomposition related to a vector partition function. "
     "Uses only slicing plances spanned by n-1 vectors. "
-  "If you use a single argument that is a Dynkin type, this function "
-  "automatically computes the cone decomposition with respect "
-  "to the positve roots of the type. Works up to type B_4. "
-  "Larger types will be rejected as their computation run time "
-  "is measured in hours or worse."
-,
+    "If you use a single argument that is a Dynkin type, this function "
+    "automatically computes the cone decomposition with respect "
+    "to the positve roots of the type. Works up to type B_4. "
+    "Larger types will be rejected as their computation run time "
+    "is measured in hours or worse.",
     "ConeDecomposition(\n"
     "(1,0,0),\n"
     "(0,1,0),\n"
@@ -93,28 +92,27 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "(0,1,1),\n"
     "(1,1,1)\n"
     ");\n"
-  "ConeDecomposition(G_2);\n",
+    "ConeDecomposition(G_2);\n",
     "CalculatorFunctionsVectorPartitionFunction::"
     "coneDecompositionSpannedSlicesNoHistory",
     "ConeDecomposition",
     innerStandard
   );
   this->addOperationHandler(
-  "ConeDecompositionWithoutAmalgamation",
-  CalculatorFunctionsVectorPartitionFunction::
-  coneDecompositionSpannedSlicesNoHistoryNoAmalgamation,
-  "",
-  "A faster version of ConeDecomposition that "
-  "produces possibly finer (more) chambers "
-  "than are actually needed. "
-  "Runs considerably faster."
-,
-  "ConeDecomposition(D_4);",
-  "CalculatorFunctionsVectorPartitionFunction::"
-  "coneDecompositionSpannedSlicesNoHistoryNoAmalgamation",
-  "ConeDecompositionWithoutAmalgamation",
-  innerStandard
-);
+    "ConeDecompositionWithoutAmalgamation",
+    CalculatorFunctionsVectorPartitionFunction::
+    coneDecompositionSpannedSlicesNoHistoryNoAmalgamation,
+    "",
+    "A faster version of ConeDecomposition that "
+    "produces possibly finer (more) chambers "
+    "than are actually needed. "
+    "Runs considerably faster.",
+    "ConeDecomposition(D_4);",
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "coneDecompositionSpannedSlicesNoHistoryNoAmalgamation",
+    "ConeDecompositionWithoutAmalgamation",
+    innerStandard
+  );
   this->addOperationHandler(
     "ConeDecompositionArbitrarySlices",
     CalculatorFunctionsVectorPartitionFunction::

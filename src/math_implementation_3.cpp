@@ -10880,6 +10880,17 @@ std::string Wall::toString() const {
   return "Wall: " + this->normal.toString();
 }
 
+bool Wall::checkConsistency() const {
+  for (int i = 0; i < this->neighborS.size; i ++) {
+    for (int j = i + 1; j < this->neighborS.size; j ++) {
+      if (this->neighborS[i] == this->neighborS[j]) {
+        global.fatal << "Neighbor appears more than once. " << global.fatal;
+      }
+    }
+  }
+  return true;
+}
+
 Cone::Payload::Payload() {
   this->lowestSlicingIndex = - 1;
   this->visited = false;
@@ -10925,7 +10936,8 @@ bool Cone::checkConsistencyFull(const ConeCollection& owner) const {
   }
   HashedList<int> allNeighbors;
   for (const Wall& wall : this->walls) {
-    for (int neighbor : wall.neighbors) {
+    wall.checkConsistency();
+    for (int neighbor : wall.neighborS) {
       if (allNeighbors.contains(neighbor)) {
         global.fatal
         << "Cone id: "
@@ -10986,7 +10998,7 @@ unsigned int Cone::hashFunction(const Cone& input) {
 List<List<int> > Cone::getAllNeighbors() const {
   List<List<int> > result;
   for (const Wall& wall : this->walls) {
-    result.addOnTop(wall.neighbors);
+    result.addOnTop(wall.neighborS);
   }
   return result;
 }
@@ -11031,7 +11043,7 @@ void Cone::intersectHyperplane(
   for (int i = 0; i < newNormals.size; i ++) {
     Wall incoming;
     incoming.normal = newNormals[i];
-    incoming.neighbors = this->walls[i].neighbors;
+    incoming.neighborS = this->walls[i].neighborS;
   }
   bool tempBool = outputConeLowerDimension.createFromWalls(inputWalls, false);
   if (!tempBool) {
@@ -12522,7 +12534,7 @@ void ConeCollection::makeAffineAndTransformToProjectiveDimensionPlusOne(
     for (int j = 0; j < refined.walls.size; j ++) {
       wall.normal =
       refined.walls[j].normal.getProjectivizedNormal(affinePoint);
-      wall.neighbors = refined.walls[j].neighbors;
+      wall.neighborS = refined.walls[j].neighborS;
     }
     wall.normal.makeEi(affineDimension + 1, affineDimension);
     incoming.createFromWalls(newNormals, false);
@@ -13106,7 +13118,7 @@ void Cone::changeBasis(Matrix<Rational>& linearMap) {
   for (const Wall& wall : this->walls) {
     Wall transformedWall;
     transformedWall.normal = wall.normal;
-    transformedWall.neighbors = wall.neighbors;
+    transformedWall.neighborS = wall.neighborS;
     linearMap.actOnVectorColumn(transformedWall.normal);
   }
   this->walls.clear();
@@ -13810,10 +13822,10 @@ bool ConeCollection::splitChamber(
   }
   Wall wall;
   wall.normal = normal;
-  wall.neighbors.addOnTop(newMinusCone.id);
+  wall.neighborS.addOnTop(newMinusCone.id);
   newPlusCone.walls.addOnTop(wall);
   wall.normal.negate();
-  wall.neighbors[0] = newPlusCone.id;
+  wall.neighborS[0] = newPlusCone.id;
   newMinusCone.walls.addOnTop(wall);
   newPlusCone.vertices.addListOnTop(zeroVertices);
   newMinusCone.vertices.addListOnTop(zeroVertices);
@@ -13891,7 +13903,7 @@ bool Cone::isSeparatingPlane(Cone& neighborCandidate, const Wall& wall) {
 void ConeCollection::removeIdFromNeighbors(const Cone& cone) {
   STACK_TRACE("ConeCollection::removeIdFromNeighbors");
   for (const Wall& wall : cone.walls) {
-    for (int id : wall.neighbors) {
+    for (int id : wall.neighborS) {
       Cone* neighbor = this->getConeByIdNonConst(id);
       if (neighbor == nullptr) {
         continue;
@@ -13963,7 +13975,7 @@ void ConeCollection::refineAllConesWithWallsWithMultipleNeighbors(
 void ConeCollection::splitConeByMultipleNeighbors(Cone& input) {
   STACK_TRACE("ConeCollection::splitConeByMultipleNeighbors");
   for (Wall& wall : input.walls) {
-    if (wall.neighbors.size > 1) {
+    if (wall.neighborS.size > 1) {
       this->splitConeByMultipleNeighbors(input, wall);
       return;
     }
@@ -13974,7 +13986,7 @@ void ConeCollection::splitConeByMultipleNeighbors(Cone& input) {
 void ConeCollection::splitConeByMultipleNeighbors(Cone& input, Wall& wall) {
   STACK_TRACE("ConeCollection::splitConeByMultipleNeighbors");
   Wall wallWithReducedNeighborCount = wall;
-  int neighborIndex = wallWithReducedNeighborCount.neighbors.popLastObject();
+  int neighborIndex = wallWithReducedNeighborCount.neighborS.popLastObject();
   Cone& neighbor = *this->getConeByIdNonConst(neighborIndex);
   HashedList<Vector<Rational> > verticesBelongingToWall;
   input.getAllVerticesPerpendicularTo(wall.normal, verticesBelongingToWall);
@@ -13995,7 +14007,7 @@ void ConeCollection::splitConeByMultipleNeighbors(Cone& input, Wall& wall) {
       // region they touch along is of not of the maximum possible dimension
       // n-1
       // (empty intersection is possible too).
-      wall.neighbors = wallWithReducedNeighborCount.neighbors;
+      wall.neighborS = wallWithReducedNeighborCount.neighborS;
       neighbor.removeNeighbor(input.id);
       this->addNonRefinedCone(input);
     }
@@ -14031,7 +14043,7 @@ bool ConeCollection::allExitWallsAreVisited(
     if (!direction.scalarEuclidean(wall.normal).isPositive()) {
       continue;
     }
-    for (int id : wall.neighbors) {
+    for (int id : wall.neighborS) {
       Cone& neighbor = this->getConeByIdNonConstNoFail(id);
       if (!neighbor.payload.visited) {
         return false;
@@ -14099,7 +14111,7 @@ bool ConeCollection::refineOneByOneDirectionArbitrarySlices(
         exitWalls[j].normal,
         newWall.normal
       );
-      newWall.neighbors.addOnTop(firstIndex + j);
+      newWall.neighborS.addOnTop(firstIndex + j);
       current.walls.addOnTop(newWall);
     }
     for (Wall& wall : toBeRefined.walls) {
@@ -14177,7 +14189,7 @@ void ConeCollection::replaceConeAdjacentToWall(
   const List<Cone*>& newCones
 ) {
   STACK_TRACE("ConeCollection::replaceConeAdjacentToWall");
-  for (int idNeighbor : wall.neighbors) {
+  for (int idNeighbor : wall.neighborS) {
     Cone* neighbor = this->getConeByIdNonConst(idNeighbor);
     if (neighbor == nullptr) {
       global.fatal
@@ -14201,11 +14213,11 @@ void ConeCollection::replaceConeInNeighbor(
 ) {
   STACK_TRACE("ConeCollection::replaceConeInNeighbor");
   Wall& neighborWall = neighbor.getWallWithNormalNoFail(wallNormal);
-  for (int i = neighborWall.neighbors.size - 1; i >= 0; i --) {
-    if (neighborWall.neighbors[i] != idReplacedCone) {
+  for (int i = neighborWall.neighborS.size - 1; i >= 0; i --) {
+    if (neighborWall.neighborS[i] != idReplacedCone) {
       continue;
     }
-    neighborWall.neighbors.removeIndexShiftDown(i);
+    neighborWall.neighborS.removeIndexShiftDown(i);
     this->addAllMutualNeighborsIfAdjacent(neighbor, neighborWall, newCones);
     return;
   }
@@ -14240,8 +14252,8 @@ void ConeCollection::addMutualNeighborsIfAdjacent(
     return;
   }
   Wall& wallInIncoming = incoming.getWallWithNormalNoFail(oppositeNormal);
-  wallInOriginal.neighbors.addOnTop(incoming.id);
-  wallInIncoming.neighbors.addOnTop(original.id);
+  wallInOriginal.neighborS.addOnTopNoRepetition(incoming.id);
+  wallInIncoming.neighborS.addOnTopNoRepetition(original.id);
 }
 
 void ConeCollection::initializeFromDirections(
@@ -14396,29 +14408,39 @@ void ConeCollection::mergeChambers() {
   }
 }
 
+void ConeCollection::mergeChambersAlongWall(
+  Wall& oldWall,
+  MapList<Vector<Rational>, Wall>& outputNewWalls,
+  HashedList<Vector<Rational> >& outputMergedWalls
+) {
+  Vector<Rational> normal = oldWall.normal;
+  Vector<Rational> minusNormal = - normal;
+  if (
+    outputNewWalls.contains(minusNormal) || outputMergedWalls.contains(normal)
+  ) {
+    outputMergedWalls.addOnTopNoRepetition(normal);
+    outputMergedWalls.addOnTop(minusNormal);
+    outputNewWalls.removeKey(normal);
+    outputNewWalls.removeKey(minusNormal);
+    return;
+  }
+  if (!outputNewWalls.contains(normal)) {
+    outputNewWalls.setKeyValue(normal, oldWall);
+    return;
+  }
+  for (int neighbor : oldWall.neighborS) {
+    outputNewWalls.getValueCreateNoInitialization(normal).neighborS.
+    addOnTopNoRepetition(neighbor);
+  }
+}
+
 void ConeCollection::mergeOneChamberFamily(HashedList<int>& family) {
   MapList<Vector<Rational>, Wall> newWalls;
   HashedList<Vector<Rational> > mergedWalls;
   for (int id : family) {
     Cone& cone = *this->getConeByIdNonConst(id);
     for (Wall& oldWall : cone.walls) {
-      Vector<Rational> normal = oldWall.normal;
-      Vector<Rational> minusNormal = - normal;
-      if (
-        newWalls.contains(minusNormal) || mergedWalls.contains(normal)
-      ) {
-        mergedWalls.addOnTopNoRepetition(normal);
-        mergedWalls.addOnTop(minusNormal);
-        newWalls.removeKey(normal);
-        newWalls.removeKey(minusNormal);
-      } else {
-        if (!newWalls.contains(normal)) {
-          newWalls.setKeyValue(normal, oldWall);
-        } else {
-          newWalls.getValueCreateNoInitialization(normal).neighbors.
-          addListOnTop(oldWall.neighbors);
-        }
-      }
+      this->mergeChambersAlongWall(oldWall, newWalls, mergedWalls);
     }
   }
   this->conesCreated ++;
@@ -14683,17 +14705,18 @@ void ConeCollection::processNeighborsOfNewlyAddedCone(const Cone& cone) {
   STACK_TRACE("ConeCollection::processNeighborsOfNewlyAddedCone");
   bool hasMultiNeighborWall = false;
   for (const Wall& wall : cone.walls) {
-    hasMultiNeighborWall = hasMultiNeighborWall || wall.neighbors.size > 1;
-    for (int otherId : wall.neighbors) {
+    hasMultiNeighborWall = hasMultiNeighborWall || wall.neighborS.size > 1;
+    for (int otherId : wall.neighborS) {
       const Cone* neighbor = this->getConeById(otherId);
-      if (neighbor->hasMultipleNeighborWall()) {
-        if (this->conesWithIrregularWalls.contains(otherId)) {
-          continue;
-        }
-        this->addCone(this->conesWithIrregularWalls, *neighbor);
-        this->nonRefinedCones.removeKey(otherId);
-        this->refinedCones.removeKey(otherId);
+      if (!neighbor->hasMultipleNeighborWall()) {
+        continue;
       }
+      if (this->conesWithIrregularWalls.contains(otherId)) {
+        continue;
+      }
+      this->addCone(this->conesWithIrregularWalls, *neighbor);
+      this->nonRefinedCones.removeKey(otherId);
+      this->refinedCones.removeKey(otherId);
     }
   }
 }
@@ -15050,7 +15073,7 @@ bool Cone::createFromNormals(
   for (int i = 0; i < inputNormals.size; i ++) {
     Wall incoming;
     incoming.normal = inputNormals[i];
-    incoming.neighbors = inputNeighbors[i];
+    incoming.neighborS = inputNeighbors[i];
     inputWalls.addOnTop(incoming);
   }
   return this->createFromWalls(inputWalls, hasEnoughProjectiveVertices);
@@ -15113,7 +15136,7 @@ int Cone::addFakeWalls() {
 
 bool Cone::hasMultipleNeighborWall() const {
   for (const Wall& wall : this->walls) {
-    if (wall.neighbors.size > 1) {
+    if (wall.neighborS.size > 1) {
       return true;
     }
   }
@@ -15122,9 +15145,9 @@ bool Cone::hasMultipleNeighborWall() const {
 
 void Cone::removeNeighbor(int neighborId) {
   for (Wall& wall : this->walls) {
-    for (int i = wall.neighbors.size - 1; i >= 0; i --) {
-      if (wall.neighbors[i] == neighborId) {
-        wall.neighbors.removeIndexShiftDown(i);
+    for (int i = wall.neighborS.size - 1; i >= 0; i --) {
+      if (wall.neighborS[i] == neighborId) {
+        wall.neighborS.removeIndexShiftDown(i);
       }
     }
   }
@@ -15292,7 +15315,7 @@ std::string Cone::toHTML() const {
   }
   out << "<br>Neighbors: ";
   for (int i = 0; i < this->walls.size; i ++) {
-    out << "<br>Along wall " << i + 1 << ": " << this->walls[i].neighbors;
+    out << "<br>Along wall " << i + 1 << ": " << this->walls[i].neighborS;
   }
   return out.str();
 }
@@ -15300,7 +15323,9 @@ std::string Cone::toHTML() const {
 void Cone::getAllNeighbors(HashedList<int>& output) const {
   output.clear();
   for (const Wall& wall : this->walls) {
-    output.addListOnTop(wall.neighbors);
+    for (int neighbor : wall.neighborS) {
+      output.addOnTopNoRepetition(neighbor);
+    }
   }
 }
 
@@ -15481,12 +15506,23 @@ std::string ConeCollection::toHTMLWithoutGraphics() const {
     << " Directions to slice along: "
     << this->slicingDirections.toString();
   }
+  int totalChambers = 0;
   for (int i = 0; i < this->refinedCones.size(); i ++) {
+    totalChambers ++;
+    if (totalChambers > this->maximumCones) {
+      out << "<br>Printout too large: omitting the rest of the cones.";
+      break;
+    }
     out << "<br>Chamber " << i + 1 << ":<br>";
     out << this->refinedCones.values[i].toHTML() << "\n\n\n";
   }
   out << "<hr>Total non-refined chambers: " << this->nonRefinedCones.size();
   for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
+    totalChambers ++;
+    if (totalChambers > this->maximumCones) {
+      out << "<br>Printout too large: omitting the rest of the cones.";
+      break;
+    }
     out << "<br>Chamber " << i + 1 << ":<br>";
     out << this->nonRefinedCones.values[i].toHTML() << "<br>";
   }
@@ -15494,6 +15530,11 @@ std::string ConeCollection::toHTMLWithoutGraphics() const {
   << "<hr>Total non-refined chambers with irregular walls: "
   << this->conesWithIrregularWalls.size();
   for (int i = 0; i < this->conesWithIrregularWalls.size(); i ++) {
+    totalChambers ++;
+    if (totalChambers > this->maximumCones) {
+      out << "<br>Printout too large: omitting the rest of the cones.";
+      break;
+    }
     out << "<br>Chamber " << i + 1 << ":<br>";
     out << this->conesWithIrregularWalls.values[i].toHTML() << "<br>";
   }

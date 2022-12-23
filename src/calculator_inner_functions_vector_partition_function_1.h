@@ -15,13 +15,19 @@ public:
   static bool applyVectorPartitionFunctionFormula(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool coneDecomposition(Calculator& calculator,
+  static bool coneDecomposition(
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool flagUseSpannedSlices,
-    bool flagIncludeHistory
-  , bool flagAmalgamateChambers);
-  static bool getVectorsForConeDecomposition(Calculator &calculator, const Expression& input, Vectors<Rational>& output);
+    bool flagIncludeHistory,
+    bool flagAmalgamateChambers
+  );
+  static bool getVectorsForConeDecomposition(
+    Calculator& calculator,
+    const Expression& input,
+    Vectors<Rational>& output
+  );
   static bool coneDecompositionSpannedSlicesNoHistory(
     Calculator& calculator, const Expression& input, Expression& output
   ) {

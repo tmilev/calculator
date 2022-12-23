@@ -82,7 +82,12 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
   return output.assignValue(calculator, result);
 }
 
-bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition(Calculator &calculator, const Expression &input, Vectors<Rational> &output){
+bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
+(
+  Calculator& calculator,
+  const Expression& input,
+  Vectors<Rational>& output
+) {
   Matrix<Rational> matrix;
   if (
     CalculatorConversions::functionGetMatrix(
@@ -94,7 +99,11 @@ bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition(
   }
   if (input.size() == 2) {
     DynkinSimpleType type;
-    if (  CalculatorConversions::functionDynkinSimpleType(calculator, input[1], type)){
+    if (
+      CalculatorConversions::functionDynkinSimpleType(
+        calculator, input[1], type
+      )
+    ) {
       WeylGroupData weylGroup;
       weylGroup.makeArbitrarySimple(type.letter, type.rank);
       weylGroup.computeRootsOfBorel(output);
@@ -102,7 +111,6 @@ bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition(
     }
   }
   return calculator << "Failed to extract matrix of rationals. ";
-
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
@@ -111,12 +119,14 @@ bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
   Expression& output,
   bool flagUseSpannedSlices,
   bool flagIncludeHistory,
-bool flagAmalgamateChambers
+  bool flagAmalgamateChambers
 ) {
   STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::coneDecomposition");
   Vectors<Rational> vectors;
-
-  if (! CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition(calculator, input, vectors)){
+  if (
+    !CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
+    (calculator, input, vectors)
+  ) {
     return false;
   }
   ConeCollection chambers;

@@ -5714,8 +5714,8 @@ class Wall {
     return output;
   }
 public:
+  List<int> neighborS;
   Vector<Rational> normal;
-  List<int> neighbors;
   bool operator==(const Wall& other) const;
   bool operator>(const Wall& other) const;
   bool operator!=(const Wall& other) const;
@@ -5730,6 +5730,7 @@ public:
     const List<Vector<Rational> >& points
   ) const;
   std::string toString() const;
+  bool checkConsistency() const;
 };
 
 class DynkinSimpleType {

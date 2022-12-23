@@ -267,6 +267,11 @@ public:
   );
   void mergeChambers();
   void mergeOneChamberFamily(HashedList<int>& family);
+  void mergeChambersAlongWall(
+    Wall& oldWall,
+    MapList<Vector<Rational>, Wall>& outputNewWalls,
+    HashedList<Vector<Rational> >& outputMergedWalls
+  );
   void accountOneDirectionSimplex(
     Cone& directionSimplex,
     MapList<List<unsigned char>, HashedList<int> >& currentConeFamilies,

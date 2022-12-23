@@ -2930,7 +2930,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
       this->transformToWeylProjective(
         0, currentAffineCone.walls[j].normal, projectivized.normal
       );
-      projectivized.neighbors = currentAffineCone.walls[j].neighbors;
+      projectivized.neighborS = currentAffineCone.walls[j].neighborS;
       walls.addOnTop(projectivized);
     }
     report.report(walls.toString());

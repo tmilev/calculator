@@ -76,7 +76,6 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     CalculatorFunctionsVectorPartitionFunction::
     coneDecompositionSpannedSlicesNoHistory,
     "",
-    "Work in progress. \n"
     "Cone decomposition related to a vector partition function. "
     "Uses only slicing plances spanned by n-1 vectors. "
     "If you use a single argument that is a Dynkin type, this function "
@@ -118,9 +117,9 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     CalculatorFunctionsVectorPartitionFunction::
     coneDecompositionArbitrarySlices,
     "",
-    "Work in progress. \n"
     "Cone decomposition related to a vector partition function. "
-    "Unlike ConeDecomposition, this decomposition uses arbitrary combinatorial chamber walls."
+    "Unlike ConeDecomposition, this decomposition "
+  "uses arbitrary combinatorial chamber walls."
     ,
     "ConeDecompositionArbitrarySlices(\n"
     "(1,0,0),\n"

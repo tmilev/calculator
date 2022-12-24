@@ -5714,7 +5714,7 @@ class Wall {
     return output;
   }
 public:
-  List<int> neighborS;
+  List<int> neighbors;
   Vector<Rational> normal;
   bool operator==(const Wall& other) const;
   bool operator>(const Wall& other) const;

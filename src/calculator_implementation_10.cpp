@@ -338,3 +338,45 @@ bool CalculatorFunctionsVectorPartitionFunction::dualLattice(
   }
   return output.assignValue(calculator, dual);
 }
+
+bool CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives
+(Calculator& calculator, const Expression& input, Expression& output) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "quotientLatticeRepresentatives"
+  );
+  if (input.size() != 3) {
+    return false;
+  }
+  Lattice dividend;
+  Lattice divisor;
+  if (
+    !input[1].isOfType(&dividend) || !input[2].isOfType(&divisor)
+  ) {
+    return
+    calculator
+    << "Could not extract lattice arguments from "
+    << input.toString();
+  }
+  if (
+    dividend.getDimension() != divisor.getDimension() ||
+    dividend.getRank() != dividend.getDimension()
+  ) {
+    return
+    calculator
+    << "Both lattices must be of full rank and equal dimension";
+  }
+  if (!dividend.containsLattice(divisor)) {
+    return calculator << "The divisor is not a sub-lattice of the dividend.";
+  }
+  Vectors<Rational> representatives;
+  if (!dividend.getAllRepresentatives(divisor, representatives)) {
+    return
+    calculator
+    << "Failed to get all representatives. "
+    << "Perhaps they are too many?";
+  }
+  Matrix<Rational> result;
+  result.assignVectorsToRows(representatives);
+  return output.makeMatrix(calculator, result);
+}

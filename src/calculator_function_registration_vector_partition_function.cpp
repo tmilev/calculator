@@ -119,8 +119,7 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "",
     "Cone decomposition related to a vector partition function. "
     "Unlike ConeDecomposition, this decomposition "
-  "uses arbitrary combinatorial chamber walls."
-    ,
+    "uses arbitrary combinatorial chamber walls.",
     "ConeDecompositionArbitrarySlices(\n"
     "(1,0,0),\n"
     "(0,1,0),\n"
@@ -237,6 +236,20 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "CalculatorFunctionsVectorPartitionFunction"
     "::subLatticeWithIntegralScalarProducts",
     "DualLattice",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "QuotientLatticeRepresentatives",
+    CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives,
+    "",
+    "Computes all representatives of a quotient lattice L/M. "
+    "Both arguments must be lattices. ",
+    "l = Lattice((1,0,0), (0,1,0), (0,0,1));\n"
+    "m = Lattice((1,2,3), (2,2,2), (3,3,9));\n"
+    "QuotientLatticeRepresentatives(l,m)",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::quotientLatticeRepresentatives",
+    "QuotientLatticeRepresentatives",
     innerStandard
   );
 }

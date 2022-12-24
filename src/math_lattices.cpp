@@ -653,6 +653,17 @@ Rational QuasiPolynomial::evaluate(
   return 0;
 }
 
+bool Lattice::containsLattice(Lattice& other) const {
+  Vectors<Rational> generators;
+  other.basisRationalForm.getVectorsFromRows(generators);
+  for (const Vector<Rational>& generator : generators) {
+    if (!this->isInLattice(generator)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool Lattice::getDualLattice(Lattice& output) const {
   if (this->getRank() != this->getDimension()) {
     return false;
@@ -822,7 +833,7 @@ void Lattice::intersectWithBothOfMaximalRank(const Lattice& other) {
 
 // Returning false means that the lattice given as rougher is not actually
 // rougher than the current lattice
-// or that there are too many representatives
+// or that there are too many representatives.
 bool Lattice::getAllRepresentatives(
   const Lattice& rougherLattice, Vectors<Rational>& output
 ) const {

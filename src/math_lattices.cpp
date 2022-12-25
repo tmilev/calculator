@@ -859,11 +859,8 @@ bool Lattice::getAllRepresentatives(
     }
     currentPeriod = rougherLattice.basisRationalForm.elements[i][column] /
     this->basisRationalForm.elements[i][column];
-    currentPeriodInt = currentPeriod.getNumerator();
-    if (currentPeriodInt.value.digits.size > 1) {
+    if (!currentPeriod.isIntegerFittingInInt(&periods[i])) {
       return false;
-    } else {
-      periods[i] = currentPeriodInt.value.digits[0];
     }
     this->basisRationalForm.getVectorFromRow(i, periodVectors[i]);
     rougherLattice.basisRationalForm.getVectorFromRow(i, root2);
@@ -875,10 +872,14 @@ bool Lattice::getAllRepresentatives(
   }
   SelectionWithDifferentMaxMultiplicities coefficientSelection;
   coefficientSelection.initializeFromIntegers(periods);
-  int NumCycles = coefficientSelection.totalNumberSubsetsSmallInt();
-  output.setSize(NumCycles);
+  LargeInteger resultSize = coefficientSelection.totalNumberOfSubsets();
+  int numberOfCycles = 0;
+  if (!resultSize.isIntegerFittingInInt(&numberOfCycles)) {
+    return false;
+  }
+  output.setSize(numberOfCycles);
   for (
-    int i = 0; i < NumCycles;
+    int i = 0; i < numberOfCycles;
     i ++,
     coefficientSelection.incrementReturnFalseIfPastLast()
   ) {
